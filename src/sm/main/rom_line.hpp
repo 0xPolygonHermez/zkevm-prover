@@ -65,7 +65,7 @@ public:
     uint8_t useJmpAddr;
     uint8_t useElseAddr;
     bool bOffsetPresent;
-    uint32_t offset;
+    int32_t offset;
     string offsetLabel;
     uint8_t useCTX;
     uint8_t isStack;

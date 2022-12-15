@@ -605,24 +605,33 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             if (rom.line[zkPC].bOffsetPresent && rom.line[zkPC].offset!=0)
             {
-                // If offset is possitive, and the sum is too big, fail
-                if (rom.line[zkPC].offset>0 &&
-                    ( ( (uint64_t(addrRel)+uint64_t(rom.line[zkPC].offset)) >= 0x20000 ) ||
-                      ( rom.line[zkPC].isMem && ((uint64_t(addrRel)+uint64_t(rom.line[zkPC].offset)) >= 0x10000) ) ) )
-                {
-                    cerr << "Error: addrRel >= " << (rom.line[zkPC].isMem ? 0x10000 : 0x20000) << " ln: " << zkPC << endl;
-                    proverRequest.result = ZKR_SM_MAIN_ADDRESS;
-                    return;
-                }
-                // If offset is negative, and its modulo is bigger than addrRel, fail
-                if (rom.line[zkPC].offset<0 && (-rom.line[zkPC].offset)>addrRel)
-                {
-                    cerr << "Error: addrRel < 0 ln: " << zkPC << endl;
-                    proverRequest.result = ZKR_SM_MAIN_ADDRESS;
-                    return;
-                }
                 addrRel += rom.line[zkPC].offset;
             }
+            if (rom.line[zkPC].isStack == 1)
+            {
+                int32_t sp;
+                if (!fr.toS32(sp, pols.SP[i]))
+                {
+                    cerr << "Error: failed calling fr.toS32(sp, pols.SP[i])" << endl;
+                    exitProcess();
+                }
+                addrRel += sp;
+            }
+            // If addrRel is possitive, and the sum is too big, fail
+            if (addrRel>=0x20000 || ((rom.line[zkPC].isMem==1) && (addrRel >= 0x10000)))
+            {
+                cerr << "Error: addrRel too big addrRel=" << addrRel << " zkPC=" << zkPC << " inst=" << rom.line[zkPC].toString(fr) << endl;
+                proverRequest.result = ZKR_SM_MAIN_ADDRESS;
+                return;
+            }
+            // If addrRel is negative, fail
+            if (addrRel < 0)
+            {
+                cerr << "Error: addrRel<0 addrRel=" << addrRel << " zkPC=" << zkPC << " inst=" << rom.line[zkPC].toString(fr) << endl;
+                proverRequest.result = ZKR_SM_MAIN_ADDRESS;
+                return;
+            }
+
             addr = addrRel;
 #ifdef LOG_ADDR
             cout << "Any addr=" << addr << endl;
@@ -641,7 +650,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // If isStack, addr = addr + STACK_OFFSET
         if (rom.line[zkPC].isStack == 1) {
             addr += STACK_OFFSET;
-            addr += fr.toU64(pols.SP[i]);
             pols.isStack[i] = fr.one();
 #ifdef LOG_ADDR
             cout << "isStack addr=" << addr << endl;

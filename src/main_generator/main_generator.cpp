@@ -226,6 +226,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
     }
     code += "    int32_t addrRel = 0; // Relative and absolute address auxiliary variables\n";
     code += "    uint64_t addr = 0;\n";
+    code += "    int32_t sp;\n";
     if (!bFastMode)
     {
         code += "    int64_t maxMemCalculated;\n";
@@ -613,64 +614,38 @@ string generate(const json &rom, const string &functionName, const string &fileN
         {
             string inROTL_CString = rom["program"][zkPC]["inROTL_C"];
             int64_t inROTL_C = atoi(inROTL_CString.c_str());
-
-            code += "    // If inROTL_C, op = C rotated left\n";
-            if (opInitialized)
+            if (inROTL_C != 0)
             {
-                if (inROTL_C == 1)
+                code += "    // If inROTL_C, op = C rotated left\n";
+                if (opInitialized)
                 {
-                    code += "    op0 = fr.add(op0, pols.C7[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    op1 = fr.add(op1, pols.C0[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    op2 = fr.add(op2, pols.C1[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    op3 = fr.add(op3, pols.C2[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    op4 = fr.add(op4, pols.C3[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    op5 = fr.add(op5, pols.C4[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    op6 = fr.add(op6, pols.C5[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    op7 = fr.add(op7, pols.C6[" + string(bFastMode?"0":"i") + "]);\n";
+                    code += "    op0 = fr.add(op0, fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C7[" + string(bFastMode?"0":"i") + "]));\n";
+                    code += "    op1 = fr.add(op1, fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C0[" + string(bFastMode?"0":"i") + "]));\n";
+                    code += "    op2 = fr.add(op2, fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C1[" + string(bFastMode?"0":"i") + "]));\n";
+                    code += "    op3 = fr.add(op3, fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C2[" + string(bFastMode?"0":"i") + "]));\n";
+                    code += "    op4 = fr.add(op4, fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C3[" + string(bFastMode?"0":"i") + "]));\n";
+                    code += "    op5 = fr.add(op5, fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C4[" + string(bFastMode?"0":"i") + "]));\n";
+                    code += "    op6 = fr.add(op6, fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C5[" + string(bFastMode?"0":"i") + "]));\n";
+                    code += "    op7 = fr.add(op7, fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C6[" + string(bFastMode?"0":"i") + "]));\n";
                 }
                 else
                 {
-                    code += "    op0 = fr.add(op0, fr.mul(rom.line[zkPC].inROTL_C, pols.C7[" + string(bFastMode?"0":"i") + "]));\n";
-                    code += "    op1 = fr.add(op1, fr.mul(rom.line[zkPC].inROTL_C, pols.C0[" + string(bFastMode?"0":"i") + "]));\n";
-                    code += "    op2 = fr.add(op2, fr.mul(rom.line[zkPC].inROTL_C, pols.C1[" + string(bFastMode?"0":"i") + "]));\n";
-                    code += "    op3 = fr.add(op3, fr.mul(rom.line[zkPC].inROTL_C, pols.C2[" + string(bFastMode?"0":"i") + "]));\n";
-                    code += "    op4 = fr.add(op4, fr.mul(rom.line[zkPC].inROTL_C, pols.C3[" + string(bFastMode?"0":"i") + "]));\n";
-                    code += "    op5 = fr.add(op5, fr.mul(rom.line[zkPC].inROTL_C, pols.C4[" + string(bFastMode?"0":"i") + "]));\n";
-                    code += "    op6 = fr.add(op6, fr.mul(rom.line[zkPC].inROTL_C, pols.C5[" + string(bFastMode?"0":"i") + "]));\n";
-                    code += "    op7 = fr.add(op7, fr.mul(rom.line[zkPC].inROTL_C, pols.C6[" + string(bFastMode?"0":"i") + "]));\n";
+                    code += "    op0 = fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C7[" + string(bFastMode?"0":"i") + "]);\n";
+                    code += "    op1 = fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C0[" + string(bFastMode?"0":"i") + "]);\n";
+                    code += "    op2 = fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C1[" + string(bFastMode?"0":"i") + "]);\n";
+                    code += "    op3 = fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C2[" + string(bFastMode?"0":"i") + "]);\n";
+                    code += "    op4 = fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C3[" + string(bFastMode?"0":"i") + "]);\n";
+                    code += "    op5 = fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C4[" + string(bFastMode?"0":"i") + "]);\n";
+                    code += "    op6 = fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C5[" + string(bFastMode?"0":"i") + "]);\n";
+                    code += "    op7 = fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C6[" + string(bFastMode?"0":"i") + "]);\n";
                 }
-            }
-            else
-            {
-                if (inROTL_C == 1)
+                if (!bFastMode)
                 {
-                    code += "    op0 = pols.C7[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    op1 = pols.C0[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    op2 = pols.C1[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    op3 = pols.C2[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    op4 = pols.C3[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    op5 = pols.C4[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    op6 = pols.C5[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    op7 = pols.C6[" + string(bFastMode?"0":"i") + "];\n";
+                    code += "    pols.inROTL_C[i] = rom.line[" + to_string(zkPC) + "].inROTL_C;\n";
                 }
-                else
-                {
-                    code += "    op0 = fr.mul(rom.line[zkPC].inROTL_C, pols.C7[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    op1 = fr.mul(rom.line[zkPC].inROTL_C, pols.C0[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    op2 = fr.mul(rom.line[zkPC].inROTL_C, pols.C1[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    op3 = fr.mul(rom.line[zkPC].inROTL_C, pols.C2[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    op4 = fr.mul(rom.line[zkPC].inROTL_C, pols.C3[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    op5 = fr.mul(rom.line[zkPC].inROTL_C, pols.C4[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    op6 = fr.mul(rom.line[zkPC].inROTL_C, pols.C5[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    op7 = fr.mul(rom.line[zkPC].inROTL_C, pols.C6[" + string(bFastMode?"0":"i") + "]);\n";
-                }
+                code += "\n";
+                opInitialized = true;
             }
-            if (!bFastMode)
-            {
-                code += "    pols.inROTL_C[i] = rom.line[zkPC].inROTL_C;\n";
-            }
-            code += "\n";
-            opInitialized = true;
         }
 
         if (rom["program"][zkPC].contains("inRCX") && (rom["program"][zkPC]["inRCX"]!=0))
@@ -735,39 +710,43 @@ string generate(const json &rom, const string &functionName, const string &fileN
             }
             if (rom["program"][zkPC].contains("offset") && (rom["program"][zkPC]["offset"] != 0))
             {
+                if (bAddrRel)
+                    code += "    addrRel += " + to_string(rom["program"][zkPC]["offset"]) + ";\n";
+                else
+                    code += "    addrRel = " + to_string(rom["program"][zkPC]["offset"]) + ";\n";
                 bOffset = true;
             }
-            if (bAddrRel && bOffset)
+            if (rom["program"][zkPC].contains("isStack") && (rom["program"][zkPC]["isStack"]==1))
             {
-                int64_t offset = rom["program"][zkPC]["offset"];
-                if (/*rom["program"][zkPC]["offset"]*/ offset > 0)
-                {
-                code += "    // If offset is possitive, and the sum is too big, fail\n";
-                code += "    if (rom.line[" + to_string(zkPC) + "].offset>0 &&\n";
-                code += "        ( ( (uint64_t(addrRel)+uint64_t(rom.line[" + to_string(zkPC) + "].offset)) >= 0x20000 ) ||\n";
-                code += "          ( rom.line[" + to_string(zkPC) + "].isMem && ((uint64_t(addrRel)+uint64_t(rom.line[" + to_string(zkPC) + "].offset)) >= 0x10000) ) ) )";
+                code += "    if (!fr.toS32(sp, pols.SP[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: addrRel >= \" << (rom.line[" + to_string(zkPC) + "].isMem ? 0x10000 : 0x20000) << \" ln: \" << " + to_string(zkPC) + " << endl;\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS;\n";
-                code += "        return;\n";
+                code += "        cerr << \"Error: failed calling fr.toS32(sp, pols.SP[i])\" << endl;\n";
+                code += "        exitProcess();\n";
                 code += "    }\n";
-                }
-                else // offset < 0
-                {
-                code += "    // If offset is negative, and its modulo is bigger than addrRel, fail\n";
-                code += "    if (" + to_string(-/*(rom["program"][zkPC]["offset"])*/offset) + ">addrRel)\n";
-                code += "    {\n";
-                code += "        cerr << \"Error: addrRel < 0 ln: \" << " + to_string(zkPC) + " << endl;\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS;\n";
-                code += "        return;\n";
-                code += "    }\n";
-                }
-                code += "    addrRel += " + to_string(rom["program"][zkPC]["offset"]) + ";\n";
-                code += "    addr = addrRel;\n\n";
+                if (bAddrRel)
+                    code += "    addrRel += sp;\n";
+                else
+                    code += "    addrRel = sp;\n";
+                bAddrRel = true;
             }
-            else if (bAddrRel && !bOffset)
+            if (bAddrRel)
             {
-                code += "    addr = addrRel;\n\n"; // TODO: Check that addrRel>=0 and <0x10000, if this is as designed
+                code += "    // If addrRel is possitive, and the sum is too big, fail\n";
+                code += "    if (addrRel>=0x20000 || ((rom.line[" + to_string(zkPC) + "].isMem==1) && (addrRel >= 0x10000)))\n";
+                code += "    {\n";
+                code += "        cerr << \"Error: addrRel too big addrRel=\" << addrRel << \" zkPC=\" << " + to_string(zkPC) + " << \" inst=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS;\n";
+                code += "        return;\n";
+                code += "    }\n";
+                code += "    // If addrRel is negative, fail\n";
+                code += "    if (addrRel < 0)\n";
+                code += "    {\n";
+                code += "        cerr << \"Error: addrRel<0 \" << addrRel << \" zkPC=\" << " + to_string(zkPC) + " << \" inst=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS;\n";
+                code += "        return;\n";
+                code += "    }\n";
+
+                code += "    addr = addrRel;\n\n";
             }
             else if (!bAddrRel && bOffset)
             {
@@ -816,7 +795,6 @@ string generate(const json &rom, const string &functionName, const string &fileN
         {
             code += "    // If isStack, addr = addr + STACK_OFFSET\n";
             code += "    addr += STACK_OFFSET;\n";
-            code += "    addr += fr.toU64(pols.SP[" + string(bFastMode?"0":"i") + "]);\n";
             if (!bFastMode)
                 code += "    pols.isStack[i] = fr.one();\n\n";
             else
