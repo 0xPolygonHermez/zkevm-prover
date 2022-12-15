@@ -226,6 +226,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
     }
     code += "    int32_t addrRel = 0; // Relative and absolute address auxiliary variables\n";
     code += "    uint64_t addr = 0;\n";
+    code += "    int32_t sp;\n";
     if (!bFastMode)
     {
         code += "    int64_t maxMemCalculated;\n";
@@ -735,39 +736,37 @@ string generate(const json &rom, const string &functionName, const string &fileN
             }
             if (rom["program"][zkPC].contains("offset") && (rom["program"][zkPC]["offset"] != 0))
             {
+                code += "    addrRel += " + to_string(rom["program"][zkPC]["offset"]) + ";\n";
                 bOffset = true;
             }
-            if (bAddrRel && bOffset)
+            if (rom["program"][zkPC].contains("isStack") && (rom["program"][zkPC]["isStack"]==1))
             {
-                int64_t offset = rom["program"][zkPC]["offset"];
-                if (/*rom["program"][zkPC]["offset"]*/ offset > 0)
-                {
-                code += "    // If offset is possitive, and the sum is too big, fail\n";
-                code += "    if (rom.line[" + to_string(zkPC) + "].offset>0 &&\n";
-                code += "        ( ( (uint64_t(addrRel)+uint64_t(rom.line[" + to_string(zkPC) + "].offset)) >= 0x20000 ) ||\n";
-                code += "          ( rom.line[" + to_string(zkPC) + "].isMem && ((uint64_t(addrRel)+uint64_t(rom.line[" + to_string(zkPC) + "].offset)) >= 0x10000) ) ) )";
+                code += "    if (!fr.toS32(sp, pols.SP[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: addrRel >= \" << (rom.line[" + to_string(zkPC) + "].isMem ? 0x10000 : 0x20000) << \" ln: \" << " + to_string(zkPC) + " << endl;\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS;\n";
-                code += "        return;\n";
+                code += "        cerr << \"Error: failed calling fr.toS32(sp, pols.SP[i])\" << endl;\n";
+                code += "        exitProcess();\n";
                 code += "    }\n";
-                }
-                else // offset < 0
-                {
-                code += "    // If offset is negative, and its modulo is bigger than addrRel, fail\n";
-                code += "    if (" + to_string(-/*(rom["program"][zkPC]["offset"])*/offset) + ">addrRel)\n";
-                code += "    {\n";
-                code += "        cerr << \"Error: addrRel < 0 ln: \" << " + to_string(zkPC) + " << endl;\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS;\n";
-                code += "        return;\n";
-                code += "    }\n";
-                }
-                code += "    addrRel += " + to_string(rom["program"][zkPC]["offset"]) + ";\n";
-                code += "    addr = addrRel;\n\n";
+                code += "    addrRel += sp;\n";
+                bAddrRel = true;
             }
-            else if (bAddrRel && !bOffset)
+            if (bAddrRel)
             {
-                code += "    addr = addrRel;\n\n"; // TODO: Check that addrRel>=0 and <0x10000, if this is as designed
+                code += "    // If addrRel is possitive, and the sum is too big, fail\n";
+                code += "    if (addrRel>=0x20000 || ((rom.line[zkPC].isMem==1) && (addrRel >= 0x10000)))\n";
+                code += "    {\n";
+                code += "        cerr << \"Error: addrRel too big addrRel=\" << addrRel << \" zkPC=\" << " + to_string(zkPC) + " << \" inst=\" << rom.line[zkPC].toString(fr) << endl;\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS;\n";
+                code += "        return;\n";
+                code += "    }\n";
+                code += "    // If addrRel is negative, fail\n";
+                code += "    if (rom.line[zkPC].offset<0 && (-rom.line[zkPC].offset)>addrRel)\n";
+                code += "    {\n";
+                code += "        cerr << \"Error: addrRel < 0 zkPC=\" << " + to_string(zkPC) + " << \" inst=\" << rom.line[zkPC].toString(fr) << endl;\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS;\n";
+                code += "        return;\n";
+                code += "    }\n";
+
+                code += "    addr = addrRel;\n\n";
             }
             else if (!bAddrRel && bOffset)
             {
@@ -816,7 +815,6 @@ string generate(const json &rom, const string &functionName, const string &fileN
         {
             code += "    // If isStack, addr = addr + STACK_OFFSET\n";
             code += "    addr += STACK_OFFSET;\n";
-            code += "    addr += fr.toU64(pols.SP[" + string(bFastMode?"0":"i") + "]);\n";
             if (!bFastMode)
                 code += "    pols.isStack[i] = fr.one();\n\n";
             else
