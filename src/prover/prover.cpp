@@ -98,8 +98,8 @@ Prover::Prover(Goldilocks &fr,
 
 Prover::~Prover()
 {
-    //· delete zkey;
-    //· delete groth16Prover;
+    // · delete zkey;
+    // · delete groth16Prover;
     mpz_clear(altBbn128r);
 }
 
@@ -474,6 +474,9 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         jProof["publics"] = publicStarkJson;
         zkin["publics"] = publicStarkJson;
 
+        json2file(zkin, "zkin.json");
+        json2file(jProof, "jProof.json");
+
         TimerStopAndLog(STARK_JSON_GENERATION_BATCH_PROOF);
 
         CommitPolsStarks cmPols12a(pAddress, (1 << starksC12a.starkInfo.starkStruct.nBits));
@@ -799,7 +802,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     json2file(publicsJson, pProverRequest->publicsOutput);
 
     pProverRequest->result = ZKR_SUCCESS;
-    
+
     free(pAddressRecursive2);
     TimerStopAndLog(PROVER_AGGREGATED_PROOF);
 }
@@ -811,7 +814,7 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     zkassert(pProverRequest->type == prt_genFinalProof);
 
     TimerStart(PROVER_FINAL_PROOF);
-    
+
     printMemoryInfo(true);
     printProcessInfo(true);
 
@@ -981,7 +984,6 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     TimerStopAndLog(STARK_RECURSIVE_F_PROOF_BATCH_PROOF);
     TimerStopAndLog(PROVER_FINAL_PROOF);
 }
-
 
 void Prover::execute(ProverRequest *pProverRequest)
 {

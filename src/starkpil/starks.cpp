@@ -13,15 +13,17 @@ void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publ
     CommitPols cmPols(pAddress, starkInfo.mapDeg.section[eSection::cm1_n]);
     Goldilocks::Element *mem = (Goldilocks::Element *)pAddress;
 
-    Goldilocks::Element *p_q_2ns = &mem[starkInfo.mapOffsets.section[eSection::q_2ns]];
     Goldilocks::Element *p_cm1_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm1_2ns]];
     Goldilocks::Element *p_cm1_n = &mem[starkInfo.mapOffsets.section[eSection::cm1_n]];
     Goldilocks::Element *p_cm2_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm2_2ns]];
     Goldilocks::Element *p_cm2_n = &mem[starkInfo.mapOffsets.section[eSection::cm2_n]];
     Goldilocks::Element *p_cm3_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm3_2ns]];
     Goldilocks::Element *p_cm3_n = &mem[starkInfo.mapOffsets.section[eSection::cm3_n]];
-    Goldilocks::Element *p_exps_withq_2ns = &mem[starkInfo.mapOffsets.section[eSection::exps_withq_2ns]];
-    Goldilocks::Element *p_exps_withq_n = &mem[starkInfo.mapOffsets.section[eSection::exps_withq_n]];
+    Goldilocks::Element *cm4_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm4_2ns]];
+    Goldilocks::Element *p_q_2ns = &mem[starkInfo.mapOffsets.section[eSection::q_2ns]];
+    Goldilocks::Element *p_f_2ns = &mem[starkInfo.mapOffsets.section[eSection::f_2ns]];
+
+    Goldilocks::Element *pBuffer = (Goldilocks::Element *)malloc(starkInfo.mapSectionsN.section[eSection::cm1_n] * NExtended * FIELD_EXTENSION * sizeof(Goldilocks::Element));
 
     Polinomial root0(HASH_SIZE, 1);
     Polinomial root1(HASH_SIZE, 1);
@@ -32,8 +34,10 @@ void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publ
     treesGL[0] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN1.section[eSection::cm1_n] + starkInfo.mapSectionsN3.section[eSection::cm1_n] * FIELD_EXTENSION, p_cm1_2ns);
     treesGL[1] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::cm2_n], p_cm2_2ns);
     treesGL[2] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::cm3_n], p_cm3_2ns);
-    treesGL[3] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::q_2ns], p_q_2ns);
+    treesGL[3] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::cm4_2ns], cm4_2ns);
     treesGL[4] = new MerkleTreeGL((Goldilocks::Element *)pConstTreeAddress);
+
+    transcript.put(&publicInputs[0], starkInfo.nPublics);
 
     //--------------------------------
     // 1.- Calculate p_cm1_2ns
@@ -42,7 +46,7 @@ void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publ
     TimerStart(STARK_STEP_1_LDE_AND_MERKLETREE);
     TimerStart(STARK_STEP_1_LDE);
 
-    ntt.extendPol(p_cm1_2ns, p_cm1_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm1_n], p_q_2ns);
+    ntt.extendPol(p_cm1_2ns, p_cm1_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm1_n], pBuffer);
 
     TimerStopAndLog(STARK_STEP_1_LDE);
     TimerStart(STARK_STEP_1_MERKLETREE);
@@ -68,12 +72,12 @@ void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publ
 #pragma omp parallel for
     for (uint64_t i = 0; i < N; i++)
     {
-        steps->step2prev_first(mem, pConstPols, pConstPols2ns, challenges, x_n, x_2ns, zi, evals, xDivXSubXi, xDivXSubWXi, publicInputs, i);
+        steps->step2prev_first(mem, pConstPols, pConstPols2ns, challenges, x_n, x_2ns, zi, evals, xDivXSubXi, xDivXSubWXi, publicInputs, p_q_2ns, p_f_2ns, i);
     }
     TimerStopAndLog(STARK_STEP_2_CALCULATE_EXPS);
-
+    
     TimerStart(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE);
-    Polinomial *transPols = transposeH1H2Columns(pAddress, numCommited);
+    Polinomial *transPols = transposeH1H2Columns(pAddress, numCommited, pBuffer);
     TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE);
 
     TimerStart(STARK_STEP_2_CALCULATEH1H2);
@@ -82,9 +86,8 @@ void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publ
     {
         nthreads += 1;
     }
-    uint64_t buffSize = starkInfo.mapSectionsN.section[eSection::q_2ns] * NExtended;
-    uint64_t *mam = (uint64_t *)pAddress;
-    uint64_t *buffer = &mam[starkInfo.mapOffsets.section[eSection::q_2ns]];
+    uint64_t buffSize = starkInfo.mapSectionsN.section[eSection::cm1_n] * NExtended * FIELD_EXTENSION;
+    uint64_t *pbufferH = (uint64_t *)malloc(buffSize * sizeof(uint64_t));
     uint64_t buffSizeThread = buffSize / nthreads;
 
 #pragma omp parallel for num_threads(nthreads)
@@ -95,16 +98,17 @@ void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publ
         {
             uint64_t buffSizeThreadValues = 3 * N;
             uint64_t buffSizeThreadKeys = buffSizeThread - buffSizeThreadValues;
-            Polinomial::calculateH1H2_opt1(transPols[indx1 + 2], transPols[indx1 + 3], transPols[indx1], transPols[indx1 + 1], i, &buffer[omp_get_thread_num() * buffSizeThread], buffSizeThreadKeys, buffSizeThreadValues);
+            Polinomial::calculateH1H2_opt1(transPols[indx1 + 2], transPols[indx1 + 3], transPols[indx1], transPols[indx1 + 1], i, &pbufferH[omp_get_thread_num() * buffSizeThread], buffSizeThreadKeys, buffSizeThreadValues);
         }
         else
         {
             assert(transPols[indx1 + 2].dim() == 3);
             uint64_t buffSizeThreadValues = 5 * N;
             uint64_t buffSizeThreadKeys = buffSizeThread - buffSizeThreadValues;
-            Polinomial::calculateH1H2_opt3(transPols[indx1 + 2], transPols[indx1 + 3], transPols[indx1], transPols[indx1 + 1], i, &buffer[omp_get_thread_num() * buffSizeThread], buffSizeThreadKeys, buffSizeThreadValues);
+            Polinomial::calculateH1H2_opt3(transPols[indx1 + 2], transPols[indx1 + 3], transPols[indx1], transPols[indx1 + 1], i, &pbufferH[omp_get_thread_num() * buffSizeThread], buffSizeThreadKeys, buffSizeThreadValues);
         }
     }
+    free(pbufferH);
     TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2);
 
     TimerStart(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE_2);
@@ -114,7 +118,7 @@ void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publ
     TimerStart(STARK_STEP_2_LDE_AND_MERKLETREE);
     TimerStart(STARK_STEP_2_LDE);
 
-    ntt.extendPol(p_cm2_2ns, p_cm2_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm2_n], p_q_2ns);
+    ntt.extendPol(p_cm2_2ns, p_cm2_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm2_n], pBuffer);
 
     TimerStopAndLog(STARK_STEP_2_LDE);
     TimerStart(STARK_STEP_2_MERKLETREE);
@@ -140,12 +144,13 @@ void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publ
 #pragma omp parallel for
     for (uint64_t i = 0; i < N; i++)
     {
-        steps->step3prev_first(mem, pConstPols, pConstPols2ns, challenges, x_n, x_2ns, zi, evals, xDivXSubXi, xDivXSubWXi, publicInputs, i);
+        steps->step3prev_first(mem, pConstPols, pConstPols2ns, challenges, x_n, x_2ns, zi, evals, xDivXSubXi, xDivXSubWXi, publicInputs, p_q_2ns, p_f_2ns, i);
     }
     TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS);
 
+
     TimerStart(STARK_STEP_3_CALCULATE_Z_TRANSPOSE);
-    Polinomial *newpols_ = transposeZColumns(pAddress, numCommited);
+    Polinomial *newpols_ = transposeZColumns(pAddress, numCommited,pBuffer);
     TimerStopAndLog(STARK_STEP_3_CALCULATE_Z_TRANSPOSE);
 
     TimerStart(STARK_STEP_3_CALCULATE_Z);
@@ -161,9 +166,16 @@ void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publ
     transposeZRows(pAddress, numCommited, newpols_);
     TimerStopAndLog(STARK_STEP_3_CALCULATE_Z_TRANSPOSE_2);
 
+    // Calculate exps
+#pragma omp parallel for
+    for (uint64_t i = 0; i < N; i++)
+    {
+        steps->step3_first(mem, pConstPols, pConstPols2ns, challenges, x_n, x_2ns, zi, evals, xDivXSubXi, xDivXSubWXi, publicInputs, p_q_2ns, p_f_2ns, i);
+    }
+
     TimerStart(STARK_STEP_3_LDE_AND_MERKLETREE);
     TimerStart(STARK_STEP_3_LDE);
-    ntt.extendPol(p_cm3_2ns, p_cm3_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm3_n], p_q_2ns);
+    ntt.extendPol(p_cm3_2ns, p_cm3_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm3_n], pBuffer);
     TimerStopAndLog(STARK_STEP_3_LDE);
     TimerStart(STARK_STEP_3_MERKLETREE);
     treesGL[2]->merkelize();
@@ -182,17 +194,18 @@ void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publ
 
     transcript.getField(challenges[4]); // gamma
 
-#pragma omp parallel for
-    for (uint64_t i = 0; i < N; i++)
-    {
-        steps->step4_first(mem, pConstPols, pConstPols2ns, challenges, x_n, x_2ns, zi, evals, xDivXSubXi, xDivXSubWXi, &publicInputs[0], i);
-    }
-    steps->step4_first(mem, pConstPols, pConstPols2ns, challenges, x_n, x_2ns, zi, evals, xDivXSubXi, xDivXSubWXi, &publicInputs[0], N - 1);
-
+    /**
+    #pragma omp parallel for
+        for (uint64_t i = 0; i < N; i++)
+        {
+            steps->step4_first(mem, pConstPols, pConstPols2ns, challenges, x_n, x_2ns, zi, evals, xDivXSubXi, xDivXSubWXi, &publicInputs[0], i);
+        }
+        steps->step4_first(mem, pConstPols, pConstPols2ns, challenges, x_n, x_2ns, zi, evals, xDivXSubXi, xDivXSubWXi, &publicInputs[0], N - 1);
+    */
     TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS);
 
     TimerStart(STARK_STEP_4_LDE);
-    ntt.extendPol(p_exps_withq_2ns, p_exps_withq_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::exps_withq_n], p_q_2ns);
+    // ntt.extendPol(p_exps_withq_2ns, p_exps_withq_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::exps_withq_n], pBuffer);
     TimerStopAndLog(STARK_STEP_4_LDE);
 
     TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS);
@@ -201,8 +214,30 @@ void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publ
 #pragma omp parallel for
     for (uint64_t i = 0; i < NExtended; i++)
     {
-        steps->step42ns_first(mem, pConstPols, pConstPols2ns, challenges, x_n, x_2ns, zi, evals, xDivXSubXi, xDivXSubWXi, &publicInputs[0], i);
+        steps->step42ns_first(mem, pConstPols, pConstPols2ns, challenges, x_n, x_2ns, zi, evals, xDivXSubXi, xDivXSubWXi, &publicInputs[0], p_q_2ns, p_f_2ns, i);
     }
+
+    Polinomial qq1 = Polinomial(NExtended, starkInfo.qDim, "qq1");
+    Polinomial qq2 = Polinomial(NExtended, starkInfo.qDim * starkInfo.qDeg, "qq2");
+
+    nttExtended.INTT(qq1.address(), p_q_2ns, NExtended, starkInfo.qDim,NULL, 2, 1);
+
+    Goldilocks::Element curS = Goldilocks::one();
+    Goldilocks::Element shiftIn = Goldilocks::exp(Goldilocks::inv(Goldilocks::shift()), N);
+
+    for (uint64_t p = 0; p < starkInfo.qDeg; p++)
+    {
+        for (uint64_t i = 0; i < N; i++)
+        {
+            for (uint64_t k = 0; k < starkInfo.qDim; k++)
+            {
+                *qq2[i * starkInfo.qDim * starkInfo.qDeg + starkInfo.qDim * p + k] = Goldilocks::mul(*qq1[p * N * starkInfo.qDim + i * starkInfo.qDim + k], curS);
+            }
+        }
+        curS = Goldilocks::mul(curS, shiftIn);
+    }
+
+    nttExtended.NTT(cm4_2ns, qq2.address(), NExtended, starkInfo.qDim * starkInfo.qDeg);
 
     TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS);
     TimerStart(STARK_STEP_4_MERKLETREE);
@@ -287,14 +322,18 @@ void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publ
 #pragma omp parallel for
     for (uint64_t i = 0; i < NExtended; i++)
     {
-        steps->step52ns_first(mem, pConstPols, pConstPols2ns, challenges, x_n, x_2ns, zi, evals, xDivXSubXi, xDivXSubWXi, publicInputs, i);
+        steps->step52ns_first(mem, pConstPols, pConstPols2ns, challenges, x_n, x_2ns, zi, evals, xDivXSubXi, xDivXSubWXi, publicInputs, p_q_2ns, p_f_2ns, i);
     }
 
     TimerStopAndLog(STARK_STEP_5_CALCULATE_EXPS);
     TimerStopAndLog(STARK_STEP_5);
     TimerStart(STARK_STEP_FRI);
 
-    Polinomial friPol = starkInfo.getPolinomial(mem, starkInfo.exps_2ns[starkInfo.friExpId]);
+    // Polinomial friPol = starkInfo.getPolinomial(mem, starkInfo.exps_2ns[starkInfo.friExpId]);
+    Polinomial friPol = Polinomial(NExtended, 3, "friPol");
+    Polinomial p_f_2ns_tmp = Polinomial(p_f_2ns, NExtended, 3);
+    Polinomial::copy(friPol, p_f_2ns_tmp);
+
     FRIProve::prove(proof, treesGL, transcript, friPol, starkInfo.starkStruct.nBitsExt, starkInfo);
 
     proof.proofs.setEvals(evals.address());
@@ -307,38 +346,39 @@ void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publ
     {
         delete treesGL[i];
     }
+    free(pBuffer);
 }
 
-Polinomial *Starks::transposeH1H2Columns(void *pAddress, uint64_t &numCommited)
+Polinomial *Starks::transposeH1H2Columns(void *pAddress, uint64_t &numCommited, Goldilocks::Element *pBuffer)
 {
     Goldilocks::Element *mem = (Goldilocks::Element *)pAddress;
 
     u_int64_t stride_pol0 = N * FIELD_EXTENSION + 8;
     uint64_t tot_pols0 = 4 * starkInfo.puCtx.size();
     Polinomial *transPols = new Polinomial[tot_pols0];
-    Goldilocks::Element *buffpols0 = &mem[starkInfo.mapOffsets.section[eSection::exps_withq_2ns]];
-    assert(starkInfo.mapSectionsN.section[eSection::q_2ns] * NExtended >= 3 * tot_pols0 * N);
+
+    assert(starkInfo.mapSectionsN.section[eSection::cm1_n] * NExtended * FIELD_EXTENSION >= 3 * tot_pols0 * N);
 
     //#pragma omp parallel for
     for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
     {
-        Polinomial fPol = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.puCtx[i].fExpId]);
-        Polinomial tPol = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.puCtx[i].tExpId]);
+        Polinomial fPol = starkInfo.getPolinomial(mem, starkInfo.tmpExp_n[starkInfo.puCtx[i].fTmpExpId]);
+        Polinomial tPol = starkInfo.getPolinomial(mem, starkInfo.tmpExp_n[starkInfo.puCtx[i].tTmpExpId]);
         Polinomial h1 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited + i * 2]);
         Polinomial h2 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited + i * 2 + 1]);
 
         uint64_t indx = i * 4;
-        transPols[indx].potConstruct(&(buffpols0[indx * stride_pol0]), fPol.degree(), fPol.dim(), fPol.dim());
+        transPols[indx].potConstruct(&(pBuffer[indx * stride_pol0]), fPol.degree(), fPol.dim(), fPol.dim());
         Polinomial::copy(transPols[indx], fPol);
         indx++;
-        transPols[indx].potConstruct(&(buffpols0[indx * stride_pol0]), tPol.degree(), tPol.dim(), tPol.dim());
+        transPols[indx].potConstruct(&(pBuffer[indx * stride_pol0]), tPol.degree(), tPol.dim(), tPol.dim());
         Polinomial::copy(transPols[indx], tPol);
         indx++;
 
-        transPols[indx].potConstruct(&(buffpols0[indx * stride_pol0]), h1.degree(), h1.dim(), h1.dim());
+        transPols[indx].potConstruct(&(pBuffer[indx * stride_pol0]), h1.degree(), h1.dim(), h1.dim());
         indx++;
 
-        transPols[indx].potConstruct(&(buffpols0[indx * stride_pol0]), h2.degree(), h2.dim(), h2.dim());
+        transPols[indx].potConstruct(&(pBuffer[indx * stride_pol0]), h2.degree(), h2.dim(), h2.dim());
     }
     return transPols;
 }
@@ -361,17 +401,16 @@ void Starks::transposeH1H2Rows(void *pAddress, uint64_t &numCommited, Polinomial
     }
     numCommited = numCommited + starkInfo.puCtx.size() * 2;
 }
-Polinomial *Starks::transposeZColumns(void *pAddress, uint64_t &numCommited)
+Polinomial *Starks::transposeZColumns(void *pAddress, uint64_t &numCommited, Goldilocks::Element *pBuffer)
 {
     Goldilocks::Element *mem = (Goldilocks::Element *)pAddress;
 
     u_int64_t stride_pol_ = N * FIELD_EXTENSION + 8; // assuming all polinomials have same degree
     uint64_t tot_pols = 3 * (starkInfo.puCtx.size() + starkInfo.peCtx.size() + starkInfo.ciCtx.size());
     Polinomial *newpols_ = (Polinomial *)calloc(tot_pols * sizeof(Polinomial), 1);
-    Goldilocks::Element *buffpols_ = &mem[starkInfo.mapOffsets.section[eSection::exps_withq_2ns]];
-    assert(starkInfo.mapSectionsN.section[eSection::q_2ns] * NExtended >= tot_pols * stride_pol_);
+    assert(starkInfo.mapSectionsN.section[eSection::cm1_n] * NExtended * FIELD_EXTENSION >= tot_pols * stride_pol_);
 
-    if (buffpols_ == NULL || newpols_ == NULL)
+    if (pBuffer == NULL || newpols_ == NULL)
     {
         cout << "memory problems!" << endl;
         exit(1);
@@ -380,42 +419,42 @@ Polinomial *Starks::transposeZColumns(void *pAddress, uint64_t &numCommited)
     //#pragma omp parallel for (better without)
     for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
     {
-        Polinomial pNum = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.puCtx[i].numId]);
-        Polinomial pDen = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.puCtx[i].denId]);
+        Polinomial pNum = starkInfo.getPolinomial(mem, starkInfo.tmpExp_n[starkInfo.puCtx[i].numTmpExpId]);
+        Polinomial pDen = starkInfo.getPolinomial(mem, starkInfo.tmpExp_n[starkInfo.puCtx[i].denTmpExpId]);
         Polinomial z = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited + i]);
         u_int64_t indx = i * 3;
-        newpols_[indx].potConstruct(&(buffpols_[indx * stride_pol_]), pNum.degree(), pNum.dim(), pNum.dim());
+        newpols_[indx].potConstruct(&(pBuffer[indx * stride_pol_]), pNum.degree(), pNum.dim(), pNum.dim());
         Polinomial::copy(newpols_[indx], pNum);
         indx++;
         assert(pNum.degree() <= N);
 
-        newpols_[indx].potConstruct(&(buffpols_[indx * stride_pol_]), pDen.degree(), pDen.dim(), pDen.dim());
+        newpols_[indx].potConstruct(&(pBuffer[indx * stride_pol_]), pDen.degree(), pDen.dim(), pDen.dim());
         Polinomial::copy(newpols_[indx], pDen);
         indx++;
         assert(pDen.degree() <= N);
 
-        newpols_[indx].potConstruct(&(buffpols_[indx * stride_pol_]), z.degree(), z.dim(), z.dim());
+        newpols_[indx].potConstruct(&(pBuffer[indx * stride_pol_]), z.degree(), z.dim(), z.dim());
         assert(z.degree() <= N);
     }
     numCommited += starkInfo.puCtx.size();
     u_int64_t offset = 3 * starkInfo.puCtx.size();
     for (uint64_t i = 0; i < starkInfo.peCtx.size(); i++)
     {
-        Polinomial pNum = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.peCtx[i].numId]);
-        Polinomial pDen = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.peCtx[i].denId]);
+        Polinomial pNum = starkInfo.getPolinomial(mem, starkInfo.tmpExp_n[starkInfo.peCtx[i].numTmpExpId]);
+        Polinomial pDen = starkInfo.getPolinomial(mem, starkInfo.tmpExp_n[starkInfo.peCtx[i].denTmpExpId]);
         Polinomial z = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited + i]);
         u_int64_t indx = 3 * i + offset;
-        newpols_[indx].potConstruct(&(buffpols_[indx * stride_pol_]), pNum.degree(), pNum.dim(), pNum.dim());
+        newpols_[indx].potConstruct(&(pBuffer[indx * stride_pol_]), pNum.degree(), pNum.dim(), pNum.dim());
         Polinomial::copy(newpols_[indx], pNum);
         indx++;
         assert(pNum.degree() <= N);
 
-        newpols_[indx].potConstruct(&(buffpols_[indx * stride_pol_]), pDen.degree(), pDen.dim(), pDen.dim());
+        newpols_[indx].potConstruct(&(pBuffer[indx * stride_pol_]), pDen.degree(), pDen.dim(), pDen.dim());
         Polinomial::copy(newpols_[indx], pDen);
         indx++;
         assert(pDen.degree() <= N);
 
-        newpols_[indx].potConstruct(&(buffpols_[indx * stride_pol_]), z.degree(), z.dim(), z.dim());
+        newpols_[indx].potConstruct(&(pBuffer[indx * stride_pol_]), z.degree(), z.dim(), z.dim());
         assert(z.degree() <= N);
     }
     numCommited += starkInfo.peCtx.size();
@@ -423,22 +462,22 @@ Polinomial *Starks::transposeZColumns(void *pAddress, uint64_t &numCommited)
     for (uint64_t i = 0; i < starkInfo.ciCtx.size(); i++)
     {
 
-        Polinomial pNum = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.ciCtx[i].numId]);
-        Polinomial pDen = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.ciCtx[i].denId]);
+        Polinomial pNum = starkInfo.getPolinomial(mem, starkInfo.tmpExp_n[starkInfo.ciCtx[i].numTmpExpId]);
+        Polinomial pDen = starkInfo.getPolinomial(mem, starkInfo.tmpExp_n[starkInfo.ciCtx[i].denTmpExpId]);
         Polinomial z = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited + i]);
         u_int64_t indx = 3 * i + offset;
 
-        newpols_[indx].potConstruct(&(buffpols_[indx * stride_pol_]), pNum.degree(), pNum.dim(), pNum.dim());
+        newpols_[indx].potConstruct(&(pBuffer[indx * stride_pol_]), pNum.degree(), pNum.dim(), pNum.dim());
         Polinomial::copy(newpols_[indx], pNum);
         indx++;
         assert(pNum.degree() <= N);
 
-        newpols_[indx].potConstruct(&(buffpols_[indx * stride_pol_]), pDen.degree(), pDen.dim(), pDen.dim());
+        newpols_[indx].potConstruct(&(pBuffer[indx * stride_pol_]), pDen.degree(), pDen.dim(), pDen.dim());
         Polinomial::copy(newpols_[indx], pDen);
         indx++;
         assert(pDen.degree() <= N);
 
-        newpols_[indx].potConstruct(&(buffpols_[indx * stride_pol_]), z.degree(), z.dim(), z.dim());
+        newpols_[indx].potConstruct(&(pBuffer[indx * stride_pol_]), z.degree(), z.dim(), z.dim());
         assert(z.degree() <= N);
     }
     numCommited += starkInfo.ciCtx.size();

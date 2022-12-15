@@ -1,5 +1,6 @@
 #include "merkleTreeGL.hpp"
 #include <cassert>
+#include <algorithm> // std::max
 
 void MerkleTreeGL::getElement(Goldilocks::Element &element, uint64_t idx, uint64_t subIdx)
 {
@@ -39,13 +40,29 @@ void MerkleTreeGL::merkelize()
     {
         return;
     }
+    uint64_t batch_size = std::max((uint64_t)8, (width + 3) / 4);
+    uint64_t nbatches = 1;
+    if (width > 0)
+    {
+        nbatches = (width + batch_size - 1) / batch_size;
+    }
+    uint64_t nlastb = width - (nbatches - 1) * batch_size;
 
+    // Hash the leaves
 #pragma omp parallel for
     for (uint64_t i = 0; i < height; i++)
     {
-        Goldilocks::Element intermediate[width];
-        std::memcpy(&intermediate[0], &source[i * width], width * sizeof(Goldilocks::Element));
-        PoseidonGoldilocks::linear_hash(&nodes[i * CAPACITY], intermediate, width);
+        Goldilocks::Element buff0[nbatches * CAPACITY];
+        for (uint64_t j = 0; j < nbatches; j++)
+        {
+            uint64_t nn = batch_size;
+            if (j == nbatches - 1)
+                nn = nlastb;
+            Goldilocks::Element buff1[batch_size];
+            std::memcpy(&buff1[0], &source[i * width + j * batch_size], nn * sizeof(Goldilocks::Element));
+            PoseidonGoldilocks::linear_hash(&buff0[j * CAPACITY], buff1, nn);
+        }
+        PoseidonGoldilocks::linear_hash(&nodes[i * CAPACITY], buff0, nbatches * CAPACITY);
     }
 
     // Build the merkle tree
