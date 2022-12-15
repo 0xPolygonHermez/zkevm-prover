@@ -49,6 +49,7 @@ zkresult StateDBRemote::set (const Goldilocks::Element (&oldRoot)[4], const Gold
         google::protobuf::Map<google::protobuf::uint64, statedb::v1::SiblingList>::iterator it;
         google::protobuf::Map<google::protobuf::uint64, statedb::v1::SiblingList> siblings;
         siblings = *response.mutable_siblings();
+        result->siblings.clear();
         for (it=siblings.begin(); it!=siblings.end(); it++)
         {
             vector<Goldilocks::Element> list;
@@ -104,6 +105,7 @@ zkresult StateDBRemote::get (const Goldilocks::Element (&root)[4], const Goldilo
         google::protobuf::Map<google::protobuf::uint64, statedb::v1::SiblingList>::iterator it;
         google::protobuf::Map<google::protobuf::uint64, statedb::v1::SiblingList> siblings;
         siblings = *response.mutable_siblings();
+        result->siblings.clear();
         for (it=siblings.begin(); it!=siblings.end(); it++)
         {
             vector<Goldilocks::Element> list;
@@ -167,7 +169,7 @@ zkresult StateDBRemote::getProgram (const Goldilocks::Element (&key)[4], vector<
     std:string sData;
 
     sData = response.data();
-
+    data.clear();
     for (uint64_t i=0; i<sData.size(); i++) {
         data.push_back(sData.at(i));
     }

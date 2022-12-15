@@ -57,6 +57,7 @@ zkresult StateDB::getProgram(const Goldilocks::Element (&key)[4], vector<uint8_t
 {
     lock_guard<recursive_mutex> guard(mlock);
 
+    data.clear();
     zkresult zkr = db.getProgram(fea2string(fr, key), data, dbReadLog);
 
     return zkr;
