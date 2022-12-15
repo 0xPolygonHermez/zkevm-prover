@@ -326,8 +326,9 @@ void buildConstTree(const string constFile, const string starkStructFile, const 
         TimerStart(MerkleTree_GL);
         uint64_t numElementsTree = MerklehashGoldilocks::getTreeNumElements(nPols, nExt);
         uint64_t sizeConstTree = numElementsTree*sizeof(Goldilocks::Element);
+        uint64_t batchSize = std::max((uint64_t)8, (nPols + 3) / 4);
         Goldilocks::Element* constTree = (Goldilocks::Element *)malloc(numElementsTree*SIZE_GL);
-        PoseidonGoldilocks::merkletree(constTree, constPolsArrayE, nPols, nExt);
+        PoseidonGoldilocks::merkletree_batch(constTree, constPolsArrayE, nPols, nExt, batchSize);
         TimerStopAndLog(MerkleTree_GL);
 
         cout << time() << " Generating files..." << endl;
@@ -363,7 +364,8 @@ void buildConstTree(const string constFile, const string starkStructFile, const 
 
         //VerKey
         if (verKeyFile!="") {
-            RawFr::Element constRoot = mt.root();
+            RawFr::Element constRoot;
+            mt.getRoot(&constRoot);
             RawFr rawfr;
             json jsonVerKey;
             json value;
@@ -376,7 +378,7 @@ void buildConstTree(const string constFile, const string starkStructFile, const 
         std::ofstream fw(constTreeFile.c_str(), std::fstream::out | std::fstream::binary);
         fw.write((const char*) &(mt.source_width), sizeof(mt.source_width));
         fw.write((const char*) &(mt.height), sizeof(mt.height));
-        fw.write((const char*) mt.elements, nPols*nExt*SIZE_GL);
+        fw.write((const char*) mt.source, nPols*nExt*SIZE_GL);
         fw.write((const char*) mt.nodes, mt.numNodes*sizeof(RawFr::Element));
         fw.close();
 
