@@ -57,12 +57,12 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     N_NoCounters(N_NO_COUNTERS_MULTIPLICATION_FACTOR*MainCommitPols::pilDegree()),
     poseidon(poseidon),
     config(config),
-    MAX_CNT_ARITH(N/32),
-    MAX_CNT_BINARY(N/16),
-    MAX_CNT_MEM_ALIGN(N/32),
-    MAX_CNT_KECCAK_F((N/155286)*44),
-    MAX_CNT_PADDING_PG(N/56),
-    MAX_CNT_POSEIDON_G(N/30)
+    MAX_CNT_ARITH((N-200)/32),
+    MAX_CNT_BINARY((N-200)/16),
+    MAX_CNT_MEM_ALIGN((N-200)/32),
+    MAX_CNT_KECCAK_F(((N-200)/155286)*44),
+    MAX_CNT_PADDING_PG((N-200)/56),
+    MAX_CNT_POSEIDON_G((N-200)/30)
 {
     /* Load and parse ROM JSON file */
 
