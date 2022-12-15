@@ -531,10 +531,6 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         pProverRequest->batchProofOutput = zkinRecursive1;
 
         // save publics to file
-        for (uint64_t i = 0; i < recursive2Verkey["constRoot"].size(); i++)
-        {
-            publicStarkJson[starkZkevm.starkInfo.nPublics + i] = to_string(recursive2Verkey["constRoot"][i]);
-        }
         json2file(publicStarkJson, pProverRequest->publicsOutput);
 
         // Save output to file
