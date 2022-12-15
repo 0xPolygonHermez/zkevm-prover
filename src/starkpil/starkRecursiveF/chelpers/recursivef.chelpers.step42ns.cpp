@@ -5,7 +5,6 @@
 #include "starkRecursiveFSteps.hpp"
 
 void StarkRecursiveFSteps::step42ns_first(StepsParams &params, uint64_t i) {
-     
      Goldilocks::Element tmp_0;
      Goldilocks::sub(tmp_0, params.pols[138412032 + i*12], params.publicInputs[0]);
      Goldilocks::Element tmp_1;

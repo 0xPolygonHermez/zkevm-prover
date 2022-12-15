@@ -4,9 +4,7 @@
 #include "constant_pols_starks.hpp"
 #include "starkRecursiveFSteps.hpp"
 
-
 void StarkRecursiveFSteps::step3_first(StepsParams &params, uint64_t i) {
-     
      Goldilocks::Element tmp_141;
      Goldilocks::copy(tmp_141, params.pols[0 + i*12]);
      Goldilocks3::Element tmp_81;
