@@ -58,9 +58,16 @@ void MerkleTreeGL::merkelize()
             uint64_t nn = batch_size;
             if (j == nbatches - 1)
                 nn = nlastb;
-            Goldilocks::Element buff1[batch_size];
-            std::memcpy(&buff1[0], &source[i * width + j * batch_size], nn * sizeof(Goldilocks::Element));
-            PoseidonGoldilocks::linear_hash(&buff0[j * CAPACITY], buff1, nn);
+            if (nlastb < 4)
+            {
+                std::memcpy(&buff0[j * CAPACITY], &source[i * width + j * batch_size], nn * sizeof(Goldilocks::Element));
+            }
+            else
+            {
+                Goldilocks::Element buff1[batch_size];
+                std::memcpy(&buff1[0], &source[i * width + j * batch_size], nn * sizeof(Goldilocks::Element));
+                PoseidonGoldilocks::linear_hash(&buff0[j * CAPACITY], buff1, nn);
+            }
         }
         PoseidonGoldilocks::linear_hash(&nodes[i * CAPACITY], buff0, nbatches * CAPACITY);
     }

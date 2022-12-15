@@ -110,8 +110,6 @@ public:
     uint64_t numId;
     uint64_t denId;
     uint64_t c2Id;
-    uint64_t denTmpExpId;
-    uint64_t numTmpExpId;
 };
 
 class PuCtx
@@ -125,10 +123,6 @@ public:
     uint64_t c1Id;
     uint64_t numId;
     uint64_t denId;
-    uint64_t denTmpExpId;
-    uint64_t fTmpExpId;
-    uint64_t numTmpExpId;
-    uint64_t tTmpExpId;
     uint64_t c2Id;
 };
 
@@ -140,8 +134,6 @@ public:
     uint64_t denId;
     uint64_t c1Id;
     uint64_t c2Id;
-    uint64_t denTmpExpId;
-    uint64_t numTmpExpId;
 };
 
 class EvMap
@@ -289,7 +281,6 @@ public:
     uint64_t qDim;
     uint64_t friExpId;
     uint64_t nExps;
-    uint64_t nTmpExps;
 
     PolsSections mapDeg;
     PolsSections mapOffsets;
@@ -315,7 +306,8 @@ public:
     vector<uint64_t> cm4_nVector;
     vector<uint64_t> cm4_2nsVector;
     vector<uint64_t> tmpExp_n;
-
+    map<string,uint64_t> exp2pol;
+    
     /* Constructor */
     StarkInfo(const Config &config, string file);
 

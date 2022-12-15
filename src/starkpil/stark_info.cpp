@@ -38,7 +38,6 @@ void StarkInfo::load(json j)
     nCm4 = j["nCm4"];
     friExpId = j["friExpId"];
     nExps = j["nExps"];
-    nTmpExps = j["nTmpExps"];
     qDim = j["qDim"];
     qDeg = j["qDeg"];
 
@@ -146,8 +145,6 @@ void StarkInfo::load(json j)
         pe.numId = j["peCtx"][i]["numId"];
         pe.denId = j["peCtx"][i]["denId"];
         pe.c2Id = j["peCtx"][i]["c2Id"];
-        pe.numTmpExpId = j["peCtx"][i]["numTmpExpId"];
-        pe.denTmpExpId = j["peCtx"][i]["denTmpExpId"];
         peCtx.push_back(pe);
     }
 
@@ -162,10 +159,6 @@ void StarkInfo::load(json j)
         pu.c1Id = j["puCtx"][i]["c1Id"];
         pu.numId = j["puCtx"][i]["numId"];
         pu.denId = j["puCtx"][i]["denId"];
-        pu.denTmpExpId = j["puCtx"][i]["denTmpExpId"];
-        pu.fTmpExpId = j["puCtx"][i]["fTmpExpId"];
-        pu.numTmpExpId = j["puCtx"][i]["numTmpExpId"];
-        pu.tTmpExpId = j["puCtx"][i]["tTmpExpId"];
         pu.c2Id = j["puCtx"][i]["c2Id"];
         puCtx.push_back(pu);
     }
@@ -178,8 +171,6 @@ void StarkInfo::load(json j)
         ci.denId = j["ciCtx"][i]["denId"];
         ci.c1Id = j["ciCtx"][i]["c1Id"];
         ci.c2Id = j["ciCtx"][i]["c2Id"];
-        ci.denTmpExpId = j["ciCtx"][i]["denTmpExpId"];
-        ci.numTmpExpId = j["ciCtx"][i]["numTmpExpId"];
         ciCtx.push_back(ci);
     }
 
@@ -442,6 +433,13 @@ void StarkInfo::load(json j)
         }
         tmpExp_n.push_back(value);
     }
+
+    for (auto it =  j["exp2pol"].begin(); it != j["exp2pol"].end(); ++it) {
+        std::string key = it.key(); 
+        uint64_t value = it.value();
+         exp2pol.insert(pair(key,value));
+    }
+
 }
 
 void StarkInfo::getPol(void *pAddress, uint64_t idPol, PolInfo &polInfo)

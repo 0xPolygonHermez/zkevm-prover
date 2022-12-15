@@ -201,8 +201,8 @@ void StarkRecursiveF::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::E
 #pragma omp parallel for
     for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
     {
-        Polinomial fPol = starkInfo.getPolinomial(mem, starkInfo.tmpExp_n[starkInfo.puCtx[i].fTmpExpId]);
-        Polinomial tPol = starkInfo.getPolinomial(mem, starkInfo.tmpExp_n[starkInfo.puCtx[i].tTmpExpId]);
+        Polinomial fPol = starkInfo.getPolinomial(mem, starkInfo.exp2pol[to_string(starkInfo.puCtx[i].fExpId)]);
+        Polinomial tPol = starkInfo.getPolinomial(mem, starkInfo.exp2pol[to_string(starkInfo.puCtx[i].tExpId)]);
         Polinomial h1 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited + i * 2]);
         Polinomial h2 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited + i * 2 + 1]);
 
@@ -250,24 +250,24 @@ void StarkRecursiveF::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::E
 
     for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
     {
-        Polinomial pNum = starkInfo.getPolinomial(mem, starkInfo.tmpExp_n[starkInfo.puCtx[i].numTmpExpId]);
-        Polinomial pDen = starkInfo.getPolinomial(mem, starkInfo.tmpExp_n[starkInfo.puCtx[i].denTmpExpId]);
+        Polinomial pNum = starkInfo.getPolinomial(mem, starkInfo.exp2pol[to_string(starkInfo.puCtx[i].numId)]);
+        Polinomial pDen = starkInfo.getPolinomial(mem, starkInfo.exp2pol[to_string(starkInfo.puCtx[i].denId)]);
         Polinomial z = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited++]);
         Polinomial::calculateZ(z, pNum, pDen);
     }
 
     for (uint64_t i = 0; i < starkInfo.peCtx.size(); i++)
     {
-        Polinomial pNum = starkInfo.getPolinomial(mem, starkInfo.tmpExp_n[starkInfo.peCtx[i].numTmpExpId]);
-        Polinomial pDen = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.peCtx[i].denId]);
+        Polinomial pNum = starkInfo.getPolinomial(mem, starkInfo.exp2pol[to_string(starkInfo.peCtx[i].numId)]);
+        Polinomial pDen = starkInfo.getPolinomial(mem, starkInfo.exp2pol[to_string(starkInfo.peCtx[i].denId)]);
         Polinomial z = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited++]);
         Polinomial::calculateZ(z, pNum, pDen);
     }
 
     for (uint64_t i = 0; i < starkInfo.ciCtx.size(); i++)
     {
-        Polinomial pNum = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.ciCtx[i].numId]);
-        Polinomial pDen = starkInfo.getPolinomial(mem, starkInfo.exps_n[starkInfo.ciCtx[i].denId]);
+        Polinomial pNum = starkInfo.getPolinomial(mem, starkInfo.exp2pol[to_string(starkInfo.ciCtx[i].numId)]);
+        Polinomial pDen = starkInfo.getPolinomial(mem, starkInfo.exp2pol[to_string(starkInfo.ciCtx[i].denId)]);
         Polinomial z = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited++]);
         Polinomial::calculateZ(z, pNum, pDen);
     }

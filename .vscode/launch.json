@@ -146,6 +146,30 @@
             "miDebuggerPath": "/usr/bin/gdb"
         },
         {
+            "name": "zkProverTest",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/zkProverTest",
+            "args": [
+                "-c",
+                "config_starkTest.json"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "Build zkProver",
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
             "name": "bctree",
             "type": "cppdbg",
             "request": "launch",

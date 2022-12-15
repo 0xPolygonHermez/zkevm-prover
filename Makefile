@@ -1,6 +1,7 @@
 TARGET_ZKP := zkProver
 TARGET_BCT := bctree
 TARGET_MNG += mainGenerator
+TARGET_TEST := zkProverTest
 
 BUILD_DIR := ./build
 SRC_DIRS := ./src ./test ./tools
@@ -29,23 +30,32 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 
-SRCS_ZKP := $(shell find $(SRC_DIRS) ! -path "./tools/starkpil/bctree/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" ! -path "./src/main_generator/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
+SRCS_ZKP := $(shell find $(SRC_DIRS) ! -path "./tools/starkpil/bctree/*" ! -path "./test/prover/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" ! -path "./src/main_generator/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
 OBJS_ZKP := $(SRCS_ZKP:%=$(BUILD_DIR)/%.o)
 DEPS_ZKP := $(OBJS_ZKP:.o=.d)
 
-SRCS_BCT := $(shell find $(SRC_DIRS) ! -path "./src/main.cpp" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" ! -path "./src/main_generator/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
+SRCS_BCT := $(shell find $(SRC_DIRS) ! -path "./src/main.cpp" ! -path "./test/prover/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" ! -path "./src/main_generator/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
 OBJS_BCT := $(SRCS_BCT:%=$(BUILD_DIR)/%.o)
 DEPS_BCT := $(OBJS_BCT:.o=.d)
+
+SRCS_TEST := $(shell find $(SRC_DIRS) ! -path "./src/main.cpp" ! -path "./tools/starkpil/bctree/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
+OBJS_TEST := $(SRCS_TEST:%=$(BUILD_DIR)/%.o)
+DEPS_TEST := $(OBJS_TEST:.o=.d)
 
 all: $(BUILD_DIR)/$(TARGET_ZKP)
 
 bctree: $(BUILD_DIR)/$(TARGET_BCT)
+
+test: $(BUILD_DIR)/$(TARGET_TEST)
 
 $(BUILD_DIR)/$(TARGET_ZKP): $(OBJS_ZKP)
 	$(CXX) $(OBJS_ZKP) $(CXXFLAGS) -o $@ $(LDFLAGS)
 
 $(BUILD_DIR)/$(TARGET_BCT): $(OBJS_BCT)
 	$(CXX) $(OBJS_BCT) $(CXXFLAGS) -o $@ $(LDFLAGS)
+
+$(BUILD_DIR)/$(TARGET_TEST): $(OBJS_TEST)
+	$(CXX) $(OBJS_TEST) $(CXXFLAGS) -o $@ $(LDFLAGS)
 
 # assembly
 $(BUILD_DIR)/%.asm.o: %.asm
