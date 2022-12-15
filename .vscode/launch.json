@@ -80,7 +80,7 @@
             "program": "${workspaceFolder}/build/zkProver",
             "args": [
                 "-c",
-                "config_runFile_AggregatedProof.json"
+                "testvectors/config_runFile_AggregatedProof.json"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -104,7 +104,7 @@
             "program": "${workspaceFolder}/build/zkProver",
             "args": [
                 "-c",
-                "config_runFile_FinalProof.json"
+                "testvectors/config_runFile_FinalProof.json"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
