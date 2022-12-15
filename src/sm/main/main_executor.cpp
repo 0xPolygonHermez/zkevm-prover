@@ -625,9 +625,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 return;
             }
             // If addrRel is negative, fail
-            if (rom.line[zkPC].offset<0 && (-rom.line[zkPC].offset)>addrRel)
+            if (addrRel < 0)
             {
-                cerr << "Error: addrRel < 0 zkPC=" << zkPC << " inst=" << rom.line[zkPC].toString(fr) << endl;
+                cerr << "Error: addrRel<0 addrRel=" << addrRel << " zkPC=" << zkPC << " inst=" << rom.line[zkPC].toString(fr) << endl;
                 proverRequest.result = ZKR_SM_MAIN_ADDRESS;
                 return;
             }

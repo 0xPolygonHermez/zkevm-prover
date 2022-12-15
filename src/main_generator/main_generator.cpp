@@ -614,64 +614,38 @@ string generate(const json &rom, const string &functionName, const string &fileN
         {
             string inROTL_CString = rom["program"][zkPC]["inROTL_C"];
             int64_t inROTL_C = atoi(inROTL_CString.c_str());
-
-            code += "    // If inROTL_C, op = C rotated left\n";
-            if (opInitialized)
+            if (inROTL_C != 0)
             {
-                if (inROTL_C == 1)
+                code += "    // If inROTL_C, op = C rotated left\n";
+                if (opInitialized)
                 {
-                    code += "    op0 = fr.add(op0, pols.C7[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    op1 = fr.add(op1, pols.C0[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    op2 = fr.add(op2, pols.C1[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    op3 = fr.add(op3, pols.C2[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    op4 = fr.add(op4, pols.C3[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    op5 = fr.add(op5, pols.C4[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    op6 = fr.add(op6, pols.C5[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    op7 = fr.add(op7, pols.C6[" + string(bFastMode?"0":"i") + "]);\n";
+                    code += "    op0 = fr.add(op0, fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C7[" + string(bFastMode?"0":"i") + "]));\n";
+                    code += "    op1 = fr.add(op1, fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C0[" + string(bFastMode?"0":"i") + "]));\n";
+                    code += "    op2 = fr.add(op2, fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C1[" + string(bFastMode?"0":"i") + "]));\n";
+                    code += "    op3 = fr.add(op3, fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C2[" + string(bFastMode?"0":"i") + "]));\n";
+                    code += "    op4 = fr.add(op4, fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C3[" + string(bFastMode?"0":"i") + "]));\n";
+                    code += "    op5 = fr.add(op5, fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C4[" + string(bFastMode?"0":"i") + "]));\n";
+                    code += "    op6 = fr.add(op6, fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C5[" + string(bFastMode?"0":"i") + "]));\n";
+                    code += "    op7 = fr.add(op7, fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C6[" + string(bFastMode?"0":"i") + "]));\n";
                 }
                 else
                 {
-                    code += "    op0 = fr.add(op0, fr.mul(rom.line[zkPC].inROTL_C, pols.C7[" + string(bFastMode?"0":"i") + "]));\n";
-                    code += "    op1 = fr.add(op1, fr.mul(rom.line[zkPC].inROTL_C, pols.C0[" + string(bFastMode?"0":"i") + "]));\n";
-                    code += "    op2 = fr.add(op2, fr.mul(rom.line[zkPC].inROTL_C, pols.C1[" + string(bFastMode?"0":"i") + "]));\n";
-                    code += "    op3 = fr.add(op3, fr.mul(rom.line[zkPC].inROTL_C, pols.C2[" + string(bFastMode?"0":"i") + "]));\n";
-                    code += "    op4 = fr.add(op4, fr.mul(rom.line[zkPC].inROTL_C, pols.C3[" + string(bFastMode?"0":"i") + "]));\n";
-                    code += "    op5 = fr.add(op5, fr.mul(rom.line[zkPC].inROTL_C, pols.C4[" + string(bFastMode?"0":"i") + "]));\n";
-                    code += "    op6 = fr.add(op6, fr.mul(rom.line[zkPC].inROTL_C, pols.C5[" + string(bFastMode?"0":"i") + "]));\n";
-                    code += "    op7 = fr.add(op7, fr.mul(rom.line[zkPC].inROTL_C, pols.C6[" + string(bFastMode?"0":"i") + "]));\n";
+                    code += "    op0 = fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C7[" + string(bFastMode?"0":"i") + "]);\n";
+                    code += "    op1 = fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C0[" + string(bFastMode?"0":"i") + "]);\n";
+                    code += "    op2 = fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C1[" + string(bFastMode?"0":"i") + "]);\n";
+                    code += "    op3 = fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C2[" + string(bFastMode?"0":"i") + "]);\n";
+                    code += "    op4 = fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C3[" + string(bFastMode?"0":"i") + "]);\n";
+                    code += "    op5 = fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C4[" + string(bFastMode?"0":"i") + "]);\n";
+                    code += "    op6 = fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C5[" + string(bFastMode?"0":"i") + "]);\n";
+                    code += "    op7 = fr.mul(rom.line[" + to_string(zkPC) + "].inROTL_C, pols.C6[" + string(bFastMode?"0":"i") + "]);\n";
                 }
-            }
-            else
-            {
-                if (inROTL_C == 1)
+                if (!bFastMode)
                 {
-                    code += "    op0 = pols.C7[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    op1 = pols.C0[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    op2 = pols.C1[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    op3 = pols.C2[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    op4 = pols.C3[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    op5 = pols.C4[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    op6 = pols.C5[" + string(bFastMode?"0":"i") + "];\n";
-                    code += "    op7 = pols.C6[" + string(bFastMode?"0":"i") + "];\n";
+                    code += "    pols.inROTL_C[i] = rom.line[" + to_string(zkPC) + "].inROTL_C;\n";
                 }
-                else
-                {
-                    code += "    op0 = fr.mul(rom.line[zkPC].inROTL_C, pols.C7[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    op1 = fr.mul(rom.line[zkPC].inROTL_C, pols.C0[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    op2 = fr.mul(rom.line[zkPC].inROTL_C, pols.C1[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    op3 = fr.mul(rom.line[zkPC].inROTL_C, pols.C2[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    op4 = fr.mul(rom.line[zkPC].inROTL_C, pols.C3[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    op5 = fr.mul(rom.line[zkPC].inROTL_C, pols.C4[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    op6 = fr.mul(rom.line[zkPC].inROTL_C, pols.C5[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    op7 = fr.mul(rom.line[zkPC].inROTL_C, pols.C6[" + string(bFastMode?"0":"i") + "]);\n";
-                }
+                code += "\n";
+                opInitialized = true;
             }
-            if (!bFastMode)
-            {
-                code += "    pols.inROTL_C[i] = rom.line[zkPC].inROTL_C;\n";
-            }
-            code += "\n";
-            opInitialized = true;
         }
 
         if (rom["program"][zkPC].contains("inRCX") && (rom["program"][zkPC]["inRCX"]!=0))
@@ -736,7 +710,10 @@ string generate(const json &rom, const string &functionName, const string &fileN
             }
             if (rom["program"][zkPC].contains("offset") && (rom["program"][zkPC]["offset"] != 0))
             {
-                code += "    addrRel += " + to_string(rom["program"][zkPC]["offset"]) + ";\n";
+                if (bAddrRel)
+                    code += "    addrRel += " + to_string(rom["program"][zkPC]["offset"]) + ";\n";
+                else
+                    code += "    addrRel = " + to_string(rom["program"][zkPC]["offset"]) + ";\n";
                 bOffset = true;
             }
             if (rom["program"][zkPC].contains("isStack") && (rom["program"][zkPC]["isStack"]==1))
@@ -746,22 +723,25 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        cerr << \"Error: failed calling fr.toS32(sp, pols.SP[i])\" << endl;\n";
                 code += "        exitProcess();\n";
                 code += "    }\n";
-                code += "    addrRel += sp;\n";
+                if (bAddrRel)
+                    code += "    addrRel += sp;\n";
+                else
+                    code += "    addrRel = sp;\n";
                 bAddrRel = true;
             }
             if (bAddrRel)
             {
                 code += "    // If addrRel is possitive, and the sum is too big, fail\n";
-                code += "    if (addrRel>=0x20000 || ((rom.line[zkPC].isMem==1) && (addrRel >= 0x10000)))\n";
+                code += "    if (addrRel>=0x20000 || ((rom.line[" + to_string(zkPC) + "].isMem==1) && (addrRel >= 0x10000)))\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: addrRel too big addrRel=\" << addrRel << \" zkPC=\" << " + to_string(zkPC) + " << \" inst=\" << rom.line[zkPC].toString(fr) << endl;\n";
+                code += "        cerr << \"Error: addrRel too big addrRel=\" << addrRel << \" zkPC=\" << " + to_string(zkPC) + " << \" inst=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS;\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    // If addrRel is negative, fail\n";
-                code += "    if (rom.line[zkPC].offset<0 && (-rom.line[zkPC].offset)>addrRel)\n";
+                code += "    if (addrRel < 0)\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: addrRel < 0 zkPC=\" << " + to_string(zkPC) + " << \" inst=\" << rom.line[zkPC].toString(fr) << endl;\n";
+                code += "        cerr << \"Error: addrRel<0 \" << addrRel << \" zkPC=\" << " + to_string(zkPC) + " << \" inst=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS;\n";
                 code += "        return;\n";
                 code += "    }\n";
