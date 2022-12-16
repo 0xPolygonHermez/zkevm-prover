@@ -5,14 +5,15 @@
 
 class ProcessBatchCache
 {
-    vector<ProverRequest> cache;
+    vector<ProverRequest *> cache;
     pthread_mutex_t mutex; // Mutex to protect the access to the throughput attributes
-    uint64_t next;
+    uint64_t readsFound;
+    uint64_t readsNotFound;
+    uint64_t writes;
 public:
-    ProcessBatchCache()
+    ProcessBatchCache() : readsFound(0), readsNotFound(0), writes(0)
     {
         pthread_mutex_init(&mutex, NULL);
-        next = 0;
     }
 private:
     void lock(void) { pthread_mutex_lock(&mutex); };
