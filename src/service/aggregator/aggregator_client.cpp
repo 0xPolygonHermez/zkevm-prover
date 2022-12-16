@@ -509,7 +509,24 @@ void* aggregatorClientThread(void* arg)
                 cerr << "aggregatorClientThread() failed calling readerWriter->Read(&aggregatorMessage)" << endl;
                 break;
             }
-            cout << "aggregatorClientThread() got: " << aggregatorMessage.ShortDebugString() << endl;
+            
+            switch (aggregatorMessage.request_case())
+            {
+                case aggregator::v1::AggregatorMessage::RequestCase::kGetStatusRequest:
+                case aggregator::v1::AggregatorMessage::RequestCase::kGenBatchProofRequest:
+                case aggregator::v1::AggregatorMessage::RequestCase::kCancelRequest:
+                case aggregator::v1::AggregatorMessage::RequestCase::kGetProofRequest:
+                    cout << "aggregatorClientThread() got: " << aggregatorMessage.ShortDebugString() << endl;
+                    break;
+                case aggregator::v1::AggregatorMessage::RequestCase::kGenAggregatedProofRequest:
+                    cout << "aggregatorClientThread() got genAggregatedProof() request" << endl;
+                    break;
+                case aggregator::v1::AggregatorMessage::RequestCase::kGenFinalProofRequest:
+                    cout << "aggregatorClientThread() got genFinalProof() request" << endl;
+                    break;
+                default:
+                    break;
+            }
 
             // We return the same ID we got in the aggregator message
             proverMessage.set_id(aggregatorMessage.id());
@@ -621,7 +638,22 @@ void* aggregatorClientThread(void* arg)
                 cerr << "aggregatorClientThread() failed calling readerWriter->Write(proverMessage)" << endl;
                 break;
             }
-            cout << "aggregatorClientThread() sent: " << proverMessage.ShortDebugString() << endl;
+            
+            switch (aggregatorMessage.request_case())
+            {
+                case aggregator::v1::AggregatorMessage::RequestCase::kGetStatusRequest:
+                case aggregator::v1::AggregatorMessage::RequestCase::kGenBatchProofRequest:
+                case aggregator::v1::AggregatorMessage::RequestCase::kGenAggregatedProofRequest:
+                case aggregator::v1::AggregatorMessage::RequestCase::kGenFinalProofRequest:
+                case aggregator::v1::AggregatorMessage::RequestCase::kCancelRequest:
+                    cout << "aggregatorClientThread() sent: " << proverMessage.ShortDebugString() << endl;
+                    break;
+                case aggregator::v1::AggregatorMessage::RequestCase::kGetProofRequest:
+                    cout << "aggregatorClientThread() getProof() response sent" << endl;
+                    break;
+                default:
+                    break;
+            }
             
             if (pAggregatorClient->config.saveResponseToFile)
             {
