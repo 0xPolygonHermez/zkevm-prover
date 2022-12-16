@@ -666,6 +666,9 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
         }
     }
 
+    // Clear logs array
+    logs.clear();
+
     // Increase transaction count
     txCount++;
 
