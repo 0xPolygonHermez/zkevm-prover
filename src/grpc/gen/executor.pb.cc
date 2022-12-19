@@ -517,38 +517,35 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "cutionTraceStep.StorageEntry\022\r\n\005depth\030\n "
   "\001(\r\022\022\n\ngas_refund\030\013 \001(\004\022!\n\005error\030\014 \001(\0162\022"
   ".executor.v1.Error\032.\n\014StorageEntry\022\013\n\003ke"
-  "y\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001*\235\010\n\005Error\022\025\n\021"
+  "y\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001*\225\007\n\005Error\022\025\n\021"
   "ERROR_UNSPECIFIED\020\000\022\022\n\016ERROR_NO_ERROR\020\001\022"
   "\024\n\020ERROR_OUT_OF_GAS\020\002\022\030\n\024ERROR_STACK_OVE"
-  "RFLOW\020\003\022\031\n\025ERROR_STACK_UNDERFLOW\020\004\022\032\n\026ER"
-  "ROR_NOT_ENOUGH_FUNDS\020\005\022\036\n\032ERROR_INSUFFIC"
-  "IENT_BALANCE\020\006\022\030\n\024ERROR_CODE_NOT_FOUND\020\007"
-  "\022 \n\034ERROR_MAX_CODE_SIZE_EXCEEDED\020\010\022$\n ER"
-  "ROR_CONTRACT_ADDRESS_COLLISION\020\t\022\017\n\013ERRO"
-  "R_DEPTH\020\n\022\034\n\030ERROR_EXECUTION_REVERTED\020\013\022"
-  "\037\n\033ERROR_CODE_STORE_OUT_OF_GAS\020\014\022\036\n\032ERRO"
-  "R_OUT_OF_COUNTERS_STEP\020\r\022 \n\034ERROR_OUT_OF"
-  "_COUNTERS_KECCAK\020\016\022 \n\034ERROR_OUT_OF_COUNT"
-  "ERS_BINARY\020\017\022\035\n\031ERROR_OUT_OF_COUNTERS_ME"
-  "M\020\020\022\037\n\033ERROR_OUT_OF_COUNTERS_ARITH\020\021\022!\n\035"
-  "ERROR_OUT_OF_COUNTERS_PADDING\020\022\022\"\n\036ERROR"
-  "_OUT_OF_COUNTERS_POSEIDON\020\023\022\026\n\022ERROR_INV"
-  "ALID_JUMP\020\024\022\030\n\024ERROR_INVALID_OPCODE\020\025\022\030\n"
-  "\024ERROR_INVALID_STATIC\020\026\022$\n ERROR_INVALID"
-  "_BYTECODE_STARTS_EF\020\027\022%\n!ERROR_INTRINSIC"
-  "_INVALID_SIGNATURE\020\030\022$\n ERROR_INTRINSIC_"
-  "INVALID_CHAIN_ID\020\031\022!\n\035ERROR_INTRINSIC_IN"
-  "VALID_NONCE\020\032\022%\n!ERROR_INTRINSIC_INVALID"
-  "_GAS_LIMIT\020\033\022#\n\037ERROR_INTRINSIC_INVALID_"
-  "BALANCE\020\034\022+\n\'ERROR_INTRINSIC_INVALID_BAT"
-  "CH_GAS_LIMIT\020\035\022\'\n#ERROR_INTRINSIC_INVALI"
-  "D_SENDER_CODE\020\036\022#\n\037ERROR_INTRINSIC_TX_GA"
-  "S_OVERFLOW\020\037\022\034\n\030ERROR_BATCH_DATA_TOO_BIG"
-  "\020 2h\n\017ExecutorService\022U\n\014ProcessBatch\022 ."
-  "executor.v1.ProcessBatchRequest\032!.execut"
-  "or.v1.ProcessBatchResponse\"\000BAZ\?github.c"
-  "om/0xPolygonHermez/zkevm-node/state/runt"
-  "ime/executor/pbb\006proto3"
+  "RFLOW\020\003\022\031\n\025ERROR_STACK_UNDERFLOW\020\004\022 \n\034ER"
+  "ROR_MAX_CODE_SIZE_EXCEEDED\020\005\022$\n ERROR_CO"
+  "NTRACT_ADDRESS_COLLISION\020\006\022\034\n\030ERROR_EXEC"
+  "UTION_REVERTED\020\007\022\036\n\032ERROR_OUT_OF_COUNTER"
+  "S_STEP\020\010\022 \n\034ERROR_OUT_OF_COUNTERS_KECCAK"
+  "\020\t\022 \n\034ERROR_OUT_OF_COUNTERS_BINARY\020\n\022\035\n\031"
+  "ERROR_OUT_OF_COUNTERS_MEM\020\013\022\037\n\033ERROR_OUT"
+  "_OF_COUNTERS_ARITH\020\014\022!\n\035ERROR_OUT_OF_COU"
+  "NTERS_PADDING\020\r\022\"\n\036ERROR_OUT_OF_COUNTERS"
+  "_POSEIDON\020\016\022\026\n\022ERROR_INVALID_JUMP\020\017\022\030\n\024E"
+  "RROR_INVALID_OPCODE\020\020\022\030\n\024ERROR_INVALID_S"
+  "TATIC\020\021\022$\n ERROR_INVALID_BYTECODE_STARTS"
+  "_EF\020\022\022%\n!ERROR_INTRINSIC_INVALID_SIGNATU"
+  "RE\020\023\022$\n ERROR_INTRINSIC_INVALID_CHAIN_ID"
+  "\020\024\022!\n\035ERROR_INTRINSIC_INVALID_NONCE\020\025\022%\n"
+  "!ERROR_INTRINSIC_INVALID_GAS_LIMIT\020\026\022#\n\037"
+  "ERROR_INTRINSIC_INVALID_BALANCE\020\027\022+\n\'ERR"
+  "OR_INTRINSIC_INVALID_BATCH_GAS_LIMIT\020\030\022\'"
+  "\n#ERROR_INTRINSIC_INVALID_SENDER_CODE\020\031\022"
+  "#\n\037ERROR_INTRINSIC_TX_GAS_OVERFLOW\020\032\022\034\n\030"
+  "ERROR_BATCH_DATA_TOO_BIG\020\0332h\n\017ExecutorSe"
+  "rvice\022U\n\014ProcessBatch\022 .executor.v1.Proc"
+  "essBatchRequest\032!.executor.v1.ProcessBat"
+  "chResponse\"\000BAZ\?github.com/0xPolygonHerm"
+  "ez/zkevm-node/state/runtime/executor/pbb"
+  "\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_executor_2eproto_deps[1] = {
 };
@@ -568,7 +565,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_exe
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_executor_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_executor_2eproto = {
-  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 3823,
+  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 3687,
   &descriptor_table_executor_2eproto_once, descriptor_table_executor_2eproto_sccs, descriptor_table_executor_2eproto_deps, 12, 0,
   schemas, file_default_instances, TableStruct_executor_2eproto::offsets,
   file_level_metadata_executor_2eproto, 12, file_level_enum_descriptors_executor_2eproto, file_level_service_descriptors_executor_2eproto,
@@ -612,11 +609,6 @@ bool Error_IsValid(int value) {
     case 25:
     case 26:
     case 27:
-    case 28:
-    case 29:
-    case 30:
-    case 31:
-    case 32:
       return true;
     default:
       return false;
