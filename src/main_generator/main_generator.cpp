@@ -723,7 +723,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        cerr << \"Error: failed calling fr.toS32(sp, pols.SP[i])\" << endl;\n";
                 code += "        exitProcess();\n";
                 code += "    }\n";
-                if (bAddrRel)
+                if (bAddrRel || bOffset)
                     code += "    addrRel += sp;\n";
                 else
                     code += "    addrRel = sp;\n";
