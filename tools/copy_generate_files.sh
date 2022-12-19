@@ -1,6 +1,6 @@
 #!/bin/bash -x
 
-VERSION=v0.5.2.0-evals2-20221215
+VERSION=v0.6.0.0-rc.1
 
 WORKING_DIR=/mnt/ofs/zkproverc/${VERSION}
 CONFIG_DIR=${WORKING_DIR}/config/
