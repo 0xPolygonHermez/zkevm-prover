@@ -3179,7 +3179,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
         {
             code += "    if (!proverRequest.input.bNoCounters)\n";
             code += "    {\n";
-            code += "        pols.cntArith[" + string(bFastMode?"0":"nexti") + "] = fr.add(pols.cntArith[" + string(bFastMode?"0":"i") + "], fr.one());\n";
+            code += "        pols.cntArith[" + string(bFastMode?"0":"nexti") + "] = fr.inc(pols.cntArith[" + string(bFastMode?"0":"i") + "]);\n";
             code += "#ifdef CHECK_MAX_CNT_ASAP\n";
             code += "        if (fr.toU64(pols.cntArith[" + string(bFastMode?"0":"nexti") + "]) > mainExecutor.MAX_CNT_ARITH)\n";
             code += "        {\n";
@@ -3209,7 +3209,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
         {
             code += "    if (!proverRequest.input.bNoCounters)\n";
             code += "    {\n";
-            code += "        pols.cntBinary[" + string(bFastMode?"0":"nexti") + "] = fr.add(pols.cntBinary[" + string(bFastMode?"0":"i") + "], fr.one());\n";
+            code += "        pols.cntBinary[" + string(bFastMode?"0":"nexti") + "] = fr.inc(pols.cntBinary[" + string(bFastMode?"0":"i") + "]);\n";
             code += "#ifdef CHECK_MAX_CNT_ASAP\n";
             code += "        if (fr.toU64(pols.cntBinary[" + string(bFastMode?"0":"nexti") + "]) > mainExecutor.MAX_CNT_BINARY)\n";
             code += "        {\n";
@@ -3239,7 +3239,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
         {
             code += "    if (!proverRequest.input.bNoCounters)\n";
             code += "    {\n";
-            code += "        pols.cntMemAlign[" + string(bFastMode?"0":"nexti") + "] = fr.add(pols.cntMemAlign[" + string(bFastMode?"0":"i") + "], fr.one());\n";
+            code += "        pols.cntMemAlign[" + string(bFastMode?"0":"nexti") + "] = fr.inc(pols.cntMemAlign[" + string(bFastMode?"0":"i") + "]);\n";
             code += "#ifdef CHECK_MAX_CNT_ASAP\n";
             code += "        if (fr.toU64(pols.cntMemAlign[" + string(bFastMode?"0":"nexti") + "]) > mainExecutor.MAX_CNT_MEM_ALIGN)\n";
             code += "        {\n";
@@ -3274,7 +3274,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    currentRCX = pols.RCX[" + string(bFastMode?"0":"i") + "];\n";
             code += "    if (!fr.isZero(pols.RCX[" + string(bFastMode?"0":"i") + "]))\n";
             code += "    {\n";
-            code += "        pols.RCX[" + string(bFastMode?"0":"nexti") + "] = fr.sub(pols.RCX[" + string(bFastMode?"0":"i") + "], fr.one());\n";
+            code += "        pols.RCX[" + string(bFastMode?"0":"nexti") + "] = fr.dec(pols.RCX[" + string(bFastMode?"0":"i") + "]);\n";
             code += "    }\n";
          }
         else
@@ -3361,7 +3361,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 if (bUseElseAddr)
                     code += "        pols.zkPC[nexti] = fr.fromU64(" + to_string(rom["program"][zkPC]["elseAddr"]) + "); // If op>=0, simply increase zkPC'=zkPC+1\n";
                 else
-                    code += "        pols.zkPC[nexti] = fr.add(pols.zkPC[i], fr.one()); // If op>=0, simply increase zkPC'=zkPC+1\n";
+                    code += "        pols.zkPC[nexti] = fr.inc(pols.zkPC[i]); // If op>=0, simply increase zkPC'=zkPC+1\n";
             }
             code += "    }\n";
             code += "    else\n";
@@ -3406,7 +3406,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 if (bUseElseAddr)
                     code += "        pols.zkPC[nexti] = fr.fromU64(" + to_string(rom["program"][zkPC]["elseAddr"]) + "); // If op>=0, simply increase zkPC'=zkPC+1\n";
                 else
-                    code += "        pols.zkPC[nexti] = fr.add(pols.zkPC[i], fr.one()); // If not carry, simply increase zkPC'=zkPC+1\n";
+                    code += "        pols.zkPC[nexti] = fr.inc(pols.zkPC[i]); // If not carry, simply increase zkPC'=zkPC+1\n";
                 code += "}\n";
             }
         }
@@ -3432,7 +3432,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 if (bUseElseAddr)
                     code += "        pols.zkPC[nexti] = fr.fromU64(" + to_string(rom["program"][zkPC]["elseAddr"]) + ");\n";
                 else
-                    code += "        pols.zkPC[nexti] = fr.add(pols.zkPC[i], fr.one());\n";
+                    code += "        pols.zkPC[nexti] = fr.inc(pols.zkPC[i]);\n";
             }
             code += "    }\n";
             if (!bFastMode)
@@ -3488,13 +3488,13 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    if (!fr.isZero(currentRCX))\n";
                 code += "        pols.zkPC[nexti] = pols.zkPC[i];\n";
                 code += "    else\n";
-                code += "        pols.zkPC[nexti] = fr.add(pols.zkPC[i], fr.one());\n";
+                code += "        pols.zkPC[nexti] = fr.inc(pols.zkPC[i]);\n";
             }
         }
         // Else, simply increase zkPC'=zkPC+1
         else if (!bFastMode)
         {
-            code += "    pols.zkPC[nexti] = fr.add(pols.zkPC[i], fr.one());\n";
+            code += "    pols.zkPC[nexti] = fr.inc(pols.zkPC[i]);\n";
         }
 
         if (!bFastMode)
