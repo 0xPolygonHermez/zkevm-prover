@@ -35,16 +35,16 @@ public:
 typedef enum
 {
     cm1_n = 0,
-    cm2_n = 1,
-    cm3_n = 2,
-    exps_withq_n = 3,
-    exps_withoutq_n = 4,
-    cm1_2ns = 5,
-    cm2_2ns = 6,
-    cm3_2ns = 7,
-    exps_withq_2ns = 8,
-    exps_withoutq_2ns = 9,
-    q_2ns = 10,
+    cm1_2ns = 1,
+    cm2_n = 2,
+    cm2_2ns = 3,
+    cm3_n = 4,
+    cm3_2ns = 5,
+    cm4_n = 6,
+    cm4_2ns = 7,
+    tmpExp_n = 8,
+    q_2ns = 9,
+    f_2ns = 10,
     eSectionMax = 11
 } eSection;
 
@@ -185,7 +185,9 @@ public:
         cm = 14,
         _const = 15,
         q = 16,
-        Zi = 17
+        Zi = 17,
+        tmpExp = 18,
+        f = 19
     } eType;
 
     eType type;
@@ -214,6 +216,8 @@ public:
         else if (s == "const") type = _const;
         else if (s == "q") type = q;
         else if (s == "Zi") type = Zi;
+        else if (s == "tmpExp") type = tmpExp;
+        else if (s == "f") type = f;
         else
         {
             cerr << "Error: StepType::setType() found invalid type: " << s << endl;
@@ -273,7 +277,8 @@ public:
     uint64_t nCm2;
     uint64_t nCm3;
     uint64_t nCm4;
-    uint64_t nQ;
+    uint64_t qDeg;
+    uint64_t qDim;
     uint64_t friExpId;
     uint64_t nExps;
 
@@ -293,12 +298,16 @@ public:
     vector<EvMap> evMap;
     Step step2prev;
     Step step3prev;
-    Step step4;
+    Step step3;
     Step step42ns;
     Step step52ns;
     vector<uint64_t> exps_n;
-    vector<uint64_t> exps_2ns;
-
+    vector<uint64_t> q_2nsVector;
+    vector<uint64_t> cm4_nVector;
+    vector<uint64_t> cm4_2nsVector;
+    vector<uint64_t> tmpExp_n;
+    map<string,uint64_t> exp2pol;
+    
     /* Constructor */
     StarkInfo(const Config &config, string file);
 

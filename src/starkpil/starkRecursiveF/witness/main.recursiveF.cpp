@@ -321,14 +321,14 @@ namespace CircomRecursiveF
     loadJsonImpl(ctx, j);
   }
 
-  void getCommitedPols(CommitPolsStarks *commitPols, const std::string zkevmVerifier, const std::string execFile, nlohmann::json &zkin)
+  void getCommitedPols(CommitPolsStarks *commitPols, const std::string zkevmVerifier, const std::string execFile, nlohmann::json &zkin, uint64_t N)
   {
     //-------------------------------------------
     // Verifier stark proof
     //-------------------------------------------
-    TimerStart(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_2);
+    TimerStart(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_F);
     Circom_Circuit *circuit = loadCircuit(zkevmVerifier);
-    TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_2);
+    TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_F);
     TimerStart(CIRCOM_LOAD_JSON_BATCH_PROOF);
     Circom_CalcWit *ctx = new Circom_CalcWit(circuit);
 
@@ -369,9 +369,6 @@ namespace CircomRecursiveF
       Goldilocks::Element d = tmp[idx_2] * Goldilocks::fromU64(exec.p_adds[i * 4 + 3].longVal[0]);
       tmp[sizeWitness + i] = c + d;
     }
-
-    uint64_t Nbits = log2(exec.nSMap - 1) + 1;
-    uint64_t N = 1 << Nbits;
 
     //#pragma omp parallel for
     for (uint i = 0; i < exec.nSMap; i++)

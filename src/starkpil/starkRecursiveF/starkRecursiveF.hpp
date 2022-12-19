@@ -17,6 +17,7 @@
 #include "merkleTreeBN128.hpp"
 #include "constant_pols_starks.hpp"
 #include "commit_pols_starks.hpp"
+#include "steps.hpp"
 
 #define BN128_ARITY 16
 #define STARK_RECURSIVE_F_NUM_TREES 5
@@ -30,38 +31,23 @@ public:
 
 private:
     void *pConstPolsAddress;
-    ConstantPolsStarks *pConstPols;
     void *pConstPolsAddress2ns;
+    ConstantPolsStarks *pConstPols;
     ConstantPolsStarks *pConstPols2ns;
     void *pConstTreeAddress;
     ZhInv zi;
-    uint64_t numCommited;
     uint64_t N;
     uint64_t NExtended;
     NTT_Goldilocks ntt;
+    NTT_Goldilocks nttExtended;
     Polinomial x_n;
     Polinomial x_2ns;
-    Polinomial challenges;
-    Polinomial xDivXSubXi;
-    Polinomial xDivXSubWXi;
-    Polinomial evals;
-    MerkleTreeBN128 *treesBN128[STARK_RECURSIVE_F_NUM_TREES];
     uint64_t constPolsSize;
     uint64_t constPolsDegree;
 
 public:
     StarkRecursiveF(const Config &config);
     ~StarkRecursiveF();
-
-    /* Resets the attributes before every proof generation */
-    void reset(void)
-    {
-        std::memset(challenges.address(), 0, challenges.size());
-        std::memset(xDivXSubXi.address(), 0, xDivXSubXi.size());
-        std::memset(xDivXSubWXi.address(), 0, xDivXSubWXi.size());
-        std::memset(evals.address(), 0, evals.size());
-        numCommited = starkInfo.nCm1;
-    }
 
     uint64_t getConstTreeSize(uint64_t n, uint64_t pol)
     {
@@ -121,25 +107,5 @@ public:
 
     /* Generates a proof from the address to all polynomials memory area, and the committed pols */
     void genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::Element publicInputs[8]);
-
-    void step2prev_first(Goldilocks::Element *pols, const Goldilocks::Element *publicInputs, uint64_t i);
-    void step2prev_i(Goldilocks::Element *pols, const Goldilocks::Element *publicInputs, uint64_t i);
-    void step2prev_last(Goldilocks::Element *pols, const Goldilocks::Element *publicInputs, uint64_t i);
-
-    void step3prev_first(Goldilocks::Element *pols, const Goldilocks::Element *publicInputs, uint64_t i);
-    void step3prev_i(Goldilocks::Element *pols, const Goldilocks::Element *publicInputs, uint64_t i);
-    void step3prev_last(Goldilocks::Element *pols, const Goldilocks::Element *publicInputs, uint64_t i);
-
-    void step4_first(Goldilocks::Element *pols, const Goldilocks::Element *publicInputs, uint64_t i);
-    void step4_i(Goldilocks::Element *pols, const Goldilocks::Element *publicInputs, uint64_t i);
-    void step4_last(Goldilocks::Element *pols, const Goldilocks::Element *publicInputs, uint64_t i);
-
-    void step42ns_first(Goldilocks::Element *pols, const Goldilocks::Element *publicInputs, uint64_t i);
-    void step42ns_i(Goldilocks::Element *pols, const Goldilocks::Element *publicInputs, uint64_t i);
-    void step42ns_last(Goldilocks::Element *pols, const Goldilocks::Element *publicInputs, uint64_t i);
-
-    void step52ns_first(Goldilocks::Element *pols, const Goldilocks::Element *publicInputs, uint64_t i);
-    void step52ns_i(Goldilocks::Element *pols, const Goldilocks::Element *publicInputs, uint64_t i);
-    void step52ns_last(Goldilocks::Element *pols, const Goldilocks::Element *publicInputs, uint64_t i);
 };
 #endif

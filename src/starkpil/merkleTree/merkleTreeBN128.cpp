@@ -17,7 +17,6 @@ MerkleTreeBN128::MerkleTreeBN128(uint64_t _height, uint64_t _width)
 void MerkleTreeBN128::initialize(Goldilocks::Element *_source)
 {
     std::memcpy(source, _source, height * source_width * sizeof(Goldilocks::Element));
-    linearHash();
     merkelize();
     intialized = true;
 }
@@ -34,8 +33,8 @@ MerkleTreeBN128::MerkleTreeBN128(uint64_t _height, uint64_t _width, Goldilocks::
     (_width > GOLDILOCKS_ELEMENTS + 1) ? width = ceil((double)_width / GOLDILOCKS_ELEMENTS) : width = 0;
     numNodes = getNumNodes(height);
     nodes = (RawFr::Element *)calloc(numNodes, sizeof(RawFr::Element));
-    linearHash();
-    merkelize();
+    //linearHash();
+    //merkelize();
     intialized = true;
 }
 
@@ -155,6 +154,9 @@ void MerkleTreeBN128::linearHash()
 
 void MerkleTreeBN128::merkelize()
 {
+
+    linearHash();
+
     RawFr::Element *cursor = &nodes[0];
     uint64_t n256 = height;
     uint64_t nextN256 = floor((double)(n256 - 1) / 16) + 1;

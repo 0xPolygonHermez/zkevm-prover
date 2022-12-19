@@ -15,5 +15,6 @@ config/c12a/*
 config/final/*
 config/recursive*/*
 config/zkevm/*
+config/tmp
 runtime/*
 !runtime/README.md

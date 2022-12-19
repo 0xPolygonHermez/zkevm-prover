@@ -257,7 +257,7 @@ namespace CircomRecursive2
     inStream.close();
     loadJsonImpl(ctx, j);
   }
-  void getCommitedPols(CommitPolsStarks *commitPols, const std::string zkevmVerifier, const std::string execFile, nlohmann::json &zkin)
+  void getCommitedPols(CommitPolsStarks *commitPols, const std::string zkevmVerifier, const std::string execFile, nlohmann::json &zkin, uint64_t N)
   {
     //-------------------------------------------
     // Verifier stark proof
@@ -305,9 +305,6 @@ namespace CircomRecursive2
       Goldilocks::Element d = tmp[idx_2] * Goldilocks::fromU64(exec.p_adds[i * 4 + 3].longVal[0]);
       tmp[sizeWitness + i] = c + d;
     }
-
-    uint64_t Nbits = log2(exec.nSMap - 1) + 1;
-    uint64_t N = 1 << Nbits;
 
     //#pragma omp parallel for
     for (uint i = 0; i < exec.nSMap; i++)
