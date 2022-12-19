@@ -18,6 +18,7 @@ private:
     Goldilocks::Element invPos[GOLDILOCKS_PRECOMPUTED_MAX];
     Goldilocks::Element invNeg[GOLDILOCKS_PRECOMPUTED_MAX];
     bool bInitialized;
+    
 #ifdef GOLDILOCKS_PRECOMPUTED_DEBUG
     pthread_mutex_t mutex;    // Mutex to protect the requests queues
     uint64_t succeeded;
@@ -25,6 +26,7 @@ private:
 #endif
 
 public:
+
     GoldilocksPrecomputed() : bInitialized(false)
     {
 #ifdef GOLDILOCKS_PRECOMPUTED_DEBUG
@@ -33,6 +35,7 @@ public:
         failed = 0;
 #endif
     }
+
     ~GoldilocksPrecomputed()
     {
 #ifdef GOLDILOCKS_PRECOMPUTED_DEBUG
@@ -44,6 +47,7 @@ public:
     void lock(void) { pthread_mutex_lock(&mutex); };
     void unlock(void) { pthread_mutex_unlock(&mutex); };
 #endif
+
     void init (void)
     {
         zkassert(!bInitialized);
@@ -62,6 +66,7 @@ public:
 
         bInitialized = true;
     }
+
     inline Goldilocks::Element inv (const Goldilocks::Element &fe)
     {
         zkassert(bInitialized);
@@ -102,25 +107,6 @@ public:
 #endif
         return fr.inv(fe);
     }
-
-    inline Goldilocks::Element inc (const Goldilocks::Element &fe)
-    {
-        Goldilocks::Element result;
-        if (fe.fe < GOLDILOCKS_PRIME - 2)
-        {
-            result.fe = fe.fe + 1;
-        }
-        else if (fe.fe == GOLDILOCKS_PRIME - 1)
-        {
-            result.fe = 0;
-        }
-        else
-        {
-            result = fr.add(fe, fr.one());
-        }
-        return result;
-    }
-
 };
 
 extern GoldilocksPrecomputed glp;

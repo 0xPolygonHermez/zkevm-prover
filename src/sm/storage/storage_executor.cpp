@@ -588,7 +588,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             }
             else
             {
-                pols.pc[nexti] = glp.inc(pols.pc[i]);
+                pols.pc[nexti] = fr.inc(pols.pc[i]);
             }
             pols.iAddress[i] = fr.fromU64(rom.line[l].address);
             pols.iJmpz[i] = fr.one();
@@ -606,7 +606,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
         // If not any jump, then simply increment program counter
         else
         {
-            pols.pc[nexti] = glp.inc(pols.pc[i]);
+            pols.pc[nexti] = fr.inc(pols.pc[i]);
         }
 
         // Rotate level registers values, from higher to lower
@@ -1194,7 +1194,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
         // Increment counter at every hash, and reset it at every latch
         if (rom.line[l].iHash)
         {
-            pols.incCounter[nexti] = glp.inc(pols.incCounter[i]);
+            pols.incCounter[nexti] = fr.inc(pols.incCounter[i]);
         }
         else if (rom.line[l].iLatchGet || rom.line[l].iLatchSet)
         {
