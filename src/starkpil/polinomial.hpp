@@ -66,6 +66,7 @@ public:
         _degree = degree;
         _dim = dim;
         _offset = offset;
+        _allocated = false;
     }
 
     Goldilocks::Element *address(void) { return _pAddress; }

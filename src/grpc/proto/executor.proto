@@ -210,7 +210,7 @@ enum Error {
     // ERROR_CONTRACT_ADDRESS_COLLISION there is a collision regarding contract addresses
     ERROR_CONTRACT_ADDRESS_COLLISION = 9;
     // ERROR_DEPTH indicates the maximun call depth has been passed
-    ERROR_DEPTH= 10;
+    ERROR_DEPTH = 10;
     // ERROR_EXECUTION_REVERTED indicates the execution has been reverted
     ERROR_EXECUTION_REVERTED = 11;
     // ERROR_CODE_STORE_OUT_OF_GAS indicates there is not enough gas for the storage
@@ -229,23 +229,30 @@ enum Error {
     ERROR_OUT_OF_COUNTERS_PADDING = 18;
     // ERROR_OUT_OF_COUNTERS_POSEIDON indicates there is not enough poseidon counters to continue the execution
     ERROR_OUT_OF_COUNTERS_POSEIDON = 19;
-    // ERROR_INVALID_TX indicates the transaction is invalid because of invalid jump dest, invalid opcode, invalid deploy
-    // or invalid static tx
-    ERROR_INVALID_TX = 20;
+    // ERROR_INVALID_JUMP indicates there is an invalid jump opcode
+    ERROR_INVALID_JUMP = 20;
+    // ERROR_INVALID_OPCODE indicates there is an invalid opcode
+    ERROR_INVALID_OPCODE = 21;
+    // ERROR_INVALID_STATIC indicates there is an invalid static call
+    ERROR_INVALID_STATIC = 22;
+    // ERROR_INVALID_BYTECODE_STARTS_EF indicates there is a bytecode starting with 0xEF
+    ERROR_INVALID_BYTECODE_STARTS_EF = 23;
     // ERROR_INTRINSIC_INVALID_SIGNATURE indicates the transaction is failing at the signature intrinsic check
-    ERROR_INTRINSIC_INVALID_SIGNATURE = 21;
+    ERROR_INTRINSIC_INVALID_SIGNATURE = 24;
     // ERROR_INTRINSIC_INVALID_CHAIN_ID indicates the transaction is failing at the chain id intrinsic check
-    ERROR_INTRINSIC_INVALID_CHAIN_ID = 22;
+    ERROR_INTRINSIC_INVALID_CHAIN_ID = 25;
     // ERROR_INTRINSIC_INVALID_NONCE indicates the transaction is failing at the nonce intrinsic check
-    ERROR_INTRINSIC_INVALID_NONCE = 23;
+    ERROR_INTRINSIC_INVALID_NONCE = 26;
     // ERROR_INTRINSIC_INVALID_GAS indicates the transaction is failing at the gas limit intrinsic check
-    ERROR_INTRINSIC_INVALID_GAS_LIMIT = 24;
+    ERROR_INTRINSIC_INVALID_GAS_LIMIT = 27;
     // ERROR_INTRINSIC_INVALID_BALANCE indicates the transaction is failing at balance intrinsic check
-    ERROR_INTRINSIC_INVALID_BALANCE = 25;
+    ERROR_INTRINSIC_INVALID_BALANCE = 28;
     // ERROR_INTRINSIC_INVALID_BATCH_GAS_LIMIT indicates the batch is exceeding the batch gas limit
-    ERROR_INTRINSIC_INVALID_BATCH_GAS_LIMIT = 26;
-    // ERROR_INTRINSIC_INVALID_SENDER_CODE indicates the batch is exceeding the batch gas limit
-    ERROR_INTRINSIC_INVALID_SENDER_CODE = 27;
+    ERROR_INTRINSIC_INVALID_BATCH_GAS_LIMIT = 29;
+    // ERROR_INTRINSIC_INVALID_SENDER_CODE indicates the transaction sender is invalid
+    ERROR_INTRINSIC_INVALID_SENDER_CODE = 30;
+    // ERROR_INTRINSIC_TX_GAS_OVERFLOW indicates the transaction gasLimit*gasPrice > MAX_UINT_256 - 1
+    ERROR_INTRINSIC_TX_GAS_OVERFLOW = 31;
     // ERROR_BATCH_DATA_TOO_BIG indicates the batch_l2_data is too big to be processed
-    ERROR_BATCH_DATA_TOO_BIG = 28;
+    ERROR_BATCH_DATA_TOO_BIG = 32;
 }
