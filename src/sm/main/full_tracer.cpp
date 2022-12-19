@@ -42,6 +42,7 @@ set<string> responseErrors = {
     "intrinsic_invalid_chain_id",
     "intrinsic_invalid_nonce",
     "intrinsic_invalid_gas_limit",
+    "intrinsic_invalid_gas_overflow",
     "intrinsic_invalid_balance",
     "intrinsic_invalid_batch_gas_limit",
     "intrinsic_invalid_sender_code"};
@@ -654,16 +655,19 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     execution_trace.clear();
 
     // Append to response logs
+    unordered_map<uint64_t, std::unordered_map<uint64_t, Log>>::iterator logIt;
     unordered_map<uint64_t, Log>::const_iterator it;
-    uint64_t context = finalTrace.responses.size();
-    if (logs.find(context) != logs.end())
+    for (logIt=logs.begin(); logIt!=logs.end(); logIt++)
     {
-        for (it = logs[context].begin(); it != logs[context].end(); it++)
+        for (it = logIt->second.begin(); it != logIt->second.end(); it++)
         {
             Log log = it->second;
             finalTrace.responses[finalTrace.responses.size() - 1].logs.push_back(log);
         }
     }
+
+    // Clear logs array
+    logs.clear();
 
     // Increase transaction count
     txCount++;
@@ -720,7 +724,7 @@ void FullTracer::onStartBatch(Context &ctx, const RomCommand &cmd)
     finalTrace.bInitialized = true;
 
 #ifdef LOG_FULL_TRACER
-    cout << "FullTracer::onStartBatch() old_state_root=" << finalTrace.old_state_root << endl;
+    cout << "FullTracer::onStartBatch()" << endl;
 #endif
 #ifdef LOG_TIME_STATISTICS
     tms.add("onStartBatch", TimeDiff(t));
@@ -1055,7 +1059,7 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     tmsop.add("setDeltaStorage", TimeDiff(top));
 #endif
 #ifdef LOG_FULL_TRACER
-    cout << "FullTracer::onOpcode() codeId=" << to_string(codeId) << " opcode=" << opcode << endl;
+    cout << "FullTracer::onOpcode() codeId=" << to_string(codeId) << " opcode=" << singleInfo.opcode << endl;
 #endif
 #ifdef LOG_TIME_STATISTICS
     tms.add("onOpcode", TimeDiff(t));

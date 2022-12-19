@@ -631,9 +631,9 @@ void StarkRecursiveF::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::E
     std::memcpy(&proof.proofs.root2[0], &root1, sizeof(RawFr::Element));
     std::memcpy(&proof.proofs.root3[0], &root2, sizeof(RawFr::Element));
     std::memcpy(&proof.proofs.root4[0], &root3, sizeof(RawFr::Element));
-    for (uint i = 0; i < 5; i++)
+    for (uint i = 0; i < 4; i++)
     {
-        treesBN128[i] = new MerkleTreeBN128();
+        delete treesBN128[i];
     }
     TimerStopAndLog(STARK_RECURSIVE_F_STEP_FRI);
 }

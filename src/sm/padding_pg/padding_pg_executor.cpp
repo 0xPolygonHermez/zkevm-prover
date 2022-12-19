@@ -210,7 +210,7 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
                 pols.prevHash1[p+1] = pols.curHash1[p];
                 pols.prevHash2[p+1] = pols.curHash2[p];
                 pols.prevHash3[p+1] = pols.curHash3[p];
-                pols.incCounter[p+1] = glp.inc(pols.incCounter[p]);
+                pols.incCounter[p+1] = fr.inc(pols.incCounter[p]);
 
                 if (j == (input[i].dataBytes.size() - 1))
                 {

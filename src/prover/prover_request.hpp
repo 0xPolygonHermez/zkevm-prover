@@ -14,9 +14,10 @@ using ordered_json = nlohmann::ordered_json;
 
 class ProverRequest
 {
-private:
+public:
     Goldilocks &fr;
     const Config &config;
+private:
     sem_t completedSem; // Semaphore to wakeup waiting thread when the request is completed
 
 public:
