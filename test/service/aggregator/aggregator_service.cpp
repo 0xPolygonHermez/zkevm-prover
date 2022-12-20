@@ -216,52 +216,55 @@ using grpc::Status;
 
         // CALL GET PROOF AND CHECK IT IS PENDING
 
-        // Send a get proof request message
-        aggregatorMessage.Clear();
-        messageId++;
-        aggregatorMessage.set_id(to_string(messageId));
-        aggregator::v1::GetProofRequest * pGetProofRequest = new aggregator::v1::GetProofRequest();
-        zkassertpermanent(pGetProofRequest != NULL);
-        pGetProofRequest->set_id(uuid);
-        aggregatorMessage.set_allocated_get_proof_request(pGetProofRequest);
-        bResult = stream->Write(aggregatorMessage);
-        if (!bResult)
+        for (uint64_t i=0; i<5; i++)
         {
-            cerr << "AggregatorServiceImpl::Channel() failed calling stream->Write(aggregatorMessage)" << endl;
-            return Status::CANCELLED;
-        }
+            // Send a get proof request message
+            aggregatorMessage.Clear();
+            messageId++;
+            aggregatorMessage.set_id(to_string(messageId));
+            aggregator::v1::GetProofRequest * pGetProofRequest = new aggregator::v1::GetProofRequest();
+            zkassertpermanent(pGetProofRequest != NULL);
+            pGetProofRequest->set_id(uuid);
+            aggregatorMessage.set_allocated_get_proof_request(pGetProofRequest);
+            bResult = stream->Write(aggregatorMessage);
+            if (!bResult)
+            {
+                cerr << "AggregatorServiceImpl::Channel() failed calling stream->Write(aggregatorMessage)" << endl;
+                return Status::CANCELLED;
+            }
 
-        // Receive the corresponding get proof response message
-        proverMessage.Clear();
-        bResult = stream->Read(&proverMessage);
-        if (!bResult)
-        {
-            cerr << "AggregatorServiceImpl::Channel() failed calling stream->Read(proverMessage)" << endl;
-            return Status::CANCELLED;
-        }
-        
-        // Check type
-        if (proverMessage.response_case() != aggregator::v1::ProverMessage::ResponseCase::kGetProofResponse)
-        {
-            cerr << "AggregatorServiceImpl::Channel() got proverMessage.response_case=" << proverMessage.response_case() << " instead of GET_PROOF_RESPONSE" << endl;
-            return Status::CANCELLED;
-        }
+            // Receive the corresponding get proof response message
+            proverMessage.Clear();
+            bResult = stream->Read(&proverMessage);
+            if (!bResult)
+            {
+                cerr << "AggregatorServiceImpl::Channel() failed calling stream->Read(proverMessage)" << endl;
+                return Status::CANCELLED;
+            }
+            
+            // Check type
+            if (proverMessage.response_case() != aggregator::v1::ProverMessage::ResponseCase::kGetProofResponse)
+            {
+                cerr << "AggregatorServiceImpl::Channel() got proverMessage.response_case=" << proverMessage.response_case() << " instead of GET_PROOF_RESPONSE" << endl;
+                return Status::CANCELLED;
+            }
 
-        // Check id
-        if (proverMessage.id() != aggregatorMessage.id())
-        {
-            cerr << "AggregatorServiceImpl::Channel() got proverMessage.id=" << proverMessage.id() << " instead of aggregatorMessage.id=" << aggregatorMessage.id() << endl;
-            return Status::CANCELLED;
-        }
+            // Check id
+            if (proverMessage.id() != aggregatorMessage.id())
+            {
+                cerr << "AggregatorServiceImpl::Channel() got proverMessage.id=" << proverMessage.id() << " instead of aggregatorMessage.id=" << aggregatorMessage.id() << endl;
+                return Status::CANCELLED;
+            }
 
-        // Check get proof result
-        if (proverMessage.get_proof_response().result() != aggregator::v1::GetProofResponse_Result_PENDING)
-        {
-            cerr << "AggregatorServiceImpl::Channel() got proverMessage.get_proof_response().result()=" << proverMessage.get_proof_response().result() << " instead of RESULT_GET_PROOF_PENDING" << endl;
-            return Status::CANCELLED;
-        }
+            // Check get proof result
+            if (proverMessage.get_proof_response().result() != aggregator::v1::GetProofResponse_Result_PENDING)
+            {
+                cerr << "AggregatorServiceImpl::Channel() got proverMessage.get_proof_response().result()=" << proverMessage.get_proof_response().result() << " instead of RESULT_GET_PROOF_PENDING" << endl;
+                return Status::CANCELLED;
+            }
 
-        sleep(1);
+            sleep(5);
+        }
     }
 
 #ifdef LOG_SERVICE

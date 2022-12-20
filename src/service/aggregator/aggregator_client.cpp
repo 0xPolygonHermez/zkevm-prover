@@ -512,11 +512,11 @@ void* aggregatorClientThread(void* arg)
             
             switch (aggregatorMessage.request_case())
             {
-                case aggregator::v1::AggregatorMessage::RequestCase::kGetStatusRequest:
+                case aggregator::v1::AggregatorMessage::RequestCase::kGetProofRequest:
                     break;
+                case aggregator::v1::AggregatorMessage::RequestCase::kGetStatusRequest:
                 case aggregator::v1::AggregatorMessage::RequestCase::kGenBatchProofRequest:
                 case aggregator::v1::AggregatorMessage::RequestCase::kCancelRequest:
-                case aggregator::v1::AggregatorMessage::RequestCase::kGetProofRequest:
                     cout << "aggregatorClientThread() got: " << aggregatorMessage.ShortDebugString() << endl;
                     break;
                 case aggregator::v1::AggregatorMessage::RequestCase::kGenAggregatedProofRequest:
@@ -643,7 +643,6 @@ void* aggregatorClientThread(void* arg)
             switch (aggregatorMessage.request_case())
             {
                 case aggregator::v1::AggregatorMessage::RequestCase::kGetStatusRequest:
-                    break;
                 case aggregator::v1::AggregatorMessage::RequestCase::kGenBatchProofRequest:
                 case aggregator::v1::AggregatorMessage::RequestCase::kGenAggregatedProofRequest:
                 case aggregator::v1::AggregatorMessage::RequestCase::kGenFinalProofRequest:
@@ -651,7 +650,8 @@ void* aggregatorClientThread(void* arg)
                     cout << "aggregatorClientThread() sent: " << proverMessage.ShortDebugString() << endl;
                     break;
                 case aggregator::v1::AggregatorMessage::RequestCase::kGetProofRequest:
-                    cout << "aggregatorClientThread() getProof() response sent" << endl;
+                    if (proverMessage.get_proof_response().result() != aggregator::v1::GetProofResponse_Result_PENDING)
+                        cout << "aggregatorClientThread() getProof() response sent; result=" << proverMessage.get_proof_response().result_string() << endl;
                     break;
                 default:
                     break;
