@@ -1,17 +1,17 @@
 #include <stdio.h>
 #include "starks.hpp"
 #include "proof2zkinStark.hpp"
-#include "recursive1StepsTest.hpp"
+#include "zkevmSteps.hpp"
 
 int main()
 {
 
     Config config;
     config.runFileGenBatchProof = true;
-    config.zkevmConstPols = "config/recursive1/recursive1.const";
+    config.zkevmConstPols = "config/zkevm/zkevm.const";
     config.mapConstPolsFile = false;
-    config.zkevmConstantsTree = "config/recursive1/recursive1.consttree";
-    config.zkevmStarkInfo = "config/recursive1/recursive1.starkinfo.json";
+    config.zkevmConstantsTree = "config/zkevm/zkevm.consttree";
+    config.zkevmStarkInfo = "config/zkevm/zkevm.starkinfo.json";
 
     StarkInfo starkInfo(config, config.zkevmStarkInfo);
 
@@ -20,7 +20,7 @@ int main()
     uint64_t polBits = starks.starkInfo.starkStruct.steps[starks.starkInfo.starkStruct.steps.size() - 1].nBits;
     FRIProof fproof((1 << polBits), FIELD_EXTENSION, starks.starkInfo.starkStruct.steps.size(), starks.starkInfo.evMap.size(), starks.starkInfo.nPublics);
 
-    void *pCommit = copyFile("config/recursive1/recursive1.commit", starkInfo.nCm1 * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
+    void *pCommit = copyFile("config/zkevm/zkevm.commit", starkInfo.nCm1 * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
     void *pAddress = (void *)calloc(starkInfo.mapTotalN, sizeof(uint64_t));
     std::memcpy(pAddress, pCommit, starkInfo.nCm1 * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
 
@@ -78,7 +78,7 @@ int main()
     {
         publicStarkJson[i] = Goldilocks::toString(publicInputs[i]);
     }
-    Recursive1StepsTest zkevmSteps;
+    ZkevmSteps zkevmSteps;
     starks.genProof(pAddress, fproof, &publicInputs[0], &zkevmSteps);
 
     nlohmann::ordered_json jProof = fproof.proofs.proof2json();
