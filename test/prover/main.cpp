@@ -79,7 +79,9 @@ int main()
         publicStarkJson[i] = Goldilocks::toString(publicInputs[i]);
     }
     ZkevmSteps zkevmSteps;
+    TimerStart(STARK_GEN_PROOF);
     starks.genProof(pAddress, fproof, &publicInputs[0], &zkevmSteps);
+    TimerStopAndLog(STARK_GEN_PROOF);
 
     nlohmann::ordered_json jProof = fproof.proofs.proof2json();
     nlohmann::json zkin = proof2zkinStark(jProof);
@@ -87,8 +89,8 @@ int main()
     jProof["publics"] = publicStarkJson;
     zkin["publics"] = publicStarkJson;
 
-    json2file(zkin, "zkin.json");
-    json2file(jProof, "jProof.json");
+    json2file(zkin, "runtime/zkin.json");
+    json2file(jProof, "runtime/jProof.json");
 
     return 0;
 }
