@@ -682,7 +682,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // If offset, record it the committed polynomial
         if (rom.line[zkPC].bOffsetPresent && (rom.line[zkPC].offset!=0))
         {
-            pols.offset[i] = fr.fromU64(rom.line[zkPC].offset);
+            pols.offset[i] = fr.fromS32(rom.line[zkPC].offset);
         }
 
         /**************/

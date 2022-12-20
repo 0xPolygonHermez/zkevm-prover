@@ -831,7 +831,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
         // If offset, record it the committed polynomial
         if (rom["program"][zkPC].contains("offset") && (rom["program"][zkPC]["offset"] != 0) && !bFastMode)
         {
-            code += "    pols.offset[i] = fr.fromU64(" + to_string(rom["program"][zkPC]["offset"]) + "); // Copy ROM flags into pols\n\n";
+            code += "    pols.offset[i] = fr.fromS32(" + to_string(rom["program"][zkPC]["offset"]) + "); // Copy ROM flags into pols\n\n";
         }
 
         /**************/
