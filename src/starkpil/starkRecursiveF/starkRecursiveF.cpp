@@ -125,7 +125,7 @@ StarkRecursiveF::~StarkRecursiveF()
 
 void StarkRecursiveF::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::Element publicInputs[8])
 {
-    
+
     StarkRecursiveFSteps recurisveFsteps;
     StarkRecursiveFSteps *steps = &recurisveFsteps;
     // Initialize vars
@@ -523,7 +523,7 @@ void StarkRecursiveF::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::E
                 Polinomial tmp(1, FIELD_EXTENSION);
 
                 Polinomial p;
-                p = (ev.type == EvMap::eType::cm) ? starkInfo.getPolinomial(mem, starkInfo.cm_2ns[ev.id]) : starkInfo.getPolinomial(mem, starkInfo.qs[ev.id]);
+                Polinomial::copy(p, (ev.type == EvMap::eType::cm) ? starkInfo.getPolinomial(mem, starkInfo.cm_2ns[ev.id]) : starkInfo.getPolinomial(mem, starkInfo.qs[ev.id]));
 
                 Polinomial ::mulElement(tmp, 0, ev.prime ? LpEv : LEv, k, p, k << extendBits);
                 for (int j = 0; j < FIELD_EXTENSION; ++j)
@@ -538,7 +538,7 @@ void StarkRecursiveF::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::E
                 Polinomial tmp(1, FIELD_EXTENSION);
 
                 Polinomial p;
-                p = (ev.type == EvMap::eType::cm) ? starkInfo.getPolinomial(mem, starkInfo.cm_2ns[ev.id]) : starkInfo.getPolinomial(mem, starkInfo.qs[ev.id]);
+                Polinomial::copy(p, (ev.type == EvMap::eType::cm) ? starkInfo.getPolinomial(mem, starkInfo.cm_2ns[ev.id]) : starkInfo.getPolinomial(mem, starkInfo.qs[ev.id]));
 
                 Polinomial ::mulElement(tmp, 0, ev.prime ? LpEv : LEv, k, p, k << extendBits);
                 for (int j = 0; j < FIELD_EXTENSION; ++j)

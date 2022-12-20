@@ -15,7 +15,29 @@ private:
     bool _allocated = false;
     std::string _name = "";
 
+
 public:
+    Polinomial(const Polinomial &pol) {
+        _pAddress = pol._pAddress;
+        _degree = pol._degree;
+        _dim = pol._dim;
+        _offset = pol._offset;
+        _allocated = false;
+        _name = pol._name;
+    }
+
+    Polinomial& operator=(const Polinomial &pol) {
+        if (_allocated && _pAddress) {
+            free(_pAddress);
+        }
+        _pAddress = pol._pAddress;
+        _degree = pol._degree;
+        _dim = pol._dim;
+        _offset = pol._offset;
+        _allocated = false;
+        _name = pol._name;
+        return *this;
+    }
     Polinomial()
     {
         _pAddress = NULL;
@@ -53,8 +75,11 @@ public:
 
     ~Polinomial()
     {
-        if (_allocated)
+        if (_allocated) {
             free(_pAddress);
+            _pAddress = NULL;
+            _allocated = false;
+        }
     };
 
     void potConstruct(Goldilocks::Element *pAddress,
@@ -62,19 +87,37 @@ public:
                       uint64_t dim,
                       uint64_t offset = 0)
     {
+        if (_allocated && _pAddress) {
+            free(_pAddress);
+        }
         _pAddress = pAddress;
         _degree = degree;
         _dim = dim;
         _offset = offset;
+        _allocated = false;
     }
 
-    Goldilocks::Element *address(void) { return _pAddress; }
-    uint64_t degree(void) { return _degree; }
-    uint64_t dim(void) { return _dim; }
-    uint64_t length(void) { return _degree * _dim; }
-    uint64_t size(void) { return _degree * _dim * sizeof(Goldilocks::Element); }
+    void potConstruct(const Polinomial &b)
+    {
+        if (_allocated && _pAddress) {
+            free(_pAddress);
+        }
+        _pAddress = b.address();
+        _degree = b.degree();
+        _dim = b.dim();
+        _offset = b.offset();
+        _allocated = false;
+    }
+
+    Goldilocks::Element *address(void) const { return _pAddress; }
+    uint64_t degree(void) const { return _degree; }
+    uint64_t dim(void) const { return _dim; }
+    uint64_t offset(void) const { return _offset; }
+    uint64_t length(void) const { return _degree * _dim; }
+    uint64_t size(void) const { return _degree * _dim * sizeof(Goldilocks::Element); }
 
     Goldilocks::Element *operator[](uint64_t i) { return &_pAddress[i * _offset]; };
+    const Goldilocks::Element *operator[](uint64_t i) const { return &_pAddress[i * _offset]; };
 
     std::string toString(uint numElements = 0, uint radix = 10)
     {
@@ -102,7 +145,7 @@ public:
         return res;
     }
 
-    static void copy(Polinomial &a, Polinomial &b, uint64_t size = 0)
+    static void copy(Polinomial &a, const Polinomial &b, uint64_t size = 0)
     {
         assert(a.dim() == b.dim());
         assert(a.degree() == b.degree());
@@ -649,4 +692,5 @@ public:
         }
     }
 };
+
 #endif

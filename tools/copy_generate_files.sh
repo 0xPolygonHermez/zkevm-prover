@@ -1,7 +1,6 @@
 #!/bin/bash -x
 
-VERSION=v0.5.2.0-evals2-20221215
-
+VERSION=v0.6.0.0-rc.1
 WORKING_DIR=/mnt/ofs/zkproverc/${VERSION}
 CONFIG_DIR=${WORKING_DIR}/config/
 C_FILES=${WORKING_DIR}/c_files
@@ -28,7 +27,7 @@ cp ${C_FILES}/zkevm.verifier_cpp/zkevm.verifier.cpp ${ZKEVM_VERIFIER_CPP}
 sed -i '1d;2d;3d;4d;5d' ${ZKEVM_VERIFIER_CPP}
 sed -i 's/Fr/FrG/g' ${ZKEVM_VERIFIER_CPP}
 sed -i "1s/^/#include \"circom.hpp\"\n#include \"calcwit.hpp\"\nnamespace Circom\n{\n/" ${ZKEVM_VERIFIER_CPP}
-sed -i "1s/^/$CIRCOM_HEADER/" ${ZKEVM_VERIFIER_CPP} 
+sed -i "1s/^/$CIRCOM_HEADER/" ${ZKEVM_VERIFIER_CPP}
 echo -e "}\n#pragma GCC diagnostic pop" >> ${ZKEVM_VERIFIER_CPP}
 
 # Generate the recursive1.verifier.cpp
@@ -36,7 +35,7 @@ cp ${C_FILES}/recursive1_cpp/recursive1.cpp ${RECURSIVE1_CPP}
 sed -i '1d;2d;3d;4d;5d' ${RECURSIVE1_CPP}
 sed -i 's/Fr/FrG/g' ${RECURSIVE1_CPP}
 sed -i "1s/^/#include \"circom.recursive1.hpp\"\n#include \"calcwit.recursive1.hpp\"\nnamespace CircomRecursive1\n{\n/" ${RECURSIVE1_CPP}
-sed -i "1s/^/$CIRCOM_HEADER/" ${RECURSIVE1_CPP} 
+sed -i "1s/^/$CIRCOM_HEADER/" ${RECURSIVE1_CPP}
 echo -e "}\n#pragma GCC diagnostic pop" >> ${RECURSIVE1_CPP}
 
 # Generate the recursive2.verifier.cpp
@@ -44,7 +43,7 @@ cp ${C_FILES}/recursive2_cpp/recursive2.cpp ${RECURSIVE2_CPP}
 sed -i '1d;2d;3d;4d;5d' ${RECURSIVE2_CPP}
 sed -i 's/Fr/FrG/g' ${RECURSIVE2_CPP}
 sed -i "1s/^/#include \"circom.recursive2.hpp\"\n#include \"calcwit.recursive2.hpp\"\nnamespace CircomRecursive2\n{\n/" ${RECURSIVE2_CPP}
-sed -i "1s/^/$CIRCOM_HEADER/" ${RECURSIVE2_CPP} 
+sed -i "1s/^/$CIRCOM_HEADER/" ${RECURSIVE2_CPP}
 echo -e "}\n#pragma GCC diagnostic pop" >> ${RECURSIVE2_CPP}
 
 # Generate the recursivef.verifier.cpp
@@ -52,14 +51,14 @@ cp ${C_FILES}/recursivef_cpp/recursivef.cpp ${RECURSIVEF_CPP}
 sed -i '1d;2d;3d;4d;5d' ${RECURSIVEF_CPP}
 sed -i 's/Fr/FrG/g' ${RECURSIVEF_CPP}
 sed -i "1s/^/#include \"circom.recursiveF.hpp\"\n#include \"calcwit.recursiveF.hpp\"\nnamespace CircomRecursiveF\n{\n/" ${RECURSIVEF_CPP}
-sed -i "1s/^/$CIRCOM_HEADER/" ${RECURSIVEF_CPP} 
+sed -i "1s/^/$CIRCOM_HEADER/" ${RECURSIVEF_CPP}
 echo -e "}\n#pragma GCC diagnostic pop" >> ${RECURSIVEF_CPP}
 
 # Generate the final.verifier.cpp
 cp ${C_FILES}/final_cpp/final.cpp ${RECURSIVEFINAL_CPP}
 sed -i '1d;2d;3d;4d;5d' ${RECURSIVEFINAL_CPP}
 sed -i "1s/^/#include \"circom.final.hpp\"\n#include \"calcwit.final.hpp\"\nnamespace CircomFinal\n{\n/" ${RECURSIVEFINAL_CPP}
-sed -i "1s/^/$CIRCOM_HEADER/" ${RECURSIVEFINAL_CPP} 
+sed -i "1s/^/$CIRCOM_HEADER/" ${RECURSIVEFINAL_CPP}
 echo -e "}\n#pragma GCC diagnostic pop" >> ${RECURSIVEFINAL_CPP}
 
 #Copy pols_generated files

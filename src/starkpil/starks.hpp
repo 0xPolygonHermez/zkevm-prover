@@ -160,8 +160,9 @@ public:
             free(pConstTreeAddress);
         }
     };
-    
+
     void genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publicInputs, Steps *steps);
+    void ___genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publicInputs, Steps *steps);
 
     Polinomial *transposeH1H2Columns(void *pAddress, uint64_t &numCommited, Goldilocks::Element *pBuffer);
     void transposeH1H2Rows(void *pAddress, uint64_t &numCommited, Polinomial *transPols);

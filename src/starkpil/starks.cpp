@@ -23,7 +23,10 @@ void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publ
     Goldilocks::Element *p_q_2ns = &mem[starkInfo.mapOffsets.section[eSection::q_2ns]];
     Goldilocks::Element *p_f_2ns = &mem[starkInfo.mapOffsets.section[eSection::f_2ns]];
 
-    Goldilocks::Element *pBuffer = (Goldilocks::Element *)malloc(starkInfo.mapSectionsN.section[eSection::cm1_n] * NExtended * FIELD_EXTENSION * sizeof(Goldilocks::Element));
+
+    uint64_t max_cm = std::max({starkInfo.mapSectionsN.section[eSection::cm1_n], starkInfo.mapSectionsN.section[eSection::cm2_n], starkInfo.mapSectionsN.section[eSection::cm3_n], starkInfo.mapSectionsN.section[eSection::cm4_2ns]});
+    std::cout << " max_cm:" << max_cm << " cm1_n:" << starkInfo.mapSectionsN.section[eSection::cm1_n] << " cm2_n:" << starkInfo.mapSectionsN.section[eSection::cm2_n] << " cm3_n:" << starkInfo.mapSectionsN.section[eSection::cm3_n] << " cm4_2ns:" << starkInfo.mapSectionsN.section[eSection::cm4_2ns] << std::endl;
+    Goldilocks::Element *pBuffer = (Goldilocks::Element *)malloc(max_cm * NExtended * FIELD_EXTENSION * sizeof(Goldilocks::Element));
 
     Polinomial root0(HASH_SIZE, 1);
     Polinomial root1(HASH_SIZE, 1);
@@ -91,6 +94,7 @@ void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publ
     TimerStopAndLog(STARK_STEP_2_CALCULATE_EXPS);
 
     TimerStart(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE);
+
     Polinomial *transPols = transposeH1H2Columns(pAddress, numCommited, pBuffer);
     TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE);
 
@@ -409,7 +413,7 @@ Polinomial *Starks::transposeZColumns(void *pAddress, uint64_t &numCommited, Gol
 
     u_int64_t stride_pol_ = N * FIELD_EXTENSION + 8; // assuming all polinomials have same degree
     uint64_t tot_pols = 3 * (starkInfo.puCtx.size() + starkInfo.peCtx.size() + starkInfo.ciCtx.size());
-    Polinomial *newpols_ = (Polinomial *)calloc(tot_pols * sizeof(Polinomial), 1);
+    Polinomial *newpols_ = new Polinomial [tot_pols];
     assert(starkInfo.mapSectionsN.section[eSection::cm1_n] * NExtended * FIELD_EXTENSION >= tot_pols * stride_pol_);
 
     if (pBuffer == NULL || newpols_ == NULL)
@@ -498,7 +502,7 @@ void Starks::transposeZRows(void *pAddress, uint64_t &numCommited, Polinomial *t
     }
     if (numpols > 0)
     {
-        free(transPols);
+        delete [] transPols;
     }
 }
 void Starks::evmap(void *pAddress, Polinomial &evals, Polinomial &LEv, Polinomial &LpEv)
@@ -546,11 +550,13 @@ void Starks::evmap(void *pAddress, Polinomial &evals, Polinomial &LEv, Polinomia
             }
             else if (ev.type == EvMap::eType::cm)
             {
-                ordPols[kk] = starkInfo.getPolinomial(mem, starkInfo.cm_2ns[ev.id]);
+                // Polinomial::copy(ordPols[kk], starkInfo.getPolinomial(mem, starkInfo.cm_2ns[ev.id]));
+                ordPols[kk].potConstruct(starkInfo.getPolinomial(mem, starkInfo.cm_2ns[ev.id]));
             }
             else if (ev.type == EvMap::eType::q)
             {
-                ordPols[kk] = starkInfo.getPolinomial(mem, starkInfo.qs[ev.id]);
+                // Polinomial::copy(ordPols[kk], starkInfo.getPolinomial(mem, starkInfo.qs[ev.id]));
+                ordPols[kk].potConstruct(starkInfo.getPolinomial(mem, starkInfo.qs[ev.id]));
             }
             isPrime[kk] = ev.prime;
             indx[kk] = *it2;
