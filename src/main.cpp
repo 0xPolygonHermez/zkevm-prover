@@ -220,6 +220,9 @@ int main(int argc, char **argv)
     // Print the zkProver version
     cout << "Version: " << string(ZKEVM_PROVER_VERSION) << endl;
 
+    // Test that stderr is properly logged
+    cerr << "Error: Checking error channel; ignore this trace" << endl;
+
     // Print the number of cores
     cout << "Number of cores=" << getNumberOfCores() << endl;
 
