@@ -513,6 +513,7 @@ void* aggregatorClientThread(void* arg)
             switch (aggregatorMessage.request_case())
             {
                 case aggregator::v1::AggregatorMessage::RequestCase::kGetStatusRequest:
+                    break;
                 case aggregator::v1::AggregatorMessage::RequestCase::kGenBatchProofRequest:
                 case aggregator::v1::AggregatorMessage::RequestCase::kCancelRequest:
                 case aggregator::v1::AggregatorMessage::RequestCase::kGetProofRequest:
@@ -642,6 +643,7 @@ void* aggregatorClientThread(void* arg)
             switch (aggregatorMessage.request_case())
             {
                 case aggregator::v1::AggregatorMessage::RequestCase::kGetStatusRequest:
+                    break;
                 case aggregator::v1::AggregatorMessage::RequestCase::kGenBatchProofRequest:
                 case aggregator::v1::AggregatorMessage::RequestCase::kGenAggregatedProofRequest:
                 case aggregator::v1::AggregatorMessage::RequestCase::kGenFinalProofRequest:
