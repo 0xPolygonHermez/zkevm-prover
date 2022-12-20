@@ -225,19 +225,23 @@ void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publ
     TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_INTT);
     nttExtended.INTT(qq1.address(), p_q_2ns, NExtended, starkInfo.qDim, NULL, 2, 1);
     TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS_INTT);
-
-    Goldilocks::Element curS = Goldilocks::one();
+    
     Goldilocks::Element shiftIn = Goldilocks::exp(Goldilocks::inv(Goldilocks::shift()), N);
 
     TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_MUL);
-    for (uint64_t p = 0; p < starkInfo.qDeg; p++)
+    uint64_t stride = 2048;
+#pragma omp parallel for
+    for (uint64_t ii = 0; ii < N; ii += stride)
     {
-        #pragma omp parallel
-        for (uint64_t i = 0; i < N; i++)
+        Goldilocks::Element curS = Goldilocks::one();
+        for (uint64_t p = 0; p < starkInfo.qDeg; p++)
         {
-            Goldilocks3::mul((Goldilocks3::Element &)*qq2[i * starkInfo.qDeg + p], (Goldilocks3::Element &)*qq1[p * N + i], curS);
+            for (uint64_t k = ii; k < min(N, ii + stride); ++k)
+            {
+                Goldilocks3::mul((Goldilocks3::Element &)*qq2[k * starkInfo.qDeg + p], (Goldilocks3::Element &)*qq1[p * N + k], curS);
+            }
+            curS = Goldilocks::mul(curS, shiftIn);
         }
-        curS = Goldilocks::mul(curS, shiftIn);
     }
     TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS_MUL);
 
