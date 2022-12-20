@@ -1,6 +1,7 @@
 #ifndef STARKS_HPP
 #define STARKS_HPP
 
+#include <algorithm>
 #include "config.hpp"
 #include "utils.hpp"
 #include "timer.hpp"

@@ -44,24 +44,27 @@ void StarkInfo::load(json j)
     mapDeg.section[cm1_n] = j["mapDeg"]["cm1_n"];
     mapDeg.section[cm2_n] = j["mapDeg"]["cm2_n"];
     mapDeg.section[cm3_n] = j["mapDeg"]["cm3_n"];
+    mapDeg.section[cm4_n] = j["mapDeg"]["cm4_n"];
     mapDeg.section[eSection::tmpExp_n] = j["mapDeg"]["tmpExp_n"];
     mapDeg.section[f_2ns] = j["mapDeg"]["f_2ns"];
     mapDeg.section[cm1_2ns] = j["mapDeg"]["cm1_2ns"];
     mapDeg.section[cm2_2ns] = j["mapDeg"]["cm2_2ns"];
     mapDeg.section[cm3_2ns] = j["mapDeg"]["cm3_2ns"];
-    mapDeg.section[q_2ns] = j["mapDeg"]["q_2ns"];
     mapDeg.section[cm4_2ns] = j["mapDeg"]["cm4_2ns"];
+    mapDeg.section[q_2ns] = j["mapDeg"]["q_2ns"];
 
     mapOffsets.section[cm1_n] = j["mapOffsets"]["cm1_n"];
     mapOffsets.section[cm2_n] = j["mapOffsets"]["cm2_n"];
     mapOffsets.section[cm3_n] = j["mapOffsets"]["cm3_n"];
+    mapOffsets.section[cm4_n] = j["mapOffsets"]["cm4_n"];
     mapOffsets.section[eSection::tmpExp_n] = j["mapOffsets"]["tmpExp_n"];
     mapOffsets.section[f_2ns] = j["mapOffsets"]["f_2ns"];
     mapOffsets.section[cm1_2ns] = j["mapOffsets"]["cm1_2ns"];
     mapOffsets.section[cm2_2ns] = j["mapOffsets"]["cm2_2ns"];
     mapOffsets.section[cm3_2ns] = j["mapOffsets"]["cm3_2ns"];
-    mapOffsets.section[q_2ns] = j["mapOffsets"]["q_2ns"];
     mapOffsets.section[cm4_2ns] = j["mapOffsets"]["cm4_2ns"];
+    mapOffsets.section[q_2ns] = j["mapOffsets"]["q_2ns"];
+
 
     for (uint64_t i = 0; i < j["mapSections"]["cm1_n"].size(); i++)
         mapSections.section[cm1_n].push_back(j["mapSections"]["cm1_n"][i]);
@@ -69,6 +72,8 @@ void StarkInfo::load(json j)
         mapSections.section[cm2_n].push_back(j["mapSections"]["cm2_n"][i]);
     for (uint64_t i = 0; i < j["mapSections"]["cm3_n"].size(); i++)
         mapSections.section[cm3_n].push_back(j["mapSections"]["cm3_n"][i]);
+    for (uint64_t i = 0; i < j["mapSections"]["cm4_n"].size(); i++)
+        mapSections.section[cm4_n].push_back(j["mapSections"]["cm4_n"][i]);
     for (uint64_t i = 0; i < j["mapSections"]["tmpExp_n"].size(); i++)
         mapSections.section[eSection::tmpExp_n].push_back(j["mapSections"]["tmpExp_n"][i]);
     for (uint64_t i = 0; i < j["mapSections"]["f_2ns"].size(); i++)
@@ -79,43 +84,47 @@ void StarkInfo::load(json j)
         mapSections.section[cm2_2ns].push_back(j["mapSections"]["cm2_2ns"][i]);
     for (uint64_t i = 0; i < j["mapSections"]["cm3_2ns"].size(); i++)
         mapSections.section[cm3_2ns].push_back(j["mapSections"]["cm3_2ns"][i]);
-    for (uint64_t i = 0; i < j["mapSections"]["q_2ns"].size(); i++)
-        mapSections.section[q_2ns].push_back(j["mapSections"]["q_2ns"][i]);
     for (uint64_t i = 0; i < j["mapSections"]["cm4_2ns"].size(); i++)
         mapSections.section[cm4_2ns].push_back(j["mapSections"]["cm4_2ns"][i]);
+    for (uint64_t i = 0; i < j["mapSections"]["q_2ns"].size(); i++)
+        mapSections.section[q_2ns].push_back(j["mapSections"]["q_2ns"][i]);
 
     mapSectionsN.section[cm1_n] = j["mapSectionsN"]["cm1_n"];
     mapSectionsN.section[cm2_n] = j["mapSectionsN"]["cm2_n"];
     mapSectionsN.section[cm3_n] = j["mapSectionsN"]["cm3_n"];
+    mapSectionsN.section[cm4_n] = j["mapSectionsN"]["cm4_n"];
     mapSectionsN.section[eSection::tmpExp_n] = j["mapSectionsN"]["tmpExp_n"];
     mapSectionsN.section[f_2ns] = j["mapSectionsN"]["f_2ns"];
     mapSectionsN.section[cm1_2ns] = j["mapSectionsN"]["cm1_2ns"];
     mapSectionsN.section[cm2_2ns] = j["mapSectionsN"]["cm2_2ns"];
     mapSectionsN.section[cm3_2ns] = j["mapSectionsN"]["cm3_2ns"];
-    mapSectionsN.section[q_2ns] = j["mapSectionsN"]["q_2ns"];
     mapSectionsN.section[cm4_2ns] = j["mapSectionsN"]["cm4_2ns"];
+    mapSectionsN.section[q_2ns] = j["mapSectionsN"]["q_2ns"];
 
     mapSectionsN1.section[cm1_n] = j["mapSectionsN1"]["cm1_n"];
     mapSectionsN1.section[cm2_n] = j["mapSectionsN1"]["cm2_n"];
     mapSectionsN1.section[cm3_n] = j["mapSectionsN1"]["cm3_n"];
+    mapSectionsN1.section[cm4_n] = j["mapSectionsN1"]["cm4_n"];
     mapSectionsN1.section[eSection::tmpExp_n] = j["mapSectionsN1"]["tmpExp_n"];
     mapSectionsN1.section[f_2ns] = j["mapSectionsN1"]["f_2ns"];
     mapSectionsN1.section[cm1_2ns] = j["mapSectionsN1"]["cm1_2ns"];
     mapSectionsN1.section[cm2_2ns] = j["mapSectionsN1"]["cm2_2ns"];
     mapSectionsN1.section[cm3_2ns] = j["mapSectionsN1"]["cm3_2ns"];
-    mapSectionsN1.section[q_2ns] = j["mapSectionsN1"]["q_2ns"];
     mapSectionsN1.section[cm4_2ns] = j["mapSectionsN1"]["cm4_2ns"];
+    mapSectionsN1.section[q_2ns] = j["mapSectionsN1"]["q_2ns"];
+
 
     mapSectionsN3.section[cm1_n] = j["mapSectionsN3"]["cm1_n"];
     mapSectionsN3.section[cm2_n] = j["mapSectionsN3"]["cm2_n"];
     mapSectionsN3.section[cm3_n] = j["mapSectionsN3"]["cm3_n"];
+    mapSectionsN3.section[cm4_n] = j["mapSectionsN3"]["cm4_n"];
     mapSectionsN3.section[eSection::tmpExp_n] = j["mapSectionsN3"]["tmpExp_n"];
     mapSectionsN3.section[f_2ns] = j["mapSectionsN3"]["f_2ns"];
     mapSectionsN3.section[cm1_2ns] = j["mapSectionsN3"]["cm1_2ns"];
     mapSectionsN3.section[cm2_2ns] = j["mapSectionsN3"]["cm2_2ns"];
     mapSectionsN3.section[cm3_2ns] = j["mapSectionsN3"]["cm3_2ns"];
-    mapSectionsN3.section[q_2ns] = j["mapSectionsN3"]["q_2ns"];
     mapSectionsN3.section[cm4_2ns] = j["mapSectionsN3"]["cm4_2ns"];
+    mapSectionsN3.section[q_2ns] = j["mapSectionsN3"]["q_2ns"];
 
     for (uint64_t i = 0; i < j["varPolMap"].size(); i++)
     {

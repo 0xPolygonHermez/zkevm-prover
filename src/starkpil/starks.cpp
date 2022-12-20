@@ -23,7 +23,9 @@ void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publ
     Goldilocks::Element *p_q_2ns = &mem[starkInfo.mapOffsets.section[eSection::q_2ns]];
     Goldilocks::Element *p_f_2ns = &mem[starkInfo.mapOffsets.section[eSection::f_2ns]];
 
-    Goldilocks::Element *pBuffer = (Goldilocks::Element *)malloc(starkInfo.mapSectionsN.section[eSection::cm1_n] * NExtended * FIELD_EXTENSION * sizeof(Goldilocks::Element));
+    uint64_t max_cm = std::max({starkInfo.mapSectionsN.section[eSection::cm1_n], starkInfo.mapSectionsN.section[eSection::cm2_n], starkInfo.mapSectionsN.section[eSection::cm3_n], starkInfo.mapSectionsN.section[eSection::cm4_n]});
+    Goldilocks::Element *pBuffer = (Goldilocks::Element *)malloc(max_cm * NExtended * FIELD_EXTENSION * sizeof(Goldilocks::Element));
+
 
     Polinomial root0(HASH_SIZE, 1);
     Polinomial root1(HASH_SIZE, 1);
@@ -220,11 +222,14 @@ void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publ
     Polinomial qq1 = Polinomial(NExtended, starkInfo.qDim, "qq1");
     Polinomial qq2 = Polinomial(NExtended * starkInfo.qDeg, starkInfo.qDim, "qq2");
 
+    TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_INTT);
     nttExtended.INTT(qq1.address(), p_q_2ns, NExtended, starkInfo.qDim, NULL, 2, 1);
+    TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS_INTT);
 
     Goldilocks::Element curS = Goldilocks::one();
     Goldilocks::Element shiftIn = Goldilocks::exp(Goldilocks::inv(Goldilocks::shift()), N);
 
+    TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_MUL);
     for (uint64_t p = 0; p < starkInfo.qDeg; p++)
     {
         #pragma omp parallel
@@ -234,8 +239,11 @@ void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publ
         }
         curS = Goldilocks::mul(curS, shiftIn);
     }
+    TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS_MUL);
 
+    TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_NTT);
     nttExtended.NTT(cm4_2ns, qq2.address(), NExtended, starkInfo.qDim * starkInfo.qDeg);
+    TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS_NTT);
 
     TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS);
     TimerStart(STARK_STEP_4_MERKLETREE);

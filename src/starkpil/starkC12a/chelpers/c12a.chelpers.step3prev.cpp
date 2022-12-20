@@ -141,7 +141,7 @@ void C12aSteps::step3prev_first(StepsParams &params, uint64_t i) {
      Goldilocks3::add(tmp_44, tmp_101, tmp_43);
      Goldilocks3::Element tmp_45;
      Goldilocks3::add(tmp_45, tmp_44, (Goldilocks3::Element &)*params.challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[222298112 + i*6]), tmp_100, tmp_45);
+     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[272629760 + i*6]), tmp_100, tmp_45);
      Goldilocks::Element tmp_102;
      Goldilocks::copy(tmp_102,  params.pConstPols->getElement(4,i));
      Goldilocks3::Element tmp_46;
@@ -256,7 +256,7 @@ void C12aSteps::step3prev_first(StepsParams &params, uint64_t i) {
      Goldilocks3::add(tmp_79, tmp_101, tmp_78);
      Goldilocks3::Element tmp_80;
      Goldilocks3::add(tmp_80, tmp_79, (Goldilocks3::Element &)*params.challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[222298115 + i*6]), tmp_121, tmp_80);
+     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[272629763 + i*6]), tmp_121, tmp_80);
 }
 
 void C12aSteps::step3prev_i(StepsParams &params, uint64_t i) {
@@ -396,7 +396,7 @@ void C12aSteps::step3prev_i(StepsParams &params, uint64_t i) {
      Goldilocks3::add(tmp_44, tmp_101, tmp_43);
      Goldilocks3::Element tmp_45;
      Goldilocks3::add(tmp_45, tmp_44, (Goldilocks3::Element &)*params.challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[222298112 + i*6]), tmp_100, tmp_45);
+     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[272629760 + i*6]), tmp_100, tmp_45);
      Goldilocks::Element tmp_102;
      Goldilocks::copy(tmp_102,  params.pConstPols->getElement(4,i));
      Goldilocks3::Element tmp_46;
@@ -511,7 +511,7 @@ void C12aSteps::step3prev_i(StepsParams &params, uint64_t i) {
      Goldilocks3::add(tmp_79, tmp_101, tmp_78);
      Goldilocks3::Element tmp_80;
      Goldilocks3::add(tmp_80, tmp_79, (Goldilocks3::Element &)*params.challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[222298115 + i*6]), tmp_121, tmp_80);
+     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[272629763 + i*6]), tmp_121, tmp_80);
 }
 
 void C12aSteps::step3prev_last(StepsParams &params, uint64_t i) {
@@ -651,7 +651,7 @@ void C12aSteps::step3prev_last(StepsParams &params, uint64_t i) {
      Goldilocks3::add(tmp_44, tmp_101, tmp_43);
      Goldilocks3::Element tmp_45;
      Goldilocks3::add(tmp_45, tmp_44, (Goldilocks3::Element &)*params.challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[222298112 + i*6]), tmp_100, tmp_45);
+     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[272629760 + i*6]), tmp_100, tmp_45);
      Goldilocks::Element tmp_102;
      Goldilocks::copy(tmp_102,  params.pConstPols->getElement(4,i));
      Goldilocks3::Element tmp_46;
@@ -766,5 +766,5 @@ void C12aSteps::step3prev_last(StepsParams &params, uint64_t i) {
      Goldilocks3::add(tmp_79, tmp_101, tmp_78);
      Goldilocks3::Element tmp_80;
      Goldilocks3::add(tmp_80, tmp_79, (Goldilocks3::Element &)*params.challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[222298115 + i*6]), tmp_121, tmp_80);
+     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[272629763 + i*6]), tmp_121, tmp_80);
 }
