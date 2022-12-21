@@ -103,7 +103,7 @@ void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publ
         nthreads += 1;
     }
     uint64_t buffSize = 8 * starkInfo.puCtx.size() * N;
-    assert(buffSize>=starkInfo.mapSectionsN.section[eSection::cm3_2ns] * NExtended)
+    assert(buffSize<=starkInfo.mapSectionsN.section[eSection::cm3_2ns] * NExtended);
     uint64_t *mam = (uint64_t *)pAddress;
     uint64_t *pbufferH = &mam[starkInfo.mapOffsets.section[eSection::cm3_2ns]];
     uint64_t buffSizeThread = buffSize / nthreads;
