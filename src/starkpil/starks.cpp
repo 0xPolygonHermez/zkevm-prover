@@ -95,15 +95,17 @@ void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publ
     TimerStart(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE);
     Polinomial *transPols = transposeH1H2Columns(pAddress, numCommited, pBuffer);
     TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE);
-
     TimerStart(STARK_STEP_2_CALCULATEH1H2);
+
     uint64_t nthreads = starkInfo.puCtx.size();
     if (nthreads == 0)
     {
         nthreads += 1;
     }
-    uint64_t buffSize = starkInfo.mapSectionsN.section[eSection::cm1_n] * NExtended * FIELD_EXTENSION;
-    uint64_t *pbufferH = (uint64_t *)malloc(buffSize * sizeof(uint64_t));
+    uint64_t buffSize = 8 * starkInfo.puCtx.size() * N;
+    assert(buffSize>=starkInfo.mapSectionsN.section[eSection::cm3_2ns] * NExtended)
+    uint64_t *mam = (uint64_t *)pAddress;
+    uint64_t *pbufferH = &mam[starkInfo.mapOffsets.section[eSection::cm3_2ns]];
     uint64_t buffSizeThread = buffSize / nthreads;
 
 #pragma omp parallel for num_threads(nthreads)
@@ -124,7 +126,6 @@ void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publ
             Polinomial::calculateH1H2_opt3(transPols[indx1 + 2], transPols[indx1 + 3], transPols[indx1], transPols[indx1 + 1], i, &pbufferH[omp_get_thread_num() * buffSizeThread], buffSizeThreadKeys, buffSizeThreadValues);
         }
     }
-    free(pbufferH);
     TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2);
 
     TimerStart(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE_2);
