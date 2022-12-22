@@ -33,10 +33,10 @@ class Prover
     // StarkRecursive2 starkRecursive2;
     StarkRecursiveF starkRecursiveF;
 
-    Starks starkZkevm;
-    Starks starksC12a;
-    Starks starksRecursive1;
-    Starks starksRecursive2;
+    Starks *starkZkevm;
+    Starks *starksC12a;
+    Starks *starksRecursive1;
+    Starks *starksRecursive2;
 
     std::unique_ptr<Groth16::Prover<AltBn128::Engine>> groth16Prover;
     std::unique_ptr<BinFileUtils::BinFile> zkey;
@@ -54,7 +54,7 @@ private:
     pthread_t proverPthread;  // Prover thread
     pthread_t cleanerPthread; // Garbage collector
     pthread_mutex_t mutex;    // Mutex to protect the requests queues
-
+    void *pAddress = NULL;
 public:
     const Config &config;
     sem_t pendingRequestSem; // Semaphore to wakeup prover thread when a new request is available
