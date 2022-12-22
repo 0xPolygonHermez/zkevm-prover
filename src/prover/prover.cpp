@@ -332,6 +332,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
     /************/
     /* Executor */
     /************/
+    TimerStart(EXECUTOR_EXECUTE_INITIALIZATION);
 
     // Allocate an area of memory, mapped to file, to store all the committed polynomials,
     // and create them using the allocated address
@@ -358,6 +359,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
 
     CommitPols cmPols(pAddress, CommitPols::pilDegree());
 
+    TimerStopAndLog(EXECUTOR_EXECUTE_INITIALIZATION);
     // Execute all the State Machines
     TimerStart(EXECUTOR_EXECUTE_BATCH_PROOF);
     executor.execute(*pProverRequest, cmPols);
@@ -525,6 +527,8 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         TimerStopAndLog(STARK_RECURSIVE_1_PROOF_BATCH_PROOF);
 
         // Save the proof & zkinproof
+        TimerStart(SAVE_PROOF);
+
         nlohmann::ordered_json jProofRecursive1 = fproofRecursive1.proofs.proof2json();
         nlohmann::ordered_json zkinRecursive1 = proof2zkinStark(jProofRecursive1);
         zkinRecursive1["publics"] = publicStarkJson;
@@ -545,7 +549,9 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
             jProofRecursive1["publics"] = publicStarkJson;
             json2file(jProofRecursive1, pProverRequest->filePrefix + "batch_proof.proof.json");
         }
+        TimerStopAndLog(SAVE_PROOF);
 
+        TimerStart(FREE_pADDRESS);
         // Unmap committed polynomials address
         if (config.zkevmCmPols.size() > 0)
         {
@@ -555,6 +561,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         {
             free(pAddress);
         }
+        TimerStopAndLog(FREE_pADDRESS);
     }
 
     TimerStopAndLog(PROVER_BATCH_PROOF);

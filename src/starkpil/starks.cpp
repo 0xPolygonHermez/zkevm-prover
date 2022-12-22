@@ -3,6 +3,8 @@
 void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publicInputs, Steps *steps)
 {
     // Initialize vars
+    TimerStart(STARK_INITIALIZATION);
+
     uint64_t numCommited = starkInfo.nCm1;
     Transcript transcript;
     Polinomial evals(N, FIELD_EXTENSION);
@@ -55,6 +57,7 @@ void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publ
         q_2ns : p_q_2ns,
         f_2ns : p_f_2ns
     };
+    TimerStopAndLog(STARK_INITIALIZATION);
     //--------------------------------
     // 1.- Calculate p_cm1_2ns
     //--------------------------------
@@ -180,6 +183,7 @@ void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publ
     TimerStart(STARK_STEP_3_CALCULATE_Z_TRANSPOSE_2);
     transposeZRows(pAddress, numCommited, newpols_);
     TimerStopAndLog(STARK_STEP_3_CALCULATE_Z_TRANSPOSE_2);
+    TimerStart(STARK_STEP_3_CALCULATE_EXPS_2);
 
     // Calculate exps
 #pragma omp parallel for
@@ -187,7 +191,7 @@ void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publ
     {
         steps->step3_first(params, i);
     }
-
+    TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS_2);
     TimerStart(STARK_STEP_3_LDE_AND_MERKLETREE);
     TimerStart(STARK_STEP_3_LDE);
     ntt.extendPol(p_cm3_2ns, p_cm3_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm3_n], pBuffer);
@@ -357,11 +361,16 @@ void Starks::genProof(void *pAddress, FRIProof &proof, Goldilocks::Element *publ
     std::memcpy(&proof.proofs.root2[0], root1.address(), HASH_SIZE * sizeof(Goldilocks::Element));
     std::memcpy(&proof.proofs.root3[0], root2.address(), HASH_SIZE * sizeof(Goldilocks::Element));
     std::memcpy(&proof.proofs.root4[0], root3.address(), HASH_SIZE * sizeof(Goldilocks::Element));
+    TimerStopAndLog(STARK_STEP_FRI);
+    TimerStart(STARK_DEALLOCATE);
+
     for (uint i = 0; i < 5; i++)
     {
         delete treesGL[i];
     }
     free(pBuffer);
+    TimerStopAndLog(STARK_DEALLOCATE);
+
 }
 
 Polinomial *Starks::transposeH1H2Columns(void *pAddress, uint64_t &numCommited, Goldilocks::Element *pBuffer)
