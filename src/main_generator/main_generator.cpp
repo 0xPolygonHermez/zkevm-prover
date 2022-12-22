@@ -19,7 +19,7 @@ string string2lower (const string &s);
 string string2upper (const string &s);
 
 int main(int argc, char **argv)
-{    
+{
     cout << "Main generator" << endl;
 
     string codeGenerationName = "main_exec_generated";
@@ -326,7 +326,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    mpz_class byteMaskOn256(\"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF\", 16);\n";
 
     // Binary free in
-    code += "    mpz_class a, b, c;\n";
+    code += "    mpz_class a, b, c, _a, _b;\n";
     code += "    mpz_class expectedC;\n";
     code += "    BinaryAction binaryAction;\n";
 
@@ -768,7 +768,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             }
         }
         else if ( (rom["program"][zkPC].contains("useCTX") && (rom["program"][zkPC]["useCTX"] == 1)) ||
-                  (rom["program"][zkPC].contains("isStack") && (rom["program"][zkPC]["isStack"] == 1)) || 
+                  (rom["program"][zkPC].contains("isStack") && (rom["program"][zkPC]["isStack"] == 1)) ||
                   (rom["program"][zkPC].contains("isMem") && (rom["program"][zkPC]["isMem"]  == 1)) )
         {
             code += "    addr = 0;\n\n";
@@ -2525,7 +2525,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
         }
 
         // HashP or Storage write instructions, required data
-        if (!bFastMode && ( (rom["program"][zkPC].contains("hashPDigest") && (rom["program"][zkPC]["hashPDigest"]==1)) || 
+        if (!bFastMode && ( (rom["program"][zkPC].contains("hashPDigest") && (rom["program"][zkPC]["hashPDigest"]==1)) ||
                             (rom["program"][zkPC].contains("sWR") && (rom["program"][zkPC]["sWR"] ==1))) )
         {
             code += "    // HashP or Storage write instructions, required data\n";
@@ -2816,10 +2816,12 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
                 code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
                 code += "    fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);\n";
-                code += "    if (a >= ScalarTwoTo255) a = a - ScalarTwoTo256;\n";
-                code += "    if (b >= ScalarTwoTo255) b = b - ScalarTwoTo256;\n";
+                code += "    _a = a;\n";
+                code += "    _b = b;\n";
+                code += "    if (a >= ScalarTwoTo255) _a = a - ScalarTwoTo256;\n";
+                code += "    if (b >= ScalarTwoTo255) _b = b - ScalarTwoTo256;\n";
 
-                code += "    expectedC = (a < b);\n";
+                code += "    expectedC = (_a < _b);\n";
                 code += "    if (c != expectedC)\n";
                 code += "    {\n";
                 code += "        cerr << \"Error: Binary SLT operation does not match zkPC=" + to_string(zkPC) + " instruction: \" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
@@ -3558,9 +3560,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
         }
 
 
-        if (!bFastMode && ( (rom["program"][zkPC].contains("sRD") && (rom["program"][zkPC]["sRD"]==1)) || 
-                            (rom["program"][zkPC].contains("sWR") && (rom["program"][zkPC]["sWR"]==1)) || 
-                            (rom["program"][zkPC].contains("hashKDigest") && (rom["program"][zkPC]["hashKDigest"]==1)) || 
+        if (!bFastMode && ( (rom["program"][zkPC].contains("sRD") && (rom["program"][zkPC]["sRD"]==1)) ||
+                            (rom["program"][zkPC].contains("sWR") && (rom["program"][zkPC]["sWR"]==1)) ||
+                            (rom["program"][zkPC].contains("hashKDigest") && (rom["program"][zkPC]["hashKDigest"]==1)) ||
                             (rom["program"][zkPC].contains("hashPDigest") && (rom["program"][zkPC]["hashPDigest"]==1)) ))
         {
             code += "    pols.incCounter[i] = fr.fromU64(incCounter);\n";
@@ -3739,7 +3741,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    if (bJump)\n";
             code += "    {\n";
             code += "        bJump = false;\n";
-            
+
             if (bUseJmpAddr)
                 code += "    goto " + functionName + "_rom_line_" + to_string(rom["program"][zkPC]["jmpAddr"]) + ";\n";
             else if (bOnlyOffset)
