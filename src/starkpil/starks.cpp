@@ -84,7 +84,7 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
         nthreads += 1;
     }
     uint64_t buffSize = 8 * starkInfo.puCtx.size() * N;
-    assert(buffSize<=starkInfo.mapSectionsN.section[eSection::cm3_2ns] * NExtended);
+    assert(buffSize <= starkInfo.mapSectionsN.section[eSection::cm3_2ns] * NExtended);
     uint64_t *mam = (uint64_t *)pAddress;
     uint64_t *pbufferH = &mam[starkInfo.mapOffsets.section[eSection::cm3_2ns]];
     uint64_t buffSizeThread = buffSize / nthreads;
@@ -295,27 +295,21 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     Polinomial::copyElement(xi, 0, challenges, 7);
     Polinomial::mulElement(wxi, 0, challenges, 7, (Goldilocks::Element &)Goldilocks::w(starkInfo.starkStruct.nBits));
 
-    Polinomial x(1, FIELD_EXTENSION);
-    *x[0] = Goldilocks::shift();
-
+#pragma omp parallel for
     for (uint64_t k = 0; k < (N << extendBits); k++)
     {
-        Polinomial::subElement(xDivXSubXi, k, x, 0, xi, 0);
-        Polinomial::subElement(xDivXSubWXi, k, x, 0, wxi, 0);
-        Polinomial::mulElement(x, 0, x, 0, (Goldilocks::Element &)Goldilocks::w(starkInfo.starkStruct.nBits + extendBits));
+        Polinomial::subElement(xDivXSubXi, k, x, k, xi, 0);
+        Polinomial::subElement(xDivXSubWXi, k, x, k, wxi, 0);
     }
 
-    Polinomial::batchInverse(xDivXSubXi, xDivXSubXi);
-    Polinomial::batchInverse(xDivXSubWXi, xDivXSubWXi);
+    Polinomial::batchInverseParallel(xDivXSubXi, xDivXSubXi);
+    Polinomial::batchInverseParallel(xDivXSubWXi, xDivXSubWXi);
 
-    Polinomial x1(1, FIELD_EXTENSION);
-    *x1[0] = Goldilocks::shift();
-
+#pragma omp parallel for
     for (uint64_t k = 0; k < (N << extendBits); k++)
     {
-        Polinomial::mulElement(xDivXSubXi, k, xDivXSubXi, k, x1, 0);
-        Polinomial::mulElement(xDivXSubWXi, k, xDivXSubWXi, k, x1, 0);
-        Polinomial::mulElement(x1, 0, x1, 0, (Goldilocks::Element &)Goldilocks::w(starkInfo.starkStruct.nBits + extendBits));
+        Polinomial::mulElement(xDivXSubXi, k, xDivXSubXi, k, x, k);
+        Polinomial::mulElement(xDivXSubWXi, k, xDivXSubWXi, k, x, k);
     }
     TimerStopAndLog(STARK_STEP_5_XDIVXSUB);
     TimerStart(STARK_STEP_5_CALCULATE_EXPS);
@@ -489,7 +483,7 @@ void Starks::transposeZRows(void *pAddress, uint64_t &numCommited, Polinomial *t
     }
     if (numpols > 0)
     {
-        delete [] transPols;
+        delete[] transPols;
     }
 }
 void Starks::evmap(void *pAddress, Polinomial &evals, Polinomial &LEv, Polinomial &LpEv)

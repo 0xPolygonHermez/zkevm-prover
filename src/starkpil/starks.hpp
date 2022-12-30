@@ -63,6 +63,8 @@ private:
 
     void *pAddress;
 
+    Polinomial x;
+
 public:
     Starks(const Config &config, StarkFiles starkFiles, void *_pAddress) : config(config),
                                                                            starkInfo(config, starkFiles.zkevmStarkInfo),
@@ -75,8 +77,8 @@ public:
                                                                            nttExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
                                                                            x_n(config.generateProof() ? N : 0, config.generateProof() ? 1 : 0),
                                                                            x_2ns(config.generateProof() ? NExtended : 0, config.generateProof() ? 1 : 0),
-                                                                           pAddress(_pAddress)
-
+                                                                           pAddress(_pAddress),
+                                                                           x(config.generateProof() ? N << (starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits) : 0, config.generateProof() ? FIELD_EXTENSION : 0)
     {
         // Avoid unnecessary initialization if we are not going to generate any proof
         if (!config.generateProof())
@@ -164,6 +166,16 @@ public:
         cm4_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm4_2ns]];
         p_q_2ns = &mem[starkInfo.mapOffsets.section[eSection::q_2ns]];
         p_f_2ns = &mem[starkInfo.mapOffsets.section[eSection::f_2ns]];
+
+
+        *x[0] = Goldilocks::shift();
+
+        uint64_t extendBits = starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits;
+
+        for (uint64_t k = 1; k < (N << extendBits); k++)
+        {
+            Polinomial::mulElement(x, k, x, k - 1, (Goldilocks::Element &)Goldilocks::w(starkInfo.starkStruct.nBits + extendBits));
+        }
 
         TimerStart(MERKLE_TREE_ALLOCATION);
         treesGL[0] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::cm1_n], p_cm1_2ns);
