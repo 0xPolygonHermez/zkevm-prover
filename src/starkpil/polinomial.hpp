@@ -4,6 +4,7 @@
 #include "goldilocks_base_field.hpp"
 #include "goldilocks_cubic_extension.hpp"
 #include "compare_fe.hpp"
+#include <math.h>       /* log2 */
 
 class Polinomial
 {
@@ -633,7 +634,8 @@ public:
         uint64_t size = src.degree();
         Polinomial tmp(size, 3);
 
-        uint64_t nThreads = omp_get_max_threads() / 4;
+        double pow2thread = floor(log2(omp_get_max_threads()));
+        uint64_t nThreads = (1 << (int)pow2thread) / 4;
         uint64_t partitionSize = size / nThreads;
 
         // initalize tmp with src
