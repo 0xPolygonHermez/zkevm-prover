@@ -4,6 +4,7 @@
 #include "goldilocks_base_field.hpp"
 #include "goldilocks_cubic_extension.hpp"
 #include "compare_fe.hpp"
+#include <math.h>       /* log2 */
 
 class Polinomial
 {
@@ -602,6 +603,95 @@ public:
         zkassert(Goldilocks3::isOne((Goldilocks3::Element &)*checkVal[0]));
     }
 
+    // compute the multiplications of the polynomials in src in parallel with partitions of size partitionSize
+    // Every thread computes a partition of size partitionSize / (2 * nThreadsPartition)
+    // after every computation the size of the partition is doubled until it reaches partitionSize
+    inline static void computeMuls(Polinomial &src, uint64_t srcSize, uint64_t partitionSize, uint64_t nThreads)
+    {
+        if (partitionSize > srcSize)
+        {
+            return;
+        }
+        uint64_t nPartitions = srcSize / partitionSize;
+        uint64_t nThreadsPartition = nThreads / nPartitions;
+
+#pragma omp parallel for num_threads(nThreads)
+        for (uint64_t i = 0; i < nThreads; i++)
+        {
+            uint64_t thread_idx = omp_get_thread_num();
+            uint64_t offset = partitionSize / 2 + thread_idx / nThreadsPartition * partitionSize;
+            uint64_t threadOffset = partitionSize / (2 * nThreadsPartition) * (thread_idx % nThreadsPartition) + offset;
+            for (uint64_t j = 0; j < partitionSize / (2 * nThreadsPartition); j++)
+            {
+                Polinomial::mulElement(src, threadOffset + j, src, threadOffset + j, src, offset - 1);
+            }
+        }
+        computeMuls(src, srcSize, partitionSize * 2, nThreads);
+    }
+
+    inline static void batchInverseParallel(Polinomial &res, Polinomial &src)
+    {
+        uint64_t size = src.degree();
+        Polinomial tmp(size, 3);
+
+        double pow2thread = floor(log2(omp_get_max_threads()));
+        uint64_t nThreads = (1 << (int)pow2thread) / 4;
+        uint64_t partitionSize = size / nThreads;
+
+        // initalize tmp with src
+        // | s_0 0 0 .. 0 | s_partitionSize 0 0 .. 0 | s_partitionSize+1 0 0 .. 0 | s_partitionSize*(nThreads-1) ... 0 |
+
+#pragma omp parallel for num_threads(nThreads)
+        for (uint64_t i = 0; i < nThreads; i++)
+        {
+            uint64_t thread_idx = omp_get_thread_num();
+            Polinomial::copyElement(tmp, thread_idx * partitionSize, src, thread_idx * partitionSize);
+        }
+
+#pragma omp parallel for num_threads(nThreads)
+        for (uint64_t j = 0; j < nThreads; j++)
+        {
+            uint64_t thread_idx = omp_get_thread_num();
+            for (uint64_t i = 1; i < partitionSize; i++)
+            {
+                Polinomial::mulElement(tmp, i + thread_idx * partitionSize, tmp, i - 1 + thread_idx * partitionSize, src, i + thread_idx * partitionSize);
+            }
+        }
+
+        computeMuls(tmp, size, 2 * partitionSize, nThreads);
+
+        Polinomial z(size, 3);
+        Goldilocks3::inv((Goldilocks3::Element *)z[0], (Goldilocks3::Element *)tmp[size - 1]);
+
+        // calculo Z
+#pragma omp parallel for num_threads(nThreads - 1)
+        for (uint64_t i = 0; i < nThreads - 1; i++)
+        {
+            uint64_t thread_idx = omp_get_thread_num();
+            Polinomial::copyElement(z, thread_idx * partitionSize + partitionSize, src, size - thread_idx * partitionSize - partitionSize);
+        }
+        Goldilocks3::inv((Goldilocks3::Element *)z[0], (Goldilocks3::Element *)tmp[size - 1]);
+
+#pragma omp parallel for num_threads(nThreads)
+        for (uint64_t j = 0; j < nThreads; j++)
+        {
+            uint64_t thread_idx = omp_get_thread_num();
+            for (uint64_t i = 1; i < partitionSize; i++)
+            {
+                Polinomial::mulElement(z, i + thread_idx * partitionSize, z, i - 1 + thread_idx * partitionSize, src, size - i - thread_idx * partitionSize);
+            }
+        }
+
+        computeMuls(z, size, 2 * partitionSize, nThreads);
+
+#pragma omp parallel for num_threads(nThreads)
+        for (uint64_t i = 0; i < size - 1; i++)
+        {
+            Polinomial::mulElement(res, size - 1 - i, z, i, tmp, size - 2 - i);
+        }
+        Polinomial::copyElement(res, 0, z, size - 1);
+    }
+
     inline static void batchInverse(Polinomial &res, Polinomial &src)
     {
         uint64_t size = src.degree();
@@ -620,11 +710,10 @@ public:
 
         for (uint64_t i = size - 1; i > 0; i--)
         {
-            Polinomial::mulElement(aux, i, z, 0, tmp, i - 1);
+            Polinomial::mulElement(res, i, z, 0, tmp, i - 1);
             Polinomial::mulElement(z, 0, z, 0, src, i);
         }
-        Polinomial::copyElement(aux, 0, z, 0);
-        Polinomial::copy(res, aux);
+        Polinomial::copyElement(res, 0, z, 0);
     }
 
     static inline void mulAddElement_adim3(Goldilocks::Element *out, Goldilocks::Element *in_a, Polinomial &in_b, uint64_t idx_b)

@@ -81,6 +81,35 @@ Prover::Prover(Goldilocks &fr,
             pCurrentRequest = NULL;
             pthread_create(&proverPthread, NULL, proverThread, this);
             pthread_create(&cleanerPthread, NULL, cleanerThread, this);
+
+            StarkInfo _starkInfo(config, config.zkevmStarkInfo);
+
+            // Allocate an area of memory, mapped to file, to store all the committed polynomials,
+            // and create them using the allocated address
+            uint64_t polsSize = _starkInfo.mapTotalN * sizeof(Goldilocks::Element) + _starkInfo.mapSectionsN.section[eSection::cm1_n] * (1 << _starkInfo.starkStruct.nBits) * FIELD_EXTENSION * sizeof(Goldilocks::Element);
+            zkassert(CommitPols::pilSize() <= polsSize);
+            zkassert(CommitPols::pilSize() == _starkInfo.mapOffsets.section[cm2_n] * sizeof(Goldilocks::Element));
+
+            if (config.zkevmCmPols.size() > 0)
+            {
+                pAddress = mapFile(config.zkevmCmPols, polsSize, true);
+                cout << "Prover::genBatchProof() successfully mapped " << polsSize << " bytes to file " << config.zkevmCmPols << endl;
+            }
+            else
+            {
+                pAddress = calloc(polsSize, 1);
+                if (pAddress == NULL)
+                {
+                    cerr << "Error: Prover::genBatchProof() failed calling malloc() of size " << polsSize << endl;
+                    exitProcess();
+                }
+                cout << "Prover::genBatchProof() successfully allocated " << polsSize << " bytes" << endl;
+            }
+
+            starkZkevm = new Starks(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo}, pAddress);
+            starksC12a = new Starks(config, {config.c12aConstPols, config.mapConstPolsFile, config.c12aConstantsTree, config.c12aStarkInfo}, pAddress);
+            starksRecursive1 = new Starks(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree, config.recursive1StarkInfo}, pAddress);
+            starksRecursive2 = new Starks(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree, config.recursive2StarkInfo}, pAddress);
         }
     }
     catch (std::exception &e)
@@ -88,35 +117,6 @@ Prover::Prover(Goldilocks &fr,
         cerr << "Error: Prover::Prover() got an exception: " << e.what() << '\n';
         exitProcess();
     }
-
-    StarkInfo _starkInfo(config, config.zkevmStarkInfo);
-
-    // Allocate an area of memory, mapped to file, to store all the committed polynomials,
-    // and create them using the allocated address
-    uint64_t polsSize = _starkInfo.mapTotalN * sizeof(Goldilocks::Element) + _starkInfo.mapSectionsN.section[eSection::cm1_n] * (1 << _starkInfo.starkStruct.nBits) * FIELD_EXTENSION * sizeof(Goldilocks::Element);
-    zkassert(CommitPols::pilSize() <= polsSize);
-    zkassert(CommitPols::pilSize() == _starkInfo.mapOffsets.section[cm2_n] * sizeof(Goldilocks::Element));
-
-    if (config.zkevmCmPols.size() > 0)
-    {
-        pAddress = mapFile(config.zkevmCmPols, polsSize, true);
-        cout << "Prover::genBatchProof() successfully mapped " << polsSize << " bytes to file " << config.zkevmCmPols << endl;
-    }
-    else
-    {
-        pAddress = calloc(polsSize, 1);
-        if (pAddress == NULL)
-        {
-            cerr << "Error: Prover::genBatchProof() failed calling malloc() of size " << polsSize << endl;
-            exitProcess();
-        }
-        cout << "Prover::genBatchProof() successfully allocated " << polsSize << " bytes" << endl;
-    }
-
-    starkZkevm = new Starks(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo}, pAddress);
-    starksC12a = new Starks(config, {config.c12aConstPols, config.mapConstPolsFile, config.c12aConstantsTree, config.c12aStarkInfo}, pAddress);
-    starksRecursive1 = new Starks(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree, config.recursive1StarkInfo}, pAddress);
-    starksRecursive2 = new Starks(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree, config.recursive2StarkInfo}, pAddress);
 }
 
 Prover::~Prover()
@@ -125,7 +125,7 @@ Prover::~Prover()
     // · delete groth16Prover;
     mpz_clear(altBbn128r);
 
-    uint64_t polsSize = starkZkevm->starkInfo.mapTotalN * sizeof(Goldilocks::Element)+ starkZkevm->starkInfo.mapSectionsN.section[eSection::cm1_n] * (1 << starkZkevm->starkInfo.starkStruct.nBits) * FIELD_EXTENSION * sizeof(Goldilocks::Element);
+    uint64_t polsSize = starkZkevm->starkInfo.mapTotalN * sizeof(Goldilocks::Element) + starkZkevm->starkInfo.mapSectionsN.section[eSection::cm1_n] * (1 << starkZkevm->starkInfo.starkStruct.nBits) * FIELD_EXTENSION * sizeof(Goldilocks::Element);
 
     // Unmap committed polynomials address
     if (config.zkevmCmPols.size() > 0)
@@ -375,7 +375,14 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
     TimerStart(EXECUTOR_EXECUTE_INITIALIZATION);
 
     CommitPols cmPols(pAddress, CommitPols::pilDegree());
-    std::memset(pAddress, 0, cmPols.size());
+    uint64_t num_threads = omp_get_max_threads();
+    uint64_t bytes_per_thread = cmPols.size() / num_threads;
+#pragma omp parallel for num_threads(num_threads)
+    for (uint64_t i = 0; i < cmPols.size(); i += bytes_per_thread) // Each iteration processes 64 bytes at a time
+    {
+        memset((uint8_t *)pAddress + i, 0, bytes_per_thread);
+    }
+
     TimerStopAndLog(EXECUTOR_EXECUTE_INITIALIZATION);
     // Execute all the State Machines
     TimerStart(EXECUTOR_EXECUTE_BATCH_PROOF);
@@ -515,6 +522,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         starksC12a->genProof(fproofC12a, publics, &c12aSteps);
 
         TimerStopAndLog(STARK_C12_A_PROOF_BATCH_PROOF);
+        TimerStart(STARK_JSON_GENERATION_BATCH_PROOF_C12A);
 
         // Save the proof & zkinproof
         nlohmann::ordered_json jProofc12a = fproofC12a.proofs.proof2json();
@@ -528,6 +536,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         rootC[3] = to_string(recursive2Verkey["constRoot"][3]);
         zkinC12a["publics"] = publicStarkJson;
         zkinC12a["rootC"] = rootC;
+        TimerStopAndLog(STARK_JSON_GENERATION_BATCH_PROOF_C12A);
 
         CommitPolsStarks cmPolsRecursive1(pAddress, (1 << starksRecursive1->starkInfo.starkStruct.nBits));
         CircomRecursive1::getCommitedPols(&cmPolsRecursive1, config.recursive1Verifier, config.recursive1Exec, zkinC12a, (1 << starksRecursive1->starkInfo.starkStruct.nBits));

@@ -3480,6 +3480,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     proverRequest.counters.poseidonG = fr.toU64(pols.cntPoseidonG[0]);
     proverRequest.counters.steps = ctx.lastStep;
 
+    // Set the error (all previous errors generated a return)
+    proverRequest.result = ZKR_SUCCESS;
+
 #ifdef CHECK_MAX_CNT_AT_THE_END
     if (fr.toU64(pols.cntArith[0]) > MAX_CNT_ARITH)
     {
@@ -3487,9 +3490,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if (bProcessBatch)
         {
             proverRequest.result = ZKR_SM_MAIN_OOC_ARITH;
-            return;
         }
-        exitProcess();
+        else
+        {
+            exitProcess();
+        }
     }
     if (fr.toU64(pols.cntBinary[0]) > MAX_CNT_BINARY)
     {
@@ -3497,9 +3502,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if (bProcessBatch)
         {
             proverRequest.result = ZKR_SM_MAIN_OOC_BINARY;
-            return;
         }
-        exitProcess();
+        else
+        {
+            exitProcess();
+        }
     }
     if (fr.toU64(pols.cntMemAlign[0]) > MAX_CNT_MEM_ALIGN)
     {
@@ -3507,9 +3514,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if (bProcessBatch)
         {
             proverRequest.result = ZKR_SM_MAIN_OOC_MEM_ALIGN;
-            return;
         }
-        exitProcess();
+        else
+        {
+            exitProcess();
+        }
     }
     if (fr.toU64(pols.cntKeccakF[0]) > MAX_CNT_KECCAK_F)
     {
@@ -3517,9 +3526,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if (bProcessBatch)
         {
             proverRequest.result = ZKR_SM_MAIN_OOC_KECCAK_F;
-            return;
         }
-        exitProcess();
+        else
+        {
+            exitProcess();
+        }
     }
     if (fr.toU64(pols.cntPaddingPG[0]) > MAX_CNT_PADDING_PG)
     {
@@ -3527,9 +3538,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if (bProcessBatch)
         {
             proverRequest.result = ZKR_SM_MAIN_OOC_PADDING_PG;
-            return;
         }
-        exitProcess();
+        else
+        {
+            exitProcess();
+        }
     }
     if (fr.toU64(pols.cntPoseidonG[0]) > MAX_CNT_POSEIDON_G)
     {
@@ -3537,9 +3550,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if (bProcessBatch)
         {
             proverRequest.result = ZKR_SM_MAIN_OOC_POSEIDON_G;
-            return;
         }
-        exitProcess();
+        else
+        {
+            exitProcess();
+        }
     }
 #endif
 
@@ -3626,8 +3641,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     StateDBClientFactory::freeStateDBClient(pStateDB);
 
     cout << "MainExecutor::execute() done lastStep=" << ctx.lastStep << " (" << (double(ctx.lastStep)*100)/N << "%)" << endl;
-
-    proverRequest.result = ZKR_SUCCESS;
 }
 
 // Initialize the first evaluation
