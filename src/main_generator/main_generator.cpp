@@ -3792,73 +3792,58 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    proverRequest.counters.paddingPG = fr.toU64(pols.cntPaddingPG[0]);\n";
     code += "    proverRequest.counters.poseidonG = fr.toU64(pols.cntPoseidonG[0]);\n";
     code += "    proverRequest.counters.steps = ctx.lastStep;\n\n";
+    
+    code += "    // Set the error (all previous errors generated a return)\n";
+    code += "    proverRequest.result = ZKR_SUCCESS;\n";
 
     code += "#ifdef CHECK_MAX_CNT_AT_THE_END\n";
     code += "    if (fr.toU64(pols.cntArith[0]) > mainExecutor.MAX_CNT_ARITH)\n";
     code += "    {\n";
     code += "        cerr << \"Error: Main Executor found pols.cntArith[0]=\" << fr.toU64(pols.cntArith[0]) << \" > MAX_CNT_ARITH=\" << mainExecutor.MAX_CNT_ARITH << endl;\n";
     if (bFastMode)
-    {
-    code += "        proverRequest.result = ZKR_SM_MAIN_OOC_ARITH;\n";
-    code += "        return;\n";
-    }
+        code += "        proverRequest.result = ZKR_SM_MAIN_OOC_ARITH;\n";
     else
-    code += "        exitProcess();\n";
+        code += "        exitProcess();\n";
     code += "    }\n";
     code += "    if (fr.toU64(pols.cntBinary[0]) > mainExecutor.MAX_CNT_BINARY)\n";
     code += "    {\n";
     code += "        cerr << \"Error: Main Executor found pols.cntBinary[0]=\" << fr.toU64(pols.cntBinary[0]) << \" > MAX_CNT_BINARY=\" << mainExecutor.MAX_CNT_BINARY << endl;\n";
     if (bFastMode)
-    {
-    code += "        proverRequest.result = ZKR_SM_MAIN_OOC_BINARY;\n";
-    code += "        return;\n";
-    }
+        code += "        proverRequest.result = ZKR_SM_MAIN_OOC_BINARY;\n";
     else
-    code += "        exitProcess();\n";
+        code += "        exitProcess();\n";
     code += "    }\n";
     code += "    if (fr.toU64(pols.cntMemAlign[0]) > mainExecutor.MAX_CNT_MEM_ALIGN)\n";
     code += "    {\n";
     code += "        cerr << \"Error: Main Executor found pols.cntMemAlign[0]=\" << fr.toU64(pols.cntMemAlign[0]) << \" > MAX_CNT_MEM_ALIGN=\" << mainExecutor.MAX_CNT_MEM_ALIGN << endl;\n";
     if (bFastMode)
-    {
-    code += "        proverRequest.result = ZKR_SM_MAIN_OOC_MEM_ALIGN;\n";
-    code += "        return;\n";
-    }
+        code += "        proverRequest.result = ZKR_SM_MAIN_OOC_MEM_ALIGN;\n";
     else
-    code += "        exitProcess();\n";
+        code += "        exitProcess();\n";
     code += "    }\n";
     code += "    if (fr.toU64(pols.cntKeccakF[0]) > mainExecutor.MAX_CNT_KECCAK_F)\n";
     code += "    {\n";
     code += "        cerr << \"Error: Main Executor found pols.cntKeccakF[0]=\" << fr.toU64(pols.cntKeccakF[0]) << \" > MAX_CNT_KECCAK_F=\" << mainExecutor.MAX_CNT_KECCAK_F << endl;\n";
     if (bFastMode)
-    {
-    code += "        proverRequest.result = ZKR_SM_MAIN_OOC_KECCAK_F;\n";
-    code += "        return;\n";
-    }
+        code += "        proverRequest.result = ZKR_SM_MAIN_OOC_KECCAK_F;\n";
     else
-    code += "        exitProcess();\n";
+        code += "        exitProcess();\n";
     code += "    }\n";
     code += "    if (fr.toU64(pols.cntPaddingPG[0]) > mainExecutor.MAX_CNT_PADDING_PG)\n";
     code += "    {\n";
     code += "        cerr << \"Error: Main Executor found pols.cntPaddingPG[0]=\" << fr.toU64(pols.cntPaddingPG[0]) << \" > MAX_CNT_PADDING_PG=\" << mainExecutor.MAX_CNT_PADDING_PG << endl;\n";
     if (bFastMode)
-    {
-    code += "        proverRequest.result = ZKR_SM_MAIN_OOC_PADDING_PG;\n";
-    code += "        return;\n";
-    }
+        code += "        proverRequest.result = ZKR_SM_MAIN_OOC_PADDING_PG;\n";
     else
-    code += "        exitProcess();\n";
+        code += "        exitProcess();\n";
     code += "    }\n";
     code += "    if (fr.toU64(pols.cntPoseidonG[0]) > mainExecutor.MAX_CNT_POSEIDON_G)\n";
     code += "    {\n";
     code += "        cerr << \"Error: Main Executor found pols.cntPoseidonG[0]=\" << fr.toU64(pols.cntPoseidonG[0]) << \" > MAX_CNT_POSEIDON_G=\" << mainExecutor.MAX_CNT_POSEIDON_G << endl;\n";
     if (bFastMode)
-    {
-    code += "        proverRequest.result = ZKR_SM_MAIN_OOC_POSEIDON_G;\n";
-    code += "        return;\n";
-    }
+        code += "        proverRequest.result = ZKR_SM_MAIN_OOC_POSEIDON_G;\n";
     else
-    code += "        exitProcess();\n";
+        code += "        exitProcess();\n";
     code += "    }\n";
     code += "#endif\n\n";
 
@@ -3937,8 +3922,6 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    StateDBClientFactory::freeStateDBClient(pStateDB);\n\n";
 
     code += "    cout << \"" + functionName + "() done lastStep=\" << ctx.lastStep << \" (\" << (double(ctx.lastStep)*100)/mainExecutor.N << \"%)\" << endl;\n\n";
-
-    code += "    proverRequest.result = ZKR_SUCCESS;\n\n";
 
     code += "    return;\n\n";
 
