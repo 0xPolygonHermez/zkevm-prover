@@ -3,7 +3,7 @@
 
 void FRIProve::prove(FRIProof &fproof, MerkleTreeGL **treesGL, Transcript transcript, Polinomial &friPol, uint64_t polBits, StarkInfo starkInfo)
 {
-    TimerStart(STARK_FRI_PROVE);
+    //TimerStart(STARK_FRI_PROVE);
 
     Polinomial polShift(1, 1);
     Polinomial polShiftInv(1, 1);
@@ -15,7 +15,7 @@ void FRIProve::prove(FRIProof &fproof, MerkleTreeGL **treesGL, Transcript transc
 
     std::vector<MerkleTreeGL *> treesFRIGL(starkInfo.starkStruct.steps.size());
 
-    TimerStart(STARK_FRI_PROVE_STEPS);
+    //TimerStart(STARK_FRI_PROVE_STEPS);
     for (uint64_t si = 0; si < starkInfo.starkStruct.steps.size(); si++)
     {
         uint64_t reductionBits = polBits - starkInfo.starkStruct.steps[si].nBits;
@@ -146,10 +146,10 @@ void FRIProve::prove(FRIProof &fproof, MerkleTreeGL **treesGL, Transcript transc
             Goldilocks::mul(*polShift[0], *polShift[0], *polShift[0]);
         }
     }
-    TimerStopAndLog(STARK_FRI_PROVE_STEPS);
+    //TimerStopAndLog(STARK_FRI_PROVE_STEPS);
     fproof.proofs.fri.setPol(friPol.address());
 
-    TimerStart(STARK_FRI_QUERIES);
+    //TimerStart(STARK_FRI_QUERIES);
 
     uint64_t ys[starkInfo.starkStruct.nQueries];
     transcript.getPermutations(ys, starkInfo.starkStruct.nQueries, starkInfo.starkStruct.steps[0].nBits);
@@ -183,8 +183,8 @@ void FRIProve::prove(FRIProof &fproof, MerkleTreeGL **treesGL, Transcript transc
         delete mt;
     }
 
-    TimerStopAndLog(STARK_FRI_QUERIES);
-    TimerStopAndLog(STARK_FRI_PROVE);
+    //TimerStopAndLog(STARK_FRI_QUERIES);
+    //TimerStopAndLog(STARK_FRI_PROVE);
     return;
 }
 

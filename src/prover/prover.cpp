@@ -522,6 +522,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         starksC12a->genProof(fproofC12a, publics, &c12aSteps);
 
         TimerStopAndLog(STARK_C12_A_PROOF_BATCH_PROOF);
+        TimerStart(STARK_JSON_GENERATION_BATCH_PROOF_C12A);
 
         // Save the proof & zkinproof
         nlohmann::ordered_json jProofc12a = fproofC12a.proofs.proof2json();
@@ -535,6 +536,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         rootC[3] = to_string(recursive2Verkey["constRoot"][3]);
         zkinC12a["publics"] = publicStarkJson;
         zkinC12a["rootC"] = rootC;
+        TimerStopAndLog(STARK_JSON_GENERATION_BATCH_PROOF_C12A);
 
         CommitPolsStarks cmPolsRecursive1(pAddress, (1 << starksRecursive1->starkInfo.starkStruct.nBits));
         CircomRecursive1::getCommitedPols(&cmPolsRecursive1, config.recursive1Verifier, config.recursive1Exec, zkinC12a, (1 << starksRecursive1->starkInfo.starkStruct.nBits));
