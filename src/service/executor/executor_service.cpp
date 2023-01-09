@@ -213,8 +213,7 @@ using grpc::Status;
     if (proverRequest.result != ZKR_SUCCESS)
     {
         cerr << "Error: ExecutorServiceImpl::ProcessBatch() detected proverRequest.result=" << proverRequest.result << "=" << zkresult2string(proverRequest.result) << endl;
-        TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
-        return Status::CANCELLED;
+        response->set_error(zkresult2error(proverRequest.result));
     }
     
     response->set_cumulative_gas_used(proverRequest.fullTracer.finalTrace.cumulative_gas_used);
@@ -472,6 +471,13 @@ using grpc::Status;
 
 ::executor::v1::Error ExecutorServiceImpl::zkresult2error (zkresult &result)
 {
+    if (result == ZKR_SUCCESS) return ::executor::v1::ERROR_NO_ERROR;
+    if (result == ZKR_SM_MAIN_OOC_ARITH) return ::executor::v1::ERROR_OUT_OF_COUNTERS_ARITH;
+    if (result == ZKR_SM_MAIN_OOC_BINARY) return ::executor::v1::ERROR_OUT_OF_COUNTERS_BINARY;
+    if (result == ZKR_SM_MAIN_OOC_KECCAK_F) return ::executor::v1::ERROR_OUT_OF_COUNTERS_KECCAK;
+    if (result == ZKR_SM_MAIN_OOC_MEM_ALIGN) return ::executor::v1::ERROR_OUT_OF_COUNTERS_MEM;
+    if (result == ZKR_SM_MAIN_OOC_PADDING_PG) return ::executor::v1::ERROR_OUT_OF_COUNTERS_PADDING;
+    if (result == ZKR_SM_MAIN_OOC_POSEIDON_G) return ::executor::v1::ERROR_OUT_OF_COUNTERS_POSEIDON;
     if (result == ZKR_SM_MAIN_BATCH_L2_DATA_TOO_BIG) return ::executor::v1::ERROR_BATCH_DATA_TOO_BIG;
     return ::executor::v1::ERROR_UNSPECIFIED;
 }
