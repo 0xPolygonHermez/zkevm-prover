@@ -15,13 +15,16 @@ int main()
 
     StarkInfo starkInfo(config, config.zkevmStarkInfo);
 
-    Starks starks(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo});
 
-    uint64_t polBits = starks.starkInfo.starkStruct.steps[starks.starkInfo.starkStruct.steps.size() - 1].nBits;
-    FRIProof fproof((1 << polBits), FIELD_EXTENSION, starks.starkInfo.starkStruct.steps.size(), starks.starkInfo.evMap.size(), starks.starkInfo.nPublics);
+    uint64_t polBits = starkInfo.starkStruct.steps[starkInfo.starkStruct.steps.size() - 1].nBits;
+    FRIProof fproof((1 << polBits), FIELD_EXTENSION, starkInfo.starkStruct.steps.size(), starkInfo.evMap.size(), starkInfo.nPublics);
 
     void *pCommit = copyFile("config/zkevm/zkevm.commit", starkInfo.nCm1 * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
-    void *pAddress = (void *)calloc(starkInfo.mapTotalN, sizeof(uint64_t));
+    void *pAddress = (void *)calloc(starkInfo.mapTotalN + (starkInfo.mapSectionsN.section[eSection::cm1_n] * (1 << starkInfo.starkStruct.nBits) * FIELD_EXTENSION ), sizeof(uint64_t));
+
+        Starks starks(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo},pAddress);
+
+
     std::memcpy(pAddress, pCommit, starkInfo.nCm1 * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
 
     Goldilocks::Element publicInputs[47] = {
@@ -79,7 +82,7 @@ int main()
         publicStarkJson[i] = Goldilocks::toString(publicInputs[i]);
     }
     ZkevmSteps zkevmSteps;
-    starks.genProof(pAddress, fproof, &publicInputs[0], &zkevmSteps);
+    starks.genProof(fproof, &publicInputs[0], &zkevmSteps);
 
     nlohmann::ordered_json jProof = fproof.proofs.proof2json();
     nlohmann::json zkin = proof2zkinStark(jProof);
