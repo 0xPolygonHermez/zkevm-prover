@@ -31,6 +31,7 @@ public:
     uint64_t retDataLengthOffset;
     uint64_t newAccInputHashOffset;
     uint64_t oldNumBatchOffset;
+    uint64_t newNumBatchOffset;
     uint64_t newLocalExitRootOffset;
     uint64_t depthOffset;
     uint64_t gasRefundOffset;
@@ -54,6 +55,7 @@ public:
             retDataLengthOffset(0),
             newAccInputHashOffset(0),
             oldNumBatchOffset(0),
+            newNumBatchOffset(0),
             newLocalExitRootOffset(0),
             depthOffset(0),
             gasRefundOffset(0),

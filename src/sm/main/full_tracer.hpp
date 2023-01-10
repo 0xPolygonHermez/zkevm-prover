@@ -29,7 +29,7 @@ public:
 class Opcode
 {
 public:
-    uint64_t remaining_gas;
+    uint64_t gas;
     int64_t gas_cost;
     string state_root;
     uint64_t depth;
@@ -46,7 +46,7 @@ public:
     vector<string> return_data;
     struct timeval startTime;
     uint64_t duration;
-    Opcode() : remaining_gas(0), gas_cost(0), depth(0), pc(0), op(0), gas_refund(0), memory_size(0), startTime({0,0}), duration(0) {};
+    Opcode() : gas(0), gas_cost(0), depth(0), pc(0), op(0), gas_refund(0), memory_size(0), startTime({0,0}), duration(0) {};
 };
 
 class Log
@@ -76,24 +76,14 @@ public:
     string batch;
     string output;
     uint64_t nonce;
-    mpz_class gasPrice;
+    mpz_class gas_price;
     uint64_t chainId;
     string old_state_root;
-    //string newStateRoot;
     uint64_t execution_time; // In us
     string error;
     vector<Log> logs;
     TxTraceContext() : gas(0), gas_used(0), nonce(0), chainId(0), execution_time(0) {};
 };
-
-/*class TxTrace
-{
-public:
-    string to;
-    TxTraceContext context;
-    vector<Opcode> steps;
-    TxTrace() : to("0x00") {};
-};*/
 
 class CallTrace
 {
@@ -125,19 +115,15 @@ class FinalTrace
 {
 public:
     bool bInitialized;
-    //string batchHash;
-    //string old_state_root;
     string new_state_root;
     string new_local_exit_root;
     string newAccInputHash;
     string new_acc_input_hash;
     uint64_t numBatch;
-    //uint64_t new_batch_num;
-    //uint64_t timestamp;
-    //string sequencerAddr;
     uint64_t cumulative_gas_used;
     vector<Response> responses;
-    FinalTrace() : bInitialized(false), numBatch(0), /*new_batch_num(0), timestamp(0),*/ cumulative_gas_used(0) {};
+    string error;
+    FinalTrace() : bInitialized(false), numBatch(0), cumulative_gas_used(0) {};
 };
 
 class FullTracer
@@ -187,20 +173,20 @@ public:
 
     FullTracer & operator =(const FullTracer & other)
     {
-        depth = other.depth;
-        initGas = other.initGas;
-        deltaStorage = other.deltaStorage;
-        finalTrace = other.finalTrace;
-        txGAS = other.txGAS;
-        txCount = other.txCount;
-        txTime = other.txTime;
-        info = other.info;
-        fullStack = other.fullStack;
-        accBatchGas = other.accBatchGas;
-        logs = other.logs;
-        call_trace = other.call_trace;
+        depth           = other.depth;
+        initGas         = other.initGas;
+        deltaStorage    = other.deltaStorage;
+        finalTrace      = other.finalTrace;
+        txGAS           = other.txGAS;
+        txCount         = other.txCount;
+        txTime          = other.txTime;
+        info            = other.info;
+        fullStack       = other.fullStack;
+        accBatchGas     = other.accBatchGas;
+        logs            = other.logs;
+        call_trace      = other.call_trace;
         execution_trace = other.execution_trace;
-        lastError = other.lastError;
+        lastError       = other.lastError;
         return *this;
     }
 };
