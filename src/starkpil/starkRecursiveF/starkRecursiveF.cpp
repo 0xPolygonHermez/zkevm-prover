@@ -598,8 +598,8 @@ void StarkRecursiveF::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::E
         Polinomial::mulElement(x, 0, x, 0, (Goldilocks::Element &)Goldilocks::w(starkInfo.starkStruct.nBits + extendBits));
     }
 
-    Polinomial::batchInverse(xDivXSubXi, xDivXSubXi);
-    Polinomial::batchInverse(xDivXSubWXi, xDivXSubWXi);
+    Polinomial::batchInverseParallel(xDivXSubXi, xDivXSubXi);
+    Polinomial::batchInverseParallel(xDivXSubWXi, xDivXSubWXi);
 
     Polinomial x1(1, FIELD_EXTENSION);
     *x1[0] = Goldilocks::shift();
