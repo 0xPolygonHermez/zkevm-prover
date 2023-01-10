@@ -169,7 +169,7 @@ inline void getRegFromCtx(Context &ctx, tReg reg, mpz_class &result)
     cmd.reg = reg;
     CommandResult cr;
     eval_getReg(ctx, cmd, cr);
-    cr2scalar(ctx.fr, cr, result);
+    cr2scalar(ctx, cr, result);
 }
 
 inline uint64_t getCurrentTime (void)
@@ -243,7 +243,7 @@ void FullTracer::handleEvent(Context &ctx, const RomCommand &cmd)
     }
     if (cmd.params.size() == 0)
     {
-        cerr << "FullTracer::handleEvent() got an invalid event with cmd.params.size()==0 cmd.function=" << function2String(cmd.function) << endl;
+        cerr << "Error: FullTracer::handleEvent() got an invalid event with cmd.params.size()==0 cmd.function=" << function2String(cmd.function) << endl;
         exitProcess();
     }
     if (cmd.params[0]->varName == "onError")
@@ -283,7 +283,7 @@ void FullTracer::handleEvent(Context &ctx, const RomCommand &cmd)
         onOpcode(ctx, cmd);
         return;
     }
-    cerr << "FullTracer::handleEvent() got an invalid event cmd.params[0]->varName=" << cmd.params[0]->varName << " cmd.function=" << function2String(cmd.function) << endl;
+    cerr << "Error: FullTracer::handleEvent() got an invalid event cmd.params[0]->varName=" << cmd.params[0]->varName << " cmd.function=" << function2String(cmd.function) << endl;
     exitProcess();
 }
 
@@ -295,7 +295,7 @@ void FullTracer::onError(Context &ctx, const RomCommand &cmd)
     // Check params size
     if (cmd.params.size() != 2)
     {
-        cerr << "FullTracer::onError() got an invalid cmd.params.size()=" << cmd.params.size() << endl;
+        cerr << "Error: FullTracer::onError() got an invalid cmd.params.size()=" << cmd.params.size() << endl;
         exitProcess();
     }
 
@@ -547,7 +547,7 @@ void FullTracer::onUpdateStorage(Context &ctx, const RomCommand &cmd)
 
     if (deltaStorage.find(depth) == deltaStorage.end())
     {
-        cerr << "FullTracer::onUpdateStorage() did not found deltaStorage of depth=" << depth << endl;
+        cerr << "Error: FullTracer::onUpdateStorage() did not found deltaStorage of depth=" << depth << endl;
         exitProcess();
     }
 

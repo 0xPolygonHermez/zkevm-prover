@@ -88,7 +88,7 @@ using grpc::Status;
     }
     catch (const std::exception &e)
     {
-        cerr << "StateDBServiceImpl::Set() exception: " << e.what() << endl;
+        cerr << "Error: StateDBServiceImpl::Set() exception: " << e.what() << endl;
         return Status::CANCELLED;
     }
 #ifdef LOG_STATEDB_SERVICE
@@ -163,7 +163,7 @@ using grpc::Status;
     }
     catch (const std::exception &e)
     {
-        cerr << "StateDBServiceImpl::Get() exception: " << e.what() << endl;
+        cerr << "Error: StateDBServiceImpl::Get() exception: " << e.what() << endl;
         return Status::CANCELLED;
     }
 #ifdef LOG_STATEDB_SERVICE
@@ -203,7 +203,7 @@ using grpc::Status;
     }
     catch (const std::exception &e)
     {
-        cerr << "StateDBServiceImpl::SetProgram() exception: " << e.what() << endl;
+        cerr << "Error: StateDBServiceImpl::SetProgram() exception: " << e.what() << endl;
         return Status::CANCELLED;
     }
 #ifdef LOG_STATEDB_SERVICE
@@ -237,7 +237,7 @@ using grpc::Status;
     }
     catch (const std::exception &e)
     {
-        cerr << "StateDBServiceImpl::GetProgram() exception: " << e.what() << endl;
+        cerr << "Error: StateDBServiceImpl::GetProgram() exception: " << e.what() << endl;
         return Status::CANCELLED;
     }
 #ifdef LOG_STATEDB_SERVICE
@@ -263,7 +263,7 @@ using grpc::Status;
     }
     catch (const std::exception &e)
     {
-        cerr << "StateDBServiceImpl::LoadDB() exception: " << e.what() << endl;
+        cerr << "Error: StateDBServiceImpl::LoadDB() exception: " << e.what() << endl;
         return Status::CANCELLED;
     }
 #ifdef LOG_STATEDB_SERVICE
@@ -297,7 +297,7 @@ using grpc::Status;
     }
     catch (const std::exception &e)
     {
-        cerr << "StateDBServiceImpl::Flush() exception: " << e.what() << endl;
+        cerr << "Error: StateDBServiceImpl::Flush() exception: " << e.what() << endl;
         return Status::CANCELLED;
     }
 #ifdef LOG_STATEDB_SERVICE

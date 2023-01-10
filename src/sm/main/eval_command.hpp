@@ -50,10 +50,10 @@ public:
 void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 
 // Converts a returned command result into a field element
-void cr2fe (Goldilocks &fr, const CommandResult &cr, Goldilocks::Element &fe);
+void cr2fe (Context &ctx, const CommandResult &cr, Goldilocks::Element &fe);
 
 // Converts a returned command result into a scalar
-void cr2scalar (Goldilocks &fr, const CommandResult &cr, mpz_class &s);
+void cr2scalar (Context &ctx, const CommandResult &cr, mpz_class &s);
 
 // Forwar declarations of internal operation functions
 void eval_number              (Context &ctx, const RomCommand &cmd, CommandResult &cr);
