@@ -7,7 +7,7 @@ bool ProcessBatchCache::Read (ProverRequest & proverRequest)
     lock();
 
 #ifdef LOG_PROCESS_BATCH_CACHE
-    cerr << "--> ProcessBatchCache::Read() writes=" << writes << endl;
+    cout << "--> ProcessBatchCache::Read() writes=" << writes << endl;
 #endif
 
     for (uint64_t i=0; i<cache.size(); i++)
@@ -20,7 +20,7 @@ bool ProcessBatchCache::Read (ProverRequest & proverRequest)
             readsFound++;
 
 #ifdef LOG_PROCESS_BATCH_CACHE
-            cerr << "<-- ProcessBatchCache::read() found i=" << i << " writes=" << writes << " readsFound=" << readsFound << " readsNotFound=" << readsNotFound << endl;
+            cout << "<-- ProcessBatchCache::read() found i=" << i << " writes=" << writes << " readsFound=" << readsFound << " readsNotFound=" << readsNotFound << endl;
 #endif
             unlock();
             return true;
@@ -30,7 +30,7 @@ bool ProcessBatchCache::Read (ProverRequest & proverRequest)
     readsNotFound++;
 
 #ifdef LOG_PROCESS_BATCH_CACHE
-    cerr << "<-- ProcessBatchCache::read() not found writes=" << writes << " readsFound=" << readsFound << " readsNotFound=" << readsNotFound << endl;
+    cout << "<-- ProcessBatchCache::read() not found writes=" << writes << " readsFound=" << readsFound << " readsNotFound=" << readsNotFound << endl;
 #endif
 
     unlock();
@@ -48,7 +48,7 @@ void ProcessBatchCache::Write (const ProverRequest & proverRequest)
     lock();
 
 #ifdef LOG_PROCESS_BATCH_CACHE
-    cerr << "--> ProcessBatchCache::Write() writes=" << writes << " readsFound=" << readsFound << " readsNotFound=" << readsNotFound << endl;
+    cout << "--> ProcessBatchCache::Write() writes=" << writes << " readsFound=" << readsFound << " readsNotFound=" << readsNotFound << endl;
 #endif
 
     if (cache.size() < PROCESS_BATCH_CACHE_MAX_ITEMS)
@@ -74,7 +74,7 @@ void ProcessBatchCache::Write (const ProverRequest & proverRequest)
     writes++;
 
 #ifdef LOG_PROCESS_BATCH_CACHE
-    cerr << "<-- ProcessBatchCache::Write() writes=" << writes << " readsFound=" << readsFound << " readsNotFound=" << readsNotFound << endl;
+    cout << "<-- ProcessBatchCache::Write() writes=" << writes << " readsFound=" << readsFound << " readsNotFound=" << readsNotFound << endl;
 #endif
 
     unlock();

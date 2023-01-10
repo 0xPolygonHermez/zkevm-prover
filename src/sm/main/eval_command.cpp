@@ -52,7 +52,7 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             case f_saveContractBytecode:            return eval_saveContractBytecode(ctx, cmd, cr);
             case f_beforeLast:                      return eval_beforeLast(ctx, cmd, cr);
             default:
-                cerr << "Error: evalCommand() found invalid function=" << cmd.function << " zkPC=" << *ctx.pZKPC << endl;
+                cerr << "Error: evalCommand() found invalid function=" << cmd.function << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
                 exitProcess();
         }
     }
@@ -87,7 +87,7 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         case op_if:             return eval_if(ctx, cmd, cr);
         case op_getMemValue:    return eval_getMemValue(ctx, cmd, cr);
         default:
-            cerr << "Error: evalCommand() found invalid operation=" << op2String(cmd.op) << " zkPC=" << *ctx.pZKPC << endl;
+            cerr << "Error: evalCommand() found invalid operation=" << op2String(cmd.op) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
             exitProcess();
     }
 }
@@ -109,14 +109,14 @@ void eval_declareVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check the variable name
     if (cmd.varName == "")
     {
-        cerr << "Error: eval_declareVar() Variable name not found" << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_declareVar() Variable name not found" << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 
     // Check that this variable does not exists
     if ( (cmd.varName[0] != '_') && (ctx.vars.find(cmd.varName) != ctx.vars.end()) )
     {
-        cerr << "Error: eval_declareVar() Variable already declared: " << cmd.varName << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_declareVar() Variable already declared: " << cmd.varName << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -140,7 +140,7 @@ void eval_getVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check the variable name
     if (cmd.varName == "")
     {
-        cerr << "Error: eval_getVar() Variable name not found" << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_getVar() Variable name not found" << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -149,7 +149,7 @@ void eval_getVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     std::unordered_map<std::string, mpz_class>::iterator it = ctx.vars.find(cmd.varName);
     if (it == ctx.vars.end())
     {
-        cerr << "Error: eval_getVar() Undefined variable: " << cmd. varName << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_getVar() Undefined variable: " << cmd. varName << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 
@@ -171,7 +171,7 @@ void eval_setVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     // Check that tag contains a values array
     if (cmd.values.size() == 0) {
-        cerr << "Error: eval_setVar() could not find array values in setVar command" << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_setVar() could not find array values in setVar command" << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -181,7 +181,7 @@ void eval_setVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_string)
     {
-        cerr << "Error: eval_setVar() unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_setVar() unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -191,7 +191,7 @@ void eval_setVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     std::unordered_map<std::string, mpz_class>::iterator it = ctx.vars.find(varName);
     if (it == ctx.vars.end())
     {
-        cerr << "Error: eval_setVar() Undefined variable: " << varName << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_setVar() Undefined variable: " << varName << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 
@@ -200,7 +200,7 @@ void eval_setVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get the field element value from the command result
     mpz_class auxScalar;
-    cr2scalar(ctx.fr, cr, auxScalar);
+    cr2scalar(ctx, cr, auxScalar);
 
     // Store the value as the new variable value
     it->second = auxScalar;
@@ -233,7 +233,7 @@ void eval_left (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         }
         default:
         {
-            cerr << "Error: eval_left() invalid left expression, op: " << op2String(cmd.op) << " zkPC=" << *ctx.pZKPC << endl;
+            cerr << "Error: eval_left() invalid left expression, op: " << op2String(cmd.op) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
             exitProcess();
         }
     }
@@ -333,7 +333,7 @@ void eval_getReg (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             cr.u64 = ctx.fr.toU64(ctx.pols.HASHPOS[*ctx.pStep]);
             break;
         default:
-            cerr << "Error: eval_getReg() Invalid register: " << reg2string(cmd.reg) << " zkPC=" << *ctx.pZKPC << endl;
+            cerr << "Error: eval_getReg() Invalid register: " << reg2string(cmd.reg) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
             exitProcess();
     }
 }
@@ -342,7 +342,7 @@ void eval_getReg (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 /* Command result conversion */
 /*****************************/
 
-void cr2fe (Goldilocks &fr, const CommandResult &cr, Goldilocks::Element &fe)
+void cr2fe (Context &ctx, const CommandResult &cr, Goldilocks::Element &fe)
 {
     switch (cr.type)
     {
@@ -350,15 +350,15 @@ void cr2fe (Goldilocks &fr, const CommandResult &cr, Goldilocks::Element &fe)
             fe = cr.fe;
             return;
         case crt_scalar:
-            scalar2fe(fr, cr.scalar, fe);
+            scalar2fe(ctx.fr, cr.scalar, fe);
             return;
         default:
-            cerr << "Error: cr2fe() unexpected type: " << cr.type << endl;
+            cerr << "Error: cr2fe() unexpected type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
             exitProcess();
     }
 }
 
-void cr2scalar (Goldilocks &fr, const CommandResult &cr, mpz_class &s)
+void cr2scalar (Context &ctx, const CommandResult &cr, mpz_class &s)
 {
     switch (cr.type)
     {
@@ -366,7 +366,7 @@ void cr2scalar (Goldilocks &fr, const CommandResult &cr, mpz_class &s)
             s = cr.scalar;
             return;
         case crt_fe:
-            fe2scalar(fr, s, cr.fe);
+            fe2scalar(ctx.fr, s, cr.fe);
             return;
         case crt_u64:
             s = cr.u64;
@@ -378,7 +378,7 @@ void cr2scalar (Goldilocks &fr, const CommandResult &cr, mpz_class &s)
             s = cr.u16;
             return;
         default:
-            cerr << "Error: cr2scalar() unexpected type: " << cr.type << endl;
+            cerr << "Error: cr2scalar() unexpected type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
             exitProcess();
     }
 }
@@ -393,18 +393,18 @@ void eval_add(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_add() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_add() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
-    cr2scalar(ctx.fr, cr, a);
+    cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
     mpz_class b;
-    cr2scalar(ctx.fr, cr, b);
+    cr2scalar(ctx, cr, b);
 
     cr.type = crt_scalar;
     cr.scalar = a + b;
@@ -416,18 +416,18 @@ void eval_sub(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_sub() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_sub() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
-    cr2scalar(ctx.fr, cr, a);
+    cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
     mpz_class b;
-    cr2scalar(ctx.fr, cr, b);
+    cr2scalar(ctx, cr, b);
 
     cr.type = crt_scalar;
     cr.scalar = a - b;
@@ -439,14 +439,14 @@ void eval_neg(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 1)
     {
-        cerr << "Error: eval_neg() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_neg() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
-    cr2scalar(ctx.fr, cr, a);
+    cr2scalar(ctx, cr, a);
 
     cr.type = crt_scalar;
     cr.scalar = -a;
@@ -458,18 +458,18 @@ void eval_mul(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_mul() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_mul() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
-    cr2scalar(ctx.fr, cr, a);
+    cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
     mpz_class b;
-    cr2scalar(ctx.fr, cr, b);
+    cr2scalar(ctx, cr, b);
 
     mpz_class mask256;
     mpz_class one(1);
@@ -485,18 +485,18 @@ void eval_div(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_div() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_div() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
-    cr2scalar(ctx.fr, cr, a);
+    cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
     mpz_class b;
-    cr2scalar(ctx.fr, cr, b);
+    cr2scalar(ctx, cr, b);
 
     cr.type = crt_scalar;
     cr.scalar = a / b;
@@ -508,18 +508,18 @@ void eval_mod(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_mod() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_mod() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
-    cr2scalar(ctx.fr, cr, a);
+    cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
     mpz_class b;
-    cr2scalar(ctx.fr, cr, b);
+    cr2scalar(ctx, cr, b);
 
     cr.type = crt_scalar;
     cr.scalar = a % b;
@@ -535,18 +535,18 @@ void eval_logical_or (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_logical_or() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_logical_or() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
-    cr2scalar(ctx.fr, cr, a);
+    cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
     mpz_class b;
-    cr2scalar(ctx.fr, cr, b);
+    cr2scalar(ctx, cr, b);
 
     cr.type = crt_scalar;
     cr.scalar = (a || b) ? 1 : 0;
@@ -558,18 +558,18 @@ void eval_logical_and (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_logical_and() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_logical_and() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
-    cr2scalar(ctx.fr, cr, a);
+    cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
     mpz_class b;
-    cr2scalar(ctx.fr, cr, b);
+    cr2scalar(ctx, cr, b);
 
     cr.type = crt_scalar;
     cr.scalar = (a && b) ? 1 : 0;
@@ -581,18 +581,18 @@ void eval_logical_gt (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_logical_gt() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_logical_gt() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
-    cr2scalar(ctx.fr, cr, a);
+    cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
     mpz_class b;
-    cr2scalar(ctx.fr, cr, b);
+    cr2scalar(ctx, cr, b);
 
     cr.type = crt_scalar;
     cr.scalar = (a > b) ? 1 : 0;
@@ -604,18 +604,18 @@ void eval_logical_ge (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_logical_ge() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_logical_ge() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
-    cr2scalar(ctx.fr, cr, a);
+    cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
     mpz_class b;
-    cr2scalar(ctx.fr, cr, b);
+    cr2scalar(ctx, cr, b);
 
     cr.type = crt_scalar;
     cr.scalar = (a >= b) ? 1 : 0;
@@ -627,18 +627,18 @@ void eval_logical_lt (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_logical_lt() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_logical_lt() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
-    cr2scalar(ctx.fr, cr, a);
+    cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
     mpz_class b;
-    cr2scalar(ctx.fr, cr, b);
+    cr2scalar(ctx, cr, b);
 
     cr.type = crt_scalar;
     cr.scalar = (a < b) ? 1 : 0;
@@ -650,18 +650,18 @@ void eval_logical_le (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_logical_le() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_logical_le() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
-    cr2scalar(ctx.fr, cr, a);
+    cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
     mpz_class b;
-    cr2scalar(ctx.fr, cr, b);
+    cr2scalar(ctx, cr, b);
 
     cr.type = crt_scalar;
     cr.scalar = (a <= b) ? 1 : 0;
@@ -673,18 +673,18 @@ void eval_logical_eq (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_logical_eq() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_logical_eq() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
-    cr2scalar(ctx.fr, cr, a);
+    cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
     mpz_class b;
-    cr2scalar(ctx.fr, cr, b);
+    cr2scalar(ctx, cr, b);
 
     cr.type = crt_scalar;
     cr.scalar = (a == b) ? 1 : 0;
@@ -696,18 +696,18 @@ void eval_logical_ne (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_logical_ne() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_logical_ne() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
-    cr2scalar(ctx.fr, cr, a);
+    cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
     mpz_class b;
-    cr2scalar(ctx.fr, cr, b);
+    cr2scalar(ctx, cr, b);
 
     cr.type = crt_scalar;
     cr.scalar = (a != b) ? 1 : 0;
@@ -719,14 +719,14 @@ void eval_logical_not (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 1)
     {
-        cerr << "Error: eval_logical_not() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_logical_not() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
-    cr2scalar(ctx.fr, cr, a);
+    cr2scalar(ctx, cr, a);
 
     cr.type = crt_scalar;
     cr.scalar = (a) ? 0 : 1;
@@ -742,18 +742,18 @@ void eval_bit_and (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_bit_and() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_bit_and() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
-    cr2scalar(ctx.fr, cr, a);
+    cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
     mpz_class b;
-    cr2scalar(ctx.fr, cr, b);
+    cr2scalar(ctx, cr, b);
 
     cr.type = crt_scalar;
     cr.scalar = a & b;
@@ -765,18 +765,18 @@ void eval_bit_or (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_bit_or() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_bit_or() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
-    cr2scalar(ctx.fr, cr, a);
+    cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
     mpz_class b;
-    cr2scalar(ctx.fr, cr, b);
+    cr2scalar(ctx, cr, b);
 
     cr.type = crt_scalar;
     cr.scalar = a | b;
@@ -788,18 +788,18 @@ void eval_bit_xor (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_bit_xor() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_bit_xor() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
-    cr2scalar(ctx.fr, cr, a);
+    cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
     mpz_class b;
-    cr2scalar(ctx.fr, cr, b);
+    cr2scalar(ctx, cr, b);
 
     cr.type = crt_scalar;
     cr.scalar = a ^ b;
@@ -811,14 +811,14 @@ void eval_bit_not (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 1)
     {
-        cerr << "Error: eval_bit_not() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_bit_not() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
-    cr2scalar(ctx.fr, cr, a);
+    cr2scalar(ctx, cr, a);
 
     cr.type = crt_scalar;
     cr.scalar = ~a;
@@ -830,18 +830,18 @@ void eval_bit_shl (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_bit_shl() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_bit_shl() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
-    cr2scalar(ctx.fr, cr, a);
+    cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
     mpz_class b;
-    cr2scalar(ctx.fr, cr, b);
+    cr2scalar(ctx, cr, b);
 
     cr.type = crt_scalar;
     cr.scalar = (a << b.get_ui());
@@ -853,18 +853,18 @@ void eval_bit_shr (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_bit_shr() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_bit_shr() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
-    cr2scalar(ctx.fr, cr, a);
+    cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
     mpz_class b;
-    cr2scalar(ctx.fr, cr, b);
+    cr2scalar(ctx, cr, b);
 
     cr.type = crt_scalar;
     cr.scalar = (a >> b.get_ui());
@@ -880,20 +880,20 @@ void eval_if (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 3)
     {
-        cerr << "Error: eval_if() found invalid number of values=" << cmd.values.size() << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_if() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
     mpz_class a;
-    cr2scalar(ctx.fr, cr, a);
+    cr2scalar(ctx, cr, a);
 
     if (a)
     {
         evalCommand(ctx, *cmd.values[1], cr);
         mpz_class b;
-        cr2scalar(ctx.fr, cr, b);
+        cr2scalar(ctx, cr, b);
 
         cr.type = crt_scalar;
         cr.scalar = b;
@@ -902,7 +902,7 @@ void eval_if (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     {
         evalCommand(ctx, *cmd.values[2], cr);
         mpz_class c;
-        cr2scalar(ctx.fr, cr, c);
+        cr2scalar(ctx, cr, c);
 
         cr.type = crt_scalar;
         cr.scalar = c;
@@ -930,7 +930,7 @@ void eval_getGlobalExitRoot(Context &ctx, const RomCommand &cmd, CommandResult &
     // Check parameters list size
     if (cmd.params.size() != 0)
     {
-        cerr << "Error: eval_getGlobalExitRoot() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_getGlobalExitRoot() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -946,7 +946,7 @@ void eval_getSequencerAddr(Context &ctx, const RomCommand &cmd, CommandResult &c
     // Check parameters list size
     if (cmd.params.size() != 0)
     {
-        cerr << "Error: eval_getSequencerAddr() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_getSequencerAddr() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -962,7 +962,7 @@ void eval_getTxsLen(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check parameters list size
     if (cmd.params.size() != 0)
     {
-        cerr << "Error: eval_getTxsLen() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_getTxsLen() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -985,7 +985,7 @@ void eval_getTxs(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check parameters list size
     if (cmd.params.size() != 2)
     {
-        cerr << "Error: eval_getTxs() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_getTxs() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -994,7 +994,7 @@ void eval_getTxs(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     evalCommand(ctx, *cmd.params[0], cr);
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar) {
-        cerr << "Error: eval_getTxs() 1 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_getTxs() 1 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1005,7 +1005,7 @@ void eval_getTxs(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_getTxs() 2 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_getTxs() 2 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1026,7 +1026,7 @@ void eval_addrOp(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check parameters list size
     if (cmd.params.size() != 1)
     {
-        cerr << "Error: eval_addrOp() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_addrOp() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1036,7 +1036,7 @@ void eval_addrOp(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_fe)
     {
-        cerr << "Error: eval_addrOp() unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_addrOp() unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1064,7 +1064,7 @@ void eval_eventLog(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check parameters list size
     if (cmd.params.size() < 1)
     {
-        cerr << "Error: eval_eventLog() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_eventLog() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1089,7 +1089,7 @@ void eval_getTimestamp(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check parameters list size
     if (cmd.params.size() != 0)
     {
-        cerr << "Error: eval_getTimestamp() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_getTimestamp() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1116,7 +1116,7 @@ void eval_cond (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check parameters list size
     if (cmd.params.size() != 1)
     {
-        cerr << "Error: eval_cond() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_cond() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1126,7 +1126,7 @@ void eval_cond (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_cond() unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_cond() unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1159,7 +1159,7 @@ void eval_exp (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check parameters list size
     if (cmd.params.size() != 2)
     {
-        cerr << "Error: eval_exp() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_exp() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1169,7 +1169,7 @@ void eval_exp (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_exp() 1 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_exp() 1 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1180,7 +1180,7 @@ void eval_exp (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_exp() 2 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_exp() 2 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1205,7 +1205,7 @@ void eval_bitwise_and (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check parameters list size
     if (cmd.params.size() != 2)
     {
-        cerr << "Error: eval_bitwise_and() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_bitwise_and() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1215,7 +1215,7 @@ void eval_bitwise_and (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_bitwise_and() 1 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_bitwise_and() 1 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1226,7 +1226,7 @@ void eval_bitwise_and (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_bitwise_and() 2 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_bitwise_and() 2 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1242,7 +1242,7 @@ void eval_bitwise_or (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check parameters list size
     if (cmd.params.size() != 2)
     {
-        cerr << "Error: eval_bitwise_or() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_bitwise_or() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1252,7 +1252,7 @@ void eval_bitwise_or (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_bitwise_or() 1 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_bitwise_or() 1 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1263,7 +1263,7 @@ void eval_bitwise_or (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_bitwise_or() 2 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_bitwise_or() 2 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1279,7 +1279,7 @@ void eval_bitwise_xor (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check parameters list size
     if (cmd.params.size() != 2)
     {
-        cerr << "Error: eval_bitwise_xor() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_bitwise_xor() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1289,7 +1289,7 @@ void eval_bitwise_xor (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_bitwise_xor() 1 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_bitwise_xor() 1 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1300,7 +1300,7 @@ void eval_bitwise_xor (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_bitwise_xor() 2 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_bitwise_xor() 2 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1316,7 +1316,7 @@ void eval_bitwise_not (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check parameters list size
     if (cmd.params.size() != 1)
     {
-        cerr << "Error: eval_bitwise_not() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_bitwise_not() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1326,7 +1326,7 @@ void eval_bitwise_not (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_bitwise_not() unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_bitwise_not() unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1346,7 +1346,7 @@ void eval_beforeLast (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check parameters list size
     if (cmd.params.size() != 0)
     {
-        cerr << "Error: eval_beforeLast() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_beforeLast() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1380,7 +1380,7 @@ void eval_comp_lt (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check parameters list size
     if (cmd.params.size() != 2)
     {
-        cerr << "Error: eval_comp_lt() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_comp_lt() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1390,7 +1390,7 @@ void eval_comp_lt (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_comp_lt() 1 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_comp_lt() 1 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1401,7 +1401,7 @@ void eval_comp_lt (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_comp_lt() 2 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_comp_lt() 2 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1417,7 +1417,7 @@ void eval_comp_gt (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check parameters list size
     if (cmd.params.size() != 2)
     {
-        cerr << "Error: eval_comp_gt() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_comp_gt() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1427,7 +1427,7 @@ void eval_comp_gt (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_comp_gt() 1 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_comp_gt() 1 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1438,7 +1438,7 @@ void eval_comp_gt (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_comp_gt() 2 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_comp_gt() 2 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1454,7 +1454,7 @@ void eval_comp_eq (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check parameters list size
     if (cmd.params.size() != 2)
     {
-        cerr << "Error: eval_comp_eq() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_comp_eq() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1464,7 +1464,7 @@ void eval_comp_eq (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_comp_eq() 1 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_comp_eq() 1 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1475,7 +1475,7 @@ void eval_comp_eq (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_comp_eq() 2 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_comp_eq() 2 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1491,7 +1491,7 @@ void eval_loadScalar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check parameters list size
     if (cmd.params.size() != 1)
     {
-        cerr << "Error: eval_loadScalar() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_loadScalar() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1509,7 +1509,7 @@ void eval_getGlobalExitRootManagerAddr (Context &ctx, const RomCommand &cmd, Com
     // Check parameters list size
     if (cmd.params.size() != 0)
     {
-        cerr << "Error: eval_getGlobalExitRootManagerAddr() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_getGlobalExitRootManagerAddr() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1529,7 +1529,7 @@ void eval_storeLog (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check parameters list size
     if (cmd.params.size() != 3)
     {
-        cerr << "Error: eval_storeLog() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_storeLog() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1539,7 +1539,7 @@ void eval_storeLog (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_storeLog() param 0 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_storeLog() param 0 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1550,7 +1550,7 @@ void eval_storeLog (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_storeLog() param 1 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_storeLog() param 1 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1561,7 +1561,7 @@ void eval_storeLog (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_storeLog() param 2 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_storeLog() param 2 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1606,7 +1606,7 @@ void eval_log (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check parameters list size
     if (cmd.params.size() != 1)
     {
-        cerr << "Error: eval_log() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_log() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1624,7 +1624,7 @@ void eval_log (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             scalarLog = cr.u64;
             break;
         default:
-            cerr << "Error: eval_storeLog() 1 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+            cerr << "Error: eval_storeLog() 1 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
             exitProcess();
     }
 
@@ -1654,7 +1654,7 @@ void eval_memAlignWR_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check parameters list size
     if (cmd.params.size() != 3)
     {
-        cerr << "Error: eval_memAlignWR_W0() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_memAlignWR_W0() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1664,7 +1664,7 @@ void eval_memAlignWR_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_memAlignWR_W0() 0 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_memAlignWR_W0() 0 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1675,7 +1675,7 @@ void eval_memAlignWR_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_memAlignWR_W0() 1 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_memAlignWR_W0() 1 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1685,7 +1685,7 @@ void eval_memAlignWR_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     evalCommand(ctx, *cmd.params[2], cr);
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar) {
-        cerr << "Error: eval_memAlignWR_W0() 2 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_memAlignWR_W0() 2 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1705,7 +1705,7 @@ void eval_memAlignWR_W1 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check parameters list size
     if (cmd.params.size() != 3)
     {
-        cerr << "Error: eval_memAlignWR_W1() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_memAlignWR_W1() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1715,7 +1715,7 @@ void eval_memAlignWR_W1 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_memAlignWR_W1() 0 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_memAlignWR_W1() 0 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1726,7 +1726,7 @@ void eval_memAlignWR_W1 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_memAlignWR_W1() 1 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_memAlignWR_W1() 1 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1737,7 +1737,7 @@ void eval_memAlignWR_W1 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_memAlignWR_W1() 2 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_memAlignWR_W1() 2 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1757,7 +1757,7 @@ void eval_memAlignWR8_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr
     // Check parameters list size
     if (cmd.params.size() != 3)
     {
-        cerr << "Error: eval_memAlignWR8_W0() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_memAlignWR8_W0() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1767,7 +1767,7 @@ void eval_memAlignWR8_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_memAlignWR8_W0() 0 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_memAlignWR8_W0() 0 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1778,7 +1778,7 @@ void eval_memAlignWR8_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_memAlignWR8_W0() 1 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_memAlignWR8_W0() 1 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1789,7 +1789,7 @@ void eval_memAlignWR8_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_memAlignWR8_W0() 2 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_memAlignWR8_W0() 2 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1813,7 +1813,7 @@ void eval_saveContractBytecode (Context &ctx, const RomCommand &cmd, CommandResu
     // Check parameters list size
     if (cmd.params.size() != 1)
     {
-        cerr << "Error: eval_saveContractBytecode() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_saveContractBytecode() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1823,7 +1823,7 @@ void eval_saveContractBytecode (Context &ctx, const RomCommand &cmd, CommandResu
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_saveContractBytecode() 0 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_saveContractBytecode() 0 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1850,7 +1850,7 @@ void eval_getBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check parameters list size
     if (cmd.params.size() != 2 && cmd.params.size() != 3)
     {
-        cerr << "Error: eval_getBytecode() invalid number of parameters function " << function2String(cmd.function) <<" zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_getBytecode() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1860,7 +1860,7 @@ void eval_getBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_getBytecode() unexpected command 0 result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_getBytecode() unexpected command 0 result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1871,7 +1871,7 @@ void eval_getBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_u64)
     {
-        cerr << "Error: eval_getBytecode() unexpected command 1 result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_getBytecode() unexpected command 1 result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1885,7 +1885,7 @@ void eval_getBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
         if (cr.type != crt_scalar)
         {
-            cerr << "Error: eval_getBytecode() unexpected command 2 result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+            cerr << "Error: eval_getBytecode() unexpected command 2 result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
             exitProcess();
         }
 #endif
@@ -1893,7 +1893,7 @@ void eval_getBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
         if (len > 32)
         {
-            cerr << "Error: eval_getBytecode() len>32 len=" << len << " zkPC=" << *ctx.pZKPC << endl;
+            cerr << "Error: eval_getBytecode() len>32 len=" << len << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
             exitProcess();
         }
 #endif
@@ -1913,7 +1913,7 @@ void eval_getBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         zkresult zkResult = ctx.pStateDB->getProgram(key, bytecode, ctx.proverRequest.dbReadLog);
         if (zkResult != ZKR_SUCCESS)
         {
-            cerr << "Error: eval_getBytecode() failed calling ctx.pStateDB->getProgram() with key=" << contractHash << " zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
+            cerr << "Error: eval_getBytecode() failed calling ctx.pStateDB->getProgram() with key=" << contractHash << " zkResult=" << zkResult << "=" << zkresult2string(zkResult) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
             cr.type = crt_fea;
             cr.fea0 = ctx.fr.zero();
             cr.fea1 = ctx.fr.zero();
@@ -1951,7 +1951,7 @@ void eval_inverseFpEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check parameters list size
     if (cmd.params.size() != 1)
     {
-        cerr << "Error: eval_inverseFpEc() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_inverseFpEc() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1961,7 +1961,7 @@ void eval_inverseFpEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_inverseFpEc() 0 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_inverseFpEc() 0 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1969,7 +1969,7 @@ void eval_inverseFpEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     ctx.fec.fromString(a, cr.scalar.get_str(16), 16);
     if (ctx.fec.isZero(a))
     {
-        cerr << "Error: eval_inverseFpEc() Division by zero" << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_inverseFpEc() Division by zero" << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 
@@ -1986,7 +1986,7 @@ void eval_inverseFnEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check parameters list size
     if (cmd.params.size() != 1)
     {
-        cerr << "Error: eval_inverseFnEc() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_inverseFnEc() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -1996,7 +1996,7 @@ void eval_inverseFnEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_inverseFnEc() 0 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_inverseFnEc() 0 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -2004,7 +2004,7 @@ void eval_inverseFnEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     ctx.fnec.fromMpz(a, cr.scalar.get_mpz_t());
     if (ctx.fnec.isZero(a))
     {
-        cerr << "Error: eval_inverseFnEc() Division by zero" << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_inverseFnEc() Division by zero" << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 
@@ -2097,7 +2097,7 @@ void eval_sqrtFpEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check parameters list size
     if (cmd.params.size() != 1)
     {
-        cerr << "Error: eval_sqrtFpEc() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_sqrtFpEc() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -2107,7 +2107,7 @@ void eval_sqrtFpEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_sqrtFpEc() 0 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_sqrtFpEc() 0 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -2169,7 +2169,7 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
     // Check parameters list size
     if (cmd.params.size() != (dbl ? 2 : 4))
     {
-        cerr << "Error: eval_AddPointEc() invalid number of parameters function " << function2String(cmd.function) << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_AddPointEc() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -2181,7 +2181,7 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_AddPointEc() 0 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_AddPointEc() 0 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -2193,7 +2193,7 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        cerr << "Error: eval_AddPointEc() 1 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+        cerr << "Error: eval_AddPointEc() 1 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 #endif
@@ -2213,7 +2213,7 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
         if (cr.type != crt_scalar)
         {
-            cerr << "Error: eval_AddPointEc() 2 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+            cerr << "Error: eval_AddPointEc() 2 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
             exitProcess();
         }
 #endif
@@ -2224,7 +2224,7 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
         if (cr.type != crt_scalar)
         {
-            cerr << "Error: eval_AddPointEc() 3 unexpected command result type: " << cr.type << " zkPC=" << *ctx.pZKPC << endl;
+            cerr << "Error: eval_AddPointEc() 3 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
             exitProcess();
         }
 #endif

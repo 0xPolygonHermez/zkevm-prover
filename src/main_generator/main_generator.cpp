@@ -250,7 +250,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    StateDBInterface *pStateDB = StateDBClientFactory::createStateDBClient(fr, mainExecutor.config);\n";
     code += "    if (pStateDB == NULL)\n";
     code += "    {\n";
-    code += "        cerr << \"Error: " + functionName + "() failed calling StateDBClientFactory::createStateDBClient()\" << endl;\n";
+    code += "        cerr << \"Error: " + functionName + "() failed calling StateDBClientFactory::createStateDBClient() uuid=\" << proverRequest.uuid << endl;\n";
     code += "        exitProcess();\n";
     code += "    }\n\n";
 
@@ -358,7 +358,6 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "\n";
 
     code += "    uint64_t zkPC = 0; // Zero-knowledge program counter\n";
-    code += "    uint64_t step = 0; // Step, number of polynomial evaluation\n";
     code += "    uint64_t i=0; // Step, as it is used internally, set to 0 in fast mode to reuse the same evaluation all the time\n";
     if (!bFastMode)
         code += "    uint64_t nexti=1; // Next step, as it is used internally, set to 0 in fast mode to reuse the same evaluation all the time\n";
@@ -387,7 +386,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    {\n";
     code += "        if (!bProcessBatch)\n";
     code += "        {\n";
-    code += "            cerr << \"Error: MainExecutor::execute() found proverRequest.input.bNoCounters=true and bProcessBatch=false\" << endl;\n";
+    code += "            cerr << \"Error: MainExecutor::execute() found proverRequest.input.bNoCounters=true and bProcessBatch=false uuid=\" << proverRequest.uuid << endl;\n";
     code += "            exitProcess();\n";
     code += "        }\n";
     code += "        N_Max = mainExecutor.N_NoCounters;\n";
@@ -456,7 +455,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        if (cr.zkResult != ZKR_SUCCESS)\n";
             code += "        {\n";
             code += "            proverRequest.result = cr.zkResult;\n";
-            code += "            cerr << \"Error: Main exec failed calling evalCommand() before result=\" << proverRequest.result << \"=\" << zkresult2string(proverRequest.result) << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+            code += "            cerr << \"Error: Main exec failed calling evalCommand() before result=\" << proverRequest.result << \"=\" << zkresult2string(proverRequest.result) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            return;\n";
             code += "        }\n";
             code += "    }\n";
@@ -700,12 +699,20 @@ string generate(const json &rom, const string &functionName, const string &fileN
             }
             if (rom["program"][zkPC].contains("ind") && (rom["program"][zkPC]["ind"]==1))
             {
-                code += "    fr.toS32(addrRel, pols.E0[" + string(bFastMode?"0":"i") + "]);\n";
+                code += "    if (!fr.toS32(addrRel, pols.E0[" + string(bFastMode?"0":"i") + "]))\n";
+                code += "    {\n";
+                code += "        cerr << \"Error: failed calling fr.toS32(sp, pols.E0[i])\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
+                code += "        exitProcess();\n";
+                code += "    }\n";
                 bAddrRel = true;
             }
             if (rom["program"][zkPC].contains("indRR") && (rom["program"][zkPC]["indRR"]==1))
             {
-                code += "    fr.toS32(addrRel, pols.RR[" + string(bFastMode?"0":"i") + "]);\n";
+                code += "    if ( !fr.toS32(addrRel, pols.RR[" + string(bFastMode?"0":"i") + "]))\n";
+                code += "    {\n";
+                code += "        cerr << \"Error: failed calling fr.toS32(sp, pols.RR[i])\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
+                code += "        exitProcess();\n";
+                code += "    }\n";
                 bAddrRel = true;
             }
             if (rom["program"][zkPC].contains("offset") && (rom["program"][zkPC]["offset"] != 0))
@@ -720,7 +727,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             {
                 code += "    if (!fr.toS32(sp, pols.SP[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: failed calling fr.toS32(sp, pols.SP[i])\" << endl;\n";
+                code += "        cerr << \"Error: failed calling fr.toS32(sp, pols.SP[i])\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        exitProcess();\n";
                 code += "    }\n";
                 if (bAddrRel || bOffset)
@@ -734,14 +741,14 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    // If addrRel is possitive, and the sum is too big, fail\n";
                 code += "    if (addrRel>=0x20000 || ((rom.line[" + to_string(zkPC) + "].isMem==1) && (addrRel >= 0x10000)))\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: addrRel too big addrRel=\" << addrRel << \" zkPC=\" << " + to_string(zkPC) + " << \" inst=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+                code += "        cerr << \"Error: addrRel too big addrRel=\" << addrRel << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS;\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    // If addrRel is negative, fail\n";
                 code += "    if (addrRel < 0)\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: addrRel<0 \" << addrRel << \" zkPC=\" << " + to_string(zkPC) + " << \" inst=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+                code += "        cerr << \"Error: addrRel<0 \" << addrRel << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS;\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -972,7 +979,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    zkResult = pStateDB->get(oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);\n";
                     code += "    if (zkResult != ZKR_SUCCESS)\n";
                     code += "    {\n";
-                    code += "        cerr << \"MainExecutor::Execute() failed calling pStateDB->get() result=\" << zkresult2string(zkResult) << endl;\n";
+                    code += "        cerr << \"Error: MainExecutor::execute() failed calling pStateDB->get() result=\" << zkresult2string(zkResult) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        proverRequest.result = zkResult;\n";
                     code += "        return;\n";
                     code += "    }\n";
@@ -1092,7 +1099,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    zkResult = pStateDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.input.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);\n";
                     code += "    if (zkResult != ZKR_SUCCESS)\n";
                     code += "    {\n";
-                    code += "        cerr << \"MainExecutor::Execute() failed calling pStateDB->set() result=\" << zkresult2string(zkResult) << endl;\n";
+                    code += "        cerr << \"Error: MainExecutor::execute() failed calling pStateDB->set() result=\" << zkresult2string(zkResult) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        proverRequest.result = zkResult;\n";
                     code += "        return;\n";
                     code += "    }\n";
@@ -1131,7 +1138,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "    size = fr.toU64(pols.D0[" + string(bFastMode?"0":"i") + "]);\n";
                         code += "    if (size>32)\n";
                         code += "    {\n";
-                        code += "        cerr << \"Error: Invalid size>32 for hashK 1: pols.D0[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16) << \" size=\" << size << \" step=\" << step << \" zkPC=" + to_string(zkPC) + " instruction=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+                        code += "        cerr << \"Error: Invalid size>32 for hashK 1: pols.D0[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16) << \" size=\" << size << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                         code += "        exitProcess();\n";
                         code += "    }\n\n";
                     }
@@ -1144,7 +1151,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    fr.toS64(iPos, pols.HASHPOS[" + string(bFastMode?"0":"i") + "]);\n";
                     code += "    if (iPos < 0)\n";
                     code += "    {\n";
-                    code += "        cerr << \"Error: Invalid pos<0 for HashK 1: pols.HASHPOS[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.HASHPOS[" + string(bFastMode?"0":"i") + "], 16) << \" pos=\" << iPos << \" step=\" << step << \" zkPC=" + to_string(zkPC) + " instruction=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+                    code += "        cerr << \"Error: Invalid pos<0 for HashK 1: pols.HASHPOS[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.HASHPOS[" + string(bFastMode?"0":"i") + "], 16) << \" pos=\" << iPos << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        exitProcess();\n";
                     code += "    }\n";
                     code += "    pos = iPos;\n\n";
@@ -1152,7 +1159,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    // Check that pos+size do not exceed data size\n";
                     code += "    if ( (pos+size) > hashIterator->second.data.size())\n";
                     code += "    {\n";
-                    code += "        cerr << \"Error: hashK 1 invalid size of hash: pos=\" << pos << \" size=\" << size << \" data.size=\" << ctx.hashK[addr].data.size() << endl;\n";
+                    code += "        cerr << \"Error: hashK 1 invalid size of hash: pos=\" << pos << \" size=\" << size << \" data.size=\" << ctx.hashK[addr].data.size() << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
                     code += "        return;\n";
                     code += "    }\n";
@@ -1181,7 +1188,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    hashIterator = ctx.hashK.find(addr);\n";
                     code += "    if (hashIterator == ctx.hashK.end())\n";
                     code += "    {\n";
-                    code += "        cerr << \"Error: hashKDigest 1: digest not defined for addr=\" << addr << endl;\n";
+                    code += "        cerr << \"Error: hashKDigest 1: digest not defined for addr=\" << addr << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
                     code += "        return;\n";
                     code += "    }\n";
@@ -1189,7 +1196,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    // If digest was not calculated, this is an error\n";
                     code += "    if (!hashIterator->second.lenCalled)\n";
                     code += "    {\n";
-                    code += "        cerr << \"Error: hashKDigest 1: digest not calculated for addr=\" << addr << \".  Call hashKLen to finish digest.\" << endl;\n";
+                    code += "        cerr << \"Error: hashKDigest 1: digest not calculated for addr=\" << addr << \".  Call hashKLen to finish digest.\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
                     code += "        return;\n";
                     code += "    }\n";
@@ -1224,7 +1231,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "    size = fr.toU64(pols.D0[" + string(bFastMode?"0":"i") + "]);\n";
                         code += "    if (size>32)\n";
                         code += "    {\n";
-                        code += "        cerr << \"Error: Invalid size>32 for hashP 1: pols.D0[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16) << \" size=\" << size << \" step=\" << step << \" zkPC=" + to_string(zkPC) + " instruction=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+                        code += "        cerr << \"Error: Invalid size>32 for hashP 1: pols.D0[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16) << \" size=\" << size << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                         code += "        exitProcess();\n";
                         code += "    }\n\n";
                     }
@@ -1237,7 +1244,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    fr.toS64(iPos, pols.HASHPOS[" + string(bFastMode?"0":"i") + "]);\n";
                     code += "    if (iPos < 0)\n";
                     code += "    {\n";
-                    code += "        cerr << \"Error: Invalid pos<0 for HashP 1: pols.HASHPOS[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.HASHPOS[" + string(bFastMode?"0":"i") + "], 16) << \" pos=\" << iPos << \" step=\" << step << \" zkPC=" + to_string(zkPC) + " instruction=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+                    code += "        cerr << \"Error: Invalid pos<0 for HashP 1: pols.HASHPOS[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.HASHPOS[" + string(bFastMode?"0":"i") + "], 16) << \" pos=\" << iPos << \" step=\" << i << \" zkPC=" + to_string(zkPC) + " instruction=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
                     code += "        exitProcess();\n";
                     code += "    }\n";
                     code += "    pos = iPos;\n\n";
@@ -1245,7 +1252,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    // Check that pos+size do not exceed data size\n";
                     code += "    if ( (pos+size) > hashIterator->second.data.size())\n";
                     code += "    {\n";
-                    code += "        cerr << \"Error: hashP 1 invalid size of hash: pos=\" << pos << \" size=\" << size << \" data.size=\" << ctx.hashP[addr].data.size() << endl;\n";
+                    code += "        cerr << \"Error: hashP 1 invalid size of hash: pos=\" << pos << \" size=\" << size << \" data.size=\" << ctx.hashP[addr].data.size() << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
                     code += "        return;\n";
                     code += "    }\n";
@@ -1270,14 +1277,14 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    hashIterator = ctx.hashP.find(addr);\n";
                     code += "    if (hashIterator == ctx.hashP.end())\n";
                     code += "    {\n";
-                    code += "        cerr << \"Error: hashPDigest 1: digest not defined\" << endl;\n";
+                    code += "        cerr << \"Error: hashPDigest 1: digest not defined\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
                     code += "        return;\n";
                     code += "    }\n";
                     code += "    // If digest was not calculated, this is an error\n";
                     code += "    if (!hashIterator->second.lenCalled)\n";
                     code += "    {\n";
-                    code += "        cerr << \"Error: hashPDigest 1: digest not calculated.  Call hashPLen to finish digest.\" << endl;\n";
+                    code += "        cerr << \"Error: hashPDigest 1: digest not calculated.  Call hashPLen to finish digest.\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
                     code += "        return;\n";
                     code += "    }\n";
@@ -1380,7 +1387,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    fea2scalar(fr, offsetScalar, pols.C0[" + string(bFastMode?"0":"i") + "], pols.C1[" + string(bFastMode?"0":"i") + "], pols.C2[" + string(bFastMode?"0":"i") + "], pols.C3[" + string(bFastMode?"0":"i") + "], pols.C4[" + string(bFastMode?"0":"i") + "], pols.C5[" + string(bFastMode?"0":"i") + "], pols.C6[" + string(bFastMode?"0":"i") + "], pols.C7[" + string(bFastMode?"0":"i") + "]);\n";
                     code += "    if (offsetScalar<0 || offsetScalar>32)\n";
                     code += "    {\n";
-                    code += "        cerr << \"Error: MemAlign out of range offset=\" << offsetScalar.get_str() << endl;\n";
+                    code += "        cerr << \"Error: MemAlign out of range offset=\" << offsetScalar.get_str() << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN;\n";
                     code += "        return;\n";
                     code += "    }\n";
@@ -1479,7 +1486,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    if (cr.zkResult != ZKR_SUCCESS)\n";
                     code += "    {\n";
                     code += "        proverRequest.result = cr.zkResult;\n";
-                    code += "        cerr << \"Error: Main exec failed calling evalCommand() result=\" << proverRequest.result << \"=\" << zkresult2string(proverRequest.result) << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+                    code += "        cerr << \"Error: Main exec failed calling evalCommand() result=\" << proverRequest.result << \"=\" << zkresult2string(proverRequest.result) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        return;\n";
                     code += "    }\n\n";
 
@@ -1540,7 +1547,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "        fi7 = fr.zero();\n";
                     code += "        break;\n";
                     code += "    default:\n";
-                    code += "        cerr << \"Error: unexpected command result type: \" << cr.type << endl;\n";
+                    code += "        cerr << \"Error: unexpected command result type: \" << cr.type << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        exitProcess();\n";
                     code += "    }\n";
                 }
@@ -1669,9 +1676,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "         (!fr.equal(pols.A6[" + string(bFastMode?"0":"i") + "], op6)) ||\n";
             code += "         (!fr.equal(pols.A7[" + string(bFastMode?"0":"i") + "], op7)) )\n";
             code += "    {\n";
-            code += "        cerr << \"Error: ROM assert failed: AN!=opN ln: \" << " + to_string(zkPC) + " << endl;\n";
-            code += "        cout << \"A: \" << fr.toString(pols.A7[" + string(bFastMode?"0":"i") + "], 16) << \":\" << fr.toString(pols.A6[" + string(bFastMode?"0":"i") + "], 16) << \":\" << fr.toString(pols.A5[" + string(bFastMode?"0":"i") + "], 16) << \":\" << fr.toString(pols.A4[" + string(bFastMode?"0":"i") + "], 16) << \":\" << fr.toString(pols.A3[" + string(bFastMode?"0":"i") + "], 16) << \":\" << fr.toString(pols.A2[" + string(bFastMode?"0":"i") + "], 16) << \":\" << fr.toString(pols.A1[" + string(bFastMode?"0":"i") + "], 16) << \":\" << fr.toString(pols.A0[" + string(bFastMode?"0":"i") + "], 16) << endl;\n";
-            code += "        cout << \"OP:\" << fr.toString(op7, 16) << \":\" << fr.toString(op6, 16) << \":\" << fr.toString(op5, 16) << \":\" << fr.toString(op4,16) << \":\" << fr.toString(op3, 16) << \":\" << fr.toString(op2, 16) << \":\" << fr.toString(op1, 16) << \":\" << fr.toString(op0, 16) << endl;\n";
+            code += "        cerr << \"Error: ROM assert failed: AN!=opN\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
+            code += "        cerr << \"A: \" << fr.toString(pols.A7[" + string(bFastMode?"0":"i") + "], 16) << \":\" << fr.toString(pols.A6[" + string(bFastMode?"0":"i") + "], 16) << \":\" << fr.toString(pols.A5[" + string(bFastMode?"0":"i") + "], 16) << \":\" << fr.toString(pols.A4[" + string(bFastMode?"0":"i") + "], 16) << \":\" << fr.toString(pols.A3[" + string(bFastMode?"0":"i") + "], 16) << \":\" << fr.toString(pols.A2[" + string(bFastMode?"0":"i") + "], 16) << \":\" << fr.toString(pols.A1[" + string(bFastMode?"0":"i") + "], 16) << \":\" << fr.toString(pols.A0[" + string(bFastMode?"0":"i") + "], 16) << endl;\n";
+            code += "        cerr << \"OP:\" << fr.toString(op7, 16) << \":\" << fr.toString(op6, 16) << \":\" << fr.toString(op5, 16) << \":\" << fr.toString(op4,16) << \":\" << fr.toString(op3, 16) << \":\" << fr.toString(op2, 16) << \":\" << fr.toString(op1, 16) << \":\" << fr.toString(op0, 16) << endl;\n";
             code += "        exitProcess();\n";
             code += "    }\n";
             if (!bFastMode)
@@ -1757,7 +1764,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "             (!fr.equal(memIterator->second.fe6, op6)) ||\n";
                 code += "             (!fr.equal(memIterator->second.fe7, op7)) )\n";
                 code += "        {\n";
-                code += "            cerr << \"Error: Memory Read does not match\" << endl;\n";
+                code += "            cerr << \"Error: Memory Read does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "            proverRequest.result = ZKR_SM_MAIN_MEMORY;\n";
                 code += "            return;\n";
                 code += "        }\n";
@@ -1773,7 +1780,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "             (!fr.isZero(op6)) ||\n";
                 code += "             (!fr.isZero(op7)) )\n";
                 code += "        {\n";
-                code += "            cerr << \"Error: Memory Read does not match (op!=0)\" << endl;\n";
+                code += "            cerr << \"Error: Memory Read does not match (op!=0)\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "            proverRequest.result = ZKR_SM_MAIN_MEMORY;\n";
                 code += "            return;\n";
                 code += "        }\n";
@@ -1852,7 +1859,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    zkResult = pStateDB->get(oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);\n";
             code += "    if (zkResult != ZKR_SUCCESS)\n";
             code += "    {\n";
-            code += "        cerr << \"MainExecutor::Execute() failed calling pStateDB->get() result=\" << zkresult2string(zkResult) << endl;\n";
+            code += "        cerr << \"Error: MainExecutor::execute() failed calling pStateDB->get() result=\" << zkresult2string(zkResult) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        proverRequest.result = zkResult;\n";
             code += "        return;\n";
             code += "    }\n";
@@ -1874,7 +1881,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    fea2scalar(fr, opScalar, op0, op1, op2, op3, op4, op5, op6, op7);\n";
             code += "    if (smtGetResult.value != opScalar)\n";
             code += "    {\n";
-            code += "        cerr << \"Error: Storage read does not match: smtGetResult.value=\" << smtGetResult.value.get_str() << \" opScalar=\" << opScalar.get_str() << endl;\n";
+            code += "        cerr << \"Error: Storage read does not match: smtGetResult.value=\" << smtGetResult.value.get_str() << \" opScalar=\" << opScalar.get_str() << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE;\n";
             code += "        return;\n";
             code += "    }\n";
@@ -1966,7 +1973,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        zkResult = pStateDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.input.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);\n";
             code += "        if (zkResult != ZKR_SUCCESS)\n";
             code += "        {\n";
-            code += "            cerr << \"MainExecutor::Execute() failed calling pStateDB->set() result=\" << zkresult2string(zkResult) << endl;\n";
+            code += "            cerr << \"Error: MainExecutor::execute() failed calling pStateDB->set() result=\" << zkresult2string(zkResult) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            proverRequest.result = zkResult;\n";
             code += "            return;\n";
             code += "        }\n";
@@ -1993,7 +2000,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "         !fr.equal(ctx.lastSWrite.newRoot[2], oldRoot[2]) ||\n";
             code += "         !fr.equal(ctx.lastSWrite.newRoot[3], oldRoot[3]) )\n";
             code += "    {\n";
-            code += "        cerr << \"Error: Storage write does not match; i: \" << i << \" zkPC=" + to_string(zkPC) + "\" << \n";
+            code += "        cerr << \"Error: Storage write does not match; i: \" << i << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << \n";
             code += "            \" ctx.lastSWrite.newRoot: \" << fr.toString(ctx.lastSWrite.newRoot[3], 16) << \":\" << fr.toString(ctx.lastSWrite.newRoot[2], 16) << \":\" << fr.toString(ctx.lastSWrite.newRoot[1], 16) << \":\" << fr.toString(ctx.lastSWrite.newRoot[0], 16) <<\n";
             code += "            \" oldRoot: \" << fr.toString(oldRoot[3], 16) << \":\" << fr.toString(oldRoot[2], 16) << \":\" << fr.toString(oldRoot[1], 16) << \":\" << fr.toString(oldRoot[0], 16) << endl;\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE;\n";
@@ -2006,7 +2013,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "         !fr.equal(ctx.lastSWrite.newRoot[2], fea[2]) ||\n";
             code += "         !fr.equal(ctx.lastSWrite.newRoot[3], fea[3]) )\n";
             code += "    {\n";
-            code += "        cerr << \"Error: Storage write does not match: ctx.lastSWrite.newRoot=\" << fea2string(fr, ctx.lastSWrite.newRoot) << \" op=\" << fea << endl;\n";
+            code += "        cerr << \"Error: Storage write does not match: ctx.lastSWrite.newRoot=\" << fea2string(fr, ctx.lastSWrite.newRoot) << \" op=\" << fea << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE;\n";
             code += "        return;\n";
             code += "    }\n";
@@ -2053,7 +2060,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    size = fr.toU64(pols.D0[" + string(bFastMode?"0":"i") + "]);\n";
                 code += "    if (size>32)\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: Invalid size>32 for hashK 2: pols.D0[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16) << \" size=\" << size << \" step=\" << step << \" zkPC=" + to_string(zkPC) + " instruction=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+                code += "        cerr << \"Error: Invalid size>32 for hashK 2: pols.D0[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16) << \" size=\" << size << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        exitProcess();\n";
                 code += "    }\n\n";
             }
@@ -2066,7 +2073,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    fr.toS64(iPos, pols.HASHPOS[" + string(bFastMode?"0":"i") + "]);\n";
             code += "    if (iPos < 0)\n";
             code += "    {\n";
-            code += "        cerr << \"Error: Invalid pos<0 for HashK 2: pols.HASHPOS[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.HASHPOS[" + string(bFastMode?"0":"i") + "], 16) << \" pos=\" << iPos << \" step=\" << step << \" zkPC=" + to_string(zkPC) + " instruction=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+            code += "        cerr << \"Error: Invalid pos<0 for HashK 2: pols.HASHPOS[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.HASHPOS[" + string(bFastMode?"0":"i") + "], 16) << \" pos=\" << iPos << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        exitProcess();\n";
             code += "    }\n";
             code += "    pos = iPos;\n\n";
@@ -2085,7 +2092,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        }\n";
             code += "        else if (hashIterator->second.data.size() < (pos+j))\n";
             code += "        {\n";
-            code += "            cerr << \"Error: hashK 2: trying to insert data in a position:\" << (pos+j) << \" higher than current data size:\" << ctx.hashK[addr].data.size() << endl;\n";
+            code += "            cerr << \"Error: hashK 2: trying to insert data in a position:\" << (pos+j) << \" higher than current data size:\" << ctx.hashK[addr].data.size() << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
             code += "            return;\n";
             code += "        }\n";
@@ -2095,7 +2102,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "            bh = hashIterator->second.data[pos+j];\n";
             code += "            if (bm != bh)\n";
             code += "            {\n";
-            code += "                cerr << \"Error: HashK 2 bytes do not match: addr=\" << addr << \" pos+j=\" << pos+j << \" is bm=\" << bm << \" and it should be bh=\" << bh << endl;\n";
+            code += "                cerr << \"Error: HashK 2 bytes do not match: addr=\" << addr << \" pos+j=\" << pos+j << \" is bm=\" << bm << \" and it should be bh=\" << bh << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "                proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
             code += "                return;\n";
             code += "            }\n";
@@ -2106,7 +2113,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    paddingA = a >> (size*8);\n";
             code += "    if (paddingA != 0)\n";
             code += "    {\n";
-            code += "        cerr << \"Error: HashK 2 incoherent size=\" << size << \" a=\" << a.get_str(16) << \" paddingA=\" << paddingA.get_str(16) << \" step=\" << step << \" zkPC=" + to_string(zkPC) + " instruction=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+            code += "        cerr << \"Error: HashK 2 incoherent size=\" << size << \" a=\" << a.get_str(16) << \" paddingA=\" << paddingA.get_str(16) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        exitProcess();\n";
             code += "    }\n\n";
 
@@ -2116,7 +2123,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    {\n";
             code += "         if ( readsIterator->second != size )\n";
             code += "        {\n";
-            code += "            cerr << \"Error: HashK 2 different read sizes in the same position addr=\" << addr << \" pos=\" << pos << \" ctx.hashK[addr].reads[pos]=\" << ctx.hashK[addr].reads[pos] << \" size=\" << size << endl;\n";
+            code += "            cerr << \"Error: HashK 2 different read sizes in the same position addr=\" << addr << \" pos=\" << pos << \" ctx.hashK[addr].reads[pos]=\" << ctx.hashK[addr].reads[pos] << \" size=\" << size << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
             code += "            return;\n";
             code += "        }\n";
@@ -2155,7 +2162,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        // Check that length = 0\n";
             code += "        if (lm != 0)\n";
             code += "        {\n";
-            code += "            cerr << \"Error: hashKLen 2 hashK[addr] is empty but lm is not 0 addr=\" << addr << \" lm=\" << lm << endl;\n";
+            code += "            cerr << \"Error: hashKLen 2 hashK[addr] is empty but lm is not 0 addr=\" << addr << \" lm=\" << lm << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
             code += "            return;\n";
             code += "        }\n\n";
@@ -2171,7 +2178,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
             code += "    if (ctx.hashK[addr].lenCalled)\n";
             code += "    {\n";
-            code += "        cerr << \"Error: hashKLen 2 called more than once addr=\" << addr << \" zkPC=\" << " + to_string(zkPC) + " << \" rom line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+            code += "        cerr << \"Error: hashKLen 2 called more than once addr=\" << addr << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        exitProcess();\n";
             code += "    }\n";
             code += "    ctx.hashK[addr].lenCalled = true;\n";
@@ -2179,7 +2186,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    lh = hashIterator->second.data.size();\n";
             code += "    if (lm != lh)\n";
             code += "    {\n";
-            code += "        cerr << \"Error: hashKLen 2 length does not match addr=\" << addr << \" is lm=\" << lm << \" and it should be lh=\" << lh << endl;\n";
+            code += "        cerr << \"Error: hashKLen 2 length does not match addr=\" << addr << \" is lm=\" << lm << \" and it should be lh=\" << lh << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
             code += "        return;\n";
             code += "    }\n";
@@ -2217,7 +2224,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    hashIterator = ctx.hashK.find(addr);\n";
             code += "    if (hashIterator == ctx.hashK.end())\n";
             code += "    {\n";
-            code += "        cerr << \"Error: hashKDigest 2 could not find entry for addr=\" << addr << endl;\n";
+            code += "        cerr << \"Error: hashKDigest 2 could not find entry for addr=\" << addr << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
             code += "        return;\n";
             code += "    }\n";
@@ -2227,14 +2234,14 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
             code += "    if (dg != hashIterator->second.digest)\n";
             code += "    {\n";
-            code += "        cerr << \"Error: hashKDigest 2: Digest does not match op\" << endl;\n";
+            code += "        cerr << \"Error: hashKDigest 2: Digest does not match op\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
             code += "        return;\n";
             code += "    }\n";
 
             code += "    if (ctx.hashK[addr].digestCalled)\n";
             code += "    {\n";
-            code += "        cerr << \"Error: hashKDigest 2 called more than once addr=\" << addr << \" zkPC=\" << " + to_string(zkPC) + " << \" rom line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+            code += "        cerr << \"Error: hashKDigest 2 called more than once addr=\" << addr << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        exitProcess();\n";
             code += "    }\n";
             code += "    ctx.hashK[addr].digestCalled = true;\n";
@@ -2279,7 +2286,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    size = fr.toU64(pols.D0[" + string(bFastMode?"0":"i") + "]);\n";
                 code += "    if (size>32)\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: Invalid size>32 for hashP 2: pols.D0[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16) << \" size=\" << size << \" step=\" << step << \" zkPC=" + to_string(zkPC) + " instruction=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+                code += "        cerr << \"Error: Invalid size>32 for hashP 2: pols.D0[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16) << \" size=\" << size << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        exitProcess();\n";
                 code += "    }\n\n";
             }
@@ -2292,7 +2299,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    fr.toS64(iPos, pols.HASHPOS[" + string(bFastMode?"0":"i") + "]);\n";
             code += "    if (iPos < 0)\n";
             code += "    {\n";
-            code += "        cerr << \"Error: Invalid pos<0 for HashP 2: pols.HASHPOS[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.HASHPOS[" + string(bFastMode?"0":"i") + "], 16) << \" pos=\" << iPos << \" step=\" << step << \" zkPC=" + to_string(zkPC) + " instruction=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+            code += "        cerr << \"Error: Invalid pos<0 for HashP 2: pols.HASHPOS[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.HASHPOS[" + string(bFastMode?"0":"i") + "], 16) << \" pos=\" << iPos << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        exitProcess();\n";
             code += "    }\n";
             code += "    pos = iPos;\n\n";
@@ -2310,7 +2317,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        }\n";
             code += "        else if (hashIterator->second.data.size() < (pos+j))\n";
             code += "        {\n";
-            code += "            cerr << \"Error: hashP 2: trying to insert data in a position:\" << (pos+j) << \" higher than current data size:\" << ctx.hashP[addr].data.size() << endl;\n";
+            code += "            cerr << \"Error: hashP 2: trying to insert data in a position:\" << (pos+j) << \" higher than current data size:\" << ctx.hashP[addr].data.size() << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
             code += "            return;\n";
             code += "        }\n";
@@ -2320,7 +2327,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "            bh = hashIterator->second.data[pos+j];\n";
             code += "            if (bm != bh)\n";
             code += "            {\n";
-            code += "                cerr << \"Error: HashP 2 bytes do not match: addr=\" << addr << \" pos+j=\" << pos+j << \" is bm=\" << bm << \" and it should be bh=\" << bh << endl;\n";
+            code += "                cerr << \"Error: HashP 2 bytes do not match: addr=\" << addr << \" pos+j=\" << pos+j << \" is bm=\" << bm << \" and it should be bh=\" << bh << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "                proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
             code += "                return;\n";
             code += "            }\n";
@@ -2331,7 +2338,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    paddingA = a >> (size*8);\n";
             code += "    if (paddingA != 0)\n";
             code += "    {\n";
-            code += "        cerr << \"Error: HashP 2 incoherent size=\" << size << \" a=\" << a.get_str(16) << \" paddingA=\" << paddingA.get_str(16) << \" step=\" << step << \" zkPC=" + to_string(zkPC) + " instruction=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+            code += "        cerr << \"Error: HashP 2 incoherent size=\" << size << \" a=\" << a.get_str(16) << \" paddingA=\" << paddingA.get_str(16) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        exitProcess();\n";
             code += "    }\n\n";
 
@@ -2341,7 +2348,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    {\n";
             code += "        if ( readsIterator->second != size )\n";
             code += "        {\n";
-            code += "            cerr << \"Error: HashP 2 diferent read sizes in the same position addr=\" << addr << \" pos=\" << pos << endl;\n";
+            code += "            cerr << \"Error: HashP 2 diferent read sizes in the same position addr=\" << addr << \" pos=\" << pos << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
             code += "            return;\n";
             code += "        }\n";
@@ -2376,7 +2383,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        // Check that length = 0\n";
             code += "        if (lm != 0)\n";
             code += "        {\n";
-            code += "            cerr << \"Error: hashPLen 2 hashP[addr] is empty but lm is not 0 addr=\" << addr << \" lm=\" << lm << endl;\n";
+            code += "            cerr << \"Error: hashPLen 2 hashP[addr] is empty but lm is not 0 addr=\" << addr << \" lm=\" << lm << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
             code += "            return;\n";
             code += "        }\n\n";
@@ -2392,7 +2399,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
             code += "    if (ctx.hashP[addr].lenCalled)\n";
             code += "    {\n";
-            code += "        cerr << \"Error: hashPLen 2 called more than once addr=\" << addr << \" zkPC=\" << " + to_string(zkPC) + " << \" rom line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+            code += "        cerr << \"Error: hashPLen 2 called more than once addr=\" << addr << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        exitProcess();\n";
             code += "    }\n";
             code += "    ctx.hashP[addr].lenCalled = true;\n";
@@ -2400,7 +2407,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    lh = hashIterator->second.data.size();\n";
             code += "    if (lm != lh)\n";
             code += "    {\n";
-            code += "        cerr << \"Error: hashPLen 2 does not match addr=\" << addr << \" is lm=\" << lm << \" and it should be lh=\" << lh << endl;\n";
+            code += "        cerr << \"Error: hashPLen 2 does not match addr=\" << addr << \" is lm=\" << lm << \" and it should be lh=\" << lh << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
             code += "        return;\n";
             code += "    }\n";
@@ -2408,7 +2415,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    {\n";
             code += "        if (hashIterator->second.data.size() == 0)\n";
             code += "        {\n";
-            code += "            cerr << \"Error: hashPLen 2 found data empty\" << endl;\n";
+            code += "            cerr << \"Error: hashPLen 2 found data empty\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
             code += "            return;\n";
             code += "        }\n";
@@ -2426,7 +2433,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        Goldilocks::Element * pBuffer = new Goldilocks::Element[bufferSize];\n";
             code += "        if (pBuffer == NULL)\n";
             code += "        {\n";
-            code += "            cerr << \"Error: hashPLen 2 failed allocating memory of \" << bufferSize << \" field elements\" << endl;\n";
+            code += "            cerr << \"Error: hashPLen 2 failed allocating memory of \" << bufferSize << \" field elements\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            exitProcess();\n";
             code += "        }\n";
             code += "        for (uint64_t j=0; j<bufferSize; j++) pBuffer[j] = fr.zero();\n";
@@ -2455,7 +2462,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        zkResult = pStateDB->setProgram(result, hashIterator->second.data, proverRequest.input.bUpdateMerkleTree);\n";
             code += "        if (zkResult != ZKR_SUCCESS)\n";
             code += "        {\n";
-            code += "            cerr << \"MainExecutor::Execute() failed calling pStateDB->setProgram() result=\" << zkresult2string(zkResult) << endl;\n";
+            code += "            cerr << \"Error: MainExecutor::execute() failed calling pStateDB->setProgram() result=\" << zkresult2string(zkResult) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            proverRequest.result = zkResult;\n";
             code += "            return;\n";
             code += "        }\n";
@@ -2494,7 +2501,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        zkResult = pStateDB->getProgram(aux, hashValue.data, proverRequest.dbReadLog);\n";
             code += "        if (zkResult != ZKR_SUCCESS)\n";
             code += "        {\n";
-            code += "            cerr << \"MainExecutor::Execute() failed calling pStateDB->getProgram() result=\" << zkresult2string(zkResult) << endl;\n";
+            code += "            cerr << \"Error: MainExecutor::execute() failed calling pStateDB->getProgram() result=\" << zkresult2string(zkResult) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            proverRequest.result = zkResult;\n";
             code += "            return;\n";
             code += "        }\n";
@@ -2508,7 +2515,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
             code += "    if (ctx.hashP[addr].digestCalled)\n";
             code += "    {\n";
-            code += "        cerr << \"Error: hashPDigest 2 called more than once addr=\" << addr << \" zkPC=\" << " + to_string(zkPC) + " << \" rom line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+            code += "        cerr << \"Error: hashPDigest 2 called more than once addr=\" << addr << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        exitProcess();\n";
             code += "    }\n";
             code += "    ctx.hashP[addr].digestCalled = true;\n";
@@ -2518,7 +2525,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    // Check that digest equals op\n";
             code += "    if (dg != hashIterator->second.digest)\n";
             code += "    {\n";
-            code += "        cerr << \"Error: hashPDigest 2: ctx.hashP[addr].digest=\" << ctx.hashP[addr].digest.get_str(16) << \" does not match op=\" << dg.get_str(16) << endl;\n";
+            code += "        cerr << \"Error: hashPDigest 2: ctx.hashP[addr].digest=\" << ctx.hashP[addr].digest.get_str(16) << \" does not match op=\" << dg.get_str(16) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
             code += "        return;\n";
             code += "    }\n";
@@ -2560,7 +2567,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
                 code += "    // Check the condition\n";
                 code += "    if ( (A*B) + C != (D<<256) + op ) {\n";
-                code += "        cerr << \"Error: Arithmetic does not match: zkPC=" + to_string(zkPC) +"\" << endl;\n";
+                code += "        cerr << \"Error: Arithmetic does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        left = (A*B) + C;\n";
                 code += "        right = (D<<256) + op;\n";
                 code += "        cerr << \"(A*B) + C = \" << left.get_str(16) << endl;\n";
@@ -2678,7 +2685,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
                 code += "    if (!x3eq || !y3eq)\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: Arithmetic curve " + string(dbl?"dbl":"add") + " point does not match\" << endl;\n";
+                code += "        cerr << \"Error: Arithmetic curve " + string(dbl?"dbl":"add") + " point does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        cerr << \" x1=\" << x1.get_str() << endl;\n";
                 code += "        cerr << \" y1=\" << y1.get_str() << endl;\n";
                 code += "        cerr << \" x2=\" << x2.get_str() << endl;\n";
@@ -2727,7 +2734,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    expectedC = (a + b) & ScalarMask256;\n";
                 code += "    if (c != expectedC)\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: Binary ADD operation does not match zkPC=" + to_string(zkPC) + " instruction: \" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+                code += "        cerr << \"Error: Binary ADD operation does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -2758,7 +2765,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    expectedC = (a - b + ScalarTwoTo256) & ScalarMask256;\n";
                 code += "    if (c != expectedC)\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: Binary SUB operation does not match zkPC=" + to_string(zkPC) + " instruction: \" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+                code += "        cerr << \"Error: Binary SUB operation does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -2789,7 +2796,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    expectedC = (a < b);\n";
                 code += "    if (c != expectedC)\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: Binary LT operation does not match zkPC=" + to_string(zkPC) + " instruction: \" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+                code += "        cerr << \"Error: Binary LT operation does not match\"<< \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -2824,7 +2831,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    expectedC = (_a < _b);\n";
                 code += "    if (c != expectedC)\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: Binary SLT operation does not match zkPC=" + to_string(zkPC) + " instruction: \" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+                code += "        cerr << \"Error: Binary SLT operation does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
+                code += "        cerr << \"a=\" << a << \" b=\" << b << \" c=\" << c << \" _a=\" << _a << \" _b=\" << _b << \" expectedC=\" << expectedC << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -2855,7 +2863,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    expectedC = (a == b);\n";
                 code += "    if (c != expectedC)\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: Binary EQ operation does not match zkPC=" + to_string(zkPC) + " instruction: \" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+                code += "        cerr << \"Error: Binary EQ operation does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -2886,7 +2894,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    expectedC = (a & b);\n";
                 code += "    if (c != expectedC)\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: Binary AND operation does not match zkPC=" + to_string(zkPC) + " instruction: \" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+                code += "        cerr << \"Error: Binary AND operation does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -2918,7 +2926,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    expectedC = (a | b);\n";
                 code += "    if (c != expectedC)\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: Binary OR operation does not match zkPC=" + to_string(zkPC) + " instruction: \" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+                code += "        cerr << \"Error: Binary OR operation does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -2947,7 +2955,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    expectedC = (a ^ b);\n";
                 code += "    if (c != expectedC)\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: Binary XOR operation does not match zkPC=" + to_string(zkPC) + " instruction: \" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+                code += "        cerr << \"Error: Binary XOR operation does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -2989,7 +2997,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    fea2scalar(fr, offsetScalar, pols.C0[" + string(bFastMode?"0":"i") + "], pols.C1[" + string(bFastMode?"0":"i") + "], pols.C2[" + string(bFastMode?"0":"i") + "], pols.C3[" + string(bFastMode?"0":"i") + "], pols.C4[" + string(bFastMode?"0":"i") + "], pols.C5[" + string(bFastMode?"0":"i") + "], pols.C6[" + string(bFastMode?"0":"i") + "], pols.C7[" + string(bFastMode?"0":"i") + "]);\n";
             code += "    if (offsetScalar<0 || offsetScalar>32)\n";
             code += "    {\n";
-            code += "        cerr << \"Error: MemAlign out of range offset=\" << offsetScalar.get_str() << endl;\n";
+            code += "        cerr << \"Error: MemAlign out of range offset=\" << offsetScalar.get_str() << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN;\n";
             code += "        return;\n";
             code += "    }\n";
@@ -3008,7 +3016,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    _W1 = (m1 & (ScalarMask256 >> offset*8)) | ((v << (256 - offset*8)) & ScalarMask256);\n";
                 code += "    if ( (w0 != _W0) || (w1 != _W1) )\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: MemAlign w0, w1 invalid: w0=\" << w0.get_str(16) << \" w1=\" << w1.get_str(16) << \" _W0=\" << _W0.get_str(16) << \" _W1=\" << _W1.get_str(16) << \" m0=\" << m0.get_str(16) << \" m1=\" << m1.get_str(16) << \" offset=\" << offset << \" v=\" << v.get_str(16) << endl;\n";
+                code += "        cerr << \"Error: MemAlign w0, w1 invalid: w0=\" << w0.get_str(16) << \" w1=\" << w1.get_str(16) << \" _W0=\" << _W0.get_str(16) << \" _W1=\" << _W1.get_str(16) << \" m0=\" << m0.get_str(16) << \" m1=\" << m1.get_str(16) << \" offset=\" << offset << \" v=\" << v.get_str(16) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN;\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -3037,7 +3045,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    _W0 = (m0 & (byteMaskOn256 >> (offset*8))) | ((v & 0xFF) << ((31-offset)*8));\n";
                 code += "    if (w0 != _W0)\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: MemAlign w0 invalid: w0=\" << w0.get_str(16) << \" _W0=\" << _W0.get_str(16) << \" m0=\" << m0.get_str(16) << \" offset=\" << offset << \" v=\" << v.get_str(16) << endl;\n";
+                code += "        cerr << \"Error: MemAlign w0 invalid: w0=\" << w0.get_str(16) << \" _W0=\" << _W0.get_str(16) << \" m0=\" << m0.get_str(16) << \" offset=\" << offset << \" v=\" << v.get_str(16) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN;\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -3066,7 +3074,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    _V = leftV | rightV;\n";
                 code += "    if (v != _V)\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: MemAlign v invalid: v=\" << v.get_str(16) << \" _V=\" << _V.get_str(16) << \" m0=\" << m0.get_str(16) << \" m1=\" << m1.get_str(16) << \" offset=\" << offset << endl;\n";
+                code += "        cerr << \"Error: MemAlign v invalid: v=\" << v.get_str(16) << \" _V=\" << _V.get_str(16) << \" m0=\" << m0.get_str(16) << \" m1=\" << m1.get_str(16) << \" offset=\" << offset << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN;\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -3185,7 +3193,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "#ifdef CHECK_MAX_CNT_ASAP\n";
             code += "        if (fr.toU64(pols.cntArith[" + string(bFastMode?"0":"nexti") + "]) > mainExecutor.MAX_CNT_ARITH)\n";
             code += "        {\n";
-            code += "            cerr << \"Error: Main Executor found pols.cntArith[nexti]=\" << fr.toU64(pols.cntArith[" + string(bFastMode?"0":"nexti") + "]) << \" > MAX_CNT_ARITH=\" << mainExecutor.MAX_CNT_ARITH << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" instruction=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+            code += "            cerr << \"Error: Main Executor found pols.cntArith[nexti]=\" << fr.toU64(pols.cntArith[" + string(bFastMode?"0":"nexti") + "]) << \" > MAX_CNT_ARITH=\" << mainExecutor.MAX_CNT_ARITH << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             if (bFastMode)
             {
             code += "            proverRequest.result = ZKR_SM_MAIN_OOC_ARITH;\n";
@@ -3215,7 +3223,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "#ifdef CHECK_MAX_CNT_ASAP\n";
             code += "        if (fr.toU64(pols.cntBinary[" + string(bFastMode?"0":"nexti") + "]) > mainExecutor.MAX_CNT_BINARY)\n";
             code += "        {\n";
-            code += "            cerr << \"Error: Main Executor found pols.cntBinary[nexti]=\" << fr.toU64(pols.cntBinary[" + string(bFastMode?"0":"nexti") + "]) << \" > MAX_CNT_BINARY=\" << mainExecutor.MAX_CNT_BINARY << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" instruction=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+            code += "            cerr << \"Error: Main Executor found pols.cntBinary[nexti]=\" << fr.toU64(pols.cntBinary[" + string(bFastMode?"0":"nexti") + "]) << \" > MAX_CNT_BINARY=\" << mainExecutor.MAX_CNT_BINARY << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             if (bFastMode)
             {
             code += "            proverRequest.result = ZKR_SM_MAIN_OOC_BINARY;\n";
@@ -3245,7 +3253,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "#ifdef CHECK_MAX_CNT_ASAP\n";
             code += "        if (fr.toU64(pols.cntMemAlign[" + string(bFastMode?"0":"nexti") + "]) > mainExecutor.MAX_CNT_MEM_ALIGN)\n";
             code += "        {\n";
-            code += "            cerr << \"Error: Main Executor found pols.cntMemAlign[nexti]=\" << fr.toU64(pols.cntMemAlign[" + string(bFastMode?"0":"nexti") + "]) << \" > MAX_CNT_MEM_ALIGN=\" << mainExecutor.MAX_CNT_MEM_ALIGN << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" instruction=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+            code += "            cerr << \"Error: Main Executor found pols.cntMemAlign[nexti]=\" << fr.toU64(pols.cntMemAlign[" + string(bFastMode?"0":"nexti") + "]) << \" > MAX_CNT_MEM_ALIGN=\" << mainExecutor.MAX_CNT_MEM_ALIGN << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             if (bFastMode)
             {
             code += "            proverRequest.result = ZKR_SM_MAIN_OOC_MEM_ALIGN;\n";
@@ -3368,7 +3376,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    }\n";
             code += "    else\n";
             code += "    {\n";
-            code += "        cerr << \"Error: MainExecutor::execute() JMPN invalid S33 value op0=\" << jmpnCondValue << endl;\n";
+            code += "        cerr << \"Error: MainExecutor::execute() JMPN invalid S33 value op0=\" << jmpnCondValue << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        exitProcess();\n";
             code += "    }\n";
             if (!bFastMode)
@@ -3576,7 +3584,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "#ifdef CHECK_MAX_CNT_ASAP\n";
             code += "        if (fr.toU64(pols.cntKeccakF[" + string(bFastMode?"0":"nexti") + "]) > mainExecutor.MAX_CNT_KECCAK_F)\n";
             code += "        {\n";
-            code += "            cerr << \"Error: Main Executor found pols.cntKeccakF[nexti]=\" << fr.toU64(pols.cntKeccakF[" + string(bFastMode?"0":"nexti") + "]) << \" > MAX_CNT_KECCAK_F=\" << mainExecutor.MAX_CNT_KECCAK_F << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" instruction=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+            code += "            cerr << \"Error: Main Executor found pols.cntKeccakF[nexti]=\" << fr.toU64(pols.cntKeccakF[" + string(bFastMode?"0":"nexti") + "]) << \" > MAX_CNT_KECCAK_F=\" << mainExecutor.MAX_CNT_KECCAK_F << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             if (bFastMode)
             {
             code += "            proverRequest.result = ZKR_SM_MAIN_OOC_KECCAK_F;\n";
@@ -3603,7 +3611,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "#ifdef CHECK_MAX_CNT_ASAP\n";
             code += "        if (fr.toU64(pols.cntPaddingPG[" + string(bFastMode?"0":"nexti") + "]) > mainExecutor.MAX_CNT_PADDING_PG)\n";
             code += "        {\n";
-            code += "            cerr << \"Error: Main Executor found pols.cntPaddingPG[nexti]=\" << fr.toU64(pols.cntPaddingPG[" + string(bFastMode?"0":"nexti") + "]) << \" > MAX_CNT_PADDING_PG=\" << mainExecutor.MAX_CNT_PADDING_PG << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" instruction=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+            code += "            cerr << \"Error: Main Executor found pols.cntPaddingPG[nexti]=\" << fr.toU64(pols.cntPaddingPG[" + string(bFastMode?"0":"nexti") + "]) << \" > MAX_CNT_PADDING_PG=\" << mainExecutor.MAX_CNT_PADDING_PG << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             if (bFastMode)
             {
             code += "            proverRequest.result = ZKR_SM_MAIN_OOC_PADDING_PG;\n";
@@ -3632,7 +3640,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "#ifdef CHECK_MAX_CNT_ASAP\n";
             code += "        if (fr.toU64(pols.cntPoseidonG[" + string(bFastMode?"0":"nexti") + "]) > mainExecutor.MAX_CNT_POSEIDON_G)\n";
             code += "        {\n";
-            code += "            cerr << \"Error: Main Executor found pols.cntPoseidonG[nexti]=\" << fr.toU64(pols.cntPoseidonG[" + string(bFastMode?"0":"nexti") + "]) << \" > MAX_CNT_POSEIDON_G=\" << mainExecutor.MAX_CNT_POSEIDON_G << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" instruction=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+            code += "            cerr << \"Error: Main Executor found pols.cntPoseidonG[nexti]=\" << fr.toU64(pols.cntPoseidonG[" + string(bFastMode?"0":"nexti") + "]) << \" > MAX_CNT_POSEIDON_G=\" << mainExecutor.MAX_CNT_POSEIDON_G << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             if (bFastMode)
             {
             code += "            proverRequest.result = ZKR_SM_MAIN_OOC_POSEIDON_G;\n";
@@ -3677,7 +3685,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "            if (cr.zkResult != ZKR_SUCCESS)\n";
             code += "            {\n";
             code += "                proverRequest.result = cr.zkResult;\n";
-            code += "                cerr << \"Error: Main exec failed calling evalCommand() after result=\" << proverRequest.result << \"=\" << zkresult2string(proverRequest.result) << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
+            code += "                cerr << \"Error: Main exec failed calling evalCommand() after result=\" << proverRequest.result << \"=\" << zkresult2string(proverRequest.result) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "                return;\n";
             code += "            }\n";
             code += "        }\n";
@@ -3799,7 +3807,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "#ifdef CHECK_MAX_CNT_AT_THE_END\n";
     code += "    if (fr.toU64(pols.cntArith[0]) > mainExecutor.MAX_CNT_ARITH)\n";
     code += "    {\n";
-    code += "        cerr << \"Error: Main Executor found pols.cntArith[0]=\" << fr.toU64(pols.cntArith[0]) << \" > MAX_CNT_ARITH=\" << mainExecutor.MAX_CNT_ARITH << endl;\n";
+    code += "        cerr << \"Error: Main Executor found pols.cntArith[0]=\" << fr.toU64(pols.cntArith[0]) << \" > MAX_CNT_ARITH=\" << mainExecutor.MAX_CNT_ARITH << \" uuid=\" << proverRequest.uuid << endl;\n";
     if (bFastMode)
         code += "        proverRequest.result = ZKR_SM_MAIN_OOC_ARITH;\n";
     else
@@ -3807,7 +3815,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    }\n";
     code += "    if (fr.toU64(pols.cntBinary[0]) > mainExecutor.MAX_CNT_BINARY)\n";
     code += "    {\n";
-    code += "        cerr << \"Error: Main Executor found pols.cntBinary[0]=\" << fr.toU64(pols.cntBinary[0]) << \" > MAX_CNT_BINARY=\" << mainExecutor.MAX_CNT_BINARY << endl;\n";
+    code += "        cerr << \"Error: Main Executor found pols.cntBinary[0]=\" << fr.toU64(pols.cntBinary[0]) << \" > MAX_CNT_BINARY=\" << mainExecutor.MAX_CNT_BINARY << \" uuid=\" << proverRequest.uuid << endl;\n";
     if (bFastMode)
         code += "        proverRequest.result = ZKR_SM_MAIN_OOC_BINARY;\n";
     else
@@ -3815,7 +3823,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    }\n";
     code += "    if (fr.toU64(pols.cntMemAlign[0]) > mainExecutor.MAX_CNT_MEM_ALIGN)\n";
     code += "    {\n";
-    code += "        cerr << \"Error: Main Executor found pols.cntMemAlign[0]=\" << fr.toU64(pols.cntMemAlign[0]) << \" > MAX_CNT_MEM_ALIGN=\" << mainExecutor.MAX_CNT_MEM_ALIGN << endl;\n";
+    code += "        cerr << \"Error: Main Executor found pols.cntMemAlign[0]=\" << fr.toU64(pols.cntMemAlign[0]) << \" > MAX_CNT_MEM_ALIGN=\" << mainExecutor.MAX_CNT_MEM_ALIGN << \" uuid=\" << proverRequest.uuid << endl;\n";
     if (bFastMode)
         code += "        proverRequest.result = ZKR_SM_MAIN_OOC_MEM_ALIGN;\n";
     else
@@ -3823,7 +3831,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    }\n";
     code += "    if (fr.toU64(pols.cntKeccakF[0]) > mainExecutor.MAX_CNT_KECCAK_F)\n";
     code += "    {\n";
-    code += "        cerr << \"Error: Main Executor found pols.cntKeccakF[0]=\" << fr.toU64(pols.cntKeccakF[0]) << \" > MAX_CNT_KECCAK_F=\" << mainExecutor.MAX_CNT_KECCAK_F << endl;\n";
+    code += "        cerr << \"Error: Main Executor found pols.cntKeccakF[0]=\" << fr.toU64(pols.cntKeccakF[0]) << \" > MAX_CNT_KECCAK_F=\" << mainExecutor.MAX_CNT_KECCAK_F << \" uuid=\" << proverRequest.uuid << endl;\n";
     if (bFastMode)
         code += "        proverRequest.result = ZKR_SM_MAIN_OOC_KECCAK_F;\n";
     else
@@ -3831,7 +3839,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    }\n";
     code += "    if (fr.toU64(pols.cntPaddingPG[0]) > mainExecutor.MAX_CNT_PADDING_PG)\n";
     code += "    {\n";
-    code += "        cerr << \"Error: Main Executor found pols.cntPaddingPG[0]=\" << fr.toU64(pols.cntPaddingPG[0]) << \" > MAX_CNT_PADDING_PG=\" << mainExecutor.MAX_CNT_PADDING_PG << endl;\n";
+    code += "        cerr << \"Error: Main Executor found pols.cntPaddingPG[0]=\" << fr.toU64(pols.cntPaddingPG[0]) << \" > MAX_CNT_PADDING_PG=\" << mainExecutor.MAX_CNT_PADDING_PG << \" uuid=\" << proverRequest.uuid << endl;\n";
     if (bFastMode)
         code += "        proverRequest.result = ZKR_SM_MAIN_OOC_PADDING_PG;\n";
     else
@@ -3839,7 +3847,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    }\n";
     code += "    if (fr.toU64(pols.cntPoseidonG[0]) > mainExecutor.MAX_CNT_POSEIDON_G)\n";
     code += "    {\n";
-    code += "        cerr << \"Error: Main Executor found pols.cntPoseidonG[0]=\" << fr.toU64(pols.cntPoseidonG[0]) << \" > MAX_CNT_POSEIDON_G=\" << mainExecutor.MAX_CNT_POSEIDON_G << endl;\n";
+    code += "        cerr << \"Error: Main Executor found pols.cntPoseidonG[0]=\" << fr.toU64(pols.cntPoseidonG[0]) << \" > MAX_CNT_POSEIDON_G=\" << mainExecutor.MAX_CNT_POSEIDON_G << \" uuid=\" << proverRequest.uuid << endl;\n";
     if (bFastMode)
         code += "        proverRequest.result = ZKR_SM_MAIN_OOC_POSEIDON_G;\n";
     else
@@ -3874,7 +3882,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += "        }\n";
         code += "        if (p != ctx.hashK[i].data.size())\n";
         code += "        {\n";
-        code += "            cerr << \"Error: Main SM Executor: Reading hashK out of limits: i=\" << i << \" p=\" << p << \" ctx.hashK[i].data.size()=\" << ctx.hashK[i].data.size() << endl;\n";
+        code += "            cerr << \"Error: Main SM Executor: Reading hashK out of limits: i=\" << i << \" p=\" << p << \" ctx.hashK[i].data.size()=\" << ctx.hashK[i].data.size() << \" uuid=\" << proverRequest.uuid << endl;\n";
         code += "            proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
         code += "            return;\n";
         code += "        }\n";
@@ -3904,7 +3912,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += "        }\n";
         code += "        if (p != ctx.hashP[i].data.size())\n";
         code += "        {\n";
-        code += "            cerr << \"Error: Main SM Executor: Reading hashP out of limits: i=\" << i << \" p=\" << p << \" ctx.hashP[i].data.size()=\" << ctx.hashK[i].data.size() << endl;\n";
+        code += "            cerr << \"Error: Main SM Executor: Reading hashP out of limits: i=\" << i << \" p=\" << p << \" ctx.hashP[i].data.size()=\" << ctx.hashK[i].data.size() << \" uuid=\" << proverRequest.uuid << endl;\n";
         code += "            proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
         code += "            return;\n";
         code += "        }\n";

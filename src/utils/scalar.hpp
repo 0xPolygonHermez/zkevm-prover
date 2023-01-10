@@ -44,7 +44,7 @@ inline void scalar2fe  (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Ele
 #ifdef DEBUG
     if ( !scalar.fits_ulong_p() )
     {
-        cerr << "scalar2fe() found scalar out of u64 range:" << scalar.get_str(16) << endl;
+        cerr << "Error: scalar2fe() found scalar out of u64 range:" << scalar.get_str(16) << endl;
         exitProcess();
     }
 #endif
@@ -72,7 +72,7 @@ inline void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Ele
     uint64_t auxH = fr.toU64(fe7);
     if (auxH >= 0x100000000)
     {
-        cerr << "fea2scalar() found element 7 has a too high value=" << fr.toString(fe7, 16) << endl;
+        cerr << "Error: fea2scalar() found element 7 has a too high value=" << fr.toString(fe7, 16) << endl;
         exitProcess();
     }
 
@@ -80,7 +80,7 @@ inline void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Ele
     uint64_t auxL = fr.toU64(fe6);
     if (auxL >= 0x100000000)
     {
-        cerr << "fea2scalar() found element 6 has a too high value=" << fr.toString(fe6, 16) << endl;
+        cerr << "Error: fea2scalar() found element 6 has a too high value=" << fr.toString(fe6, 16) << endl;
         exitProcess();
     }
 
@@ -91,7 +91,7 @@ inline void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Ele
     auxH = fr.toU64(fe5);
     if (auxH >= 0x100000000)
     {
-        cerr << "fea2scalar() found element 5 has a too high value=" << fr.toString(fe5, 16) << endl;
+        cerr << "Error: fea2scalar() found element 5 has a too high value=" << fr.toString(fe5, 16) << endl;
         exitProcess();
     }
 
@@ -99,7 +99,7 @@ inline void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Ele
     auxL = fr.toU64(fe4);
     if (auxL >= 0x100000000)
     {
-        cerr << "fea2scalar() found element 4 has a too high value=" << fr.toString(fe4, 16) << endl;
+        cerr << "Error: fea2scalar() found element 4 has a too high value=" << fr.toString(fe4, 16) << endl;
         exitProcess();
     }
     
@@ -110,7 +110,7 @@ inline void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Ele
     auxH = fr.toU64(fe3);
     if (auxH >= 0x100000000)
     {
-        cerr << "fea2scalar() found element 3 has a too high value=" << fr.toString(fe3, 16) << endl;
+        cerr << "Error: fea2scalar() found element 3 has a too high value=" << fr.toString(fe3, 16) << endl;
         exitProcess();
     }
 
@@ -118,7 +118,7 @@ inline void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Ele
     auxL = fr.toU64(fe2);
     if (auxL >= 0x100000000)
     {
-        cerr << "fea2scalar() found element 2 has a too high value=" << fr.toString(fe2, 16) << endl;
+        cerr << "Error: fea2scalar() found element 2 has a too high value=" << fr.toString(fe2, 16) << endl;
         exitProcess();
     }
     
@@ -129,7 +129,7 @@ inline void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Ele
     auxH = fr.toU64(fe1);
     if (auxH >= 0x100000000)
     {
-        cerr << "fea2scalar() found element 1 has a too high value=" << fr.toString(fe1, 16) << endl;
+        cerr << "Error: fea2scalar() found element 1 has a too high value=" << fr.toString(fe1, 16) << endl;
         exitProcess();
     }
 
@@ -137,7 +137,7 @@ inline void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Ele
     auxL = fr.toU64(fe0);
     if (auxL >= 0x100000000)
     {
-        cerr << "fea2scalar() found element 0 has a too high value=" << fr.toString(fe0, 16) << endl;
+        cerr << "Error: fea2scalar() found element 0 has a too high value=" << fr.toString(fe0, 16) << endl;
         exitProcess();
     }
     

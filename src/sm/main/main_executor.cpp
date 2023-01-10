@@ -119,7 +119,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     StateDBInterface *pStateDB = StateDBClientFactory::createStateDBClient(fr, config);
     if (pStateDB == NULL)
     {
-        cerr << "Error: MainExecutor::MainExecutor() failed calling StateDBClientFactory::createStateDBClient()" << endl;
+        cerr << "Error: MainExecutor::MainExecutor() failed calling StateDBClientFactory::createStateDBClient() uuid=" << proverRequest.uuid << endl;
         exitProcess();
     }
 
@@ -162,7 +162,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     {
         if (!bProcessBatch)
         {
-            cerr << "Error: MainExecutor::execute() found proverRequest.bNoCounters=true and bProcessBatch=false" << endl;
+            cerr << "Error: MainExecutor::execute() found proverRequest.bNoCounters=true and bProcessBatch=false uuid=" << proverRequest.uuid << endl;
             exitProcess();
         }
         N_Max = N_NoCounters;
@@ -239,7 +239,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (cr.zkResult != ZKR_SUCCESS)
             {
                 proverRequest.result = cr.zkResult;
-                cerr << "Error: Main exec failed calling evalCommand() before result=" << proverRequest.result << "=" << zkresult2string(proverRequest.result) << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << endl;
+                cerr << "Error: Main exec failed calling evalCommand() before, result=" << proverRequest.result << "=" << zkresult2string(proverRequest.result) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 return;
             }
         }
@@ -591,7 +591,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             {
                 if (!fr.toS32(addrRel, pols.E0[i]))
                 {
-                    cerr << "Error: failed calling fr.toS32() with pols.E0[i]=" << fr.toString(pols.E0[i], 16) << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                    cerr << "Error: failed calling fr.toS32() with pols.E0[i]=" << fr.toString(pols.E0[i], 16) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     exitProcess();
                 }
             }
@@ -599,7 +599,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             {
                 if (!fr.toS32(addrRel, pols.RR[i]))
                 {
-                    cerr << "Error: failed calling fr.toS32() with pols.RR[i]=" << fr.toString(pols.RR[i], 16) << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                    cerr << "Error: failed calling fr.toS32() with pols.RR[i]=" << fr.toString(pols.RR[i], 16) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     exitProcess();
                 }
             }
@@ -612,7 +612,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 int32_t sp;
                 if (!fr.toS32(sp, pols.SP[i]))
                 {
-                    cerr << "Error: failed calling fr.toS32(sp, pols.SP[i])" << endl;
+                    cerr << "Error: failed calling fr.toS32(sp, pols.SP[i])" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     exitProcess();
                 }
                 addrRel += sp;
@@ -620,14 +620,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             // If addrRel is possitive, and the sum is too big, fail
             if (addrRel>=0x20000 || ((rom.line[zkPC].isMem==1) && (addrRel >= 0x10000)))
             {
-                cerr << "Error: addrRel too big addrRel=" << addrRel << " zkPC=" << zkPC << " inst=" << rom.line[zkPC].toString(fr) << endl;
+                cerr << "Error: addrRel too big addrRel=" << addrRel << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 proverRequest.result = ZKR_SM_MAIN_ADDRESS;
                 return;
             }
             // If addrRel is negative, fail
             if (addrRel < 0)
             {
-                cerr << "Error: addrRel<0 addrRel=" << addrRel << " zkPC=" << zkPC << " inst=" << rom.line[zkPC].toString(fr) << endl;
+                cerr << "Error: addrRel<0 addrRel=" << addrRel << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 proverRequest.result = ZKR_SM_MAIN_ADDRESS;
                 return;
             }
@@ -694,7 +694,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         {
             // freeInTag must be present
             if (rom.line[zkPC].freeInTag.isPresent == false) {
-                cerr << "Error: Instruction with freeIn without freeInTag: zkPC=" << zkPC << endl;
+                cerr << "Error: Instruction with freeIn without freeInTag:" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 exitProcess();
             }
 
@@ -832,7 +832,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     zkresult zkResult = pStateDB->get(oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);
                     if (zkResult != ZKR_SUCCESS)
                     {
-                        cerr << "MainExecutor::Execute() failed calling pStateDB->get() result=" << zkresult2string(zkResult) << endl;
+                        cerr << "Error: MainExecutor::Execute() failed calling pStateDB->get() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                         proverRequest.result = zkResult;
                         return;
                     }
@@ -954,7 +954,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     zkresult zkResult = pStateDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.input.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
                     if (zkResult != ZKR_SUCCESS)
                     {
-                        cerr << "MainExecutor::Execute() failed calling pStateDB->set() result=" << zkresult2string(zkResult) << endl;
+                        cerr << "Error: MainExecutor::Execute() failed calling pStateDB->set() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                         proverRequest.result = zkResult;
                         return;
                     }
@@ -993,7 +993,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         size = fr.toU64(pols.D0[i]);
                         if (size>32)
                         {
-                            cerr << "Error: Invalid size>32 for hashK 1: pols.D0[i]=" << fr.toString(pols.D0[i], 16) << " size=" << size << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                            cerr << "Error: Invalid size>32 for hashK 1: pols.D0[i]=" << fr.toString(pols.D0[i], 16) << " size=" << size << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                             exitProcess();
                         }
                     }
@@ -1003,7 +1003,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     fr.toS64(iPos, pols.HASHPOS[i]);
                     if (iPos < 0)
                     {
-                        cerr << "Error: Invalid pos<0 for HashK 1: pols.HASHPOS[i]=" << fr.toString(pols.HASHPOS[i], 16) << " pos=" << iPos << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                        cerr << "Error: Invalid pos<0 for HashK 1: pols.HASHPOS[i]=" << fr.toString(pols.HASHPOS[i], 16) << " pos=" << iPos << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                         exitProcess();
                     }
                     uint64_t pos = iPos;
@@ -1011,7 +1011,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // Check that pos+size do not exceed data size
                     if ( (pos+size) > hashKIterator->second.data.size())
                     {
-                        cerr << "Error: hashK 1 invalid size of hash: pos=" << pos << " size=" << size << " data.size=" << ctx.hashK[addr].data.size() << endl;
+                        cerr << "Error: hashK 1 invalid size of hash: pos=" << pos << " size=" << size << " data.size=" << ctx.hashK[addr].data.size() << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                         proverRequest.result = ZKR_SM_MAIN_HASHK;
                         return;
                     }
@@ -1041,7 +1041,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     hashKIterator = ctx.hashK.find(addr);
                     if (hashKIterator == ctx.hashK.end())
                     {
-                        cerr << "Error: hashKDigest 1: digest not defined for addr=" << addr << endl;
+                        cerr << "Error: hashKDigest 1: digest not defined for addr=" << addr << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                         proverRequest.result = ZKR_SM_MAIN_HASHK;
                         return;
                     }
@@ -1049,7 +1049,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // If digest was not calculated, this is an error
                     if (!hashKIterator->second.lenCalled)
                     {
-                        cerr << "Error: hashKDigest 1: digest not calculated for addr=" << addr << ".  Call hashKLen to finish digest." << endl;
+                        cerr << "Error: hashKDigest 1: digest not calculated for addr=" << addr << ".  Call hashKLen to finish digest." << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                         proverRequest.result = ZKR_SM_MAIN_HASHK;
                         return;
                     }
@@ -1086,7 +1086,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         size = fr.toU64(pols.D0[i]);
                         if (size>32)
                         {
-                            cerr << "Error: Invalid size>32 for hashP 1: pols.D0[i]=" << fr.toString(pols.D0[i], 16) << " size=" << size << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                            cerr << "Error: Invalid size>32 for hashP 1: pols.D0[i]=" << fr.toString(pols.D0[i], 16) << " size=" << size << " step=" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                             exitProcess();
                         }
                     }
@@ -1096,7 +1096,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     fr.toS64(iPos, pols.HASHPOS[i]);
                     if (iPos < 0)
                     {
-                        cerr << "Error: Invalid pos<0 for HashP 1: pols.HASHPOS[i]=" << fr.toString(pols.HASHPOS[i], 16) << " pos=" << iPos << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                        cerr << "Error: Invalid pos<0 for HashP 1: pols.HASHPOS[i]=" << fr.toString(pols.HASHPOS[i], 16) << " pos=" << iPos << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                         exitProcess();
                     }
                     uint64_t pos = iPos;
@@ -1104,7 +1104,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // Check that pos+size do not exceed data size
                     if ( (pos+size) > hashPIterator->second.data.size())
                     {
-                        cerr << "Error: hashP 1 invalid size of hash: pos=" << pos << " size=" << size << " data.size=" << ctx.hashP[addr].data.size() << endl;
+                        cerr << "Error: hashP 1 invalid size of hash: pos=" << pos << " size=" << size << " data.size=" << ctx.hashP[addr].data.size() << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                         proverRequest.result = ZKR_SM_MAIN_HASHP;
                         return;
                     }
@@ -1130,7 +1130,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     hashPIterator = ctx.hashP.find(addr);
                     if (hashPIterator == ctx.hashP.end())
                     {
-                        cerr << "Error: hashPDigest 1: digest not defined" << endl;
+                        cerr << "Error: hashPDigest 1: digest not defined" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                         proverRequest.result = ZKR_SM_MAIN_HASHP;
                         return;
                     }
@@ -1138,7 +1138,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // If digest was not calculated, this is an error
                     if (!hashPIterator->second.lenCalled)
                     {
-                        cerr << "Error: hashPDigest 1: digest not calculated.  Call hashPLen to finish digest." << endl;
+                        cerr << "Error: hashPDigest 1: digest not calculated.  Call hashPLen to finish digest." << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                         proverRequest.result = ZKR_SM_MAIN_HASHP;
                         return;
                     }
@@ -1228,7 +1228,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     }
                     else
                     {
-                        cerr << "Error: Invalid binary operation: opcode=" << rom.line[zkPC].binOpcode << endl;
+                        cerr << "Error: Invalid binary operation: opcode=" << rom.line[zkPC].binOpcode << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                         exitProcess();
                     }
                 }
@@ -1244,7 +1244,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     fea2scalar(fr, offsetScalar, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]);
                     if (offsetScalar<0 || offsetScalar>32)
                     {
-                        cerr << "Error: MemAlign out of range offset=" << offsetScalar.get_str() << endl;
+                        cerr << "Error: MemAlign out of range offset=" << offsetScalar.get_str() << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                         proverRequest.result = ZKR_SM_MAIN_MEMALIGN;
                         return;
                     }
@@ -1262,7 +1262,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 // Check that one and only one instruction has been requested
                 if (nHits != 1)
                 {
-                    cerr << "Error: Empty freeIn without just one instruction: zkPC=" << zkPC << " nHits=" << nHits << endl;
+                    cerr << "Error: Empty freeIn without just one instruction: nHits=" << nHits << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     exitProcess();
                 }
             }
@@ -1284,7 +1284,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (cr.zkResult != ZKR_SUCCESS)
                 {
                     proverRequest.result = cr.zkResult;
-                    cerr << "Error: Main exec failed calling evalCommand() result=" << proverRequest.result << "=" << zkresult2string(proverRequest.result) << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << endl;
+                    cerr << "Error: Main exec failed calling evalCommand() result=" << proverRequest.result << "=" << zkresult2string(proverRequest.result) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     return;
                 }
 
@@ -1350,7 +1350,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 else
                 {
-                    cerr << "Error: unexpected command result type: " << cr.type << endl;
+                    cerr << "Error: unexpected command result type: " << cr.type << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     exitProcess();
                 }
             }
@@ -1400,7 +1400,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                  (!fr.equal(pols.A6[i], op6)) ||
                  (!fr.equal(pols.A7[i], op7)) )
             {
-                cerr << "Error: ROM assert failed: AN!=opN step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].line << " file=" << rom.line[zkPC].fileName << " line content: " << rom.line[zkPC].toString(fr) << endl;
+                cerr << "Error: ROM assert failed: AN!=opN" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 cerr << "A: " << fr.toString(pols.A7[i], 16) << ":" << fr.toString(pols.A6[i], 16) << ":" << fr.toString(pols.A5[i], 16) << ":" << fr.toString(pols.A4[i], 16) << ":" << fr.toString(pols.A3[i], 16) << ":" << fr.toString(pols.A2[i], 16) << ":" << fr.toString(pols.A1[i], 16) << ":" << fr.toString(pols.A0[i], 16) << endl;
                 cerr << "OP:" << fr.toString(op7, 16) << ":" << fr.toString(op6, 16) << ":" << fr.toString(op5, 16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0,16) << endl;
                 proverRequest.result = ZKR_SM_MAIN_ASSERT;
@@ -1482,7 +1482,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                          (!fr.equal(ctx.mem[addr].fe6, op6)) ||
                          (!fr.equal(ctx.mem[addr].fe7, op7)) )
                     {
-                        cerr << "Error: Memory Read does not match" << endl;
+                        cerr << "Error: Memory Read does not match" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                         proverRequest.result = ZKR_SM_MAIN_MEMORY;
                         return;
                     }
@@ -1498,7 +1498,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                          (!fr.isZero(op6)) ||
                          (!fr.isZero(op7)) )
                     {
-                        cerr << "Error: Memory Read does not match (op!=0)" << endl;
+                        cerr << "Error: Memory Read does not match (op!=0)" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                         proverRequest.result = ZKR_SM_MAIN_MEMORY;
                         return;
                     }
@@ -1580,7 +1580,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             zkresult zkResult = pStateDB->get(oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);
             if (zkResult != ZKR_SUCCESS)
             {
-                cerr << "MainExecutor::Execute() failed calling pStateDB->get() result=" << zkresult2string(zkResult) << endl;
+                cerr << "Error: MainExecutor::Execute() failed calling pStateDB->get() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 proverRequest.result = zkResult;
                 return;
             }
@@ -1605,7 +1605,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             fea2scalar(fr, opScalar, op0, op1, op2, op3, op4, op5, op6, op7);
             if (smtGetResult.value != opScalar)
             {
-                cerr << "Error: Storage read does not match: smtGetResult.value=" << smtGetResult.value.get_str() << " opScalar=" << opScalar.get_str() << endl;
+                cerr << "Error: Storage read does not match: smtGetResult.value=" << smtGetResult.value.get_str() << " opScalar=" << opScalar.get_str() << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 proverRequest.result = ZKR_SM_MAIN_STORAGE;
                 return;
             }
@@ -1692,7 +1692,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 zkresult zkResult = pStateDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.input.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
                 if (zkResult != ZKR_SUCCESS)
                 {
-                    cerr << "MainExecutor::Execute() failed calling pStateDB->set() result=" << zkresult2string(zkResult) << endl;
+                    cerr << "Error: MainExecutor::Execute() failed calling pStateDB->set() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     proverRequest.result = zkResult;
                     return;
                 }
@@ -1720,7 +1720,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                  !fr.equal(ctx.lastSWrite.newRoot[2], oldRoot[2]) ||
                  !fr.equal(ctx.lastSWrite.newRoot[3], oldRoot[3]) )
             {
-                cerr << "Error: Storage write does not match; i: " << i << " zkPC: " << zkPC <<
+                cerr << "Error: Storage write does not match" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid <<
                     " ctx.lastSWrite.newRoot: " << fr.toString(ctx.lastSWrite.newRoot[3], 16) << ":" << fr.toString(ctx.lastSWrite.newRoot[2], 16) << ":" << fr.toString(ctx.lastSWrite.newRoot[1], 16) << ":" << fr.toString(ctx.lastSWrite.newRoot[0], 16) <<
                     " oldRoot: " << fr.toString(oldRoot[3], 16) << ":" << fr.toString(oldRoot[2], 16) << ":" << fr.toString(oldRoot[1], 16) << ":" << fr.toString(oldRoot[0], 16) << endl;
                 proverRequest.result = ZKR_SM_MAIN_STORAGE;
@@ -1734,7 +1734,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                  !fr.equal(ctx.lastSWrite.newRoot[2], fea[2]) ||
                  !fr.equal(ctx.lastSWrite.newRoot[3], fea[3]) )
             {
-                cerr << "Error: Storage write does not match: ctx.lastSWrite.newRoot=" << fea2string(fr, ctx.lastSWrite.newRoot) << " op=" << fea << endl;
+                cerr << "Error: Storage write does not match: ctx.lastSWrite.newRoot=" << fea2string(fr, ctx.lastSWrite.newRoot) << " op=" << fea << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 proverRequest.result = ZKR_SM_MAIN_STORAGE;
                 return;
             }
@@ -1780,7 +1780,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 size = fr.toU64(pols.D0[i]);
                 if (size>32)
                 {
-                    cerr << "Error: Invalid size>32 for hashK 2: pols.D0[i]=" << fr.toString(pols.D0[i], 16) << " size=" << size << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                    cerr << "Error: Invalid size>32 for hashK 2: pols.D0[i]=" << fr.toString(pols.D0[i], 16) << " size=" << size << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     exitProcess();
                 }
             }
@@ -1790,7 +1790,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             fr.toS64(iPos, pols.HASHPOS[i]);
             if (iPos < 0)
             {
-                cerr << "Error: Invalid pos<0 for HashK 2: pols.HASHPOS[i]=" << fr.toString(pols.HASHPOS[i], 16) << " pos=" << iPos << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                cerr << "Error: Invalid pos<0 for HashK 2: pols.HASHPOS[i]=" << fr.toString(pols.HASHPOS[i], 16) << " pos=" << iPos << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 exitProcess();
             }
             uint64_t pos = iPos;
@@ -1811,7 +1811,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 else if (hashKIterator->second.data.size() < (pos+j))
                 {
-                    cerr << "Error: hashK 2: trying to insert data in a position:" << (pos+j) << " higher than current data size:" << ctx.hashK[addr].data.size() << endl;
+                    cerr << "Error: hashK 2: trying to insert data in a position:" << (pos+j) << " higher than current data size:" << ctx.hashK[addr].data.size() << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     proverRequest.result = ZKR_SM_MAIN_HASHK;
                     return;
                 }
@@ -1821,7 +1821,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     bh = hashKIterator->second.data[pos+j];
                     if (bm != bh)
                     {
-                        cerr << "Error: HashK 2 bytes do not match: addr=" << addr << " pos+j=" << pos+j << " is bm=" << bm << " and it should be bh=" << bh << endl;
+                        cerr << "Error: HashK 2 bytes do not match: addr=" << addr << " pos+j=" << pos+j << " is bm=" << bm << " and it should be bh=" << bh << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                         proverRequest.result = ZKR_SM_MAIN_HASHK;
                         return;
                     }
@@ -1832,7 +1832,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             mpz_class paddingA = a >> (size*8);
             if (paddingA != 0)
             {
-                cerr << "Error: HashK 2 incoherent size=" << size << " a=" << a.get_str(16) << " paddingA=" << paddingA.get_str(16) << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                cerr << "Error: HashK 2 incoherent size=" << size << " a=" << a.get_str(16) << " paddingA=" << paddingA.get_str(16) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 exitProcess();
             }
 
@@ -1843,7 +1843,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             {
                 if (readsIterator->second != size)
                 {
-                    cerr << "Error: HashK 2 different read sizes in the same position addr=" << addr << " pos=" << pos << " ctx.hashK[addr].reads[pos]=" << ctx.hashK[addr].reads[pos] << " size=" << size << endl;
+                    cerr << "Error: HashK 2 different read sizes in the same position addr=" << addr << " pos=" << pos << " ctx.hashK[addr].reads[pos]=" << ctx.hashK[addr].reads[pos] << " size=" << size << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     proverRequest.result = ZKR_SM_MAIN_HASHK;
                     return;
                 }
@@ -1880,7 +1880,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 // Check that length = 0
                 if (lm != 0)
                 {
-                    cerr << "Error: hashKLen 2 hashK[addr] is empty but lm is not 0 addr=" << addr << " lm=" << lm << endl;
+                    cerr << "Error: hashKLen 2 hashK[addr] is empty but lm is not 0 addr=" << addr << " lm=" << lm << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     proverRequest.result = ZKR_SM_MAIN_HASHK;
                     return;
                 }
@@ -1897,7 +1897,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             if (ctx.hashK[addr].lenCalled)
             {
-                cerr << "Error: hashKLen 2 called more than once addr=" << addr << " zkPC=" << zkPC << " rom line=" << rom.line[zkPC].toString(fr) << endl;
+                cerr << "Error: hashKLen 2 called more than once addr=" << addr << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 exitProcess();
             }
             ctx.hashK[addr].lenCalled = true;
@@ -1905,7 +1905,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             uint64_t lh = hashKIterator->second.data.size();
             if (lm != lh)
             {
-                cerr << "Error: hashKLen 2 length does not match addr=" << addr << " is lm=" << lm << " and it should be lh=" << lh << endl;
+                cerr << "Error: hashKLen 2 length does not match addr=" << addr << " is lm=" << lm << " and it should be lh=" << lh << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 proverRequest.result = ZKR_SM_MAIN_HASHK;
                 return;
             }
@@ -1942,7 +1942,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             hashKIterator = ctx.hashK.find(addr);
             if (hashKIterator == ctx.hashK.end())
             {
-                cerr << "Error: hashKDigest 2 could not find entry for addr=" << addr << endl;
+                cerr << "Error: hashKDigest 2 could not find entry for addr=" << addr << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 proverRequest.result = ZKR_SM_MAIN_HASHK;
                 return;
             }
@@ -1953,14 +1953,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             if (dg != hashKIterator->second.digest)
             {
-                cerr << "Error: hashKDigest 2: Digest does not match op" << endl;
+                cerr << "Error: hashKDigest 2: Digest does not match op" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 proverRequest.result = ZKR_SM_MAIN_HASHK;
                 return;
             }
 
             if (ctx.hashK[addr].digestCalled)
             {
-                cerr << "Error: hashKDigest 2 called more than once addr=" << addr << " zkPC=" << zkPC << " rom line=" << rom.line[zkPC].toString(fr) << endl;
+                cerr << "Error: hashKDigest 2 called more than once addr=" << addr << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 exitProcess();
             }
             ctx.hashK[addr].digestCalled = true;
@@ -2006,7 +2006,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 size = fr.toU64(pols.D0[i]);
                 if (size>32)
                 {
-                    cerr << "Error: Invalid size>32 for hashP 2: pols.D0[i]=" << fr.toString(pols.D0[i], 16) << " size=" << size << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                    cerr << "Error: Invalid size>32 for hashP 2: pols.D0[i]=" << fr.toString(pols.D0[i], 16) << " size=" << size << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     exitProcess();
                 }
             }
@@ -2016,7 +2016,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             fr.toS64(iPos, pols.HASHPOS[i]);
             if (iPos < 0)
             {
-                cerr << "Error: Invalid pos<0 for HashP 2: pols.HASHPOS[i]=" << fr.toString(pols.HASHPOS[i], 16) << " pos=" << iPos << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                cerr << "Error: Invalid pos<0 for HashP 2: pols.HASHPOS[i]=" << fr.toString(pols.HASHPOS[i], 16) << " pos=" << iPos << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 exitProcess();
             }
             uint64_t pos = iPos;
@@ -2036,7 +2036,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 else if (hashPIterator->second.data.size() < (pos+j))
                 {
-                    cerr << "Error: hashP 2: trying to insert data in a position:" << (pos+j) << " higher than current data size:" << ctx.hashP[addr].data.size() << endl;
+                    cerr << "Error: hashP 2: trying to insert data in a position:" << (pos+j) << " higher than current data size:" << ctx.hashP[addr].data.size() << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     proverRequest.result = ZKR_SM_MAIN_HASHP;
                     return;
                 }
@@ -2046,7 +2046,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     bh = hashPIterator->second.data[pos+j];
                     if (bm != bh)
                     {
-                        cerr << "Error: HashP 2 bytes do not match: addr=" << addr << " pos+j=" << pos+j << " is bm=" << bm << " and it should be bh=" << bh << endl;
+                        cerr << "Error: HashP 2 bytes do not match: addr=" << addr << " pos+j=" << pos+j << " is bm=" << bm << " and it should be bh=" << bh << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                         proverRequest.result = ZKR_SM_MAIN_HASHP;
                         return;
                     }
@@ -2068,7 +2068,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             {
                 if (readsIterator->second != size)
                 {
-                    cerr << "Error: HashP 2 diferent read sizes in the same position addr=" << addr << " pos=" << pos << endl;
+                    cerr << "Error: HashP 2 diferent read sizes in the same position addr=" << addr << " pos=" << pos << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     proverRequest.result = ZKR_SM_MAIN_HASHP;
                     return;
                 }
@@ -2101,7 +2101,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 // Check that length = 0
                 if (lm != 0)
                 {
-                    cerr << "Error: hashPLen 2 hashP[addr] is empty but lm is not 0 addr=" << addr << " lm=" << lm << endl;
+                    cerr << "Error: hashPLen 2 hashP[addr] is empty but lm is not 0 addr=" << addr << " lm=" << lm << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     proverRequest.result = ZKR_SM_MAIN_HASHK;
                     return;
                 }
@@ -2118,7 +2118,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             if (ctx.hashP[addr].lenCalled)
             {
-                cerr << "Error: hashPLen 2 called more than once addr=" << addr << " zkPC=" << zkPC << " rom line=" << rom.line[zkPC].toString(fr) << endl;
+                cerr << "Error: hashPLen 2 called more than once addr=" << addr << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 exitProcess();
             }
             ctx.hashP[addr].lenCalled = true;
@@ -2126,7 +2126,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             uint64_t lh = hashPIterator->second.data.size();
             if (lm != lh)
             {
-                cerr << "Error: hashPLen 2 does not match match addr=" << addr << " is lm=" << lm << " and it should be lh=" << lh << endl;
+                cerr << "Error: hashPLen 2 does not match match addr=" << addr << " is lm=" << lm << " and it should be lh=" << lh << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 proverRequest.result = ZKR_SM_MAIN_HASHP;
                 return;
             }
@@ -2134,7 +2134,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             {
                 if (hashPIterator->second.data.size() == 0)
                 {
-                    cerr << "Error: hashPLen 2 found data empty" << endl;
+                    cerr << "Error: hashPLen 2 found data empty" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     proverRequest.result = ZKR_SM_MAIN_HASHP;
                     return;
                 }
@@ -2152,7 +2152,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 Goldilocks::Element * pBuffer = new Goldilocks::Element[bufferSize];
                 if (pBuffer == NULL)
                 {
-                    cerr << "Error: hashPLen 2 failed allocating memory of " << bufferSize << " field elements" << endl;
+                    cerr << "Error: hashPLen 2 failed allocating memory of " << bufferSize << " field elements" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     exitProcess();
                 }
                 for (uint64_t j=0; j<bufferSize; j++) pBuffer[j] = fr.zero();
@@ -2185,7 +2185,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 zkresult zkResult = pStateDB->setProgram(result, hashPIterator->second.data, proverRequest.input.bUpdateMerkleTree);
                 if (zkResult != ZKR_SUCCESS)
                 {
-                    cerr << "MainExecutor::Execute() failed calling pStateDB->setProgram() result=" << zkresult2string(zkResult) << endl;
+                    cerr << "Error: MainExecutor::Execute() failed calling pStateDB->setProgram() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     proverRequest.result = zkResult;
                     return;
                 }
@@ -2225,7 +2225,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 zkresult zkResult = pStateDB->getProgram(aux, hashValue.data, proverRequest.dbReadLog);
                 if (zkResult != ZKR_SUCCESS)
                 {
-                    cerr << "MainExecutor::Execute() failed calling pStateDB->getProgram() result=" << zkresult2string(zkResult) << endl;
+                    cerr << "Error: MainExecutor::Execute() failed calling pStateDB->getProgram() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     proverRequest.result = zkResult;
                     return;
                 }
@@ -2240,7 +2240,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             if (ctx.hashP[addr].digestCalled)
             {
-                cerr << "Error: hashPDigest 2 called more than once addr=" << addr << " zkPC=" << zkPC << " rom line=" << rom.line[zkPC].toString(fr) << endl;
+                cerr << "Error: hashPDigest 2 called more than once addr=" << addr << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 exitProcess();
             }
             ctx.hashP[addr].digestCalled = true;
@@ -2250,7 +2250,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             // Check that digest equals op
             if (dg != hashPIterator->second.digest)
             {
-                cerr << "Error: hashPDigest 2: ctx.hashP[addr].digest=" << ctx.hashP[addr].digest.get_str(16) << " does not match op=" << dg.get_str(16) << endl;
+                cerr << "Error: hashPDigest 2: ctx.hashP[addr].digest=" << ctx.hashP[addr].digest.get_str(16) << " does not match op=" << dg.get_str(16) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 proverRequest.result = ZKR_SM_MAIN_HASHP;
                 return;
             }
@@ -2288,7 +2288,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                 // Check the condition
                 if ( (A*B) + C != (D<<256) + op ) {
-                    cerr << "Error: Arithmetic does not match: zkPC=" << zkPC << endl;
+                    cerr << "Error: Arithmetic does not match:" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     mpz_class left = (A*B) + C;
                     mpz_class right = (D<<256) + op;
                     cerr << "(A*B) + C = " << left.get_str(16) << endl;
@@ -2348,7 +2348,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 else
                 {
-                    cerr << "Error: Invalid arithmetic op zkPC=" << zkPC << " instruction: " << rom.line[zkPC].toString(fr) << endl;
+                    cerr << "Error: Invalid arithmetic op" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     exitProcess();
                 }
 
@@ -2410,7 +2410,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                 if (!x3eq || !y3eq)
                 {
-                    cerr << "Error: Arithmetic curve " << (dbl?"dbl":"add") << " point does not match" << endl;
+                    cerr << "Error: Arithmetic curve " << (dbl?"dbl":"add") << " point does not match" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     cerr << " x1=" << x1.get_str() << endl;
                     cerr << " y1=" << y1.get_str() << endl;
                     cerr << " x2=" << x2.get_str() << endl;
@@ -2461,7 +2461,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 expectedC = (a + b) & ScalarMask256;
                 if (c != expectedC)
                 {
-                    cerr << "Error: Binary ADD operation does not match zkPC=" << zkPC << " instruction: " << rom.line[zkPC].toString(fr) << endl;
+                    cerr << "Error: Binary ADD operation does not match" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     proverRequest.result = ZKR_SM_MAIN_BINARY;
                     return;
                 }
@@ -2493,7 +2493,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 expectedC = (a - b + ScalarTwoTo256) & ScalarMask256;
                 if (c != expectedC)
                 {
-                    cerr << "Error: Binary SUB operation does not match zkPC=" << zkPC << " instruction: " << rom.line[zkPC].toString(fr) << endl;
+                    cerr << "Error: Binary SUB operation does not match" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     proverRequest.result = ZKR_SM_MAIN_BINARY;
                     return;
                 }
@@ -2525,7 +2525,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 expectedC = (a < b);
                 if (c != expectedC)
                 {
-                    cerr << "Error: Binary LT operation does not match zkPC=" << zkPC << " instruction: " << rom.line[zkPC].toString(fr) << endl;
+                    cerr << "Error: Binary LT operation does not match" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     proverRequest.result = ZKR_SM_MAIN_BINARY;
                     return;
                 }
@@ -2563,8 +2563,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 expectedC = (_a < _b);
                 if (c != expectedC)
                 {
-                    cout << "a=" << a << " b=" << b << " c=" << c << " _a=" << _a << " _b=" << _b << " expectedC=" << expectedC << endl;
-                    cerr << "Error: Binary SLT operation does not match zkPC=" << zkPC << " instruction: " << rom.line[zkPC].toString(fr) << endl;
+                    cerr << "Error: Binary SLT operation does not match" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
+                    cerr << "a=" << a << " b=" << b << " c=" << c << " _a=" << _a << " _b=" << _b << " expectedC=" << expectedC << endl;
                     proverRequest.result = ZKR_SM_MAIN_BINARY;
                     return;
                 }
@@ -2596,7 +2596,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 expectedC = (a == b);
                 if (c != expectedC)
                 {
-                    cerr << "Error: Binary EQ operation does not match zkPC=" << zkPC << " instruction: " << rom.line[zkPC].toString(fr) << endl;
+                    cerr << "Error: Binary EQ operation does not match" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     proverRequest.result = ZKR_SM_MAIN_BINARY;
                     return;
                 }
@@ -2628,7 +2628,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 expectedC = (a & b);
                 if (c != expectedC)
                 {
-                    cerr << "Error: Binary AND operation does not match zkPC=" << zkPC << " instruction: " << rom.line[zkPC].toString(fr) << endl;
+                    cerr << "Error: Binary AND operation does not match" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     proverRequest.result = ZKR_SM_MAIN_BINARY;
                     return;
                 }
@@ -2663,7 +2663,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 expectedC = (a | b);
                 if (c != expectedC)
                 {
-                    cerr << "Error: Binary OR operation does not match zkPC=" << zkPC << " instruction: " << rom.line[zkPC].toString(fr) << endl;
+                    cerr << "Error: Binary OR operation does not match" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     proverRequest.result = ZKR_SM_MAIN_BINARY;
                     return;
                 }
@@ -2693,7 +2693,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 expectedC = (a ^ b);
                 if (c != expectedC)
                 {
-                    cerr << "Error: Binary XOR operation does not match zkPC=" << zkPC << " instruction: " << rom.line[zkPC].toString(fr) << endl;
+                    cerr << "Error: Binary XOR operation does not match" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     proverRequest.result = ZKR_SM_MAIN_BINARY;
                     return;
                 }
@@ -2714,7 +2714,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             else
             {
-                cerr << "Error: Invalid binary operation opcode=" << rom.line[zkPC].binOpcode << " zkPC=" << zkPC << " instruction: " << rom.line[zkPC].toString(fr) << endl;
+                cerr << "Error: Invalid binary operation opcode=" << rom.line[zkPC].binOpcode << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 proverRequest.result = ZKR_SM_MAIN_BINARY;
                 return;
             }
@@ -2734,7 +2734,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             fea2scalar(fr, offsetScalar, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]);
             if (offsetScalar<0 || offsetScalar>32)
             {
-                cerr << "Error: MemAlign out of range offset=" << offsetScalar.get_str() << endl;
+                cerr << "Error: MemAlign out of range offset=" << offsetScalar.get_str() << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 proverRequest.result = ZKR_SM_MAIN_MEMALIGN;
                 return;
             }
@@ -2754,7 +2754,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 _W1 = (m1 & (ScalarMask256 >> offset*8)) | ((v << (256 - offset*8)) & ScalarMask256);
                 if ( (w0 != _W0) || (w1 != _W1) )
                 {
-                    cerr << "Error: MemAlign w0, w1 invalid: w0=" << w0.get_str(16) << " w1=" << w1.get_str(16) << " _W0=" << _W0.get_str(16) << " _W1=" << _W1.get_str(16) << " m0=" << m0.get_str(16) << " m1=" << m1.get_str(16) << " offset=" << offset << " v=" << v.get_str(16) << endl;
+                    cerr << "Error: MemAlign w0, w1 invalid: w0=" << w0.get_str(16) << " w1=" << w1.get_str(16) << " _W0=" << _W0.get_str(16) << " _W1=" << _W1.get_str(16) << " m0=" << m0.get_str(16) << " m1=" << m1.get_str(16) << " offset=" << offset << " v=" << v.get_str(16) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     proverRequest.result = ZKR_SM_MAIN_MEMALIGN;
                     return;
                 }
@@ -2784,7 +2784,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 _W0 = (m0 & (byteMaskOn256 >> (offset*8))) | ((v & 0xFF) << ((31-offset)*8));
                 if (w0 != _W0)
                 {
-                    cerr << "Error: MemAlign w0 invalid: w0=" << w0.get_str(16) << " _W0=" << _W0.get_str(16) << " m0=" << m0.get_str(16) << " offset=" << offset << " v=" << v.get_str(16) << endl;
+                    cerr << "Error: MemAlign w0 invalid: w0=" << w0.get_str(16) << " _W0=" << _W0.get_str(16) << " m0=" << m0.get_str(16) << " offset=" << offset << " v=" << v.get_str(16) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     proverRequest.result = ZKR_SM_MAIN_MEMALIGN;
                     return;
                 }
@@ -2815,7 +2815,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 _V = leftV | rightV;
                 if (v != _V)
                 {
-                    cerr << "Error: MemAlign v invalid: v=" << v.get_str(16) << " _V=" << _V.get_str(16) << " m0=" << m0.get_str(16) << " m1=" << m1.get_str(16) << " offset=" << offset << endl;
+                    cerr << "Error: MemAlign v invalid: v=" << v.get_str(16) << " _V=" << _V.get_str(16) << " m0=" << m0.get_str(16) << " m1=" << m1.get_str(16) << " offset=" << offset << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     proverRequest.result = ZKR_SM_MAIN_MEMALIGN;
                     return;
                 }
@@ -2836,7 +2836,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             else
             {
-                cerr << "Error: Invalid memAlign operation zpPC=" << zkPC << " memAlignRD=" << rom.line[zkPC].memAlignRD << " memAlignWR=" << rom.line[zkPC].memAlignWR << " memAlignWR8=" << rom.line[zkPC].memAlignWR8 << endl;
+                cerr << "Error: Invalid memAlign operation zpPC=" << zkPC << " memAlignRD=" << rom.line[zkPC].memAlignRD << " memAlignWR=" << rom.line[zkPC].memAlignWR << " memAlignWR8=" << rom.line[zkPC].memAlignWR8 << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 exitProcess();
             }
         }
@@ -3061,7 +3061,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef CHECK_MAX_CNT_ASAP
             if (fr.toU64(pols.cntArith[nexti]) > MAX_CNT_ARITH)
             {
-                cerr << "Error: Main Executor found pols.cntArith[nexti]=" << fr.toU64(pols.cntArith[nexti]) << " > MAX_CNT_ARITH=" << MAX_CNT_ARITH << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                cerr << "Error: Main Executor found pols.cntArith[nexti]=" << fr.toU64(pols.cntArith[nexti]) << " > MAX_CNT_ARITH=" << MAX_CNT_ARITH << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 if (bProcessBatch)
                 {
                     proverRequest.result = ZKR_SM_MAIN_OOC_ARITH;
@@ -3080,7 +3080,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef CHECK_MAX_CNT_ASAP
             if (fr.toU64(pols.cntBinary[nexti]) > MAX_CNT_BINARY)
             {
-                cerr << "Error: Main Executor found pols.cntBinary[nexti]=" << fr.toU64(pols.cntBinary[nexti]) << " > MAX_CNT_BINARY=" << MAX_CNT_BINARY << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                cerr << "Error: Main Executor found pols.cntBinary[nexti]=" << fr.toU64(pols.cntBinary[nexti]) << " > MAX_CNT_BINARY=" << MAX_CNT_BINARY << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 if (bProcessBatch)
                 {
                     proverRequest.result = ZKR_SM_MAIN_OOC_BINARY;
@@ -3099,7 +3099,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef CHECK_MAX_CNT_ASAP
             if (fr.toU64(pols.cntMemAlign[nexti]) > MAX_CNT_MEM_ALIGN)
             {
-                cerr << "Error: Main Executor found pols.cntMemAlign[nexti]=" << fr.toU64(pols.cntMemAlign[nexti]) << " > MAX_CNT_MEM_ALIGN=" << MAX_CNT_MEM_ALIGN << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                cerr << "Error: Main Executor found pols.cntMemAlign[nexti]=" << fr.toU64(pols.cntMemAlign[nexti]) << " > MAX_CNT_MEM_ALIGN=" << MAX_CNT_MEM_ALIGN << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 if (bProcessBatch)
                 {
                     proverRequest.result = ZKR_SM_MAIN_OOC_MEM_ALIGN;
@@ -3201,7 +3201,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             else
             {
-                cerr << "Error: MainExecutor::execute() JMPN invalid S33 value op0=" << jmpnCondValue << endl;
+                cerr << "Error: MainExecutor::execute() JMPN invalid S33 value op0=" << jmpnCondValue << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 exitProcess();
             }
             pols.lJmpnCondValue[i] = fr.fromU64(jmpnCondValue & 0x7FFFFF);
@@ -3356,7 +3356,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef CHECK_MAX_CNT_ASAP
             if (fr.toU64(pols.cntKeccakF[nexti]) > MAX_CNT_KECCAK_F)
             {
-                cerr << "Error: Main Executor found pols.cntKeccakF[nexti]=" << fr.toU64(pols.cntKeccakF[nexti]) << " > MAX_CNT_KECCAK_F=" << MAX_CNT_KECCAK_F << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                cerr << "Error: Main Executor found pols.cntKeccakF[nexti]=" << fr.toU64(pols.cntKeccakF[nexti]) << " > MAX_CNT_KECCAK_F=" << MAX_CNT_KECCAK_F << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 if (bProcessBatch)
                 {
                     proverRequest.result = ZKR_SM_MAIN_OOC_KECCAK_F;
@@ -3377,7 +3377,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef CHECK_MAX_CNT_ASAP
             if (fr.toU64(pols.cntPaddingPG[nexti]) > MAX_CNT_PADDING_PG)
             {
-                cerr << "Error: Main Executor found pols.cntPaddingPG[nexti]=" << fr.toU64(pols.cntPaddingPG[nexti]) << " > MAX_CNT_PADDING_PG=" << MAX_CNT_PADDING_PG << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                cerr << "Error: Main Executor found pols.cntPaddingPG[nexti]=" << fr.toU64(pols.cntPaddingPG[nexti]) << " > MAX_CNT_PADDING_PG=" << MAX_CNT_PADDING_PG << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 if (bProcessBatch)
                 {
                     proverRequest.result = ZKR_SM_MAIN_OOC_PADDING_PG;
@@ -3398,7 +3398,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef CHECK_MAX_CNT_ASAP
             if (fr.toU64(pols.cntPoseidonG[nexti]) > MAX_CNT_POSEIDON_G)
             {
-                cerr << "Error: Main Executor found pols.cntPoseidonG[nexti]=" << fr.toU64(pols.cntPoseidonG[nexti]) << " > MAX_CNT_POSEIDON_G=" << MAX_CNT_POSEIDON_G << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
+                cerr << "Error: Main Executor found pols.cntPoseidonG[nexti]=" << fr.toU64(pols.cntPoseidonG[nexti]) << " > MAX_CNT_POSEIDON_G=" << MAX_CNT_POSEIDON_G << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 if (bProcessBatch)
                 {
                     proverRequest.result = ZKR_SM_MAIN_OOC_POSEIDON_G;
@@ -3434,7 +3434,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (cr.zkResult != ZKR_SUCCESS)
                 {
                     proverRequest.result = cr.zkResult;
-                    cerr << "Error: Main exec failed calling evalCommand() after result=" << proverRequest.result << "=" << zkresult2string(proverRequest.result) << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << endl;
+                    cerr << "Error: Main exec failed calling evalCommand() after result=" << proverRequest.result << "=" << zkresult2string(proverRequest.result) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     return;
                 }
             }
@@ -3486,7 +3486,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef CHECK_MAX_CNT_AT_THE_END
     if (fr.toU64(pols.cntArith[0]) > MAX_CNT_ARITH)
     {
-        cerr << "Error: Main Executor found pols.cntArith[0]=" << fr.toU64(pols.cntArith[0]) << " > MAX_CNT_ARITH=" << MAX_CNT_ARITH << endl;
+        cerr << "Error: Main Executor found pols.cntArith[0]=" << fr.toU64(pols.cntArith[0]) << " > MAX_CNT_ARITH=" << MAX_CNT_ARITH << " uuid=" << proverRequest.uuid << endl;
         if (bProcessBatch)
         {
             proverRequest.result = ZKR_SM_MAIN_OOC_ARITH;
@@ -3498,7 +3498,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     }
     if (fr.toU64(pols.cntBinary[0]) > MAX_CNT_BINARY)
     {
-        cerr << "Error: Main Executor found pols.cntBinary[0]=" << fr.toU64(pols.cntBinary[0]) << " > MAX_CNT_BINARY=" << MAX_CNT_BINARY << endl;
+        cerr << "Error: Main Executor found pols.cntBinary[0]=" << fr.toU64(pols.cntBinary[0]) << " > MAX_CNT_BINARY=" << MAX_CNT_BINARY << " uuid=" << proverRequest.uuid << endl;
         if (bProcessBatch)
         {
             proverRequest.result = ZKR_SM_MAIN_OOC_BINARY;
@@ -3510,7 +3510,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     }
     if (fr.toU64(pols.cntMemAlign[0]) > MAX_CNT_MEM_ALIGN)
     {
-        cerr << "Error: Main Executor found pols.cntMemAlign[0]=" << fr.toU64(pols.cntMemAlign[0]) << " > MAX_CNT_MEM_ALIGN=" << MAX_CNT_MEM_ALIGN << endl;
+        cerr << "Error: Main Executor found pols.cntMemAlign[0]=" << fr.toU64(pols.cntMemAlign[0]) << " > MAX_CNT_MEM_ALIGN=" << MAX_CNT_MEM_ALIGN << " uuid=" << proverRequest.uuid << endl;
         if (bProcessBatch)
         {
             proverRequest.result = ZKR_SM_MAIN_OOC_MEM_ALIGN;
@@ -3522,7 +3522,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     }
     if (fr.toU64(pols.cntKeccakF[0]) > MAX_CNT_KECCAK_F)
     {
-        cerr << "Error: Main Executor found pols.cntKeccakF[0]=" << fr.toU64(pols.cntKeccakF[0]) << " > MAX_CNT_KECCAK_F=" << MAX_CNT_KECCAK_F << endl;
+        cerr << "Error: Main Executor found pols.cntKeccakF[0]=" << fr.toU64(pols.cntKeccakF[0]) << " > MAX_CNT_KECCAK_F=" << MAX_CNT_KECCAK_F << " uuid=" << proverRequest.uuid << endl;
         if (bProcessBatch)
         {
             proverRequest.result = ZKR_SM_MAIN_OOC_KECCAK_F;
@@ -3534,7 +3534,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     }
     if (fr.toU64(pols.cntPaddingPG[0]) > MAX_CNT_PADDING_PG)
     {
-        cerr << "Error: Main Executor found pols.cntPaddingPG[0]=" << fr.toU64(pols.cntPaddingPG[0]) << " > MAX_CNT_PADDING_PG=" << MAX_CNT_PADDING_PG << endl;
+        cerr << "Error: Main Executor found pols.cntPaddingPG[0]=" << fr.toU64(pols.cntPaddingPG[0]) << " > MAX_CNT_PADDING_PG=" << MAX_CNT_PADDING_PG << " uuid=" << proverRequest.uuid << endl;
         if (bProcessBatch)
         {
             proverRequest.result = ZKR_SM_MAIN_OOC_PADDING_PG;
@@ -3546,7 +3546,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     }
     if (fr.toU64(pols.cntPoseidonG[0]) > MAX_CNT_POSEIDON_G)
     {
-        cerr << "Error: Main Executor found pols.cntPoseidonG[0]=" << fr.toU64(pols.cntPoseidonG[0]) << " > MAX_CNT_POSEIDON_G=" << MAX_CNT_POSEIDON_G << endl;
+        cerr << "Error: Main Executor found pols.cntPoseidonG[0]=" << fr.toU64(pols.cntPoseidonG[0]) << " > MAX_CNT_POSEIDON_G=" << MAX_CNT_POSEIDON_G << " uuid=" << proverRequest.uuid << endl;
         if (bProcessBatch)
         {
             proverRequest.result = ZKR_SM_MAIN_OOC_POSEIDON_G;
@@ -3591,7 +3591,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             if (p != ctx.hashK[i].data.size())
             {
-                cerr << "Error: Main SM Executor: Reading hashK out of limits: i=" << i << " p=" << p << " ctx.hashK[i].data.size()=" << ctx.hashK[i].data.size() << endl;
+                cerr << "Error: Main SM Executor: Reading hashK out of limits: i=" << i << " p=" << p << " ctx.hashK[i].data.size()=" << ctx.hashK[i].data.size() << " uuid=" << proverRequest.uuid << endl;
                 proverRequest.result = ZKR_SM_MAIN_HASHK;
                 return;
             }
@@ -3621,7 +3621,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             if (p != ctx.hashP[i].data.size())
             {
-                cerr << "Error: Main SM Executor: Reading hashP out of limits: i=" << i << " p=" << p << " ctx.hashP[i].data.size()=" << ctx.hashP[i].data.size() << endl;
+                cerr << "Error: Main SM Executor: Reading hashP out of limits: i=" << i << " p=" << p << " ctx.hashP[i].data.size()=" << ctx.hashP[i].data.size() << " uuid=" << proverRequest.uuid << endl;
                 proverRequest.result = ZKR_SM_MAIN_HASHP;
                 return;
             }
@@ -3701,7 +3701,7 @@ void MainExecutor::checkFinalState(Context &ctx)
         (!fr.isZero(ctx.pols.zkPC[0]))
     )
     {
-        cerr << "Error: MainExecutor::checkFinalState() Program terminated with registers A, D, E, SR, CTX, PC, MAXMEM, zkPC not set to zero" << endl;
+        cerr << "Error: MainExecutor::checkFinalState() Program terminated with registers A, D, E, SR, CTX, PC, MAXMEM, zkPC not set to zero" << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << rom.line[*ctx.pZKPC].toString(fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 
@@ -3719,7 +3719,7 @@ void MainExecutor::checkFinalState(Context &ctx)
     {
         mpz_class bScalar;
         fea2scalar(ctx.fr, bScalar, ctx.pols.B0[0], ctx.pols.B1[0], ctx.pols.B2[0], ctx.pols.B3[0], ctx.pols.B4[0], ctx.pols.B5[0], ctx.pols.B6[0], ctx.pols.B7[0]);
-        cerr << "Error:: MainExecutor::checkFinalState() Register B=" << bScalar.get_str(16) << " not terminated equal as its initial value=" << ctx.proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) << endl;
+        cerr << "Error:: MainExecutor::checkFinalState() Register B=" << bScalar.get_str(16) << " not terminated equal as its initial value=" << ctx.proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << rom.line[*ctx.pZKPC].toString(fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 
@@ -3737,19 +3737,19 @@ void MainExecutor::checkFinalState(Context &ctx)
     {
         mpz_class cScalar;
         fea2scalar(ctx.fr, cScalar, ctx.pols.C0[0], ctx.pols.C1[0], ctx.pols.C2[0], ctx.pols.C3[0], ctx.pols.C4[0], ctx.pols.C5[0], ctx.pols.C6[0], ctx.pols.C7[0]);
-        cerr << "Error:: MainExecutor::checkFinalState() Register C=" << cScalar.get_str(16) << " not terminated equal as its initial value=" << ctx.proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16) << endl;
+        cerr << "Error:: MainExecutor::checkFinalState() Register C=" << cScalar.get_str(16) << " not terminated equal as its initial value=" << ctx.proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << rom.line[*ctx.pZKPC].toString(fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
     
     if (!fr.equal(ctx.pols.SP[0], fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum)))
     {
-        cerr << "Error:: MainExecutor::checkFinalState() Register SP not terminated equal as its initial value" << endl;
+        cerr << "Error:: MainExecutor::checkFinalState() Register SP not terminated equal as its initial value" << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << rom.line[*ctx.pZKPC].toString(fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 
     if (!fr.equal(ctx.pols.GAS[0], fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.chainID)))
     {
-        cerr << "Error:: MainExecutor::checkFinalState() Register GAS not terminated equal as its initial value" << endl;
+        cerr << "Error:: MainExecutor::checkFinalState() Register GAS not terminated equal as its initial value" << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << rom.line[*ctx.pZKPC].toString(fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 }
@@ -3775,7 +3775,7 @@ void MainExecutor::assertOutputs(Context &ctx)
         {
             mpz_class auxScalar;
             fea2scalar(fr, auxScalar, ctx.pols.SR0[step], ctx.pols.SR1[step], ctx.pols.SR2[step], ctx.pols.SR3[step], ctx.pols.SR4[step], ctx.pols.SR5[step], ctx.pols.SR6[step], ctx.pols.SR7[step] );
-            cerr << "Error:: MainExecutor::assertOutputs() Register SR=" << auxScalar.get_str(16) << " not terminated equal to newStateRoot=" << ctx.proverRequest.input.publicInputsExtended.newStateRoot.get_str(16) << " at step=" << step << endl;
+            cerr << "Error:: MainExecutor::assertOutputs() Register SR=" << auxScalar.get_str(16) << " not terminated equal to newStateRoot=" << ctx.proverRequest.input.publicInputsExtended.newStateRoot.get_str(16) << " step=" << step << " zkPC=" << *ctx.pZKPC << " line=" << rom.line[*ctx.pZKPC].toString(fr) << " uuid=" << ctx.proverRequest.uuid << endl;
             exitProcess();
         }
     }
@@ -3797,7 +3797,7 @@ void MainExecutor::assertOutputs(Context &ctx)
         {
             mpz_class auxScalar;
             fea2scalar(fr, auxScalar, ctx.pols.D0[step], ctx.pols.D1[step], ctx.pols.D2[step], ctx.pols.D3[step], ctx.pols.D4[step], ctx.pols.D5[step], ctx.pols.D6[step], ctx.pols.D7[step] );
-            cerr << "Error:: MainExecutor::assertOutputs() Register D=" << auxScalar.get_str(16) << " not terminated equal to newAccInputHash=" << ctx.proverRequest.input.publicInputsExtended.newAccInputHash.get_str(16) << " at step=" << step << endl;
+            cerr << "Error:: MainExecutor::assertOutputs() Register D=" << auxScalar.get_str(16) << " not terminated equal to newAccInputHash=" << ctx.proverRequest.input.publicInputsExtended.newAccInputHash.get_str(16) << " step=" << step << " zkPC=" << *ctx.pZKPC << " line=" << rom.line[*ctx.pZKPC].toString(fr) << " uuid=" << ctx.proverRequest.uuid << endl;
             exitProcess();
         }
     }
@@ -3819,7 +3819,7 @@ void MainExecutor::assertOutputs(Context &ctx)
         {
             mpz_class auxScalar;
             fea2scalar(fr, auxScalar, ctx.pols.E0[step], ctx.pols.E1[step], ctx.pols.E2[step], ctx.pols.E3[step], ctx.pols.E4[step], ctx.pols.E5[step], ctx.pols.E6[step], ctx.pols.E7[step] );
-            cerr << "Error:: MainExecutor::assertOutputs() Register E=" << auxScalar.get_str(16) << " not terminated equal to newLocalExitRoot=" << ctx.proverRequest.input.publicInputsExtended.newLocalExitRoot.get_str(16) << " at step=" << step << endl;
+            cerr << "Error:: MainExecutor::assertOutputs() Register E=" << auxScalar.get_str(16) << " not terminated equal to newLocalExitRoot=" << ctx.proverRequest.input.publicInputsExtended.newLocalExitRoot.get_str(16) << " step=" << step << " zkPC=" << *ctx.pZKPC << " line=" << rom.line[*ctx.pZKPC].toString(fr) << " uuid=" << ctx.proverRequest.uuid << endl;
             exitProcess();
         }
     }
@@ -3828,7 +3828,7 @@ void MainExecutor::assertOutputs(Context &ctx)
     {
         if (!fr.equal(ctx.pols.PC[step], fr.fromU64(ctx.proverRequest.input.publicInputsExtended.newBatchNum)))
         {
-            cerr << "Error:: MainExecutor::assertOutputs() Register PC=" << fr.toU64(ctx.pols.PC[step]) << " not terminated equal to newBatchNum=" << ctx.proverRequest.input.publicInputsExtended.newBatchNum << " at step=" << step << endl;
+            cerr << "Error:: MainExecutor::assertOutputs() Register PC=" << fr.toU64(ctx.pols.PC[step]) << " not terminated equal to newBatchNum=" << ctx.proverRequest.input.publicInputsExtended.newBatchNum << " step=" << step << " zkPC=" << *ctx.pZKPC << " line=" << rom.line[*ctx.pZKPC].toString(fr) << " uuid=" << ctx.proverRequest.uuid << endl;
             exitProcess();
         }
     }

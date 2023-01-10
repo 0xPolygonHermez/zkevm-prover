@@ -297,7 +297,7 @@ ProverRequest *Prover::waitForRequestToComplete(const string &uuid, const uint64
     std::unordered_map<std::string, ProverRequest *>::iterator it = requestsMap.find(uuid);
     if (it == requestsMap.end())
     {
-        cerr << "Prover::waitForRequestToComplete() unknown uuid: " << uuid << endl;
+        cerr << "Error: Prover::waitForRequestToComplete() unknown uuid: " << uuid << endl;
         unlock();
         return NULL;
     }
@@ -612,7 +612,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
 
     if (pProverRequest->aggregatedProofInput1["publics"][17] != pProverRequest->aggregatedProofInput2["publics"][17])
     {
-        std::cerr << "Inputs has different chainId" << std::endl;
+        std::cerr << "Error: Inputs has different chainId" << std::endl;
         std::cerr << pProverRequest->aggregatedProofInput1["publics"][17] << "!=" << pProverRequest->aggregatedProofInput2["publics"][17] << std::endl;
         pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
         return;
@@ -622,7 +622,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     {
         if (pProverRequest->aggregatedProofInput1["publics"][18 + i] != pProverRequest->aggregatedProofInput2["publics"][0 + i])
         {
-            std::cerr << "The newStateRoot and the oldStateRoot are not consistent" << std::endl;
+            std::cerr << "Error: The newStateRoot and the oldStateRoot are not consistent" << std::endl;
             std::cerr << pProverRequest->aggregatedProofInput1["publics"][18 + i] << "!=" << pProverRequest->aggregatedProofInput2["publics"][0 + i] << std::endl;
             pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
             return;
@@ -633,7 +633,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     {
         if (pProverRequest->aggregatedProofInput1["publics"][26 + i] != pProverRequest->aggregatedProofInput2["publics"][8 + i])
         {
-            std::cerr << "newAccInputHash and oldAccInputHash are not consistent" << std::endl;
+            std::cerr << "Error: newAccInputHash and oldAccInputHash are not consistent" << std::endl;
             std::cerr << pProverRequest->aggregatedProofInput1["publics"][26 + i] << "!=" << pProverRequest->aggregatedProofInput2["publics"][8 + i] << std::endl;
             pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
             return;
@@ -642,7 +642,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     // Check batchNum
     if (pProverRequest->aggregatedProofInput1["publics"][42] != pProverRequest->aggregatedProofInput2["publics"][16])
     {
-        std::cerr << "newBatchNum and oldBatchNum are not consistent" << std::endl;
+        std::cerr << "Error: newBatchNum and oldBatchNum are not consistent" << std::endl;
         std::cerr << pProverRequest->aggregatedProofInput1["publics"][42] << "!=" << pProverRequest->aggregatedProofInput2["publics"][16] << std::endl;
         pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
         return;
