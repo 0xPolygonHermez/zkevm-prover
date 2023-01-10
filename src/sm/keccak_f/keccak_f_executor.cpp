@@ -8,51 +8,51 @@ void KeccakFExecutor::loadScript (json j)
     if ( !j.contains("program") ||
          !j["program"].is_array())
     {
-        cerr << "KeccakFExecutor::loadEvals() found JSON object does not contain not a program array" << endl;
+        cerr << "Error: KeccakFExecutor::loadEvals() found JSON object does not contain not a program array" << endl;
         exitProcess();
     }
     for (uint64_t i=0; i<j["program"].size(); i++)
     {
         if ( !j["program"][i].is_object() )
         {
-            cerr << "KeccakFExecutor::loadEvals() found JSON array's element is not an object" << endl;
+            cerr << "Error: KeccakFExecutor::loadEvals() found JSON array's element is not an object" << endl;
             exitProcess();
         }
         if ( !j["program"][i].contains("op") ||
              !j["program"][i]["op"].is_string() )
         {
-            cerr << "KeccakFExecutor::loadEvals() found JSON array's element does not contain string op field" << endl;
+            cerr << "Error: KeccakFExecutor::loadEvals() found JSON array's element does not contain string op field" << endl;
             exitProcess();
         }
         if ( !j["program"][i].contains("ref") ||
              !j["program"][i]["ref"].is_number_unsigned() ||
               j["program"][i]["ref"]>=maxRefs )
         {
-            cerr << "KeccakFExecutor::loadEvals() found JSON array's element does not contain unsigned number ref field" << endl;
+            cerr << "Error: KeccakFExecutor::loadEvals() found JSON array's element does not contain unsigned number ref field" << endl;
             exitProcess();
         }
         if ( !j["program"][i].contains("a") ||
              !j["program"][i]["a"].is_object() )
         {
-            cerr << "KeccakFExecutor::loadEvals() found JSON array's element does not contain object a field" << endl;
+            cerr << "Error: KeccakFExecutor::loadEvals() found JSON array's element does not contain object a field" << endl;
             exitProcess();
         }
         if ( !j["program"][i].contains("b") ||
              !j["program"][i]["b"].is_object() )
         {
-            cerr << "KeccakFExecutor::loadEvals() found JSON array's element does not contain object b field" << endl;
+            cerr << "Error: KeccakFExecutor::loadEvals() found JSON array's element does not contain object b field" << endl;
             exitProcess();
         }
         if ( !j["program"][i]["a"].contains("type") ||
              !j["program"][i]["a"]["type"].is_string() )
         {
-            cerr << "KeccakFExecutor::loadEvals() found JSON array's element does not contain string a type field" << endl;
+            cerr << "Error: KeccakFExecutor::loadEvals() found JSON array's element does not contain string a type field" << endl;
             exitProcess();
         }
         if ( !j["program"][i]["b"].contains("type") ||
              !j["program"][i]["b"]["type"].is_string() )
         {
-            cerr << "KeccakFExecutor::loadEvals() found JSON array's element does not contain string b type field" << endl;
+            cerr << "Error: KeccakFExecutor::loadEvals() found JSON array's element does not contain string b type field" << endl;
             exitProcess();
         }
         

@@ -98,7 +98,7 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
     ProverRequest * pProverRequest = new ProverRequest(fr, config, prt_genBatchProof);
     if (pProverRequest == NULL)
     {
-        cerr << "AggregatorClient::GenBatchProof() failed allocation a new ProveRequest" << endl;
+        cerr << "Error: AggregatorClient::GenBatchProof() failed allocation a new ProveRequest" << endl;
         exitProcess();
     }
 #ifdef LOG_SERVICE
@@ -243,7 +243,7 @@ bool AggregatorClient::GenAggregatedProof (const aggregator::v1::GenAggregatedPr
     ProverRequest * pProverRequest = new ProverRequest(fr, config, prt_genAggregatedProof);
     if (pProverRequest == NULL)
     {
-        cerr << "AggregatorClient::GenAggregatedProof() failed allocation a new ProveRequest" << endl;
+        cerr << "Error: AggregatorClient::GenAggregatedProof() failed allocation a new ProveRequest" << endl;
         exitProcess();
     }
 #ifdef LOG_SERVICE
@@ -275,7 +275,7 @@ bool AggregatorClient::GenFinalProof (const aggregator::v1::GenFinalProofRequest
     ProverRequest * pProverRequest = new ProverRequest(fr, config, prt_genFinalProof);
     if (pProverRequest == NULL)
     {
-        cerr << "AggregatorClient::GenFinalProof() failed allocation a new ProveRequest" << endl;
+        cerr << "Error: AggregatorClient::GenFinalProof() failed allocation a new ProveRequest" << endl;
         exitProcess();
     }
 #ifdef LOG_SERVICE
@@ -321,7 +321,7 @@ bool AggregatorClient::Cancel (const aggregator::v1::CancelRequest &cancelReques
     if (it == prover.requestsMap.end())
     {
         prover.unlock();
-        cerr << "AggregatorClient::Cancel() unknown uuid: " << uuid << endl;
+        cerr << "Error: AggregatorClient::Cancel() unknown uuid: " << uuid << endl;
         cancelResponse.set_result(aggregator::v1::Result::ERROR);
         return false;
     }
@@ -330,7 +330,7 @@ bool AggregatorClient::Cancel (const aggregator::v1::CancelRequest &cancelReques
     if (it->second->bCompleted)
     {
         prover.unlock();
-        cerr << "AggregatorClient::Cancel() already completed uuid: " << uuid << endl;
+        cerr << "Error: AggregatorClient::Cancel() already completed uuid: " << uuid << endl;
         cancelResponse.set_result(aggregator::v1::Result::ERROR);
         return false;
     }
@@ -366,7 +366,7 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
     // If UUID is not found, return the proper error
     if (it == prover.requestsMap.end())
     {
-        cerr << "AggregatorClient::GetProof() invalid uuid:" << uuid << endl;
+        cerr << "Error: AggregatorClient::GetProof() invalid uuid:" << uuid << endl;
         getProofResponse.set_result(aggregator::v1::GetProofResponse_Result_ERROR);
         getProofResponse.set_result_string("invalid UUID");
     }
@@ -377,7 +377,7 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
         // If request is not completed, return the proper result
         if (!pProverRequest->bCompleted)
         {
-            //cerr << "ZKProverServiceImpl::GetProof() not completed uuid=" << uuid << endl;
+            //cerr << "Error: ZKProverServiceImpl::GetProof() not completed uuid=" << uuid << endl;
             getProofResponse.set_result(aggregator::v1::GetProofResponse_Result_PENDING);
             getProofResponse.set_result_string("pending");
         }
@@ -470,7 +470,7 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
                 }
                 default:
                 {
-                    cerr << "AggregatorClient::GetProof() invalid pProverRequest->type=" << pProverRequest->type << endl;
+                    cerr << "Error: AggregatorClient::GetProof() invalid pProverRequest->type=" << pProverRequest->type << endl;
                     exitProcess();
                 }
             }
@@ -506,7 +506,7 @@ void* aggregatorClientThread(void* arg)
             bResult = readerWriter->Read(&aggregatorMessage);
             if (!bResult)
             {
-                cerr << "aggregatorClientThread() failed calling readerWriter->Read(&aggregatorMessage)" << endl;
+                cerr << "Error: aggregatorClientThread() failed calling readerWriter->Read(&aggregatorMessage)" << endl;
                 break;
             }
             
@@ -627,7 +627,7 @@ void* aggregatorClientThread(void* arg)
 
                 default:
                 {
-                    cerr << "aggregatorClientThread() received an invalid type=" << aggregatorMessage.request_case() << endl;
+                    cerr << "Error: aggregatorClientThread() received an invalid type=" << aggregatorMessage.request_case() << endl;
                     break;
                 }
             }
@@ -636,7 +636,7 @@ void* aggregatorClientThread(void* arg)
             bResult = readerWriter->Write(proverMessage);
             if (!bResult)
             {
-                cerr << "aggregatorClientThread() failed calling readerWriter->Write(proverMessage)" << endl;
+                cerr << "Error: aggregatorClientThread() failed calling readerWriter->Write(proverMessage)" << endl;
                 break;
             }
             

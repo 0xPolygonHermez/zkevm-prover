@@ -489,7 +489,7 @@ int main(int argc, char **argv)
         int iResult = system(command.c_str());
         if (iResult != 0)
         {
-            cerr << "main() system() returned: " << to_string(iResult) << endl;
+            cerr << "Error: main() system() returned: " << to_string(iResult) << endl;
         }
     }
 

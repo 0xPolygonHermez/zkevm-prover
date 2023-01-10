@@ -62,7 +62,7 @@ ProverRequest::ProverRequest (Goldilocks &fr, const Config &config, tProverReque
         }
         default:
         {
-            cerr << "ProverRequest::ProverRequest() got invalid type=" << type << endl;
+            cerr << "Error: ProverRequest::ProverRequest() got invalid type=" << type << endl;
             exitProcess();
         }
     }

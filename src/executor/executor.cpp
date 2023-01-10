@@ -19,7 +19,7 @@ void Executor::process_batch (ProverRequest &proverRequest)
         void * pAddress = calloc(CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
         if (pAddress == NULL)
         {
-            cerr << "Executor::process_batch() failed calling calloc(" << CommitPols::pilSize() << ")" << endl;
+            cerr << "Error: Executor::process_batch() failed calling calloc(" << CommitPols::pilSize() << ")" << endl;
             exitProcess();
         }
         CommitPols commitPols(pAddress,1);
