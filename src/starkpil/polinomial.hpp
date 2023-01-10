@@ -697,6 +697,7 @@ public:
         uint64_t size = src.degree();
         Polinomial aux(size, 3);
         Polinomial tmp(size, 3);
+        Polinomial z(size, 3);
 
         Polinomial::copyElement(tmp, 0, src, 0);
 
@@ -705,13 +706,12 @@ public:
             Polinomial::mulElement(tmp, i, tmp, i - 1, src, i);
         }
 
-        Polinomial z(1, 3);
-        Goldilocks3::inv((Goldilocks3::Element *)z[0], (Goldilocks3::Element *)tmp[size - 1]);
+        Goldilocks3::inv((Goldilocks3::Element *)z[size - 1], (Goldilocks3::Element *)tmp[size - 1]);
 
         for (uint64_t i = size - 1; i > 0; i--)
         {
-            Polinomial::mulElement(res, i, z, 0, tmp, i - 1);
-            Polinomial::mulElement(z, 0, z, 0, src, i);
+            Polinomial::mulElement(z, i - 1, z, i, src, i);
+            Polinomial::mulElement(res, i, z, i, tmp, i - 1);
         }
         Polinomial::copyElement(res, 0, z, 0);
     }
