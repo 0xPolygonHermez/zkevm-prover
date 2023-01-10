@@ -103,16 +103,15 @@ inline void getFromMemory(Context &ctx, mpz_class &offset, mpz_class &length, st
 }
 
 // Get a global or context variable
-inline void getVarFromCtx(Context &ctx, bool global, const char *pVarLabel, uint64_t varOffset, mpz_class &result)
+inline void getVarFromCtx(Context &ctx, bool global, uint64_t varOffset, mpz_class &result)
 {
-    uint64_t offsetCtx = global ? 0 : ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]) * 0x40000;
-    //uint64_t offsetRelative = findOffsetLabel(ctx, pVarLabel);
-    uint64_t addressMem = offsetCtx + varOffset; //offsetRelative;
+    uint64_t offsetCtx = global ? 0 : ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep])*0x40000;
+    uint64_t addressMem = offsetCtx + varOffset;
     unordered_map<uint64_t, Fea>::iterator memIterator;
     memIterator = ctx.mem.find(addressMem);
     if (memIterator == ctx.mem.end())
     {
-        // cout << "FullTracer::getVarFromCtx() could not find in ctx.mem address=" << pVarLabel << "=" << offsetRelative << endl; TODO: Double check this is as designed?
+        //cout << "FullTracer::getVarFromCtx() could not find in ctx.mem address with offset=" << varOffset << endl;
         result = 0;
     }
     else
@@ -128,7 +127,9 @@ inline void getCalldataFromStack(Context &ctx, uint64_t offset, uint64_t length,
     uint64_t contextAddress = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep])*0x40000;
     uint64_t firstAddr = contextAddress + 0x10000 + 1024 + offset;
     uint64_t lastAddr = contextAddress + 0x20000;
+    mpz_class auxScalar;
     result = "0x";
+    
     unordered_map<uint64_t, Fea>::iterator memIterator;
     uint64_t consumedLength = 0;
     for (uint64_t i = firstAddr; i < lastAddr; i++)
@@ -139,7 +140,6 @@ inline void getCalldataFromStack(Context &ctx, uint64_t offset, uint64_t length,
             break;
         }
         Fea memVal = memIterator->second;
-        mpz_class auxScalar;
         fea2scalar(ctx.fr, auxScalar, memVal.fe0, memVal.fe1, memVal.fe2, memVal.fe3, memVal.fe4, memVal.fe5, memVal.fe6, memVal.fe7);
         result += PrependZeros(auxScalar.get_str(16), 64);
         if (length > 0)
@@ -314,6 +314,7 @@ void FullTracer::onError(Context &ctx, const RomCommand &cmd)
             Response response;
             response.error = lastError;
             finalTrace.responses.push_back(response);
+            finalTrace.error = lastError;
         }
         else
         {
@@ -398,12 +399,12 @@ void FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
 
     // Add log info
     mpz_class auxScalar;
-    getVarFromCtx(ctx, false, "txDestAddr", ctx.rom.txDestAddrOffset, auxScalar);
+    getVarFromCtx(ctx, false, ctx.rom.txDestAddrOffset, auxScalar);
     it->second.address = auxScalar.get_str(16);
-    it->second.batch_number = finalTrace.numBatch; // Candidate to delete, use finalTrace.numBatch instead
+    getVarFromCtx(ctx, false, ctx.rom.newNumBatchOffset, auxScalar);
+    it->second.batch_number = auxScalar.get_ui();
     it->second.tx_hash = finalTrace.responses[txCount].tx_hash;
     it->second.tx_index = txCount;
-    it->second.batch_hash = finalTrace.newAccInputHash; // Candidate to delete, use context.batch instead
     it->second.index = indexLog;
 
 #ifdef LOG_FULL_TRACER
@@ -426,7 +427,7 @@ void FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
     /* Fill context object */
 
     // TX to
-    getVarFromCtx(ctx, false, "txDestAddr", ctx.rom.txDestAddrOffset, auxScalar);
+    getVarFromCtx(ctx, false, ctx.rom.txDestAddrOffset, auxScalar);
     string to = Add0xIfMissing(auxScalar.get_str(16));
     response.call_trace.context.to = (to == "0x0") ? "0x" : to;
 
@@ -434,19 +435,16 @@ void FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
     response.call_trace.context.type = (to == "0x0") ? "CREATE" : "CALL";
 
     // TX data
-    getVarFromCtx(ctx, false, "txCalldataLen", ctx.rom.txCalldataLenOffset, auxScalar);
+    getVarFromCtx(ctx, false, ctx.rom.txCalldataLenOffset, auxScalar);
     getCalldataFromStack(ctx, 0, auxScalar.get_ui(), response.call_trace.context.data);
 
     // TX gas
-    getVarFromCtx(ctx, false, "txGasLimit", ctx.rom.txGasLimitOffset, auxScalar);
+    getVarFromCtx(ctx, false, ctx.rom.txGasLimitOffset, auxScalar);
     response.call_trace.context.gas = auxScalar.get_ui();
 
     // TX value
-    getVarFromCtx(ctx, false, "txValue", ctx.rom.txValueOffset, auxScalar);
+    getVarFromCtx(ctx, false, ctx.rom.txValueOffset, auxScalar);
     response.call_trace.context.value = auxScalar;
-
-    // TX batch
-    response.call_trace.context.batch = finalTrace.newAccInputHash;
 
     // TX output
     response.call_trace.context.output = "";
@@ -461,36 +459,32 @@ void FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
     fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]);
     response.call_trace.context.old_state_root = Add0xIfMissing(auxScalar.get_str(16));
 
-    // TX nonce
-    getVarFromCtx(ctx, false, "txNonce", ctx.rom.txNonceOffset, auxScalar);
-    response.call_trace.context.nonce = auxScalar.get_ui();
-
     // TX gas price
-    getVarFromCtx(ctx, false, "txGasPriceRLP", ctx.rom.txGasPriceRLPOffset, auxScalar);
-    response.call_trace.context.gasPrice = auxScalar;
-
-    // TX chain ID
-    getVarFromCtx(ctx, false, "txChainId", ctx.rom.txChainIdOffset, auxScalar);
-    response.call_trace.context.chainId = auxScalar.get_ui();
+    getVarFromCtx(ctx, false, ctx.rom.txGasPriceRLPOffset, auxScalar);
+    response.call_trace.context.gas_price = auxScalar;
 
     /* Fill response object */
 
     mpz_class r;
-    getVarFromCtx(ctx, false, "txR", ctx.rom.txROffset, r);
+    getVarFromCtx(ctx, false, ctx.rom.txROffset, r);
 
     mpz_class s;
-    getVarFromCtx(ctx, false, "txS", ctx.rom.txSOffset, s);
+    getVarFromCtx(ctx, false, ctx.rom.txSOffset, s);
 
     mpz_class ctxV;
-    getVarFromCtx(ctx, false, "txV", ctx.rom.txVOffset, ctxV);
+    getVarFromCtx(ctx, false, ctx.rom.txVOffset, ctxV);
     uint64_t v = ctxV.get_ui() - 27 + response.call_trace.context.chainId * 2 + 35;
+
+    mpz_class nonceScalar;
+    getVarFromCtx(ctx, false, ctx.rom.txNonceOffset, nonceScalar);
+    uint64_t nonce = nonceScalar.get_ui();
 
     // TX hash
     getTransactionHash(response.call_trace.context.to,
                         response.call_trace.context.value,
-                        response.call_trace.context.nonce,
+                        nonce,
                         response.call_trace.context.gas,
-                        response.call_trace.context.gasPrice,
+                        response.call_trace.context.gas_price,
                         response.call_trace.context.data,
                         r,
                         s,
@@ -571,7 +565,7 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
 
     // Set from address
     mpz_class fromScalar;
-    getVarFromCtx(ctx, true, "txSrcOriginAddr", ctx.rom.txSrcOriginAddrOffset, fromScalar);
+    getVarFromCtx(ctx, true, ctx.rom.txSrcOriginAddrOffset, fromScalar);
     response.call_trace.context.from = Add0xIfMissing(fromScalar.get_str(16));
 
     // Set consumed tx gas
@@ -589,9 +583,9 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
 
     // Set return data
     mpz_class offsetScalar;
-    getVarFromCtx(ctx, false, "retDataOffset", ctx.rom.retDataOffsetOffset, offsetScalar);
+    getVarFromCtx(ctx, false, ctx.rom.retDataOffsetOffset, offsetScalar);
     mpz_class lengthScalar;
-    getVarFromCtx(ctx, false, "retDataLength", ctx.rom.retDataLengthOffset, lengthScalar);
+    getVarFromCtx(ctx, false, ctx.rom.retDataLengthOffset, lengthScalar);
     if (response.call_trace.context.to == "0x")
     {
         getCalldataFromStack(ctx, offsetScalar.get_ui(), lengthScalar.get_ui(), response.return_value);
@@ -605,7 +599,7 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     if (response.call_trace.context.to == "0x")
     {
         mpz_class addressScalar;
-        getVarFromCtx(ctx, false, "txDestAddr", ctx.rom.txDestAddrOffset, addressScalar);
+        getVarFromCtx(ctx, false, ctx.rom.txDestAddrOffset, addressScalar);
         response.create_address = addressScalar.get_str(16);
     }
 
@@ -629,7 +623,7 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
         if (info.size() >= 2)
         {
             Opcode beforeLastOpcode = info[info.size() - 2];
-            lastOpcode.gas_cost = beforeLastOpcode.remaining_gas - lastOpcode.remaining_gas;
+            lastOpcode.gas_cost = beforeLastOpcode.gas - lastOpcode.gas;
         }
 
         // Add last opcode
@@ -693,38 +687,12 @@ void FullTracer::onStartBatch(Context &ctx, const RomCommand &cmd)
         return;
     }
 
-    mpz_class auxScalar;
-
-    // Batch hash
-    // getRegFromCtx(ctx, cmd.params[1]->reg, auxScalar);
-    // finalTrace.batchHash = Add0xIfMissing(auxScalar.get_str(16));
-
-    // Old state root
-    // getVarFromCtx(ctx, true, "oldStateRoot", auxScalar);
-    // finalTrace.old_state_root = Add0xIfMissing(auxScalar.get_str(16));
-
-    // Global hash
-    getVarFromCtx(ctx, true, "newAccInputHash", ctx.rom.newAccInputHashOffset, auxScalar);
-    finalTrace.newAccInputHash = Add0xIfMissing(auxScalar.get_str(16));
-
-    // Number of batch
-    getVarFromCtx(ctx, true, "oldNumBatch", ctx.rom.oldNumBatchOffset, auxScalar);
-    finalTrace.numBatch = auxScalar.get_ui() + 1;
-
-    // Timestamp
-    // getVarFromCtx(ctx, true, "timestamp", auxScalar);
-    // finalTrace.timestamp = auxScalar.get_ui();
-
-    // Sequencer address
-    // getVarFromCtx(ctx, true, "sequencerAddr", auxScalar);
-    // finalTrace.sequencerAddr = Add0xIfMissing(auxScalar.get_str(16));
-
     finalTrace.responses.clear();
-
+    finalTrace.error.clear();
     finalTrace.bInitialized = true;
 
 #ifdef LOG_FULL_TRACER
-    cout << "FullTracer::onStartBatch()" << endl;
+    cout << "FullTracer::onStartBatch() old_state_root=" << finalTrace.old_state_root << endl;
 #endif
 #ifdef LOG_TIME_STATISTICS
     tms.add("onStartBatch", TimeDiff(t));
@@ -745,11 +713,21 @@ void FullTracer::onFinishBatch(Context &ctx, const RomCommand &cmd)
     finalTrace.new_state_root = PrependZeros(auxScalar.get_str(16), 64);
 
     // New acc input hash
-    getVarFromCtx(ctx, true, "newAccInputHash", ctx.rom.newAccInputHashOffset, auxScalar);
+    getVarFromCtx(ctx, true, ctx.rom.newAccInputHashOffset, auxScalar);
     finalTrace.new_acc_input_hash = PrependZeros(auxScalar.get_str(16), 64);
 
+    // TODO: Can we simply use finalTrace.new_acc_input_hash when constructing the response? Can we avoid these fields in the .proto?
+    for (uint64_t r=0; r<finalTrace.responses.size(); r++)
+    {
+        finalTrace.responses[r].call_trace.context.batch = finalTrace.new_acc_input_hash;
+        for (uint64_t l=0; l<finalTrace.responses[r].logs.size(); l++)
+        {
+            finalTrace.responses[r].logs[l].batch_hash = finalTrace.new_acc_input_hash;
+        }
+    }
+
     // New local exit root
-    getVarFromCtx(ctx, true, "newLocalExitRoot", ctx.rom.newLocalExitRootOffset, auxScalar);
+    getVarFromCtx(ctx, true, ctx.rom.newLocalExitRootOffset, auxScalar);
     finalTrace.new_local_exit_root = PrependZeros(auxScalar.get_str(16), 64);
 
     // New batch number
@@ -770,7 +748,6 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     gettimeofday(&t, NULL);
 #endif
     Opcode singleInfo;
-    mpz_class auxScalar;
 
     if (ctx.proverRequest.input.bNoCounters)
     {
@@ -780,6 +757,8 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 #endif
         return;
     }
+
+    mpz_class auxScalar;
 
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&top, NULL);
@@ -816,6 +795,8 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
     tmsop.add("getCodeName", TimeDiff(top));
 #endif
+
+#if 0 // finalMemory is not used for performance reasons
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&top, NULL);
 #endif
@@ -828,23 +809,26 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     string finalMemory;
     if (ctx.proverRequest.generateCallTraces())
     {
-        uint64_t lengthMemOffset = ctx.rom.memLengthOffset;//findOffsetLabel(ctx, "memLength");
+        uint64_t lengthMemOffset = ctx.rom.memLengthOffset;
         uint64_t lenMemValueFinal = 0;
-        if (ctx.mem.find(offsetCtx + lengthMemOffset) != ctx.mem.end())
+        unordered_map< uint64_t, Fea >::iterator it;
+        it = ctx.mem.find(offsetCtx + lengthMemOffset);
+        if (it != ctx.mem.end())
         {
-            Fea lenMemValue = ctx.mem[offsetCtx + lengthMemOffset];
+            Fea lenMemValue = it->second;
             fea2scalar(ctx.fr, auxScalar, lenMemValue.fe0, lenMemValue.fe1, lenMemValue.fe2, lenMemValue.fe3, lenMemValue.fe4, lenMemValue.fe5, lenMemValue.fe6, lenMemValue.fe7);
             lenMemValueFinal = ceil(double(auxScalar.get_ui()) / 32);
         }
 
         for (uint64_t i = 0; i < lenMemValueFinal; i++)
         {
-            if (ctx.mem.find(addrMem + i) == ctx.mem.end())
+            it = ctx.mem.find(addrMem + i);
+            if (it == ctx.mem.end())
             {
                 finalMemory += "0000000000000000000000000000000000000000000000000000000000000000";
                 continue;
             }
-            Fea memValue = ctx.mem[addrMem + i];
+            Fea memValue = it->second;
             fea2scalar(ctx.fr, auxScalar, memValue.fe0, memValue.fe1, memValue.fe2, memValue.fe3, memValue.fe4, memValue.fe5, memValue.fe6, memValue.fe7);
             finalMemory += PrependZeros(auxScalar.get_str(16), 64);
         }
@@ -853,6 +837,8 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
     tmsop.add("getMemory", TimeDiff(top));
 #endif
+#endif
+
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&top, NULL);
 #endif
@@ -887,13 +873,12 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     gettimeofday(&top, NULL);
 #endif
     // add info opcodes
-    getVarFromCtx(ctx, true, "depth", ctx.rom.depthOffset, auxScalar);
+    getVarFromCtx(ctx, true, ctx.rom.depthOffset, auxScalar);
     depth = auxScalar.get_ui();
     singleInfo.depth = depth + 1;
     singleInfo.pc = fr.toU64(ctx.pols.PC[*ctx.pStep]);
-    singleInfo.remaining_gas = fr.toU64(ctx.pols.GAS[*ctx.pStep]);
+    singleInfo.gas = fr.toU64(ctx.pols.GAS[*ctx.pStep]);
     gettimeofday(&singleInfo.startTime, NULL);
-    
 
 #ifdef LOG_TIME_STATISTICS
     tmsop.add("getDepth", TimeDiff(top));
@@ -905,7 +890,7 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     if (info.size() > 0)
     {
         // The gas cost of the opcode is gas before - gas after processing the opcode
-        info[info.size() - 1].gas_cost = int64_t(info[info.size() - 1].remaining_gas) - fr.toS64(ctx.pols.GAS[*ctx.pStep]);
+        info[info.size() - 1].gas_cost = int64_t(info[info.size() - 1].gas) - fr.toS64(ctx.pols.GAS[*ctx.pStep]);
         // cout << "info[info.size() - 1].gas_cost=" << info[info.size() - 1].gas_cost << endl;
 
         // If negative gasCost means gas has been added from a deeper context, we should recalculate
@@ -914,7 +899,7 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
             if (info.size() > 1)
             {
                 Opcode beforePrevTrace = info[info.size() - 2];
-                info[info.size() - 1].gas_cost = beforePrevTrace.remaining_gas - info[info.size() - 1].remaining_gas;
+                info[info.size() - 1].gas_cost = beforePrevTrace.gas - info[info.size() - 1].gas;
             }
             else
             {
@@ -934,7 +919,7 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 #endif
     if (ctx.proverRequest.generateCallTraces())
     {
-        getVarFromCtx(ctx, false, "gasRefund", ctx.rom.gasRefundOffset, auxScalar);
+        getVarFromCtx(ctx, false, ctx.rom.gasRefundOffset, auxScalar);
         singleInfo.gas_refund = auxScalar.get_ui();
 
         singleInfo.op = codeId;
@@ -962,18 +947,24 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     // Add contract info
     if (ctx.proverRequest.generateCallTraces())
     {
-        getVarFromCtx(ctx, false, "txDestAddr", ctx.rom.txDestAddrOffset, auxScalar);
+        getVarFromCtx(ctx, false, ctx.rom.txDestAddrOffset, auxScalar);
         singleInfo.contract.address = auxScalar.get_str(16);
 
-        getVarFromCtx(ctx, false, "txSrcAddr", ctx.rom.txSrcAddrOffset, auxScalar);
+        getVarFromCtx(ctx, false, ctx.rom.txSrcAddrOffset, auxScalar);
         singleInfo.contract.caller = auxScalar.get_str(16);
 
-        getVarFromCtx(ctx, false, "txValue", ctx.rom.txValueOffset, auxScalar);
+        getVarFromCtx(ctx, false, ctx.rom.txValueOffset, auxScalar);
         singleInfo.contract.value = auxScalar;
 
         getCalldataFromStack(ctx, 0, 0, singleInfo.contract.data);
     }
 
+#ifdef LOG_TIME_STATISTICS
+    tmsop.add("getMore", TimeDiff(top));
+#endif
+#ifdef LOG_TIME_STATISTICS
+    gettimeofday(&top, NULL);
+#endif
     singleInfo.contract.gas = txGAS[depth];
 
     if (ctx.proverRequest.generateCallTraces())
@@ -981,12 +972,12 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
         singleInfo.storage = deltaStorage[depth];
 
         // Round up to next multiple of 32
-        getVarFromCtx(ctx, false, "memLength", ctx.rom.memLengthOffset, auxScalar);
+        getVarFromCtx(ctx, false, ctx.rom.memLengthOffset, auxScalar);
         singleInfo.memory_size = (auxScalar.get_ui() / 32) * 32;
     }
 
 #ifdef LOG_TIME_STATISTICS
-    tmsop.add("getMore", TimeDiff(top));
+    tmsop.add("getMore3", TimeDiff(top));
 #endif
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&top, NULL);
@@ -1034,7 +1025,7 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
         if (opIncContext.find(prevStep.opcode) != opIncContext.end())
         {
             // Set gasCall when depth has changed
-            getVarFromCtx(ctx, true, "gasCall", ctx.rom.gasCallOffset, auxScalar);
+            getVarFromCtx(ctx, true, ctx.rom.gasCallOffset, auxScalar);
             txGAS[depth] = auxScalar.get_ui();
             if (ctx.proverRequest.generateCallTraces())
             {
