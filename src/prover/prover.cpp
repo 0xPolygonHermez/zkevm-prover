@@ -326,7 +326,7 @@ void Prover::processBatch(ProverRequest *pProverRequest)
     {
         json inputJson;
         pProverRequest->input.save(inputJson);
-        json2file(inputJson, pProverRequest->inputFile);
+        json2file(inputJson, pProverRequest->inputFile());
     }
 
     // Execute the program, in the process batch way
@@ -337,7 +337,7 @@ void Prover::processBatch(ProverRequest *pProverRequest)
     {
         json inputJsonEx;
         pProverRequest->input.save(inputJsonEx, *pProverRequest->dbReadLog);
-        json2file(inputJsonEx, pProverRequest->inputFileEx);
+        json2file(inputJsonEx, pProverRequest->inputDbFile());
     }
 
     TimerStopAndLog(PROVER_PROCESS_BATCH);
@@ -357,16 +357,16 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
 
     cout << "Prover::genBatchProof() timestamp: " << pProverRequest->timestamp << endl;
     cout << "Prover::genBatchProof() UUID: " << pProverRequest->uuid << endl;
-    cout << "Prover::genBatchProof() input file: " << pProverRequest->inputFile << endl;
-    cout << "Prover::genBatchProof() public file: " << pProverRequest->publicsOutput << endl;
-    cout << "Prover::genBatchProof() proof file: " << pProverRequest->proofFile << endl;
+    cout << "Prover::genBatchProof() input file: " << pProverRequest->inputFile() << endl;
+    //cout << "Prover::genBatchProof() public file: " << pProverRequest->publicsOutputFile() << endl;
+    //cout << "Prover::genBatchProof() proof file: " << pProverRequest->proofFile() << endl;
 
     // Save input to <timestamp>.input.json, as provided by client
     if (config.saveInputToFile)
     {
         json inputJson;
         pProverRequest->input.save(inputJson);
-        json2file(inputJson, pProverRequest->inputFile);
+        json2file(inputJson, pProverRequest->inputFile());
     }
 
     /************/
@@ -394,7 +394,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
     {
         json inputJsonEx;
         pProverRequest->input.save(inputJsonEx, *pProverRequest->dbReadLog);
-        json2file(inputJsonEx, pProverRequest->inputFileEx);
+        json2file(inputJsonEx, pProverRequest->inputDbFile());
     }
 
     if (pProverRequest->result == ZKR_SUCCESS)
@@ -562,7 +562,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         pProverRequest->batchProofOutput = zkinRecursive1;
 
         // save publics to file
-        json2file(publicStarkJson, pProverRequest->publicsOutput);
+        json2file(publicStarkJson, pProverRequest->publicsOutputFile());
 
         // Save output to file
         if (config.saveOutputToFile)
@@ -713,7 +713,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     publicsJson[45] = to_string(recursive2Verkey["constRoot"][2]);
     publicsJson[46] = to_string(recursive2Verkey["constRoot"][3]);
 
-    json2file(publicsJson, pProverRequest->publicsOutput);
+    json2file(publicsJson, pProverRequest->publicsOutputFile());
 
     pProverRequest->result = ZKR_SUCCESS;
 
@@ -804,7 +804,7 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     AltBn128::FrElement aux;
     AltBn128::Fr.toMontgomery(aux, pWitnessFinal[1]);
     publicJson[0] = AltBn128::Fr.toString(aux);
-    json2file(publicJson, pProverRequest->publicsOutput);
+    json2file(publicJson, pProverRequest->publicsOutputFile());
     TimerStopAndLog(SAVE_PUBLICS_JSON);
 
     // Generate Groth16 via rapid SNARK
@@ -860,16 +860,16 @@ void Prover::execute(ProverRequest *pProverRequest)
 
     cout << "Prover::execute() timestamp: " << pProverRequest->timestamp << endl;
     cout << "Prover::execute() UUID: " << pProverRequest->uuid << endl;
-    cout << "Prover::execute() input file: " << pProverRequest->inputFile << endl;
-    cout << "Prover::execute() public file: " << pProverRequest->publicsOutput << endl;
-    cout << "Prover::execute() proof file: " << pProverRequest->proofFile << endl;
+    cout << "Prover::execute() input file: " << pProverRequest->inputFile() << endl;
+    //cout << "Prover::execute() public file: " << pProverRequest->publicsOutputFile() << endl;
+    //cout << "Prover::execute() proof file: " << pProverRequest->proofFile() << endl;
 
     // Save input to <timestamp>.input.json, as provided by client
     if (config.saveInputToFile)
     {
         json inputJson;
         pProverRequest->input.save(inputJson);
-        json2file(inputJson, pProverRequest->inputFile);
+        json2file(inputJson, pProverRequest->inputFile());
     }
 
     /************/
@@ -888,7 +888,7 @@ void Prover::execute(ProverRequest *pProverRequest)
     {
         json inputJsonEx;
         pProverRequest->input.save(inputJsonEx, *pProverRequest->dbReadLog);
-        json2file(inputJsonEx, pProverRequest->inputFileEx);
+        json2file(inputJsonEx, pProverRequest->inputDbFile());
     }
 
     TimerStopAndLog(PROVER_EXECUTE);

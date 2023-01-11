@@ -34,6 +34,8 @@
     "saveOutputToFile": true,
     "saveProofToFile": true,
     "saveResponseToFile": true,
+    "saveFilesInSubfolders": false,
+    
     "loadDBToMemCache": true,
     "opcodeTracer": false,
     "logRemoteDbReads": false,

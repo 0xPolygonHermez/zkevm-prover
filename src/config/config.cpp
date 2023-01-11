@@ -138,6 +138,10 @@ void Config::load(json &config)
     if (config.contains("saveProofToFile") && config["saveProofToFile"].is_boolean())
         saveProofToFile = config["saveProofToFile"];
 
+    saveFilesInSubfolders = false;
+    if (config.contains("saveFilesInSubfolders") && config["saveFilesInSubfolders"].is_boolean())
+        saveFilesInSubfolders = config["saveFilesInSubfolders"];
+
     loadDBToMemCache = false;
     if (config.contains("loadDBToMemCache") && config["loadDBToMemCache"].is_boolean())
         loadDBToMemCache = config["loadDBToMemCache"];
