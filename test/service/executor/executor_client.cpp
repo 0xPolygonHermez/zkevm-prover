@@ -78,6 +78,7 @@ bool ExecutorClient::ProcessBatch (void)
     request.set_no_counters(input.bNoCounters);
     request.set_tx_hash_to_generate_execute_trace(input.txHashToGenerateExecuteTrace);
     request.set_tx_hash_to_generate_call_trace(input.txHashToGenerateCallTrace);
+    request.set_old_batch_num(input.publicInputsExtended.publicInputs.oldBatchNum);
 
     // Parse keys map
     DatabaseMap::MTMap::const_iterator it;

@@ -49,8 +49,11 @@ void printProcessInfo(bool compact = false);
 // Prints current call stack with function names (mangled)
 void printCallStack (void);
 
-// Returns timestamp in UTC, e.g. "2022-01-28_08:08:22_348"
+// Returns timestamp in UTC, e.g. "20230110_173200_128863"
 string getTimestamp(void);
+
+// Returns timestamp in UTC with slashes up to the hour, e.g. "2023/01/10/17/3200_128863"
+void getTimestampWithSlashes(string &timestamp, string &folder, string &file);
 
 // Returns a new UUID, e.g. "8796757a-827c-11ec-a8a3-0242ac120002"
 string getUUID (void);
@@ -62,6 +65,9 @@ void file2json(const string &fileName, ordered_json &j);
 
 // Returns if file exists
 bool fileExists (const string &fileName);
+
+// Ensure directory exists
+void ensureDirectoryExists (const string &fileName);
 
 // Maps memory into a file
 void * mapFile (const string &fileName, uint64_t size, bool bOutput);

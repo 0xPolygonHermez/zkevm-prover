@@ -18,67 +18,57 @@ ProverRequest::ProverRequest (Goldilocks &fr, const Config &config, tProverReque
     sem_init(&completedSem, 0, 0);
     
     uuid = getUUID();
-    timestamp = getTimestamp();
 
-    filePrefix = config.outputPath + "/" + timestamp + "_" + uuid + ".";
-    proofFile = filePrefix + config.proofFile;
-
-    switch (type)
+    if (config.saveFilesInSubfolders)
     {
-        case prt_genBatchProof:
-        {
-            inputFile = filePrefix + "gen_batch_proof_input.json";
-            inputFileEx = filePrefix + "gen_batch_proof_input_db.json";
-            publicsOutput = filePrefix + "batch_proof." + config.publicsOutput;
-            break;
-        }
-        case prt_genAggregatedProof:
-        {
-            inputFile = filePrefix + "gen_aggregated_proof_input.json";
-            inputFileEx = filePrefix + "gen_aggregated_proof_input_db.json";
-            publicsOutput = filePrefix + "aggregated_proof." + config.publicsOutput;
-            break;
-        }
-        case prt_genFinalProof:
-        {
-            inputFile = filePrefix + "gen_final_proof_input.json";
-            inputFileEx = filePrefix + "gen_final_proof_input_db.json";
-            publicsOutput = filePrefix + "final_proof." + config.publicsOutput;
-            break;
-        }
-        case prt_processBatch:
-        {
-            inputFile = filePrefix + "process_batch_input.json";
-            inputFileEx = filePrefix + "process_batch_input_db.json";
-            publicsOutput = filePrefix + "process_batch_" + config.publicsOutput;
-            break;
-        }
-        case prt_execute:
-        {
-            inputFile = filePrefix + "execute_input.json";
-            inputFileEx = filePrefix + "execute_input_db.json";
-            publicsOutput = filePrefix + "execute_" + config.publicsOutput;
-            break;
-        }
-        default:
-        {
-            cerr << "Error: ProverRequest::ProverRequest() got invalid type=" << type << endl;
-            exitProcess();
-        }
+        string folder, file;
+        getTimestampWithSlashes(timestamp, folder, file);
+        string directory = config.outputPath + "/" + folder;
+        ensureDirectoryExists(directory);
+        filePrefix = directory + "/" + timestamp + "_" + uuid + ".";
+    }
+    else
+    {
+
+        timestamp = getTimestamp();
+        filePrefix = config.outputPath + "/" + timestamp + "_" + uuid + ".";
     }
 
-    if (config.saveDbReadsToFile) {
+    if (config.saveDbReadsToFile)
+    {
         dbReadLog = new DatabaseMap();
         if (config.saveDbReadsToFileOnChange)
+        {
             dbReadLog->setOnChangeCallback(this, ProverRequest::onDBReadLogChangeCallback);
+        }
     }
+}
+
+string ProverRequest::proofFile (void)
+{
+    return filePrefix + config.proofFile;
+}
+
+string ProverRequest::inputFile (void)
+{
+    return filePrefix + to_string(input.publicInputsExtended.publicInputs.oldBatchNum) + "." + proverRequestType2string(type) + "_input.json";
+}
+
+string ProverRequest::inputDbFile (void)
+{
+    return filePrefix + to_string(input.publicInputsExtended.publicInputs.oldBatchNum) + "." + proverRequestType2string(type) + "_input_db.json";
+}
+
+string ProverRequest::publicsOutputFile (void)
+{
+    return filePrefix + to_string(input.publicInputsExtended.publicInputs.oldBatchNum) + "." + proverRequestType2string(type) + "_" + config.publicsOutput;
 }
 
 void ProverRequest::onDBReadLogChange(DatabaseMap *dbMap)
 {
     json inputJsonEx;
     input.save(inputJsonEx, *dbMap);
-    json2file(inputJsonEx, inputFileEx);
+    json2file(inputJsonEx, inputDbFile());
 }
 
 ProverRequest::~ProverRequest()

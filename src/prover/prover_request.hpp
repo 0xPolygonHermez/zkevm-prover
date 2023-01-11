@@ -27,12 +27,8 @@ public:
     time_t startTime; // Time when the request started being processed
     time_t endTime; // Time when the request ended
 
-    /* Files */
+    /* Output files prefix */
     string filePrefix;
-    string inputFile;
-    string inputFileEx;
-    string publicsOutput;
-    string proofFile;
 
     /* Prrover request type */
     tProverRequestType type;
@@ -73,6 +69,12 @@ public:
     /* Constructor */
     ProverRequest (Goldilocks &fr, const Config &config, tProverRequestType type);
     ~ProverRequest();
+
+    /* Output file names */
+    string proofFile (void);
+    string inputFile (void);
+    string inputDbFile (void);
+    string publicsOutputFile (void);
 
     /* Block until completed */
     void waitForCompleted (const uint64_t timeoutInSeconds)
