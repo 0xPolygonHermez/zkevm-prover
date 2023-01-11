@@ -215,6 +215,10 @@ using grpc::Status;
         cerr << "Error: ExecutorServiceImpl::ProcessBatch() detected proverRequest.result=" << proverRequest.result << "=" << zkresult2string(proverRequest.result) << endl;
         response->set_error(zkresult2error(proverRequest.result));
     }
+    else
+    {
+        response->set_error(string2error(proverRequest.fullTracer.finalTrace.error));
+    }
     
     response->set_cumulative_gas_used(proverRequest.fullTracer.finalTrace.cumulative_gas_used);
     response->set_cnt_keccak_hashes(proverRequest.counters.keccakF);
@@ -267,7 +271,7 @@ using grpc::Status;
                 executor::v1::ExecutionTraceStep * pExecutionTraceStep = pProcessTransactionResponse->add_execution_trace();
                 pExecutionTraceStep->set_pc(responses[tx].call_trace.steps[step].pc); // Program Counter
                 pExecutionTraceStep->set_op(responses[tx].call_trace.steps[step].opcode); // OpCode
-                pExecutionTraceStep->set_remaining_gas(responses[tx].call_trace.steps[step].remaining_gas);
+                pExecutionTraceStep->set_remaining_gas(responses[tx].call_trace.steps[step].gas);
                 pExecutionTraceStep->set_gas_cost(responses[tx].call_trace.steps[step].gas_cost); // Gas cost of the operation
                 pExecutionTraceStep->set_memory(string2ba(responses[tx].call_trace.steps[step].memory)); // Content of memory
                 pExecutionTraceStep->set_memory_size(responses[tx].call_trace.steps[step].memory_size);
@@ -295,7 +299,7 @@ using grpc::Status;
             pTransactionContext->set_to(responses[tx].call_trace.context.to); // Target of the transaction
             pTransactionContext->set_data(string2ba(responses[tx].call_trace.context.data)); // Input data of the transaction
             pTransactionContext->set_gas(responses[tx].call_trace.context.gas);
-            pTransactionContext->set_gas_price(Add0xIfMissing(responses[tx].call_trace.context.gasPrice.get_str(16)));
+            pTransactionContext->set_gas_price(Add0xIfMissing(responses[tx].call_trace.context.gas_price.get_str(16)));
             pTransactionContext->set_value(Add0xIfMissing(responses[tx].call_trace.context.value.get_str(16)));
             pTransactionContext->set_batch(string2ba(responses[tx].call_trace.context.batch)); // Hash of the batch in which the transaction was included
             pTransactionContext->set_output(string2ba(responses[tx].call_trace.context.output)); // Returned data from the runtime (function result or data supplied with revert opcode)
@@ -308,7 +312,7 @@ using grpc::Status;
                 pTransactionStep->set_state_root(string2ba(responses[tx].call_trace.steps[step].state_root));
                 pTransactionStep->set_depth(responses[tx].call_trace.steps[step].depth); // Call depth
                 pTransactionStep->set_pc(responses[tx].call_trace.steps[step].pc); // Program counter
-                pTransactionStep->set_gas(responses[tx].call_trace.steps[step].remaining_gas); // Remaining gas
+                pTransactionStep->set_gas(responses[tx].call_trace.steps[step].gas); // Remaining gas
                 pTransactionStep->set_gas_cost(responses[tx].call_trace.steps[step].gas_cost); // Gas cost of the operation
                 pTransactionStep->set_gas_refund(responses[tx].call_trace.steps[step].gas_refund); // Gas refunded during the operation
                 pTransactionStep->set_op(responses[tx].call_trace.steps[step].op); // Opcode

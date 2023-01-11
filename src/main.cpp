@@ -485,12 +485,7 @@ int main(int argc, char **argv)
     // Create output directory, if specified; otherwise, current working directory will be used to store output files
     if (config.outputPath.size() > 0)
     {
-        string command = "[ -d " + config.outputPath + " ] && echo \"Output directory already exists\" || mkdir -p " + config.outputPath;
-        int iResult = system(command.c_str());
-        if (iResult != 0)
-        {
-            cerr << "Error: main() system() returned: " << to_string(iResult) << endl;
-        }
+        ensureDirectoryExists(config.outputPath);
     }
 
     // Create an instace of the Prover

@@ -273,6 +273,21 @@ string getTimestamp(void)
     return buf;
 }
 
+void getTimestampWithSlashes(string &timestamp, string &folder, string &file)
+{
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    char tmbuf[64], buf[256];
+    strftime(tmbuf, sizeof(tmbuf), "%Y%m%d_%H%M%S", gmtime(&tv.tv_sec));
+    snprintf(buf, sizeof(buf), "%s_%06ld", tmbuf, tv.tv_usec);
+    timestamp = buf;
+    strftime(tmbuf, sizeof(tmbuf), "%Y/%m/%d/%H", gmtime(&tv.tv_sec));
+    folder = tmbuf;
+    strftime(tmbuf, sizeof(tmbuf), "%M%S", gmtime(&tv.tv_sec));
+    snprintf(buf, sizeof(buf), "%s_%06ld", tmbuf, tv.tv_usec);
+    file = buf;
+}
+
 string getUUID(void)
 {
     char uuidString[37];
@@ -339,6 +354,17 @@ bool fileExists (const string &fileName)
     struct stat fileStat;
     int iResult = stat( fileName.c_str(), &fileStat);
     return (iResult == 0);
+}
+
+void ensureDirectoryExists (const string &fileName)
+{
+    string command = "[ -d " + fileName + " ] && echo \"Directory already exists\" || mkdir -p " + fileName;
+    int iResult = system(command.c_str());
+    if (iResult != 0)
+    {
+        cerr << "Error: ensureDirectoryExists() system() returned: " << to_string(iResult) << endl;
+        exitProcess();
+    }
 }
 
 void *mapFileInternal(const string &fileName, uint64_t size, bool bOutput, bool bMapInputFile)

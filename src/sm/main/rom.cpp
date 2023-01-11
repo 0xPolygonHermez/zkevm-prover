@@ -39,6 +39,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
     retDataLengthOffset    = getMemoryOffset("retDataLength");
     newAccInputHashOffset  = getMemoryOffset("newAccInputHash");
     oldNumBatchOffset      = getMemoryOffset("oldNumBatch");
+    newNumBatchOffset      = getMemoryOffset("newNumBatch");
     newLocalExitRootOffset = getMemoryOffset("newLocalExitRoot");
     depthOffset            = getMemoryOffset("depth");
     gasRefundOffset        = getMemoryOffset("gasRefund");
