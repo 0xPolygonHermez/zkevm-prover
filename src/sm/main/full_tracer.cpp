@@ -464,6 +464,10 @@ void FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
     response.call_trace.context.gas_price = auxScalar;
 
     /* Fill response object */
+    
+    // TX chain ID
+    getVarFromCtx(ctx, false, ctx.rom.txChainIdOffset, auxScalar);
+    response.call_trace.context.chainId = auxScalar.get_ui();
 
     mpz_class r;
     getVarFromCtx(ctx, false, ctx.rom.txROffset, r);
