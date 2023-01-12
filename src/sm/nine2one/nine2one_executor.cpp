@@ -5,16 +5,34 @@
 
 /*
     This SM inserts 44 bits of 44 different Keccak-f inputs/outputs in the lower bits of a field element.
-    The first evaluation is skipped to match the keccak-f gates topology.
-    The evaluations usage are: 1 (skipped) + 44 (one per bit) + 1 (accumulated field element) + 44 + 1 + ...
+    The first evaluation is reserved to match the keccak-f gates topology.
+    The evaluations usage are: 1 (reserved) + 44 (one per bit0 of 44 inputs) + 44 + ...
 
-    Pos 0: skipped
+    As per PIL spec: field44' = (1-FieldLatch)*field44 + bit*Factor;
+    Where FieldLatch and Factor are constant polynomials:
+    FieldLatch = 0, 43 zeros, 1, 43 zeros, 1, ...
+    Factor = 0, 1, 2, 4, ..., 1<<43, 1, 2, 4, ...
 
-    Pos 1: bit j of input i*44 + 0
+    For example, if bit_0 of the first 44 inputs were alterned ones and zeros, and bit_N=bit_N-1:
+
+    Pos 0:  Factor=0     FieldLatch=0 bit=0 field44=0b0 (reserved)
+    Pos 1:  Factor=1     FieldLatch=0 bit=1 field44=0b0
+    Pos 2:  Factor=2     FieldLatch=0 bit=0 field44=0b1
+    Pos 3:  Factor=4     FieldLatch=0 bit=1 field44=0b01
+    Pos 4:  Factor=8     FieldLatch=0 bit=0 field44=0b101
+    Pos 5:  Factor=16    FieldLatch=0 bit=1 field44=0b0101
+    Pos 6:  Factor=32    FieldLatch=0 bit=0 field44=0b10101
     ...
-    Pos 44: bit j of input i*44 + 43
-    Pos 45: field element with 44 bits
-
+    Pos 44: Factor=1<<43 FieldLatch=0 bit=0 field44=0b1010101010101010101010101010101010101010101
+    Pos 45: Factor=1     FieldLatch=1 bit=1 field44=0b01010101010101010101010101010101010101010101
+    Pos 46: Factor=2     FieldLatch=0 bit=0 field44=0b1
+    Pos 47  Factor=4     FieldLatch=0 bit=1 field44=0b01
+    Pos 48: Factor=8     FieldLatch=0 bit=0 field44=0b101
+    Pos 49: Factor=16    FieldLatch=0 bit=1 field44=0b0101
+    Pos 50: Factor=32    FieldLatch=0 bit=0 field44=0b10101
+    ...
+    Pos 88: Factor=1<<43 FieldLatch=0 bit=0 field44=0b1010101010101010101010101010101010101010101
+    Pos 89: Factor=1     FieldLatch=1 bit=1 field44=0b01010101010101010101010101010101010101010101
     etc.
 */
 
