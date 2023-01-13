@@ -526,7 +526,7 @@ public:
     inline uint64_t size (void) { return _degree*8*sizeof(Goldilocks::Element); }
 };
 
-class Nine2OneConstantPols
+class Bits2FieldConstantPols
 {
 public:
     ConstantPol FieldLatch;
@@ -536,7 +536,7 @@ private:
     uint64_t _degree;
 public:
 
-    Nine2OneConstantPols (void * pAddress, uint64_t degree) :
+    Bits2FieldConstantPols (void * pAddress, uint64_t degree) :
         FieldLatch((Goldilocks::Element *)((uint8_t *)pAddress + 1520), degree, 190),
         Factor((Goldilocks::Element *)((uint8_t *)pAddress + 1528), degree, 191),
         _pAddress(pAddress),
@@ -570,7 +570,7 @@ public:
     ConstantPol FSOut7;
     ConstantPol ConnSOutBit;
     ConstantPol ConnSInBit;
-    ConstantPol ConnNine2OneBit;
+    ConstantPol ConnBits2FieldBit;
 private:
     void * _pAddress;
     uint64_t _degree;
@@ -593,7 +593,7 @@ public:
         FSOut7((Goldilocks::Element *)((uint8_t *)pAddress + 1640), degree, 205),
         ConnSOutBit((Goldilocks::Element *)((uint8_t *)pAddress + 1648), degree, 206),
         ConnSInBit((Goldilocks::Element *)((uint8_t *)pAddress + 1656), degree, 207),
-        ConnNine2OneBit((Goldilocks::Element *)((uint8_t *)pAddress + 1664), degree, 208),
+        ConnBits2FieldBit((Goldilocks::Element *)((uint8_t *)pAddress + 1664), degree, 208),
         _pAddress(pAddress),
         _degree(degree) {};
 
@@ -651,7 +651,7 @@ public:
     PaddingPGConstantPols PaddingPG;
     StorageConstantPols Storage;
     KeccakFConstantPols KeccakF;
-    Nine2OneConstantPols Nine2One;
+    Bits2FieldConstantPols Bits2Field;
     PaddingKKBitConstantPols PaddingKKBit;
     PaddingKKConstantPols PaddingKK;
 private:
@@ -669,7 +669,7 @@ public:
         PaddingPG(pAddress, degree),
         Storage(pAddress, degree),
         KeccakF(pAddress, degree),
-        Nine2One(pAddress, degree),
+        Bits2Field(pAddress, degree),
         PaddingKKBit(pAddress, degree),
         PaddingKK(pAddress, degree),
         _pAddress(pAddress),

@@ -3,7 +3,7 @@
 
 #include <vector>
 #include "commit_pols.hpp"
-#include "sm/nine2one/nine2one_executor.hpp"
+#include "sm/bits2field/bits2field_executor.hpp"
 
 using namespace std;
 
@@ -44,7 +44,7 @@ public:
         nSlots(44*((N-1)/slotSize)) {};
 
     /* Executor */
-    void execute (vector<PaddingKKBitExecutorInput> &input, PaddingKKBitCommitPols &pols, vector<Nine2OneExecutorInput> &required);
+    void execute (vector<PaddingKKBitExecutorInput> &input, PaddingKKBitCommitPols &pols, vector<Bits2FieldExecutorInput> &required);
 };
 
 #endif
