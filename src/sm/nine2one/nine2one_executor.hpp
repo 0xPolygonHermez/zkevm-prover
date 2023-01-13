@@ -9,16 +9,10 @@ using namespace std;
 class Nine2OneExecutorInput
 {
 public:
-    /* Input and output states: st[I/O][x][y][z/2]
-       x, y, z as per Keccak-f spec
-       st[0] is the input state
-       st[1] is the output state
-       x = 0...4
-       y = 0...4
-       z = 0...63
-       z values are split into 2 chunks of 32bits, stored in the 32 lower bits of uint64_t
-    */
-    uint64_t st[2][5][5][2];
+
+    /* Input and output states */
+    uint8_t inputState[200];
+    uint8_t outputState[200];
 };
 
 class Nine2OneExecutor
@@ -46,11 +40,9 @@ public:
     void execute (vector<Nine2OneExecutorInput> &input, Nine2OneCommitPols &pols, vector<vector<Goldilocks::Element>> &required);
 
 private:
-    /* Gets bit "i" from 1600-bits state */
-    Goldilocks::Element bitFromState (uint64_t (&st)[5][5][2], uint64_t i);
 
     /* Gets bit "pos" from input vector position "block" */
-    Goldilocks::Element getBit (vector<Nine2OneExecutorInput> &input, uint64_t block, bool isOut, uint64_t pos);
+    Goldilocks::Element getBit (vector<Nine2OneExecutorInput> &input, uint64_t block, bool isOutput, uint64_t pos);
 
 };
 

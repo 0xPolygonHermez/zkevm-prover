@@ -146,7 +146,7 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
                 PaddingKKBitExecutorInput paddingKKBitExecutorInput;
                 for (uint64_t k=0; k<bytesPerBlock; k++)
                 {
-                    paddingKKBitExecutorInput.r[k] = input[i].dataBytes[j - bytesPerBlock + 1 + k];
+                    paddingKKBitExecutorInput.data[k] = input[i].dataBytes[j - bytesPerBlock + 1 + k];
                 }
                 paddingKKBitExecutorInput.connected = (j < bytesPerBlock) ? false : true;
                 required.push_back(paddingKKBitExecutorInput);
@@ -233,7 +233,7 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
                 PaddingKKBitExecutorInput paddingKKBitExecutorInput;
                 for (uint64_t k=0; k<bytesPerBlock; k++)
                 {
-                    paddingKKBitExecutorInput.r[k] = bytes0[k];
+                    paddingKKBitExecutorInput.data[k] = bytes0[k];
                 }
                 paddingKKBitExecutorInput.connected = false;
                 required.push_back(paddingKKBitExecutorInput);
