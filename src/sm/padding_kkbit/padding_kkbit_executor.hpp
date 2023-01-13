@@ -10,24 +10,40 @@ using namespace std;
 class PaddingKKBitExecutorInput
 {
 public:
+
+    /* If connected, this means that this is not the first block of a keccak message to hash,
+       and then the state of the previous block is used as initial state of this block */
     bool connected;
-    uint8_t r[136];
+
+    /* Input keccak block data: 136 bytes = 1088 bits */
+    uint8_t data[136];
+
+    /* Constructor */
     PaddingKKBitExecutorInput() : connected(false) {};
 };
 
 class PaddingKKBitExecutor
 {
 private:
+
+    /* Goldilocks reference */
     Goldilocks &fr;
+
+    /* Constant values */
     const uint64_t N;
     const uint64_t slotSize;
     const uint64_t nSlots;
+
 public:
+
+    /* Constructor */
     PaddingKKBitExecutor(Goldilocks &fr) :
         fr(fr),
         N(PaddingKKBitCommitPols::pilDegree()),
         slotSize(155286),
         nSlots(44*((N-1)/slotSize)) {};
+
+    /* Executor */
     void execute (vector<PaddingKKBitExecutorInput> &input, PaddingKKBitCommitPols &pols, vector<Nine2OneExecutorInput> &required);
 };
 
