@@ -44,8 +44,8 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push
-        id: docker_build
+      - name: Build and push Executor
+        id: docker_build_executor
         uses: docker/build-push-action@v2
         with:
           # build-args: |
@@ -54,9 +54,23 @@ jobs:
           file: Dockerfile-GHA
           platforms: linux/amd64
           push: true
+          target: executor
           tags: |
+            hermeznetwork/zkevm-prover:${{ steps.setvars.outputs.sha_short }}-executor
             hermeznetwork/zkevm-prover:${{ steps.setvars.outputs.sha_short }}
-            hermeznetwork/zkevm-prover:${{ steps.setvars.outputs.image_tag }}
+
+      - name: Build and push Full Prover
+        id: docker_build_prover
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: Dockerfile-GHA
+          platforms: linux/amd64
+          push: true
+          target: prover
+          tags: |
+            hermeznetwork/zkevm-prover:${{ steps.setvars.outputs.sha_short }}-prover
+
 
   # node-tests:
   #   needs: build-docker
