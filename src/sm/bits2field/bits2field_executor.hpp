@@ -1,12 +1,12 @@
-#ifndef NINE2ONE_EXECUTOR_HPP
-#define NINE2ONE_EXECUTOR_HPP
+#ifndef BITS2FIELD_EXECUTOR_HPP
+#define BITS2FIELD_EXECUTOR_HPP
 
 #include <vector>
 #include "commit_pols.hpp"
 
 using namespace std;
 
-class Nine2OneExecutorInput
+class Bits2FieldExecutorInput
 {
 public:
 
@@ -15,7 +15,7 @@ public:
     uint8_t outputState[200];
 };
 
-class Nine2OneExecutor
+class Bits2FieldExecutor
 {
 private:
 
@@ -30,19 +30,19 @@ private:
 public:
 
     /* Constructor */
-    Nine2OneExecutor(Goldilocks &fr) :
+    Bits2FieldExecutor(Goldilocks &fr) :
         fr(fr),
         slotSize(155286),
-        N(Nine2OneCommitPols::pilDegree()),
+        N(Bits2FieldCommitPols::pilDegree()),
         nSlots((N-1)/slotSize) {};
 
     /* Executor */
-    void execute (vector<Nine2OneExecutorInput> &input, Nine2OneCommitPols &pols, vector<vector<Goldilocks::Element>> &required);
+    void execute (vector<Bits2FieldExecutorInput> &input, Bits2FieldCommitPols &pols, vector<vector<Goldilocks::Element>> &required);
 
 private:
 
     /* Gets bit "pos" from input vector position "block" */
-    Goldilocks::Element getBit (vector<Nine2OneExecutorInput> &input, uint64_t block, bool isOutput, uint64_t pos);
+    Goldilocks::Element getBit (vector<Bits2FieldExecutorInput> &input, uint64_t block, bool isOutput, uint64_t pos);
 
 };
 

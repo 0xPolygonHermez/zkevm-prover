@@ -11,7 +11,7 @@
 #include "sm/arith/arith_executor.hpp"
 #include "sm/padding_kk/padding_kk_executor.hpp"
 #include "sm/padding_kkbit/padding_kkbit_executor.hpp"
-#include "sm/nine2one/nine2one_executor.hpp"
+#include "sm/bits2field/bits2field_executor.hpp"
 #include "sm/keccak_f/keccak_f_executor.hpp"
 #include "sm/padding_pg/padding_pg_executor.hpp"
 #include "sm/poseidon_g/poseidon_g_executor.hpp"
@@ -31,7 +31,7 @@ public:
     ArithExecutor arithExecutor;
     PaddingKKExecutor paddingKKExecutor;
     PaddingKKBitExecutor paddingKKBitExecutor;
-    Nine2OneExecutor nine2OneExecutor;
+    Bits2FieldExecutor bits2FieldExecutor;
     KeccakFExecutor keccakFExecutor;
     PaddingPGExecutor paddingPGExecutor;
     PoseidonGExecutor poseidonGExecutor;
@@ -47,7 +47,7 @@ public:
         arithExecutor(fr, config),
         paddingKKExecutor(fr),
         paddingKKBitExecutor(fr),
-        nine2OneExecutor(fr),
+        bits2FieldExecutor(fr),
         keccakFExecutor(fr, config),
         paddingPGExecutor(fr, poseidon),
         poseidonGExecutor(fr, poseidon),

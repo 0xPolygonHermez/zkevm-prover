@@ -23,7 +23,7 @@ inline void callKeccakF (const uint8_t (&inputState)[200], uint8_t (&outputState
     KeccakF1600(outputState);
 }
 
-void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, PaddingKKBitCommitPols &pols, vector<Nine2OneExecutorInput> &required)
+void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, PaddingKKBitCommitPols &pols, vector<Bits2FieldExecutorInput> &required)
 {
 #ifdef LOG_TIME_STATISTICS
     struct timeval t;
@@ -98,13 +98,13 @@ void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, Pa
         keccakTime += TimeDiff(t);
         keccakTimes+=1;
 #endif
-        Nine2OneExecutorInput nine2OneExecutorInput;
-        // Copy: nine2OneExecutorInput.inputState = stateWithR
-        memcpy(&nine2OneExecutorInput.inputState, stateWithR, sizeof(nine2OneExecutorInput.inputState));
-        // Copy: nine2OneExecutorInput.outputState = currentState
-        memcpy(&nine2OneExecutorInput.outputState, currentState, sizeof(nine2OneExecutorInput.outputState));
+        Bits2FieldExecutorInput bits2FieldExecutorInput;
+        // Copy: bits2FieldExecutorInput.inputState = stateWithR
+        memcpy(&bits2FieldExecutorInput.inputState, stateWithR, sizeof(bits2FieldExecutorInput.inputState));
+        // Copy: bits2FieldExecutorInput.outputState = currentState
+        memcpy(&bits2FieldExecutorInput.outputState, currentState, sizeof(bits2FieldExecutorInput.outputState));
 
-        required.push_back(nine2OneExecutorInput);
+        required.push_back(bits2FieldExecutorInput);
 
         for (uint64_t j=0; j<256; j++)
         {

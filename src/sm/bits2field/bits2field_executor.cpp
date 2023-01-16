@@ -1,5 +1,5 @@
 #include "config.hpp"
-#include "nine2one_executor.hpp"
+#include "bits2field_executor.hpp"
 #include "zkassert.hpp"
 #include "utils.hpp"
 
@@ -46,13 +46,13 @@ inline uint64_t getBitFromState ( const uint8_t (&state)[200], uint64_t i )
     return (state[i/8] >> (i%8)) & 1;
 }
 
-void Nine2OneExecutor::execute (vector<Nine2OneExecutorInput> &input, Nine2OneCommitPols &pols, vector<vector<Goldilocks::Element>> &required)
+void Bits2FieldExecutor::execute (vector<Bits2FieldExecutorInput> &input, Bits2FieldCommitPols &pols, vector<vector<Goldilocks::Element>> &required)
 {
     /* Check input size (the number of keccaks blocks to process) is not bigger than
        the capacity of the SM (the number of slots that fit into the evaluations multiplied by the number of bits per field element) */
     if (input.size() > nSlots*44)
     {
-        cerr << "Error: Nine2OneExecutor::execute() too many entries input.size()=" << input.size() << " > nSlots*44=" << nSlots*44 << endl;
+        cerr << "Error: Bits2FieldExecutor::execute() too many entries input.size()=" << input.size() << " > nSlots*44=" << nSlots*44 << endl;
         exitProcess();
     }
 
@@ -140,10 +140,10 @@ void Nine2OneExecutor::execute (vector<Nine2OneExecutorInput> &input, Nine2OneCo
     /* Sanity check */
     zkassert(p <= N);
 
-    cout << "Nine2OneExecutor successfully processed " << input.size() << " Keccak hashes (" << (double(input.size())*slotSize*100)/(44*N) << "%)" << endl;
+    cout << "Bits2FieldExecutor successfully processed " << input.size() << " Keccak hashes (" << (double(input.size())*slotSize*100)/(44*N) << "%)" << endl;
 }
 
-Goldilocks::Element Nine2OneExecutor::getBit (vector<Nine2OneExecutorInput> &input, uint64_t block, bool isOutput, uint64_t pos)
+Goldilocks::Element Bits2FieldExecutor::getBit (vector<Bits2FieldExecutorInput> &input, uint64_t block, bool isOutput, uint64_t pos)
 {
     /* If we run out of input, simply return zero */
     if (block >= input.size())

@@ -841,7 +841,7 @@ public:
     inline uint64_t size (void) { return _degree*12*sizeof(Goldilocks::Element); }
 };
 
-class Nine2OneCommitPols
+class Bits2FieldCommitPols
 {
 public:
     CommitPol bit;
@@ -851,7 +851,7 @@ private:
     uint64_t _degree;
 public:
 
-    Nine2OneCommitPols (void * pAddress, uint64_t degree) :
+    Bits2FieldCommitPols (void * pAddress, uint64_t degree) :
         bit((Goldilocks::Element *)((uint8_t *)pAddress + 3416), degree, 427),
         field44((Goldilocks::Element *)((uint8_t *)pAddress + 3424), degree, 428),
         _pAddress(pAddress),
@@ -1431,7 +1431,7 @@ public:
     PaddingPGCommitPols PaddingPG;
     StorageCommitPols Storage;
     KeccakFCommitPols KeccakF;
-    Nine2OneCommitPols Nine2One;
+    Bits2FieldCommitPols Bits2Field;
     PaddingKKBitCommitPols PaddingKKBit;
     PaddingKKCommitPols PaddingKK;
     MemCommitPols Mem;
@@ -1449,7 +1449,7 @@ public:
         PaddingPG(pAddress, degree),
         Storage(pAddress, degree),
         KeccakF(pAddress, degree),
-        Nine2One(pAddress, degree),
+        Bits2Field(pAddress, degree),
         PaddingKKBit(pAddress, degree),
         PaddingKK(pAddress, degree),
         Mem(pAddress, degree),
