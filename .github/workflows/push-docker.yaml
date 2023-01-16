@@ -56,7 +56,6 @@ jobs:
           push: true
           target: executor
           tags: |
-            hermeznetwork/zkevm-prover:${{ steps.setvars.outputs.sha_short }}-executor
             hermeznetwork/zkevm-prover:${{ steps.setvars.outputs.sha_short }}
 
       - name: Build and push Full Prover
@@ -71,6 +70,15 @@ jobs:
           tags: |
             hermeznetwork/zkevm-prover:${{ steps.setvars.outputs.sha_short }}-prover
 
+      - name: Push Prover to ECR
+        id: ecr_push
+        uses: jwalton/gh-ecr-push@v1
+        with:
+          access-key-id: ${{ secrets.ECR_AWS_ACCESS_KEY_ID }}
+          secret-access-key: ${{ secrets.ECR_AWS_SECRET_ACCESS_KEY }}
+          region: eu-west-1
+          local-image: ${{ steps.docker_build_prover.outputs.imageid }}
+          image: public.ecr.aws/v2p3f1r8/zkevm-prover:${{ steps.setvars.outputs.sha_short }}-prover
 
   # node-tests:
   #   needs: build-docker
