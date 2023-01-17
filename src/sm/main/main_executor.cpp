@@ -839,6 +839,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     incCounter = smtGetResult.proofHashCounter + 2;
                     //cout << "smt.get() returns value=" << smtGetResult.value.get_str(16) << endl;
 
+                    if (bProcessBatch)
+                    {
+                        proverRequest.fullTracer.addReadWriteAddress( pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i],
+                                                                      pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i],
+                                                                      smtGetResult.value);
+                    }
+
 #ifdef LOG_TIME_STATISTICS
                     mainMetrics.add("SMT Get", TimeDiff(t));
 #endif
@@ -959,6 +966,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         return;
                     }
                     incCounter = ctx.lastSWrite.res.proofHashCounter + 2;
+
+                    if (bProcessBatch)
+                    {
+                        proverRequest.fullTracer.addReadWriteAddress( pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i],
+                                                                      pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i],
+                                                                      scalarD);
+                    }
+
 #ifdef LOG_TIME_STATISTICS
                     mainMetrics.add("SMT Set", TimeDiff(t));
 #endif
@@ -2365,11 +2380,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                     // denominator = 2*y1 = y1+y1
                     fec.add(denominator, fecY1, fecY1);
+                    if (fec.isZero(denominator))
+                    {
+                        cerr << "Error: denominator=0 in arith operation 1" << endl;
+                        exitProcess();
+                    }
 
                     // s = numerator/denominator
                     fec.div(s, numerator, denominator);
-
-                    // TODO: y1 == 0 => division by zero ==> how manage? Feli
                 }
                 else
                 {
@@ -2381,11 +2399,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                     // denominator = x2-x1
                     fec.sub(denominator, fecX2, fecX1);
+                    if (fec.isZero(denominator))
+                    {
+                        cerr << "Error: denominator=0 in arith operation 2" << endl;
+                        exitProcess();
+                    }
 
                     // s = numerator/denominator
                     fec.div(s, numerator, denominator);
-
-                    // TODO: x2-x1 == 0 => division by zero ==> how manage? Feli
                 }
 
                 RawFec::Element fecS, minuend, subtrahend;

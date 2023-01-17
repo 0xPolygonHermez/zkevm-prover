@@ -283,6 +283,14 @@ void FullTracer::handleEvent(Context &ctx, const RomCommand &cmd)
         onOpcode(ctx, cmd);
         return;
     }
+    if (cmd.params[0]->function == f_onTouchedAddress)
+    {
+        return;
+    }
+    if (cmd.params[0]->function == f_onTouchedSlot)
+    {
+        return;
+    }
     cerr << "Error: FullTracer::handleEvent() got an invalid event cmd.params[0]->varName=" << cmd.params[0]->varName << " cmd.function=" << function2String(cmd.function) << endl;
     exitProcess();
 }
@@ -314,7 +322,6 @@ void FullTracer::onError(Context &ctx, const RomCommand &cmd)
             Response response;
             response.error = lastError;
             finalTrace.responses.push_back(response);
-            finalTrace.error = lastError;
         }
         else
         {
@@ -465,26 +472,34 @@ void FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
 
     /* Fill response object */
     
-    // TX chain ID
-    getVarFromCtx(ctx, false, ctx.rom.txChainIdOffset, auxScalar);
-    response.call_trace.context.chainId = auxScalar.get_ui();
-
     mpz_class r;
     getVarFromCtx(ctx, false, ctx.rom.txROffset, r);
 
     mpz_class s;
     getVarFromCtx(ctx, false, ctx.rom.txSOffset, s);
 
-    mpz_class ctxV;
-    getVarFromCtx(ctx, false, ctx.rom.txVOffset, ctxV);
-    uint64_t v = ctxV.get_ui() - 27 + response.call_trace.context.chainId * 2 + 35;
+    // chain ID
+    getVarFromCtx(ctx, false, ctx.rom.txChainIdOffset, auxScalar);
+    uint64_t chainId = auxScalar.get_ui();
+
+    // v
+    getVarFromCtx(ctx, false, ctx.rom.txVOffset, auxScalar);
+    uint64_t v;
+    if (chainId == 0)
+    {
+        v = auxScalar.get_ui();
+    }
+    else
+    {
+        v = auxScalar.get_ui() - 27 + chainId * 2 + 35;
+    }
 
     mpz_class nonceScalar;
     getVarFromCtx(ctx, false, ctx.rom.txNonceOffset, nonceScalar);
     uint64_t nonce = nonceScalar.get_ui();
 
     // TX hash
-    getTransactionHash(response.call_trace.context.to,
+    getTransactionHash( response.call_trace.context.to,
                         response.call_trace.context.value,
                         nonce,
                         response.call_trace.context.gas,
@@ -692,7 +707,6 @@ void FullTracer::onStartBatch(Context &ctx, const RomCommand &cmd)
     }
 
     finalTrace.responses.clear();
-    finalTrace.error.clear();
     finalTrace.bInitialized = true;
 
 #ifdef LOG_FULL_TRACER
@@ -1058,5 +1072,67 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 #endif
 #ifdef LOG_TIME_STATISTICS
     tms.add("onOpcode", TimeDiff(t));
+#endif
+}
+
+#define SMT_KEY_BALANCE 0
+#define SMT_KEY_NONCE 1
+
+/*
+   Add an address when it is either read/write in the state-tree
+   address - address accessed
+   keyType - Parameter accessed in the state-tree
+   value - value read/write
+ */
+
+void FullTracer::addReadWriteAddress ( const Goldilocks::Element &address0, const Goldilocks::Element &address1, const Goldilocks::Element &address2, const Goldilocks::Element &address3, const Goldilocks::Element &address4, const Goldilocks::Element &address5, const Goldilocks::Element &address6, const Goldilocks::Element &address7,
+                                       const Goldilocks::Element &keyType0, const Goldilocks::Element &keyType1, const Goldilocks::Element &keyType2, const Goldilocks::Element &keyType3, const Goldilocks::Element &keyType4, const Goldilocks::Element &keyType5, const Goldilocks::Element &keyType6, const Goldilocks::Element &keyType7,
+                                       const mpz_class &value )
+{
+#ifdef LOG_TIME_STATISTICS
+    gettimeofday(&t, NULL);
+#endif
+
+    // Get address
+    mpz_class address;
+    fea2scalar(fr, address, address0, address1, address2, address3, address4, address5, address6, address7);
+    string addressHex = "0x" + NormalizeToNFormat(address.get_str(16), 40);
+
+    // Get key type
+    mpz_class keyType;
+    fea2scalar(fr, keyType, keyType0, keyType1, keyType2, keyType3, keyType4, keyType5, keyType6, keyType7);
+
+    unordered_map<string, InfoReadWrite>::iterator it;
+    if (keyType == SMT_KEY_BALANCE)
+    {
+        it = read_write_addresses.find(addressHex);
+        if (it == read_write_addresses.end())
+        {
+            InfoReadWrite infoReadWrite;
+            infoReadWrite.balance = value.get_str();
+            read_write_addresses[addressHex] = infoReadWrite;
+        }
+        else
+        {
+            it->second.balance = value.get_str();
+        }
+    }
+    else if (keyType == SMT_KEY_NONCE)
+    {
+        it = read_write_addresses.find(addressHex);
+        if (it == read_write_addresses.end())
+        {
+            InfoReadWrite infoReadWrite;
+            infoReadWrite.nonce = value.get_str();
+            read_write_addresses[addressHex] = infoReadWrite;
+        }
+        else
+        {
+            it->second.nonce = value.get_str();
+        }
+    }
+
+#ifdef LOG_TIME_STATISTICS
+    tms.add("addReadWriteAddress", TimeDiff(t));
 #endif
 }

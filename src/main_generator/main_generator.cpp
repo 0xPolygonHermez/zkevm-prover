@@ -984,6 +984,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "        return;\n";
                     code += "    }\n";
                     code += "    incCounter = smtGetResult.proofHashCounter + 2;\n";
+                    if (bFastMode)
+                        code += "    proverRequest.fullTracer.addReadWriteAddress( pols.A0[0], pols.A1[0], pols.A2[0], pols.A3[0], pols.A4[0], pols.A5[0], pols.A6[0], pols.A7[0], pols.B0[0], pols.B1[0], pols.B2[0], pols.B3[0], pols.B4[0], pols.B5[0], pols.B6[0], pols.B7[0], smtGetResult.value);\n";
                     code += "#ifdef LOG_TIME_STATISTICS\n";
                     code += "    mainMetrics.add(\"SMT Get\", TimeDiff(t));\n";
                     code += "#endif\n";
@@ -1104,6 +1106,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "        return;\n";
                     code += "    }\n";
                     code += "    incCounter = ctx.lastSWrite.res.proofHashCounter + 2;\n";
+                    if (bFastMode)
+                        code += "    proverRequest.fullTracer.addReadWriteAddress( pols.A0[0], pols.A1[0], pols.A2[0], pols.A3[0], pols.A4[0], pols.A5[0], pols.A6[0], pols.A7[0], pols.B0[0], pols.B1[0], pols.B2[0], pols.B3[0], pols.B4[0], pols.B5[0], pols.B6[0], pols.B7[0], scalarD);\n";
                     code += "#ifdef LOG_TIME_STATISTICS\n";
                     code += "    mainMetrics.add(\"SMT Set\", TimeDiff(t));\n";
                     code += "#endif\n";
@@ -2645,6 +2649,12 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    // denominator = 2*y1 = y1+y1\n";
                     code += "    mainExecutor.fec.add(denominator, fecY1, fecY1);\n";
 
+                    code += "    if (mainExecutor.fec.isZero(denominator))\n";
+                    code += "    {\n";
+                    code += "        cerr << \"Error: denominator=0 in arith operation 1\" << endl;";
+                    code += "        exitProcess();\n";
+                    code += "    }\n";
+
                     code += "    // s = numerator/denominator\n";
                     code += "    mainExecutor.fec.div(s_fec, numerator, denominator);\n";
 
@@ -2659,6 +2669,12 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
                     code += "    // denominator = x2-x1\n";
                     code += "    mainExecutor.fec.sub(denominator, fecX2, fecX1);\n";
+
+                    code += "    if (mainExecutor.fec.isZero(denominator))\n";
+                    code += "    {\n";
+                    code += "        cerr << \"Error: denominator=0 in arith operation 2\" << endl;";
+                    code += "        exitProcess();\n";
+                    code += "    }\n";
 
                     code += "    // s = numerator/denominator\n";
                     code += "    mainExecutor.fec.div(s_fec, numerator, denominator);\n";
