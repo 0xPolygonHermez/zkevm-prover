@@ -8,12 +8,14 @@ using namespace std;
 
 uint64_t TimeDiff(const struct timeval &startTime, const struct timeval &endTime)
 {
-    struct timeval diff = {0, 0};
+    struct timeval diff;
 
     // Calculate the time difference
     diff.tv_sec = endTime.tv_sec - startTime.tv_sec;
     if (endTime.tv_usec >= startTime.tv_usec)
+    {
         diff.tv_usec = endTime.tv_usec - startTime.tv_usec;
+    }
     else if (diff.tv_sec > 0)
     {
         diff.tv_usec = 1000000 + endTime.tv_usec - startTime.tv_usec;
@@ -21,8 +23,8 @@ uint64_t TimeDiff(const struct timeval &startTime, const struct timeval &endTime
     }
     else
     {
-        cerr << "Error: TimeDiff() got startTime > endTime" << endl;
-        exitProcess();
+        cerr << "Error: TimeDiff() got startTime > endTime: startTime.tv_sec=" << startTime.tv_sec << " startTime.tv_usec=" << startTime.tv_usec << " endTime.tv_sec=" << endTime.tv_sec << " endTime.tv_usec=" << endTime.tv_usec << endl;
+        diff.tv_usec = 0;
     }
 
     // Return the total number of us

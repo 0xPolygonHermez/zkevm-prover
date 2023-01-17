@@ -2098,12 +2098,13 @@ class GetStatusResponse PROTOBUF_FINAL :
     kCurrentComputingRequestIdFieldNumber = 4,
     kVersionProtoFieldNumber = 6,
     kVersionServerFieldNumber = 7,
-    kProverIdFieldNumber = 9,
+    kProverNameFieldNumber = 9,
+    kProverIdFieldNumber = 10,
     kLastComputedEndTimeFieldNumber = 3,
     kCurrentComputingStartTimeFieldNumber = 5,
-    kNumberOfCoresFieldNumber = 10,
-    kTotalMemoryFieldNumber = 11,
-    kFreeMemoryFieldNumber = 12,
+    kNumberOfCoresFieldNumber = 11,
+    kTotalMemoryFieldNumber = 12,
+    kFreeMemoryFieldNumber = 13,
     kStatusFieldNumber = 1,
   };
   // repeated string pending_request_queue_ids = 8;
@@ -2230,7 +2231,32 @@ class GetStatusResponse PROTOBUF_FINAL :
   std::string* _internal_mutable_version_server();
   public:
 
-  // string prover_id = 9;
+  // string prover_name = 9;
+  void clear_prover_name();
+  const std::string& prover_name() const;
+  void set_prover_name(const std::string& value);
+  void set_prover_name(std::string&& value);
+  void set_prover_name(const char* value);
+  void set_prover_name(const char* value, size_t size);
+  std::string* mutable_prover_name();
+  std::string* release_prover_name();
+  void set_allocated_prover_name(std::string* prover_name);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_prover_name();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_prover_name(
+      std::string* prover_name);
+  private:
+  const std::string& _internal_prover_name() const;
+  void _internal_set_prover_name(const std::string& value);
+  std::string* _internal_mutable_prover_name();
+  public:
+
+  // string prover_id = 10;
   void clear_prover_id();
   const std::string& prover_id() const;
   void set_prover_id(const std::string& value);
@@ -2273,7 +2299,7 @@ class GetStatusResponse PROTOBUF_FINAL :
   void _internal_set_current_computing_start_time(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // uint64 number_of_cores = 10;
+  // uint64 number_of_cores = 11;
   void clear_number_of_cores();
   ::PROTOBUF_NAMESPACE_ID::uint64 number_of_cores() const;
   void set_number_of_cores(::PROTOBUF_NAMESPACE_ID::uint64 value);
@@ -2282,7 +2308,7 @@ class GetStatusResponse PROTOBUF_FINAL :
   void _internal_set_number_of_cores(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // uint64 total_memory = 11;
+  // uint64 total_memory = 12;
   void clear_total_memory();
   ::PROTOBUF_NAMESPACE_ID::uint64 total_memory() const;
   void set_total_memory(::PROTOBUF_NAMESPACE_ID::uint64 value);
@@ -2291,7 +2317,7 @@ class GetStatusResponse PROTOBUF_FINAL :
   void _internal_set_total_memory(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // uint64 free_memory = 12;
+  // uint64 free_memory = 13;
   void clear_free_memory();
   ::PROTOBUF_NAMESPACE_ID::uint64 free_memory() const;
   void set_free_memory(::PROTOBUF_NAMESPACE_ID::uint64 value);
@@ -2321,6 +2347,7 @@ class GetStatusResponse PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr current_computing_request_id_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr version_proto_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr version_server_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr prover_name_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr prover_id_;
   ::PROTOBUF_NAMESPACE_ID::uint64 last_computed_end_time_;
   ::PROTOBUF_NAMESPACE_ID::uint64 current_computing_start_time_;
@@ -6826,7 +6853,88 @@ GetStatusResponse::mutable_pending_request_queue_ids() {
   return &pending_request_queue_ids_;
 }
 
-// string prover_id = 9;
+// string prover_name = 9;
+inline void GetStatusResponse::clear_prover_name() {
+  prover_name_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& GetStatusResponse::prover_name() const {
+  // @@protoc_insertion_point(field_get:aggregator.v1.GetStatusResponse.prover_name)
+  return _internal_prover_name();
+}
+inline void GetStatusResponse::set_prover_name(const std::string& value) {
+  _internal_set_prover_name(value);
+  // @@protoc_insertion_point(field_set:aggregator.v1.GetStatusResponse.prover_name)
+}
+inline std::string* GetStatusResponse::mutable_prover_name() {
+  // @@protoc_insertion_point(field_mutable:aggregator.v1.GetStatusResponse.prover_name)
+  return _internal_mutable_prover_name();
+}
+inline const std::string& GetStatusResponse::_internal_prover_name() const {
+  return prover_name_.Get();
+}
+inline void GetStatusResponse::_internal_set_prover_name(const std::string& value) {
+  
+  prover_name_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void GetStatusResponse::set_prover_name(std::string&& value) {
+  
+  prover_name_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:aggregator.v1.GetStatusResponse.prover_name)
+}
+inline void GetStatusResponse::set_prover_name(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  prover_name_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:aggregator.v1.GetStatusResponse.prover_name)
+}
+inline void GetStatusResponse::set_prover_name(const char* value,
+    size_t size) {
+  
+  prover_name_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:aggregator.v1.GetStatusResponse.prover_name)
+}
+inline std::string* GetStatusResponse::_internal_mutable_prover_name() {
+  
+  return prover_name_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* GetStatusResponse::release_prover_name() {
+  // @@protoc_insertion_point(field_release:aggregator.v1.GetStatusResponse.prover_name)
+  return prover_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void GetStatusResponse::set_allocated_prover_name(std::string* prover_name) {
+  if (prover_name != nullptr) {
+    
+  } else {
+    
+  }
+  prover_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), prover_name,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.GetStatusResponse.prover_name)
+}
+inline std::string* GetStatusResponse::unsafe_arena_release_prover_name() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.GetStatusResponse.prover_name)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return prover_name_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void GetStatusResponse::unsafe_arena_set_allocated_prover_name(
+    std::string* prover_name) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (prover_name != nullptr) {
+    
+  } else {
+    
+  }
+  prover_name_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      prover_name, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.GetStatusResponse.prover_name)
+}
+
+// string prover_id = 10;
 inline void GetStatusResponse::clear_prover_id() {
   prover_id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -6907,7 +7015,7 @@ inline void GetStatusResponse::unsafe_arena_set_allocated_prover_id(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.GetStatusResponse.prover_id)
 }
 
-// uint64 number_of_cores = 10;
+// uint64 number_of_cores = 11;
 inline void GetStatusResponse::clear_number_of_cores() {
   number_of_cores_ = PROTOBUF_ULONGLONG(0);
 }
@@ -6927,7 +7035,7 @@ inline void GetStatusResponse::set_number_of_cores(::PROTOBUF_NAMESPACE_ID::uint
   // @@protoc_insertion_point(field_set:aggregator.v1.GetStatusResponse.number_of_cores)
 }
 
-// uint64 total_memory = 11;
+// uint64 total_memory = 12;
 inline void GetStatusResponse::clear_total_memory() {
   total_memory_ = PROTOBUF_ULONGLONG(0);
 }
@@ -6947,7 +7055,7 @@ inline void GetStatusResponse::set_total_memory(::PROTOBUF_NAMESPACE_ID::uint64 
   // @@protoc_insertion_point(field_set:aggregator.v1.GetStatusResponse.total_memory)
 }
 
-// uint64 free_memory = 12;
+// uint64 free_memory = 13;
 inline void GetStatusResponse::clear_free_memory() {
   free_memory_ = PROTOBUF_ULONGLONG(0);
 }

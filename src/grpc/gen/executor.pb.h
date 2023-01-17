@@ -51,7 +51,7 @@ struct TableStruct_executor_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxillaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[12]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[14]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -72,6 +72,9 @@ extern ExecutionTraceStepDefaultTypeInternal _ExecutionTraceStep_default_instanc
 class ExecutionTraceStep_StorageEntry_DoNotUse;
 class ExecutionTraceStep_StorageEntry_DoNotUseDefaultTypeInternal;
 extern ExecutionTraceStep_StorageEntry_DoNotUseDefaultTypeInternal _ExecutionTraceStep_StorageEntry_DoNotUse_default_instance_;
+class InfoReadWrite;
+class InfoReadWriteDefaultTypeInternal;
+extern InfoReadWriteDefaultTypeInternal _InfoReadWrite_default_instance_;
 class Log;
 class LogDefaultTypeInternal;
 extern LogDefaultTypeInternal _Log_default_instance_;
@@ -87,6 +90,9 @@ extern ProcessBatchRequest_DbEntry_DoNotUseDefaultTypeInternal _ProcessBatchRequ
 class ProcessBatchResponse;
 class ProcessBatchResponseDefaultTypeInternal;
 extern ProcessBatchResponseDefaultTypeInternal _ProcessBatchResponse_default_instance_;
+class ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse;
+class ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUseDefaultTypeInternal;
+extern ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUseDefaultTypeInternal _ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse_default_instance_;
 class ProcessTransactionResponse;
 class ProcessTransactionResponseDefaultTypeInternal;
 extern ProcessTransactionResponseDefaultTypeInternal _ProcessTransactionResponse_default_instance_;
@@ -103,11 +109,13 @@ template<> ::executor::v1::CallTrace* Arena::CreateMaybeMessage<::executor::v1::
 template<> ::executor::v1::Contract* Arena::CreateMaybeMessage<::executor::v1::Contract>(Arena*);
 template<> ::executor::v1::ExecutionTraceStep* Arena::CreateMaybeMessage<::executor::v1::ExecutionTraceStep>(Arena*);
 template<> ::executor::v1::ExecutionTraceStep_StorageEntry_DoNotUse* Arena::CreateMaybeMessage<::executor::v1::ExecutionTraceStep_StorageEntry_DoNotUse>(Arena*);
+template<> ::executor::v1::InfoReadWrite* Arena::CreateMaybeMessage<::executor::v1::InfoReadWrite>(Arena*);
 template<> ::executor::v1::Log* Arena::CreateMaybeMessage<::executor::v1::Log>(Arena*);
 template<> ::executor::v1::ProcessBatchRequest* Arena::CreateMaybeMessage<::executor::v1::ProcessBatchRequest>(Arena*);
 template<> ::executor::v1::ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse* Arena::CreateMaybeMessage<::executor::v1::ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse>(Arena*);
 template<> ::executor::v1::ProcessBatchRequest_DbEntry_DoNotUse* Arena::CreateMaybeMessage<::executor::v1::ProcessBatchRequest_DbEntry_DoNotUse>(Arena*);
 template<> ::executor::v1::ProcessBatchResponse* Arena::CreateMaybeMessage<::executor::v1::ProcessBatchResponse>(Arena*);
+template<> ::executor::v1::ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse* Arena::CreateMaybeMessage<::executor::v1::ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse>(Arena*);
 template<> ::executor::v1::ProcessTransactionResponse* Arena::CreateMaybeMessage<::executor::v1::ProcessTransactionResponse>(Arena*);
 template<> ::executor::v1::TransactionContext* Arena::CreateMaybeMessage<::executor::v1::TransactionContext>(Arena*);
 template<> ::executor::v1::TransactionStep* Arena::CreateMaybeMessage<::executor::v1::TransactionStep>(Arena*);
@@ -115,56 +123,87 @@ PROTOBUF_NAMESPACE_CLOSE
 namespace executor {
 namespace v1 {
 
-enum Error : int {
-  ERROR_UNSPECIFIED = 0,
-  ERROR_NO_ERROR = 1,
-  ERROR_OUT_OF_GAS = 2,
-  ERROR_STACK_OVERFLOW = 3,
-  ERROR_STACK_UNDERFLOW = 4,
-  ERROR_MAX_CODE_SIZE_EXCEEDED = 5,
-  ERROR_CONTRACT_ADDRESS_COLLISION = 6,
-  ERROR_EXECUTION_REVERTED = 7,
-  ERROR_OUT_OF_COUNTERS_STEP = 8,
-  ERROR_OUT_OF_COUNTERS_KECCAK = 9,
-  ERROR_OUT_OF_COUNTERS_BINARY = 10,
-  ERROR_OUT_OF_COUNTERS_MEM = 11,
-  ERROR_OUT_OF_COUNTERS_ARITH = 12,
-  ERROR_OUT_OF_COUNTERS_PADDING = 13,
-  ERROR_OUT_OF_COUNTERS_POSEIDON = 14,
-  ERROR_INVALID_JUMP = 15,
-  ERROR_INVALID_OPCODE = 16,
-  ERROR_INVALID_STATIC = 17,
-  ERROR_INVALID_BYTECODE_STARTS_EF = 18,
-  ERROR_INTRINSIC_INVALID_SIGNATURE = 19,
-  ERROR_INTRINSIC_INVALID_CHAIN_ID = 20,
-  ERROR_INTRINSIC_INVALID_NONCE = 21,
-  ERROR_INTRINSIC_INVALID_GAS_LIMIT = 22,
-  ERROR_INTRINSIC_INVALID_BALANCE = 23,
-  ERROR_INTRINSIC_INVALID_BATCH_GAS_LIMIT = 24,
-  ERROR_INTRINSIC_INVALID_SENDER_CODE = 25,
-  ERROR_INTRINSIC_TX_GAS_OVERFLOW = 26,
-  ERROR_BATCH_DATA_TOO_BIG = 27,
-  Error_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
-  Error_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
+enum RomError : int {
+  ROM_ERROR_UNSPECIFIED = 0,
+  ROM_ERROR_NO_ERROR = 1,
+  ROM_ERROR_OUT_OF_GAS = 2,
+  ROM_ERROR_STACK_OVERFLOW = 3,
+  ROM_ERROR_STACK_UNDERFLOW = 4,
+  ROM_ERROR_MAX_CODE_SIZE_EXCEEDED = 5,
+  ROM_ERROR_CONTRACT_ADDRESS_COLLISION = 6,
+  ROM_ERROR_EXECUTION_REVERTED = 7,
+  ROM_ERROR_OUT_OF_COUNTERS_STEP = 8,
+  ROM_ERROR_OUT_OF_COUNTERS_KECCAK = 9,
+  ROM_ERROR_OUT_OF_COUNTERS_BINARY = 10,
+  ROM_ERROR_OUT_OF_COUNTERS_MEM = 11,
+  ROM_ERROR_OUT_OF_COUNTERS_ARITH = 12,
+  ROM_ERROR_OUT_OF_COUNTERS_PADDING = 13,
+  ROM_ERROR_OUT_OF_COUNTERS_POSEIDON = 14,
+  ROM_ERROR_INVALID_JUMP = 15,
+  ROM_ERROR_INVALID_OPCODE = 16,
+  ROM_ERROR_INVALID_STATIC = 17,
+  ROM_ERROR_INVALID_BYTECODE_STARTS_EF = 18,
+  ROM_ERROR_INTRINSIC_INVALID_SIGNATURE = 19,
+  ROM_ERROR_INTRINSIC_INVALID_CHAIN_ID = 20,
+  ROM_ERROR_INTRINSIC_INVALID_NONCE = 21,
+  ROM_ERROR_INTRINSIC_INVALID_GAS_LIMIT = 22,
+  ROM_ERROR_INTRINSIC_INVALID_BALANCE = 23,
+  ROM_ERROR_INTRINSIC_INVALID_BATCH_GAS_LIMIT = 24,
+  ROM_ERROR_INTRINSIC_INVALID_SENDER_CODE = 25,
+  ROM_ERROR_INTRINSIC_TX_GAS_OVERFLOW = 26,
+  ROM_ERROR_BATCH_DATA_TOO_BIG = 27,
+  RomError_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
+  RomError_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
-bool Error_IsValid(int value);
-constexpr Error Error_MIN = ERROR_UNSPECIFIED;
-constexpr Error Error_MAX = ERROR_BATCH_DATA_TOO_BIG;
-constexpr int Error_ARRAYSIZE = Error_MAX + 1;
+bool RomError_IsValid(int value);
+constexpr RomError RomError_MIN = ROM_ERROR_UNSPECIFIED;
+constexpr RomError RomError_MAX = ROM_ERROR_BATCH_DATA_TOO_BIG;
+constexpr int RomError_ARRAYSIZE = RomError_MAX + 1;
 
-const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* Error_descriptor();
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* RomError_descriptor();
 template<typename T>
-inline const std::string& Error_Name(T enum_t_value) {
-  static_assert(::std::is_same<T, Error>::value ||
+inline const std::string& RomError_Name(T enum_t_value) {
+  static_assert(::std::is_same<T, RomError>::value ||
     ::std::is_integral<T>::value,
-    "Incorrect type passed to function Error_Name.");
+    "Incorrect type passed to function RomError_Name.");
   return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
-    Error_descriptor(), enum_t_value);
+    RomError_descriptor(), enum_t_value);
 }
-inline bool Error_Parse(
-    const std::string& name, Error* value) {
-  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<Error>(
-    Error_descriptor(), name, value);
+inline bool RomError_Parse(
+    const std::string& name, RomError* value) {
+  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<RomError>(
+    RomError_descriptor(), name, value);
+}
+enum ExecutorError : int {
+  EXECUTOR_ERROR_UNSPECIFIED = 0,
+  EXECUTOR_ERROR_NO_ERROR = 1,
+  EXECUTOR_ERROR_COUNTERS_OVERFLOW_KECCAK = 2,
+  EXECUTOR_ERROR_COUNTERS_OVERFLOW_BINARY = 3,
+  EXECUTOR_ERROR_COUNTERS_OVERFLOW_MEM = 4,
+  EXECUTOR_ERROR_COUNTERS_OVERFLOW_ARITH = 5,
+  EXECUTOR_ERROR_COUNTERS_OVERFLOW_PADDING = 6,
+  EXECUTOR_ERROR_COUNTERS_OVERFLOW_POSEIDON = 7,
+  ExecutorError_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
+  ExecutorError_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
+};
+bool ExecutorError_IsValid(int value);
+constexpr ExecutorError ExecutorError_MIN = EXECUTOR_ERROR_UNSPECIFIED;
+constexpr ExecutorError ExecutorError_MAX = EXECUTOR_ERROR_COUNTERS_OVERFLOW_POSEIDON;
+constexpr int ExecutorError_ARRAYSIZE = ExecutorError_MAX + 1;
+
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ExecutorError_descriptor();
+template<typename T>
+inline const std::string& ExecutorError_Name(T enum_t_value) {
+  static_assert(::std::is_same<T, ExecutorError>::value ||
+    ::std::is_integral<T>::value,
+    "Incorrect type passed to function ExecutorError_Name.");
+  return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
+    ExecutorError_descriptor(), enum_t_value);
+}
+inline bool ExecutorError_Parse(
+    const std::string& name, ExecutorError* value) {
+  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<ExecutorError>(
+    ExecutorError_descriptor(), name, value);
 }
 // ===================================================================
 
@@ -682,6 +721,38 @@ class ProcessBatchRequest PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse : public ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse, 
+    std::string, ::executor::v1::InfoReadWrite,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_MESSAGE,
+    0 > {
+public:
+  typedef ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse, 
+    std::string, ::executor::v1::InfoReadWrite,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_MESSAGE,
+    0 > SuperType;
+  ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse();
+  ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  void MergeFrom(const ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse& other);
+  static const ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse* internal_default_instance() { return reinterpret_cast<const ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse*>(&_ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse_default_instance_); }
+  static bool ValidateKey(std::string* s) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "executor.v1.ProcessBatchResponse.ReadWriteAddressesEntry.key");
+ }
+  static bool ValidateValue(void*) { return true; }
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& other) final;
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
+    return ::descriptor_table_executor_2eproto.file_level_metadata[3];
+  }
+
+  public:
+};
+
+// -------------------------------------------------------------------
+
 class ProcessBatchResponse PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:executor.v1.ProcessBatchResponse) */ {
  public:
@@ -724,7 +795,7 @@ class ProcessBatchResponse PROTOBUF_FINAL :
                &_ProcessBatchResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    3;
+    4;
 
   friend void swap(ProcessBatchResponse& a, ProcessBatchResponse& b) {
     a.Swap(&b);
@@ -792,10 +863,12 @@ class ProcessBatchResponse PROTOBUF_FINAL :
 
   // nested types ----------------------------------------------------
 
+
   // accessors -------------------------------------------------------
 
   enum : int {
     kResponsesFieldNumber = 13,
+    kReadWriteAddressesFieldNumber = 15,
     kNewStateRootFieldNumber = 1,
     kNewAccInputHashFieldNumber = 2,
     kNewLocalExitRootFieldNumber = 3,
@@ -827,6 +900,23 @@ class ProcessBatchResponse PROTOBUF_FINAL :
   ::executor::v1::ProcessTransactionResponse* add_responses();
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::executor::v1::ProcessTransactionResponse >&
       responses() const;
+
+  // map<string, .executor.v1.InfoReadWrite> read_write_addresses = 15;
+  int read_write_addresses_size() const;
+  private:
+  int _internal_read_write_addresses_size() const;
+  public:
+  void clear_read_write_addresses();
+  private:
+  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::executor::v1::InfoReadWrite >&
+      _internal_read_write_addresses() const;
+  ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::executor::v1::InfoReadWrite >*
+      _internal_mutable_read_write_addresses();
+  public:
+  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::executor::v1::InfoReadWrite >&
+      read_write_addresses() const;
+  ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::executor::v1::InfoReadWrite >*
+      mutable_read_write_addresses();
 
   // bytes new_state_root = 1;
   void clear_new_state_root();
@@ -984,13 +1074,13 @@ class ProcessBatchResponse PROTOBUF_FINAL :
   void _internal_set_cnt_steps(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
-  // .executor.v1.Error error = 14;
+  // .executor.v1.ExecutorError error = 14;
   void clear_error();
-  ::executor::v1::Error error() const;
-  void set_error(::executor::v1::Error value);
+  ::executor::v1::ExecutorError error() const;
+  void set_error(::executor::v1::ExecutorError value);
   private:
-  ::executor::v1::Error _internal_error() const;
-  void _internal_set_error(::executor::v1::Error value);
+  ::executor::v1::ExecutorError _internal_error() const;
+  void _internal_set_error(::executor::v1::ExecutorError value);
   public:
 
   // @@protoc_insertion_point(class_scope:executor.v1.ProcessBatchResponse)
@@ -1001,6 +1091,12 @@ class ProcessBatchResponse PROTOBUF_FINAL :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::executor::v1::ProcessTransactionResponse > responses_;
+  ::PROTOBUF_NAMESPACE_ID::internal::MapField<
+      ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse,
+      std::string, ::executor::v1::InfoReadWrite,
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_MESSAGE,
+      0 > read_write_addresses_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr new_state_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr new_acc_input_hash_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr new_local_exit_root_;
@@ -1014,6 +1110,186 @@ class ProcessBatchResponse PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint64 cumulative_gas_used_;
   ::PROTOBUF_NAMESPACE_ID::uint32 cnt_steps_;
   int error_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_executor_2eproto;
+};
+// -------------------------------------------------------------------
+
+class InfoReadWrite PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:executor.v1.InfoReadWrite) */ {
+ public:
+  inline InfoReadWrite() : InfoReadWrite(nullptr) {};
+  virtual ~InfoReadWrite();
+
+  InfoReadWrite(const InfoReadWrite& from);
+  InfoReadWrite(InfoReadWrite&& from) noexcept
+    : InfoReadWrite() {
+    *this = ::std::move(from);
+  }
+
+  inline InfoReadWrite& operator=(const InfoReadWrite& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline InfoReadWrite& operator=(InfoReadWrite&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const InfoReadWrite& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const InfoReadWrite* internal_default_instance() {
+    return reinterpret_cast<const InfoReadWrite*>(
+               &_InfoReadWrite_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    5;
+
+  friend void swap(InfoReadWrite& a, InfoReadWrite& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(InfoReadWrite* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(InfoReadWrite* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline InfoReadWrite* New() const final {
+    return CreateMaybeMessage<InfoReadWrite>(nullptr);
+  }
+
+  InfoReadWrite* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<InfoReadWrite>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const InfoReadWrite& from);
+  void MergeFrom(const InfoReadWrite& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(InfoReadWrite* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "executor.v1.InfoReadWrite";
+  }
+  protected:
+  explicit InfoReadWrite(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
+    return ::descriptor_table_executor_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kNonceFieldNumber = 1,
+    kBalanceFieldNumber = 2,
+  };
+  // string nonce = 1;
+  void clear_nonce();
+  const std::string& nonce() const;
+  void set_nonce(const std::string& value);
+  void set_nonce(std::string&& value);
+  void set_nonce(const char* value);
+  void set_nonce(const char* value, size_t size);
+  std::string* mutable_nonce();
+  std::string* release_nonce();
+  void set_allocated_nonce(std::string* nonce);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_nonce();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_nonce(
+      std::string* nonce);
+  private:
+  const std::string& _internal_nonce() const;
+  void _internal_set_nonce(const std::string& value);
+  std::string* _internal_mutable_nonce();
+  public:
+
+  // string balance = 2;
+  void clear_balance();
+  const std::string& balance() const;
+  void set_balance(const std::string& value);
+  void set_balance(std::string&& value);
+  void set_balance(const char* value);
+  void set_balance(const char* value, size_t size);
+  std::string* mutable_balance();
+  std::string* release_balance();
+  void set_allocated_balance(std::string* balance);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_balance();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_balance(
+      std::string* balance);
+  private:
+  const std::string& _internal_balance() const;
+  void _internal_set_balance(const std::string& value);
+  std::string* _internal_mutable_balance();
+  public:
+
+  // @@protoc_insertion_point(class_scope:executor.v1.InfoReadWrite)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr nonce_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr balance_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
 };
@@ -1061,7 +1337,7 @@ class CallTrace PROTOBUF_FINAL :
                &_CallTrace_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    4;
+    6;
 
   friend void swap(CallTrace& a, CallTrace& b) {
     a.Swap(&b);
@@ -1227,7 +1503,7 @@ class TransactionContext PROTOBUF_FINAL :
                &_TransactionContext_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    5;
+    7;
 
   friend void swap(TransactionContext& a, TransactionContext& b) {
     a.Swap(&b);
@@ -1629,7 +1905,7 @@ class TransactionStep PROTOBUF_FINAL :
                &_TransactionStep_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    6;
+    8;
 
   friend void swap(TransactionStep& a, TransactionStep& b) {
     a.Swap(&b);
@@ -1884,13 +2160,13 @@ class TransactionStep PROTOBUF_FINAL :
   void _internal_set_gas_refund(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // .executor.v1.Error error = 12;
+  // .executor.v1.RomError error = 12;
   void clear_error();
-  ::executor::v1::Error error() const;
-  void set_error(::executor::v1::Error value);
+  ::executor::v1::RomError error() const;
+  void set_error(::executor::v1::RomError value);
   private:
-  ::executor::v1::Error _internal_error() const;
-  void _internal_set_error(::executor::v1::Error value);
+  ::executor::v1::RomError _internal_error() const;
+  void _internal_set_error(::executor::v1::RomError value);
   public:
 
   // @@protoc_insertion_point(class_scope:executor.v1.TransactionStep)
@@ -1959,7 +2235,7 @@ class Contract PROTOBUF_FINAL :
                &_Contract_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    7;
+    9;
 
   friend void swap(Contract& a, Contract& b) {
     a.Swap(&b);
@@ -2204,7 +2480,7 @@ class ProcessTransactionResponse PROTOBUF_FINAL :
                &_ProcessTransactionResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    8;
+    10;
 
   friend void swap(ProcessTransactionResponse& a, ProcessTransactionResponse& b) {
     a.Swap(&b);
@@ -2486,13 +2762,13 @@ class ProcessTransactionResponse PROTOBUF_FINAL :
   void _internal_set_type(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
-  // .executor.v1.Error error = 8;
+  // .executor.v1.RomError error = 8;
   void clear_error();
-  ::executor::v1::Error error() const;
-  void set_error(::executor::v1::Error value);
+  ::executor::v1::RomError error() const;
+  void set_error(::executor::v1::RomError value);
   private:
-  ::executor::v1::Error _internal_error() const;
-  void _internal_set_error(::executor::v1::Error value);
+  ::executor::v1::RomError _internal_error() const;
+  void _internal_set_error(::executor::v1::RomError value);
   public:
 
   // uint64 gas_used = 6;
@@ -2580,7 +2856,7 @@ class Log PROTOBUF_FINAL :
                &_Log_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    9;
+    11;
 
   friend void swap(Log& a, Log& b) {
     a.Swap(&b);
@@ -2857,7 +3133,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
-    return ::descriptor_table_executor_2eproto.file_level_metadata[10];
+    return ::descriptor_table_executor_2eproto.file_level_metadata[12];
   }
 
   public:
@@ -2907,7 +3183,7 @@ class ExecutionTraceStep PROTOBUF_FINAL :
                &_ExecutionTraceStep_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    11;
+    13;
 
   friend void swap(ExecutionTraceStep& a, ExecutionTraceStep& b) {
     a.Swap(&b);
@@ -3162,13 +3438,13 @@ class ExecutionTraceStep PROTOBUF_FINAL :
   void _internal_set_gas_refund(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // .executor.v1.Error error = 12;
+  // .executor.v1.RomError error = 12;
   void clear_error();
-  ::executor::v1::Error error() const;
-  void set_error(::executor::v1::Error value);
+  ::executor::v1::RomError error() const;
+  void set_error(::executor::v1::RomError value);
   private:
-  ::executor::v1::Error _internal_error() const;
-  void _internal_set_error(::executor::v1::Error value);
+  ::executor::v1::RomError _internal_error() const;
+  void _internal_set_error(::executor::v1::RomError value);
   public:
 
   // @@protoc_insertion_point(class_scope:executor.v1.ExecutionTraceStep)
@@ -4021,6 +4297,8 @@ ProcessBatchRequest::mutable_contracts_bytecode() {
 
 // -------------------------------------------------------------------
 
+// -------------------------------------------------------------------
+
 // ProcessBatchResponse
 
 // bytes new_state_root = 1;
@@ -4485,24 +4763,219 @@ ProcessBatchResponse::responses() const {
   return responses_;
 }
 
-// .executor.v1.Error error = 14;
+// .executor.v1.ExecutorError error = 14;
 inline void ProcessBatchResponse::clear_error() {
   error_ = 0;
 }
-inline ::executor::v1::Error ProcessBatchResponse::_internal_error() const {
-  return static_cast< ::executor::v1::Error >(error_);
+inline ::executor::v1::ExecutorError ProcessBatchResponse::_internal_error() const {
+  return static_cast< ::executor::v1::ExecutorError >(error_);
 }
-inline ::executor::v1::Error ProcessBatchResponse::error() const {
+inline ::executor::v1::ExecutorError ProcessBatchResponse::error() const {
   // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchResponse.error)
   return _internal_error();
 }
-inline void ProcessBatchResponse::_internal_set_error(::executor::v1::Error value) {
+inline void ProcessBatchResponse::_internal_set_error(::executor::v1::ExecutorError value) {
   
   error_ = value;
 }
-inline void ProcessBatchResponse::set_error(::executor::v1::Error value) {
+inline void ProcessBatchResponse::set_error(::executor::v1::ExecutorError value) {
   _internal_set_error(value);
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponse.error)
+}
+
+// map<string, .executor.v1.InfoReadWrite> read_write_addresses = 15;
+inline int ProcessBatchResponse::_internal_read_write_addresses_size() const {
+  return read_write_addresses_.size();
+}
+inline int ProcessBatchResponse::read_write_addresses_size() const {
+  return _internal_read_write_addresses_size();
+}
+inline void ProcessBatchResponse::clear_read_write_addresses() {
+  read_write_addresses_.Clear();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::executor::v1::InfoReadWrite >&
+ProcessBatchResponse::_internal_read_write_addresses() const {
+  return read_write_addresses_.GetMap();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::executor::v1::InfoReadWrite >&
+ProcessBatchResponse::read_write_addresses() const {
+  // @@protoc_insertion_point(field_map:executor.v1.ProcessBatchResponse.read_write_addresses)
+  return _internal_read_write_addresses();
+}
+inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::executor::v1::InfoReadWrite >*
+ProcessBatchResponse::_internal_mutable_read_write_addresses() {
+  return read_write_addresses_.MutableMap();
+}
+inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::executor::v1::InfoReadWrite >*
+ProcessBatchResponse::mutable_read_write_addresses() {
+  // @@protoc_insertion_point(field_mutable_map:executor.v1.ProcessBatchResponse.read_write_addresses)
+  return _internal_mutable_read_write_addresses();
+}
+
+// -------------------------------------------------------------------
+
+// InfoReadWrite
+
+// string nonce = 1;
+inline void InfoReadWrite::clear_nonce() {
+  nonce_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& InfoReadWrite::nonce() const {
+  // @@protoc_insertion_point(field_get:executor.v1.InfoReadWrite.nonce)
+  return _internal_nonce();
+}
+inline void InfoReadWrite::set_nonce(const std::string& value) {
+  _internal_set_nonce(value);
+  // @@protoc_insertion_point(field_set:executor.v1.InfoReadWrite.nonce)
+}
+inline std::string* InfoReadWrite::mutable_nonce() {
+  // @@protoc_insertion_point(field_mutable:executor.v1.InfoReadWrite.nonce)
+  return _internal_mutable_nonce();
+}
+inline const std::string& InfoReadWrite::_internal_nonce() const {
+  return nonce_.Get();
+}
+inline void InfoReadWrite::_internal_set_nonce(const std::string& value) {
+  
+  nonce_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void InfoReadWrite::set_nonce(std::string&& value) {
+  
+  nonce_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:executor.v1.InfoReadWrite.nonce)
+}
+inline void InfoReadWrite::set_nonce(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  nonce_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:executor.v1.InfoReadWrite.nonce)
+}
+inline void InfoReadWrite::set_nonce(const char* value,
+    size_t size) {
+  
+  nonce_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:executor.v1.InfoReadWrite.nonce)
+}
+inline std::string* InfoReadWrite::_internal_mutable_nonce() {
+  
+  return nonce_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* InfoReadWrite::release_nonce() {
+  // @@protoc_insertion_point(field_release:executor.v1.InfoReadWrite.nonce)
+  return nonce_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void InfoReadWrite::set_allocated_nonce(std::string* nonce) {
+  if (nonce != nullptr) {
+    
+  } else {
+    
+  }
+  nonce_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), nonce,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:executor.v1.InfoReadWrite.nonce)
+}
+inline std::string* InfoReadWrite::unsafe_arena_release_nonce() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.InfoReadWrite.nonce)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return nonce_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void InfoReadWrite::unsafe_arena_set_allocated_nonce(
+    std::string* nonce) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (nonce != nullptr) {
+    
+  } else {
+    
+  }
+  nonce_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      nonce, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.InfoReadWrite.nonce)
+}
+
+// string balance = 2;
+inline void InfoReadWrite::clear_balance() {
+  balance_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& InfoReadWrite::balance() const {
+  // @@protoc_insertion_point(field_get:executor.v1.InfoReadWrite.balance)
+  return _internal_balance();
+}
+inline void InfoReadWrite::set_balance(const std::string& value) {
+  _internal_set_balance(value);
+  // @@protoc_insertion_point(field_set:executor.v1.InfoReadWrite.balance)
+}
+inline std::string* InfoReadWrite::mutable_balance() {
+  // @@protoc_insertion_point(field_mutable:executor.v1.InfoReadWrite.balance)
+  return _internal_mutable_balance();
+}
+inline const std::string& InfoReadWrite::_internal_balance() const {
+  return balance_.Get();
+}
+inline void InfoReadWrite::_internal_set_balance(const std::string& value) {
+  
+  balance_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void InfoReadWrite::set_balance(std::string&& value) {
+  
+  balance_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:executor.v1.InfoReadWrite.balance)
+}
+inline void InfoReadWrite::set_balance(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  balance_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:executor.v1.InfoReadWrite.balance)
+}
+inline void InfoReadWrite::set_balance(const char* value,
+    size_t size) {
+  
+  balance_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:executor.v1.InfoReadWrite.balance)
+}
+inline std::string* InfoReadWrite::_internal_mutable_balance() {
+  
+  return balance_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* InfoReadWrite::release_balance() {
+  // @@protoc_insertion_point(field_release:executor.v1.InfoReadWrite.balance)
+  return balance_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void InfoReadWrite::set_allocated_balance(std::string* balance) {
+  if (balance != nullptr) {
+    
+  } else {
+    
+  }
+  balance_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), balance,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:executor.v1.InfoReadWrite.balance)
+}
+inline std::string* InfoReadWrite::unsafe_arena_release_balance() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.InfoReadWrite.balance)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return balance_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void InfoReadWrite::unsafe_arena_set_allocated_balance(
+    std::string* balance) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (balance != nullptr) {
+    
+  } else {
+    
+  }
+  balance_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      balance, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.InfoReadWrite.balance)
 }
 
 // -------------------------------------------------------------------
@@ -5944,22 +6417,22 @@ inline void TransactionStep::set_allocated_contract(::executor::v1::Contract* co
   // @@protoc_insertion_point(field_set_allocated:executor.v1.TransactionStep.contract)
 }
 
-// .executor.v1.Error error = 12;
+// .executor.v1.RomError error = 12;
 inline void TransactionStep::clear_error() {
   error_ = 0;
 }
-inline ::executor::v1::Error TransactionStep::_internal_error() const {
-  return static_cast< ::executor::v1::Error >(error_);
+inline ::executor::v1::RomError TransactionStep::_internal_error() const {
+  return static_cast< ::executor::v1::RomError >(error_);
 }
-inline ::executor::v1::Error TransactionStep::error() const {
+inline ::executor::v1::RomError TransactionStep::error() const {
   // @@protoc_insertion_point(field_get:executor.v1.TransactionStep.error)
   return _internal_error();
 }
-inline void TransactionStep::_internal_set_error(::executor::v1::Error value) {
+inline void TransactionStep::_internal_set_error(::executor::v1::RomError value) {
   
   error_ = value;
 }
-inline void TransactionStep::set_error(::executor::v1::Error value) {
+inline void TransactionStep::set_error(::executor::v1::RomError value) {
   _internal_set_error(value);
   // @@protoc_insertion_point(field_set:executor.v1.TransactionStep.error)
 }
@@ -6639,22 +7112,22 @@ inline void ProcessTransactionResponse::set_gas_refunded(::PROTOBUF_NAMESPACE_ID
   // @@protoc_insertion_point(field_set:executor.v1.ProcessTransactionResponse.gas_refunded)
 }
 
-// .executor.v1.Error error = 8;
+// .executor.v1.RomError error = 8;
 inline void ProcessTransactionResponse::clear_error() {
   error_ = 0;
 }
-inline ::executor::v1::Error ProcessTransactionResponse::_internal_error() const {
-  return static_cast< ::executor::v1::Error >(error_);
+inline ::executor::v1::RomError ProcessTransactionResponse::_internal_error() const {
+  return static_cast< ::executor::v1::RomError >(error_);
 }
-inline ::executor::v1::Error ProcessTransactionResponse::error() const {
+inline ::executor::v1::RomError ProcessTransactionResponse::error() const {
   // @@protoc_insertion_point(field_get:executor.v1.ProcessTransactionResponse.error)
   return _internal_error();
 }
-inline void ProcessTransactionResponse::_internal_set_error(::executor::v1::Error value) {
+inline void ProcessTransactionResponse::_internal_set_error(::executor::v1::RomError value) {
   
   error_ = value;
 }
-inline void ProcessTransactionResponse::set_error(::executor::v1::Error value) {
+inline void ProcessTransactionResponse::set_error(::executor::v1::RomError value) {
   _internal_set_error(value);
   // @@protoc_insertion_point(field_set:executor.v1.ProcessTransactionResponse.error)
 }
@@ -7914,22 +8387,22 @@ inline void ExecutionTraceStep::set_gas_refund(::PROTOBUF_NAMESPACE_ID::uint64 v
   // @@protoc_insertion_point(field_set:executor.v1.ExecutionTraceStep.gas_refund)
 }
 
-// .executor.v1.Error error = 12;
+// .executor.v1.RomError error = 12;
 inline void ExecutionTraceStep::clear_error() {
   error_ = 0;
 }
-inline ::executor::v1::Error ExecutionTraceStep::_internal_error() const {
-  return static_cast< ::executor::v1::Error >(error_);
+inline ::executor::v1::RomError ExecutionTraceStep::_internal_error() const {
+  return static_cast< ::executor::v1::RomError >(error_);
 }
-inline ::executor::v1::Error ExecutionTraceStep::error() const {
+inline ::executor::v1::RomError ExecutionTraceStep::error() const {
   // @@protoc_insertion_point(field_get:executor.v1.ExecutionTraceStep.error)
   return _internal_error();
 }
-inline void ExecutionTraceStep::_internal_set_error(::executor::v1::Error value) {
+inline void ExecutionTraceStep::_internal_set_error(::executor::v1::RomError value) {
   
   error_ = value;
 }
-inline void ExecutionTraceStep::set_error(::executor::v1::Error value) {
+inline void ExecutionTraceStep::set_error(::executor::v1::RomError value) {
   _internal_set_error(value);
   // @@protoc_insertion_point(field_set:executor.v1.ExecutionTraceStep.error)
 }
@@ -7937,6 +8410,10 @@ inline void ExecutionTraceStep::set_error(::executor::v1::Error value) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
@@ -7967,10 +8444,15 @@ inline void ExecutionTraceStep::set_error(::executor::v1::Error value) {
 
 PROTOBUF_NAMESPACE_OPEN
 
-template <> struct is_proto_enum< ::executor::v1::Error> : ::std::true_type {};
+template <> struct is_proto_enum< ::executor::v1::RomError> : ::std::true_type {};
 template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::executor::v1::Error>() {
-  return ::executor::v1::Error_descriptor();
+inline const EnumDescriptor* GetEnumDescriptor< ::executor::v1::RomError>() {
+  return ::executor::v1::RomError_descriptor();
+}
+template <> struct is_proto_enum< ::executor::v1::ExecutorError> : ::std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::executor::v1::ExecutorError>() {
+  return ::executor::v1::ExecutorError_descriptor();
 }
 
 PROTOBUF_NAMESPACE_CLOSE

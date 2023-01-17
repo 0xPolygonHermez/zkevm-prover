@@ -45,6 +45,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
     gasRefundOffset        = getMemoryOffset("gasRefund");
     txSrcAddrOffset        = getMemoryOffset("txSrcAddr");
     gasCallOffset          = getMemoryOffset("gasCall");
+    isPreEIP155Offset      = getMemoryOffset("isPreEIP155");
 }
 
 void Rom::loadProgram(Goldilocks &fr, json &romJson)
