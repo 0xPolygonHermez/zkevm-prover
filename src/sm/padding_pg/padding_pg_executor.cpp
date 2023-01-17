@@ -103,8 +103,6 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
                 if (fr.toU64(pols.rem[p]) > 0xFFFF) pols.spare[p] = fr.one();
             }
             
-            if (j == 0) pols.firstHash[p] = fr.one();
-            
             bool lastBlock = (p % bytesPerBlock) == (bytesPerBlock - 1);
             bool lastHash = lastBlock && ((!fr.isZero(pols.spare[p])) || fr.isZero(pols.rem[p]));
             if (lastHash)
@@ -291,11 +289,7 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
             pols.addr[p] = fr.fromU64(addr);
             pols.rem[p] = fr.neg(fr.fromU64(j)); // = -j
             if (!fr.isZero(pols.rem[p])) pols.remInv[p] = glp.inv(pols.rem[p]);
-            if (j == 0)
-            {
-                pols.firstHash[p] = fr.one();
-            }
-            else
+            if (j != 0)
             {
                 pols.spare[p] = fr.one();
             }
