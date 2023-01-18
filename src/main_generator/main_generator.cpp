@@ -2853,7 +2853,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        return;\n";
                 code += "    }\n";
 
-                code += "    pols.carry[" + string(bFastMode?"0":"i") + "] = fr.fromU64(a < b);\n";
+                code += "    pols.carry[" + string(bFastMode?"0":"i") + "] = fr.fromU64(_a < _b);\n";
 
                 if (!bFastMode)
                 {
