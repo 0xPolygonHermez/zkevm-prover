@@ -213,9 +213,9 @@ using grpc::Status;
     if (proverRequest.result != ZKR_SUCCESS)
     {
         cerr << "Error: ExecutorServiceImpl::ProcessBatch() detected proverRequest.result=" << proverRequest.result << "=" << zkresult2string(proverRequest.result) << endl;
-        response->set_error(zkresult2error(proverRequest.result));
     }
     
+    response->set_error(zkresult2error(proverRequest.result));
     response->set_cumulative_gas_used(proverRequest.fullTracer.finalTrace.cumulative_gas_used);
     response->set_cnt_keccak_hashes(proverRequest.counters.keccakF);
     response->set_cnt_poseidon_hashes(proverRequest.counters.poseidonG);
@@ -342,6 +342,7 @@ using grpc::Status;
 
 #ifdef LOG_SERVICE_EXECUTOR_OUTPUT
     cout << "ExecutorServiceImpl::ProcessBatch() returns"
+         << " error=" << response->error()
          << " new_state_root=" << proverRequest.fullTracer.finalTrace.new_state_root
          << " new_acc_input_hash=" << proverRequest.fullTracer.finalTrace.new_acc_input_hash
          << " new_local_exit_root=" << proverRequest.fullTracer.finalTrace.new_local_exit_root
