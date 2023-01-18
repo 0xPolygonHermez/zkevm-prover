@@ -358,8 +358,8 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
     cout << "Prover::genBatchProof() timestamp: " << pProverRequest->timestamp << endl;
     cout << "Prover::genBatchProof() UUID: " << pProverRequest->uuid << endl;
     cout << "Prover::genBatchProof() input file: " << pProverRequest->inputFile() << endl;
-    //cout << "Prover::genBatchProof() public file: " << pProverRequest->publicsOutputFile() << endl;
-    //cout << "Prover::genBatchProof() proof file: " << pProverRequest->proofFile() << endl;
+    // cout << "Prover::genBatchProof() public file: " << pProverRequest->publicsOutputFile() << endl;
+    // cout << "Prover::genBatchProof() proof file: " << pProverRequest->proofFile() << endl;
 
     // Save input to <timestamp>.input.json, as provided by client
     if (config.saveInputToFile)
@@ -861,8 +861,8 @@ void Prover::execute(ProverRequest *pProverRequest)
     cout << "Prover::execute() timestamp: " << pProverRequest->timestamp << endl;
     cout << "Prover::execute() UUID: " << pProverRequest->uuid << endl;
     cout << "Prover::execute() input file: " << pProverRequest->inputFile() << endl;
-    //cout << "Prover::execute() public file: " << pProverRequest->publicsOutputFile() << endl;
-    //cout << "Prover::execute() proof file: " << pProverRequest->proofFile() << endl;
+    // cout << "Prover::execute() public file: " << pProverRequest->publicsOutputFile() << endl;
+    // cout << "Prover::execute() proof file: " << pProverRequest->proofFile() << endl;
 
     // Save input to <timestamp>.input.json, as provided by client
     if (config.saveInputToFile)
