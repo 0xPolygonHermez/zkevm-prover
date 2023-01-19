@@ -49,8 +49,10 @@ message ProcessBatchResponse {
 }
 
 message InfoReadWrite {
-    string nonce = 1; // If nonce="" then it has not been set; if set, string is in decimal (base 10)
-    string balance = 2; // If balance="" then it has not been set; if set, string is in decimal (base 10)
+    // If nonce="" then it has not been set; if set, string is in decimal (base 10)
+    string nonce = 1;
+    // If balance="" then it has not been set; if set, string is in decimal (base 10)
+    string balance = 2;
 }
 
 message CallTrace {
