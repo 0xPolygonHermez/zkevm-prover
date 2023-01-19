@@ -235,11 +235,9 @@ message GetProofResponse {
 /*
  * @dev FinalProof
  * @param {proof} - groth16 proof
- * @param {public} - public circuit inputs
 */
 message FinalProof {
     Proof proof = 1;
-    PublicInputsExtended public = 2;
 }
 
 /*
