@@ -3816,7 +3816,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    proverRequest.counters.paddingPG = fr.toU64(pols.cntPaddingPG[0]);\n";
     code += "    proverRequest.counters.poseidonG = fr.toU64(pols.cntPoseidonG[0]);\n";
     code += "    proverRequest.counters.steps = ctx.lastStep;\n\n";
-    
+
     code += "    // Set the error (all previous errors generated a return)\n";
     code += "    proverRequest.result = ZKR_SUCCESS;\n";
 
@@ -3932,8 +3932,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += "            proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
         code += "            return;\n";
         code += "        }\n";
-        code += "        h.digestCalled = ctx.hashK[i].digestCalled;\n";
-        code += "        h.lenCalled = ctx.hashK[i].lenCalled;\n";
+        code += "        h.digestCalled = ctx.hashP[i].digestCalled;\n";
+        code += "        h.lenCalled = ctx.hashP[i].lenCalled;\n";
         code += "        required.PaddingPG.push_back(h);\n";
         code += "    }\n";
     }
