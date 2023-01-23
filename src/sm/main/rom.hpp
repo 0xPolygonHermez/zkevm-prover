@@ -42,6 +42,15 @@ public:
     uint64_t gasCallOffset;
     uint64_t isPreEIP155Offset;
 
+    /* Constants */
+    uint64_t MAX_CNT_STEPS_LIMIT;
+    uint64_t MAX_CNT_ARITH_LIMIT;
+    uint64_t MAX_CNT_BINARY_LIMIT;
+    uint64_t MAX_CNT_MEM_ALIGN_LIMIT;
+    uint64_t MAX_CNT_KECCAK_F_LIMIT;
+    uint64_t MAX_CNT_PADDING_PG_LIMIT;
+    uint64_t MAX_CNT_POSEIDON_G_LIMIT;
+
     /* Constructor */
     Rom() : size(0),
             line(NULL),
@@ -67,7 +76,14 @@ public:
             gasRefundOffset(0),
             txSrcAddrOffset(0),
             gasCallOffset(0),
-            isPreEIP155Offset(0)
+            isPreEIP155Offset(0),
+            MAX_CNT_STEPS_LIMIT(0),
+            MAX_CNT_ARITH_LIMIT(0),
+            MAX_CNT_BINARY_LIMIT(0),
+            MAX_CNT_MEM_ALIGN_LIMIT(0),
+            MAX_CNT_KECCAK_F_LIMIT(0),
+            MAX_CNT_PADDING_PG_LIMIT(0),
+            MAX_CNT_POSEIDON_G_LIMIT(0)
             { };
 
     /* Destructor */
@@ -81,6 +97,7 @@ public:
     
     uint64_t getLabel(const string &label) const;
     uint64_t getMemoryOffset(const string &label) const;
+    uint64_t getConstant(json &romJson, const string &constantName);
 
 private:
     void loadProgram(Goldilocks &fr, json &romJson);

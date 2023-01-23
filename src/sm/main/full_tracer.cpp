@@ -195,7 +195,7 @@ inline void getTransactionHash( string    &to,
                                 string    &rlpTx )
 {
 #ifdef LOG_TX_HASH
-    cout << "FullTracer::getTransactionHash() to=" << to << " value=" << value << " nonce=" << nonce << " gasLimit=" << gasLimit << " gasPrice=" << gasPrice << " data=" << data << " r=" << r.get_str(16) << " s=" << s.get_str(16) << " v=" << v << endl;
+    cout << "FullTracer::getTransactionHash() to=" << to << " value=" << value << " nonce=" << nonce << " gasLimit=" << gasLimit << " gasPrice=" << gasPrice << " data=" << data << " r=0x" << r.get_str(16) << " s=0x" << s.get_str(16) << " v=" << v << endl;
 #endif
 
     string raw;
