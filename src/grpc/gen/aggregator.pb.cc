@@ -16,7 +16,7 @@
 #include <google/protobuf/port_def.inc>
 extern PROTOBUF_INTERNAL_EXPORT_aggregator_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_CancelRequest_aggregator_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_aggregator_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_CancelResponse_aggregator_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_aggregator_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_FinalProof_aggregator_2eproto;
+extern PROTOBUF_INTERNAL_EXPORT_aggregator_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_FinalProof_aggregator_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_aggregator_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_GenAggregatedProofRequest_aggregator_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_aggregator_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_GenAggregatedProofResponse_aggregator_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_aggregator_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_GenBatchProofRequest_aggregator_2eproto;
@@ -33,6 +33,7 @@ extern PROTOBUF_INTERNAL_EXPORT_aggregator_2eproto ::PROTOBUF_NAMESPACE_ID::inte
 extern PROTOBUF_INTERNAL_EXPORT_aggregator_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_Proof_aggregator_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_aggregator_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_ProofB_aggregator_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_aggregator_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_PublicInputs_aggregator_2eproto;
+extern PROTOBUF_INTERNAL_EXPORT_aggregator_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_PublicInputsExtended_aggregator_2eproto;
 namespace aggregator {
 namespace v1 {
 class VersionDefaultTypeInternal {
@@ -202,9 +203,10 @@ static void InitDefaultsscc_info_FinalProof_aggregator_2eproto() {
   ::aggregator::v1::FinalProof::InitAsDefaultInstance();
 }
 
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_FinalProof_aggregator_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_FinalProof_aggregator_2eproto}, {
-      &scc_info_Proof_aggregator_2eproto.base,}};
+::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_FinalProof_aggregator_2eproto =
+    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 2, 0, InitDefaultsscc_info_FinalProof_aggregator_2eproto}, {
+      &scc_info_Proof_aggregator_2eproto.base,
+      &scc_info_PublicInputsExtended_aggregator_2eproto.base,}};
 
 static void InitDefaultsscc_info_GenAggregatedProofRequest_aggregator_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -620,6 +622,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_aggregator_2eproto::offsets[] 
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::FinalProof, proof_),
+  PROTOBUF_FIELD_OFFSET(::aggregator::v1::FinalProof, public__),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::PublicInputs, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -702,13 +705,13 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 109, -1, sizeof(::aggregator::v1::CancelResponse)},
   { 115, -1, sizeof(::aggregator::v1::GetProofResponse)},
   { 126, -1, sizeof(::aggregator::v1::FinalProof)},
-  { 132, -1, sizeof(::aggregator::v1::PublicInputs)},
-  { 146, -1, sizeof(::aggregator::v1::ProofB)},
-  { 152, -1, sizeof(::aggregator::v1::Proof)},
-  { 160, 167, sizeof(::aggregator::v1::InputProver_DbEntry_DoNotUse)},
-  { 169, 176, sizeof(::aggregator::v1::InputProver_ContractsBytecodeEntry_DoNotUse)},
-  { 178, -1, sizeof(::aggregator::v1::InputProver)},
-  { 186, -1, sizeof(::aggregator::v1::PublicInputsExtended)},
+  { 133, -1, sizeof(::aggregator::v1::PublicInputs)},
+  { 147, -1, sizeof(::aggregator::v1::ProofB)},
+  { 153, -1, sizeof(::aggregator::v1::Proof)},
+  { 161, 168, sizeof(::aggregator::v1::InputProver_DbEntry_DoNotUse)},
+  { 170, 177, sizeof(::aggregator::v1::InputProver_ContractsBytecodeEntry_DoNotUse)},
+  { 179, -1, sizeof(::aggregator::v1::InputProver)},
+  { 187, -1, sizeof(::aggregator::v1::PublicInputsExtended)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -797,35 +800,36 @@ const char descriptor_table_protodef_aggregator_2eproto[] PROTOBUF_SECTION_VARIA
   "sult_string\030\005 \001(\t\"x\n\006Result\022\017\n\013UNSPECIFI"
   "ED\020\000\022\020\n\014COMPLETED_OK\020\001\022\t\n\005ERROR\020\002\022\023\n\017COM"
   "PLETED_ERROR\020\003\022\013\n\007PENDING\020\004\022\022\n\016INTERNAL_"
-  "ERROR\020\005\022\n\n\006CANCEL\020\006B\007\n\005proof\"1\n\nFinalPro"
-  "of\022#\n\005proof\030\001 \001(\0132\024.aggregator.v1.Proof\""
-  "\344\001\n\014PublicInputs\022\026\n\016old_state_root\030\001 \001(\014"
-  "\022\032\n\022old_acc_input_hash\030\002 \001(\014\022\025\n\rold_batc"
-  "h_num\030\003 \001(\004\022\020\n\010chain_id\030\004 \001(\004\022\025\n\rbatch_l"
-  "2_data\030\005 \001(\014\022\030\n\020global_exit_root\030\006 \001(\014\022\025"
-  "\n\reth_timestamp\030\007 \001(\004\022\026\n\016sequencer_addr\030"
-  "\010 \001(\t\022\027\n\017aggregator_addr\030\t \001(\t\"\030\n\006ProofB"
-  "\022\016\n\006proofs\030\001 \003(\t\"Q\n\005Proof\022\017\n\007proof_a\030\001 \003"
-  "(\t\022&\n\007proof_b\030\002 \003(\0132\025.aggregator.v1.Proo"
-  "fB\022\017\n\007proof_c\030\003 \003(\t\"\245\002\n\013InputProver\0222\n\rp"
-  "ublic_inputs\030\001 \001(\0132\033.aggregator.v1.Publi"
-  "cInputs\022.\n\002db\030\004 \003(\0132\".aggregator.v1.Inpu"
-  "tProver.DbEntry\022M\n\022contracts_bytecode\030\005 "
-  "\003(\01321.aggregator.v1.InputProver.Contract"
-  "sBytecodeEntry\032)\n\007DbEntry\022\013\n\003key\030\001 \001(\t\022\r"
-  "\n\005value\030\002 \001(\t:\0028\001\0328\n\026ContractsBytecodeEn"
-  "try\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"\262\001\n\024"
-  "PublicInputsExtended\0222\n\rpublic_inputs\030\001 "
-  "\001(\0132\033.aggregator.v1.PublicInputs\022\026\n\016new_"
-  "state_root\030\002 \001(\014\022\032\n\022new_acc_input_hash\030\003"
-  " \001(\014\022\033\n\023new_local_exit_root\030\004 \001(\014\022\025\n\rnew"
-  "_batch_num\030\005 \001(\004*@\n\006Result\022\017\n\013UNSPECIFIE"
-  "D\020\000\022\006\n\002OK\020\001\022\t\n\005ERROR\020\002\022\022\n\016INTERNAL_ERROR"
-  "\020\0032d\n\021AggregatorService\022O\n\007Channel\022\034.agg"
-  "regator.v1.ProverMessage\032 .aggregator.v1"
-  ".AggregatorMessage\"\000(\0010\001B7Z5github.com/0"
-  "xPolygonHermez/zkevm-node/proverclient/p"
-  "bb\006proto3"
+  "ERROR\020\005\022\n\n\006CANCEL\020\006B\007\n\005proof\"f\n\nFinalPro"
+  "of\022#\n\005proof\030\001 \001(\0132\024.aggregator.v1.Proof\022"
+  "3\n\006public\030\002 \001(\0132#.aggregator.v1.PublicIn"
+  "putsExtended\"\344\001\n\014PublicInputs\022\026\n\016old_sta"
+  "te_root\030\001 \001(\014\022\032\n\022old_acc_input_hash\030\002 \001("
+  "\014\022\025\n\rold_batch_num\030\003 \001(\004\022\020\n\010chain_id\030\004 \001"
+  "(\004\022\025\n\rbatch_l2_data\030\005 \001(\014\022\030\n\020global_exit"
+  "_root\030\006 \001(\014\022\025\n\reth_timestamp\030\007 \001(\004\022\026\n\016se"
+  "quencer_addr\030\010 \001(\t\022\027\n\017aggregator_addr\030\t "
+  "\001(\t\"\030\n\006ProofB\022\016\n\006proofs\030\001 \003(\t\"Q\n\005Proof\022\017"
+  "\n\007proof_a\030\001 \003(\t\022&\n\007proof_b\030\002 \003(\0132\025.aggre"
+  "gator.v1.ProofB\022\017\n\007proof_c\030\003 \003(\t\"\245\002\n\013Inp"
+  "utProver\0222\n\rpublic_inputs\030\001 \001(\0132\033.aggreg"
+  "ator.v1.PublicInputs\022.\n\002db\030\004 \003(\0132\".aggre"
+  "gator.v1.InputProver.DbEntry\022M\n\022contract"
+  "s_bytecode\030\005 \003(\01321.aggregator.v1.InputPr"
+  "over.ContractsBytecodeEntry\032)\n\007DbEntry\022\013"
+  "\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\0328\n\026Contra"
+  "ctsBytecodeEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002"
+  " \001(\t:\0028\001\"\262\001\n\024PublicInputsExtended\0222\n\rpub"
+  "lic_inputs\030\001 \001(\0132\033.aggregator.v1.PublicI"
+  "nputs\022\026\n\016new_state_root\030\002 \001(\014\022\032\n\022new_acc"
+  "_input_hash\030\003 \001(\014\022\033\n\023new_local_exit_root"
+  "\030\004 \001(\014\022\025\n\rnew_batch_num\030\005 \001(\004*@\n\006Result\022"
+  "\017\n\013UNSPECIFIED\020\000\022\006\n\002OK\020\001\022\t\n\005ERROR\020\002\022\022\n\016I"
+  "NTERNAL_ERROR\020\0032d\n\021AggregatorService\022O\n\007"
+  "Channel\022\034.aggregator.v1.ProverMessage\032 ."
+  "aggregator.v1.AggregatorMessage\"\000(\0010\001B7Z"
+  "5github.com/0xPolygonHermez/zkevm-node/p"
+  "roverclient/pbb\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_aggregator_2eproto_deps[1] = {
 };
@@ -856,7 +860,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_agg
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_aggregator_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_aggregator_2eproto = {
-  false, false, descriptor_table_protodef_aggregator_2eproto, "aggregator.proto", 3489,
+  false, false, descriptor_table_protodef_aggregator_2eproto, "aggregator.proto", 3542,
   &descriptor_table_aggregator_2eproto_once, descriptor_table_aggregator_2eproto_sccs, descriptor_table_aggregator_2eproto_deps, 23, 0,
   schemas, file_default_instances, TableStruct_aggregator_2eproto::offsets,
   file_level_metadata_aggregator_2eproto, 23, file_level_enum_descriptors_aggregator_2eproto, file_level_service_descriptors_aggregator_2eproto,
@@ -5562,15 +5566,22 @@ void GetProofResponse::InternalSwap(GetProofResponse* other) {
 void FinalProof::InitAsDefaultInstance() {
   ::aggregator::v1::_FinalProof_default_instance_._instance.get_mutable()->proof_ = const_cast< ::aggregator::v1::Proof*>(
       ::aggregator::v1::Proof::internal_default_instance());
+  ::aggregator::v1::_FinalProof_default_instance_._instance.get_mutable()->public__ = const_cast< ::aggregator::v1::PublicInputsExtended*>(
+      ::aggregator::v1::PublicInputsExtended::internal_default_instance());
 }
 class FinalProof::_Internal {
  public:
   static const ::aggregator::v1::Proof& proof(const FinalProof* msg);
+  static const ::aggregator::v1::PublicInputsExtended& public_(const FinalProof* msg);
 };
 
 const ::aggregator::v1::Proof&
 FinalProof::_Internal::proof(const FinalProof* msg) {
   return *msg->proof_;
+}
+const ::aggregator::v1::PublicInputsExtended&
+FinalProof::_Internal::public_(const FinalProof* msg) {
+  return *msg->public__;
 }
 FinalProof::FinalProof(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
@@ -5586,12 +5597,19 @@ FinalProof::FinalProof(const FinalProof& from)
   } else {
     proof_ = nullptr;
   }
+  if (from._internal_has_public_()) {
+    public__ = new ::aggregator::v1::PublicInputsExtended(*from.public__);
+  } else {
+    public__ = nullptr;
+  }
   // @@protoc_insertion_point(copy_constructor:aggregator.v1.FinalProof)
 }
 
 void FinalProof::SharedCtor() {
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_FinalProof_aggregator_2eproto.base);
-  proof_ = nullptr;
+  ::memset(&proof_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&public__) -
+      reinterpret_cast<char*>(&proof_)) + sizeof(public__));
 }
 
 FinalProof::~FinalProof() {
@@ -5603,6 +5621,7 @@ FinalProof::~FinalProof() {
 void FinalProof::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
   if (this != internal_default_instance()) delete proof_;
+  if (this != internal_default_instance()) delete public__;
 }
 
 void FinalProof::ArenaDtor(void* object) {
@@ -5630,6 +5649,10 @@ void FinalProof::Clear() {
     delete proof_;
   }
   proof_ = nullptr;
+  if (GetArena() == nullptr && public__ != nullptr) {
+    delete public__;
+  }
+  public__ = nullptr;
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -5645,6 +5668,13 @@ const char* FinalProof::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID:
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
           ptr = ctx->ParseMessage(_internal_mutable_proof(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // .aggregator.v1.PublicInputsExtended public = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+          ptr = ctx->ParseMessage(_internal_mutable_public_(), ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -5684,6 +5714,14 @@ failure:
         1, _Internal::proof(this), target, stream);
   }
 
+  // .aggregator.v1.PublicInputsExtended public = 2;
+  if (this->has_public_()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        2, _Internal::public_(this), target, stream);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -5705,6 +5743,13 @@ size_t FinalProof::ByteSizeLong() const {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
         *proof_);
+  }
+
+  // .aggregator.v1.PublicInputsExtended public = 2;
+  if (this->has_public_()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *public__);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -5741,6 +5786,9 @@ void FinalProof::MergeFrom(const FinalProof& from) {
   if (from.has_proof()) {
     _internal_mutable_proof()->::aggregator::v1::Proof::MergeFrom(from._internal_proof());
   }
+  if (from.has_public_()) {
+    _internal_mutable_public_()->::aggregator::v1::PublicInputsExtended::MergeFrom(from._internal_public_());
+  }
 }
 
 void FinalProof::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
@@ -5764,7 +5812,12 @@ bool FinalProof::IsInitialized() const {
 void FinalProof::InternalSwap(FinalProof* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
-  swap(proof_, other->proof_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(FinalProof, public__)
+      + sizeof(FinalProof::public__)
+      - PROTOBUF_FIELD_OFFSET(FinalProof, proof_)>(
+          reinterpret_cast<char*>(&proof_),
+          reinterpret_cast<char*>(&other->proof_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata FinalProof::GetMetadata() const {

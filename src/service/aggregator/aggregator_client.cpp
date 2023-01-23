@@ -447,6 +447,13 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
                     pPublicInputs->set_eth_timestamp(pProverRequest->proof.publicInputsExtended.publicInputs.timestamp);
                     pPublicInputs->set_sequencer_addr(Add0xIfMissing(pProverRequest->proof.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)));
                     pPublicInputs->set_aggregator_addr(Add0xIfMissing(pProverRequest->proof.publicInputsExtended.publicInputs.aggregatorAddress.get_str(16)));
+                    aggregator::v1::PublicInputsExtended* pPublicInputsExtended = new(aggregator::v1::PublicInputsExtended);
+                    pPublicInputsExtended->set_allocated_public_inputs(pPublicInputs);
+                    pPublicInputsExtended->set_new_state_root(scalar2ba(pProverRequest->proof.publicInputsExtended.newStateRoot));
+                    pPublicInputsExtended->set_new_acc_input_hash(scalar2ba(pProverRequest->proof.publicInputsExtended.newAccInputHash));
+                    pPublicInputsExtended->set_new_local_exit_root(scalar2ba(pProverRequest->proof.publicInputsExtended.newLocalExitRoot));
+                    pPublicInputsExtended->set_new_batch_num(pProverRequest->proof.publicInputsExtended.newBatchNum);
+                    pFinalProof->set_allocated_public_(pPublicInputsExtended);
 
                     getProofResponse.set_allocated_final_proof(pFinalProof);
 

@@ -3402,6 +3402,7 @@ class FinalProof PROTOBUF_FINAL :
 
   enum : int {
     kProofFieldNumber = 1,
+    kPublicFieldNumber = 2,
   };
   // .aggregator.v1.Proof proof = 1;
   bool has_proof() const;
@@ -3421,6 +3422,24 @@ class FinalProof PROTOBUF_FINAL :
       ::aggregator::v1::Proof* proof);
   ::aggregator::v1::Proof* unsafe_arena_release_proof();
 
+  // .aggregator.v1.PublicInputsExtended public = 2;
+  bool has_public_() const;
+  private:
+  bool _internal_has_public_() const;
+  public:
+  void clear_public_();
+  const ::aggregator::v1::PublicInputsExtended& public_() const;
+  ::aggregator::v1::PublicInputsExtended* release_public_();
+  ::aggregator::v1::PublicInputsExtended* mutable_public_();
+  void set_allocated_public_(::aggregator::v1::PublicInputsExtended* public_);
+  private:
+  const ::aggregator::v1::PublicInputsExtended& _internal_public_() const;
+  ::aggregator::v1::PublicInputsExtended* _internal_mutable_public_();
+  public:
+  void unsafe_arena_set_allocated_public_(
+      ::aggregator::v1::PublicInputsExtended* public_);
+  ::aggregator::v1::PublicInputsExtended* unsafe_arena_release_public_();
+
   // @@protoc_insertion_point(class_scope:aggregator.v1.FinalProof)
  private:
   class _Internal;
@@ -3429,6 +3448,7 @@ class FinalProof PROTOBUF_FINAL :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::aggregator::v1::Proof* proof_;
+  ::aggregator::v1::PublicInputsExtended* public__;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_aggregator_2eproto;
 };
@@ -7870,6 +7890,87 @@ inline void FinalProof::set_allocated_proof(::aggregator::v1::Proof* proof) {
   }
   proof_ = proof;
   // @@protoc_insertion_point(field_set_allocated:aggregator.v1.FinalProof.proof)
+}
+
+// .aggregator.v1.PublicInputsExtended public = 2;
+inline bool FinalProof::_internal_has_public_() const {
+  return this != internal_default_instance() && public__ != nullptr;
+}
+inline bool FinalProof::has_public_() const {
+  return _internal_has_public_();
+}
+inline void FinalProof::clear_public_() {
+  if (GetArena() == nullptr && public__ != nullptr) {
+    delete public__;
+  }
+  public__ = nullptr;
+}
+inline const ::aggregator::v1::PublicInputsExtended& FinalProof::_internal_public_() const {
+  const ::aggregator::v1::PublicInputsExtended* p = public__;
+  return p != nullptr ? *p : *reinterpret_cast<const ::aggregator::v1::PublicInputsExtended*>(
+      &::aggregator::v1::_PublicInputsExtended_default_instance_);
+}
+inline const ::aggregator::v1::PublicInputsExtended& FinalProof::public_() const {
+  // @@protoc_insertion_point(field_get:aggregator.v1.FinalProof.public)
+  return _internal_public_();
+}
+inline void FinalProof::unsafe_arena_set_allocated_public_(
+    ::aggregator::v1::PublicInputsExtended* public_) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(public__);
+  }
+  public__ = public_;
+  if (public_) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.FinalProof.public)
+}
+inline ::aggregator::v1::PublicInputsExtended* FinalProof::release_public_() {
+  auto temp = unsafe_arena_release_public_();
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::aggregator::v1::PublicInputsExtended* FinalProof::unsafe_arena_release_public_() {
+  // @@protoc_insertion_point(field_release:aggregator.v1.FinalProof.public)
+  
+  ::aggregator::v1::PublicInputsExtended* temp = public__;
+  public__ = nullptr;
+  return temp;
+}
+inline ::aggregator::v1::PublicInputsExtended* FinalProof::_internal_mutable_public_() {
+  
+  if (public__ == nullptr) {
+    auto* p = CreateMaybeMessage<::aggregator::v1::PublicInputsExtended>(GetArena());
+    public__ = p;
+  }
+  return public__;
+}
+inline ::aggregator::v1::PublicInputsExtended* FinalProof::mutable_public_() {
+  // @@protoc_insertion_point(field_mutable:aggregator.v1.FinalProof.public)
+  return _internal_mutable_public_();
+}
+inline void FinalProof::set_allocated_public_(::aggregator::v1::PublicInputsExtended* public_) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete public__;
+  }
+  if (public_) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(public_);
+    if (message_arena != submessage_arena) {
+      public_ = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, public_, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  public__ = public_;
+  // @@protoc_insertion_point(field_set_allocated:aggregator.v1.FinalProof.public)
 }
 
 // -------------------------------------------------------------------
