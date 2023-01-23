@@ -439,12 +439,67 @@ using grpc::Status;
         lastTotalBytes = totalBytes;
         lastTotalTime = now;
     }
-    cout << "ExecutorServiceImpl::ProcessBatch() done counter=" << counter << " B=" << execBytes <<  " gas=" << execGas << " time=" << execTime << " TP=" << double(execBytes)/execTime << "B/s=" << double(execGas)/execTime << "gas/s=" << double(execGas)/double(execBytes) << "gas/B totalTP=" << totalTPB << "B/s=" << totalTPG << "gas/s=" << totalTPG/totalTPB << "gas/B" << endl;
+    cout << "ExecutorServiceImpl::ProcessBatch() done counter=" << counter << " B=" << execBytes <<  " gas=" << execGas << " time=" << execTime << " TP=" << double(execBytes)/execTime << "B/s=" << double(execGas)/execTime << "gas/s=" << double(execGas)/double(execBytes) << "gas/B totalTP=" << totalTPB << "B/s=" << totalTPG << "gas/s=" << totalTPG/totalTPB << "gas/B totalTime=" << totalTime << endl;
     unlock();
 #endif
 
     return Status::OK;
 }
+
+#ifdef PROCESS_BATCH_STREAM
+
+::grpc::Status ExecutorServiceImpl::ProcessBatchStream (::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::executor::v1::ProcessBatchResponse, ::executor::v1::ProcessBatchRequest>* stream)
+{
+    TimerStart(PROCESS_BATCH_STREAM);
+
+#ifdef LOG_SERVICE
+    cout << "ExecutorServiceImpl::ProcessBatchStream() stream starts" << endl;
+#endif
+    executor::v1::ProcessBatchRequest processBatchRequest;
+    executor::v1::ProcessBatchResponse processBatchResponse;
+    bool bResult;
+    ::grpc::Status grpcStatus;
+    uint64_t numberOfRequests = 0;
+
+    while (true)
+    {
+        // Clear variables
+        processBatchRequest.Clear();
+        processBatchResponse.Clear();
+
+        // Receive the next ProcessBatchRequest
+        bResult = stream->Read(&processBatchRequest);
+        if (!bResult)
+        {
+            cerr << "ExecutorServiceImpl::ProcessBatchStream() failed calling stream->Read(processBatchRequest) numberOfRequests=" << numberOfRequests << endl;
+            TimerStopAndLog(PROCESS_BATCH_STREAM);
+            return Status::CANCELLED;
+        }
+
+        // Call ProcessBatch
+        grpcStatus = ProcessBatch(context, &processBatchRequest, &processBatchResponse);
+        if (!grpcStatus.ok())
+        {
+            cerr << "ExecutorServiceImpl::ProcessBatchStream() failed calling ProcessBatch() numberOfRequests=" << numberOfRequests << endl;
+            TimerStopAndLog(PROCESS_BATCH_STREAM);
+            return grpcStatus;
+        }
+
+        // Send the response
+        bResult = stream->Write(processBatchResponse);
+        if (!bResult)
+        {
+            cerr << "ExecutorServiceImpl::ProcessBatchStream() failed calling stream->Write(processBatchResponse) numberOfRequests=" << numberOfRequests << endl;
+            TimerStopAndLog(PROCESS_BATCH_STREAM);
+            return Status::CANCELLED;
+        }
+
+        // Increment number of requests
+        numberOfRequests++;
+    }
+}
+
+#endif
 
 ::executor::v1::RomError ExecutorServiceImpl::string2error (string &errorString)
 {
