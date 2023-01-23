@@ -9,6 +9,8 @@
 #include "zkresult.hpp"
 #include "process_batch_cache.hpp"
 
+//#define PROCESS_BATCH_STREAM
+
 class ExecutorServiceImpl final : public executor::v1::ExecutorService::Service
 {
     Goldilocks &fr;
@@ -41,6 +43,9 @@ public:
     void lock(void) { pthread_mutex_lock(&mutex); };
     void unlock(void) { pthread_mutex_unlock(&mutex); };
     ::grpc::Status ProcessBatch (::grpc::ServerContext* context, const ::executor::v1::ProcessBatchRequest* request, ::executor::v1::ProcessBatchResponse* response) override;
+#ifdef PROCESS_BATCH_STREAM
+    ::grpc::Status ProcessBatchStream (::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::executor::v1::ProcessBatchResponse, ::executor::v1::ProcessBatchRequest>* stream) override;
+#endif    
     ::executor::v1::RomError string2error (string &errorString);
     ::executor::v1::ExecutorError zkresult2error (zkresult &result);
 };
