@@ -52,14 +52,6 @@ public:
     uint64_t assertNewLocalExitRootLabel;
     uint64_t checkAndSaveFromLabel;
 
-    // Max counter values
-    const uint64_t MAX_CNT_ARITH;
-    const uint64_t MAX_CNT_BINARY;
-    const uint64_t MAX_CNT_MEM_ALIGN;
-    const uint64_t MAX_CNT_KECCAK_F;
-    const uint64_t MAX_CNT_PADDING_PG;
-    const uint64_t MAX_CNT_POSEIDON_G;
-
     // Constructor
     MainExecutor(Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config);
 

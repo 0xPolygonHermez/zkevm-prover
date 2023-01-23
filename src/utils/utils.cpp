@@ -15,6 +15,10 @@
 #include <openssl/evp.h>
 #include <openssl/sha.h>
 #include <openssl/crypto.h>
+#include <netdb.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 using namespace std;
 using namespace std::filesystem;
@@ -583,3 +587,30 @@ bool octalText2hexText (const string &octalText, string &hexText)
     return true;
 }
 */
+
+// Get hostname and IP address
+void getNetworkInfo (string &hostname, string &ipAddress)
+{
+    char host[256];
+    char *ip;
+    struct hostent *host_entry;
+    int iResult;
+    iResult = gethostname(host, sizeof(host));
+    if (iResult == -1)
+    {
+        cerr << "Error: getNetworkInfo() failed calling gethostname()" << endl;
+        hostname = "(error calling gethostname)";
+        ipAddress = "(error calling gethostname)";
+        return;
+    }
+    hostname = host;
+    host_entry = gethostbyname(host);
+    if (host_entry == NULL)
+    {
+        cerr << "Error: getNetworkInfo() failed calling gethostbyname()" << endl;
+        ipAddress = "(error calling gethostbyname)";
+        return;        
+    }
+    ip = inet_ntoa(*((struct in_addr*) host_entry->h_addr_list[0]));
+    ipAddress = ip;
+}
