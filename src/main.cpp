@@ -227,9 +227,8 @@ int main(int argc, char **argv)
     cout << "Number of cores=" << getNumberOfCores() << endl;
 
     // Print the hostname and the IP address
-    string hostname, ipAddress;
-    getNetworkInfo(hostname, ipAddress);
-    cout << "Host name=" << hostname << endl;
+    string ipAddress;
+    getIPAddress(ipAddress);
     cout << "IP address=" << ipAddress << endl;
 
 #ifdef DEBUG

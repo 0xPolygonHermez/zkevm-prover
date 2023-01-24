@@ -96,7 +96,7 @@ bool octal2hex (const string &octalString, string &hexString);
 bool octalText2hexText (const string &octalText, string &hexText);
 */
 
-// Get hostname and IP address
-void getNetworkInfo (string &hostname, string &ipAddress);
+// Get IP address
+void getIPAddress (string &ipAddress);
 
 #endif
