@@ -1,6 +1,6 @@
 #!/bin/bash -x
 
-VERSION=v0.6.0.0-rc.1
+VERSION=v0.7.0.0-rc.3
 
 WORKING_DIR=/mnt/ofs/zkproverc/${VERSION}
 CONFIG_DIR=${WORKING_DIR}/config/
@@ -15,6 +15,7 @@ RECURSIVEFINAL_CPP=./src/starkpil/recursivefinal/final.verifier.cpp
 
 #Sync the config directory
 rsync -avz --progress ${CONFIG_DIR}/scripts/ config/scripts/
+rsync -avz --progress ${CONFIG_DIR}/ config/
 
 #Copy the chelpers files
 cp ${C_FILES}/zkevm.chelpers/*.step* ./src/starkpil/zkevm/chelpers/
