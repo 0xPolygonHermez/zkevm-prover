@@ -9,8 +9,8 @@ using json = nlohmann::json;
 
 void Config::load(json &config)
 {
-    zkassert(processID == "");
-    processID = getUUID();
+    zkassert(proverID == "");
+    proverID = getUUID();
 
     runExecutorServer = false;
     if (config.contains("runExecutorServer") && config["runExecutorServer"].is_boolean())
@@ -396,13 +396,18 @@ void Config::load(json &config)
     maxStateDBThreads = 16;
     if (config.contains("maxStateDBThreads") && config["maxStateDBThreads"].is_number())
         maxStateDBThreads = config["maxStateDBThreads"];
+
+    proverName = "UNSPECIFIED";
+    if (config.contains("proverName") && config["proverName"].is_string())
+        proverName = config["proverName"];
 }
 
 void Config::print(void)
 {
     cout << "Configuration:" << endl;
 
-    cout << "    processID=" << processID << endl;
+    cout << "    proverID=" << proverID << endl;
+    cout << "    proverName=" << proverName << endl;
 
     if (runExecutorServer)
         cout << "    runExecutorServer=true" << endl;

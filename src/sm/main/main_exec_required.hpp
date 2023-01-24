@@ -9,7 +9,7 @@
 #include "sm/arith/arith_action.hpp"
 #include "sm/padding_kk/padding_kk_executor.hpp"
 #include "sm/padding_kkbit/padding_kkbit_executor.hpp"
-#include "sm/nine2one/nine2one_executor.hpp"
+#include "sm/bits2field/bits2field_executor.hpp"
 #include "sm/memory/memory_executor.hpp"
 #include "sm/padding_pg/padding_pg_executor.hpp"
 #include "sm/mem_align/mem_align_executor.hpp"
@@ -25,7 +25,7 @@ public:
     vector<ArithAction> Arith;
     vector<PaddingKKExecutorInput> PaddingKK;
     vector<PaddingKKBitExecutorInput> PaddingKKBit;
-    vector<Nine2OneExecutorInput> Nine2One;
+    vector<Bits2FieldExecutorInput> Bits2Field;
     vector<vector<Goldilocks::Element>> KeccakF;
     vector<PaddingPGExecutorInput> PaddingPG;
     vector<array<Goldilocks::Element, 17>> PoseidonG; // The 17th fe is the permutation

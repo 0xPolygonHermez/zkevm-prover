@@ -75,14 +75,12 @@ public:
     mpz_class value;
     string batch;
     string output;
-    uint64_t nonce;
     mpz_class gas_price;
-    uint64_t chainId;
     string old_state_root;
     uint64_t execution_time; // In us
     string error;
     vector<Log> logs;
-    TxTraceContext() : gas(0), gas_used(0), nonce(0), chainId(0), execution_time(0) {};
+    TxTraceContext() : gas(0), gas_used(0), execution_time(0) {};
 };
 
 class CallTrace
@@ -126,6 +124,13 @@ public:
     FinalTrace() : bInitialized(false), numBatch(0), cumulative_gas_used(0) {};
 };
 
+class InfoReadWrite
+{
+public:
+    string nonce;
+    string balance;
+};
+
 class FullTracer
 {
 public:
@@ -144,6 +149,7 @@ public:
     vector<Opcode> call_trace; // TODO: Can we remove this attribute?
     vector<Opcode> execution_trace; // TODO: Can we remove this attribute?
     string lastError;
+    unordered_map<string, InfoReadWrite> read_write_addresses;
 #ifdef LOG_TIME_STATISTICS
     TimeMetricStorage tms;
     struct timeval t;
@@ -159,6 +165,9 @@ public:
     void onStartBatch (Context &ctx, const RomCommand &cmd);
     void onFinishBatch (Context &ctx, const RomCommand &cmd);
     void onOpcode (Context &ctx, const RomCommand &cmd);
+    void addReadWriteAddress ( const Goldilocks::Element &address0, const Goldilocks::Element &address1, const Goldilocks::Element &address2, const Goldilocks::Element &faddress3, const Goldilocks::Element &address4, const Goldilocks::Element &address5, const Goldilocks::Element &address6, const Goldilocks::Element &address7,
+                               const Goldilocks::Element &keyType0, const Goldilocks::Element &keyType1, const Goldilocks::Element &keyType2, const Goldilocks::Element &keyType3, const Goldilocks::Element &keyType4, const Goldilocks::Element &keyType5, const Goldilocks::Element &keyType6, const Goldilocks::Element &keyType7,
+                               const mpz_class &value );
 
     FullTracer(Goldilocks &fr) : fr(fr), depth(1), initGas(0), txCount(0), txTime(0), accBatchGas(0) { };
     ~FullTracer()

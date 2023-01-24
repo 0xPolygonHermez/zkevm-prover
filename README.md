@@ -40,14 +40,17 @@ $ git submodule update
 ### Compile
 The following packages must be installed.
 ```sh
-$ sudo apt install build-essential libbenchmark-dev libomp-dev libgmp-dev nlohmann-json3-dev postgresql libpqxx-dev libpqxx-doc nasm libsecp256k1-dev grpc-proto libsodium-dev libprotobuf-dev libssl-dev cmake libgrpc++-dev protobuf-compiler protobuf-compiler-grpc uuid-dev
+$ sudo apt update && sudo apt install build-essential libbenchmark-dev libomp-dev libgmp-dev nlohmann-json3-dev postgresql libpqxx-dev libpqxx-doc nasm libsecp256k1-dev grpc-proto libsodium-dev libprotobuf-dev libssl-dev cmake libgrpc++-dev protobuf-compiler protobuf-compiler-grpc uuid-dev
 ```
-To download the files needed to run the prover, you have to execute the following command, which will be downloaded in the `testvector` folder
+To download the files needed to run the prover, you have to execute the following command
 ```sh
-$ make download_dependencies
+$ wget https://de012a78750e59b808d922b39535e862.s3.eu-west-1.amazonaws.com/v0.6.0.0-rc.1.tgz
+$ tar -xzvf v0.6.0.0-rc.1.tgz
+$ rm config
+$ mv v0.6.0.0-rc.1/config .
 ```
 
-Run `make` to compile the project (this process can take up to ~3 hours)
+Run `make` to compile the project
 ```sh
 $ make clean
 $ make -j
@@ -55,8 +58,7 @@ $ make -j
 
 To run the testvector:
 ```sh
-$ cd testvectors
-$ ../build/zkProver -c config_runFile.json 
+$ ./build/zkProver -c testvectors/config_runFile_BatchProof.json
 ```
 
 ### StateDB service database

@@ -984,6 +984,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "        return;\n";
                     code += "    }\n";
                     code += "    incCounter = smtGetResult.proofHashCounter + 2;\n";
+                    if (bFastMode)
+                        code += "    proverRequest.fullTracer.addReadWriteAddress( pols.A0[0], pols.A1[0], pols.A2[0], pols.A3[0], pols.A4[0], pols.A5[0], pols.A6[0], pols.A7[0], pols.B0[0], pols.B1[0], pols.B2[0], pols.B3[0], pols.B4[0], pols.B5[0], pols.B6[0], pols.B7[0], smtGetResult.value);\n";
                     code += "#ifdef LOG_TIME_STATISTICS\n";
                     code += "    mainMetrics.add(\"SMT Get\", TimeDiff(t));\n";
                     code += "#endif\n";
@@ -1104,6 +1106,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "        return;\n";
                     code += "    }\n";
                     code += "    incCounter = ctx.lastSWrite.res.proofHashCounter + 2;\n";
+                    if (bFastMode)
+                        code += "    proverRequest.fullTracer.addReadWriteAddress( pols.A0[0], pols.A1[0], pols.A2[0], pols.A3[0], pols.A4[0], pols.A5[0], pols.A6[0], pols.A7[0], pols.B0[0], pols.B1[0], pols.B2[0], pols.B3[0], pols.B4[0], pols.B5[0], pols.B6[0], pols.B7[0], scalarD);\n";
                     code += "#ifdef LOG_TIME_STATISTICS\n";
                     code += "    mainMetrics.add(\"SMT Set\", TimeDiff(t));\n";
                     code += "#endif\n";
@@ -2645,6 +2649,12 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    // denominator = 2*y1 = y1+y1\n";
                     code += "    mainExecutor.fec.add(denominator, fecY1, fecY1);\n";
 
+                    code += "    if (mainExecutor.fec.isZero(denominator))\n";
+                    code += "    {\n";
+                    code += "        cerr << \"Error: denominator=0 in arith operation 1\" << endl;";
+                    code += "        exitProcess();\n";
+                    code += "    }\n";
+
                     code += "    // s = numerator/denominator\n";
                     code += "    mainExecutor.fec.div(s_fec, numerator, denominator);\n";
 
@@ -2659,6 +2669,12 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
                     code += "    // denominator = x2-x1\n";
                     code += "    mainExecutor.fec.sub(denominator, fecX2, fecX1);\n";
+
+                    code += "    if (mainExecutor.fec.isZero(denominator))\n";
+                    code += "    {\n";
+                    code += "        cerr << \"Error: denominator=0 in arith operation 2\" << endl;";
+                    code += "        exitProcess();\n";
+                    code += "    }\n";
 
                     code += "    // s = numerator/denominator\n";
                     code += "    mainExecutor.fec.div(s_fec, numerator, denominator);\n";
@@ -3191,9 +3207,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    {\n";
             code += "        pols.cntArith[" + string(bFastMode?"0":"nexti") + "] = fr.inc(pols.cntArith[" + string(bFastMode?"0":"i") + "]);\n";
             code += "#ifdef CHECK_MAX_CNT_ASAP\n";
-            code += "        if (fr.toU64(pols.cntArith[" + string(bFastMode?"0":"nexti") + "]) > mainExecutor.MAX_CNT_ARITH)\n";
+            code += "        if (fr.toU64(pols.cntArith[" + string(bFastMode?"0":"nexti") + "]) > " + (string)rom["constants"]["MAX_CNT_ARITH_LIMIT"]["value"] + ")\n";
             code += "        {\n";
-            code += "            cerr << \"Error: Main Executor found pols.cntArith[nexti]=\" << fr.toU64(pols.cntArith[" + string(bFastMode?"0":"nexti") + "]) << \" > MAX_CNT_ARITH=\" << mainExecutor.MAX_CNT_ARITH << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
+            code += "            cerr << \"Error: Main Executor found pols.cntArith[nexti]=\" << fr.toU64(pols.cntArith[" + string(bFastMode?"0":"nexti") + "]) << \" > MAX_CNT_ARITH_LIMIT=" + (string)rom["constants"]["MAX_CNT_ARITH_LIMIT"]["value"] + " step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             if (bFastMode)
             {
             code += "            proverRequest.result = ZKR_SM_MAIN_OOC_ARITH;\n";
@@ -3221,9 +3237,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    {\n";
             code += "        pols.cntBinary[" + string(bFastMode?"0":"nexti") + "] = fr.inc(pols.cntBinary[" + string(bFastMode?"0":"i") + "]);\n";
             code += "#ifdef CHECK_MAX_CNT_ASAP\n";
-            code += "        if (fr.toU64(pols.cntBinary[" + string(bFastMode?"0":"nexti") + "]) > mainExecutor.MAX_CNT_BINARY)\n";
+            code += "        if (fr.toU64(pols.cntBinary[" + string(bFastMode?"0":"nexti") + "]) > " + (string)rom["constants"]["MAX_CNT_BINARY_LIMIT"]["value"] + ")\n";
             code += "        {\n";
-            code += "            cerr << \"Error: Main Executor found pols.cntBinary[nexti]=\" << fr.toU64(pols.cntBinary[" + string(bFastMode?"0":"nexti") + "]) << \" > MAX_CNT_BINARY=\" << mainExecutor.MAX_CNT_BINARY << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
+            code += "            cerr << \"Error: Main Executor found pols.cntBinary[nexti]=\" << fr.toU64(pols.cntBinary[" + string(bFastMode?"0":"nexti") + "]) << \" > MAX_CNT_BINARY_LIMIT=" + (string)rom["constants"]["MAX_CNT_BINARY_LIMIT"]["value"] + " step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             if (bFastMode)
             {
             code += "            proverRequest.result = ZKR_SM_MAIN_OOC_BINARY;\n";
@@ -3251,9 +3267,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    {\n";
             code += "        pols.cntMemAlign[" + string(bFastMode?"0":"nexti") + "] = fr.inc(pols.cntMemAlign[" + string(bFastMode?"0":"i") + "]);\n";
             code += "#ifdef CHECK_MAX_CNT_ASAP\n";
-            code += "        if (fr.toU64(pols.cntMemAlign[" + string(bFastMode?"0":"nexti") + "]) > mainExecutor.MAX_CNT_MEM_ALIGN)\n";
+            code += "        if (fr.toU64(pols.cntMemAlign[" + string(bFastMode?"0":"nexti") + "]) > " + (string)rom["constants"]["MAX_CNT_MEM_ALIGN_LIMIT"]["value"] + ")\n";
             code += "        {\n";
-            code += "            cerr << \"Error: Main Executor found pols.cntMemAlign[nexti]=\" << fr.toU64(pols.cntMemAlign[" + string(bFastMode?"0":"nexti") + "]) << \" > MAX_CNT_MEM_ALIGN=\" << mainExecutor.MAX_CNT_MEM_ALIGN << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
+            code += "            cerr << \"Error: Main Executor found pols.cntMemAlign[nexti]=\" << fr.toU64(pols.cntMemAlign[" + string(bFastMode?"0":"nexti") + "]) << \" > MAX_CNT_MEM_ALIGN_LIMIT=" + (string)rom["constants"]["MAX_CNT_MEM_ALIGN_LIMIT"]["value"] + " step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             if (bFastMode)
             {
             code += "            proverRequest.result = ZKR_SM_MAIN_OOC_MEM_ALIGN;\n";
@@ -3582,9 +3598,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    {\n";
             code += "        pols.cntKeccakF[" + string(bFastMode?"0":"nexti") + "] = fr.add(pols.cntKeccakF[" + string(bFastMode?"0":"i") + "], fr.fromU64(incCounter));\n";
             code += "#ifdef CHECK_MAX_CNT_ASAP\n";
-            code += "        if (fr.toU64(pols.cntKeccakF[" + string(bFastMode?"0":"nexti") + "]) > mainExecutor.MAX_CNT_KECCAK_F)\n";
+            code += "        if (fr.toU64(pols.cntKeccakF[" + string(bFastMode?"0":"nexti") + "]) > " + (string)rom["constants"]["MAX_CNT_KECCAK_F_LIMIT"]["value"] + ")\n";
             code += "        {\n";
-            code += "            cerr << \"Error: Main Executor found pols.cntKeccakF[nexti]=\" << fr.toU64(pols.cntKeccakF[" + string(bFastMode?"0":"nexti") + "]) << \" > MAX_CNT_KECCAK_F=\" << mainExecutor.MAX_CNT_KECCAK_F << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
+            code += "            cerr << \"Error: Main Executor found pols.cntKeccakF[nexti]=\" << fr.toU64(pols.cntKeccakF[" + string(bFastMode?"0":"nexti") + "]) << \" > MAX_CNT_KECCAK_F_LIMIT=" + (string)rom["constants"]["MAX_CNT_KECCAK_F_LIMIT"]["value"] + " step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             if (bFastMode)
             {
             code += "            proverRequest.result = ZKR_SM_MAIN_OOC_KECCAK_F;\n";
@@ -3609,9 +3625,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    {\n";
             code += "        pols.cntPaddingPG[" + string(bFastMode?"0":"nexti") + "] = fr.add(pols.cntPaddingPG[" + string(bFastMode?"0":"i") + "], fr.fromU64(incCounter));\n";
             code += "#ifdef CHECK_MAX_CNT_ASAP\n";
-            code += "        if (fr.toU64(pols.cntPaddingPG[" + string(bFastMode?"0":"nexti") + "]) > mainExecutor.MAX_CNT_PADDING_PG)\n";
+            code += "        if (fr.toU64(pols.cntPaddingPG[" + string(bFastMode?"0":"nexti") + "]) > " + (string)rom["constants"]["MAX_CNT_PADDING_PG_LIMIT"]["value"] + ")\n";
             code += "        {\n";
-            code += "            cerr << \"Error: Main Executor found pols.cntPaddingPG[nexti]=\" << fr.toU64(pols.cntPaddingPG[" + string(bFastMode?"0":"nexti") + "]) << \" > MAX_CNT_PADDING_PG=\" << mainExecutor.MAX_CNT_PADDING_PG << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
+            code += "            cerr << \"Error: Main Executor found pols.cntPaddingPG[nexti]=\" << fr.toU64(pols.cntPaddingPG[" + string(bFastMode?"0":"nexti") + "]) << \" > MAX_CNT_PADDING_PG_LIMIT=" + (string)rom["constants"]["MAX_CNT_PADDING_PG_LIMIT"]["value"] + " step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             if (bFastMode)
             {
             code += "            proverRequest.result = ZKR_SM_MAIN_OOC_PADDING_PG;\n";
@@ -3638,9 +3654,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    {\n";
             code += "        pols.cntPoseidonG[" + string(bFastMode?"0":"nexti") + "] = fr.add(pols.cntPoseidonG[" + string(bFastMode?"0":"i") + "], fr.fromU64(incCounter));\n";
             code += "#ifdef CHECK_MAX_CNT_ASAP\n";
-            code += "        if (fr.toU64(pols.cntPoseidonG[" + string(bFastMode?"0":"nexti") + "]) > mainExecutor.MAX_CNT_POSEIDON_G)\n";
+            code += "        if (fr.toU64(pols.cntPoseidonG[" + string(bFastMode?"0":"nexti") + "]) > " + (string)rom["constants"]["MAX_CNT_POSEIDON_G_LIMIT"]["value"] + ")\n";
             code += "        {\n";
-            code += "            cerr << \"Error: Main Executor found pols.cntPoseidonG[nexti]=\" << fr.toU64(pols.cntPoseidonG[" + string(bFastMode?"0":"nexti") + "]) << \" > MAX_CNT_POSEIDON_G=\" << mainExecutor.MAX_CNT_POSEIDON_G << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
+            code += "            cerr << \"Error: Main Executor found pols.cntPoseidonG[nexti]=\" << fr.toU64(pols.cntPoseidonG[" + string(bFastMode?"0":"nexti") + "]) << \" > MAX_CNT_POSEIDON_G_LIMIT=" + (string)rom["constants"]["MAX_CNT_POSEIDON_G_LIMIT"]["value"] + " step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             if (bFastMode)
             {
             code += "            proverRequest.result = ZKR_SM_MAIN_OOC_POSEIDON_G;\n";
@@ -3800,54 +3816,54 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    proverRequest.counters.paddingPG = fr.toU64(pols.cntPaddingPG[0]);\n";
     code += "    proverRequest.counters.poseidonG = fr.toU64(pols.cntPoseidonG[0]);\n";
     code += "    proverRequest.counters.steps = ctx.lastStep;\n\n";
-    
+
     code += "    // Set the error (all previous errors generated a return)\n";
     code += "    proverRequest.result = ZKR_SUCCESS;\n";
 
     code += "#ifdef CHECK_MAX_CNT_AT_THE_END\n";
-    code += "    if (fr.toU64(pols.cntArith[0]) > mainExecutor.MAX_CNT_ARITH)\n";
+    code += "    if (fr.toU64(pols.cntArith[0]) > " + (string)rom["constants"]["MAX_CNT_ARITH_LIMIT"]["value"] + ")\n";
     code += "    {\n";
-    code += "        cerr << \"Error: Main Executor found pols.cntArith[0]=\" << fr.toU64(pols.cntArith[0]) << \" > MAX_CNT_ARITH=\" << mainExecutor.MAX_CNT_ARITH << \" uuid=\" << proverRequest.uuid << endl;\n";
+    code += "        cerr << \"Error: Main Executor found pols.cntArith[0]=\" << fr.toU64(pols.cntArith[0]) << \" > MAX_CNT_ARITH_LIMIT=" + (string)rom["constants"]["MAX_CNT_ARITH_LIMIT"]["value"] + " uuid=\" << proverRequest.uuid << endl;\n";
     if (bFastMode)
         code += "        proverRequest.result = ZKR_SM_MAIN_OOC_ARITH;\n";
     else
         code += "        exitProcess();\n";
     code += "    }\n";
-    code += "    if (fr.toU64(pols.cntBinary[0]) > mainExecutor.MAX_CNT_BINARY)\n";
+    code += "    if (fr.toU64(pols.cntBinary[0]) > " + (string)rom["constants"]["MAX_CNT_BINARY_LIMIT"]["value"] + ")\n";
     code += "    {\n";
-    code += "        cerr << \"Error: Main Executor found pols.cntBinary[0]=\" << fr.toU64(pols.cntBinary[0]) << \" > MAX_CNT_BINARY=\" << mainExecutor.MAX_CNT_BINARY << \" uuid=\" << proverRequest.uuid << endl;\n";
+    code += "        cerr << \"Error: Main Executor found pols.cntBinary[0]=\" << fr.toU64(pols.cntBinary[0]) << \" > MAX_CNT_BINARY_LIMIT=" + (string)rom["constants"]["MAX_CNT_BINARY_LIMIT"]["value"] + " uuid=\" << proverRequest.uuid << endl;\n";
     if (bFastMode)
         code += "        proverRequest.result = ZKR_SM_MAIN_OOC_BINARY;\n";
     else
         code += "        exitProcess();\n";
     code += "    }\n";
-    code += "    if (fr.toU64(pols.cntMemAlign[0]) > mainExecutor.MAX_CNT_MEM_ALIGN)\n";
+    code += "    if (fr.toU64(pols.cntMemAlign[0]) > " + (string)rom["constants"]["MAX_CNT_MEM_ALIGN_LIMIT"]["value"] + ")\n";
     code += "    {\n";
-    code += "        cerr << \"Error: Main Executor found pols.cntMemAlign[0]=\" << fr.toU64(pols.cntMemAlign[0]) << \" > MAX_CNT_MEM_ALIGN=\" << mainExecutor.MAX_CNT_MEM_ALIGN << \" uuid=\" << proverRequest.uuid << endl;\n";
+    code += "        cerr << \"Error: Main Executor found pols.cntMemAlign[0]=\" << fr.toU64(pols.cntMemAlign[0]) << \" > MAX_CNT_MEM_ALIGN_LIMIT=" + (string)rom["constants"]["MAX_CNT_MEM_ALIGN_LIMIT"]["value"] + " uuid=\" << proverRequest.uuid << endl;\n";
     if (bFastMode)
         code += "        proverRequest.result = ZKR_SM_MAIN_OOC_MEM_ALIGN;\n";
     else
         code += "        exitProcess();\n";
     code += "    }\n";
-    code += "    if (fr.toU64(pols.cntKeccakF[0]) > mainExecutor.MAX_CNT_KECCAK_F)\n";
+    code += "    if (fr.toU64(pols.cntKeccakF[0]) > " + (string)rom["constants"]["MAX_CNT_KECCAK_F_LIMIT"]["value"] + ")\n";
     code += "    {\n";
-    code += "        cerr << \"Error: Main Executor found pols.cntKeccakF[0]=\" << fr.toU64(pols.cntKeccakF[0]) << \" > MAX_CNT_KECCAK_F=\" << mainExecutor.MAX_CNT_KECCAK_F << \" uuid=\" << proverRequest.uuid << endl;\n";
+    code += "        cerr << \"Error: Main Executor found pols.cntKeccakF[0]=\" << fr.toU64(pols.cntKeccakF[0]) << \" > MAX_CNT_KECCAK_F_LIMIT=" + (string)rom["constants"]["MAX_CNT_KECCAK_F_LIMIT"]["value"] + " uuid=\" << proverRequest.uuid << endl;\n";
     if (bFastMode)
         code += "        proverRequest.result = ZKR_SM_MAIN_OOC_KECCAK_F;\n";
     else
         code += "        exitProcess();\n";
     code += "    }\n";
-    code += "    if (fr.toU64(pols.cntPaddingPG[0]) > mainExecutor.MAX_CNT_PADDING_PG)\n";
+    code += "    if (fr.toU64(pols.cntPaddingPG[0]) > " + (string)rom["constants"]["MAX_CNT_PADDING_PG_LIMIT"]["value"] + ")\n";
     code += "    {\n";
-    code += "        cerr << \"Error: Main Executor found pols.cntPaddingPG[0]=\" << fr.toU64(pols.cntPaddingPG[0]) << \" > MAX_CNT_PADDING_PG=\" << mainExecutor.MAX_CNT_PADDING_PG << \" uuid=\" << proverRequest.uuid << endl;\n";
+    code += "        cerr << \"Error: Main Executor found pols.cntPaddingPG[0]=\" << fr.toU64(pols.cntPaddingPG[0]) << \" > MAX_CNT_PADDING_PG_LIMIT=" + (string)rom["constants"]["MAX_CNT_PADDING_PG_LIMIT"]["value"] + " uuid=\" << proverRequest.uuid << endl;\n";
     if (bFastMode)
         code += "        proverRequest.result = ZKR_SM_MAIN_OOC_PADDING_PG;\n";
     else
         code += "        exitProcess();\n";
     code += "    }\n";
-    code += "    if (fr.toU64(pols.cntPoseidonG[0]) > mainExecutor.MAX_CNT_POSEIDON_G)\n";
+    code += "    if (fr.toU64(pols.cntPoseidonG[0]) > " + (string)rom["constants"]["MAX_CNT_POSEIDON_G_LIMIT"]["value"] + ")\n";
     code += "    {\n";
-    code += "        cerr << \"Error: Main Executor found pols.cntPoseidonG[0]=\" << fr.toU64(pols.cntPoseidonG[0]) << \" > MAX_CNT_POSEIDON_G=\" << mainExecutor.MAX_CNT_POSEIDON_G << \" uuid=\" << proverRequest.uuid << endl;\n";
+    code += "        cerr << \"Error: Main Executor found pols.cntPoseidonG[0]=\" << fr.toU64(pols.cntPoseidonG[0]) << \" > MAX_CNT_POSEIDON_G_LIMIT=" + (string)rom["constants"]["MAX_CNT_POSEIDON_G_LIMIT"]["value"] + " uuid=\" << proverRequest.uuid << endl;\n";
     if (bFastMode)
         code += "        proverRequest.result = ZKR_SM_MAIN_OOC_POSEIDON_G;\n";
     else
@@ -3916,8 +3932,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += "            proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
         code += "            return;\n";
         code += "        }\n";
-        code += "        h.digestCalled = ctx.hashK[i].digestCalled;\n";
-        code += "        h.lenCalled = ctx.hashK[i].lenCalled;\n";
+        code += "        h.digestCalled = ctx.hashP[i].digestCalled;\n";
+        code += "        h.lenCalled = ctx.hashP[i].lenCalled;\n";
         code += "        required.PaddingPG.push_back(h);\n";
         code += "    }\n";
     }

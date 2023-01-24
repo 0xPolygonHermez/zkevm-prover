@@ -122,4 +122,6 @@ void eval_memAlignWR_W1       (Context &ctx, const RomCommand &cmd, CommandResul
 void eval_memAlignWR8_W0      (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_saveContractBytecode(Context &ctx, const RomCommand &cmd, CommandResult &cr);
 
+void eval_onTouchedAddress(Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_onTouchedSlot(Context &ctx, const RomCommand &cmd, CommandResult &cr);
 #endif

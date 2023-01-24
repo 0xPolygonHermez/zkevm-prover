@@ -12,7 +12,7 @@ using json = nlohmann::json;
 class Config
 {
 public:
-    string processID; // UUID assigned to this process instance, i.e. to this zkProver execution
+    string proverID; // UUID assigned to this process instance, i.e. to this zkProver execution
 
     bool runExecutorServer;
     bool runExecutorClient;
@@ -121,6 +121,7 @@ public:
     uint64_t maxExecutorThreads;
     uint64_t maxProverThreads;
     uint64_t maxStateDBThreads;
+    string proverName;
     void load(json &config);
     bool generateProof(void) const { return runFileGenBatchProof || runFileGenAggregatedProof || runFileGenFinalProof || runAggregatorClient; }
     void print(void);

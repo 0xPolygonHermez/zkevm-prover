@@ -45,7 +45,9 @@ typedef enum : int {
     f_memAlignWR_W1,
     f_memAlignWR8_W0,
     f_saveContractBytecode,
-    f_onOpcode
+    f_onOpcode,
+    f_onTouchedAddress,
+    f_onTouchedSlot
 } tFunction;
 
 // ROM command (op)

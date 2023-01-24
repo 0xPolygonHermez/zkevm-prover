@@ -130,13 +130,13 @@ void* KeccakThread (void* arg)
     
     // Execute the PaddingKKBit State Machine
     TimerStart(PADDING_KK_BIT_SM_EXECUTE_THREAD);
-    pExecutorContext->pExecutor->paddingKKBitExecutor.execute(pExecutorContext->pRequired->PaddingKKBit, pExecutorContext->pCommitPols->PaddingKKBit, pExecutorContext->pRequired->Nine2One);
+    pExecutorContext->pExecutor->paddingKKBitExecutor.execute(pExecutorContext->pRequired->PaddingKKBit, pExecutorContext->pCommitPols->PaddingKKBit, pExecutorContext->pRequired->Bits2Field);
     TimerStopAndLog(PADDING_KK_BIT_SM_EXECUTE_THREAD);
     
     // Execute the Poseidon G State Machine
-    TimerStart(NINE2ONE_SM_EXECUTE_THREAD);
-    pExecutorContext->pExecutor->nine2OneExecutor.execute(pExecutorContext->pRequired->Nine2One, pExecutorContext->pCommitPols->Nine2One, pExecutorContext->pRequired->KeccakF);
-    TimerStopAndLog(NINE2ONE_SM_EXECUTE_THREAD);
+    TimerStart(BITS2FIELD_SM_EXECUTE_THREAD);
+    pExecutorContext->pExecutor->bits2FieldExecutor.execute(pExecutorContext->pRequired->Bits2Field, pExecutorContext->pCommitPols->Bits2Field, pExecutorContext->pRequired->KeccakF);
+    TimerStopAndLog(BITS2FIELD_SM_EXECUTE_THREAD);
     
     // Execute the Keccak F State Machine
     TimerStart(KECCAK_F_SM_EXECUTE_THREAD);
@@ -208,13 +208,13 @@ void Executor::execute (ProverRequest &proverRequest, CommitPols & commitPols)
 
         // Execute the PaddingKKBit State Machine
         TimerStart(PADDING_KK_BIT_SM_EXECUTE);
-        paddingKKBitExecutor.execute(required.PaddingKKBit, commitPols.PaddingKKBit, required.Nine2One);
+        paddingKKBitExecutor.execute(required.PaddingKKBit, commitPols.PaddingKKBit, required.Bits2Field);
         TimerStopAndLog(PADDING_KK_BIT_SM_EXECUTE);
 
-        // Execute the Nine2One State Machine
-        TimerStart(NINE2ONE_SM_EXECUTE);
-        nine2OneExecutor.execute(required.Nine2One, commitPols.Nine2One, required.KeccakF);
-        TimerStopAndLog(NINE2ONE_SM_EXECUTE);
+        // Execute the Bits2Field State Machine
+        TimerStart(BITS2FIELD_SM_EXECUTE);
+        bits2FieldExecutor.execute(required.Bits2Field, commitPols.Bits2Field, required.KeccakF);
+        TimerStopAndLog(BITS2FIELD_SM_EXECUTE);
 
         // Execute the Keccak F State Machine
         TimerStart(KECCAK_F_SM_EXECUTE);
@@ -274,7 +274,7 @@ void Executor::execute (ProverRequest &proverRequest, CommitPols & commitPols)
         pthread_t memoryThread;
         pthread_create(&memoryThread, NULL, MemoryThread, &executorContext);
 
-        // Execute the PaddingKK, PaddingKKBit, Nine2One, Keccak F and NormGate9 State Machines
+        // Execute the PaddingKK, PaddingKKBit, Bits2Field, Keccak F and NormGate9 State Machines
         pthread_t keccakThread;
         pthread_create(&keccakThread, NULL, KeccakThread, &executorContext);
 

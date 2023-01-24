@@ -45,6 +45,16 @@ void Rom::load(Goldilocks &fr, json &romJson)
     gasRefundOffset        = getMemoryOffset("gasRefund");
     txSrcAddrOffset        = getMemoryOffset("txSrcAddr");
     gasCallOffset          = getMemoryOffset("gasCall");
+    isPreEIP155Offset      = getMemoryOffset("isPreEIP155");
+
+    // Load ROM constants
+    MAX_CNT_STEPS_LIMIT      = getConstant(romJson, "MAX_CNT_STEPS_LIMIT");
+    MAX_CNT_ARITH_LIMIT      = getConstant(romJson, "MAX_CNT_ARITH_LIMIT");
+    MAX_CNT_BINARY_LIMIT     = getConstant(romJson, "MAX_CNT_BINARY_LIMIT");
+    MAX_CNT_MEM_ALIGN_LIMIT  = getConstant(romJson, "MAX_CNT_MEM_ALIGN_LIMIT");
+    MAX_CNT_KECCAK_F_LIMIT   = getConstant(romJson, "MAX_CNT_KECCAK_F_LIMIT");
+    MAX_CNT_PADDING_PG_LIMIT = getConstant(romJson, "MAX_CNT_PADDING_PG_LIMIT");
+    MAX_CNT_POSEIDON_G_LIMIT = getConstant(romJson, "MAX_CNT_POSEIDON_G_LIMIT");
 }
 
 void Rom::loadProgram(Goldilocks &fr, json &romJson)
@@ -285,6 +295,32 @@ uint64_t Rom::getMemoryOffset(const string &label) const
         exitProcess();
     }
     return it->second;
+}
+
+uint64_t Rom::getConstant(json &romJson, const string &constantName)
+{
+    if (!romJson.contains("constants") ||
+        !romJson["constants"].is_object())
+    {
+        cerr << "Error: Rom::getConstant() could not find constants in rom json" << endl;
+        exitProcess();
+    }
+    if (!romJson["constants"].contains(constantName) ||
+        !romJson["constants"][constantName].is_object() )
+    {
+        cerr << "Error: Rom::load() could not find constant " << constantName << " in rom json" << endl;
+        exitProcess();
+    }
+    if (!romJson["constants"][constantName].contains("value") ||
+        !romJson["constants"][constantName]["value"].is_string() )
+    {
+        cerr << "Error: Rom::load() could not find value for constant " << constantName << " in rom json" << endl;
+        exitProcess();
+    }
+    string auxString;
+    auxString = romJson["constants"][constantName]["value"];
+    //cout << "Rom::getConstant() " << constantName << "=" << auxString << endl;
+    return atoi(auxString.c_str());
 }
 
 void Rom::unload(void)

@@ -54,7 +54,10 @@ bool AggregatorClientMock::GetStatus (::aggregator::v1::GetStatusResponse &getSt
     getStatusResponse.add_pending_request_queue_ids(getUUID());
 
     // Set the prover id
-    getStatusResponse.set_prover_id(config.processID);
+    getStatusResponse.set_prover_id(config.proverID);
+
+    // Set the prover name
+    getStatusResponse.set_prover_name(config.proverName);
 
     // Set the number of cores
     getStatusResponse.set_number_of_cores(getNumberOfCores());

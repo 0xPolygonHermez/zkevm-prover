@@ -51,6 +51,8 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             case f_memAlignWR8_W0:                  return eval_memAlignWR8_W0(ctx, cmd, cr);
             case f_saveContractBytecode:            return eval_saveContractBytecode(ctx, cmd, cr);
             case f_beforeLast:                      return eval_beforeLast(ctx, cmd, cr);
+            case f_onTouchedAddress:                return eval_onTouchedAddress(ctx, cmd, cr);
+            case f_onTouchedSlot:                   return eval_onTouchedSlot(ctx, cmd, cr);
             default:
                 cerr << "Error: evalCommand() found invalid function=" << cmd.function << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
                 exitProcess();
@@ -2261,4 +2263,16 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
     ctx.fec.sub(aux1, x1, x3);;
     ctx.fec.mul(aux1, aux1, s);
     ctx.fec.sub(y3, aux1, y1);
+}
+
+void eval_onTouchedAddress(Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    cr.type = crt_scalar;
+    cr.scalar = 0;
+}
+
+void eval_onTouchedSlot(Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    cr.type = crt_scalar;
+    cr.scalar = 0;
 }

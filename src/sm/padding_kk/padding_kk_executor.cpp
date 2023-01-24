@@ -94,7 +94,6 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
                 }
             }
             
-            if (j == 0) pols.firstHash[p] = fr.one();
             pols.incCounter[p] = fr.fromU64((j / bytesPerBlock) +1);
             
             bool lastBlock = (p % bytesPerBlock) == (bytesPerBlock - 1);
@@ -146,7 +145,7 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
                 PaddingKKBitExecutorInput paddingKKBitExecutorInput;
                 for (uint64_t k=0; k<bytesPerBlock; k++)
                 {
-                    paddingKKBitExecutorInput.r[k] = input[i].dataBytes[j - bytesPerBlock + 1 + k];
+                    paddingKKBitExecutorInput.data[k] = input[i].dataBytes[j - bytesPerBlock + 1 + k];
                 }
                 paddingKKBitExecutorInput.connected = (j < bytesPerBlock) ? false : true;
                 required.push_back(paddingKKBitExecutorInput);
@@ -210,7 +209,6 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
             if (j == 0)
             {
                 pols.freeIn[p] = fr.one();
-                pols.firstHash[p] = fr.one();
             }
             else
             {
@@ -233,7 +231,7 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
                 PaddingKKBitExecutorInput paddingKKBitExecutorInput;
                 for (uint64_t k=0; k<bytesPerBlock; k++)
                 {
-                    paddingKKBitExecutorInput.r[k] = bytes0[k];
+                    paddingKKBitExecutorInput.data[k] = bytes0[k];
                 }
                 paddingKKBitExecutorInput.connected = false;
                 required.push_back(paddingKKBitExecutorInput);
@@ -271,11 +269,7 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
         pols.addr[p] = fr.fromU64(addr);
     
 
-        if (p == fp)
-        {
-            pols.firstHash[p] = fr.one(); 
-        }
-        else
+        if (p != fp)
         {
             pols.rem[p] = fr.sub(pols.rem[p-1], fr.one());
             if (!fr.isZero(pols.rem[p])) pols.remInv[p] = glp.inv(pols.rem[p]);

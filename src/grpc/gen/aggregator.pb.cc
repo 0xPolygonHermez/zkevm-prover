@@ -573,6 +573,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_aggregator_2eproto::offsets[] 
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::GetStatusResponse, version_proto_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::GetStatusResponse, version_server_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::GetStatusResponse, pending_request_queue_ids_),
+  PROTOBUF_FIELD_OFFSET(::aggregator::v1::GetStatusResponse, prover_name_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::GetStatusResponse, prover_id_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::GetStatusResponse, number_of_cores_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::GetStatusResponse, total_memory_),
@@ -698,19 +699,19 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 57, -1, sizeof(::aggregator::v1::CancelRequest)},
   { 63, -1, sizeof(::aggregator::v1::GetProofRequest)},
   { 70, -1, sizeof(::aggregator::v1::GetStatusResponse)},
-  { 87, -1, sizeof(::aggregator::v1::GenBatchProofResponse)},
-  { 94, -1, sizeof(::aggregator::v1::GenAggregatedProofResponse)},
-  { 101, -1, sizeof(::aggregator::v1::GenFinalProofResponse)},
-  { 108, -1, sizeof(::aggregator::v1::CancelResponse)},
-  { 114, -1, sizeof(::aggregator::v1::GetProofResponse)},
-  { 125, -1, sizeof(::aggregator::v1::FinalProof)},
-  { 132, -1, sizeof(::aggregator::v1::PublicInputs)},
-  { 146, -1, sizeof(::aggregator::v1::ProofB)},
-  { 152, -1, sizeof(::aggregator::v1::Proof)},
-  { 160, 167, sizeof(::aggregator::v1::InputProver_DbEntry_DoNotUse)},
-  { 169, 176, sizeof(::aggregator::v1::InputProver_ContractsBytecodeEntry_DoNotUse)},
-  { 178, -1, sizeof(::aggregator::v1::InputProver)},
-  { 186, -1, sizeof(::aggregator::v1::PublicInputsExtended)},
+  { 88, -1, sizeof(::aggregator::v1::GenBatchProofResponse)},
+  { 95, -1, sizeof(::aggregator::v1::GenAggregatedProofResponse)},
+  { 102, -1, sizeof(::aggregator::v1::GenFinalProofResponse)},
+  { 109, -1, sizeof(::aggregator::v1::CancelResponse)},
+  { 115, -1, sizeof(::aggregator::v1::GetProofResponse)},
+  { 126, -1, sizeof(::aggregator::v1::FinalProof)},
+  { 133, -1, sizeof(::aggregator::v1::PublicInputs)},
+  { 147, -1, sizeof(::aggregator::v1::ProofB)},
+  { 153, -1, sizeof(::aggregator::v1::Proof)},
+  { 161, 168, sizeof(::aggregator::v1::InputProver_DbEntry_DoNotUse)},
+  { 170, 177, sizeof(::aggregator::v1::InputProver_ContractsBytecodeEntry_DoNotUse)},
+  { 179, -1, sizeof(::aggregator::v1::InputProver)},
+  { 187, -1, sizeof(::aggregator::v1::PublicInputsExtended)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -772,63 +773,63 @@ const char descriptor_table_protodef_aggregator_2eproto[] PROTOBUF_SECTION_VARIA
   "quest\022\027\n\017recursive_proof\030\001 \001(\t\022\027\n\017aggreg"
   "ator_addr\030\002 \001(\t\"\033\n\rCancelRequest\022\n\n\002id\030\001"
   " \001(\t\".\n\017GetProofRequest\022\n\n\002id\030\001 \001(\t\022\017\n\007t"
-  "imeout\030\002 \001(\004\"\316\003\n\021GetStatusResponse\0227\n\006st"
+  "imeout\030\002 \001(\004\"\343\003\n\021GetStatusResponse\0227\n\006st"
   "atus\030\001 \001(\0162\'.aggregator.v1.GetStatusResp"
   "onse.Status\022 \n\030last_computed_request_id\030"
   "\002 \001(\t\022\036\n\026last_computed_end_time\030\003 \001(\004\022$\n"
   "\034current_computing_request_id\030\004 \001(\t\022$\n\034c"
   "urrent_computing_start_time\030\005 \001(\004\022\025\n\rver"
   "sion_proto\030\006 \001(\t\022\026\n\016version_server\030\007 \001(\t"
-  "\022!\n\031pending_request_queue_ids\030\010 \003(\t\022\021\n\tp"
-  "rover_id\030\t \001(\t\022\027\n\017number_of_cores\030\n \001(\004\022"
-  "\024\n\014total_memory\030\013 \001(\004\022\023\n\013free_memory\030\014 \001"
-  "(\004\"I\n\006Status\022\017\n\013UNSPECIFIED\020\000\022\013\n\007BOOTING"
-  "\020\001\022\r\n\tCOMPUTING\020\002\022\010\n\004IDLE\020\003\022\010\n\004HALT\020\004\"J\n"
-  "\025GenBatchProofResponse\022\n\n\002id\030\001 \001(\t\022%\n\006re"
-  "sult\030\002 \001(\0162\025.aggregator.v1.Result\"O\n\032Gen"
-  "AggregatedProofResponse\022\n\n\002id\030\001 \001(\t\022%\n\006r"
-  "esult\030\002 \001(\0162\025.aggregator.v1.Result\"J\n\025Ge"
-  "nFinalProofResponse\022\n\n\002id\030\001 \001(\t\022%\n\006resul"
-  "t\030\002 \001(\0162\025.aggregator.v1.Result\"7\n\016Cancel"
-  "Response\022%\n\006result\030\001 \001(\0162\025.aggregator.v1"
-  ".Result\"\275\002\n\020GetProofResponse\022\n\n\002id\030\001 \001(\t"
-  "\0220\n\013final_proof\030\002 \001(\0132\031.aggregator.v1.Fi"
-  "nalProofH\000\022\031\n\017recursive_proof\030\003 \001(\tH\000\0226\n"
-  "\006result\030\004 \001(\0162&.aggregator.v1.GetProofRe"
-  "sponse.Result\022\025\n\rresult_string\030\005 \001(\t\"x\n\006"
-  "Result\022\017\n\013UNSPECIFIED\020\000\022\020\n\014COMPLETED_OK\020"
-  "\001\022\t\n\005ERROR\020\002\022\023\n\017COMPLETED_ERROR\020\003\022\013\n\007PEN"
-  "DING\020\004\022\022\n\016INTERNAL_ERROR\020\005\022\n\n\006CANCEL\020\006B\007"
-  "\n\005proof\"f\n\nFinalProof\022#\n\005proof\030\001 \001(\0132\024.a"
-  "ggregator.v1.Proof\0223\n\006public\030\002 \001(\0132#.agg"
-  "regator.v1.PublicInputsExtended\"\344\001\n\014Publ"
-  "icInputs\022\026\n\016old_state_root\030\001 \001(\014\022\032\n\022old_"
-  "acc_input_hash\030\002 \001(\014\022\025\n\rold_batch_num\030\003 "
-  "\001(\004\022\020\n\010chain_id\030\004 \001(\004\022\025\n\rbatch_l2_data\030\005"
-  " \001(\014\022\030\n\020global_exit_root\030\006 \001(\014\022\025\n\reth_ti"
-  "mestamp\030\007 \001(\004\022\026\n\016sequencer_addr\030\010 \001(\t\022\027\n"
-  "\017aggregator_addr\030\t \001(\t\"\030\n\006ProofB\022\016\n\006proo"
-  "fs\030\001 \003(\t\"Q\n\005Proof\022\017\n\007proof_a\030\001 \003(\t\022&\n\007pr"
-  "oof_b\030\002 \003(\0132\025.aggregator.v1.ProofB\022\017\n\007pr"
-  "oof_c\030\003 \003(\t\"\245\002\n\013InputProver\0222\n\rpublic_in"
-  "puts\030\001 \001(\0132\033.aggregator.v1.PublicInputs\022"
-  ".\n\002db\030\004 \003(\0132\".aggregator.v1.InputProver."
-  "DbEntry\022M\n\022contracts_bytecode\030\005 \003(\01321.ag"
-  "gregator.v1.InputProver.ContractsBytecod"
-  "eEntry\032)\n\007DbEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030"
-  "\002 \001(\t:\0028\001\0328\n\026ContractsBytecodeEntry\022\013\n\003k"
-  "ey\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"\262\001\n\024PublicIn"
-  "putsExtended\0222\n\rpublic_inputs\030\001 \001(\0132\033.ag"
-  "gregator.v1.PublicInputs\022\026\n\016new_state_ro"
-  "ot\030\002 \001(\014\022\032\n\022new_acc_input_hash\030\003 \001(\014\022\033\n\023"
-  "new_local_exit_root\030\004 \001(\014\022\025\n\rnew_batch_n"
-  "um\030\005 \001(\004*@\n\006Result\022\017\n\013UNSPECIFIED\020\000\022\006\n\002O"
-  "K\020\001\022\t\n\005ERROR\020\002\022\022\n\016INTERNAL_ERROR\020\0032d\n\021Ag"
-  "gregatorService\022O\n\007Channel\022\034.aggregator."
-  "v1.ProverMessage\032 .aggregator.v1.Aggrega"
-  "torMessage\"\000(\0010\001B7Z5github.com/0xPolygon"
-  "Hermez/zkevm-node/proverclient/pbb\006proto"
-  "3"
+  "\022!\n\031pending_request_queue_ids\030\010 \003(\t\022\023\n\013p"
+  "rover_name\030\t \001(\t\022\021\n\tprover_id\030\n \001(\t\022\027\n\017n"
+  "umber_of_cores\030\013 \001(\004\022\024\n\014total_memory\030\014 \001"
+  "(\004\022\023\n\013free_memory\030\r \001(\004\"I\n\006Status\022\017\n\013UNS"
+  "PECIFIED\020\000\022\013\n\007BOOTING\020\001\022\r\n\tCOMPUTING\020\002\022\010"
+  "\n\004IDLE\020\003\022\010\n\004HALT\020\004\"J\n\025GenBatchProofRespo"
+  "nse\022\n\n\002id\030\001 \001(\t\022%\n\006result\030\002 \001(\0162\025.aggreg"
+  "ator.v1.Result\"O\n\032GenAggregatedProofResp"
+  "onse\022\n\n\002id\030\001 \001(\t\022%\n\006result\030\002 \001(\0162\025.aggre"
+  "gator.v1.Result\"J\n\025GenFinalProofResponse"
+  "\022\n\n\002id\030\001 \001(\t\022%\n\006result\030\002 \001(\0162\025.aggregato"
+  "r.v1.Result\"7\n\016CancelResponse\022%\n\006result\030"
+  "\001 \001(\0162\025.aggregator.v1.Result\"\275\002\n\020GetProo"
+  "fResponse\022\n\n\002id\030\001 \001(\t\0220\n\013final_proof\030\002 \001"
+  "(\0132\031.aggregator.v1.FinalProofH\000\022\031\n\017recur"
+  "sive_proof\030\003 \001(\tH\000\0226\n\006result\030\004 \001(\0162&.agg"
+  "regator.v1.GetProofResponse.Result\022\025\n\rre"
+  "sult_string\030\005 \001(\t\"x\n\006Result\022\017\n\013UNSPECIFI"
+  "ED\020\000\022\020\n\014COMPLETED_OK\020\001\022\t\n\005ERROR\020\002\022\023\n\017COM"
+  "PLETED_ERROR\020\003\022\013\n\007PENDING\020\004\022\022\n\016INTERNAL_"
+  "ERROR\020\005\022\n\n\006CANCEL\020\006B\007\n\005proof\"f\n\nFinalPro"
+  "of\022#\n\005proof\030\001 \001(\0132\024.aggregator.v1.Proof\022"
+  "3\n\006public\030\002 \001(\0132#.aggregator.v1.PublicIn"
+  "putsExtended\"\344\001\n\014PublicInputs\022\026\n\016old_sta"
+  "te_root\030\001 \001(\014\022\032\n\022old_acc_input_hash\030\002 \001("
+  "\014\022\025\n\rold_batch_num\030\003 \001(\004\022\020\n\010chain_id\030\004 \001"
+  "(\004\022\025\n\rbatch_l2_data\030\005 \001(\014\022\030\n\020global_exit"
+  "_root\030\006 \001(\014\022\025\n\reth_timestamp\030\007 \001(\004\022\026\n\016se"
+  "quencer_addr\030\010 \001(\t\022\027\n\017aggregator_addr\030\t "
+  "\001(\t\"\030\n\006ProofB\022\016\n\006proofs\030\001 \003(\t\"Q\n\005Proof\022\017"
+  "\n\007proof_a\030\001 \003(\t\022&\n\007proof_b\030\002 \003(\0132\025.aggre"
+  "gator.v1.ProofB\022\017\n\007proof_c\030\003 \003(\t\"\245\002\n\013Inp"
+  "utProver\0222\n\rpublic_inputs\030\001 \001(\0132\033.aggreg"
+  "ator.v1.PublicInputs\022.\n\002db\030\004 \003(\0132\".aggre"
+  "gator.v1.InputProver.DbEntry\022M\n\022contract"
+  "s_bytecode\030\005 \003(\01321.aggregator.v1.InputPr"
+  "over.ContractsBytecodeEntry\032)\n\007DbEntry\022\013"
+  "\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\0328\n\026Contra"
+  "ctsBytecodeEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002"
+  " \001(\t:\0028\001\"\262\001\n\024PublicInputsExtended\0222\n\rpub"
+  "lic_inputs\030\001 \001(\0132\033.aggregator.v1.PublicI"
+  "nputs\022\026\n\016new_state_root\030\002 \001(\014\022\032\n\022new_acc"
+  "_input_hash\030\003 \001(\014\022\033\n\023new_local_exit_root"
+  "\030\004 \001(\014\022\025\n\rnew_batch_num\030\005 \001(\004*@\n\006Result\022"
+  "\017\n\013UNSPECIFIED\020\000\022\006\n\002OK\020\001\022\t\n\005ERROR\020\002\022\022\n\016I"
+  "NTERNAL_ERROR\020\0032d\n\021AggregatorService\022O\n\007"
+  "Channel\022\034.aggregator.v1.ProverMessage\032 ."
+  "aggregator.v1.AggregatorMessage\"\000(\0010\001B7Z"
+  "5github.com/0xPolygonHermez/zkevm-node/p"
+  "roverclient/pbb\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_aggregator_2eproto_deps[1] = {
 };
@@ -859,7 +860,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_agg
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_aggregator_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_aggregator_2eproto = {
-  false, false, descriptor_table_protodef_aggregator_2eproto, "aggregator.proto", 3521,
+  false, false, descriptor_table_protodef_aggregator_2eproto, "aggregator.proto", 3542,
   &descriptor_table_aggregator_2eproto_once, descriptor_table_aggregator_2eproto_sccs, descriptor_table_aggregator_2eproto_deps, 23, 0,
   schemas, file_default_instances, TableStruct_aggregator_2eproto::offsets,
   file_level_metadata_aggregator_2eproto, 23, file_level_enum_descriptors_aggregator_2eproto, file_level_service_descriptors_aggregator_2eproto,
@@ -3693,6 +3694,11 @@ GetStatusResponse::GetStatusResponse(const GetStatusResponse& from)
     version_server_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_version_server(),
       GetArena());
   }
+  prover_name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_prover_name().empty()) {
+    prover_name_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_prover_name(),
+      GetArena());
+  }
   prover_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (!from._internal_prover_id().empty()) {
     prover_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_prover_id(),
@@ -3710,6 +3716,7 @@ void GetStatusResponse::SharedCtor() {
   current_computing_request_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   version_proto_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   version_server_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  prover_name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   prover_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   ::memset(&last_computed_end_time_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&status_) -
@@ -3728,6 +3735,7 @@ void GetStatusResponse::SharedDtor() {
   current_computing_request_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   version_proto_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   version_server_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  prover_name_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   prover_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
@@ -3757,6 +3765,7 @@ void GetStatusResponse::Clear() {
   current_computing_request_id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   version_proto_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   version_server_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  prover_name_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   prover_id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::memset(&last_computed_end_time_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&status_) -
@@ -3844,32 +3853,41 @@ const char* GetStatusResponse::_InternalParse(const char* ptr, ::PROTOBUF_NAMESP
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<66>(ptr));
         } else goto handle_unusual;
         continue;
-      // string prover_id = 9;
+      // string prover_name = 9;
       case 9:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 74)) {
+          auto str = _internal_mutable_prover_name();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "aggregator.v1.GetStatusResponse.prover_name"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string prover_id = 10;
+      case 10:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 82)) {
           auto str = _internal_mutable_prover_id();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "aggregator.v1.GetStatusResponse.prover_id"));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // uint64 number_of_cores = 10;
-      case 10:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 80)) {
+      // uint64 number_of_cores = 11;
+      case 11:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 88)) {
           number_of_cores_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // uint64 total_memory = 11;
-      case 11:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 88)) {
+      // uint64 total_memory = 12;
+      case 12:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 96)) {
           total_memory_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // uint64 free_memory = 12;
-      case 12:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 96)) {
+      // uint64 free_memory = 13;
+      case 13:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 104)) {
           free_memory_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
@@ -3971,32 +3989,42 @@ failure:
     target = stream->WriteString(8, s, target);
   }
 
-  // string prover_id = 9;
+  // string prover_name = 9;
+  if (this->prover_name().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_prover_name().data(), static_cast<int>(this->_internal_prover_name().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "aggregator.v1.GetStatusResponse.prover_name");
+    target = stream->WriteStringMaybeAliased(
+        9, this->_internal_prover_name(), target);
+  }
+
+  // string prover_id = 10;
   if (this->prover_id().size() > 0) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_prover_id().data(), static_cast<int>(this->_internal_prover_id().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
       "aggregator.v1.GetStatusResponse.prover_id");
     target = stream->WriteStringMaybeAliased(
-        9, this->_internal_prover_id(), target);
+        10, this->_internal_prover_id(), target);
   }
 
-  // uint64 number_of_cores = 10;
+  // uint64 number_of_cores = 11;
   if (this->number_of_cores() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(10, this->_internal_number_of_cores(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(11, this->_internal_number_of_cores(), target);
   }
 
-  // uint64 total_memory = 11;
+  // uint64 total_memory = 12;
   if (this->total_memory() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(11, this->_internal_total_memory(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(12, this->_internal_total_memory(), target);
   }
 
-  // uint64 free_memory = 12;
+  // uint64 free_memory = 13;
   if (this->free_memory() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(12, this->_internal_free_memory(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(13, this->_internal_free_memory(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -4051,7 +4079,14 @@ size_t GetStatusResponse::ByteSizeLong() const {
         this->_internal_version_server());
   }
 
-  // string prover_id = 9;
+  // string prover_name = 9;
+  if (this->prover_name().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_prover_name());
+  }
+
+  // string prover_id = 10;
   if (this->prover_id().size() > 0) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
@@ -4072,21 +4107,21 @@ size_t GetStatusResponse::ByteSizeLong() const {
         this->_internal_current_computing_start_time());
   }
 
-  // uint64 number_of_cores = 10;
+  // uint64 number_of_cores = 11;
   if (this->number_of_cores() != 0) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
         this->_internal_number_of_cores());
   }
 
-  // uint64 total_memory = 11;
+  // uint64 total_memory = 12;
   if (this->total_memory() != 0) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
         this->_internal_total_memory());
   }
 
-  // uint64 free_memory = 12;
+  // uint64 free_memory = 13;
   if (this->free_memory() != 0) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
@@ -4143,6 +4178,9 @@ void GetStatusResponse::MergeFrom(const GetStatusResponse& from) {
   if (from.version_server().size() > 0) {
     _internal_set_version_server(from._internal_version_server());
   }
+  if (from.prover_name().size() > 0) {
+    _internal_set_prover_name(from._internal_prover_name());
+  }
   if (from.prover_id().size() > 0) {
     _internal_set_prover_id(from._internal_prover_id());
   }
@@ -4192,6 +4230,7 @@ void GetStatusResponse::InternalSwap(GetStatusResponse* other) {
   current_computing_request_id_.Swap(&other->current_computing_request_id_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   version_proto_.Swap(&other->version_proto_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   version_server_.Swap(&other->version_server_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  prover_name_.Swap(&other->prover_name_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   prover_id_.Swap(&other->prover_id_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(GetStatusResponse, status_)
