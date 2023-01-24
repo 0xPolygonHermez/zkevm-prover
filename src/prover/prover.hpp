@@ -29,9 +29,7 @@ class Prover
     PoseidonGoldilocks &poseidon;
     Executor executor;
 
-    // StarkRecursive1 starkRecursive1;
-    // StarkRecursive2 starkRecursive2;
-    StarkRecursiveF starkRecursiveF;
+    StarkRecursiveF *starksRecursiveF;
 
     Starks *starkZkevm;
     Starks *starksC12a;
@@ -55,6 +53,7 @@ private:
     pthread_t cleanerPthread; // Garbage collector
     pthread_mutex_t mutex;    // Mutex to protect the requests queues
     void *pAddress = NULL;
+    void *pAddressStarksRecursiveF = NULL;
 public:
     const Config &config;
     sem_t pendingRequestSem; // Semaphore to wakeup prover thread when a new request is available
