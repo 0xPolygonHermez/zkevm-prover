@@ -15,10 +15,6 @@
 #include <openssl/evp.h>
 #include <openssl/sha.h>
 #include <openssl/crypto.h>
-//#include <netdb.h>
-//#include <sys/socket.h>
-//#include <netinet/in.h>
-//#include <arpa/inet.h>
 #include <ifaddrs.h>
 #include <net/if.h>
 #include <arpa/inet.h>
