@@ -41,8 +41,8 @@ public:
     void lock(void) { pthread_mutex_lock(&mutex); };
     void unlock(void) { pthread_mutex_unlock(&mutex); };
     ::grpc::Status ProcessBatch (::grpc::ServerContext* context, const ::executor::v1::ProcessBatchRequest* request, ::executor::v1::ProcessBatchResponse* response) override;
-    ::executor::v1::Error string2error (string &errorString);
-    ::executor::v1::Error zkresult2error (zkresult &result);
+    ::executor::v1::RomError string2error (string &errorString);
+    ::executor::v1::ExecutorError zkresult2error (zkresult &result);
 };
 
 #endif

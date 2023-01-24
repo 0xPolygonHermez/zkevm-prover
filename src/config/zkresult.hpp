@@ -25,7 +25,9 @@ typedef enum : int
     ZKR_SM_MAIN_OOC_MEM_ALIGN = 19, // Incremented mem align counters exceeded the maximum
     ZKR_SM_MAIN_OOC_KECCAK_F = 20, // Incremented keccak-f counters exceeded the maximum
     ZKR_SM_MAIN_OOC_PADDING_PG = 21, // Incremented padding pg counters exceeded the maximum
-    ZKR_SM_MAIN_OOC_POSEIDON_G = 22 // Incremented poseidon g counters exceeded the maximum
+    ZKR_SM_MAIN_OOC_POSEIDON_G = 22, // Incremented poseidon g counters exceeded the maximum
+    ZKR_STATEDB_GRPC_ERROR = 23, // Error making GRPC call to stateDB service
+    ZKR_SM_MAIN_OUT_OF_STEPS = 24 // Main state machine executor did not complete the execution within available steps
 } zkresult;
 
 const char* zkresult2string (int code);

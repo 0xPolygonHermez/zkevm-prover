@@ -38,6 +38,10 @@ zkresult StateDBRemote::set (const Goldilocks::Element (&oldRoot)[4], const Gold
     request.set_get_db_read_log((dbReadLog != NULL));
 
     grpc::Status s = stub->Set(&context, request, &response);
+    if (s.error_code() != grpc::StatusCode::OK) {
+        cerr << "Error: StateDBRemote::set() GRPC error(" << s.error_code() << "): " << s.error_message() << endl;
+        return ZKR_STATEDB_GRPC_ERROR;
+    }
 
     grpc2fea(fr, response.new_root(), newRoot);
 
@@ -93,7 +97,11 @@ zkresult StateDBRemote::get (const Goldilocks::Element (&root)[4], const Goldilo
     request.set_details(result != NULL);
     request.set_get_db_read_log((dbReadLog != NULL));
 
-    stub->Get(&context, request, &response);
+    grpc::Status s = stub->Get(&context, request, &response);
+    if (s.error_code() != grpc::StatusCode::OK) {
+        cerr << "Error: StateDBRemote::get() GRPC error(" << s.error_code() << "): " << s.error_message() << endl;
+        return ZKR_STATEDB_GRPC_ERROR;
+    }
 
     value.set_str(response.value(),16);
 
@@ -149,7 +157,11 @@ zkresult StateDBRemote::setProgram (const Goldilocks::Element (&key)[4], const v
 
     request.set_persistent(persistent);
 
-    stub->SetProgram(&context, request, &response);
+    grpc::Status s = stub->SetProgram(&context, request, &response);
+    if (s.error_code() != grpc::StatusCode::OK) {
+        cerr << "Error: StateDBRemote::setProgram() GRPC error(" << s.error_code() << "): " << s.error_message() << endl;
+        return ZKR_STATEDB_GRPC_ERROR;
+    }
 
     return static_cast<zkresult>(response.result().code());
 }
@@ -164,7 +176,11 @@ zkresult StateDBRemote::getProgram (const Goldilocks::Element (&key)[4], vector<
     fea2grpc(fr, key, reqKey);
     request.set_allocated_key(reqKey);
 
-    stub->GetProgram(&context, request, &response);
+    grpc::Status s = stub->GetProgram(&context, request, &response);
+    if (s.error_code() != grpc::StatusCode::OK) {
+        cerr << "Error: StateDBRemote::getProgram() GRPC error(" << s.error_code() << "): " << s.error_message() << endl;
+        return ZKR_STATEDB_GRPC_ERROR;
+    }
 
     std:string sData;
 
@@ -191,7 +207,10 @@ void StateDBRemote::loadDB(const DatabaseMap::MTMap &input, const bool persisten
 
     request.set_persistent(persistent);
 
-    stub->LoadDB(&context, request, &response);
+    grpc::Status s = stub->LoadDB(&context, request, &response);
+    if (s.error_code() != grpc::StatusCode::OK) {
+        cerr << "Error: StateDBRemote:loadDB() GRPC error(" << s.error_code() << "): " << s.error_message() << endl;
+    }    
 }
 
 void StateDBRemote::loadProgramDB(const DatabaseMap::ProgramMap &input, const bool persistent)
@@ -204,7 +223,10 @@ void StateDBRemote::loadProgramDB(const DatabaseMap::ProgramMap &input, const bo
 
     request.set_persistent(persistent);
 
-    stub->LoadProgramDB(&context, request, &response);
+    grpc::Status s = stub->LoadProgramDB(&context, request, &response);
+    if (s.error_code() != grpc::StatusCode::OK) {
+        cerr << "Error: StateDBRemote:loadProgramDB() GRPC error(" << s.error_code() << "): " << s.error_message() << endl;
+    }       
 }
 
 void StateDBRemote::flush()
@@ -212,5 +234,8 @@ void StateDBRemote::flush()
     ::grpc::ClientContext context;
     ::google::protobuf::Empty request;
     ::google::protobuf::Empty response;
-    stub->Flush(&context, request, &response);
+    grpc::Status s = stub->Flush(&context, request, &response);
+    if (s.error_code() != grpc::StatusCode::OK) {
+        cerr << "Error: StateDBRemote:flush() GRPC error(" << s.error_code() << "): " << s.error_message() << endl;
+    }       
 }
