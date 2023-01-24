@@ -3477,11 +3477,18 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
 
         // When processing a txs batch, break the loop when done to complete the execution faster
-        if ( bProcessBatch && (zkPC == finalizeExecutionLabel) )
+        if ( zkPC == finalizeExecutionLabel )
         {
-            cout << "ROM label finalizeExecution reached; stopping execution" << endl;
+            if (ctx.lastStep != 0)
+            {
+                cerr << "Error: MainExecutor::execute() called finalizeExecutionLabel with a non-zero ctx.lastStep=" << ctx.lastStep << endl;
+                exitProcess();
+            }
             ctx.lastStep = step;
-            break;
+            if (bProcessBatch)
+            {
+                break;
+            }
         }
 
     } // End of main executor loop, for all evaluations
@@ -3497,6 +3504,32 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
     // Set the error (all previous errors generated a return)
     proverRequest.result = ZKR_SUCCESS;
+
+    // Check that we did not run out of steps during the execution
+    if (ctx.lastStep == 0)
+    {
+        cerr << "Error: Main executor found ctx.lastStep=0, so execution was not complete" << endl;
+        if (bProcessBatch)
+        {
+            proverRequest.result = ZKR_SM_MAIN_OUT_OF_STEPS;
+        }
+        else
+        {
+            exitProcess();
+        }
+    }
+    if (ctx.lastStep > rom.MAX_CNT_STEPS_LIMIT)
+    {
+        cerr << "Error: Main executor found ctx.lastStep=" << ctx.lastStep << " > MAX_CNT_STEPS_LIMIT=" << rom.MAX_CNT_STEPS_LIMIT << endl;
+        if (bProcessBatch)
+        {
+            proverRequest.result = ZKR_SM_MAIN_OUT_OF_STEPS;
+        }
+        else
+        {
+            exitProcess();
+        }
+    }
 
 #ifdef CHECK_MAX_CNT_AT_THE_END
     if (fr.toU64(pols.cntArith[0]) > rom.MAX_CNT_ARITH_LIMIT)

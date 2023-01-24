@@ -372,7 +372,16 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += "    ctx.pStep = &i; // ctx.pStep is used inside evaluateCommand() to find the current value of the registers, e.g. pols(A0)[ctx.step]\n";
     }
     code += "    ctx.pZKPC = &zkPC; // Pointer to the zkPC\n\n";
-    code += "    Goldilocks::Element currentRCX = fr.zero();\n";
+
+    // Declare currentRCX only if repeat instruction is used
+    for (uint64_t zkPC=0; zkPC<rom["program"].size(); zkPC++)
+    {
+        if (rom["program"][zkPC].contains("repeat") && (rom["program"][zkPC]["repeat"]==1))
+        {
+            code += "    Goldilocks::Element currentRCX = fr.zero();\n";
+            break;
+        }
+    }
 
     code += "    uint64_t incHashPos = 0;\n";
     code += "    uint64_t incCounter = 0;\n\n";
@@ -3302,7 +3311,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    {\n";
             code += "        pols.RCX[" + string(bFastMode?"0":"nexti") + "] = fr.dec(pols.RCX[" + string(bFastMode?"0":"i") + "]);\n";
             code += "    }\n";
-         }
+        }
         else
         {
             code += "    pols.RCX[" + string(bFastMode?"0":"nexti") + "] = pols.RCX[" + string(bFastMode?"0":"i") + "];\n";
@@ -3736,9 +3745,15 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += "#endif\n\n";
 
         // Jump to the end label if we are done and we are in fast mode
-        if (bFastMode && (zkPC == rom["labels"]["finalizeExecution"]))
+        if (zkPC == rom["labels"]["finalizeExecution"])
         {
+            code += "    if (ctx.lastStep != 0)\n";
+            code += "    {\n";
+            code += "        cerr << \"Error: MainExecutor::execute() called finalizeExecutionLabel with a non-zero ctx.lastStep=\" << ctx.lastStep << endl;\n";
+            code += "        exitProcess();\n";
+            code += "    }\n";
             code += "    ctx.lastStep = i;\n";
+            if (bFastMode)
             code += "    goto " + functionName + "_end;\n\n";
         }
 
@@ -3819,6 +3834,32 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
     code += "    // Set the error (all previous errors generated a return)\n";
     code += "    proverRequest.result = ZKR_SUCCESS;\n";
+
+    code += "    // Check that we did not run out of steps during the execution\n";
+    code += "    if (ctx.lastStep == 0)\n";
+    code += "    {\n";
+    code += "        cerr << \"Error: Main executor found ctx.lastStep=0, so execution was not complete\" << endl;\n";
+    if (bFastMode)
+    {
+    code += "        proverRequest.result = ZKR_SM_MAIN_OUT_OF_STEPS;\n";
+    }
+    else
+    {
+    code += "        exitProcess();\n";
+    }
+    code += "    }\n";
+    code += "    if (ctx.lastStep > " + (string)rom["constants"]["MAX_CNT_STEPS_LIMIT"]["value"] + ")\n";
+    code += "    {\n";
+    code += "        cerr << \"Error: Main executor found ctx.lastStep=\" << ctx.lastStep << \" > MAX_CNT_STEPS_LIMIT=" + (string)rom["constants"]["MAX_CNT_STEPS_LIMIT"]["value"] + "\" << endl;\n";
+    if (bFastMode)
+    {
+    code += "        proverRequest.result = ZKR_SM_MAIN_OUT_OF_STEPS;\n";
+    }
+    else
+    {
+    code += "        exitProcess();\n";
+    }
+    code += "    }\n\n";
 
     code += "#ifdef CHECK_MAX_CNT_AT_THE_END\n";
     code += "    if (fr.toU64(pols.cntArith[0]) > " + (string)rom["constants"]["MAX_CNT_ARITH_LIMIT"]["value"] + ")\n";
