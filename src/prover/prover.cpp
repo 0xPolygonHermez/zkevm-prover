@@ -400,6 +400,14 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         json2file(inputJsonEx, pProverRequest->inputDbFile());
     }
 
+    // Save commit pols to file zkevm.commit
+    if (config.zkevmCmPolsAfterExecutor != "")
+    {
+        void *pointerCmPols = mapFile(config.zkevmCmPolsAfterExecutor, cmPols.size(), true);
+        memcpy(pointerCmPols, cmPols.address(), cmPols.size());
+        unmapFile(pointerCmPols, cmPols.size());
+    }
+
     if (pProverRequest->result == ZKR_SUCCESS)
     {
         /*************************************/
@@ -917,6 +925,14 @@ void Prover::execute(ProverRequest *pProverRequest)
         json inputJsonEx;
         pProverRequest->input.save(inputJsonEx, *pProverRequest->dbReadLog);
         json2file(inputJsonEx, pProverRequest->inputDbFile());
+    }
+
+    // Save commit pols to file zkevm.commit
+    if (config.zkevmCmPolsAfterExecutor != "")
+    {
+        void *pointerCmPols = mapFile(config.zkevmCmPolsAfterExecutor, cmPols.size(), true);
+        memcpy(pointerCmPols, cmPols.address(), cmPols.size());
+        unmapFile(pointerCmPols, cmPols.size());
     }
 
     /***************/
