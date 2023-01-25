@@ -2,14 +2,15 @@ name: Build docker image and run node tests
 
 on:
   push:
-    branches: [ develop, main ]
+    branches: [ develop, main, mango_fixes ]
 
 jobs:
   build-docker:
     runs-on: [self-hosted, linux, X64, hc]
 
     outputs:
-      image_tag: ${{ steps.setvars.outputs.image_tag }}
+      sha_short: ${{ steps.setvars.outputs.sha_short }}
+      tag: ${{ steps.setvars.outputs.tag }}
 
     steps:
       - name: Checkout code
@@ -19,13 +20,7 @@ jobs:
         id: setvars
         run: |
           echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
-          if [[ "${{github.base_ref}}" == "main" || "${{github.ref}}" == "refs/heads/main" ]]; then
-            echo "::set-output name=image_tag::latest"
-            # echo "::set-output name=dbg::0"
-          else
-            echo "::set-output name=image_tag::develop"
-            # echo "::set-output name=dbg::1"
-          fi
+          echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
 
       - name: Submodule init
         run: |
@@ -44,19 +39,18 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push
-        id: docker_build
+      - name: Build and push Executor
+        id: docker_build_executor
         uses: docker/build-push-action@v2
         with:
-          # build-args: |
-          #   dbg=${{ steps.setvars.outputs.dbg }}
           context: .
           file: Dockerfile-GHA
           platforms: linux/amd64
           push: true
+          target: executor
           tags: |
+            hermeznetwork/zkevm-prover:${{ steps.setvars.outputs.tag }}
             hermeznetwork/zkevm-prover:${{ steps.setvars.outputs.sha_short }}
-            hermeznetwork/zkevm-prover:${{ steps.setvars.outputs.image_tag }}
 
   # node-tests:
   #   needs: build-docker
