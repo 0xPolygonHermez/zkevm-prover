@@ -14,6 +14,7 @@ COPY ./test ./test
 COPY ./tools ./tools
 COPY ./config ./config
 COPY Makefile .
+RUN mkdir build
 RUN make main_generator
 RUN ./build/mainGenerator
 RUN make -j
