@@ -930,9 +930,11 @@ void Prover::execute(ProverRequest *pProverRequest)
     // Save commit pols to file zkevm.commit
     if (config.zkevmCmPolsAfterExecutor != "")
     {
+        TimerStart(PROVER_EXECUTE_SAVE_COMMIT_POLS_AFTER_EXECUTOR);
         void *pointerCmPols = mapFile(config.zkevmCmPolsAfterExecutor, cmPols.size(), true);
         memcpy(pointerCmPols, cmPols.address(), cmPols.size());
         unmapFile(pointerCmPols, cmPols.size());
+        TimerStopAndLog(PROVER_EXECUTE_SAVE_COMMIT_POLS_AFTER_EXECUTOR);
     }
 
     /***************/
