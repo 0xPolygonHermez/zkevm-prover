@@ -8,6 +8,8 @@ COPY ./src ./src
 COPY ./test ./test
 COPY ./tools ./tools
 COPY Makefile .
+RUN make main_generator
+RUN ./build/mainGenerator
 RUN make -j
 
 FROM ubuntu:22.04
