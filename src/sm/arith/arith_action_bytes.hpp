@@ -34,28 +34,6 @@ public:
     uint64_t _q0[16];
     uint64_t _q1[16];
     uint64_t _q2[16];
-
-    ArithActionBytes()
-    {
-        selEq0 = 0;
-        selEq1 = 0;
-        selEq2 = 0;
-        selEq3 = 0;
-        memset(_x1, 0, sizeof(_x1));
-        memset(_y1, 0, sizeof(_y1));
-        memset(_x2, 0, sizeof(_x2));
-        memset(_y2, 0, sizeof(_y2));
-        memset(_x3, 0, sizeof(_x3));
-        memset(_x3, 0, sizeof(_y3));
-        memset(_selEq0, 0, sizeof(_selEq0));
-        memset(_selEq1, 0, sizeof(_selEq1));
-        memset(_selEq2, 0, sizeof(_selEq2));
-        memset(_selEq3, 0, sizeof(_selEq3));
-        memset(_s, 0, sizeof(_s));
-        memset(_q0, 0, sizeof(_q0));
-        memset(_q1, 0, sizeof(_q1));
-        memset(_q2, 0, sizeof(_q2));
-    }
 };
 
 #endif

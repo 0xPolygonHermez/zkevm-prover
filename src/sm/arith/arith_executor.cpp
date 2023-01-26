@@ -28,6 +28,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
     {
         uint64_t dataSize;
         ArithActionBytes actionBytes;
+
         actionBytes.x1 = action[i].x1;
         actionBytes.y1 = action[i].y1;
         actionBytes.x2 = action[i].x2;
@@ -38,6 +39,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
         actionBytes.selEq1 = action[i].selEq1;
         actionBytes.selEq2 = action[i].selEq2;
         actionBytes.selEq3 = action[i].selEq3;
+
         dataSize = 16;
         scalar2ba16(actionBytes._x1, dataSize, action[i].x1);
         dataSize = 16;
@@ -58,6 +60,12 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
         scalar2ba16(actionBytes._selEq2, dataSize, action[i].selEq2);
         dataSize = 16;
         scalar2ba16(actionBytes._selEq3, dataSize, action[i].selEq3);
+
+        memset(actionBytes._s, 0, sizeof(actionBytes._s));
+        memset(actionBytes._q0, 0, sizeof(actionBytes._q0));
+        memset(actionBytes._q1, 0, sizeof(actionBytes._q1));
+        memset(actionBytes._q2, 0, sizeof(actionBytes._q2));
+
         input.push_back(actionBytes);
     }
 
