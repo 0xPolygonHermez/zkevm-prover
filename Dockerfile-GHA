@@ -12,6 +12,7 @@ WORKDIR /usr/src/app
 COPY ./src ./src
 COPY ./test ./test
 COPY ./tools ./tools
+COPY ./config ./config
 COPY Makefile .
 RUN make main_generator
 RUN ./build/mainGenerator
