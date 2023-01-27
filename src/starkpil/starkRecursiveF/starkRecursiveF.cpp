@@ -8,7 +8,7 @@
 
 #define NUM_CHALLENGES 8
 
-StarkRecursiveF::StarkRecursiveF(const Config &config) : config(config),
+StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config(config),
                                                          starkInfo(config, config.recursivefStarkInfo),
                                                          zi(config.generateProof() ? starkInfo.starkStruct.nBits : 0,
                                                             config.generateProof() ? starkInfo.starkStruct.nBitsExt : 0),
@@ -17,7 +17,8 @@ StarkRecursiveF::StarkRecursiveF(const Config &config) : config(config),
                                                          ntt(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
                                                          nttExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
                                                          x_n(config.generateProof() ? N : 0, config.generateProof() ? 1 : 0),
-                                                         x_2ns(config.generateProof() ? NExtended : 0, config.generateProof() ? 1 : 0)
+                                                         x_2ns(config.generateProof() ? NExtended : 0, config.generateProof() ? 1 : 0),
+                                                         pAddress(_pAddress)
 {
     // Avoid unnecessary initialization if we are not going to generate any proof
     if (!config.generateProof())
@@ -93,6 +94,20 @@ StarkRecursiveF::StarkRecursiveF(const Config &config) : config(config),
         Goldilocks::mul(xx, xx, Goldilocks::w(starkInfo.starkStruct.nBitsExt));
     }
     TimerStopAndLog(COMPUTE_X_N_AND_X_2_NS);
+
+    mem = (Goldilocks::Element *)_pAddress;
+    pBuffer = (Goldilocks::Element *)malloc(starkInfo.mapSectionsN.section[eSection::cm1_n] * NExtended * FIELD_EXTENSION * sizeof(Goldilocks::Element));
+
+    p_cm1_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm1_2ns]];
+    p_cm1_n = &mem[starkInfo.mapOffsets.section[eSection::cm1_n]];
+    p_cm2_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm2_2ns]];
+    p_cm2_n = &mem[starkInfo.mapOffsets.section[eSection::cm2_n]];
+    p_cm3_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm3_2ns]];
+    p_cm3_n = &mem[starkInfo.mapOffsets.section[eSection::cm3_n]];
+    cm4_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm4_2ns]];
+    p_q_2ns = &mem[starkInfo.mapOffsets.section[eSection::q_2ns]];
+    p_f_2ns = &mem[starkInfo.mapOffsets.section[eSection::f_2ns]];
+
 }
 
 StarkRecursiveF::~StarkRecursiveF()
@@ -121,9 +136,11 @@ StarkRecursiveF::~StarkRecursiveF()
     {
         free(pConstTreeAddress);
     }
+
+    free(pBuffer);
 }
 
-void StarkRecursiveF::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::Element publicInputs[8])
+void StarkRecursiveF::genProof( FRIProofC12 &proof, Goldilocks::Element publicInputs[8])
 {
     
     StarkRecursiveFSteps recurisveFsteps;
@@ -137,20 +154,8 @@ void StarkRecursiveF::genProof(void *pAddress, FRIProofC12 &proof, Goldilocks::E
     Polinomial challenges(NUM_CHALLENGES, FIELD_EXTENSION);
 
 
+
     CommitPolsStarks cmPols(pAddress, starkInfo.mapDeg.section[eSection::cm1_n]);
-    Goldilocks::Element *mem = (Goldilocks::Element *)pAddress;
-
-    Goldilocks::Element *p_cm1_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm1_2ns]];
-    Goldilocks::Element *p_cm1_n = &mem[starkInfo.mapOffsets.section[eSection::cm1_n]];
-    Goldilocks::Element *p_cm2_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm2_2ns]];
-    Goldilocks::Element *p_cm2_n = &mem[starkInfo.mapOffsets.section[eSection::cm2_n]];
-    Goldilocks::Element *p_cm3_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm3_2ns]];
-    Goldilocks::Element *p_cm3_n = &mem[starkInfo.mapOffsets.section[eSection::cm3_n]];
-    Goldilocks::Element *cm4_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm4_2ns]];
-    Goldilocks::Element *p_q_2ns = &mem[starkInfo.mapOffsets.section[eSection::q_2ns]];
-    Goldilocks::Element *p_f_2ns = &mem[starkInfo.mapOffsets.section[eSection::f_2ns]];
-
-    Goldilocks::Element *pBuffer = (Goldilocks::Element *)malloc(starkInfo.mapSectionsN.section[eSection::cm1_n] * NExtended * FIELD_EXTENSION * sizeof(Goldilocks::Element));
 
     RawFr::Element root0;
     RawFr::Element root1;

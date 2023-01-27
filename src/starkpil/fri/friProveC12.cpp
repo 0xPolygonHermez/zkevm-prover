@@ -247,6 +247,7 @@ void FRIProveC12::queryPol(FRIProofC12 &fproof, MerkleTreeBN128 **trees, uint64_
         trees[i]->getGroupProof(&buff[0], idx);
         MerkleProofC12 mkProof(trees[i]->source_width, MerkleTreeBN128::getMerkleProofLength(trees[i]->height), &buff[0]);
         vMkProof.push_back(mkProof);
+        free(buff);
     }
     fproof.proofs.fri.trees[treeIdx].polQueries.push_back(vMkProof);
 
@@ -263,6 +264,6 @@ void FRIProveC12::queryPol(FRIProofC12 &fproof, MerkleTreeBN128 *tree, uint64_t 
     MerkleProofC12 mkProof(tree->source_width, MerkleTreeBN128::getMerkleProofLength(tree->height), &buff[0]);
     vMkProof.push_back(mkProof);
     fproof.proofs.fri.trees[treeIdx].polQueries.push_back(vMkProof);
-
+    free(buff);
     return;
 }

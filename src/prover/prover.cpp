@@ -35,8 +35,6 @@ Prover::Prover(Goldilocks &fr,
                const Config &config) : fr(fr),
                                        poseidon(poseidon),
                                        executor(fr, config, poseidon),
-                                       starkRecursiveF(config),
-
                                        pCurrentRequest(NULL),
                                        config(config),
                                        lastComputedRequestEndTime(0)
@@ -106,10 +104,15 @@ Prover::Prover(Goldilocks &fr,
                 cout << "Prover::genBatchProof() successfully allocated " << polsSize << " bytes" << endl;
             }
 
+            StarkInfo _starkInfoRecursiveF(config, config.recursivefStarkInfo);
+            pAddressStarksRecursiveF = (void *)malloc(_starkInfoRecursiveF.mapTotalN * sizeof(Goldilocks::Element));
+
             starkZkevm = new Starks(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo}, pAddress);
             starksC12a = new Starks(config, {config.c12aConstPols, config.mapConstPolsFile, config.c12aConstantsTree, config.c12aStarkInfo}, pAddress);
             starksRecursive1 = new Starks(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree, config.recursive1StarkInfo}, pAddress);
             starksRecursive2 = new Starks(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree, config.recursive2StarkInfo}, pAddress);
+            starksRecursiveF = new StarkRecursiveF(config, pAddressStarksRecursiveF);
+
         }
     }
     catch (std::exception &e)
@@ -123,8 +126,21 @@ Prover::~Prover()
 {
     if (config.generateProof())
     {
-        // · delete zkey;
-        // · delete groth16Prover;
+        Groth16::Prover<AltBn128::Engine> *pGroth16 = groth16Prover.release();
+        BinFileUtils::BinFile *pZkey = zkey.release();
+        ZKeyUtils::Header *pZkeyHeader = zkeyHeader.release();
+
+        assert (groth16Prover.get() == nullptr);
+        assert (groth16Prover == nullptr);
+        assert (zkey.get() == nullptr);
+        assert (zkey == nullptr);
+        assert (zkeyHeader.get() == nullptr);
+        assert (zkeyHeader == nullptr);
+
+        delete pGroth16;
+        delete pZkey;
+        delete pZkeyHeader;
+
         mpz_clear(altBbn128r);
 
         uint64_t polsSize = starkZkevm->starkInfo.mapTotalN * sizeof(Goldilocks::Element) + starkZkevm->starkInfo.mapSectionsN.section[eSection::cm1_n] * (1 << starkZkevm->starkInfo.starkStruct.nBits) * FIELD_EXTENSION * sizeof(Goldilocks::Element);
@@ -138,6 +154,7 @@ Prover::~Prover()
         {
             free(pAddress);
         }
+        free(pAddressStarksRecursiveF);
 
         delete starkZkevm;
         delete starksC12a;
@@ -754,26 +771,24 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
 
     json zkinFinal = pProverRequest->finalProofInput;
 
-    Goldilocks::Element publics[starkRecursiveF.starkInfo.nPublics];
+    Goldilocks::Element publics[starksRecursiveF->starkInfo.nPublics];
 
-    for (uint64_t i = 0; i < starkRecursiveF.starkInfo.nPublics; i++)
+    for (uint64_t i = 0; i < starksRecursiveF->starkInfo.nPublics; i++)
     {
         publics[i] = Goldilocks::fromString(zkinFinal["publics"][i]);
     }
 
-    uint64_t polsSizeRecursiveF = starkRecursiveF.getTotalPolsSize();
-    void *pAddressRecursiveF = (void *)malloc(polsSizeRecursiveF);
-    CommitPolsStarks cmPolsRecursive2(pAddressRecursiveF, (1 << starkRecursiveF.starkInfo.starkStruct.nBits));
-    CircomRecursiveF::getCommitedPols(&cmPolsRecursive2, config.recursivefVerifier, config.recursivefExec, zkinFinal, (1 << starkRecursiveF.starkInfo.starkStruct.nBits));
+    CommitPolsStarks cmPolsRecursive2(pAddressStarksRecursiveF, (1 << starksRecursiveF->starkInfo.starkStruct.nBits));
+    CircomRecursiveF::getCommitedPols(&cmPolsRecursive2, config.recursivefVerifier, config.recursivefExec, zkinFinal, (1 << starksRecursiveF->starkInfo.starkStruct.nBits));
 
     //  ----------------------------------------------
     //  Generate Recursive Final proof
     //  ----------------------------------------------
 
     TimerStart(STARK_RECURSIVE_F_PROOF_BATCH_PROOF);
-    uint64_t polBitsRecursiveF = starkRecursiveF.starkInfo.starkStruct.steps[starkRecursiveF.starkInfo.starkStruct.steps.size() - 1].nBits;
-    FRIProofC12 fproofRecursiveF((1 << polBitsRecursiveF), FIELD_EXTENSION, starkRecursiveF.starkInfo.starkStruct.steps.size(), starkRecursiveF.starkInfo.evMap.size(), starkRecursiveF.starkInfo.nPublics);
-    starkRecursiveF.genProof(pAddressRecursiveF, fproofRecursiveF, publics);
+    uint64_t polBitsRecursiveF = starksRecursiveF->starkInfo.starkStruct.steps[starksRecursiveF->starkInfo.starkStruct.steps.size() - 1].nBits;
+    FRIProofC12 fproofRecursiveF((1 << polBitsRecursiveF), FIELD_EXTENSION, starksRecursiveF->starkInfo.starkStruct.steps.size(),starksRecursiveF->starkInfo.evMap.size(), starksRecursiveF->starkInfo.nPublics);
+    starksRecursiveF->genProof( fproofRecursiveF, publics);
 
     // Save the proof & zkinproof
     nlohmann::ordered_json jProofRecursiveF = fproofRecursiveF.proofs.proof2json();
@@ -842,7 +857,6 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     // Populate Proof with the correct data
     PublicInputsExtended publicInputsExtended;
     publicInputsExtended.publicInputs = pProverRequest->input.publicInputsExtended.publicInputs;
-    // publicInputsExtended.inputHash = NormalizeTo0xNFormat(fr.toString(cmPols.Main.FREE0[0], 16), 64);
     pProverRequest->proof.load(jsonProof, publicInputsExtended);
 
     pProverRequest->result = ZKR_SUCCESS;
@@ -851,7 +865,6 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     /* Cleanup */
     /***********/
     free(pWitnessFinal);
-    free(pAddressRecursiveF);
 
     TimerStopAndLog(STARK_RECURSIVE_F_PROOF_BATCH_PROOF);
     TimerStopAndLog(PROVER_FINAL_PROOF);

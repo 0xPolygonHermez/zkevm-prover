@@ -50,7 +50,9 @@ namespace CircomFinal
 
   Circom_CalcWit::~Circom_CalcWit()
   {
-    // ...
+    delete[] inputSignalAssigned;
+    delete[] signalValues;
+    delete[] componentMemory;
   }
 
   uint Circom_CalcWit::getInputSignalHashPosition(u64 h)
