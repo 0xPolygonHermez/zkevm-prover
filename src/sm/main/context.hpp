@@ -40,6 +40,8 @@ class LastSWrite
 public:
     Goldilocks &fr;
     uint64_t step;
+    Goldilocks::Element Kin0[12];
+    Goldilocks::Element Kin1[12];
     Goldilocks::Element key[4];
     Goldilocks::Element keyI[4];
     Goldilocks::Element newRoot[4];
@@ -47,18 +49,26 @@ public:
     void reset (void)
     {
         step = 0;
-        key[0] = fr.zero();
-        key[1] = fr.zero();
-        key[2] = fr.zero();
-        key[3] = fr.zero();
-        keyI[0] = fr.zero();
-        keyI[1] = fr.zero();
-        keyI[2] = fr.zero();
-        keyI[3] = fr.zero();
-        newRoot[0] = fr.zero();
-        newRoot[1] = fr.zero();
-        newRoot[2] = fr.zero();
-        newRoot[3] = fr.zero();
+        for (uint64_t i=0; i<12; i++)
+        {
+            Kin0[i] = fr.zero();
+        }
+        for (uint64_t i=0; i<12; i++)
+        {
+            Kin1[i] = fr.zero();
+        }
+        for (uint64_t i=0; i<4; i++)
+        {
+            key[i] = fr.zero();
+        }
+        for (uint64_t i=0; i<4; i++)
+        {
+            keyI[i] = fr.zero();
+        }
+        for (uint64_t i=0; i<4; i++)
+        {
+            newRoot[i] = fr.zero();
+        }
         res.mode = "";
     }
     LastSWrite(Goldilocks &fr) : fr(fr) { reset(); }
