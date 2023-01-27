@@ -760,24 +760,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_TIME_STATISTICS
                     gettimeofday(&t, NULL);
 #endif
-                    // Prepare PoseidonG required data
-                    array<Goldilocks::Element,17> pg;
-                    if (!bProcessBatch) for (uint64_t j=0; j<12; j++) pg[j] = Kin0[j];
-
                     // Call poseidon and get the hash key
                     Goldilocks::Element Kin0Hash[4];
                     poseidon.hash(Kin0Hash, Kin0);
-
-                    // Complete PoseidonG required data
-                    if (!bProcessBatch)
-                    {
-                        pg[12] = Kin0Hash[0];
-                        pg[13] = Kin0Hash[1];
-                        pg[14] = Kin0Hash[2];
-                        pg[15] = Kin0Hash[3];
-                        pg[16] = fr.fromU64(POSEIDONG_PERMUTATION1_ID);
-                        required.PoseidonG.push_back(pg);
-                    }
 
                     // Reinject the first resulting hash as the capacity for the next poseidon hash
                     Kin1[8] = Kin0Hash[0];
@@ -785,23 +770,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     Kin1[10] = Kin0Hash[2];
                     Kin1[11] = Kin0Hash[3];
 
-                    // Prepare PoseidonG required data
-                    if (!bProcessBatch) for (uint64_t j=0; j<12; j++) pg[j] = Kin1[j];
-
                     // Call poseidon hash
                     Goldilocks::Element Kin1Hash[4];
                     poseidon.hash(Kin1Hash, Kin1);
-
-                    // Complete PoseidonG required data
-                    if (!bProcessBatch)
-                    {
-                        pg[12] = Kin1Hash[0];
-                        pg[13] = Kin1Hash[1];
-                        pg[14] = Kin1Hash[2];
-                        pg[15] = Kin1Hash[3];
-                        pg[16] = fr.fromU64(POSEIDONG_PERMUTATION2_ID);
-                        required.PoseidonG.push_back(pg);
-                    }
 
                     Goldilocks::Element key[4];
                     key[0] = Kin1Hash[0];
@@ -884,58 +855,40 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_TIME_STATISTICS
                     gettimeofday(&t, NULL);
 #endif
-
-                    // Prepare PoseidonG required data
-                    array<Goldilocks::Element,17> pg;
-                    if (!bProcessBatch) for (uint64_t j=0; j<12; j++) pg[j] = Kin0[j];
-
                     // Call poseidon and get the hash key
                     Goldilocks::Element Kin0Hash[4];
                     poseidon.hash(Kin0Hash, Kin0);
-
-                    // Complete PoseidonG required data
-                    if (!bProcessBatch)
-                    {
-                        pg[12] = Kin0Hash[0];
-                        pg[13] = Kin0Hash[1];
-                        pg[14] = Kin0Hash[2];
-                        pg[15] = Kin0Hash[3];
-                        pg[16] = fr.fromU64(POSEIDONG_PERMUTATION1_ID);
-                        required.PoseidonG.push_back(pg);
-                    }
 
                     Kin1[8] = Kin0Hash[0];
                     Kin1[9] = Kin0Hash[1];
                     Kin1[10] = Kin0Hash[2];
                     Kin1[11] = Kin0Hash[3];
 
-                    ctx.lastSWrite.keyI[0] = Kin0Hash[0];
-                    ctx.lastSWrite.keyI[1] = Kin0Hash[1];
-                    ctx.lastSWrite.keyI[2] = Kin0Hash[2];
-                    ctx.lastSWrite.keyI[3] = Kin0Hash[3];
-
-                    // Prepare PoseidonG required data
-                    if (!bProcessBatch) for (uint64_t j=0; j<12; j++) pg[j] = Kin1[j];
-
                     // Call poseidon hash
                     Goldilocks::Element Kin1Hash[4];
                     poseidon.hash(Kin1Hash, Kin1);
-
-                    // Complete PoseidonG required data
+                    
+                    // Store a copy of the data in ctx.lastSWrite
                     if (!bProcessBatch)
                     {
-                        pg[12] = Kin1Hash[0];
-                        pg[13] = Kin1Hash[1];
-                        pg[14] = Kin1Hash[2];
-                        pg[15] = Kin1Hash[3];
-                        pg[16] = fr.fromU64(POSEIDONG_PERMUTATION2_ID);
-                        required.PoseidonG.push_back(pg);
+                        for (uint64_t j=0; j<12; j++)
+                        {
+                            ctx.lastSWrite.Kin0[j] = Kin0[j];
+                        }
+                        for (uint64_t j=0; j<12; j++)
+                        {
+                            ctx.lastSWrite.Kin1[j] = Kin1[j];
+                        }
+                    }
+                    for (uint64_t j=0; j<4; j++)
+                    {
+                        ctx.lastSWrite.keyI[j] = Kin0Hash[j];
+                    }
+                    for (uint64_t j=0; j<4; j++)
+                    {
+                        ctx.lastSWrite.key[j] = Kin1Hash[j];
                     }
 
-                    ctx.lastSWrite.key[0] = Kin1Hash[0];
-                    ctx.lastSWrite.key[1] = Kin1Hash[1];
-                    ctx.lastSWrite.key[2] = Kin1Hash[2];
-                    ctx.lastSWrite.key[3] = Kin1Hash[3];
 #ifdef LOG_TIME_STATISTICS
                     mainMetrics.add("Poseidon", TimeDiff(t));
 #endif
@@ -1565,6 +1518,37 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             Goldilocks::Element Kin1Hash[4];
             poseidon.hash(Kin1Hash, Kin1);
 
+            // Store PoseidonG required data
+            if (!bProcessBatch)
+            {
+                // Declare PoseidonG required data
+                array<Goldilocks::Element,17> pg;
+                
+                // Store PoseidonG required data
+                for (uint64_t j=0; j<12; j++)
+                {
+                    pg[j] = Kin0[j];
+                }
+                for (uint64_t j=0; j<4; j++)
+                {
+                    pg[12+j] = Kin0Hash[j];
+                }
+                pg[16] = fr.fromU64(POSEIDONG_PERMUTATION1_ID);
+                required.PoseidonG.push_back(pg);
+
+                // Store PoseidonG required data
+                for (uint64_t j=0; j<12; j++)
+                {
+                    pg[j] = Kin1[j];
+                }
+                for (uint64_t j=0; j<4; j++)
+                {
+                    pg[12+j] = Kin1Hash[j];
+                }
+                pg[16] = fr.fromU64(POSEIDONG_PERMUTATION2_ID);
+                required.PoseidonG.push_back(pg);
+            }
+
             Goldilocks::Element key[4];
             key[0] = Kin1Hash[0];
             key[1] = Kin1Hash[1];
@@ -1668,11 +1652,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 Goldilocks::Element Kin0Hash[4];
                 poseidon.hash(Kin0Hash, Kin0);
 
-                ctx.lastSWrite.keyI[0] = Kin0Hash[0];
-                ctx.lastSWrite.keyI[1] = Kin0Hash[1];
-                ctx.lastSWrite.keyI[2] = Kin0Hash[2];
-                ctx.lastSWrite.keyI[3] = Kin0Hash[3];
-
                 Kin1[8] = Kin0Hash[0];
                 Kin1[9] = Kin0Hash[1];
                 Kin1[10] = Kin0Hash[2];
@@ -1680,11 +1659,27 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                 Goldilocks::Element Kin1Hash[4];
                 poseidon.hash(Kin1Hash, Kin1);
-
-                ctx.lastSWrite.key[0] = Kin1Hash[0];
-                ctx.lastSWrite.key[1] = Kin1Hash[1];
-                ctx.lastSWrite.key[2] = Kin1Hash[2];
-                ctx.lastSWrite.key[3] = Kin1Hash[3];
+                    
+                // Store a copy of the data in ctx.lastSWrite
+                if (!bProcessBatch)
+                {
+                    for (uint64_t j=0; j<12; j++)
+                    {
+                        ctx.lastSWrite.Kin0[j] = Kin0[j];
+                    }
+                    for (uint64_t j=0; j<12; j++)
+                    {
+                        ctx.lastSWrite.Kin1[j] = Kin1[j];
+                    }
+                }
+                for (uint64_t j=0; j<4; j++)
+                {
+                    ctx.lastSWrite.keyI[j] = Kin0Hash[j];
+                }
+                for (uint64_t j=0; j<4; j++)
+                {
+                    ctx.lastSWrite.key[j] = Kin1Hash[j];
+                }
 
 #ifdef LOG_TIME_STATISTICS
                 mainMetrics.add("Poseidon", TimeDiff(t));
@@ -1710,6 +1705,37 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 mainMetrics.add("SMT Set", TimeDiff(t));
 #endif
                 ctx.lastSWrite.step = i;
+            }
+
+            // Store PoseidonG required data
+            if (!bProcessBatch)
+            {
+                // Declare PoseidonG required data
+                array<Goldilocks::Element,17> pg;
+
+                // Store PoseidonG required data
+                for (uint64_t j=0; j<12; j++)
+                {
+                    pg[j] = ctx.lastSWrite.Kin0[j];
+                }
+                for (uint64_t j=0; j<4; j++)
+                {
+                    pg[12+j] = ctx.lastSWrite.keyI[j];
+                }
+                pg[16] = fr.fromU64(POSEIDONG_PERMUTATION1_ID);
+                required.PoseidonG.push_back(pg);
+
+                // Store PoseidonG required data
+                for (uint64_t j=0; j<12; j++)
+                {
+                    pg[j] = ctx.lastSWrite.Kin1[j];
+                }
+                for (uint64_t j=0; j<4; j++)
+                {
+                    pg[12+j] = ctx.lastSWrite.key[j];
+                }
+                pg[16] = fr.fromU64(POSEIDONG_PERMUTATION2_ID);
+                required.PoseidonG.push_back(pg);
             }
 
             if (!bProcessBatch)

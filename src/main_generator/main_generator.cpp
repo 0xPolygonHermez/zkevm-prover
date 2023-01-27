@@ -925,24 +925,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "#ifdef LOG_TIME_STATISTICS\n";
                     code += "    gettimeofday(&t, NULL);\n";
                     code += "#endif\n";
-                    if (!bFastMode)
-                    {
-                        code += "    // Prepare PoseidonG required data\n";
-                        code += "    for (uint64_t j=0; j<12; j++) pg[j] = Kin0[j];\n";
-                    }
+
                     code += "    // Call poseidon and get the hash key\n";
                     code += "    mainExecutor.poseidon.hash(Kin0Hash, Kin0);\n";
-
-                    if (!bFastMode)
-                    {
-                        code += "    // Complete PoseidonG required data\n";
-                        code += "    pg[12] = Kin0Hash[0];\n";
-                        code += "    pg[13] = Kin0Hash[1];\n";
-                        code += "    pg[14] = Kin0Hash[2];\n";
-                        code += "    pg[15] = Kin0Hash[3];\n";
-                        code += "    pg[16] = fr.fromU64(POSEIDONG_PERMUTATION1_ID);\n";
-                        code += "    required.PoseidonG.push_back(pg);\n";
-                    }
 
                     code += "    // Reinject the first resulting hash as the capacity for the next poseidon hash\n";
                     code += "    Kin1[8] = Kin0Hash[0];\n";
@@ -950,25 +935,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    Kin1[10] = Kin0Hash[2];\n";
                     code += "    Kin1[11] = Kin0Hash[3];\n";
 
-                    if (!bFastMode)
-                    {
-                        code += "    // Prepare PoseidonG required data\n";
-                        code += "    for (uint64_t j=0; j<12; j++) pg[j] = Kin1[j];\n";
-                    }
-
                     code += "    // Call poseidon hash\n";
                     code += "    mainExecutor.poseidon.hash(Kin1Hash, Kin1);\n";
-
-                    if (!bFastMode)
-                    {
-                        code += "    // Complete PoseidonG required data\n";
-                        code += "    pg[12] = Kin1Hash[0];\n";
-                        code += "    pg[13] = Kin1Hash[1];\n";
-                        code += "    pg[14] = Kin1Hash[2];\n";
-                        code += "    pg[15] = Kin1Hash[3];\n";
-                        code += "    pg[16] = fr.fromU64(POSEIDONG_PERMUTATION2_ID);\n";
-                        code += "    required.PoseidonG.push_back(pg);\n";
-                    }
 
                     code += "    key[0] = Kin1Hash[0];\n";
                     code += "    key[1] = Kin1Hash[1];\n";
@@ -1039,25 +1007,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    gettimeofday(&t, NULL);\n";
                     code += "#endif\n";
 
-                    if (!bFastMode)
-                    {
-                        code += "    // Prepare PoseidonG required data\n";
-                        code += "    for (uint64_t j=0; j<12; j++) pg[j] = Kin0[j];\n";
-                    }
-
                     code += "    // Call poseidon and get the hash key\n";
                     code += "    mainExecutor.poseidon.hash(Kin0Hash, Kin0);\n";
-
-                    if (!bFastMode)
-                    {
-                        code += "    // Complete PoseidonG required data\n";
-                        code += "    pg[12] = Kin0Hash[0];\n";
-                        code += "    pg[13] = Kin0Hash[1];\n";
-                        code += "    pg[14] = Kin0Hash[2];\n";
-                        code += "    pg[15] = Kin0Hash[3];\n";
-                        code += "    pg[16] = fr.fromU64(POSEIDONG_PERMUTATION1_ID);\n";
-                        code += "    required.PoseidonG.push_back(pg);\n";
-                    }
 
                     code += "    Kin1[8] = Kin0Hash[0];\n";
                     code += "    Kin1[9] = Kin0Hash[1];\n";
@@ -1069,25 +1020,21 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    ctx.lastSWrite.keyI[2] = Kin0Hash[2];\n";
                     code += "    ctx.lastSWrite.keyI[3] = Kin0Hash[3];\n";
 
-                    if (!bFastMode)
-                    {
-                        code += "    // Prepare PoseidonG required data\n";
-                        code += "    for (uint64_t j=0; j<12; j++) pg[j] = Kin1[j];\n";
-                    }
-
                     code += "    // Call poseidon hash\n";
                     code += "    mainExecutor.poseidon.hash(Kin1Hash, Kin1);\n";
 
+                    code += "    // Store a copy of the data in ctx.lastSWrite\n";
                     if (!bFastMode)
                     {
-                        code += "    // Complete PoseidonG required data\n";
-                        code += "    pg[12] = Kin1Hash[0];\n";
-                        code += "    pg[13] = Kin1Hash[1];\n";
-                        code += "    pg[14] = Kin1Hash[2];\n";
-                        code += "    pg[15] = Kin1Hash[3];\n";
-                        code += "    pg[16] = fr.fromU64(POSEIDONG_PERMUTATION2_ID);\n";
-                        code += "    required.PoseidonG.push_back(pg);\n";
+                        code += "    for (uint64_t j=0; j<12; j++)\n";
+                        code += "        ctx.lastSWrite.Kin0[j] = Kin0[j];\n";
+                        code += "    for (uint64_t j=0; j<12; j++)\n";
+                        code += "        ctx.lastSWrite.Kin1[j] = Kin1[j];\n";
                     }
+                    code += "    for (uint64_t j=0; j<4; j++)\n";
+                    code += "        ctx.lastSWrite.keyI[j] = Kin0Hash[j];\n";
+                    code += "    for (uint64_t j=0; j<4; j++)\n";
+                    code += "        ctx.lastSWrite.key[j] = Kin1Hash[j];\n";
 
                     code += "    ctx.lastSWrite.key[0] = Kin1Hash[0];\n";
                     code += "    ctx.lastSWrite.key[1] = Kin1Hash[1];\n";
@@ -1851,6 +1798,26 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
             code += "    mainExecutor.poseidon.hash(Kin1Hash, Kin1);\n";
 
+            // Store PoseidonG required data
+            if (!bFastMode)
+            {                
+                code += "    // Store PoseidonG required data\n";
+                code += "    for (uint64_t j=0; j<12; j++)\n";
+                code += "        pg[j] = Kin0[j];\n";
+                code += "    for (uint64_t j=0; j<4; j++)\n";
+                code += "        pg[12+j] = Kin0Hash[j];\n";
+                code += "    pg[16] = fr.fromU64(POSEIDONG_PERMUTATION1_ID);\n";
+                code += "    required.PoseidonG.push_back(pg);\n";
+
+                code += "    // Store PoseidonG required data\n";
+                code += "    for (uint64_t j=0; j<12; j++)\n";
+                code += "        pg[j] = Kin1[j];\n";
+                code += "    for (uint64_t j=0; j<4; j++)\n";
+                code += "        pg[12+j] = Kin1Hash[j];\n";
+                code += "    pg[16] = fr.fromU64(POSEIDONG_PERMUTATION2_ID);\n";
+                code += "    required.PoseidonG.push_back(pg);\n";
+            }
+
             code += "    key[0] = Kin1Hash[0];\n";
             code += "    key[1] = Kin1Hash[1];\n";
             code += "    key[2] = Kin1Hash[2];\n";
@@ -1966,6 +1933,19 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
             code += "        mainExecutor.poseidon.hash(Kin1Hash, Kin1);\n";
 
+            code += "        // Store a copy of the data in ctx.lastSWrite\n";
+            if (!bFastMode)
+            {
+                code += "        for (uint64_t j=0; j<12; j++)\n";
+                code += "            ctx.lastSWrite.Kin0[j] = Kin0[j];\n";
+                code += "        for (uint64_t j=0; j<12; j++)\n";
+                code += "            ctx.lastSWrite.Kin1[j] = Kin1[j];\n";
+            }
+            code += "        for (uint64_t j=0; j<4; j++)\n";
+            code += "            ctx.lastSWrite.keyI[j] = Kin0Hash[j];\n";
+            code += "        for (uint64_t j=0; j<4; j++)\n";
+            code += "            ctx.lastSWrite.key[j] = Kin1Hash[j];\n";
+
             code += "        ctx.lastSWrite.key[0] = Kin1Hash[0];\n";
             code += "        ctx.lastSWrite.key[1] = Kin1Hash[1];\n";
             code += "        ctx.lastSWrite.key[2] = Kin1Hash[2];\n";
@@ -1997,6 +1977,25 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
             code += "        ctx.lastSWrite.step = i;\n";
             code += "    }\n";
+
+            // Store PoseidonG required data
+            if (!bFastMode)
+            {
+                code += "    // Store PoseidonG required data\n";
+                code += "    for (uint64_t j=0; j<12; j++)\n";
+                code += "        pg[j] = ctx.lastSWrite.Kin0[j];\n";
+                code += "    for (uint64_t j=0; j<4; j++)\n";
+                code += "        pg[12+j] = ctx.lastSWrite.keyI[j];\n";
+                code += "    pg[16] = fr.fromU64(POSEIDONG_PERMUTATION1_ID);\n";
+                code += "    required.PoseidonG.push_back(pg);\n";
+                code += "    // Store PoseidonG required data\n";
+                code += "    for (uint64_t j=0; j<12; j++)\n";
+                code += "        pg[j] = ctx.lastSWrite.Kin1[j];\n";
+                code += "    for (uint64_t j=0; j<4; j++)\n";
+                code += "       pg[12+j] = ctx.lastSWrite.key[j];\n";
+                code += "    pg[16] = fr.fromU64(POSEIDONG_PERMUTATION2_ID);\n";
+                code += "    required.PoseidonG.push_back(pg);\n";
+            }
 
             if (!bFastMode)
             {
