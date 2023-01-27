@@ -126,8 +126,21 @@ Prover::~Prover()
 {
     if (config.generateProof())
     {
-        // · delete zkey;
-        // · delete groth16Prover;
+        Groth16::Prover<AltBn128::Engine> *pGroth16 = groth16Prover.release();
+        BinFileUtils::BinFile *pZkey = zkey.release();
+        ZKeyUtils::Header *pZkeyHeader = zkeyHeader.release();
+
+        assert (groth16Prover.get() == nullptr);
+        assert (groth16Prover == nullptr);
+        assert (zkey.get() == nullptr);
+        assert (zkey == nullptr);
+        assert (zkeyHeader.get() == nullptr);
+        assert (zkeyHeader == nullptr);
+
+        delete pGroth16;
+        delete pZkey;
+        delete pZkeyHeader;
+
         mpz_clear(altBbn128r);
 
         uint64_t polsSize = starkZkevm->starkInfo.mapTotalN * sizeof(Goldilocks::Element) + starkZkevm->starkInfo.mapSectionsN.section[eSection::cm1_n] * (1 << starkZkevm->starkInfo.starkStruct.nBits) * FIELD_EXTENSION * sizeof(Goldilocks::Element);
@@ -836,7 +849,6 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     // Populate Proof with the correct data
     PublicInputsExtended publicInputsExtended;
     publicInputsExtended.publicInputs = pProverRequest->input.publicInputsExtended.publicInputs;
-    // publicInputsExtended.inputHash = NormalizeTo0xNFormat(fr.toString(cmPols.Main.FREE0[0], 16), 64);
     pProverRequest->proof.load(jsonProof, publicInputsExtended);
 
     pProverRequest->result = ZKR_SUCCESS;

@@ -137,7 +137,7 @@ StarkRecursiveF::~StarkRecursiveF()
         free(pConstTreeAddress);
     }
 
-    delete pBuffer;
+    free(pBuffer);
 }
 
 void StarkRecursiveF::genProof( FRIProofC12 &proof, Goldilocks::Element publicInputs[8])
