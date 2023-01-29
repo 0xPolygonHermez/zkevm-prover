@@ -361,7 +361,7 @@ bool fileExists (const string &fileName)
 
 void ensureDirectoryExists (const string &fileName)
 {
-    string command = "[ -d " + fileName + " ] && echo \"Directory already exists\" || mkdir -p " + fileName;
+    string command = "[ -d " + fileName + " ] || mkdir -p " + fileName;
     int iResult = system(command.c_str());
     if (iResult != 0)
     {
