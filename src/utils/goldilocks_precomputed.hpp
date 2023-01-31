@@ -48,24 +48,7 @@ public:
     void unlock(void) { pthread_mutex_unlock(&mutex); };
 #endif
 
-    void init (void)
-    {
-        zkassert(!bInitialized);
-
-        invPos[0] = fr.zero();
-        for (uint64_t i=1; i<GOLDILOCKS_PRECOMPUTED_MAX; i++)
-        {
-            invPos[i] = fr.inv(fr.fromU64(i));
-        }
-
-        invNeg[0] = fr.zero();
-        for (uint64_t i=1; i<GOLDILOCKS_PRECOMPUTED_MAX; i++)
-        {
-            invNeg[i] = fr.inv(fr.fromU64(GOLDILOCKS_PRIME - i));
-        }
-
-        bInitialized = true;
-    }
+    void init (void);
 
     inline Goldilocks::Element inv (const Goldilocks::Element &fe)
     {
