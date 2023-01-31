@@ -40,7 +40,7 @@ bool AggregatorClient::GetStatus (::aggregator::v1::GetStatusResponse &getStatus
     // If computing, set the current request data
     if ((prover.pCurrentRequest != NULL) || (prover.pendingRequests.size() > 0))
     {
-        getStatusResponse.set_status(aggregator::v1::GetStatusResponse_Status_COMPUTING);
+        getStatusResponse.set_status(aggregator::v1::GetStatusResponse_Status_STATUS_COMPUTING);
         if (prover.pCurrentRequest != NULL)
         {
             getStatusResponse.set_current_computing_request_id(prover.pCurrentRequest->uuid);
@@ -54,7 +54,7 @@ bool AggregatorClient::GetStatus (::aggregator::v1::GetStatusResponse &getStatus
     }
     else
     {
-        getStatusResponse.set_status(aggregator::v1::GetStatusResponse_Status_IDLE);
+        getStatusResponse.set_status(aggregator::v1::GetStatusResponse_Status_STATUS_IDLE);
         getStatusResponse.set_current_computing_request_id("");
         getStatusResponse.set_current_computing_start_time(0);
     }
@@ -116,7 +116,7 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
     if (auxString.size() > 64)
     {
         cerr << "Error: AggregatorClient::GenProof() got oldStateRoot too long, size=" << auxString.size() << endl;
-        genBatchProofResponse.set_result(aggregator::v1::Result::ERROR);
+        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
     pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot.set_str(auxString, 16);
@@ -125,7 +125,7 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
     if (auxString.size() > 64)
     {
         cerr << "Error: AggregatorClient::GenProof() got oldAccInputHash too long, size=" << auxString.size() << endl;
-        genBatchProofResponse.set_result(aggregator::v1::Result::ERROR);
+        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
     pProverRequest->input.publicInputsExtended.publicInputs.oldAccInputHash.set_str(auxString, 16);
@@ -136,7 +136,7 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
     if (pProverRequest->input.publicInputsExtended.publicInputs.chainID == 0)
     {
         cerr << "Error: AggregatorClient::GenProof() got chainID = 0" << endl;
-        genBatchProofResponse.set_result(aggregator::v1::Result::ERROR);
+        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
 
@@ -144,14 +144,14 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
     if (pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data.size() > MAX_BATCH_L2_DATA_SIZE)
     {
         cerr << "Error: AggregatorClient::GenProof() found batchL2Data.size()=" << pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data.size() << " > MAX_BATCH_L2_DATA_SIZE=" << MAX_BATCH_L2_DATA_SIZE << endl;
-        genBatchProofResponse.set_result(aggregator::v1::Result::ERROR);
+        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
 
     if (genBatchProofRequest.input().public_inputs().global_exit_root().size() > 32)
     {
         cerr << "Error: AggregatorClient::GenProof() got globalExitRoot too long, size=" << genBatchProofRequest.input().public_inputs().global_exit_root().size() << endl;
-        genBatchProofResponse.set_result(aggregator::v1::Result::ERROR);
+        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
     ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.globalExitRoot, genBatchProofRequest.input().public_inputs().global_exit_root());
@@ -162,7 +162,7 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
     if (auxString.size() > 40)
     {
         cerr << "Error: AggregatorClient::GenProof() got sequencerAddr too long, size=" << auxString.size() << endl;
-        genBatchProofResponse.set_result(aggregator::v1::Result::ERROR);
+        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
     pProverRequest->input.publicInputsExtended.publicInputs.sequencerAddr.set_str(auxString, 16);
@@ -171,7 +171,7 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
     if (auxString.size() > 40)
     {
         cerr << "Error: AggregatorClient::GenProof() got aggregator address too long, size=" << auxString.size() << endl;
-        genBatchProofResponse.set_result(aggregator::v1::Result::ERROR);
+        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
     pProverRequest->input.publicInputsExtended.publicInputs.aggregatorAddress.set_str(auxString, 16);
@@ -185,7 +185,7 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
         if (it->first.size() > (64))
         {
             cerr << "Error: AggregatorClient::GenBatchProof() got db key too long, size=" << it->first.size() << endl;
-            genBatchProofResponse.set_result(aggregator::v1::Result::ERROR);
+            genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
             return false;
         }
         vector<Goldilocks::Element> dbValue;
@@ -193,7 +193,7 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
         if (concatenatedValues.size()%16!=0)
         {
             cerr << "Error: AggregatorClient::GenBatchProof() found invalid db value size: " << concatenatedValues.size() << endl;
-            genBatchProofResponse.set_result(aggregator::v1::Result::ERROR);
+            genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
             return false;
         }
         for (uint64_t i=0; i<concatenatedValues.size(); i+=16)
@@ -229,7 +229,7 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
     string uuid = prover.submitRequest(pProverRequest);
 
     // Build the response as Ok, returning the UUID assigned by the prover to this request
-    genBatchProofResponse.set_result(aggregator::v1::Result::OK);
+    genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_OK);
     genBatchProofResponse.set_id(uuid.c_str());
 
 #ifdef LOG_SERVICE
@@ -261,7 +261,7 @@ bool AggregatorClient::GenAggregatedProof (const aggregator::v1::GenAggregatedPr
     string uuid = prover.submitRequest(pProverRequest);
 
     // Build the response as Ok, returning the UUID assigned by the prover to this request
-    genAggregatedProofResponse.set_result(aggregator::v1::Result::OK);
+    genAggregatedProofResponse.set_result(aggregator::v1::Result::RESULT_OK);
     genAggregatedProofResponse.set_id(uuid.c_str());
 
 #ifdef LOG_SERVICE
@@ -293,7 +293,7 @@ bool AggregatorClient::GenFinalProof (const aggregator::v1::GenFinalProofRequest
     if (auxString.size() > 40)
     {
         cerr << "Error: AggregatorClient::GenFinalProof() got aggregator address too long, size=" << auxString.size() << endl;
-        genFinalProofResponse.set_result(aggregator::v1::Result::ERROR);
+        genFinalProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
     pProverRequest->input.publicInputsExtended.publicInputs.aggregatorAddress.set_str(auxString, 16);
@@ -302,7 +302,7 @@ bool AggregatorClient::GenFinalProof (const aggregator::v1::GenFinalProofRequest
     string uuid = prover.submitRequest(pProverRequest);
 
     // Build the response as Ok, returning the UUID assigned by the prover to this request
-    genFinalProofResponse.set_result(aggregator::v1::Result::OK);
+    genFinalProofResponse.set_result(aggregator::v1::Result::RESULT_OK);
     genFinalProofResponse.set_id(uuid.c_str());
 
 #ifdef LOG_SERVICE
@@ -325,7 +325,7 @@ bool AggregatorClient::Cancel (const aggregator::v1::CancelRequest &cancelReques
     {
         prover.unlock();
         cerr << "Error: AggregatorClient::Cancel() unknown uuid: " << uuid << endl;
-        cancelResponse.set_result(aggregator::v1::Result::ERROR);
+        cancelResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
 
@@ -334,7 +334,7 @@ bool AggregatorClient::Cancel (const aggregator::v1::CancelRequest &cancelReques
     {
         prover.unlock();
         cerr << "Error: AggregatorClient::Cancel() already completed uuid: " << uuid << endl;
-        cancelResponse.set_result(aggregator::v1::Result::ERROR);
+        cancelResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
 
@@ -344,7 +344,7 @@ bool AggregatorClient::Cancel (const aggregator::v1::CancelRequest &cancelReques
     // Unlock the prover
     prover.unlock();
 
-    cancelResponse.set_result(aggregator::v1::Result::OK);
+    cancelResponse.set_result(aggregator::v1::Result::RESULT_OK);
 
 #ifdef LOG_SERVICE
     cout << "AggregatorClient::Cancel() returns: " << cancelResponse.DebugString() << endl;
@@ -370,7 +370,7 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
     if (it == prover.requestsMap.end())
     {
         cerr << "Error: AggregatorClient::GetProof() invalid uuid:" << uuid << endl;
-        getProofResponse.set_result(aggregator::v1::GetProofResponse_Result_ERROR);
+        getProofResponse.set_result(aggregator::v1::GetProofResponse_Result_RESULT_ERROR);
         getProofResponse.set_result_string("invalid UUID");
     }
     else
@@ -381,7 +381,7 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
         if (!pProverRequest->bCompleted)
         {
             //cerr << "Error: ZKProverServiceImpl::GetProof() not completed uuid=" << uuid << endl;
-            getProofResponse.set_result(aggregator::v1::GetProofResponse_Result_PENDING);
+            getProofResponse.set_result(aggregator::v1::GetProofResponse_Result_RESULT_PENDING);
             getProofResponse.set_result_string("pending");
         }
         // If request is completed, return the proof
@@ -391,12 +391,12 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
             getProofResponse.set_id(uuid);
             if (pProverRequest->result != ZKR_SUCCESS)
             {
-                getProofResponse.set_result(aggregator::v1::GetProofResponse_Result_COMPLETED_ERROR);
+                getProofResponse.set_result(aggregator::v1::GetProofResponse_Result_RESULT_COMPLETED_ERROR);
                 getProofResponse.set_result_string("completed_error");
             }
             else
             {
-                getProofResponse.set_result(aggregator::v1::GetProofResponse_Result_COMPLETED_OK);
+                getProofResponse.set_result(aggregator::v1::GetProofResponse_Result_RESULT_COMPLETED_OK);
                 getProofResponse.set_result_string("completed");
             }
 
@@ -653,7 +653,7 @@ void* aggregatorClientThread(void* arg)
                     cout << "aggregatorClientThread() sent: " << proverMessage.ShortDebugString() << endl;
                     break;
                 case aggregator::v1::AggregatorMessage::RequestCase::kGetProofRequest:
-                    if (proverMessage.get_proof_response().result() != aggregator::v1::GetProofResponse_Result_PENDING)
+                    if (proverMessage.get_proof_response().result() != aggregator::v1::GetProofResponse_Result_RESULT_PENDING)
                         cout << "aggregatorClientThread() getProof() response sent; result=" << proverMessage.get_proof_response().result_string() << endl;
                     break;
                 default:

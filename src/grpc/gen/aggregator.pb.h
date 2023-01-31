@@ -160,17 +160,17 @@ namespace aggregator {
 namespace v1 {
 
 enum GetStatusResponse_Status : int {
-  GetStatusResponse_Status_UNSPECIFIED = 0,
-  GetStatusResponse_Status_BOOTING = 1,
-  GetStatusResponse_Status_COMPUTING = 2,
-  GetStatusResponse_Status_IDLE = 3,
-  GetStatusResponse_Status_HALT = 4,
+  GetStatusResponse_Status_STATUS_UNSPECIFIED = 0,
+  GetStatusResponse_Status_STATUS_BOOTING = 1,
+  GetStatusResponse_Status_STATUS_COMPUTING = 2,
+  GetStatusResponse_Status_STATUS_IDLE = 3,
+  GetStatusResponse_Status_STATUS_HALT = 4,
   GetStatusResponse_Status_GetStatusResponse_Status_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   GetStatusResponse_Status_GetStatusResponse_Status_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool GetStatusResponse_Status_IsValid(int value);
-constexpr GetStatusResponse_Status GetStatusResponse_Status_Status_MIN = GetStatusResponse_Status_UNSPECIFIED;
-constexpr GetStatusResponse_Status GetStatusResponse_Status_Status_MAX = GetStatusResponse_Status_HALT;
+constexpr GetStatusResponse_Status GetStatusResponse_Status_Status_MIN = GetStatusResponse_Status_STATUS_UNSPECIFIED;
+constexpr GetStatusResponse_Status GetStatusResponse_Status_Status_MAX = GetStatusResponse_Status_STATUS_HALT;
 constexpr int GetStatusResponse_Status_Status_ARRAYSIZE = GetStatusResponse_Status_Status_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* GetStatusResponse_Status_descriptor();
@@ -188,19 +188,19 @@ inline bool GetStatusResponse_Status_Parse(
     GetStatusResponse_Status_descriptor(), name, value);
 }
 enum GetProofResponse_Result : int {
-  GetProofResponse_Result_UNSPECIFIED = 0,
-  GetProofResponse_Result_COMPLETED_OK = 1,
-  GetProofResponse_Result_ERROR = 2,
-  GetProofResponse_Result_COMPLETED_ERROR = 3,
-  GetProofResponse_Result_PENDING = 4,
-  GetProofResponse_Result_INTERNAL_ERROR = 5,
-  GetProofResponse_Result_CANCEL = 6,
+  GetProofResponse_Result_RESULT_UNSPECIFIED = 0,
+  GetProofResponse_Result_RESULT_COMPLETED_OK = 1,
+  GetProofResponse_Result_RESULT_ERROR = 2,
+  GetProofResponse_Result_RESULT_COMPLETED_ERROR = 3,
+  GetProofResponse_Result_RESULT_PENDING = 4,
+  GetProofResponse_Result_RESULT_INTERNAL_ERROR = 5,
+  GetProofResponse_Result_RESULT_CANCEL = 6,
   GetProofResponse_Result_GetProofResponse_Result_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   GetProofResponse_Result_GetProofResponse_Result_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool GetProofResponse_Result_IsValid(int value);
-constexpr GetProofResponse_Result GetProofResponse_Result_Result_MIN = GetProofResponse_Result_UNSPECIFIED;
-constexpr GetProofResponse_Result GetProofResponse_Result_Result_MAX = GetProofResponse_Result_CANCEL;
+constexpr GetProofResponse_Result GetProofResponse_Result_Result_MIN = GetProofResponse_Result_RESULT_UNSPECIFIED;
+constexpr GetProofResponse_Result GetProofResponse_Result_Result_MAX = GetProofResponse_Result_RESULT_CANCEL;
 constexpr int GetProofResponse_Result_Result_ARRAYSIZE = GetProofResponse_Result_Result_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* GetProofResponse_Result_descriptor();
@@ -218,16 +218,16 @@ inline bool GetProofResponse_Result_Parse(
     GetProofResponse_Result_descriptor(), name, value);
 }
 enum Result : int {
-  UNSPECIFIED = 0,
-  OK = 1,
-  ERROR = 2,
-  INTERNAL_ERROR = 3,
+  RESULT_UNSPECIFIED = 0,
+  RESULT_OK = 1,
+  RESULT_ERROR = 2,
+  RESULT_INTERNAL_ERROR = 3,
   Result_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   Result_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool Result_IsValid(int value);
-constexpr Result Result_MIN = UNSPECIFIED;
-constexpr Result Result_MAX = INTERNAL_ERROR;
+constexpr Result Result_MIN = RESULT_UNSPECIFIED;
+constexpr Result Result_MAX = RESULT_INTERNAL_ERROR;
 constexpr int Result_ARRAYSIZE = Result_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* Result_descriptor();
@@ -2055,16 +2055,16 @@ class GetStatusResponse PROTOBUF_FINAL :
   // nested types ----------------------------------------------------
 
   typedef GetStatusResponse_Status Status;
-  static constexpr Status UNSPECIFIED =
-    GetStatusResponse_Status_UNSPECIFIED;
-  static constexpr Status BOOTING =
-    GetStatusResponse_Status_BOOTING;
-  static constexpr Status COMPUTING =
-    GetStatusResponse_Status_COMPUTING;
-  static constexpr Status IDLE =
-    GetStatusResponse_Status_IDLE;
-  static constexpr Status HALT =
-    GetStatusResponse_Status_HALT;
+  static constexpr Status STATUS_UNSPECIFIED =
+    GetStatusResponse_Status_STATUS_UNSPECIFIED;
+  static constexpr Status STATUS_BOOTING =
+    GetStatusResponse_Status_STATUS_BOOTING;
+  static constexpr Status STATUS_COMPUTING =
+    GetStatusResponse_Status_STATUS_COMPUTING;
+  static constexpr Status STATUS_IDLE =
+    GetStatusResponse_Status_STATUS_IDLE;
+  static constexpr Status STATUS_HALT =
+    GetStatusResponse_Status_STATUS_HALT;
   static inline bool Status_IsValid(int value) {
     return GetStatusResponse_Status_IsValid(value);
   }
@@ -3106,20 +3106,20 @@ class GetProofResponse PROTOBUF_FINAL :
   // nested types ----------------------------------------------------
 
   typedef GetProofResponse_Result Result;
-  static constexpr Result UNSPECIFIED =
-    GetProofResponse_Result_UNSPECIFIED;
-  static constexpr Result COMPLETED_OK =
-    GetProofResponse_Result_COMPLETED_OK;
-  static constexpr Result ERROR =
-    GetProofResponse_Result_ERROR;
-  static constexpr Result COMPLETED_ERROR =
-    GetProofResponse_Result_COMPLETED_ERROR;
-  static constexpr Result PENDING =
-    GetProofResponse_Result_PENDING;
-  static constexpr Result INTERNAL_ERROR =
-    GetProofResponse_Result_INTERNAL_ERROR;
-  static constexpr Result CANCEL =
-    GetProofResponse_Result_CANCEL;
+  static constexpr Result RESULT_UNSPECIFIED =
+    GetProofResponse_Result_RESULT_UNSPECIFIED;
+  static constexpr Result RESULT_COMPLETED_OK =
+    GetProofResponse_Result_RESULT_COMPLETED_OK;
+  static constexpr Result RESULT_ERROR =
+    GetProofResponse_Result_RESULT_ERROR;
+  static constexpr Result RESULT_COMPLETED_ERROR =
+    GetProofResponse_Result_RESULT_COMPLETED_ERROR;
+  static constexpr Result RESULT_PENDING =
+    GetProofResponse_Result_RESULT_PENDING;
+  static constexpr Result RESULT_INTERNAL_ERROR =
+    GetProofResponse_Result_RESULT_INTERNAL_ERROR;
+  static constexpr Result RESULT_CANCEL =
+    GetProofResponse_Result_RESULT_CANCEL;
   static inline bool Result_IsValid(int value) {
     return GetProofResponse_Result_IsValid(value);
   }
@@ -3569,13 +3569,14 @@ class PublicInputs PROTOBUF_FINAL :
   enum : int {
     kOldStateRootFieldNumber = 1,
     kOldAccInputHashFieldNumber = 2,
-    kBatchL2DataFieldNumber = 5,
-    kGlobalExitRootFieldNumber = 6,
-    kSequencerAddrFieldNumber = 8,
-    kAggregatorAddrFieldNumber = 9,
+    kBatchL2DataFieldNumber = 6,
+    kGlobalExitRootFieldNumber = 7,
+    kSequencerAddrFieldNumber = 9,
+    kAggregatorAddrFieldNumber = 10,
     kOldBatchNumFieldNumber = 3,
     kChainIdFieldNumber = 4,
-    kEthTimestampFieldNumber = 7,
+    kForkIdFieldNumber = 5,
+    kEthTimestampFieldNumber = 8,
   };
   // bytes old_state_root = 1;
   void clear_old_state_root();
@@ -3627,7 +3628,7 @@ class PublicInputs PROTOBUF_FINAL :
   std::string* _internal_mutable_old_acc_input_hash();
   public:
 
-  // bytes batch_l2_data = 5;
+  // bytes batch_l2_data = 6;
   void clear_batch_l2_data();
   const std::string& batch_l2_data() const;
   void set_batch_l2_data(const std::string& value);
@@ -3652,7 +3653,7 @@ class PublicInputs PROTOBUF_FINAL :
   std::string* _internal_mutable_batch_l2_data();
   public:
 
-  // bytes global_exit_root = 6;
+  // bytes global_exit_root = 7;
   void clear_global_exit_root();
   const std::string& global_exit_root() const;
   void set_global_exit_root(const std::string& value);
@@ -3677,7 +3678,7 @@ class PublicInputs PROTOBUF_FINAL :
   std::string* _internal_mutable_global_exit_root();
   public:
 
-  // string sequencer_addr = 8;
+  // string sequencer_addr = 9;
   void clear_sequencer_addr();
   const std::string& sequencer_addr() const;
   void set_sequencer_addr(const std::string& value);
@@ -3702,7 +3703,7 @@ class PublicInputs PROTOBUF_FINAL :
   std::string* _internal_mutable_sequencer_addr();
   public:
 
-  // string aggregator_addr = 9;
+  // string aggregator_addr = 10;
   void clear_aggregator_addr();
   const std::string& aggregator_addr() const;
   void set_aggregator_addr(const std::string& value);
@@ -3745,7 +3746,16 @@ class PublicInputs PROTOBUF_FINAL :
   void _internal_set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // uint64 eth_timestamp = 7;
+  // uint64 fork_id = 5;
+  void clear_fork_id();
+  ::PROTOBUF_NAMESPACE_ID::uint64 fork_id() const;
+  void set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_fork_id() const;
+  void _internal_set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 eth_timestamp = 8;
   void clear_eth_timestamp();
   ::PROTOBUF_NAMESPACE_ID::uint64 eth_timestamp() const;
   void set_eth_timestamp(::PROTOBUF_NAMESPACE_ID::uint64 value);
@@ -3769,6 +3779,7 @@ class PublicInputs PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr aggregator_addr_;
   ::PROTOBUF_NAMESPACE_ID::uint64 old_batch_num_;
   ::PROTOBUF_NAMESPACE_ID::uint64 chain_id_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 fork_id_;
   ::PROTOBUF_NAMESPACE_ID::uint64 eth_timestamp_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_aggregator_2eproto;
@@ -8179,7 +8190,27 @@ inline void PublicInputs::set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   // @@protoc_insertion_point(field_set:aggregator.v1.PublicInputs.chain_id)
 }
 
-// bytes batch_l2_data = 5;
+// uint64 fork_id = 5;
+inline void PublicInputs::clear_fork_id() {
+  fork_id_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 PublicInputs::_internal_fork_id() const {
+  return fork_id_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 PublicInputs::fork_id() const {
+  // @@protoc_insertion_point(field_get:aggregator.v1.PublicInputs.fork_id)
+  return _internal_fork_id();
+}
+inline void PublicInputs::_internal_set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  fork_id_ = value;
+}
+inline void PublicInputs::set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_fork_id(value);
+  // @@protoc_insertion_point(field_set:aggregator.v1.PublicInputs.fork_id)
+}
+
+// bytes batch_l2_data = 6;
 inline void PublicInputs::clear_batch_l2_data() {
   batch_l2_data_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -8260,7 +8291,7 @@ inline void PublicInputs::unsafe_arena_set_allocated_batch_l2_data(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.PublicInputs.batch_l2_data)
 }
 
-// bytes global_exit_root = 6;
+// bytes global_exit_root = 7;
 inline void PublicInputs::clear_global_exit_root() {
   global_exit_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -8341,7 +8372,7 @@ inline void PublicInputs::unsafe_arena_set_allocated_global_exit_root(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.PublicInputs.global_exit_root)
 }
 
-// uint64 eth_timestamp = 7;
+// uint64 eth_timestamp = 8;
 inline void PublicInputs::clear_eth_timestamp() {
   eth_timestamp_ = PROTOBUF_ULONGLONG(0);
 }
@@ -8361,7 +8392,7 @@ inline void PublicInputs::set_eth_timestamp(::PROTOBUF_NAMESPACE_ID::uint64 valu
   // @@protoc_insertion_point(field_set:aggregator.v1.PublicInputs.eth_timestamp)
 }
 
-// string sequencer_addr = 8;
+// string sequencer_addr = 9;
 inline void PublicInputs::clear_sequencer_addr() {
   sequencer_addr_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -8442,7 +8473,7 @@ inline void PublicInputs::unsafe_arena_set_allocated_sequencer_addr(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.PublicInputs.sequencer_addr)
 }
 
-// string aggregator_addr = 9;
+// string aggregator_addr = 10;
 inline void PublicInputs::clear_aggregator_addr() {
   aggregator_addr_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
