@@ -140,6 +140,8 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
         return false;
     }
 
+    pProverRequest->input.publicInputsExtended.publicInputs.forkID = genBatchProofRequest.input().public_inputs().fork_id();
+
     pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data = genBatchProofRequest.input().public_inputs().batch_l2_data();
     if (pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data.size() > MAX_BATCH_L2_DATA_SIZE)
     {
@@ -440,8 +442,9 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
                     aggregator::v1::PublicInputs* pPublicInputs = new(aggregator::v1::PublicInputs);
                     pPublicInputs->set_old_state_root(scalar2ba(pProverRequest->proof.publicInputsExtended.publicInputs.oldStateRoot));
                     pPublicInputs->set_old_acc_input_hash(scalar2ba(pProverRequest->proof.publicInputsExtended.publicInputs.oldAccInputHash));
-                    pPublicInputs->set_old_batch_num(pProverRequest->proof.publicInputsExtended.publicInputs.chainID);
-                    pPublicInputs->set_chain_id(pProverRequest->proof.publicInputsExtended.publicInputs.timestamp);
+                    pPublicInputs->set_old_batch_num(pProverRequest->proof.publicInputsExtended.publicInputs.oldBatchNum);
+                    pPublicInputs->set_chain_id(pProverRequest->proof.publicInputsExtended.publicInputs.chainID);
+                    pPublicInputs->set_fork_id(pProverRequest->proof.publicInputsExtended.publicInputs.forkID);
                     pPublicInputs->set_batch_l2_data(pProverRequest->proof.publicInputsExtended.publicInputs.batchL2Data);
                     pPublicInputs->set_global_exit_root(scalar2ba(pProverRequest->proof.publicInputsExtended.publicInputs.globalExitRoot));
                     pPublicInputs->set_eth_timestamp(pProverRequest->proof.publicInputsExtended.publicInputs.timestamp);

@@ -137,6 +137,7 @@ using grpc::Status;
         pPublicInputs->set_old_acc_input_hash(scalar2ba(input.publicInputsExtended.publicInputs.oldAccInputHash));
         pPublicInputs->set_old_batch_num(input.publicInputsExtended.publicInputs.oldBatchNum);
         pPublicInputs->set_chain_id(input.publicInputsExtended.publicInputs.chainID);
+        pPublicInputs->set_fork_id(input.publicInputsExtended.publicInputs.forkID);
         pPublicInputs->set_batch_l2_data(input.publicInputsExtended.publicInputs.batchL2Data);
         pPublicInputs->set_global_exit_root(scalar2ba(input.publicInputsExtended.publicInputs.globalExitRoot));
         pPublicInputs->set_eth_timestamp(input.publicInputsExtended.publicInputs.timestamp);

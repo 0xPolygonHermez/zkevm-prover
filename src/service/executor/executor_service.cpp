@@ -64,6 +64,9 @@ using grpc::Status;
         return Status::CANCELLED;
     }
 
+    // Get fork ID
+    proverRequest.input.publicInputsExtended.publicInputs.forkID = request->fork_id();
+
     // Get batchL2Data
     proverRequest.input.publicInputsExtended.publicInputs.batchL2Data = request->batch_l2_data();
 
@@ -182,6 +185,7 @@ using grpc::Status;
         << " oldAccInputHash=" << proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16)
         << " oldBatchNum=" << proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum
         << " chainId=" << proverRequest.input.publicInputsExtended.publicInputs.chainID
+        << " forkId=" << proverRequest.input.publicInputsExtended.publicInputs.forkID
         << " globalExitRoot=" << proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot.get_str(16)
         << " timestamp=" << proverRequest.input.publicInputsExtended.publicInputs.timestamp
 
@@ -528,6 +532,7 @@ using grpc::Status;
     if (errorString == "invalidStaticTx") return ::executor::v1::ROM_ERROR_INVALID_STATIC;
     if (errorString == "invalidCodeSize") return ::executor::v1::ROM_ERROR_MAX_CODE_SIZE_EXCEEDED;
     if (errorString == "invalidCodeStartsEF") return ::executor::v1::ROM_ERROR_INVALID_BYTECODE_STARTS_EF;
+    if (errorString == "invalid_fork_id") return ::executor::v1::ROM_ERROR_UNSUPPORTED_FORK_ID;
     if (errorString == "") return ::executor::v1::ROM_ERROR_NO_ERROR;
     cerr << "Error: ExecutorServiceImpl::string2error() found invalid error string=" << errorString << endl;
     exitProcess();

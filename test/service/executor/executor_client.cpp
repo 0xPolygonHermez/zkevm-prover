@@ -74,6 +74,7 @@ bool ExecutorClient::ProcessBatch (void)
     request.set_eth_timestamp(input.publicInputsExtended.publicInputs.timestamp);
     request.set_update_merkle_tree(update_merkle_tree);
     request.set_chain_id(input.publicInputsExtended.publicInputs.chainID);
+    request.set_fork_id(input.publicInputsExtended.publicInputs.forkID);
     request.set_from(input.from);
     request.set_no_counters(input.bNoCounters);
     request.set_tx_hash_to_generate_execute_trace(input.txHashToGenerateExecuteTrace);
