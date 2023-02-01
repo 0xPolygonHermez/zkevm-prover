@@ -426,13 +426,18 @@ void FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
 
     /* Fill context object */
 
-    // TX to
+    // TX to and type
     getVarFromCtx(ctx, false, ctx.rom.txDestAddrOffset, auxScalar);
-    string to = Add0xIfMissing(auxScalar.get_str(16));
-    response.call_trace.context.to = (to == "0x0") ? "0x" : to;
-
-    // TX type
-    response.call_trace.context.type = (to == "0x0") ? "CREATE" : "CALL";
+    if (auxScalar == 0)
+    {
+        response.call_trace.context.to = "0x";
+        response.call_trace.context.type = "CREATE";
+    }
+    else
+    {
+        response.call_trace.context.to = NormalizeTo0xNFormat(auxScalar.get_str(16), 40);
+        response.call_trace.context.type = "CALL";
+    }
 
     // TX data
     getVarFromCtx(ctx, false, ctx.rom.txCalldataLenOffset, auxScalar);
