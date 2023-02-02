@@ -86,6 +86,7 @@ bool AggregatorClient::GetStatus (::aggregator::v1::GetStatusResponse &getStatus
     getMemoryInfo(memoryInfo);
     getStatusResponse.set_total_memory(memoryInfo.total);
     getStatusResponse.set_free_memory(memoryInfo.free);
+    getStatusResponse.set_fork_id(PROVER_FORK_ID);
 
 #ifdef LOG_SERVICE
     cout << "AggregatorClient::GetStatus() returns: " << getStatusResponse.DebugString() << endl;

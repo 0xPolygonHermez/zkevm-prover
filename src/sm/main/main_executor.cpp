@@ -77,9 +77,7 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     rom.load(fr, romJson);
 
     finalizeExecutionLabel = rom.getLabel(string("finalizeExecution"));
-    assertNewStateRootLabel = 0; //rom.getLabel(string("assertNewStateRoot"));
-    assertNewLocalExitRootLabel = 0; //rom.getLabel(string("assertNewLocalExitRoot"));
-    checkAndSaveFromLabel = rom.getLabel(string("checkAndSaveFrom"));
+    checkAndSaveFromLabel  = rom.getLabel(string("checkAndSaveFrom"));
 
     // Initialize the Ethereum opcode list: opcode=array position, operation=position content
     ethOpcodeInit();
@@ -3731,6 +3729,9 @@ void MainExecutor::initState(Context &ctx)
 
     // Set chainID to GAS register
     ctx.pols.GAS[0] = fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.chainID);
+
+    // Set fork ID to CTX register
+    ctx.pols.CTX[0] = fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID);
 }
 
 // Check that last evaluation (which is in fact the first one) is zero
@@ -3769,7 +3770,6 @@ void MainExecutor::checkFinalState(Context &ctx)
         (!fr.isZero(ctx.pols.SR5[0])) ||
         (!fr.isZero(ctx.pols.SR6[0])) ||
         (!fr.isZero(ctx.pols.SR7[0])) ||
-        (!fr.isZero(ctx.pols.CTX[0])) ||
         (!fr.isZero(ctx.pols.PC[0])) ||
         (!fr.isZero(ctx.pols.MAXMEM[0])) ||
         (!fr.isZero(ctx.pols.zkPC[0]))
@@ -3824,6 +3824,12 @@ void MainExecutor::checkFinalState(Context &ctx)
     if (!fr.equal(ctx.pols.GAS[0], fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.chainID)))
     {
         cerr << "Error:: MainExecutor::checkFinalState() Register GAS not terminated equal as its initial value" << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << rom.line[*ctx.pZKPC].toString(fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+        exitProcess();
+    }
+
+    if (!fr.equal(ctx.pols.CTX[0], fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID)))
+    {
+        cerr << "Error:: MainExecutor::checkFinalState() Register CTX not terminated equal as its initial value" << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << rom.line[*ctx.pZKPC].toString(fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 }

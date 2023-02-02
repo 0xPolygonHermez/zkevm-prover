@@ -48,8 +48,6 @@ public:
 
     // ROM labels
     uint64_t finalizeExecutionLabel;
-    uint64_t assertNewStateRootLabel;
-    uint64_t assertNewLocalExitRootLabel;
     uint64_t checkAndSaveFromLabel;
 
     // Constructor

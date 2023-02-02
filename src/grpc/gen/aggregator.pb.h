@@ -2105,6 +2105,7 @@ class GetStatusResponse PROTOBUF_FINAL :
     kNumberOfCoresFieldNumber = 11,
     kTotalMemoryFieldNumber = 12,
     kFreeMemoryFieldNumber = 13,
+    kForkIdFieldNumber = 14,
     kStatusFieldNumber = 1,
   };
   // repeated string pending_request_queue_ids = 8;
@@ -2326,6 +2327,15 @@ class GetStatusResponse PROTOBUF_FINAL :
   void _internal_set_free_memory(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
+  // uint64 fork_id = 14;
+  void clear_fork_id();
+  ::PROTOBUF_NAMESPACE_ID::uint64 fork_id() const;
+  void set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_fork_id() const;
+  void _internal_set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
   // .aggregator.v1.GetStatusResponse.Status status = 1;
   void clear_status();
   ::aggregator::v1::GetStatusResponse_Status status() const;
@@ -2354,6 +2364,7 @@ class GetStatusResponse PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint64 number_of_cores_;
   ::PROTOBUF_NAMESPACE_ID::uint64 total_memory_;
   ::PROTOBUF_NAMESPACE_ID::uint64 free_memory_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 fork_id_;
   int status_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_aggregator_2eproto;
@@ -7084,6 +7095,26 @@ inline void GetStatusResponse::_internal_set_free_memory(::PROTOBUF_NAMESPACE_ID
 inline void GetStatusResponse::set_free_memory(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   _internal_set_free_memory(value);
   // @@protoc_insertion_point(field_set:aggregator.v1.GetStatusResponse.free_memory)
+}
+
+// uint64 fork_id = 14;
+inline void GetStatusResponse::clear_fork_id() {
+  fork_id_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetStatusResponse::_internal_fork_id() const {
+  return fork_id_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetStatusResponse::fork_id() const {
+  // @@protoc_insertion_point(field_get:aggregator.v1.GetStatusResponse.fork_id)
+  return _internal_fork_id();
+}
+inline void GetStatusResponse::_internal_set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  fork_id_ = value;
+}
+inline void GetStatusResponse::set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_fork_id(value);
+  // @@protoc_insertion_point(field_set:aggregator.v1.GetStatusResponse.fork_id)
 }
 
 // -------------------------------------------------------------------
