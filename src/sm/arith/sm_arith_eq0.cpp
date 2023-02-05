@@ -5,9 +5,11 @@
 */
 
 #include <stdint.h>
+#include "definitions.hpp"
 #include "sm/pols_generated/commit_pols.hpp"
 #include "goldilocks_base_field.hpp"
 
+USING_PROVER_FORK_NAMESPACE;
 
 Goldilocks::Element eq0 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o)
 {

@@ -2,6 +2,7 @@
 #include "scalar.hpp"
 #include "utils.hpp"
 #include "zkresult.hpp"
+#include "zkmax.hpp"
 
 zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, SmtSetResult &result, DatabaseMap *dbReadLog)
 {

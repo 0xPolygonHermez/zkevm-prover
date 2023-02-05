@@ -67,6 +67,15 @@ using grpc::Status;
     // Get fork ID
     proverRequest.input.publicInputsExtended.publicInputs.forkID = request->fork_id();
 
+    // Create full tracer based on fork ID
+    proverRequest.CreateFullTracer();
+    if (proverRequest.result != ZKR_SUCCESS)
+    {
+        response->set_error(zkresult2error(proverRequest.result));
+        TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+        return Status::OK;
+    }
+
     // Get batchL2Data
     proverRequest.input.publicInputsExtended.publicInputs.batchL2Data = request->batch_l2_data();
 
@@ -197,22 +206,7 @@ using grpc::Status;
         << endl;
 #endif
 
-    if (config.useProcessBatchCache)
-    {
-        bool bFoundInCache = processBatchCache.Read(proverRequest);
-        if (!bFoundInCache)
-        {
-            prover.processBatch(&proverRequest);
-            if (proverRequest.result == ZKR_SUCCESS)
-            {
-                processBatchCache.Write(proverRequest);
-            }
-        }
-    }
-    else
-    {
-        prover.processBatch(&proverRequest);
-    }
+    prover.processBatch(&proverRequest);
 
     if (proverRequest.result != ZKR_SUCCESS)
     {
@@ -220,7 +214,7 @@ using grpc::Status;
     }
     
     response->set_error(zkresult2error(proverRequest.result));
-    response->set_cumulative_gas_used(proverRequest.fullTracer.finalTrace.cumulative_gas_used);
+    response->set_cumulative_gas_used(proverRequest.pFullTracer->get_cumulative_gas_used());
     response->set_cnt_keccak_hashes(proverRequest.counters.keccakF);
     response->set_cnt_poseidon_hashes(proverRequest.counters.poseidonG);
     response->set_cnt_poseidon_paddings(proverRequest.counters.paddingPG);
@@ -228,19 +222,25 @@ using grpc::Status;
     response->set_cnt_arithmetics(proverRequest.counters.arith);
     response->set_cnt_binaries(proverRequest.counters.binary);
     response->set_cnt_steps(proverRequest.counters.steps);
-    response->set_new_state_root(string2ba(proverRequest.fullTracer.finalTrace.new_state_root));
-    response->set_new_acc_input_hash(string2ba(proverRequest.fullTracer.finalTrace.new_acc_input_hash));
-    response->set_new_local_exit_root(string2ba(proverRequest.fullTracer.finalTrace.new_local_exit_root));
-    unordered_map<string, InfoReadWrite>::const_iterator itRWA;
-    for (itRWA=proverRequest.fullTracer.read_write_addresses.begin(); itRWA != proverRequest.fullTracer.read_write_addresses.end(); itRWA++)
+    response->set_new_state_root(string2ba(proverRequest.pFullTracer->get_new_state_root()));
+    response->set_new_acc_input_hash(string2ba(proverRequest.pFullTracer->get_new_acc_input_hash()));
+    response->set_new_local_exit_root(string2ba(proverRequest.pFullTracer->get_new_local_exit_root()));
+    
+    unordered_map<string, InfoReadWrite> * p_read_write_addresses = proverRequest.pFullTracer->get_read_write_addresses();
+    if (p_read_write_addresses != NULL)
     {
-        executor::v1::InfoReadWrite infoReadWrite;
-        google::protobuf::Map<std::string, executor::v1::InfoReadWrite> * pReadWriteAddresses = response->mutable_read_write_addresses();
-        infoReadWrite.set_balance(itRWA->second.balance);
-        infoReadWrite.set_nonce(itRWA->second.nonce);
-        (*pReadWriteAddresses)[itRWA->first] = infoReadWrite;
+        unordered_map<string, InfoReadWrite>::const_iterator itRWA;
+        for (itRWA=p_read_write_addresses->begin(); itRWA != p_read_write_addresses->end(); itRWA++)
+        {
+            executor::v1::InfoReadWrite infoReadWrite;
+            google::protobuf::Map<std::string, executor::v1::InfoReadWrite> * pReadWriteAddresses = response->mutable_read_write_addresses();
+            infoReadWrite.set_balance(itRWA->second.balance);
+            infoReadWrite.set_nonce(itRWA->second.nonce);
+            (*pReadWriteAddresses)[itRWA->first] = infoReadWrite;
+        }
     }
-    vector<Response> &responses(proverRequest.fullTracer.finalTrace.responses);
+
+    vector<Response> &responses(proverRequest.pFullTracer->get_responses());
     for (uint64_t tx=0; tx<responses.size(); tx++)
     {
         executor::v1::ProcessTransactionResponse * pProcessTransactionResponse = response->add_responses();
@@ -347,12 +347,12 @@ using grpc::Status;
 #ifdef LOG_SERVICE_EXECUTOR_OUTPUT
     cout << "ExecutorServiceImpl::ProcessBatch() returns"
          << " error=" << response->error()
-         << " new_state_root=" << proverRequest.fullTracer.finalTrace.new_state_root
-         << " new_acc_input_hash=" << proverRequest.fullTracer.finalTrace.new_acc_input_hash
-         << " new_local_exit_root=" << proverRequest.fullTracer.finalTrace.new_local_exit_root
+         << " new_state_root=" << proverRequest.pFullTracer->get_new_state_root()
+         << " new_acc_input_hash=" << proverRequest.pFullTracer->get_new_acc_input_hash()
+         << " new_local_exit_root=" << proverRequest.pFullTracer->get_new_local_exit_root()
          //<< " new_batch_num=" << proverRequest.fullTracer.finalTrace.new_batch_num
          << " steps=" << proverRequest.counters.steps
-         << " gasUsed=" << proverRequest.fullTracer.finalTrace.cumulative_gas_used
+         << " gasUsed=" << proverRequest.pFullTracer->get_cumulative_gas_used()
          << " counters.keccakF=" << proverRequest.counters.keccakF
          << " counters.poseidonG=" << proverRequest.counters.poseidonG
          << " counters.paddingPG=" << proverRequest.counters.paddingPG
@@ -387,15 +387,16 @@ using grpc::Status;
     if (config.opcodeTracer)
     {
         map<uint8_t, vector<Opcode>> opcodeMap;
-        cout << "Received " << proverRequest.fullTracer.info.size() << " opcodes:" << endl;
-        for (uint64_t i=0; i<proverRequest.fullTracer.info.size(); i++)
+        vector<Opcode> &info(proverRequest.pFullTracer->get_info());
+        cout << "Received " << info.size() << " opcodes:" << endl;
+        for (uint64_t i=0; i<info.size(); i++)
         {
-            if (opcodeMap.find(proverRequest.fullTracer.info[i].op) == opcodeMap.end())
+            if (opcodeMap.find(info[i].op) == opcodeMap.end())
             {
                 vector<Opcode> aux;
-                opcodeMap[proverRequest.fullTracer.info[i].op] = aux;
+                opcodeMap[info[i].op] = aux;
             }
-            opcodeMap[proverRequest.fullTracer.info[i].op].push_back(proverRequest.fullTracer.info[i]);
+            opcodeMap[info[i].op].push_back(info[i]);
         }
         map<uint8_t, vector<Opcode>>::iterator opcodeMapIt;
         for (opcodeMapIt = opcodeMap.begin(); opcodeMapIt != opcodeMap.end(); opcodeMapIt++)
@@ -548,5 +549,6 @@ using grpc::Status;
     if (result == ZKR_SM_MAIN_OOC_MEM_ALIGN) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_MEM;
     if (result == ZKR_SM_MAIN_OOC_PADDING_PG) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_PADDING;
     if (result == ZKR_SM_MAIN_OOC_POSEIDON_G) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_POSEIDON;
+    if (result == ZKR_SM_MAIN_INVALID_FORK_ID) return ::executor::v1::EXECUTOR_ERROR_UNSUPPORTED_FORK_ID;
     return ::executor::v1::EXECUTOR_ERROR_UNSPECIFIED;
 }

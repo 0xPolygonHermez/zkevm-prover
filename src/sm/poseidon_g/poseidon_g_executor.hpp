@@ -3,9 +3,12 @@
 
 #include <vector>
 #include <array>
-#include "commit_pols.hpp"
+#include "definitions.hpp"
+#include "sm/pols_generated/commit_pols.hpp"
 #include "goldilocks_base_field.hpp"
 #include "poseidon_goldilocks.hpp"
+
+USING_PROVER_FORK_NAMESPACE;
 
 using namespace std;
 
@@ -26,7 +29,7 @@ public:
     PoseidonGExecutor(Goldilocks &fr, PoseidonGoldilocks &poseidon) :
         fr(fr),
         poseidon(poseidon),
-        N(PoseidonGCommitPols::pilDegree()),
+        N(PROVER_FORK_NAMESPACE::PoseidonGCommitPols::pilDegree()),
         t(12),
         nRoundsF(8),
         nRoundsP(22),
@@ -46,7 +49,7 @@ public:
             }
         }
     };
-    void execute (vector<array<Goldilocks::Element, 17>> &input, PoseidonGCommitPols &pols);
+    void execute (vector<array<Goldilocks::Element, 17>> &input, PROVER_FORK_NAMESPACE::PoseidonGCommitPols &pols);
     Goldilocks::Element pow7(Goldilocks::Element &a);
 };
 

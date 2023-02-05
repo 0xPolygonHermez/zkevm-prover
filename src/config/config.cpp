@@ -1,5 +1,6 @@
 #include <string>
 #include <nlohmann/json.hpp>
+#include "definitions.hpp"
 #include "config.hpp"
 #include "zkassert.hpp"
 #include "utils.hpp"
@@ -102,10 +103,6 @@ void Config::load(json &config)
     if (config.contains("useMainExecGenerated") && config["useMainExecGenerated"].is_boolean())
         useMainExecGenerated = config["useMainExecGenerated"];
 
-    useProcessBatchCache = false;
-    if (config.contains("useProcessBatchCache") && config["useProcessBatchCache"].is_boolean())
-        useProcessBatchCache = config["useProcessBatchCache"];
-
     executeInParallel = false;
     if (config.contains("executeInParallel") && config["executeInParallel"].is_boolean())
         executeInParallel = config["executeInParallel"];
@@ -203,9 +200,6 @@ void Config::load(json &config)
     if (config.contains("inputFile2") && config["inputFile2"].is_string())
         inputFile2 = config["inputFile2"];
 
-    if (config.contains("rom") && config["rom"].is_string())
-        rom = config["rom"];
-
     if (config.contains("outputPath") && config["outputPath"].is_string())
         outputPath = config["outputPath"];
 
@@ -215,7 +209,7 @@ void Config::load(json &config)
         configPath = config["configPath"];
 
     // Set default config files names
-    rom = configPath + "/scripts/rom.json";
+    rom = string("src/main_sm/") + string(PROVER_FORK_NAMESPACE_STRING) + string("/scripts/rom.json");
     keccakScriptFile = configPath + "/scripts/keccak_script.json";
     storageRomFile = configPath + "/scripts/storage_sm_rom.json";
     zkevmConstPols = configPath + "/zkevm/zkevm.const";
@@ -246,6 +240,9 @@ void Config::load(json &config)
     finalVerkey = configPath + "/final/final.verkey.json";
     finalStarkZkey = configPath + "/final/final.g16.0001.zkey";
 
+
+    if (config.contains("rom") && config["rom"].is_string())
+        rom = config["rom"];
 
     if (config.contains("zkevmCmPols") && config["zkevmCmPols"].is_string())
         zkevmCmPols = config["zkevmCmPols"];
@@ -460,8 +457,6 @@ void Config::print(void)
         cout << "    executeInParallel=true" << endl;
     if (useMainExecGenerated)
         cout << "    useMainExecGenerated=true" << endl;
-    if (useProcessBatchCache)
-        cout << "    useProcessBatchCache=true" << endl;
 
     if (saveRequestToFile)
         cout << "    saveRequestToFile=true" << endl;

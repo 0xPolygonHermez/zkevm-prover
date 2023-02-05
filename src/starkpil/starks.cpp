@@ -1,4 +1,8 @@
+#include "definitions.hpp"
 #include "starks.hpp"
+#include "sm/pols_generated/commit_pols.hpp"
+
+USING_PROVER_FORK_NAMESPACE;
 
 void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps *steps)
 {

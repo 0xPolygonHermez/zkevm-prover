@@ -6,7 +6,6 @@
 #include <iomanip>
 #include <sys/time.h>
 #include "goldilocks_base_field.hpp"
-#include "sm/main/main_executor.hpp"
 #include "utils.hpp"
 #include "config.hpp"
 #include "version.hpp"

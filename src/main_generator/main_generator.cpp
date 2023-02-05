@@ -6,6 +6,9 @@
 using namespace std;
 using json = nlohmann::json;
 
+// Fork namespace
+const string forkNamespace = "fork_1";
+
 // Forward declaration
 void file2json (json &rom, string &romFileName);
 void string2file (const string & s, const string & fileName);
@@ -26,10 +29,10 @@ int main(int argc, char **argv)
 
     string functionName = codeGenerationName;
     string fileName = codeGenerationName;
-    string directoryName = "src/sm/" + codeGenerationName;
+    string directoryName = "src/main_sm/" + forkNamespace + "/" + codeGenerationName;
 
     // Load rom.json
-    string romFileName = "config/scripts/rom.json";
+    string romFileName = "src/main_sm/" + forkNamespace + "/scripts/rom.json";
     json rom;
     file2json(rom, romFileName);
 
@@ -143,20 +146,20 @@ string generate(const json &rom, const string &functionName, const string &fileN
     {
         if (bFastMode)
         {
-            code += "#ifndef MAIN_EXEC_GENERATED_FAST_HPP\n";
-            code += "#define MAIN_EXEC_GENERATED_FAST_HPP\n";
+            code += "#ifndef MAIN_EXEC_GENERATED_FAST_HPP_" + forkNamespace + "\n";
+            code += "#define MAIN_EXEC_GENERATED_FAST_HPP_" + forkNamespace + "\n";
         }
         else
         {
-            code += "#ifndef MAIN_EXEC_GENERATED_HPP\n";
-            code += "#define MAIN_EXEC_GENERATED_HPP\n";
+            code += "#ifndef MAIN_EXEC_GENERATED_HPP_" + forkNamespace + "\n";
+            code += "#define MAIN_EXEC_GENERATED_HPP_" + forkNamespace + "\n";
         }
         code += "\n";
         code += "#include <string>\n";
         code += "#include \"main_executor.hpp\"\n";
         if (!bFastMode)
         {
-            code += "#include \"sm/main/main_exec_required.hpp\"\n";
+            code += "#include \"main_sm/" + forkNamespace + "/main/main_exec_required.hpp\"\n";
         }
     }
     else
@@ -164,11 +167,11 @@ string generate(const json &rom, const string &functionName, const string &fileN
         if (bFastMode)
         {
             code += "#define COMMIT_POL_FAST_MODE\n";
-            code += "#include \"commit_pols.hpp\"\n";
+            code += "#include \"main_sm/" + forkNamespace + "/pols_generated/commit_pols.hpp\"\n";
         }
         code += "#include \"" + fileName + ".hpp\"\n";
         code += "#include \"scalar.hpp\"\n";
-        code += "#include \"eval_command.hpp\"\n";
+        code += "#include \"main_sm/"+ forkNamespace + "/main/eval_command.hpp\"\n";
         code += "#include <fstream>\n";
         code += "#include \"utils.hpp\"\n";
         code += "#include \"timer.hpp\"\n";
@@ -181,6 +184,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
     }
     code += "\n";
+
+    code += "namespace " + forkNamespace + "\n";
+    code += "{\n";
 
     if (!bHeader)
     {
@@ -205,13 +211,14 @@ string generate(const json &rom, const string &functionName, const string &fileN
     }
 
     if (bFastMode)
-        code += "void " + functionName + " (MainExecutor &mainExecutor, ProverRequest &proverRequest)";
+        code += "void " + functionName + " (" + forkNamespace + "::MainExecutor &mainExecutor, ProverRequest &proverRequest)";
     else
-        code += "void "+ functionName + " (MainExecutor &mainExecutor, ProverRequest &proverRequest, MainCommitPols &pols, MainExecRequired &required)";
+        code += "void "+ functionName + " (" + forkNamespace + "::MainExecutor &mainExecutor, ProverRequest &proverRequest, " + forkNamespace + "::MainCommitPols &pols, " + forkNamespace + "::MainExecRequired &required)";
 
     if (bHeader)
     {
         code += ";\n";
+        code += "}\n";
         code += "\n";
         code += "#endif\n";
         return code;
@@ -962,7 +969,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    }\n";
                     code += "    incCounter = smtGetResult.proofHashCounter + 2;\n";
                     if (bFastMode)
-                        code += "    proverRequest.fullTracer.addReadWriteAddress( pols.A0[0], pols.A1[0], pols.A2[0], pols.A3[0], pols.A4[0], pols.A5[0], pols.A6[0], pols.A7[0], pols.B0[0], pols.B1[0], pols.B2[0], pols.B3[0], pols.B4[0], pols.B5[0], pols.B6[0], pols.B7[0], smtGetResult.value);\n";
+                        code += "    eval_addReadWriteAddress(ctx, smtGetResult.value);\n";
                     code += "#ifdef LOG_TIME_STATISTICS\n";
                     code += "    mainMetrics.add(\"SMT Get\", TimeDiff(t));\n";
                     code += "#endif\n";
@@ -1063,7 +1070,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    }\n";
                     code += "    incCounter = ctx.lastSWrite.res.proofHashCounter + 2;\n";
                     if (bFastMode)
-                        code += "    proverRequest.fullTracer.addReadWriteAddress( pols.A0[0], pols.A1[0], pols.A2[0], pols.A3[0], pols.A4[0], pols.A5[0], pols.A6[0], pols.A7[0], pols.B0[0], pols.B1[0], pols.B2[0], pols.B3[0], pols.B4[0], pols.B5[0], pols.B6[0], pols.B7[0], scalarD);\n";
+                        code += "    eval_addReadWriteAddress(ctx, scalarD);\n";
                     code += "#ifdef LOG_TIME_STATISTICS\n";
                     code += "    mainMetrics.add(\"SMT Set\", TimeDiff(t));\n";
                     code += "#endif\n";
@@ -3991,7 +3998,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
     code += "}\n\n";
 
-    code += "#pragma GCC pop_options\n";
+    code += "#pragma GCC pop_options\n\n";
+
+    code += "} // namespace\n\n";
 
     return code;
 }

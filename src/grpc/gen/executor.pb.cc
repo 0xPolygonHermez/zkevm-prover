@@ -611,7 +611,7 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "\022+\n\'ROM_ERROR_INTRINSIC_INVALID_SENDER_C"
   "ODE\020\031\022\'\n#ROM_ERROR_INTRINSIC_TX_GAS_OVER"
   "FLOW\020\032\022 \n\034ROM_ERROR_BATCH_DATA_TOO_BIG\020\033"
-  "\022!\n\035ROM_ERROR_UNSUPPORTED_FORK_ID\020\034*\331\002\n\r"
+  "\022!\n\035ROM_ERROR_UNSUPPORTED_FORK_ID\020\034*\201\003\n\r"
   "ExecutorError\022\036\n\032EXECUTOR_ERROR_UNSPECIF"
   "IED\020\000\022\033\n\027EXECUTOR_ERROR_NO_ERROR\020\001\022+\n\'EX"
   "ECUTOR_ERROR_COUNTERS_OVERFLOW_KECCAK\020\002\022"
@@ -620,7 +620,8 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "_MEM\020\004\022*\n&EXECUTOR_ERROR_COUNTERS_OVERFL"
   "OW_ARITH\020\005\022,\n(EXECUTOR_ERROR_COUNTERS_OV"
   "ERFLOW_PADDING\020\006\022-\n)EXECUTOR_ERROR_COUNT"
-  "ERS_OVERFLOW_POSEIDON\020\0072h\n\017ExecutorServi"
+  "ERS_OVERFLOW_POSEIDON\020\007\022&\n\"EXECUTOR_ERRO"
+  "R_UNSUPPORTED_FORK_ID\020\0102h\n\017ExecutorServi"
   "ce\022U\n\014ProcessBatch\022 .executor.v1.Process"
   "BatchRequest\032!.executor.v1.ProcessBatchR"
   "esponse\"\000BAZ\?github.com/0xPolygonHermez/"
@@ -647,7 +648,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_exe
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_executor_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_executor_2eproto = {
-  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 4444,
+  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 4484,
   &descriptor_table_executor_2eproto_once, descriptor_table_executor_2eproto_sccs, descriptor_table_executor_2eproto_deps, 14, 0,
   schemas, file_default_instances, TableStruct_executor_2eproto::offsets,
   file_level_metadata_executor_2eproto, 14, file_level_enum_descriptors_executor_2eproto, file_level_service_descriptors_executor_2eproto,
@@ -712,6 +713,7 @@ bool ExecutorError_IsValid(int value) {
     case 5:
     case 6:
     case 7:
+    case 8:
       return true;
     default:
       return false;

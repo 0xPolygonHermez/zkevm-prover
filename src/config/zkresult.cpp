@@ -28,7 +28,8 @@ struct {
     { ZKR_SM_MAIN_OOC_PADDING_PG, "Main state machine executor out of padding pg counters" },
     { ZKR_SM_MAIN_OOC_POSEIDON_G, "Main state machine executor out of poseidon g counters" },
     { ZKR_STATEDB_GRPC_ERROR, "Error making GRPC call to stateDB service" },
-    { ZKR_SM_MAIN_OUT_OF_STEPS, "Main state machine executor did not complete the execution within available steps" }
+    { ZKR_SM_MAIN_OUT_OF_STEPS, "Main state machine executor did not complete the execution within available steps" },
+    { ZKR_SM_MAIN_INVALID_FORK_ID, "Main state machine executor does not support the requested fork ID" }
 };
 
 const char* zkresult2string (int code)
