@@ -77,6 +77,7 @@ tFunction string2Function(string s)
     else {
         cerr << "Error: string2function() invalid string = " << s << endl;
         exitProcess();
+        return f_empty;
     }
 }
 
@@ -158,6 +159,7 @@ tOp string2Op(string s)
     else {
         cerr << "Error: string2op() invalid string = " << s << endl;
         exitProcess();
+        return op_empty;
     }
 }
 
@@ -225,6 +227,7 @@ tReg string2reg(string s)
     else {
         cerr << "Error: string2Reg() invalid string = " << s << endl;
         exitProcess();
+        return reg_A;
     }
 }
 

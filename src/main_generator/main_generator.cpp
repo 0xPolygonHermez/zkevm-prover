@@ -2,12 +2,13 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <gmpxx.h>
+#include "../config/definitions.hpp" // This is the only file allowed to be included
 
 using namespace std;
 using json = nlohmann::json;
 
 // Fork namespace
-const string forkNamespace = "fork_1";
+const string forkNamespace = PROVER_FORK_NAMESPACE_STRING;
 
 // Forward declaration
 void file2json (json &rom, string &romFileName);
@@ -156,7 +157,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
         }
         code += "\n";
         code += "#include <string>\n";
-        code += "#include \"main_executor.hpp\"\n";
+        code += "#include \"main_sm/" + forkNamespace + "/main/main_executor.hpp\"\n";
         if (!bFastMode)
         {
             code += "#include \"main_sm/" + forkNamespace + "/main/main_exec_required.hpp\"\n";

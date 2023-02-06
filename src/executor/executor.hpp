@@ -25,7 +25,7 @@ public:
     const Config &config;
     
     fork_0::MainExecutor mainExecutor_fork_0;
-    fork_1::MainExecutor mainExecutor; // Default executor used by prover
+    PROVER_FORK_NAMESPACE::MainExecutor mainExecutor; // Default executor used by prover
     StorageExecutor storageExecutor;
     MemoryExecutor memoryExecutor;
     BinaryExecutor binaryExecutor;

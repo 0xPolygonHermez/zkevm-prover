@@ -78,7 +78,8 @@ tFunction string2Function(string s)
     else if (s == "")                               return f_empty;
     else {
         cerr << "Error: string2function() invalid string = " << s << endl;
-        exit(-1);
+        exitProcess();
+        return f_empty;
     }
 }
 
@@ -161,7 +162,8 @@ tOp string2Op(string s)
     else if (s == "")                return op_empty;
     else {
         cerr << "Error: string2op() invalid string = " << s << endl;
-        exit(-1);
+        exitProcess();
+        return op_empty;
     }
 }
 
@@ -228,7 +230,8 @@ tReg string2reg(string s)
     else if (s == "HASHPOS") return reg_HASHPOS;
     else {
         cerr << "Error: string2Reg() invalid string = " << s << endl;
-        exit(-1);
+        exitProcess();
+        return reg_A;
     }
 }
 
