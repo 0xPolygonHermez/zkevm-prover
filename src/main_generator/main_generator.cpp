@@ -264,6 +264,15 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    // Init execution flags\n";
     code += "    bool bProcessBatch = (proverRequest.type == prt_processBatch);\n";
     code += "    bool bUnsignedTransaction = (proverRequest.input.from != \"\") && (proverRequest.input.from != \"0x\");\n\n";
+    
+    code += "    // Unsigned transactions (from!=empty) are intended to be used to \"estimage gas\" (or \"call\")\n";
+    code += "    // In prover mode, we cannot accept unsigned transactions, since the proof would not meet the PIL constrains\n";
+    code += "    if (bUnsignedTransaction && !bProcessBatch)\n";
+    code += "    {\n";
+    code += "        cerr << \"Error: MainExecutor::MainExecutor() failed called with bUnsignedTransaction=true but bProcessBatch=false\" << endl;\n";
+    code += "        proverRequest.result = ZKR_SM_MAIN_INVALID_UNSIGNED_TX;\n";
+    code += "        return;\n";
+    code += "    }\n\n";
 
     code += "    Context ctx(mainExecutor.fr, mainExecutor.config, mainExecutor.fec, mainExecutor.fnec, pols, mainExecutor.rom, proverRequest, pStateDB);\n\n";
 

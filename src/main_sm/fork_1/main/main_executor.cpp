@@ -122,6 +122,15 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     bool bProcessBatch = (proverRequest.type == prt_processBatch);
     bool bUnsignedTransaction = (proverRequest.input.from != "") && (proverRequest.input.from != "0x");
 
+    // Unsigned transactions (from!=empty) are intended to be used to "estimage gas" (or "call")
+    // In prover mode, we cannot accept unsigned transactions, since the proof would not meet the PIL constrains
+    if (bUnsignedTransaction && !bProcessBatch)
+    {
+        cerr << "Error: MainExecutor::MainExecutor() failed called with bUnsignedTransaction=true but bProcessBatch=false" << endl;
+        proverRequest.result = ZKR_SM_MAIN_INVALID_UNSIGNED_TX;
+        return;
+    }
+
     // Create context and store a finite field reference in it
     Context ctx(fr, config, fec, fnec, pols, rom, proverRequest, pStateDB);
 
