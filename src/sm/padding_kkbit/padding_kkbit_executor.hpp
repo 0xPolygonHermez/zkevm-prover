@@ -2,8 +2,11 @@
 #define PADDING_KKBIT_EXECUTOR_HPP
 
 #include <vector>
-#include "commit_pols.hpp"
+#include "definitions.hpp"
+#include "sm/pols_generated/commit_pols.hpp"
 #include "sm/bits2field/bits2field_executor.hpp"
+
+USING_PROVER_FORK_NAMESPACE;
 
 using namespace std;
 
@@ -39,12 +42,12 @@ public:
     /* Constructor */
     PaddingKKBitExecutor(Goldilocks &fr) :
         fr(fr),
-        N(PaddingKKBitCommitPols::pilDegree()),
+        N(PROVER_FORK_NAMESPACE::PaddingKKBitCommitPols::pilDegree()),
         slotSize(155286),
         nSlots(44*((N-1)/slotSize)) {};
 
     /* Executor */
-    void execute (vector<PaddingKKBitExecutorInput> &input, PaddingKKBitCommitPols &pols, vector<Bits2FieldExecutorInput> &required);
+    void execute (vector<PaddingKKBitExecutorInput> &input, PROVER_FORK_NAMESPACE::PaddingKKBitCommitPols &pols, vector<Bits2FieldExecutorInput> &required);
 };
 
 #endif

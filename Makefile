@@ -74,6 +74,7 @@ $(BUILD_DIR)/%.cc.o: %.cc
 main_generator: $(BUILD_DIR)/$(TARGET_MNG)
 
 $(BUILD_DIR)/$(TARGET_MNG): ./src/main_generator/main_generator.cpp
+	$(MKDIR_P) $(BUILD_DIR)
 	g++ -g ./src/main_generator/main_generator.cpp -o $@ -lgmp
 
 .PHONY: clean

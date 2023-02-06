@@ -1,46 +1,86 @@
 #include "executor.hpp"
 #include "utils.hpp"
-#include "sm/main_exec_generated/main_exec_generated.hpp"
-#include "sm/main_exec_generated/main_exec_generated_fast.hpp"
+#include "main_sm/fork_0/main_exec_generated/main_exec_generated.hpp"
+#include "main_sm/fork_0/main_exec_generated/main_exec_generated_fast.hpp"
+#include "main_sm/fork_1/main_exec_generated/main_exec_generated.hpp"
+#include "main_sm/fork_1/main_exec_generated/main_exec_generated_fast.hpp"
 #include "timer.hpp"
 
 // Reduced version: only 1 evaluation is allocated, and some asserts are disabled
 void Executor::process_batch (ProverRequest &proverRequest)
 {
     // Execute the Main State Machine
-    //TimerStart(EXECUTOR_PROCESS_BATCH);
-    if (config.useMainExecGenerated)
+    switch (proverRequest.input.publicInputsExtended.publicInputs.forkID)
     {
-        main_exec_generated_fast(mainExecutor, proverRequest);
-    }
-    else
-    {
-        // Allocate committed polynomials for only 1 evaluation
-        void * pAddress = calloc(CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
-        if (pAddress == NULL)
+        case 0:
         {
-            cerr << "Error: Executor::process_batch() failed calling calloc(" << CommitPols::pilSize() << ")" << endl;
-            exitProcess();
+            if (config.useMainExecGenerated)
+            {
+                fork_0::main_exec_generated_fast(mainExecutor_fork_0, proverRequest);
+            }
+            else
+            {
+                // Allocate committed polynomials for only 1 evaluation
+                void * pAddress = calloc(fork_0::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
+                if (pAddress == NULL)
+                {
+                    cerr << "Error: Executor::process_batch() failed calling calloc(" << fork_0::CommitPols::pilSize() << ")" << endl;
+                    exitProcess();
+                }
+                fork_0::CommitPols commitPols(pAddress,1);
+
+                // This instance will store all data required to execute the rest of State Machines
+                fork_0::MainExecRequired required;
+
+                mainExecutor_fork_0.execute(proverRequest, commitPols.Main, required);
+
+                // Free committed polynomials address space
+                free(pAddress);
+            }
+            return;
         }
-        CommitPols commitPols(pAddress,1);
+        case 1:
+        {
+            if (config.useMainExecGenerated)
+            {
+                fork_1::main_exec_generated_fast(mainExecutor, proverRequest);
+            }
+            else
+            {
+                // Allocate committed polynomials for only 1 evaluation
+                void * pAddress = calloc(fork_1::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
+                if (pAddress == NULL)
+                {
+                    cerr << "Error: Executor::process_batch() failed calling calloc(" << fork_1::CommitPols::pilSize() << ")" << endl;
+                    exitProcess();
+                }
+                fork_1::CommitPols commitPols(pAddress,1);
 
-        // This instance will store all data required to execute the rest of State Machines
-        MainExecRequired required;
+                // This instance will store all data required to execute the rest of State Machines
+                fork_1::MainExecRequired required;
 
-        mainExecutor.execute(proverRequest, commitPols.Main, required);
+                mainExecutor.execute(proverRequest, commitPols.Main, required);
 
-        // Free committed polynomials address space
-        free(pAddress);
+                // Free committed polynomials address space
+                free(pAddress);
+            }
+            return;
+        }
+        default:
+        {
+            cerr << "Error: Executor::process_batch() got invalid fork ID=" << proverRequest.input.publicInputsExtended.publicInputs.forkID << endl;
+            proverRequest.result = ZKR_SM_MAIN_INVALID_FORK_ID;
+            return;
+        }
     }
-    //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
 }
 
 class ExecutorContext
 {
 public:
     Executor * pExecutor;
-    MainExecRequired * pRequired;
-    CommitPols * pCommitPols;
+    PROVER_FORK_NAMESPACE::MainExecRequired * pRequired;
+    PROVER_FORK_NAMESPACE::CommitPols * pCommitPols;
 };
 
 void* BinaryThread (void* arg)
@@ -147,22 +187,30 @@ void* KeccakThread (void* arg)
 }
 
 // Full version: all polynomials are evaluated, in all evaluations
-void Executor::execute (ProverRequest &proverRequest, CommitPols & commitPols)
+void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::CommitPols & commitPols)
 {
     if (!config.executeInParallel)
     {
         // This instance will store all data required to execute the rest of State Machines
-        MainExecRequired required;
+        PROVER_FORK_NAMESPACE::MainExecRequired required;
 
         // Execute the Main State Machine
         TimerStart(MAIN_EXECUTOR_EXECUTE);
-        if (config.useMainExecGenerated)
+        if (proverRequest.input.publicInputsExtended.publicInputs.forkID == 1)
         {
-            main_exec_generated(mainExecutor, proverRequest, commitPols.Main, required);
+            if (config.useMainExecGenerated)
+            {
+                PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor, proverRequest, commitPols.Main, required);
+            }
+            else
+            {
+                mainExecutor.execute(proverRequest, commitPols.Main, required);
+            }
         }
         else
         {
-            mainExecutor.execute(proverRequest, commitPols.Main, required);
+            cerr << "Error: Executor::execute() got invalid fork ID=" << proverRequest.input.publicInputsExtended.publicInputs.forkID << endl;
+            proverRequest.result = ZKR_SM_MAIN_INVALID_FORK_ID;
         }
         TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
 
@@ -230,7 +278,7 @@ void Executor::execute (ProverRequest &proverRequest, CommitPols & commitPols)
     {
 
         // This instance will store all data required to execute the rest of State Machines
-        MainExecRequired required;
+        PROVER_FORK_NAMESPACE::MainExecRequired required;
         ExecutorContext executorContext;
         executorContext.pExecutor = this;
         executorContext.pCommitPols = &commitPols;
@@ -240,7 +288,7 @@ void Executor::execute (ProverRequest &proverRequest, CommitPols & commitPols)
         TimerStart(MAIN_EXECUTOR_EXECUTE);
         if (config.useMainExecGenerated)
         {
-            main_exec_generated(mainExecutor, proverRequest, commitPols.Main, required);
+            PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor, proverRequest, commitPols.Main, required);
         }
         else
         {

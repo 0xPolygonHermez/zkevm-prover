@@ -2,12 +2,15 @@
 #define KECCAK_SM_EXECUTOR_HPP
 
 #include <array>
+#include "definitions.hpp"
 #include "config.hpp"
 #include "sm/keccak_f/keccak_state.hpp"
 //#include "keccak2/keccak2.hpp"
 #include "keccak_instruction.hpp"
-#include "commit_pols.hpp"
+#include "sm/pols_generated/commit_pols.hpp"
 #include "timer.hpp"
+
+USING_PROVER_FORK_NAMESPACE;
 
 using namespace std;
 
@@ -41,7 +44,7 @@ public:
     KeccakFExecutor (Goldilocks &fr, const Config &config) :
         fr(fr),
         config(config),
-        N(KeccakFCommitPols::pilDegree()),
+        N(PROVER_FORK_NAMESPACE::KeccakFCommitPols::pilDegree()),
         numberOfSlots((N-1)/Keccak_SlotSize)
     {
         bLoaded = false;
@@ -69,12 +72,12 @@ public:
     void execute (KeccakFExecuteInput &input, KeccakFExecuteOutput &output);
 
     /* Input is fe[numberOfSlots*1600], output is KeccakPols */
-    void execute (const Goldilocks::Element *input, const uint64_t inputLength, KeccakFCommitPols &pols);
+    void execute (const Goldilocks::Element *input, const uint64_t inputLength, PROVER_FORK_NAMESPACE::KeccakFCommitPols &pols);
 
     /* Input is a vector of numberOfSlots*1600 fe, output is KeccakPols */
-    void execute (const vector<vector<Goldilocks::Element>> &input, KeccakFCommitPols &pols);
-    void setPol (CommitPol (&pol)[4], uint64_t index, uint64_t value);
-    uint64_t getPol (CommitPol (&pol)[4], uint64_t index);
+    void execute (const vector<vector<Goldilocks::Element>> &input, PROVER_FORK_NAMESPACE::KeccakFCommitPols &pols);
+    void setPol (PROVER_FORK_NAMESPACE::CommitPol (&pol)[4], uint64_t index, uint64_t value);
+    uint64_t getPol (PROVER_FORK_NAMESPACE::CommitPol (&pol)[4], uint64_t index);
 
     /* Calculates keccak hash of input data.  Output must be 32-bytes long. */
     /* Internally, it calls execute(KeccakState) */

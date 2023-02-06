@@ -5,7 +5,6 @@
 #include <string>
 #include "goldilocks_base_field.hpp"
 #include "ffiasm/fec.hpp"
-#include "utils.hpp"
 #include "exit_process.hpp"
 
 using namespace std;

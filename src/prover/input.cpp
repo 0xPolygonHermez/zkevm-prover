@@ -69,7 +69,7 @@ void Input::loadGlobals (json &input)
     cout << "loadGlobals(): oldBatchNum=" << publicInputsExtended.publicInputs.oldBatchNum << endl;
 #endif
 
-    // Input JSON file could contain a chainID key at the root level (not mandatory)
+    // Input JSON file must contain a chainID key at the root level (it is mandatory)
     if ( !input.contains("chainID") ||
          !input["chainID"].is_number_unsigned() )
     {
@@ -82,6 +82,16 @@ void Input::loadGlobals (json &input)
     }
 #ifdef LOG_INPUT
     cout << "loadGlobals(): chainID=" << publicInputsExtended.publicInputs.chainID << endl;
+#endif
+
+    // Input JSON file could contain a forkID key at the root level (not mandatory, default is 0)
+    if ( input.contains("forkID") &&
+         input["forkID"].is_number_unsigned() )
+    {
+        publicInputsExtended.publicInputs.forkID = input["forkID"];
+    }
+#ifdef LOG_INPUT
+    cout << "loadGlobals(): forkID=" << publicInputsExtended.publicInputs.forkID << endl;
 #endif
 
     // Input JSON file must contain a batchL2Data key at the root level
@@ -262,6 +272,7 @@ void Input::saveGlobals (json &input) const
     input["oldAccInputHash"] = Add0xIfMissing(publicInputsExtended.publicInputs.oldAccInputHash.get_str(16));
     input["oldNumBatch"] = publicInputsExtended.publicInputs.oldBatchNum;
     input["chainID"] = publicInputsExtended.publicInputs.chainID;
+    input["forkID"] = publicInputsExtended.publicInputs.forkID;
     input["batchL2Data"] = Add0xIfMissing(ba2string(publicInputsExtended.publicInputs.batchL2Data));
     input["globalExitRoot"] = Add0xIfMissing(publicInputsExtended.publicInputs.globalExitRoot.get_str(16));
     input["timestamp"] = publicInputsExtended.publicInputs.timestamp;

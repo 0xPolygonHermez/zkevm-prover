@@ -40,7 +40,7 @@ bool AggregatorClientMock::GetStatus (::aggregator::v1::GetStatusResponse &getSt
     getStatusResponse.set_last_computed_end_time(time(NULL));
 
     // If computing, set the current request data
-    getStatusResponse.set_status(bComputing ? aggregator::v1::GetStatusResponse_Status_COMPUTING : aggregator::v1::GetStatusResponse_Status_IDLE);
+    getStatusResponse.set_status(bComputing ? aggregator::v1::GetStatusResponse_Status_STATUS_COMPUTING : aggregator::v1::GetStatusResponse_Status_STATUS_IDLE);
     getStatusResponse.set_current_computing_request_id(bComputing ? lastAggregatorUUID : "");
     getStatusResponse.set_current_computing_start_time(time(NULL));
 
@@ -81,7 +81,7 @@ bool AggregatorClientMock::GenBatchProof (const aggregator::v1::GenBatchProofReq
 #endif
     requestType = prt_genBatchProof;
     // Build the response as Ok, returning the UUID assigned by the prover to this request
-    genBatchProofResponse.set_result(aggregator::v1::Result::OK);
+    genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_OK);
     lastAggregatorUUID = getUUID();
     genBatchProofResponse.set_id(lastAggregatorUUID);
     gettimeofday(&lastAggregatorGenProof,NULL);
@@ -100,7 +100,7 @@ bool AggregatorClientMock::GenAggregatedProof (const aggregator::v1::GenAggregat
     requestType = prt_genAggregatedProof;
 
     // Build the response as Ok, returning the UUID assigned by the prover to this request
-    genAggregatedProofResponse.set_result(aggregator::v1::Result::OK);
+    genAggregatedProofResponse.set_result(aggregator::v1::Result::RESULT_OK);
     lastAggregatorUUID = getUUID();
     genAggregatedProofResponse.set_id(lastAggregatorUUID);
     gettimeofday(&lastAggregatorGenProof,NULL);
@@ -120,7 +120,7 @@ bool AggregatorClientMock::GenFinalProof (const aggregator::v1::GenFinalProofReq
     requestType = prt_genFinalProof;
 
     // Build the response as Ok, returning the UUID assigned by the prover to this request
-    genFinalProofResponse.set_result(aggregator::v1::Result::OK);
+    genFinalProofResponse.set_result(aggregator::v1::Result::RESULT_OK);
     lastAggregatorUUID = getUUID();
     genFinalProofResponse.set_id(lastAggregatorUUID);
     gettimeofday(&lastAggregatorGenProof,NULL);
@@ -137,12 +137,12 @@ bool AggregatorClientMock::Cancel (const aggregator::v1::CancelRequest &cancelRe
 
     if (bComputing && (cancelRequest.id() == lastAggregatorUUID ))
     {
-        cancelResponse.set_result(aggregator::v1::Result::OK);
+        cancelResponse.set_result(aggregator::v1::Result::RESULT_OK);
         lastAggregatorGenProof = {0,0};
     }
     else
     {
-        cancelResponse.set_result(aggregator::v1::Result::ERROR);
+        cancelResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
     }
 
 #ifdef LOG_SERVICE
@@ -166,7 +166,7 @@ bool AggregatorClientMock::GetProof (const aggregator::v1::GetProofRequest &getP
     {
         // Request is completed
         getProofResponse.set_id(uuid);
-        getProofResponse.set_result(aggregator::v1::GetProofResponse_Result_COMPLETED_OK);
+        getProofResponse.set_result(aggregator::v1::GetProofResponse_Result_RESULT_COMPLETED_OK);
         getProofResponse.set_result_string("completed");
         switch (requestType)
         {
@@ -236,14 +236,14 @@ bool AggregatorClientMock::GetProof (const aggregator::v1::GetProofRequest &getP
     {
         // Request is being computed
         getProofResponse.set_id(uuid);
-        getProofResponse.set_result(aggregator::v1::GetProofResponse_Result_PENDING);
+        getProofResponse.set_result(aggregator::v1::GetProofResponse_Result_RESULT_PENDING);
         getProofResponse.set_result_string("pending");
     }
     else
     {
         // Request is being computed
         getProofResponse.set_id(uuid);
-        getProofResponse.set_result(aggregator::v1::GetProofResponse_Result_ERROR);
+        getProofResponse.set_result(aggregator::v1::GetProofResponse_Result_RESULT_ERROR);
         getProofResponse.set_result_string("pending");
     }
 

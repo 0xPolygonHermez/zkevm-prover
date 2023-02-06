@@ -1,6 +1,8 @@
 #include "prover_request.hpp"
 #include "utils.hpp"
 #include "exit_process.hpp"
+#include "main_sm/fork_0/main/full_tracer.hpp"
+#include "main_sm/fork_1/main/full_tracer.hpp"
 
 ProverRequest::ProverRequest (Goldilocks &fr, const Config &config, tProverRequestType type) :
     fr(fr),
@@ -10,7 +12,7 @@ ProverRequest::ProverRequest (Goldilocks &fr, const Config &config, tProverReque
     type(type),
     input(fr),
     dbReadLog(NULL),
-    fullTracer(fr),
+    pFullTracer(NULL),
     bCompleted(false),
     bCancelling(false),
     result(ZKR_UNSPECIFIED)
@@ -40,6 +42,76 @@ ProverRequest::ProverRequest (Goldilocks &fr, const Config &config, tProverReque
         if (config.saveDbReadsToFileOnChange)
         {
             dbReadLog->setOnChangeCallback(this, ProverRequest::onDBReadLogChangeCallback);
+        }
+    }
+}
+
+void ProverRequest::CreateFullTracer(void)
+{
+    if (pFullTracer != NULL)
+    {
+        cerr << "Error: ProverRequest::CreateFullTracer() called with pFullTracer != NULL" << endl;
+        exitProcess();
+    }
+    switch (input.publicInputsExtended.publicInputs.forkID)
+    {
+        case 0:
+        {
+            pFullTracer = new fork_0::FullTracer(fr);
+            if (pFullTracer == NULL)
+            {
+                cerr << "Error: ProverRequest::CreateFullTracer() failed calling new fork_0::FullTracer()" << endl;
+                exitProcess();
+            }
+            result = ZKR_SUCCESS;
+            return;
+        }
+        case 1:
+        {
+            pFullTracer = new fork_1::FullTracer(fr);
+            if (pFullTracer == NULL)
+            {
+                cerr << "Error: ProverRequest::CreateFullTracer() failed calling new fork_1::FullTracer()" << endl;
+                exitProcess();
+            }
+            result = ZKR_SUCCESS;
+            return;
+        }
+        default:
+        {
+            cerr << "Error: ProverRequest::CreateFullTracer() failed calling invalid fork ID=" << input.publicInputsExtended.publicInputs.forkID << endl;
+            result = ZKR_SM_MAIN_INVALID_FORK_ID;
+            return;
+        }
+    }
+}
+
+void ProverRequest::DestroyFullTracer(void)
+{
+    if (pFullTracer == NULL)
+    {
+        cerr << "Error: ProverRequest::CreateFullTracer() called with pFullTracer == NULL" << endl;
+        exitProcess();
+    }
+    switch (input.publicInputsExtended.publicInputs.forkID)
+    {
+        case 0:
+        {
+            delete pFullTracer;
+            pFullTracer = NULL; 
+            break;
+        }
+        case 1:
+        {
+            delete pFullTracer;
+            pFullTracer = NULL; 
+            break;
+        }
+        default:
+        {
+            cerr << "Error: ProverRequest::DestroyFullTracer() failed calling invalid fork ID=" << input.publicInputsExtended.publicInputs.forkID << endl;
+            result = ZKR_SM_MAIN_INVALID_FORK_ID;
+            return;
         }
     }
 }
@@ -74,5 +146,12 @@ void ProverRequest::onDBReadLogChange(DatabaseMap *dbMap)
 ProverRequest::~ProverRequest()
 {
     if (dbReadLog != NULL)
+    {
         delete dbReadLog;
+    }
+
+    if (pFullTracer != NULL)
+    {
+        DestroyFullTracer();
+    }
 }
