@@ -40,8 +40,6 @@ build/./src/main_sm/fork_1/main_exec_generated/main_exec_generated.cpp.o: \
  src/main_sm/fork_1/main/eval_command.hpp src/utils/utils.hpp \
  src/prover/proof.hpp src/utils/timer.hpp src/utils/exit_process.hpp \
  src/sm/poseidon_g/poseidon_g_permutation.hpp \
- src/main_sm/fork_0/main/time_metric.hpp \
- src/main_sm/fork_0/main/rom_command.hpp \
  src/utils/goldilocks_precomputed.hpp src/utils/zkassert.hpp
 src/main_sm/fork_1/main_exec_generated/main_exec_generated.hpp:
 src/main_sm/fork_1/main/main_executor.hpp:
@@ -106,7 +104,5 @@ src/prover/proof.hpp:
 src/utils/timer.hpp:
 src/utils/exit_process.hpp:
 src/sm/poseidon_g/poseidon_g_permutation.hpp:
-src/main_sm/fork_0/main/time_metric.hpp:
-src/main_sm/fork_0/main/rom_command.hpp:
 src/utils/goldilocks_precomputed.hpp:
 src/utils/zkassert.hpp:

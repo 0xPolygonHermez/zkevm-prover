@@ -40,8 +40,7 @@ build/./src/main_sm/fork_0/main_exec_generated/main_exec_generated_fast.cpp.o: \
  src/service/statedb/statedb_interface.hpp src/prover/counters.hpp \
  src/main_sm/fork_0/main/eval_command.hpp src/utils/utils.hpp \
  src/prover/proof.hpp src/utils/timer.hpp src/utils/exit_process.hpp \
- src/sm/poseidon_g/poseidon_g_permutation.hpp \
- src/main_sm/fork_0/main/time_metric.hpp
+ src/sm/poseidon_g/poseidon_g_permutation.hpp
 src/main_sm/fork_0/pols_generated/commit_pols.hpp:
 src/goldilocks/src/goldilocks_base_field.hpp:
 src/main_sm/fork_0/main_exec_generated/main_exec_generated_fast.hpp:
@@ -106,4 +105,3 @@ src/prover/proof.hpp:
 src/utils/timer.hpp:
 src/utils/exit_process.hpp:
 src/sm/poseidon_g/poseidon_g_permutation.hpp:
-src/main_sm/fork_0/main/time_metric.hpp:
