@@ -18,6 +18,7 @@
 #include "main_sm/fork_1/main/eval_command.hpp"
 #include "main_sm/fork_1/main/eth_opcodes.hpp"
 #include "main_sm/fork_1/main/opcode_address.hpp"
+#include "main_sm/fork_1/main/time_metric.hpp"
 #include "input.hpp"
 #include "scalar.hpp"
 #include "utils.hpp"
@@ -31,7 +32,6 @@
 #include "exit_process.hpp"
 #include "zkassert.hpp"
 #include "poseidon_g_permutation.hpp"
-#include "time_metric.hpp"
 #include "goldilocks_precomputed.hpp"
 
 using namespace std;

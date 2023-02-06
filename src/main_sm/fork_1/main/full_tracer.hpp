@@ -6,9 +6,9 @@
 #include "main_sm/fork_1/main/context.hpp"
 #include "main_sm/fork_1/main/rom_command.hpp"
 #include "main_sm/fork_1/main/rom_line.hpp"
+#include "main_sm/fork_1/main/time_metric.hpp"
 #include "goldilocks_base_field.hpp"
 #include "config.hpp"
-#include "time_metric.hpp"
 #include "full_tracer_interface.hpp"
 
 namespace fork_1

@@ -2,7 +2,6 @@
 #include "executor_service.hpp"
 #include "input.hpp"
 #include "proof.hpp"
-#include "full_tracer.hpp"
 
 #include <grpcpp/grpcpp.h>
 

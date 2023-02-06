@@ -10,7 +10,6 @@
 #include "main_sm/fork_0/main/rom_command.hpp"
 #include "main_sm/fork_0/pols_generated/commit_pols.hpp"
 #include "main_sm/fork_0/main/full_tracer.hpp"
-#include "main_sm/fork_0/main/rom.hpp"
 #include "config.hpp"
 #include "goldilocks_base_field.hpp"
 #include "smt.hpp"

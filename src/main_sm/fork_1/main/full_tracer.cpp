@@ -11,7 +11,6 @@
 #include "rlp.hpp"
 #include "utils.hpp"
 #include "timer.hpp"
-#include "time_metric.hpp"
 
 using namespace std;
 

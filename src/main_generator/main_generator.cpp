@@ -170,7 +170,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "#define COMMIT_POL_FAST_MODE\n";
             code += "#include \"main_sm/" + forkNamespace + "/pols_generated/commit_pols.hpp\"\n";
         }
-        code += "#include \"" + fileName + ".hpp\"\n";
+        code += "#include \"main_sm/" + forkNamespace + "/main_exec_generated/" + fileName + ".hpp\"\n";
         code += "#include \"scalar.hpp\"\n";
         code += "#include \"main_sm/"+ forkNamespace + "/main/eval_command.hpp\"\n";
         code += "#include <fstream>\n";
@@ -179,7 +179,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += "#include \"exit_process.hpp\"\n";
         code += "#include \"zkassert.hpp\"\n";
         code += "#include \"poseidon_g_permutation.hpp\"\n";
-        code += "#include \"time_metric.hpp\"\n";
+        code += "#include \"main_sm/"+ forkNamespace + "/main/time_metric.hpp\"\n";
         if (!bFastMode)
             code += "#include \"goldilocks_precomputed.hpp\"\n";
 
