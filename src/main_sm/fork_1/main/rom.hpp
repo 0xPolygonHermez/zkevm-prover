@@ -44,6 +44,7 @@ public:
     uint64_t txSrcAddrOffset;
     uint64_t gasCallOffset;
     uint64_t isPreEIP155Offset;
+    uint64_t isCreateContractOffset;
 
     /* Constants */
     uint64_t MAX_CNT_STEPS_LIMIT;
