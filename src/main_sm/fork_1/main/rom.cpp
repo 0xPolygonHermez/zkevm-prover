@@ -49,6 +49,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
     txSrcAddrOffset        = getMemoryOffset("txSrcAddr");
     gasCallOffset          = getMemoryOffset("gasCall");
     isPreEIP155Offset      = getMemoryOffset("isPreEIP155");
+    isCreateContractOffset      = getMemoryOffset("isCreateContract");
 
     // Load ROM constants
     MAX_CNT_STEPS_LIMIT      = getConstant(romJson, "MAX_CNT_STEPS_LIMIT");
