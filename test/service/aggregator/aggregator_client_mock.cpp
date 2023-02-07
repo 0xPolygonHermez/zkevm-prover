@@ -67,6 +67,7 @@ bool AggregatorClientMock::GetStatus (::aggregator::v1::GetStatusResponse &getSt
     getMemoryInfo(memoryInfo);
     getStatusResponse.set_total_memory(memoryInfo.total);
     getStatusResponse.set_free_memory(memoryInfo.free);
+    getStatusResponse.set_fork_id(PROVER_FORK_ID);
 
 #ifdef LOG_SERVICE
     cout << "AggregatorClientMock::GetStatus() returns: " << getStatusResponse.DebugString() << endl;
