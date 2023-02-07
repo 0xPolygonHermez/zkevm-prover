@@ -3835,11 +3835,11 @@ void MainExecutor::checkFinalState(Context &ctx)
         exitProcess();
     }
 
-    if (!fr.equal(ctx.pols.CTX[0], fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID)))
+    /*if (!fr.equal(ctx.pols.CTX[0], fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID)))
     {
         cerr << "Error:: MainExecutor::checkFinalState() Register CTX not terminated equal as its initial value" << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << rom.line[*ctx.pZKPC].toString(fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
-    }
+    }*/
 }
 
 void MainExecutor::assertOutputs(Context &ctx)

@@ -77,10 +77,18 @@ void runFileGenBatchProof(Goldilocks fr, Prover &prover, Config &config)
         if (zkResult != ZKR_SUCCESS)
         {
             cerr << "Error: runFileGenBatchProof() failed calling proverRequest.input.load() zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
-            exit(-1);
+            exitProcess();
         }
     }
     TimerStopAndLog(INPUT_LOAD);
+    
+    // Create full tracer based on fork ID
+    proverRequest.CreateFullTracer();
+    if (proverRequest.result != ZKR_SUCCESS)
+    {
+        cerr << "Error: runFileGenBatchProof() failed calling proverRequest.CreateFullTracer() zkResult=" << proverRequest.result << "=" << zkresult2string(proverRequest.result) << endl;
+        exitProcess();
+    }
 
     // Call the prover
     prover.genBatchProof(&proverRequest);
@@ -136,10 +144,18 @@ void runFileProcessBatch(Goldilocks fr, Prover &prover, Config &config)
         if (zkResult != ZKR_SUCCESS)
         {
             cerr << "Error: runFileProcessBatch() failed calling proverRequest.input.load() zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
-            exit(-1);
+            exitProcess();
         }
     }
     TimerStopAndLog(INPUT_LOAD);
+    
+    // Create full tracer based on fork ID
+    proverRequest.CreateFullTracer();
+    if (proverRequest.result != ZKR_SUCCESS)
+    {
+        cerr << "Error: runFileProcessBatch() failed calling proverRequest.CreateFullTracer() zkResult=" << proverRequest.result << "=" << zkresult2string(proverRequest.result) << endl;
+        exitProcess();
+    }
 
     // Call the prover
     prover.processBatch(&proverRequest);
@@ -203,10 +219,18 @@ void runFileExecute(Goldilocks fr, Prover &prover, Config &config)
         if (zkResult != ZKR_SUCCESS)
         {
             cerr << "Error: runFileExecute() failed calling proverRequest.input.load() zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
-            exit(-1);
+            exitProcess();
         }
     }
     TimerStopAndLog(INPUT_LOAD);
+    
+    // Create full tracer based on fork ID
+    proverRequest.CreateFullTracer();
+    if (proverRequest.result != ZKR_SUCCESS)
+    {
+        cerr << "Error: runFileExecute() failed calling proverRequest.CreateFullTracer() zkResult=" << proverRequest.result << "=" << zkresult2string(proverRequest.result) << endl;
+        exitProcess();
+    }
 
     // Call the prover
     prover.execute(&proverRequest);

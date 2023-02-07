@@ -143,6 +143,22 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
 
     pProverRequest->input.publicInputsExtended.publicInputs.forkID = genBatchProofRequest.input().public_inputs().fork_id();
 
+    if (pProverRequest->input.publicInputsExtended.publicInputs.forkID != PROVER_FORK_ID)
+    {
+        cerr << "Error: AggregatorClient::GenProof() got an invalid prover ID=" << pProverRequest->input.publicInputsExtended.publicInputs.forkID << " different from expected=" << PROVER_FORK_ID << endl;
+        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return false;
+    }
+
+    // Create full tracer based on fork ID
+    pProverRequest->CreateFullTracer();
+    if (pProverRequest->result != ZKR_SUCCESS)
+    {
+        cerr << "Error: AggregatorClient::GenProof() failed calling pProverRequest->CreateFullTracer() result=" << pProverRequest->result << "=" << zkresult2string(pProverRequest->result) << endl;
+        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return false;
+    }
+
     pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data = genBatchProofRequest.input().public_inputs().batch_l2_data();
     if (pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data.size() > MAX_BATCH_L2_DATA_SIZE)
     {
