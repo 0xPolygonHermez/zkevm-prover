@@ -409,7 +409,7 @@ void FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
     // Add log info
     mpz_class auxScalar;
     getVarFromCtx(ctx, false, ctx.rom.txDestAddrOffset, auxScalar);
-    it->second.address = auxScalar.get_str(16);
+    it->second.address = NormalizeTo0xNFormat(auxScalar.get_str(16), 40);
     getVarFromCtx(ctx, false, ctx.rom.newNumBatchOffset, auxScalar);
     it->second.batch_number = auxScalar.get_ui();
     it->second.tx_hash = finalTrace.responses[txCount].tx_hash;
@@ -435,21 +435,20 @@ void FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
 
     /* Fill context object */
 
-    // TX to
-    getVarFromCtx(ctx, false, ctx.rom.txDestAddrOffset, auxScalar);
-    if (auxScalar == 0)
+    // TX to and type
+    getVarFromCtx(ctx, false, ctx.rom.isCreateContractOffset, auxScalar);    
+    if (auxScalar.get_ui())
     {
+        response.call_trace.context.type = "CREATE";
         response.call_trace.context.to = "0x";
     }
     else
     {
+        response.call_trace.context.type = "CALL";
+        getVarFromCtx(ctx, false, ctx.rom.txDestAddrOffset, auxScalar);
         response.call_trace.context.to = NormalizeTo0xNFormat(auxScalar.get_str(16), 40);
     }
 
-    // TX type
-    getVarFromCtx(ctx, false, ctx.rom.isCreateContractOffset, auxScalar);
-    response.call_trace.context.type = auxScalar.get_ui() ? "CREATE" : "CALL";
-    
     // TX data
     getVarFromCtx(ctx, false, ctx.rom.txCalldataLenOffset, auxScalar);
     getCalldataFromStack(ctx, 0, auxScalar.get_ui(), response.call_trace.context.data);
@@ -473,7 +472,7 @@ void FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
 
     // TX old state root
     fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]);
-    response.call_trace.context.old_state_root = Add0xIfMissing(auxScalar.get_str(16));
+    response.call_trace.context.old_state_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
 
     // TX gas price
     getVarFromCtx(ctx, false, ctx.rom.txGasPriceRLPOffset, auxScalar);
@@ -594,7 +593,7 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     // Set from address
     mpz_class fromScalar;
     getVarFromCtx(ctx, true, ctx.rom.txSrcOriginAddrOffset, fromScalar);
-    response.call_trace.context.from = Add0xIfMissing(fromScalar.get_str(16));
+    response.call_trace.context.from = NormalizeTo0xNFormat(fromScalar.get_str(16), 40);
 
     // Set consumed tx gas
     uint64_t polsGas = fr.toU64(ctx.pols.GAS[*ctx.pStep]);
@@ -628,7 +627,7 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     {
         mpz_class addressScalar;
         getVarFromCtx(ctx, false, ctx.rom.txDestAddrOffset, addressScalar);
-        response.create_address = addressScalar.get_str(16);
+        response.create_address = NormalizeToNFormat(addressScalar.get_str(16), 40);
     }
 
     // Set gas left
@@ -637,7 +636,7 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     // Set new State Root
     mpz_class auxScalar;
     fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]);
-    response.state_root = Add0xIfMissing(auxScalar.get_str(16));
+    response.state_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
 
     // If processed opcodes
     if (info.size() > 0)
@@ -737,11 +736,11 @@ void FullTracer::onFinishBatch(Context &ctx, const RomCommand &cmd)
     // New state root
     mpz_class auxScalar;
     fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]);
-    finalTrace.new_state_root = PrependZeros(auxScalar.get_str(16), 64);
+    finalTrace.new_state_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
 
     // New acc input hash
     getVarFromCtx(ctx, true, ctx.rom.newAccInputHashOffset, auxScalar);
-    finalTrace.new_acc_input_hash = PrependZeros(auxScalar.get_str(16), 64);
+    finalTrace.new_acc_input_hash = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
 
     // TODO: Can we simply use finalTrace.new_acc_input_hash when constructing the response? Can we avoid these fields in the .proto?
     for (uint64_t r=0; r<finalTrace.responses.size(); r++)
@@ -755,7 +754,7 @@ void FullTracer::onFinishBatch(Context &ctx, const RomCommand &cmd)
 
     // New local exit root
     getVarFromCtx(ctx, true, ctx.rom.newLocalExitRootOffset, auxScalar);
-    finalTrace.new_local_exit_root = PrependZeros(auxScalar.get_str(16), 64);
+    finalTrace.new_local_exit_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
 
     // New batch number
     // getVarFromCtx(ctx, true, "newNumBatch", auxScalar);
@@ -962,7 +961,7 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     if (ctx.proverRequest.generateCallTraces())
     {
         fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]);
-        singleInfo.state_root = /*"0x" +*/ auxScalar.get_str(16);//Add0xIfMissing(auxScalar.get_str(16));
+        singleInfo.state_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
     }
 
 #ifdef LOG_TIME_STATISTICS
@@ -975,10 +974,10 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     if (ctx.proverRequest.generateCallTraces())
     {
         getVarFromCtx(ctx, false, ctx.rom.txDestAddrOffset, auxScalar);
-        singleInfo.contract.address = auxScalar.get_str(16);
+        singleInfo.contract.address = NormalizeToNFormat(auxScalar.get_str(16), 40);
 
         getVarFromCtx(ctx, false, ctx.rom.txSrcAddrOffset, auxScalar);
-        singleInfo.contract.caller = auxScalar.get_str(16);
+        singleInfo.contract.caller = NormalizeToNFormat(auxScalar.get_str(16), 40);
 
         getVarFromCtx(ctx, false, ctx.rom.txValueOffset, auxScalar);
         singleInfo.contract.value = auxScalar;
@@ -1105,7 +1104,7 @@ void FullTracer::addReadWriteAddress ( const Goldilocks::Element &address0, cons
     // Get address
     mpz_class address;
     fea2scalar(fr, address, address0, address1, address2, address3, address4, address5, address6, address7);
-    string addressHex = "0x" + NormalizeToNFormat(address.get_str(16), 40);
+    string addressHex = NormalizeTo0xNFormat(address.get_str(16), 40);
 
     // Get key type
     mpz_class keyType;
