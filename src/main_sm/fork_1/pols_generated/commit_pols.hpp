@@ -1473,4 +1473,3 @@ public:
 } // namespace
 
 #endif // COMMIT_POLS_HPP_fork_1
-
