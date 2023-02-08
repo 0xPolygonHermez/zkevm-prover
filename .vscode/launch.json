@@ -222,6 +222,30 @@
             ],
             "preLaunchTask": "Build main generator",
             "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "pols_generator",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/polsGenerator",
+            "args": [
+                //"-c",
+                //"../testvectors/zkevm.const",
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "Build pols generator",
+            "miDebuggerPath": "/usr/bin/gdb"
         }
     ]
 }
