@@ -697,3 +697,4 @@ public:
 } // namespace
 
 #endif // CONSTANT_POLS_HPP_fork_1
+

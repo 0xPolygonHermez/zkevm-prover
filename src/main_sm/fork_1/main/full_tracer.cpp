@@ -313,7 +313,8 @@ void FullTracer::onError(Context &ctx, const RomCommand &cmd)
     lastError = cmd.params[1]->varName;
 
     // Intrinsic error should be set at tx level (not opcode)
-    if (responseErrors.find(lastError) != responseErrors.end())
+    if ( (responseErrors.find(lastError) != responseErrors.end()) ||
+         (info.size() == 0) )
     {
         if (finalTrace.responses.size() > txCount)
         {

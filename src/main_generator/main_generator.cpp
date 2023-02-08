@@ -2,7 +2,7 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <gmpxx.h>
-#include "../config/definitions.hpp" // This is the only file allowed to be included
+#include "../config/definitions.hpp" // This is the only project file allowed to be included
 
 using namespace std;
 using json = nlohmann::json;
