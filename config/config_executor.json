@@ -70,7 +70,6 @@
     "recursive2CmPols_disabled": "runtime/recursive2.commit",
     "recursivefCmPols_disabled": "runtime/recursivef.commit",
     "finalCmPols_disabled": "runtime/final.commit",
-
     "publicsOutput": "public.json",
     "proofFile": "proof.json",
 
