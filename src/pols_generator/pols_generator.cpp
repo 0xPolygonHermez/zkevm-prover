@@ -5,24 +5,15 @@
 #include "../config/definitions.hpp" // This is the only project file allowed to be included
 
 using namespace std;
-using json = nlohmann::json;
+using namespace nlohmann;
 
 // Fork namespace
 const string forkNamespace = PROVER_FORK_NAMESPACE_STRING;
 
 // Forward declaration
-void file2json (json &rom, string &romFileName);
+void file2json (ordered_json &rom, string &romFileName);
+string generate(const ordered_json &pols, const string &type, const string &namespaceName);
 void string2file (const string & s, const string & fileName);
-string generate(const json &rom, const string &functionName, const string &fileName, bool bFastMode, bool bHeader);
-string selector8 (const string &regName, const string &regValue, bool opInitialized, bool bFastMode);
-string selector1 (const string &regName, const string &regValue, bool opInitialized, bool bFastMode);
-string selectorConst (int64_t CONST, bool opInitialized, bool bFastMode);
-string selectorConstL (const string &CONSTL, bool opInitialized, bool bFastMode);
-string setter8 (const string &reg, bool setReg, bool bFastMode, uint64_t zkPC, const json &rom);
-string string2lower (const string &s);
-string string2upper (const string &s);
-
-string generate(const json &pols, const string &type, const string &namespaceName);
 
 int main(int argc, char **argv)
 {
@@ -30,7 +21,7 @@ int main(int argc, char **argv)
 
     // Load main.pil.json
     string pilFileName = "src/main_sm/" + forkNamespace + "/scripts/main.pil.json";
-    json pols;
+    ordered_json pols;
     file2json(pols, pilFileName);
 
     string directoryName = "src/main_sm/" + forkNamespace + "/pols_generated";
@@ -44,21 +35,21 @@ int main(int argc, char **argv)
     return 0;
 }
 
-void file2json (json &rom, string &romFileName)
+void file2json (ordered_json &pols, string &polsFileName)
 {
-    std::ifstream inputStream(romFileName);
+    std::ifstream inputStream(polsFileName);
     if (!inputStream.good())
     {
-        cerr << "Error: Main generator failed loading input JSON file " << romFileName << endl;
+        cerr << "Error: Main generator failed loading input JSON file " << polsFileName << endl;
         exit(-1);
     }
     try
     {
-        inputStream >> rom;
+        pols = nlohmann::ordered_json::parse(inputStream);
     }
     catch (exception &e)
     {
-        cerr << "Error: Main generator failed parsing input JSON file " << romFileName << " exception=" << e.what() << endl;
+        cerr << "Error: Main generator failed parsing input JSON file " << polsFileName << " exception=" << e.what() << endl;
         exit(-1);
     }
     inputStream.close();
@@ -93,7 +84,7 @@ vector<string> splitString (const string &s)
 
 #define max(a,b) (a>b?a:b)
 
-string generate(const json &pols, const string &type, const string &namespaceName)
+string generate(const ordered_json &pols, const string &type, const string &namespaceName)
 {
 
     string code = "";
@@ -103,7 +94,7 @@ string generate(const json &pols, const string &type, const string &namespaceNam
     vector<uint64_t> numberOfPols;
     vector<uint64_t> degree;
 
-    for (json::const_iterator it = pols["references"].begin(); it != pols["references"].end(); ++it)
+    for (ordered_json::const_iterator it = pols["references"].begin(); it != pols["references"].end(); ++it)
     {
         string key = it.key();
         if (pols["references"][key]["type"] == type)
@@ -190,7 +181,7 @@ string generate(const json &pols, const string &type, const string &namespaceNam
     // For each cmP pol, add it to the proper namespace array
     for (uint64_t i = 0; i < numPols; i++)
     {
-        for (json::const_iterator it = pols["references"].begin(); it != pols["references"].end(); ++it)
+        for (ordered_json::const_iterator it = pols["references"].begin(); it != pols["references"].end(); ++it)
         {
             string key = it.key();
             json pol = pols["references"][key];

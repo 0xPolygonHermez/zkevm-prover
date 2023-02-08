@@ -23,102 +23,6 @@ public:
     inline uint64_t index (void) { return _index; }
 };
 
-class ArithConstantPols
-{
-public:
-    ConstantPol BYTE2_BIT19;
-    ConstantPol SEL_BYTE2_BIT19;
-    ConstantPol GL_SIGNED_22BITS;
-private:
-    void * _pAddress;
-    uint64_t _degree;
-public:
-
-    ArithConstantPols (void * pAddress, uint64_t degree) :
-        BYTE2_BIT19((Goldilocks::Element *)((uint8_t *)pAddress + 848), degree, 106),
-        SEL_BYTE2_BIT19((Goldilocks::Element *)((uint8_t *)pAddress + 856), degree, 107),
-        GL_SIGNED_22BITS((Goldilocks::Element *)((uint8_t *)pAddress + 864), degree, 108),
-        _pAddress(pAddress),
-        _degree(degree) {};
-
-    inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 24; }
-    inline static uint64_t numPols (void) { return 3; }
-
-    inline void * address (void) { return _pAddress; }
-    inline uint64_t degree (void) { return _degree; }
-    inline uint64_t size (void) { return _degree*3*sizeof(Goldilocks::Element); }
-};
-
-class BinaryConstantPols
-{
-public:
-    ConstantPol P_OPCODE;
-    ConstantPol P_CIN;
-    ConstantPol P_LAST;
-    ConstantPol P_USE_CARRY;
-    ConstantPol P_C;
-    ConstantPol P_COUT;
-    ConstantPol FACTOR[8];
-private:
-    void * _pAddress;
-    uint64_t _degree;
-public:
-
-    BinaryConstantPols (void * pAddress, uint64_t degree) :
-        P_OPCODE((Goldilocks::Element *)((uint8_t *)pAddress + 872), degree, 109),
-        P_CIN((Goldilocks::Element *)((uint8_t *)pAddress + 880), degree, 110),
-        P_LAST((Goldilocks::Element *)((uint8_t *)pAddress + 888), degree, 111),
-        P_USE_CARRY((Goldilocks::Element *)((uint8_t *)pAddress + 896), degree, 112),
-        P_C((Goldilocks::Element *)((uint8_t *)pAddress + 904), degree, 113),
-        P_COUT((Goldilocks::Element *)((uint8_t *)pAddress + 912), degree, 114),
-        FACTOR{
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 920), degree, 115),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 928), degree, 116),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 936), degree, 117),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 944), degree, 118),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 952), degree, 119),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 960), degree, 120),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 968), degree, 121),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 976), degree, 122)
-        },
-        _pAddress(pAddress),
-        _degree(degree) {};
-
-    inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 112; }
-    inline static uint64_t numPols (void) { return 14; }
-
-    inline void * address (void) { return _pAddress; }
-    inline uint64_t degree (void) { return _degree; }
-    inline uint64_t size (void) { return _degree*14*sizeof(Goldilocks::Element); }
-};
-
-class Bits2FieldConstantPols
-{
-public:
-    ConstantPol FieldLatch;
-    ConstantPol Factor;
-private:
-    void * _pAddress;
-    uint64_t _degree;
-public:
-
-    Bits2FieldConstantPols (void * pAddress, uint64_t degree) :
-        FieldLatch((Goldilocks::Element *)((uint8_t *)pAddress + 1528), degree, 191),
-        Factor((Goldilocks::Element *)((uint8_t *)pAddress + 1536), degree, 192),
-        _pAddress(pAddress),
-        _degree(degree) {};
-
-    inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 16; }
-    inline static uint64_t numPols (void) { return 2; }
-
-    inline void * address (void) { return _pAddress; }
-    inline uint64_t degree (void) { return _degree; }
-    inline uint64_t size (void) { return _degree*2*sizeof(Goldilocks::Element); }
-};
-
 class GlobalConstantPols
 {
 public:
@@ -198,264 +102,6 @@ public:
     inline void * address (void) { return _pAddress; }
     inline uint64_t degree (void) { return _degree; }
     inline uint64_t size (void) { return _degree*47*sizeof(Goldilocks::Element); }
-};
-
-class KeccakFConstantPols
-{
-public:
-    ConstantPol ConnA;
-    ConstantPol ConnB;
-    ConstantPol ConnC;
-    ConstantPol GateType;
-    ConstantPol kGateType;
-    ConstantPol kA;
-    ConstantPol kB;
-    ConstantPol kC;
-private:
-    void * _pAddress;
-    uint64_t _degree;
-public:
-
-    KeccakFConstantPols (void * pAddress, uint64_t degree) :
-        ConnA((Goldilocks::Element *)((uint8_t *)pAddress + 1464), degree, 183),
-        ConnB((Goldilocks::Element *)((uint8_t *)pAddress + 1472), degree, 184),
-        ConnC((Goldilocks::Element *)((uint8_t *)pAddress + 1480), degree, 185),
-        GateType((Goldilocks::Element *)((uint8_t *)pAddress + 1488), degree, 186),
-        kGateType((Goldilocks::Element *)((uint8_t *)pAddress + 1496), degree, 187),
-        kA((Goldilocks::Element *)((uint8_t *)pAddress + 1504), degree, 188),
-        kB((Goldilocks::Element *)((uint8_t *)pAddress + 1512), degree, 189),
-        kC((Goldilocks::Element *)((uint8_t *)pAddress + 1520), degree, 190),
-        _pAddress(pAddress),
-        _degree(degree) {};
-
-    inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 64; }
-    inline static uint64_t numPols (void) { return 8; }
-
-    inline void * address (void) { return _pAddress; }
-    inline uint64_t degree (void) { return _degree; }
-    inline uint64_t size (void) { return _degree*8*sizeof(Goldilocks::Element); }
-};
-
-class MemAlignConstantPols
-{
-public:
-    ConstantPol BYTE_C4096;
-    ConstantPol FACTOR[8];
-    ConstantPol FACTORV[8];
-    ConstantPol WR256;
-    ConstantPol WR8;
-    ConstantPol OFFSET;
-    ConstantPol SELM1;
-private:
-    void * _pAddress;
-    uint64_t _degree;
-public:
-
-    MemAlignConstantPols (void * pAddress, uint64_t degree) :
-        BYTE_C4096((Goldilocks::Element *)((uint8_t *)pAddress + 680), degree, 85),
-        FACTOR{
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 688), degree, 86),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 696), degree, 87),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 704), degree, 88),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 712), degree, 89),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 720), degree, 90),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 728), degree, 91),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 736), degree, 92),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 744), degree, 93)
-        },
-        FACTORV{
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 752), degree, 94),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 760), degree, 95),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 768), degree, 96),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 776), degree, 97),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 784), degree, 98),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 792), degree, 99),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 800), degree, 100),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 808), degree, 101)
-        },
-        WR256((Goldilocks::Element *)((uint8_t *)pAddress + 816), degree, 102),
-        WR8((Goldilocks::Element *)((uint8_t *)pAddress + 824), degree, 103),
-        OFFSET((Goldilocks::Element *)((uint8_t *)pAddress + 832), degree, 104),
-        SELM1((Goldilocks::Element *)((uint8_t *)pAddress + 840), degree, 105),
-        _pAddress(pAddress),
-        _degree(degree) {};
-
-    inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 168; }
-    inline static uint64_t numPols (void) { return 21; }
-
-    inline void * address (void) { return _pAddress; }
-    inline uint64_t degree (void) { return _degree; }
-    inline uint64_t size (void) { return _degree*21*sizeof(Goldilocks::Element); }
-};
-
-class PaddingKKConstantPols
-{
-public:
-    ConstantPol r8Id;
-    ConstantPol lastBlock;
-    ConstantPol lastBlockLatch;
-    ConstantPol r8valid;
-    ConstantPol sOutId;
-    ConstantPol forceLastHash;
-private:
-    void * _pAddress;
-    uint64_t _degree;
-public:
-
-    PaddingKKConstantPols (void * pAddress, uint64_t degree) :
-        r8Id((Goldilocks::Element *)((uint8_t *)pAddress + 1680), degree, 210),
-        lastBlock((Goldilocks::Element *)((uint8_t *)pAddress + 1688), degree, 211),
-        lastBlockLatch((Goldilocks::Element *)((uint8_t *)pAddress + 1696), degree, 212),
-        r8valid((Goldilocks::Element *)((uint8_t *)pAddress + 1704), degree, 213),
-        sOutId((Goldilocks::Element *)((uint8_t *)pAddress + 1712), degree, 214),
-        forceLastHash((Goldilocks::Element *)((uint8_t *)pAddress + 1720), degree, 215),
-        _pAddress(pAddress),
-        _degree(degree) {};
-
-    inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 48; }
-    inline static uint64_t numPols (void) { return 6; }
-
-    inline void * address (void) { return _pAddress; }
-    inline uint64_t degree (void) { return _degree; }
-    inline uint64_t size (void) { return _degree*6*sizeof(Goldilocks::Element); }
-};
-
-class PaddingKKBitConstantPols
-{
-public:
-    ConstantPol r8Id;
-    ConstantPol sOutId;
-    ConstantPol latchR8;
-    ConstantPol Fr8;
-    ConstantPol rBitValid;
-    ConstantPol latchSOut;
-    ConstantPol FSOut0;
-    ConstantPol FSOut1;
-    ConstantPol FSOut2;
-    ConstantPol FSOut3;
-    ConstantPol FSOut4;
-    ConstantPol FSOut5;
-    ConstantPol FSOut6;
-    ConstantPol FSOut7;
-    ConstantPol ConnSOutBit;
-    ConstantPol ConnSInBit;
-    ConstantPol ConnBits2FieldBit;
-private:
-    void * _pAddress;
-    uint64_t _degree;
-public:
-
-    PaddingKKBitConstantPols (void * pAddress, uint64_t degree) :
-        r8Id((Goldilocks::Element *)((uint8_t *)pAddress + 1544), degree, 193),
-        sOutId((Goldilocks::Element *)((uint8_t *)pAddress + 1552), degree, 194),
-        latchR8((Goldilocks::Element *)((uint8_t *)pAddress + 1560), degree, 195),
-        Fr8((Goldilocks::Element *)((uint8_t *)pAddress + 1568), degree, 196),
-        rBitValid((Goldilocks::Element *)((uint8_t *)pAddress + 1576), degree, 197),
-        latchSOut((Goldilocks::Element *)((uint8_t *)pAddress + 1584), degree, 198),
-        FSOut0((Goldilocks::Element *)((uint8_t *)pAddress + 1592), degree, 199),
-        FSOut1((Goldilocks::Element *)((uint8_t *)pAddress + 1600), degree, 200),
-        FSOut2((Goldilocks::Element *)((uint8_t *)pAddress + 1608), degree, 201),
-        FSOut3((Goldilocks::Element *)((uint8_t *)pAddress + 1616), degree, 202),
-        FSOut4((Goldilocks::Element *)((uint8_t *)pAddress + 1624), degree, 203),
-        FSOut5((Goldilocks::Element *)((uint8_t *)pAddress + 1632), degree, 204),
-        FSOut6((Goldilocks::Element *)((uint8_t *)pAddress + 1640), degree, 205),
-        FSOut7((Goldilocks::Element *)((uint8_t *)pAddress + 1648), degree, 206),
-        ConnSOutBit((Goldilocks::Element *)((uint8_t *)pAddress + 1656), degree, 207),
-        ConnSInBit((Goldilocks::Element *)((uint8_t *)pAddress + 1664), degree, 208),
-        ConnBits2FieldBit((Goldilocks::Element *)((uint8_t *)pAddress + 1672), degree, 209),
-        _pAddress(pAddress),
-        _degree(degree) {};
-
-    inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 136; }
-    inline static uint64_t numPols (void) { return 17; }
-
-    inline void * address (void) { return _pAddress; }
-    inline uint64_t degree (void) { return _degree; }
-    inline uint64_t size (void) { return _degree*17*sizeof(Goldilocks::Element); }
-};
-
-class PaddingPGConstantPols
-{
-public:
-    ConstantPol F[8];
-    ConstantPol lastBlock;
-    ConstantPol crValid;
-private:
-    void * _pAddress;
-    uint64_t _degree;
-public:
-
-    PaddingPGConstantPols (void * pAddress, uint64_t degree) :
-        F{
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1112), degree, 139),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1120), degree, 140),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1128), degree, 141),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1136), degree, 142),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1144), degree, 143),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1152), degree, 144),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1160), degree, 145),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1168), degree, 146)
-        },
-        lastBlock((Goldilocks::Element *)((uint8_t *)pAddress + 1176), degree, 147),
-        crValid((Goldilocks::Element *)((uint8_t *)pAddress + 1184), degree, 148),
-        _pAddress(pAddress),
-        _degree(degree) {};
-
-    inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 80; }
-    inline static uint64_t numPols (void) { return 10; }
-
-    inline void * address (void) { return _pAddress; }
-    inline uint64_t degree (void) { return _degree; }
-    inline uint64_t size (void) { return _degree*10*sizeof(Goldilocks::Element); }
-};
-
-class PoseidonGConstantPols
-{
-public:
-    ConstantPol LAST;
-    ConstantPol LATCH;
-    ConstantPol LASTBLOCK;
-    ConstantPol PARTIAL;
-    ConstantPol C[12];
-private:
-    void * _pAddress;
-    uint64_t _degree;
-public:
-
-    PoseidonGConstantPols (void * pAddress, uint64_t degree) :
-        LAST((Goldilocks::Element *)((uint8_t *)pAddress + 984), degree, 123),
-        LATCH((Goldilocks::Element *)((uint8_t *)pAddress + 992), degree, 124),
-        LASTBLOCK((Goldilocks::Element *)((uint8_t *)pAddress + 1000), degree, 125),
-        PARTIAL((Goldilocks::Element *)((uint8_t *)pAddress + 1008), degree, 126),
-        C{
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1016), degree, 127),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1024), degree, 128),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1032), degree, 129),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1040), degree, 130),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1048), degree, 131),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1056), degree, 132),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1064), degree, 133),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1072), degree, 134),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1080), degree, 135),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1088), degree, 136),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1096), degree, 137),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1104), degree, 138)
-        },
-        _pAddress(pAddress),
-        _degree(degree) {};
-
-    inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 128; }
-    inline static uint64_t numPols (void) { return 16; }
-
-    inline void * address (void) { return _pAddress; }
-    inline uint64_t degree (void) { return _degree; }
-    inline uint64_t size (void) { return _degree*16*sizeof(Goldilocks::Element); }
 };
 
 class RomConstantPols
@@ -555,6 +201,210 @@ public:
     inline uint64_t size (void) { return _degree*38*sizeof(Goldilocks::Element); }
 };
 
+class MemAlignConstantPols
+{
+public:
+    ConstantPol BYTE_C4096;
+    ConstantPol FACTOR[8];
+    ConstantPol FACTORV[8];
+    ConstantPol WR256;
+    ConstantPol WR8;
+    ConstantPol OFFSET;
+    ConstantPol SELM1;
+private:
+    void * _pAddress;
+    uint64_t _degree;
+public:
+
+    MemAlignConstantPols (void * pAddress, uint64_t degree) :
+        BYTE_C4096((Goldilocks::Element *)((uint8_t *)pAddress + 680), degree, 85),
+        FACTOR{
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 688), degree, 86),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 696), degree, 87),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 704), degree, 88),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 712), degree, 89),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 720), degree, 90),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 728), degree, 91),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 736), degree, 92),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 744), degree, 93)
+        },
+        FACTORV{
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 752), degree, 94),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 760), degree, 95),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 768), degree, 96),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 776), degree, 97),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 784), degree, 98),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 792), degree, 99),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 800), degree, 100),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 808), degree, 101)
+        },
+        WR256((Goldilocks::Element *)((uint8_t *)pAddress + 816), degree, 102),
+        WR8((Goldilocks::Element *)((uint8_t *)pAddress + 824), degree, 103),
+        OFFSET((Goldilocks::Element *)((uint8_t *)pAddress + 832), degree, 104),
+        SELM1((Goldilocks::Element *)((uint8_t *)pAddress + 840), degree, 105),
+        _pAddress(pAddress),
+        _degree(degree) {};
+
+    inline static uint64_t pilDegree (void) { return 8388608; }
+    inline static uint64_t pilSize (void) { return 168; }
+    inline static uint64_t numPols (void) { return 21; }
+
+    inline void * address (void) { return _pAddress; }
+    inline uint64_t degree (void) { return _degree; }
+    inline uint64_t size (void) { return _degree*21*sizeof(Goldilocks::Element); }
+};
+
+class ArithConstantPols
+{
+public:
+    ConstantPol BYTE2_BIT19;
+    ConstantPol SEL_BYTE2_BIT19;
+    ConstantPol GL_SIGNED_22BITS;
+private:
+    void * _pAddress;
+    uint64_t _degree;
+public:
+
+    ArithConstantPols (void * pAddress, uint64_t degree) :
+        BYTE2_BIT19((Goldilocks::Element *)((uint8_t *)pAddress + 848), degree, 106),
+        SEL_BYTE2_BIT19((Goldilocks::Element *)((uint8_t *)pAddress + 856), degree, 107),
+        GL_SIGNED_22BITS((Goldilocks::Element *)((uint8_t *)pAddress + 864), degree, 108),
+        _pAddress(pAddress),
+        _degree(degree) {};
+
+    inline static uint64_t pilDegree (void) { return 8388608; }
+    inline static uint64_t pilSize (void) { return 24; }
+    inline static uint64_t numPols (void) { return 3; }
+
+    inline void * address (void) { return _pAddress; }
+    inline uint64_t degree (void) { return _degree; }
+    inline uint64_t size (void) { return _degree*3*sizeof(Goldilocks::Element); }
+};
+
+class BinaryConstantPols
+{
+public:
+    ConstantPol P_OPCODE;
+    ConstantPol P_CIN;
+    ConstantPol P_LAST;
+    ConstantPol P_USE_CARRY;
+    ConstantPol P_C;
+    ConstantPol P_COUT;
+    ConstantPol FACTOR[8];
+private:
+    void * _pAddress;
+    uint64_t _degree;
+public:
+
+    BinaryConstantPols (void * pAddress, uint64_t degree) :
+        P_OPCODE((Goldilocks::Element *)((uint8_t *)pAddress + 872), degree, 109),
+        P_CIN((Goldilocks::Element *)((uint8_t *)pAddress + 880), degree, 110),
+        P_LAST((Goldilocks::Element *)((uint8_t *)pAddress + 888), degree, 111),
+        P_USE_CARRY((Goldilocks::Element *)((uint8_t *)pAddress + 896), degree, 112),
+        P_C((Goldilocks::Element *)((uint8_t *)pAddress + 904), degree, 113),
+        P_COUT((Goldilocks::Element *)((uint8_t *)pAddress + 912), degree, 114),
+        FACTOR{
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 920), degree, 115),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 928), degree, 116),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 936), degree, 117),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 944), degree, 118),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 952), degree, 119),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 960), degree, 120),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 968), degree, 121),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 976), degree, 122)
+        },
+        _pAddress(pAddress),
+        _degree(degree) {};
+
+    inline static uint64_t pilDegree (void) { return 8388608; }
+    inline static uint64_t pilSize (void) { return 112; }
+    inline static uint64_t numPols (void) { return 14; }
+
+    inline void * address (void) { return _pAddress; }
+    inline uint64_t degree (void) { return _degree; }
+    inline uint64_t size (void) { return _degree*14*sizeof(Goldilocks::Element); }
+};
+
+class PoseidonGConstantPols
+{
+public:
+    ConstantPol LAST;
+    ConstantPol LATCH;
+    ConstantPol LASTBLOCK;
+    ConstantPol PARTIAL;
+    ConstantPol C[12];
+private:
+    void * _pAddress;
+    uint64_t _degree;
+public:
+
+    PoseidonGConstantPols (void * pAddress, uint64_t degree) :
+        LAST((Goldilocks::Element *)((uint8_t *)pAddress + 984), degree, 123),
+        LATCH((Goldilocks::Element *)((uint8_t *)pAddress + 992), degree, 124),
+        LASTBLOCK((Goldilocks::Element *)((uint8_t *)pAddress + 1000), degree, 125),
+        PARTIAL((Goldilocks::Element *)((uint8_t *)pAddress + 1008), degree, 126),
+        C{
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1016), degree, 127),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1024), degree, 128),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1032), degree, 129),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1040), degree, 130),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1048), degree, 131),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1056), degree, 132),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1064), degree, 133),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1072), degree, 134),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1080), degree, 135),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1088), degree, 136),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1096), degree, 137),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1104), degree, 138)
+        },
+        _pAddress(pAddress),
+        _degree(degree) {};
+
+    inline static uint64_t pilDegree (void) { return 8388608; }
+    inline static uint64_t pilSize (void) { return 128; }
+    inline static uint64_t numPols (void) { return 16; }
+
+    inline void * address (void) { return _pAddress; }
+    inline uint64_t degree (void) { return _degree; }
+    inline uint64_t size (void) { return _degree*16*sizeof(Goldilocks::Element); }
+};
+
+class PaddingPGConstantPols
+{
+public:
+    ConstantPol F[8];
+    ConstantPol lastBlock;
+    ConstantPol crValid;
+private:
+    void * _pAddress;
+    uint64_t _degree;
+public:
+
+    PaddingPGConstantPols (void * pAddress, uint64_t degree) :
+        F{
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1112), degree, 139),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1120), degree, 140),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1128), degree, 141),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1136), degree, 142),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1144), degree, 143),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1152), degree, 144),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1160), degree, 145),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1168), degree, 146)
+        },
+        lastBlock((Goldilocks::Element *)((uint8_t *)pAddress + 1176), degree, 147),
+        crValid((Goldilocks::Element *)((uint8_t *)pAddress + 1184), degree, 148),
+        _pAddress(pAddress),
+        _degree(degree) {};
+
+    inline static uint64_t pilDegree (void) { return 8388608; }
+    inline static uint64_t pilSize (void) { return 80; }
+    inline static uint64_t numPols (void) { return 10; }
+
+    inline void * address (void) { return _pAddress; }
+    inline uint64_t degree (void) { return _degree; }
+    inline uint64_t size (void) { return _degree*10*sizeof(Goldilocks::Element); }
+};
+
 class StorageConstantPols
 {
 public:
@@ -644,39 +494,189 @@ public:
     inline uint64_t size (void) { return _degree*34*sizeof(Goldilocks::Element); }
 };
 
+class KeccakFConstantPols
+{
+public:
+    ConstantPol ConnA;
+    ConstantPol ConnB;
+    ConstantPol ConnC;
+    ConstantPol GateType;
+    ConstantPol kGateType;
+    ConstantPol kA;
+    ConstantPol kB;
+    ConstantPol kC;
+private:
+    void * _pAddress;
+    uint64_t _degree;
+public:
+
+    KeccakFConstantPols (void * pAddress, uint64_t degree) :
+        ConnA((Goldilocks::Element *)((uint8_t *)pAddress + 1464), degree, 183),
+        ConnB((Goldilocks::Element *)((uint8_t *)pAddress + 1472), degree, 184),
+        ConnC((Goldilocks::Element *)((uint8_t *)pAddress + 1480), degree, 185),
+        GateType((Goldilocks::Element *)((uint8_t *)pAddress + 1488), degree, 186),
+        kGateType((Goldilocks::Element *)((uint8_t *)pAddress + 1496), degree, 187),
+        kA((Goldilocks::Element *)((uint8_t *)pAddress + 1504), degree, 188),
+        kB((Goldilocks::Element *)((uint8_t *)pAddress + 1512), degree, 189),
+        kC((Goldilocks::Element *)((uint8_t *)pAddress + 1520), degree, 190),
+        _pAddress(pAddress),
+        _degree(degree) {};
+
+    inline static uint64_t pilDegree (void) { return 8388608; }
+    inline static uint64_t pilSize (void) { return 64; }
+    inline static uint64_t numPols (void) { return 8; }
+
+    inline void * address (void) { return _pAddress; }
+    inline uint64_t degree (void) { return _degree; }
+    inline uint64_t size (void) { return _degree*8*sizeof(Goldilocks::Element); }
+};
+
+class Bits2FieldConstantPols
+{
+public:
+    ConstantPol FieldLatch;
+    ConstantPol Factor;
+private:
+    void * _pAddress;
+    uint64_t _degree;
+public:
+
+    Bits2FieldConstantPols (void * pAddress, uint64_t degree) :
+        FieldLatch((Goldilocks::Element *)((uint8_t *)pAddress + 1528), degree, 191),
+        Factor((Goldilocks::Element *)((uint8_t *)pAddress + 1536), degree, 192),
+        _pAddress(pAddress),
+        _degree(degree) {};
+
+    inline static uint64_t pilDegree (void) { return 8388608; }
+    inline static uint64_t pilSize (void) { return 16; }
+    inline static uint64_t numPols (void) { return 2; }
+
+    inline void * address (void) { return _pAddress; }
+    inline uint64_t degree (void) { return _degree; }
+    inline uint64_t size (void) { return _degree*2*sizeof(Goldilocks::Element); }
+};
+
+class PaddingKKBitConstantPols
+{
+public:
+    ConstantPol r8Id;
+    ConstantPol sOutId;
+    ConstantPol latchR8;
+    ConstantPol Fr8;
+    ConstantPol rBitValid;
+    ConstantPol latchSOut;
+    ConstantPol FSOut0;
+    ConstantPol FSOut1;
+    ConstantPol FSOut2;
+    ConstantPol FSOut3;
+    ConstantPol FSOut4;
+    ConstantPol FSOut5;
+    ConstantPol FSOut6;
+    ConstantPol FSOut7;
+    ConstantPol ConnSOutBit;
+    ConstantPol ConnSInBit;
+    ConstantPol ConnBits2FieldBit;
+private:
+    void * _pAddress;
+    uint64_t _degree;
+public:
+
+    PaddingKKBitConstantPols (void * pAddress, uint64_t degree) :
+        r8Id((Goldilocks::Element *)((uint8_t *)pAddress + 1544), degree, 193),
+        sOutId((Goldilocks::Element *)((uint8_t *)pAddress + 1552), degree, 194),
+        latchR8((Goldilocks::Element *)((uint8_t *)pAddress + 1560), degree, 195),
+        Fr8((Goldilocks::Element *)((uint8_t *)pAddress + 1568), degree, 196),
+        rBitValid((Goldilocks::Element *)((uint8_t *)pAddress + 1576), degree, 197),
+        latchSOut((Goldilocks::Element *)((uint8_t *)pAddress + 1584), degree, 198),
+        FSOut0((Goldilocks::Element *)((uint8_t *)pAddress + 1592), degree, 199),
+        FSOut1((Goldilocks::Element *)((uint8_t *)pAddress + 1600), degree, 200),
+        FSOut2((Goldilocks::Element *)((uint8_t *)pAddress + 1608), degree, 201),
+        FSOut3((Goldilocks::Element *)((uint8_t *)pAddress + 1616), degree, 202),
+        FSOut4((Goldilocks::Element *)((uint8_t *)pAddress + 1624), degree, 203),
+        FSOut5((Goldilocks::Element *)((uint8_t *)pAddress + 1632), degree, 204),
+        FSOut6((Goldilocks::Element *)((uint8_t *)pAddress + 1640), degree, 205),
+        FSOut7((Goldilocks::Element *)((uint8_t *)pAddress + 1648), degree, 206),
+        ConnSOutBit((Goldilocks::Element *)((uint8_t *)pAddress + 1656), degree, 207),
+        ConnSInBit((Goldilocks::Element *)((uint8_t *)pAddress + 1664), degree, 208),
+        ConnBits2FieldBit((Goldilocks::Element *)((uint8_t *)pAddress + 1672), degree, 209),
+        _pAddress(pAddress),
+        _degree(degree) {};
+
+    inline static uint64_t pilDegree (void) { return 8388608; }
+    inline static uint64_t pilSize (void) { return 136; }
+    inline static uint64_t numPols (void) { return 17; }
+
+    inline void * address (void) { return _pAddress; }
+    inline uint64_t degree (void) { return _degree; }
+    inline uint64_t size (void) { return _degree*17*sizeof(Goldilocks::Element); }
+};
+
+class PaddingKKConstantPols
+{
+public:
+    ConstantPol r8Id;
+    ConstantPol lastBlock;
+    ConstantPol lastBlockLatch;
+    ConstantPol r8valid;
+    ConstantPol sOutId;
+    ConstantPol forceLastHash;
+private:
+    void * _pAddress;
+    uint64_t _degree;
+public:
+
+    PaddingKKConstantPols (void * pAddress, uint64_t degree) :
+        r8Id((Goldilocks::Element *)((uint8_t *)pAddress + 1680), degree, 210),
+        lastBlock((Goldilocks::Element *)((uint8_t *)pAddress + 1688), degree, 211),
+        lastBlockLatch((Goldilocks::Element *)((uint8_t *)pAddress + 1696), degree, 212),
+        r8valid((Goldilocks::Element *)((uint8_t *)pAddress + 1704), degree, 213),
+        sOutId((Goldilocks::Element *)((uint8_t *)pAddress + 1712), degree, 214),
+        forceLastHash((Goldilocks::Element *)((uint8_t *)pAddress + 1720), degree, 215),
+        _pAddress(pAddress),
+        _degree(degree) {};
+
+    inline static uint64_t pilDegree (void) { return 8388608; }
+    inline static uint64_t pilSize (void) { return 48; }
+    inline static uint64_t numPols (void) { return 6; }
+
+    inline void * address (void) { return _pAddress; }
+    inline uint64_t degree (void) { return _degree; }
+    inline uint64_t size (void) { return _degree*6*sizeof(Goldilocks::Element); }
+};
+
 class ConstantPols
 {
 public:
+    GlobalConstantPols Global;
+    RomConstantPols Rom;
+    MemAlignConstantPols MemAlign;
     ArithConstantPols Arith;
     BinaryConstantPols Binary;
-    Bits2FieldConstantPols Bits2Field;
-    GlobalConstantPols Global;
-    KeccakFConstantPols KeccakF;
-    MemAlignConstantPols MemAlign;
-    PaddingKKConstantPols PaddingKK;
-    PaddingKKBitConstantPols PaddingKKBit;
-    PaddingPGConstantPols PaddingPG;
     PoseidonGConstantPols PoseidonG;
-    RomConstantPols Rom;
+    PaddingPGConstantPols PaddingPG;
     StorageConstantPols Storage;
+    KeccakFConstantPols KeccakF;
+    Bits2FieldConstantPols Bits2Field;
+    PaddingKKBitConstantPols PaddingKKBit;
+    PaddingKKConstantPols PaddingKK;
 private:
     void * _pAddress;
     uint64_t _degree;
 public:
 
     ConstantPols (void * pAddress, uint64_t degree) :
+        Global(pAddress, degree),
+        Rom(pAddress, degree),
+        MemAlign(pAddress, degree),
         Arith(pAddress, degree),
         Binary(pAddress, degree),
-        Bits2Field(pAddress, degree),
-        Global(pAddress, degree),
-        KeccakF(pAddress, degree),
-        MemAlign(pAddress, degree),
-        PaddingKK(pAddress, degree),
-        PaddingKKBit(pAddress, degree),
-        PaddingPG(pAddress, degree),
         PoseidonG(pAddress, degree),
-        Rom(pAddress, degree),
+        PaddingPG(pAddress, degree),
         Storage(pAddress, degree),
+        KeccakF(pAddress, degree),
+        Bits2Field(pAddress, degree),
+        PaddingKKBit(pAddress, degree),
+        PaddingKK(pAddress, degree),
         _pAddress(pAddress),
         _degree(degree) {}
 
