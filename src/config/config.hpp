@@ -54,6 +54,7 @@ public:
     bool opcodeTracer;
     bool logRemoteDbReads;
     bool logExecutorServerResponses;
+    bool dontLoadRomOffsets;
 
     uint16_t executorServerPort;
     bool executorROMLineTraces;

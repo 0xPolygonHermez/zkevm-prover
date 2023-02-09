@@ -4,6 +4,7 @@
 #include <nlohmann/json.hpp>
 #include <string>
 #include "main_sm/fork_1/main/rom_line.hpp"
+#include "config.hpp"
 
 using json = nlohmann::json;
 using namespace std;
@@ -14,6 +15,8 @@ namespace fork_1
 class Rom
 {
 public:
+
+    const Config &config;
 
     uint64_t size; // Size of the ROM program, i.e. number of ROM lines found in rom.json
     RomLine *line; // ROM program lines, parsed and stored in memory
@@ -56,7 +59,9 @@ public:
     uint64_t MAX_CNT_POSEIDON_G_LIMIT;
 
     /* Constructor */
-    Rom() : size(0),
+    Rom (const Config &config) :
+            config(config),
+            size(0),
             line(NULL),
             memLengthOffset(0),
             txDestAddrOffset(0),

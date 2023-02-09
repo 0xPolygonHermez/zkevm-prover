@@ -59,6 +59,7 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     N(MainCommitPols::pilDegree()),
     N_NoCounters(N_NO_COUNTERS_MULTIPLICATION_FACTOR*MainCommitPols::pilDegree()),
     poseidon(poseidon),
+    rom(config),
     config(config)
 {
     /* Load and parse ROM JSON file */
@@ -2680,15 +2681,15 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     return;
                 }
 
+                if (c != 0)
+                {
+                    pols.carry[i] = fr.one();
+                }
+
                 if (!bProcessBatch)
                 {
                     pols.binOpcode[i] = fr.fromU64(5);
                     
-                    if (c != 0)
-                    {
-                        pols.carry[i] = fr.one();
-                    }
-
                     // Store the binary action to execute it later with the binary SM
                     BinaryAction binaryAction;
                     binaryAction.a = a;
