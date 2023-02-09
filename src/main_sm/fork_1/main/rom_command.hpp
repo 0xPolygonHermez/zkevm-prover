@@ -21,7 +21,6 @@ typedef enum : int {
     f_getTimestamp,
     f_getTxs,
     f_getTxsLen,
-    f_addrOp,
     f_eventLog,
     f_cond,
     f_inverseFpEc,
@@ -31,7 +30,6 @@ typedef enum : int {
     f_yAddPointEc,
     f_xDblPointEc,
     f_yDblPointEc,
-    f_getBytecode ,
     f_bitwise_and,
     f_bitwise_or,
     f_bitwise_xor,
@@ -47,10 +45,7 @@ typedef enum : int {
     f_memAlignWR_W0,
     f_memAlignWR_W1,
     f_memAlignWR8_W0,
-    f_saveContractBytecode,
-    f_onOpcode,
-    f_onTouchedAddress,
-    f_onTouchedSlot
+    f_onOpcode
 } tFunction;
 
 // ROM command (op)

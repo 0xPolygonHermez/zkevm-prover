@@ -25,7 +25,6 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             case f_getTimestamp:                    return eval_getTimestamp(ctx, cmd, cr);
             case f_getTxs:                          return eval_getTxs(ctx, cmd, cr);
             case f_getTxsLen:                       return eval_getTxsLen(ctx, cmd, cr);
-            case f_addrOp:                          return eval_addrOp(ctx, cmd, cr);
             case f_eventLog:                        return eval_eventLog(ctx, cmd, cr);
             case f_cond:                            return eval_cond(ctx, cmd, cr);
             case f_inverseFpEc:                     return eval_inverseFpEc(ctx, cmd, cr);
@@ -35,7 +34,6 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             case f_yAddPointEc:                     return eval_yAddPointEc(ctx, cmd, cr);
             case f_xDblPointEc:                     return eval_xDblPointEc(ctx, cmd, cr);
             case f_yDblPointEc:                     return eval_yDblPointEc(ctx, cmd, cr);
-            case f_getBytecode:                     return eval_getBytecode(ctx, cmd, cr);
             case f_bitwise_and:                     return eval_bitwise_and(ctx, cmd, cr);
             case f_bitwise_or:                      return eval_bitwise_or(ctx, cmd, cr);
             case f_bitwise_xor:                     return eval_bitwise_xor(ctx, cmd, cr);
@@ -51,10 +49,7 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             case f_memAlignWR_W0:                   return eval_memAlignWR_W0(ctx, cmd, cr);
             case f_memAlignWR_W1:                   return eval_memAlignWR_W1(ctx, cmd, cr);
             case f_memAlignWR8_W0:                  return eval_memAlignWR8_W0(ctx, cmd, cr);
-            case f_saveContractBytecode:            return eval_saveContractBytecode(ctx, cmd, cr);
             case f_beforeLast:                      return eval_beforeLast(ctx, cmd, cr);
-            case f_onTouchedAddress:                return eval_onTouchedAddress(ctx, cmd, cr);
-            case f_onTouchedSlot:                   return eval_onTouchedSlot(ctx, cmd, cr);
             default:
                 cerr << "Error: evalCommand() found invalid function=" << cmd.function << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
                 exitProcess();
@@ -1020,44 +1015,6 @@ void eval_getTxs(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     ba2fea(ctx.fr, (uint8_t *)(ctx.proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.c_str()) + offset, len, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
-/**************************/
-/* Get opcode ROM address */
-/**************************/
-
-void eval_addrOp(Context &ctx, const RomCommand &cmd, CommandResult &cr)
-{
-#ifdef CHECK_EVAL_COMMAND_PARAMETERS
-    // Check parameters list size
-    if (cmd.params.size() != 1)
-    {
-        cerr << "Error: eval_addrOp() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
-        exitProcess();
-    }
-#endif
-
-    // Get offset by executing cmd.params[0]
-    evalCommand(ctx, *cmd.params[0], cr);
-#ifdef CHECK_EVAL_COMMAND_PARAMETERS
-    if (cr.type != crt_fe)
-    {
-        cerr << "Error: eval_addrOp() unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
-        exitProcess();
-    }
-#endif
-    uint64_t codeId = ctx.fr.toU64(cr.fe);
-    cr.type = crt_fea;
-
-    uint64_t addr = opcodeAddress[codeId];
-    cr.fea0 = ctx.fr.fromU64(addr);
-    cr.fea1 = ctx.fr.zero();
-    cr.fea2 = ctx.fr.zero();
-    cr.fea3 = ctx.fr.zero();
-    cr.fea4 = ctx.fr.zero();
-    cr.fea5 = ctx.fr.zero();
-    cr.fea6 = ctx.fr.zero();
-    cr.fea7 = ctx.fr.zero();
-}
-
 /*********************/
 /* Full tracer event */
 /*********************/
@@ -1809,144 +1766,6 @@ void eval_memAlignWR8_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr
     scalar2fea(ctx.fr, result, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
-/*********************/
-/* Contract bytecode */
-/*********************/
-
-void eval_saveContractBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
-{
-#ifdef CHECK_EVAL_COMMAND_PARAMETERS
-    // Check parameters list size
-    if (cmd.params.size() != 1)
-    {
-        cerr << "Error: eval_saveContractBytecode() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
-        exitProcess();
-    }
-#endif
-
-    // Get addr by executing cmd.params[0]
-    evalCommand(ctx, *cmd.params[0], cr);
-#ifdef CHECK_EVAL_COMMAND_PARAMETERS
-    if (cr.type != crt_scalar)
-    {
-        cerr << "Error: eval_saveContractBytecode() 0 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
-        exitProcess();
-    }
-#endif
-    uint64_t addr = cr.scalar.get_ui();
-
-    string digestString = ctx.hashP[addr].digest.get_str(16);
-    ctx.proverRequest.input.contractsBytecode[digestString] = ctx.hashP[addr].data;
-
-    // Return an empty array of field elements
-    cr.type = crt_fea;
-    cr.fea0 = ctx.fr.zero();
-    cr.fea1 = ctx.fr.zero();
-    cr.fea2 = ctx.fr.zero();
-    cr.fea3 = ctx.fr.zero();
-    cr.fea4 = ctx.fr.zero();
-    cr.fea5 = ctx.fr.zero();
-    cr.fea6 = ctx.fr.zero();
-    cr.fea7 = ctx.fr.zero();
-}
-
-void eval_getBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
-{
-#ifdef CHECK_EVAL_COMMAND_PARAMETERS
-    // Check parameters list size
-    if (cmd.params.size() != 2 && cmd.params.size() != 3)
-    {
-        cerr << "Error: eval_getBytecode() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
-        exitProcess();
-    }
-#endif
-
-    // Get contractHash by executing cmd.params[0]
-    evalCommand(ctx, *cmd.params[0], cr);
-#ifdef CHECK_EVAL_COMMAND_PARAMETERS
-    if (cr.type != crt_scalar)
-    {
-        cerr << "Error: eval_getBytecode() unexpected command 0 result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
-        exitProcess();
-    }
-#endif
-    string contractHash = cr.scalar.get_str(16);
-
-    // Get offset by executing cmd.params[1]
-    evalCommand(ctx, *cmd.params[1], cr);
-#ifdef CHECK_EVAL_COMMAND_PARAMETERS
-    if (cr.type != crt_u64)
-    {
-        cerr << "Error: eval_getBytecode() unexpected command 1 result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
-        exitProcess();
-    }
-#endif
-    uint64_t offset = cr.u64;
-
-    // Get length by executing cmd.params[2]
-    uint64_t len = 1;
-    if (cmd.params.size() == 3)
-    {
-        evalCommand(ctx, *cmd.params[2], cr);
-#ifdef CHECK_EVAL_COMMAND_PARAMETERS
-        if (cr.type != crt_scalar)
-        {
-            cerr << "Error: eval_getBytecode() unexpected command 2 result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
-            exitProcess();
-        }
-#endif
-        len = cr.scalar.get_ui();
-#ifdef CHECK_EVAL_COMMAND_PARAMETERS
-        if (len > 32)
-        {
-            cerr << "Error: eval_getBytecode() len>32 len=" << len << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
-            exitProcess();
-        }
-#endif
-    }
-
-    unordered_map<string, vector<uint8_t>>::const_iterator it;
-    it = ctx.proverRequest.input.contractsBytecode.find(contractHash);
-    if (it == ctx.proverRequest.input.contractsBytecode.end())
-    {
-        // Get the contract hash key
-        mpz_class scalar("0x"+contractHash);
-        Goldilocks::Element key[4];
-        scalar2fea(ctx.fr, scalar, key);
-
-        // Get the contract from the database
-        vector<uint8_t> bytecode;
-        zkresult zkResult = ctx.pStateDB->getProgram(key, bytecode, ctx.proverRequest.dbReadLog);
-        if (zkResult != ZKR_SUCCESS)
-        {
-            cerr << "Error: eval_getBytecode() failed calling ctx.pStateDB->getProgram() with key=" << contractHash << " zkResult=" << zkResult << "=" << zkresult2string(zkResult) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
-            cr.type = crt_fea;
-            cr.fea0 = ctx.fr.zero();
-            cr.fea1 = ctx.fr.zero();
-            cr.fea2 = ctx.fr.zero();
-            cr.fea3 = ctx.fr.zero();
-            cr.fea4 = ctx.fr.zero();
-            cr.fea5 = ctx.fr.zero();
-            cr.fea6 = ctx.fr.zero();
-            cr.fea7 = ctx.fr.zero();
-            cr.zkResult = zkResult;
-            return;
-        }
-
-        // Store the bytecode locally
-        ctx.proverRequest.input.contractsBytecode[contractHash] = bytecode;
-
-        // Get the iterator
-        it = ctx.proverRequest.input.contractsBytecode.find(contractHash);
-        zkassert(it != ctx.proverRequest.input.contractsBytecode.end());
-    }
-
-    cr.type = crt_fea;
-    ba2fea(ctx.fr, it->second.data() + offset, len, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
-    
-    //cout << "getBytecode hash=" << contractHash << " offset=" << offset << " len=" << len << " cmd=" << cmd.toString() << endl;
-}
-
 /*************************/
 /* Inverse field element */
 /*************************/
@@ -2267,18 +2086,6 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
     ctx.fec.sub(aux1, x1, x3);;
     ctx.fec.mul(aux1, aux1, s);
     ctx.fec.sub(y3, aux1, y1);
-}
-
-void eval_onTouchedAddress(Context &ctx, const RomCommand &cmd, CommandResult &cr)
-{
-    cr.type = crt_scalar;
-    cr.scalar = 0;
-}
-
-void eval_onTouchedSlot(Context &ctx, const RomCommand &cmd, CommandResult &cr)
-{
-    cr.type = crt_scalar;
-    cr.scalar = 0;
 }
 
 void eval_addReadWriteAddress (Context &ctx, const mpz_class value)

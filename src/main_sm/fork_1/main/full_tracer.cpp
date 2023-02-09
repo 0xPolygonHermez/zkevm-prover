@@ -285,14 +285,6 @@ void FullTracer::handleEvent(Context &ctx, const RomCommand &cmd)
         onOpcode(ctx, cmd);
         return;
     }
-    if (cmd.params[0]->function == f_onTouchedAddress)
-    {
-        return;
-    }
-    if (cmd.params[0]->function == f_onTouchedSlot)
-    {
-        return;
-    }
     cerr << "Error: FullTracer::handleEvent() got an invalid event cmd.params[0]->varName=" << cmd.params[0]->varName << " cmd.function=" << function2String(cmd.function) << endl;
     exitProcess();
 }
