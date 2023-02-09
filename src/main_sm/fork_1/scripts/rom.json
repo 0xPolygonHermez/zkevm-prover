@@ -309,7 +309,7 @@
    "lineStr": "        $ => C                                  :HASHKDIGEST(E)"
   },
   {
-   "CONSTL": "995052982721906769083524541345745747257928364082",
+   "CONSTL": "936572701188795762702460789585668173002398546170",
    "setA": 1,
    "line": 63,
    "fileName": "main.zkasm",
@@ -766,7 +766,7 @@
    "lineStr": "        $${eventLog(onFinishTx)}   :JMP(txLoop)"
   },
   {
-   "CONSTL": "995052982721906769083524541345745747257928364082",
+   "CONSTL": "936572701188795762702460789585668173002398546170",
    "setA": 1,
    "line": 147,
    "fileName": "main.zkasm",
@@ -66643,7 +66643,7 @@
  },
  "constants": {
   "ADDRESS_GLOBAL_EXIT_ROOT_MANAGER_L2": {
-   "value": "995052982721906769083524541345745747257928364082",
+   "value": "936572701188795762702460789585668173002398546170",
    "type": "CONSTL",
    "line": 2,
    "fileName": "constants.zkasm"
