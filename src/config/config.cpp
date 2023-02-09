@@ -155,6 +155,10 @@ void Config::load(json &config)
     if (config.contains("logExecutorServerResponses") && config["logExecutorServerResponses"].is_boolean())
         logExecutorServerResponses = config["logExecutorServerResponses"];
 
+    dontLoadRomOffsets = false;
+    if (config.contains("dontLoadRomOffsets") && config["dontLoadRomOffsets"].is_boolean())
+        dontLoadRomOffsets = config["dontLoadRomOffsets"];
+
     executorServerPort = 50071;
     if (config.contains("executorServerPort") && config["executorServerPort"].is_number())
         executorServerPort = config["executorServerPort"];
@@ -480,6 +484,8 @@ void Config::print(void)
         cout << "    logRemoteDbReads=true" << endl;
     if (logExecutorServerResponses)
         cout << "    logExecutorServerResponses=true" << endl;
+    if (dontLoadRomOffsets)
+        cout << "    dontLoadRomOffsets=true" << endl;
 
     cout << "    executorServerPort=" << to_string(executorServerPort) << endl;
     cout << "    executorClientPort=" << to_string(executorClientPort) << endl;
