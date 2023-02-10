@@ -152,12 +152,13 @@ enum RomError : int {
   ROM_ERROR_INTRINSIC_INVALID_SENDER_CODE = 25,
   ROM_ERROR_INTRINSIC_TX_GAS_OVERFLOW = 26,
   ROM_ERROR_BATCH_DATA_TOO_BIG = 27,
+  ROM_ERROR_UNSUPPORTED_FORK_ID = 28,
   RomError_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   RomError_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool RomError_IsValid(int value);
 constexpr RomError RomError_MIN = ROM_ERROR_UNSPECIFIED;
-constexpr RomError RomError_MAX = ROM_ERROR_BATCH_DATA_TOO_BIG;
+constexpr RomError RomError_MAX = ROM_ERROR_UNSUPPORTED_FORK_ID;
 constexpr int RomError_ARRAYSIZE = RomError_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* RomError_descriptor();
@@ -183,12 +184,13 @@ enum ExecutorError : int {
   EXECUTOR_ERROR_COUNTERS_OVERFLOW_ARITH = 5,
   EXECUTOR_ERROR_COUNTERS_OVERFLOW_PADDING = 6,
   EXECUTOR_ERROR_COUNTERS_OVERFLOW_POSEIDON = 7,
+  EXECUTOR_ERROR_UNSUPPORTED_FORK_ID = 8,
   ExecutorError_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   ExecutorError_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool ExecutorError_IsValid(int value);
 constexpr ExecutorError ExecutorError_MIN = EXECUTOR_ERROR_UNSPECIFIED;
-constexpr ExecutorError ExecutorError_MAX = EXECUTOR_ERROR_COUNTERS_OVERFLOW_POSEIDON;
+constexpr ExecutorError ExecutorError_MAX = EXECUTOR_ERROR_UNSUPPORTED_FORK_ID;
 constexpr int ExecutorError_ARRAYSIZE = ExecutorError_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ExecutorError_descriptor();
@@ -389,23 +391,24 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kDbFieldNumber = 14,
-    kContractsBytecodeFieldNumber = 15,
+    kDbFieldNumber = 15,
+    kContractsBytecodeFieldNumber = 16,
     kOldStateRootFieldNumber = 1,
     kOldAccInputHashFieldNumber = 2,
-    kBatchL2DataFieldNumber = 5,
-    kGlobalExitRootFieldNumber = 6,
-    kCoinbaseFieldNumber = 8,
-    kTxHashToGenerateExecuteTraceFieldNumber = 10,
-    kTxHashToGenerateCallTraceFieldNumber = 11,
-    kFromFieldNumber = 13,
+    kBatchL2DataFieldNumber = 6,
+    kGlobalExitRootFieldNumber = 7,
+    kCoinbaseFieldNumber = 9,
+    kTxHashToGenerateExecuteTraceFieldNumber = 11,
+    kTxHashToGenerateCallTraceFieldNumber = 12,
+    kFromFieldNumber = 14,
     kOldBatchNumFieldNumber = 3,
     kChainIdFieldNumber = 4,
-    kEthTimestampFieldNumber = 7,
-    kNoCountersFieldNumber = 12,
-    kUpdateMerkleTreeFieldNumber = 9,
+    kForkIdFieldNumber = 5,
+    kEthTimestampFieldNumber = 8,
+    kNoCountersFieldNumber = 13,
+    kUpdateMerkleTreeFieldNumber = 10,
   };
-  // map<string, string> db = 14;
+  // map<string, string> db = 15;
   int db_size() const;
   private:
   int _internal_db_size() const;
@@ -422,7 +425,7 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
       mutable_db();
 
-  // map<string, string> contracts_bytecode = 15;
+  // map<string, string> contracts_bytecode = 16;
   int contracts_bytecode_size() const;
   private:
   int _internal_contracts_bytecode_size() const;
@@ -489,7 +492,7 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   std::string* _internal_mutable_old_acc_input_hash();
   public:
 
-  // bytes batch_l2_data = 5;
+  // bytes batch_l2_data = 6;
   void clear_batch_l2_data();
   const std::string& batch_l2_data() const;
   void set_batch_l2_data(const std::string& value);
@@ -514,7 +517,7 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   std::string* _internal_mutable_batch_l2_data();
   public:
 
-  // bytes global_exit_root = 6;
+  // bytes global_exit_root = 7;
   void clear_global_exit_root();
   const std::string& global_exit_root() const;
   void set_global_exit_root(const std::string& value);
@@ -539,7 +542,7 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   std::string* _internal_mutable_global_exit_root();
   public:
 
-  // string coinbase = 8;
+  // string coinbase = 9;
   void clear_coinbase();
   const std::string& coinbase() const;
   void set_coinbase(const std::string& value);
@@ -564,7 +567,7 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   std::string* _internal_mutable_coinbase();
   public:
 
-  // bytes tx_hash_to_generate_execute_trace = 10;
+  // bytes tx_hash_to_generate_execute_trace = 11;
   void clear_tx_hash_to_generate_execute_trace();
   const std::string& tx_hash_to_generate_execute_trace() const;
   void set_tx_hash_to_generate_execute_trace(const std::string& value);
@@ -589,7 +592,7 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   std::string* _internal_mutable_tx_hash_to_generate_execute_trace();
   public:
 
-  // bytes tx_hash_to_generate_call_trace = 11;
+  // bytes tx_hash_to_generate_call_trace = 12;
   void clear_tx_hash_to_generate_call_trace();
   const std::string& tx_hash_to_generate_call_trace() const;
   void set_tx_hash_to_generate_call_trace(const std::string& value);
@@ -614,7 +617,7 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   std::string* _internal_mutable_tx_hash_to_generate_call_trace();
   public:
 
-  // string from = 13;
+  // string from = 14;
   void clear_from();
   const std::string& from() const;
   void set_from(const std::string& value);
@@ -657,7 +660,16 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   void _internal_set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // uint64 eth_timestamp = 7;
+  // uint64 fork_id = 5;
+  void clear_fork_id();
+  ::PROTOBUF_NAMESPACE_ID::uint64 fork_id() const;
+  void set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_fork_id() const;
+  void _internal_set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 eth_timestamp = 8;
   void clear_eth_timestamp();
   ::PROTOBUF_NAMESPACE_ID::uint64 eth_timestamp() const;
   void set_eth_timestamp(::PROTOBUF_NAMESPACE_ID::uint64 value);
@@ -666,7 +678,7 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   void _internal_set_eth_timestamp(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // uint64 no_counters = 12;
+  // uint64 no_counters = 13;
   void clear_no_counters();
   ::PROTOBUF_NAMESPACE_ID::uint64 no_counters() const;
   void set_no_counters(::PROTOBUF_NAMESPACE_ID::uint64 value);
@@ -675,7 +687,7 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   void _internal_set_no_counters(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // uint32 update_merkle_tree = 9;
+  // uint32 update_merkle_tree = 10;
   void clear_update_merkle_tree();
   ::PROTOBUF_NAMESPACE_ID::uint32 update_merkle_tree() const;
   void set_update_merkle_tree(::PROTOBUF_NAMESPACE_ID::uint32 value);
@@ -713,6 +725,7 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr from_;
   ::PROTOBUF_NAMESPACE_ID::uint64 old_batch_num_;
   ::PROTOBUF_NAMESPACE_ID::uint64 chain_id_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 fork_id_;
   ::PROTOBUF_NAMESPACE_ID::uint64 eth_timestamp_;
   ::PROTOBUF_NAMESPACE_ID::uint64 no_counters_;
   ::PROTOBUF_NAMESPACE_ID::uint32 update_merkle_tree_;
@@ -3691,7 +3704,27 @@ inline void ProcessBatchRequest::set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 va
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequest.chain_id)
 }
 
-// bytes batch_l2_data = 5;
+// uint64 fork_id = 5;
+inline void ProcessBatchRequest::clear_fork_id() {
+  fork_id_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessBatchRequest::_internal_fork_id() const {
+  return fork_id_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessBatchRequest::fork_id() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchRequest.fork_id)
+  return _internal_fork_id();
+}
+inline void ProcessBatchRequest::_internal_set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  fork_id_ = value;
+}
+inline void ProcessBatchRequest::set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_fork_id(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequest.fork_id)
+}
+
+// bytes batch_l2_data = 6;
 inline void ProcessBatchRequest::clear_batch_l2_data() {
   batch_l2_data_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -3772,7 +3805,7 @@ inline void ProcessBatchRequest::unsafe_arena_set_allocated_batch_l2_data(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBatchRequest.batch_l2_data)
 }
 
-// bytes global_exit_root = 6;
+// bytes global_exit_root = 7;
 inline void ProcessBatchRequest::clear_global_exit_root() {
   global_exit_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -3853,7 +3886,7 @@ inline void ProcessBatchRequest::unsafe_arena_set_allocated_global_exit_root(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBatchRequest.global_exit_root)
 }
 
-// uint64 eth_timestamp = 7;
+// uint64 eth_timestamp = 8;
 inline void ProcessBatchRequest::clear_eth_timestamp() {
   eth_timestamp_ = PROTOBUF_ULONGLONG(0);
 }
@@ -3873,7 +3906,7 @@ inline void ProcessBatchRequest::set_eth_timestamp(::PROTOBUF_NAMESPACE_ID::uint
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequest.eth_timestamp)
 }
 
-// string coinbase = 8;
+// string coinbase = 9;
 inline void ProcessBatchRequest::clear_coinbase() {
   coinbase_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -3954,7 +3987,7 @@ inline void ProcessBatchRequest::unsafe_arena_set_allocated_coinbase(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBatchRequest.coinbase)
 }
 
-// uint32 update_merkle_tree = 9;
+// uint32 update_merkle_tree = 10;
 inline void ProcessBatchRequest::clear_update_merkle_tree() {
   update_merkle_tree_ = 0u;
 }
@@ -3974,7 +4007,7 @@ inline void ProcessBatchRequest::set_update_merkle_tree(::PROTOBUF_NAMESPACE_ID:
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequest.update_merkle_tree)
 }
 
-// bytes tx_hash_to_generate_execute_trace = 10;
+// bytes tx_hash_to_generate_execute_trace = 11;
 inline void ProcessBatchRequest::clear_tx_hash_to_generate_execute_trace() {
   tx_hash_to_generate_execute_trace_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -4055,7 +4088,7 @@ inline void ProcessBatchRequest::unsafe_arena_set_allocated_tx_hash_to_generate_
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBatchRequest.tx_hash_to_generate_execute_trace)
 }
 
-// bytes tx_hash_to_generate_call_trace = 11;
+// bytes tx_hash_to_generate_call_trace = 12;
 inline void ProcessBatchRequest::clear_tx_hash_to_generate_call_trace() {
   tx_hash_to_generate_call_trace_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -4136,7 +4169,7 @@ inline void ProcessBatchRequest::unsafe_arena_set_allocated_tx_hash_to_generate_
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBatchRequest.tx_hash_to_generate_call_trace)
 }
 
-// uint64 no_counters = 12;
+// uint64 no_counters = 13;
 inline void ProcessBatchRequest::clear_no_counters() {
   no_counters_ = PROTOBUF_ULONGLONG(0);
 }
@@ -4156,7 +4189,7 @@ inline void ProcessBatchRequest::set_no_counters(::PROTOBUF_NAMESPACE_ID::uint64
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequest.no_counters)
 }
 
-// string from = 13;
+// string from = 14;
 inline void ProcessBatchRequest::clear_from() {
   from_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -4237,7 +4270,7 @@ inline void ProcessBatchRequest::unsafe_arena_set_allocated_from(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBatchRequest.from)
 }
 
-// map<string, string> db = 14;
+// map<string, string> db = 15;
 inline int ProcessBatchRequest::_internal_db_size() const {
   return db_.size();
 }
@@ -4266,7 +4299,7 @@ ProcessBatchRequest::mutable_db() {
   return _internal_mutable_db();
 }
 
-// map<string, string> contracts_bytecode = 15;
+// map<string, string> contracts_bytecode = 16;
 inline int ProcessBatchRequest::_internal_contracts_bytecode_size() const {
   return contracts_bytecode_.size();
 }

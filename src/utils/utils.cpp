@@ -22,128 +22,6 @@
 using namespace std;
 using namespace std::filesystem;
 
-void printRegs(Context &ctx)
-{
-    cout << "Registers:" << endl;
-    printReg(ctx, "A7", ctx.pols.A7[*ctx.pStep]);
-    printReg(ctx, "A6", ctx.pols.A6[*ctx.pStep]);
-    printReg(ctx, "A5", ctx.pols.A5[*ctx.pStep]);
-    printReg(ctx, "A4", ctx.pols.A4[*ctx.pStep]);
-    printReg(ctx, "A3", ctx.pols.A3[*ctx.pStep]);
-    printReg(ctx, "A2", ctx.pols.A2[*ctx.pStep]);
-    printReg(ctx, "A1", ctx.pols.A1[*ctx.pStep]);
-    printReg(ctx, "A0", ctx.pols.A0[*ctx.pStep]);
-    printReg(ctx, "B7", ctx.pols.B7[*ctx.pStep]);
-    printReg(ctx, "B6", ctx.pols.B6[*ctx.pStep]);
-    printReg(ctx, "B5", ctx.pols.B5[*ctx.pStep]);
-    printReg(ctx, "B4", ctx.pols.B4[*ctx.pStep]);
-    printReg(ctx, "B3", ctx.pols.B3[*ctx.pStep]);
-    printReg(ctx, "B2", ctx.pols.B2[*ctx.pStep]);
-    printReg(ctx, "B1", ctx.pols.B1[*ctx.pStep]);
-    printReg(ctx, "B0", ctx.pols.B0[*ctx.pStep]);
-    printReg(ctx, "C7", ctx.pols.C7[*ctx.pStep]);
-    printReg(ctx, "C6", ctx.pols.C6[*ctx.pStep]);
-    printReg(ctx, "C5", ctx.pols.C5[*ctx.pStep]);
-    printReg(ctx, "C4", ctx.pols.C4[*ctx.pStep]);
-    printReg(ctx, "C3", ctx.pols.C3[*ctx.pStep]);
-    printReg(ctx, "C2", ctx.pols.C2[*ctx.pStep]);
-    printReg(ctx, "C1", ctx.pols.C1[*ctx.pStep]);
-    printReg(ctx, "C0", ctx.pols.C0[*ctx.pStep]);
-    printReg(ctx, "D7", ctx.pols.D7[*ctx.pStep]);
-    printReg(ctx, "D6", ctx.pols.D6[*ctx.pStep]);
-    printReg(ctx, "D5", ctx.pols.D5[*ctx.pStep]);
-    printReg(ctx, "D4", ctx.pols.D4[*ctx.pStep]);
-    printReg(ctx, "D3", ctx.pols.D3[*ctx.pStep]);
-    printReg(ctx, "D2", ctx.pols.D2[*ctx.pStep]);
-    printReg(ctx, "D1", ctx.pols.D1[*ctx.pStep]);
-    printReg(ctx, "D0", ctx.pols.D0[*ctx.pStep]);
-    printReg(ctx, "E7", ctx.pols.E7[*ctx.pStep]);
-    printReg(ctx, "E6", ctx.pols.E6[*ctx.pStep]);
-    printReg(ctx, "E5", ctx.pols.E5[*ctx.pStep]);
-    printReg(ctx, "E4", ctx.pols.E4[*ctx.pStep]);
-    printReg(ctx, "E3", ctx.pols.E3[*ctx.pStep]);
-    printReg(ctx, "E2", ctx.pols.E2[*ctx.pStep]);
-    printReg(ctx, "E1", ctx.pols.E1[*ctx.pStep]);
-    printReg(ctx, "E0", ctx.pols.E0[*ctx.pStep]);
-    printReg(ctx, "SR7", ctx.pols.SR7[*ctx.pStep]);
-    printReg(ctx, "SR6", ctx.pols.SR6[*ctx.pStep]);
-    printReg(ctx, "SR5", ctx.pols.SR5[*ctx.pStep]);
-    printReg(ctx, "SR4", ctx.pols.SR4[*ctx.pStep]);
-    printReg(ctx, "SR3", ctx.pols.SR3[*ctx.pStep]);
-    printReg(ctx, "SR2", ctx.pols.SR2[*ctx.pStep]);
-    printReg(ctx, "SR1", ctx.pols.SR1[*ctx.pStep]);
-    printReg(ctx, "SR0", ctx.pols.SR0[*ctx.pStep]);
-    printReg(ctx, "CTX", ctx.pols.CTX[*ctx.pStep]);
-    printReg(ctx, "SP", ctx.pols.SP[*ctx.pStep]);
-    printReg(ctx, "PC", ctx.pols.PC[*ctx.pStep]);
-    printReg(ctx, "MAXMEM", ctx.pols.MAXMEM[*ctx.pStep]);
-    printReg(ctx, "GAS", ctx.pols.GAS[*ctx.pStep]);
-    printReg(ctx, "zkPC", ctx.pols.zkPC[*ctx.pStep]);
-    Goldilocks::Element step;
-    step = ctx.fr.fromU64(*ctx.pStep);
-    printReg(ctx, "STEP", step, false, true);
-#ifdef LOG_FILENAME
-    cout << "File: " << ctx.fileName << " Line: " << ctx.line << endl;
-#endif
-}
-
-void printVars(Context &ctx)
-{
-    cout << "Variables:" << endl;
-    uint64_t i = 0;
-    for (unordered_map<string, mpz_class>::iterator it = ctx.vars.begin(); it != ctx.vars.end(); it++)
-    {
-        cout << "i: " << i << " varName: " << it->first << " fe: " << it->second.get_str(16) << endl;
-        i++;
-    }
-}
-
-string printFea(Context &ctx, Fea &fea)
-{
-    return ctx.fr.toString(fea.fe7, 16) +
-           ":" + ctx.fr.toString(fea.fe6, 16) +
-           ":" + ctx.fr.toString(fea.fe5, 16) +
-           ":" + ctx.fr.toString(fea.fe4, 16) +
-           ":" + ctx.fr.toString(fea.fe3, 16) +
-           ":" + ctx.fr.toString(fea.fe2, 16) +
-           ":" + ctx.fr.toString(fea.fe1, 16) +
-           ":" + ctx.fr.toString(fea.fe0, 16);
-}
-
-void printMem(Context &ctx)
-{
-    cout << "Memory:" << endl;
-    uint64_t i = 0;
-    for (unordered_map<uint64_t, Fea>::iterator it = ctx.mem.begin(); it != ctx.mem.end(); it++)
-    {
-        mpz_class addr(it->first);
-        cout << "i: " << i << " address:" << addr.get_str(16) << " ";
-        cout << printFea(ctx, it->second);
-        cout << endl;
-        i++;
-    }
-}
-
-void printReg(Context &ctx, string name, Goldilocks::Element &fe, bool h, bool bShort)
-{
-    cout << "    Register: " << name << " Value: " << ctx.fr.toString(fe, 16) << endl;
-}
-
-void printU64(Context &ctx, string name, uint64_t v)
-{
-    cout << "    U64: " << name << ":" << v << endl;
-}
-
-void printU32(Context &ctx, string name, uint32_t v)
-{
-    cout << "    U32: " << name << ":" << v << endl;
-}
-
-void printU16(Context &ctx, string name, uint16_t v)
-{
-    cout << "    U16: " << name << ":" << v << endl;
-}
-
 void printBa(uint8_t *pData, uint64_t dataSize, string name)
 {
     cout << name << " = ";
@@ -361,7 +239,7 @@ bool fileExists (const string &fileName)
 
 void ensureDirectoryExists (const string &fileName)
 {
-    string command = "[ -d " + fileName + " ] && echo \"Directory already exists\" || mkdir -p " + fileName;
+    string command = "[ -d " + fileName + " ] || mkdir -p " + fileName;
     int iResult = system(command.c_str());
     if (iResult != 0)
     {

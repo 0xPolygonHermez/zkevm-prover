@@ -40,7 +40,6 @@ public:
     
     bool executeInParallel;
     bool useMainExecGenerated;
-    bool useProcessBatchCache;
 
     bool saveRequestToFile; // Saves the grpc service request, in text format
     bool saveInputToFile; // Saves the grpc input data, in json format
@@ -55,6 +54,7 @@ public:
     bool opcodeTracer;
     bool logRemoteDbReads;
     bool logExecutorServerResponses;
+    bool dontLoadRomOffsets;
 
     uint16_t executorServerPort;
     bool executorROMLineTraces;

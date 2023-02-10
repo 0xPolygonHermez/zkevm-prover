@@ -21,6 +21,8 @@ FROM ubuntu:22.04 as executor
 WORKDIR /app
 COPY ./testvectors ./testvectors
 COPY ./config ./config
+COPY ./src/main_sm/fork_0/scripts/rom.json ./src/main_sm/fork_0/scripts/rom.json
+COPY ./src/main_sm/fork_1/scripts/rom.json ./src/main_sm/fork_1/scripts/rom.json
 
 RUN DEBIAN_FRONTEND=noninteractive apt update && \
     DEBIAN_FRONTEND=noninteractive apt install -y libgmp-dev \

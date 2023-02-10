@@ -15,7 +15,7 @@ node ../pil-stark/src/main_verifier.js -p config/recursive1/recursive1.pil -s co
 ```
 ### Verify recursive2 proof with pil-stark
 ```bash
-node ../pil-stark/src/main_verifier.js -p config/recursive2/recursive2.pil -s config/recursive2/recursive2.starkinfo.json -o $(ls -t runtime//output/*.aggregated_proof.proof.json | head -n1) -b $(ls -t runtime//output/*.aggregated_proof.public.json | head -n1) -v config/recursive2/recursive2.verkey.json
+node ../pil-stark/src/main_verifier.js -p config/recursive2/recursive2.pil -s config/recursive2/recursive2.starkinfo.json -o $(ls -t runtime/output/*.aggregated_proof.proof.json | head -n1) -b $(ls -t runtime/output/*.gen_aggregated_proof_public.json | head -n1) -v config/recursive2/recursive2.verkey.json
 ```
 
 #### Verify final snark

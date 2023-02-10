@@ -3,7 +3,6 @@
 
 #include <sys/time.h>
 #include "goldilocks_base_field.hpp"
-#include "context.hpp"
 #include "config.hpp"
 #include "input.hpp"
 #include "proof.hpp"
@@ -22,23 +21,6 @@ struct MemoryInfo {
     uint64_t swapTotal;
     uint64_t swapFree;
 };
-
-/*********/
-/* Print */
-/*********/
-
-// These functions log information into the console
-
-void printRegs(Context &ctx);
-void printVars(Context &ctx);
-void printMem(Context &ctx);
-
-void printReg(Context &ctx, string name, Goldilocks::Element &V, bool h = false, bool bShort = false);
-void printU64(Context &ctx, string name, uint64_t v);
-void printU32(Context &ctx, string name, uint32_t v);
-void printU16(Context &ctx, string name, uint16_t v);
-
-string printFea(Context &ctx, Fea &fea);
 
 void printBa(uint8_t * pData, uint64_t dataSize, string name);
 void printBits(uint8_t * pData, uint64_t dataSize, string name);

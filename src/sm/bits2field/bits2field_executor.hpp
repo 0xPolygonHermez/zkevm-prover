@@ -2,7 +2,10 @@
 #define BITS2FIELD_EXECUTOR_HPP
 
 #include <vector>
-#include "commit_pols.hpp"
+#include "definitions.hpp"
+#include "sm/pols_generated/commit_pols.hpp"
+
+USING_PROVER_FORK_NAMESPACE;
 
 using namespace std;
 

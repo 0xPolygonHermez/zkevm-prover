@@ -1,6 +1,7 @@
 #include <iostream>
 #include "prover_request_type.hpp"
 #include "utils.hpp"
+#include "exit_process.hpp"
 
 string proverRequestType2string (tProverRequestType type)
 {

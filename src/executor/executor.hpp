@@ -1,10 +1,10 @@
 #ifndef EXECUTOR_HPP
 #define EXECUTOR_HPP
 
-#include "sm/pols_generated/commit_pols.hpp"
 #include "config.hpp"
 #include "goldilocks_base_field.hpp"
-#include "sm/main/main_executor.hpp"
+#include "main_sm/fork_0/main/main_executor.hpp"
+#include "main_sm/fork_1/main/main_executor.hpp"
 #include "sm/storage/storage_executor.hpp"
 #include "sm/memory/memory_executor.hpp"
 #include "sm/binary/binary_executor.hpp"
@@ -24,7 +24,8 @@ public:
     Goldilocks &fr;
     const Config &config;
     
-    MainExecutor mainExecutor;
+    fork_0::MainExecutor mainExecutor_fork_0;
+    PROVER_FORK_NAMESPACE::MainExecutor mainExecutor; // Default executor used by prover
     StorageExecutor storageExecutor;
     MemoryExecutor memoryExecutor;
     BinaryExecutor binaryExecutor;
@@ -40,6 +41,7 @@ public:
     Executor(Goldilocks &fr, const Config &config, PoseidonGoldilocks &poseidon) :
         fr(fr),
         config(config),
+        mainExecutor_fork_0(fr, poseidon, config),
         mainExecutor(fr, poseidon, config),
         storageExecutor(fr, poseidon, config),
         memoryExecutor(fr, config),
@@ -55,7 +57,7 @@ public:
         {};
 
     // Full version: all polynomials are evaluated, in all evaluations
-    void execute (ProverRequest &proverRequest, CommitPols & commitPols);
+    void execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::CommitPols & commitPols);
 
     // Reduced version: only 2 evaluations are allocated, and assert is disabled
     void process_batch (ProverRequest &proverRequest);

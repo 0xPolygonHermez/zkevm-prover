@@ -2,9 +2,13 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <gmpxx.h>
+#include "../config/definitions.hpp" // This is the only project file allowed to be included
 
 using namespace std;
 using json = nlohmann::json;
+
+// Fork namespace
+const string forkNamespace = PROVER_FORK_NAMESPACE_STRING;
 
 // Forward declaration
 void file2json (json &rom, string &romFileName);
@@ -26,10 +30,10 @@ int main(int argc, char **argv)
 
     string functionName = codeGenerationName;
     string fileName = codeGenerationName;
-    string directoryName = "src/sm/" + codeGenerationName;
+    string directoryName = "src/main_sm/" + forkNamespace + "/" + codeGenerationName;
 
     // Load rom.json
-    string romFileName = "config/scripts/rom.json";
+    string romFileName = "src/main_sm/" + forkNamespace + "/scripts/rom.json";
     json rom;
     file2json(rom, romFileName);
 
@@ -143,20 +147,20 @@ string generate(const json &rom, const string &functionName, const string &fileN
     {
         if (bFastMode)
         {
-            code += "#ifndef MAIN_EXEC_GENERATED_FAST_HPP\n";
-            code += "#define MAIN_EXEC_GENERATED_FAST_HPP\n";
+            code += "#ifndef MAIN_EXEC_GENERATED_FAST_HPP_" + forkNamespace + "\n";
+            code += "#define MAIN_EXEC_GENERATED_FAST_HPP_" + forkNamespace + "\n";
         }
         else
         {
-            code += "#ifndef MAIN_EXEC_GENERATED_HPP\n";
-            code += "#define MAIN_EXEC_GENERATED_HPP\n";
+            code += "#ifndef MAIN_EXEC_GENERATED_HPP_" + forkNamespace + "\n";
+            code += "#define MAIN_EXEC_GENERATED_HPP_" + forkNamespace + "\n";
         }
         code += "\n";
         code += "#include <string>\n";
-        code += "#include \"main_executor.hpp\"\n";
+        code += "#include \"main_sm/" + forkNamespace + "/main/main_executor.hpp\"\n";
         if (!bFastMode)
         {
-            code += "#include \"sm/main/main_exec_required.hpp\"\n";
+            code += "#include \"main_sm/" + forkNamespace + "/main/main_exec_required.hpp\"\n";
         }
     }
     else
@@ -164,23 +168,26 @@ string generate(const json &rom, const string &functionName, const string &fileN
         if (bFastMode)
         {
             code += "#define COMMIT_POL_FAST_MODE\n";
-            code += "#include \"commit_pols.hpp\"\n";
+            code += "#include \"main_sm/" + forkNamespace + "/pols_generated/commit_pols.hpp\"\n";
         }
-        code += "#include \"" + fileName + ".hpp\"\n";
+        code += "#include \"main_sm/" + forkNamespace + "/main_exec_generated/" + fileName + ".hpp\"\n";
         code += "#include \"scalar.hpp\"\n";
-        code += "#include \"eval_command.hpp\"\n";
+        code += "#include \"main_sm/"+ forkNamespace + "/main/eval_command.hpp\"\n";
         code += "#include <fstream>\n";
         code += "#include \"utils.hpp\"\n";
         code += "#include \"timer.hpp\"\n";
         code += "#include \"exit_process.hpp\"\n";
         code += "#include \"zkassert.hpp\"\n";
         code += "#include \"poseidon_g_permutation.hpp\"\n";
-        code += "#include \"time_metric.hpp\"\n";
+        code += "#include \"main_sm/"+ forkNamespace + "/main/time_metric.hpp\"\n";
         if (!bFastMode)
             code += "#include \"goldilocks_precomputed.hpp\"\n";
 
     }
     code += "\n";
+
+    code += "namespace " + forkNamespace + "\n";
+    code += "{\n";
 
     if (!bHeader)
     {
@@ -205,13 +212,14 @@ string generate(const json &rom, const string &functionName, const string &fileN
     }
 
     if (bFastMode)
-        code += "void " + functionName + " (MainExecutor &mainExecutor, ProverRequest &proverRequest)";
+        code += "void " + functionName + " (" + forkNamespace + "::MainExecutor &mainExecutor, ProverRequest &proverRequest)";
     else
-        code += "void "+ functionName + " (MainExecutor &mainExecutor, ProverRequest &proverRequest, MainCommitPols &pols, MainExecRequired &required)";
+        code += "void "+ functionName + " (" + forkNamespace + "::MainExecutor &mainExecutor, ProverRequest &proverRequest, " + forkNamespace + "::MainCommitPols &pols, " + forkNamespace + "::MainExecRequired &required)";
 
     if (bHeader)
     {
         code += ";\n";
+        code += "}\n";
         code += "\n";
         code += "#endif\n";
         return code;
@@ -257,6 +265,15 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    // Init execution flags\n";
     code += "    bool bProcessBatch = (proverRequest.type == prt_processBatch);\n";
     code += "    bool bUnsignedTransaction = (proverRequest.input.from != \"\") && (proverRequest.input.from != \"0x\");\n\n";
+    
+    code += "    // Unsigned transactions (from!=empty) are intended to be used to \"estimage gas\" (or \"call\")\n";
+    code += "    // In prover mode, we cannot accept unsigned transactions, since the proof would not meet the PIL constrains\n";
+    code += "    if (bUnsignedTransaction && !bProcessBatch)\n";
+    code += "    {\n";
+    code += "        cerr << \"Error: MainExecutor::MainExecutor() failed called with bUnsignedTransaction=true but bProcessBatch=false\" << endl;\n";
+    code += "        proverRequest.result = ZKR_SM_MAIN_INVALID_UNSIGNED_TX;\n";
+    code += "        return;\n";
+    code += "    }\n\n";
 
     code += "    Context ctx(mainExecutor.fr, mainExecutor.config, mainExecutor.fec, mainExecutor.fnec, pols, mainExecutor.rom, proverRequest, pStateDB);\n\n";
 
@@ -962,7 +979,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    }\n";
                     code += "    incCounter = smtGetResult.proofHashCounter + 2;\n";
                     if (bFastMode)
-                        code += "    proverRequest.fullTracer.addReadWriteAddress( pols.A0[0], pols.A1[0], pols.A2[0], pols.A3[0], pols.A4[0], pols.A5[0], pols.A6[0], pols.A7[0], pols.B0[0], pols.B1[0], pols.B2[0], pols.B3[0], pols.B4[0], pols.B5[0], pols.B6[0], pols.B7[0], smtGetResult.value);\n";
+                        code += "    eval_addReadWriteAddress(ctx, smtGetResult.value);\n";
                     code += "#ifdef LOG_TIME_STATISTICS\n";
                     code += "    mainMetrics.add(\"SMT Get\", TimeDiff(t));\n";
                     code += "#endif\n";
@@ -1063,7 +1080,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    }\n";
                     code += "    incCounter = ctx.lastSWrite.res.proofHashCounter + 2;\n";
                     if (bFastMode)
-                        code += "    proverRequest.fullTracer.addReadWriteAddress( pols.A0[0], pols.A1[0], pols.A2[0], pols.A3[0], pols.A4[0], pols.A5[0], pols.A6[0], pols.A7[0], pols.B0[0], pols.B1[0], pols.B2[0], pols.B3[0], pols.B4[0], pols.B5[0], pols.B6[0], pols.B7[0], scalarD);\n";
+                        code += "    eval_addReadWriteAddress(ctx, scalarD);\n";
                     code += "#ifdef LOG_TIME_STATISTICS\n";
                     code += "    mainMetrics.add(\"SMT Set\", TimeDiff(t));\n";
                     code += "#endif\n";
@@ -2923,12 +2940,12 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        return;\n";
                 code += "    }\n";
 
+                code += "    if (c != 0)\n";
+                code += "        pols.carry[" + string(bFastMode?"0":"i") + "] = fr.one();\n";
+
                 if (!bFastMode)
                 {
                     code += "    pols.binOpcode[i] = fr.fromU64(5);\n";
-
-                    code += "    if (c != 0)\n";
-                    code += "        pols.carry[i] = fr.one();\n";
 
                     code += "    // Store the binary action to execute it later with the binary SM\n";
                     code += "    binaryAction.a = a;\n";
@@ -3991,7 +4008,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
     code += "}\n\n";
 
-    code += "#pragma GCC pop_options\n";
+    code += "#pragma GCC pop_options\n\n";
+
+    code += "} // namespace\n\n";
 
     return code;
 }
