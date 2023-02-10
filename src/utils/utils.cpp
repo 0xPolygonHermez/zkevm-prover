@@ -15,9 +15,8 @@
 #include <openssl/evp.h>
 #include <openssl/sha.h>
 #include <openssl/crypto.h>
-#include <netdb.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
+#include <ifaddrs.h>
+#include <net/if.h>
 #include <arpa/inet.h>
 
 using namespace std;
@@ -588,29 +587,57 @@ bool octalText2hexText (const string &octalText, string &hexText)
 }
 */
 
-// Get hostname and IP address
-void getNetworkInfo (string &hostname, string &ipAddress)
+// Get IP address
+void getIPAddress (string &ipAddress)
 {
-    char host[256];
-    char *ip;
-    struct hostent *host_entry;
-    int iResult;
-    iResult = gethostname(host, sizeof(host));
-    if (iResult == -1)
+    ipAddress.clear();
+
+    struct ifaddrs* pIfaddrs = NULL;
+
+    int iResult = getifaddrs(&pIfaddrs);
+    if (iResult != 0)
     {
-        cerr << "Error: getNetworkInfo() failed calling gethostname()" << endl;
-        hostname = "(error calling gethostname)";
-        ipAddress = "(error calling gethostname)";
+        cerr << "Error: getNetworkInfo() failed calling getifaddrs() iResult=" << iResult << "=" << strerror(iResult) << endl;
         return;
     }
-    hostname = host;
-    host_entry = gethostbyname(host);
-    if (host_entry == NULL)
+
+    for ( struct ifaddrs* pEntry = pIfaddrs; pEntry != NULL; pEntry = pEntry->ifa_next)
     {
-        cerr << "Error: getNetworkInfo() failed calling gethostbyname()" << endl;
-        ipAddress = "(error calling gethostbyname)";
-        return;        
+        // Skip localhost
+        std::string name = std::string(pEntry->ifa_name);
+        if (name == "lo")
+        {
+            continue;
+        }
+        sa_family_t address_family = pEntry->ifa_addr->sa_family;
+
+        // Report IPv4 addresses
+        if (address_family == AF_INET)
+        {
+            if (pEntry->ifa_addr != NULL)
+            {
+                char buffer[INET_ADDRSTRLEN] = {0};
+                inet_ntop(address_family, &((struct sockaddr_in*)(pEntry->ifa_addr))->sin_addr, buffer, INET_ADDRSTRLEN);
+                if (ipAddress != "")
+                {
+                    ipAddress += ",";
+                }
+                ipAddress += buffer;
+            }
+        }
+
+        // Report IPv6 addresses
+        /*else if (address_family == AF_INET6)
+        {
+            if ( pEntry->ifa_addr != nullptr )
+            {
+                char buffer[INET6_ADDRSTRLEN] = {0};
+                inet_ntop(address_family, &((struct sockaddr_in6*)(pEntry->ifa_addr))->sin6_addr, buffer, INET6_ADDRSTRLEN);
+                ipAddress += buffer;
+                ipAddress += " ";
+            }
+        }*/
     }
-    ip = inet_ntoa(*((struct in_addr*) host_entry->h_addr_list[0]));
-    ipAddress = ip;
+
+    freeifaddrs(pIfaddrs);
 }

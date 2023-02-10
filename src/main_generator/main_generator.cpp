@@ -372,7 +372,16 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += "    ctx.pStep = &i; // ctx.pStep is used inside evaluateCommand() to find the current value of the registers, e.g. pols(A0)[ctx.step]\n";
     }
     code += "    ctx.pZKPC = &zkPC; // Pointer to the zkPC\n\n";
-    code += "    Goldilocks::Element currentRCX = fr.zero();\n";
+
+    // Declare currentRCX only if repeat instruction is used
+    for (uint64_t zkPC=0; zkPC<rom["program"].size(); zkPC++)
+    {
+        if (rom["program"][zkPC].contains("repeat") && (rom["program"][zkPC]["repeat"]==1))
+        {
+            code += "    Goldilocks::Element currentRCX = fr.zero();\n";
+            break;
+        }
+    }
 
     code += "    uint64_t incHashPos = 0;\n";
     code += "    uint64_t incCounter = 0;\n\n";
@@ -916,24 +925,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "#ifdef LOG_TIME_STATISTICS\n";
                     code += "    gettimeofday(&t, NULL);\n";
                     code += "#endif\n";
-                    if (!bFastMode)
-                    {
-                        code += "    // Prepare PoseidonG required data\n";
-                        code += "    for (uint64_t j=0; j<12; j++) pg[j] = Kin0[j];\n";
-                    }
+
                     code += "    // Call poseidon and get the hash key\n";
                     code += "    mainExecutor.poseidon.hash(Kin0Hash, Kin0);\n";
-
-                    if (!bFastMode)
-                    {
-                        code += "    // Complete PoseidonG required data\n";
-                        code += "    pg[12] = Kin0Hash[0];\n";
-                        code += "    pg[13] = Kin0Hash[1];\n";
-                        code += "    pg[14] = Kin0Hash[2];\n";
-                        code += "    pg[15] = Kin0Hash[3];\n";
-                        code += "    pg[16] = fr.fromU64(POSEIDONG_PERMUTATION1_ID);\n";
-                        code += "    required.PoseidonG.push_back(pg);\n";
-                    }
 
                     code += "    // Reinject the first resulting hash as the capacity for the next poseidon hash\n";
                     code += "    Kin1[8] = Kin0Hash[0];\n";
@@ -941,25 +935,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    Kin1[10] = Kin0Hash[2];\n";
                     code += "    Kin1[11] = Kin0Hash[3];\n";
 
-                    if (!bFastMode)
-                    {
-                        code += "    // Prepare PoseidonG required data\n";
-                        code += "    for (uint64_t j=0; j<12; j++) pg[j] = Kin1[j];\n";
-                    }
-
                     code += "    // Call poseidon hash\n";
                     code += "    mainExecutor.poseidon.hash(Kin1Hash, Kin1);\n";
-
-                    if (!bFastMode)
-                    {
-                        code += "    // Complete PoseidonG required data\n";
-                        code += "    pg[12] = Kin1Hash[0];\n";
-                        code += "    pg[13] = Kin1Hash[1];\n";
-                        code += "    pg[14] = Kin1Hash[2];\n";
-                        code += "    pg[15] = Kin1Hash[3];\n";
-                        code += "    pg[16] = fr.fromU64(POSEIDONG_PERMUTATION2_ID);\n";
-                        code += "    required.PoseidonG.push_back(pg);\n";
-                    }
 
                     code += "    key[0] = Kin1Hash[0];\n";
                     code += "    key[1] = Kin1Hash[1];\n";
@@ -1030,25 +1007,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    gettimeofday(&t, NULL);\n";
                     code += "#endif\n";
 
-                    if (!bFastMode)
-                    {
-                        code += "    // Prepare PoseidonG required data\n";
-                        code += "    for (uint64_t j=0; j<12; j++) pg[j] = Kin0[j];\n";
-                    }
-
                     code += "    // Call poseidon and get the hash key\n";
                     code += "    mainExecutor.poseidon.hash(Kin0Hash, Kin0);\n";
-
-                    if (!bFastMode)
-                    {
-                        code += "    // Complete PoseidonG required data\n";
-                        code += "    pg[12] = Kin0Hash[0];\n";
-                        code += "    pg[13] = Kin0Hash[1];\n";
-                        code += "    pg[14] = Kin0Hash[2];\n";
-                        code += "    pg[15] = Kin0Hash[3];\n";
-                        code += "    pg[16] = fr.fromU64(POSEIDONG_PERMUTATION1_ID);\n";
-                        code += "    required.PoseidonG.push_back(pg);\n";
-                    }
 
                     code += "    Kin1[8] = Kin0Hash[0];\n";
                     code += "    Kin1[9] = Kin0Hash[1];\n";
@@ -1060,25 +1020,21 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    ctx.lastSWrite.keyI[2] = Kin0Hash[2];\n";
                     code += "    ctx.lastSWrite.keyI[3] = Kin0Hash[3];\n";
 
-                    if (!bFastMode)
-                    {
-                        code += "    // Prepare PoseidonG required data\n";
-                        code += "    for (uint64_t j=0; j<12; j++) pg[j] = Kin1[j];\n";
-                    }
-
                     code += "    // Call poseidon hash\n";
                     code += "    mainExecutor.poseidon.hash(Kin1Hash, Kin1);\n";
 
+                    code += "    // Store a copy of the data in ctx.lastSWrite\n";
                     if (!bFastMode)
                     {
-                        code += "    // Complete PoseidonG required data\n";
-                        code += "    pg[12] = Kin1Hash[0];\n";
-                        code += "    pg[13] = Kin1Hash[1];\n";
-                        code += "    pg[14] = Kin1Hash[2];\n";
-                        code += "    pg[15] = Kin1Hash[3];\n";
-                        code += "    pg[16] = fr.fromU64(POSEIDONG_PERMUTATION2_ID);\n";
-                        code += "    required.PoseidonG.push_back(pg);\n";
+                        code += "    for (uint64_t j=0; j<12; j++)\n";
+                        code += "        ctx.lastSWrite.Kin0[j] = Kin0[j];\n";
+                        code += "    for (uint64_t j=0; j<12; j++)\n";
+                        code += "        ctx.lastSWrite.Kin1[j] = Kin1[j];\n";
                     }
+                    code += "    for (uint64_t j=0; j<4; j++)\n";
+                    code += "        ctx.lastSWrite.keyI[j] = Kin0Hash[j];\n";
+                    code += "    for (uint64_t j=0; j<4; j++)\n";
+                    code += "        ctx.lastSWrite.key[j] = Kin1Hash[j];\n";
 
                     code += "    ctx.lastSWrite.key[0] = Kin1Hash[0];\n";
                     code += "    ctx.lastSWrite.key[1] = Kin1Hash[1];\n";
@@ -1842,6 +1798,26 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
             code += "    mainExecutor.poseidon.hash(Kin1Hash, Kin1);\n";
 
+            // Store PoseidonG required data
+            if (!bFastMode)
+            {                
+                code += "    // Store PoseidonG required data\n";
+                code += "    for (uint64_t j=0; j<12; j++)\n";
+                code += "        pg[j] = Kin0[j];\n";
+                code += "    for (uint64_t j=0; j<4; j++)\n";
+                code += "        pg[12+j] = Kin0Hash[j];\n";
+                code += "    pg[16] = fr.fromU64(POSEIDONG_PERMUTATION1_ID);\n";
+                code += "    required.PoseidonG.push_back(pg);\n";
+
+                code += "    // Store PoseidonG required data\n";
+                code += "    for (uint64_t j=0; j<12; j++)\n";
+                code += "        pg[j] = Kin1[j];\n";
+                code += "    for (uint64_t j=0; j<4; j++)\n";
+                code += "        pg[12+j] = Kin1Hash[j];\n";
+                code += "    pg[16] = fr.fromU64(POSEIDONG_PERMUTATION2_ID);\n";
+                code += "    required.PoseidonG.push_back(pg);\n";
+            }
+
             code += "    key[0] = Kin1Hash[0];\n";
             code += "    key[1] = Kin1Hash[1];\n";
             code += "    key[2] = Kin1Hash[2];\n";
@@ -1957,6 +1933,19 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
             code += "        mainExecutor.poseidon.hash(Kin1Hash, Kin1);\n";
 
+            code += "        // Store a copy of the data in ctx.lastSWrite\n";
+            if (!bFastMode)
+            {
+                code += "        for (uint64_t j=0; j<12; j++)\n";
+                code += "            ctx.lastSWrite.Kin0[j] = Kin0[j];\n";
+                code += "        for (uint64_t j=0; j<12; j++)\n";
+                code += "            ctx.lastSWrite.Kin1[j] = Kin1[j];\n";
+            }
+            code += "        for (uint64_t j=0; j<4; j++)\n";
+            code += "            ctx.lastSWrite.keyI[j] = Kin0Hash[j];\n";
+            code += "        for (uint64_t j=0; j<4; j++)\n";
+            code += "            ctx.lastSWrite.key[j] = Kin1Hash[j];\n";
+
             code += "        ctx.lastSWrite.key[0] = Kin1Hash[0];\n";
             code += "        ctx.lastSWrite.key[1] = Kin1Hash[1];\n";
             code += "        ctx.lastSWrite.key[2] = Kin1Hash[2];\n";
@@ -1988,6 +1977,25 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
             code += "        ctx.lastSWrite.step = i;\n";
             code += "    }\n";
+
+            // Store PoseidonG required data
+            if (!bFastMode)
+            {
+                code += "    // Store PoseidonG required data\n";
+                code += "    for (uint64_t j=0; j<12; j++)\n";
+                code += "        pg[j] = ctx.lastSWrite.Kin0[j];\n";
+                code += "    for (uint64_t j=0; j<4; j++)\n";
+                code += "        pg[12+j] = ctx.lastSWrite.keyI[j];\n";
+                code += "    pg[16] = fr.fromU64(POSEIDONG_PERMUTATION1_ID);\n";
+                code += "    required.PoseidonG.push_back(pg);\n";
+                code += "    // Store PoseidonG required data\n";
+                code += "    for (uint64_t j=0; j<12; j++)\n";
+                code += "        pg[j] = ctx.lastSWrite.Kin1[j];\n";
+                code += "    for (uint64_t j=0; j<4; j++)\n";
+                code += "       pg[12+j] = ctx.lastSWrite.key[j];\n";
+                code += "    pg[16] = fr.fromU64(POSEIDONG_PERMUTATION2_ID);\n";
+                code += "    required.PoseidonG.push_back(pg);\n";
+            }
 
             if (!bFastMode)
             {
@@ -3302,7 +3310,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    {\n";
             code += "        pols.RCX[" + string(bFastMode?"0":"nexti") + "] = fr.dec(pols.RCX[" + string(bFastMode?"0":"i") + "]);\n";
             code += "    }\n";
-         }
+        }
         else
         {
             code += "    pols.RCX[" + string(bFastMode?"0":"nexti") + "] = pols.RCX[" + string(bFastMode?"0":"i") + "];\n";
@@ -3736,9 +3744,15 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += "#endif\n\n";
 
         // Jump to the end label if we are done and we are in fast mode
-        if (bFastMode && (zkPC == rom["labels"]["finalizeExecution"]))
+        if (zkPC == rom["labels"]["finalizeExecution"])
         {
+            code += "    if (ctx.lastStep != 0)\n";
+            code += "    {\n";
+            code += "        cerr << \"Error: MainExecutor::execute() called finalizeExecutionLabel with a non-zero ctx.lastStep=\" << ctx.lastStep << endl;\n";
+            code += "        exitProcess();\n";
+            code += "    }\n";
             code += "    ctx.lastStep = i;\n";
+            if (bFastMode)
             code += "    goto " + functionName + "_end;\n\n";
         }
 
@@ -3819,6 +3833,32 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
     code += "    // Set the error (all previous errors generated a return)\n";
     code += "    proverRequest.result = ZKR_SUCCESS;\n";
+
+    code += "    // Check that we did not run out of steps during the execution\n";
+    code += "    if (ctx.lastStep == 0)\n";
+    code += "    {\n";
+    code += "        cerr << \"Error: Main executor found ctx.lastStep=0, so execution was not complete\" << endl;\n";
+    if (bFastMode)
+    {
+    code += "        proverRequest.result = ZKR_SM_MAIN_OUT_OF_STEPS;\n";
+    }
+    else
+    {
+    code += "        exitProcess();\n";
+    }
+    code += "    }\n";
+    code += "    if (ctx.lastStep > " + (string)rom["constants"]["MAX_CNT_STEPS_LIMIT"]["value"] + ")\n";
+    code += "    {\n";
+    code += "        cerr << \"Error: Main executor found ctx.lastStep=\" << ctx.lastStep << \" > MAX_CNT_STEPS_LIMIT=" + (string)rom["constants"]["MAX_CNT_STEPS_LIMIT"]["value"] + "\" << endl;\n";
+    if (bFastMode)
+    {
+    code += "        proverRequest.result = ZKR_SM_MAIN_OUT_OF_STEPS;\n";
+    }
+    else
+    {
+    code += "        exitProcess();\n";
+    }
+    code += "    }\n\n";
 
     code += "#ifdef CHECK_MAX_CNT_AT_THE_END\n";
     code += "    if (fr.toU64(pols.cntArith[0]) > " + (string)rom["constants"]["MAX_CNT_ARITH_LIMIT"]["value"] + ")\n";

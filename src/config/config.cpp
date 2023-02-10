@@ -250,6 +250,9 @@ void Config::load(json &config)
     if (config.contains("zkevmCmPols") && config["zkevmCmPols"].is_string())
         zkevmCmPols = config["zkevmCmPols"];
 
+    if (config.contains("zkevmCmPolsAfterExecutor") && config["zkevmCmPolsAfterExecutor"].is_string())
+        zkevmCmPolsAfterExecutor = config["zkevmCmPolsAfterExecutor"];
+
     if (config.contains("c12aCmPols") && config["c12aCmPols"].is_string())
         c12aCmPols = config["c12aCmPols"];
 

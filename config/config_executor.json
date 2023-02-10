@@ -64,6 +64,7 @@
     "configPath": "config",
 
     "zkevmCmPols_disabled": "runtime/zkevm.commit",
+    "zkevmCmPolsAfterExecutor_disabled": "runtime/zkevm.commit",
     "c12aCmPols": "runtime/c12a.commit",
     "recursive1CmPols_disabled": "runtime/recursive1.commit",
     "recursive2CmPols_disabled": "runtime/recursive2.commit",

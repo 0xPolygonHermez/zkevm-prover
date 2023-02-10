@@ -101,14 +101,12 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
     }
 
     // Local array of N uint32
-    uint32_t * c0Temp;
-    c0Temp = (uint32_t *)malloc(N*sizeof(uint32_t));
+    uint32_t * c0Temp = (uint32_t *)calloc(N*sizeof(uint32_t),1);
     if (c0Temp == NULL)
     {
         cerr << "Error: BinaryExecutor::execute() failed calling malloc() for c0Temp" << endl;
         exitProcess();
     }
-    memset(c0Temp, 0, N*sizeof(uint32_t));
 
     // Process all the inputs
 //#pragma omp parallel for // TODO: Disabled since OMP decreases performance, probably due to cache invalidations
