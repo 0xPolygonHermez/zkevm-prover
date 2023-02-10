@@ -30,6 +30,8 @@
 #include "recursive1Steps.hpp"
 #include "recursive2Steps.hpp"
 
+#define NROWS_STEPS_ 4 // if AVX is used this must be 4
+
 Prover::Prover(Goldilocks &fr,
                PoseidonGoldilocks &poseidon,
                const Config &config) : fr(fr),
@@ -107,6 +109,7 @@ Prover::Prover(Goldilocks &fr,
             }
 
             starkZkevm = new Starks(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo}, pAddress);
+            starkZkevm->nrowsStepBatch = NROWS_STEPS_;
             starksC12a = new Starks(config, {config.c12aConstPols, config.mapConstPolsFile, config.c12aConstantsTree, config.c12aStarkInfo}, pAddress);
             starksRecursive1 = new Starks(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree, config.recursive1StarkInfo}, pAddress);
             starksRecursive2 = new Starks(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree, config.recursive2StarkInfo}, pAddress);
@@ -922,7 +925,7 @@ void Prover::execute(ProverRequest *pProverRequest)
     /***************/
     /* Free memory */
     /***************/
-    
+
     // Unmap committed polynomials address
     if (config.zkevmCmPols.size() > 0)
     {

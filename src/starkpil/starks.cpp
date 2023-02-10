@@ -179,11 +179,19 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     TimerStopAndLog(STARK_STEP_4_INIT);
     TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS);
 
-#pragma omp parallel for
-    for (uint64_t i = 0; i < NExtended; i++)
+    if (nrowsStepBatch > 1)
     {
-        steps->step42ns_first(params, i);
+        steps->step42ns_parser_first_avx(params, NExtended, nrowsStepBatch);
     }
+    else
+    {
+#pragma omp parallel for
+        for (uint64_t i = 0; i < NExtended; i++)
+        {
+            steps->step42ns_first(params, i);
+        }
+    }
+
     TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS);
 
     TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_INTT);
@@ -293,11 +301,17 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     }
     TimerStopAndLog(STARK_STEP_5_XDIVXSUB);
     TimerStart(STARK_STEP_5_CALCULATE_EXPS);
-
-#pragma omp parallel for
-    for (uint64_t i = 0; i < NExtended; i++)
+    if (nrowsStepBatch > 1)
     {
-        steps->step52ns_first(params, i);
+        steps->step52ns_parser_first_avx(params, NExtended, nrowsStepBatch);
+    }
+    else
+    {
+#pragma omp parallel for
+        for (uint64_t i = 0; i < NExtended; i++)
+        {
+            steps->step52ns_first(params, i);
+        }
     }
 
     TimerStopAndLog(STARK_STEP_5_CALCULATE_EXPS);
