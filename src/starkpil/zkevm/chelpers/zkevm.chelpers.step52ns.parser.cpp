@@ -151,7 +151,7 @@ void ZkevmSteps::step52ns_parser_first_avx(StepsParams &params, uint64_t nrows, 
                     i_args += 3;
                     break;
                case 18:
-                    // 2, 13, 7, -> 18: 332
+                    // 2, 13, 7, -> 18: 338
                     Goldilocks3::mul_avx(tmp0_0, tmp0_1, tmp0_2, tmp0_0, tmp0_1, tmp0_2, chall60_, chall61_, chall62_, chall6o0_, chall6o1_, chall6o2_);
                     Goldilocks3::sub13c_avx(tmp2_0, tmp2_1, tmp2_2, &params.pConstPols2ns->getElement(args[i_args], i), &evals_[args[i_args + 1] * 3], params.pConstPols2ns->numPols());
                     Goldilocks3::add_avx(tmp0_0, tmp0_1, tmp0_2, tmp0_0, tmp0_1, tmp0_2, tmp2_0, tmp2_1, tmp2_2);
