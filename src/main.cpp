@@ -29,7 +29,7 @@
 #include "statedb/statedb_server.hpp"
 #include "service/statedb/statedb_test.hpp"
 #include "service/statedb/statedb.hpp"
-#include "sha256.hpp"
+#include "sha256_test.hpp"
 #include "blake.hpp"
 #include "goldilocks_precomputed.hpp"
 
