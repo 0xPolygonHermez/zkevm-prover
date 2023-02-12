@@ -21,28 +21,23 @@ void ZkevmSteps::step42ns_parser_first_avx(StepsParams &params, uint64_t nrows, 
                switch (op42[kk])
                {
                case 0:
-                    // Goldilocks::add0(&tmp1[(NR_ * args42[i_args])], &tmp1[NR_ * args42[i_args + 1]], &tmp1[NR_ * args42[i_args + 2]]);
-                    //   assert(NR_ == 4);
                     Goldilocks::add_avx(&tmp1[(NR_ * args42[i_args])], &tmp1[NR_ * args42[i_args + 1]], &tmp1[NR_ * args42[i_args + 2]]);
-                    // rick
                     i_args += 3;
                     break;
                case 1:
-                    Goldilocks::add0(&tmp1[(NR_ * args42[i_args])], &tmp1[NR_ * args42[i_args + 1]], &params.pols[args42[i_args + 2] + i * args42[i_args + 3]], args42[i_args + 3]);
+                    Goldilocks::add_avx(&tmp1[(NR_ * args42[i_args])], &tmp1[NR_ * args42[i_args + 1]], &params.pols[args42[i_args + 2] + i * args42[i_args + 3]], 1, args42[i_args + 3]);
                     i_args += 4;
                     break;
                case 2:
-                    Goldilocks::add0(&tmp1[(NR_ * args42[i_args])], &tmp1[NR_ * args42[i_args + 1]], Goldilocks::fromU64(args42[i_args + 2]));
+                    Goldilocks::add_avx(&tmp1[(NR_ * args42[i_args])], &tmp1[NR_ * args42[i_args + 1]], Goldilocks::fromU64(args42[i_args + 2]));
                     i_args += 3;
                     break;
                case 3:
-                    Goldilocks::add0(&tmp1[(NR_ * args42[i_args])], &tmp1[NR_ * args42[i_args + 1]], &params.pConstPols2ns->getElement(args42[i_args + 2], i), params.pConstPols2ns->numPols());
+                    Goldilocks::add_avx(&tmp1[(NR_ * args42[i_args])], &tmp1[NR_ * args42[i_args + 1]], &params.pConstPols2ns->getElement(args42[i_args + 2], i), 1, params.pConstPols2ns->numPols());
                     i_args += 3;
                     break;
                case 4:
-
-                    for (uint64_t j = 0; j < NR_; ++j)
-                         Goldilocks::add0(&tmp1[(NR_ * args42[i_args])], &params.pols[args42[i_args + 1] + i * args42[i_args + 2]], &params.pols[args42[i_args + 3] + i * args42[i_args + 4]], args42[i_args + 2], args42[i_args + 4]);
+                    Goldilocks::add_avx(&tmp1[(NR_ * args42[i_args])], &params.pols[args42[i_args + 1] + i * args42[i_args + 2]], &params.pols[args42[i_args + 3] + i * args42[i_args + 4]], args42[i_args + 2], args42[i_args + 4]);
                     i_args += 5;
                     break;
                case 5:
@@ -52,15 +47,15 @@ void ZkevmSteps::step42ns_parser_first_avx(StepsParams &params, uint64_t nrows, 
                     i_args += 9;
                     break;
                case 6:
-                    Goldilocks::add0(&tmp1[(NR_ * args42[i_args])], &params.pols[args42[i_args + 1] + i * args42[i_args + 2]], &params.pConstPols2ns->getElement(args42[i_args + 3], i), args42[i_args + 2], params.pConstPols2ns->numPols());
+                    Goldilocks::add_avx(&tmp1[(NR_ * args42[i_args])], &params.pols[args42[i_args + 1] + i * args42[i_args + 2]], &params.pConstPols2ns->getElement(args42[i_args + 3], i), args42[i_args + 2], params.pConstPols2ns->numPols());
                     i_args += 4;
                     break;
                case 7:
-                    Goldilocks::add0(&tmp1[(NR_ * args42[i_args])], &params.pols[args42[i_args + 1] + i * args42[i_args + 2]], Goldilocks::fromU64(args42[i_args + 3]), args42[i_args + 2]);
+                    Goldilocks::add_avx(&tmp1[(NR_ * args42[i_args])], &params.pols[args42[i_args + 1] + i * args42[i_args + 2]], Goldilocks::fromU64(args42[i_args + 3]), args42[i_args + 2]);
                     i_args += 4;
                     break;
                case 8:
-                    Goldilocks::add0(&tmp1[(NR_ * args42[i_args])], &params.pConstPols2ns->getElement(args42[i_args + 1], i), &params.pConstPols2ns->getElement(args42[i_args + 2], i), params.pConstPols2ns->numPols(), params.pConstPols2ns->numPols());
+                    Goldilocks::add_avx(&tmp1[(NR_ * args42[i_args])], &params.pConstPols2ns->getElement(args42[i_args + 1], i), &params.pConstPols2ns->getElement(args42[i_args + 2], i), params.pConstPols2ns->numPols(), params.pConstPols2ns->numPols());
                     i_args += 3;
                     break;
                case 9:
@@ -69,7 +64,7 @@ void ZkevmSteps::step42ns_parser_first_avx(StepsParams &params, uint64_t nrows, 
                     i_args += 7;
                     break;
                case 10:
-                    Goldilocks::add0(&tmp1[(NR_ * args42[i_args])], &params.pConstPols2ns->getElement(args42[i_args + 1], i), Goldilocks::fromU64(args42[i_args + 2]), params.pConstPols2ns->numPols());
+                    Goldilocks::add_avx(&tmp1[(NR_ * args42[i_args])], &params.pConstPols2ns->getElement(args42[i_args + 1], i), Goldilocks::fromU64(args42[i_args + 2]), params.pConstPols2ns->numPols());
                     i_args += 3;
                     break;
                case 11:
@@ -114,10 +109,7 @@ void ZkevmSteps::step42ns_parser_first_avx(StepsParams &params, uint64_t nrows, 
                     i_args += 4;
                     break;
                case 21:
-                    // assert(NR_ == 4);
-                    // Goldilocks::sub0(&tmp1[(NR_ * args42[i_args])], &tmp1[NR_ * args42[i_args + 1]], &tmp1[NR_ * args42[i_args + 2]]);
                     Goldilocks::sub_avx(&tmp1[(NR_ * args42[i_args])], &tmp1[NR_ * args42[i_args + 1]], &tmp1[NR_ * args42[i_args + 2]]);
-                    // rick
                     i_args += 3;
                     break;
                case 22: // rick
@@ -332,10 +324,7 @@ void ZkevmSteps::step42ns_parser_first_avx(StepsParams &params, uint64_t nrows, 
                     i_args += 1;
                     break;
                case 70:
-                    // assert(NR_ == 4);
-                    // Goldilocks3::mul3(&(tmp3[NR_ * args42[i_args]][0]), &(tmp3[NR_ * args42[i_args + 2]][0]), params.challenges[args42[i_args + 1]]);
                     Goldilocks3::mul33c_avx(&(tmp3[NR_ * args42[i_args]][0]), &(tmp3[NR_ * args42[i_args + 2]][0]), params.challenges[args42[i_args + 1]]);
-                    //  rick
                     i_args += 3;
                     break;
                case 71:
@@ -404,7 +393,7 @@ void ZkevmSteps::step42ns_parser_first_avx(StepsParams &params, uint64_t nrows, 
                     break;
                case 101:
                     // 0 - 50: 1462
-                    Goldilocks::add0(&tmp1[(NR_ * args42[i_args])], &tmp1[NR_ * args42[i_args + 1]], &tmp1[NR_ * args42[i_args + 2]]);
+                    Goldilocks::add_avx(&tmp1[(NR_ * args42[i_args])], &tmp1[NR_ * args42[i_args + 1]], &tmp1[NR_ * args42[i_args + 2]]);
                     i_args += 3;
                     Goldilocks::mul0(&tmp1[(NR_ * args42[i_args])], &params.pols[args42[i_args + 1] + i * args42[i_args + 2]], &params.pols[args42[i_args + 3] + i * args42[i_args + 4]], args42[i_args + 2], args42[i_args + 4]);
                     i_args += 5;
@@ -472,28 +461,26 @@ void ZkevmSteps::step42ns_parser_first(StepsParams &params, uint64_t nrows, uint
                switch (op42[kk])
                {
                case 0:
-                    Goldilocks::add0(&tmp1[(NR_ * args42[i_args])], &tmp1[NR_ * args42[i_args + 1]], &tmp1[NR_ * args42[i_args + 2]]);
+                    Goldilocks::add_batch(&tmp1[(NR_ * args42[i_args])], &tmp1[NR_ * args42[i_args + 1]], &tmp1[NR_ * args42[i_args + 2]]);
                     //   assert(NR_ == 4);
                     // Goldilocks::add_batch(&tmp1[(NR_ * args42[i_args])], &tmp1[NR_ * args42[i_args + 1]], &tmp1[NR_ * args42[i_args + 2]]);
                     // rick
                     i_args += 3;
                     break;
                case 1:
-                    Goldilocks::add0(&tmp1[(NR_ * args42[i_args])], &tmp1[NR_ * args42[i_args + 1]], &params.pols[args42[i_args + 2] + i * args42[i_args + 3]], args42[i_args + 3]);
+                    Goldilocks::add_batch(&tmp1[(NR_ * args42[i_args])], &tmp1[NR_ * args42[i_args + 1]], &params.pols[args42[i_args + 2] + i * args42[i_args + 3]], args42[i_args + 3]);
                     i_args += 4;
                     break;
                case 2:
-                    Goldilocks::add0(&tmp1[(NR_ * args42[i_args])], &tmp1[NR_ * args42[i_args + 1]], Goldilocks::fromU64(args42[i_args + 2]));
+                    Goldilocks::add_batch(&tmp1[(NR_ * args42[i_args])], &tmp1[NR_ * args42[i_args + 1]], Goldilocks::fromU64(args42[i_args + 2]));
                     i_args += 3;
                     break;
                case 3:
-                    Goldilocks::add0(&tmp1[(NR_ * args42[i_args])], &tmp1[NR_ * args42[i_args + 1]], &params.pConstPols2ns->getElement(args42[i_args + 2], i), params.pConstPols2ns->numPols());
+                    Goldilocks::add_batch(&tmp1[(NR_ * args42[i_args])], &tmp1[NR_ * args42[i_args + 1]], &params.pConstPols2ns->getElement(args42[i_args + 2], i), params.pConstPols2ns->numPols());
                     i_args += 3;
                     break;
                case 4:
-
-                    for (uint64_t j = 0; j < NR_; ++j)
-                         Goldilocks::add0(&tmp1[(NR_ * args42[i_args])], &params.pols[args42[i_args + 1] + i * args42[i_args + 2]], &params.pols[args42[i_args + 3] + i * args42[i_args + 4]], args42[i_args + 2], args42[i_args + 4]);
+                    Goldilocks::add_batch(&tmp1[(NR_ * args42[i_args])], &params.pols[args42[i_args + 1] + i * args42[i_args + 2]], &params.pols[args42[i_args + 3] + i * args42[i_args + 4]], args42[i_args + 2], args42[i_args + 4]);
                     i_args += 5;
                     break;
                case 5:
@@ -503,15 +490,15 @@ void ZkevmSteps::step42ns_parser_first(StepsParams &params, uint64_t nrows, uint
                     i_args += 9;
                     break;
                case 6:
-                    Goldilocks::add0(&tmp1[(NR_ * args42[i_args])], &params.pols[args42[i_args + 1] + i * args42[i_args + 2]], &params.pConstPols2ns->getElement(args42[i_args + 3], i), args42[i_args + 2], params.pConstPols2ns->numPols());
+                    Goldilocks::add_batch(&tmp1[(NR_ * args42[i_args])], &params.pols[args42[i_args + 1] + i * args42[i_args + 2]], &params.pConstPols2ns->getElement(args42[i_args + 3], i), args42[i_args + 2], params.pConstPols2ns->numPols());
                     i_args += 4;
                     break;
                case 7:
-                    Goldilocks::add0(&tmp1[(NR_ * args42[i_args])], &params.pols[args42[i_args + 1] + i * args42[i_args + 2]], Goldilocks::fromU64(args42[i_args + 3]), args42[i_args + 2]);
+                    Goldilocks::add_batch(&tmp1[(NR_ * args42[i_args])], &params.pols[args42[i_args + 1] + i * args42[i_args + 2]], Goldilocks::fromU64(args42[i_args + 3]), args42[i_args + 2]);
                     i_args += 4;
                     break;
                case 8:
-                    Goldilocks::add0(&tmp1[(NR_ * args42[i_args])], &params.pConstPols2ns->getElement(args42[i_args + 1], i), &params.pConstPols2ns->getElement(args42[i_args + 2], i), params.pConstPols2ns->numPols(), params.pConstPols2ns->numPols());
+                    Goldilocks::add_batch(&tmp1[(NR_ * args42[i_args])], &params.pConstPols2ns->getElement(args42[i_args + 1], i), &params.pConstPols2ns->getElement(args42[i_args + 2], i), params.pConstPols2ns->numPols(), params.pConstPols2ns->numPols());
                     i_args += 3;
                     break;
                case 9:
@@ -520,7 +507,7 @@ void ZkevmSteps::step42ns_parser_first(StepsParams &params, uint64_t nrows, uint
                     i_args += 7;
                     break;
                case 10:
-                    Goldilocks::add0(&tmp1[(NR_ * args42[i_args])], &params.pConstPols2ns->getElement(args42[i_args + 1], i), Goldilocks::fromU64(args42[i_args + 2]), params.pConstPols2ns->numPols());
+                    Goldilocks::add_batch(&tmp1[(NR_ * args42[i_args])], &params.pConstPols2ns->getElement(args42[i_args + 1], i), Goldilocks::fromU64(args42[i_args + 2]), params.pConstPols2ns->numPols());
                     i_args += 3;
                     break;
                case 11:
@@ -855,7 +842,7 @@ void ZkevmSteps::step42ns_parser_first(StepsParams &params, uint64_t nrows, uint
                     break;
                case 101:
                     // 0 - 50: 1462
-                    Goldilocks::add0(&tmp1[(NR_ * args42[i_args])], &tmp1[NR_ * args42[i_args + 1]], &tmp1[NR_ * args42[i_args + 2]]);
+                    Goldilocks::add_batch(&tmp1[(NR_ * args42[i_args])], &tmp1[NR_ * args42[i_args + 1]], &tmp1[NR_ * args42[i_args + 2]]);
                     i_args += 3;
                     Goldilocks::mul0(&tmp1[(NR_ * args42[i_args])], &params.pols[args42[i_args + 1] + i * args42[i_args + 2]], &params.pols[args42[i_args + 3] + i * args42[i_args + 4]], args42[i_args + 2], args42[i_args + 4]);
                     i_args += 5;
