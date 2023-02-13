@@ -1,12 +1,12 @@
-#include "sha256_state.hpp"
+#include "gate_state.hpp"
 #include "pols_identity_constants.hpp"
 #include "zkassert.hpp"
 
 // Constructor
-SHA256_State::SHA256_State ()
+GateState::GateState (const GateConfig &gateConfig) : gateConfig(gateConfig)
 {
     // Allocate array of gates
-    gate = new Gate[maxRefs];
+    gate = new Gate[gateConfig.maxRefs];
     zkassert(gate!=NULL);
 
     // Reset
@@ -14,50 +14,50 @@ SHA256_State::SHA256_State ()
 }
 
 // Destructor
-SHA256_State::~SHA256_State ()
+GateState::~GateState ()
 {
     // Free array of gates
     delete[] gate;
 }
 
-void SHA256_State::resetBitsAndCounters (void)
+void GateState::resetBitsAndCounters (void)
 {
     // Initialize array
-    for (uint64_t i=0; i<maxRefs; i++)
+    for (uint64_t i=0; i<gateConfig.maxRefs; i++)
     {
         gate[i].reset();
     }
     
     // Initialize the input state references
-    for (uint64_t i=0; i<1600; i++)
+    for (uint64_t i=0; i<gateConfig.sinRefNumber; i++)
     {
-        SinRefs[i] = SHA256_SinRef0 + 44*i;
+        SinRefs[i] = gateConfig.sinRef0 + gateConfig.sinRefDistance*i;
     }
     
     // Initialize the output state references
-    for (uint64_t i=0; i<1600; i++)
+    for (uint64_t i=0; i<gateConfig.soutRefNumber; i++)
     {
-        SoutRefs[i] = SHA256_SoutRef0 + 44*i;
+        SoutRefs[i] = gateConfig.soutRef0 + gateConfig.soutRefDistance*i;
     }
 
     // Calculate the next reference (the first free slot)
-    nextRef = SHA256_FirstNextRef;
+    nextRef = gateConfig.firstNextRef;
 
     // Init counters
-    xors = 0;
-    ors = 0;
+    xors  = 0;
+    ors   = 0;
     andps = 0;
-    ands = 0;
+    ands  = 0;
 
     // Init ZeroRef and OneRef gates
-    gate[SHA256_ZeroRef].pin[pin_a].bit = 0;
-    gate[SHA256_ZeroRef].pin[pin_b].bit = 1;
-    gate[SHA256_ZeroRef].op = gop_xor;
-    gate[SHA256_ZeroRef].pin[pin_r].bit = 1;
+    gate[gateConfig.zeroRef].pin[pin_a].bit = 0;
+    gate[gateConfig.zeroRef].pin[pin_b].bit = 1;
+    gate[gateConfig.zeroRef].op = gop_xor;
+    gate[gateConfig.zeroRef].pin[pin_r].bit = 1;
 }
 
 // Set Rin data into bits array at SinRef0 position
-void SHA256_State::setRin (uint8_t * pRin)
+/*void GateState::setRin (uint8_t * pRin)
 {
     zkassert(pRin != NULL);
     for (uint64_t i=0; i<1088; i++)
@@ -68,16 +68,16 @@ void SHA256_State::setRin (uint8_t * pRin)
 }
 
 // Mix Rin data with Sin data
-void SHA256_State::mixRin (void)
+void GateState::mixRin (void)
 {
     for (uint64_t i=0; i<1088; i++)
     {
         XOR(SHA256_SinRef0+i*44, pin_a, SHA256_SinRef0+i*44, pin_b, SHA256_SinRef0+i*44);
     }
-}
+}*/
 
 // Get 32-bytes output from SinRef0
-void SHA256_State::getOutput (uint8_t * pOutput)
+/*void GateState::getOutput (uint8_t * pOutput)
 {
     for (uint64_t i=0; i<32; i++)
     {
@@ -88,12 +88,12 @@ void SHA256_State::getOutput (uint8_t * pOutput)
         }
         bits2byte(aux, *(pOutput+i));
     }
-}
+}*/
 
 // Get a free reference (the next one) and increment counter
-uint64_t SHA256_State::getFreeRef (void)
+uint64_t GateState::getFreeRef (void)
 {
-    zkassert(nextRef < maxRefs);
+    zkassert(nextRef < gateConfig.maxRefs);
     uint64_t result = nextRef;
     nextRef++;
 
@@ -107,7 +107,7 @@ uint64_t SHA256_State::getFreeRef (void)
 }
 
 // Copy Sout references to Sin references
-void SHA256_State::copySoutRefsToSinRefs (void)
+/*void GateState::copySoutRefsToSinRefs (void)
 {
     for (uint64_t i=0; i<1600; i++)
     {
@@ -116,7 +116,7 @@ void SHA256_State::copySoutRefsToSinRefs (void)
 }
 
 // Copy Sout data to Sin buffer, and reset
-void SHA256_State::copySoutToSinAndResetRefs (void)
+void GateState::copySoutToSinAndResetRefs (void)
 {
     uint8_t localSout[1600];
     for (uint64_t i=0; i<1600; i++)
@@ -128,13 +128,13 @@ void SHA256_State::copySoutToSinAndResetRefs (void)
     {
         gate[SHA256_SinRef0+i*44].pin[pin_a].bit = localSout[i];
     }
-}
+}*/
 
-void SHA256_State::OP (GateOperation op, uint64_t refA, PinId pinA, uint64_t refB, PinId pinB, uint64_t refR)
+void GateState::OP (GateOperation op, uint64_t refA, PinId pinA, uint64_t refB, PinId pinB, uint64_t refR)
 {
-    zkassert(refA < maxRefs);
-    zkassert(refB < maxRefs);
-    zkassert(refR < maxRefs);
+    zkassert(refA < gateConfig.maxRefs);
+    zkassert(refB < gateConfig.maxRefs);
+    zkassert(refR < gateConfig.maxRefs);
     zkassert(pinA==pin_a || pinA==pin_b || pinA==pin_r);
     zkassert(pinB==pin_a || pinB==pin_b || pinB==pin_r);
     zkassert(gate[refA].pin[pinA].bit <= 1);
@@ -179,7 +179,7 @@ void SHA256_State::OP (GateOperation op, uint64_t refA, PinId pinA, uint64_t ref
             ands++;
             break;
         default:
-            cerr << "Error: SHA256_State::OP() got invalid op=" << op << endl;
+            cerr << "Error: GateState::OP() got invalid op=" << op << endl;
             exitProcess();
     }
 
@@ -200,7 +200,7 @@ void SHA256_State::OP (GateOperation op, uint64_t refA, PinId pinA, uint64_t ref
 }
 
 // Print statistics, for development purposes
-void SHA256_State::printCounters (void)
+void GateState::printCounters (void)
 {
     double totalOperations = xors + ors + andps + ands;
     cout << "xors=" << xors << "=" << double(xors)*100/totalOperations << "%" << endl;
@@ -211,7 +211,7 @@ void SHA256_State::printCounters (void)
 }
 
 // Refs must be an array of 1600 bits
-void SHA256_State::printRefs (uint64_t * pRefs, string name)
+void GateState::printRefs (uint64_t * pRefs, string name)
 {
     // Get a local copy of the 1600 bits by reference
     uint8_t aux[1600];
@@ -224,23 +224,8 @@ void SHA256_State::printRefs (uint64_t * pRefs, string name)
     printBits(aux, 1600, name);
 }
 
-// Map an operation code into a string
-string SHA256_State::op2string (GateOperation op)
-{
-    switch (op)
-    {
-        case gop_xor:
-            return "xor";
-        case gop_andp:
-            return "andp";
-        default:
-            cerr << "KeccakSMState::op2string() found invalid op value:" << op << endl;
-            exit(-1);
-    }
-}
-
 // Generate a JSON object containing all data required for the executor script file
-void SHA256_State::saveScriptToJson (json &j)
+void GateState::saveScriptToJson (json &j)
 {
     // In order of execution, add the operations data
     json programJson;
@@ -248,7 +233,7 @@ void SHA256_State::saveScriptToJson (json &j)
     {
         // Root elements
         json evalJson;
-        evalJson["op"] = op2string(program[i]->op);
+        evalJson["op"] = gateop2string(program[i]->op);
         evalJson["ref"] = program[i]->pin[pin_r].wiredRef;
 
         // Input a elements
@@ -291,11 +276,13 @@ void SHA256_State::saveScriptToJson (json &j)
     // Add counters
     j["maxRef"] = nextRef-1;
     j["xors"] = xors;
+    j["ors"] = ors;
     j["andps"] = andps;
+    j["ands"] = ands;
 }
 
 // Generate a JSON object containing all a, b, r, and op polynomials values
-void SHA256_State::savePolsToJson (json &pols)
+void GateState::savePolsToJson (json &pols)
 {
 #if 0
     // TODO: Activate KeccakSMState::savePolsToJson() after clarifying how to deal with 64-b FE
@@ -476,7 +463,7 @@ void SHA256_State::savePolsToJson (json &pols)
 }
 
 // Generate a JSON object containing all wired connections
-void SHA256_State::saveConnectionsToJson (json &j)
+void GateState::saveConnectionsToJson (json &j)
 {
     // In order of position, add the gates data
     j = json::array();

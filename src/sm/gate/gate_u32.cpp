@@ -1,12 +1,12 @@
 #include <iostream>
-#include "sha256_u32.hpp"
+#include "gate_u32.hpp"
 #include "scalar.hpp"
 #include "zkassert.hpp"
 #include "exit_process.hpp"
 
 using namespace std;
 
-void SHA256_U32::fromU32 (uint32_t value)
+void GateU32::fromU32 (uint32_t value)
 {
     // Convert U32 value to an array of bits
     vector<uint8_t> bits;
@@ -16,7 +16,7 @@ void SHA256_U32::fromU32 (uint32_t value)
     // Assign the proper reference
     for (uint64_t i=0; i<32; i++)
     {
-        bit[i].ref = SHA256_ZeroRef;
+        bit[i].ref = S.gateConfig.zeroRef;
         if (bits[i] == 0)
         {
             bit[i].pin = pin_a;
@@ -27,13 +27,13 @@ void SHA256_U32::fromU32 (uint32_t value)
         }
         else
         {
-            cerr << "Error: SHA256_U32::init() got invalid bit value=" << value << " i=" << i << " bits[i]=" << bits[i] << endl;
+            cerr << "Error: GateU32::fromU32() got invalid bit value=" << value << " i=" << i << " bits[i]=" << bits[i] << endl;
             exitProcess();
         }
     }
 }
 
-uint32_t SHA256_U32::toU32 (SHA256_State &S)
+uint32_t GateU32::toU32 (void)
 {
     // Collect bits
     vector<uint8_t> bits;
@@ -46,16 +46,16 @@ uint32_t SHA256_U32::toU32 (SHA256_State &S)
     return bits2u32(bits);
 }
 
-string SHA256_U32::toString (SHA256_State &S)
+string GateU32::toString (void)
 {
-    mpz_class aux = toU32(S);
+    mpz_class aux = toU32();
     return aux.get_str(16);
 }
 
-void SHA256_U32::rotateRight (uint64_t pos)
+void GateU32::rotateRight (uint64_t pos)
 {
     // Store the rotated value on a temporary variable
-    SHA256_Bit auxBit[32];
+    GateBit auxBit[32];
     for (uint64_t i=0; i<32; i++)
     {
         auxBit[i] = bit[(i+pos)%32];
@@ -68,10 +68,10 @@ void SHA256_U32::rotateRight (uint64_t pos)
     }
 }
 
-void SHA256_U32::shiftRight (uint64_t pos)
+void GateU32::shiftRight (uint64_t pos)
 {
     // Store the shifted value on a temporary variable
-    SHA256_Bit auxBit[32] = {0};
+    GateBit auxBit[32] = {0};
     uint64_t i = 0;
     for (; i<(32-pos); i++)
     {
@@ -81,7 +81,7 @@ void SHA256_U32::shiftRight (uint64_t pos)
     // Set rest of pins to zero
     for (; i<32; i++)
     {
-        auxBit[i].ref = SHA256_ZeroRef;
+        auxBit[i].ref = S.gateConfig.zeroRef;
         auxBit[i].pin = pin_a;
     }
 
@@ -94,7 +94,7 @@ void SHA256_U32::shiftRight (uint64_t pos)
 
 /* r = xor(a,b), for every individual bit */
 
-void SHA256_xor (SHA256_State &S, const SHA256_U32 &a, const SHA256_U32 &b, SHA256_U32 &r)
+void GateU32_xor (GateState &S, const GateU32 &a, const GateU32 &b, GateU32 &r)
 {
     for (uint64_t i=0; i<32; i++)
     {
@@ -106,7 +106,7 @@ void SHA256_xor (SHA256_State &S, const SHA256_U32 &a, const SHA256_U32 &b, SHA2
 
 /* r = and(a,b), for every individual bit */
 
-void SHA256_and (SHA256_State &S, const SHA256_U32 &a, const SHA256_U32 &b, SHA256_U32 &r)
+void GateU32_and (GateState &S, const GateU32 &a, const GateU32 &b, GateU32 &r)
 {
     for (uint64_t i=0; i<32; i++)
     {
@@ -118,13 +118,13 @@ void SHA256_and (SHA256_State &S, const SHA256_U32 &a, const SHA256_U32 &b, SHA2
 
 /* r = not(a), for every individual bit */
 
-void SHA256_not (SHA256_State &S, const SHA256_U32 &a, SHA256_U32 &r)
+void GateU32_not (GateState &S, const GateU32 &a, GateU32 &r)
 {
     for (uint64_t i=0; i<32; i++)
     {
         r.bit[i].ref = S.getFreeRef();
         // NOT(a) is the same operation as XOR(a,1)
-        S.XOR(a.bit[i].ref, a.bit[i].pin, SHA256_ZeroRef, pin_b, r.bit[i].ref);
+        S.XOR(a.bit[i].ref, a.bit[i].pin, S.gateConfig.zeroRef, pin_b, r.bit[i].ref);
         r.bit[i].pin = pin_r;
     }
 }
@@ -150,10 +150,10 @@ void SHA256_not (SHA256_State &S, const SHA256_U32 &a, SHA256_U32 &r)
    bit 31:  r = 1 (a) + 1 (b) + 1 (carry) = 1 = xor(xor(a,b),carry))  carry is not needed any more
 */
 
-void SHA256_add (SHA256_State &S, const SHA256_U32 &a, const SHA256_U32 &b, SHA256_U32 &r)
+void GateU32_add (GateState &S, const GateU32 &a, const GateU32 &b, GateU32 &r)
 {
     // Carry bit 
-    SHA256_Bit carry;
+    GateBit carry;
 
     for (uint64_t i=0; i<32; i++)
     {
