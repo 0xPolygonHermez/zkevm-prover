@@ -52,6 +52,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
         gasCallOffset          = getMemoryOffset("gasCall");
         isPreEIP155Offset      = getMemoryOffset("isPreEIP155");
         isCreateContractOffset = getMemoryOffset("isCreateContract");
+        storageAddrOffset      = getMemoryOffset("storageAddr");
     }
 
     // Load ROM constants

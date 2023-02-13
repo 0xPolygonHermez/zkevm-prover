@@ -401,7 +401,7 @@ void FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
 
     // Add log info
     mpz_class auxScalar;
-    getVarFromCtx(ctx, false, ctx.rom.txDestAddrOffset, auxScalar);
+    getVarFromCtx(ctx, false, ctx.rom.storageAddrOffset, auxScalar);
     it->second.address = NormalizeTo0xNFormat(auxScalar.get_str(16), 40);
     getVarFromCtx(ctx, false, ctx.rom.newNumBatchOffset, auxScalar);
     it->second.batch_number = auxScalar.get_ui();

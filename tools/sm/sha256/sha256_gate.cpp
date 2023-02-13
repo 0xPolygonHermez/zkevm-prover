@@ -1,5 +1,6 @@
+#include "sha256_config.hpp"
 #include "sha256_gate.hpp"
-#include "sha256_u32.hpp"
+#include "gate_u32.hpp"
 #include "utils.hpp"
 #include "scalar.hpp"
 #include "timer.hpp"
@@ -16,18 +17,6 @@ void SHA256Gate (const uint8_t * pData, uint64_t dataSize, string &hash)
     // Initialize hash values:
     // (first 32 bits of the fractional parts of the square roots of the first 8 primes 2..19):
     uint32_t h[8] = { 0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19 };
-
-    // Initialize array of round constants:
-    // (first 32 bits of the fractional parts of the cube roots of the first 64 primes 2..311):
-    SHA256_U32 k[64] = {
-        0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
-        0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
-        0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
-        0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
-        0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
-        0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
-        0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
-        0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2 };
 
     // Padding:
     // original message of length L bits
@@ -54,7 +43,48 @@ void SHA256Gate (const uint8_t * pData, uint64_t dataSize, string &hash)
     // Process the message in successive 512-bit chunks: break message into 512-bit chunks
     for (uint64_t chunk=0; chunk<paddedSize/64; chunk++)
     {
-        SHA256_State S;
+        // Initialize array of round constants:
+        // (first 32 bits of the fractional parts of the cube roots of the first 64 primes 2..311):
+
+        // Create a gate configuration instance
+        GateConfig gateConfig;
+        gateConfig.zeroRef         = SHA256_ZeroRef;
+        gateConfig.slotSize        = SHA256_SlotSize;
+        gateConfig.maxRefs         = SHA256_MaxRefs;
+        gateConfig.firstNextRef    = SHA256_FirstNextRef;
+        gateConfig.sinRef0         = SHA256_SinRef0;
+        gateConfig.sinRefNumber    = SHA256_SinRefNumber;
+        gateConfig.sinRefDistance  = SHA256_SinRefDistance;
+        gateConfig.soutRef0        = SHA256_SoutRef0;
+        gateConfig.soutRefNumber   = SHA256_SoutRefNumber;
+        gateConfig.soutRefDistance = SHA256_SoutRefDistance;
+
+        // Create a new gate state per loop
+        GateState S(gateConfig);
+
+        // Create the k constants
+        GateU32 k[64] = {
+            GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S),
+            GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S),
+            GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S),
+            GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S),
+            GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S),
+            GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S),
+            GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S),
+            GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S) };
+        uint64_t kValue[64] = {
+            0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+            0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+            0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+            0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+            0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+            0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+            0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+            0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2 };
+        for (uint64_t i=0; i<64; i++)
+        {
+            k[i] = kValue[i];
+        }
 
         // copy chunk into first 16 words w[0..15] of the message schedule array
         
@@ -70,7 +100,7 @@ void SHA256Gate (const uint8_t * pData, uint64_t dataSize, string &hash)
         }
 
         // create a set of 8 variables of 32-bit words = 256 bits
-        SHA256_U32 h32[8];
+        GateU32 h32[8] = {GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S)};
 
         // copy the h[8] state (256 bits) into Sin[512..767] and into h32[0..7]
         for (uint64_t i=0; i<8; i++)
@@ -88,7 +118,15 @@ void SHA256Gate (const uint8_t * pData, uint64_t dataSize, string &hash)
             //cout << "h32[" << i << "]=" << h32[i].toString(S) << endl;
         }
         // create a 64-entry message schedule array w[0..63] of 32-bit words
-        SHA256_U32 w[64];
+        GateU32 w[64] = {
+            GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S),
+            GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S),
+            GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S),
+            GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S),
+            GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S),
+            GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S),
+            GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S),
+            GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S) };
 
         // copy the 64 data bytes (512 bits) into Sin[0..511] and into w[0..15]
         for (uint64_t i=0; i<16; i++)
@@ -112,7 +150,7 @@ void SHA256Gate (const uint8_t * pData, uint64_t dataSize, string &hash)
         // Extend the first 16 words into the remaining 48 words w[16..63] of the message schedule array:
         for (uint64_t i=16; i<64; i++)
         {
-            SHA256_U32 aux1, aux2, aux3, aux4;
+            GateU32 aux1(S), aux2(S), aux3(S), aux4(S);
 
             // uint32_t s0 = rotateRight32(w[i-15], 7) ^ rotateRight32(w[i-15], 18) ^ ( w[i-15] >> 3 );
             aux1 = w[i-15];
@@ -121,9 +159,9 @@ void SHA256Gate (const uint8_t * pData, uint64_t dataSize, string &hash)
             aux2.rotateRight(18);
             aux3 = w[i-15];
             aux3.shiftRight(3);
-            SHA256_xor(S, aux1, aux2, aux4);
-            SHA256_U32 s0;
-            SHA256_xor(S, aux4, aux3, s0);
+            GateU32_xor(S, aux1, aux2, aux4);
+            GateU32 s0(S);
+            GateU32_xor(S, aux4, aux3, s0);
             //cout << "s0[" << i << "]=" << s0.toString(S) << endl;
 
             // uint32_t s1 = rotateRight32(w[i-2], 17) ^ rotateRight32(w[i-2], 19) ^ ( w[i-2] >> 10 );
@@ -136,18 +174,18 @@ void SHA256Gate (const uint8_t * pData, uint64_t dataSize, string &hash)
             aux3 = w[i-2];
             aux3.shiftRight(10);
             //cout << "w[i-2]=" << w[i-2].toString(S) << " aux3=" << aux3.toString(S) << endl;
-            SHA256_xor(S, aux1, aux2, aux4);
+            GateU32_xor(S, aux1, aux2, aux4);
             //cout << "aux4=" << aux4.toString(S) << endl;
-            SHA256_U32 s1;
-            SHA256_xor(S, aux4, aux3, s1);
+            GateU32 s1(S);
+            GateU32_xor(S, aux4, aux3, s1);
             //cout << "s1[" << i << "]=" << s1.toString(S) << endl;
 
             // w[i] = w[i-16] + s0 + w[i-7] + s1;
-            SHA256_add(S, w[i-16], s0, aux1);
+            GateU32_add(S, w[i-16], s0, aux1);
             //cout << "aux1=" << aux1.toString(S) << "=" << w[i-16].toString(S) << "+" << s0.toString(S) << endl;
-            SHA256_add(S, aux1, w[i-7], aux2);
+            GateU32_add(S, aux1, w[i-7], aux2);
             //cout << "aux2=" << aux2.toString(S) << "=" << aux1.toString(S) << "+" << w[i-7].toString(S) << endl;
-            SHA256_add(S, aux2, s1, w[i]);
+            GateU32_add(S, aux2, s1, w[i]);
             //cout << "w[i]=" << w[i].toString(S) << "=" << aux2.toString(S) << "+" << s1.toString(S) << endl;
             //cout << "w[" << i << "]=" << w[i-16].toString(S) << "+" << s0.toString(S) << "+" << w[i-7].toString(S) << "+" << s1.toString(S) << endl;
 
@@ -155,90 +193,91 @@ void SHA256Gate (const uint8_t * pData, uint64_t dataSize, string &hash)
         }
 
         // Initialize working variables to current hash value
-        SHA256_U32 a = h32[0];
-        SHA256_U32 b = h32[1];
-        SHA256_U32 c = h32[2];
-        SHA256_U32 d = h32[3];
-        SHA256_U32 e = h32[4];
-        SHA256_U32 f = h32[5];
-        SHA256_U32 g = h32[6];
-        SHA256_U32 hh = h32[7];
+        GateU32 a(S), b(S), c(S), d(S), e(S), f(S), g(S), hh(S);
+        a = h32[0];
+        b = h32[1];
+        c = h32[2];
+        d = h32[3];
+        e = h32[4];
+        f = h32[5];
+        g = h32[6];
+        hh = h32[7];
 
         // Compression function main loop
         for (uint64_t i=0; i<64; i++)
         {
-            SHA256_U32 aux1, aux2, aux3, aux4;
+            GateU32 aux1(S), aux2(S), aux3(S), aux4(S);
 
             // uint32_t S1 = rotateRight32(e, 6) ^ rotateRight32(e, 11) ^ rotateRight32(e, 25);
-            SHA256_U32 S1;
+            GateU32 S1(S);
             aux1 = e;
             aux1.rotateRight(6);
             aux2 = e;
             aux2.rotateRight(11);
             aux3 = e;
             aux3.rotateRight(25);
-            SHA256_xor(S, aux1, aux2, aux4);
-            SHA256_xor(S, aux4, aux3, S1);
+            GateU32_xor(S, aux1, aux2, aux4);
+            GateU32_xor(S, aux4, aux3, S1);
 
             // uint32_t ch = (e & f) ^ ((~e) & g);
-            SHA256_U32 ch;
-            SHA256_and(S, e, f, aux1);
-            SHA256_not(S, e, aux2);
-            SHA256_and(S, aux2, g, aux3);
-            SHA256_xor(S, aux1, aux3, ch);
+            GateU32 ch(S);
+            GateU32_and(S, e, f, aux1);
+            GateU32_not(S, e, aux2);
+            GateU32_and(S, aux2, g, aux3);
+            GateU32_xor(S, aux1, aux3, ch);
 
             // uint32_t temp1 = h + S1 + ch + k[i] + w[i];
-            SHA256_U32 temp1;
-            SHA256_add(S, hh, S1, aux1);
-            SHA256_add(S, aux1, ch, aux2);
-            SHA256_add(S, aux2, k[i], aux3);
-            SHA256_add(S, aux3, w[i], temp1);
+            GateU32 temp1(S);
+            GateU32_add(S, hh, S1, aux1);
+            GateU32_add(S, aux1, ch, aux2);
+            GateU32_add(S, aux2, k[i], aux3);
+            GateU32_add(S, aux3, w[i], temp1);
             //cout << "temp1[" << i << "]=" << temp1.toString(S) << endl;
 
             // uint32_t S0 = rotateRight32(a, 2) ^ rotateRight32(a, 13) ^ rotateRight32(a, 22);
-            SHA256_U32 S0;
+            GateU32 S0(S);
             aux1 = a;
             aux1.rotateRight(2);
             aux2 = a;
             aux2.rotateRight(13);
             aux3 = a;
             aux3.rotateRight(22);
-            SHA256_xor(S, aux1, aux2, aux4);
-            SHA256_xor(S, aux4, aux3, S0);
+            GateU32_xor(S, aux1, aux2, aux4);
+            GateU32_xor(S, aux4, aux3, S0);
 
             // uint32_t maj = (a & b) ^ (a & c) ^ (b & c);
-            SHA256_U32 maj;
-            SHA256_and(S, a, b, aux1);
-            SHA256_and(S, a, c, aux2);
-            SHA256_and(S, b, c, aux3);
-            SHA256_xor(S, aux1, aux2, aux4);
-            SHA256_xor(S, aux4, aux3, maj);
+            GateU32 maj(S);
+            GateU32_and(S, a, b, aux1);
+            GateU32_and(S, a, c, aux2);
+            GateU32_and(S, b, c, aux3);
+            GateU32_xor(S, aux1, aux2, aux4);
+            GateU32_xor(S, aux4, aux3, maj);
 
             // uint32_t temp2 = S0 + maj;
-            SHA256_U32 temp2;
-            SHA256_add(S, S0, maj, temp2);
+            GateU32 temp2(S);
+            GateU32_add(S, S0, maj, temp2);
             //cout << "temp2[" << i << "]=" << temp2.toString(S) << endl;
     
             hh = g;
             g = f;
             f = e;
             // e = d + temp1;
-            SHA256_add(S, d, temp1, e);
+            GateU32_add(S, d, temp1, e);
             d = c;
             c = b;
             b = a;
             // a = temp1 + temp2;
-            SHA256_add(S, temp1, temp2, a);
+            GateU32_add(S, temp1, temp2, a);
         }
         // Add the compressed chunk to the current hash value
-        h[0] = h[0] + a.toU32(S);
-        h[1] = h[1] + b.toU32(S);
-        h[2] = h[2] + c.toU32(S);
-        h[3] = h[3] + d.toU32(S);
-        h[4] = h[4] + e.toU32(S);
-        h[5] = h[5] + f.toU32(S);
-        h[6] = h[6] + g.toU32(S);
-        h[7] = h[7] + hh.toU32(S);
+        h[0] = h[0] + a.toU32();
+        h[1] = h[1] + b.toU32();
+        h[2] = h[2] + c.toU32();
+        h[3] = h[3] + d.toU32();
+        h[4] = h[4] + e.toU32();
+        h[5] = h[5] + f.toU32();
+        h[6] = h[6] + g.toU32();
+        h[7] = h[7] + hh.toU32();
 
         S.printCounters();
     }

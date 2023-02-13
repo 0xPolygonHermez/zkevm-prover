@@ -8,14 +8,16 @@
 #include "config.hpp"
 #include "scalar.hpp"
 #include "utils.hpp"
-#include "sha256_config.hpp"
+#include "gate_config.hpp"
 
 using namespace std;
 using json = nlohmann::json;
 
-class SHA256_State
+class GateState
 {
 public:
+    const GateConfig &gateConfig;
+
     uint64_t nextRef; 
     uint64_t SinRefs[1600];
     uint64_t SoutRefs[1600];
@@ -32,27 +34,27 @@ public:
     uint64_t andps;
     uint64_t ands;
 
-    SHA256_State ();
-    ~SHA256_State ();
+    GateState (const GateConfig &gateConfig);
+    ~GateState ();
     void resetBitsAndCounters (void);
 
     // Set Rin data into bits array at RinRef0 position
-    void setRin (uint8_t * pRin);
+    //void setRin (uint8_t * pRin);
     
     // Mix Rin data with Sin data
-    void mixRin (void);
+    //void mixRin (void);
 
     // Get 32-bytes output from SinRef0
-    void getOutput (uint8_t * pOutput);
+    //void getOutput (uint8_t * pOutput);
     
     // Get a free reference (the next one) and increment counter
     uint64_t getFreeRef (void);
 
     // Copy Sout references to Sin references
-    void copySoutRefsToSinRefs (void);
+    //void copySoutRefsToSinRefs (void);
     
     // Copy Sout data to Sin buffer, and reset
-    void copySoutToSinAndResetRefs (void);
+    //void copySoutToSinAndResetRefs (void);
 
     // Perform the gate operation
     void OP (GateOperation op, uint64_t refA, PinId pinA, uint64_t refB, PinId pinB, uint64_t refR);
@@ -79,9 +81,6 @@ public:
     // Refs must be an array of 1600 bits
     void printRefs (uint64_t * pRefs, string name);
 
-    // Map an operation code into a string
-    string op2string (GateOperation op);
-
     // Generate a JSON object containing all data required for the executor script file
     void saveScriptToJson (json &j);
 
@@ -90,20 +89,20 @@ public:
 
     // Generate a JSON object containing all wired pin connections, with length 2^parity
     void saveConnectionsToJson (json &pols);
+
+    // Converts relative references to absolute references, based on the slot
+    inline uint64_t relRef2AbsRef (uint64_t ref, uint64_t slot)
+    {
+        uint64_t result;
+
+        // ZeroRef is the same for all the slots, and it is at reference 0
+        if (ref==gateConfig.zeroRef) result = gateConfig.zeroRef;
+
+        // Next references have an offset of one slot size per slot
+        else result = slot*gateConfig.slotSize + ref;
+
+        return result;
+    }
 };
-
-// Converts relative references to absolute references, based on the slot
-inline uint64_t relRef2AbsRef (uint64_t ref, uint64_t slot)
-{
-    uint64_t result;
-
-    // ZeroRef is the same for all the slots, and it is at reference 0
-    if (ref==SHA256_ZeroRef) result = SHA256_ZeroRef;
-
-    // Next references have an offset of one slot size per slot
-    else result = slot*SHA256_SlotSize + ref;
-
-    return result;
-}
 
 #endif
