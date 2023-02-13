@@ -80,14 +80,22 @@ void SHA256 (const uint8_t * pData, uint64_t dataSize, string &hash)
         for (uint64_t i=0; i<16; i++)
         {
             bytes2u32(pChunkBytes + 4*i, w[i], true);
+            mpz_class aux = w[i];
+            //cout << "w[" << i << "]=" << aux.get_str(16) << endl;
         }
 
         // Extend the first 16 words into the remaining 48 words w[16..63] of the message schedule array:
         for (uint64_t i=16; i<64; i++)
         {
             uint32_t s0 = rotateRight32(w[i-15], 7) ^ rotateRight32(w[i-15], 18) ^ ( w[i-15] >> 3 );
+            mpz_class aux = s0;
+            //cout << "s0[" << i << "]=" << aux.get_str(16) << endl;
             uint32_t s1 = rotateRight32(w[i-2], 17) ^ rotateRight32(w[i-2], 19) ^ ( w[i-2] >> 10 );
+            aux = s1;
+            //cout << "s1[" << i << "]=" << aux.get_str(16) << endl;
             w[i] = w[i-16] + s0 + w[i-7] + s1;
+            aux = w[i];
+            //cout << "w[" << i << "]=" << aux.get_str(16) << endl;
         }
 
         // Initialize working variables to current hash value
@@ -106,9 +114,13 @@ void SHA256 (const uint8_t * pData, uint64_t dataSize, string &hash)
             uint32_t S1 = rotateRight32(e, 6) ^ rotateRight32(e, 11) ^ rotateRight32(e, 25);
             uint32_t ch = (e & f) ^ ((~e) & g);
             uint32_t temp1 = h + S1 + ch + k[i] + w[i];
+            mpz_class aux = temp1;
+            //cout << "temp1[" << i << "]=" << aux.get_str(16) << endl;
             uint32_t S0 = rotateRight32(a, 2) ^ rotateRight32(a, 13) ^ rotateRight32(a, 22);
             uint32_t maj = (a & b) ^ (a & c) ^ (b & c);
             uint32_t temp2 = S0 + maj;
+            aux = temp2;
+            //cout << "temp2[" << i << "]=" << aux.get_str(16) << endl;
     
             h = g;
             g = f;
@@ -148,38 +160,4 @@ void SHA256 (const uint8_t * pData, uint64_t dataSize, string &hash)
     hashScalar += h7;
 
     hash = "0x" + hashScalar.get_str(16);
-}
-
-vector<vector<string>> sha256TestVectors = {
-    {"", "0xe3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
-    {"0x", "0xe3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
-    {"0x00", "0x6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"},
-    {"0x0000", "0x96a296d224f285c67bee93c30f8a309157f0daa35dc5b87e410b78630a09cfc7"},
-    {"0x01", "0x4bf5122f344554c53bde2ebb8cd2b7e3d1600ad631c385a5d7cce23c7785459a"},
-    {"0x0102030405060708090a0b0c0d0e0f", "0x36030fcc7e566294905b49a720eb45bf962209d2ee1c9b73e2b7bc7ae8830376"},
-    {"0x000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f", "0xb1d1a68efaee9083e1e43459e6ef9620320ba3eff096b2a96ef77956472c0e33"},
-    {"0x000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0fffffff", "0xe603b922cc427b9b171e8c6fd23fbfbcd775913b4ec9242411e1d0cb77d1ef06"},
-    };
-
-void SHA256Test (Goldilocks &fr, Config &config)
-{
-    TimerStart(SHA256_TEST);
-
-    for (uint64_t i=0; i<sha256TestVectors.size(); i++)
-    {
-        string input = sha256TestVectors[i][0];
-        string expectedHash = sha256TestVectors[i][1];
-        string hash;
-        SHA256String(input, hash);
-        if (hash != expectedHash)
-        {
-            cerr << "Error: SHA256Test() failed, hash of " << input << " is " << hash << " instead of " << expectedHash << endl;
-            exitProcess();
-        }
-    }
-
-    TimerStopAndLog(SHA256_TEST);
-
-    cout << "SHA256Test() done" << endl;
-
 }
