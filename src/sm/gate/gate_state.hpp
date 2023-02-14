@@ -19,8 +19,8 @@ public:
     const GateConfig &gateConfig;
 
     uint64_t nextRef; 
-    uint64_t SinRefs[1600];
-    uint64_t SoutRefs[1600];
+    uint64_t * SinRefs;
+    uint64_t * SoutRefs;
 
     // Evaluations, i.e. a chronological list of operations to implement a keccak-f()
     vector<Gate *> program;

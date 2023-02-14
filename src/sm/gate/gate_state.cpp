@@ -5,9 +5,29 @@
 // Constructor
 GateState::GateState (const GateConfig &gateConfig) : gateConfig(gateConfig)
 {
+    // Allocate Sin references
+    SinRefs = new uint64_t[gateConfig.sinRefNumber];
+    if (SinRefs == NULL)
+    {
+        cout << "Error: GateState::GateState() failed calling new for SinRefs, N=" << gateConfig.sinRefNumber << endl;
+        exitProcess();
+    }
+
+    // Allocate Sout references
+    SoutRefs = new uint64_t[gateConfig.soutRefNumber];
+    if (SinRefs == NULL)
+    {
+        cout << "Error: GateState::GateState() failed calling new for SoutRefs, N=" << gateConfig.soutRefNumber << endl;
+        exitProcess();
+    }
+
     // Allocate array of gates
     gate = new Gate[gateConfig.maxRefs];
-    zkassert(gate!=NULL);
+    if (gate == NULL)
+    {
+        cout << "Error: GateState::GateState() failed calling new for gate, N=" << gateConfig.maxRefs << endl;
+        exitProcess();
+    }
 
     // Reset
     resetBitsAndCounters();
@@ -16,7 +36,9 @@ GateState::GateState (const GateConfig &gateConfig) : gateConfig(gateConfig)
 // Destructor
 GateState::~GateState ()
 {
-    // Free array of gates
+    // Free memory
+    delete[] SinRefs;
+    delete[] SoutRefs;
     delete[] gate;
 }
 

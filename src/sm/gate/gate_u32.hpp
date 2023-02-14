@@ -2,20 +2,7 @@
 #define GATE_U32_HPP
 
 #include "gate_state.hpp"
-
-class GateBit
-{
-public:
-    uint64_t ref;
-    PinId pin;
-
-    GateBit & operator =(const GateBit & other)
-    {
-        ref = other.ref;
-        pin = other.pin;
-        return *this;
-    }
-};
+#include "gate_bit.hpp"
 
 class GateU32
 {
@@ -23,11 +10,12 @@ public:
     GateState &S;
     GateBit bit[32];
     GateU32(GateState &S) : S(S) { fromU32(0); };
-    void fromU32 (uint32_t value);
-    uint32_t toU32 (void);
-    string toString (void);
-    void rotateRight (uint64_t pos);
-    void shiftRight (uint64_t pos);
+
+    void     fromU32     (uint32_t value);
+    uint32_t toU32       (void);
+    string   toString    (void);
+    void     rotateRight (uint64_t pos);
+    void     shiftRight  (uint64_t pos);
 
     GateU32 & operator =(const uint32_t & value)
     {
