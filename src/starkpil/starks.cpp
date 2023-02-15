@@ -307,7 +307,7 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     TimerStart(STARK_STEP_5_CALCULATE_EXPS);
     if (nrowsStepBatch > 1)
     {
-        steps->step52ns_parser_first(params, NExtended, nrowsStepBatch);
+        steps->step52ns_parser_first_avx(params, NExtended, nrowsStepBatch);
     }
     else
     {
