@@ -20,6 +20,6 @@ string gateop2string (GateOperation op)
         default:
             cerr << "gateop2string() found invalid op value:" << op << endl;
             exitProcess();
-            return "";
+            return "UNKNOWN";
     }
 }

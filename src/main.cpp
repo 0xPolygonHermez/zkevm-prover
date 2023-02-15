@@ -30,7 +30,7 @@
 #include "service/statedb/statedb_test.hpp"
 #include "service/statedb/statedb.hpp"
 #include "sha256_test.hpp"
-#include "blake.hpp"
+#include "blake_test.hpp"
 #include "goldilocks_precomputed.hpp"
 
 using namespace std;
