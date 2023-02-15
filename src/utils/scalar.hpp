@@ -346,6 +346,10 @@ void scalar2bits(mpz_class s, vector<uint8_t> &bits);
 void u322bits(uint32_t value, vector<uint8_t> &bits);
 uint32_t bits2u32(const vector<uint8_t> &bits);
 
+/* Converts an unsigned 64 to a vector of bits, with value 1 or 0; bits[0] is least significant bit */
+void u642bits(uint64_t value, vector<uint8_t> &bits);
+uint64_t bits2u64(const vector<uint8_t> &bits);
+
 /* Byte to/from bits array conversion, with value 1 or 0; bits[0] is the least significant bit */
 void byte2bits(uint8_t byte, uint8_t *pBits);
 void bits2byte(const uint8_t *pBits, uint8_t &byte);

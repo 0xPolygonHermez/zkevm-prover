@@ -662,6 +662,13 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
         {
             finalTrace.responses[finalTrace.responses.size() - 1].error = lastOpcode.error;
         }
+        
+        // If only opcode is STOP, remove redundancy
+        if (finalTrace.responses[finalTrace.responses.size() - 1].call_trace.context.data == "0x")
+        {
+            finalTrace.responses[finalTrace.responses.size() - 1].execution_trace.clear();
+            finalTrace.responses[finalTrace.responses.size() - 1].call_trace.steps.clear();
+        }
     }
 
     // Clean aux array for next iteration

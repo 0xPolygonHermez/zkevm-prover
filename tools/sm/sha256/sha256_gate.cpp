@@ -4,6 +4,7 @@
 #include "utils.hpp"
 #include "scalar.hpp"
 #include "timer.hpp"
+#include "zkassert.hpp"
 
 void SHA256GateString (const string &s, string &hash)
 {
@@ -17,6 +18,19 @@ void SHA256Gate (const uint8_t * pData, uint64_t dataSize, string &hash)
     // Initialize hash values:
     // (first 32 bits of the fractional parts of the square roots of the first 8 primes 2..19):
     uint32_t h[8] = { 0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19 };
+
+    // Create a gate configuration instance
+    GateConfig gateConfig;
+    gateConfig.zeroRef         = SHA256_ZeroRef;
+    gateConfig.slotSize        = SHA256_SlotSize;
+    gateConfig.maxRefs         = SHA256_MaxRefs;
+    gateConfig.firstNextRef    = SHA256_FirstNextRef;
+    gateConfig.sinRef0         = SHA256_SinRef0;
+    gateConfig.sinRefNumber    = SHA256_SinRefNumber;
+    gateConfig.sinRefDistance  = SHA256_SinRefDistance;
+    gateConfig.soutRef0        = SHA256_SoutRef0;
+    gateConfig.soutRefNumber   = SHA256_SoutRefNumber;
+    gateConfig.soutRefDistance = SHA256_SoutRefDistance;
 
     // Padding:
     // original message of length L bits
@@ -45,19 +59,6 @@ void SHA256Gate (const uint8_t * pData, uint64_t dataSize, string &hash)
     {
         // Initialize array of round constants:
         // (first 32 bits of the fractional parts of the cube roots of the first 64 primes 2..311):
-
-        // Create a gate configuration instance
-        GateConfig gateConfig;
-        gateConfig.zeroRef         = SHA256_ZeroRef;
-        gateConfig.slotSize        = SHA256_SlotSize;
-        gateConfig.maxRefs         = SHA256_MaxRefs;
-        gateConfig.firstNextRef    = SHA256_FirstNextRef;
-        gateConfig.sinRef0         = SHA256_SinRef0;
-        gateConfig.sinRefNumber    = SHA256_SinRefNumber;
-        gateConfig.sinRefDistance  = SHA256_SinRefDistance;
-        gateConfig.soutRef0        = SHA256_SoutRef0;
-        gateConfig.soutRefNumber   = SHA256_SoutRefNumber;
-        gateConfig.soutRefDistance = SHA256_SoutRefDistance;
 
         // Create a new gate state per loop
         GateState S(gateConfig);
@@ -107,6 +108,7 @@ void SHA256Gate (const uint8_t * pData, uint64_t dataSize, string &hash)
         {
             vector<uint8_t> bits;
             u322bits(h[i], bits);
+            zkassert(bits.size() == 32);
             for (uint64_t j=0; j<32; j++)
             {
                 uint64_t ref = SHA256_SinRef0 + (512 + i*32 + j)*44;
@@ -136,6 +138,7 @@ void SHA256Gate (const uint8_t * pData, uint64_t dataSize, string &hash)
             bytes2u32(pChunkBytes + 4*i, aux, true);
             vector<uint8_t> bits;
             u322bits(aux, bits);
+            zkassert(bits.size() == 32);
             for (uint64_t j=0; j<32; j++)
             {
                 uint64_t ref = SHA256_SinRef0 + (i*32 + j)*44;
