@@ -38,23 +38,23 @@ public:
     ~GateState ();
     void resetBitsAndCounters (void);
 
-    // Set Rin data into bits array at RinRef0 position
-    //void setRin (uint8_t * pRin);
+    // Set Rin data into bits array at RinRef0 position (used by Keccak-f)
+    void setRin (uint8_t * pRin);
     
-    // Mix Rin data with Sin data
-    //void mixRin (void);
+    // Mix Rin data with Sin data (used by Keccak-f)
+    void mixRin (void);
 
-    // Get 32-bytes output from SinRef0
-    //void getOutput (uint8_t * pOutput);
+    // Get 32-bytes output from SinRef0 (used by Keccak-f)
+    void getOutput (uint8_t * pOutput);
     
     // Get a free reference (the next one) and increment counter
     uint64_t getFreeRef (void);
 
-    // Copy Sout references to Sin references
-    //void copySoutRefsToSinRefs (void);
+    // Copy Sout references to Sin references (they must have the same size)
+    void copySoutRefsToSinRefs (void);
     
-    // Copy Sout data to Sin buffer, and reset
-    //void copySoutToSinAndResetRefs (void);
+    // Copy Sout data to Sin buffer, and reset (they must have the same size)
+    void copySoutToSinAndResetRefs (void);
 
     // Perform the gate operation
     void OP (GateOperation op, uint64_t refA, PinId pinA, uint64_t refB, PinId pinB, uint64_t refR);
@@ -78,7 +78,7 @@ public:
     // Print statistics, for development purposes
     void printCounters (void);
 
-    // Refs must be an array of 1600 bits
+    // Refs must be an array of references: SinRef or SoutRef
     void printRefs (uint64_t * pRefs, string name);
 
     // Generate a JSON object containing all data required for the executor script file
