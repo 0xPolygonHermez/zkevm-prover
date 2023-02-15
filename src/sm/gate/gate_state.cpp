@@ -140,11 +140,37 @@ uint64_t GateState::getFreeRef (void)
     uint64_t result = nextRef;
     nextRef++;
 
-    // Skip Sin and Sout gates, every gateConfig.sinRefDistance slots
-    if ( (nextRef<=(3200*gateConfig.sinRefDistance+1)) && (((nextRef-1)%gateConfig.sinRefDistance)==0) )
+    while (true)
     {
-        nextRef++;
+        // Skip ZeroRef
+        if (nextRef == gateConfig.zeroRef)
+        {
+            nextRef++;
+            continue;
+        }
+
+        // Skip Sin gates
+        if ( (nextRef >= gateConfig.sinRef0) &&
+             (nextRef <= gateConfig.sinRef0 + (gateConfig.sinRefNumber - 1)*gateConfig.sinRefDistance) &&
+             (((nextRef - gateConfig.sinRef0) % gateConfig.sinRefDistance) == 0) )
+        {
+            nextRef++;
+            continue;
+        }
+
+        // Skip Sout gates
+        if ( (nextRef >= gateConfig.soutRef0) &&
+             (nextRef <= gateConfig.soutRef0 + (gateConfig.soutRefNumber - 1)*gateConfig.soutRefDistance) &&
+             (((nextRef - gateConfig.soutRef0) % gateConfig.soutRefDistance) == 0) )
+        {
+            nextRef++;
+            continue;
+        }
+
+        break;
     }
+
+    zkassert(nextRef < gateConfig.maxRefs);
 
     return result;
 }
@@ -276,11 +302,11 @@ void GateState::OP (GateOperation op, uint64_t refA, PinId pinA, uint64_t refB, 
 void GateState::printCounters (void)
 {
     double totalOperations = xors + ors + andps + ands;
-    cout << "xors=" << xors << "=" << double(xors)*100/totalOperations << "%" << endl;
-    cout << "ors=" << ors << "=" << double(ors)*100/totalOperations << "%" << endl;
-    cout << "andps=" << andps << "=" << double(andps)*100/totalOperations  << "%" << endl;
-    cout << "ands=" << ands << "=" << double(ands)*100/totalOperations  << "%" << endl;
-    cout << "nextRef-1=" << nextRef-1 << endl;
+    cout << "xors      = " << xors << " = " << double(xors)*100/totalOperations << "%" << endl;
+    cout << "ors       = " << ors << " = " << double(ors)*100/totalOperations << "%" << endl;
+    cout << "andps     = " << andps << " = " << double(andps)*100/totalOperations  << "%" << endl;
+    cout << "ands      = " << ands << " = " << double(ands)*100/totalOperations  << "%" << endl;
+    cout << "nextRef-1 = " << nextRef-1 << endl;
 }
 
 // Refs must be an array of references
