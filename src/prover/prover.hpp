@@ -22,7 +22,7 @@
 #include "starkpil/stark_info.hpp"
 #include "starks.hpp"
 #include "constant_pols_starks.hpp"
-
+#include "fflonk_prover.hpp"
 class Prover
 {
     Goldilocks &fr;

@@ -841,33 +841,43 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     json2file(publicJson, pProverRequest->publicsOutputFile());
     TimerStopAndLog(SAVE_PUBLICS_JSON);
 
-    // Generate Groth16 via rapid SNARK
-    TimerStart(RAPID_SNARK);
-    json jsonProof;
-    try
-    {
-        auto proof = groth16Prover->prove(pWitnessFinal);
-        jsonProof = proof->toJson();
-    }
-    catch (std::exception &e)
-    {
-        cerr << "Error: Prover::genProof() got exception in rapid SNARK:" << e.what() << '\n';
-        exitProcess();
-    }
-    TimerStopAndLog(RAPID_SNARK);
+    // TODO: sREMOVE COPY
+    auto wtns = BinFileUtils::BinFile((void *)pWitnessFinal, witnessSizeFinal, "wtns", 1);
 
-    // Save proof to file
-    if (config.saveProofToFile)
+    if (true)
     {
-        json2file(jsonProof, pProverRequest->filePrefix + "final_proof.proof.json");
+        auto prover = new Fflonk::FflonkProver<AltBn128::Engine>(AltBn128::Engine::engine);
+        auto [proofJson, publicSignalsJson] = prover->prove(zkey.get(), &wtns);
     }
+    else
+    {
+        // Generate Groth16 via rapid SNARK
+        TimerStart(RAPID_SNARK);
+        json jsonProof;
+        try
+        {
+            auto proof = groth16Prover->prove(pWitnessFinal);
+            jsonProof = proof->toJson();
+        }
+        catch (std::exception &e)
+        {
+            cerr << "Error: Prover::genProof() got exception in rapid SNARK:" << e.what() << '\n';
+            exitProcess();
+        }
+        TimerStopAndLog(RAPID_SNARK);
 
-    // Populate Proof with the correct data
-    PublicInputsExtended publicInputsExtended;
-    publicInputsExtended.publicInputs = pProverRequest->input.publicInputsExtended.publicInputs;
-    pProverRequest->proof.load(jsonProof, publicInputsExtended);
+        // Save proof to file
+        if (config.saveProofToFile)
+        {
+            json2file(jsonProof, pProverRequest->filePrefix + "final_proof.proof.json");
+        }
+        // Populate Proof with the correct data
+        PublicInputsExtended publicInputsExtended;
+        publicInputsExtended.publicInputs = pProverRequest->input.publicInputsExtended.publicInputs;
+        pProverRequest->proof.load(jsonProof, publicInputsExtended);
 
-    pProverRequest->result = ZKR_SUCCESS;
+        pProverRequest->result = ZKR_SUCCESS;
+    }
 
     /***********/
     /* Cleanup */

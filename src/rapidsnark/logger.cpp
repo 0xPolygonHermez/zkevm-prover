@@ -43,16 +43,16 @@ const string logFileName = "MyLogFile.log";
 
 Logger::Logger()
 {
-   //m_File.open(logFileName.c_str(), ios::out|ios::app); // This is creating a file at disk, even if console traces are being used.
+   m_File.open(logFileName.c_str(), ios::out|ios::app);
    m_LogLevel	= LOG_LEVEL_TRACE;
-   m_LogType	= CONSOLE; //FILE_LOG;
+   m_LogType	= FILE_LOG;
 
    // Initialize mutex
 #ifdef WIN32
    InitializeCriticalSection(&m_Mutex);
 #else
    int ret=0;
-   ret = pthread_mutexattr_init(&m_Attr);
+   ret = pthread_mutexattr_init(&m_Attr); // TODO: Pull request - Add this change to the common repo
    if (ret != 0)
    {
       printf("Logger::Logger() -- Mutex attribute could not initialize!!\n");

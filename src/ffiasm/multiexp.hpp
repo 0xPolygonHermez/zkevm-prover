@@ -28,12 +28,21 @@ class ParallelMultiexp {
 
     uint32_t getChunk(uint32_t scalarIdx, uint32_t chunkIdx);
     void processChunk(uint32_t idxChunk);
+    void processChunk(uint32_t idxChunk, uint32_t nx, uint64_t x[]);
     void packThreads();
     void reduce(typename Curve::Point &res, uint32_t nBits);
 
 public:
     ParallelMultiexp(Curve &_g): g(_g) {}
     void multiexp(typename Curve::Point &r, typename Curve::PointAffine *_bases, uint8_t* _scalars, uint32_t _scalarSize, uint32_t _n, uint32_t _nThreads=0);
+    void multiexp(typename Curve::Point &r,
+                  typename Curve::PointAffine *_bases,
+                  uint8_t* _scalars,
+                  uint32_t _scalarSize,
+                  uint32_t _n,
+                  uint32_t nx,
+                  uint64_t x[],
+                  uint32_t _nThreads=0);
 
 };
 
