@@ -45,7 +45,6 @@ tFunction string2Function(string s)
     else if (s == "getTimestamp")                   return f_getTimestamp;
     else if (s == "getTxs")                         return f_getTxs;
     else if (s == "getTxsLen")                      return f_getTxsLen;
-    else if (s == "addrOp")                         return f_addrOp;
     else if (s == "eventLog")                       return f_eventLog;
     else if (s == "cond")                           return f_cond;
     else if (s == "inverseFpEc")                    return f_inverseFpEc;
@@ -55,7 +54,6 @@ tFunction string2Function(string s)
     else if (s == "yAddPointEc")                    return f_yAddPointEc;
     else if (s == "xDblPointEc")                    return f_xDblPointEc;
     else if (s == "yDblPointEc")                    return f_yDblPointEc;
-    else if (s == "getBytecode")                    return f_getBytecode;
     else if (s == "f_bitwise_and")                  return f_bitwise_and;
     else if (s == "f_bitwise_or")                   return f_bitwise_or;
     else if (s == "f_bitwise_xor")                  return f_bitwise_xor;
@@ -71,10 +69,7 @@ tFunction string2Function(string s)
     else if (s == "memAlignWR_W0")                  return f_memAlignWR_W0;
     else if (s == "memAlignWR_W1")                  return f_memAlignWR_W1;
     else if (s == "memAlignWR8_W0")                 return f_memAlignWR8_W0;
-    else if (s == "saveContractBytecode")           return f_saveContractBytecode;
     else if (s == "onOpcode")                       return f_onOpcode;
-    else if (s == "onTouchedAddress")               return f_onTouchedAddress;
-    else if (s == "onTouchedSlot")                  return f_onTouchedSlot;
     else if (s == "")                               return f_empty;
     else {
         cerr << "Error: string2function() invalid string = " << s << endl;
@@ -93,7 +88,6 @@ string function2String(tFunction f)
         case f_getTimestamp:                    return "getTimestamp";
         case f_getTxs:                          return "getTxs";
         case f_getTxsLen:                       return "getTxsLen";
-        case f_addrOp:                          return "addrOp";
         case f_eventLog:                        return "eventLog";
         case f_cond:                            return "cond";
         case f_inverseFpEc:                     return "inverseFpEc";
@@ -103,7 +97,6 @@ string function2String(tFunction f)
         case f_yAddPointEc:                     return "yAddPointEc";
         case f_xDblPointEc:                     return "xDblPointEc";
         case f_yDblPointEc:                     return "yDblPointEc";
-        case f_getBytecode:                     return "getBytecode";
         case f_bitwise_and:                     return "bitwise_and";
         case f_bitwise_or:                      return "bitwise_or";
         case f_bitwise_xor:                     return "bitwise_xor";
@@ -119,10 +112,7 @@ string function2String(tFunction f)
         case f_memAlignWR_W0:                   return "memAlignWR_W0";
         case f_memAlignWR_W1:                   return "memAlignWR_W1";
         case f_memAlignWR8_W0:                  return "memAlignWR8_W0";
-        case f_saveContractBytecode:            return "saveContractBytecode";
         case f_onOpcode:                        return "onOpcode";
-        case f_onTouchedAddress:                return "onTouchedAddress";
-        case f_onTouchedSlot:                   return "onTouchedSlot";
         case f_empty:                           return "";
         default:                                return "unknown";
     }

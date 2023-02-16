@@ -1,13 +1,11 @@
 #ifndef SHA256_HPP
 #define SHA256_HPP
 
-#include "goldilocks_base_field.hpp"
-#include "config.hpp"
+#include <string>
 
+using namespace std;
 
-void SHA256String (const string &s, string &hash);
 void SHA256 (const uint8_t * pData, uint64_t dataSize, string &hash);
-
-void SHA256Test (Goldilocks &fr, Config &config);
+void SHA256String (const string &s, string &hash);
 
 #endif

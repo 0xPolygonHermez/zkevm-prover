@@ -499,6 +499,90 @@ void scalar2bits(mpz_class s, vector<uint8_t> &bits)
     }
 }
 
+/* Converts an unsigned 32 to a vector of bits, with value 1 or 0; bits[0] is least significant bit */
+
+void u322bits(uint32_t value, vector<uint8_t> &bits)
+{
+    // Call scalar2bits()
+    mpz_class s(value);
+    scalar2bits(s, bits);
+
+    // Append any missing zeros
+    while (bits.size() < 32)
+    {
+        bits.push_back(0);
+    }
+}
+
+uint32_t bits2u32(const vector<uint8_t> &bits)
+{
+    if (bits.size() != 32)
+    {
+        cerr << "Error: bits2u32() got invalid bits size=" << bits.size() << endl;
+        exitProcess();
+    }
+    uint32_t result = 0;
+    for (int64_t i=31; i>=0; i--)
+    {
+        result = result << 1;
+        switch (bits[i])
+        {
+            case 0:
+                break;
+            case 1:
+                result += 1;
+                break;
+            default:
+                cerr << "Error: bits2u32() got invalid bit i=" << i << " value=" << bits[i] << endl;
+                exitProcess();
+                break;
+        }
+    }
+    return result;
+}
+
+/* Converts an unsigned 64 to a vector of bits, with value 1 or 0; bits[0] is least significant bit */
+
+void u642bits(uint64_t value, vector<uint8_t> &bits)
+{
+    // Call scalar2bits()
+    mpz_class s(value);
+    scalar2bits(s, bits);
+
+    // Append any missing zeros
+    while (bits.size() < 64)
+    {
+        bits.push_back(0);
+    }
+}
+
+uint64_t bits2u64(const vector<uint8_t> &bits)
+{
+    if (bits.size() != 64)
+    {
+        cerr << "Error: bits2u64() got invalid bits size=" << bits.size() << endl;
+        exitProcess();
+    }
+    uint64_t result = 0;
+    for (int64_t i=63; i>=0; i--)
+    {
+        result = result << 1;
+        switch (bits[i])
+        {
+            case 0:
+                break;
+            case 1:
+                result += 1;
+                break;
+            default:
+                cerr << "Error: bits2u64() got invalid bit i=" << i << " value=" << bits[i] << endl;
+                exitProcess();
+                break;
+        }
+    }
+    return result;
+}
+
 /* Byte to/from bits array conversion, with value 1 or 0; bits[0] is the least significant bit */
 
 void byte2bits(uint8_t byte, uint8_t *pBits)
@@ -611,7 +695,7 @@ void bytes2u32 (const uint8_t * pInput, uint32_t &output, bool bBigEndian)
     for (uint64_t i=0; i<4; i++)
     {
         if (i != 0) output = output << 8;
-        output |= pInput[bBigEndian ? i : (4-i)];
+        output |= pInput[bBigEndian ? i : (3-i)];
     }
 }
 

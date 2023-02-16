@@ -2940,12 +2940,12 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        return;\n";
                 code += "    }\n";
 
+                code += "    if (c != 0)\n";
+                code += "        pols.carry[" + string(bFastMode?"0":"i") + "] = fr.one();\n";
+
                 if (!bFastMode)
                 {
                     code += "    pols.binOpcode[i] = fr.fromU64(5);\n";
-
-                    code += "    if (c != 0)\n";
-                    code += "        pols.carry[i] = fr.one();\n";
 
                     code += "    // Store the binary action to execute it later with the binary SM\n";
                     code += "    binaryAction.a = a;\n";

@@ -95,7 +95,6 @@ void eval_getRawTx            (Context &ctx, const RomCommand &cmd, CommandResul
 void eval_getSequencerAddr    (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getTxs              (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getTxsLen           (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_addrOp              (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_eventLog            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getTimestamp        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_cond                (Context &ctx, const RomCommand &cmd, CommandResult &cr);
@@ -106,7 +105,6 @@ void eval_xAddPointEc         (Context &ctx, const RomCommand &cmd, CommandResul
 void eval_yAddPointEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_xDblPointEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_yDblPointEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_getBytecode         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_beforeLast          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_bitwise_and         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_bitwise_or          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
@@ -123,11 +121,6 @@ void eval_storeLog            (Context &ctx, const RomCommand &cmd, CommandResul
 void eval_memAlignWR_W0       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_memAlignWR_W1       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_memAlignWR8_W0      (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_saveContractBytecode(Context &ctx, const RomCommand &cmd, CommandResult &cr);
-
-void eval_onTouchedAddress(Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_onTouchedSlot(Context &ctx, const RomCommand &cmd, CommandResult &cr);
-
 void eval_addReadWriteAddress (Context &ctx, const mpz_class value);
 
 } // namespace
