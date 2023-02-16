@@ -43,7 +43,6 @@ namespace Fflonk {
         MulZ<Engine> *mulZ;
 
         BinFileUtils::BinFile *fdZkey;
-        BinFileUtils::BinFile *fdWtns;
 
         Zkey::FflonkZkeyHeader *zkey;
         u_int32_t zkeyPower;
@@ -79,7 +78,7 @@ namespace Fflonk {
 
         ~FflonkProver();
 
-        std::tuple <json, json> prove(BinFileUtils::BinFile *fdZkey, BinFileUtils::BinFile *fdWtns);
+        std::tuple <json, json> prove(BinFileUtils::BinFile *fdZkey, FrElement *buffWitness);
 
         void calculateAdditions(BinFileUtils::BinFile *fdZkey);
 

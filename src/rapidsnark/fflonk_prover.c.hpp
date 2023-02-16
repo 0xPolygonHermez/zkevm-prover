@@ -31,7 +31,7 @@ namespace Fflonk
     }
 
     template <typename Engine>
-    std::tuple<json, json> FflonkProver<Engine>::prove(BinFileUtils::BinFile *fdZkey, BinFileUtils::BinFile *fdWtns)
+    std::tuple<json, json> FflonkProver<Engine>::prove(BinFileUtils::BinFile *fdZkey, FrElement *buffWitness)
     {
         try
         {
@@ -43,10 +43,6 @@ namespace Fflonk
             dump = new Dump::Dump<Engine>(E);
 
             this->fdZkey = fdZkey;
-            this->fdWtns = fdWtns;
-
-            auto wtns = WtnsUtils::loadHeader(fdWtns);
-            takeTime(T1, "Load wtns fflonk header");
 
             LOG_TRACE("> Reading zkey file");
 
@@ -65,24 +61,6 @@ namespace Fflonk
             takeTime(T1, "fft init");
 
             mulZ = new MulZ<Engine>(E, fft);
-
-            if (mpz_cmp(zkey->rPrime, wtns->prime) != 0)
-            {
-                throw std::invalid_argument("Curve of the witness does not match the curve of the proving key");
-            }
-
-            // TODO compare zkey field with current field
-            //            if (mpz_cmp(zkeyHeader->rPrime, altBbn128r) != 0) {
-            //                throw std::invalid_argument( "zkey curve not supported" );
-            //            }
-
-            if (wtns->nVars != zkey->nVars - zkey->nAdditions)
-            {
-                std::ostringstream ss;
-                ss << "Invalid witness length. Circuit: " << zkey->nVars << ", witness: " << wtns->nVars << ", "
-                   << zkey->nAdditions;
-                throw std::invalid_argument(ss.str());
-            }
 
             sDomain = zkey->domainSize * sizeof(FrElement);
 
@@ -334,15 +312,8 @@ namespace Fflonk
             takeTime(T1, "Reading PTAU polynomial & evaluations");
 
             transcript = new Keccak256Transcript<Engine>(E);
-
-            takeTime(T1, "Reading circuit file data");
             resetTimer(T2);
-
-            // Read witness data
-            LOG_TRACE("> Reading witness file data");
-            buffWitness = (FrElement *)fdWtns->getSectionData(2);
-            takeTime(T1, "Reading witness file data");
-
+            
             // First element in plonk is not used and can be any value. (But always the same).
             // We set it to zero to go faster in the exponentiations.
             buffWitness[0] = E.fr.zero();

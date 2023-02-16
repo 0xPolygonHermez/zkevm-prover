@@ -841,13 +841,10 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     json2file(publicJson, pProverRequest->publicsOutputFile());
     TimerStopAndLog(SAVE_PUBLICS_JSON);
 
-    // TODO: sREMOVE COPY
-    auto wtns = BinFileUtils::BinFile((void *)pWitnessFinal, witnessSizeFinal, "wtns", 1);
-
     if (true)
     {
         auto prover = new Fflonk::FflonkProver<AltBn128::Engine>(AltBn128::Engine::engine);
-        auto [proofJson, publicSignalsJson] = prover->prove(zkey.get(), &wtns);
+        auto [proofJson, publicSignalsJson] = prover->prove(zkey.get(), pWitnessFinal);
     }
     else
     {
