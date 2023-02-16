@@ -549,27 +549,30 @@ void FullTracer::onUpdateStorage(Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&t, NULL);
 #endif
-    mpz_class regScalar;
-
-    // The storage key is stored in C
-    getRegFromCtx(ctx, reg_C, regScalar);
-    string key = PrependZeros(regScalar.get_str(16), 64);
-
-    // The storage value is stored in D
-    getRegFromCtx(ctx, reg_D, regScalar);
-    string value = PrependZeros(regScalar.get_str(16), 64);
-
-    if (deltaStorage.find(depth) == deltaStorage.end())
+    if (ctx.proverRequest.input.traceConfig.generateStorage())
     {
-        cerr << "Error: FullTracer::onUpdateStorage() did not found deltaStorage of depth=" << depth << endl;
-        exitProcess();
-    }
+        mpz_class regScalar;
 
-    deltaStorage[depth][key] = value;
+        // The storage key is stored in C
+        getRegFromCtx(ctx, reg_C, regScalar);
+        string key = PrependZeros(regScalar.get_str(16), 64);
+
+        // The storage value is stored in D
+        getRegFromCtx(ctx, reg_D, regScalar);
+        string value = PrependZeros(regScalar.get_str(16), 64);
+
+        if (deltaStorage.find(depth) == deltaStorage.end())
+        {
+            cerr << "Error: FullTracer::onUpdateStorage() did not found deltaStorage of depth=" << depth << endl;
+            exitProcess();
+        }
+
+        deltaStorage[depth][key] = value;
 
 #ifdef LOG_FULL_TRACER
-    cout << "FullTracer::onUpdateStorage() depth=" << depth << " key=" << key << " value=" << value << endl;
+        cout << "FullTracer::onUpdateStorage() depth=" << depth << " key=" << key << " value=" << value << endl;
 #endif
+    }
 #ifdef LOG_TIME_STATISTICS
     tms.add("onUpdateStorage", TimeDiff(t));
 #endif
@@ -602,17 +605,20 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     accBatchGas += response.gas_used;
 
     // Set return data
-    mpz_class offsetScalar;
-    getVarFromCtx(ctx, false, ctx.rom.retDataOffsetOffset, offsetScalar);
-    mpz_class lengthScalar;
-    getVarFromCtx(ctx, false, ctx.rom.retDataLengthOffset, lengthScalar);
-    if (response.call_trace.context.to == "0x")
+    if (ctx.proverRequest.input.traceConfig.generateReturnData())
     {
-        getCalldataFromStack(ctx, offsetScalar.get_ui(), lengthScalar.get_ui(), response.return_value);
-    }
-    else
-    {
-        getFromMemory(ctx, offsetScalar, lengthScalar, response.return_value);
+        mpz_class offsetScalar;
+        getVarFromCtx(ctx, false, ctx.rom.retDataOffsetOffset, offsetScalar);
+        mpz_class lengthScalar;
+        getVarFromCtx(ctx, false, ctx.rom.retDataLengthOffset, lengthScalar);
+        if (response.call_trace.context.to == "0x")
+        {
+            getCalldataFromStack(ctx, offsetScalar.get_ui(), lengthScalar.get_ui(), response.return_value);
+        }
+        else
+        {
+            getFromMemory(ctx, offsetScalar, lengthScalar, response.return_value);
+        }
     }
 
     // Set create address in case of deploy
