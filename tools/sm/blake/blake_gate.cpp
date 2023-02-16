@@ -129,13 +129,6 @@ void Blake2b256Gate_Compress (uint64_t (&h)[8], uint8_t (&chunk)[128], uint64_t 
     // Create a new gate state per loop
     GateState S(gateConfig);
 
-    /* Input state (Sin) map:
-       0..1023 (1024 bits) --> Input chunk data chunk[128] --> m[16]
-       1024..1535 (512 bits) --> Hash state h[8] --> h32[8]
-       1536..1599 (64 bits) --> c bytes compressed
-       1600 (1 bit) --> bLastChunk --> lastChunk 
-    */
-
     // Input State: Treat each 128-byte message chunk as sixteen 8-byte (64-bit) words m
     GateU64 m[16] = {
             GateU64(S), GateU64(S), GateU64(S), GateU64(S), GateU64(S), GateU64(S), GateU64(S), GateU64(S),
@@ -265,6 +258,18 @@ void Blake2b256Gate_Compress (uint64_t (&h)[8], uint8_t (&chunk)[128], uint64_t 
         GateU64_xor(S, h64[i], V[i], aux1);
         GateU64_xor(S, aux1, V[8+i], h64[i]);
         h[i] = h64[i].toU64();
+    }
+
+    // Make sure that Sout is located in the expected gates, both in pin a and r
+    for (uint64_t i=0; i<8; i++)
+    {
+        for (uint64_t j=0; j<64; j++)
+        {
+            uint64_t ref = gateConfig.soutRef0 + gateConfig.soutRefDistance*(64*i + j);
+            S.XOR( h64[i].bit[j].ref, h64[i].bit[j].pin, gateConfig.zeroRef, pin_a, ref );
+            S.SoutRefs[64*i + j] = ref;
+            //cout << "SHA256() i=" << i << " aux=" << aux << " pin_a=" << (uint64_t)S.gate[S.SoutRefs[i]].pin[pin_a].bit << " pin_r=" << (uint64_t)S.gate[S.SoutRefs[i]].pin[pin_r].bit << endl;
+        }
     }
 
     S.printCounters();

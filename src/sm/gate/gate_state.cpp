@@ -71,46 +71,67 @@ void GateState::resetBitsAndCounters (void)
     andps = 0;
     ands  = 0;
 
-    // Init ZeroRef and OneRef gates
+    // Init ZeroRef and OneRef gates as 1 = XOR(0,1)
+    gate[gateConfig.zeroRef].op = gop_xor;
     gate[gateConfig.zeroRef].pin[pin_a].bit = 0;
     gate[gateConfig.zeroRef].pin[pin_b].bit = 1;
-    gate[gateConfig.zeroRef].op = gop_xor;
     gate[gateConfig.zeroRef].pin[pin_r].bit = 1;
 }
 
 // Set Rin data into bits array at SinRef0 position
-/*void GateState::setRin (uint8_t * pRin)
+void GateState::setRin (uint8_t * pRin)
 {
+    if (gateConfig.sinRefNumber < 1088)
+    {
+        cout << "Error: GateState::setRin() called with gateConfig.sinRefNumber=" << gateConfig.sinRefNumber << " < 1088" << endl;
+        exitProcess();
+    }
+
     zkassert(pRin != NULL);
+
     for (uint64_t i=0; i<1088; i++)
     {
-        gate[SHA256_SinRef0+i*44].pin[pin_b].bit = pRin[i];
-        gate[SHA256_SinRef0+i*44].pin[pin_b].source = external;
+        uint64_t ref = gateConfig.sinRef0+i*gateConfig.sinRefDistance;
+        gate[ref].pin[pin_b].bit = pRin[i];
+        gate[ref].pin[pin_b].source = external;
     }
 }
 
 // Mix Rin data with Sin data
 void GateState::mixRin (void)
 {
+    if (gateConfig.sinRefNumber < 1088)
+    {
+        cout << "Error: GateState::mixRin() called with gateConfig.sinRefNumber=" << gateConfig.sinRefNumber << " < 1088" << endl;
+        exitProcess();
+    }
+
     for (uint64_t i=0; i<1088; i++)
     {
-        XOR(SHA256_SinRef0+i*44, pin_a, SHA256_SinRef0+i*44, pin_b, SHA256_SinRef0+i*44);
+        uint64_t ref = gateConfig.sinRef0+i*gateConfig.sinRefDistance;
+        XOR(ref, pin_a, ref, pin_b, ref);
     }
-}*/
+}
 
 // Get 32-bytes output from SinRef0
-/*void GateState::getOutput (uint8_t * pOutput)
+void GateState::getOutput (uint8_t * pOutput)
 {
+    if (gateConfig.sinRefNumber < (32*8))
+    {
+        cout << "Error: GateState::getOutput() called with gateConfig.sinRefNumber=" << gateConfig.sinRefNumber << " < 32*8" << endl;
+        exitProcess();
+    }
+
     for (uint64_t i=0; i<32; i++)
     {
         uint8_t aux[8];
         for (uint64_t j=0; j<8; j++)
         {
-            aux[j] = gate[SHA256_SinRef0+(i*8+j)*44].pin[pin_a].bit;
+            aux[j] = gate[gateConfig.sinRef0 + (i*8+j)*gateConfig.sinRefDistance].pin[pin_a].bit;
         }
         bits2byte(aux, *(pOutput+i));
     }
-}*/
+}
 
 // Get a free reference (the next one) and increment counter
 uint64_t GateState::getFreeRef (void)
@@ -119,19 +140,53 @@ uint64_t GateState::getFreeRef (void)
     uint64_t result = nextRef;
     nextRef++;
 
-    // Skip Sin and Sout gates, every 44 slots
-    if ( (nextRef<=(3200*44+1)) && (((nextRef-1)%44)==0) )
+    while (true)
     {
-        nextRef++;
+        // Skip ZeroRef
+        if (nextRef == gateConfig.zeroRef)
+        {
+            nextRef++;
+            continue;
+        }
+
+        // Skip Sin gates
+        if ( (nextRef >= gateConfig.sinRef0) &&
+             (nextRef <= gateConfig.sinRef0 + (gateConfig.sinRefNumber - 1)*gateConfig.sinRefDistance) &&
+             (((nextRef - gateConfig.sinRef0) % gateConfig.sinRefDistance) == 0) )
+        {
+            nextRef++;
+            continue;
+        }
+
+        // Skip Sout gates
+        if ( (nextRef >= gateConfig.soutRef0) &&
+             (nextRef <= gateConfig.soutRef0 + (gateConfig.soutRefNumber - 1)*gateConfig.soutRefDistance) &&
+             (((nextRef - gateConfig.soutRef0) % gateConfig.soutRefDistance) == 0) )
+        {
+            nextRef++;
+            continue;
+        }
+
+        break;
     }
+
+    zkassert(nextRef < gateConfig.maxRefs);
 
     return result;
 }
 
 // Copy Sout references to Sin references
-/*void GateState::copySoutRefsToSinRefs (void)
+void GateState::copySoutRefsToSinRefs (void)
 {
-    for (uint64_t i=0; i<1600; i++)
+    // Check sizes
+    if (gateConfig.sinRefNumber != gateConfig.soutRefNumber)
+    {
+        cout << "Error: GateState::copySoutRefsToSinRefs() called with gateConfig.sinRefNumber=" << gateConfig.sinRefNumber << " different from gateConfig.soutRefNumber=" << gateConfig.soutRefNumber << endl;
+        exitProcess();
+    }
+
+    // Copy SoutRefs into SinRefs
+    for (uint64_t i=0; i<gateConfig.sinRefNumber; i++)
     {
         SinRefs[i] = SoutRefs[i];
     }
@@ -140,17 +195,39 @@ uint64_t GateState::getFreeRef (void)
 // Copy Sout data to Sin buffer, and reset
 void GateState::copySoutToSinAndResetRefs (void)
 {
-    uint8_t localSout[1600];
-    for (uint64_t i=0; i<1600; i++)
+    // Check sizes
+    if (gateConfig.sinRefNumber != gateConfig.soutRefNumber)
+    {
+        cout << "Error: GateState::copySoutToSinAndResetRefs() called with gateConfig.sinRefNumber=" << gateConfig.sinRefNumber << " different from gateConfig.soutRefNumber=" << gateConfig.soutRefNumber << endl;
+        exitProcess();
+    }
+
+    // Allocate a local set of references
+    uint8_t * localSout = new uint8_t[gateConfig.sinRefNumber];
+    if (localSout == NULL)
+    {
+        cout << "Error: GateState::copySoutToSinAndResetRefs() failed allocating uint8_t of size=" << gateConfig.sinRefNumber << endl;
+        exitProcess();
+    }
+
+    // Copy Sout into local
+    for (uint64_t i=0; i<gateConfig.sinRefNumber; i++)
     {
         localSout[i] = gate[SoutRefs[i]].pin[pin_r].bit;
     }
+
+    // Reset
     resetBitsAndCounters();
-    for (uint64_t i=0; i<1600; i++)
+
+    // Restore local to Sin
+    for (uint64_t i=0; i<gateConfig.sinRefNumber; i++)
     {
-        gate[SHA256_SinRef0+i*44].pin[pin_a].bit = localSout[i];
+        gate[gateConfig.sinRef0+i*gateConfig.sinRefDistance].pin[pin_a].bit = localSout[i];
     }
-}*/
+
+    // Free memory
+    delete[] localSout;
+}
 
 void GateState::OP (GateOperation op, uint64_t refA, PinId pinA, uint64_t refB, PinId pinB, uint64_t refR)
 {
@@ -225,25 +302,52 @@ void GateState::OP (GateOperation op, uint64_t refA, PinId pinA, uint64_t refB, 
 void GateState::printCounters (void)
 {
     double totalOperations = xors + ors + andps + ands;
-    cout << "xors=" << xors << "=" << double(xors)*100/totalOperations << "%" << endl;
-    cout << "ors=" << ors << "=" << double(ors)*100/totalOperations << "%" << endl;
-    cout << "andps=" << andps << "=" << double(andps)*100/totalOperations  << "%" << endl;
-    cout << "ands=" << ands << "=" << double(ands)*100/totalOperations  << "%" << endl;
-    cout << "nextRef-1=" << nextRef-1 << endl;
+    cout << "xors      = " << xors << " = " << double(xors)*100/totalOperations << "%" << endl;
+    cout << "ors       = " << ors << " = " << double(ors)*100/totalOperations << "%" << endl;
+    cout << "andps     = " << andps << " = " << double(andps)*100/totalOperations  << "%" << endl;
+    cout << "ands      = " << ands << " = " << double(ands)*100/totalOperations  << "%" << endl;
+    cout << "nextRef-1 = " << nextRef-1 << endl;
 }
 
-// Refs must be an array of 1600 bits
+// Refs must be an array of references
 void GateState::printRefs (uint64_t * pRefs, string name)
 {
-    // Get a local copy of the 1600 bits by reference
-    uint8_t aux[1600];
-    for (uint64_t i=0; i<1600; i++)
+    uint64_t size = 0;
+
+    // Find the size
+    if (pRefs == SinRefs)
+    {
+        size = gateConfig.sinRefNumber;
+    }
+    else if (pRefs == SoutRefs)
+    {
+        size = gateConfig.soutRefNumber;
+    }
+    else
+    {
+        cerr << "Error: GateState::printRefs() got invalid value of pRefs=" << pRefs << endl;
+        exitProcess();
+    }
+
+    // Allocate memory
+    uint8_t * aux = new uint8_t[size];
+    if (aux == NULL)
+    {
+        cerr << "Error: GateState::printRefs() failed allocating " << size << " bytes" << endl;
+        exitProcess();
+    }
+
+    // Copy the bits
+    for (uint64_t i=0; i<size; i++)
     {
         aux[i] = gate[pRefs[i]].pin[pin_r].bit;
     }
 
     // Print the bits
-    printBits(aux, 1600, name);
+    printBits(aux, size, name);
+
+    // Free  memory
+    delete[] aux;
 }
 
 // Generate a JSON object containing all data required for the executor script file
@@ -261,10 +365,10 @@ void GateState::saveScriptToJson (json &j)
         // Input a elements
         json a;
         uint64_t refa = program[i]->pin[pin_a].wiredRef;
-        if ( (refa<=(1600*44+1)) && (((refa-1)%44)==0) && (refa>44) && (program[i]->pin[pin_a].wiredPinId==PinId::pin_a) )
+        if ( (refa<=(gateConfig.sinRefNumber*gateConfig.sinRefDistance+1)) && (((refa-1)%gateConfig.sinRefDistance)==0) && (refa>gateConfig.sinRefDistance) && (program[i]->pin[pin_a].wiredPinId==PinId::pin_a) )
         {
             a["type"] = "input";
-            a["bit"] = (refa/44) - 1;
+            a["bit"] = (refa/gateConfig.sinRefDistance) - 1;
         }
         else
         {
@@ -277,10 +381,10 @@ void GateState::saveScriptToJson (json &j)
         // Input b elements
         json b;
         uint64_t refb = program[i]->pin[pin_b].wiredRef;
-        if ( (refb<=(1600*44+1)) && (((refb-1)%44)==0) && (refb>44) && (program[i]->pin[pin_b].wiredPinId==PinId::pin_a) )
+        if ( (refb<=(gateConfig.sinRefNumber*gateConfig.sinRefDistance+1)) && (((refb-1)%gateConfig.sinRefDistance)==0) && (refb>gateConfig.sinRefDistance) && (program[i]->pin[pin_b].wiredPinId==PinId::pin_a) )
         {
             b["type"] = "input";
-            b["bit"] = (refb/44) - 1;
+            b["bit"] = (refb/gateConfig.sinRefDistance) - 1;
         }
         else
         {
