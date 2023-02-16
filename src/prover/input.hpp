@@ -9,6 +9,7 @@
 #include "compare_fe.hpp"
 #include "database.hpp"
 #include "zkresult.hpp"
+#include "trace_config.hpp"
 
 using json = nlohmann::json;
 
@@ -30,8 +31,7 @@ public:
     // These fields are only used if this is an executor process batch
     bool bUpdateMerkleTree; // if true, save DB writes to SQL database
     bool bNoCounters; // if true, do not increase counters nor limit evaluations
-    string txHashToGenerateExecuteTrace; // return execute traces of this tx
-    string txHashToGenerateCallTrace; // return call traces of this tx
+    TraceConfig traceConfig; // FullTracer configuration
 
     // Constructor
     Input (Goldilocks &fr) :
@@ -65,8 +65,7 @@ public:
             from == input.from &&
             bUpdateMerkleTree == input.bUpdateMerkleTree &&
             bNoCounters == input.bNoCounters &&
-            txHashToGenerateExecuteTrace == input.txHashToGenerateExecuteTrace &&
-            txHashToGenerateCallTrace == input.txHashToGenerateCallTrace &&
+            traceConfig == input.traceConfig &&
             db == input.db &&
             contractsBytecode == input.contractsBytecode;
     };
@@ -79,8 +78,7 @@ public:
         from = other.from;
         bUpdateMerkleTree = other.bUpdateMerkleTree;
         bNoCounters = other.bNoCounters;
-        txHashToGenerateExecuteTrace = other.txHashToGenerateExecuteTrace;
-        txHashToGenerateCallTrace = other.txHashToGenerateCallTrace;
+        traceConfig = other.traceConfig;
         db = other.db;
         contractsBytecode = other.contractsBytecode;
         return *this;

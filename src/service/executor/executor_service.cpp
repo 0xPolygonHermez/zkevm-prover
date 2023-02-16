@@ -121,8 +121,29 @@ using grpc::Status;
 
     // Flags
     proverRequest.input.bUpdateMerkleTree = request->update_merkle_tree();
-    proverRequest.input.txHashToGenerateExecuteTrace = "0x" + ba2string(request->tx_hash_to_generate_execute_trace());
-    proverRequest.input.txHashToGenerateCallTrace = "0x" + ba2string(request->tx_hash_to_generate_call_trace());
+    if (request->has_trace_config())
+    {
+        proverRequest.input.traceConfig.bEnabled = true;
+        const executor::v1::TraceConfig & traceConfig = request->trace_config();
+        if (traceConfig.disable_storage())
+        {
+            proverRequest.input.traceConfig.bDisableStorage = true;
+        }
+        if (traceConfig.disable_stack())
+        {
+            proverRequest.input.traceConfig.bDisableStack = true;
+        }
+        if (traceConfig.enable_memory())
+        {
+            proverRequest.input.traceConfig.bEnableMemory = true;
+        }
+        if (traceConfig.enable_return_data())
+        {
+            proverRequest.input.traceConfig.bEnableReturnData = true;
+        }
+        proverRequest.input.traceConfig.txHashToGenerateExecuteTrace = "0x" + ba2string(traceConfig.tx_hash_to_generate_execute_trace());
+        proverRequest.input.traceConfig.txHashToGenerateCallTrace = "0x" + ba2string(traceConfig.tx_hash_to_generate_call_trace());
+    }
 
     // Default values
     proverRequest.input.publicInputsExtended.newStateRoot = "0x0";
@@ -200,8 +221,7 @@ using grpc::Status;
         << " from=" << proverRequest.input.from
         << " bUpdateMerkleTree=" << proverRequest.input.bUpdateMerkleTree
         << " bNoCounters=" << proverRequest.input.bNoCounters
-        << " txHashToGenerateExecuteTrace=" << proverRequest.input.txHashToGenerateExecuteTrace
-        << " txHashToGenerateCallTrace=" << proverRequest.input.txHashToGenerateCallTrace
+        << " traceConfig=" << proverRequest.input.traceConfig.toString()
         << endl;
 #endif
 
@@ -272,7 +292,7 @@ using grpc::Status;
             pLog->set_batch_hash(string2ba(responses[tx].logs[log].batch_hash)); // Hash of the batch in which the transaction was included
             pLog->set_index(responses[tx].logs[log].index); // Index of the log in the block
         }
-        if (proverRequest.input.txHashToGenerateExecuteTrace == responses[tx].tx_hash)
+        if (proverRequest.input.traceConfig.bEnabled && (proverRequest.input.traceConfig.txHashToGenerateExecuteTrace == responses[tx].tx_hash))
         {
             for (uint64_t step=0; step<responses[tx].call_trace.steps.size(); step++)
             {
@@ -298,7 +318,7 @@ using grpc::Status;
                 pExecutionTraceStep->set_error(string2error(responses[tx].call_trace.steps[step].error));
             }
         }
-        if (proverRequest.input.txHashToGenerateCallTrace == responses[tx].tx_hash)
+        if (proverRequest.input.traceConfig.bEnabled && (proverRequest.input.traceConfig.txHashToGenerateCallTrace == responses[tx].tx_hash))
         {
             executor::v1::CallTrace * pCallTrace = new executor::v1::CallTrace();
             executor::v1::TransactionContext * pTransactionContext = pCallTrace->mutable_context();

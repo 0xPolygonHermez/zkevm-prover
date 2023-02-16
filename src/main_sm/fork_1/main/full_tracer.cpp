@@ -822,7 +822,6 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     tmsop.add("getCodeName", TimeDiff(top));
 #endif
 
-#if 0 // finalMemory is not used for performance reasons
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&top, NULL);
 #endif
@@ -833,7 +832,7 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     uint64_t addrMem = offsetCtx + 0x20000;
 
     string finalMemory;
-    if (ctx.proverRequest.generateCallTraces())
+    if (ctx.proverRequest.input.traceConfig.generateMemory())
     {
         uint64_t lengthMemOffset = ctx.rom.memLengthOffset;
         uint64_t lenMemValueFinal = 0;
@@ -863,18 +862,18 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
     tmsop.add("getMemory", TimeDiff(top));
 #endif
-#endif
 
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&top, NULL);
 #endif
-    // Get stack address
-    //uint64_t addr = offsetCtx + 0x10000;
 
     vector<mpz_class> finalStack;
-    /*
-    if (ctx.proverRequest.generateCallTraces())
+    
+    if (ctx.proverRequest.input.traceConfig.generateStack())
     {
+        // Get stack address
+        uint64_t addr = offsetCtx + 0x10000;
+
         uint16_t sp = fr.toU64(ctx.pols.SP[*ctx.pStep]);
         unordered_map<uint64_t, Fea>::iterator it;
         for (uint16_t i = 0; i < sp; i++)
@@ -890,7 +889,7 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
             // hexString = "0x" + hexString;
             finalStack.push_back(stackScalar);
         }
-    }*/
+    }
 
 #ifdef LOG_TIME_STATISTICS
     tmsop.add("getStack", TimeDiff(top));
@@ -943,7 +942,7 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&top, NULL);
 #endif
-    if (ctx.proverRequest.generateCallTraces())
+    if (ctx.proverRequest.input.traceConfig.generateCallTraces())
     {
         getVarFromCtx(ctx, false, ctx.rom.gasRefundOffset, auxScalar);
         singleInfo.gas_refund = auxScalar.get_ui();
@@ -958,7 +957,7 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&top, NULL);
 #endif
-    if (ctx.proverRequest.generateCallTraces())
+    if (ctx.proverRequest.input.traceConfig.generateCallTraces())
     {
         fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]);
         singleInfo.state_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
@@ -971,7 +970,7 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     gettimeofday(&top, NULL);
 #endif
     // Add contract info
-    if (ctx.proverRequest.generateCallTraces())
+    if (ctx.proverRequest.input.traceConfig.generateCallTraces())
     {
         getVarFromCtx(ctx, false, ctx.rom.txDestAddrOffset, auxScalar);
         singleInfo.contract.address = NormalizeToNFormat(auxScalar.get_str(16), 40);
@@ -993,7 +992,7 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 #endif
     singleInfo.contract.gas = txGAS[depth];
 
-    if (ctx.proverRequest.generateCallTraces())
+    if (ctx.proverRequest.input.traceConfig.generateCallTraces())
     {
         singleInfo.storage = deltaStorage[depth];
 
@@ -1014,14 +1013,17 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     // build trace
     uint64_t index = fullStack.size();
 
-    if (index > 1)
+    if ((index > 1) && (ctx.proverRequest.input.traceConfig.generateCallTraces()))
     {
         Opcode singleCallTrace = info[index - 2];
-        /*if (ctx.proverRequest.generateCallTraces())
+        if (ctx.proverRequest.input.traceConfig.generateStack())
         {
             singleCallTrace.stack = finalStack;
+        }
+        if (ctx.proverRequest.input.traceConfig.generateMemory())
+        {
             singleCallTrace.memory = finalMemory;
-        }*/
+        }
 
         Opcode singleExecuteTrace = info[index - 2];
         singleCallTrace.storage.clear();
@@ -1053,7 +1055,7 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
             // Set gasCall when depth has changed
             getVarFromCtx(ctx, true, ctx.rom.gasCallOffset, auxScalar);
             txGAS[depth] = auxScalar.get_ui();
-            if (ctx.proverRequest.generateCallTraces())
+            if (ctx.proverRequest.input.traceConfig.generateCallTraces())
             {
                 singleInfo.contract.gas = txGAS[depth];
             }

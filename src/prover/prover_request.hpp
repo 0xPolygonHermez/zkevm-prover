@@ -96,12 +96,6 @@ public:
         sem_post(&completedSem);
     }
 
-    /* Generate FullTracer call traces if true */
-    bool generateCallTraces (void)
-    {
-        return (input.txHashToGenerateExecuteTrace.size() > 0) || (input.txHashToGenerateCallTrace.size() > 0);
-    }
-
     static void onDBReadLogChangeCallback(void *p, DatabaseMap *dbMap)
     {
         ((ProverRequest *)p) -> onDBReadLogChange(dbMap);
