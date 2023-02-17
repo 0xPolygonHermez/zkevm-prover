@@ -567,7 +567,14 @@ void FullTracer::onUpdateStorage(Context &ctx, const RomCommand &cmd)
             exitProcess();
         }
 
+        // Add key/value to deltaStorage
         deltaStorage[depth][key] = value;
+        
+        // Add deltaStorage to current execution_trace opcode info
+        if (execution_trace.size() > 0)
+        {
+            execution_trace[execution_trace.size() - 1].storage = deltaStorage[depth];
+        }
 
 #ifdef LOG_FULL_TRACER
         cout << "FullTracer::onUpdateStorage() depth=" << depth << " key=" << key << " value=" << value << endl;
@@ -667,13 +674,6 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
         if (finalTrace.responses[finalTrace.responses.size() - 1].error == "")
         {
             finalTrace.responses[finalTrace.responses.size() - 1].error = lastOpcode.error;
-        }
-        
-        // If only opcode is STOP, remove redundancy
-        if (finalTrace.responses[finalTrace.responses.size() - 1].call_trace.context.data == "0x")
-        {
-            finalTrace.responses[finalTrace.responses.size() - 1].execution_trace.clear();
-            finalTrace.responses[finalTrace.responses.size() - 1].call_trace.steps.clear();
         }
     }
 
@@ -1000,11 +1000,18 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 
     if (ctx.proverRequest.input.traceConfig.generateCallTraces())
     {
-        singleInfo.storage = deltaStorage[depth];
-
         // Round up to next multiple of 32
         getVarFromCtx(ctx, false, ctx.rom.memLengthOffset, auxScalar);
         singleInfo.memory_size = (auxScalar.get_ui() / 32) * 32;
+    }
+
+    if (ctx.proverRequest.input.traceConfig.generateStack())
+    {
+        singleInfo.stack = finalStack;
+    }
+    if (ctx.proverRequest.input.traceConfig.generateMemory())
+    {
+        singleInfo.memory = finalMemory;
     }
 
 #ifdef LOG_TIME_STATISTICS
@@ -1014,33 +1021,12 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     gettimeofday(&top, NULL);
 #endif
     info.push_back(singleInfo);
-    fullStack.push_back(finalStack);
 
-    // build trace
-    uint64_t index = fullStack.size();
-
-    if ((index > 1) && (ctx.proverRequest.input.traceConfig.generateCallTraces()))
+    if (ctx.proverRequest.input.traceConfig.generateCallTraces())
     {
-        Opcode singleCallTrace = info[index - 2];
-        if (ctx.proverRequest.input.traceConfig.generateStack())
-        {
-            singleCallTrace.stack = finalStack;
-        }
-        if (ctx.proverRequest.input.traceConfig.generateMemory())
-        {
-            singleCallTrace.memory = finalMemory;
-        }
-
-        Opcode singleExecuteTrace = info[index - 2];
-        singleCallTrace.storage.clear();
-        singleCallTrace.memory_size = 0;
-        singleExecuteTrace.contract.address.clear();
-        singleExecuteTrace.contract.caller.clear();
-        singleExecuteTrace.contract.data.clear();
-        singleExecuteTrace.contract.gas = 0;
-        singleExecuteTrace.contract.value = 0;
-        call_trace.push_back(singleCallTrace);
-        execution_trace.push_back(singleExecuteTrace);
+        // Save output traces
+        call_trace.push_back(singleInfo);
+        execution_trace.push_back(singleInfo);
     }
 
 #ifdef LOG_TIME_STATISTICS
@@ -1052,12 +1038,15 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     // Return data
     singleInfo.return_data.clear();
 
+    bool bOpIncContextFoundInPrevStep = false;
     // Check previous step
     if (info.size() >= 2)
     {
         Opcode prevStep = info[info.size() - 2];
         if (opIncContext.find(prevStep.opcode) != opIncContext.end())
         {
+            bOpIncContextFoundInPrevStep = true;
+
             // Set gasCall when depth has changed
             getVarFromCtx(ctx, true, ctx.rom.gasCallOffset, auxScalar);
             txGAS[depth] = auxScalar.get_ui();
@@ -1074,6 +1063,18 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&top, NULL);
 #endif
+
+    // If is an ether transfer, don't add stop opcode to trace
+    if ( (singleInfo.opcode == opcodeName[0x00/*STOP*/].pName) &&
+         ( (info.size() < 2) || bOpIncContextFoundInPrevStep) )
+    {
+        getVarFromCtx(ctx, false, ctx.rom.bytecodeLengthOffset, auxScalar);
+        if ((auxScalar == 0) && (info.size() > 0))
+        {
+            info.pop_back();
+        }
+    }
+
     if (opIncContext.find(singleInfo.opcode) != opIncContext.end())
     {
         unordered_map<string, string> auxMap;
