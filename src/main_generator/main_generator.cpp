@@ -3916,8 +3916,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += "            proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
         code += "            return;\n";
         code += "        }\n";
-        code += "        h.digestCalled = ctx.hashK[i].digestCalled;\n";
-        code += "        h.lenCalled = ctx.hashK[i].lenCalled;\n";
+        code += "        h.digestCalled = ctx.hashP[i].digestCalled;\n";
+        code += "        h.lenCalled = ctx.hashP[i].lenCalled;\n";
         code += "        required.PaddingPG.push_back(h);\n";
         code += "    }\n";
     }
