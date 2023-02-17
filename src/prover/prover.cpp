@@ -121,26 +121,29 @@ Prover::Prover(Goldilocks &fr,
 
 Prover::~Prover()
 {
-    // · delete zkey;
-    // · delete groth16Prover;
-    mpz_clear(altBbn128r);
-
-    uint64_t polsSize = starkZkevm->starkInfo.mapTotalN * sizeof(Goldilocks::Element) + starkZkevm->starkInfo.mapSectionsN.section[eSection::cm1_n] * (1 << starkZkevm->starkInfo.starkStruct.nBits) * FIELD_EXTENSION * sizeof(Goldilocks::Element);
-
-    // Unmap committed polynomials address
-    if (config.zkevmCmPols.size() > 0)
+    if (config.generateProof())
     {
-        unmapFile(pAddress, polsSize);
-    }
-    else
-    {
-        free(pAddress);
-    }
+        // · delete zkey;
+        // · delete groth16Prover;
+        mpz_clear(altBbn128r);
 
-    delete starkZkevm;
-    delete starksC12a;
-    delete starksRecursive1;
-    delete starksRecursive2;
+        uint64_t polsSize = starkZkevm->starkInfo.mapTotalN * sizeof(Goldilocks::Element) + starkZkevm->starkInfo.mapSectionsN.section[eSection::cm1_n] * (1 << starkZkevm->starkInfo.starkStruct.nBits) * FIELD_EXTENSION * sizeof(Goldilocks::Element);
+
+        // Unmap committed polynomials address
+        if (config.zkevmCmPols.size() > 0)
+        {
+            unmapFile(pAddress, polsSize);
+        }
+        else
+        {
+            free(pAddress);
+        }
+
+        delete starkZkevm;
+        delete starksC12a;
+        delete starksRecursive1;
+        delete starksRecursive2;
+    }
 }
 
 void *proverThread(void *arg)
@@ -872,11 +875,36 @@ void Prover::execute(ProverRequest *pProverRequest)
         json2file(inputJson, pProverRequest->inputFile());
     }
 
+    /*******************/
+    /* Allocate memory */
+    /*******************/
+
+    // Allocate an area of memory, mapped to file, to store all the committed polynomials,
+    // and create them using the allocated address
+    uint64_t polsSize = CommitPols::pilSize();
+    void *pExecuteAddress = NULL;
+
+    if (config.zkevmCmPols.size() > 0)
+    {
+        pExecuteAddress = mapFile(config.zkevmCmPols, polsSize, true);
+        cout << "Prover::execute() successfully mapped " << polsSize << " bytes to file " << config.zkevmCmPols << endl;
+    }
+    else
+    {
+        pExecuteAddress = calloc(polsSize, 1);
+        if (pExecuteAddress == NULL)
+        {
+            cerr << "Error: Prover::execute() failed calling malloc() of size " << polsSize << endl;
+            exitProcess();
+        }
+        cout << "Prover::execute() successfully allocated " << polsSize << " bytes" << endl;
+    }
+
     /************/
     /* Executor */
     /************/
 
-    CommitPols cmPols(pAddress, CommitPols::pilDegree());
+    CommitPols cmPols(pExecuteAddress, CommitPols::pilDegree());
 
     // Execute all the State Machines
     TimerStart(EXECUTOR_EXECUTE_EXECUTE);
@@ -889,6 +917,20 @@ void Prover::execute(ProverRequest *pProverRequest)
         json inputJsonEx;
         pProverRequest->input.save(inputJsonEx, *pProverRequest->dbReadLog);
         json2file(inputJsonEx, pProverRequest->inputDbFile());
+    }
+
+    /***************/
+    /* Free memory */
+    /***************/
+
+    // Unmap committed polynomials address
+    if (config.zkevmCmPols.size() > 0)
+    {
+        unmapFile(pExecuteAddress, polsSize);
+    }
+    else
+    {
+        free(pExecuteAddress);
     }
 
     TimerStopAndLog(PROVER_EXECUTE);
