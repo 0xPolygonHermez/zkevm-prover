@@ -180,7 +180,6 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
         if (l["inSP"].is_string()) fr.fromString(line[i].inSP, l["inSP"]); else line[i].inSP = fr.zero();
         if (l["inPC"].is_string()) fr.fromString(line[i].inPC, l["inPC"]); else line[i].inPC = fr.zero();
         if (l["inGAS"].is_string()) fr.fromString(line[i].inGAS, l["inGAS"]); else line[i].inGAS = fr.zero();
-        if (l["inMAXMEM"].is_string()) fr.fromString(line[i].inMAXMEM, l["inMAXMEM"]); else line[i].inMAXMEM = fr.zero();
         if (l["inSTEP"].is_string()) fr.fromString(line[i].inSTEP, l["inSTEP"]); else line[i].inSTEP = fr.zero();
         if (l["inFREE"].is_string()) fr.fromString(line[i].inFREE, l["inFREE"]); else line[i].inFREE = fr.zero();
         if (l["inRR"].is_string()) fr.fromString(line[i].inRR, l["inRR"]); else line[i].inRR = fr.zero();
@@ -234,7 +233,6 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
         if (l["setSP"].is_number_integer()) line[i].setSP = l["setSP"]; else line[i].setSP = 0;
         if (l["setPC"].is_number_integer()) line[i].setPC = l["setPC"]; else line[i].setPC = 0;
         if (l["setGAS"].is_number_integer()) line[i].setGAS = l["setGAS"]; else line[i].setGAS = 0;
-        if (l["setMAXMEM"].is_number_integer()) line[i].setMAXMEM = l["setMAXMEM"]; else line[i].setMAXMEM = 0;
         if (l["setRR"].is_number_integer()) line[i].setRR = l["setRR"]; else line[i].setRR = 0;
         if (l["setHASHPOS"].is_number_integer()) line[i].setHASHPOS = l["setHASHPOS"]; else line[i].setHASHPOS = 0;
         if (l["setRCX"].is_number_integer()) line[i].setRCX = l["setRCX"]; else line[i].setRCX = 0;

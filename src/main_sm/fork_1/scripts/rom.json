@@ -1248,7 +1248,6 @@
    "setD": 1,
    "setE": 1,
    "setPC": 1,
-   "setMAXMEM": 1,
    "setSR": 1,
    "setHASHPOS": 1,
    "setRR": 1,
@@ -1259,7 +1258,7 @@
    "line": 4,
    "jmpAddrLabel": "start",
    "fileName": "end.zkasm",
-   "lineStr": "    0 => A, D, E, PC, MAXMEM, SR, HASHPOS, RR, RCX   :JMP(start)"
+   "lineStr": "    0 => A, D, E, PC, SR, HASHPOS, RR, RCX   :JMP(start)"
   },
   {
    "freeInTag": {
@@ -1785,24 +1784,24 @@
    "JMPC": 0,
    "JMPN": 0,
    "useJmpAddr": 1,
-   "jmpAddr": 119,
+   "jmpAddr": 99,
    "call": 1,
    "line": 40,
-   "jmpAddrLabel": "checkLongRLP",
+   "jmpAddrLabel": "addBatchHashData",
    "fileName": "load-tx-rlp.zkasm",
-   "lineStr": "                                        :CALL(checkLongRLP)"
+   "lineStr": "                                        :CALL(addBatchHashData)"
   },
   {
    "JMP": 0,
    "JMPC": 0,
    "JMPN": 0,
    "useJmpAddr": 1,
-   "jmpAddr": 99,
+   "jmpAddr": 119,
    "call": 1,
    "line": 41,
-   "jmpAddrLabel": "addBatchHashData",
+   "jmpAddrLabel": "checkLongRLP",
    "fileName": "load-tx-rlp.zkasm",
-   "lineStr": "                                        :CALL(addBatchHashData)"
+   "lineStr": "                                        :CALL(checkLongRLP)"
   },
   {
    "JMP": 1,
@@ -2025,24 +2024,24 @@
    "JMPC": 0,
    "JMPN": 0,
    "useJmpAddr": 1,
-   "jmpAddr": 116,
+   "jmpAddr": 99,
    "call": 1,
    "line": 70,
-   "jmpAddrLabel": "checkShortRLP",
+   "jmpAddrLabel": "addBatchHashData",
    "fileName": "load-tx-rlp.zkasm",
-   "lineStr": "                                        :CALL(checkShortRLP)"
+   "lineStr": "                                        :CALL(addBatchHashData)"
   },
   {
    "JMP": 0,
    "JMPC": 0,
    "JMPN": 0,
    "useJmpAddr": 1,
-   "jmpAddr": 99,
+   "jmpAddr": 116,
    "call": 1,
    "line": 71,
-   "jmpAddrLabel": "addBatchHashData",
+   "jmpAddrLabel": "checkShortRLP",
    "fileName": "load-tx-rlp.zkasm",
-   "lineStr": "                                        :CALL(addBatchHashData)"
+   "lineStr": "                                        :CALL(checkShortRLP)"
   },
   {
    "inA": "1",
@@ -2154,24 +2153,24 @@
    "JMPC": 0,
    "JMPN": 0,
    "useJmpAddr": 1,
-   "jmpAddr": 116,
+   "jmpAddr": 99,
    "call": 1,
    "line": 91,
-   "jmpAddrLabel": "checkShortRLP",
+   "jmpAddrLabel": "addBatchHashData",
    "fileName": "load-tx-rlp.zkasm",
-   "lineStr": "                                        :CALL(checkShortRLP)"
+   "lineStr": "                                        :CALL(addBatchHashData)"
   },
   {
    "JMP": 0,
    "JMPC": 0,
    "JMPN": 0,
    "useJmpAddr": 1,
-   "jmpAddr": 99,
+   "jmpAddr": 116,
    "call": 1,
    "line": 92,
-   "jmpAddrLabel": "addBatchHashData",
+   "jmpAddrLabel": "checkShortRLP",
    "fileName": "load-tx-rlp.zkasm",
-   "lineStr": "                                        :CALL(addBatchHashData)"
+   "lineStr": "                                        :CALL(checkShortRLP)"
   },
   {
    "inA": "1",
@@ -2283,24 +2282,24 @@
    "JMPC": 0,
    "JMPN": 0,
    "useJmpAddr": 1,
-   "jmpAddr": 116,
+   "jmpAddr": 99,
    "call": 1,
    "line": 112,
-   "jmpAddrLabel": "checkShortRLP",
+   "jmpAddrLabel": "addBatchHashData",
    "fileName": "load-tx-rlp.zkasm",
-   "lineStr": "                                        :CALL(checkShortRLP)"
+   "lineStr": "                                        :CALL(addBatchHashData)"
   },
   {
    "JMP": 0,
    "JMPC": 0,
    "JMPN": 0,
    "useJmpAddr": 1,
-   "jmpAddr": 99,
+   "jmpAddr": 116,
    "call": 1,
    "line": 113,
-   "jmpAddrLabel": "addBatchHashData",
+   "jmpAddrLabel": "checkShortRLP",
    "fileName": "load-tx-rlp.zkasm",
-   "lineStr": "                                        :CALL(addBatchHashData)"
+   "lineStr": "                                        :CALL(checkShortRLP)"
   },
   {
    "inA": "1",
@@ -2558,24 +2557,24 @@
    "JMPC": 0,
    "JMPN": 0,
    "useJmpAddr": 1,
-   "jmpAddr": 116,
+   "jmpAddr": 99,
    "call": 1,
    "line": 153,
-   "jmpAddrLabel": "checkShortRLP",
+   "jmpAddrLabel": "addBatchHashData",
    "fileName": "load-tx-rlp.zkasm",
-   "lineStr": "                                        :CALL(checkShortRLP)"
+   "lineStr": "                                        :CALL(addBatchHashData)"
   },
   {
    "JMP": 0,
    "JMPC": 0,
    "JMPN": 0,
    "useJmpAddr": 1,
-   "jmpAddr": 99,
+   "jmpAddr": 116,
    "call": 1,
    "line": 154,
-   "jmpAddrLabel": "addBatchHashData",
+   "jmpAddrLabel": "checkShortRLP",
    "fileName": "load-tx-rlp.zkasm",
-   "lineStr": "                                        :CALL(addBatchHashData)"
+   "lineStr": "                                        :CALL(checkShortRLP)"
   },
   {
    "inA": "1",
@@ -2810,24 +2809,24 @@
    "JMPC": 0,
    "JMPN": 0,
    "useJmpAddr": 1,
-   "jmpAddr": 119,
+   "jmpAddr": 99,
    "call": 1,
    "line": 184,
-   "jmpAddrLabel": "checkLongRLP",
+   "jmpAddrLabel": "addBatchHashData",
    "fileName": "load-tx-rlp.zkasm",
-   "lineStr": "                                        :CALL(checkLongRLP)"
+   "lineStr": "                                        :CALL(addBatchHashData)"
   },
   {
    "JMP": 0,
    "JMPC": 0,
    "JMPN": 0,
    "useJmpAddr": 1,
-   "jmpAddr": 99,
+   "jmpAddr": 119,
    "call": 1,
    "line": 185,
-   "jmpAddrLabel": "addBatchHashData",
+   "jmpAddrLabel": "checkLongRLP",
    "fileName": "load-tx-rlp.zkasm",
-   "lineStr": "                                        :CALL(addBatchHashData)"
+   "lineStr": "                                        :CALL(checkLongRLP)"
   },
   {
    "freeInTag": {
@@ -2977,18 +2976,6 @@
    "lineStr": "        B => D                          :CALL(addHashTx)"
   },
   {
-   "JMP": 0,
-   "JMPC": 0,
-   "JMPN": 0,
-   "useJmpAddr": 1,
-   "jmpAddr": 121,
-   "call": 1,
-   "line": 200,
-   "jmpAddrLabel": "checkShortDataRLP",
-   "fileName": "load-tx-rlp.zkasm",
-   "lineStr": "                                        :CALL(checkShortDataRLP)"
-  },
-  {
    "CONST": "32",
    "inD": "-1",
    "setD": 1,
@@ -2998,7 +2985,7 @@
    "useJmpAddr": 1,
    "jmpAddr": 4530,
    "call": 1,
-   "line": 201,
+   "line": 200,
    "jmpAddrLabel": "SHLarith",
    "fileName": "load-tx-rlp.zkasm",
    "lineStr": "        32 - D => D                     :CALL(SHLarith)"
@@ -3014,7 +3001,7 @@
    "useCTX": 1,
    "mOp": 1,
    "mWR": 1,
-   "line": 202,
+   "line": 201,
    "fileName": "load-tx-rlp.zkasm",
    "lineStr": "        A                               :MSTORE(SP)"
   },
@@ -3028,10 +3015,22 @@
    "useJmpAddr": 1,
    "jmpAddr": 4729,
    "call": 1,
-   "line": 203,
+   "line": 202,
    "jmpAddrLabel": "addBatchHashByteByByte",
    "fileName": "load-tx-rlp.zkasm",
    "lineStr": "        32 - D => D                     :CALL(addBatchHashByteByByte)"
+  },
+  {
+   "JMP": 0,
+   "JMPC": 0,
+   "JMPN": 0,
+   "useJmpAddr": 1,
+   "jmpAddr": 121,
+   "call": 1,
+   "line": 203,
+   "jmpAddrLabel": "checkShortDataRLP",
+   "fileName": "load-tx-rlp.zkasm",
+   "lineStr": "                                        :CALL(checkShortDataRLP)"
   },
   {
    "inC": "1",
@@ -3172,24 +3171,24 @@
    "JMPC": 0,
    "JMPN": 0,
    "useJmpAddr": 1,
-   "jmpAddr": 116,
+   "jmpAddr": 99,
    "call": 1,
    "line": 226,
-   "jmpAddrLabel": "checkShortRLP",
+   "jmpAddrLabel": "addBatchHashData",
    "fileName": "load-tx-rlp.zkasm",
-   "lineStr": "                                        :CALL(checkShortRLP)"
+   "lineStr": "                                        :CALL(addBatchHashData)"
   },
   {
    "JMP": 0,
    "JMPC": 0,
    "JMPN": 0,
    "useJmpAddr": 1,
-   "jmpAddr": 99,
+   "jmpAddr": 116,
    "call": 1,
    "line": 227,
-   "jmpAddrLabel": "addBatchHashData",
+   "jmpAddrLabel": "checkShortRLP",
    "fileName": "load-tx-rlp.zkasm",
-   "lineStr": "                                        :CALL(addBatchHashData)"
+   "lineStr": "                                        :CALL(checkShortRLP)"
   },
   {
    "inA": "1",
