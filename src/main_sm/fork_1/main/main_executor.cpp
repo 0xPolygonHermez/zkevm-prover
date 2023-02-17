@@ -421,16 +421,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
         }
 
-        // If inMAXMEM, op = op + inMAXMEM*MAXMEM
-        if (!fr.isZero(rom.line[zkPC].inMAXMEM))
-        {
-            op0 = fr.add(op0, fr.mul(rom.line[zkPC].inMAXMEM, pols.MAXMEM[i]));
-            pols.inMAXMEM[i] = rom.line[zkPC].inMAXMEM;
-#ifdef LOG_INX
-            cout << "inMAXMEM op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
-#endif
-        }
-
         // If inSTEP, op = op + inSTEP*STEP
         if (!fr.isZero(rom.line[zkPC].inSTEP))
         {
@@ -3345,32 +3335,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.zkPC[nexti] = fr.inc(pols.zkPC[i]);
         }
 
-        // Calculate the new max mem address, if any
-        uint32_t maxMemCalculated = 0;
-        uint32_t mm = fr.toU64(pols.MAXMEM[i]);
-        if (rom.line[zkPC].isMem==1)
-        {
-            if (uint32_t(addrRel) > mm) {
-                pols.isMaxMem[i] = fr.one();
-                maxMemCalculated = addrRel;
-            } else {
-                maxMemCalculated = mm;
-            }
-        } else {
-            maxMemCalculated = mm;
-        }
-
-        // If setMAXMEM, MAXMEM'=op
-        if (rom.line[zkPC].setMAXMEM == 1) {
-            pols.MAXMEM[nexti] = op0;
-            pols.setMAXMEM[i] = fr.one();
-#ifdef LOG_SETX
-            cout << "setMAXMEM MAXMEM[nexti]=" << pols.MAXMEM[nexti] << endl;
-#endif
-        } else {
-            pols.MAXMEM[nexti] = fr.fromU64(maxMemCalculated);
-        }
-
         // If setGAS, GAS'=op
         if (rom.line[zkPC].setGAS == 1) {
             pols.GAS[nexti] = op0;
@@ -3780,11 +3744,10 @@ void MainExecutor::checkFinalState(Context &ctx)
         (!fr.isZero(ctx.pols.SR6[0])) ||
         (!fr.isZero(ctx.pols.SR7[0])) ||
         (!fr.isZero(ctx.pols.PC[0])) ||
-        (!fr.isZero(ctx.pols.MAXMEM[0])) ||
         (!fr.isZero(ctx.pols.zkPC[0]))
     )
     {
-        cerr << "Error: MainExecutor::checkFinalState() Program terminated with registers A, D, E, SR, CTX, PC, MAXMEM, zkPC not set to zero" << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << rom.line[*ctx.pZKPC].toString(fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+        cerr << "Error: MainExecutor::checkFinalState() Program terminated with registers A, D, E, SR, CTX, PC, zkPC not set to zero" << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << rom.line[*ctx.pZKPC].toString(fr) << " uuid=" << ctx.proverRequest.uuid << endl;
         exitProcess();
     }
 

@@ -57,7 +57,6 @@ void Context::printRegs()
     printReg("CTX", pols.CTX[*pStep]);
     printReg("SP", pols.SP[*pStep]);
     printReg("PC", pols.PC[*pStep]);
-    printReg("MAXMEM", pols.MAXMEM[*pStep]);
     printReg("GAS", pols.GAS[*pStep]);
     printReg("zkPC", pols.zkPC[*pStep]);
     Goldilocks::Element step;
