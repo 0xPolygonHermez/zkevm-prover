@@ -10,7 +10,6 @@ namespace ZKeyUtils {
 
     class Header {
 
-
     public:
         u_int32_t n8q;
         mpz_t qPrime;

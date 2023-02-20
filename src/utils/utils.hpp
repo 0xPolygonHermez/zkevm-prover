@@ -5,7 +5,7 @@
 #include "goldilocks_base_field.hpp"
 #include "config.hpp"
 #include "input.hpp"
-#include "proof.hpp"
+#include "proof_fflonk.hpp"
 #include "definitions.hpp"
 
 using json = nlohmann::json;

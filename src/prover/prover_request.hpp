@@ -3,7 +3,7 @@
 
 #include <semaphore.h>
 #include "input.hpp"
-#include "proof.hpp"
+#include "proof_fflonk.hpp"
 #include "counters.hpp"
 #include "full_tracer_interface.hpp"
 #include "database_map.hpp"
