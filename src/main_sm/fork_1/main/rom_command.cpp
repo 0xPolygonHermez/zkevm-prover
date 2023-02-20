@@ -208,7 +208,6 @@ tReg string2reg(string s)
     else if (s == "CTX") return reg_CTX;
     else if (s == "SP") return reg_SP;
     else if (s == "PC") return reg_PC;
-    else if (s == "MAXMEM") return reg_MAXMEM;
     else if (s == "GAS") return reg_GAS;
     else if (s == "zkPC") return reg_zkPC;
     else if (s == "RR") return reg_RR;
@@ -241,7 +240,6 @@ string reg2string(tReg reg)
         case reg_CTX:               return "CTX";
         case reg_SP:                return "SP";
         case reg_PC:                return "PC";
-        case reg_MAXMEM:            return "MAXMEM";
         case reg_GAS:               return "GAS";
         case reg_zkPC:              return "zkPC";
         case reg_RR:                return "RR";

@@ -17,7 +17,6 @@ string RomLine::toString(Goldilocks &fr)
     if (!fr.isZero(inSP)) result += " inSP=" + fr.toString(inSP,10);
     if (!fr.isZero(inPC)) result += " inPC=" + fr.toString(inPC,10);
     if (!fr.isZero(inGAS)) result += " inGAS=" + fr.toString(inGAS,10);
-    if (!fr.isZero(inMAXMEM)) result += " inMAXMEM=" + fr.toString(inMAXMEM,10);
     if (!fr.isZero(inSTEP)) result += " inSTEP=" + fr.toString(inSTEP,10);
     if (!fr.isZero(inFREE))
     {
@@ -77,7 +76,6 @@ string RomLine::toString(Goldilocks &fr)
     if (setSP != 0) result += " setSP=" + to_string(setSP);
     if (setPC != 0) result += " setPC=" + to_string(setPC);
     if (setGAS != 0) result += " setGAS=" + to_string(setGAS);
-    if (setMAXMEM != 0) result += " setMAXMEM=" + to_string(setMAXMEM);
     if (setRR != 0) result += " setRR=" + to_string(setRR);
     if (setHASHPOS != 0) result += " setHASHPOS=" + to_string(setHASHPOS);
     if (setRCX != 0) result += " setRCX=" + to_string(setRCX);

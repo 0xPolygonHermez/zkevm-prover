@@ -100,25 +100,6 @@ void SHA256Gate (const uint8_t * pData, uint64_t dataSize, string &hash)
             pChunkBytes = pData + chunk*64;
         }
 
-        // create a set of 8 variables of 32-bit words = 256 bits
-        GateU32 h32[8] = {GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S)};
-
-        // copy the h[8] state (256 bits) into Sin[512..767] and into h32[0..7]
-        for (uint64_t i=0; i<8; i++)
-        {
-            vector<uint8_t> bits;
-            u322bits(h[i], bits);
-            zkassert(bits.size() == 32);
-            for (uint64_t j=0; j<32; j++)
-            {
-                uint64_t ref = SHA256_SinRef0 + (512 + i*32 + j)*44;
-                S.gate[ref].pin[pin_a].bit = bits[j];
-                S.gate[ref].pin[pin_a].source = external;
-                h32[i].bit[j].ref = ref;
-                h32[i].bit[j].pin = pin_a;
-            }
-            //cout << "h32[" << i << "]=" << h32[i].toString(S) << endl;
-        }
         // create a 64-entry message schedule array w[0..63] of 32-bit words
         GateU32 w[64] = {
             GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S),
@@ -148,6 +129,26 @@ void SHA256Gate (const uint8_t * pData, uint64_t dataSize, string &hash)
                 w[i].bit[j].pin = pin_a;
             }
             //cout << "w[" << i << "]=" << w[i].toString(S) << endl;
+        }
+
+        // create a set of 8 variables of 32-bit words = 256 bits
+        GateU32 h32[8] = {GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S), GateU32(S)};
+
+        // copy the h[8] state (256 bits) into Sin[512..767] and into h32[0..7]
+        for (uint64_t i=0; i<8; i++)
+        {
+            vector<uint8_t> bits;
+            u322bits(h[i], bits);
+            zkassert(bits.size() == 32);
+            for (uint64_t j=0; j<32; j++)
+            {
+                uint64_t ref = SHA256_SinRef0 + (512 + i*32 + j)*44;
+                S.gate[ref].pin[pin_a].bit = bits[j];
+                S.gate[ref].pin[pin_a].source = external;
+                h32[i].bit[j].ref = ref;
+                h32[i].bit[j].pin = pin_a;
+            }
+            //cout << "h32[" << i << "]=" << h32[i].toString(S) << endl;
         }
 
         // Extend the first 16 words into the remaining 48 words w[16..63] of the message schedule array:
@@ -281,6 +282,31 @@ void SHA256Gate (const uint8_t * pData, uint64_t dataSize, string &hash)
         h[5] = h[5] + f.toU32();
         h[6] = h[6] + g.toU32();
         h[7] = h[7] + hh.toU32();
+
+        // Make sure that Sout is located in the expected gates, both in pin a and r
+        for (uint64_t i=0; i<8; i++)
+        {
+            GateU32 * pGateU32 = NULL;
+            switch (i)
+            {
+                case 0: pGateU32 = &a; break;
+                case 1: pGateU32 = &b; break;
+                case 2: pGateU32 = &c; break;
+                case 3: pGateU32 = &d; break;
+                case 4: pGateU32 = &e; break;
+                case 5: pGateU32 = &f; break;
+                case 6: pGateU32 = &g; break;
+                case 7: pGateU32 = &hh; break;
+                default: zkassert(false);                
+            }
+            for (uint64_t j=0; j<32; j++)
+            {
+                uint64_t aux = gateConfig.soutRef0 + gateConfig.soutRefDistance*(32*i + j);
+                S.XOR( pGateU32->bit[j].ref, pGateU32->bit[i].pin, gateConfig.zeroRef, pin_a, aux );
+                S.SoutRefs[32*i + j] = aux;
+                //cout << "SHA256() i=" << i << " aux=" << aux << " pin_a=" << (uint64_t)S.gate[S.SoutRefs[i]].pin[pin_a].bit << " pin_r=" << (uint64_t)S.gate[S.SoutRefs[i]].pin[pin_r].bit << endl;
+            }
+        }
 
         S.printCounters();
     }
