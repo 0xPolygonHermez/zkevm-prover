@@ -121,8 +121,29 @@ using grpc::Status;
 
     // Flags
     proverRequest.input.bUpdateMerkleTree = request->update_merkle_tree();
-    proverRequest.input.txHashToGenerateExecuteTrace = "0x" + ba2string(request->tx_hash_to_generate_execute_trace());
-    proverRequest.input.txHashToGenerateCallTrace = "0x" + ba2string(request->tx_hash_to_generate_call_trace());
+    if (request->has_trace_config())
+    {
+        proverRequest.input.traceConfig.bEnabled = true;
+        const executor::v1::TraceConfig & traceConfig = request->trace_config();
+        if (traceConfig.disable_storage())
+        {
+            proverRequest.input.traceConfig.bDisableStorage = true;
+        }
+        if (traceConfig.disable_stack())
+        {
+            proverRequest.input.traceConfig.bDisableStack = true;
+        }
+        if (traceConfig.enable_memory())
+        {
+            proverRequest.input.traceConfig.bEnableMemory = true;
+        }
+        if (traceConfig.enable_return_data())
+        {
+            proverRequest.input.traceConfig.bEnableReturnData = true;
+        }
+        proverRequest.input.traceConfig.txHashToGenerateExecuteTrace = "0x" + ba2string(traceConfig.tx_hash_to_generate_execute_trace());
+        proverRequest.input.traceConfig.txHashToGenerateCallTrace = "0x" + ba2string(traceConfig.tx_hash_to_generate_call_trace());
+    }
 
     // Default values
     proverRequest.input.publicInputsExtended.newStateRoot = "0x0";
@@ -200,8 +221,7 @@ using grpc::Status;
         << " from=" << proverRequest.input.from
         << " bUpdateMerkleTree=" << proverRequest.input.bUpdateMerkleTree
         << " bNoCounters=" << proverRequest.input.bNoCounters
-        << " txHashToGenerateExecuteTrace=" << proverRequest.input.txHashToGenerateExecuteTrace
-        << " txHashToGenerateCallTrace=" << proverRequest.input.txHashToGenerateCallTrace
+        << " traceConfig=" << proverRequest.input.traceConfig.toString()
         << endl;
 #endif
 
@@ -272,33 +292,33 @@ using grpc::Status;
             pLog->set_batch_hash(string2ba(responses[tx].logs[log].batch_hash)); // Hash of the batch in which the transaction was included
             pLog->set_index(responses[tx].logs[log].index); // Index of the log in the block
         }
-        if (proverRequest.input.txHashToGenerateExecuteTrace == responses[tx].tx_hash)
+        if (proverRequest.input.traceConfig.bEnabled && (proverRequest.input.traceConfig.txHashToGenerateExecuteTrace == responses[tx].tx_hash))
         {
-            for (uint64_t step=0; step<responses[tx].call_trace.steps.size(); step++)
+            for (uint64_t step=0; step<responses[tx].execution_trace.size(); step++)
             {
                 executor::v1::ExecutionTraceStep * pExecutionTraceStep = pProcessTransactionResponse->add_execution_trace();
-                pExecutionTraceStep->set_pc(responses[tx].call_trace.steps[step].pc); // Program Counter
-                pExecutionTraceStep->set_op(responses[tx].call_trace.steps[step].opcode); // OpCode
-                pExecutionTraceStep->set_remaining_gas(responses[tx].call_trace.steps[step].gas);
-                pExecutionTraceStep->set_gas_cost(responses[tx].call_trace.steps[step].gas_cost); // Gas cost of the operation
-                pExecutionTraceStep->set_memory(string2ba(responses[tx].call_trace.steps[step].memory)); // Content of memory
-                pExecutionTraceStep->set_memory_size(responses[tx].call_trace.steps[step].memory_size);
-                for (uint64_t stack=0; stack<responses[tx].call_trace.steps[step].stack.size() ; stack++)
-                    pExecutionTraceStep->add_stack(PrependZeros(responses[tx].call_trace.steps[step].stack[stack].get_str(16), 64)); // Content of the stack
+                pExecutionTraceStep->set_pc(responses[tx].execution_trace[step].pc); // Program Counter
+                pExecutionTraceStep->set_op(responses[tx].execution_trace[step].opcode); // OpCode
+                pExecutionTraceStep->set_remaining_gas(responses[tx].execution_trace[step].gas);
+                pExecutionTraceStep->set_gas_cost(responses[tx].execution_trace[step].gas_cost); // Gas cost of the operation
+                pExecutionTraceStep->set_memory(string2ba(responses[tx].execution_trace[step].memory)); // Content of memory
+                pExecutionTraceStep->set_memory_size(responses[tx].execution_trace[step].memory_size);
+                for (uint64_t stack=0; stack<responses[tx].execution_trace[step].stack.size() ; stack++)
+                    pExecutionTraceStep->add_stack(PrependZeros(responses[tx].execution_trace[step].stack[stack].get_str(16), 64)); // Content of the stack
                 string dataConcatenated;
-                for (uint64_t data=0; data<responses[tx].call_trace.steps[step].return_data.size(); data++)
-                    dataConcatenated += responses[tx].call_trace.steps[step].return_data[data];
+                for (uint64_t data=0; data<responses[tx].execution_trace[step].return_data.size(); data++)
+                    dataConcatenated += responses[tx].execution_trace[step].return_data[data];
                 pExecutionTraceStep->set_return_data(string2ba(dataConcatenated));
                 google::protobuf::Map<std::string, std::string> * pStorage = pExecutionTraceStep->mutable_storage();
                 unordered_map<string,string>::iterator it;
-                for (it=responses[tx].call_trace.steps[step].storage.begin(); it!=responses[tx].call_trace.steps[step].storage.end(); it++)
+                for (it=responses[tx].execution_trace[step].storage.begin(); it!=responses[tx].execution_trace[step].storage.end(); it++)
                     (*pStorage)[it->first] = it->second; // Content of the storage
-                pExecutionTraceStep->set_depth(responses[tx].call_trace.steps[step].depth); // Call depth
-                pExecutionTraceStep->set_gas_refund(responses[tx].call_trace.steps[step].gas_refund);
-                pExecutionTraceStep->set_error(string2error(responses[tx].call_trace.steps[step].error));
+                pExecutionTraceStep->set_depth(responses[tx].execution_trace[step].depth); // Call depth
+                pExecutionTraceStep->set_gas_refund(responses[tx].execution_trace[step].gas_refund);
+                pExecutionTraceStep->set_error(string2error(responses[tx].execution_trace[step].error));
             }
         }
-        if (proverRequest.input.txHashToGenerateCallTrace == responses[tx].tx_hash)
+        if (proverRequest.input.traceConfig.bEnabled && (proverRequest.input.traceConfig.txHashToGenerateCallTrace == responses[tx].tx_hash))
         {
             executor::v1::CallTrace * pCallTrace = new executor::v1::CallTrace();
             executor::v1::TransactionContext * pTransactionContext = pCallTrace->mutable_context();

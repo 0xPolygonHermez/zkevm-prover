@@ -270,7 +270,7 @@ uint8_t char2byte (char c)
 char byte2char (uint8_t b)
 {
     if (b < 10) return '0' + b;
-    if (b < 16) return 'A' + b - 10;
+    if (b < 16) return 'a' + b - 10;
     cerr << "Error: byte2char() called with an invalid byte: " << b << endl;
     exitProcess();
     return 0;
