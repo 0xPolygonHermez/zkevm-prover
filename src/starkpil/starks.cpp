@@ -154,10 +154,17 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     TimerStart(STARK_STEP_3_CALCULATE_EXPS_2);
 
     // Calculate exps
-#pragma omp parallel for
-    for (uint64_t i = 0; i < N; i++)
+    if (nrowsStepBatch > 1 && false)
     {
-        steps->step3_first(params, i);
+        steps->step3_parser_first_avx(params, NExtended, nrowsStepBatch);
+    }
+    else
+    {
+#pragma omp parallel for
+        for (uint64_t i = 0; i < N; i++)
+        {
+            steps->step3_first(params, i);
+        }
     }
     TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS_2);
     TimerStart(STARK_STEP_3_LDE_AND_MERKLETREE);

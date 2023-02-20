@@ -32,6 +32,9 @@ public:
     virtual void step3_first(StepsParams &params, uint64_t i) = 0;
     virtual void step3_i(StepsParams &params, uint64_t i) = 0;
     virtual void step3_last(StepsParams &params, uint64_t i) = 0;
+    virtual void step3_parser_first(StepsParams &params, uint64_t nrows, uint64_t nrowsBatch){};
+    virtual void step3_parser_first_avx(StepsParams &params, uint64_t nrows, uint64_t nrowsBatch){};
+
 
     virtual void step42ns_first(StepsParams &params, uint64_t i) = 0;
     virtual void step42ns_i(StepsParams &params, uint64_t i) = 0;
