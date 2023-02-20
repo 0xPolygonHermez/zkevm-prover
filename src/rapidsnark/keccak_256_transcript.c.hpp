@@ -36,7 +36,7 @@ typename Engine::FrElement Keccak256Transcript<Engine>::getChallenge() {
     u_int64_t bytes = 0;
 
     memset(data, 0, length);
-    for (int i = 0; i < this->elements.size(); i++) {
+    for (unsigned long i = 0; i < this->elements.size(); i++) {
         if(FrType == elements[i].type) {
             FrElement element = std::any_cast<FrElement>(elements[i].element);
             bytes += E.fr.toRprBE(element, data + bytes, E.fr.bytes());

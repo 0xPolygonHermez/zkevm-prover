@@ -2,7 +2,7 @@
 #define EXECUTOR_SERVICE_HPP
 
 #include "grpc/gen/executor.grpc.pb.h"
-#include "proof.hpp"
+#include "proof_fflonk.hpp"
 #include "goldilocks_base_field.hpp"
 #include "prover.hpp"
 #include "config.hpp"

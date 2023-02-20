@@ -6,13 +6,13 @@
     "runStateDBServer": false,
     "runStateDBTest": false,
 
-    "runAggregatorServer": false,
-    "runAggregatorClient": false,
+    "runAggregatorServer": true,
+    "runAggregatorClient": true,
     "runAggregatorClientMock": false,     
 
     "runFileGenBatchProof": false,
     "runFileGenAggregatedProof": false,
-    "runFileGenFinalProof": true,
+    "runFileGenFinalProof": false,
     "runFileProcessBatch": false,
     "runFileProcessBatchMultithread": false,
 
@@ -59,7 +59,7 @@
     "mapConstPolsFile": false,
     "mapConstantsTreeFile": false,
 
-    "inputFile": "testvectors/finalProof/20230209_211343_901843_3aa26759-4291-4791-933d-50ab569e4470.aggregated_proof.output.json",
+    "inputFile": "testvectors/finalProof/recursive2.zkin.proof_03.json",
     "inputFile2": "testvectors/finalProof/recursive1.zkin.proof_1.json",
 
     "rom": "config/scripts/rom.json",
@@ -101,8 +101,8 @@
 
     "finalConstConstantsTree": "config/final/final.consttree",
     "finalVerifier": "config/final/final.verifier.dat",
-    "finalVerkey":"config/final/final.verkey.json",
-    "finalStarkZkey": "config/final/final.g16.0001.zkey",
+    "finalVerkey":"config/final/final.fflonk.verkey.json",
+    "finalStarkZkey": "config/final/final.fflonk.zkey",
 
     "outputPath": "runtime/output",
 

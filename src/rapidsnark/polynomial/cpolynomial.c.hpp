@@ -46,11 +46,10 @@ Polynomial<Engine> *CPolynomial<Engine>::getPolynomial(FrElement *reservedBuffer
 
     u_int64_t maxDegree = this->getDegree();
     u_int64_t lengthBuffer = std::pow(2, ((u_int64_t)log2(maxDegree - 1)) + 1);
-
     Polynomial<Engine> *polynomial = new Polynomial<Engine>(E, reservedBuffer, lengthBuffer);
 
     #pragma omp parallel for
-    for (u_int64_t i = 0; i < maxDegree; i++) {
+    for (u_int64_t i = 0; i < maxDegree+1; i++) {
         for (int j = 0; j < n; j++) {
             if (polynomials[j] != NULL) {
                 if (i <= degrees[j]) polynomial->coef[i * n + j] = polynomials[j]->coef[i];

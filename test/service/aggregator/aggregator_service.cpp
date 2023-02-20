@@ -1,7 +1,7 @@
 #include "config.hpp"
 #include "aggregator_service.hpp"
 #include "input.hpp"
-#include "proof.hpp"
+#include "proof_fflonk.hpp"
 #include <grpcpp/grpcpp.h>
 
 using grpc::Server;

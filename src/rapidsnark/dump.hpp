@@ -7,7 +7,10 @@
 namespace Dump {
     template <typename Engine>
     class Dump {
+       protected:
+        Engine &E;
       public:
+        bool showValues;
         Dump(Engine &engine):E(engine), showValues(false) {};
         void dump(const std::string &label, const u_int8_t *elements, int count);
         void dump(const std::string &label, u_int32_t *elements, int count);
@@ -19,10 +22,8 @@ namespace Dump {
         void dump(const std::string &label, typename Engine::G1PointAffine &point);
         void dump(const std::string &label, typename Engine::G1Point &point);
         std::string getColorLiteHash(std::string &data);
-        bool showValues;
 
       protected:
-        Engine &E;
         void setShowValues ( bool value ) { showValues = value; };
         std::string getLiteHash(std::string &data);
         std::string getHash(const void *data, u_int32_t len);

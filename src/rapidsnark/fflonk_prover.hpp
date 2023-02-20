@@ -134,6 +134,8 @@ namespace Fflonk {
 
         FrElement getMontgomeryBatchedInverse();
 
+        FrElement computeLiS0(u_int32_t i);
+
         FrElement computeLiS1(u_int32_t i);
 
         FrElement computeLiS2(u_int32_t i);

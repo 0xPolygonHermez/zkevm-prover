@@ -34,14 +34,26 @@ Polynomial<Engine>::Polynomial(Engine &_E, FrElement *reservedBuffer, u_int64_t 
 
 template<typename Engine>
 Polynomial<Engine> *
-Polynomial<Engine>::fromCoefficients(Engine &_E, FrElement *coefficients, u_int64_t length, u_int64_t blindLength) {
-    Polynomial<Engine> *pol = new Polynomial<Engine>(_E, length, blindLength);
+Polynomial<Engine>::fromPolynomial(Engine &_E, Polynomial<Engine> &polynomial, u_int64_t blindLength) {
+    Polynomial<Engine> *newPol = new Polynomial<Engine>(_E, polynomial.length, blindLength);
 
     int nThreads = omp_get_max_threads() / 2;
-    ThreadUtils::parcpy(pol->coef, coefficients, length * sizeof(FrElement), nThreads);
-    pol->fixDegree();
+    ThreadUtils::parcpy(newPol->coef, &polynomial.coef[0], polynomial.length * sizeof(FrElement), nThreads);
+    newPol->fixDegree();
 
-    return pol;
+    return newPol;
+}
+
+template<typename Engine>
+Polynomial<Engine> *
+Polynomial<Engine>::fromPolynomial(Engine &_E, Polynomial<Engine> &polynomial, FrElement *reservedBuffer, u_int64_t blindLength) {
+    Polynomial<Engine> *newPol = new Polynomial<Engine>(_E, reservedBuffer, polynomial.length, blindLength);
+
+    int nThreads = omp_get_max_threads() / 2;
+    ThreadUtils::parcpy(newPol->coef, &polynomial.coef[0], polynomial.length * sizeof(FrElement), nThreads);
+    newPol->fixDegree();
+
+    return newPol;
 }
 
 template<typename Engine>
@@ -114,7 +126,7 @@ template<typename Engine>
 void Polynomial<Engine>::blindCoefficients(FrElement blindingFactors[], u_int32_t length) {
     const u_int32_t polLength = this->length;
 
-    for (int i = 0; i < length; i++) {
+    for (u_int32_t i = 0; i < length; i++) {
         coef[polLength - length + i] = E.fr.add(coef[polLength - length + i], blindingFactors[i]);
         coef[i] = E.fr.sub(coef[i], blindingFactors[i]);
     }
@@ -185,7 +197,7 @@ typename Engine::FrElement Polynomial<Engine>::fastEvaluate(FrElement point) con
         }
     }
 
-    for (uint i = 1; i < nThreads; i++) {
+    for (int i = 1; i < nThreads; i++) {
         res[0] = E.fr.add(res[0], E.fr.mul(xN[i - 1], res[i*4]));
         xN[i] = E.fr.mul(xN[i - 1], xN[0]);
     }
@@ -195,7 +207,7 @@ typename Engine::FrElement Polynomial<Engine>::fastEvaluate(FrElement point) con
 
 template<typename Engine>
 void Polynomial<Engine>::add(Polynomial<Engine> &polynomial) {
-    FrElement *newCoef;
+    FrElement *newCoef = NULL;
     bool resize = polynomial.length > this->length;
 
     if (resize) {
@@ -205,7 +217,7 @@ void Polynomial<Engine>::add(Polynomial<Engine> &polynomial) {
     u_int64_t thisLength = this->length;
     u_int64_t polyLength = polynomial.length;
 
-#pragma omp parallel for
+    #pragma omp parallel for
     for (u_int64_t i = 0; i < std::max(thisLength, polyLength); i++) {
         FrElement a = i < thisLength ? this->coef[i] : E.fr.zero();
         FrElement b = i < polyLength ? polynomial.coef[i] : E.fr.zero();
@@ -252,13 +264,13 @@ void Polynomial<Engine>::mulScalar(FrElement &value) {
 
 template<typename Engine>
 void Polynomial<Engine>::addScalar(FrElement &value) {
-    FrElement currentValue = (0 == this->length) ? E.fr.zero : this->coef[0];
+    FrElement currentValue = (0 == this->length) ? E.fr.zero() : this->coef[0];
     E.fr.add(this->coef[0], currentValue, value);
 }
 
 template<typename Engine>
 void Polynomial<Engine>::subScalar(FrElement &value) {
-    FrElement currentValue = (0 == this->length) ? E.fr.zero : this->coef[0];
+    FrElement currentValue = (0 == this->length) ? E.fr.zero() : this->coef[0];
     E.fr.sub(this->coef[0], currentValue, value);
 }
 
@@ -284,8 +296,35 @@ void Polynomial<Engine>::byXSubValue(FrElement &value) {
     pol->add(*this);
 
     // Swap buffers
-    delete[] this->coef;
+    if(this->createBuffer) delete[] this->coef;
     this->coef = pol->coef;
+
+    fixDegree();
+}
+
+// Multiply current polynomial by the polynomial (X - value)
+template<typename Engine>
+void Polynomial<Engine>::byXNSubValue(int n, FrElement &value) {
+    const bool resize = !((this->length - n - 1) >= this->degree);
+
+    u_int64_t length = resize ? this->length + n : this->length;
+    Polynomial<Engine> *pol = new Polynomial<Engine>(E, length);
+
+    // Step 0: Set current coefficients to the new buffer shifted one position
+    int nThreads = omp_get_max_threads() / 2;
+    ThreadUtils::parcpy(&pol->coef[n], this->coef, (this->degree + 1) * sizeof(FrElement), nThreads);
+    pol->fixDegree();
+
+    // Step 1: multiply each coefficient by value
+    this->mulScalar(value);
+
+    // Step 2: Add current polynomial to destination polynomial
+    pol->add(*this);
+
+    // Swap buffers
+    if(this->createBuffer) delete[] this->coef;
+    this->coef = pol->coef;
+    delete pol;
 
     fixDegree();
 }
@@ -330,7 +369,7 @@ void Polynomial<Engine>::divByMonic(uint32_t m, FrElement beta) {
 
     uint32_t nThreads = m;
     #pragma omp parallel for
-    for(int k = 0; k<nThreads;k++) {
+    for(uint32_t k = 0; k<nThreads;k++) {
         for (int i = d - 2 * m - k; i >= 0; i = i - nThreads) {
             if(i<0) break;
             uint32_t idx = k;
@@ -419,9 +458,9 @@ Polynomial<Engine> *Polynomial<Engine>::divByVanishing(FrElement *reservedBuffer
     ThreadUtils::parcpy(reservedBuffer, coef, this->length * sizeof(FrElement), nThreads);
     ThreadUtils::parset(coef, 0, this->length * sizeof(FrElement), nThreads);
 
-#pragma omp parallel for
-    for (int k = 0; k < m; k++) {
-        for (int32_t i = this->length - 1 - k; i >= m; i = i - m) {
+    #pragma omp parallel for
+    for (uint32_t k = 0; k < m; k++) {
+        for (uint32_t i = this->length - 1 - k; i >= m; i = i - m) {
             FrElement leadingCoef = polR->coef[i];
             if (E.fr.eq(E.fr.zero(), leadingCoef)) continue;
 
@@ -546,13 +585,13 @@ void Polynomial<Engine>::divZh(u_int64_t domainSize, int extension) {
     }
 
     int nThreads = pow(2, log2(omp_get_max_threads()));
-    int nElementsThread = domainSize / nThreads;
-    int nChunks = this->length / domainSize;
+    uint64_t nElementsThread = domainSize / nThreads;
+    uint64_t nChunks = this->length / domainSize;
 
-    for (uint i = 0; i < nChunks - 1; i++) {
-#pragma omp parallel for
-        for (uint k = 0; k < nThreads; k++) {
-            for (uint j = 0; j < nElementsThread; j++) {
+    for (uint64_t i = 0; i < nChunks - 1; i++) {
+    #pragma omp parallel for
+        for (int k = 0; k < nThreads; k++) {
+            for (uint64_t j = 0; j < nElementsThread; j++) {
                 int id = k;
                 u_int64_t idxBase = id * nElementsThread + j;
                 u_int64_t idx0 = idxBase + i * domainSize;
@@ -561,6 +600,72 @@ void Polynomial<Engine>::divZh(u_int64_t domainSize, int extension) {
 
                 if (i > (domainSize * (extension - 1) - extension)) {
                     if (!E.fr.isZero(coef[idx1])) {
+                        throw std::runtime_error("Polynomial is not divisible");
+                    }
+                }
+            }
+        }
+    }
+
+    fixDegree();
+}
+
+template<typename Engine>
+void Polynomial<Engine>::divByZerofier(u_int64_t n, FrElement beta) {
+    FrElement invBeta, invBetaNeg;
+    FrElement negOne;
+    E.fr.neg(negOne, E.fr.one());
+    E.fr.inv(invBeta, beta);
+    E.fr.neg(invBetaNeg, invBeta);
+
+    bool isOne = E.fr.eq(E.fr.one(), invBetaNeg);
+    bool isNegOne = E.fr.eq(negOne, invBetaNeg);
+
+    if(!isOne) {
+        #pragma omp parallel for
+        for (u_int64_t i = 0; i < n; i++) {
+            // If invBetaNeg === -1 we'll save a multiplication changing it by a neg function call
+            if(isNegOne) {
+                E.fr.neg(this->coef[i], this->coef[i]);
+            } else {
+                this->coef[i] = E.fr.mul(invBetaNeg, this->coef[i]);
+            }
+        }
+    }
+
+    int nThreads = pow(2, log2(omp_get_max_threads()));
+    uint64_t nElementsThread = n / nThreads;
+    uint64_t nChunks = this->length / n;
+
+    isOne = E.fr.eq(E.fr.one(), invBeta);
+    isNegOne = E.fr.eq(negOne, invBeta);
+
+    for (uint64_t i = 0; i < nChunks - 1; i++) {
+        #pragma omp parallel for
+        for (int k = 0; k < nThreads; k++) {
+            for (uint64_t j = 0; j < nElementsThread; j++) {
+                int id = k;
+                u_int64_t idxBase = id * nElementsThread + j;
+                u_int64_t idx0 = idxBase + i * n;
+                u_int64_t idx1 = idxBase + (i + 1) * n;
+
+                FrElement element = E.fr.sub(coef[idx0], coef[idx1]);
+
+                // If invBeta === 1 we'll not do anything
+                if(!isOne) {
+                    // If invBeta === -1 we'll save a multiplication changing it by a neg function call
+                    if(isNegOne) {
+                        E.fr.neg(element, element);
+                    } else {
+                        element = E.fr.mul(invBeta, element);
+                    }
+                }
+
+                coef[idx1] = element;
+
+                // Check if polynomial is divisible by checking if n high coefficients are zero
+                if (i > this->length - n - 1) {
+                    if (!E.fr.isZero(element)) {
                         throw std::runtime_error("Polynomial is not divisible");
                     }
                 }

@@ -6,7 +6,7 @@
 
 using namespace std;
 
-void Proof::load (json &proof, PublicInputsExtended &publicinputsextended)
+void ProofGroth16::load (json &proof, PublicInputsExtended &publicinputsextended)
 {
     string aux;
 

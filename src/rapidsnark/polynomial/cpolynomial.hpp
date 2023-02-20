@@ -11,9 +11,9 @@ class CPolynomial {
     using G1PointAffine = typename Engine::G1PointAffine;
 
     Polynomial<Engine> **polynomials;
-    int n;
-
     Engine &E;
+
+    int n;
 
 public:
     CPolynomial(Engine &_E, int n);

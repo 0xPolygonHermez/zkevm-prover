@@ -29,7 +29,9 @@ public:
     Polynomial(Engine &_E, FrElement *reservedBuffer, u_int64_t length, u_int64_t blindLength = 0);
 
     // From coefficients
-    static Polynomial<Engine>* fromCoefficients(Engine &_E, FrElement *coefficients, u_int64_t length, u_int64_t blindLength = 0);
+    static Polynomial<Engine>* fromPolynomial(Engine &_E, Polynomial<Engine> &polynomial, u_int64_t blindLength = 0);
+
+    static Polynomial<Engine>* fromPolynomial(Engine &_E, Polynomial<Engine> &polynomial, FrElement *reservedBuffer, u_int64_t blindLength = 0);
 
     // From evaluations
     static Polynomial<Engine>* fromEvaluations(Engine &_E, FFT<typename Engine::Fr> *fft, FrElement *evaluations, u_int64_t length, u_int64_t blindLength = 0);
@@ -58,7 +60,7 @@ public:
         FrElement result = E.fr.zero();
 
         for (u_int64_t i = degree + 1; i > 0; i--) {
-             E.fr.add(result,coef[i - 1], E.fr.mul(result, point));
+            result = E.fr.add(coef[i - 1], E.fr.mul(result, point));
         }
         return result;
     }
@@ -78,6 +80,8 @@ public:
     // Multiply current polynomial by the polynomial (X - value)
     void byXSubValue(FrElement &value);
 
+    void byXNSubValue(int n, FrElement &value);
+
     // Euclidean division, returns reminder polygon
     Polynomial<Engine>* divBy(Polynomial<Engine> &polynomial);
 
@@ -90,6 +94,8 @@ public:
     void fastDivByVanishing(FrElement *reservedBuffer, uint32_t m, FrElement beta);
 
     void divZh(u_int64_t domainSize, int extension = 4);
+
+    void divByZerofier(u_int64_t domainSize, FrElement beta);
 
     void byX();
 

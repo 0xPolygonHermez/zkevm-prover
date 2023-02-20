@@ -7,7 +7,7 @@
 #include "goldilocks_base_field.hpp"
 #include "input.hpp"
 #include "rom.hpp"
-#include "proof.hpp"
+#include "proof_fflonk.hpp"
 #include "alt_bn128.hpp"
 #include "groth16.hpp"
 #include "binfile_utils.hpp"
@@ -54,6 +54,7 @@ private:
     pthread_mutex_t mutex;    // Mutex to protect the requests queues
     void *pAddress = NULL;
     void *pAddressStarksRecursiveF = NULL;
+    int protocolId;
 public:
     const Config &config;
     sem_t pendingRequestSem; // Semaphore to wakeup prover thread when a new request is available

@@ -144,7 +144,7 @@ std::string Dump<Engine>::getHash(const void *data, u_int32_t len)
     unsigned int outLen = keccak((void *)data, len, digest, sizeof(digest));
 
     std::stringstream ss;
-    for (int i=0; i<outLen; i++) {
+    for (uint i=0; i<outLen; i++) {
         ss << std::setw(2) << std::setfill('0') << std::hex << std::uppercase << static_cast<unsigned>(digest[i]);
     }
     return ss.str();
