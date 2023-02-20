@@ -13,7 +13,7 @@ public:
     void step2prev_first(StepsParams &params, uint64_t i);
     void step2prev_i(StepsParams &params, uint64_t i);
     void step2prev_last(StepsParams &params, uint64_t i);
-    
+
     void step3prev_first(StepsParams &params, uint64_t i);
     void step3prev_i(StepsParams &params, uint64_t i);
     void step3prev_last(StepsParams &params, uint64_t i);
@@ -25,10 +25,14 @@ public:
     void step42ns_first(StepsParams &params, uint64_t i);
     void step42ns_i(StepsParams &params, uint64_t i);
     void step42ns_last(StepsParams &params, uint64_t i);
+    void step42ns_parser_first(StepsParams &params, uint64_t nrows, uint64_t nrowsBatch);
+    void step42ns_parser_first_avx(StepsParams &params, uint64_t nrows, uint64_t nrowsBatch);
 
     void step52ns_first(StepsParams &params, uint64_t i);
     void step52ns_i(StepsParams &params, uint64_t i);
     void step52ns_last(StepsParams &params, uint64_t i);
+    void step52ns_parser_first(StepsParams &params, uint64_t nrows, uint64_t nrowsBatch);
+    void step52ns_parser_first_avx(StepsParams &params, uint64_t nrows, uint64_t nrowsBatch);
 };
 
 #endif // STARKS_STEPS_HPP
