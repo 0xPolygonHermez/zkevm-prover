@@ -27,12 +27,11 @@ public:
     unordered_map<uint64_t,uint64_t> txGAS;
     uint64_t txCount;
     uint64_t txTime; // in us
-    vector<Opcode> info; // Opcode step traces of the all the processed tx
     vector<vector<mpz_class>> fullStack;// Stack of the transaction
     uint64_t accBatchGas;
     unordered_map<uint64_t,unordered_map<uint64_t,Log>> logs;
-    vector<Opcode> call_trace; // TODO: Can we remove this attribute?
-    vector<Opcode> execution_trace; // TODO: Can we remove this attribute?
+    vector<Opcode> call_trace;
+    vector<Opcode> execution_trace;
     string lastError;
     unordered_map<string, InfoReadWrite> read_write_addresses;
 #ifdef LOG_TIME_STATISTICS
@@ -74,7 +73,7 @@ public:
         txGAS           = other.txGAS;
         txCount         = other.txCount;
         txTime          = other.txTime;
-        info            = other.info;
+        //info            = other.info;
         fullStack       = other.fullStack;
         accBatchGas     = other.accBatchGas;
         logs            = other.logs;
@@ -111,7 +110,7 @@ public:
     }
     vector<Opcode> & get_info(void)
     {
-        return info;
+        return execution_trace;
     }
 };
 

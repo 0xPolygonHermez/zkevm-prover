@@ -306,7 +306,7 @@ void FullTracer::onError(Context &ctx, const RomCommand &cmd)
 
     // Intrinsic error should be set at tx level (not opcode)
     if ( (responseErrors.find(lastError) != responseErrors.end()) ||
-         (info.size() == 0) )
+         (execution_trace.size() == 0) )
     {
         if (finalTrace.responses.size() > txCount)
         {
@@ -326,9 +326,9 @@ void FullTracer::onError(Context &ctx, const RomCommand &cmd)
     }
     else
     {
-        if (info.size() > 0)
+        if (execution_trace.size() > 0)
         {
-            info[info.size() - 1].error = lastError;
+            execution_trace[execution_trace.size() - 1].error = lastError;
         }
 
         // Revert logs
@@ -549,27 +549,37 @@ void FullTracer::onUpdateStorage(Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&t, NULL);
 #endif
-    mpz_class regScalar;
-
-    // The storage key is stored in C
-    getRegFromCtx(ctx, reg_C, regScalar);
-    string key = PrependZeros(regScalar.get_str(16), 64);
-
-    // The storage value is stored in D
-    getRegFromCtx(ctx, reg_D, regScalar);
-    string value = PrependZeros(regScalar.get_str(16), 64);
-
-    if (deltaStorage.find(depth) == deltaStorage.end())
+    if (ctx.proverRequest.input.traceConfig.generateStorage())
     {
-        cerr << "Error: FullTracer::onUpdateStorage() did not found deltaStorage of depth=" << depth << endl;
-        exitProcess();
-    }
+        mpz_class regScalar;
 
-    deltaStorage[depth][key] = value;
+        // The storage key is stored in C
+        getRegFromCtx(ctx, reg_C, regScalar);
+        string key = PrependZeros(regScalar.get_str(16), 64);
+
+        // The storage value is stored in D
+        getRegFromCtx(ctx, reg_D, regScalar);
+        string value = PrependZeros(regScalar.get_str(16), 64);
+
+        if (deltaStorage.find(depth) == deltaStorage.end())
+        {
+            cerr << "Error: FullTracer::onUpdateStorage() did not found deltaStorage of depth=" << depth << endl;
+            exitProcess();
+        }
+
+        // Add key/value to deltaStorage
+        deltaStorage[depth][key] = value;
+        
+        // Add deltaStorage to current execution_trace opcode info
+        if (execution_trace.size() > 0)
+        {
+            execution_trace[execution_trace.size() - 1].storage = deltaStorage[depth];
+        }
 
 #ifdef LOG_FULL_TRACER
-    cout << "FullTracer::onUpdateStorage() depth=" << depth << " key=" << key << " value=" << value << endl;
+        cout << "FullTracer::onUpdateStorage() depth=" << depth << " key=" << key << " value=" << value << endl;
 #endif
+    }
 #ifdef LOG_TIME_STATISTICS
     tms.add("onUpdateStorage", TimeDiff(t));
 #endif
@@ -602,17 +612,20 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     accBatchGas += response.gas_used;
 
     // Set return data
-    mpz_class offsetScalar;
-    getVarFromCtx(ctx, false, ctx.rom.retDataOffsetOffset, offsetScalar);
-    mpz_class lengthScalar;
-    getVarFromCtx(ctx, false, ctx.rom.retDataLengthOffset, lengthScalar);
-    if (response.call_trace.context.to == "0x")
+    if (ctx.proverRequest.input.traceConfig.generateReturnData())
     {
-        getCalldataFromStack(ctx, offsetScalar.get_ui(), lengthScalar.get_ui(), response.return_value);
-    }
-    else
-    {
-        getFromMemory(ctx, offsetScalar, lengthScalar, response.return_value);
+        mpz_class offsetScalar;
+        getVarFromCtx(ctx, false, ctx.rom.retDataOffsetOffset, offsetScalar);
+        mpz_class lengthScalar;
+        getVarFromCtx(ctx, false, ctx.rom.retDataLengthOffset, lengthScalar);
+        if (response.call_trace.context.to == "0x")
+        {
+            getCalldataFromStack(ctx, offsetScalar.get_ui(), lengthScalar.get_ui(), response.return_value);
+        }
+        else
+        {
+            getFromMemory(ctx, offsetScalar, lengthScalar, response.return_value);
+        }
     }
 
     // Set create address in case of deploy
@@ -632,27 +645,20 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     response.state_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
 
     // If processed opcodes
-    if (info.size() > 0)
+    if (execution_trace.size() > 0)
     {
-        Opcode lastOpcode = info[info.size() - 1];
+        Opcode &lastOpcodeExecution = execution_trace.at(execution_trace.size() - 1);
+        Opcode &lastOpcodeCall = call_trace.at(call_trace.size() - 1);
 
         // set refunded gas
-        response.gas_refunded = lastOpcode.gas_refund;
+        response.gas_refunded = lastOpcodeExecution.gas_refund;
 
         // Set gas price of last opcode
-        if (info.size() >= 2)
+        if (execution_trace.size() >= 2)
         {
-            Opcode beforeLastOpcode = info[info.size() - 2];
-            lastOpcode.gas_cost = beforeLastOpcode.gas - lastOpcode.gas;
-        }
-
-        // Add last opcode
-        call_trace.push_back(lastOpcode);
-        execution_trace.push_back(lastOpcode);
-        if (call_trace.size() < info.size())
-        {
-            call_trace.erase(call_trace.begin());
-            execution_trace.erase(execution_trace.begin());
+            Opcode &beforeLastOpcode = execution_trace.at(execution_trace.size() - 2);
+            lastOpcodeExecution.gas_cost = beforeLastOpcode.gas - lastOpcodeExecution.gas;
+            lastOpcodeCall.gas_cost = lastOpcodeExecution.gas_cost;
         }
 
         // Append processed opcodes to the transaction object
@@ -660,20 +666,9 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
         finalTrace.responses[finalTrace.responses.size() - 1].call_trace.steps = call_trace;
         if (finalTrace.responses[finalTrace.responses.size() - 1].error == "")
         {
-            finalTrace.responses[finalTrace.responses.size() - 1].error = lastOpcode.error;
-        }
-        
-        // If only opcode is STOP, remove redundancy
-        if (finalTrace.responses[finalTrace.responses.size() - 1].call_trace.context.data == "0x")
-        {
-            finalTrace.responses[finalTrace.responses.size() - 1].execution_trace.clear();
-            finalTrace.responses[finalTrace.responses.size() - 1].call_trace.steps.clear();
+            finalTrace.responses[finalTrace.responses.size() - 1].error = lastOpcodeExecution.error;
         }
     }
-
-    // Clean aux array for next iteration
-    call_trace.clear();
-    execution_trace.clear();
 
     // Append to response logs
     unordered_map<uint64_t, std::unordered_map<uint64_t, Log>>::iterator logIt;
@@ -692,6 +687,11 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
 
     // Increase transaction count
     txCount++;
+
+    // Clean aux array for next iteration
+    call_trace.clear();
+    execution_trace.clear();
+    logs.clear(); // TODO: Should we remove logs?
 
 #ifdef LOG_FULL_TRACER
     cout << "FullTracer::onFinishTx() txCount=" << txCount << " finalTrace.responses.size()=" << finalTrace.responses.size() << " create_address=" << response.create_address << " state_root=" << response.state_root << endl;
@@ -777,7 +777,7 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 
     if (ctx.proverRequest.input.bNoCounters)
     {
-        info.push_back(singleInfo);
+        execution_trace.push_back(singleInfo);
 #ifdef LOG_TIME_STATISTICS
         tms.add("onOpcode", TimeDiff(t));
 #endif
@@ -814,15 +814,15 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&top, NULL);
 #endif
-    // Get opcode name into singleInfo.opcode
+    // Get opcode name into singleInfo.opcode, and filter code ID
     singleInfo.opcode = opcodeName[codeId].pName;
     codeId = opcodeName[codeId].codeID;
+    singleInfo.op = codeId;
 
 #ifdef LOG_TIME_STATISTICS
     tmsop.add("getCodeName", TimeDiff(top));
 #endif
 
-#if 0 // finalMemory is not used for performance reasons
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&top, NULL);
 #endif
@@ -833,7 +833,7 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     uint64_t addrMem = offsetCtx + 0x20000;
 
     string finalMemory;
-    if (ctx.proverRequest.generateCallTraces())
+    if (ctx.proverRequest.input.traceConfig.generateMemory())
     {
         uint64_t lengthMemOffset = ctx.rom.memLengthOffset;
         uint64_t lenMemValueFinal = 0;
@@ -863,18 +863,18 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
     tmsop.add("getMemory", TimeDiff(top));
 #endif
-#endif
 
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&top, NULL);
 #endif
-    // Get stack address
-    //uint64_t addr = offsetCtx + 0x10000;
 
     vector<mpz_class> finalStack;
-    /*
-    if (ctx.proverRequest.generateCallTraces())
+    
+    if (ctx.proverRequest.input.traceConfig.generateStack())
     {
+        // Get stack address
+        uint64_t addr = offsetCtx + 0x10000;
+
         uint16_t sp = fr.toU64(ctx.pols.SP[*ctx.pStep]);
         unordered_map<uint64_t, Fea>::iterator it;
         for (uint16_t i = 0; i < sp; i++)
@@ -890,7 +890,7 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
             // hexString = "0x" + hexString;
             finalStack.push_back(stackScalar);
         }
-    }*/
+    }
 
 #ifdef LOG_TIME_STATISTICS
     tmsop.add("getStack", TimeDiff(top));
@@ -913,28 +913,36 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     gettimeofday(&top, NULL);
 #endif
     // cout << "singleInfo.remaining_gas=" << singleInfo.remaining_gas << endl;
-    if (info.size() > 0)
+    // compute: gas spent & zk-counters in previous opcode
+    if (call_trace.size() > 0)
     {
+        // get last opcode processed
+        Opcode &prevTraceCall = call_trace.at(call_trace.size() - 1);
+        Opcode &prevTraceExecution = execution_trace.at(execution_trace.size() - 1);
+
         // The gas cost of the opcode is gas before - gas after processing the opcode
-        info[info.size() - 1].gas_cost = int64_t(info[info.size() - 1].gas) - fr.toS64(ctx.pols.GAS[*ctx.pStep]);
+        int64_t gasCost = prevTraceCall.gas - fr.toS64(ctx.pols.GAS[*ctx.pStep]);
+        prevTraceCall.gas_cost = gasCost;
+        prevTraceExecution.gas_cost = gasCost;
         // cout << "info[info.size() - 1].gas_cost=" << info[info.size() - 1].gas_cost << endl;
 
         // If negative gasCost means gas has been added from a deeper context, we should recalculate
-        if (info[info.size() - 1].gas_cost < 0)
+        if (prevTraceCall.gas_cost < 0)
         {
-            if (info.size() > 1)
+            if (call_trace.size() > 1)
             {
-                Opcode beforePrevTrace = info[info.size() - 2];
-                info[info.size() - 1].gas_cost = beforePrevTrace.gas - info[info.size() - 1].gas;
+                prevTraceCall.gas_cost = call_trace[call_trace.size() - 2].gas - prevTraceCall.gas;
+                prevTraceExecution.gas_cost = prevTraceCall.gas_cost;
             }
             else
             {
                 cout << "Warning: FullTracer::onOpcode() could not calculate prevTrace.gas_cost" << endl;
-                info[info.size() - 1].gas_cost = 0;
+                prevTraceCall.gas_cost = 0;
+                prevTraceExecution.gas_cost = 0;
             }
         }
 
-        info[info.size() - 1].duration = TimeDiff(info[info.size() - 1].startTime, singleInfo.startTime);
+        prevTraceExecution.duration = TimeDiff(prevTraceExecution.startTime, singleInfo.startTime);
     }
 
 #ifdef LOG_TIME_STATISTICS
@@ -943,12 +951,10 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&top, NULL);
 #endif
-    if (ctx.proverRequest.generateCallTraces())
+    if (ctx.proverRequest.input.traceConfig.generateCallTraces())
     {
         getVarFromCtx(ctx, false, ctx.rom.gasRefundOffset, auxScalar);
         singleInfo.gas_refund = auxScalar.get_ui();
-
-        singleInfo.op = codeId;
     }
     //singleInfo.error = "";
 
@@ -958,7 +964,7 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&top, NULL);
 #endif
-    if (ctx.proverRequest.generateCallTraces())
+    if (ctx.proverRequest.input.traceConfig.generateCallTraces())
     {
         fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]);
         singleInfo.state_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
@@ -971,7 +977,7 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     gettimeofday(&top, NULL);
 #endif
     // Add contract info
-    if (ctx.proverRequest.generateCallTraces())
+    if (ctx.proverRequest.input.traceConfig.generateCallTraces())
     {
         getVarFromCtx(ctx, false, ctx.rom.txDestAddrOffset, auxScalar);
         singleInfo.contract.address = NormalizeToNFormat(auxScalar.get_str(16), 40);
@@ -993,13 +999,20 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 #endif
     singleInfo.contract.gas = txGAS[depth];
 
-    if (ctx.proverRequest.generateCallTraces())
+    if (ctx.proverRequest.input.traceConfig.generateCallTraces())
     {
-        singleInfo.storage = deltaStorage[depth];
-
         // Round up to next multiple of 32
         getVarFromCtx(ctx, false, ctx.rom.memLengthOffset, auxScalar);
         singleInfo.memory_size = (auxScalar.get_ui() / 32) * 32;
+    }
+
+    if (ctx.proverRequest.input.traceConfig.generateStack())
+    {
+        singleInfo.stack = finalStack;
+    }
+    if (ctx.proverRequest.input.traceConfig.generateMemory())
+    {
+        singleInfo.memory = finalMemory;
     }
 
 #ifdef LOG_TIME_STATISTICS
@@ -1008,31 +1021,12 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&top, NULL);
 #endif
-    info.push_back(singleInfo);
-    fullStack.push_back(finalStack);
 
-    // build trace
-    uint64_t index = fullStack.size();
-
-    if (index > 1)
+    if (ctx.proverRequest.input.traceConfig.generateCallTraces())
     {
-        Opcode singleCallTrace = info[index - 2];
-        /*if (ctx.proverRequest.generateCallTraces())
-        {
-            singleCallTrace.stack = finalStack;
-            singleCallTrace.memory = finalMemory;
-        }*/
-
-        Opcode singleExecuteTrace = info[index - 2];
-        singleCallTrace.storage.clear();
-        singleCallTrace.memory_size = 0;
-        singleExecuteTrace.contract.address.clear();
-        singleExecuteTrace.contract.caller.clear();
-        singleExecuteTrace.contract.data.clear();
-        singleExecuteTrace.contract.gas = 0;
-        singleExecuteTrace.contract.value = 0;
-        call_trace.push_back(singleCallTrace);
-        execution_trace.push_back(singleExecuteTrace);
+        // Save output traces
+        call_trace.push_back(singleInfo);
+        execution_trace.push_back(singleInfo);
     }
 
 #ifdef LOG_TIME_STATISTICS
@@ -1044,16 +1038,18 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     // Return data
     singleInfo.return_data.clear();
 
+    bool bOpIncContextFoundInPrevStep = false;
     // Check previous step
-    if (info.size() >= 2)
+    if (execution_trace.size() >= 2)
     {
-        Opcode prevStep = info[info.size() - 2];
-        if (opIncContext.find(prevStep.opcode) != opIncContext.end())
+        if (opIncContext.find(execution_trace[execution_trace.size() - 2].opcode) != opIncContext.end())
         {
+            bOpIncContextFoundInPrevStep = true;
+
             // Set gasCall when depth has changed
             getVarFromCtx(ctx, true, ctx.rom.gasCallOffset, auxScalar);
             txGAS[depth] = auxScalar.get_ui();
-            if (ctx.proverRequest.generateCallTraces())
+            if (ctx.proverRequest.input.traceConfig.generateCallTraces())
             {
                 singleInfo.contract.gas = txGAS[depth];
             }
@@ -1066,6 +1062,18 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&top, NULL);
 #endif
+
+    // If is an ether transfer, don't add stop opcode to trace
+    if ( (singleInfo.opcode == opcodeName[0x00/*STOP*/].pName) &&
+         ( (execution_trace.size() < 2) || bOpIncContextFoundInPrevStep) )
+    {
+        getVarFromCtx(ctx, false, ctx.rom.bytecodeLengthOffset, auxScalar);
+        if ((auxScalar == 0) && (execution_trace.size() > 0))
+        {
+            execution_trace.pop_back();
+        }
+    }
+
     if (opIncContext.find(singleInfo.opcode) != opIncContext.end())
     {
         unordered_map<string, string> auxMap;
