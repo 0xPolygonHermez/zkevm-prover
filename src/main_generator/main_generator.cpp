@@ -235,11 +235,6 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    int32_t addrRel = 0; // Relative and absolute address auxiliary variables\n";
     code += "    uint64_t addr = 0;\n";
     code += "    int32_t sp;\n";
-    if (!bFastMode)
-    {
-        code += "    int64_t maxMemCalculated;\n";
-        code += "    int32_t mm;\n";
-    }
     code += "    int64_t i64Aux;\n";
     //code += "    int64_t incHashPos = 0;\n"; // TODO: Remove initialization to check it is initialized before being used
     code += "    Rom &rom = mainExecutor.rom;\n";
@@ -549,12 +544,6 @@ string generate(const json &rom, const string &functionName, const string &fileN
         if (rom["program"][zkPC].contains("inGAS") && (rom["program"][zkPC]["inGAS"]!=0))
         {
             code += selector1("GAS", rom["program"][zkPC]["inGAS"], opInitialized, bFastMode);
-            opInitialized = true;
-        }
-
-        if (rom["program"][zkPC].contains("inMAXMEM") && (rom["program"][zkPC]["inMAXMEM"]!=0))
-        {
-            code += selector1("MAXMEM", rom["program"][zkPC]["inMAXMEM"], opInitialized, bFastMode);
             opInitialized = true;
         }
 
@@ -3546,35 +3535,6 @@ string generate(const json &rom, const string &functionName, const string &fileN
         else if (!bFastMode)
         {
             code += "    pols.zkPC[nexti] = fr.inc(pols.zkPC[i]);\n";
-        }
-
-        if (!bFastMode)
-        {
-            code += "    maxMemCalculated = 0;\n";
-            code += "    fr.toS32(mm, pols.MAXMEM[i]);\n";
-            if (rom["program"][zkPC].contains("isMem") && (rom["program"][zkPC]["isMem"] == 1))
-            {
-                code += "    if (addrRel>mm)\n";
-                code += "    {\n";
-                code += "        pols.isMaxMem[i] = fr.one();\n";
-                code += "        maxMemCalculated = addrRel;\n";
-                code += "    } else {\n";
-                code += "        maxMemCalculated = mm;\n";
-                code += "    }\n";
-            } else {
-                code += "    maxMemCalculated = mm;\n";
-            }
-        }
-
-        // If setMAXMEM, MAXMEM'=op
-        if (rom["program"][zkPC].contains("setMAXMEM") && (rom["program"][zkPC]["setMAXMEM"] == 1) && !bFastMode)
-        {
-            code += "    pols.MAXMEM[nexti] = op0; // If setMAXMEM, MAXMEM'=op\n";
-            code += "    pols.setMAXMEM[i] = fr.one();\n";
-        }
-        else if (!bFastMode)
-        {
-            code += "    pols.MAXMEM[nexti] = fr.fromU64(maxMemCalculated);\n";
         }
 
         // If setGAS, GAS'=op

@@ -94,7 +94,6 @@ typedef enum : int {
     reg_CTX,
     reg_SP,
     reg_PC,
-    reg_MAXMEM,
     reg_GAS,
     reg_zkPC,
     reg_RR,

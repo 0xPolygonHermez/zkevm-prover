@@ -283,10 +283,6 @@ void eval_getReg (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             cr.type = crt_u32;
             cr.u32 = ctx.fr.toU64(ctx.pols.PC[*ctx.pStep]);
             break;
-        case reg_MAXMEM:
-            cr.type = crt_u32;
-            cr.u32 = ctx.fr.toU64(ctx.pols.MAXMEM[*ctx.pStep]);
-            break;
         case reg_GAS:
             cr.type = crt_u64;
             cr.u64 = ctx.fr.toU64(ctx.pols.GAS[*ctx.pStep]);

@@ -28,7 +28,6 @@ public:
     Goldilocks::Element inSP;
     Goldilocks::Element inPC;
     Goldilocks::Element inGAS;
-    Goldilocks::Element inMAXMEM;
     Goldilocks::Element inSTEP;
     Goldilocks::Element inFREE;
     Goldilocks::Element inRR;
@@ -88,7 +87,6 @@ public:
     uint8_t setSP;
     uint8_t setPC;
     uint8_t setGAS;
-    uint8_t setMAXMEM;
     uint8_t setRR;
     uint8_t setHASHPOS;
     uint8_t setRCX;
