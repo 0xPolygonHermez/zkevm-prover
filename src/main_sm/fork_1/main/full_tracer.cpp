@@ -258,12 +258,6 @@ void FullTracer::handleEvent(Context &ctx, const RomCommand &cmd)
         onProcessTx(ctx, cmd);
         return;
     }
-    if (cmd.params[0]->varName == "onUpdateStorage")
-    {
-        // if (ctx.proverRequest.bNoCounters) return;
-        onUpdateStorage(ctx, cmd);
-        return;
-    }
     if (cmd.params[0]->varName == "onFinishTx")
     {
         onFinishTx(ctx, cmd);
@@ -283,6 +277,12 @@ void FullTracer::handleEvent(Context &ctx, const RomCommand &cmd)
     {
         // if (ctx.proverRequest.bNoCounters) return;
         onOpcode(ctx, cmd);
+        return;
+    }
+    if (cmd.params[0]->function == f_onUpdateStorage)
+    {
+        // if (ctx.proverRequest.bNoCounters) return;
+        onUpdateStorage(ctx, *cmd.params[0]);
         return;
     }
     cerr << "Error: FullTracer::handleEvent() got an invalid event cmd.params[0]->varName=" << cmd.params[0]->varName << " cmd.function=" << function2String(cmd.function) << endl;
@@ -551,14 +551,16 @@ void FullTracer::onUpdateStorage(Context &ctx, const RomCommand &cmd)
 #endif
     if (ctx.proverRequest.input.traceConfig.generateStorage())
     {
+        zkassert(cmd.params.size() == 2);
+
         mpz_class regScalar;
 
         // The storage key is stored in C
-        getRegFromCtx(ctx, reg_C, regScalar);
+        getRegFromCtx(ctx, cmd.params[0]->reg, regScalar);
         string key = PrependZeros(regScalar.get_str(16), 64);
 
         // The storage value is stored in D
-        getRegFromCtx(ctx, reg_D, regScalar);
+        getRegFromCtx(ctx, cmd.params[1]->reg, regScalar);
         string value = PrependZeros(regScalar.get_str(16), 64);
 
         if (deltaStorage.find(depth) == deltaStorage.end())
