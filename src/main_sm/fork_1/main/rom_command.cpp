@@ -70,6 +70,7 @@ tFunction string2Function(string s)
     else if (s == "memAlignWR_W1")                  return f_memAlignWR_W1;
     else if (s == "memAlignWR8_W0")                 return f_memAlignWR8_W0;
     else if (s == "onOpcode")                       return f_onOpcode;
+    else if (s == "onUpdateStorage")                return f_onUpdateStorage;
     else if (s == "")                               return f_empty;
     else {
         cerr << "Error: string2function() invalid string = " << s << endl;
@@ -113,6 +114,7 @@ string function2String(tFunction f)
         case f_memAlignWR_W1:                   return "memAlignWR_W1";
         case f_memAlignWR8_W0:                  return "memAlignWR8_W0";
         case f_onOpcode:                        return "onOpcode";
+        case f_onUpdateStorage:                 return "onUpdateStorage";
         case f_empty:                           return "";
         default:                                return "unknown";
     }

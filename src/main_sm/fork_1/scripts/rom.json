@@ -25557,18 +25557,6 @@
    "CONST": "3",
    "setB": 1,
    "line": 162,
-   "cmdAfter": [
-    {
-     "op": "functionCall",
-     "funcName": "eventLog",
-     "params": [
-      {
-       "op": "getVar",
-       "varName": "onUpdateStorage"
-      }
-     ]
-    }
-   ],
    "fileName": "opcodes/storage-memory.zkasm",
    "lineStr": "    %SMT_KEY_SC_STORAGE => B"
   },
@@ -25579,7 +25567,29 @@
    "inFREE": "1",
    "setE": 1,
    "sRD": 1,
-   "line": 164,
+   "line": 163,
+   "cmdAfter": [
+    {
+     "op": "functionCall",
+     "funcName": "eventLog",
+     "params": [
+      {
+       "op": "functionCall",
+       "funcName": "onUpdateStorage",
+       "params": [
+        {
+         "op": "getReg",
+         "regName": "C"
+        },
+        {
+         "op": "getReg",
+         "regName": "E"
+        }
+       ]
+      }
+     ]
+    }
+   ],
    "fileName": "opcodes/storage-memory.zkasm",
    "lineStr": "    $ => E          :SLOAD"
   },
@@ -26512,8 +26522,18 @@
      "funcName": "eventLog",
      "params": [
       {
-       "op": "getVar",
-       "varName": "onUpdateStorage"
+       "op": "functionCall",
+       "funcName": "onUpdateStorage",
+       "params": [
+        {
+         "op": "getReg",
+         "regName": "C"
+        },
+        {
+         "op": "getReg",
+         "regName": "D"
+        }
+       ]
       }
      ]
     }

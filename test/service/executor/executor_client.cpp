@@ -156,7 +156,7 @@ void* executorClientThreads (void* arg)
     ExecutorClient *pClient = (ExecutorClient *)arg;
 
     // Allow service to initialize
-    sleep(2);
+    sleep(1);
 
     // Execute should block and succeed
     //cout << "executorClientThreads() calling pClient->ProcessBatch()" << endl;
