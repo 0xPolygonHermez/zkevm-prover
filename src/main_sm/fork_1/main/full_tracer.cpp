@@ -306,7 +306,7 @@ void FullTracer::onError(Context &ctx, const RomCommand &cmd)
 
     // Intrinsic error should be set at tx level (not opcode)
     if ( (responseErrors.find(lastError) != responseErrors.end()) ||
-         (info.size() == 0) )
+         (execution_trace.size() == 0) )
     {
         if (finalTrace.responses.size() > txCount)
         {
@@ -326,9 +326,9 @@ void FullTracer::onError(Context &ctx, const RomCommand &cmd)
     }
     else
     {
-        if (info.size() > 0)
+        if (execution_trace.size() > 0)
         {
-            info[info.size() - 1].error = lastError;
+            execution_trace[execution_trace.size() - 1].error = lastError;
         }
 
         // Revert logs
@@ -645,27 +645,20 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     response.state_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
 
     // If processed opcodes
-    if (info.size() > 0)
+    if (execution_trace.size() > 0)
     {
-        Opcode lastOpcode = info[info.size() - 1];
+        Opcode &lastOpcodeExecution = execution_trace.at(execution_trace.size() - 1);
+        Opcode &lastOpcodeCall = call_trace.at(call_trace.size() - 1);
 
         // set refunded gas
-        response.gas_refunded = lastOpcode.gas_refund;
+        response.gas_refunded = lastOpcodeExecution.gas_refund;
 
         // Set gas price of last opcode
-        if (info.size() >= 2)
+        if (execution_trace.size() >= 2)
         {
-            Opcode beforeLastOpcode = info[info.size() - 2];
-            lastOpcode.gas_cost = beforeLastOpcode.gas - lastOpcode.gas;
-        }
-
-        // Add last opcode
-        call_trace.push_back(lastOpcode);
-        execution_trace.push_back(lastOpcode);
-        if (call_trace.size() < info.size())
-        {
-            call_trace.erase(call_trace.begin());
-            execution_trace.erase(execution_trace.begin());
+            Opcode &beforeLastOpcode = execution_trace.at(execution_trace.size() - 2);
+            lastOpcodeExecution.gas_cost = beforeLastOpcode.gas - lastOpcodeExecution.gas;
+            lastOpcodeCall.gas_cost = lastOpcodeExecution.gas_cost;
         }
 
         // Append processed opcodes to the transaction object
@@ -673,13 +666,9 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
         finalTrace.responses[finalTrace.responses.size() - 1].call_trace.steps = call_trace;
         if (finalTrace.responses[finalTrace.responses.size() - 1].error == "")
         {
-            finalTrace.responses[finalTrace.responses.size() - 1].error = lastOpcode.error;
+            finalTrace.responses[finalTrace.responses.size() - 1].error = lastOpcodeExecution.error;
         }
     }
-
-    // Clean aux array for next iteration
-    call_trace.clear();
-    execution_trace.clear();
 
     // Append to response logs
     unordered_map<uint64_t, std::unordered_map<uint64_t, Log>>::iterator logIt;
@@ -698,6 +687,11 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
 
     // Increase transaction count
     txCount++;
+
+    // Clean aux array for next iteration
+    call_trace.clear();
+    execution_trace.clear();
+    logs.clear(); // TODO: Should we remove logs?
 
 #ifdef LOG_FULL_TRACER
     cout << "FullTracer::onFinishTx() txCount=" << txCount << " finalTrace.responses.size()=" << finalTrace.responses.size() << " create_address=" << response.create_address << " state_root=" << response.state_root << endl;
@@ -783,7 +777,7 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 
     if (ctx.proverRequest.input.bNoCounters)
     {
-        info.push_back(singleInfo);
+        execution_trace.push_back(singleInfo);
 #ifdef LOG_TIME_STATISTICS
         tms.add("onOpcode", TimeDiff(t));
 #endif
@@ -820,9 +814,10 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&top, NULL);
 #endif
-    // Get opcode name into singleInfo.opcode
+    // Get opcode name into singleInfo.opcode, and filter code ID
     singleInfo.opcode = opcodeName[codeId].pName;
     codeId = opcodeName[codeId].codeID;
+    singleInfo.op = codeId;
 
 #ifdef LOG_TIME_STATISTICS
     tmsop.add("getCodeName", TimeDiff(top));
@@ -918,28 +913,36 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     gettimeofday(&top, NULL);
 #endif
     // cout << "singleInfo.remaining_gas=" << singleInfo.remaining_gas << endl;
-    if (info.size() > 0)
+    // compute: gas spent & zk-counters in previous opcode
+    if (call_trace.size() > 0)
     {
+        // get last opcode processed
+        Opcode &prevTraceCall = call_trace.at(call_trace.size() - 1);
+        Opcode &prevTraceExecution = execution_trace.at(execution_trace.size() - 1);
+
         // The gas cost of the opcode is gas before - gas after processing the opcode
-        info[info.size() - 1].gas_cost = int64_t(info[info.size() - 1].gas) - fr.toS64(ctx.pols.GAS[*ctx.pStep]);
+        int64_t gasCost = prevTraceCall.gas - fr.toS64(ctx.pols.GAS[*ctx.pStep]);
+        prevTraceCall.gas_cost = gasCost;
+        prevTraceExecution.gas_cost = gasCost;
         // cout << "info[info.size() - 1].gas_cost=" << info[info.size() - 1].gas_cost << endl;
 
         // If negative gasCost means gas has been added from a deeper context, we should recalculate
-        if (info[info.size() - 1].gas_cost < 0)
+        if (prevTraceCall.gas_cost < 0)
         {
-            if (info.size() > 1)
+            if (call_trace.size() > 1)
             {
-                Opcode beforePrevTrace = info[info.size() - 2];
-                info[info.size() - 1].gas_cost = beforePrevTrace.gas - info[info.size() - 1].gas;
+                prevTraceCall.gas_cost = call_trace[call_trace.size() - 2].gas - prevTraceCall.gas;
+                prevTraceExecution.gas_cost = prevTraceCall.gas_cost;
             }
             else
             {
                 cout << "Warning: FullTracer::onOpcode() could not calculate prevTrace.gas_cost" << endl;
-                info[info.size() - 1].gas_cost = 0;
+                prevTraceCall.gas_cost = 0;
+                prevTraceExecution.gas_cost = 0;
             }
         }
 
-        info[info.size() - 1].duration = TimeDiff(info[info.size() - 1].startTime, singleInfo.startTime);
+        prevTraceExecution.duration = TimeDiff(prevTraceExecution.startTime, singleInfo.startTime);
     }
 
 #ifdef LOG_TIME_STATISTICS
@@ -952,8 +955,6 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     {
         getVarFromCtx(ctx, false, ctx.rom.gasRefundOffset, auxScalar);
         singleInfo.gas_refund = auxScalar.get_ui();
-
-        singleInfo.op = codeId;
     }
     //singleInfo.error = "";
 
@@ -1020,7 +1021,6 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&top, NULL);
 #endif
-    info.push_back(singleInfo);
 
     if (ctx.proverRequest.input.traceConfig.generateCallTraces())
     {
@@ -1040,10 +1040,9 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 
     bool bOpIncContextFoundInPrevStep = false;
     // Check previous step
-    if (info.size() >= 2)
+    if (execution_trace.size() >= 2)
     {
-        Opcode prevStep = info[info.size() - 2];
-        if (opIncContext.find(prevStep.opcode) != opIncContext.end())
+        if (opIncContext.find(execution_trace[execution_trace.size() - 2].opcode) != opIncContext.end())
         {
             bOpIncContextFoundInPrevStep = true;
 
@@ -1066,12 +1065,12 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 
     // If is an ether transfer, don't add stop opcode to trace
     if ( (singleInfo.opcode == opcodeName[0x00/*STOP*/].pName) &&
-         ( (info.size() < 2) || bOpIncContextFoundInPrevStep) )
+         ( (execution_trace.size() < 2) || bOpIncContextFoundInPrevStep) )
     {
         getVarFromCtx(ctx, false, ctx.rom.bytecodeLengthOffset, auxScalar);
-        if ((auxScalar == 0) && (info.size() > 0))
+        if ((auxScalar == 0) && (execution_trace.size() > 0))
         {
-            info.pop_back();
+            execution_trace.pop_back();
         }
     }
 
