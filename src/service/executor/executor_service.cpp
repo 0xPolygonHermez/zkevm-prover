@@ -294,28 +294,28 @@ using grpc::Status;
         }
         if (proverRequest.input.traceConfig.bEnabled && (proverRequest.input.traceConfig.txHashToGenerateExecuteTrace == responses[tx].tx_hash))
         {
-            for (uint64_t step=0; step<responses[tx].call_trace.steps.size(); step++)
+            for (uint64_t step=0; step<responses[tx].execution_trace.size(); step++)
             {
                 executor::v1::ExecutionTraceStep * pExecutionTraceStep = pProcessTransactionResponse->add_execution_trace();
-                pExecutionTraceStep->set_pc(responses[tx].call_trace.steps[step].pc); // Program Counter
-                pExecutionTraceStep->set_op(responses[tx].call_trace.steps[step].opcode); // OpCode
-                pExecutionTraceStep->set_remaining_gas(responses[tx].call_trace.steps[step].gas);
-                pExecutionTraceStep->set_gas_cost(responses[tx].call_trace.steps[step].gas_cost); // Gas cost of the operation
-                pExecutionTraceStep->set_memory(string2ba(responses[tx].call_trace.steps[step].memory)); // Content of memory
-                pExecutionTraceStep->set_memory_size(responses[tx].call_trace.steps[step].memory_size);
-                for (uint64_t stack=0; stack<responses[tx].call_trace.steps[step].stack.size() ; stack++)
-                    pExecutionTraceStep->add_stack(PrependZeros(responses[tx].call_trace.steps[step].stack[stack].get_str(16), 64)); // Content of the stack
+                pExecutionTraceStep->set_pc(responses[tx].execution_trace[step].pc); // Program Counter
+                pExecutionTraceStep->set_op(responses[tx].execution_trace[step].opcode); // OpCode
+                pExecutionTraceStep->set_remaining_gas(responses[tx].execution_trace[step].gas);
+                pExecutionTraceStep->set_gas_cost(responses[tx].execution_trace[step].gas_cost); // Gas cost of the operation
+                pExecutionTraceStep->set_memory(string2ba(responses[tx].execution_trace[step].memory)); // Content of memory
+                pExecutionTraceStep->set_memory_size(responses[tx].execution_trace[step].memory_size);
+                for (uint64_t stack=0; stack<responses[tx].execution_trace[step].stack.size() ; stack++)
+                    pExecutionTraceStep->add_stack(PrependZeros(responses[tx].execution_trace[step].stack[stack].get_str(16), 64)); // Content of the stack
                 string dataConcatenated;
-                for (uint64_t data=0; data<responses[tx].call_trace.steps[step].return_data.size(); data++)
-                    dataConcatenated += responses[tx].call_trace.steps[step].return_data[data];
+                for (uint64_t data=0; data<responses[tx].execution_trace[step].return_data.size(); data++)
+                    dataConcatenated += responses[tx].execution_trace[step].return_data[data];
                 pExecutionTraceStep->set_return_data(string2ba(dataConcatenated));
                 google::protobuf::Map<std::string, std::string> * pStorage = pExecutionTraceStep->mutable_storage();
                 unordered_map<string,string>::iterator it;
-                for (it=responses[tx].call_trace.steps[step].storage.begin(); it!=responses[tx].call_trace.steps[step].storage.end(); it++)
+                for (it=responses[tx].execution_trace[step].storage.begin(); it!=responses[tx].execution_trace[step].storage.end(); it++)
                     (*pStorage)[it->first] = it->second; // Content of the storage
-                pExecutionTraceStep->set_depth(responses[tx].call_trace.steps[step].depth); // Call depth
-                pExecutionTraceStep->set_gas_refund(responses[tx].call_trace.steps[step].gas_refund);
-                pExecutionTraceStep->set_error(string2error(responses[tx].call_trace.steps[step].error));
+                pExecutionTraceStep->set_depth(responses[tx].execution_trace[step].depth); // Call depth
+                pExecutionTraceStep->set_gas_refund(responses[tx].execution_trace[step].gas_refund);
+                pExecutionTraceStep->set_error(string2error(responses[tx].execution_trace[step].error));
             }
         }
         if (proverRequest.input.traceConfig.bEnabled && (proverRequest.input.traceConfig.txHashToGenerateCallTrace == responses[tx].tx_hash))
