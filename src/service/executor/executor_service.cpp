@@ -141,8 +141,18 @@ using grpc::Status;
         {
             proverRequest.input.traceConfig.bEnableReturnData = true;
         }
-        proverRequest.input.traceConfig.txHashToGenerateExecuteTrace = "0x" + ba2string(traceConfig.tx_hash_to_generate_execute_trace());
-        proverRequest.input.traceConfig.txHashToGenerateCallTrace = "0x" + ba2string(traceConfig.tx_hash_to_generate_call_trace());
+        string auxString;
+        auxString = ba2string(traceConfig.tx_hash_to_generate_execute_trace());
+        if (auxString != "")
+        {
+            proverRequest.input.traceConfig.txHashToGenerateExecuteTrace = Add0xIfMissing(auxString);
+        }
+        auxString = ba2string(traceConfig.tx_hash_to_generate_call_trace());
+        if (auxString != "")
+        {
+            proverRequest.input.traceConfig.txHashToGenerateCallTrace = Add0xIfMissing(auxString);
+        }
+        proverRequest.input.traceConfig.calculateFlags();
     }
 
     // Default values

@@ -309,6 +309,9 @@ void Input::loadGlobals (json &input)
         cout << "loadGlobals(): txHashToGenerateCallTrace=" << txHashToGenerateCallTrace << endl;
 #endif
     }
+
+    // Calculate the trace configuration flags
+    traceConfig.calculateFlags();
 }
 
 void Input::saveGlobals (json &input) const
