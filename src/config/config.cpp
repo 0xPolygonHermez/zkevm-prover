@@ -241,8 +241,8 @@ void Config::load(json &config)
     recursivefStarkInfo = configPath + "/recursivef/recursivef.starkinfo.json";
     recursivefVerifier = configPath + "/recursivef/recursivef.verifier.dat";
     finalVerifier = configPath + "/final/final.verifier.dat";
-    finalVerkey = configPath + "/final/final.verkey.json";
-    finalStarkZkey = configPath + "/final/final.g16.0001.zkey";
+    finalVerkey = configPath + "/final/final.fflonk.verkey.json";
+    finalStarkZkey = configPath + "/final/final.fflonk.zkey";
 
 
     if (config.contains("rom") && config["rom"].is_string())

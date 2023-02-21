@@ -84,7 +84,7 @@ void ZkevmSteps::step52ns_parser_first_avx(StepsParams &params, uint64_t nrows, 
                {
                case 0:
                {
-                    Goldilocks3::mul13c_avx(tmp0_0, tmp0_1, tmp0_2, &params.pols[12197036032 + i * 669], (Goldilocks3::Element &)*params.challenges[5], 669);
+                    Goldilocks3::mul13c_avx(tmp0_0, tmp0_1, tmp0_2, &params.pols[12037652480 + i * 665], (Goldilocks3::Element &)*params.challenges[5], 665);
                     break;
                }
                case 1:
@@ -250,7 +250,7 @@ void ZkevmSteps::step52ns_parser_first(StepsParams &params, uint64_t nrows, uint
                {
                case 0:
                {
-                    Goldilocks3::mul13c_batch(tmp, &params.pols[12197036032 + i * 669], (Goldilocks3::Element &)*params.challenges[5], 669);
+                    Goldilocks3::mul13c_batch(tmp, &params.pols[12037652480 + i * 665], (Goldilocks3::Element &)*params.challenges[5], 665);
                     break;
                }
                case 1:

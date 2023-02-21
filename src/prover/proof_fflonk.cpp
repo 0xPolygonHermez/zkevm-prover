@@ -200,16 +200,5 @@ std::string Proof::getStringProof()
     aux.set_str(evaluations.inv, 10);
     result += NormalizeToNFormat(aux.get_str(16), 64);
 
-    result += ",[\"";
-    for (uint32_t i = 0; i < publics.size(); i++)
-    {
-        aux.set_str(publics[i], 10);
-        result += "0x";
-        result += NormalizeToNFormat(aux.get_str(16), 64);
-        if (i < publics.size() - 1)
-            result += ",";
-    }
-    result += "\"]";
-
     return result;
 }
