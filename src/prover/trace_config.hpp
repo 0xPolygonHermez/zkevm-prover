@@ -4,7 +4,10 @@
 class TraceConfig
 {
 public:
+     // bEnabled = true if a trace configuration has been provided
     bool bEnabled;
+
+    // Configuration parameters
     bool bDisableStorage;
     bool bDisableStack;
     bool bEnableMemory;
@@ -12,37 +15,35 @@ public:
     string txHashToGenerateExecuteTrace; // return execute traces of this tx
     string txHashToGenerateCallTrace; // return call traces of this tx
 
+    // Flags to enable/disable functionality
+    bool bGenerateCallTraces;
+    bool bGenerateStorage;
+    bool bGenerateStack;
+    bool bGenerateMemory;
+    bool bGenerateReturnData;
+
     TraceConfig() :
         bEnabled(false),
         bDisableStorage(false),
         bDisableStack(false),
         bEnableMemory(false),
-        bEnableReturnData(false) {};
+        bEnableReturnData(false),
+        bGenerateCallTraces(false),
+        bGenerateStorage(false),
+        bGenerateStack(false),
+        bGenerateMemory(false),
+        bGenerateReturnData(false)
+        {};
 
-    bool generateCallTraces (void)
+    // Call calculateFlags() once all configuration parameters have been set
+    void calculateFlags (void)
     {
-        return bEnabled && ((txHashToGenerateExecuteTrace.size() > 0) || (txHashToGenerateCallTrace.size() > 0));
-    }
-
-    bool generateStorage (void)
-    {
-        return bEnabled && !bDisableStorage;
-    }
-
-    bool generateStack (void)
-    {
-        return bEnabled && !bDisableStack;
-    }
-
-    bool generateMemory (void)
-    {
-        return bEnabled && bEnableMemory;
-    }
-
-    bool generateReturnData (void)
-    {
-        return bEnabled && bEnableReturnData;
-    }    
+        bGenerateCallTraces = bEnabled && ((txHashToGenerateExecuteTrace.size() > 0) || (txHashToGenerateCallTrace.size() > 0));
+        bGenerateStorage    = bEnabled && !bDisableStorage;
+        bGenerateStack      = bEnabled && !bDisableStack;
+        bGenerateMemory     = bEnabled && bEnableMemory;
+        bGenerateReturnData = bEnabled && bEnableReturnData;
+    } 
 
     bool operator==(TraceConfig &other)
     {

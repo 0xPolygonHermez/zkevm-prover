@@ -39,5 +39,11 @@
       "0000000000000000",
       "0000000000000000"
     ]
-  }
+  },
+  "disableStorage": true,
+  "disableStack": true,
+  "enableMemory": false,
+  "enableReturnData": false,
+  "txHashToGenerateExecuteTrace_disabled": "0x5da56360f34658d23f2aa9fca6c022bdf0fc9e6013ad5976b01aabb244740a71",
+  "txHashToGenerateCallTrace_disabled": "0x5da56360f34658d23f2aa9fca6c022bdf0fc9e6013ad5976b01aabb244740a71"
 }

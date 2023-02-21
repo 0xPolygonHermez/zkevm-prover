@@ -121,6 +121,9 @@ using grpc::Status;
 
     // Flags
     proverRequest.input.bUpdateMerkleTree = request->update_merkle_tree();
+
+    // Trace config
+    /*
     if (request->has_trace_config())
     {
         proverRequest.input.traceConfig.bEnabled = true;
@@ -141,8 +144,33 @@ using grpc::Status;
         {
             proverRequest.input.traceConfig.bEnableReturnData = true;
         }
-        proverRequest.input.traceConfig.txHashToGenerateExecuteTrace = "0x" + ba2string(traceConfig.tx_hash_to_generate_execute_trace());
-        proverRequest.input.traceConfig.txHashToGenerateCallTrace = "0x" + ba2string(traceConfig.tx_hash_to_generate_call_trace());
+        string auxString;
+        auxString = ba2string(traceConfig.tx_hash_to_generate_execute_trace());
+        if (auxString != "")
+        {
+            proverRequest.input.traceConfig.txHashToGenerateExecuteTrace = Add0xIfMissing(auxString);
+        }
+        auxString = ba2string(traceConfig.tx_hash_to_generate_call_trace());
+        if (auxString != "")
+        {
+            proverRequest.input.traceConfig.txHashToGenerateCallTrace = Add0xIfMissing(auxString);
+        }
+        proverRequest.input.traceConfig.calculateFlags();
+    }*/
+    string tx_hash_to_generate_execute_trace = ba2string(request->tx_hash_to_generate_execute_trace());
+    string tx_hash_to_generate_call_trace = ba2string(request->tx_hash_to_generate_call_trace());
+    if ( (tx_hash_to_generate_execute_trace.size() > 0) || (tx_hash_to_generate_call_trace.size() > 0) )
+    {
+        proverRequest.input.traceConfig.bEnabled = true;
+        if (tx_hash_to_generate_execute_trace.size() > 0)
+        {
+            proverRequest.input.traceConfig.txHashToGenerateExecuteTrace = Add0xIfMissing(tx_hash_to_generate_execute_trace);
+        }
+        if (tx_hash_to_generate_call_trace.size() > 0)
+        {
+            proverRequest.input.traceConfig.txHashToGenerateCallTrace = Add0xIfMissing(tx_hash_to_generate_call_trace);
+        }
+        proverRequest.input.traceConfig.calculateFlags();
     }
 
     // Default values
