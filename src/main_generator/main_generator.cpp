@@ -3945,7 +3945,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += "        }\n";
         code += "        if (p != ctx.hashP[i].data.size())\n";
         code += "        {\n";
-        code += "            cerr << \"Error: Main SM Executor: Reading hashP out of limits: i=\" << i << \" p=\" << p << \" ctx.hashP[i].data.size()=\" << ctx.hashK[i].data.size() << \" uuid=\" << proverRequest.uuid << endl;\n";
+        code += "            cerr << \"Error: Main SM Executor: Reading hashP out of limits: i=\" << i << \" p=\" << p << \" ctx.hashP[i].data.size()=\" << ctx.hashP[i].data.size() << \" uuid=\" << proverRequest.uuid << endl;\n";
         code += "            proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
         code += "            return;\n";
         code += "        }\n";
