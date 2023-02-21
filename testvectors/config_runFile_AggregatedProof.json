@@ -101,8 +101,8 @@
 
     "finalConstConstantsTree": "config/final/final.consttree",
     "finalVerifier": "config/final/final.verifier.dat",
-    "finalVerkey":"config/final/final.verkey.json",
-    "finalStarkZkey": "config/final/final.g16.0001.zkey",
+    "finalVerkey":"config/final/final.fflonk.verkey.json",
+    "finalStarkZkey": "config/final/final.fflonk.zkey",
 
     "outputPath": "runtime/output",
 
