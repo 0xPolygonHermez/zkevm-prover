@@ -32,7 +32,7 @@ void TimeMetricStorage::print(const char * pTitle, uint64_t padding)
     {
         cout << "TimeMetricStorage::print():" << endl;
     }
-    uint64_t totalTime = 0;
+    uint64_t totalTime =  1;
     uint64_t totalTimes = 0;
     unordered_map<string, TimeMetric>::iterator it;
     for (it = map.begin(); it != map.end(); it++)

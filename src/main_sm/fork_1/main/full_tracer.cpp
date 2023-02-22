@@ -647,7 +647,9 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     response.state_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
 
     // If processed opcodes
-    if (execution_trace.size() > 0)
+    if ( ctx.proverRequest.input.traceConfig.bGenerateCallTraces &&
+         (execution_trace.size() > 0) &&
+         (call_trace.size() > 0) )
     {
         Opcode &lastOpcodeExecution = execution_trace.at(execution_trace.size() - 1);
         Opcode &lastOpcodeCall = call_trace.at(call_trace.size() - 1);
