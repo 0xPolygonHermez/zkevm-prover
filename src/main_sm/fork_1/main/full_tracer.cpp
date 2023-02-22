@@ -614,20 +614,17 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     accBatchGas += response.gas_used;
 
     // Set return data
-    if (ctx.proverRequest.input.traceConfig.bGenerateReturnData)
+    mpz_class offsetScalar;
+    getVarFromCtx(ctx, false, ctx.rom.retDataOffsetOffset, offsetScalar);
+    mpz_class lengthScalar;
+    getVarFromCtx(ctx, false, ctx.rom.retDataLengthOffset, lengthScalar);
+    if (response.call_trace.context.to == "0x")
     {
-        mpz_class offsetScalar;
-        getVarFromCtx(ctx, false, ctx.rom.retDataOffsetOffset, offsetScalar);
-        mpz_class lengthScalar;
-        getVarFromCtx(ctx, false, ctx.rom.retDataLengthOffset, lengthScalar);
-        if (response.call_trace.context.to == "0x")
-        {
-            getCalldataFromStack(ctx, offsetScalar.get_ui(), lengthScalar.get_ui(), response.return_value);
-        }
-        else
-        {
-            getFromMemory(ctx, offsetScalar, lengthScalar, response.return_value);
-        }
+        getCalldataFromStack(ctx, offsetScalar.get_ui(), lengthScalar.get_ui(), response.return_value);
+    }
+    else
+    {
+        getFromMemory(ctx, offsetScalar, lengthScalar, response.return_value);
     }
 
     // Set create address in case of deploy
