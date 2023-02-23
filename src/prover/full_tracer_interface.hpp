@@ -127,6 +127,13 @@ public:
     string balance;
 };
 
+class TxGAS
+{
+public:
+    uint64_t forwarded;
+    uint64_t remaining;
+};
+
 class FullTracerInterface
 {
 public:

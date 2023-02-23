@@ -24,7 +24,7 @@ public:
     uint64_t initGas;
     unordered_map<uint64_t,unordered_map<string,string>> deltaStorage;
     FinalTrace finalTrace;
-    unordered_map<uint64_t,uint64_t> txGAS;
+    unordered_map<uint64_t,TxGAS> txGAS;
     uint64_t txCount;
     uint64_t txTime; // in us
     vector<vector<mpz_class>> fullStack;// Stack of the transaction
