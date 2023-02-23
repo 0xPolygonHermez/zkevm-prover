@@ -154,7 +154,7 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     TimerStart(STARK_STEP_3_CALCULATE_EXPS_2);
 
     // Calculate exps
-    if (nrowsStepBatch > 1 && false)
+    if (nrowsStepBatch > 1)
     {
         steps->step3_parser_first_avx(params, NExtended, nrowsStepBatch);
     }
