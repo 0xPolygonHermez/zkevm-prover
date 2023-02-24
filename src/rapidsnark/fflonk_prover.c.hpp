@@ -458,10 +458,11 @@ namespace Fflonk
         // 0 index not used, set to zero
         randombytes_buf((void *)&blindingFactors[0], BLINDINGFACTORSLENGTH * sizeof(FrElement));
 
+        /*
         for (u_int32_t i = 0; i < BLINDINGFACTORSLENGTH; i++)
         {
             blindingFactors[i] = E.fr.one();
-        }
+        } */
         takeTime(T2, "Blinding coefficients");
 
         // STEP 1.2 - Compute wire polynomials a(X), b(X) and c(X)
