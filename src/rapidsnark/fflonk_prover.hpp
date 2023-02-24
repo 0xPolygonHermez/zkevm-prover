@@ -18,6 +18,8 @@
 using json = nlohmann::json;
 using namespace std::chrono;
 
+#define BLINDINGFACTORSLENGTH 10
+
 namespace Fflonk {
 
     template<typename Engine>
@@ -25,8 +27,6 @@ namespace Fflonk {
         using FrElement = typename Engine::FrElement;
         using G1Point = typename Engine::G1Point;
         using G1PointAffine = typename Engine::G1PointAffine;
-
-        Dump::Dump<Engine> *dump;
 
         struct ProcessingTime {
             std::string label;
@@ -69,7 +69,7 @@ namespace Fflonk {
         std::map <std::string, FrElement> toInverse;
         std::map <std::string, FrElement> challenges;
         std::map<std::string, FrElement *> roots;
-        FrElement blindingFactors[10];
+        FrElement blindingFactors[BLINDINGFACTORSLENGTH];
 
         Keccak256Transcript<Engine> *transcript;
         SnarkProof<Engine> *proof;

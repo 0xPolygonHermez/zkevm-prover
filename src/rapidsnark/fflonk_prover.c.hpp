@@ -27,10 +27,6 @@ namespace Fflonk
     template <typename Engine>
     FflonkProver<Engine>::~FflonkProver()
     {
-        if (NULL != fft)
-        {
-            delete fft;
-        }
     }
 
     template <typename Engine>
@@ -43,8 +39,6 @@ namespace Fflonk
             LOG_TRACE("FFLONK PROVER STARTED");
 
             LOG_TRACE("> Reading witness file");
-
-            dump = new Dump::Dump<Engine>(E);
 
             this->fdZkey = fdZkey;
 
@@ -397,6 +391,14 @@ namespace Fflonk
 
             LOG_TRACE("FFLONK PROVER FINISHED");
 
+            delete mulZ;
+            delete fft;
+            delete[] PTau;
+            delete transcript;
+            delete[] bigBufferBuffers;
+            delete[] bigBufferPolynomials;
+            delete[] bigBufferEvaluations;
+            delete[] buffInternalWitness;
             return {proof->toJson(), publicSignals};
         }
         catch (const std::exception &e)
@@ -449,8 +451,9 @@ namespace Fflonk
         // STEP 1.1 - Generate random blinding scalars (b_1, ..., b9) ∈ F
 
         // 0 index not used, set to zero
-        randombytes_buf((void *)&blindingFactors[0], 9 * sizeof(FrElement));
-        for (u_int32_t i = 0; i < zkey->nAdditions; i++)
+        randombytes_buf((void *)&blindingFactors[0], BLINDINGFACTORSLENGTH * sizeof(FrElement));
+
+        for (u_int32_t i = 0; i < BLINDINGFACTORSLENGTH; i++)
         {
             blindingFactors[i] = E.fr.one();
         }
@@ -1545,6 +1548,9 @@ namespace Fflonk
         {
             E.fr.mul(elements[index], inverses[index], products[index - 1]);
         }
+
+        delete[] products;
+        delete[] inverses;
     }
 
     template <typename Engine>
@@ -1697,9 +1703,9 @@ namespace Fflonk
     template <typename Engine>
     void FflonkProver<Engine>::printPol(std::string name, const Polynomial<Engine> *polynomial)
     {
-        dump->dump(name, polynomial->coef[0]);
-        dump->dump(name, polynomial->coef[polynomial->getDegree()]);
-        dump->dump(name, polynomial->coef[polynomial->getLength() - 1]);
+        // dump->dump(name, polynomial->coef[0]);
+        // dump->dump(name, polynomial->coef[polynomial->getDegree()]);
+        // dump->dump(name, polynomial->coef[polynomial->getLength() - 1]);
     }
 
     template <typename Engine>
