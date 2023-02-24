@@ -390,6 +390,11 @@ namespace Fflonk
             }
 
             LOG_TRACE("FFLONK PROVER FINISHED");
+            for (auto const &x : mapBuffers)
+            {
+                delete[] x.second;
+            }
+            mapBuffers.clear();
 
             delete mulZ;
             delete fft;

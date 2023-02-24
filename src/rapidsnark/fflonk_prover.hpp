@@ -57,7 +57,7 @@ namespace Fflonk {
         FrElement *bigBufferBuffers;
         FrElement *bigBufferPolynomials;
         FrElement *bigBufferEvaluations;
-        std::map<std::string, FrElement *> bufPtr;
+
         std::map<std::string, FrElement *> polPtr;
         std::map<std::string, FrElement *> evalPtr;
 
