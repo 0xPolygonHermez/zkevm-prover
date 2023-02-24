@@ -637,7 +637,6 @@ void Polynomial<Engine>::divByZerofier(u_int64_t n, FrElement beta) {
 
     int nThreads = pow(2, floor(log2(omp_get_max_threads())));
     uint64_t nElementsThread = n / nThreads;
-    assert(domainSize == nElementsThread * nThreads);
 
     uint64_t nChunks = this->length / n;
 
