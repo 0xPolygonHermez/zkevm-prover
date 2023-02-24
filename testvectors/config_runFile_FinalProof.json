@@ -6,13 +6,13 @@
     "runStateDBServer": false,
     "runStateDBTest": false,
 
-    "runAggregatorServer": true,
-    "runAggregatorClient": true,
+    "runAggregatorServer": false,
+    "runAggregatorClient": false,
     "runAggregatorClientMock": false,     
 
     "runFileGenBatchProof": false,
     "runFileGenAggregatedProof": false,
-    "runFileGenFinalProof": false,
+    "runFileGenFinalProof": true,
     "runFileProcessBatch": false,
     "runFileProcessBatchMultithread": false,
 

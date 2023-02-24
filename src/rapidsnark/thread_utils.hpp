@@ -20,7 +20,7 @@ inline void ThreadUtils::parcpy(void *dst, const void *src, uint64_t nBytes, uin
     for(uint32_t i=0; i < nThreads; i++)
     {
         uint64_t offset = i * bytesThread;
-        memcpy((uint8_t*)dst + offset,(uint8_t*)src + offset, (uint32_t)omp_get_thread_num() == nThreads - 1 ? bytesThread + residualBytes : bytesThread);
+        memcpy((uint8_t *)dst + offset, (uint8_t *)src + offset, i == nThreads - 1 ? bytesThread + residualBytes : bytesThread);
     }
 }
 
@@ -34,7 +34,7 @@ inline void ThreadUtils::parset(void *dst, int value, uint64_t nBytes, uint32_t 
     for(uint32_t i=0; i < nThreads; i++)
     {
         uint64_t offset = i * bytesThread;
-        memset((uint8_t*)dst + offset, value, (uint32_t)omp_get_thread_num() == nThreads - 1 ? bytesThread + residualBytes : bytesThread);
+        memset((uint8_t *)dst + offset, value, i == nThreads - 1 ? bytesThread + residualBytes : bytesThread);
     }
 }
 
