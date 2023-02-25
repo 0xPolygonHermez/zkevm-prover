@@ -16,6 +16,11 @@ ExecutorClient::ExecutorClient (Goldilocks &fr, const Config &config) :
     stub = new executor::v1::ExecutorService::Stub(channel);
 }
 
+ExecutorClient::~ExecutorClient()
+{
+    delete stub;
+}
+
 void ExecutorClient::runThread (void)
 {
     pthread_create(&t, NULL, executorClientThread, this);

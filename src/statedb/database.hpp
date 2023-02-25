@@ -33,12 +33,14 @@ private:
     pqxx::connection * pConnectionRead = NULL;
     pqxx::connection * pAsyncWriteConnection = NULL;
     pqxx::work* transaction = NULL;
+    string multiWriteProgram;
+    string multiWriteNodes;
 
 private:
     // Remote database based on Postgres (PostgreSQL)
     void initRemote(void);
-    zkresult readRemote(const string tableName, const string &key, string &value);
-    zkresult writeRemote(const string tableName, const string &key, const string &value);
+    zkresult readRemote(bool bProgram, const string &key, string &value);
+    zkresult writeRemote(bool bProgram, const string &key, const string &value);
     void string2fea(const string os, vector<Goldilocks::Element> &fea);
     void string2ba(const string os, vector<uint8_t> &data);
     string removeBSXIfExists(string s) {return ((s.at(0) == '\\') && (s.at(1) == 'x')) ? s.substr(2) : s;};

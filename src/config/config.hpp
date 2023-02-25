@@ -117,6 +117,7 @@ public:
     string dbNodesTableName;
     string dbProgramTableName;
     bool dbAsyncWrite;
+    bool dbMultiWrite;
     uint64_t cleanerPollingPeriod;
     uint64_t requestsPersistence;
     uint64_t maxExecutorThreads;

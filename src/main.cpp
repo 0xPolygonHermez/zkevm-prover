@@ -751,7 +751,7 @@ int main(int argc, char **argv)
     }
 
     // Wait for StateDBServer thread to end
-    if (config.runStateDBServer)
+    if (config.runStateDBServer && !config.runStateDBTest)
     {
         zkassert(pStateDBServer != NULL);
         pStateDBServer->waitForThread();

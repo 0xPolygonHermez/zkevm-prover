@@ -383,6 +383,10 @@ void Config::load(json &config)
     if (config.contains("dbAsyncWrite") && config["dbAsyncWrite"].is_boolean())
         dbAsyncWrite = config["dbAsyncWrite"];
 
+    dbMultiWrite = false;
+    if (config.contains("dbMultiWrite") && config["dbMultiWrite"].is_boolean())
+        dbMultiWrite = config["dbMultiWrite"];
+
     if (config.contains("cleanerPollingPeriod") && config["cleanerPollingPeriod"].is_number())
         cleanerPollingPeriod = config["cleanerPollingPeriod"];
 

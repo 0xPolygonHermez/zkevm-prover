@@ -24,6 +24,7 @@ public:
 
 public:
     ExecutorClient (Goldilocks &fr, const Config &config);
+    ~ExecutorClient ();
 
     // Mono-thread
     void runThread (void);

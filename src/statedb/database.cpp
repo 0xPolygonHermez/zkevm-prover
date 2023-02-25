@@ -61,7 +61,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
     {
         // Otherwise, read it remotelly
         string sData;
-        r = readRemote(config.dbNodesTableName, key, sData);
+        r = readRemote(false, key, sData);
         if (r == ZKR_SUCCESS)
         {
             string2fea(sData, value);
@@ -118,7 +118,7 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
             valueString += PrependZeros(fr.toString(value[i], 16), 16);
         }
 
-        r = writeRemote(config.dbNodesTableName, key, valueString);
+        r = writeRemote(false, key, valueString);
     }
     else r = ZKR_SUCCESS;
 
@@ -170,8 +170,10 @@ void Database::initRemote(void)
     }
 }
 
-zkresult Database::readRemote(const string tableName, const string &key, string &value)
+zkresult Database::readRemote(bool bProgram, const string &key, string &value)
 {
+    const string &tableName = (bProgram ? config.dbProgramTableName : config.dbNodesTableName);
+
     if (config.logRemoteDbReads)
     {
         cout << "   Database::readRemote() table=" << tableName << " key=" << key << endl;
@@ -220,30 +222,46 @@ zkresult Database::readRemote(const string tableName, const string &key, string 
     return ZKR_SUCCESS;
 }
 
-zkresult Database::writeRemote(const string tableName, const string &key, const string &value)
+zkresult Database::writeRemote(bool bProgram, const string &key, const string &value)
 {
+    const string &tableName = (bProgram ? config.dbProgramTableName : config.dbNodesTableName);
     try
     {
-        string query = "INSERT INTO " + tableName + " ( hash, data ) VALUES ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' ) " +
-                       "ON CONFLICT (hash) DO NOTHING;";
-
-        if (config.dbAsyncWrite)
+        if (config.dbMultiWrite)
         {
-            addWriteQueue(query);
-        }
-        else
-        {
-            if (autoCommit)
+            string &multiWrite = bProgram ? multiWriteProgram : multiWriteNodes;
+            if (multiWrite.size() == 0)
             {
-                pqxx::work w(*pConnectionWrite);
-                pqxx::result res = w.exec(query);
-                w.commit();
+                multiWrite = "INSERT INTO " + tableName + " ( hash, data ) VALUES ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' ) ";
             }
             else
             {
-                if (transaction == NULL)
-                    transaction = new pqxx::work{*pConnectionWrite};
-                pqxx::result res = transaction->exec(query);
+                multiWrite += ", ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' )";
+            }            
+        }
+        else
+        {
+            string query = "INSERT INTO " + tableName + " ( hash, data ) VALUES ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' ) " +
+                        "ON CONFLICT (hash) DO NOTHING;";
+
+            if (config.dbAsyncWrite)
+            {
+                addWriteQueue(query);
+            }
+            else
+            {
+                if (autoCommit)
+                {
+                    pqxx::work w(*pConnectionWrite);
+                    pqxx::result res = w.exec(query);
+                    w.commit();
+                }
+                else
+                {
+                    if (transaction == NULL)
+                        transaction = new pqxx::work{*pConnectionWrite};
+                    pqxx::result res = transaction->exec(query);
+                }
             }
         }
     }
@@ -279,7 +297,7 @@ zkresult Database::setProgram(const string &_key, const vector<uint8_t> &data, c
             sData += byte2string(data[i]);
         }
 
-        r = writeRemote(config.dbProgramTableName, key, sData);
+        r = writeRemote(true, key, sData);
     }
     else r = ZKR_SUCCESS;
 
@@ -331,7 +349,7 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
     {
         // Otherwise, read it remotelly
         string sData;
-        r = readRemote(config.dbProgramTableName, key, sData);
+        r = readRemote(true, key, sData);
         if (r == ZKR_SUCCESS)
         {
             //String to byte/uint8_t vector
@@ -477,7 +495,56 @@ void Database::addWriteQueue(const string sqlWrite)
 
 void Database::flush()
 {
-    if (config.dbAsyncWrite)
+    if (config.dbMultiWrite)
+    {
+        if ( (multiWriteProgram.size() == 0) && (multiWriteNodes.size() == 0) )
+        {
+            return;
+        }
+
+        try
+        {
+            if (multiWriteProgram.size() > 0)
+            {
+                multiWriteProgram += " ON CONFLICT (hash) DO NOTHING;";
+                
+                // Start a transaction
+                pqxx::work w(*pConnectionWrite);
+
+                // Execute the query
+                pqxx::result res = w.exec(multiWriteProgram);
+
+                // Commit your transaction
+                w.commit();
+
+                //cout << "Database::flush() sent " << multiWriteProgram << endl;
+
+                multiWriteProgram.clear();
+            }
+            if (multiWriteNodes.size() > 0)
+            {
+                multiWriteNodes += " ON CONFLICT (hash) DO NOTHING;";
+                
+                // Start a transaction
+                pqxx::work w(*pConnectionWrite);
+
+                // Execute the query
+                pqxx::result res = w.exec(multiWriteNodes);
+
+                // Commit your transaction
+                w.commit();
+
+                //cout << "Database::flush() sent " << multiWriteNodes << endl;
+
+                multiWriteNodes.clear();
+            }
+        }
+        catch (const std::exception &e)
+        {
+            cerr << "Error: Database::flush() execute query exception: " << e.what() << endl;
+        }
+    }
+    else if (config.dbAsyncWrite)
     {
         pthread_mutex_lock(&writeQueueMutex);
         while (writeQueue.size() > 0)

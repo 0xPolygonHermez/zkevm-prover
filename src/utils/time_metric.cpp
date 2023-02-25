@@ -1,9 +1,7 @@
-#include "main_sm/fork_1/main/time_metric.hpp"
+#include <iomanip>
+#include "utils/time_metric.hpp"
 
 using namespace std;
-
-namespace fork_1
-{
 
 void TimeMetricStorage::add(string &key, uint64_t time, uint64_t times)
 {
@@ -57,5 +55,3 @@ void TimeMetricStorage::print(const char * pTitle, uint64_t padding)
 
     cout << total << " time: " << setw(10) << totalTime << " us (100%), called " << setw(8) << totalTimes << " times, so " << setw(7) << totalTime*1000/zkmax(totalTimes,(uint64_t)1) << " ns/time" << endl;
 }
-
-} // namespace
