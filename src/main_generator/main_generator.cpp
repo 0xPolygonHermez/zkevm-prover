@@ -293,8 +293,10 @@ string generate(const json &rom, const string &functionName, const string &fileN
     // Free in
     code += "    Goldilocks::Element fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7;\n";
     code += "    CommandResult cr;\n";
+    code += "#ifdef LOG_TIME_STATISTICS\n";
     code += "    RomCommand * pCmd;\n";
     code += "    string cmdString;\n"; 
+    code += "#endif\n";
 
     // Storage free in
     code += "    Goldilocks::Element Kin0[12];\n";
