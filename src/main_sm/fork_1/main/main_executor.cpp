@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <gmpxx.h>
+#include <unistd.h>
 #include "config.hpp"
 #include "main_sm/fork_1/main/main_executor.hpp"
 #include "main_sm/fork_1/main/rom_line.hpp"
@@ -94,12 +95,24 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
         exitProcess();
     }
     opcodeAddressInit(romJson["labels"]);
+    
+    pthread_mutex_init(&flushMutex, NULL);
 
     TimerStopAndLog(ROM_LOAD);
 };
 
 MainExecutor::~MainExecutor ()
 {
+    TimerStart(MAIN_EXECUTOR_DESTRUCTOR);
+
+    flushLock();
+    for (uint64_t i=0; i<flushQueue.size(); i++)
+    {
+        pthread_join(flushQueue[i], NULL);
+    }
+    flushUnlock();
+
+    TimerStopAndLog(MAIN_EXECUTOR_DESTRUCTOR);
 }
 
 void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, MainExecRequired &required)
@@ -3751,8 +3764,15 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     evalCommandMetrics.print("Main Executor eval command calls");
 #endif
 
-    pStateDB->flush();
-    StateDBClientFactory::freeStateDBClient(pStateDB);
+    if (config.dbFlushInParallel)
+    {
+        flushInParallel(pStateDB);
+    }
+    else
+    {
+        pStateDB->flush();
+        StateDBClientFactory::freeStateDBClient(pStateDB);
+    }
 
     cout << "MainExecutor::execute() done lastStep=" << ctx.lastStep << " (" << (double(ctx.lastStep)*100)/N << "%)" << endl;
 }
@@ -3953,6 +3973,30 @@ void MainExecutor::assertOutputs(Context &ctx)
             exitProcess();
         }
     }
+}
+
+void MainExecutor::flushInParallel(StateDBInterface * pStateDB)
+{
+    // Create a thread to flush the database writes in parallel
+    pthread_t flushPthread; 
+    pthread_create(&flushPthread, NULL, mainExecutorFlushThread, pStateDB);
+
+    // Add the thread to the flush queue
+    flushLock();
+    flushQueue.push_back(flushPthread);
+    flushUnlock();
+}
+
+void *mainExecutorFlushThread(void *arg)
+{
+    TimerStart(MAIN_EXECUTOR_FLUSH_THREAD);
+
+    StateDBInterface *pStateDB = (StateDBInterface *)arg;
+    pStateDB->flush();
+    StateDBClientFactory::freeStateDBClient(pStateDB);
+
+    TimerStopAndLog(MAIN_EXECUTOR_FLUSH_THREAD);
+    return NULL;
 }
 
 } // namespace

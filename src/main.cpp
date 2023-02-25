@@ -730,7 +730,7 @@ int main(int argc, char **argv)
         zkassert(pExecutorClient != NULL);
         pExecutorClient->waitForThread();
         sleep(1);
-        exit(0);
+        return 0;
     }
 
     // Wait for the executor client thread to end
@@ -740,7 +740,7 @@ int main(int argc, char **argv)
         pExecutorClient->waitForThreads();
         cout << "All executor client threads have completed" << endl;
         sleep(1);
-        exit(0);
+        return 0;
     }
 
     // Wait for the executor server thread to end
@@ -763,7 +763,7 @@ int main(int argc, char **argv)
         zkassert(pAggregatorClient != NULL);
         pAggregatorClient->waitForThread();
         sleep(1);
-        exit(0);
+        return 0;
     }
 
     // Wait for the aggregator client mock thread to end
@@ -772,7 +772,7 @@ int main(int argc, char **argv)
         zkassert(pAggregatorClientMock != NULL);
         pAggregatorClientMock->waitForThread();
         sleep(1);
-        exit(0);
+        return 0;
     }
 
     // Wait for the aggregator server thread to end

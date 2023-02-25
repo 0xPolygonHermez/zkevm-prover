@@ -80,6 +80,7 @@
     "dbProgramTableName": "state.program",
     "dbAsyncWrite": false,
     "dbMultiWrite": true,
+    "dbFlushInParallel": true,
     "cleanerPollingPeriod": 600,
     "requestsPersistence": 3600,
     "maxExecutorThreads": 20,

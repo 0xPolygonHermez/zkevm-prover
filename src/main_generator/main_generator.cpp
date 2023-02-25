@@ -4029,9 +4029,16 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    mainMetrics.print(\"Main Executor calls\");\n";
     code += "    evalCommandMetrics.print(\"Main Executor eval command calls\");\n";
     code += "#endif\n\n";
-
-    code += "    pStateDB->flush();\n";
-    code += "    StateDBClientFactory::freeStateDBClient(pStateDB);\n\n";
+    
+    code += "    if (mainExecutor.config.dbFlushInParallel)\n";
+    code += "    {\n";
+    code += "        mainExecutor.flushInParallel(pStateDB);\n";
+    code += "    }\n";
+    code += "    else\n";
+    code += "    {\n";
+    code += "        pStateDB->flush();\n";
+    code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+    code += "    }\n\n";
 
     code += "    cout << \"" + functionName + "() done lastStep=\" << ctx.lastStep << \" (\" << (double(ctx.lastStep)*100)/mainExecutor.N << \"%)\" << endl;\n\n";
 
