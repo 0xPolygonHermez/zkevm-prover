@@ -41,6 +41,7 @@ void Proof::load(json &proof, json &publicSignalsJson)
     evaluations.b = proof["evaluations"]["b"];
     evaluations.c = proof["evaluations"]["c"];
     evaluations.inv = proof["evaluations"]["inv"];
+    evaluations.ql = proof["evaluations"]["ql"];
     evaluations.qc = proof["evaluations"]["qc"];
     evaluations.qm = proof["evaluations"]["qm"];
     evaluations.qo = proof["evaluations"]["qo"];
@@ -168,9 +169,6 @@ std::string Proof::getStringProof()
     result += NormalizeToNFormat(aux.get_str(16), 64);
 
     aux.set_str(evaluations.s2, 10);
-    result += NormalizeToNFormat(aux.get_str(16), 64);
-
-    aux.set_str(evaluations.s3, 10);
     result += NormalizeToNFormat(aux.get_str(16), 64);
 
     aux.set_str(evaluations.s3, 10);
