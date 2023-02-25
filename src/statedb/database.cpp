@@ -576,21 +576,6 @@ void Database::processWriteQueue()
 
     cout << "Database::processWriteQueue() started" << endl;
 
-    try
-    {
-        // Build the remote database URI
-        string uri = config.databaseURL;
-        cout << "Database::processWriteQueue URI: " << uri << endl;
-
-        // Create the connection
-        pAsyncWriteConnection = new pqxx::connection{uri};
-    }
-    catch (const std::exception &e)
-    {
-        cerr << "Error: Database::processWriteQueue() connection to the DB exception: " << e.what() << endl;
-        return;
-    }
-
     while (true)
     {
         pthread_mutex_lock(&writeQueueMutex);
@@ -631,11 +616,6 @@ void Database::processWriteQueue()
             cout << "Database::processWriteQueue() found pending writes queue empty, so ignoring" << endl;
             pthread_mutex_unlock(&writeQueueMutex);
         }
-    }
-
-    if (pAsyncWriteConnection != NULL)
-    {
-        delete pAsyncWriteConnection;
     }
 }
 

@@ -31,7 +31,6 @@ private:
     pthread_cond_t emptyWriteQueueCond; // Cond to signal when queue is empty
     pqxx::connection * pConnectionWrite = NULL;
     pqxx::connection * pConnectionRead = NULL;
-    pqxx::connection * pAsyncWriteConnection = NULL;
     pqxx::work* transaction = NULL;
     string multiWriteProgram;
     string multiWriteNodes;
