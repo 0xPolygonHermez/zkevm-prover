@@ -12,7 +12,7 @@
 DatabaseMap Database::dbCache;
 bool Database::dbLoaded2Cache = false;
 
-void Database::init(const Config &_config)
+void Database::init(void)
 {
     // Check that it has not been initialized before
     if (bInitialized)
@@ -20,8 +20,6 @@ void Database::init(const Config &_config)
         cerr << "Error: Database::init() called when already initialized" << endl;
         exitProcess();
     }
-
-    config = _config;
 
     // Configure the server, if configuration is provided
     if (config.databaseURL != "local")

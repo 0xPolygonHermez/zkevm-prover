@@ -33,6 +33,9 @@ void ExecutorClient::waitForThread (void)
 
 void ExecutorClient::runThreads (void)
 {
+    // Allow service to initialize
+    sleep(1);
+
     for (uint64_t i=0; i<EXECUTOR_CLIENT_MULTITHREAD_N_THREADS; i++)
     {
         pthread_create(&threads[i], NULL, executorClientThreads, this);
@@ -161,9 +164,6 @@ void* executorClientThreads (void* arg)
     //cout << "executorClientThreads() started" << endl;
     string uuid;
     ExecutorClient *pClient = (ExecutorClient *)arg;
-
-    // Allow service to initialize
-    sleep(1);
 
     // Execute should block and succeed
     //cout << "executorClientThreads() calling pClient->ProcessBatch()" << endl;

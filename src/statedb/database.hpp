@@ -19,11 +19,11 @@ class Database
 {
 private:
     Goldilocks &fr;
+    const Config &config;
     bool autoCommit = true;
     bool asyncWrite = false;
     bool bInitialized = false;
     bool useRemoteDB = false;
-    Config config;
     pthread_t writeThread;
     vector<string> writeQueue;
     pthread_mutex_t writeQueueMutex; // Mutex to protect writeQueue list
@@ -50,9 +50,9 @@ public:
     static DatabaseMap dbCache; // Local database based on a map attribute
     static bool dbLoaded2Cache; // Indicates if we have already loaded the database into the mem cache for this process
 
-    Database(Goldilocks &fr) : fr(fr) {};
+    Database(Goldilocks &fr, const Config &config) : fr(fr), config(config) {};
     ~Database();
-    void init(const Config &config);
+    void init(void);
     zkresult read(const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog);
     zkresult write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent);
     zkresult getProgram(const string &_key, vector<uint8_t> &value, DatabaseMap *dbReadLog);

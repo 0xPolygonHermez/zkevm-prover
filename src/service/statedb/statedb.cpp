@@ -8,9 +8,9 @@
 #include "zkresult.hpp"
 #include "database_map.hpp"
 
-StateDB::StateDB(Goldilocks &fr, const Config &config) : fr(fr), config(config), db(fr), smt(fr)
+StateDB::StateDB(Goldilocks &fr, const Config &config) : fr(fr), config(config), db(fr, config), smt(fr)
 {
-    db.init(config);
+    db.init();
 }
 
 StateDB::~StateDB()
