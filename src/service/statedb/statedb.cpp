@@ -26,7 +26,9 @@ zkresult StateDB::set(const Goldilocks::Element (&oldRoot)[4], const Goldilocks:
     gettimeofday(&t, NULL);
 #endif
 
+#ifdef STATEDB_LOCK
     lock_guard<recursive_mutex> guard(mlock);
+#endif
 
     SmtSetResult *r;
     if (result == NULL) r = new SmtSetResult;
@@ -50,7 +52,9 @@ zkresult StateDB::get(const Goldilocks::Element (&root)[4], const Goldilocks::El
     gettimeofday(&t, NULL);
 #endif
 
+#ifdef STATEDB_LOCK
     lock_guard<recursive_mutex> guard(mlock);
+#endif
 
     SmtGetResult *r;
     if (result == NULL) r = new SmtGetResult;
@@ -75,7 +79,9 @@ zkresult StateDB::setProgram(const Goldilocks::Element (&key)[4], const vector<u
     gettimeofday(&t, NULL);
 #endif
 
+#ifdef STATEDB_LOCK
     lock_guard<recursive_mutex> guard(mlock);
+#endif
 
     zkresult zkr = db.setProgram(fea2string(fr, key), data, persistent);
 
@@ -92,7 +98,9 @@ zkresult StateDB::getProgram(const Goldilocks::Element (&key)[4], vector<uint8_t
     gettimeofday(&t, NULL);
 #endif
 
+#ifdef STATEDB_LOCK
     lock_guard<recursive_mutex> guard(mlock);
+#endif
 
     data.clear();
     zkresult zkr = db.getProgram(fea2string(fr, key), data, dbReadLog);
@@ -110,7 +118,9 @@ void StateDB::loadDB(const DatabaseMap::MTMap &input, const bool persistent)
     gettimeofday(&t, NULL);
 #endif
 
+#ifdef STATEDB_LOCK
     lock_guard<recursive_mutex> guard(mlock);
+#endif
 
     DatabaseMap::MTMap::const_iterator it;
     for (it = input.begin(); it != input.end(); it++)
@@ -130,7 +140,9 @@ void StateDB::loadProgramDB(const DatabaseMap::ProgramMap &input, const bool per
     gettimeofday(&t, NULL);
 #endif
 
+#ifdef STATEDB_LOCK
     lock_guard<recursive_mutex> guard(mlock);
+#endif
 
     DatabaseMap::ProgramMap::const_iterator it;
     for (it = input.begin(); it != input.end(); it++)
@@ -149,7 +161,9 @@ void StateDB::loadDB2MemCache()
     gettimeofday(&t, NULL);
 #endif
 
+#ifdef STATEDB_LOCK
     lock_guard<recursive_mutex> guard(mlock);
+#endif
 
     db.loadDB2MemCache();
 
@@ -164,7 +178,9 @@ void StateDB::flush()
     gettimeofday(&t, NULL);
 #endif
 
+#ifdef STATEDB_LOCK
     lock_guard<recursive_mutex> guard(mlock);
+#endif
 
     db.flush();
 
@@ -181,9 +197,13 @@ void StateDB::setAutoCommit(const bool autoCommit)
     gettimeofday(&t, NULL);
 #endif
 
+#ifdef STATEDB_LOCK
     lock_guard<recursive_mutex> guard(mlock);
+#endif
 
+#ifdef DATABASE_COMMIT
     db.setAutoCommit(autoCommit);
+#endif
 
 #ifdef LOG_TIME_STATISTICS_STATEDB
     tms.add("setAutoCommit", TimeDiff(t));
@@ -196,9 +216,13 @@ void StateDB::commit()
     gettimeofday(&t, NULL);
 #endif
 
+#ifdef STATEDB_LOCK
     lock_guard<recursive_mutex> guard(mlock);
+#endif
 
+#ifdef DATABASE_COMMIT
     db.commit();
+#endif
 
 #ifdef LOG_TIME_STATISTICS_STATEDB
     tms.add("commit", TimeDiff(t));
@@ -211,7 +235,9 @@ void StateDB::hashSave(const Goldilocks::Element (&a)[8], const Goldilocks::Elem
     gettimeofday(&t, NULL);
 #endif
 
+#ifdef STATEDB_LOCK
     lock_guard<recursive_mutex> guard(mlock);
+#endif
 
     smt.hashSave(db, a, c, persistent, hash);
 

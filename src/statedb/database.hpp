@@ -20,7 +20,9 @@ class Database
 private:
     Goldilocks &fr;
     const Config &config;
+#ifdef DATABASE_COMMIT
     bool autoCommit = true;
+#endif
     bool asyncWrite = false;
     bool bInitialized = false;
     bool useRemoteDB = false;
@@ -32,6 +34,11 @@ private:
     pqxx::connection * pConnectionWrite = NULL;
     pqxx::connection * pConnectionRead = NULL;
     pqxx::work* transaction = NULL;
+
+    // Multi write attributes
+    pthread_mutex_t mutex; // Mutex to protect the multi write queues
+    void lock(void) { pthread_mutex_lock(&mutex); };
+    void unlock(void) { pthread_mutex_unlock(&mutex); };
     string multiWriteProgram;
     string multiWriteNodes;
 
@@ -47,8 +54,11 @@ private:
     void signalEmptyWriteQueue() {};
 
 public:
+
+#ifdef DATABASE_USE_CACHE
     static DatabaseMap dbCache; // Local database based on a map attribute
     static bool dbLoaded2Cache; // Indicates if we have already loaded the database into the mem cache for this process
+#endif
 
     Database(Goldilocks &fr, const Config &config) : fr(fr), config(config) {};
     ~Database();
@@ -59,8 +69,10 @@ public:
     zkresult setProgram(const string &_key, const vector<uint8_t> &value, const bool persistent);
     void loadDB2MemCache();
     void processWriteQueue();
+#ifdef DATABASE_COMMIT
     void setAutoCommit(const bool autoCommit);
     void commit();
+#endif
     void flush();
     void print(void);
     void printTree(const string &root, string prefix = "");

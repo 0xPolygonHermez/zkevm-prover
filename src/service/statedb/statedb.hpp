@@ -16,7 +16,11 @@ private:
     const Config &config;
     Database db;
     Smt smt;
+
+#ifdef STATEDB_LOCK
     recursive_mutex mlock;
+#endif
+
 #ifdef LOG_TIME_STATISTICS_STATEDB
     TimeMetricStorage tms;
     struct timeval t;

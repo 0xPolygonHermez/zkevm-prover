@@ -10,7 +10,7 @@
 #include "goldilocks_base_field.hpp"
 #include "prover.hpp"
 
-#define EXECUTOR_CLIENT_MULTITHREAD_N_THREADS  100
+#define EXECUTOR_CLIENT_MULTITHREAD_N_THREADS  10
 #define EXECUTOR_CLIENT_MULTITHREAD_N_FILES 100
 
 class ExecutorClient
