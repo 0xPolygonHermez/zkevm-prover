@@ -85,13 +85,6 @@ void StateDB::loadProgramDB(const DatabaseMap::ProgramMap &input, const bool per
     }
 }
 
-void StateDB::loadDB2MemCache()
-{
-    lock_guard<recursive_mutex> guard(mlock);
-
-    db.loadDB2MemCache();
-}
-
 void StateDB::flush()
 {
     lock_guard<recursive_mutex> guard(mlock);

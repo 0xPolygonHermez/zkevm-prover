@@ -37,6 +37,10 @@
     "saveFilesInSubfolders": false,
     
     "loadDBToMemCache": true,
+    "loadDBToMemCacheInParallel": false,
+    "dbMTCacheSize": 16384,
+    "dbProgramCacheSize": 16384,
+    
     "opcodeTracer": false,
     "logRemoteDbReads": false,
     "logExecutorServerResponses": false,

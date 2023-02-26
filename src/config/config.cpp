@@ -143,6 +143,18 @@ void Config::load(json &config)
     if (config.contains("loadDBToMemCache") && config["loadDBToMemCache"].is_boolean())
         loadDBToMemCache = config["loadDBToMemCache"];
 
+    loadDBToMemCacheInParallel = false;
+    if (config.contains("loadDBToMemCacheInParallel") && config["loadDBToMemCacheInParallel"].is_boolean())
+        loadDBToMemCacheInParallel = config["loadDBToMemCacheInParallel"];
+
+    dbMTCacheSize = 0;
+    if (config.contains("dbMTCacheSize") && config["dbMTCacheSize"].is_number())
+        dbMTCacheSize = config["dbMTCacheSize"];
+
+    dbProgramCacheSize = 0;
+    if (config.contains("dbProgramCacheSize") && config["dbProgramCacheSize"].is_number())
+        dbProgramCacheSize = config["dbProgramCacheSize"];
+
     opcodeTracer = false;
     if (config.contains("opcodeTracer") && config["opcodeTracer"].is_boolean())
         opcodeTracer = config["opcodeTracer"];
@@ -478,6 +490,8 @@ void Config::print(void)
         cout << "    saveResponseToFile=true" << endl;
     if (loadDBToMemCache)
         cout << "    loadDBToMemCache=true" << endl;
+    if (loadDBToMemCacheInParallel)
+        cout << "    loadDBToMemCacheInParallel=true" << endl;
     if (opcodeTracer)
         cout << "    opcodeTracer=true" << endl;
     if (logRemoteDbReads)
@@ -538,4 +552,6 @@ void Config::print(void)
     cout << "    maxExecutorThreads=" << maxExecutorThreads << endl;
     cout << "    maxProverThreads=" << maxProverThreads << endl;
     cout << "    maxStateDBThreads=" << maxStateDBThreads << endl;
+    cout << "    dbMTCacheSize=" << dbMTCacheSize << endl;
+    cout << "    dbProgramCacheSize=" << dbProgramCacheSize << endl;
 }
