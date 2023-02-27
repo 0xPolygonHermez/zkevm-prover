@@ -34,16 +34,28 @@ private:
     pthread_mutex_t writeQueueMutex; // Mutex to protect writeQueue list
     pthread_cond_t writeQueueCond; // Cond to signal when queue has new items (no empty)
     pthread_cond_t emptyWriteQueueCond; // Cond to signal when queue is empty
-    pqxx::connection * pConnectionWrite = NULL;
-    pqxx::connection * pConnectionRead = NULL;
+#ifdef DATABASE_COMMIT
     pqxx::work* transaction = NULL;
+#endif
+
+    // Write connection attributes
+    pqxx::connection * pConnectionWrite = NULL;
+    pthread_mutex_t writeMutex; // Mutex to protect the write connection
+    void writeLock(void) { pthread_mutex_lock(&writeMutex); };
+    void writeUnlock(void) { pthread_mutex_unlock(&writeMutex); };
+
+    // Read connection attributes
+    pqxx::connection * pConnectionRead = NULL;
+    pthread_mutex_t readMutex; // Mutex to protect the read connection
+    void readLock(void) { pthread_mutex_lock(&readMutex); };
+    void readUnlock(void) { pthread_mutex_unlock(&readMutex); };
 
     // Multi write attributes
-    pthread_mutex_t mutex; // Mutex to protect the multi write queues
-    void lock(void) { pthread_mutex_lock(&mutex); };
-    void unlock(void) { pthread_mutex_unlock(&mutex); };
     string multiWriteProgram;
     string multiWriteNodes;
+    pthread_mutex_t multiWriteMutex; // Mutex to protect the multi write queues
+    void multiWriteLock(void) { pthread_mutex_lock(&multiWriteMutex); };
+    void multiWriteUnlock(void) { pthread_mutex_unlock(&multiWriteMutex); };
 
 private:
     // Remote database based on Postgres (PostgreSQL)

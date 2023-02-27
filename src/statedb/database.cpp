@@ -34,8 +34,10 @@ void Database::init(void)
         exitProcess();
     }
 
-    // Init mutex
-    pthread_mutex_init(&mutex, NULL);
+    // Init mutexes
+    pthread_mutex_init(&multiWriteMutex, NULL);
+    pthread_mutex_init(&writeMutex, NULL);
+    pthread_mutex_init(&readMutex, NULL);
 
     useDBMTCache = dbMTCache.enabled();
     useDBProgramCache = dbProgramCache.enabled();
@@ -209,14 +211,21 @@ zkresult Database::readRemote(bool bProgram, const string &key, string &value)
 
     try
     {
-        // Start a transaction.
-        pqxx::nontransaction n(*pConnectionRead);
-
         // Prepare the query
         string query = "SELECT * FROM " + tableName + " WHERE hash = E\'\\\\x" + key + "\';";
 
+        readLock();
+
+        // Start a transaction.
+        pqxx::nontransaction n(*pConnectionRead);
+
         // Execute the query
         pqxx::result rows = n.exec(query);
+
+        // Commit your transaction
+        n.commit();
+
+        readUnlock();
 
         // Process the result
         if (rows.size() == 0)
@@ -237,9 +246,6 @@ zkresult Database::readRemote(bool bProgram, const string &key, string &value)
         }
         pqxx::field const fieldData = row[1];
         value = removeBSXIfExists(fieldData.c_str());
-
-        // Commit your transaction
-        n.commit();
     }
     catch (const std::exception &e)
     {
@@ -258,7 +264,7 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
         if (config.dbMultiWrite)
         {
             string &multiWrite = bProgram ? multiWriteProgram : multiWriteNodes;
-            lock();
+            multiWriteLock();
             if (multiWrite.size() == 0)
             {
                 multiWrite = "INSERT INTO " + tableName + " ( hash, data ) VALUES ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' ) ";
@@ -267,7 +273,7 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
             {
                 multiWrite += ", ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' )";
             }
-            unlock();       
+            multiWriteUnlock();       
         }
         else
         {
@@ -284,9 +290,11 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
                 if (autoCommit)
 #endif
                 {
+                    writeLock();
                     pqxx::work w(*pConnectionWrite);
                     pqxx::result res = w.exec(query);
                     w.commit();
+                    writeUnlock();
                 }
 #ifdef DATABASE_COMMIT
                 else
@@ -439,10 +447,10 @@ void Database::flush()
 {
     if (config.dbMultiWrite)
     {
-        lock();
+        multiWriteLock();
         if ( (multiWriteProgram.size() == 0) && (multiWriteNodes.size() == 0) )
         {
-            unlock();
+            multiWriteUnlock();
             return;
         }
 
@@ -487,7 +495,7 @@ void Database::flush()
         {
             cerr << "Error: Database::flush() execute query exception: " << e.what() << endl;
         }
-        unlock();
+        multiWriteUnlock();
     }
     else if (config.dbAsyncWrite)
     {
