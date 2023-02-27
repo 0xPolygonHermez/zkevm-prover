@@ -60,6 +60,21 @@ void string2fe (Goldilocks &fr, const string &s, Goldilocks::Element &fe)
     fr.fromString(fe, Remove0xIfPresent(s), 16);
 }
 
+void string2fea(Goldilocks &fr, const string os, vector<Goldilocks::Element> &fea)
+{
+    Goldilocks::Element fe;
+    for (uint64_t i = 0; i < os.size(); i += 16)
+    {
+        if (i + 16 > os.size())
+        {
+            cerr << "Error: Database::string2fea() found incorrect DATA column size: " << os.size() << endl;
+            exitProcess();
+        }
+        string2fe(fr, os.substr(i, 16), fe);
+        fea.push_back(fe);
+    }
+}
+
 string fea2string (Goldilocks &fr, const Goldilocks::Element(&fea)[4])
 {
     mpz_class auxScalar;
@@ -338,6 +353,23 @@ string string2ba (const string &textString)
     string result;
     string2ba(textString, result);
     return result;
+}
+
+void string2ba(const string os, vector<uint8_t> &data)
+{
+    string s = Remove0xIfPresent(os);
+
+    if (s.size()%2 != 0)
+    {
+        s = "0" + s;
+    }
+
+    uint64_t dsize = s.size()/2;
+    const char *p = s.c_str();
+    for (uint64_t i=0; i<dsize; i++)
+    {
+        data.push_back(char2byte(p[2*i])*16 + char2byte(p[2*i + 1]));
+    }
 }
 
 void ba2string (string &s, const uint8_t *pData, uint64_t dataSize)
@@ -720,3 +752,4 @@ uint64_t swapBytes64 (uint64_t input)
             (((input) & 0x000000000000ff00ull) << 40) |
             (((input) & 0x00000000000000ffull) << 56));
 }
+
