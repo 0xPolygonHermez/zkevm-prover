@@ -2,7 +2,7 @@ name: Build docker image and run node tests
 
 on:
   push:
-    branches: [ develop, main, fix-aggr-client ]
+    branches: [ develop, main ]
 
 jobs:
   build-docker:
