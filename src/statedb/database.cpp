@@ -1,4 +1,5 @@
 #include <iostream>
+#include <thread>
 #include "database.hpp"
 #include "config.hpp"
 #include "scalar.hpp"
@@ -6,14 +7,24 @@
 #include "definitions.hpp"
 #include "zkresult.hpp"
 #include "utils.hpp"
+#include <unistd.h>
+#include "timer.hpp"
 
 #ifdef DATABASE_USE_CACHE
-// Create static Database::dbCache object. This will be used to store DB records in memory
-// and it will be shared for all the instances of Database class. DatabaseMap class is thread-safe
-DatabaseMap Database::dbCache;
-bool Database::dbLoaded2Cache = false;
+
+// Create static Database::dbMTCache and DatabaseCacheProgram objects
+// This will be used to store DB records in memory and it will be shared for all the instances of Database class
+// DatabaseCacheMT and DatabaseCacheProgram classes are thread-safe
+DatabaseMTCache Database::dbMTCache;
+DatabaseProgramCache Database::dbProgramCache;
+
 #endif
 
+// Helper functions
+string removeBSXIfExists(string s) {return ((s.at(0) == '\\') && (s.at(1) == 'x')) ? s.substr(2) : s;}
+void* asyncDatabaseWriteThread(void* arg);
+
+// Database class implementation
 void Database::init(void)
 {
     // Check that it has not been initialized before
@@ -25,6 +36,9 @@ void Database::init(void)
 
     // Init mutex
     pthread_mutex_init(&mutex, NULL);
+
+    useDBMTCache = dbMTCache.enabled();
+    useDBProgramCache = dbProgramCache.enabled();
 
     // Configure the server, if configuration is provided
     if (config.databaseURL != "local")
@@ -54,7 +68,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
 
 #ifdef DATABASE_USE_CACHE
     // If the key is found in local database (cached) simply return it
-    if (Database::dbCache.findMT(key, value))
+    if ((useDBMTCache) && (Database::dbMTCache.find(key, value)))
     {
         // Add to the read log
         if (dbReadLog != NULL) dbReadLog->add(key, value);
@@ -70,10 +84,11 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
         r = readRemote(false, key, sData);
         if (r == ZKR_SUCCESS)
         {
-            string2fea(sData, value);
+            string2fea(fr, sData, value);
+
 #ifdef DATABASE_USE_CACHE
             // Store it locally to avoid any future remote access for this key
-            Database::dbCache.add(key, value);
+            if (useDBMTCache) Database::dbMTCache.add(key, value);
 #endif
 
             // Add to the read log
@@ -134,10 +149,10 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
     else r = ZKR_SUCCESS;
 
 #ifdef DATABASE_USE_CACHE
-    if (r == ZKR_SUCCESS)
+    if ((r == ZKR_SUCCESS) && (useDBMTCache))
     {
         // Create in memory cache
-        Database::dbCache.add(key, value);
+        Database::dbMTCache.add(key, value);
     }
 #endif
 
@@ -325,10 +340,10 @@ zkresult Database::setProgram(const string &_key, const vector<uint8_t> &data, c
     else r = ZKR_SUCCESS;
 
 #ifdef DATABASE_USE_CACHE
-    if (r == ZKR_SUCCESS)
+    if ((r == ZKR_SUCCESS) && (useDBProgramCache))
     {
         // Create in memory cache
-        Database::dbCache.add(key, data);
+        Database::dbProgramCache.add(key, data);
     }
 #endif
 
@@ -364,7 +379,7 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
 
 #ifdef DATABASE_USE_CACHE
     // If the key is found in local database (cached) simply return it
-    if (Database::dbCache.findProgram(key, data))
+    if ((useDBProgramCache) && (Database::dbProgramCache.find(key, data)))
     {
         // Add to the read log
         if (dbReadLog != NULL) dbReadLog->add(key, data);
@@ -385,7 +400,7 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
 
 #ifdef DATABASE_USE_CACHE
             // Store it locally to avoid any future remote access for this key
-            Database::dbCache.add(key, data);
+            if (useDBProgramCache) Database::dbProgramCache.add(key, data);
 #endif
 
             // Add to the read log
@@ -410,113 +425,6 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
 #endif
 
     return r;
-}
-
-void Database::string2fea(const string os, vector<Goldilocks::Element> &fea)
-{
-    Goldilocks::Element fe;
-    for (uint64_t i = 0; i < os.size(); i += 16)
-    {
-        if (i + 16 > os.size())
-        {
-            cerr << "Error: Database::string2fea() found incorrect DATA column size: " << os.size() << endl;
-            exitProcess();
-        }
-        string2fe(fr, os.substr(i, 16), fe);
-        fea.push_back(fe);
-    }
-}
-
-void Database::string2ba(const string os, vector<uint8_t> &data)
-{
-    string s = Remove0xIfPresent(os);
-
-    if (s.size()%2 != 0)
-    {
-        s = "0" + s;
-    }
-
-    uint64_t dsize = s.size()/2;
-    const char *p = s.c_str();
-    for (uint64_t i=0; i<dsize; i++)
-    {
-        data.push_back(char2byte(p[2*i])*16 + char2byte(p[2*i + 1]));
-    }
-}
-
-void Database::loadDB2MemCache()
-{
-#ifdef DATABASE_USE_CACHE
-
-    if (!useRemoteDB) return;
-
-    if (Database::dbLoaded2Cache) return;
-
-    cout << "Loading SQL Database to memory cache..." << endl;
-
-    try
-    {
-        // Start a transaction.
-        pqxx::nontransaction n(*pConnectionRead);
-
-        // Prepare the query
-        string query = "SELECT * FROM " + config.dbNodesTableName +";";
-
-        // Execute the query
-        pqxx::result rows = n.exec(query);
-
-        for (pqxx::result::size_type i=0; i < rows.size(); i++)
-        {
-            vector<Goldilocks::Element> value;
-
-            string2fea(removeBSXIfExists(rows[i][1].c_str()), value);
-
-            Database::dbCache.add(removeBSXIfExists(rows[i][0].c_str()), value);
-        }
-
-        // Commit your transaction
-        n.commit();
-    }
-    catch (const std::exception &e)
-    {
-        cerr << "Error: Database::loadDB2MemCache() table=" << config.dbNodesTableName << " exception: " << e.what() << endl;
-        exitProcess();
-    }
-
-    try
-    {
-        // Start a transaction.
-        pqxx::nontransaction n(*pConnectionRead);
-
-        // Prepare the query
-        string query = "SELECT * FROM " + config.dbProgramTableName +";";
-
-        // Execute the query
-        pqxx::result rows = n.exec(query);
-
-        for (pqxx::result::size_type i=0; i < rows.size(); i++)
-        {
-            vector<uint8_t> value;
-
-            string2ba(removeBSXIfExists(rows[i][1].c_str()), value);
-
-            Database::dbCache.add(removeBSXIfExists(rows[i][0].c_str()), value);
-        }
-
-        // Commit your transaction
-        n.commit();
-    }
-    catch (const std::exception &e)
-    {
-        cerr << "Error: Database::loadDB2MemCache() table=" << config.dbProgramTableName << " exception: " << e.what() << endl;
-        exitProcess();
-    }
-
-    Database::dbLoaded2Cache = true;
-    
-    cout << "Load done" << endl;
-
-#endif
 }
 
 void Database::addWriteQueue(const string sqlWrite)
@@ -660,26 +568,6 @@ void Database::processWriteQueue()
     }
 }
 
-void Database::print(void)
-{
-
-#ifdef DATABASE_USE_CACHE
-
-    DatabaseMap::MTMap mtDB = Database::dbCache.getMTDB();
-    cout << "Database of " << mtDB.size() << " elements:" << endl;
-    for (DatabaseMap::MTMap::iterator it = mtDB.begin(); it != mtDB.end(); it++)
-    {
-        vector<Goldilocks::Element> vect = it->second;
-        cout << "key:" << it->first << " ";
-        for (uint64_t i = 0; i < vect.size(); i++)
-            cout << fr.toString(vect[i], 16) << ":";
-        cout << endl;
-    }
-
-#endif
-
-}
-
 void Database::printTree(const string &root, string prefix)
 {
     if (prefix == "")
@@ -790,4 +678,112 @@ void *asyncDatabaseWriteThread(void *arg)
     Database *db = (Database *)arg;
     db->processWriteQueue();
     return NULL;
+}
+
+void loadDb2MemCache(const Config config)
+{
+#ifdef DATABASE_USE_CACHE
+
+    TimerStart(LOAD_DB_TO_CACHE);
+    
+    Goldilocks fr;
+    pqxx::connection *pConnection = NULL;
+
+    try
+    {
+        // Create the database connection
+        pConnection = new pqxx::connection{config.databaseURL};
+    }
+    catch(const std::exception& e)
+    {
+        cerr << "Error: Database::loadDb2MemCache() exception: " << e.what() << endl;
+        exitProcess();
+    }
+
+    try
+    {
+        if (config.dbMTCacheSize > 0) 
+        {
+            // Start a transaction.
+            pqxx::nontransaction n(*pConnection);
+
+            // Prepare the query
+            string query = "SELECT * FROM " + config.dbNodesTableName +";";
+
+            // Execute the query
+            pqxx::result rows = n.exec(query);
+            pqxx::result::size_type i;
+            uint64_t count = 0;
+            for (i=0; i < rows.size(); i++)
+            {
+                count++;
+                vector<Goldilocks::Element> value;
+                string2fea(fr, removeBSXIfExists(rows[i][1].c_str()), value);
+
+                if (Database::dbMTCache.add(removeBSXIfExists(rows[i][0].c_str()), value))
+                {
+                    // Cache is full stop loading records
+                    cout << "MT cache full, stop loading records" << endl;
+                    break;
+                }
+            }
+
+            cout << "MT cache loaded. Count=" << count << endl;
+
+            // Commit your transaction
+            n.commit();
+        }
+    }
+    catch (const std::exception &e)
+    {
+        cerr << "Error: Database::loadDb2MemCache() table=" << config.dbNodesTableName << " exception: " << e.what() << endl;
+        exitProcess();
+    }
+
+    try
+    {
+        if (config.dbProgramCacheSize)
+        {
+            // Start a transaction.
+            pqxx::nontransaction n(*pConnection);
+
+            // Prepare the query
+            string query = "SELECT * FROM " + config.dbProgramTableName +";";
+
+            // Execute the query
+            pqxx::result rows = n.exec(query);
+            pqxx::result::size_type i = 0;
+            uint64_t count = 0;
+            for (i=0; i < rows.size(); i++)
+            {
+                count++;
+                vector<uint8_t> value;
+                string2ba(removeBSXIfExists(rows[i][1].c_str()), value);
+
+                if (Database::dbProgramCache.add(removeBSXIfExists(rows[i][0].c_str()), value))
+                {
+                    // Cache is full stop loading records
+                    cout << "Program cache full, stop loading records" << endl;
+                    break;
+                }
+            }
+
+            cout << "Program cache loaded. Count=" << count << endl;
+
+            // Commit your transaction
+            n.commit();
+        }
+    }
+    catch (const std::exception &e)
+    {
+        cerr << "Error: Database::loadDb2MemCache() table=" << config.dbProgramTableName << " exception: " << e.what() << endl;
+        exitProcess();
+    }
+
+    if (pConnection != NULL)
+        delete pConnection;
+
+    TimerStopAndLog(LOAD_DB_TO_CACHE);
+
+#endif
 }

@@ -155,23 +155,6 @@ void StateDB::loadProgramDB(const DatabaseMap::ProgramMap &input, const bool per
 #endif
 }
 
-void StateDB::loadDB2MemCache()
-{
-#ifdef LOG_TIME_STATISTICS_STATEDB
-    gettimeofday(&t, NULL);
-#endif
-
-#ifdef STATEDB_LOCK
-    lock_guard<recursive_mutex> guard(mlock);
-#endif
-
-    db.loadDB2MemCache();
-
-#ifdef LOG_TIME_STATISTICS_STATEDB
-    tms.add("loadDB2MemCache", TimeDiff(t));
-#endif
-}
-
 void StateDB::flush()
 {
 #ifdef LOG_TIME_STATISTICS_STATEDB

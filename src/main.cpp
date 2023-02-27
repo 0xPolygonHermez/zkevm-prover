@@ -524,11 +524,32 @@ int main(int argc, char **argv)
     TimerStopAndLog(PROVER_CONSTRUCTOR);
 
     /* INIT DB CACHE */
-    if (config.loadDBToMemCache && (config.runAggregatorClient || config.runExecutorServer || config.runStateDBServer))
+    if (config.databaseURL != "local") // remote DB
     {
-        StateDB stateDB(fr, config);
-        stateDB.loadDB2MemCache();
-    }
+        Database::dbMTCache.setCacheSize(config.dbMTCacheSize*1024*1024);
+        Database::dbProgramCache.setCacheSize(config.dbProgramCacheSize*1024*1024);
+
+        if (config.loadDBToMemCache && (config.runAggregatorClient || config.runExecutorServer || config.runStateDBServer))
+        {        
+            // if we have a db cache enabled
+            if ((Database::dbMTCache.enabled()) || (Database::dbProgramCache.enabled()))
+            {
+                if (config.loadDBToMemCacheInParallel) {
+                    // Run thread that loads the DB into the dbCache
+                    std::thread loadDBThread (loadDb2MemCache, config);
+                    loadDBThread.detach();
+                } else {
+                    loadDb2MemCache(config);
+                }
+            }
+        }
+    } 
+    else 
+    {
+        // set no limit for the db caches as we are using local (in memory) db
+        Database::dbMTCache.setCacheSize(-1); 
+        Database:: dbProgramCache.setCacheSize(-1);
+    }    
 
     /* SERVERS */
 

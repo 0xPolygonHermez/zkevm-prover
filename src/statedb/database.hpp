@@ -10,6 +10,7 @@
 #include <semaphore.h>
 #include "zkresult.hpp"
 #include "database_map.hpp"
+#include "database_cache.hpp"
 
 using namespace std;
 
@@ -26,6 +27,8 @@ private:
     bool asyncWrite = false;
     bool bInitialized = false;
     bool useRemoteDB = false;
+    bool useDBMTCache = false;
+    bool useDBProgramCache = false;
     pthread_t writeThread;
     vector<string> writeQueue;
     pthread_mutex_t writeQueueMutex; // Mutex to protect writeQueue list
@@ -47,18 +50,12 @@ private:
     void initRemote(void);
     zkresult readRemote(bool bProgram, const string &key, string &value);
     zkresult writeRemote(bool bProgram, const string &key, const string &value);
-    void string2fea(const string os, vector<Goldilocks::Element> &fea);
-    void string2ba(const string os, vector<uint8_t> &data);
-    string removeBSXIfExists(string s) {return ((s.at(0) == '\\') && (s.at(1) == 'x')) ? s.substr(2) : s;};
     void addWriteQueue(const string sqlWrite);
     void signalEmptyWriteQueue() {};
 
 public:
-
-#ifdef DATABASE_USE_CACHE
-    static DatabaseMap dbCache; // Local database based on a map attribute
-    static bool dbLoaded2Cache; // Indicates if we have already loaded the database into the mem cache for this process
-#endif
+    static DatabaseMTCache dbMTCache;
+    static DatabaseProgramCache dbProgramCache;
 
     Database(Goldilocks &fr, const Config &config) : fr(fr), config(config) {};
     ~Database();
@@ -67,17 +64,15 @@ public:
     zkresult write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent);
     zkresult getProgram(const string &_key, vector<uint8_t> &value, DatabaseMap *dbReadLog);
     zkresult setProgram(const string &_key, const vector<uint8_t> &value, const bool persistent);
-    void loadDB2MemCache();
     void processWriteQueue();
 #ifdef DATABASE_COMMIT
     void setAutoCommit(const bool autoCommit);
     void commit();
 #endif
     void flush();
-    void print(void);
     void printTree(const string &root, string prefix = "");
 };
 
-void* asyncDatabaseWriteThread(void* arg);
+void loadDb2MemCache(const Config config);
 
 #endif
