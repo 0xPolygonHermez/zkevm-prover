@@ -10,19 +10,16 @@
 #include <unistd.h>
 #include "timer.hpp"
 
+
 // Create static Database::dbMTCache and DatabaseCacheProgram objects
 // This will be used to store DB records in memory and it will be shared for all the instances of Database class
 // DatabaseCacheMT and DatabaseCacheProgram classes are thread-safe
 DatabaseMTCache Database::dbMTCache;
 DatabaseProgramCache Database::dbProgramCache;
 
-
 // Helper functions
 string removeBSXIfExists(string s) {return ((s.at(0) == '\\') && (s.at(1) == 'x')) ? s.substr(2) : s;}
-void string2fea(Goldilocks &fr, const string os, vector<Goldilocks::Element> &fea);
-void string2ba(Goldilocks &fr, const string os, vector<uint8_t> &data);
 void* asyncDatabaseWriteThread(void* arg);
-void loadDb2MemCache(const Config config);
 
 // Database class implementation
 void Database::init(const Config &_config)
@@ -351,7 +348,7 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
         if (r == ZKR_SUCCESS)
         {
             //String to byte/uint8_t vector
-            string2ba(fr, sData, data);
+            string2ba(sData, data);
 
             // Store it locally to avoid any future remote access for this key
             if (useDBProgramCache) Database::dbProgramCache.add(key, data);
@@ -418,7 +415,6 @@ void Database::commit()
 
 void Database::processWriteQueue()
 {
-    //TODO: Review implementation of this function. The code should be directly in the thread function
     string writeQuery;
 
     cout << "Database::processWriteQueue() started" << endl;
@@ -606,38 +602,6 @@ Database::~Database()
     }
 }
 
-void string2fea(Goldilocks &fr, const string os, vector<Goldilocks::Element> &fea)
-{
-    Goldilocks::Element fe;
-    for (uint64_t i = 0; i < os.size(); i += 16)
-    {
-        if (i + 16 > os.size())
-        {
-            cerr << "Error: Database::string2fea() found incorrect DATA column size: " << os.size() << endl;
-            exitProcess();
-        }
-        string2fe(fr, os.substr(i, 16), fe);
-        fea.push_back(fe);
-    }
-}
-
-void string2ba(Goldilocks &fr, const string os, vector<uint8_t> &data)
-{
-    string s = Remove0xIfPresent(os);
-
-    if (s.size()%2 != 0)
-    {
-        s = "0" + s;
-    }
-
-    uint64_t dsize = s.size()/2;
-    const char *p = s.c_str();
-    for (uint64_t i=0; i<dsize; i++)
-    {
-        data.push_back(char2byte(p[2*i])*16 + char2byte(p[2*i + 1]));
-    }
-}
-
 void *asyncDatabaseWriteThread(void *arg)
 {
     Database *db = (Database *)arg;
@@ -721,7 +685,7 @@ void loadDb2MemCache(const Config config)
             {
                 count++;
                 vector<uint8_t> value;
-                string2ba(fr, removeBSXIfExists(rows[i][1].c_str()), value);
+                string2ba(removeBSXIfExists(rows[i][1].c_str()), value);
 
                 if (Database::dbProgramCache.add(removeBSXIfExists(rows[i][0].c_str()), value))
                 {

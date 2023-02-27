@@ -526,8 +526,8 @@ int main(int argc, char **argv)
     /* INIT DB CACHE */
     if (config.databaseURL != "local") // remote DB
     {
-        Database::dbMTCache.setCacheSize(config.dbMTCacheSize*(int64_t)1024*(int64_t)1024);
-        Database::dbProgramCache.setCacheSize(config.dbProgramCacheSize*(int64_t)1024*(int64_t)1024);
+        Database::dbMTCache.setCacheSize(config.dbMTCacheSize*1024*1024);
+        Database::dbProgramCache.setCacheSize(config.dbProgramCacheSize*1024*1024);
 
         if (config.loadDBToMemCache && (config.runAggregatorClient || config.runExecutorServer || config.runStateDBServer))
         {        

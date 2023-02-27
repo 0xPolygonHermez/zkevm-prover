@@ -131,8 +131,11 @@ bool DatabaseMTCache::add(const string key, vector<Goldilocks::Element> value)
     *pValue = value;
     record->value = pValue;
     record->key = key;
-    //TODO: Use hardcoded value for the mtValue size (8*Goldilocks::Element)?
-    record->size = sizeof(DatabaseCacheRecord)+record->key.size()+sizeof(Goldilocks::Element)*pValue->size();
+    record->size = 
+        sizeof(DatabaseCacheRecord)+
+        (record->key.capacity()+1)+
+        sizeof(vector<Goldilocks::Element>)+
+        sizeof(Goldilocks::Element)*pValue->capacity();
 
     return addRecord(key, record);
 }
@@ -172,7 +175,11 @@ bool DatabaseProgramCache::add(const string key, vector<uint8_t> value)
     *pValue = value;
     record->value = pValue;
     record->key = key;
-    record->size = sizeof(DatabaseCacheRecord)+record->key.size()+pValue->size();
+    record->size = 
+        sizeof(DatabaseCacheRecord)+
+        (record->key.capacity()+1)+
+        sizeof(vector<uint8_t>)+
+        pValue->capacity();
 
     return addRecord(key, record);
 }
