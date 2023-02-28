@@ -62,10 +62,17 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     TimerStart(STARK_STEP_2_CALCULATE_EXPS);
 
     // Calculate exps
-#pragma omp parallel for
-    for (uint64_t i = 0; i < N; i++)
+    if (nrowsStepBatch > 1)
     {
-        steps->step2prev_first(params, i);
+        steps->step2prev_parser_first_avx(params, N, nrowsStepBatch);
+    }
+    else
+    {
+#pragma omp parallel for
+        for (uint64_t i = 0; i < N; i++)
+        {
+            steps->step2prev_first(params, i);
+        }
     }
     TimerStopAndLog(STARK_STEP_2_CALCULATE_EXPS);
 
@@ -128,10 +135,17 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     transcript.getField(challenges[3]); // betta
     TimerStart(STARK_STEP_3_CALCULATE_EXPS);
 
-#pragma omp parallel for
-    for (uint64_t i = 0; i < N; i++)
+    if (nrowsStepBatch > 1)
     {
-        steps->step3prev_first(params, i);
+        steps->step3prev_parser_first_avx(params, N, nrowsStepBatch);
+    }
+    else
+    {
+#pragma omp parallel for
+        for (uint64_t i = 0; i < N; i++)
+        {
+            steps->step3prev_first(params, i);
+        }
     }
     TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS);
 
@@ -156,7 +170,7 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     // Calculate exps
     if (nrowsStepBatch > 1)
     {
-        steps->step3_parser_first_avx(params, NExtended, nrowsStepBatch);
+        steps->step3_parser_first_avx(params, N, nrowsStepBatch);
     }
     else
     {
