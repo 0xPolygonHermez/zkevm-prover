@@ -395,6 +395,14 @@ void Config::load(json &config)
     if (config.contains("dbAsyncWrite") && config["dbAsyncWrite"].is_boolean())
         dbAsyncWrite = config["dbAsyncWrite"];
 
+    dbMultiWrite = false;
+    if (config.contains("dbMultiWrite") && config["dbMultiWrite"].is_boolean())
+        dbMultiWrite = config["dbMultiWrite"];
+
+    dbFlushInParallel = false;
+    if (config.contains("dbFlushInParallel") && config["dbFlushInParallel"].is_boolean())
+        dbFlushInParallel = config["dbFlushInParallel"];
+
     if (config.contains("cleanerPollingPeriod") && config["cleanerPollingPeriod"].is_number())
         cleanerPollingPeriod = config["cleanerPollingPeriod"];
 
@@ -547,6 +555,8 @@ void Config::print(void)
     cout << "    dbNodesTableName=" << dbNodesTableName << endl;
     cout << "    dbProgramTableName=" << dbProgramTableName << endl;
     cout << "    dbAsyncWrite=" << to_string(dbAsyncWrite) << endl;
+    cout << "    dbMultiWrite=" << to_string(dbMultiWrite) << endl;
+    cout << "    dbFlushInParallel=" << to_string(dbFlushInParallel) << endl;
     cout << "    cleanerPollingPeriod=" << cleanerPollingPeriod << endl;
     cout << "    requestsPersistence=" << requestsPersistence << endl;
     cout << "    maxExecutorThreads=" << maxExecutorThreads << endl;

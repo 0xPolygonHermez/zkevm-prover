@@ -478,6 +478,8 @@ using grpc::Status;
     totalGas += execGas;
     uint64_t execBytes = request->batch_l2_data().size();
     totalBytes += execBytes;
+    uint64_t execTX = responses.size();
+    totalTX += execTX;
     double execTime = double(TimeDiff(EXECUTOR_PROCESS_BATCH_start, EXECUTOR_PROCESS_BATCH_stop))/1000000;
     totalTime += execTime;
     struct timeval now;
@@ -487,11 +489,13 @@ using grpc::Status;
     {
         totalTPG = double(totalGas - lastTotalGas)/timeSinceLastTotal;
         totalTPB = double(totalBytes - lastTotalBytes)/timeSinceLastTotal;
+        totalTPTX = double(totalTX - lastTotalTX)/timeSinceLastTotal;
         lastTotalGas = totalGas;
         lastTotalBytes = totalBytes;
+        lastTotalTX = totalTX;
         lastTotalTime = now;
     }
-    cout << "ExecutorServiceImpl::ProcessBatch() done counter=" << counter << " B=" << execBytes <<  " gas=" << execGas << " time=" << execTime << " TP=" << double(execBytes)/execTime << "B/s=" << double(execGas)/execTime << "gas/s=" << double(execGas)/double(execBytes) << "gas/B totalTP=" << totalTPB << "B/s=" << totalTPG << "gas/s=" << totalTPG/totalTPB << "gas/B totalTime=" << totalTime << endl;
+    cout << "ExecutorServiceImpl::ProcessBatch() done counter=" << counter << " B=" << execBytes << " TX=" << execTX << " gas=" << execGas << " time=" << execTime << " TP=" << double(execBytes)/execTime << "B/s=" << double(execTX)/execTime << "TX/s=" << double(execGas)/execTime << "gas/s=" << double(execGas)/double(execBytes) << "gas/B totalTP=" << totalTPB << "B/s=" << totalTPTX << "TX/s=" << totalTPG << "gas/s=" << totalTPG/totalTPB << "gas/B totalTime=" << totalTime << endl;
     unlock();
 #endif
 

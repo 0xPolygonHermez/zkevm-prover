@@ -120,6 +120,8 @@ public:
     string dbNodesTableName;
     string dbProgramTableName;
     bool dbAsyncWrite;
+    bool dbMultiWrite;
+    bool dbFlushInParallel;
     uint64_t cleanerPollingPeriod;
     uint64_t requestsPersistence;
     uint64_t maxExecutorThreads;

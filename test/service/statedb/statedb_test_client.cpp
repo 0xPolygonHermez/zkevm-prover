@@ -21,6 +21,8 @@ void runStateDBTestClient (const Config& config)
 
 void* stateDBTestClientThread (const Config& config)
 {
+    TimerStart(STATEDB_TEST_CLIENT);
+
     cout << "StateDB test client started" << endl;
     Goldilocks fr;
 
@@ -501,6 +503,8 @@ void* stateDBTestClientThread (const Config& config)
     delete client;
 
     cout << "StateDB test client done" << endl;
+
+    TimerStopAndLog(STATEDB_TEST_CLIENT);
 
     return NULL;
 }

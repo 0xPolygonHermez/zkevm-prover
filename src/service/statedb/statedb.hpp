@@ -7,6 +7,7 @@
 #include "smt.hpp"
 #include "statedb_interface.hpp"
 #include "zkresult.hpp"
+#include "utils/time_metric.hpp"
 
 class StateDB : public StateDBInterface
 {
@@ -15,10 +16,19 @@ private:
     const Config &config;
     Database db;
     Smt smt;
+
+#ifdef STATEDB_LOCK
     recursive_mutex mlock;
+#endif
+
+#ifdef LOG_TIME_STATISTICS_STATEDB
+    TimeMetricStorage tms;
+    struct timeval t;
+#endif
 
 public:
     StateDB(Goldilocks &fr, const Config &config);
+    ~StateDB();
     zkresult set(const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, Goldilocks::Element (&newRoot)[4], SmtSetResult *result, DatabaseMap *dbReadLog);
     zkresult get(const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtGetResult *result, DatabaseMap *dbReadLog);
     zkresult setProgram(const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const bool persistent);
