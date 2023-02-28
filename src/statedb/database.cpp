@@ -183,15 +183,6 @@ void Database::initRemote(void)
         // Create the connection
         pConnectionWrite = new pqxx::connection{uri};
         pConnectionRead = new pqxx::connection{uri};
-
-        // Create the thread to process asynchronous writes to de DB
-        if (config.dbAsyncWrite)
-        {
-            pthread_cond_init(&writeQueueCond, 0);
-            pthread_cond_init(&emptyWriteQueueCond, 0);
-            pthread_mutex_init(&writeQueueMutex, NULL);
-            pthread_create(&writeThread, NULL, asyncDatabaseWriteThread, this);
-        }
     }
     catch (const std::exception &e)
     {
@@ -280,31 +271,24 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
             string query = "INSERT INTO " + tableName + " ( hash, data ) VALUES ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' ) " +
                         "ON CONFLICT (hash) DO NOTHING;";
 
-            if (config.dbAsyncWrite)
+#ifdef DATABASE_COMMIT
+            if (autoCommit)
+#endif
             {
-                addWriteQueue(query);
+                writeLock();
+                pqxx::work w(*pConnectionWrite);
+                pqxx::result res = w.exec(query);
+                w.commit();
+                writeUnlock();
             }
+#ifdef DATABASE_COMMIT
             else
             {
-#ifdef DATABASE_COMMIT
-                if (autoCommit)
-#endif
-                {
-                    writeLock();
-                    pqxx::work w(*pConnectionWrite);
-                    pqxx::result res = w.exec(query);
-                    w.commit();
-                    writeUnlock();
-                }
-#ifdef DATABASE_COMMIT
-                else
-                {
-                    if (transaction == NULL)
-                        transaction = new pqxx::work{*pConnectionWrite};
-                    pqxx::result res = transaction->exec(query);
-                }
-#endif
+                if (transaction == NULL)
+                    transaction = new pqxx::work{*pConnectionWrite};
+                pqxx::result res = transaction->exec(query);
             }
+#endif
         }
     }
     catch (const std::exception &e)
@@ -435,14 +419,6 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
     return r;
 }
 
-void Database::addWriteQueue(const string sqlWrite)
-{
-    pthread_mutex_lock(&writeQueueMutex);
-    writeQueue.push_back(sqlWrite);
-    pthread_cond_signal(&writeQueueCond);
-    pthread_mutex_unlock(&writeQueueMutex);
-}
-
 void Database::flush()
 {
     if (config.dbMultiWrite)
@@ -459,6 +435,8 @@ void Database::flush()
             if (multiWriteProgram.size() > 0)
             {
                 multiWriteProgram += " ON CONFLICT (hash) DO NOTHING;";
+
+                writeLock();
                 
                 // Start a transaction
                 pqxx::work w(*pConnectionWrite);
@@ -469,6 +447,8 @@ void Database::flush()
                 // Commit your transaction
                 w.commit();
 
+                writeUnlock();
+
                 //cout << "Database::flush() sent " << multiWriteProgram << endl;
 
                 multiWriteProgram.clear();
@@ -476,6 +456,8 @@ void Database::flush()
             if (multiWriteNodes.size() > 0)
             {
                 multiWriteNodes += " ON CONFLICT (hash) DO NOTHING;";
+
+                writeLock();
                 
                 // Start a transaction
                 pqxx::work w(*pConnectionWrite);
@@ -485,6 +467,8 @@ void Database::flush()
 
                 // Commit your transaction
                 w.commit();
+
+                writeUnlock();
 
                 //cout << "Database::flush() sent " << multiWriteNodes << endl;
 
@@ -496,13 +480,6 @@ void Database::flush()
             cerr << "Error: Database::flush() execute query exception: " << e.what() << endl;
         }
         multiWriteUnlock();
-    }
-    else if (config.dbAsyncWrite)
-    {
-        pthread_mutex_lock(&writeQueueMutex);
-        while (writeQueue.size() > 0)
-            pthread_cond_wait(&emptyWriteQueueCond, &writeQueueMutex);
-        pthread_mutex_unlock(&writeQueueMutex);
     }
 }
 
@@ -526,55 +503,6 @@ void Database::commit()
 }
 
 #endif
-
-void Database::processWriteQueue()
-{
-    string writeQuery;
-
-    cout << "Database::processWriteQueue() started" << endl;
-
-    while (true)
-    {
-        pthread_mutex_lock(&writeQueueMutex);
-
-        // Wait for the pending writes in the queue, if there are no more pending writes
-        if (writeQueue.size() == 0)
-        {
-            pthread_cond_signal(&emptyWriteQueueCond);
-            pthread_cond_wait(&writeQueueCond, &writeQueueMutex);
-        }
-
-        // Check that the pending writes queue is not empty
-        if (writeQueue.size() > 0)
-        {
-            try
-            {
-                // Get the query for the pending write
-                writeQuery = writeQueue[0];
-                writeQueue.erase(writeQueue.begin());
-                pthread_mutex_unlock(&writeQueueMutex);
-
-                // Start a transaction
-                pqxx::work w(*pConnectionWrite);
-
-                // Execute the query
-                pqxx::result res = w.exec(writeQuery);
-
-                // Commit your transaction
-                w.commit();
-            }
-            catch (const std::exception &e)
-            {
-                cerr << "Error: Database::processWriteQueue() execute query exception: " << e.what() << endl;
-            }
-        }
-        else
-        {
-            cout << "Database::processWriteQueue() found pending writes queue empty, so ignoring" << endl;
-            pthread_mutex_unlock(&writeQueueMutex);
-        }
-    }
-}
 
 void Database::printTree(const string &root, string prefix)
 {
@@ -669,23 +597,14 @@ void Database::printTree(const string &root, string prefix)
 Database::~Database()
 {
     if (pConnectionWrite != NULL)
-        delete pConnectionWrite;
-    if (pConnectionRead != NULL)
-        delete pConnectionRead;
-
-    if (config.dbAsyncWrite)
     {
-        pthread_mutex_destroy(&writeQueueMutex);
-        pthread_cond_destroy(&writeQueueCond);
-        pthread_cond_destroy(&emptyWriteQueueCond);
+        delete pConnectionWrite;
     }
-}
 
-void *asyncDatabaseWriteThread(void *arg)
-{
-    Database *db = (Database *)arg;
-    db->processWriteQueue();
-    return NULL;
+    if (pConnectionRead != NULL)
+    {
+        delete pConnectionRead;
+    }
 }
 
 void loadDb2MemCache(const Config config)

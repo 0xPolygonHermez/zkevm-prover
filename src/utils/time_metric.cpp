@@ -5,6 +5,8 @@ using namespace std;
 
 void TimeMetricStorage::add(string &key, uint64_t time, uint64_t times)
 {
+    lock();
+
     unordered_map<string, TimeMetric>::iterator it;
     it = map.find(key);
     if (map.find(key) == map.end())
@@ -19,9 +21,13 @@ void TimeMetricStorage::add(string &key, uint64_t time, uint64_t times)
         it->second.time  += time;
         it->second.times += times;
     }
+
+    unlock();
 }
 void TimeMetricStorage::print(const char * pTitle, uint64_t padding)
 {
+    lock();
+
     if (pTitle != NULL)
     {
         cout << pTitle << ":" << endl;
@@ -30,6 +36,7 @@ void TimeMetricStorage::print(const char * pTitle, uint64_t padding)
     {
         cout << "TimeMetricStorage::print():" << endl;
     }
+    
     uint64_t totalTime = 0;
     uint64_t totalTimes = 0;
     unordered_map<string, TimeMetric>::iterator it;
@@ -54,4 +61,13 @@ void TimeMetricStorage::print(const char * pTitle, uint64_t padding)
     }
 
     cout << total << " time: " << setw(10) << totalTime << " us (100%), called " << setw(8) << totalTimes << " times, so " << setw(7) << totalTime*1000/zkmax(totalTimes,(uint64_t)1) << " ns/time" << endl;
+
+    unlock();
+}
+
+void TimeMetricStorage::clear (void)
+{
+    lock();
+    map.clear();
+    unlock();
 }

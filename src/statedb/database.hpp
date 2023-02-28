@@ -21,19 +21,17 @@ class Database
 private:
     Goldilocks &fr;
     const Config &config;
+
 #ifdef DATABASE_COMMIT
     bool autoCommit = true;
 #endif
-    bool asyncWrite = false;
+
+    // Basic flags
     bool bInitialized = false;
     bool useRemoteDB = false;
     bool useDBMTCache = false;
     bool useDBProgramCache = false;
-    pthread_t writeThread;
-    vector<string> writeQueue;
-    pthread_mutex_t writeQueueMutex; // Mutex to protect writeQueue list
-    pthread_cond_t writeQueueCond; // Cond to signal when queue has new items (no empty)
-    pthread_cond_t emptyWriteQueueCond; // Cond to signal when queue is empty
+
 #ifdef DATABASE_COMMIT
     pqxx::work* transaction = NULL;
 #endif
@@ -62,26 +60,32 @@ private:
     void initRemote(void);
     zkresult readRemote(bool bProgram, const string &key, string &value);
     zkresult writeRemote(bool bProgram, const string &key, const string &value);
-    void addWriteQueue(const string sqlWrite);
-    void signalEmptyWriteQueue() {};
 
 public:
+    // Cache static instances
     static DatabaseMTCache dbMTCache;
     static DatabaseProgramCache dbProgramCache;
 
+    // Constructor and destructor
     Database(Goldilocks &fr, const Config &config) : fr(fr), config(config) {};
     ~Database();
+
+    // Basic methods
     void init(void);
     zkresult read(const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog);
     zkresult write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent);
     zkresult getProgram(const string &_key, vector<uint8_t> &value, DatabaseMap *dbReadLog);
     zkresult setProgram(const string &_key, const vector<uint8_t> &value, const bool persistent);
-    void processWriteQueue();
+
 #ifdef DATABASE_COMMIT
     void setAutoCommit(const bool autoCommit);
     void commit();
 #endif
+
+    // Flush multi write pending requests
     void flush();
+
+    // Print tree
     void printTree(const string &root, string prefix = "");
 };
 

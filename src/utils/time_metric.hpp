@@ -17,15 +17,32 @@ class TimeMetric
 
 class TimeMetricStorage
 {
-public:
+private:
+
+    // Lock
+    pthread_mutex_t mutex; // Mutex to protect multithread access
+    void lock(void) { pthread_mutex_lock(&mutex); };
+    void unlock(void) { pthread_mutex_unlock(&mutex); };
+
+    // Data
     unordered_map<string, TimeMetric> map;
+
+public:
+
+    TimeMetricStorage()
+    {
+        pthread_mutex_init(&mutex, NULL);
+    }
+    
     void add(const char * pChar, uint64_t time, uint64_t times=1)
     {
         string key = pChar;
         add(key, time, times);
     }
-    void add(string &key, uint64_t time, uint64_t times=1);
-    void print(const char * pTitle, uint64_t padding = 32);
+    
+    void add   (string &key, uint64_t time, uint64_t times=1);
+    void print (const char * pTitle, uint64_t padding = 32);
+    void clear (void);
 };
 
 #endif

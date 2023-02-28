@@ -170,7 +170,7 @@ void StateDB::flush()
 #ifdef LOG_TIME_STATISTICS_STATEDB
     tms.add("flush", TimeDiff(t));
     tms.print("StateDB");
-    tms.map.clear();
+    tms.clear();
 #endif
 }
 
