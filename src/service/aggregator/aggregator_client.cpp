@@ -426,34 +426,7 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
                     aggregator::v1::FinalProof * pFinalProof = new aggregator::v1::FinalProof();
                     zkassert(pFinalProof != NULL);
 
-                    // Convert the returned Proof to aggregator::Proof
-
-                    aggregator::v1::Proof * pProofProver = new aggregator::v1::Proof();
-                    zkassert (pProofProver != NULL);
-
-                    // Set proofA
-                    for (uint64_t i=0; i<pProverRequest->proof.proofA.size(); i++)
-                    {
-                        pProofProver->add_proof_a(pProverRequest->proof.proofA[i]);
-                    }
-
-                    // Set proofB
-                    for (uint64_t i=0; i<pProverRequest->proof.proofB.size(); i++)
-                    {
-                        aggregator::v1::ProofB *pProofB = pProofProver->add_proof_b();
-                        for (uint64_t j=0; j<pProverRequest->proof.proofB[i].proof.size(); j++)
-                        {
-                            pProofB->add_proofs(pProverRequest->proof.proofB[i].proof[j]);
-                        }
-                    }
-
-                    // Set proofC
-                    for (uint64_t i=0; i<pProverRequest->proof.proofC.size(); i++)
-                    {
-                        pProofProver->add_proof_c(pProverRequest->proof.proofC[i]);
-                    }
-
-                    pFinalProof->set_allocated_proof(pProofProver);
+                    pFinalProof->set_proof(pProverRequest->proof.getStringProof());
                     
                     // Set public inputs extended
                     aggregator::v1::PublicInputs* pPublicInputs = new(aggregator::v1::PublicInputs);

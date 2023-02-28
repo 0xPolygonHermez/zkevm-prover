@@ -6,7 +6,7 @@
 #include "main_sm/fork_1/main/context.hpp"
 #include "main_sm/fork_1/main/rom_command.hpp"
 #include "main_sm/fork_1/main/rom_line.hpp"
-#include "main_sm/fork_1/main/time_metric.hpp"
+#include "utils/time_metric.hpp"
 #include "goldilocks_base_field.hpp"
 #include "config.hpp"
 #include "full_tracer_interface.hpp"

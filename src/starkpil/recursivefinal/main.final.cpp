@@ -190,7 +190,7 @@ namespace CircomFinal
         errStrStream << "Invalid JSON type\n";
         throw std::runtime_error(errStrStream.str());
       }
-      Fr_str2element(&v, s.c_str(), base);
+      Fr_str2element(&v, s.c_str());
       vval.push_back(v);
     }
     else

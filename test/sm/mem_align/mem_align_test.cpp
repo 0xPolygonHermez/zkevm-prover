@@ -24,8 +24,8 @@ void MemAlignSMTest (Goldilocks &fr, Config &config)
     cout << "MemAlignSMTest starting..." << endl;
 
     Smt smt(fr);
-    Database db(fr);
-    db.init(config);
+    Database db(fr, config);
+    db.init();
 
     vector<MemAlignAction> input;
 

@@ -27,6 +27,8 @@
 //#define LOG_FILENAME // If defined, logs ROM compilation file name and line number
 #define LOG_TIME // If defined, logs time differences to measure performance
 //#define LOG_TIME_STATISTICS // If defined, generates main executor statistics for main operations
+#define LOG_TIME_STATISTICS_STATEDB_REMOTE // If defined, generates remote statedb statistics
+#define LOG_TIME_STATISTICS_STATEDB // If defined, generates statedb statistics
 //#define LOG_TXS
 //#define LOG_SERVICE
 #define LOG_SERVICE_EXECUTOR_INPUT
@@ -52,5 +54,10 @@
 /* Prover defines */
 //#define PROVER_USE_PROOF_GOOD_JSON
 //#define PROVER_INJECT_ZKIN_JSON
+
+/* State DB*/
+//#define STATEDB_LOCK // If defined, the StateDB class will use a lock in all its methods, i.e. they will be serialized
+//#define DATABASE_COMMIT // If defined, the Database class can be configured to autocommit, or explicitly commit(); used for testing only
+#define DATABASE_USE_CACHE // If defined, the Database class uses a cache
 
 #endif

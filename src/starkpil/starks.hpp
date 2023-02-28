@@ -29,6 +29,7 @@ class Starks
 public:
     const Config &config;
     StarkInfo starkInfo;
+    uint64_t nrowsStepBatch;
 
 private:
     void *pConstPolsAddress;
@@ -80,6 +81,7 @@ public:
                                                                            pAddress(_pAddress),
                                                                            x(config.generateProof() ? N << (starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits) : 0, config.generateProof() ? FIELD_EXTENSION : 0)
     {
+        nrowsStepBatch = 1;
         // Avoid unnecessary initialization if we are not going to generate any proof
         if (!config.generateProof())
             return;
@@ -166,7 +168,6 @@ public:
         cm4_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm4_2ns]];
         p_q_2ns = &mem[starkInfo.mapOffsets.section[eSection::q_2ns]];
         p_f_2ns = &mem[starkInfo.mapOffsets.section[eSection::f_2ns]];
-
 
         *x[0] = Goldilocks::shift();
 

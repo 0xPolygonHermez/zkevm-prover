@@ -524,11 +524,32 @@ int main(int argc, char **argv)
     TimerStopAndLog(PROVER_CONSTRUCTOR);
 
     /* INIT DB CACHE */
-    if (config.loadDBToMemCache && (config.runAggregatorClient || config.runExecutorServer || config.runStateDBServer))
+    if (config.databaseURL != "local") // remote DB
     {
-        StateDB stateDB(fr, config);
-        stateDB.loadDB2MemCache();
-    }
+        Database::dbMTCache.setCacheSize(config.dbMTCacheSize*1024*1024);
+        Database::dbProgramCache.setCacheSize(config.dbProgramCacheSize*1024*1024);
+
+        if (config.loadDBToMemCache && (config.runAggregatorClient || config.runExecutorServer || config.runStateDBServer))
+        {        
+            // if we have a db cache enabled
+            if ((Database::dbMTCache.enabled()) || (Database::dbProgramCache.enabled()))
+            {
+                if (config.loadDBToMemCacheInParallel) {
+                    // Run thread that loads the DB into the dbCache
+                    std::thread loadDBThread (loadDb2MemCache, config);
+                    loadDBThread.detach();
+                } else {
+                    loadDb2MemCache(config);
+                }
+            }
+        }
+    } 
+    else 
+    {
+        // set no limit for the db caches as we are using local (in memory) db
+        Database::dbMTCache.setCacheSize(-1); 
+        Database:: dbProgramCache.setCacheSize(-1);
+    }    
 
     /* SERVERS */
 
@@ -730,7 +751,7 @@ int main(int argc, char **argv)
         zkassert(pExecutorClient != NULL);
         pExecutorClient->waitForThread();
         sleep(1);
-        exit(0);
+        return 0;
     }
 
     // Wait for the executor client thread to end
@@ -740,7 +761,7 @@ int main(int argc, char **argv)
         pExecutorClient->waitForThreads();
         cout << "All executor client threads have completed" << endl;
         sleep(1);
-        exit(0);
+        return 0;
     }
 
     // Wait for the executor server thread to end
@@ -751,7 +772,7 @@ int main(int argc, char **argv)
     }
 
     // Wait for StateDBServer thread to end
-    if (config.runStateDBServer)
+    if (config.runStateDBServer && !config.runStateDBTest)
     {
         zkassert(pStateDBServer != NULL);
         pStateDBServer->waitForThread();
@@ -763,7 +784,7 @@ int main(int argc, char **argv)
         zkassert(pAggregatorClient != NULL);
         pAggregatorClient->waitForThread();
         sleep(1);
-        exit(0);
+        return 0;
     }
 
     // Wait for the aggregator client mock thread to end
@@ -772,7 +793,7 @@ int main(int argc, char **argv)
         zkassert(pAggregatorClientMock != NULL);
         pAggregatorClientMock->waitForThread();
         sleep(1);
-        exit(0);
+        return 0;
     }
 
     // Wait for the aggregator server thread to end

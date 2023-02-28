@@ -4,37 +4,37 @@
 #include <map>
 #include <vector>
 #include <memory>
-// NEW
-#include <sys/stat.h>
 
-namespace BinFileUtils {
-    
-    class BinFile {
+namespace BinFileUtils
+{
+
+    class BinFile
+    {
 
         void *addr;
         u_int64_t size;
         u_int64_t pos;
 
-        class Section {
+        class Section
+        {
             void *start;
             u_int64_t size;
 
         public:
-
             friend BinFile;
-            Section(void *_start, u_int64_t _size)  : start(_start), size(_size) {};
+            Section(void *_start, u_int64_t _size) : start(_start), size(_size){};
         };
 
-        std::map<int,std::vector<Section>> sections;
+        std::map<int, std::vector<Section>> sections;
         std::string type;
         u_int32_t version;
 
         Section *readingSection;
 
-
     public:
-
+        BinFile(void *data, uint64_t size, std::string type, uint32_t maxVersion);
         BinFile(std::string fileName, std::string type, uint32_t maxVersion);
+
         ~BinFile();
 
         void *getSetcionData(u_int32_t sectionId, u_int32_t sectionPos = 0);

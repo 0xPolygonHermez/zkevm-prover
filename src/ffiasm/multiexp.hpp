@@ -15,25 +15,34 @@ class ParallelMultiexp {
 
     typename Curve::PointAffine *bases;
     uint8_t* scalars;
-    uint32_t scalarSize;
-    uint32_t n;
-    uint32_t nThreads;
-    uint32_t bitsPerChunk;
+    uint64_t scalarSize;
+    uint64_t n;
+    uint64_t nThreads;
+    uint64_t bitsPerChunk;
     uint64_t accsPerChunk;
-    uint32_t nChunks;
+    uint64_t nChunks;
     Curve &g;
     PaddedPoint *accs;
 
     void initAccs();
 
-    uint32_t getChunk(uint32_t scalarIdx, uint32_t chunkIdx);
-    void processChunk(uint32_t idxChunk);
+    uint64_t getChunk(uint64_t scalarIdx, uint64_t chunkIdx);
+    void processChunk(uint64_t idxChunk);
+    void processChunk(uint64_t idxChunk, uint64_t nx, uint64_t x[]);
     void packThreads();
-    void reduce(typename Curve::Point &res, uint32_t nBits);
+    void reduce(typename Curve::Point &res, uint64_t nBits);
 
 public:
     ParallelMultiexp(Curve &_g): g(_g) {}
-    void multiexp(typename Curve::Point &r, typename Curve::PointAffine *_bases, uint8_t* _scalars, uint32_t _scalarSize, uint32_t _n, uint32_t _nThreads=0);
+    void multiexp(typename Curve::Point &r, typename Curve::PointAffine *_bases, uint8_t* _scalars, uint64_t _scalarSize, uint64_t _n, uint64_t _nThreads=0);
+    void multiexp(typename Curve::Point &r,
+                  typename Curve::PointAffine *_bases,
+                  uint8_t* _scalars,
+                  uint64_t _scalarSize,
+                  uint64_t _n,
+                  uint64_t nx,
+                  uint64_t x[],
+                  uint64_t _nThreads=0);
 
 };
 

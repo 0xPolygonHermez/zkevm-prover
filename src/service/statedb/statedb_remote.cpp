@@ -18,8 +18,21 @@ StateDBRemote::StateDBRemote (Goldilocks &fr, const Config &config) : fr(fr), co
     stub = new statedb::v1::StateDBService::Stub(channel);
 }
 
+StateDBRemote::~StateDBRemote()
+{
+    delete stub;
+    
+#ifdef LOG_TIME_STATISTICS_STATEDB_REMOTE
+    tms.print("StateDBRemote");
+#endif    
+}
+
 zkresult StateDBRemote::set (const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, Goldilocks::Element (&newRoot)[4], SmtSetResult *result, DatabaseMap *dbReadLog)
 {
+#ifdef LOG_TIME_STATISTICS_STATEDB_REMOTE
+    gettimeofday(&t, NULL);
+#endif
+
     ::grpc::ClientContext context;
     ::statedb::v1::SetRequest request;
     ::statedb::v1::SetResponse response;
@@ -78,11 +91,19 @@ zkresult StateDBRemote::set (const Goldilocks::Element (&oldRoot)[4], const Gold
         dbReadLog->add(mtMap);
     }
 
+#ifdef LOG_TIME_STATISTICS_STATEDB_REMOTE
+    tms.add("set", TimeDiff(t));
+#endif
+
     return static_cast<zkresult>(response.result().code());
 }
 
 zkresult StateDBRemote::get (const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtGetResult *result, DatabaseMap *dbReadLog)
 {
+#ifdef LOG_TIME_STATISTICS_STATEDB_REMOTE
+    gettimeofday(&t, NULL);
+#endif
+
     ::grpc::ClientContext context;
     ::statedb::v1::GetRequest request;
     ::statedb::v1::GetResponse response;
@@ -136,11 +157,19 @@ zkresult StateDBRemote::get (const Goldilocks::Element (&root)[4], const Goldilo
         dbReadLog->add(mtMap);
     }
 
+#ifdef LOG_TIME_STATISTICS_STATEDB_REMOTE
+    tms.add("get", TimeDiff(t));
+#endif
+
     return static_cast<zkresult>(response.result().code());
 }
 
 zkresult StateDBRemote::setProgram (const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const bool persistent)
 {
+#ifdef LOG_TIME_STATISTICS_STATEDB_REMOTE
+    gettimeofday(&t, NULL);
+#endif
+
     ::grpc::ClientContext context;
     ::statedb::v1::SetProgramRequest request;
     ::statedb::v1::SetProgramResponse response;
@@ -163,11 +192,19 @@ zkresult StateDBRemote::setProgram (const Goldilocks::Element (&key)[4], const v
         return ZKR_STATEDB_GRPC_ERROR;
     }
 
+#ifdef LOG_TIME_STATISTICS_STATEDB_REMOTE
+    tms.add("setProgram", TimeDiff(t));
+#endif
+
     return static_cast<zkresult>(response.result().code());
 }
 
 zkresult StateDBRemote::getProgram (const Goldilocks::Element (&key)[4], vector<uint8_t> &data, DatabaseMap *dbReadLog)
 {
+#ifdef LOG_TIME_STATISTICS_STATEDB_REMOTE
+    gettimeofday(&t, NULL);
+#endif
+
     ::grpc::ClientContext context;
     ::statedb::v1::GetProgramRequest request;
     ::statedb::v1::GetProgramResponse response;
@@ -194,11 +231,18 @@ zkresult StateDBRemote::getProgram (const Goldilocks::Element (&key)[4], vector<
         dbReadLog->add(fea2string(fr, key), data);
     }
 
+#ifdef LOG_TIME_STATISTICS_STATEDB_REMOTE
+    tms.add("getProgram", TimeDiff(t));
+#endif
+
     return static_cast<zkresult>(response.result().code());
 }
 
 void StateDBRemote::loadDB(const DatabaseMap::MTMap &input, const bool persistent)
 {
+#ifdef LOG_TIME_STATISTICS_STATEDB_REMOTE
+    gettimeofday(&t, NULL);
+#endif
     ::grpc::ClientContext context;
     ::statedb::v1::LoadDBRequest request;
     ::google::protobuf::Empty response;
@@ -210,11 +254,18 @@ void StateDBRemote::loadDB(const DatabaseMap::MTMap &input, const bool persisten
     grpc::Status s = stub->LoadDB(&context, request, &response);
     if (s.error_code() != grpc::StatusCode::OK) {
         cerr << "Error: StateDBRemote:loadDB() GRPC error(" << s.error_code() << "): " << s.error_message() << endl;
-    }    
+    }
+
+#ifdef LOG_TIME_STATISTICS_STATEDB_REMOTE
+    tms.add("loadDB", TimeDiff(t));
+#endif
 }
 
 void StateDBRemote::loadProgramDB(const DatabaseMap::ProgramMap &input, const bool persistent)
 {
+#ifdef LOG_TIME_STATISTICS_STATEDB_REMOTE
+    gettimeofday(&t, NULL);
+#endif
     ::grpc::ClientContext context;
     ::statedb::v1::LoadProgramDBRequest request;
     ::google::protobuf::Empty response;
@@ -226,16 +277,27 @@ void StateDBRemote::loadProgramDB(const DatabaseMap::ProgramMap &input, const bo
     grpc::Status s = stub->LoadProgramDB(&context, request, &response);
     if (s.error_code() != grpc::StatusCode::OK) {
         cerr << "Error: StateDBRemote:loadProgramDB() GRPC error(" << s.error_code() << "): " << s.error_message() << endl;
-    }       
+    }
+
+#ifdef LOG_TIME_STATISTICS_STATEDB_REMOTE
+    tms.add("loadProgramDB", TimeDiff(t));
+#endif
 }
 
 void StateDBRemote::flush()
 {
+#ifdef LOG_TIME_STATISTICS_STATEDB_REMOTE
+    gettimeofday(&t, NULL);
+#endif
     ::grpc::ClientContext context;
     ::google::protobuf::Empty request;
     ::google::protobuf::Empty response;
     grpc::Status s = stub->Flush(&context, request, &response);
     if (s.error_code() != grpc::StatusCode::OK) {
         cerr << "Error: StateDBRemote:flush() GRPC error(" << s.error_code() << "): " << s.error_message() << endl;
-    }       
+    }
+
+#ifdef LOG_TIME_STATISTICS_STATEDB_REMOTE
+    tms.add("flush", TimeDiff(t));
+#endif
 }

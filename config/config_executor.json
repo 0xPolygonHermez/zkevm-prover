@@ -37,6 +37,10 @@
     "saveFilesInSubfolders": false,
     
     "loadDBToMemCache": true,
+    "loadDBToMemCacheInParallel": false,
+    "dbMTCacheSize": 16384,
+    "dbProgramCacheSize": 16384,
+
     "opcodeTracer": false,
     "logRemoteDbReads": false,
     "logExecutorServerResponses": false,
@@ -78,6 +82,8 @@
     "dbNodesTableName": "state.nodes",
     "dbProgramTableName": "state.program",
     "dbAsyncWrite": false,
+    "dbMultiWrite": true,
+    "dbFlushInParallel": true,
     "cleanerPollingPeriod": 600,
     "requestsPersistence": 3600,
     "maxExecutorThreads": 20,

@@ -143,6 +143,18 @@ void Config::load(json &config)
     if (config.contains("loadDBToMemCache") && config["loadDBToMemCache"].is_boolean())
         loadDBToMemCache = config["loadDBToMemCache"];
 
+    loadDBToMemCacheInParallel = false;
+    if (config.contains("loadDBToMemCacheInParallel") && config["loadDBToMemCacheInParallel"].is_boolean())
+        loadDBToMemCacheInParallel = config["loadDBToMemCacheInParallel"];
+
+    dbMTCacheSize = 0;
+    if (config.contains("dbMTCacheSize") && config["dbMTCacheSize"].is_number())
+        dbMTCacheSize = config["dbMTCacheSize"];
+
+    dbProgramCacheSize = 0;
+    if (config.contains("dbProgramCacheSize") && config["dbProgramCacheSize"].is_number())
+        dbProgramCacheSize = config["dbProgramCacheSize"];
+
     opcodeTracer = false;
     if (config.contains("opcodeTracer") && config["opcodeTracer"].is_boolean())
         opcodeTracer = config["opcodeTracer"];
@@ -241,8 +253,8 @@ void Config::load(json &config)
     recursivefStarkInfo = configPath + "/recursivef/recursivef.starkinfo.json";
     recursivefVerifier = configPath + "/recursivef/recursivef.verifier.dat";
     finalVerifier = configPath + "/final/final.verifier.dat";
-    finalVerkey = configPath + "/final/final.verkey.json";
-    finalStarkZkey = configPath + "/final/final.g16.0001.zkey";
+    finalVerkey = configPath + "/final/final.fflonk.verkey.json";
+    finalStarkZkey = configPath + "/final/final.fflonk.zkey";
 
 
     if (config.contains("rom") && config["rom"].is_string())
@@ -383,6 +395,14 @@ void Config::load(json &config)
     if (config.contains("dbAsyncWrite") && config["dbAsyncWrite"].is_boolean())
         dbAsyncWrite = config["dbAsyncWrite"];
 
+    dbMultiWrite = false;
+    if (config.contains("dbMultiWrite") && config["dbMultiWrite"].is_boolean())
+        dbMultiWrite = config["dbMultiWrite"];
+
+    dbFlushInParallel = false;
+    if (config.contains("dbFlushInParallel") && config["dbFlushInParallel"].is_boolean())
+        dbFlushInParallel = config["dbFlushInParallel"];
+
     if (config.contains("cleanerPollingPeriod") && config["cleanerPollingPeriod"].is_number())
         cleanerPollingPeriod = config["cleanerPollingPeriod"];
 
@@ -478,6 +498,8 @@ void Config::print(void)
         cout << "    saveResponseToFile=true" << endl;
     if (loadDBToMemCache)
         cout << "    loadDBToMemCache=true" << endl;
+    if (loadDBToMemCacheInParallel)
+        cout << "    loadDBToMemCacheInParallel=true" << endl;
     if (opcodeTracer)
         cout << "    opcodeTracer=true" << endl;
     if (logRemoteDbReads)
@@ -533,9 +555,13 @@ void Config::print(void)
     cout << "    dbNodesTableName=" << dbNodesTableName << endl;
     cout << "    dbProgramTableName=" << dbProgramTableName << endl;
     cout << "    dbAsyncWrite=" << to_string(dbAsyncWrite) << endl;
+    cout << "    dbMultiWrite=" << to_string(dbMultiWrite) << endl;
+    cout << "    dbFlushInParallel=" << to_string(dbFlushInParallel) << endl;
     cout << "    cleanerPollingPeriod=" << cleanerPollingPeriod << endl;
     cout << "    requestsPersistence=" << requestsPersistence << endl;
     cout << "    maxExecutorThreads=" << maxExecutorThreads << endl;
     cout << "    maxProverThreads=" << maxProverThreads << endl;
     cout << "    maxStateDBThreads=" << maxStateDBThreads << endl;
+    cout << "    dbMTCacheSize=" << dbMTCacheSize << endl;
+    cout << "    dbProgramCacheSize=" << dbProgramCacheSize << endl;
 }

@@ -51,6 +51,9 @@ public:
     bool saveFilesInSubfolders; // Saves output files in folders per hour, e.g. output/2023/01/10/18
 
     bool loadDBToMemCache;
+    bool loadDBToMemCacheInParallel;
+    int64_t dbMTCacheSize; // Size in MBytes for the cache to store MT records
+    int64_t dbProgramCacheSize; // Size in MBytes for the cache to store Program (SC) records
     bool opcodeTracer;
     bool logRemoteDbReads;
     bool logExecutorServerResponses;
@@ -117,6 +120,8 @@ public:
     string dbNodesTableName;
     string dbProgramTableName;
     bool dbAsyncWrite;
+    bool dbMultiWrite;
+    bool dbFlushInParallel;
     uint64_t cleanerPollingPeriod;
     uint64_t requestsPersistence;
     uint64_t maxExecutorThreads;

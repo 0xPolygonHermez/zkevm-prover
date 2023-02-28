@@ -30,6 +30,8 @@
 #include "recursive1Steps.hpp"
 #include "recursive2Steps.hpp"
 
+#define NROWS_STEPS_ 4 // if AVX is used this must be 4
+
 Prover::Prover(Goldilocks &fr,
                PoseidonGoldilocks &poseidon,
                const Config &config) : fr(fr),
@@ -47,30 +49,34 @@ Prover::Prover(Goldilocks &fr,
         if (config.generateProof())
         {
             zkey = BinFileUtils::openExisting(config.finalStarkZkey, "zkey", 1);
-            zkeyHeader = ZKeyUtils::loadHeader(zkey.get());
-
-            if (mpz_cmp(zkeyHeader->rPrime, altBbn128r) != 0)
+            protocolId = Zkey::getProtocolIdFromZkey(zkey.get());
+            if (Zkey::GROTH16_PROTOCOL_ID == protocolId)
             {
-                throw std::invalid_argument("zkey curve not supported");
-            }
+                zkeyHeader = ZKeyUtils::loadHeader(zkey.get());
 
-            groth16Prover = Groth16::makeProver<AltBn128::Engine>(
-                zkeyHeader->nVars,
-                zkeyHeader->nPublic,
-                zkeyHeader->domainSize,
-                zkeyHeader->nCoefs,
-                zkeyHeader->vk_alpha1,
-                zkeyHeader->vk_beta1,
-                zkeyHeader->vk_beta2,
-                zkeyHeader->vk_delta1,
-                zkeyHeader->vk_delta2,
-                zkey->getSectionData(4), // Coefs
-                zkey->getSectionData(5), // pointsA
-                zkey->getSectionData(6), // pointsB1
-                zkey->getSectionData(7), // pointsB2
-                zkey->getSectionData(8), // pointsC
-                zkey->getSectionData(9)  // pointsH1
-            );
+                if (mpz_cmp(zkeyHeader->rPrime, altBbn128r) != 0)
+                {
+                    throw std::invalid_argument("zkey curve not supported");
+                }
+
+                groth16Prover = Groth16::makeProver<AltBn128::Engine>(
+                    zkeyHeader->nVars,
+                    zkeyHeader->nPublic,
+                    zkeyHeader->domainSize,
+                    zkeyHeader->nCoefs,
+                    zkeyHeader->vk_alpha1,
+                    zkeyHeader->vk_beta1,
+                    zkeyHeader->vk_beta2,
+                    zkeyHeader->vk_delta1,
+                    zkeyHeader->vk_delta2,
+                    zkey->getSectionData(4), // Coefs
+                    zkey->getSectionData(5), // pointsA
+                    zkey->getSectionData(6), // pointsB1
+                    zkey->getSectionData(7), // pointsB2
+                    zkey->getSectionData(8), // pointsC
+                    zkey->getSectionData(9)  // pointsH1
+                );
+            }
 
             lastComputedRequestEndTime = 0;
 
@@ -108,6 +114,7 @@ Prover::Prover(Goldilocks &fr,
             pAddressStarksRecursiveF = (void *)malloc(_starkInfoRecursiveF.mapTotalN * sizeof(Goldilocks::Element));
 
             starkZkevm = new Starks(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo}, pAddress);
+            starkZkevm->nrowsStepBatch = NROWS_STEPS_;
             starksC12a = new Starks(config, {config.c12aConstPols, config.mapConstPolsFile, config.c12aConstantsTree, config.c12aStarkInfo}, pAddress);
             starksRecursive1 = new Starks(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree, config.recursive1StarkInfo}, pAddress);
             starksRecursive2 = new Starks(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree, config.recursive2StarkInfo}, pAddress);
@@ -841,33 +848,62 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     json2file(publicJson, pProverRequest->publicsOutputFile());
     TimerStopAndLog(SAVE_PUBLICS_JSON);
 
-    // Generate Groth16 via rapid SNARK
-    TimerStart(RAPID_SNARK);
-    json jsonProof;
-    try
+    if (Zkey::GROTH16_PROTOCOL_ID != protocolId)
     {
-        auto proof = groth16Prover->prove(pWitnessFinal);
-        jsonProof = proof->toJson();
+        TimerStart(RAPID_SNARK);
+        try
+        {
+            auto prover = new Fflonk::FflonkProver<AltBn128::Engine>(AltBn128::Engine::engine);
+            auto [jsonProof, publicSignalsJson] = prover->prove(zkey.get(), pWitnessFinal);
+            // Save proof to file
+            if (config.saveProofToFile)
+            {
+                json2file(jsonProof, pProverRequest->filePrefix + "final_proof.proof.json");
+            }
+            TimerStopAndLog(RAPID_SNARK);
+
+            // Populate Proof with the correct data
+            PublicInputsExtended publicInputsExtended;
+            publicInputsExtended.publicInputs = pProverRequest->input.publicInputsExtended.publicInputs;
+            pProverRequest->proof.load(jsonProof, publicSignalsJson);
+
+            pProverRequest->result = ZKR_SUCCESS;
+        }
+        catch (std::exception &e)
+        {
+            cerr << "Error: Prover::genProof() got exception in rapid SNARK:" << e.what() << '\n';
+            exitProcess();
+        }
     }
-    catch (std::exception &e)
+    else
     {
-        cerr << "Error: Prover::genProof() got exception in rapid SNARK:" << e.what() << '\n';
-        exitProcess();
+        // Generate Groth16 via rapid SNARK
+        TimerStart(RAPID_SNARK);
+        json jsonProof;
+        try
+        {
+            auto proof = groth16Prover->prove(pWitnessFinal);
+            jsonProof = proof->toJson();
+        }
+        catch (std::exception &e)
+        {
+            cerr << "Error: Prover::genProof() got exception in rapid SNARK:" << e.what() << '\n';
+            exitProcess();
+        }
+        TimerStopAndLog(RAPID_SNARK);
+
+        // Save proof to file
+        if (config.saveProofToFile)
+        {
+            json2file(jsonProof, pProverRequest->filePrefix + "final_proof.proof.json");
+        }
+        // Populate Proof with the correct data
+        PublicInputsExtended publicInputsExtended;
+        publicInputsExtended.publicInputs = pProverRequest->input.publicInputsExtended.publicInputs;
+        pProverRequest->proof.load(jsonProof, publicJson);
+
+        pProverRequest->result = ZKR_SUCCESS;
     }
-    TimerStopAndLog(RAPID_SNARK);
-
-    // Save proof to file
-    if (config.saveProofToFile)
-    {
-        json2file(jsonProof, pProverRequest->filePrefix + "final_proof.proof.json");
-    }
-
-    // Populate Proof with the correct data
-    PublicInputsExtended publicInputsExtended;
-    publicInputsExtended.publicInputs = pProverRequest->input.publicInputsExtended.publicInputs;
-    pProverRequest->proof.load(jsonProof, publicInputsExtended);
-
-    pProverRequest->result = ZKR_SUCCESS;
 
     /***********/
     /* Cleanup */

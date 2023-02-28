@@ -97,9 +97,11 @@ public:
     RawFq();
     ~RawFq();
 
-    Element &zero() { return fZero; };
-    Element &one() { return fOne; };
-    Element &negOne() { return fNegOne; };
+    const Element &zero() { return fZero; };
+    const Element &one() { return fOne; };
+    const Element &negOne() { return fNegOne; };
+    Element set(int value);
+    void set(Element &r, int value);
 
     void fromString(Element &r, const std::string &n, uint32_t radix = 10);
     std::string toString(const Element &a, uint32_t radix = 10);
@@ -109,6 +111,22 @@ public:
     void inline add(Element &r, const Element &a, const Element &b) { Fq_rawAdd(r.v, a.v, b.v); };
     void inline sub(Element &r, const Element &a, const Element &b) { Fq_rawSub(r.v, a.v, b.v); };
     void inline mul(Element &r, const Element &a, const Element &b) { Fq_rawMMul(r.v, a.v, b.v); };
+
+    Element inline add(const Element &a, const Element &b) { Element r; Fq_rawAdd(r.v, a.v, b.v); return r;};
+    Element inline sub(const Element &a, const Element &b) { Element r; Fq_rawSub(r.v, a.v, b.v); return r;};
+    Element inline mul(const Element &a, const Element &b) { Element r; Fq_rawMMul(r.v, a.v, b.v); return r;};
+
+    Element inline neg(const Element &a) { Element r; Fq_rawNeg(r.v, a.v); return r; };
+    Element inline square(const Element &a) { Element r; Fq_rawMSquare(r.v, a.v); return r; };
+
+    Element inline add(int a, const Element &b) { return add(set(a), b);};
+    Element inline sub(int a, const Element &b) { return sub(set(a), b);};
+    Element inline mul(int a, const Element &b) { return mul(set(a), b);};
+
+    Element inline add(const Element &a, int b) { return add(a, set(b));};
+    Element inline sub(const Element &a, int b) { return sub(a, set(b));};
+    Element inline mul(const Element &a, int b) { return mul(a, set(b));};
+    
     void inline mul1(Element &r, const Element &a, uint64_t b) { Fq_rawMMul1(r.v, a.v, b); };
     void inline neg(Element &r, const Element &a) { Fq_rawNeg(r.v, a.v); };
     void inline square(Element &r, const Element &a) { Fq_rawMSquare(r.v, a.v); };
@@ -124,6 +142,11 @@ public:
     void toMpz(mpz_t r, const Element &a);
     void fromMpz(Element &a, const mpz_t r);
 
+    int toRprBE(const Element &element, uint8_t *data, int bytes);
+    int fromRprBE(Element &element, const uint8_t *data, int bytes);
+    
+    int bytes ( void ) { return Fq_N64 * 8; };
+    
     void fromUI(Element &r, unsigned long int v);
 
     static RawFq field;
