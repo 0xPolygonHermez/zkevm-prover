@@ -248,6 +248,21 @@ void ensureDirectoryExists (const string &fileName)
     }
 }
 
+uint64_t getNumberOfFileDescriptors (void)
+{
+    auto iterator = std::filesystem::directory_iterator("/proc/self/fd");
+    uint64_t result = 0;
+    for (auto& i : iterator)
+    {
+        if (i.exists())
+        {
+            result++;
+        }
+        //cout << "getNumberOfFileDescriptors() i=" << i << " file=" << i.path() << endl;
+    }
+    return result;
+}
+
 void *mapFileInternal(const string &fileName, uint64_t size, bool bOutput, bool bMapInputFile)
 {
     // If input, check the file size is the same as the expected polsSize

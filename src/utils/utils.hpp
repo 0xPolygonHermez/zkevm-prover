@@ -51,6 +51,9 @@ bool fileExists (const string &fileName);
 // Ensure directory exists
 void ensureDirectoryExists (const string &fileName);
 
+// Get number of open file descriptors
+uint64_t getNumberOfFileDescriptors (void);
+
 // Maps memory into a file
 void * mapFile (const string &fileName, uint64_t size, bool bOutput);
 void unmapFile (void * pAddress, uint64_t size);
