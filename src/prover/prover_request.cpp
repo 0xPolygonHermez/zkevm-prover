@@ -3,6 +3,7 @@
 #include "exit_process.hpp"
 #include "main_sm/fork_0/main/full_tracer.hpp"
 #include "main_sm/fork_1/main/full_tracer.hpp"
+#include "main_sm/fork_2/main/full_tracer.hpp"
 
 ProverRequest::ProverRequest (Goldilocks &fr, const Config &config, tProverRequestType type) :
     fr(fr),
@@ -77,6 +78,17 @@ void ProverRequest::CreateFullTracer(void)
             result = ZKR_SUCCESS;
             return;
         }
+        case 2:
+        {
+            pFullTracer = new fork_2::FullTracer(fr);
+            if (pFullTracer == NULL)
+            {
+                cerr << "Error: ProverRequest::CreateFullTracer() failed calling new fork_2::FullTracer()" << endl;
+                exitProcess();
+            }
+            result = ZKR_SUCCESS;
+            return;
+        }
         default:
         {
             cerr << "Error: ProverRequest::CreateFullTracer() failed calling invalid fork ID=" << input.publicInputsExtended.publicInputs.forkID << endl;
@@ -102,6 +114,12 @@ void ProverRequest::DestroyFullTracer(void)
             break;
         }
         case 1:
+        {
+            delete pFullTracer;
+            pFullTracer = NULL; 
+            break;
+        }
+        case 2:
         {
             delete pFullTracer;
             pFullTracer = NULL; 
