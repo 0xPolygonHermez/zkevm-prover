@@ -56,7 +56,7 @@ void ProverRequest::CreateFullTracer(void)
     }
     switch (input.publicInputsExtended.publicInputs.forkID)
     {
-        case 0:
+        case 0: // fork_0
         {
             pFullTracer = new fork_0::FullTracer(fr);
             if (pFullTracer == NULL)
@@ -67,7 +67,7 @@ void ProverRequest::CreateFullTracer(void)
             result = ZKR_SUCCESS;
             return;
         }
-        case 1:
+        case 1: // fork_1
         {
             pFullTracer = new fork_1::FullTracer(fr);
             if (pFullTracer == NULL)
@@ -78,7 +78,7 @@ void ProverRequest::CreateFullTracer(void)
             result = ZKR_SUCCESS;
             return;
         }
-        case 2:
+        case 2: // fork_2
         {
             pFullTracer = new fork_2::FullTracer(fr);
             if (pFullTracer == NULL)
@@ -107,19 +107,19 @@ void ProverRequest::DestroyFullTracer(void)
     }
     switch (input.publicInputsExtended.publicInputs.forkID)
     {
-        case 0:
+        case 0: // fork_0
         {
             delete pFullTracer;
             pFullTracer = NULL; 
             break;
         }
-        case 1:
+        case 1: // fork_1
         {
             delete pFullTracer;
             pFullTracer = NULL; 
             break;
         }
-        case 2:
+        case 2: // fork_2
         {
             delete pFullTracer;
             pFullTracer = NULL; 

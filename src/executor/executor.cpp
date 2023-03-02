@@ -14,7 +14,7 @@ void Executor::process_batch (ProverRequest &proverRequest)
     // Execute the Main State Machine
     switch (proverRequest.input.publicInputsExtended.publicInputs.forkID)
     {
-        case 0:
+        case 0: // fork_0
         {
             if (config.useMainExecGenerated)
             {
@@ -41,7 +41,7 @@ void Executor::process_batch (ProverRequest &proverRequest)
             }
             return;
         }
-        case 1:
+        case 1: // fork_1
         {
             if (config.useMainExecGenerated)
             {
@@ -68,7 +68,7 @@ void Executor::process_batch (ProverRequest &proverRequest)
             }
             return;
         }
-        case 2:
+        case 2: // fork_2
         {
             if (config.useMainExecGenerated)
             {
