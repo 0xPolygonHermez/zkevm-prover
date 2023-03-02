@@ -1,6 +1,6 @@
 #!/bin/bash -x
 
-VERSION=v0.8.0.0-rc.1-fork.1
+VERSION=v0.8.0.0-rc.2-forkid.2
 FORK_VERSION=$(sed -e 's/.*-fork.//g' <<< ${VERSION})
 FORK_ID=fork_$FORK_VERSION
 
