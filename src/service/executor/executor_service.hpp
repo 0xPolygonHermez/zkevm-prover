@@ -33,10 +33,22 @@ class ExecutorServiceImpl final : public executor::v1::ExecutorService::Service
     pthread_mutex_t mutex; // Mutex to protect the access to the throughput attributes
 
 public:
-    ExecutorServiceImpl (Goldilocks &fr, Config &config, Prover &prover) : fr(fr), config(config), prover(prover), counter(0), totalGas(0), totalBytes(0), totalTime(0), lastTotalGas(0)
+    ExecutorServiceImpl (Goldilocks &fr, Config &config, Prover &prover) :
+        fr(fr),
+        config(config),
+        prover(prover),
+        counter(0),
+        totalGas(0),
+        totalBytes(0),
+        totalTX(0),
+        totalTime(0),
+        lastTotalGas(0),
+        lastTotalBytes(0),
+        lastTotalTX(0),
+        totalTPG(0),
+        totalTPB(0),
+        totalTPTX(0)
     {
-        lastTotalTime.tv_sec = 0;
-        lastTotalTime.tv_usec = 0;
         pthread_mutex_init(&mutex, NULL);
         gettimeofday(&lastTotalTime, NULL);
     };

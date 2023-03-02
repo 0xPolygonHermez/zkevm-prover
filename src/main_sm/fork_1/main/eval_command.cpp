@@ -1027,7 +1027,7 @@ void eval_eventLog(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #endif
 
     zkassert(ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID == 1);
-    ((fork_1::FullTracer *)ctx.proverRequest.pFullTracer)->handleEvent(ctx, cmd);
+    cr.zkResult = ((fork_1::FullTracer *)ctx.proverRequest.pFullTracer)->handleEvent(ctx, cmd);
 
     // Return an empty array of field elements
     cr.type = crt_fea;

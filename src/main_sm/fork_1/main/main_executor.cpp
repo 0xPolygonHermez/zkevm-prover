@@ -939,6 +939,17 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         eval_addReadWriteAddress(ctx, scalarD);
                     }
 
+                    // If we just modified a balance
+                    if ( fr.isZero(pols.B0[i]) && fr.isZero(pols.B1[i]) )
+                    {
+                        mpz_class balanceDifference = ctx.lastSWrite.res.newValue - ctx.lastSWrite.res.oldValue;
+                        ctx.totalTransferredBalance += balanceDifference;
+                        //cout << "Set balance: oldValue=" << ctx.lastSWrite.res.oldValue.get_str(10) << 
+                        //        " newValue=" << ctx.lastSWrite.res.newValue.get_str(10) <<
+                        //        " difference=" << balanceDifference.get_str(10) <<
+                        //        " total=" << ctx.totalTransferredBalance.get_str(10) << endl;
+                    }
+
 #ifdef LOG_TIME_STATISTICS
                     mainMetrics.add("SMT Set", TimeDiff(t));
 #endif
@@ -1612,6 +1623,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             incCounter = smtGetResult.proofHashCounter + 2;
             //cout << "smt.get() returns value=" << smtGetResult.value.get_str(16) << endl;
 
+            if (bProcessBatch)
+            {
+                eval_addReadWriteAddress(ctx, smtGetResult.value);
+            }
+
 #ifdef LOG_TIME_STATISTICS
             mainMetrics.add("SMT Get", TimeDiff(t));
 #endif
@@ -1734,7 +1750,21 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     StateDBClientFactory::freeStateDBClient(pStateDB);
                     return;
                 }
+
                 incCounter = ctx.lastSWrite.res.proofHashCounter + 2;
+
+                if (bProcessBatch)
+                {
+                    eval_addReadWriteAddress(ctx, scalarD);
+                }
+
+                // If we just modified a balance
+                if ( fr.isZero(pols.B0[i]) && fr.isZero(pols.B1[i]) )
+                {
+                    mpz_class balanceDifference = ctx.lastSWrite.res.newValue - ctx.lastSWrite.res.oldValue;
+                    ctx.totalTransferredBalance += balanceDifference;
+                }
+
 #ifdef LOG_TIME_STATISTICS
                 mainMetrics.add("SMT Set", TimeDiff(t));
 #endif

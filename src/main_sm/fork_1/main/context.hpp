@@ -117,6 +117,7 @@ public:
     ProverRequest &proverRequest;
     StateDBInterface *pStateDB;
     uint64_t lastStep;
+    mpz_class totalTransferredBalance; // Total transferred balance of all accounts, which should be 0 after any transfer
 
     Context( Goldilocks &fr,
              const Config &config,
