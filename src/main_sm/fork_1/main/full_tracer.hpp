@@ -10,6 +10,7 @@
 #include "goldilocks_base_field.hpp"
 #include "config.hpp"
 #include "full_tracer_interface.hpp"
+#include "zkresult.hpp"
 
 namespace fork_1
 {
@@ -62,7 +63,7 @@ public:
 #endif    
     }
     
-    void handleEvent (Context &ctx, const RomCommand &cmd);
+    zkresult handleEvent (Context &ctx, const RomCommand &cmd);
 
     FullTracer & operator =(const FullTracer & other)
     {

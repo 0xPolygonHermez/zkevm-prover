@@ -44,6 +44,7 @@
     "opcodeTracer": false,
     "logRemoteDbReads": false,
     "logExecutorServerResponses": false,
+    "logExecutorServerTxs": true,
 
     "executorServerPort": 50071,
     "executorROMLineTraces": false,
@@ -82,9 +83,9 @@
     "databaseURL_disabled": "postgresql://statedb:statedb@127.0.0.1:5432/testdb",
     "dbNodesTableName": "state.nodes",
     "dbProgramTableName": "state.program",
-    "dbAsyncWrite": false,
     "dbMultiWrite": true,
     "dbFlushInParallel": true,
+    "dbConnectionsPool": false,
     "cleanerPollingPeriod": 600,
     "requestsPersistence": 3600,
     "maxExecutorThreads": 20,

@@ -978,8 +978,10 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "        return;\n";
                     code += "    }\n";
                     code += "    incCounter = smtGetResult.proofHashCounter + 2;\n";
+
                     if (bFastMode)
                         code += "    eval_addReadWriteAddress(ctx, smtGetResult.value);\n";
+
                     code += "#ifdef LOG_TIME_STATISTICS\n";
                     code += "    mainMetrics.add(\"SMT Get\", TimeDiff(t));\n";
                     code += "#endif\n";
@@ -1080,8 +1082,14 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "        return;\n";
                     code += "    }\n";
                     code += "    incCounter = ctx.lastSWrite.res.proofHashCounter + 2;\n";
+
                     if (bFastMode)
                         code += "    eval_addReadWriteAddress(ctx, scalarD);\n";
+                        
+                    code += "    // If we just modified a balance\n";
+                    code += "    if ( fr.isZero(pols.B0[" + string(bFastMode?"0":"i") + "]) && fr.isZero(pols.B1[" + string(bFastMode?"0":"i") + "]) )\n";
+                    code += "        ctx.totalTransferredBalance += (ctx.lastSWrite.res.newValue - ctx.lastSWrite.res.oldValue);\n";
+
                     code += "#ifdef LOG_TIME_STATISTICS\n";
                     code += "    mainMetrics.add(\"SMT Set\", TimeDiff(t));\n";
                     code += "#endif\n";
@@ -1875,6 +1883,10 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        return;\n";
             code += "    }\n";
             code += "    incCounter = smtGetResult.proofHashCounter + 2;\n";
+                    
+            if (bFastMode)
+                code += "    eval_addReadWriteAddress(ctx, scalarD);\n";
+
             code += "#ifdef LOG_TIME_STATISTICS\n";
             code += "    mainMetrics.add(\"SMT Get\", TimeDiff(t));\n";
             code += "#endif\n";
@@ -2004,6 +2016,14 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "            return;\n";
             code += "        }\n";
             code += "        incCounter = ctx.lastSWrite.res.proofHashCounter + 2;\n";
+                    
+            if (bFastMode)
+                code += "        eval_addReadWriteAddress(ctx, scalarD);\n";
+                        
+            code += "        // If we just modified a balance\n";
+            code += "        if ( fr.isZero(pols.B0[" + string(bFastMode?"0":"i") + "]) && fr.isZero(pols.B1[" + string(bFastMode?"0":"i") + "]) )\n";
+            code += "            ctx.totalTransferredBalance += (ctx.lastSWrite.res.newValue - ctx.lastSWrite.res.oldValue);\n";
+
             code += "#ifdef LOG_TIME_STATISTICS\n";
             code += "        mainMetrics.add(\"SMT Set\", TimeDiff(t));\n";
             code += "#endif\n";
