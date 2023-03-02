@@ -5,6 +5,7 @@
 #include "goldilocks_base_field.hpp"
 #include "main_sm/fork_0/main/main_executor.hpp"
 #include "main_sm/fork_1/main/main_executor.hpp"
+#include "main_sm/fork_2/main/main_executor.hpp"
 #include "sm/storage/storage_executor.hpp"
 #include "sm/memory/memory_executor.hpp"
 #include "sm/binary/binary_executor.hpp"
@@ -25,6 +26,7 @@ public:
     const Config &config;
     
     fork_0::MainExecutor mainExecutor_fork_0;
+    fork_1::MainExecutor mainExecutor_fork_1;
     PROVER_FORK_NAMESPACE::MainExecutor mainExecutor; // Default executor used by prover
     StorageExecutor storageExecutor;
     MemoryExecutor memoryExecutor;
@@ -42,6 +44,7 @@ public:
         fr(fr),
         config(config),
         mainExecutor_fork_0(fr, poseidon, config),
+        mainExecutor_fork_1(fr, poseidon, config),
         mainExecutor(fr, poseidon, config),
         storageExecutor(fr, poseidon, config),
         memoryExecutor(fr, config),

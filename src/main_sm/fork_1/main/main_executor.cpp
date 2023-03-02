@@ -103,7 +103,7 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
 
 MainExecutor::~MainExecutor ()
 {
-    TimerStart(MAIN_EXECUTOR_DESTRUCTOR);
+    TimerStart(MAIN_EXECUTOR_DESTRUCTOR_fork_1);
 
     flushLock();
     for (uint64_t i=0; i<flushQueue.size(); i++)
@@ -112,7 +112,7 @@ MainExecutor::~MainExecutor ()
     }
     flushUnlock();
 
-    TimerStopAndLog(MAIN_EXECUTOR_DESTRUCTOR);
+    TimerStopAndLog(MAIN_EXECUTOR_DESTRUCTOR_fork_1);
 }
 
 void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, MainExecRequired &required)
