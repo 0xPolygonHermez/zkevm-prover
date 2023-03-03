@@ -76,7 +76,7 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
 
     // Load file contents into a json instance
     json romJson;
-    file2json(config.rom, romJson);
+    file2json("src/main_sm/fork_1/scripts/rom.json", romJson);
 
     // Load ROM data from JSON data
     rom.load(fr, romJson);
