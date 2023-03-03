@@ -14,8 +14,10 @@ void ZkevmSteps::step3prev_parser_first_avx(StepsParams &params, uint64_t nrows,
      for (uint64_t i = 0; i < nrows; i += nrowsBatch)
      {
           int i_args = 0;
-          __m256i *tmp1 = new __m256i[20000];
-          Goldilocks3::Element_avx *tmp3 = new Goldilocks3::Element_avx[20000];
+          //__m256i *tmp1 = new __m256i[NTEMP1_];
+          // Goldilocks3::Element_avx *tmp3 = new Goldilocks3::Element_avx[NTEMP3_];
+          __m256i tmp1[NTEMP1_];
+          Goldilocks3::Element_avx tmp3[NTEMP3_];
           uint64_t offsets1[4], offsets2[4];
           uint64_t numpols = params.pConstPols->numPols();
 
@@ -1083,7 +1085,7 @@ void ZkevmSteps::step3prev_parser_first_avx(StepsParams &params, uint64_t nrows,
           if (i_args != NARGS_)
                std::cout << " " << i_args << " - " << NARGS_ << std::endl;
           assert(i_args == NARGS_);
-          delete (tmp1);
-          delete (tmp3);
+          // delete (tmp1);
+          // delete (tmp3);
      }
 }
