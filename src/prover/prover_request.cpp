@@ -3,6 +3,7 @@
 #include "exit_process.hpp"
 #include "main_sm/fork_0/main/full_tracer.hpp"
 #include "main_sm/fork_1/main/full_tracer.hpp"
+#include "main_sm/fork_2/main/full_tracer.hpp"
 
 ProverRequest::ProverRequest (Goldilocks &fr, const Config &config, tProverRequestType type) :
     fr(fr),
@@ -55,7 +56,7 @@ void ProverRequest::CreateFullTracer(void)
     }
     switch (input.publicInputsExtended.publicInputs.forkID)
     {
-        case 0:
+        case 0: // fork_0
         {
             pFullTracer = new fork_0::FullTracer(fr);
             if (pFullTracer == NULL)
@@ -66,12 +67,23 @@ void ProverRequest::CreateFullTracer(void)
             result = ZKR_SUCCESS;
             return;
         }
-        case 1:
+        case 1: // fork_1
         {
             pFullTracer = new fork_1::FullTracer(fr);
             if (pFullTracer == NULL)
             {
                 cerr << "Error: ProverRequest::CreateFullTracer() failed calling new fork_1::FullTracer()" << endl;
+                exitProcess();
+            }
+            result = ZKR_SUCCESS;
+            return;
+        }
+        case 2: // fork_2
+        {
+            pFullTracer = new fork_2::FullTracer(fr);
+            if (pFullTracer == NULL)
+            {
+                cerr << "Error: ProverRequest::CreateFullTracer() failed calling new fork_2::FullTracer()" << endl;
                 exitProcess();
             }
             result = ZKR_SUCCESS;
@@ -95,13 +107,19 @@ void ProverRequest::DestroyFullTracer(void)
     }
     switch (input.publicInputsExtended.publicInputs.forkID)
     {
-        case 0:
+        case 0: // fork_0
         {
             delete pFullTracer;
             pFullTracer = NULL; 
             break;
         }
-        case 1:
+        case 1: // fork_1
+        {
+            delete pFullTracer;
+            pFullTracer = NULL; 
+            break;
+        }
+        case 2: // fork_2
         {
             delete pFullTracer;
             pFullTracer = NULL; 

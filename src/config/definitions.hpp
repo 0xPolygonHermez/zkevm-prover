@@ -3,10 +3,10 @@
 
 #define ADDRESS_GLOBAL_EXIT_ROOT_MANAGER_L2 "0xAE4bB80bE56B819606589DE61d5ec3b522EEB032"
 
-#define PROVER_FORK_ID 1
-#define PROVER_FORK_NAMESPACE fork_1
-#define PROVER_FORK_NAMESPACE_STRING "fork_1"
-#define USING_PROVER_FORK_NAMESPACE using namespace fork_1
+#define PROVER_FORK_ID 2
+#define PROVER_FORK_NAMESPACE fork_2
+#define PROVER_FORK_NAMESPACE_STRING "fork_2"
+#define USING_PROVER_FORK_NAMESPACE using namespace fork_2
 
 /* Log traces selector: uncomment to enable the corresponding trace */
 //#define LOG_START_STEPS
@@ -27,8 +27,8 @@
 //#define LOG_FILENAME // If defined, logs ROM compilation file name and line number
 #define LOG_TIME // If defined, logs time differences to measure performance
 //#define LOG_TIME_STATISTICS // If defined, generates main executor statistics for main operations
-#define LOG_TIME_STATISTICS_STATEDB_REMOTE // If defined, generates remote statedb statistics
-#define LOG_TIME_STATISTICS_STATEDB // If defined, generates statedb statistics
+//#define LOG_TIME_STATISTICS_STATEDB_REMOTE // If defined, generates remote statedb statistics
+//#define LOG_TIME_STATISTICS_STATEDB // If defined, generates statedb statistics
 //#define LOG_TXS
 //#define LOG_SERVICE
 #define LOG_SERVICE_EXECUTOR_INPUT

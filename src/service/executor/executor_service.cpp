@@ -406,15 +406,18 @@ using grpc::Status;
          << " counters.arith=" << proverRequest.counters.arith
          << " counters.binary=" << proverRequest.counters.binary
          << " nTxs=" << responses.size();
-        for (uint64_t tx=0; tx<responses.size(); tx++)
-        {
-            cout << " tx[" << tx << "].hash=" << responses[tx].tx_hash
-                 << " gasUsed=" << responses[tx].gas_used
-                 << " gasLeft=" << responses[tx].gas_left
-                 << " gasUsed+gasLeft=" << (responses[tx].gas_used + responses[tx].gas_left)
-                 << " gasRefunded=" << responses[tx].gas_refunded
-                 << " error=" << responses[tx].error;
-        }
+         if (config.logExecutorServerTxs)
+         {
+            for (uint64_t tx=0; tx<responses.size(); tx++)
+            {
+                cout << " tx[" << tx << "].hash=" << responses[tx].tx_hash
+                    << " gasUsed=" << responses[tx].gas_used
+                    << " gasLeft=" << responses[tx].gas_left
+                    << " gasUsed+gasLeft=" << (responses[tx].gas_used + responses[tx].gas_left)
+                    << " gasRefunded=" << responses[tx].gas_refunded
+                    << " error=" << responses[tx].error;
+            }
+         }
         cout << endl;
 #endif
 
@@ -483,8 +486,8 @@ using grpc::Status;
     totalTime += execTime;
     struct timeval now;
     gettimeofday(&now, NULL);
-    double timeSinceLastTotal = double(TimeDiff(lastTotalTime, now))/1000000;
-    if (timeSinceLastTotal >= 1.0)
+    double timeSinceLastTotal = zkmax(1, double(TimeDiff(lastTotalTime, now))/1000000);
+    if (timeSinceLastTotal >= 10.0)
     {
         totalTPG = double(totalGas - lastTotalGas)/timeSinceLastTotal;
         totalTPB = double(totalBytes - lastTotalBytes)/timeSinceLastTotal;
@@ -494,7 +497,10 @@ using grpc::Status;
         lastTotalTX = totalTX;
         lastTotalTime = now;
     }
-    cout << "ExecutorServiceImpl::ProcessBatch() done counter=" << counter << " B=" << execBytes << " TX=" << execTX << " gas=" << execGas << " time=" << execTime << " TP=" << double(execBytes)/execTime << "B/s=" << double(execTX)/execTime << "TX/s=" << double(execGas)/execTime << "gas/s=" << double(execGas)/double(execBytes) << "gas/B totalTP=" << totalTPB << "B/s=" << totalTPTX << "TX/s=" << totalTPG << "gas/s=" << totalTPG/totalTPB << "gas/B totalTime=" << totalTime << endl;
+    
+    uint64_t nfd = getNumberOfFileDescriptors();
+
+    cout << "ExecutorServiceImpl::ProcessBatch() done counter=" << counter << " B=" << execBytes << " TX=" << execTX << " gas=" << execGas << " time=" << execTime << " TP=" << double(execBytes)/execTime << "B/s=" << double(execTX)/execTime << "TX/s=" << double(execGas)/execTime << "gas/s=" << double(execGas)/double(execBytes) << "gas/B totalTP(30s)=" << totalTPB << "B/s=" << totalTPTX << "TX/s=" << totalTPG << "gas/s=" << totalTPG/zkmax(1,totalTPB) << "gas/B totalTime=" << totalTime  << " filedesc=" << nfd << endl;
     unlock();
 #endif
 
@@ -600,5 +606,6 @@ using grpc::Status;
     if (result == ZKR_SM_MAIN_OOC_PADDING_PG) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_PADDING;
     if (result == ZKR_SM_MAIN_OOC_POSEIDON_G) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_POSEIDON;
     if (result == ZKR_SM_MAIN_INVALID_FORK_ID) return ::executor::v1::EXECUTOR_ERROR_UNSUPPORTED_FORK_ID;
+    if (result == ZKR_SM_MAIN_UNBALANCED_BALANCE) return ::executor::v1::EXECUTOR_ERROR_UNSPECIFIED; // TODO: Decide final error mapping
     return ::executor::v1::EXECUTOR_ERROR_UNSPECIFIED;
 }

@@ -96,9 +96,6 @@ void* stateDBPerfTestThread (const Config& config)
             client->get(root, key, value, &getResult);
         #endif
     }
-    #if PERF_TEST == PERF_SET
-        if (config.dbAsyncWrite) client->flush();
-    #endif
     uint64_t totalTimeUS = TimeDiff(tset);
 
     #if PERF_TEST == PERF_SET

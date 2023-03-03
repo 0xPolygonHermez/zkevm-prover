@@ -238,13 +238,13 @@ inline void getTransactionHash( string    &to,
 /* Full tracer */
 /***************/
 
-void FullTracer::handleEvent(Context &ctx, const RomCommand &cmd)
+zkresult FullTracer::handleEvent(Context &ctx, const RomCommand &cmd)
 {
     if (cmd.function == f_storeLog)
     {
         // if (ctx.proverRequest.bNoCounters) return;
         onStoreLog(ctx, cmd);
-        return;
+        return ZKR_SUCCESS;
     }
     if (cmd.params.size() == 0)
     {
@@ -254,42 +254,53 @@ void FullTracer::handleEvent(Context &ctx, const RomCommand &cmd)
     if (cmd.params[0]->varName == "onError")
     {
         onError(ctx, cmd);
-        return;
+        return ZKR_SUCCESS;
     }
     if (cmd.params[0]->varName == "onProcessTx")
     {
         onProcessTx(ctx, cmd);
-        return;
+        return ZKR_SUCCESS;
     }
     if (cmd.params[0]->varName == "onFinishTx")
     {
+        if (ctx.totalTransferredBalance != 0)
+        {
+            cerr << "Error: FullTracer::handleEvent(onFinishTx) found ctx.totalTransferredBalance=" << ctx.totalTransferredBalance.get_str(10) << endl;
+            return ZKR_SM_MAIN_UNBALANCED_BALANCE;
+        }
         onFinishTx(ctx, cmd);
-        return;
+        return ZKR_SUCCESS;
     }
     if (cmd.params[0]->varName == "onStartBatch")
     {
         onStartBatch(ctx, cmd);
-        return;
+        return ZKR_SUCCESS;
     }
     if (cmd.params[0]->varName == "onFinishBatch")
     {
+        if (ctx.totalTransferredBalance != 0)
+        {
+            cerr << "Error: FullTracer::handleEvent(onFinishBatch) found ctx.totalTransferredBalance=" << ctx.totalTransferredBalance.get_str(10) << endl;
+            return ZKR_SM_MAIN_UNBALANCED_BALANCE;
+        }
         onFinishBatch(ctx, cmd);
-        return;
+        return ZKR_SUCCESS;
     }
     if (cmd.params[0]->function == f_onOpcode)
     {
         // if (ctx.proverRequest.bNoCounters) return;
         onOpcode(ctx, cmd);
-        return;
+        return ZKR_SUCCESS;
     }
     if (cmd.params[0]->function == f_onUpdateStorage)
     {
         // if (ctx.proverRequest.bNoCounters) return;
         onUpdateStorage(ctx, *cmd.params[0]);
-        return;
+        return ZKR_SUCCESS;
     }
     cerr << "Error: FullTracer::handleEvent() got an invalid event cmd.params[0]->varName=" << cmd.params[0]->varName << " cmd.function=" << function2String(cmd.function) << endl;
     exitProcess();
+    return ZKR_INTERNAL_ERROR;
 }
 
 void FullTracer::onError(Context &ctx, const RomCommand &cmd)
@@ -617,14 +628,22 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     response.call_trace.context.gas_used = response.gas_used;
     accBatchGas += response.gas_used;
 
-    // Set return data
+    // Set return data, in case of deploy, get return buffer from stack if there is no error, otherwise get it from memory
     mpz_class offsetScalar;
     getVarFromCtx(ctx, false, ctx.rom.retDataOffsetOffset, offsetScalar);
     mpz_class lengthScalar;
     getVarFromCtx(ctx, false, ctx.rom.retDataLengthOffset, lengthScalar);
     if (response.call_trace.context.to == "0x")
     {
-        getCalldataFromStack(ctx, offsetScalar.get_ui(), lengthScalar.get_ui(), response.return_value);
+        // Check if there has been any error
+        if ( (execution_trace.size() > 0) && (execution_trace[execution_trace.size() - 1].error.size() > 0) )
+        {
+            getFromMemory(ctx, offsetScalar, lengthScalar, response.return_value);
+        }
+        else
+        {
+            getCalldataFromStack(ctx, offsetScalar.get_ui(), lengthScalar.get_ui(), response.return_value);
+        }
     }
     else
     {
@@ -689,6 +708,15 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
         if (response.error.size() == 0)
         {
             response.error = lastOpcodeCall.error;
+        }
+    }
+    else if ( ctx.proverRequest.input.bNoCounters &&
+              (execution_trace.size() > 0) )
+    {
+        Opcode &lastOpcodeExecution = execution_trace.at(execution_trace.size() - 1);
+        if (finalTrace.responses[finalTrace.responses.size() - 1].error == "")
+        {
+            finalTrace.responses[finalTrace.responses.size() - 1].error = lastOpcodeExecution.error;
         }
     }
 

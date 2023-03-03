@@ -57,6 +57,7 @@ public:
     bool opcodeTracer;
     bool logRemoteDbReads;
     bool logExecutorServerResponses;
+    bool logExecutorServerTxs;
     bool dontLoadRomOffsets;
 
     uint16_t executorServerPort;
@@ -119,9 +120,9 @@ public:
     string databaseURL;
     string dbNodesTableName;
     string dbProgramTableName;
-    bool dbAsyncWrite;
     bool dbMultiWrite;
     bool dbFlushInParallel;
+    bool dbConnectionsPool;
     uint64_t cleanerPollingPeriod;
     uint64_t requestsPersistence;
     uint64_t maxExecutorThreads;
