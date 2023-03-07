@@ -31,7 +31,7 @@ struct {
     { ZKR_SM_MAIN_OUT_OF_STEPS, "Main state machine executor did not complete the execution within available steps" },
     { ZKR_SM_MAIN_INVALID_FORK_ID, "Main state machine executor does not support the requested fork ID" },
     { ZKR_SM_MAIN_INVALID_UNSIGNED_TX, "Main state machine executor cannot process unsigned TXs in prover mode" },
-    { ZKR_SM_MAIN_UNBALANCED_BALANCE, "Main state machine executor found that total tranderred balances are not zero" }
+    { ZKR_SM_MAIN_BALANCE_MISMATCH, "Main state machine executor found that total tranferred balances are not zero" }
 };
 
 const char* zkresult2string (int code)
