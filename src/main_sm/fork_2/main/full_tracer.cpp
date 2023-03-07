@@ -632,7 +632,7 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     if (response.call_trace.context.to == "0x")
     {
         // Check if there has been any error
-        if ( (execution_trace.size() > 0) && (execution_trace[execution_trace.size() - 1].error.size() > 0) )
+        if ( bOpcodeCalled && (response.error.size()>0) )
         {
             getFromMemory(ctx, offsetScalar, lengthScalar, response.return_value);
         }
@@ -802,6 +802,10 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&t, NULL);
 #endif
+
+    // Remember that at least one opcode was called
+    bOpcodeCalled = true;
+
     Opcode singleInfo;
 
     if (ctx.proverRequest.input.bNoCounters)
