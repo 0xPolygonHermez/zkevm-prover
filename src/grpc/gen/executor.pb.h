@@ -189,12 +189,13 @@ enum ExecutorError : int {
   EXECUTOR_ERROR_COUNTERS_OVERFLOW_PADDING = 6,
   EXECUTOR_ERROR_COUNTERS_OVERFLOW_POSEIDON = 7,
   EXECUTOR_ERROR_UNSUPPORTED_FORK_ID = 8,
+  EXECUTOR_ERROR_BALANCE_MISMATCH = 9,
   ExecutorError_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   ExecutorError_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool ExecutorError_IsValid(int value);
 constexpr ExecutorError ExecutorError_MIN = EXECUTOR_ERROR_UNSPECIFIED;
-constexpr ExecutorError ExecutorError_MAX = EXECUTOR_ERROR_UNSUPPORTED_FORK_ID;
+constexpr ExecutorError ExecutorError_MAX = EXECUTOR_ERROR_BALANCE_MISMATCH;
 constexpr int ExecutorError_ARRAYSIZE = ExecutorError_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ExecutorError_descriptor();

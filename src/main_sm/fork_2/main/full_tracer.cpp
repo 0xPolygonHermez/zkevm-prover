@@ -266,7 +266,7 @@ zkresult FullTracer::handleEvent(Context &ctx, const RomCommand &cmd)
         if (ctx.totalTransferredBalance != 0)
         {
             cerr << "Error: FullTracer::handleEvent(onFinishTx) found ctx.totalTransferredBalance=" << ctx.totalTransferredBalance.get_str(10) << endl;
-            return ZKR_SM_MAIN_UNBALANCED_BALANCE;
+            return ZKR_SM_MAIN_BALANCE_MISMATCH;
         }
         onFinishTx(ctx, cmd);
         return ZKR_SUCCESS;
@@ -281,7 +281,7 @@ zkresult FullTracer::handleEvent(Context &ctx, const RomCommand &cmd)
         if (ctx.totalTransferredBalance != 0)
         {
             cerr << "Error: FullTracer::handleEvent(onFinishBatch) found ctx.totalTransferredBalance=" << ctx.totalTransferredBalance.get_str(10) << endl;
-            return ZKR_SM_MAIN_UNBALANCED_BALANCE;
+            return ZKR_SM_MAIN_BALANCE_MISMATCH;
         }
         onFinishBatch(ctx, cmd);
         return ZKR_SUCCESS;
