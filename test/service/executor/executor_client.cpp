@@ -23,6 +23,9 @@ ExecutorClient::~ExecutorClient()
 
 void ExecutorClient::runThread (void)
 {
+    // Allow service to initialize
+    sleep(1);
+
     pthread_create(&t, NULL, executorClientThread, this);
 }
 
@@ -149,10 +152,7 @@ void* executorClientThread (void* arg)
     cout << "executorClientThread() started" << endl;
     string uuid;
     ExecutorClient *pClient = (ExecutorClient *)arg;
-
-    // Allow service to initialize
-    sleep(1);
-
+    
     // Execute should block and succeed
     cout << "executorClientThread() calling pClient->ProcessBatch()" << endl;
     pClient->ProcessBatch();

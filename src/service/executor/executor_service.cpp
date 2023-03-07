@@ -18,6 +18,16 @@ using grpc::Status;
     cout << "ExecutorServiceImpl::ProcessBatch() got request:\n" << request->DebugString() << endl;
 #endif
 
+#ifdef LOG_TIME
+    lock();
+    if ( (firstTotalTime.tv_sec == 0) && (firstTotalTime.tv_usec == 0) )
+    {
+        gettimeofday(&firstTotalTime, NULL);
+        lastTotalTime = firstTotalTime;
+    }
+    unlock();
+#endif
+
     // Create and init an instance of ProverRequest
     ProverRequest proverRequest(fr, config, prt_processBatch);
 
@@ -498,10 +508,20 @@ using grpc::Status;
         lastTotalTX = totalTX;
         lastTotalTime = now;
     }
+    double timeSinceFirstTotal = zkmax(1, double(TimeDiff(firstTotalTime, now))/1000000);
+    double TPG = double(totalGas)/timeSinceFirstTotal;
+    double TPB = double(totalBytes)/timeSinceFirstTotal;
+    double TPTX = double(totalTX)/timeSinceFirstTotal;
     
     uint64_t nfd = getNumberOfFileDescriptors();
 
-    cout << "ExecutorServiceImpl::ProcessBatch() done counter=" << counter << " B=" << execBytes << " TX=" << execTX << " gas=" << execGas << " time=" << execTime << " TP=" << double(execBytes)/execTime << "B/s=" << double(execTX)/execTime << "TX/s=" << double(execGas)/execTime << "gas/s=" << double(execGas)/double(execBytes) << "gas/B totalTP(30s)=" << totalTPB << "B/s=" << totalTPTX << "TX/s=" << totalTPG << "gas/s=" << totalTPG/zkmax(1,totalTPB) << "gas/B totalTime=" << totalTime  << " filedesc=" << nfd << endl;
+    cout << "ExecutorServiceImpl::ProcessBatch() done counter=" << counter << " B=" << execBytes << " TX=" << execTX << " gas=" << execGas << " time=" << execTime
+         << " TP=" << double(execBytes)/execTime << "B/s=" << double(execTX)/execTime << "TX/s=" << double(execGas)/execTime << "gas/s=" << double(execGas)/double(execBytes) << "gas/B" 
+         << " totalTP(10s)=" << totalTPB << "B/s=" << totalTPTX << "TX/s=" << totalTPG << "gas/s=" << totalTPG/zkmax(1,totalTPB) << "gas/B"
+         << " totalTP(ever)=" << TPB << "B/s=" << TPTX << "TX/s=" << TPG << "gas/s=" << TPG/zkmax(1,TPB) << "gas/B"
+         << " totalTime=" << totalTime
+         << " filedesc=" << nfd
+         << endl;
     unlock();
 #endif
 

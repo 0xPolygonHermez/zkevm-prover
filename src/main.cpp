@@ -50,7 +50,7 @@ using json = nlohmann::json;
     | | Storage State Machine------\
     | |                             |--> Poseidon G State Machine
     | | Padding PG State Machine---/
-    | | Padding KK SM -> Padding KK Bit -> Nine To One SM -> Keccak-f SM -> Norm Gate 9 SM
+    | | Padding KK SM -> Padding KK Bit -> Bits 2 Field SM -> Keccak-f SM
     |  \
     |   State DB (available via GRPC service)
     |   |\
@@ -523,6 +523,7 @@ int main(int argc, char **argv)
                   config);
     TimerStopAndLog(PROVER_CONSTRUCTOR);
 
+#ifdef DATABASE_USE_CACHE
     /* INIT DB CACHE */
     if (config.databaseURL != "local") // remote DB
     {
@@ -530,7 +531,8 @@ int main(int argc, char **argv)
         Database::dbProgramCache.setCacheSize(config.dbProgramCacheSize*1024*1024);
 
         if (config.loadDBToMemCache && (config.runAggregatorClient || config.runExecutorServer || config.runStateDBServer))
-        {        
+        {
+            TimerStart(DB_CACHE_LOAD);
             // if we have a db cache enabled
             if ((Database::dbMTCache.enabled()) || (Database::dbProgramCache.enabled()))
             {
@@ -542,6 +544,7 @@ int main(int argc, char **argv)
                     loadDb2MemCache(config);
                 }
             }
+            TimerStopAndLog(DB_CACHE_LOAD);
         }
     } 
     else 
@@ -549,7 +552,8 @@ int main(int argc, char **argv)
         // set no limit for the db caches as we are using local (in memory) db
         Database::dbMTCache.setCacheSize(-1); 
         Database:: dbProgramCache.setCacheSize(-1);
-    }    
+    }
+#endif // DATABASE_USE_CACHE
 
     /* SERVERS */
 
