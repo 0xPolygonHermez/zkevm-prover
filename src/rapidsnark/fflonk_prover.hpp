@@ -11,7 +11,6 @@
 #include "polynomial/polynomial.hpp"
 #include "polynomial/evaluations.hpp"
 #include <nlohmann/json.hpp>
-#include "mul_z.hpp"
 #include "keccak_256_transcript.hpp"
 #include "wtns_utils.hpp"
 
@@ -30,7 +29,6 @@ namespace Fflonk {
 
         Engine &E;
         FFT<typename Engine::Fr> *fft = NULL;
-        MulZ<Engine> *mulZ;
 
         Zkey::FflonkZkeyHeader *zkey;
         u_int32_t zkeyPower;

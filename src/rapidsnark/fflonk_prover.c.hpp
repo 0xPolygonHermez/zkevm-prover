@@ -5,7 +5,6 @@
 #include "zkey_fflonk.hpp"
 #include "wtns_utils.hpp"
 #include <sodium.h>
-#include "mul_z.hpp"
 #include "thread_utils.hpp"
 #include "polynomial/cpolynomial.hpp"
 
@@ -64,8 +63,6 @@ namespace Fflonk
             fft = new FFT<typename Engine::Fr>(zkey->domainSize * 16);
             zkeyPower = fft->log2(zkey->domainSize);
 
-            mulZ = new MulZ<Engine>(E, fft);
-
             if(NULL != wtnsHeader) {
                 if (mpz_cmp(zkey->rPrime, wtnsHeader->prime) != 0)
                 {
@@ -97,7 +94,7 @@ namespace Fflonk
 
             // Reserve big buffer memory for buffers to avoid dynamic reservation
             u_int64_t buffersLength = zkey->domainSize * 3; // A, B, C
-            buffersLength += zkey->domainSize * 4 * 2;      // T0 & T0z
+            buffersLength += zkey->domainSize * 4;          // T0
             buffersLength += zkey->domainSize * 2 * 2;      // T1 & T1z
             buffersLength += zkey->domainSize * 4 * 2;      // T2 & T2z
             buffersLength += zkey->domainSize;              // Z
@@ -116,8 +113,6 @@ namespace Fflonk
             buffers["C"] = &bigBufferBuffers[accLength];
             accLength += zkey->domainSize;
             buffers["T0"] = &bigBufferBuffers[accLength];
-            accLength += zkey->domainSize * 4;
-            buffers["T0z"] = &bigBufferBuffers[accLength];
             accLength += zkey->domainSize * 4;
             buffers["T1"] = &bigBufferBuffers[accLength];
             accLength += zkey->domainSize * 2;
@@ -145,7 +140,7 @@ namespace Fflonk
             polynomialsLength += zkey->domainSize * 5;              // QL, QR, QM, QO & QC
             polynomialsLength += zkey->domainSize * 8;              // C0
             polynomialsLength += zkey->domainSize * 16 * 2;         // C1 & C2
-            polynomialsLength += zkey->domainSize * 4 * 2;          // T0 & T0z
+            polynomialsLength += zkey->domainSize * 4;              // T0
             polynomialsLength += zkey->domainSize * 2 * 2;          // T1 & T1z
             polynomialsLength += zkey->domainSize * 4 * 2;          // T2 & T2z
             polynomialsLength += zkey->domainSize * 2;              // Z
@@ -185,8 +180,6 @@ namespace Fflonk
             polPtr["C2"] = &bigBufferPolynomials[accLength];
             accLength += zkey->domainSize * 16;
             polPtr["T0"] = &bigBufferPolynomials[accLength];
-            accLength += zkey->domainSize * 4;
-            polPtr["T0z"] = &bigBufferPolynomials[accLength];
             accLength += zkey->domainSize * 4;
             polPtr["T1"] = &bigBufferPolynomials[accLength];
             accLength += zkey->domainSize * 2;
@@ -494,7 +487,6 @@ namespace Fflonk
             }
             mapBuffers.clear();
 
-            delete mulZ;
             delete fft;
             delete[] PTau;
             delete transcript;
@@ -597,15 +589,15 @@ namespace Fflonk
         computeWirePolynomial("C", bFactorsC);
 
         // Check degrees
-        if (polynomials["A"]->getDegree() >= zkey->domainSize + 2)
+        if (polynomials["A"]->getDegree() >= zkey->domainSize)
         {
             throw std::runtime_error("A Polynomial is not well calculated");
         }
-        if (polynomials["B"]->getDegree() >= zkey->domainSize + 2)
+        if (polynomials["B"]->getDegree() >= zkey->domainSize)
         {
             throw std::runtime_error("B Polynomial is not well calculated");
         }
-        if (polynomials["C"]->getDegree() >= zkey->domainSize + 2)
+        if (polynomials["C"]->getDegree() >= zkey->domainSize)
         {
             throw std::runtime_error("C Polynomial is not well calculated");
         }
@@ -615,17 +607,19 @@ namespace Fflonk
     void FflonkProver<Engine>::computeWirePolynomial(std::string polName, FrElement blindingFactors[])
     {
 
-// Compute all witness from signal ids and set them to the polynomial buffers
-#pragma omp parallel for
+        // Compute all witness from signal ids and set them to the polynomial buffers
+        #pragma omp parallel for
         for (u_int32_t i = 0; i < zkey->nConstraints; ++i)
         {
             FrElement witness = getWitness(mapBuffers[polName][i]);
             E.fr.toMontgomery(buffers[polName][i], witness);
         }
 
+        buffers[polName][zkey->domainSize-2] = blindingFactors[1];
+        buffers[polName][zkey->domainSize-1] = blindingFactors[0];
+
         // Create the polynomial
         // and compute the coefficients of the wire polynomials from evaluations
-        u_int32_t bFactorsLen = 2;
         std::ostringstream ss;
         ss << "··· Computing " << polName << " ifft";
         LOG_TRACE(ss);
@@ -636,9 +630,6 @@ namespace Fflonk
         ss << "··· Computing " << polName << " fft";
         LOG_TRACE(ss);
         evaluations[polName] = new Evaluations<Engine>(E, fft, evalPtr[polName], *polynomials[polName], zkey->domainSize * 4);
-
-        // Blind polynomial coefficients with blinding scalars blindingFactors
-        polynomials[polName]->blindCoefficients(blindingFactors, bFactorsLen);
     }
 
     template <typename Engine>
@@ -653,8 +644,6 @@ namespace Fflonk
             ////                LOG_TRACE(ss);
             //            }
 
-            FrElement omega = fft->root(zkeyPower + 2, i);
-
             // Get related evaluations to compute current T0 evaluation
             FrElement a = evaluations["A"]->eval[i];
             FrElement b = evaluations["B"]->eval[i];
@@ -665,11 +654,6 @@ namespace Fflonk
             FrElement qm = evaluations["QM"]->eval[i];
             FrElement qo = evaluations["QO"]->eval[i];
             FrElement qc = evaluations["QC"]->eval[i];
-
-            // Compute blinding factors
-            FrElement az = E.fr.add(E.fr.mul(blindingFactors[1], omega), blindingFactors[2]);
-            FrElement bz = E.fr.add(E.fr.mul(blindingFactors[3], omega), blindingFactors[4]);
-            FrElement cz = E.fr.add(E.fr.mul(blindingFactors[5], omega), blindingFactors[6]);
 
             // Compute current public input
             FrElement pi = E.fr.zero();
@@ -686,27 +670,20 @@ namespace Fflonk
             // Compute first T0(X)·Z_H(X), so divide later the resulting polynomial by Z_H(X)
             // expression 1 -> q_L(X)·a(X)
             FrElement e1 = E.fr.mul(a, ql);
-            FrElement e1z = E.fr.mul(az, ql);
 
             // expression 2 -> q_R(X)·b(X)
             FrElement e2 = E.fr.mul(b, qr);
-            FrElement e2z = E.fr.mul(bz, qr);
 
             // expression 3 -> q_M(X)·a(X)·b(X)
-            auto [e3, e3z] = mulZ->mul2(a, b, az, bz, i % 4);
-            e3 = E.fr.mul(e3, qm);
-            e3z = E.fr.mul(e3z, qm);
+            FrElement e3 = E.fr.mul(E.fr.mul(a, b), qm);
 
             // expression 4 -> q_O(X)·c(X)
             FrElement e4 = E.fr.mul(c, qo);
-            FrElement e4z = E.fr.mul(cz, qo);
 
             // t0 = expressions 1 + expression 2 + expression 3 + expression 4 + qc + pi
             FrElement t0 = E.fr.add(e1, E.fr.add(e2, E.fr.add(e3, E.fr.add(e4, E.fr.add(qc, pi)))));
-            FrElement t0z = E.fr.add(e1z, E.fr.add(e2z, E.fr.add(e3z, e4z)));
 
             buffers["T0"][i] = t0;
-            buffers["T0z"][i] = t0z;
         }
 
         // Compute the coefficients of the polynomial T0(X) from buffers.T0
@@ -717,15 +694,8 @@ namespace Fflonk
         LOG_TRACE("··· Computing T0 / ZH");
         polynomials["T0"]->divZh(zkey->domainSize);
 
-        // Compute the coefficients of the polynomial T0z(X) from buffers.T0z
-        LOG_TRACE("··· Computing T0z ifft");
-        polynomials["T0z"] = Polynomial<Engine>::fromEvaluations(E, fft, buffers["T0z"], polPtr["T0z"], zkey->domainSize * 4);
-
-        // Add the polynomial T0z to T0 to get the final polynomial T0
-        polynomials["T0"]->add(*polynomials["T0z"]);
-
         // Check degree
-        if (polynomials["T0"]->getDegree() >= 2 * zkey->domainSize + 2)
+        if (polynomials["T0"]->getDegree() >= 2 * zkey->domainSize - 2)
         {
             throw std::runtime_error("T0 Polynomial is not well calculated");
         }
@@ -745,7 +715,7 @@ namespace Fflonk
         polynomials["C1"] = C1->getPolynomial(polPtr["C1"]);
 
         // Check degree
-        if (polynomials["C1"]->getDegree() >= 8 * zkey->domainSize + 8)
+        if (polynomials["C1"]->getDegree() >= 8 * zkey->domainSize - 8)
         {
             throw std::runtime_error("C1 Polynomial is not well calculated");
         }
@@ -918,7 +888,7 @@ namespace Fflonk
 
         std::ostringstream ss;
 
-#pragma omp parallel for
+        #pragma omp parallel for
         for (u_int64_t i = 0; i < zkey->domainSize * 2; i++)
         {
             //            if ((0 != i) && (i % 100000 == 0)) {
@@ -956,7 +926,7 @@ namespace Fflonk
         LOG_TRACE("··· Computing T1z ifft");
         polynomials["T1z"] = Polynomial<Engine>::fromEvaluations(E, fft, buffers["T1z"], polPtr["T1z"], zkey->domainSize * 2);
 
-        // Add the polynomial T0z to T0 to get the final polynomial T0
+        // Add the polynomial T1z to T1 to get the final polynomial T1
         polynomials["T1"]->add(*polynomials["T1z"]);
 
         // Check degree
@@ -972,7 +942,7 @@ namespace Fflonk
         LOG_TRACE("··· Computing T2 evaluations");
 
         std::ostringstream ss;
-#pragma omp parallel for
+        #pragma omp parallel for
         for (u_int64_t i = 0; i < zkey->domainSize * 4; i++)
         {
             //            if ((0 != i) && (i % 100000 == 0)) {
@@ -992,9 +962,6 @@ namespace Fflonk
             FrElement z = evaluations["Z"]->eval[i];
             FrElement zW = evaluations["Z"]->eval[(zkey->domainSize * 4 + 4 + i) % (zkey->domainSize * 4)];
 
-            FrElement ap = E.fr.add(E.fr.mul(blindingFactors[1], omega), blindingFactors[2]);
-            FrElement bp = E.fr.add(E.fr.mul(blindingFactors[3], omega), blindingFactors[4]);
-            FrElement cp = E.fr.add(E.fr.mul(blindingFactors[5], omega), blindingFactors[6]);
             FrElement zp = E.fr.add(E.fr.add(E.fr.mul(blindingFactors[7], omega2), E.fr.mul(blindingFactors[8], omega)),
                                     blindingFactors[9]);
             FrElement zWp = E.fr.add(
@@ -1021,7 +988,8 @@ namespace Fflonk
             FrElement e13 = E.fr.add(c, E.fr.mul(betaX, *((FrElement *)zkey->k2)));
             e13 = E.fr.add(e13, challenges["gamma"]);
 
-            auto [e1, e1z] = mulZ->mul4(e11, e12, e13, z, ap, bp, cp, zp, i % 4);
+            FrElement e1 = E.fr.mul(E.fr.mul(E.fr.mul(e11, e12), e13), z);
+            FrElement e1z = E.fr.mul(E.fr.mul(E.fr.mul(e11, e12), e13), zp);
 
             // expression 2 -> (a(X) + beta·sigma1(X) + gamma)(b(X) + beta·sigma2(X) + gamma)(c(X) + beta·sigma3(X) + gamma)z(Xω)
             FrElement e21 = E.fr.add(a, E.fr.mul(challenges["beta"], sigma1));
@@ -1033,7 +1001,8 @@ namespace Fflonk
             FrElement e23 = E.fr.add(c, E.fr.mul(challenges["beta"], sigma3));
             e23 = E.fr.add(e23, challenges["gamma"]);
 
-            auto [e2, e2z] = mulZ->mul4(e21, e22, e23, zW, ap, bp, cp, zWp, i % 4);
+            FrElement e2 = E.fr.mul(E.fr.mul(E.fr.mul(e21, e22), e23), zW);
+            FrElement e2z = E.fr.mul(E.fr.mul(E.fr.mul(e21, e22), e23), zWp);
 
             FrElement t2 = E.fr.sub(e1, e2);
             FrElement t2z = E.fr.sub(e1z, e2z);
@@ -1057,7 +1026,7 @@ namespace Fflonk
         polynomials["T2"]->add(*polynomials["T2z"]);
 
         // Check degree
-        if (polynomials["T2"]->getDegree() >= 3 * zkey->domainSize + 6)
+        if (polynomials["T2"]->getDegree() >= 3 * zkey->domainSize)
         {
             throw std::runtime_error("T2 Polynomial is not well calculated");
         }
@@ -1076,7 +1045,7 @@ namespace Fflonk
         polynomials["C2"] = C2->getPolynomial(polPtr["C2"]);
 
         // Check degree
-        if (polynomials["C2"]->getDegree() >= 9 * zkey->domainSize + 18)
+        if (polynomials["C2"]->getDegree() >= 9 * zkey->domainSize)
         {
             throw std::runtime_error("C2 Polynomial is not well calculated");
         }
@@ -1333,7 +1302,7 @@ namespace Fflonk
         polynomials["F"]->add(*fTmp);
 
         // Check degree
-        if (polynomials["F"]->getDegree() >= 9 * zkey->domainSize + 12)
+        if (polynomials["F"]->getDegree() >= 9 * zkey->domainSize - 6)
         {
             throw std::runtime_error("F Polynomial is not well calculated");
         }
@@ -1382,7 +1351,7 @@ namespace Fflonk
         LOG_TRACE("> Computing W' = L / ZTS2 polynomial");
         polynomials["L"]->divByZerofier(1, challenges["y"]);
 
-        if (polynomials["L"]->getDegree() >= 9 * zkey->domainSize + 17)
+        if (polynomials["L"]->getDegree() >= 9 * zkey->domainSize - 1)
         {
             throw std::runtime_error("Degree of L(X)/(ZTS2(y)(X-y)) is not correct");
         }
@@ -1458,7 +1427,7 @@ namespace Fflonk
         polynomials["L"]->sub(*polynomials["F"]);
 
         // Check degree
-        if (polynomials["L"]->getDegree() >= 9 * zkey->domainSize + 18)
+        if (polynomials["L"]->getDegree() >= 9 * zkey->domainSize)
         {
             throw std::runtime_error("L Polynomial is not well calculated");
         }
