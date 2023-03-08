@@ -338,19 +338,17 @@ void FullTracer::onError(Context &ctx, const RomCommand &cmd)
             exitProcess();
         }
     }
-    else
-    {
-        if (execution_trace.size() > 0)
-        {
-            execution_trace[execution_trace.size() - 1].error = lastError;
-        }
 
-        // Revert logs
-        uint64_t CTX = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
-        if (logs.find(CTX) != logs.end())
-        {
-            logs.erase(CTX);
-        }
+    if (execution_trace.size() > 0)
+    {
+        execution_trace[execution_trace.size() - 1].error = lastError;
+    }
+
+    // Revert logs
+    uint64_t CTX = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
+    if (logs.find(CTX) != logs.end())
+    {
+        logs.erase(CTX);
     }
 
 #ifdef LOG_FULL_TRACER_ON_ERROR
