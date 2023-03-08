@@ -16,7 +16,9 @@ public:
     string txHashToGenerateCallTrace; // return call traces of this tx
 
     // Flags to enable/disable functionality
-    bool bGenerateCallTraces;
+    bool bGenerateCallTrace;
+    bool bGenerateExecuteTrace;
+    bool bGenerateTrace;
     bool bGenerateStorage;
     bool bGenerateStack;
     bool bGenerateMemory;
@@ -28,7 +30,9 @@ public:
         bDisableStack(false),
         bEnableMemory(false),
         bEnableReturnData(false),
-        bGenerateCallTraces(false),
+        bGenerateCallTrace(false),
+        bGenerateExecuteTrace(false),
+        bGenerateTrace(false),
         bGenerateStorage(false),
         bGenerateStack(false),
         bGenerateMemory(false),
@@ -38,11 +42,21 @@ public:
     // Call calculateFlags() once all configuration parameters have been set
     void calculateFlags (void)
     {
-        bGenerateCallTraces = bEnabled && ((txHashToGenerateExecuteTrace.size() > 0) || (txHashToGenerateCallTrace.size() > 0));
-        bGenerateStorage    = bEnabled && !bDisableStorage;
-        bGenerateStack      = bEnabled && !bDisableStack;
-        bGenerateMemory     = bEnabled && bEnableMemory;
-        bGenerateReturnData = bEnabled && bEnableReturnData;
+        bGenerateCallTrace    = bEnabled && (txHashToGenerateCallTrace.size() > 0);
+        bGenerateExecuteTrace = bEnabled && (txHashToGenerateExecuteTrace.size() > 0);
+        bGenerateTrace        = bGenerateCallTrace || bGenerateExecuteTrace;
+        
+        // If any of call trace or execute trace are active, let's activate both
+        if (bGenerateTrace)
+        {
+            bGenerateCallTrace = true;
+            bGenerateExecuteTrace = true;
+        }
+
+        bGenerateStorage      = bEnabled && !bDisableStorage;
+        bGenerateStack        = bEnabled && !bDisableStack;
+        bGenerateMemory       = bEnabled && bEnableMemory;
+        bGenerateReturnData   = bEnabled && bEnableReturnData;
     } 
 
     bool operator==(TraceConfig &other)

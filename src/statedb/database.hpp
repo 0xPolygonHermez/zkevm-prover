@@ -11,10 +11,20 @@
 #include "zkresult.hpp"
 #include "database_map.hpp"
 #include "database_cache.hpp"
+#include "zkassert.hpp"
 
 using namespace std;
 
-class DatabaseMap;
+#define DATABASE_WRITE_CONNECTIONS 25
+#define DATABASE_READ_CONNECTIONS 25
+
+class DatabaseConnection
+{
+public:
+    pqxx::connection * pConnection;
+    bool bInUse;
+    DatabaseConnection() : pConnection(NULL), bInUse(false) {};
+};
 
 class Database
 {
@@ -37,16 +47,26 @@ private:
 #endif
 
     // Write connection attributes
-    pqxx::connection * pConnectionWrite = NULL;
     pthread_mutex_t writeMutex; // Mutex to protect the write connection
     void writeLock(void) { pthread_mutex_lock(&writeMutex); };
     void writeUnlock(void) { pthread_mutex_unlock(&writeMutex); };
+    DatabaseConnection writeConnection;
+    DatabaseConnection writeConnectionsPool[DATABASE_WRITE_CONNECTIONS];
+    uint64_t nextWriteConnection;
+    uint64_t usedWriteConnections;
+    DatabaseConnection * getWriteConnection (void);
+    void disposeWriteConnection (DatabaseConnection * pConnection);
 
     // Read connection attributes
-    pqxx::connection * pConnectionRead = NULL;
     pthread_mutex_t readMutex; // Mutex to protect the read connection
     void readLock(void) { pthread_mutex_lock(&readMutex); };
     void readUnlock(void) { pthread_mutex_unlock(&readMutex); };
+    DatabaseConnection readConnection;
+    DatabaseConnection readConnectionsPool[DATABASE_READ_CONNECTIONS];
+    uint64_t nextReadConnection;
+    uint64_t usedReadConnections;
+    DatabaseConnection * getReadConnection (void);
+    void disposeReadConnection (DatabaseConnection * pConnection);
 
     // Multi write attributes
     string multiWriteProgram;
@@ -62,12 +82,26 @@ private:
     zkresult writeRemote(bool bProgram, const string &key, const string &value);
 
 public:
+#ifdef DATABASE_USE_CACHE
     // Cache static instances
     static DatabaseMTCache dbMTCache;
     static DatabaseProgramCache dbProgramCache;
+#endif
 
     // Constructor and destructor
-    Database(Goldilocks &fr, const Config &config) : fr(fr), config(config) {};
+    Database(Goldilocks &fr, const Config &config) :
+        fr(fr),
+        config(config)
+    {
+        // Init mutexes
+        pthread_mutex_init(&multiWriteMutex, NULL);
+        pthread_mutex_init(&writeMutex, NULL);
+        pthread_mutex_init(&readMutex, NULL);
+
+        // Reset connections pools
+        memset(&writeConnectionsPool, 0, sizeof(writeConnectionsPool));
+        memset(&readConnectionsPool, 0, sizeof(readConnectionsPool));
+    };
     ~Database();
 
     // Basic methods

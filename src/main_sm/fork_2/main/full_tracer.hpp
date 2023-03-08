@@ -25,7 +25,7 @@ public:
     uint64_t initGas;
     unordered_map<uint64_t,unordered_map<string,string>> deltaStorage;
     FinalTrace finalTrace;
-    unordered_map<uint64_t,uint64_t> txGAS;
+    unordered_map<uint64_t,TxGAS> txGAS;
     uint64_t txCount;
     uint64_t txTime; // in us
     vector<vector<mpz_class>> fullStack;// Stack of the transaction
@@ -35,6 +35,7 @@ public:
     vector<Opcode> execution_trace;
     string lastError;
     unordered_map<string, InfoReadWrite> read_write_addresses;
+    bool bOpcodeCalled;
 #ifdef LOG_TIME_STATISTICS
     TimeMetricStorage tms;
     struct timeval t;
@@ -54,7 +55,7 @@ public:
                                const Goldilocks::Element &keyType0, const Goldilocks::Element &keyType1, const Goldilocks::Element &keyType2, const Goldilocks::Element &keyType3, const Goldilocks::Element &keyType4, const Goldilocks::Element &keyType5, const Goldilocks::Element &keyType6, const Goldilocks::Element &keyType7,
                                const mpz_class &value );
 
-    FullTracer(Goldilocks &fr) : fr(fr), depth(1), initGas(0), txCount(0), txTime(0), accBatchGas(0) { };
+    FullTracer(Goldilocks &fr) : fr(fr), depth(1), initGas(0), txCount(0), txTime(0), accBatchGas(0), bOpcodeCalled(false) { };
     ~FullTracer()
     {
 #ifdef LOG_TIME_STATISTICS

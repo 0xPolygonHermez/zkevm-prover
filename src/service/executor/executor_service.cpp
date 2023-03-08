@@ -18,6 +18,16 @@ using grpc::Status;
     cout << "ExecutorServiceImpl::ProcessBatch() got request:\n" << request->DebugString() << endl;
 #endif
 
+#ifdef LOG_TIME
+    lock();
+    if ( (firstTotalTime.tv_sec == 0) && (firstTotalTime.tv_usec == 0) )
+    {
+        gettimeofday(&firstTotalTime, NULL);
+        lastTotalTime = firstTotalTime;
+    }
+    unlock();
+#endif
+
     // Create and init an instance of ProverRequest
     ProverRequest proverRequest(fr, config, prt_processBatch);
 
@@ -123,7 +133,6 @@ using grpc::Status;
     proverRequest.input.bUpdateMerkleTree = request->update_merkle_tree();
 
     // Trace config
-    /*
     if (request->has_trace_config())
     {
         proverRequest.input.traceConfig.bEnabled = true;
@@ -156,8 +165,8 @@ using grpc::Status;
             proverRequest.input.traceConfig.txHashToGenerateCallTrace = Add0xIfMissing(auxString);
         }
         proverRequest.input.traceConfig.calculateFlags();
-    }*/
-    string tx_hash_to_generate_execute_trace = ba2string(request->tx_hash_to_generate_execute_trace());
+    }
+    /*string tx_hash_to_generate_execute_trace = ba2string(request->tx_hash_to_generate_execute_trace());
     string tx_hash_to_generate_call_trace = ba2string(request->tx_hash_to_generate_call_trace());
     if ( (tx_hash_to_generate_execute_trace.size() > 0) || (tx_hash_to_generate_call_trace.size() > 0) )
     {
@@ -171,7 +180,7 @@ using grpc::Status;
             proverRequest.input.traceConfig.txHashToGenerateCallTrace = Add0xIfMissing(tx_hash_to_generate_call_trace);
         }
         proverRequest.input.traceConfig.calculateFlags();
-    }
+    }*/
 
     // Default values
     proverRequest.input.publicInputsExtended.newStateRoot = "0x0";
@@ -498,10 +507,20 @@ using grpc::Status;
         lastTotalTX = totalTX;
         lastTotalTime = now;
     }
+    double timeSinceFirstTotal = zkmax(1, double(TimeDiff(firstTotalTime, now))/1000000);
+    double TPG = double(totalGas)/timeSinceFirstTotal;
+    double TPB = double(totalBytes)/timeSinceFirstTotal;
+    double TPTX = double(totalTX)/timeSinceFirstTotal;
     
     uint64_t nfd = getNumberOfFileDescriptors();
 
-    cout << "ExecutorServiceImpl::ProcessBatch() done counter=" << counter << " B=" << execBytes << " TX=" << execTX << " gas=" << execGas << " time=" << execTime << " TP=" << double(execBytes)/execTime << "B/s=" << double(execTX)/execTime << "TX/s=" << double(execGas)/execTime << "gas/s=" << double(execGas)/double(execBytes) << "gas/B totalTP(30s)=" << totalTPB << "B/s=" << totalTPTX << "TX/s=" << totalTPG << "gas/s=" << totalTPG/zkmax(1,totalTPB) << "gas/B totalTime=" << totalTime  << " filedesc=" << nfd << endl;
+    cout << "ExecutorServiceImpl::ProcessBatch() done counter=" << counter << " B=" << execBytes << " TX=" << execTX << " gas=" << execGas << " time=" << execTime
+         << " TP=" << double(execBytes)/execTime << "B/s=" << double(execTX)/execTime << "TX/s=" << double(execGas)/execTime << "gas/s=" << double(execGas)/double(execBytes) << "gas/B" 
+         << " totalTP(10s)=" << totalTPB << "B/s=" << totalTPTX << "TX/s=" << totalTPG << "gas/s=" << totalTPG/zkmax(1,totalTPB) << "gas/B"
+         << " totalTP(ever)=" << TPB << "B/s=" << TPTX << "TX/s=" << TPG << "gas/s=" << TPG/zkmax(1,TPB) << "gas/B"
+         << " totalTime=" << totalTime
+         << " filedesc=" << nfd
+         << endl;
     unlock();
 #endif
 
@@ -565,33 +584,33 @@ using grpc::Status;
 
 ::executor::v1::RomError ExecutorServiceImpl::string2error (string &errorString)
 {
-    if (errorString == "OOG") return ::executor::v1::ROM_ERROR_OUT_OF_GAS;
-    if (errorString == "revert") return ::executor::v1::ROM_ERROR_EXECUTION_REVERTED;
-    if (errorString == "overflow") return ::executor::v1::ROM_ERROR_STACK_OVERFLOW;
-    if (errorString == "underflow") return ::executor::v1::ROM_ERROR_STACK_UNDERFLOW;
-    if (errorString == "OOCS") return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_STEP;
-    if (errorString == "OOCK") return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_KECCAK;
-    if (errorString == "OOCB") return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_BINARY;
-    if (errorString == "OOCM") return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_MEM;
-    if (errorString == "OOCA") return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_ARITH;
-    if (errorString == "OOCPA") return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_PADDING;
-    if (errorString == "OOCPO") return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_POSEIDON;
-    if (errorString == "intrinsic_invalid_signature") return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_SIGNATURE;
-    if (errorString == "intrinsic_invalid_chain_id") return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_CHAIN_ID;
-    if (errorString == "intrinsic_invalid_nonce") return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_NONCE;
-    if (errorString == "intrinsic_invalid_gas_limit") return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_GAS_LIMIT;
-    if (errorString == "intrinsic_invalid_gas_overflow") return ::executor::v1::ROM_ERROR_INTRINSIC_TX_GAS_OVERFLOW;
-    if (errorString == "intrinsic_invalid_balance") return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_BALANCE;
+    if (errorString == "OOG"                              ) return ::executor::v1::ROM_ERROR_OUT_OF_GAS;
+    if (errorString == "revert"                           ) return ::executor::v1::ROM_ERROR_EXECUTION_REVERTED;
+    if (errorString == "overflow"                         ) return ::executor::v1::ROM_ERROR_STACK_OVERFLOW;
+    if (errorString == "underflow"                        ) return ::executor::v1::ROM_ERROR_STACK_UNDERFLOW;
+    if (errorString == "OOCS"                             ) return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_STEP;
+    if (errorString == "OOCK"                             ) return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_KECCAK;
+    if (errorString == "OOCB"                             ) return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_BINARY;
+    if (errorString == "OOCM"                             ) return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_MEM;
+    if (errorString == "OOCA"                             ) return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_ARITH;
+    if (errorString == "OOCPA"                            ) return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_PADDING;
+    if (errorString == "OOCPO"                            ) return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_POSEIDON;
+    if (errorString == "intrinsic_invalid_signature"      ) return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_SIGNATURE;
+    if (errorString == "intrinsic_invalid_chain_id"       ) return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_CHAIN_ID;
+    if (errorString == "intrinsic_invalid_nonce"          ) return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_NONCE;
+    if (errorString == "intrinsic_invalid_gas_limit"      ) return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_GAS_LIMIT;
+    if (errorString == "intrinsic_invalid_gas_overflow"   ) return ::executor::v1::ROM_ERROR_INTRINSIC_TX_GAS_OVERFLOW;
+    if (errorString == "intrinsic_invalid_balance"        ) return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_BALANCE;
     if (errorString == "intrinsic_invalid_batch_gas_limit") return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_BATCH_GAS_LIMIT;
-    if (errorString == "intrinsic_invalid_sender_code") return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_SENDER_CODE;
-    if (errorString == "invalidJump") return ::executor::v1::ROM_ERROR_INVALID_JUMP;
-    if (errorString == "invalidOpcode") return ::executor::v1::ROM_ERROR_INVALID_OPCODE;
-    if (errorString == "invalidAddressCollision") return ::executor::v1::ROM_ERROR_CONTRACT_ADDRESS_COLLISION;
-    if (errorString == "invalidStaticTx") return ::executor::v1::ROM_ERROR_INVALID_STATIC;
-    if (errorString == "invalidCodeSize") return ::executor::v1::ROM_ERROR_MAX_CODE_SIZE_EXCEEDED;
-    if (errorString == "invalidCodeStartsEF") return ::executor::v1::ROM_ERROR_INVALID_BYTECODE_STARTS_EF;
-    if (errorString == "invalid_fork_id") return ::executor::v1::ROM_ERROR_UNSUPPORTED_FORK_ID;
-    if (errorString == "") return ::executor::v1::ROM_ERROR_NO_ERROR;
+    if (errorString == "intrinsic_invalid_sender_code"    ) return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_SENDER_CODE;
+    if (errorString == "invalidJump"                      ) return ::executor::v1::ROM_ERROR_INVALID_JUMP;
+    if (errorString == "invalidOpcode"                    ) return ::executor::v1::ROM_ERROR_INVALID_OPCODE;
+    if (errorString == "invalidAddressCollision"          ) return ::executor::v1::ROM_ERROR_CONTRACT_ADDRESS_COLLISION;
+    if (errorString == "invalidStaticTx"                  ) return ::executor::v1::ROM_ERROR_INVALID_STATIC;
+    if (errorString == "invalidCodeSize"                  ) return ::executor::v1::ROM_ERROR_MAX_CODE_SIZE_EXCEEDED;
+    if (errorString == "invalidCodeStartsEF"              ) return ::executor::v1::ROM_ERROR_INVALID_BYTECODE_STARTS_EF;
+    if (errorString == "invalid_fork_id"                  ) return ::executor::v1::ROM_ERROR_UNSUPPORTED_FORK_ID;
+    if (errorString == ""                                 ) return ::executor::v1::ROM_ERROR_NO_ERROR;
     cerr << "Error: ExecutorServiceImpl::string2error() found invalid error string=" << errorString << endl;
     exitProcess();
     return ::executor::v1::ROM_ERROR_UNSPECIFIED;
@@ -599,14 +618,14 @@ using grpc::Status;
 
 ::executor::v1::ExecutorError ExecutorServiceImpl::zkresult2error (zkresult &result)
 {
-    if (result == ZKR_SUCCESS) return ::executor::v1::EXECUTOR_ERROR_NO_ERROR;
-    if (result == ZKR_SM_MAIN_OOC_ARITH) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_ARITH;
-    if (result == ZKR_SM_MAIN_OOC_BINARY) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_BINARY;
-    if (result == ZKR_SM_MAIN_OOC_KECCAK_F) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_KECCAK;
-    if (result == ZKR_SM_MAIN_OOC_MEM_ALIGN) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_MEM;
-    if (result == ZKR_SM_MAIN_OOC_PADDING_PG) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_PADDING;
-    if (result == ZKR_SM_MAIN_OOC_POSEIDON_G) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_POSEIDON;
-    if (result == ZKR_SM_MAIN_INVALID_FORK_ID) return ::executor::v1::EXECUTOR_ERROR_UNSUPPORTED_FORK_ID;
-    if (result == ZKR_SM_MAIN_UNBALANCED_BALANCE) return ::executor::v1::EXECUTOR_ERROR_UNSPECIFIED; // TODO: Decide final error mapping
+    if (result == ZKR_SUCCESS                 ) return ::executor::v1::EXECUTOR_ERROR_NO_ERROR;
+    if (result == ZKR_SM_MAIN_OOC_ARITH       ) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_ARITH;
+    if (result == ZKR_SM_MAIN_OOC_BINARY      ) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_BINARY;
+    if (result == ZKR_SM_MAIN_OOC_KECCAK_F    ) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_KECCAK;
+    if (result == ZKR_SM_MAIN_OOC_MEM_ALIGN   ) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_MEM;
+    if (result == ZKR_SM_MAIN_OOC_PADDING_PG  ) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_PADDING;
+    if (result == ZKR_SM_MAIN_OOC_POSEIDON_G  ) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_POSEIDON;
+    if (result == ZKR_SM_MAIN_INVALID_FORK_ID ) return ::executor::v1::EXECUTOR_ERROR_UNSUPPORTED_FORK_ID;
+    if (result == ZKR_SM_MAIN_BALANCE_MISMATCH) return ::executor::v1::EXECUTOR_ERROR_BALANCE_MISMATCH;
     return ::executor::v1::EXECUTOR_ERROR_UNSPECIFIED;
 }

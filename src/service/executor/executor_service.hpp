@@ -24,6 +24,7 @@ class ExecutorServiceImpl final : public executor::v1::ExecutorService::Service
     uint64_t totalTX; // Total amount of transactions returned
     double totalTime; // Total time, i.e. the sum of time (in seconds) of all calls to ProcessBatch
     struct timeval lastTotalTime; // Time when the last total was calculated
+    struct timeval firstTotalTime; // Time when the executor service instance started
     uint64_t lastTotalGas; // Gas when the last total was calculated
     uint64_t lastTotalBytes; // Bytes when the last total was calculated
     uint64_t lastTotalTX; // TXs when the last total was calculated
@@ -50,7 +51,8 @@ public:
         totalTPTX(0)
     {
         pthread_mutex_init(&mutex, NULL);
-        gettimeofday(&lastTotalTime, NULL);
+        lastTotalTime = {0,0};
+        firstTotalTime = {0, 0};
     };
     void lock(void) { pthread_mutex_lock(&mutex); };
     void unlock(void) { pthread_mutex_unlock(&mutex); };

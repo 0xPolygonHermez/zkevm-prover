@@ -344,8 +344,7 @@ void Prover::processBatch(ProverRequest *pProverRequest)
     zkassert(pProverRequest != NULL);
     zkassert(pProverRequest->type == prt_processBatch);
 
-    cout << "Prover::processBatch() timestamp: " << pProverRequest->timestamp << endl;
-    cout << "Prover::processBatch() UUID: " << pProverRequest->uuid << endl;
+    cout << "Prover::processBatch() timestamp=" << pProverRequest->timestamp << " UUID=" << pProverRequest->uuid << endl;
 
     // Save input to <timestamp>.input.json, as provided by client
     if (config.saveInputToFile)
