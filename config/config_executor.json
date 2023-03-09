@@ -85,6 +85,8 @@
     "dbMultiWrite": true,
     "dbFlushInParallel": true,
     "dbConnectionsPool": false,
+    "dbNumberOfWritePoolConnections": 25,
+    "dbNumberOfReadPoolConnections": 25,
     "cleanerPollingPeriod": 600,
     "requestsPersistence": 3600,
     "maxExecutorThreads": 20,
