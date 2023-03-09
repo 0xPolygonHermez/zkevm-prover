@@ -45,9 +45,14 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     //--------------------------------
     TimerStart(STARK_STEP_1);
     TimerStart(STARK_STEP_1_LDE_AND_MERKLETREE);
+    TimerStart(STARK_STEP_1_LDE);
     ntt.extendPol(p_cm1_2ns, p_cm1_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm1_n], pBuffer);
+    std::cout << "Hola: " << starkInfo.mapSectionsN.section[eSection::cm1_n] << " " << NExtended << " " << N << std::endl;
+    TimerStopAndLog(STARK_STEP_1_LDE);
+    TimerStart(STARK_STEP_1_MERKLETREE);
     treesGL[0]->merkelize();
     treesGL[0]->getRoot(root0.address());
+    TimerStopAndLog(STARK_STEP_1_MERKLETREE);
     std::cout << "MerkleTree rootGL 0: [ " << root0.toString(4) << " ]" << std::endl;
     transcript.put(root0.address(), HASH_SIZE);
     TimerStopAndLog(STARK_STEP_1_LDE_AND_MERKLETREE);
@@ -117,10 +122,15 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE_2);
 
     TimerStart(STARK_STEP_2_LDE_AND_MERKLETREE);
-
+    TimerStart(STARK_STEP_2_LDE);
     ntt.extendPol(p_cm2_2ns, p_cm2_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm2_n], pBuffer);
+    std::cout << "Hola: " << starkInfo.mapSectionsN.section[eSection::cm2_n] << std::endl;
+
+    TimerStopAndLog(STARK_STEP_2_LDE);
+    TimerStart(STARK_STEP_2_MERKLETREE);
     treesGL[1]->merkelize();
     treesGL[1]->getRoot(root1.address());
+    TimerStopAndLog(STARK_STEP_2_MERKLETREE);
     std::cout << "MerkleTree rootGL 1: [ " << root1.toString(4) << " ]" << std::endl;
     transcript.put(root1.address(), HASH_SIZE);
 
@@ -180,11 +190,17 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
             steps->step3_first(params, i);
         }
     }
+
     TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS_2);
     TimerStart(STARK_STEP_3_LDE_AND_MERKLETREE);
+    TimerStart(STARK_STEP_3_LDE);
     ntt.extendPol(p_cm3_2ns, p_cm3_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm3_n], pBuffer);
+    std::cout << "Hola: " << starkInfo.mapSectionsN.section[eSection::cm3_n] << std::endl;
+    TimerStopAndLog(STARK_STEP_3_LDE);
+    TimerStart(STARK_STEP_3_MERKLETREE);
     treesGL[2]->merkelize();
     treesGL[2]->getRoot(root2.address());
+    TimerStopAndLog(STARK_STEP_3_MERKLETREE);
     std::cout << "MerkleTree rootGL 2: [ " << root2.toString(4) << " ]" << std::endl;
     transcript.put(root2.address(), HASH_SIZE);
     TimerStopAndLog(STARK_STEP_3_LDE_AND_MERKLETREE);
