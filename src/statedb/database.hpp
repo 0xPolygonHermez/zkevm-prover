@@ -15,9 +15,6 @@
 
 using namespace std;
 
-#define DATABASE_WRITE_CONNECTIONS 25
-#define DATABASE_READ_CONNECTIONS 25
-
 class DatabaseConnection
 {
 public:
@@ -51,7 +48,7 @@ private:
     void writeLock(void) { pthread_mutex_lock(&writeMutex); };
     void writeUnlock(void) { pthread_mutex_unlock(&writeMutex); };
     DatabaseConnection writeConnection;
-    DatabaseConnection writeConnectionsPool[DATABASE_WRITE_CONNECTIONS];
+    DatabaseConnection * writeConnectionsPool;
     uint64_t nextWriteConnection;
     uint64_t usedWriteConnections;
     DatabaseConnection * getWriteConnection (void);
@@ -62,7 +59,7 @@ private:
     void readLock(void) { pthread_mutex_lock(&readMutex); };
     void readUnlock(void) { pthread_mutex_unlock(&readMutex); };
     DatabaseConnection readConnection;
-    DatabaseConnection readConnectionsPool[DATABASE_READ_CONNECTIONS];
+    DatabaseConnection * readConnectionsPool;
     uint64_t nextReadConnection;
     uint64_t usedReadConnections;
     DatabaseConnection * getReadConnection (void);
@@ -91,7 +88,9 @@ public:
     // Constructor and destructor
     Database(Goldilocks &fr, const Config &config) :
         fr(fr),
-        config(config)
+        config(config),
+        writeConnectionsPool(NULL),
+        readConnectionsPool(NULL)
     {
         // Init mutexes
         pthread_mutex_init(&multiWriteMutex, NULL);

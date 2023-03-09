@@ -7,11 +7,19 @@
 // Add a record in the head of the cache. Returns true if the cache is full (or no cache), false otherwise
 bool DatabaseCache::addRecord(const string key, DatabaseCacheRecord* record) 
 {
-    if (cacheSize == 0) return true;
+    if (cacheSize == 0)
+    {
+        freeRecord(record);
+        return true;
+    }
 
     DatabaseCacheRecord* tmpRecord;
     // If key already exists in the cache return. The findKey also sets the record in the head of the cache
-    if (findKey(key, tmpRecord)) return false;
+    if (findKey(key, tmpRecord))
+    {
+        freeRecord(record);
+        return false;
+    }
 
     bool full = false;
 
@@ -48,6 +56,9 @@ bool DatabaseCache::addRecord(const string key, DatabaseCacheRecord* record)
         cacheCurrentSize -= tmp->size;      
     }
 
+    //cout << "DatabaseCache::addRecord() key=" << key << " cacheCurrentSize=" << cacheCurrentSize << " cacheMap.size()=" << cacheMap.size() << " record.size()=" << record->size << endl;
+    //printMemoryInfo(true);
+    
     return full;
 }
 

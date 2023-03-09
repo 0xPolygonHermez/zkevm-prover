@@ -123,6 +123,8 @@ public:
     bool dbMultiWrite;
     bool dbFlushInParallel;
     bool dbConnectionsPool;
+    uint64_t dbNumberOfWritePoolConnections;
+    uint64_t dbNumberOfReadPoolConnections;
     uint64_t cleanerPollingPeriod;
     uint64_t requestsPersistence;
     uint64_t maxExecutorThreads;
