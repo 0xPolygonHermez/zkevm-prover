@@ -45,7 +45,8 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     //--------------------------------
     TimerStart(STARK_STEP_1);
     TimerStart(STARK_STEP_1_LDE_AND_MERKLETREE);
-    ntt.extendPol(p_cm1_2ns, p_cm1_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm1_n], pBuffer);
+
+    ntt.extendPol(p_cm1_2ns, p_cm1_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm1_n], p_cm2_2ns);
     treesGL[0]->merkelize();
     treesGL[0]->getRoot(root0.address());
     std::cout << "MerkleTree rootGL 0: [ " << root0.toString(4) << " ]" << std::endl;
