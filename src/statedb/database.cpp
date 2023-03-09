@@ -77,6 +77,13 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
 #endif
     if (useRemoteDB)
     {
+        // If multi write is enabled, flush pending data, since some previously written keys
+        // could be in the multi write string but flushed from the cache
+        if (config.dbMultiWrite)
+        {
+            flush();
+        }
+
         // Otherwise, read it remotelly
         string sData;
         r = readRemote(false, key, sData);
