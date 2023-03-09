@@ -45,7 +45,8 @@ typedef enum : int {
     f_memAlignWR_W0,
     f_memAlignWR_W1,
     f_memAlignWR8_W0,
-    f_onOpcode
+    f_onOpcode,
+    f_onUpdateStorage
 } tFunction;
 
 // ROM command (op)
@@ -94,7 +95,6 @@ typedef enum : int {
     reg_CTX,
     reg_SP,
     reg_PC,
-    reg_MAXMEM,
     reg_GAS,
     reg_zkPC,
     reg_RR,

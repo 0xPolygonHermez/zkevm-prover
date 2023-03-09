@@ -6,10 +6,11 @@
 #include "main_sm/fork_1/main/context.hpp"
 #include "main_sm/fork_1/main/rom_command.hpp"
 #include "main_sm/fork_1/main/rom_line.hpp"
-#include "main_sm/fork_1/main/time_metric.hpp"
+#include "utils/time_metric.hpp"
 #include "goldilocks_base_field.hpp"
 #include "config.hpp"
 #include "full_tracer_interface.hpp"
+#include "zkresult.hpp"
 
 namespace fork_1
 {
@@ -24,15 +25,14 @@ public:
     uint64_t initGas;
     unordered_map<uint64_t,unordered_map<string,string>> deltaStorage;
     FinalTrace finalTrace;
-    unordered_map<uint64_t,uint64_t> txGAS;
+    unordered_map<uint64_t,TxGAS> txGAS;
     uint64_t txCount;
     uint64_t txTime; // in us
-    vector<Opcode> info; // Opcode step traces of the all the processed tx
     vector<vector<mpz_class>> fullStack;// Stack of the transaction
     uint64_t accBatchGas;
     unordered_map<uint64_t,unordered_map<uint64_t,Log>> logs;
-    vector<Opcode> call_trace; // TODO: Can we remove this attribute?
-    vector<Opcode> execution_trace; // TODO: Can we remove this attribute?
+    vector<Opcode> call_trace;
+    vector<Opcode> execution_trace;
     string lastError;
     unordered_map<string, InfoReadWrite> read_write_addresses;
 #ifdef LOG_TIME_STATISTICS
@@ -63,7 +63,7 @@ public:
 #endif    
     }
     
-    void handleEvent (Context &ctx, const RomCommand &cmd);
+    zkresult handleEvent (Context &ctx, const RomCommand &cmd);
 
     FullTracer & operator =(const FullTracer & other)
     {
@@ -74,7 +74,7 @@ public:
         txGAS           = other.txGAS;
         txCount         = other.txCount;
         txTime          = other.txTime;
-        info            = other.info;
+        //info            = other.info;
         fullStack       = other.fullStack;
         accBatchGas     = other.accBatchGas;
         logs            = other.logs;
@@ -111,7 +111,7 @@ public:
     }
     vector<Opcode> & get_info(void)
     {
-        return info;
+        return execution_trace;
     }
 };
 

@@ -3,7 +3,7 @@
 
 #include <semaphore.h>
 #include "input.hpp"
-#include "proof.hpp"
+#include "proof_fflonk.hpp"
 #include "counters.hpp"
 #include "full_tracer_interface.hpp"
 #include "database_map.hpp"
@@ -94,12 +94,6 @@ public:
     {
         bCompleted = true;
         sem_post(&completedSem);
-    }
-
-    /* Generate FullTracer call traces if true */
-    bool generateCallTraces (void)
-    {
-        return (input.txHashToGenerateExecuteTrace.size() > 0) || (input.txHashToGenerateCallTrace.size() > 0);
     }
 
     static void onDBReadLogChangeCallback(void *p, DatabaseMap *dbMap)

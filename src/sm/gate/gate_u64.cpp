@@ -152,8 +152,10 @@ void GateU64_not (GateState &S, const GateU64 &a, GateU64 &r)
 
 void GateU64_add (GateState &S, const GateU64 &a, const GateU64 &b, GateU64 &r)
 {
-    // Carry bit 
+    // Carry bit; set default to zero
     GateBit carry;
+    carry.ref = S.gateConfig.zeroRef;
+    carry.pin = pin_a;
 
     for (uint64_t i=0; i<64; i++)
     {

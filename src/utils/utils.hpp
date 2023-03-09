@@ -5,7 +5,7 @@
 #include "goldilocks_base_field.hpp"
 #include "config.hpp"
 #include "input.hpp"
-#include "proof.hpp"
+#include "proof_fflonk.hpp"
 #include "definitions.hpp"
 
 using json = nlohmann::json;
@@ -50,6 +50,9 @@ bool fileExists (const string &fileName);
 
 // Ensure directory exists
 void ensureDirectoryExists (const string &fileName);
+
+// Get number of open file descriptors
+uint64_t getNumberOfFileDescriptors (void);
 
 // Maps memory into a file
 void * mapFile (const string &fileName, uint64_t size, bool bOutput);

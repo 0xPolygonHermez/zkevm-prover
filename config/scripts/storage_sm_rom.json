@@ -705,7 +705,7 @@
    },
    "inFREE": "1",
    "setRKEY": 1,
-   "line": 13,
+   "line": 15,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
@@ -716,7 +716,7 @@
    },
    "inFREE": "1",
    "setHASH_LEFT": 1,
-   "line": 16,
+   "line": 18,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
@@ -727,7 +727,7 @@
    },
    "inFREE": "1",
    "setHASH_RIGHT": 1,
-   "line": 17,
+   "line": 19,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
@@ -738,13 +738,13 @@
    "setHASH_RIGHT": 1,
    "iHash": "1",
    "iHashType": 0,
-   "line": 18,
+   "line": 20,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
    "inRKEY": "1",
    "setHASH_LEFT": 1,
-   "line": 21,
+   "line": 23,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
@@ -755,7 +755,7 @@
    "setOLD_ROOT": 1,
    "iHash": "1",
    "iHashType": 1,
-   "line": 22,
+   "line": 24,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
@@ -767,7 +767,7 @@
    "inFREE": "1",
    "setVALUE_LOW": 1,
    "setHASH_LEFT": 1,
-   "line": 25,
+   "line": 27,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
@@ -779,7 +779,7 @@
    "inFREE": "1",
    "setVALUE_HIGH": 1,
    "setHASH_RIGHT": 1,
-   "line": 26,
+   "line": 28,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
@@ -790,13 +790,13 @@
    "setHASH_RIGHT": 1,
    "iHash": "1",
    "iHashType": 0,
-   "line": 27,
+   "line": 29,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
    "inRKEY": "1",
    "setHASH_LEFT": 1,
-   "line": 30,
+   "line": 32,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
@@ -807,13 +807,13 @@
    "setNEW_ROOT": 1,
    "iHash": "1",
    "iHashType": 1,
-   "line": 31,
+   "line": 33,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
    "CONST": "1",
    "setLEVEL": 1,
-   "line": 37,
+   "line": 39,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
@@ -830,23 +830,23 @@
    "inFREE": "1",
    "iJmpz": "1",
    "addressLabel": "SU_LevelBit1",
-   "line": 40,
+   "line": 42,
    "address": 94,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
    "iRotateLevel": "1",
-   "line": 41,
-   "fileName": "storage_sm_set_update.zkasm"
-  },
-  {
-   "iRotateLevel": "1",
-   "line": 42,
-   "fileName": "storage_sm_set_update.zkasm"
-  },
-  {
-   "iRotateLevel": "1",
    "line": 43,
+   "fileName": "storage_sm_set_update.zkasm"
+  },
+  {
+   "iRotateLevel": "1",
+   "line": 44,
+   "fileName": "storage_sm_set_update.zkasm"
+  },
+  {
+   "iRotateLevel": "1",
+   "line": 45,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
@@ -863,18 +863,18 @@
    "inFREE": "1",
    "iJmpz": "1",
    "addressLabel": "SU_ClimbTree",
-   "line": 48,
+   "line": 50,
    "address": 97,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
    "iRotateLevel": "1",
-   "line": 49,
+   "line": 51,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
    "iRotateLevel": "1",
-   "line": 50,
+   "line": 52,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
@@ -886,7 +886,7 @@
    "inFREE": "1",
    "iJmpz": "1",
    "addressLabel": "SU_Latch",
-   "line": 55,
+   "line": 57,
    "address": 115,
    "fileName": "storage_sm_set_update.zkasm"
   },
@@ -900,7 +900,7 @@
    "setRKEY_BIT": 1,
    "iJmpz": "1",
    "addressLabel": "SU_SiblingIsRight",
-   "line": 58,
+   "line": 60,
    "address": 107,
    "fileName": "storage_sm_set_update.zkasm"
   },
@@ -912,13 +912,13 @@
    },
    "inFREE": "1",
    "setHASH_LEFT": 1,
-   "line": 63,
+   "line": 65,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
    "inNEW_ROOT": "1",
    "setHASH_RIGHT": 1,
-   "line": 64,
+   "line": 66,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
@@ -929,13 +929,13 @@
    "setNEW_ROOT": 1,
    "iHash": "1",
    "iHashType": 0,
-   "line": 65,
+   "line": 67,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
    "inOLD_ROOT": "1",
    "setHASH_RIGHT": 1,
-   "line": 68,
+   "line": 70,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
@@ -946,30 +946,30 @@
    "setOLD_ROOT": 1,
    "iHash": "1",
    "iHashType": 0,
-   "line": 69,
+   "line": 71,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
    "iRotateLevel": "1",
-   "line": 72,
+   "line": 74,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
    "iClimbRkey": "1",
-   "line": 73,
+   "line": 75,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
    "iJmp": "1",
    "addressLabel": "SU_ClimbTree",
-   "line": 75,
+   "line": 77,
    "address": 97,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
    "inNEW_ROOT": "1",
    "setHASH_LEFT": 1,
-   "line": 80,
+   "line": 82,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
@@ -980,7 +980,7 @@
    },
    "inFREE": "1",
    "setHASH_RIGHT": 1,
-   "line": 81,
+   "line": 83,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
@@ -991,13 +991,13 @@
    "setNEW_ROOT": 1,
    "iHash": "1",
    "iHashType": 0,
-   "line": 82,
+   "line": 84,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
    "inOLD_ROOT": "1",
    "setHASH_LEFT": 1,
-   "line": 85,
+   "line": 87,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
@@ -1008,35 +1008,35 @@
    "setOLD_ROOT": 1,
    "iHash": "1",
    "iHashType": 0,
-   "line": 86,
+   "line": 88,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
    "iRotateLevel": "1",
-   "line": 89,
+   "line": 91,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
    "iClimbRkey": "1",
-   "line": 90,
+   "line": 92,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
    "iJmp": "1",
    "addressLabel": "SU_ClimbTree",
-   "line": 92,
+   "line": 94,
    "address": 97,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
    "iLatchSet": "1",
-   "line": 97,
+   "line": 99,
    "fileName": "storage_sm_set_update.zkasm"
   },
   {
    "iJmp": "1",
    "addressLabel": "Run",
-   "line": 100,
+   "line": 102,
    "address": 0,
    "fileName": "storage_sm_set_update.zkasm"
   },

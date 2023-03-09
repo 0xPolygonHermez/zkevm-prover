@@ -1,4 +1,5 @@
 #include <iostream>
+#include <thread>
 #include "database.hpp"
 #include "config.hpp"
 #include "scalar.hpp"
@@ -6,13 +7,24 @@
 #include "definitions.hpp"
 #include "zkresult.hpp"
 #include "utils.hpp"
+#include <unistd.h>
+#include "timer.hpp"
 
-// Create static Database::dbCache object. This will be used to store DB records in memory
-// and it will be shared for all the instances of Database class. DatabaseMap class is thread-safe
-DatabaseMap Database::dbCache;
-bool Database::dbLoaded2Cache = false;
+#ifdef DATABASE_USE_CACHE
 
-void Database::init(const Config &_config)
+// Create static Database::dbMTCache and DatabaseCacheProgram objects
+// This will be used to store DB records in memory and it will be shared for all the instances of Database class
+// DatabaseCacheMT and DatabaseCacheProgram classes are thread-safe
+DatabaseMTCache Database::dbMTCache;
+DatabaseProgramCache Database::dbProgramCache;
+
+#endif
+
+// Helper functions
+string removeBSXIfExists(string s) {return ((s.at(0) == '\\') && (s.at(1) == 'x')) ? s.substr(2) : s;}
+
+// Database class implementation
+void Database::init(void)
 {
     // Check that it has not been initialized before
     if (bInitialized)
@@ -21,7 +33,10 @@ void Database::init(const Config &_config)
         exitProcess();
     }
 
-    config = _config;
+#ifdef DATABASE_USE_CACHE
+    useDBMTCache = dbMTCache.enabled();
+    useDBProgramCache = dbProgramCache.enabled();
+#endif
 
     // Configure the server, if configuration is provided
     if (config.databaseURL != "local")
@@ -49,25 +64,30 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
     string key = NormalizeToNFormat(_key, 64);
     key = stringToLower(key);
 
+#ifdef DATABASE_USE_CACHE
     // If the key is found in local database (cached) simply return it
-    if (Database::dbCache.findMT(key, value))
+    if ((useDBMTCache) && (Database::dbMTCache.find(key, value)))
     {
         // Add to the read log
         if (dbReadLog != NULL) dbReadLog->add(key, value);
 
         r = ZKR_SUCCESS;
     }
-    else if (useRemoteDB)
+    else
+#endif
+    if (useRemoteDB)
     {
         // Otherwise, read it remotelly
         string sData;
-        r = readRemote(config.dbNodesTableName, key, sData);
+        r = readRemote(false, key, sData);
         if (r == ZKR_SUCCESS)
         {
-            string2fea(sData, value);
+            string2fea(fr, sData, value);
 
+#ifdef DATABASE_USE_CACHE
             // Store it locally to avoid any future remote access for this key
-            Database::dbCache.add(key, value);
+            if (useDBMTCache) Database::dbMTCache.add(key, value);
+#endif
 
             // Add to the read log
             if (dbReadLog != NULL) dbReadLog->add(key, value);
@@ -108,7 +128,11 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
     string key = NormalizeToNFormat(_key, 64);
     key = stringToLower(key);
 
-    if (useRemoteDB && persistent)
+    if ( useRemoteDB
+#ifdef DATABASE_USE_CACHE
+         && persistent
+#endif
+         )
     {
         // Prepare the query
         string valueString = "";
@@ -118,15 +142,20 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
             valueString += PrependZeros(fr.toString(value[i], 16), 16);
         }
 
-        r = writeRemote(config.dbNodesTableName, key, valueString);
+        r = writeRemote(false, key, valueString);
     }
-    else r = ZKR_SUCCESS;
+    else
+    {
+        r = ZKR_SUCCESS;
+    }
 
-    if (r == ZKR_SUCCESS)
+#ifdef DATABASE_USE_CACHE
+    if ((r == ZKR_SUCCESS) && (useDBMTCache))
     {
         // Create in memory cache
-        Database::dbCache.add(key, value);
+        Database::dbMTCache.add(key, value);
     }
+#endif
 
 #ifdef LOG_DB_WRITE
     cout << "Database::write()";
@@ -139,58 +168,269 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
     cout << " persistent=" << persistent << endl;
 #endif
 
-    return ZKR_SUCCESS;
+    return r;
 }
 
 void Database::initRemote(void)
 {
+    TimerStart(DB_INIT_REMOTE);
+
     try
     {
         // Build the remote database URI
         string uri = config.databaseURL;
-        cout << "Database URI: " << uri << endl;
+        //cout << "Database URI: " << uri << endl;
 
-        // Create the connection
-        pConnectionWrite = new pqxx::connection{uri};
-        pConnectionRead = new pqxx::connection{uri};
+        // Create the database connections
+        writeLock();
 
-        // Create the thread to process asynchronous writes to de DB
-        if (config.dbAsyncWrite)
+        if (config.dbConnectionsPool)
         {
-            pthread_cond_init(&writeQueueCond, 0);
-            pthread_cond_init(&emptyWriteQueueCond, 0);
-            pthread_mutex_init(&writeQueueMutex, NULL);
-            pthread_create(&writeThread, NULL, asyncDatabaseWriteThread, this);
+            if (config.maxStateDBThreads > DATABASE_WRITE_CONNECTIONS)
+            {
+                cerr << "Error: Database::initRemote() found config.maxStateDBThreads=" << config.maxStateDBThreads << " < DATABASE_WRITE_CONNECTIONS=" << DATABASE_WRITE_CONNECTIONS << endl;
+                exitProcess();
+            }
+            for (uint64_t i=0; i<DATABASE_WRITE_CONNECTIONS; i++)
+            {
+                writeConnectionsPool[i].pConnection = new pqxx::connection{uri};
+                if (writeConnectionsPool[i].pConnection == NULL)
+                {
+                    cerr << "Error: Database::initRemote() failed creating write connection " << i << endl;
+                    exitProcess();
+                }
+                writeConnectionsPool[i].bInUse = false;
+                //cout << "Database::initRemote() created write connection i=" << i << " writeConnectionsPool[i]=" << writeConnectionsPool[i].pConnection << endl;
+            }
+            nextWriteConnection = 0;
+            usedWriteConnections = 0;
         }
+        else
+        {
+            writeConnection.pConnection = new pqxx::connection{uri};
+            if (writeConnection.pConnection == NULL)
+            {
+                cerr << "Error: Database::initRemote() failed creating unique write connection" << endl;
+                exitProcess();
+            }
+        }
+        
+        writeUnlock();
+        
+        readLock();
+        
+        if (config.dbConnectionsPool)
+        {
+            if (config.maxStateDBThreads > DATABASE_READ_CONNECTIONS)
+            {
+                cerr << "Error: Database::initRemote() found config.maxStateDBThreads=" << config.maxStateDBThreads << " < DATABASE_READ_CONNECTIONS=" << DATABASE_READ_CONNECTIONS << endl;
+                exitProcess();
+            }
+            for (uint64_t i=0; i<DATABASE_READ_CONNECTIONS; i++)
+            {
+                readConnectionsPool[i].pConnection = new pqxx::connection{uri};
+                if (readConnectionsPool[i].pConnection == NULL)
+                {
+                    cerr << "Error: Database::initRemote() failed creating read connection " << i << endl;
+                    exitProcess();
+                }
+                readConnectionsPool[i].bInUse = false;
+                //cout << "Database::initRemote() created read connection i=" << i << " readConnectionsPool[i]=" << readConnectionsPool[i].pConnection << endl;
+            }
+            nextReadConnection = 0;
+            usedReadConnections = 0;
+        }
+        else
+        {
+            readConnection.pConnection = new pqxx::connection{uri};
+            if (readConnection.pConnection == NULL)
+            {
+                cerr << "Error: Database::initRemote() failed creating unique read connection" << endl;
+                exitProcess();
+            }
+        }
+
+        readUnlock();
     }
     catch (const std::exception &e)
     {
         cerr << "Error: Database::initRemote() exception: " << e.what() << endl;
         exitProcess();
     }
+
+    TimerStopAndLog(DB_INIT_REMOTE);
 }
 
-zkresult Database::readRemote(const string tableName, const string &key, string &value)
+DatabaseConnection * Database::getWriteConnection (void)
 {
+    if (config.dbConnectionsPool)
+    {
+        writeLock();
+        DatabaseConnection * pConnection = NULL;
+        uint64_t i=0;
+        for (i=0; i<DATABASE_WRITE_CONNECTIONS; i++)
+        {
+            if (!writeConnectionsPool[nextWriteConnection].bInUse) break;
+            nextWriteConnection++;
+            if (nextWriteConnection == DATABASE_WRITE_CONNECTIONS)
+            {
+                nextWriteConnection = 0;
+            }
+        }
+        if (i==DATABASE_WRITE_CONNECTIONS)
+        {
+            cerr << "Error: Database::getWriteConnection() run out of free connections" << endl;
+            exitProcess();
+        }
+
+        pConnection = &writeConnectionsPool[nextWriteConnection];
+        zkassert(pConnection->bInUse == false);
+        pConnection->bInUse = true;
+        nextWriteConnection++;
+        if (nextWriteConnection == DATABASE_WRITE_CONNECTIONS)
+        {
+            nextWriteConnection = 0;
+        }
+        usedWriteConnections++;
+        //cout << "Database::getWriteConnection() pConnection=" << pConnection << " nextWriteConnection=" << to_string(nextWriteConnection) << " usedWriteConnections=" << to_string(usedWriteConnections) << endl;
+        writeUnlock();
+        return pConnection;
+    }
+    else
+    {
+        writeLock();
+        zkassert(writeConnection.bInUse == false);
+#ifdef DEBUG
+        writeConnection.bInUse = true;
+#endif
+        return &writeConnection;
+    }
+}
+
+void Database::disposeWriteConnection (DatabaseConnection * pConnection)
+{
+    if (config.dbConnectionsPool)
+    {
+        writeLock();
+        zkassert(pConnection->bInUse == true);
+        pConnection->bInUse = false;
+        zkassert(usedWriteConnections > 0);
+        usedWriteConnections--;
+        //cout << "Database::disposeWriteConnection() pConnection=" << pConnection << " nextWriteConnection=" << to_string(nextWriteConnection) << " usedWriteConnections=" << to_string(usedWriteConnections) << endl;
+        writeUnlock();
+    }
+    else
+    {
+        zkassert(pConnection == &writeConnection);
+        zkassert(pConnection->bInUse == true);
+#ifdef DEBUG
+        pConnection->bInUse = false;
+#endif
+        writeUnlock();
+    }
+}
+
+DatabaseConnection * Database::getReadConnection (void)
+{
+    if (config.dbConnectionsPool)
+    {
+        readLock();
+        DatabaseConnection * pConnection = NULL;
+        uint64_t i=0;
+        for (i=0; i<DATABASE_READ_CONNECTIONS; i++)
+        {
+            if (!readConnectionsPool[nextReadConnection].bInUse) break;
+            nextReadConnection++;
+            if (nextReadConnection == DATABASE_READ_CONNECTIONS)
+            {
+                nextReadConnection = 0;
+            }
+        }
+        if (i==DATABASE_READ_CONNECTIONS)
+        {
+            cerr << "Error: Database::getReadConnection() run out of free connections" << endl;
+            exitProcess();
+        }
+
+        pConnection = &readConnectionsPool[nextReadConnection];
+        zkassert(pConnection->bInUse == false);
+        pConnection->bInUse = true;
+        nextReadConnection++;
+        if (nextReadConnection == DATABASE_READ_CONNECTIONS)
+        {
+            nextReadConnection = 0;
+        }
+        usedReadConnections++;
+        //cout << "Database::getReadConnection() pConnection=" << pConnection << " nextReadConnection=" << to_string(nextReadConnection) << " usedReadConnections=" << to_string(usedReadConnections) << endl;
+        readUnlock();
+        return pConnection;
+    }
+    else
+    {
+        readLock();
+        zkassert(readConnection.bInUse == false);
+#ifdef DEBUG
+        readConnection.bInUse = true;
+#endif
+        return &readConnection;
+    }
+}
+
+void Database::disposeReadConnection (DatabaseConnection * pConnection)
+{
+    if (config.dbConnectionsPool)
+    {
+        readLock();
+        zkassert(pConnection->bInUse == true);
+        pConnection->bInUse = false;
+        zkassert(usedReadConnections > 0);
+        usedReadConnections--;
+        //cout << "Database::disposeReadConnection() pConnection=" << pConnection << " nextReadConnection=" << to_string(nextReadConnection) << " usedReadConnections=" << to_string(usedReadConnections) << endl;
+        readUnlock();
+    }
+    else
+    {
+        zkassert(pConnection == &readConnection);
+        zkassert(pConnection->bInUse == true);
+#ifdef DEBUG
+        pConnection->bInUse = false;
+#endif
+        readUnlock();
+    }
+}
+
+zkresult Database::readRemote(bool bProgram, const string &key, string &value)
+{
+    const string &tableName = (bProgram ? config.dbProgramTableName : config.dbNodesTableName);
+
     if (config.logRemoteDbReads)
     {
         cout << "   Database::readRemote() table=" << tableName << " key=" << key << endl;
     }
 
+    // Get a free read db connection
+    DatabaseConnection * pDatabaseConnection = getReadConnection();
+
     try
     {
-        // Start a transaction.
-        pqxx::nontransaction n(*pConnectionRead);
-
         // Prepare the query
         string query = "SELECT * FROM " + tableName + " WHERE hash = E\'\\\\x" + key + "\';";
 
+        pqxx::result rows;
+
+        // Start a transaction.
+        pqxx::nontransaction n(*(pDatabaseConnection->pConnection));
+
         // Execute the query
-        pqxx::result rows = n.exec(query);
+        rows = n.exec(query);
+
+        // Commit your transaction
+        n.commit();
 
         // Process the result
         if (rows.size() == 0)
         {
+            disposeReadConnection(pDatabaseConnection);
             return ZKR_DB_KEY_NOT_FOUND;
         }
         else if (rows.size() > 1)
@@ -207,50 +447,70 @@ zkresult Database::readRemote(const string tableName, const string &key, string 
         }
         pqxx::field const fieldData = row[1];
         value = removeBSXIfExists(fieldData.c_str());
-
-        // Commit your transaction
-        n.commit();
     }
     catch (const std::exception &e)
     {
-        cerr << "Error: Database::readRemote() table="<< tableName << " exception: " << e.what() << endl;
+        cerr << "Error: Database::readRemote() table="<< tableName << " exception: " << e.what() << " connection=" << pDatabaseConnection << endl;
         exitProcess();
     }
+    
+    // Dispose the read db conneciton
+    disposeReadConnection(pDatabaseConnection);
 
     return ZKR_SUCCESS;
 }
 
-zkresult Database::writeRemote(const string tableName, const string &key, const string &value)
+zkresult Database::writeRemote(bool bProgram, const string &key, const string &value)
 {
-    try
+    const string &tableName = (bProgram ? config.dbProgramTableName : config.dbNodesTableName);
+    
+    if (config.dbMultiWrite)
     {
-        string query = "INSERT INTO " + tableName + " ( hash, data ) VALUES ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' ) " +
-                       "ON CONFLICT (hash) DO NOTHING;";
-
-        if (config.dbAsyncWrite)
+        string &multiWrite = bProgram ? multiWriteProgram : multiWriteNodes;
+        multiWriteLock();
+        if (multiWrite.size() == 0)
         {
-            addWriteQueue(query);
+            multiWrite = "INSERT INTO " + tableName + " ( hash, data ) VALUES ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' ) ";
         }
         else
         {
+            multiWrite += ", ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' )";
+        }
+        multiWriteUnlock();       
+    }
+    else
+    {
+        string query = "INSERT INTO " + tableName + " ( hash, data ) VALUES ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' ) " +
+                    "ON CONFLICT (hash) DO NOTHING;";
+            
+        DatabaseConnection * pDatabaseConnection = getWriteConnection();
+
+        try
+        {        
+
+#ifdef DATABASE_COMMIT
             if (autoCommit)
+#endif
             {
-                pqxx::work w(*pConnectionWrite);
+                pqxx::work w(*(pDatabaseConnection->pConnection));
                 pqxx::result res = w.exec(query);
                 w.commit();
+                disposeWriteConnection(pDatabaseConnection);
             }
+#ifdef DATABASE_COMMIT
             else
             {
                 if (transaction == NULL)
                     transaction = new pqxx::work{*pConnectionWrite};
                 pqxx::result res = transaction->exec(query);
             }
+#endif
         }
-    }
-    catch (const std::exception &e)
-    {
-        cerr << "Error: Database::writeRemote() table="<< tableName << " exception: " << e.what() << endl;
-        exitProcess();
+        catch (const std::exception &e)
+        {
+            cerr << "Error: Database::writeRemote() table="<< tableName << " exception: " << e.what() << " connection=" << pDatabaseConnection << endl;
+            exitProcess();
+        }
     }
 
     return ZKR_SUCCESS;
@@ -271,7 +531,11 @@ zkresult Database::setProgram(const string &_key, const vector<uint8_t> &data, c
     string key = NormalizeToNFormat(_key, 64);
     key = stringToLower(key);
 
-    if (useRemoteDB && persistent)
+    if ( useRemoteDB
+#ifdef DATABASE_USE_CACHE
+         && persistent
+#endif
+         )
     {
         string sData = "";
         for (uint64_t i=0; i<data.size(); i++)
@@ -279,15 +543,20 @@ zkresult Database::setProgram(const string &_key, const vector<uint8_t> &data, c
             sData += byte2string(data[i]);
         }
 
-        r = writeRemote(config.dbProgramTableName, key, sData);
+        r = writeRemote(true, key, sData);
     }
-    else r = ZKR_SUCCESS;
+    else
+    {
+        r = ZKR_SUCCESS;
+    }
 
-    if (r == ZKR_SUCCESS)
+#ifdef DATABASE_USE_CACHE
+    if ((r == ZKR_SUCCESS) && (useDBProgramCache))
     {
         // Create in memory cache
-        Database::dbCache.add(key, data);
+        Database::dbProgramCache.add(key, data);
     }
+#endif
 
 #ifdef LOG_DB_WRITE
     cout << "Database::setProgram()";
@@ -301,7 +570,7 @@ zkresult Database::setProgram(const string &_key, const vector<uint8_t> &data, c
     cout << " persistent=" << persistent << endl;
 #endif
 
-    return ZKR_SUCCESS;
+    return r;
 }
 
 zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, DatabaseMap *dbReadLog)
@@ -319,26 +588,31 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
     string key = NormalizeToNFormat(_key, 64);
     key = stringToLower(key);
 
+#ifdef DATABASE_USE_CACHE
     // If the key is found in local database (cached) simply return it
-    if (Database::dbCache.findProgram(key, data))
+    if ((useDBProgramCache) && (Database::dbProgramCache.find(key, data)))
     {
         // Add to the read log
         if (dbReadLog != NULL) dbReadLog->add(key, data);
 
         r = ZKR_SUCCESS;
     }
-    else if (useRemoteDB)
+    else
+#endif
+    if (useRemoteDB)
     {
         // Otherwise, read it remotelly
         string sData;
-        r = readRemote(config.dbProgramTableName, key, sData);
+        r = readRemote(true, key, sData);
         if (r == ZKR_SUCCESS)
         {
             //String to byte/uint8_t vector
             string2ba(sData, data);
 
+#ifdef DATABASE_USE_CACHE
             // Store it locally to avoid any future remote access for this key
-            Database::dbCache.add(key, data);
+            if (useDBProgramCache) Database::dbProgramCache.add(key, data);
+#endif
 
             // Add to the read log
             if (dbReadLog != NULL) dbReadLog->add(key, data);
@@ -364,127 +638,71 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
     return r;
 }
 
-void Database::string2fea(const string os, vector<Goldilocks::Element> &fea)
-{
-    Goldilocks::Element fe;
-    for (uint64_t i = 0; i < os.size(); i += 16)
-    {
-        if (i + 16 > os.size())
-        {
-            cerr << "Error: Database::string2fea() found incorrect DATA column size: " << os.size() << endl;
-            exitProcess();
-        }
-        string2fe(fr, os.substr(i, 16), fe);
-        fea.push_back(fe);
-    }
-}
-
-void Database::string2ba(const string os, vector<uint8_t> &data)
-{
-    string s = Remove0xIfPresent(os);
-
-    if (s.size()%2 != 0)
-    {
-        s = "0" + s;
-    }
-
-    uint64_t dsize = s.size()/2;
-    const char *p = s.c_str();
-    for (uint64_t i=0; i<dsize; i++)
-    {
-        data.push_back(char2byte(p[2*i])*16 + char2byte(p[2*i + 1]));
-    }
-}
-
-void Database::loadDB2MemCache()
-{
-    if (!useRemoteDB) return;
-
-    if (Database::dbLoaded2Cache) return;
-
-    cout << "Loading SQL Database to memory cache..." << endl;
-
-    try
-    {
-        // Start a transaction.
-        pqxx::nontransaction n(*pConnectionRead);
-
-        // Prepare the query
-        string query = "SELECT * FROM " + config.dbNodesTableName +";";
-
-        // Execute the query
-        pqxx::result rows = n.exec(query);
-
-        for (pqxx::result::size_type i=0; i < rows.size(); i++)
-        {
-            vector<Goldilocks::Element> value;
-
-            string2fea(removeBSXIfExists(rows[i][1].c_str()), value);
-
-            Database::dbCache.add(removeBSXIfExists(rows[i][0].c_str()), value);
-        }
-
-        // Commit your transaction
-        n.commit();
-    }
-    catch (const std::exception &e)
-    {
-        cerr << "Error: Database::loadDB2MemCache() table=" << config.dbNodesTableName << " exception: " << e.what() << endl;
-        exitProcess();
-    }
-
-    try
-    {
-        // Start a transaction.
-        pqxx::nontransaction n(*pConnectionRead);
-
-        // Prepare the query
-        string query = "SELECT * FROM " + config.dbProgramTableName +";";
-
-        // Execute the query
-        pqxx::result rows = n.exec(query);
-
-        for (pqxx::result::size_type i=0; i < rows.size(); i++)
-        {
-            vector<uint8_t> value;
-
-            string2ba(removeBSXIfExists(rows[i][1].c_str()), value);
-
-            Database::dbCache.add(removeBSXIfExists(rows[i][0].c_str()), value);
-        }
-
-        // Commit your transaction
-        n.commit();
-    }
-    catch (const std::exception &e)
-    {
-        cerr << "Error: Database::loadDB2MemCache() table=" << config.dbProgramTableName << " exception: " << e.what() << endl;
-        exitProcess();
-    }
-
-    Database::dbLoaded2Cache = true;
-    
-    cout << "Load done" << endl;        
-}
-
-void Database::addWriteQueue(const string sqlWrite)
-{
-    pthread_mutex_lock(&writeQueueMutex);
-    writeQueue.push_back(sqlWrite);
-    pthread_cond_signal(&writeQueueCond);
-    pthread_mutex_unlock(&writeQueueMutex);
-}
-
 void Database::flush()
 {
-    if (config.dbAsyncWrite)
+    if (!config.dbMultiWrite)
     {
-        pthread_mutex_lock(&writeQueueMutex);
-        while (writeQueue.size() > 0)
-            pthread_cond_wait(&emptyWriteQueueCond, &writeQueueMutex);
-        pthread_mutex_unlock(&writeQueueMutex);
+        return;
     }
+
+    multiWriteLock();
+
+    if ( (multiWriteProgram.size() > 0) || (multiWriteNodes.size() > 0) )
+    {
+
+        // Get a free write db connection
+        DatabaseConnection * pDatabaseConnection = getWriteConnection();
+
+        try
+        {
+            if (multiWriteProgram.size() > 0)
+            {
+                multiWriteProgram += " ON CONFLICT (hash) DO NOTHING;";
+                
+                // Start a transaction
+                pqxx::work w(*(pDatabaseConnection->pConnection));
+
+                // Execute the query
+                pqxx::result res = w.exec(multiWriteProgram);
+
+                // Commit your transaction
+                w.commit();
+
+                //cout << "Database::flush() sent " << multiWriteProgram << endl;
+
+                multiWriteProgram.clear();
+            }
+            if (multiWriteNodes.size() > 0)
+            {
+                multiWriteNodes += " ON CONFLICT (hash) DO NOTHING;";
+                
+                // Start a transaction
+                pqxx::work w(*(pDatabaseConnection->pConnection));
+
+                // Execute the query
+                pqxx::result res = w.exec(multiWriteNodes);
+
+                // Commit your transaction
+                w.commit();
+
+                //cout << "Database::flush() sent " << multiWriteNodes << endl;
+
+                multiWriteNodes.clear();
+            }
+        }
+        catch (const std::exception &e)
+        {
+            cerr << "Error: Database::flush() execute query exception: " << e.what() << endl;
+            exitProcess();
+        }
+
+        // Dispose the write db connection
+        disposeWriteConnection(pDatabaseConnection);
+    }
+    multiWriteUnlock();
 }
+
+#ifdef DATABASE_COMMIT
 
 void Database::setAutoCommit(const bool ac)
 {
@@ -503,88 +721,7 @@ void Database::commit()
     }
 }
 
-void Database::processWriteQueue()
-{
-    string writeQuery;
-
-    cout << "Database::processWriteQueue() started" << endl;
-
-    try
-    {
-        // Build the remote database URI
-        string uri = config.databaseURL;
-        cout << "Database::processWriteQueue URI: " << uri << endl;
-
-        // Create the connection
-        pAsyncWriteConnection = new pqxx::connection{uri};
-    }
-    catch (const std::exception &e)
-    {
-        cerr << "Error: Database::processWriteQueue() connection to the DB exception: " << e.what() << endl;
-        return;
-    }
-
-    while (true)
-    {
-        pthread_mutex_lock(&writeQueueMutex);
-
-        // Wait for the pending writes in the queue, if there are no more pending writes
-        if (writeQueue.size() == 0)
-        {
-            pthread_cond_signal(&emptyWriteQueueCond);
-            pthread_cond_wait(&writeQueueCond, &writeQueueMutex);
-        }
-
-        // Check that the pending writes queue is not empty
-        if (writeQueue.size() > 0)
-        {
-            try
-            {
-                // Get the query for the pending write
-                writeQuery = writeQueue[0];
-                writeQueue.erase(writeQueue.begin());
-                pthread_mutex_unlock(&writeQueueMutex);
-
-                // Start a transaction
-                pqxx::work w(*pConnectionWrite);
-
-                // Execute the query
-                pqxx::result res = w.exec(writeQuery);
-
-                // Commit your transaction
-                w.commit();
-            }
-            catch (const std::exception &e)
-            {
-                cerr << "Error: Database::processWriteQueue() execute query exception: " << e.what() << endl;
-            }
-        }
-        else
-        {
-            cout << "Database::processWriteQueue() found pending writes queue empty, so ignoring" << endl;
-            pthread_mutex_unlock(&writeQueueMutex);
-        }
-    }
-
-    if (pAsyncWriteConnection != NULL)
-    {
-        delete pAsyncWriteConnection;
-    }
-}
-
-void Database::print(void)
-{
-    DatabaseMap::MTMap mtDB = Database::dbCache.getMTDB();
-    cout << "Database of " << mtDB.size() << " elements:" << endl;
-    for (DatabaseMap::MTMap::iterator it = mtDB.begin(); it != mtDB.end(); it++)
-    {
-        vector<Goldilocks::Element> vect = it->second;
-        cout << "key:" << it->first << " ";
-        for (uint64_t i = 0; i < vect.size(); i++)
-            cout << fr.toString(vect[i], 16) << ":";
-        cout << endl;
-    }
-}
+#endif
 
 void Database::printTree(const string &root, string prefix)
 {
@@ -678,22 +815,142 @@ void Database::printTree(const string &root, string prefix)
 
 Database::~Database()
 {
-    if (pConnectionWrite != NULL)
-        delete pConnectionWrite;
-    if (pConnectionRead != NULL)
-        delete pConnectionRead;
-
-    if (config.dbAsyncWrite)
+    if (config.dbConnectionsPool)
     {
-        pthread_mutex_destroy(&writeQueueMutex);
-        pthread_cond_destroy(&writeQueueCond);
-        pthread_cond_destroy(&emptyWriteQueueCond);
+        for (uint64_t i=0; i<DATABASE_WRITE_CONNECTIONS; i++)
+        {
+            if (writeConnectionsPool[i].pConnection != NULL)
+            {
+                delete writeConnectionsPool[i].pConnection;
+            }
+        }
+
+        for (uint64_t i=0; i<DATABASE_READ_CONNECTIONS; i++)
+        {
+            if (readConnectionsPool[i].pConnection != NULL)
+            {
+                delete readConnectionsPool[i].pConnection;
+            }
+        }
+    }
+    else
+    {
+        if (writeConnection.pConnection != NULL)
+        {
+            delete writeConnection.pConnection;
+        }
+
+        if (readConnection.pConnection != NULL)
+        {
+            delete readConnection.pConnection;
+        }
     }
 }
 
-void *asyncDatabaseWriteThread(void *arg)
+void loadDb2MemCache(const Config config)
 {
-    Database *db = (Database *)arg;
-    db->processWriteQueue();
-    return NULL;
+#ifdef DATABASE_USE_CACHE
+
+    TimerStart(LOAD_DB_TO_CACHE);
+    
+    Goldilocks fr;
+    pqxx::connection *pConnection = NULL;
+
+    try
+    {
+        // Create the database connection
+        pConnection = new pqxx::connection{config.databaseURL};
+    }
+    catch(const std::exception& e)
+    {
+        cerr << "Error: Database::loadDb2MemCache() exception: " << e.what() << endl;
+        exitProcess();
+    }
+
+    try
+    {
+        if (config.dbMTCacheSize > 0) 
+        {
+            // Start a transaction.
+            pqxx::nontransaction n(*pConnection);
+
+            // Prepare the query
+            string query = "SELECT * FROM " + config.dbNodesTableName +";";
+
+            // Execute the query
+            pqxx::result rows = n.exec(query);
+            pqxx::result::size_type i;
+            uint64_t count = 0;
+            for (i=0; i < rows.size(); i++)
+            {
+                count++;
+                vector<Goldilocks::Element> value;
+                string2fea(fr, removeBSXIfExists(rows[i][1].c_str()), value);
+
+                if (Database::dbMTCache.add(removeBSXIfExists(rows[i][0].c_str()), value))
+                {
+                    // Cache is full stop loading records
+                    cout << "MT cache full, stop loading records" << endl;
+                    break;
+                }
+            }
+
+            cout << "MT cache loaded. Count=" << count << endl;
+
+            // Commit your transaction
+            n.commit();
+        }
+    }
+    catch (const std::exception &e)
+    {
+        cerr << "Error: Database::loadDb2MemCache() table=" << config.dbNodesTableName << " exception: " << e.what() << endl;
+        exitProcess();
+    }
+
+    try
+    {
+        if (config.dbProgramCacheSize)
+        {
+            // Start a transaction.
+            pqxx::nontransaction n(*pConnection);
+
+            // Prepare the query
+            string query = "SELECT * FROM " + config.dbProgramTableName +";";
+
+            // Execute the query
+            pqxx::result rows = n.exec(query);
+            pqxx::result::size_type i = 0;
+            uint64_t count = 0;
+            for (i=0; i < rows.size(); i++)
+            {
+                count++;
+                vector<uint8_t> value;
+                string2ba(removeBSXIfExists(rows[i][1].c_str()), value);
+
+                if (Database::dbProgramCache.add(removeBSXIfExists(rows[i][0].c_str()), value))
+                {
+                    // Cache is full stop loading records
+                    cout << "Program cache full, stop loading records" << endl;
+                    break;
+                }
+            }
+
+            cout << "Program cache loaded. Count=" << count << endl;
+
+            // Commit your transaction
+            n.commit();
+        }
+    }
+    catch (const std::exception &e)
+    {
+        cerr << "Error: Database::loadDb2MemCache() table=" << config.dbProgramTableName << " exception: " << e.what() << endl;
+        exitProcess();
+    }
+
+    if (pConnection != NULL)
+        delete pConnection;
+
+    TimerStopAndLog(LOAD_DB_TO_CACHE);
+
+#endif
 }

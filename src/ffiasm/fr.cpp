@@ -177,8 +177,8 @@ void Fr_fail() {
 
 RawFr::RawFr() {
     Fr_init();
-    fromString(fZero, "0");
-    fromString(fOne, "1");
+    set(fZero, 0);
+    set(fOne, 1);
     neg(fNegOne, fOne);
 }
 
@@ -205,7 +205,27 @@ void RawFr::fromUI(Element &r, unsigned long int v) {
     mpz_clear(mr);
 }
 
+RawFr::Element RawFr::set(int value) {
+  Element r;
+  set(r, value);
+  return r;
+}
 
+void RawFr::set(Element &r, int value) {
+  mpz_t mr;
+  mpz_init(mr);
+  mpz_set_si(mr, value);
+  if (value < 0) {
+      mpz_add(mr, mr, q);
+  }
+
+  mpz_export((void *)(r.v), NULL, -1, 8, -1, 0, mr);
+      
+  for (int i=0; i<Fr_N64; i++) r.v[i] = 0;
+  mpz_export((void *)(r.v), NULL, -1, 8, -1, 0, mr);
+  Fr_rawToMontgomery(r.v,r.v);
+  mpz_clear(mr);
+}
 
 std::string RawFr::toString(const Element &a, uint32_t radix) {
     Element tmp;
@@ -274,6 +294,34 @@ void RawFr::fromMpz(Element &r, const mpz_t a) {
     Fr_rawToMontgomery(r.v, r.v);
 }
 
+int RawFr::toRprBE(const Element &element, uint8_t *data, int bytes)
+{
+    if (bytes < Fr_N64 * 8) {
+      return -(Fr_N64 * 8);
+    }
+
+    mpz_t r;
+    mpz_init(r);
+  
+    toMpz(r, element);
+    
+    mpz_export(data, NULL, 1, 8, 1, 0, r);
+  
+    return Fr_N64 * 8;
+}
+
+int RawFr::fromRprBE(Element &element, const uint8_t *data, int bytes)
+{
+    if (bytes < Fr_N64 * 8) {
+      return -(Fr_N64* 8);
+    }
+    mpz_t r;
+    mpz_init(r);
+
+    mpz_import(r, Fr_N64 * 8, 0, 1, 0, 0, data);
+    fromMpz(element, r);
+    return Fr_N64 * 8;
+}
 
 static bool init = Fr_init();
 

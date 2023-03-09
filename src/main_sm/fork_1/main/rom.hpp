@@ -49,6 +49,10 @@ public:
     uint64_t isPreEIP155Offset;
     uint64_t isCreateContractOffset;
     uint64_t storageAddrOffset;
+    uint64_t bytecodeLengthOffset;
+    uint64_t originCTXOffset;
+    uint64_t gasCTXOffset;
+
 
     /* Constants */
     uint64_t MAX_CNT_STEPS_LIMIT;

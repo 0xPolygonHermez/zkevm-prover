@@ -224,7 +224,7 @@ void Input::loadGlobals (json &input)
 #endif
     }
 
-    // Input JSON file may contain a bUpdateMerkleTree key at the root level
+    // Input JSON file may contain an updateMerkleTree key at the root level
     if ( input.contains("updateMerkleTree") &&
          input["updateMerkleTree"].is_boolean() )
     {
@@ -234,7 +234,7 @@ void Input::loadGlobals (json &input)
 #endif
     }
 
-    // Input JSON file may contain a bNoCounters key at the root level
+    // Input JSON file may contain a noCounters key at the root level
     if ( input.contains("noCounters") &&
          input["noCounters"].is_boolean() )
     {
@@ -244,11 +244,56 @@ void Input::loadGlobals (json &input)
 #endif
     }
 
+    // Input JSON file may contain a disableStorage key at the root level
+    if ( input.contains("disableStorage") &&
+         input["disableStorage"].is_boolean() )
+    {
+        traceConfig.bEnabled = true;
+        traceConfig.bDisableStorage = input["disableStorage"];
+#ifdef LOG_INPUT
+        cout << "loadGlobals(): disableStorage=" << traceConfig.bDisableStorage << endl;
+#endif
+    }
+
+    // Input JSON file may contain a disableStack key at the root level
+    if ( input.contains("disableStack") &&
+         input["disableStack"].is_boolean() )
+    {
+        traceConfig.bEnabled = true;
+        traceConfig.bDisableStack = input["disableStack"];
+#ifdef LOG_INPUT
+        cout << "loadGlobals(): disableStack=" << traceConfig.bDisableStack << endl;
+#endif
+    }
+
+    // Input JSON file may contain a enableMemory key at the root level
+    if ( input.contains("enableMemory") &&
+         input["enableMemory"].is_boolean() )
+    {
+        traceConfig.bEnabled = true;
+        traceConfig.bEnableMemory = input["enableMemory"];
+#ifdef LOG_INPUT
+        cout << "loadGlobals(): enableMemory=" << traceConfig.bEnableMemory << endl;
+#endif
+    }
+
+    // Input JSON file may contain a enableReturnData key at the root level
+    if ( input.contains("enableReturnData") &&
+         input["enableReturnData"].is_boolean() )
+    {
+        traceConfig.bEnabled = true;
+        traceConfig.bEnableReturnData = input["enableReturnData"];
+#ifdef LOG_INPUT
+        cout << "loadGlobals(): enableReturnData=" << traceConfig.bEnableReturnData << endl;
+#endif
+    }
+
     // Input JSON file may contain a txHashToGenerateExecuteTrace key at the root level
     if ( input.contains("txHashToGenerateExecuteTrace") &&
          input["txHashToGenerateExecuteTrace"].is_string() )
     {
-        txHashToGenerateExecuteTrace = Add0xIfMissing(input["txHashToGenerateExecuteTrace"]);
+        traceConfig.bEnabled = true;
+        traceConfig.txHashToGenerateExecuteTrace = Add0xIfMissing(input["txHashToGenerateExecuteTrace"]);
 #ifdef LOG_INPUT
         cout << "loadGlobals(): txHashToGenerateExecuteTrace=" << txHashToGenerateExecuteTrace << endl;
 #endif
@@ -258,11 +303,15 @@ void Input::loadGlobals (json &input)
     if ( input.contains("txHashToGenerateCallTrace") &&
          input["txHashToGenerateCallTrace"].is_string() )
     {
-        txHashToGenerateCallTrace = Add0xIfMissing(input["txHashToGenerateCallTrace"]);
+        traceConfig.bEnabled = true;
+        traceConfig.txHashToGenerateCallTrace = Add0xIfMissing(input["txHashToGenerateCallTrace"]);
 #ifdef LOG_INPUT
         cout << "loadGlobals(): txHashToGenerateCallTrace=" << txHashToGenerateCallTrace << endl;
 #endif
     }
+
+    // Calculate the trace configuration flags
+    traceConfig.calculateFlags();
 }
 
 void Input::saveGlobals (json &input) const
@@ -289,8 +338,14 @@ void Input::saveGlobals (json &input) const
     input["from"] = from;
     input["updateMerkleTree"] = bUpdateMerkleTree;
     input["noCounters"] = bNoCounters;
-    input["txHashToGenerateExecuteTrace"] = txHashToGenerateExecuteTrace;
-    input["txHashToGenerateCallTrace"] = txHashToGenerateCallTrace;
+
+    // TraceConfig
+    input["disableStorage"] = traceConfig.bDisableStorage;
+    input["disableStack"] = traceConfig.bDisableStack;
+    input["enableMemory"] = traceConfig.bEnableMemory;
+    input["enableReturnData"] = traceConfig.bEnableReturnData;
+    input["txHashToGenerateExecuteTrace"] = traceConfig.txHashToGenerateExecuteTrace;
+    input["txHashToGenerateCallTrace"] = traceConfig.txHashToGenerateCallTrace;
 }
 
 

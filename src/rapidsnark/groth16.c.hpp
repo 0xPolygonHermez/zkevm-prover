@@ -1,5 +1,5 @@
 #include <sodium.h>
-#include <sstream>
+#include <memory>
 #include "logger.hpp"
 
 using namespace CPlusPlusLogging;
@@ -47,26 +47,16 @@ std::unique_ptr<Prover<Engine>> makeProver(
 
 template <typename Engine>
 std::unique_ptr<Proof<Engine>> Prover<Engine>::prove(typename Engine::FrElement *wtns) {
-    stringstream ss;
 
     LOG_TRACE("Start Initializing a b c A");
     auto a = new typename Engine::FrElement[domainSize];
-    ss << "a = " << (const void *)a << endl;
-    LOG_TRACE("auto a = new typename Engine::FrElement[domainSize];");
     auto b = new typename Engine::FrElement[domainSize];
-    ss << "b = " << (const void *)b << endl;
-    LOG_TRACE("auto b = new typename Engine::FrElement[domainSize];");
     auto c = new typename Engine::FrElement[domainSize];
-    ss << "c = " << (const void *)c << endl;
-    LOG_TRACE("auto c = new typename Engine::FrElement[domainSize];");
 
-    ss << "domainSize=" << domainSize;
-    LOG_TRACE(ss.str().c_str());
     #pragma omp parallel for
     for (u_int32_t i=0; i<domainSize; i++) {
         E.fr.copy(a[i], E.fr.zero());
         E.fr.copy(b[i], E.fr.zero());
-        if (i==0) LOG_TRACE("E.fr.copy i=0");
     }
 
     LOG_TRACE("Processing coefs");
@@ -175,8 +165,8 @@ std::unique_ptr<Proof<Engine>> Prover<Engine>::prove(typename Engine::FrElement 
     LOG_DEBUG(E.fr.toString(a[0]).c_str());
     LOG_DEBUG(E.fr.toString(a[1]).c_str());
 
-    delete[] b;
-    delete[] c;
+    delete b;
+    delete c;
 
     LOG_TRACE("Start Multiexp H");
     typename Engine::G1Point pih;
@@ -185,7 +175,7 @@ std::unique_ptr<Proof<Engine>> Prover<Engine>::prove(typename Engine::FrElement 
     ss1 << "pih: " << E.g1.toString(pih);
     LOG_DEBUG(ss1);
 
-    delete[] a;
+    delete a;
 
     LOG_TRACE("Start Multiexp A");
     uint32_t sW = sizeof(wtns[0]);

@@ -3,6 +3,8 @@
 
 #include <string>
 #include <nlohmann/json.hpp>
+#include <pthread.h>
+#include <semaphore.h>
 #include "config.hpp"
 #include "main_sm/fork_1/main/rom.hpp"
 #include "main_sm/fork_1/main/context.hpp"
@@ -64,7 +66,19 @@ public:
     void initState(Context &ctx);
     void checkFinalState(Context &ctx);
     void assertOutputs(Context &ctx);
+
+private:
+    // Flush
+    pthread_mutex_t flushMutex; // Mutex to protect the flush threads queue
+    void flushLock(void) { pthread_mutex_lock(&flushMutex); };
+    void flushUnlock(void) { pthread_mutex_unlock(&flushMutex); };
+    vector<pthread_t> flushQueue;
+    
+public:
+    void flushInParallel(StateDBInterface * pStateDB);
 };
+
+void *mainExecutorFlushThread(void *arg);
 
 } // namespace
 

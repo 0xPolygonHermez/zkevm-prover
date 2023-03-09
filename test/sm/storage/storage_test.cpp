@@ -35,8 +35,8 @@ void StorageSM_UnitTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &c
     cout << "StorageSM_UnitTest starting..." << endl;
 
     Smt smt(fr);
-    Database db(fr);
-    db.init(config);
+    Database db(fr, config);
+    db.init();
     SmtActionList actionList;
     SmtGetResult getResult;
     SmtSetResult setResult;
@@ -170,8 +170,8 @@ void StorageSM_ZeroToZeroTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Con
     {
         cout << "StorageSM_ZeroToZeroTest() Add zero value test 1. Testing..." << endl;
         Smt smt(fr);
-        Database db(fr);
-        db.init(config);
+        Database db(fr, config);
+        db.init();
         SmtActionList actionList;
         SmtSetResult setResult;
         Goldilocks::Element root[4]={fr.zero(), fr.zero(), fr.zero(), fr.zero()};
@@ -204,8 +204,8 @@ void StorageSM_ZeroToZeroTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Con
     {
         cout << "StorageSM_ZeroToZeroTest() Add zero value test 2. Testing..." << endl;
         Smt smt(fr);
-        Database db(fr);
-        db.init(config);
+        Database db(fr, config);
+        db.init();
         SmtActionList actionList;
         SmtSetResult setResult;
         Goldilocks::Element root[4]={0,0,0,0};
@@ -244,8 +244,8 @@ void StorageSM_ZeroToZeroTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Con
     {
         cout << "StorageSM_ZeroToZeroTest() Add zero value in an empty tree. Testing..." << endl;
         Smt smt(fr);
-        Database db(fr);
-        db.init(config);
+        Database db(fr, config);
+        db.init();
         SmtActionList actionList;
         SmtSetResult setResult;
         Goldilocks::Element root[4]={0,0,0,0};
@@ -268,8 +268,8 @@ void StorageSM_ZeroToZeroTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Con
     {
         cout << "StorageSM_ZeroToZeroTest() Add a zero value with an intermediate node as sibling. Testing..." << endl;
         Smt smt(fr);
-        Database db(fr);
-        db.init(config);
+        Database db(fr, config);
+        db.init();
         SmtActionList actionList;
         SmtSetResult setResult;
         Goldilocks::Element root[4]={0,0,0,0};
@@ -329,8 +329,8 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
     // It should add and remove an element
     {
         Smt smt(fr);
-        Database db(fr);
-        db.init(config);
+        Database db(fr, config);
+        db.init();
         SmtActionList actionList;
         SmtSetResult setResult;
         SmtGetResult getResult;
@@ -370,8 +370,8 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
     // It should update an element 1
     {
         Smt smt(fr);
-        Database db(fr);
-        db.init(config);
+        Database db(fr, config);
+        db.init();
         SmtActionList actionList;
         SmtSetResult setResult;
         SmtGetResult getResult;
@@ -416,8 +416,8 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
     // It should add a shared element 2
     {
         Smt smt(fr);
-        Database db(fr);
-        db.init(config);
+        Database db(fr, config);
+        db.init();
         SmtActionList actionList;
         SmtSetResult setResult;
         SmtGetResult getResult;
@@ -467,8 +467,8 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
     // It should add a shared element 3
     {
         Smt smt(fr);
-        Database db(fr);
-        db.init(config);
+        Database db(fr, config);
+        db.init();
         SmtActionList actionList;
         SmtSetResult setResult;
         SmtGetResult getResult;
@@ -518,8 +518,8 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
     // It should add a shared element
     {
         Smt smt(fr);
-        Database db(fr);
-        db.init(config);
+        Database db(fr, config);
+        db.init();
         SmtActionList actionList;
         SmtSetResult setResult;
         SmtGetResult getResult;
@@ -584,8 +584,8 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
     // Add-Remove 128 elements
     {
         Smt smt(fr);
-        Database db(fr);
-        db.init(config);
+        Database db(fr, config);
+        db.init();
         SmtActionList actionList;
         SmtSetResult setResult;
         SmtGetResult getResult;
@@ -628,8 +628,8 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
     // Should read random
     {
         Smt smt(fr);
-        Database db(fr);
-        db.init(config);
+        Database db(fr, config);
+        db.init();
         SmtActionList actionList;
         SmtSetResult setResult;
         SmtGetResult getResult;
@@ -669,8 +669,8 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
     // It should add elements with similar keys
     {
         Smt smt(fr);
-        Database db(fr);
-        db.init(config);
+        Database db(fr, config);
+        db.init();
         SmtActionList actionList;
         SmtSetResult setResult;
         SmtGetResult getResult;
@@ -721,8 +721,8 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
     // It should update leaf with more than one level depth
     {
         Smt smt(fr);
-        Database db(fr);
-        db.init(config);
+        Database db(fr, config);
+        db.init();
         SmtActionList actionList;
         SmtSetResult setResult;
         SmtGetResult getResult;
@@ -790,8 +790,8 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
     // It should Zero to Zero with isOldZero=0
     {
         Smt smt(fr);
-        Database db(fr);
-        db.init(config);
+        Database db(fr, config);
+        db.init();
         SmtActionList actionList;
         SmtSetResult setResult;
         SmtGetResult getResult;
@@ -837,8 +837,8 @@ void StorageSM_UseCaseTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
     // It should Zero to Zero with isOldZero=0
     {
         Smt smt(fr);
-        Database db(fr);
-        db.init(config);
+        Database db(fr, config);
+        db.init();
         SmtActionList actionList;
         SmtSetResult setResult;
         SmtGetResult getResult;
@@ -881,8 +881,8 @@ void StorageSM_GetZeroTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config
     cout << "StorageSM_GetZeroTest starting..." << endl;
 
     Smt smt(fr);
-    Database db(fr);
-    db.init(config);
+    Database db(fr, config);
+    db.init();
     SmtActionList actionList;
     SmtSetResult setResult;
     SmtGetResult getResult;

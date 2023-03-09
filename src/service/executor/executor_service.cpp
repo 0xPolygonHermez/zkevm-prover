@@ -18,6 +18,16 @@ using grpc::Status;
     cout << "ExecutorServiceImpl::ProcessBatch() got request:\n" << request->DebugString() << endl;
 #endif
 
+#ifdef LOG_TIME
+    lock();
+    if ( (firstTotalTime.tv_sec == 0) && (firstTotalTime.tv_usec == 0) )
+    {
+        gettimeofday(&firstTotalTime, NULL);
+        lastTotalTime = firstTotalTime;
+    }
+    unlock();
+#endif
+
     // Create and init an instance of ProverRequest
     ProverRequest proverRequest(fr, config, prt_processBatch);
 
@@ -121,8 +131,56 @@ using grpc::Status;
 
     // Flags
     proverRequest.input.bUpdateMerkleTree = request->update_merkle_tree();
-    proverRequest.input.txHashToGenerateExecuteTrace = "0x" + ba2string(request->tx_hash_to_generate_execute_trace());
-    proverRequest.input.txHashToGenerateCallTrace = "0x" + ba2string(request->tx_hash_to_generate_call_trace());
+
+    // Trace config
+    if (request->has_trace_config())
+    {
+        proverRequest.input.traceConfig.bEnabled = true;
+        const executor::v1::TraceConfig & traceConfig = request->trace_config();
+        if (traceConfig.disable_storage())
+        {
+            proverRequest.input.traceConfig.bDisableStorage = true;
+        }
+        if (traceConfig.disable_stack())
+        {
+            proverRequest.input.traceConfig.bDisableStack = true;
+        }
+        if (traceConfig.enable_memory())
+        {
+            proverRequest.input.traceConfig.bEnableMemory = true;
+        }
+        if (traceConfig.enable_return_data())
+        {
+            proverRequest.input.traceConfig.bEnableReturnData = true;
+        }
+        string auxString;
+        auxString = ba2string(traceConfig.tx_hash_to_generate_execute_trace());
+        if (auxString != "")
+        {
+            proverRequest.input.traceConfig.txHashToGenerateExecuteTrace = Add0xIfMissing(auxString);
+        }
+        auxString = ba2string(traceConfig.tx_hash_to_generate_call_trace());
+        if (auxString != "")
+        {
+            proverRequest.input.traceConfig.txHashToGenerateCallTrace = Add0xIfMissing(auxString);
+        }
+        proverRequest.input.traceConfig.calculateFlags();
+    }
+    /*string tx_hash_to_generate_execute_trace = ba2string(request->tx_hash_to_generate_execute_trace());
+    string tx_hash_to_generate_call_trace = ba2string(request->tx_hash_to_generate_call_trace());
+    if ( (tx_hash_to_generate_execute_trace.size() > 0) || (tx_hash_to_generate_call_trace.size() > 0) )
+    {
+        proverRequest.input.traceConfig.bEnabled = true;
+        if (tx_hash_to_generate_execute_trace.size() > 0)
+        {
+            proverRequest.input.traceConfig.txHashToGenerateExecuteTrace = Add0xIfMissing(tx_hash_to_generate_execute_trace);
+        }
+        if (tx_hash_to_generate_call_trace.size() > 0)
+        {
+            proverRequest.input.traceConfig.txHashToGenerateCallTrace = Add0xIfMissing(tx_hash_to_generate_call_trace);
+        }
+        proverRequest.input.traceConfig.calculateFlags();
+    }*/
 
     // Default values
     proverRequest.input.publicInputsExtended.newStateRoot = "0x0";
@@ -200,8 +258,7 @@ using grpc::Status;
         << " from=" << proverRequest.input.from
         << " bUpdateMerkleTree=" << proverRequest.input.bUpdateMerkleTree
         << " bNoCounters=" << proverRequest.input.bNoCounters
-        << " txHashToGenerateExecuteTrace=" << proverRequest.input.txHashToGenerateExecuteTrace
-        << " txHashToGenerateCallTrace=" << proverRequest.input.txHashToGenerateCallTrace
+        << " traceConfig=" << proverRequest.input.traceConfig.toString()
         << endl;
 #endif
 
@@ -272,33 +329,33 @@ using grpc::Status;
             pLog->set_batch_hash(string2ba(responses[tx].logs[log].batch_hash)); // Hash of the batch in which the transaction was included
             pLog->set_index(responses[tx].logs[log].index); // Index of the log in the block
         }
-        if (proverRequest.input.txHashToGenerateExecuteTrace == responses[tx].tx_hash)
+        if (proverRequest.input.traceConfig.bEnabled && (proverRequest.input.traceConfig.txHashToGenerateExecuteTrace == responses[tx].tx_hash))
         {
-            for (uint64_t step=0; step<responses[tx].call_trace.steps.size(); step++)
+            for (uint64_t step=0; step<responses[tx].execution_trace.size(); step++)
             {
                 executor::v1::ExecutionTraceStep * pExecutionTraceStep = pProcessTransactionResponse->add_execution_trace();
-                pExecutionTraceStep->set_pc(responses[tx].call_trace.steps[step].pc); // Program Counter
-                pExecutionTraceStep->set_op(responses[tx].call_trace.steps[step].opcode); // OpCode
-                pExecutionTraceStep->set_remaining_gas(responses[tx].call_trace.steps[step].gas);
-                pExecutionTraceStep->set_gas_cost(responses[tx].call_trace.steps[step].gas_cost); // Gas cost of the operation
-                pExecutionTraceStep->set_memory(string2ba(responses[tx].call_trace.steps[step].memory)); // Content of memory
-                pExecutionTraceStep->set_memory_size(responses[tx].call_trace.steps[step].memory_size);
-                for (uint64_t stack=0; stack<responses[tx].call_trace.steps[step].stack.size() ; stack++)
-                    pExecutionTraceStep->add_stack(PrependZeros(responses[tx].call_trace.steps[step].stack[stack].get_str(16), 64)); // Content of the stack
+                pExecutionTraceStep->set_pc(responses[tx].execution_trace[step].pc); // Program Counter
+                pExecutionTraceStep->set_op(responses[tx].execution_trace[step].opcode); // OpCode
+                pExecutionTraceStep->set_remaining_gas(responses[tx].execution_trace[step].gas);
+                pExecutionTraceStep->set_gas_cost(responses[tx].execution_trace[step].gas_cost); // Gas cost of the operation
+                pExecutionTraceStep->set_memory(string2ba(responses[tx].execution_trace[step].memory)); // Content of memory
+                pExecutionTraceStep->set_memory_size(responses[tx].execution_trace[step].memory_size);
+                for (uint64_t stack=0; stack<responses[tx].execution_trace[step].stack.size() ; stack++)
+                    pExecutionTraceStep->add_stack(PrependZeros(responses[tx].execution_trace[step].stack[stack].get_str(16), 64)); // Content of the stack
                 string dataConcatenated;
-                for (uint64_t data=0; data<responses[tx].call_trace.steps[step].return_data.size(); data++)
-                    dataConcatenated += responses[tx].call_trace.steps[step].return_data[data];
+                for (uint64_t data=0; data<responses[tx].execution_trace[step].return_data.size(); data++)
+                    dataConcatenated += responses[tx].execution_trace[step].return_data[data];
                 pExecutionTraceStep->set_return_data(string2ba(dataConcatenated));
                 google::protobuf::Map<std::string, std::string> * pStorage = pExecutionTraceStep->mutable_storage();
                 unordered_map<string,string>::iterator it;
-                for (it=responses[tx].call_trace.steps[step].storage.begin(); it!=responses[tx].call_trace.steps[step].storage.end(); it++)
+                for (it=responses[tx].execution_trace[step].storage.begin(); it!=responses[tx].execution_trace[step].storage.end(); it++)
                     (*pStorage)[it->first] = it->second; // Content of the storage
-                pExecutionTraceStep->set_depth(responses[tx].call_trace.steps[step].depth); // Call depth
-                pExecutionTraceStep->set_gas_refund(responses[tx].call_trace.steps[step].gas_refund);
-                pExecutionTraceStep->set_error(string2error(responses[tx].call_trace.steps[step].error));
+                pExecutionTraceStep->set_depth(responses[tx].execution_trace[step].depth); // Call depth
+                pExecutionTraceStep->set_gas_refund(responses[tx].execution_trace[step].gas_refund);
+                pExecutionTraceStep->set_error(string2error(responses[tx].execution_trace[step].error));
             }
         }
-        if (proverRequest.input.txHashToGenerateCallTrace == responses[tx].tx_hash)
+        if (proverRequest.input.traceConfig.bEnabled && (proverRequest.input.traceConfig.txHashToGenerateCallTrace == responses[tx].tx_hash))
         {
             executor::v1::CallTrace * pCallTrace = new executor::v1::CallTrace();
             executor::v1::TransactionContext * pTransactionContext = pCallTrace->mutable_context();
@@ -359,15 +416,18 @@ using grpc::Status;
          << " counters.arith=" << proverRequest.counters.arith
          << " counters.binary=" << proverRequest.counters.binary
          << " nTxs=" << responses.size();
-        for (uint64_t tx=0; tx<responses.size(); tx++)
-        {
-            cout << " tx[" << tx << "].hash=" << responses[tx].tx_hash
-                 << " gasUsed=" << responses[tx].gas_used
-                 << " gasLeft=" << responses[tx].gas_left
-                 << " gasUsed+gasLeft=" << (responses[tx].gas_used + responses[tx].gas_left)
-                 << " gasRefunded=" << responses[tx].gas_refunded
-                 << " error=" << responses[tx].error;
-        }
+         if (config.logExecutorServerTxs)
+         {
+            for (uint64_t tx=0; tx<responses.size(); tx++)
+            {
+                cout << " tx[" << tx << "].hash=" << responses[tx].tx_hash
+                    << " gasUsed=" << responses[tx].gas_used
+                    << " gasLeft=" << responses[tx].gas_left
+                    << " gasUsed+gasLeft=" << (responses[tx].gas_used + responses[tx].gas_left)
+                    << " gasRefunded=" << responses[tx].gas_refunded
+                    << " error=" << responses[tx].error;
+            }
+         }
         cout << endl;
 #endif
 
@@ -430,20 +490,37 @@ using grpc::Status;
     totalGas += execGas;
     uint64_t execBytes = request->batch_l2_data().size();
     totalBytes += execBytes;
+    uint64_t execTX = responses.size();
+    totalTX += execTX;
     double execTime = double(TimeDiff(EXECUTOR_PROCESS_BATCH_start, EXECUTOR_PROCESS_BATCH_stop))/1000000;
     totalTime += execTime;
     struct timeval now;
     gettimeofday(&now, NULL);
-    double timeSinceLastTotal = double(TimeDiff(lastTotalTime, now))/1000000;
-    if (timeSinceLastTotal >= 1.0)
+    double timeSinceLastTotal = zkmax(1, double(TimeDiff(lastTotalTime, now))/1000000);
+    if (timeSinceLastTotal >= 10.0)
     {
         totalTPG = double(totalGas - lastTotalGas)/timeSinceLastTotal;
         totalTPB = double(totalBytes - lastTotalBytes)/timeSinceLastTotal;
+        totalTPTX = double(totalTX - lastTotalTX)/timeSinceLastTotal;
         lastTotalGas = totalGas;
         lastTotalBytes = totalBytes;
+        lastTotalTX = totalTX;
         lastTotalTime = now;
     }
-    cout << "ExecutorServiceImpl::ProcessBatch() done counter=" << counter << " B=" << execBytes <<  " gas=" << execGas << " time=" << execTime << " TP=" << double(execBytes)/execTime << "B/s=" << double(execGas)/execTime << "gas/s=" << double(execGas)/double(execBytes) << "gas/B totalTP=" << totalTPB << "B/s=" << totalTPG << "gas/s=" << totalTPG/totalTPB << "gas/B totalTime=" << totalTime << endl;
+    double timeSinceFirstTotal = zkmax(1, double(TimeDiff(firstTotalTime, now))/1000000);
+    double TPG = double(totalGas)/timeSinceFirstTotal;
+    double TPB = double(totalBytes)/timeSinceFirstTotal;
+    double TPTX = double(totalTX)/timeSinceFirstTotal;
+    
+    uint64_t nfd = getNumberOfFileDescriptors();
+
+    cout << "ExecutorServiceImpl::ProcessBatch() done counter=" << counter << " B=" << execBytes << " TX=" << execTX << " gas=" << execGas << " time=" << execTime
+         << " TP=" << double(execBytes)/execTime << "B/s=" << double(execTX)/execTime << "TX/s=" << double(execGas)/execTime << "gas/s=" << double(execGas)/double(execBytes) << "gas/B" 
+         << " totalTP(10s)=" << totalTPB << "B/s=" << totalTPTX << "TX/s=" << totalTPG << "gas/s=" << totalTPG/zkmax(1,totalTPB) << "gas/B"
+         << " totalTP(ever)=" << TPB << "B/s=" << TPTX << "TX/s=" << TPG << "gas/s=" << TPG/zkmax(1,TPB) << "gas/B"
+         << " totalTime=" << totalTime
+         << " filedesc=" << nfd
+         << endl;
     unlock();
 #endif
 
@@ -507,33 +584,33 @@ using grpc::Status;
 
 ::executor::v1::RomError ExecutorServiceImpl::string2error (string &errorString)
 {
-    if (errorString == "OOG") return ::executor::v1::ROM_ERROR_OUT_OF_GAS;
-    if (errorString == "revert") return ::executor::v1::ROM_ERROR_EXECUTION_REVERTED;
-    if (errorString == "overflow") return ::executor::v1::ROM_ERROR_STACK_OVERFLOW;
-    if (errorString == "underflow") return ::executor::v1::ROM_ERROR_STACK_UNDERFLOW;
-    if (errorString == "OOCS") return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_STEP;
-    if (errorString == "OOCK") return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_KECCAK;
-    if (errorString == "OOCB") return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_BINARY;
-    if (errorString == "OOCM") return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_MEM;
-    if (errorString == "OOCA") return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_ARITH;
-    if (errorString == "OOCPA") return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_PADDING;
-    if (errorString == "OOCPO") return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_POSEIDON;
-    if (errorString == "intrinsic_invalid_signature") return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_SIGNATURE;
-    if (errorString == "intrinsic_invalid_chain_id") return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_CHAIN_ID;
-    if (errorString == "intrinsic_invalid_nonce") return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_NONCE;
-    if (errorString == "intrinsic_invalid_gas_limit") return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_GAS_LIMIT;
-    if (errorString == "intrinsic_invalid_gas_overflow") return ::executor::v1::ROM_ERROR_INTRINSIC_TX_GAS_OVERFLOW;
-    if (errorString == "intrinsic_invalid_balance") return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_BALANCE;
+    if (errorString == "OOG"                              ) return ::executor::v1::ROM_ERROR_OUT_OF_GAS;
+    if (errorString == "revert"                           ) return ::executor::v1::ROM_ERROR_EXECUTION_REVERTED;
+    if (errorString == "overflow"                         ) return ::executor::v1::ROM_ERROR_STACK_OVERFLOW;
+    if (errorString == "underflow"                        ) return ::executor::v1::ROM_ERROR_STACK_UNDERFLOW;
+    if (errorString == "OOCS"                             ) return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_STEP;
+    if (errorString == "OOCK"                             ) return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_KECCAK;
+    if (errorString == "OOCB"                             ) return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_BINARY;
+    if (errorString == "OOCM"                             ) return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_MEM;
+    if (errorString == "OOCA"                             ) return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_ARITH;
+    if (errorString == "OOCPA"                            ) return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_PADDING;
+    if (errorString == "OOCPO"                            ) return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_POSEIDON;
+    if (errorString == "intrinsic_invalid_signature"      ) return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_SIGNATURE;
+    if (errorString == "intrinsic_invalid_chain_id"       ) return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_CHAIN_ID;
+    if (errorString == "intrinsic_invalid_nonce"          ) return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_NONCE;
+    if (errorString == "intrinsic_invalid_gas_limit"      ) return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_GAS_LIMIT;
+    if (errorString == "intrinsic_invalid_gas_overflow"   ) return ::executor::v1::ROM_ERROR_INTRINSIC_TX_GAS_OVERFLOW;
+    if (errorString == "intrinsic_invalid_balance"        ) return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_BALANCE;
     if (errorString == "intrinsic_invalid_batch_gas_limit") return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_BATCH_GAS_LIMIT;
-    if (errorString == "intrinsic_invalid_sender_code") return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_SENDER_CODE;
-    if (errorString == "invalidJump") return ::executor::v1::ROM_ERROR_INVALID_JUMP;
-    if (errorString == "invalidOpcode") return ::executor::v1::ROM_ERROR_INVALID_OPCODE;
-    if (errorString == "invalidAddressCollision") return ::executor::v1::ROM_ERROR_CONTRACT_ADDRESS_COLLISION;
-    if (errorString == "invalidStaticTx") return ::executor::v1::ROM_ERROR_INVALID_STATIC;
-    if (errorString == "invalidCodeSize") return ::executor::v1::ROM_ERROR_MAX_CODE_SIZE_EXCEEDED;
-    if (errorString == "invalidCodeStartsEF") return ::executor::v1::ROM_ERROR_INVALID_BYTECODE_STARTS_EF;
-    if (errorString == "invalid_fork_id") return ::executor::v1::ROM_ERROR_UNSUPPORTED_FORK_ID;
-    if (errorString == "") return ::executor::v1::ROM_ERROR_NO_ERROR;
+    if (errorString == "intrinsic_invalid_sender_code"    ) return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_SENDER_CODE;
+    if (errorString == "invalidJump"                      ) return ::executor::v1::ROM_ERROR_INVALID_JUMP;
+    if (errorString == "invalidOpcode"                    ) return ::executor::v1::ROM_ERROR_INVALID_OPCODE;
+    if (errorString == "invalidAddressCollision"          ) return ::executor::v1::ROM_ERROR_CONTRACT_ADDRESS_COLLISION;
+    if (errorString == "invalidStaticTx"                  ) return ::executor::v1::ROM_ERROR_INVALID_STATIC;
+    if (errorString == "invalidCodeSize"                  ) return ::executor::v1::ROM_ERROR_MAX_CODE_SIZE_EXCEEDED;
+    if (errorString == "invalidCodeStartsEF"              ) return ::executor::v1::ROM_ERROR_INVALID_BYTECODE_STARTS_EF;
+    if (errorString == "invalid_fork_id"                  ) return ::executor::v1::ROM_ERROR_UNSUPPORTED_FORK_ID;
+    if (errorString == ""                                 ) return ::executor::v1::ROM_ERROR_NO_ERROR;
     cerr << "Error: ExecutorServiceImpl::string2error() found invalid error string=" << errorString << endl;
     exitProcess();
     return ::executor::v1::ROM_ERROR_UNSPECIFIED;
@@ -541,13 +618,14 @@ using grpc::Status;
 
 ::executor::v1::ExecutorError ExecutorServiceImpl::zkresult2error (zkresult &result)
 {
-    if (result == ZKR_SUCCESS) return ::executor::v1::EXECUTOR_ERROR_NO_ERROR;
-    if (result == ZKR_SM_MAIN_OOC_ARITH) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_ARITH;
-    if (result == ZKR_SM_MAIN_OOC_BINARY) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_BINARY;
-    if (result == ZKR_SM_MAIN_OOC_KECCAK_F) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_KECCAK;
-    if (result == ZKR_SM_MAIN_OOC_MEM_ALIGN) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_MEM;
-    if (result == ZKR_SM_MAIN_OOC_PADDING_PG) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_PADDING;
-    if (result == ZKR_SM_MAIN_OOC_POSEIDON_G) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_POSEIDON;
-    if (result == ZKR_SM_MAIN_INVALID_FORK_ID) return ::executor::v1::EXECUTOR_ERROR_UNSUPPORTED_FORK_ID;
+    if (result == ZKR_SUCCESS                 ) return ::executor::v1::EXECUTOR_ERROR_NO_ERROR;
+    if (result == ZKR_SM_MAIN_OOC_ARITH       ) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_ARITH;
+    if (result == ZKR_SM_MAIN_OOC_BINARY      ) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_BINARY;
+    if (result == ZKR_SM_MAIN_OOC_KECCAK_F    ) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_KECCAK;
+    if (result == ZKR_SM_MAIN_OOC_MEM_ALIGN   ) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_MEM;
+    if (result == ZKR_SM_MAIN_OOC_PADDING_PG  ) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_PADDING;
+    if (result == ZKR_SM_MAIN_OOC_POSEIDON_G  ) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_POSEIDON;
+    if (result == ZKR_SM_MAIN_INVALID_FORK_ID ) return ::executor::v1::EXECUTOR_ERROR_UNSUPPORTED_FORK_ID;
+    if (result == ZKR_SM_MAIN_BALANCE_MISMATCH) return ::executor::v1::EXECUTOR_ERROR_BALANCE_MISMATCH;
     return ::executor::v1::EXECUTOR_ERROR_UNSPECIFIED;
 }
