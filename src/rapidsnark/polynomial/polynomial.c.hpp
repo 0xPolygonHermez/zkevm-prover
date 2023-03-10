@@ -89,7 +89,7 @@ Polynomial<Engine>::fromEvaluations(Engine &_E, FFT<typename Engine::Fr> *fft, F
 
 template<typename Engine>
 Polynomial<Engine>::~Polynomial() {
-    if(!this->createBuffer) {
+    if(this->createBuffer) {
         delete[] this->coef;
     }
 }
@@ -232,7 +232,7 @@ void Polynomial<Engine>::add(Polynomial<Engine> &polynomial) {
     }
 
     if (resize) {
-        delete this->coef;
+        if(createBuffer) delete[] this->coef;
         this->coef = newCoef;
     }
 
@@ -379,7 +379,9 @@ void Polynomial<Engine>::divByMonic(uint32_t m, FrElement beta) {
     }
 
     // Swap buffers
-    delete[] this->coef;
+    if(createBuffer) {
+        delete[] this->coef;
+    }
     this->coef = polResult->coef;
 
     fixDegree();

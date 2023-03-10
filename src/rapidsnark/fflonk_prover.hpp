@@ -13,6 +13,7 @@
 #include <nlohmann/json.hpp>
 #include "keccak_256_transcript.hpp"
 #include "wtns_utils.hpp"
+#include "zkey.hpp"
 
 using json = nlohmann::json;
 using namespace std::chrono;
@@ -35,14 +36,19 @@ namespace Fflonk {
         std::string curveName;
         size_t sDomain;
 
+        FrElement *reservedMemoryPtr;
+
+        u_int64_t lengthPrecomputedBigBuffer;
+        FrElement *precomputedBigBuffer;
         G1PointAffine *PTau;
+
+        u_int64_t lengthNonPrecomputedBigBuffer;
+        FrElement *nonPrecomputedBigBuffer;
 
         FrElement *buffWitness;
         FrElement *buffInternalWitness;
 
-        FrElement *bigBufferBuffers;
-        FrElement *bigBufferPolynomials;
-        FrElement *bigBufferEvaluations;
+        Zkey::Addition<Engine> *additionsBuff;
 
         std::map<std::string, FrElement *> polPtr;
         std::map<std::string, FrElement *> evalPtr;
@@ -61,14 +67,24 @@ namespace Fflonk {
         SnarkProof<Engine> *proof;
     public:
         FflonkProver(Engine &E);
+        FflonkProver(Engine &E, void* reservedMemoryPtr);
 
         ~FflonkProver();
 
-        std::tuple <json, json> prove(BinFileUtils::BinFile *fdZkey, BinFileUtils::BinFile *fdWtns);
+        void setZkey(BinFileUtils::BinFile *fdZkey);
 
+        std::tuple <json, json> prove(BinFileUtils::BinFile *fdZkey, BinFileUtils::BinFile *fdWtns);
         std::tuple <json, json> prove(BinFileUtils::BinFile *fdZkey, FrElement *wtns, WtnsUtils::Header* wtnsHeader = NULL);
 
-        void calculateAdditions(BinFileUtils::BinFile *fdZkey);
+        std::tuple <json, json> prove(BinFileUtils::BinFile *fdWtns);
+        std::tuple <json, json> prove(FrElement *wtns, WtnsUtils::Header* wtnsHeader = NULL);
+
+    protected:
+        void initialize(void* reservedMemoryPtr);
+
+        void removePrecomputedData();
+
+        void calculateAdditions();
 
         FrElement getWitness(u_int64_t idx);
 
