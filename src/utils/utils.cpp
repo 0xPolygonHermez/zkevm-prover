@@ -90,14 +90,15 @@ void getMemoryInfo(MemoryInfo &info)
 
 void printMemoryInfo(bool compact)
 {
-    cout << "MEMORY INFO" << endl;
+    string endLine = (compact ? ", " : "\n");
+
+    cout << "MEMORY INFO" << endLine;
 
     constexpr double factorMB = 1024;
 
     MemoryInfo info;
     getMemoryInfo(info);
 
-    string endLine = (compact ? ", " : "\n");
     int tab = (compact ? 0 : 15);
 
     cout << left << setw(tab) << "MemTotal: " << right << setw(tab) << (info.total / factorMB) << " MB" << endLine;
@@ -112,7 +113,9 @@ void printMemoryInfo(bool compact)
 
 void printProcessInfo(bool compact)
 {
-    cout << "PROCESS INFO" << endl;
+    string endLine = (compact ? ", " : "\n");
+
+    cout << "PROCESS INFO" << endLine;
 
     ifstream stat("/proc/self/stat", ios_base::in);
     if (!stat.good())
@@ -133,7 +136,6 @@ void printProcessInfo(bool compact)
 
     stat.close();
 
-    string endLine = (compact ? ", " : "\n");
     int tab = (compact ? 0 : 15);
 
     cout << left << setw(tab) << "Pid: " << right << setw(tab) << pid << endLine;
