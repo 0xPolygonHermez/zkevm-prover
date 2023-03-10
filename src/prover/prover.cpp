@@ -113,6 +113,9 @@ Prover::Prover(Goldilocks &fr,
                 cout << "Prover::genBatchProof() successfully allocated " << polsSize << " bytes" << endl;
             }
 
+            prover = new Fflonk::FflonkProver<AltBn128::Engine>(AltBn128::Engine::engine, pAddress);
+            prover->setZkey(zkey.get());
+
             StarkInfo _starkInfoRecursiveF(config, config.recursivefStarkInfo);
             pAddressStarksRecursiveF = (void *)malloc(_starkInfoRecursiveF.mapTotalN * sizeof(Goldilocks::Element));
 
@@ -164,6 +167,8 @@ Prover::~Prover()
             free(pAddress);
         }
         free(pAddressStarksRecursiveF);
+
+        delete prover;
 
         delete starkZkevm;
         delete starksC12a;
@@ -855,8 +860,7 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
         TimerStart(RAPID_SNARK);
         try
         {
-            auto prover = new Fflonk::FflonkProver<AltBn128::Engine>(AltBn128::Engine::engine);
-            auto [jsonProof, publicSignalsJson] = prover->prove(zkey.get(), pWitnessFinal);
+            auto [jsonProof, publicSignalsJson] = prover->prove(pWitnessFinal);
             // Save proof to file
             if (config.saveProofToFile)
             {
