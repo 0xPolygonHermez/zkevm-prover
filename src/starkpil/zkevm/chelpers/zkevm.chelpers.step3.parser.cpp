@@ -708,6 +708,12 @@ void ZkevmSteps::step3_parser_first_avx(StepsParams &params, uint64_t nrows, uin
                     i_args += 4;
                     break;
                }
+               case 91:
+               {
+                    assert(0); // code not used
+                    i_args += 4;
+                    break;
+               }
                case 92:
                {
                     Goldilocks::sub_avx(&params.pols[args3[i_args] + i * args3[i_args + 1]], args3[i_args + 1], tmp1[args3[i_args + 2]], tmp1[args3[i_args + 3]]);
@@ -738,9 +744,21 @@ void ZkevmSteps::step3_parser_first_avx(StepsParams &params, uint64_t nrows, uin
                     i_args += 4;
                     break;
                }
+               case 97:
+               {
+                    assert(0); // code not used
+                    i_args += 4;
+                    break;
+               }
                case 98:
                {
                     Goldilocks3::mul_avx(&params.pols[args3[i_args] + i * args3[i_args + 1]], args3[i_args + 1], tmp3[args3[i_args + 2]], tmp3[args3[i_args + 3]]);
+                    i_args += 4;
+                    break;
+               }
+               case 99:
+               {
+                    assert(0); // code not used
                     i_args += 4;
                     break;
                }
