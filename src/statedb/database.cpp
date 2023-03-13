@@ -77,6 +77,13 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
 #endif
     if (useRemoteDB)
     {
+        // If multi write is enabled, flush pending data, since some previously written keys
+        // could be in the multi write string but flushed from the cache
+        if (config.dbMultiWrite)
+        {
+            flush();
+        }
+
         // Otherwise, read it remotelly
         string sData;
         r = readRemote(false, key, sData);
@@ -186,12 +193,28 @@ void Database::initRemote(void)
 
         if (config.dbConnectionsPool)
         {
-            if (config.maxStateDBThreads > DATABASE_WRITE_CONNECTIONS)
+            // Check that we don't support more threads than available connections
+            if ( config.runStateDBServer && (config.maxStateDBThreads > config.dbNumberOfWritePoolConnections) )
             {
-                cerr << "Error: Database::initRemote() found config.maxStateDBThreads=" << config.maxStateDBThreads << " < DATABASE_WRITE_CONNECTIONS=" << DATABASE_WRITE_CONNECTIONS << endl;
+                cerr << "Error: Database::initRemote() found config.maxStateDBThreads=" << config.maxStateDBThreads << " > config.dbNumberOfWritePoolConnections=" << config.dbNumberOfWritePoolConnections << endl;
                 exitProcess();
             }
-            for (uint64_t i=0; i<DATABASE_WRITE_CONNECTIONS; i++)
+            if ( config.runExecutorServer && (config.maxExecutorThreads > config.dbNumberOfWritePoolConnections) )
+            {
+                cerr << "Error: Database::initRemote() found config.maxExecutorThreads=" << config.maxExecutorThreads << " > config.dbNumberOfWritePoolConnections=" << config.dbNumberOfWritePoolConnections << endl;
+                exitProcess();
+            }
+
+            // Allocate write connections pool
+            writeConnectionsPool = new DatabaseConnection[config.dbNumberOfWritePoolConnections];
+            if (writeConnectionsPool == NULL)
+            {
+                cerr << "Error: Database::initRemote() failed creating write connection pool of size " << config.dbNumberOfWritePoolConnections << endl;
+                exitProcess();
+            }
+
+            // Create write connections
+            for (uint64_t i=0; i<config.dbNumberOfWritePoolConnections; i++)
             {
                 writeConnectionsPool[i].pConnection = new pqxx::connection{uri};
                 if (writeConnectionsPool[i].pConnection == NULL)
@@ -202,6 +225,8 @@ void Database::initRemote(void)
                 writeConnectionsPool[i].bInUse = false;
                 //cout << "Database::initRemote() created write connection i=" << i << " writeConnectionsPool[i]=" << writeConnectionsPool[i].pConnection << endl;
             }
+
+            // Reset counters
             nextWriteConnection = 0;
             usedWriteConnections = 0;
         }
@@ -221,12 +246,28 @@ void Database::initRemote(void)
         
         if (config.dbConnectionsPool)
         {
-            if (config.maxStateDBThreads > DATABASE_READ_CONNECTIONS)
+            // Check that we don't support more threads than available connections
+            if ( config.runStateDBServer && (config.maxStateDBThreads > config.dbNumberOfReadPoolConnections) )
             {
-                cerr << "Error: Database::initRemote() found config.maxStateDBThreads=" << config.maxStateDBThreads << " < DATABASE_READ_CONNECTIONS=" << DATABASE_READ_CONNECTIONS << endl;
+                cerr << "Error: Database::initRemote() found config.maxStateDBThreads=" << config.maxStateDBThreads << " > config.dbNumberOfReadPoolConnections=" << config.dbNumberOfReadPoolConnections << endl;
                 exitProcess();
             }
-            for (uint64_t i=0; i<DATABASE_READ_CONNECTIONS; i++)
+            if ( config.runExecutorServer && (config.maxExecutorThreads > config.dbNumberOfReadPoolConnections) )
+            {
+                cerr << "Error: Database::initRemote() found config.maxExecutorThreads=" << config.maxExecutorThreads << " > config.dbNumberOfReadPoolConnections=" << config.dbNumberOfReadPoolConnections << endl;
+                exitProcess();
+            }
+
+            // Allocate read connections pool
+            readConnectionsPool = new DatabaseConnection[config.dbNumberOfReadPoolConnections];
+            if (readConnectionsPool == NULL)
+            {
+                cerr << "Error: Database::initRemote() failed creating read connection pool of size " << config.dbNumberOfReadPoolConnections << endl;
+                exitProcess();
+            }
+
+            // Create read connections
+            for (uint64_t i=0; i<config.dbNumberOfReadPoolConnections; i++)
             {
                 readConnectionsPool[i].pConnection = new pqxx::connection{uri};
                 if (readConnectionsPool[i].pConnection == NULL)
@@ -237,6 +278,8 @@ void Database::initRemote(void)
                 readConnectionsPool[i].bInUse = false;
                 //cout << "Database::initRemote() created read connection i=" << i << " readConnectionsPool[i]=" << readConnectionsPool[i].pConnection << endl;
             }
+
+            // Reset counters
             nextReadConnection = 0;
             usedReadConnections = 0;
         }
@@ -268,16 +311,16 @@ DatabaseConnection * Database::getWriteConnection (void)
         writeLock();
         DatabaseConnection * pConnection = NULL;
         uint64_t i=0;
-        for (i=0; i<DATABASE_WRITE_CONNECTIONS; i++)
+        for (i=0; i<config.dbNumberOfWritePoolConnections; i++)
         {
             if (!writeConnectionsPool[nextWriteConnection].bInUse) break;
             nextWriteConnection++;
-            if (nextWriteConnection == DATABASE_WRITE_CONNECTIONS)
+            if (nextWriteConnection == config.dbNumberOfWritePoolConnections)
             {
                 nextWriteConnection = 0;
             }
         }
-        if (i==DATABASE_WRITE_CONNECTIONS)
+        if (i==config.dbNumberOfWritePoolConnections)
         {
             cerr << "Error: Database::getWriteConnection() run out of free connections" << endl;
             exitProcess();
@@ -287,7 +330,7 @@ DatabaseConnection * Database::getWriteConnection (void)
         zkassert(pConnection->bInUse == false);
         pConnection->bInUse = true;
         nextWriteConnection++;
-        if (nextWriteConnection == DATABASE_WRITE_CONNECTIONS)
+        if (nextWriteConnection == config.dbNumberOfWritePoolConnections)
         {
             nextWriteConnection = 0;
         }
@@ -337,16 +380,16 @@ DatabaseConnection * Database::getReadConnection (void)
         readLock();
         DatabaseConnection * pConnection = NULL;
         uint64_t i=0;
-        for (i=0; i<DATABASE_READ_CONNECTIONS; i++)
+        for (i=0; i<config.dbNumberOfReadPoolConnections; i++)
         {
             if (!readConnectionsPool[nextReadConnection].bInUse) break;
             nextReadConnection++;
-            if (nextReadConnection == DATABASE_READ_CONNECTIONS)
+            if (nextReadConnection == config.dbNumberOfReadPoolConnections)
             {
                 nextReadConnection = 0;
             }
         }
-        if (i==DATABASE_READ_CONNECTIONS)
+        if (i==config.dbNumberOfReadPoolConnections)
         {
             cerr << "Error: Database::getReadConnection() run out of free connections" << endl;
             exitProcess();
@@ -356,7 +399,7 @@ DatabaseConnection * Database::getReadConnection (void)
         zkassert(pConnection->bInUse == false);
         pConnection->bInUse = true;
         nextReadConnection++;
-        if (nextReadConnection == DATABASE_READ_CONNECTIONS)
+        if (nextReadConnection == config.dbNumberOfReadPoolConnections)
         {
             nextReadConnection = 0;
         }
@@ -817,20 +860,28 @@ Database::~Database()
 {
     if (config.dbConnectionsPool)
     {
-        for (uint64_t i=0; i<DATABASE_WRITE_CONNECTIONS; i++)
+        if (writeConnectionsPool != NULL)
         {
-            if (writeConnectionsPool[i].pConnection != NULL)
+            for (uint64_t i=0; i<config.dbNumberOfWritePoolConnections; i++)
             {
-                delete writeConnectionsPool[i].pConnection;
+                if (writeConnectionsPool[i].pConnection != NULL)
+                {
+                    delete[] writeConnectionsPool[i].pConnection;
+                }
             }
+            delete writeConnectionsPool;
         }
 
-        for (uint64_t i=0; i<DATABASE_READ_CONNECTIONS; i++)
+        if (readConnectionsPool != NULL)
         {
-            if (readConnectionsPool[i].pConnection != NULL)
+            for (uint64_t i=0; i<config.dbNumberOfReadPoolConnections; i++)
             {
-                delete readConnectionsPool[i].pConnection;
+                if (readConnectionsPool[i].pConnection != NULL)
+                {
+                    delete[] readConnectionsPool[i].pConnection;
+                }
             }
+            delete readConnectionsPool;
         }
     }
     else

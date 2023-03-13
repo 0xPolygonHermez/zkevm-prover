@@ -48,6 +48,15 @@ set<string> responseErrors = {
     "intrinsic_invalid_balance",
     "intrinsic_invalid_batch_gas_limit",
     "intrinsic_invalid_sender_code"};
+    
+set<string> oocErrors = {
+    "OOCS",
+    "OOCK",
+    "OOCB",
+    "OOCM",
+    "OOCA",
+    "OOCPA",
+    "OOCPO"};
 
 //////////
 // UTILS
@@ -263,7 +272,7 @@ zkresult FullTracer::handleEvent(Context &ctx, const RomCommand &cmd)
     }
     if (cmd.params[0]->varName == "onFinishTx")
     {
-        if (ctx.totalTransferredBalance != 0)
+        if ( (oocErrors.find(lastError)==oocErrors.end()) && (ctx.totalTransferredBalance != 0) )
         {
             cerr << "Error: FullTracer::handleEvent(onFinishTx) found ctx.totalTransferredBalance=" << ctx.totalTransferredBalance.get_str(10) << endl;
             return ZKR_SM_MAIN_BALANCE_MISMATCH;
@@ -278,7 +287,7 @@ zkresult FullTracer::handleEvent(Context &ctx, const RomCommand &cmd)
     }
     if (cmd.params[0]->varName == "onFinishBatch")
     {
-        if (ctx.totalTransferredBalance != 0)
+        if ( (oocErrors.find(lastError)==oocErrors.end()) && (ctx.totalTransferredBalance != 0) )
         {
             cerr << "Error: FullTracer::handleEvent(onFinishBatch) found ctx.totalTransferredBalance=" << ctx.totalTransferredBalance.get_str(10) << endl;
             return ZKR_SM_MAIN_BALANCE_MISMATCH;

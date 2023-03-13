@@ -777,6 +777,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     Kin1[6] = pols.B0[i];
                     Kin1[7] = pols.B1[i];
 
+                    if  ( !fr.isZero(pols.A5[i]) || !fr.isZero(pols.A6[i]) || !fr.isZero(pols.A7[i]) || !fr.isZero(pols.B2[i]) || !fr.isZero(pols.B3[i]) || !fr.isZero(pols.B4[i]) || !fr.isZero(pols.B5[i])|| !fr.isZero(pols.B6[i])|| !fr.isZero(pols.B7[i]) )
+                    {
+                        cerr << "Error: MainExecutor::Execute() storage read free in found non-zero A-B storage registers step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
+                        proverRequest.result = ZKR_SM_MAIN_STORAGE;
+                        StateDBClientFactory::freeStateDBClient(pStateDB);
+                        return;
+                    }
+
 #ifdef LOG_TIME_STATISTICS
                     gettimeofday(&t, NULL);
 #endif
@@ -870,6 +878,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     Kin1[5] = pols.A5[i];
                     Kin1[6] = pols.B0[i];
                     Kin1[7] = pols.B1[i];
+
+                    if  ( !fr.isZero(pols.A5[i]) || !fr.isZero(pols.A6[i]) || !fr.isZero(pols.A7[i]) || !fr.isZero(pols.B2[i]) || !fr.isZero(pols.B3[i]) || !fr.isZero(pols.B4[i]) || !fr.isZero(pols.B5[i])|| !fr.isZero(pols.B6[i])|| !fr.isZero(pols.B7[i]) )
+                    {
+                        cerr << "Error: MainExecutor::Execute() storage write free in found non-zero A-B registers step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
+                        proverRequest.result = ZKR_SM_MAIN_STORAGE;
+                        StateDBClientFactory::freeStateDBClient(pStateDB);
+                        return;
+                    }
 
 #ifdef LOG_TIME_STATISTICS
                     gettimeofday(&t, NULL);
@@ -1539,6 +1555,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             Kin1[6] = pols.B0[i];
             Kin1[7] = pols.B1[i];
 
+            if  ( !fr.isZero(pols.A5[i]) || !fr.isZero(pols.A6[i]) || !fr.isZero(pols.A7[i]) || !fr.isZero(pols.B2[i]) || !fr.isZero(pols.B3[i]) || !fr.isZero(pols.B4[i]) || !fr.isZero(pols.B5[i])|| !fr.isZero(pols.B6[i])|| !fr.isZero(pols.B7[i]) )
+            {
+                cerr << "Error: MainExecutor::Execute() storage read instruction found non-zero A-B registers step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
+                proverRequest.result = ZKR_SM_MAIN_STORAGE;
+                StateDBClientFactory::freeStateDBClient(pStateDB);
+                return;
+            }
+
 #ifdef LOG_TIME_STATISTICS
             gettimeofday(&t, NULL);
 #endif
@@ -1693,6 +1717,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 Kin1[5] = pols.A5[i];
                 Kin1[6] = pols.B0[i];
                 Kin1[7] = pols.B1[i];
+
+                if  ( !fr.isZero(pols.A5[i]) || !fr.isZero(pols.A6[i]) || !fr.isZero(pols.A7[i]) || !fr.isZero(pols.B2[i]) || !fr.isZero(pols.B3[i]) || !fr.isZero(pols.B4[i]) || !fr.isZero(pols.B5[i])|| !fr.isZero(pols.B6[i])|| !fr.isZero(pols.B7[i]) )
+                {
+                    cerr << "Error: MainExecutor::Execute() storage write instruction found non-zero A-B registers step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
+                    proverRequest.result = ZKR_SM_MAIN_STORAGE;
+                    StateDBClientFactory::freeStateDBClient(pStateDB);
+                    return;
+                }
 
 #ifdef LOG_TIME_STATISTICS
                 gettimeofday(&t, NULL);

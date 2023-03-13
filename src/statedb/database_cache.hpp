@@ -29,8 +29,9 @@ protected:
 
     DatabaseCache() : cacheCurrentSize(0), head(NULL), last(NULL) {};
     ~DatabaseCache();
-    bool addRecord(const string key, DatabaseCacheRecord* record); // returns true if cache is full
-    bool findKey(const string key, DatabaseCacheRecord* &record);
+    bool addKeyValue(const string &key, const void * value); // returns true if cache is full
+    bool findKey(const string &key, DatabaseCacheRecord* &record);
+    virtual DatabaseCacheRecord* allocRecord(const string key, const void * value) { return NULL;};
     virtual void freeRecord(DatabaseCacheRecord* record) {};
 
 public:
@@ -42,16 +43,18 @@ public:
 class DatabaseMTCache : public DatabaseCache
 {
 public:  
-    bool add(const string key, vector<Goldilocks::Element> value); // returns true if cache is full
-    bool find(const string key, vector<Goldilocks::Element> &value);
+    bool add(const string &key, const vector<Goldilocks::Element> &value); // returns true if cache is full
+    bool find(const string &key, vector<Goldilocks::Element> &value);
+    DatabaseCacheRecord* allocRecord(const string key, const void * value);
     void freeRecord(DatabaseCacheRecord* record);
 };
 
 class DatabaseProgramCache : public DatabaseCache
 {
 public:  
-    bool add(const string key, vector<uint8_t> value); // returns true if cache is full
-    bool find(const string key, vector<uint8_t> &value);
+    bool add(const string &key, const vector<uint8_t> &value); // returns true if cache is full
+    bool find(const string &key, vector<uint8_t> &value);
+    DatabaseCacheRecord* allocRecord(const string key, const void * value);
     void freeRecord(DatabaseCacheRecord* record);
 };
 

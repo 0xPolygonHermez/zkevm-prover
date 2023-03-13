@@ -5,13 +5,21 @@
 // DatabaseCache class implementation
 
 // Add a record in the head of the cache. Returns true if the cache is full (or no cache), false otherwise
-bool DatabaseCache::addRecord(const string key, DatabaseCacheRecord* record) 
+bool DatabaseCache::addKeyValue(const string &key, const void * value) 
 {
-    if (cacheSize == 0) return true;
+    if (cacheSize == 0)
+    {
+        return true;
+    }
 
-    DatabaseCacheRecord* tmpRecord;
+    DatabaseCacheRecord * record;
     // If key already exists in the cache return. The findKey also sets the record in the head of the cache
-    if (findKey(key, tmpRecord)) return false;
+    if (findKey(key, record))
+    {
+        return false;
+    }
+
+    record = allocRecord(key, value);
 
     bool full = false;
 
@@ -48,10 +56,13 @@ bool DatabaseCache::addRecord(const string key, DatabaseCacheRecord* record)
         cacheCurrentSize -= tmp->size;      
     }
 
+    //cout << "DatabaseCache::addRecord() key=" << key << " cacheCurrentSize=" << cacheCurrentSize << " cacheMap.size()=" << cacheMap.size() << " record.size()=" << record->size << endl;
+    //printMemoryInfo(true);
+    
     return full;
 }
 
-bool DatabaseCache::findKey(const string key, DatabaseCacheRecord* &record) 
+bool DatabaseCache::findKey(const string &key, DatabaseCacheRecord* &record) 
 {
     unordered_map<string, DatabaseCacheRecord*>::iterator it = cacheMap.find(key);
 
@@ -120,27 +131,16 @@ DatabaseCache::~DatabaseCache()
 // DatabaseMTCache class implementation
 
 // Add a record in the head of the MT cache. Returns true if the cache is full (or no cache), false otherwise
-bool DatabaseMTCache::add(const string key, vector<Goldilocks::Element> value)
+bool DatabaseMTCache::add(const string &key, const vector<Goldilocks::Element> &value)
 {
     lock_guard<recursive_mutex> guard(mlock);
 
     if (cacheSize == 0) return true;
 
-    DatabaseCacheRecord* record = new(DatabaseCacheRecord);
-    vector<Goldilocks::Element>* pValue = new(vector<Goldilocks::Element>);
-    *pValue = value;
-    record->value = pValue;
-    record->key = key;
-    record->size = 
-        sizeof(DatabaseCacheRecord)+
-        (record->key.capacity()+1)+
-        sizeof(vector<Goldilocks::Element>)+
-        sizeof(Goldilocks::Element)*pValue->capacity();
-
-    return addRecord(key, record);
+    return addKeyValue(key, (const void *)&value);
 }
 
-bool DatabaseMTCache::find(const string key, vector<Goldilocks::Element> &value)
+bool DatabaseMTCache::find(const string &key, vector<Goldilocks::Element> &value)
 {
     lock_guard<recursive_mutex> guard(mlock);
 
@@ -156,6 +156,37 @@ bool DatabaseMTCache::find(const string key, vector<Goldilocks::Element> &value)
     return found;
 }
 
+DatabaseCacheRecord * DatabaseMTCache::allocRecord(const string key, const void * value)
+{
+    // Allocate memory
+    DatabaseCacheRecord * pRecord = new(DatabaseCacheRecord);
+    if (pRecord == NULL)
+    {
+        cerr << "Error: DatabaseMTCache::allocRecord() failed calling new(DatabaseCacheRecord)" << endl;
+        exitProcess();
+    }
+    vector<Goldilocks::Element>* pValue = new(vector<Goldilocks::Element>);
+    if (pValue == NULL)
+    {
+        cerr << "Error: DatabaseMTCache::allocRecord() failed calling new(vector<Goldilocks::Element>)" << endl;
+        exitProcess();
+    }
+
+    // Copy vector
+    *pValue = *(const vector<Goldilocks::Element> *)value;
+
+    // Assign values to record
+    pRecord->value = pValue;
+    pRecord->key = key;
+    pRecord->size = 
+        sizeof(DatabaseCacheRecord)+
+        (pRecord->key.capacity()+1)+
+        sizeof(vector<Goldilocks::Element>)+
+        sizeof(Goldilocks::Element)*pValue->capacity();
+        
+    return pRecord;
+}
+
 void DatabaseMTCache::freeRecord(DatabaseCacheRecord* record)
 {
     delete (vector<Goldilocks::Element>*)(record->value);
@@ -164,27 +195,16 @@ void DatabaseMTCache::freeRecord(DatabaseCacheRecord* record)
 
 // DatabaseProgramCache class implementation
 // Add a record in the head of the Program cache. Returns true if the cache is full (or no cache), false otherwise
-bool DatabaseProgramCache::add(const string key, vector<uint8_t> value)
+bool DatabaseProgramCache::add(const string &key, const vector<uint8_t> &value)
 {
     lock_guard<recursive_mutex> guard(mlock);
 
     if (cacheSize == 0) return true;
 
-    DatabaseCacheRecord* record = new(DatabaseCacheRecord);
-    vector<uint8_t>* pValue = new(vector<uint8_t>);
-    *pValue = value;
-    record->value = pValue;
-    record->key = key;
-    record->size = 
-        sizeof(DatabaseCacheRecord)+
-        (record->key.capacity()+1)+
-        sizeof(vector<uint8_t>)+
-        pValue->capacity();
-
-    return addRecord(key, record);
+    return addKeyValue(key, (const void *)&value);
 }
 
-bool DatabaseProgramCache::find(const string key, vector<uint8_t> &value)
+bool DatabaseProgramCache::find(const string &key, vector<uint8_t> &value)
 {
     lock_guard<recursive_mutex> guard(mlock);
 
@@ -198,6 +218,37 @@ bool DatabaseProgramCache::find(const string key, vector<uint8_t> &value)
     }
 
     return found;
+}
+
+DatabaseCacheRecord * DatabaseProgramCache::allocRecord(const string key, const void * value)
+{
+    // Allocate memory
+    DatabaseCacheRecord * pRecord = new(DatabaseCacheRecord);
+    if (pRecord == NULL)
+    {
+        cerr << "Error: DatabaseProgramCache::allocRecord() failed calling new(DatabaseCacheRecord)" << endl;
+        exitProcess();
+    }
+    vector<uint8_t>* pValue = new(vector<uint8_t>);
+    if (pValue == NULL)
+    {
+        cerr << "Error: DatabaseProgramCache::allocRecord() failed calling new(vector<uint8_t>)" << endl;
+        exitProcess();
+    }
+
+    // Copy vector
+    *pValue = *(const vector<uint8_t> *)value;
+
+    // Assign values to record
+    pRecord->value = pValue;
+    pRecord->key = key;
+    pRecord->size = 
+        sizeof(DatabaseCacheRecord)+
+        (pRecord->key.capacity()+1)+
+        sizeof(vector<uint8_t>)+
+        sizeof(uint8_t)*pValue->capacity();
+        
+    return pRecord;
 }
 
 void DatabaseProgramCache::freeRecord(DatabaseCacheRecord* record)
