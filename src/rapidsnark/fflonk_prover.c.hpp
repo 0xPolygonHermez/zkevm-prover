@@ -40,21 +40,30 @@ namespace Fflonk
     template <typename Engine>
     FflonkProver<Engine>::~FflonkProver() {
         this->removePrecomputedData();
+
+        delete transcript;
+        delete proof;
     }
 
     template<typename Engine>
     void FflonkProver<Engine>::removePrecomputedData() {
-        // Delete memory of precomputed data if necessary
+        // DELETE RESERVED MEMORY (if necessary)
         if(NULL == reservedMemoryPtr) {
             delete[] precomputedBigBuffer;
+            delete[] mapBuffersBigBuffer;
+            delete[] buffInternalWitness;
+            delete[] inverses;
+            delete[] products;
+            for (auto const &x : mapBuffers) delete[] x.second;
+            delete[] nonPrecomputedBigBuffer;
         }
-
-        delete[] buffInternalWitness;
 
         delete fft;
 
-        for (auto const &x : mapBuffers) delete[] x.second;
         mapBuffers.clear();
+
+        for (auto const &x : roots) delete[] x.second;
+        roots.clear();
 
         delete polynomials["QL"];
         delete polynomials["QR"];
@@ -123,11 +132,10 @@ namespace Fflonk
             // Precomputed 3 > ptau buffer
             lengthPrecomputedBigBuffer += zkey->domainSize * 9 * sizeof(G1PointAffine) / sizeof(FrElement); // PTau buffer
 
-            if(NULL != this->reservedMemoryPtr) {
-                precomputedBigBuffer = this->reservedMemoryPtr;
-
-            } else {
+            if(NULL == this->reservedMemoryPtr) {
                 precomputedBigBuffer = new FrElement[lengthPrecomputedBigBuffer];
+            } else {
+                precomputedBigBuffer = this->reservedMemoryPtr;
             }
 
             polPtr["Sigma1"] = &precomputedBigBuffer[0];
@@ -274,21 +282,35 @@ namespace Fflonk
                                 (G1PointAffine *)fdZkey->getSectionData(Zkey::ZKEY_FF_PTAU_SECTION),
                                 (zkey->domainSize * 9) * sizeof(G1PointAffine), nThreads);
 
-            buffInternalWitness = new FrElement[zkey->nAdditions];
-            LOG_TRACE("··· Loading additions");
-            additionsBuff = (Zkey::Addition<Engine> *)fdZkey->getSectionData(Zkey::ZKEY_FF_ADDITIONS_SECTION);
-
             // Load A, B & C map buffers
             LOG_TRACE("... Loading A, B & C map buffers");
 
             u_int64_t byteLength = sizeof(u_int32_t) * zkey->nConstraints;
-            mapBuffers["A"] = new u_int32_t[zkey->nConstraints];
-            mapBuffers["B"] = new u_int32_t[zkey->nConstraints];
-            mapBuffers["C"] = new u_int32_t[zkey->nConstraints];
+            lengthMapBuffers = std::ceil((float)(3 * byteLength) / sizeof(FrElement));
+            
+            if(NULL == this->reservedMemoryPtr) {
+                mapBuffersBigBuffer = new u_int32_t[zkey->nConstraints * 3];
+            } else {
+                mapBuffersBigBuffer = (u_int32_t *)(this->reservedMemoryPtr + lengthPrecomputedBigBuffer);
+            }
 
-            ThreadUtils::parset(mapBuffers["A"], 0, byteLength, nThreads);
-            ThreadUtils::parset(mapBuffers["B"], 0, byteLength, nThreads);
-            ThreadUtils::parset(mapBuffers["C"], 0, byteLength, nThreads);
+            mapBuffers["A"] = mapBuffersBigBuffer;
+            mapBuffers["B"] = mapBuffers["A"] + zkey->nConstraints;
+            mapBuffers["C"] = mapBuffers["B"] + zkey->nConstraints;
+
+            lengthInternalWitnessBuffer = zkey->nAdditions;
+
+            if(NULL == this->reservedMemoryPtr) {
+                buffInternalWitness = new FrElement[lengthInternalWitnessBuffer];
+            } else {
+                buffInternalWitness = this->reservedMemoryPtr + lengthPrecomputedBigBuffer + lengthMapBuffers;
+            }
+
+            LOG_TRACE("··· Loading additions");
+            additionsBuff = (Zkey::Addition<Engine> *)fdZkey->getSectionData(Zkey::ZKEY_FF_ADDITIONS_SECTION);
+
+            LOG_TRACE("··· Loading map buffers");
+            ThreadUtils::parset(mapBuffers["A"], 0, byteLength * 3, nThreads);
 
             // Read zkey sections and fill the buffers
             ThreadUtils::parcpy(mapBuffers["A"],
@@ -300,65 +322,26 @@ namespace Fflonk
             ThreadUtils::parcpy(mapBuffers["C"],
                                 (FrElement *)fdZkey->getSectionData(Zkey::ZKEY_FF_C_MAP_SECTION),
                                 byteLength, nThreads);
-        }
-        catch (const std::exception &e)
-        {
-            std::cerr << "EXCEPTION: " << e.what() << "\n";
-            exit(EXIT_FAILURE);
-        }
-    }
 
-    template<typename Engine>
-    std::tuple <json, json> FflonkProver<Engine>::prove(BinFileUtils::BinFile *fdZkey, BinFileUtils::BinFile *fdWtns) {
-        this->setZkey(fdZkey);
-        return this->prove(fdWtns);
-    }
+            transcript = new Keccak256Transcript<Engine>(E);
+            proof = new SnarkProof<Engine>(E, "fflonk");
 
-    template <typename Engine>
-    std::tuple<json, json> FflonkProver<Engine>::prove(BinFileUtils::BinFile *fdZkey, FrElement *buffWitness, WtnsUtils::Header* wtnsHeader)
-    {
-        this->setZkey(fdZkey);
-        return this->prove(buffWitness, wtnsHeader);
-    }
+            roots["w8"] = new FrElement[8];
+            roots["w4"] = new FrElement[4];
+            roots["w3"] = new FrElement[3];
+            roots["S0h0"] = new FrElement[8];
+            roots["S1h1"] = new FrElement[4];
+            roots["S2h2"] = new FrElement[3];
+            roots["S2h3"] = new FrElement[3];
 
-    template<typename Engine>
-    std::tuple <json, json> FflonkProver<Engine>::prove(BinFileUtils::BinFile *fdWtns) {
-        LOG_TRACE("> Reading witness file");
-        auto wtnsHeader = WtnsUtils::loadHeader(fdWtns);
+            lengthBatchInversesBuffer = zkey->domainSize * 2;
 
-        // Read witness data
-        LOG_TRACE("> Reading witness file data");
-        buffWitness = (FrElement *)fdWtns->getSectionData(2);
-
-        return this->prove(buffWitness, wtnsHeader.get());
-    }
-
-    template <typename Engine>
-    std::tuple<json, json> FflonkProver<Engine>::prove(FrElement *buffWitness, WtnsUtils::Header* wtnsHeader)
-    {
-        if(NULL == zkey) {
-            throw std::runtime_error("Zkey data not set");
-        }
-
-        try
-        {
-            LOG_TRACE("FFLONK PROVER STARTED");
-
-            this->buffWitness = buffWitness;
-
-            if(NULL != wtnsHeader) {
-                if (mpz_cmp(zkey->rPrime, wtnsHeader->prime) != 0)
-                {
-                    throw std::invalid_argument("Curve of the witness does not match the curve of the proving key");
-                }
-
-                if (wtnsHeader->nVars != zkey->nVars - zkey->nAdditions)
-                {
-                    std::ostringstream ss;
-                    ss << "Invalid witness length. Circuit: " << zkey->nVars << ", witness: " << wtnsHeader->nVars << ", "
-                    << zkey->nAdditions;
-                    throw std::invalid_argument(ss.str());
-                }
+            if(NULL == this->reservedMemoryPtr) {
+                inverses = new FrElement[zkey->domainSize];
+                products = new FrElement[zkey->domainSize];
+            } else {
+                inverses = this->reservedMemoryPtr + lengthPrecomputedBigBuffer + lengthMapBuffers + lengthInternalWitnessBuffer;
+                products = inverses + zkey->domainSize;
             }
 
             ////////////////////////////////////////////////////
@@ -375,15 +358,15 @@ namespace Fflonk
             lengthNonPrecomputedBigBuffer += zkey->domainSize * 4  * 3; // Evaluations A, B & C
             lengthNonPrecomputedBigBuffer += zkey->domainSize * 4  * 1; // Evaluations Z
             // Non-precomputed 3 > buffers buffer
-            u_int64_t buffersLength = 0;
+            buffersLength = 0;
             buffersLength   += zkey->domainSize * 4  * 3; // Evaluations A, B & C
             buffersLength   += zkey->domainSize * 16 * 1; // Evaluations tmp (Z, numArr, denArr, T0, T1, T1z, T2 & T2z will (re)use this buffer)
             lengthNonPrecomputedBigBuffer += buffersLength;
 
-            if(NULL != this->reservedMemoryPtr) {
-                nonPrecomputedBigBuffer = this->reservedMemoryPtr + lengthPrecomputedBigBuffer;
-            } else {
+            if(NULL == this->reservedMemoryPtr) {
                 nonPrecomputedBigBuffer = new FrElement[lengthNonPrecomputedBigBuffer];
+            } else {
+                nonPrecomputedBigBuffer = this->reservedMemoryPtr + lengthPrecomputedBigBuffer + lengthMapBuffers + lengthInternalWitnessBuffer + lengthBatchInversesBuffer;
             }
 
             polPtr["L"] = &nonPrecomputedBigBuffer[0];
@@ -421,9 +404,66 @@ namespace Fflonk
             buffers["T1z"]    = buffers["tmp"] + zkey->domainSize * 2;
             buffers["T2"]     = buffers["tmp"];
             buffers["T2z"]    = buffers["tmp"] + zkey->domainSize * 4;
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << "EXCEPTION: " << e.what() << "\n";
+            exit(EXIT_FAILURE);
+        }
+    }
 
-            int nThreads = omp_get_max_threads() / 2;
-            ThreadUtils::parset(buffers["A"], 0, buffersLength * sizeof(FrElement), nThreads);
+    template<typename Engine>
+    std::tuple <json, json> FflonkProver<Engine>::prove(BinFileUtils::BinFile *fdZkey, BinFileUtils::BinFile *fdWtns) {
+        this->setZkey(fdZkey);
+        return this->prove(fdWtns);
+    }
+
+    template <typename Engine>
+    std::tuple<json, json> FflonkProver<Engine>::prove(BinFileUtils::BinFile *fdZkey, FrElement *buffWitness, WtnsUtils::Header* wtnsHeader)
+    {
+        this->setZkey(fdZkey);
+        return this->prove(buffWitness, wtnsHeader);
+    }
+
+    template<typename Engine>
+    std::tuple <json, json> FflonkProver<Engine>::prove(BinFileUtils::BinFile *fdWtns) {
+        LOG_TRACE("> Reading witness file header");
+        auto wtnsHeader = WtnsUtils::loadHeader(fdWtns);
+
+        // Read witness data
+        LOG_TRACE("> Reading witness file data");
+        buffWitness = (FrElement *)fdWtns->getSectionData(2);
+
+        return this->prove(buffWitness, wtnsHeader.get());
+    }
+
+    template <typename Engine>
+    std::tuple<json, json> FflonkProver<Engine>::prove(FrElement *buffWitness, WtnsUtils::Header* wtnsHeader)
+    {
+        if(NULL == zkey) {
+            throw std::runtime_error("Zkey data not set");
+        }
+
+        try
+        {
+            LOG_TRACE("FFLONK PROVER STARTED");
+
+            this->buffWitness = buffWitness;
+
+            if(NULL != wtnsHeader) {
+                if (mpz_cmp(zkey->rPrime, wtnsHeader->prime) != 0)
+                {
+                    throw std::invalid_argument("Curve of the witness does not match the curve of the proving key");
+                }
+
+                if (wtnsHeader->nVars != zkey->nVars - zkey->nAdditions)
+                {
+                    std::ostringstream ss;
+                    ss << "Invalid witness length. Circuit: " << zkey->nVars << ", witness: " << wtnsHeader->nVars << ", "
+                    << zkey->nAdditions;
+                    throw std::invalid_argument(ss.str());
+                }
+            }
 
             std::ostringstream ss;
             LOG_TRACE("----------------------------");
@@ -451,7 +491,8 @@ namespace Fflonk
             LOG_TRACE(ss);
             LOG_TRACE("----------------------------");
 
-            transcript = new Keccak256Transcript<Engine>(E);
+            transcript->reset();
+            proof->reset();
 
             // First element in plonk is not used and can be any value. (But always the same).
             // We set it to zero to go faster in the exponentiations.
@@ -479,9 +520,12 @@ namespace Fflonk
             // this big function into two parts: until here circuit dependent and from here is the proof calculation
 
             double startTime = omp_get_wtime();
-            proof = new SnarkProof<Engine>(E, "fflonk");
 
             LOG_TRACE("> Computing Additions");
+
+            int nThreads = omp_get_max_threads() / 2;
+            // Set 0's to buffers["A"], buffers["B"], buffers["C"] & buffers["Z"]
+            ThreadUtils::parset(buffers["A"], 0, buffersLength * sizeof(FrElement), nThreads);
 
             calculateAdditions();
 
@@ -524,15 +568,6 @@ namespace Fflonk
             ss << "Execution time: " << omp_get_wtime() - startTime << "\n";
             LOG_TRACE(ss);
 
-            // DELETE RESERVED MEMORY
-            // Delete memory of circuit-dependent data if necessary
-            if(NULL == reservedMemoryPtr) {
-                delete[] nonPrecomputedBigBuffer;
-            }
-
-            for (auto const &x : roots) delete[] x.second;
-            roots.clear();
-
             delete polynomials["A"];
             delete polynomials["B"];
             delete polynomials["C"];
@@ -556,9 +591,6 @@ namespace Fflonk
             delete evaluations["B"];
             delete evaluations["C"];
             delete evaluations["Z"];
-
-            // Delete created objects
-            delete transcript;
 
             return {proof->toJson(), publicSignals};
         }
@@ -1136,7 +1168,6 @@ namespace Fflonk
         E.fr.square(xiSeed2, challenges["xiSeed"]);
 
         // Compute omega8, omega4 and omega3
-        roots["w8"] = new FrElement[8];
         roots["w8"][0] = E.fr.one();
         for (uint i = 1; i < 8; i++)
         {
@@ -1144,20 +1175,17 @@ namespace Fflonk
         }
 
         // Compute omega3 and omega4
-        roots["w4"] = new FrElement[4];
         roots["w4"][0] = E.fr.one();
         for (uint i = 1; i < 4; i++)
         {
             roots["w4"][i] = E.fr.mul(roots["w4"][i - 1], *((FrElement *)zkey->w4));
         }
 
-        roots["w3"] = new FrElement[3];
         roots["w3"][0] = E.fr.one();
         roots["w3"][1] = *((FrElement *)zkey->w3);
         E.fr.square(roots["w3"][2], roots["w3"][1]);
 
         // Compute h0 = xiSeeder^3
-        roots["S0h0"] = new FrElement[8];
         roots["S0h0"][0] = E.fr.mul(xiSeed2, challenges["xiSeed"]);
         for (uint i = 1; i < 8; i++)
         {
@@ -1165,7 +1193,6 @@ namespace Fflonk
         }
 
         // Compute h1 = xi_seeder^6
-        roots["S1h1"] = new FrElement[4];
         roots["S1h1"][0] = E.fr.square(roots["S0h0"][0]);
         for (uint i = 1; i < 4; i++)
         {
@@ -1173,12 +1200,10 @@ namespace Fflonk
         }
 
         // Compute h2 = xi_seeder^8
-        roots["S2h2"] = new FrElement[3];
         roots["S2h2"][0] = E.fr.mul(roots["S1h1"][0], xiSeed2);
         roots["S2h2"][1] = E.fr.mul(roots["S2h2"][0], roots["w3"][1]);
         roots["S2h2"][2] = E.fr.mul(roots["S2h2"][0], roots["w3"][2]);
 
-        roots["S2h3"] = new FrElement[3];
         // Multiply h3 by third-root-omega to obtain h_3^3 = xiω
         // So, h3 = xi_seeder^8 ω^{1/3}
         roots["S2h3"][0] = E.fr.mul(roots["S2h2"][0], *((FrElement *)zkey->wr));
@@ -1513,8 +1538,6 @@ namespace Fflonk
     void FflonkProver<Engine>::batchInverse(FrElement *elements, u_int64_t length)
     {
         // Calculate products: a, ab, abc, abcd, ...
-        FrElement *products = new FrElement[length];
-
         products[0] = elements[0];
         for (u_int64_t index = 1; index < length; index++)
         {
@@ -1522,7 +1545,6 @@ namespace Fflonk
         }
 
         // Calculate inverses: 1/a, 1/ab, 1/abc, 1/abcd, ...
-        FrElement *inverses = new FrElement[length];
         E.fr.inv(inverses[length - 1], products[length - 1]);
         for (uint64_t index = length - 1; index > 0; index--)
         {
@@ -1534,9 +1556,6 @@ namespace Fflonk
         {
             E.fr.mul(elements[index], inverses[index], products[index - 1]);
         }
-
-        delete[] products;
-        delete[] inverses;
     }
 
     template <typename Engine>

@@ -10,14 +10,13 @@ template<typename Engine>
 SnarkProof<Engine>::SnarkProof(Engine &_E, const std::string &protocol) : E(_E) {
     this->protocol = protocol;
     this->curve = CurveUtils::getCurveNameByEngine();
-    this->polynomialCommitments = {};
-    this->evaluationCommitments = {};
+    this->reset();
 }
 
 template<typename Engine>
-void SnarkProof<Engine>::resetProof() {
-    this->polynomialCommitments = {};
-    this->evaluationCommitments = {};
+void SnarkProof<Engine>::reset() {
+    this->polynomialCommitments.clear();
+    this->evaluationCommitments.clear();
 }
 
 template<typename Engine>

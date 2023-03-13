@@ -45,10 +45,23 @@ namespace Fflonk {
         u_int64_t lengthNonPrecomputedBigBuffer;
         FrElement *nonPrecomputedBigBuffer;
 
-        FrElement *buffWitness;
+        u_int64_t lengthMapBuffers;
+        u_int32_t *mapBuffersBigBuffer;
+
+        u_int64_t lengthInternalWitnessBuffer;
+        
         FrElement *buffInternalWitness;
+        FrElement *buffWitness;
 
         Zkey::Addition<Engine> *additionsBuff;
+
+        u_int64_t lengthBatchInversesBuffer;
+
+        FrElement *inverses;
+        FrElement *products;
+
+        // This is the length of the buffer that must be zeroed after each proof (starting from buffers["A"] pointer)
+        u_int64_t buffersLength;
 
         std::map<std::string, FrElement *> polPtr;
         std::map<std::string, FrElement *> evalPtr;
