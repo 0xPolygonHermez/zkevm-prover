@@ -4,16 +4,20 @@
 #include "statedb.grpc.pb.h"
 #include "goldilocks_base_field.hpp"
 #include "statedb.hpp"
+#include "statedb_singleton.hpp"
 #include <mutex>
 
 class StateDBServiceImpl final : public statedb::v1::StateDBService::Service
 {
     Goldilocks &fr;
     const Config &config;
-    StateDB stateDB;
+    StateDB * pStateDB;
 
 public:
-    StateDBServiceImpl (Goldilocks &fr, const Config& config, const bool autoCommit, const bool asyncWrite) : fr(fr), config(config), stateDB(fr, config) {};
+    StateDBServiceImpl (Goldilocks &fr, const Config& config, const bool autoCommit, const bool asyncWrite) : fr(fr), config(config)
+    {
+        pStateDB = stateDBSingleton.get(fr, config);
+    };
     ::grpc::Status Set (::grpc::ServerContext* context, const ::statedb::v1::SetRequest* request, ::statedb::v1::SetResponse* response) override;
     ::grpc::Status Get (::grpc::ServerContext* context, const ::statedb::v1::GetRequest* request, ::statedb::v1::GetResponse* response) override;
     ::grpc::Status SetProgram (::grpc::ServerContext* context, const ::statedb::v1::SetProgramRequest* request, ::statedb::v1::SetProgramResponse* response) override;

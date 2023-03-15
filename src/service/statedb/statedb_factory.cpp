@@ -3,6 +3,7 @@
 #include "statedb_factory.hpp"
 #include "statedb.hpp"
 #include "statedb_remote.hpp"
+#include "statedb_singleton.hpp"
 #include "utils.hpp"
 #include "exit_process.hpp"
 
@@ -10,10 +11,10 @@ StateDBInterface* StateDBClientFactory::createStateDBClient (Goldilocks &fr, con
 {
     if (config.stateDBURL=="local")
     {
-        StateDBInterface *pLocalClient = new StateDB (fr, config);
+        StateDBInterface * pLocalClient = stateDBSingleton.get(fr, config);
         if (pLocalClient == NULL)
         {
-            cerr << "Error: StateDBClientFactory::createStateDBClient() failed calling new StateDB()" << endl;
+            cerr << "Error: StateDBClientFactory::createStateDBClient() failed calling new stateDBSingleton.get()" << endl;
             exitProcess();
         }
         return pLocalClient;
@@ -37,5 +38,8 @@ void StateDBClientFactory::freeStateDBClient (StateDBInterface * pStateDB)
         exitProcess();
     }
 
-    delete pStateDB;
+    if (pStateDB != stateDBSingleton.get())
+    {
+        delete pStateDB;
+    }
 }
