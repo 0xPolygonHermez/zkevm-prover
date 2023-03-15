@@ -284,14 +284,14 @@ void StateDBRemote::loadProgramDB(const DatabaseMap::ProgramMap &input, const bo
 #endif
 }
 
-void StateDBRemote::flush()
+zkresult StateDBRemote::flush()
 {
 #ifdef LOG_TIME_STATISTICS_STATEDB_REMOTE
     gettimeofday(&t, NULL);
 #endif
     ::grpc::ClientContext context;
     ::google::protobuf::Empty request;
-    ::google::protobuf::Empty response;
+    ::statedb::v1::FlushResponse response;
     grpc::Status s = stub->Flush(&context, request, &response);
     if (s.error_code() != grpc::StatusCode::OK) {
         cerr << "Error: StateDBRemote:flush() GRPC error(" << s.error_code() << "): " << s.error_message() << endl;
@@ -300,4 +300,5 @@ void StateDBRemote::flush()
 #ifdef LOG_TIME_STATISTICS_STATEDB_REMOTE
     tms.add("flush", TimeDiff(t));
 #endif
+    return static_cast<zkresult>(response.result().code());
 }

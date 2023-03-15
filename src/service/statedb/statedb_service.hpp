@@ -20,7 +20,7 @@ public:
     ::grpc::Status GetProgram (::grpc::ServerContext* context, const ::statedb::v1::GetProgramRequest* request, ::statedb::v1::GetProgramResponse* response) override;
     ::grpc::Status LoadDB(::grpc::ServerContext* context, const ::statedb::v1::LoadDBRequest* request, ::google::protobuf::Empty* response);
     ::grpc::Status LoadProgramDB(::grpc::ServerContext* context, const ::statedb::v1::LoadProgramDBRequest* request, ::google::protobuf::Empty* response);
-    ::grpc::Status Flush (::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::google::protobuf::Empty* response) override;
+    ::grpc::Status Flush (::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::statedb::v1::FlushResponse* response) override;
 };
 
 #endif

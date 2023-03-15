@@ -4089,6 +4089,14 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    else\n";
     code += "    {\n";
     code += "        pStateDB->flush();\n";
+    code += "        zkresult zkr = pStateDB->flush();\n";
+    code += "        if (zkr != ZKR_SUCCESS)\n";
+    code += "        {\n";
+    code += "            cerr << \"Error: Main SM Executor: failed calling pStateDB->flush() result=\" << zkr << \" =\" << zkresult2string(zkr) << endl;\n";
+    code += "            proverRequest.result = zkr;\n";
+    code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+    code += "            return;\n";
+    code += "        }\n";
     code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
     code += "    }\n\n";
 

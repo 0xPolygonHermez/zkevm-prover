@@ -19,7 +19,7 @@ public:
     virtual zkresult getProgram(const Goldilocks::Element (&key)[4], vector<uint8_t> &data, DatabaseMap *dbReadLog) = 0;
     virtual void loadDB(const DatabaseMap::MTMap &input, const bool persistent) = 0;
     virtual void loadProgramDB(const DatabaseMap::ProgramMap &input, const bool persistent) = 0;
-    virtual void flush() = 0;
+    virtual zkresult flush() = 0;
 };
 
 #endif

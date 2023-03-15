@@ -52,7 +52,7 @@ struct TableStruct_statedb_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxillaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[21]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[22]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -67,6 +67,9 @@ extern FeListDefaultTypeInternal _FeList_default_instance_;
 class Fea;
 class FeaDefaultTypeInternal;
 extern FeaDefaultTypeInternal _Fea_default_instance_;
+class FlushResponse;
+class FlushResponseDefaultTypeInternal;
+extern FlushResponseDefaultTypeInternal _FlushResponse_default_instance_;
 class GetProgramRequest;
 class GetProgramRequestDefaultTypeInternal;
 extern GetProgramRequestDefaultTypeInternal _GetProgramRequest_default_instance_;
@@ -129,6 +132,7 @@ extern VersionDefaultTypeInternal _Version_default_instance_;
 PROTOBUF_NAMESPACE_OPEN
 template<> ::statedb::v1::FeList* Arena::CreateMaybeMessage<::statedb::v1::FeList>(Arena*);
 template<> ::statedb::v1::Fea* Arena::CreateMaybeMessage<::statedb::v1::Fea>(Arena*);
+template<> ::statedb::v1::FlushResponse* Arena::CreateMaybeMessage<::statedb::v1::FlushResponse>(Arena*);
 template<> ::statedb::v1::GetProgramRequest* Arena::CreateMaybeMessage<::statedb::v1::GetProgramRequest>(Arena*);
 template<> ::statedb::v1::GetProgramResponse* Arena::CreateMaybeMessage<::statedb::v1::GetProgramResponse>(Arena*);
 template<> ::statedb::v1::GetRequest* Arena::CreateMaybeMessage<::statedb::v1::GetRequest>(Arena*);
@@ -2647,6 +2651,152 @@ class GetProgramResponse PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class FlushResponse PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:statedb.v1.FlushResponse) */ {
+ public:
+  inline FlushResponse() : FlushResponse(nullptr) {};
+  virtual ~FlushResponse();
+
+  FlushResponse(const FlushResponse& from);
+  FlushResponse(FlushResponse&& from) noexcept
+    : FlushResponse() {
+    *this = ::std::move(from);
+  }
+
+  inline FlushResponse& operator=(const FlushResponse& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline FlushResponse& operator=(FlushResponse&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const FlushResponse& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const FlushResponse* internal_default_instance() {
+    return reinterpret_cast<const FlushResponse*>(
+               &_FlushResponse_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    17;
+
+  friend void swap(FlushResponse& a, FlushResponse& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(FlushResponse* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(FlushResponse* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline FlushResponse* New() const final {
+    return CreateMaybeMessage<FlushResponse>(nullptr);
+  }
+
+  FlushResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<FlushResponse>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const FlushResponse& from);
+  void MergeFrom(const FlushResponse& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(FlushResponse* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "statedb.v1.FlushResponse";
+  }
+  protected:
+  explicit FlushResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_statedb_2eproto);
+    return ::descriptor_table_statedb_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kResultFieldNumber = 1,
+  };
+  // .statedb.v1.ResultCode result = 1;
+  bool has_result() const;
+  private:
+  bool _internal_has_result() const;
+  public:
+  void clear_result();
+  const ::statedb::v1::ResultCode& result() const;
+  ::statedb::v1::ResultCode* release_result();
+  ::statedb::v1::ResultCode* mutable_result();
+  void set_allocated_result(::statedb::v1::ResultCode* result);
+  private:
+  const ::statedb::v1::ResultCode& _internal_result() const;
+  ::statedb::v1::ResultCode* _internal_mutable_result();
+  public:
+  void unsafe_arena_set_allocated_result(
+      ::statedb::v1::ResultCode* result);
+  ::statedb::v1::ResultCode* unsafe_arena_release_result();
+
+  // @@protoc_insertion_point(class_scope:statedb.v1.FlushResponse)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::statedb::v1::ResultCode* result_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_statedb_2eproto;
+};
+// -------------------------------------------------------------------
+
 class Fea PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:statedb.v1.Fea) */ {
  public:
@@ -2689,7 +2839,7 @@ class Fea PROTOBUF_FINAL :
                &_Fea_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    17;
+    18;
 
   friend void swap(Fea& a, Fea& b) {
     a.Swap(&b);
@@ -2859,7 +3009,7 @@ class FeList PROTOBUF_FINAL :
                &_FeList_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    18;
+    19;
 
   friend void swap(FeList& a, FeList& b) {
     a.Swap(&b);
@@ -3010,7 +3160,7 @@ class SiblingList PROTOBUF_FINAL :
                &_SiblingList_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    19;
+    20;
 
   friend void swap(SiblingList& a, SiblingList& b) {
     a.Swap(&b);
@@ -3161,7 +3311,7 @@ class ResultCode PROTOBUF_FINAL :
                &_ResultCode_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    20;
+    21;
 
   friend void swap(ResultCode& a, ResultCode& b) {
     a.Swap(&b);
@@ -5958,6 +6108,91 @@ inline void GetProgramResponse::set_allocated_result(::statedb::v1::ResultCode* 
 
 // -------------------------------------------------------------------
 
+// FlushResponse
+
+// .statedb.v1.ResultCode result = 1;
+inline bool FlushResponse::_internal_has_result() const {
+  return this != internal_default_instance() && result_ != nullptr;
+}
+inline bool FlushResponse::has_result() const {
+  return _internal_has_result();
+}
+inline void FlushResponse::clear_result() {
+  if (GetArena() == nullptr && result_ != nullptr) {
+    delete result_;
+  }
+  result_ = nullptr;
+}
+inline const ::statedb::v1::ResultCode& FlushResponse::_internal_result() const {
+  const ::statedb::v1::ResultCode* p = result_;
+  return p != nullptr ? *p : *reinterpret_cast<const ::statedb::v1::ResultCode*>(
+      &::statedb::v1::_ResultCode_default_instance_);
+}
+inline const ::statedb::v1::ResultCode& FlushResponse::result() const {
+  // @@protoc_insertion_point(field_get:statedb.v1.FlushResponse.result)
+  return _internal_result();
+}
+inline void FlushResponse::unsafe_arena_set_allocated_result(
+    ::statedb::v1::ResultCode* result) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(result_);
+  }
+  result_ = result;
+  if (result) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:statedb.v1.FlushResponse.result)
+}
+inline ::statedb::v1::ResultCode* FlushResponse::release_result() {
+  auto temp = unsafe_arena_release_result();
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::statedb::v1::ResultCode* FlushResponse::unsafe_arena_release_result() {
+  // @@protoc_insertion_point(field_release:statedb.v1.FlushResponse.result)
+  
+  ::statedb::v1::ResultCode* temp = result_;
+  result_ = nullptr;
+  return temp;
+}
+inline ::statedb::v1::ResultCode* FlushResponse::_internal_mutable_result() {
+  
+  if (result_ == nullptr) {
+    auto* p = CreateMaybeMessage<::statedb::v1::ResultCode>(GetArena());
+    result_ = p;
+  }
+  return result_;
+}
+inline ::statedb::v1::ResultCode* FlushResponse::mutable_result() {
+  // @@protoc_insertion_point(field_mutable:statedb.v1.FlushResponse.result)
+  return _internal_mutable_result();
+}
+inline void FlushResponse::set_allocated_result(::statedb::v1::ResultCode* result) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete result_;
+  }
+  if (result) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(result);
+    if (message_arena != submessage_arena) {
+      result = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, result, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  result_ = result;
+  // @@protoc_insertion_point(field_set_allocated:statedb.v1.FlushResponse.result)
+}
+
+// -------------------------------------------------------------------
+
 // Fea
 
 // uint64 fe0 = 1;
@@ -6169,6 +6404,8 @@ inline void ResultCode::set_code(::statedb::v1::ResultCode_Code value) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

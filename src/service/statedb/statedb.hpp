@@ -35,7 +35,7 @@ public:
     zkresult getProgram(const Goldilocks::Element (&key)[4], vector<uint8_t> &data, DatabaseMap *dbReadLog);
     void loadDB(const DatabaseMap::MTMap &inputDB, const bool persistent);
     void loadProgramDB(const DatabaseMap::ProgramMap &inputProgramDB, const bool persistent);
-    void flush();
+    zkresult flush();
 
     // Methods added for testing purposes
     void setAutoCommit(const bool autoCommit);
