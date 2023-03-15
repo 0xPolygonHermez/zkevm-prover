@@ -6,6 +6,8 @@
 #include "main_sm/fork_1/main_exec_generated/main_exec_generated_fast.hpp"
 #include "main_sm/fork_2/main_exec_generated/main_exec_generated.hpp"
 #include "main_sm/fork_2/main_exec_generated/main_exec_generated_fast.hpp"
+#include "main_sm/fork_3/main_exec_generated/main_exec_generated.hpp"
+#include "main_sm/fork_3/main_exec_generated/main_exec_generated_fast.hpp"
 #include "timer.hpp"
 
 // Reduced version: only 1 evaluation is allocated, and some asserts are disabled
@@ -72,7 +74,7 @@ void Executor::process_batch (ProverRequest &proverRequest)
         {
             if (config.useMainExecGenerated)
             {
-                fork_2::main_exec_generated_fast(mainExecutor, proverRequest);
+                fork_2::main_exec_generated_fast(mainExecutor_fork_2, proverRequest);
             }
             else
             {
@@ -87,6 +89,32 @@ void Executor::process_batch (ProverRequest &proverRequest)
 
                 // This instance will store all data required to execute the rest of State Machines
                 fork_2::MainExecRequired required;
+
+                mainExecutor_fork_2.execute(proverRequest, commitPols.Main, required);
+
+                // Free committed polynomials address space
+                free(pAddress);
+            }
+        }
+        case 3: // fork_3
+        {
+            if (config.useMainExecGenerated)
+            {
+                fork_3::main_exec_generated_fast(mainExecutor, proverRequest);
+            }
+            else
+            {
+                // Allocate committed polynomials for only 1 evaluation
+                void * pAddress = calloc(fork_3::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
+                if (pAddress == NULL)
+                {
+                    cerr << "Error: Executor::process_batch() failed calling calloc(" << fork_3::CommitPols::pilSize() << ")" << endl;
+                    exitProcess();
+                }
+                fork_3::CommitPols commitPols(pAddress,1);
+
+                // This instance will store all data required to execute the rest of State Machines
+                fork_3::MainExecRequired required;
 
                 mainExecutor.execute(proverRequest, commitPols.Main, required);
 
