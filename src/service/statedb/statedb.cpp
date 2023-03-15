@@ -155,7 +155,7 @@ void StateDB::loadProgramDB(const DatabaseMap::ProgramMap &input, const bool per
 #endif
 }
 
-void StateDB::flush()
+zkresult StateDB::flush()
 {
 #ifdef LOG_TIME_STATISTICS_STATEDB
     gettimeofday(&t, NULL);
@@ -165,13 +165,16 @@ void StateDB::flush()
     lock_guard<recursive_mutex> guard(mlock);
 #endif
 
-    db.flush();
+    zkresult result;
+    result = db.flush();
 
 #ifdef LOG_TIME_STATISTICS_STATEDB
     tms.add("flush", TimeDiff(t));
     tms.print("StateDB");
     tms.clear();
 #endif
+
+    return result;
 }
 
 void StateDB::setAutoCommit(const bool autoCommit)

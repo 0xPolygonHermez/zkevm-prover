@@ -286,14 +286,20 @@ using grpc::Status;
     return Status::OK;
 }
 
-::grpc::Status StateDBServiceImpl::Flush(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::google::protobuf::Empty* response)
+::grpc::Status StateDBServiceImpl::Flush(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::statedb::v1::FlushResponse* response)
 {
 #ifdef LOG_STATEDB_SERVICE
     cout << "StateDBServiceImpl::Flush called." << endl;
 #endif
     try
     {
-        stateDB.flush();
+        // Call the StateDB flush method
+        zkresult zkres = stateDB.flush();
+
+        // return the result in the response
+        ::statedb::v1::ResultCode* result = new ::statedb::v1::ResultCode();
+        result->set_code(static_cast<::statedb::v1::ResultCode_Code>(zkres));
+        response->set_allocated_result(result);
     }
     catch (const std::exception &e)
     {

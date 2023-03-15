@@ -3832,7 +3832,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     }
     else
     {
-        pStateDB->flush();
+        zkresult zkr = pStateDB->flush();
+        if (zkr != ZKR_SUCCESS)
+        {
+            cerr << "Error: Main SM Executor: failed calling pStateDB->flush() result=" << zkr << " =" << zkresult2string(zkr) << endl;
+            proverRequest.result = zkr;
+            StateDBClientFactory::freeStateDBClient(pStateDB);
+            return;
+        }
         StateDBClientFactory::freeStateDBClient(pStateDB);
     }
 
@@ -4054,7 +4061,11 @@ void *mainExecutorFlushThread(void *arg)
     TimerStart(MAIN_EXECUTOR_FLUSH_THREAD);
 
     StateDBInterface *pStateDB = (StateDBInterface *)arg;
-    pStateDB->flush();
+    zkresult zkr = pStateDB->flush();
+    if (zkr != ZKR_SUCCESS)
+    {
+        cerr << "Error: mainExecutorFlushThread() failed calling pStateDB->flush() result=" << zkr << " =" << zkresult2string(zkr) << endl;
+    }
     StateDBClientFactory::freeStateDBClient(pStateDB);
 
     TimerStopAndLog(MAIN_EXECUTOR_FLUSH_THREAD);
