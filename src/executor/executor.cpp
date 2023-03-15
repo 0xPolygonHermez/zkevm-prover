@@ -235,6 +235,14 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
             {
                 mainExecutor.execute(proverRequest, commitPols.Main, required);
             }
+            
+            // Save input to <timestamp>.input.json after execution including dbReadLog
+            if (config.saveDbReadsToFile)
+            {
+                json inputJsonEx;
+                proverRequest.input.save(inputJsonEx, *proverRequest.dbReadLog);
+                json2file(inputJsonEx, proverRequest.inputDbFile());
+            }
         }
         else
         {

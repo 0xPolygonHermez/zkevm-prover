@@ -116,7 +116,7 @@ public:
 #endif
 
     // Flush multi write pending requests
-    void flush();
+    zkresult flush();
 
     // Print tree
     void printTree(const string &root, string prefix = "");

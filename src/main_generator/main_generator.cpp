@@ -458,8 +458,6 @@ string generate(const json &rom, const string &functionName, const string &fileN
         // INITIALIZATION
 
         bool opInitialized = false;
-        bool binExecuted = false;
-        bool skipCopyFiToOp = false;
 
         // COMMAND BEFORE
         if (rom["program"][zkPC].contains("cmdBefore") &&
@@ -939,7 +937,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    Kin1[5] = pols.A5[" + string(bFastMode?"0":"i") + "];\n";
                     code += "    Kin1[6] = pols.B0[" + string(bFastMode?"0":"i") + "];\n";
                     code += "    Kin1[7] = pols.B1[" + string(bFastMode?"0":"i") + "];\n";
-
+                    
                     code += "    if  ( !fr.isZero(pols.A5[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A6[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A7[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B2[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B3[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B4[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B5[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B6[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B7[" + string(bFastMode?"0":"i") + "]) )\n";
                     code += "    {\n";
                     code += "        cerr << \"Error: MainExecutor::Execute() storage read free in found non-zero A-B storage registers step=\" << i << \" zkPC=" + to_string(zkPC) + " line=\" << rom.line[zkPC].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
@@ -1306,24 +1304,13 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 // Binary free in
                 if (rom["program"][zkPC].contains("bin") && (rom["program"][zkPC]["bin"] == 1))
                 {
-                    binExecuted = true;
-
                     if (rom["program"][zkPC]["binOpcode"] == 0) // ADD
                     {
                         code += "    //Binary free in ADD\n";
                         code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
                         code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
                         code += "    c = (a + b) & ScalarMask256;\n";
-                        if (bFastMode && !opInitialized && (rom["program"][zkPC]["inFREE"] == "1"))
-                        {
-                            code += "    scalar2fea(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);\n";
-                            opInitialized = true;
-                            skipCopyFiToOp = true;
-                        }
-                        else
-                        {
-                            code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
-                        }
+                        code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
                         nHits++;
                     }
                     else if (rom["program"][zkPC]["binOpcode"] == 1) // SUB
@@ -1332,16 +1319,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
                         code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
                         code += "    c = (a - b + ScalarTwoTo256) & ScalarMask256;\n";
-                        if (bFastMode && !opInitialized && (rom["program"][zkPC]["inFREE"] == "1"))
-                        {
-                            code += "    scalar2fea(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);\n";
-                            opInitialized = true;
-                            skipCopyFiToOp = true;
-                        }
-                        else
-                        {
-                            code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
-                        }
+                        code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
                         nHits++;
                     }
                     else if (rom["program"][zkPC]["binOpcode"] == 2) // LT
@@ -1350,16 +1328,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
                         code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
                         code += "    c = (a < b);\n";
-                        if (bFastMode && !opInitialized && (rom["program"][zkPC]["inFREE"] == "1"))
-                        {
-                            code += "    scalar2fea(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);\n";
-                            opInitialized = true;
-                            skipCopyFiToOp = true;
-                        }
-                        else
-                        {
-                            code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
-                        }
+                        code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
                         nHits++;
                     }
                     else if (rom["program"][zkPC]["binOpcode"] == 3) // SLT
@@ -1370,16 +1339,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "    if (a >= ScalarTwoTo255) a = a - ScalarTwoTo256;\n";
                         code += "    if (b >= ScalarTwoTo255) b = b - ScalarTwoTo256;\n";
                         code += "    c = (a < b);\n";
-                        if (bFastMode && !opInitialized && (rom["program"][zkPC]["inFREE"] == "1"))
-                        {
-                            code += "    scalar2fea(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);\n";
-                            opInitialized = true;
-                            skipCopyFiToOp = true;
-                        }
-                        else
-                        {
-                            code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
-                        }
+                        code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
                         nHits++;
                     }
                     else if (rom["program"][zkPC]["binOpcode"] == 4) // EQ
@@ -1388,16 +1348,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
                         code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
                         code += "    c = (a == b);\n";
-                        if (bFastMode && !opInitialized && (rom["program"][zkPC]["inFREE"] == "1"))
-                        {
-                            code += "    scalar2fea(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);\n";
-                            opInitialized = true;
-                            skipCopyFiToOp = true;
-                        }
-                        else
-                        {
-                            code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
-                        }
+                        code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
                         nHits++;
                     }
                     else if (rom["program"][zkPC]["binOpcode"] == 5) // AND
@@ -1406,16 +1357,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
                         code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
                         code += "    c = (a & b);\n";
-                        if (bFastMode && !opInitialized && (rom["program"][zkPC]["inFREE"] == "1"))
-                        {
-                            code += "    scalar2fea(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);\n";
-                            opInitialized = true;
-                            skipCopyFiToOp = true;
-                        }
-                        else
-                        {
-                            code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
-                        }
+                        code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
                         nHits++;
                     }
                     else if (rom["program"][zkPC]["binOpcode"] == 6) // OR
@@ -1424,16 +1366,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
                         code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
                         code += "    c = (a | b);\n";
-                        if (bFastMode && !opInitialized && (rom["program"][zkPC]["inFREE"] == "1"))
-                        {
-                            code += "    scalar2fea(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);\n";
-                            opInitialized = true;
-                            skipCopyFiToOp = true;
-                        }
-                        else
-                        {
-                            code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
-                        }
+                        code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
                         nHits++;
                     }
                     else if (rom["program"][zkPC]["binOpcode"] == 7) // XOR
@@ -1442,16 +1375,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
                         code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
                         code += "    c = (a ^ b);\n";
-                        if (bFastMode && !opInitialized && (rom["program"][zkPC]["inFREE"] == "1"))
-                        {
-                            code += "    scalar2fea(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);\n";
-                            opInitialized = true;
-                            skipCopyFiToOp = true;
-                        }
-                        else
-                        {
-                            code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
-                        }
+                        code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
                         nHits++;
                     }
                     else
@@ -1673,62 +1597,59 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    pols.FREE7[i] = fi7;\n\n";
             }
 
-            if (!skipCopyFiToOp)
+            code += "    // op = op + inFREE*fi\n";
+            string inFREEString = rom["program"][zkPC]["inFREE"];
+            int64_t inFREE = atoi(inFREEString.c_str());
+            if (inFREE == 1)
             {
-                code += "    // op = op + inFREE*fi\n";
-                string inFREEString = rom["program"][zkPC]["inFREE"];
-                int64_t inFREE = atoi(inFREEString.c_str());
-                if (inFREE == 1)
+                if (opInitialized)
                 {
-                    if (opInitialized)
-                    {
-                        code += "    op0 = fr.add(op0, fi0);\n";
-                        code += "    op1 = fr.add(op1, fi1);\n";
-                        code += "    op2 = fr.add(op2, fi2);\n";
-                        code += "    op3 = fr.add(op3, fi3);\n";
-                        code += "    op4 = fr.add(op4, fi4);\n";
-                        code += "    op5 = fr.add(op5, fi5);\n";
-                        code += "    op6 = fr.add(op6, fi6);\n";
-                        code += "    op7 = fr.add(op7, fi7);\n\n";
-                    }
-                    else
-                    {
-                        code += "    op0 = fi0;\n";
-                        code += "    op1 = fi1;\n";
-                        code += "    op2 = fi2;\n";
-                        code += "    op3 = fi3;\n";
-                        code += "    op4 = fi4;\n";
-                        code += "    op5 = fi5;\n";
-                        code += "    op6 = fi6;\n";
-                        code += "    op7 = fi7;\n\n";
-                        opInitialized = true;
-                    }
+                    code += "    op0 = fr.add(op0, fi0);\n";
+                    code += "    op1 = fr.add(op1, fi1);\n";
+                    code += "    op2 = fr.add(op2, fi2);\n";
+                    code += "    op3 = fr.add(op3, fi3);\n";
+                    code += "    op4 = fr.add(op4, fi4);\n";
+                    code += "    op5 = fr.add(op5, fi5);\n";
+                    code += "    op6 = fr.add(op6, fi6);\n";
+                    code += "    op7 = fr.add(op7, fi7);\n\n";
                 }
                 else
                 {
-                    if (opInitialized)
-                    {
-                        code += "    op0 = fr.add(op0, fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi0));\n";
-                        code += "    op1 = fr.add(op1, fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi1));\n";
-                        code += "    op2 = fr.add(op2, fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi2));\n";
-                        code += "    op3 = fr.add(op3, fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi3));\n";
-                        code += "    op4 = fr.add(op4, fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi4));\n";
-                        code += "    op5 = fr.add(op5, fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi5));\n";
-                        code += "    op6 = fr.add(op6, fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi6));\n";
-                        code += "    op7 = fr.add(op7, fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi7));\n\n";
-                    }
-                    else
-                    {
-                        code += "    op0 = fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi0);\n";
-                        code += "    op1 = fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi1);\n";
-                        code += "    op2 = fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi2);\n";
-                        code += "    op3 = fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi3);\n";
-                        code += "    op4 = fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi4);\n";
-                        code += "    op5 = fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi5);\n";
-                        code += "    op6 = fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi6);\n";
-                        code += "    op7 = fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi7);\n\n";
-                        opInitialized = true;
-                    }
+                    code += "    op0 = fi0;\n";
+                    code += "    op1 = fi1;\n";
+                    code += "    op2 = fi2;\n";
+                    code += "    op3 = fi3;\n";
+                    code += "    op4 = fi4;\n";
+                    code += "    op5 = fi5;\n";
+                    code += "    op6 = fi6;\n";
+                    code += "    op7 = fi7;\n\n";
+                    opInitialized = true;
+                }
+            }
+            else
+            {
+                if (opInitialized)
+                {
+                    code += "    op0 = fr.add(op0, fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi0));\n";
+                    code += "    op1 = fr.add(op1, fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi1));\n";
+                    code += "    op2 = fr.add(op2, fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi2));\n";
+                    code += "    op3 = fr.add(op3, fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi3));\n";
+                    code += "    op4 = fr.add(op4, fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi4));\n";
+                    code += "    op5 = fr.add(op5, fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi5));\n";
+                    code += "    op6 = fr.add(op6, fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi6));\n";
+                    code += "    op7 = fr.add(op7, fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi7));\n\n";
+                }
+                else
+                {
+                    code += "    op0 = fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi0);\n";
+                    code += "    op1 = fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi1);\n";
+                    code += "    op2 = fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi2);\n";
+                    code += "    op3 = fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi3);\n";
+                    code += "    op4 = fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi4);\n";
+                    code += "    op5 = fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi5);\n";
+                    code += "    op6 = fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi6);\n";
+                    code += "    op7 = fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi7);\n\n";
+                    opInitialized = true;
                 }
             }
 
@@ -2934,14 +2855,13 @@ string generate(const json &rom, const string &functionName, const string &fileN
             if (rom["program"][zkPC]["binOpcode"] == 0) // ADD
             {
                 code += "    // Binary instruction: ADD\n";
-                if (!binExecuted)
-                {
-                    code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    c = (a + b) & ScalarMask256;\n";
-                }
-                code += "    fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7);\n";
-                code += "    if (c != op)\n";
+
+                code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
+                code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
+                code += "    fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);\n";
+
+                code += "    expectedC = (a + b) & ScalarMask256;\n";
+                code += "    if (c != expectedC)\n";
                 code += "    {\n";
                 code += "        cerr << \"Error: Binary ADD operation does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
@@ -2967,14 +2887,13 @@ string generate(const json &rom, const string &functionName, const string &fileN
             else if (rom["program"][zkPC]["binOpcode"] == 1) // SUB
             {
                 code += "    // Binary instruction: SUB\n";
-                if (!binExecuted)
-                {
-                    code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    c = (a - b + ScalarTwoTo256) & ScalarMask256;\n";
-                }
-                code += "    fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7);\n";
-                code += "    if (c != op)\n";
+
+                code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
+                code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
+                code += "    fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);\n";
+
+                code += "    expectedC = (a - b + ScalarTwoTo256) & ScalarMask256;\n";
+                code += "    if (c != expectedC)\n";
                 code += "    {\n";
                 code += "        cerr << \"Error: Binary SUB operation does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
@@ -3000,14 +2919,13 @@ string generate(const json &rom, const string &functionName, const string &fileN
             else if (rom["program"][zkPC]["binOpcode"] == 2) // LT
             {
                 code += "    // Binary instruction: LT\n";
-                if (!binExecuted)
-                {
-                    code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    c = (a < b);\n";
-                }
-                code += "    fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7);\n";
-                code += "    if (c != op)\n";
+
+                code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
+                code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
+                code += "    fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);\n";
+
+                code += "    expectedC = (a < b);\n";
+                code += "    if (c != expectedC)\n";
                 code += "    {\n";
                 code += "        cerr << \"Error: Binary LT operation does not match\"<< \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
@@ -3033,20 +2951,17 @@ string generate(const json &rom, const string &functionName, const string &fileN
             else if (rom["program"][zkPC]["binOpcode"] == 3) // SLT
             {
                 code += "    // Binary instruction: SLT\n";
-                if (!binExecuted)
-                {
-                    code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    c = (_a < _b);\n";
-                }
-                code += "    fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7);\n";
+
+                code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
+                code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
+                code += "    fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);\n";
                 code += "    _a = a;\n";
                 code += "    _b = b;\n";
                 code += "    if (a >= ScalarTwoTo255) _a = a - ScalarTwoTo256;\n";
                 code += "    if (b >= ScalarTwoTo255) _b = b - ScalarTwoTo256;\n";
 
                 code += "    expectedC = (_a < _b);\n";
-                code += "    if (op != expectedC)\n";
+                code += "    if (c != expectedC)\n";
                 code += "    {\n";
                 code += "        cerr << \"Error: Binary SLT operation does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        cerr << \"a=\" << a << \" b=\" << b << \" c=\" << c << \" _a=\" << _a << \" _b=\" << _b << \" expectedC=\" << expectedC << endl;\n";
@@ -3073,14 +2988,13 @@ string generate(const json &rom, const string &functionName, const string &fileN
             else if (rom["program"][zkPC]["binOpcode"] == 4) // EQ
             {
                 code += "    // Binary instruction: EQ\n";
-                if (!binExecuted)
-                {
-                    code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    c = (a == b);\n";
-                }
-                code += "    fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7);\n";
-                code += "    if (c != op)\n";
+
+                code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
+                code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
+                code += "    fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);\n";
+
+                code += "    expectedC = (a == b);\n";
+                code += "    if (c != expectedC)\n";
                 code += "    {\n";
                 code += "        cerr << \"Error: Binary EQ operation does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
@@ -3106,14 +3020,13 @@ string generate(const json &rom, const string &functionName, const string &fileN
             else if (rom["program"][zkPC]["binOpcode"] == 5) // AND
             {
                 code += "    // Binary instruction: AND\n";
-                if (!binExecuted)
-                {
-                    code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    c = (a & b);\n";
-                }
-                code += "    fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7);\n";
-                code += "    if (c != op)\n";
+
+                code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
+                code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
+                code += "    fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);\n";
+
+                code += "    expectedC = (a & b);\n";
+                code += "    if (c != expectedC)\n";
                 code += "    {\n";
                 code += "        cerr << \"Error: Binary AND operation does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
@@ -3140,14 +3053,13 @@ string generate(const json &rom, const string &functionName, const string &fileN
             else if (rom["program"][zkPC]["binOpcode"] == 6) // OR
             {
                 code += "    // Binary instruction: OR\n";
-                if (!binExecuted)
-                {
-                    code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    c = (a | b);\n";
-                }
-                code += "    fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7);\n";
-                code += "    if (c != op)\n";
+
+                code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
+                code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
+                code += "    fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);\n";
+
+                code += "    expectedC = (a | b);\n";
+                code += "    if (c != expectedC)\n";
                 code += "    {\n";
                 code += "        cerr << \"Error: Binary OR operation does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
@@ -3171,14 +3083,13 @@ string generate(const json &rom, const string &functionName, const string &fileN
             else if (rom["program"][zkPC]["binOpcode"] == 7) // XOR
             {
                 code += "    // Binary instruction: XOR\n";
-                if (!binExecuted)
-                {
-                    code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    c = (a ^ b);\n";
-                }
-                code += "    fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7);\n";
-                code += "    if (c != op)\n";
+
+                code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
+                code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
+                code += "    fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);\n";
+
+                code += "    expectedC = (a ^ b);\n";
+                code += "    if (c != expectedC)\n";
                 code += "    {\n";
                 code += "        cerr << \"Error: Binary XOR operation does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
@@ -4178,6 +4089,14 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    else\n";
     code += "    {\n";
     code += "        pStateDB->flush();\n";
+    code += "        zkresult zkr = pStateDB->flush();\n";
+    code += "        if (zkr != ZKR_SUCCESS)\n";
+    code += "        {\n";
+    code += "            cerr << \"Error: Main SM Executor: failed calling pStateDB->flush() result=\" << zkr << \" =\" << zkresult2string(zkr) << endl;\n";
+    code += "            proverRequest.result = zkr;\n";
+    code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+    code += "            return;\n";
+    code += "        }\n";
     code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
     code += "    }\n\n";
 

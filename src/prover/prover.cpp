@@ -417,14 +417,6 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
     executor.execute(*pProverRequest, cmPols);
     TimerStopAndLog(EXECUTOR_EXECUTE_BATCH_PROOF);
 
-    // Save input to <timestamp>.input.json after execution including dbReadLog
-    if (config.saveDbReadsToFile)
-    {
-        json inputJsonEx;
-        pProverRequest->input.save(inputJsonEx, *pProverRequest->dbReadLog);
-        json2file(inputJsonEx, pProverRequest->inputDbFile());
-    }
-
     // Save commit pols to file zkevm.commit
     if (config.zkevmCmPolsAfterExecutor != "")
     {

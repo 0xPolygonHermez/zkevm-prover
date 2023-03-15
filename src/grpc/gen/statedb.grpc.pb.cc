@@ -216,32 +216,32 @@ void StateDBService::Stub::experimental_async::LoadProgramDB(::grpc::ClientConte
   return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::google::protobuf::Empty>::Create(channel_.get(), cq, rpcmethod_LoadProgramDB_, context, request, false);
 }
 
-::grpc::Status StateDBService::Stub::Flush(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::google::protobuf::Empty* response) {
+::grpc::Status StateDBService::Stub::Flush(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::statedb::v1::FlushResponse* response) {
   return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_Flush_, context, request, response);
 }
 
-void StateDBService::Stub::experimental_async::Flush(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)> f) {
+void StateDBService::Stub::experimental_async::Flush(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::statedb::v1::FlushResponse* response, std::function<void(::grpc::Status)> f) {
   ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_Flush_, context, request, response, std::move(f));
 }
 
-void StateDBService::Stub::experimental_async::Flush(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)> f) {
+void StateDBService::Stub::experimental_async::Flush(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::statedb::v1::FlushResponse* response, std::function<void(::grpc::Status)> f) {
   ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_Flush_, context, request, response, std::move(f));
 }
 
-void StateDBService::Stub::experimental_async::Flush(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+void StateDBService::Stub::experimental_async::Flush(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::statedb::v1::FlushResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
   ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_Flush_, context, request, response, reactor);
 }
 
-void StateDBService::Stub::experimental_async::Flush(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+void StateDBService::Stub::experimental_async::Flush(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::statedb::v1::FlushResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
   ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_Flush_, context, request, response, reactor);
 }
 
-::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* StateDBService::Stub::AsyncFlushRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::google::protobuf::Empty>::Create(channel_.get(), cq, rpcmethod_Flush_, context, request, true);
+::grpc::ClientAsyncResponseReader< ::statedb::v1::FlushResponse>* StateDBService::Stub::AsyncFlushRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::statedb::v1::FlushResponse>::Create(channel_.get(), cq, rpcmethod_Flush_, context, request, true);
 }
 
-::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* StateDBService::Stub::PrepareAsyncFlushRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::google::protobuf::Empty>::Create(channel_.get(), cq, rpcmethod_Flush_, context, request, false);
+::grpc::ClientAsyncResponseReader< ::statedb::v1::FlushResponse>* StateDBService::Stub::PrepareAsyncFlushRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::statedb::v1::FlushResponse>::Create(channel_.get(), cq, rpcmethod_Flush_, context, request, false);
 }
 
 StateDBService::Service::Service() {
@@ -308,11 +308,11 @@ StateDBService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       StateDBService_method_names[6],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< StateDBService::Service, ::google::protobuf::Empty, ::google::protobuf::Empty>(
+      new ::grpc::internal::RpcMethodHandler< StateDBService::Service, ::google::protobuf::Empty, ::statedb::v1::FlushResponse>(
           [](StateDBService::Service* service,
              ::grpc_impl::ServerContext* ctx,
              const ::google::protobuf::Empty* req,
-             ::google::protobuf::Empty* resp) {
+             ::statedb::v1::FlushResponse* resp) {
                return service->Flush(ctx, req, resp);
              }, this)));
 }
@@ -362,7 +362,7 @@ StateDBService::Service::~Service() {
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
 }
 
-::grpc::Status StateDBService::Service::Flush(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::google::protobuf::Empty* response) {
+::grpc::Status StateDBService::Service::Flush(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::statedb::v1::FlushResponse* response) {
   (void) context;
   (void) request;
   (void) response;

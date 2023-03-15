@@ -27,7 +27,7 @@ service StateDBService {
     rpc GetProgram(GetProgramRequest) returns (GetProgramResponse) {}
     rpc LoadDB(LoadDBRequest) returns (google.protobuf.Empty) {}
     rpc LoadProgramDB(LoadProgramDBRequest) returns (google.protobuf.Empty) {}
-    rpc Flush (google.protobuf.Empty) returns (google.protobuf.Empty) {}
+    rpc Flush (google.protobuf.Empty) returns (FlushResponse) {}
 }
 
 ///////////////////
@@ -184,6 +184,14 @@ message SetProgramResponse {
 message GetProgramResponse {
     bytes data = 1;
     ResultCode result = 2;
+}
+
+/**
+ * @dev FlushResponse
+ * @param {result} - result code
+ */
+message FlushResponse {
+    ResultCode result = 1;
 }
 
 /**

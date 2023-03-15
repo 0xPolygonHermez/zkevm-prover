@@ -505,6 +505,8 @@ zkresult Database::readRemote(bool bProgram, const string &key, string &value)
 
 zkresult Database::writeRemote(bool bProgram, const string &key, const string &value)
 {
+    zkresult result = ZKR_SUCCESS;
+
     const string &tableName = (bProgram ? config.dbProgramTableName : config.dbNodesTableName);
     
     if (config.dbMultiWrite)
@@ -552,11 +554,11 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
         catch (const std::exception &e)
         {
             cerr << "Error: Database::writeRemote() table="<< tableName << " exception: " << e.what() << " connection=" << pDatabaseConnection << endl;
-            exitProcess();
+            result = ZKR_DB_ERROR;
         }
     }
 
-    return ZKR_SUCCESS;
+    return result;
 }
 
 zkresult Database::setProgram(const string &_key, const vector<uint8_t> &data, const bool persistent)
@@ -681,12 +683,16 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
     return r;
 }
 
-void Database::flush()
+zkresult Database::flush()
 {
     if (!config.dbMultiWrite)
     {
-        return;
+        return ZKR_SUCCESS;
     }
+
+    //TimerStart(DATABASE_FLUSH);
+
+    zkresult zkr = ZKR_SUCCESS;
 
     multiWriteLock();
 
@@ -698,51 +704,58 @@ void Database::flush()
 
         try
         {
+            string query;
             if (multiWriteProgram.size() > 0)
             {
-                multiWriteProgram += " ON CONFLICT (hash) DO NOTHING;";
+                query = multiWriteProgram + " ON CONFLICT (hash) DO NOTHING;";
                 
                 // Start a transaction
                 pqxx::work w(*(pDatabaseConnection->pConnection));
 
                 // Execute the query
-                pqxx::result res = w.exec(multiWriteProgram);
+                pqxx::result res = w.exec(query);
 
                 // Commit your transaction
                 w.commit();
 
                 //cout << "Database::flush() sent " << multiWriteProgram << endl;
 
+                // Delete the accumulated query data only if the query succeeded
                 multiWriteProgram.clear();
             }
             if (multiWriteNodes.size() > 0)
             {
-                multiWriteNodes += " ON CONFLICT (hash) DO NOTHING;";
+                query = multiWriteNodes + " ON CONFLICT (hash) DO NOTHING;";
                 
                 // Start a transaction
                 pqxx::work w(*(pDatabaseConnection->pConnection));
 
                 // Execute the query
-                pqxx::result res = w.exec(multiWriteNodes);
+                pqxx::result res = w.exec(query);
 
                 // Commit your transaction
                 w.commit();
 
                 //cout << "Database::flush() sent " << multiWriteNodes << endl;
 
+                // Delete the accumulated query data only if the query succeeded
                 multiWriteNodes.clear();
             }
         }
         catch (const std::exception &e)
         {
             cerr << "Error: Database::flush() execute query exception: " << e.what() << endl;
-            exitProcess();
+            zkr = ZKR_DB_ERROR;
         }
 
         // Dispose the write db connection
         disposeWriteConnection(pDatabaseConnection);
     }
     multiWriteUnlock();
+
+    //TimerStopAndLog(DATABASE_FLUSH);
+    
+    return zkr;
 }
 
 #ifdef DATABASE_COMMIT
@@ -866,6 +879,7 @@ Database::~Database()
             {
                 if (writeConnectionsPool[i].pConnection != NULL)
                 {
+                    //cout << "Database::~Database() deleting writeConnectionsPool[" << i << "].pConnection=" << writeConnectionsPool[i].pConnection << endl;
                     delete[] writeConnectionsPool[i].pConnection;
                 }
             }
@@ -878,6 +892,7 @@ Database::~Database()
             {
                 if (readConnectionsPool[i].pConnection != NULL)
                 {
+                    //cout << "Database::~Database() deleting readConnectionsPool[" << i << "].pConnection=" << readConnectionsPool[i].pConnection << endl;
                     delete[] readConnectionsPool[i].pConnection;
                 }
             }
