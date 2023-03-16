@@ -95,6 +95,7 @@ void Executor::process_batch (ProverRequest &proverRequest)
                 // Free committed polynomials address space
                 free(pAddress);
             }
+            return;
         }
         case 3: // fork_3
         {
