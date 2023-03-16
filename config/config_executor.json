@@ -26,7 +26,7 @@
 
     "executeInParallel": true,
     "useMainExecGenerated": true,
-    "useProcessBatchCache": false,
+    
     "saveRequestToFile": false,
     "saveInputToFile": false,
     "saveDbReadsToFile": false,
@@ -52,7 +52,7 @@
     "executorClientHost": "127.0.0.1",
 
     "stateDBServerPort": 50061,
-    "stateDBURL": "SET STATEDB SERVER IP",
+    "stateDBURL": "local",
 
     "aggregatorServerPort": 50081,
     "aggregatorClientPort": 50081,
