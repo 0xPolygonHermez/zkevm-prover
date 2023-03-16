@@ -1,10 +1,10 @@
 #!/bin/bash -x
 
-VERSION=v0.8.0.0-rc.2-forkid.2
+VERSION=v1.0.0-rc.1-fork.3
 FORK_VERSION=$(sed -e 's/.*-fork.//g' <<< ${VERSION})
 FORK_ID=fork_$FORK_VERSION
 
-WORKING_DIR=/mnt/ofs/zkproverc/${VERSION}
+WORKING_DIR=/home/feli/releases/${VERSION}
 CONFIG_DIR=${WORKING_DIR}/config/
 C_FILES=${WORKING_DIR}/c_files
 CIRCOM_HEADER="#pragma GCC diagnostic push\n#pragma GCC diagnostic ignored \"-Wunused-variable\"\n#pragma GCC push_options\n#pragma GCC optimize (\"O0\")\n#include <stdio.h>\n#include <iostream>\n#include <assert.h>\n#include <cassert>\n"
@@ -66,7 +66,6 @@ sed -i "1s/^/$CIRCOM_HEADER/" ${RECURSIVEFINAL_CPP}
 echo -e "}\n#pragma GCC diagnostic pop" >> ${RECURSIVEFINAL_CPP}
 
 #Copy pols_generated files
-cp -r ${C_FILES}/pols_generated/* ./src/main_sm/$FORK_ID/pols_generated/
 cp -r ${CONFIG_DIR}/scripts/* ./src/main_sm/$FORK_ID/scripts/
 cp ${WORKING_DIR}/pil/zkevm/main.pil.json  ./src/main_sm/$FORK_ID/scripts/
 
