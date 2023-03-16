@@ -95,8 +95,6 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
         exitProcess();
     }
     opcodeAddressInit(romJson["labels"]);
-    
-    pthread_mutex_init(&flushMutex, NULL);
 
     TimerStopAndLog(ROM_LOAD);
 };
@@ -104,13 +102,6 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
 MainExecutor::~MainExecutor ()
 {
     TimerStart(MAIN_EXECUTOR_DESTRUCTOR_fork_3);
-
-    flushLock();
-    for (uint64_t i=0; i<flushQueue.size(); i++)
-    {
-        pthread_join(flushQueue[i], NULL);
-    }
-    flushUnlock();
 
     TimerStopAndLog(MAIN_EXECUTOR_DESTRUCTOR_fork_3);
 }
@@ -4049,11 +4040,6 @@ void MainExecutor::flushInParallel(StateDBInterface * pStateDB)
     // Create a thread to flush the database writes in parallel
     pthread_t flushPthread; 
     pthread_create(&flushPthread, NULL, mainExecutorFlushThread, pStateDB);
-
-    // Add the thread to the flush queue
-    flushLock();
-    flushQueue.push_back(flushPthread);
-    flushUnlock();
 }
 
 void *mainExecutorFlushThread(void *arg)

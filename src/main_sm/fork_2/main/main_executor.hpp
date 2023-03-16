@@ -66,13 +66,6 @@ public:
     void initState(Context &ctx);
     void checkFinalState(Context &ctx);
     void assertOutputs(Context &ctx);
-
-private:
-    // Flush
-    pthread_mutex_t flushMutex; // Mutex to protect the flush threads queue
-    void flushLock(void) { pthread_mutex_lock(&flushMutex); };
-    void flushUnlock(void) { pthread_mutex_unlock(&flushMutex); };
-    vector<pthread_t> flushQueue;
     
 public:
     void flushInParallel(StateDBInterface * pStateDB);
