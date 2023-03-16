@@ -89,13 +89,13 @@ public:
 
     Polynomial<Engine>* divByVanishing(uint32_t m, FrElement beta);
 
-    Polynomial<Engine>* divByVanishing(FrElement *reservedBuffer, uint32_t m, FrElement beta);
+    Polynomial<Engine>* divByVanishing(FrElement *reservedBuffer, uint64_t m, FrElement beta);
 
     void fastDivByVanishing(FrElement *reservedBuffer, uint32_t m, FrElement beta);
 
     void divZh(u_int64_t domainSize, int extension = 4);
 
-    void divByZerofier(u_int64_t domainSize, FrElement beta);
+    void divByZerofier(u_int64_t n, FrElement beta);
 
     void byX();
 

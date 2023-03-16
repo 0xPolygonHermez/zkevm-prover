@@ -11,9 +11,9 @@
 #include "polynomial/polynomial.hpp"
 #include "polynomial/evaluations.hpp"
 #include <nlohmann/json.hpp>
-#include "mul_z.hpp"
-#include "dump.hpp"
 #include "keccak_256_transcript.hpp"
+#include "wtns_utils.hpp"
+#include "zkey.hpp"
 
 using json = nlohmann::json;
 using namespace std::chrono;
@@ -28,35 +28,40 @@ namespace Fflonk {
         using G1Point = typename Engine::G1Point;
         using G1PointAffine = typename Engine::G1PointAffine;
 
-        struct ProcessingTime {
-            std::string label;
-            double duration;
-
-            ProcessingTime(std::string label, double duration) : label(label), duration(duration) {}
-        };
-
-        std::vector <ProcessingTime> T1;
-        std::vector <ProcessingTime> T2;
-
         Engine &E;
         FFT<typename Engine::Fr> *fft = NULL;
-        MulZ<Engine> *mulZ;
-
-        BinFileUtils::BinFile *fdZkey;
 
         Zkey::FflonkZkeyHeader *zkey;
         u_int32_t zkeyPower;
         std::string curveName;
         size_t sDomain;
 
+        FrElement *reservedMemoryPtr;
+
+        u_int64_t lengthPrecomputedBigBuffer;
+        FrElement *precomputedBigBuffer;
         G1PointAffine *PTau;
 
-        FrElement *buffWitness;
-        FrElement *buffInternalWitness;
+        u_int64_t lengthNonPrecomputedBigBuffer;
+        FrElement *nonPrecomputedBigBuffer;
 
-        FrElement *bigBufferBuffers;
-        FrElement *bigBufferPolynomials;
-        FrElement *bigBufferEvaluations;
+        u_int64_t lengthMapBuffers;
+        u_int32_t *mapBuffersBigBuffer;
+
+        u_int64_t lengthInternalWitnessBuffer;
+        
+        FrElement *buffInternalWitness;
+        FrElement *buffWitness;
+
+        Zkey::Addition<Engine> *additionsBuff;
+
+        u_int64_t lengthBatchInversesBuffer;
+
+        FrElement *inverses;
+        FrElement *products;
+
+        // This is the length of the buffer that must be zeroed after each proof (starting from buffers["A"] pointer)
+        u_int64_t buffersLength;
 
         std::map<std::string, FrElement *> polPtr;
         std::map<std::string, FrElement *> evalPtr;
@@ -75,12 +80,24 @@ namespace Fflonk {
         SnarkProof<Engine> *proof;
     public:
         FflonkProver(Engine &E);
+        FflonkProver(Engine &E, void* reservedMemoryPtr);
 
         ~FflonkProver();
 
-        std::tuple <json, json> prove(BinFileUtils::BinFile *fdZkey, FrElement *buffWitness);
+        void setZkey(BinFileUtils::BinFile *fdZkey);
 
-        void calculateAdditions(BinFileUtils::BinFile *fdZkey);
+        std::tuple <json, json> prove(BinFileUtils::BinFile *fdZkey, BinFileUtils::BinFile *fdWtns);
+        std::tuple <json, json> prove(BinFileUtils::BinFile *fdZkey, FrElement *wtns, WtnsUtils::Header* wtnsHeader = NULL);
+
+        std::tuple <json, json> prove(BinFileUtils::BinFile *fdWtns);
+        std::tuple <json, json> prove(FrElement *wtns, WtnsUtils::Header* wtnsHeader = NULL);
+
+    protected:
+        void initialize(void* reservedMemoryPtr);
+
+        void removePrecomputedData();
+
+        void calculateAdditions();
 
         FrElement getWitness(u_int64_t idx);
 
@@ -143,13 +160,6 @@ namespace Fflonk {
         G1Point multiExponentiation(Polynomial<Engine> *polynomial);
 
         G1Point multiExponentiation(Polynomial<Engine> *polynomial, u_int32_t nx, u_int64_t x[]);
-
-        void printPol(std::string name, const Polynomial<Engine> *polynomial);
-
-        void resetTimer(std::vector <ProcessingTime> &T);
-        void takeTime(std::vector <ProcessingTime> &T, const std::string label);
-
-        void printTimer(std::vector <ProcessingTime> &T);
     };
 }
 

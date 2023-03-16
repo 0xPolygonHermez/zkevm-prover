@@ -36,6 +36,7 @@ class Prover
     Starks *starksRecursive1;
     Starks *starksRecursive2;
 
+    Fflonk::FflonkProver<AltBn128::Engine> *prover;
     std::unique_ptr<Groth16::Prover<AltBn128::Engine>> groth16Prover;
     std::unique_ptr<BinFileUtils::BinFile> zkey;
     std::unique_ptr<ZKeyUtils::Header> zkeyHeader;

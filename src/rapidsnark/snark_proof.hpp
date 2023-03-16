@@ -22,7 +22,7 @@ class SnarkProof {
 public :
     SnarkProof(Engine &E, const std::string &protocol);
 
-    void resetProof();
+    void reset();
 
     void addPolynomialCommitment(const std::string &key, G1Point &polynomialCommitment);
 
