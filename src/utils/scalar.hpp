@@ -40,13 +40,11 @@ inline void fe2scalar  (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Ele
 
 inline void scalar2fe  (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Element &fe)
 {
-#ifdef DEBUG
     if ( !scalar.fits_ulong_p() )
     {
         cerr << "Error: scalar2fe() found scalar out of u64 range:" << scalar.get_str(16) << endl;
         exitProcess();
     }
-#endif
     fe = fr.fromU64(scalar.get_ui());
 }
 
@@ -65,8 +63,6 @@ inline void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Ele
 
 inline void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element &fe0, const Goldilocks::Element &fe1, const Goldilocks::Element &fe2, const Goldilocks::Element &fe3, const Goldilocks::Element &fe4, const Goldilocks::Element &fe5, const Goldilocks::Element &fe6, const Goldilocks::Element &fe7)
 {
-#ifdef DEBUG
-
     // Add field element 7
     uint64_t auxH = fr.toU64(fe7);
     if (auxH >= 0x100000000)
@@ -141,18 +137,6 @@ inline void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Ele
     }
     
     scalar += (auxH<<32) + auxL;
-
-#else // DEBUG
-
-    scalar  = (fr.toU64(fe7)<<32) + fr.toU64(fe6);
-    scalar <<= 64;
-    scalar += (fr.toU64(fe5)<<32) + fr.toU64(fe4);
-    scalar <<= 64;
-    scalar += (fr.toU64(fe3)<<32) + fr.toU64(fe2);
-    scalar <<= 64;
-    scalar += (fr.toU64(fe1)<<32) + fr.toU64(fe0);
-
-#endif // DEBUG
 }
 
 inline void fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element (&fea)[8])
@@ -164,47 +148,38 @@ inline void scalar2fea (Goldilocks &fr, const mpz_class &scalar, Goldilocks::Ele
 {
     mpz_class aux = scalar & ScalarMask64;
 
-#ifdef DEBUG
     if (aux >= ScalarGoldilocksPrime)
     {
         cerr << "Error: scalar2fea() found value higher than prime: " << aux.get_str(16) << endl;
         exitProcess();
     }
-#endif
 
     fea[0] = fr.fromU64(aux.get_ui());
     aux = scalar>>64 & ScalarMask64;
 
-#ifdef DEBUG
     if (aux >= ScalarGoldilocksPrime)
     {
         cerr << "Error: scalar2fea() found value higher than prime: " << aux.get_str(16) << endl;
         exitProcess();
     }
-#endif
 
     fea[1] = fr.fromU64(aux.get_ui());
     aux = scalar>>128 & ScalarMask64;
 
-#ifdef DEBUG
     if (aux >= ScalarGoldilocksPrime)
     {
         cerr << "Error: scalar2fea() found value higher than prime: " << aux.get_str(16) << endl;
         exitProcess();
     }
-#endif
 
     fea[2] = fr.fromU64(aux.get_ui());
     aux = scalar>>192 & ScalarMask64;
 
-#ifdef DEBUG
     if (aux >= ScalarGoldilocksPrime)
     {
         cerr << "Error: scalar2fea() found value higher than prime: " << aux.get_str(16) << endl;
         exitProcess();
     }
-
-#endif
 
     fea[3] = fr.fromU64(aux.get_ui());
 }
