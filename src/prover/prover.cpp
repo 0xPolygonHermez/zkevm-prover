@@ -810,9 +810,6 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     zkinRecursiveF["publics"] = zkinFinal["publics"];
     zkinRecursiveF["aggregatorAddr"] = strAddress10;
 
-    json2file(zkinRecursiveF, "zkinRecursiveF.json");
-    json2file(jProofRecursiveF, "jProofRecursiveF.json");
-
     //  ----------------------------------------------
     //  Verifier final
     //  ----------------------------------------------

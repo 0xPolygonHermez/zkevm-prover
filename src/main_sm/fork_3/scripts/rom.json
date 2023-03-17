@@ -48547,6 +48547,10 @@
    "lineStr": "        $ => B  :MLOAD(mulPointEc_p3_x)"
   },
   {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
    "bin": 1,
    "binOpcode": 4,
    "JMPC": 1,
@@ -48558,7 +48562,7 @@
    "jmpAddrLabel": "mulPointEc_x_equals_before_add",
    "elseAddrLabel": "next",
    "fileName": "ecrecover/mulPointEc.zkasm",
-   "lineStr": "                :EQ,JMPC(mulPointEc_x_equals_before_add)"
+   "lineStr": "        $        :EQ,JMPC(mulPointEc_x_equals_before_add)"
   },
   {
    "freeInTag": {
@@ -64150,11 +64154,26 @@
     "op": ""
    },
    "inFREE": "1",
+   "setE": 1,
+   "offset": 29,
+   "mOp": 1,
+   "mWR": 0,
+   "line": 1072,
+   "offsetLabel": "contractHashId",
+   "useCTX": 1,
+   "fileName": "utils.zkasm",
+   "lineStr": "    $ => E                      :MLOAD(contractHashId)"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
    "setA": 1,
    "offset": 153,
    "mOp": 1,
    "mWR": 0,
-   "line": 1071,
+   "line": 1073,
    "offsetLabel": "numBlocks",
    "useCTX": 0,
    "fileName": "utils.zkasm",
@@ -64171,23 +64190,12 @@
    "useJmpAddr": 1,
    "jmpAddr": 4785,
    "useElseAddr": 1,
-   "elseAddr": 4764,
-   "line": 1072,
+   "elseAddr": 4765,
+   "line": 1074,
    "jmpAddrLabel": "endPushInit",
    "elseAddrLabel": "next",
    "fileName": "utils.zkasm",
    "lineStr": "    $                           :EQ, JMPC(endPushInit)"
-  },
-  {
-   "inE": "1",
-   "offset": 29,
-   "mOp": 1,
-   "mWR": 0,
-   "line": 1074,
-   "offsetLabel": "contractHashId",
-   "useCTX": 1,
-   "fileName": "utils.zkasm",
-   "lineStr": "    E                           :MLOAD(contractHashId)"
   },
   {
    "freeInTag": {
