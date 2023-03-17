@@ -415,6 +415,14 @@ void string2File (const string & s, const string & fileName)
     outfile.close();
 }
 
+void file2String (const string &fileName, string &s)
+{
+    std::ifstream infile;
+    infile.open(fileName);
+    infile >> s;
+    infile.close();
+}
+
 /*
 // Convert an octal string into an hex string
 bool octal2hex (const string &octalString, string &hexString)
