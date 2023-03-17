@@ -407,7 +407,7 @@ uint64_t getNumberOfCores (void)
     return omp_get_num_procs();
 }
 
-void string2File (const string & s, const string & fileName)
+void string2file (const string & s, const string & fileName)
 {
     std::ofstream outfile;
     outfile.open(fileName);
@@ -415,7 +415,7 @@ void string2File (const string & s, const string & fileName)
     outfile.close();
 }
 
-void file2String (const string &fileName, string &s)
+void file2string (const string &fileName, string &s)
 {
     std::ifstream infile;
     infile.open(fileName);

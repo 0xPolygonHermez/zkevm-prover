@@ -71,10 +71,10 @@ vector<string> getFolderFiles (string folder, bool sorted);
 uint64_t getNumberOfCores (void);
 
 // Save a string into a file
-void string2File (const string &s, const string &fileName);
+void string2file (const string &s, const string &fileName);
 
 // Copy a file content into a string
-void file2String (const string &fileName, string &s);
+void file2string (const string &fileName, string &s);
 
 /*
 // Convert an octal string into an hex string

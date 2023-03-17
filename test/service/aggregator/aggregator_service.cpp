@@ -361,14 +361,14 @@ using grpc::Status;
         cerr << "Error: AggregatorServiceImpl::GenAggregatedProof() found inputFileA empty" << endl;
         exitProcess();
     }
-    file2String(inputFileA, inputFileAContent);
+    file2string(inputFileA, inputFileAContent);
 
     if (inputFileB.size() == 0)
     {
         cerr << "Error: AggregatorServiceImpl::GenAggregatedProof() found inputFileB empty" << endl;
         exitProcess();
     }
-    file2String(inputFileB, inputFileBContent);
+    file2string(inputFileB, inputFileBContent);
 
     // Allocate the aggregated batch request
     aggregator::v1::GenAggregatedProofRequest *pGenAggregatedProofRequest = new aggregator::v1::GenAggregatedProofRequest();
@@ -429,7 +429,7 @@ using grpc::Status;
         cerr << "Error: AggregatorServiceImpl::GenFinalProof() found inputFile empty" << endl;
         exitProcess();
     }
-    file2String(inputFile, inputFileContent);
+    file2string(inputFile, inputFileContent);
 
     // Allocate the final batch request
     aggregator::v1::GenFinalProofRequest *pGenFinalProofRequest = new aggregator::v1::GenFinalProofRequest();
@@ -582,7 +582,7 @@ using grpc::Status;
         cerr << "Error: AggregatorServiceImpl::GenAndGetBatchProof() got an empty batch proof" << endl;
         return Status::CANCELLED;
     }
-    string2File(proof, outputFile);
+    string2file(proof, outputFile);
 
     return Status::OK;
 }
@@ -635,7 +635,7 @@ using grpc::Status;
         cerr << "Error: AggregatorServiceImpl::GenAndGetAggregatedProof() got an empty batch proof" << endl;
         return Status::CANCELLED;
     }
-    string2File(proof, outputFile);
+    string2file(proof, outputFile);
 
     return Status::OK;
 }
@@ -688,7 +688,7 @@ using grpc::Status;
         cerr << "Error: AggregatorServiceImpl::GenAndGetFinalProof() got an empty batch proof" << endl;
         return Status::CANCELLED;
     }
-    string2File(proof, outputFile);
+    string2file(proof, outputFile);
 
     return Status::OK;
 }

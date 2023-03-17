@@ -532,7 +532,7 @@ void* aggregatorClientThread(void* arg)
 
             if (pAggregatorClient->config.saveRequestToFile)
             {
-                string2File(aggregatorMessage.DebugString(), filePrefix + "aggregator_request.txt");
+                string2file(aggregatorMessage.DebugString(), filePrefix + "aggregator_request.txt");
             }
 
             switch (aggregatorMessage.request_case())
@@ -655,7 +655,7 @@ void* aggregatorClientThread(void* arg)
             
             if (pAggregatorClient->config.saveResponseToFile)
             {
-                string2File(proverMessage.DebugString(), filePrefix + "aggregator_response.txt");
+                string2file(proverMessage.DebugString(), filePrefix + "aggregator_response.txt");
             }
         }
         cout << "aggregatorClientThread() channel broken; will retry in 5 seconds" << endl;

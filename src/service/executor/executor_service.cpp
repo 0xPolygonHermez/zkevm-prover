@@ -34,7 +34,7 @@ using grpc::Status;
     // Save request to file
     if (config.saveRequestToFile)
     {
-        string2File(request->DebugString(), proverRequest.filePrefix + "executor_request.txt");
+        string2file(request->DebugString(), proverRequest.filePrefix + "executor_request.txt");
     }
 
     // PUBLIC INPUTS
@@ -440,7 +440,7 @@ using grpc::Status;
 
     if (config.saveResponseToFile)
     {
-        string2File(response->DebugString(), proverRequest.filePrefix + "executor_response.txt");
+        string2file(response->DebugString(), proverRequest.filePrefix + "executor_response.txt");
     }
 
     if (config.opcodeTracer)
