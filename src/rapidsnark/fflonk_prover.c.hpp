@@ -14,10 +14,13 @@ using namespace CPlusPlusLogging;
 namespace Fflonk
 {
     template <typename Engine>
-    void FflonkProver<Engine>::initialize(void* reservedMemoryPtr)
+    void FflonkProver<Engine>::initialize(void* reservedMemoryPtr, uint64_t reservedMemorySize)
     {
         zkey = NULL;
         this->reservedMemoryPtr = (FrElement *)reservedMemoryPtr;
+        if (this->reservedMemoryPtr) {
+            memset(this->reservedMemoryPtr, 0, reservedMemorySize);
+        }
 
         curveName = CurveUtils::getCurveNameByEngine();
 
@@ -32,9 +35,9 @@ namespace Fflonk
     }
 
     template <typename Engine>
-    FflonkProver<Engine>::FflonkProver(Engine &_E, void* reservedMemoryPtr) : E(_E)
+    FflonkProver<Engine>::FflonkProver(Engine &_E, void* reservedMemoryPtr, uint64_t reservedMemorySize) : E(_E)
     {
-        initialize(reservedMemoryPtr);
+        initialize(reservedMemoryPtr, reservedMemorySize);
     }
 
     template <typename Engine>
@@ -194,7 +197,7 @@ namespace Fflonk
             polynomials["QM"]->fixDegree();
             polynomials["QO"]->fixDegree();
             polynomials["QC"]->fixDegree();
-            
+
             std::ostringstream ss;
             ss << "... Reading Q selector evaluations ";
 
@@ -221,7 +224,7 @@ namespace Fflonk
             ThreadUtils::parcpy(evaluations["QC"]->eval,
                                 (FrElement *)fdZkey->getSectionData(Zkey::ZKEY_FF_QC_SECTION) + zkey->domainSize,
                                 sDomain * 4, nThreads);
-                                
+
             // Read Sigma polynomial coefficients and evaluations from zkey file
             LOG_TRACE("... Loading Sigma1, Sigma2 & Sigma3 polynomial coefficients and evaluations");
 
@@ -287,7 +290,7 @@ namespace Fflonk
 
             u_int64_t byteLength = sizeof(u_int32_t) * zkey->nConstraints;
             lengthMapBuffers = std::ceil((float)(3 * byteLength) / sizeof(FrElement));
-            
+
             if(NULL == this->reservedMemoryPtr) {
                 mapBuffersBigBuffer = new u_int32_t[zkey->nConstraints * 3];
             } else {
@@ -1286,7 +1289,7 @@ namespace Fflonk
         LOG_TRACE("> Computing W1 multi exponentiation");
         u_int64_t lengths[1] = {polynomials["F"]->getDegree() + 1};
         G1Point W1 = multiExponentiation(polynomials["F"], 1, lengths);
-        
+
         proof->addPolynomialCommitment("W1", W1);
     }
 
