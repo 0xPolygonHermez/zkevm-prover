@@ -270,7 +270,7 @@ void* aggregatorClientMockThread(void* arg)
 
             if (pAggregatorClientMock->config.saveRequestToFile)
             {
-                string2File(aggregatorMessage.DebugString(), filePrefix + "aggregator_request.txt");
+                string2file(aggregatorMessage.DebugString(), filePrefix + "aggregator_request.txt");
             }
 
             switch (aggregatorMessage.request_case())
@@ -377,7 +377,7 @@ void* aggregatorClientMockThread(void* arg)
             
             if (pAggregatorClientMock->config.saveResponseToFile)
             {
-                string2File(proverMessage.DebugString(), filePrefix + "aggregator_response.txt");
+                string2file(proverMessage.DebugString(), filePrefix + "aggregator_response.txt");
             }
         }
         cout << "aggregatorClientMockThread() channel broken; will retry in 5 seconds" << endl;

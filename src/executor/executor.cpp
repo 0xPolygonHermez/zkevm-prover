@@ -342,7 +342,6 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
     }
     else
     {
-
         // This instance will store all data required to execute the rest of State Machines
         PROVER_FORK_NAMESPACE::MainExecRequired required;
         ExecutorContext executorContext;
@@ -360,6 +359,15 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         {
             mainExecutor.execute(proverRequest, commitPols.Main, required);
         }
+            
+        // Save input to <timestamp>.input.json after execution including dbReadLog
+        if (config.saveDbReadsToFile)
+        {
+            json inputJsonEx;
+            proverRequest.input.save(inputJsonEx, *proverRequest.dbReadLog);
+            json2file(inputJsonEx, proverRequest.inputDbFile());
+        }
+
         TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
 
         if (proverRequest.result != ZKR_SUCCESS)
