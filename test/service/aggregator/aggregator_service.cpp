@@ -22,32 +22,31 @@ using grpc::Status;
     ::grpc::Status grpcStatus;
     string requestID;
     string proof;
-    uint64_t i;
 
     const string inputFile0  = "testvectors/batchProof/input_executor_0.json";
     const string outputFile0 = "testvectors/aggregatedProof/recursive1.zkin.proof_0.json";
     const string inputFile1  = "testvectors/batchProof/input_executor_1.json";
     const string outputFile1 = "testvectors/aggregatedProof/recursive1.zkin.proof_1.json";
 
-    const string inputFile01a  = outputFile0;
-    const string inputFile01b  = outputFile1;
-    const string outputFile01  = "testvectors/finalProof/recursive2.zkin.proof_01.json";
+    const string inputFile01a = outputFile0;
+    const string inputFile01b = outputFile1;
+    const string outputFile01 = "testvectors/finalProof/recursive2.zkin.proof_01.json";
 
     const string inputFile2  = "testvectors/batchProof/input_executor_2.json";
     const string outputFile2 = "testvectors/aggregatedProof/recursive1.zkin.proof_2.json";
     const string inputFile3  = "testvectors/batchProof/input_executor_3.json";
     const string outputFile3 = "testvectors/aggregatedProof/recursive1.zkin.proof_3.json";
 
-    const string inputFile23a  = outputFile2;
-    const string inputFile23b  = outputFile3;
-    const string outputFile23  = "testvectors/finalProof/recursive2.zkin.proof_23.json";
+    const string inputFile23a = outputFile2;
+    const string inputFile23b = outputFile3;
+    const string outputFile23 = "testvectors/finalProof/recursive2.zkin.proof_23.json";
 
-    const string inputFile03a  = outputFile01;
-    const string inputFile03b  = outputFile23;
-    const string outputFile03  = "testvectors/finalProof/recursive2.zkin.proof_03.json";
+    const string inputFile03a = outputFile01;
+    const string inputFile03b = outputFile23;
+    const string outputFile03 = "testvectors/finalProof/recursive2.zkin.proof_03.json";
 
     const string inputFileFinal  = outputFile03;
-    const string outputFileFinal  = "testvectors/finalProof/proof.json";
+    const string outputFileFinal = "testvectors/finalProof/proof.json";
 
 
     // Get status
@@ -134,12 +133,6 @@ using grpc::Status;
         return grpcStatus;
     }
     cout << "AggregatorServiceImpl::Channel() called GenAndGetFinalProof(" << inputFileFinal << ", " << outputFileFinal << ")" << endl;
-
-
-    for (i=0; i<600; i++) // 60 retries every 10 seconds = 600 seconds = 10 minutes
-    {
-        sleep(10);
-    }
 
     return Status::OK;
 }
