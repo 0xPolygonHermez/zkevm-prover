@@ -9,6 +9,7 @@ using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
 
+#define AGGREGATOR_SERVER_NUMBER_OF_LOOPS 1
 
 ::grpc::Status AggregatorServiceImpl::Channel(::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::aggregator::v1::AggregatorMessage, ::aggregator::v1::ProverMessage>* stream)
 {
@@ -68,71 +69,74 @@ using grpc::Status;
         return Status::CANCELLED;
     }
 
-    // Generate batch proof 0
-    grpcStatus = GenAndGetBatchProof(context, stream, inputFile0, outputFile0);
-    if (grpcStatus.error_code() != Status::OK.error_code())
+    for ( uint64_t loop=0; loop<AGGREGATOR_SERVER_NUMBER_OF_LOOPS; loop++ )
     {
-        return grpcStatus;
+        // Generate batch proof 0
+        grpcStatus = GenAndGetBatchProof(context, stream, inputFile0, outputFile0);
+        if (grpcStatus.error_code() != Status::OK.error_code())
+        {
+            return grpcStatus;
+        }
+        cout << "AggregatorServiceImpl::Channel() called GenAndGetBatchProof(" << inputFile0 << ", " << outputFile0 << ")" << endl;
+
+        // Generate batch proof 1
+        grpcStatus = GenAndGetBatchProof(context, stream, inputFile1, outputFile1);
+        if (grpcStatus.error_code() != Status::OK.error_code())
+        {
+            return grpcStatus;
+        }
+        cout << "AggregatorServiceImpl::Channel() called GenAndGetBatchProof(" << inputFile1 << ", " << outputFile1 << ")" << endl;
+
+        // Generate aggregated proof 01
+        grpcStatus = GenAndGetAggregatedProof(context, stream, inputFile01a, inputFile01b, outputFile01);
+        if (grpcStatus.error_code() != Status::OK.error_code())
+        {
+            return grpcStatus;
+        }
+        cout << "AggregatorServiceImpl::Channel() called GenAndGetAggregatedProof(" << inputFile01a << ", " << inputFile01b << ", " << outputFile01 << ")" << endl;
+
+
+        // Generate batch proof 2
+        grpcStatus = GenAndGetBatchProof(context, stream, inputFile2, outputFile2);
+        if (grpcStatus.error_code() != Status::OK.error_code())
+        {
+            return grpcStatus;
+        }
+        cout << "AggregatorServiceImpl::Channel() called GenAndGetBatchProof(" << inputFile2 << ", " << outputFile2 << ")" << endl;
+
+        // Generate batch proof 3
+        grpcStatus = GenAndGetBatchProof(context, stream, inputFile3, outputFile3);
+        if (grpcStatus.error_code() != Status::OK.error_code())
+        {
+            return grpcStatus;
+        }
+        cout << "AggregatorServiceImpl::Channel() called GenAndGetBatchProof(" << inputFile3 << ", " << outputFile3 << ")" << endl;
+
+        // Generate aggregated proof 23
+        grpcStatus = GenAndGetAggregatedProof(context, stream, inputFile23a, inputFile23b, outputFile23);
+        if (grpcStatus.error_code() != Status::OK.error_code())
+        {
+            return grpcStatus;
+        }
+        cout << "AggregatorServiceImpl::Channel() called GenAndGetAggregatedProof(" << inputFile23a << ", " << inputFile23b << ", " << outputFile23 << ")" << endl;
+
+
+        // Generate aggregated proof 03
+        grpcStatus = GenAndGetAggregatedProof(context, stream, inputFile03a, inputFile03b, outputFile03);
+        if (grpcStatus.error_code() != Status::OK.error_code())
+        {
+            return grpcStatus;
+        }
+        cout << "AggregatorServiceImpl::Channel() called GenAndGetAggregatedProof(" << inputFile03a << ", " << inputFile03b << ", " << outputFile03 << ")" << endl;
+
+        // Generate final proof
+        grpcStatus = GenAndGetFinalProof(context, stream, inputFileFinal, outputFileFinal);
+        if (grpcStatus.error_code() != Status::OK.error_code())
+        {
+            return grpcStatus;
+        }
+        cout << "AggregatorServiceImpl::Channel() called GenAndGetFinalProof(" << inputFileFinal << ", " << outputFileFinal << ")" << endl;
     }
-    cout << "AggregatorServiceImpl::Channel() called GenAndGetBatchProof(" << inputFile0 << ", " << outputFile0 << ")" << endl;
-
-    // Generate batch proof 1
-    grpcStatus = GenAndGetBatchProof(context, stream, inputFile1, outputFile1);
-    if (grpcStatus.error_code() != Status::OK.error_code())
-    {
-        return grpcStatus;
-    }
-    cout << "AggregatorServiceImpl::Channel() called GenAndGetBatchProof(" << inputFile1 << ", " << outputFile1 << ")" << endl;
-
-    // Generate aggregated proof 01
-    grpcStatus = GenAndGetAggregatedProof(context, stream, inputFile01a, inputFile01b, outputFile01);
-    if (grpcStatus.error_code() != Status::OK.error_code())
-    {
-        return grpcStatus;
-    }
-    cout << "AggregatorServiceImpl::Channel() called GenAndGetAggregatedProof(" << inputFile01a << ", " << inputFile01b << ", " << outputFile01 << ")" << endl;
-
-
-    // Generate batch proof 2
-    grpcStatus = GenAndGetBatchProof(context, stream, inputFile2, outputFile2);
-    if (grpcStatus.error_code() != Status::OK.error_code())
-    {
-        return grpcStatus;
-    }
-    cout << "AggregatorServiceImpl::Channel() called GenAndGetBatchProof(" << inputFile2 << ", " << outputFile2 << ")" << endl;
-
-    // Generate batch proof 3
-    grpcStatus = GenAndGetBatchProof(context, stream, inputFile3, outputFile3);
-    if (grpcStatus.error_code() != Status::OK.error_code())
-    {
-        return grpcStatus;
-    }
-    cout << "AggregatorServiceImpl::Channel() called GenAndGetBatchProof(" << inputFile3 << ", " << outputFile3 << ")" << endl;
-
-    // Generate aggregated proof 23
-    grpcStatus = GenAndGetAggregatedProof(context, stream, inputFile23a, inputFile23b, outputFile23);
-    if (grpcStatus.error_code() != Status::OK.error_code())
-    {
-        return grpcStatus;
-    }
-    cout << "AggregatorServiceImpl::Channel() called GenAndGetAggregatedProof(" << inputFile23a << ", " << inputFile23b << ", " << outputFile23 << ")" << endl;
-
-
-    // Generate aggregated proof 03
-    grpcStatus = GenAndGetAggregatedProof(context, stream, inputFile03a, inputFile03b, outputFile03);
-    if (grpcStatus.error_code() != Status::OK.error_code())
-    {
-        return grpcStatus;
-    }
-    cout << "AggregatorServiceImpl::Channel() called GenAndGetAggregatedProof(" << inputFile03a << ", " << inputFile03b << ", " << outputFile03 << ")" << endl;
-
-    // Generate final proof
-    grpcStatus = GenAndGetFinalProof(context, stream, inputFileFinal, outputFileFinal);
-    if (grpcStatus.error_code() != Status::OK.error_code())
-    {
-        return grpcStatus;
-    }
-    cout << "AggregatorServiceImpl::Channel() called GenAndGetFinalProof(" << inputFileFinal << ", " << outputFileFinal << ")" << endl;
 
     return Status::OK;
 }
