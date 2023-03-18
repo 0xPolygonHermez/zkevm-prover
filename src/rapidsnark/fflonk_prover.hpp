@@ -37,6 +37,7 @@ namespace Fflonk {
         size_t sDomain;
 
         FrElement *reservedMemoryPtr;
+        uint64_t reservedMemorySize;
 
         u_int64_t lengthPrecomputedBigBuffer;
         FrElement *precomputedBigBuffer;

@@ -18,8 +18,9 @@ namespace Fflonk
     {
         zkey = NULL;
         this->reservedMemoryPtr = (FrElement *)reservedMemoryPtr;
+        this->reservedMemorySize = reservedMemorySize;
         if (this->reservedMemoryPtr) {
-            memset(this->reservedMemoryPtr, 0, reservedMemorySize);
+            memset(this->reservedMemoryPtr, 0, this->reservedMemorySize);
         }
 
         curveName = CurveUtils::getCurveNameByEngine();
@@ -417,6 +418,8 @@ namespace Fflonk
 
     template<typename Engine>
     std::tuple <json, json> FflonkProver<Engine>::prove(BinFileUtils::BinFile *fdZkey, BinFileUtils::BinFile *fdWtns) {
+
+        memset(this->reservedMemoryPtr, 0, this->reservedMemorySize);
         this->setZkey(fdZkey);
         return this->prove(fdWtns);
     }
@@ -424,6 +427,7 @@ namespace Fflonk
     template <typename Engine>
     std::tuple<json, json> FflonkProver<Engine>::prove(BinFileUtils::BinFile *fdZkey, FrElement *buffWitness, WtnsUtils::Header* wtnsHeader)
     {
+        memset(this->reservedMemoryPtr, 0, this->reservedMemorySize);
         this->setZkey(fdZkey);
         return this->prove(buffWitness, wtnsHeader);
     }
@@ -431,6 +435,7 @@ namespace Fflonk
     template<typename Engine>
     std::tuple <json, json> FflonkProver<Engine>::prove(BinFileUtils::BinFile *fdWtns) {
         LOG_TRACE("> Reading witness file header");
+        memset(this->reservedMemoryPtr, 0, this->reservedMemorySize);
         auto wtnsHeader = WtnsUtils::loadHeader(fdWtns);
 
         // Read witness data
@@ -447,6 +452,7 @@ namespace Fflonk
             throw std::runtime_error("Zkey data not set");
         }
 
+        memset(this->reservedMemoryPtr, 0, this->reservedMemorySize);
         try
         {
             LOG_TRACE("FFLONK PROVER STARTED");
