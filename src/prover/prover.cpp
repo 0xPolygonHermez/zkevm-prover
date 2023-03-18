@@ -91,9 +91,9 @@ Prover::Prover(Goldilocks &fr,
             // Allocate an area of memory, mapped to file, to store all the committed polynomials,
             // and create them using the allocated address
             uint64_t polsSize = _starkInfo.mapTotalN * sizeof(Goldilocks::Element) + _starkInfo.mapSectionsN.section[eSection::cm3_2ns] * (1 << _starkInfo.starkStruct.nBitsExt) * sizeof(Goldilocks::Element);
-            
+
             zkassert(_starkInfo.mapSectionsN.section[eSection::cm1_2ns] * sizeof(Goldilocks::Element) <= polsSize - _starkInfo.mapSectionsN.section[eSection::cm2_2ns] * sizeof(Goldilocks::Element));
-            
+
             zkassert(PROVER_FORK_NAMESPACE::CommitPols::pilSize() <= polsSize);
             zkassert(PROVER_FORK_NAMESPACE::CommitPols::pilSize() == _starkInfo.mapOffsets.section[cm2_n] * sizeof(Goldilocks::Element));
 
@@ -113,7 +113,7 @@ Prover::Prover(Goldilocks &fr,
                 cout << "Prover::genBatchProof() successfully allocated " << polsSize << " bytes" << endl;
             }
 
-            prover = new Fflonk::FflonkProver<AltBn128::Engine>(AltBn128::Engine::engine, pAddress);
+            prover = new Fflonk::FflonkProver<AltBn128::Engine>(AltBn128::Engine::engine, pAddress, polsSize);
             prover->setZkey(zkey.get());
 
             StarkInfo _starkInfoRecursiveF(config, config.recursivefStarkInfo);
