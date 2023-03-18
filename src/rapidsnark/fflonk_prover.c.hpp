@@ -14,10 +14,11 @@ using namespace CPlusPlusLogging;
 namespace Fflonk
 {
     template <typename Engine>
-    void FflonkProver<Engine>::initialize(void* reservedMemoryPtr)
+    void FflonkProver<Engine>::initialize(void* reservedMemoryPtr, uint64_t reservedMemorySize)
     {
         zkey = NULL;
         this->reservedMemoryPtr = (FrElement *)reservedMemoryPtr;
+        this->reservedMemorySize = reservedMemorySize;
 
         curveName = CurveUtils::getCurveNameByEngine();
 
@@ -32,9 +33,9 @@ namespace Fflonk
     }
 
     template <typename Engine>
-    FflonkProver<Engine>::FflonkProver(Engine &_E, void* reservedMemoryPtr) : E(_E)
+    FflonkProver<Engine>::FflonkProver(Engine &_E, void* reservedMemoryPtr, uint64_t reservedMemorySize) : E(_E)
     {
-        initialize(reservedMemoryPtr);
+        initialize(reservedMemoryPtr, reservedMemorySize);
     }
 
     template <typename Engine>
@@ -48,10 +49,11 @@ namespace Fflonk
     template<typename Engine>
     void FflonkProver<Engine>::removePrecomputedData() {
         // DELETE RESERVED MEMORY (if necessary)
+        delete[] precomputedBigBuffer;
+        delete[] mapBuffersBigBuffer;
+        delete[] buffInternalWitness;
+
         if(NULL == reservedMemoryPtr) {
-            delete[] precomputedBigBuffer;
-            delete[] mapBuffersBigBuffer;
-            delete[] buffInternalWitness;
             delete[] inverses;
             delete[] products;
             for (auto const &x : mapBuffers) delete[] x.second;
@@ -132,11 +134,7 @@ namespace Fflonk
             // Precomputed 3 > ptau buffer
             lengthPrecomputedBigBuffer += zkey->domainSize * 9 * sizeof(G1PointAffine) / sizeof(FrElement); // PTau buffer
 
-            if(NULL == this->reservedMemoryPtr) {
-                precomputedBigBuffer = new FrElement[lengthPrecomputedBigBuffer];
-            } else {
-                precomputedBigBuffer = this->reservedMemoryPtr;
-            }
+            precomputedBigBuffer = new FrElement[lengthPrecomputedBigBuffer];
 
             polPtr["Sigma1"] = &precomputedBigBuffer[0];
             polPtr["Sigma2"] = polPtr["Sigma1"] + zkey->domainSize;
@@ -194,7 +192,7 @@ namespace Fflonk
             polynomials["QM"]->fixDegree();
             polynomials["QO"]->fixDegree();
             polynomials["QC"]->fixDegree();
-            
+
             std::ostringstream ss;
             ss << "... Reading Q selector evaluations ";
 
@@ -221,7 +219,7 @@ namespace Fflonk
             ThreadUtils::parcpy(evaluations["QC"]->eval,
                                 (FrElement *)fdZkey->getSectionData(Zkey::ZKEY_FF_QC_SECTION) + zkey->domainSize,
                                 sDomain * 4, nThreads);
-                                
+
             // Read Sigma polynomial coefficients and evaluations from zkey file
             LOG_TRACE("... Loading Sigma1, Sigma2 & Sigma3 polynomial coefficients and evaluations");
 
@@ -287,12 +285,8 @@ namespace Fflonk
 
             u_int64_t byteLength = sizeof(u_int32_t) * zkey->nConstraints;
             lengthMapBuffers = std::ceil((float)(3 * byteLength) / sizeof(FrElement));
-            
-            if(NULL == this->reservedMemoryPtr) {
-                mapBuffersBigBuffer = new u_int32_t[zkey->nConstraints * 3];
-            } else {
-                mapBuffersBigBuffer = (u_int32_t *)(this->reservedMemoryPtr + lengthPrecomputedBigBuffer);
-            }
+
+            mapBuffersBigBuffer = new u_int32_t[zkey->nConstraints * 3];
 
             mapBuffers["A"] = mapBuffersBigBuffer;
             mapBuffers["B"] = mapBuffers["A"] + zkey->nConstraints;
@@ -300,11 +294,7 @@ namespace Fflonk
 
             lengthInternalWitnessBuffer = zkey->nAdditions;
 
-            if(NULL == this->reservedMemoryPtr) {
-                buffInternalWitness = new FrElement[lengthInternalWitnessBuffer];
-            } else {
-                buffInternalWitness = this->reservedMemoryPtr + lengthPrecomputedBigBuffer + lengthMapBuffers;
-            }
+            buffInternalWitness = new FrElement[lengthInternalWitnessBuffer];
 
             LOG_TRACE("··· Loading additions");
             additionsBuff = (Zkey::Addition<Engine> *)fdZkey->getSectionData(Zkey::ZKEY_FF_ADDITIONS_SECTION);
@@ -340,7 +330,7 @@ namespace Fflonk
                 inverses = new FrElement[zkey->domainSize];
                 products = new FrElement[zkey->domainSize];
             } else {
-                inverses = this->reservedMemoryPtr + lengthPrecomputedBigBuffer + lengthMapBuffers + lengthInternalWitnessBuffer;
+                inverses = this->reservedMemoryPtr;
                 products = inverses + zkey->domainSize;
             }
 
@@ -366,7 +356,7 @@ namespace Fflonk
             if(NULL == this->reservedMemoryPtr) {
                 nonPrecomputedBigBuffer = new FrElement[lengthNonPrecomputedBigBuffer];
             } else {
-                nonPrecomputedBigBuffer = this->reservedMemoryPtr + lengthPrecomputedBigBuffer + lengthMapBuffers + lengthInternalWitnessBuffer + lengthBatchInversesBuffer;
+                nonPrecomputedBigBuffer = this->reservedMemoryPtr + lengthBatchInversesBuffer;
             }
 
             polPtr["L"] = &nonPrecomputedBigBuffer[0];
@@ -414,6 +404,7 @@ namespace Fflonk
 
     template<typename Engine>
     std::tuple <json, json> FflonkProver<Engine>::prove(BinFileUtils::BinFile *fdZkey, BinFileUtils::BinFile *fdWtns) {
+
         this->setZkey(fdZkey);
         return this->prove(fdWtns);
     }
@@ -1286,7 +1277,7 @@ namespace Fflonk
         LOG_TRACE("> Computing W1 multi exponentiation");
         u_int64_t lengths[1] = {polynomials["F"]->getDegree() + 1};
         G1Point W1 = multiExponentiation(polynomials["F"], 1, lengths);
-        
+
         proof->addPolynomialCommitment("W1", W1);
     }
 
