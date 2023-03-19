@@ -53,7 +53,7 @@ namespace CircomRecursiveF
     std::string templateName;
     std::string componentName;
     u64 idFather;
-    u32 *subcomponents;
+    u32 *subcomponents = NULL;
     bool *subcomponentsParallel = NULL;
     bool *outputIsSet = NULL;   // one for each output
     std::mutex *mutexes = NULL; // one for each output
@@ -87,6 +87,5 @@ namespace CircomRecursiveF
   uint get_size_of_witness();
   uint get_size_of_constants();
   uint get_size_of_io_map();
-
 }
 #endif // __CIRCOM_H
