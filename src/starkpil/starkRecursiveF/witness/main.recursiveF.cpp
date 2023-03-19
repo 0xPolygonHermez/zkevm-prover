@@ -85,7 +85,7 @@ namespace CircomRecursiveF
       memcpy((void *)dataiomap, (void *)(bdata + inisize), sb.st_size - inisize);
       u32 *pu32 = dataiomap;
 
-      for (uint64_t i = 0; i < get_size_of_io_map(); i++)
+      for (uint i = 0; i < get_size_of_io_map(); i++)
       {
         u32 n = *pu32;
         IODefPair p;
@@ -116,6 +116,14 @@ namespace CircomRecursiveF
     return circuit;
   }
 
+  void freeCircuit(Circom_Circuit *circuit)
+  {
+    delete[] circuit->InputHashMap;
+    delete[] circuit->witness2SignalList;
+    delete[] circuit->circuitConstants;
+    delete circuit;
+  }
+
   bool check_valid_number(std::string &s, uint base)
   {
     bool is_valid = true;
@@ -136,14 +144,6 @@ namespace CircomRecursiveF
       }
     }
     return is_valid;
-  }
-
-  void freeCircuit(Circom_Circuit *circuit)
-  {
-    delete[] circuit->InputHashMap;
-    delete[] circuit->witness2SignalList;
-    delete[] circuit->circuitConstants;
-    delete circuit;
   }
 
   void json2FrGElements(json val, std::vector<FrGElement> &vval)
@@ -212,12 +212,6 @@ namespace CircomRecursiveF
 
   void loadJsonImpl(Circom_CalcWit *ctx, json &j)
   {
-
-    // u64 nItems = j.size();
-    //  printf("Items : %llu\n",nItems);
-    // std::ifstream inStream(filename);
-    // json j;
-    // inStream >> j;
 
     u64 nItems = j.size();
     // printf("Items : %llu\n",nItems);
@@ -320,15 +314,14 @@ namespace CircomRecursiveF
     inStream.close();
     loadJsonImpl(ctx, j);
   }
-
   void getCommitedPols(CommitPolsStarks *commitPols, const std::string zkevmVerifier, const std::string execFile, nlohmann::json &zkin, uint64_t N)
   {
     //-------------------------------------------
     // Verifier stark proof
     //-------------------------------------------
-    TimerStart(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_F);
+    TimerStart(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_2);
     Circom_Circuit *circuit = loadCircuit(zkevmVerifier);
-    TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_F);
+    TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_2);
     TimerStart(CIRCOM_LOAD_JSON_BATCH_PROOF);
     Circom_CalcWit *ctx = new Circom_CalcWit(circuit);
 
@@ -370,7 +363,7 @@ namespace CircomRecursiveF
       tmp[sizeWitness + i] = c + d;
     }
 
-    //#pragma omp parallel for
+    // #pragma omp parallel for
     for (uint i = 0; i < exec.nSMap; i++)
     {
       for (uint j = 0; j < 12; j++)

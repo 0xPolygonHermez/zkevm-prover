@@ -5,7 +5,7 @@
 
 namespace CircomFinal
 {
-  extern void run(Circom_CalcWit *ctx);
+    extern void run(Circom_CalcWit *ctx);
 
   std::string int_to_hex(u64 i)
   {
@@ -37,7 +37,7 @@ namespace CircomFinal
       inputSignalAssigned[i] = false;
     }
     signalValues = new FrElement[get_total_signal_no()];
-    Fr_str2element(&signalValues[0], "1");
+    Fr_str2element(&signalValues[0], "1", 10);
     componentMemory = new Circom_Component[get_number_of_components()];
     circuitConstants = circuit->circuitConstants;
     templateInsId2IOSignalInfo = circuit->templateInsId2IOSignalInfo;
@@ -50,6 +50,7 @@ namespace CircomFinal
 
   Circom_CalcWit::~Circom_CalcWit()
   {
+    // ...
     delete[] inputSignalAssigned;
     delete[] signalValues;
     delete[] componentMemory;
@@ -87,7 +88,6 @@ namespace CircomFinal
       run(this);
     }
   }
-
   void Circom_CalcWit::setInputSignal(u64 h, uint i, FrElement &val)
   {
     if (inputSignalAssignedCounter == 0)

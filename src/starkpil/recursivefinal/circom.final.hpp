@@ -53,7 +53,7 @@ namespace CircomFinal
     std::string templateName;
     std::string componentName;
     u64 idFather;
-    u32 *subcomponents;
+    u32 *subcomponents = NULL;
     bool *subcomponentsParallel = NULL;
     bool *outputIsSet = NULL;   // one for each output
     std::mutex *mutexes = NULL; // one for each output
