@@ -319,9 +319,9 @@ namespace CircomRecursiveF
     //-------------------------------------------
     // Verifier stark proof
     //-------------------------------------------
-    TimerStart(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_2);
+    TimerStart(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_F);
     Circom_Circuit *circuit = loadCircuit(zkevmVerifier);
-    TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_2);
+    TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_F);
     TimerStart(CIRCOM_LOAD_JSON_BATCH_PROOF);
     Circom_CalcWit *ctx = new Circom_CalcWit(circuit);
 
