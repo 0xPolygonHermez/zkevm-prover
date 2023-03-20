@@ -11,6 +11,9 @@ using grpc::Status;
 
 #define AGGREGATOR_SERVER_NUMBER_OF_LOOPS 1
 
+#define AGGREGATOR_SERVER_RETRY_SLEEP 10
+#define AGGREGATOR_SERVER_NUMBER_OF_GET_PROOF_RETRIES 600  // 600 retries every 10 seconds = 6000 seconds = 100 minutes
+
 ::grpc::Status AggregatorServiceImpl::Channel(::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::aggregator::v1::AggregatorMessage, ::aggregator::v1::ProverMessage>* stream)
 {
 #ifdef LOG_SERVICE
@@ -26,6 +29,7 @@ using grpc::Status;
 
     const string inputFile0  = "testvectors/batchProof/input_executor_0.json";
     const string outputFile0 = "testvectors/aggregatedProof/recursive1.zkin.proof_0.json";
+
     const string inputFile1  = "testvectors/batchProof/input_executor_1.json";
     const string outputFile1 = "testvectors/aggregatedProof/recursive1.zkin.proof_1.json";
 
@@ -35,6 +39,7 @@ using grpc::Status;
 
     const string inputFile2  = "testvectors/batchProof/input_executor_2.json";
     const string outputFile2 = "testvectors/aggregatedProof/recursive1.zkin.proof_2.json";
+    
     const string inputFile3  = "testvectors/batchProof/input_executor_3.json";
     const string outputFile3 = "testvectors/aggregatedProof/recursive1.zkin.proof_3.json";
 
@@ -256,7 +261,7 @@ using grpc::Status;
     zkassertpermanent(pInputProver != NULL);
     Input input(fr);
     json inputJson;
-    file2json(config.inputFile, inputJson);
+    file2json(inputFile, inputJson);
     zkresult zkResult = input.load(inputJson);
     if (zkResult != ZKR_SUCCESS)
     {
@@ -554,9 +559,9 @@ using grpc::Status;
     cout << "AggregatorServiceImpl::GenAndGetBatchProof() called GenBatchProof() and got requestID=" << requestID << endl;
 
     // Get batch proof 0
-    for (i=0; i<600; i++) // 600 retries every 10 seconds = 6000 seconds = 100 minutes
+    for (i=0; i<AGGREGATOR_SERVER_NUMBER_OF_GET_PROOF_RETRIES; i++)
     {
-        sleep(10);
+        sleep(AGGREGATOR_SERVER_RETRY_SLEEP);
 
         aggregator::v1::GetProofResponse_Result getProofResponseResult;
         grpcStatus = GetProof(context, stream, requestID, getProofResponseResult, proof);        
@@ -576,7 +581,7 @@ using grpc::Status;
         cerr << "Error: AggregatorServiceImpl::GenAndGetBatchProof() got getProofResponseResult=" << getProofResponseResult << " instead of RESULT_PENDING or RESULT_COMPLETED_OK" << endl;
         return Status::CANCELLED;
     }
-    if (i == 60)
+    if (i == AGGREGATOR_SERVER_NUMBER_OF_GET_PROOF_RETRIES)
     {
         cerr << "Error: AggregatorServiceImpl::GenAndGetBatchProof() timed out waiting for batch proof" << endl;
         return Status::CANCELLED;
@@ -607,9 +612,9 @@ using grpc::Status;
     cout << "AggregatorServiceImpl::GenAndGetAggregatedProof() called GenAggregatedProof() and got requestID=" << requestID << endl;
 
     // Get batch proof 0
-    for (i=0; i<600; i++) // 600 retries every 10 seconds = 6000 seconds = 100 minutes
+    for (i=0; i<AGGREGATOR_SERVER_NUMBER_OF_GET_PROOF_RETRIES; i++)
     {
-        sleep(10);
+        sleep(AGGREGATOR_SERVER_RETRY_SLEEP);
 
         aggregator::v1::GetProofResponse_Result getProofResponseResult;
         grpcStatus = GetProof(context, stream, requestID, getProofResponseResult, proof);        
@@ -629,7 +634,7 @@ using grpc::Status;
         cerr << "Error: AggregatorServiceImpl::GenAndGetAggregatedProof() got getProofResponseResult=" << getProofResponseResult << " instead of RESULT_PENDING or RESULT_COMPLETED_OK" << endl;
         return Status::CANCELLED;
     }
-    if (i == 60)
+    if (i == AGGREGATOR_SERVER_NUMBER_OF_GET_PROOF_RETRIES)
     {
         cerr << "Error: AggregatorServiceImpl::GenAndGetAggregatedProof() timed out waiting for batch proof" << endl;
         return Status::CANCELLED;
@@ -660,9 +665,9 @@ using grpc::Status;
     cout << "AggregatorServiceImpl::GenAndGetFinalProof() called GenBatchProof() and got requestID=" << requestID << endl;
 
     // Get batch proof 0
-    for (i=0; i<600; i++) // 600 retries every 10 seconds = 6000 seconds = 100 minutes
+    for (i=0; i<AGGREGATOR_SERVER_NUMBER_OF_GET_PROOF_RETRIES; i++)
     {
-        sleep(10);
+        sleep(AGGREGATOR_SERVER_RETRY_SLEEP);
 
         aggregator::v1::GetProofResponse_Result getProofResponseResult;
         grpcStatus = GetProof(context, stream, requestID, getProofResponseResult, proof);        
@@ -682,7 +687,7 @@ using grpc::Status;
         cerr << "Error: AggregatorServiceImpl::GenAndGetFinalProof() got getProofResponseResult=" << getProofResponseResult << " instead of RESULT_PENDING or RESULT_COMPLETED_OK" << endl;
         return Status::CANCELLED;
     }
-    if (i == 60)
+    if (i == AGGREGATOR_SERVER_NUMBER_OF_GET_PROOF_RETRIES)
     {
         cerr << "Error: AggregatorServiceImpl::GenAndGetFinalProof() timed out waiting for batch proof" << endl;
         return Status::CANCELLED;
