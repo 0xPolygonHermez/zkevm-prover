@@ -26,7 +26,11 @@ typedef enum : int
     ZKR_SM_MAIN_OOC_KECCAK_F = 20, // Incremented keccak-f counters exceeded the maximum
     ZKR_SM_MAIN_OOC_PADDING_PG = 21, // Incremented padding pg counters exceeded the maximum
     ZKR_SM_MAIN_OOC_POSEIDON_G = 22, // Incremented poseidon g counters exceeded the maximum
-    ZKR_STATEDB_GRPC_ERROR = 23 // Error making GRPC call to stateDB service
+    ZKR_STATEDB_GRPC_ERROR = 23, // Error making GRPC call to stateDB service
+    ZKR_SM_MAIN_OUT_OF_STEPS = 24, // Main state machine executor did not complete the execution within available steps
+    ZKR_SM_MAIN_INVALID_FORK_ID = 25, // Main state machine executor does not support the requested fork ID
+    ZKR_SM_MAIN_INVALID_UNSIGNED_TX = 26, // Main state machine executor cannot process unsigned TXs in prover mode
+    ZKR_SM_MAIN_BALANCE_MISMATCH = 27 // Main state machine executor found that total tranferred balances are not zero
 } zkresult;
 
 const char* zkresult2string (int code);

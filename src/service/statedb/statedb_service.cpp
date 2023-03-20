@@ -38,7 +38,7 @@ using grpc::Status;
             dbReadLog = new DatabaseMap();
 
         Goldilocks::Element newRoot[4];
-        zkresult zkr = stateDB.set(oldRoot, key, value, persistent, newRoot, &r, dbReadLog);
+        zkresult zkr = pStateDB->set(oldRoot, key, value, persistent, newRoot, &r, dbReadLog);
 
         if (request->get_db_read_log())
         {
@@ -118,7 +118,7 @@ using grpc::Status;
             dbReadLog = new DatabaseMap();
 
         mpz_class value;
-        zkresult zkr = stateDB.get(root, key, value, &r, dbReadLog);
+        zkresult zkr = pStateDB->get(root, key, value, &r, dbReadLog);
 
         if (request->get_db_read_log())
         {
@@ -195,7 +195,7 @@ using grpc::Status;
             cout << byte2string(data[i]);
         cout << " persistent=" << request->persistent() << endl;
 #endif
-        zkresult r = stateDB.setProgram(key, data, request->persistent());
+        zkresult r = pStateDB->setProgram(key, data, request->persistent());
 
         ::statedb::v1::ResultCode* result = new ::statedb::v1::ResultCode();
         result->set_code(static_cast<::statedb::v1::ResultCode_Code>(r));
@@ -224,7 +224,7 @@ using grpc::Status;
         cout << " key=" << fea2string(fr, key[0], key[1], key[2], key[3]) << endl;
 #endif
         vector<uint8_t> value;
-        zkresult r = stateDB.getProgram(key, value, NULL);
+        zkresult r = pStateDB->getProgram(key, value, NULL);
 
         for (uint64_t i=0; i<value.size(); i++) {
             sData.push_back((char)value.at(i));
@@ -259,7 +259,7 @@ using grpc::Status;
     {
         DatabaseMap::MTMap map;
         grpc2mtMap(fr, request->input_db(), map);
-        stateDB.loadDB(map, request->persistent());
+        pStateDB->loadDB(map, request->persistent());
     }
     catch (const std::exception &e)
     {
@@ -279,21 +279,27 @@ using grpc::Status;
 #endif
         DatabaseMap::ProgramMap mapProgram;
         grpc2programMap(fr, request->input_program_db(), mapProgram);
-        stateDB.loadProgramDB(mapProgram, request->persistent());
+        pStateDB->loadProgramDB(mapProgram, request->persistent());
 #ifdef LOG_STATEDB_SERVICE
     cout << "StateDBServiceImpl::LoadProgramDB() completed." << endl;
 #endif
     return Status::OK;
 }
 
-::grpc::Status StateDBServiceImpl::Flush(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::google::protobuf::Empty* response)
+::grpc::Status StateDBServiceImpl::Flush(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::statedb::v1::FlushResponse* response)
 {
 #ifdef LOG_STATEDB_SERVICE
     cout << "StateDBServiceImpl::Flush called." << endl;
 #endif
     try
     {
-        stateDB.flush();
+        // Call the StateDB flush method
+        zkresult zkres = pStateDB->flush();
+
+        // return the result in the response
+        ::statedb::v1::ResultCode* result = new ::statedb::v1::ResultCode();
+        result->set_code(static_cast<::statedb::v1::ResultCode_Code>(zkres));
+        response->set_allocated_result(result);
     }
     catch (const std::exception &e)
     {

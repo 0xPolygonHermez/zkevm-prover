@@ -5,7 +5,7 @@
 
 namespace CircomFinal
 {
-  extern void run(Circom_CalcWit *ctx);
+    extern void run(Circom_CalcWit *ctx);
 
   std::string int_to_hex(u64 i)
   {
@@ -51,6 +51,9 @@ namespace CircomFinal
   Circom_CalcWit::~Circom_CalcWit()
   {
     // ...
+    delete[] inputSignalAssigned;
+    delete[] signalValues;
+    delete[] componentMemory;
   }
 
   uint Circom_CalcWit::getInputSignalHashPosition(u64 h)
@@ -85,7 +88,6 @@ namespace CircomFinal
       run(this);
     }
   }
-
   void Circom_CalcWit::setInputSignal(u64 h, uint i, FrElement &val)
   {
     if (inputSignalAssignedCounter == 0)

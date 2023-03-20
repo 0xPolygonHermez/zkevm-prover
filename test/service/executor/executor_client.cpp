@@ -16,8 +16,16 @@ ExecutorClient::ExecutorClient (Goldilocks &fr, const Config &config) :
     stub = new executor::v1::ExecutorService::Stub(channel);
 }
 
+ExecutorClient::~ExecutorClient()
+{
+    delete stub;
+}
+
 void ExecutorClient::runThread (void)
 {
+    // Allow service to initialize
+    sleep(1);
+
     pthread_create(&t, NULL, executorClientThread, this);
 }
 
@@ -28,6 +36,9 @@ void ExecutorClient::waitForThread (void)
 
 void ExecutorClient::runThreads (void)
 {
+    // Allow service to initialize
+    sleep(1);
+
     for (uint64_t i=0; i<EXECUTOR_CLIENT_MULTITHREAD_N_THREADS; i++)
     {
         pthread_create(&threads[i], NULL, executorClientThreads, this);
@@ -74,10 +85,21 @@ bool ExecutorClient::ProcessBatch (void)
     request.set_eth_timestamp(input.publicInputsExtended.publicInputs.timestamp);
     request.set_update_merkle_tree(update_merkle_tree);
     request.set_chain_id(input.publicInputsExtended.publicInputs.chainID);
+    request.set_fork_id(input.publicInputsExtended.publicInputs.forkID);
     request.set_from(input.from);
     request.set_no_counters(input.bNoCounters);
-    request.set_tx_hash_to_generate_execute_trace(input.txHashToGenerateExecuteTrace);
-    request.set_tx_hash_to_generate_call_trace(input.txHashToGenerateCallTrace);
+    if (input.traceConfig.bEnabled)
+    {
+        executor::v1::TraceConfig * pTraceConfig = request.mutable_trace_config();
+        pTraceConfig->set_disable_storage(input.traceConfig.bDisableStorage);
+        pTraceConfig->set_disable_stack(input.traceConfig.bDisableStack);
+        pTraceConfig->set_enable_memory(input.traceConfig.bEnableMemory);
+        pTraceConfig->set_enable_return_data(input.traceConfig.bEnableReturnData);
+        pTraceConfig->set_tx_hash_to_generate_execute_trace(string2ba(input.traceConfig.txHashToGenerateExecuteTrace));
+        pTraceConfig->set_tx_hash_to_generate_call_trace(string2ba(input.traceConfig.txHashToGenerateCallTrace));
+        //request.set_tx_hash_to_generate_execute_trace(string2ba(input.traceConfig.txHashToGenerateExecuteTrace));
+        //request.set_tx_hash_to_generate_call_trace(string2ba(input.traceConfig.txHashToGenerateCallTrace));
+    }
     request.set_old_batch_num(input.publicInputsExtended.publicInputs.oldBatchNum);
 
     // Parse keys map
@@ -130,10 +152,7 @@ void* executorClientThread (void* arg)
     cout << "executorClientThread() started" << endl;
     string uuid;
     ExecutorClient *pClient = (ExecutorClient *)arg;
-
-    // Allow service to initialize
-    sleep(1);
-
+    
     // Execute should block and succeed
     cout << "executorClientThread() calling pClient->ProcessBatch()" << endl;
     pClient->ProcessBatch();
@@ -145,9 +164,6 @@ void* executorClientThreads (void* arg)
     //cout << "executorClientThreads() started" << endl;
     string uuid;
     ExecutorClient *pClient = (ExecutorClient *)arg;
-
-    // Allow service to initialize
-    sleep(1);
 
     // Execute should block and succeed
     //cout << "executorClientThreads() calling pClient->ProcessBatch()" << endl;

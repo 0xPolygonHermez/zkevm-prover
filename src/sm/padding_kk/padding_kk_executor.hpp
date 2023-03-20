@@ -3,10 +3,13 @@
 
 #include <vector>
 #include <gmpxx.h>
-#include "commit_pols.hpp"
+#include "definitions.hpp"
+#include "sm/pols_generated/commit_pols.hpp"
 #include "goldilocks_base_field.hpp"
 #include "sm/padding_kkbit/padding_kkbit_executor.hpp"
 #include "scalar.hpp"
+
+USING_PROVER_FORK_NAMESPACE;
 
 using namespace std;
 
@@ -48,14 +51,14 @@ public:
         fr(fr),
         blockSize(155286),
         bytesPerBlock(136),
-        N(PaddingKKCommitPols::pilDegree())
+        N(PROVER_FORK_NAMESPACE::PaddingKKCommitPols::pilDegree())
     {
         keccak256(NULL, 0, hashZeroScalar);
         scalar2fea(fr, hashZeroScalar, hash0);
     };
 
     /* Executor */
-    void execute (vector<PaddingKKExecutorInput> &input, PaddingKKCommitPols &pols, vector<PaddingKKBitExecutorInput> &required);
+    void execute (vector<PaddingKKExecutorInput> &input, PROVER_FORK_NAMESPACE::PaddingKKCommitPols &pols, vector<PaddingKKBitExecutorInput> &required);
 };
 
 

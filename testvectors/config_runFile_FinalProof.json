@@ -62,49 +62,8 @@
     "inputFile": "testvectors/finalProof/recursive2.zkin.proof_03.json",
     "inputFile2": "testvectors/finalProof/recursive1.zkin.proof_1.json",
 
-    "rom": "config/scripts/rom.json",
-    "keccakScriptFile": "config/scripts/keccak_script.json",
-    "storageRomFile": "config/scripts/storage_sm_rom.json",
-
-    "zkevmConstPols": "config/zkevm/zkevm.const",
-    "zkevmConstantsTree": "config/zkevm/zkevm.consttree",
-    "zkevmStarkInfo": "config/zkevm/zkevm.starkinfo.json",
-    "zkevmVerifier": "config/zkevm/zkevm.verifier.dat",
-
-    "c12aConstPols": "config/c12a/c12a.const",
-    "c12aConstantsTree": "config/c12a/c12a.consttree",
-    "c12aExec": "config/c12a/c12a.exec",
-    "c12aStarkInfo": "config/c12a/c12a.starkinfo.json",
-    "c12aVerifier": "config/c12a/c12a.verifier.dat",
-    "c12aVerkey": "config/c12a/c12a.verkey.json",
-
-    "recursive1ConstPols": "config/recursive1/recursive1.const",
-    "recursive1ConstantsTree": "config/recursive1/recursive1.consttree",
-    "recursive1Exec": "config/recursive1/recursive1.exec",
-    "recursive1StarkInfo": "config/recursive1/recursive1.starkinfo.json",
-    "recursive1Verifier": "config/recursive1/recursive1.verifier.dat",
-    "recursive1Verkey": "config/recursive1/recursive1.verkey.json",
-
-    "recursive2ConstPols": "config/recursive2/recursive2.const",
-    "recursive2ConstantsTree": "config/recursive2/recursive2.consttree",
-    "recursive2Exec": "config/recursive2/recursive2.exec",
-    "recursive2StarkInfo": "config/recursive2/recursive2.starkinfo.json",
-    "recursive2Verifier": "config/recursive2/recursive2.verifier.dat",
-    "recursive2Verkey": "config/recursive2/recursive2.verkey.json",
-
-    "recursivefConstPols": "config/recursivef/recursivef.const",
-    "recursivefConstantsTree": "config/recursivef/recursivef.consttree",
-    "recursivefExec": "config/recursivef/recursivef.exec",
-    "recursivefStarkInfo": "config/recursivef/recursivef.starkinfo.json",
-    "recursivefVerifier": "config/recursivef/recursivef.verifier.dat",
-    "recursivefVerkey": "config/recursivef/recursivef.verkey.json",
-
-    "finalConstConstantsTree": "config/final/final.consttree",
-    "finalVerifier": "config/final/final.verifier.dat",
-    "finalVerkey":"config/final/final.verkey.json",
-    "finalStarkZkey": "config/final/final.g16.0001.zkey",
-
     "outputPath": "runtime/output",
+    "configPath": "config",
 
     "zkevmCmPols_disabled": "runtime/zkevm.commit",
     "c12aCmPols": "runtime/c12a.commit",

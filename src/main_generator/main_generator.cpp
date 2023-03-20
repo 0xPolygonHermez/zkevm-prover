@@ -2,9 +2,13 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <gmpxx.h>
+#include "../config/definitions.hpp" // This is the only project file allowed to be included
 
 using namespace std;
 using json = nlohmann::json;
+
+// Fork namespace
+const string forkNamespace = PROVER_FORK_NAMESPACE_STRING;
 
 // Forward declaration
 void file2json (json &rom, string &romFileName);
@@ -26,10 +30,10 @@ int main(int argc, char **argv)
 
     string functionName = codeGenerationName;
     string fileName = codeGenerationName;
-    string directoryName = "src/sm/" + codeGenerationName;
+    string directoryName = "src/main_sm/" + forkNamespace + "/" + codeGenerationName;
 
     // Load rom.json
-    string romFileName = "config/scripts/rom.json";
+    string romFileName = "src/main_sm/" + forkNamespace + "/scripts/rom.json";
     json rom;
     file2json(rom, romFileName);
 
@@ -143,20 +147,20 @@ string generate(const json &rom, const string &functionName, const string &fileN
     {
         if (bFastMode)
         {
-            code += "#ifndef MAIN_EXEC_GENERATED_FAST_HPP\n";
-            code += "#define MAIN_EXEC_GENERATED_FAST_HPP\n";
+            code += "#ifndef MAIN_EXEC_GENERATED_FAST_HPP_" + forkNamespace + "\n";
+            code += "#define MAIN_EXEC_GENERATED_FAST_HPP_" + forkNamespace + "\n";
         }
         else
         {
-            code += "#ifndef MAIN_EXEC_GENERATED_HPP\n";
-            code += "#define MAIN_EXEC_GENERATED_HPP\n";
+            code += "#ifndef MAIN_EXEC_GENERATED_HPP_" + forkNamespace + "\n";
+            code += "#define MAIN_EXEC_GENERATED_HPP_" + forkNamespace + "\n";
         }
         code += "\n";
         code += "#include <string>\n";
-        code += "#include \"main_executor.hpp\"\n";
+        code += "#include \"main_sm/" + forkNamespace + "/main/main_executor.hpp\"\n";
         if (!bFastMode)
         {
-            code += "#include \"sm/main/main_exec_required.hpp\"\n";
+            code += "#include \"main_sm/" + forkNamespace + "/main/main_exec_required.hpp\"\n";
         }
     }
     else
@@ -164,23 +168,26 @@ string generate(const json &rom, const string &functionName, const string &fileN
         if (bFastMode)
         {
             code += "#define COMMIT_POL_FAST_MODE\n";
-            code += "#include \"commit_pols.hpp\"\n";
+            code += "#include \"main_sm/" + forkNamespace + "/pols_generated/commit_pols.hpp\"\n";
         }
-        code += "#include \"" + fileName + ".hpp\"\n";
+        code += "#include \"main_sm/" + forkNamespace + "/main_exec_generated/" + fileName + ".hpp\"\n";
         code += "#include \"scalar.hpp\"\n";
-        code += "#include \"eval_command.hpp\"\n";
+        code += "#include \"main_sm/"+ forkNamespace + "/main/eval_command.hpp\"\n";
         code += "#include <fstream>\n";
         code += "#include \"utils.hpp\"\n";
         code += "#include \"timer.hpp\"\n";
         code += "#include \"exit_process.hpp\"\n";
         code += "#include \"zkassert.hpp\"\n";
         code += "#include \"poseidon_g_permutation.hpp\"\n";
-        code += "#include \"time_metric.hpp\"\n";
+        code += "#include \"utils/time_metric.hpp\"\n";
         if (!bFastMode)
             code += "#include \"goldilocks_precomputed.hpp\"\n";
 
     }
     code += "\n";
+
+    code += "namespace " + forkNamespace + "\n";
+    code += "{\n";
 
     if (!bHeader)
     {
@@ -205,13 +212,14 @@ string generate(const json &rom, const string &functionName, const string &fileN
     }
 
     if (bFastMode)
-        code += "void " + functionName + " (MainExecutor &mainExecutor, ProverRequest &proverRequest)";
+        code += "void " + functionName + " (" + forkNamespace + "::MainExecutor &mainExecutor, ProverRequest &proverRequest)";
     else
-        code += "void "+ functionName + " (MainExecutor &mainExecutor, ProverRequest &proverRequest, MainCommitPols &pols, MainExecRequired &required)";
+        code += "void "+ functionName + " (" + forkNamespace + "::MainExecutor &mainExecutor, ProverRequest &proverRequest, " + forkNamespace + "::MainCommitPols &pols, " + forkNamespace + "::MainExecRequired &required)";
 
     if (bHeader)
     {
         code += ";\n";
+        code += "}\n";
         code += "\n";
         code += "#endif\n";
         return code;
@@ -227,11 +235,6 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    int32_t addrRel = 0; // Relative and absolute address auxiliary variables\n";
     code += "    uint64_t addr = 0;\n";
     code += "    int32_t sp;\n";
-    if (!bFastMode)
-    {
-        code += "    int64_t maxMemCalculated;\n";
-        code += "    int32_t mm;\n";
-    }
     code += "    int64_t i64Aux;\n";
     //code += "    int64_t incHashPos = 0;\n"; // TODO: Remove initialization to check it is initialized before being used
     code += "    Rom &rom = mainExecutor.rom;\n";
@@ -257,6 +260,16 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    // Init execution flags\n";
     code += "    bool bProcessBatch = (proverRequest.type == prt_processBatch);\n";
     code += "    bool bUnsignedTransaction = (proverRequest.input.from != \"\") && (proverRequest.input.from != \"0x\");\n\n";
+    
+    code += "    // Unsigned transactions (from!=empty) are intended to be used to \"estimage gas\" (or \"call\")\n";
+    code += "    // In prover mode, we cannot accept unsigned transactions, since the proof would not meet the PIL constrains\n";
+    code += "    if (bUnsignedTransaction && !bProcessBatch)\n";
+    code += "    {\n";
+    code += "        cerr << \"Error: MainExecutor::MainExecutor() failed called with bUnsignedTransaction=true but bProcessBatch=false\" << endl;\n";
+    code += "        proverRequest.result = ZKR_SM_MAIN_INVALID_UNSIGNED_TX;\n";
+    code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+    code += "        return;\n";
+    code += "    }\n\n";
 
     code += "    Context ctx(mainExecutor.fr, mainExecutor.config, mainExecutor.fec, mainExecutor.fnec, pols, mainExecutor.rom, proverRequest, pStateDB);\n\n";
 
@@ -280,6 +293,10 @@ string generate(const json &rom, const string &functionName, const string &fileN
     // Free in
     code += "    Goldilocks::Element fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7;\n";
     code += "    CommandResult cr;\n";
+    code += "#ifdef LOG_TIME_STATISTICS\n";
+    code += "    RomCommand * pCmd;\n";
+    code += "    string cmdString;\n"; 
+    code += "#endif\n";
 
     // Storage free in
     code += "    Goldilocks::Element Kin0[12];\n";
@@ -372,7 +389,16 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += "    ctx.pStep = &i; // ctx.pStep is used inside evaluateCommand() to find the current value of the registers, e.g. pols(A0)[ctx.step]\n";
     }
     code += "    ctx.pZKPC = &zkPC; // Pointer to the zkPC\n\n";
-    code += "    Goldilocks::Element currentRCX = fr.zero();\n";
+
+    // Declare currentRCX only if repeat instruction is used
+    for (uint64_t zkPC=0; zkPC<rom["program"].size(); zkPC++)
+    {
+        if (rom["program"][zkPC].contains("repeat") && (rom["program"][zkPC]["repeat"]==1))
+        {
+            code += "    Goldilocks::Element currentRCX = fr.zero();\n";
+            break;
+        }
+    }
 
     code += "    uint64_t incHashPos = 0;\n";
     code += "    uint64_t incCounter = 0;\n\n";
@@ -449,13 +475,16 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "\n";
             code += "#ifdef LOG_TIME_STATISTICS\n";
             code += "        mainMetrics.add(\"Eval command\", TimeDiff(t));\n";
-            code += "        evalCommandMetrics.add(*rom.line[" + to_string(zkPC) + "].cmdBefore[j], TimeDiff(t));\n";
+            code += "        pCmd = rom.line[" + to_string(zkPC) + "].cmdBefore[j];\n";
+            code += "        cmdString = op2String(pCmd->op) + \"[\" + function2String(pCmd->function) + \"]\";\n";
+            code += "        evalCommandMetrics.add(cmdString, TimeDiff(t));\n";
             code += "#endif\n";
             code += "        // In case of an external error, return it\n";
             code += "        if (cr.zkResult != ZKR_SUCCESS)\n";
             code += "        {\n";
             code += "            proverRequest.result = cr.zkResult;\n";
             code += "            cerr << \"Error: Main exec failed calling evalCommand() before result=\" << proverRequest.result << \"=\" << zkresult2string(proverRequest.result) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
+            code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             code += "        }\n";
             code += "    }\n";
@@ -523,12 +552,6 @@ string generate(const json &rom, const string &functionName, const string &fileN
         if (rom["program"][zkPC].contains("inGAS") && (rom["program"][zkPC]["inGAS"]!=0))
         {
             code += selector1("GAS", rom["program"][zkPC]["inGAS"], opInitialized, bFastMode);
-            opInitialized = true;
-        }
-
-        if (rom["program"][zkPC].contains("inMAXMEM") && (rom["program"][zkPC]["inMAXMEM"]!=0))
-        {
-            code += selector1("MAXMEM", rom["program"][zkPC]["inMAXMEM"], opInitialized, bFastMode);
             opInitialized = true;
         }
 
@@ -743,6 +766,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    {\n";
                 code += "        cerr << \"Error: addrRel too big addrRel=\" << addrRel << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    // If addrRel is negative, fail\n";
@@ -750,6 +774,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    {\n";
                 code += "        cerr << \"Error: addrRel<0 \" << addrRel << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -912,28 +937,21 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    Kin1[5] = pols.A5[" + string(bFastMode?"0":"i") + "];\n";
                     code += "    Kin1[6] = pols.B0[" + string(bFastMode?"0":"i") + "];\n";
                     code += "    Kin1[7] = pols.B1[" + string(bFastMode?"0":"i") + "];\n";
+                    
+                    code += "    if  ( !fr.isZero(pols.A5[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A6[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A7[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B2[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B3[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B4[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B5[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B6[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B7[" + string(bFastMode?"0":"i") + "]) )\n";
+                    code += "    {\n";
+                    code += "        cerr << \"Error: MainExecutor::Execute() storage read free in found non-zero A-B storage registers step=\" << i << \" zkPC=" + to_string(zkPC) + " line=\" << rom.line[zkPC].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
+                    code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE;\n";
+                    code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                    code += "        return;\n";
+                    code += "    }\n\n";
 
                     code += "#ifdef LOG_TIME_STATISTICS\n";
                     code += "    gettimeofday(&t, NULL);\n";
                     code += "#endif\n";
-                    if (!bFastMode)
-                    {
-                        code += "    // Prepare PoseidonG required data\n";
-                        code += "    for (uint64_t j=0; j<12; j++) pg[j] = Kin0[j];\n";
-                    }
+
                     code += "    // Call poseidon and get the hash key\n";
                     code += "    mainExecutor.poseidon.hash(Kin0Hash, Kin0);\n";
-
-                    if (!bFastMode)
-                    {
-                        code += "    // Complete PoseidonG required data\n";
-                        code += "    pg[12] = Kin0Hash[0];\n";
-                        code += "    pg[13] = Kin0Hash[1];\n";
-                        code += "    pg[14] = Kin0Hash[2];\n";
-                        code += "    pg[15] = Kin0Hash[3];\n";
-                        code += "    pg[16] = fr.fromU64(POSEIDONG_PERMUTATION1_ID);\n";
-                        code += "    required.PoseidonG.push_back(pg);\n";
-                    }
 
                     code += "    // Reinject the first resulting hash as the capacity for the next poseidon hash\n";
                     code += "    Kin1[8] = Kin0Hash[0];\n";
@@ -941,25 +959,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    Kin1[10] = Kin0Hash[2];\n";
                     code += "    Kin1[11] = Kin0Hash[3];\n";
 
-                    if (!bFastMode)
-                    {
-                        code += "    // Prepare PoseidonG required data\n";
-                        code += "    for (uint64_t j=0; j<12; j++) pg[j] = Kin1[j];\n";
-                    }
-
                     code += "    // Call poseidon hash\n";
                     code += "    mainExecutor.poseidon.hash(Kin1Hash, Kin1);\n";
-
-                    if (!bFastMode)
-                    {
-                        code += "    // Complete PoseidonG required data\n";
-                        code += "    pg[12] = Kin1Hash[0];\n";
-                        code += "    pg[13] = Kin1Hash[1];\n";
-                        code += "    pg[14] = Kin1Hash[2];\n";
-                        code += "    pg[15] = Kin1Hash[3];\n";
-                        code += "    pg[16] = fr.fromU64(POSEIDONG_PERMUTATION2_ID);\n";
-                        code += "    required.PoseidonG.push_back(pg);\n";
-                    }
 
                     code += "    key[0] = Kin1Hash[0];\n";
                     code += "    key[1] = Kin1Hash[1];\n";
@@ -981,11 +982,14 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    {\n";
                     code += "        cerr << \"Error: MainExecutor::execute() failed calling pStateDB->get() result=\" << zkresult2string(zkResult) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        proverRequest.result = zkResult;\n";
+                    code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                     code += "        return;\n";
                     code += "    }\n";
                     code += "    incCounter = smtGetResult.proofHashCounter + 2;\n";
+
                     if (bFastMode)
-                        code += "    proverRequest.fullTracer.addReadWriteAddress( pols.A0[0], pols.A1[0], pols.A2[0], pols.A3[0], pols.A4[0], pols.A5[0], pols.A6[0], pols.A7[0], pols.B0[0], pols.B1[0], pols.B2[0], pols.B3[0], pols.B4[0], pols.B5[0], pols.B6[0], pols.B7[0], smtGetResult.value);\n";
+                        code += "    eval_addReadWriteAddress(ctx, smtGetResult.value);\n";
+
                     code += "#ifdef LOG_TIME_STATISTICS\n";
                     code += "    mainMetrics.add(\"SMT Get\", TimeDiff(t));\n";
                     code += "#endif\n";
@@ -1026,29 +1030,20 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    Kin1[6] = pols.B0[" + string(bFastMode?"0":"i") + "];\n";
                     code += "    Kin1[7] = pols.B1[" + string(bFastMode?"0":"i") + "];\n";
 
+                    code += "    if  ( !fr.isZero(pols.A5[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A6[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A7[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B2[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B3[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B4[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B5[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B6[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B7[" + string(bFastMode?"0":"i") + "]) )\n";
+                    code += "    {\n";
+                    code += "        cerr << \"Error: MainExecutor::Execute() storage write free in found non-zero A-B storage registers step=\" << i << \" zkPC=" + to_string(zkPC) + " line=\" << rom.line[zkPC].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
+                    code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE;\n";
+                    code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                    code += "        return;\n";
+                    code += "    }\n\n";
+
                     code += "#ifdef LOG_TIME_STATISTICS\n";
                     code += "    gettimeofday(&t, NULL);\n";
                     code += "#endif\n";
 
-                    if (!bFastMode)
-                    {
-                        code += "    // Prepare PoseidonG required data\n";
-                        code += "    for (uint64_t j=0; j<12; j++) pg[j] = Kin0[j];\n";
-                    }
-
                     code += "    // Call poseidon and get the hash key\n";
                     code += "    mainExecutor.poseidon.hash(Kin0Hash, Kin0);\n";
-
-                    if (!bFastMode)
-                    {
-                        code += "    // Complete PoseidonG required data\n";
-                        code += "    pg[12] = Kin0Hash[0];\n";
-                        code += "    pg[13] = Kin0Hash[1];\n";
-                        code += "    pg[14] = Kin0Hash[2];\n";
-                        code += "    pg[15] = Kin0Hash[3];\n";
-                        code += "    pg[16] = fr.fromU64(POSEIDONG_PERMUTATION1_ID);\n";
-                        code += "    required.PoseidonG.push_back(pg);\n";
-                    }
 
                     code += "    Kin1[8] = Kin0Hash[0];\n";
                     code += "    Kin1[9] = Kin0Hash[1];\n";
@@ -1060,25 +1055,21 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    ctx.lastSWrite.keyI[2] = Kin0Hash[2];\n";
                     code += "    ctx.lastSWrite.keyI[3] = Kin0Hash[3];\n";
 
-                    if (!bFastMode)
-                    {
-                        code += "    // Prepare PoseidonG required data\n";
-                        code += "    for (uint64_t j=0; j<12; j++) pg[j] = Kin1[j];\n";
-                    }
-
                     code += "    // Call poseidon hash\n";
                     code += "    mainExecutor.poseidon.hash(Kin1Hash, Kin1);\n";
 
+                    code += "    // Store a copy of the data in ctx.lastSWrite\n";
                     if (!bFastMode)
                     {
-                        code += "    // Complete PoseidonG required data\n";
-                        code += "    pg[12] = Kin1Hash[0];\n";
-                        code += "    pg[13] = Kin1Hash[1];\n";
-                        code += "    pg[14] = Kin1Hash[2];\n";
-                        code += "    pg[15] = Kin1Hash[3];\n";
-                        code += "    pg[16] = fr.fromU64(POSEIDONG_PERMUTATION2_ID);\n";
-                        code += "    required.PoseidonG.push_back(pg);\n";
+                        code += "    for (uint64_t j=0; j<12; j++)\n";
+                        code += "        ctx.lastSWrite.Kin0[j] = Kin0[j];\n";
+                        code += "    for (uint64_t j=0; j<12; j++)\n";
+                        code += "        ctx.lastSWrite.Kin1[j] = Kin1[j];\n";
                     }
+                    code += "    for (uint64_t j=0; j<4; j++)\n";
+                    code += "        ctx.lastSWrite.keyI[j] = Kin0Hash[j];\n";
+                    code += "    for (uint64_t j=0; j<4; j++)\n";
+                    code += "        ctx.lastSWrite.key[j] = Kin1Hash[j];\n";
 
                     code += "    ctx.lastSWrite.key[0] = Kin1Hash[0];\n";
                     code += "    ctx.lastSWrite.key[1] = Kin1Hash[1];\n";
@@ -1103,11 +1094,18 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    {\n";
                     code += "        cerr << \"Error: MainExecutor::execute() failed calling pStateDB->set() result=\" << zkresult2string(zkResult) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        proverRequest.result = zkResult;\n";
+                    code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                     code += "        return;\n";
                     code += "    }\n";
                     code += "    incCounter = ctx.lastSWrite.res.proofHashCounter + 2;\n";
+
                     if (bFastMode)
-                        code += "    proverRequest.fullTracer.addReadWriteAddress( pols.A0[0], pols.A1[0], pols.A2[0], pols.A3[0], pols.A4[0], pols.A5[0], pols.A6[0], pols.A7[0], pols.B0[0], pols.B1[0], pols.B2[0], pols.B3[0], pols.B4[0], pols.B5[0], pols.B6[0], pols.B7[0], scalarD);\n";
+                        code += "    eval_addReadWriteAddress(ctx, scalarD);\n";
+                        
+                    code += "    // If we just modified a balance\n";
+                    code += "    if ( fr.isZero(pols.B0[" + string(bFastMode?"0":"i") + "]) && fr.isZero(pols.B1[" + string(bFastMode?"0":"i") + "]) )\n";
+                    code += "        ctx.totalTransferredBalance += (ctx.lastSWrite.res.newValue - ctx.lastSWrite.res.oldValue);\n";
+
                     code += "#ifdef LOG_TIME_STATISTICS\n";
                     code += "    mainMetrics.add(\"SMT Set\", TimeDiff(t));\n";
                     code += "#endif\n";
@@ -1165,6 +1163,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    {\n";
                     code += "        cerr << \"Error: hashK 1 invalid size of hash: pos=\" << pos << \" size=\" << size << \" data.size=\" << ctx.hashK[addr].data.size() << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+                    code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                     code += "        return;\n";
                     code += "    }\n";
 
@@ -1194,6 +1193,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    {\n";
                     code += "        cerr << \"Error: hashKDigest 1: digest not defined for addr=\" << addr << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+                    code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                     code += "        return;\n";
                     code += "    }\n";
 
@@ -1202,6 +1202,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    {\n";
                     code += "        cerr << \"Error: hashKDigest 1: digest not calculated for addr=\" << addr << \".  Call hashKLen to finish digest.\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+                    code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                     code += "        return;\n";
                     code += "    }\n";
 
@@ -1258,6 +1259,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    {\n";
                     code += "        cerr << \"Error: hashP 1 invalid size of hash: pos=\" << pos << \" size=\" << size << \" data.size=\" << ctx.hashP[addr].data.size() << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+                    code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                     code += "        return;\n";
                     code += "    }\n";
 
@@ -1283,6 +1285,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    {\n";
                     code += "        cerr << \"Error: hashPDigest 1: digest not defined\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+                    code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                     code += "        return;\n";
                     code += "    }\n";
                     code += "    // If digest was not calculated, this is an error\n";
@@ -1290,6 +1293,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    {\n";
                     code += "        cerr << \"Error: hashPDigest 1: digest not calculated.  Call hashPLen to finish digest.\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+                    code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                     code += "        return;\n";
                     code += "    }\n";
                     code += "    // Copy digest into fi\n";
@@ -1393,6 +1397,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    {\n";
                     code += "        cerr << \"Error: MemAlign out of range offset=\" << offsetScalar.get_str() << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN;\n";
+                    code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                     code += "        return;\n";
                     code += "    }\n";
                     code += "    offset = offsetScalar.get_ui();\n";
@@ -1491,6 +1496,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    {\n";
                     code += "        proverRequest.result = cr.zkResult;\n";
                     code += "        cerr << \"Error: Main exec failed calling evalCommand() result=\" << proverRequest.result << \"=\" << zkresult2string(proverRequest.result) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
+                    code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                     code += "        return;\n";
                     code += "    }\n\n";
 
@@ -1558,7 +1564,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
                 code += "#ifdef LOG_TIME_STATISTICS\n";
                 code += "    mainMetrics.add(\"Eval command\", TimeDiff(t));\n";
-                code += "    evalCommandMetrics.add(rom.line[" + to_string(zkPC) + "].freeInTag, TimeDiff(t));\n";
+                code += "    pCmd = &rom.line[" + to_string(zkPC) + "].freeInTag;\n";
+                code += "    cmdString = op2String(pCmd->op) + \"[\" + function2String(pCmd->function) + \"]\";\n";
+                code += "    evalCommandMetrics.add(cmdString, TimeDiff(t));\n";
                 code += "#endif\n";
 
                 /*
@@ -1770,6 +1778,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        {\n";
                 code += "            cerr << \"Error: Memory Read does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "            proverRequest.result = ZKR_SM_MAIN_MEMORY;\n";
+                code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "            return;\n";
                 code += "        }\n";
                 code += "    }\n";
@@ -1786,6 +1795,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        {\n";
                 code += "            cerr << \"Error: Memory Read does not match (op!=0)\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "            proverRequest.result = ZKR_SM_MAIN_MEMORY;\n";
+                code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "            return;\n";
                 code += "        }\n";
                 code += "    }\n\n";
@@ -1823,6 +1833,14 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    Kin1[6] = pols.B0[" + string(bFastMode?"0":"i") + "];\n";
             code += "    Kin1[7] = pols.B1[" + string(bFastMode?"0":"i") + "];\n";
 
+            code += "    if  ( !fr.isZero(pols.A5[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A6[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A7[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B2[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B3[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B4[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B5[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B6[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B7[" + string(bFastMode?"0":"i") + "]) )\n";
+            code += "    {\n";
+            code += "        cerr << \"Error: MainExecutor::Execute() storage read instruction found non-zero A-B storage registers step=\" << i << \" zkPC=" + to_string(zkPC) + " line=\" << rom.line[zkPC].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE;\n";
+            code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+            code += "        return;\n";
+            code += "    }\n\n";
+
             code += "#ifdef LOG_TIME_STATISTICS\n";
             code += "    gettimeofday(&t, NULL);\n";
             code += "#endif\n";
@@ -1841,6 +1859,26 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    Kin1[11] = Kin0Hash[3];\n";
 
             code += "    mainExecutor.poseidon.hash(Kin1Hash, Kin1);\n";
+
+            // Store PoseidonG required data
+            if (!bFastMode)
+            {                
+                code += "    // Store PoseidonG required data\n";
+                code += "    for (uint64_t j=0; j<12; j++)\n";
+                code += "        pg[j] = Kin0[j];\n";
+                code += "    for (uint64_t j=0; j<4; j++)\n";
+                code += "        pg[12+j] = Kin0Hash[j];\n";
+                code += "    pg[16] = fr.fromU64(POSEIDONG_PERMUTATION1_ID);\n";
+                code += "    required.PoseidonG.push_back(pg);\n";
+
+                code += "    // Store PoseidonG required data\n";
+                code += "    for (uint64_t j=0; j<12; j++)\n";
+                code += "        pg[j] = Kin1[j];\n";
+                code += "    for (uint64_t j=0; j<4; j++)\n";
+                code += "        pg[12+j] = Kin1Hash[j];\n";
+                code += "    pg[16] = fr.fromU64(POSEIDONG_PERMUTATION2_ID);\n";
+                code += "    required.PoseidonG.push_back(pg);\n";
+            }
 
             code += "    key[0] = Kin1Hash[0];\n";
             code += "    key[1] = Kin1Hash[1];\n";
@@ -1865,9 +1903,14 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    {\n";
             code += "        cerr << \"Error: MainExecutor::execute() failed calling pStateDB->get() result=\" << zkresult2string(zkResult) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        proverRequest.result = zkResult;\n";
+            code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "        return;\n";
             code += "    }\n";
             code += "    incCounter = smtGetResult.proofHashCounter + 2;\n";
+                    
+            if (bFastMode)
+                code += "    eval_addReadWriteAddress(ctx, scalarD);\n";
+
             code += "#ifdef LOG_TIME_STATISTICS\n";
             code += "    mainMetrics.add(\"SMT Get\", TimeDiff(t));\n";
             code += "#endif\n";
@@ -1887,6 +1930,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    {\n";
             code += "        cerr << \"Error: Storage read does not match: smtGetResult.value=\" << smtGetResult.value.get_str() << \" opScalar=\" << opScalar.get_str() << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE;\n";
+            code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "        return;\n";
             code += "    }\n";
 
@@ -1938,6 +1982,14 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        Kin1[6] = pols.B0[" + string(bFastMode?"0":"i") + "];\n";
             code += "        Kin1[7] = pols.B1[" + string(bFastMode?"0":"i") + "];\n";
 
+            code += "        if  ( !fr.isZero(pols.A5[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A6[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A7[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B2[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B3[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B4[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B5[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B6[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B7[" + string(bFastMode?"0":"i") + "]) )\n";
+            code += "        {\n";
+            code += "            cerr << \"Error: MainExecutor::Execute() storage write instruction found non-zero A-B storage registers step=\" << i << \" zkPC=" + to_string(zkPC) + " line=\" << rom.line[zkPC].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
+            code += "            proverRequest.result = ZKR_SM_MAIN_STORAGE;\n";
+            code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+            code += "            return;\n";
+            code += "        }\n\n";
+
             code += "#ifdef LOG_TIME_STATISTICS\n";
             code += "        gettimeofday(&t, NULL);\n";
             code += "#endif\n";
@@ -1956,6 +2008,19 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        Kin1[11] = Kin0Hash[3];\n";
 
             code += "        mainExecutor.poseidon.hash(Kin1Hash, Kin1);\n";
+
+            code += "        // Store a copy of the data in ctx.lastSWrite\n";
+            if (!bFastMode)
+            {
+                code += "        for (uint64_t j=0; j<12; j++)\n";
+                code += "            ctx.lastSWrite.Kin0[j] = Kin0[j];\n";
+                code += "        for (uint64_t j=0; j<12; j++)\n";
+                code += "            ctx.lastSWrite.Kin1[j] = Kin1[j];\n";
+            }
+            code += "        for (uint64_t j=0; j<4; j++)\n";
+            code += "            ctx.lastSWrite.keyI[j] = Kin0Hash[j];\n";
+            code += "        for (uint64_t j=0; j<4; j++)\n";
+            code += "            ctx.lastSWrite.key[j] = Kin1Hash[j];\n";
 
             code += "        ctx.lastSWrite.key[0] = Kin1Hash[0];\n";
             code += "        ctx.lastSWrite.key[1] = Kin1Hash[1];\n";
@@ -1979,15 +2044,43 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        {\n";
             code += "            cerr << \"Error: MainExecutor::execute() failed calling pStateDB->set() result=\" << zkresult2string(zkResult) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            proverRequest.result = zkResult;\n";
+            code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             code += "        }\n";
             code += "        incCounter = ctx.lastSWrite.res.proofHashCounter + 2;\n";
+                    
+            if (bFastMode)
+                code += "        eval_addReadWriteAddress(ctx, scalarD);\n";
+                        
+            code += "        // If we just modified a balance\n";
+            code += "        if ( fr.isZero(pols.B0[" + string(bFastMode?"0":"i") + "]) && fr.isZero(pols.B1[" + string(bFastMode?"0":"i") + "]) )\n";
+            code += "            ctx.totalTransferredBalance += (ctx.lastSWrite.res.newValue - ctx.lastSWrite.res.oldValue);\n";
+
             code += "#ifdef LOG_TIME_STATISTICS\n";
             code += "        mainMetrics.add(\"SMT Set\", TimeDiff(t));\n";
             code += "#endif\n";
 
             code += "        ctx.lastSWrite.step = i;\n";
             code += "    }\n";
+
+            // Store PoseidonG required data
+            if (!bFastMode)
+            {
+                code += "    // Store PoseidonG required data\n";
+                code += "    for (uint64_t j=0; j<12; j++)\n";
+                code += "        pg[j] = ctx.lastSWrite.Kin0[j];\n";
+                code += "    for (uint64_t j=0; j<4; j++)\n";
+                code += "        pg[12+j] = ctx.lastSWrite.keyI[j];\n";
+                code += "    pg[16] = fr.fromU64(POSEIDONG_PERMUTATION1_ID);\n";
+                code += "    required.PoseidonG.push_back(pg);\n";
+                code += "    // Store PoseidonG required data\n";
+                code += "    for (uint64_t j=0; j<12; j++)\n";
+                code += "        pg[j] = ctx.lastSWrite.Kin1[j];\n";
+                code += "    for (uint64_t j=0; j<4; j++)\n";
+                code += "       pg[12+j] = ctx.lastSWrite.key[j];\n";
+                code += "    pg[16] = fr.fromU64(POSEIDONG_PERMUTATION2_ID);\n";
+                code += "    required.PoseidonG.push_back(pg);\n";
+            }
 
             if (!bFastMode)
             {
@@ -2008,6 +2101,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "            \" ctx.lastSWrite.newRoot: \" << fr.toString(ctx.lastSWrite.newRoot[3], 16) << \":\" << fr.toString(ctx.lastSWrite.newRoot[2], 16) << \":\" << fr.toString(ctx.lastSWrite.newRoot[1], 16) << \":\" << fr.toString(ctx.lastSWrite.newRoot[0], 16) <<\n";
             code += "            \" oldRoot: \" << fr.toString(oldRoot[3], 16) << \":\" << fr.toString(oldRoot[2], 16) << \":\" << fr.toString(oldRoot[1], 16) << \":\" << fr.toString(oldRoot[0], 16) << endl;\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE;\n";
+            code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "        return;\n";
             code += "    }\n";
 
@@ -2019,6 +2113,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    {\n";
             code += "        cerr << \"Error: Storage write does not match: ctx.lastSWrite.newRoot=\" << fea2string(fr, ctx.lastSWrite.newRoot) << \" op=\" << fea << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE;\n";
+            code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "        return;\n";
             code += "    }\n";
 
@@ -2098,6 +2193,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        {\n";
             code += "            cerr << \"Error: hashK 2: trying to insert data in a position:\" << (pos+j) << \" higher than current data size:\" << ctx.hashK[addr].data.size() << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+            code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             code += "        }\n";
             code += "        else\n";
@@ -2108,6 +2204,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "            {\n";
             code += "                cerr << \"Error: HashK 2 bytes do not match: addr=\" << addr << \" pos+j=\" << pos+j << \" is bm=\" << bm << \" and it should be bh=\" << bh << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "                proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+            code += "                StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "                return;\n";
             code += "            }\n";
             code += "        }\n";
@@ -2129,6 +2226,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        {\n";
             code += "            cerr << \"Error: HashK 2 different read sizes in the same position addr=\" << addr << \" pos=\" << pos << \" ctx.hashK[addr].reads[pos]=\" << ctx.hashK[addr].reads[pos] << \" size=\" << size << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+            code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             code += "        }\n";
             code += "    }\n";
@@ -2168,6 +2266,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        {\n";
             code += "            cerr << \"Error: hashKLen 2 hashK[addr] is empty but lm is not 0 addr=\" << addr << \" lm=\" << lm << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+            code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             code += "        }\n\n";
 
@@ -2192,6 +2291,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    {\n";
             code += "        cerr << \"Error: hashKLen 2 length does not match addr=\" << addr << \" is lm=\" << lm << \" and it should be lh=\" << lh << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+            code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "        return;\n";
             code += "    }\n";
             code += "    if (!hashIterator->second.digestCalled)\n";
@@ -2230,6 +2330,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    {\n";
             code += "        cerr << \"Error: hashKDigest 2 could not find entry for addr=\" << addr << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+            code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "        return;\n";
             code += "    }\n";
 
@@ -2240,6 +2341,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    {\n";
             code += "        cerr << \"Error: hashKDigest 2: Digest does not match op\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+            code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "        return;\n";
             code += "    }\n";
 
@@ -2323,6 +2425,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        {\n";
             code += "            cerr << \"Error: hashP 2: trying to insert data in a position:\" << (pos+j) << \" higher than current data size:\" << ctx.hashP[addr].data.size() << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+            code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             code += "        }\n";
             code += "        else\n";
@@ -2333,6 +2436,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "            {\n";
             code += "                cerr << \"Error: HashP 2 bytes do not match: addr=\" << addr << \" pos+j=\" << pos+j << \" is bm=\" << bm << \" and it should be bh=\" << bh << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "                proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+            code += "                StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "                return;\n";
             code += "            }\n";
             code += "        }\n";
@@ -2354,6 +2458,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        {\n";
             code += "            cerr << \"Error: HashP 2 diferent read sizes in the same position addr=\" << addr << \" pos=\" << pos << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+            code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             code += "        }\n";
             code += "    }\n";
@@ -2389,6 +2494,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        {\n";
             code += "            cerr << \"Error: hashPLen 2 hashP[addr] is empty but lm is not 0 addr=\" << addr << \" lm=\" << lm << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+            code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             code += "        }\n\n";
 
@@ -2413,6 +2519,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    {\n";
             code += "        cerr << \"Error: hashPLen 2 does not match addr=\" << addr << \" is lm=\" << lm << \" and it should be lh=\" << lh << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+            code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "        return;\n";
             code += "    }\n";
             code += "    if (!hashIterator->second.digestCalled)\n";
@@ -2421,6 +2528,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        {\n";
             code += "            cerr << \"Error: hashPLen 2 found data empty\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+            code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             code += "        }\n";
 
@@ -2468,6 +2576,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        {\n";
             code += "            cerr << \"Error: MainExecutor::execute() failed calling pStateDB->setProgram() result=\" << zkresult2string(zkResult) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            proverRequest.result = zkResult;\n";
+            code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             code += "        }\n";
             code += "#ifdef LOG_TIME_STATISTICS\n";
@@ -2507,6 +2616,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        {\n";
             code += "            cerr << \"Error: MainExecutor::execute() failed calling pStateDB->getProgram() result=\" << zkresult2string(zkResult) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            proverRequest.result = zkResult;\n";
+            code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             code += "        }\n";
             code += "#ifdef LOG_TIME_STATISTICS\n";
@@ -2531,6 +2641,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    {\n";
             code += "        cerr << \"Error: hashPDigest 2: ctx.hashP[addr].digest=\" << ctx.hashP[addr].digest.get_str(16) << \" does not match op=\" << dg.get_str(16) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+            code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "        return;\n";
             code += "    }\n";
         }
@@ -2577,6 +2688,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        cerr << \"(A*B) + C = \" << left.get_str(16) << endl;\n";
                 code += "        cerr << \"(D<<256) + op = \" << right.get_str(16) << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_ARITH;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -2711,6 +2823,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        cerr << \"_x3=\" << _x3.get_str() << endl;\n";
                 code += "        cerr << \"_y3=\" << _y3.get_str() << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_ARITH;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -2752,6 +2865,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    {\n";
                 code += "        cerr << \"Error: Binary ADD operation does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -2783,6 +2897,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    {\n";
                 code += "        cerr << \"Error: Binary SUB operation does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -2814,6 +2929,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    {\n";
                 code += "        cerr << \"Error: Binary LT operation does not match\"<< \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -2850,6 +2966,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        cerr << \"Error: Binary SLT operation does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        cerr << \"a=\" << a << \" b=\" << b << \" c=\" << c << \" _a=\" << _a << \" _b=\" << _b << \" expectedC=\" << expectedC << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -2881,6 +2998,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    {\n";
                 code += "        cerr << \"Error: Binary EQ operation does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -2912,15 +3030,16 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    {\n";
                 code += "        cerr << \"Error: Binary AND operation does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
+
+                code += "    if (c != 0)\n";
+                code += "        pols.carry[" + string(bFastMode?"0":"i") + "] = fr.one();\n";
 
                 if (!bFastMode)
                 {
                     code += "    pols.binOpcode[i] = fr.fromU64(5);\n";
-
-                    code += "    if (c != 0)\n";
-                    code += "        pols.carry[i] = fr.one();\n";
 
                     code += "    // Store the binary action to execute it later with the binary SM\n";
                     code += "    binaryAction.a = a;\n";
@@ -2944,6 +3063,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    {\n";
                 code += "        cerr << \"Error: Binary OR operation does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -2973,6 +3093,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    {\n";
                 code += "        cerr << \"Error: Binary XOR operation does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -3015,6 +3136,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    {\n";
             code += "        cerr << \"Error: MemAlign out of range offset=\" << offsetScalar.get_str() << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN;\n";
+            code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "        return;\n";
             code += "    }\n";
             code += "    offset = offsetScalar.get_ui();\n";
@@ -3034,6 +3156,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    {\n";
                 code += "        cerr << \"Error: MemAlign w0, w1 invalid: w0=\" << w0.get_str(16) << \" w1=\" << w1.get_str(16) << \" _W0=\" << _W0.get_str(16) << \" _W1=\" << _W1.get_str(16) << \" m0=\" << m0.get_str(16) << \" m1=\" << m1.get_str(16) << \" offset=\" << offset << \" v=\" << v.get_str(16) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -3063,6 +3186,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    {\n";
                 code += "        cerr << \"Error: MemAlign w0 invalid: w0=\" << w0.get_str(16) << \" _W0=\" << _W0.get_str(16) << \" m0=\" << m0.get_str(16) << \" offset=\" << offset << \" v=\" << v.get_str(16) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -3092,6 +3216,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    {\n";
                 code += "        cerr << \"Error: MemAlign v invalid: v=\" << v.get_str(16) << \" _V=\" << _V.get_str(16) << \" m0=\" << m0.get_str(16) << \" m1=\" << m1.get_str(16) << \" offset=\" << offset << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -3213,6 +3338,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             if (bFastMode)
             {
             code += "            proverRequest.result = ZKR_SM_MAIN_OOC_ARITH;\n";
+            code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             }
             else
@@ -3243,6 +3369,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             if (bFastMode)
             {
             code += "            proverRequest.result = ZKR_SM_MAIN_OOC_BINARY;\n";
+            code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             }
             else
@@ -3273,6 +3400,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             if (bFastMode)
             {
             code += "            proverRequest.result = ZKR_SM_MAIN_OOC_MEM_ALIGN;\n";
+            code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             }
             else
@@ -3302,7 +3430,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    {\n";
             code += "        pols.RCX[" + string(bFastMode?"0":"nexti") + "] = fr.dec(pols.RCX[" + string(bFastMode?"0":"i") + "]);\n";
             code += "    }\n";
-         }
+        }
         else
         {
             code += "    pols.RCX[" + string(bFastMode?"0":"nexti") + "] = pols.RCX[" + string(bFastMode?"0":"i") + "];\n";
@@ -3523,35 +3651,6 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    pols.zkPC[nexti] = fr.inc(pols.zkPC[i]);\n";
         }
 
-        if (!bFastMode)
-        {
-            code += "    maxMemCalculated = 0;\n";
-            code += "    fr.toS32(mm, pols.MAXMEM[i]);\n";
-            if (rom["program"][zkPC].contains("isMem") && (rom["program"][zkPC]["isMem"] == 1))
-            {
-                code += "    if (addrRel>mm)\n";
-                code += "    {\n";
-                code += "        pols.isMaxMem[i] = fr.one();\n";
-                code += "        maxMemCalculated = addrRel;\n";
-                code += "    } else {\n";
-                code += "        maxMemCalculated = mm;\n";
-                code += "    }\n";
-            } else {
-                code += "    maxMemCalculated = mm;\n";
-            }
-        }
-
-        // If setMAXMEM, MAXMEM'=op
-        if (rom["program"][zkPC].contains("setMAXMEM") && (rom["program"][zkPC]["setMAXMEM"] == 1) && !bFastMode)
-        {
-            code += "    pols.MAXMEM[nexti] = op0; // If setMAXMEM, MAXMEM'=op\n";
-            code += "    pols.setMAXMEM[i] = fr.one();\n";
-        }
-        else if (!bFastMode)
-        {
-            code += "    pols.MAXMEM[nexti] = fr.fromU64(maxMemCalculated);\n";
-        }
-
         // If setGAS, GAS'=op
         if ( rom["program"][zkPC].contains("setGAS") && (rom["program"][zkPC]["setGAS"] == 1) )
         {
@@ -3604,6 +3703,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             if (bFastMode)
             {
             code += "            proverRequest.result = ZKR_SM_MAIN_OOC_KECCAK_F;\n";
+            code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             }
             else
@@ -3631,6 +3731,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             if (bFastMode)
             {
             code += "            proverRequest.result = ZKR_SM_MAIN_OOC_PADDING_PG;\n";
+            code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             }
             else
@@ -3660,6 +3761,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             if (bFastMode)
             {
             code += "            proverRequest.result = ZKR_SM_MAIN_OOC_POSEIDON_G;\n";
+            code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             }
             else
@@ -3695,13 +3797,16 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    \n";
             code += "#ifdef LOG_TIME_STATISTICS\n";
             code += "            mainMetrics.add(\"Eval command\", TimeDiff(t));\n";
-            code += "            evalCommandMetrics.add(*rom.line[" + to_string(zkPC) + "].cmdAfter[j], TimeDiff(t));\n";
+            code += "            pCmd = rom.line[" + to_string(zkPC) + "].cmdAfter[j];\n";
+            code += "            cmdString = op2String(pCmd->op) + \"[\" + function2String(pCmd->function) + \"]\";\n";
+            code += "            evalCommandMetrics.add(cmdString, TimeDiff(t));\n";
             code += "#endif\n";
             code += "            // In case of an external error, return it\n";
             code += "            if (cr.zkResult != ZKR_SUCCESS)\n";
             code += "            {\n";
             code += "                proverRequest.result = cr.zkResult;\n";
             code += "                cerr << \"Error: Main exec failed calling evalCommand() after result=\" << proverRequest.result << \"=\" << zkresult2string(proverRequest.result) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
+            code += "                StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "                return;\n";
             code += "            }\n";
             code += "        }\n";
@@ -3736,9 +3841,15 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += "#endif\n\n";
 
         // Jump to the end label if we are done and we are in fast mode
-        if (bFastMode && (zkPC == rom["labels"]["finalizeExecution"]))
+        if (zkPC == rom["labels"]["finalizeExecution"])
         {
+            code += "    if (ctx.lastStep != 0)\n";
+            code += "    {\n";
+            code += "        cerr << \"Error: MainExecutor::execute() called finalizeExecutionLabel with a non-zero ctx.lastStep=\" << ctx.lastStep << endl;\n";
+            code += "        exitProcess();\n";
+            code += "    }\n";
             code += "    ctx.lastStep = i;\n";
+            if (bFastMode)
             code += "    goto " + functionName + "_end;\n\n";
         }
 
@@ -3820,6 +3931,32 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    // Set the error (all previous errors generated a return)\n";
     code += "    proverRequest.result = ZKR_SUCCESS;\n";
 
+    code += "    // Check that we did not run out of steps during the execution\n";
+    code += "    if (ctx.lastStep == 0)\n";
+    code += "    {\n";
+    code += "        cerr << \"Error: Main executor found ctx.lastStep=0, so execution was not complete\" << endl;\n";
+    if (bFastMode)
+    {
+    code += "        proverRequest.result = ZKR_SM_MAIN_OUT_OF_STEPS;\n";
+    }
+    else
+    {
+    code += "        exitProcess();\n";
+    }
+    code += "    }\n";
+    code += "    if (ctx.lastStep > " + (string)rom["constants"]["MAX_CNT_STEPS_LIMIT"]["value"] + ")\n";
+    code += "    {\n";
+    code += "        cerr << \"Error: Main executor found ctx.lastStep=\" << ctx.lastStep << \" > MAX_CNT_STEPS_LIMIT=" + (string)rom["constants"]["MAX_CNT_STEPS_LIMIT"]["value"] + "\" << endl;\n";
+    if (bFastMode)
+    {
+    code += "        proverRequest.result = ZKR_SM_MAIN_OUT_OF_STEPS;\n";
+    }
+    else
+    {
+    code += "        exitProcess();\n";
+    }
+    code += "    }\n\n";
+
     code += "#ifdef CHECK_MAX_CNT_AT_THE_END\n";
     code += "    if (fr.toU64(pols.cntArith[0]) > " + (string)rom["constants"]["MAX_CNT_ARITH_LIMIT"]["value"] + ")\n";
     code += "    {\n";
@@ -3900,6 +4037,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += "        {\n";
         code += "            cerr << \"Error: Main SM Executor: Reading hashK out of limits: i=\" << i << \" p=\" << p << \" ctx.hashK[i].data.size()=\" << ctx.hashK[i].data.size() << \" uuid=\" << proverRequest.uuid << endl;\n";
         code += "            proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+        code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
         code += "            return;\n";
         code += "        }\n";
         code += "        h.digestCalled = ctx.hashK[i].digestCalled;\n";
@@ -3928,8 +4066,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += "        }\n";
         code += "        if (p != ctx.hashP[i].data.size())\n";
         code += "        {\n";
-        code += "            cerr << \"Error: Main SM Executor: Reading hashP out of limits: i=\" << i << \" p=\" << p << \" ctx.hashP[i].data.size()=\" << ctx.hashK[i].data.size() << \" uuid=\" << proverRequest.uuid << endl;\n";
+        code += "            cerr << \"Error: Main SM Executor: Reading hashP out of limits: i=\" << i << \" p=\" << p << \" ctx.hashP[i].data.size()=\" << ctx.hashP[i].data.size() << \" uuid=\" << proverRequest.uuid << endl;\n";
         code += "            proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+        code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
         code += "            return;\n";
         code += "        }\n";
         code += "        h.digestCalled = ctx.hashP[i].digestCalled;\n";
@@ -3942,8 +4081,24 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    mainMetrics.print(\"Main Executor calls\");\n";
     code += "    evalCommandMetrics.print(\"Main Executor eval command calls\");\n";
     code += "#endif\n\n";
-
-    code += "    StateDBClientFactory::freeStateDBClient(pStateDB);\n\n";
+    
+    code += "    if (mainExecutor.config.dbFlushInParallel)\n";
+    code += "    {\n";
+    code += "        mainExecutor.flushInParallel(pStateDB);\n";
+    code += "    }\n";
+    code += "    else\n";
+    code += "    {\n";
+    code += "        pStateDB->flush();\n";
+    code += "        zkresult zkr = pStateDB->flush();\n";
+    code += "        if (zkr != ZKR_SUCCESS)\n";
+    code += "        {\n";
+    code += "            cerr << \"Error: Main SM Executor: failed calling pStateDB->flush() result=\" << zkr << \" =\" << zkresult2string(zkr) << endl;\n";
+    code += "            proverRequest.result = zkr;\n";
+    code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+    code += "            return;\n";
+    code += "        }\n";
+    code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+    code += "    }\n\n";
 
     code += "    cout << \"" + functionName + "() done lastStep=\" << ctx.lastStep << \" (\" << (double(ctx.lastStep)*100)/mainExecutor.N << \"%)\" << endl;\n\n";
 
@@ -3951,7 +4106,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
     code += "}\n\n";
 
-    code += "#pragma GCC pop_options\n";
+    code += "#pragma GCC pop_options\n\n";
+
+    code += "} // namespace\n\n";
 
     return code;
 }

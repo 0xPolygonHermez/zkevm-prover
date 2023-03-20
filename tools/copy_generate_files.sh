@@ -1,6 +1,8 @@
 #!/bin/bash -x
 
-VERSION=v0.7.0.0-rc.3
+VERSION=v1.0.0-rc.1-fork.3
+FORK_VERSION=$(sed -e 's/.*-fork.//g' <<< ${VERSION})
+FORK_ID=fork_$FORK_VERSION
 
 WORKING_DIR=/mnt/ofs/zkproverc/${VERSION}
 CONFIG_DIR=${WORKING_DIR}/config/
@@ -16,6 +18,9 @@ RECURSIVEFINAL_CPP=./src/starkpil/recursivefinal/final.verifier.cpp
 #Sync the config directory
 rsync -avz --progress ${CONFIG_DIR}/scripts/ config/scripts/
 rsync -avz --progress ${CONFIG_DIR}/ config/
+
+#Uncomment the following line if you want to generate source code the first time after the release files generation
+exit 0
 
 #Copy the chelpers files
 cp ${C_FILES}/zkevm.chelpers/*.step* ./src/starkpil/zkevm/chelpers/
@@ -64,9 +69,14 @@ sed -i "1s/^/$CIRCOM_HEADER/" ${RECURSIVEFINAL_CPP}
 echo -e "}\n#pragma GCC diagnostic pop" >> ${RECURSIVEFINAL_CPP}
 
 #Copy pols_generated files
-cp  ${C_FILES}/pols_generated/* ./src/sm/pols_generated/
+cp -r ${CONFIG_DIR}/scripts/* ./src/main_sm/$FORK_ID/scripts/
+cp ${WORKING_DIR}/pil/zkevm/main.pil.json  ./src/main_sm/$FORK_ID/scripts/
 
 #main generator files
 make main_generator
 
 ./build/mainGenerator
+
+make pols_generator
+
+./build/polsGenerator

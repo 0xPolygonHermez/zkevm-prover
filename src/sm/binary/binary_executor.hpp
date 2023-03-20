@@ -2,10 +2,13 @@
 #define BINARY_SM_HPP
 
 #include "config.hpp"
+#include "definitions.hpp"
 #include "goldilocks_base_field.hpp"
 #include "binary_action.hpp"
 #include "utils.hpp"
-#include "commit_pols.hpp"
+#include "sm/pols_generated/commit_pols.hpp"
+
+USING_PROVER_FORK_NAMESPACE;
 
 class BinaryExecutor
 {
@@ -19,7 +22,7 @@ private:
 public:
     BinaryExecutor (Goldilocks &fr, const Config &config);
     
-    void execute (vector<BinaryAction> &action, BinaryCommitPols &pols);
+    void execute (vector<BinaryAction> &action, PROVER_FORK_NAMESPACE::BinaryCommitPols &pols);
 
     void execute (vector<BinaryAction> &action); // Only for testing purposes
 

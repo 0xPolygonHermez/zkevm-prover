@@ -51,7 +51,7 @@ struct TableStruct_aggregator_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxillaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[23]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[21]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -111,12 +111,6 @@ extern InputProver_ContractsBytecodeEntry_DoNotUseDefaultTypeInternal _InputProv
 class InputProver_DbEntry_DoNotUse;
 class InputProver_DbEntry_DoNotUseDefaultTypeInternal;
 extern InputProver_DbEntry_DoNotUseDefaultTypeInternal _InputProver_DbEntry_DoNotUse_default_instance_;
-class Proof;
-class ProofDefaultTypeInternal;
-extern ProofDefaultTypeInternal _Proof_default_instance_;
-class ProofB;
-class ProofBDefaultTypeInternal;
-extern ProofBDefaultTypeInternal _ProofB_default_instance_;
 class ProverMessage;
 class ProverMessageDefaultTypeInternal;
 extern ProverMessageDefaultTypeInternal _ProverMessage_default_instance_;
@@ -149,8 +143,6 @@ template<> ::aggregator::v1::GetStatusResponse* Arena::CreateMaybeMessage<::aggr
 template<> ::aggregator::v1::InputProver* Arena::CreateMaybeMessage<::aggregator::v1::InputProver>(Arena*);
 template<> ::aggregator::v1::InputProver_ContractsBytecodeEntry_DoNotUse* Arena::CreateMaybeMessage<::aggregator::v1::InputProver_ContractsBytecodeEntry_DoNotUse>(Arena*);
 template<> ::aggregator::v1::InputProver_DbEntry_DoNotUse* Arena::CreateMaybeMessage<::aggregator::v1::InputProver_DbEntry_DoNotUse>(Arena*);
-template<> ::aggregator::v1::Proof* Arena::CreateMaybeMessage<::aggregator::v1::Proof>(Arena*);
-template<> ::aggregator::v1::ProofB* Arena::CreateMaybeMessage<::aggregator::v1::ProofB>(Arena*);
 template<> ::aggregator::v1::ProverMessage* Arena::CreateMaybeMessage<::aggregator::v1::ProverMessage>(Arena*);
 template<> ::aggregator::v1::PublicInputs* Arena::CreateMaybeMessage<::aggregator::v1::PublicInputs>(Arena*);
 template<> ::aggregator::v1::PublicInputsExtended* Arena::CreateMaybeMessage<::aggregator::v1::PublicInputsExtended>(Arena*);
@@ -160,17 +152,17 @@ namespace aggregator {
 namespace v1 {
 
 enum GetStatusResponse_Status : int {
-  GetStatusResponse_Status_UNSPECIFIED = 0,
-  GetStatusResponse_Status_BOOTING = 1,
-  GetStatusResponse_Status_COMPUTING = 2,
-  GetStatusResponse_Status_IDLE = 3,
-  GetStatusResponse_Status_HALT = 4,
+  GetStatusResponse_Status_STATUS_UNSPECIFIED = 0,
+  GetStatusResponse_Status_STATUS_BOOTING = 1,
+  GetStatusResponse_Status_STATUS_COMPUTING = 2,
+  GetStatusResponse_Status_STATUS_IDLE = 3,
+  GetStatusResponse_Status_STATUS_HALT = 4,
   GetStatusResponse_Status_GetStatusResponse_Status_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   GetStatusResponse_Status_GetStatusResponse_Status_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool GetStatusResponse_Status_IsValid(int value);
-constexpr GetStatusResponse_Status GetStatusResponse_Status_Status_MIN = GetStatusResponse_Status_UNSPECIFIED;
-constexpr GetStatusResponse_Status GetStatusResponse_Status_Status_MAX = GetStatusResponse_Status_HALT;
+constexpr GetStatusResponse_Status GetStatusResponse_Status_Status_MIN = GetStatusResponse_Status_STATUS_UNSPECIFIED;
+constexpr GetStatusResponse_Status GetStatusResponse_Status_Status_MAX = GetStatusResponse_Status_STATUS_HALT;
 constexpr int GetStatusResponse_Status_Status_ARRAYSIZE = GetStatusResponse_Status_Status_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* GetStatusResponse_Status_descriptor();
@@ -188,19 +180,19 @@ inline bool GetStatusResponse_Status_Parse(
     GetStatusResponse_Status_descriptor(), name, value);
 }
 enum GetProofResponse_Result : int {
-  GetProofResponse_Result_UNSPECIFIED = 0,
-  GetProofResponse_Result_COMPLETED_OK = 1,
-  GetProofResponse_Result_ERROR = 2,
-  GetProofResponse_Result_COMPLETED_ERROR = 3,
-  GetProofResponse_Result_PENDING = 4,
-  GetProofResponse_Result_INTERNAL_ERROR = 5,
-  GetProofResponse_Result_CANCEL = 6,
+  GetProofResponse_Result_RESULT_UNSPECIFIED = 0,
+  GetProofResponse_Result_RESULT_COMPLETED_OK = 1,
+  GetProofResponse_Result_RESULT_ERROR = 2,
+  GetProofResponse_Result_RESULT_COMPLETED_ERROR = 3,
+  GetProofResponse_Result_RESULT_PENDING = 4,
+  GetProofResponse_Result_RESULT_INTERNAL_ERROR = 5,
+  GetProofResponse_Result_RESULT_CANCEL = 6,
   GetProofResponse_Result_GetProofResponse_Result_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   GetProofResponse_Result_GetProofResponse_Result_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool GetProofResponse_Result_IsValid(int value);
-constexpr GetProofResponse_Result GetProofResponse_Result_Result_MIN = GetProofResponse_Result_UNSPECIFIED;
-constexpr GetProofResponse_Result GetProofResponse_Result_Result_MAX = GetProofResponse_Result_CANCEL;
+constexpr GetProofResponse_Result GetProofResponse_Result_Result_MIN = GetProofResponse_Result_RESULT_UNSPECIFIED;
+constexpr GetProofResponse_Result GetProofResponse_Result_Result_MAX = GetProofResponse_Result_RESULT_CANCEL;
 constexpr int GetProofResponse_Result_Result_ARRAYSIZE = GetProofResponse_Result_Result_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* GetProofResponse_Result_descriptor();
@@ -218,16 +210,16 @@ inline bool GetProofResponse_Result_Parse(
     GetProofResponse_Result_descriptor(), name, value);
 }
 enum Result : int {
-  UNSPECIFIED = 0,
-  OK = 1,
-  ERROR = 2,
-  INTERNAL_ERROR = 3,
+  RESULT_UNSPECIFIED = 0,
+  RESULT_OK = 1,
+  RESULT_ERROR = 2,
+  RESULT_INTERNAL_ERROR = 3,
   Result_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   Result_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool Result_IsValid(int value);
-constexpr Result Result_MIN = UNSPECIFIED;
-constexpr Result Result_MAX = INTERNAL_ERROR;
+constexpr Result Result_MIN = RESULT_UNSPECIFIED;
+constexpr Result Result_MAX = RESULT_INTERNAL_ERROR;
 constexpr int Result_ARRAYSIZE = Result_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* Result_descriptor();
@@ -2055,16 +2047,16 @@ class GetStatusResponse PROTOBUF_FINAL :
   // nested types ----------------------------------------------------
 
   typedef GetStatusResponse_Status Status;
-  static constexpr Status UNSPECIFIED =
-    GetStatusResponse_Status_UNSPECIFIED;
-  static constexpr Status BOOTING =
-    GetStatusResponse_Status_BOOTING;
-  static constexpr Status COMPUTING =
-    GetStatusResponse_Status_COMPUTING;
-  static constexpr Status IDLE =
-    GetStatusResponse_Status_IDLE;
-  static constexpr Status HALT =
-    GetStatusResponse_Status_HALT;
+  static constexpr Status STATUS_UNSPECIFIED =
+    GetStatusResponse_Status_STATUS_UNSPECIFIED;
+  static constexpr Status STATUS_BOOTING =
+    GetStatusResponse_Status_STATUS_BOOTING;
+  static constexpr Status STATUS_COMPUTING =
+    GetStatusResponse_Status_STATUS_COMPUTING;
+  static constexpr Status STATUS_IDLE =
+    GetStatusResponse_Status_STATUS_IDLE;
+  static constexpr Status STATUS_HALT =
+    GetStatusResponse_Status_STATUS_HALT;
   static inline bool Status_IsValid(int value) {
     return GetStatusResponse_Status_IsValid(value);
   }
@@ -2105,6 +2097,7 @@ class GetStatusResponse PROTOBUF_FINAL :
     kNumberOfCoresFieldNumber = 11,
     kTotalMemoryFieldNumber = 12,
     kFreeMemoryFieldNumber = 13,
+    kForkIdFieldNumber = 14,
     kStatusFieldNumber = 1,
   };
   // repeated string pending_request_queue_ids = 8;
@@ -2326,6 +2319,15 @@ class GetStatusResponse PROTOBUF_FINAL :
   void _internal_set_free_memory(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
+  // uint64 fork_id = 14;
+  void clear_fork_id();
+  ::PROTOBUF_NAMESPACE_ID::uint64 fork_id() const;
+  void set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_fork_id() const;
+  void _internal_set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
   // .aggregator.v1.GetStatusResponse.Status status = 1;
   void clear_status();
   ::aggregator::v1::GetStatusResponse_Status status() const;
@@ -2354,6 +2356,7 @@ class GetStatusResponse PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint64 number_of_cores_;
   ::PROTOBUF_NAMESPACE_ID::uint64 total_memory_;
   ::PROTOBUF_NAMESPACE_ID::uint64 free_memory_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 fork_id_;
   int status_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_aggregator_2eproto;
@@ -3106,20 +3109,20 @@ class GetProofResponse PROTOBUF_FINAL :
   // nested types ----------------------------------------------------
 
   typedef GetProofResponse_Result Result;
-  static constexpr Result UNSPECIFIED =
-    GetProofResponse_Result_UNSPECIFIED;
-  static constexpr Result COMPLETED_OK =
-    GetProofResponse_Result_COMPLETED_OK;
-  static constexpr Result ERROR =
-    GetProofResponse_Result_ERROR;
-  static constexpr Result COMPLETED_ERROR =
-    GetProofResponse_Result_COMPLETED_ERROR;
-  static constexpr Result PENDING =
-    GetProofResponse_Result_PENDING;
-  static constexpr Result INTERNAL_ERROR =
-    GetProofResponse_Result_INTERNAL_ERROR;
-  static constexpr Result CANCEL =
-    GetProofResponse_Result_CANCEL;
+  static constexpr Result RESULT_UNSPECIFIED =
+    GetProofResponse_Result_RESULT_UNSPECIFIED;
+  static constexpr Result RESULT_COMPLETED_OK =
+    GetProofResponse_Result_RESULT_COMPLETED_OK;
+  static constexpr Result RESULT_ERROR =
+    GetProofResponse_Result_RESULT_ERROR;
+  static constexpr Result RESULT_COMPLETED_ERROR =
+    GetProofResponse_Result_RESULT_COMPLETED_ERROR;
+  static constexpr Result RESULT_PENDING =
+    GetProofResponse_Result_RESULT_PENDING;
+  static constexpr Result RESULT_INTERNAL_ERROR =
+    GetProofResponse_Result_RESULT_INTERNAL_ERROR;
+  static constexpr Result RESULT_CANCEL =
+    GetProofResponse_Result_RESULT_CANCEL;
   static inline bool Result_IsValid(int value) {
     return GetProofResponse_Result_IsValid(value);
   }
@@ -3404,23 +3407,30 @@ class FinalProof PROTOBUF_FINAL :
     kProofFieldNumber = 1,
     kPublicFieldNumber = 2,
   };
-  // .aggregator.v1.Proof proof = 1;
-  bool has_proof() const;
-  private:
-  bool _internal_has_proof() const;
-  public:
+  // string proof = 1;
   void clear_proof();
-  const ::aggregator::v1::Proof& proof() const;
-  ::aggregator::v1::Proof* release_proof();
-  ::aggregator::v1::Proof* mutable_proof();
-  void set_allocated_proof(::aggregator::v1::Proof* proof);
-  private:
-  const ::aggregator::v1::Proof& _internal_proof() const;
-  ::aggregator::v1::Proof* _internal_mutable_proof();
-  public:
+  const std::string& proof() const;
+  void set_proof(const std::string& value);
+  void set_proof(std::string&& value);
+  void set_proof(const char* value);
+  void set_proof(const char* value, size_t size);
+  std::string* mutable_proof();
+  std::string* release_proof();
+  void set_allocated_proof(std::string* proof);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_proof();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
   void unsafe_arena_set_allocated_proof(
-      ::aggregator::v1::Proof* proof);
-  ::aggregator::v1::Proof* unsafe_arena_release_proof();
+      std::string* proof);
+  private:
+  const std::string& _internal_proof() const;
+  void _internal_set_proof(const std::string& value);
+  std::string* _internal_mutable_proof();
+  public:
 
   // .aggregator.v1.PublicInputsExtended public = 2;
   bool has_public_() const;
@@ -3447,7 +3457,7 @@ class FinalProof PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::aggregator::v1::Proof* proof_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr proof_;
   ::aggregator::v1::PublicInputsExtended* public__;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_aggregator_2eproto;
@@ -3569,13 +3579,14 @@ class PublicInputs PROTOBUF_FINAL :
   enum : int {
     kOldStateRootFieldNumber = 1,
     kOldAccInputHashFieldNumber = 2,
-    kBatchL2DataFieldNumber = 5,
-    kGlobalExitRootFieldNumber = 6,
-    kSequencerAddrFieldNumber = 8,
-    kAggregatorAddrFieldNumber = 9,
+    kBatchL2DataFieldNumber = 6,
+    kGlobalExitRootFieldNumber = 7,
+    kSequencerAddrFieldNumber = 9,
+    kAggregatorAddrFieldNumber = 10,
     kOldBatchNumFieldNumber = 3,
     kChainIdFieldNumber = 4,
-    kEthTimestampFieldNumber = 7,
+    kForkIdFieldNumber = 5,
+    kEthTimestampFieldNumber = 8,
   };
   // bytes old_state_root = 1;
   void clear_old_state_root();
@@ -3627,7 +3638,7 @@ class PublicInputs PROTOBUF_FINAL :
   std::string* _internal_mutable_old_acc_input_hash();
   public:
 
-  // bytes batch_l2_data = 5;
+  // bytes batch_l2_data = 6;
   void clear_batch_l2_data();
   const std::string& batch_l2_data() const;
   void set_batch_l2_data(const std::string& value);
@@ -3652,7 +3663,7 @@ class PublicInputs PROTOBUF_FINAL :
   std::string* _internal_mutable_batch_l2_data();
   public:
 
-  // bytes global_exit_root = 6;
+  // bytes global_exit_root = 7;
   void clear_global_exit_root();
   const std::string& global_exit_root() const;
   void set_global_exit_root(const std::string& value);
@@ -3677,7 +3688,7 @@ class PublicInputs PROTOBUF_FINAL :
   std::string* _internal_mutable_global_exit_root();
   public:
 
-  // string sequencer_addr = 8;
+  // string sequencer_addr = 9;
   void clear_sequencer_addr();
   const std::string& sequencer_addr() const;
   void set_sequencer_addr(const std::string& value);
@@ -3702,7 +3713,7 @@ class PublicInputs PROTOBUF_FINAL :
   std::string* _internal_mutable_sequencer_addr();
   public:
 
-  // string aggregator_addr = 9;
+  // string aggregator_addr = 10;
   void clear_aggregator_addr();
   const std::string& aggregator_addr() const;
   void set_aggregator_addr(const std::string& value);
@@ -3745,7 +3756,16 @@ class PublicInputs PROTOBUF_FINAL :
   void _internal_set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // uint64 eth_timestamp = 7;
+  // uint64 fork_id = 5;
+  void clear_fork_id();
+  ::PROTOBUF_NAMESPACE_ID::uint64 fork_id() const;
+  void set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_fork_id() const;
+  void _internal_set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 eth_timestamp = 8;
   void clear_eth_timestamp();
   ::PROTOBUF_NAMESPACE_ID::uint64 eth_timestamp() const;
   void set_eth_timestamp(::PROTOBUF_NAMESPACE_ID::uint64 value);
@@ -3769,357 +3789,8 @@ class PublicInputs PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr aggregator_addr_;
   ::PROTOBUF_NAMESPACE_ID::uint64 old_batch_num_;
   ::PROTOBUF_NAMESPACE_ID::uint64 chain_id_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 fork_id_;
   ::PROTOBUF_NAMESPACE_ID::uint64 eth_timestamp_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  friend struct ::TableStruct_aggregator_2eproto;
-};
-// -------------------------------------------------------------------
-
-class ProofB PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:aggregator.v1.ProofB) */ {
- public:
-  inline ProofB() : ProofB(nullptr) {};
-  virtual ~ProofB();
-
-  ProofB(const ProofB& from);
-  ProofB(ProofB&& from) noexcept
-    : ProofB() {
-    *this = ::std::move(from);
-  }
-
-  inline ProofB& operator=(const ProofB& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline ProofB& operator=(ProofB&& from) noexcept {
-    if (GetArena() == from.GetArena()) {
-      if (this != &from) InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return GetMetadataStatic().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return GetMetadataStatic().reflection;
-  }
-  static const ProofB& default_instance();
-
-  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
-  static inline const ProofB* internal_default_instance() {
-    return reinterpret_cast<const ProofB*>(
-               &_ProofB_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    17;
-
-  friend void swap(ProofB& a, ProofB& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(ProofB* other) {
-    if (other == this) return;
-    if (GetArena() == other->GetArena()) {
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(ProofB* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  inline ProofB* New() const final {
-    return CreateMaybeMessage<ProofB>(nullptr);
-  }
-
-  ProofB* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<ProofB>(arena);
-  }
-  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const ProofB& from);
-  void MergeFrom(const ProofB& from);
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
-      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _cached_size_.Get(); }
-
-  private:
-  inline void SharedCtor();
-  inline void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(ProofB* other);
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "aggregator.v1.ProofB";
-  }
-  protected:
-  explicit ProofB(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  private:
-  static void ArenaDtor(void* object);
-  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  public:
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_aggregator_2eproto);
-    return ::descriptor_table_aggregator_2eproto.file_level_metadata[kIndexInFileMessages];
-  }
-
-  public:
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kProofsFieldNumber = 1,
-  };
-  // repeated string proofs = 1;
-  int proofs_size() const;
-  private:
-  int _internal_proofs_size() const;
-  public:
-  void clear_proofs();
-  const std::string& proofs(int index) const;
-  std::string* mutable_proofs(int index);
-  void set_proofs(int index, const std::string& value);
-  void set_proofs(int index, std::string&& value);
-  void set_proofs(int index, const char* value);
-  void set_proofs(int index, const char* value, size_t size);
-  std::string* add_proofs();
-  void add_proofs(const std::string& value);
-  void add_proofs(std::string&& value);
-  void add_proofs(const char* value);
-  void add_proofs(const char* value, size_t size);
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& proofs() const;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_proofs();
-  private:
-  const std::string& _internal_proofs(int index) const;
-  std::string* _internal_add_proofs();
-  public:
-
-  // @@protoc_insertion_point(class_scope:aggregator.v1.ProofB)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> proofs_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  friend struct ::TableStruct_aggregator_2eproto;
-};
-// -------------------------------------------------------------------
-
-class Proof PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:aggregator.v1.Proof) */ {
- public:
-  inline Proof() : Proof(nullptr) {};
-  virtual ~Proof();
-
-  Proof(const Proof& from);
-  Proof(Proof&& from) noexcept
-    : Proof() {
-    *this = ::std::move(from);
-  }
-
-  inline Proof& operator=(const Proof& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline Proof& operator=(Proof&& from) noexcept {
-    if (GetArena() == from.GetArena()) {
-      if (this != &from) InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return GetMetadataStatic().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return GetMetadataStatic().reflection;
-  }
-  static const Proof& default_instance();
-
-  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
-  static inline const Proof* internal_default_instance() {
-    return reinterpret_cast<const Proof*>(
-               &_Proof_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    18;
-
-  friend void swap(Proof& a, Proof& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(Proof* other) {
-    if (other == this) return;
-    if (GetArena() == other->GetArena()) {
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(Proof* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  inline Proof* New() const final {
-    return CreateMaybeMessage<Proof>(nullptr);
-  }
-
-  Proof* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<Proof>(arena);
-  }
-  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const Proof& from);
-  void MergeFrom(const Proof& from);
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
-      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _cached_size_.Get(); }
-
-  private:
-  inline void SharedCtor();
-  inline void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(Proof* other);
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "aggregator.v1.Proof";
-  }
-  protected:
-  explicit Proof(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  private:
-  static void ArenaDtor(void* object);
-  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  public:
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_aggregator_2eproto);
-    return ::descriptor_table_aggregator_2eproto.file_level_metadata[kIndexInFileMessages];
-  }
-
-  public:
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kProofAFieldNumber = 1,
-    kProofBFieldNumber = 2,
-    kProofCFieldNumber = 3,
-  };
-  // repeated string proof_a = 1;
-  int proof_a_size() const;
-  private:
-  int _internal_proof_a_size() const;
-  public:
-  void clear_proof_a();
-  const std::string& proof_a(int index) const;
-  std::string* mutable_proof_a(int index);
-  void set_proof_a(int index, const std::string& value);
-  void set_proof_a(int index, std::string&& value);
-  void set_proof_a(int index, const char* value);
-  void set_proof_a(int index, const char* value, size_t size);
-  std::string* add_proof_a();
-  void add_proof_a(const std::string& value);
-  void add_proof_a(std::string&& value);
-  void add_proof_a(const char* value);
-  void add_proof_a(const char* value, size_t size);
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& proof_a() const;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_proof_a();
-  private:
-  const std::string& _internal_proof_a(int index) const;
-  std::string* _internal_add_proof_a();
-  public:
-
-  // repeated .aggregator.v1.ProofB proof_b = 2;
-  int proof_b_size() const;
-  private:
-  int _internal_proof_b_size() const;
-  public:
-  void clear_proof_b();
-  ::aggregator::v1::ProofB* mutable_proof_b(int index);
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::aggregator::v1::ProofB >*
-      mutable_proof_b();
-  private:
-  const ::aggregator::v1::ProofB& _internal_proof_b(int index) const;
-  ::aggregator::v1::ProofB* _internal_add_proof_b();
-  public:
-  const ::aggregator::v1::ProofB& proof_b(int index) const;
-  ::aggregator::v1::ProofB* add_proof_b();
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::aggregator::v1::ProofB >&
-      proof_b() const;
-
-  // repeated string proof_c = 3;
-  int proof_c_size() const;
-  private:
-  int _internal_proof_c_size() const;
-  public:
-  void clear_proof_c();
-  const std::string& proof_c(int index) const;
-  std::string* mutable_proof_c(int index);
-  void set_proof_c(int index, const std::string& value);
-  void set_proof_c(int index, std::string&& value);
-  void set_proof_c(int index, const char* value);
-  void set_proof_c(int index, const char* value, size_t size);
-  std::string* add_proof_c();
-  void add_proof_c(const std::string& value);
-  void add_proof_c(std::string&& value);
-  void add_proof_c(const char* value);
-  void add_proof_c(const char* value, size_t size);
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& proof_c() const;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_proof_c();
-  private:
-  const std::string& _internal_proof_c(int index) const;
-  std::string* _internal_add_proof_c();
-  public:
-
-  // @@protoc_insertion_point(class_scope:aggregator.v1.Proof)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> proof_a_;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::aggregator::v1::ProofB > proof_b_;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> proof_c_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_aggregator_2eproto;
 };
@@ -4151,7 +3822,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_aggregator_2eproto);
-    return ::descriptor_table_aggregator_2eproto.file_level_metadata[19];
+    return ::descriptor_table_aggregator_2eproto.file_level_metadata[17];
   }
 
   public:
@@ -4185,7 +3856,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_aggregator_2eproto);
-    return ::descriptor_table_aggregator_2eproto.file_level_metadata[20];
+    return ::descriptor_table_aggregator_2eproto.file_level_metadata[18];
   }
 
   public:
@@ -4235,7 +3906,7 @@ class InputProver PROTOBUF_FINAL :
                &_InputProver_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    21;
+    19;
 
   friend void swap(InputProver& a, InputProver& b) {
     a.Swap(&b);
@@ -4430,7 +4101,7 @@ class PublicInputsExtended PROTOBUF_FINAL :
                &_PublicInputsExtended_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    22;
+    20;
 
   friend void swap(PublicInputsExtended& a, PublicInputsExtended& b) {
     a.Swap(&b);
@@ -7075,6 +6746,26 @@ inline void GetStatusResponse::set_free_memory(::PROTOBUF_NAMESPACE_ID::uint64 v
   // @@protoc_insertion_point(field_set:aggregator.v1.GetStatusResponse.free_memory)
 }
 
+// uint64 fork_id = 14;
+inline void GetStatusResponse::clear_fork_id() {
+  fork_id_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetStatusResponse::_internal_fork_id() const {
+  return fork_id_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetStatusResponse::fork_id() const {
+  // @@protoc_insertion_point(field_get:aggregator.v1.GetStatusResponse.fork_id)
+  return _internal_fork_id();
+}
+inline void GetStatusResponse::_internal_set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  fork_id_ = value;
+}
+inline void GetStatusResponse::set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_fork_id(value);
+  // @@protoc_insertion_point(field_set:aggregator.v1.GetStatusResponse.fork_id)
+}
+
 // -------------------------------------------------------------------
 
 // GenBatchProofResponse
@@ -7811,85 +7502,85 @@ inline GetProofResponse::ProofCase GetProofResponse::proof_case() const {
 
 // FinalProof
 
-// .aggregator.v1.Proof proof = 1;
-inline bool FinalProof::_internal_has_proof() const {
-  return this != internal_default_instance() && proof_ != nullptr;
-}
-inline bool FinalProof::has_proof() const {
-  return _internal_has_proof();
-}
+// string proof = 1;
 inline void FinalProof::clear_proof() {
-  if (GetArena() == nullptr && proof_ != nullptr) {
-    delete proof_;
-  }
-  proof_ = nullptr;
+  proof_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline const ::aggregator::v1::Proof& FinalProof::_internal_proof() const {
-  const ::aggregator::v1::Proof* p = proof_;
-  return p != nullptr ? *p : *reinterpret_cast<const ::aggregator::v1::Proof*>(
-      &::aggregator::v1::_Proof_default_instance_);
-}
-inline const ::aggregator::v1::Proof& FinalProof::proof() const {
+inline const std::string& FinalProof::proof() const {
   // @@protoc_insertion_point(field_get:aggregator.v1.FinalProof.proof)
   return _internal_proof();
 }
-inline void FinalProof::unsafe_arena_set_allocated_proof(
-    ::aggregator::v1::Proof* proof) {
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(proof_);
-  }
-  proof_ = proof;
-  if (proof) {
-    
-  } else {
-    
-  }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.FinalProof.proof)
+inline void FinalProof::set_proof(const std::string& value) {
+  _internal_set_proof(value);
+  // @@protoc_insertion_point(field_set:aggregator.v1.FinalProof.proof)
 }
-inline ::aggregator::v1::Proof* FinalProof::release_proof() {
-  auto temp = unsafe_arena_release_proof();
-  if (GetArena() != nullptr) {
-    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
-  }
-  return temp;
-}
-inline ::aggregator::v1::Proof* FinalProof::unsafe_arena_release_proof() {
-  // @@protoc_insertion_point(field_release:aggregator.v1.FinalProof.proof)
-  
-  ::aggregator::v1::Proof* temp = proof_;
-  proof_ = nullptr;
-  return temp;
-}
-inline ::aggregator::v1::Proof* FinalProof::_internal_mutable_proof() {
-  
-  if (proof_ == nullptr) {
-    auto* p = CreateMaybeMessage<::aggregator::v1::Proof>(GetArena());
-    proof_ = p;
-  }
-  return proof_;
-}
-inline ::aggregator::v1::Proof* FinalProof::mutable_proof() {
+inline std::string* FinalProof::mutable_proof() {
   // @@protoc_insertion_point(field_mutable:aggregator.v1.FinalProof.proof)
   return _internal_mutable_proof();
 }
-inline void FinalProof::set_allocated_proof(::aggregator::v1::Proof* proof) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
-  if (message_arena == nullptr) {
-    delete proof_;
-  }
-  if (proof) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(proof);
-    if (message_arena != submessage_arena) {
-      proof = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, proof, submessage_arena);
-    }
+inline const std::string& FinalProof::_internal_proof() const {
+  return proof_.Get();
+}
+inline void FinalProof::_internal_set_proof(const std::string& value) {
+  
+  proof_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void FinalProof::set_proof(std::string&& value) {
+  
+  proof_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:aggregator.v1.FinalProof.proof)
+}
+inline void FinalProof::set_proof(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  proof_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:aggregator.v1.FinalProof.proof)
+}
+inline void FinalProof::set_proof(const char* value,
+    size_t size) {
+  
+  proof_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:aggregator.v1.FinalProof.proof)
+}
+inline std::string* FinalProof::_internal_mutable_proof() {
+  
+  return proof_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* FinalProof::release_proof() {
+  // @@protoc_insertion_point(field_release:aggregator.v1.FinalProof.proof)
+  return proof_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void FinalProof::set_allocated_proof(std::string* proof) {
+  if (proof != nullptr) {
     
   } else {
     
   }
-  proof_ = proof;
+  proof_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), proof,
+      GetArena());
   // @@protoc_insertion_point(field_set_allocated:aggregator.v1.FinalProof.proof)
+}
+inline std::string* FinalProof::unsafe_arena_release_proof() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:aggregator.v1.FinalProof.proof)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return proof_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void FinalProof::unsafe_arena_set_allocated_proof(
+    std::string* proof) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (proof != nullptr) {
+    
+  } else {
+    
+  }
+  proof_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      proof, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.FinalProof.proof)
 }
 
 // .aggregator.v1.PublicInputsExtended public = 2;
@@ -8179,7 +7870,27 @@ inline void PublicInputs::set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   // @@protoc_insertion_point(field_set:aggregator.v1.PublicInputs.chain_id)
 }
 
-// bytes batch_l2_data = 5;
+// uint64 fork_id = 5;
+inline void PublicInputs::clear_fork_id() {
+  fork_id_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 PublicInputs::_internal_fork_id() const {
+  return fork_id_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 PublicInputs::fork_id() const {
+  // @@protoc_insertion_point(field_get:aggregator.v1.PublicInputs.fork_id)
+  return _internal_fork_id();
+}
+inline void PublicInputs::_internal_set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  fork_id_ = value;
+}
+inline void PublicInputs::set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_fork_id(value);
+  // @@protoc_insertion_point(field_set:aggregator.v1.PublicInputs.fork_id)
+}
+
+// bytes batch_l2_data = 6;
 inline void PublicInputs::clear_batch_l2_data() {
   batch_l2_data_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -8260,7 +7971,7 @@ inline void PublicInputs::unsafe_arena_set_allocated_batch_l2_data(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.PublicInputs.batch_l2_data)
 }
 
-// bytes global_exit_root = 6;
+// bytes global_exit_root = 7;
 inline void PublicInputs::clear_global_exit_root() {
   global_exit_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -8341,7 +8052,7 @@ inline void PublicInputs::unsafe_arena_set_allocated_global_exit_root(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.PublicInputs.global_exit_root)
 }
 
-// uint64 eth_timestamp = 7;
+// uint64 eth_timestamp = 8;
 inline void PublicInputs::clear_eth_timestamp() {
   eth_timestamp_ = PROTOBUF_ULONGLONG(0);
 }
@@ -8361,7 +8072,7 @@ inline void PublicInputs::set_eth_timestamp(::PROTOBUF_NAMESPACE_ID::uint64 valu
   // @@protoc_insertion_point(field_set:aggregator.v1.PublicInputs.eth_timestamp)
 }
 
-// string sequencer_addr = 8;
+// string sequencer_addr = 9;
 inline void PublicInputs::clear_sequencer_addr() {
   sequencer_addr_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -8442,7 +8153,7 @@ inline void PublicInputs::unsafe_arena_set_allocated_sequencer_addr(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.PublicInputs.sequencer_addr)
 }
 
-// string aggregator_addr = 9;
+// string aggregator_addr = 10;
 inline void PublicInputs::clear_aggregator_addr() {
   aggregator_addr_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -8521,275 +8232,6 @@ inline void PublicInputs::unsafe_arena_set_allocated_aggregator_addr(
   aggregator_addr_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       aggregator_addr, GetArena());
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:aggregator.v1.PublicInputs.aggregator_addr)
-}
-
-// -------------------------------------------------------------------
-
-// ProofB
-
-// repeated string proofs = 1;
-inline int ProofB::_internal_proofs_size() const {
-  return proofs_.size();
-}
-inline int ProofB::proofs_size() const {
-  return _internal_proofs_size();
-}
-inline void ProofB::clear_proofs() {
-  proofs_.Clear();
-}
-inline std::string* ProofB::add_proofs() {
-  // @@protoc_insertion_point(field_add_mutable:aggregator.v1.ProofB.proofs)
-  return _internal_add_proofs();
-}
-inline const std::string& ProofB::_internal_proofs(int index) const {
-  return proofs_.Get(index);
-}
-inline const std::string& ProofB::proofs(int index) const {
-  // @@protoc_insertion_point(field_get:aggregator.v1.ProofB.proofs)
-  return _internal_proofs(index);
-}
-inline std::string* ProofB::mutable_proofs(int index) {
-  // @@protoc_insertion_point(field_mutable:aggregator.v1.ProofB.proofs)
-  return proofs_.Mutable(index);
-}
-inline void ProofB::set_proofs(int index, const std::string& value) {
-  // @@protoc_insertion_point(field_set:aggregator.v1.ProofB.proofs)
-  proofs_.Mutable(index)->assign(value);
-}
-inline void ProofB::set_proofs(int index, std::string&& value) {
-  // @@protoc_insertion_point(field_set:aggregator.v1.ProofB.proofs)
-  proofs_.Mutable(index)->assign(std::move(value));
-}
-inline void ProofB::set_proofs(int index, const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  proofs_.Mutable(index)->assign(value);
-  // @@protoc_insertion_point(field_set_char:aggregator.v1.ProofB.proofs)
-}
-inline void ProofB::set_proofs(int index, const char* value, size_t size) {
-  proofs_.Mutable(index)->assign(
-    reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:aggregator.v1.ProofB.proofs)
-}
-inline std::string* ProofB::_internal_add_proofs() {
-  return proofs_.Add();
-}
-inline void ProofB::add_proofs(const std::string& value) {
-  proofs_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add:aggregator.v1.ProofB.proofs)
-}
-inline void ProofB::add_proofs(std::string&& value) {
-  proofs_.Add(std::move(value));
-  // @@protoc_insertion_point(field_add:aggregator.v1.ProofB.proofs)
-}
-inline void ProofB::add_proofs(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  proofs_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add_char:aggregator.v1.ProofB.proofs)
-}
-inline void ProofB::add_proofs(const char* value, size_t size) {
-  proofs_.Add()->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_add_pointer:aggregator.v1.ProofB.proofs)
-}
-inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>&
-ProofB::proofs() const {
-  // @@protoc_insertion_point(field_list:aggregator.v1.ProofB.proofs)
-  return proofs_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
-ProofB::mutable_proofs() {
-  // @@protoc_insertion_point(field_mutable_list:aggregator.v1.ProofB.proofs)
-  return &proofs_;
-}
-
-// -------------------------------------------------------------------
-
-// Proof
-
-// repeated string proof_a = 1;
-inline int Proof::_internal_proof_a_size() const {
-  return proof_a_.size();
-}
-inline int Proof::proof_a_size() const {
-  return _internal_proof_a_size();
-}
-inline void Proof::clear_proof_a() {
-  proof_a_.Clear();
-}
-inline std::string* Proof::add_proof_a() {
-  // @@protoc_insertion_point(field_add_mutable:aggregator.v1.Proof.proof_a)
-  return _internal_add_proof_a();
-}
-inline const std::string& Proof::_internal_proof_a(int index) const {
-  return proof_a_.Get(index);
-}
-inline const std::string& Proof::proof_a(int index) const {
-  // @@protoc_insertion_point(field_get:aggregator.v1.Proof.proof_a)
-  return _internal_proof_a(index);
-}
-inline std::string* Proof::mutable_proof_a(int index) {
-  // @@protoc_insertion_point(field_mutable:aggregator.v1.Proof.proof_a)
-  return proof_a_.Mutable(index);
-}
-inline void Proof::set_proof_a(int index, const std::string& value) {
-  // @@protoc_insertion_point(field_set:aggregator.v1.Proof.proof_a)
-  proof_a_.Mutable(index)->assign(value);
-}
-inline void Proof::set_proof_a(int index, std::string&& value) {
-  // @@protoc_insertion_point(field_set:aggregator.v1.Proof.proof_a)
-  proof_a_.Mutable(index)->assign(std::move(value));
-}
-inline void Proof::set_proof_a(int index, const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  proof_a_.Mutable(index)->assign(value);
-  // @@protoc_insertion_point(field_set_char:aggregator.v1.Proof.proof_a)
-}
-inline void Proof::set_proof_a(int index, const char* value, size_t size) {
-  proof_a_.Mutable(index)->assign(
-    reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:aggregator.v1.Proof.proof_a)
-}
-inline std::string* Proof::_internal_add_proof_a() {
-  return proof_a_.Add();
-}
-inline void Proof::add_proof_a(const std::string& value) {
-  proof_a_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add:aggregator.v1.Proof.proof_a)
-}
-inline void Proof::add_proof_a(std::string&& value) {
-  proof_a_.Add(std::move(value));
-  // @@protoc_insertion_point(field_add:aggregator.v1.Proof.proof_a)
-}
-inline void Proof::add_proof_a(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  proof_a_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add_char:aggregator.v1.Proof.proof_a)
-}
-inline void Proof::add_proof_a(const char* value, size_t size) {
-  proof_a_.Add()->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_add_pointer:aggregator.v1.Proof.proof_a)
-}
-inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>&
-Proof::proof_a() const {
-  // @@protoc_insertion_point(field_list:aggregator.v1.Proof.proof_a)
-  return proof_a_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
-Proof::mutable_proof_a() {
-  // @@protoc_insertion_point(field_mutable_list:aggregator.v1.Proof.proof_a)
-  return &proof_a_;
-}
-
-// repeated .aggregator.v1.ProofB proof_b = 2;
-inline int Proof::_internal_proof_b_size() const {
-  return proof_b_.size();
-}
-inline int Proof::proof_b_size() const {
-  return _internal_proof_b_size();
-}
-inline void Proof::clear_proof_b() {
-  proof_b_.Clear();
-}
-inline ::aggregator::v1::ProofB* Proof::mutable_proof_b(int index) {
-  // @@protoc_insertion_point(field_mutable:aggregator.v1.Proof.proof_b)
-  return proof_b_.Mutable(index);
-}
-inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::aggregator::v1::ProofB >*
-Proof::mutable_proof_b() {
-  // @@protoc_insertion_point(field_mutable_list:aggregator.v1.Proof.proof_b)
-  return &proof_b_;
-}
-inline const ::aggregator::v1::ProofB& Proof::_internal_proof_b(int index) const {
-  return proof_b_.Get(index);
-}
-inline const ::aggregator::v1::ProofB& Proof::proof_b(int index) const {
-  // @@protoc_insertion_point(field_get:aggregator.v1.Proof.proof_b)
-  return _internal_proof_b(index);
-}
-inline ::aggregator::v1::ProofB* Proof::_internal_add_proof_b() {
-  return proof_b_.Add();
-}
-inline ::aggregator::v1::ProofB* Proof::add_proof_b() {
-  // @@protoc_insertion_point(field_add:aggregator.v1.Proof.proof_b)
-  return _internal_add_proof_b();
-}
-inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::aggregator::v1::ProofB >&
-Proof::proof_b() const {
-  // @@protoc_insertion_point(field_list:aggregator.v1.Proof.proof_b)
-  return proof_b_;
-}
-
-// repeated string proof_c = 3;
-inline int Proof::_internal_proof_c_size() const {
-  return proof_c_.size();
-}
-inline int Proof::proof_c_size() const {
-  return _internal_proof_c_size();
-}
-inline void Proof::clear_proof_c() {
-  proof_c_.Clear();
-}
-inline std::string* Proof::add_proof_c() {
-  // @@protoc_insertion_point(field_add_mutable:aggregator.v1.Proof.proof_c)
-  return _internal_add_proof_c();
-}
-inline const std::string& Proof::_internal_proof_c(int index) const {
-  return proof_c_.Get(index);
-}
-inline const std::string& Proof::proof_c(int index) const {
-  // @@protoc_insertion_point(field_get:aggregator.v1.Proof.proof_c)
-  return _internal_proof_c(index);
-}
-inline std::string* Proof::mutable_proof_c(int index) {
-  // @@protoc_insertion_point(field_mutable:aggregator.v1.Proof.proof_c)
-  return proof_c_.Mutable(index);
-}
-inline void Proof::set_proof_c(int index, const std::string& value) {
-  // @@protoc_insertion_point(field_set:aggregator.v1.Proof.proof_c)
-  proof_c_.Mutable(index)->assign(value);
-}
-inline void Proof::set_proof_c(int index, std::string&& value) {
-  // @@protoc_insertion_point(field_set:aggregator.v1.Proof.proof_c)
-  proof_c_.Mutable(index)->assign(std::move(value));
-}
-inline void Proof::set_proof_c(int index, const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  proof_c_.Mutable(index)->assign(value);
-  // @@protoc_insertion_point(field_set_char:aggregator.v1.Proof.proof_c)
-}
-inline void Proof::set_proof_c(int index, const char* value, size_t size) {
-  proof_c_.Mutable(index)->assign(
-    reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:aggregator.v1.Proof.proof_c)
-}
-inline std::string* Proof::_internal_add_proof_c() {
-  return proof_c_.Add();
-}
-inline void Proof::add_proof_c(const std::string& value) {
-  proof_c_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add:aggregator.v1.Proof.proof_c)
-}
-inline void Proof::add_proof_c(std::string&& value) {
-  proof_c_.Add(std::move(value));
-  // @@protoc_insertion_point(field_add:aggregator.v1.Proof.proof_c)
-}
-inline void Proof::add_proof_c(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  proof_c_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add_char:aggregator.v1.Proof.proof_c)
-}
-inline void Proof::add_proof_c(const char* value, size_t size) {
-  proof_c_.Add()->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_add_pointer:aggregator.v1.Proof.proof_c)
-}
-inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>&
-Proof::proof_c() const {
-  // @@protoc_insertion_point(field_list:aggregator.v1.Proof.proof_c)
-  return proof_c_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
-Proof::mutable_proof_c() {
-  // @@protoc_insertion_point(field_mutable_list:aggregator.v1.Proof.proof_c)
-  return &proof_c_;
 }
 
 // -------------------------------------------------------------------
@@ -9290,10 +8732,6 @@ inline void PublicInputsExtended::set_new_batch_num(::PROTOBUF_NAMESPACE_ID::uin
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
-// -------------------------------------------------------------------
-
-// -------------------------------------------------------------------
-
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

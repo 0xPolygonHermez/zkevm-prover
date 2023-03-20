@@ -3,9 +3,9 @@
 
 #include <semaphore.h>
 #include "input.hpp"
-#include "proof.hpp"
+#include "proof_fflonk.hpp"
 #include "counters.hpp"
-#include "full_tracer.hpp"
+#include "full_tracer_interface.hpp"
 #include "database_map.hpp"
 #include "prover_request_type.hpp"
 
@@ -53,7 +53,7 @@ public:
     /* Execution generated data */
     Counters counters; // Counters of the batch execution
     DatabaseMap *dbReadLog; // Database reads logs done during the execution (if enabled)
-    FullTracer fullTracer; // Execution traces
+    FullTracerInterface * pFullTracer; // Execution traces interface
 
     /* State */
     bool bCompleted;
@@ -69,6 +69,9 @@ public:
     /* Constructor */
     ProverRequest (Goldilocks &fr, const Config &config, tProverRequestType type);
     ~ProverRequest();
+
+    void CreateFullTracer(void);
+    void DestroyFullTracer(void);
 
     /* Output file names */
     string proofFile (void);
@@ -91,12 +94,6 @@ public:
     {
         bCompleted = true;
         sem_post(&completedSem);
-    }
-
-    /* Generate FullTracer call traces if true */
-    bool generateCallTraces (void)
-    {
-        return (input.txHashToGenerateExecuteTrace.size() > 0) || (input.txHashToGenerateCallTrace.size() > 0);
     }
 
     static void onDBReadLogChangeCallback(void *p, DatabaseMap *dbMap)

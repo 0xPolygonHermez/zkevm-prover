@@ -15,7 +15,7 @@ public:
     vector<string> proof;
 };
 
-class Proof
+class ProofGroth16
 {
 public:
     vector<string> proofA;

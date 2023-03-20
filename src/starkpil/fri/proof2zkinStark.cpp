@@ -101,23 +101,25 @@ ordered_json joinzkin(ordered_json &zkin1, ordered_json &zkin2, ordered_json &ve
 
     zkinOut["publics"][17] = zkin1["publics"][17]; // chainId
 
+    zkinOut["publics"][18] = zkin1["publics"][18]; // forkid
+
     // newStateRoot
     for (int i = 0; i < 8; i++)
     {
-        zkinOut["publics"][18 + i] = zkin2["publics"][18 + i];
+        zkinOut["publics"][19 + i] = zkin2["publics"][19 + i];
     }
     // newAccInputHash0
     for (int i = 0; i < 8; i++)
     {
-        zkinOut["publics"][26 + i] = zkin2["publics"][26 + i];
+        zkinOut["publics"][27 + i] = zkin2["publics"][27 + i];
     }
     // newLocalExitRoot
     for (int i = 0; i < 8; i++)
     {
-        zkinOut["publics"][34 + i] = zkin2["publics"][34 + i];
+        zkinOut["publics"][35 + i] = zkin2["publics"][35 + i];
     }
 
-    zkinOut["publics"][42] = zkin2["publics"][42]; // oldBatchNum
+    zkinOut["publics"][43] = zkin2["publics"][43]; // oldBatchNum
 
     zkinOut["a_publics"] = zkin1["publics"];
     zkinOut["a_root1"] = zkin1["root1"];

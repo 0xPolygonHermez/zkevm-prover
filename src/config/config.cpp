@@ -1,5 +1,6 @@
 #include <string>
 #include <nlohmann/json.hpp>
+#include "definitions.hpp"
 #include "config.hpp"
 #include "zkassert.hpp"
 #include "utils.hpp"
@@ -102,10 +103,6 @@ void Config::load(json &config)
     if (config.contains("useMainExecGenerated") && config["useMainExecGenerated"].is_boolean())
         useMainExecGenerated = config["useMainExecGenerated"];
 
-    useProcessBatchCache = false;
-    if (config.contains("useProcessBatchCache") && config["useProcessBatchCache"].is_boolean())
-        useProcessBatchCache = config["useProcessBatchCache"];
-
     executeInParallel = false;
     if (config.contains("executeInParallel") && config["executeInParallel"].is_boolean())
         executeInParallel = config["executeInParallel"];
@@ -146,6 +143,18 @@ void Config::load(json &config)
     if (config.contains("loadDBToMemCache") && config["loadDBToMemCache"].is_boolean())
         loadDBToMemCache = config["loadDBToMemCache"];
 
+    loadDBToMemCacheInParallel = false;
+    if (config.contains("loadDBToMemCacheInParallel") && config["loadDBToMemCacheInParallel"].is_boolean())
+        loadDBToMemCacheInParallel = config["loadDBToMemCacheInParallel"];
+
+    dbMTCacheSize = 0;
+    if (config.contains("dbMTCacheSize") && config["dbMTCacheSize"].is_number())
+        dbMTCacheSize = config["dbMTCacheSize"];
+
+    dbProgramCacheSize = 0;
+    if (config.contains("dbProgramCacheSize") && config["dbProgramCacheSize"].is_number())
+        dbProgramCacheSize = config["dbProgramCacheSize"];
+
     opcodeTracer = false;
     if (config.contains("opcodeTracer") && config["opcodeTracer"].is_boolean())
         opcodeTracer = config["opcodeTracer"];
@@ -157,6 +166,14 @@ void Config::load(json &config)
     logExecutorServerResponses = false;
     if (config.contains("logExecutorServerResponses") && config["logExecutorServerResponses"].is_boolean())
         logExecutorServerResponses = config["logExecutorServerResponses"];
+
+    logExecutorServerTxs = true;
+    if (config.contains("logExecutorServerTxs") && config["logExecutorServerTxs"].is_boolean())
+        logExecutorServerTxs = config["logExecutorServerTxs"];
+
+    dontLoadRomOffsets = false;
+    if (config.contains("dontLoadRomOffsets") && config["dontLoadRomOffsets"].is_boolean())
+        dontLoadRomOffsets = config["dontLoadRomOffsets"];
 
     executorServerPort = 50071;
     if (config.contains("executorServerPort") && config["executorServerPort"].is_number())
@@ -203,9 +220,6 @@ void Config::load(json &config)
     if (config.contains("inputFile2") && config["inputFile2"].is_string())
         inputFile2 = config["inputFile2"];
 
-    if (config.contains("rom") && config["rom"].is_string())
-        rom = config["rom"];
-
     if (config.contains("outputPath") && config["outputPath"].is_string())
         outputPath = config["outputPath"];
 
@@ -215,7 +229,7 @@ void Config::load(json &config)
         configPath = config["configPath"];
 
     // Set default config files names
-    rom = configPath + "/scripts/rom.json";
+    rom = string("src/main_sm/") + string(PROVER_FORK_NAMESPACE_STRING) + string("/scripts/rom.json");
     keccakScriptFile = configPath + "/scripts/keccak_script.json";
     storageRomFile = configPath + "/scripts/storage_sm_rom.json";
     zkevmConstPols = configPath + "/zkevm/zkevm.const";
@@ -243,12 +257,18 @@ void Config::load(json &config)
     recursivefStarkInfo = configPath + "/recursivef/recursivef.starkinfo.json";
     recursivefVerifier = configPath + "/recursivef/recursivef.verifier.dat";
     finalVerifier = configPath + "/final/final.verifier.dat";
-    finalVerkey = configPath + "/final/final.verkey.json";
-    finalStarkZkey = configPath + "/final/final.g16.0001.zkey";
+    finalVerkey = configPath + "/final/final.fflonk.verkey.json";
+    finalStarkZkey = configPath + "/final/final.fflonk.zkey";
 
+
+    if (config.contains("rom") && config["rom"].is_string())
+        rom = config["rom"];
 
     if (config.contains("zkevmCmPols") && config["zkevmCmPols"].is_string())
         zkevmCmPols = config["zkevmCmPols"];
+
+    if (config.contains("zkevmCmPolsAfterExecutor") && config["zkevmCmPolsAfterExecutor"].is_string())
+        zkevmCmPolsAfterExecutor = config["zkevmCmPolsAfterExecutor"];
 
     if (config.contains("c12aCmPols") && config["c12aCmPols"].is_string())
         c12aCmPols = config["c12aCmPols"];
@@ -375,9 +395,25 @@ void Config::load(json &config)
     if (config.contains("dbProgramTableName") && config["dbProgramTableName"].is_string())
         dbProgramTableName = config["dbProgramTableName"];
 
-    dbAsyncWrite = false;
-    if (config.contains("dbAsyncWrite") && config["dbAsyncWrite"].is_boolean())
-        dbAsyncWrite = config["dbAsyncWrite"];
+    dbMultiWrite = false;
+    if (config.contains("dbMultiWrite") && config["dbMultiWrite"].is_boolean())
+        dbMultiWrite = config["dbMultiWrite"];
+
+    dbFlushInParallel = false;
+    if (config.contains("dbFlushInParallel") && config["dbFlushInParallel"].is_boolean())
+        dbFlushInParallel = config["dbFlushInParallel"];
+
+    dbConnectionsPool = false;
+    if (config.contains("dbConnectionsPool") && config["dbConnectionsPool"].is_boolean())
+        dbConnectionsPool = config["dbConnectionsPool"];
+
+    dbNumberOfWritePoolConnections = 25;
+    if (config.contains("dbNumberOfWritePoolConnections") && config["dbNumberOfWritePoolConnections"].is_number())
+        dbNumberOfWritePoolConnections = config["dbNumberOfWritePoolConnections"];
+
+    dbNumberOfReadPoolConnections = 25;
+    if (config.contains("dbNumberOfReadPoolConnections") && config["dbNumberOfReadPoolConnections"].is_number())
+        dbNumberOfReadPoolConnections = config["dbNumberOfReadPoolConnections"];
 
     if (config.contains("cleanerPollingPeriod") && config["cleanerPollingPeriod"].is_number())
         cleanerPollingPeriod = config["cleanerPollingPeriod"];
@@ -457,8 +493,6 @@ void Config::print(void)
         cout << "    executeInParallel=true" << endl;
     if (useMainExecGenerated)
         cout << "    useMainExecGenerated=true" << endl;
-    if (useProcessBatchCache)
-        cout << "    useProcessBatchCache=true" << endl;
 
     if (saveRequestToFile)
         cout << "    saveRequestToFile=true" << endl;
@@ -476,12 +510,18 @@ void Config::print(void)
         cout << "    saveResponseToFile=true" << endl;
     if (loadDBToMemCache)
         cout << "    loadDBToMemCache=true" << endl;
+    if (loadDBToMemCacheInParallel)
+        cout << "    loadDBToMemCacheInParallel=true" << endl;
     if (opcodeTracer)
         cout << "    opcodeTracer=true" << endl;
     if (logRemoteDbReads)
         cout << "    logRemoteDbReads=true" << endl;
     if (logExecutorServerResponses)
         cout << "    logExecutorServerResponses=true" << endl;
+    if (logExecutorServerTxs)
+        cout << "    logExecutorServerTxs=true" << endl;
+    if (dontLoadRomOffsets)
+        cout << "    dontLoadRomOffsets=true" << endl;
 
     cout << "    executorServerPort=" << to_string(executorServerPort) << endl;
     cout << "    executorClientPort=" << to_string(executorClientPort) << endl;
@@ -528,10 +568,16 @@ void Config::print(void)
     cout << "    databaseURL=" << databaseURL << endl;
     cout << "    dbNodesTableName=" << dbNodesTableName << endl;
     cout << "    dbProgramTableName=" << dbProgramTableName << endl;
-    cout << "    dbAsyncWrite=" << to_string(dbAsyncWrite) << endl;
+    cout << "    dbMultiWrite=" << to_string(dbMultiWrite) << endl;
+    cout << "    dbFlushInParallel=" << to_string(dbFlushInParallel) << endl;
+    cout << "    dbConnectionsPool=" << to_string(dbConnectionsPool) << endl;
+    cout << "    dbNumberOfWritePoolConnections=" << dbNumberOfWritePoolConnections << endl;
+    cout << "    dbNumberOfReadPoolConnections=" << dbNumberOfReadPoolConnections << endl;
     cout << "    cleanerPollingPeriod=" << cleanerPollingPeriod << endl;
     cout << "    requestsPersistence=" << requestsPersistence << endl;
     cout << "    maxExecutorThreads=" << maxExecutorThreads << endl;
     cout << "    maxProverThreads=" << maxProverThreads << endl;
     cout << "    maxStateDBThreads=" << maxStateDBThreads << endl;
+    cout << "    dbMTCacheSize=" << dbMTCacheSize << endl;
+    cout << "    dbProgramCacheSize=" << dbProgramCacheSize << endl;
 }

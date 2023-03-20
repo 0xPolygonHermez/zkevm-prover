@@ -26,7 +26,7 @@
 
     "executeInParallel": true,
     "useMainExecGenerated": true,
-    "useProcessBatchCache": false,
+    
     "saveRequestToFile": false,
     "saveInputToFile": false,
     "saveDbReadsToFile": false,
@@ -37,9 +37,14 @@
     "saveFilesInSubfolders": false,
     
     "loadDBToMemCache": true,
+    "loadDBToMemCacheInParallel": false,
+    "dbMTCacheSize": 16384,
+    "dbProgramCacheSize": 16384,
+
     "opcodeTracer": false,
     "logRemoteDbReads": false,
     "logExecutorServerResponses": false,
+    "logExecutorServerTxs": true,
 
     "executorServerPort": 50071,
     "executorROMLineTraces": false,
@@ -47,7 +52,7 @@
     "executorClientHost": "127.0.0.1",
 
     "stateDBServerPort": 50061,
-    "stateDBURL": "SET STATEDB SERVER IP",
+    "stateDBURL": "local",
 
     "aggregatorServerPort": 50081,
     "aggregatorClientPort": 50081,
@@ -64,12 +69,12 @@
     "configPath": "config",
 
     "zkevmCmPols_disabled": "runtime/zkevm.commit",
+    "zkevmCmPolsAfterExecutor_disabled": "runtime/zkevm.commit",
     "c12aCmPols": "runtime/c12a.commit",
     "recursive1CmPols_disabled": "runtime/recursive1.commit",
     "recursive2CmPols_disabled": "runtime/recursive2.commit",
     "recursivefCmPols_disabled": "runtime/recursivef.commit",
     "finalCmPols_disabled": "runtime/final.commit",
-
     "publicsOutput": "public.json",
     "proofFile": "proof.json",
 
@@ -77,7 +82,11 @@
     "databaseURL_disabled": "postgresql://statedb:statedb@127.0.0.1:5432/testdb",
     "dbNodesTableName": "state.nodes",
     "dbProgramTableName": "state.program",
-    "dbAsyncWrite": false,
+    "dbMultiWrite": true,
+    "dbFlushInParallel": true,
+    "dbConnectionsPool": false,
+    "dbNumberOfWritePoolConnections": 25,
+    "dbNumberOfReadPoolConnections": 25,
     "cleanerPollingPeriod": 600,
     "requestsPersistence": 3600,
     "maxExecutorThreads": 20,

@@ -3,10 +3,9 @@
 
 #include <sys/time.h>
 #include "goldilocks_base_field.hpp"
-#include "context.hpp"
 #include "config.hpp"
 #include "input.hpp"
-#include "proof.hpp"
+#include "proof_fflonk.hpp"
 #include "definitions.hpp"
 
 using json = nlohmann::json;
@@ -22,23 +21,6 @@ struct MemoryInfo {
     uint64_t swapTotal;
     uint64_t swapFree;
 };
-
-/*********/
-/* Print */
-/*********/
-
-// These functions log information into the console
-
-void printRegs(Context &ctx);
-void printVars(Context &ctx);
-void printMem(Context &ctx);
-
-void printReg(Context &ctx, string name, Goldilocks::Element &V, bool h = false, bool bShort = false);
-void printU64(Context &ctx, string name, uint64_t v);
-void printU32(Context &ctx, string name, uint32_t v);
-void printU16(Context &ctx, string name, uint16_t v);
-
-string printFea(Context &ctx, Fea &fea);
 
 void printBa(uint8_t * pData, uint64_t dataSize, string name);
 void printBits(uint8_t * pData, uint64_t dataSize, string name);
@@ -69,6 +51,9 @@ bool fileExists (const string &fileName);
 // Ensure directory exists
 void ensureDirectoryExists (const string &fileName);
 
+// Get number of open file descriptors
+uint64_t getNumberOfFileDescriptors (void);
+
 // Maps memory into a file
 void * mapFile (const string &fileName, uint64_t size, bool bOutput);
 void unmapFile (void * pAddress, uint64_t size);
@@ -86,7 +71,10 @@ vector<string> getFolderFiles (string folder, bool sorted);
 uint64_t getNumberOfCores (void);
 
 // Save a string into a file
-void string2File (const string & s, const string & fileName);
+void string2file (const string &s, const string &fileName);
+
+// Copy a file content into a string
+void file2string (const string &fileName, string &s);
 
 /*
 // Convert an octal string into an hex string
@@ -96,7 +84,7 @@ bool octal2hex (const string &octalString, string &hexString);
 bool octalText2hexText (const string &octalText, string &hexText);
 */
 
-// Get hostname and IP address
-void getNetworkInfo (string &hostname, string &ipAddress);
+// Get IP address
+void getIPAddress (string &ipAddress);
 
 #endif

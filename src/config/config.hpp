@@ -40,7 +40,6 @@ public:
     
     bool executeInParallel;
     bool useMainExecGenerated;
-    bool useProcessBatchCache;
 
     bool saveRequestToFile; // Saves the grpc service request, in text format
     bool saveInputToFile; // Saves the grpc input data, in json format
@@ -52,9 +51,14 @@ public:
     bool saveFilesInSubfolders; // Saves output files in folders per hour, e.g. output/2023/01/10/18
 
     bool loadDBToMemCache;
+    bool loadDBToMemCacheInParallel;
+    int64_t dbMTCacheSize; // Size in MBytes for the cache to store MT records
+    int64_t dbProgramCacheSize; // Size in MBytes for the cache to store Program (SC) records
     bool opcodeTracer;
     bool logRemoteDbReads;
     bool logExecutorServerResponses;
+    bool logExecutorServerTxs;
+    bool dontLoadRomOffsets;
 
     uint16_t executorServerPort;
     bool executorROMLineTraces;
@@ -74,7 +78,8 @@ public:
     string outputPath;
     string configPath;
     string rom;
-    string zkevmCmPols;
+    string zkevmCmPols; // Maps commit pols memory into file, which slows down a bit the executor
+    string zkevmCmPolsAfterExecutor; // Saves commit pols into file after the executor has completed, avoiding having to map it from the beginning
     string c12aCmPols;
     string recursive1CmPols;
     string zkevmConstPols;
@@ -115,7 +120,11 @@ public:
     string databaseURL;
     string dbNodesTableName;
     string dbProgramTableName;
-    bool dbAsyncWrite;
+    bool dbMultiWrite;
+    bool dbFlushInParallel;
+    bool dbConnectionsPool;
+    uint64_t dbNumberOfWritePoolConnections;
+    uint64_t dbNumberOfReadPoolConnections;
     uint64_t cleanerPollingPeriod;
     uint64_t requestsPersistence;
     uint64_t maxExecutorThreads;

@@ -7,7 +7,7 @@
 #include "goldilocks_base_field.hpp"
 #include "input.hpp"
 #include "rom.hpp"
-#include "proof.hpp"
+#include "proof_fflonk.hpp"
 #include "alt_bn128.hpp"
 #include "groth16.hpp"
 #include "binfile_utils.hpp"
@@ -22,22 +22,21 @@
 #include "starkpil/stark_info.hpp"
 #include "starks.hpp"
 #include "constant_pols_starks.hpp"
-
+#include "fflonk_prover.hpp"
 class Prover
 {
     Goldilocks &fr;
     PoseidonGoldilocks &poseidon;
     Executor executor;
 
-    // StarkRecursive1 starkRecursive1;
-    // StarkRecursive2 starkRecursive2;
-    StarkRecursiveF starkRecursiveF;
+    StarkRecursiveF *starksRecursiveF;
 
     Starks *starkZkevm;
     Starks *starksC12a;
     Starks *starksRecursive1;
     Starks *starksRecursive2;
 
+    Fflonk::FflonkProver<AltBn128::Engine> *prover;
     std::unique_ptr<Groth16::Prover<AltBn128::Engine>> groth16Prover;
     std::unique_ptr<BinFileUtils::BinFile> zkey;
     std::unique_ptr<ZKeyUtils::Header> zkeyHeader;
@@ -55,6 +54,8 @@ private:
     pthread_t cleanerPthread; // Garbage collector
     pthread_mutex_t mutex;    // Mutex to protect the requests queues
     void *pAddress = NULL;
+    void *pAddressStarksRecursiveF = NULL;
+    int protocolId;
 public:
     const Config &config;
     sem_t pendingRequestSem; // Semaphore to wakeup prover thread when a new request is available

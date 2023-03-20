@@ -23,8 +23,9 @@ uint64_t TimeDiff(const struct timeval &startTime, const struct timeval &endTime
     }
     else
     {
-        cerr << "Error: TimeDiff() got startTime > endTime: startTime.tv_sec=" << startTime.tv_sec << " startTime.tv_usec=" << startTime.tv_usec << " endTime.tv_sec=" << endTime.tv_sec << " endTime.tv_usec=" << endTime.tv_usec << endl;
-        diff.tv_usec = 0;
+        // gettimeofday() can go backwards under some circumstances: NTP, multithread...
+        //cerr << "Error: TimeDiff() got startTime > endTime: startTime.tv_sec=" << startTime.tv_sec << " startTime.tv_usec=" << startTime.tv_usec << " endTime.tv_sec=" << endTime.tv_sec << " endTime.tv_usec=" << endTime.tv_usec << endl;
+        return 0;
     }
 
     // Return the total number of us

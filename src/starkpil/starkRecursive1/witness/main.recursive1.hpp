@@ -23,6 +23,6 @@ namespace CircomRecursive1
     void writeBinWitness(Circom_CalcWit *ctx, std::string wtnsFileName);
     void getBinWitness(Circom_CalcWit *ctx, FrGElement *&pWitness, uint64_t &witnessSize);
     void getCommitedPols(CommitPolsStarks *commitPols, const std::string zkevmVerifier, const std::string execFile, nlohmann::json &zkin, uint64_t N);
-
+    bool check_valid_number(std::string &s, uint base);
 }
 #endif

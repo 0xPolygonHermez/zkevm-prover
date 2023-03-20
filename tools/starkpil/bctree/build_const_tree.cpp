@@ -358,6 +358,7 @@ void buildConstTree(const string constFile, const string starkStructFile, const 
 
         TimerStart(MerkleTree_BN128);
         MerkleTreeBN128 mt(nExt, nPols, constPolsArrayE);
+        mt.merkelize();
         TimerStopAndLog(MerkleTree_BN128);
 
         cout << time() << " Generating files..." << endl;

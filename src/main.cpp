@@ -6,7 +6,6 @@
 #include <iomanip>
 #include <sys/time.h>
 #include "goldilocks_base_field.hpp"
-#include "sm/main/main_executor.hpp"
 #include "utils.hpp"
 #include "config.hpp"
 #include "version.hpp"
@@ -30,8 +29,8 @@
 #include "statedb/statedb_server.hpp"
 #include "service/statedb/statedb_test.hpp"
 #include "service/statedb/statedb.hpp"
-#include "sha256.hpp"
-#include "blake.hpp"
+#include "sha256_test.hpp"
+#include "blake_test.hpp"
 #include "goldilocks_precomputed.hpp"
 
 using namespace std;
@@ -51,7 +50,7 @@ using json = nlohmann::json;
     | | Storage State Machine------\
     | |                             |--> Poseidon G State Machine
     | | Padding PG State Machine---/
-    | | Padding KK SM -> Padding KK Bit -> Nine To One SM -> Keccak-f SM -> Norm Gate 9 SM
+    | | Padding KK SM -> Padding KK Bit -> Bits 2 Field SM -> Keccak-f SM
     |  \
     |   State DB (available via GRPC service)
     |   |\
@@ -78,10 +77,18 @@ void runFileGenBatchProof(Goldilocks fr, Prover &prover, Config &config)
         if (zkResult != ZKR_SUCCESS)
         {
             cerr << "Error: runFileGenBatchProof() failed calling proverRequest.input.load() zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
-            exit(-1);
+            exitProcess();
         }
     }
     TimerStopAndLog(INPUT_LOAD);
+    
+    // Create full tracer based on fork ID
+    proverRequest.CreateFullTracer();
+    if (proverRequest.result != ZKR_SUCCESS)
+    {
+        cerr << "Error: runFileGenBatchProof() failed calling proverRequest.CreateFullTracer() zkResult=" << proverRequest.result << "=" << zkresult2string(proverRequest.result) << endl;
+        exitProcess();
+    }
 
     // Call the prover
     prover.genBatchProof(&proverRequest);
@@ -137,10 +144,18 @@ void runFileProcessBatch(Goldilocks fr, Prover &prover, Config &config)
         if (zkResult != ZKR_SUCCESS)
         {
             cerr << "Error: runFileProcessBatch() failed calling proverRequest.input.load() zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
-            exit(-1);
+            exitProcess();
         }
     }
     TimerStopAndLog(INPUT_LOAD);
+    
+    // Create full tracer based on fork ID
+    proverRequest.CreateFullTracer();
+    if (proverRequest.result != ZKR_SUCCESS)
+    {
+        cerr << "Error: runFileProcessBatch() failed calling proverRequest.CreateFullTracer() zkResult=" << proverRequest.result << "=" << zkresult2string(proverRequest.result) << endl;
+        exitProcess();
+    }
 
     // Call the prover
     prover.processBatch(&proverRequest);
@@ -204,10 +219,18 @@ void runFileExecute(Goldilocks fr, Prover &prover, Config &config)
         if (zkResult != ZKR_SUCCESS)
         {
             cerr << "Error: runFileExecute() failed calling proverRequest.input.load() zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
-            exit(-1);
+            exitProcess();
         }
     }
     TimerStopAndLog(INPUT_LOAD);
+    
+    // Create full tracer based on fork ID
+    proverRequest.CreateFullTracer();
+    if (proverRequest.result != ZKR_SUCCESS)
+    {
+        cerr << "Error: runFileExecute() failed calling proverRequest.CreateFullTracer() zkResult=" << proverRequest.result << "=" << zkresult2string(proverRequest.result) << endl;
+        exitProcess();
+    }
 
     // Call the prover
     prover.execute(&proverRequest);
@@ -227,9 +250,8 @@ int main(int argc, char **argv)
     cout << "Number of cores=" << getNumberOfCores() << endl;
 
     // Print the hostname and the IP address
-    string hostname, ipAddress;
-    getNetworkInfo(hostname, ipAddress);
-    cout << "Host name=" << hostname << endl;
+    string ipAddress;
+    getIPAddress(ipAddress);
     cout << "IP address=" << ipAddress << endl;
 
 #ifdef DEBUG
@@ -501,12 +523,37 @@ int main(int argc, char **argv)
                   config);
     TimerStopAndLog(PROVER_CONSTRUCTOR);
 
+#ifdef DATABASE_USE_CACHE
     /* INIT DB CACHE */
-    if (config.loadDBToMemCache && (config.runAggregatorClient || config.runExecutorServer || config.runStateDBServer))
+    if (config.databaseURL != "local") // remote DB
     {
-        StateDB stateDB(fr, config);
-        stateDB.loadDB2MemCache();
+        Database::dbMTCache.setCacheSize(config.dbMTCacheSize*1024*1024);
+        Database::dbProgramCache.setCacheSize(config.dbProgramCacheSize*1024*1024);
+
+        if (config.loadDBToMemCache && (config.runAggregatorClient || config.runExecutorServer || config.runStateDBServer))
+        {
+            TimerStart(DB_CACHE_LOAD);
+            // if we have a db cache enabled
+            if ((Database::dbMTCache.enabled()) || (Database::dbProgramCache.enabled()))
+            {
+                if (config.loadDBToMemCacheInParallel) {
+                    // Run thread that loads the DB into the dbCache
+                    std::thread loadDBThread (loadDb2MemCache, config);
+                    loadDBThread.detach();
+                } else {
+                    loadDb2MemCache(config);
+                }
+            }
+            TimerStopAndLog(DB_CACHE_LOAD);
+        }
+    } 
+    else 
+    {
+        // set no limit for the db caches as we are using local (in memory) db
+        Database::dbMTCache.setCacheSize(-1); 
+        Database:: dbProgramCache.setCacheSize(-1);
     }
+#endif // DATABASE_USE_CACHE
 
     /* SERVERS */
 
@@ -538,6 +585,7 @@ int main(int argc, char **argv)
         zkassert(pAggregatorServer != NULL);
         cout << "Launching aggregator server thread..." << endl;
         pAggregatorServer->runThread();
+        sleep(2);
     }
 
     /* FILE-BASED INPUT */
@@ -708,7 +756,7 @@ int main(int argc, char **argv)
         zkassert(pExecutorClient != NULL);
         pExecutorClient->waitForThread();
         sleep(1);
-        exit(0);
+        return 0;
     }
 
     // Wait for the executor client thread to end
@@ -718,7 +766,7 @@ int main(int argc, char **argv)
         pExecutorClient->waitForThreads();
         cout << "All executor client threads have completed" << endl;
         sleep(1);
-        exit(0);
+        return 0;
     }
 
     // Wait for the executor server thread to end
@@ -729,7 +777,7 @@ int main(int argc, char **argv)
     }
 
     // Wait for StateDBServer thread to end
-    if (config.runStateDBServer)
+    if (config.runStateDBServer && !config.runStateDBTest)
     {
         zkassert(pStateDBServer != NULL);
         pStateDBServer->waitForThread();
@@ -741,7 +789,7 @@ int main(int argc, char **argv)
         zkassert(pAggregatorClient != NULL);
         pAggregatorClient->waitForThread();
         sleep(1);
-        exit(0);
+        return 0;
     }
 
     // Wait for the aggregator client mock thread to end
@@ -750,7 +798,7 @@ int main(int argc, char **argv)
         zkassert(pAggregatorClientMock != NULL);
         pAggregatorClientMock->waitForThread();
         sleep(1);
-        exit(0);
+        return 0;
     }
 
     // Wait for the aggregator server thread to end

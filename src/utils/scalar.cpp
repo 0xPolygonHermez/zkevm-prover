@@ -60,6 +60,21 @@ void string2fe (Goldilocks &fr, const string &s, Goldilocks::Element &fe)
     fr.fromString(fe, Remove0xIfPresent(s), 16);
 }
 
+void string2fea(Goldilocks &fr, const string os, vector<Goldilocks::Element> &fea)
+{
+    Goldilocks::Element fe;
+    for (uint64_t i = 0; i < os.size(); i += 16)
+    {
+        if (i + 16 > os.size())
+        {
+            cerr << "Error: Database::string2fea() found incorrect DATA column size: " << os.size() << endl;
+            exitProcess();
+        }
+        string2fe(fr, os.substr(i, 16), fe);
+        fea.push_back(fe);
+    }
+}
+
 string fea2string (Goldilocks &fr, const Goldilocks::Element(&fea)[4])
 {
     mpz_class auxScalar;
@@ -270,7 +285,7 @@ uint8_t char2byte (char c)
 char byte2char (uint8_t b)
 {
     if (b < 10) return '0' + b;
-    if (b < 16) return 'A' + b - 10;
+    if (b < 16) return 'a' + b - 10;
     cerr << "Error: byte2char() called with an invalid byte: " << b << endl;
     exitProcess();
     return 0;
@@ -338,6 +353,23 @@ string string2ba (const string &textString)
     string result;
     string2ba(textString, result);
     return result;
+}
+
+void string2ba(const string os, vector<uint8_t> &data)
+{
+    string s = Remove0xIfPresent(os);
+
+    if (s.size()%2 != 0)
+    {
+        s = "0" + s;
+    }
+
+    uint64_t dsize = s.size()/2;
+    const char *p = s.c_str();
+    for (uint64_t i=0; i<dsize; i++)
+    {
+        data.push_back(char2byte(p[2*i])*16 + char2byte(p[2*i + 1]));
+    }
 }
 
 void ba2string (string &s, const uint8_t *pData, uint64_t dataSize)
@@ -499,6 +531,90 @@ void scalar2bits(mpz_class s, vector<uint8_t> &bits)
     }
 }
 
+/* Converts an unsigned 32 to a vector of bits, with value 1 or 0; bits[0] is least significant bit */
+
+void u322bits(uint32_t value, vector<uint8_t> &bits)
+{
+    // Call scalar2bits()
+    mpz_class s(value);
+    scalar2bits(s, bits);
+
+    // Append any missing zeros
+    while (bits.size() < 32)
+    {
+        bits.push_back(0);
+    }
+}
+
+uint32_t bits2u32(const vector<uint8_t> &bits)
+{
+    if (bits.size() != 32)
+    {
+        cerr << "Error: bits2u32() got invalid bits size=" << bits.size() << endl;
+        exitProcess();
+    }
+    uint32_t result = 0;
+    for (int64_t i=31; i>=0; i--)
+    {
+        result = result << 1;
+        switch (bits[i])
+        {
+            case 0:
+                break;
+            case 1:
+                result += 1;
+                break;
+            default:
+                cerr << "Error: bits2u32() got invalid bit i=" << i << " value=" << bits[i] << endl;
+                exitProcess();
+                break;
+        }
+    }
+    return result;
+}
+
+/* Converts an unsigned 64 to a vector of bits, with value 1 or 0; bits[0] is least significant bit */
+
+void u642bits(uint64_t value, vector<uint8_t> &bits)
+{
+    // Call scalar2bits()
+    mpz_class s(value);
+    scalar2bits(s, bits);
+
+    // Append any missing zeros
+    while (bits.size() < 64)
+    {
+        bits.push_back(0);
+    }
+}
+
+uint64_t bits2u64(const vector<uint8_t> &bits)
+{
+    if (bits.size() != 64)
+    {
+        cerr << "Error: bits2u64() got invalid bits size=" << bits.size() << endl;
+        exitProcess();
+    }
+    uint64_t result = 0;
+    for (int64_t i=63; i>=0; i--)
+    {
+        result = result << 1;
+        switch (bits[i])
+        {
+            case 0:
+                break;
+            case 1:
+                result += 1;
+                break;
+            default:
+                cerr << "Error: bits2u64() got invalid bit i=" << i << " value=" << bits[i] << endl;
+                exitProcess();
+                break;
+        }
+    }
+    return result;
+}
+
 /* Byte to/from bits array conversion, with value 1 or 0; bits[0] is the least significant bit */
 
 void byte2bits(uint8_t byte, uint8_t *pBits)
@@ -611,7 +727,7 @@ void bytes2u32 (const uint8_t * pInput, uint32_t &output, bool bBigEndian)
     for (uint64_t i=0; i<4; i++)
     {
         if (i != 0) output = output << 8;
-        output |= pInput[bBigEndian ? i : (4-i)];
+        output |= pInput[bBigEndian ? i : (3-i)];
     }
 }
 
@@ -636,3 +752,4 @@ uint64_t swapBytes64 (uint64_t input)
             (((input) & 0x000000000000ff00ull) << 40) |
             (((input) & 0x00000000000000ffull) << 56));
 }
+

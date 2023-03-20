@@ -7,7 +7,7 @@
 #include <grpcpp/create_channel.h>
 #include <grpcpp/security/credentials.h>
 #include "aggregator.grpc.pb.h"
-#include "proof.hpp"
+#include "proof_fflonk.hpp"
 #include "goldilocks_base_field.hpp"
 #include "prover.hpp"
 

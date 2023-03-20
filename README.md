@@ -1,19 +1,19 @@
 # zkEVM Prover
 zkEVM proof generator
 ## General info
-The zkEVM Prover process can provide up to 3 RPC services:
-
-### Prover service
-- It calls the Prover component that executes the input data (a batch of EVM transactions), calculates the resulting state, and generates the proof of the calculation based on the PIL polynomials definition and their constrains.
-- When called by the Prover service, the Executor component combines 14 state machines that process the input data to generate the evaluations of the committed polynomials, required to generate the proof.  Every state machine generates their computation evidence data, and the more complex calculus demonstrations are delegated to the next state machine.
-- The Prover component calls the Stark component to generate a proof of the Executor state machines committed polynomials.
-- The interface of this service is defined by the file zk-prover.proto.
+The zkEVM Prover process can provide up to 3 RPC services and clients:
 
 ### Aggregator client
-- It connects to an Aggregator server
+- It connects to an Aggregator server.
+- Many zkEVM Provers can connect to the Aggregator server at the same time, providing more proof generation power.
+- When called by the Aggregator service to generate a batch proof:
 - It calls the Prover component that executes the input data (a batch of EVM transactions), calculates the resulting state, and generates the proof of the calculation based on the PIL polynomials definition and their constrains.
-- When called by the Aggregator service, the Executor component combines 14 state machines that process the input data to generate the evaluations of the committed polynomials, required to generate the proof.  Every state machine generates their computation evidence data, and the more complex calculus demonstrations are delegated to the next state machine.
+    - The Executor component combines 14 state machines that process the input data to generate the evaluations of the committed polynomials, required to generate the proof.  Every state machine generates their computation evidence data, and the more complex calculus demonstrations are delegated to the next state machine.
 - The Prover component calls the Stark component to generate a proof of the Executor state machines committed polynomials.
+- When called by the Aggregator service to generate an aggregated proof:
+    - The Prover component combines the result of 2 previously calculated batch or aggregated proofs, provided by the Aggregator, and generates an aggregated proof.
+- When called by the Aggregator service to generate a final proof:
+    - The Prover component takes the result of a previously calculated aggregated proof, provided by the Aggregator, and generates a final proof that can be verified.
 - The interface of the server of this service is defined by the file aggregator.proto.
 
 ### Executor service

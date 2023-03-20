@@ -1,4 +1,8 @@
+#include "definitions.hpp"
 #include "starks.hpp"
+#include "sm/pols_generated/commit_pols.hpp"
+
+USING_PROVER_FORK_NAMESPACE;
 
 void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps *steps)
 {
@@ -41,9 +45,14 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     //--------------------------------
     TimerStart(STARK_STEP_1);
     TimerStart(STARK_STEP_1_LDE_AND_MERKLETREE);
-    ntt.extendPol(p_cm1_2ns, p_cm1_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm1_n], pBuffer);
+    TimerStart(STARK_STEP_1_LDE);
+
+    ntt.extendPol(p_cm1_2ns, p_cm1_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm1_n], p_cm2_2ns);
+    TimerStopAndLog(STARK_STEP_1_LDE);
+    TimerStart(STARK_STEP_1_MERKLETREE);
     treesGL[0]->merkelize();
     treesGL[0]->getRoot(root0.address());
+    TimerStopAndLog(STARK_STEP_1_MERKLETREE);
     std::cout << "MerkleTree rootGL 0: [ " << root0.toString(4) << " ]" << std::endl;
     transcript.put(root0.address(), HASH_SIZE);
     TimerStopAndLog(STARK_STEP_1_LDE_AND_MERKLETREE);
@@ -58,10 +67,17 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     TimerStart(STARK_STEP_2_CALCULATE_EXPS);
 
     // Calculate exps
-#pragma omp parallel for
-    for (uint64_t i = 0; i < N; i++)
+    if (nrowsStepBatch > 1)
     {
-        steps->step2prev_first(params, i);
+        steps->step2prev_parser_first_avx(params, N, nrowsStepBatch);
+    }
+    else
+    {
+#pragma omp parallel for
+        for (uint64_t i = 0; i < N; i++)
+        {
+            steps->step2prev_first(params, i);
+        }
     }
     TimerStopAndLog(STARK_STEP_2_CALCULATE_EXPS);
 
@@ -106,10 +122,13 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE_2);
 
     TimerStart(STARK_STEP_2_LDE_AND_MERKLETREE);
-
+    TimerStart(STARK_STEP_2_LDE);
     ntt.extendPol(p_cm2_2ns, p_cm2_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm2_n], pBuffer);
+    TimerStopAndLog(STARK_STEP_2_LDE);
+    TimerStart(STARK_STEP_2_MERKLETREE);
     treesGL[1]->merkelize();
     treesGL[1]->getRoot(root1.address());
+    TimerStopAndLog(STARK_STEP_2_MERKLETREE);
     std::cout << "MerkleTree rootGL 1: [ " << root1.toString(4) << " ]" << std::endl;
     transcript.put(root1.address(), HASH_SIZE);
 
@@ -124,10 +143,17 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     transcript.getField(challenges[3]); // betta
     TimerStart(STARK_STEP_3_CALCULATE_EXPS);
 
-#pragma omp parallel for
-    for (uint64_t i = 0; i < N; i++)
+    if (nrowsStepBatch > 1)
     {
-        steps->step3prev_first(params, i);
+        steps->step3prev_parser_first_avx(params, N, nrowsStepBatch);
+    }
+    else
+    {
+#pragma omp parallel for
+        for (uint64_t i = 0; i < N; i++)
+        {
+            steps->step3prev_first(params, i);
+        }
     }
     TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS);
 
@@ -150,16 +176,28 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     TimerStart(STARK_STEP_3_CALCULATE_EXPS_2);
 
     // Calculate exps
-#pragma omp parallel for
-    for (uint64_t i = 0; i < N; i++)
+    if (nrowsStepBatch > 1)
     {
-        steps->step3_first(params, i);
+        steps->step3_parser_first_avx(params, N, nrowsStepBatch);
     }
+    else
+    {
+#pragma omp parallel for
+        for (uint64_t i = 0; i < N; i++)
+        {
+            steps->step3_first(params, i);
+        }
+    }
+
     TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS_2);
     TimerStart(STARK_STEP_3_LDE_AND_MERKLETREE);
+    TimerStart(STARK_STEP_3_LDE);
     ntt.extendPol(p_cm3_2ns, p_cm3_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm3_n], pBuffer);
+    TimerStopAndLog(STARK_STEP_3_LDE);
+    TimerStart(STARK_STEP_3_MERKLETREE);
     treesGL[2]->merkelize();
     treesGL[2]->getRoot(root2.address());
+    TimerStopAndLog(STARK_STEP_3_MERKLETREE);
     std::cout << "MerkleTree rootGL 2: [ " << root2.toString(4) << " ]" << std::endl;
     transcript.put(root2.address(), HASH_SIZE);
     TimerStopAndLog(STARK_STEP_3_LDE_AND_MERKLETREE);
@@ -179,11 +217,19 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     TimerStopAndLog(STARK_STEP_4_INIT);
     TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS);
 
-#pragma omp parallel for
-    for (uint64_t i = 0; i < NExtended; i++)
+    if (nrowsStepBatch > 1)
     {
-        steps->step42ns_first(params, i);
+        steps->step42ns_parser_first_avx(params, NExtended, nrowsStepBatch);
     }
+    else
+    {
+#pragma omp parallel for
+        for (uint64_t i = 0; i < NExtended; i++)
+        {
+            steps->step42ns_first(params, i);
+        }
+    }
+
     TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS);
 
     TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_INTT);
@@ -293,11 +339,17 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     }
     TimerStopAndLog(STARK_STEP_5_XDIVXSUB);
     TimerStart(STARK_STEP_5_CALCULATE_EXPS);
-
-#pragma omp parallel for
-    for (uint64_t i = 0; i < NExtended; i++)
+    if (nrowsStepBatch > 1)
     {
-        steps->step52ns_first(params, i);
+        steps->step52ns_parser_first_avx(params, NExtended, nrowsStepBatch);
+    }
+    else
+    {
+#pragma omp parallel for
+        for (uint64_t i = 0; i < NExtended; i++)
+        {
+            steps->step52ns_first(params, i);
+        }
     }
 
     TimerStopAndLog(STARK_STEP_5_CALCULATE_EXPS);

@@ -62,6 +62,27 @@
 				"isDefault": false
 			},
 			"detail": "compiler: /usr/bin/gcc"
+		},
+		{
+			"type": "cppbuild",
+			"label": "Build pols generator",
+			"command": "make",
+			"args": [
+				"pols_generator",
+				"dbg=1",
+				"-j$(nproc)"
+			],
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": false
+			},
+			"detail": "compiler: /usr/bin/gcc"
 		}
 	]
 }

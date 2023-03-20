@@ -12,6 +12,7 @@ MerkleTreeBN128::MerkleTreeBN128(uint64_t _height, uint64_t _width)
     (_width > GOLDILOCKS_ELEMENTS + 1) ? width = ceil((double)_width / GOLDILOCKS_ELEMENTS) : width = 0;
     numNodes = getNumNodes(height);
     nodes = (RawFr::Element *)calloc(numNodes, sizeof(RawFr::Element));
+    isNodesAllocated = true;
 }
 
 void MerkleTreeBN128::initialize(Goldilocks::Element *_source)
@@ -33,12 +34,11 @@ MerkleTreeBN128::MerkleTreeBN128(uint64_t _height, uint64_t _width, Goldilocks::
     (_width > GOLDILOCKS_ELEMENTS + 1) ? width = ceil((double)_width / GOLDILOCKS_ELEMENTS) : width = 0;
     numNodes = getNumNodes(height);
     nodes = (RawFr::Element *)calloc(numNodes, sizeof(RawFr::Element));
-    //linearHash();
-    //merkelize();
+    isNodesAllocated = true;
     intialized = true;
 }
 
-MerkleTreeBN128::MerkleTreeBN128(void *_source) : allocated(true)
+MerkleTreeBN128::MerkleTreeBN128(void *_source)
 {
     Goldilocks::Element *tree = (Goldilocks::Element *)_source;
     source_width = Goldilocks::toU64(tree[0]);
@@ -51,7 +51,7 @@ MerkleTreeBN128::MerkleTreeBN128(void *_source) : allocated(true)
 
 MerkleTreeBN128::~MerkleTreeBN128()
 {
-    if (!allocated)
+    if (isNodesAllocated)
     {
         free(nodes);
     }
@@ -214,6 +214,7 @@ void MerkleTreeBN128::getGroupProof(void *res, uint64_t idx)
     merkle_genMerkleProof(mp, idx, 0, height);
 
     std::memcpy(resCursor, &mp[0], getMerkleProofSize(height));
+    free(mp);
 }
 
 Goldilocks::Element MerkleTreeBN128::getElement(uint64_t idx, uint64_t subIdx)

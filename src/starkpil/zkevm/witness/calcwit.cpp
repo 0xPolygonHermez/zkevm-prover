@@ -37,7 +37,7 @@ namespace Circom
       inputSignalAssigned[i] = false;
     }
     signalValues = new FrGElement[get_total_signal_no()];
-    FrG_str2element(&signalValues[0], "1");
+    FrG_str2element(&signalValues[0], "1", 10);
     componentMemory = new Circom_Component[get_number_of_components()];
     circuitConstants = circuit->circuitConstants;
     templateInsId2IOSignalInfo = circuit->templateInsId2IOSignalInfo;
@@ -81,6 +81,13 @@ namespace Circom
     return pos;
   }
 
+  void Circom_CalcWit::tryRunCircuit()
+  {
+    if (inputSignalAssignedCounter == 0)
+    {
+      run(this);
+    }
+  }
   void Circom_CalcWit::setInputSignal(u64 h, uint i, FrGElement &val)
   {
     if (inputSignalAssignedCounter == 0)
@@ -104,10 +111,7 @@ namespace Circom
     signalValues[si] = val;
     inputSignalAssigned[si - get_main_input_signal_start()] = true;
     inputSignalAssignedCounter--;
-    if (inputSignalAssignedCounter == 0)
-    {
-      run(this);
-    }
+    tryRunCircuit();
   }
 
   u64 Circom_CalcWit::getInputSignalSize(u64 h)

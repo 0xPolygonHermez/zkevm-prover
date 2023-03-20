@@ -51,6 +51,9 @@ namespace CircomRecursiveF
   Circom_CalcWit::~Circom_CalcWit()
   {
     // ...
+    delete[] inputSignalAssigned;
+    delete[] signalValues;
+    delete[] componentMemory;
   }
 
   uint Circom_CalcWit::getInputSignalHashPosition(u64 h)
@@ -85,7 +88,6 @@ namespace CircomRecursiveF
       run(this);
     }
   }
-
   void Circom_CalcWit::setInputSignal(u64 h, uint i, FrGElement &val)
   {
     if (inputSignalAssignedCounter == 0)

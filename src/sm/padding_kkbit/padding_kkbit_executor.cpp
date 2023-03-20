@@ -3,6 +3,7 @@
 #include "timer.hpp"
 #include "definitions.hpp"
 #include "Keccak-more-compact.hpp"
+#include "zkmax.hpp"
 
 inline uint64_t getStateBit ( const uint8_t (&state)[200], uint64_t i )
 {

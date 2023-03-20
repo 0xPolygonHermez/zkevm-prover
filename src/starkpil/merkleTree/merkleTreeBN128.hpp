@@ -24,7 +24,6 @@ public:
     uint64_t width;
     uint64_t source_width;
     bool intialized = false;
-    bool allocated = false;
     bool isSourceAllocated = false;
     bool isNodesAllocated = false;
     MerkleTreeBN128(){};

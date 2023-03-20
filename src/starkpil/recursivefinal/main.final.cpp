@@ -108,6 +108,14 @@ namespace CircomFinal
     return circuit;
   }
 
+  void freeCircuit(Circom_Circuit *circuit)
+  {
+    delete[] circuit->InputHashMap;
+    delete[] circuit->witness2SignalList;
+    delete[] circuit->circuitConstants;
+    delete circuit;
+  }
+
   bool check_valid_number(std::string &s, uint base)
   {
     bool is_valid = true;
@@ -128,14 +136,6 @@ namespace CircomFinal
       }
     }
     return is_valid;
-  }
-
-  void freeCircuit(Circom_Circuit *circuit)
-  {
-    delete[] circuit->InputHashMap;
-    delete[] circuit->witness2SignalList;
-    delete[] circuit->circuitConstants;
-    delete circuit;
   }
 
   void json2FrElements(json val, std::vector<FrElement> &vval)
@@ -204,9 +204,6 @@ namespace CircomFinal
 
   void loadJsonImpl(Circom_CalcWit *ctx, json &j)
   {
-    // std::ifstream inStream(filename);
-    // json j;
-    // inStream >> j;
 
     u64 nItems = j.size();
     // printf("Items : %llu\n",nItems);
@@ -237,7 +234,7 @@ namespace CircomFinal
       {
         try
         {
-          // std::cout << it.key() << "," << i << " => " << Fr_element2str(&(v[i])) << '\n';
+          // std::cout << it.key() << "," << i << " => " << FrG_element2str(&(v[i])) << '\n';
           ctx->setInputSignal(h, i, v[i]);
         }
         catch (std::runtime_error &e)

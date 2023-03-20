@@ -4,7 +4,7 @@
 #include "goldilocks_base_field.hpp"
 #include "goldilocks_cubic_extension.hpp"
 #include "compare_fe.hpp"
-#include <math.h>       /* log2 */
+#include <math.h> /* log2 */
 
 class Polinomial
 {
@@ -70,11 +70,12 @@ public:
         _allocated = false;
     }
 
-    Goldilocks::Element *address(void) { return _pAddress; }
-    uint64_t degree(void) { return _degree; }
-    uint64_t dim(void) { return _dim; }
-    uint64_t length(void) { return _degree * _dim; }
-    uint64_t size(void) { return _degree * _dim * sizeof(Goldilocks::Element); }
+    inline Goldilocks::Element *address(void) { return _pAddress; }
+    inline uint64_t degree(void) { return _degree; }
+    inline uint64_t dim(void) { return _dim; }
+    inline uint64_t length(void) { return _degree * _dim; }
+    inline uint64_t size(void) { return _degree * _dim * sizeof(Goldilocks::Element); }
+    inline uint64_t offset(void) { return _offset; }
 
     Goldilocks::Element *operator[](uint64_t i) { return &_pAddress[i * _offset]; };
 
