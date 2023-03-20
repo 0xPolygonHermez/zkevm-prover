@@ -419,7 +419,9 @@ void file2string (const string &fileName, string &s)
 {
     std::ifstream infile;
     infile.open(fileName);
-    infile >> s;
+    std::stringstream ss;
+    ss << infile.rdbuf();
+    s = ss.str();
     infile.close();
 }
 

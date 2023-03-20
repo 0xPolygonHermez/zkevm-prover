@@ -361,9 +361,15 @@ void FullTracer::onError(Context &ctx, const RomCommand &cmd)
 
     // Revert logs
     uint64_t CTX = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
-    if (logs.find(CTX) != logs.end())
+    mpz_class auxScalar;
+    getVarFromCtx(ctx, true, ctx.rom.lastCtxUsedOffset, auxScalar);
+    uint64_t lastContextUsed = auxScalar.get_ui();
+    for (uint64_t i=CTX; i<=lastContextUsed; i++)
     {
-        logs.erase(CTX);
+        if (logs.find(i) != logs.end())
+        {
+            logs.erase(i);
+        }
     }
 
 #ifdef LOG_FULL_TRACER_ON_ERROR

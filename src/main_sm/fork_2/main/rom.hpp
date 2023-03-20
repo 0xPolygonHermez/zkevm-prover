@@ -52,7 +52,7 @@ public:
     uint64_t bytecodeLengthOffset;
     uint64_t originCTXOffset;
     uint64_t gasCTXOffset;
-
+    uint64_t lastCtxUsedOffset;
 
     /* Constants */
     uint64_t MAX_CNT_STEPS_LIMIT;
@@ -91,6 +91,12 @@ public:
             txSrcAddrOffset(0),
             gasCallOffset(0),
             isPreEIP155Offset(0),
+            isCreateContractOffset(0),
+            storageAddrOffset(0),
+            bytecodeLengthOffset(0),
+            originCTXOffset(0),
+            gasCTXOffset(0),
+            lastCtxUsedOffset(0),
             MAX_CNT_STEPS_LIMIT(0),
             MAX_CNT_ARITH_LIMIT(0),
             MAX_CNT_BINARY_LIMIT(0),
