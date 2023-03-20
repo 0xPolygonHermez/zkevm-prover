@@ -37,6 +37,7 @@ namespace Fflonk {
         size_t sDomain;
 
         FrElement *reservedMemoryPtr;
+        uint64_t reservedMemorySize;
 
         u_int64_t lengthPrecomputedBigBuffer;
         FrElement *precomputedBigBuffer;
@@ -49,7 +50,7 @@ namespace Fflonk {
         u_int32_t *mapBuffersBigBuffer;
 
         u_int64_t lengthInternalWitnessBuffer;
-        
+
         FrElement *buffInternalWitness;
         FrElement *buffWitness;
 
@@ -80,7 +81,7 @@ namespace Fflonk {
         SnarkProof<Engine> *proof;
     public:
         FflonkProver(Engine &E);
-        FflonkProver(Engine &E, void* reservedMemoryPtr);
+        FflonkProver(Engine &E, void* reservedMemoryPtr, uint64_t reservedMemorySize);
 
         ~FflonkProver();
 
@@ -93,7 +94,7 @@ namespace Fflonk {
         std::tuple <json, json> prove(FrElement *wtns, WtnsUtils::Header* wtnsHeader = NULL);
 
     protected:
-        void initialize(void* reservedMemoryPtr);
+        void initialize(void* reservedMemoryPtr, uint64_t reservedMemorySize = 0);
 
         void removePrecomputedData();
 
