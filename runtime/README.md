@@ -20,5 +20,5 @@ node ../pil-stark/src/main_verifier.js -p config/recursive2/recursive2.pil -s co
 
 #### Verify final snark
 ```bash
-snarkjs g16v config/final/final.g16.verkey.json $(ls -t runtime//output/*.gen_final_proof_public.json | head -n1) $(ls -t runtime//output/*.final_proof.proof.json | head -n1)
+snarkjs ffv config/final/final.fflonk.verkey.json $(ls -t runtime//output/*.gen_final_proof_public.json | head -n1) $(ls -t runtime//output/*.final_proof.proof.json | head -n1)
 ```
