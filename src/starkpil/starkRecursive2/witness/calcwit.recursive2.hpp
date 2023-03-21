@@ -10,7 +10,7 @@
 #include "circom.recursive2.hpp"
 #include "fr_goldilocks.hpp"
 
-#define NMUTEXES 12 // 512
+#define NMUTEXES 32 // 512
 
 namespace CircomRecursive2
 {
@@ -34,9 +34,9 @@ namespace CircomRecursive2
     // parallelism
     std::mutex numThreadMutex;
     std::condition_variable ntcvs;
-    uint numThread;
+    int numThread;
 
-    uint maxThread;
+    int maxThread;
 
     // Functions called by the circuit
     Circom_CalcWit(Circom_Circuit *aCircuit, uint numTh = NMUTEXES);
