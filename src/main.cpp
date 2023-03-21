@@ -585,7 +585,7 @@ int main(int argc, char **argv)
         zkassert(pAggregatorServer != NULL);
         cout << "Launching aggregator server thread..." << endl;
         pAggregatorServer->runThread();
-        sleep(2);
+        sleep(5);
     }
 
     /* FILE-BASED INPUT */
