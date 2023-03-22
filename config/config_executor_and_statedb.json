@@ -3,7 +3,7 @@
     "runExecutorClient": false,
     "runExecutorClientMultithread": false,
 
-    "runStateDBServer": false,
+    "runStateDBServer": true,
     "runStateDBTest": false,
 
     "runAggregatorServer": false,
@@ -85,11 +85,11 @@
     "dbMultiWrite": true,
     "dbFlushInParallel": true,
     "dbConnectionsPool": true,
-    "dbNumberOfWritePoolConnections": 25,
-    "dbNumberOfReadPoolConnections": 25,
+    "dbNumberOfWritePoolConnections": 40,
+    "dbNumberOfReadPoolConnections": 40,
     "cleanerPollingPeriod": 600,
     "requestsPersistence": 3600,
     "maxExecutorThreads": 20,
     "maxProverThreads": 8,
-    "maxStateDBThreads": 8
+    "maxStateDBThreads": 20
 }
