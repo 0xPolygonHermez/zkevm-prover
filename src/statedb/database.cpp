@@ -9,6 +9,7 @@
 #include "utils.hpp"
 #include <unistd.h>
 #include "timer.hpp"
+#include "statedb_singleton.hpp"
 
 #ifdef DATABASE_USE_CACHE
 
@@ -17,6 +18,8 @@
 // DatabaseCacheMT and DatabaseCacheProgram classes are thread-safe
 DatabaseMTCache Database::dbMTCache;
 DatabaseProgramCache Database::dbProgramCache;
+
+string Database::dbStateRootKey("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // 64 f's
 
 #endif
 
@@ -49,7 +52,7 @@ void Database::init(void)
     bInitialized = true;
 }
 
-zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog)
+zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, const bool update)
 {
     // Check that it has been initialized before
     if (!bInitialized)
@@ -93,7 +96,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
 
 #ifdef DATABASE_USE_CACHE
             // Store it locally to avoid any future remote access for this key
-            if (useDBMTCache) Database::dbMTCache.add(key, value);
+            if (useDBMTCache) Database::dbMTCache.add(key, value, update);
 #endif
 
             // Add to the read log
@@ -120,13 +123,19 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
     return r;
 }
 
-zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent)
+zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent, const bool update)
 {
     // Check that it has  been initialized before
     if (!bInitialized)
     {
         cerr << "Error: Database::write() called uninitialized" << endl;
         exitProcess();
+    }
+
+    if (config.dbMultiWrite && !useDBMTCache && !persistent)
+    {
+        cerr << "Error: Database::write() called with multi-write active, cache disabled and no persistance in database, so there is no place to store the date" << endl;
+        return ZKR_DB_ERROR;
     }
 
     zkresult r;
@@ -149,7 +158,7 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
             valueString += PrependZeros(fr.toString(value[i], 16), 16);
         }
 
-        r = writeRemote(false, key, valueString);
+        r = writeRemote(false, key, valueString, update);
     }
     else
     {
@@ -160,7 +169,7 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
     if ((r == ZKR_SUCCESS) && (useDBMTCache))
     {
         // Create in memory cache
-        Database::dbMTCache.add(key, value);
+        Database::dbMTCache.add(key, value, update);
     }
 #endif
 
@@ -172,7 +181,7 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
     cout << " value=";
     for (uint64_t i = 0; i < value.size(); i++)
         cout << fr.toString(value[i], 16) << ":";
-    cout << " persistent=" << persistent << endl;
+    cout << " persistent=" << persistent << " update=" << update << endl;
 #endif
 
     return r;
@@ -503,7 +512,7 @@ zkresult Database::readRemote(bool bProgram, const string &key, string &value)
     return ZKR_SUCCESS;
 }
 
-zkresult Database::writeRemote(bool bProgram, const string &key, const string &value)
+zkresult Database::writeRemote(bool bProgram, const string &key, const string &value, const bool update)
 {
     zkresult result = ZKR_SUCCESS;
 
@@ -511,22 +520,31 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
     
     if (config.dbMultiWrite)
     {
-        string &multiWrite = bProgram ? multiWriteProgram : multiWriteNodes;
-        multiWriteLock();
-        if (multiWrite.size() == 0)
+        if (update && (key==dbStateRootKey))
         {
-            multiWrite = "INSERT INTO " + tableName + " ( hash, data ) VALUES ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' ) ";
+            multiWriteLock();
+            multiWriteNodesStateRoot = "INSERT INTO " + tableName + " ( hash, data ) VALUES ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' ) ";
+            multiWriteUnlock();       
         }
         else
         {
-            multiWrite += ", ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' )";
+            string &multiWrite = bProgram ? (update ? multiWriteProgramUpdate : multiWriteProgram) : (update ? multiWriteNodesUpdate : multiWriteNodes);
+            multiWriteLock();
+            if (multiWrite.size() == 0)
+            {
+                multiWrite = "INSERT INTO " + tableName + " ( hash, data ) VALUES ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' ) ";
+            }
+            else
+            {
+                multiWrite += ", ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' )";
+            }
+            multiWriteUnlock();       
         }
-        multiWriteUnlock();       
     }
     else
     {
         string query = "INSERT INTO " + tableName + " ( hash, data ) VALUES ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' ) " +
-                    "ON CONFLICT (hash) DO NOTHING;";
+                    (update ? "ON CONFLICT (hash) DO UPDATE SET data = EXCLUDED.data;" : "ON CONFLICT (hash) DO NOTHING;");
             
         DatabaseConnection * pDatabaseConnection = getWriteConnection();
 
@@ -561,7 +579,7 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
     return result;
 }
 
-zkresult Database::setProgram(const string &_key, const vector<uint8_t> &data, const bool persistent)
+zkresult Database::setProgram(const string &_key, const vector<uint8_t> &data, const bool persistent, const bool update)
 {
     // Check that it has been initialized before
     if (!bInitialized)
@@ -588,7 +606,7 @@ zkresult Database::setProgram(const string &_key, const vector<uint8_t> &data, c
             sData += byte2string(data[i]);
         }
 
-        r = writeRemote(true, key, sData);
+        r = writeRemote(true, key, sData, update);
     }
     else
     {
@@ -599,7 +617,7 @@ zkresult Database::setProgram(const string &_key, const vector<uint8_t> &data, c
     if ((r == ZKR_SUCCESS) && (useDBProgramCache))
     {
         // Create in memory cache
-        Database::dbProgramCache.add(key, data);
+        Database::dbProgramCache.add(key, data, update);
     }
 #endif
 
@@ -612,13 +630,13 @@ zkresult Database::setProgram(const string &_key, const vector<uint8_t> &data, c
     for (uint64_t i = 0; (i < (data.size()) && (i < 100)); i++)
         cout << byte2string(data[i]);
     if (data.size() > 100) cout << "...";
-    cout << " persistent=" << persistent << endl;
+    cout << " persistent=" << persistent << " update=" << update << endl;
 #endif
 
     return r;
 }
 
-zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, DatabaseMap *dbReadLog)
+zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, DatabaseMap *dbReadLog, const bool update)
 {
     // Check that it has been initialized before
     if (!bInitialized)
@@ -635,7 +653,7 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
 
 #ifdef DATABASE_USE_CACHE
     // If the key is found in local database (cached) simply return it
-    if ((useDBProgramCache) && (Database::dbProgramCache.find(key, data)))
+    if (useDBProgramCache && !update && Database::dbProgramCache.find(key, data))
     {
         // Add to the read log
         if (dbReadLog != NULL) dbReadLog->add(key, data);
@@ -656,7 +674,7 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
 
 #ifdef DATABASE_USE_CACHE
             // Store it locally to avoid any future remote access for this key
-            if (useDBProgramCache) Database::dbProgramCache.add(key, data);
+            if (useDBProgramCache) Database::dbProgramCache.add(key, data, update);
 #endif
 
             // Add to the read log
@@ -676,8 +694,9 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
     cout << " key=" << key;
     cout << " data=";
     for (uint64_t i = 0; (i < (data.size()) && (i < 100)); i++)
-        cout << byte2string(data[i]) << endl;
+        cout << byte2string(data[i]);
     if (data.size() > 100) cout << "...";
+    cout << " update=" << update << endl;
 #endif
 
     return r;
@@ -696,7 +715,7 @@ zkresult Database::flush()
 
     multiWriteLock();
 
-    if ( (multiWriteProgram.size() > 0) || (multiWriteNodes.size() > 0) )
+    if ( (multiWriteNodes.size() > 0) || (multiWriteNodesStateRoot.size() > 0) || (multiWriteNodesUpdate.size() > 0) || (multiWriteProgram.size() > 0) || (multiWriteProgramUpdate.size() > 0) )
     {
 
         // Get a free write db connection
@@ -718,10 +737,28 @@ zkresult Database::flush()
                 // Commit your transaction
                 w.commit();
 
-                //cout << "Database::flush() sent " << multiWriteProgram << endl;
+                //cout << "Database::flush() sent " << query << endl;
 
                 // Delete the accumulated query data only if the query succeeded
                 multiWriteProgram.clear();
+            }
+            if (multiWriteProgramUpdate.size() > 0)
+            {
+                query = multiWriteProgramUpdate + " ON CONFLICT (hash) DO UPDATE SET data = EXCLUDED.data;";
+                
+                // Start a transaction
+                pqxx::work w(*(pDatabaseConnection->pConnection));
+
+                // Execute the query
+                pqxx::result res = w.exec(query);
+
+                // Commit your transaction
+                w.commit();
+
+                //cout << "Database::flush() sent " << query << endl;
+
+                // Delete the accumulated query data only if the query succeeded
+                multiWriteProgramUpdate.clear();
             }
             if (multiWriteNodes.size() > 0)
             {
@@ -736,10 +773,46 @@ zkresult Database::flush()
                 // Commit your transaction
                 w.commit();
 
-                //cout << "Database::flush() sent " << multiWriteNodes << endl;
+                //cout << "Database::flush() sent " << query << endl;
 
                 // Delete the accumulated query data only if the query succeeded
                 multiWriteNodes.clear();
+            }
+            if (multiWriteNodesUpdate.size() > 0)
+            {
+                query = multiWriteNodesUpdate + " ON CONFLICT (hash) DO UPDATE SET data = EXCLUDED.data;";
+                
+                // Start a transaction
+                pqxx::work w(*(pDatabaseConnection->pConnection));
+
+                // Execute the query
+                pqxx::result res = w.exec(query);
+
+                // Commit your transaction
+                w.commit();
+
+                //cout << "Database::flush() sent " << query << endl;
+
+                // Delete the accumulated query data only if the query succeeded
+                multiWriteNodesUpdate.clear();
+            }
+            if (multiWriteNodesStateRoot.size() > 0)
+            {
+                query = multiWriteNodesStateRoot + " ON CONFLICT (hash) DO UPDATE SET data = EXCLUDED.data;";
+                
+                // Start a transaction
+                pqxx::work w(*(pDatabaseConnection->pConnection));
+
+                // Execute the query
+                pqxx::result res = w.exec(query);
+
+                // Commit your transaction
+                w.commit();
+
+                //cout << "Database::flush() sent " << query << endl;
+
+                // Delete the accumulated query data only if the query succeeded
+                multiWriteNodesStateRoot.clear();
             }
         }
         catch (const std::exception &e)
@@ -915,106 +988,137 @@ Database::~Database()
 
 void loadDb2MemCache(const Config config)
 {
+    if (config.databaseURL == "local")
+    {
+        cerr << "Error: loadDb2MemCache() called with config.stateDBURL==local" << endl;
+        exitProcess();
+    }
+
 #ifdef DATABASE_USE_CACHE
 
     TimerStart(LOAD_DB_TO_CACHE);
-    
+
     Goldilocks fr;
-    pqxx::connection *pConnection = NULL;
+    StateDB * pStateDB = (StateDB *)stateDBSingleton.get(fr, config);
 
-    try
+    vector<Goldilocks::Element> dbValue;
+
+    zkresult zkr = pStateDB->db.read(Database::dbStateRootKey, dbValue, NULL, true);
+    if (zkr == ZKR_DB_KEY_NOT_FOUND)
     {
-        // Create the database connection
-        pConnection = new pqxx::connection{config.databaseURL};
+        cout << "Warning: loadDb2MemCache() dbStateRootKey=" <<  Database::dbStateRootKey << " not found in database; normal only if database is empty" << endl;
+        TimerStopAndLog(LOAD_DB_TO_CACHE);
+        return;
     }
-    catch(const std::exception& e)
+    else if (zkr != ZKR_SUCCESS)
     {
-        cerr << "Error: Database::loadDb2MemCache() exception: " << e.what() << endl;
-        exitProcess();
+        cerr << "Error: loadDb2MemCache() failed calling db.read result=" << zkr << "=" << zkresult2string(zkr) << endl;
+        TimerStopAndLog(LOAD_DB_TO_CACHE);
+        return;
+    }
+    
+    string stateRootKey = fea2string(fr, dbValue[0], dbValue[1], dbValue[2], dbValue[3]);
+    cout << "loadDb2MemCache() found state root=" << stateRootKey << endl;
+
+    if (stateRootKey == "0")
+    {
+        cout << "loadDb2MemCache() found an empty tree" << endl;
+        TimerStopAndLog(LOAD_DB_TO_CACHE);
+        return;
     }
 
-    try
+    unordered_map<uint64_t, vector<string>> treeMap;
+    vector<string> emptyVector;
+    string hash, leftHash, rightHash;
+    uint64_t counter = 0;
+
+    treeMap[0] = emptyVector;
+    treeMap[0].push_back(stateRootKey);
+    unordered_map<uint64_t, std::vector<std::string>>::iterator treeMapIterator;
+    for (uint64_t level=0; level<256; level++)
     {
-        if (config.dbMTCacheSize > 0) 
+        treeMapIterator = treeMap.find(level);
+        if (treeMapIterator == treeMap.end())
         {
-            // Start a transaction.
-            pqxx::nontransaction n(*pConnection);
+            break;
+        }
 
-            // Prepare the query
-            string query = "SELECT * FROM " + config.dbNodesTableName +";";
+        if (treeMapIterator->second.size()==0)
+        {
+            break;
+        }
 
-            // Execute the query
-            pqxx::result rows = n.exec(query);
-            pqxx::result::size_type i;
-            uint64_t count = 0;
-            for (i=0; i < rows.size(); i++)
+        treeMap[level+1] = emptyVector;
+
+        //cout << "loadDb2MemCache() searching at level=" << level << " for elements=" << treeMapIterator->second.size() << endl;
+        
+        for (uint64_t i=0; i<treeMapIterator->second.size(); i++)
+        {
+            hash = treeMapIterator->second[i];
+            dbValue.clear();
+            zkresult zkr = pStateDB->db.read(hash, dbValue, NULL, true);
+            if (zkr != ZKR_SUCCESS)
             {
-                count++;
-                vector<Goldilocks::Element> value;
-                string2fea(fr, removeBSXIfExists(rows[i][1].c_str()), value);
-
-                if (Database::dbMTCache.add(removeBSXIfExists(rows[i][0].c_str()), value))
-                {
-                    // Cache is full stop loading records
-                    cout << "MT cache full, stop loading records" << endl;
-                    break;
-                }
+                cerr << "Error: loadDb2MemCache() failed calling db.read(" << hash << ") result=" << zkr << "=" << zkresult2string(zkr) << endl;
+                TimerStopAndLog(LOAD_DB_TO_CACHE);
+                return;
+            }
+            if (dbValue.size() != 12)
+            {
+                cerr << "Error: loadDb2MemCache() failed calling db.read(" << hash << ") dbValue.size()=" << dbValue.size() << endl;
+                TimerStopAndLog(LOAD_DB_TO_CACHE);
+                return;
+            }
+            counter++;
+            double sizePercentage = double(Database::dbMTCache.getCurrentSize())*100.0/double(Database::dbMTCache.getMaxSize());
+            if ( sizePercentage > 90 )
+            {
+                cout << "loadDb2MemCache() stopping since size percentage=" << sizePercentage << endl;
+                break;
             }
 
-            cout << "MT cache loaded. Count=" << count << endl;
-
-            // Commit your transaction
-            n.commit();
-        }
-    }
-    catch (const std::exception &e)
-    {
-        cerr << "Error: Database::loadDb2MemCache() table=" << config.dbNodesTableName << " exception: " << e.what() << endl;
-        exitProcess();
-    }
-
-    try
-    {
-        if (config.dbProgramCacheSize)
-        {
-            // Start a transaction.
-            pqxx::nontransaction n(*pConnection);
-
-            // Prepare the query
-            string query = "SELECT * FROM " + config.dbProgramTableName +";";
-
-            // Execute the query
-            pqxx::result rows = n.exec(query);
-            pqxx::result::size_type i = 0;
-            uint64_t count = 0;
-            for (i=0; i < rows.size(); i++)
+            // If capaxity is X000
+            if (fr.isZero(dbValue[9]) && fr.isZero(dbValue[10]) && fr.isZero(dbValue[11]))
             {
-                count++;
-                vector<uint8_t> value;
-                string2ba(removeBSXIfExists(rows[i][1].c_str()), value);
-
-                if (Database::dbProgramCache.add(removeBSXIfExists(rows[i][0].c_str()), value))
+                // If capacity is 0000, this is an intermediate node that contains left and right hashes of its children
+                if (fr.isZero(dbValue[8]))
                 {
-                    // Cache is full stop loading records
-                    cout << "Program cache full, stop loading records" << endl;
-                    break;
+                    leftHash = fea2string(fr, dbValue[0], dbValue[1], dbValue[2], dbValue[3]);
+                    if (leftHash != "0")
+                    {
+                        treeMap[level+1].push_back(leftHash);
+                        //cout << "loadDb2MemCache() level=" << level << " found leftHash=" << leftHash << endl;
+                    }
+                    rightHash = fea2string(fr, dbValue[4], dbValue[5], dbValue[6], dbValue[7]);
+                    if (rightHash != "0")
+                    {
+                        treeMap[level+1].push_back(rightHash);
+                        //cout << "loadDb2MemCache() level=" << level << " found rightHash=" << rightHash << endl;
+                    }
+                }
+                // If capacity is 1000, this is a leaf node that contains right hash of the value node
+                else if (fr.isOne(dbValue[8]))
+                {
+                    rightHash = fea2string(fr, dbValue[4], dbValue[5], dbValue[6], dbValue[7]);
+                    if (rightHash != "0")
+                    {
+                        //cout << "loadDb2MemCache() level=" << level << " found value rightHash=" << rightHash << endl;
+                        dbValue.clear();
+                        zkresult zkr = pStateDB->db.read(rightHash, dbValue, NULL, true);
+                        if (zkr != ZKR_SUCCESS)
+                        {
+                            cerr << "Error: loadDb2MemCache() failed calling db.read(" << rightHash << ") result=" << zkr << "=" << zkresult2string(zkr) << endl;
+                            TimerStopAndLog(LOAD_DB_TO_CACHE);
+                            return;
+                        }
+                        counter++;
+                    }
                 }
             }
-
-            cout << "Program cache loaded. Count=" << count << endl;
-
-            // Commit your transaction
-            n.commit();
         }
     }
-    catch (const std::exception &e)
-    {
-        cerr << "Error: Database::loadDb2MemCache() table=" << config.dbProgramTableName << " exception: " << e.what() << endl;
-        exitProcess();
-    }
 
-    if (pConnection != NULL)
-        delete pConnection;
+    cout << "loadDb2MemCache() done counter=" << counter << " cache at " << (double(Database::dbMTCache.getCurrentSize())/double(Database::dbMTCache.getMaxSize()))*100 << "%" << endl;
 
     TimerStopAndLog(LOAD_DB_TO_CACHE);
 

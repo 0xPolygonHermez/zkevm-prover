@@ -5,18 +5,33 @@
 // DatabaseCache class implementation
 
 // Add a record in the head of the cache. Returns true if the cache is full (or no cache), false otherwise
-bool DatabaseCache::addKeyValue(const string &key, const void * value) 
+bool DatabaseCache::addKeyValue(const string &key, const void * value, const bool update) 
 {
-    if (cacheSize == 0)
+    if (maxSize == 0)
     {
         return true;
+    }
+
+    attempts++;
+    if (attempts%1000000 == 0)
+    {
+        cout << "DatabaseCache::addKeyValue() name=" << name << " maxSize=" << maxSize << " currentSize=" << currentSize << " attempts=" << attempts << " hits=" << hits << " hit ratio=" << double(hits)*100.0/double(attempts) << "%" << endl;
     }
 
     DatabaseCacheRecord * record;
     // If key already exists in the cache return. The findKey also sets the record in the head of the cache
     if (findKey(key, record))
     {
-        return false;
+        if (update)
+        {
+            updateRecord(record, value);
+            return true;
+        }
+        else
+        {
+            hits++;
+            return false;
+        }
     }
 
     record = allocRecord(key, value);
@@ -38,12 +53,10 @@ bool DatabaseCache::addKeyValue(const string &key, const void * value)
 
     cacheMap[key] = record;
 
-    if (cacheSize == -1) return false; // no cache limit
-
-    cacheCurrentSize += record->size;
-    full = (cacheCurrentSize > cacheSize); 
-    // remove lats records from the cache to be under cacheSize
-    while (cacheCurrentSize > cacheSize) 
+    currentSize += record->size;
+    full = (currentSize > maxSize); 
+    // remove lats records from the cache to be under maxSize
+    while (currentSize > maxSize) 
     {
         // Set new last record
         DatabaseCacheRecord* tmp = last;
@@ -53,7 +66,7 @@ bool DatabaseCache::addKeyValue(const string &key, const void * value)
         cacheMap.erase(tmp->key);
         freeRecord(tmp);
         // Update cache size
-        cacheCurrentSize -= tmp->size;      
+        currentSize -= tmp->size;      
     }
 
     //cout << "DatabaseCache::addRecord() key=" << key << " cacheCurrentSize=" << cacheCurrentSize << " cacheMap.size()=" << cacheMap.size() << " record.size()=" << record->size << endl;
@@ -93,8 +106,8 @@ bool DatabaseCache::findKey(const string &key, DatabaseCacheRecord* &record)
 
 void DatabaseCache::print(bool printContent)
 {
-    cout << "Cache current size: " << cacheCurrentSize << endl;
-    cout << "Cache max size: " << cacheSize << endl;
+    cout << "Cache current size: " << currentSize << endl;
+    cout << "Cache max size: " << maxSize << endl;
     cout << "Head: " << (head != NULL ? head->key : "NULL") << endl;
     cout << "Last: " << (last != NULL ? last->key : "NULL") << endl;
     
@@ -131,20 +144,20 @@ DatabaseCache::~DatabaseCache()
 // DatabaseMTCache class implementation
 
 // Add a record in the head of the MT cache. Returns true if the cache is full (or no cache), false otherwise
-bool DatabaseMTCache::add(const string &key, const vector<Goldilocks::Element> &value)
+bool DatabaseMTCache::add(const string &key, const vector<Goldilocks::Element> &value, const bool update)
 {
     lock_guard<recursive_mutex> guard(mlock);
 
-    if (cacheSize == 0) return true;
+    if (maxSize == 0) return true;
 
-    return addKeyValue(key, (const void *)&value);
+    return addKeyValue(key, (const void *)&value, update);
 }
 
 bool DatabaseMTCache::find(const string &key, vector<Goldilocks::Element> &value)
 {
     lock_guard<recursive_mutex> guard(mlock);
 
-    if (cacheSize == 0) return false;
+    if (maxSize == 0) return false;
 
     DatabaseCacheRecord* record;
     bool found = findKey(key, record);
@@ -193,22 +206,27 @@ void DatabaseMTCache::freeRecord(DatabaseCacheRecord* record)
     delete record;
 }
 
+void DatabaseMTCache::updateRecord(DatabaseCacheRecord* record, const void * value)
+{
+    *(vector<Goldilocks::Element>*)(record->value) = *(vector<Goldilocks::Element>*)(value);
+}
+
 // DatabaseProgramCache class implementation
 // Add a record in the head of the Program cache. Returns true if the cache is full (or no cache), false otherwise
-bool DatabaseProgramCache::add(const string &key, const vector<uint8_t> &value)
+bool DatabaseProgramCache::add(const string &key, const vector<uint8_t> &value, const bool update)
 {
     lock_guard<recursive_mutex> guard(mlock);
 
-    if (cacheSize == 0) return true;
+    if (maxSize == 0) return true;
 
-    return addKeyValue(key, (const void *)&value);
+    return addKeyValue(key, (const void *)&value, update);
 }
 
 bool DatabaseProgramCache::find(const string &key, vector<uint8_t> &value)
 {
     lock_guard<recursive_mutex> guard(mlock);
 
-    if (cacheSize == 0) return false;
+    if (maxSize == 0) return false;
 
     DatabaseCacheRecord* record;
     bool found = findKey(key, record);
@@ -255,4 +273,9 @@ void DatabaseProgramCache::freeRecord(DatabaseCacheRecord* record)
 {
     delete (vector<uint8_t>*)(record->value);
     delete record;
+}
+
+void DatabaseProgramCache::updateRecord(DatabaseCacheRecord* record, const void * value)
+{
+    *(vector<uint8_t>*)(record->value) = *(vector<uint8_t>*)(value);
 }

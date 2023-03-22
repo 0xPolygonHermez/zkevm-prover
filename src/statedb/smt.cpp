@@ -151,7 +151,11 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
 
                 // Save and get the new value hash
                 Goldilocks::Element newValH[4];
-                hashSave(db, v, c, persistent, newValH);
+                dbres = hashSave(db, v, c, persistent, newValH);
+                if (dbres != ZKR_SUCCESS)
+                {
+                    return dbres;
+                }
 
                 // Second, we create the db entry for the new leaf node = RKEY + HASH, and store the calculated hash in newLeafHash
                 for (uint64_t i=0; i<4; i++) v[i] = foundRKey[i];
@@ -162,7 +166,11 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
 
                 // Save and get the hash
                 Goldilocks::Element newLeafHash[4];
-                hashSave(db, v, c, persistent, newLeafHash);
+                dbres = hashSave(db, v, c, persistent, newLeafHash);
+                if (dbres != ZKR_SUCCESS)
+                {
+                    return dbres;
+                }
 
                 // Increment the counter
                 proofHashCounter += 2;
@@ -220,7 +228,11 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
 
                 // Save and get the hash
                 Goldilocks::Element oldLeafHash[4];
-                hashSave(db, v, c, persistent, oldLeafHash);
+                dbres = hashSave(db, v, c, persistent, oldLeafHash);
+                if (dbres != ZKR_SUCCESS)
+                {
+                    return dbres;
+                }
 
                 // Record the inserted key for the reallocated old value
                 insKey[0] = foundKey[0];
@@ -249,7 +261,11 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
 
                 // Create the intermediate node
                 Goldilocks::Element newValH[4];
-                hashSave(db, valueFea, c, persistent, newValH);
+                dbres = hashSave(db, valueFea, c, persistent, newValH);
+                if (dbres != ZKR_SUCCESS)
+                {
+                    return dbres;
+                }
 
                 // Insert a new leaf node for the new key-value hash pair
 
@@ -262,7 +278,11 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
 
                 // Create the node and store the hash in newLeafHash
                 Goldilocks::Element newLeafHash[4];
-                hashSave(db, v, c, persistent, newLeafHash);
+                dbres = hashSave(db, v, c, persistent, newLeafHash);
+                if (dbres != ZKR_SUCCESS)
+                {
+                    return dbres;
+                }
 
                 // Insert a new bifurcation intermediate node with both hashes (old and new) in the right position based on the bit
 
@@ -279,7 +299,11 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
 
                 // Create the node and store the calculated hash in r2
                 Goldilocks::Element r2[4];
-                hashSave(db, node, c, persistent, r2);
+                dbres = hashSave(db, node, c, persistent, r2);
+                if (dbres != ZKR_SUCCESS)
+                {
+                    return dbres;
+                }
                 proofHashCounter += 4;
                 level2--;
 #ifdef LOG_SMT
@@ -302,7 +326,11 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                     c[0] = fr.zero();
 
                     // Create the intermediate node and store the calculated hash in r2
-                    hashSave(db, node, c, persistent, r2);
+                    dbres = hashSave(db, node, c, persistent, r2);
+                    if (dbres != ZKR_SUCCESS)
+                    {
+                        return dbres;
+                    }
 
                     proofHashCounter += 1;
 
@@ -355,7 +383,11 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
 
             // Create the node and store the calculated hash in newValH
             Goldilocks::Element newValH[4];
-            hashSave(db, valueFea, c, persistent, newValH);
+            dbres = hashSave(db, valueFea, c, persistent, newValH);
+            if (dbres != ZKR_SUCCESS)
+            {
+                return dbres;
+            }
 
             // Insert the new key-value hash leaf node
 
@@ -369,7 +401,11 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
 
             // Create the new leaf node and store the calculated hash in newLeafHash
             Goldilocks::Element newLeafHash[4];
-            hashSave(db, keyvalVector, c, persistent, newLeafHash);
+            dbres = hashSave(db, keyvalVector, c, persistent, newLeafHash);
+            if (dbres != ZKR_SUCCESS)
+            {
+                return dbres;
+            }
 
             proofHashCounter += 2;
 
@@ -503,7 +539,11 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
 
                         // Create node and store computed hash in oldLeafHash
                         Goldilocks::Element oldLeafHash[4];
-                        hashSave(db, a, c, persistent, oldLeafHash);
+                        dbres = hashSave(db, a, c, persistent, oldLeafHash);
+                        if (dbres != ZKR_SUCCESS)
+                        {
+                            return dbres;
+                        }
 
                         // Increment the counter
                         proofHashCounter += 1;
@@ -584,7 +624,11 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
         Goldilocks::Element a[8], c[4];
         for (uint64_t i=0; i<8; i++) a[i] = siblings[level][i];
         for (uint64_t i=0; i<4; i++) c[i] = siblings[level][8+i];
-        hashSave(db, a, c, persistent, newRoot);
+        dbres = hashSave(db, a, c, persistent, newRoot);
+        if (dbres != ZKR_SUCCESS)
+        {
+            return dbres;
+        }
 
         // Increment the counter
         proofHashCounter += 1;
@@ -598,6 +642,21 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
             {
                 siblings[level][keys[level]*4 + j] = newRoot[j];
             }
+        }
+    }
+
+    if ( persistent &&
+         (
+            !fr.equal(oldRoot[0], newRoot[0]) ||
+            !fr.equal(oldRoot[1], newRoot[1]) ||
+            !fr.equal(oldRoot[2], newRoot[2]) ||
+            !fr.equal(oldRoot[3], newRoot[3])
+        ) )
+    {
+        dbres = saveStateRoot(db, newRoot);
+        if (dbres != ZKR_SUCCESS)
+        {
+            return dbres;
         }
     }
 
@@ -893,7 +952,7 @@ void Smt::removeKeyBits ( const Goldilocks::Element (&key)[4], uint64_t nBits, G
     }
 }
 
-void Smt::hashSave ( Database &db, const Goldilocks::Element (&a)[8], const Goldilocks::Element (&c)[4], const bool persistent, Goldilocks::Element (&hash)[4])
+zkresult Smt::hashSave ( Database &db, const Goldilocks::Element (&a)[8], const Goldilocks::Element (&c)[4], const bool persistent, Goldilocks::Element (&hash)[4])
 {
     // Calculate the poseidon hash of the vector of field elements: v = a | c
     Goldilocks::Element v[12];
@@ -908,13 +967,44 @@ void Smt::hashSave ( Database &db, const Goldilocks::Element (&a)[8], const Gold
     vector<Goldilocks::Element> dbValue;
     for (uint64_t i=0; i<8; i++) dbValue.push_back(a[i]);
     for (uint64_t i=0; i<4; i++) dbValue.push_back(c[i]);
-    db.write(hashString, dbValue, persistent);
+    zkresult zkr;
+    zkr = db.write(hashString, dbValue, persistent);
+    if (zkr != ZKR_SUCCESS)
+    {
+        cerr << "Error: Smt::hashSave() failed calling db.write() key=" << hashString << " result=" << zkr << "=" << zkresult2string(zkr) << endl;
+    }
 
 #ifdef LOG_SMT
     cout << "Smt::hashSave() key=" << hashString << " value=";
     for (uint64_t i=0; i<12; i++) cout << fr.toString(dbValue[i],16) << ":";
+    cout << " zkr=" << zkr;
     cout << endl;
 #endif
+    return zkr;
+}
+
+zkresult Smt::saveStateRoot(Database &db, const Goldilocks::Element (&stateRoot)[4])
+{
+    // Copy the state root in the first 4 elements of dbValue
+    vector<Goldilocks::Element> dbValue;
+    for (uint64_t i=0; i<4; i++) dbValue.push_back(stateRoot[i]);
+    for (uint64_t i=0; i<8; i++) dbValue.push_back(fr.zero());
+
+    // Write to db using the dbStateRootKey
+    zkresult zkr;
+    zkr = db.write(Database::dbStateRootKey, dbValue, true, true);
+    if (zkr != ZKR_SUCCESS)
+    {
+        cerr << "Error: Smt::saveStateRoot() failed calling db.write() result=" << zkr << "=" << zkresult2string(zkr) << endl;
+    }
+
+#ifdef LOG_SMT
+    cout << "Smt::saveStateRoot() key=" << Database::dbStateRootKey << " value=";
+    for (uint64_t i=0; i<12; i++) cout << fr.toString(dbValue[i],16) << ":";
+    cout << " zkr=" << zkr;
+    cout << endl;
+#endif
+    return zkr;
 }
 
 int64_t Smt::getUniqueSibling(vector<Goldilocks::Element> &a)

@@ -281,11 +281,17 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
     code += "    // Copy input database content into context database\n";
     code += "    if (proverRequest.input.db.size() > 0)\n";
-    code += "        pStateDB->loadDB(proverRequest.input.db, false);\n\n";
+    code += "    {\n";
+    code += "        pStateDB->loadDB(proverRequest.input.db, true);\n";
+    code += "        pStateDB->flush();\n";
+    code += "    }\n\n";
 
     code += "    // Copy input contracts database content into context database (dbProgram)\n";
     code += "    if (proverRequest.input.contractsBytecode.size() > 0)\n";
-    code += "        pStateDB->loadProgramDB(proverRequest.input.contractsBytecode, false);\n\n";
+    code += "    {\n";
+    code += "        pStateDB->loadProgramDB(proverRequest.input.contractsBytecode, true);\n";
+    code += "        pStateDB->flush();\n";
+    code += "    }\n\n";
 
     code += "    // opN are local, uncommitted polynomials\n";
     code += "    Goldilocks::Element op0, op1, op2, op3, op4, op5, op6, op7;\n";

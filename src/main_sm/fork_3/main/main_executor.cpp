@@ -149,11 +149,17 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
     // Copy input database content into context database
     if (proverRequest.input.db.size() > 0)
-        pStateDB->loadDB(proverRequest.input.db, false);
+    {
+        pStateDB->loadDB(proverRequest.input.db, true);
+        pStateDB->flush();
+    }
 
     // Copy input contracts database content into context database (dbProgram)
     if (proverRequest.input.contractsBytecode.size() > 0)
-        pStateDB->loadProgramDB(proverRequest.input.contractsBytecode, false);
+    {
+        pStateDB->loadProgramDB(proverRequest.input.contractsBytecode, true);
+        pStateDB->flush();
+    }
 
     // opN are local, uncommitted polynomials
     Goldilocks::Element op0, op1, op2, op3, op4, op5, op6, op7;
@@ -3809,7 +3815,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             required.PaddingPG.push_back(h);
         }
     }
-
+    
     TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
 
 #ifdef LOG_TIME_STATISTICS

@@ -67,7 +67,10 @@ private:
 
     // Multi write attributes
     string multiWriteProgram;
+    string multiWriteProgramUpdate;
     string multiWriteNodes;
+    string multiWriteNodesUpdate;
+    string multiWriteNodesStateRoot;
     pthread_mutex_t multiWriteMutex; // Mutex to protect the multi write queues
     void multiWriteLock(void) { pthread_mutex_lock(&multiWriteMutex); };
     void multiWriteUnlock(void) { pthread_mutex_unlock(&multiWriteMutex); };
@@ -76,13 +79,19 @@ private:
     // Remote database based on Postgres (PostgreSQL)
     void initRemote(void);
     zkresult readRemote(bool bProgram, const string &key, string &value);
-    zkresult writeRemote(bool bProgram, const string &key, const string &value);
+    zkresult writeRemote(bool bProgram, const string &key, const string &value, const bool update);
 
 public:
 #ifdef DATABASE_USE_CACHE
     // Cache static instances
     static DatabaseMTCache dbMTCache;
     static DatabaseProgramCache dbProgramCache;
+
+    // This is a fixed key to store the latest state root hash, used to load it to the cache
+    // This key is "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    // This key cannot be the result of a hash because it is out of the Goldilocks Element range
+    static string dbStateRootKey;
+
 #endif
 
     // Constructor and destructor
@@ -105,10 +114,10 @@ public:
 
     // Basic methods
     void init(void);
-    zkresult read(const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog);
-    zkresult write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent);
-    zkresult getProgram(const string &_key, vector<uint8_t> &value, DatabaseMap *dbReadLog);
-    zkresult setProgram(const string &_key, const vector<uint8_t> &value, const bool persistent);
+    zkresult read(const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, const bool update = false);
+    zkresult write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent, const bool update = false);
+    zkresult getProgram(const string &_key, vector<uint8_t> &value, DatabaseMap *dbReadLog, const bool update = false);
+    zkresult setProgram(const string &_key, const vector<uint8_t> &value, const bool persistent, const bool update = false);
 
 #ifdef DATABASE_COMMIT
     void setAutoCommit(const bool autoCommit);
