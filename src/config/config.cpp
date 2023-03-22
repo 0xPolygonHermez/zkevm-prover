@@ -411,13 +411,9 @@ void Config::load(json &config)
     if (config.contains("dbConnectionsPool") && config["dbConnectionsPool"].is_boolean())
         dbConnectionsPool = config["dbConnectionsPool"];
 
-    dbNumberOfWritePoolConnections = 25;
-    if (config.contains("dbNumberOfWritePoolConnections") && config["dbNumberOfWritePoolConnections"].is_number())
-        dbNumberOfWritePoolConnections = config["dbNumberOfWritePoolConnections"];
-
-    dbNumberOfReadPoolConnections = 25;
-    if (config.contains("dbNumberOfReadPoolConnections") && config["dbNumberOfReadPoolConnections"].is_number())
-        dbNumberOfReadPoolConnections = config["dbNumberOfReadPoolConnections"];
+    dbNumberOfPoolConnections = 25;
+    if (config.contains("dbNumberOfPoolConnections") && config["dbNumberOfPoolConnections"].is_number())
+        dbNumberOfPoolConnections = config["dbNumberOfPoolConnections"];
 
     if (config.contains("cleanerPollingPeriod") && config["cleanerPollingPeriod"].is_number())
         cleanerPollingPeriod = config["cleanerPollingPeriod"];
@@ -581,8 +577,7 @@ void Config::print(void)
     cout << "    dbMultiWrite=" << to_string(dbMultiWrite) << endl;
     cout << "    dbFlushInParallel=" << to_string(dbFlushInParallel) << endl;
     cout << "    dbConnectionsPool=" << to_string(dbConnectionsPool) << endl;
-    cout << "    dbNumberOfWritePoolConnections=" << dbNumberOfWritePoolConnections << endl;
-    cout << "    dbNumberOfReadPoolConnections=" << dbNumberOfReadPoolConnections << endl;
+    cout << "    dbNumberOfPoolConnections=" << dbNumberOfPoolConnections << endl;
     cout << "    cleanerPollingPeriod=" << cleanerPollingPeriod << endl;
     cout << "    requestsPersistence=" << requestsPersistence << endl;
     cout << "    maxExecutorThreads=" << maxExecutorThreads << endl;

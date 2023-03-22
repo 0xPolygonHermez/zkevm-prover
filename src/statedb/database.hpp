@@ -43,27 +43,16 @@ private:
     pqxx::work* transaction = NULL;
 #endif
 
-    // Write connection attributes
-    pthread_mutex_t writeMutex; // Mutex to protect the write connection
-    void writeLock(void) { pthread_mutex_lock(&writeMutex); };
-    void writeUnlock(void) { pthread_mutex_unlock(&writeMutex); };
-    DatabaseConnection writeConnection;
-    DatabaseConnection * writeConnectionsPool;
-    uint64_t nextWriteConnection;
-    uint64_t usedWriteConnections;
-    DatabaseConnection * getWriteConnection (void);
-    void disposeWriteConnection (DatabaseConnection * pConnection);
-
-    // Read connection attributes
-    pthread_mutex_t readMutex; // Mutex to protect the read connection
-    void readLock(void) { pthread_mutex_lock(&readMutex); };
-    void readUnlock(void) { pthread_mutex_unlock(&readMutex); };
-    DatabaseConnection readConnection;
-    DatabaseConnection * readConnectionsPool;
-    uint64_t nextReadConnection;
-    uint64_t usedReadConnections;
-    DatabaseConnection * getReadConnection (void);
-    void disposeReadConnection (DatabaseConnection * pConnection);
+    // Connection(s) attributes
+    pthread_mutex_t connMutex; // Mutex to protect the connection(s)
+    void connLock(void) { pthread_mutex_lock(&connMutex); };
+    void connUnlock(void) { pthread_mutex_unlock(&connMutex); };
+    DatabaseConnection connection;
+    DatabaseConnection * connectionsPool;
+    uint64_t nextConnection;
+    uint64_t usedConnections;
+    DatabaseConnection * getConnection (void);
+    void disposeConnection (DatabaseConnection * pConnection);
 
     // Multi write attributes
     string multiWriteProgram;
@@ -98,17 +87,11 @@ public:
     Database(Goldilocks &fr, const Config &config) :
         fr(fr),
         config(config),
-        writeConnectionsPool(NULL),
-        readConnectionsPool(NULL)
+        connectionsPool(NULL)
     {
         // Init mutexes
         pthread_mutex_init(&multiWriteMutex, NULL);
-        pthread_mutex_init(&writeMutex, NULL);
-        pthread_mutex_init(&readMutex, NULL);
-
-        // Reset connections pools
-        memset(&writeConnectionsPool, 0, sizeof(writeConnectionsPool));
-        memset(&readConnectionsPool, 0, sizeof(readConnectionsPool));
+        pthread_mutex_init(&connMutex, NULL);
     };
     ~Database();
 
