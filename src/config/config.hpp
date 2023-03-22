@@ -62,6 +62,7 @@ public:
 
     uint16_t executorServerPort;
     bool executorROMLineTraces;
+    bool executorTimeStatistics;
     uint16_t executorClientPort;
     string executorClientHost;
 

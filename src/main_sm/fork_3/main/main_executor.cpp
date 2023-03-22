@@ -3843,8 +3843,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-    mainMetrics.print("Main Executor calls");
-    evalCommandMetrics.print("Main Executor eval command calls");
+    if (config.executorTimeStatistics)
+    {
+        mainMetrics.print("Main Executor calls");
+        evalCommandMetrics.print("Main Executor eval command calls");
+    }
 #endif
 
     cout << "MainExecutor::execute() done lastStep=" << ctx.lastStep << " (" << (double(ctx.lastStep)*100)/N << "%)" << endl;

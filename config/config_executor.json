@@ -48,6 +48,7 @@
 
     "executorServerPort": 50071,
     "executorROMLineTraces": false,
+    "executorTimeStatistics": false,
     "executorClientPort": 50071,
     "executorClientHost": "127.0.0.1",
 

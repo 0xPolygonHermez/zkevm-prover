@@ -183,6 +183,10 @@ void Config::load(json &config)
     if (config.contains("executorROMLineTraces") && config["executorROMLineTraces"].is_boolean())
         executorROMLineTraces = config["executorROMLineTraces"];
 
+    executorTimeStatistics = false;
+    if (config.contains("executorTimeStatistics") && config["executorTimeStatistics"].is_boolean())
+        executorTimeStatistics = config["executorTimeStatistics"];
+
     executorClientPort = 50071;
     if (config.contains("executorClientPort") && config["executorClientPort"].is_number())
         executorClientPort = config["executorClientPort"];
@@ -493,6 +497,12 @@ void Config::print(void)
         cout << "    executeInParallel=true" << endl;
     if (useMainExecGenerated)
         cout << "    useMainExecGenerated=true" << endl;
+
+    if (executorROMLineTraces)
+        cout << "    executorROMLineTraces=true" << endl;
+
+    if (executorTimeStatistics)
+        cout << "    executorTimeStatistics=true" << endl;
 
     if (saveRequestToFile)
         cout << "    saveRequestToFile=true" << endl;
