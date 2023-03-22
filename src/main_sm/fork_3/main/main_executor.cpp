@@ -110,7 +110,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 {
     TimerStart(MAIN_EXECUTOR_EXECUTE);
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
     struct timeval t;
     TimeMetricStorage mainMetrics;
     TimeMetricStorage evalCommandMetrics;
@@ -241,13 +241,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // Evaluate the list cmdBefore commands, and any children command, recursively
         for (uint64_t j=0; j<rom.line[zkPC].cmdBefore.size(); j++)
         {
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             gettimeofday(&t, NULL);
 #endif
             CommandResult cr;
             evalCommand(ctx, *rom.line[zkPC].cmdBefore[j], cr);
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             mainMetrics.add("Eval command", TimeDiff(t));
             RomCommand &cmd = *rom.line[zkPC].cmdBefore[j];
             string cmdString = op2String(cmd.op) + "[" + function2String(cmd.function) + "]";
@@ -782,7 +782,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         return;
                     }
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                     gettimeofday(&t, NULL);
 #endif
                     // Call poseidon and get the hash key
@@ -804,7 +804,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     key[1] = Kin1Hash[1];
                     key[2] = Kin1Hash[2];
                     key[3] = Kin1Hash[3];
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                     mainMetrics.add("Poseidon", TimeDiff(t), 3);
 #endif
 
@@ -814,7 +814,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     Goldilocks::Element oldRoot[4];
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                     gettimeofday(&t, NULL);
 #endif
                     SmtGetResult smtGetResult;
@@ -835,7 +835,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         eval_addReadWriteAddress(ctx, smtGetResult.value);
                     }
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                     mainMetrics.add("SMT Get", TimeDiff(t));
 #endif
 
@@ -884,7 +884,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         return;
                     }
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                     gettimeofday(&t, NULL);
 #endif
                     // Call poseidon and get the hash key
@@ -921,7 +921,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         ctx.lastSWrite.key[j] = Kin1Hash[j];
                     }
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                     mainMetrics.add("Poseidon", TimeDiff(t));
 #endif
 
@@ -931,7 +931,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // Call SMT to get the new Merkel Tree root hash
                     mpz_class scalarD;
                     fea2scalar(fr, scalarD, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                     gettimeofday(&t, NULL);
 #endif
                     Goldilocks::Element oldRoot[4];
@@ -963,7 +963,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         //        " total=" << ctx.totalTransferredBalance.get_str(10) << endl;
                     }
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                     mainMetrics.add("SMT Set", TimeDiff(t));
 #endif
                     ctx.lastSWrite.step = i;
@@ -1280,14 +1280,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             // If freeInTag.op!="", then evaluate the requested command (recursively)
             else
             {
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 gettimeofday(&t, NULL);
 #endif
                 // Call evalCommand()
                 CommandResult cr;
                 evalCommand(ctx, rom.line[zkPC].freeInTag, cr);
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 mainMetrics.add("Eval command", TimeDiff(t));
                 RomCommand &cmd = rom.line[zkPC].freeInTag;
                 string cmdString = op2String(cmd.op) + "[" + function2String(cmd.function) + "]";
@@ -1560,7 +1560,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 return;
             }
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             gettimeofday(&t, NULL);
 #endif
             // Call poseidon and get the hash key
@@ -1618,7 +1618,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             key[2] = Kin1Hash[2];
             key[3] = Kin1Hash[3];
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             mainMetrics.add("Poseidon", TimeDiff(t), 3);
 #endif
 
@@ -1628,7 +1628,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             Goldilocks::Element oldRoot[4];
             sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             gettimeofday(&t, NULL);
 #endif
             SmtGetResult smtGetResult;
@@ -1649,7 +1649,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 eval_addReadWriteAddress(ctx, smtGetResult.value);
             }
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             mainMetrics.add("SMT Get", TimeDiff(t));
 #endif
             if (!bProcessBatch)
@@ -1723,7 +1723,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     return;
                 }
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 gettimeofday(&t, NULL);
 #endif
                 // Call poseidon and get the hash key
@@ -1759,13 +1759,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     ctx.lastSWrite.key[j] = Kin1Hash[j];
                 }
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 mainMetrics.add("Poseidon", TimeDiff(t));
 #endif
                 // Call SMT to get the new Merkel Tree root hash
                 mpz_class scalarD;
                 fea2scalar(fr, scalarD, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 gettimeofday(&t, NULL);
 #endif
                 Goldilocks::Element oldRoot[4];
@@ -1794,7 +1794,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     ctx.totalTransferredBalance += balanceDifference;
                 }
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 mainMetrics.add("SMT Set", TimeDiff(t));
 #endif
                 ctx.lastSWrite.step = i;
@@ -2046,11 +2046,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             if (!hashKIterator->second.digestCalled)
             {
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 gettimeofday(&t, NULL);
 #endif
                 keccak256(hashKIterator->second.data.data(), hashKIterator->second.data.size(), hashKIterator->second.digest);
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 mainMetrics.add("Keccak", TimeDiff(t));
 #endif
 
@@ -2309,20 +2309,20 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     //cout << "fePos=" << fePos << " data=" << to_string(data[j]) << " shifted=" << shifted << " fe=" << fr.toString(pBuffer[fePos],16) << endl;
                 }
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 gettimeofday(&t, NULL);
 #endif
                 Goldilocks::Element result[4];
                 poseidon.linear_hash(result, pBuffer, bufferSize);
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 mainMetrics.add("Poseidon", TimeDiff(t));
 #endif
                 fea2scalar(fr, hashPIterator->second.digest, result);
                 //cout << "ctx.hashP[" << addr << "].digest=" << ctx.hashP[addr].digest.get_str(16) << endl;
                 delete[] pBuffer;
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 gettimeofday(&t, NULL);
 #endif
                 zkresult zkResult = pStateDB->setProgram(result, hashPIterator->second.data, proverRequest.input.bUpdateMerkleTree);
@@ -2334,7 +2334,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     return;
                 }
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 mainMetrics.add("Set program", TimeDiff(t));
 #endif
 
@@ -2363,7 +2363,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 hashValue.digest = dg;
                 Goldilocks::Element aux[4];
                 scalar2fea(fr, dg, aux);
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 gettimeofday(&t, NULL);
 #endif
                 zkresult zkResult = pStateDB->getProgram(aux, hashValue.data, proverRequest.dbReadLog);
@@ -2375,7 +2375,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     return;
                 }
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 mainMetrics.add("Get program", TimeDiff(t));
 #endif
                 ctx.hashP[addr] = hashValue;
@@ -3567,13 +3567,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (!bProcessBatch) i++;
             for (uint64_t j=0; j<rom.line[zkPC].cmdAfter.size(); j++)
             {
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 gettimeofday(&t, NULL);
 #endif
                 CommandResult cr;
                 evalCommand(ctx, *rom.line[zkPC].cmdAfter[j], cr);
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 mainMetrics.add("Eval command", TimeDiff(t));
                 RomCommand &cmd = *rom.line[zkPC].cmdAfter[j];
                 string cmdString = op2String(cmd.op) + "[" + function2String(cmd.function) + "]";
@@ -3818,9 +3818,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     
     TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
 
-#ifdef LOG_TIME_STATISTICS
-    mainMetrics.print("Main Executor calls");
-    evalCommandMetrics.print("Main Executor eval command calls");
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+    gettimeofday(&t, NULL);
 #endif
 
     if (config.dbFlushInParallel)
@@ -3839,6 +3838,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
         StateDBClientFactory::freeStateDBClient(pStateDB);
     }
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+    mainMetrics.add("Flush", TimeDiff(t));
+#endif
+
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+    mainMetrics.print("Main Executor calls");
+    evalCommandMetrics.print("Main Executor eval command calls");
+#endif
 
     cout << "MainExecutor::execute() done lastStep=" << ctx.lastStep << " (" << (double(ctx.lastStep)*100)/N << "%)" << endl;
 }
