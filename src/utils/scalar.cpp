@@ -501,7 +501,7 @@ string scalar2ba(const mpz_class &s)
         exitProcess();
     }
 
-    uint8_t buffer[32];
+    uint8_t buffer[32] = {0};
     mpz_export(buffer, NULL, 1, 1, 1, 0, s.get_mpz_t());
 
     string result;
