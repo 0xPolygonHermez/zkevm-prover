@@ -6,11 +6,11 @@
     "runStateDBServer": false,
     "runStateDBTest": false,
 
-    "runAggregatorServer": false,
-    "runAggregatorClient": false,
+    "runAggregatorServer": true,
+    "runAggregatorClient": true,
     "runAggregatorClientMock": false, 
     
-    "runFileGenBatchProof": true,
+    "runFileGenBatchProof": false,
     "runFileGenAggregatedProof": false,
     "runFileGenFinalProof": false,
     "runFileProcessBatch": false,
@@ -27,7 +27,7 @@
     "executeInParallel": true,
     "useMainExecGenerated": true,
     "saveRequestToFile": false,
-    "saveInputToFile": false,
+    "saveInputToFile": true,
     "saveDbReadsToFile": false,
     "saveDbReadsToFileOnChange": false,
     "saveOutputToFile": true,
