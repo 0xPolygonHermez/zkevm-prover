@@ -147,11 +147,11 @@ void Config::load(json &config)
     if (config.contains("loadDBToMemCacheInParallel") && config["loadDBToMemCacheInParallel"].is_boolean())
         loadDBToMemCacheInParallel = config["loadDBToMemCacheInParallel"];
 
-    dbMTCacheSize = 0;
+    dbMTCacheSize = 4*1024;
     if (config.contains("dbMTCacheSize") && config["dbMTCacheSize"].is_number())
         dbMTCacheSize = config["dbMTCacheSize"];
 
-    dbProgramCacheSize = 0;
+    dbProgramCacheSize = 1*1024;
     if (config.contains("dbProgramCacheSize") && config["dbProgramCacheSize"].is_number())
         dbProgramCacheSize = config["dbProgramCacheSize"];
 
