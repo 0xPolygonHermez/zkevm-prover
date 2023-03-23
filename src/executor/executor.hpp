@@ -7,6 +7,7 @@
 #include "main_sm/fork_1/main/main_executor.hpp"
 #include "main_sm/fork_2/main/main_executor.hpp"
 #include "main_sm/fork_3/main/main_executor.hpp"
+#include "main_sm/fork_4/main/main_executor.hpp"
 #include "sm/storage/storage_executor.hpp"
 #include "sm/memory/memory_executor.hpp"
 #include "sm/binary/binary_executor.hpp"
@@ -29,7 +30,8 @@ public:
     fork_0::MainExecutor mainExecutor_fork_0;
     fork_1::MainExecutor mainExecutor_fork_1;
     fork_2::MainExecutor mainExecutor_fork_2;
-    PROVER_FORK_NAMESPACE::MainExecutor mainExecutor; // Default executor used by prover
+    fork_3::MainExecutor mainExecutor_fork_3;
+    fork_4::MainExecutor mainExecutor_fork_4;
     StorageExecutor storageExecutor;
     MemoryExecutor memoryExecutor;
     BinaryExecutor binaryExecutor;
@@ -48,7 +50,8 @@ public:
         mainExecutor_fork_0(fr, poseidon, config),
         mainExecutor_fork_1(fr, poseidon, config),
         mainExecutor_fork_2(fr, poseidon, config),
-        mainExecutor(fr, poseidon, config),
+        mainExecutor_fork_3(fr, poseidon, config),
+        mainExecutor_fork_4(fr, poseidon, config),
         storageExecutor(fr, poseidon, config),
         memoryExecutor(fr, config),
         binaryExecutor(fr, config),
