@@ -195,11 +195,11 @@ DatabaseCacheRecord * DatabaseMTCache::allocRecord(const string key, const void 
     // Assign values to record
     pRecord->value = pValue;
     pRecord->key = key;
-    pRecord->size = 
+    pRecord->size = 2*(
         sizeof(DatabaseCacheRecord)+
         (pRecord->key.capacity()+1)+
         sizeof(vector<Goldilocks::Element>)+
-        sizeof(Goldilocks::Element)*pValue->capacity();
+        sizeof(Goldilocks::Element)*pValue->capacity() );
         
     return pRecord;
 }
@@ -264,11 +264,11 @@ DatabaseCacheRecord * DatabaseProgramCache::allocRecord(const string key, const 
     // Assign values to record
     pRecord->value = pValue;
     pRecord->key = key;
-    pRecord->size = 
+    pRecord->size = 2*(
         sizeof(DatabaseCacheRecord)+
         (pRecord->key.capacity()+1)+
         sizeof(vector<uint8_t>)+
-        sizeof(uint8_t)*pValue->capacity();
+        sizeof(uint8_t)*pValue->capacity() );
         
     return pRecord;
 }
