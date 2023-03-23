@@ -62,6 +62,7 @@ public:
 
     uint16_t executorServerPort;
     bool executorROMLineTraces;
+    bool executorTimeStatistics;
     uint16_t executorClientPort;
     string executorClientHost;
 
@@ -123,8 +124,7 @@ public:
     bool dbMultiWrite;
     bool dbFlushInParallel;
     bool dbConnectionsPool;
-    uint64_t dbNumberOfWritePoolConnections;
-    uint64_t dbNumberOfReadPoolConnections;
+    uint64_t dbNumberOfPoolConnections;
     uint64_t cleanerPollingPeriod;
     uint64_t requestsPersistence;
     uint64_t maxExecutorThreads;

@@ -147,11 +147,11 @@ void Config::load(json &config)
     if (config.contains("loadDBToMemCacheInParallel") && config["loadDBToMemCacheInParallel"].is_boolean())
         loadDBToMemCacheInParallel = config["loadDBToMemCacheInParallel"];
 
-    dbMTCacheSize = 0;
+    dbMTCacheSize = 4*1024;
     if (config.contains("dbMTCacheSize") && config["dbMTCacheSize"].is_number())
         dbMTCacheSize = config["dbMTCacheSize"];
 
-    dbProgramCacheSize = 0;
+    dbProgramCacheSize = 1*1024;
     if (config.contains("dbProgramCacheSize") && config["dbProgramCacheSize"].is_number())
         dbProgramCacheSize = config["dbProgramCacheSize"];
 
@@ -182,6 +182,10 @@ void Config::load(json &config)
     executorROMLineTraces = false;
     if (config.contains("executorROMLineTraces") && config["executorROMLineTraces"].is_boolean())
         executorROMLineTraces = config["executorROMLineTraces"];
+
+    executorTimeStatistics = false;
+    if (config.contains("executorTimeStatistics") && config["executorTimeStatistics"].is_boolean())
+        executorTimeStatistics = config["executorTimeStatistics"];
 
     executorClientPort = 50071;
     if (config.contains("executorClientPort") && config["executorClientPort"].is_number())
@@ -407,13 +411,9 @@ void Config::load(json &config)
     if (config.contains("dbConnectionsPool") && config["dbConnectionsPool"].is_boolean())
         dbConnectionsPool = config["dbConnectionsPool"];
 
-    dbNumberOfWritePoolConnections = 25;
-    if (config.contains("dbNumberOfWritePoolConnections") && config["dbNumberOfWritePoolConnections"].is_number())
-        dbNumberOfWritePoolConnections = config["dbNumberOfWritePoolConnections"];
-
-    dbNumberOfReadPoolConnections = 25;
-    if (config.contains("dbNumberOfReadPoolConnections") && config["dbNumberOfReadPoolConnections"].is_number())
-        dbNumberOfReadPoolConnections = config["dbNumberOfReadPoolConnections"];
+    dbNumberOfPoolConnections = 25;
+    if (config.contains("dbNumberOfPoolConnections") && config["dbNumberOfPoolConnections"].is_number())
+        dbNumberOfPoolConnections = config["dbNumberOfPoolConnections"];
 
     if (config.contains("cleanerPollingPeriod") && config["cleanerPollingPeriod"].is_number())
         cleanerPollingPeriod = config["cleanerPollingPeriod"];
@@ -494,6 +494,12 @@ void Config::print(void)
     if (useMainExecGenerated)
         cout << "    useMainExecGenerated=true" << endl;
 
+    if (executorROMLineTraces)
+        cout << "    executorROMLineTraces=true" << endl;
+
+    if (executorTimeStatistics)
+        cout << "    executorTimeStatistics=true" << endl;
+
     if (saveRequestToFile)
         cout << "    saveRequestToFile=true" << endl;
     if (saveInputToFile)
@@ -571,8 +577,7 @@ void Config::print(void)
     cout << "    dbMultiWrite=" << to_string(dbMultiWrite) << endl;
     cout << "    dbFlushInParallel=" << to_string(dbFlushInParallel) << endl;
     cout << "    dbConnectionsPool=" << to_string(dbConnectionsPool) << endl;
-    cout << "    dbNumberOfWritePoolConnections=" << dbNumberOfWritePoolConnections << endl;
-    cout << "    dbNumberOfReadPoolConnections=" << dbNumberOfReadPoolConnections << endl;
+    cout << "    dbNumberOfPoolConnections=" << dbNumberOfPoolConnections << endl;
     cout << "    cleanerPollingPeriod=" << cleanerPollingPeriod << endl;
     cout << "    requestsPersistence=" << requestsPersistence << endl;
     cout << "    maxExecutorThreads=" << maxExecutorThreads << endl;

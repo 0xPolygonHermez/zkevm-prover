@@ -130,6 +130,14 @@ void runFileGenFinalProof(Goldilocks fr, Prover &prover, Config &config)
     prover.genFinalProof(&proverRequest);
 }
 
+uint64_t processBatchTotalArith = 0;
+uint64_t processBatchTotalBinary = 0;
+uint64_t processBatchTotalKeccakF = 0;
+uint64_t processBatchTotalMemAlign = 0;
+uint64_t processBatchTotalPaddingPG = 0;
+uint64_t processBatchTotalPoseidonG = 0;
+uint64_t processBatchTotalSteps = 0;
+
 void runFileProcessBatch(Goldilocks fr, Prover &prover, Config &config)
 {
     // Load and parse input JSON file
@@ -159,7 +167,31 @@ void runFileProcessBatch(Goldilocks fr, Prover &prover, Config &config)
 
     // Call the prover
     prover.processBatch(&proverRequest);
-}
+
+    processBatchTotalArith += proverRequest.counters.arith;
+    processBatchTotalBinary += proverRequest.counters.binary;
+    processBatchTotalKeccakF += proverRequest.counters.keccakF;
+    processBatchTotalMemAlign += proverRequest.counters.memAlign;
+    processBatchTotalPaddingPG += proverRequest.counters.paddingPG;
+    processBatchTotalPoseidonG += proverRequest.counters.poseidonG;
+    processBatchTotalSteps += proverRequest.counters.steps;
+
+    cout << "runFileProcessBatch(" << config.inputFile << ") got counters: arith=" << proverRequest.counters.arith <<
+        " binary=" << proverRequest.counters.binary <<
+        " keccakF=" << proverRequest.counters.keccakF <<
+        " memAlign=" << proverRequest.counters.memAlign <<
+        " paddingPG=" << proverRequest.counters.paddingPG <<
+        " poseidonG=" << proverRequest.counters.poseidonG <<
+        " steps=" << proverRequest.counters.steps <<
+        " totals:" <<
+        " arith=" << processBatchTotalArith <<
+        " binary=" << processBatchTotalBinary <<
+        " keccakF=" << processBatchTotalKeccakF <<
+        " memAlign=" << processBatchTotalMemAlign <<
+        " paddingPG=" << processBatchTotalPaddingPG <<
+        " poseidonG=" << processBatchTotalPoseidonG <<
+        " steps=" << processBatchTotalSteps << endl;
+ }
 
 class RunFileThreadArguments
 {
@@ -524,11 +556,15 @@ int main(int argc, char **argv)
     TimerStopAndLog(PROVER_CONSTRUCTOR);
 
 #ifdef DATABASE_USE_CACHE
+
     /* INIT DB CACHE */
+    Database::dbMTCache.setName("MTCache");
+    Database::dbProgramCache.setName("ProgramCache");
+    Database::dbMTCache.setMaxSize(config.dbMTCacheSize*1024*1024);
+    Database::dbProgramCache.setMaxSize(config.dbProgramCacheSize*1024*1024);
+
     if (config.databaseURL != "local") // remote DB
     {
-        Database::dbMTCache.setCacheSize(config.dbMTCacheSize*1024*1024);
-        Database::dbProgramCache.setCacheSize(config.dbProgramCacheSize*1024*1024);
 
         if (config.loadDBToMemCache && (config.runAggregatorClient || config.runExecutorServer || config.runStateDBServer))
         {
@@ -546,13 +582,8 @@ int main(int argc, char **argv)
             }
             TimerStopAndLog(DB_CACHE_LOAD);
         }
-    } 
-    else 
-    {
-        // set no limit for the db caches as we are using local (in memory) db
-        Database::dbMTCache.setCacheSize(-1); 
-        Database:: dbProgramCache.setCacheSize(-1);
     }
+    
 #endif // DATABASE_USE_CACHE
 
     /* SERVERS */

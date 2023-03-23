@@ -21,41 +21,57 @@ class DatabaseCache
 {
 protected:
     recursive_mutex mlock;
-    int64_t cacheSize = 0;
-    int64_t cacheCurrentSize = 0;
+    uint64_t maxSize;
+    uint64_t currentSize;
     unordered_map<string, DatabaseCacheRecord*> cacheMap;
-    DatabaseCacheRecord* head = NULL;
-    DatabaseCacheRecord* last = NULL;
+    DatabaseCacheRecord * head;
+    DatabaseCacheRecord * last;
+    uint64_t attempts;
+    uint64_t hits;
+    string name;
 
-    DatabaseCache() : cacheCurrentSize(0), head(NULL), last(NULL) {};
+    DatabaseCache() :
+        maxSize(0),
+        currentSize(0),
+        head(NULL),
+        last(NULL),
+        attempts(0),
+        hits(0)
+        {};
     ~DatabaseCache();
-    bool addKeyValue(const string &key, const void * value); // returns true if cache is full
+    bool addKeyValue(const string &key, const void * value, const bool update); // returns true if cache is full
     bool findKey(const string &key, DatabaseCacheRecord* &record);
     virtual DatabaseCacheRecord* allocRecord(const string key, const void * value) { return NULL;};
     virtual void freeRecord(DatabaseCacheRecord* record) {};
+    virtual void updateRecord(DatabaseCacheRecord* record, const void * value) {};
 
 public:
-    bool enabled() {return ((cacheSize == -1) || (cacheSize > 0));};
-    void setCacheSize(int64_t size) {cacheSize = size;}; // size is in bytes. 0 = no cache; -1 = cache no limit
+    uint64_t getMaxSize(void) { return maxSize; };
+    uint64_t getCurrentSize(void) { return currentSize; };
+    bool enabled() {return (maxSize > 0);};
+    void setMaxSize(int64_t size) { maxSize = size; }; // size is in bytes, 0 = no cache
+    void setName(const char * pChar) { name = pChar; };
     void print(bool printContent);
 };
 
 class DatabaseMTCache : public DatabaseCache
 {
 public:  
-    bool add(const string &key, const vector<Goldilocks::Element> &value); // returns true if cache is full
+    bool add(const string &key, const vector<Goldilocks::Element> &value, const bool update); // returns true if cache is full
     bool find(const string &key, vector<Goldilocks::Element> &value);
     DatabaseCacheRecord* allocRecord(const string key, const void * value);
     void freeRecord(DatabaseCacheRecord* record);
+    void updateRecord(DatabaseCacheRecord* record, const void * value);
 };
 
 class DatabaseProgramCache : public DatabaseCache
 {
 public:  
-    bool add(const string &key, const vector<uint8_t> &value); // returns true if cache is full
+    bool add(const string &key, const vector<uint8_t> &value, const bool update); // returns true if cache is full
     bool find(const string &key, vector<uint8_t> &value);
     DatabaseCacheRecord* allocRecord(const string key, const void * value);
     void freeRecord(DatabaseCacheRecord* record);
+    void updateRecord(DatabaseCacheRecord* record, const void * value);
 };
 
 #endif

@@ -8,6 +8,8 @@
 #include "main_sm/fork_2/main_exec_generated/main_exec_generated_fast.hpp"
 #include "main_sm/fork_3/main_exec_generated/main_exec_generated.hpp"
 #include "main_sm/fork_3/main_exec_generated/main_exec_generated_fast.hpp"
+#include "main_sm/fork_4/main_exec_generated/main_exec_generated.hpp"
+#include "main_sm/fork_4/main_exec_generated/main_exec_generated_fast.hpp"
 #include "timer.hpp"
 
 // Reduced version: only 1 evaluation is allocated, and some asserts are disabled
@@ -101,7 +103,7 @@ void Executor::process_batch (ProverRequest &proverRequest)
         {
             if (config.useMainExecGenerated)
             {
-                fork_3::main_exec_generated_fast(mainExecutor, proverRequest);
+                fork_3::main_exec_generated_fast(mainExecutor_fork_3, proverRequest);
             }
             else
             {
@@ -117,7 +119,34 @@ void Executor::process_batch (ProverRequest &proverRequest)
                 // This instance will store all data required to execute the rest of State Machines
                 fork_3::MainExecRequired required;
 
-                mainExecutor.execute(proverRequest, commitPols.Main, required);
+                mainExecutor_fork_3.execute(proverRequest, commitPols.Main, required);
+
+                // Free committed polynomials address space
+                free(pAddress);
+            }
+            return;
+        }
+        case 4: // fork_4
+        {
+            if (config.useMainExecGenerated)
+            {
+                fork_4::main_exec_generated_fast(mainExecutor_fork_4, proverRequest);
+            }
+            else
+            {
+                // Allocate committed polynomials for only 1 evaluation
+                void * pAddress = calloc(fork_4::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
+                if (pAddress == NULL)
+                {
+                    cerr << "Error: Executor::process_batch() failed calling calloc(" << fork_4::CommitPols::pilSize() << ")" << endl;
+                    exitProcess();
+                }
+                fork_4::CommitPols commitPols(pAddress,1);
+
+                // This instance will store all data required to execute the rest of State Machines
+                fork_4::MainExecRequired required;
+
+                mainExecutor_fork_4.execute(proverRequest, commitPols.Main, required);
 
                 // Free committed polynomials address space
                 free(pAddress);
@@ -258,11 +287,11 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         {
             if (config.useMainExecGenerated)
             {
-                PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor, proverRequest, commitPols.Main, required);
+                PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor_fork_4, proverRequest, commitPols.Main, required);
             }
             else
             {
-                mainExecutor.execute(proverRequest, commitPols.Main, required);
+                mainExecutor_fork_4.execute(proverRequest, commitPols.Main, required);
             }
             
             // Save input to <timestamp>.input.json after execution including dbReadLog
@@ -353,11 +382,11 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         TimerStart(MAIN_EXECUTOR_EXECUTE);
         if (config.useMainExecGenerated)
         {
-            PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor, proverRequest, commitPols.Main, required);
+            PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor_fork_4, proverRequest, commitPols.Main, required);
         }
         else
         {
-            mainExecutor.execute(proverRequest, commitPols.Main, required);
+            mainExecutor_fork_4.execute(proverRequest, commitPols.Main, required);
         }
             
         // Save input to <timestamp>.input.json after execution including dbReadLog

@@ -1,10 +1,10 @@
 #!/bin/bash -x
 
-VERSION=v1.0.0-rc.1-fork.3
+VERSION=v1.1.0-rc.1-fork.4
 FORK_VERSION=$(sed -e 's/.*-fork.//g' <<< ${VERSION})
 FORK_ID=fork_$FORK_VERSION
 
-WORKING_DIR=/mnt/ofs/zkproverc/${VERSION}
+WORKING_DIR=/releases/${VERSION}
 CONFIG_DIR=${WORKING_DIR}/config/
 C_FILES=${WORKING_DIR}/c_files
 CIRCOM_HEADER="#pragma GCC diagnostic push\n#pragma GCC diagnostic ignored \"-Wunused-variable\"\n#pragma GCC push_options\n#pragma GCC optimize (\"O0\")\n#include <stdio.h>\n#include <iostream>\n#include <assert.h>\n#include <cassert>\n"
@@ -20,7 +20,6 @@ rsync -avz --progress ${CONFIG_DIR}/scripts/ config/scripts/
 rsync -avz --progress ${CONFIG_DIR}/ config/
 
 #Uncomment the following line if you want to generate source code the first time after the release files generation
-exit 0
 
 #Copy the chelpers files
 cp ${C_FILES}/zkevm.chelpers/*.step* ./src/starkpil/zkevm/chelpers/
