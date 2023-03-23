@@ -556,11 +556,15 @@ int main(int argc, char **argv)
     TimerStopAndLog(PROVER_CONSTRUCTOR);
 
 #ifdef DATABASE_USE_CACHE
+
     /* INIT DB CACHE */
+    Database::dbMTCache.setName("MTCache");
+    Database::dbProgramCache.setName("ProgramCache");
+    Database::dbMTCache.setMaxSize(config.dbMTCacheSize*1024*1024);
+    Database::dbProgramCache.setMaxSize(config.dbProgramCacheSize*1024*1024);
+
     if (config.databaseURL != "local") // remote DB
     {
-        Database::dbMTCache.setCacheSize(config.dbMTCacheSize*1024*1024);
-        Database::dbProgramCache.setCacheSize(config.dbProgramCacheSize*1024*1024);
 
         if (config.loadDBToMemCache && (config.runAggregatorClient || config.runExecutorServer || config.runStateDBServer))
         {
@@ -578,13 +582,8 @@ int main(int argc, char **argv)
             }
             TimerStopAndLog(DB_CACHE_LOAD);
         }
-    } 
-    else 
-    {
-        // set no limit for the db caches as we are using local (in memory) db
-        Database::dbMTCache.setCacheSize(-1); 
-        Database:: dbProgramCache.setCacheSize(-1);
     }
+    
 #endif // DATABASE_USE_CACHE
 
     /* SERVERS */

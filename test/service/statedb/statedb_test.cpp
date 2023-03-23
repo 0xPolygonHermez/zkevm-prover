@@ -57,12 +57,12 @@ void runStateDBTest (const Config& config)
             cerr << "Error: i=" << i << " zkr=" << zkr << "=" << zkresult2string(zkr) << endl;
             exitProcess();
         }
-        if (i%1000 == 0)
+        if (i%10000 == 0)
         {
             cout << getTimestamp() << " i=" << i << endl;
             printMemoryInfo(true);
         }
-        //if (i%100==0) pStateDB->flush();
+        if (i%100==0) pStateDB->flush();
     }
 
     #endif

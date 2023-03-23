@@ -14,7 +14,9 @@ class StateDB : public StateDBInterface
 private:
     Goldilocks &fr;
     const Config &config;
+public:
     Database db;
+private:
     Smt smt;
 
 #ifdef STATEDB_LOCK
