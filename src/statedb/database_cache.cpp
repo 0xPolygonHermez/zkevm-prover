@@ -15,7 +15,7 @@ bool DatabaseCache::addKeyValue(const string &key, const void * value, const boo
     attempts++;
     if (attempts%1000000 == 0)
     {
-        cout << "DatabaseCache::addKeyValue() name=" << name << " maxSize=" << maxSize << " currentSize=" << currentSize << " attempts=" << attempts << " hits=" << hits << " hit ratio=" << double(hits)*100.0/double(attempts) << "%" << endl;
+        cout << "DatabaseCache::addKeyValue() name=" << name << " count=" << cacheMap.size() << " maxSize=" << maxSize << " currentSize=" << currentSize << " attempts=" << attempts << " hits=" << hits << " hit ratio=" << double(hits)*100.0/double(attempts) << "%" << endl;
     }
 
     DatabaseCacheRecord * record;
@@ -62,11 +62,15 @@ bool DatabaseCache::addKeyValue(const string &key, const void * value, const boo
         DatabaseCacheRecord* tmp = last;
         if (last->prev != NULL) last->prev->next = NULL;
         last = last->prev;
+        
         // Free old last record
         cacheMap.erase(tmp->key);
-        freeRecord(tmp);
+        
         // Update cache size
-        currentSize -= tmp->size;      
+        zkassert(currentSize >= tmp->size);
+        currentSize -= tmp->size;
+
+        freeRecord(tmp);
     }
 
     //cout << "DatabaseCache::addRecord() key=" << key << " cacheCurrentSize=" << cacheCurrentSize << " cacheMap.size()=" << cacheMap.size() << " record.size()=" << record->size << endl;
