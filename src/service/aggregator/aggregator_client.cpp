@@ -427,7 +427,7 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
                     zkassert(pFinalProof != NULL);
 
                     pFinalProof->set_proof(pProverRequest->proof.getStringProof());
-                    
+
                     // Set public inputs extended
                     aggregator::v1::PublicInputs* pPublicInputs = new(aggregator::v1::PublicInputs);
                     pPublicInputs->set_old_state_root(scalar2ba(pProverRequest->proof.publicInputsExtended.publicInputs.oldStateRoot));
@@ -472,7 +472,7 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
             }
         }
     }
-    
+
     prover.unlock();
 
 #ifdef LOG_SERVICE
@@ -491,10 +491,12 @@ void* aggregatorClientThread(void* arg)
     {
         ::grpc::ClientContext context;
 
+        /*
         // 5 minutes of inactivity timeout; if aggregator does not send any request, the connection is restarted
         time_point deadline = std::chrono::system_clock::now() +
-        std::chrono::milliseconds(5*60*1000);
+        std::chrono::milliseconds(5*60*100000);
         context.set_deadline(deadline);
+        */
 
         std::unique_ptr<grpc::ClientReaderWriter<aggregator::v1::ProverMessage, aggregator::v1::AggregatorMessage>> readerWriter;
         readerWriter = pAggregatorClient->stub->Channel(&context);
@@ -511,7 +513,7 @@ void* aggregatorClientThread(void* arg)
                 cerr << "Error: aggregatorClientThread() failed calling readerWriter->Read(&aggregatorMessage)" << endl;
                 break;
             }
-            
+
             switch (aggregatorMessage.request_case())
             {
                 case aggregator::v1::AggregatorMessage::RequestCase::kGetProofRequest:
@@ -641,7 +643,7 @@ void* aggregatorClientThread(void* arg)
                 cerr << "Error: aggregatorClientThread() failed calling readerWriter->Write(proverMessage)" << endl;
                 break;
             }
-            
+
             switch (aggregatorMessage.request_case())
             {
                 case aggregator::v1::AggregatorMessage::RequestCase::kGetStatusRequest:
@@ -658,7 +660,7 @@ void* aggregatorClientThread(void* arg)
                 default:
                     break;
             }
-            
+
             if (pAggregatorClient->config.saveResponseToFile)
             {
                 string2file(proverMessage.DebugString(), filePrefix + "aggregator_response.txt");
