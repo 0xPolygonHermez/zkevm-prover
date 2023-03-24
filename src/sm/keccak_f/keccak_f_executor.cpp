@@ -2,57 +2,58 @@
 #include "utils.hpp"
 #include "exit_process.hpp"
 #include "zkassert.hpp"
+#include "zklog.hpp"
 
 void KeccakFExecutor::loadScript (json j)
 {
     if ( !j.contains("program") ||
          !j["program"].is_array())
     {
-        cerr << "Error: KeccakFExecutor::loadEvals() found JSON object does not contain not a program array" << endl;
+        zklog.error("KeccakFExecutor::loadEvals() found JSON object does not contain not a program array");
         exitProcess();
     }
     for (uint64_t i=0; i<j["program"].size(); i++)
     {
         if ( !j["program"][i].is_object() )
         {
-            cerr << "Error: KeccakFExecutor::loadEvals() found JSON array's element is not an object" << endl;
+            zklog.error("KeccakFExecutor::loadEvals() found JSON array's element is not an object");
             exitProcess();
         }
         if ( !j["program"][i].contains("op") ||
              !j["program"][i]["op"].is_string() )
         {
-            cerr << "Error: KeccakFExecutor::loadEvals() found JSON array's element does not contain string op field" << endl;
+            zklog.error("KeccakFExecutor::loadEvals() found JSON array's element does not contain string op field");
             exitProcess();
         }
         if ( !j["program"][i].contains("ref") ||
              !j["program"][i]["ref"].is_number_unsigned() ||
               j["program"][i]["ref"]>=maxRefs )
         {
-            cerr << "Error: KeccakFExecutor::loadEvals() found JSON array's element does not contain unsigned number ref field" << endl;
+            zklog.error("KeccakFExecutor::loadEvals() found JSON array's element does not contain unsigned number ref field");
             exitProcess();
         }
         if ( !j["program"][i].contains("a") ||
              !j["program"][i]["a"].is_object() )
         {
-            cerr << "Error: KeccakFExecutor::loadEvals() found JSON array's element does not contain object a field" << endl;
+            zklog.error("KeccakFExecutor::loadEvals() found JSON array's element does not contain object a field");
             exitProcess();
         }
         if ( !j["program"][i].contains("b") ||
              !j["program"][i]["b"].is_object() )
         {
-            cerr << "Error: KeccakFExecutor::loadEvals() found JSON array's element does not contain object b field" << endl;
+            zklog.error("KeccakFExecutor::loadEvals() found JSON array's element does not contain object b field");
             exitProcess();
         }
         if ( !j["program"][i]["a"].contains("type") ||
              !j["program"][i]["a"]["type"].is_string() )
         {
-            cerr << "Error: KeccakFExecutor::loadEvals() found JSON array's element does not contain string a type field" << endl;
+            zklog.error("KeccakFExecutor::loadEvals() found JSON array's element does not contain string a type field");
             exitProcess();
         }
         if ( !j["program"][i]["b"].contains("type") ||
              !j["program"][i]["b"]["type"].is_string() )
         {
-            cerr << "Error: KeccakFExecutor::loadEvals() found JSON array's element does not contain string b type field" << endl;
+            zklog.error("KeccakFExecutor::loadEvals() found JSON array's element does not contain string b type field");
             exitProcess();
         }
         
@@ -69,7 +70,8 @@ void KeccakFExecutor::loadScript (json j)
         }
         else
         {
-            cerr << "Error: KeccakFExecutor::loadEvals() found invalid op value: " << j[i]["op"] << endl;
+            string opString = j[i]["op"];
+            zklog.error("KeccakFExecutor::loadEvals() found invalid op value: " + opString);
             exitProcess();
         }
         instruction.refr = j["program"][i]["ref"];
@@ -90,7 +92,7 @@ void KeccakFExecutor::loadScript (json j)
         }
         else
         {
-            cerr << "Error: KeccakFExecutor::loadEvals() found invalid a type value: " << typea << endl;
+            zklog.error("KeccakFExecutor::loadEvals() found invalid a type value: " + typea);
             exitProcess();
         }
         
@@ -110,7 +112,7 @@ void KeccakFExecutor::loadScript (json j)
         }
         else
         {
-            cerr << "Error: KeccakFExecutor::loadEvals() found invalid b type value: " << typeb << endl;
+            zklog.error("KeccakFExecutor::loadEvals() found invalid b type value: " + typeb);
             exitProcess();
         }
         
@@ -142,7 +144,7 @@ void KeccakFExecutor::execute (KeccakState &S)
         }
         else
         {
-            cerr << "Error: KeccakFExecutor::execute() found invalid op: " << program[i].op << " in evaluation: " << i << endl;
+            zklog.error("KeccakFExecutor::execute() found invalid op: " + to_string(program[i].op) + " in evaluation: " + to_string(i));
             exitProcess();
         }
     }
@@ -196,7 +198,7 @@ void KeccakFExecutor::execute (uint8_t * bit)
             }
             else
             {
-                cerr << "Error: KeccakFExecutor::execute() found invalid op: " << program[i].op << " in evaluation: " << i << endl;
+                zklog.error("KeccakFExecutor::execute() found invalid op: " + to_string(program[i].op) + " in evaluation: " + to_string(i));
                 exitProcess();
             }
         }
@@ -269,7 +271,7 @@ void KeccakFExecutor::execute (KeccakFExecuteInput &input, KeccakFExecuteOutput 
                     break;
 
                 default:
-                    cerr << "Error: KeccakFExecutor::execute() found invalid op: " << program[i].op << " in evaluation: " << i << endl;
+                    zklog.error("KeccakFExecutor::execute() found invalid op: " + to_string(program[i].op) + " in evaluation: " + to_string(i));
                     exitProcess();
             }
         }
@@ -281,7 +283,7 @@ void KeccakFExecutor::execute (const Goldilocks::Element *input, const uint64_t 
 {
     if (inputLength != numberOfSlots*1600)
     {
-        cerr << "Error: KeccakFExecutor::execute() got input size=" << inputLength << " different from numberOfSlots=" << numberOfSlots << "x1600" << endl;
+        zklog.error("KeccakFExecutor::execute() got input size=" + to_string(inputLength) + " different from numberOfSlots=" + to_string(numberOfSlots) + "x1600");
         exitProcess();
     }
     vector<vector<Goldilocks::Element>> inputVector;
@@ -303,7 +305,7 @@ void KeccakFExecutor::execute (const vector<vector<Goldilocks::Element>> &input,
     // Check input size
     if (input.size() != numberOfSlots)
     {
-        cerr << "Error: KeccakFExecutor::execute() got input.size()=" << input.size() << " different from numberOfSlots=" << numberOfSlots << endl;
+        zklog.error("KeccakFExecutor::execute() got input.size()=" + to_string(input.size()) + " different from numberOfSlots=" + to_string(numberOfSlots));
         exitProcess();
     }
 
@@ -312,7 +314,7 @@ void KeccakFExecutor::execute (const vector<vector<Goldilocks::Element>> &input,
     {
         if (input[i].size() != 1600)
         {
-            cerr << "Error: KeccakFExecutor::execute() got input i=" << i << " size=" << input[i].size() << " different from 1600" << endl;
+            zklog.error("KeccakFExecutor::execute() got input i=" + to_string(i) + " size=" + to_string(input[i].size()) + " different from 1600");
             exitProcess();
         }
     }
@@ -356,7 +358,7 @@ void KeccakFExecutor::execute (const vector<vector<Goldilocks::Element>> &input,
                     setPol(pols.a, absRefr, getPol(pols.c, absRefa));
                     break;
                 default:
-                    cerr << "Error: KeccakFExecutor() found invalid program[i].pina=" << program[i].pina << endl;
+                    zklog.error("KeccakFExecutor() found invalid program[i].pina=" + to_string(program[i].pina));
                     exitProcess();
             }
             switch (program[i].pinb)
@@ -371,7 +373,7 @@ void KeccakFExecutor::execute (const vector<vector<Goldilocks::Element>> &input,
                     setPol(pols.b, absRefr, getPol(pols.c, absRefb));
                     break;
                 default:
-                    cerr << "Error: KeccakFExecutor() found invalid program[i].pinb=" << program[i].pinb << endl;
+                    zklog.error("KeccakFExecutor() found invalid program[i].pinb=" + to_string(program[i].pinb));
                     exitProcess();
             }
 
@@ -394,7 +396,7 @@ void KeccakFExecutor::execute (const vector<vector<Goldilocks::Element>> &input,
                 }
                 default:
                 {
-                    cerr << "Error: KeccakFExecutor::execute() found invalid op: " << program[i].op << " in evaluation: " << i << endl;
+                    zklog.error("KeccakFExecutor::execute() found invalid op: " + to_string(program[i].op) + " in evaluation: " + to_string(i));
                     exitProcess();
                 }
             }

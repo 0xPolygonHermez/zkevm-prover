@@ -4,6 +4,7 @@
 #include "scalar.hpp"
 #include "database.hpp"
 #include "utils.hpp"
+#include "zklog.hpp"
 
 zkresult Input::load (json &input)
 {
@@ -37,7 +38,7 @@ void Input::loadGlobals (json &input)
     if ( !input.contains("oldStateRoot") ||
          !input["oldStateRoot"].is_string() )
     {
-        cerr << "Error: oldStateRoot key not found in input JSON file" << endl;
+        zklog.error("oldStateRoot key not found in input JSON file");
         exitProcess();
     }
     auxString = Remove0xIfPresent(input["oldStateRoot"]);
@@ -61,7 +62,7 @@ void Input::loadGlobals (json &input)
     if ( !input.contains("oldNumBatch") ||
          !input["oldNumBatch"].is_number_unsigned() )
     {
-        cerr << "Error: oldNumBatch key not found in input JSON file" << endl;
+        zklog.error("oldNumBatch key not found in input JSON file");
         exitProcess();
     }
     publicInputsExtended.publicInputs.oldBatchNum = input["oldNumBatch"];
@@ -73,7 +74,7 @@ void Input::loadGlobals (json &input)
     if ( !input.contains("chainID") ||
          !input["chainID"].is_number_unsigned() )
     {
-        cerr << "Error: chainID key not found in input JSON file" << endl;
+        zklog.error("chainID key not found in input JSON file");
         exitProcess();
     }
     else
@@ -98,7 +99,7 @@ void Input::loadGlobals (json &input)
     if ( !input.contains("batchL2Data") ||
          !input["batchL2Data"].is_string() )
     {
-        cerr << "Error: batchL2Data key not found in input JSON file" << endl;
+        zklog.error("batchL2Data key not found in input JSON file");
         exitProcess();
     }
     publicInputsExtended.publicInputs.batchL2Data = string2ba(input["batchL2Data"]);
@@ -106,7 +107,7 @@ void Input::loadGlobals (json &input)
     // Check the batchL2Data length
     if (publicInputsExtended.publicInputs.batchL2Data.size() > (MAX_BATCH_L2_DATA_SIZE))
     {
-        cerr << "Error: Input::loadGlobals() found batchL2Data.size()=" << publicInputsExtended.publicInputs.batchL2Data.size() << " > MAX_BATCH_L2_DATA_SIZE=" << MAX_BATCH_L2_DATA_SIZE << endl;
+        zklog.error("Input::loadGlobals() found batchL2Data.size()=" + to_string(publicInputsExtended.publicInputs.batchL2Data.size()) + " > MAX_BATCH_L2_DATA_SIZE=" + to_string(MAX_BATCH_L2_DATA_SIZE));
         exitProcess();
     }
 #ifdef LOG_INPUT
@@ -117,7 +118,7 @@ void Input::loadGlobals (json &input)
     if ( !input.contains("globalExitRoot") ||
          !input["globalExitRoot"].is_string() )
     {
-        cerr << "Error: globalExitRoot key not found in input JSON file" << endl;
+        zklog.error("globalExitRoot key not found in input JSON file");
         exitProcess();
     }
     publicInputsExtended.publicInputs.globalExitRoot.set_str(Remove0xIfPresent(input["globalExitRoot"]), 16);
@@ -129,7 +130,7 @@ void Input::loadGlobals (json &input)
     if ( !input.contains("timestamp") ||
          !input["timestamp"].is_number_unsigned() )
     {
-        cerr << "Error: timestamp key not found in input JSON file" << endl;
+        zklog.error("timestamp key not found in input JSON file");
         exitProcess();
     }
     publicInputsExtended.publicInputs.timestamp = input["timestamp"];
@@ -141,7 +142,7 @@ void Input::loadGlobals (json &input)
     if ( !input.contains("sequencerAddr") ||
          !input["sequencerAddr"].is_string() )
     {
-        cerr << "Error: sequencerAddr key not found in input JSON file" << endl;
+        zklog.error("sequencerAddr key not found in input JSON file");
         exitProcess();
     }
     publicInputsExtended.publicInputs.sequencerAddr.set_str(Remove0xIfPresent(input["sequencerAddr"]), 16);
@@ -166,7 +167,7 @@ void Input::loadGlobals (json &input)
     if ( !input.contains("newStateRoot") ||
          !input["newStateRoot"].is_string() )
     {
-        cerr << "Error: newStateRoot key not found in input JSON file" << endl;
+        zklog.error("newStateRoot key not found in input JSON file");
         exitProcess();
     }
     auxString = Remove0xIfPresent(input["newStateRoot"]);
@@ -190,7 +191,7 @@ void Input::loadGlobals (json &input)
     if ( !input.contains("newLocalExitRoot") ||
          !input["newLocalExitRoot"].is_string() )
     {
-        cerr << "Error: newLocalExitRoot key not found in input JSON file" << endl;
+        zklog.error("newLocalExitRoot key not found in input JSON file");
         exitProcess();
     }
     auxString = Remove0xIfPresent(input["newLocalExitRoot"]);
@@ -204,7 +205,7 @@ void Input::loadGlobals (json &input)
     if ( !input.contains("newNumBatch") ||
          !input["newNumBatch"].is_number_unsigned() )
     {
-        cerr << "Error: newNumBatch key not found in input JSON file" << endl;
+        zklog.error("newNumBatch key not found in input JSON file");
         exitProcess();
     }
     publicInputsExtended.newBatchNum = input["newNumBatch"];
@@ -374,7 +375,7 @@ void Input::loadDatabase (json &input)
             if (!it.value().is_array() ||
                 !((it.value().size()==12) || (it.value().size()==8)) )
             {
-                cerr << "Error: Input::loadDatabase() keys value array with invalid length in input JSON file: " << it.value() << endl;
+                zklog.error("Input::loadDatabase() keys value array with invalid length in input JSON file: " + it.value());
                 exitProcess();
             }*/
 
