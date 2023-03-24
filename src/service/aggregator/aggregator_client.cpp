@@ -1,6 +1,7 @@
 
 #include <nlohmann/json.hpp>
 #include "aggregator_client.hpp"
+#include "zklog.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -102,7 +103,7 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
     ProverRequest * pProverRequest = new ProverRequest(fr, config, prt_genBatchProof);
     if (pProverRequest == NULL)
     {
-        cerr << "Error: AggregatorClient::GenBatchProof() failed allocation a new ProveRequest" << endl;
+        zklog.error("AggregatorClient::GenBatchProof() failed allocation a new ProveRequest");
         exitProcess();
     }
 #ifdef LOG_SERVICE
@@ -116,7 +117,7 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
     auxString = ba2string(genBatchProofRequest.input().public_inputs().old_state_root());
     if (auxString.size() > 64)
     {
-        cerr << "Error: AggregatorClient::GenProof() got oldStateRoot too long, size=" << auxString.size() << endl;
+        zklog.error("AggregatorClient::GenProof() got oldStateRoot too long, size=" + to_string(auxString.size()));
         genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
@@ -125,7 +126,7 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
     auxString = ba2string(genBatchProofRequest.input().public_inputs().old_acc_input_hash());
     if (auxString.size() > 64)
     {
-        cerr << "Error: AggregatorClient::GenProof() got oldAccInputHash too long, size=" << auxString.size() << endl;
+        zklog.error("AggregatorClient::GenProof() got oldAccInputHash too long, size=" + to_string(auxString.size()));
         genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
@@ -136,7 +137,7 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
     pProverRequest->input.publicInputsExtended.publicInputs.chainID = genBatchProofRequest.input().public_inputs().chain_id();
     if (pProverRequest->input.publicInputsExtended.publicInputs.chainID == 0)
     {
-        cerr << "Error: AggregatorClient::GenProof() got chainID = 0" << endl;
+        zklog.error("AggregatorClient::GenProof() got chainID = 0");
         genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
@@ -145,7 +146,7 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
 
     if (pProverRequest->input.publicInputsExtended.publicInputs.forkID != PROVER_FORK_ID)
     {
-        cerr << "Error: AggregatorClient::GenProof() got an invalid prover ID=" << pProverRequest->input.publicInputsExtended.publicInputs.forkID << " different from expected=" << PROVER_FORK_ID << endl;
+        zklog.error("AggregatorClient::GenProof() got an invalid prover ID=" + to_string(pProverRequest->input.publicInputsExtended.publicInputs.forkID) + " different from expected=" + to_string(PROVER_FORK_ID));
         genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
@@ -154,7 +155,7 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
     pProverRequest->CreateFullTracer();
     if (pProverRequest->result != ZKR_SUCCESS)
     {
-        cerr << "Error: AggregatorClient::GenProof() failed calling pProverRequest->CreateFullTracer() result=" << pProverRequest->result << "=" << zkresult2string(pProverRequest->result) << endl;
+        zklog.error("AggregatorClient::GenProof() failed calling pProverRequest->CreateFullTracer() result=" + to_string(pProverRequest->result) + "=" + zkresult2string(pProverRequest->result));
         genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
@@ -162,14 +163,14 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
     pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data = genBatchProofRequest.input().public_inputs().batch_l2_data();
     if (pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data.size() > MAX_BATCH_L2_DATA_SIZE)
     {
-        cerr << "Error: AggregatorClient::GenProof() found batchL2Data.size()=" << pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data.size() << " > MAX_BATCH_L2_DATA_SIZE=" << MAX_BATCH_L2_DATA_SIZE << endl;
+        zklog.error("AggregatorClient::GenProof() found batchL2Data.size()=" + to_string(pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data.size()) + " > MAX_BATCH_L2_DATA_SIZE=" + to_string(MAX_BATCH_L2_DATA_SIZE));
         genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
 
     if (genBatchProofRequest.input().public_inputs().global_exit_root().size() > 32)
     {
-        cerr << "Error: AggregatorClient::GenProof() got globalExitRoot too long, size=" << genBatchProofRequest.input().public_inputs().global_exit_root().size() << endl;
+        zklog.error("AggregatorClient::GenProof() got globalExitRoot too long, size=" + to_string(genBatchProofRequest.input().public_inputs().global_exit_root().size()));
         genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
@@ -180,7 +181,7 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
     auxString = Remove0xIfPresent(genBatchProofRequest.input().public_inputs().sequencer_addr());
     if (auxString.size() > 40)
     {
-        cerr << "Error: AggregatorClient::GenProof() got sequencerAddr too long, size=" << auxString.size() << endl;
+        zklog.error("AggregatorClient::GenProof() got sequencerAddr too long, size=" + to_string(auxString.size()));
         genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
@@ -189,7 +190,7 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
     auxString = Remove0xIfPresent(genBatchProofRequest.input().public_inputs().aggregator_addr());
     if (auxString.size() > 40)
     {
-        cerr << "Error: AggregatorClient::GenProof() got aggregator address too long, size=" << auxString.size() << endl;
+        zklog.error("AggregatorClient::GenProof() got aggregator address too long, size=" + to_string(auxString.size()));
         genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
@@ -203,7 +204,7 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
     {
         if (it->first.size() > (64))
         {
-            cerr << "Error: AggregatorClient::GenBatchProof() got db key too long, size=" << it->first.size() << endl;
+            zklog.error("AggregatorClient::GenBatchProof() got db key too long, size=" + to_string(it->first.size()));
             genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
             return false;
         }
@@ -211,7 +212,7 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
         string concatenatedValues = it->second;
         if (concatenatedValues.size()%16!=0)
         {
-            cerr << "Error: AggregatorClient::GenBatchProof() found invalid db value size: " << concatenatedValues.size() << endl;
+            zklog.error("AggregatorClient::GenBatchProof() found invalid db value size: " + to_string(concatenatedValues.size()));
             genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
             return false;
         }
@@ -232,7 +233,7 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
     {
         /*if (it->first.size() != (2+64))
         {
-            cerr << "Error: ZKProverServiceImpl::GenProof() got contracts bytecode key too long, size=" << it->first.size() << endl;
+            zklog.error("ZKProverServiceImpl::GenProof() got contracts bytecode key too long, size=" + to_string(it->first.size()));
             return Status::CANCELLED;
         }*/
         vector<uint8_t> dbValue;
@@ -265,7 +266,7 @@ bool AggregatorClient::GenAggregatedProof (const aggregator::v1::GenAggregatedPr
     ProverRequest * pProverRequest = new ProverRequest(fr, config, prt_genAggregatedProof);
     if (pProverRequest == NULL)
     {
-        cerr << "Error: AggregatorClient::GenAggregatedProof() failed allocation a new ProveRequest" << endl;
+        zklog.error("AggregatorClient::GenAggregatedProof() failed allocation a new ProveRequest");
         exitProcess();
     }
 #ifdef LOG_SERVICE
@@ -297,7 +298,7 @@ bool AggregatorClient::GenFinalProof (const aggregator::v1::GenFinalProofRequest
     ProverRequest * pProverRequest = new ProverRequest(fr, config, prt_genFinalProof);
     if (pProverRequest == NULL)
     {
-        cerr << "Error: AggregatorClient::GenFinalProof() failed allocation a new ProveRequest" << endl;
+        zklog.error("AggregatorClient::GenFinalProof() failed allocation a new ProveRequest");
         exitProcess();
     }
 #ifdef LOG_SERVICE
@@ -311,7 +312,7 @@ bool AggregatorClient::GenFinalProof (const aggregator::v1::GenFinalProofRequest
     string auxString = Remove0xIfPresent(genFinalProofRequest.aggregator_addr());
     if (auxString.size() > 40)
     {
-        cerr << "Error: AggregatorClient::GenFinalProof() got aggregator address too long, size=" << auxString.size() << endl;
+        zklog.error("AggregatorClient::GenFinalProof() got aggregator address too long, size=" + to_string(auxString.size()));
         genFinalProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
@@ -343,7 +344,7 @@ bool AggregatorClient::Cancel (const aggregator::v1::CancelRequest &cancelReques
     if (it == prover.requestsMap.end())
     {
         prover.unlock();
-        cerr << "Error: AggregatorClient::Cancel() unknown uuid: " << uuid << endl;
+        zklog.error("AggregatorClient::Cancel() unknown uuid: " + uuid);
         cancelResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
@@ -352,7 +353,7 @@ bool AggregatorClient::Cancel (const aggregator::v1::CancelRequest &cancelReques
     if (it->second->bCompleted)
     {
         prover.unlock();
-        cerr << "Error: AggregatorClient::Cancel() already completed uuid: " << uuid << endl;
+        zklog.error("AggregatorClient::Cancel() already completed uuid: " + uuid);
         cancelResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
@@ -388,7 +389,7 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
     // If UUID is not found, return the proper error
     if (it == prover.requestsMap.end())
     {
-        cerr << "Error: AggregatorClient::GetProof() invalid uuid:" << uuid << endl;
+        zklog.error("AggregatorClient::GetProof() invalid uuid:" + uuid);
         getProofResponse.set_result(aggregator::v1::GetProofResponse_Result_RESULT_ERROR);
         getProofResponse.set_result_string("invalid UUID");
     }
@@ -399,7 +400,7 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
         // If request is not completed, return the proper result
         if (!pProverRequest->bCompleted)
         {
-            //cerr << "Error: ZKProverServiceImpl::GetProof() not completed uuid=" << uuid << endl;
+            //zklog.error("ZKProverServiceImpl::GetProof() not completed uuid=" + uuid);
             getProofResponse.set_result(aggregator::v1::GetProofResponse_Result_RESULT_PENDING);
             getProofResponse.set_result_string("pending");
         }
@@ -466,7 +467,7 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
                 }
                 default:
                 {
-                    cerr << "Error: AggregatorClient::GetProof() invalid pProverRequest->type=" << pProverRequest->type << endl;
+                    zklog.error("AggregatorClient::GetProof() invalid pProverRequest->type=" + to_string(pProverRequest->type));
                     exitProcess();
                 }
             }
@@ -508,7 +509,7 @@ void* aggregatorClientThread(void* arg)
             bResult = readerWriter->Read(&aggregatorMessage);
             if (!bResult)
             {
-                cerr << "Error: aggregatorClientThread() failed calling readerWriter->Read(&aggregatorMessage)" << endl;
+                zklog.error("aggregatorClientThread() failed calling readerWriter->Read(&aggregatorMessage)");
                 break;
             }
             
@@ -629,7 +630,7 @@ void* aggregatorClientThread(void* arg)
 
                 default:
                 {
-                    cerr << "Error: aggregatorClientThread() received an invalid type=" << aggregatorMessage.request_case() << endl;
+                    zklog.error("aggregatorClientThread() received an invalid type=" + to_string(aggregatorMessage.request_case()));
                     break;
                 }
             }
@@ -638,7 +639,7 @@ void* aggregatorClientThread(void* arg)
             bResult = readerWriter->Write(proverMessage);
             if (!bResult)
             {
-                cerr << "Error: aggregatorClientThread() failed calling readerWriter->Write(proverMessage)" << endl;
+                zklog.error("aggregatorClientThread() failed calling readerWriter->Write(proverMessage)");
                 break;
             }
             
