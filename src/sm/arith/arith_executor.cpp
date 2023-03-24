@@ -4,6 +4,7 @@
 //#include "arith_defines.hpp"
 #include "utils.hpp"
 #include "scalar.hpp"
+#include "zklog.hpp"
 
 using json = nlohmann::json;
 
@@ -18,7 +19,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
     // Check that we have enough room in polynomials  TODO: Do this check in JS
     if (action.size()*32 > N)
     {
-        cerr << "Error: ArithExecutor::execute() Too many Arith entries=" << action.size() << " > N/32=" << N/32 << endl;
+        zklog.error("ArithExecutor::execute() Too many Arith entries=" + to_string(action.size()) + " > N/32=" + to_string(N/32));
         exitProcess();
     }
 
@@ -115,7 +116,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
             q0 = -(pq0/pFec);
             if ((pq0 + pFec*q0) != 0)
             {
-                cerr << "Error: ArithExecutor::execute() For input " << i << " with the calculated q0 the residual is not zero (diff point)" << endl;
+                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " with the calculated q0 the residual is not zero (diff point)");
                 exitProcess();
             } 
             q0 += ScalarTwoTo258;
@@ -139,7 +140,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
             q0 = -(pq0/pFec);
             if ((pq0 + pFec*q0) != 0)
             {
-                cerr << "Error: ArithExecutor::execute() For input " << i << " with the calculated q0 the residual is not zero (same point)" << endl;
+                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " with the calculated q0 the residual is not zero (same point)");
                 exitProcess();
             } 
             q0 += ScalarTwoTo258;
@@ -162,7 +163,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
             q1 = -(pq1/pFec);
             if ((pq1 + pFec*q1) != 0)
             {
-                cerr << "Error: ArithExecutor::execute() For input " << i << " with the calculated q1 the residual is not zero" << endl;
+                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " with the calculated q1 the residual is not zero");
                 exitProcess();
             } 
             q1 += ScalarTwoTo258;
@@ -173,7 +174,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
             q2 = -(pq2/pFec);
             if ((pq2 + pFec*q2) != 0)
             {
-                cerr << "Error: ArithExecutor::execute() For input " << i << " with the calculated q2 the residual is not zero" << endl;
+                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " with the calculated q2 the residual is not zero");
                 exitProcess();
             } 
             q2 += ScalarTwoTo258;
@@ -250,7 +251,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                     case 3: eq[eqIndex] = fr.toS64(eq3(fr, pols, step, offset)); break;
                     case 4: eq[eqIndex] = fr.toS64(eq4(fr, pols, step, offset)); break;
                     default:
-                        cerr << "Error: ArithExecutor::execute() invalid eqIndex=" << eqIndex << endl;
+                        zklog.error("ArithExecutor::execute() invalid eqIndex=" + to_string(eqIndex));
                         exitProcess();
                 }
                 pols.carry[carryIndex][offset + step] = fr.fromScalar(carry[carryIndex]);

@@ -3,6 +3,7 @@
 #include "utils.hpp"
 #include "scalar.hpp"
 #include "timer.hpp"
+#include "zklog.hpp"
 
 using json = nlohmann::json;
 
@@ -15,7 +16,7 @@ void MemoryExecutor::execute (vector<MemoryAccess> &input, MemCommitPols &pols)
     // Check input size does not exceed the number of evaluations
     if (inputSize > N)
     {
-        cerr << "Error: MemoryExecutor::execute() Too many entries input.size()=" << input.size() << " > N=" << N << endl;
+        zklog.error("MemoryExecutor::execute() Too many entries input.size()=" + to_string(input.size()) + " > N=" + to_string(N));
         exitProcess();
     }
 

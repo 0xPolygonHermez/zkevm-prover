@@ -5,6 +5,7 @@
 #include "utils.hpp"
 #include "scalar.hpp"
 #include "timer.hpp"
+#include "zklog.hpp"
 
 using json = nlohmann::json;
 
@@ -83,7 +84,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
     // Check that we have enough room in polynomials  TODO: Do this check in JS
     if (action.size()*LATCH_SIZE > N)
     {
-        cerr << "Error: BinaryExecutor::execute() Too many Binary entries=" << action.size() << " > N/LATCH_SIZE=" << N/LATCH_SIZE << endl;
+        zklog.error("BinaryExecutor::execute() Too many Binary entries=" + to_string(action.size()) + " > N/LATCH_SIZE=" + to_string(N/LATCH_SIZE));
         exitProcess();
     }
 
@@ -104,7 +105,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
     uint32_t * c0Temp = (uint32_t *)calloc(N*sizeof(uint32_t),1);
     if (c0Temp == NULL)
     {
-        cerr << "Error: BinaryExecutor::execute() failed calling malloc() for c0Temp" << endl;
+        zklog.error("BinaryExecutor::execute() failed calling malloc() for c0Temp");
         exitProcess();
     }
 
