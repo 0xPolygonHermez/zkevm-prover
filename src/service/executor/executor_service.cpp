@@ -2,7 +2,7 @@
 #include "executor_service.hpp"
 #include "input.hpp"
 #include "proof.hpp"
-
+#include "zklog.hpp"
 #include <grpcpp/grpcpp.h>
 
 using grpc::Server;
@@ -45,7 +45,7 @@ using grpc::Status;
     auxString = ba2string(request->old_state_root());
     if (auxString.size() > 64)
     {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got oldStateRoot too long, size=" << auxString.size() << endl;
+        zklog.error("ExecutorServiceImpl::ProcessBatch() got oldStateRoot too long, size=" + to_string(auxString.size()));
         TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::CANCELLED;
     }
@@ -55,7 +55,7 @@ using grpc::Status;
     auxString = ba2string(request->old_acc_input_hash());
     if (auxString.size() > 64)
     {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got oldAccInputHash too long, size=" << auxString.size() << endl;
+        zklog.error("ExecutorServiceImpl::ProcessBatch() got oldAccInputHash too long, size=" + to_string(auxString.size()));
         TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::CANCELLED;
     }
@@ -68,7 +68,7 @@ using grpc::Status;
     proverRequest.input.publicInputsExtended.publicInputs.chainID = request->chain_id();
     if (proverRequest.input.publicInputsExtended.publicInputs.chainID == 0)
     {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got chainID = 0" << endl;
+        zklog.error("ExecutorServiceImpl::ProcessBatch() got chainID = 0");
         TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::CANCELLED;
     }
@@ -91,7 +91,7 @@ using grpc::Status;
     // Check the batchL2Data length
     if (proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size() > MAX_BATCH_L2_DATA_SIZE)
     {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() found batchL2Data.size()=" << proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size() << " > MAX_BATCH_L2_DATA_SIZE=" << MAX_BATCH_L2_DATA_SIZE << endl;
+        zklog.error("ExecutorServiceImpl::ProcessBatch() found batchL2Data.size()=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size()) + " > MAX_BATCH_L2_DATA_SIZE=" + to_string(MAX_BATCH_L2_DATA_SIZE));
         TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::CANCELLED;
     }
@@ -99,7 +99,7 @@ using grpc::Status;
     // Get globalExitRoot
     if (request->global_exit_root().size() > 32)
     {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got globalExitRoot too long, size=" << request->global_exit_root().size() << endl;
+        zklog.error("ExecutorServiceImpl::ProcessBatch() got globalExitRoot too long, size=" + to_string(request->global_exit_root().size()));
         TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::CANCELLED;
     }
@@ -112,7 +112,7 @@ using grpc::Status;
     auxString = Remove0xIfPresent(request->coinbase());
     if (auxString.size() > 40)
     {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got sequencer address too long, size=" << auxString.size() << endl;
+        zklog.error("ExecutorServiceImpl::ProcessBatch() got sequencer address too long, size=" + to_string(auxString.size()));
         TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::CANCELLED;
     }
@@ -124,7 +124,7 @@ using grpc::Status;
     proverRequest.input.from = Add0xIfMissing(request->from());
     if (proverRequest.input.from.size() > (2 + 40))
     {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() got from too long, size=" << proverRequest.input.from.size() << endl;
+        zklog.error("ExecutorServiceImpl::ProcessBatch() got from too long, size=" + to_string(proverRequest.input.from.size()));
         TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::CANCELLED;
     }
@@ -196,7 +196,7 @@ using grpc::Status;
     {
         if (it->first.size() > (64))
         {
-            cerr << "Error: ExecutorServiceImpl::ProcessBatch() got db key too long, size=" << it->first.size() << endl;
+            zklog.error("ExecutorServiceImpl::ProcessBatch() got db key too long, size=" + to_string(it->first.size()));
             TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
             return Status::CANCELLED;
         }
@@ -204,7 +204,7 @@ using grpc::Status;
         string concatenatedValues = it->second;
         if (concatenatedValues.size()%16!=0)
         {
-            cerr << "Error: ExecutorServiceImpl::ProcessBatch() found invalid db value size: " << concatenatedValues.size() << endl;
+            zklog.error("ExecutorServiceImpl::ProcessBatch() found invalid db value size: " + to_string(concatenatedValues.size()));
             TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
             return Status::CANCELLED;
         }
@@ -266,7 +266,7 @@ using grpc::Status;
 
     if (proverRequest.result != ZKR_SUCCESS)
     {
-        cerr << "Error: ExecutorServiceImpl::ProcessBatch() detected proverRequest.result=" << proverRequest.result << "=" << zkresult2string(proverRequest.result) << endl;
+        zklog.error("ExecutorServiceImpl::ProcessBatch() detected proverRequest.result=" + to_string(proverRequest.result) + "=" + zkresult2string(proverRequest.result));
     }
     
     response->set_error(zkresult2error(proverRequest.result));
@@ -552,7 +552,7 @@ using grpc::Status;
         bResult = stream->Read(&processBatchRequest);
         if (!bResult)
         {
-            cerr << "ExecutorServiceImpl::ProcessBatchStream() failed calling stream->Read(processBatchRequest) numberOfRequests=" << numberOfRequests << endl;
+            zklog.error("ExecutorServiceImpl::ProcessBatchStream() failed calling stream->Read(processBatchRequest) numberOfRequests=" + to_string(numberOfRequests));
             TimerStopAndLog(PROCESS_BATCH_STREAM);
             return Status::CANCELLED;
         }
@@ -561,7 +561,7 @@ using grpc::Status;
         grpcStatus = ProcessBatch(context, &processBatchRequest, &processBatchResponse);
         if (!grpcStatus.ok())
         {
-            cerr << "ExecutorServiceImpl::ProcessBatchStream() failed calling ProcessBatch() numberOfRequests=" << numberOfRequests << endl;
+            zklog.error("ExecutorServiceImpl::ProcessBatchStream() failed calling ProcessBatch() numberOfRequests=" + to_string(numberOfRequests));
             TimerStopAndLog(PROCESS_BATCH_STREAM);
             return grpcStatus;
         }
@@ -570,7 +570,7 @@ using grpc::Status;
         bResult = stream->Write(processBatchResponse);
         if (!bResult)
         {
-            cerr << "ExecutorServiceImpl::ProcessBatchStream() failed calling stream->Write(processBatchResponse) numberOfRequests=" << numberOfRequests << endl;
+            zklog.error("ExecutorServiceImpl::ProcessBatchStream() failed calling stream->Write(processBatchResponse) numberOfRequests=" + to_string(numberOfRequests));
             TimerStopAndLog(PROCESS_BATCH_STREAM);
             return Status::CANCELLED;
         }
@@ -611,7 +611,7 @@ using grpc::Status;
     if (errorString == "invalidCodeStartsEF"              ) return ::executor::v1::ROM_ERROR_INVALID_BYTECODE_STARTS_EF;
     if (errorString == "invalid_fork_id"                  ) return ::executor::v1::ROM_ERROR_UNSUPPORTED_FORK_ID;
     if (errorString == ""                                 ) return ::executor::v1::ROM_ERROR_NO_ERROR;
-    cerr << "Error: ExecutorServiceImpl::string2error() found invalid error string=" << errorString << endl;
+    zklog.error("ExecutorServiceImpl::string2error() found invalid error string=" + errorString);
     exitProcess();
     return ::executor::v1::ROM_ERROR_UNSPECIFIED;
 }

@@ -49,31 +49,7 @@ public:
     
     Pin (PinId id) : id(id) { reset(); };
 
-    void reset (void)
-    {
-        switch (id)
-        {
-            case pin_a: 
-                source = external;
-                break;
-            case pin_b: 
-                source = external;
-                break;
-            case pin_r: 
-                source = gated;
-                break;
-            default:
-                cerr << "Error: Pin:reset() found invalid PinID:" << id << endl;
-                exitProcess();
-        }
-
-        wiredRef = 0;
-        wiredPinId = pin_r;
-        bit = 0;
-        fanOut = 0;
-        connectionsToInputA.clear();
-        connectionsToInputB.clear();
-    }
+    void reset (void);
 };
 
 #endif

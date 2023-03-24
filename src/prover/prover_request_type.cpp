@@ -2,6 +2,7 @@
 #include "prover_request_type.hpp"
 #include "utils.hpp"
 #include "exit_process.hpp"
+#include "zklog.hpp"
 
 string proverRequestType2string (tProverRequestType type)
 {
@@ -14,7 +15,7 @@ string proverRequestType2string (tProverRequestType type)
         case prt_processBatch:       return "process_batch";
         case prt_execute:            return "execute";
         default:
-            cerr << "Error: proverRequestType2string() got invalid type=" << type << endl;
+            zklog.error("proverRequestType2string() got invalid type=" + to_string(type));
             exitProcess();
             return "";
     }

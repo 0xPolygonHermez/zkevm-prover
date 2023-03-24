@@ -6,6 +6,7 @@
 #include "main_sm/fork_2/main/full_tracer.hpp"
 #include "main_sm/fork_3/main/full_tracer.hpp"
 #include "main_sm/fork_4/main/full_tracer.hpp"
+#include "zklog.hpp"
 
 ProverRequest::ProverRequest (Goldilocks &fr, const Config &config, tProverRequestType type) :
     fr(fr),
@@ -53,7 +54,7 @@ void ProverRequest::CreateFullTracer(void)
 {
     if (pFullTracer != NULL)
     {
-        cerr << "Error: ProverRequest::CreateFullTracer() called with pFullTracer != NULL" << endl;
+        zklog.error("ProverRequest::CreateFullTracer() called with pFullTracer != NULL");
         exitProcess();
     }
     switch (input.publicInputsExtended.publicInputs.forkID)
@@ -63,7 +64,7 @@ void ProverRequest::CreateFullTracer(void)
             pFullTracer = new fork_0::FullTracer(fr);
             if (pFullTracer == NULL)
             {
-                cerr << "Error: ProverRequest::CreateFullTracer() failed calling new fork_0::FullTracer()" << endl;
+                zklog.error("ProverRequest::CreateFullTracer() failed calling new fork_0::FullTracer()");
                 exitProcess();
             }
             result = ZKR_SUCCESS;
@@ -74,7 +75,7 @@ void ProverRequest::CreateFullTracer(void)
             pFullTracer = new fork_1::FullTracer(fr);
             if (pFullTracer == NULL)
             {
-                cerr << "Error: ProverRequest::CreateFullTracer() failed calling new fork_1::FullTracer()" << endl;
+                zklog.error("ProverRequest::CreateFullTracer() failed calling new fork_1::FullTracer()");
                 exitProcess();
             }
             result = ZKR_SUCCESS;
@@ -85,7 +86,7 @@ void ProverRequest::CreateFullTracer(void)
             pFullTracer = new fork_2::FullTracer(fr);
             if (pFullTracer == NULL)
             {
-                cerr << "Error: ProverRequest::CreateFullTracer() failed calling new fork_2::FullTracer()" << endl;
+                zklog.error("ProverRequest::CreateFullTracer() failed calling new fork_2::FullTracer()");
                 exitProcess();
             }
             result = ZKR_SUCCESS;
@@ -96,7 +97,7 @@ void ProverRequest::CreateFullTracer(void)
             pFullTracer = new fork_3::FullTracer(fr);
             if (pFullTracer == NULL)
             {
-                cerr << "Error: ProverRequest::CreateFullTracer() failed calling new fork_3::FullTracer()" << endl;
+                zklog.error("ProverRequest::CreateFullTracer() failed calling new fork_3::FullTracer()");
                 exitProcess();
             }
             result = ZKR_SUCCESS;
@@ -107,7 +108,7 @@ void ProverRequest::CreateFullTracer(void)
             pFullTracer = new fork_4::FullTracer(fr);
             if (pFullTracer == NULL)
             {
-                cerr << "Error: ProverRequest::CreateFullTracer() failed calling new fork_4::FullTracer()" << endl;
+                zklog.error("ProverRequest::CreateFullTracer() failed calling new fork_4::FullTracer()");
                 exitProcess();
             }
             result = ZKR_SUCCESS;
@@ -115,7 +116,7 @@ void ProverRequest::CreateFullTracer(void)
         }
         default:
         {
-            cerr << "Error: ProverRequest::CreateFullTracer() failed calling invalid fork ID=" << input.publicInputsExtended.publicInputs.forkID << endl;
+            zklog.error("ProverRequest::CreateFullTracer() failed calling invalid fork ID=" + to_string(input.publicInputsExtended.publicInputs.forkID));
             result = ZKR_SM_MAIN_INVALID_FORK_ID;
             return;
         }
@@ -126,7 +127,7 @@ void ProverRequest::DestroyFullTracer(void)
 {
     if (pFullTracer == NULL)
     {
-        cerr << "Error: ProverRequest::CreateFullTracer() called with pFullTracer == NULL" << endl;
+        zklog.error("ProverRequest::CreateFullTracer() called with pFullTracer == NULL");
         exitProcess();
     }
     switch (input.publicInputsExtended.publicInputs.forkID)
@@ -163,7 +164,7 @@ void ProverRequest::DestroyFullTracer(void)
         }
         default:
         {
-            cerr << "Error: ProverRequest::DestroyFullTracer() failed calling invalid fork ID=" << input.publicInputsExtended.publicInputs.forkID << endl;
+            zklog.error("ProverRequest::DestroyFullTracer() failed calling invalid fork ID=" + to_string(input.publicInputsExtended.publicInputs.forkID));
             result = ZKR_SM_MAIN_INVALID_FORK_ID;
             return;
         }
