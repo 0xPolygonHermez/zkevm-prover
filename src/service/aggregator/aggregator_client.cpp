@@ -490,6 +490,12 @@ void* aggregatorClientThread(void* arg)
     while (true)
     {
         ::grpc::ClientContext context;
+
+        // 5 minutes of inactivity timeout; if aggregator does not send any request, the connection is restarted
+        time_point deadline = std::chrono::system_clock::now() +
+        std::chrono::milliseconds(5*60*1000);
+        context.set_deadline(deadline);
+
         std::unique_ptr<grpc::ClientReaderWriter<aggregator::v1::ProverMessage, aggregator::v1::AggregatorMessage>> readerWriter;
         readerWriter = pAggregatorClient->stub->Channel(&context);
         bool bResult;
