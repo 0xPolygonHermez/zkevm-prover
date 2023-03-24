@@ -1,3 +1,5 @@
+#if 0 // Generated code has been disabled in old forks
+
 #ifndef MAIN_EXEC_GENERATED_HPP_fork_0
 #define MAIN_EXEC_GENERATED_HPP_fork_0
 
@@ -14,3 +16,4 @@ void main_exec_generated (MainExecutor &mainExecutor, ProverRequest &proverReque
 
 #endif
 
+#endif

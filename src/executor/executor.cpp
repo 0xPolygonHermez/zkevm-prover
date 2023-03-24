@@ -20,11 +20,11 @@ void Executor::process_batch (ProverRequest &proverRequest)
     {
         case 0: // fork_0
         {
-            if (config.useMainExecGenerated)
+            /*if (config.useMainExecGenerated) // Generated code has been disabled in old forks
             {
                 fork_0::main_exec_generated_fast(mainExecutor_fork_0, proverRequest);
             }
-            else
+            else*/
             {
                 // Allocate committed polynomials for only 1 evaluation
                 void * pAddress = calloc(fork_0::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
@@ -47,11 +47,11 @@ void Executor::process_batch (ProverRequest &proverRequest)
         }
         case 1: // fork_1
         {
-            if (config.useMainExecGenerated)
+            /*if (config.useMainExecGenerated) // Generated code has been disabled in old forks
             {
                 fork_1::main_exec_generated_fast(mainExecutor_fork_1, proverRequest);
             }
-            else
+            else*/
             {
                 // Allocate committed polynomials for only 1 evaluation
                 void * pAddress = calloc(fork_1::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
@@ -74,11 +74,11 @@ void Executor::process_batch (ProverRequest &proverRequest)
         }
         case 2: // fork_2
         {
-            if (config.useMainExecGenerated)
+            /*if (config.useMainExecGenerated) // Generated code has been disabled in old forks
             {
                 fork_2::main_exec_generated_fast(mainExecutor_fork_2, proverRequest);
             }
-            else
+            else*/
             {
                 // Allocate committed polynomials for only 1 evaluation
                 void * pAddress = calloc(fork_2::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
@@ -101,11 +101,11 @@ void Executor::process_batch (ProverRequest &proverRequest)
         }
         case 3: // fork_3
         {
-            if (config.useMainExecGenerated)
+            /*if (config.useMainExecGenerated) // Generated code has been disabled in old forks
             {
                 fork_3::main_exec_generated_fast(mainExecutor_fork_3, proverRequest);
             }
-            else
+            else*/
             {
                 // Allocate committed polynomials for only 1 evaluation
                 void * pAddress = calloc(fork_3::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
