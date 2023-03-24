@@ -18,6 +18,7 @@
 #include <ifaddrs.h>
 #include <net/if.h>
 #include <arpa/inet.h>
+#include "zklog.hpp"
 
 using namespace std;
 using namespace std::filesystem;
@@ -185,7 +186,7 @@ void json2file(const json &j, const string &fileName)
     ofstream outputStream(fileName);
     if (!outputStream.good())
     {
-        cerr << "Error: json2file() failed creating output JSON file " << fileName << endl;
+        zklog.error("json2file() failed creating output JSON file " + fileName);
         exitProcess();
     }
     outputStream << setw(4) << j << endl;
@@ -197,7 +198,7 @@ void file2json(const string &fileName, json &j)
     std::ifstream inputStream(fileName);
     if (!inputStream.good())
     {
-        cerr << "Error: file2json() failed loading input JSON file " << fileName << endl;
+        zklog.error("file2json() failed loading input JSON file " + fileName);
         exitProcess();
     }
     try
@@ -206,7 +207,7 @@ void file2json(const string &fileName, json &j)
     }
     catch (exception &e)
     {
-        cerr << "Error: file2json() failed parsing input JSON file " << fileName << " exception=" << e.what() << endl;
+        zklog.error("file2json() failed parsing input JSON file " + fileName + " exception=" + e.what());
         exitProcess();
     }
     inputStream.close();
@@ -217,7 +218,7 @@ void file2json(const string &fileName, ordered_json &j)
     std::ifstream inputStream(fileName);
     if (!inputStream.good())
     {
-        cerr << "Error: file2json() failed loading input JSON file " << fileName << endl;
+        zklog.error("file2json() failed loading input JSON file " + fileName);
         exitProcess();
     }
     try
@@ -226,7 +227,7 @@ void file2json(const string &fileName, ordered_json &j)
     }
     catch (exception &e)
     {
-        cerr << "Error: file2json() failed parsing input JSON file " << fileName << " exception=" << e.what() << endl;
+        zklog.error("file2json() failed parsing input JSON file " + fileName + " exception=" + e.what());
         exitProcess();
     }
     inputStream.close();
@@ -245,7 +246,7 @@ void ensureDirectoryExists (const string &fileName)
     int iResult = system(command.c_str());
     if (iResult != 0)
     {
-        cerr << "Error: ensureDirectoryExists() system() returned: " << to_string(iResult) << endl;
+        zklog.error("ensureDirectoryExists() system() returned: " + to_string(iResult));
         exitProcess();
     }
 }
@@ -260,7 +261,7 @@ uint64_t getNumberOfFileDescriptors (void)
         {
             result++;
         }
-        //cout << "getNumberOfFileDescriptors() i=" << i << " file=" << i.path() << endl;
+        //zklog.info("getNumberOfFileDescriptors() i=" + to_string(i) + " file=" + i.path());
     }
     return result;
 }
@@ -273,12 +274,12 @@ void *mapFileInternal(const string &fileName, uint64_t size, bool bOutput, bool 
         struct stat sb;
         if (lstat(fileName.c_str(), &sb) == -1)
         {
-            cerr << "Error: mapFile() failed calling lstat() of file " << fileName << endl;
+            zklog.error("mapFile() failed calling lstat() of file " + fileName);
             exitProcess();
         }
         if ((uint64_t)sb.st_size != size)
         {
-            cerr << "Error: mapFile() found size of file " << fileName << " to be " << sb.st_size << " B instead of " << size << " B" << endl;
+            zklog.error("mapFile() found size of file " + fileName + " to be " + to_string(sb.st_size) + " B instead of " + to_string(size) + " B");
             exitProcess();
         }
     }
@@ -292,7 +293,7 @@ void *mapFileInternal(const string &fileName, uint64_t size, bool bOutput, bool 
     int fd = open(fileName.c_str(), oflags, 0666);
     if (fd < 0)
     {
-        cerr << "Error: mapFile() failed opening file: " << fileName << endl;
+        zklog.error("mapFile() failed opening file: " + fileName);
         exitProcess();
     }
 
@@ -303,7 +304,7 @@ void *mapFileInternal(const string &fileName, uint64_t size, bool bOutput, bool 
         int result = lseek(fd, size - 1, SEEK_SET);
         if (result == -1)
         {
-            cerr << "Error: mapFile() failed calling lseek() of file: " << fileName << endl;
+            zklog.error("mapFile() failed calling lseek() of file: " + fileName);
             exitProcess();
         }
 
@@ -311,7 +312,7 @@ void *mapFileInternal(const string &fileName, uint64_t size, bool bOutput, bool 
         result = write(fd, "", 1);
         if (result < 0)
         {
-            cerr << "Error: mapFile() failed calling write() of file: " << fileName << endl;
+            zklog.error("mapFile() failed calling write() of file: " + fileName);
             exitProcess();
         }
     }
@@ -321,7 +322,7 @@ void *mapFileInternal(const string &fileName, uint64_t size, bool bOutput, bool 
     pAddress = (uint8_t *)mmap(NULL, size, bOutput ? (PROT_READ | PROT_WRITE) : PROT_READ, MAP_SHARED, fd, 0);
     if (pAddress == MAP_FAILED)
     {
-        cerr << "Error: mapFile() failed calling mmap() of file: " << fileName << endl;
+        zklog.error("mapFile() failed calling mmap() of file: " + fileName);
         exitProcess();
     }
     close(fd);
@@ -334,7 +335,7 @@ void *mapFileInternal(const string &fileName, uint64_t size, bool bOutput, bool 
     void *pMemAddress = malloc(size);
     if (pMemAddress == NULL)
     {
-        cerr << "Error: mapFile() failed calling malloc() of size: " << size << endl;
+        zklog.error("mapFile() failed calling malloc() of size: " + to_string(size));
         exitProcess();
     }
 
@@ -362,7 +363,7 @@ void unmapFile(void *pAddress, uint64_t size)
     int err = munmap(pAddress, size);
     if (err != 0)
     {
-        cerr << "Error: unmapFile() failed calling munmap() of address=" << pAddress << " size=" << size << endl;
+        zklog.error("unmapFile() failed calling munmap() of address=" + to_string(uint64_t(pAddress)) + " size=" + to_string(size));
         exitProcess();
     }
 }
@@ -442,7 +443,7 @@ bool octal2hex (const string &octalString, string &hexString)
         }
         if (octalStringSize - i < 3)
         {
-            cerr << "Error: octal2hex() found an invalid octal sequence at position i=" << i << " rest=" << octalString.substr(i) << endl;
+            zklog.error("octal2hex() found an invalid octal sequence at position i=" + to_string(i) + " rest=" + octalString.substr(i));
             return false;
         }
         i++;
@@ -477,7 +478,7 @@ bool octalText2hexText (const string &octalText, string &hexText)
         stringEnd = octalText.find('"', stringBegin + 1);
         if (stringEnd == string::npos)
         {
-            cerr << "Error: octalText2hexText() could not find the ending \"" << endl;
+            zklog.error("octalText2hexText() could not find the ending \"");
             hexText = octalText; // Copy it as it is
             return false;
         }
@@ -502,7 +503,7 @@ void getIPAddress (string &ipAddress)
     int iResult = getifaddrs(&pIfaddrs);
     if (iResult != 0)
     {
-        cerr << "Error: getNetworkInfo() failed calling getifaddrs() iResult=" << iResult << "=" << strerror(iResult) << endl;
+        zklog.error("getNetworkInfo() failed calling getifaddrs() iResult=" + to_string(iResult) + "=" + strerror(iResult));
         return;
     }
 

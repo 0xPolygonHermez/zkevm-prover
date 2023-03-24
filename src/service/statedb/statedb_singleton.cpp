@@ -1,5 +1,6 @@
 #include <iostream>
 #include "statedb_singleton.hpp"
+#include "zklog.hpp"
 
 using namespace std;
 
@@ -18,7 +19,7 @@ StateDB * StateDBSingleton::get(Goldilocks &fr, const Config &config)
         pStateDB = new StateDB(fr, config);
         if (pStateDB == NULL)
         {
-            cerr << "Error: StateDBSingleton::get() failed creating a new StateDB instance" << endl;
+            zklog.error("StateDBSingleton::get() failed creating a new StateDB instance");
             exitProcess();
         }
     }

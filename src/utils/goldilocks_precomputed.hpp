@@ -5,6 +5,7 @@
 #include <pthread.h>
 #include "goldilocks_base_field.hpp"
 #include "zkassert.hpp"
+#include "zklog.hpp"
 
 using namespace std;
 
@@ -62,7 +63,7 @@ public:
             unlock();
             if (!fr.equal(fr.inv(fe), invPos[fe.fe]))
             {
-                cerr << "Error: GoldilocksPrecomputed::inv() pos fe=" << fr.toString(fe,16) << " fr.inv(fe)=" << fr.toString(fr.inv(fe),16) << " invPos[fe.fe]=" << fr.toString(invPos[fe.fe],16) << endl;
+                zklog.error("GoldilocksPrecomputed::inv() pos fe=" + fr.toString(fe,16) + " fr.inv(fe)=" + fr.toString(fr.inv(fe),16) + " invPos[fe.fe]=" + fr.toString(invPos[fe.fe],16));
                 exit(-1);
             }
 #endif
@@ -76,7 +77,7 @@ public:
             unlock();
             if (!fr.equal(fr.inv(fe), invNeg[GOLDILOCKS_PRIME - fe.fe]))
             {
-                cerr << "Error: GoldilocksPrecomputed::inv() neg fe=" << fr.toString(fe,16) << " fr.inv(fe)=" << fr.toString(fr.inv(fe),16) << " invNeg[GOLDILOCKS_PRIME - fe.fe]=" << fr.toString(invNeg[GOLDILOCKS_PRIME - fe.fe],16) << endl;
+                zklog.error("GoldilocksPrecomputed::inv() neg fe=" + fr.toString(fe,16) + " fr.inv(fe)=" + fr.toString(fr.inv(fe),16) + " invNeg[GOLDILOCKS_PRIME - fe.fe]=" + fr.toString(invNeg[GOLDILOCKS_PRIME - fe.fe],16));
                 exit(-1);
             }
 #endif
