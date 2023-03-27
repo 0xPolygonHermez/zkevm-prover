@@ -62,7 +62,7 @@ $ ./build/zkProver -c testvectors/config_runFile_BatchProof.json
 ```
 
 ### StateDB service database
-To use persistence in the StateDB (Merkle-tree) service you must create the database objects needed by the service. To do this run the shell script: 
+To use persistence in the StateDB (Merkle-tree) service you must create the database objects needed by the service. To do this run the shell script:
 ```sh
 $ ./tools/statedb/create_db.sh <database> <user> <password>
 ```
@@ -104,11 +104,5 @@ To run a proof test you must perform the following steps:
 - Run the Prover from the `testvectors` folder using the command `$ ../build/zkProver`
 - The result files of the proof will be stored in the folder specified in the `"outputPath"` config parameter
 
-## License
 
-### Copyright
-Polygon `zkevm-prover` was developed by Polygon. While we plan to adopt an open source license, we haven’t selected one yet, so all rights are reserved for the time being. Please reach out to us if you have thoughts on licensing.  
-  
-### Disclaimer
-This code has not yet been audited, and should not be used in any production systems.
 
