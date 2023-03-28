@@ -30,7 +30,8 @@ typedef enum : int
     ZKR_SM_MAIN_OUT_OF_STEPS = 24, // Main state machine executor did not complete the execution within available steps
     ZKR_SM_MAIN_INVALID_FORK_ID = 25, // Main state machine executor does not support the requested fork ID
     ZKR_SM_MAIN_INVALID_UNSIGNED_TX = 26, // Main state machine executor cannot process unsigned TXs in prover mode
-    ZKR_SM_MAIN_BALANCE_MISMATCH = 27 // Main state machine executor found that total tranferred balances are not zero
+    ZKR_SM_MAIN_BALANCE_MISMATCH = 27, // Main state machine executor found that total tranferred balances are not zero
+    ZKR_SM_MAIN_FEA2SCALAR = 28 // Main state machine executor failed calling fea2scalar()
 } zkresult;
 
 const char* zkresult2string (int code);

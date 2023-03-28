@@ -647,7 +647,7 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "T\020\030\022+\n\'ROM_ERROR_INTRINSIC_INVALID_SENDE"
   "R_CODE\020\031\022\'\n#ROM_ERROR_INTRINSIC_TX_GAS_O"
   "VERFLOW\020\032\022 \n\034ROM_ERROR_BATCH_DATA_TOO_BI"
-  "G\020\033\022!\n\035ROM_ERROR_UNSUPPORTED_FORK_ID\020\034*\246"
+  "G\020\033\022!\n\035ROM_ERROR_UNSUPPORTED_FORK_ID\020\034*\305"
   "\003\n\rExecutorError\022\036\n\032EXECUTOR_ERROR_UNSPE"
   "CIFIED\020\000\022\033\n\027EXECUTOR_ERROR_NO_ERROR\020\001\022+\n"
   "\'EXECUTOR_ERROR_COUNTERS_OVERFLOW_KECCAK"
@@ -658,12 +658,12 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "_OVERFLOW_PADDING\020\006\022-\n)EXECUTOR_ERROR_CO"
   "UNTERS_OVERFLOW_POSEIDON\020\007\022&\n\"EXECUTOR_E"
   "RROR_UNSUPPORTED_FORK_ID\020\010\022#\n\037EXECUTOR_E"
-  "RROR_BALANCE_MISMATCH\020\t2h\n\017ExecutorServi"
-  "ce\022U\n\014ProcessBatch\022 .executor.v1.Process"
-  "BatchRequest\032!.executor.v1.ProcessBatchR"
-  "esponse\"\000BAZ\?github.com/0xPolygonHermez/"
-  "zkevm-node/state/runtime/executor/pbb\006pr"
-  "oto3"
+  "RROR_BALANCE_MISMATCH\020\t\022\035\n\031EXECUTOR_ERRO"
+  "R_FEA2SCALAR\020\n2h\n\017ExecutorService\022U\n\014Pro"
+  "cessBatch\022 .executor.v1.ProcessBatchRequ"
+  "est\032!.executor.v1.ProcessBatchResponse\"\000"
+  "BAZ\?github.com/0xPolygonHermez/zkevm-nod"
+  "e/state/runtime/executor/pbb\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_executor_2eproto_deps[1] = {
 };
@@ -686,7 +686,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_exe
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_executor_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_executor_2eproto = {
-  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 4684,
+  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 4715,
   &descriptor_table_executor_2eproto_once, descriptor_table_executor_2eproto_sccs, descriptor_table_executor_2eproto_deps, 15, 0,
   schemas, file_default_instances, TableStruct_executor_2eproto::offsets,
   file_level_metadata_executor_2eproto, 15, file_level_enum_descriptors_executor_2eproto, file_level_service_descriptors_executor_2eproto,
@@ -753,6 +753,7 @@ bool ExecutorError_IsValid(int value) {
     case 7:
     case 8:
     case 9:
+    case 10:
       return true;
     default:
       return false;

@@ -196,6 +196,10 @@ void eval_setVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Call evalCommand() to build the field element value for this variable
     evalCommand(ctx, *cmd.values[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 
     // Get the field element value from the command result
     mpz_class auxScalar;
@@ -249,27 +253,51 @@ void eval_getReg (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     {
         case reg_A:
             cr.type = crt_scalar;
-            fea2scalar(ctx.fr, cr.scalar, ctx.pols.A0[*ctx.pStep], ctx.pols.A1[*ctx.pStep], ctx.pols.A2[*ctx.pStep], ctx.pols.A3[*ctx.pStep], ctx.pols.A4[*ctx.pStep], ctx.pols.A5[*ctx.pStep], ctx.pols.A6[*ctx.pStep], ctx.pols.A7[*ctx.pStep]);
+            if (!fea2scalar(ctx.fr, cr.scalar, ctx.pols.A0[*ctx.pStep], ctx.pols.A1[*ctx.pStep], ctx.pols.A2[*ctx.pStep], ctx.pols.A3[*ctx.pStep], ctx.pols.A4[*ctx.pStep], ctx.pols.A5[*ctx.pStep], ctx.pols.A6[*ctx.pStep], ctx.pols.A7[*ctx.pStep]))
+            {
+                cr.zkResult = ZKR_SM_MAIN_FEA2SCALAR;
+                return;
+            }
             break;
         case reg_B:
             cr.type = crt_scalar;
-            fea2scalar(ctx.fr, cr.scalar, ctx.pols.B0[*ctx.pStep], ctx.pols.B1[*ctx.pStep], ctx.pols.B2[*ctx.pStep], ctx.pols.B3[*ctx.pStep], ctx.pols.B4[*ctx.pStep], ctx.pols.B5[*ctx.pStep], ctx.pols.B6[*ctx.pStep], ctx.pols.B7[*ctx.pStep]);
+            if (!fea2scalar(ctx.fr, cr.scalar, ctx.pols.B0[*ctx.pStep], ctx.pols.B1[*ctx.pStep], ctx.pols.B2[*ctx.pStep], ctx.pols.B3[*ctx.pStep], ctx.pols.B4[*ctx.pStep], ctx.pols.B5[*ctx.pStep], ctx.pols.B6[*ctx.pStep], ctx.pols.B7[*ctx.pStep]))
+            {
+                cr.zkResult = ZKR_SM_MAIN_FEA2SCALAR;
+                return;
+            }
             break;
         case reg_C:
             cr.type = crt_scalar;
-            fea2scalar(ctx.fr, cr.scalar, ctx.pols.C0[*ctx.pStep], ctx.pols.C1[*ctx.pStep], ctx.pols.C2[*ctx.pStep], ctx.pols.C3[*ctx.pStep], ctx.pols.C4[*ctx.pStep], ctx.pols.C5[*ctx.pStep], ctx.pols.C6[*ctx.pStep], ctx.pols.C7[*ctx.pStep]);
+            if (!fea2scalar(ctx.fr, cr.scalar, ctx.pols.C0[*ctx.pStep], ctx.pols.C1[*ctx.pStep], ctx.pols.C2[*ctx.pStep], ctx.pols.C3[*ctx.pStep], ctx.pols.C4[*ctx.pStep], ctx.pols.C5[*ctx.pStep], ctx.pols.C6[*ctx.pStep], ctx.pols.C7[*ctx.pStep]))
+            {
+                cr.zkResult = ZKR_SM_MAIN_FEA2SCALAR;
+                return;
+            }
             break;
         case reg_D:
             cr.type = crt_scalar;
-            fea2scalar(ctx.fr, cr.scalar, ctx.pols.D0[*ctx.pStep], ctx.pols.D1[*ctx.pStep], ctx.pols.D2[*ctx.pStep], ctx.pols.D3[*ctx.pStep], ctx.pols.D4[*ctx.pStep], ctx.pols.D5[*ctx.pStep], ctx.pols.D6[*ctx.pStep], ctx.pols.D7[*ctx.pStep]);
+            if (!fea2scalar(ctx.fr, cr.scalar, ctx.pols.D0[*ctx.pStep], ctx.pols.D1[*ctx.pStep], ctx.pols.D2[*ctx.pStep], ctx.pols.D3[*ctx.pStep], ctx.pols.D4[*ctx.pStep], ctx.pols.D5[*ctx.pStep], ctx.pols.D6[*ctx.pStep], ctx.pols.D7[*ctx.pStep]))
+            {
+                cr.zkResult = ZKR_SM_MAIN_FEA2SCALAR;
+                return;
+            }
             break;
         case reg_E:
             cr.type = crt_scalar;
-            fea2scalar(ctx.fr, cr.scalar, ctx.pols.E0[*ctx.pStep], ctx.pols.E1[*ctx.pStep], ctx.pols.E2[*ctx.pStep], ctx.pols.E3[*ctx.pStep], ctx.pols.E4[*ctx.pStep], ctx.pols.E5[*ctx.pStep], ctx.pols.E6[*ctx.pStep], ctx.pols.E7[*ctx.pStep]);
+            if (!fea2scalar(ctx.fr, cr.scalar, ctx.pols.E0[*ctx.pStep], ctx.pols.E1[*ctx.pStep], ctx.pols.E2[*ctx.pStep], ctx.pols.E3[*ctx.pStep], ctx.pols.E4[*ctx.pStep], ctx.pols.E5[*ctx.pStep], ctx.pols.E6[*ctx.pStep], ctx.pols.E7[*ctx.pStep]))
+            {
+                cr.zkResult = ZKR_SM_MAIN_FEA2SCALAR;
+                return;
+            }
             break;
         case reg_SR:
             cr.type = crt_scalar;
-            fea2scalar(ctx.fr, cr.scalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]);
+            if (!fea2scalar(ctx.fr, cr.scalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]))
+            {
+                cr.zkResult = ZKR_SM_MAIN_FEA2SCALAR;
+                return;
+            }
             break;
         case reg_CTX:
             cr.type = crt_u32;
@@ -394,10 +422,18 @@ void eval_add(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class a;
     cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class b;
     cr2scalar(ctx, cr, b);
 
@@ -417,10 +453,18 @@ void eval_sub(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class a;
     cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class b;
     cr2scalar(ctx, cr, b);
 
@@ -440,6 +484,10 @@ void eval_neg(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class a;
     cr2scalar(ctx, cr, a);
 
@@ -459,10 +507,18 @@ void eval_mul(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class a;
     cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class b;
     cr2scalar(ctx, cr, b);
 
@@ -486,10 +542,18 @@ void eval_div(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class a;
     cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class b;
     cr2scalar(ctx, cr, b);
 
@@ -509,10 +573,18 @@ void eval_mod(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class a;
     cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class b;
     cr2scalar(ctx, cr, b);
 
@@ -536,10 +608,18 @@ void eval_logical_or (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class a;
     cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class b;
     cr2scalar(ctx, cr, b);
 
@@ -559,10 +639,18 @@ void eval_logical_and (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class a;
     cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class b;
     cr2scalar(ctx, cr, b);
 
@@ -582,10 +670,18 @@ void eval_logical_gt (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class a;
     cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class b;
     cr2scalar(ctx, cr, b);
 
@@ -605,10 +701,18 @@ void eval_logical_ge (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class a;
     cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class b;
     cr2scalar(ctx, cr, b);
 
@@ -628,10 +732,18 @@ void eval_logical_lt (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class a;
     cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class b;
     cr2scalar(ctx, cr, b);
 
@@ -651,10 +763,18 @@ void eval_logical_le (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class a;
     cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class b;
     cr2scalar(ctx, cr, b);
 
@@ -674,10 +794,18 @@ void eval_logical_eq (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class a;
     cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class b;
     cr2scalar(ctx, cr, b);
 
@@ -697,10 +825,18 @@ void eval_logical_ne (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class a;
     cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class b;
     cr2scalar(ctx, cr, b);
 
@@ -720,6 +856,10 @@ void eval_logical_not (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class a;
     cr2scalar(ctx, cr, a);
 
@@ -743,10 +883,18 @@ void eval_bit_and (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class a;
     cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class b;
     cr2scalar(ctx, cr, b);
 
@@ -766,10 +914,18 @@ void eval_bit_or (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class a;
     cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class b;
     cr2scalar(ctx, cr, b);
 
@@ -789,10 +945,18 @@ void eval_bit_xor (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class a;
     cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class b;
     cr2scalar(ctx, cr, b);
 
@@ -812,6 +976,10 @@ void eval_bit_not (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class a;
     cr2scalar(ctx, cr, a);
 
@@ -831,10 +999,18 @@ void eval_bit_shl (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class a;
     cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class b;
     cr2scalar(ctx, cr, b);
 
@@ -854,10 +1030,18 @@ void eval_bit_shr (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class a;
     cr2scalar(ctx, cr, a);
 
     evalCommand(ctx, *cmd.values[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class b;
     cr2scalar(ctx, cr, b);
 
@@ -881,12 +1065,20 @@ void eval_if (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #endif
 
     evalCommand(ctx, *cmd.values[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
     mpz_class a;
     cr2scalar(ctx, cr, a);
 
     if (a)
     {
         evalCommand(ctx, *cmd.values[1], cr);
+        if (cr.zkResult != ZKR_SUCCESS)
+        {
+            return;
+        }
         mpz_class b;
         cr2scalar(ctx, cr, b);
 
@@ -896,6 +1088,10 @@ void eval_if (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     else
     {
         evalCommand(ctx, *cmd.values[2], cr);
+        if (cr.zkResult != ZKR_SUCCESS)
+        {
+            return;
+        }
         mpz_class c;
         cr2scalar(ctx, cr, c);
 
@@ -912,7 +1108,11 @@ void eval_getMemValue (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     cr.type = crt_scalar;
     Fea fea = ctx.mem[cmd.offset];
-    fea2scalar(ctx.fr, cr.scalar, fea.fe0, fea.fe1, fea.fe2, fea.fe3, fea.fe4, fea.fe5, fea.fe6, fea.fe7);
+    if (!fea2scalar(ctx.fr, cr.scalar, fea.fe0, fea.fe1, fea.fe2, fea.fe3, fea.fe4, fea.fe5, fea.fe6, fea.fe7))
+    {
+        cr.zkResult = ZKR_SM_MAIN_FEA2SCALAR;
+        return;
+    }
 }
 
 /**************/
@@ -987,6 +1187,10 @@ void eval_getTxs(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get offset by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar) {
         cerr << "Error: eval_getTxs() 1 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
@@ -997,6 +1201,10 @@ void eval_getTxs(Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get offset by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -1081,6 +1289,10 @@ void eval_cond (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get offset by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -1124,6 +1336,10 @@ void eval_exp (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get a by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -1135,6 +1351,10 @@ void eval_exp (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get b by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -1170,6 +1390,10 @@ void eval_bitwise_and (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get a by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -1181,6 +1405,10 @@ void eval_bitwise_and (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get b by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -1207,6 +1435,10 @@ void eval_bitwise_or (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get a by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -1218,6 +1450,10 @@ void eval_bitwise_or (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get b by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -1244,6 +1480,10 @@ void eval_bitwise_xor (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get a by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -1255,6 +1495,10 @@ void eval_bitwise_xor (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get b by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -1281,6 +1525,10 @@ void eval_bitwise_not (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get a by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -1345,6 +1593,10 @@ void eval_comp_lt (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get a by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -1356,6 +1608,10 @@ void eval_comp_lt (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get b by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -1382,6 +1638,10 @@ void eval_comp_gt (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get a by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -1393,6 +1653,10 @@ void eval_comp_gt (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get b by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -1419,6 +1683,10 @@ void eval_comp_eq (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get a by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -1430,6 +1698,10 @@ void eval_comp_eq (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get b by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -1455,6 +1727,10 @@ void eval_loadScalar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #endif
 
     evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 }
 
 
@@ -1494,6 +1770,10 @@ void eval_storeLog (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get indexLog by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -1505,6 +1785,10 @@ void eval_storeLog (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get isTopic by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -1516,6 +1800,10 @@ void eval_storeLog (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get isTopic by executing cmd.params[2]
     evalCommand(ctx, *cmd.params[2], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -1572,12 +1860,20 @@ void eval_log (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get indexLog by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 
     mpz_class scalarLog;
     switch (cr.type)
     {
         case crt_fea:
-            fea2scalar(ctx.fr, scalarLog, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+            if (!fea2scalar(ctx.fr, scalarLog, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7))
+            {
+                cr.zkResult = ZKR_SM_MAIN_FEA2SCALAR;
+                return;
+            }
             break;
         case crt_u64:
             scalarLog = cr.u64;
@@ -1620,6 +1916,10 @@ void eval_memAlignWR_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get m0 by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -1631,6 +1931,10 @@ void eval_memAlignWR_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get value by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -1642,6 +1946,10 @@ void eval_memAlignWR_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get offset by executing cmd.params[2]
     evalCommand(ctx, *cmd.params[2], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar) {
         cerr << "Error: eval_memAlignWR_W0() 2 unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
@@ -1671,6 +1979,10 @@ void eval_memAlignWR_W1 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get m1 by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -1682,6 +1994,10 @@ void eval_memAlignWR_W1 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get value by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -1693,6 +2009,10 @@ void eval_memAlignWR_W1 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get offset by executing cmd.params[2]
     evalCommand(ctx, *cmd.params[2], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -1723,6 +2043,10 @@ void eval_memAlignWR8_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr
 
     // Get m0 by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -1734,6 +2058,10 @@ void eval_memAlignWR8_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr
 
     // Get value by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -1745,6 +2073,10 @@ void eval_memAlignWR8_W0 (Context &ctx, const RomCommand &cmd, CommandResult &cr
 
     // Get offset by executing cmd.params[2]
     evalCommand(ctx, *cmd.params[2], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -1779,6 +2111,10 @@ void eval_inverseFpEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get a by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -1814,6 +2150,10 @@ void eval_inverseFnEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get a by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -1925,6 +2265,10 @@ void eval_sqrtFpEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Get a by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -1999,6 +2343,10 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
 
     // Get x1 by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -2011,6 +2359,10 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
 
     // Get y1 by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
@@ -2031,6 +2383,10 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
     {
         // Get x2 by executing cmd.params[2]
         evalCommand(ctx, *cmd.params[2], cr);
+        if (cr.zkResult != ZKR_SUCCESS)
+        {
+            return;
+        }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
         if (cr.type != crt_scalar)
         {
@@ -2042,6 +2398,10 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
 
         // Get y2 by executing cmd.params[3]
         evalCommand(ctx, *cmd.params[3], cr);
+        if (cr.zkResult != ZKR_SUCCESS)
+        {
+            return;
+        }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
         if (cr.type != crt_scalar)
         {

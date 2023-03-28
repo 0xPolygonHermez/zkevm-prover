@@ -627,5 +627,6 @@ using grpc::Status;
     if (result == ZKR_SM_MAIN_OOC_POSEIDON_G  ) return ::executor::v1::EXECUTOR_ERROR_COUNTERS_OVERFLOW_POSEIDON;
     if (result == ZKR_SM_MAIN_INVALID_FORK_ID ) return ::executor::v1::EXECUTOR_ERROR_UNSUPPORTED_FORK_ID;
     if (result == ZKR_SM_MAIN_BALANCE_MISMATCH) return ::executor::v1::EXECUTOR_ERROR_BALANCE_MISMATCH;
+    if (result == ZKR_SM_MAIN_FEA2SCALAR      ) return ::executor::v1::EXECUTOR_ERROR_FEA2SCALAR;
     return ::executor::v1::EXECUTOR_ERROR_UNSPECIFIED;
 }
