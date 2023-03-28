@@ -43,17 +43,17 @@ public:
     struct timeval top;
 #endif
 public:
-    void onError (Context &ctx, const RomCommand &cmd);
-    void onStoreLog (Context &ctx, const RomCommand &cmd);
-    void onProcessTx (Context &ctx, const RomCommand &cmd);
-    void onUpdateStorage (Context &ctx, const RomCommand &cmd);
-    void onFinishTx (Context &ctx, const RomCommand &cmd);
-    void onStartBatch (Context &ctx, const RomCommand &cmd);
-    void onFinishBatch (Context &ctx, const RomCommand &cmd);
-    void onOpcode (Context &ctx, const RomCommand &cmd);
-    void addReadWriteAddress ( const Goldilocks::Element &address0, const Goldilocks::Element &address1, const Goldilocks::Element &address2, const Goldilocks::Element &faddress3, const Goldilocks::Element &address4, const Goldilocks::Element &address5, const Goldilocks::Element &address6, const Goldilocks::Element &address7,
-                               const Goldilocks::Element &keyType0, const Goldilocks::Element &keyType1, const Goldilocks::Element &keyType2, const Goldilocks::Element &keyType3, const Goldilocks::Element &keyType4, const Goldilocks::Element &keyType5, const Goldilocks::Element &keyType6, const Goldilocks::Element &keyType7,
-                               const mpz_class &value );
+    zkresult onError (Context &ctx, const RomCommand &cmd);
+    zkresult onStoreLog (Context &ctx, const RomCommand &cmd);
+    zkresult onProcessTx (Context &ctx, const RomCommand &cmd);
+    zkresult onUpdateStorage (Context &ctx, const RomCommand &cmd);
+    zkresult onFinishTx (Context &ctx, const RomCommand &cmd);
+    zkresult onStartBatch (Context &ctx, const RomCommand &cmd);
+    zkresult onFinishBatch (Context &ctx, const RomCommand &cmd);
+    zkresult onOpcode (Context &ctx, const RomCommand &cmd);
+    zkresult addReadWriteAddress ( const Goldilocks::Element &address0, const Goldilocks::Element &address1, const Goldilocks::Element &address2, const Goldilocks::Element &faddress3, const Goldilocks::Element &address4, const Goldilocks::Element &address5, const Goldilocks::Element &address6, const Goldilocks::Element &address7,
+                                   const Goldilocks::Element &keyType0, const Goldilocks::Element &keyType1, const Goldilocks::Element &keyType2, const Goldilocks::Element &keyType3, const Goldilocks::Element &keyType4, const Goldilocks::Element &keyType5, const Goldilocks::Element &keyType6, const Goldilocks::Element &keyType7,
+                                   const mpz_class &value );
 
     FullTracer(Goldilocks &fr) : fr(fr), depth(1), initGas(0), txCount(0), txTime(0), accBatchGas(0), bOpcodeCalled(false) { };
     ~FullTracer()

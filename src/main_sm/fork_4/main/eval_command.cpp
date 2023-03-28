@@ -1829,7 +1829,7 @@ void eval_storeLog (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     }
 
     zkassert(ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID == 4); // fork_4
-    ((fork_4::FullTracer *)ctx.proverRequest.pFullTracer)->handleEvent(ctx, cmd);
+    cr.zkResult = ((fork_4::FullTracer *)ctx.proverRequest.pFullTracer)->handleEvent(ctx, cmd);
 
     // Return an empty array of field elements
     cr.type = crt_fea;
@@ -2444,10 +2444,10 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
     ctx.fec.sub(y3, aux1, y1);
 }
 
-void eval_addReadWriteAddress (Context &ctx, const mpz_class value)
+zkresult eval_addReadWriteAddress (Context &ctx, const mpz_class value)
 {
     zkassert(ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID == 4); // fork_4
-    ((fork_4::FullTracer *)ctx.proverRequest.pFullTracer)->addReadWriteAddress(
+    return ((fork_4::FullTracer *)ctx.proverRequest.pFullTracer)->addReadWriteAddress(
         ctx.pols.A0[0], ctx.pols.A1[0], ctx.pols.A2[0], ctx.pols.A3[0], ctx.pols.A4[0], ctx.pols.A5[0], ctx.pols.A6[0], ctx.pols.A7[0],
         ctx.pols.B0[0], ctx.pols.B1[0], ctx.pols.B2[0], ctx.pols.B3[0], ctx.pols.B4[0], ctx.pols.B5[0], ctx.pols.B6[0], ctx.pols.B7[0],
         value);

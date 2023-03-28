@@ -121,7 +121,8 @@ void eval_storeLog            (Context &ctx, const RomCommand &cmd, CommandResul
 void eval_memAlignWR_W0       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_memAlignWR_W1       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_memAlignWR8_W0      (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_addReadWriteAddress (Context &ctx, const mpz_class value);
+
+zkresult eval_addReadWriteAddress (Context &ctx, const mpz_class value);
 
 } // namespace
 

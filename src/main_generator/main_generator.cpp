@@ -995,7 +995,18 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    incCounter = smtGetResult.proofHashCounter + 2;\n";
 
                     if (bFastMode)
-                        code += "    eval_addReadWriteAddress(ctx, smtGetResult.value);\n";
+                    {
+                        code += "    zkResult = eval_addReadWriteAddress(ctx, smtGetResult.value);\n";
+                        code += "    if (zkResult != ZKR_SUCCESS)\n";
+                        code += "    {\n";
+                        code += "        zklog.error(string(\"" + functionName + " failed calling eval_addReadWriteAddress() 1 result=\") + zkresult2string(zkResult));\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx);\n";
+                        code += "        proverRequest.result = zkResult;\n";
+                        code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                        code += "        return;\n";
+                        code += "    }\n";
+                    }
 
                     code += "#ifdef LOG_TIME_STATISTICS\n";
                     code += "    mainMetrics.add(\"SMT Get\", TimeDiff(t));\n";
@@ -1114,7 +1125,18 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    incCounter = ctx.lastSWrite.res.proofHashCounter + 2;\n";
 
                     if (bFastMode)
-                        code += "    eval_addReadWriteAddress(ctx, scalarD);\n";
+                    {
+                        code += "    zkResult = eval_addReadWriteAddress(ctx, scalarD);\n";
+                        code += "    if (zkResult != ZKR_SUCCESS)\n";
+                        code += "    {\n";
+                        code += "        zklog.error(string(\"" + functionName + " failed calling eval_addReadWriteAddress() 2 result=\") + zkresult2string(zkResult));\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx);\n";
+                        code += "        proverRequest.result = zkResult;\n";
+                        code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                        code += "        return;\n";
+                        code += "    }\n";
+                    }
                         
                     code += "    // If we just modified a balance\n";
                     code += "    if ( fr.isZero(pols.B0[" + string(bFastMode?"0":"i") + "]) && fr.isZero(pols.B1[" + string(bFastMode?"0":"i") + "]) )\n";
@@ -2056,7 +2078,18 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    incCounter = smtGetResult.proofHashCounter + 2;\n";
                     
             if (bFastMode)
-                code += "    eval_addReadWriteAddress(ctx, scalarD);\n";
+            {
+                code += "    zkResult = eval_addReadWriteAddress(ctx, scalarD);\n";
+                code += "    if (zkResult != ZKR_SUCCESS)\n";
+                code += "    {\n";
+                code += "        zklog.error(string(\"" + functionName + " failed calling eval_addReadWriteAddress() 3 result=\") + zkresult2string(zkResult));\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = zkResult;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
+            }
 
             code += "#ifdef LOG_TIME_STATISTICS\n";
             code += "    mainMetrics.add(\"SMT Get\", TimeDiff(t));\n";
@@ -2211,7 +2244,18 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        incCounter = ctx.lastSWrite.res.proofHashCounter + 2;\n";
                     
             if (bFastMode)
-                code += "        eval_addReadWriteAddress(ctx, scalarD);\n";
+            {
+                code += "        zkResult = eval_addReadWriteAddress(ctx, scalarD);\n";
+                code += "        if (zkResult != ZKR_SUCCESS)\n";
+                code += "        {\n";
+                code += "            zklog.error(string(\"" + functionName + " failed calling eval_addReadWriteAddress() 4 result=\") + zkresult2string(zkResult));\n";
+                code += "            zkPC=" + to_string(zkPC) +";\n";
+                code += "            mainExecutor.logError(ctx);\n";
+                code += "            proverRequest.result = zkResult;\n";
+                code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "            return;\n";
+                code += "        }\n";
+            }
                         
             code += "        // If we just modified a balance\n";
             code += "        if ( fr.isZero(pols.B0[" + string(bFastMode?"0":"i") + "]) && fr.isZero(pols.B1[" + string(bFastMode?"0":"i") + "]) )\n";
