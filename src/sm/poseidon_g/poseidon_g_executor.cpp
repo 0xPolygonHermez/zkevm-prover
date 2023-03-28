@@ -4,6 +4,7 @@
 #include "utils.hpp"
 #include "exit_process.hpp"
 #include "poseidon_g_permutation.hpp"
+#include "zklog.hpp"
 
 using namespace std;
 
@@ -108,7 +109,7 @@ void PoseidonGExecutor::execute (vector<array<Goldilocks::Element, 17>> &input, 
     // Check input size
     if (input.size() > maxHashes)
     {
-        cerr << "Error: PoseidonGExecutor::execute() Not enough Poseidon slots input.size()=" << input.size() << " > maxHashes=" << maxHashes << endl;
+        zklog.error("PoseidonGExecutor::execute() Not enough Poseidon slots input.size()=" + to_string(input.size()) + " > maxHashes=" + to_string(maxHashes));
         exitProcess();
     }
 
@@ -149,7 +150,7 @@ void PoseidonGExecutor::execute (vector<array<Goldilocks::Element, 17>> &input, 
                 // pols.result4[p] = fr.one();
                 break;
             default:
-                cerr << "Error: PoseidonGExecutor::execute() got an invalid permutation=" << permutation << " at input i=" << i << endl;
+                zklog.error("PoseidonGExecutor::execute() got an invalid permutation=" + to_string(permutation) + " at input i=" + to_string(i));
                 exitProcess();
                 break;
         }

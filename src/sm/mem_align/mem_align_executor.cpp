@@ -1,6 +1,7 @@
 #include "mem_align_executor.hpp"
 #include "utils.hpp"
 #include "scalar.hpp"
+#include "zklog.hpp"
 
 uint8_t STEP (uint64_t i) { return i % 32; }
 uint8_t OFFSET (uint64_t i) { return ((i >> 5) % 32); }
@@ -22,7 +23,7 @@ void MemAlignExecutor::execute (vector<MemAlignAction> &input, MemAlignCommitPol
     // Check input size 
     if (input.size()*32 > N)
     {
-        cerr << "Error: MemAlignExecutor::execute() Too many entries input.size()=" << input.size() << " > N/32=" << N/32 << endl;
+        zklog.error("MemAlignExecutor::execute() Too many entries input.size()=" + to_string(input.size()) + " > N/32=" + to_string(N/32));
         exitProcess();
     }
 

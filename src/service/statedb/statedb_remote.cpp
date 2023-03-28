@@ -5,6 +5,7 @@
 #include "statedb_utils.hpp"
 #include "statedb_remote.hpp"
 #include "zkresult.hpp"
+#include "zklog.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -52,7 +53,7 @@ zkresult StateDBRemote::set (const Goldilocks::Element (&oldRoot)[4], const Gold
 
     grpc::Status s = stub->Set(&context, request, &response);
     if (s.error_code() != grpc::StatusCode::OK) {
-        cerr << "Error: StateDBRemote::set() GRPC error(" << s.error_code() << "): " << s.error_message() << endl;
+        zklog.error("StateDBRemote::set() GRPC error(" + to_string(s.error_code()) + "): " + s.error_message());
         return ZKR_STATEDB_GRPC_ERROR;
     }
 
@@ -120,7 +121,7 @@ zkresult StateDBRemote::get (const Goldilocks::Element (&root)[4], const Goldilo
 
     grpc::Status s = stub->Get(&context, request, &response);
     if (s.error_code() != grpc::StatusCode::OK) {
-        cerr << "Error: StateDBRemote::get() GRPC error(" << s.error_code() << "): " << s.error_message() << endl;
+        zklog.error("StateDBRemote::get() GRPC error(" + to_string(s.error_code()) + "): " + s.error_message());
         return ZKR_STATEDB_GRPC_ERROR;
     }
 
@@ -188,7 +189,7 @@ zkresult StateDBRemote::setProgram (const Goldilocks::Element (&key)[4], const v
 
     grpc::Status s = stub->SetProgram(&context, request, &response);
     if (s.error_code() != grpc::StatusCode::OK) {
-        cerr << "Error: StateDBRemote::setProgram() GRPC error(" << s.error_code() << "): " << s.error_message() << endl;
+        zklog.error("StateDBRemote::setProgram() GRPC error(" + to_string(s.error_code()) + "): " + s.error_message());
         return ZKR_STATEDB_GRPC_ERROR;
     }
 
@@ -215,7 +216,7 @@ zkresult StateDBRemote::getProgram (const Goldilocks::Element (&key)[4], vector<
 
     grpc::Status s = stub->GetProgram(&context, request, &response);
     if (s.error_code() != grpc::StatusCode::OK) {
-        cerr << "Error: StateDBRemote::getProgram() GRPC error(" << s.error_code() << "): " << s.error_message() << endl;
+        zklog.error("StateDBRemote::getProgram() GRPC error(" + to_string(s.error_code()) + "): " + s.error_message());
         return ZKR_STATEDB_GRPC_ERROR;
     }
 
@@ -253,7 +254,7 @@ void StateDBRemote::loadDB(const DatabaseMap::MTMap &input, const bool persisten
 
     grpc::Status s = stub->LoadDB(&context, request, &response);
     if (s.error_code() != grpc::StatusCode::OK) {
-        cerr << "Error: StateDBRemote:loadDB() GRPC error(" << s.error_code() << "): " << s.error_message() << endl;
+        zklog.error("StateDBRemote:loadDB() GRPC error(" + to_string(s.error_code()) + "): " + s.error_message());
     }
 
 #ifdef LOG_TIME_STATISTICS_STATEDB_REMOTE
@@ -276,7 +277,7 @@ void StateDBRemote::loadProgramDB(const DatabaseMap::ProgramMap &input, const bo
 
     grpc::Status s = stub->LoadProgramDB(&context, request, &response);
     if (s.error_code() != grpc::StatusCode::OK) {
-        cerr << "Error: StateDBRemote:loadProgramDB() GRPC error(" << s.error_code() << "): " << s.error_message() << endl;
+        zklog.error("StateDBRemote:loadProgramDB() GRPC error(" + to_string(s.error_code()) + "): " + s.error_message());
     }
 
 #ifdef LOG_TIME_STATISTICS_STATEDB_REMOTE
@@ -294,7 +295,7 @@ zkresult StateDBRemote::flush()
     ::statedb::v1::FlushResponse response;
     grpc::Status s = stub->Flush(&context, request, &response);
     if (s.error_code() != grpc::StatusCode::OK) {
-        cerr << "Error: StateDBRemote:flush() GRPC error(" << s.error_code() << "): " << s.error_message() << endl;
+        zklog.error("StateDBRemote:flush() GRPC error(" + to_string(s.error_code()) + "): " + s.error_message());
     }
 
 #ifdef LOG_TIME_STATISTICS_STATEDB_REMOTE

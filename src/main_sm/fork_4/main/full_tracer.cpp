@@ -63,7 +63,7 @@ set<string> oocErrors = {
 //////////
 
 // Get range from memory
-inline void getFromMemory(Context &ctx, mpz_class &offset, mpz_class &length, string &result)
+inline zkresult getFromMemory(Context &ctx, mpz_class &offset, mpz_class &length, string &result)
 {
     uint64_t offsetCtx = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]) * 0x40000;
     uint64_t addrMem = offsetCtx + 0x20000;
@@ -81,7 +81,11 @@ inline void getFromMemory(Context &ctx, mpz_class &offset, mpz_class &length, st
         std::unordered_map<uint64_t, Fea>::iterator it = ctx.mem.find(initFloor);
         if (it != ctx.mem.end())
         {
-            fea2scalar(ctx.fr, memScalarStart, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7);
+            if (!fea2scalar(ctx.fr, memScalarStart, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7))
+            {
+                zklog.error("getFromMemory() failed calling fea2scalar() 1");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
         }
         string hexStringStart = PrependZeros(memScalarStart.get_str(16), 64);
         uint64_t bytesToSkip = (init - double(initFloor)) * 32;
@@ -94,7 +98,11 @@ inline void getFromMemory(Context &ctx, mpz_class &offset, mpz_class &length, st
         if (ctx.mem.find(i) != ctx.mem.end())
         {
             Fea memValue = ctx.mem[i];
-            fea2scalar(ctx.fr, memScalar, memValue.fe0, memValue.fe1, memValue.fe2, memValue.fe3, memValue.fe4, memValue.fe5, memValue.fe6, memValue.fe7);
+            if (!fea2scalar(ctx.fr, memScalar, memValue.fe0, memValue.fe1, memValue.fe2, memValue.fe3, memValue.fe4, memValue.fe5, memValue.fe6, memValue.fe7))
+            {
+                zklog.error("getFromMemory() failed calling fea2scalar() 2");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
         }
         result += PrependZeros(memScalar.get_str(16), 64);
     }
@@ -105,16 +113,22 @@ inline void getFromMemory(Context &ctx, mpz_class &offset, mpz_class &length, st
         std::unordered_map<uint64_t, Fea>::iterator it = ctx.mem.find(endFloor);
         if (it != ctx.mem.end())
         {
-            fea2scalar(ctx.fr, memScalarEnd, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7);
+            if (!fea2scalar(ctx.fr, memScalarEnd, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7))
+            {
+                zklog.error("getFromMemory() failed calling fea2scalar() 2");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
         }
         string hexStringEnd = PrependZeros(memScalarEnd.get_str(16), 64);
         uint64_t bytesToRetrieve = (end - double(endFloor)) * 32;
         result += hexStringEnd.substr(0, bytesToRetrieve * 2);
     }
+
+    return ZKR_SUCCESS;
 }
 
 // Get a global or context variable
-inline void getVarFromCtx(Context &ctx, bool global, uint64_t varOffset, mpz_class &result, uint64_t * pContext = NULL)
+inline zkresult getVarFromCtx(Context &ctx, bool global, uint64_t varOffset, mpz_class &result, uint64_t * pContext = NULL)
 {
     // global and pContext!=NULL should never happen at the same time
     zkassert((global && (pContext==NULL)) || !global);
@@ -131,12 +145,17 @@ inline void getVarFromCtx(Context &ctx, bool global, uint64_t varOffset, mpz_cla
     else
     {
         Fea value = memIterator->second;
-        fea2scalar(ctx.fr, result, value.fe0, value.fe1, value.fe2, value.fe3, value.fe4, value.fe5, value.fe6, value.fe7);
+        if (!fea2scalar(ctx.fr, result, value.fe0, value.fe1, value.fe2, value.fe3, value.fe4, value.fe5, value.fe6, value.fe7))
+        {
+            zklog.error("getVarFromCtx() failed calling fea2scalar()");
+            return ZKR_SM_MAIN_FEA2SCALAR;
+        }
     }
+    return ZKR_SUCCESS;
 }
 
 // Get the stored calldata in the stack
-inline void getCalldataFromStack(Context &ctx, uint64_t offset, uint64_t length, string &result)
+inline zkresult getCalldataFromStack(Context &ctx, uint64_t offset, uint64_t length, string &result)
 {
     uint64_t contextAddress = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep])*0x40000;
     uint64_t firstAddr = contextAddress + 0x10000 + 1024 + offset;
@@ -154,7 +173,11 @@ inline void getCalldataFromStack(Context &ctx, uint64_t offset, uint64_t length,
             break;
         }
         Fea memVal = memIterator->second;
-        fea2scalar(ctx.fr, auxScalar, memVal.fe0, memVal.fe1, memVal.fe2, memVal.fe3, memVal.fe4, memVal.fe5, memVal.fe6, memVal.fe7);
+        if (!fea2scalar(ctx.fr, auxScalar, memVal.fe0, memVal.fe1, memVal.fe2, memVal.fe3, memVal.fe4, memVal.fe5, memVal.fe6, memVal.fe7))
+        {
+            zklog.error("getCalldataFromStack() failed calling fea2scalar()");
+            return ZKR_SM_MAIN_FEA2SCALAR;
+        }
         result += PrependZeros(auxScalar.get_str(16), 64);
         if (length > 0)
         {
@@ -174,6 +197,8 @@ inline void getCalldataFromStack(Context &ctx, uint64_t offset, uint64_t length,
     {
         result = "0x0";
     }*/
+
+    return ZKR_SUCCESS;
 }
 
 // Get the value of a reg (A, B, C, D, E...)
@@ -258,8 +283,7 @@ zkresult FullTracer::handleEvent(Context &ctx, const RomCommand &cmd)
     if (cmd.function == f_storeLog)
     {
         // if (ctx.proverRequest.bNoCounters) return;
-        onStoreLog(ctx, cmd);
-        return ZKR_SUCCESS;
+        return onStoreLog(ctx, cmd);
     }
     if (cmd.params.size() == 0)
     {
@@ -268,13 +292,11 @@ zkresult FullTracer::handleEvent(Context &ctx, const RomCommand &cmd)
     }
     if (cmd.params[0]->varName == "onError")
     {
-        onError(ctx, cmd);
-        return ZKR_SUCCESS;
+        return onError(ctx, cmd);
     }
     if (cmd.params[0]->varName == "onProcessTx")
     {
-        onProcessTx(ctx, cmd);
-        return ZKR_SUCCESS;
+        return onProcessTx(ctx, cmd);
     }
     if (cmd.params[0]->varName == "onFinishTx")
     {
@@ -283,13 +305,11 @@ zkresult FullTracer::handleEvent(Context &ctx, const RomCommand &cmd)
             cerr << "Error: FullTracer::handleEvent(onFinishTx) found ctx.totalTransferredBalance=" << ctx.totalTransferredBalance.get_str(10) << endl;
             return ZKR_SM_MAIN_BALANCE_MISMATCH;
         }
-        onFinishTx(ctx, cmd);
-        return ZKR_SUCCESS;
+        return onFinishTx(ctx, cmd);
     }
     if (cmd.params[0]->varName == "onStartBatch")
     {
-        onStartBatch(ctx, cmd);
-        return ZKR_SUCCESS;
+        return onStartBatch(ctx, cmd);
     }
     if (cmd.params[0]->varName == "onFinishBatch")
     {
@@ -298,27 +318,24 @@ zkresult FullTracer::handleEvent(Context &ctx, const RomCommand &cmd)
             cerr << "Error: FullTracer::handleEvent(onFinishBatch) found ctx.totalTransferredBalance=" << ctx.totalTransferredBalance.get_str(10) << endl;
             return ZKR_SM_MAIN_BALANCE_MISMATCH;
         }
-        onFinishBatch(ctx, cmd);
-        return ZKR_SUCCESS;
+        return onFinishBatch(ctx, cmd);
     }
     if (cmd.params[0]->function == f_onOpcode)
     {
         // if (ctx.proverRequest.bNoCounters) return;
-        onOpcode(ctx, cmd);
-        return ZKR_SUCCESS;
+        return onOpcode(ctx, cmd);
     }
     if (cmd.params[0]->function == f_onUpdateStorage)
     {
         // if (ctx.proverRequest.bNoCounters) return;
-        onUpdateStorage(ctx, *cmd.params[0]);
-        return ZKR_SUCCESS;
+        return onUpdateStorage(ctx, *cmd.params[0]);
     }
     cerr << "Error: FullTracer::handleEvent() got an invalid event cmd.params[0]->varName=" << cmd.params[0]->varName << " cmd.function=" << function2String(cmd.function) << endl;
     exitProcess();
     return ZKR_INTERNAL_ERROR;
 }
 
-void FullTracer::onError(Context &ctx, const RomCommand &cmd)
+zkresult FullTracer::onError(Context &ctx, const RomCommand &cmd)
 {
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&t, NULL);
@@ -329,6 +346,8 @@ void FullTracer::onError(Context &ctx, const RomCommand &cmd)
         cerr << "Error: FullTracer::onError() got an invalid cmd.params.size()=" << cmd.params.size() << endl;
         exitProcess();
     }
+
+    zkresult zkr;
 
     // Store the error
     lastError = cmd.params[1]->varName;
@@ -362,7 +381,12 @@ void FullTracer::onError(Context &ctx, const RomCommand &cmd)
     // Revert logs
     uint64_t CTX = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
     mpz_class auxScalar;
-    getVarFromCtx(ctx, true, ctx.rom.lastCtxUsedOffset, auxScalar);
+    zkr = getVarFromCtx(ctx, true, ctx.rom.lastCtxUsedOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onError() failed calling getVarFromCtx(ctx.rom.lastCtxUsedOffset)");
+        return zkr;
+    }
     uint64_t lastContextUsed = auxScalar.get_ui();
     for (uint64_t i=CTX; i<=lastContextUsed; i++)
     {
@@ -378,13 +402,17 @@ void FullTracer::onError(Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
     tms.add("onError", TimeDiff(t));
 #endif
+    return ZKR_SUCCESS;
 }
 
-void FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
+zkresult FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
 {
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&t, NULL);
 #endif
+
+    zkresult zkr;
+    
     // Get indexLog from the provided register value
     mpz_class indexLogScalar;
     getRegFromCtx(ctx, cmd.params[0]->reg, indexLogScalar);
@@ -434,9 +462,19 @@ void FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
 
     // Add log info
     mpz_class auxScalar;
-    getVarFromCtx(ctx, false, ctx.rom.storageAddrOffset, auxScalar);
+    zkr = getVarFromCtx(ctx, false, ctx.rom.storageAddrOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onStoreLog() failed calling getVarFromCtx(ctx.rom.storageAddrOffset)");
+        return zkr;
+    }
     it->second.address = NormalizeTo0xNFormat(auxScalar.get_str(16), 40);
-    getVarFromCtx(ctx, true, ctx.rom.newNumBatchOffset, auxScalar);
+    zkr = getVarFromCtx(ctx, true, ctx.rom.newNumBatchOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onStoreLog() failed calling getVarFromCtx(ctx.rom.newNumBatchOffset)");
+        return zkr;
+    }
     it->second.batch_number = auxScalar.get_ui();
     it->second.tx_hash = finalTrace.responses[txCount].tx_hash;
     it->second.tx_index = txCount;
@@ -448,21 +486,29 @@ void FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
     tms.add("onStoreLog", TimeDiff(t));
 #endif
+
+    return ZKR_SUCCESS;
 }
 
 // Triggered at the very beginning of transaction process
-void FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
+zkresult FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
 {
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&t, NULL);
 #endif
     mpz_class auxScalar;
     Response response;
+    zkresult zkr;
 
     /* Fill context object */
 
     // TX to and type
-    getVarFromCtx(ctx, false, ctx.rom.isCreateContractOffset, auxScalar);    
+    zkr = getVarFromCtx(ctx, false, ctx.rom.isCreateContractOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onProcessTx() failed calling getVarFromCtx(ctx.rom.isCreateContractOffset)");
+        return zkr;
+    }
     if (auxScalar.get_ui())
     {
         response.call_trace.context.type = "CREATE";
@@ -471,20 +517,45 @@ void FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
     else
     {
         response.call_trace.context.type = "CALL";
-        getVarFromCtx(ctx, false, ctx.rom.txDestAddrOffset, auxScalar);
+        zkr = getVarFromCtx(ctx, false, ctx.rom.txDestAddrOffset, auxScalar);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("FullTracer::onProcessTx() failed calling getVarFromCtx(ctx.rom.txDestAddrOffset)");
+            return zkr;
+        }
         response.call_trace.context.to = NormalizeTo0xNFormat(auxScalar.get_str(16), 40);
     }
 
     // TX data
-    getVarFromCtx(ctx, false, ctx.rom.txCalldataLenOffset, auxScalar);
-    getCalldataFromStack(ctx, 0, auxScalar.get_ui(), response.call_trace.context.data);
+    zkr = getVarFromCtx(ctx, false, ctx.rom.txCalldataLenOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onProcessTx() failed calling getVarFromCtx(ctx.rom.txCalldataLenOffset)");
+        return zkr;
+    }
+    zkr = getCalldataFromStack(ctx, 0, auxScalar.get_ui(), response.call_trace.context.data);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onProcessTx() failed calling getCalldataFromStack()");
+        return zkr;
+    }
 
     // TX gas
-    getVarFromCtx(ctx, false, ctx.rom.txGasLimitOffset, auxScalar);
+    zkr = getVarFromCtx(ctx, false, ctx.rom.txGasLimitOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onProcessTx() failed calling getVarFromCtx(ctx.rom.txGasLimitOffset)");
+        return zkr;
+    }
     response.call_trace.context.gas = auxScalar.get_ui();
 
     // TX value
-    getVarFromCtx(ctx, false, ctx.rom.txValueOffset, auxScalar);
+    zkr = getVarFromCtx(ctx, false, ctx.rom.txValueOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onProcessTx() failed calling getVarFromCtx(ctx.rom.txValueOffset)");
+        return zkr;
+    }
     response.call_trace.context.value = auxScalar;
 
     // TX output
@@ -497,27 +568,56 @@ void FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
     response.call_trace.context.execution_time = 0;
 
     // TX old state root
-    fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]);
+    if (!fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]))
+    {
+        zklog.error("FullTracer::onProcessTx() failed calling fea2scalar()");
+        return ZKR_SM_MAIN_FEA2SCALAR;
+    }
     response.call_trace.context.old_state_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
 
     // TX gas price
-    getVarFromCtx(ctx, false, ctx.rom.txGasPriceRLPOffset, auxScalar);
+    zkr = getVarFromCtx(ctx, false, ctx.rom.txGasPriceRLPOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onProcessTx() failed calling getVarFromCtx(ctx.rom.txGasPriceRLPOffset)");
+        return zkr;
+    }
     response.call_trace.context.gas_price = auxScalar;
 
     /* Fill response object */
     
     mpz_class r;
-    getVarFromCtx(ctx, false, ctx.rom.txROffset, r);
+    zkr = getVarFromCtx(ctx, false, ctx.rom.txROffset, r);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onProcessTx() failed calling getVarFromCtx(ctx.rom.txROffset)");
+        return zkr;
+    }
 
     mpz_class s;
-    getVarFromCtx(ctx, false, ctx.rom.txSOffset, s);
+    zkr = getVarFromCtx(ctx, false, ctx.rom.txSOffset, s);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onProcessTx() failed calling getVarFromCtx(ctx.rom.txSOffset)");
+        return zkr;
+    }
 
     // chain ID
-    getVarFromCtx(ctx, false, ctx.rom.txChainIdOffset, auxScalar);
+    zkr = getVarFromCtx(ctx, false, ctx.rom.txChainIdOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onProcessTx() failed calling getVarFromCtx(ctx.rom.txChainIdOffset)");
+        return zkr;
+    }
     uint64_t chainId = auxScalar.get_ui();
 
     // v
-    getVarFromCtx(ctx, false, ctx.rom.txVOffset, auxScalar);
+    zkr = getVarFromCtx(ctx, false, ctx.rom.txVOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onProcessTx() failed calling getVarFromCtx(ctx.rom.txVOffset)");
+        return zkr;
+    }
     uint64_t v;
     if (chainId == 0)
     {
@@ -529,7 +629,12 @@ void FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
     }
 
     mpz_class nonceScalar;
-    getVarFromCtx(ctx, false, ctx.rom.txNonceOffset, nonceScalar);
+    zkr = getVarFromCtx(ctx, false, ctx.rom.txNonceOffset, nonceScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onProcessTx() failed calling getVarFromCtx(ctx.rom.txNonceOffset)");
+        return zkr;
+    }
     uint64_t nonce = nonceScalar.get_ui();
 
     // TX hash
@@ -574,10 +679,12 @@ void FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
     tms.add("onProcessTx", TimeDiff(t));
 #endif
+
+    return ZKR_SUCCESS;
 }
 
 // Triggered when storage is updated in opcode processing
-void FullTracer::onUpdateStorage(Context &ctx, const RomCommand &cmd)
+zkresult FullTracer::onUpdateStorage(Context &ctx, const RomCommand &cmd)
 {
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&t, NULL);
@@ -619,19 +726,27 @@ void FullTracer::onUpdateStorage(Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
     tms.add("onUpdateStorage", TimeDiff(t));
 #endif
+
+    return ZKR_SUCCESS;
 }
 
 // Triggered after processing a transaction
-void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
+zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
 {
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&t, NULL);
 #endif
+    zkresult zkr;
     Response &response = finalTrace.responses[txCount];
 
     // Set from address
     mpz_class fromScalar;
-    getVarFromCtx(ctx, true, ctx.rom.txSrcOriginAddrOffset, fromScalar);
+    zkr = getVarFromCtx(ctx, true, ctx.rom.txSrcOriginAddrOffset, fromScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onFinishTx() failed calling getVarFromCtx(ctx.rom.txSrcOriginAddrOffset)");
+        return zkr;
+    }
     response.call_trace.context.from = NormalizeTo0xNFormat(fromScalar.get_str(16), 40);
 
     // Set consumed tx gas
@@ -649,31 +764,61 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
 
     // Set return data, in case of deploy, get return buffer from stack if there is no error, otherwise get it from memory
     mpz_class offsetScalar;
-    getVarFromCtx(ctx, false, ctx.rom.retDataOffsetOffset, offsetScalar);
+    zkr = getVarFromCtx(ctx, false, ctx.rom.retDataOffsetOffset, offsetScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onFinishTx() failed calling getVarFromCtx(ctx.rom.retDataOffsetOffset)");
+        return zkr;
+    }
     mpz_class lengthScalar;
-    getVarFromCtx(ctx, false, ctx.rom.retDataLengthOffset, lengthScalar);
+    zkr = getVarFromCtx(ctx, false, ctx.rom.retDataLengthOffset, lengthScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onFinishTx() failed calling getVarFromCtx(ctx.rom.retDataLengthOffset)");
+        return zkr;
+    }
     if (response.call_trace.context.to == "0x")
     {
         // Check if there has been any error
         if ( bOpcodeCalled && (response.error.size()>0) )
         {
-            getFromMemory(ctx, offsetScalar, lengthScalar, response.return_value);
+            zkr = getFromMemory(ctx, offsetScalar, lengthScalar, response.return_value);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("FullTracer::onFinishTx() failed calling getFromMemory() 1");
+                return zkr;
+            }
         }
         else
         {
-            getCalldataFromStack(ctx, offsetScalar.get_ui(), lengthScalar.get_ui(), response.return_value);
+            zkr = getCalldataFromStack(ctx, offsetScalar.get_ui(), lengthScalar.get_ui(), response.return_value);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("FullTracer::onFinishTx() failed calling getCalldataFromStack()");
+                return zkr;
+            }
         }
     }
     else
     {
-        getFromMemory(ctx, offsetScalar, lengthScalar, response.return_value);
+        zkr = getFromMemory(ctx, offsetScalar, lengthScalar, response.return_value);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("FullTracer::onFinishTx() failed calling getFromMemory() 2");
+            return zkr;
+        }
     }
 
     // Set create address in case of deploy
     if (response.call_trace.context.to == "0x")
     {
         mpz_class addressScalar;
-        getVarFromCtx(ctx, false, ctx.rom.txDestAddrOffset, addressScalar);
+        zkr = getVarFromCtx(ctx, false, ctx.rom.txDestAddrOffset, addressScalar);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("FullTracer::onFinishTx() failed calling getVarFromCtx(ctx.rom.txDestAddrOffset)");
+            return zkr;
+        }
         response.create_address = NormalizeToNFormat(addressScalar.get_str(16), 40);
     }
 
@@ -682,7 +827,11 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
 
     // Set new State Root
     mpz_class auxScalar;
-    fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]);
+    if (!fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]))
+    {
+        zklog.error("FullTracer::onFinishTx() failed calling fea2scalar(SR)");
+        return ZKR_SM_MAIN_FEA2SCALAR;
+    }
     response.state_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
 
     // If processed opcodes
@@ -768,9 +917,11 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
     tms.add("onFinishTx", TimeDiff(t));
 #endif
+
+    return ZKR_SUCCESS;
 }
 
-void FullTracer::onStartBatch(Context &ctx, const RomCommand &cmd)
+zkresult FullTracer::onStartBatch(Context &ctx, const RomCommand &cmd)
 {
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&t, NULL);
@@ -780,7 +931,7 @@ void FullTracer::onStartBatch(Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
         tms.add("onStartBatch", TimeDiff(t));
 #endif
-        return;
+        return ZKR_SUCCESS;
     }
 
     finalTrace.responses.clear();
@@ -792,23 +943,36 @@ void FullTracer::onStartBatch(Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
     tms.add("onStartBatch", TimeDiff(t));
 #endif
+
+    return ZKR_SUCCESS;
 }
 
-void FullTracer::onFinishBatch(Context &ctx, const RomCommand &cmd)
+zkresult FullTracer::onFinishBatch(Context &ctx, const RomCommand &cmd)
 {
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&t, NULL);
 #endif
+    zkresult zkr;
+
     // Update used gas
     finalTrace.cumulative_gas_used = accBatchGas;
 
     // New state root
     mpz_class auxScalar;
-    fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]);
+    if (!fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]))
+    {
+        zklog.error("FullTracer::onFinishBatch() failed calling fea2scalar(SR)");
+        return ZKR_SM_MAIN_FEA2SCALAR;
+    }
     finalTrace.new_state_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
 
     // New acc input hash
-    getVarFromCtx(ctx, true, ctx.rom.newAccInputHashOffset, auxScalar);
+    zkr = getVarFromCtx(ctx, true, ctx.rom.newAccInputHashOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onFinishBatch() failed calling getVarFromCtx(ctx.rom.newAccInputHashOffset)");
+        return zkr;
+    }
     finalTrace.new_acc_input_hash = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
 
     // TODO: Can we simply use finalTrace.new_acc_input_hash when constructing the response? Can we avoid these fields in the .proto?
@@ -822,7 +986,12 @@ void FullTracer::onFinishBatch(Context &ctx, const RomCommand &cmd)
     }
 
     // New local exit root
-    getVarFromCtx(ctx, true, ctx.rom.newLocalExitRootOffset, auxScalar);
+    zkr = getVarFromCtx(ctx, true, ctx.rom.newLocalExitRootOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onFinishBatch() failed calling getVarFromCtx(ctx.rom.newLocalExitRootOffset)");
+        return zkr;
+    }
     finalTrace.new_local_exit_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
 
     // New batch number
@@ -835,13 +1004,17 @@ void FullTracer::onFinishBatch(Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
     tms.add("onFinishBatch", TimeDiff(t));
 #endif
+
+    return ZKR_SUCCESS;
 }
 
-void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
+zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 {
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&t, NULL);
 #endif
+
+    zkresult zkr;
 
     // Remember that at least one opcode was called
     bOpcodeCalled = true;
@@ -854,7 +1027,7 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
         tms.add("onOpcode", TimeDiff(t));
 #endif
-        return;
+        return ZKR_SUCCESS;
     }
 
     mpz_class auxScalar;
@@ -893,7 +1066,12 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     singleInfo.op = codeId;
 
     // Check depth changes and update depth
-    getVarFromCtx(ctx, true, ctx.rom.depthOffset, auxScalar);
+    zkr = getVarFromCtx(ctx, true, ctx.rom.depthOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.depthOffset)");
+        return zkr;
+    }
     uint64_t newDepth = auxScalar.get_ui();
     bool decreaseDepth = newDepth < depth;
     bool increaseDepth = newDepth > depth;
@@ -911,14 +1089,19 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     if ( (singleInfo.opcode == opcodeName[0x00/*STOP*/].pName) &&
         ( (prevTraceCall == NULL) || increaseDepth) )
     {
-        getVarFromCtx(ctx, false, ctx.rom.bytecodeLengthOffset, auxScalar);
+        zkr = getVarFromCtx(ctx, false, ctx.rom.bytecodeLengthOffset, auxScalar);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.bytecodeLengthOffset)");
+            return zkr;
+        }
         if (auxScalar == 0)
         {
 #ifdef LOG_TIME_STATISTICS
             tmsop.add("getCodeName", TimeDiff(top));
             tms.add("onOpcode", TimeDiff(t));
 #endif
-            return;
+            return ZKR_SUCCESS;
         }
     }
 
@@ -947,7 +1130,11 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
         if (it != ctx.mem.end())
         {
             Fea lenMemValue = it->second;
-            fea2scalar(ctx.fr, auxScalar, lenMemValue.fe0, lenMemValue.fe1, lenMemValue.fe2, lenMemValue.fe3, lenMemValue.fe4, lenMemValue.fe5, lenMemValue.fe6, lenMemValue.fe7);
+            if (!fea2scalar(ctx.fr, auxScalar, lenMemValue.fe0, lenMemValue.fe1, lenMemValue.fe2, lenMemValue.fe3, lenMemValue.fe4, lenMemValue.fe5, lenMemValue.fe6, lenMemValue.fe7))
+            {
+                zklog.error("FullTracer::onOpcode() failed calling fea2scalar(lenMemValue)");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
             lenMemValueFinal = ceil(double(auxScalar.get_ui()) / 32);
         }
 
@@ -960,7 +1147,11 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
                 continue;
             }
             Fea memValue = it->second;
-            fea2scalar(ctx.fr, auxScalar, memValue.fe0, memValue.fe1, memValue.fe2, memValue.fe3, memValue.fe4, memValue.fe5, memValue.fe6, memValue.fe7);
+            if (!fea2scalar(ctx.fr, auxScalar, memValue.fe0, memValue.fe1, memValue.fe2, memValue.fe3, memValue.fe4, memValue.fe5, memValue.fe6, memValue.fe7))
+            {
+                zklog.error("FullTracer::onOpcode() failed calling fea2scalar(memValue)");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
             finalMemory += PrependZeros(auxScalar.get_str(16), 64);
         }
         
@@ -994,7 +1185,11 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
                 continue;
             Fea stack = it->second;
             mpz_class stackScalar;
-            fea2scalar(ctx.fr, stackScalar, stack.fe0, stack.fe1, stack.fe2, stack.fe3, stack.fe4, stack.fe5, stack.fe6, stack.fe7);
+            if (!fea2scalar(ctx.fr, stackScalar, stack.fe0, stack.fe1, stack.fe2, stack.fe3, stack.fe4, stack.fe5, stack.fe6, stack.fe7))
+            {
+                zklog.error("FullTracer::onOpcode() failed calling fea2scalar(stackScalar)");
+                return ZKR_SM_MAIN_FEA2SCALAR;
+            }
             finalStack.push_back(stackScalar);
         }
 
@@ -1014,10 +1209,19 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
         singleInfo.pc = fr.toU64(ctx.pols.PC[*ctx.pStep]);
         singleInfo.gas = fr.toU64(ctx.pols.GAS[*ctx.pStep]);
         gettimeofday(&singleInfo.startTime, NULL);
-        getVarFromCtx(ctx, false, ctx.rom.gasRefundOffset, auxScalar);
+        zkr = getVarFromCtx(ctx, false, ctx.rom.gasRefundOffset, auxScalar);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.gasRefundOffset)");
+            return zkr;
+        }
         singleInfo.gas_refund = auxScalar.get_ui();
         //singleInfo.error = "";
-        fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]);
+        if (!fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]))
+        {
+            zklog.error("FullTracer::onOpcode() failed calling fea2scalar()");
+            return ZKR_SM_MAIN_FEA2SCALAR;
+        }
         singleInfo.state_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
 
         // Set gas forwarded to a new context and save gas left in previous context
@@ -1027,24 +1231,54 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
             uint64_t gasForwarded = fr.toU64(ctx.pols.GAS[*ctx.pStep]);
 
             // get gas remaining in origin context
-            getVarFromCtx(ctx, false, ctx.rom.originCTXOffset, auxScalar);
+            zkr = getVarFromCtx(ctx, false, ctx.rom.originCTXOffset, auxScalar);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.originCTXOffset)");
+                return zkr;
+            }
             uint64_t originCTX = auxScalar.get_ui();
-            getVarFromCtx(ctx, false, ctx.rom.gasCTXOffset, auxScalar, &originCTX);
+            zkr = getVarFromCtx(ctx, false, ctx.rom.gasCTXOffset, auxScalar, &originCTX);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.gasCTXOffset)");
+                return zkr;
+            }
             uint64_t gasRemaining = auxScalar.get_ui();
             txGAS[depth] = {gasForwarded, gasRemaining};
         }
 
         // Add contract info
-        getVarFromCtx(ctx, false, ctx.rom.txDestAddrOffset, auxScalar);
+        zkr = getVarFromCtx(ctx, false, ctx.rom.txDestAddrOffset, auxScalar);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.txDestAddrOffset)");
+            return zkr;
+        }
         singleInfo.contract.address = NormalizeToNFormat(auxScalar.get_str(16), 40);
 
-        getVarFromCtx(ctx, false, ctx.rom.txSrcAddrOffset, auxScalar);
+        zkr = getVarFromCtx(ctx, false, ctx.rom.txSrcAddrOffset, auxScalar);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.txSrcAddrOffset)");
+            return zkr;
+        }
         singleInfo.contract.caller = NormalizeToNFormat(auxScalar.get_str(16), 40);
 
-        getVarFromCtx(ctx, false, ctx.rom.txValueOffset, auxScalar);
+        zkr = getVarFromCtx(ctx, false, ctx.rom.txValueOffset, auxScalar);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.txValueOffset)");
+            return zkr;
+        }
         singleInfo.contract.value = auxScalar;
 
-        getCalldataFromStack(ctx, 0, 0, singleInfo.contract.data);
+        zkr = getCalldataFromStack(ctx, 0, 0, singleInfo.contract.data);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("FullTracer::onOpcode() failed calling getCalldataFromStack()");
+            return zkr;
+        }
         
         singleInfo.contract.gas = txGAS[depth].forwarded;
     }
@@ -1083,7 +1317,12 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
         prevTraceExecution->duration = TimeDiff(prevTraceExecution->startTime, singleInfo.startTime);
 
         // Round up to next multiple of 32
-        getVarFromCtx(ctx, false, ctx.rom.memLengthOffset, auxScalar);
+        zkr = getVarFromCtx(ctx, false, ctx.rom.memLengthOffset, auxScalar);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.memLengthOffset)");
+            return zkr;
+        }
         singleInfo.memory_size = (auxScalar.get_ui() / 32) * 32;
     }
 
@@ -1127,6 +1366,8 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
     tms.add("onOpcode", TimeDiff(t));
 #endif
+
+    return ZKR_SUCCESS;
 }
 
 #define SMT_KEY_BALANCE 0
@@ -1139,9 +1380,9 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
    value - value read/write
  */
 
-void FullTracer::addReadWriteAddress ( const Goldilocks::Element &address0, const Goldilocks::Element &address1, const Goldilocks::Element &address2, const Goldilocks::Element &address3, const Goldilocks::Element &address4, const Goldilocks::Element &address5, const Goldilocks::Element &address6, const Goldilocks::Element &address7,
-                                       const Goldilocks::Element &keyType0, const Goldilocks::Element &keyType1, const Goldilocks::Element &keyType2, const Goldilocks::Element &keyType3, const Goldilocks::Element &keyType4, const Goldilocks::Element &keyType5, const Goldilocks::Element &keyType6, const Goldilocks::Element &keyType7,
-                                       const mpz_class &value )
+zkresult FullTracer::addReadWriteAddress ( const Goldilocks::Element &address0, const Goldilocks::Element &address1, const Goldilocks::Element &address2, const Goldilocks::Element &address3, const Goldilocks::Element &address4, const Goldilocks::Element &address5, const Goldilocks::Element &address6, const Goldilocks::Element &address7,
+                                           const Goldilocks::Element &keyType0, const Goldilocks::Element &keyType1, const Goldilocks::Element &keyType2, const Goldilocks::Element &keyType3, const Goldilocks::Element &keyType4, const Goldilocks::Element &keyType5, const Goldilocks::Element &keyType6, const Goldilocks::Element &keyType7,
+                                           const mpz_class &value )
 {
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&t, NULL);
@@ -1149,12 +1390,20 @@ void FullTracer::addReadWriteAddress ( const Goldilocks::Element &address0, cons
 
     // Get address
     mpz_class address;
-    fea2scalar(fr, address, address0, address1, address2, address3, address4, address5, address6, address7);
+    if (!fea2scalar(fr, address, address0, address1, address2, address3, address4, address5, address6, address7))
+    {
+        zklog.error("FullTracer::addReadWriteAddress() failed calling fea2scalar(address)");
+        return ZKR_SM_MAIN_FEA2SCALAR;
+    }
     string addressHex = NormalizeTo0xNFormat(address.get_str(16), 40);
 
     // Get key type
     mpz_class keyType;
-    fea2scalar(fr, keyType, keyType0, keyType1, keyType2, keyType3, keyType4, keyType5, keyType6, keyType7);
+    if (!fea2scalar(fr, keyType, keyType0, keyType1, keyType2, keyType3, keyType4, keyType5, keyType6, keyType7))
+    {
+        zklog.error("FullTracer::addReadWriteAddress() failed calling fea2scalar(keyType)");
+        return ZKR_SM_MAIN_FEA2SCALAR;
+    }
 
     unordered_map<string, InfoReadWrite>::iterator it;
     if (keyType == SMT_KEY_BALANCE)
@@ -1189,6 +1438,8 @@ void FullTracer::addReadWriteAddress ( const Goldilocks::Element &address0, cons
 #ifdef LOG_TIME_STATISTICS
     tms.add("addReadWriteAddress", TimeDiff(t));
 #endif
+
+    return ZKR_SUCCESS;
 }
 
 } // namespace

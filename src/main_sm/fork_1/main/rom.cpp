@@ -3,6 +3,7 @@
 #include "main_sm/fork_1/main/rom_command.hpp"
 #include "scalar.hpp"
 #include "utils.hpp"
+#include "zklog.hpp"
 
 namespace fork_1
 {
@@ -12,7 +13,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
     // Load ROM program
     if (!romJson.contains("program"))
     {
-        cerr << "Error: Rom::load() could not find program in rom json" << endl;
+        zklog.error("Rom::load() could not find program in rom json");
         exitProcess();
     }
     loadProgram(fr, romJson["program"]);

@@ -4,6 +4,7 @@
 #include "definitions.hpp"
 #include "Keccak-more-compact.hpp"
 #include "zkmax.hpp"
+#include "zklog.hpp"
 
 inline uint64_t getStateBit ( const uint8_t (&state)[200], uint64_t i )
 {
@@ -33,7 +34,7 @@ void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, Pa
     // Check that input size does not exeed the number of slots
     if (input.size() > nSlots)
     {
-        cerr << "Error: PaddingKKBitExecutor::execute() Too many entries input.size()=" << input.size() << " > nSlots=" << nSlots << endl;
+        zklog.error("PaddingKKBitExecutor::execute() Too many entries input.size()=" + to_string(input.size()) + " > nSlots=" + to_string(nSlots));
         exitProcess();
     }
 

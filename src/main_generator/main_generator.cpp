@@ -180,6 +180,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += "#include \"zkassert.hpp\"\n";
         code += "#include \"poseidon_g_permutation.hpp\"\n";
         code += "#include \"utils/time_metric.hpp\"\n";
+        code += "#include \"zklog.hpp\"\n";
         if (!bFastMode)
             code += "#include \"goldilocks_precomputed.hpp\"\n";
 
@@ -994,7 +995,18 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    incCounter = smtGetResult.proofHashCounter + 2;\n";
 
                     if (bFastMode)
-                        code += "    eval_addReadWriteAddress(ctx, smtGetResult.value);\n";
+                    {
+                        code += "    zkResult = eval_addReadWriteAddress(ctx, smtGetResult.value);\n";
+                        code += "    if (zkResult != ZKR_SUCCESS)\n";
+                        code += "    {\n";
+                        code += "        zklog.error(string(\"" + functionName + " failed calling eval_addReadWriteAddress() 1 result=\") + zkresult2string(zkResult));\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx);\n";
+                        code += "        proverRequest.result = zkResult;\n";
+                        code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                        code += "        return;\n";
+                        code += "    }\n";
+                    }
 
                     code += "#ifdef LOG_TIME_STATISTICS\n";
                     code += "    mainMetrics.add(\"SMT Get\", TimeDiff(t));\n";
@@ -1089,7 +1101,14 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    cout << \"Storage write sWR got poseidon key: \" << ctx.fr.toString(ctx.lastSWrite.key, 16) << endl;\n";
                     code += "#endif\n";
                     code += "    // Call SMT to get the new Merkel Tree root hash\n";
-                    code += "    fea2scalar(fr, scalarD, pols.D0[" + string(bFastMode?"0":"i") + "], pols.D1[" + string(bFastMode?"0":"i") + "], pols.D2[" + string(bFastMode?"0":"i") + "], pols.D3[" + string(bFastMode?"0":"i") + "], pols.D4[" + string(bFastMode?"0":"i") + "], pols.D5[" + string(bFastMode?"0":"i") + "], pols.D6[" + string(bFastMode?"0":"i") + "], pols.D7[" + string(bFastMode?"0":"i") + "]);\n";
+                    code += "    if (!fea2scalar(fr, scalarD, pols.D0[" + string(bFastMode?"0":"i") + "], pols.D1[" + string(bFastMode?"0":"i") + "], pols.D2[" + string(bFastMode?"0":"i") + "], pols.D3[" + string(bFastMode?"0":"i") + "], pols.D4[" + string(bFastMode?"0":"i") + "], pols.D5[" + string(bFastMode?"0":"i") + "], pols.D6[" + string(bFastMode?"0":"i") + "], pols.D7[" + string(bFastMode?"0":"i") + "]))\n";
+                    code += "    {\n";
+                    code += "        zkPC=" + to_string(zkPC) +";\n";
+                    code += "        mainExecutor.logError(ctx);\n";
+                    code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                    code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                    code += "        return;\n";
+                    code += "    }\n";
                     code += "#ifdef LOG_TIME_STATISTICS\n";
                     code += "    gettimeofday(&t, NULL);\n";
                     code += "#endif\n";
@@ -1106,7 +1125,18 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    incCounter = ctx.lastSWrite.res.proofHashCounter + 2;\n";
 
                     if (bFastMode)
-                        code += "    eval_addReadWriteAddress(ctx, scalarD);\n";
+                    {
+                        code += "    zkResult = eval_addReadWriteAddress(ctx, scalarD);\n";
+                        code += "    if (zkResult != ZKR_SUCCESS)\n";
+                        code += "    {\n";
+                        code += "        zklog.error(string(\"" + functionName + " failed calling eval_addReadWriteAddress() 2 result=\") + zkresult2string(zkResult));\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx);\n";
+                        code += "        proverRequest.result = zkResult;\n";
+                        code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                        code += "        return;\n";
+                        code += "    }\n";
+                    }
                         
                     code += "    // If we just modified a balance\n";
                     code += "    if ( fr.isZero(pols.B0[" + string(bFastMode?"0":"i") + "]) && fr.isZero(pols.B1[" + string(bFastMode?"0":"i") + "]) )\n";
@@ -1313,8 +1343,22 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     if (rom["program"][zkPC]["binOpcode"] == 0) // ADD
                     {
                         code += "    //Binary free in ADD\n";
-                        code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
-                        code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
+                        code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
+                        code += "    {\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx);\n";
+                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                        code += "        return;\n";
+                        code += "    }\n";
+                        code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
+                        code += "    {\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx);\n";
+                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                        code += "        return;\n";
+                        code += "    }\n";
                         code += "    c = (a + b) & ScalarMask256;\n";
                         code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
                         nHits++;
@@ -1322,8 +1366,22 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     else if (rom["program"][zkPC]["binOpcode"] == 1) // SUB
                     {
                         code += "    //Binary free in SUB\n";
-                        code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
-                        code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
+                        code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
+                        code += "    {\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx);\n";
+                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                        code += "        return;\n";
+                        code += "    }\n";
+                        code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
+                        code += "    {\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx);\n";
+                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                        code += "        return;\n";
+                        code += "    }\n";
                         code += "    c = (a - b + ScalarTwoTo256) & ScalarMask256;\n";
                         code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
                         nHits++;
@@ -1331,8 +1389,22 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     else if (rom["program"][zkPC]["binOpcode"] == 2) // LT
                     {
                         code += "    //Binary free in LT\n";
-                        code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
-                        code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
+                        code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
+                        code += "    {\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx);\n";
+                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                        code += "        return;\n";
+                        code += "    }\n";
+                        code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
+                        code += "    {\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx);\n";
+                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                        code += "        return;\n";
+                        code += "    }\n";
                         code += "    c = (a < b);\n";
                         code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
                         nHits++;
@@ -1340,8 +1412,22 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     else if (rom["program"][zkPC]["binOpcode"] == 3) // SLT
                     {
                         code += "    //Binary free in SLT\n";
-                        code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
-                        code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
+                        code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
+                        code += "    {\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx);\n";
+                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                        code += "        return;\n";
+                        code += "    }\n";
+                        code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
+                        code += "    {\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx);\n";
+                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                        code += "        return;\n";
+                        code += "    }\n";
                         code += "    if (a >= ScalarTwoTo255) a = a - ScalarTwoTo256;\n";
                         code += "    if (b >= ScalarTwoTo255) b = b - ScalarTwoTo256;\n";
                         code += "    c = (a < b);\n";
@@ -1351,8 +1437,22 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     else if (rom["program"][zkPC]["binOpcode"] == 4) // EQ
                     {
                         code += "    //Binary free in EQ\n";
-                        code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
-                        code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
+                        code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
+                        code += "    {\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx);\n";
+                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                        code += "        return;\n";
+                        code += "    }\n";
+                        code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
+                        code += "    {\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx);\n";
+                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                        code += "        return;\n";
+                        code += "    }\n";
                         code += "    c = (a == b);\n";
                         code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
                         nHits++;
@@ -1360,8 +1460,22 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     else if (rom["program"][zkPC]["binOpcode"] == 5) // AND
                     {
                         code += "    //Binary free in AND\n";
-                        code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
-                        code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
+                        code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
+                        code += "    {\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx);\n";
+                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                        code += "        return;\n";
+                        code += "    }\n";
+                        code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
+                        code += "    {\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx);\n";
+                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                        code += "        return;\n";
+                        code += "    }\n";
                         code += "    c = (a & b);\n";
                         code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
                         nHits++;
@@ -1369,8 +1483,22 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     else if (rom["program"][zkPC]["binOpcode"] == 6) // OR
                     {
                         code += "    //Binary free in OR\n";
-                        code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
-                        code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
+                        code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
+                        code += "    {\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx);\n";
+                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                        code += "        return;\n";
+                        code += "    }\n";
+                        code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
+                        code += "    {\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx);\n";
+                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                        code += "        return;\n";
+                        code += "    }\n";
                         code += "    c = (a | b);\n";
                         code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
                         nHits++;
@@ -1378,8 +1506,22 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     else if (rom["program"][zkPC]["binOpcode"] == 7) // XOR
                     {
                         code += "    //Binary free in XOR\n";
-                        code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
-                        code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
+                        code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
+                        code += "    {\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx);\n";
+                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                        code += "        return;\n";
+                        code += "    }\n";
+                        code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
+                        code += "    {\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx);\n";
+                        code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                        code += "        return;\n";
+                        code += "    }\n";
                         code += "    c = (a ^ b);\n";
                         code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
                         nHits++;
@@ -1396,9 +1538,30 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 if (rom["program"][zkPC].contains("memAlignRD") && (rom["program"][zkPC]["memAlignRD"]==1))
                 {
                     code += "    // Mem allign read free in\n";
-                    code += "    fea2scalar(fr, m0, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    fea2scalar(fr, m1, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
-                    code += "    fea2scalar(fr, offsetScalar, pols.C0[" + string(bFastMode?"0":"i") + "], pols.C1[" + string(bFastMode?"0":"i") + "], pols.C2[" + string(bFastMode?"0":"i") + "], pols.C3[" + string(bFastMode?"0":"i") + "], pols.C4[" + string(bFastMode?"0":"i") + "], pols.C5[" + string(bFastMode?"0":"i") + "], pols.C6[" + string(bFastMode?"0":"i") + "], pols.C7[" + string(bFastMode?"0":"i") + "]);\n";
+                    code += "    if (!fea2scalar(fr, m0, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
+                    code += "    {\n";
+                    code += "        zkPC=" + to_string(zkPC) +";\n";
+                    code += "        mainExecutor.logError(ctx);\n";
+                    code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                    code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                    code += "        return;\n";
+                    code += "    }\n";
+                    code += "    if (!fea2scalar(fr, m1, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
+                    code += "    {\n";
+                    code += "        zkPC=" + to_string(zkPC) +";\n";
+                    code += "        mainExecutor.logError(ctx);\n";
+                    code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                    code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                    code += "        return;\n";
+                    code += "    }\n";
+                    code += "    if (!fea2scalar(fr, offsetScalar, pols.C0[" + string(bFastMode?"0":"i") + "], pols.C1[" + string(bFastMode?"0":"i") + "], pols.C2[" + string(bFastMode?"0":"i") + "], pols.C3[" + string(bFastMode?"0":"i") + "], pols.C4[" + string(bFastMode?"0":"i") + "], pols.C5[" + string(bFastMode?"0":"i") + "], pols.C6[" + string(bFastMode?"0":"i") + "], pols.C7[" + string(bFastMode?"0":"i") + "]))\n";
+                    code += "    {\n";
+                    code += "        zkPC=" + to_string(zkPC) +";\n";
+                    code += "        mainExecutor.logError(ctx);\n";
+                    code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                    code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                    code += "        return;\n";
+                    code += "    }\n";
                     code += "    if (offsetScalar<0 || offsetScalar>32)\n";
                     code += "    {\n";
                     code += "        cerr << \"Error: MemAlign out of range offset=\" << offsetScalar.get_str() << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
@@ -1915,7 +2078,18 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    incCounter = smtGetResult.proofHashCounter + 2;\n";
                     
             if (bFastMode)
-                code += "    eval_addReadWriteAddress(ctx, scalarD);\n";
+            {
+                code += "    zkResult = eval_addReadWriteAddress(ctx, scalarD);\n";
+                code += "    if (zkResult != ZKR_SUCCESS)\n";
+                code += "    {\n";
+                code += "        zklog.error(string(\"" + functionName + " failed calling eval_addReadWriteAddress() 3 result=\") + zkresult2string(zkResult));\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = zkResult;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
+            }
 
             code += "#ifdef LOG_TIME_STATISTICS\n";
             code += "    mainMetrics.add(\"SMT Get\", TimeDiff(t));\n";
@@ -1931,7 +2105,14 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    cout << \"Storage read sRD read from key: \" << ctx.fr.toString(ctx.lastSWrite.key, 16) << \" value:\" << fr.toString(fi3, 16) << \":\" << fr.toString(fi2, 16) << \":\" << fr.toString(fi1, 16) << \":\" << fr.toString(fi0, 16) << endl;\n";
             code += "#endif\n";
 
-            code += "    fea2scalar(fr, opScalar, op0, op1, op2, op3, op4, op5, op6, op7);\n";
+            code += "    if (!fea2scalar(fr, opScalar, op0, op1, op2, op3, op4, op5, op6, op7))\n";
+            code += "    {\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx);\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+            code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+            code += "        return;\n";
+            code += "    }\n";
             code += "    if (smtGetResult.value != opScalar)\n";
             code += "    {\n";
             code += "        cerr << \"Error: Storage read does not match: smtGetResult.value=\" << smtGetResult.value.get_str() << \" opScalar=\" << opScalar.get_str() << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
@@ -2038,7 +2219,14 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "#endif\n";
 
             code += "        // Call SMT to get the new Merkel Tree root hash\n";
-            code += "        fea2scalar(fr, scalarD, pols.D0[" + string(bFastMode?"0":"i") + "], pols.D1[" + string(bFastMode?"0":"i") + "], pols.D2[" + string(bFastMode?"0":"i") + "], pols.D3[" + string(bFastMode?"0":"i") + "], pols.D4[" + string(bFastMode?"0":"i") + "], pols.D5[" + string(bFastMode?"0":"i") + "], pols.D6[" + string(bFastMode?"0":"i") + "], pols.D7[" + string(bFastMode?"0":"i") + "]);\n";
+            code += "        if (!fea2scalar(fr, scalarD, pols.D0[" + string(bFastMode?"0":"i") + "], pols.D1[" + string(bFastMode?"0":"i") + "], pols.D2[" + string(bFastMode?"0":"i") + "], pols.D3[" + string(bFastMode?"0":"i") + "], pols.D4[" + string(bFastMode?"0":"i") + "], pols.D5[" + string(bFastMode?"0":"i") + "], pols.D6[" + string(bFastMode?"0":"i") + "], pols.D7[" + string(bFastMode?"0":"i") + "]))\n";
+            code += "        {\n";
+            code += "            zkPC=" + to_string(zkPC) +";\n";
+            code += "            mainExecutor.logError(ctx);\n";
+            code += "            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+            code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+            code += "            return;\n";
+            code += "        }\n";
             code += "#ifdef LOG_TIME_STATISTICS\n";
             code += "        gettimeofday(&t, NULL);\n";
             code += "#endif\n";
@@ -2056,7 +2244,18 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        incCounter = ctx.lastSWrite.res.proofHashCounter + 2;\n";
                     
             if (bFastMode)
-                code += "        eval_addReadWriteAddress(ctx, scalarD);\n";
+            {
+                code += "        zkResult = eval_addReadWriteAddress(ctx, scalarD);\n";
+                code += "        if (zkResult != ZKR_SUCCESS)\n";
+                code += "        {\n";
+                code += "            zklog.error(string(\"" + functionName + " failed calling eval_addReadWriteAddress() 4 result=\") + zkresult2string(zkResult));\n";
+                code += "            zkPC=" + to_string(zkPC) +";\n";
+                code += "            mainExecutor.logError(ctx);\n";
+                code += "            proverRequest.result = zkResult;\n";
+                code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "            return;\n";
+                code += "        }\n";
+            }
                         
             code += "        // If we just modified a balance\n";
             code += "        if ( fr.isZero(pols.B0[" + string(bFastMode?"0":"i") + "]) && fr.isZero(pols.B1[" + string(bFastMode?"0":"i") + "]) )\n";
@@ -2184,7 +2383,14 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    pos = iPos;\n\n";
 
             code += "    // Get contents of opN into a\n";
-            code += "    fea2scalar(fr, a, op0, op1, op2, op3, op4, op5, op6, op7);\n\n";
+            code += "    if (!fea2scalar(fr, a, op0, op1, op2, op3, op4, op5, op6, op7))\n";
+            code += "    {\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx);\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+            code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+            code += "        return;\n";
+            code += "    }\n\n";
 
             code += "    // Fill the hash data vector with chunks of the scalar value\n";
             code += "    for (uint64_t j=0; j<size; j++)\n";
@@ -2341,7 +2547,14 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    }\n";
 
             code += "    // Get contents of op into dg\n";
-            code += "    fea2scalar(fr, dg, op0, op1, op2, op3, op4, op5, op6, op7);\n";
+            code += "    if (!fea2scalar(fr, dg, op0, op1, op2, op3, op4, op5, op6, op7))\n";
+            code += "    {\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx);\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+            code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+            code += "        return;\n";
+            code += "    }\n";
 
             code += "    if (dg != hashIterator->second.digest)\n";
             code += "    {\n";
@@ -2417,7 +2630,14 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    pos = iPos;\n\n";
 
             code += "    // Get contents of opN into a\n";
-            code += "    fea2scalar(fr, a, op0, op1, op2, op3, op4, op5, op6, op7);\n";
+            code += "    if (!fea2scalar(fr, a, op0, op1, op2, op3, op4, op5, op6, op7))\n";
+            code += "    {\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx);\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+            code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+            code += "        return;\n";
+            code += "    }\n";
 
             code += "    // Fill the hash data vector with chunks of the scalar value\n";
             code += "    for (uint64_t j=0; j<size; j++) {\n";
@@ -2605,7 +2825,14 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    pols.hashPDigest[i] = fr.one();\n";
 
             code += "    // Get contents of op into dg\n";
-            code += "    fea2scalar(fr, dg, op0, op1, op2, op3, op4, op5, op6, op7);\n";
+            code += "    if (!fea2scalar(fr, dg, op0, op1, op2, op3, op4, op5, op6, op7))\n";
+            code += "    {\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx);\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+            code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+            code += "        return;\n";
+            code += "    }\n";
 
             code += "    hashIterator = ctx.hashP.find(addr);\n";
             code += "    if (hashIterator == ctx.hashP.end())\n";
@@ -2657,7 +2884,14 @@ string generate(const json &rom, const string &functionName, const string &fileN
                             (rom["program"][zkPC].contains("sWR") && (rom["program"][zkPC]["sWR"] ==1))) )
         {
             code += "    // HashP or Storage write instructions, required data\n";
-            code += "    fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7);\n";
+            code += "    if (!fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7))\n";
+            code += "    {\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx);\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+            code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+            code += "        return;\n";
+            code += "    }\n";
             code += "    // Store the binary action to execute it later with the binary SM\n";
             code += "    binaryAction.a = op;\n";
             code += "    binaryAction.b = 0;\n";
@@ -2680,11 +2914,46 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    // Arith instruction: check that A*B + C = D<<256 + op, using scalars (result can be a big number)\n";
 
                 code += "    // Convert to scalar\n";
-                code += "    fea2scalar(fr, A, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
-                code += "    fea2scalar(fr, B, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
-                code += "    fea2scalar(fr, C, pols.C0[" + string(bFastMode?"0":"i") + "], pols.C1[" + string(bFastMode?"0":"i") + "], pols.C2[" + string(bFastMode?"0":"i") + "], pols.C3[" + string(bFastMode?"0":"i") + "], pols.C4[" + string(bFastMode?"0":"i") + "], pols.C5[" + string(bFastMode?"0":"i") + "], pols.C6[" + string(bFastMode?"0":"i") + "], pols.C7[" + string(bFastMode?"0":"i") + "]);\n";
-                code += "    fea2scalar(fr, D, pols.D0[" + string(bFastMode?"0":"i") + "], pols.D1[" + string(bFastMode?"0":"i") + "], pols.D2[" + string(bFastMode?"0":"i") + "], pols.D3[" + string(bFastMode?"0":"i") + "], pols.D4[" + string(bFastMode?"0":"i") + "], pols.D5[" + string(bFastMode?"0":"i") + "], pols.D6[" + string(bFastMode?"0":"i") + "], pols.D7[" + string(bFastMode?"0":"i") + "]);\n";
-                code += "    fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7);\n";
+                code += "    if (!fea2scalar(fr, A, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
+                code += "    if (!fea2scalar(fr, B, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
+                code += "    if (!fea2scalar(fr, C, pols.C0[" + string(bFastMode?"0":"i") + "], pols.C1[" + string(bFastMode?"0":"i") + "], pols.C2[" + string(bFastMode?"0":"i") + "], pols.C3[" + string(bFastMode?"0":"i") + "], pols.C4[" + string(bFastMode?"0":"i") + "], pols.C5[" + string(bFastMode?"0":"i") + "], pols.C6[" + string(bFastMode?"0":"i") + "], pols.C7[" + string(bFastMode?"0":"i") + "]))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
+                code += "    if (!fea2scalar(fr, D, pols.D0[" + string(bFastMode?"0":"i") + "], pols.D1[" + string(bFastMode?"0":"i") + "], pols.D2[" + string(bFastMode?"0":"i") + "], pols.D3[" + string(bFastMode?"0":"i") + "], pols.D4[" + string(bFastMode?"0":"i") + "], pols.D5[" + string(bFastMode?"0":"i") + "], pols.D6[" + string(bFastMode?"0":"i") + "], pols.D7[" + string(bFastMode?"0":"i") + "]))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
+                code += "    if (!fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
 
                 code += "    // Check the condition\n";
                 code += "    if ( (A*B) + C != (D<<256) + op ) {\n";
@@ -2722,12 +2991,54 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    // Arith instruction: check curve points\n";
 
                 code += "    // Convert to scalar\n";
-                code += "    fea2scalar(fr, x1, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
-                code += "    fea2scalar(fr, y1, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
-                code += "    fea2scalar(fr, x2, pols.C0[" + string(bFastMode?"0":"i") + "], pols.C1[" + string(bFastMode?"0":"i") + "], pols.C2[" + string(bFastMode?"0":"i") + "], pols.C3[" + string(bFastMode?"0":"i") + "], pols.C4[" + string(bFastMode?"0":"i") + "], pols.C5[" + string(bFastMode?"0":"i") + "], pols.C6[" + string(bFastMode?"0":"i") + "], pols.C7[" + string(bFastMode?"0":"i") + "]);\n";
-                code += "    fea2scalar(fr, y2, pols.D0[" + string(bFastMode?"0":"i") + "], pols.D1[" + string(bFastMode?"0":"i") + "], pols.D2[" + string(bFastMode?"0":"i") + "], pols.D3[" + string(bFastMode?"0":"i") + "], pols.D4[" + string(bFastMode?"0":"i") + "], pols.D5[" + string(bFastMode?"0":"i") + "], pols.D6[" + string(bFastMode?"0":"i") + "], pols.D7[" + string(bFastMode?"0":"i") + "]);\n";
-                code += "    fea2scalar(fr, x3, pols.E0[" + string(bFastMode?"0":"i") + "], pols.E1[" + string(bFastMode?"0":"i") + "], pols.E2[" + string(bFastMode?"0":"i") + "], pols.E3[" + string(bFastMode?"0":"i") + "], pols.E4[" + string(bFastMode?"0":"i") + "], pols.E5[" + string(bFastMode?"0":"i") + "], pols.E6[" + string(bFastMode?"0":"i") + "], pols.E7[" + string(bFastMode?"0":"i") + "]);\n";
-                code += "    fea2scalar(fr, y3, op0, op1, op2, op3, op4, op5, op6, op7);\n";
+                code += "    if (!fea2scalar(fr, x1, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
+                code += "    if (!fea2scalar(fr, y1, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
+                code += "    if (!fea2scalar(fr, x2, pols.C0[" + string(bFastMode?"0":"i") + "], pols.C1[" + string(bFastMode?"0":"i") + "], pols.C2[" + string(bFastMode?"0":"i") + "], pols.C3[" + string(bFastMode?"0":"i") + "], pols.C4[" + string(bFastMode?"0":"i") + "], pols.C5[" + string(bFastMode?"0":"i") + "], pols.C6[" + string(bFastMode?"0":"i") + "], pols.C7[" + string(bFastMode?"0":"i") + "]))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
+                code += "    if (!fea2scalar(fr, y2, pols.D0[" + string(bFastMode?"0":"i") + "], pols.D1[" + string(bFastMode?"0":"i") + "], pols.D2[" + string(bFastMode?"0":"i") + "], pols.D3[" + string(bFastMode?"0":"i") + "], pols.D4[" + string(bFastMode?"0":"i") + "], pols.D5[" + string(bFastMode?"0":"i") + "], pols.D6[" + string(bFastMode?"0":"i") + "], pols.D7[" + string(bFastMode?"0":"i") + "]))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
+                code += "    if (!fea2scalar(fr, x3, pols.E0[" + string(bFastMode?"0":"i") + "], pols.E1[" + string(bFastMode?"0":"i") + "], pols.E2[" + string(bFastMode?"0":"i") + "], pols.E3[" + string(bFastMode?"0":"i") + "], pols.E4[" + string(bFastMode?"0":"i") + "], pols.E5[" + string(bFastMode?"0":"i") + "], pols.E6[" + string(bFastMode?"0":"i") + "], pols.E7[" + string(bFastMode?"0":"i") + "]))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
+                code += "    if (!fea2scalar(fr, y3, op0, op1, op2, op3, op4, op5, op6, op7))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
 
                 code += "    // Convert to RawFec::Element\n";
                 code += "    mainExecutor.fec.fromMpz(fecX1, x1.get_mpz_t());\n";
@@ -2862,9 +3173,30 @@ string generate(const json &rom, const string &functionName, const string &fileN
             {
                 code += "    // Binary instruction: ADD\n";
 
-                code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
-                code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
-                code += "    fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);\n";
+                code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
+                code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
+                code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
 
                 code += "    expectedC = (a + b) & ScalarMask256;\n";
                 code += "    if (c != expectedC)\n";
@@ -2894,9 +3226,30 @@ string generate(const json &rom, const string &functionName, const string &fileN
             {
                 code += "    // Binary instruction: SUB\n";
 
-                code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
-                code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
-                code += "    fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);\n";
+                code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
+                code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
+                code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
 
                 code += "    expectedC = (a - b + ScalarTwoTo256) & ScalarMask256;\n";
                 code += "    if (c != expectedC)\n";
@@ -2926,9 +3279,30 @@ string generate(const json &rom, const string &functionName, const string &fileN
             {
                 code += "    // Binary instruction: LT\n";
 
-                code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
-                code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
-                code += "    fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);\n";
+                code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
+                code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
+                code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
 
                 code += "    expectedC = (a < b);\n";
                 code += "    if (c != expectedC)\n";
@@ -2958,9 +3332,30 @@ string generate(const json &rom, const string &functionName, const string &fileN
             {
                 code += "    // Binary instruction: SLT\n";
 
-                code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
-                code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
-                code += "    fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);\n";
+                code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
+                code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
+                code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
                 code += "    _a = a;\n";
                 code += "    _b = b;\n";
                 code += "    if (a >= ScalarTwoTo255) _a = a - ScalarTwoTo256;\n";
@@ -2995,9 +3390,30 @@ string generate(const json &rom, const string &functionName, const string &fileN
             {
                 code += "    // Binary instruction: EQ\n";
 
-                code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
-                code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
-                code += "    fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);\n";
+                code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
+                code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
+                code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
 
                 code += "    expectedC = (a == b);\n";
                 code += "    if (c != expectedC)\n";
@@ -3027,9 +3443,30 @@ string generate(const json &rom, const string &functionName, const string &fileN
             {
                 code += "    // Binary instruction: AND\n";
 
-                code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
-                code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
-                code += "    fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);\n";
+                code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
+                code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
+                code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
 
                 code += "    expectedC = (a & b);\n";
                 code += "    if (c != expectedC)\n";
@@ -3060,9 +3497,30 @@ string generate(const json &rom, const string &functionName, const string &fileN
             {
                 code += "    // Binary instruction: OR\n";
 
-                code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
-                code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
-                code += "    fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);\n";
+                code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
+                code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
+                code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
 
                 code += "    expectedC = (a | b);\n";
                 code += "    if (c != expectedC)\n";
@@ -3090,9 +3548,30 @@ string generate(const json &rom, const string &functionName, const string &fileN
             {
                 code += "    // Binary instruction: XOR\n";
 
-                code += "    fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
-                code += "    fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
-                code += "    fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);\n";
+                code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
+                code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
+                code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
 
                 code += "    expectedC = (a ^ b);\n";
                 code += "    if (c != expectedC)\n";
@@ -3134,10 +3613,38 @@ string generate(const json &rom, const string &functionName, const string &fileN
              (rom["program"][zkPC].contains("memAlignWR8") && (rom["program"][zkPC]["memAlignWR8"]==1)) )
         {
             code += "    // MemAlign instruction\n";
-            code += "    fea2scalar(fr, m0, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]);\n";
-            code += "    fea2scalar(fr, m1, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]);\n";
-            code += "    fea2scalar(fr, v, op0, op1, op2, op3, op4, op5, op6, op7);\n";
-            code += "    fea2scalar(fr, offsetScalar, pols.C0[" + string(bFastMode?"0":"i") + "], pols.C1[" + string(bFastMode?"0":"i") + "], pols.C2[" + string(bFastMode?"0":"i") + "], pols.C3[" + string(bFastMode?"0":"i") + "], pols.C4[" + string(bFastMode?"0":"i") + "], pols.C5[" + string(bFastMode?"0":"i") + "], pols.C6[" + string(bFastMode?"0":"i") + "], pols.C7[" + string(bFastMode?"0":"i") + "]);\n";
+            code += "    if (!fea2scalar(fr, m0, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
+            code += "    {\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx);\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+            code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+            code += "        return;\n";
+            code += "    }\n";
+            code += "    if (!fea2scalar(fr, m1, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
+            code += "    {\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx);\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+            code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+            code += "        return;\n";
+            code += "    }\n";
+            code += "    if (!fea2scalar(fr, v, op0, op1, op2, op3, op4, op5, op6, op7))\n";
+            code += "    {\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx);\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+            code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+            code += "        return;\n";
+            code += "    }\n";
+            code += "    if (!fea2scalar(fr, offsetScalar, pols.C0[" + string(bFastMode?"0":"i") + "], pols.C1[" + string(bFastMode?"0":"i") + "], pols.C2[" + string(bFastMode?"0":"i") + "], pols.C3[" + string(bFastMode?"0":"i") + "], pols.C4[" + string(bFastMode?"0":"i") + "], pols.C5[" + string(bFastMode?"0":"i") + "], pols.C6[" + string(bFastMode?"0":"i") + "], pols.C7[" + string(bFastMode?"0":"i") + "]))\n";
+            code += "    {\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx);\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+            code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+            code += "        return;\n";
+            code += "    }\n";
             code += "    if (offsetScalar<0 || offsetScalar>32)\n";
             code += "    {\n";
             code += "        cerr << \"Error: MemAlign out of range offset=\" << offsetScalar.get_str() << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
@@ -3154,8 +3661,22 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 if (!bFastMode)
                     code += "    pols.memAlignWR[i] = fr.one();\n";
 
-                code += "    fea2scalar(fr, w0, pols.D0[" + string(bFastMode?"0":"i") + "], pols.D1[" + string(bFastMode?"0":"i") + "], pols.D2[" + string(bFastMode?"0":"i") + "], pols.D3[" + string(bFastMode?"0":"i") + "], pols.D4[" + string(bFastMode?"0":"i") + "], pols.D5[" + string(bFastMode?"0":"i") + "], pols.D6[" + string(bFastMode?"0":"i") + "], pols.D7[" + string(bFastMode?"0":"i") + "]);\n";
-                code += "    fea2scalar(fr, w1, pols.E0[" + string(bFastMode?"0":"i") + "], pols.E1[" + string(bFastMode?"0":"i") + "], pols.E2[" + string(bFastMode?"0":"i") + "], pols.E3[" + string(bFastMode?"0":"i") + "], pols.E4[" + string(bFastMode?"0":"i") + "], pols.E5[" + string(bFastMode?"0":"i") + "], pols.E6[" + string(bFastMode?"0":"i") + "], pols.E7[" + string(bFastMode?"0":"i") + "]);\n";
+                code += "    if (!fea2scalar(fr, w0, pols.D0[" + string(bFastMode?"0":"i") + "], pols.D1[" + string(bFastMode?"0":"i") + "], pols.D2[" + string(bFastMode?"0":"i") + "], pols.D3[" + string(bFastMode?"0":"i") + "], pols.D4[" + string(bFastMode?"0":"i") + "], pols.D5[" + string(bFastMode?"0":"i") + "], pols.D6[" + string(bFastMode?"0":"i") + "], pols.D7[" + string(bFastMode?"0":"i") + "]))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
+                code += "    if (!fea2scalar(fr, w1, pols.E0[" + string(bFastMode?"0":"i") + "], pols.E1[" + string(bFastMode?"0":"i") + "], pols.E2[" + string(bFastMode?"0":"i") + "], pols.E3[" + string(bFastMode?"0":"i") + "], pols.E4[" + string(bFastMode?"0":"i") + "], pols.E5[" + string(bFastMode?"0":"i") + "], pols.E6[" + string(bFastMode?"0":"i") + "], pols.E7[" + string(bFastMode?"0":"i") + "]))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
                 code += "    _W0 = (m0 & (ScalarTwoTo256 - (ScalarOne << (256-offset*8)))) | (v >> offset*8);\n";
                 code += "    _W1 = (m1 & (ScalarMask256 >> offset*8)) | ((v << (256 - offset*8)) & ScalarMask256);\n";
                 code += "    if ( (w0 != _W0) || (w1 != _W1) )\n";
@@ -3186,7 +3707,14 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 if (!bFastMode)
                     code += "    pols.memAlignWR8[i] = fr.one();\n";
 
-                code += "    fea2scalar(fr, w0, pols.D0[" + string(bFastMode?"0":"i") + "], pols.D1[" + string(bFastMode?"0":"i") + "], pols.D2[" + string(bFastMode?"0":"i") + "], pols.D3[" + string(bFastMode?"0":"i") + "], pols.D4[" + string(bFastMode?"0":"i") + "], pols.D5[" + string(bFastMode?"0":"i") + "], pols.D6[" + string(bFastMode?"0":"i") + "], pols.D7[" + string(bFastMode?"0":"i") + "]);\n";
+                code += "    if (!fea2scalar(fr, w0, pols.D0[" + string(bFastMode?"0":"i") + "], pols.D1[" + string(bFastMode?"0":"i") + "], pols.D2[" + string(bFastMode?"0":"i") + "], pols.D3[" + string(bFastMode?"0":"i") + "], pols.D4[" + string(bFastMode?"0":"i") + "], pols.D5[" + string(bFastMode?"0":"i") + "], pols.D6[" + string(bFastMode?"0":"i") + "], pols.D7[" + string(bFastMode?"0":"i") + "]))\n";
+                code += "    {\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx);\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
                 code += "    _W0 = (m0 & (byteMaskOn256 >> (offset*8))) | ((v & 0xFF) << ((31-offset)*8));\n";
                 code += "    if (w0 != _W0)\n";
                 code += "    {\n";

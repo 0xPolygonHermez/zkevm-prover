@@ -3,6 +3,7 @@
 #include "utils.hpp"
 #include "zkresult.hpp"
 #include "zkmax.hpp"
+#include "zklog.hpp"
 
 zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, SmtSetResult &result, DatabaseMap *dbReadLog)
 {
@@ -51,7 +52,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
         dbres = db.read(rootString, dbValue, dbReadLog);
         if (dbres != ZKR_SUCCESS)
         {
-            cerr << "Error: Smt::set() db.read error: " << dbres << " (" << zkresult2string(dbres) << ") root:" << rootString << endl;
+            zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + rootString);
             return dbres;
         }
 
@@ -71,7 +72,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
             dbres = db.read(valueHashString, dbValue, dbReadLog);
             if (dbres != ZKR_SUCCESS)
             {
-                cerr << "Error: Smt::set() db.read error: " << dbres << " (" << zkresult2string(dbres) << ") key:" << valueHashString << endl;
+                zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") key:" + valueHashString);
                 return dbres;
             }
 
@@ -464,7 +465,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                     dbres = db.read(auxString, dbValue, dbReadLog);
                     if ( dbres != ZKR_SUCCESS)
                     {
-                        cerr << "Error: Smt::set() db.read error: " << dbres << " (" << zkresult2string(dbres) << ") root:" << auxString << endl;
+                        zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + auxString);
                         return dbres;
                     }
 
@@ -484,12 +485,12 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                         dbres = db.read(valHString, dbValue, dbReadLog);
                         if (dbres != ZKR_SUCCESS)
                         {
-                            cerr << "Error: Smt::set() db.read error: " << dbres << " (" << zkresult2string(dbres) << ") root:" << valHString << endl;
+                            zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + valHString);
                             return dbres;
                         }
                         else if (dbValue.size()<8)
                         {
-                            cerr << "Error: Smt::set() dbValue.size()<8 root:" << valHString << endl;
+                            zklog.error("Smt::set() dbValue.size()<8 root:" + valHString);
                             return ZKR_SMT_INVALID_DATA_SIZE;
                         }
 
@@ -741,7 +742,7 @@ zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Gold
         dbres = db.read(rString, dbValue, dbReadLog);
         if (dbres != ZKR_SUCCESS)
         {
-            cerr << "Error: Smt::get() db.read error: " << dbres << " (" << zkresult2string(dbres) << ") root:" << rString << endl;
+            zklog.error("Smt::get() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + rString);
             return dbres;
         }
 
@@ -762,7 +763,7 @@ zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Gold
             dbres = db.read(valueHashString, dbValue, dbReadLog);
             if (dbres != ZKR_SUCCESS)
             {
-                cerr << "Error: Smt::get() db.read error: " << dbres << " (" << zkresult2string(dbres) << ") root:" << valueHashString << endl;
+                zklog.error("Smt::get() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + valueHashString);
                 return dbres;
             }
 
@@ -971,7 +972,7 @@ zkresult Smt::hashSave ( Database &db, const Goldilocks::Element (&a)[8], const 
     zkr = db.write(hashString, dbValue, persistent);
     if (zkr != ZKR_SUCCESS)
     {
-        cerr << "Error: Smt::hashSave() failed calling db.write() key=" << hashString << " result=" << zkr << "=" << zkresult2string(zkr) << endl;
+        zklog.error("Smt::hashSave() failed calling db.write() key=" + hashString + " result=" + to_string(zkr) + "=" + zkresult2string(zkr));
     }
 
 #ifdef LOG_SMT
@@ -995,7 +996,7 @@ zkresult Smt::saveStateRoot(Database &db, const Goldilocks::Element (&stateRoot)
     zkr = db.write(Database::dbStateRootKey, dbValue, true, true);
     if (zkr != ZKR_SUCCESS)
     {
-        cerr << "Error: Smt::saveStateRoot() failed calling db.write() result=" << zkr << "=" << zkresult2string(zkr) << endl;
+        zklog.error("Smt::saveStateRoot() failed calling db.write() result=" + to_string(zkr) + "=" + zkresult2string(zkr));
     }
 
 #ifdef LOG_SMT

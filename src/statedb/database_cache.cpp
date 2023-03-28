@@ -1,6 +1,7 @@
 #include "database_cache.hpp"
 #include "utils.hpp"
 #include "scalar.hpp"
+#include "zklog.hpp"
 
 // DatabaseCache class implementation
 
@@ -179,13 +180,13 @@ DatabaseCacheRecord * DatabaseMTCache::allocRecord(const string key, const void 
     DatabaseCacheRecord * pRecord = new(DatabaseCacheRecord);
     if (pRecord == NULL)
     {
-        cerr << "Error: DatabaseMTCache::allocRecord() failed calling new(DatabaseCacheRecord)" << endl;
+        zklog.error("DatabaseMTCache::allocRecord() failed calling new(DatabaseCacheRecord)");
         exitProcess();
     }
     vector<Goldilocks::Element>* pValue = new(vector<Goldilocks::Element>);
     if (pValue == NULL)
     {
-        cerr << "Error: DatabaseMTCache::allocRecord() failed calling new(vector<Goldilocks::Element>)" << endl;
+        zklog.error("DatabaseMTCache::allocRecord() failed calling new(vector<Goldilocks::Element>)");
         exitProcess();
     }
 
@@ -248,13 +249,13 @@ DatabaseCacheRecord * DatabaseProgramCache::allocRecord(const string key, const 
     DatabaseCacheRecord * pRecord = new(DatabaseCacheRecord);
     if (pRecord == NULL)
     {
-        cerr << "Error: DatabaseProgramCache::allocRecord() failed calling new(DatabaseCacheRecord)" << endl;
+        zklog.error("DatabaseProgramCache::allocRecord() failed calling new(DatabaseCacheRecord)");
         exitProcess();
     }
     vector<uint8_t>* pValue = new(vector<uint8_t>);
     if (pValue == NULL)
     {
-        cerr << "Error: DatabaseProgramCache::allocRecord() failed calling new(vector<uint8_t>)" << endl;
+        zklog.error("DatabaseProgramCache::allocRecord() failed calling new(vector<uint8_t>)");
         exitProcess();
     }
 

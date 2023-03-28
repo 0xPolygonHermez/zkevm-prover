@@ -1,6 +1,7 @@
 #include "gate_state.hpp"
 #include "pols_identity_constants.hpp"
 #include "zkassert.hpp"
+#include "zklog.hpp"
 
 // Constructor
 GateState::GateState (const GateConfig &gateConfig) : gateConfig(gateConfig)
@@ -278,7 +279,7 @@ void GateState::OP (GateOperation op, uint64_t refA, PinId pinA, uint64_t refB, 
             ands++;
             break;
         default:
-            cerr << "Error: GateState::OP() got invalid op=" << op << endl;
+            zklog.error("GateState::OP() got invalid op=" + to_string(op));
             exitProcess();
     }
 
@@ -325,7 +326,7 @@ void GateState::printRefs (uint64_t * pRefs, string name)
     }
     else
     {
-        cerr << "Error: GateState::printRefs() got invalid value of pRefs=" << pRefs << endl;
+        zklog.error("GateState::printRefs() got invalid value of pRefs=" + to_string(uint64_t(pRefs)));
         exitProcess();
     }
 
@@ -333,7 +334,7 @@ void GateState::printRefs (uint64_t * pRefs, string name)
     uint8_t * aux = new uint8_t[size];
     if (aux == NULL)
     {
-        cerr << "Error: GateState::printRefs() failed allocating " << size << " bytes" << endl;
+        zklog.error("GateState::printRefs() failed allocating " + to_string(size) + " bytes");
         exitProcess();
     }
 
