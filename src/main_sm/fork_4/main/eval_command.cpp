@@ -6,6 +6,7 @@
 #include "scalar.hpp"
 #include "utils.hpp"
 #include "zkassert.hpp"
+#include "zklog.hpp"
 
 namespace fork_4
 {
@@ -51,7 +52,7 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             case f_memAlignWR8_W0:                  return eval_memAlignWR8_W0(ctx, cmd, cr);
             case f_beforeLast:                      return eval_beforeLast(ctx, cmd, cr);
             default:
-                cerr << "Error: evalCommand() found invalid function=" << cmd.function << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+                zklog.error("evalCommand() found invalid function=" + to_string(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
                 exitProcess();
         }
     }
@@ -86,7 +87,7 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         case op_if:             return eval_if(ctx, cmd, cr);
         case op_getMemValue:    return eval_getMemValue(ctx, cmd, cr);
         default:
-            cerr << "Error: evalCommand() found invalid operation=" << op2String(cmd.op) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+            zklog.error("evalCommand() found invalid operation=" + op2String(cmd.op) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
             exitProcess();
     }
 }
@@ -108,14 +109,14 @@ void eval_declareVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check the variable name
     if (cmd.varName == "")
     {
-        cerr << "Error: eval_declareVar() Variable name not found" << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+        zklog.error("eval_declareVar() Variable name not found step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 
     // Check that this variable does not exists
     if ( (cmd.varName[0] != '_') && (ctx.vars.find(cmd.varName) != ctx.vars.end()) )
     {
-        cerr << "Error: eval_declareVar() Variable already declared: " << cmd.varName << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+        zklog.error("eval_declareVar() Variable already declared: " + cmd.varName + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 #endif
@@ -139,7 +140,7 @@ void eval_getVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check the variable name
     if (cmd.varName == "")
     {
-        cerr << "Error: eval_getVar() Variable name not found" << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+        zklog.error("eval_getVar() Variable name not found step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 #endif
@@ -148,7 +149,7 @@ void eval_getVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     std::unordered_map<std::string, mpz_class>::iterator it = ctx.vars.find(cmd.varName);
     if (it == ctx.vars.end())
     {
-        cerr << "Error: eval_getVar() Undefined variable: " << cmd. varName << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+        zklog.error("eval_getVar() Undefined variable: " + cmd.varName + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 
@@ -170,7 +171,7 @@ void eval_setVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     // Check that tag contains a values array
     if (cmd.values.size() == 0) {
-        cerr << "Error: eval_setVar() could not find array values in setVar command" << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+        zklog.error("eval_setVar() could not find array values in setVar command step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 #endif
@@ -180,7 +181,7 @@ void eval_setVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_string)
     {
-        cerr << "Error: eval_setVar() unexpected command result type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+        zklog.error("eval_setVar() unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 #endif
@@ -190,7 +191,7 @@ void eval_setVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     std::unordered_map<std::string, mpz_class>::iterator it = ctx.vars.find(varName);
     if (it == ctx.vars.end())
     {
-        cerr << "Error: eval_setVar() Undefined variable: " << varName << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+        zklog.error("eval_setVar() Undefined variable: " + varName + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 
@@ -236,7 +237,7 @@ void eval_left (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         }
         default:
         {
-            cerr << "Error: eval_left() invalid left expression, op: " << op2String(cmd.op) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+            zklog.error("eval_left() invalid left expression, op: " + op2String(cmd.op) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
             exitProcess();
         }
     }
@@ -356,7 +357,7 @@ void eval_getReg (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             cr.u64 = ctx.fr.toU64(ctx.pols.HASHPOS[*ctx.pStep]);
             break;
         default:
-            cerr << "Error: eval_getReg() Invalid register: " << reg2string(cmd.reg) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+            zklog.error("eval_getReg() Invalid register: " + reg2string(cmd.reg) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
             exitProcess();
     }
 }
@@ -376,7 +377,7 @@ void cr2fe (Context &ctx, const CommandResult &cr, Goldilocks::Element &fe)
             scalar2fe(ctx.fr, cr.scalar, fe);
             return;
         default:
-            cerr << "Error: cr2fe() unexpected type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+            zklog.error("cr2fe() unexpected type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
             exitProcess();
     }
 }
@@ -401,7 +402,7 @@ void cr2scalar (Context &ctx, const CommandResult &cr, mpz_class &s)
             s = cr.u16;
             return;
         default:
-            cerr << "Error: cr2scalar() unexpected type: " << cr.type << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+            zklog.error("cr2scalar() unexpected type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
             exitProcess();
     }
 }
@@ -416,7 +417,7 @@ void eval_add(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_add() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+        zklog.error("eval_add() found invalid number of values=" + to_string(cmd.values.size()) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 #endif
@@ -447,7 +448,7 @@ void eval_sub(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_sub() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+        zklog.error("eval_sub() found invalid number of values=" + to_string(cmd.values.size()) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 #endif
@@ -478,7 +479,7 @@ void eval_neg(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 1)
     {
-        cerr << "Error: eval_neg() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+        zklog.error("eval_neg() found invalid number of values=" + to_string(cmd.values.size()) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 #endif
@@ -501,7 +502,7 @@ void eval_mul(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_mul() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+        zklog.error("eval_mul() found invalid number of values=" + to_string(cmd.values.size()) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 #endif
@@ -536,7 +537,7 @@ void eval_div(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_div() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+        zklog.error("eval_div() found invalid number of values=" + to_string(cmd.values.size()) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 #endif
@@ -567,7 +568,7 @@ void eval_mod(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_mod() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+        zklog.error("eval_mod() found invalid number of values=" + to_string(cmd.values.size()) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 #endif
@@ -602,7 +603,7 @@ void eval_logical_or (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_logical_or() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+        zklog.error("eval_logical_or() found invalid number of values=" + to_string(cmd.values.size()) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 #endif
@@ -633,7 +634,7 @@ void eval_logical_and (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_logical_and() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+        zklog.error("eval_logical_and() found invalid number of values=" + to_string(cmd.values.size()) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 #endif
@@ -664,7 +665,7 @@ void eval_logical_gt (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_logical_gt() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+        zklog.error("eval_logical_gt() found invalid number of values=" + to_string(cmd.values.size()) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 #endif
@@ -695,7 +696,7 @@ void eval_logical_ge (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_logical_ge() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+        zklog.error("eval_logical_ge() found invalid number of values=" + to_string(cmd.values.size()) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 #endif
@@ -726,7 +727,7 @@ void eval_logical_lt (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_logical_lt() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+        zklog.error("eval_logical_lt() found invalid number of values=" + to_string(cmd.values.size()) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 #endif
@@ -757,7 +758,7 @@ void eval_logical_le (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_logical_le() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+        zklog.error("eval_logical_le() found invalid number of values=" + to_string(cmd.values.size()) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 #endif
@@ -788,7 +789,7 @@ void eval_logical_eq (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_logical_eq() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+        zklog.error("eval_logical_eq() found invalid number of values=" + to_string(cmd.values.size()) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 #endif
@@ -819,7 +820,7 @@ void eval_logical_ne (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 2)
     {
-        cerr << "Error: eval_logical_ne() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+        zklog.error("eval_logical_ne() found invalid number of values=" + to_string(cmd.values.size()) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 #endif
@@ -850,7 +851,7 @@ void eval_logical_not (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     // Check number of values
     if (cmd.values.size() != 1)
     {
-        cerr << "Error: eval_logical_not() found invalid number of values=" << cmd.values.size() << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+        zklog.error("eval_logical_not() found invalid number of values=" + to_string(cmd.values.size()) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 #endif
