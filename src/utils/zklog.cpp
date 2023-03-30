@@ -11,20 +11,20 @@ zkLog::zkLog ()
 void zkLog::info (const string &message)
 {
     lock();
-    cout << getTimestamp() << " Info: " << message << endl;
+    cout << getTimestamp() << " " << message << endl;
     unlock();
 }
 
 void zkLog::warning (const string &message)
 {
     lock();
-    cout << getTimestamp() << " Warning: " << message << endl;
+    cout << getTimestamp() << " zkWarning: " << message << endl;
     unlock();
 }
 
 void zkLog::error (const string &message)
 {
     lock();
-    cerr << getTimestamp() << " Error: " << message << endl;
+    cerr << getTimestamp() << " zkError: " << message << endl;
     unlock();
 }

@@ -3,6 +3,7 @@
 #include "main_sm/fork_4/main/rom_command.hpp"
 #include "scalar.hpp"
 #include "utils.hpp"
+#include "zklog.hpp"
 
 namespace fork_4
 {
@@ -12,7 +13,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
     // Load ROM program
     if (!romJson.contains("program"))
     {
-        cerr << "Error: Rom::load() could not find program in rom json" << endl;
+        zklog.error("Rom::load() could not find program in rom json");
         exitProcess();
     }
     loadProgram(fr, romJson["program"]);
@@ -20,7 +21,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
     // Load ROM labels
     if (!romJson.contains("labels"))
     {
-        cerr << "Error: Rom::load() could not find labels in rom json" << endl;
+        zklog.error("Rom::load() could not find labels in rom json");
         exitProcess();
     }
     loadLabels(fr, romJson["labels"]);
@@ -74,14 +75,14 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
     // Check that rom is null
     if (line != NULL)
     {
-        cerr << "Error: Rom::loadProgram() called with line!=NULL" << endl;
+        zklog.error("Rom::loadProgram() called with line!=NULL");
         exitProcess();
     }
 
     // Get size of ROM JSON file array
     if (!romJson.is_array())
     {
-        cerr << "Error: Rom::loadProgram() ROM JSON file content is not an array" << endl;
+        zklog.error("Rom::loadProgram() ROM JSON file content is not an array");
         exitProcess();
     }
     size = romJson.size();
@@ -91,7 +92,7 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
     line = (RomLine *)new RomLine[size];
     if (line==NULL)
     {
-        cerr << "Error: Rom::loadProgram() failed allocating ROM memory for " << size << " instructions" << endl;
+        zklog.error("Rom::loadProgram() failed allocating ROM memory for " + to_string(size) + " instructions");
         exitProcess();
     }
 
@@ -260,14 +261,14 @@ void Rom::loadLabels(Goldilocks &fr, json &romJson)
     // Check that memoryMap is empty
     if (labels.size() != 0)
     {
-        cerr << "Error: Rom::loadLabels() called with labels.size()=" << labels.size() << endl;
+        zklog.error("Rom::loadLabels() called with labels.size()=" + to_string(labels.size()));
         exitProcess();
     }
 
     // Check it is an object
     if (!romJson.is_object())
     {
-        cerr << "Error: Rom::loadLabels() labels content is not an object" << endl;
+        zklog.error("Rom::loadLabels() labels content is not an object");
         exitProcess();
     }
 
@@ -276,7 +277,7 @@ void Rom::loadLabels(Goldilocks &fr, json &romJson)
     {
         if (!it.value().is_number())
         {
-            cerr << "Error: Rom::loadLabels() labels value is not a number" << endl;
+            zklog.error("Rom::loadLabels() labels value is not a number");
             exitProcess();
         }
         labels[it.key()] = it.value();
@@ -289,7 +290,7 @@ uint64_t Rom::getLabel(const string &label) const
     it = labels.find(label);
     if (it==labels.end())
     {
-        cerr << "Error: Rom::getLabel() could not find label=" << label << endl;
+        zklog.error("Rom::getLabel() could not find label=" + label);
         exitProcess();
     }
     return it->second;
@@ -301,7 +302,7 @@ uint64_t Rom::getMemoryOffset(const string &label) const
     it = memoryMap.find(label);
     if (it==memoryMap.end())
     {
-        cerr << "Error: Rom::getMemoryOffset() could not find label=" << label << endl;
+        zklog.error("Rom::getMemoryOffset() could not find label=" + label);
         exitProcess();
     }
     return it->second;
@@ -312,19 +313,19 @@ uint64_t Rom::getConstant(json &romJson, const string &constantName)
     if (!romJson.contains("constants") ||
         !romJson["constants"].is_object())
     {
-        cerr << "Error: Rom::getConstant() could not find constants in rom json" << endl;
+        zklog.error("Rom::getConstant() could not find constants in rom json");
         exitProcess();
     }
     if (!romJson["constants"].contains(constantName) ||
         !romJson["constants"][constantName].is_object() )
     {
-        cerr << "Error: Rom::load() could not find constant " << constantName << " in rom json" << endl;
+        zklog.error("Rom::load() could not find constant " + constantName + " in rom json");
         exitProcess();
     }
     if (!romJson["constants"][constantName].contains("value") ||
         !romJson["constants"][constantName]["value"].is_string() )
     {
-        cerr << "Error: Rom::load() could not find value for constant " << constantName << " in rom json" << endl;
+        zklog.error("Rom::load() could not find value for constant " + constantName + " in rom json");
         exitProcess();
     }
     string auxString;
