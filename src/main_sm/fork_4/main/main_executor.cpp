@@ -261,7 +261,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (cr.zkResult != ZKR_SUCCESS)
             {
                 proverRequest.result = cr.zkResult;
-                logError(ctx, "Main exec failed calling evalCommand() before, result=" + to_string(proverRequest.result) + "=" + zkresult2string(proverRequest.result));
+                logError(ctx, string("Failed calling evalCommand() before, result=") + zkresult2string(proverRequest.result));
                 StateDBClientFactory::freeStateDBClient(pStateDB);
                 return;
             }
@@ -605,7 +605,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (!fr.toS32(addrRel, pols.E0[i]))
                 {
                     proverRequest.result = ZKR_SM_MAIN_TOS32;
-                    logError(ctx, "failed calling fr.toS32() with pols.E0[i]=" + fr.toString(pols.E0[i], 16));
+                    logError(ctx, "Failed calling fr.toS32() with pols.E0[i]=" + fr.toString(pols.E0[i], 16));
                     StateDBClientFactory::freeStateDBClient(pStateDB);
                     return;
                 }
@@ -615,7 +615,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (!fr.toS32(addrRel, pols.RR[i]))
                 {
                     proverRequest.result = ZKR_SM_MAIN_TOS32;
-                    logError(ctx, "failed calling fr.toS32() with pols.RR[i]=" + fr.toString(pols.RR[i], 16));
+                    logError(ctx, "Failed calling fr.toS32() with pols.RR[i]=" + fr.toString(pols.RR[i], 16));
                     StateDBClientFactory::freeStateDBClient(pStateDB);
                     return;
                 }
@@ -4558,6 +4558,10 @@ void MainExecutor::logError(Context &ctx, const string &message)
     }
     zklog.error(string("MainExecutor::logError() proverRequest.result=") + zkresult2string(ctx.proverRequest.result) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " rom.line={" + rom.line[*ctx.pZKPC].toString(fr) + "} uuid=" + ctx.proverRequest.uuid);
     ctx.printRegs();
+    
+    json inputJson;
+    ctx.proverRequest.input.save(inputJson);
+    zklog.error("Input=\n" + inputJson.dump());
 }
 
 } // namespace

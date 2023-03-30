@@ -277,7 +277,7 @@ int main(int argc, char **argv)
     zklog.info("Version: " + string(ZKEVM_PROVER_VERSION));
 
     // Test that stderr is properly logged
-    zklog.error("Checking error channel; ignore this trace");
+    cerr << "Checking error channel; ignore this trace\n";
     zklog.warning("Checking warning channel; ignore this trace");
 
     // Print the number of cores
