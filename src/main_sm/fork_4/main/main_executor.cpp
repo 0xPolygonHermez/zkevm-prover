@@ -791,7 +791,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     if  ( !fr.isZero(pols.A5[i]) || !fr.isZero(pols.A6[i]) || !fr.isZero(pols.A7[i]) || !fr.isZero(pols.B2[i]) || !fr.isZero(pols.B3[i]) || !fr.isZero(pols.B4[i]) || !fr.isZero(pols.B5[i])|| !fr.isZero(pols.B6[i])|| !fr.isZero(pols.B7[i]) )
                     {
                         proverRequest.result = ZKR_SM_MAIN_STORAGE;
-                        logError(ctx, "storage read free in found non-zero A-B storage registers");
+                        logError(ctx, "Storage read free in found non-zero A-B storage registers");
                         StateDBClientFactory::freeStateDBClient(pStateDB);
                         return;
                     }
@@ -837,7 +837,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     if (zkResult != ZKR_SUCCESS)
                     {
                         proverRequest.result = zkResult;
-                        logError(ctx, string("failed calling pStateDB->get() result=") + zkresult2string(zkResult));
+                        logError(ctx, string("Failed calling pStateDB->get() result=") + zkresult2string(zkResult));
                         StateDBClientFactory::freeStateDBClient(pStateDB);
                         return;
                     }
@@ -850,7 +850,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         if (zkResult != ZKR_SUCCESS)
                         {
                             proverRequest.result = zkResult;
-                            logError(ctx, string("MainExecutor::Execute() failed calling eval_addReadWriteAddress() 1 result=") + zkresult2string(zkResult));
+                            logError(ctx, string("Failed calling eval_addReadWriteAddress() 1 result=") + zkresult2string(zkResult));
                             StateDBClientFactory::freeStateDBClient(pStateDB);
                             return;
                         }
@@ -900,7 +900,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     if  ( !fr.isZero(pols.A5[i]) || !fr.isZero(pols.A6[i]) || !fr.isZero(pols.A7[i]) || !fr.isZero(pols.B2[i]) || !fr.isZero(pols.B3[i]) || !fr.isZero(pols.B4[i]) || !fr.isZero(pols.B5[i])|| !fr.isZero(pols.B6[i])|| !fr.isZero(pols.B7[i]) )
                     {
                         proverRequest.result = ZKR_SM_MAIN_STORAGE;
-                        logError(ctx, "storage write free in found non-zero A-B registers");
+                        logError(ctx, "Storage write free in found non-zero A-B registers");
                         StateDBClientFactory::freeStateDBClient(pStateDB);
                         return;
                     }
@@ -980,7 +980,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         if (zkResult != ZKR_SUCCESS)
                         {
                             proverRequest.result = zkResult;
-                            logError(ctx, string("failed calling eval_addReadWriteAddress() 2 result=") + zkresult2string(zkResult));
+                            logError(ctx, string("Failed calling eval_addReadWriteAddress() 2 result=") + zkresult2string(zkResult));
                             StateDBClientFactory::freeStateDBClient(pStateDB);
                             return;
                         }
@@ -1032,7 +1032,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         if (size>32)
                         {
                             proverRequest.result = ZKR_SM_MAIN_HASHK;
-                            logError(ctx, "Invalid size>32 for hashK 1: pols.D0[i]=" + fr.toString(pols.D0[i], 16));
+                            logError(ctx, "Invalid size>32 for hashK 1: pols.D0[i]=" + fr.toString(pols.D0[i], 16) + " size=" + to_string(size));
                             StateDBClientFactory::freeStateDBClient(pStateDB);
                             return;
                         }
@@ -1054,7 +1054,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     if ( (pos+size) > hashKIterator->second.data.size())
                     {
                         proverRequest.result = ZKR_SM_MAIN_HASHK;
-                        logError(ctx, "hashK 1 invalid size of hash: pos=" + to_string(pos));
+                        logError(ctx, "HashK 1 invalid size of hash: pos=" + to_string(pos) + " + size=" + to_string(size) + " > data.size=" + to_string(hashKIterator->second.data.size()));
                         StateDBClientFactory::freeStateDBClient(pStateDB);
                         return;
                     }
@@ -1085,7 +1085,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     if (hashKIterator == ctx.hashK.end())
                     {
                         proverRequest.result = ZKR_SM_MAIN_HASHK;
-                        logError(ctx, "hashKDigest 1: digest not defined for addr=" + to_string(addr));
+                        logError(ctx, "HashKDigest 1: digest not defined for addr=" + to_string(addr));
                         StateDBClientFactory::freeStateDBClient(pStateDB);
                         return;
                     }
@@ -1094,7 +1094,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     if (!hashKIterator->second.lenCalled)
                     {
                         proverRequest.result = ZKR_SM_MAIN_HASHK;
-                        logError(ctx, "hashKDigest 1: digest not calculated for addr=" + to_string(addr) + ".  Call hashKLen to finish digest.");
+                        logError(ctx, "HashKDigest 1: digest not calculated for addr=" + to_string(addr) + ".  Call hashKLen to finish digest.");
                         StateDBClientFactory::freeStateDBClient(pStateDB);
                         return;
                     }
@@ -1154,7 +1154,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     if ( (pos+size) > hashPIterator->second.data.size())
                     {
                         proverRequest.result = ZKR_SM_MAIN_HASHP;
-                        logError(ctx, "hashP 1 invalid size of hash: pos=" + to_string(pos) + " size=" + to_string(size) + " data.size=" + to_string(ctx.hashP[addr].data.size()));
+                        logError(ctx, "HashP 1 invalid size of hash: pos=" + to_string(pos) + " size=" + to_string(size) + " data.size=" + to_string(ctx.hashP[addr].data.size()));
                         StateDBClientFactory::freeStateDBClient(pStateDB);
                         return;
                     }
@@ -1181,7 +1181,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     if (hashPIterator == ctx.hashP.end())
                     {
                         proverRequest.result = ZKR_SM_MAIN_HASHP;
-                        logError(ctx, "hashPDigest 1: digest not defined addr=" + to_string(addr));
+                        logError(ctx, "HashPDigest 1: digest not defined addr=" + to_string(addr));
                         StateDBClientFactory::freeStateDBClient(pStateDB);
                         return;
                     }
@@ -1190,7 +1190,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     if (!hashPIterator->second.lenCalled)
                     {
                         proverRequest.result = ZKR_SM_MAIN_HASHP;
-                        logError(ctx, "hashPDigest 1: digest not calculated.  Call hashPLen to finish digest.");
+                        logError(ctx, "HashPDigest 1: digest not calculated.  Call hashPLen to finish digest.");
                         StateDBClientFactory::freeStateDBClient(pStateDB);
                         return;
                     }
@@ -1453,7 +1453,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (cr.zkResult != ZKR_SUCCESS)
                 {
                     proverRequest.result = cr.zkResult;
-                    logError(ctx, "Main exec failed calling evalCommand() result=" + to_string(proverRequest.result) + "=" + zkresult2string(proverRequest.result));
+                    logError(ctx, string("Main exec failed calling evalCommand() result=") + zkresult2string(proverRequest.result));
                     StateDBClientFactory::freeStateDBClient(pStateDB);
                     return;
                 }
@@ -1520,7 +1520,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 else
                 {
-                    logError(ctx, "unexpected command result type: " + to_string(cr.type));
+                    logError(ctx, "Unexpected command result type: " + to_string(cr.type));
                     exitProcess();
                 }
             }
@@ -1572,7 +1572,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             {
                 proverRequest.result = ZKR_SM_MAIN_ASSERT;
                 logError(ctx, string("ROM assert failed: AN!=opN") +
-                " A: " + fr.toString(pols.A7[i], 16) + ":" + fr.toString(pols.A6[i], 16) + ":" + fr.toString(pols.A5[i], 16) + ":" + fr.toString(pols.A4[i], 16) + ":" + fr.toString(pols.A3[i], 16) + ":" + fr.toString(pols.A2[i], 16) + ":" + fr.toString(pols.A1[i], 16) + ":" + fr.toString(pols.A0[i], 16) +
+                " A:" + fr.toString(pols.A7[i], 16) + ":" + fr.toString(pols.A6[i], 16) + ":" + fr.toString(pols.A5[i], 16) + ":" + fr.toString(pols.A4[i], 16) + ":" + fr.toString(pols.A3[i], 16) + ":" + fr.toString(pols.A2[i], 16) + ":" + fr.toString(pols.A1[i], 16) + ":" + fr.toString(pols.A0[i], 16) +
                 " OP:" + fr.toString(op7, 16) + ":" + fr.toString(op6, 16) + ":" + fr.toString(op5, 16) + ":" + fr.toString(op4,16) + ":" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0,16));
                 StateDBClientFactory::freeStateDBClient(pStateDB);
                 return;
@@ -1793,7 +1793,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (zkResult != ZKR_SUCCESS)
             {
                 proverRequest.result = zkResult;
-                logError(ctx, string("MainExecutor::Execute() failed calling pStateDB->get() result=") + zkresult2string(zkResult));
+                logError(ctx, string("Failed calling pStateDB->get() result=") + zkresult2string(zkResult));
                 StateDBClientFactory::freeStateDBClient(pStateDB);
                 return;
             }
@@ -1806,7 +1806,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (zkResult != ZKR_SUCCESS)
                 {
                     proverRequest.result = zkResult;
-                    logError(ctx, string("MainExecutor::Execute() failed calling eval_addReadWriteAddress() 3 result=") + zkresult2string(zkResult));
+                    logError(ctx, string("Failed calling eval_addReadWriteAddress() 3 result=") + zkresult2string(zkResult));
                     StateDBClientFactory::freeStateDBClient(pStateDB);
                     return;
                 }
@@ -2133,7 +2133,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 else if (hashKIterator->second.data.size() < (pos+j))
                 {
                     proverRequest.result = ZKR_SM_MAIN_HASHK;
-                    logError(ctx, "hashK 2: trying to insert data in a position:" + to_string(pos+j) + " higher than current data size:" + to_string(ctx.hashK[addr].data.size()));
+                    logError(ctx, "HashK 2: trying to insert data in a position:" + to_string(pos+j) + " higher than current data size:" + to_string(ctx.hashK[addr].data.size()));
                     StateDBClientFactory::freeStateDBClient(pStateDB);
                     return;
                 }
@@ -2207,7 +2207,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (lm != 0)
                 {
                     proverRequest.result = ZKR_SM_MAIN_HASHK;
-                    logError(ctx, "hashKLen 2 hashK[addr] is empty but lm is not 0 addr=" + to_string(addr) + " lm=" + to_string(lm));
+                    logError(ctx, "HashKLen 2 hashK[addr] is empty but lm is not 0 addr=" + to_string(addr) + " lm=" + to_string(lm));
                     StateDBClientFactory::freeStateDBClient(pStateDB);
                     return;
                 }
@@ -2225,7 +2225,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (ctx.hashK[addr].lenCalled)
             {
                 proverRequest.result = ZKR_SM_MAIN_HASHK;
-                logError(ctx, "hashKLen 2 called more than once addr=" + to_string(addr));
+                logError(ctx, "HashKLen 2 called more than once addr=" + to_string(addr));
                 StateDBClientFactory::freeStateDBClient(pStateDB);
                 return;
             }
@@ -2235,7 +2235,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (lm != lh)
             {
                 proverRequest.result = ZKR_SM_MAIN_HASHK;
-                logError(ctx, "hashKLen 2 length does not match addr=" + to_string(addr) + " is lm=" + to_string(lm) + " and it should be lh=" + to_string(lh));
+                logError(ctx, "HashKLen 2 length does not match addr=" + to_string(addr) + " is lm=" + to_string(lm) + " and it should be lh=" + to_string(lh));
                 StateDBClientFactory::freeStateDBClient(pStateDB);
                 return;
             }
@@ -2273,7 +2273,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (hashKIterator == ctx.hashK.end())
             {
                 proverRequest.result = ZKR_SM_MAIN_HASHK;
-                logError(ctx, "hashKDigest 2 could not find entry for addr=" + to_string(addr));
+                logError(ctx, "HashKDigest 2 could not find entry for addr=" + to_string(addr));
                 StateDBClientFactory::freeStateDBClient(pStateDB);
                 return;
             }
@@ -2291,7 +2291,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (dg != hashKIterator->second.digest)
             {
                 proverRequest.result = ZKR_SM_MAIN_HASHK;
-                logError(ctx, "hashKDigest 2: Digest does not match op");
+                logError(ctx, "HashKDigest 2: Digest does not match op");
                 StateDBClientFactory::freeStateDBClient(pStateDB);
                 return;
             }
@@ -2299,7 +2299,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (ctx.hashK[addr].digestCalled)
             {
                 proverRequest.result = ZKR_SM_MAIN_HASHK;
-                logError(ctx, "hashKDigest 2 called more than once addr=" + to_string(addr));
+                logError(ctx, "HashKDigest 2 called more than once addr=" + to_string(addr));
                 StateDBClientFactory::freeStateDBClient(pStateDB);
                 return;
             }
@@ -2347,7 +2347,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (size>32)
                 {
                     proverRequest.result = ZKR_SM_MAIN_HASHP;
-                    logError(ctx, "Invalid size>32 for hashP 2: pols.D0[i]=" + fr.toString(pols.D0[i], 16));
+                    logError(ctx, "Invalid size>32 for hashP 2: pols.D0[i]=" + fr.toString(pols.D0[i], 16) + " size=" + to_string(size));
                     StateDBClientFactory::freeStateDBClient(pStateDB);
                     return;
                 }
@@ -2387,7 +2387,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 else if (hashPIterator->second.data.size() < (pos+j))
                 {
                     proverRequest.result = ZKR_SM_MAIN_HASHP;
-                    logError(ctx, "hashP 2: trying to insert data in a position:" + to_string(pos+j) + " higher than current data size:" + to_string(ctx.hashP[addr].data.size()));
+                    logError(ctx, "HashP 2: trying to insert data in a position:" + to_string(pos+j) + " higher than current data size:" + to_string(ctx.hashP[addr].data.size()));
                     StateDBClientFactory::freeStateDBClient(pStateDB);
                     return;
                 }
@@ -2456,8 +2456,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 // Check that length = 0
                 if (lm != 0)
                 {
-                    proverRequest.result = ZKR_SM_MAIN_HASHK;
-                    logError(ctx, "hashPLen 2 hashP[addr] is empty but lm is not 0 addr=" + to_string(addr) + " lm=" + to_string(lm));
+                    proverRequest.result = ZKR_SM_MAIN_HASHP;
+                    logError(ctx, "HashPLen 2 hashP[addr] is empty but lm is not 0 addr=" + to_string(addr) + " lm=" + to_string(lm));
                     StateDBClientFactory::freeStateDBClient(pStateDB);
                     return;
                 }
@@ -2474,8 +2474,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             if (ctx.hashP[addr].lenCalled)
             {
-                proverRequest.result = ZKR_SM_MAIN_HASHK;
-                logError(ctx, "hashPLen 2 called more than once addr=" + to_string(addr));
+                proverRequest.result = ZKR_SM_MAIN_HASHP;
+                logError(ctx, "HashPLen 2 called more than once addr=" + to_string(addr));
                 StateDBClientFactory::freeStateDBClient(pStateDB);
                 return;
             }
@@ -2485,7 +2485,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (lm != lh)
             {
                 proverRequest.result = ZKR_SM_MAIN_HASHP;
-                logError(ctx, "hashPLen 2 does not match match addr=" + to_string(addr) + " is lm=" + to_string(lm) + " and it should be lh=" + to_string(lh));
+                logError(ctx, "HashPLen 2 does not match match addr=" + to_string(addr) + " is lm=" + to_string(lm) + " and it should be lh=" + to_string(lh));
                 StateDBClientFactory::freeStateDBClient(pStateDB);
                 return;
             }
@@ -2494,7 +2494,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (hashPIterator->second.data.size() == 0)
                 {
                     proverRequest.result = ZKR_SM_MAIN_HASHP;
-                    logError(ctx, "hashPLen 2 found data empty");
+                    logError(ctx, "HashPLen 2 found data empty");
                     StateDBClientFactory::freeStateDBClient(pStateDB);
                     return;
                 }
@@ -2609,7 +2609,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (ctx.hashP[addr].digestCalled)
             {
                 proverRequest.result = ZKR_SM_MAIN_HASHP;
-                logError(ctx, "hashPDigest 2 called more than once addr=" + to_string(addr));
+                logError(ctx, "HashPDigest 2 called more than once addr=" + to_string(addr));
                 StateDBClientFactory::freeStateDBClient(pStateDB);
                 return;
             }
@@ -2621,7 +2621,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (dg != hashPIterator->second.digest)
             {
                 proverRequest.result = ZKR_SM_MAIN_HASHP;
-                logError(ctx, "hashPDigest 2: ctx.hashP[addr].digest=" + ctx.hashP[addr].digest.get_str(16) + " does not match op=" + dg.get_str(16));
+                logError(ctx, "HashPDigest 2: ctx.hashP[addr].digest=" + ctx.hashP[addr].digest.get_str(16) + " does not match op=" + dg.get_str(16));
                 StateDBClientFactory::freeStateDBClient(pStateDB);
                 return;
             }
@@ -2934,7 +2934,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (c != expectedC)
                 {
                     proverRequest.result = ZKR_SM_MAIN_BINARY;
-                    logError(ctx, "Binary ADD operation does not match");
+                    logError(ctx, "Binary ADD operation does not match c=op=" + c.get_str(16) + " expectedC=(a + b) & ScalarMask256=" + expectedC.get_str(16));
                     StateDBClientFactory::freeStateDBClient(pStateDB);
                     return;
                 }
@@ -2985,7 +2985,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (c != expectedC)
                 {
                     proverRequest.result = ZKR_SM_MAIN_BINARY;
-                    logError(ctx, "Binary SUB operation does not match");
+                    logError(ctx, "Binary SUB operation does not match c=op=" + c.get_str(16) + " expectedC=(a - b + ScalarTwoTo256) & ScalarMask256=" + expectedC.get_str(16));
                     StateDBClientFactory::freeStateDBClient(pStateDB);
                     return;
                 }
@@ -3036,7 +3036,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (c != expectedC)
                 {
                     proverRequest.result = ZKR_SM_MAIN_BINARY;
-                    logError(ctx, "Binary LT operation does not match");
+                    logError(ctx, "Binary LY operation does not match c=op=" + c.get_str(16) + " expectedC=(a < b)=" + expectedC.get_str(16));
                     StateDBClientFactory::freeStateDBClient(pStateDB);
                     return;
                 }
@@ -3144,7 +3144,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (c != expectedC)
                 {
                     proverRequest.result = ZKR_SM_MAIN_BINARY;
-                    logError( ctx, "Binary EQ operation does not match");
+                    logError( ctx, "Binary EQ operation does not match c=op=" + c.get_str(16) + " expectedC=(a==b)=" + expectedC.get_str(16));
                     StateDBClientFactory::freeStateDBClient(pStateDB);
                     return;
                 }
@@ -3195,7 +3195,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (c != expectedC)
                 {
                     proverRequest.result = ZKR_SM_MAIN_BINARY;
-                    logError(ctx, "Binary AND operation does not match");
+                    logError(ctx, "Binary AND operation does not match c=op=" + c.get_str(16) + " expectedC=(a&b)=" + expectedC.get_str(16));
                     StateDBClientFactory::freeStateDBClient(pStateDB);
                     return;
                 }
@@ -3249,7 +3249,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (c != expectedC)
                 {
                     proverRequest.result = ZKR_SM_MAIN_BINARY;
-                    logError(ctx, "Binary OR operation does not match");
+                    logError(ctx, "Binary OR operation does not match c=op=" + c.get_str(16) + " expectedC=(a|b)=" + expectedC.get_str(16));
                     StateDBClientFactory::freeStateDBClient(pStateDB);
                     return;
                 }
@@ -3298,7 +3298,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (c != expectedC)
                 {
                     proverRequest.result = ZKR_SM_MAIN_BINARY;
-                    logError(ctx, "Binary XOR operation does not match");
+                    logError(ctx, "Binary XOR operation does not match c=op=" + c.get_str(16) + " expectedC=(a^b)=" + expectedC.get_str(16));
                     StateDBClientFactory::freeStateDBClient(pStateDB);
                     return;
                 }
@@ -3856,8 +3856,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             else
             {
-                logError(ctx, "MainExecutor::execute() JMPN invalid S33 value op0=" + to_string(jmpnCondValue));
-                exitProcess();
+                proverRequest.result = ZKR_SM_MAIN_S33;
+                logError(ctx, "JMPN invalid S33 value op0=" + to_string(jmpnCondValue));
+                StateDBClientFactory::freeStateDBClient(pStateDB);
+                return;
             }
             pols.lJmpnCondValue[i] = fr.fromU64(jmpnCondValue & 0x7FFFFF);
             jmpnCondValue = jmpnCondValue >> 23;
@@ -4068,7 +4070,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (cr.zkResult != ZKR_SUCCESS)
                 {
                     proverRequest.result = cr.zkResult;
-                    logError(ctx, "Failed calling evalCommand() after");
+                    logError(ctx, string("Failed calling evalCommand() after result=") + zkresult2string(proverRequest.result));
                     StateDBClientFactory::freeStateDBClient(pStateDB);
                     return;
                 }
