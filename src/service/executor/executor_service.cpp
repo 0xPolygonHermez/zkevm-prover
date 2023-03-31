@@ -335,7 +335,11 @@ using grpc::Status;
             {
                 executor::v1::ExecutionTraceStep * pExecutionTraceStep = pProcessTransactionResponse->add_execution_trace();
                 pExecutionTraceStep->set_pc(responses[tx].execution_trace[step].pc); // Program Counter
-                pExecutionTraceStep->set_op(responses[tx].execution_trace[step].opcode); // OpCode
+                // opcode can be null if bNoCounters=true
+                if (responses[tx].execution_trace[step].opcode != NULL)
+                {
+                    pExecutionTraceStep->set_op(responses[tx].execution_trace[step].opcode); // OpCode
+                }
                 pExecutionTraceStep->set_remaining_gas(responses[tx].execution_trace[step].gas);
                 pExecutionTraceStep->set_gas_cost(responses[tx].execution_trace[step].gas_cost); // Gas cost of the operation
                 pExecutionTraceStep->set_memory(string2ba(responses[tx].execution_trace[step].memory)); // Content of memory
