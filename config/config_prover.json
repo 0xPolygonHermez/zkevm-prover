@@ -38,6 +38,7 @@
     
     "loadDBToMemCache": true,
     "loadDBToMemCacheInParallel": false,
+    "loadDBToMemTimeout": 30000000,
     "dbMTCacheSize": 16384,
     "dbProgramCacheSize": 16384,
     

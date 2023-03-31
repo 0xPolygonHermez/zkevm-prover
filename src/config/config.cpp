@@ -147,6 +147,10 @@ void Config::load(json &config)
     if (config.contains("loadDBToMemCacheInParallel") && config["loadDBToMemCacheInParallel"].is_boolean())
         loadDBToMemCacheInParallel = config["loadDBToMemCacheInParallel"];
 
+    loadDBToMemTimeout = 30*1000*1000; // Default = 30 seconds
+    if (config.contains("loadDBToMemTimeout") && config["loadDBToMemTimeout"].is_number())
+        loadDBToMemTimeout = config["loadDBToMemTimeout"];
+
     dbMTCacheSize = 4*1024;
     if (config.contains("dbMTCacheSize") && config["dbMTCacheSize"].is_number())
         dbMTCacheSize = config["dbMTCacheSize"];
@@ -585,4 +589,5 @@ void Config::print(void)
     cout << "    maxStateDBThreads=" << maxStateDBThreads << endl;
     cout << "    dbMTCacheSize=" << dbMTCacheSize << endl;
     cout << "    dbProgramCacheSize=" << dbProgramCacheSize << endl;
+    cout << "    loadDBToMemTimeout=" << loadDBToMemTimeout << endl;
 }
