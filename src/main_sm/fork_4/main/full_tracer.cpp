@@ -1327,7 +1327,7 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
         singleInfo.memory_size = (auxScalar.get_ui() / 32) * 32;
     }
 
-    if (ctx.proverRequest.input.traceConfig.bGenerateStorage && increaseDepth)
+    if (ctx.proverRequest.input.traceConfig.bGenerateStorage /*&& increaseDepth*/)
     {
         unordered_map<string, string> auxMap;
         deltaStorage[depth + 1] = auxMap;
