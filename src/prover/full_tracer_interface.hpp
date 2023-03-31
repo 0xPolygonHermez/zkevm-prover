@@ -41,7 +41,7 @@ public:
     vector<string> return_data;
     struct timeval startTime;
     uint64_t duration;
-    Opcode() : gas(0), gas_cost(0), depth(0), pc(0), op(0), gas_refund(0), memory_size(0), startTime({0,0}), duration(0) {};
+    Opcode() : gas(0), gas_cost(0), depth(0), pc(0), op(0), opcode(NULL), gas_refund(0), memory_size(0), startTime({0,0}), duration(0) {};
 };
 
 class Log
