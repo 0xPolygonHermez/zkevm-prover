@@ -893,6 +893,9 @@ void loadDb2MemCache(const Config config)
         return;
     }
 
+    struct timeval loadCacheStartTime;
+    gettimeofday(&loadCacheStartTime, NULL);
+
     unordered_map<uint64_t, vector<string>> treeMap;
     vector<string> emptyVector;
     string hash, leftHash, rightHash;
@@ -903,6 +906,12 @@ void loadDb2MemCache(const Config config)
     unordered_map<uint64_t, std::vector<std::string>>::iterator treeMapIterator;
     for (uint64_t level=0; level<256; level++)
     {
+        // Spend only 10 seconds
+        if (TimeDiff(loadCacheStartTime) > config.loadDBToMemTimeout)
+        {
+            break;
+        }
+
         treeMapIterator = treeMap.find(level);
         if (treeMapIterator == treeMap.end())
         {
@@ -920,6 +929,12 @@ void loadDb2MemCache(const Config config)
         
         for (uint64_t i=0; i<treeMapIterator->second.size(); i++)
         {
+            // Spend only 10 seconds
+            if (TimeDiff(loadCacheStartTime) > config.loadDBToMemTimeout)
+            {
+                break;
+            }
+
             hash = treeMapIterator->second[i];
             dbValue.clear();
             zkresult zkr = pStateDB->db.read(hash, dbValue, NULL, true);

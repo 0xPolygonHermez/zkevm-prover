@@ -52,6 +52,7 @@ public:
 
     bool loadDBToMemCache;
     bool loadDBToMemCacheInParallel;
+    uint64_t loadDBToMemTimeout;
     int64_t dbMTCacheSize; // Size in MBytes for the cache to store MT records
     int64_t dbProgramCacheSize; // Size in MBytes for the cache to store Program (SC) records
     bool opcodeTracer;
