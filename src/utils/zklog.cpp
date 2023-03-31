@@ -25,6 +25,6 @@ void zkLog::warning (const string &message)
 void zkLog::error (const string &message)
 {
     lock();
-    cerr << getTimestamp() << " zkError: " << message << endl;
+    cerr << getTimestamp() << " zkError: " << message << endl << flush;
     unlock();
 }

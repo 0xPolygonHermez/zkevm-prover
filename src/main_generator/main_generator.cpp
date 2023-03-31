@@ -254,8 +254,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    StateDBInterface *pStateDB = StateDBClientFactory::createStateDBClient(fr, mainExecutor.config);\n";
     code += "    if (pStateDB == NULL)\n";
     code += "    {\n";
-    code += "        cerr << \"Error: " + functionName + "() failed calling StateDBClientFactory::createStateDBClient() uuid=\" << proverRequest.uuid << endl;\n";
-    code += "        exitProcess();\n";
+    code += "        zklog.error(\"" + functionName + "() failed calling StateDBClientFactory::createStateDBClient() uuid=\" + proverRequest.uuid);\n";
+    code += "        proverRequest.result = ZKR_DB_ERROR;\n";
+    code += "        return;\n";
     code += "    }\n\n";
 
     code += "    // Init execution flags\n";
@@ -266,8 +267,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    // In prover mode, we cannot accept unsigned transactions, since the proof would not meet the PIL constrains\n";
     code += "    if (bUnsignedTransaction && !bProcessBatch)\n";
     code += "    {\n";
-    code += "        cerr << \"Error: MainExecutor::MainExecutor() failed called with bUnsignedTransaction=true but bProcessBatch=false\" << endl;\n";
     code += "        proverRequest.result = ZKR_SM_MAIN_INVALID_UNSIGNED_TX;\n";
+    code += "        zklog.error(\"MainExecutor::execute() failed called with bUnsignedTransaction=true but bProcessBatch=false\");\n";
     code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
     code += "        return;\n";
     code += "    }\n\n";
@@ -419,8 +420,10 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    {\n";
     code += "        if (!bProcessBatch)\n";
     code += "        {\n";
-    code += "            cerr << \"Error: MainExecutor::execute() found proverRequest.input.bNoCounters=true and bProcessBatch=false uuid=\" << proverRequest.uuid << endl;\n";
-    code += "            exitProcess();\n";
+    code += "            proverRequest.result = ZKR_SM_MAIN_BATCH_INVALID_INPUT;;\n";
+    code += "            mainExecutor.logError(ctx, \"" + functionName + "()) found proverRequest.bNoCounters=true and bProcessBatch=false\");\n";
+    code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+    code += "            return;\n";
     code += "        }\n";
     code += "        N_Max = mainExecutor.N_NoCounters;\n";
     code += "    }\n";
@@ -490,7 +493,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        if (cr.zkResult != ZKR_SUCCESS)\n";
             code += "        {\n";
             code += "            proverRequest.result = cr.zkResult;\n";
-            code += "            cerr << \"Error: Main exec failed calling evalCommand() before result=\" << proverRequest.result << \"=\" << zkresult2string(proverRequest.result) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
+            code += "            mainExecutor.logError(ctx, string(\"Failed calling evalCommand() before result=\") + zkresult2string(proverRequest.result));\n";
             code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             code += "        }\n";
@@ -731,8 +734,11 @@ string generate(const json &rom, const string &functionName, const string &fileN
             {
                 code += "    if (!fr.toS32(addrRel, pols.E0[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: failed calling fr.toS32(sp, pols.E0[i])\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
-                code += "        exitProcess();\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_TOS32;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fr.toS32() with pols.E0[i]=\" + fr.toString(pols.E0[" + string(bFastMode?"0":"i") + "], 16));\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
                 code += "    }\n";
                 bAddrRel = true;
             }
@@ -740,8 +746,11 @@ string generate(const json &rom, const string &functionName, const string &fileN
             {
                 code += "    if ( !fr.toS32(addrRel, pols.RR[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: failed calling fr.toS32(sp, pols.RR[i])\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
-                code += "        exitProcess();\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_TOS32;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fr.toS32() with pols.RR[i]=\" + fr.toString(pols.RR[" + string(bFastMode?"0":"i") + "], 16));\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
                 code += "    }\n";
                 bAddrRel = true;
             }
@@ -757,8 +766,11 @@ string generate(const json &rom, const string &functionName, const string &fileN
             {
                 code += "    if (!fr.toS32(sp, pols.SP[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: failed calling fr.toS32(sp, pols.SP[i])\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
-                code += "        exitProcess();\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_TOS32;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fr.toS32() with pols.SP[i]=\" + fr.toString(pols.SP[" + string(bFastMode?"0":"i") + "], 16));\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
                 code += "    }\n";
                 if (bAddrRel || bOffset)
                     code += "    addrRel += sp;\n";
@@ -771,16 +783,18 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    // If addrRel is possitive, and the sum is too big, fail\n";
                 code += "    if (addrRel>=0x20000 || ((rom.line[" + to_string(zkPC) + "].isMem==1) && (addrRel >= 0x10000)))\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: addrRel too big addrRel=\" << addrRel << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"addrRel too big addrRel=\" + to_string(addrRel));\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    // If addrRel is negative, fail\n";
                 code += "    if (addrRel < 0)\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: addrRel<0 \" << addrRel << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"addrRel<0 addrRel=\" + to_string(addrRel));\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -947,8 +961,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     
                     code += "    if  ( !fr.isZero(pols.A5[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A6[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A7[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B2[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B3[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B4[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B5[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B6[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B7[" + string(bFastMode?"0":"i") + "]) )\n";
                     code += "    {\n";
-                    code += "        cerr << \"Error: MainExecutor::Execute() storage read free in found non-zero A-B storage registers step=\" << i << \" zkPC=" + to_string(zkPC) + " line=\" << rom.line[zkPC].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE;\n";
+                    code += "        zkPC=" + to_string(zkPC) +";\n";
+                    code += "        mainExecutor.logError(ctx, \"Storage read free in found non-zero A-B storage registers\");\n";
                     code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                     code += "        return;\n";
                     code += "    }\n\n";
@@ -987,8 +1002,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    zkResult = pStateDB->get(oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);\n";
                     code += "    if (zkResult != ZKR_SUCCESS)\n";
                     code += "    {\n";
-                    code += "        cerr << \"Error: MainExecutor::execute() failed calling pStateDB->get() result=\" << zkresult2string(zkResult) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        proverRequest.result = zkResult;\n";
+                    code += "        zkPC=" + to_string(zkPC) +";\n";
+                    code += "        mainExecutor.logError(ctx, string(\"Failed calling pStateDB->get() result=\") + zkresult2string(zkResult));\n";
                     code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                     code += "        return;\n";
                     code += "    }\n";
@@ -999,10 +1015,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "    zkResult = eval_addReadWriteAddress(ctx, smtGetResult.value);\n";
                         code += "    if (zkResult != ZKR_SUCCESS)\n";
                         code += "    {\n";
-                        code += "        zklog.error(string(\"" + functionName + " failed calling eval_addReadWriteAddress() 1 result=\") + zkresult2string(zkResult));\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx);\n";
                         code += "        proverRequest.result = zkResult;\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx, string(\"Failed calling eval_addReadWriteAddress() 1 result=\") + zkresult2string(zkResult));\n";
                         code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                         code += "        return;\n";
                         code += "    }\n";
@@ -1050,8 +1065,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
                     code += "    if  ( !fr.isZero(pols.A5[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A6[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A7[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B2[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B3[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B4[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B5[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B6[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B7[" + string(bFastMode?"0":"i") + "]) )\n";
                     code += "    {\n";
-                    code += "        cerr << \"Error: MainExecutor::Execute() storage write free in found non-zero A-B storage registers step=\" << i << \" zkPC=" + to_string(zkPC) + " line=\" << rom.line[zkPC].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE;\n";
+                    code += "        zkPC=" + to_string(zkPC) +";\n";
+                    code += "        mainExecutor.logError(ctx, \"Storage write free in found non-zero A-B registers\");\n";
                     code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                     code += "        return;\n";
                     code += "    }\n\n";
@@ -1103,9 +1119,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    // Call SMT to get the new Merkel Tree root hash\n";
                     code += "    if (!fea2scalar(fr, scalarD, pols.D0[" + string(bFastMode?"0":"i") + "], pols.D1[" + string(bFastMode?"0":"i") + "], pols.D2[" + string(bFastMode?"0":"i") + "], pols.D3[" + string(bFastMode?"0":"i") + "], pols.D4[" + string(bFastMode?"0":"i") + "], pols.D5[" + string(bFastMode?"0":"i") + "], pols.D6[" + string(bFastMode?"0":"i") + "], pols.D7[" + string(bFastMode?"0":"i") + "]))\n";
                     code += "    {\n";
-                    code += "        zkPC=" + to_string(zkPC) +";\n";
-                    code += "        mainExecutor.logError(ctx);\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                    code += "        zkPC=" + to_string(zkPC) +";\n";
+                    code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar()\");\n";
                     code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                     code += "        return;\n";
                     code += "    }\n";
@@ -1117,8 +1133,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    zkResult = pStateDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.input.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);\n";
                     code += "    if (zkResult != ZKR_SUCCESS)\n";
                     code += "    {\n";
-                    code += "        cerr << \"Error: MainExecutor::execute() failed calling pStateDB->set() result=\" << zkresult2string(zkResult) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        proverRequest.result = zkResult;\n";
+                    code += "        zkPC=" + to_string(zkPC) +";\n";
+                    code += "        mainExecutor.logError(ctx, string(\"Failed calling pStateDB->set() result=\") + zkresult2string(zkResult));\n";
                     code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                     code += "        return;\n";
                     code += "    }\n";
@@ -1129,10 +1146,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "    zkResult = eval_addReadWriteAddress(ctx, scalarD);\n";
                         code += "    if (zkResult != ZKR_SUCCESS)\n";
                         code += "    {\n";
-                        code += "        zklog.error(string(\"" + functionName + " failed calling eval_addReadWriteAddress() 2 result=\") + zkresult2string(zkResult));\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx);\n";
                         code += "        proverRequest.result = zkResult;\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx, string(\"Failed calling eval_addReadWriteAddress() 2 result=\") + zkresult2string(zkResult));\n";
                         code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                         code += "        return;\n";
                         code += "    }\n";
@@ -1176,8 +1192,11 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "    size = fr.toU64(pols.D0[" + string(bFastMode?"0":"i") + "]);\n";
                         code += "    if (size>32)\n";
                         code += "    {\n";
-                        code += "        cerr << \"Error: Invalid size>32 for hashK 1: pols.D0[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16) << \" size=\" << size << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
-                        code += "        exitProcess();\n";
+                        code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx, \"Invalid size>32 for hashK 1: pols.D0[" + string(bFastMode?"0":"i") + "]=\" + fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16) + \" size=\" + to_string(size));\n";
+                        code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                        code += "        return;\n";
                         code += "    }\n\n";
                     }
                     else
@@ -1189,16 +1208,20 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    fr.toS64(iPos, pols.HASHPOS[" + string(bFastMode?"0":"i") + "]);\n";
                     code += "    if (iPos < 0)\n";
                     code += "    {\n";
-                    code += "        cerr << \"Error: Invalid pos<0 for HashK 1: pols.HASHPOS[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.HASHPOS[" + string(bFastMode?"0":"i") + "], 16) << \" pos=\" << iPos << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
-                    code += "        exitProcess();\n";
+                    code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+                    code += "        zkPC=" + to_string(zkPC) +";\n";
+                    code += "        mainExecutor.logError(ctx, \"Invalid pos<0 for HashK 1: pols.HASHPOS[" + string(bFastMode?"0":"i") + "]=\" + fr.toString(pols.HASHPOS[" + string(bFastMode?"0":"i") + "], 16) + \" pos=\" + to_string(iPos));\n";
+                    code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                    code += "        return;\n";
                     code += "    }\n";
                     code += "    pos = iPos;\n\n";
 
                     code += "    // Check that pos+size do not exceed data size\n";
                     code += "    if ( (pos+size) > hashIterator->second.data.size())\n";
                     code += "    {\n";
-                    code += "        cerr << \"Error: hashK 1 invalid size of hash: pos=\" << pos << \" size=\" << size << \" data.size=\" << ctx.hashK[addr].data.size() << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+                    code += "        zkPC=" + to_string(zkPC) +";\n";
+                    code += "        mainExecutor.logError(ctx, \"HashK 1 invalid size of hash: pos=\" + to_string(pos) + \" + size=\" + to_string(size) + \" > data.size=\" + to_string(hashIterator->second.data.size()));\n";
                     code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                     code += "        return;\n";
                     code += "    }\n";
@@ -1227,8 +1250,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    hashIterator = ctx.hashK.find(addr);\n";
                     code += "    if (hashIterator == ctx.hashK.end())\n";
                     code += "    {\n";
-                    code += "        cerr << \"Error: hashKDigest 1: digest not defined for addr=\" << addr << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+                    code += "        zkPC=" + to_string(zkPC) +";\n";
+                    code += "        mainExecutor.logError(ctx, \"HashKDigest 1: digest not defined for addr=\" + to_string(addr));\n";
                     code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                     code += "        return;\n";
                     code += "    }\n";
@@ -1236,8 +1260,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    // If digest was not calculated, this is an error\n";
                     code += "    if (!hashIterator->second.lenCalled)\n";
                     code += "    {\n";
-                    code += "        cerr << \"Error: hashKDigest 1: digest not calculated for addr=\" << addr << \".  Call hashKLen to finish digest.\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+                    code += "        zkPC=" + to_string(zkPC) +";\n";
+                    code += "        mainExecutor.logError(ctx, \"HashKDigest 1: digest not calculated for addr=\" + to_string(addr) + \".  Call hashKLen to finish digest.\");\n";
                     code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                     code += "        return;\n";
                     code += "    }\n";
@@ -1272,8 +1297,11 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "    size = fr.toU64(pols.D0[" + string(bFastMode?"0":"i") + "]);\n";
                         code += "    if (size>32)\n";
                         code += "    {\n";
-                        code += "        cerr << \"Error: Invalid size>32 for hashP 1: pols.D0[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16) << \" size=\" << size << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
-                        code += "        exitProcess();\n";
+                        code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx, \"Invalid size>32 for hashP 1: pols.D0[" + string(bFastMode?"0":"i") + "]=\" + fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16) + \" size=\" + to_string(size));\n";
+                        code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                        code += "        return;\n";
                         code += "    }\n\n";
                     }
                     else
@@ -1285,16 +1313,20 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    fr.toS64(iPos, pols.HASHPOS[" + string(bFastMode?"0":"i") + "]);\n";
                     code += "    if (iPos < 0)\n";
                     code += "    {\n";
-                    code += "        cerr << \"Error: Invalid pos<0 for HashP 1: pols.HASHPOS[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.HASHPOS[" + string(bFastMode?"0":"i") + "], 16) << \" pos=\" << iPos << \" step=\" << i << \" zkPC=" + to_string(zkPC) + " instruction=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
-                    code += "        exitProcess();\n";
+                    code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+                    code += "        zkPC=" + to_string(zkPC) +";\n";
+                    code += "        mainExecutor.logError(ctx, \"Invalid pos<0 for HashP 1: pols.HASHPOS[" + string(bFastMode?"0":"i") + "]=\" + fr.toString(pols.HASHPOS[" + string(bFastMode?"0":"i") + "], 16) + \" pos=\" + to_string(iPos));\n";
+                    code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                    code += "        return;\n";
                     code += "    }\n";
                     code += "    pos = iPos;\n\n";
 
                     code += "    // Check that pos+size do not exceed data size\n";
                     code += "    if ( (pos+size) > hashIterator->second.data.size())\n";
                     code += "    {\n";
-                    code += "        cerr << \"Error: hashP 1 invalid size of hash: pos=\" << pos << \" size=\" << size << \" data.size=\" << ctx.hashP[addr].data.size() << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+                    code += "        zkPC=" + to_string(zkPC) +";\n";
+                    code += "        mainExecutor.logError(ctx, \"HashP 1 invalid size of hash: pos=\" + to_string(pos) + \" size=\" + to_string(size) + \" data.size=\" + to_string(ctx.hashP[addr].data.size()));\n";
                     code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                     code += "        return;\n";
                     code += "    }\n";
@@ -1319,16 +1351,18 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    hashIterator = ctx.hashP.find(addr);\n";
                     code += "    if (hashIterator == ctx.hashP.end())\n";
                     code += "    {\n";
-                    code += "        cerr << \"Error: hashPDigest 1: digest not defined\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+                    code += "        zkPC=" + to_string(zkPC) +";\n";
+                    code += "        mainExecutor.logError(ctx, \"HashPDigest 1: digest not defined addr=\" + to_string(addr));\n";
                     code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                     code += "        return;\n";
                     code += "    }\n";
                     code += "    // If digest was not calculated, this is an error\n";
                     code += "    if (!hashIterator->second.lenCalled)\n";
                     code += "    {\n";
-                    code += "        cerr << \"Error: hashPDigest 1: digest not calculated.  Call hashPLen to finish digest.\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+                    code += "        zkPC=" + to_string(zkPC) +";\n";
+                    code += "        mainExecutor.logError(ctx, \"HashPDigest 1: digest not calculated.  Call hashPLen to finish digest.\");\n";
                     code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                     code += "        return;\n";
                     code += "    }\n";
@@ -1345,17 +1379,17 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "    //Binary free in ADD\n";
                         code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                         code += "    {\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx);\n";
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
                         code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                         code += "        return;\n";
                         code += "    }\n";
                         code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
                         code += "    {\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx);\n";
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
                         code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                         code += "        return;\n";
                         code += "    }\n";
@@ -1368,17 +1402,17 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "    //Binary free in SUB\n";
                         code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                         code += "    {\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx);\n";
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
                         code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                         code += "        return;\n";
                         code += "    }\n";
                         code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
                         code += "    {\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx);\n";
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
                         code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                         code += "        return;\n";
                         code += "    }\n";
@@ -1391,17 +1425,17 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "    //Binary free in LT\n";
                         code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                         code += "    {\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx);\n";
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
                         code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                         code += "        return;\n";
                         code += "    }\n";
                         code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
                         code += "    {\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx);\n";
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
                         code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                         code += "        return;\n";
                         code += "    }\n";
@@ -1414,17 +1448,17 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "    //Binary free in SLT\n";
                         code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                         code += "    {\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx);\n";
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
                         code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                         code += "        return;\n";
                         code += "    }\n";
                         code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
                         code += "    {\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx);\n";
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
                         code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                         code += "        return;\n";
                         code += "    }\n";
@@ -1439,17 +1473,17 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "    //Binary free in EQ\n";
                         code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                         code += "    {\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx);\n";
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
                         code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                         code += "        return;\n";
                         code += "    }\n";
                         code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
                         code += "    {\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx);\n";
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
                         code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                         code += "        return;\n";
                         code += "    }\n";
@@ -1462,17 +1496,17 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "    //Binary free in AND\n";
                         code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                         code += "    {\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx);\n";
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
                         code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                         code += "        return;\n";
                         code += "    }\n";
                         code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
                         code += "    {\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx);\n";
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
                         code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                         code += "        return;\n";
                         code += "    }\n";
@@ -1485,17 +1519,17 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "    //Binary free in OR\n";
                         code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                         code += "    {\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx);\n";
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
                         code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                         code += "        return;\n";
                         code += "    }\n";
                         code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
                         code += "    {\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx);\n";
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
                         code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                         code += "        return;\n";
                         code += "    }\n";
@@ -1508,17 +1542,17 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "    //Binary free in XOR\n";
                         code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                         code += "    {\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx);\n";
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
                         code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                         code += "        return;\n";
                         code += "    }\n";
                         code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
                         code += "    {\n";
-                        code += "        zkPC=" + to_string(zkPC) +";\n";
-                        code += "        mainExecutor.logError(ctx);\n";
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                        code += "        zkPC=" + to_string(zkPC) +";\n";
+                        code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
                         code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                         code += "        return;\n";
                         code += "    }\n";
@@ -1540,32 +1574,32 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    // Mem allign read free in\n";
                     code += "    if (!fea2scalar(fr, m0, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                     code += "    {\n";
-                    code += "        zkPC=" + to_string(zkPC) +";\n";
-                    code += "        mainExecutor.logError(ctx);\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                    code += "        zkPC=" + to_string(zkPC) +";\n";
+                    code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
                     code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                     code += "        return;\n";
                     code += "    }\n";
                     code += "    if (!fea2scalar(fr, m1, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
                     code += "    {\n";
-                    code += "        zkPC=" + to_string(zkPC) +";\n";
-                    code += "        mainExecutor.logError(ctx);\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                    code += "        zkPC=" + to_string(zkPC) +";\n";
+                    code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
                     code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                     code += "        return;\n";
                     code += "    }\n";
                     code += "    if (!fea2scalar(fr, offsetScalar, pols.C0[" + string(bFastMode?"0":"i") + "], pols.C1[" + string(bFastMode?"0":"i") + "], pols.C2[" + string(bFastMode?"0":"i") + "], pols.C3[" + string(bFastMode?"0":"i") + "], pols.C4[" + string(bFastMode?"0":"i") + "], pols.C5[" + string(bFastMode?"0":"i") + "], pols.C6[" + string(bFastMode?"0":"i") + "], pols.C7[" + string(bFastMode?"0":"i") + "]))\n";
                     code += "    {\n";
-                    code += "        zkPC=" + to_string(zkPC) +";\n";
-                    code += "        mainExecutor.logError(ctx);\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                    code += "        zkPC=" + to_string(zkPC) +";\n";
+                    code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.C)\");\n";
                     code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                     code += "        return;\n";
                     code += "    }\n";
                     code += "    if (offsetScalar<0 || offsetScalar>32)\n";
                     code += "    {\n";
-                    code += "        cerr << \"Error: MemAlign out of range offset=\" << offsetScalar.get_str() << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN;\n";
+                    code += "        mainExecutor.logError(ctx, \"MemAlign out of range offset=\" + offsetScalar.get_str());\n";
                     code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                     code += "        return;\n";
                     code += "    }\n";
@@ -1664,7 +1698,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    if (cr.zkResult != ZKR_SUCCESS)\n";
                     code += "    {\n";
                     code += "        proverRequest.result = cr.zkResult;\n";
-                    code += "        cerr << \"Error: Main exec failed calling evalCommand() result=\" << proverRequest.result << \"=\" << zkresult2string(proverRequest.result) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
+                    code += "        zkPC=" + to_string(zkPC) +";\n";
+                    code += "        mainExecutor.logError(ctx, string(\"Main exec failed calling evalCommand() result=\") + zkresult2string(proverRequest.result));\n";
                     code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                     code += "        return;\n";
                     code += "    }\n\n";
@@ -1726,7 +1761,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "        fi7 = fr.zero();\n";
                     code += "        break;\n";
                     code += "    default:\n";
-                    code += "        cerr << \"Error: unexpected command result type: \" << cr.type << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
+                    code += "        mainExecutor.logError(ctx, \"Unexpected command result type: \" + to_string(cr.type));\n";
                     code += "        exitProcess();\n";
                     code += "    }\n";
                 }
@@ -1857,10 +1892,13 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "         (!fr.equal(pols.A6[" + string(bFastMode?"0":"i") + "], op6)) ||\n";
             code += "         (!fr.equal(pols.A7[" + string(bFastMode?"0":"i") + "], op7)) )\n";
             code += "    {\n";
-            code += "        cerr << \"Error: ROM assert failed: AN!=opN\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
-            code += "        cerr << \"A: \" << fr.toString(pols.A7[" + string(bFastMode?"0":"i") + "], 16) << \":\" << fr.toString(pols.A6[" + string(bFastMode?"0":"i") + "], 16) << \":\" << fr.toString(pols.A5[" + string(bFastMode?"0":"i") + "], 16) << \":\" << fr.toString(pols.A4[" + string(bFastMode?"0":"i") + "], 16) << \":\" << fr.toString(pols.A3[" + string(bFastMode?"0":"i") + "], 16) << \":\" << fr.toString(pols.A2[" + string(bFastMode?"0":"i") + "], 16) << \":\" << fr.toString(pols.A1[" + string(bFastMode?"0":"i") + "], 16) << \":\" << fr.toString(pols.A0[" + string(bFastMode?"0":"i") + "], 16) << endl;\n";
-            code += "        cerr << \"OP:\" << fr.toString(op7, 16) << \":\" << fr.toString(op6, 16) << \":\" << fr.toString(op5, 16) << \":\" << fr.toString(op4,16) << \":\" << fr.toString(op3, 16) << \":\" << fr.toString(op2, 16) << \":\" << fr.toString(op1, 16) << \":\" << fr.toString(op0, 16) << endl;\n";
-            code += "        exitProcess();\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_ASSERT;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, string(\"ROM assert failed: AN!=opN\") + ";
+            code += "\" A:\" + fr.toString(pols.A7[" + string(bFastMode?"0":"i") + "], 16) + \":\" + fr.toString(pols.A6[" + string(bFastMode?"0":"i") + "], 16) + \":\" + fr.toString(pols.A5[" + string(bFastMode?"0":"i") + "], 16) + \":\" + fr.toString(pols.A4[" + string(bFastMode?"0":"i") + "], 16) + \":\" + fr.toString(pols.A3[" + string(bFastMode?"0":"i") + "], 16) + \":\" + fr.toString(pols.A2[" + string(bFastMode?"0":"i") + "], 16) + \":\" + fr.toString(pols.A1[" + string(bFastMode?"0":"i") + "], 16) + \":\" + fr.toString(pols.A0[" + string(bFastMode?"0":"i") + "], 16) + ";
+            code += "\" OP:\" + fr.toString(op7, 16) + \":\" + fr.toString(op6, 16) + \":\" + fr.toString(op5, 16) + \":\" + fr.toString(op4,16) + \":\" + fr.toString(op3, 16) + \":\" + fr.toString(op2, 16) + \":\" + fr.toString(op1, 16) + \":\" + fr.toString(op0, 16));\n";
+            code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+            code += "        return;\n";
             code += "    }\n";
             if (!bFastMode)
                 code += "    pols.assert_pol[i] = fr.one();\n";
@@ -1945,8 +1983,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "             (!fr.equal(memIterator->second.fe6, op6)) ||\n";
                 code += "             (!fr.equal(memIterator->second.fe7, op7)) )\n";
                 code += "        {\n";
-                code += "            cerr << \"Error: Memory Read does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "            proverRequest.result = ZKR_SM_MAIN_MEMORY;\n";
+                code += "            zkPC=" + to_string(zkPC) +";\n";
+                code += "            mainExecutor.logError(ctx, \"Memory Read does not match\");\n";
                 code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "            return;\n";
                 code += "        }\n";
@@ -1962,8 +2001,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "             (!fr.isZero(op6)) ||\n";
                 code += "             (!fr.isZero(op7)) )\n";
                 code += "        {\n";
-                code += "            cerr << \"Error: Memory Read does not match (op!=0)\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "            proverRequest.result = ZKR_SM_MAIN_MEMORY;\n";
+                code += "            zkPC=" + to_string(zkPC) +";\n";
+                code += "            mainExecutor.logError(ctx, \"Memory Read does not match (op!=0)\");\n";
                 code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "            return;\n";
                 code += "        }\n";
@@ -2004,8 +2044,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
             code += "    if  ( !fr.isZero(pols.A5[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A6[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A7[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B2[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B3[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B4[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B5[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B6[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B7[" + string(bFastMode?"0":"i") + "]) )\n";
             code += "    {\n";
-            code += "        cerr << \"Error: MainExecutor::Execute() storage read instruction found non-zero A-B storage registers step=\" << i << \" zkPC=" + to_string(zkPC) + " line=\" << rom.line[zkPC].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, \"Storage read instruction found non-zero A-B registers\");\n";
             code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "        return;\n";
             code += "    }\n\n";
@@ -2070,8 +2111,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    zkResult = pStateDB->get(oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);\n";
             code += "    if (zkResult != ZKR_SUCCESS)\n";
             code += "    {\n";
-            code += "        cerr << \"Error: MainExecutor::execute() failed calling pStateDB->get() result=\" << zkresult2string(zkResult) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        proverRequest.result = zkResult;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, string(\"Failed calling pStateDB->get() result=\") + zkresult2string(zkResult));\n";
             code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "        return;\n";
             code += "    }\n";
@@ -2082,10 +2124,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    zkResult = eval_addReadWriteAddress(ctx, scalarD);\n";
                 code += "    if (zkResult != ZKR_SUCCESS)\n";
                 code += "    {\n";
-                code += "        zklog.error(string(\"" + functionName + " failed calling eval_addReadWriteAddress() 3 result=\") + zkresult2string(zkResult));\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = zkResult;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, string(\"Failed calling eval_addReadWriteAddress() 3 result=\") + zkresult2string(zkResult));\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -2107,16 +2148,17 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
             code += "    if (!fea2scalar(fr, opScalar, op0, op1, op2, op3, op4, op5, op6, op7))\n";
             code += "    {\n";
-            code += "        zkPC=" + to_string(zkPC) +";\n";
-            code += "        mainExecutor.logError(ctx);\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
             code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "        return;\n";
             code += "    }\n";
             code += "    if (smtGetResult.value != opScalar)\n";
             code += "    {\n";
-            code += "        cerr << \"Error: Storage read does not match: smtGetResult.value=\" << smtGetResult.value.get_str() << \" opScalar=\" << opScalar.get_str() << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, \"Storage read does not match: smtGetResult.value=\" + smtGetResult.value.get_str() + \" opScalar=\" + opScalar.get_str());\n";
             code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "        return;\n";
             code += "    }\n";
@@ -2171,8 +2213,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
             code += "        if  ( !fr.isZero(pols.A5[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A6[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A7[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B2[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B3[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B4[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B5[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B6[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B7[" + string(bFastMode?"0":"i") + "]) )\n";
             code += "        {\n";
-            code += "            cerr << \"Error: MainExecutor::Execute() storage write instruction found non-zero A-B storage registers step=\" << i << \" zkPC=" + to_string(zkPC) + " line=\" << rom.line[zkPC].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            proverRequest.result = ZKR_SM_MAIN_STORAGE;\n";
+            code += "            zkPC=" + to_string(zkPC) +";\n";
+            code += "            mainExecutor.logError(ctx, \"Storage write instruction found non-zero A-B registers\");\n";
             code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             code += "        }\n\n";
@@ -2221,9 +2264,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        // Call SMT to get the new Merkel Tree root hash\n";
             code += "        if (!fea2scalar(fr, scalarD, pols.D0[" + string(bFastMode?"0":"i") + "], pols.D1[" + string(bFastMode?"0":"i") + "], pols.D2[" + string(bFastMode?"0":"i") + "], pols.D3[" + string(bFastMode?"0":"i") + "], pols.D4[" + string(bFastMode?"0":"i") + "], pols.D5[" + string(bFastMode?"0":"i") + "], pols.D6[" + string(bFastMode?"0":"i") + "], pols.D7[" + string(bFastMode?"0":"i") + "]))\n";
             code += "        {\n";
-            code += "            zkPC=" + to_string(zkPC) +";\n";
-            code += "            mainExecutor.logError(ctx);\n";
             code += "            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+            code += "            zkPC=" + to_string(zkPC) +";\n";
+            code += "            mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.D)\");\n";
             code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             code += "        }\n";
@@ -2236,8 +2279,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        zkResult = pStateDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.input.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);\n";
             code += "        if (zkResult != ZKR_SUCCESS)\n";
             code += "        {\n";
-            code += "            cerr << \"Error: MainExecutor::execute() failed calling pStateDB->set() result=\" << zkresult2string(zkResult) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            proverRequest.result = zkResult;\n";
+            code += "            zkPC=" + to_string(zkPC) +";\n";
+            code += "            mainExecutor.logError(ctx, string(\"Failed calling pStateDB->set() result=\") + zkresult2string(zkResult));\n";
             code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             code += "        }\n";
@@ -2248,10 +2292,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        zkResult = eval_addReadWriteAddress(ctx, scalarD);\n";
                 code += "        if (zkResult != ZKR_SUCCESS)\n";
                 code += "        {\n";
-                code += "            zklog.error(string(\"" + functionName + " failed calling eval_addReadWriteAddress() 4 result=\") + zkresult2string(zkResult));\n";
-                code += "            zkPC=" + to_string(zkPC) +";\n";
-                code += "            mainExecutor.logError(ctx);\n";
                 code += "            proverRequest.result = zkResult;\n";
+                code += "            zkPC=" + to_string(zkPC) +";\n";
+                code += "            mainExecutor.logError(ctx, string(\"Failed calling eval_addReadWriteAddress() 4 result=\") + zkresult2string(zkResult));\n";
                 code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "            return;\n";
                 code += "        }\n";
@@ -2302,10 +2345,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "         !fr.equal(ctx.lastSWrite.newRoot[2], oldRoot[2]) ||\n";
             code += "         !fr.equal(ctx.lastSWrite.newRoot[3], oldRoot[3]) )\n";
             code += "    {\n";
-            code += "        cerr << \"Error: Storage write does not match; i: \" << i << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << \n";
-            code += "            \" ctx.lastSWrite.newRoot: \" << fr.toString(ctx.lastSWrite.newRoot[3], 16) << \":\" << fr.toString(ctx.lastSWrite.newRoot[2], 16) << \":\" << fr.toString(ctx.lastSWrite.newRoot[1], 16) << \":\" << fr.toString(ctx.lastSWrite.newRoot[0], 16) <<\n";
-            code += "            \" oldRoot: \" << fr.toString(oldRoot[3], 16) << \":\" << fr.toString(oldRoot[2], 16) << \":\" << fr.toString(oldRoot[1], 16) << \":\" << fr.toString(oldRoot[0], 16) << endl;\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, \"Storage write does not match: ctx.lastSWrite.newRoot: \" + fr.toString(ctx.lastSWrite.newRoot[3], 16) + \":\" + fr.toString(ctx.lastSWrite.newRoot[2], 16) + \":\" + fr.toString(ctx.lastSWrite.newRoot[1], 16) + \":\" + fr.toString(ctx.lastSWrite.newRoot[0], 16) + \" oldRoot: \" + fr.toString(oldRoot[3], 16) + \":\" + fr.toString(oldRoot[2], 16) + \":\" + fr.toString(oldRoot[1], 16) + \":\" + fr.toString(oldRoot[0], 16));\n";
             code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "        return;\n";
             code += "    }\n";
@@ -2316,8 +2358,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "         !fr.equal(ctx.lastSWrite.newRoot[2], fea[2]) ||\n";
             code += "         !fr.equal(ctx.lastSWrite.newRoot[3], fea[3]) )\n";
             code += "    {\n";
-            code += "        cerr << \"Error: Storage write does not match: ctx.lastSWrite.newRoot=\" << fea2string(fr, ctx.lastSWrite.newRoot) << \" op=\" << fea << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, \"Storage write does not match: ctx.lastSWrite.newRoot=\" + fea2string(fr, ctx.lastSWrite.newRoot) + \" op=\" + fea2string(fr, fea));\n";
             code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "        return;\n";
             code += "    }\n";
@@ -2364,8 +2407,11 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    size = fr.toU64(pols.D0[" + string(bFastMode?"0":"i") + "]);\n";
                 code += "    if (size>32)\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: Invalid size>32 for hashK 2: pols.D0[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16) << \" size=\" << size << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
-                code += "        exitProcess();\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Invalid size>32 for hashK 2: pols.D0[" + string(bFastMode?"0":"i") + "]=\" + fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16));\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
                 code += "    }\n\n";
             }
             else
@@ -2377,17 +2423,20 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    fr.toS64(iPos, pols.HASHPOS[" + string(bFastMode?"0":"i") + "]);\n";
             code += "    if (iPos < 0)\n";
             code += "    {\n";
-            code += "        cerr << \"Error: Invalid pos<0 for HashK 2: pols.HASHPOS[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.HASHPOS[" + string(bFastMode?"0":"i") + "], 16) << \" pos=\" << iPos << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
-            code += "        exitProcess();\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, \"Invalid pos<0 for HashK 2: pols.HASHPOS[" + string(bFastMode?"0":"i") + "]=\" + fr.toString(pols.HASHPOS[" + string(bFastMode?"0":"i") + "], 16) + \" pos=\" + to_string(iPos));\n";
+            code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+            code += "        return;\n";
             code += "    }\n";
             code += "    pos = iPos;\n\n";
 
             code += "    // Get contents of opN into a\n";
             code += "    if (!fea2scalar(fr, a, op0, op1, op2, op3, op4, op5, op6, op7))\n";
             code += "    {\n";
-            code += "        zkPC=" + to_string(zkPC) +";\n";
-            code += "        mainExecutor.logError(ctx);\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
             code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "        return;\n";
             code += "    }\n\n";
@@ -2403,8 +2452,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        }\n";
             code += "        else if (hashIterator->second.data.size() < (pos+j))\n";
             code += "        {\n";
-            code += "            cerr << \"Error: hashK 2: trying to insert data in a position:\" << (pos+j) << \" higher than current data size:\" << ctx.hashK[addr].data.size() << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+            code += "            zkPC=" + to_string(zkPC) +";\n";
+            code += "            mainExecutor.logError(ctx, \"HashK 2: trying to insert data in a position:\" + to_string(pos+j) + \" higher than current data size:\" + to_string(ctx.hashK[addr].data.size()));\n";
             code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             code += "        }\n";
@@ -2414,8 +2464,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "            bh = hashIterator->second.data[pos+j];\n";
             code += "            if (bm != bh)\n";
             code += "            {\n";
-            code += "                cerr << \"Error: HashK 2 bytes do not match: addr=\" << addr << \" pos+j=\" << pos+j << \" is bm=\" << bm << \" and it should be bh=\" << bh << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "                proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+            code += "                zkPC=" + to_string(zkPC) +";\n";
+            code += "                mainExecutor.logError(ctx, \"HashK 2 bytes do not match: addr=\" + to_string(addr) + \" pos+j=\" + to_string(pos+j) + \" is bm=\" + to_string(bm) + \" and it should be bh=\" + to_string(bh));\n";
             code += "                StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "                return;\n";
             code += "            }\n";
@@ -2426,8 +2477,11 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    paddingA = a >> (size*8);\n";
             code += "    if (paddingA != 0)\n";
             code += "    {\n";
-            code += "        cerr << \"Error: HashK 2 incoherent size=\" << size << \" a=\" << a.get_str(16) << \" paddingA=\" << paddingA.get_str(16) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
-            code += "        exitProcess();\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, \"HashK 2 incoherent size=\" + to_string(size) + \" a=\" + a.get_str(16) + \" paddingA=\" + paddingA.get_str(16));\n";
+            code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+            code += "        return;\n";
             code += "    }\n\n";
 
             code += "    // Record the read operation\n";
@@ -2436,8 +2490,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    {\n";
             code += "         if ( readsIterator->second != size )\n";
             code += "        {\n";
-            code += "            cerr << \"Error: HashK 2 different read sizes in the same position addr=\" << addr << \" pos=\" << pos << \" ctx.hashK[addr].reads[pos]=\" << ctx.hashK[addr].reads[pos] << \" size=\" << size << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+            code += "            zkPC=" + to_string(zkPC) +";\n";
+            code += "            mainExecutor.logError(ctx, \"HashK 2 different read sizes in the same position addr=\" + to_string(addr) + \" pos=\" + to_string(pos) + \" ctx.hashK[addr].reads[pos]=\" + to_string(ctx.hashK[addr].reads[pos]) + \" size=\" + to_string(size));\n";
             code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             code += "        }\n";
@@ -2476,8 +2531,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        // Check that length = 0\n";
             code += "        if (lm != 0)\n";
             code += "        {\n";
-            code += "            cerr << \"Error: hashKLen 2 hashK[addr] is empty but lm is not 0 addr=\" << addr << \" lm=\" << lm << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+            code += "            zkPC=" + to_string(zkPC) +";\n";
+            code += "            mainExecutor.logError(ctx, \"HashKLen 2 hashK[addr] is empty but lm is not 0 addr=\" + to_string(addr) + \" lm=\" + to_string(lm));\n";
             code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             code += "        }\n\n";
@@ -2493,16 +2549,20 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
             code += "    if (ctx.hashK[addr].lenCalled)\n";
             code += "    {\n";
-            code += "        cerr << \"Error: hashKLen 2 called more than once addr=\" << addr << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
-            code += "        exitProcess();\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, \"HashKLen 2 called more than once addr=\" + to_string(addr));\n";
+            code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+            code += "        return;\n";
             code += "    }\n";
             code += "    ctx.hashK[addr].lenCalled = true;\n";
 
             code += "    lh = hashIterator->second.data.size();\n";
             code += "    if (lm != lh)\n";
             code += "    {\n";
-            code += "        cerr << \"Error: hashKLen 2 length does not match addr=\" << addr << \" is lm=\" << lm << \" and it should be lh=\" << lh << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, \"HashKLen 2 length does not match addr=\" + to_string(addr) + \" is lm=\" + to_string(lm) + \" and it should be lh=\" + to_string(lh));\n";
             code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "        return;\n";
             code += "    }\n";
@@ -2540,8 +2600,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    hashIterator = ctx.hashK.find(addr);\n";
             code += "    if (hashIterator == ctx.hashK.end())\n";
             code += "    {\n";
-            code += "        cerr << \"Error: hashKDigest 2 could not find entry for addr=\" << addr << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, \"HashKDigest 2 could not find entry for addr=\" + to_string(addr));\n";
             code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "        return;\n";
             code += "    }\n";
@@ -2549,25 +2610,29 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    // Get contents of op into dg\n";
             code += "    if (!fea2scalar(fr, dg, op0, op1, op2, op3, op4, op5, op6, op7))\n";
             code += "    {\n";
-            code += "        zkPC=" + to_string(zkPC) +";\n";
-            code += "        mainExecutor.logError(ctx);\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
             code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "        return;\n";
             code += "    }\n";
 
             code += "    if (dg != hashIterator->second.digest)\n";
             code += "    {\n";
-            code += "        cerr << \"Error: hashKDigest 2: Digest does not match op\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, \"HashKDigest 2: Digest does not match op\");\n";
             code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "        return;\n";
             code += "    }\n";
 
             code += "    if (ctx.hashK[addr].digestCalled)\n";
             code += "    {\n";
-            code += "        cerr << \"Error: hashKDigest 2 called more than once addr=\" << addr << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
-            code += "        exitProcess();\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, \"HashKDigest 2 called more than once addr=\" + to_string(addr));\n";
+            code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+            code += "        return;\n";
             code += "    }\n";
             code += "    ctx.hashK[addr].digestCalled = true;\n";
 
@@ -2611,8 +2676,11 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    size = fr.toU64(pols.D0[" + string(bFastMode?"0":"i") + "]);\n";
                 code += "    if (size>32)\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: Invalid size>32 for hashP 2: pols.D0[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16) << \" size=\" << size << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
-                code += "        exitProcess();\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Invalid size>32 for hashP 2: pols.D0[" + string(bFastMode?"0":"i") + "]=\" + fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16) + \" size=\" + to_string(size));\n";
+                code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                code += "        return;\n";
                 code += "    }\n\n";
             }
             else
@@ -2624,17 +2692,20 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    fr.toS64(iPos, pols.HASHPOS[" + string(bFastMode?"0":"i") + "]);\n";
             code += "    if (iPos < 0)\n";
             code += "    {\n";
-            code += "        cerr << \"Error: Invalid pos<0 for HashP 2: pols.HASHPOS[" + string(bFastMode?"0":"i") + "]=\" << fr.toString(pols.HASHPOS[" + string(bFastMode?"0":"i") + "], 16) << \" pos=\" << iPos << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
-            code += "        exitProcess();\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, \"Invalid pos<0 for HashP 2: pols.HASHPOS[" + string(bFastMode?"0":"i") + "]=\" + fr.toString(pols.HASHPOS[" + string(bFastMode?"0":"i") + "], 16) + \" pos=\" + to_string(iPos));\n";
+            code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+            code += "        return;\n";
             code += "    }\n";
             code += "    pos = iPos;\n\n";
 
             code += "    // Get contents of opN into a\n";
             code += "    if (!fea2scalar(fr, a, op0, op1, op2, op3, op4, op5, op6, op7))\n";
             code += "    {\n";
-            code += "        zkPC=" + to_string(zkPC) +";\n";
-            code += "        mainExecutor.logError(ctx);\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
             code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "        return;\n";
             code += "    }\n";
@@ -2649,8 +2720,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        }\n";
             code += "        else if (hashIterator->second.data.size() < (pos+j))\n";
             code += "        {\n";
-            code += "            cerr << \"Error: hashP 2: trying to insert data in a position:\" << (pos+j) << \" higher than current data size:\" << ctx.hashP[addr].data.size() << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+            code += "            zkPC=" + to_string(zkPC) +";\n";
+            code += "            mainExecutor.logError(ctx, \"HashP 2: trying to insert data in a position:\" + to_string(pos+j) + \" higher than current data size:\" + to_string(ctx.hashP[addr].data.size()));\n";
             code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             code += "        }\n";
@@ -2660,8 +2732,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "            bh = hashIterator->second.data[pos+j];\n";
             code += "            if (bm != bh)\n";
             code += "            {\n";
-            code += "                cerr << \"Error: HashP 2 bytes do not match: addr=\" << addr << \" pos+j=\" << pos+j << \" is bm=\" << bm << \" and it should be bh=\" << bh << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "                proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+            code += "                zkPC=" + to_string(zkPC) +";\n";
+            code += "                mainExecutor.logError(ctx, \"HashP 2 bytes do not match: addr=\" + to_string(addr) + \" pos+j=\" + to_string(pos+j) + \" is bm=\" + to_string(bm) + \" and it should be bh=\" + to_string(bh));\n";
             code += "                StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "                return;\n";
             code += "            }\n";
@@ -2672,8 +2745,11 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    paddingA = a >> (size*8);\n";
             code += "    if (paddingA != 0)\n";
             code += "    {\n";
-            code += "        cerr << \"Error: HashP 2 incoherent size=\" << size << \" a=\" << a.get_str(16) << \" paddingA=\" << paddingA.get_str(16) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
-            code += "        exitProcess();\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, \"HashP2 incoherent size=\" + to_string(size) + \" a=\" + a.get_str(16) + \" paddingA=\" + paddingA.get_str(16));\n";
+            code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+            code += "        return;\n";
             code += "    }\n\n";
 
             code += "    // Record the read operation\n";
@@ -2682,8 +2758,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    {\n";
             code += "        if ( readsIterator->second != size )\n";
             code += "        {\n";
-            code += "            cerr << \"Error: HashP 2 diferent read sizes in the same position addr=\" << addr << \" pos=\" << pos << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+            code += "            zkPC=" + to_string(zkPC) +";\n";
+            code += "            mainExecutor.logError(ctx, \"HashP 2 diferent read sizes in the same position addr=\" + to_string(addr) + \" pos=\" + to_string(pos));\n";
             code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             code += "        }\n";
@@ -2718,8 +2795,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        // Check that length = 0\n";
             code += "        if (lm != 0)\n";
             code += "        {\n";
-            code += "            cerr << \"Error: hashPLen 2 hashP[addr] is empty but lm is not 0 addr=\" << addr << \" lm=\" << lm << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
-            code += "            proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+            code += "            proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+            code += "            zkPC=" + to_string(zkPC) +";\n";
+            code += "            mainExecutor.logError(ctx, \"HashPLen 2 hashP[addr] is empty but lm is not 0 addr=\" + to_string(addr) + \" lm=\" + to_string(lm));\n";
             code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             code += "        }\n\n";
@@ -2735,16 +2813,20 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
             code += "    if (ctx.hashP[addr].lenCalled)\n";
             code += "    {\n";
-            code += "        cerr << \"Error: hashPLen 2 called more than once addr=\" << addr << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
-            code += "        exitProcess();\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, \"HashPLen 2 called more than once addr=\" + to_string(addr));\n";
+            code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+            code += "        return;\n";
             code += "    }\n";
             code += "    ctx.hashP[addr].lenCalled = true;\n";
 
             code += "    lh = hashIterator->second.data.size();\n";
             code += "    if (lm != lh)\n";
             code += "    {\n";
-            code += "        cerr << \"Error: hashPLen 2 does not match addr=\" << addr << \" is lm=\" << lm << \" and it should be lh=\" << lh << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, \"HashPLen 2 does not match match addr=\" + to_string(addr) + \" is lm=\" + to_string(lm) + \" and it should be lh=\" + to_string(lh));\n";
             code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "        return;\n";
             code += "    }\n";
@@ -2752,8 +2834,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    {\n";
             code += "        if (hashIterator->second.data.size() == 0)\n";
             code += "        {\n";
-            code += "            cerr << \"Error: hashPLen 2 found data empty\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+            code += "            zkPC=" + to_string(zkPC) +";\n";
+            code += "            mainExecutor.logError(ctx, \"HashPLen 2 found data empty\");\n";
             code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             code += "        }\n";
@@ -2771,7 +2854,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        Goldilocks::Element * pBuffer = new Goldilocks::Element[bufferSize];\n";
             code += "        if (pBuffer == NULL)\n";
             code += "        {\n";
-            code += "            cerr << \"Error: hashPLen 2 failed allocating memory of \" << bufferSize << \" field elements\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
+            code += "            zkPC=" + to_string(zkPC) +";\n";
+            code += "            mainExecutor.logError(ctx, \"hashPLen 2 failed allocating memory of \" + to_string(bufferSize) + \" field elements\");\n";
             code += "            exitProcess();\n";
             code += "        }\n";
             code += "        for (uint64_t j=0; j<bufferSize; j++) pBuffer[j] = fr.zero();\n";
@@ -2800,8 +2884,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        zkResult = pStateDB->setProgram(result, hashIterator->second.data, proverRequest.input.bUpdateMerkleTree);\n";
             code += "        if (zkResult != ZKR_SUCCESS)\n";
             code += "        {\n";
-            code += "            cerr << \"Error: MainExecutor::execute() failed calling pStateDB->setProgram() result=\" << zkresult2string(zkResult) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            proverRequest.result = zkResult;\n";
+            code += "            zkPC=" + to_string(zkPC) +";\n";
+            code += "            mainExecutor.logError(ctx, string(\"Failed calling pStateDB->setProgram() result=\") + zkresult2string(zkResult));\n";
             code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             code += "        }\n";
@@ -2827,9 +2912,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    // Get contents of op into dg\n";
             code += "    if (!fea2scalar(fr, dg, op0, op1, op2, op3, op4, op5, op6, op7))\n";
             code += "    {\n";
-            code += "        zkPC=" + to_string(zkPC) +";\n";
-            code += "        mainExecutor.logError(ctx);\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
             code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "        return;\n";
             code += "    }\n";
@@ -2847,8 +2932,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        zkResult = pStateDB->getProgram(aux, hashValue.data, proverRequest.dbReadLog);\n";
             code += "        if (zkResult != ZKR_SUCCESS)\n";
             code += "        {\n";
-            code += "            cerr << \"Error: MainExecutor::execute() failed calling pStateDB->getProgram() result=\" << zkresult2string(zkResult) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "            proverRequest.result = zkResult;\n";
+            code += "            zkPC=" + to_string(zkPC) +";\n";
+            code += "            mainExecutor.logError(ctx, string(\"Failed calling pStateDB->getProgram() result=\") + zkresult2string(zkResult));\n";
             code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             code += "        }\n";
@@ -2862,8 +2948,11 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
             code += "    if (ctx.hashP[addr].digestCalled)\n";
             code += "    {\n";
-            code += "        cerr << \"Error: hashPDigest 2 called more than once addr=\" << addr << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
-            code += "        exitProcess();\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, \"HashPDigest 2 called more than once addr=\" + to_string(addr));\n";
+            code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+            code += "        return;\n";
             code += "    }\n";
             code += "    ctx.hashP[addr].digestCalled = true;\n";
 
@@ -2872,8 +2961,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    // Check that digest equals op\n";
             code += "    if (dg != hashIterator->second.digest)\n";
             code += "    {\n";
-            code += "        cerr << \"Error: hashPDigest 2: ctx.hashP[addr].digest=\" << ctx.hashP[addr].digest.get_str(16) << \" does not match op=\" << dg.get_str(16) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, \"HashPDigest 2: ctx.hashP[addr].digest=\" + ctx.hashP[addr].digest.get_str(16) + \" does not match op=\" + dg.get_str(16));\n";
             code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "        return;\n";
             code += "    }\n";
@@ -2886,9 +2976,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    // HashP or Storage write instructions, required data\n";
             code += "    if (!fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7))\n";
             code += "    {\n";
-            code += "        zkPC=" + to_string(zkPC) +";\n";
-            code += "        mainExecutor.logError(ctx);\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
             code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "        return;\n";
             code += "    }\n";
@@ -2916,53 +3006,53 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    // Convert to scalar\n";
                 code += "    if (!fea2scalar(fr, A, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, B, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, C, pols.C0[" + string(bFastMode?"0":"i") + "], pols.C1[" + string(bFastMode?"0":"i") + "], pols.C2[" + string(bFastMode?"0":"i") + "], pols.C3[" + string(bFastMode?"0":"i") + "], pols.C4[" + string(bFastMode?"0":"i") + "], pols.C5[" + string(bFastMode?"0":"i") + "], pols.C6[" + string(bFastMode?"0":"i") + "], pols.C7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.C)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, D, pols.D0[" + string(bFastMode?"0":"i") + "], pols.D1[" + string(bFastMode?"0":"i") + "], pols.D2[" + string(bFastMode?"0":"i") + "], pols.D3[" + string(bFastMode?"0":"i") + "], pols.D4[" + string(bFastMode?"0":"i") + "], pols.D5[" + string(bFastMode?"0":"i") + "], pols.D6[" + string(bFastMode?"0":"i") + "], pols.D7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.D)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
                 code += "    // Check the condition\n";
-                code += "    if ( (A*B) + C != (D<<256) + op ) {\n";
-                code += "        cerr << \"Error: Arithmetic does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
+                code += "    if ( (A*B) + C != (D<<256) + op )\n";
+                code += "    {\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_ARITH;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        left = (A*B) + C;\n";
                 code += "        right = (D<<256) + op;\n";
-                code += "        cerr << \"(A*B) + C = \" << left.get_str(16) << endl;\n";
-                code += "        cerr << \"(D<<256) + op = \" << right.get_str(16) << endl;\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_ARITH;\n";
+                code += "        mainExecutor.logError(ctx, \"Arithmetic does not match: (A*B) + C = \" + left.get_str(16) + \", (D<<256) + op = \" + right.get_str(16));;\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -2993,49 +3083,49 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    // Convert to scalar\n";
                 code += "    if (!fea2scalar(fr, x1, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, y1, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, x2, pols.C0[" + string(bFastMode?"0":"i") + "], pols.C1[" + string(bFastMode?"0":"i") + "], pols.C2[" + string(bFastMode?"0":"i") + "], pols.C3[" + string(bFastMode?"0":"i") + "], pols.C4[" + string(bFastMode?"0":"i") + "], pols.C5[" + string(bFastMode?"0":"i") + "], pols.C6[" + string(bFastMode?"0":"i") + "], pols.C7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.C)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, y2, pols.D0[" + string(bFastMode?"0":"i") + "], pols.D1[" + string(bFastMode?"0":"i") + "], pols.D2[" + string(bFastMode?"0":"i") + "], pols.D3[" + string(bFastMode?"0":"i") + "], pols.D4[" + string(bFastMode?"0":"i") + "], pols.D5[" + string(bFastMode?"0":"i") + "], pols.D6[" + string(bFastMode?"0":"i") + "], pols.D7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.D)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, x3, pols.E0[" + string(bFastMode?"0":"i") + "], pols.E1[" + string(bFastMode?"0":"i") + "], pols.E2[" + string(bFastMode?"0":"i") + "], pols.E3[" + string(bFastMode?"0":"i") + "], pols.E4[" + string(bFastMode?"0":"i") + "], pols.E5[" + string(bFastMode?"0":"i") + "], pols.E6[" + string(bFastMode?"0":"i") + "], pols.E7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.E)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, y3, op0, op1, op2, op3, op4, op5, op6, op7))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -3080,8 +3170,11 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
                     code += "    if (mainExecutor.fec.isZero(denominator))\n";
                     code += "    {\n";
-                    code += "        cerr << \"Error: denominator=0 in arith operation 1\" << endl;";
-                    code += "        exitProcess();\n";
+                    code += "        proverRequest.result = ZKR_SM_MAIN_ARITH;\n";
+                    code += "        zkPC=" + to_string(zkPC) +";\n";
+                    code += "        mainExecutor.logError(ctx, \"Denominator=0 in arith operation 1\");";
+                    code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                    code += "        return;\n";
                     code += "    }\n";
 
                     code += "    // s = numerator/denominator\n";
@@ -3101,8 +3194,11 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
                     code += "    if (mainExecutor.fec.isZero(denominator))\n";
                     code += "    {\n";
-                    code += "        cerr << \"Error: denominator=0 in arith operation 2\" << endl;";
-                    code += "        exitProcess();\n";
+                    code += "        proverRequest.result = ZKR_SM_MAIN_ARITH;\n";
+                    code += "        zkPC=" + to_string(zkPC) +";\n";
+                    code += "        mainExecutor.logError(ctx, \"Denominator=0 in arith operation 2\");";
+                    code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+                    code += "        return;\n";
                     code += "    }\n";
 
                     code += "    // s = numerator/denominator\n";
@@ -3130,16 +3226,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
                 code += "    if (!x3eq || !y3eq)\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: Arithmetic curve " + string(dbl?"dbl":"add") + " point does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
-                code += "        cerr << \" x1=\" << x1.get_str() << endl;\n";
-                code += "        cerr << \" y1=\" << y1.get_str() << endl;\n";
-                code += "        cerr << \" x2=\" << x2.get_str() << endl;\n";
-                code += "        cerr << \" y2=\" << y2.get_str() << endl;\n";
-                code += "        cerr << \" x3=\" << x3.get_str() << endl;\n";
-                code += "        cerr << \" y3=\" << y3.get_str() << endl;\n";
-                code += "        cerr << \"_x3=\" << _x3.get_str() << endl;\n";
-                code += "        cerr << \"_y3=\" << _y3.get_str() << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_ARITH;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, string(\"Arithmetic curve " + string(dbl?"dbl":"add") + " point does not match x1=\") + x1.get_str() + \" y1=\" + y1.get_str() + \" x2=\" + x2.get_str() + \" y2=\" + y2.get_str() + \" x3=\" + x3.get_str() + \" y3=\" + y3.get_str() + \"_x3=\" + _x3.get_str() + \"_y3=\" + _y3.get_str());\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -3175,25 +3264,25 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
                 code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -3201,8 +3290,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    expectedC = (a + b) & ScalarMask256;\n";
                 code += "    if (c != expectedC)\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: Binary ADD operation does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Binary ADD operation does not match c=op=\" + c.get_str(16) + \" expectedC=(a + b) & ScalarMask256=\" + expectedC.get_str(16));\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -3228,25 +3318,25 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
                 code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -3254,8 +3344,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    expectedC = (a - b + ScalarTwoTo256) & ScalarMask256;\n";
                 code += "    if (c != expectedC)\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: Binary SUB operation does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Binary SUB operation does not match c=op=\" + c.get_str(16) + \" expectedC=(a - b + ScalarTwoTo256) & ScalarMask256=\" + expectedC.get_str(16));\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -3281,25 +3372,25 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
                 code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -3307,8 +3398,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    expectedC = (a < b);\n";
                 code += "    if (c != expectedC)\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: Binary LT operation does not match\"<< \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Binary LT operation does not match c=op=\" + c.get_str(16) + \" expectedC=(a < b)=\" + expectedC.get_str(16));\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -3334,25 +3426,25 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
                 code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -3364,9 +3456,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    expectedC = (_a < _b);\n";
                 code += "    if (c != expectedC)\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: Binary SLT operation does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
-                code += "        cerr << \"a=\" << a << \" b=\" << b << \" c=\" << c << \" _a=\" << _a << \" _b=\" << _b << \" expectedC=\" << expectedC << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Binary SLT operation does not match a=\" + a.get_str(16) + \" b=\" + b.get_str(16) + \" c=\" + c.get_str(16) + \" _a=\" + _a.get_str(16) + \" _b=\" + _b.get_str(16) + \" expectedC=\" + expectedC.get_str(16));\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -3392,25 +3484,25 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
                 code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -3418,8 +3510,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    expectedC = (a == b);\n";
                 code += "    if (c != expectedC)\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: Binary EQ operation does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError( ctx, \"Binary EQ operation does not match c=op=\" + c.get_str(16) + \" expectedC=(a==b)=\" + expectedC.get_str(16));\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -3445,25 +3538,25 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
                 code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -3471,8 +3564,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    expectedC = (a & b);\n";
                 code += "    if (c != expectedC)\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: Binary AND operation does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Binary AND operation does not match c=op=\" + c.get_str(16) + \" expectedC=(a&b)=\" + expectedC.get_str(16));\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -3499,25 +3593,25 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
                 code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -3525,8 +3619,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    expectedC = (a | b);\n";
                 code += "    if (c != expectedC)\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: Binary OR operation does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Binary OR operation does not match c=op=\" + c.get_str(16) + \" expectedC=(a|b)=\" + expectedC.get_str(16));\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -3550,25 +3645,25 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
                 code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -3576,8 +3671,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    expectedC = (a ^ b);\n";
                 code += "    if (c != expectedC)\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: Binary XOR operation does not match\" << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Binary XOR operation does not match c=op=\" + c.get_str(16) + \" expectedC=(a^b)=\" + expectedC.get_str(16));\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -3615,40 +3711,41 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    // MemAlign instruction\n";
             code += "    if (!fea2scalar(fr, m0, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
             code += "    {\n";
-            code += "        zkPC=" + to_string(zkPC) +";\n";
-            code += "        mainExecutor.logError(ctx);\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
             code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "        return;\n";
             code += "    }\n";
             code += "    if (!fea2scalar(fr, m1, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
             code += "    {\n";
-            code += "        zkPC=" + to_string(zkPC) +";\n";
-            code += "        mainExecutor.logError(ctx);\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
             code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "        return;\n";
             code += "    }\n";
             code += "    if (!fea2scalar(fr, v, op0, op1, op2, op3, op4, op5, op6, op7))\n";
             code += "    {\n";
-            code += "        zkPC=" + to_string(zkPC) +";\n";
-            code += "        mainExecutor.logError(ctx);\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
             code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "        return;\n";
             code += "    }\n";
             code += "    if (!fea2scalar(fr, offsetScalar, pols.C0[" + string(bFastMode?"0":"i") + "], pols.C1[" + string(bFastMode?"0":"i") + "], pols.C2[" + string(bFastMode?"0":"i") + "], pols.C3[" + string(bFastMode?"0":"i") + "], pols.C4[" + string(bFastMode?"0":"i") + "], pols.C5[" + string(bFastMode?"0":"i") + "], pols.C6[" + string(bFastMode?"0":"i") + "], pols.C7[" + string(bFastMode?"0":"i") + "]))\n";
             code += "    {\n";
-            code += "        zkPC=" + to_string(zkPC) +";\n";
-            code += "        mainExecutor.logError(ctx);\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.C)\");\n";
             code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "        return;\n";
             code += "    }\n";
             code += "    if (offsetScalar<0 || offsetScalar>32)\n";
             code += "    {\n";
-            code += "        cerr << \"Error: MemAlign out of range offset=\" << offsetScalar.get_str() << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, \"MemAlign out of range offset=\" + offsetScalar.get_str());\n";
             code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "        return;\n";
             code += "    }\n";
@@ -3663,17 +3760,17 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
                 code += "    if (!fea2scalar(fr, w0, pols.D0[" + string(bFastMode?"0":"i") + "], pols.D1[" + string(bFastMode?"0":"i") + "], pols.D2[" + string(bFastMode?"0":"i") + "], pols.D3[" + string(bFastMode?"0":"i") + "], pols.D4[" + string(bFastMode?"0":"i") + "], pols.D5[" + string(bFastMode?"0":"i") + "], pols.D6[" + string(bFastMode?"0":"i") + "], pols.D7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.D)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, w1, pols.E0[" + string(bFastMode?"0":"i") + "], pols.E1[" + string(bFastMode?"0":"i") + "], pols.E2[" + string(bFastMode?"0":"i") + "], pols.E3[" + string(bFastMode?"0":"i") + "], pols.E4[" + string(bFastMode?"0":"i") + "], pols.E5[" + string(bFastMode?"0":"i") + "], pols.E6[" + string(bFastMode?"0":"i") + "], pols.E7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.E)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -3681,8 +3778,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    _W1 = (m1 & (ScalarMask256 >> offset*8)) | ((v << (256 - offset*8)) & ScalarMask256);\n";
                 code += "    if ( (w0 != _W0) || (w1 != _W1) )\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: MemAlign w0, w1 invalid: w0=\" << w0.get_str(16) << \" w1=\" << w1.get_str(16) << \" _W0=\" << _W0.get_str(16) << \" _W1=\" << _W1.get_str(16) << \" m0=\" << m0.get_str(16) << \" m1=\" << m1.get_str(16) << \" offset=\" << offset << \" v=\" << v.get_str(16) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"MemAlign w0, w1 invalid: w0=\" + w0.get_str(16) + \" w1=\" + w1.get_str(16) + \" _W0=\" + _W0.get_str(16) + \" _W1=\" + _W1.get_str(16) + \" m0=\" + m0.get_str(16) + \" m1=\" + m1.get_str(16) + \" offset=\" + to_string(offset) + \" v=\" + v.get_str(16));\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -3709,17 +3807,18 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
                 code += "    if (!fea2scalar(fr, w0, pols.D0[" + string(bFastMode?"0":"i") + "], pols.D1[" + string(bFastMode?"0":"i") + "], pols.D2[" + string(bFastMode?"0":"i") + "], pols.D3[" + string(bFastMode?"0":"i") + "], pols.D4[" + string(bFastMode?"0":"i") + "], pols.D5[" + string(bFastMode?"0":"i") + "], pols.D6[" + string(bFastMode?"0":"i") + "], pols.D7[" + string(bFastMode?"0":"i") + "]))\n";
                 code += "    {\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx);\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.D)\");\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    _W0 = (m0 & (byteMaskOn256 >> (offset*8))) | ((v & 0xFF) << ((31-offset)*8));\n";
                 code += "    if (w0 != _W0)\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: MemAlign w0 invalid: w0=\" << w0.get_str(16) << \" _W0=\" << _W0.get_str(16) << \" m0=\" << m0.get_str(16) << \" offset=\" << offset << \" v=\" << v.get_str(16) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Error: MemAlign w0 invalid: w0=\" + w0.get_str(16) + \" _W0=\" + _W0.get_str(16) + \" m0=\" + m0.get_str(16) + \" offset=\" + to_string(offset) + \" v=\" + v.get_str(16));\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -3748,8 +3847,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    _V = leftV | rightV;\n";
                 code += "    if (v != _V)\n";
                 code += "    {\n";
-                code += "        cerr << \"Error: MemAlign v invalid: v=\" << v.get_str(16) << \" _V=\" << _V.get_str(16) << \" m0=\" << m0.get_str(16) << \" m1=\" << m1.get_str(16) << \" offset=\" << offset << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"MemAlign v invalid: v=\" + v.get_str(16) + \" _V=\" + _V.get_str(16) + \" m0=\" + m0.get_str(16) + \" m1=\" + m1.get_str(16) + \" offset=\" + to_string(offset));\n";
                 code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                 code += "        return;\n";
                 code += "    }\n";
@@ -4054,8 +4154,11 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    }\n";
             code += "    else\n";
             code += "    {\n";
-            code += "        cerr << \"Error: MainExecutor::execute() JMPN invalid S33 value op0=\" << jmpnCondValue << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
-            code += "        exitProcess();\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_S33;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, \"JMPN invalid S33 value op0=\" + to_string(jmpnCondValue));\n";
+            code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
+            code += "        return;\n";
             code += "    }\n";
             if (!bFastMode)
             {
@@ -4339,7 +4442,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "            if (cr.zkResult != ZKR_SUCCESS)\n";
             code += "            {\n";
             code += "                proverRequest.result = cr.zkResult;\n";
-            code += "                cerr << \"Error: Main exec failed calling evalCommand() after result=\" << proverRequest.result << \"=\" << zkresult2string(proverRequest.result) << \" step=\" << i << \" zkPC=\" << " + to_string(zkPC) + " << \" line=\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \" uuid=\" << proverRequest.uuid << endl;\n";
+            code += "                zkPC=" + to_string(zkPC) +";\n";
+            code += "                mainExecutor.logError(ctx, string(\"Failed calling evalCommand() after result=\") + zkresult2string(proverRequest.result));\n";
             code += "                StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "                return;\n";
             code += "            }\n";
@@ -4379,7 +4483,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
         {
             code += "    if (ctx.lastStep != 0)\n";
             code += "    {\n";
-            code += "        cerr << \"Error: MainExecutor::execute() called finalizeExecutionLabel with a non-zero ctx.lastStep=\" << ctx.lastStep << endl;\n";
+            code += "        zkPC=" + to_string(zkPC) +";\n";
+            code += "        mainExecutor.logError(ctx, \"Called finalizeExecutionLabel with a non-zero ctx.lastStep=\" + to_string(ctx.lastStep));\n";
             code += "        exitProcess();\n";
             code += "    }\n";
             code += "    ctx.lastStep = i;\n";
@@ -4468,24 +4573,16 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    // Check that we did not run out of steps during the execution\n";
     code += "    if (ctx.lastStep == 0)\n";
     code += "    {\n";
-    code += "        cerr << \"Error: Main executor found ctx.lastStep=0, so execution was not complete\" << endl;\n";
-    if (bFastMode)
-    {
     code += "        proverRequest.result = ZKR_SM_MAIN_OUT_OF_STEPS;\n";
-    }
-    else
-    {
+    code += "        mainExecutor.logError(ctx, \"Found ctx.lastStep=0, so execution was not complete\");\n";
+    if (!bFastMode)
     code += "        exitProcess();\n";
-    }
     code += "    }\n";
     code += "    if (ctx.lastStep > " + (string)rom["constants"]["MAX_CNT_STEPS_LIMIT"]["value"] + ")\n";
     code += "    {\n";
-    code += "        cerr << \"Error: Main executor found ctx.lastStep=\" << ctx.lastStep << \" > MAX_CNT_STEPS_LIMIT=" + (string)rom["constants"]["MAX_CNT_STEPS_LIMIT"]["value"] + "\" << endl;\n";
-    if (bFastMode)
-    {
     code += "        proverRequest.result = ZKR_SM_MAIN_OUT_OF_STEPS;\n";
-    }
-    else
+    code += "        mainExecutor.logError(ctx, \"Found ctx.lastStep=\" + to_string(ctx.lastStep) + \" > MAX_CNT_STEPS_LIMIT=" + (string)rom["constants"]["MAX_CNT_STEPS_LIMIT"]["value"] + "\");\n";
+    if (!bFastMode)
     {
     code += "        exitProcess();\n";
     }
@@ -4494,50 +4591,44 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "#ifdef CHECK_MAX_CNT_AT_THE_END\n";
     code += "    if (fr.toU64(pols.cntArith[0]) > " + (string)rom["constants"]["MAX_CNT_ARITH_LIMIT"]["value"] + ")\n";
     code += "    {\n";
-    code += "        cerr << \"Error: Main Executor found pols.cntArith[0]=\" << fr.toU64(pols.cntArith[0]) << \" > MAX_CNT_ARITH_LIMIT=" + (string)rom["constants"]["MAX_CNT_ARITH_LIMIT"]["value"] + " uuid=\" << proverRequest.uuid << endl;\n";
-    if (bFastMode)
-        code += "        proverRequest.result = ZKR_SM_MAIN_OOC_ARITH;\n";
-    else
+    code += "        proverRequest.result = ZKR_SM_MAIN_OOC_ARITH;\n";
+    code += "        mainExecutor.logError(ctx, \"Found pols.cntArith[0]=\" + to_string(fr.toU64(pols.cntArith[0])) + \" > MAX_CNT_ARITH_LIMIT=" + (string)rom["constants"]["MAX_CNT_ARITH_LIMIT"]["value"] + "\");\n";
+    if (!bFastMode)
         code += "        exitProcess();\n";
     code += "    }\n";
     code += "    if (fr.toU64(pols.cntBinary[0]) > " + (string)rom["constants"]["MAX_CNT_BINARY_LIMIT"]["value"] + ")\n";
     code += "    {\n";
-    code += "        cerr << \"Error: Main Executor found pols.cntBinary[0]=\" << fr.toU64(pols.cntBinary[0]) << \" > MAX_CNT_BINARY_LIMIT=" + (string)rom["constants"]["MAX_CNT_BINARY_LIMIT"]["value"] + " uuid=\" << proverRequest.uuid << endl;\n";
-    if (bFastMode)
-        code += "        proverRequest.result = ZKR_SM_MAIN_OOC_BINARY;\n";
-    else
+    code += "        proverRequest.result = ZKR_SM_MAIN_OOC_BINARY;\n";
+    code += "        mainExecutor.logError(ctx, \"Found pols.cntBinary[0]=\" + to_string(fr.toU64(pols.cntBinary[0])) + \" > MAX_CNT_BINARY_LIMIT=" + (string)rom["constants"]["MAX_CNT_BINARY_LIMIT"]["value"] + "\");\n";
+    if (!bFastMode)
         code += "        exitProcess();\n";
     code += "    }\n";
     code += "    if (fr.toU64(pols.cntMemAlign[0]) > " + (string)rom["constants"]["MAX_CNT_MEM_ALIGN_LIMIT"]["value"] + ")\n";
     code += "    {\n";
-    code += "        cerr << \"Error: Main Executor found pols.cntMemAlign[0]=\" << fr.toU64(pols.cntMemAlign[0]) << \" > MAX_CNT_MEM_ALIGN_LIMIT=" + (string)rom["constants"]["MAX_CNT_MEM_ALIGN_LIMIT"]["value"] + " uuid=\" << proverRequest.uuid << endl;\n";
-    if (bFastMode)
-        code += "        proverRequest.result = ZKR_SM_MAIN_OOC_MEM_ALIGN;\n";
-    else
+    code += "        proverRequest.result = ZKR_SM_MAIN_OOC_MEM_ALIGN;\n";
+    code += "        mainExecutor.logError(ctx, \"Found pols.cntMemAlign[0]=\" + to_string(fr.toU64(pols.cntMemAlign[0])) + \" > MAX_CNT_MEM_ALIGN_LIMIT=" + (string)rom["constants"]["MAX_CNT_MEM_ALIGN_LIMIT"]["value"] + "\");\n";
+    if (!bFastMode)
         code += "        exitProcess();\n";
     code += "    }\n";
     code += "    if (fr.toU64(pols.cntKeccakF[0]) > " + (string)rom["constants"]["MAX_CNT_KECCAK_F_LIMIT"]["value"] + ")\n";
     code += "    {\n";
-    code += "        cerr << \"Error: Main Executor found pols.cntKeccakF[0]=\" << fr.toU64(pols.cntKeccakF[0]) << \" > MAX_CNT_KECCAK_F_LIMIT=" + (string)rom["constants"]["MAX_CNT_KECCAK_F_LIMIT"]["value"] + " uuid=\" << proverRequest.uuid << endl;\n";
-    if (bFastMode)
-        code += "        proverRequest.result = ZKR_SM_MAIN_OOC_KECCAK_F;\n";
-    else
+    code += "        proverRequest.result = ZKR_SM_MAIN_OOC_KECCAK_F;\n";
+    code += "        mainExecutor.logError(ctx, \"Found pols.cntKeccakF[0]=\" + to_string(fr.toU64(pols.cntKeccakF[0])) + \" > MAX_CNT_KECCAK_F_LIMIT=" + (string)rom["constants"]["MAX_CNT_KECCAK_F_LIMIT"]["value"] + "\");\n";
+    if (!bFastMode)
         code += "        exitProcess();\n";
     code += "    }\n";
     code += "    if (fr.toU64(pols.cntPaddingPG[0]) > " + (string)rom["constants"]["MAX_CNT_PADDING_PG_LIMIT"]["value"] + ")\n";
     code += "    {\n";
-    code += "        cerr << \"Error: Main Executor found pols.cntPaddingPG[0]=\" << fr.toU64(pols.cntPaddingPG[0]) << \" > MAX_CNT_PADDING_PG_LIMIT=" + (string)rom["constants"]["MAX_CNT_PADDING_PG_LIMIT"]["value"] + " uuid=\" << proverRequest.uuid << endl;\n";
-    if (bFastMode)
-        code += "        proverRequest.result = ZKR_SM_MAIN_OOC_PADDING_PG;\n";
-    else
+    code += "        proverRequest.result = ZKR_SM_MAIN_OOC_PADDING_PG;\n";
+    code += "        mainExecutor.logError(ctx, \"Found pols.cntPaddingPG[0]=\" + to_string(fr.toU64(pols.cntPaddingPG[0])) + \" > MAX_CNT_PADDING_PG_LIMIT=" + (string)rom["constants"]["MAX_CNT_PADDING_PG_LIMIT"]["value"] + "\");\n";
+    if (!bFastMode)
         code += "        exitProcess();\n";
     code += "    }\n";
     code += "    if (fr.toU64(pols.cntPoseidonG[0]) > " + (string)rom["constants"]["MAX_CNT_POSEIDON_G_LIMIT"]["value"] + ")\n";
     code += "    {\n";
-    code += "        cerr << \"Error: Main Executor found pols.cntPoseidonG[0]=\" << fr.toU64(pols.cntPoseidonG[0]) << \" > MAX_CNT_POSEIDON_G_LIMIT=" + (string)rom["constants"]["MAX_CNT_POSEIDON_G_LIMIT"]["value"] + " uuid=\" << proverRequest.uuid << endl;\n";
-    if (bFastMode)
-        code += "        proverRequest.result = ZKR_SM_MAIN_OOC_POSEIDON_G;\n";
-    else
+    code += "        proverRequest.result = ZKR_SM_MAIN_OOC_POSEIDON_G;\n";
+    code += "        mainExecutor.logError(ctx, \"Found pols.cntPoseidonG[0]=\" + to_string(fr.toU64(pols.cntPoseidonG[0])) + \" > MAX_CNT_POSEIDON_G_LIMIT=" + (string)rom["constants"]["MAX_CNT_POSEIDON_G_LIMIT"]["value"] + "\");\n";
+    if (!bFastMode)
         code += "        exitProcess();\n";
     code += "    }\n";
     code += "#endif\n\n";
@@ -4569,8 +4660,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += "        }\n";
         code += "        if (p != ctx.hashK[i].data.size())\n";
         code += "        {\n";
-        code += "            cerr << \"Error: Main SM Executor: Reading hashK out of limits: i=\" << i << \" p=\" << p << \" ctx.hashK[i].data.size()=\" << ctx.hashK[i].data.size() << \" uuid=\" << proverRequest.uuid << endl;\n";
         code += "            proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+        code += "            mainExecutor.logError(ctx, \"Reading hashK out of limits: i=\" + to_string(i) + \" p=\" + to_string(p) + \" ctx.hashK[i].data.size()=\" + to_string(ctx.hashK[i].data.size()));\n";
         code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
         code += "            return;\n";
         code += "        }\n";
@@ -4600,8 +4691,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += "        }\n";
         code += "        if (p != ctx.hashP[i].data.size())\n";
         code += "        {\n";
-        code += "            cerr << \"Error: Main SM Executor: Reading hashP out of limits: i=\" << i << \" p=\" << p << \" ctx.hashP[i].data.size()=\" << ctx.hashP[i].data.size() << \" uuid=\" << proverRequest.uuid << endl;\n";
         code += "            proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+        code += "            mainExecutor.logError(ctx, \"Reading hashP out of limits: i=\" + to_string(i) + \" p=\" + to_string(p) + \" ctx.hashP[i].data.size()=\" + to_string(ctx.hashP[i].data.size()));\n";
         code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
         code += "            return;\n";
         code += "        }\n";
@@ -4626,8 +4717,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "        zkresult zkr = pStateDB->flush();\n";
     code += "        if (zkr != ZKR_SUCCESS)\n";
     code += "        {\n";
-    code += "            cerr << \"Error: Main SM Executor: failed calling pStateDB->flush() result=\" << zkr << \" =\" << zkresult2string(zkr) << endl;\n";
     code += "            proverRequest.result = zkr;\n";
+    code += "            mainExecutor.logError(ctx, string(\"Failed calling pStateDB->flush() result=\") + zkresult2string(zkr));\n";
     code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
     code += "            return;\n";
     code += "        }\n";
