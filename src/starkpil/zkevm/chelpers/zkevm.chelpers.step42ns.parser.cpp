@@ -533,9 +533,9 @@ void ZkevmSteps::step42ns_parser_first_avx(StepsParams &params, uint64_t nrows, 
                     Goldilocks::Element ti0[4];
                     Goldilocks::Element ti1[4];
                     Goldilocks::Element ti2[4];
-                    Goldilocks::store(ti0, tmp3[args42[i_args]][0]);
-                    Goldilocks::store(ti1, tmp3[args42[i_args]][1]);
-                    Goldilocks::store(ti2, tmp3[args42[i_args]][2]);
+                    Goldilocks::store_avx(ti0, tmp3[args42[i_args]][0]);
+                    Goldilocks::store_avx(ti1, tmp3[args42[i_args]][1]);
+                    Goldilocks::store_avx(ti2, tmp3[args42[i_args]][2]);
 
                     for (uint64_t j = 0; j < NR_; ++j)
                     {
@@ -1946,9 +1946,9 @@ void ZkevmSteps::step42ns_parser_first_avx_jump(StepsParams &params, uint64_t nr
               Goldilocks::Element ti0[4];
               Goldilocks::Element ti1[4];
               Goldilocks::Element ti2[4];
-              Goldilocks::store(ti0, tmp3[args42[i_args]][0]);
-              Goldilocks::store(ti1, tmp3[args42[i_args]][1]);
-              Goldilocks::store(ti2, tmp3[args42[i_args]][2]);
+              Goldilocks::store_avx(ti0, tmp3[args42[i_args]][0]);
+              Goldilocks::store_avx(ti1, tmp3[args42[i_args]][1]);
+              Goldilocks::store_avx(ti2, tmp3[args42[i_args]][2]);
 
               for (uint64_t j = 0; j < NR_; ++j)
               {

@@ -52,12 +52,12 @@ void ZkevmSteps::step52ns_parser_first_avx(StepsParams &params, uint64_t nrows, 
                aux1[k] = challenge5[1];
                aux2[k] = challenge5[2];
           }
-          Goldilocks::load(chall5o0_, aux0_ops);
-          Goldilocks::load(chall5o1_, aux1_ops);
-          Goldilocks::load(chall5o2_, aux2_ops);
-          Goldilocks::load(chall50_, aux0);
-          Goldilocks::load(chall51_, aux1);
-          Goldilocks::load(chall52_, aux2);
+          Goldilocks::load_avx(chall5o0_, aux0_ops);
+          Goldilocks::load_avx(chall5o1_, aux1_ops);
+          Goldilocks::load_avx(chall5o2_, aux2_ops);
+          Goldilocks::load_avx(chall50_, aux0);
+          Goldilocks::load_avx(chall51_, aux1);
+          Goldilocks::load_avx(chall52_, aux2);
 
           for (int k = 0; k < NR_; ++k)
           {
@@ -68,12 +68,12 @@ void ZkevmSteps::step52ns_parser_first_avx(StepsParams &params, uint64_t nrows, 
                aux1[k] = challenge6[1];
                aux2[k] = challenge6[2];
           }
-          Goldilocks::load(chall6o0_, aux0_ops);
-          Goldilocks::load(chall6o1_, aux1_ops);
-          Goldilocks::load(chall6o2_, aux2_ops);
-          Goldilocks::load(chall60_, aux0);
-          Goldilocks::load(chall61_, aux1);
-          Goldilocks::load(chall62_, aux2);
+          Goldilocks::load_avx(chall6o0_, aux0_ops);
+          Goldilocks::load_avx(chall6o1_, aux1_ops);
+          Goldilocks::load_avx(chall6o2_, aux2_ops);
+          Goldilocks::load_avx(chall60_, aux0);
+          Goldilocks::load_avx(chall61_, aux1);
+          Goldilocks::load_avx(chall62_, aux2);
           Goldilocks::Element *evals_ = params.evals[0];
 
           // Parser
