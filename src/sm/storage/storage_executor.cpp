@@ -5,6 +5,8 @@
 #include "scalar.hpp"
 #include "poseidon_g_permutation.hpp"
 #include "goldilocks_precomputed.hpp"
+#include "zklog.hpp"
+#include "exit_process.hpp"
 
 using json = nlohmann::json;
 using namespace std;
@@ -299,7 +301,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                     // This call only makes sense then this is an SMT set
                     if (!action[a].bIsSet)
                     {
-                        cerr << "Error: StorageExecutor() GetOldValueLow called in an SMT get action" << endl;
+                        zklog.error("StorageExecutor() GetOldValueLow called in an SMT get action");
                         exitProcess();
                     }
 
@@ -324,7 +326,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                     // This call only makes sense then this is an SMT set
                     if (!action[a].bIsSet)
                     {
-                        cerr << "Error: StorageExecutor() GetOldValueLow called in an SMT get action" << endl;
+                        zklog.error("StorageExecutor() GetOldValueLow called in an SMT get action");
                         exitProcess();
                     }
 
@@ -349,7 +351,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                     // Check that we have the one single parameter: the bit number
                     if (rom.line[l].params.size()!=1)
                     {
-                        cerr << "Error: StorageExecutor() called with GetLevelBit but wrong number of parameters=" << rom.line[l].params.size() << endl;
+                        zklog.error("StorageExecutor() called with GetLevelBit but wrong number of parameters=" + to_string(rom.line[l].params.size()));
                         exitProcess();
                     }
 
@@ -359,7 +361,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                     // Check that the bit is either 0 or 1
                     if (bit!=0 && bit!=1)
                     {
-                        cerr << "Error: StorageExecutor() called with GetLevelBit but wrong bit=" << bit << endl;
+                        zklog.error("StorageExecutor() called with GetLevelBit but wrong bit=" + to_string(bit));
                         exitProcess();
                     }
 
@@ -411,7 +413,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                     ctx.currentLevel--;
                     if (ctx.currentLevel<0)
                     {
-                        cerr << "Error: StorageExecutor.execute() GetNextKeyBit() found ctx.currentLevel<0" << endl;
+                        zklog.error("StorageExecutor.execute() GetNextKeyBit() found ctx.currentLevel<0 =" + to_string(ctx.currentLevel));
                         exitProcess();
                     }
 
@@ -440,7 +442,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                 }
                 else
                 {
-                    cerr << "Error: StorageExecutor() unknown funcName:" << rom.line[l].funcName << endl;
+                    zklog.error("StorageExecutor() unknown funcName:" + rom.line[l].funcName);
                     exitProcess();
                 }                
             }
@@ -453,7 +455,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             // Any other value is an unexpected value
             else
             {
-                cerr << "Error: StorageExecutor() unknown op:" << rom.line[l].op << endl;
+                zklog.error("StorageExecutor() unknown op:" + rom.line[l].op);
                 exitProcess();
             }
 
@@ -647,7 +649,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             }
             else
             {
-                cerr << "Error: StorageExecutor:execute() found invalid iHashType=" << rom.line[l].iHashType << endl;
+                zklog.error("StorageExecutor:execute() found invalid iHashType=" + to_string(rom.line[l].iHashType));
                 exitProcess();
             }
             fea[9] = fr.zero();
@@ -830,7 +832,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             // Check that the current action is an SMT get
             if (action[a].bIsSet)
             {
-                cerr << "Error: StorageExecutor() LATCH GET found action " << a << " bIsSet=true" << endl;
+                zklog.error("StorageExecutor() LATCH GET found action " + to_string(a) + " bIsSet=true");
                 exitProcess();
             }
 
@@ -840,7 +842,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                  !fr.equal(pols.oldRoot2[i], action[a].getResult.root[2]) ||
                  !fr.equal(pols.oldRoot3[i], action[a].getResult.root[3]) )
             {
-                cerr << "Error: StorageExecutor() LATCH GET found action " << a << " pols.oldRoot=" << fea2string(fr, pols.oldRoot0[i], pols.oldRoot1[i], pols.oldRoot2[i], pols.oldRoot3[i]) << " different from action.getResult.oldRoot=" << fea2string(fr, action[a].getResult.root[0], action[a].getResult.root[1], action[a].getResult.root[2], action[a].getResult.root[3]) << endl;
+                zklog.error("StorageExecutor() LATCH GET found action " + to_string(a) + " pols.oldRoot=" + fea2string(fr, pols.oldRoot0[i], pols.oldRoot1[i], pols.oldRoot2[i], pols.oldRoot3[i]) + " different from action.getResult.oldRoot=" + fea2string(fr, action[a].getResult.root[0], action[a].getResult.root[1], action[a].getResult.root[2], action[a].getResult.root[3]));
                 exitProcess();
             }
 
@@ -850,7 +852,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                  !fr.equal(pols.rkey2[i], action[a].getResult.key[2]) ||
                  !fr.equal(pols.rkey3[i], action[a].getResult.key[3]) )
             {
-                cerr << "Error: StorageExecutor() LATCH GET found action " << a << " pols.rkey!=action.getResult.key" << endl;
+                zklog.error("StorageExecutor() LATCH GET found action " + to_string(a) + " pols.rkey=" + fea2string(fr, pols.rkey0[i], pols.rkey1[i], pols.rkey2[i], pols.rkey3[i]) + " different from action.getResult.key=" + fea2string(fr, action[a].getResult.key[0], action[a].getResult.key[1], action[a].getResult.key[2], action[a].getResult.key[3]));
                 exitProcess();                
             }
 
@@ -860,7 +862,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                  !fr.isZero(pols.level2[i]) ||
                  !fr.isZero(pols.level3[i]) )
             {
-                cerr << "Error: StorageExecutor() LATCH GET found action " << a << " wrong level=" << fr.toU64(pols.level3[i]) << ":" << fr.toU64(pols.level2[i]) << ":" << fr.toU64(pols.level1[i]) << ":" << fr.toU64(pols.level0[i]) << endl;
+                zklog.error("StorageExecutor() LATCH GET found action " + to_string(a) + " wrong level=" + fr.toString(pols.level3[i], 10) + ":" + fr.toString(pols.level2[i], 10) + ":" + fr.toString(pols.level1[i], 10) + ":" + fr.toString(pols.level0[i], 10));
                 exitProcess();                
             }
 
@@ -878,7 +880,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             fea2scalar(fr, valueScalar, valueFea);
             if ( valueScalar != action[a].getResult.value )
             {
-                cerr << "Error: StorageExecutor() LATCH GET found action " << a << " pols.value=" << valueScalar.get_str(16) << " != action.getResult.value=" << action[a].getResult.value.get_str(16) << endl;
+                zklog.error("StorageExecutor() LATCH GET found action " + to_string(a) + " pols.value=" + valueScalar.get_str(16) + " != action.getResult.value=" + action[a].getResult.value.get_str(16));
                 exitProcess();                
             }
 
@@ -913,7 +915,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             // Check that the current action is an SMT set
             if (!action[a].bIsSet)
             {
-                cerr << "Error: StorageExecutor() LATCH SET found action " << a << " bIsSet=false" << endl;
+                zklog.error("StorageExecutor() LATCH SET found action " + to_string(a) + " bIsSet=false");
                 exitProcess();
             }
 
@@ -923,7 +925,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                  !fr.equal(pols.oldRoot2[i], action[a].setResult.oldRoot[2]) ||
                  !fr.equal(pols.oldRoot3[i], action[a].setResult.oldRoot[3]) )
             {
-                cerr << "Error: StorageExecutor() LATCH SET found action " << a << " pols.oldRoot=" << fea2string(fr, pols.oldRoot0[i], pols.oldRoot1[i], pols.oldRoot2[i], pols.oldRoot3[i]) << " different from action.setResult.oldRoot=" << fea2string(fr, action[a].setResult.oldRoot[0], action[a].setResult.oldRoot[1], action[a].setResult.oldRoot[2], action[a].setResult.oldRoot[3]) << " mode=" << action[a].setResult.mode << endl;
+                zklog.error("StorageExecutor() LATCH SET found action " + to_string(a) + " pols.oldRoot=" + fea2string(fr, pols.oldRoot0[i], pols.oldRoot1[i], pols.oldRoot2[i], pols.oldRoot3[i]) + " different from action.setResult.oldRoot=" + fea2string(fr, action[a].setResult.oldRoot[0], action[a].setResult.oldRoot[1], action[a].setResult.oldRoot[2], action[a].setResult.oldRoot[3]) + " mode=" + action[a].setResult.mode);
                 exitProcess();
             }
 
@@ -933,7 +935,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                  !fr.equal(pols.newRoot2[i], action[a].setResult.newRoot[2]) ||
                  !fr.equal(pols.newRoot3[i], action[a].setResult.newRoot[3]) )
             {
-                cerr << "Error: StorageExecutor() LATCH SET found action " << a << " pols.newRoot=" << fea2string(fr, pols.newRoot0[i], pols.newRoot1[i], pols.newRoot2[i], pols.newRoot3[i]) << " different from action.setResult.newRoot=" << fea2string(fr, action[a].setResult.newRoot[0], action[a].setResult.newRoot[1], action[a].setResult.newRoot[2], action[a].setResult.newRoot[3]) << " mode=" << action[a].setResult.mode << endl;
+                zklog.error("StorageExecutor() LATCH SET found action " + to_string(a) + " pols.newRoot=" + fea2string(fr, pols.newRoot0[i], pols.newRoot1[i], pols.newRoot2[i], pols.newRoot3[i]) + " different from action.setResult.newRoot=" + fea2string(fr, action[a].setResult.newRoot[0], action[a].setResult.newRoot[1], action[a].setResult.newRoot[2], action[a].setResult.newRoot[3]) + " mode=" + action[a].setResult.mode);
                 exitProcess();
             }
 
@@ -943,7 +945,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                  !fr.equal(pols.rkey2[i], action[a].setResult.key[2]) ||
                  !fr.equal(pols.rkey3[i], action[a].setResult.key[3]) )
             {
-                cerr << "Error: StorageExecutor() LATCH SET found action " << a << " pols.rkey!=action.setResult.key" << " mode=" << action[a].setResult.mode << endl;
+                zklog.error("StorageExecutor() LATCH SET found action " + to_string(a) + " pols.rkey=" + fea2string(fr, pols.rkey0[i], pols.rkey1[i], pols.rkey2[i], pols.rkey3[i]) + " different from action.setResult.key=" + fea2string(fr, action[a].setResult.key[0], action[a].setResult.key[1], action[a].setResult.key[2], action[a].setResult.key[3]) + " mode=" + action[a].setResult.mode);
                 exitProcess();                
             }
 
@@ -953,7 +955,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                  !fr.isZero(pols.level2[i]) ||
                  !fr.isZero(pols.level3[i]) )
             {
-                cerr << "Error: StorageExecutor() LATCH SET found action " << a << " wrong level=" << fr.toU64(pols.level3[i]) << ":" << fr.toU64(pols.level2[i]) << ":" << fr.toU64(pols.level1[i]) << ":" << fr.toU64(pols.level0[i]) << " mode=" << action[a].setResult.mode << endl;
+                zklog.error("StorageExecutor() LATCH SET found action " + to_string(a) + " wrong level=" + fr.toString(pols.level3[i], 10) + ":" + fr.toString(pols.level2[i], 10) + ":" + fr.toString(pols.level1[i], 10) + ":" + fr.toString(pols.level0[i], 10) + " mode=" + action[a].setResult.mode);
                 exitProcess();                
             }
 
@@ -971,7 +973,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             fea2scalar(fr, valueScalar, valueFea);
             if ( valueScalar != action[a].setResult.newValue )
             {
-                cerr << "Error: StorageExecutor() LATCH SET found action " << a << " pols.value=" << valueScalar.get_str(16) << " != action.setResult.newValue=" << action[a].setResult.newValue.get_str(16) << " mode=" << action[a].setResult.mode << endl;
+                zklog.error("StorageExecutor() LATCH SET found action " + to_string(a) + " pols.value=" + valueScalar.get_str(16) + " != action.setResult.newValue=" + action[a].setResult.newValue.get_str(16) + " mode=" + action[a].setResult.mode);
                 exitProcess();                
             }
 
@@ -1213,7 +1215,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
     // Check that ROM has done all its work
     if (lastStep == 0)
     {
-        cerr << "Error: StorageExecutor::execute() finished execution but ROM did not call isAlmostEndPolynomial" << endl;
+        zklog.error("StorageExecutor::execute() finished execution but ROM did not call isAlmostEndPolynomial");
         exitProcess();
     }
 

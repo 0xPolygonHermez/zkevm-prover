@@ -19,6 +19,8 @@ using json = nlohmann::json;
 #include "timer.hpp"
 #include "execFile.hpp"
 #include "commit_pols_starks.hpp"
+#include "zklog.hpp"
+#include "exit_process.hpp"
 
 using namespace std;
 
@@ -327,7 +329,7 @@ namespace Circom
     loadJsonImpl(ctx, zkin);
     if (ctx->getRemaingInputsToBeSet() != 0)
     {
-      cerr << "Error: Prover::genBatchProof() Not all inputs have been set. Only " << get_main_input_signal_no() - ctx->getRemaingInputsToBeSet() << " out of " << get_main_input_signal_no() << endl;
+      zklog.error("Prover::genBatchProof() Not all inputs have been set. Only " + to_string(get_main_input_signal_no() - ctx->getRemaingInputsToBeSet()) + " out of " + to_string(get_main_input_signal_no()));
       exitProcess();
     }
     TimerStopAndLog(CIRCOM_LOAD_JSON_BATCH_PROOF);
