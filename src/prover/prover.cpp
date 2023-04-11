@@ -29,6 +29,8 @@
 #include "c12aSteps.hpp"
 #include "recursive1Steps.hpp"
 #include "recursive2Steps.hpp"
+#include "zklog.hpp"
+#include "exit_process.hpp"
 
 #define NROWS_STEPS_ 4 // if AVX is used this must be 4
 
@@ -107,7 +109,7 @@ Prover::Prover(Goldilocks &fr,
                 pAddress = calloc(polsSize, 1);
                 if (pAddress == NULL)
                 {
-                    cerr << "Error: Prover::genBatchProof() failed calling malloc() of size " << polsSize << endl;
+                    zklog.error("Prover::genBatchProof() failed calling malloc() of size " + to_string(polsSize));
                     exitProcess();
                 }
                 cout << "Prover::genBatchProof() successfully allocated " << polsSize << " bytes" << endl;
@@ -129,7 +131,7 @@ Prover::Prover(Goldilocks &fr,
     }
     catch (std::exception &e)
     {
-        cerr << "Error: Prover::Prover() got an exception: " << e.what() << '\n';
+        zklog.error("Prover::Prover() got an exception: " + string(e.what()));
         exitProcess();
     }
 }
@@ -228,7 +230,7 @@ void *proverThread(void *arg)
             pProver->execute(pProver->pCurrentRequest);
             break;
         default:
-            cerr << "Error: proverThread() got an invalid prover request type=" << pProver->pCurrentRequest->type << endl;
+            zklog.error("proverThread() got an invalid prover request type=" + to_string(pProver->pCurrentRequest->type));
             exitProcess();
         }
 
@@ -331,7 +333,7 @@ ProverRequest *Prover::waitForRequestToComplete(const string &uuid, const uint64
     std::unordered_map<std::string, ProverRequest *>::iterator it = requestsMap.find(uuid);
     if (it == requestsMap.end())
     {
-        cerr << "Error: Prover::waitForRequestToComplete() unknown uuid: " << uuid << endl;
+        zklog.error("Prover::waitForRequestToComplete() unknown uuid: " + uuid);
         unlock();
         return NULL;
     }
@@ -647,15 +649,13 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
 
     if (pProverRequest->aggregatedProofInput1["publics"][17] != pProverRequest->aggregatedProofInput2["publics"][17])
     {
-        std::cerr << "Error: Inputs has different chainId" << std::endl;
-        std::cerr << pProverRequest->aggregatedProofInput1["publics"][17] << "!=" << pProverRequest->aggregatedProofInput2["publics"][17] << std::endl;
+        zklog.error("Prover::genAggregatedProof() Inputs has different chainId " + pProverRequest->aggregatedProofInput1["publics"][17].dump() + "!=" + pProverRequest->aggregatedProofInput2["publics"][17].dump());
         pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
         return;
     }
     if (pProverRequest->aggregatedProofInput1["publics"][18] != pProverRequest->aggregatedProofInput2["publics"][18])
     {
-        std::cerr << "Error: Inputs has different forkId" << std::endl;
-        std::cerr << pProverRequest->aggregatedProofInput1["publics"][18] << "!=" << pProverRequest->aggregatedProofInput2["publics"][18] << std::endl;
+        zklog.error("Prover::genAggregatedProof() Inputs has different forkId " + pProverRequest->aggregatedProofInput1["publics"][18].dump() + "!=" + pProverRequest->aggregatedProofInput2["publics"][18].dump());
         pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
         return;
     }
@@ -664,8 +664,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     {
         if (pProverRequest->aggregatedProofInput1["publics"][19 + i] != pProverRequest->aggregatedProofInput2["publics"][0 + i])
         {
-            std::cerr << "Error: The newStateRoot and the oldStateRoot are not consistent" << std::endl;
-            std::cerr << pProverRequest->aggregatedProofInput1["publics"][19 + i] << "!=" << pProverRequest->aggregatedProofInput2["publics"][0 + i] << std::endl;
+            zklog.error("Prover::genAggregatedProof() The newStateRoot and the oldStateRoot are not consistent "+ pProverRequest->aggregatedProofInput1["publics"][19 + i].dump() + "!=" + pProverRequest->aggregatedProofInput2["publics"][0 + i].dump());
             pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
             return;
         }
@@ -675,8 +674,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     {
         if (pProverRequest->aggregatedProofInput1["publics"][27 + i] != pProverRequest->aggregatedProofInput2["publics"][8 + i])
         {
-            std::cerr << "Error: newAccInputHash and oldAccInputHash are not consistent" << std::endl;
-            std::cerr << pProverRequest->aggregatedProofInput1["publics"][27 + i] << "!=" << pProverRequest->aggregatedProofInput2["publics"][8 + i] << std::endl;
+            zklog.error("Prover::genAggregatedProof() newAccInputHash and oldAccInputHash are not consistent" + pProverRequest->aggregatedProofInput1["publics"][27 + i].dump() + "!=" + pProverRequest->aggregatedProofInput2["publics"][8 + i].dump());
             pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
             return;
         }
@@ -684,8 +682,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     // Check batchNum
     if (pProverRequest->aggregatedProofInput1["publics"][43] != pProverRequest->aggregatedProofInput2["publics"][16])
     {
-        std::cerr << "Error: newBatchNum and oldBatchNum are not consistent" << std::endl;
-        std::cerr << pProverRequest->aggregatedProofInput1["publics"][43] << "!=" << pProverRequest->aggregatedProofInput2["publics"][16] << std::endl;
+        zklog.error("Prover::genAggregatedProof() newBatchNum and oldBatchNum are not consistent" + pProverRequest->aggregatedProofInput1["publics"][43].dump() + "!=" + pProverRequest->aggregatedProofInput2["publics"][16].dump());
         pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
         return;
     }
@@ -824,7 +821,7 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     CircomFinal::loadJsonImpl(ctxFinal, zkinRecursiveF);
     if (ctxFinal->getRemaingInputsToBeSet() != 0)
     {
-        cerr << "Error: Prover::genProof() Not all inputs have been set. Only " << CircomFinal::get_main_input_signal_no() - ctxFinal->getRemaingInputsToBeSet() << " out of " << CircomFinal::get_main_input_signal_no() << endl;
+        zklog.error("Prover::genProof() Not all inputs have been set. Only " + to_string(CircomFinal::get_main_input_signal_no() - ctxFinal->getRemaingInputsToBeSet()) + " out of " + to_string(CircomFinal::get_main_input_signal_no()));
         exitProcess();
     }
     TimerStopAndLog(CIRCOM_FINAL_LOAD_JSON);
@@ -869,7 +866,7 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
         }
         catch (std::exception &e)
         {
-            cerr << "Error: Prover::genProof() got exception in rapid SNARK:" << e.what() << '\n';
+            zklog.error("Prover::genProof() got exception in rapid SNARK:" + string(e.what()));
             exitProcess();
         }
     }
@@ -885,7 +882,7 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
         }
         catch (std::exception &e)
         {
-            cerr << "Error: Prover::genProof() got exception in rapid SNARK:" << e.what() << '\n';
+            zklog.error("Prover::genProof() got exception in rapid SNARK:" + string(e.what()));
             exitProcess();
         }
         TimerStopAndLog(RAPID_SNARK);
@@ -957,7 +954,7 @@ void Prover::execute(ProverRequest *pProverRequest)
         pExecuteAddress = calloc(polsSize, 1);
         if (pExecuteAddress == NULL)
         {
-            cerr << "Error: Prover::execute() failed calling malloc() of size " << polsSize << endl;
+            zklog.error("Prover::execute() failed calling malloc() of size " + to_string(polsSize));
             exitProcess();
         }
         cout << "Prover::execute() successfully allocated " << polsSize << " bytes" << endl;
