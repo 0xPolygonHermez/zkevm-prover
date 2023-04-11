@@ -1,11 +1,12 @@
 #include "main_sm/fork_4/main/context.hpp"
+#include "zklog.hpp"
 
 namespace fork_4
 {
 
 void Context::printRegs()
 {
-    cout << "Registers:" << endl;
+    zklog.info("Registers:");
     printReg("A7", pols.A7[*pStep]);
     printReg("A6", pols.A6[*pStep]);
     printReg("A5", pols.A5[*pStep]);
@@ -63,17 +64,17 @@ void Context::printRegs()
     step = fr.fromU64(*pStep);
     printReg("STEP", step, false, true);
 #ifdef LOG_FILENAME
-    cout << "File: " << fileName << " Line: " << line << endl;
+    zklog.info("File: " + fileName + " Line: " + to_string(line));
 #endif
 }
 
 void Context::printVars()
 {
-    cout << "Variables:" << endl;
+    zklog.info("Variables:");
     uint64_t i = 0;
     for (unordered_map<string, mpz_class>::iterator it = vars.begin(); it != vars.end(); it++)
     {
-        cout << "i: " << i << " varName: " << it->first << " fe: " << it->second.get_str(16) << endl;
+        zklog.info("i: " + to_string(i) + " varName: " + it->first + " fe: " + it->second.get_str(16));
         i++;
     }
 }
@@ -92,36 +93,34 @@ string Context::printFea(Fea &fea)
 
 void Context::printMem()
 {
-    cout << "Memory:" << endl;
+    zklog.info("Memory:");
     uint64_t i = 0;
     for (unordered_map<uint64_t, Fea>::iterator it = mem.begin(); it != mem.end(); it++)
     {
         mpz_class addr(it->first);
-        cout << "i: " << i << " address:" << addr.get_str(16) << " ";
-        cout << printFea(it->second);
-        cout << endl;
+        zklog.info("i: " + to_string(i) + " address:" + addr.get_str(16) + " " + printFea(it->second));
         i++;
     }
 }
 
 void Context::printReg(string name, Goldilocks::Element &fe, bool h, bool bShort)
 {
-    cout << "    Register: " << name << " Value: " << fr.toString(fe, 16) << endl;
+    zklog.info("    Register: " + name + " Value: " + fr.toString(fe, 16));
 }
 
 void Context::printU64(string name, uint64_t v)
 {
-    cout << "    U64: " << name << ":" << v << endl;
+    zklog.info("    U64: " + name + ":" + to_string(v));
 }
 
 void Context::printU32(string name, uint32_t v)
 {
-    cout << "    U32: " << name << ":" << v << endl;
+    zklog.info("    U32: " + name + ":" + to_string(v));
 }
 
 void Context::printU16(string name, uint16_t v)
 {
-    cout << "    U16: " << name << ":" << v << endl;
+    zklog.info("    U16: " + name + ":" + to_string(v));
 }
 
 } // namespace
