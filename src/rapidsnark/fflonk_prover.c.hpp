@@ -6,6 +6,8 @@
 #include <sodium.h>
 #include "thread_utils.hpp"
 #include "polynomial/cpolynomial.hpp"
+#include "zklog.hpp"
+#include "exit_process.hpp"
 
 #define ELPP_NO_DEFAULT_LOG_FILE
 #include "logger.hpp"
@@ -397,8 +399,8 @@ namespace Fflonk
         }
         catch (const std::exception &e)
         {
-            std::cerr << "EXCEPTION: " << e.what() << "\n";
-            exit(EXIT_FAILURE);
+            zklog.error("Fflonk::setZkey() EXCEPTION: " + string(e.what()));
+            exitProcess();
         }
     }
 
@@ -587,8 +589,9 @@ namespace Fflonk
         }
         catch (const std::exception &e)
         {
-            std::cerr << "EXCEPTION: " << e.what() << "\n";
-            exit(EXIT_FAILURE);
+            zklog.error("Fflonk::prove() EXCEPTION: " + string(e.what()));
+            exitProcess();
+            exit(-1);
         }
     }
 

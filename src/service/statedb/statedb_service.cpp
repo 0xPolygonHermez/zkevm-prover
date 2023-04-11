@@ -7,6 +7,7 @@
 #include "scalar.hpp"
 #include "zkresult.hpp"
 #include <iomanip>
+#include "zklog.hpp"
 
 using grpc::Server;
 using grpc::ServerBuilder;
@@ -88,7 +89,7 @@ using grpc::Status;
     }
     catch (const std::exception &e)
     {
-        cerr << "Error: StateDBServiceImpl::Set() exception: " << e.what() << endl;
+        zklog.error("StateDBServiceImpl::Set() exception: " + string(e.what()));
         return Status::CANCELLED;
     }
 #ifdef LOG_STATEDB_SERVICE
@@ -163,7 +164,7 @@ using grpc::Status;
     }
     catch (const std::exception &e)
     {
-        cerr << "Error: StateDBServiceImpl::Get() exception: " << e.what() << endl;
+        zklog.error("StateDBServiceImpl::Get() exception: " + string(e.what()));
         return Status::CANCELLED;
     }
 #ifdef LOG_STATEDB_SERVICE
@@ -203,7 +204,7 @@ using grpc::Status;
     }
     catch (const std::exception &e)
     {
-        cerr << "Error: StateDBServiceImpl::SetProgram() exception: " << e.what() << endl;
+        zklog.error("StateDBServiceImpl::SetProgram() exception: " + string(e.what()));
         return Status::CANCELLED;
     }
 #ifdef LOG_STATEDB_SERVICE
@@ -237,7 +238,7 @@ using grpc::Status;
     }
     catch (const std::exception &e)
     {
-        cerr << "Error: StateDBServiceImpl::GetProgram() exception: " << e.what() << endl;
+        zklog.error("StateDBServiceImpl::GetProgram() exception: " + string(e.what()));
         return Status::CANCELLED;
     }
 #ifdef LOG_STATEDB_SERVICE
@@ -263,7 +264,7 @@ using grpc::Status;
     }
     catch (const std::exception &e)
     {
-        cerr << "Error: StateDBServiceImpl::LoadDB() exception: " << e.what() << endl;
+        zklog.error("StateDBServiceImpl::LoadDB() exception: " + string(e.what()));
         return Status::CANCELLED;
     }
 #ifdef LOG_STATEDB_SERVICE
@@ -303,7 +304,7 @@ using grpc::Status;
     }
     catch (const std::exception &e)
     {
-        cerr << "Error: StateDBServiceImpl::Flush() exception: " << e.what() << endl;
+        zklog.error("StateDBServiceImpl::Flush() exception: " + string(e.what()));
         return Status::CANCELLED;
     }
 #ifdef LOG_STATEDB_SERVICE

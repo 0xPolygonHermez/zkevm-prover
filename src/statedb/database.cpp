@@ -10,6 +10,8 @@
 #include <unistd.h>
 #include "timer.hpp"
 #include "statedb_singleton.hpp"
+#include "zklog.hpp"
+#include "exit_process.hpp"
 
 #ifdef DATABASE_USE_CACHE
 
@@ -32,7 +34,7 @@ void Database::init(void)
     // Check that it has not been initialized before
     if (bInitialized)
     {
-        cerr << "Error: Database::init() called when already initialized" << endl;
+        zklog.error("Database::init() called when already initialized");
         exitProcess();
     }
 
@@ -57,7 +59,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
     // Check that it has been initialized before
     if (!bInitialized)
     {
-        cerr << "Error: Database::read() called uninitialized" << endl;
+        zklog.error("Database::read() called uninitialized");
         exitProcess();
     }
 
@@ -105,7 +107,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
     }
     else
     {
-        cerr << "Error: Database::read() requested a key that does not exist: " << key << endl;
+        zklog.error("Database::read() requested a key that does not exist: " + key);
         r = ZKR_DB_KEY_NOT_FOUND;
     }
 
@@ -128,13 +130,13 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
     // Check that it has  been initialized before
     if (!bInitialized)
     {
-        cerr << "Error: Database::write() called uninitialized" << endl;
+        zklog.error("Database::write() called uninitialized");
         exitProcess();
     }
 
     if (config.dbMultiWrite && !useDBMTCache && !persistent)
     {
-        cerr << "Error: Database::write() called with multi-write active, cache disabled and no persistance in database, so there is no place to store the date" << endl;
+        zklog.error("Database::write() called with multi-write active, cache disabled and no persistance in database, so there is no place to store the date");
         return ZKR_DB_ERROR;
     }
 
@@ -205,17 +207,17 @@ void Database::initRemote(void)
             // Check that we don't support more threads than available connections
             if ( config.runStateDBServer && (config.maxStateDBThreads > config.dbNumberOfPoolConnections) )
             {
-                cerr << "Error: Database::initRemote() found config.maxStateDBThreads=" << config.maxStateDBThreads << " > config.dbNumberOfPoolConnections=" << config.dbNumberOfPoolConnections << endl;
+                zklog.error("Database::initRemote() found config.maxStateDBThreads=" + to_string(config.maxStateDBThreads) + " > config.dbNumberOfPoolConnections=" + to_string(config.dbNumberOfPoolConnections));
                 exitProcess();
             }
             if ( config.runExecutorServer && (config.maxExecutorThreads > config.dbNumberOfPoolConnections) )
             {
-                cerr << "Error: Database::initRemote() found config.maxExecutorThreads=" << config.maxExecutorThreads << " > config.dbNumberOfPoolConnections=" << config.dbNumberOfPoolConnections << endl;
+                zklog.error("Database::initRemote() found config.maxExecutorThreads=" + to_string(config.maxExecutorThreads) + " > config.dbNumberOfPoolConnections=" + to_string(config.dbNumberOfPoolConnections));
                 exitProcess();
             }
             if ( config.runStateDBServer && config.runExecutorServer && ((config.maxStateDBThreads+config.maxExecutorThreads) > config.dbNumberOfPoolConnections) )
             {
-                cerr << "Error: Database::initRemote() found config.maxStateDBThreads+config.maxExecutorThreads=" << config.maxStateDBThreads+config.maxExecutorThreads << " > config.dbNumberOfPoolConnections=" << config.dbNumberOfPoolConnections << endl;
+                zklog.error("Database::initRemote() found config.maxStateDBThreads+config.maxExecutorThreads=" + to_string(config.maxStateDBThreads+config.maxExecutorThreads) + " > config.dbNumberOfPoolConnections=" + to_string(config.dbNumberOfPoolConnections));
                 exitProcess();
             }
 
@@ -223,7 +225,7 @@ void Database::initRemote(void)
             connectionsPool = new DatabaseConnection[config.dbNumberOfPoolConnections];
             if (connectionsPool == NULL)
             {
-                cerr << "Error: Database::initRemote() failed creating write connection pool of size " << config.dbNumberOfPoolConnections << endl;
+                zklog.error("Database::initRemote() failed creating write connection pool of size " + to_string(config.dbNumberOfPoolConnections));
                 exitProcess();
             }
 
@@ -233,7 +235,7 @@ void Database::initRemote(void)
                 connectionsPool[i].pConnection = new pqxx::connection{uri};
                 if (connectionsPool[i].pConnection == NULL)
                 {
-                    cerr << "Error: Database::initRemote() failed creating write connection " << i << endl;
+                    zklog.error("Database::initRemote() failed creating write connection " + to_string(i));
                     exitProcess();
                 }
                 connectionsPool[i].bInUse = false;
@@ -249,7 +251,7 @@ void Database::initRemote(void)
             connection.pConnection = new pqxx::connection{uri};
             if (connection.pConnection == NULL)
             {
-                cerr << "Error: Database::initRemote() failed creating unique connection" << endl;
+                zklog.error("Database::initRemote() failed creating unique connection");
                 exitProcess();
             }
             connection.bInUse = false;
@@ -259,7 +261,7 @@ void Database::initRemote(void)
     }
     catch (const std::exception &e)
     {
-        cerr << "Error: Database::initRemote() exception: " << e.what() << endl;
+        zklog.error("Database::initRemote() exception: " + string(e.what()));
         exitProcess();
     }
 
@@ -284,7 +286,7 @@ DatabaseConnection * Database::getConnection (void)
         }
         if (i==config.dbNumberOfPoolConnections)
         {
-            cerr << "Error: Database::getWriteConnection() run out of free connections" << endl;
+            zklog.error("Database::getWriteConnection() run out of free connections");
             exitProcess();
         }
 
@@ -371,14 +373,14 @@ zkresult Database::readRemote(bool bProgram, const string &key, string &value)
         }
         else if (rows.size() > 1)
         {
-            cerr << "Error: Database::readRemote() table="<< tableName << " got more than one row for the same key: " << rows.size() << endl;
+            zklog.error("Database::readRemote() table=" + tableName + " got more than one row for the same key: " + to_string(rows.size()));
             exitProcess();
         }
 
         pqxx::row const row = rows[0];
         if (row.size() != 2)
         {
-            cerr << "Error: Database::readRemote() table="<< tableName << " got an invalid number of colums for the row: " << row.size() << endl;
+            zklog.error("Database::readRemote() table=" + tableName + " got an invalid number of colums for the row: " + to_string(row.size()));
             exitProcess();
         }
         pqxx::field const fieldData = row[1];
@@ -386,7 +388,7 @@ zkresult Database::readRemote(bool bProgram, const string &key, string &value)
     }
     catch (const std::exception &e)
     {
-        cerr << "Error: Database::readRemote() table="<< tableName << " exception: " << e.what() << " connection=" << pDatabaseConnection << endl;
+        zklog.error("Database::readRemote() table=" + tableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
         exitProcess();
     }
     
@@ -455,7 +457,7 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
         }
         catch (const std::exception &e)
         {
-            cerr << "Error: Database::writeRemote() table="<< tableName << " exception: " << e.what() << " connection=" << pDatabaseConnection << endl;
+            zklog.error("Database::writeRemote() table=" + tableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
             result = ZKR_DB_ERROR;
         }
     }
@@ -468,7 +470,7 @@ zkresult Database::setProgram(const string &_key, const vector<uint8_t> &data, c
     // Check that it has been initialized before
     if (!bInitialized)
     {
-        cerr << "Error: Database::setProgram() called uninitialized" << endl;
+        zklog.error("Database::setProgram() called uninitialized");
         exitProcess();
     }
 
@@ -525,7 +527,7 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
     // Check that it has been initialized before
     if (!bInitialized)
     {
-        cerr << "Error: Database::getProgram() called uninitialized" << endl;
+        zklog.error("Database::getProgram() called uninitialized");
         exitProcess();
     }
 
@@ -567,7 +569,7 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
     }
     else
     {
-        cerr << "Error: Database::getProgram() requested a key that does not exist: " << key << endl;
+        zklog.error("Database::getProgram() requested a key that does not exist: " + key);
         r = ZKR_DB_KEY_NOT_FOUND;
     }
 
@@ -701,7 +703,7 @@ zkresult Database::flush()
         }
         catch (const std::exception &e)
         {
-            cerr << "Error: Database::flush() execute query exception: " << e.what() << endl;
+            zklog.error("Database::flush() execute query exception: " + string(e.what()));
             zkr = ZKR_DB_ERROR;
         }
 
@@ -745,22 +747,22 @@ void Database::printTree(const string &root, string prefix)
     read(key, value, NULL);
     if (value.size() != 12)
     {
-        cerr << "Error: Database::printTree() found value.size()=" << value.size() << endl;
+        zklog.error("Database::printTree() found value.size()=" + to_string(value.size()));
         return;
     }
     if (!fr.equal(value[11], fr.zero()))
     {
-        cerr << "Error: Database::printTree() found value[11]=" << fr.toString(value[11], 16) << endl;
+        zklog.error("Database::printTree() found value[11]=" + fr.toString(value[11], 16));
         return;
     }
     if (!fr.equal(value[10], fr.zero()))
     {
-        cerr << "Error: Database::printTree() found value[10]=" << fr.toString(value[10], 16) << endl;
+        zklog.error("Database::printTree() found value[10]=" + fr.toString(value[10], 16));
         return;
     }
     if (!fr.equal(value[9], fr.zero()))
     {
-        cerr << "Error: Database::printTree() found value[9]=" << fr.toString(value[9], 16) << endl;
+        zklog.error("Database::printTree() found value[9]=" + fr.toString(value[9], 16));
         return;
     }
     if (fr.equal(value[8], fr.zero())) // Intermediate node
@@ -786,22 +788,22 @@ void Database::printTree(const string &root, string prefix)
         {
             if (!fr.equal(leafValue[8], fr.zero()))
             {
-                cerr << "Error: Database::printTree() found leafValue[8]=" << fr.toString(leafValue[8], 16) << endl;
+                zklog.error("Database::printTree() found leafValue[8]=" + fr.toString(leafValue[8], 16));
                 return;
             }
             if (!fr.equal(leafValue[9], fr.zero()))
             {
-                cerr << "Error: Database::printTree() found leafValue[9]=" << fr.toString(leafValue[9], 16) << endl;
+                zklog.error("Database::printTree() found leafValue[9]=" + fr.toString(leafValue[9], 16));
                 return;
             }
             if (!fr.equal(leafValue[10], fr.zero()))
             {
-                cerr << "Error: Database::printTree() found leafValue[10]=" << fr.toString(leafValue[10], 16) << endl;
+                zklog.error("Database::printTree() found leafValue[10]=" + fr.toString(leafValue[10], 16));
                 return;
             }
             if (!fr.equal(leafValue[11], fr.zero()))
             {
-                cerr << "Error: Database::printTree() found leafValue[11]=" << fr.toString(leafValue[11], 16) << endl;
+                zklog.error("Database::printTree() found leafValue[11]=" + fr.toString(leafValue[11], 16));
                 return;
             }
         }
@@ -811,7 +813,7 @@ void Database::printTree(const string &root, string prefix)
         }
         else
         {
-            cerr << "Error: Database::printTree() found lleafValue.size()=" << leafValue.size() << endl;
+            zklog.error("Database::printTree() found lleafValue.size()=" + to_string(leafValue.size()));
             return;
         }
         mpz_class scalarValue;
@@ -820,7 +822,7 @@ void Database::printTree(const string &root, string prefix)
     }
     else
     {
-        cerr << "Error: Database::printTree() found value[8]=" << fr.toString(value[8], 16) << endl;
+        zklog.error("Database::printTree() found value[8]=" + fr.toString(value[8], 16));
         return;
     }
     if (prefix == "") cout << endl;
@@ -856,7 +858,7 @@ void loadDb2MemCache(const Config config)
 {
     if (config.databaseURL == "local")
     {
-        cerr << "Error: loadDb2MemCache() called with config.stateDBURL==local" << endl;
+        zklog.error("loadDb2MemCache() called with config.stateDBURL==local");
         exitProcess();
     }
 
@@ -878,7 +880,7 @@ void loadDb2MemCache(const Config config)
     }
     else if (zkr != ZKR_SUCCESS)
     {
-        cerr << "Error: loadDb2MemCache() failed calling db.read result=" << zkr << "=" << zkresult2string(zkr) << endl;
+        zklog.error("loadDb2MemCache() failed calling db.read result=" + string(zkresult2string(zkr)));
         TimerStopAndLog(LOAD_DB_TO_CACHE);
         return;
     }
@@ -940,13 +942,13 @@ void loadDb2MemCache(const Config config)
             zkresult zkr = pStateDB->db.read(hash, dbValue, NULL, true);
             if (zkr != ZKR_SUCCESS)
             {
-                cerr << "Error: loadDb2MemCache() failed calling db.read(" << hash << ") result=" << zkr << "=" << zkresult2string(zkr) << endl;
+                zklog.error("loadDb2MemCache() failed calling db.read(" + hash + ") result=" + string(zkresult2string(zkr)));
                 TimerStopAndLog(LOAD_DB_TO_CACHE);
                 return;
             }
             if (dbValue.size() != 12)
             {
-                cerr << "Error: loadDb2MemCache() failed calling db.read(" << hash << ") dbValue.size()=" << dbValue.size() << endl;
+                zklog.error("loadDb2MemCache() failed calling db.read(" + hash + ") dbValue.size()=" + to_string(dbValue.size()));
                 TimerStopAndLog(LOAD_DB_TO_CACHE);
                 return;
             }
@@ -988,7 +990,7 @@ void loadDb2MemCache(const Config config)
                         zkresult zkr = pStateDB->db.read(rightHash, dbValue, NULL, true);
                         if (zkr != ZKR_SUCCESS)
                         {
-                            cerr << "Error: loadDb2MemCache() failed calling db.read(" << rightHash << ") result=" << zkr << "=" << zkresult2string(zkr) << endl;
+                            zklog.error("loadDb2MemCache() failed calling db.read(" + rightHash + ") result=" + string(zkresult2string(zkr)));
                             TimerStopAndLog(LOAD_DB_TO_CACHE);
                             return;
                         }

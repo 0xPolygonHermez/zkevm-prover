@@ -5,6 +5,8 @@
 #include "fr.hpp"
 #include "poseidon_opt.hpp"
 #include "starkRecursiveFSteps.hpp"
+#include "zklog.hpp"
+#include "exit_process.hpp"
 
 #define NUM_CHALLENGES 8
 
@@ -30,8 +32,8 @@ StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config
     pConstPolsAddress = NULL;
     if (config.recursivefConstPols.size() == 0)
     {
-        cerr << "Error: StarkRecursiveF::StarkRecursiveF() received an empty config.recursivefConstPols" << endl;
-        exit(-1);
+        zklog.error("StarkRecursiveF::StarkRecursiveF() received an empty config.recursivefConstPols");
+        exitProcess();
     }
     constPolsDegree = (1 << starkInfo.starkStruct.nBits);
     constPolsSize = starkInfo.nConstants * sizeof(Goldilocks::Element) * constPolsDegree;
@@ -55,8 +57,8 @@ StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config
     pConstTreeAddress = NULL;
     if (config.recursivefConstantsTree.size() == 0)
     {
-        cerr << "Error: StarkRecursiveF::StarkRecursiveF() received an empty config.recursivefConstantsTree" << endl;
-        exit(-1);
+        zklog.error("StarkRecursiveF::StarkRecursiveF() received an empty config.recursivefConstantsTree");
+        exitProcess();
     }
 
     if (config.mapConstantsTreeFile)

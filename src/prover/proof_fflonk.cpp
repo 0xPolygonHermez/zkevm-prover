@@ -4,6 +4,8 @@
 #include "proof_fflonk.hpp"
 #include "utils.hpp"
 #include "scalar.hpp"
+#include "zklog.hpp"
+#include "exit_process.hpp"
 
 using namespace std;
 
@@ -13,7 +15,7 @@ void Proof::load(json &proof, json &publicSignalsJson)
 
     if (!proof.contains("evaluations") || !proof["evaluations"].is_object())
     {
-        cerr << "Error: proof does not contain evaluations" << endl;
+        zklog.error("Proof::load() proof does not contain evaluations");
         exitProcess();
     }
     if (!proof["evaluations"].contains("a") ||
@@ -33,7 +35,7 @@ void Proof::load(json &proof, json &publicSignalsJson)
         !proof["evaluations"].contains("z") ||
         !proof["evaluations"].contains("zw"))
     {
-        cerr << "Error: proof does not contain one evaluation" << endl;
+        zklog.error("Proof::load() proof does not contain one evaluation");
         exitProcess();
     }
 
@@ -56,31 +58,31 @@ void Proof::load(json &proof, json &publicSignalsJson)
 
     if (!proof.contains("polynomials") || !proof["evaluations"].is_object())
     {
-        cerr << "Error: proof does not contain polynomials" << endl;
+        zklog.error("Proof::load() proof does not contain polynomials");
         exitProcess();
     }
 
     if (!proof["polynomials"].contains("C1") || !proof["polynomials"]["C1"].is_array())
     {
-        cerr << "Error: proof does not contain C1 polynomial" << endl;
+        zklog.error("Proof::load() proof does not contain C1 polynomial");
         exitProcess();
     }
 
     if (!proof["polynomials"].contains("C2") || !proof["polynomials"]["C2"].is_array())
     {
-        cerr << "Error: proof does not contain C1 polynomial" << endl;
+        zklog.error("Proof::load() proof does not contain C1 polynomial");
         exitProcess();
     }
 
     if (!proof["polynomials"].contains("W1") || !proof["polynomials"]["W1"].is_array())
     {
-        cerr << "Error: proof does not contain C1 polynomial" << endl;
+        zklog.error("Proof::load() proof does not contain C1 polynomial");
         exitProcess();
     }
 
     if (!proof["polynomials"].contains("W2") || !proof["polynomials"]["W2"].is_array())
     {
-        cerr << "Error: proof does not contain C1 polynomial" << endl;
+        zklog.error("Proof::load() proof does not contain C1 polynomial");
         exitProcess();
     }
 
@@ -115,7 +117,7 @@ void Proof::load(json &proof, json &publicSignalsJson)
     // Load public inputs
     if (!publicSignalsJson.is_array())
     {
-        cerr << "Error: publicSignalsJson is not an array" << endl;
+        zklog.error("Proof::load() publicSignalsJson is not an array");
         exitProcess();
     }
 
