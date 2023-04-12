@@ -221,7 +221,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         uint64_t incCounter = 0;
 
 #ifdef LOG_START_STEPS
-        cout << "--> Starting step=" << step << " zkPC=" << zkPC << " zkasm=" << rom.line[zkPC].lineStr << endl;
+        zklog.info("--> Starting step=" + to_string(step) + " zkPC=" + to_string(zkPC) + " zkasm=" + rom.line[zkPC].lineStr);
 #endif
         if (config.executorROMLineTraces)
         {
@@ -300,7 +300,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.inA[i] = rom.line[zkPC].inA;
 
 #ifdef LOG_INX
-            cout << "inA op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inA op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -319,7 +319,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.inB[i] = rom.line[zkPC].inB;
 
 #ifdef LOG_INX
-            cout << "inB op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inB op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -338,7 +338,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.inC[i] = rom.line[zkPC].inC;
 
 #ifdef LOG_INX
-            cout << "inC op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inC op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -357,7 +357,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.inD[i] = rom.line[zkPC].inD;
 
 #ifdef LOG_INX
-            cout << "inD op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inD op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -376,7 +376,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.inE[i] = rom.line[zkPC].inE;
 
 #ifdef LOG_INX
-            cout << "inE op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inE op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -395,7 +395,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.inSR[i] = rom.line[zkPC].inSR;
 
 #ifdef LOG_INX
-            cout << "inSR op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inSR op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -405,7 +405,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, fr.mul(rom.line[zkPC].inCTX, pols.CTX[i]));
             pols.inCTX[i] = rom.line[zkPC].inCTX;
 #ifdef LOG_INX
-            cout << "inCTX op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inCTX op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -415,7 +415,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, fr.mul(rom.line[zkPC].inSP, pols.SP[i]));
             pols.inSP[i] = rom.line[zkPC].inSP;
 #ifdef LOG_INX
-            cout << "inSP op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inSP op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -425,7 +425,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, fr.mul(rom.line[zkPC].inPC, pols.PC[i]));
             pols.inPC[i] = rom.line[zkPC].inPC;
 #ifdef LOG_INX
-            cout << "inPC op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inPC op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -435,7 +435,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, fr.mul(rom.line[zkPC].inGAS, pols.GAS[i]));
             pols.inGAS[i] = rom.line[zkPC].inGAS;
 #ifdef LOG_INX
-            cout << "inGAS op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inGAS op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -445,7 +445,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, fr.mul( rom.line[zkPC].inSTEP, fr.fromU64(proverRequest.input.bNoCounters ? 0 : step) ));
             pols.inSTEP[i] = rom.line[zkPC].inSTEP;
 #ifdef LOG_INX
-            cout << "inSTEP op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inSTEP op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -455,7 +455,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, fr.mul(rom.line[zkPC].inRR, pols.RR[i]));
             pols.inRR[i] = rom.line[zkPC].inRR;
 #ifdef LOG_INX
-            cout << "inRR op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inRR op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -465,7 +465,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, fr.mul(rom.line[zkPC].inHASHPOS, pols.HASHPOS[i]));
             pols.inHASHPOS[i] = rom.line[zkPC].inHASHPOS;
 #ifdef LOG_INX
-            cout << "inHASHPOS op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inHASHPOS op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -475,7 +475,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, fr.mul(rom.line[zkPC].inCntArith, pols.cntArith[i]));
             pols.inCntArith[i] = rom.line[zkPC].inCntArith;
 #ifdef LOG_INX
-            cout << "inCntArith op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inCntArith op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -485,7 +485,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, fr.mul(rom.line[zkPC].inCntBinary, pols.cntBinary[i]));
             pols.inCntBinary[i] = rom.line[zkPC].inCntBinary;
 #ifdef LOG_INX
-            cout << "inCntBinary op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inCntBinary op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -495,7 +495,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, fr.mul(rom.line[zkPC].inCntMemAlign, pols.cntMemAlign[i]));
             pols.inCntMemAlign[i] = rom.line[zkPC].inCntMemAlign;
 #ifdef LOG_INX
-            cout << "inCntMemAlign op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inCntMemAlign op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -505,7 +505,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, fr.mul(rom.line[zkPC].inCntKeccakF, pols.cntKeccakF[i]));
             pols.inCntKeccakF[i] = rom.line[zkPC].inCntKeccakF;
 #ifdef LOG_INX
-            cout << "inCntKeccakF op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inCntKeccakF op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -515,7 +515,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, fr.mul(rom.line[zkPC].inCntPoseidonG, pols.cntPoseidonG[i]));
             pols.inCntPoseidonG[i] = rom.line[zkPC].inCntPoseidonG;
 #ifdef LOG_INX
-            cout << "inCntPoseidonG op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inCntPoseidonG op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -525,7 +525,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, fr.mul(rom.line[zkPC].inCntPaddingPG, pols.cntPaddingPG[i]));
             pols.inCntPaddingPG[i] = rom.line[zkPC].inCntPaddingPG;
 #ifdef LOG_INX
-            cout << "inCntPaddingPG op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inCntPaddingPG op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -550,7 +550,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, fr.mul(rom.line[zkPC].inRCX, pols.RCX[i]));
             pols.inRCX[i] = rom.line[zkPC].inRCX;
 #ifdef LOG_INX
-            cout << "inCntPaddingPG op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inCntPaddingPG op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -567,7 +567,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.CONST6[i] = op6;
             pols.CONST7[i] = op7;
 #ifdef LOG_INX
-            cout << "CONSTL op=" << rom.line[zkPC].CONSTL.get_str(16) << endl;
+            zklog.info("CONSTL op=" + rom.line[zkPC].CONSTL.get_str(16));
 #endif
         }
         else if (rom.line[zkPC].bConstPresent)
@@ -575,7 +575,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, rom.line[zkPC].CONST);
             pols.CONST0[i] = rom.line[zkPC].CONST;
 #ifdef LOG_INX
-            cout << "CONST op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("CONST op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -655,7 +655,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             addr = addrRel;
 #ifdef LOG_ADDR
-            cout << "Any addr=" << addr << endl;
+            zklog.info("Any addr=" + to_string(addr));
 #endif
         }
 
@@ -665,7 +665,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             addr += fr.toU64(pols.CTX[i])*CTX_OFFSET;
             pols.useCTX[i] = fr.one();
 #ifdef LOG_ADDR
-            cout << "useCTX addr=" << addr << endl;
+            zklog.info("useCTX addr=" + to_string(addr));
 #endif
         }
 
@@ -675,7 +675,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             addr += STACK_OFFSET;
             pols.isStack[i] = fr.one();
 #ifdef LOG_ADDR
-            cout << "isStack addr=" << addr << endl;
+            zklog.info("isStack addr=" + to_string(addr));
 #endif
         }
 
@@ -685,7 +685,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             addr += MEM_OFFSET;
             pols.isMem[i] = fr.one();
 #ifdef LOG_ADDR
-            cout << "isMem addr=" << addr << endl;
+            zklog.info("isMem addr=" + to_string(addr));
 #endif
         }
 
@@ -737,7 +737,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     memIterator = ctx.mem.find(addr);
                     if (memIterator != ctx.mem.end()) {
 #ifdef LOG_MEMORY
-                        cout << "Memory read mRD: addr:" << addr << " " << printFea(ctx, ctx.mem[addr]) << endl;
+                        zklog.info("Memory read mRD: addr:" + to_string(addr) + " " + fea2string(fr, ctx.mem[addr].fe0, ctx.mem[addr].fe1, ctx.mem[addr].fe2, ctx.mem[addr].fe3, ctx.mem[addr].fe4, ctx.mem[addr].fe5, ctx.mem[addr].fe6, ctx.mem[addr].fe7));
 #endif
                         fi0 = memIterator->second.fe0;
                         fi1 = memIterator->second.fe1;
@@ -823,7 +823,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
 
 #ifdef LOG_STORAGE
-                    cout << "Storage read sRD got poseidon key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << endl;
+                    zklog.info("Storage read sRD got poseidon key: " + ctx.fr.toString(ctx.lastSWrite.key, 16));
 #endif
                     Goldilocks::Element oldRoot[4];
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
@@ -864,7 +864,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                     nHits++;
 #ifdef LOG_STORAGE
-                    cout << "Storage read sRD read from key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " value:" << fr.toString(fi3, 16) << ":" << fr.toString(fi2, 16) << ":" << fr.toString(fi1, 16) << ":" << fr.toString(fi0, 16) << endl;
+                    zklog.info("Storage read sRD read from key: " + ctx.fr.toString(ctx.lastSWrite.key, 16) + " value:" + fr.toString(fi3, 16) + ":" + fr.toString(fi2, 16) + ":" + fr.toString(fi1, 16) + ":" + fr.toString(fi0, 16));
 #endif
                 }
 
@@ -947,7 +947,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
 
 #ifdef LOG_STORAGE
-                    cout << "Storage write sWR got poseidon key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << endl;
+                    zklog.info("Storage write sWR got poseidon key: " + ctx.fr.toString(ctx.lastSWrite.key, 16));
 #endif
                     // Call SMT to get the new Merkel Tree root hash
                     mpz_class scalarD;
@@ -1005,7 +1005,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     sr4to8(fr, ctx.lastSWrite.newRoot[0], ctx.lastSWrite.newRoot[1], ctx.lastSWrite.newRoot[2], ctx.lastSWrite.newRoot[3], fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                     nHits++;
 #ifdef LOG_STORAGE
-                    cout << "Storage write sWR stored at key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " newRoot: " << fr.toString(res.newRoot, 16) << endl;
+                    zklog.info("Storage write sWR stored at key: " + ctx.fr.toString(ctx.lastSWrite.key, 16) + " newRoot: " + fr.toString(ctx.lastSWrite.res.newRoot, 16));
 #endif
                 }
 
@@ -1071,7 +1071,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     nHits++;
 
 #ifdef LOG_HASHK
-                    cout << "hashK 1 i=" << i << " zkPC=" << zkPC << " addr=" << addr << " pos=" << pos << " size=" << size << " data=" << s.get_str(16) << endl;
+                    zklog.info("hashK 1 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr) + " pos=" + to_string(pos) + " size=" + to_string(size) + " data=" + s.get_str(16));
 #endif
                 }
 
@@ -1105,7 +1105,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     nHits++;
 
 #ifdef LOG_HASHK
-                    cout << "hashKDigest 1 i=" << i << " zkPC=" << zkPC << " addr=" << addr << " digest=" << ctx.hashK[addr].digest.get_str(16) << endl;
+                    zklog.info("hashKDigest 1 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr) + " digest=" + ctx.hashK[addr].digest.get_str(16));
 #endif
                 }
 
@@ -1579,7 +1579,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             pols.assert_pol[i] = fr.one();
 #ifdef LOG_ASSERT
-            cout << "assert" << endl;
+            zklog.info("assert");
 #endif
         }
 
@@ -1620,7 +1620,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
 
 #ifdef LOG_MEMORY
-                cout << "Memory write mWR: addr:" << addr << " " << printFea(ctx, ctx.mem[addr]) << endl;
+                zklog.info("Memory write mWR: addr:" + to_string(addr) + " " + fea2string(fr, ctx.mem[addr].fe0, ctx.mem[addr].fe1, ctx.mem[addr].fe2, ctx.mem[addr].fe3, ctx.mem[addr].fe4, ctx.mem[addr].fe5, ctx.mem[addr].fe6, ctx.mem[addr].fe7));
 #endif
             }
             else
@@ -1779,7 +1779,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
 
 #ifdef LOG_STORAGE
-            cout << "Storage read sRD got poseidon key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << endl;
+            zklog.info("Storage read sRD got poseidon key: " + ctx.fr.toString(ctx.lastSWrite.key, 16));
 #endif
             Goldilocks::Element oldRoot[4];
             sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
@@ -1824,7 +1824,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
 
 #ifdef LOG_STORAGE
-            cout << "Storage read sRD read from key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " value:" << fr.toString(fi3, 16) << ":" << fr.toString(fi2, 16) << ":" << fr.toString(fi1, 16) << ":" << fr.toString(fi0, 16) << endl;
+            zklog.info("Storage read sRD read from key: " + ctx.fr.toString(ctx.lastSWrite.key, 16) + " value:" + value.get_str(16));
 #endif
             mpz_class opScalar;
             if (!fea2scalar(fr, opScalar, op0, op1, op2, op3, op4, op5, op6, op7))
@@ -2183,7 +2183,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             incHashPos = size;
 
 #ifdef LOG_HASHK
-            cout << "hashK 2 i=" << i << " zkPC=" << zkPC << " addr=" << addr << " pos=" << pos << " size=" << size << " data=" << a.get_str(16) << endl;
+            zklog.info("hashK 2 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr) + " pos=" + to_string(pos) + " size=" + to_string(size) + " data=" + a.get_str(16));
 #endif
         }
 
@@ -2257,7 +2257,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
 
 #ifdef LOG_HASHK
-            cout << "hashKLen 2 i=" << i << " zkPC=" << zkPC << " addr=" << addr << endl;
+            zklog.info("hashKLen 2 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr));
 #endif
         }
 
@@ -2308,7 +2308,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             incCounter = ceil((double(hashKIterator->second.data.size()) + double(1)) / double(136));
 
 #ifdef LOG_HASHK
-            cout << "hashKDigest 2 i=" << i << " zkPC=" << zkPC << " addr=" << addr << " digest=" << ctx.hashK[addr].digest.get_str(16) << endl;
+            zklog.info("hashKDigest 2 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr) + " digest=" + ctx.hashK[addr].digest.get_str(16));
 #endif
         }
 
@@ -3515,7 +3515,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.A7[nexti] = op7;
             pols.setA[i] = fr.one();
 #ifdef LOG_SETX
-            cout << "setA A[nexti]=" << pols.A3[nexti] << ":" << pols.A2[nexti] << ":" << pols.A1[nexti] << ":" << fr.toString(pols.A0[nexti], 16) << endl;
+            zklog.info("setA A[nexti]=" + fea2string(fr, pols.A0[nexti], pols.A1[nexti], pols.A2[nexti], pols.A3[nexti], pols.A4[nexti], pols.A5[nexti], pols.A6[nexti], pols.A7[nexti]));
 #endif
         } else if (bUnsignedTransaction && (zkPC == checkAndSaveFromLabel)) {
             // Set A register with input.from to process unsigned transactions
@@ -3544,7 +3544,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.B7[nexti] = op7;
             pols.setB[i] = fr.one();
 #ifdef LOG_SETX
-            cout << "setB B[nexti]=" << pols.B3[nexti] << ":" << pols.B2[nexti] << ":" << pols.B1[nexti] << ":" << fr.toString(pols.B0[nexti], 16) << endl;
+            zklog.info("setB B[nexti]=" + fea2string(fr, pols.B0[nexti], pols.B1[nexti], pols.B2[nexti], pols.B3[nexti], pols.B4[nexti], pols.B5[nexti], pols.B6[nexti], pols.B7[nexti]));
 #endif
         } else {
             pols.B0[nexti] = pols.B0[i];
@@ -3569,7 +3569,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.C7[nexti] = op7;
             pols.setC[i] = fr.one();
 #ifdef LOG_SETX
-            cout << "setC C[nexti]=" << pols.C3[nexti] << ":" << pols.C2[nexti] << ":" << pols.C1[nexti] << ":" << fr.toString(pols.C0[nexti], 16) << endl;
+            zklog.info("setC C[nexti]=" + fea2string(fr, pols.C0[nexti], pols.C1[nexti], pols.C2[nexti], pols.C3[nexti], pols.C4[nexti], pols.C5[nexti], pols.C6[nexti], pols.C7[nexti]));
 #endif
         } else {
             pols.C0[nexti] = pols.C0[i];
@@ -3594,7 +3594,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.D7[nexti] = op7;
             pols.setD[i] = fr.one();
 #ifdef LOG_SETX
-            cout << "setD D[nexti]=" << pols.D3[nexti] << ":" << pols.D2[nexti] << ":" << pols.D1[nexti] << ":" << fr.toString(pols.D0[nexti], 16) << endl;
+            zklog.info("setD D[nexti]=" + fea2string(fr, pols.D0[nexti], pols.D1[nexti], pols.D2[nexti], pols.D3[nexti], pols.D4[nexti], pols.D5[nexti], pols.D6[nexti], pols.D7[nexti]));
 #endif
         } else {
             pols.D0[nexti] = pols.D0[i];
@@ -3619,7 +3619,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.E7[nexti] = op7;
             pols.setE[i] = fr.one();
 #ifdef LOG_SETX
-            cout << "setE E[nexti]=" << pols.E3[nexti] << ":" << pols.E2[nexti] << ":" << pols.E1[nexti] << ":" << fr.toString(pols.E0[nexti] ,16) << endl;
+            zklog.info("setE E[nexti]=" + fea2string(fr, pols.E0[nexti], pols.E1[nexti], pols.E2[nexti], pols.E3[nexti], pols.E4[nexti], pols.E5[nexti], pols.E6[nexti], pols.E7[nexti]));
 #endif
         } else {
             pols.E0[nexti] = pols.E0[i];
@@ -3644,7 +3644,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.SR7[nexti] = op7;
             pols.setSR[i] = fr.one();
 #ifdef LOG_SETX
-            cout << "setSR SR[nexti]=" << fr.toString(pols.SR[nexti], 16) << endl;
+            zklog.info("setSR SR[nexti]=" + fea2string(fr, pols.SR0[nexti], pols.SR1[nexti], pols.SR2[nexti], pols.SR3[nexti], pols.SR4[nexti], pols.SR5[nexti], pols.SR6[nexti], pols.SR7[nexti]));
 #endif
         } else {
             pols.SR0[nexti] = pols.SR0[i];
@@ -3662,7 +3662,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.CTX[nexti] = op0;
             pols.setCTX[i] = fr.one();
 #ifdef LOG_SETX
-            cout << "setCTX CTX[nexti]=" << pols.CTX[nexti] << endl;
+            zklog.info("setCTX CTX[nexti]=" + fr.toString(pols.CTX[nexti], 16));
 #endif
         } else {
             pols.CTX[nexti] = pols.CTX[i];
@@ -3673,7 +3673,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.SP[nexti] = op0;
             pols.setSP[i] = fr.one();
 #ifdef LOG_SETX
-            cout << "setSP SP[nexti]=" << pols.SP[nexti] << endl;
+            zklog.info("setSP SP[nexti]=" + fr.toString(pols.SP[nexti], 16));
 #endif
         } else {
             // SP' = SP + incStack
@@ -3685,7 +3685,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.PC[nexti] = op0;
             pols.setPC[i] = fr.one();
 #ifdef LOG_SETX
-            cout << "setPC PC[nexti]=" << pols.PC[nexti] << endl;
+            zklog.info("setPC PC[nexti]=" + fr.toString(pols.PC[nexti], 16));
 #endif
         } else {
             // PC' = PC
@@ -3826,7 +3826,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if (rom.line[zkPC].JMPN == 1)
         {
 #ifdef LOG_JMP
-            cout << "JMPN: op0=" << fr.toString(op0) << endl;
+            zklog.info("JMPN: op0=" + fr.toString(op0));
 #endif
             uint64_t jmpnCondValue = fr.toU64(op0);
 
@@ -3840,7 +3840,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     pols.zkPC[nexti] = fr.fromU64(addr);
                 jmpnCondValue = fr.toU64(fr.add(op0, fr.fromU64(0x100000000)));
 #ifdef LOG_JMP
-                cout << "JMPN next zkPC(1)=" << pols.zkPC[nexti] << endl;
+                zklog.info("JMPN next zkPC(1)=" + fr.toString(pols.zkPC[nexti]));
 #endif
             }
             // If op>=0, simply increase zkPC'=zkPC+1
@@ -3851,7 +3851,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 else
                     pols.zkPC[nexti] = fr.inc(pols.zkPC[i]);
 #ifdef LOG_JMP
-                cout << "JMPN next zkPC(2)=" << pols.zkPC[nexti] << endl;
+                zklog.info("JMPN next zkPC(2)=" + fr.toString(pols.zkPC[nexti]));
 #endif
             }
             else
@@ -3881,7 +3881,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 else
                     pols.zkPC[nexti] = fr.fromU64(addr);
 #ifdef LOG_JMP
-               cout << "JMPC next zkPC(3)=" << pols.zkPC[nexti] << endl;
+               zklog.info("JMPC next zkPC(3)=" + fr.toString(pols.zkPC[nexti]));
 #endif
             }
             // If not carry, simply increase zkPC'=zkPC+1
@@ -3892,7 +3892,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 else
                     pols.zkPC[nexti] = fr.inc(pols.zkPC[i]);
 #ifdef LOG_JMP
-                cout << "JMPC next zkPC(4)=" << pols.zkPC[nexti] << endl;
+                zklog.info("JMPC next zkPC(4)=" + fr.toString(pols.zkPC[nexti]));
 #endif
             }
             pols.JMPC[i] = fr.one();
@@ -3924,7 +3924,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             else
                 pols.zkPC[nexti] = fr.fromU64(addr);
 #ifdef LOG_JMP
-            cout << "JMP next zkPC(5)=" << pols.zkPC[nexti] << endl;
+            zklog.info("JMP next zkPC(5)=" + fr.toString(pols.zkPC[nexti]));
 #endif
             pols.JMP[i] = fr.one();
         }
@@ -3959,7 +3959,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.GAS[nexti] = op0;
             pols.setGAS[i] = fr.one();
 #ifdef LOG_SETX
-            cout << "setGAS GAS[nexti]=" << pols.GAS[nexti] << endl;
+            zklog.info("setGAS GAS[nexti]=" + fr.toString(pols.GAS[nexti]));
 #endif
         } else {
             pols.GAS[nexti] = pols.GAS[i];
@@ -4079,7 +4079,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
 #ifdef LOG_COMPLETED_STEPS
-        cout << "<-- Completed step=" << step << " zkPC=" << zkPC << " op=" << fr.toString(op7,16) << ":" << fr.toString(op6,16) << ":" << fr.toString(op5,16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3,16) << ":" << fr.toString(op2,16) << ":" << fr.toString(op1,16) << ":" << fr.toString(op0,16) << " ABCDE0=" << fr.toString(pols.A0[i],16) << ":" << fr.toString(pols.B0[i],16) << ":" << fr.toString(pols.C0[i],16) << ":" << fr.toString(pols.D0[i],16) << ":" << fr.toString(pols.E0[i],16) << " FREE0:7=" << fr.toString(pols.FREE0[i],16) << ":" << fr.toString(pols.FREE7[i],16) << " addr=" << addr << endl;
+        zklog.info("<-- Completed step=" + to_string(step) +
+            " zkPC=" + to_string(zkPC) +
+            " op=" + fr.toString(op7,16) + ":" + fr.toString(op6,16) + ":" + fr.toString(op5,16) + ":" + fr.toString(op4,16) + ":" + fr.toString(op3,16) + ":" + fr.toString(op2,16) + ":" + fr.toString(op1,16) + ":" + fr.toString(op0,16) +
+            " ABCDE0=" + fr.toString(pols.A0[i],16) + ":" + fr.toString(pols.B0[i],16) + ":" + fr.toString(pols.C0[i],16) + ":" + fr.toString(pols.D0[i],16) + ":" + fr.toString(pols.E0[i],16) +
+            " FREE0:7=" + fr.toString(pols.FREE0[i],16) + ":" + fr.toString(pols.FREE7[i],16) +
+            " addr=" + to_string(addr));
 #endif
 #ifdef LOG_COMPLETED_STEPS_TO_FILE
         std::ofstream outfile;
@@ -4313,7 +4318,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     }
 #endif
 
-    cout << "MainExecutor::execute() done lastStep=" << ctx.lastStep << " (" << (double(ctx.lastStep)*100)/N << "%)" << endl;
+    zklog.info("MainExecutor::execute() done lastStep=" + to_string(ctx.lastStep) + " (" + to_string((double(ctx.lastStep)*100)/N) + "%)");
 }
 
 // Initialize the first evaluation
