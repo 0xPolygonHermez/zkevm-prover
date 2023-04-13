@@ -1,20 +1,42 @@
 #include "database_map.hpp"
 #include "utils.hpp"
 #include "scalar.hpp"
+#include "zklog.hpp"
+#include "zkmax.hpp"
 
-void DatabaseMap::add(const string key, vector<Goldilocks::Element> value)
+void DatabaseMap::add(const string key, vector<Goldilocks::Element> value, const bool cached, const uint64_t time)
 {
     lock_guard<recursive_mutex> guard(mlock);
 
     mtDB[key] = value;
+    if (cached)
+    {
+        mtCachedTimes += 1;
+        mtCachedTime += time;
+    }
+    else
+    {
+        mtDbTimes += 1;
+        mtDbTime += time;
+    }
     if (callbackOnChange) onChangeCallback();
 }
 
-void DatabaseMap::add(const string key, vector<uint8_t> value)
+void DatabaseMap::add(const string key, vector<uint8_t> value, const bool cached, const uint64_t time)
 {
     lock_guard<recursive_mutex> guard(mlock);
 
     programDB[key] = value;
+    if (cached)
+    {
+        programCachedTimes += 1;
+        programCachedTime += time;
+    }
+    else
+    {
+        programDbTimes += 1;
+        programDbTime += time;
+    }
     if (callbackOnChange) onChangeCallback();
 }
 
@@ -93,4 +115,18 @@ void DatabaseMap::setOnChangeCallback(void *instance, onChangeCallbackFunctionPt
 void DatabaseMap::onChangeCallback()
 {
     cbFunction(cbInstance, this);
+}
+
+void DatabaseMap::print(void)
+{
+    zklog.info(string("Database map:") +
+        " MT.size=" + to_string(mtDB.size()) +
+        " cached=" + to_string(mtCachedTimes) + "times=" + to_string(mtCachedTime) + "us=" + to_string(mtCachedTime/zkmax(mtCachedTimes,1)) + "us/time" +
+        " db=" + to_string(mtDbTimes) + "times=" + to_string(mtDbTime) + "us=" + to_string(mtDbTime/zkmax(mtDbTimes,1)) + "us/time" +
+        " cacheHitRatio=" + to_string(mtCachedTimes*100/zkmax(mtCachedTimes+mtDbTimes,1)) + "%" +
+        " Program.size=" + to_string(programDB.size()) +
+        " cached=" + to_string(programCachedTimes) + "times=" + to_string(programCachedTime) + "us=" + to_string(programCachedTime/zkmax(programCachedTimes,1)) + "us/time" +
+        " db=" + to_string(programDbTimes) + "times=" + to_string(programDbTime) + "us=" + to_string(programDbTime/zkmax(programDbTimes,1)) + "us/time" +
+        " cacheHitRatio=" + to_string(programCachedTimes*100/zkmax(programCachedTimes+programDbTimes,1)) + "%"
+        );
 }

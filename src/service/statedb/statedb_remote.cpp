@@ -229,7 +229,7 @@ zkresult StateDBRemote::getProgram (const Goldilocks::Element (&key)[4], vector<
     }
 
     if (dbReadLog != NULL) {
-        dbReadLog->add(fea2string(fr, key), data);
+        dbReadLog->add(fea2string(fr, key), data, false, 0);
     }
 
 #ifdef LOG_TIME_STATISTICS_STATEDB_REMOTE

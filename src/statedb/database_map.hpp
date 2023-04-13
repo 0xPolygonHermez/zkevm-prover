@@ -28,12 +28,32 @@ private:
     onChangeCallbackFunctionPtr cbFunction = NULL;
     void *cbInstance = NULL;
 
+    uint64_t mtCachedTimes;
+    uint64_t mtCachedTime;
+    uint64_t mtDbTimes;
+    uint64_t mtDbTime;
+    uint64_t programCachedTimes;
+    uint64_t programCachedTime;
+    uint64_t programDbTimes;
+    uint64_t programDbTime;
+
     void onChangeCallback();
 
 public:
-    DatabaseMap(){};
-    void add(const string key, vector<Goldilocks::Element> value);
-    void add(const string key, vector<uint8_t> value);
+    DatabaseMap() :
+        mtCachedTimes(0),
+        mtCachedTime(0),
+        mtDbTimes(0),
+        mtDbTime(0),
+        programCachedTimes(0),
+        programCachedTime(0),
+        programDbTimes(0),
+        programDbTime(0)
+    {
+
+    };
+    void add(const string key, vector<Goldilocks::Element> value, const bool cached, const uint64_t time);
+    void add(const string key, vector<uint8_t> value, const bool cached, const uint64_t time);
     void add(MTMap &db);
     void add(ProgramMap &db);
     bool findMT(const string key, vector<Goldilocks::Element> &value);
@@ -41,6 +61,7 @@ public:
     MTMap getMTDB();
     ProgramMap getProgramDB();
     void setOnChangeCallback(void *instance, onChangeCallbackFunctionPtr function);
+    void print(void);
 };
 
 #endif

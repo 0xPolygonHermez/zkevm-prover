@@ -4277,8 +4277,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             required.PaddingPG.push_back(h);
         }
     }
-    
-    TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
     gettimeofday(&t, NULL);
@@ -4312,7 +4310,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     }
 #endif
 
+    if (config.dbMetrics)
+    {
+        proverRequest.dbReadLog->print();
+    }
+
     zklog.info("MainExecutor::execute() done lastStep=" + to_string(ctx.lastStep) + " (" + to_string((double(ctx.lastStep)*100)/N) + "%)");
+    
+    TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
 }
 
 // Initialize the first evaluation

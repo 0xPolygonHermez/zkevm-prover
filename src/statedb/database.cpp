@@ -63,6 +63,9 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
         exitProcess();
     }
 
+    struct timeval t;
+    if (dbReadLog != NULL) gettimeofday(&t, NULL);
+
     zkresult r;
 
     // Normalize key format
@@ -74,7 +77,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
     if ((useDBMTCache) && (Database::dbMTCache.find(key, value)))
     {
         // Add to the read log
-        if (dbReadLog != NULL) dbReadLog->add(key, value);
+        if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
 
         r = ZKR_SUCCESS;
     }
@@ -102,7 +105,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
 #endif
 
             // Add to the read log
-            if (dbReadLog != NULL) dbReadLog->add(key, value);
+            if (dbReadLog != NULL) dbReadLog->add(key, value, false, TimeDiff(t));
         }
     }
     else
@@ -533,6 +536,9 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
 
     zkresult r;
 
+    struct timeval t;
+    if (dbReadLog != NULL) gettimeofday(&t, NULL);
+
     // Normalize key format
     string key = NormalizeToNFormat(_key, 64);
     key = stringToLower(key);
@@ -542,7 +548,7 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
     if (useDBProgramCache && !update && Database::dbProgramCache.find(key, data))
     {
         // Add to the read log
-        if (dbReadLog != NULL) dbReadLog->add(key, data);
+        if (dbReadLog != NULL) dbReadLog->add(key, data, true, TimeDiff(t));
 
         r = ZKR_SUCCESS;
     }
@@ -564,7 +570,7 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
 #endif
 
             // Add to the read log
-            if (dbReadLog != NULL) dbReadLog->add(key, data);
+            if (dbReadLog != NULL) dbReadLog->add(key, data, false, TimeDiff(t));
         }
     }
     else
