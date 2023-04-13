@@ -60,6 +60,7 @@
     "aggregatorClientPort": 50081,
     "aggregatorClientHost": "127.0.0.1",
     "aggregatorClientMockTimeout": 10000000,
+    "aggregatorClientWatchdogTimeout": 60000000,
 
     "mapConstPolsFile": false,
     "mapConstantsTreeFile": false,
