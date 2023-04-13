@@ -86,7 +86,7 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
         exitProcess();
     }
     size = romJson.size();
-    cout << "ROM size: " << size << " lines" << endl;
+    zklog.info("ROM size: " + to_string(size) + " lines");
 
     // Allocate romSize tRomLine's
     line = (RomLine *)new RomLine[size];

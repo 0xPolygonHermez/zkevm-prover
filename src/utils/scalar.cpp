@@ -89,6 +89,13 @@ string fea2string (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldil
     return fea2string(fr, fea);
 }
 
+string fea2string (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldilocks::Element &fea1, const Goldilocks::Element &fea2, const Goldilocks::Element &fea3, const Goldilocks::Element &fea4, const Goldilocks::Element &fea5, const Goldilocks::Element &fea6, const Goldilocks::Element &fea7)
+{
+    mpz_class auxScalar;
+    fea2scalar(fr, auxScalar, fea0, fea1, fea2, fea3, fea4, fea5, fea6, fea7);
+    return auxScalar.get_str(16);
+}
+
 /* Normalized strings */
 
 string Remove0xIfPresent(const string &s)
