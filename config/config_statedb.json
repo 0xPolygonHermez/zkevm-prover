@@ -38,6 +38,7 @@
     
     "loadDBToMemCache": true,
     "loadDBToMemCacheInParallel": false,
+    "loadDBToMemTimeout": 30000000,
     "dbMTCacheSize": 16384,
     "dbProgramCacheSize": 16384,
 
@@ -88,6 +89,7 @@
     "dbFlushInParallel": true,
     "dbConnectionsPool": false,
     "dbNumberOfPoolConnections": 25,
+    "dbMetrics": false,
     "cleanerPollingPeriod": 600,
     "requestsPersistence": 3600,
     "maxExecutorThreads": 20,

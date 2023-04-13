@@ -40,7 +40,7 @@ ProverRequest::ProverRequest (Goldilocks &fr, const Config &config, tProverReque
         filePrefix = config.outputPath + "/" + timestamp + "_" + uuid + ".";
     }
 
-    if (config.saveDbReadsToFile)
+    if (config.saveDbReadsToFile || config.dbMetrics)
     {
         dbReadLog = new DatabaseMap();
         if (config.saveDbReadsToFileOnChange)

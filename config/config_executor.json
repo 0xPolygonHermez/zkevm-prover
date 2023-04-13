@@ -88,6 +88,7 @@
     "dbFlushInParallel": true,
     "dbConnectionsPool": true,
     "dbNumberOfPoolConnections": 25,
+    "dbMetrics": false,
     "cleanerPollingPeriod": 600,
     "requestsPersistence": 3600,
     "maxExecutorThreads": 20,

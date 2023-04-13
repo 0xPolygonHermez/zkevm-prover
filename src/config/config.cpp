@@ -419,6 +419,10 @@ void Config::load(json &config)
     if (config.contains("dbNumberOfPoolConnections") && config["dbNumberOfPoolConnections"].is_number())
         dbNumberOfPoolConnections = config["dbNumberOfPoolConnections"];
 
+    dbMetrics = false;
+    if (config.contains("dbMetrics") && config["dbMetrics"].is_boolean())
+        dbMetrics = config["dbMetrics"];
+
     if (config.contains("cleanerPollingPeriod") && config["cleanerPollingPeriod"].is_number())
         cleanerPollingPeriod = config["cleanerPollingPeriod"];
 
@@ -582,6 +586,7 @@ void Config::print(void)
     cout << "    dbFlushInParallel=" << to_string(dbFlushInParallel) << endl;
     cout << "    dbConnectionsPool=" << to_string(dbConnectionsPool) << endl;
     cout << "    dbNumberOfPoolConnections=" << dbNumberOfPoolConnections << endl;
+    cout << "    dbMetrics=" << to_string(dbMetrics) << endl;
     cout << "    cleanerPollingPeriod=" << cleanerPollingPeriod << endl;
     cout << "    requestsPersistence=" << requestsPersistence << endl;
     cout << "    maxExecutorThreads=" << maxExecutorThreads << endl;
