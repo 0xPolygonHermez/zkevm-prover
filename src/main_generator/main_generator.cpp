@@ -301,10 +301,6 @@ string generate(const json &rom, const string &functionName, const string &fileN
     // Free in
     code += "    Goldilocks::Element fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7;\n";
     code += "    CommandResult cr;\n";
-    code += "#ifdef LOG_TIME_STATISTICS\n";
-    code += "    RomCommand * pCmd;\n";
-    code += "    string cmdString;\n"; 
-    code += "#endif\n";
 
     // Storage free in
     code += "    Goldilocks::Element Kin0[12];\n";
@@ -355,7 +351,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    mpz_class expectedC;\n";
     code += "    BinaryAction binaryAction;\n";
 
-    code += "#ifdef LOG_TIME_STATISTICS\n";
+    code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
     code += "    struct timeval t;\n";
     code += "    TimeMetricStorage mainMetrics;\n";
     code += "    TimeMetricStorage evalCommandMetrics;\n";
@@ -476,18 +472,16 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    // Evaluate the list cmdBefore commands, and any children command, recursively\n";
             code += "    for (uint64_t j=0; j<rom.line[" + to_string(zkPC) + "].cmdBefore.size(); j++)\n";
             code += "    {\n";
-            code += "#ifdef LOG_TIME_STATISTICS\n";
+            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
             code += "        gettimeofday(&t, NULL);\n";
             code += "#endif\n";
             code += "        cr.reset();\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        evalCommand(ctx, *rom.line[" + to_string(zkPC) + "].cmdBefore[j], cr);\n";
             code += "\n";
-            code += "#ifdef LOG_TIME_STATISTICS\n";
+            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
             code += "        mainMetrics.add(\"Eval command\", TimeDiff(t));\n";
-            code += "        pCmd = rom.line[" + to_string(zkPC) + "].cmdBefore[j];\n";
-            code += "        cmdString = op2String(pCmd->op) + \"[\" + function2String(pCmd->function) + \"]\";\n";
-            code += "        evalCommandMetrics.add(cmdString, TimeDiff(t));\n";
+            code += "        evalCommandMetrics.add(rom.line[" + to_string(zkPC) + "].cmdBefore[j]->opAndFunction, TimeDiff(t));\n";
             code += "#endif\n";
             code += "        // In case of an external error, return it\n";
             code += "        if (cr.zkResult != ZKR_SUCCESS)\n";
@@ -968,7 +962,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "        return;\n";
                     code += "    }\n\n";
 
-                    code += "#ifdef LOG_TIME_STATISTICS\n";
+                    code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
                     code += "    gettimeofday(&t, NULL);\n";
                     code += "#endif\n";
 
@@ -988,7 +982,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    key[1] = Kin1Hash[1];\n";
                     code += "    key[2] = Kin1Hash[2];\n";
                     code += "    key[3] = Kin1Hash[3];\n";
-                    code += "#ifdef LOG_TIME_STATISTICS\n";
+                    code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
                     code += "    mainMetrics.add(\"Poseidon\", TimeDiff(t), 3);\n";
                     code += "#endif\n";
 
@@ -996,7 +990,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    cout << \"Storage read sRD got poseidon key: \" << ctx.fr.toString(ctx.lastSWrite.key, 16) << endl;\n";
                     code += "#endif\n";
                     code += "    sr8to4(fr, pols.SR0[" + string(bFastMode?"0":"i") + "], pols.SR1[" + string(bFastMode?"0":"i") + "], pols.SR2[" + string(bFastMode?"0":"i") + "], pols.SR3[" + string(bFastMode?"0":"i") + "], pols.SR4[" + string(bFastMode?"0":"i") + "], pols.SR5[" + string(bFastMode?"0":"i") + "], pols.SR6[" + string(bFastMode?"0":"i") + "], pols.SR7[" + string(bFastMode?"0":"i") + "], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);\n";
-                    code += "#ifdef LOG_TIME_STATISTICS\n";
+                    code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
                     code += "    gettimeofday(&t, NULL);\n";
                     code += "#endif\n";
                     code += "    zkResult = pStateDB->get(oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);\n";
@@ -1023,7 +1017,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "    }\n";
                     }
 
-                    code += "#ifdef LOG_TIME_STATISTICS\n";
+                    code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
                     code += "    mainMetrics.add(\"SMT Get\", TimeDiff(t));\n";
                     code += "#endif\n";
                     code += "    scalar2fea(fr, smtGetResult.value, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
@@ -1072,7 +1066,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "        return;\n";
                     code += "    }\n\n";
 
-                    code += "#ifdef LOG_TIME_STATISTICS\n";
+                    code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
                     code += "    gettimeofday(&t, NULL);\n";
                     code += "#endif\n";
 
@@ -1109,7 +1103,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    ctx.lastSWrite.key[1] = Kin1Hash[1];\n";
                     code += "    ctx.lastSWrite.key[2] = Kin1Hash[2];\n";
                     code += "    ctx.lastSWrite.key[3] = Kin1Hash[3];\n";
-                    code += "#ifdef LOG_TIME_STATISTICS\n";
+                    code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
                     code += "    mainMetrics.add(\"Poseidon\", TimeDiff(t));\n";
                     code += "#endif\n";
 
@@ -1125,7 +1119,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
                     code += "        return;\n";
                     code += "    }\n";
-                    code += "#ifdef LOG_TIME_STATISTICS\n";
+                    code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
                     code += "    gettimeofday(&t, NULL);\n";
                     code += "#endif\n";
                     code += "    sr8to4(fr, pols.SR0[" + string(bFastMode?"0":"i") + "], pols.SR1[" + string(bFastMode?"0":"i") + "], pols.SR2[" + string(bFastMode?"0":"i") + "], pols.SR3[" + string(bFastMode?"0":"i") + "], pols.SR4[" + string(bFastMode?"0":"i") + "], pols.SR5[" + string(bFastMode?"0":"i") + "], pols.SR6[" + string(bFastMode?"0":"i") + "], pols.SR7[" + string(bFastMode?"0":"i") + "], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);\n";
@@ -1158,7 +1152,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    if ( fr.isZero(pols.B0[" + string(bFastMode?"0":"i") + "]) && fr.isZero(pols.B1[" + string(bFastMode?"0":"i") + "]) )\n";
                     code += "        ctx.totalTransferredBalance += (ctx.lastSWrite.res.newValue - ctx.lastSWrite.res.oldValue);\n";
 
-                    code += "#ifdef LOG_TIME_STATISTICS\n";
+                    code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
                     code += "    mainMetrics.add(\"SMT Set\", TimeDiff(t));\n";
                     code += "#endif\n";
                     code += "    ctx.lastSWrite.step = i;\n";
@@ -1622,7 +1616,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             // If freeInTag.op!="", then evaluate the requested command (recursively)
             else
             {
-                code += "#ifdef LOG_TIME_STATISTICS\n";
+                code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
                 code += "    gettimeofday(&t, NULL);\n";
                 code += "#endif\n";
 
@@ -1766,11 +1760,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    }\n";
                 }
 
-                code += "#ifdef LOG_TIME_STATISTICS\n";
+                code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
                 code += "    mainMetrics.add(\"Eval command\", TimeDiff(t));\n";
-                code += "    pCmd = &rom.line[" + to_string(zkPC) + "].freeInTag;\n";
-                code += "    cmdString = op2String(pCmd->op) + \"[\" + function2String(pCmd->function) + \"]\";\n";
-                code += "    evalCommandMetrics.add(cmdString, TimeDiff(t));\n";
+                code += "    evalCommandMetrics.add(rom.line[" + to_string(zkPC) + "].freeInTag.opAndFunction, TimeDiff(t));\n";
                 code += "#endif\n";
 
                 /*
@@ -2051,7 +2043,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        return;\n";
             code += "    }\n\n";
 
-            code += "#ifdef LOG_TIME_STATISTICS\n";
+            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
             code += "    gettimeofday(&t, NULL);\n";
             code += "#endif\n";
 
@@ -2095,7 +2087,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    key[2] = Kin1Hash[2];\n";
             code += "    key[3] = Kin1Hash[3];\n";
 
-            code += "#ifdef LOG_TIME_STATISTICS\n";
+            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
             code += "    mainMetrics.add(\"Poseidon\", TimeDiff(t), 3);\n";
             code += "#endif\n";
 
@@ -2105,7 +2097,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
             code += "    sr8to4(fr, pols.SR0[" + string(bFastMode?"0":"i") + "], pols.SR1[" + string(bFastMode?"0":"i") + "], pols.SR2[" + string(bFastMode?"0":"i") + "], pols.SR3[" + string(bFastMode?"0":"i") + "], pols.SR4[" + string(bFastMode?"0":"i") + "], pols.SR5[" + string(bFastMode?"0":"i") + "], pols.SR6[" + string(bFastMode?"0":"i") + "], pols.SR7[" + string(bFastMode?"0":"i") + "], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);\n";
 
-            code += "#ifdef LOG_TIME_STATISTICS\n";
+            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
             code += "    gettimeofday(&t, NULL);\n";
             code += "#endif\n";
             code += "    zkResult = pStateDB->get(oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);\n";
@@ -2132,7 +2124,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    }\n";
             }
 
-            code += "#ifdef LOG_TIME_STATISTICS\n";
+            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
             code += "    mainMetrics.add(\"SMT Get\", TimeDiff(t));\n";
             code += "#endif\n";
             if (!bFastMode)
@@ -2220,7 +2212,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "            return;\n";
             code += "        }\n\n";
 
-            code += "#ifdef LOG_TIME_STATISTICS\n";
+            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
             code += "        gettimeofday(&t, NULL);\n";
             code += "#endif\n";
 
@@ -2257,7 +2249,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        ctx.lastSWrite.key[2] = Kin1Hash[2];\n";
             code += "        ctx.lastSWrite.key[3] = Kin1Hash[3];\n";
 
-            code += "#ifdef LOG_TIME_STATISTICS\n";
+            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
             code += "        mainMetrics.add(\"Poseidon\", TimeDiff(t));\n";
             code += "#endif\n";
 
@@ -2270,7 +2262,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             code += "        }\n";
-            code += "#ifdef LOG_TIME_STATISTICS\n";
+            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
             code += "        gettimeofday(&t, NULL);\n";
             code += "#endif\n";
 
@@ -2304,7 +2296,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        if ( fr.isZero(pols.B0[" + string(bFastMode?"0":"i") + "]) && fr.isZero(pols.B1[" + string(bFastMode?"0":"i") + "]) )\n";
             code += "            ctx.totalTransferredBalance += (ctx.lastSWrite.res.newValue - ctx.lastSWrite.res.oldValue);\n";
 
-            code += "#ifdef LOG_TIME_STATISTICS\n";
+            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
             code += "        mainMetrics.add(\"SMT Set\", TimeDiff(t));\n";
             code += "#endif\n";
 
@@ -2568,11 +2560,11 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    }\n";
             code += "    if (!hashIterator->second.digestCalled)\n";
             code += "    {\n";
-            code += "#ifdef LOG_TIME_STATISTICS\n";
+            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
             code += "        gettimeofday(&t, NULL);\n";
             code += "#endif\n";
             code += "        keccak256(hashIterator->second.data.data(), hashIterator->second.data.size(), hashIterator->second.digest);\n";
-            code += "#ifdef LOG_TIME_STATISTICS\n";
+            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
             code += "        mainMetrics.add(\"Keccak\", TimeDiff(t));\n";
             code += "#endif\n";
 
@@ -2868,17 +2860,17 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "            pBuffer[fePos] = fr.add(pBuffer[fePos], fr.fromU64(shifted));\n";
             code += "        }\n";
 
-            code += "#ifdef LOG_TIME_STATISTICS\n";
+            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
             code += "        gettimeofday(&t, NULL);\n";
             code += "#endif\n";
             code += "        Goldilocks::Element result[4];\n";
             code += "        mainExecutor.poseidon.linear_hash(result, pBuffer, bufferSize);\n";
-            code += "#ifdef LOG_TIME_STATISTICS\n";
+            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
             code += "        mainMetrics.add(\"Poseidon\", TimeDiff(t));\n";
             code += "#endif\n";
             code += "        fea2scalar(fr, hashIterator->second.digest, result);\n";
             code += "        delete[] pBuffer;\n";
-            code += "#ifdef LOG_TIME_STATISTICS\n";
+            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
             code += "        gettimeofday(&t, NULL);\n";
             code += "#endif\n";
             code += "        zkResult = pStateDB->setProgram(result, hashIterator->second.data, proverRequest.input.bUpdateMerkleTree);\n";
@@ -2890,7 +2882,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             code += "        }\n";
-            code += "#ifdef LOG_TIME_STATISTICS\n";
+            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
             code += "        mainMetrics.add(\"Set program\", TimeDiff(t));\n";
             code += "#endif\n";
             code += "#ifdef LOG_HASH\n";
@@ -2926,7 +2918,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        hashValue.digest = dg;\n";
             code += "        Goldilocks::Element aux[4];\n";
             code += "        scalar2fea(fr, dg, aux);\n";
-            code += "#ifdef LOG_TIME_STATISTICS\n";
+            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
             code += "        gettimeofday(&t, NULL);\n";
             code += "#endif\n";
             code += "        zkResult = pStateDB->getProgram(aux, hashValue.data, proverRequest.dbReadLog);\n";
@@ -2938,7 +2930,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "            StateDBClientFactory::freeStateDBClient(pStateDB);\n";
             code += "            return;\n";
             code += "        }\n";
-            code += "#ifdef LOG_TIME_STATISTICS\n";
+            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
             code += "        mainMetrics.add(\"Get program\", TimeDiff(t));\n";
             code += "#endif\n";
             code += "        ctx.hashP[addr] = hashValue;\n";
@@ -4431,18 +4423,16 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        i++;\n";
             code += "        for (uint64_t j=0; j<rom.line[" + to_string(zkPC) + "].cmdAfter.size(); j++)\n";
             code += "        {\n";
-            code += "#ifdef LOG_TIME_STATISTICS\n";
+            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
             code += "            gettimeofday(&t, NULL);\n";
             code += "#endif\n";
             code += "            cr.reset();\n";
             code += "            zkPC=" + to_string(zkPC) +";\n";
             code += "            evalCommand(ctx, *rom.line[" + to_string(zkPC) + "].cmdAfter[j], cr);\n";
             code += "    \n";
-            code += "#ifdef LOG_TIME_STATISTICS\n";
+            code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
             code += "            mainMetrics.add(\"Eval command\", TimeDiff(t));\n";
-            code += "            pCmd = rom.line[" + to_string(zkPC) + "].cmdAfter[j];\n";
-            code += "            cmdString = op2String(pCmd->op) + \"[\" + function2String(pCmd->function) + \"]\";\n";
-            code += "            evalCommandMetrics.add(cmdString, TimeDiff(t));\n";
+            code += "            evalCommandMetrics.add(rom.line[" + to_string(zkPC) + "].cmdAfter[j]->opAndFunction, TimeDiff(t));\n";
             code += "#endif\n";
             code += "            // In case of an external error, return it\n";
             code += "            if (cr.zkResult != ZKR_SUCCESS)\n";
@@ -4708,10 +4698,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += "    }\n";
     }
 
-    code += "#ifdef LOG_TIME_STATISTICS\n";
-    code += "    mainMetrics.print(\"Main Executor calls\");\n";
-    code += "    evalCommandMetrics.print(\"Main Executor eval command calls\");\n";
-    code += "#endif\n\n";
+    code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+    code += "    gettimeofday(&t, NULL);\n";
+    code += "#endif\n";
     
     code += "    if (mainExecutor.config.dbFlushInParallel)\n";
     code += "    {\n";
@@ -4730,6 +4719,18 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "        }\n";
     code += "        StateDBClientFactory::freeStateDBClient(pStateDB);\n";
     code += "    }\n\n";
+
+    code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+    code += "    mainMetrics.add(\"Flush\", TimeDiff(t));\n";
+    code += "#endif\n";
+
+    code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
+    code += "    if (mainExecutor.config.executorTimeStatistics)\n";
+    code += "    {\n";
+    code += "        mainMetrics.print(\"Main Executor calls\");\n";
+    code += "        evalCommandMetrics.print(\"Main Executor eval command calls\");\n";
+    code += "    }\n";
+    code += "#endif\n\n";
 
     code += "    cout << \"" + functionName + "() done lastStep=\" << ctx.lastStep << \" (\" << (double(ctx.lastStep)*100)/mainExecutor.N << \"%)\" << endl;\n\n";
 

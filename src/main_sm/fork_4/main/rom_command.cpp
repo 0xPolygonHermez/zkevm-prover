@@ -284,6 +284,9 @@ void parseRomCommand (RomCommand &cmd, json tag)
     if (tag.contains("offset") && tag["offset"].is_number()) { cmd.offset = tag["offset"]; }
     if (tag.contains("values")) parseRomCommandArray(cmd.values, tag["values"]);
     if (tag.contains("params")) parseRomCommandArray(cmd.params, tag["params"]);
+
+    // Build opAndVar string to be used in time statistics
+    cmd.opAndFunction = op2String(cmd.op) + "[" + function2String(cmd.function) + "]";
 }
 
 void parseRomCommandArray (vector<RomCommand *> &values, json tag)

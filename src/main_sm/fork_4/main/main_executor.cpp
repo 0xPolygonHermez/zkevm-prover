@@ -253,9 +253,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             mainMetrics.add("Eval command", TimeDiff(t));
-            RomCommand &cmd = *rom.line[zkPC].cmdBefore[j];
-            string cmdString = op2String(cmd.op) + "[" + function2String(cmd.function) + "]";
-            evalCommandMetrics.add(cmdString, TimeDiff(t));
+            evalCommandMetrics.add(rom.line[zkPC].cmdBefore[j]->opAndFunction, TimeDiff(t));
 #endif
             // In case of an external error, return it
             if (cr.zkResult != ZKR_SUCCESS)
@@ -1445,9 +1443,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 mainMetrics.add("Eval command", TimeDiff(t));
-                RomCommand &cmd = rom.line[zkPC].freeInTag;
-                string cmdString = op2String(cmd.op) + "[" + function2String(cmd.function) + "]";
-                evalCommandMetrics.add(cmdString, TimeDiff(t));
+                evalCommandMetrics.add(rom.line[zkPC].freeInTag.opAndFunction, TimeDiff(t));
 #endif
                 // In case of an external error, return it
                 if (cr.zkResult != ZKR_SUCCESS)
@@ -4062,9 +4058,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 mainMetrics.add("Eval command", TimeDiff(t));
-                RomCommand &cmd = *rom.line[zkPC].cmdAfter[j];
-                string cmdString = op2String(cmd.op) + "[" + function2String(cmd.function) + "]";
-                evalCommandMetrics.add(cmdString, TimeDiff(t));
+                evalCommandMetrics.add(rom.line[zkPC].cmdAfter[j]->opAndFunction, TimeDiff(t));
 #endif
                 // In case of an external error, return it
                 if (cr.zkResult != ZKR_SUCCESS)
