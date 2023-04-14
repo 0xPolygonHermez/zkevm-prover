@@ -48,6 +48,7 @@ public:
     Goldilocks::Element jmpAddr;
     bool bElseAddrPresent;
     Goldilocks::Element elseAddr;
+    string elseAddrLabel;
     uint8_t mOp;
     uint8_t mWR;
     uint8_t hashK;

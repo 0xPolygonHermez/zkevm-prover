@@ -198,7 +198,7 @@ void file2json(const string &fileName, json &j)
     std::ifstream inputStream(fileName);
     if (!inputStream.good())
     {
-        zklog.error("file2json() failed loading input JSON file " + fileName);
+        zklog.error("file2json() failed loading input JSON file " + fileName + "; does this file exist?");
         exitProcess();
     }
     try

@@ -63,9 +63,9 @@ set<string> oocErrors = {
 //////////
 
 // Get range from memory
-inline void getFromMemory(Context &ctx, mpz_class &offset, mpz_class &length, string &result)
+inline void getFromMemory(Context &ctx, mpz_class &offset, mpz_class &length, string &result, uint64_t * pContext = NULL)
 {
-    uint64_t offsetCtx = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]) * 0x40000;
+    uint64_t offsetCtx = (pContext != NULL) ? *pContext*0x40000 : ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]) * 0x40000;
     uint64_t addrMem = offsetCtx + 0x20000;
 
     result = "";
@@ -648,25 +648,17 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     accBatchGas += response.gas_used;
 
     // Set return data, in case of deploy, get return buffer from stack if there is no error, otherwise get it from memory
-    mpz_class offsetScalar;
-    getVarFromCtx(ctx, false, ctx.rom.retDataOffsetOffset, offsetScalar);
-    mpz_class lengthScalar;
-    getVarFromCtx(ctx, false, ctx.rom.retDataLengthOffset, lengthScalar);
-    if (response.call_trace.context.to == "0x")
+    if (ctx.proverRequest.input.traceConfig.bGenerateReturnData)
     {
-        // Check if there has been any error
-        if ( bOpcodeCalled && (response.error.size()>0) )
-        {
-            getFromMemory(ctx, offsetScalar, lengthScalar, response.return_value);
-        }
-        else
-        {
-            getCalldataFromStack(ctx, offsetScalar.get_ui(), lengthScalar.get_ui(), response.return_value);
-        }
-    }
-    else
-    {
+        mpz_class offsetScalar;
+        getVarFromCtx(ctx, false, ctx.rom.retDataOffsetOffset, offsetScalar);
+        mpz_class lengthScalar;
+        getVarFromCtx(ctx, false, ctx.rom.retDataLengthOffset, lengthScalar);
         getFromMemory(ctx, offsetScalar, lengthScalar, response.return_value);
+        if ( ctx.proverRequest.input.traceConfig.bGenerateCallTrace )
+        {
+            response.call_trace.context.output = response.return_value;
+        }
     }
 
     // Set create address in case of deploy
@@ -1096,7 +1088,19 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     // Return data
     if (ctx.proverRequest.input.traceConfig.bGenerateReturnData)
     {
-        singleInfo.return_data.clear();
+        mpz_class retDataCTXScalar;
+        getVarFromCtx(ctx, false, ctx.rom.retDataCTXOffset, retDataCTXScalar);
+        if (retDataCTXScalar != 0)
+        {
+            uint64_t retDataCTX = retDataCTXScalar.get_ui();
+            mpz_class offsetScalar;
+            getVarFromCtx(ctx, false, ctx.rom.retDataOffsetOffset, offsetScalar, &retDataCTX);
+            mpz_class lengthScalar;
+            getVarFromCtx(ctx, false, ctx.rom.retDataLengthOffset, lengthScalar, &retDataCTX);
+            string return_value;
+            getFromMemory(ctx, offsetScalar, lengthScalar, return_value, &retDataCTX);
+            singleInfo.return_data.push_back(return_value);
+        }
     }
 
 #ifdef LOG_TIME_STATISTICS

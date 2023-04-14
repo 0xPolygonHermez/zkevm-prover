@@ -4522,7 +4522,19 @@ string generate(const json &rom, const string &functionName, const string &fileN
             if (bUseElseAddr)
             {
                 code += "    else\n";
-                code += "        goto " + functionName + "_rom_line_" + to_string(rom["program"][zkPC]["elseAddr"]) + ";\n";
+                if (rom["program"][zkPC]["elseAddrLabel"] == "invalidIntrinsicTxSenderCode")
+                {
+                    code += "        if (bUnsignedTransaction)\n";
+                    if (bUseJmpAddr)
+                        code += "            goto " + functionName + "_rom_line_" + to_string(rom["program"][zkPC]["jmpAddr"]) + ";\n";
+                    else
+                        code += "            goto *" + functionName + "_labels[addr];\n";
+                    code += "        else\n";
+                }
+                else
+                {
+                    code += "        goto " + functionName + "_rom_line_" + to_string(rom["program"][zkPC]["elseAddr"]) + ";\n";
+                }
             }
         }
         if (rom["program"][zkPC].contains("repeat") && (rom["program"][zkPC]["repeat"]==1))

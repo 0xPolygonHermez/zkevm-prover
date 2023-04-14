@@ -40,6 +40,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
         txSOffset              = getMemoryOffset("txS");
         txVOffset              = getMemoryOffset("txV");
         txSrcOriginAddrOffset  = getMemoryOffset("txSrcOriginAddr");
+        retDataCTXOffset       = getMemoryOffset("retDataCTX");
         retDataOffsetOffset    = getMemoryOffset("retDataOffset");
         retDataLengthOffset    = getMemoryOffset("retDataLength");
         newAccInputHashOffset  = getMemoryOffset("newAccInputHash");
@@ -152,6 +153,7 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
         {
             line[i].bElseAddrPresent = true;
             line[i].elseAddr = fr.fromU64(l["elseAddr"]);
+            line[i].elseAddrLabel = l["elseAddrLabel"];
         }
         else
         {

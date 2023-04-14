@@ -36,6 +36,7 @@ public:
     uint64_t txSOffset;
     uint64_t txVOffset;
     uint64_t txSrcOriginAddrOffset;
+    uint64_t retDataCTXOffset;
     uint64_t retDataOffsetOffset;
     uint64_t retDataLengthOffset;
     uint64_t newAccInputHashOffset;

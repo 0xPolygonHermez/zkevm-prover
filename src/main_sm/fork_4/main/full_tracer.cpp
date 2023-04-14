@@ -64,9 +64,9 @@ set<string> oocErrors = {
 //////////
 
 // Get range from memory
-inline zkresult getFromMemory(Context &ctx, mpz_class &offset, mpz_class &length, string &result)
+inline zkresult getFromMemory(Context &ctx, mpz_class &offset, mpz_class &length, string &result, uint64_t * pContext = NULL)
 {
-    uint64_t offsetCtx = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]) * 0x40000;
+    uint64_t offsetCtx = (pContext != NULL) ? *pContext*0x40000 : ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]) * 0x40000;
     uint64_t addrMem = offsetCtx + 0x20000;
 
     result = "";
@@ -764,49 +764,31 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     accBatchGas += response.gas_used;
 
     // Set return data, in case of deploy, get return buffer from stack if there is no error, otherwise get it from memory
-    mpz_class offsetScalar;
-    zkr = getVarFromCtx(ctx, false, ctx.rom.retDataOffsetOffset, offsetScalar);
-    if (zkr != ZKR_SUCCESS)
+    if (ctx.proverRequest.input.traceConfig.bGenerateReturnData)
     {
-        zklog.error("FullTracer::onFinishTx() failed calling getVarFromCtx(ctx.rom.retDataOffsetOffset)");
-        return zkr;
-    }
-    mpz_class lengthScalar;
-    zkr = getVarFromCtx(ctx, false, ctx.rom.retDataLengthOffset, lengthScalar);
-    if (zkr != ZKR_SUCCESS)
-    {
-        zklog.error("FullTracer::onFinishTx() failed calling getVarFromCtx(ctx.rom.retDataLengthOffset)");
-        return zkr;
-    }
-    if (response.call_trace.context.to == "0x")
-    {
-        // Check if there has been any error
-        if ( bOpcodeCalled && (response.error.size()>0) )
+        mpz_class offsetScalar;
+        zkr = getVarFromCtx(ctx, false, ctx.rom.retDataOffsetOffset, offsetScalar);
+        if (zkr != ZKR_SUCCESS)
         {
-            zkr = getFromMemory(ctx, offsetScalar, lengthScalar, response.return_value);
-            if (zkr != ZKR_SUCCESS)
-            {
-                zklog.error("FullTracer::onFinishTx() failed calling getFromMemory() 1");
-                return zkr;
-            }
+            zklog.error("FullTracer::onFinishTx() failed calling getVarFromCtx(ctx.rom.retDataOffsetOffset)");
+            return zkr;
         }
-        else
+        mpz_class lengthScalar;
+        zkr = getVarFromCtx(ctx, false, ctx.rom.retDataLengthOffset, lengthScalar);
+        if (zkr != ZKR_SUCCESS)
         {
-            zkr = getCalldataFromStack(ctx, offsetScalar.get_ui(), lengthScalar.get_ui(), response.return_value);
-            if (zkr != ZKR_SUCCESS)
-            {
-                zklog.error("FullTracer::onFinishTx() failed calling getCalldataFromStack()");
-                return zkr;
-            }
+            zklog.error("FullTracer::onFinishTx() failed calling getVarFromCtx(ctx.rom.retDataLengthOffset)");
+            return zkr;
         }
-    }
-    else
-    {
         zkr = getFromMemory(ctx, offsetScalar, lengthScalar, response.return_value);
         if (zkr != ZKR_SUCCESS)
         {
-            zklog.error("FullTracer::onFinishTx() failed calling getFromMemory() 2");
+            zklog.error("FullTracer::onFinishTx() failed calling getFromMemory() 1");
             return zkr;
+        }
+        if ( ctx.proverRequest.input.traceConfig.bGenerateCallTrace )
+        {
+            response.call_trace.context.output = response.return_value;
         }
     }
 
@@ -1336,7 +1318,39 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     // Return data
     if (ctx.proverRequest.input.traceConfig.bGenerateReturnData)
     {
-        singleInfo.return_data.clear();
+        mpz_class retDataCTXScalar;
+        zkr = getVarFromCtx(ctx, false, ctx.rom.retDataCTXOffset, retDataCTXScalar);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.retDataCTXOffset)");
+            return zkr;
+        }
+        if (retDataCTXScalar != 0)
+        {
+            uint64_t retDataCTX = retDataCTXScalar.get_ui();
+            mpz_class offsetScalar;
+            zkr = getVarFromCtx(ctx, false, ctx.rom.retDataOffsetOffset, offsetScalar, &retDataCTX);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.retDataOffsetOffset)");
+                return zkr;
+            }
+            mpz_class lengthScalar;
+            zkr = getVarFromCtx(ctx, false, ctx.rom.retDataLengthOffset, lengthScalar, &retDataCTX);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.retDataLengthOffset)");
+                return zkr;
+            }
+            string return_value;
+            zkr = getFromMemory(ctx, offsetScalar, lengthScalar, return_value, &retDataCTX);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("FullTracer::onOpcode() failed calling getFromMemory() 1");
+                return zkr;
+            }
+            singleInfo.return_data.push_back(return_value);
+        }
     }
 
 #ifdef LOG_TIME_STATISTICS
