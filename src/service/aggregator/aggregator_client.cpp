@@ -2,6 +2,7 @@
 #include <nlohmann/json.hpp>
 #include "aggregator_client.hpp"
 #include "zklog.hpp"
+#include "watchdog.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -487,20 +488,15 @@ void* aggregatorClientThread(void* arg)
     cout << "aggregatorClientThread() started" << endl;
     string uuid;
     AggregatorClient *pAggregatorClient = (AggregatorClient *)arg;
+    Watchdog watchdog;
 
     while (true)
     {
         ::grpc::ClientContext context;
 
-        /*
-        // 5 minutes of inactivity timeout; if aggregator does not send any request, the connection is restarted
-        time_point deadline = std::chrono::system_clock::now() +
-        std::chrono::milliseconds(5*60*100000);
-        context.set_deadline(deadline);
-        */
-
         std::unique_ptr<grpc::ClientReaderWriter<aggregator::v1::ProverMessage, aggregator::v1::AggregatorMessage>> readerWriter;
         readerWriter = pAggregatorClient->stub->Channel(&context);
+        watchdog.start(pAggregatorClient->config.aggregatorClientWatchdogTimeout);
         bool bResult;
         while (true)
         {
@@ -508,13 +504,15 @@ void* aggregatorClientThread(void* arg)
             ::aggregator::v1::ProverMessage proverMessage;
 
             // Read a new aggregator message
+            watchdog.restart();
             bResult = readerWriter->Read(&aggregatorMessage);
             if (!bResult)
             {
                 zklog.error("aggregatorClientThread() failed calling readerWriter->Read(&aggregatorMessage)");
                 break;
             }
-
+            watchdog.restart();
+            
             switch (aggregatorMessage.request_case())
             {
                 case aggregator::v1::AggregatorMessage::RequestCase::kGetProofRequest:
@@ -638,13 +636,15 @@ void* aggregatorClientThread(void* arg)
             }
 
             // Write the prover message
+            watchdog.restart();
             bResult = readerWriter->Write(proverMessage);
             if (!bResult)
             {
                 zklog.error("aggregatorClientThread() failed calling readerWriter->Write(proverMessage)");
                 break;
             }
-
+            watchdog.restart();
+            
             switch (aggregatorMessage.request_case())
             {
                 case aggregator::v1::AggregatorMessage::RequestCase::kGetStatusRequest:
@@ -667,6 +667,7 @@ void* aggregatorClientThread(void* arg)
                 string2file(proverMessage.DebugString(), filePrefix + "aggregator_response.txt");
             }
         }
+        watchdog.stop();
         cout << "aggregatorClientThread() channel broken; will retry in 5 seconds" << endl;
         sleep(5);
     }

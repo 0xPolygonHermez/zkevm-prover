@@ -74,6 +74,7 @@ public:
     uint16_t aggregatorClientPort;
     string aggregatorClientHost;
     uint64_t aggregatorClientMockTimeout;
+    uint64_t aggregatorClientWatchdogTimeout;
 
     string inputFile;
     string inputFile2; // Used as the second input in genAggregatedProof

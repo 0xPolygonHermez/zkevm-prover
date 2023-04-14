@@ -223,6 +223,10 @@ void Config::load(json &config)
     if (config.contains("aggregatorClientMockTimeout") && config["aggregatorClientMockTimeout"].is_number())
         aggregatorClientMockTimeout = config["aggregatorClientMockTimeout"];
 
+    aggregatorClientWatchdogTimeout = 60 * 1000 * 1000;
+    if (config.contains("aggregatorClientWatchdogTimeout") && config["aggregatorClientWatchdogTimeout"].is_number())
+        aggregatorClientWatchdogTimeout = config["aggregatorClientWatchdogTimeout"];
+
     if (config.contains("inputFile") && config["inputFile"].is_string())
         inputFile = config["inputFile"];
     if (config.contains("inputFile2") && config["inputFile2"].is_string())
