@@ -429,7 +429,7 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
                     zkassert(pFinalProof != NULL);
 
                     pFinalProof->set_proof(pProverRequest->proof.getStringProof());
-                    
+
                     // Set public inputs extended
                     aggregator::v1::PublicInputs* pPublicInputs = new(aggregator::v1::PublicInputs);
                     pPublicInputs->set_old_state_root(scalar2ba(pProverRequest->proof.publicInputsExtended.publicInputs.oldStateRoot));
@@ -474,7 +474,7 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
             }
         }
     }
-    
+
     prover.unlock();
 
 #ifdef LOG_SERVICE
@@ -661,7 +661,7 @@ void* aggregatorClientThread(void* arg)
                 default:
                     break;
             }
-            
+
             if (pAggregatorClient->config.saveResponseToFile)
             {
                 string2file(proverMessage.DebugString(), filePrefix + "aggregator_response.txt");
