@@ -44,10 +44,10 @@ $ sudo apt update && sudo apt install build-essential libbenchmark-dev libomp-de
 ```
 To download the files needed to run the prover, you have to execute the following command
 ```sh
-$ wget https://de012a78750e59b808d922b39535e862.s3.eu-west-1.amazonaws.com/v0.6.0.0-rc.1.tgz
-$ tar -xzvf v0.6.0.0-rc.1.tgz
+$ wget https://de012a78750e59b808d922b39535e862.s3.eu-west-1.amazonaws.com/v1.1.0-rc.1-fork.4.tgz
+$ tar -xzvf v1.1.0-rc.1-fork.4.tgz
 $ rm config
-$ mv v0.6.0.0-rc.1/config .
+$ mv v1.1.0-rc.1-fork.4.tgz/config .
 ```
 
 Run `make` to compile the project
