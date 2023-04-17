@@ -199,6 +199,10 @@ void Config::load(json &config)
     if (config.contains("executorClientHost") && config["executorClientHost"].is_string())
         executorClientHost = config["executorClientHost"];
 
+    executorClientLoops = 1;
+    if (config.contains("executorClientLoops") && config["executorClientLoops"].is_number())
+        executorClientLoops = config["executorClientLoops"];
+
     stateDBServerPort = 50061;
     if (config.contains("stateDBServerPort") && config["stateDBServerPort"].is_number())
         stateDBServerPort = config["stateDBServerPort"];
@@ -544,6 +548,7 @@ void Config::print(void)
     cout << "    executorServerPort=" << to_string(executorServerPort) << endl;
     cout << "    executorClientPort=" << to_string(executorClientPort) << endl;
     cout << "    executorClientHost=" << executorClientHost << endl;
+    cout << "    executorClientLoops=" << executorClientLoops << endl;
     cout << "    stateDBServerPort=" << to_string(stateDBServerPort) << endl;
     cout << "    stateDBURL=" << stateDBURL << endl;
     cout << "    aggregatorServerPort=" << to_string(aggregatorServerPort) << endl;
