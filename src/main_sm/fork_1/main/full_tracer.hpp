@@ -35,6 +35,7 @@ public:
     vector<Opcode> execution_trace;
     string lastError;
     unordered_map<string, InfoReadWrite> read_write_addresses;
+    ReturnFromCreate returnFromCreate;
 #ifdef LOG_TIME_STATISTICS
     TimeMetricStorage tms;
     struct timeval t;

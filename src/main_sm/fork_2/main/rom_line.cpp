@@ -36,7 +36,7 @@ string RomLine::toString(Goldilocks &fr)
     if (bConstPresent) result += " CONST=" + fr.toString(CONST,10);
     if (bConstLPresent) result += " CONSTL=" + CONSTL.get_str(16);
     if (bJmpAddrPresent) result += " jmpAddr=" + fr.toString(jmpAddr,10);
-    if (bElseAddrPresent) result += " elseAddr=" + fr.toString(elseAddr,10);
+    if (bElseAddrPresent) result += " elseAddr=" + fr.toString(elseAddr,10) + " elseAddrLabel=" + elseAddrLabel;
     if (mOp != 0) result += " mOp=" + to_string(mOp);
     if (mWR != 0) result += " mWR=" + to_string(mWR);
     if (hashK != 0) result += " hashK=" + to_string(hashK);

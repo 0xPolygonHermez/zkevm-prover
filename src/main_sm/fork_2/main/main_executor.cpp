@@ -3356,9 +3356,20 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             else if (jmpnCondValue <= FrLast32Positive)
             {
                 if (rom.line[zkPC].useElseAddr)
-                    pols.zkPC[nexti] = rom.line[zkPC].elseAddr;
+                {
+                    if (bUnsignedTransaction && (rom.line[zkPC].elseAddrLabel == "invalidIntrinsicTxSenderCode"))
+                    {
+                        pols.zkPC[nexti] = rom.line[zkPC].useJmpAddr ? rom.line[zkPC].jmpAddr : fr.fromU64(addr);
+                    }
+                    else
+                    {
+                        pols.zkPC[nexti] = rom.line[zkPC].elseAddr;
+                    }
+                }
                 else
+                {
                     pols.zkPC[nexti] = fr.inc(pols.zkPC[i]);
+                }
 #ifdef LOG_JMP
                 cout << "JMPN next zkPC(2)=" << pols.zkPC[nexti] << endl;
 #endif
@@ -3395,9 +3406,20 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             else
             {
                 if (rom.line[zkPC].useElseAddr)
-                    pols.zkPC[nexti] = rom.line[zkPC].elseAddr;
+                {
+                    if (bUnsignedTransaction && (rom.line[zkPC].elseAddrLabel == "invalidIntrinsicTxSenderCode"))
+                    {
+                        pols.zkPC[nexti] = rom.line[zkPC].useJmpAddr ? rom.line[zkPC].jmpAddr : fr.fromU64(addr);
+                    }
+                    else
+                    {
+                        pols.zkPC[nexti] = rom.line[zkPC].elseAddr;
+                    }
+                }
                 else
+                {
                     pols.zkPC[nexti] = fr.inc(pols.zkPC[i]);
+                }
 #ifdef LOG_JMP
                 cout << "JMPC next zkPC(4)=" << pols.zkPC[nexti] << endl;
 #endif
@@ -3417,9 +3439,20 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             else
             {
                 if (rom.line[zkPC].useElseAddr)
-                    pols.zkPC[nexti] = rom.line[zkPC].elseAddr;
+                {
+                    if (bUnsignedTransaction && (rom.line[zkPC].elseAddrLabel == "invalidIntrinsicTxSenderCode"))
+                    {
+                        pols.zkPC[nexti] = rom.line[zkPC].useJmpAddr ? rom.line[zkPC].jmpAddr : fr.fromU64(addr);
+                    }
+                    else
+                    {
+                        pols.zkPC[nexti] = rom.line[zkPC].elseAddr;
+                    }
+                }
                 else
+                {
                     pols.zkPC[nexti] = fr.inc(pols.zkPC[i]);
+                }
             }
             pols.JMPZ[i] = fr.one();
         }
