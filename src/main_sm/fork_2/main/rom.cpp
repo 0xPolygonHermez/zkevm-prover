@@ -56,8 +56,10 @@ void Rom::load(Goldilocks &fr, json &romJson)
         storageAddrOffset      = getMemoryOffset("storageAddr");
         bytecodeLengthOffset   = getMemoryOffset("bytecodeLength");
         originCTXOffset        = getMemoryOffset("originCTX");
+        currentCTXOffset       = getMemoryOffset("currentCTX");
         gasCTXOffset           = getMemoryOffset("gasCTX");
         lastCtxUsedOffset      = getMemoryOffset("lastCtxUsed");
+        isCreateOffset         = getMemoryOffset("isCreate");
     }
 
     // Load ROM constants

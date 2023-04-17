@@ -1318,38 +1318,117 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     // Return data
     if (ctx.proverRequest.input.traceConfig.bGenerateReturnData)
     {
-        mpz_class retDataCTXScalar;
-        zkr = getVarFromCtx(ctx, false, ctx.rom.retDataCTXOffset, retDataCTXScalar);
+        // Write return data from create/create2 until CTX changes
+        if (returnFromCreate.enabled)
+        {
+            if (returnFromCreate.returnValue.size() == 0)
+            {
+                uint64_t retDataCTX = returnFromCreate.createCTX;
+                mpz_class offsetScalar;
+                zkr = getVarFromCtx(ctx, false, ctx.rom.retDataOffsetOffset, offsetScalar, &retDataCTX);
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.retDataOffsetOffset)");
+                    return zkr;
+                }
+                mpz_class lengthScalar;
+                zkr = getVarFromCtx(ctx, false, ctx.rom.retDataLengthOffset, lengthScalar, &retDataCTX);
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.retDataLengthOffset)");
+                    return zkr;
+                }
+                string return_value;
+                zkr = getFromMemory(ctx, offsetScalar, lengthScalar, return_value, &retDataCTX);
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("FullTracer::onOpcode() failed calling getFromMemory() 1");
+                    return zkr;
+                }
+                returnFromCreate.returnValue.push_back(return_value);
+            }
+
+            mpz_class currentCTXScalar;
+            zkr = getVarFromCtx(ctx, true, ctx.rom.currentCTXOffset, currentCTXScalar);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.currentCTXOffset)");
+                return zkr;
+            }
+            uint64_t currentCTX = currentCTXScalar.get_ui();
+            if (returnFromCreate.originCTX == currentCTX)
+            {
+                singleInfo.return_data = returnFromCreate.returnValue;
+            }
+            else
+            {
+                returnFromCreate.enabled = false;
+            }
+        }
+
+        // Check if return is called from CREATE/CREATE2
+        mpz_class isCreateScalar;
+        zkr = getVarFromCtx(ctx, false, ctx.rom.isCreateOffset, isCreateScalar);
         if (zkr != ZKR_SUCCESS)
         {
-            zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.retDataCTXOffset)");
+            zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.isCreateOffset)");
             return zkr;
         }
-        if (retDataCTXScalar != 0)
+        bool isCreate = isCreateScalar.get_ui();
+
+        if (isCreate)
+        {            
+            if (singleInfo.opcode == opcodeName[0xf3/*RETURN*/].pName)
+            {
+                returnFromCreate.enabled = true;
+
+                mpz_class originCTXScalar;
+                zkr = getVarFromCtx(ctx, false, ctx.rom.originCTXOffset, originCTXScalar);
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.originCTXOffset)");
+                    return zkr;
+                }
+                returnFromCreate.originCTX = originCTXScalar.get_ui();
+
+                returnFromCreate.createCTX = fr.toU64(ctx.pols.CTX[*ctx.pStep]);
+            }
+        }
+        else
         {
-            uint64_t retDataCTX = retDataCTXScalar.get_ui();
-            mpz_class offsetScalar;
-            zkr = getVarFromCtx(ctx, false, ctx.rom.retDataOffsetOffset, offsetScalar, &retDataCTX);
+            mpz_class retDataCTXScalar;
+            zkr = getVarFromCtx(ctx, false, ctx.rom.retDataCTXOffset, retDataCTXScalar);
             if (zkr != ZKR_SUCCESS)
             {
-                zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.retDataOffsetOffset)");
+                zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.retDataCTXOffset)");
                 return zkr;
             }
-            mpz_class lengthScalar;
-            zkr = getVarFromCtx(ctx, false, ctx.rom.retDataLengthOffset, lengthScalar, &retDataCTX);
-            if (zkr != ZKR_SUCCESS)
+            if (retDataCTXScalar != 0)
             {
-                zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.retDataLengthOffset)");
-                return zkr;
+                uint64_t retDataCTX = retDataCTXScalar.get_ui();
+                mpz_class offsetScalar;
+                zkr = getVarFromCtx(ctx, false, ctx.rom.retDataOffsetOffset, offsetScalar, &retDataCTX);
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.retDataOffsetOffset)");
+                    return zkr;
+                }
+                mpz_class lengthScalar;
+                zkr = getVarFromCtx(ctx, false, ctx.rom.retDataLengthOffset, lengthScalar, &retDataCTX);
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.retDataLengthOffset)");
+                    return zkr;
+                }
+                string return_value;
+                zkr = getFromMemory(ctx, offsetScalar, lengthScalar, return_value, &retDataCTX);
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("FullTracer::onOpcode() failed calling getFromMemory() 1");
+                    return zkr;
+                }
+                singleInfo.return_data.push_back(return_value);
             }
-            string return_value;
-            zkr = getFromMemory(ctx, offsetScalar, lengthScalar, return_value, &retDataCTX);
-            if (zkr != ZKR_SUCCESS)
-            {
-                zklog.error("FullTracer::onOpcode() failed calling getFromMemory() 1");
-                return zkr;
-            }
-            singleInfo.return_data.push_back(return_value);
         }
     }
 

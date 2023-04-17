@@ -134,6 +134,16 @@ public:
     uint64_t remaining;
 };
 
+class ReturnFromCreate
+{
+public:
+    bool enabled;
+    uint64_t originCTX;
+    uint64_t createCTX;
+    vector<string> returnValue;
+    ReturnFromCreate() : enabled(false), originCTX(0), createCTX(0) {};
+};
+
 class FullTracerInterface
 {
 public:
