@@ -49,7 +49,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
         string rootString = fea2string(fr, r);
         vector<Goldilocks::Element> dbValue;
 
-        dbres = db.read(rootString, dbValue, dbReadLog);
+        dbres = db.read(rootString, dbValue, dbReadLog, false, &keys, level);
         if (dbres != ZKR_SUCCESS)
         {
             zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + rootString);
@@ -462,7 +462,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
 
                     // Read its 2 siblings
                     vector<Goldilocks::Element> dbValue;
-                    dbres = db.read(auxString, dbValue, dbReadLog);
+                    dbres = db.read(auxString, dbValue, dbReadLog, false, &keys, level);
                     if ( dbres != ZKR_SUCCESS)
                     {
                         zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + auxString);
@@ -739,7 +739,7 @@ zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Gold
         // Read the content of db for entry r: siblings[level] = db.read(r)
         string rString = fea2string(fr, r);
         vector<Goldilocks::Element> dbValue;
-        dbres = db.read(rString, dbValue, dbReadLog);
+        dbres = db.read(rString, dbValue, dbReadLog, false, &keys, level);
         if (dbres != ZKR_SUCCESS)
         {
             zklog.error("Smt::get() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + rString);

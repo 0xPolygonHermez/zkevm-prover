@@ -286,6 +286,10 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    {\n";
     code += "        pStateDB->loadDB(proverRequest.input.db, true);\n";
     code += "        pStateDB->flush();\n";
+    code += "        if (mainExecutor.config.dbClearCache && (mainExecutor.config.databaseURL != \"local\"))\n";
+    code += "        {\n";
+    code += "            pStateDB->clearCache();\n";
+    code += "        }\n";
     code += "    }\n\n";
 
     code += "    // Copy input contracts database content into context database (dbProgram)\n";
@@ -293,6 +297,10 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    {\n";
     code += "        pStateDB->loadProgramDB(proverRequest.input.contractsBytecode, true);\n";
     code += "        pStateDB->flush();\n";
+    code += "        if (mainExecutor.config.dbClearCache && (mainExecutor.config.databaseURL != \"local\"))\n";
+    code += "        {\n";
+    code += "            pStateDB->clearCache();\n";
+    code += "        }\n";
     code += "    }\n\n";
 
     code += "    // opN are local, uncommitted polynomials\n";

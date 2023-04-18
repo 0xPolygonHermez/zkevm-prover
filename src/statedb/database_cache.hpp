@@ -52,6 +52,7 @@ public:
     void setMaxSize(int64_t size) { maxSize = size; }; // size is in bytes, 0 = no cache
     void setName(const char * pChar) { name = pChar; };
     void print(bool printContent);
+    void clear(void);
 };
 
 class DatabaseMTCache : public DatabaseCache

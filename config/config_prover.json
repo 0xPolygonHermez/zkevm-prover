@@ -92,6 +92,8 @@
     "dbConnectionsPool": false,
     "dbNumberOfPoolConnections": 25,
     "dbMetrics": false,
+    "dbClearCache": false,
+    "dbGetTree": false,
     "cleanerPollingPeriod": 600,
     "requestsPersistence": 3600,
     "maxExecutorThreads": 20,

@@ -154,6 +154,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     {
         pStateDB->loadDB(proverRequest.input.db, true);
         pStateDB->flush();
+        if (config.dbClearCache && (config.databaseURL != "local"))
+        {
+            pStateDB->clearCache();
+        }
     }
 
     // Copy input contracts database content into context database (dbProgram)
@@ -161,6 +165,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     {
         pStateDB->loadProgramDB(proverRequest.input.contractsBytecode, true);
         pStateDB->flush();
+        if (config.dbClearCache && (config.databaseURL != "local"))
+        {
+            pStateDB->clearCache();
+        }
     }
 
     // opN are local, uncommitted polynomials

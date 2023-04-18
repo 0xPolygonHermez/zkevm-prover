@@ -54,7 +54,7 @@ void Database::init(void)
     bInitialized = true;
 }
 
-zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, const bool update)
+zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, const bool update, const vector<uint64_t> *keys, uint64_t level)
 {
     // Check that it has been initialized before
     if (!bInitialized)
@@ -66,7 +66,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
     struct timeval t;
     if (dbReadLog != NULL) gettimeofday(&t, NULL);
 
-    zkresult r;
+    zkresult r = ZKR_UNSPECIFIED;
 
     // Normalize key format
     string key = NormalizeToNFormat(_key, 64);
@@ -74,16 +74,50 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
 
 #ifdef DATABASE_USE_CACHE
     // If the key is found in local database (cached) simply return it
-    if ((useDBMTCache) && (Database::dbMTCache.find(key, value)))
+    if (useDBMTCache)
     {
-        // Add to the read log
-        if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
+        // If the key is present in the cache, get its value from there
+        if (Database::dbMTCache.find(key, value))
+        {
+            // Add to the read log
+            if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
 
-        r = ZKR_SUCCESS;
+            r = ZKR_SUCCESS;
+        }
+        // If get tree is configured, read the tree from the branch (key hash) to the leaf (keys since level)
+        else if (config.dbGetTree && (keys != NULL))
+        {
+            // Get the tree
+            uint64_t numberOfFields;
+            r = readTreeRemote(key, keys, level, numberOfFields);
+
+            // Add to the read log, and restart the timer
+            if (dbReadLog != NULL)
+            {
+                dbReadLog->addGetTree(TimeDiff(t), numberOfFields);
+                gettimeofday(&t, NULL);
+            }
+
+            // If succeeded, now the value should be present in the cache
+            if ( r == ZKR_SUCCESS)
+            {
+                if (Database::dbMTCache.find(key, value))
+                {
+                    // Add to the read log
+                    if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
+
+                    r = ZKR_SUCCESS;
+                }
+                else
+                {
+                    zklog.warning("Database::read() called readTreeRemote() but key=" + key + " is not present");
+                    r = ZKR_UNSPECIFIED;
+                }
+            }
+        }
     }
-    else
 #endif
-    if (useRemoteDB)
+    if (useRemoteDB && (r == ZKR_UNSPECIFIED))
     {
         // If multi write is enabled, flush pending data, since some previously written keys
         // could be in the multi write string but flushed from the cache
@@ -108,7 +142,9 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
             if (dbReadLog != NULL) dbReadLog->add(key, value, false, TimeDiff(t));
         }
     }
-    else
+
+    // If we could not find the value, report the error
+    if (r == ZKR_UNSPECIFIED)
     {
         zklog.error("Database::read() requested a key that does not exist: " + key);
         r = ZKR_DB_KEY_NOT_FOUND;
@@ -268,6 +304,12 @@ void Database::initRemote(void)
         exitProcess();
     }
 
+    // If configured to use the get tree function, we must install it in the database before using it
+    if (config.dbGetTree)
+    {
+        writeGetTreeFunction();
+    }
+
     TimerStopAndLog(DB_INIT_REMOTE);
 }
 
@@ -346,7 +388,7 @@ zkresult Database::readRemote(bool bProgram, const string &key, string &value)
 
     if (config.logRemoteDbReads)
     {
-        cout << "   Database::readRemote() table=" << tableName << " key=" << key << endl;
+        zklog.info("Database::readRemote() table=" + tableName + " key=" + key);
     }
 
     // Get a free read db connection
@@ -399,6 +441,117 @@ zkresult Database::readRemote(bool bProgram, const string &key, string &value)
     disposeConnection(pDatabaseConnection);
 
     return ZKR_SUCCESS;
+}
+
+zkresult Database::readTreeRemote(const string &key, const vector<uint64_t> *keys, uint64_t level, uint64_t &numberOfFields)
+{
+    zkassert(keys != NULL);
+
+    if (config.logRemoteDbReads)
+    {
+        zklog.info("Database::readTreeRemote() key=" + key);
+    }
+    string rkey;
+    for (uint64_t i=level; i<keys->size(); i++)
+    {
+        uint8_t auxByte = (*keys)[i];
+        if (auxByte > 1)
+        {
+            zklog.error("Database::readTreeRemote() found invalid keys value=" + to_string(auxByte) + " at position " + to_string(i));
+            return ZKR_DB_ERROR;
+        }
+        rkey.append(1, byte2char(auxByte >> 4));
+        rkey.append(1, byte2char(auxByte & 0x0F));
+    }
+
+    // Get a free read db connection
+    DatabaseConnection * pDatabaseConnection = getConnection();
+
+    numberOfFields = 0;
+
+    try
+    {
+        // Prepare the query
+        string query = "SELECT get_tree (E\'\\\\x" + key + "\', E\'\\\\x" + rkey + "\');";
+
+        pqxx::result rows;
+
+        // Start a transaction.
+        pqxx::nontransaction n(*(pDatabaseConnection->pConnection));
+
+        // Execute the query
+        rows = n.exec(query);
+
+        // Commit your transaction
+        n.commit();
+
+        // Process the result
+        numberOfFields = rows.size();
+        for (uint64_t i=0; i<numberOfFields; i++)
+        {
+            pqxx::row const row = rows[i];
+            if (row.size() != 1)
+            {
+                zklog.error("Database::readTreeRemote() got an invalid number of colums for the row: " + to_string(row.size()));
+                disposeConnection(pDatabaseConnection);
+                return ZKR_UNSPECIFIED;
+            }
+            pqxx::field const fieldData = row[0];
+            string fieldDataString = fieldData.c_str();
+            //zklog.info("got value=" + fieldDataString);
+            string hash, data;
+
+            string first = "(\"\\\\x";
+            string second = "\",\"\\\\x";
+            string third = "\")";
+
+            size_t firstPosition = fieldDataString.find(first);
+            size_t secondPosition = fieldDataString.find(second);
+            size_t thirdPosition = fieldDataString.find(third);
+
+            if ( (firstPosition != 0) ||
+                 (firstPosition + first.size() + 32*2 != secondPosition ) ||
+                 (secondPosition <= first.size()) ||
+                 (thirdPosition == 0) ||
+                 ( (secondPosition + second.size() + 12*8*2 != thirdPosition) &&
+                   (secondPosition + second.size() + 8*8*2 != thirdPosition) ))
+            {
+                zklog.error("Database::readTreeRemote() got an invalid field=" + fieldDataString);
+                disposeConnection(pDatabaseConnection);
+                return ZKR_UNSPECIFIED;
+            }
+
+            hash = fieldDataString.substr(firstPosition + first.size(), 32*2);
+            data = fieldDataString.substr(secondPosition + second.size(), thirdPosition - secondPosition - second.size());
+            vector<Goldilocks::Element> value;
+            string2fea(fr, data, value);
+
+#ifdef DATABASE_USE_CACHE
+            // Store it locally to avoid any future remote access for this key
+            if (useDBMTCache)
+            {
+                //zklog.info("Database::readTreeRemote() adding hash=" + hash + " to dbMTCache");
+                Database::dbMTCache.add(hash, value, false);
+            }
+#endif
+        }
+    }
+    catch (const std::exception &e)
+    {
+        zklog.error("Database::readTreeRemote() exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
+        exitProcess();
+    }
+    
+    // Dispose the read db conneciton
+    disposeConnection(pDatabaseConnection);
+
+    if (config.logRemoteDbReads)
+    {
+        zklog.info("Database::readTreeRemote() key=" + key + " read " + to_string(numberOfFields));
+    }
+
+    return ZKR_SUCCESS;
+    
 }
 
 zkresult Database::writeRemote(bool bProgram, const string &key, const string &value, const bool update)
@@ -465,6 +618,182 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
         }
     }
 
+    return result;
+}
+
+zkresult Database::writeGetTreeFunction(void)
+{
+    if (!config.dbGetTree)
+    {
+        zklog.error("Database::writeGetTreeFunction() dalled with config.dbGetTree=false");
+        return ZKR_DB_ERROR;
+    }
+    
+    if (config.databaseURL == "local")
+    {
+        zklog.error("Database::writeGetTreeFunction() dalled with config.databaseURL=local");
+        return ZKR_DB_ERROR;
+    }
+
+    zkresult result = ZKR_SUCCESS;
+
+    string query = string("") +
+    "create or replace function get_tree (root_hash bytea, remaining_key bytea)\n" +
+	"   returns setof state.nodes\n" +
+	"   language plpgsql\n" +
+    "as $$\n" +
+    "declare\n" +
+    "	current_hash bytea;\n" +
+    "	current_row " + config.dbNodesTableName + "%rowtype;\n" +
+    "	remaining_key_length integer;\n" +
+    "	remaining_key_bit integer;\n" +
+    "	byte_71 integer;\n" +
+    "	aux_integer integer;\n" +
+    "begin\n" +
+    "	remaining_key_length = octet_length(remaining_key);\n" +
+    "	current_hash = root_hash;\n" +
+
+    "	-- For every bit (0 or 1) in remaining key\n" +
+    "	for counter in 0..(remaining_key_length-1) loop\n" +
+
+    "		-- Get the current_hash row and store it into current_row\n" +
+    "		select * into current_row from " + config.dbNodesTableName + " where hash = current_hash;\n" +
+    "		if not found then\n" +
+    "			raise EXCEPTION 'Hash % not found', current_hash;\n" +
+    "		end if;\n" +
+
+    "		-- Return it as a result\n" +
+    "		return next current_row;\n" +
+
+    "		-- Data should be a byte array of 12x8 bytes (12 field elements)\n" +
+    "		-- Check data length is exactly 12 field elements\n" +
+    "		if (octet_length(current_row.data) != 12*8) then\n" +
+    "			raise EXCEPTION 'Hash % got invalid data size %', current_hash, octet_length(current_row.data);\n" +
+    "		end if;\n" +
+	//	-- Check that last 3 field elements are zero
+	//	--if (substring(current_row.data from 89 for 8) != E'\\x0000000000000000') then
+	//	--	RAISE EXCEPTION 'Hash % got non-null 12th field element data=%', current_hash, current_row.data;
+	//	--end if;
+	//	--if (substring(current_row.data from 81 for 8) != E'\\x0000000000000000') then
+	//	--	RAISE EXCEPTION 'Hash % got non-null 11th field element data=%', current_hash, current_row.data;
+	//	--end if;
+	//	--if (substring(current_row.data from 73 for 8) != E'\\x0000000000000000') then
+	//	--	RAISE EXCEPTION 'Hash % got non-null 10th field element data=%', current_hash, current_row.data;
+	//	--end if;
+    "		-- If last 4 field elements are 0000, this is an intermediate node\n" +
+    "		byte_71 = get_byte(current_row.data, 71);\n" +
+    "		case byte_71\n" +
+    "		when 0 then\n" +
+
+    "			-- If the next remaining key is a 0, take the left sibling way, if it is a 1, take the right one\n" +
+    "			remaining_key_bit = get_byte(remaining_key, counter);\n" +
+    "			case remaining_key_bit\n" +
+    "			when 0 then\n" +
+    "				current_hash =\n" +
+    "					substring(current_row.data from 25 for 8) ||\n" +
+    "					substring(current_row.data from 17 for 8) ||\n" +
+    "					substring(current_row.data from 9 for 8) ||\n" +
+    "					substring(current_row.data from 1 for 8);\n" +
+    "			when 1 then\n" +
+    "				current_hash =\n" +
+    "					substring(current_row.data from 57 for 8) ||\n" +
+    "					substring(current_row.data from 49 for 8) ||\n" +
+    "					substring(current_row.data from 41 for 8) ||\n" +
+    "					substring(current_row.data from 33 for 8);\n" +
+    "			else\n" +
+    "				raise EXCEPTION 'Invalid remaining key bit at position % with value %', counter, remaining_key_bit ;\n" +
+    "			end case;\n" +
+    
+    "			-- If the hash is a 0, we reached the end of the branch\n" +
+    "			if (get_byte(current_hash, 0) = 0) and\n" +
+    "			   (get_byte(current_hash, 1) = 0) and\n" +
+    "			   (get_byte(current_hash, 2) = 0) and\n" +
+    "			   (get_byte(current_hash, 3) = 0) and\n" +
+    "			   (get_byte(current_hash, 4) = 0) and\n" +
+    "			   (get_byte(current_hash, 5) = 0) and\n" +
+    "			   (get_byte(current_hash, 6) = 0) and\n" +
+    "			   (get_byte(current_hash, 7) = 0) and\n" +
+    "			   (get_byte(current_hash, 8) = 0) and\n" +
+    "			   (get_byte(current_hash, 9) = 0) and\n" +
+    "			   (get_byte(current_hash, 10) = 0) and\n" +
+    "			   (get_byte(current_hash, 11) = 0) and\n" +
+    "			   (get_byte(current_hash, 12) = 0) and\n" +
+    "			   (get_byte(current_hash, 13) = 0) and\n" +
+    "			   (get_byte(current_hash, 14) = 0) and\n" +
+    "			   (get_byte(current_hash, 15) = 0) and\n" +
+    "			   (get_byte(current_hash, 16) = 0) and\n" +
+    "			   (get_byte(current_hash, 17) = 0) and\n" +
+    "			   (get_byte(current_hash, 18) = 0) and\n" +
+    "			   (get_byte(current_hash, 19) = 0) and\n" +
+    "			   (get_byte(current_hash, 20) = 0) and\n" +
+    "			   (get_byte(current_hash, 21) = 0) and\n" +
+    "			   (get_byte(current_hash, 22) = 0) and\n" +
+    "			   (get_byte(current_hash, 23) = 0) and\n" +
+    "			   (get_byte(current_hash, 24) = 0) and\n" +
+    "			   (get_byte(current_hash, 25) = 0) and\n" +
+    "			   (get_byte(current_hash, 26) = 0) and\n" +
+    "			   (get_byte(current_hash, 27) = 0) and\n" +
+    "			   (get_byte(current_hash, 28) = 0) and\n" +
+    "			   (get_byte(current_hash, 29) = 0) and\n" +
+    "			   (get_byte(current_hash, 30) = 0) and\n" +
+    "			   (get_byte(current_hash, 31) = 0) then\n" +
+    "			   return;\n" +
+    "			end if;\n" +
+
+    "		-- If last 4 field elements are 1000, this is a leaf node\n" +
+    "		when 1 then	\n" +
+
+    "			current_hash =\n" +
+    "				substring(current_row.data from 57 for 8) ||\n" +
+    "				substring(current_row.data from 49 for 8) ||\n" +
+    "				substring(current_row.data from 41 for 8) ||\n" +
+    "				substring(current_row.data from 33 for 8);\n" +
+    "			select * into current_row from " + config.dbNodesTableName + " where hash = current_hash;\n" +
+    "			if not found then\n" +
+    "				raise EXCEPTION 'Hash % not found', current_hash;\n" +
+    "			end if;\n" +
+    "			return next current_row;\n" +
+    "			return;\n" +
+
+    "		else\n" +
+    "			raise EXCEPTION 'Hash % got invalid 9th field element data=%', current_hash, current_row.data;\n" +
+    "		end case;\n" +
+			
+    "	end loop;\n" +
+
+    "	return;\n" +
+    "end;$$\n";
+        
+    DatabaseConnection * pDatabaseConnection = getConnection();
+    
+    try
+    {
+#ifdef DATABASE_COMMIT
+        if (autoCommit)
+#endif
+        {
+            pqxx::work w(*(pDatabaseConnection->pConnection));
+            pqxx::result res = w.exec(query);
+            w.commit();
+            disposeConnection(pDatabaseConnection);
+        }
+#ifdef DATABASE_COMMIT
+        else
+        {
+            if (transaction == NULL)
+                transaction = new pqxx::work{*pConnectionWrite};
+            pqxx::result res = transaction->exec(query);
+        }
+#endif
+    }
+    catch (const std::exception &e)
+    {
+        zklog.error("Database::writeGetTreeFunction() exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
+        result = ZKR_DB_ERROR;
+    }
+
+    zklog.info("Database::writeGetTreeFunction() returns " + string(zkresult2string(result)));
+        
     return result;
 }
 
@@ -860,6 +1189,12 @@ Database::~Database()
     }
 }
 
+void Database::clearCache (void)
+{
+    dbMTCache.clear();
+    dbProgramCache.clear();
+}
+
 void loadDb2MemCache(const Config config)
 {
     if (config.databaseURL == "local")
@@ -880,7 +1215,7 @@ void loadDb2MemCache(const Config config)
     zkresult zkr = pStateDB->db.read(Database::dbStateRootKey, dbValue, NULL, true);
     if (zkr == ZKR_DB_KEY_NOT_FOUND)
     {
-        cout << "Warning: loadDb2MemCache() dbStateRootKey=" <<  Database::dbStateRootKey << " not found in database; normal only if database is empty" << endl;
+        zklog.warning("loadDb2MemCache() dbStateRootKey=" +  Database::dbStateRootKey + " not found in database; normal only if database is empty");
         TimerStopAndLog(LOAD_DB_TO_CACHE);
         return;
     }
@@ -892,11 +1227,11 @@ void loadDb2MemCache(const Config config)
     }
     
     string stateRootKey = fea2string(fr, dbValue[0], dbValue[1], dbValue[2], dbValue[3]);
-    cout << "loadDb2MemCache() found state root=" << stateRootKey << endl;
+    zklog.info("loadDb2MemCache() found state root=" + stateRootKey);
 
     if (stateRootKey == "0")
     {
-        cout << "loadDb2MemCache() found an empty tree" << endl;
+        zklog.warning("loadDb2MemCache() found an empty tree");
         TimerStopAndLog(LOAD_DB_TO_CACHE);
         return;
     }
@@ -962,7 +1297,7 @@ void loadDb2MemCache(const Config config)
             double sizePercentage = double(Database::dbMTCache.getCurrentSize())*100.0/double(Database::dbMTCache.getMaxSize());
             if ( sizePercentage > 90 )
             {
-                cout << "loadDb2MemCache() stopping since size percentage=" << sizePercentage << endl;
+                zklog.info("loadDb2MemCache() stopping since size percentage=" + to_string(sizePercentage));
                 break;
             }
 
@@ -1007,7 +1342,7 @@ void loadDb2MemCache(const Config config)
         }
     }
 
-    cout << "loadDb2MemCache() done counter=" << counter << " cache at " << (double(Database::dbMTCache.getCurrentSize())/double(Database::dbMTCache.getMaxSize()))*100 << "%" << endl;
+    zklog.info("loadDb2MemCache() done counter=" + to_string(counter) + " cache at " + to_string((double(Database::dbMTCache.getCurrentSize())/double(Database::dbMTCache.getMaxSize()))*100) + "%");
 
     TimerStopAndLog(LOAD_DB_TO_CACHE);
 
