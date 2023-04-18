@@ -52,6 +52,7 @@
     "executorTimeStatistics": false,
     "executorClientPort": 50071,
     "executorClientHost": "127.0.0.1",
+    "executorClientLoops": 1,
 
     "stateDBServerPort": 50061,
     "stateDBURL": "local",

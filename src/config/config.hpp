@@ -66,6 +66,7 @@ public:
     bool executorTimeStatistics;
     uint16_t executorClientPort;
     string executorClientHost;
+    uint64_t executorClientLoops;
 
     uint16_t stateDBServerPort;
     string stateDBURL;

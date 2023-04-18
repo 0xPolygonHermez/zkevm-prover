@@ -129,7 +129,7 @@ bool ExecutorClient::ProcessBatch (void)
         (*request.mutable_contracts_bytecode())[key] = value;
     }
 
-    for (uint64_t i=0; i<1; i++)
+    for (uint64_t i=0; i<config.executorClientLoops; i++)
     {
         if (i == 1)
         {
