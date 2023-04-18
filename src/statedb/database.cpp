@@ -305,7 +305,7 @@ void Database::initRemote(void)
     }
 
     // If configured to use the get tree function, we must install it in the database before using it
-    if (config.dbGetTree)
+    if (config.dbGetTree && !config.dbReadOnly)
     {
         writeGetTreeFunction();
     }
@@ -539,7 +539,7 @@ zkresult Database::readTreeRemote(const string &key, const vector<uint64_t> *key
     catch (const std::exception &e)
     {
         zklog.error("Database::readTreeRemote() exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
-        exitProcess();
+        return ZKR_DB_ERROR;
     }
     
     // Dispose the read db conneciton
