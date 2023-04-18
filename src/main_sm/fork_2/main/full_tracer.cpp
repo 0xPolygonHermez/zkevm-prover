@@ -1036,7 +1036,10 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
         getVarFromCtx(ctx, false, ctx.rom.txValueOffset, auxScalar);
         singleInfo.contract.value = auxScalar;
 
-        getCalldataFromStack(ctx, 0, 0, singleInfo.contract.data);
+        getVarFromCtx(ctx, false, ctx.rom.txCalldataLenOffset, auxScalar);
+        uint64_t txCalldataLen  = auxScalar.get_ui();
+
+        getCalldataFromStack(ctx, 0, txCalldataLen, singleInfo.contract.data);
         
         singleInfo.contract.gas = txGAS[depth].forwarded;
     }

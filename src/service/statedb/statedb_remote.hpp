@@ -35,6 +35,7 @@ public:
     void loadDB(const DatabaseMap::MTMap &input, const bool persistent);
     void loadProgramDB(const DatabaseMap::ProgramMap &input, const bool persistent);
     zkresult flush();
+    void clearCache(void) {};
 };
 
 #endif

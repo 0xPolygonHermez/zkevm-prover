@@ -133,8 +133,10 @@ void DatabaseCache::print(bool printContent)
     cout << "Cache calculated size: " << size << endl;
 }
 
-DatabaseCache::~DatabaseCache()
+void DatabaseCache::clear(void)
 {
+    lock_guard<recursive_mutex> guard(mlock);
+
     DatabaseCacheRecord* record = head;
     DatabaseCacheRecord* tmp;
     // Free cache records
@@ -144,6 +146,16 @@ DatabaseCache::~DatabaseCache()
         freeRecord(record);
         record = tmp;
     }
+    head = NULL;
+    last = NULL;
+    attempts = 0;
+    hits = 0;
+    cacheMap.clear();
+}
+
+DatabaseCache::~DatabaseCache()
+{
+    clear();
 }
 
 // DatabaseMTCache class implementation

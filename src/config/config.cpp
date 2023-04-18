@@ -431,6 +431,14 @@ void Config::load(json &config)
     if (config.contains("dbMetrics") && config["dbMetrics"].is_boolean())
         dbMetrics = config["dbMetrics"];
 
+    dbClearCache = false;
+    if (config.contains("dbClearCache") && config["dbClearCache"].is_boolean())
+        dbClearCache = config["dbClearCache"];
+
+    dbGetTree = false;
+    if (config.contains("dbGetTree") && config["dbGetTree"].is_boolean())
+        dbGetTree = config["dbGetTree"];
+
     if (config.contains("cleanerPollingPeriod") && config["cleanerPollingPeriod"].is_number())
         cleanerPollingPeriod = config["cleanerPollingPeriod"];
 
@@ -596,6 +604,8 @@ void Config::print(void)
     cout << "    dbConnectionsPool=" << to_string(dbConnectionsPool) << endl;
     cout << "    dbNumberOfPoolConnections=" << dbNumberOfPoolConnections << endl;
     cout << "    dbMetrics=" << to_string(dbMetrics) << endl;
+    cout << "    dbClearCache=" << to_string(dbClearCache) << endl;
+    cout << "    dbGetTree=" << to_string(dbGetTree) << endl;
     cout << "    cleanerPollingPeriod=" << cleanerPollingPeriod << endl;
     cout << "    requestsPersistence=" << requestsPersistence << endl;
     cout << "    maxExecutorThreads=" << maxExecutorThreads << endl;

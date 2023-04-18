@@ -40,6 +40,14 @@ void DatabaseMap::add(const string key, vector<uint8_t> value, const bool cached
     if (callbackOnChange) onChangeCallback();
 }
 
+void DatabaseMap::addGetTree(const uint64_t time, const uint64_t numberOfFields)
+{
+    lock_guard<recursive_mutex> guard(mlock);
+    getTreeTimes += 1;
+    getTreeTime += time;
+    getTreeFields += numberOfFields;
+}
+
 void DatabaseMap::add(MTMap &db)
 {
     lock_guard<recursive_mutex> guard(mlock);
@@ -119,14 +127,16 @@ void DatabaseMap::onChangeCallback()
 
 void DatabaseMap::print(void)
 {
-    zklog.info(string("Database map:") +
+    zklog.info(
+        string("Database map:") +
         " MT.size=" + to_string(mtDB.size()) +
         " cached=" + to_string(mtCachedTimes) + "times=" + to_string(mtCachedTime) + "us=" + to_string(mtCachedTime/zkmax(mtCachedTimes,1)) + "us/time" +
         " db=" + to_string(mtDbTimes) + "times=" + to_string(mtDbTime) + "us=" + to_string(mtDbTime/zkmax(mtDbTimes,1)) + "us/time" +
         " cacheHitRatio=" + to_string(mtCachedTimes*100/zkmax(mtCachedTimes+mtDbTimes,1)) + "%" +
-        " Program.size=" + to_string(programDB.size()) +
+        " PROGRAM.size=" + to_string(programDB.size()) +
         " cached=" + to_string(programCachedTimes) + "times=" + to_string(programCachedTime) + "us=" + to_string(programCachedTime/zkmax(programCachedTimes,1)) + "us/time" +
         " db=" + to_string(programDbTimes) + "times=" + to_string(programDbTime) + "us=" + to_string(programDbTime/zkmax(programDbTimes,1)) + "us/time" +
-        " cacheHitRatio=" + to_string(programCachedTimes*100/zkmax(programCachedTimes+programDbTimes,1)) + "%"
+        " cacheHitRatio=" + to_string(programCachedTimes*100/zkmax(programCachedTimes+programDbTimes,1)) + "%" +
+        " GET_TREE " + to_string(getTreeTimes) + "times=" + to_string(getTreeTime) + "us=" + to_string(getTreeTime/zkmax(getTreeTimes,1)) + "us/time=" + to_string(getTreeFields) + "fields=" + to_string(double(getTreeFields)/zkmax(getTreeTimes,1)) + "fields/time=" + to_string(getTreeTime/zkmax(getTreeFields,1)) +"us/field"
         );
 }

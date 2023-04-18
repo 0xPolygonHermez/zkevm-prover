@@ -129,6 +129,8 @@ public:
     bool dbConnectionsPool;
     uint64_t dbNumberOfPoolConnections;
     bool dbMetrics;
+    bool dbClearCache;
+    bool dbGetTree;
     uint64_t cleanerPollingPeriod;
     uint64_t requestsPersistence;
     uint64_t maxExecutorThreads;
