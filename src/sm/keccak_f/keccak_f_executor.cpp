@@ -159,7 +159,7 @@ void KeccakFExecutor::execute (uint8_t * bit)
     gate = new Gate[Keccak_PolLength];
     if (gate == NULL)
     {
-        cout << "Error: KeccakFExecutor::execute() failed calling malloc" << endl;
+        zklog.error("Error: KeccakFExecutor::execute() failed calling malloc");
         exitProcess();
     }
 
@@ -185,7 +185,7 @@ void KeccakFExecutor::execute (uint8_t * bit)
 
             /*if (program[i].refr==(3200*44+1) || program[i].refr==((3200*44)+2) || program[i].refr==1 || program[i].refr==Keccak_SlotSize )
             {
-                cout << "slot=" << slot << " i=" << i << "/" << program.size() << " refa=" << program[i].refa << " absRefa=" << absRefa << " refb=" << program[i].refb << " absRefb=" << absRefb << " refr=" << program[i].refr << " absRefr=" << absRefr << endl;
+                zklog.info("slot=" + to_string(slot) + " i=" + to_string(i) + "/" + to_string(program.size()) + " refa=" + to_string(program[i].refa) + " absRefa=" + to_string(absRefa) + " refb=" + to_string(program[i].refb) + " absRefb=" + to_string(absRefb) + " refr=" + to_string(program[i].refr) + " absRefr=" + to_string(absRefr));
             }*/
 
             if (program[i].op == gop_xor)
@@ -257,7 +257,7 @@ void KeccakFExecutor::execute (KeccakFExecuteInput &input, KeccakFExecuteOutput 
 
             /*if (instruction.refr==(3200*44+1) || instruction.refr==((3200*44)+2) || instruction.refr==1 || instruction.refr==Keccak_SlotSize)
             {
-                cout << "slot=" << slot << " i=" << i << "/" << program.size() << " refa=" << instruction.refa << " absRefa=" << absRefa << " refb=" << instruction.refb << " absRefb=" << absRefb << " refr=" << instruction.refr << " absRefr=" << absRefr << endl;
+                zklog.info("slot=" + to_string(slot) + " i=" + to_string(i) + "/" + to_string(program.size()) + " refa=" + to_string(instruction.refa) + " absRefa=" + to_string(absRefa) + " refb=" + to_string(instruction.refb) + " absRefb=" + to_string(absRefb) + " refr=" + to_string(instruction.refr) + " absRefr=" + to_string(absRefr));
             }*/
 
             switch (program[i].op)
@@ -379,7 +379,7 @@ void KeccakFExecutor::execute (const vector<vector<Goldilocks::Element>> &input,
 
             /*if (program[i].refr==(3200*44+1) || program[i].refr==((3200*44)+2) || program[i].refr==1 || program[i].refr==Keccak_SlotSize)
             {
-                cout << "slot=" << slot << " i=" << i << "/" << program.size() << " refa=" << program[i].refa << " absRefa=" << absRefa << " refb=" << program[i].refb << " absRefb=" << absRefb << " refr=" << program[i].refr << " absRefr=" << absRefr << endl;
+                zklog.info("slot=" + to_string(slot) + " i=" + to_string(i) + "/" + to_string(program.size()) + " refa=" + to_string(program[i].refa) + " absRefa=" + to_string(absRefa) + " refb=" + to_string(program[i].refb) + " absRefb=" + to_string(absRefb) + " refr=" + to_string(program[i].refr) + " absRefr=" + to_string(absRefr));
             }*/
 
             switch (program[i].op)
@@ -403,7 +403,7 @@ void KeccakFExecutor::execute (const vector<vector<Goldilocks::Element>> &input,
         }
     }
 
-    cout << "KeccakFExecutor successfully processed " << numberOfSlots << " Keccak-F actions (" << (double(input.size())*Keccak_SlotSize*100)/N << "%)" << endl;
+    zklog.info("KeccakFExecutor successfully processed " + to_string(numberOfSlots) + " Keccak-F actions (" + to_string((double(input.size())*Keccak_SlotSize*100)/N) + "%)");
 }
 
 void KeccakFExecutor::setPol (CommitPol (&pol)[4], uint64_t index, uint64_t value)

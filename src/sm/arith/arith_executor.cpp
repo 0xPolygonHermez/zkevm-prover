@@ -81,7 +81,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
 #ifdef LOG_BINARY_EXECUTOR
         if (i%10000 == 0)
         {
-            cout << "Computing binary pols " << i << "/" << input.size() << endl;
+            zklog.info("Computing binary pols " + to_string(i) + "/" + to_string(input.size()));
         }
 #endif
         // TODO: if not have x1, need to componse it
@@ -264,5 +264,5 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
         if (!fr.isZero(pols.selEq[2][offset])) pols.resultEq2[offset + 31] = fr.one();
     }
     
-    cout << "ArithExecutor successfully processed " << action.size() << " arith actions (" << (double(action.size())*32*100)/N << "%)" << endl;
+    zklog.info("ArithExecutor successfully processed " + to_string(action.size()) + " arith actions (" + to_string((double(action.size())*32*100)/N) + "%)");
 }

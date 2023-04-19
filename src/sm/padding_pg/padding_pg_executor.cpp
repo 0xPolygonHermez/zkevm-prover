@@ -311,5 +311,5 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
         addr += 1;
     }
 
-    cout << "PaddingPGExecutor successfully processed " << input.size() << " Poseidon hashes p=" << p << " pDone=" << pDone << " (" << (double(pDone)*100)/N << "%)" << endl;
+    zklog.info("PaddingPGExecutor successfully processed " + to_string(input.size()) + " Poseidon hashes p=" + to_string(p) + " pDone=" + to_string(pDone) + " (" + to_string((double(pDone)*100)/N) + "%)");
 }

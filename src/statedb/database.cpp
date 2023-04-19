@@ -538,7 +538,7 @@ zkresult Database::readTreeRemote(const string &key, const vector<uint64_t> *key
     }
     catch (const std::exception &e)
     {
-        zklog.error("Database::readTreeRemote() exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
+        zklog.warning("Database::readTreeRemote() exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
         return ZKR_DB_ERROR;
     }
     
@@ -927,6 +927,20 @@ zkresult Database::flush()
 {
     if (!config.dbMultiWrite)
     {
+        return ZKR_SUCCESS;
+    }
+
+    // If we are connected to a read-only database, just pretend to have sent all the data
+    if (config.dbReadOnly)
+    {
+        multiWriteLock();
+        multiWriteProgram.clear();
+        multiWriteProgramUpdate.clear();
+        multiWriteNodes.clear();
+        multiWriteNodesUpdate.clear();
+        multiWriteNodesStateRoot.clear();
+        multiWriteUnlock();
+
         return ZKR_SUCCESS;
     }
 

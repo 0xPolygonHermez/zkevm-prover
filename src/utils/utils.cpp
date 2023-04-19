@@ -25,24 +25,24 @@ using namespace std::filesystem;
 
 void printBa(uint8_t *pData, uint64_t dataSize, string name)
 {
-    cout << name << " = ";
+    string s = name + " = ";
     for (uint64_t k = 0; k < dataSize; k++)
     {
-        cout << byte2string(pData[k]) << ":";
+        s += byte2string(pData[k]) + ":";
     }
-    cout << endl;
+    zklog.info(s);
 }
 
 void printBits(uint8_t *pData, uint64_t dataSize, string name)
 {
-    cout << name << " = ";
+    string s = name + " = ";
     for (uint64_t k = 0; k < dataSize / 8; k++)
     {
         uint8_t byte;
         bits2byte(pData + k * 8, byte);
-        cout << byte2string(byte) << ":";
+        s += byte2string(byte) + ":";
     }
-    cout << endl;
+    zklog.info(s);
 }
 
 void printCallStack(void)
@@ -50,10 +50,10 @@ void printCallStack(void)
     void *callStack[100];
     size_t callStackSize = backtrace(callStack, 100);
     char **callStackSymbols = backtrace_symbols(callStack, callStackSize);
-    cout << "CALL STACK" << endl;
+    zklog.info("CALL STACK");
     for (uint64_t i = 0; i < callStackSize; i++)
     {
-        cout << i << ": call=" << callStackSymbols[i] << endl;
+        zklog.info(to_string(i) + ": call=" + callStackSymbols[i]);
     }
     free(callStackSymbols);
 }
@@ -65,7 +65,7 @@ void getMemoryInfo(MemoryInfo &info)
     ifstream meminfo = ifstream{"/proc/meminfo"};
     if (!meminfo.good())
     {
-        cout << "Failed to get memory info" << endl;
+        zklog.error("Failed to get memory info");
     }
 
     string line, label;
@@ -91,37 +91,42 @@ void getMemoryInfo(MemoryInfo &info)
 
 void printMemoryInfo(bool compact)
 {
-    string endLine = (compact ? ", " : "\n");
+    string s;
 
-    cout << "MEMORY INFO" << endLine;
+    string endLine = (compact ? ", " : "\n");
+    string tab = (compact ? "" : "    ");
+
+    s = "MEMORY INFO" + endLine;
 
     constexpr double factorMB = 1024;
 
     MemoryInfo info;
     getMemoryInfo(info);
 
-    int tab = (compact ? 0 : 15);
+    s += tab + "MemTotal: "+ to_string(info.total / factorMB) + " MB" + endLine;
+    s += tab + "MemFree: " + to_string(info.free / factorMB) + " MB" + endLine;
+    s += tab + "MemAvailable: " + to_string(info.available / factorMB) + " MB" + endLine;
+    s += tab + "Buffers: " + to_string(info.buffers / factorMB) + " MB" + endLine;
+    s += tab + "Cached: " + to_string(info.cached / factorMB) + " MB" + endLine;
+    s += tab + "SwapCached: " + to_string(info.swapCached / factorMB) + " MB" + endLine;
+    s += tab + "SwapTotal: " + to_string(info.swapTotal / factorMB) + " MB" + endLine;
+    s += tab + "SwapFree: " + to_string(info.swapFree / factorMB) + " MB";
 
-    cout << left << setw(tab) << "MemTotal: " << right << setw(tab) << (info.total / factorMB) << " MB" << endLine;
-    cout << left << setw(tab) << "MemFree: " << right << setw(tab) << (info.free / factorMB) << " MB" << endLine;
-    cout << left << setw(tab) << "MemAvailable: " << right << setw(tab) << (info.available / factorMB) << " MB" << endLine;
-    cout << left << setw(tab) << "Buffers: " << right << setw(tab) << (info.buffers / factorMB) << " MB" << endLine;
-    cout << left << setw(tab) << "Cached: " << right << setw(tab) << (info.cached / factorMB) << " MB" << endLine;
-    cout << left << setw(tab) << "SwapCached: " << right << setw(tab) << (info.swapCached / factorMB) << " MB" << endLine;
-    cout << left << setw(tab) << "SwapTotal: " << right << setw(tab) << (info.swapTotal / factorMB) << " MB" << endLine;
-    cout << left << setw(tab) << "SwapFree: " << right << setw(tab) << (info.swapFree / factorMB) << " MB" << endl;
+    zklog.info(s);
 }
 
 void printProcessInfo(bool compact)
 {
     string endLine = (compact ? ", " : "\n");
+    string tab = (compact ? "" : "    ");
 
-    cout << "PROCESS INFO" << endLine;
+    string s = "PROCESS INFO" + endLine;
 
     ifstream stat("/proc/self/stat", ios_base::in);
     if (!stat.good())
     {
-        cout << "Failed to get process stat info" << endl;
+        zklog.error("printProcessInfo() failed to get process stat info");
+        return;
     }
 
     string comm, state, ppid, pgrp, session, tty_nr;
@@ -137,14 +142,14 @@ void printProcessInfo(bool compact)
 
     stat.close();
 
-    int tab = (compact ? 0 : 15);
+    s += tab + "Pid: " + to_string(pid) + endLine;
+    s += tab + "User time: " + to_string((double)utime / sysconf(_SC_CLK_TCK)) + " s" + endLine;
+    s += tab + "Kernel time: " + to_string((double)stime / sysconf(_SC_CLK_TCK)) + " s" + endLine;
+    s += tab + "Total time: " + to_string((double)utime / sysconf(_SC_CLK_TCK) + (double)stime / sysconf(_SC_CLK_TCK)) + " s" + endLine;
+    s += tab + "Num threads: " + to_string(numthreads) + endLine;
+    s += tab + "Virtual mem: " + to_string(vsize / 1024 / 1024) + " MB";
 
-    cout << left << setw(tab) << "Pid: " << right << setw(tab) << pid << endLine;
-    cout << left << setw(tab) << "User time: " << right << setw(tab) << (double)utime / sysconf(_SC_CLK_TCK) << " s" << endLine;
-    cout << left << setw(tab) << "Kernel time: " << right << setw(tab) << (double)stime / sysconf(_SC_CLK_TCK) << " s" << endLine;
-    cout << left << setw(tab) << "Total time: " << right << setw(tab) << (double)utime / sysconf(_SC_CLK_TCK) + (double)stime / sysconf(_SC_CLK_TCK) << " s" << endLine;
-    cout << left << setw(tab) << "Num threads: " << right << setw(tab) << numthreads << endLine;
-    cout << left << setw(tab) << "Virtual mem: " << right << setw(tab) << vsize / 1024 / 1024 << " MB" << endl;
+    zklog.info(s);
 }
 
 string getTimestamp(void)
