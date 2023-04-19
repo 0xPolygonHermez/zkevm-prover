@@ -628,8 +628,7 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     response.call_trace.context.gas_used = response.gas_used;
     accBatchGas += response.gas_used;
 
-    // Set return data, in case of deploy, get return buffer from stack if there is no error, otherwise get it from memory
-    if (ctx.proverRequest.input.traceConfig.bGenerateReturnData)
+    // Set return data always; get it from memory
     {
         mpz_class offsetScalar;
         getVarFromCtx(ctx, false, ctx.rom.retDataOffsetOffset, offsetScalar);
