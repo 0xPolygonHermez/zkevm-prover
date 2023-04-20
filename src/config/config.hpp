@@ -57,6 +57,7 @@ public:
     int64_t dbProgramCacheSize; // Size in MBytes for the cache to store Program (SC) records
     bool opcodeTracer;
     bool logRemoteDbReads;
+    bool logExecutorServerInput;
     bool logExecutorServerResponses;
     bool logExecutorServerTxs;
     bool dontLoadRomOffsets;

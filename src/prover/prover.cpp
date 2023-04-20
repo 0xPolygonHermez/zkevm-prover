@@ -364,6 +364,14 @@ void Prover::processBatch(ProverRequest *pProverRequest)
         json2file(inputJson, pProverRequest->inputFile());
     }
 
+    // Log input if requested
+    if (config.logExecutorServerInput)
+    {
+        json inputJson;
+        pProverRequest->input.save(inputJson);
+        zklog.info("Input=\n" + inputJson.dump());
+    }
+
     // Execute the program, in the process batch way
     executor.process_batch(*pProverRequest);
 

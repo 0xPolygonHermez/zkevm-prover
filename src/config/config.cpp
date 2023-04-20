@@ -168,6 +168,10 @@ void Config::load(json &config)
     if (config.contains("logRemoteDbReads") && config["logRemoteDbReads"].is_boolean())
         logRemoteDbReads = config["logRemoteDbReads"];
 
+    logExecutorServerInput = false;
+    if (config.contains("logExecutorServerInput") && config["logExecutorServerInput"].is_boolean())
+        logExecutorServerInput = config["logExecutorServerInput"];
+
     logExecutorServerResponses = false;
     if (config.contains("logExecutorServerResponses") && config["logExecutorServerResponses"].is_boolean())
         logExecutorServerResponses = config["logExecutorServerResponses"];
