@@ -10,7 +10,7 @@ GateState::GateState (const GateConfig &gateConfig) : gateConfig(gateConfig)
     SinRefs = new uint64_t[gateConfig.sinRefNumber];
     if (SinRefs == NULL)
     {
-        cout << "Error: GateState::GateState() failed calling new for SinRefs, N=" << gateConfig.sinRefNumber << endl;
+        zklog.info("Error: GateState::GateState() failed calling new for SinRefs, N=" + to_string(gateConfig.sinRefNumber));
         exitProcess();
     }
 
@@ -18,7 +18,7 @@ GateState::GateState (const GateConfig &gateConfig) : gateConfig(gateConfig)
     SoutRefs = new uint64_t[gateConfig.soutRefNumber];
     if (SinRefs == NULL)
     {
-        cout << "Error: GateState::GateState() failed calling new for SoutRefs, N=" << gateConfig.soutRefNumber << endl;
+        zklog.info("Error: GateState::GateState() failed calling new for SoutRefs, N=" + to_string(gateConfig.soutRefNumber));
         exitProcess();
     }
 
@@ -26,7 +26,7 @@ GateState::GateState (const GateConfig &gateConfig) : gateConfig(gateConfig)
     gate = new Gate[gateConfig.maxRefs];
     if (gate == NULL)
     {
-        cout << "Error: GateState::GateState() failed calling new for gate, N=" << gateConfig.maxRefs << endl;
+        zklog.info("Error: GateState::GateState() failed calling new for gate, N=" + to_string(gateConfig.maxRefs));
         exitProcess();
     }
 
@@ -84,7 +84,7 @@ void GateState::setRin (uint8_t * pRin)
 {
     if (gateConfig.sinRefNumber < 1088)
     {
-        cout << "Error: GateState::setRin() called with gateConfig.sinRefNumber=" << gateConfig.sinRefNumber << " < 1088" << endl;
+        zklog.error("GateState::setRin() called with gateConfig.sinRefNumber=" + to_string(gateConfig.sinRefNumber) + " < 1088");
         exitProcess();
     }
 
@@ -103,7 +103,7 @@ void GateState::mixRin (void)
 {
     if (gateConfig.sinRefNumber < 1088)
     {
-        cout << "Error: GateState::mixRin() called with gateConfig.sinRefNumber=" << gateConfig.sinRefNumber << " < 1088" << endl;
+        zklog.error("GateState::mixRin() called with gateConfig.sinRefNumber=" + to_string(gateConfig.sinRefNumber) + " < 1088");
         exitProcess();
     }
 
@@ -119,7 +119,7 @@ void GateState::getOutput (uint8_t * pOutput)
 {
     if (gateConfig.sinRefNumber < (32*8))
     {
-        cout << "Error: GateState::getOutput() called with gateConfig.sinRefNumber=" << gateConfig.sinRefNumber << " < 32*8" << endl;
+        zklog.error("GateState::getOutput() called with gateConfig.sinRefNumber=" + to_string(gateConfig.sinRefNumber) + " < 32*8");
         exitProcess();
     }
 
@@ -182,7 +182,7 @@ void GateState::copySoutRefsToSinRefs (void)
     // Check sizes
     if (gateConfig.sinRefNumber != gateConfig.soutRefNumber)
     {
-        cout << "Error: GateState::copySoutRefsToSinRefs() called with gateConfig.sinRefNumber=" << gateConfig.sinRefNumber << " different from gateConfig.soutRefNumber=" << gateConfig.soutRefNumber << endl;
+        zklog.error("GateState::copySoutRefsToSinRefs() called with gateConfig.sinRefNumber=" + to_string(gateConfig.sinRefNumber) + " different from gateConfig.soutRefNumber=" + to_string(gateConfig.soutRefNumber));
         exitProcess();
     }
 
@@ -199,7 +199,7 @@ void GateState::copySoutToSinAndResetRefs (void)
     // Check sizes
     if (gateConfig.sinRefNumber != gateConfig.soutRefNumber)
     {
-        cout << "Error: GateState::copySoutToSinAndResetRefs() called with gateConfig.sinRefNumber=" << gateConfig.sinRefNumber << " different from gateConfig.soutRefNumber=" << gateConfig.soutRefNumber << endl;
+        zklog.error("GateState::copySoutToSinAndResetRefs() called with gateConfig.sinRefNumber=" + to_string(gateConfig.sinRefNumber) + " different from gateConfig.soutRefNumber=" + to_string(gateConfig.soutRefNumber));
         exitProcess();
     }
 
@@ -207,7 +207,7 @@ void GateState::copySoutToSinAndResetRefs (void)
     uint8_t * localSout = new uint8_t[gateConfig.sinRefNumber];
     if (localSout == NULL)
     {
-        cout << "Error: GateState::copySoutToSinAndResetRefs() failed allocating uint8_t of size=" << gateConfig.sinRefNumber << endl;
+        zklog.error("GateState::copySoutToSinAndResetRefs() failed allocating uint8_t of size=" + to_string(gateConfig.sinRefNumber));
         exitProcess();
     }
 
@@ -303,11 +303,11 @@ void GateState::OP (GateOperation op, uint64_t refA, PinId pinA, uint64_t refB, 
 void GateState::printCounters (void)
 {
     double totalOperations = xors + ors + andps + ands;
-    cout << "xors      = " << xors << " = " << double(xors)*100/totalOperations << "%" << endl;
-    cout << "ors       = " << ors << " = " << double(ors)*100/totalOperations << "%" << endl;
-    cout << "andps     = " << andps << " = " << double(andps)*100/totalOperations  << "%" << endl;
-    cout << "ands      = " << ands << " = " << double(ands)*100/totalOperations  << "%" << endl;
-    cout << "nextRef-1 = " << nextRef-1 << endl;
+    zklog.info("xors      = " + to_string(xors) + " = " + to_string(double(xors)*100/totalOperations) + "%");
+    zklog.info("ors       = " + to_string(ors) + " = " + to_string(double(ors)*100/totalOperations) + "%");
+    zklog.info("andps     = " + to_string(andps) + " = " + to_string(double(andps)*100/totalOperations) + "%");
+    zklog.info("ands      = " + to_string(ands) + " = " + to_string(double(ands)*100/totalOperations) + "%");
+    zklog.info("nextRef-1 = " + to_string(nextRef-1));
 }
 
 // Refs must be an array of references
@@ -428,7 +428,7 @@ void GateState::savePolsToJson (json &pols)
     pols["op"] = json::array();
 
 
-    cout << "KeccakSMState::savePolsToJson() arity=" << Keccak_Arity << " length=" << Keccak_PolLength << " slotSize=" << Keccak_SlotSize << " numberOfSlots=" << KeccakSM_NumberOfSlots << " constant=" << fr.toString(identityConstant) << endl;
+    zklog.info("KeccakSMState::savePolsToJson() arity=" + to_string(Keccak_Arity) + " length=" + to_string(Keccak_PolLength) + " slotSize=" + to_string(Keccak_SlotSize) + " numberOfSlots=" + to_string(KeccakSM_NumberOfSlots) + " constant=" + fr.toString(identityConstant));
 
     // Initialize all polynomials to the corresponding default values, without permutations
     RawFr::Element acc;
@@ -445,7 +445,7 @@ void GateState::savePolsToJson (json &pols)
         // Log a trace every one million loops
         if ((i%1000000==0) || i==(Keccak_PolLength-1))
         {
-            cout << "KeccakSMState::savePolsToJson() initializing evaluation " << i << endl;
+            zklog.info("KeccakSMState::savePolsToJson() initializing evaluation " + to_string(i));
         }
 
         // Polynomial input a
@@ -462,7 +462,7 @@ void GateState::savePolsToJson (json &pols)
     }
 
     // After the whole round, the acc value must be the unit
-    cout << "KeccakSMState::savePolsToJson() final acc=" << fr.toString(acc) << endl;
+    zklog.info("KeccakSMState::savePolsToJson() final acc=" + fr.toString(acc));
     zkassert(fr.toString(acc)=="1");
 
     // Init polynomial op (operation)
@@ -491,7 +491,7 @@ void GateState::savePolsToJson (json &pols)
     // Perform the polynomials permutations by rotating all inter-connected connections (except the ZeroRef, which is done later since it is shared by all slots)
     for (uint64_t slot=0; slot<KeccakSM_NumberOfSlots; slot++)
     {
-        cout << "KeccakSMState::savePolsToJson() permuting non-zero references of slot " << slot+1 << " of " << KeccakSM_NumberOfSlots << endl;
+        zklog.info("KeccakSMState::savePolsToJson() permuting non-zero references of slot " + to_string(slot+1) + " of " + to_string(KeccakSM_NumberOfSlots));
         
         // For all gates
         for (uint64_t ref=1; ref<nextRef; ref++)
@@ -543,7 +543,7 @@ void GateState::savePolsToJson (json &pols)
     // For the pins a and b of the ZeroRef
     for (uint64_t pin=0; pin<2; pin++)
     {
-        cout << "KeccakSMState::savePolsToJson() permuting zero references of pin " << pin << endl;
+        zklog.info("KeccakSMState::savePolsToJson() permuting zero references of pin " + to_string(pin));
 
         // Get the initialized value of that pin for reference ZeroRef
         string pinString = (pin==0) ? "a" : "b";

@@ -102,7 +102,7 @@ Prover::Prover(Goldilocks &fr,
             if (config.zkevmCmPols.size() > 0)
             {
                 pAddress = mapFile(config.zkevmCmPols, polsSize, true);
-                cout << "Prover::genBatchProof() successfully mapped " << polsSize << " bytes to file " << config.zkevmCmPols << endl;
+                zklog.info("Prover::genBatchProof() successfully mapped " + to_string(polsSize) + " bytes to file " + config.zkevmCmPols);
             }
             else
             {
@@ -112,7 +112,7 @@ Prover::Prover(Goldilocks &fr,
                     zklog.error("Prover::genBatchProof() failed calling malloc() of size " + to_string(polsSize));
                     exitProcess();
                 }
-                cout << "Prover::genBatchProof() successfully allocated " << polsSize << " bytes" << endl;
+                zklog.info("Prover::genBatchProof() successfully allocated " + to_string(polsSize) + " bytes");
             }
 
             prover = new Fflonk::FflonkProver<AltBn128::Engine>(AltBn128::Engine::engine, pAddress, polsSize);
@@ -182,7 +182,7 @@ Prover::~Prover()
 void *proverThread(void *arg)
 {
     Prover *pProver = (Prover *)arg;
-    cout << "proverThread() started" << endl;
+    zklog.info("proverThread() started");
 
     zkassert(pProver->config.generateProof());
 
@@ -201,7 +201,7 @@ void *proverThread(void *arg)
         if (pProver->pendingRequests.size() == 0)
         {
             pProver->unlock();
-            cout << "proverThread() found pending requests queue empty, so ignoring" << endl;
+            zklog.info("proverThread() found pending requests queue empty, so ignoring");
             continue;
         }
 
@@ -210,7 +210,7 @@ void *proverThread(void *arg)
         pProver->pCurrentRequest->startTime = time(NULL);
         pProver->pendingRequests.erase(pProver->pendingRequests.begin());
 
-        cout << "proverThread() starting to process request with UUID: " << pProver->pCurrentRequest->uuid << endl;
+        zklog.info("proverThread() starting to process request with UUID: " + pProver->pCurrentRequest->uuid);
 
         pProver->unlock();
 
@@ -245,19 +245,19 @@ void *proverThread(void *arg)
         pProver->pCurrentRequest = NULL;
         pProver->unlock();
 
-        cout << "proverThread() done processing request with UUID: " << pProverRequest->uuid << endl;
+        zklog.info("proverThread() done processing request with UUID: " + pProverRequest->uuid);
 
         // Release the prove request semaphore to notify any blocked waiting call
         pProverRequest->notifyCompleted();
     }
-    cout << "proverThread() done" << endl;
+    zklog.info("proverThread() done");
     return NULL;
 }
 
 void *cleanerThread(void *arg)
 {
     Prover *pProver = (Prover *)arg;
-    cout << "cleanerThread() started" << endl;
+    zklog.info("cleanerThread() started");
 
     zkassert(pProver->config.generateProof());
 
@@ -279,7 +279,7 @@ void *cleanerThread(void *arg)
             {
                 if (now - pProver->completedRequests[i]->endTime > (int64_t)pProver->config.requestsPersistence)
                 {
-                    cout << "cleanerThread() deleting request with uuid: " << pProver->completedRequests[i]->uuid << endl;
+                    zklog.info("cleanerThread() deleting request with uuid: " + pProver->completedRequests[i]->uuid);
                     ProverRequest *pProverRequest = pProver->completedRequests[i];
                     pProver->completedRequests.erase(pProver->completedRequests.begin() + i);
                     pProver->requestsMap.erase(pProverRequest->uuid);
@@ -293,7 +293,7 @@ void *cleanerThread(void *arg)
         // Unlock the prover
         pProver->unlock();
     }
-    cout << "cleanerThread() done" << endl;
+    zklog.info("cleanerThread() done");
     return NULL;
 }
 
@@ -302,7 +302,7 @@ string Prover::submitRequest(ProverRequest *pProverRequest) // returns UUID for 
     zkassert(config.generateProof());
     zkassert(pProverRequest != NULL);
 
-    cout << "Prover::submitRequest() started type=" << pProverRequest->type << endl;
+    zklog.info("Prover::submitRequest() started type=" + to_string(pProverRequest->type));
 
     // Get the prover request UUID
     string uuid = pProverRequest->uuid;
@@ -314,7 +314,7 @@ string Prover::submitRequest(ProverRequest *pProverRequest) // returns UUID for 
     sem_post(&pendingRequestSem);
     unlock();
 
-    cout << "Prover::submitRequest() returns UUID: " << uuid << endl;
+    zklog.info("Prover::submitRequest() returns UUID: " + uuid);
     return uuid;
 }
 
@@ -322,7 +322,7 @@ ProverRequest *Prover::waitForRequestToComplete(const string &uuid, const uint64
 {
     zkassert(config.generateProof());
     zkassert(uuid.size() > 0);
-    cout << "Prover::waitForRequestToComplete() waiting for request with UUID: " << uuid << endl;
+    zklog.info("Prover::waitForRequestToComplete() waiting for request with UUID: " + uuid);
 
     // We will store here the address of the prove request corresponding to this UUID
     ProverRequest *pProverRequest = NULL;
@@ -342,7 +342,7 @@ ProverRequest *Prover::waitForRequestToComplete(const string &uuid, const uint64
     pProverRequest = it->second;
     unlock();
     pProverRequest->waitForCompleted(timeoutInSeconds);
-    cout << "Prover::waitForRequestToComplete() done waiting for request with UUID: " << uuid << endl;
+    zklog.info("Prover::waitForRequestToComplete() done waiting for request with UUID: " + uuid);
 
     // Return the request pointer
     return pProverRequest;
@@ -354,7 +354,7 @@ void Prover::processBatch(ProverRequest *pProverRequest)
     zkassert(pProverRequest != NULL);
     zkassert(pProverRequest->type == prt_processBatch);
 
-    cout << "Prover::processBatch() timestamp=" << pProverRequest->timestamp << " UUID=" << pProverRequest->uuid << endl;
+    zklog.info("Prover::processBatch() timestamp=" + pProverRequest->timestamp + " UUID=" + pProverRequest->uuid);
 
     // Save input to <timestamp>.input.json, as provided by client
     if (config.saveInputToFile)
@@ -390,11 +390,11 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
 
     zkassert(pProverRequest != NULL);
 
-    cout << "Prover::genBatchProof() timestamp: " << pProverRequest->timestamp << endl;
-    cout << "Prover::genBatchProof() UUID: " << pProverRequest->uuid << endl;
-    cout << "Prover::genBatchProof() input file: " << pProverRequest->inputFile() << endl;
-    // cout << "Prover::genBatchProof() public file: " << pProverRequest->publicsOutputFile() << endl;
-    // cout << "Prover::genBatchProof() proof file: " << pProverRequest->proofFile() << endl;
+    zklog.info("Prover::genBatchProof() timestamp: " + pProverRequest->timestamp);
+    zklog.info("Prover::genBatchProof() UUID: " + pProverRequest->uuid);
+    zklog.info("Prover::genBatchProof() input file: " + pProverRequest->inputFile());
+    // zklog.info("Prover::genBatchProof() public file: " + pProverRequest->publicsOutputFile());
+    // zklog.info("Prover::genBatchProof() proof file: " + pProverRequest->proofFile());
 
     // Save input to <timestamp>.input.json, as provided by client
     if (config.saveInputToFile)
@@ -921,11 +921,11 @@ void Prover::execute(ProverRequest *pProverRequest)
 
     zkassert(pProverRequest != NULL);
 
-    cout << "Prover::execute() timestamp: " << pProverRequest->timestamp << endl;
-    cout << "Prover::execute() UUID: " << pProverRequest->uuid << endl;
-    cout << "Prover::execute() input file: " << pProverRequest->inputFile() << endl;
-    // cout << "Prover::execute() public file: " << pProverRequest->publicsOutputFile() << endl;
-    // cout << "Prover::execute() proof file: " << pProverRequest->proofFile() << endl;
+    zklog.info("Prover::execute() timestamp: " + pProverRequest->timestamp);
+    zklog.info("Prover::execute() UUID: " + pProverRequest->uuid);
+    zklog.info("Prover::execute() input file: " + pProverRequest->inputFile());
+    // zklog.info("Prover::execute() public file: " + pProverRequest->publicsOutputFile());
+    // zklog.info("Prover::execute() proof file: " + pProverRequest->proofFile());
 
     // Save input to <timestamp>.input.json, as provided by client
     if (config.saveInputToFile)
@@ -947,7 +947,7 @@ void Prover::execute(ProverRequest *pProverRequest)
     if (config.zkevmCmPols.size() > 0)
     {
         pExecuteAddress = mapFile(config.zkevmCmPols, polsSize, true);
-        cout << "Prover::execute() successfully mapped " << polsSize << " bytes to file " << config.zkevmCmPols << endl;
+        zklog.info("Prover::execute() successfully mapped " + to_string(polsSize) + " bytes to file " + config.zkevmCmPols);
     }
     else
     {
@@ -957,7 +957,7 @@ void Prover::execute(ProverRequest *pProverRequest)
             zklog.error("Prover::execute() failed calling malloc() of size " + to_string(polsSize));
             exitProcess();
         }
-        cout << "Prover::execute() successfully allocated " << polsSize << " bytes" << endl;
+        zklog.info("Prover::execute() successfully allocated " + to_string(polsSize) + " bytes");
     }
 
     /************/

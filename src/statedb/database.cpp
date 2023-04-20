@@ -151,14 +151,16 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
     }
 
 #ifdef LOG_DB_READ
-    cout << "Database::read()";
-    if (r != ZKR_SUCCESS)
-        cout << " ERROR=" << r << " (" << zkresult2string(r) << ")";
-    cout << " key=" << key;
-    cout << " value=";
-    for (uint64_t i = 0; i < value.size(); i++)
-        cout << fr.toString(value[i], 16) << ":";
-    cout << endl;
+    {
+        string s = "Database::read()";
+        if (r != ZKR_SUCCESS)
+            s += " ERROR=" + string(zkresult2string(r));
+        s += " key=" + key;
+        s += " value=";
+        for (uint64_t i = 0; i < value.size(); i++)
+            s += fr.toString(value[i], 16) + ":";
+        zklog.info(s);
+    }
 #endif
 
     return r;
@@ -215,14 +217,17 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
 #endif
 
 #ifdef LOG_DB_WRITE
-    cout << "Database::write()";
-    if (r != ZKR_SUCCESS)
-        cout << " ERROR=" << r << " (" << zkresult2string(r) << ")";
-    cout << " key=" << key;
-    cout << " value=";
-    for (uint64_t i = 0; i < value.size(); i++)
-        cout << fr.toString(value[i], 16) << ":";
-    cout << " persistent=" << persistent << " update=" << update << endl;
+    {
+        string s = "Database::write()";
+        if (r != ZKR_SUCCESS)
+            s += " ERROR=" + sring(zkresult2string(r));
+        s += " key=" + key;
+        s += " value=";
+        for (uint64_t i = 0; i < value.size(); i++)
+            s += fr.toString(value[i], 16) + ":";
+        s += " persistent=" + to_string(persistent) + " update=" + to_string(update);
+        zklog.info(s);
+    }
 #endif
 
     return r;
@@ -236,7 +241,7 @@ void Database::initRemote(void)
     {
         // Build the remote database URI
         string uri = config.databaseURL;
-        //cout << "Database URI: " << uri << endl;
+        //zklog.info("Database URI: " + uri);
 
         // Create the database connections
         connLock();
@@ -278,7 +283,7 @@ void Database::initRemote(void)
                     exitProcess();
                 }
                 connectionsPool[i].bInUse = false;
-                //cout << "Database::initRemote() created write connection i=" << i << " connectionsPool[i]=" <<connectionsPool[i].pConnection << endl;
+                //zklog.info("Database::initRemote() created write connection i=" + to_string(i) + " connectionsPool[i]=" + to_string((uint64_t)connectionsPool[i].pConnection));
             }
 
             // Reset counters
@@ -344,7 +349,7 @@ DatabaseConnection * Database::getConnection (void)
             nextConnection = 0;
         }
         usedConnections++;
-        //cout << "Database::getWriteConnection() pConnection=" << pConnection << " nextConnection=" << to_string(nextConnection) << " usedConnections=" << to_string(usedConnections) << endl;
+        //zklog.info("Database::getWriteConnection() pConnection=" + to_string((uint64_t)pConnection) + " nextConnection=" + to_string(nextConnection) + " usedConnections=" + to_string(usedConnections));
         connUnlock();
         return pConnection;
     }
@@ -368,7 +373,7 @@ void Database::disposeConnection (DatabaseConnection * pConnection)
         pConnection->bInUse = false;
         zkassert(usedConnections > 0);
         usedConnections--;
-        //cout << "Database::disposeWriteConnection() pConnection=" << pConnection << " nextConnection=" << to_string(nextConnection) << " usedConnections=" << to_string(usedConnections) << endl;
+        //zklog.info("Database::disposeWriteConnection() pConnection=" + to_string((uint64_t)pConnection) + " nextConnection=" + to_string(nextConnection) + " usedConnections=" + to_string(usedConnections));
         connUnlock();
     }
     else
@@ -840,15 +845,18 @@ zkresult Database::setProgram(const string &_key, const vector<uint8_t> &data, c
 #endif
 
 #ifdef LOG_DB_WRITE
-    cout << "Database::setProgram()";
-    if (r != ZKR_SUCCESS)
-        cout << " ERROR=" << r << " (" << zkresult2string(r) << ")";
-    cout << " key=" << key;
-    cout << " data=";
-    for (uint64_t i = 0; (i < (data.size()) && (i < 100)); i++)
-        cout << byte2string(data[i]);
-    if (data.size() > 100) cout << "...";
-    cout << " persistent=" << persistent << " update=" << update << endl;
+    {
+        string s = "Database::setProgram()";
+        if (r != ZKR_SUCCESS)
+            s += " ERROR=" + string(zkresult2string(r));
+        s += " key=" + key;
+        s += " data=";
+        for (uint64_t i = 0; (i < (data.size()) && (i < 100)); i++)
+            s += byte2string(data[i]);
+        if (data.size() > 100) s += "...";
+        s += " persistent=" + to_string(persistent) + " update=" + to_string(update);
+        zklog.info(s);
+    }
 #endif
 
     return r;
@@ -909,15 +917,18 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
     }
 
 #ifdef LOG_DB_READ
-    cout << "Database::getProgram()";
-    if (r != ZKR_SUCCESS)
-        cout << " ERROR=" << r << " (" << zkresult2string(r) << ")";
-    cout << " key=" << key;
-    cout << " data=";
-    for (uint64_t i = 0; (i < (data.size()) && (i < 100)); i++)
-        cout << byte2string(data[i]);
-    if (data.size() > 100) cout << "...";
-    cout << " update=" << update << endl;
+    {
+        string s = "Database::getProgram()";
+        if (r != ZKR_SUCCESS)
+            s += " ERROR=" + string(zkresult2string(r));
+        s += " key=" + key;
+        s += " data=";
+        for (uint64_t i = 0; (i < (data.size()) && (i < 100)); i++)
+            s += byte2string(data[i]);
+        if (data.size() > 100) s += "...";
+        s += " update=" + to_string(update);
+        zklog.info(s);
+    }
 #endif
 
     return r;
@@ -972,7 +983,7 @@ zkresult Database::flush()
                 // Commit your transaction
                 w.commit();
 
-                //cout << "Database::flush() sent " << query << endl;
+                //zklog.info("Database::flush() sent query=" + query);
 
                 // Delete the accumulated query data only if the query succeeded
                 multiWriteProgram.clear();
@@ -990,7 +1001,7 @@ zkresult Database::flush()
                 // Commit your transaction
                 w.commit();
 
-                //cout << "Database::flush() sent " << query << endl;
+                //zklog.info("Database::flush() sent query=" + query);
 
                 // Delete the accumulated query data only if the query succeeded
                 multiWriteProgramUpdate.clear();
@@ -1008,7 +1019,7 @@ zkresult Database::flush()
                 // Commit your transaction
                 w.commit();
 
-                //cout << "Database::flush() sent " << query << endl;
+                //zklog.info("Database::flush() sent query=" + query);
 
                 // Delete the accumulated query data only if the query succeeded
                 multiWriteNodes.clear();
@@ -1026,7 +1037,7 @@ zkresult Database::flush()
                 // Commit your transaction
                 w.commit();
 
-                //cout << "Database::flush() sent " << query << endl;
+                //zklog.info("Database::flush() sent query=" + query);
 
                 // Delete the accumulated query data only if the query succeeded
                 multiWriteNodesUpdate.clear();
@@ -1044,7 +1055,7 @@ zkresult Database::flush()
                 // Commit your transaction
                 w.commit();
 
-                //cout << "Database::flush() sent " << query << endl;
+                //zklog.info("Database::flush() sent query=" + query);
 
                 // Delete the accumulated query data only if the query succeeded
                 multiWriteNodesStateRoot.clear();
@@ -1090,7 +1101,9 @@ void Database::commit()
 void Database::printTree(const string &root, string prefix)
 {
     if (prefix == "")
-        cout << "Printint tree of root=" << root << endl;
+    {
+        zklog.info("Printint tree of root=" + root);
+    }
     string key = root;
     vector<Goldilocks::Element> value;
     read(key, value, NULL);
@@ -1117,20 +1130,20 @@ void Database::printTree(const string &root, string prefix)
     if (fr.equal(value[8], fr.zero())) // Intermediate node
     {
         string leftKey = fea2string(fr, value[0], value[1], value[2], value[3]);
-        cout << prefix << "Intermediate node - left hash=" << leftKey << endl;
+        zklog.info(prefix + "Intermediate node - left hash=" + leftKey);
         if (leftKey != "0")
             printTree(leftKey, prefix + "  ");
         string rightKey = fea2string(fr, value[4], value[5], value[6], value[7]);
-        cout << prefix << "Intermediate node - right hash=" << rightKey << endl;
+        zklog.info(prefix + "Intermediate node - right hash=" + rightKey);
         if (rightKey != "0")
             printTree(rightKey, prefix + "  ");
     }
     else if (fr.equal(value[8], fr.one())) // Leaf node
     {
         string rKey = fea2string(fr, value[0], value[1], value[2], value[3]);
-        cout << prefix << "rKey=" << rKey << endl;
+        zklog.info(prefix + "rKey=" + rKey);
         string hashValue = fea2string(fr, value[4], value[5], value[6], value[7]);
-        cout << prefix << "hashValue=" << hashValue << endl;
+        zklog.info(prefix + "hashValue=" + hashValue);
         vector<Goldilocks::Element> leafValue;
         read(hashValue, leafValue, NULL);
         if (leafValue.size() == 12)
@@ -1158,7 +1171,7 @@ void Database::printTree(const string &root, string prefix)
         }
         else if (leafValue.size() == 8)
         {
-            cout << prefix << "leafValue.size()=" << leafValue.size() << endl;
+            zklog.info(prefix + "leafValue.size()=" + to_string(leafValue.size()));
         }
         else
         {
@@ -1167,14 +1180,14 @@ void Database::printTree(const string &root, string prefix)
         }
         mpz_class scalarValue;
         fea2scalar(fr, scalarValue, leafValue[0], leafValue[1], leafValue[2], leafValue[3], leafValue[4], leafValue[5], leafValue[6], leafValue[7]);
-        cout << prefix << "leafValue=" << PrependZeros(scalarValue.get_str(16), 64) << endl;
+        zklog.info(prefix + "leafValue=" + PrependZeros(scalarValue.get_str(16), 64));
     }
     else
     {
         zklog.error("Database::printTree() found value[8]=" + fr.toString(value[8], 16));
         return;
     }
-    if (prefix == "") cout << endl;
+    if (prefix == "") zklog.info("");
 }
 
 Database::~Database()
@@ -1187,7 +1200,7 @@ Database::~Database()
             {
                 if (connectionsPool[i].pConnection != NULL)
                 {
-                    //cout << "Database::~Database() deleting writeConnectionsPool[" << i << "].pConnection=" << writeConnectionsPool[i].pConnection << endl;
+                    //zklog.info("Database::~Database() deleting writeConnectionsPool[" + to_string(i) + "].pConnection=" + to_string((uint64_t)writeConnectionsPool[i].pConnection));
                     delete[] connectionsPool[i].pConnection;
                 }
             }
@@ -1282,7 +1295,7 @@ void loadDb2MemCache(const Config config)
 
         treeMap[level+1] = emptyVector;
 
-        //cout << "loadDb2MemCache() searching at level=" << level << " for elements=" << treeMapIterator->second.size() << endl;
+        //zklog.info("loadDb2MemCache() searching at level=" + to_string(level) + " for elements=" + to_string(treeMapIterator->second.size()));
         
         for (uint64_t i=0; i<treeMapIterator->second.size(); i++)
         {
@@ -1325,13 +1338,13 @@ void loadDb2MemCache(const Config config)
                     if (leftHash != "0")
                     {
                         treeMap[level+1].push_back(leftHash);
-                        //cout << "loadDb2MemCache() level=" << level << " found leftHash=" << leftHash << endl;
+                        //zklog.info("loadDb2MemCache() level=" + to_string(level) + " found leftHash=" + leftHash);
                     }
                     rightHash = fea2string(fr, dbValue[4], dbValue[5], dbValue[6], dbValue[7]);
                     if (rightHash != "0")
                     {
                         treeMap[level+1].push_back(rightHash);
-                        //cout << "loadDb2MemCache() level=" << level << " found rightHash=" << rightHash << endl;
+                        //zklog.info("loadDb2MemCache() level=" + to_string(level) + " found rightHash=" + rightHash);
                     }
                 }
                 // If capacity is 1000, this is a leaf node that contains right hash of the value node
@@ -1340,7 +1353,7 @@ void loadDb2MemCache(const Config config)
                     rightHash = fea2string(fr, dbValue[4], dbValue[5], dbValue[6], dbValue[7]);
                     if (rightHash != "0")
                     {
-                        //cout << "loadDb2MemCache() level=" << level << " found value rightHash=" << rightHash << endl;
+                        //zklog.info("loadDb2MemCache() level=" + to_string(level) + " found value rightHash=" + rightHash);
                         dbValue.clear();
                         zkresult zkr = pStateDB->db.read(rightHash, dbValue, NULL, true);
                         if (zkr != ZKR_SUCCESS)

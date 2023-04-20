@@ -73,7 +73,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                         op[0] = fr.one();
 
 #ifdef LOG_STORAGE_EXECUTOR
-                        cout << "StorageExecutor isUpdate returns " << fea2string(fr, op) << endl;
+                        zklog.info("StorageExecutor isUpdate returns " + fea2string(fr, op));
 #endif
                     }
                 }
@@ -86,7 +86,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                         op[0] = fr.one();
 
 #ifdef LOG_STORAGE_EXECUTOR
-                        cout << "StorageExecutor isInsertFound returns " << fea2string(fr, op) << endl;
+                        zklog.info("StorageExecutor isInsertFound returns " + fea2string(fr, op));
 #endif
                     }
                 }
@@ -99,7 +99,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                         op[0] = fr.one();
 
 #ifdef LOG_STORAGE_EXECUTOR
-                        cout << "StorageExecutor isInsertNotFound returns " << fea2string(fr, op) << endl;
+                        zklog.info("StorageExecutor isInsertNotFound returns " + fea2string(fr, op));
 #endif
                     }
                 }
@@ -112,7 +112,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                         op[0] = fr.one();
 
 #ifdef LOG_STORAGE_EXECUTOR
-                        cout << "StorageExecutor isDeleteLast returns " << fea2string(fr, op) << endl;
+                        zklog.info("StorageExecutor isDeleteLast returns " + fea2string(fr, op));
 #endif
                     }
                 }
@@ -125,7 +125,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                         op[0] = fr.one();
 
 #ifdef LOG_STORAGE_EXECUTOR
-                        cout << "StorageExecutor isSetDeleteFound returns " << fea2string(fr, op) << endl;
+                        zklog.info("StorageExecutor isSetDeleteFound returns " + fea2string(fr, op));
 #endif
                     }
                 }
@@ -138,7 +138,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                         op[0] = fr.one();
 
 #ifdef LOG_STORAGE_EXECUTOR
-                        cout << "StorageExecutor isSetDeleteNotFound returns " << fea2string(fr, op) << endl;
+                        zklog.info("StorageExecutor isSetDeleteNotFound returns " + fea2string(fr, op));
 #endif
                     }
                 }
@@ -151,7 +151,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                         op[0] = fr.one();
 
 #ifdef LOG_STORAGE_EXECUTOR
-                        cout << "StorageExecutor isZeroToZero returns " << fea2string(fr, op) << endl;
+                        zklog.info("StorageExecutor isZeroToZero returns " + fea2string(fr, op));
 #endif
                     }
                 }
@@ -163,7 +163,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                     {
                         op[0] = fr.one();
 #ifdef LOG_STORAGE_EXECUTOR
-                        cout << "StorageExecutor isOld0 returns " << fea2string(fr, op) << endl;
+                        zklog.info("StorageExecutor isOld0 returns " + fea2string(fr, op));
 #endif
                     }
                 }
@@ -177,7 +177,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                         op[0] = fr.one();
 
 #ifdef LOG_STORAGE_EXECUTOR
-                        cout << "StorageExecutor isGet returns " << fea2string(fr, op) << endl;
+                        zklog.info("StorageExecutor isGet returns " + fea2string(fr, op));
 #endif
                     }
                 }
@@ -191,7 +191,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                     op[3] = ctx.rKey[3];
 
 #ifdef LOG_STORAGE_EXECUTOR
-                    cout << "StorageExecutor GetRkey returns " << fea2string(fr, op) << endl;
+                    zklog.info("StorageExecutor GetRkey returns " + fea2string(fr, op));
 #endif
                 }
 
@@ -204,7 +204,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                     op[3] = ctx.siblingRKey[3];
 
 #ifdef LOG_STORAGE_EXECUTOR
-                    cout << "StorageExecutor GetSiblingRkey returns " << fea2string(fr, op) << endl;
+                    zklog.info("StorageExecutor GetSiblingRkey returns " + fea2string(fr, op));
 #endif
                 }
 
@@ -228,7 +228,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                     }
 
 #ifdef LOG_STORAGE_EXECUTOR
-                    cout << "StorageExecutor GetSiblingHash returns " << fea2string(fr, op) << endl;
+                    zklog.info("StorageExecutor GetSiblingHash returns " + fea2string(fr, op));
 #endif
                 }
 
@@ -246,7 +246,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                     op[3] = fea[3];
 
 #ifdef LOG_STORAGE_EXECUTOR
-                    cout << "StorageExecutor GetValueLow returns " << fea2string(fr, op) << endl;
+                    zklog.info("StorageExecutor GetValueLow returns " + fea2string(fr, op));
 #endif
                 }
 
@@ -261,7 +261,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                     op[3] = fea[7];
 
 #ifdef LOG_STORAGE_EXECUTOR
-                    cout << "StorageExecutor GetValueHigh returns " << fea2string(fr, op) << endl;
+                    zklog.info("StorageExecutor GetValueHigh returns " + fea2string(fr, op));
 #endif
                 }
 
@@ -276,7 +276,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                     op[3] = fea[3];
 
 #ifdef LOG_STORAGE_EXECUTOR
-                    cout << "StorageExecutor GetSiblingValueLow returns " << fea2string(fr, op) << endl;
+                    zklog.info("StorageExecutor GetSiblingValueLow returns " + fea2string(fr, op));
 #endif
                 }
 
@@ -291,7 +291,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                     op[3] = fea[7];
 
 #ifdef LOG_STORAGE_EXECUTOR
-                    cout << "StorageExecutor GetSiblingValueHigh returns " << fea2string(fr, op) << endl;
+                    zklog.info("StorageExecutor GetSiblingValueHigh returns " + fea2string(fr, op));
 #endif
                 }
 
@@ -316,7 +316,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                     op[3] = fea[3];
 
 #ifdef LOG_STORAGE_EXECUTOR
-                    cout << "StorageExecutor GetOldValueLow returns " << fea2string(fr, op) << endl;
+                    zklog.info("StorageExecutor GetOldValueLow returns " + fea2string(fr, op));
 #endif
                 }
 
@@ -341,7 +341,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                     op[3] = fea[7];
 
 #ifdef LOG_STORAGE_EXECUTOR
-                    cout << "StorageExecutor GetOldValueHigh returns " << fea2string(fr, op) << endl;
+                    zklog.info("StorageExecutor GetOldValueHigh returns " + fea2string(fr, op));
 #endif
                 }
 
@@ -372,7 +372,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                     }
 
 #ifdef LOG_STORAGE_EXECUTOR
-                    cout << "StorageExecutor GetLevelBit(" << bit << ") returns " << fea2string(fr, op) << endl;
+                    zklog.info("StorageExecutor GetLevelBit(" + to_string(bit) + ") returns " + fea2string(fr, op));
 #endif
                 }
 
@@ -386,7 +386,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                     }
 
 #ifdef LOG_STORAGE_EXECUTOR
-                    cout << "StorageExecutor GetTopTree returns " << fea2string(fr, op) << endl;
+                    zklog.info("StorageExecutor GetTopTree returns " + fea2string(fr, op));
 #endif
                 }
 
@@ -401,7 +401,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                     }
 
 #ifdef LOG_STORAGE_EXECUTOR
-                    cout << "StorageExecutor GetTopOfBranch returns " << fea2string(fr, op) << endl;
+                    zklog.info("StorageExecutor GetTopOfBranch returns " + fea2string(fr, op));
 #endif
                 }
 
@@ -421,7 +421,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                     op[0] = fr.fromU64(ctx.bits[ctx.currentLevel]);
 
 #ifdef LOG_STORAGE_EXECUTOR
-                    cout << "StorageExecutor GetNextKeyBit returns " << fea2string(fr, op) << endl;
+                    zklog.info("StorageExecutor GetNextKeyBit returns " + fea2string(fr, op));
 #endif
                 }
 
@@ -433,7 +433,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                     {
                         op[0] = fr.one();
 #ifdef LOG_STORAGE_EXECUTOR
-                        cout << "StorageExecutor isEndPolynomial returns " << fea2string(fr,op) << endl;
+                        zklog.info("StorageExecutor isEndPolynomial returns " + fea2string(fr,op));
 #endif
                     }
 
@@ -586,7 +586,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             if (fr.isZero(op[0]))
             {
                 pols.pc[nexti] = fr.fromU64(rom.line[l].address);
-                //cout << "StorageExecutor iJmpz address=" << rom.line[l].address << endl;
+                //zklog.info("StorageExecutor iJmpz address=" + to_string(rom.line[l].address));
             }
             else
             {
@@ -601,7 +601,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
         {
             pols.pc[nexti] = fr.fromU64(rom.line[l].address);
             pols.iAddress[i] = fr.fromU64(rom.line[l].address);
-            //cout << "StorageExecutor iJmp address=" << rom.line[l].address << endl;
+            //zklog.info("StorageExecutor iJmp address=" + to_string(rom.line[l].address));
             pols.iJmp[i] = fr.one();
         }
 
@@ -621,7 +621,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             pols.iRotateLevel[i] = fr.one();
 
 #ifdef LOG_STORAGE_EXECUTOR
-            cout << "StorageExecutor iRotateLevel level[3:2:1:0]=" << fr.toU64(pols.level3[i]) << ":" << fr.toU64(pols.level2[i]) << ":" << fr.toU64(pols.level1[i]) << ":" << fr.toU64(pols.level0[i]) << endl;
+            zklog.info("StorageExecutor iRotateLevel level[3:2:1:0]=" + fr.toString(pols.level3[i],10) + ":" + fr.toString(pols.level2[i],10) + ":" + fr.toString(pols.level1[i],10) + ":" + fr.toString(pols.level0[i],10));
 #endif
         }
 
@@ -692,9 +692,11 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             required.push_back(req);
 
 #ifdef LOG_STORAGE_EXECUTOR
-            cout << "StorageExecutor iHash" << rom.line[l].iHashType << " hash=" << fea2string(fr, op) << " value=";
-            for (uint64_t i=0; i<12; i++) cout << fr.toString(auxFea[i],16) << ":";
-            cout << endl;
+            {
+                string s = "StorageExecutor iHash iHashType=" + to_string(rom.line[l].iHashType) + " hash=" + fea2string(fr, op) + " value=";
+                for (uint64_t i=0; i<12; i++) s += fr.toString(auxFea[i],16) + ":";
+                zklog.info(s);
+            }
 #endif
         }
 
@@ -734,7 +736,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
 
 #ifdef LOG_STORAGE_EXECUTOR
             Goldilocks::Element fea[4] = {pols.rkey0[i], pols.rkey1[i], pols.rkey2[i], pols.rkey3[i]};
-            cout << "StorageExecutor iClimbRkey sibling bit=" << bit << " rkey=" << fea2string(fr,fea) << endl;
+            zklog.info("StorageExecutor iClimbRkey sibling bit=" + to_string(bit) + " rkey=" + fea2string(fr,fea));
 #endif
         }
 
@@ -743,7 +745,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
         {
 #ifdef LOG_STORAGE_EXECUTOR
             Goldilocks::Element fea1[4] = {pols.siblingRkey0[i], pols.siblingRkey1[i], pols.siblingRkey2[i], pols.siblingRkey3[i]};
-            cout << "StorageExecutor iClimbSiblingRkey before rkey=" << fea2string(fr,fea1) << endl;
+            zklog.info("StorageExecutor iClimbSiblingRkey before rkey=" + fea2string(fr,fea1));
 #endif
             uint64_t bit = fr.toU64(pols.rkeyBit[i]);
             if (fr.isOne(pols.level0[i]))
@@ -778,7 +780,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
 
 #ifdef LOG_STORAGE_EXECUTOR
             Goldilocks::Element fea[4] = {pols.siblingRkey0[i], pols.siblingRkey1[i], pols.siblingRkey2[i], pols.siblingRkey3[i]};
-            cout << "StorageExecutor iClimbSiblingRkey after sibling bit=" << bit << " rkey=" << fea2string(fr,fea) << endl;
+            zklog.info("StorageExecutor iClimbSiblingRkey after sibling bit=" + to_string(bit) + " rkey=" + fea2string(fr,fea));
 #endif
         }
 
@@ -787,7 +789,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
         {
 #ifdef LOG_STORAGE_EXECUTOR
             Goldilocks::Element fea1[4] = {pols.siblingRkey0[i], pols.siblingRkey1[i], pols.siblingRkey2[i], pols.siblingRkey3[i]};
-            cout << "StorageExecutor iClimbSiblingRkeyN before rkey=" << fea2string(fr,fea1) << endl;
+            zklog.info("StorageExecutor iClimbSiblingRkeyN before rkey=" + fea2string(fr,fea1));
 #endif
             uint64_t bit = 1 - fr.toU64(pols.rkeyBit[i]);
             if (fr.equal(pols.level0[i], fr.one()))
@@ -822,7 +824,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
 
 #ifdef LOG_STORAGE_EXECUTOR
             Goldilocks::Element fea[4] = {pols.siblingRkey0[i], pols.siblingRkey1[i], pols.siblingRkey2[i], pols.siblingRkey3[i]};
-            cout << "StorageExecutor iClimbSiblingRkeyN after sibling bit=" << bit << " rkey=" << fea2string(fr,fea) << endl;
+            zklog.info("StorageExecutor iClimbSiblingRkeyN after sibling bit=" + to_string(bit) + " rkey=" + fea2string(fr,fea));
 #endif
         }
 
@@ -885,7 +887,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             }
 
 #ifdef LOG_STORAGE_EXECUTOR
-            cout << "StorageExecutor LATCH GET" << endl;
+            zklog.info("StorageExecutor LATCH GET");
 #endif
 
             // Increase action
@@ -897,7 +899,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                 actionListEmpty = true;
 
 #ifdef LOG_STORAGE_EXECUTOR
-                cout << "StorageExecutor LATCH GET detected the end of the action list a=" << a << " i=" << i << endl;
+                zklog.info("StorageExecutor LATCH GET detected the end of the action list a=" + to_string(a) + " i=" + to_string(i));
 #endif
             }
             // Initialize the context for the new action
@@ -978,7 +980,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             }
 
 #ifdef LOG_STORAGE_EXECUTOR
-            cout << "StorageExecutor LATCH SET" << endl;
+            zklog.info("StorageExecutor LATCH SET");
 #endif
 
             // Increase action
@@ -990,7 +992,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                 actionListEmpty = true;
 
 #ifdef LOG_STORAGE_EXECUTOR
-                cout << "StorageExecutor() LATCH SET detected the end of the action list a=" << a << " i=" << i << endl;
+                zklog.info("StorageExecutor() LATCH SET detected the end of the action list a=" + to_string(a) + " i=" + to_string(i));
 #endif
             }
             // Initialize the context for the new action
@@ -1208,7 +1210,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
         }
 
 #ifdef LOG_STORAGE_EXECUTOR
-        if ((i%1000) == 0) cout << "StorageExecutor step " << i << " done" << endl;
+        if ((i%1000) == 0) zklog.info("StorageExecutor step " + to_string(i) + " done");
 #endif
     }
 
@@ -1219,7 +1221,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
         exitProcess();
     }
 
-    cout << "StorageExecutor successfully processed " << action.size() << " SMT actions (" << (double(lastStep)*100)/N << "%)" << endl;
+    zklog.info("StorageExecutor successfully processed " + to_string(action.size()) + " SMT actions (" + to_string((double(lastStep)*100)/N) + "%)");
 }
 
 // To be used only for testing, since it allocates a lot of memory
