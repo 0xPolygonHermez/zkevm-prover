@@ -4,6 +4,7 @@
 #include <grpcpp/health_check_service_interface.h>
 #include "statedb_server.hpp"
 #include "statedb_service.hpp"
+#include "zklog.hpp"
 
 using grpc::Server;
 using grpc::ServerBuilder;
@@ -36,7 +37,7 @@ void StateDBServer::run (void)
     // Finally assemble the server.
     std::unique_ptr<Server> server(builder.BuildAndStart());
 
-    std::cout << "StateDB server listening on " << server_address << std::endl;
+    zklog.info("StateDB server listening on " + server_address);
 
     // Wait for the server to shutdown. Note that some other thread must be
     // responsible for shutting down the server for this call to ever return.

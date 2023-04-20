@@ -2,6 +2,7 @@
 #include "utils.hpp"
 #include "scalar.hpp"
 #include "zklog.hpp"
+#include "zkmax.hpp"
 
 // DatabaseCache class implementation
 
@@ -16,7 +17,7 @@ bool DatabaseCache::addKeyValue(const string &key, const void * value, const boo
     attempts++;
     if (attempts%1000000 == 0)
     {
-        cout << "DatabaseCache::addKeyValue() name=" << name << " count=" << cacheMap.size() << " maxSize=" << maxSize << " currentSize=" << currentSize << " attempts=" << attempts << " hits=" << hits << " hit ratio=" << double(hits)*100.0/double(attempts) << "%" << endl;
+        zklog.info("DatabaseCache::addKeyValue() name=" + name + " count=" + to_string(cacheMap.size()) + " maxSize=" + to_string(maxSize) + " currentSize=" + to_string(currentSize) + " attempts=" + to_string(attempts) + " hits=" + to_string(hits) + " hit ratio=" + to_string(double(hits)*100.0/double(zkmax(attempts,1))) + "%");
     }
 
     DatabaseCacheRecord * record;
@@ -74,7 +75,7 @@ bool DatabaseCache::addKeyValue(const string &key, const void * value, const boo
         freeRecord(tmp);
     }
 
-    //cout << "DatabaseCache::addRecord() key=" << key << " cacheCurrentSize=" << cacheCurrentSize << " cacheMap.size()=" << cacheMap.size() << " record.size()=" << record->size << endl;
+    //zklog.info("DatabaseCache::addRecord() key=" + key + " cacheCurrentSize=" + to_string(cacheCurrentSize) + " cacheMap.size()=" + to_string(cacheMap.size()) + " record.size()=" + to_string(record->size));
     //printMemoryInfo(true);
     
     return full;
@@ -111,10 +112,10 @@ bool DatabaseCache::findKey(const string &key, DatabaseCacheRecord* &record)
 
 void DatabaseCache::print(bool printContent)
 {
-    cout << "Cache current size: " << currentSize << endl;
-    cout << "Cache max size: " << maxSize << endl;
-    cout << "Head: " << (head != NULL ? head->key : "NULL") << endl;
-    cout << "Last: " << (last != NULL ? last->key : "NULL") << endl;
+    zklog.info("Cache current size: " + to_string(currentSize));
+    zklog.info("Cache max size: " + to_string(maxSize));
+    zklog.info("Head: " + (head != NULL ? head->key : "NULL"));
+    zklog.info("Last: " + (last != NULL ? last->key : "NULL"));
     
     DatabaseCacheRecord* record = head;
     uint64_t count = 0;
@@ -123,14 +124,14 @@ void DatabaseCache::print(bool printContent)
     {
         if (printContent)
         {
-            cout << "key:" << record->key << endl;
+            zklog.info("key:" + record->key);
         }
         count++;
         size += record->size;
         record = record->next;
     }
-    cout << "Cache count: " << count << endl;
-    cout << "Cache calculated size: " << size << endl;
+    zklog.info("Cache count: " + to_string(count));
+    zklog.info("Cache calculated size: " + to_string(size));
 }
 
 void DatabaseCache::clear(void)

@@ -284,5 +284,5 @@ void PaddingKKExecutor::execute (vector<PaddingKKExecutorInput> &input, PaddingK
         p += 1;
     }
 
-    cout << "PaddingKKExecutor successfully processed " << input.size() << " Keccak hashes p=" << p << " pDone=" << pDone << " (" << (double(pDone)*100)/N << "%)" << endl;
+    zklog.info("PaddingKKExecutor successfully processed " + to_string(input.size()) + " Keccak hashes p=" + to_string(p) + " pDone=" + to_string(pDone) + " (" + to_string((double(pDone)*100)/N) + "%)");
 }
