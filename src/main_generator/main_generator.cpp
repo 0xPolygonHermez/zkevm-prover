@@ -458,10 +458,10 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += "    fi0=fi1=fi2=fi3=fi4=fi5=fi6=fi7=fr.zero();\n";
         code += "#endif\n";
         code += "#ifdef LOG_START_STEPS\n";
-        code += "    cout << \"--> Starting step=\" << i << \" zkPC=" + to_string(zkPC) + " zkasm=\" << rom.line[" + to_string(zkPC) + "].lineStr << endl;\n";
+        code += "    zklog.info(\"--> Starting step=\" + to_string(i) + \" zkPC=" + to_string(zkPC) + " zkasm=\" + rom.line[" + to_string(zkPC) + "].lineStr);\n";
         code += "#endif\n";
         code += "#ifdef LOG_PRINT_ROM_LINES\n";
-        code += "    cout << \"step=\" << i << \" rom.line[" + to_string(zkPC) + "] =[\" << rom.line[" + to_string(zkPC) + "].toString(fr) << \"]\" << endl;\n";
+        code += "    zklog.info(\"step=\" + to_string(i) + \" rom.line[" + to_string(zkPC) + "] =[\" + rom.line[" + to_string(zkPC) + "].toString(fr) + \"]\");\n";
         code += "#endif\n";
         code += "#ifdef LOG_START_STEPS_TO_FILE\n";
         code += "    outfile.open(\"c.txt\", std::ios_base::app); // append instead of overwrite\n";
@@ -995,7 +995,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "#endif\n";
 
                     code += "#ifdef LOG_STORAGE\n";
-                    code += "    cout << \"Storage read sRD got poseidon key: \" << ctx.fr.toString(ctx.lastSWrite.key, 16) << endl;\n";
+                    code += "    zklog.info(\"Storage read sRD got poseidon key: \" + ctx.fr.toString(ctx.lastSWrite.key, 16));\n";
                     code += "#endif\n";
                     code += "    sr8to4(fr, pols.SR0[" + string(bFastMode?"0":"i") + "], pols.SR1[" + string(bFastMode?"0":"i") + "], pols.SR2[" + string(bFastMode?"0":"i") + "], pols.SR3[" + string(bFastMode?"0":"i") + "], pols.SR4[" + string(bFastMode?"0":"i") + "], pols.SR5[" + string(bFastMode?"0":"i") + "], pols.SR6[" + string(bFastMode?"0":"i") + "], pols.SR7[" + string(bFastMode?"0":"i") + "], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);\n";
                     code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
@@ -1031,7 +1031,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    scalar2fea(fr, smtGetResult.value, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
 
                     code += "#ifdef LOG_STORAGE\n";
-                    code += "    cout << \"Storage read sRD read from key: \" << ctx.fr.toString(ctx.lastSWrite.key, 16) << \" value:\" << fr.toString(fi3, 16) << \":\" << fr.toString(fi2, 16) << \":\" << fr.toString(fi1, 16) << \":\" << fr.toString(fi0, 16) << endl;\n";
+                    code += "    zklog.info(\"Storage read sRD read from key: \" + ctx.fr.toString(ctx.lastSWrite.key, 16) + \" value:\" + fr.toString(fi3, 16) + \":\" + fr.toString(fi2, 16) + \":\" + fr.toString(fi1, 16) + \":\" + fr.toString(fi0, 16));\n";
                     code += "#endif\n";
 
                     nHits++;
@@ -1116,7 +1116,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "#endif\n";
 
                     code += "#ifdef LOG_STORAGE\n";
-                    code += "    cout << \"Storage write sWR got poseidon key: \" << ctx.fr.toString(ctx.lastSWrite.key, 16) << endl;\n";
+                    code += "    zklog.info(\"Storage write sWR got poseidon key: \" + ctx.fr.toString(ctx.lastSWrite.key, 16));\n";
                     code += "#endif\n";
                     code += "    // Call SMT to get the new Merkel Tree root hash\n";
                     code += "    if (!fea2scalar(fr, scalarD, pols.D0[" + string(bFastMode?"0":"i") + "], pols.D1[" + string(bFastMode?"0":"i") + "], pols.D2[" + string(bFastMode?"0":"i") + "], pols.D3[" + string(bFastMode?"0":"i") + "], pols.D4[" + string(bFastMode?"0":"i") + "], pols.D5[" + string(bFastMode?"0":"i") + "], pols.D6[" + string(bFastMode?"0":"i") + "], pols.D7[" + string(bFastMode?"0":"i") + "]))\n";
@@ -1168,7 +1168,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    sr4to8(fr, ctx.lastSWrite.newRoot[0], ctx.lastSWrite.newRoot[1], ctx.lastSWrite.newRoot[2], ctx.lastSWrite.newRoot[3], fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
 
                     code += "#ifdef LOG_STORAGE\n";
-                    code += "    cout << \"Storage write sWR stored at key: \" << ctx.fr.toString(ctx.lastSWrite.key, 16) << \" newRoot: \" << fr.toString(res.newRoot, 16) << endl;\n";
+                    code += "    zklog.info(\"Storage write sWR stored at key: \" + ctx.fr.toString(ctx.lastSWrite.key, 16) + \" newRoot: \" + fr.toString(ctx.lastSWrite.res.newRoot, 16));\n";
                     code += "#endif\n";
 
                     nHits++;
@@ -1238,7 +1238,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    scalar2fea(fr, s, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);\n";
 
                     code += "#ifdef LOG_HASHK\n";
-                    code += "    cout << \"hashK 1 i=\" << i << \" zkPC=" + to_string(zkPC) + " addr=\" << addr << \" pos=\" << pos << \" size=\" << size << \" data=\" << s.get_str(16) << endl;\n";
+                    code += "    zklog.info(\"hashK 1 i=\" + to_string(i) + \" zkPC=" + to_string(zkPC) + " addr=\" + to_string(addr) + \" pos=\" + to_string(pos) + \" size=\" + to_string(size) + \" data=\" + s.get_str(16));\n";
                     code += "#endif\n";
 
                     nHits++;
@@ -1273,7 +1273,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    scalar2fea(fr, hashIterator->second.digest, fi0, fi1, fi2, fi3, fi4 ,fi5 ,fi6 ,fi7);\n";
 
                     code += "#ifdef LOG_HASHK\n";
-                    code += "    cout << \"hashKDigest 1 i=\" << i << \" zkPC=" + to_string(zkPC) + " addr=\" << addr << \" digest=\" << ctx.hashK[addr].digest.get_str(16) << endl;\n";
+                    code += "    zklog.info(\"hashKDigest 1 i=\" + to_string(i) + \" zkPC=" + to_string(zkPC) + " addr=\" + to_string(addr) + \" digest=\" + ctx.hashK[addr].digest.get_str(16));\n";
                     code += "#endif\n";
 
                     nHits++;
@@ -2100,7 +2100,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "#endif\n";
 
             code += "#ifdef LOG_STORAGE\n";
-            code += "    cout << \"Storage read sRD got poseidon key: \" << ctx.fr.toString(ctx.lastSWrite.key, 16) << endl;\n";
+            code += "    zklog.info(\"Storage read sRD got poseidon key: \" + ctx.fr.toString(ctx.lastSWrite.key, 16));\n";
             code += "#endif\n";
 
             code += "    sr8to4(fr, pols.SR0[" + string(bFastMode?"0":"i") + "], pols.SR1[" + string(bFastMode?"0":"i") + "], pols.SR2[" + string(bFastMode?"0":"i") + "], pols.SR3[" + string(bFastMode?"0":"i") + "], pols.SR4[" + string(bFastMode?"0":"i") + "], pols.SR5[" + string(bFastMode?"0":"i") + "], pols.SR6[" + string(bFastMode?"0":"i") + "], pols.SR7[" + string(bFastMode?"0":"i") + "], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);\n";
@@ -2143,7 +2143,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             }
 
             code += "#ifdef LOG_STORAGE\n";
-            code += "    cout << \"Storage read sRD read from key: \" << ctx.fr.toString(ctx.lastSWrite.key, 16) << \" value:\" << fr.toString(fi3, 16) << \":\" << fr.toString(fi2, 16) << \":\" << fr.toString(fi1, 16) << \":\" << fr.toString(fi0, 16) << endl;\n";
+            code += "    zklog.info(\"Storage read sRD read from key: \" + ctx.fr.toString(ctx.lastSWrite.key, 16) + \" value:\" + fr.toString(fi3, 16) + \":\" + fr.toString(fi2, 16) + \":\" + fr.toString(fi1, 16) + \":\" + fr.toString(fi0, 16));\n";
             code += "#endif\n";
 
             code += "    if (!fea2scalar(fr, opScalar, op0, op1, op2, op3, op4, op5, op6, op7))\n";
@@ -2507,7 +2507,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             bIncHashPos = true;
 
             code += "#ifdef LOG_HASHK\n";
-            code += "    cout << \"hashK 2 i=\" << i << \" zkPC=" + to_string(zkPC) + " addr=\" << addr << \" pos=\" << pos << \" size=\" << size << \" data=\" << a.get_str(16) << endl;\n";
+            code += "    zklog.info(\"hashK 2 i=\" + to_string(i) + \" zkPC=" + to_string(zkPC) + " addr=\" + to_string(addr) + \" pos=\" + to_string(pos) + \" size=\" + to_string(size) + \" data=\" + a.get_str(16));\n";
             code += "#endif\n\n";
         }
 
@@ -2577,14 +2577,16 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "#endif\n";
 
             code += "#ifdef LOG_HASHK\n";
-            code += "        cout << \"hashKLen 2 calculate hashKLen: addr:\" << addr << \" hash:\" << ctx.hashK[addr].digest.get_str(16) << \" size:\" << ctx.hashK[addr].data.size() << \" data:\";\n";
-            code += "        for (uint64_t k=0; k<ctx.hashK[addr].data.size(); k++) cout << byte2string(ctx.hashK[addr].data[k]) << \":\";\n";
-            code += "        cout << endl;\n";
+            code += "        {\n";
+            code += "           string s = \"hashKLen 2 calculate hashKLen: addr:\" + to_string(addr) + \" hash:\" + ctx.hashK[addr].digest.get_str(16) + \" size:\" + to_string(ctx.hashK[addr].data.size()) + \" data:\";\n";
+            code += "           for (uint64_t k=0; k<ctx.hashK[addr].data.size(); k++) s += byte2string(ctx.hashK[addr].data[k]) + \":\";\n";
+            code += "           zklog.info(s);\n";
+            code += "        }\n";
             code += "#endif\n";
             code += "    }\n";
 
             code += "#ifdef LOG_HASHK\n";
-            code += "    cout << \"hashKLen 2 i=\" << i << \" zkPC=" + to_string(zkPC) + " addr=\" << addr << endl;\n";
+            code += "    zklog.info(\"hashKLen 2 i=\" + to_string(i) + \" zkPC=" + to_string(zkPC) + " addr=\" + to_string(addr));\n";
             code += "#endif\n";
         }
 
@@ -2639,7 +2641,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    incCounter = ceil((double(hashIterator->second.data.size()) + double(1)) / double(136));\n";
 
             code += "#ifdef LOG_HASHK\n";
-            code += "    cout << \"hashKDigest 2 i=\" << i << \" zkPC=" + to_string(zkPC) + " addr=\" << addr << \" digest=\" << ctx.hashK[addr].digest.get_str(16) << endl;\n";
+            code += "    zklog.info(\"hashKDigest 2 i=\" + to_string(i) + \" zkPC=" + to_string(zkPC) + " addr=\" + to_string(addr) + \" digest=\" + ctx.hashK[addr].digest.get_str(16));\n";
             code += "#endif\n";
         }
 
@@ -2894,9 +2896,11 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        mainMetrics.add(\"Set program\", TimeDiff(t));\n";
             code += "#endif\n";
             code += "#ifdef LOG_HASH\n";
-            code += "        cout << \"Hash calculate hashPLen 2: addr:\" << addr << \" hash:\" << ctx.hashP[addr].digest.get_str(16) << \" size:\" << ctx.hashP[addr].data.size() << \" data:\";\n";
-            code += "        for (uint64_t k=0; k<ctx.hashP[addr].data.size(); k++) cout << byte2string(ctx.hashP[addr].data[k]) << \":\";\n";
-            code += "        cout << endl;\n";
+            code += "        {\n";
+            code += "           string s = \"Hash calculate hashPLen 2: addr:\" + to_string(addr) + \" hash:\" + ctx.hashP[addr].digest.get_str(16) + \" size:\" + to_string(ctx.hashP[addr].data.size()) + \" data:\";\n";
+            code += "           for (uint64_t k=0; k<ctx.hashP[addr].data.size(); k++) s += byte2string(ctx.hashP[addr].data[k]) + \":\";\n";
+            code += "           zklog.info(s);\n";
+            code += "        }\n";
             code += "#endif\n";
             code += "    }\n";
         }
@@ -4458,15 +4462,15 @@ string generate(const json &rom, const string &functionName, const string &fileN
         }
 
         code += "#ifdef LOG_COMPLETED_STEPS\n";
-        code += "    cout << \"<-- Completed step=\" << i << \" zkPC=" + to_string(zkPC) + " op=\" << fr.toString(op7,16) << \":\" << fr.toString(op6,16) << \":\" << fr.toString(op5,16) << \":\" << fr.toString(op4,16) << \":\" << fr.toString(op3,16) << \":\" << fr.toString(op2,16) << \":\" << fr.toString(op1,16) << \":\" << fr.toString(op0,16) << \" ABCDE0=\" << fr.toString(pols.A0[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.B0[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.C0[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.E0[" + string(bFastMode?"0":"i") + "],16) << \" FREE0:7=\" << fr.toString(fi0,16) << \":\" << fr.toString(fi7],16) << \" addr=\" << addr << endl;\n";
-        /*code += "    cout << \"<-- Completed step=\" << i << \" zkPC=" + to_string(zkPC) +
-                " op=\" << fr.toString(op7,16) << \":\" << fr.toString(op6,16) << \":\" << fr.toString(op5,16) << \":\" << fr.toString(op4,16) << \":\" << fr.toString(op3,16) << \":\" << fr.toString(op2,16) << \":\" << fr.toString(op1,16) << \":\" << fr.toString(op0,16) << \"" +
-                " A=\" << fr.toString(pols.A7[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.A6[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.A5[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.A4[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.A3[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.A2[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.A1[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.A0[" + string(bFastMode?"0":"i") + "],16) << \"" +
-                " B=\" << fr.toString(pols.B7[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.B6[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.B5[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.B4[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.B3[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.B2[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.B1[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.B0[" + string(bFastMode?"0":"i") + "],16) << \"" +
-                " C=\" << fr.toString(pols.C7[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.C6[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.C5[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.C4[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.C3[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.C2[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.C1[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.C0[" + string(bFastMode?"0":"i") + "],16) << \"" +
-                " D=\" << fr.toString(pols.D7[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.D6[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.D5[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.D4[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.D3[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.D2[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.D1[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "],16) << \"" +
-                " E=\" << fr.toString(pols.E7[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.E6[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.E5[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.E4[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.E3[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.E2[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.E1[" + string(bFastMode?"0":"i") + "],16) << \":\" << fr.toString(pols.E0[" + string(bFastMode?"0":"i") + "],16) << \"" +
-                " FREE0:7=\" << fr.toString(fi0,16) << \":\" << fr.toString(fi7],16) << \" addr=\" << addr << endl;\n";*/
+        code += "    zklog.info( \"<-- Completed step=\" + to_string(i) + \" zkPC=" + to_string(zkPC) + " op=\" + fr.toString(op7,16) + \":\" + fr.toString(op6,16) + \":\" + fr.toString(op5,16) + \":\" + fr.toString(op4,16) + \":\" + fr.toString(op3,16) + \":\" + fr.toString(op2,16) + \":\" + fr.toString(op1,16) + \":\" + fr.toString(op0,16) + \" ABCDE0=\" + fr.toString(pols.A0[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.B0[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.C0[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.E0[" + string(bFastMode?"0":"i") + "],16) + \" FREE0:7=\" + fr.toString(fi0,16) + \":\" + fr.toString(fi7,16) + \" addr=\" + to_string(addr));\n";
+        /*code += "    zklog.info(\"<-- Completed step=\" + to_string(i) + \" zkPC=" + to_string(zkPC) +
+                " op=\" + fr.toString(op7,16) + \":\" + fr.toString(op6,16) + \":\" + fr.toString(op5,16) + \":\" + fr.toString(op4,16) + \":\" + fr.toString(op3,16) + \":\" + fr.toString(op2,16) + \":\" + fr.toString(op1,16) + \":\" + fr.toString(op0,16) + \"" +
+                " A=\" + fr.toString(pols.A7[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.A6[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.A5[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.A4[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.A3[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.A2[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.A1[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.A0[" + string(bFastMode?"0":"i") + "],16) + \"" +
+                " B=\" + fr.toString(pols.B7[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.B6[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.B5[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.B4[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.B3[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.B2[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.B1[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.B0[" + string(bFastMode?"0":"i") + "],16) + \"" +
+                " C=\" + fr.toString(pols.C7[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.C6[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.C5[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.C4[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.C3[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.C2[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.C1[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.C0[" + string(bFastMode?"0":"i") + "],16) + \"" +
+                " D=\" + fr.toString(pols.D7[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.D6[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.D5[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.D4[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.D3[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.D2[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.D1[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "],16) + \"" +
+                " E=\" + fr.toString(pols.E7[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.E6[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.E5[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.E4[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.E3[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.E2[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.E1[" + string(bFastMode?"0":"i") + "],16) + \":\" + fr.toString(pols.E0[" + string(bFastMode?"0":"i") + "],16) + \"" +
+                " FREE0:7=\" + fr.toString(fi0,16) + \":\" + fr.toString(fi7],16) + \" addr=\" + to_string(addr));\n";*/
         code += "#endif\n";
         code += "#ifdef LOG_COMPLETED_STEPS_TO_FILE\n";
         code += "    outfile.open(\"c.txt\", std::ios_base::app); // append instead of overwrite\n";
@@ -4754,7 +4758,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
     
     code += "    if (mainExecutor.config.dbMetrics) proverRequest.dbReadLog->print();\n\n";
 
-    code += "    cout << \"" + functionName + "() done lastStep=\" << ctx.lastStep << \" (\" << (double(ctx.lastStep)*100)/mainExecutor.N << \"%)\" << endl;\n\n";
+    code += "    zklog.info(\"" + functionName + "() done lastStep=\" + to_string(ctx.lastStep) + \" (\" + to_string((double(ctx.lastStep)*100)/mainExecutor.N) + \"%)\");\n\n";
 
     code += "    return;\n\n";
 

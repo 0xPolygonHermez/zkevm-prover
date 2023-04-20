@@ -29,7 +29,7 @@
 //#define LOG_TIME_STATISTICS // If defined, generates main executor statistics for main operations
 //#define LOG_TIME_STATISTICS_STATEDB_REMOTE // If defined, generates remote statedb statistics
 //#define LOG_TIME_STATISTICS_STATEDB // If defined, generates statedb statistics
-#define LOG_TIME_STATISTICS_MAIN_EXECUTOR
+//#define LOG_TIME_STATISTICS_MAIN_EXECUTOR
 //#define LOG_TXS
 //#define LOG_SERVICE
 #define LOG_SERVICE_EXECUTOR_INPUT
@@ -44,6 +44,7 @@
 //#define LOG_MEMORY_EXECUTOR
 //#define LOG_BINARY_EXECUTOR
 //#define LOG_HASHK
+//#define LOG_HASH
 //#define LOG_DB_READ
 //#define LOG_DB_WRITE
 //#define LOG_STATEDB_SERVICE
