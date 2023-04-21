@@ -154,7 +154,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
     {
         string s = "Database::read()";
         if (r != ZKR_SUCCESS)
-            s += " ERROR=" + string(zkresult2string(r));
+            s += " ERROR=" + zkresult2string(r);
         s += " key=" + key;
         s += " value=";
         for (uint64_t i = 0; i < value.size(); i++)
@@ -220,7 +220,7 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
     {
         string s = "Database::write()";
         if (r != ZKR_SUCCESS)
-            s += " ERROR=" + sring(zkresult2string(r));
+            s += " ERROR=" + zkresult2string(r);
         s += " key=" + key;
         s += " value=";
         for (uint64_t i = 0; i < value.size(); i++)
@@ -797,7 +797,7 @@ zkresult Database::writeGetTreeFunction(void)
         result = ZKR_DB_ERROR;
     }
 
-    zklog.info("Database::writeGetTreeFunction() returns " + string(zkresult2string(result)));
+    zklog.info("Database::writeGetTreeFunction() returns " + zkresult2string(result));
         
     return result;
 }
@@ -848,7 +848,7 @@ zkresult Database::setProgram(const string &_key, const vector<uint8_t> &data, c
     {
         string s = "Database::setProgram()";
         if (r != ZKR_SUCCESS)
-            s += " ERROR=" + string(zkresult2string(r));
+            s += " ERROR=" + zkresult2string(r);
         s += " key=" + key;
         s += " data=";
         for (uint64_t i = 0; (i < (data.size()) && (i < 100)); i++)
@@ -920,7 +920,7 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
     {
         string s = "Database::getProgram()";
         if (r != ZKR_SUCCESS)
-            s += " ERROR=" + string(zkresult2string(r));
+            s += " ERROR=" + zkresult2string(r);
         s += " key=" + key;
         s += " data=";
         for (uint64_t i = 0; (i < (data.size()) && (i < 100)); i++)
@@ -1248,7 +1248,7 @@ void loadDb2MemCache(const Config config)
     }
     else if (zkr != ZKR_SUCCESS)
     {
-        zklog.error("loadDb2MemCache() failed calling db.read result=" + string(zkresult2string(zkr)));
+        zklog.error("loadDb2MemCache() failed calling db.read result=" + zkresult2string(zkr));
         TimerStopAndLog(LOAD_DB_TO_CACHE);
         return;
     }
@@ -1310,7 +1310,7 @@ void loadDb2MemCache(const Config config)
             zkresult zkr = pStateDB->db.read(hash, dbValue, NULL, true);
             if (zkr != ZKR_SUCCESS)
             {
-                zklog.error("loadDb2MemCache() failed calling db.read(" + hash + ") result=" + string(zkresult2string(zkr)));
+                zklog.error("loadDb2MemCache() failed calling db.read(" + hash + ") result=" + zkresult2string(zkr));
                 TimerStopAndLog(LOAD_DB_TO_CACHE);
                 return;
             }
@@ -1358,7 +1358,7 @@ void loadDb2MemCache(const Config config)
                         zkresult zkr = pStateDB->db.read(rightHash, dbValue, NULL, true);
                         if (zkr != ZKR_SUCCESS)
                         {
-                            zklog.error("loadDb2MemCache() failed calling db.read(" + rightHash + ") result=" + string(zkresult2string(zkr)));
+                            zklog.error("loadDb2MemCache() failed calling db.read(" + rightHash + ") result=" + zkresult2string(zkr));
                             TimerStopAndLog(LOAD_DB_TO_CACHE);
                             return;
                         }

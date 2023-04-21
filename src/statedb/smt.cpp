@@ -979,7 +979,7 @@ zkresult Smt::hashSave ( Database &db, const Goldilocks::Element (&a)[8], const 
     {
         string s = "Smt::hashSave() key=" + hashString + " value=";
         for (uint64_t i=0; i<12; i++) s += fr.toString(dbValue[i],16) + ":";
-        s += " zkr=" + string(zkresult2string(zkr));
+        s += " zkr=" + zkresult2string(zkr);
         zklog.info(s);
     }
 #endif
@@ -1005,7 +1005,7 @@ zkresult Smt::saveStateRoot(Database &db, const Goldilocks::Element (&stateRoot)
     {
         string s = "Smt::saveStateRoot() key=" + Database::dbStateRootKey + " value=";
         for (uint64_t i=0; i<12; i++) s += fr.toString(dbValue[i],16) + ":";
-        s += " zkr=" + string(zkresult2string(zkr));
+        s += " zkr=" + zkresult2string(zkr);
         zklog.info(s);
     }
 #endif
