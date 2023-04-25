@@ -103,12 +103,12 @@ public:
         if (starkFiles.mapConstPolsFile)
         {
             pConstPolsAddress = mapFile(starkFiles.zkevmConstPols, constPolsSize, false);
-            cout << "Starks::Starks() successfully mapped " << constPolsSize << " bytes from constant file " << starkFiles.zkevmConstPols << endl;
+            zklog.info("Starks::Starks() successfully mapped " + to_string(constPolsSize) + " bytes from constant file " + starkFiles.zkevmConstPols);
         }
         else
         {
             pConstPolsAddress = copyFile(starkFiles.zkevmConstPols, constPolsSize);
-            cout << "Starks::Starks() successfully copied " << constPolsSize << " bytes from constant file " << starkFiles.zkevmConstPols << endl;
+            zklog.info("Starks::Starks() successfully copied " + to_string(constPolsSize) + " bytes from constant file " + starkFiles.zkevmConstPols);
         }
         pConstPols = new ConstantPolsStarks(pConstPolsAddress, constPolsSize, starkInfo.nConstants);
         TimerStopAndLog(LOAD_CONST_POLS_TO_MEMORY);
@@ -125,12 +125,12 @@ public:
         if (config.mapConstantsTreeFile)
         {
             pConstTreeAddress = mapFile(starkFiles.zkevmConstantsTree, starkInfo.getConstTreeSizeInBytes(), false);
-            cout << "Starks::Starks() successfully mapped " << starkInfo.getConstTreeSizeInBytes() << " bytes from constant tree file " << starkFiles.zkevmConstantsTree << endl;
+            zklog.info("Starks::Starks() successfully mapped " + to_string(starkInfo.getConstTreeSizeInBytes()) + " bytes from constant tree file " + starkFiles.zkevmConstantsTree);
         }
         else
         {
             pConstTreeAddress = copyFile(starkFiles.zkevmConstantsTree, starkInfo.getConstTreeSizeInBytes());
-            cout << "Starks::Starks() successfully copied " << starkInfo.getConstTreeSizeInBytes() << " bytes from constant file " << starkFiles.zkevmConstantsTree << endl;
+            zklog.info("Starks::Starks() successfully copied " + to_string(starkInfo.getConstTreeSizeInBytes()) + " bytes from constant file " + starkFiles.zkevmConstantsTree);
         }
         TimerStopAndLog(LOAD_CONST_TREE_TO_MEMORY);
 

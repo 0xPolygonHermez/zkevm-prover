@@ -41,12 +41,12 @@ StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config
     if (config.mapConstPolsFile)
     {
         pConstPolsAddress = mapFile(config.recursivefConstPols, constPolsSize, false);
-        cout << "StarkRecursiveF::StarkRecursiveF() successfully mapped " << constPolsSize << " bytes from constant file " << config.recursivefConstPols << endl;
+        zklog.info("StarkRecursiveF::StarkRecursiveF() successfully mapped " + to_string(constPolsSize) + " bytes from constant file " + config.recursivefConstPols);
     }
     else
     {
         pConstPolsAddress = copyFile(config.recursivefConstPols, constPolsSize);
-        cout << "StarkRecursiveF::StarkRecursiveF() successfully copied " << constPolsSize << " bytes from constant file " << config.recursivefConstPols << endl;
+        zklog.info("StarkRecursiveF::StarkRecursiveF() successfully copied " + to_string(constPolsSize) + " bytes from constant file " + config.recursivefConstPols);
     }
     pConstPols = new ConstantPolsStarks(pConstPolsAddress, constPolsDegree, starkInfo.nConstants);
     TimerStopAndLog(LOAD_RECURSIVE_F_CONST_POLS_TO_MEMORY);
@@ -64,12 +64,12 @@ StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config
     if (config.mapConstantsTreeFile)
     {
         pConstTreeAddress = mapFile(config.recursivefConstantsTree, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants), false);
-        cout << "StarkRecursiveF::StarkRecursiveF() successfully mapped " << getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants) << " bytes from constant tree file " << config.recursivefConstantsTree << endl;
+        zklog.info("StarkRecursiveF::StarkRecursiveF() successfully mapped " + to_string(getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants)) + " bytes from constant tree file " + config.recursivefConstantsTree);
     }
     else
     {
         pConstTreeAddress = copyFile(config.recursivefConstantsTree, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants));
-        cout << "StarkRecursiveF::StarkRecursiveF() successfully copied " << getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants) << " bytes from constant file " << config.recursivefConstantsTree << endl;
+        zklog.info("StarkRecursiveF::StarkRecursiveF() successfully copied " + to_string(getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants)) + " bytes from constant file " + config.recursivefConstantsTree);
     }
     TimerStopAndLog(LOAD_RECURSIVE_F_CONST_TREE_TO_MEMORY);
 
@@ -198,7 +198,7 @@ void StarkRecursiveF::genProof( FRIProofC12 &proof, Goldilocks::Element publicIn
 
     treesBN128[0]->merkelize();
     treesBN128[0]->getRoot(&root0);
-    std::cout << "MerkleTree root 0: [ " << RawFr::field.toString(root0, 10) << " ]" << std::endl;
+    zklog.info("MerkleTree root 0: [ " + RawFr::field.toString(root0, 10) + " ]");
     transcript.put(&root0, 1);
 
     TimerStopAndLog(STARK_RECURSIVE_F_STEP_1_LDE);
@@ -240,7 +240,7 @@ void StarkRecursiveF::genProof( FRIProofC12 &proof, Goldilocks::Element publicIn
 
     treesBN128[1]->merkelize();
     treesBN128[1]->getRoot(&root1);
-    std::cout << "MerkleTree root 1: [ " << RawFr::field.toString(root1, 10) << " ]" << std::endl;
+    zklog.info("MerkleTree root 1: [ " + RawFr::field.toString(root1, 10) + " ]");
     transcript.put(&root1, 1);
 
     TimerStopAndLog(STARK_RECURSIVE_F_STEP_2_LDE_AND_MERKLETREE);
@@ -293,7 +293,7 @@ void StarkRecursiveF::genProof( FRIProofC12 &proof, Goldilocks::Element publicIn
 
     treesBN128[2]->merkelize();
     treesBN128[2]->getRoot(&root2);
-    std::cout << "MerkleTree root 2: [ " << RawFr::field.toString(root2, 10) << " ]" << std::endl;
+    zklog.info("MerkleTree root 2: [ " + RawFr::field.toString(root2, 10) + " ]");
     transcript.put(&root2, 1);
 
     TimerStopAndLog(STARK_RECURSIVE_F_STEP_3_LDE_AND_MERKLETREE);
@@ -342,7 +342,7 @@ void StarkRecursiveF::genProof( FRIProofC12 &proof, Goldilocks::Element publicIn
 
     treesBN128[3]->merkelize();
     treesBN128[3]->getRoot(&root3);
-    std::cout << "MerkleTree root 3: [ " << RawFr::field.toString(root3, 10) << " ]" << std::endl;
+    zklog.info("MerkleTree root 3: [ " + RawFr::field.toString(root3, 10) + " ]");
     transcript.put(&root3, 1);
     TimerStopAndLog(STARK_RECURSIVE_F_STEP_4_MERKLETREE);
     TimerStopAndLog(STARK_RECURSIVE_F_STEP_4);
