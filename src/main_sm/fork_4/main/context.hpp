@@ -171,7 +171,8 @@ public:
     void printRegs();
     void printVars();
     void printMem();
-    void printReg(string name, Goldilocks::Element &V, bool h = false, bool bShort = false);
+    void printReg(string name, Goldilocks::Element &fe);
+    void printReg(string name, Goldilocks::Element &fe0, Goldilocks::Element &fe1, Goldilocks::Element &fe2, Goldilocks::Element &fe3, Goldilocks::Element &fe4, Goldilocks::Element &fe5, Goldilocks::Element &fe6, Goldilocks::Element &fe7);
     void printU64(string name, uint64_t v);
     void printU32(string name, uint32_t v);
     void printU16(string name, uint16_t v);

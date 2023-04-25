@@ -4612,7 +4612,7 @@ void MainExecutor::logError(Context &ctx, const string &message)
     
     json inputJson;
     ctx.proverRequest.input.save(inputJson);
-    zklog.error("Input=\n" + inputJson.dump());
+    zklog.error("Input=" + inputJson.dump());
 }
 
 } // namespace
