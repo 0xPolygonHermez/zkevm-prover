@@ -133,6 +133,8 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
         r = readRemote(false, key, sData);
         if ( (r != ZKR_SUCCESS) && (config.dbReadRetryDelay > 0) )
         {
+            zklog.warning("Database::read() failed calling readRemote with error=" + zkresult2string(r) + "; retrying after " + to_string(config.dbReadRetryDelay) + "us");
+
             // Retry after dbReadRetryDelay us
             usleep(config.dbReadRetryDelay);
             r = readRemote(false, key, sData);
