@@ -63,12 +63,12 @@ void Context::printMem()
 
 void Context::printReg(string name, Goldilocks::Element &fe)
 {
-    zklog.info("    Register: " + name + " Value: " + fr.toString(fe, 16));
+    zklog.info("    Register " + name + " = " + fr.toString(fe, 16));
 }
 
 void Context::printReg(string name, Goldilocks::Element &fe0, Goldilocks::Element &fe1, Goldilocks::Element &fe2, Goldilocks::Element &fe3, Goldilocks::Element &fe4, Goldilocks::Element &fe5, Goldilocks::Element &fe6, Goldilocks::Element &fe7)
 {
-    zklog.info("    Register: " + name + " Value: " + fr.toString(fe7, 16) + ":" + fr.toString(fe6, 16) + ":" + fr.toString(fe5, 16) + ":" + fr.toString(fe4, 16) + ":" + fr.toString(fe3, 16) + ":" + fr.toString(fe2, 16) + ":" + fr.toString(fe1, 16) + ":" + fr.toString(fe0, 16));
+    zklog.info("    Register " + name + " = " + fr.toString(fe7, 16) + ":" + fr.toString(fe6, 16) + ":" + fr.toString(fe5, 16) + ":" + fr.toString(fe4, 16) + ":" + fr.toString(fe3, 16) + ":" + fr.toString(fe2, 16) + ":" + fr.toString(fe1, 16) + ":" + fr.toString(fe0, 16));
 }
 
 void Context::printU64(string name, uint64_t v)
