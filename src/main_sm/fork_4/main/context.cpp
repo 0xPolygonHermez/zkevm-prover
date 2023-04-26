@@ -7,54 +7,12 @@ namespace fork_4
 void Context::printRegs()
 {
     zklog.info("Registers:");
-    printReg("A7", pols.A7[*pStep]);
-    printReg("A6", pols.A6[*pStep]);
-    printReg("A5", pols.A5[*pStep]);
-    printReg("A4", pols.A4[*pStep]);
-    printReg("A3", pols.A3[*pStep]);
-    printReg("A2", pols.A2[*pStep]);
-    printReg("A1", pols.A1[*pStep]);
-    printReg("A0", pols.A0[*pStep]);
-    printReg("B7", pols.B7[*pStep]);
-    printReg("B6", pols.B6[*pStep]);
-    printReg("B5", pols.B5[*pStep]);
-    printReg("B4", pols.B4[*pStep]);
-    printReg("B3", pols.B3[*pStep]);
-    printReg("B2", pols.B2[*pStep]);
-    printReg("B1", pols.B1[*pStep]);
-    printReg("B0", pols.B0[*pStep]);
-    printReg("C7", pols.C7[*pStep]);
-    printReg("C6", pols.C6[*pStep]);
-    printReg("C5", pols.C5[*pStep]);
-    printReg("C4", pols.C4[*pStep]);
-    printReg("C3", pols.C3[*pStep]);
-    printReg("C2", pols.C2[*pStep]);
-    printReg("C1", pols.C1[*pStep]);
-    printReg("C0", pols.C0[*pStep]);
-    printReg("D7", pols.D7[*pStep]);
-    printReg("D6", pols.D6[*pStep]);
-    printReg("D5", pols.D5[*pStep]);
-    printReg("D4", pols.D4[*pStep]);
-    printReg("D3", pols.D3[*pStep]);
-    printReg("D2", pols.D2[*pStep]);
-    printReg("D1", pols.D1[*pStep]);
-    printReg("D0", pols.D0[*pStep]);
-    printReg("E7", pols.E7[*pStep]);
-    printReg("E6", pols.E6[*pStep]);
-    printReg("E5", pols.E5[*pStep]);
-    printReg("E4", pols.E4[*pStep]);
-    printReg("E3", pols.E3[*pStep]);
-    printReg("E2", pols.E2[*pStep]);
-    printReg("E1", pols.E1[*pStep]);
-    printReg("E0", pols.E0[*pStep]);
-    printReg("SR7", pols.SR7[*pStep]);
-    printReg("SR6", pols.SR6[*pStep]);
-    printReg("SR5", pols.SR5[*pStep]);
-    printReg("SR4", pols.SR4[*pStep]);
-    printReg("SR3", pols.SR3[*pStep]);
-    printReg("SR2", pols.SR2[*pStep]);
-    printReg("SR1", pols.SR1[*pStep]);
-    printReg("SR0", pols.SR0[*pStep]);
+    printReg("A", pols.A0[*pStep], pols.A1[*pStep], pols.A2[*pStep], pols.A3[*pStep], pols.A4[*pStep], pols.A5[*pStep], pols.A6[*pStep], pols.A7[*pStep]);
+    printReg("B", pols.B0[*pStep], pols.B1[*pStep], pols.B2[*pStep], pols.B3[*pStep], pols.B4[*pStep], pols.B5[*pStep], pols.B6[*pStep], pols.B7[*pStep]);
+    printReg("C", pols.C0[*pStep], pols.C1[*pStep], pols.C2[*pStep], pols.C3[*pStep], pols.C4[*pStep], pols.C5[*pStep], pols.C6[*pStep], pols.C7[*pStep]);
+    printReg("D", pols.D0[*pStep], pols.D1[*pStep], pols.D2[*pStep], pols.D3[*pStep], pols.D4[*pStep], pols.D5[*pStep], pols.D6[*pStep], pols.D7[*pStep]);
+    printReg("E", pols.E0[*pStep], pols.E1[*pStep], pols.E2[*pStep], pols.E3[*pStep], pols.E4[*pStep], pols.E5[*pStep], pols.E6[*pStep], pols.E7[*pStep]);
+    printReg("SR", pols.SR0[*pStep], pols.SR1[*pStep], pols.SR2[*pStep], pols.SR3[*pStep], pols.SR4[*pStep], pols.SR5[*pStep], pols.SR6[*pStep], pols.SR7[*pStep]);
     printReg("CTX", pols.CTX[*pStep]);
     printReg("SP", pols.SP[*pStep]);
     printReg("PC", pols.PC[*pStep]);
@@ -62,7 +20,7 @@ void Context::printRegs()
     printReg("zkPC", pols.zkPC[*pStep]);
     Goldilocks::Element step;
     step = fr.fromU64(*pStep);
-    printReg("STEP", step, false, true);
+    printReg("STEP", step);
 #ifdef LOG_FILENAME
     zklog.info("File: " + fileName + " Line: " + to_string(line));
 #endif
@@ -103,9 +61,14 @@ void Context::printMem()
     }
 }
 
-void Context::printReg(string name, Goldilocks::Element &fe, bool h, bool bShort)
+void Context::printReg(string name, Goldilocks::Element &fe)
 {
-    zklog.info("    Register: " + name + " Value: " + fr.toString(fe, 16));
+    zklog.info("    Register " + name + " = " + fr.toString(fe, 16));
+}
+
+void Context::printReg(string name, Goldilocks::Element &fe0, Goldilocks::Element &fe1, Goldilocks::Element &fe2, Goldilocks::Element &fe3, Goldilocks::Element &fe4, Goldilocks::Element &fe5, Goldilocks::Element &fe6, Goldilocks::Element &fe7)
+{
+    zklog.info("    Register " + name + " = " + fr.toString(fe7, 16) + ":" + fr.toString(fe6, 16) + ":" + fr.toString(fe5, 16) + ":" + fr.toString(fe4, 16) + ":" + fr.toString(fe3, 16) + ":" + fr.toString(fe2, 16) + ":" + fr.toString(fe1, 16) + ":" + fr.toString(fe0, 16));
 }
 
 void Context::printU64(string name, uint64_t v)

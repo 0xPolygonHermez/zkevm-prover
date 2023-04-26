@@ -38,7 +38,7 @@ struct {
     { ZKR_SM_MAIN_S33, "ZKR_SM_MAIN_S33" }
 };
 
-const char* zkresult2string (int code)
+string zkresult2string (int code)
 {
     for (int i = 0; resultdesc[i].message; i++)
         if (resultdesc[i].code == code)

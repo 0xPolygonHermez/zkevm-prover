@@ -13,6 +13,7 @@
 
 #include "goldilocks_base_field.hpp"
 #include "fr_goldilocks.hpp"
+#include "zklog.hpp"
 
 class ExecFile
 {
@@ -32,7 +33,7 @@ public:
         fd = open(execFile.c_str(), O_RDONLY);
         if (fd == -1)
         {
-            std::cout << ".exec file not found: " << execFile << "\n";
+            zklog.error("ExecFile::ExecFile() .exec file not found: " + execFile);
             throw std::system_error(errno, std::generic_category(), "open");
         }
 
