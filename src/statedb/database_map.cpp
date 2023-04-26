@@ -128,7 +128,7 @@ void DatabaseMap::onChangeCallback()
 void DatabaseMap::print(void)
 {
     zklog.info(
-        string("Database map:") +
+        string("Database map: dbMetrics") +
         " MT.size=" + to_string(mtDB.size()) +
         " cached=" + to_string(mtCachedTimes) + "times=" + to_string(mtCachedTime) + "us=" + to_string(mtCachedTime/zkmax(mtCachedTimes,1)) + "us/time" +
         " db=" + to_string(mtDbTimes) + "times=" + to_string(mtDbTime) + "us=" + to_string(mtDbTime/zkmax(mtDbTimes,1)) + "us/time" +

@@ -60,6 +60,11 @@ private:
     string multiWriteNodes;
     string multiWriteNodesUpdate;
     string multiWriteNodesStateRoot;
+    uint64_t multiWriteProgramCounter;
+    uint64_t multiWriteProgramUpdateCounter;
+    uint64_t multiWriteNodesCounter;
+    uint64_t multiWriteNodesUpdateCounter;
+    uint64_t multiWriteNodesStateRootCounter;
     pthread_mutex_t multiWriteMutex; // Mutex to protect the multi write queues
     void multiWriteLock(void) { pthread_mutex_lock(&multiWriteMutex); };
     void multiWriteUnlock(void) { pthread_mutex_unlock(&multiWriteMutex); };
@@ -89,7 +94,12 @@ public:
     Database(Goldilocks &fr, const Config &config) :
         fr(fr),
         config(config),
-        connectionsPool(NULL)
+        connectionsPool(NULL),
+        multiWriteProgramCounter(0),
+        multiWriteProgramUpdateCounter(0),
+        multiWriteNodesCounter(0),
+        multiWriteNodesUpdateCounter(0),
+        multiWriteNodesStateRootCounter(0)
     {
         // Init mutexes
         pthread_mutex_init(&multiWriteMutex, NULL);

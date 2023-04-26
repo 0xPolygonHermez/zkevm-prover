@@ -133,6 +133,7 @@ public:
     bool dbClearCache;
     bool dbGetTree;
     bool dbReadOnly;
+    uint64_t dbReadRetryDelay;
     uint64_t cleanerPollingPeriod;
     uint64_t requestsPersistence;
     uint64_t maxExecutorThreads;

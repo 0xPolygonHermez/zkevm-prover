@@ -448,6 +448,10 @@ void Config::load(json &config)
     if (config.contains("dbReadOnly") && config["dbReadOnly"].is_boolean())
         dbReadOnly = config["dbReadOnly"];
 
+    dbReadRetryDelay = 100*1000;
+    if (config.contains("dbReadRetryDelay") && config["dbReadRetryDelay"].is_number())
+        dbReadRetryDelay = config["dbReadRetryDelay"];
+
     if (config.contains("cleanerPollingPeriod") && config["cleanerPollingPeriod"].is_number())
         cleanerPollingPeriod = config["cleanerPollingPeriod"];
 
@@ -616,6 +620,7 @@ void Config::print(void)
     zklog.info("    dbClearCache=" + to_string(dbClearCache));
     zklog.info("    dbGetTree=" + to_string(dbGetTree));
     zklog.info("    dbReadOnly=" + to_string(dbReadOnly));
+    zklog.info("    dbReadRetryDelay=" + to_string(dbReadRetryDelay));
     zklog.info("    cleanerPollingPeriod=" + to_string(cleanerPollingPeriod));
     zklog.info("    requestsPersistence=" + to_string(requestsPersistence));
     zklog.info("    maxExecutorThreads=" + to_string(maxExecutorThreads));

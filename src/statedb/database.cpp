@@ -12,6 +12,7 @@
 #include "statedb_singleton.hpp"
 #include "zklog.hpp"
 #include "exit_process.hpp"
+#include "zkmax.hpp"
 
 #ifdef DATABASE_USE_CACHE
 
@@ -114,6 +115,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
                     r = ZKR_UNSPECIFIED;
                 }
             }
+            else r = ZKR_UNSPECIFIED;
         }
     }
 #endif
@@ -126,9 +128,19 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
             flush();
         }
 
-        // Otherwise, read it remotelly
+        // Otherwise, read it remotelly, up to two times
         string sData;
         r = readRemote(false, key, sData);
+        if ( (r != ZKR_SUCCESS) && (config.dbReadRetryDelay > 0) )
+        {
+            // Retry after dbReadRetryDelay us
+            usleep(config.dbReadRetryDelay);
+            r = readRemote(false, key, sData);
+            if (r != ZKR_SUCCESS)
+            {
+                zklog.error("Database::read() retried readRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r));
+            }
+        }
         if (r == ZKR_SUCCESS)
         {
             string2fea(fr, sData, value);
@@ -571,11 +583,13 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
         {
             multiWriteLock();
             multiWriteNodesStateRoot = "INSERT INTO " + tableName + " ( hash, data ) VALUES ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' ) ";
-            multiWriteUnlock();       
+            multiWriteNodesStateRootCounter++;
+            multiWriteUnlock();
         }
         else
         {
             string &multiWrite = bProgram ? (update ? multiWriteProgramUpdate : multiWriteProgram) : (update ? multiWriteNodesUpdate : multiWriteNodes);
+            uint64_t &multiWriteCounter = bProgram ? (update ? multiWriteProgramUpdateCounter : multiWriteProgramCounter) : (update ? multiWriteNodesUpdateCounter : multiWriteNodesCounter);
             multiWriteLock();
             if (multiWrite.size() == 0)
             {
@@ -585,6 +599,7 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
             {
                 multiWrite += ", ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' )";
             }
+            multiWriteCounter++;
             multiWriteUnlock();       
         }
     }
@@ -950,6 +965,11 @@ zkresult Database::flush()
         multiWriteNodes.clear();
         multiWriteNodesUpdate.clear();
         multiWriteNodesStateRoot.clear();
+        multiWriteProgramCounter = 0;
+        multiWriteProgramUpdateCounter = 0;
+        multiWriteNodesCounter = 0;
+        multiWriteNodesUpdateCounter = 0;
+        multiWriteNodesStateRootCounter = 0;
         multiWriteUnlock();
 
         return ZKR_SUCCESS;
@@ -966,12 +986,18 @@ zkresult Database::flush()
 
         // Get a free write db connection
         DatabaseConnection * pDatabaseConnection = getConnection();
+        
+        // Time calculation variables
+        struct timeval t;
+        uint64_t timeDiff;
 
         try
         {
             string query;
             if (multiWriteProgram.size() > 0)
             {
+                if (config.dbMetrics) gettimeofday(&t, NULL);
+
                 query = multiWriteProgram + " ON CONFLICT (hash) DO NOTHING;";
                 
                 // Start a transaction
@@ -984,12 +1010,20 @@ zkresult Database::flush()
                 w.commit();
 
                 //zklog.info("Database::flush() sent query=" + query);
-
+                if (config.dbMetrics)
+                {
+                    timeDiff = TimeDiff(t);
+                    zklog.info("Database::Flush() dbMetrics multiWriteProgram " + to_string(multiWriteProgramCounter) + "fields=" + to_string(timeDiff) + "us=" + to_string(timeDiff/zkmax(multiWriteProgramCounter,1)) + "us/field");
+                }
+                
                 // Delete the accumulated query data only if the query succeeded
                 multiWriteProgram.clear();
+                multiWriteProgramCounter = 0;
             }
             if (multiWriteProgramUpdate.size() > 0)
             {
+                if (config.dbMetrics) gettimeofday(&t, NULL);
+
                 query = multiWriteProgramUpdate + " ON CONFLICT (hash) DO UPDATE SET data = EXCLUDED.data;";
                 
                 // Start a transaction
@@ -1002,12 +1036,20 @@ zkresult Database::flush()
                 w.commit();
 
                 //zklog.info("Database::flush() sent query=" + query);
+                if (config.dbMetrics)
+                {
+                    timeDiff = TimeDiff(t);
+                    zklog.info("Database::Flush() dbMetrics multiWriteProgramUpdate " + to_string(multiWriteProgramUpdateCounter) + "fields=" + to_string(timeDiff) + "us=" + to_string(timeDiff/zkmax(multiWriteProgramUpdateCounter,1)) + "us/field");
+                }
 
                 // Delete the accumulated query data only if the query succeeded
                 multiWriteProgramUpdate.clear();
+                multiWriteProgramUpdateCounter = 0;
             }
             if (multiWriteNodes.size() > 0)
             {
+                if (config.dbMetrics) gettimeofday(&t, NULL);
+
                 query = multiWriteNodes + " ON CONFLICT (hash) DO NOTHING;";
                 
                 // Start a transaction
@@ -1020,12 +1062,20 @@ zkresult Database::flush()
                 w.commit();
 
                 //zklog.info("Database::flush() sent query=" + query);
+                if (config.dbMetrics)
+                {
+                    timeDiff = TimeDiff(t);
+                    zklog.info("Database::Flush() dbMetrics multiWriteNodes " + to_string(multiWriteNodesCounter) + "fields=" + to_string(timeDiff) + "us=" + to_string(timeDiff/zkmax(multiWriteNodesCounter,1)) + "us/field");
+                }
 
                 // Delete the accumulated query data only if the query succeeded
                 multiWriteNodes.clear();
+                multiWriteNodesCounter = 0;
             }
             if (multiWriteNodesUpdate.size() > 0)
             {
+                if (config.dbMetrics) gettimeofday(&t, NULL);
+
                 query = multiWriteNodesUpdate + " ON CONFLICT (hash) DO UPDATE SET data = EXCLUDED.data;";
                 
                 // Start a transaction
@@ -1038,12 +1088,20 @@ zkresult Database::flush()
                 w.commit();
 
                 //zklog.info("Database::flush() sent query=" + query);
+                if (config.dbMetrics)
+                {
+                    timeDiff = TimeDiff(t);
+                    zklog.info("Database::Flush() dbMetrics multiWriteNodesUpdate " + to_string(multiWriteNodesUpdateCounter) + "fields=" + to_string(timeDiff) + "us=" + to_string(timeDiff/zkmax(multiWriteNodesUpdateCounter,1)) + "us/field");
+                }
 
                 // Delete the accumulated query data only if the query succeeded
                 multiWriteNodesUpdate.clear();
+                multiWriteNodesUpdateCounter = 0;
             }
             if (multiWriteNodesStateRoot.size() > 0)
             {
+                if (config.dbMetrics) gettimeofday(&t, NULL);
+
                 query = multiWriteNodesStateRoot + " ON CONFLICT (hash) DO UPDATE SET data = EXCLUDED.data;";
                 
                 // Start a transaction
@@ -1056,9 +1114,15 @@ zkresult Database::flush()
                 w.commit();
 
                 //zklog.info("Database::flush() sent query=" + query);
+                if (config.dbMetrics)
+                {
+                    timeDiff = TimeDiff(t);
+                    zklog.info("Database::Flush() dbMetrics multiWriteNodesStateRoot " + to_string(multiWriteNodesStateRootCounter) + "fields=" + to_string(timeDiff) + "us=" + to_string(timeDiff/zkmax(multiWriteNodesStateRootCounter,1)) + "us/field");
+                }
 
                 // Delete the accumulated query data only if the query succeeded
                 multiWriteNodesStateRoot.clear();
+                multiWriteNodesStateRootCounter = 0;
             }
         }
         catch (const std::exception &e)
