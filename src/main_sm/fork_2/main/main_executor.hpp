@@ -11,7 +11,7 @@
 #include "main_sm/fork_2/pols_generated/commit_pols.hpp"
 #include "main_sm/fork_2/main/main_exec_required.hpp"
 #include "scalar.hpp"
-#include "statedb_factory.hpp"
+#include "hashdb_factory.hpp"
 #include "poseidon_goldilocks.hpp"
 #include "counters.hpp"
 #include "goldilocks_base_field.hpp"
@@ -68,7 +68,7 @@ public:
     void assertOutputs(Context &ctx);
     
 public:
-    void flushInParallel(StateDBInterface * pStateDB);
+    void flushInParallel(HashDBInterface * pHashDB);
 };
 
 void *mainExecutorFlushThread(void *arg);

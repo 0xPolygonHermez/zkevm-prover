@@ -26,13 +26,13 @@ void Config::load(json &config)
     if (config.contains("runExecutorClientMultithread") && config["runExecutorClientMultithread"].is_boolean())
         runExecutorClientMultithread = config["runExecutorClientMultithread"];
 
-    runStateDBServer = false;
-    if (config.contains("runStateDBServer") && config["runStateDBServer"].is_boolean())
-        runStateDBServer = config["runStateDBServer"];
+    runHashDBServer = false;
+    if (config.contains("runHashDBServer") && config["runHashDBServer"].is_boolean())
+        runHashDBServer = config["runHashDBServer"];
 
-    runStateDBTest = false;
-    if (config.contains("runStateDBTest") && config["runStateDBTest"].is_boolean())
-        runStateDBTest = config["runStateDBTest"];
+    runHashDBTest = false;
+    if (config.contains("runHashDBTest") && config["runHashDBTest"].is_boolean())
+        runHashDBTest = config["runHashDBTest"];
 
     runAggregatorServer = false;
     if (config.contains("runAggregatorServer") && config["runAggregatorServer"].is_boolean())
@@ -208,13 +208,13 @@ void Config::load(json &config)
     if (config.contains("executorClientLoops") && config["executorClientLoops"].is_number())
         executorClientLoops = config["executorClientLoops"];
 
-    stateDBServerPort = 50061;
-    if (config.contains("stateDBServerPort") && config["stateDBServerPort"].is_number())
-        stateDBServerPort = config["stateDBServerPort"];
+    hashDBServerPort = 50061;
+    if (config.contains("hashDBServerPort") && config["hashDBServerPort"].is_number())
+        hashDBServerPort = config["hashDBServerPort"];
 
-    stateDBURL = "local";
-    if (config.contains("stateDBURL") && config["stateDBURL"].is_string())
-        stateDBURL = config["stateDBURL"];
+    hashDBURL = "local";
+    if (config.contains("hashDBURL") && config["hashDBURL"].is_string())
+        hashDBURL = config["hashDBURL"];
 
     aggregatorServerPort = 50071;
     if (config.contains("aggregatorServerPort") && config["aggregatorServerPort"].is_number())
@@ -404,9 +404,6 @@ void Config::load(json &config)
     if (config.contains("recursivefStarkInfo") && config["recursivefStarkInfo"].is_string())
         recursivefStarkInfo = config["recursivefStarkInfo"];
 
-    if (config.contains("stateDBURL") && config["stateDBURL"].is_string())
-        stateDBURL = config["stateDBURL"];
-
     if (config.contains("databaseURL") && config["databaseURL"].is_string())
         databaseURL = config["databaseURL"];
 
@@ -466,9 +463,9 @@ void Config::load(json &config)
     if (config.contains("maxProverThreads") && config["maxProverThreads"].is_number())
         maxProverThreads = config["maxProverThreads"];
 
-    maxStateDBThreads = 16;
-    if (config.contains("maxStateDBThreads") && config["maxStateDBThreads"].is_number())
-        maxStateDBThreads = config["maxStateDBThreads"];
+    maxHashDBThreads = 16;
+    if (config.contains("maxHashDBThreads") && config["maxHashDBThreads"].is_number())
+        maxHashDBThreads = config["maxHashDBThreads"];
 
     proverName = "UNSPECIFIED";
     if (config.contains("proverName") && config["proverName"].is_string())
@@ -488,10 +485,10 @@ void Config::print(void)
         zklog.info("    runExecutorClient=true");
     if (runExecutorClientMultithread)
         zklog.info("    runExecutorClientMultithread=true");
-    if (runStateDBServer)
-        zklog.info("    runStateDBServer=true");
-    if (runStateDBTest)
-        zklog.info("    runStateDBTest=true");
+    if (runHashDBServer)
+        zklog.info("    runHashDBServer=true");
+    if (runHashDBTest)
+        zklog.info("    runHashDBTest=true");
     if (runAggregatorServer)
         zklog.info("    runAggregatorServer=true");
     if (runAggregatorClient)
@@ -570,8 +567,8 @@ void Config::print(void)
     zklog.info("    executorClientPort=" + to_string(executorClientPort));
     zklog.info("    executorClientHost=" + executorClientHost);
     zklog.info("    executorClientLoops=" + to_string(executorClientLoops));
-    zklog.info("    stateDBServerPort=" + to_string(stateDBServerPort));
-    zklog.info("    stateDBURL=" + stateDBURL);
+    zklog.info("    hashDBServerPort=" + to_string(hashDBServerPort));
+    zklog.info("    hashDBURL=" + hashDBURL);
     zklog.info("    aggregatorServerPort=" + to_string(aggregatorServerPort));
     zklog.info("    aggregatorClientPort=" + to_string(aggregatorClientPort));
     zklog.info("    aggregatorClientHost=" + aggregatorClientHost);
@@ -625,7 +622,7 @@ void Config::print(void)
     zklog.info("    requestsPersistence=" + to_string(requestsPersistence));
     zklog.info("    maxExecutorThreads=" + to_string(maxExecutorThreads));
     zklog.info("    maxProverThreads=" + to_string(maxProverThreads));
-    zklog.info("    maxStateDBThreads=" + to_string(maxStateDBThreads));
+    zklog.info("    maxHashDBThreads=" + to_string(maxHashDBThreads));
     zklog.info("    dbMTCacheSize=" + to_string(dbMTCacheSize));
     zklog.info("    dbProgramCacheSize=" + to_string(dbProgramCacheSize));
     zklog.info("    loadDBToMemTimeout=" + to_string(loadDBToMemTimeout));

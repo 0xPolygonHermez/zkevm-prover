@@ -17,8 +17,8 @@ public:
     bool runExecutorServer;
     bool runExecutorClient;
     bool runExecutorClientMultithread;
-    bool runStateDBServer;
-    bool runStateDBTest;
+    bool runHashDBServer;
+    bool runHashDBTest;
     bool runAggregatorServer;
     bool runAggregatorClient;
     bool runAggregatorClientMock;    
@@ -69,8 +69,8 @@ public:
     string executorClientHost;
     uint64_t executorClientLoops;
 
-    uint16_t stateDBServerPort;
-    string stateDBURL;
+    uint16_t hashDBServerPort;
+    string hashDBURL;
 
     uint16_t aggregatorServerPort;
     uint16_t aggregatorClientPort;
@@ -138,7 +138,7 @@ public:
     uint64_t requestsPersistence;
     uint64_t maxExecutorThreads;
     uint64_t maxProverThreads;
-    uint64_t maxStateDBThreads;
+    uint64_t maxHashDBThreads;
     string proverName;
     void load(json &config);
     bool generateProof(void) const { return runFileGenBatchProof || runFileGenAggregatedProof || runFileGenFinalProof || runAggregatorClient; }
