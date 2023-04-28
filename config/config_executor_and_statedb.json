@@ -89,7 +89,7 @@
     "dbProgramTableName": "state.program",
     "dbMultiWrite": true,
     "dbConnectionsPool": true,
-    "dbNumberOfPoolConnections": 40,
+    "dbNumberOfPoolConnections": 41,
     "dbMetrics": false,
     "dbClearCache": false,
     "dbGetTree": false,

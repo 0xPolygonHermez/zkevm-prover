@@ -323,20 +323,25 @@ void Database::initRemote(void)
 
         if (config.dbConnectionsPool)
         {
-            // Check that we don't support more threads than available connections
-            if ( config.runHashDBServer && (config.maxHashDBThreads > config.dbNumberOfPoolConnections) )
+            // Check that we don't support more threads than available connections, including the sender thread
+            if (config.dbNumberOfPoolConnections == 0)
             {
-                zklog.error("Database::initRemote() found config.maxHashDBThreads=" + to_string(config.maxHashDBThreads) + " > config.dbNumberOfPoolConnections=" + to_string(config.dbNumberOfPoolConnections));
+                zklog.error("Database::initRemote() found config.dbNumberOfPoolConnections=" + to_string(config.dbNumberOfPoolConnections));
                 exitProcess();
             }
-            if ( config.runExecutorServer && (config.maxExecutorThreads > config.dbNumberOfPoolConnections) )
+            if ( config.runHashDBServer && ((config.maxHashDBThreads + 1) > config.dbNumberOfPoolConnections) )
             {
-                zklog.error("Database::initRemote() found config.maxExecutorThreads=" + to_string(config.maxExecutorThreads) + " > config.dbNumberOfPoolConnections=" + to_string(config.dbNumberOfPoolConnections));
+                zklog.error("Database::initRemote() found config.maxHashDBThreads + 1=" + to_string(config.maxHashDBThreads + 1) + " > config.dbNumberOfPoolConnections=" + to_string(config.dbNumberOfPoolConnections));
                 exitProcess();
             }
-            if ( config.runHashDBServer && config.runExecutorServer && ((config.maxHashDBThreads+config.maxExecutorThreads) > config.dbNumberOfPoolConnections) )
+            if ( config.runExecutorServer && ((config.maxExecutorThreads + 1) > config.dbNumberOfPoolConnections) )
             {
-                zklog.error("Database::initRemote() found config.maxHashDBThreads+config.maxExecutorThreads=" + to_string(config.maxHashDBThreads+config.maxExecutorThreads) + " > config.dbNumberOfPoolConnections=" + to_string(config.dbNumberOfPoolConnections));
+                zklog.error("Database::initRemote() found config.maxExecutorThreads + 1=" + to_string(config.maxExecutorThreads + 1) + " > config.dbNumberOfPoolConnections=" + to_string(config.dbNumberOfPoolConnections));
+                exitProcess();
+            }
+            if ( config.runHashDBServer && config.runExecutorServer && ((config.maxHashDBThreads + config.maxExecutorThreads + 1) > config.dbNumberOfPoolConnections) )
+            {
+                zklog.error("Database::initRemote() found config.maxHashDBThreads + config.maxExecutorThreads + 1=" + to_string(config.maxHashDBThreads + config.maxExecutorThreads + 1) + " > config.dbNumberOfPoolConnections=" + to_string(config.dbNumberOfPoolConnections));
                 exitProcess();
             }
 
