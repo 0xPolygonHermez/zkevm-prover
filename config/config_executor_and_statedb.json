@@ -3,8 +3,8 @@
     "runExecutorClient": false,
     "runExecutorClientMultithread": false,
 
-    "runStateDBServer": true,
-    "runStateDBTest": false,
+    "runHashDBServer": true,
+    "runHashDBTest": false,
 
     "runAggregatorServer": false,
     "runAggregatorClient": false,
@@ -55,8 +55,8 @@
     "executorClientHost": "127.0.0.1",
     "executorClientLoops": 1,
 
-    "stateDBServerPort": 50061,
-    "stateDBURL": "local",
+    "hashDBServerPort": 50061,
+    "hashDBURL": "local",
 
     "aggregatorServerPort": 50081,
     "aggregatorClientPort": 50081,
@@ -88,7 +88,6 @@
     "dbNodesTableName": "state.nodes",
     "dbProgramTableName": "state.program",
     "dbMultiWrite": true,
-    "dbFlushInParallel": false,
     "dbConnectionsPool": true,
     "dbNumberOfPoolConnections": 40,
     "dbMetrics": false,
@@ -99,5 +98,5 @@
     "requestsPersistence": 3600,
     "maxExecutorThreads": 20,
     "maxProverThreads": 8,
-    "maxStateDBThreads": 20
+    "maxHashDBThreads": 20
 }

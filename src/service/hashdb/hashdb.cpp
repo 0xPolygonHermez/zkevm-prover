@@ -155,7 +155,7 @@ void HashDB::loadProgramDB(const DatabaseMap::ProgramMap &input, const bool pers
 #endif
 }
 
-zkresult HashDB::flush()
+zkresult HashDB::flush(uint64_t &flushId, uint64_t &lastSentFlushId)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB
     gettimeofday(&t, NULL);
@@ -166,7 +166,7 @@ zkresult HashDB::flush()
 #endif
 
     zkresult result;
-    result = db.flush();
+    result = db.flush(flushId, lastSentFlushId);
 
 #ifdef LOG_TIME_STATISTICS_HASHDB
     tms.add("flush", TimeDiff(t));
@@ -175,6 +175,27 @@ zkresult HashDB::flush()
 #endif
 
     return result;
+}
+
+zkresult HashDB::getFlushStatus(uint64_t &lastSentFlushId, uint64_t &sendingFlushId, uint64_t &lastFlushId)
+{
+#ifdef LOG_TIME_STATISTICS_HASHDB
+    gettimeofday(&t, NULL);
+#endif
+
+#ifdef HASHDB_LOCK
+    lock_guard<recursive_mutex> guard(mlock);
+#endif
+
+    db.getFlushStatus(lastSentFlushId, sendingFlushId, lastFlushId);
+
+#ifdef LOG_TIME_STATISTICS_HASHDB
+    tms.add("getFlushStatus", TimeDiff(t));
+    tms.print("HashDB");
+    tms.clear();
+#endif
+
+    return ZKR_SUCCESS;
 }
 
 void HashDB::clearCache(void)

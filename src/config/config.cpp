@@ -417,10 +417,6 @@ void Config::load(json &config)
     if (config.contains("dbMultiWrite") && config["dbMultiWrite"].is_boolean())
         dbMultiWrite = config["dbMultiWrite"];
 
-    dbFlushInParallel = false;
-    if (config.contains("dbFlushInParallel") && config["dbFlushInParallel"].is_boolean())
-        dbFlushInParallel = config["dbFlushInParallel"];
-
     dbConnectionsPool = false;
     if (config.contains("dbConnectionsPool") && config["dbConnectionsPool"].is_boolean())
         dbConnectionsPool = config["dbConnectionsPool"];
@@ -610,7 +606,6 @@ void Config::print(void)
     zklog.info("    dbNodesTableName=" + dbNodesTableName);
     zklog.info("    dbProgramTableName=" + dbProgramTableName);
     zklog.info("    dbMultiWrite=" + to_string(dbMultiWrite));
-    zklog.info("    dbFlushInParallel=" + to_string(dbFlushInParallel));
     zklog.info("    dbConnectionsPool=" + to_string(dbConnectionsPool));
     zklog.info("    dbNumberOfPoolConnections=" + to_string(dbNumberOfPoolConnections));
     zklog.info("    dbMetrics=" + to_string(dbMetrics));

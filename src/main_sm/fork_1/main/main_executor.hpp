@@ -73,12 +73,7 @@ private:
     void flushLock(void) { pthread_mutex_lock(&flushMutex); };
     void flushUnlock(void) { pthread_mutex_unlock(&flushMutex); };
     vector<pthread_t> flushQueue;
-    
-public:
-    void flushInParallel(HashDBInterface * pHashDB);
 };
-
-void *mainExecutorFlushThread(void *arg);
 
 } // namespace
 

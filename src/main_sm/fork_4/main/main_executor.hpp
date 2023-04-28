@@ -67,12 +67,7 @@ public:
     void checkFinalState(Context &ctx);
     void assertOutputs(Context &ctx);
     void logError(Context &ctx, const string &message = "");
-    
-public:
-    void flushInParallel(HashDBInterface * pHashDB);
 };
-
-void *mainExecutorFlushThread(void *arg);
 
 } // namespace
 

@@ -28,6 +28,7 @@ service HashDBService {
     rpc LoadDB(LoadDBRequest) returns (google.protobuf.Empty) {}
     rpc LoadProgramDB(LoadProgramDBRequest) returns (google.protobuf.Empty) {}
     rpc Flush (google.protobuf.Empty) returns (FlushResponse) {}
+    rpc GetFlushStatus (google.protobuf.Empty) returns (GetFlushStatusResponse) {}
 }
 
 ///////////////////
@@ -188,10 +189,26 @@ message GetProgramResponse {
 
 /**
  * @dev FlushResponse
+ * @param {flush_id} - id assigned to this flush data
+ * @param {last_sent_flush_id} - id of the last flush data sent to database
  * @param {result} - result code
  */
 message FlushResponse {
-    ResultCode result = 1;
+    uint64 flush_id = 1;
+    uint64 last_sent_flush_id = 2;
+    ResultCode result = 3;
+}
+
+/**
+ * @dev GetFlushStatusResponse
+ * @param {last_sent_flush_id} - id of the last flush data sent to database
+ * @param {sending_flush_id} - id of the flush data being sent now to database
+ * @param {last_flush_id} - id assigned to the last call to flush
+ */
+message GetFlushStatusResponse {
+    uint64 last_sent_flush_id = 1;
+    uint64 sending_flush_id = 2;
+    uint64 last_flush_id = 3;
 }
 
 /**

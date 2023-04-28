@@ -31,6 +31,7 @@ void runHashDBTest (const Config& config)
 
     Goldilocks fr;
     HashDBInterface * pHashDB = HashDBClientFactory::createHashDBClient(fr,config);
+    uint64_t flushId, lastSentFlushId;
 
     Goldilocks::Element root[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
     for (uint64_t i=0; i<10000000; i++)
@@ -62,7 +63,7 @@ void runHashDBTest (const Config& config)
             cout << getTimestamp() << " i=" << i << endl;
             printMemoryInfo(true);
         }
-        if (i%100==0) pHashDB->flush();
+        if (i%100==0) pHashDB->flush(flushId, lastSentFlushId);
     }
 
     #endif

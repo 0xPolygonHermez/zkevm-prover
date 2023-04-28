@@ -66,12 +66,7 @@ public:
     void initState(Context &ctx);
     void checkFinalState(Context &ctx);
     void assertOutputs(Context &ctx);
-    
-public:
-    void flushInParallel(HashDBInterface * pHashDB);
 };
-
-void *mainExecutorFlushThread(void *arg);
 
 } // namespace
 

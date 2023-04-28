@@ -293,12 +293,15 @@ using grpc::Status;
     try
     {
         // Call the HashDB flush method
-        zkresult zkres = pHashDB->flush();
+        uint64_t flushId, lastSentFlushId;
+        zkresult zkres = pHashDB->flush(flushId, lastSentFlushId);
 
         // return the result in the response
         ::hashdb::v1::ResultCode* result = new ::hashdb::v1::ResultCode();
         result->set_code(static_cast<::hashdb::v1::ResultCode_Code>(zkres));
         response->set_allocated_result(result);
+        response->set_flush_id(flushId);
+        response->set_last_sent_flush_id(lastSentFlushId);
     }
     catch (const std::exception &e)
     {
@@ -308,6 +311,33 @@ using grpc::Status;
 #ifdef LOG_HASHDB_SERVICE
     zklog.info("HashDBServiceImpl::Flush() completed.");
 #endif
+    return Status::OK;
+}
+
+::grpc::Status HashDBServiceImpl::GetFlushStatus (::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetFlushStatusResponse* response)
+{
+#ifdef LOG_HASHDB_SERVICE
+    zklog.info("HashDBServiceImpl::GetFlushStatus called.");
+#endif
+    try
+    {
+        uint64_t lastSentFlushId;
+        uint64_t sendingFlushId;
+        uint64_t lastFlushId;
+        pHashDB->getFlushStatus(lastSentFlushId, sendingFlushId, lastFlushId);
+        response->set_last_sent_flush_id(lastSentFlushId);
+        response->set_sending_flush_id(sendingFlushId);
+        response->set_last_flush_id(lastFlushId);
+    }
+    catch (const std::exception &e)
+    {
+        zklog.error("HashDBServiceImpl::GetFlushStatus() exception: " + string(e.what()));
+        return Status::CANCELLED;
+    }
+#ifdef LOG_HASHDB_SERVICE
+    zklog.info("HashDBServiceImpl::GetFlushStatus() completed.");
+#endif
+    
     return Status::OK;
 }
 

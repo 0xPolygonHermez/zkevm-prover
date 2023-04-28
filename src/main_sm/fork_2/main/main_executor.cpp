@@ -3850,22 +3850,15 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     evalCommandMetrics.print("Main Executor eval command calls");
 #endif
 
-    if (config.dbFlushInParallel)
+    zkresult zkr = pHashDB->flush(proverRequest.flushId, proverRequest.lastSentFlushId);
+    if (zkr != ZKR_SUCCESS)
     {
-        flushInParallel(pHashDB);
-    }
-    else
-    {
-        zkresult zkr = pHashDB->flush();
-        if (zkr != ZKR_SUCCESS)
-        {
-            cerr << "Error: Main SM Executor: failed calling pHashDB->flush() result=" << zkr << " =" << zkresult2string(zkr) << endl;
-            proverRequest.result = zkr;
-            HashDBClientFactory::freeHashDBClient(pHashDB);
-            return;
-        }
+        cerr << "Error: Main SM Executor: failed calling pHashDB->flush() result=" << zkr << " =" << zkresult2string(zkr) << endl;
+        proverRequest.result = zkr;
         HashDBClientFactory::freeHashDBClient(pHashDB);
+        return;
     }
+    HashDBClientFactory::freeHashDBClient(pHashDB);
 
     cout << "MainExecutor::execute() done lastStep=" << ctx.lastStep << " (" << (double(ctx.lastStep)*100)/N << "%)" << endl;
 }
@@ -4066,29 +4059,6 @@ void MainExecutor::assertOutputs(Context &ctx)
             exitProcess();
         }
     }
-}
-
-void MainExecutor::flushInParallel(HashDBInterface * pHashDB)
-{
-    // Create a thread to flush the database writes in parallel
-    pthread_t flushPthread; 
-    pthread_create(&flushPthread, NULL, mainExecutorFlushThread, pHashDB);
-}
-
-void *mainExecutorFlushThread(void *arg)
-{
-    TimerStart(MAIN_EXECUTOR_FLUSH_THREAD);
-
-    HashDBInterface *pHashDB = (HashDBInterface *)arg;
-    zkresult zkr = pHashDB->flush();
-    if (zkr != ZKR_SUCCESS)
-    {
-        cerr << "Error: mainExecutorFlushThread() failed calling pHashDB->flush() result=" << zkr << " =" << zkresult2string(zkr) << endl;
-    }
-    HashDBClientFactory::freeHashDBClient(pHashDB);
-
-    TimerStopAndLog(MAIN_EXECUTOR_FLUSH_THREAD);
-    return NULL;
 }
 
 } // namespace

@@ -29,6 +29,45 @@ string Database::dbStateRootKey("fffffffffffffffffffffffffffffffffffffffffffffff
 // Helper functions
 string removeBSXIfExists(string s) {return ((s.at(0) == '\\') && (s.at(1) == 'x')) ? s.substr(2) : s;}
 
+Database::Database (Goldilocks &fr, const Config &config) :
+        fr(fr),
+        config(config),
+        connectionsPool(NULL)
+{
+    // Init mutex
+    pthread_mutex_init(&connMutex, NULL);
+
+    // Sender thread creation
+    sem_init(&senderSem, 0, 0);
+    pthread_create(&senderPthread, NULL, dbSenderThread, this);
+};
+
+Database::~Database()
+{
+    if (config.dbConnectionsPool)
+    {
+        if (connectionsPool != NULL)
+        {
+            for (uint64_t i=0; i<config.dbNumberOfPoolConnections; i++)
+            {
+                if (connectionsPool[i].pConnection != NULL)
+                {
+                    //zklog.info("Database::~Database() deleting writeConnectionsPool[" + to_string(i) + "].pConnection=" + to_string((uint64_t)writeConnectionsPool[i].pConnection));
+                    delete[] connectionsPool[i].pConnection;
+                }
+            }
+            delete connectionsPool;
+        }
+    }
+    else
+    {
+        if (connection.pConnection != NULL)
+        {
+            delete connection.pConnection;
+        }
+    }
+}
+
 // Database class implementation
 void Database::init(void)
 {
@@ -145,10 +184,10 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
     {
         // If multi write is enabled, flush pending data, since some previously written keys
         // could be in the multi write string but flushed from the cache
-        if (config.dbMultiWrite)
+        /*if (config.dbMultiWrite)
         {
-            flush();
-        }
+            flush(); // TODO: manage this situation
+        }*/
 
         // Otherwise, read it remotelly, up to two times
         string sData;
@@ -605,26 +644,30 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
     {
         if (update && (key==dbStateRootKey))
         {
-            multiWriteLock();
-            multiWriteNodesStateRoot = "INSERT INTO " + tableName + " ( hash, data ) VALUES ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' ) ";
-            multiWriteNodesStateRootCounter++;
-            multiWriteUnlock();
+            multiWrite.Lock();
+            multiWrite.data[multiWrite.processingDataIndex].nodesStateRoot = "INSERT INTO " + tableName + " ( hash, data ) VALUES ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' ) ";
+            multiWrite.data[multiWrite.processingDataIndex].nodesStateRootCounter++;
+            multiWrite.Unlock();
         }
         else
         {
-            string &multiWrite = bProgram ? (update ? multiWriteProgramUpdate : multiWriteProgram) : (update ? multiWriteNodesUpdate : multiWriteNodes);
-            uint64_t &multiWriteCounter = bProgram ? (update ? multiWriteProgramUpdateCounter : multiWriteProgramCounter) : (update ? multiWriteNodesUpdateCounter : multiWriteNodesCounter);
-            multiWriteLock();
-            if (multiWrite.size() == 0)
+            multiWrite.Lock();
+            string &multiWriteString =
+                bProgram ? (update ? multiWrite.data[multiWrite.processingDataIndex].programUpdate : multiWrite.data[multiWrite.processingDataIndex].program) :
+                           (update ? multiWrite.data[multiWrite.processingDataIndex].nodesUpdate   : multiWrite.data[multiWrite.processingDataIndex].nodes);
+            uint64_t &multiWriteCounter =
+                bProgram ? (update ? multiWrite.data[multiWrite.processingDataIndex].programUpdateCounter : multiWrite.data[multiWrite.processingDataIndex].programCounter) :
+                           (update ? multiWrite.data[multiWrite.processingDataIndex].nodesUpdateCounter   : multiWrite.data[multiWrite.processingDataIndex].nodesCounter);
+            if (multiWriteString.size() == 0)
             {
-                multiWrite = "INSERT INTO " + tableName + " ( hash, data ) VALUES ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' ) ";
+                multiWriteString = "INSERT INTO " + tableName + " ( hash, data ) VALUES ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' ) ";
             }
             else
             {
-                multiWrite += ", ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' )";
+                multiWriteString += ", ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' )";
             }
             multiWriteCounter++;
-            multiWriteUnlock();       
+            multiWrite.Unlock();       
         }
     }
     else
@@ -841,7 +884,7 @@ zkresult Database::writeGetTreeFunction(void)
     return result;
 }
 
-zkresult Database::setProgram(const string &_key, const vector<uint8_t> &data, const bool persistent, const bool update)
+zkresult Database::setProgram (const string &_key, const vector<uint8_t> &data, const bool persistent, const bool update)
 {
     // Check that it has been initialized before
     if (!bInitialized)
@@ -973,195 +1016,210 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
     return r;
 }
 
-zkresult Database::flush()
+zkresult Database::flush(uint64_t &thisBatch, uint64_t &lastSentBatch)
 {
     if (!config.dbMultiWrite)
     {
         return ZKR_SUCCESS;
     }
 
-    // If we are connected to a read-only database, just pretend to have sent all the data
+    // If we are connected to a read-only database, just free memory and pretend to have sent all the data
     if (config.dbReadOnly)
     {
-        multiWriteLock();
-        multiWriteProgram.clear();
-        multiWriteProgramUpdate.clear();
-        multiWriteNodes.clear();
-        multiWriteNodesUpdate.clear();
-        multiWriteNodesStateRoot.clear();
-        multiWriteProgramCounter = 0;
-        multiWriteProgramUpdateCounter = 0;
-        multiWriteNodesCounter = 0;
-        multiWriteNodesUpdateCounter = 0;
-        multiWriteNodesStateRootCounter = 0;
-        multiWriteUnlock();
+        multiWrite.Lock();
+        multiWrite.data[multiWrite.processingDataIndex].Reset();
+        multiWrite.Unlock();
 
         return ZKR_SUCCESS;
     }
 
     //TimerStart(DATABASE_FLUSH);
 
+    multiWrite.Lock();
+
+    // Increase the last processed batch id and return the last sent batch id
+    multiWrite.lastFlushId++;
+    thisBatch = multiWrite.lastFlushId;
+    lastSentBatch = multiWrite.lastSentFlushId;
+
+    // Notify the thread
+    sem_post(&senderSem);
+
+    multiWrite.Unlock();
+
+    return ZKR_SUCCESS;
+}
+
+void Database::getFlushStatus(uint64_t &lastSentFlushId, uint64_t &sendingFlushId, uint64_t &lastFlushId)
+{
+    multiWrite.Lock();
+    lastSentFlushId = multiWrite.lastSentFlushId;
+    sendingFlushId = multiWrite.sendingFlushId;
+    lastFlushId = multiWrite.lastFlushId;
+    multiWrite.Unlock();
+}
+
+zkresult Database::sendData (void)
+{
     zkresult zkr = ZKR_SUCCESS;
 
-    multiWriteLock();
-
-    if ( (multiWriteNodes.size() > 0) || (multiWriteNodesStateRoot.size() > 0) || (multiWriteNodesUpdate.size() > 0) || (multiWriteProgram.size() > 0) || (multiWriteProgramUpdate.size() > 0) )
-    {
-
-        // Get a free write db connection
-        DatabaseConnection * pDatabaseConnection = getConnection();
-        
-        // Time calculation variables
-        struct timeval t;
-        uint64_t timeDiff;
-
-        try
-        {
-            string query;
-            if (multiWriteProgram.size() > 0)
-            {
-                if (config.dbMetrics) gettimeofday(&t, NULL);
-
-                query = multiWriteProgram + " ON CONFLICT (hash) DO NOTHING;";
-                
-                // Start a transaction
-                pqxx::work w(*(pDatabaseConnection->pConnection));
-
-                // Execute the query
-                pqxx::result res = w.exec(query);
-
-                // Commit your transaction
-                w.commit();
-
-                //zklog.info("Database::flush() sent query=" + query);
-                if (config.dbMetrics)
-                {
-                    timeDiff = TimeDiff(t);
-                    zklog.info("Database::Flush() dbMetrics multiWriteProgram " + to_string(multiWriteProgramCounter) + "fields=" + to_string(timeDiff) + "us=" + to_string(timeDiff/zkmax(multiWriteProgramCounter,1)) + "us/field");
-                }
-                
-                // Delete the accumulated query data only if the query succeeded
-                multiWriteProgram.clear();
-                multiWriteProgramCounter = 0;
-            }
-            if (multiWriteProgramUpdate.size() > 0)
-            {
-                if (config.dbMetrics) gettimeofday(&t, NULL);
-
-                query = multiWriteProgramUpdate + " ON CONFLICT (hash) DO UPDATE SET data = EXCLUDED.data;";
-                
-                // Start a transaction
-                pqxx::work w(*(pDatabaseConnection->pConnection));
-
-                // Execute the query
-                pqxx::result res = w.exec(query);
-
-                // Commit your transaction
-                w.commit();
-
-                //zklog.info("Database::flush() sent query=" + query);
-                if (config.dbMetrics)
-                {
-                    timeDiff = TimeDiff(t);
-                    zklog.info("Database::Flush() dbMetrics multiWriteProgramUpdate " + to_string(multiWriteProgramUpdateCounter) + "fields=" + to_string(timeDiff) + "us=" + to_string(timeDiff/zkmax(multiWriteProgramUpdateCounter,1)) + "us/field");
-                }
-
-                // Delete the accumulated query data only if the query succeeded
-                multiWriteProgramUpdate.clear();
-                multiWriteProgramUpdateCounter = 0;
-            }
-            if (multiWriteNodes.size() > 0)
-            {
-                if (config.dbMetrics) gettimeofday(&t, NULL);
-
-                query = multiWriteNodes + " ON CONFLICT (hash) DO NOTHING;";
-                
-                // Start a transaction
-                pqxx::work w(*(pDatabaseConnection->pConnection));
-
-                // Execute the query
-                pqxx::result res = w.exec(query);
-
-                // Commit your transaction
-                w.commit();
-
-                //zklog.info("Database::flush() sent query=" + query);
-                if (config.dbMetrics)
-                {
-                    timeDiff = TimeDiff(t);
-                    zklog.info("Database::Flush() dbMetrics multiWriteNodes " + to_string(multiWriteNodesCounter) + "fields=" + to_string(timeDiff) + "us=" + to_string(timeDiff/zkmax(multiWriteNodesCounter,1)) + "us/field");
-                }
-
-                // Delete the accumulated query data only if the query succeeded
-                multiWriteNodes.clear();
-                multiWriteNodesCounter = 0;
-            }
-            if (multiWriteNodesUpdate.size() > 0)
-            {
-                if (config.dbMetrics) gettimeofday(&t, NULL);
-
-                query = multiWriteNodesUpdate + " ON CONFLICT (hash) DO UPDATE SET data = EXCLUDED.data;";
-                
-                // Start a transaction
-                pqxx::work w(*(pDatabaseConnection->pConnection));
-
-                // Execute the query
-                pqxx::result res = w.exec(query);
-
-                // Commit your transaction
-                w.commit();
-
-                //zklog.info("Database::flush() sent query=" + query);
-                if (config.dbMetrics)
-                {
-                    timeDiff = TimeDiff(t);
-                    zklog.info("Database::Flush() dbMetrics multiWriteNodesUpdate " + to_string(multiWriteNodesUpdateCounter) + "fields=" + to_string(timeDiff) + "us=" + to_string(timeDiff/zkmax(multiWriteNodesUpdateCounter,1)) + "us/field");
-                }
-
-                // Delete the accumulated query data only if the query succeeded
-                multiWriteNodesUpdate.clear();
-                multiWriteNodesUpdateCounter = 0;
-            }
-            if (multiWriteNodesStateRoot.size() > 0)
-            {
-                if (config.dbMetrics) gettimeofday(&t, NULL);
-
-                query = multiWriteNodesStateRoot + " ON CONFLICT (hash) DO UPDATE SET data = EXCLUDED.data;";
-                
-                // Start a transaction
-                pqxx::work w(*(pDatabaseConnection->pConnection));
-
-                // Execute the query
-                pqxx::result res = w.exec(query);
-
-                // Commit your transaction
-                w.commit();
-
-                //zklog.info("Database::flush() sent query=" + query);
-                if (config.dbMetrics)
-                {
-                    timeDiff = TimeDiff(t);
-                    zklog.info("Database::Flush() dbMetrics multiWriteNodesStateRoot " + to_string(multiWriteNodesStateRootCounter) + "fields=" + to_string(timeDiff) + "us=" + to_string(timeDiff/zkmax(multiWriteNodesStateRootCounter,1)) + "us/field");
-                }
-
-                // Delete the accumulated query data only if the query succeeded
-                multiWriteNodesStateRoot.clear();
-                multiWriteNodesStateRootCounter = 0;
-            }
-        }
-        catch (const std::exception &e)
-        {
-            zklog.error("Database::flush() execute query exception: " + string(e.what()));
-            zkr = ZKR_DB_ERROR;
-        }
-
-        // Dispose the write db connection
-        disposeConnection(pDatabaseConnection);
-    }
-    multiWriteUnlock();
-
-    //TimerStopAndLog(DATABASE_FLUSH);
+    // Get a free write db connection
+    DatabaseConnection * pDatabaseConnection = getConnection();
     
+    // Time calculation variables
+    struct timeval t;
+    uint64_t timeDiff;
+
+    MultiWriteData &data = multiWrite.data[multiWrite.sendingDataIndex];
+
+    try
+    {
+        string query;
+        if (data.program.size() > 0)
+        {
+            if (config.dbMetrics) gettimeofday(&t, NULL);
+
+            query = data.program + " ON CONFLICT (hash) DO NOTHING;";
+            
+            // Start a transaction
+            pqxx::work w(*(pDatabaseConnection->pConnection));
+
+            // Execute the query
+            pqxx::result res = w.exec(query);
+
+            // Commit your transaction
+            w.commit();
+
+            //zklog.info("Database::flush() sent query=" + query);
+            if (config.dbMetrics)
+            {
+                timeDiff = TimeDiff(t);
+                zklog.info("Database::sendData() dbMetrics multiWrite program " + to_string(data.programCounter) + "fields=" + to_string(timeDiff) + "us=" + to_string(timeDiff/zkmax(data.programCounter,1)) + "us/field");
+            }
+            
+            // Delete the accumulated query data only if the query succeeded
+            data.program.clear();
+            data.programCounter = 0;
+        }
+        if (data.programUpdate.size() > 0)
+        {
+            if (config.dbMetrics) gettimeofday(&t, NULL);
+
+            query = data.programUpdate + " ON CONFLICT (hash) DO UPDATE SET data = EXCLUDED.data;";
+            
+            // Start a transaction
+            pqxx::work w(*(pDatabaseConnection->pConnection));
+
+            // Execute the query
+            pqxx::result res = w.exec(query);
+
+            // Commit your transaction
+            w.commit();
+
+            //zklog.info("Database::flush() sent query=" + query);
+            if (config.dbMetrics)
+            {
+                timeDiff = TimeDiff(t);
+                zklog.info("Database::sendData() dbMetrics multiWrite programUpdate " + to_string(data.programUpdateCounter) + "fields=" + to_string(timeDiff) + "us=" + to_string(timeDiff/zkmax(data.programUpdateCounter,1)) + "us/field");
+            }
+
+            // Delete the accumulated query data only if the query succeeded
+            data.programUpdate.clear();
+            data.programUpdateCounter = 0;
+        }
+        if (data.nodes.size() > 0)
+        {
+            if (config.dbMetrics) gettimeofday(&t, NULL);
+
+            query = data.nodes + " ON CONFLICT (hash) DO NOTHING;";
+            
+            // Start a transaction
+            pqxx::work w(*(pDatabaseConnection->pConnection));
+
+            // Execute the query
+            pqxx::result res = w.exec(query);
+
+            // Commit your transaction
+            w.commit();
+
+            //zklog.info("Database::flush() sent query=" + query);
+            if (config.dbMetrics)
+            {
+                timeDiff = TimeDiff(t);
+                zklog.info("Database::sendData() dbMetrics multiWrite nodes " + to_string(data.nodesCounter) + "fields=" + to_string(timeDiff) + "us=" + to_string(timeDiff/zkmax(data.nodesCounter,1)) + "us/field");
+            }
+
+            // Delete the accumulated query data only if the query succeeded
+            data.nodes.clear();
+            data.nodesCounter = 0;
+        }
+        if (data.nodesUpdate.size() > 0)
+        {
+            if (config.dbMetrics) gettimeofday(&t, NULL);
+
+            query = data.nodesUpdate + " ON CONFLICT (hash) DO UPDATE SET data = EXCLUDED.data;";
+            
+            // Start a transaction
+            pqxx::work w(*(pDatabaseConnection->pConnection));
+
+            // Execute the query
+            pqxx::result res = w.exec(query);
+
+            // Commit your transaction
+            w.commit();
+
+            //zklog.info("Database::flush() sent query=" + query);
+            if (config.dbMetrics)
+            {
+                timeDiff = TimeDiff(t);
+                zklog.info("Database::sendData() dbMetrics multiWrite nodesUpdate " + to_string(data.nodesUpdateCounter) + "fields=" + to_string(timeDiff) + "us=" + to_string(timeDiff/zkmax(data.nodesUpdateCounter,1)) + "us/field");
+            }
+
+            // Delete the accumulated query data only if the query succeeded
+            data.nodesUpdate.clear();
+            data.nodesUpdateCounter = 0;
+        }
+        if (data.nodesStateRoot.size() > 0)
+        {
+            if (config.dbMetrics) gettimeofday(&t, NULL);
+
+            query = data.nodesStateRoot + " ON CONFLICT (hash) DO UPDATE SET data = EXCLUDED.data;";
+            
+            // Start a transaction
+            pqxx::work w(*(pDatabaseConnection->pConnection));
+
+            // Execute the query
+            pqxx::result res = w.exec(query);
+
+            // Commit your transaction
+            w.commit();
+
+            //zklog.info("Database::flush() sent query=" + query);
+            if (config.dbMetrics)
+            {
+                timeDiff = TimeDiff(t);
+                zklog.info("Database::sendData() dbMetrics multiWrite nodesStateRoot " + to_string(data.nodesStateRootCounter) + "fields=" + to_string(timeDiff) + "us=" + to_string(timeDiff/zkmax(data.nodesStateRootCounter,1)) + "us/field");
+            }
+
+            // Delete the accumulated query data only if the query succeeded
+            data.nodesStateRoot.clear();
+            data.nodesStateRootCounter = 0;
+        }
+
+        // If we succeeded, update last sent batch
+        multiWrite.Lock();
+        multiWrite.lastSentFlushId = multiWrite.sendingFlushId;
+        multiWrite.Unlock();
+    }
+    catch (const std::exception &e)
+    {
+        zklog.error("Database::sendData() execute query exception: " + string(e.what()));
+        zkr = ZKR_DB_ERROR;
+    }
+
+    // Dispose the write db connection
+    disposeConnection(pDatabaseConnection);
+
     return zkr;
 }
 
@@ -1278,37 +1336,76 @@ void Database::printTree(const string &root, string prefix)
     if (prefix == "") zklog.info("");
 }
 
-Database::~Database()
-{
-    if (config.dbConnectionsPool)
-    {
-        if (connectionsPool != NULL)
-        {
-            for (uint64_t i=0; i<config.dbNumberOfPoolConnections; i++)
-            {
-                if (connectionsPool[i].pConnection != NULL)
-                {
-                    //zklog.info("Database::~Database() deleting writeConnectionsPool[" + to_string(i) + "].pConnection=" + to_string((uint64_t)writeConnectionsPool[i].pConnection));
-                    delete[] connectionsPool[i].pConnection;
-                }
-            }
-            delete connectionsPool;
-        }
-    }
-    else
-    {
-        if (connection.pConnection != NULL)
-        {
-            delete connection.pConnection;
-        }
-    }
-}
-
 void Database::clearCache (void)
 {
     dbMTCache.clear();
     dbProgramCache.clear();
 }
+
+void *dbSenderThread (void *arg)
+{
+    Database *pDatabase = (Database *)arg;
+    zklog.info("dbSenderThread() started");
+    MultiWrite &multiWrite = pDatabase->multiWrite;
+
+    while (true)
+    {
+        // Wait for the sending semaphore to be released, if there is no more data to send
+        sem_wait(&pDatabase->senderSem);
+
+        // Check that the pending requests queue is not empty
+        if (multiWrite.IsEmpty())
+        {
+            // Mark as if we sent all batches
+            multiWrite.lastSentFlushId = multiWrite.lastFlushId;
+
+            zklog.info("dbSenderThread() found multi write data empty, so ignoring");
+            multiWrite.Unlock();
+            continue;
+        }
+
+        // If sending data is not empty (it failed before) then try to send it again
+        if (!multiWrite.data[multiWrite.sendingDataIndex].IsEmpty())
+        {
+            zklog.warning("dbSenderThread() found sending data index not empty, probably because of a previous error; resuming...");
+        }
+        // Else, switch data indexes
+        else
+        {
+            // Swap sendDataIndez and processingDataIndex
+            multiWrite.sendingDataIndex = multiWrite.processingDataIndex;
+            multiWrite.processingDataIndex = 1 - multiWrite.processingDataIndex;
+
+            // Record the last processed batch included in this data set
+            multiWrite.sendingFlushId = multiWrite.lastFlushId;
+        }
+
+        // Unlock to let more processing batch data in
+        multiWrite.Unlock();
+
+        zklog.info("dbSenderThread() starting to send data, lastSentFlushId=" + to_string(multiWrite.lastSentFlushId) + " sendingFlushId=" + to_string(multiWrite.sendingFlushId));
+
+        zkresult zkr;
+        zkr = pDatabase->sendData();
+        if (zkr == ZKR_SUCCESS)
+        {
+            multiWrite.Lock();
+            multiWrite.lastSentFlushId = multiWrite.sendingFlushId;
+            zklog.info("dbSenderThread() successfully sent data, lastSentFlushId=" + to_string(multiWrite.lastSentFlushId) + " sendingFlush=" + to_string(multiWrite.sendingFlushId));
+            multiWrite.Unlock();
+        }
+        else
+        {
+            zklog.error("dbSenderThread() failed calling sendData() error=" + zkresult2string(zkr));
+            usleep(1000000);
+        }
+
+    }
+
+    zklog.info("dbSenderThread() done");
+    return NULL;
+}
+
 
 void loadDb2MemCache(const Config config)
 {

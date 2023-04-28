@@ -240,6 +240,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
     //code += "    int64_t incHashPos = 0;\n"; // TODO: Remove initialization to check it is initialized before being used
     code += "    Rom &rom = mainExecutor.rom;\n";
     code += "    Goldilocks &fr = mainExecutor.fr;\n";
+    code += "    uint64_t flushId;\n";
+    code += "    uint64_t lastSentFlushId;\n";
     code += "\n";
 
     code += "    if (" + functionName + "_labels.size()==0)\n";
@@ -285,7 +287,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    if (proverRequest.input.db.size() > 0)\n";
     code += "    {\n";
     code += "        pHashDB->loadDB(proverRequest.input.db, true);\n";
-    code += "        pHashDB->flush();\n";
+    code += "        pHashDB->flush(flushId, lastSentFlushId);\n";
     code += "        if (mainExecutor.config.dbClearCache && (mainExecutor.config.databaseURL != \"local\"))\n";
     code += "        {\n";
     code += "            pHashDB->clearCache();\n";
@@ -296,7 +298,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    if (proverRequest.input.contractsBytecode.size() > 0)\n";
     code += "    {\n";
     code += "        pHashDB->loadProgramDB(proverRequest.input.contractsBytecode, true);\n";
-    code += "        pHashDB->flush();\n";
+    code += "        pHashDB->flush(flushId, lastSentFlushId);\n";
     code += "        if (mainExecutor.config.dbClearCache && (mainExecutor.config.databaseURL != \"local\"))\n";
     code += "        {\n";
     code += "            pHashDB->clearCache();\n";
@@ -4726,23 +4728,15 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    gettimeofday(&t, NULL);\n";
     code += "#endif\n";
     
-    code += "    if (mainExecutor.config.dbFlushInParallel)\n";
+    code += "    zkresult zkr = pHashDB->flush(proverRequest.flushId, proverRequest.lastSentFlushId);\n";
+    code += "    if (zkr != ZKR_SUCCESS)\n";
     code += "    {\n";
-    code += "        mainExecutor.flushInParallel(pHashDB);\n";
-    code += "    }\n";
-    code += "    else\n";
-    code += "    {\n";
-    code += "        pHashDB->flush();\n";
-    code += "        zkresult zkr = pHashDB->flush();\n";
-    code += "        if (zkr != ZKR_SUCCESS)\n";
-    code += "        {\n";
-    code += "            proverRequest.result = zkr;\n";
-    code += "            mainExecutor.logError(ctx, string(\"Failed calling pHashDB->flush() result=\") + zkresult2string(zkr));\n";
-    code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
-    code += "            return;\n";
-    code += "        }\n";
+    code += "        proverRequest.result = zkr;\n";
+    code += "        mainExecutor.logError(ctx, string(\"Failed calling pHashDB->flush() result=\") + zkresult2string(zkr));\n";
     code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
-    code += "    }\n\n";
+    code += "        return;\n";
+    code += "    }\n";
+    code += "    HashDBClientFactory::freeHashDBClient(pHashDB);\n\n";
 
     code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
     code += "    mainMetrics.add(\"Flush\", TimeDiff(t));\n";

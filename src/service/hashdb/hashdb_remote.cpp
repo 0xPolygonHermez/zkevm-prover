@@ -285,7 +285,7 @@ void HashDBRemote::loadProgramDB(const DatabaseMap::ProgramMap &input, const boo
 #endif
 }
 
-zkresult HashDBRemote::flush()
+zkresult HashDBRemote::flush(uint64_t &flushId, uint64_t &lastSentFlushId)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
     gettimeofday(&t, NULL);
@@ -297,9 +297,36 @@ zkresult HashDBRemote::flush()
     if (s.error_code() != grpc::StatusCode::OK) {
         zklog.error("HashDBRemote:flush() GRPC error(" + to_string(s.error_code()) + "): " + s.error_message());
     }
+    flushId = response.flush_id();
+    lastSentFlushId = response.last_sent_flush_id();
 
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
     tms.add("flush", TimeDiff(t));
 #endif
     return static_cast<zkresult>(response.result().code());
+}
+
+zkresult HashDBRemote::getFlushStatus(uint64_t &lastSentFlushId, uint64_t &sendingFlushId, uint64_t &lastFlushId)
+{
+#ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
+    gettimeofday(&t, NULL);
+#endif
+    ::grpc::ClientContext context;
+    ::google::protobuf::Empty request;
+    ::hashdb::v1::GetFlushStatusResponse response;
+    grpc::Status s = stub->GetFlushStatus(&context, request, &response);
+    if (s.error_code() != grpc::StatusCode::OK) {
+        zklog.error("HashDBRemote:getFlushStatus() GRPC error(" + to_string(s.error_code()) + "): " + s.error_message());
+        return ZKR_HASHDB_GRPC_ERROR;
+    }
+
+    lastSentFlushId = response.last_sent_flush_id();
+    sendingFlushId = response.sending_flush_id();
+    lastFlushId = response.last_flush_id();
+
+#ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
+    tms.add("getFlushStatus", TimeDiff(t));
+#endif
+
+    return ZKR_SUCCESS;
 }

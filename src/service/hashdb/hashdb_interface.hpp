@@ -19,7 +19,8 @@ public:
     virtual zkresult getProgram(const Goldilocks::Element (&key)[4], vector<uint8_t> &data, DatabaseMap *dbReadLog) = 0;
     virtual void loadDB(const DatabaseMap::MTMap &input, const bool persistent) = 0;
     virtual void loadProgramDB(const DatabaseMap::ProgramMap &input, const bool persistent) = 0;
-    virtual zkresult flush() = 0;
+    virtual zkresult flush(uint64_t &flushId, uint64_t &lastSentFlushId) = 0;
+    virtual zkresult getFlushStatus(uint64_t &lastSentFlushId, uint64_t &sendingFlushId, uint64_t &lastFlushId) = 0;
     virtual void clearCache(void) = 0;
 };
 

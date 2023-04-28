@@ -151,14 +151,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     if (proverRequest.input.db.size() > 0)
     {
         pHashDB->loadDB(proverRequest.input.db, true);
-        pHashDB->flush();
+        uint64_t flushId, lastSentFlushId;
+        pHashDB->flush(flushId, lastSentFlushId);
     }
 
     // Copy input contracts database content into context database (dbProgram)
     if (proverRequest.input.contractsBytecode.size() > 0)
     {
         pHashDB->loadProgramDB(proverRequest.input.contractsBytecode, true);
-        pHashDB->flush();
+        uint64_t flushId, lastSentFlushId;
+        pHashDB->flush(flushId, lastSentFlushId);
     }
 
     // opN are local, uncommitted polynomials
@@ -3855,22 +3857,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     gettimeofday(&t, NULL);
 #endif
 
-    if (config.dbFlushInParallel)
+    zkresult zkr = pHashDB->flush(proverRequest.flushId, proverRequest.lastSentFlushId);
+    if (zkr != ZKR_SUCCESS)
     {
-        flushInParallel(pHashDB);
-    }
-    else
-    {
-        zkresult zkr = pHashDB->flush();
-        if (zkr != ZKR_SUCCESS)
-        {
-            cerr << "Error: Main SM Executor: failed calling pHashDB->flush() result=" << zkr << " =" << zkresult2string(zkr) << endl;
-            proverRequest.result = zkr;
-            HashDBClientFactory::freeHashDBClient(pHashDB);
-            return;
-        }
+        cerr << "Error: Main SM Executor: failed calling pHashDB->flush() result=" << zkr << " =" << zkresult2string(zkr) << endl;
+        proverRequest.result = zkr;
         HashDBClientFactory::freeHashDBClient(pHashDB);
+        return;
     }
+    HashDBClientFactory::freeHashDBClient(pHashDB);
+        
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
     mainMetrics.add("Flush", TimeDiff(t));
 #endif
@@ -4082,29 +4078,6 @@ void MainExecutor::assertOutputs(Context &ctx)
             exitProcess();
         }
     }
-}
-
-void MainExecutor::flushInParallel(HashDBInterface * pHashDB)
-{
-    // Create a thread to flush the database writes in parallel
-    pthread_t flushPthread; 
-    pthread_create(&flushPthread, NULL, mainExecutorFlushThread, pHashDB);
-}
-
-void *mainExecutorFlushThread(void *arg)
-{
-    TimerStart(MAIN_EXECUTOR_FLUSH_THREAD);
-
-    HashDBInterface *pHashDB = (HashDBInterface *)arg;
-    zkresult zkr = pHashDB->flush();
-    if (zkr != ZKR_SUCCESS)
-    {
-        cerr << "Error: mainExecutorFlushThread() failed calling pHashDB->flush() result=" << zkr << " =" << zkresult2string(zkr) << endl;
-    }
-    HashDBClientFactory::freeHashDBClient(pHashDB);
-
-    TimerStopAndLog(MAIN_EXECUTOR_FLUSH_THREAD);
-    return NULL;
 }
 
 } // namespace

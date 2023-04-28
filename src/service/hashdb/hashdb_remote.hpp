@@ -34,7 +34,8 @@ public:
     zkresult getProgram(const Goldilocks::Element (&key)[4], vector<uint8_t> &data, DatabaseMap *dbReadLog);
     void loadDB(const DatabaseMap::MTMap &input, const bool persistent);
     void loadProgramDB(const DatabaseMap::ProgramMap &input, const bool persistent);
-    zkresult flush();
+    zkresult flush(uint64_t &flushId, uint64_t &lastSentFlushId);
+    zkresult getFlushStatus(uint64_t &lastSentFlushId, uint64_t &sendingFlushId, uint64_t &lastFlushId);
     void clearCache(void) {};
 };
 

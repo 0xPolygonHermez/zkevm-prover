@@ -23,6 +23,80 @@ public:
     DatabaseConnection() : pConnection(NULL), bInUse(false) {};
 };
 
+class MultiWriteData
+{
+public:
+    string program;
+    string programUpdate;
+    string nodes;
+    string nodesUpdate;
+    string nodesStateRoot;
+
+    uint64_t programCounter;
+    uint64_t programUpdateCounter;
+    uint64_t nodesCounter;
+    uint64_t nodesUpdateCounter;
+    uint64_t nodesStateRootCounter;
+
+    void Reset (void)
+    {
+        // Reset strings
+        program.clear();
+        programUpdate.clear();
+        nodes.clear();
+        nodesUpdate.clear();
+        nodesStateRoot.clear();
+
+        // Reset counters
+        programCounter = 0;
+        programUpdateCounter = 0;
+        nodesCounter = 0;
+        nodesUpdateCounter = 0;
+        nodesStateRootCounter = 0;
+    }
+
+    bool IsEmpty (void)
+    {
+        return (nodes.size() == 0) && (nodesUpdate.size() == 0) && (nodesStateRoot.size() == 0) && (program.size() == 0) && (programUpdate.size() == 0);
+    }
+};
+
+class MultiWrite
+{
+public:
+
+    uint64_t lastFlushId;
+    uint64_t lastSentFlushId;
+    uint64_t sendingFlushId;
+    uint64_t processingDataIndex; // Index of data to store data of batches being processed
+    uint64_t sendingDataIndex; // Index of data being sent to database
+
+    MultiWriteData data[2];
+
+    pthread_mutex_t mutex; // Mutex to protect the multi write queues
+    
+    // Constructor
+    MultiWrite() :
+        lastFlushId(0),
+        lastSentFlushId(0),
+        sendingFlushId(0),
+        processingDataIndex(0),
+        sendingDataIndex(1)
+    {
+        // Init mutex
+        pthread_mutex_init(&mutex, NULL);
+
+        // Reset data
+        data[0].Reset();
+        data[1].Reset();
+    };
+
+    // Lock/Unlock
+    void Lock(void) { pthread_mutex_lock(&mutex); };
+    void Unlock(void) { pthread_mutex_unlock(&mutex); };
+    bool IsEmpty(void) { return data[0].IsEmpty() && data[1].IsEmpty(); };
+};
+
 class Database
 {
 private:
@@ -55,19 +129,11 @@ private:
     void disposeConnection (DatabaseConnection * pConnection);
 
     // Multi write attributes
-    string multiWriteProgram;
-    string multiWriteProgramUpdate;
-    string multiWriteNodes;
-    string multiWriteNodesUpdate;
-    string multiWriteNodesStateRoot;
-    uint64_t multiWriteProgramCounter;
-    uint64_t multiWriteProgramUpdateCounter;
-    uint64_t multiWriteNodesCounter;
-    uint64_t multiWriteNodesUpdateCounter;
-    uint64_t multiWriteNodesStateRootCounter;
-    pthread_mutex_t multiWriteMutex; // Mutex to protect the multi write queues
-    void multiWriteLock(void) { pthread_mutex_lock(&multiWriteMutex); };
-    void multiWriteUnlock(void) { pthread_mutex_unlock(&multiWriteMutex); };
+public:
+    MultiWrite multiWrite;
+    sem_t senderSem; // Semaphore to wakeup database sender thread when flush() is called
+private:
+    pthread_t senderPthread; // Database sender thread
 
 private:
     // Remote database based on Postgres (PostgreSQL)
@@ -91,20 +157,7 @@ public:
 #endif
 
     // Constructor and destructor
-    Database(Goldilocks &fr, const Config &config) :
-        fr(fr),
-        config(config),
-        connectionsPool(NULL),
-        multiWriteProgramCounter(0),
-        multiWriteProgramUpdateCounter(0),
-        multiWriteNodesCounter(0),
-        multiWriteNodesUpdateCounter(0),
-        multiWriteNodesStateRootCounter(0)
-    {
-        // Init mutexes
-        pthread_mutex_init(&multiWriteMutex, NULL);
-        pthread_mutex_init(&connMutex, NULL);
-    };
+    Database(Goldilocks &fr, const Config &config);
     ~Database();
 
     // Basic methods
@@ -120,7 +173,11 @@ public:
 #endif
 
     // Flush multi write pending requests
-    zkresult flush();
+    zkresult flush(uint64_t &flushId, uint64_t &lastSentFlushId);
+    void getFlushStatus(uint64_t &lastSentFlushId, uint64_t &sendingFlushId, uint64_t &lastFlushId);
+
+    // Send multi write data to remote database; called by dbSenderThread
+    zkresult sendData(void);
 
     // Print tree
     void printTree(const string &root, string prefix = "");
@@ -128,6 +185,8 @@ public:
     // Clear cache
     void clearCache(void);
 };
+
+void *dbSenderThread(void *arg);
 
 void loadDb2MemCache(const Config config);
 

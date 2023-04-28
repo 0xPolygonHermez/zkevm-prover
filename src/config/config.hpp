@@ -126,7 +126,6 @@ public:
     string dbNodesTableName;
     string dbProgramTableName;
     bool dbMultiWrite;
-    bool dbFlushInParallel;
     bool dbConnectionsPool;
     uint64_t dbNumberOfPoolConnections;
     bool dbMetrics;

@@ -3827,15 +3827,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     evalCommandMetrics.print("Main Executor eval command calls");
 #endif
 
-    if (config.dbFlushInParallel)
-    {
-        flushInParallel(pHashDB);
-    }
-    else
-    {
-        pHashDB->flush();
-        HashDBClientFactory::freeHashDBClient(pHashDB);
-    }
+    pHashDB->flush(proverRequest.flushId, proverRequest.lastSentFlushId);
+    HashDBClientFactory::freeHashDBClient(pHashDB);
 
     cout << "MainExecutor::execute() done lastStep=" << ctx.lastStep << " (" << (double(ctx.lastStep)*100)/N << "%)" << endl;
 }
@@ -4036,30 +4029,6 @@ void MainExecutor::assertOutputs(Context &ctx)
             exitProcess();
         }
     }
-}
-
-void MainExecutor::flushInParallel(HashDBInterface * pHashDB)
-{
-    // Create a thread to flush the database writes in parallel
-    pthread_t flushPthread; 
-    pthread_create(&flushPthread, NULL, mainExecutorFlushThread, pHashDB);
-
-    // Add the thread to the flush queue
-    flushLock();
-    flushQueue.push_back(flushPthread);
-    flushUnlock();
-}
-
-void *mainExecutorFlushThread(void *arg)
-{
-    TimerStart(MAIN_EXECUTOR_FLUSH_THREAD);
-
-    HashDBInterface *pHashDB = (HashDBInterface *)arg;
-    pHashDB->flush();
-    HashDBClientFactory::freeHashDBClient(pHashDB);
-
-    TimerStopAndLog(MAIN_EXECUTOR_FLUSH_THREAD);
-    return NULL;
 }
 
 } // namespace
