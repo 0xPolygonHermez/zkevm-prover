@@ -369,7 +369,7 @@ void Prover::processBatch(ProverRequest *pProverRequest)
     {
         json inputJson;
         pProverRequest->input.save(inputJson);
-        zklog.info("Input=\n" + inputJson.dump());
+        zklog.info("Input=" + inputJson.dump());
     }
 
     // Execute the program, in the process batch way

@@ -526,6 +526,14 @@ using grpc::Status;
         " totalTP(ever)=" + to_string(TPB) + "B/s=" + to_string(TPTX) + "TX/s=" + to_string(TPG) + "gas/s=" + to_string(TPG/zkmax(1,TPB)) + "gas/B" +
         " totalTime=" + to_string(totalTime) +
         " filedesc=" + to_string(nfd));
+    
+    // If the TP in gas/s is < threshold, log the input, unless it has been done before
+    if (!config.logExecutorServerInput && (config.logExecutorServerInputGasThreshold > 0) && ((double(execGas)/execTime) < config.logExecutorServerInputGasThreshold))
+    {
+        json inputJson;
+        proverRequest.input.save(inputJson);
+        zklog.info("Input=" + inputJson.dump());
+    }
     unlock();
 #endif
 
