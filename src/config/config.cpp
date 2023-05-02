@@ -172,6 +172,10 @@ void Config::load(json &config)
     if (config.contains("logExecutorServerInput") && config["logExecutorServerInput"].is_boolean())
         logExecutorServerInput = config["logExecutorServerInput"];
 
+    logExecutorServerInputGasThreshold = 0;
+    if (config.contains("logExecutorServerInputGasThreshold") && config["logExecutorServerInputGasThreshold"].is_number())
+        logExecutorServerInputGasThreshold = config["logExecutorServerInputGasThreshold"];
+
     logExecutorServerResponses = false;
     if (config.contains("logExecutorServerResponses") && config["logExecutorServerResponses"].is_boolean())
         logExecutorServerResponses = config["logExecutorServerResponses"];
@@ -552,6 +556,10 @@ void Config::print(void)
         zklog.info("    opcodeTracer=true");
     if (logRemoteDbReads)
         zklog.info("    logRemoteDbReads=true");
+    if (logExecutorServerInput)
+        zklog.info("    logExecutorServerInput=true");
+    if (logExecutorServerInputGasThreshold)
+        zklog.info("    logExecutorServerInputGasThreshold=true");
     if (logExecutorServerResponses)
         zklog.info("    logExecutorServerResponses=true");
     if (logExecutorServerTxs)

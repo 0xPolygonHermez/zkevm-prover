@@ -27,10 +27,10 @@
 //#define LOG_FILENAME // If defined, logs ROM compilation file name and line number
 #define LOG_TIME // If defined, logs time differences to measure performance
 //#define LOG_TIME_STATISTICS // If defined, generates main executor statistics for main operations
-//#define LOG_TIME_STATISTICS_HASHDB_REMOTE // If defined, generates remote hashdb statistics
-//#define LOG_TIME_STATISTICS_HASHDB // If defined, generates hashdb statistics
-//#define LOG_TIME_STATISTICS_MAIN_EXECUTOR
-#define TIME_METRIC_TABLE
+//#define LOG_TIME_STATISTICS_STATEDB_REMOTE // If defined, generates remote statedb statistics
+//#define LOG_TIME_STATISTICS_STATEDB // If defined, generates statedb statistics
+#define LOG_TIME_STATISTICS_MAIN_EXECUTOR
+//#define TIME_METRIC_TABLE
 //#define LOG_TXS
 //#define LOG_SERVICE
 #define LOG_SERVICE_EXECUTOR_INPUT
