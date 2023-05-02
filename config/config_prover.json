@@ -45,6 +45,7 @@
     "opcodeTracer": false,
     "logRemoteDbReads": false,
     "logExecutorServerInput": false,
+    "logExecutorServerInputGasThreshold": 0,
     "logExecutorServerResponses": false,
     "logExecutorServerTxs": true,
 
