@@ -8,23 +8,28 @@ zkLog::zkLog ()
     pthread_mutex_init(&mutex, NULL);
 }
 
+void zkLog::setPrefix ( const string &_prefix)
+{
+    prefix = _prefix;
+}
+
 void zkLog::info (const string &message)
 {
     lock();
-    cout << getTimestamp() << " " << message << endl;
+    cout << getTimestamp() << " " << prefix << message << endl;
     unlock();
 }
 
 void zkLog::warning (const string &message)
 {
     lock();
-    cout << getTimestamp() << " zkWarning: " << message << endl;
+    cout << getTimestamp() << " " << prefix << "zkWarning: " << message << endl;
     unlock();
 }
 
 void zkLog::error (const string &message)
 {
     lock();
-    cerr << getTimestamp() << " zkError: " << message << endl << flush;
+    cerr << getTimestamp() << " " << prefix << "zkError: " << message << endl << flush;
     unlock();
 }

@@ -273,6 +273,32 @@ int main(int argc, char **argv)
 {
     /* CONFIG */
 
+    if (argc == 2)
+    {
+        if ((strcmp(argv[1], "-v") == 0) || (strcmp(argv[1], "--version") == 0))
+        {
+            // If requested to only print the version, then exit the program
+            return 0;
+        }
+    }
+
+    // Parse the name of the configuration file
+    char *pConfigFile = (char *)"config/config.json";
+    if (argc == 3)
+    {
+        if ((strcmp(argv[1], "-c") == 0) || (strcmp(argv[1], "--config") == 0))
+        {
+            pConfigFile = argv[2];
+        }
+    }
+
+    // Create one instance of Config based on the contents of the file config.json
+    json configJson;
+    file2json(pConfigFile, configJson);
+    Config config;
+    config.load(configJson);
+    zklog.setPrefix(config.proverID.substr(0, 7) + " "); // Set the logs prefix
+
     // Print the zkProver version
     zklog.info("Version: " + string(ZKEVM_PROVER_VERSION));
 
@@ -292,35 +318,9 @@ int main(int argc, char **argv)
     zklog.info("DEBUG defined");
 #endif
 
-    if (argc == 2)
-    {
-        if ((strcmp(argv[1], "-v") == 0) || (strcmp(argv[1], "--version") == 0))
-        {
-            // If requested to only print the version, then exit the program
-            return 0;
-        }
-    }
+    config.print();
 
     TimerStart(WHOLE_PROCESS);
-
-    // Parse the name of the configuration file
-    char *pConfigFile = (char *)"config/config.json";
-    if (argc == 3)
-    {
-        if ((strcmp(argv[1], "-c") == 0) || (strcmp(argv[1], "--config") == 0))
-        {
-            pConfigFile = argv[2];
-        }
-    }
-
-    // Create one instance of Config based on the contents of the file config.json
-    TimerStart(LOAD_CONFIG_JSON);
-    json configJson;
-    file2json(pConfigFile, configJson);
-    Config config;
-    config.load(configJson);
-    config.print();
-    TimerStopAndLog(LOAD_CONFIG_JSON);
 
     // Check required files presence
     bool bError = false;

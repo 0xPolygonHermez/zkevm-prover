@@ -532,7 +532,7 @@ using grpc::Status;
     {
         json inputJson;
         proverRequest.input.save(inputJson);
-        zklog.info("Input=" + inputJson.dump());
+        zklog.info("TP=" + to_string(double(execGas)/execTime) + "gas/s Input=" + inputJson.dump());
     }
     unlock();
 #endif
