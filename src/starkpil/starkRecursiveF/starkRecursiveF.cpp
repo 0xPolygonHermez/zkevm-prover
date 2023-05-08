@@ -11,16 +11,16 @@
 #define NUM_CHALLENGES 8
 
 StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config(config),
-                                                         starkInfo(config, config.recursivefStarkInfo),
-                                                         zi(config.generateProof() ? starkInfo.starkStruct.nBits : 0,
-                                                            config.generateProof() ? starkInfo.starkStruct.nBitsExt : 0),
-                                                         N(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
-                                                         NExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
-                                                         ntt(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
-                                                         nttExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
-                                                         x_n(config.generateProof() ? N : 0, config.generateProof() ? 1 : 0),
-                                                         x_2ns(config.generateProof() ? NExtended : 0, config.generateProof() ? 1 : 0),
-                                                         pAddress(_pAddress)
+                                                                          starkInfo(config, config.recursivefStarkInfo),
+                                                                          zi(config.generateProof() ? starkInfo.starkStruct.nBits : 0,
+                                                                             config.generateProof() ? starkInfo.starkStruct.nBitsExt : 0),
+                                                                          N(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
+                                                                          NExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
+                                                                          ntt(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
+                                                                          nttExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
+                                                                          x_n(config.generateProof() ? N : 0, config.generateProof() ? 1 : 0),
+                                                                          x_2ns(config.generateProof() ? NExtended : 0, config.generateProof() ? 1 : 0),
+                                                                          pAddress(_pAddress)
 {
     // Avoid unnecessary initialization if we are not going to generate any proof
     if (!config.generateProof())
@@ -109,7 +109,6 @@ StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config
     cm4_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm4_2ns]];
     p_q_2ns = &mem[starkInfo.mapOffsets.section[eSection::q_2ns]];
     p_f_2ns = &mem[starkInfo.mapOffsets.section[eSection::f_2ns]];
-
 }
 
 StarkRecursiveF::~StarkRecursiveF()
@@ -142,9 +141,9 @@ StarkRecursiveF::~StarkRecursiveF()
     free(pBuffer);
 }
 
-void StarkRecursiveF::genProof( FRIProofC12 &proof, Goldilocks::Element publicInputs[8])
+void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInputs[8])
 {
-    
+
     StarkRecursiveFSteps recurisveFsteps;
     StarkRecursiveFSteps *steps = &recurisveFsteps;
     // Initialize vars
@@ -154,8 +153,6 @@ void StarkRecursiveF::genProof( FRIProofC12 &proof, Goldilocks::Element publicIn
     Polinomial xDivXSubXi(NExtended, FIELD_EXTENSION);
     Polinomial xDivXSubWXi(NExtended, FIELD_EXTENSION);
     Polinomial challenges(NUM_CHALLENGES, FIELD_EXTENSION);
-
-
 
     CommitPolsStarks cmPols(pAddress, starkInfo.mapDeg.section[eSection::cm1_n]);
 
@@ -253,13 +250,13 @@ void StarkRecursiveF::genProof( FRIProofC12 &proof, Goldilocks::Element publicIn
     transcript.getField((uint64_t *)challenges[2]); // gamma
     transcript.getField((uint64_t *)challenges[3]); // betta
 
-    TimerStart(STARK_RECURSIVE_F_STEP_3_CALCULATE_EXPS);
+    TimerStart(STARK_RECURSIVE_F_STEP_3_PREV_CALCULATE_EXPS);
 #pragma omp parallel for
     for (uint64_t i = 0; i < N; i++)
     {
         steps->step3prev_first(params, i);
     }
-    TimerStopAndLog(STARK_RECURSIVE_F_STEP_3_CALCULATE_EXPS);
+    TimerStopAndLog(STARK_RECURSIVE_F_STEP_3_PREV_CALCULATE_EXPS);
     TimerStart(STARK_RECURSIVE_F_STEP_3_CALCULATE_Z);
 
     for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
@@ -286,6 +283,14 @@ void StarkRecursiveF::genProof( FRIProofC12 &proof, Goldilocks::Element publicIn
         Polinomial::calculateZ(z, pNum, pDen);
     }
     TimerStopAndLog(STARK_RECURSIVE_F_STEP_3_CALCULATE_Z);
+
+    TimerStart(STARK_RECURSIVE_F_STEP_3_CALCULATE_EXPS);
+    #pragma omp parallel for
+    for (uint64_t i = 0; i < N; i++)
+    {
+        steps->step3_first(params, i);
+    }
+    TimerStopAndLog(STARK_RECURSIVE_F_STEP_3_CALCULATE_EXPS);
 
     TimerStart(STARK_RECURSIVE_F_STEP_3_LDE_AND_MERKLETREE);
 
