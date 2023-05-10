@@ -341,6 +341,94 @@ using grpc::Status;
     return Status::OK;
 }
 
+::grpc::Status HashDBServiceImpl::GetFlushData (::grpc::ServerContext* context, const ::hashdb::v1::GetFlushDataRequest* request, ::hashdb::v1::GetFlushDataResponse* response)
+{
+#ifdef LOG_HASHDB_SERVICE
+    zklog.info("HashDBServiceImpl::GetFlushData called.");
+#endif
+    try
+    {
+        // Declare local variables to store the result
+        uint64_t lastSentFlushId;
+        vector<FlushData> nodes;
+        vector<FlushData> nodesUpdate;
+        vector<FlushData> program;
+        vector<FlushData> programUpdate;
+        string nodesStateRoot;
+
+        // Call the local getFlushData method
+        pHashDB->getFlushData(request->last_got_flush_id(), lastSentFlushId, nodes, nodesUpdate, program, programUpdate, nodesStateRoot);
+
+        // Set the last sent flush ID
+        response->set_last_sent_flush_id(lastSentFlushId);
+
+        // Set the nodes
+        for (uint64_t i=0; i<nodes.size(); i++)
+        {
+            hashdb::v1::FlushData * pFlushData = response->add_nodes();
+            if (pFlushData == NULL)
+            {
+                zklog.error("HashDBServiceImpl::GetFlushData() failed calling response->add_nodes()");
+                exitProcess();
+            }
+            pFlushData->set_key(nodes[i].key);
+            pFlushData->set_value(nodes[i].value);
+        }
+
+        // Set the nodes update
+        for (uint64_t i=0; i<nodesUpdate.size(); i++)
+        {
+            hashdb::v1::FlushData * pFlushData = response->add_nodes_update();
+            if (pFlushData == NULL)
+            {
+                zklog.error("HashDBServiceImpl::GetFlushData() failed calling response->add_nodes_update()");
+                exitProcess();
+            }
+            pFlushData->set_key(nodes[i].key);
+            pFlushData->set_value(nodesUpdate[i].value);
+        }
+
+        // Set the program
+        for (uint64_t i=0; i<program.size(); i++)
+        {
+            hashdb::v1::FlushData * pFlushData = response->add_program();
+            if (pFlushData == NULL)
+            {
+                zklog.error("HashDBServiceImpl::GetFlushData() failed calling response->add_program()");
+                exitProcess();
+            }
+            pFlushData->set_key(nodes[i].key);
+            pFlushData->set_value(program[i].value);
+        }
+
+        // Set the program update
+        for (uint64_t i=0; i<programUpdate.size(); i++)
+        {
+            hashdb::v1::FlushData * pFlushData = response->add_program_update();
+            if (pFlushData == NULL)
+            {
+                zklog.error("HashDBServiceImpl::GetFlushData() failed calling response->add_program_update()");
+                exitProcess();
+            }
+            pFlushData->set_key(nodes[i].key);
+            pFlushData->set_value(programUpdate[i].value);
+        }
+
+        // Set the nodes state root
+        response->set_nodes_state_root(nodesStateRoot);
+    }
+    catch (const std::exception &e)
+    {
+        zklog.error("HashDBServiceImpl::GetFlushData() exception: " + string(e.what()));
+        return Status::CANCELLED;
+    }
+#ifdef LOG_HASHDB_SERVICE
+    zklog.info("HashDBServiceImpl::GetFlushData() completed.");
+#endif
+    
+    return Status::OK;
+}
+
 
 
 

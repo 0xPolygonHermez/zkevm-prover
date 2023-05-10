@@ -23,6 +23,7 @@
     "runMemAlignSMTest": false,
     "runSHA256Test": false,
     "runBlakeTest": false,
+    "runECRecoverTest": false,
 
     "executeInParallel": false,
     "useMainExecGenerated": true,
@@ -58,6 +59,7 @@
 
     "hashDBServerPort": 50061,
     "hashDBURL": "local",
+    "dbCacheSynchURL_disabled": "127.0.0.1:50061",
 
     "aggregatorServerPort": 50081,
     "aggregatorClientPort": 50081,

@@ -63,7 +63,10 @@ void runHashDBTest (const Config& config)
             cout << getTimestamp() << " i=" << i << endl;
             printMemoryInfo(true);
         }
-        if (i%100==0) pHashDB->flush(flushId, lastSentFlushId);
+        if (i%100==0)
+        {
+            pHashDB->flush(flushId, lastSentFlushId);
+        }
     }
 
     #endif

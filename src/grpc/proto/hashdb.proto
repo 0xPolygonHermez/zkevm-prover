@@ -29,6 +29,7 @@ service HashDBService {
     rpc LoadProgramDB(LoadProgramDBRequest) returns (google.protobuf.Empty) {}
     rpc Flush (google.protobuf.Empty) returns (FlushResponse) {}
     rpc GetFlushStatus (google.protobuf.Empty) returns (GetFlushStatusResponse) {}
+    rpc GetFlushData (GetFlushDataRequest) returns (GetFlushDataResponse) {}
 }
 
 ///////////////////
@@ -105,6 +106,14 @@ message LoadDBRequest {
 message LoadProgramDBRequest {
     map<string, bytes> input_program_db = 1;
     bool persistent = 2;
+}
+
+/**
+ * @dev GetFlushDataRequest
+ * @param {last_got_flush_id} - last flush ID got using this method, or 0 if it never was called before
+ */
+message GetFlushDataRequest {
+    uint64 last_got_flush_id = 1;
 }
 
 /////////////////////
@@ -212,6 +221,26 @@ message GetFlushStatusResponse {
 }
 
 /**
+ * @dev GetFlushDataResponse
+ * @param {last_sent_flush_id} - id of the last flush data sent to database
+ * @param {nodes} - data to insert in the nodes table
+ * @param {nodes_update} - data to update in the nodes table
+ * @param {program} - data to insert in the program table
+ * @param {program_update} - data to update in the program table
+ * @param {nodes_state_root} - nodes state root to update in the nodes table
+ * @param {result} - result code
+ */
+message GetFlushDataResponse {
+    uint64 last_sent_flush_id = 1;
+    repeated FlushData nodes = 2;
+    repeated FlushData nodes_update = 3;
+    repeated FlushData program = 4;
+    repeated FlushData program_update = 5;
+    string nodes_state_root = 6;
+    ResultCode result = 7;
+}
+
+/**
  * @dev Array of 4 FE
  * @param {fe0} - Field Element value for pos 0
  * @param {fe1} - Field Element value for pos 1
@@ -239,6 +268,16 @@ message FeList {
 */
 message SiblingList {
     repeated uint64 sibling = 1;
+}
+
+/**
+ * @dev Flush Data
+ * @param {key} - hash key
+ * @param {value} - string value
+*/
+message FlushData {
+    string key = 1;
+    string value = 2;
 }
 
 /**

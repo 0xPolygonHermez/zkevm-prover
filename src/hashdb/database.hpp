@@ -12,6 +12,7 @@
 #include "database_map.hpp"
 #include "database_cache.hpp"
 #include "zkassert.hpp"
+#include "flush_data.hpp"
 
 using namespace std;
 
@@ -26,12 +27,28 @@ public:
 class MultiWriteData
 {
 public:
-    string program;
-    string programUpdate;
-    string nodes;
-    string nodesUpdate;
+    // Flush data
+    vector<FlushData> program;
+    vector<FlushData> programUpdate;
+    vector<FlushData> nodes;
+    vector<FlushData> nodesUpdate;
     string nodesStateRoot;
 
+    // SQL queries
+    string programQuery;
+    string programUpdateQuery;
+    string nodesQuery;
+    string nodesUpdateQuery;
+    string nodesStateRootQuery;
+
+    // Query states
+    bool programQueryReadyToSend;
+    bool programUpdateQueryReadyToSend;
+    bool nodesQueryReadyToSend;
+    bool nodesUpdateQueryReadyToSend;
+    bool nodesStateRootQueryReadyToSend;
+
+    // Counters
     uint64_t programCounter;
     uint64_t programUpdateCounter;
     uint64_t nodesCounter;
@@ -47,6 +64,20 @@ public:
         nodesUpdate.clear();
         nodesStateRoot.clear();
 
+        // Reset queries
+        programQuery.clear();
+        programUpdateQuery.clear();
+        nodesQuery.clear();
+        nodesUpdateQuery.clear();
+        nodesStateRootQuery.clear();
+
+        // Reset query states
+        programQueryReadyToSend = false;
+        programUpdateQueryReadyToSend = false;
+        nodesQueryReadyToSend = false;
+        nodesUpdateQueryReadyToSend = false;
+        nodesStateRootQueryReadyToSend = false;
+
         // Reset counters
         programCounter = 0;
         programUpdateCounter = 0;
@@ -59,6 +90,11 @@ public:
     {
         return (nodes.size() == 0) && (nodesUpdate.size() == 0) && (nodesStateRoot.size() == 0) && (program.size() == 0) && (programUpdate.size() == 0);
     }
+
+    bool QueriesEmpty (void)
+    {
+        return (nodesQuery.size() == 0) && (nodesUpdateQuery.size() == 0) && (nodesStateRootQuery.size() == 0) && (programQuery.size() == 0) && (programUpdateQuery.size() == 0);
+    }
 };
 
 class MultiWrite
@@ -68,10 +104,12 @@ public:
     uint64_t lastFlushId;
     uint64_t lastSentFlushId;
     uint64_t sendingFlushId;
+
     uint64_t processingDataIndex; // Index of data to store data of batches being processed
     uint64_t sendingDataIndex; // Index of data being sent to database
+    uint64_t synchronizingDataIndex; // Index of data being synchronized to other database caches
 
-    MultiWriteData data[2];
+    MultiWriteData data[3];
 
     pthread_mutex_t mutex; // Mutex to protect the multi write queues
     
@@ -81,7 +119,8 @@ public:
         lastSentFlushId(0),
         sendingFlushId(0),
         processingDataIndex(0),
-        sendingDataIndex(1)
+        sendingDataIndex(2),
+        synchronizingDataIndex(2)
     {
         // Init mutex
         pthread_mutex_init(&mutex, NULL);
@@ -89,17 +128,18 @@ public:
         // Reset data
         data[0].Reset();
         data[1].Reset();
+        data[2].Reset();
     };
 
     // Lock/Unlock
     void Lock(void) { pthread_mutex_lock(&mutex); };
     void Unlock(void) { pthread_mutex_unlock(&mutex); };
-    bool IsEmpty(void) { return data[0].IsEmpty() && data[1].IsEmpty(); };
+    bool IsEmpty(void) { return data[0].IsEmpty() && data[1].IsEmpty() && data[2].IsEmpty(); };
 };
 
 class Database
 {
-private:
+public:
     Goldilocks &fr;
     const Config &config;
 
@@ -132,8 +172,10 @@ private:
 public:
     MultiWrite multiWrite;
     sem_t senderSem; // Semaphore to wakeup database sender thread when flush() is called
+    sem_t getFlushDataSem; // Semaphore to unblock getFlushData() callers when new data is available
 private:
     pthread_t senderPthread; // Database sender thread
+    pthread_t cacheSynchPthread; // Cache synchronization thread
 
 private:
     // Remote database based on Postgres (PostgreSQL)
@@ -179,6 +221,9 @@ public:
     // Send multi write data to remote database; called by dbSenderThread
     zkresult sendData(void);
 
+    // Get flush data, written to database by dbSenderThread; it blocks
+    zkresult getFlushData(uint64_t lastGotFlushId, uint64_t &lastSentFlushId, vector<FlushData> (&nodes), vector<FlushData> (&nodesUpdate), vector<FlushData> (&program), vector<FlushData> (&programUpdate), string &nodesStateRoot);
+
     // Print tree
     void printTree(const string &root, string prefix = "");
 
@@ -186,7 +231,11 @@ public:
     void clearCache(void);
 };
 
+// Thread to send data to database
 void *dbSenderThread(void *arg);
+
+// Thread to synchronize cache from master hash DB server
+void *dbCacheSynchThread(void *arg);
 
 void loadDb2MemCache(const Config config);
 

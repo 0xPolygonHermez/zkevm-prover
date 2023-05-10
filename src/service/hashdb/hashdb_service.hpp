@@ -26,6 +26,7 @@ public:
     ::grpc::Status LoadProgramDB(::grpc::ServerContext* context, const ::hashdb::v1::LoadProgramDBRequest* request, ::google::protobuf::Empty* response);
     ::grpc::Status Flush (::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::FlushResponse* response) override;
     ::grpc::Status GetFlushStatus (::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetFlushStatusResponse* response) override;
+    ::grpc::Status GetFlushData (::grpc::ServerContext* context, const ::hashdb::v1::GetFlushDataRequest* request, ::hashdb::v1::GetFlushDataResponse* response) override;
 };
 
 #endif

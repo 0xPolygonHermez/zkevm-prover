@@ -33,6 +33,7 @@
 #include "blake_test.hpp"
 #include "goldilocks_precomputed.hpp"
 #include "zklog.hpp"
+#include "ecrecover_test.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -528,6 +529,12 @@ int main(int argc, char **argv)
     if (config.runBlakeTest)
     {
         Blake2b256_Test(fr, config);
+    }
+
+    // Test ECRecover
+    if (config.runECRecoverTest)
+    {
+        ECRecoverTest();
     }
 
     // If there is nothing else to run, exit normally

@@ -53,6 +53,7 @@ public:
     // ROM labels
     uint64_t finalizeExecutionLabel;
     uint64_t checkAndSaveFromLabel;
+    uint64_t ecrecoverStoreArgsLabel;
 
     // Constructor
     MainExecutor(Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config);

@@ -102,6 +102,13 @@ class HashDBService final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::GetFlushStatusResponse>> PrepareAsyncGetFlushStatus(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::GetFlushStatusResponse>>(PrepareAsyncGetFlushStatusRaw(context, request, cq));
     }
+    virtual ::grpc::Status GetFlushData(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest& request, ::hashdb::v1::GetFlushDataResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::GetFlushDataResponse>> AsyncGetFlushData(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::GetFlushDataResponse>>(AsyncGetFlushDataRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::GetFlushDataResponse>> PrepareAsyncGetFlushData(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::GetFlushDataResponse>>(PrepareAsyncGetFlushDataRaw(context, request, cq));
+    }
     class experimental_async_interface {
      public:
       virtual ~experimental_async_interface() {}
@@ -201,6 +208,18 @@ class HashDBService final {
       #else
       virtual void GetFlushStatus(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetFlushStatusResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
       #endif
+      virtual void GetFlushData(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest* request, ::hashdb::v1::GetFlushDataResponse* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void GetFlushData(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetFlushDataResponse* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void GetFlushData(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest* request, ::hashdb::v1::GetFlushDataResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void GetFlushData(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest* request, ::hashdb::v1::GetFlushDataResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void GetFlushData(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetFlushDataResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void GetFlushData(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetFlushDataResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
     };
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     typedef class experimental_async_interface async_interface;
@@ -226,6 +245,8 @@ class HashDBService final {
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::FlushResponse>* PrepareAsyncFlushRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::GetFlushStatusResponse>* AsyncGetFlushStatusRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::GetFlushStatusResponse>* PrepareAsyncGetFlushStatusRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::GetFlushDataResponse>* AsyncGetFlushDataRaw(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::GetFlushDataResponse>* PrepareAsyncGetFlushDataRaw(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest& request, ::grpc::CompletionQueue* cq) = 0;
   };
   class Stub final : public StubInterface {
    public:
@@ -285,6 +306,13 @@ class HashDBService final {
     }
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetFlushStatusResponse>> PrepareAsyncGetFlushStatus(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetFlushStatusResponse>>(PrepareAsyncGetFlushStatusRaw(context, request, cq));
+    }
+    ::grpc::Status GetFlushData(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest& request, ::hashdb::v1::GetFlushDataResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetFlushDataResponse>> AsyncGetFlushData(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetFlushDataResponse>>(AsyncGetFlushDataRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetFlushDataResponse>> PrepareAsyncGetFlushData(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetFlushDataResponse>>(PrepareAsyncGetFlushDataRaw(context, request, cq));
     }
     class experimental_async final :
       public StubInterface::experimental_async_interface {
@@ -385,6 +413,18 @@ class HashDBService final {
       #else
       void GetFlushStatus(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetFlushStatusResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
       #endif
+      void GetFlushData(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest* request, ::hashdb::v1::GetFlushDataResponse* response, std::function<void(::grpc::Status)>) override;
+      void GetFlushData(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetFlushDataResponse* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void GetFlushData(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest* request, ::hashdb::v1::GetFlushDataResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void GetFlushData(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest* request, ::hashdb::v1::GetFlushDataResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void GetFlushData(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetFlushDataResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void GetFlushData(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetFlushDataResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
      private:
       friend class Stub;
       explicit experimental_async(Stub* stub): stub_(stub) { }
@@ -412,6 +452,8 @@ class HashDBService final {
     ::grpc::ClientAsyncResponseReader< ::hashdb::v1::FlushResponse>* PrepareAsyncFlushRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetFlushStatusResponse>* AsyncGetFlushStatusRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetFlushStatusResponse>* PrepareAsyncGetFlushStatusRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetFlushDataResponse>* AsyncGetFlushDataRaw(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetFlushDataResponse>* PrepareAsyncGetFlushDataRaw(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest& request, ::grpc::CompletionQueue* cq) override;
     const ::grpc::internal::RpcMethod rpcmethod_Set_;
     const ::grpc::internal::RpcMethod rpcmethod_Get_;
     const ::grpc::internal::RpcMethod rpcmethod_SetProgram_;
@@ -420,6 +462,7 @@ class HashDBService final {
     const ::grpc::internal::RpcMethod rpcmethod_LoadProgramDB_;
     const ::grpc::internal::RpcMethod rpcmethod_Flush_;
     const ::grpc::internal::RpcMethod rpcmethod_GetFlushStatus_;
+    const ::grpc::internal::RpcMethod rpcmethod_GetFlushData_;
   };
   static std::unique_ptr<Stub> NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
 
@@ -435,6 +478,7 @@ class HashDBService final {
     virtual ::grpc::Status LoadProgramDB(::grpc::ServerContext* context, const ::hashdb::v1::LoadProgramDBRequest* request, ::google::protobuf::Empty* response);
     virtual ::grpc::Status Flush(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::FlushResponse* response);
     virtual ::grpc::Status GetFlushStatus(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetFlushStatusResponse* response);
+    virtual ::grpc::Status GetFlushData(::grpc::ServerContext* context, const ::hashdb::v1::GetFlushDataRequest* request, ::hashdb::v1::GetFlushDataResponse* response);
   };
   template <class BaseClass>
   class WithAsyncMethod_Set : public BaseClass {
@@ -596,7 +640,27 @@ class HashDBService final {
       ::grpc::Service::RequestAsyncUnary(7, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
-  typedef WithAsyncMethod_Set<WithAsyncMethod_Get<WithAsyncMethod_SetProgram<WithAsyncMethod_GetProgram<WithAsyncMethod_LoadDB<WithAsyncMethod_LoadProgramDB<WithAsyncMethod_Flush<WithAsyncMethod_GetFlushStatus<Service > > > > > > > > AsyncService;
+  template <class BaseClass>
+  class WithAsyncMethod_GetFlushData : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_GetFlushData() {
+      ::grpc::Service::MarkMethodAsync(8);
+    }
+    ~WithAsyncMethod_GetFlushData() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetFlushData(::grpc::ServerContext* /*context*/, const ::hashdb::v1::GetFlushDataRequest* /*request*/, ::hashdb::v1::GetFlushDataResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestGetFlushData(::grpc::ServerContext* context, ::hashdb::v1::GetFlushDataRequest* request, ::grpc::ServerAsyncResponseWriter< ::hashdb::v1::GetFlushDataResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(8, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  typedef WithAsyncMethod_Set<WithAsyncMethod_Get<WithAsyncMethod_SetProgram<WithAsyncMethod_GetProgram<WithAsyncMethod_LoadDB<WithAsyncMethod_LoadProgramDB<WithAsyncMethod_Flush<WithAsyncMethod_GetFlushStatus<WithAsyncMethod_GetFlushData<Service > > > > > > > > > AsyncService;
   template <class BaseClass>
   class ExperimentalWithCallbackMethod_Set : public BaseClass {
    private:
@@ -973,11 +1037,58 @@ class HashDBService final {
     #endif
       { return nullptr; }
   };
+  template <class BaseClass>
+  class ExperimentalWithCallbackMethod_GetFlushData : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithCallbackMethod_GetFlushData() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(8,
+          new ::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::GetFlushDataRequest, ::hashdb::v1::GetFlushDataResponse>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::hashdb::v1::GetFlushDataRequest* request, ::hashdb::v1::GetFlushDataResponse* response) { return this->GetFlushData(context, request, response); }));}
+    void SetMessageAllocatorFor_GetFlushData(
+        ::grpc::experimental::MessageAllocator< ::hashdb::v1::GetFlushDataRequest, ::hashdb::v1::GetFlushDataResponse>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(8);
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(8);
+    #endif
+      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::GetFlushDataRequest, ::hashdb::v1::GetFlushDataResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~ExperimentalWithCallbackMethod_GetFlushData() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetFlushData(::grpc::ServerContext* /*context*/, const ::hashdb::v1::GetFlushDataRequest* /*request*/, ::hashdb::v1::GetFlushDataResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* GetFlushData(
+      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::GetFlushDataRequest* /*request*/, ::hashdb::v1::GetFlushDataResponse* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* GetFlushData(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::hashdb::v1::GetFlushDataRequest* /*request*/, ::hashdb::v1::GetFlushDataResponse* /*response*/)
+    #endif
+      { return nullptr; }
+  };
   #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-  typedef ExperimentalWithCallbackMethod_Set<ExperimentalWithCallbackMethod_Get<ExperimentalWithCallbackMethod_SetProgram<ExperimentalWithCallbackMethod_GetProgram<ExperimentalWithCallbackMethod_LoadDB<ExperimentalWithCallbackMethod_LoadProgramDB<ExperimentalWithCallbackMethod_Flush<ExperimentalWithCallbackMethod_GetFlushStatus<Service > > > > > > > > CallbackService;
+  typedef ExperimentalWithCallbackMethod_Set<ExperimentalWithCallbackMethod_Get<ExperimentalWithCallbackMethod_SetProgram<ExperimentalWithCallbackMethod_GetProgram<ExperimentalWithCallbackMethod_LoadDB<ExperimentalWithCallbackMethod_LoadProgramDB<ExperimentalWithCallbackMethod_Flush<ExperimentalWithCallbackMethod_GetFlushStatus<ExperimentalWithCallbackMethod_GetFlushData<Service > > > > > > > > > CallbackService;
   #endif
 
-  typedef ExperimentalWithCallbackMethod_Set<ExperimentalWithCallbackMethod_Get<ExperimentalWithCallbackMethod_SetProgram<ExperimentalWithCallbackMethod_GetProgram<ExperimentalWithCallbackMethod_LoadDB<ExperimentalWithCallbackMethod_LoadProgramDB<ExperimentalWithCallbackMethod_Flush<ExperimentalWithCallbackMethod_GetFlushStatus<Service > > > > > > > > ExperimentalCallbackService;
+  typedef ExperimentalWithCallbackMethod_Set<ExperimentalWithCallbackMethod_Get<ExperimentalWithCallbackMethod_SetProgram<ExperimentalWithCallbackMethod_GetProgram<ExperimentalWithCallbackMethod_LoadDB<ExperimentalWithCallbackMethod_LoadProgramDB<ExperimentalWithCallbackMethod_Flush<ExperimentalWithCallbackMethod_GetFlushStatus<ExperimentalWithCallbackMethod_GetFlushData<Service > > > > > > > > > ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_Set : public BaseClass {
    private:
@@ -1110,6 +1221,23 @@ class HashDBService final {
     }
     // disable synchronous version of this method
     ::grpc::Status GetFlushStatus(::grpc::ServerContext* /*context*/, const ::google::protobuf::Empty* /*request*/, ::hashdb::v1::GetFlushStatusResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_GetFlushData : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_GetFlushData() {
+      ::grpc::Service::MarkMethodGeneric(8);
+    }
+    ~WithGenericMethod_GetFlushData() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetFlushData(::grpc::ServerContext* /*context*/, const ::hashdb::v1::GetFlushDataRequest* /*request*/, ::hashdb::v1::GetFlushDataResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1272,6 +1400,26 @@ class HashDBService final {
     }
     void RequestGetFlushStatus(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
       ::grpc::Service::RequestAsyncUnary(7, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_GetFlushData : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_GetFlushData() {
+      ::grpc::Service::MarkMethodRaw(8);
+    }
+    ~WithRawMethod_GetFlushData() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetFlushData(::grpc::ServerContext* /*context*/, const ::hashdb::v1::GetFlushDataRequest* /*request*/, ::hashdb::v1::GetFlushDataResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestGetFlushData(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(8, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -1579,6 +1727,44 @@ class HashDBService final {
       { return nullptr; }
   };
   template <class BaseClass>
+  class ExperimentalWithRawCallbackMethod_GetFlushData : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithRawCallbackMethod_GetFlushData() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(8,
+          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->GetFlushData(context, request, response); }));
+    }
+    ~ExperimentalWithRawCallbackMethod_GetFlushData() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status GetFlushData(::grpc::ServerContext* /*context*/, const ::hashdb::v1::GetFlushDataRequest* /*request*/, ::hashdb::v1::GetFlushDataResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* GetFlushData(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* GetFlushData(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
   class WithStreamedUnaryMethod_Set : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
@@ -1794,9 +1980,36 @@ class HashDBService final {
     // replace default version of method with streamed unary
     virtual ::grpc::Status StreamedGetFlushStatus(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::google::protobuf::Empty,::hashdb::v1::GetFlushStatusResponse>* server_unary_streamer) = 0;
   };
-  typedef WithStreamedUnaryMethod_Set<WithStreamedUnaryMethod_Get<WithStreamedUnaryMethod_SetProgram<WithStreamedUnaryMethod_GetProgram<WithStreamedUnaryMethod_LoadDB<WithStreamedUnaryMethod_LoadProgramDB<WithStreamedUnaryMethod_Flush<WithStreamedUnaryMethod_GetFlushStatus<Service > > > > > > > > StreamedUnaryService;
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_GetFlushData : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_GetFlushData() {
+      ::grpc::Service::MarkMethodStreamed(8,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::hashdb::v1::GetFlushDataRequest, ::hashdb::v1::GetFlushDataResponse>(
+            [this](::grpc_impl::ServerContext* context,
+                   ::grpc_impl::ServerUnaryStreamer<
+                     ::hashdb::v1::GetFlushDataRequest, ::hashdb::v1::GetFlushDataResponse>* streamer) {
+                       return this->StreamedGetFlushData(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_GetFlushData() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status GetFlushData(::grpc::ServerContext* /*context*/, const ::hashdb::v1::GetFlushDataRequest* /*request*/, ::hashdb::v1::GetFlushDataResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedGetFlushData(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::hashdb::v1::GetFlushDataRequest,::hashdb::v1::GetFlushDataResponse>* server_unary_streamer) = 0;
+  };
+  typedef WithStreamedUnaryMethod_Set<WithStreamedUnaryMethod_Get<WithStreamedUnaryMethod_SetProgram<WithStreamedUnaryMethod_GetProgram<WithStreamedUnaryMethod_LoadDB<WithStreamedUnaryMethod_LoadProgramDB<WithStreamedUnaryMethod_Flush<WithStreamedUnaryMethod_GetFlushStatus<WithStreamedUnaryMethod_GetFlushData<Service > > > > > > > > > StreamedUnaryService;
   typedef Service SplitStreamedService;
-  typedef WithStreamedUnaryMethod_Set<WithStreamedUnaryMethod_Get<WithStreamedUnaryMethod_SetProgram<WithStreamedUnaryMethod_GetProgram<WithStreamedUnaryMethod_LoadDB<WithStreamedUnaryMethod_LoadProgramDB<WithStreamedUnaryMethod_Flush<WithStreamedUnaryMethod_GetFlushStatus<Service > > > > > > > > StreamedService;
+  typedef WithStreamedUnaryMethod_Set<WithStreamedUnaryMethod_Get<WithStreamedUnaryMethod_SetProgram<WithStreamedUnaryMethod_GetProgram<WithStreamedUnaryMethod_LoadDB<WithStreamedUnaryMethod_LoadProgramDB<WithStreamedUnaryMethod_Flush<WithStreamedUnaryMethod_GetFlushStatus<WithStreamedUnaryMethod_GetFlushData<Service > > > > > > > > > StreamedService;
 };
 
 }  // namespace v1

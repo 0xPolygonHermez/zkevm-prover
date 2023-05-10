@@ -12,8 +12,13 @@ using json = nlohmann::json;
 
 HashDBRemote::HashDBRemote (Goldilocks &fr, const Config &config) : fr(fr), config(config)
 {
+	//options = [('grpc.max_message_length', 100 * 1024 * 1024)]
+
+    grpc::ChannelArguments channelArguments;
+    channelArguments.SetMaxReceiveMessageSize(100*1024*1024);
+
     // Create channel
-    std::shared_ptr<grpc_impl::Channel> channel = ::grpc::CreateChannel(config.hashDBURL, grpc::InsecureChannelCredentials());
+    std::shared_ptr<grpc_impl::Channel> channel = ::grpc::CreateCustomChannel(config.hashDBURL, grpc::InsecureChannelCredentials(), channelArguments);
 
     // Create stub (i.e. client)
     stub = new hashdb::v1::HashDBService::Stub(channel);
@@ -326,6 +331,84 @@ zkresult HashDBRemote::getFlushStatus(uint64_t &lastSentFlushId, uint64_t &sendi
 
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
     tms.add("getFlushStatus", TimeDiff(t));
+#endif
+
+    return ZKR_SUCCESS;
+}
+
+zkresult HashDBRemote::getFlushData(uint64_t lastGotFlushId, uint64_t &lastSentFlushId, vector<FlushData> (&nodes), vector<FlushData> (&nodesUpdate), vector<FlushData> (&program), vector<FlushData> (&programUpdate), string &nodesStateRoot)
+{
+#ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
+    gettimeofday(&t, NULL);
+#endif
+    ::grpc::ClientContext context;
+
+    // Prepare the request
+    ::hashdb::v1::GetFlushDataRequest request;
+    request.set_last_got_flush_id(lastGotFlushId);
+
+    // Declare the response
+    ::hashdb::v1::GetFlushDataResponse response;
+
+    // Call the gRPC GetFlushData method
+    grpc::Status s = stub->GetFlushData(&context, request, &response);
+    if (s.error_code() != grpc::StatusCode::OK) {
+        zklog.error("HashDBRemote:getFlushData() GRPC error(" + to_string(s.error_code()) + "): " + s.error_message());
+        return ZKR_HASHDB_GRPC_ERROR;
+    }
+
+    // Copy the last sent flush ID
+    lastSentFlushId = response.last_sent_flush_id();
+
+    // Copy the nodes vector
+    nodes.clear();
+    for (int64_t i=0; i<response.nodes_size(); i++)
+    {
+        const ::hashdb::v1::FlushData &flushDataResponse = response.nodes(i);
+        FlushData flushData;
+        flushData.key = flushDataResponse.key();
+        flushData.value = flushDataResponse.value();
+        nodes.push_back(flushData);
+    }
+
+    // Copy the nodes update vector
+    nodesUpdate.clear();
+    for (int64_t i=0; i<response.nodes_update_size(); i++)
+    {
+        const ::hashdb::v1::FlushData &flushDataResponse = response.nodes_update(i);
+        FlushData flushData;
+        flushData.key = flushDataResponse.key();
+        flushData.value = flushDataResponse.value();
+        nodesUpdate.push_back(flushData);
+    }
+
+    // Copy the program vector
+    program.clear();
+    for (int64_t i=0; i<response.program_size(); i++)
+    {
+        const ::hashdb::v1::FlushData &flushDataResponse = response.program(i);
+        FlushData flushData;
+        flushData.key = flushDataResponse.key();
+        flushData.value = flushDataResponse.value();
+        program.push_back(flushData);
+    }
+
+    // Copy the program update vector
+    programUpdate.clear();
+    for (int64_t i=0; i<response.program_update_size(); i++)
+    {
+        const ::hashdb::v1::FlushData &flushDataResponse = response.program_update(i);
+        FlushData flushData;
+        flushData.key = flushDataResponse.key();
+        flushData.value = flushDataResponse.value();
+        programUpdate.push_back(flushData);
+    }
+
+    // Copy the nodes state root
+    nodesStateRoot = response.nodes_state_root();    
+
+#ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
+    tms.add("getFlushData", TimeDiff(t));
 #endif
 
     return ZKR_SUCCESS;

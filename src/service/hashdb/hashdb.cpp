@@ -198,6 +198,17 @@ zkresult HashDB::getFlushStatus(uint64_t &lastSentFlushId, uint64_t &sendingFlus
     return ZKR_SUCCESS;
 }
 
+zkresult HashDB::getFlushData(uint64_t lastGotFlushId, uint64_t &lastSentFlushId, vector<FlushData> (&nodes), vector<FlushData> (&nodesUpdate), vector<FlushData> (&program), vector<FlushData> (&programUpdate), string &nodesStateRoot)
+{
+    if (!config.dbMultiWrite)
+    {
+        zklog.error("HashDB::getFlushData() called with config.dbMultiWrite=false");
+        return ZKR_DB_ERROR;
+    }
+
+    return db.getFlushData(lastGotFlushId, lastSentFlushId, nodes, nodesUpdate, program, programUpdate, nodesStateRoot);
+}
+
 void HashDB::clearCache(void)
 {
     db.clearCache();

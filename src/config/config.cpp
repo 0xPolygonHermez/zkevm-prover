@@ -100,6 +100,10 @@ void Config::load(json &config)
     if (config.contains("runBlakeTest") && config["runBlakeTest"].is_boolean())
         runBlakeTest = config["runBlakeTest"];
 
+    runECRecoverTest = false;
+    if (config.contains("runECRecoverTest") && config["runECRecoverTest"].is_boolean())
+        runECRecoverTest = config["runECRecoverTest"];
+
     useMainExecGenerated = false;
     if (config.contains("useMainExecGenerated") && config["useMainExecGenerated"].is_boolean())
         useMainExecGenerated = config["useMainExecGenerated"];
@@ -219,6 +223,10 @@ void Config::load(json &config)
     hashDBURL = "local";
     if (config.contains("hashDBURL") && config["hashDBURL"].is_string())
         hashDBURL = config["hashDBURL"];
+
+    dbCacheSynchURL = "";
+    if (config.contains("dbCacheSynchURL") && config["dbCacheSynchURL"].is_string())
+        dbCacheSynchURL = config["dbCacheSynchURL"];
 
     aggregatorServerPort = 50071;
     if (config.contains("aggregatorServerPort") && config["aggregatorServerPort"].is_number())
@@ -522,6 +530,8 @@ void Config::print(void)
         zklog.info("    runSHA256Test=true");
     if (runBlakeTest)
         zklog.info("    runBlakeTest=true");
+    if (runECRecoverTest)
+        zklog.info("    runECRecoverTest=true");
 
     if (executeInParallel)
         zklog.info("    executeInParallel=true");
@@ -573,6 +583,7 @@ void Config::print(void)
     zklog.info("    executorClientLoops=" + to_string(executorClientLoops));
     zklog.info("    hashDBServerPort=" + to_string(hashDBServerPort));
     zklog.info("    hashDBURL=" + hashDBURL);
+    zklog.info("    dbCacheSynchURL=" + dbCacheSynchURL);
     zklog.info("    aggregatorServerPort=" + to_string(aggregatorServerPort));
     zklog.info("    aggregatorClientPort=" + to_string(aggregatorClientPort));
     zklog.info("    aggregatorClientHost=" + aggregatorClientHost);

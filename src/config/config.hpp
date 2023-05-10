@@ -37,6 +37,7 @@ public:
     bool runMemAlignSMTest;
     bool runSHA256Test;
     bool runBlakeTest;
+    bool runECRecoverTest;
     
     bool executeInParallel;
     bool useMainExecGenerated;
@@ -72,6 +73,7 @@ public:
 
     uint16_t hashDBServerPort;
     string hashDBURL;
+    string dbCacheSynchURL;
 
     uint16_t aggregatorServerPort;
     uint16_t aggregatorClientPort;

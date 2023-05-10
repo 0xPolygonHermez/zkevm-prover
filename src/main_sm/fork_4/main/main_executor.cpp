@@ -82,8 +82,9 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     // Load ROM data from JSON data
     rom.load(fr, romJson);
 
-    finalizeExecutionLabel = rom.getLabel(string("finalizeExecution"));
-    checkAndSaveFromLabel  = rom.getLabel(string("checkAndSaveFrom"));
+    finalizeExecutionLabel  = rom.getLabel(string("finalizeExecution"));
+    checkAndSaveFromLabel   = rom.getLabel(string("checkAndSaveFrom"));
+    ecrecoverStoreArgsLabel = rom.getLabel(string("ecrecover_store_args"));
 
     // Initialize the Ethereum opcode list: opcode=array position, operation=position content
     ethOpcodeInit();
@@ -245,6 +246,20 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         outfile.close();
         }
 #endif
+
+        /*if (zkPC == ecrecoverStoreArgsLabel)
+        {
+            mpz_class auxScalar;
+
+            fea2scalar(fr, auxScalar, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
+            zklog.info("ecrecover_store_args hash=" + auxScalar.get_str(16));
+            fea2scalar(fr, auxScalar, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
+            zklog.info("ecrecover_store_args r=" + auxScalar.get_str(16));
+            fea2scalar(fr, auxScalar, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]);
+            zklog.info("ecrecover_store_args s=" + auxScalar.get_str(16));
+            fea2scalar(fr, auxScalar, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
+            zklog.info("ecrecover_store_args v=" + auxScalar.get_str(16));
+        }*/
 
 #ifdef LOG_FILENAME
         // Store fileName and line

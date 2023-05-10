@@ -36,6 +36,7 @@ public:
     void loadProgramDB(const DatabaseMap::ProgramMap &input, const bool persistent);
     zkresult flush(uint64_t &flushId, uint64_t &lastSentFlushId);
     zkresult getFlushStatus(uint64_t &lastSentFlushId, uint64_t &sendingFlushId, uint64_t &lastFlushId);
+    zkresult getFlushData(uint64_t lastGotFlushId, uint64_t &lastSentFlushId, vector<FlushData> (&nodes), vector<FlushData> (&nodesUpdate), vector<FlushData> (&program), vector<FlushData> (&programUpdate), string &nodesStateRoot);
     void clearCache(void) {};
 };
 
