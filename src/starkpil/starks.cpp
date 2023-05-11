@@ -65,11 +65,10 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     transcript.getField(challenges[0]); // u
     transcript.getField(challenges[1]); // defVal
     TimerStart(STARK_STEP_2_CALCULATE_EXPS);
-
-    // Calculate exps
     if (nrowsStepBatch > 1)
     {
-        steps->step2prev_parser_first_avx(params, N, nrowsStepBatch);
+        // steps->step2prev_parser_first_avx(params, N, nrowsStepBatch);
+        steps->step2prev_parser_first_avx512(params, N, 8);
     }
     else
     {
@@ -142,10 +141,10 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     transcript.getField(challenges[2]); // gamma
     transcript.getField(challenges[3]); // betta
     TimerStart(STARK_STEP_3_CALCULATE_EXPS);
-
     if (nrowsStepBatch > 1)
     {
-        steps->step3prev_parser_first_avx(params, N, nrowsStepBatch);
+        // steps->step3prev_parser_first_avx(params, N, nrowsStepBatch);
+        steps->step3prev_parser_first_avx512(params, N, 8);
     }
     else
     {
@@ -155,6 +154,35 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
             steps->step3prev_first(params, i);
         }
     }
+#if 0
+    // Debug ============================
+    {
+        std::cout << "DEBUG: " << std::endl;
+        double t1 = omp_get_wtime();
+        uint64_t polsSize = starkInfo.mapTotalN + starkInfo.mapSectionsN.section[eSection::cm3_2ns] * (1 << starkInfo.starkStruct.nBitsExt);
+        uint64_t ncolsDGB = 4529;
+        uint64_t nrowsDGB = polsSize / ncolsDGB;
+        assert(nrowsDGB * ncolsDGB == polsSize);
+        // std::cout << "polsSize: " << polsSize << " " << nrowsDGB << " " << ncolsDGB << std::endl;
+        uint64_t numElementsTreeDBG = MerklehashGoldilocks::getTreeNumElements(nrowsDGB);
+        // std::cout << "numElementsTreeDBG: " << numElementsTreeDBG << std::endl;
+        Goldilocks::Element *treeDBG = new Goldilocks::Element[numElementsTreeDBG];
+        Goldilocks::Element rootDBG[4];
+        PoseidonGoldilocks::merkletree_avx512(treeDBG, (Goldilocks::Element *)pAddress, ncolsDGB, nrowsDGB);
+        MerklehashGoldilocks::root(&(rootDBG[0]), treeDBG, numElementsTreeDBG);
+        double t2 = omp_get_wtime();
+        std::cout << "Time: " << t2 - t1 << std::endl;
+        std::cout << "rootDBG[0]: [ " << Goldilocks::toU64(rootDBG[0]) << " ]" << std::endl;
+        std::cout << "rootDBG[1]: [ " << Goldilocks::toU64(rootDBG[1]) << " ]" << std::endl;
+        std::cout << "rootDBG[2]: [ " << Goldilocks::toU64(rootDBG[2]) << " ]" << std::endl;
+        std::cout << "rootDBG[3]: [ " << Goldilocks::toU64(rootDBG[3]) << " ]" << std::endl;
+        cout << endl;
+        delete[] treeDBG;
+    }
+    // Debug ============================
+    exit(0);
+#endif
+
     TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS);
 
     TimerStart(STARK_STEP_3_CALCULATE_Z_TRANSPOSE);
@@ -174,14 +202,14 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     transposeZRows(pAddress, numCommited, newpols_);
     TimerStopAndLog(STARK_STEP_3_CALCULATE_Z_TRANSPOSE_2);
     TimerStart(STARK_STEP_3_CALCULATE_EXPS_2);
-
-    // Calculate exps
     if (nrowsStepBatch > 1)
     {
-        steps->step3_parser_first_avx(params, N, nrowsStepBatch);
+        // steps->step3_parser_first_avx(params, N, nrowsStepBatch);
+        steps->step3_parser_first_avx512(params, N, 8);
     }
     else
     {
+
 #pragma omp parallel for
         for (uint64_t i = 0; i < N; i++)
         {
@@ -216,10 +244,10 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     uint64_t extendBits = starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits;
     TimerStopAndLog(STARK_STEP_4_INIT);
     TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS);
-
     if (nrowsStepBatch > 1)
     {
-        steps->step42ns_parser_first_avx(params, NExtended, nrowsStepBatch);
+        // steps->step42ns_parser_first_avx(params, NExtended, nrowsStepBatch);
+        steps->step42ns_parser_first_avx512(params, NExtended, 8);
     }
     else
     {
@@ -229,7 +257,6 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
             steps->step42ns_first(params, i);
         }
     }
-
     TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS);
 
     TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_INTT);
@@ -299,6 +326,7 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     }
     ntt.INTT(LEv.address(), LEv.address(), N, 3);
     ntt.INTT(LpEv.address(), LpEv.address(), N, 3);
+
     TimerStopAndLog(STARK_STEP_5_LEv_LpEv);
 
     TimerStart(STARK_STEP_5_EVMAP);
@@ -341,7 +369,8 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     TimerStart(STARK_STEP_5_CALCULATE_EXPS);
     if (nrowsStepBatch > 1)
     {
-        steps->step52ns_parser_first_avx(params, NExtended, nrowsStepBatch);
+        // steps->step52ns_parser_first_avx(params, NExtended, nrowsStepBatch);
+        steps->step52ns_parser_first_avx512(params, NExtended, 8);
     }
     else
     {
