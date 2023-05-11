@@ -38,6 +38,7 @@ public:
     void loadDB(const DatabaseMap::MTMap &inputDB, const bool persistent);
     void loadProgramDB(const DatabaseMap::ProgramMap &inputProgramDB, const bool persistent);
     zkresult flush();
+    void clearCache(void);
 
     // Methods added for testing purposes
     void setAutoCommit(const bool autoCommit);

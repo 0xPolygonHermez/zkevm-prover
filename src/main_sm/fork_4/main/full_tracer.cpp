@@ -64,9 +64,9 @@ set<string> oocErrors = {
 //////////
 
 // Get range from memory
-inline zkresult getFromMemory(Context &ctx, mpz_class &offset, mpz_class &length, string &result)
+inline zkresult getFromMemory(Context &ctx, mpz_class &offset, mpz_class &length, string &result, uint64_t * pContext = NULL)
 {
-    uint64_t offsetCtx = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]) * 0x40000;
+    uint64_t offsetCtx = (pContext != NULL) ? *pContext*0x40000 : ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]) * 0x40000;
     uint64_t addrMem = offsetCtx + 0x20000;
 
     result = "";
@@ -235,7 +235,7 @@ inline void getTransactionHash( string    &to,
                                 string    &rlpTx )
 {
 #ifdef LOG_TX_HASH
-    cout << "FullTracer::getTransactionHash() to=" << to << " value=" << value << " nonce=" << nonce << " gasLimit=" << gasLimit << " gasPrice=" << gasPrice << " data=" << data << " r=0x" << r.get_str(16) << " s=0x" << s.get_str(16) << " v=" << v << endl;
+    zklog.info("FullTracer::getTransactionHash() to=" + to + " value=" + value.get_str(16) + " nonce=" + to_string(nonce) + " gasLimit=" + to_string(gasLimit) + " gasPrice=" + gasPrice.get_str(10) + " data=" + data + " r=0x" + r.get_str(16) + " s=0x" + s.get_str(16) + " v=" + to_string(v));
 #endif
 
     string raw;
@@ -245,13 +245,13 @@ inline void getTransactionHash( string    &to,
     encode(raw, gasLimit);
     if (!encodeHexData(raw, to))
     {
-        cout << "ERROR encoding to" << endl;
+        zklog.error("FullTracer::getTransactionHash() ERROR encoding to");
     }
     encode(raw, value);
 
     if (!encodeHexData(raw, data))
     {
-        cout << "ERROR encoding data" << endl;
+        zklog.error("FullTracer::getTransactionHash() ERROR encoding data");
     }
 
     encode(raw, v);
@@ -265,7 +265,7 @@ inline void getTransactionHash( string    &to,
     txHash = keccak256((const uint8_t *)(rlpTx.c_str()), rlpTx.length());
 
 #ifdef LOG_TX_HASH
-    cout << "FullTracer::getTransactionHash() keccak output txHash=" << txHash << " rlpTx=" << ba2string(rlpTx) << endl;
+    zklog.info("FullTracer::getTransactionHash() keccak output txHash=" + txHash + " rlpTx=" + ba2string(rlpTx));
 #endif
 }
 
@@ -398,7 +398,7 @@ zkresult FullTracer::onError(Context &ctx, const RomCommand &cmd)
     }
 
 #ifdef LOG_FULL_TRACER_ON_ERROR
-    cout << "FullTracer::onError() error=" << lastError << " zkPC=" << *ctx.pZKPC << " rom=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << endl;
+    zklog.info("FullTracer::onError() error=" + lastError + " zkPC=" + to_string(*ctx.pZKPC) + " rom=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr));
 #endif
 #ifdef LOG_TIME_STATISTICS
     tms.add("onError", TimeDiff(t));
@@ -482,7 +482,7 @@ zkresult FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
     it->second.index = indexLog;
 
 #ifdef LOG_FULL_TRACER
-    cout << "FullTracer::onStoreLog() CTX=" << to_string(CTX) << " indexLog=" << indexLog << " isTopic=" << to_string(isTopic) << " data=" << dataString << endl;
+    zklog.info("FullTracer::onStoreLog() CTX=" + to_string(CTX) + " indexLog=" + to_string(indexLog) + " isTopic=" + to_string(isTopic) + " data=" + dataString);
 #endif
 #ifdef LOG_TIME_STATISTICS
     tms.add("onStoreLog", TimeDiff(t));
@@ -675,7 +675,7 @@ zkresult FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
     lastError = "";
 
 #ifdef LOG_FULL_TRACER
-    cout << "FullTracer::onProcessTx() finalTrace.responses.size()=" << finalTrace.responses.size() << endl;
+    zklog.info("FullTracer::onProcessTx() finalTrace.responses.size()=" + to_string(finalTrace.responses.size()));
 #endif
 #ifdef LOG_TIME_STATISTICS
     tms.add("onProcessTx", TimeDiff(t));
@@ -721,7 +721,7 @@ zkresult FullTracer::onUpdateStorage(Context &ctx, const RomCommand &cmd)
         }
 
 #ifdef LOG_FULL_TRACER
-        cout << "FullTracer::onUpdateStorage() depth=" << depth << " key=" << key << " value=" << value << endl;
+        zklog.info("FullTracer::onUpdateStorage() depth=" + to_string(depth) + " key=" + key + " value=" + value);
 #endif
     }
 #ifdef LOG_TIME_STATISTICS
@@ -763,50 +763,31 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     response.call_trace.context.gas_used = response.gas_used;
     accBatchGas += response.gas_used;
 
-    // Set return data, in case of deploy, get return buffer from stack if there is no error, otherwise get it from memory
-    mpz_class offsetScalar;
-    zkr = getVarFromCtx(ctx, false, ctx.rom.retDataOffsetOffset, offsetScalar);
-    if (zkr != ZKR_SUCCESS)
+    // Set return data always; get it from memory
     {
-        zklog.error("FullTracer::onFinishTx() failed calling getVarFromCtx(ctx.rom.retDataOffsetOffset)");
-        return zkr;
-    }
-    mpz_class lengthScalar;
-    zkr = getVarFromCtx(ctx, false, ctx.rom.retDataLengthOffset, lengthScalar);
-    if (zkr != ZKR_SUCCESS)
-    {
-        zklog.error("FullTracer::onFinishTx() failed calling getVarFromCtx(ctx.rom.retDataLengthOffset)");
-        return zkr;
-    }
-    if (response.call_trace.context.to == "0x")
-    {
-        // Check if there has been any error
-        if ( bOpcodeCalled && (response.error.size()>0) )
+        mpz_class offsetScalar;
+        zkr = getVarFromCtx(ctx, false, ctx.rom.retDataOffsetOffset, offsetScalar);
+        if (zkr != ZKR_SUCCESS)
         {
-            zkr = getFromMemory(ctx, offsetScalar, lengthScalar, response.return_value);
-            if (zkr != ZKR_SUCCESS)
-            {
-                zklog.error("FullTracer::onFinishTx() failed calling getFromMemory() 1");
-                return zkr;
-            }
+            zklog.error("FullTracer::onFinishTx() failed calling getVarFromCtx(ctx.rom.retDataOffsetOffset)");
+            return zkr;
         }
-        else
+        mpz_class lengthScalar;
+        zkr = getVarFromCtx(ctx, false, ctx.rom.retDataLengthOffset, lengthScalar);
+        if (zkr != ZKR_SUCCESS)
         {
-            zkr = getCalldataFromStack(ctx, offsetScalar.get_ui(), lengthScalar.get_ui(), response.return_value);
-            if (zkr != ZKR_SUCCESS)
-            {
-                zklog.error("FullTracer::onFinishTx() failed calling getCalldataFromStack()");
-                return zkr;
-            }
+            zklog.error("FullTracer::onFinishTx() failed calling getVarFromCtx(ctx.rom.retDataLengthOffset)");
+            return zkr;
         }
-    }
-    else
-    {
         zkr = getFromMemory(ctx, offsetScalar, lengthScalar, response.return_value);
         if (zkr != ZKR_SUCCESS)
         {
-            zklog.error("FullTracer::onFinishTx() failed calling getFromMemory() 2");
+            zklog.error("FullTracer::onFinishTx() failed calling getFromMemory() 1");
             return zkr;
+        }
+        if ( ctx.proverRequest.input.traceConfig.bGenerateCallTrace )
+        {
+            response.call_trace.context.output = response.return_value;
         }
     }
 
@@ -913,7 +894,7 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     logs.clear(); // TODO: Should we remove logs?
 
 #ifdef LOG_FULL_TRACER
-    cout << "FullTracer::onFinishTx() txCount=" << txCount << " finalTrace.responses.size()=" << finalTrace.responses.size() << " create_address=" << response.create_address << " state_root=" << response.state_root << endl;
+    zklog.info("FullTracer::onFinishTx() txCount=" + to_string(txCount) + " finalTrace.responses.size()=" + to_string(finalTrace.responses.size()) + " create_address=" + response.create_address + " state_root=" + response.state_root);
 #endif
 #ifdef LOG_TIME_STATISTICS
     tms.add("onFinishTx", TimeDiff(t));
@@ -939,7 +920,7 @@ zkresult FullTracer::onStartBatch(Context &ctx, const RomCommand &cmd)
     finalTrace.bInitialized = true;
 
 #ifdef LOG_FULL_TRACER
-    cout << "FullTracer::onStartBatch() old_state_root=" << finalTrace.old_state_root << endl;
+    zklog.info("FullTracer::onStartBatch()");
 #endif
 #ifdef LOG_TIME_STATISTICS
     tms.add("onStartBatch", TimeDiff(t));
@@ -1000,7 +981,7 @@ zkresult FullTracer::onFinishBatch(Context &ctx, const RomCommand &cmd)
     // finalTrace.new_batch_num = auxScalar.get_ui();
 
 #ifdef LOG_FULL_TRACER
-    cout << "FullTracer::onFinishBatch() new_state_root=" << finalTrace.new_state_root << endl;
+    zklog.info("FullTracer::onFinishBatch() new_state_root=" + finalTrace.new_state_root);
 #endif
 #ifdef LOG_TIME_STATISTICS
     tms.add("onFinishBatch", TimeDiff(t));
@@ -1274,7 +1255,15 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
         }
         singleInfo.contract.value = auxScalar;
 
-        zkr = getCalldataFromStack(ctx, 0, 0, singleInfo.contract.data);
+        zkr = getVarFromCtx(ctx, false, ctx.rom.txCalldataLenOffset, auxScalar);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.txCalldataLenOffset)");
+            return zkr;
+        }
+        uint64_t txCalldataLen  = auxScalar.get_ui();
+
+        zkr = getCalldataFromStack(ctx, 0, txCalldataLen, singleInfo.contract.data);
         if (zkr != ZKR_SUCCESS)
         {
             zklog.error("FullTracer::onOpcode() failed calling getCalldataFromStack()");
@@ -1327,7 +1316,7 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
         singleInfo.memory_size = (auxScalar.get_ui() / 32) * 32;
     }
 
-    if (ctx.proverRequest.input.traceConfig.bGenerateStorage && increaseDepth)
+    if (ctx.proverRequest.input.traceConfig.bGenerateStorage /*&& increaseDepth*/)
     {
         unordered_map<string, string> auxMap;
         deltaStorage[depth + 1] = auxMap;
@@ -1336,7 +1325,118 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     // Return data
     if (ctx.proverRequest.input.traceConfig.bGenerateReturnData)
     {
-        singleInfo.return_data.clear();
+        // Write return data from create/create2 until CTX changes
+        if (returnFromCreate.enabled)
+        {
+            if (returnFromCreate.returnValue.size() == 0)
+            {
+                uint64_t retDataCTX = returnFromCreate.createCTX;
+                mpz_class offsetScalar;
+                zkr = getVarFromCtx(ctx, false, ctx.rom.retDataOffsetOffset, offsetScalar, &retDataCTX);
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.retDataOffsetOffset)");
+                    return zkr;
+                }
+                mpz_class lengthScalar;
+                zkr = getVarFromCtx(ctx, false, ctx.rom.retDataLengthOffset, lengthScalar, &retDataCTX);
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.retDataLengthOffset)");
+                    return zkr;
+                }
+                string return_value;
+                zkr = getFromMemory(ctx, offsetScalar, lengthScalar, return_value, &retDataCTX);
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("FullTracer::onOpcode() failed calling getFromMemory() 1");
+                    return zkr;
+                }
+                returnFromCreate.returnValue.push_back(return_value);
+            }
+
+            mpz_class currentCTXScalar;
+            zkr = getVarFromCtx(ctx, true, ctx.rom.currentCTXOffset, currentCTXScalar);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.currentCTXOffset)");
+                return zkr;
+            }
+            uint64_t currentCTX = currentCTXScalar.get_ui();
+            if (returnFromCreate.originCTX == currentCTX)
+            {
+                singleInfo.return_data = returnFromCreate.returnValue;
+            }
+            else
+            {
+                returnFromCreate.enabled = false;
+            }
+        }
+
+        // Check if return is called from CREATE/CREATE2
+        mpz_class isCreateScalar;
+        zkr = getVarFromCtx(ctx, false, ctx.rom.isCreateOffset, isCreateScalar);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.isCreateOffset)");
+            return zkr;
+        }
+        bool isCreate = isCreateScalar.get_ui();
+
+        if (isCreate)
+        {            
+            if (singleInfo.opcode == opcodeName[0xf3/*RETURN*/].pName)
+            {
+                returnFromCreate.enabled = true;
+
+                mpz_class originCTXScalar;
+                zkr = getVarFromCtx(ctx, false, ctx.rom.originCTXOffset, originCTXScalar);
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.originCTXOffset)");
+                    return zkr;
+                }
+                returnFromCreate.originCTX = originCTXScalar.get_ui();
+
+                returnFromCreate.createCTX = fr.toU64(ctx.pols.CTX[*ctx.pStep]);
+            }
+        }
+        else
+        {
+            mpz_class retDataCTXScalar;
+            zkr = getVarFromCtx(ctx, false, ctx.rom.retDataCTXOffset, retDataCTXScalar);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.retDataCTXOffset)");
+                return zkr;
+            }
+            if (retDataCTXScalar != 0)
+            {
+                uint64_t retDataCTX = retDataCTXScalar.get_ui();
+                mpz_class offsetScalar;
+                zkr = getVarFromCtx(ctx, false, ctx.rom.retDataOffsetOffset, offsetScalar, &retDataCTX);
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.retDataOffsetOffset)");
+                    return zkr;
+                }
+                mpz_class lengthScalar;
+                zkr = getVarFromCtx(ctx, false, ctx.rom.retDataLengthOffset, lengthScalar, &retDataCTX);
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.retDataLengthOffset)");
+                    return zkr;
+                }
+                string return_value;
+                zkr = getFromMemory(ctx, offsetScalar, lengthScalar, return_value, &retDataCTX);
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("FullTracer::onOpcode() failed calling getFromMemory() 1");
+                    return zkr;
+                }
+                singleInfo.return_data.push_back(return_value);
+            }
+        }
     }
 
 #ifdef LOG_TIME_STATISTICS
@@ -1362,7 +1462,7 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     tmsop.add("copySingleInfoIntoTraces", TimeDiff(top));
 #endif
 #ifdef LOG_FULL_TRACER
-    cout << "FullTracer::onOpcode() codeId=" << to_string(codeId) << " opcode=" << singleInfo.opcode << endl;
+    zklog.info("FullTracer::onOpcode() codeId=" + to_string(codeId) + " opcode=" + string(singleInfo.opcode));
 #endif
 #ifdef LOG_TIME_STATISTICS
     tms.add("onOpcode", TimeDiff(t));

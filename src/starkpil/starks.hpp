@@ -12,6 +12,8 @@
 #include "transcript.hpp"
 #include "zhInv.hpp"
 #include "steps.hpp"
+#include "zklog.hpp"
+#include "exit_process.hpp"
 
 #define STARK_C12_A_NUM_TREES 5
 #define NUM_CHALLENGES 8
@@ -92,8 +94,8 @@ public:
         pConstPolsAddress = NULL;
         if (starkFiles.zkevmConstPols.size() == 0)
         {
-            cerr << "Error: Starks::Starks() received an empty config.zkevmConstPols" << endl;
-            exit(-1);
+            zklog.error("Starks::Starks() received an empty config.zkevmConstPols");
+            exitProcess();
         }
         constPolsDegree = (1 << starkInfo.starkStruct.nBits);
         constPolsSize = starkInfo.nConstants * sizeof(Goldilocks::Element) * constPolsDegree;
@@ -101,12 +103,12 @@ public:
         if (starkFiles.mapConstPolsFile)
         {
             pConstPolsAddress = mapFile(starkFiles.zkevmConstPols, constPolsSize, false);
-            cout << "Starks::Starks() successfully mapped " << constPolsSize << " bytes from constant file " << starkFiles.zkevmConstPols << endl;
+            zklog.info("Starks::Starks() successfully mapped " + to_string(constPolsSize) + " bytes from constant file " + starkFiles.zkevmConstPols);
         }
         else
         {
             pConstPolsAddress = copyFile(starkFiles.zkevmConstPols, constPolsSize);
-            cout << "Starks::Starks() successfully copied " << constPolsSize << " bytes from constant file " << starkFiles.zkevmConstPols << endl;
+            zklog.info("Starks::Starks() successfully copied " + to_string(constPolsSize) + " bytes from constant file " + starkFiles.zkevmConstPols);
         }
         pConstPols = new ConstantPolsStarks(pConstPolsAddress, constPolsSize, starkInfo.nConstants);
         TimerStopAndLog(LOAD_CONST_POLS_TO_MEMORY);
@@ -116,19 +118,19 @@ public:
         pConstTreeAddress = NULL;
         if (starkFiles.zkevmConstantsTree.size() == 0)
         {
-            cerr << "Error: Starks::Starks() received an empty config.zkevmConstantsTree" << endl;
-            exit(-1);
+            zklog.error("Starks::Starks() received an empty config.zkevmConstantsTree");
+            exitProcess();
         }
 
         if (config.mapConstantsTreeFile)
         {
             pConstTreeAddress = mapFile(starkFiles.zkevmConstantsTree, starkInfo.getConstTreeSizeInBytes(), false);
-            cout << "Starks::Starks() successfully mapped " << starkInfo.getConstTreeSizeInBytes() << " bytes from constant tree file " << starkFiles.zkevmConstantsTree << endl;
+            zklog.info("Starks::Starks() successfully mapped " + to_string(starkInfo.getConstTreeSizeInBytes()) + " bytes from constant tree file " + starkFiles.zkevmConstantsTree);
         }
         else
         {
             pConstTreeAddress = copyFile(starkFiles.zkevmConstantsTree, starkInfo.getConstTreeSizeInBytes());
-            cout << "Starks::Starks() successfully copied " << starkInfo.getConstTreeSizeInBytes() << " bytes from constant file " << starkFiles.zkevmConstantsTree << endl;
+            zklog.info("Starks::Starks() successfully copied " + to_string(starkInfo.getConstTreeSizeInBytes()) + " bytes from constant file " + starkFiles.zkevmConstantsTree);
         }
         TimerStopAndLog(LOAD_CONST_TREE_TO_MEMORY);
 

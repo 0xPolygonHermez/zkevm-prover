@@ -44,6 +44,8 @@
     
     "opcodeTracer": false,
     "logRemoteDbReads": false,
+    "logExecutorServerInput": false,
+    "logExecutorServerInputGasThreshold": 0,
     "logExecutorServerResponses": false,
     "logExecutorServerTxs": true,
 
@@ -52,6 +54,7 @@
     "executorTimeStatistics": false,
     "executorClientPort": 50071,
     "executorClientHost": "127.0.0.1",
+    "executorClientLoops": 1,
 
     "stateDBServerPort": 50061,
     "stateDBURL": "local",
@@ -60,6 +63,7 @@
     "aggregatorClientPort": 50081,
     "aggregatorClientHost": "127.0.0.1",
     "aggregatorClientMockTimeout": 10000000,
+    "aggregatorClientWatchdogTimeout": 60000000,
 
     "mapConstPolsFile": false,
     "mapConstantsTreeFile": false,
@@ -86,9 +90,13 @@
     "dbNodesTableName": "state.nodes",
     "dbProgramTableName": "state.program",
     "dbMultiWrite": true,
-    "dbFlushInParallel": true,
+    "dbFlushInParallel": false,
     "dbConnectionsPool": false,
     "dbNumberOfPoolConnections": 25,
+    "dbMetrics": false,
+    "dbClearCache": false,
+    "dbGetTree": false,
+    "dbReadRetryDelay": 100000,
     "cleanerPollingPeriod": 600,
     "requestsPersistence": 3600,
     "maxExecutorThreads": 20,

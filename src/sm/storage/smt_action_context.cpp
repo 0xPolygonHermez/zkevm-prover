@@ -1,5 +1,6 @@
 #include "smt_action_context.hpp"
 #include "scalar.hpp"
+#include "zklog.hpp"
 
 void SmtActionContext::init (Goldilocks &fr, const SmtAction &action)
 {
@@ -22,7 +23,7 @@ void SmtActionContext::init (Goldilocks &fr, const SmtAction &action)
         siblingRKey[3] = action.setResult.insKey[3];
 
 #ifdef LOG_STORAGE_EXECUTOR
-        cout << "SmtActionContext::init() mode=" << action.setResult.mode << endl;
+        zklog.info("SmtActionContext::init() mode=" + action.setResult.mode);
 #endif
 
     }
@@ -45,21 +46,21 @@ void SmtActionContext::init (Goldilocks &fr, const SmtAction &action)
     }
 
 #ifdef LOG_STORAGE_EXECUTOR
-    cout << "SmtActionContext::init()    key=" << fea2string(fr, action.bIsSet ? action.setResult.key : action.getResult.key) << endl;
-    cout << "SmtActionContext::init() insKey=" << fea2string(fr, action.bIsSet ? action.setResult.insKey : action.getResult.insKey) << endl;
-    cout << "SmtActionContext::init() insValue=" << ( action.bIsSet ? action.setResult.insValue.get_str(16) : action.getResult.insValue.get_str(16) ) << endl;
-    cout << "SmtActionContext::init() level=" << level << endl;
+    zklog.info("SmtActionContext::init()    key=" + fea2string(fr, action.bIsSet ? action.setResult.key : action.getResult.key));
+    zklog.info("SmtActionContext::init() insKey=" + fea2string(fr, action.bIsSet ? action.setResult.insKey : action.getResult.insKey));
+    zklog.info("SmtActionContext::init() insValue=" + ( action.bIsSet ? action.setResult.insValue.get_str(16) : action.getResult.insValue.get_str(16) ));
+    zklog.info("SmtActionContext::init() level=" + to_string(level));
     map< uint64_t, vector<Goldilocks::Element> >::const_iterator it;
     for ( it = ( action.bIsSet ? action.setResult.siblings.begin() : action.getResult.siblings.begin() );
           it != ( action.bIsSet ? action.setResult.siblings.end() : action.getResult.siblings.end() );
           it++ )
     {
-        cout << "siblings[" << it->first << "]= ";
+        string s = "siblings[" + to_string(it->first) + "]= ";
         for (uint64_t i=0; i<it->second.size(); i++)
         {
-            cout << fr.toString(it->second[i], 16) << ":";
+            s += fr.toString(it->second[i], 16) + ":";
         }
-        cout << endl;
+        zklog.info(s);
     }
 #endif
 
@@ -86,7 +87,7 @@ void SmtActionContext::init (Goldilocks &fr, const SmtAction &action)
         }
 
 #ifdef LOG_STORAGE_EXECUTOR
-        cout << "SmtActionContext::init()   rKey=" << fea2string(fr, rKey) << endl;
+        zklog.info("SmtActionContext::init()   rKey=" + fea2string(fr, rKey));
 #endif
     }
 
@@ -94,7 +95,7 @@ void SmtActionContext::init (Goldilocks &fr, const SmtAction &action)
     if ( ( action.bIsSet && (action.setResult.mode=="insertFound") ) ||
          ( action.bIsSet && (action.setResult.mode=="deleteFound") ) )
     {
-        //cout << "SmtActionContext::init() before siblingRKey=" << fea2string(fr, siblingRKey) << endl;
+        //zklog.info("SmtActionContext::init() before siblingRKey=" + fea2string(fr, siblingRKey));
         for (uint64_t i=0; i<256; i++)
         {
             uint64_t keyNumber = i%4; // 0, 1, 2, 3, 0, 1, 2, 3...
@@ -104,12 +105,12 @@ void SmtActionContext::init (Goldilocks &fr, const SmtAction &action)
             siblingRKey[keyNumber] = fr.fromU64(fr.toU64(siblingRKey[keyNumber]) / 2);
             bits.push_back(bit);
             siblingBits.push_back(siblingBit);
-            //cout << "SmtActionContext::init() bit=" << siblingBit << " siblingRKey=" << fea2string(fr, siblingRKey) << endl;
+            //zklog.info("SmtActionContext::init() bit=" + to_string(siblingBit) + " siblingRKey=" + fea2string(fr, siblingRKey));
             if (bit!=siblingBit) break;
         }
 #ifdef LOG_STORAGE_EXECUTOR
-        cout << "SmtActionContext::init()        rKey=" << fea2string(fr, rKey) << endl;
-        cout << "SmtActionContext::init() siblingRKey=" << fea2string(fr, siblingRKey) << endl;
+        zklog.info("SmtActionContext::init()        rKey=" + fea2string(fr, rKey));
+        zklog.info("SmtActionContext::init() siblingRKey=" + fea2string(fr, siblingRKey));
 #endif
 
         // Update level
@@ -121,13 +122,15 @@ void SmtActionContext::init (Goldilocks &fr, const SmtAction &action)
 
     // Print bits vector content
 #ifdef LOG_STORAGE_EXECUTOR
-    cout << "SmtActionContext::init() ";
-    for (uint64_t i=0; i<bits.size(); i++)
     {
-        cout << "bits[" << i << "]=" << bits[i] << " ";
+        string s = "SmtActionContext::init() ";
+        for (uint64_t i=0; i<bits.size(); i++)
+        {
+            s += "bits[" + to_string(i) + "]=" + to_string(bits[i]) + " ";
+        }
+        zklog.info(s);
     }
-    cout << endl;
-    cout << "SmtActionContext::init() currentLevel=" << currentLevel << endl;
+    zklog.info("SmtActionContext::init() currentLevel=" + to_string(currentLevel));
 #endif
 
 }

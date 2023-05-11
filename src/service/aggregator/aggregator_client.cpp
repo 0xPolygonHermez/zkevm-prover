@@ -2,6 +2,8 @@
 #include <nlohmann/json.hpp>
 #include "aggregator_client.hpp"
 #include "zklog.hpp"
+#include "watchdog.hpp"
+#include "zklog.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -20,7 +22,7 @@ AggregatorClient::AggregatorClient (Goldilocks &fr, const Config &config, Prover
 
 void AggregatorClient::runThread (void)
 {
-    cout << "AggregatorClient::runThread() creating aggregatorClientThread" << endl;
+    zklog.info("AggregatorClient::runThread() creating aggregatorClientThread");
     pthread_create(&t, NULL, aggregatorClientThread, this);
 }
 
@@ -90,7 +92,7 @@ bool AggregatorClient::GetStatus (::aggregator::v1::GetStatusResponse &getStatus
     getStatusResponse.set_fork_id(PROVER_FORK_ID);
 
 #ifdef LOG_SERVICE
-    cout << "AggregatorClient::GetStatus() returns: " << getStatusResponse.DebugString() << endl;
+    zklog.info("AggregatorClient::GetStatus() returns: " + getStatusResponse.DebugString());
 #endif
     return true;
 }
@@ -98,7 +100,7 @@ bool AggregatorClient::GetStatus (::aggregator::v1::GetStatusResponse &getStatus
 bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest &genBatchProofRequest, aggregator::v1::GenBatchProofResponse &genBatchProofResponse)
 {
 #ifdef LOG_SERVICE
-    cout << "AggregatorClient::GenBatchProof() called with request: " << genBatchProofRequest.DebugString() << endl;
+    zklog.info("AggregatorClient::GenBatchProof() called with request: " + genBatchProofRequest.DebugString());
 #endif
     ProverRequest * pProverRequest = new ProverRequest(fr, config, prt_genBatchProof);
     if (pProverRequest == NULL)
@@ -107,7 +109,7 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
         exitProcess();
     }
 #ifdef LOG_SERVICE
-    cout << "AggregatorClient::GenBatchProof() created a new prover request: " << to_string((uint64_t)pProverRequest) << endl;
+    zklog.info("AggregatorClient::GenBatchProof() created a new prover request: " + to_string((uint64_t)pProverRequest));
 #endif
 
     // Parse public inputs
@@ -253,7 +255,7 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
     genBatchProofResponse.set_id(uuid.c_str());
 
 #ifdef LOG_SERVICE
-    cout << "AggregatorClient::GenBatchProof() returns: " << genBatchProofResponse.DebugString() << endl;
+    zklog.info("AggregatorClient::GenBatchProof() returns: " + genBatchProofResponse.DebugString());
 #endif
     return true;
 }
@@ -261,7 +263,7 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
 bool AggregatorClient::GenAggregatedProof (const aggregator::v1::GenAggregatedProofRequest &genAggregatedProofRequest, aggregator::v1::GenAggregatedProofResponse &genAggregatedProofResponse)
 {
 #ifdef LOG_SERVICE
-    cout << "AggregatorClient::GenAggregatedProof() called with request: " << genAggregatedProofRequest.DebugString() << endl;
+    zklog.info("AggregatorClient::GenAggregatedProof() called with request: " + genAggregatedProofRequest.DebugString());
 #endif
     ProverRequest * pProverRequest = new ProverRequest(fr, config, prt_genAggregatedProof);
     if (pProverRequest == NULL)
@@ -270,7 +272,7 @@ bool AggregatorClient::GenAggregatedProof (const aggregator::v1::GenAggregatedPr
         exitProcess();
     }
 #ifdef LOG_SERVICE
-    cout << "AggregatorClient::GenAggregatedProof() created a new prover request: " << to_string((uint64_t)pProverRequest) << endl;
+    zklog.info("AggregatorClient::GenAggregatedProof() created a new prover request: " + to_string((uint64_t)pProverRequest));
 #endif
 
     // Set the 2 inputs
@@ -285,7 +287,7 @@ bool AggregatorClient::GenAggregatedProof (const aggregator::v1::GenAggregatedPr
     genAggregatedProofResponse.set_id(uuid.c_str());
 
 #ifdef LOG_SERVICE
-    cout << "AggregatorClient::GenAggregatedProof() returns: " << genAggregatedProofResponse.DebugString() << endl;
+    zklog.info("AggregatorClient::GenAggregatedProof() returns: " + genAggregatedProofResponse.DebugString());
 #endif
     return true;
 }
@@ -293,7 +295,7 @@ bool AggregatorClient::GenAggregatedProof (const aggregator::v1::GenAggregatedPr
 bool AggregatorClient::GenFinalProof (const aggregator::v1::GenFinalProofRequest &genFinalProofRequest, aggregator::v1::GenFinalProofResponse &genFinalProofResponse)
 {
 #ifdef LOG_SERVICE
-    cout << "AggregatorClient::GenFinalProof() called with request: " << genFinalProofRequest.DebugString() << endl;
+    zklog.info("AggregatorClient::GenFinalProof() called with request: " + genFinalProofRequest.DebugString());
 #endif
     ProverRequest * pProverRequest = new ProverRequest(fr, config, prt_genFinalProof);
     if (pProverRequest == NULL)
@@ -302,7 +304,7 @@ bool AggregatorClient::GenFinalProof (const aggregator::v1::GenFinalProofRequest
         exitProcess();
     }
 #ifdef LOG_SERVICE
-    cout << "AggregatorClient::GenFinalProof() created a new prover request: " << to_string((uint64_t)pProverRequest) << endl;
+    zklog.info("AggregatorClient::GenFinalProof() created a new prover request: " + to_string((uint64_t)pProverRequest));
 #endif
 
     // Set the input
@@ -326,7 +328,7 @@ bool AggregatorClient::GenFinalProof (const aggregator::v1::GenFinalProofRequest
     genFinalProofResponse.set_id(uuid.c_str());
 
 #ifdef LOG_SERVICE
-    cout << "AggregatorClient::GenFinalProof() returns: " << genFinalProofResponse.DebugString() << endl;
+    zklog.info("AggregatorClient::GenFinalProof() returns: " + genFinalProofResponse.DebugString());
 #endif
     return true;
 }
@@ -367,7 +369,7 @@ bool AggregatorClient::Cancel (const aggregator::v1::CancelRequest &cancelReques
     cancelResponse.set_result(aggregator::v1::Result::RESULT_OK);
 
 #ifdef LOG_SERVICE
-    cout << "AggregatorClient::Cancel() returns: " << cancelResponse.DebugString() << endl;
+    zklog.info("AggregatorClient::Cancel() returns: " + cancelResponse.DebugString());
 #endif
     return true;
 }
@@ -375,7 +377,7 @@ bool AggregatorClient::Cancel (const aggregator::v1::CancelRequest &cancelReques
 bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProofRequest, aggregator::v1::GetProofResponse &getProofResponse)
 {
 #ifdef LOG_SERVICE
-    cout << "AggregatorClient::GetProof() received request: " << getProofRequest.DebugString();
+    zklog.info("AggregatorClient::GetProof() received request: " + getProofRequest.DebugString());
 #endif
     // Get the prover request UUID from the request
     string uuid = getProofRequest.id();
@@ -477,30 +479,25 @@ bool AggregatorClient::GetProof (const aggregator::v1::GetProofRequest &getProof
     prover.unlock();
 
 #ifdef LOG_SERVICE
-    cout << "AggregatorClient::GetProof() sends response: " << getProofResponse.DebugString();
+    zklog.info("AggregatorClient::GetProof() sends response: " + getProofResponse.DebugString());
 #endif
     return true;
 }
 
 void* aggregatorClientThread(void* arg)
 {
-    cout << "aggregatorClientThread() started" << endl;
+    zklog.info("aggregatorClientThread() started");
     string uuid;
     AggregatorClient *pAggregatorClient = (AggregatorClient *)arg;
+    Watchdog watchdog;
 
     while (true)
     {
         ::grpc::ClientContext context;
 
-        /*
-        // 5 minutes of inactivity timeout; if aggregator does not send any request, the connection is restarted
-        time_point deadline = std::chrono::system_clock::now() +
-        std::chrono::milliseconds(5*60*100000);
-        context.set_deadline(deadline);
-        */
-
         std::unique_ptr<grpc::ClientReaderWriter<aggregator::v1::ProverMessage, aggregator::v1::AggregatorMessage>> readerWriter;
         readerWriter = pAggregatorClient->stub->Channel(&context);
+        watchdog.start(pAggregatorClient->config.aggregatorClientWatchdogTimeout);
         bool bResult;
         while (true)
         {
@@ -508,13 +505,15 @@ void* aggregatorClientThread(void* arg)
             ::aggregator::v1::ProverMessage proverMessage;
 
             // Read a new aggregator message
+            watchdog.restart();
             bResult = readerWriter->Read(&aggregatorMessage);
             if (!bResult)
             {
                 zklog.error("aggregatorClientThread() failed calling readerWriter->Read(&aggregatorMessage)");
                 break;
             }
-
+            watchdog.restart();
+            
             switch (aggregatorMessage.request_case())
             {
                 case aggregator::v1::AggregatorMessage::RequestCase::kGetProofRequest:
@@ -522,13 +521,13 @@ void* aggregatorClientThread(void* arg)
                 case aggregator::v1::AggregatorMessage::RequestCase::kGetStatusRequest:
                 case aggregator::v1::AggregatorMessage::RequestCase::kGenBatchProofRequest:
                 case aggregator::v1::AggregatorMessage::RequestCase::kCancelRequest:
-                    cout << "aggregatorClientThread() got: " << aggregatorMessage.ShortDebugString() << endl;
+                    zklog.info("aggregatorClientThread() got: " + aggregatorMessage.ShortDebugString());
                     break;
                 case aggregator::v1::AggregatorMessage::RequestCase::kGenAggregatedProofRequest:
-                    cout << "aggregatorClientThread() got genAggregatedProof() request" << endl;
+                    zklog.info("aggregatorClientThread() got genAggregatedProof() request");
                     break;
                 case aggregator::v1::AggregatorMessage::RequestCase::kGenFinalProofRequest:
-                    cout << "aggregatorClientThread() got genFinalProof() request" << endl;
+                    zklog.info("aggregatorClientThread() got genFinalProof() request");
                     break;
                 default:
                     break;
@@ -638,13 +637,15 @@ void* aggregatorClientThread(void* arg)
             }
 
             // Write the prover message
+            watchdog.restart();
             bResult = readerWriter->Write(proverMessage);
             if (!bResult)
             {
                 zklog.error("aggregatorClientThread() failed calling readerWriter->Write(proverMessage)");
                 break;
             }
-
+            watchdog.restart();
+            
             switch (aggregatorMessage.request_case())
             {
                 case aggregator::v1::AggregatorMessage::RequestCase::kGetStatusRequest:
@@ -652,11 +653,11 @@ void* aggregatorClientThread(void* arg)
                 case aggregator::v1::AggregatorMessage::RequestCase::kGenAggregatedProofRequest:
                 case aggregator::v1::AggregatorMessage::RequestCase::kGenFinalProofRequest:
                 case aggregator::v1::AggregatorMessage::RequestCase::kCancelRequest:
-                    cout << "aggregatorClientThread() sent: " << proverMessage.ShortDebugString() << endl;
+                    zklog.info("aggregatorClientThread() sent: " + proverMessage.ShortDebugString());
                     break;
                 case aggregator::v1::AggregatorMessage::RequestCase::kGetProofRequest:
                     if (proverMessage.get_proof_response().result() != aggregator::v1::GetProofResponse_Result_RESULT_PENDING)
-                        cout << "aggregatorClientThread() getProof() response sent; result=" << proverMessage.get_proof_response().result_string() << endl;
+                        zklog.info("aggregatorClientThread() getProof() response sent; result=" + proverMessage.get_proof_response().result_string());
                     break;
                 default:
                     break;
@@ -667,7 +668,8 @@ void* aggregatorClientThread(void* arg)
                 string2file(proverMessage.DebugString(), filePrefix + "aggregator_response.txt");
             }
         }
-        cout << "aggregatorClientThread() channel broken; will retry in 5 seconds" << endl;
+        watchdog.stop();
+        zklog.info("aggregatorClientThread() channel broken; will retry in 5 seconds");
         sleep(5);
     }
     return NULL;

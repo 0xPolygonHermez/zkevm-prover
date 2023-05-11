@@ -1,6 +1,10 @@
 #ifndef ZKRESULT_HPP
 #define ZKRESULT_HPP
 
+#include <string>
+
+using namespace std;
+
 typedef enum : int
 {
     ZKR_UNSPECIFIED = 0,
@@ -37,6 +41,6 @@ typedef enum : int
     ZKR_SM_MAIN_S33 = 31, // Main state machine executor failed getting an S33 value from op
 } zkresult;
 
-const char* zkresult2string (int code);
+string zkresult2string (int code);
 
 #endif

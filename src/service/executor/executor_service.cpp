@@ -15,7 +15,7 @@ using grpc::Status;
     TimerStart(EXECUTOR_PROCESS_BATCH);
 
 #ifdef LOG_SERVICE
-    cout << "ExecutorServiceImpl::ProcessBatch() got request:\n" << request->DebugString() << endl;
+    zklog.info("ExecutorServiceImpl::ProcessBatch() got request:\n" + request->DebugString());
 #endif
 
 #ifdef LOG_TIME
@@ -218,7 +218,7 @@ using grpc::Status;
         string2fe(fr, it->first, fe);
         proverRequest.input.db[it->first] = dbValue;
 #ifdef LOG_SERVICE_EXECUTOR_INPUT
-        //cout << "input.db[" << it->first << "]: " << proverRequest.input.db[it->first] << endl;
+        //zklog.info("input.db[" + it->first + "]: " + proverRequest.input.db[it->first]);
 #endif
     }
 
@@ -236,7 +236,7 @@ using grpc::Status;
         }
         proverRequest.input.contractsBytecode[itp->first] = dbValue;
 #ifdef LOG_SERVICE_EXECUTOR_INPUT
-        //cout << "proverRequest.input.contractsBytecode[" << itp->first << "]: " << itp->second << endl;
+        //zklog.info("proverRequest.input.contractsBytecode[" + itp->first + "]: " + itp->second);
 #endif
     }
 
@@ -244,22 +244,21 @@ using grpc::Status;
     proverRequest.input.bNoCounters = request->no_counters();
 
 #ifdef LOG_SERVICE_EXECUTOR_INPUT
-    cout << "ExecutorServiceImpl::ProcessBatch() got sequencerAddr=" << proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)
-        << " batchL2DataLength=" << request->batch_l2_data().size()
-        << " batchL2Data=0x" << ba2string(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(0, 10)) << "..." << ba2string(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(zkmax(int64_t(0),int64_t(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size())-10), proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size()))
-        << " oldStateRoot=" << proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16)
-        << " oldAccInputHash=" << proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16)
-        << " oldBatchNum=" << proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum
-        << " chainId=" << proverRequest.input.publicInputsExtended.publicInputs.chainID
-        << " forkId=" << proverRequest.input.publicInputsExtended.publicInputs.forkID
-        << " globalExitRoot=" << proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot.get_str(16)
-        << " timestamp=" << proverRequest.input.publicInputsExtended.publicInputs.timestamp
+    zklog.info("ExecutorServiceImpl::ProcessBatch() got sequencerAddr=" + proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16) +
+        " batchL2DataLength=" + to_string(request->batch_l2_data().size()) +
+        " batchL2Data=0x" + ba2string(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(0, 10)) + "..." + ba2string(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(zkmax(int64_t(0),int64_t(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size())-10), proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size())) +
+        " oldStateRoot=" + proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) +
+        " oldAccInputHash=" + proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16) +
+        " oldBatchNum=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum) +
+        " chainId=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.chainID) +
+        " forkId=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID) +
+        " globalExitRoot=" + proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot.get_str(16) +
+        " timestamp=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.timestamp) +
 
-        << " from=" << proverRequest.input.from
-        << " bUpdateMerkleTree=" << proverRequest.input.bUpdateMerkleTree
-        << " bNoCounters=" << proverRequest.input.bNoCounters
-        << " traceConfig=" << proverRequest.input.traceConfig.toString()
-        << endl;
+        " from=" + proverRequest.input.from +
+        " bUpdateMerkleTree=" + to_string(proverRequest.input.bUpdateMerkleTree) +
+        " bNoCounters=" + to_string(proverRequest.input.bNoCounters) +
+        " traceConfig=" + proverRequest.input.traceConfig.toString());
 #endif
 
     prover.processBatch(&proverRequest);
@@ -405,39 +404,40 @@ using grpc::Status;
     }
 
 #ifdef LOG_SERVICE_EXECUTOR_OUTPUT
-    cout << "ExecutorServiceImpl::ProcessBatch() returns"
-         << " error=" << response->error()
-         << " new_state_root=" << proverRequest.pFullTracer->get_new_state_root()
-         << " new_acc_input_hash=" << proverRequest.pFullTracer->get_new_acc_input_hash()
-         << " new_local_exit_root=" << proverRequest.pFullTracer->get_new_local_exit_root()
-         //<< " new_batch_num=" << proverRequest.fullTracer.finalTrace.new_batch_num
-         << " steps=" << proverRequest.counters.steps
-         << " gasUsed=" << proverRequest.pFullTracer->get_cumulative_gas_used()
-         << " counters.keccakF=" << proverRequest.counters.keccakF
-         << " counters.poseidonG=" << proverRequest.counters.poseidonG
-         << " counters.paddingPG=" << proverRequest.counters.paddingPG
-         << " counters.memAlign=" << proverRequest.counters.memAlign
-         << " counters.arith=" << proverRequest.counters.arith
-         << " counters.binary=" << proverRequest.counters.binary
-         << " nTxs=" << responses.size();
+    {
+        string s = "ExecutorServiceImpl::ProcessBatch() returns error=" + to_string(response->error()) +
+            " new_state_root=" + proverRequest.pFullTracer->get_new_state_root() +
+            " new_acc_input_hash=" + proverRequest.pFullTracer->get_new_acc_input_hash() +
+            " new_local_exit_root=" + proverRequest.pFullTracer->get_new_local_exit_root() +
+            //" new_batch_num=" + to_string(proverRequest.fullTracer.finalTrace.new_batch_num) +
+            " steps=" + to_string(proverRequest.counters.steps) +
+            " gasUsed=" + to_string(proverRequest.pFullTracer->get_cumulative_gas_used()) +
+            " counters.keccakF=" + to_string(proverRequest.counters.keccakF) +
+            " counters.poseidonG=" + to_string(proverRequest.counters.poseidonG) +
+            " counters.paddingPG=" + to_string(proverRequest.counters.paddingPG) +
+            " counters.memAlign=" + to_string(proverRequest.counters.memAlign) +
+            " counters.arith=" + to_string(proverRequest.counters.arith) +
+            " counters.binary=" + to_string(proverRequest.counters.binary) +
+             " nTxs=" + to_string(responses.size());
          if (config.logExecutorServerTxs)
          {
             for (uint64_t tx=0; tx<responses.size(); tx++)
             {
-                cout << " tx[" << tx << "].hash=" << responses[tx].tx_hash
-                    << " gasUsed=" << responses[tx].gas_used
-                    << " gasLeft=" << responses[tx].gas_left
-                    << " gasUsed+gasLeft=" << (responses[tx].gas_used + responses[tx].gas_left)
-                    << " gasRefunded=" << responses[tx].gas_refunded
-                    << " error=" << responses[tx].error;
+                s += " tx[" + to_string(tx) + "].hash=" + responses[tx].tx_hash +
+                    " gasUsed=" + to_string(responses[tx].gas_used) +
+                    " gasLeft=" + to_string(responses[tx].gas_left) +
+                    " gasUsed+gasLeft=" + to_string(responses[tx].gas_used + responses[tx].gas_left) +
+                    " gasRefunded=" + to_string(responses[tx].gas_refunded) +
+                    " error=" + responses[tx].error;
             }
          }
-        cout << endl;
+        zklog.info(s);
+    }
 #endif
 
     if (config.logExecutorServerResponses)
     {
-        cout << "ExecutorServiceImpl::ProcessBatch() returns:\n" << response->DebugString() << endl;
+        zklog.info("ExecutorServiceImpl::ProcessBatch() returns:\n" + response->DebugString());
     }
 
     TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
@@ -451,7 +451,7 @@ using grpc::Status;
     {
         map<uint8_t, vector<Opcode>> opcodeMap;
         vector<Opcode> &info(proverRequest.pFullTracer->get_info());
-        cout << "Received " << info.size() << " opcodes:" << endl;
+        zklog.info("Received " + to_string(info.size()) + " opcodes:");
         for (uint64_t i=0; i<info.size(); i++)
         {
             if (opcodeMap.find(info[i].op) == opcodeMap.end())
@@ -461,29 +461,31 @@ using grpc::Status;
             }
             opcodeMap[info[i].op].push_back(info[i]);
         }
+        string s;
         map<uint8_t, vector<Opcode>>::iterator opcodeMapIt;
         for (opcodeMapIt = opcodeMap.begin(); opcodeMapIt != opcodeMap.end(); opcodeMapIt++)
         {
-            cout << "    0x" << byte2string(opcodeMapIt->first) << "=" << opcodeMapIt->second[0].opcode << " called " << opcodeMapIt->second.size() << " times";
+            s += "    0x" + byte2string(opcodeMapIt->first) + "=" + opcodeMapIt->second[0].opcode + " called " + to_string(opcodeMapIt->second.size()) + " times";
 
             uint64_t opcodeTotalGas = 0;
-            cout << " gas=";
+            s += " gas=";
             for (uint64_t i=0; i<opcodeMapIt->second.size(); i++)
             {
-                cout << opcodeMapIt->second[i].gas_cost << ",";
+                s += to_string(opcodeMapIt->second[i].gas_cost) + ",";
                 opcodeTotalGas += opcodeMapIt->second[i].gas_cost;
             }
 
             uint64_t opcodeTotalDuration = 0;
-            cout << " duration=";
+            s += " duration=";
             for (uint64_t i=0; i<opcodeMapIt->second.size(); i++)
             {
-                cout << opcodeMapIt->second[i].duration << ",";
+                s += to_string(opcodeMapIt->second[i].duration) + ",";
                 opcodeTotalDuration += opcodeMapIt->second[i].duration;
             }
 
-            cout << " TP=" << (double(opcodeTotalGas)*1000000)/double(opcodeTotalDuration) << "gas/s" << endl;
+            s += " TP=" + to_string((double(opcodeTotalGas)*1000000)/double(opcodeTotalDuration)) + "gas/s";
         }
+        zklog.info(s);
     }
 
     // Calculate the throughput, for this ProcessBatch call, and for all calls
@@ -518,13 +520,20 @@ using grpc::Status;
     
     uint64_t nfd = getNumberOfFileDescriptors();
 
-    cout << "ExecutorServiceImpl::ProcessBatch() done counter=" << counter << " B=" << execBytes << " TX=" << execTX << " gas=" << execGas << " time=" << execTime
-         << " TP=" << double(execBytes)/execTime << "B/s=" << double(execTX)/execTime << "TX/s=" << double(execGas)/execTime << "gas/s=" << double(execGas)/double(execBytes) << "gas/B" 
-         << " totalTP(10s)=" << totalTPB << "B/s=" << totalTPTX << "TX/s=" << totalTPG << "gas/s=" << totalTPG/zkmax(1,totalTPB) << "gas/B"
-         << " totalTP(ever)=" << TPB << "B/s=" << TPTX << "TX/s=" << TPG << "gas/s=" << TPG/zkmax(1,TPB) << "gas/B"
-         << " totalTime=" << totalTime
-         << " filedesc=" << nfd
-         << endl;
+    zklog.info("ExecutorServiceImpl::ProcessBatch() done counter=" + to_string(counter) + " B=" + to_string(execBytes) + " TX=" + to_string(execTX) + " gas=" + to_string(execGas) + " time=" + to_string(execTime) +
+        " TP=" + to_string(double(execBytes)/execTime) + "B/s=" + to_string(double(execTX)/execTime) + "TX/s=" + to_string(double(execGas)/execTime) + "gas/s=" + to_string(double(execGas)/double(execBytes)) + "gas/B" +
+        " totalTP(10s)=" + to_string(totalTPB) + "B/s=" + to_string(totalTPTX) + "TX/s=" + to_string(totalTPG) + "gas/s=" + to_string(totalTPG/zkmax(1,totalTPB)) + "gas/B" +
+        " totalTP(ever)=" + to_string(TPB) + "B/s=" + to_string(TPTX) + "TX/s=" + to_string(TPG) + "gas/s=" + to_string(TPG/zkmax(1,TPB)) + "gas/B" +
+        " totalTime=" + to_string(totalTime) +
+        " filedesc=" + to_string(nfd));
+    
+    // If the TP in gas/s is < threshold, log the input, unless it has been done before
+    if (!config.logExecutorServerInput && (config.logExecutorServerInputGasThreshold > 0) && ((double(execGas)/execTime) < config.logExecutorServerInputGasThreshold))
+    {
+        json inputJson;
+        proverRequest.input.save(inputJson);
+        zklog.info("TP=" + to_string(double(execGas)/execTime) + "gas/s Input=" + inputJson.dump());
+    }
     unlock();
 #endif
 
@@ -538,7 +547,7 @@ using grpc::Status;
     TimerStart(PROCESS_BATCH_STREAM);
 
 #ifdef LOG_SERVICE
-    cout << "ExecutorServiceImpl::ProcessBatchStream() stream starts" << endl;
+    zklog.info("ExecutorServiceImpl::ProcessBatchStream() stream starts");
 #endif
     executor::v1::ProcessBatchRequest processBatchRequest;
     executor::v1::ProcessBatchResponse processBatchResponse;

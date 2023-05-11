@@ -1,6 +1,8 @@
 #include "definitions.hpp"
 #include "starks.hpp"
 #include "sm/pols_generated/commit_pols.hpp"
+#include "zklog.hpp"
+#include "exit_process.hpp"
 
 USING_PROVER_FORK_NAMESPACE;
 
@@ -53,7 +55,7 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     treesGL[0]->merkelize();
     treesGL[0]->getRoot(root0.address());
     TimerStopAndLog(STARK_STEP_1_MERKLETREE);
-    std::cout << "MerkleTree rootGL 0: [ " << root0.toString(4) << " ]" << std::endl;
+    zklog.info("MerkleTree rootGL 0: [ " + root0.toString(4) + " ]");
     transcript.put(root0.address(), HASH_SIZE);
     TimerStopAndLog(STARK_STEP_1_LDE_AND_MERKLETREE);
     TimerStopAndLog(STARK_STEP_1);
@@ -128,7 +130,7 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     treesGL[1]->merkelize();
     treesGL[1]->getRoot(root1.address());
     TimerStopAndLog(STARK_STEP_2_MERKLETREE);
-    std::cout << "MerkleTree rootGL 1: [ " << root1.toString(4) << " ]" << std::endl;
+    zklog.info("MerkleTree rootGL 1: [ " + root1.toString(4) + " ]");
     transcript.put(root1.address(), HASH_SIZE);
 
     TimerStopAndLog(STARK_STEP_2_LDE_AND_MERKLETREE);
@@ -226,7 +228,7 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     treesGL[2]->merkelize();
     treesGL[2]->getRoot(root2.address());
     TimerStopAndLog(STARK_STEP_3_MERKLETREE);
-    std::cout << "MerkleTree rootGL 2: [ " << root2.toString(4) << " ]" << std::endl;
+    zklog.info("MerkleTree rootGL 2: [ " + root2.toString(4) + " ]");
     transcript.put(root2.address(), HASH_SIZE);
     TimerStopAndLog(STARK_STEP_3_LDE_AND_MERKLETREE);
     TimerStopAndLog(STARK_STEP_3);
@@ -290,7 +292,7 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
 
     treesGL[3]->merkelize();
     treesGL[3]->getRoot(root3.address());
-    std::cout << "MerkleTree rootGL 3: [ " << root3.toString(4) << " ]" << std::endl;
+    zklog.info("MerkleTree rootGL 3: [ " + root3.toString(4) + " ]");
     transcript.put(root3.address(), HASH_SIZE);
 
     TimerStopAndLog(STARK_STEP_4_MERKLETREE);
@@ -460,8 +462,8 @@ Polinomial *Starks::transposeZColumns(void *pAddress, uint64_t &numCommited, Gol
 
     if (pBuffer == NULL || newpols_ == NULL)
     {
-        cout << "memory problems!" << endl;
-        exit(1);
+        zklog.error("Starks::transposeZColumns() failed calling new Polinomial[" + to_string(tot_pols) + "]");
+        exitProcess();
     }
 
     // #pragma omp parallel for (better without)

@@ -6,6 +6,7 @@
 #include "statedb_singleton.hpp"
 #include "utils.hpp"
 #include "exit_process.hpp"
+#include "zklog.hpp"
 
 StateDBInterface* StateDBClientFactory::createStateDBClient (Goldilocks &fr, const Config &config)
 {
@@ -14,7 +15,7 @@ StateDBInterface* StateDBClientFactory::createStateDBClient (Goldilocks &fr, con
         StateDBInterface * pLocalClient = stateDBSingleton.get(fr, config);
         if (pLocalClient == NULL)
         {
-            cerr << "Error: StateDBClientFactory::createStateDBClient() failed calling new stateDBSingleton.get()" << endl;
+            zklog.error("StateDBClientFactory::createStateDBClient() failed calling new stateDBSingleton.get()");
             exitProcess();
         }
         return pLocalClient;
@@ -23,7 +24,7 @@ StateDBInterface* StateDBClientFactory::createStateDBClient (Goldilocks &fr, con
     StateDBInterface *pRemoteClient = new StateDBRemote (fr, config);
     if (pRemoteClient == NULL)
     {
-        cerr << "Error: StateDBClientFactory::createStateDBClient() failed calling new StateDBRemote()" << endl;
+        zklog.error("StateDBClientFactory::createStateDBClient() failed calling new StateDBRemote()");
         exitProcess();
     }
     return pRemoteClient;
@@ -34,7 +35,7 @@ void StateDBClientFactory::freeStateDBClient (StateDBInterface * pStateDB)
     // Check the interface is not null
     if (pStateDB == NULL)
     {
-        cerr << "Error: StateDBClientFactory::freeStateDBClient() called with pStateDB=NULL" << endl;
+        zklog.error("StateDBClientFactory::freeStateDBClient() called with pStateDB=NULL");
         exitProcess();
     }
 

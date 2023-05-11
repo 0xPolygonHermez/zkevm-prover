@@ -177,6 +177,11 @@ zkresult StateDB::flush()
     return result;
 }
 
+void StateDB::clearCache(void)
+{
+    db.clearCache();
+}
+
 void StateDB::setAutoCommit(const bool autoCommit)
 {
 #ifdef LOG_TIME_STATISTICS_STATEDB

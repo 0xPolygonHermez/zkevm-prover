@@ -1,5 +1,6 @@
 #include "transcriptBN128.hpp"
 #include "math.h"
+#include "zklog.hpp"
 
 void TranscriptBN128::put(Goldilocks::Element *input, uint64_t size)
 {
@@ -103,7 +104,7 @@ void TranscriptBN128::getPermutations(uint64_t *res, uint64_t n, uint64_t nBits)
         fields[i] = getFields253();
     }
 
-    std::cout << "fields[" << 0 << "]: " << RawFr::field.toString(fields[0], 10) << std::endl;
+    zklog.info("fields[0]: " + RawFr::field.toString(fields[0], 10));
 
     uint64_t curField = 0;
     uint64_t curBit = 0;

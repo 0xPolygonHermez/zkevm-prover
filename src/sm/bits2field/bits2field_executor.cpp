@@ -141,7 +141,7 @@ void Bits2FieldExecutor::execute (vector<Bits2FieldExecutorInput> &input, Bits2F
     /* Sanity check */
     zkassert(p <= N);
 
-    cout << "Bits2FieldExecutor successfully processed " << input.size() << " Keccak hashes (" << (double(input.size())*slotSize*100)/(44*N) << "%)" << endl;
+    zklog.info("Bits2FieldExecutor successfully processed " + to_string(input.size()) + " Keccak hashes (" + to_string((double(input.size())*slotSize*100)/(44*N)) + "%)");
 }
 
 Goldilocks::Element Bits2FieldExecutor::getBit (vector<Bits2FieldExecutorInput> &input, uint64_t block, bool isOutput, uint64_t pos)

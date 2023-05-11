@@ -971,7 +971,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     sr4to8(fr, ctx.lastSWrite.newRoot[0], ctx.lastSWrite.newRoot[1], ctx.lastSWrite.newRoot[2], ctx.lastSWrite.newRoot[3], fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                     nHits++;
 #ifdef LOG_STORAGE
-                    cout << "Storage write sWR stored at key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " newRoot: " << fr.toString(res.newRoot, 16) << endl;
+                    cout << "Storage write sWR stored at key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " newRoot: " << fr.toString(ctx.lastSWrite.res.newRoot, 16) << endl;
 #endif
                 }
 
@@ -3362,9 +3362,20 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             else if (jmpnCondValue <= FrLast32Positive)
             {
                 if (rom.line[zkPC].useElseAddr)
-                    pols.zkPC[nexti] = rom.line[zkPC].elseAddr;
+                {
+                    if (bUnsignedTransaction && (rom.line[zkPC].elseAddrLabel == "invalidIntrinsicTxSenderCode"))
+                    {
+                        pols.zkPC[nexti] = rom.line[zkPC].useJmpAddr ? rom.line[zkPC].jmpAddr : fr.fromU64(addr);
+                    }
+                    else
+                    {
+                        pols.zkPC[nexti] = rom.line[zkPC].elseAddr;
+                    }
+                }
                 else
+                {
                     pols.zkPC[nexti] = fr.inc(pols.zkPC[i]);
+                }
 #ifdef LOG_JMP
                 cout << "JMPN next zkPC(2)=" << pols.zkPC[nexti] << endl;
 #endif
@@ -3401,9 +3412,20 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             else
             {
                 if (rom.line[zkPC].useElseAddr)
-                    pols.zkPC[nexti] = rom.line[zkPC].elseAddr;
+                {
+                    if (bUnsignedTransaction && (rom.line[zkPC].elseAddrLabel == "invalidIntrinsicTxSenderCode"))
+                    {
+                        pols.zkPC[nexti] = rom.line[zkPC].useJmpAddr ? rom.line[zkPC].jmpAddr : fr.fromU64(addr);
+                    }
+                    else
+                    {
+                        pols.zkPC[nexti] = rom.line[zkPC].elseAddr;
+                    }
+                }
                 else
+                {
                     pols.zkPC[nexti] = fr.inc(pols.zkPC[i]);
+                }
 #ifdef LOG_JMP
                 cout << "JMPC next zkPC(4)=" << pols.zkPC[nexti] << endl;
 #endif
@@ -3423,9 +3445,20 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             else
             {
                 if (rom.line[zkPC].useElseAddr)
-                    pols.zkPC[nexti] = rom.line[zkPC].elseAddr;
+                {
+                    if (bUnsignedTransaction && (rom.line[zkPC].elseAddrLabel == "invalidIntrinsicTxSenderCode"))
+                    {
+                        pols.zkPC[nexti] = rom.line[zkPC].useJmpAddr ? rom.line[zkPC].jmpAddr : fr.fromU64(addr);
+                    }
+                    else
+                    {
+                        pols.zkPC[nexti] = rom.line[zkPC].elseAddr;
+                    }
+                }
                 else
+                {
                     pols.zkPC[nexti] = fr.inc(pols.zkPC[i]);
+                }
             }
             pols.JMPZ[i] = fr.one();
         }

@@ -8,7 +8,7 @@
 zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, SmtSetResult &result, DatabaseMap *dbReadLog)
 {
 #ifdef LOG_SMT
-    cout << "Smt::set() called with oldRoot=" << fea2string(fr,oldRoot) << " key=" << fea2string(fr,key) << " value=" << value.get_str(16) << " persistent=" << persistent << endl;
+    zklog.info("Smt::set() called with oldRoot=" + fea2string(fr,oldRoot) + " key=" + fea2string(fr,key) + " value=" + value.get_str(16) + " persistent=" + to_string(persistent));
 #endif
     Goldilocks::Element r[4];
     for (uint64_t i=0; i<4; i++) r[i] = oldRoot[i];
@@ -49,7 +49,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
         string rootString = fea2string(fr, r);
         vector<Goldilocks::Element> dbValue;
 
-        dbres = db.read(rootString, dbValue, dbReadLog);
+        dbres = db.read(rootString, dbValue, dbReadLog, false, &keys, level);
         if (dbres != ZKR_SUCCESS)
         {
             zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + rootString);
@@ -92,7 +92,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
             bFoundKey = true;
 
 #ifdef LOG_SMT
-            cout << "Smt::set() found at level=" << level << " foundVal=" << foundVal.get_str(16) << " foundKey=" << fea2string(fr,foundKey) << " foundRKey=" << fea2string(fr,foundRKey) << endl;
+            zklog.info("Smt::set() found at level=" + to_string(level) + " foundVal=" + foundVal.get_str(16) + " foundKey=" + fea2string(fr,foundKey) + " foundRKey=" + fea2string(fr,foundRKey));
 #endif
         }
         // This is an intermediate node
@@ -108,7 +108,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
             accKey.push_back(keys[level]);
 
 #ifdef LOG_SMT
-            cout << "Smt::set() down 1 level=" << level << " keys[level]=" << keys[level] << " root/hash=" << fea2string(fr,r) << endl;
+            zklog.info("Smt::set() down 1 level=" + to_string(level) + " keys[level]=" + to_string(keys[level]) + " root/hash=" + fea2string(fr,r));
 #endif
             // Increase the level
             level++;
@@ -139,7 +139,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
             {
                 mode = "update";
 #ifdef LOG_SMT
-                cout << "Smt::set() mode=" << mode << endl;
+                zklog.info("Smt::set() mode=" + mode);
 #endif
                 oldValue = foundVal;
 
@@ -193,14 +193,14 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                     newRoot[3] = newLeafHash[3];
                 }
 #ifdef LOG_SMT
-                cout << "Smt::set() updated an existing node at level=" << level << " leaf node hash=" << fea2string(fr,newLeafHash) << " value hash=" << fea2string(fr,newValH) << endl;
+                zklog.info("Smt::set() updated an existing node at level=" + to_string(level) + " leaf node hash=" + fea2string(fr,newLeafHash) + " value hash=" + fea2string(fr,newValH));
 #endif
             }
             else // keys are not equal, so insert with foundKey
             {
                 mode = "insertFound";
 #ifdef LOG_SMT
-                cout << "Smt::set() mode=" << mode << endl;
+                zklog.info("Smt::set() mode=" + mode);
 #endif
 
                 // Increase the level since we need to create a new leaf node
@@ -244,7 +244,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                 isOld0 = false;
 
 #ifdef LOG_SMT
-                cout << "Smt::set() stored leaf node insValue=" << insValue.get_str(16) << " insKey=" << fea2string(fr,insKey) << endl;
+                zklog.info("Smt::set() stored leaf node insValue=" + insValue.get_str(16) + " insKey=" + fea2string(fr,insKey));
 #endif
 
                 // Insert a new value node for the new value, and store the calculated hash in newValH
@@ -308,7 +308,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                 proofHashCounter += 4;
                 level2--;
 #ifdef LOG_SMT
-                cout << "Smt::set() inserted a new intermediate node level=" << level2 << " leaf node hash=" << fea2string(fr,r2) << endl;
+                zklog.info("Smt::set() inserted a new intermediate node level=" + to_string(level2) + " leaf node hash=" + fea2string(fr,r2));
 #endif
                 // Climb the branch up to the level where the key bits were common
                 while (level2!=level)
@@ -336,7 +336,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                     proofHashCounter += 1;
 
 #ifdef LOG_SMT
-                    cout << "Smt::set() inserted a new intermediate level=" << level2 << " leaf node hash=" << fea2string(fr,r2) << endl;
+                    zklog.info("Smt::set() inserted a new intermediate level=" + to_string(level2) + " leaf node hash=" + fea2string(fr,r2));
 #endif
 
                     // Climb the branch
@@ -365,7 +365,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
         {
             mode = "insertNotFound";
 #ifdef LOG_SMT
-            cout << "Smt::set() mode=" << mode << endl;
+            zklog.info("Smt::set() mode=" + mode);
 #endif
             // We could not find any key with any bit in common, so we need to create a new intermediate node, and a new leaf node
 
@@ -453,7 +453,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                 {
                     mode = "deleteFound";
 #ifdef LOG_SMT
-                    cout << "Smt::set() mode=" << mode << endl;
+                    zklog.info("Smt::set() mode=" + mode);
 #endif
                     // Calculate the key of the deleted element
                     Goldilocks::Element auxFea[4];
@@ -462,7 +462,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
 
                     // Read its 2 siblings
                     vector<Goldilocks::Element> dbValue;
-                    dbres = db.read(auxString, dbValue, dbReadLog);
+                    dbres = db.read(auxString, dbValue, dbReadLog, false, &keys, level);
                     if ( dbres != ZKR_SUCCESS)
                     {
                         zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + auxString);
@@ -571,7 +571,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                     {
                         mode = "deleteNotFound";
 #ifdef LOG_SMT
-                        cout << "Smt::set() mode=" << mode << endl;
+                        zklog.info("Smt::set() mode=" + mode);
 #endif
                     }
                 }
@@ -580,7 +580,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                 {
                     mode = "deleteNotFound";
 #ifdef LOG_SMT
-                    cout << "Smt::set() mode=" << mode << endl;
+                    zklog.info("Smt::set() mode=" + mode);
 #endif
                 }
             }
@@ -589,7 +589,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
             {
                 mode = "deleteLast";
 #ifdef LOG_SMT
-                cout << "Smt::set() mode=" << mode << endl;
+                zklog.info("Smt::set() mode=" + mode);
 #endif
                 newRoot[0] = fr.zero();
                 newRoot[1] = fr.zero();
@@ -608,7 +608,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                 isOld0 = false;
             }
 #ifdef LOG_SMT
-            cout << "Smt::set() mode=" << mode << endl;
+            zklog.info("Smt::set() mode=" + mode);
 #endif
         }
     }
@@ -686,7 +686,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
     result.proofHashCounter = proofHashCounter;
 
 #ifdef LOG_SMT
-    cout << "Smt::set() returns isOld0=" << result.isOld0 << " insKey=" << fea2string(fr,result.insKey) << " oldValue=" << result.oldValue.get_str(16) << " newRoot=" << fea2string(fr,result.newRoot) << " mode=" << result.mode << endl << endl;
+    zklog.info("Smt::set() returns isOld0=" + to_string(result.isOld0) + " insKey=" + fea2string(fr,result.insKey) + " oldValue=" + result.oldValue.get_str(16) + " newRoot=" + fea2string(fr,result.newRoot) + " mode=" + result.mode);
 #endif
 #ifdef LOG_SMT_SET_PRINT_TREE
     db.printTree(fea2string(fr,result.newRoot));
@@ -698,7 +698,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
 zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], SmtGetResult &result, DatabaseMap *dbReadLog)
 {
 #ifdef LOG_SMT
-    cout << "Smt::get() called with root=" << fea2string(fr,root) << " and key=" << fea2string(fr,key) << endl;
+    zklog.info("Smt::get() called with root=" + fea2string(fr,root) + " and key=" + fea2string(fr,key));
 #endif
     Goldilocks::Element r[4];
     for (uint64_t i=0; i<4; i++)
@@ -728,7 +728,7 @@ zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Gold
     zkresult dbres;
 
 #ifdef LOG_SMT
-    //cout << "Smt::get() found database content:" << endl;
+    //zklog.info("Smt::get() found database content:");
     //db.print();
 #endif
 
@@ -739,7 +739,7 @@ zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Gold
         // Read the content of db for entry r: siblings[level] = db.read(r)
         string rString = fea2string(fr, r);
         vector<Goldilocks::Element> dbValue;
-        dbres = db.read(rString, dbValue, dbReadLog);
+        dbres = db.read(rString, dbValue, dbReadLog, false, &keys, level);
         if (dbres != ZKR_SUCCESS)
         {
             zklog.error("Smt::get() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + rString);
@@ -786,7 +786,7 @@ zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Gold
             joinKey(accKey, foundRKey, foundKey);
             bFoundKey = true;
 #ifdef LOG_SMT
-            cout << "Smt::get() found at level=" << level << " value/hash=" << fea2string(fr,valueHashFea) << " foundKey=" << fea2string(fr, foundKey) << " value=" << foundVal.get_str(16) << endl;
+            zklog.info("Smt::get() found at level=" + to_string(level) + " value/hash=" + fea2string(fr,valueHashFea) + " foundKey=" + fea2string(fr, foundKey) + " value=" + foundVal.get_str(16));
 #endif
         }
         // If this is an intermediate node
@@ -802,7 +802,7 @@ zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Gold
             accKey.push_back(keys[level]);
 
 #ifdef LOG_SMT
-            cout << "Smt::get() down 1 level=" << level << " keys[level]=" << keys[level] << " root/hash=" << fea2string(fr,r) << endl;
+            zklog.info("Smt::get() down 1 level=" + to_string(level) + " keys[level]=" + to_string(keys[level]) + " root/hash=" + fea2string(fr,r));
 #endif
             // Increase the level
             level++;
@@ -868,7 +868,7 @@ zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Gold
     }
 
 #ifdef LOG_SMT
-    cout << "Smt::get() returns isOld0=" << result.isOld0 << " insKey=" << fea2string(fr,result.insKey) << " and value=" << result.value.get_str(16) << endl << endl;
+    zklog.info("Smt::get() returns isOld0=" + to_string(result.isOld0) + " insKey=" + fea2string(fr,result.insKey) + " and value=" + result.value.get_str(16));
 #endif
 
     return ZKR_SUCCESS;
@@ -976,10 +976,12 @@ zkresult Smt::hashSave ( Database &db, const Goldilocks::Element (&a)[8], const 
     }
 
 #ifdef LOG_SMT
-    cout << "Smt::hashSave() key=" << hashString << " value=";
-    for (uint64_t i=0; i<12; i++) cout << fr.toString(dbValue[i],16) << ":";
-    cout << " zkr=" << zkr;
-    cout << endl;
+    {
+        string s = "Smt::hashSave() key=" + hashString + " value=";
+        for (uint64_t i=0; i<12; i++) s += fr.toString(dbValue[i],16) + ":";
+        s += " zkr=" + zkresult2string(zkr);
+        zklog.info(s);
+    }
 #endif
     return zkr;
 }
@@ -1000,10 +1002,12 @@ zkresult Smt::saveStateRoot(Database &db, const Goldilocks::Element (&stateRoot)
     }
 
 #ifdef LOG_SMT
-    cout << "Smt::saveStateRoot() key=" << Database::dbStateRootKey << " value=";
-    for (uint64_t i=0; i<12; i++) cout << fr.toString(dbValue[i],16) << ":";
-    cout << " zkr=" << zkr;
-    cout << endl;
+    {
+        string s = "Smt::saveStateRoot() key=" + Database::dbStateRootKey + " value=";
+        for (uint64_t i=0; i<12; i++) s += fr.toString(dbValue[i],16) + ":";
+        s += " zkr=" + zkresult2string(zkr);
+        zklog.info(s);
+    }
 #endif
     return zkr;
 }

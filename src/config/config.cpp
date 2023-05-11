@@ -4,6 +4,7 @@
 #include "config.hpp"
 #include "zkassert.hpp"
 #include "utils.hpp"
+#include "zklog.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -167,6 +168,14 @@ void Config::load(json &config)
     if (config.contains("logRemoteDbReads") && config["logRemoteDbReads"].is_boolean())
         logRemoteDbReads = config["logRemoteDbReads"];
 
+    logExecutorServerInput = false;
+    if (config.contains("logExecutorServerInput") && config["logExecutorServerInput"].is_boolean())
+        logExecutorServerInput = config["logExecutorServerInput"];
+
+    logExecutorServerInputGasThreshold = 0;
+    if (config.contains("logExecutorServerInputGasThreshold") && config["logExecutorServerInputGasThreshold"].is_number())
+        logExecutorServerInputGasThreshold = config["logExecutorServerInputGasThreshold"];
+
     logExecutorServerResponses = false;
     if (config.contains("logExecutorServerResponses") && config["logExecutorServerResponses"].is_boolean())
         logExecutorServerResponses = config["logExecutorServerResponses"];
@@ -199,6 +208,10 @@ void Config::load(json &config)
     if (config.contains("executorClientHost") && config["executorClientHost"].is_string())
         executorClientHost = config["executorClientHost"];
 
+    executorClientLoops = 1;
+    if (config.contains("executorClientLoops") && config["executorClientLoops"].is_number())
+        executorClientLoops = config["executorClientLoops"];
+
     stateDBServerPort = 50061;
     if (config.contains("stateDBServerPort") && config["stateDBServerPort"].is_number())
         stateDBServerPort = config["stateDBServerPort"];
@@ -222,6 +235,10 @@ void Config::load(json &config)
     aggregatorClientMockTimeout = 60 * 1000 * 1000;
     if (config.contains("aggregatorClientMockTimeout") && config["aggregatorClientMockTimeout"].is_number())
         aggregatorClientMockTimeout = config["aggregatorClientMockTimeout"];
+
+    aggregatorClientWatchdogTimeout = 60 * 1000 * 1000;
+    if (config.contains("aggregatorClientWatchdogTimeout") && config["aggregatorClientWatchdogTimeout"].is_number())
+        aggregatorClientWatchdogTimeout = config["aggregatorClientWatchdogTimeout"];
 
     if (config.contains("inputFile") && config["inputFile"].is_string())
         inputFile = config["inputFile"];
@@ -419,6 +436,26 @@ void Config::load(json &config)
     if (config.contains("dbNumberOfPoolConnections") && config["dbNumberOfPoolConnections"].is_number())
         dbNumberOfPoolConnections = config["dbNumberOfPoolConnections"];
 
+    dbMetrics = false;
+    if (config.contains("dbMetrics") && config["dbMetrics"].is_boolean())
+        dbMetrics = config["dbMetrics"];
+
+    dbClearCache = false;
+    if (config.contains("dbClearCache") && config["dbClearCache"].is_boolean())
+        dbClearCache = config["dbClearCache"];
+
+    dbGetTree = false;
+    if (config.contains("dbGetTree") && config["dbGetTree"].is_boolean())
+        dbGetTree = config["dbGetTree"];
+
+    dbReadOnly = false;
+    if (config.contains("dbReadOnly") && config["dbReadOnly"].is_boolean())
+        dbReadOnly = config["dbReadOnly"];
+
+    dbReadRetryDelay = 100*1000;
+    if (config.contains("dbReadRetryDelay") && config["dbReadRetryDelay"].is_number())
+        dbReadRetryDelay = config["dbReadRetryDelay"];
+
     if (config.contains("cleanerPollingPeriod") && config["cleanerPollingPeriod"].is_number())
         cleanerPollingPeriod = config["cleanerPollingPeriod"];
 
@@ -444,150 +481,160 @@ void Config::load(json &config)
 
 void Config::print(void)
 {
-    cout << "Configuration:" << endl;
+    zklog.info("Configuration:");
 
-    cout << "    proverID=" << proverID << endl;
-    cout << "    proverName=" << proverName << endl;
+    zklog.info("    proverID=" + proverID);
+    zklog.info("    proverName=" + proverName);
 
     if (runExecutorServer)
-        cout << "    runExecutorServer=true" << endl;
+        zklog.info("    runExecutorServer=true");
     if (runExecutorClient)
-        cout << "    runExecutorClient=true" << endl;
+        zklog.info("    runExecutorClient=true");
     if (runExecutorClientMultithread)
-        cout << "    runExecutorClientMultithread=true" << endl;
+        zklog.info("    runExecutorClientMultithread=true");
     if (runStateDBServer)
-        cout << "    runStateDBServer=true" << endl;
+        zklog.info("    runStateDBServer=true");
     if (runStateDBTest)
-        cout << "    runStateDBTest=true" << endl;
+        zklog.info("    runStateDBTest=true");
     if (runAggregatorServer)
-        cout << "    runAggregatorServer=true" << endl;
+        zklog.info("    runAggregatorServer=true");
     if (runAggregatorClient)
-        cout << "    runAggregatorClient=true" << endl;
+        zklog.info("    runAggregatorClient=true");
     if (runAggregatorClientMock)        
-        cout << "    runAggregatorClientMock=true" << endl;
+        zklog.info("    runAggregatorClientMock=true");
     if (runFileGenBatchProof)
-        cout << "    runFileGenBatchProof=true" << endl;
+        zklog.info("    runFileGenBatchProof=true");
     if (runFileGenAggregatedProof)
-        cout << "    runFileGenAggregatedProof=true" << endl;
+        zklog.info("    runFileGenAggregatedProof=true");
     if (runFileGenFinalProof)
-        cout << "    runFileGenFinalProof=true" << endl;
+        zklog.info("    runFileGenFinalProof=true");
     if (runFileProcessBatch)
-        cout << "    runFileProcessBatch=true" << endl;
+        zklog.info("    runFileProcessBatch=true");
     if (runFileProcessBatchMultithread)
-        cout << "    runFileProcessBatchMultithread=true" << endl;
+        zklog.info("    runFileProcessBatchMultithread=true");
     if (runFileExecute)
-        cout << "    runFileExecute=true" << endl;
+        zklog.info("    runFileExecute=true");
 
     if (runKeccakScriptGenerator)
-        cout << "    runKeccakScriptGenerator=true" << endl;
+        zklog.info("    runKeccakScriptGenerator=true");
     if (runKeccakTest)
-        cout << "    runKeccakTest=true" << endl;
+        zklog.info("    runKeccakTest=true");
     if (runStorageSMTest)
-        cout << "    runStorageSMTest=true" << endl;
+        zklog.info("    runStorageSMTest=true");
     if (runBinarySMTest)
-        cout << "    runBinarySMTest=true" << endl;
+        zklog.info("    runBinarySMTest=true");
     if (runMemAlignSMTest)
-        cout << "    runMemAlignSMTest=true" << endl;
+        zklog.info("    runMemAlignSMTest=true");
     if (runSHA256Test)
-        cout << "    runSHA256Test=true" << endl;
+        zklog.info("    runSHA256Test=true");
     if (runBlakeTest)
-        cout << "    runBlakeTest=true" << endl;
+        zklog.info("    runBlakeTest=true");
 
     if (executeInParallel)
-        cout << "    executeInParallel=true" << endl;
+        zklog.info("    executeInParallel=true");
     if (useMainExecGenerated)
-        cout << "    useMainExecGenerated=true" << endl;
+        zklog.info("    useMainExecGenerated=true");
 
     if (executorROMLineTraces)
-        cout << "    executorROMLineTraces=true" << endl;
+        zklog.info("    executorROMLineTraces=true");
 
     if (executorTimeStatistics)
-        cout << "    executorTimeStatistics=true" << endl;
+        zklog.info("    executorTimeStatistics=true");
 
     if (saveRequestToFile)
-        cout << "    saveRequestToFile=true" << endl;
+        zklog.info("    saveRequestToFile=true");
     if (saveInputToFile)
-        cout << "    saveInputToFile=true" << endl;
+        zklog.info("    saveInputToFile=true");
     if (saveDbReadsToFile)
-        cout << "    saveDbReadsToFile=true" << endl;
+        zklog.info("    saveDbReadsToFile=true");
     if (saveDbReadsToFileOnChange)
-        cout << "    saveDbReadsToFileOnChange=true" << endl;
+        zklog.info("    saveDbReadsToFileOnChange=true");
     if (saveOutputToFile)
-        cout << "    saveOutputToFile=true" << endl;
+        zklog.info("    saveOutputToFile=true");
     if (saveProofToFile)
-        cout << "    saveProofToFile=true" << endl;
+        zklog.info("    saveProofToFile=true");
     if (saveResponseToFile)
-        cout << "    saveResponseToFile=true" << endl;
+        zklog.info("    saveResponseToFile=true");
     if (loadDBToMemCache)
-        cout << "    loadDBToMemCache=true" << endl;
+        zklog.info("    loadDBToMemCache=true");
     if (loadDBToMemCacheInParallel)
-        cout << "    loadDBToMemCacheInParallel=true" << endl;
+        zklog.info("    loadDBToMemCacheInParallel=true");
     if (opcodeTracer)
-        cout << "    opcodeTracer=true" << endl;
+        zklog.info("    opcodeTracer=true");
     if (logRemoteDbReads)
-        cout << "    logRemoteDbReads=true" << endl;
+        zklog.info("    logRemoteDbReads=true");
+    if (logExecutorServerInput)
+        zklog.info("    logExecutorServerInput=true");
+    if (logExecutorServerInputGasThreshold)
+        zklog.info("    logExecutorServerInputGasThreshold=true");
     if (logExecutorServerResponses)
-        cout << "    logExecutorServerResponses=true" << endl;
+        zklog.info("    logExecutorServerResponses=true");
     if (logExecutorServerTxs)
-        cout << "    logExecutorServerTxs=true" << endl;
+        zklog.info("    logExecutorServerTxs=true");
     if (dontLoadRomOffsets)
-        cout << "    dontLoadRomOffsets=true" << endl;
+        zklog.info("    dontLoadRomOffsets=true");
 
-    cout << "    executorServerPort=" << to_string(executorServerPort) << endl;
-    cout << "    executorClientPort=" << to_string(executorClientPort) << endl;
-    cout << "    executorClientHost=" << executorClientHost << endl;
-    cout << "    stateDBServerPort=" << to_string(stateDBServerPort) << endl;
-    cout << "    stateDBURL=" << stateDBURL << endl;
-    cout << "    aggregatorServerPort=" << to_string(aggregatorServerPort) << endl;
-    cout << "    aggregatorClientPort=" << to_string(aggregatorClientPort) << endl;
-    cout << "    aggregatorClientHost=" << aggregatorClientHost << endl;
-    cout << "    aggregatorClientMockTimeout=" << to_string(aggregatorClientMockTimeout) << endl;
+    zklog.info("    executorServerPort=" + to_string(executorServerPort));
+    zklog.info("    executorClientPort=" + to_string(executorClientPort));
+    zklog.info("    executorClientHost=" + executorClientHost);
+    zklog.info("    executorClientLoops=" + to_string(executorClientLoops));
+    zklog.info("    stateDBServerPort=" + to_string(stateDBServerPort));
+    zklog.info("    stateDBURL=" + stateDBURL);
+    zklog.info("    aggregatorServerPort=" + to_string(aggregatorServerPort));
+    zklog.info("    aggregatorClientPort=" + to_string(aggregatorClientPort));
+    zklog.info("    aggregatorClientHost=" + aggregatorClientHost);
+    zklog.info("    aggregatorClientMockTimeout=" + to_string(aggregatorClientMockTimeout));
 
-    cout << "    inputFile=" << inputFile << endl;
-    cout << "    inputFile2=" << inputFile2 << endl;
-    cout << "    outputPath=" << outputPath << endl;
-    cout << "    configPath=" << configPath << endl;
-    cout << "    rom=" << rom << endl;
-    cout << "    zkevmCmPols=" << zkevmCmPols << endl;
-    cout << "    c12aCmPols=" << c12aCmPols << endl;
-    cout << "    recursive1CmPols=" << recursive1CmPols << endl;
-    cout << "    zkevmConstPols=" << zkevmConstPols << endl;
-    cout << "    c12aConstPols=" << c12aConstPols << endl;
+    zklog.info("    inputFile=" + inputFile);
+    zklog.info("    inputFile2=" + inputFile2);
+    zklog.info("    outputPath=" + outputPath);
+    zklog.info("    configPath=" + configPath);
+    zklog.info("    rom=" + rom);
+    zklog.info("    zkevmCmPols=" + zkevmCmPols);
+    zklog.info("    c12aCmPols=" + c12aCmPols);
+    zklog.info("    recursive1CmPols=" + recursive1CmPols);
+    zklog.info("    zkevmConstPols=" + zkevmConstPols);
+    zklog.info("    c12aConstPols=" + c12aConstPols);
     if (mapConstPolsFile)
-        cout << "    mapConstPolsFile=true" << endl;
-    cout << "    zkevmConstantsTree=" << zkevmConstantsTree << endl;
-    cout << "    c12aConstantsTree=" << c12aConstantsTree << endl;
+        zklog.info("    mapConstPolsFile=true");
+    zklog.info("    zkevmConstantsTree=" + zkevmConstantsTree);
+    zklog.info("    c12aConstantsTree=" + c12aConstantsTree);
     if (mapConstantsTreeFile)
-        cout << "    mapConstantsTreeFile=true" << endl;
-    cout << "    finalVerkey=" << finalVerkey << endl;
-    cout << "    zkevmVerifier=" << zkevmVerifier << endl;
-    cout << "    recursive1Verifier=" << recursive1Verifier << endl;
-    cout << "    recursive2Verifier=" << recursive2Verifier << endl;
-    cout << "    recursive2Verkey=" << recursive2Verkey << endl;
-    cout << "    recursivefVerifier=" << recursivefVerifier << endl;
-    cout << "    finalVerifier=" << finalVerifier << endl;
-    cout << "    finalStarkZkey=" << finalStarkZkey << endl;
-    cout << "    publicsOutput=" << publicsOutput << endl;
-    cout << "    proofFile=" << proofFile << endl;
-    cout << "    keccakScriptFile=" << keccakScriptFile << endl;
-    cout << "    keccakPolsFile=" << keccakPolsFile << endl;
-    cout << "    keccakConnectionsFile=" << keccakConnectionsFile << endl;
-    cout << "    storageRomFile=" << storageRomFile << endl;
-    cout << "    zkevmStarkInfo=" << zkevmStarkInfo << endl;
-    cout << "    c12aStarkInfo=" << c12aStarkInfo << endl;
-    cout << "    databaseURL=" << databaseURL << endl;
-    cout << "    dbNodesTableName=" << dbNodesTableName << endl;
-    cout << "    dbProgramTableName=" << dbProgramTableName << endl;
-    cout << "    dbMultiWrite=" << to_string(dbMultiWrite) << endl;
-    cout << "    dbFlushInParallel=" << to_string(dbFlushInParallel) << endl;
-    cout << "    dbConnectionsPool=" << to_string(dbConnectionsPool) << endl;
-    cout << "    dbNumberOfPoolConnections=" << dbNumberOfPoolConnections << endl;
-    cout << "    cleanerPollingPeriod=" << cleanerPollingPeriod << endl;
-    cout << "    requestsPersistence=" << requestsPersistence << endl;
-    cout << "    maxExecutorThreads=" << maxExecutorThreads << endl;
-    cout << "    maxProverThreads=" << maxProverThreads << endl;
-    cout << "    maxStateDBThreads=" << maxStateDBThreads << endl;
-    cout << "    dbMTCacheSize=" << dbMTCacheSize << endl;
-    cout << "    dbProgramCacheSize=" << dbProgramCacheSize << endl;
-    cout << "    loadDBToMemTimeout=" << loadDBToMemTimeout << endl;
+        zklog.info("    mapConstantsTreeFile=true");
+    zklog.info("    finalVerkey=" + finalVerkey);
+    zklog.info("    zkevmVerifier=" + zkevmVerifier);
+    zklog.info("    recursive1Verifier=" + recursive1Verifier);
+    zklog.info("    recursive2Verifier=" + recursive2Verifier);
+    zklog.info("    recursive2Verkey=" + recursive2Verkey);
+    zklog.info("    recursivefVerifier=" + recursivefVerifier);
+    zklog.info("    finalVerifier=" + finalVerifier);
+    zklog.info("    finalStarkZkey=" + finalStarkZkey);
+    zklog.info("    publicsOutput=" + publicsOutput);
+    zklog.info("    proofFile=" + proofFile);
+    zklog.info("    keccakScriptFile=" + keccakScriptFile);
+    zklog.info("    keccakPolsFile=" + keccakPolsFile);
+    zklog.info("    keccakConnectionsFile=" + keccakConnectionsFile);
+    zklog.info("    storageRomFile=" + storageRomFile);
+    zklog.info("    zkevmStarkInfo=" + zkevmStarkInfo);
+    zklog.info("    c12aStarkInfo=" + c12aStarkInfo);
+    zklog.info("    databaseURL=" + databaseURL);
+    zklog.info("    dbNodesTableName=" + dbNodesTableName);
+    zklog.info("    dbProgramTableName=" + dbProgramTableName);
+    zklog.info("    dbMultiWrite=" + to_string(dbMultiWrite));
+    zklog.info("    dbFlushInParallel=" + to_string(dbFlushInParallel));
+    zklog.info("    dbConnectionsPool=" + to_string(dbConnectionsPool));
+    zklog.info("    dbNumberOfPoolConnections=" + to_string(dbNumberOfPoolConnections));
+    zklog.info("    dbMetrics=" + to_string(dbMetrics));
+    zklog.info("    dbClearCache=" + to_string(dbClearCache));
+    zklog.info("    dbGetTree=" + to_string(dbGetTree));
+    zklog.info("    dbReadOnly=" + to_string(dbReadOnly));
+    zklog.info("    dbReadRetryDelay=" + to_string(dbReadRetryDelay));
+    zklog.info("    cleanerPollingPeriod=" + to_string(cleanerPollingPeriod));
+    zklog.info("    requestsPersistence=" + to_string(requestsPersistence));
+    zklog.info("    maxExecutorThreads=" + to_string(maxExecutorThreads));
+    zklog.info("    maxProverThreads=" + to_string(maxProverThreads));
+    zklog.info("    maxStateDBThreads=" + to_string(maxStateDBThreads));
+    zklog.info("    dbMTCacheSize=" + to_string(dbMTCacheSize));
+    zklog.info("    dbProgramCacheSize=" + to_string(dbProgramCacheSize));
+    zklog.info("    loadDBToMemTimeout=" + to_string(loadDBToMemTimeout));
 }

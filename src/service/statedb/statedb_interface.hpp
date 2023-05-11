@@ -20,6 +20,7 @@ public:
     virtual void loadDB(const DatabaseMap::MTMap &input, const bool persistent) = 0;
     virtual void loadProgramDB(const DatabaseMap::ProgramMap &input, const bool persistent) = 0;
     virtual zkresult flush() = 0;
+    virtual void clearCache(void) = 0;
 };
 
 #endif

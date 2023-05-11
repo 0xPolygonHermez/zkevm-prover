@@ -177,21 +177,21 @@ void runFileProcessBatch(Goldilocks fr, Prover &prover, Config &config)
     processBatchTotalPoseidonG += proverRequest.counters.poseidonG;
     processBatchTotalSteps += proverRequest.counters.steps;
 
-    cout << "runFileProcessBatch(" << config.inputFile << ") got counters: arith=" << proverRequest.counters.arith <<
-        " binary=" << proverRequest.counters.binary <<
-        " keccakF=" << proverRequest.counters.keccakF <<
-        " memAlign=" << proverRequest.counters.memAlign <<
-        " paddingPG=" << proverRequest.counters.paddingPG <<
-        " poseidonG=" << proverRequest.counters.poseidonG <<
-        " steps=" << proverRequest.counters.steps <<
-        " totals:" <<
-        " arith=" << processBatchTotalArith <<
-        " binary=" << processBatchTotalBinary <<
-        " keccakF=" << processBatchTotalKeccakF <<
-        " memAlign=" << processBatchTotalMemAlign <<
-        " paddingPG=" << processBatchTotalPaddingPG <<
-        " poseidonG=" << processBatchTotalPoseidonG <<
-        " steps=" << processBatchTotalSteps << endl;
+    zklog.info("runFileProcessBatch(" + config.inputFile + ") got counters: arith=" + to_string(proverRequest.counters.arith) +
+        " binary=" + to_string(proverRequest.counters.binary) +
+        " keccakF=" + to_string(proverRequest.counters.keccakF) +
+        " memAlign=" + to_string(proverRequest.counters.memAlign) +
+        " paddingPG=" + to_string(proverRequest.counters.paddingPG) +
+        " poseidonG=" + to_string(proverRequest.counters.poseidonG) +
+        " steps=" + to_string(proverRequest.counters.steps) +
+        " totals:" +
+        " arith=" + to_string(processBatchTotalArith) +
+        " binary=" + to_string(processBatchTotalBinary) +
+        " keccakF=" + to_string(processBatchTotalKeccakF) +
+        " memAlign=" + to_string(processBatchTotalMemAlign) +
+        " paddingPG=" + to_string(processBatchTotalPaddingPG) +
+        " poseidonG=" + to_string(processBatchTotalPoseidonG) +
+        " steps=" + to_string(processBatchTotalSteps));
  }
 
 class RunFileThreadArguments
@@ -273,6 +273,32 @@ int main(int argc, char **argv)
 {
     /* CONFIG */
 
+    if (argc == 2)
+    {
+        if ((strcmp(argv[1], "-v") == 0) || (strcmp(argv[1], "--version") == 0))
+        {
+            // If requested to only print the version, then exit the program
+            return 0;
+        }
+    }
+
+    // Parse the name of the configuration file
+    char *pConfigFile = (char *)"config/config.json";
+    if (argc == 3)
+    {
+        if ((strcmp(argv[1], "-c") == 0) || (strcmp(argv[1], "--config") == 0))
+        {
+            pConfigFile = argv[2];
+        }
+    }
+
+    // Create one instance of Config based on the contents of the file config.json
+    json configJson;
+    file2json(pConfigFile, configJson);
+    Config config;
+    config.load(configJson);
+    zklog.setPrefix(config.proverID.substr(0, 7) + " "); // Set the logs prefix
+
     // Print the zkProver version
     zklog.info("Version: " + string(ZKEVM_PROVER_VERSION));
 
@@ -292,35 +318,9 @@ int main(int argc, char **argv)
     zklog.info("DEBUG defined");
 #endif
 
-    if (argc == 2)
-    {
-        if ((strcmp(argv[1], "-v") == 0) || (strcmp(argv[1], "--version") == 0))
-        {
-            // If requested to only print the version, then exit the program
-            return 0;
-        }
-    }
+    config.print();
 
     TimerStart(WHOLE_PROCESS);
-
-    // Parse the name of the configuration file
-    char *pConfigFile = (char *)"config/config.json";
-    if (argc == 3)
-    {
-        if ((strcmp(argv[1], "-c") == 0) || (strcmp(argv[1], "--config") == 0))
-        {
-            pConfigFile = argv[2];
-        }
-    }
-
-    // Create one instance of Config based on the contents of the file config.json
-    TimerStart(LOAD_CONFIG_JSON);
-    json configJson;
-    file2json(pConfigFile, configJson);
-    Config config;
-    config.load(configJson);
-    config.print();
-    TimerStopAndLog(LOAD_CONFIG_JSON);
 
     // Check required files presence
     bool bError = false;
@@ -596,7 +596,7 @@ int main(int argc, char **argv)
     {
         pStateDBServer = new StateDBServer(fr, config);
         zkassert(pStateDBServer != NULL);
-        cout << "Launching StateDB server thread..." << endl;
+        zklog.info("Launching StateDB server thread...");
         pStateDBServer->runThread();
     }
 
@@ -606,7 +606,7 @@ int main(int argc, char **argv)
     {
         pExecutorServer = new ExecutorServer(fr, prover, config);
         zkassert(pExecutorServer != NULL);
-        cout << "Launching executor server thread..." << endl;
+        zklog.info("Launching executor server thread...");
         pExecutorServer->runThread();
     }
 
@@ -616,7 +616,7 @@ int main(int argc, char **argv)
     {
         pAggregatorServer = new AggregatorServer(fr, config);
         zkassert(pAggregatorServer != NULL);
-        cout << "Launching aggregator server thread..." << endl;
+        zklog.info("Launching aggregator server thread...");
         pAggregatorServer->runThread();
         sleep(5);
     }
@@ -635,7 +635,7 @@ int main(int argc, char **argv)
             for (size_t i = 0; i < files.size(); i++)
             {
                 tmpConfig.inputFile = config.inputFile + files[i];
-                cout << "runFileGenBatchProof inputFile=" << tmpConfig.inputFile << endl;
+                zklog.info("runFileGenBatchProof inputFile=" + tmpConfig.inputFile);
                 // Call the prover
                 runFileGenBatchProof(fr, prover, tmpConfig);
             }

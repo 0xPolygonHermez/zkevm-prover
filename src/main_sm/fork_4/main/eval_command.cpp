@@ -125,7 +125,7 @@ void eval_declareVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     ctx.vars[cmd.varName] = 0;
 
 #ifdef LOG_VARIABLES
-    cout << "Declare variable: " << cmd.varName << endl;
+    zklog.info("Declare variable: " + cmd.varName);
 #endif
 
     // Return the current value of this variable
@@ -154,7 +154,7 @@ void eval_getVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     }
 
 #ifdef LOG_VARIABLES
-    cout << "Get variable: " << cmd.varName << " scalar: " << ctx.vars[cmd.varName].get_str(16) << endl;
+    zklog.info("Get variable: " + cmd.varName + " scalar: " + ctx.vars[cmd.varName].get_str(16));
 #endif
 
     // Return the current value of this variable
@@ -214,7 +214,7 @@ void eval_setVar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     cr.scalar = auxScalar;
 
 #ifdef LOG_VARIABLES
-    cout << "Set variable: " << varName << " scalar: " << ctx.vars[varName].get_str(16) << endl;
+    zklog.info("Set variable: " + varName + " scalar: " + ctx.vars[varName].get_str(16));
 #endif
 }
 
@@ -1886,7 +1886,7 @@ void eval_log (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     // Print the log
     string hexLog = Add0xIfMissing(scalarLog.get_str(16));
-    cout << "Log regname=" << reg2string(cmd.params[0]->reg) << " hexLog=" << hexLog << endl;
+    zklog.info("Log regname=" + reg2string(cmd.params[0]->reg) + " hexLog=" + hexLog);
 
     // Return an empty array of field elements
     cr.type = crt_fea;

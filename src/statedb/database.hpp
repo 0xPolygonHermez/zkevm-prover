@@ -60,6 +60,11 @@ private:
     string multiWriteNodes;
     string multiWriteNodesUpdate;
     string multiWriteNodesStateRoot;
+    uint64_t multiWriteProgramCounter;
+    uint64_t multiWriteProgramUpdateCounter;
+    uint64_t multiWriteNodesCounter;
+    uint64_t multiWriteNodesUpdateCounter;
+    uint64_t multiWriteNodesStateRootCounter;
     pthread_mutex_t multiWriteMutex; // Mutex to protect the multi write queues
     void multiWriteLock(void) { pthread_mutex_lock(&multiWriteMutex); };
     void multiWriteUnlock(void) { pthread_mutex_unlock(&multiWriteMutex); };
@@ -68,7 +73,9 @@ private:
     // Remote database based on Postgres (PostgreSQL)
     void initRemote(void);
     zkresult readRemote(bool bProgram, const string &key, string &value);
+    zkresult readTreeRemote(const string &key, const vector<uint64_t> *keys, uint64_t level, uint64_t &numberOfFields);
     zkresult writeRemote(bool bProgram, const string &key, const string &value, const bool update);
+    zkresult writeGetTreeFunction(void);
 
 public:
 #ifdef DATABASE_USE_CACHE
@@ -87,7 +94,12 @@ public:
     Database(Goldilocks &fr, const Config &config) :
         fr(fr),
         config(config),
-        connectionsPool(NULL)
+        connectionsPool(NULL),
+        multiWriteProgramCounter(0),
+        multiWriteProgramUpdateCounter(0),
+        multiWriteNodesCounter(0),
+        multiWriteNodesUpdateCounter(0),
+        multiWriteNodesStateRootCounter(0)
     {
         // Init mutexes
         pthread_mutex_init(&multiWriteMutex, NULL);
@@ -97,7 +109,7 @@ public:
 
     // Basic methods
     void init(void);
-    zkresult read(const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, const bool update = false);
+    zkresult read(const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, const bool update = false, const vector<uint64_t> *keys = NULL , uint64_t level=0);
     zkresult write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent, const bool update = false);
     zkresult getProgram(const string &_key, vector<uint8_t> &value, DatabaseMap *dbReadLog, const bool update = false);
     zkresult setProgram(const string &_key, const vector<uint8_t> &value, const bool persistent, const bool update = false);
@@ -112,6 +124,9 @@ public:
 
     // Print tree
     void printTree(const string &root, string prefix = "");
+
+    // Clear cache
+    void clearCache(void);
 };
 
 void loadDb2MemCache(const Config config);

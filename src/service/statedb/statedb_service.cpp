@@ -7,12 +7,12 @@
 #include "scalar.hpp"
 #include "zkresult.hpp"
 #include <iomanip>
+#include "zklog.hpp"
 
 using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
-
 
 ::grpc::Status StateDBServiceImpl::Set(::grpc::ServerContext* context, const ::statedb::v1::SetRequest* request, ::statedb::v1::SetResponse* response)
 {
@@ -27,11 +27,10 @@ using grpc::Status;
         mpz_class value(request->value(),16);
         bool persistent = request->persistent();
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::Set() called.";
-    cout << " odlRoot=" << fea2string(fr, oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
-    cout << " key=" << fea2string(fr, key[0], key[1], key[2], key[3]);
-    cout << " value=" <<  value.get_str(16);
-    cout << " persistent=" << persistent << endl;
+        zklog.info("StateDBServiceImpl::Set() called. odlRoot=" + fea2string(fr, oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]) +
+            " key=" + fea2string(fr, key[0], key[1], key[2], key[3]) +
+            " value=" +  value.get_str(16) +
+            " persistent=" + to_string(persistent));
 #endif
         DatabaseMap *dbReadLog = NULL;
         if (request->get_db_read_log())
@@ -88,11 +87,11 @@ using grpc::Status;
     }
     catch (const std::exception &e)
     {
-        cerr << "Error: StateDBServiceImpl::Set() exception: " << e.what() << endl;
+        zklog.error("StateDBServiceImpl::Set() exception: " + string(e.what()));
         return Status::CANCELLED;
     }
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::Set() completed. newRoot= " << fea2string(fr, r.newRoot[0], r.newRoot[1], r.newRoot[2], r.newRoot[3]) << endl;
+    zklog.info("StateDBServiceImpl::Set() completed. newRoot= " + fea2string(fr, r.newRoot[0], r.newRoot[1], r.newRoot[2], r.newRoot[3]));
 #endif
     return Status::OK;
 }
@@ -108,9 +107,8 @@ using grpc::Status;
         Goldilocks::Element key[4];
         grpc2fea (fr, request->key(), key);
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::Get() called.";
-    cout << " root=" << fea2string(fr, root[0], root[1], root[2], root[3]);
-    cout << " key=" << fea2string(fr, key[0], key[1], key[2], key[3]) << endl;
+        zklog.info("StateDBServiceImpl::Get() called. root=" + fea2string(fr, root[0], root[1], root[2], root[3]) +
+            " key=" + fea2string(fr, key[0], key[1], key[2], key[3]));
 #endif
 
         DatabaseMap *dbReadLog = NULL;
@@ -163,11 +161,11 @@ using grpc::Status;
     }
     catch (const std::exception &e)
     {
-        cerr << "Error: StateDBServiceImpl::Get() exception: " << e.what() << endl;
+        zklog.error("StateDBServiceImpl::Get() exception: " + string(e.what()));
         return Status::CANCELLED;
     }
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::Get() completed. value=" <<  r.value.get_str(16) << endl;
+    zklog.info("StateDBServiceImpl::Get() completed. value=" +  r.value.get_str(16));
 #endif
     return Status::OK;
 }
@@ -188,12 +186,13 @@ using grpc::Status;
             data.push_back(sData.at(i));
         }
 #ifdef LOG_STATEDB_SERVICE
-        cout << "StateDBServiceImpl::SetProgram() called.";
-        cout << " key=" << fea2string(fr, key[0], key[1], key[2], key[3]);
-        cout << " data=";
-        for (uint64_t i=0; i<data.size(); i++)
-            cout << byte2string(data[i]);
-        cout << " persistent=" << request->persistent() << endl;
+        {
+            string s = "StateDBServiceImpl::SetProgram() called. key=" + fea2string(fr, key[0], key[1], key[2], key[3]) + " data=";
+            for (uint64_t i=0; i<data.size(); i++)
+                s += byte2string(data[i]);
+            s += " persistent=" + to_string(request->persistent());
+            zklog.info(s);
+        }
 #endif
         zkresult r = pStateDB->setProgram(key, data, request->persistent());
 
@@ -203,11 +202,11 @@ using grpc::Status;
     }
     catch (const std::exception &e)
     {
-        cerr << "Error: StateDBServiceImpl::SetProgram() exception: " << e.what() << endl;
+        zklog.error("StateDBServiceImpl::SetProgram() exception: " + string(e.what()));
         return Status::CANCELLED;
     }
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::SetProgram() completed." << endl;
+    zklog.info("StateDBServiceImpl::SetProgram() completed.");
 #endif
     return Status::OK;
 }
@@ -220,8 +219,7 @@ using grpc::Status;
         Goldilocks::Element key[4];
         grpc2fea (fr, request->key(), key);
 #ifdef LOG_STATEDB_SERVICE
-        cout << "StateDBServiceImpl::GetProgram() called.";
-        cout << " key=" << fea2string(fr, key[0], key[1], key[2], key[3]) << endl;
+        zklog.info("StateDBServiceImpl::GetProgram() called. key=" + fea2string(fr, key[0], key[1], key[2], key[3]));
 #endif
         vector<uint8_t> value;
         zkresult r = pStateDB->getProgram(key, value, NULL);
@@ -237,15 +235,16 @@ using grpc::Status;
     }
     catch (const std::exception &e)
     {
-        cerr << "Error: StateDBServiceImpl::GetProgram() exception: " << e.what() << endl;
+        zklog.error("StateDBServiceImpl::GetProgram() exception: " + string(e.what()));
         return Status::CANCELLED;
     }
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::GetProgram() completed.";
-    cout << " data=";
-    for (uint64_t i=0; i<sData.size(); i++)
-        cout << byte2string(sData.at(i));
-    cout << endl;
+    {
+        string s = "StateDBServiceImpl::GetProgram() completed. data=";
+        for (uint64_t i=0; i<sData.size(); i++)
+            s += byte2string(sData.at(i));
+        zklog.info(s);
+    }
 #endif
     return Status::OK;
 }
@@ -253,7 +252,7 @@ using grpc::Status;
 ::grpc::Status StateDBServiceImpl::LoadDB(::grpc::ServerContext* context, const ::statedb::v1::LoadDBRequest* request, ::google::protobuf::Empty* response)
 {
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::LoadDB called." << endl;
+    zklog.info("StateDBServiceImpl::LoadDB called.");
 #endif
     try
     {
@@ -263,11 +262,11 @@ using grpc::Status;
     }
     catch (const std::exception &e)
     {
-        cerr << "Error: StateDBServiceImpl::LoadDB() exception: " << e.what() << endl;
+        zklog.error("StateDBServiceImpl::LoadDB() exception: " + string(e.what()));
         return Status::CANCELLED;
     }
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::LoadDB() completed." << endl;
+    zklog.info("StateDBServiceImpl::LoadDB() completed.");
 #endif
     return Status::OK;
 }
@@ -275,13 +274,13 @@ using grpc::Status;
 ::grpc::Status StateDBServiceImpl::LoadProgramDB(::grpc::ServerContext* context, const ::statedb::v1::LoadProgramDBRequest* request, ::google::protobuf::Empty* response)
 {
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::LoadProgramDB called." << endl;
+    zklog.info("StateDBServiceImpl::LoadProgramDB called.");
 #endif
         DatabaseMap::ProgramMap mapProgram;
         grpc2programMap(fr, request->input_program_db(), mapProgram);
         pStateDB->loadProgramDB(mapProgram, request->persistent());
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::LoadProgramDB() completed." << endl;
+    zklog.info("StateDBServiceImpl::LoadProgramDB() completed.");
 #endif
     return Status::OK;
 }
@@ -289,7 +288,7 @@ using grpc::Status;
 ::grpc::Status StateDBServiceImpl::Flush(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::statedb::v1::FlushResponse* response)
 {
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::Flush called." << endl;
+    zklog.info("StateDBServiceImpl::Flush called.");
 #endif
     try
     {
@@ -303,11 +302,11 @@ using grpc::Status;
     }
     catch (const std::exception &e)
     {
-        cerr << "Error: StateDBServiceImpl::Flush() exception: " << e.what() << endl;
+        zklog.error("StateDBServiceImpl::Flush() exception: " + string(e.what()));
         return Status::CANCELLED;
     }
 #ifdef LOG_STATEDB_SERVICE
-    cout << "StateDBServiceImpl::Flush() completed." << endl;
+    zklog.info("StateDBServiceImpl::Flush() completed.");
 #endif
     return Status::OK;
 }

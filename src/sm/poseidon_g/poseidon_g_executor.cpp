@@ -291,7 +291,7 @@ void PoseidonGExecutor::execute (vector<array<Goldilocks::Element, 17>> &input, 
         p+=1;
     }
 
-    cout << "PoseidonGExecutor successfully processed " << input.size() << " Poseidon hashes p=" << p << " pDone=" << pDone << " (" << (double(pDone)*100)/N << "%)" << endl;
+    zklog.info("PoseidonGExecutor successfully processed " + to_string(input.size()) + " Poseidon hashes p=" + to_string(p) + " pDone=" + to_string(pDone) + " (" + to_string((double(pDone)*100)/N) + "%)");
 }
 
 Goldilocks::Element PoseidonGExecutor::pow7 (Goldilocks::Element &a)

@@ -62,7 +62,6 @@ bool ExecutorClient::ProcessBatch (void)
         cerr << "Error: ExecutorClient::ProcessBatch() found config.inputFile empty" << endl;
         exit(-1);
     }
-    ::grpc::ClientContext context;
     ::executor::v1::ProcessBatchRequest request;
     Input input(fr);
     json inputJson;
@@ -130,17 +129,26 @@ bool ExecutorClient::ProcessBatch (void)
         (*request.mutable_contracts_bytecode())[key] = value;
     }
 
-    ::executor::v1::ProcessBatchResponse response;
-    std::unique_ptr<grpc::ClientReaderWriter<executor::v1::ProcessBatchRequest, executor::v1::ProcessBatchResponse>> readerWriter;
-    ::grpc::Status grpcStatus = stub->ProcessBatch(&context, request, &response);
-    if (grpcStatus.error_code() != grpc::StatusCode::OK)
+    for (uint64_t i=0; i<config.executorClientLoops; i++)
     {
-        cerr << "Error: ExecutorClient::ProcessBatch() failed calling server" << endl;
-    }
+        if (i == 1)
+        {
+            request.clear_db();
+            request.clear_contracts_bytecode();
+        }
+        ::grpc::ClientContext context;
+        ::executor::v1::ProcessBatchResponse response;
+        ::grpc::Status grpcStatus = stub->ProcessBatch(&context, request, &response);
+        if (grpcStatus.error_code() != grpc::StatusCode::OK)
+        {
+            cerr << "Error: ExecutorClient::ProcessBatch() failed calling server i=" << i << endl;
+            break;
+        }
 
 #ifdef LOG_SERVICE
-    cout << "ExecutorClient::ProcessBatch() got:\n" << response.DebugString() << endl;
+        cout << "ExecutorClient::ProcessBatch() got:\n" << response.DebugString() << endl;
 #endif
+    }
 
     TimerStopAndLog(EXECUTOR_CLIENT_PROCESS_BATCH);
 

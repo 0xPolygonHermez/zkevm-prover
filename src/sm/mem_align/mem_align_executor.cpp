@@ -97,5 +97,5 @@ void MemAlignExecutor::execute (vector<MemAlignAction> &input, MemAlignCommitPol
         }
     }    
 
-    cout << "MemAlignExecutor successfully processed " << input.size() << " memory align actions (" << (double(input.size())*32*100)/N << "%)" << endl;
+    zklog.info("MemAlignExecutor successfully processed " + to_string(input.size()) + " memory align actions (" + to_string((double(input.size())*32*100)/N) + "%)");
 }

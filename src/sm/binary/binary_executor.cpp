@@ -116,7 +116,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
 #ifdef LOG_BINARY_EXECUTOR
         if (i%10000 == 0)
         {
-            cout << "Computing binary pols " << i << "/" << input.size() << endl;
+            zklog.info("Computing binary pols " + to_string(i) + "/" + to_string(input.size()));
         }
 #endif
 
@@ -382,7 +382,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
 
     free(c0Temp);
 
-    cout << "BinaryExecutor successfully processed " << action.size() << " binary actions (" << (double(action.size())*LATCH_SIZE*100)/N << "%)" << endl;
+    zklog.info("BinaryExecutor successfully processed " + to_string(action.size()) + " binary actions (" + to_string((double(action.size())*LATCH_SIZE*100)/N) + "%)");
 }
 
 // To be used only for testing, since it allocates a lot of memory

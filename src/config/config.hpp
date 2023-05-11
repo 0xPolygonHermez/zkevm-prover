@@ -57,6 +57,8 @@ public:
     int64_t dbProgramCacheSize; // Size in MBytes for the cache to store Program (SC) records
     bool opcodeTracer;
     bool logRemoteDbReads;
+    bool logExecutorServerInput; // Logs all inputs; 
+    uint64_t logExecutorServerInputGasThreshold; // Logs input if gas/s < this value, active if this value is > 0
     bool logExecutorServerResponses;
     bool logExecutorServerTxs;
     bool dontLoadRomOffsets;
@@ -66,6 +68,7 @@ public:
     bool executorTimeStatistics;
     uint16_t executorClientPort;
     string executorClientHost;
+    uint64_t executorClientLoops;
 
     uint16_t stateDBServerPort;
     string stateDBURL;
@@ -74,6 +77,7 @@ public:
     uint16_t aggregatorClientPort;
     string aggregatorClientHost;
     uint64_t aggregatorClientMockTimeout;
+    uint64_t aggregatorClientWatchdogTimeout;
 
     string inputFile;
     string inputFile2; // Used as the second input in genAggregatedProof
@@ -126,6 +130,11 @@ public:
     bool dbFlushInParallel;
     bool dbConnectionsPool;
     uint64_t dbNumberOfPoolConnections;
+    bool dbMetrics;
+    bool dbClearCache;
+    bool dbGetTree;
+    bool dbReadOnly;
+    uint64_t dbReadRetryDelay;
     uint64_t cleanerPollingPeriod;
     uint64_t requestsPersistence;
     uint64_t maxExecutorThreads;

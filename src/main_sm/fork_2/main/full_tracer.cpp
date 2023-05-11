@@ -63,9 +63,9 @@ set<string> oocErrors = {
 //////////
 
 // Get range from memory
-inline void getFromMemory(Context &ctx, mpz_class &offset, mpz_class &length, string &result)
+inline void getFromMemory(Context &ctx, mpz_class &offset, mpz_class &length, string &result, uint64_t * pContext = NULL)
 {
-    uint64_t offsetCtx = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]) * 0x40000;
+    uint64_t offsetCtx = (pContext != NULL) ? *pContext*0x40000 : ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]) * 0x40000;
     uint64_t addrMem = offsetCtx + 0x20000;
 
     result = "";
@@ -647,26 +647,17 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     response.call_trace.context.gas_used = response.gas_used;
     accBatchGas += response.gas_used;
 
-    // Set return data, in case of deploy, get return buffer from stack if there is no error, otherwise get it from memory
-    mpz_class offsetScalar;
-    getVarFromCtx(ctx, false, ctx.rom.retDataOffsetOffset, offsetScalar);
-    mpz_class lengthScalar;
-    getVarFromCtx(ctx, false, ctx.rom.retDataLengthOffset, lengthScalar);
-    if (response.call_trace.context.to == "0x")
+    // Set return data always; get it from memory
     {
-        // Check if there has been any error
-        if ( bOpcodeCalled && (response.error.size()>0) )
-        {
-            getFromMemory(ctx, offsetScalar, lengthScalar, response.return_value);
-        }
-        else
-        {
-            getCalldataFromStack(ctx, offsetScalar.get_ui(), lengthScalar.get_ui(), response.return_value);
-        }
-    }
-    else
-    {
+        mpz_class offsetScalar;
+        getVarFromCtx(ctx, false, ctx.rom.retDataOffsetOffset, offsetScalar);
+        mpz_class lengthScalar;
+        getVarFromCtx(ctx, false, ctx.rom.retDataLengthOffset, lengthScalar);
         getFromMemory(ctx, offsetScalar, lengthScalar, response.return_value);
+        if ( ctx.proverRequest.input.traceConfig.bGenerateCallTrace )
+        {
+            response.call_trace.context.output = response.return_value;
+        }
     }
 
     // Set create address in case of deploy
@@ -1044,7 +1035,10 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
         getVarFromCtx(ctx, false, ctx.rom.txValueOffset, auxScalar);
         singleInfo.contract.value = auxScalar;
 
-        getCalldataFromStack(ctx, 0, 0, singleInfo.contract.data);
+        getVarFromCtx(ctx, false, ctx.rom.txCalldataLenOffset, auxScalar);
+        uint64_t txCalldataLen  = auxScalar.get_ui();
+
+        getCalldataFromStack(ctx, 0, txCalldataLen, singleInfo.contract.data);
         
         singleInfo.contract.gas = txGAS[depth].forwarded;
     }
@@ -1087,7 +1081,7 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
         singleInfo.memory_size = (auxScalar.get_ui() / 32) * 32;
     }
 
-    if (ctx.proverRequest.input.traceConfig.bGenerateStorage && increaseDepth)
+    if (ctx.proverRequest.input.traceConfig.bGenerateStorage /*&& increaseDepth*/)
     {
         unordered_map<string, string> auxMap;
         deltaStorage[depth + 1] = auxMap;
@@ -1096,7 +1090,68 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     // Return data
     if (ctx.proverRequest.input.traceConfig.bGenerateReturnData)
     {
-        singleInfo.return_data.clear();
+        // Write return data from create/create2 until CTX changes
+        if (returnFromCreate.enabled)
+        {
+            if (returnFromCreate.returnValue.size() == 0)
+            {
+                uint64_t retDataCTX = returnFromCreate.createCTX;
+                mpz_class offsetScalar;
+                getVarFromCtx(ctx, false, ctx.rom.retDataOffsetOffset, offsetScalar, &retDataCTX);
+                mpz_class lengthScalar;
+                getVarFromCtx(ctx, false, ctx.rom.retDataLengthOffset, lengthScalar, &retDataCTX);
+                string return_value;
+                getFromMemory(ctx, offsetScalar, lengthScalar, return_value, &retDataCTX);
+                returnFromCreate.returnValue.push_back(return_value);
+            }
+
+            mpz_class currentCTXScalar;
+            getVarFromCtx(ctx, true, ctx.rom.currentCTXOffset, currentCTXScalar);
+            uint64_t currentCTX = currentCTXScalar.get_ui();
+            if (returnFromCreate.originCTX == currentCTX)
+            {
+                singleInfo.return_data = returnFromCreate.returnValue;
+            }
+            else
+            {
+                returnFromCreate.enabled = false;
+            }
+        }
+
+        // Check if return is called from CREATE/CREATE2
+        mpz_class isCreateScalar;
+        getVarFromCtx(ctx, false, ctx.rom.isCreateOffset, isCreateScalar);
+        bool isCreate = isCreateScalar.get_ui();
+
+        if (isCreate)
+        {            
+            if (singleInfo.opcode == opcodeName[0xf3/*RETURN*/].pName)
+            {
+                returnFromCreate.enabled = true;
+
+                mpz_class originCTXScalar;
+                getVarFromCtx(ctx, false, ctx.rom.originCTXOffset, originCTXScalar);
+                returnFromCreate.originCTX = originCTXScalar.get_ui();
+
+                returnFromCreate.createCTX = fr.toU64(ctx.pols.CTX[*ctx.pStep]);
+            }
+        }
+        else
+        {
+            mpz_class retDataCTXScalar;
+            getVarFromCtx(ctx, false, ctx.rom.retDataCTXOffset, retDataCTXScalar);
+            if (retDataCTXScalar != 0)
+            {
+                uint64_t retDataCTX = retDataCTXScalar.get_ui();
+                mpz_class offsetScalar;
+                getVarFromCtx(ctx, false, ctx.rom.retDataOffsetOffset, offsetScalar, &retDataCTX);
+                mpz_class lengthScalar;
+                getVarFromCtx(ctx, false, ctx.rom.retDataLengthOffset, lengthScalar, &retDataCTX);
+                string return_value;
+                getFromMemory(ctx, offsetScalar, lengthScalar, return_value, &retDataCTX);
+                singleInfo.return_data.push_back(return_value);
+            }
+        }
     }
 
 #ifdef LOG_TIME_STATISTICS
