@@ -841,7 +841,7 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
         // set refunded gas
         response.gas_refunded = lastOpcodeExecution.gas_refund;
 
-        //  Set gas price of last opcode if no error and is not a deploy and is not STOP (RETURN + REVERT)
+        // Set gas price of last opcode if no error and is not a deploy and is not STOP (RETURN + REVERT)
         if ( (execution_trace.size() > 1) &&
              (lastOpcodeExecution.op != 0x00 /*STOP opcode*/ ) &&
              (lastOpcodeExecution.error.size() == 0) &&
