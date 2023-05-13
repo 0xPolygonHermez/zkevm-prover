@@ -6,9 +6,6 @@
 #include "zkevm.chelpers.step2prev.parser.hpp"
 #include <immintrin.h>
 
-#define NR_ 4
-#define NR512_ 8
-
 void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows, uint64_t nrowsBatch)
 {
 #pragma omp parallel for
@@ -58,7 +55,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 5:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * args2prev[i_args + 4];
                          offsets2[j] = args2prev[i_args + 5] + (((i + j) + args2prev[i_args + 6]) % args2prev[i_args + 7]) * args2prev[i_args + 8];
@@ -87,7 +84,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 9:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * numpols;
                          offsets2[j] = args2prev[i_args + 4] + (((i + j) + args2prev[i_args + 5]) % args2prev[i_args + 6]) * numpols;
@@ -104,7 +101,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 11:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * numpols;
                     }
@@ -183,7 +180,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 23:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets2[j] = args2prev[i_args + 2] + (((i + j) + args2prev[i_args + 3]) % args2prev[i_args + 4]) * args2prev[i_args + 5];
                     }
@@ -200,7 +197,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                case 25:
                {
 
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * args2prev[i_args + 4];
                     }
@@ -229,7 +226,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 29:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * args2prev[i_args + 4];
                     }
@@ -245,7 +242,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 31:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets2[j] = args2prev[i_args + 2] + (((i + j) + args2prev[i_args + 3]) % args2prev[i_args + 4]) * args2prev[i_args + 5];
                     }
@@ -261,7 +258,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 33:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets2[j] = args2prev[i_args + 2] + (((i + j) + args2prev[i_args + 3]) % args2prev[i_args + 4]) * numpols;
                     }
@@ -277,7 +274,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 35:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * args2prev[i_args + 4];
                          offsets2[j] = args2prev[i_args + 5] + (i + j) * args2prev[i_args + 6];
@@ -288,7 +285,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 36:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (i + j) * args2prev[i_args + 2];
                          offsets2[j] = args2prev[i_args + 3] + (((i + j) + args2prev[i_args + 4]) % args2prev[i_args + 5]) * args2prev[i_args + 6];
@@ -305,7 +302,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 38:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * args2prev[i_args + 4];
                          offsets2[j] = args2prev[i_args + 5] + (((i + j) + args2prev[i_args + 6]) % args2prev[i_args + 7]) * args2prev[i_args + 8];
@@ -370,7 +367,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 48:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * args2prev[i_args + 4];
                     }
@@ -392,7 +389,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 51:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (i + j) * args2prev[i_args + 2];
                          offsets2[j] = args2prev[i_args + 3] + (((i + j) + args2prev[i_args + 4]) % args2prev[i_args + 5]) * args2prev[i_args + 6];
@@ -403,7 +400,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 52:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * args2prev[i_args + 4];
                          offsets2[j] = args2prev[i_args + 5] + (((i + j) + args2prev[i_args + 6]) % args2prev[i_args + 7]) * args2prev[i_args + 8];
@@ -426,7 +423,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 55:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * args2prev[i_args + 4];
                          offsets2[j] = args2prev[i_args + 5] + (i + j) * numpols;
@@ -443,7 +440,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 57:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets2[j] = args2prev[i_args + 2] + (((i + j) + args2prev[i_args + 3]) % args2prev[i_args + 4]) * args2prev[i_args + 5];
                     }
@@ -484,7 +481,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 63:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * args2prev[i_args + 4];
                     }
@@ -500,10 +497,10 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 65:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * args2prev[i_args + 4];
-                         offsets2[j] = FIELD_EXTENSION * (j + NR_ * args2prev[i_args + 5]);
+                         offsets2[j] = FIELD_EXTENSION * (j + AVX_SIZE_ * args2prev[i_args + 5]);
                     }
                     Goldilocks3::mul13_avx(tmp3[args2prev[i_args]], &params.pols[0], tmp3[args2prev[i_args + 5]], offsets1);
                     i_args += 6;
@@ -538,7 +535,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                     Goldilocks::store_avx(ti1, tmp3[args2prev[i_args]][1]);
                     Goldilocks::store_avx(ti2, tmp3[args2prev[i_args]][2]);
 
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          tmp_inv[0] = ti0[j];
                          tmp_inv[1] = ti1[j];
@@ -571,7 +568,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 73:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * args2prev[i_args + 4];
                     }
@@ -582,10 +579,10 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 74:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * args2prev[i_args + 4];
-                         offsets2[j] = FIELD_EXTENSION * (j + NR_ * args2prev[i_args + 5]);
+                         offsets2[j] = FIELD_EXTENSION * (j + AVX_SIZE_ * args2prev[i_args + 5]);
                     }
                     Goldilocks3::mul_avx(tmp3[args2prev[i_args]], &params.pols[0], tmp3[args2prev[i_args + 5]], offsets1);
                     i_args += 6;
@@ -605,7 +602,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 77:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * args2prev[i_args + 4];
                          offsets2[j] = args2prev[i_args + 5] + (i + j) * args2prev[i_args + 6];
@@ -628,7 +625,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 80:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * args2prev[i_args + 4];
                     }
@@ -650,7 +647,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 83:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * numpols;
                     }
@@ -660,7 +657,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 84:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 2] + (((i + j) + args2prev[i_args + 3]) % args2prev[i_args + 4]) * args2prev[i_args + 5];
                     }
@@ -670,7 +667,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 85:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * args2prev[i_args + 4];
                     }
@@ -770,7 +767,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 101:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args] + (((i + j) + args2prev[i_args + 1]) % args2prev[i_args + 2]) * args2prev[i_args + 3];
                     }
@@ -780,7 +777,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 102:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args] + (((i + j) + args2prev[i_args + 1]) % args2prev[i_args + 2]) * args2prev[i_args + 3];
                     }
@@ -790,7 +787,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 103:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args] + (((i + j) + args2prev[i_args + 1]) % args2prev[i_args + 2]) * args2prev[i_args + 3];
                     }
@@ -800,7 +797,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 104:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args] + (((i + j) + args2prev[i_args + 1]) % args2prev[i_args + 2]) * args2prev[i_args + 3];
                     }
@@ -810,7 +807,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 105:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args] + (((i + j) + args2prev[i_args + 1]) % args2prev[i_args + 2]) * args2prev[i_args + 3];
                     }
@@ -820,7 +817,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 106:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args] + (((i + j) + args2prev[i_args + 1]) % args2prev[i_args + 2]) * args2prev[i_args + 3];
                     }
@@ -830,7 +827,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 107:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args] + (((i + j) + args2prev[i_args + 1]) % args2prev[i_args + 2]) * args2prev[i_args + 3];
                     }
@@ -840,7 +837,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 108:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args] + (((i + j) + args2prev[i_args + 1]) % args2prev[i_args + 2]) * args2prev[i_args + 3];
                     }
@@ -850,7 +847,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 109:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args] + (((i + j) + args2prev[i_args + 1]) % args2prev[i_args + 2]) * args2prev[i_args + 3];
                     }
@@ -860,7 +857,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 110:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args] + (((i + j) + args2prev[i_args + 1]) % args2prev[i_args + 2]) * args2prev[i_args + 3];
                     }
@@ -870,7 +867,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 111:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args] + (((i + j) + args2prev[i_args + 1]) % args2prev[i_args + 2]) * args2prev[i_args + 3];
                          offsets2[j] = args2prev[i_args + 4] + (((i + j) + args2prev[i_args + 5]) % args2prev[i_args + 6]) * numpols;
@@ -881,7 +878,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 112:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args] + (((i + j) + args2prev[i_args + 1]) % args2prev[i_args + 2]) * args2prev[i_args + 3];
                     }
@@ -891,7 +888,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 113:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args] + (((i + j) + args2prev[i_args + 1]) % args2prev[i_args + 2]) * args2prev[i_args + 3];
                     }
@@ -901,7 +898,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 114:
                {
-                    for (uint64_t j = 0; j < NR_; ++j)
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args] + (((i + j) + args2prev[i_args + 1]) % args2prev[i_args + 2]) * args2prev[i_args + 3];
                          offsets2[j] = args2prev[i_args + 5] + (((i + j) + args2prev[i_args + 6]) % args2prev[i_args + 7]) * args2prev[i_args + 8];
@@ -925,6 +922,7 @@ void ZkevmSteps::step2prev_parser_first_avx(StepsParams &params, uint64_t nrows,
      }
 }
 
+#ifdef __AVX512__
 void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nrows, uint64_t nrowsBatch)
 {
 #pragma omp parallel for
@@ -935,7 +933,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
           // Goldilocks3::Element_avx *tmp3 = new Goldilocks3::Element_avx[NTEMP3_];
           __m512i tmp1[NTEMP1_];
           Goldilocks3::Element_avx512 tmp3[NTEMP3_];
-          uint64_t offsets1[NR512_], offsets2[NR512_];
+          uint64_t offsets1[AVX512_SIZE_], offsets2[AVX512_SIZE_];
           uint64_t numpols = params.pConstPols->numPols();
 
           for (int kk = 0; kk < NOPS_; ++kk)
@@ -974,7 +972,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 5:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * args2prev[i_args + 4];
                          offsets2[j] = args2prev[i_args + 5] + (((i + j) + args2prev[i_args + 6]) % args2prev[i_args + 7]) * args2prev[i_args + 8];
@@ -1003,7 +1001,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 9:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * numpols;
                          offsets2[j] = args2prev[i_args + 4] + (((i + j) + args2prev[i_args + 5]) % args2prev[i_args + 6]) * numpols;
@@ -1020,7 +1018,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 11:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * numpols;
                     }
@@ -1099,7 +1097,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 23:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets2[j] = args2prev[i_args + 2] + (((i + j) + args2prev[i_args + 3]) % args2prev[i_args + 4]) * args2prev[i_args + 5];
                     }
@@ -1116,7 +1114,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                case 25:
                {
 
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * args2prev[i_args + 4];
                     }
@@ -1145,7 +1143,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 29:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * args2prev[i_args + 4];
                     }
@@ -1161,7 +1159,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 31:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets2[j] = args2prev[i_args + 2] + (((i + j) + args2prev[i_args + 3]) % args2prev[i_args + 4]) * args2prev[i_args + 5];
                     }
@@ -1177,7 +1175,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 33:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets2[j] = args2prev[i_args + 2] + (((i + j) + args2prev[i_args + 3]) % args2prev[i_args + 4]) * numpols;
                     }
@@ -1193,7 +1191,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 35:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * args2prev[i_args + 4];
                          offsets2[j] = args2prev[i_args + 5] + (i + j) * args2prev[i_args + 6];
@@ -1204,7 +1202,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 36:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (i + j) * args2prev[i_args + 2];
                          offsets2[j] = args2prev[i_args + 3] + (((i + j) + args2prev[i_args + 4]) % args2prev[i_args + 5]) * args2prev[i_args + 6];
@@ -1221,7 +1219,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 38:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * args2prev[i_args + 4];
                          offsets2[j] = args2prev[i_args + 5] + (((i + j) + args2prev[i_args + 6]) % args2prev[i_args + 7]) * args2prev[i_args + 8];
@@ -1286,7 +1284,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 48:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * args2prev[i_args + 4];
                     }
@@ -1308,7 +1306,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 51:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (i + j) * args2prev[i_args + 2];
                          offsets2[j] = args2prev[i_args + 3] + (((i + j) + args2prev[i_args + 4]) % args2prev[i_args + 5]) * args2prev[i_args + 6];
@@ -1319,7 +1317,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 52:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * args2prev[i_args + 4];
                          offsets2[j] = args2prev[i_args + 5] + (((i + j) + args2prev[i_args + 6]) % args2prev[i_args + 7]) * args2prev[i_args + 8];
@@ -1342,7 +1340,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 55:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * args2prev[i_args + 4];
                          offsets2[j] = args2prev[i_args + 5] + (i + j) * numpols;
@@ -1359,7 +1357,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 57:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets2[j] = args2prev[i_args + 2] + (((i + j) + args2prev[i_args + 3]) % args2prev[i_args + 4]) * args2prev[i_args + 5];
                     }
@@ -1400,7 +1398,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 63:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * args2prev[i_args + 4];
                     }
@@ -1416,10 +1414,10 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 65:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * args2prev[i_args + 4];
-                         offsets2[j] = FIELD_EXTENSION * (j + NR512_ * args2prev[i_args + 5]);
+                         offsets2[j] = FIELD_EXTENSION * (j + AVX512_SIZE_ * args2prev[i_args + 5]);
                     }
                     Goldilocks3::mul13_avx512(tmp3[args2prev[i_args]], &params.pols[0], tmp3[args2prev[i_args + 5]], offsets1);
                     i_args += 6;
@@ -1447,14 +1445,14 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                {
 
                     Goldilocks::Element tmp_inv[3];
-                    Goldilocks::Element ti0[NR512_];
-                    Goldilocks::Element ti1[NR512_];
-                    Goldilocks::Element ti2[NR512_];
+                    Goldilocks::Element ti0[AVX512_SIZE_];
+                    Goldilocks::Element ti1[AVX512_SIZE_];
+                    Goldilocks::Element ti2[AVX512_SIZE_];
                     Goldilocks::store_avx512(ti0, tmp3[args2prev[i_args]][0]);
                     Goldilocks::store_avx512(ti1, tmp3[args2prev[i_args]][1]);
                     Goldilocks::store_avx512(ti2, tmp3[args2prev[i_args]][2]);
 
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          tmp_inv[0] = ti0[j];
                          tmp_inv[1] = ti1[j];
@@ -1487,7 +1485,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 73:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * args2prev[i_args + 4];
                     }
@@ -1498,10 +1496,10 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 74:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * args2prev[i_args + 4];
-                         offsets2[j] = FIELD_EXTENSION * (j + NR512_ * args2prev[i_args + 5]);
+                         offsets2[j] = FIELD_EXTENSION * (j + AVX512_SIZE_ * args2prev[i_args + 5]);
                     }
                     Goldilocks3::mul_avx512(tmp3[args2prev[i_args]], &params.pols[0], tmp3[args2prev[i_args + 5]], offsets1);
                     i_args += 6;
@@ -1521,7 +1519,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 77:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * args2prev[i_args + 4];
                          offsets2[j] = args2prev[i_args + 5] + (i + j) * args2prev[i_args + 6];
@@ -1544,7 +1542,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 80:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * args2prev[i_args + 4];
                     }
@@ -1566,7 +1564,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 83:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * numpols;
                     }
@@ -1576,7 +1574,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 84:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 2] + (((i + j) + args2prev[i_args + 3]) % args2prev[i_args + 4]) * args2prev[i_args + 5];
                     }
@@ -1586,7 +1584,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 85:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args + 1] + (((i + j) + args2prev[i_args + 2]) % args2prev[i_args + 3]) * args2prev[i_args + 4];
                     }
@@ -1686,7 +1684,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 101:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args] + (((i + j) + args2prev[i_args + 1]) % args2prev[i_args + 2]) * args2prev[i_args + 3];
                     }
@@ -1696,7 +1694,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 102:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args] + (((i + j) + args2prev[i_args + 1]) % args2prev[i_args + 2]) * args2prev[i_args + 3];
                     }
@@ -1706,7 +1704,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 103:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args] + (((i + j) + args2prev[i_args + 1]) % args2prev[i_args + 2]) * args2prev[i_args + 3];
                     }
@@ -1716,7 +1714,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 104:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args] + (((i + j) + args2prev[i_args + 1]) % args2prev[i_args + 2]) * args2prev[i_args + 3];
                     }
@@ -1726,7 +1724,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 105:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args] + (((i + j) + args2prev[i_args + 1]) % args2prev[i_args + 2]) * args2prev[i_args + 3];
                     }
@@ -1736,7 +1734,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 106:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args] + (((i + j) + args2prev[i_args + 1]) % args2prev[i_args + 2]) * args2prev[i_args + 3];
                     }
@@ -1746,7 +1744,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 107:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args] + (((i + j) + args2prev[i_args + 1]) % args2prev[i_args + 2]) * args2prev[i_args + 3];
                     }
@@ -1756,7 +1754,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 108:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args] + (((i + j) + args2prev[i_args + 1]) % args2prev[i_args + 2]) * args2prev[i_args + 3];
                     }
@@ -1766,7 +1764,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 109:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args] + (((i + j) + args2prev[i_args + 1]) % args2prev[i_args + 2]) * args2prev[i_args + 3];
                     }
@@ -1776,7 +1774,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 110:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args] + (((i + j) + args2prev[i_args + 1]) % args2prev[i_args + 2]) * args2prev[i_args + 3];
                     }
@@ -1786,7 +1784,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 111:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args] + (((i + j) + args2prev[i_args + 1]) % args2prev[i_args + 2]) * args2prev[i_args + 3];
                          offsets2[j] = args2prev[i_args + 4] + (((i + j) + args2prev[i_args + 5]) % args2prev[i_args + 6]) * numpols;
@@ -1797,7 +1795,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 112:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args] + (((i + j) + args2prev[i_args + 1]) % args2prev[i_args + 2]) * args2prev[i_args + 3];
                     }
@@ -1807,7 +1805,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 113:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args] + (((i + j) + args2prev[i_args + 1]) % args2prev[i_args + 2]) * args2prev[i_args + 3];
                     }
@@ -1817,7 +1815,7 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 114:
                {
-                    for (uint64_t j = 0; j < NR512_; ++j)
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
                     {
                          offsets1[j] = args2prev[i_args] + (((i + j) + args2prev[i_args + 1]) % args2prev[i_args + 2]) * args2prev[i_args + 3];
                          offsets2[j] = args2prev[i_args + 5] + (((i + j) + args2prev[i_args + 6]) % args2prev[i_args + 7]) * args2prev[i_args + 8];
@@ -1840,3 +1838,4 @@ void ZkevmSteps::step2prev_parser_first_avx512(StepsParams &params, uint64_t nro
           // delete (tmp3);
      }
 }
+#endif

@@ -6,9 +6,6 @@
 #include "zkevm.chelpers.step52ns.parser.hpp"
 #include <immintrin.h>
 
-#define NR_ 4
-#define NR512_ 8
-
 void ZkevmSteps::step52ns_parser_first_avx(StepsParams &params, uint64_t nrows, uint64_t nrowsBatch)
 {
 
@@ -44,7 +41,7 @@ void ZkevmSteps::step52ns_parser_first_avx(StepsParams &params, uint64_t nrows, 
           __m256i chall60_, chall61_, chall62_;
           __m256i chall6o0_, chall6o1_, chall6o2_;
 
-          for (int k = 0; k < NR_; ++k)
+          for (int k = 0; k < AVX_SIZE_; ++k)
           {
                aux0_ops[k] = challenge5_ops[0];
                aux1_ops[k] = challenge5_ops[1];
@@ -60,7 +57,7 @@ void ZkevmSteps::step52ns_parser_first_avx(StepsParams &params, uint64_t nrows, 
           Goldilocks::load_avx(chall51_, aux1);
           Goldilocks::load_avx(chall52_, aux2);
 
-          for (int k = 0; k < NR_; ++k)
+          for (int k = 0; k < AVX_SIZE_; ++k)
           {
                aux0_ops[k] = challenge6_ops[0];
                aux1_ops[k] = challenge6_ops[1];
@@ -227,7 +224,7 @@ void ZkevmSteps::step52ns_parser_first(StepsParams &params, uint64_t nrows, uint
 #pragma omp parallel for
      for (uint64_t i = 0; i < nrows; i += nrowsBatch)
      {
-          Goldilocks::Element tmp[NR_ * 3], tmp1[NR_ * 3], tmp2[NR_ * 3];
+          Goldilocks::Element tmp[AVX_SIZE_ * 3], tmp1[AVX_SIZE_ * 3], tmp2[AVX_SIZE_ * 3];
 
           Goldilocks::Element *challenge5 = params.challenges[5];
           Goldilocks::Element *challenge6 = params.challenges[6];
@@ -389,6 +386,7 @@ void ZkevmSteps::step52ns_parser_first(StepsParams &params, uint64_t nrows, uint
      }
 }
 
+#ifdef __AVX512__
 void ZkevmSteps::step52ns_parser_first_avx512(StepsParams &params, uint64_t nrows, uint64_t nrowsBatch)
 {
 
@@ -417,14 +415,14 @@ void ZkevmSteps::step52ns_parser_first_avx512(StepsParams &params, uint64_t nrow
           challenge6_ops[1] = challenge6[0] + challenge6[2];
           challenge6_ops[2] = challenge6[1] + challenge6[2];
 
-          Goldilocks::Element aux0_ops[NR512_], aux1_ops[NR512_], aux2_ops[NR512_];
-          Goldilocks::Element aux0[NR512_], aux1[NR512_], aux2[NR512_];
+          Goldilocks::Element aux0_ops[AVX512_SIZE_], aux1_ops[AVX512_SIZE_], aux2_ops[AVX512_SIZE_];
+          Goldilocks::Element aux0[AVX512_SIZE_], aux1[AVX512_SIZE_], aux2[AVX512_SIZE_];
           __m512i chall50_, chall51_, chall52_;
           __m512i chall5o0_, chall5o1_, chall5o2_;
           __m512i chall60_, chall61_, chall62_;
           __m512i chall6o0_, chall6o1_, chall6o2_;
 
-          for (int k = 0; k < NR512_; ++k)
+          for (int k = 0; k < AVX512_SIZE_; ++k)
           {
                aux0_ops[k] = challenge5_ops[0];
                aux1_ops[k] = challenge5_ops[1];
@@ -440,7 +438,7 @@ void ZkevmSteps::step52ns_parser_first_avx512(StepsParams &params, uint64_t nrow
           Goldilocks::load_avx512(chall51_, aux1);
           Goldilocks::load_avx512(chall52_, aux2);
 
-          for (int k = 0; k < NR512_; ++k)
+          for (int k = 0; k < AVX512_SIZE_; ++k)
           {
                aux0_ops[k] = challenge6_ops[0];
                aux1_ops[k] = challenge6_ops[1];
@@ -601,3 +599,4 @@ void ZkevmSteps::step52ns_parser_first_avx512(StepsParams &params, uint64_t nrow
           assert(i_args == NARGS_);
      }
 }
+#endif

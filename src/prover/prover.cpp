@@ -32,7 +32,11 @@
 #include "zklog.hpp"
 #include "exit_process.hpp"
 
-#define NROWS_STEPS_ 4 // if AVX is used this must be 4
+#ifndef __AVX512__
+#define NROWS_STEPS_ 4
+#else
+#define NROWS_STEPS_ 8
+#endif
 
 Prover::Prover(Goldilocks &fr,
                PoseidonGoldilocks &poseidon,
@@ -672,7 +676,7 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     {
         if (pProverRequest->aggregatedProofInput1["publics"][19 + i] != pProverRequest->aggregatedProofInput2["publics"][0 + i])
         {
-            zklog.error("Prover::genAggregatedProof() The newStateRoot and the oldStateRoot are not consistent "+ pProverRequest->aggregatedProofInput1["publics"][19 + i].dump() + "!=" + pProverRequest->aggregatedProofInput2["publics"][0 + i].dump());
+            zklog.error("Prover::genAggregatedProof() The newStateRoot and the oldStateRoot are not consistent " + pProverRequest->aggregatedProofInput1["publics"][19 + i].dump() + "!=" + pProverRequest->aggregatedProofInput2["publics"][0 + i].dump());
             pProverRequest->result = ZKR_AGGREGATED_PROOF_INVALID_INPUT;
             return;
         }
