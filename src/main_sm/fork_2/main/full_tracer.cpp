@@ -23,14 +23,29 @@ set<string> opIncContext = {
     "DELEGATECALL",
     "CALLCODE",
     "CREATE",
-    "CREATE2"};
+    "CREATE2" };
 
 set<string> opDecContext = {
     "SELFDESTRUCT",
     "STOP",
     "INVALID",
     "REVERT",
-    "RETURN"};
+    "RETURN" };
+
+set<string> opCall = {
+    "CALL",
+    "STATICCALL",
+    "DELEGATECALL",
+    "CALLCODE" };
+
+set<string> opCreate = {
+    "CREATE",
+    "CREATE2" };
+
+set<string> zeroCostOp = {
+    "STOP",
+    "REVERT",
+    "RETURN" };
     
 set<string> responseErrors = {
     "OOCS",
@@ -47,7 +62,7 @@ set<string> responseErrors = {
     "intrinsic_invalid_gas_overflow",
     "intrinsic_invalid_balance",
     "intrinsic_invalid_batch_gas_limit",
-    "intrinsic_invalid_sender_code"};
+    "intrinsic_invalid_sender_code" };
     
 set<string> oocErrors = {
     "OOCS",
@@ -56,7 +71,7 @@ set<string> oocErrors = {
     "OOCM",
     "OOCA",
     "OOCPA",
-    "OOCPO"};
+    "OOCPO" };
 
 //////////
 // UTILS
@@ -599,8 +614,8 @@ void FullTracer::onUpdateStorage(Context &ctx, const RomCommand &cmd)
 
         if (deltaStorage.find(depth) == deltaStorage.end())
         {
-            cerr << "Error: FullTracer::onUpdateStorage() did not found deltaStorage of depth=" << depth << endl;
-            exitProcess();
+            unordered_map<string, string> auxMap;
+            deltaStorage[depth] = auxMap;
         }
 
         // Add key/value to deltaStorage
@@ -685,8 +700,14 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
         // set refunded gas
         response.gas_refunded = lastOpcodeExecution.gas_refund;
 
-        // Set gas price of last opcode
-        lastOpcodeExecution.gas_cost = lastOpcodeExecution.gas - response.gas_left;
+        // Set gas price of last opcode if no error and is not a deploy and is not STOP (RETURN + REVERT)
+        if ( (execution_trace.size() > 1) &&
+             (lastOpcodeExecution.op != 0x00 /*STOP opcode*/ ) &&
+             (lastOpcodeExecution.error.size() == 0) &&
+             (response.call_trace.context.to != "0x") )
+        {
+            lastOpcodeExecution.gas_cost = lastOpcodeExecution.gas - fr.toU64(ctx.pols.GAS[*ctx.pStep]);
+        }
 
         response.execution_trace = execution_trace;
 
@@ -705,13 +726,14 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
         // set refunded gas
         response.gas_refunded = lastOpcodeCall.gas_refund;
 
-        // Set counters of last opcode to zero
-        //Object.keys(lastOpcodeCall.counters).forEach((key) => {
-        //            lastOpcodeCall.counters[key] = 0;
-        //        });
-
-        // Set gas price of last opcode
-        lastOpcodeCall.gas_cost = lastOpcodeCall.gas - response.gas_left;
+        //  Set gas price of last opcode if no error and is not a deploy and is not STOP (RETURN + REVERT)
+        if ( (execution_trace.size() > 1) &&
+             (lastOpcodeCall.op != 0x00 /*STOP opcode*/ ) &&
+             (lastOpcodeCall.error.size() == 0) &&
+             (response.call_trace.context.to != "0x") )
+        {
+            lastOpcodeCall.gas_cost = lastOpcodeCall.gas - fr.toU64(ctx.pols.GAS[*ctx.pStep]);
+        }
 
         response.call_trace.steps = call_trace;
 
@@ -879,8 +901,8 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     gettimeofday(&top, NULL);
 #endif
     // Get opcode name into singleInfo.opcode, and filter code ID
-    singleInfo.opcode = opcodeName[codeId].pName;
-    codeId = opcodeName[codeId].codeID;
+    singleInfo.opcode = opcodeInfo[codeId].pName;
+    codeId = opcodeInfo[codeId].codeID;
     singleInfo.op = codeId;
 
     // Check depth changes and update depth
@@ -899,7 +921,7 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     Opcode * prevTraceExecution = (numOpcodes > 0) ? &execution_trace.at(numOpcodes - 1) : NULL;
 
     // If is an ether transfer, don't add stop opcode to trace
-    if ( (singleInfo.opcode == opcodeName[0x00/*STOP*/].pName) &&
+    if ( (singleInfo.opcode == opcodeInfo[0x00/*STOP*/].pName) &&
         ( (prevTraceCall == NULL) || increaseDepth) )
     {
         getVarFromCtx(ctx, false, ctx.rom.bytecodeLengthOffset, auxScalar);
@@ -1055,8 +1077,56 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     {
         // The gas cost of the opcode is gas before - gas after processing the opcode
         int64_t gasCost = prevTraceCall->gas - fr.toS64(ctx.pols.GAS[*ctx.pStep]);
-        prevTraceCall->gas_cost = gasCost;
-        prevTraceExecution->gas_cost = gasCost;
+
+        if (zeroCostOp.find(prevTraceCall->opcode) != zeroCostOp.end())
+        {
+            prevTraceCall->gas_cost = 0;
+            prevTraceExecution->gas_cost = 0;
+        }
+        else if (opCreate.find(prevTraceCall->opcode) != opCreate.end())
+        {
+            // In case of error at create, we can't get the gas cost from next opcodes, so we have to use rom variables
+            if (prevTraceExecution->error.size() > 0)
+            {
+                getVarFromCtx(ctx, true, ctx.rom.gasCallOffset, auxScalar);
+                uint64_t gasCall = auxScalar.get_ui();
+                prevTraceCall->gas_cost = gasCost - gasCall + fr.toS64(ctx.pols.GAS[*ctx.pStep]);
+            }
+            else
+            {
+                // If is a create opcode, set gas cost as currentGas - gasCall
+
+                // get gas CTX in origin context
+                getVarFromCtx(ctx, false, ctx.rom.originCTXOffset, auxScalar);
+                uint64_t originCTX = auxScalar.get_ui();
+                getVarFromCtx(ctx, false, ctx.rom.gasCTXOffset, auxScalar, &originCTX);
+                uint64_t gasCTX = auxScalar.get_ui();
+
+                // Set gas cost
+                prevTraceCall->gas_cost = gasCost - gasCTX;
+            }
+            prevTraceExecution->gas_cost = prevTraceCall->gas_cost;
+        }
+        else if ( (opCall.find(prevTraceCall->opcode) != opCall.end()) &&
+                  (prevTraceCall->depth != singleInfo.depth) )
+        {
+            // Only check if different depth because we are removing STOP from trace in case the call is empty (CALL-STOP)
+
+            // get gas CTX in origin context
+            getVarFromCtx(ctx, false, ctx.rom.originCTXOffset, auxScalar);
+            uint64_t originCTX = auxScalar.get_ui();
+            getVarFromCtx(ctx, false, ctx.rom.gasCTXOffset, auxScalar, &originCTX);
+            uint64_t gasCTX = auxScalar.get_ui();
+
+            prevTraceCall->gas_cost = prevTraceCall->gas - gasCTX;
+            prevTraceExecution->gas_cost = prevTraceCall->gas_cost;
+        }
+        else
+        {
+            prevTraceCall->gas_cost = gasCost;
+            prevTraceExecution->gas_cost = gasCost;
+        }
+
         // cout << "info[info.size() - 1].gas_cost=" << info[info.size() - 1].gas_cost << endl;
 
         // going to previous depth
@@ -1072,6 +1142,19 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
             // set opcode gas cost to traces
             prevTraceCall->gas_cost = gasLastOpcode;
             prevTraceExecution->gas_cost = gasLastOpcode;
+        }
+
+        // Set gas refund for sstore opcode
+        getVarFromCtx(ctx, false, ctx.rom.gasRefundOffset, auxScalar);
+        uint64_t gasRefund = auxScalar.get_ui();
+        if (gasRefund > 0)
+        {
+            singleInfo.gas_refund = gasRefund;
+            if (prevTraceCall->op == 0x55 /*SSTORE*/)
+            {
+                prevTraceCall->gas_refund = gasRefund;
+                prevTraceExecution->gas_refund = gasRefund;
+            }
         }
 
         prevTraceExecution->duration = TimeDiff(prevTraceExecution->startTime, singleInfo.startTime);
@@ -1125,7 +1208,7 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 
         if (isCreate)
         {            
-            if (singleInfo.opcode == opcodeName[0xf3/*RETURN*/].pName)
+            if (singleInfo.opcode == opcodeInfo[0xf3/*RETURN*/].pName)
             {
                 returnFromCreate.enabled = true;
 
@@ -1161,18 +1244,53 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     gettimeofday(&top, NULL);
 #endif
 
-    if (ctx.proverRequest.input.traceConfig.bGenerateCallTrace)
+    // Check previous step
+    Opcode * prevStep = NULL;
+    if (execution_trace.size() > 1)
     {
-        // Save output traces
-        call_trace.push_back(singleInfo);
+        prevStep = &execution_trace[execution_trace.size() - 2];
+        if (opIncContext.find(prevStep->opcode) != opIncContext.end())
+        {            
+            getVarFromCtx(ctx, true, ctx.rom.gasCallOffset, auxScalar);
+            TxGAS gas;
+            gas.forwarded = 0;
+            gas.remaining = auxScalar.get_ui();
+            txGAS[depth] = gas;
+            if (ctx.proverRequest.input.traceConfig.bGenerateCallTrace)
+            {
+                singleInfo.contract.gas = gas.remaining;
+            }
+        }
+    }
+        
+    // If is an ether transfer, don't add stop opcode to trace
+    bool bAddOpcode = true;
+    if ( (singleInfo.op == 0x00 /*STOP*/) &&
+         ( (prevStep==NULL) || (opIncContext.find(prevStep->opcode) != opIncContext.end()) ) &&
+         ( (prevStep==NULL) || (opCall.find(prevStep->opcode) != opCall.end()) || ( (opCreate.find(prevStep->opcode) != opCreate.end()) && (prevStep->gas_cost <= 32000))))
+    {
+        getVarFromCtx(ctx, false, ctx.rom.bytecodeLengthOffset, auxScalar);
+        if (auxScalar == 0)
+        {
+            bAddOpcode = false;
+        }
     }
 
-    if (ctx.proverRequest.input.traceConfig.bGenerateExecuteTrace)
+    if (bAddOpcode)
     {
-        // Save output traces
-        execution_trace.push_back(singleInfo);
-    }
+        if (ctx.proverRequest.input.traceConfig.bGenerateCallTrace)
+        {
+            // Save output traces
+            call_trace.push_back(singleInfo);
+        }
 
+        if (ctx.proverRequest.input.traceConfig.bGenerateExecuteTrace)
+        {
+            // Save output traces
+            execution_trace.push_back(singleInfo);
+        }
+    }
+    
 #ifdef LOG_TIME_STATISTICS
     tmsop.add("copySingleInfoIntoTraces", TimeDiff(top));
 #endif
