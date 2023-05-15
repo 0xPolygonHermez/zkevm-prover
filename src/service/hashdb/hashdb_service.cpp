@@ -293,15 +293,15 @@ using grpc::Status;
     try
     {
         // Call the HashDB flush method
-        uint64_t flushId, lastSentFlushId;
-        zkresult zkres = pHashDB->flush(flushId, lastSentFlushId);
+        uint64_t flushId, storedFlushId;
+        zkresult zkres = pHashDB->flush(flushId, storedFlushId);
 
         // return the result in the response
         ::hashdb::v1::ResultCode* result = new ::hashdb::v1::ResultCode();
         result->set_code(static_cast<::hashdb::v1::ResultCode_Code>(zkres));
         response->set_allocated_result(result);
         response->set_flush_id(flushId);
-        response->set_last_sent_flush_id(lastSentFlushId);
+        response->set_stored_flush_id(storedFlushId);
     }
     catch (const std::exception &e)
     {
@@ -321,13 +321,23 @@ using grpc::Status;
 #endif
     try
     {
-        uint64_t lastSentFlushId;
-        uint64_t sendingFlushId;
+        uint64_t storedFlushId;
+        uint64_t storingFlushId;
         uint64_t lastFlushId;
-        pHashDB->getFlushStatus(lastSentFlushId, sendingFlushId, lastFlushId);
-        response->set_last_sent_flush_id(lastSentFlushId);
-        response->set_sending_flush_id(sendingFlushId);
+        uint64_t pendingToFlushNodes;
+        uint64_t pendingToFlushProgram;
+        uint64_t storingNodes;
+        uint64_t storingProgram;
+        string proverId;
+        pHashDB->getFlushStatus(storedFlushId, storingFlushId, lastFlushId, pendingToFlushNodes, pendingToFlushProgram, storingNodes, storingProgram, proverId);
+        response->set_stored_flush_id(storedFlushId);
+        response->set_storing_flush_id(storingFlushId);
         response->set_last_flush_id(lastFlushId);
+        response->set_pending_to_flush_nodes(pendingToFlushNodes);
+        response->set_pending_to_flush_program(pendingToFlushProgram);
+        response->set_storing_nodes(storingNodes);
+        response->set_storing_program(storingProgram);
+        response->set_prover_id(proverId);
     }
     catch (const std::exception &e)
     {
@@ -349,7 +359,7 @@ using grpc::Status;
     try
     {
         // Declare local variables to store the result
-        uint64_t lastSentFlushId;
+        uint64_t storedFlushId;
         vector<FlushData> nodes;
         vector<FlushData> nodesUpdate;
         vector<FlushData> program;
@@ -357,10 +367,10 @@ using grpc::Status;
         string nodesStateRoot;
 
         // Call the local getFlushData method
-        pHashDB->getFlushData(request->last_got_flush_id(), lastSentFlushId, nodes, nodesUpdate, program, programUpdate, nodesStateRoot);
+        pHashDB->getFlushData(request->flush_id(), storedFlushId, nodes, nodesUpdate, program, programUpdate, nodesStateRoot);
 
         // Set the last sent flush ID
-        response->set_last_sent_flush_id(lastSentFlushId);
+        response->set_stored_flush_id(storedFlushId);
 
         // Set the nodes
         for (uint64_t i=0; i<nodes.size(); i++)

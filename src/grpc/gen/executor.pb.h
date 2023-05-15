@@ -863,6 +863,7 @@ class ProcessBatchResponse PROTOBUF_FINAL :
     kNewStateRootFieldNumber = 1,
     kNewAccInputHashFieldNumber = 2,
     kNewLocalExitRootFieldNumber = 3,
+    kProverIdFieldNumber = 18,
     kNewBatchNumFieldNumber = 4,
     kCntKeccakHashesFieldNumber = 5,
     kCntPoseidonHashesFieldNumber = 6,
@@ -874,7 +875,7 @@ class ProcessBatchResponse PROTOBUF_FINAL :
     kCntStepsFieldNumber = 11,
     kErrorFieldNumber = 14,
     kFlushIdFieldNumber = 16,
-    kLastSentFlushIdFieldNumber = 17,
+    kStoredFlushIdFieldNumber = 17,
   };
   // repeated .executor.v1.ProcessTransactionResponse responses = 13;
   int responses_size() const;
@@ -986,6 +987,31 @@ class ProcessBatchResponse PROTOBUF_FINAL :
   std::string* _internal_mutable_new_local_exit_root();
   public:
 
+  // string prover_id = 18;
+  void clear_prover_id();
+  const std::string& prover_id() const;
+  void set_prover_id(const std::string& value);
+  void set_prover_id(std::string&& value);
+  void set_prover_id(const char* value);
+  void set_prover_id(const char* value, size_t size);
+  std::string* mutable_prover_id();
+  std::string* release_prover_id();
+  void set_allocated_prover_id(std::string* prover_id);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_prover_id();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_prover_id(
+      std::string* prover_id);
+  private:
+  const std::string& _internal_prover_id() const;
+  void _internal_set_prover_id(const std::string& value);
+  std::string* _internal_mutable_prover_id();
+  public:
+
   // uint64 new_batch_num = 4;
   void clear_new_batch_num();
   ::PROTOBUF_NAMESPACE_ID::uint64 new_batch_num() const;
@@ -1085,13 +1111,13 @@ class ProcessBatchResponse PROTOBUF_FINAL :
   void _internal_set_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // uint64 last_sent_flush_id = 17;
-  void clear_last_sent_flush_id();
-  ::PROTOBUF_NAMESPACE_ID::uint64 last_sent_flush_id() const;
-  void set_last_sent_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  // uint64 stored_flush_id = 17;
+  void clear_stored_flush_id();
+  ::PROTOBUF_NAMESPACE_ID::uint64 stored_flush_id() const;
+  void set_stored_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_last_sent_flush_id() const;
-  void _internal_set_last_sent_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_stored_flush_id() const;
+  void _internal_set_stored_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
   // @@protoc_insertion_point(class_scope:executor.v1.ProcessBatchResponse)
@@ -1111,6 +1137,7 @@ class ProcessBatchResponse PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr new_state_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr new_acc_input_hash_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr new_local_exit_root_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr prover_id_;
   ::PROTOBUF_NAMESPACE_ID::uint64 new_batch_num_;
   ::PROTOBUF_NAMESPACE_ID::uint32 cnt_keccak_hashes_;
   ::PROTOBUF_NAMESPACE_ID::uint32 cnt_poseidon_hashes_;
@@ -1122,7 +1149,7 @@ class ProcessBatchResponse PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint32 cnt_steps_;
   int error_;
   ::PROTOBUF_NAMESPACE_ID::uint64 flush_id_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 last_sent_flush_id_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 stored_flush_id_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
 };
@@ -1241,26 +1268,56 @@ class GetFlushStatusResponse PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kLastSentFlushIdFieldNumber = 1,
-    kSendingFlushIdFieldNumber = 2,
+    kProverIdFieldNumber = 8,
+    kStoredFlushIdFieldNumber = 1,
+    kStoringFlushIdFieldNumber = 2,
     kLastFlushIdFieldNumber = 3,
+    kPendingToFlushNodesFieldNumber = 4,
+    kPendingToFlushProgramFieldNumber = 5,
+    kStoringNodesFieldNumber = 6,
+    kStoringProgramFieldNumber = 7,
   };
-  // uint64 last_sent_flush_id = 1;
-  void clear_last_sent_flush_id();
-  ::PROTOBUF_NAMESPACE_ID::uint64 last_sent_flush_id() const;
-  void set_last_sent_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  // string prover_id = 8;
+  void clear_prover_id();
+  const std::string& prover_id() const;
+  void set_prover_id(const std::string& value);
+  void set_prover_id(std::string&& value);
+  void set_prover_id(const char* value);
+  void set_prover_id(const char* value, size_t size);
+  std::string* mutable_prover_id();
+  std::string* release_prover_id();
+  void set_allocated_prover_id(std::string* prover_id);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_prover_id();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_prover_id(
+      std::string* prover_id);
   private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_last_sent_flush_id() const;
-  void _internal_set_last_sent_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  const std::string& _internal_prover_id() const;
+  void _internal_set_prover_id(const std::string& value);
+  std::string* _internal_mutable_prover_id();
   public:
 
-  // uint64 sending_flush_id = 2;
-  void clear_sending_flush_id();
-  ::PROTOBUF_NAMESPACE_ID::uint64 sending_flush_id() const;
-  void set_sending_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  // uint64 stored_flush_id = 1;
+  void clear_stored_flush_id();
+  ::PROTOBUF_NAMESPACE_ID::uint64 stored_flush_id() const;
+  void set_stored_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_sending_flush_id() const;
-  void _internal_set_sending_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_stored_flush_id() const;
+  void _internal_set_stored_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 storing_flush_id = 2;
+  void clear_storing_flush_id();
+  ::PROTOBUF_NAMESPACE_ID::uint64 storing_flush_id() const;
+  void set_storing_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_storing_flush_id() const;
+  void _internal_set_storing_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
   // uint64 last_flush_id = 3;
@@ -1272,6 +1329,42 @@ class GetFlushStatusResponse PROTOBUF_FINAL :
   void _internal_set_last_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
+  // uint64 pending_to_flush_nodes = 4;
+  void clear_pending_to_flush_nodes();
+  ::PROTOBUF_NAMESPACE_ID::uint64 pending_to_flush_nodes() const;
+  void set_pending_to_flush_nodes(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_pending_to_flush_nodes() const;
+  void _internal_set_pending_to_flush_nodes(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 pending_to_flush_program = 5;
+  void clear_pending_to_flush_program();
+  ::PROTOBUF_NAMESPACE_ID::uint64 pending_to_flush_program() const;
+  void set_pending_to_flush_program(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_pending_to_flush_program() const;
+  void _internal_set_pending_to_flush_program(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 storing_nodes = 6;
+  void clear_storing_nodes();
+  ::PROTOBUF_NAMESPACE_ID::uint64 storing_nodes() const;
+  void set_storing_nodes(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_storing_nodes() const;
+  void _internal_set_storing_nodes(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 storing_program = 7;
+  void clear_storing_program();
+  ::PROTOBUF_NAMESPACE_ID::uint64 storing_program() const;
+  void set_storing_program(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_storing_program() const;
+  void _internal_set_storing_program(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:executor.v1.GetFlushStatusResponse)
  private:
   class _Internal;
@@ -1279,9 +1372,14 @@ class GetFlushStatusResponse PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 last_sent_flush_id_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 sending_flush_id_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr prover_id_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 stored_flush_id_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 storing_flush_id_;
   ::PROTOBUF_NAMESPACE_ID::uint64 last_flush_id_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 pending_to_flush_nodes_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 pending_to_flush_program_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 storing_nodes_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 storing_program_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
 };
@@ -5167,68 +5265,149 @@ inline void ProcessBatchResponse::set_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 v
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponse.flush_id)
 }
 
-// uint64 last_sent_flush_id = 17;
-inline void ProcessBatchResponse::clear_last_sent_flush_id() {
-  last_sent_flush_id_ = PROTOBUF_ULONGLONG(0);
+// uint64 stored_flush_id = 17;
+inline void ProcessBatchResponse::clear_stored_flush_id() {
+  stored_flush_id_ = PROTOBUF_ULONGLONG(0);
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessBatchResponse::_internal_last_sent_flush_id() const {
-  return last_sent_flush_id_;
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessBatchResponse::_internal_stored_flush_id() const {
+  return stored_flush_id_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessBatchResponse::last_sent_flush_id() const {
-  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchResponse.last_sent_flush_id)
-  return _internal_last_sent_flush_id();
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessBatchResponse::stored_flush_id() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchResponse.stored_flush_id)
+  return _internal_stored_flush_id();
 }
-inline void ProcessBatchResponse::_internal_set_last_sent_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+inline void ProcessBatchResponse::_internal_set_stored_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   
-  last_sent_flush_id_ = value;
+  stored_flush_id_ = value;
 }
-inline void ProcessBatchResponse::set_last_sent_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_last_sent_flush_id(value);
-  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponse.last_sent_flush_id)
+inline void ProcessBatchResponse::set_stored_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_stored_flush_id(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponse.stored_flush_id)
+}
+
+// string prover_id = 18;
+inline void ProcessBatchResponse::clear_prover_id() {
+  prover_id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& ProcessBatchResponse::prover_id() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchResponse.prover_id)
+  return _internal_prover_id();
+}
+inline void ProcessBatchResponse::set_prover_id(const std::string& value) {
+  _internal_set_prover_id(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponse.prover_id)
+}
+inline std::string* ProcessBatchResponse::mutable_prover_id() {
+  // @@protoc_insertion_point(field_mutable:executor.v1.ProcessBatchResponse.prover_id)
+  return _internal_mutable_prover_id();
+}
+inline const std::string& ProcessBatchResponse::_internal_prover_id() const {
+  return prover_id_.Get();
+}
+inline void ProcessBatchResponse::_internal_set_prover_id(const std::string& value) {
+  
+  prover_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void ProcessBatchResponse::set_prover_id(std::string&& value) {
+  
+  prover_id_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:executor.v1.ProcessBatchResponse.prover_id)
+}
+inline void ProcessBatchResponse::set_prover_id(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  prover_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:executor.v1.ProcessBatchResponse.prover_id)
+}
+inline void ProcessBatchResponse::set_prover_id(const char* value,
+    size_t size) {
+  
+  prover_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:executor.v1.ProcessBatchResponse.prover_id)
+}
+inline std::string* ProcessBatchResponse::_internal_mutable_prover_id() {
+  
+  return prover_id_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* ProcessBatchResponse::release_prover_id() {
+  // @@protoc_insertion_point(field_release:executor.v1.ProcessBatchResponse.prover_id)
+  return prover_id_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ProcessBatchResponse::set_allocated_prover_id(std::string* prover_id) {
+  if (prover_id != nullptr) {
+    
+  } else {
+    
+  }
+  prover_id_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), prover_id,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessBatchResponse.prover_id)
+}
+inline std::string* ProcessBatchResponse::unsafe_arena_release_prover_id() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.ProcessBatchResponse.prover_id)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return prover_id_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void ProcessBatchResponse::unsafe_arena_set_allocated_prover_id(
+    std::string* prover_id) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (prover_id != nullptr) {
+    
+  } else {
+    
+  }
+  prover_id_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      prover_id, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBatchResponse.prover_id)
 }
 
 // -------------------------------------------------------------------
 
 // GetFlushStatusResponse
 
-// uint64 last_sent_flush_id = 1;
-inline void GetFlushStatusResponse::clear_last_sent_flush_id() {
-  last_sent_flush_id_ = PROTOBUF_ULONGLONG(0);
+// uint64 stored_flush_id = 1;
+inline void GetFlushStatusResponse::clear_stored_flush_id() {
+  stored_flush_id_ = PROTOBUF_ULONGLONG(0);
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint64 GetFlushStatusResponse::_internal_last_sent_flush_id() const {
-  return last_sent_flush_id_;
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetFlushStatusResponse::_internal_stored_flush_id() const {
+  return stored_flush_id_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint64 GetFlushStatusResponse::last_sent_flush_id() const {
-  // @@protoc_insertion_point(field_get:executor.v1.GetFlushStatusResponse.last_sent_flush_id)
-  return _internal_last_sent_flush_id();
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetFlushStatusResponse::stored_flush_id() const {
+  // @@protoc_insertion_point(field_get:executor.v1.GetFlushStatusResponse.stored_flush_id)
+  return _internal_stored_flush_id();
 }
-inline void GetFlushStatusResponse::_internal_set_last_sent_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+inline void GetFlushStatusResponse::_internal_set_stored_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   
-  last_sent_flush_id_ = value;
+  stored_flush_id_ = value;
 }
-inline void GetFlushStatusResponse::set_last_sent_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_last_sent_flush_id(value);
-  // @@protoc_insertion_point(field_set:executor.v1.GetFlushStatusResponse.last_sent_flush_id)
+inline void GetFlushStatusResponse::set_stored_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_stored_flush_id(value);
+  // @@protoc_insertion_point(field_set:executor.v1.GetFlushStatusResponse.stored_flush_id)
 }
 
-// uint64 sending_flush_id = 2;
-inline void GetFlushStatusResponse::clear_sending_flush_id() {
-  sending_flush_id_ = PROTOBUF_ULONGLONG(0);
+// uint64 storing_flush_id = 2;
+inline void GetFlushStatusResponse::clear_storing_flush_id() {
+  storing_flush_id_ = PROTOBUF_ULONGLONG(0);
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint64 GetFlushStatusResponse::_internal_sending_flush_id() const {
-  return sending_flush_id_;
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetFlushStatusResponse::_internal_storing_flush_id() const {
+  return storing_flush_id_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint64 GetFlushStatusResponse::sending_flush_id() const {
-  // @@protoc_insertion_point(field_get:executor.v1.GetFlushStatusResponse.sending_flush_id)
-  return _internal_sending_flush_id();
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetFlushStatusResponse::storing_flush_id() const {
+  // @@protoc_insertion_point(field_get:executor.v1.GetFlushStatusResponse.storing_flush_id)
+  return _internal_storing_flush_id();
 }
-inline void GetFlushStatusResponse::_internal_set_sending_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+inline void GetFlushStatusResponse::_internal_set_storing_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   
-  sending_flush_id_ = value;
+  storing_flush_id_ = value;
 }
-inline void GetFlushStatusResponse::set_sending_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_sending_flush_id(value);
-  // @@protoc_insertion_point(field_set:executor.v1.GetFlushStatusResponse.sending_flush_id)
+inline void GetFlushStatusResponse::set_storing_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_storing_flush_id(value);
+  // @@protoc_insertion_point(field_set:executor.v1.GetFlushStatusResponse.storing_flush_id)
 }
 
 // uint64 last_flush_id = 3;
@@ -5249,6 +5428,167 @@ inline void GetFlushStatusResponse::_internal_set_last_flush_id(::PROTOBUF_NAMES
 inline void GetFlushStatusResponse::set_last_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   _internal_set_last_flush_id(value);
   // @@protoc_insertion_point(field_set:executor.v1.GetFlushStatusResponse.last_flush_id)
+}
+
+// uint64 pending_to_flush_nodes = 4;
+inline void GetFlushStatusResponse::clear_pending_to_flush_nodes() {
+  pending_to_flush_nodes_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetFlushStatusResponse::_internal_pending_to_flush_nodes() const {
+  return pending_to_flush_nodes_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetFlushStatusResponse::pending_to_flush_nodes() const {
+  // @@protoc_insertion_point(field_get:executor.v1.GetFlushStatusResponse.pending_to_flush_nodes)
+  return _internal_pending_to_flush_nodes();
+}
+inline void GetFlushStatusResponse::_internal_set_pending_to_flush_nodes(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  pending_to_flush_nodes_ = value;
+}
+inline void GetFlushStatusResponse::set_pending_to_flush_nodes(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_pending_to_flush_nodes(value);
+  // @@protoc_insertion_point(field_set:executor.v1.GetFlushStatusResponse.pending_to_flush_nodes)
+}
+
+// uint64 pending_to_flush_program = 5;
+inline void GetFlushStatusResponse::clear_pending_to_flush_program() {
+  pending_to_flush_program_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetFlushStatusResponse::_internal_pending_to_flush_program() const {
+  return pending_to_flush_program_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetFlushStatusResponse::pending_to_flush_program() const {
+  // @@protoc_insertion_point(field_get:executor.v1.GetFlushStatusResponse.pending_to_flush_program)
+  return _internal_pending_to_flush_program();
+}
+inline void GetFlushStatusResponse::_internal_set_pending_to_flush_program(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  pending_to_flush_program_ = value;
+}
+inline void GetFlushStatusResponse::set_pending_to_flush_program(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_pending_to_flush_program(value);
+  // @@protoc_insertion_point(field_set:executor.v1.GetFlushStatusResponse.pending_to_flush_program)
+}
+
+// uint64 storing_nodes = 6;
+inline void GetFlushStatusResponse::clear_storing_nodes() {
+  storing_nodes_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetFlushStatusResponse::_internal_storing_nodes() const {
+  return storing_nodes_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetFlushStatusResponse::storing_nodes() const {
+  // @@protoc_insertion_point(field_get:executor.v1.GetFlushStatusResponse.storing_nodes)
+  return _internal_storing_nodes();
+}
+inline void GetFlushStatusResponse::_internal_set_storing_nodes(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  storing_nodes_ = value;
+}
+inline void GetFlushStatusResponse::set_storing_nodes(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_storing_nodes(value);
+  // @@protoc_insertion_point(field_set:executor.v1.GetFlushStatusResponse.storing_nodes)
+}
+
+// uint64 storing_program = 7;
+inline void GetFlushStatusResponse::clear_storing_program() {
+  storing_program_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetFlushStatusResponse::_internal_storing_program() const {
+  return storing_program_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetFlushStatusResponse::storing_program() const {
+  // @@protoc_insertion_point(field_get:executor.v1.GetFlushStatusResponse.storing_program)
+  return _internal_storing_program();
+}
+inline void GetFlushStatusResponse::_internal_set_storing_program(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  storing_program_ = value;
+}
+inline void GetFlushStatusResponse::set_storing_program(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_storing_program(value);
+  // @@protoc_insertion_point(field_set:executor.v1.GetFlushStatusResponse.storing_program)
+}
+
+// string prover_id = 8;
+inline void GetFlushStatusResponse::clear_prover_id() {
+  prover_id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& GetFlushStatusResponse::prover_id() const {
+  // @@protoc_insertion_point(field_get:executor.v1.GetFlushStatusResponse.prover_id)
+  return _internal_prover_id();
+}
+inline void GetFlushStatusResponse::set_prover_id(const std::string& value) {
+  _internal_set_prover_id(value);
+  // @@protoc_insertion_point(field_set:executor.v1.GetFlushStatusResponse.prover_id)
+}
+inline std::string* GetFlushStatusResponse::mutable_prover_id() {
+  // @@protoc_insertion_point(field_mutable:executor.v1.GetFlushStatusResponse.prover_id)
+  return _internal_mutable_prover_id();
+}
+inline const std::string& GetFlushStatusResponse::_internal_prover_id() const {
+  return prover_id_.Get();
+}
+inline void GetFlushStatusResponse::_internal_set_prover_id(const std::string& value) {
+  
+  prover_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void GetFlushStatusResponse::set_prover_id(std::string&& value) {
+  
+  prover_id_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:executor.v1.GetFlushStatusResponse.prover_id)
+}
+inline void GetFlushStatusResponse::set_prover_id(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  prover_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:executor.v1.GetFlushStatusResponse.prover_id)
+}
+inline void GetFlushStatusResponse::set_prover_id(const char* value,
+    size_t size) {
+  
+  prover_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:executor.v1.GetFlushStatusResponse.prover_id)
+}
+inline std::string* GetFlushStatusResponse::_internal_mutable_prover_id() {
+  
+  return prover_id_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* GetFlushStatusResponse::release_prover_id() {
+  // @@protoc_insertion_point(field_release:executor.v1.GetFlushStatusResponse.prover_id)
+  return prover_id_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void GetFlushStatusResponse::set_allocated_prover_id(std::string* prover_id) {
+  if (prover_id != nullptr) {
+    
+  } else {
+    
+  }
+  prover_id_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), prover_id,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:executor.v1.GetFlushStatusResponse.prover_id)
+}
+inline std::string* GetFlushStatusResponse::unsafe_arena_release_prover_id() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.GetFlushStatusResponse.prover_id)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return prover_id_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void GetFlushStatusResponse::unsafe_arena_set_allocated_prover_id(
+    std::string* prover_id) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (prover_id != nullptr) {
+    
+  } else {
+    
+  }
+  prover_id_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      prover_id, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.GetFlushStatusResponse.prover_id)
 }
 
 // -------------------------------------------------------------------

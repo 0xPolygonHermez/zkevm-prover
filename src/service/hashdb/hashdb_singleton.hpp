@@ -16,8 +16,8 @@ public:
     void unlock(void) { pthread_mutex_unlock(&mutex); };
 
 public:
-    // Returns a valid HashDB pointer, creating it the first time it is called
-    HashDB * get(Goldilocks &fr, const Config &config);
+    // Creates the HashDB pointer; must be called once before get()
+    HashDB * init(Goldilocks &fr, const Config &config);
 
     // Gets the current value of pHashDB, without creating any
     HashDB * get(void);

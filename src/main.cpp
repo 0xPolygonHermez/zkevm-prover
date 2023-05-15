@@ -34,6 +34,7 @@
 #include "goldilocks_precomputed.hpp"
 #include "zklog.hpp"
 #include "ecrecover_test.hpp"
+#include "hashdb_singleton.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -477,6 +478,9 @@ int main(int argc, char **argv)
 
     // Create one instance of the Poseidon hash library
     PoseidonGoldilocks poseidon;
+
+    // Init the HashDB singleton
+    hashDBSingleton.init(fr, config);
 
     // Init goldilocks precomputed
     TimerStart(GOLDILOCKS_PRECOMPUTED_INIT);

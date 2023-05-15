@@ -151,7 +151,7 @@ bool ExecutorClient::ProcessBatch (void)
 #endif
     }
 
-    if (processBatchResponse.last_sent_flush_id() != processBatchResponse.flush_id())
+    if (processBatchResponse.stored_flush_id() != processBatchResponse.flush_id())
     {
         executor::v1::GetFlushStatusResponse getFlushStatusResponse;
         do
@@ -165,7 +165,8 @@ bool ExecutorClient::ProcessBatch (void)
                 cerr << "Error: ExecutorClient::ProcessBatch() failed calling GetFlushStatus()" << endl;
                 break;
             }
-        } while (getFlushStatusResponse.last_sent_flush_id() < processBatchResponse.flush_id());
+        } while (getFlushStatusResponse.stored_flush_id() < processBatchResponse.flush_id());
+        zklog.info("ExecutorClient::ProcessBatch() successfully stored returned flush id=" + to_string(processBatchResponse.flush_id()));
         
     }
 

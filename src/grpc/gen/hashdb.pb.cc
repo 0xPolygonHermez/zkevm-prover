@@ -597,7 +597,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_hashdb_2eproto::offsets[] PROT
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::hashdb::v1::GetFlushDataRequest, last_got_flush_id_),
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::GetFlushDataRequest, flush_id_),
   PROTOBUF_FIELD_OFFSET(::hashdb::v1::SetResponse_SiblingsEntry_DoNotUse, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::hashdb::v1::SetResponse_SiblingsEntry_DoNotUse, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -686,22 +686,27 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_hashdb_2eproto::offsets[] PROT
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::hashdb::v1::FlushResponse, flush_id_),
-  PROTOBUF_FIELD_OFFSET(::hashdb::v1::FlushResponse, last_sent_flush_id_),
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::FlushResponse, stored_flush_id_),
   PROTOBUF_FIELD_OFFSET(::hashdb::v1::FlushResponse, result_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::hashdb::v1::GetFlushStatusResponse, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::hashdb::v1::GetFlushStatusResponse, last_sent_flush_id_),
-  PROTOBUF_FIELD_OFFSET(::hashdb::v1::GetFlushStatusResponse, sending_flush_id_),
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::GetFlushStatusResponse, stored_flush_id_),
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::GetFlushStatusResponse, storing_flush_id_),
   PROTOBUF_FIELD_OFFSET(::hashdb::v1::GetFlushStatusResponse, last_flush_id_),
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::GetFlushStatusResponse, pending_to_flush_nodes_),
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::GetFlushStatusResponse, pending_to_flush_program_),
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::GetFlushStatusResponse, storing_nodes_),
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::GetFlushStatusResponse, storing_program_),
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::GetFlushStatusResponse, prover_id_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::hashdb::v1::GetFlushDataResponse, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::hashdb::v1::GetFlushDataResponse, last_sent_flush_id_),
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::GetFlushDataResponse, stored_flush_id_),
   PROTOBUF_FIELD_OFFSET(::hashdb::v1::GetFlushDataResponse, nodes_),
   PROTOBUF_FIELD_OFFSET(::hashdb::v1::GetFlushDataResponse, nodes_update_),
   PROTOBUF_FIELD_OFFSET(::hashdb::v1::GetFlushDataResponse, program_),
@@ -764,12 +769,12 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 153, -1, sizeof(::hashdb::v1::GetProgramResponse)},
   { 160, -1, sizeof(::hashdb::v1::FlushResponse)},
   { 168, -1, sizeof(::hashdb::v1::GetFlushStatusResponse)},
-  { 176, -1, sizeof(::hashdb::v1::GetFlushDataResponse)},
-  { 188, -1, sizeof(::hashdb::v1::Fea)},
-  { 197, -1, sizeof(::hashdb::v1::FeList)},
-  { 203, -1, sizeof(::hashdb::v1::SiblingList)},
-  { 209, -1, sizeof(::hashdb::v1::FlushData)},
-  { 216, -1, sizeof(::hashdb::v1::ResultCode)},
+  { 181, -1, sizeof(::hashdb::v1::GetFlushDataResponse)},
+  { 193, -1, sizeof(::hashdb::v1::Fea)},
+  { 202, -1, sizeof(::hashdb::v1::FeList)},
+  { 208, -1, sizeof(::hashdb::v1::SiblingList)},
+  { 214, -1, sizeof(::hashdb::v1::FlushData)},
+  { 221, -1, sizeof(::hashdb::v1::ResultCode)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -822,77 +827,80 @@ const char descriptor_table_protodef_hashdb_2eproto[] PROTOBUF_SECTION_VARIABLE(
   "t_program_db\030\001 \003(\01323.hashdb.v1.LoadProgr"
   "amDBRequest.InputProgramDbEntry\022\022\n\npersi"
   "stent\030\002 \001(\010\0325\n\023InputProgramDbEntry\022\013\n\003ke"
-  "y\030\001 \001(\t\022\r\n\005value\030\002 \001(\014:\0028\001\"0\n\023GetFlushDa"
-  "taRequest\022\031\n\021last_got_flush_id\030\001 \001(\004\"\254\004\n"
-  "\013SetResponse\022 \n\010old_root\030\001 \001(\0132\016.hashdb."
-  "v1.Fea\022 \n\010new_root\030\002 \001(\0132\016.hashdb.v1.Fea"
-  "\022\033\n\003key\030\003 \001(\0132\016.hashdb.v1.Fea\0226\n\010sibling"
-  "s\030\004 \003(\0132$.hashdb.v1.SetResponse.Siblings"
-  "Entry\022\037\n\007ins_key\030\005 \001(\0132\016.hashdb.v1.Fea\022\021"
-  "\n\tins_value\030\006 \001(\t\022\017\n\007is_old0\030\007 \001(\010\022\021\n\tol"
-  "d_value\030\010 \001(\t\022\021\n\tnew_value\030\t \001(\t\022\014\n\004mode"
-  "\030\n \001(\t\022\032\n\022proof_hash_counter\030\013 \001(\004\022:\n\013db"
-  "_read_log\030\014 \003(\0132%.hashdb.v1.SetResponse."
-  "DbReadLogEntry\022%\n\006result\030\r \001(\0132\025.hashdb."
-  "v1.ResultCode\032G\n\rSiblingsEntry\022\013\n\003key\030\001 "
-  "\001(\004\022%\n\005value\030\002 \001(\0132\026.hashdb.v1.SiblingLi"
-  "st:\0028\001\032C\n\016DbReadLogEntry\022\013\n\003key\030\001 \001(\t\022 \n"
-  "\005value\030\002 \001(\0132\021.hashdb.v1.FeList:\0028\001\"\341\003\n\013"
-  "GetResponse\022\034\n\004root\030\001 \001(\0132\016.hashdb.v1.Fe"
-  "a\022\033\n\003key\030\002 \001(\0132\016.hashdb.v1.Fea\0226\n\010siblin"
-  "gs\030\003 \003(\0132$.hashdb.v1.GetResponse.Sibling"
-  "sEntry\022\037\n\007ins_key\030\004 \001(\0132\016.hashdb.v1.Fea\022"
-  "\021\n\tins_value\030\005 \001(\t\022\017\n\007is_old0\030\006 \001(\010\022\r\n\005v"
-  "alue\030\007 \001(\t\022\032\n\022proof_hash_counter\030\010 \001(\004\022:"
-  "\n\013db_read_log\030\t \003(\0132%.hashdb.v1.GetRespo"
-  "nse.DbReadLogEntry\022%\n\006result\030\n \001(\0132\025.has"
-  "hdb.v1.ResultCode\032G\n\rSiblingsEntry\022\013\n\003ke"
-  "y\030\001 \001(\004\022%\n\005value\030\002 \001(\0132\026.hashdb.v1.Sibli"
-  "ngList:\0028\001\032C\n\016DbReadLogEntry\022\013\n\003key\030\001 \001("
-  "\t\022 \n\005value\030\002 \001(\0132\021.hashdb.v1.FeList:\0028\001\""
-  ";\n\022SetProgramResponse\022%\n\006result\030\001 \001(\0132\025."
-  "hashdb.v1.ResultCode\"I\n\022GetProgramRespon"
-  "se\022\014\n\004data\030\001 \001(\014\022%\n\006result\030\002 \001(\0132\025.hashd"
-  "b.v1.ResultCode\"d\n\rFlushResponse\022\020\n\010flus"
-  "h_id\030\001 \001(\004\022\032\n\022last_sent_flush_id\030\002 \001(\004\022%"
-  "\n\006result\030\003 \001(\0132\025.hashdb.v1.ResultCode\"e\n"
-  "\026GetFlushStatusResponse\022\032\n\022last_sent_flu"
-  "sh_id\030\001 \001(\004\022\030\n\020sending_flush_id\030\002 \001(\004\022\025\n"
-  "\rlast_flush_id\030\003 \001(\004\"\231\002\n\024GetFlushDataRes"
-  "ponse\022\032\n\022last_sent_flush_id\030\001 \001(\004\022#\n\005nod"
-  "es\030\002 \003(\0132\024.hashdb.v1.FlushData\022*\n\014nodes_"
-  "update\030\003 \003(\0132\024.hashdb.v1.FlushData\022%\n\007pr"
-  "ogram\030\004 \003(\0132\024.hashdb.v1.FlushData\022,\n\016pro"
-  "gram_update\030\005 \003(\0132\024.hashdb.v1.FlushData\022"
-  "\030\n\020nodes_state_root\030\006 \001(\t\022%\n\006result\030\007 \001("
-  "\0132\025.hashdb.v1.ResultCode\"9\n\003Fea\022\013\n\003fe0\030\001"
-  " \001(\004\022\013\n\003fe1\030\002 \001(\004\022\013\n\003fe2\030\003 \001(\004\022\013\n\003fe3\030\004 "
-  "\001(\004\"\024\n\006FeList\022\n\n\002fe\030\001 \003(\004\"\036\n\013SiblingList"
-  "\022\017\n\007sibling\030\001 \003(\004\"\'\n\tFlushData\022\013\n\003key\030\001 "
-  "\001(\t\022\r\n\005value\030\002 \001(\t\"\316\001\n\nResultCode\022(\n\004cod"
-  "e\030\001 \001(\0162\032.hashdb.v1.ResultCode.Code\"\225\001\n\004"
-  "Code\022\024\n\020CODE_UNSPECIFIED\020\000\022\020\n\014CODE_SUCCE"
-  "SS\020\001\022\031\n\025CODE_DB_KEY_NOT_FOUND\020\002\022\021\n\rCODE_"
-  "DB_ERROR\020\003\022\027\n\023CODE_INTERNAL_ERROR\020\004\022\036\n\032C"
-  "ODE_SMT_INVALID_DATA_SIZE\020\0162\202\005\n\rHashDBSe"
-  "rvice\0226\n\003Set\022\025.hashdb.v1.SetRequest\032\026.ha"
-  "shdb.v1.SetResponse\"\000\0226\n\003Get\022\025.hashdb.v1"
-  ".GetRequest\032\026.hashdb.v1.GetResponse\"\000\022K\n"
-  "\nSetProgram\022\034.hashdb.v1.SetProgramReques"
-  "t\032\035.hashdb.v1.SetProgramResponse\"\000\022K\n\nGe"
-  "tProgram\022\034.hashdb.v1.GetProgramRequest\032\035"
-  ".hashdb.v1.GetProgramResponse\"\000\022<\n\006LoadD"
-  "B\022\030.hashdb.v1.LoadDBRequest\032\026.google.pro"
-  "tobuf.Empty\"\000\022J\n\rLoadProgramDB\022\037.hashdb."
-  "v1.LoadProgramDBRequest\032\026.google.protobu"
-  "f.Empty\"\000\022;\n\005Flush\022\026.google.protobuf.Emp"
-  "ty\032\030.hashdb.v1.FlushResponse\"\000\022M\n\016GetFlu"
-  "shStatus\022\026.google.protobuf.Empty\032!.hashd"
-  "b.v1.GetFlushStatusResponse\"\000\022Q\n\014GetFlus"
-  "hData\022\036.hashdb.v1.GetFlushDataRequest\032\037."
-  "hashdb.v1.GetFlushDataResponse\"\000B5Z3gith"
-  "ub.com/0xPolygonHermez/zkevm-node/merkle"
-  "tree/pbb\006proto3"
+  "y\030\001 \001(\t\022\r\n\005value\030\002 \001(\014:\0028\001\"\'\n\023GetFlushDa"
+  "taRequest\022\020\n\010flush_id\030\001 \001(\004\"\254\004\n\013SetRespo"
+  "nse\022 \n\010old_root\030\001 \001(\0132\016.hashdb.v1.Fea\022 \n"
+  "\010new_root\030\002 \001(\0132\016.hashdb.v1.Fea\022\033\n\003key\030\003"
+  " \001(\0132\016.hashdb.v1.Fea\0226\n\010siblings\030\004 \003(\0132$"
+  ".hashdb.v1.SetResponse.SiblingsEntry\022\037\n\007"
+  "ins_key\030\005 \001(\0132\016.hashdb.v1.Fea\022\021\n\tins_val"
+  "ue\030\006 \001(\t\022\017\n\007is_old0\030\007 \001(\010\022\021\n\told_value\030\010"
+  " \001(\t\022\021\n\tnew_value\030\t \001(\t\022\014\n\004mode\030\n \001(\t\022\032\n"
+  "\022proof_hash_counter\030\013 \001(\004\022:\n\013db_read_log"
+  "\030\014 \003(\0132%.hashdb.v1.SetResponse.DbReadLog"
+  "Entry\022%\n\006result\030\r \001(\0132\025.hashdb.v1.Result"
+  "Code\032G\n\rSiblingsEntry\022\013\n\003key\030\001 \001(\004\022%\n\005va"
+  "lue\030\002 \001(\0132\026.hashdb.v1.SiblingList:\0028\001\032C\n"
+  "\016DbReadLogEntry\022\013\n\003key\030\001 \001(\t\022 \n\005value\030\002 "
+  "\001(\0132\021.hashdb.v1.FeList:\0028\001\"\341\003\n\013GetRespon"
+  "se\022\034\n\004root\030\001 \001(\0132\016.hashdb.v1.Fea\022\033\n\003key\030"
+  "\002 \001(\0132\016.hashdb.v1.Fea\0226\n\010siblings\030\003 \003(\0132"
+  "$.hashdb.v1.GetResponse.SiblingsEntry\022\037\n"
+  "\007ins_key\030\004 \001(\0132\016.hashdb.v1.Fea\022\021\n\tins_va"
+  "lue\030\005 \001(\t\022\017\n\007is_old0\030\006 \001(\010\022\r\n\005value\030\007 \001("
+  "\t\022\032\n\022proof_hash_counter\030\010 \001(\004\022:\n\013db_read"
+  "_log\030\t \003(\0132%.hashdb.v1.GetResponse.DbRea"
+  "dLogEntry\022%\n\006result\030\n \001(\0132\025.hashdb.v1.Re"
+  "sultCode\032G\n\rSiblingsEntry\022\013\n\003key\030\001 \001(\004\022%"
+  "\n\005value\030\002 \001(\0132\026.hashdb.v1.SiblingList:\0028"
+  "\001\032C\n\016DbReadLogEntry\022\013\n\003key\030\001 \001(\t\022 \n\005valu"
+  "e\030\002 \001(\0132\021.hashdb.v1.FeList:\0028\001\";\n\022SetPro"
+  "gramResponse\022%\n\006result\030\001 \001(\0132\025.hashdb.v1"
+  ".ResultCode\"I\n\022GetProgramResponse\022\014\n\004dat"
+  "a\030\001 \001(\014\022%\n\006result\030\002 \001(\0132\025.hashdb.v1.Resu"
+  "ltCode\"a\n\rFlushResponse\022\020\n\010flush_id\030\001 \001("
+  "\004\022\027\n\017stored_flush_id\030\002 \001(\004\022%\n\006result\030\003 \001"
+  "(\0132\025.hashdb.v1.ResultCode\"\347\001\n\026GetFlushSt"
+  "atusResponse\022\027\n\017stored_flush_id\030\001 \001(\004\022\030\n"
+  "\020storing_flush_id\030\002 \001(\004\022\025\n\rlast_flush_id"
+  "\030\003 \001(\004\022\036\n\026pending_to_flush_nodes\030\004 \001(\004\022 "
+  "\n\030pending_to_flush_program\030\005 \001(\004\022\025\n\rstor"
+  "ing_nodes\030\006 \001(\004\022\027\n\017storing_program\030\007 \001(\004"
+  "\022\021\n\tprover_id\030\010 \001(\t\"\226\002\n\024GetFlushDataResp"
+  "onse\022\027\n\017stored_flush_id\030\001 \001(\004\022#\n\005nodes\030\002"
+  " \003(\0132\024.hashdb.v1.FlushData\022*\n\014nodes_upda"
+  "te\030\003 \003(\0132\024.hashdb.v1.FlushData\022%\n\007progra"
+  "m\030\004 \003(\0132\024.hashdb.v1.FlushData\022,\n\016program"
+  "_update\030\005 \003(\0132\024.hashdb.v1.FlushData\022\030\n\020n"
+  "odes_state_root\030\006 \001(\t\022%\n\006result\030\007 \001(\0132\025."
+  "hashdb.v1.ResultCode\"9\n\003Fea\022\013\n\003fe0\030\001 \001(\004"
+  "\022\013\n\003fe1\030\002 \001(\004\022\013\n\003fe2\030\003 \001(\004\022\013\n\003fe3\030\004 \001(\004\""
+  "\024\n\006FeList\022\n\n\002fe\030\001 \003(\004\"\036\n\013SiblingList\022\017\n\007"
+  "sibling\030\001 \003(\004\"\'\n\tFlushData\022\013\n\003key\030\001 \001(\t\022"
+  "\r\n\005value\030\002 \001(\t\"\316\001\n\nResultCode\022(\n\004code\030\001 "
+  "\001(\0162\032.hashdb.v1.ResultCode.Code\"\225\001\n\004Code"
+  "\022\024\n\020CODE_UNSPECIFIED\020\000\022\020\n\014CODE_SUCCESS\020\001"
+  "\022\031\n\025CODE_DB_KEY_NOT_FOUND\020\002\022\021\n\rCODE_DB_E"
+  "RROR\020\003\022\027\n\023CODE_INTERNAL_ERROR\020\004\022\036\n\032CODE_"
+  "SMT_INVALID_DATA_SIZE\020\0162\202\005\n\rHashDBServic"
+  "e\0226\n\003Set\022\025.hashdb.v1.SetRequest\032\026.hashdb"
+  ".v1.SetResponse\"\000\0226\n\003Get\022\025.hashdb.v1.Get"
+  "Request\032\026.hashdb.v1.GetResponse\"\000\022K\n\nSet"
+  "Program\022\034.hashdb.v1.SetProgramRequest\032\035."
+  "hashdb.v1.SetProgramResponse\"\000\022K\n\nGetPro"
+  "gram\022\034.hashdb.v1.GetProgramRequest\032\035.has"
+  "hdb.v1.GetProgramResponse\"\000\022<\n\006LoadDB\022\030."
+  "hashdb.v1.LoadDBRequest\032\026.google.protobu"
+  "f.Empty\"\000\022J\n\rLoadProgramDB\022\037.hashdb.v1.L"
+  "oadProgramDBRequest\032\026.google.protobuf.Em"
+  "pty\"\000\022;\n\005Flush\022\026.google.protobuf.Empty\032\030"
+  ".hashdb.v1.FlushResponse\"\000\022M\n\016GetFlushSt"
+  "atus\022\026.google.protobuf.Empty\032!.hashdb.v1"
+  ".GetFlushStatusResponse\"\000\022Q\n\014GetFlushDat"
+  "a\022\036.hashdb.v1.GetFlushDataRequest\032\037.hash"
+  "db.v1.GetFlushDataResponse\"\000B5Z3github.c"
+  "om/0xPolygonHermez/zkevm-node/merkletree"
+  "/pbb\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_hashdb_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2fempty_2eproto,
@@ -927,7 +935,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_has
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_hashdb_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_hashdb_2eproto = {
-  false, false, descriptor_table_protodef_hashdb_2eproto, "hashdb.proto", 3615,
+  false, false, descriptor_table_protodef_hashdb_2eproto, "hashdb.proto", 3731,
   &descriptor_table_hashdb_2eproto_once, descriptor_table_hashdb_2eproto_sccs, descriptor_table_hashdb_2eproto_deps, 26, 1,
   schemas, file_default_instances, TableStruct_hashdb_2eproto::offsets,
   file_level_metadata_hashdb_2eproto, 26, file_level_enum_descriptors_hashdb_2eproto, file_level_service_descriptors_hashdb_2eproto,
@@ -2929,12 +2937,12 @@ GetFlushDataRequest::GetFlushDataRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena)
 GetFlushDataRequest::GetFlushDataRequest(const GetFlushDataRequest& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  last_got_flush_id_ = from.last_got_flush_id_;
+  flush_id_ = from.flush_id_;
   // @@protoc_insertion_point(copy_constructor:hashdb.v1.GetFlushDataRequest)
 }
 
 void GetFlushDataRequest::SharedCtor() {
-  last_got_flush_id_ = PROTOBUF_ULONGLONG(0);
+  flush_id_ = PROTOBUF_ULONGLONG(0);
 }
 
 GetFlushDataRequest::~GetFlushDataRequest() {
@@ -2968,7 +2976,7 @@ void GetFlushDataRequest::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  last_got_flush_id_ = PROTOBUF_ULONGLONG(0);
+  flush_id_ = PROTOBUF_ULONGLONG(0);
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -2980,10 +2988,10 @@ const char* GetFlushDataRequest::_InternalParse(const char* ptr, ::PROTOBUF_NAME
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     CHK_(ptr);
     switch (tag >> 3) {
-      // uint64 last_got_flush_id = 1;
+      // uint64 flush_id = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          last_got_flush_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          flush_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -3015,10 +3023,10 @@ failure:
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // uint64 last_got_flush_id = 1;
-  if (this->last_got_flush_id() != 0) {
+  // uint64 flush_id = 1;
+  if (this->flush_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_last_got_flush_id(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_flush_id(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -3037,11 +3045,11 @@ size_t GetFlushDataRequest::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // uint64 last_got_flush_id = 1;
-  if (this->last_got_flush_id() != 0) {
+  // uint64 flush_id = 1;
+  if (this->flush_id() != 0) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_last_got_flush_id());
+        this->_internal_flush_id());
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -3075,8 +3083,8 @@ void GetFlushDataRequest::MergeFrom(const GetFlushDataRequest& from) {
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from.last_got_flush_id() != 0) {
-    _internal_set_last_got_flush_id(from._internal_last_got_flush_id());
+  if (from.flush_id() != 0) {
+    _internal_set_flush_id(from._internal_flush_id());
   }
 }
 
@@ -3101,7 +3109,7 @@ bool GetFlushDataRequest::IsInitialized() const {
 void GetFlushDataRequest::InternalSwap(GetFlushDataRequest* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
-  swap(last_got_flush_id_, other->last_got_flush_id_);
+  swap(flush_id_, other->flush_id_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata GetFlushDataRequest::GetMetadata() const {
@@ -4984,16 +4992,16 @@ FlushResponse::FlushResponse(const FlushResponse& from)
     result_ = nullptr;
   }
   ::memcpy(&flush_id_, &from.flush_id_,
-    static_cast<size_t>(reinterpret_cast<char*>(&last_sent_flush_id_) -
-    reinterpret_cast<char*>(&flush_id_)) + sizeof(last_sent_flush_id_));
+    static_cast<size_t>(reinterpret_cast<char*>(&stored_flush_id_) -
+    reinterpret_cast<char*>(&flush_id_)) + sizeof(stored_flush_id_));
   // @@protoc_insertion_point(copy_constructor:hashdb.v1.FlushResponse)
 }
 
 void FlushResponse::SharedCtor() {
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_FlushResponse_hashdb_2eproto.base);
   ::memset(&result_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&last_sent_flush_id_) -
-      reinterpret_cast<char*>(&result_)) + sizeof(last_sent_flush_id_));
+      reinterpret_cast<char*>(&stored_flush_id_) -
+      reinterpret_cast<char*>(&result_)) + sizeof(stored_flush_id_));
 }
 
 FlushResponse::~FlushResponse() {
@@ -5033,8 +5041,8 @@ void FlushResponse::Clear() {
   }
   result_ = nullptr;
   ::memset(&flush_id_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&last_sent_flush_id_) -
-      reinterpret_cast<char*>(&flush_id_)) + sizeof(last_sent_flush_id_));
+      reinterpret_cast<char*>(&stored_flush_id_) -
+      reinterpret_cast<char*>(&flush_id_)) + sizeof(stored_flush_id_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -5053,10 +5061,10 @@ const char* FlushResponse::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // uint64 last_sent_flush_id = 2;
+      // uint64 stored_flush_id = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
-          last_sent_flush_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          stored_flush_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -5101,10 +5109,10 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_flush_id(), target);
   }
 
-  // uint64 last_sent_flush_id = 2;
-  if (this->last_sent_flush_id() != 0) {
+  // uint64 stored_flush_id = 2;
+  if (this->stored_flush_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(2, this->_internal_last_sent_flush_id(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(2, this->_internal_stored_flush_id(), target);
   }
 
   // .hashdb.v1.ResultCode result = 3;
@@ -5145,11 +5153,11 @@ size_t FlushResponse::ByteSizeLong() const {
         this->_internal_flush_id());
   }
 
-  // uint64 last_sent_flush_id = 2;
-  if (this->last_sent_flush_id() != 0) {
+  // uint64 stored_flush_id = 2;
+  if (this->stored_flush_id() != 0) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_last_sent_flush_id());
+        this->_internal_stored_flush_id());
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -5189,8 +5197,8 @@ void FlushResponse::MergeFrom(const FlushResponse& from) {
   if (from.flush_id() != 0) {
     _internal_set_flush_id(from._internal_flush_id());
   }
-  if (from.last_sent_flush_id() != 0) {
-    _internal_set_last_sent_flush_id(from._internal_last_sent_flush_id());
+  if (from.stored_flush_id() != 0) {
+    _internal_set_stored_flush_id(from._internal_stored_flush_id());
   }
 }
 
@@ -5216,8 +5224,8 @@ void FlushResponse::InternalSwap(FlushResponse* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(FlushResponse, last_sent_flush_id_)
-      + sizeof(FlushResponse::last_sent_flush_id_)
+      PROTOBUF_FIELD_OFFSET(FlushResponse, stored_flush_id_)
+      + sizeof(FlushResponse::stored_flush_id_)
       - PROTOBUF_FIELD_OFFSET(FlushResponse, result_)>(
           reinterpret_cast<char*>(&result_),
           reinterpret_cast<char*>(&other->result_));
@@ -5245,16 +5253,23 @@ GetFlushStatusResponse::GetFlushStatusResponse(::PROTOBUF_NAMESPACE_ID::Arena* a
 GetFlushStatusResponse::GetFlushStatusResponse(const GetFlushStatusResponse& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::memcpy(&last_sent_flush_id_, &from.last_sent_flush_id_,
-    static_cast<size_t>(reinterpret_cast<char*>(&last_flush_id_) -
-    reinterpret_cast<char*>(&last_sent_flush_id_)) + sizeof(last_flush_id_));
+  prover_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_prover_id().empty()) {
+    prover_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_prover_id(),
+      GetArena());
+  }
+  ::memcpy(&stored_flush_id_, &from.stored_flush_id_,
+    static_cast<size_t>(reinterpret_cast<char*>(&storing_program_) -
+    reinterpret_cast<char*>(&stored_flush_id_)) + sizeof(storing_program_));
   // @@protoc_insertion_point(copy_constructor:hashdb.v1.GetFlushStatusResponse)
 }
 
 void GetFlushStatusResponse::SharedCtor() {
-  ::memset(&last_sent_flush_id_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&last_flush_id_) -
-      reinterpret_cast<char*>(&last_sent_flush_id_)) + sizeof(last_flush_id_));
+  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_GetFlushStatusResponse_hashdb_2eproto.base);
+  prover_id_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  ::memset(&stored_flush_id_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&storing_program_) -
+      reinterpret_cast<char*>(&stored_flush_id_)) + sizeof(storing_program_));
 }
 
 GetFlushStatusResponse::~GetFlushStatusResponse() {
@@ -5265,6 +5280,7 @@ GetFlushStatusResponse::~GetFlushStatusResponse() {
 
 void GetFlushStatusResponse::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
+  prover_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
 void GetFlushStatusResponse::ArenaDtor(void* object) {
@@ -5288,9 +5304,10 @@ void GetFlushStatusResponse::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  ::memset(&last_sent_flush_id_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&last_flush_id_) -
-      reinterpret_cast<char*>(&last_sent_flush_id_)) + sizeof(last_flush_id_));
+  prover_id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  ::memset(&stored_flush_id_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&storing_program_) -
+      reinterpret_cast<char*>(&stored_flush_id_)) + sizeof(storing_program_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -5302,17 +5319,17 @@ const char* GetFlushStatusResponse::_InternalParse(const char* ptr, ::PROTOBUF_N
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     CHK_(ptr);
     switch (tag >> 3) {
-      // uint64 last_sent_flush_id = 1;
+      // uint64 stored_flush_id = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          last_sent_flush_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          stored_flush_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // uint64 sending_flush_id = 2;
+      // uint64 storing_flush_id = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
-          sending_flush_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          storing_flush_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -5320,6 +5337,43 @@ const char* GetFlushStatusResponse::_InternalParse(const char* ptr, ::PROTOBUF_N
       case 3:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
           last_flush_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // uint64 pending_to_flush_nodes = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
+          pending_to_flush_nodes_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // uint64 pending_to_flush_program = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 40)) {
+          pending_to_flush_program_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // uint64 storing_nodes = 6;
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 48)) {
+          storing_nodes_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // uint64 storing_program = 7;
+      case 7:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 56)) {
+          storing_program_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string prover_id = 8;
+      case 8:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 66)) {
+          auto str = _internal_mutable_prover_id();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "hashdb.v1.GetFlushStatusResponse.prover_id"));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -5351,22 +5405,56 @@ failure:
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // uint64 last_sent_flush_id = 1;
-  if (this->last_sent_flush_id() != 0) {
+  // uint64 stored_flush_id = 1;
+  if (this->stored_flush_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_last_sent_flush_id(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_stored_flush_id(), target);
   }
 
-  // uint64 sending_flush_id = 2;
-  if (this->sending_flush_id() != 0) {
+  // uint64 storing_flush_id = 2;
+  if (this->storing_flush_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(2, this->_internal_sending_flush_id(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(2, this->_internal_storing_flush_id(), target);
   }
 
   // uint64 last_flush_id = 3;
   if (this->last_flush_id() != 0) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(3, this->_internal_last_flush_id(), target);
+  }
+
+  // uint64 pending_to_flush_nodes = 4;
+  if (this->pending_to_flush_nodes() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(4, this->_internal_pending_to_flush_nodes(), target);
+  }
+
+  // uint64 pending_to_flush_program = 5;
+  if (this->pending_to_flush_program() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(5, this->_internal_pending_to_flush_program(), target);
+  }
+
+  // uint64 storing_nodes = 6;
+  if (this->storing_nodes() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(6, this->_internal_storing_nodes(), target);
+  }
+
+  // uint64 storing_program = 7;
+  if (this->storing_program() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(7, this->_internal_storing_program(), target);
+  }
+
+  // string prover_id = 8;
+  if (this->prover_id().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_prover_id().data(), static_cast<int>(this->_internal_prover_id().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "hashdb.v1.GetFlushStatusResponse.prover_id");
+    target = stream->WriteStringMaybeAliased(
+        8, this->_internal_prover_id(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -5385,18 +5473,25 @@ size_t GetFlushStatusResponse::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // uint64 last_sent_flush_id = 1;
-  if (this->last_sent_flush_id() != 0) {
+  // string prover_id = 8;
+  if (this->prover_id().size() > 0) {
     total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_last_sent_flush_id());
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_prover_id());
   }
 
-  // uint64 sending_flush_id = 2;
-  if (this->sending_flush_id() != 0) {
+  // uint64 stored_flush_id = 1;
+  if (this->stored_flush_id() != 0) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_sending_flush_id());
+        this->_internal_stored_flush_id());
+  }
+
+  // uint64 storing_flush_id = 2;
+  if (this->storing_flush_id() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_storing_flush_id());
   }
 
   // uint64 last_flush_id = 3;
@@ -5404,6 +5499,34 @@ size_t GetFlushStatusResponse::ByteSizeLong() const {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
         this->_internal_last_flush_id());
+  }
+
+  // uint64 pending_to_flush_nodes = 4;
+  if (this->pending_to_flush_nodes() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_pending_to_flush_nodes());
+  }
+
+  // uint64 pending_to_flush_program = 5;
+  if (this->pending_to_flush_program() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_pending_to_flush_program());
+  }
+
+  // uint64 storing_nodes = 6;
+  if (this->storing_nodes() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_storing_nodes());
+  }
+
+  // uint64 storing_program = 7;
+  if (this->storing_program() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_storing_program());
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -5437,14 +5560,29 @@ void GetFlushStatusResponse::MergeFrom(const GetFlushStatusResponse& from) {
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from.last_sent_flush_id() != 0) {
-    _internal_set_last_sent_flush_id(from._internal_last_sent_flush_id());
+  if (from.prover_id().size() > 0) {
+    _internal_set_prover_id(from._internal_prover_id());
   }
-  if (from.sending_flush_id() != 0) {
-    _internal_set_sending_flush_id(from._internal_sending_flush_id());
+  if (from.stored_flush_id() != 0) {
+    _internal_set_stored_flush_id(from._internal_stored_flush_id());
+  }
+  if (from.storing_flush_id() != 0) {
+    _internal_set_storing_flush_id(from._internal_storing_flush_id());
   }
   if (from.last_flush_id() != 0) {
     _internal_set_last_flush_id(from._internal_last_flush_id());
+  }
+  if (from.pending_to_flush_nodes() != 0) {
+    _internal_set_pending_to_flush_nodes(from._internal_pending_to_flush_nodes());
+  }
+  if (from.pending_to_flush_program() != 0) {
+    _internal_set_pending_to_flush_program(from._internal_pending_to_flush_program());
+  }
+  if (from.storing_nodes() != 0) {
+    _internal_set_storing_nodes(from._internal_storing_nodes());
+  }
+  if (from.storing_program() != 0) {
+    _internal_set_storing_program(from._internal_storing_program());
   }
 }
 
@@ -5469,12 +5607,13 @@ bool GetFlushStatusResponse::IsInitialized() const {
 void GetFlushStatusResponse::InternalSwap(GetFlushStatusResponse* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  prover_id_.Swap(&other->prover_id_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(GetFlushStatusResponse, last_flush_id_)
-      + sizeof(GetFlushStatusResponse::last_flush_id_)
-      - PROTOBUF_FIELD_OFFSET(GetFlushStatusResponse, last_sent_flush_id_)>(
-          reinterpret_cast<char*>(&last_sent_flush_id_),
-          reinterpret_cast<char*>(&other->last_sent_flush_id_));
+      PROTOBUF_FIELD_OFFSET(GetFlushStatusResponse, storing_program_)
+      + sizeof(GetFlushStatusResponse::storing_program_)
+      - PROTOBUF_FIELD_OFFSET(GetFlushStatusResponse, stored_flush_id_)>(
+          reinterpret_cast<char*>(&stored_flush_id_),
+          reinterpret_cast<char*>(&other->stored_flush_id_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata GetFlushStatusResponse::GetMetadata() const {
@@ -5524,7 +5663,7 @@ GetFlushDataResponse::GetFlushDataResponse(const GetFlushDataResponse& from)
   } else {
     result_ = nullptr;
   }
-  last_sent_flush_id_ = from.last_sent_flush_id_;
+  stored_flush_id_ = from.stored_flush_id_;
   // @@protoc_insertion_point(copy_constructor:hashdb.v1.GetFlushDataResponse)
 }
 
@@ -5532,8 +5671,8 @@ void GetFlushDataResponse::SharedCtor() {
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_GetFlushDataResponse_hashdb_2eproto.base);
   nodes_state_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   ::memset(&result_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&last_sent_flush_id_) -
-      reinterpret_cast<char*>(&result_)) + sizeof(last_sent_flush_id_));
+      reinterpret_cast<char*>(&stored_flush_id_) -
+      reinterpret_cast<char*>(&result_)) + sizeof(stored_flush_id_));
 }
 
 GetFlushDataResponse::~GetFlushDataResponse() {
@@ -5578,7 +5717,7 @@ void GetFlushDataResponse::Clear() {
     delete result_;
   }
   result_ = nullptr;
-  last_sent_flush_id_ = PROTOBUF_ULONGLONG(0);
+  stored_flush_id_ = PROTOBUF_ULONGLONG(0);
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -5590,10 +5729,10 @@ const char* GetFlushDataResponse::_InternalParse(const char* ptr, ::PROTOBUF_NAM
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     CHK_(ptr);
     switch (tag >> 3) {
-      // uint64 last_sent_flush_id = 1;
+      // uint64 stored_flush_id = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          last_sent_flush_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          stored_flush_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -5689,10 +5828,10 @@ failure:
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // uint64 last_sent_flush_id = 1;
-  if (this->last_sent_flush_id() != 0) {
+  // uint64 stored_flush_id = 1;
+  if (this->stored_flush_id() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_last_sent_flush_id(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_stored_flush_id(), target);
   }
 
   // repeated .hashdb.v1.FlushData nodes = 2;
@@ -5803,11 +5942,11 @@ size_t GetFlushDataResponse::ByteSizeLong() const {
         *result_);
   }
 
-  // uint64 last_sent_flush_id = 1;
-  if (this->last_sent_flush_id() != 0) {
+  // uint64 stored_flush_id = 1;
+  if (this->stored_flush_id() != 0) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_last_sent_flush_id());
+        this->_internal_stored_flush_id());
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -5851,8 +5990,8 @@ void GetFlushDataResponse::MergeFrom(const GetFlushDataResponse& from) {
   if (from.has_result()) {
     _internal_mutable_result()->::hashdb::v1::ResultCode::MergeFrom(from._internal_result());
   }
-  if (from.last_sent_flush_id() != 0) {
-    _internal_set_last_sent_flush_id(from._internal_last_sent_flush_id());
+  if (from.stored_flush_id() != 0) {
+    _internal_set_stored_flush_id(from._internal_stored_flush_id());
   }
 }
 
@@ -5883,8 +6022,8 @@ void GetFlushDataResponse::InternalSwap(GetFlushDataResponse* other) {
   program_update_.InternalSwap(&other->program_update_);
   nodes_state_root_.Swap(&other->nodes_state_root_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(GetFlushDataResponse, last_sent_flush_id_)
-      + sizeof(GetFlushDataResponse::last_sent_flush_id_)
+      PROTOBUF_FIELD_OFFSET(GetFlushDataResponse, stored_flush_id_)
+      + sizeof(GetFlushDataResponse::stored_flush_id_)
       - PROTOBUF_FIELD_OFFSET(GetFlushDataResponse, result_)>(
           reinterpret_cast<char*>(&result_),
           reinterpret_cast<char*>(&other->result_));

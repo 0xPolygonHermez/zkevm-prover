@@ -12,7 +12,7 @@ HashDBInterface* HashDBClientFactory::createHashDBClient (Goldilocks &fr, const 
 {
     if (config.hashDBURL=="local")
     {
-        HashDBInterface * pLocalClient = hashDBSingleton.get(fr, config);
+        HashDBInterface * pLocalClient = hashDBSingleton.get();
         if (pLocalClient == NULL)
         {
             zklog.error("HashDBClientFactory::createHashDBClient() failed calling new hashDBSingleton.get()");

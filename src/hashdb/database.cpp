@@ -660,23 +660,23 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
         if (update && (key==dbStateRootKey))
         {
             multiWrite.Lock();
-            multiWrite.data[multiWrite.processingDataIndex].nodesStateRoot = value;
-            multiWrite.data[multiWrite.processingDataIndex].nodesStateRootQuery = "INSERT INTO " + tableName + " ( hash, data ) VALUES ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' ) ON CONFLICT (hash) DO NOTHING;";
-            multiWrite.data[multiWrite.processingDataIndex].nodesStateRootCounter++;
+            multiWrite.data[multiWrite.pendingToFlushDataIndex].nodesStateRoot = value;
+            multiWrite.data[multiWrite.pendingToFlushDataIndex].nodesStateRootQuery = "INSERT INTO " + tableName + " ( hash, data ) VALUES ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' ) ON CONFLICT (hash) DO NOTHING;";
+            multiWrite.data[multiWrite.pendingToFlushDataIndex].nodesStateRootCounter++;
             multiWrite.Unlock();
         }
         else
         {
             multiWrite.Lock();
             vector<FlushData> &multiWriteFlushData =
-                bProgram ? (update ? multiWrite.data[multiWrite.processingDataIndex].programUpdate : multiWrite.data[multiWrite.processingDataIndex].program) :
-                           (update ? multiWrite.data[multiWrite.processingDataIndex].nodesUpdate   : multiWrite.data[multiWrite.processingDataIndex].nodes);
+                bProgram ? (update ? multiWrite.data[multiWrite.pendingToFlushDataIndex].programUpdate : multiWrite.data[multiWrite.pendingToFlushDataIndex].program) :
+                           (update ? multiWrite.data[multiWrite.pendingToFlushDataIndex].nodesUpdate   : multiWrite.data[multiWrite.pendingToFlushDataIndex].nodes);
             string &multiWriteQuery =
-                bProgram ? (update ? multiWrite.data[multiWrite.processingDataIndex].programUpdateQuery : multiWrite.data[multiWrite.processingDataIndex].programQuery) :
-                           (update ? multiWrite.data[multiWrite.processingDataIndex].nodesUpdateQuery   : multiWrite.data[multiWrite.processingDataIndex].nodesQuery);
+                bProgram ? (update ? multiWrite.data[multiWrite.pendingToFlushDataIndex].programUpdateQuery : multiWrite.data[multiWrite.pendingToFlushDataIndex].programQuery) :
+                           (update ? multiWrite.data[multiWrite.pendingToFlushDataIndex].nodesUpdateQuery   : multiWrite.data[multiWrite.pendingToFlushDataIndex].nodesQuery);
             uint64_t &multiWriteCounter =
-                bProgram ? (update ? multiWrite.data[multiWrite.processingDataIndex].programUpdateCounter : multiWrite.data[multiWrite.processingDataIndex].programCounter) :
-                           (update ? multiWrite.data[multiWrite.processingDataIndex].nodesUpdateCounter   : multiWrite.data[multiWrite.processingDataIndex].nodesCounter);
+                bProgram ? (update ? multiWrite.data[multiWrite.pendingToFlushDataIndex].programUpdateCounter : multiWrite.data[multiWrite.pendingToFlushDataIndex].programCounter) :
+                           (update ? multiWrite.data[multiWrite.pendingToFlushDataIndex].nodesUpdateCounter   : multiWrite.data[multiWrite.pendingToFlushDataIndex].nodesCounter);
             FlushData auxFlushData;
             auxFlushData.key = key;
             auxFlushData.value = value;
@@ -1050,7 +1050,7 @@ zkresult Database::flush(uint64_t &thisBatch, uint64_t &lastSentBatch)
     if (config.dbReadOnly)
     {
         multiWrite.Lock();
-        multiWrite.data[multiWrite.processingDataIndex].Reset();
+        multiWrite.data[multiWrite.pendingToFlushDataIndex].Reset();
         multiWrite.Unlock();
 
         return ZKR_SUCCESS;
@@ -1063,25 +1063,30 @@ zkresult Database::flush(uint64_t &thisBatch, uint64_t &lastSentBatch)
     // Increase the last processed batch id and return the last sent batch id
     multiWrite.lastFlushId++;
     thisBatch = multiWrite.lastFlushId;
-    lastSentBatch = multiWrite.lastSentFlushId;
+    lastSentBatch = multiWrite.storedFlushId;
 
     // Notify the thread
     sem_post(&senderSem);
 
     multiWrite.Unlock();
 
-    zklog.info("Database::flush() thisBatch=" + to_string(thisBatch) + " lastSentBatch=" + to_string(lastSentBatch));
+    //zklog.info("Database::flush() thisBatch=" + to_string(thisBatch) + " lastSentBatch=" + to_string(lastSentBatch));
 
     return ZKR_SUCCESS;
 }
 
-void Database::getFlushStatus(uint64_t &lastSentFlushId, uint64_t &sendingFlushId, uint64_t &lastFlushId)
+zkresult Database::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram)
 {
     multiWrite.Lock();
-    lastSentFlushId = multiWrite.lastSentFlushId;
-    sendingFlushId = multiWrite.sendingFlushId;
+    storedFlushId = multiWrite.storedFlushId;
+    storingFlushId = multiWrite.storingFlushId;
     lastFlushId = multiWrite.lastFlushId;
+    pendingToFlushNodes = multiWrite.data[multiWrite.pendingToFlushDataIndex].nodes.size();
+    pendingToFlushProgram = multiWrite.data[multiWrite.pendingToFlushDataIndex].program.size();
+    storingNodes = multiWrite.data[multiWrite.storingDataIndex].nodes.size();
+    storingProgram = multiWrite.data[multiWrite.storingDataIndex].program.size();
     multiWrite.Unlock();
+    return ZKR_SUCCESS;
 }
 
 zkresult Database::sendData (void)
@@ -1096,7 +1101,7 @@ zkresult Database::sendData (void)
     uint64_t timeDiff;
 
     // Select proper data instance
-    MultiWriteData &data = multiWrite.data[multiWrite.sendingDataIndex];
+    MultiWriteData &data = multiWrite.data[multiWrite.storingDataIndex];
 
     // Query string
     string query;
@@ -1213,7 +1218,7 @@ zkresult Database::sendData (void)
 
         // If we succeeded, update last sent batch
         multiWrite.Lock();
-        multiWrite.lastSentFlushId = multiWrite.sendingFlushId;
+        multiWrite.storedFlushId = multiWrite.storingFlushId;
         multiWrite.Unlock();
     }
     catch (const std::exception &e)
@@ -1230,7 +1235,7 @@ zkresult Database::sendData (void)
 }
 
 // Get flush data, written to database by dbSenderThread; it blocks
-zkresult Database::getFlushData(uint64_t lastGotFlushId, uint64_t &lastSentFlushId, vector<FlushData> (&nodes), vector<FlushData> (&nodesUpdate), vector<FlushData> (&program), vector<FlushData> (&programUpdate), string &nodesStateRoot)
+zkresult Database::getFlushData(uint64_t flushId, uint64_t &storedFlushId, vector<FlushData> (&nodes), vector<FlushData> (&nodesUpdate), vector<FlushData> (&program), vector<FlushData> (&programUpdate), string &nodesStateRoot)
 {
     //zklog.info("--> getFlushData()");
 
@@ -1251,8 +1256,8 @@ zkresult Database::getFlushData(uint64_t lastGotFlushId, uint64_t &lastSentFlush
     multiWrite.Lock();
     MultiWriteData &data = multiWrite.data[multiWrite.synchronizingDataIndex];
 
-    zklog.info("getFlushData woke up: processingDataIndex=" + to_string(multiWrite.processingDataIndex) +
-        " sendingDataIndex=" + to_string(multiWrite.sendingDataIndex) +
+    zklog.info("getFlushData woke up: pendingToFlushDataIndex=" + to_string(multiWrite.pendingToFlushDataIndex) +
+        " storingDataIndex=" + to_string(multiWrite.storingDataIndex) +
         " synchronizingDataIndex=" + to_string(multiWrite.synchronizingDataIndex) +
         " nodes=" + to_string(data.nodes.size()) +
         " nodesUpdate=" + to_string(data.nodesUpdate.size()) +
@@ -1425,15 +1430,15 @@ void *dbSenderThread (void *arg)
         bool bDataEmpty = false;
 
         // If sending data is not empty (it failed before) then try to send it again
-        if (!multiWrite.data[multiWrite.sendingDataIndex].QueriesEmpty())
+        if (!multiWrite.data[multiWrite.storingDataIndex].QueriesEmpty())
         {
             zklog.warning("dbSenderThread() found sending data index not empty, probably because of a previous error; resuming...");
         }
         // If processing data is empty, then simply pretend to have sent data
-        else if (multiWrite.data[multiWrite.processingDataIndex].IsEmpty())
+        else if (multiWrite.data[multiWrite.pendingToFlushDataIndex].IsEmpty())
         {
             // Mark as if we sent all batches
-            multiWrite.lastSentFlushId = multiWrite.lastFlushId;
+            multiWrite.storedFlushId = multiWrite.lastFlushId;
 
             zklog.info("dbSenderThread() found multi write processing data empty, so ignoring");
             multiWrite.Unlock();
@@ -1443,23 +1448,23 @@ void *dbSenderThread (void *arg)
         else
         {
             // Advance processing and sending indexes
-            multiWrite.sendingDataIndex = (multiWrite.sendingDataIndex + 1) % 3;
-            multiWrite.processingDataIndex = (multiWrite.processingDataIndex + 1) % 3;
-            multiWrite.data[multiWrite.processingDataIndex].Reset();
-            zklog.info("dbSenderThread() updated: processingDataIndex=" + to_string(multiWrite.processingDataIndex) + " sendingDataIndex=" + to_string(multiWrite.sendingDataIndex) + " synchronizingDataIndex=" + to_string(multiWrite.synchronizingDataIndex));
+            multiWrite.storingDataIndex = (multiWrite.storingDataIndex + 1) % 3;
+            multiWrite.pendingToFlushDataIndex = (multiWrite.pendingToFlushDataIndex + 1) % 3;
+            multiWrite.data[multiWrite.pendingToFlushDataIndex].Reset();
+            zklog.info("dbSenderThread() updated: pendingToFlushDataIndex=" + to_string(multiWrite.pendingToFlushDataIndex) + " storingDataIndex=" + to_string(multiWrite.storingDataIndex) + " synchronizingDataIndex=" + to_string(multiWrite.synchronizingDataIndex));
 
             // Record the last processed batch included in this data set
-            multiWrite.sendingFlushId = multiWrite.lastFlushId;
+            multiWrite.storingFlushId = multiWrite.lastFlushId;
 
             // If there is no data to send, just pretend to have sent it
-            if (multiWrite.data[multiWrite.sendingDataIndex].QueriesEmpty())
+            if (multiWrite.data[multiWrite.storingDataIndex].QueriesEmpty())
             {
-                // Update last sent flush ID
-                multiWrite.lastSentFlushId = multiWrite.sendingFlushId;
+                // Update stored flush ID
+                multiWrite.storedFlushId = multiWrite.storingFlushId;
 
                 // Advance synchronizing index
                 multiWrite.synchronizingDataIndex = (multiWrite.synchronizingDataIndex + 1) % 3;
-                zklog.info("dbSenderThread() no data to send: processingDataIndex=" + to_string(multiWrite.processingDataIndex) + " sendingDataIndex=" + to_string(multiWrite.sendingDataIndex) + " synchronizingDataIndex=" + to_string(multiWrite.synchronizingDataIndex));
+                zklog.info("dbSenderThread() no data to send: pendingToFlushDataIndex=" + to_string(multiWrite.pendingToFlushDataIndex) + " storingDataIndex=" + to_string(multiWrite.storingDataIndex) + " synchronizingDataIndex=" + to_string(multiWrite.synchronizingDataIndex));
 
                 bDataEmpty = true;
             }
@@ -1471,19 +1476,19 @@ void *dbSenderThread (void *arg)
 
         if (!bDataEmpty)
         {
-            zklog.info("dbSenderThread() starting to send data, lastSentFlushId=" + to_string(multiWrite.lastSentFlushId) + " sendingFlushId=" + to_string(multiWrite.sendingFlushId));
+            zklog.info("dbSenderThread() starting to send data, storedFlushId=" + to_string(multiWrite.storedFlushId) + " storingFlushId=" + to_string(multiWrite.storingFlushId));
 
             zkresult zkr;
             zkr = pDatabase->sendData();
             if (zkr == ZKR_SUCCESS)
             {
                 multiWrite.Lock();
-                multiWrite.lastSentFlushId = multiWrite.sendingFlushId;
-                zklog.info("dbSenderThread() successfully sent data, lastSentFlushId=" + to_string(multiWrite.lastSentFlushId) + " sendingFlush=" + to_string(multiWrite.sendingFlushId));
+                multiWrite.storedFlushId = multiWrite.storingFlushId;
+                zklog.info("dbSenderThread() successfully sent data, storedFlushId=" + to_string(multiWrite.storedFlushId) + " sendingFlush=" + to_string(multiWrite.storingFlushId));
                 
                 // Advance synchronizing index
                 multiWrite.synchronizingDataIndex = (multiWrite.synchronizingDataIndex + 1) % 3;
-                zklog.info("dbSenderThread() updated: processingDataIndex=" + to_string(multiWrite.processingDataIndex) + " sendingDataIndex=" + to_string(multiWrite.sendingDataIndex) + " synchronizingDataIndex=" + to_string(multiWrite.synchronizingDataIndex));
+                zklog.info("dbSenderThread() updated: pendingToFlushDataIndex=" + to_string(multiWrite.pendingToFlushDataIndex) + " storingDataIndex=" + to_string(multiWrite.storingDataIndex) + " synchronizingDataIndex=" + to_string(multiWrite.synchronizingDataIndex));
 
                 sem_post(&pDatabase->getFlushDataSem);
                 zklog.info("dbSenderThread() successfully called sem_post(&pDatabase->getFlushDataSem)");
@@ -1506,7 +1511,7 @@ void *dbCacheSynchThread (void *arg)
     Database *pDatabase = (Database *)arg;
     zklog.info("dbCacheSynchThread() started");
 
-    uint64_t lastSentFlushId = 0;
+    uint64_t storedFlushId = 0;
 
     Config config = pDatabase->config;
     config.hashDBURL = config.dbCacheSynchURL;
@@ -1530,7 +1535,7 @@ void *dbCacheSynchThread (void *arg)
             string nodesStateRoot;
             
             // Call getFlushData() remotelly
-            zkresult zkr = pHashDBRemote->getFlushData(lastSentFlushId, lastSentFlushId, nodes, nodesUpdate, program, programUpdate, nodesStateRoot);
+            zkresult zkr = pHashDBRemote->getFlushData(storedFlushId, storedFlushId, nodes, nodesUpdate, program, programUpdate, nodesStateRoot);
             if (zkr != ZKR_SUCCESS)
             {
                 zklog.error("dbCacheSynchThread() failed calling pHashDB->getFlushData() result=" + zkresult2string(zkr));
@@ -1540,12 +1545,12 @@ void *dbCacheSynchThread (void *arg)
 
             if (nodes.size()==0 && nodesUpdate.size()==0 && program.size()==0 && programUpdate.size()==0 && nodesStateRoot.size()==0)
             {
-                zklog.info("dbCacheSynchThread() called getFlushData() remotely and got no data: lastSentFlushId=" + to_string(lastSentFlushId));
+                zklog.info("dbCacheSynchThread() called getFlushData() remotely and got no data: storedFlushId=" + to_string(storedFlushId));
                 continue;
             }
 
             TimerStart(DATABASE_CACHE_SYNCH);
-            zklog.info("dbCacheSynchThread() called getFlushData() remotely and got: lastSentFlushId=" + to_string(lastSentFlushId) + " nodes=" + to_string(nodes.size()) + " nodesUpdate=" + to_string(nodesUpdate.size()) + " program=" + to_string(program.size()) + " programUpdate=" + to_string(programUpdate.size()) + " nodesStateRoot=" + nodesStateRoot);
+            zklog.info("dbCacheSynchThread() called getFlushData() remotely and got: storedFlushId=" + to_string(storedFlushId) + " nodes=" + to_string(nodes.size()) + " nodesUpdate=" + to_string(nodesUpdate.size()) + " program=" + to_string(program.size()) + " programUpdate=" + to_string(programUpdate.size()) + " nodesStateRoot=" + nodesStateRoot);
 
             // Save nodes to cache
             if (nodes.size() > 0)
@@ -1608,7 +1613,7 @@ void *dbCacheSynchThread (void *arg)
     return NULL;
 }
 
-void loadDb2MemCache(const Config config)
+void loadDb2MemCache(const Config &config)
 {
     if (config.databaseURL == "local")
     {
@@ -1621,7 +1626,7 @@ void loadDb2MemCache(const Config config)
     TimerStart(LOAD_DB_TO_CACHE);
 
     Goldilocks fr;
-    HashDB * pHashDB = (HashDB *)hashDBSingleton.get(fr, config);
+    HashDB * pHashDB = (HashDB *)hashDBSingleton.get();
 
     vector<Goldilocks::Element> dbValue;
 

@@ -155,7 +155,7 @@ void HashDB::loadProgramDB(const DatabaseMap::ProgramMap &input, const bool pers
 #endif
 }
 
-zkresult HashDB::flush(uint64_t &flushId, uint64_t &lastSentFlushId)
+zkresult HashDB::flush(uint64_t &flushId, uint64_t &storedFlushId)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB
     gettimeofday(&t, NULL);
@@ -166,7 +166,7 @@ zkresult HashDB::flush(uint64_t &flushId, uint64_t &lastSentFlushId)
 #endif
 
     zkresult result;
-    result = db.flush(flushId, lastSentFlushId);
+    result = db.flush(flushId, storedFlushId);
 
 #ifdef LOG_TIME_STATISTICS_HASHDB
     tms.add("flush", TimeDiff(t));
@@ -177,7 +177,7 @@ zkresult HashDB::flush(uint64_t &flushId, uint64_t &lastSentFlushId)
     return result;
 }
 
-zkresult HashDB::getFlushStatus(uint64_t &lastSentFlushId, uint64_t &sendingFlushId, uint64_t &lastFlushId)
+zkresult HashDB::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram, string &proverId)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB
     gettimeofday(&t, NULL);
@@ -187,7 +187,11 @@ zkresult HashDB::getFlushStatus(uint64_t &lastSentFlushId, uint64_t &sendingFlus
     lock_guard<recursive_mutex> guard(mlock);
 #endif
 
-    db.getFlushStatus(lastSentFlushId, sendingFlushId, lastFlushId);
+    // Get IDs and counters from database
+    db.getFlushStatus(storedFlushId, storingFlushId, lastFlushId, pendingToFlushNodes, pendingToFlushProgram, storingNodes, storingProgram);
+
+    // Get proces ID from configuration
+    proverId = config.proverID;
 
 #ifdef LOG_TIME_STATISTICS_HASHDB
     tms.add("getFlushStatus", TimeDiff(t));
@@ -198,7 +202,7 @@ zkresult HashDB::getFlushStatus(uint64_t &lastSentFlushId, uint64_t &sendingFlus
     return ZKR_SUCCESS;
 }
 
-zkresult HashDB::getFlushData(uint64_t lastGotFlushId, uint64_t &lastSentFlushId, vector<FlushData> (&nodes), vector<FlushData> (&nodesUpdate), vector<FlushData> (&program), vector<FlushData> (&programUpdate), string &nodesStateRoot)
+zkresult HashDB::getFlushData(uint64_t flushId, uint64_t &lastSentFlushId, vector<FlushData> (&nodes), vector<FlushData> (&nodesUpdate), vector<FlushData> (&program), vector<FlushData> (&programUpdate), string &nodesStateRoot)
 {
     if (!config.dbMultiWrite)
     {
@@ -206,7 +210,7 @@ zkresult HashDB::getFlushData(uint64_t lastGotFlushId, uint64_t &lastSentFlushId
         return ZKR_DB_ERROR;
     }
 
-    return db.getFlushData(lastGotFlushId, lastSentFlushId, nodes, nodesUpdate, program, programUpdate, nodesStateRoot);
+    return db.getFlushData(flushId, lastSentFlushId, nodes, nodesUpdate, program, programUpdate, nodesStateRoot);
 }
 
 void HashDB::clearCache(void)

@@ -16,7 +16,7 @@ class HashDBServiceImpl final : public hashdb::v1::HashDBService::Service
 public:
     HashDBServiceImpl (Goldilocks &fr, const Config& config, const bool autoCommit, const bool asyncWrite) : fr(fr), config(config)
     {
-        pHashDB = hashDBSingleton.get(fr, config);
+        pHashDB = hashDBSingleton.get();
     };
     ::grpc::Status Set (::grpc::ServerContext* context, const ::hashdb::v1::SetRequest* request, ::hashdb::v1::SetResponse* response) override;
     ::grpc::Status Get (::grpc::ServerContext* context, const ::hashdb::v1::GetRequest* request, ::hashdb::v1::GetResponse* response) override;

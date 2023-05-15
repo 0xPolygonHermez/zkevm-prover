@@ -102,11 +102,11 @@ class MultiWrite
 public:
 
     uint64_t lastFlushId;
-    uint64_t lastSentFlushId;
-    uint64_t sendingFlushId;
+    uint64_t storedFlushId;
+    uint64_t storingFlushId;
 
-    uint64_t processingDataIndex; // Index of data to store data of batches being processed
-    uint64_t sendingDataIndex; // Index of data being sent to database
+    uint64_t pendingToFlushDataIndex; // Index of data to store data of batches being processed
+    uint64_t storingDataIndex; // Index of data being sent to database
     uint64_t synchronizingDataIndex; // Index of data being synchronized to other database caches
 
     MultiWriteData data[3];
@@ -116,10 +116,10 @@ public:
     // Constructor
     MultiWrite() :
         lastFlushId(0),
-        lastSentFlushId(0),
-        sendingFlushId(0),
-        processingDataIndex(0),
-        sendingDataIndex(2),
+        storedFlushId(0),
+        storingFlushId(0),
+        pendingToFlushDataIndex(0),
+        storingDataIndex(2),
         synchronizingDataIndex(2)
     {
         // Init mutex
@@ -216,13 +216,13 @@ public:
 
     // Flush multi write pending requests
     zkresult flush(uint64_t &flushId, uint64_t &lastSentFlushId);
-    void getFlushStatus(uint64_t &lastSentFlushId, uint64_t &sendingFlushId, uint64_t &lastFlushId);
+    zkresult getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram);
 
     // Send multi write data to remote database; called by dbSenderThread
     zkresult sendData(void);
 
     // Get flush data, written to database by dbSenderThread; it blocks
-    zkresult getFlushData(uint64_t lastGotFlushId, uint64_t &lastSentFlushId, vector<FlushData> (&nodes), vector<FlushData> (&nodesUpdate), vector<FlushData> (&program), vector<FlushData> (&programUpdate), string &nodesStateRoot);
+    zkresult getFlushData(uint64_t flushId, uint64_t &lastSentFlushId, vector<FlushData> (&nodes), vector<FlushData> (&nodesUpdate), vector<FlushData> (&program), vector<FlushData> (&programUpdate), string &nodesStateRoot);
 
     // Print tree
     void printTree(const string &root, string prefix = "");
@@ -237,6 +237,6 @@ void *dbSenderThread(void *arg);
 // Thread to synchronize cache from master hash DB server
 void *dbCacheSynchThread(void *arg);
 
-void loadDb2MemCache(const Config config);
+void loadDb2MemCache(const Config &config);
 
 #endif

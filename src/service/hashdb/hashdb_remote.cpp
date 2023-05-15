@@ -290,7 +290,7 @@ void HashDBRemote::loadProgramDB(const DatabaseMap::ProgramMap &input, const boo
 #endif
 }
 
-zkresult HashDBRemote::flush(uint64_t &flushId, uint64_t &lastSentFlushId)
+zkresult HashDBRemote::flush(uint64_t &flushId, uint64_t &storedFlushId)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
     gettimeofday(&t, NULL);
@@ -303,7 +303,7 @@ zkresult HashDBRemote::flush(uint64_t &flushId, uint64_t &lastSentFlushId)
         zklog.error("HashDBRemote:flush() GRPC error(" + to_string(s.error_code()) + "): " + s.error_message());
     }
     flushId = response.flush_id();
-    lastSentFlushId = response.last_sent_flush_id();
+    storedFlushId = response.stored_flush_id();
 
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
     tms.add("flush", TimeDiff(t));
@@ -311,7 +311,7 @@ zkresult HashDBRemote::flush(uint64_t &flushId, uint64_t &lastSentFlushId)
     return static_cast<zkresult>(response.result().code());
 }
 
-zkresult HashDBRemote::getFlushStatus(uint64_t &lastSentFlushId, uint64_t &sendingFlushId, uint64_t &lastFlushId)
+zkresult HashDBRemote::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram, string &proverId)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
     gettimeofday(&t, NULL);
@@ -325,9 +325,14 @@ zkresult HashDBRemote::getFlushStatus(uint64_t &lastSentFlushId, uint64_t &sendi
         return ZKR_HASHDB_GRPC_ERROR;
     }
 
-    lastSentFlushId = response.last_sent_flush_id();
-    sendingFlushId = response.sending_flush_id();
+    storedFlushId = response.stored_flush_id();
+    storingFlushId = response.storing_flush_id();
     lastFlushId = response.last_flush_id();
+    pendingToFlushNodes = response.pending_to_flush_nodes();
+    pendingToFlushProgram = response.pending_to_flush_program();
+    storingNodes = response.storing_nodes();
+    storingProgram = response.storing_program();
+    proverId = response.prover_id();
 
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
     tms.add("getFlushStatus", TimeDiff(t));
@@ -336,7 +341,7 @@ zkresult HashDBRemote::getFlushStatus(uint64_t &lastSentFlushId, uint64_t &sendi
     return ZKR_SUCCESS;
 }
 
-zkresult HashDBRemote::getFlushData(uint64_t lastGotFlushId, uint64_t &lastSentFlushId, vector<FlushData> (&nodes), vector<FlushData> (&nodesUpdate), vector<FlushData> (&program), vector<FlushData> (&programUpdate), string &nodesStateRoot)
+zkresult HashDBRemote::getFlushData(uint64_t flushId, uint64_t &storedFlushId, vector<FlushData> (&nodes), vector<FlushData> (&nodesUpdate), vector<FlushData> (&program), vector<FlushData> (&programUpdate), string &nodesStateRoot)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
     gettimeofday(&t, NULL);
@@ -345,7 +350,7 @@ zkresult HashDBRemote::getFlushData(uint64_t lastGotFlushId, uint64_t &lastSentF
 
     // Prepare the request
     ::hashdb::v1::GetFlushDataRequest request;
-    request.set_last_got_flush_id(lastGotFlushId);
+    request.set_flush_id(flushId);
 
     // Declare the response
     ::hashdb::v1::GetFlushDataResponse response;
@@ -358,7 +363,7 @@ zkresult HashDBRemote::getFlushData(uint64_t lastGotFlushId, uint64_t &lastSentF
     }
 
     // Copy the last sent flush ID
-    lastSentFlushId = response.last_sent_flush_id();
+    storedFlushId = response.stored_flush_id();
 
     // Copy the nodes vector
     nodes.clear();

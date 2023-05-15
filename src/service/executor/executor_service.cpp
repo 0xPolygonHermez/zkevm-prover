@@ -281,7 +281,8 @@ using grpc::Status;
     response->set_new_acc_input_hash(string2ba(proverRequest.pFullTracer->get_new_acc_input_hash()));
     response->set_new_local_exit_root(string2ba(proverRequest.pFullTracer->get_new_local_exit_root()));
     response->set_flush_id(proverRequest.flushId);
-    response->set_last_sent_flush_id(proverRequest.lastSentFlushId);
+    response->set_stored_flush_id(proverRequest.lastSentFlushId);
+    response->set_prover_id(config.proverID);
     
     unordered_map<string, InfoReadWrite> * p_read_write_addresses = proverRequest.pFullTracer->get_read_write_addresses();
     if (p_read_write_addresses != NULL)
@@ -546,13 +547,25 @@ using grpc::Status;
 
 ::grpc::Status ExecutorServiceImpl::GetFlushStatus (::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::executor::v1::GetFlushStatusResponse* response)
 {
-    uint64_t lastSentFlushId;
-    uint64_t sendingFlushId;
+    uint64_t storedFlushId;
+    uint64_t storingFlushId;
     uint64_t lastFlushId;
-    pHashDB->getFlushStatus(lastSentFlushId, sendingFlushId, lastFlushId);
-    response->set_last_sent_flush_id(lastSentFlushId);
-    response->set_sending_flush_id(sendingFlushId);
+    uint64_t pendingToFlushNodes;
+    uint64_t pendingToFlushProgram;
+    uint64_t storingNodes;
+    uint64_t storingProgram;
+    string proverId;
+
+    pHashDB->getFlushStatus(storedFlushId, storingFlushId, lastFlushId, pendingToFlushNodes, pendingToFlushProgram, storingNodes, storingProgram, proverId);
+    
+    response->set_stored_flush_id(storedFlushId);
+    response->set_storing_flush_id(storingFlushId);
     response->set_last_flush_id(lastFlushId);
+    response->set_pending_to_flush_nodes(pendingToFlushNodes);
+    response->set_pending_to_flush_program(pendingToFlushProgram);
+    response->set_storing_nodes(storingNodes);
+    response->set_storing_program(storingProgram);
+    response->set_prover_id(proverId);
 
     return Status::OK;
 }
