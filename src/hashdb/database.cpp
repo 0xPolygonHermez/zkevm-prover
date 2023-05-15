@@ -661,8 +661,6 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
         {
             multiWrite.Lock();
             multiWrite.data[multiWrite.pendingToFlushDataIndex].nodesStateRoot = value;
-            multiWrite.data[multiWrite.pendingToFlushDataIndex].nodesStateRootQuery = "INSERT INTO " + tableName + " ( hash, data ) VALUES ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' ) ON CONFLICT (hash) DO NOTHING;";
-            multiWrite.data[multiWrite.pendingToFlushDataIndex].nodesStateRootCounter++;
             multiWrite.Unlock();
         }
         else
@@ -671,25 +669,10 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
             vector<FlushData> &multiWriteFlushData =
                 bProgram ? (update ? multiWrite.data[multiWrite.pendingToFlushDataIndex].programUpdate : multiWrite.data[multiWrite.pendingToFlushDataIndex].program) :
                            (update ? multiWrite.data[multiWrite.pendingToFlushDataIndex].nodesUpdate   : multiWrite.data[multiWrite.pendingToFlushDataIndex].nodes);
-            string &multiWriteQuery =
-                bProgram ? (update ? multiWrite.data[multiWrite.pendingToFlushDataIndex].programUpdateQuery : multiWrite.data[multiWrite.pendingToFlushDataIndex].programQuery) :
-                           (update ? multiWrite.data[multiWrite.pendingToFlushDataIndex].nodesUpdateQuery   : multiWrite.data[multiWrite.pendingToFlushDataIndex].nodesQuery);
-            uint64_t &multiWriteCounter =
-                bProgram ? (update ? multiWrite.data[multiWrite.pendingToFlushDataIndex].programUpdateCounter : multiWrite.data[multiWrite.pendingToFlushDataIndex].programCounter) :
-                           (update ? multiWrite.data[multiWrite.pendingToFlushDataIndex].nodesUpdateCounter   : multiWrite.data[multiWrite.pendingToFlushDataIndex].nodesCounter);
             FlushData auxFlushData;
             auxFlushData.key = key;
             auxFlushData.value = value;
             multiWriteFlushData.push_back(auxFlushData);
-            if (multiWriteQuery.size() == 0)
-            {
-                multiWriteQuery = "INSERT INTO " + tableName + " ( hash, data ) VALUES ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' ) ";
-            }
-            else
-            {
-                multiWriteQuery += ", ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' )";
-            }
-            multiWriteCounter++;
             multiWrite.Unlock();       
         }
     }
@@ -1092,9 +1075,6 @@ zkresult Database::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlus
 zkresult Database::sendData (void)
 {
     zkresult zkr = ZKR_SUCCESS;
-
-    // Get a free write db connection
-    DatabaseConnection * pDatabaseConnection = getConnection();
     
     // Time calculation variables
     struct timeval t;
@@ -1103,86 +1083,100 @@ zkresult Database::sendData (void)
     // Select proper data instance
     MultiWriteData &data = multiWrite.data[multiWrite.storingDataIndex];
 
-    // Query string
-    string query;
+    // Check if there is data
+    if (data.IsEmpty())
+    {
+        zklog.warning("Database::sendData() called with empty data");
+        return ZKR_SUCCESS;
+    }
+
+    // Check if it has already been stored to database
+    if (data.stored)
+    {
+        zklog.warning("Database::sendData() called with stored=true");
+        return ZKR_SUCCESS;
+    }
+
+    // Get a free write db connection
+    DatabaseConnection * pDatabaseConnection = getConnection();
 
     try
     {
         if (config.dbMetrics) gettimeofday(&t, NULL);
 
-        // If there is a nodes query, add it
-        if (data.nodes.size() > 0)
+        if (data.query.size() == 0)
         {
-            if (!data.nodesQueryReadyToSend)
+            // If there are nodes add the corresponding query
+            if (data.nodes.size() > 0)
             {
-                data.nodesQuery += " ON CONFLICT (hash) DO NOTHING;";
-                data.nodesQueryReadyToSend = true;
+                data.query += "INSERT INTO " + config.dbNodesTableName + " ( hash, data ) VALUES ";
+                for (uint64_t i=0; i<data.nodes.size(); i++)
+                {
+                    if (i != 0)
+                    {
+                        data.query += ", ";
+                    }
+                    data.query += "( E\'\\\\x" + data.nodes[i].key + "\', E\'\\\\x" + data.nodes[i].value + "\' ) ";
+                }
+                data.query += " ON CONFLICT (hash) DO NOTHING;";
             }
-            /*if (query.size() > 0)
+
+            // If there is a nodes update query, add it
+            if (data.nodesUpdate.size() > 0)
             {
-                query += ";";
-            }*/
-            query += data.nodesQuery;
+                data.query += "INSERT INTO " + config.dbNodesTableName + " ( hash, data ) VALUES ";
+                for (uint64_t i=0; i<data.nodesUpdate.size(); i++)
+                {
+                    if (i != 0)
+                    {
+                        data.query += ", ";
+                    }
+                    data.query += "( E\'\\\\x" + data.nodesUpdate[i].key + "\', E\'\\\\x" + data.nodesUpdate[i].value + "\' ) ";
+                }
+                data.query += " ON CONFLICT (hash) DO UPDATE SET data = EXCLUDED.data;";
+            }
+
+            // If there are program add the corresponding query
+            if (data.program.size() > 0)
+            {
+                data.query += "INSERT INTO " + config.dbProgramTableName + " ( hash, data ) VALUES ";
+                for (uint64_t i=0; i<data.program.size(); i++)
+                {
+                    if (i != 0)
+                    {
+                        data.query += ", ";
+                    }
+                    data.query += "( E\'\\\\x" + data.program[i].key + "\', E\'\\\\x" + data.program[i].value + "\' ) ";
+                }
+                data.query += " ON CONFLICT (hash) DO NOTHING;";
+            }
+
+            // If there is a program update query, add it
+            if (data.programUpdate.size() > 0)
+            {
+                data.query += "INSERT INTO " + config.dbProgramTableName + " ( hash, data ) VALUES ";
+                for (uint64_t i=0; i<data.programUpdate.size(); i++)
+                {
+                    if (i != 0)
+                    {
+                        data.query += ", ";
+                    }
+                    data.query += "( E\'\\\\x" + data.programUpdate[i].key + "\', E\'\\\\x" + data.programUpdate[i].value + "\' ) ";
+                }
+                data.query += " ON CONFLICT (hash) DO UPDATE SET data = EXCLUDED.data;";
+            }
+
+            // If there is a nodes state root query, add it
+            if (data.nodesStateRoot.size() > 0)
+            {
+                data.query += "INSERT INTO " + config.dbNodesTableName + " ( hash, data ) VALUES ( E\'\\\\x" + dbStateRootKey + "\', E\'\\\\x" + data.nodesStateRoot + "\' ) ON CONFLICT (hash) DO NOTHING;";
+            }
         }
 
-        // If there is a nodes update query, add it
-        if (data.nodesUpdate.size() > 0)
-        {
-            if (!data.nodesUpdateQueryReadyToSend)
-            {
-                data.nodesUpdateQuery += " ON CONFLICT (hash) DO UPDATE SET data = EXCLUDED.data;";
-                data.nodesUpdateQueryReadyToSend = true;
-            }
-            /*if (query.size() > 0)
-            {
-                query += ";";
-            }*/
-            query += data.nodesUpdateQuery;
-        }
-
-        // If there is a program query, add it
-        if (data.programQuery.size() > 0)
-        {
-            if (!data.programQueryReadyToSend)
-            {
-                data.programQuery += " ON CONFLICT (hash) DO NOTHING;";
-                data.programQueryReadyToSend = true;
-            }
-            /*if (query.size() > 0)
-            {
-                query += ";";
-            }*/
-            query += data.programQuery;
-        }
-        
-        // If there is a program update query, add it
-        if (data.programUpdateQuery.size() > 0)
-        {
-            if (!data.programUpdateQueryReadyToSend)
-            {
-                data.programUpdateQuery += " ON CONFLICT (hash) DO UPDATE SET data = EXCLUDED.data;";
-                data.programUpdateQueryReadyToSend = true;
-            }
-            /*if (query.size() > 0)
-            {
-                query += ";";
-            }*/
-            query += data.programUpdateQuery;
-        }
-
-        // If there is a nodes state root query, add it
-        if (data.nodesStateRootQuery.size() > 0)
-        {
-            /*if (query.size() > 0)
-            {
-                query += ";";
-            }*/
-            query += data.nodesStateRootQuery;
-        }
-
-        if (query.size() == 0)
+        if (data.query.size() == 0)
         {
             zklog.warning("Database::sendData() called without any data to send");
+            data.stored = true;
         }
         else
         {
@@ -1190,7 +1184,7 @@ zkresult Database::sendData (void)
             pqxx::work w(*(pDatabaseConnection->pConnection));
 
             // Execute the query
-            pqxx::result res = w.exec(query);
+            pqxx::result res = w.exec(data.query);
 
             // Commit your transaction
             w.commit();
@@ -1199,21 +1193,18 @@ zkresult Database::sendData (void)
             if (config.dbMetrics)
             {
                 timeDiff = TimeDiff(t);
-                uint64_t fields = data.nodesCounter + data.nodesUpdateCounter + data.programCounter + data.programUpdateCounter + (data.nodesStateRootCounter>0?1:0);
-                zklog.info("Database::sendData() dbMetrics multiWrite nodes=" + to_string(data.nodesCounter) +
-                    " nodesUpdate=" + to_string(data.nodesUpdateCounter) +
-                    " program=" + to_string(data.programCounter) +
-                    " programUpdate=" + to_string(data.programUpdateCounter) +
-                    " nodesStateRootCounter=" + to_string(data.nodesStateRootCounter) +
+                uint64_t fields = data.nodes.size() + data.nodesUpdate.size() + data.program.size() + data.programUpdate.size() + (data.nodesStateRoot.size() > 0 ? 1 : 0);
+                zklog.info("Database::sendData() dbMetrics multiWrite nodes=" + to_string(data.nodes.size()) +
+                    " nodesUpdate=" + to_string(data.nodesUpdate.size()) +
+                    " program=" + to_string(data.program.size()) +
+                    " programUpdate=" + to_string(data.programUpdate.size()) +
+                    " nodesStateRootCounter=" + to_string(data.nodesStateRoot.size() > 0 ? 1 : 0) +
                     " total=" + to_string(fields) + "fields=" + to_string(timeDiff) + "us=" + to_string(timeDiff/zkmax(fields,1)) + "us/field");
             }
-                
-            // Delete the accumulated query data only if the query succeeded
-            data.nodesQuery.clear();
-            data.nodesUpdateQuery.clear();
-            data.programQuery.clear();
-            data.programUpdateQuery.clear();
-            data.nodesStateRootQuery.clear();
+
+            // Update status
+            data.query.clear();
+            data.stored = true;
         }
 
         // If we succeeded, update last sent batch
@@ -1430,7 +1421,7 @@ void *dbSenderThread (void *arg)
         bool bDataEmpty = false;
 
         // If sending data is not empty (it failed before) then try to send it again
-        if (!multiWrite.data[multiWrite.storingDataIndex].QueriesEmpty())
+        if (multiWrite.data[multiWrite.storingDataIndex].query.size() > 0)
         {
             zklog.warning("dbSenderThread() found sending data index not empty, probably because of a previous error; resuming...");
         }
@@ -1439,8 +1430,9 @@ void *dbSenderThread (void *arg)
         {
             // Mark as if we sent all batches
             multiWrite.storedFlushId = multiWrite.lastFlushId;
-
+#ifdef LOG_DB_SENDER_THREAD
             zklog.info("dbSenderThread() found multi write processing data empty, so ignoring");
+#endif
             multiWrite.Unlock();
             continue;
         }
@@ -1451,21 +1443,24 @@ void *dbSenderThread (void *arg)
             multiWrite.storingDataIndex = (multiWrite.storingDataIndex + 1) % 3;
             multiWrite.pendingToFlushDataIndex = (multiWrite.pendingToFlushDataIndex + 1) % 3;
             multiWrite.data[multiWrite.pendingToFlushDataIndex].Reset();
+#ifdef LOG_DB_SENDER_THREAD
             zklog.info("dbSenderThread() updated: pendingToFlushDataIndex=" + to_string(multiWrite.pendingToFlushDataIndex) + " storingDataIndex=" + to_string(multiWrite.storingDataIndex) + " synchronizingDataIndex=" + to_string(multiWrite.synchronizingDataIndex));
+#endif
 
             // Record the last processed batch included in this data set
             multiWrite.storingFlushId = multiWrite.lastFlushId;
 
             // If there is no data to send, just pretend to have sent it
-            if (multiWrite.data[multiWrite.storingDataIndex].QueriesEmpty())
+            if (multiWrite.data[multiWrite.storingDataIndex].IsEmpty())
             {
                 // Update stored flush ID
                 multiWrite.storedFlushId = multiWrite.storingFlushId;
 
                 // Advance synchronizing index
                 multiWrite.synchronizingDataIndex = (multiWrite.synchronizingDataIndex + 1) % 3;
+#ifdef LOG_DB_SENDER_THREAD
                 zklog.info("dbSenderThread() no data to send: pendingToFlushDataIndex=" + to_string(multiWrite.pendingToFlushDataIndex) + " storingDataIndex=" + to_string(multiWrite.storingDataIndex) + " synchronizingDataIndex=" + to_string(multiWrite.synchronizingDataIndex));
-
+#endif
                 bDataEmpty = true;
             }
 
@@ -1476,22 +1471,27 @@ void *dbSenderThread (void *arg)
 
         if (!bDataEmpty)
         {
+#ifdef LOG_DB_SENDER_THREAD
             zklog.info("dbSenderThread() starting to send data, storedFlushId=" + to_string(multiWrite.storedFlushId) + " storingFlushId=" + to_string(multiWrite.storingFlushId));
-
+#endif
             zkresult zkr;
             zkr = pDatabase->sendData();
             if (zkr == ZKR_SUCCESS)
             {
                 multiWrite.Lock();
                 multiWrite.storedFlushId = multiWrite.storingFlushId;
-                zklog.info("dbSenderThread() successfully sent data, storedFlushId=" + to_string(multiWrite.storedFlushId) + " sendingFlush=" + to_string(multiWrite.storingFlushId));
-                
+#ifdef LOG_DB_SENDER_THREAD
+                zklog.info("dbSenderThread() successfully sent data, storedFlushId=" + to_string(multiWrite.storedFlushId) + " storingFlushId=" + to_string(multiWrite.storingFlushId));
+#endif
                 // Advance synchronizing index
                 multiWrite.synchronizingDataIndex = (multiWrite.synchronizingDataIndex + 1) % 3;
+#ifdef LOG_DB_SENDER_THREAD
                 zklog.info("dbSenderThread() updated: pendingToFlushDataIndex=" + to_string(multiWrite.pendingToFlushDataIndex) + " storingDataIndex=" + to_string(multiWrite.storingDataIndex) + " synchronizingDataIndex=" + to_string(multiWrite.synchronizingDataIndex));
-
+#endif
                 sem_post(&pDatabase->getFlushDataSem);
+#ifdef LOG_DB_SENDER_THREAD
                 zklog.info("dbSenderThread() successfully called sem_post(&pDatabase->getFlushDataSem)");
+#endif
                 multiWrite.Unlock();
             }
             else

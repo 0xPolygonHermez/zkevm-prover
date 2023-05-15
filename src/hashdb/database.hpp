@@ -34,26 +34,11 @@ public:
     vector<FlushData> nodesUpdate;
     string nodesStateRoot;
 
-    // SQL queries
-    string programQuery;
-    string programUpdateQuery;
-    string nodesQuery;
-    string nodesUpdateQuery;
-    string nodesStateRootQuery;
+    // SQL query including all data to store in database
+    string query;
 
-    // Query states
-    bool programQueryReadyToSend;
-    bool programUpdateQueryReadyToSend;
-    bool nodesQueryReadyToSend;
-    bool nodesUpdateQueryReadyToSend;
-    bool nodesStateRootQueryReadyToSend;
-
-    // Counters
-    uint64_t programCounter;
-    uint64_t programUpdateCounter;
-    uint64_t nodesCounter;
-    uint64_t nodesUpdateCounter;
-    uint64_t nodesStateRootCounter;
+    // Indicates if data has been already stored in database
+    bool stored;
 
     void Reset (void)
     {
@@ -63,37 +48,13 @@ public:
         nodes.clear();
         nodesUpdate.clear();
         nodesStateRoot.clear();
-
-        // Reset queries
-        programQuery.clear();
-        programUpdateQuery.clear();
-        nodesQuery.clear();
-        nodesUpdateQuery.clear();
-        nodesStateRootQuery.clear();
-
-        // Reset query states
-        programQueryReadyToSend = false;
-        programUpdateQueryReadyToSend = false;
-        nodesQueryReadyToSend = false;
-        nodesUpdateQueryReadyToSend = false;
-        nodesStateRootQueryReadyToSend = false;
-
-        // Reset counters
-        programCounter = 0;
-        programUpdateCounter = 0;
-        nodesCounter = 0;
-        nodesUpdateCounter = 0;
-        nodesStateRootCounter = 0;
+        query.clear();
+        stored = false;
     }
 
     bool IsEmpty (void)
     {
         return (nodes.size() == 0) && (nodesUpdate.size() == 0) && (nodesStateRoot.size() == 0) && (program.size() == 0) && (programUpdate.size() == 0);
-    }
-
-    bool QueriesEmpty (void)
-    {
-        return (nodesQuery.size() == 0) && (nodesUpdateQuery.size() == 0) && (nodesStateRootQuery.size() == 0) && (programQuery.size() == 0) && (programUpdateQuery.size() == 0);
     }
 };
 

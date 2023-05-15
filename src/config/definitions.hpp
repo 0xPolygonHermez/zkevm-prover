@@ -48,6 +48,7 @@
 //#define LOG_HASH
 //#define LOG_DB_READ
 //#define LOG_DB_WRITE
+//#define LOG_DB_SENDER_THREAD
 //#define LOG_HASHDB_SERVICE
 //#define LOG_FULL_TRACER
 #define LOG_FULL_TRACER_ON_ERROR
