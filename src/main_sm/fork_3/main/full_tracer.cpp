@@ -874,9 +874,6 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     // Increase opcodes counter
     numberOfOpcodesInThisTx++;
 
-    // Remember that at least one opcode was called
-    bOpcodeCalled = true;
-
     Opcode singleInfo;
 
     if (ctx.proverRequest.input.bNoCounters)

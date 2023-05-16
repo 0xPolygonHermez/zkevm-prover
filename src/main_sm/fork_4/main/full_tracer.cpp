@@ -1037,9 +1037,6 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 
     zkresult zkr;
 
-    // Remember that at least one opcode was called
-    bOpcodeCalled = true;
-
     Opcode singleInfo;
 
     if (ctx.proverRequest.input.bNoCounters)
