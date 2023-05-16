@@ -1199,6 +1199,7 @@ zkresult Database::sendData (void)
                     " program=" + to_string(data.program.size()) +
                     " programUpdate=" + to_string(data.programUpdate.size()) +
                     " nodesStateRootCounter=" + to_string(data.nodesStateRoot.size() > 0 ? 1 : 0) +
+                    " query.size=" + to_string(data.query.size()) + "B=" + to_string(data.query.size()/zkmax(fields,1)) + "B/field" +
                     " total=" + to_string(fields) + "fields=" + to_string(timeDiff) + "us=" + to_string(timeDiff/zkmax(fields,1)) + "us/field");
             }
 
