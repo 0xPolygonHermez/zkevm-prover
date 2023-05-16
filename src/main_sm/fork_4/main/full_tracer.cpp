@@ -367,6 +367,7 @@ zkresult FullTracer::onError(Context &ctx, const RomCommand &cmd)
 
     // Store the error
     lastError = cmd.params[1]->varName;
+    lastErrorOpcode = numberOfOpcodesInThisTx;
 
     // Intrinsic error should be set at tx level (not opcode)
     if ( (responseErrors.find(lastError) != responseErrors.end()) ||
@@ -892,6 +893,14 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
             finalTrace.responses[finalTrace.responses.size() - 1].error = lastOpcodeExecution.error;
         }
     }
+        
+    if ( !ctx.proverRequest.input.traceConfig.bGenerateExecuteTrace && 
+         !ctx.proverRequest.input.traceConfig.bGenerateCallTrace && 
+         (numberOfOpcodesInThisTx != 0) &&
+         (lastErrorOpcode != numberOfOpcodesInThisTx) )
+    {
+        finalTrace.responses[finalTrace.responses.size() - 1].error = "";
+    }
 
     // Append to response logs
     unordered_map<uint64_t, std::unordered_map<uint64_t, Log>>::iterator logIt;
@@ -915,6 +924,10 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     call_trace.clear();
     execution_trace.clear();
     logs.clear(); // TODO: Should we remove logs?
+
+    // Reset opcodes counters
+    numberOfOpcodesInThisTx = 0;
+    lastErrorOpcode = 0;
 
 #ifdef LOG_FULL_TRACER
     zklog.info("FullTracer::onFinishTx() txCount=" + to_string(txCount) + " finalTrace.responses.size()=" + to_string(finalTrace.responses.size()) + " create_address=" + response.create_address + " state_root=" + response.state_root);
@@ -1018,6 +1031,9 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&t, NULL);
 #endif
+
+    // Increase opcodes counter
+    numberOfOpcodesInThisTx++;
 
     zkresult zkr;
 
