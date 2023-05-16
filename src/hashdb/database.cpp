@@ -88,11 +88,6 @@ void Database::init(void)
         exitProcess();
     }
 
-#ifdef DATABASE_USE_CACHE
-    useDBMTCache = dbMTCache.enabled();
-    useDBProgramCache = dbProgramCache.enabled();
-#endif
-
     // Configure the server, if configuration is provided
     if (config.databaseURL != "local")
     {
@@ -124,10 +119,10 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
 
 #ifdef DATABASE_USE_CACHE
     // If the key is found in local database (cached) simply return it
-    if (useDBMTCache)
+    if (dbMTCache.enabled())
     {
         // If the key is present in the cache, get its value from there
-        if (Database::dbMTCache.find(key, value))
+        if (dbMTCache.find(key, value))
         {
             // Add to the read log
             if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
@@ -173,7 +168,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
             // If succeeded, now the value should be present in the cache
             if ( r == ZKR_SUCCESS)
             {
-                if (Database::dbMTCache.find(key, value))
+                if (dbMTCache.find(key, value))
                 {
                     // Add to the read log
                     if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
@@ -220,7 +215,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
 
 #ifdef DATABASE_USE_CACHE
             // Store it locally to avoid any future remote access for this key
-            if (useDBMTCache) Database::dbMTCache.add(key, value, update);
+            if (dbMTCache.enabled()) dbMTCache.add(key, value, update);
 #endif
 
             // Add to the read log
@@ -260,7 +255,7 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
         exitProcess();
     }
 
-    if (config.dbMultiWrite && !useDBMTCache && !persistent)
+    if (config.dbMultiWrite && !dbMTCache.enabled() && !persistent)
     {
         zklog.error("Database::write() called with multi-write active, cache disabled and no persistance in database, so there is no place to store the date");
         return ZKR_DB_ERROR;
@@ -294,10 +289,10 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
     }
 
 #ifdef DATABASE_USE_CACHE
-    if ((r == ZKR_SUCCESS) && (useDBMTCache))
+    if ((r == ZKR_SUCCESS) && dbMTCache.enabled())
     {
         // Create in memory cache
-        Database::dbMTCache.add(key, value, update);
+        dbMTCache.add(key, value, update);
     }
 #endif
 
@@ -623,10 +618,10 @@ zkresult Database::readTreeRemote(const string &key, const vector<uint64_t> *key
 
 #ifdef DATABASE_USE_CACHE
             // Store it locally to avoid any future remote access for this key
-            if (useDBMTCache)
+            if (dbMTCache.enabled())
             {
                 //zklog.info("Database::readTreeRemote() adding hash=" + hash + " to dbMTCache");
-                Database::dbMTCache.add(hash, value, false);
+                dbMTCache.add(hash, value, false);
             }
 #endif
         }
@@ -925,10 +920,10 @@ zkresult Database::setProgram (const string &_key, const vector<uint8_t> &data, 
     }
 
 #ifdef DATABASE_USE_CACHE
-    if ((r == ZKR_SUCCESS) && (useDBProgramCache))
+    if ((r == ZKR_SUCCESS) && (dbProgramCache.enabled()))
     {
         // Create in memory cache
-        Database::dbProgramCache.add(key, data, update);
+        dbProgramCache.add(key, data, update);
     }
 #endif
 
@@ -970,7 +965,7 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
 
 #ifdef DATABASE_USE_CACHE
     // If the key is found in local database (cached) simply return it
-    if (useDBProgramCache && !update && Database::dbProgramCache.find(key, data))
+    if (dbProgramCache.enabled() && !update && dbProgramCache.find(key, data))
     {
         // Add to the read log
         if (dbReadLog != NULL) dbReadLog->add(key, data, true, TimeDiff(t));
@@ -991,7 +986,7 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
 
 #ifdef DATABASE_USE_CACHE
             // Store it locally to avoid any future remote access for this key
-            if (useDBProgramCache) Database::dbProgramCache.add(key, data, update);
+            if (dbProgramCache.enabled()) dbProgramCache.add(key, data, update);
 #endif
 
             // Add to the read log
@@ -1058,7 +1053,7 @@ zkresult Database::flush(uint64_t &thisBatch, uint64_t &lastSentBatch)
     return ZKR_SUCCESS;
 }
 
-zkresult Database::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram)
+zkresult Database::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram)
 {
     multiWrite.Lock();
     storedFlushId = multiWrite.storedFlushId;
