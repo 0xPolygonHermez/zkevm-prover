@@ -7,10 +7,16 @@ TARGET_TEST := zkProverTest
 BUILD_DIR := ./build
 SRC_DIRS := ./src ./test ./tools
 
+GRPCPP_FLAGS := $(shell pkg-config grpc++ --cflags)
+GRPCPP_LIBS := $(shell pkg-config grpc++ --libs) -lgrpc++_reflection
+ifndef GRPCPP_LIBS
+$(error gRPC++ could not be found via pkg-config, you need to install them)
+endif
+
 CXX := g++
 AS := nasm
-CXXFLAGS := -std=c++17 -Wall -pthread -flarge-source-files -Wno-unused-label -rdynamic -mavx2 #-Wfatal-errors
-LDFLAGS := -lprotobuf -lsodium -lgrpc -lgrpc++ -lgrpc++_reflection -lgpr -lpthread -lpqxx -lpq -lgmp -lstdc++ -lgmpxx -lsecp256k1 -lcrypto -luuid
+CXXFLAGS := -std=c++17 -Wall -pthread -flarge-source-files -Wno-unused-label -rdynamic -mavx2 $(GRPCPP_FLAGS) #-Wfatal-errors
+LDFLAGS := -lprotobuf -lsodium -lgpr -lpthread -lpqxx -lpq -lgmp -lstdc++ -lgmpxx -lsecp256k1 -lcrypto -luuid $(GRPCPP_LIBS)
 CFLAGS := -fopenmp
 ASFLAGS := -felf64
 
