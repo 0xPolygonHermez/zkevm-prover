@@ -12,7 +12,7 @@ using json = nlohmann::json;
 StateDBRemote::StateDBRemote (Goldilocks &fr, const Config &config) : fr(fr), config(config)
 {
     // Create channel
-    std::shared_ptr<grpc_impl::Channel> channel = ::grpc::CreateChannel(config.stateDBURL, grpc::InsecureChannelCredentials());
+    std::shared_ptr<grpc::Channel> channel = ::grpc::CreateChannel(config.stateDBURL, grpc::InsecureChannelCredentials());
 
     // Create stub (i.e. client)
     stub = new statedb::v1::StateDBService::Stub(channel);
