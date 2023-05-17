@@ -7,15 +7,10 @@ TARGET_TEST := zkProverTest
 BUILD_DIR := ./build
 SRC_DIRS := ./src ./test ./tools
 
-LIBOMP := $(shell find /usr/lib/llvm-* -name "libomp.so" | sed 's/libomp.so//')
-ifndef LIBOMP
-$(error LIBOMP is not set, you need to install libomp-dev)
-endif
-
 CXX := g++
 AS := nasm
 CXXFLAGS := -std=c++17 -Wall -pthread -flarge-source-files -Wno-unused-label -rdynamic -mavx2 #-Wfatal-errors
-LDFLAGS := -lprotobuf -lsodium -lgrpc -lgrpc++ -lgrpc++_reflection -lgpr -lpthread -lpqxx -lpq -lgmp -lstdc++ -lomp -lgmpxx -lsecp256k1 -lcrypto -luuid -L$(LIBOMP)
+LDFLAGS := -lprotobuf -lsodium -lgrpc -lgrpc++ -lgrpc++_reflection -lgpr -lpthread -lpqxx -lpq -lgmp -lstdc++ -lgmpxx -lsecp256k1 -lcrypto -luuid
 CFLAGS := -fopenmp
 ASFLAGS := -felf64
 
@@ -50,13 +45,13 @@ bctree: $(BUILD_DIR)/$(TARGET_BCT)
 test: $(BUILD_DIR)/$(TARGET_TEST)
 
 $(BUILD_DIR)/$(TARGET_ZKP): $(OBJS_ZKP)
-	$(CXX) $(OBJS_ZKP) $(CXXFLAGS) -o $@ $(LDFLAGS)
+	$(CXX) $(OBJS_ZKP) $(CXXFLAGS) -o $@ $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS)
 
 $(BUILD_DIR)/$(TARGET_BCT): $(OBJS_BCT)
-	$(CXX) $(OBJS_BCT) $(CXXFLAGS) -o $@ $(LDFLAGS)
+	$(CXX) $(OBJS_BCT) $(CXXFLAGS) -o $@ $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS)
 
 $(BUILD_DIR)/$(TARGET_TEST): $(OBJS_TEST)
-	$(CXX) $(OBJS_TEST) $(CXXFLAGS) -o $@ $(LDFLAGS)
+	$(CXX) $(OBJS_TEST) $(CXXFLAGS) -o $@ $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS)
 
 # assembly
 $(BUILD_DIR)/%.asm.o: %.asm
