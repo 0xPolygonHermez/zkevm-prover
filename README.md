@@ -38,9 +38,13 @@ $ git submodule update
 ```
 
 ### Compile
-The following packages must be installed.
+The following packages must be installed (Ubuntu variants):
 ```sh
 $ sudo apt update && sudo apt install build-essential libbenchmark-dev libomp-dev libgmp-dev nlohmann-json3-dev postgresql libpqxx-dev libpqxx-doc nasm libsecp256k1-dev grpc-proto libsodium-dev libprotobuf-dev libssl-dev cmake libgrpc++-dev protobuf-compiler protobuf-compiler-grpc uuid-dev
+```
+The equivalent for Arch Linux is:
+```sh
+$ sudo pacman -S base-devel extra/protobuf community/grpc-cli community/nlohmann-json extra/libpqxx nasm extra/libsodium community/libsecp256k1
 ```
 To download the files needed to run the prover, you have to execute the following command
 ```sh
@@ -48,6 +52,11 @@ $ wget https://de012a78750e59b808d922b39535e862.s3.eu-west-1.amazonaws.com/v1.1.
 $ tar -xzvf v1.1.0-rc.1-fork.4.tgz
 $ rm config
 $ mv v1.1.0-rc.1-fork.4.tgz/config .
+```
+
+Depending on your `protobuf` version, you may need to regenerate gRPC files:
+```sh
+$ make -C src/grpc
 ```
 
 Run `make` to compile the project
