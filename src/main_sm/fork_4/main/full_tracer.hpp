@@ -34,8 +34,9 @@ public:
     vector<Opcode> call_trace;
     vector<Opcode> execution_trace;
     string lastError;
+    uint64_t numberOfOpcodesInThisTx;
+    uint64_t lastErrorOpcode;
     unordered_map<string, InfoReadWrite> read_write_addresses;
-    bool bOpcodeCalled;
     ReturnFromCreate returnFromCreate;
 #ifdef LOG_TIME_STATISTICS
     TimeMetricStorage tms;
@@ -56,7 +57,7 @@ public:
                                    const Goldilocks::Element &keyType0, const Goldilocks::Element &keyType1, const Goldilocks::Element &keyType2, const Goldilocks::Element &keyType3, const Goldilocks::Element &keyType4, const Goldilocks::Element &keyType5, const Goldilocks::Element &keyType6, const Goldilocks::Element &keyType7,
                                    const mpz_class &value );
 
-    FullTracer(Goldilocks &fr) : fr(fr), depth(1), initGas(0), txCount(0), txTime(0), accBatchGas(0), bOpcodeCalled(false) { };
+    FullTracer(Goldilocks &fr) : fr(fr), depth(1), initGas(0), txCount(0), txTime(0), accBatchGas(0), numberOfOpcodesInThisTx(0), lastErrorOpcode(0) { };
     ~FullTracer()
     {
 #ifdef LOG_TIME_STATISTICS

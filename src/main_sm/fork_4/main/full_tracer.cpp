@@ -367,6 +367,7 @@ zkresult FullTracer::onError(Context &ctx, const RomCommand &cmd)
 
     // Store the error
     lastError = cmd.params[1]->varName;
+    lastErrorOpcode = numberOfOpcodesInThisTx;
 
     // Intrinsic error should be set at tx level (not opcode)
     if ( (responseErrors.find(lastError) != responseErrors.end()) ||
@@ -892,6 +893,14 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
             finalTrace.responses[finalTrace.responses.size() - 1].error = lastOpcodeExecution.error;
         }
     }
+        
+    if ( !ctx.proverRequest.input.traceConfig.bGenerateExecuteTrace && 
+         !ctx.proverRequest.input.traceConfig.bGenerateCallTrace && 
+         (numberOfOpcodesInThisTx != 0) &&
+         (lastErrorOpcode != numberOfOpcodesInThisTx) )
+    {
+        finalTrace.responses[finalTrace.responses.size() - 1].error = "";
+    }
 
     // Append to response logs
     unordered_map<uint64_t, std::unordered_map<uint64_t, Log>>::iterator logIt;
@@ -915,6 +924,10 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     call_trace.clear();
     execution_trace.clear();
     logs.clear(); // TODO: Should we remove logs?
+
+    // Reset opcodes counters
+    numberOfOpcodesInThisTx = 0;
+    lastErrorOpcode = 0;
 
 #ifdef LOG_FULL_TRACER
     zklog.info("FullTracer::onFinishTx() txCount=" + to_string(txCount) + " finalTrace.responses.size()=" + to_string(finalTrace.responses.size()) + " create_address=" + response.create_address + " state_root=" + response.state_root);
@@ -1019,10 +1032,10 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     gettimeofday(&t, NULL);
 #endif
 
-    zkresult zkr;
+    // Increase opcodes counter
+    numberOfOpcodesInThisTx++;
 
-    // Remember that at least one opcode was called
-    bOpcodeCalled = true;
+    zkresult zkr;
 
     Opcode singleInfo;
 
@@ -1077,13 +1090,8 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
         zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.depthOffset)");
         return zkr;
     }
-    uint64_t newDepth = auxScalar.get_ui();
-    bool decreaseDepth = newDepth < depth;
-    bool increaseDepth = newDepth > depth;
-    if (decreaseDepth || increaseDepth)
-    {
-        depth = newDepth;
-    }
+    depth = auxScalar.get_ui();
+    singleInfo.depth = depth + 1;
 
     // get previous opcode processed
     uint64_t numOpcodes = call_trace.size();
@@ -1092,7 +1100,7 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 
     // If is an ether transfer, don't add stop opcode to trace
     if ( (singleInfo.opcode == opcodeInfo[0x00/*STOP*/].pName) &&
-        ( (prevTraceCall == NULL) || increaseDepth) )
+        ( (prevTraceCall == NULL) || (opIncContext.find(prevTraceCall->opcode) != opIncContext.end()) ) )
     {
         zkr = getVarFromCtx(ctx, false, ctx.rom.bytecodeLengthOffset, auxScalar);
         if (zkr != ZKR_SUCCESS)
@@ -1215,6 +1223,8 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
         singleInfo.gas = fr.toU64(ctx.pols.GAS[*ctx.pStep]);
         singleInfo.gas_cost = opcodeInfo[codeId].gas;
         gettimeofday(&singleInfo.startTime, NULL);
+
+        // Set gas refund
         zkr = getVarFromCtx(ctx, false, ctx.rom.gasRefundOffset, auxScalar);
         if (zkr != ZKR_SUCCESS)
         {
@@ -1222,37 +1232,16 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
             return zkr;
         }
         singleInfo.gas_refund = auxScalar.get_ui();
+
         //singleInfo.error = "";
+        
+        // Set state root
         if (!fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]))
         {
             zklog.error("FullTracer::onOpcode() failed calling fea2scalar()");
             return ZKR_SM_MAIN_FEA2SCALAR;
         }
         singleInfo.state_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
-
-        // Set gas forwarded to a new context and save gas left in previous context
-        if (increaseDepth)
-        {
-            // get gas forwarded to current ctx
-            uint64_t gasForwarded = fr.toU64(ctx.pols.GAS[*ctx.pStep]);
-
-            // get gas remaining in origin context
-            zkr = getVarFromCtx(ctx, false, ctx.rom.originCTXOffset, auxScalar);
-            if (zkr != ZKR_SUCCESS)
-            {
-                zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.originCTXOffset)");
-                return zkr;
-            }
-            uint64_t originCTX = auxScalar.get_ui();
-            zkr = getVarFromCtx(ctx, false, ctx.rom.gasCTXOffset, auxScalar, &originCTX);
-            if (zkr != ZKR_SUCCESS)
-            {
-                zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.gasCTXOffset)");
-                return zkr;
-            }
-            uint64_t gasRemaining = auxScalar.get_ui();
-            txGAS[depth] = {gasForwarded, gasRemaining};
-        }
 
         // Add contract info
         zkr = getVarFromCtx(ctx, false, ctx.rom.txDestAddrOffset, auxScalar);
@@ -1385,21 +1374,6 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
         }
 
         // cout << "info[info.size() - 1].gas_cost=" << info[info.size() - 1].gas_cost << endl;
-
-        // going to previous depth
-        if (decreaseDepth) {
-            // get gas cost consumed by current ctx except last opcode: gasForwarded - gasSecondLast
-            uint64_t gasConsumedExceptLastOpcode = txGAS[depth + 1].forwarded - prevTraceCall->gas;
-            // get gas remaining at the end of the previous context
-            uint64_t gasEndPreviousCtx = singleInfo.gas - txGAS[depth + 1].remaining;
-            // get gas spend by previous ctx
-            uint64_t gasSpendPreviousCtx = txGAS[depth + 1].forwarded - gasEndPreviousCtx;
-            // compute gas spend by the last opcode
-            uint64_t gasLastOpcode = gasSpendPreviousCtx - gasConsumedExceptLastOpcode;
-            // set opcode gas cost to traces
-            prevTraceCall->gas_cost = gasLastOpcode;
-            prevTraceExecution->gas_cost = gasLastOpcode;
-        }
 
         // Set gas refund for sstore opcode
         zkr = getVarFromCtx(ctx, false, ctx.rom.gasRefundOffset, auxScalar);

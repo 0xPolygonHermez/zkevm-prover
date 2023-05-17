@@ -341,12 +341,15 @@ void Input::saveGlobals (json &input) const
     input["noCounters"] = bNoCounters;
 
     // TraceConfig
-    input["disableStorage"] = traceConfig.bDisableStorage;
-    input["disableStack"] = traceConfig.bDisableStack;
-    input["enableMemory"] = traceConfig.bEnableMemory;
-    input["enableReturnData"] = traceConfig.bEnableReturnData;
-    input["txHashToGenerateExecuteTrace"] = traceConfig.txHashToGenerateExecuteTrace;
-    input["txHashToGenerateCallTrace"] = traceConfig.txHashToGenerateCallTrace;
+    if (traceConfig.bEnabled)
+    {
+        input["disableStorage"] = traceConfig.bDisableStorage;
+        input["disableStack"] = traceConfig.bDisableStack;
+        input["enableMemory"] = traceConfig.bEnableMemory;
+        input["enableReturnData"] = traceConfig.bEnableReturnData;
+        input["txHashToGenerateExecuteTrace"] = traceConfig.txHashToGenerateExecuteTrace;
+        input["txHashToGenerateCallTrace"] = traceConfig.txHashToGenerateCallTrace;
+    }
 }
 
 
