@@ -392,7 +392,13 @@ void Input::loadDatabase (json &input)
             }
 
             // Get the key fe element
-            string key = NormalizeToNFormat(it.key(), 64);
+            string key = Remove0xIfPresent(it.key());
+            if (key.size() > 64)
+            {
+                zklog.error("Input::loadDatabase() found too big key size=" + to_string(key.size()));
+                exitProcess();
+            }
+            key = NormalizeToNFormat(key, 64);
 
             // Add the key:value pair to the context database
             db[key] = dbValue;
@@ -427,7 +433,13 @@ void Input::loadDatabase (json &input)
             }
 
             // Get the key fe element
-            string key = NormalizeToNFormat(it.key(), 64);
+            string key = Remove0xIfPresent(it.key());
+            if (key.size() > 64)
+            {
+                zklog.error("Input::loadDatabase() found too big key size=" + to_string(key.size()));
+                exitProcess();
+            }
+            key = NormalizeToNFormat(key, 64);
 
             // Add the key:value pair to the context database
             contractsBytecode[key] = dbValue;
