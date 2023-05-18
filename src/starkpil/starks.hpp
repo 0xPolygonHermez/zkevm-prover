@@ -68,6 +68,8 @@ private:
 
     Polinomial x;
 
+    void merkelizeMemory(); // function for DBG purposes
+
 public:
     Starks(const Config &config, StarkFiles starkFiles, void *_pAddress) : config(config),
                                                                            starkInfo(config, starkFiles.zkevmStarkInfo),
