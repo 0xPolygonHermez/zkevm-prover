@@ -53,7 +53,9 @@ public:
     void *address(void) { return _pAddress; }
     uint64_t degree(void) { return _degree; }
     uint64_t size(void) { return _degree * _nCommitedPols * sizeof(Goldilocks::Element); }
-    ~CompressorCommitPolsStarks() {};
+    ~CompressorCommitPolsStarks() {
+        delete[] a;
+    };
 };
 
 class CommitPolsStarks
