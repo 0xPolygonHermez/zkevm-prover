@@ -17,47 +17,80 @@ using grpc::Status;
 ::grpc::Status HashDBServiceImpl::Set(::grpc::ServerContext* context, const ::hashdb::v1::SetRequest* request, ::hashdb::v1::SetResponse* response)
 {
     SmtSetResult r;
-    try {
+    try
+    {
+        // Get old state root
         Goldilocks::Element oldRoot[4];
-        grpc2fea (fr, request->old_root(), oldRoot);
+        grpc2fea(fr, request->old_root(), oldRoot);
 
+        // Get key
         Goldilocks::Element key[4];
-        grpc2fea (fr, request->key(), key);
+        grpc2fea(fr, request->key(), key);
 
-        mpz_class value(request->value(),16);
+        // Get value
+        if (request->value().size() > 64)
+        {
+            zklog.error("HashDBServiceImpl::Set() got a too big value: " + request->value());
+            return Status::CANCELLED;
+        }
+        if (!stringIsHex(request->value()))
+        {
+            zklog.error("HashDBServiceImpl::Set() got a non-hex value: " + request->value());
+            return Status::CANCELLED;
+        }
+        mpz_class value(request->value(), 16);
+
+        // Get persistent flag
         bool persistent = request->persistent();
+
 #ifdef LOG_HASHDB_SERVICE
         zklog.info("HashDBServiceImpl::Set() called. odlRoot=" + fea2string(fr, oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]) +
             " key=" + fea2string(fr, key[0], key[1], key[2], key[3]) +
             " value=" +  value.get_str(16) +
             " persistent=" + to_string(persistent));
 #endif
+        // Get database read log flag
         DatabaseMap *dbReadLog = NULL;
         if (request->get_db_read_log())
+        {
             dbReadLog = new DatabaseMap();
+            if (dbReadLog == NULL)
+            {
+                zklog.error("HashDBServiceImpl::Set() failed allocating a new DatabaseMap");
+                return Status::CANCELLED;
+            }
+        }
 
+        // Call SMT set
         Goldilocks::Element newRoot[4];
         zkresult zkr = pHashDB->set(oldRoot, key, value, persistent, newRoot, &r, dbReadLog);
 
+        // Return database read log
         if (request->get_db_read_log())
         {
             mtMap2grpc(fr, dbReadLog->getMTDB(), response->mutable_db_read_log());
             delete dbReadLog;
         }
 
+        // Return new state root
         ::hashdb::v1::Fea* resNewRoot = new ::hashdb::v1::Fea();
-        fea2grpc (fr, r.newRoot, resNewRoot);
+        fea2grpc(fr, r.newRoot, resNewRoot);
         response->set_allocated_new_root(resNewRoot);
 
-        if (request->details()) {
+        // If requested, return details
+        if (request->details())
+        {
+            // Return old state root
             ::hashdb::v1::Fea* resOldRoot = new ::hashdb::v1::Fea();
-            fea2grpc (fr, r.oldRoot, resOldRoot);
+            fea2grpc(fr, r.oldRoot, resOldRoot);
             response->set_allocated_old_root(resOldRoot);
 
+            // Return key
             ::hashdb::v1::Fea* resKey = new ::hashdb::v1::Fea();
-            fea2grpc (fr, r.key, resKey);
+            fea2grpc(fr, r.key, resKey);
             response->set_allocated_key(resKey);
 
+            // Return siblings
             std::map<uint64_t, std::vector<Goldilocks::Element>>::iterator it;
             for (it=r.siblings.begin(); it!=r.siblings.end(); it++)
             {
@@ -69,18 +102,31 @@ using grpc::Status;
                 (*response->mutable_siblings())[it->first] = list;
             }
 
+            // Return ins key
             ::hashdb::v1::Fea* resInsKey = new ::hashdb::v1::Fea();
-            fea2grpc (fr, r.insKey, resInsKey);
+            fea2grpc(fr, r.insKey, resInsKey);
             response->set_allocated_ins_key(resInsKey);
 
+            // Return ins value
             response->set_ins_value(r.insValue.get_str(16));
+
+            // Return is old0
             response->set_is_old0(r.isOld0);
+
+            // Return old value
             response->set_old_value(r.oldValue.get_str(16));
+
+            // Return new value
             response->set_new_value(r.newValue.get_str(16));
+
+            // Return mode
             response->set_mode(r.mode);
+
+            // Return hash counter
             response->set_proof_hash_counter(r.proofHashCounter);
         }
 
+        // Return result
         ::hashdb::v1::ResultCode* rc = new ::hashdb::v1::ResultCode();
         rc->set_code(static_cast<::hashdb::v1::ResultCode_Code>(zkr));
         response->set_allocated_result(rc);
@@ -90,9 +136,11 @@ using grpc::Status;
         zklog.error("HashDBServiceImpl::Set() exception: " + string(e.what()));
         return Status::CANCELLED;
     }
+
 #ifdef LOG_HASHDB_SERVICE
     zklog.info("HashDBServiceImpl::Set() completed. newRoot= " + fea2string(fr, r.newRoot[0], r.newRoot[1], r.newRoot[2], r.newRoot[3]));
 #endif
+
     return Status::OK;
 }
 
@@ -101,40 +149,59 @@ using grpc::Status;
     SmtGetResult r;
     try
     {
+        // Get state root
         Goldilocks::Element root[4];
         grpc2fea (fr, request->root(), root);
 
+        // Get key
         Goldilocks::Element key[4];
         grpc2fea (fr, request->key(), key);
+
 #ifdef LOG_HASHDB_SERVICE
         zklog.info("HashDBServiceImpl::Get() called. root=" + fea2string(fr, root[0], root[1], root[2], root[3]) +
             " key=" + fea2string(fr, key[0], key[1], key[2], key[3]));
 #endif
 
+        // Get database read log flag
         DatabaseMap *dbReadLog = NULL;
         if (request->get_db_read_log())
+        {
             dbReadLog = new DatabaseMap();
+            if (dbReadLog == NULL)
+            {
+                zklog.error("HashDBServiceImpl::Get() failed allocating a new DatabaseMap");
+                return Status::CANCELLED;
+            }
+        }
 
+        // Call SMT get
         mpz_class value;
         zkresult zkr = pHashDB->get(root, key, value, &r, dbReadLog);
 
+        // Return database read log
         if (request->get_db_read_log())
         {
             mtMap2grpc(fr, dbReadLog->getMTDB(), response->mutable_db_read_log());
             delete dbReadLog;
         }
 
+        // Return value
         response->set_value(PrependZeros(r.value.get_str(16), 64));
 
-        if (request->details()) {
+        // If requested, return details
+        if (request->details())
+        {
+            // Return state root
             ::hashdb::v1::Fea* resRoot = new ::hashdb::v1::Fea();
-            fea2grpc (fr, r.root, resRoot);
+            fea2grpc(fr, r.root, resRoot);
             response->set_allocated_root(resRoot);
 
+            // Return key
             ::hashdb::v1::Fea* resKey = new ::hashdb::v1::Fea();
-            fea2grpc (fr, r.key, resKey);
+            fea2grpc(fr, r.key, resKey);
             response->set_allocated_key(resKey);
 
+            // Return siblings
             std::map<uint64_t, std::vector<Goldilocks::Element>>::iterator it;
             for (it=r.siblings.begin(); it!=r.siblings.end(); it++)
             {
@@ -146,15 +213,22 @@ using grpc::Status;
                 (*response->mutable_siblings())[it->first] = list;
             }
 
+            // Return ins key
             ::hashdb::v1::Fea* resInsKey = new ::hashdb::v1::Fea();
             fea2grpc (fr, r.insKey, resInsKey);
             response->set_allocated_ins_key(resInsKey);
 
+            // Return ins value
             response->set_ins_value(r.insValue.get_str(16));
+
+            // Return is old0
             response->set_is_old0(r.isOld0);
+
+            // Return hash counter
             response->set_proof_hash_counter(r.proofHashCounter);
         }
 
+        // Return result
         ::hashdb::v1::ResultCode* rc = new ::hashdb::v1::ResultCode();
         rc->set_code(static_cast<::hashdb::v1::ResultCode_Code>(zkr));
         response->set_allocated_result(rc);
@@ -164,9 +238,11 @@ using grpc::Status;
         zklog.error("HashDBServiceImpl::Get() exception: " + string(e.what()));
         return Status::CANCELLED;
     }
+
 #ifdef LOG_HASHDB_SERVICE
     zklog.info("HashDBServiceImpl::Get() completed. value=" +  r.value.get_str(16));
 #endif
+
     return Status::OK;
 }
 
@@ -174,17 +250,17 @@ using grpc::Status;
 {
     try
     {
+        // Get key
         Goldilocks::Element key[4];
-        grpc2fea (fr, request->key(), key);
+        grpc2fea(fr, request->key(), key);
 
+        // Get data
         vector<uint8_t> data;
-        std:string sData;
-
-        sData = request->data();
-
-        for (uint64_t i=0; i<sData.size(); i++) {
-            data.push_back(sData.at(i));
+        for (uint64_t i=0; i<request->data().size(); i++)
+        {
+            data.push_back(request->data().at(i));
         }
+
 #ifdef LOG_HASHDB_SERVICE
         {
             string s = "HashDBServiceImpl::SetProgram() called. key=" + fea2string(fr, key[0], key[1], key[2], key[3]) + " data=";
@@ -194,8 +270,10 @@ using grpc::Status;
             zklog.info(s);
         }
 #endif
+        // Call set program
         zkresult r = pHashDB->setProgram(key, data, request->persistent());
 
+        // Return result
         ::hashdb::v1::ResultCode* result = new ::hashdb::v1::ResultCode();
         result->set_code(static_cast<::hashdb::v1::ResultCode_Code>(r));
         response->set_allocated_result(result);
@@ -205,30 +283,39 @@ using grpc::Status;
         zklog.error("HashDBServiceImpl::SetProgram() exception: " + string(e.what()));
         return Status::CANCELLED;
     }
+
 #ifdef LOG_HASHDB_SERVICE
     zklog.info("HashDBServiceImpl::SetProgram() completed.");
 #endif
+
     return Status::OK;
 }
 
 ::grpc::Status HashDBServiceImpl::GetProgram(::grpc::ServerContext* context, const ::hashdb::v1::GetProgramRequest* request, ::hashdb::v1::GetProgramResponse* response)
 {
-    string sData;
     try
     {
+        // Get key
         Goldilocks::Element key[4];
         grpc2fea (fr, request->key(), key);
+
 #ifdef LOG_HASHDB_SERVICE
         zklog.info("HashDBServiceImpl::GetProgram() called. key=" + fea2string(fr, key[0], key[1], key[2], key[3]));
 #endif
+
+        // Call get program
         vector<uint8_t> value;
         zkresult r = pHashDB->getProgram(key, value, NULL);
 
-        for (uint64_t i=0; i<value.size(); i++) {
+        // Return data
+        string sData;
+        for (uint64_t i=0; i<value.size(); i++)
+        {
             sData.push_back((char)value.at(i));
         }
         response->set_data(sData);
 
+        // Return result
         ::hashdb::v1::ResultCode* result = new ::hashdb::v1::ResultCode();
         result->set_code(static_cast<::hashdb::v1::ResultCode_Code>(r));
         response->set_allocated_result(result);
@@ -238,6 +325,7 @@ using grpc::Status;
         zklog.error("HashDBServiceImpl::GetProgram() exception: " + string(e.what()));
         return Status::CANCELLED;
     }
+
 #ifdef LOG_HASHDB_SERVICE
     {
         string s = "HashDBServiceImpl::GetProgram() completed. data=";
@@ -246,6 +334,7 @@ using grpc::Status;
         zklog.info(s);
     }
 #endif
+
     return Status::OK;
 }
 
@@ -254,20 +343,23 @@ using grpc::Status;
 #ifdef LOG_HASHDB_SERVICE
     zklog.info("HashDBServiceImpl::LoadDB called.");
 #endif
-    try
+
+    // Get Merkle tree map
+    DatabaseMap::MTMap map;
+    bool bResult = grpc2mtMap(fr, request->input_db(), map);
+    if (!bResult)
     {
-        DatabaseMap::MTMap map;
-        grpc2mtMap(fr, request->input_db(), map);
-        pHashDB->loadDB(map, request->persistent());
-    }
-    catch (const std::exception &e)
-    {
-        zklog.error("HashDBServiceImpl::LoadDB() exception: " + string(e.what()));
+        zklog.error("HashDBServiceImpl::LoadDB() failed calling grpc2mtMap()");
         return Status::CANCELLED;
     }
+
+    // Call load database
+    pHashDB->loadDB(map, request->persistent());
+
 #ifdef LOG_HASHDB_SERVICE
     zklog.info("HashDBServiceImpl::LoadDB() completed.");
 #endif
+
     return Status::OK;
 }
 
@@ -276,12 +368,23 @@ using grpc::Status;
 #ifdef LOG_HASHDB_SERVICE
     zklog.info("HashDBServiceImpl::LoadProgramDB called.");
 #endif
-        DatabaseMap::ProgramMap mapProgram;
-        grpc2programMap(fr, request->input_program_db(), mapProgram);
-        pHashDB->loadProgramDB(mapProgram, request->persistent());
+
+    // Get program map
+    DatabaseMap::ProgramMap mapProgram;
+    bool bResult = grpc2programMap(fr, request->input_program_db(), mapProgram);
+    if (!bResult)
+    {
+        zklog.error("HashDBServiceImpl::LoadProgramDB() failed calling grpc2programMap()");
+        return Status::CANCELLED;
+    }
+
+    // Call load program database
+    pHashDB->loadProgramDB(mapProgram, request->persistent());
+
 #ifdef LOG_HASHDB_SERVICE
     zklog.info("HashDBServiceImpl::LoadProgramDB() completed.");
 #endif
+
     return Status::OK;
 }
 
@@ -290,6 +393,7 @@ using grpc::Status;
 #ifdef LOG_HASHDB_SERVICE
     zklog.info("HashDBServiceImpl::Flush called.");
 #endif
+
     try
     {
         // Call the HashDB flush method
@@ -308,9 +412,11 @@ using grpc::Status;
         zklog.error("HashDBServiceImpl::Flush() exception: " + string(e.what()));
         return Status::CANCELLED;
     }
+
 #ifdef LOG_HASHDB_SERVICE
     zklog.info("HashDBServiceImpl::Flush() completed.");
 #endif
+
     return Status::OK;
 }
 
@@ -319,6 +425,7 @@ using grpc::Status;
 #ifdef LOG_HASHDB_SERVICE
     zklog.info("HashDBServiceImpl::GetFlushStatus called.");
 #endif
+
     try
     {
         uint64_t storedFlushId;
@@ -329,7 +436,9 @@ using grpc::Status;
         uint64_t storingNodes;
         uint64_t storingProgram;
         string proverId;
+
         pHashDB->getFlushStatus(storedFlushId, storingFlushId, lastFlushId, pendingToFlushNodes, pendingToFlushProgram, storingNodes, storingProgram, proverId);
+
         response->set_stored_flush_id(storedFlushId);
         response->set_storing_flush_id(storingFlushId);
         response->set_last_flush_id(lastFlushId);
@@ -344,6 +453,7 @@ using grpc::Status;
         zklog.error("HashDBServiceImpl::GetFlushStatus() exception: " + string(e.what()));
         return Status::CANCELLED;
     }
+
 #ifdef LOG_HASHDB_SERVICE
     zklog.info("HashDBServiceImpl::GetFlushStatus() completed.");
 #endif
@@ -353,9 +463,11 @@ using grpc::Status;
 
 ::grpc::Status HashDBServiceImpl::GetFlushData (::grpc::ServerContext* context, const ::hashdb::v1::GetFlushDataRequest* request, ::hashdb::v1::GetFlushDataResponse* response)
 {
+
 #ifdef LOG_HASHDB_SERVICE
     zklog.info("HashDBServiceImpl::GetFlushData called.");
 #endif
+
     try
     {
         // Declare local variables to store the result
@@ -432,6 +544,7 @@ using grpc::Status;
         zklog.error("HashDBServiceImpl::GetFlushData() exception: " + string(e.what()));
         return Status::CANCELLED;
     }
+
 #ifdef LOG_HASHDB_SERVICE
     zklog.info("HashDBServiceImpl::GetFlushData() completed.");
 #endif
