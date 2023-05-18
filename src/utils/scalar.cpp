@@ -104,6 +104,11 @@ string Remove0xIfPresent(const string &s)
     return s;
 }
 
+void Remove0xIfPresentNoCopy(string &s)
+{
+    if ( (s.size() >= 2) && (s.at(1) == 'x') && (s.at(0) == '0') ) s = s.substr(2);
+}
+
 string Add0xIfMissing(const string &s)
 {
     if ( (s.size() >= 2) && (s.at(1) == 'x') && (s.at(0) == '0') ) return s;
@@ -201,19 +206,19 @@ string PrependZeros (const string &s, uint64_t n)
     return s;
 }
 
-void PrependZeros (string &s, uint64_t n)
+void PrependZerosNoCopy (string &s, uint64_t n)
 {
     // Check that n is not too big
     if (n > 64)
     {
-        zklog.error("PrependZeros() called with an n that is too big n=" + to_string(n));
+        zklog.error("PrependZerosNoCopy() called with an n that is too big n=" + to_string(n));
         exitProcess();
     }
     // Check that string size is not too big
     uint64_t stringSize = s.size();
     if ( (stringSize > n) || (stringSize > 64) )
     {
-        zklog.error("PrependZeros() called with a string with too large s.size=" + to_string(stringSize) + " n=" + to_string(n));
+        zklog.error("PrependZerosNoCopy() called with a string with too large s.size=" + to_string(stringSize) + " n=" + to_string(n));
         exitProcess();
     }
 
@@ -236,6 +241,36 @@ string stringToLower (const string &s)
     string result = s;
     transform(result.begin(), result.end(), result.begin(), ::tolower);
     return result;
+}
+
+bool stringIsHex (const string &s)
+{
+    for (uint64_t i=0; i<s.size(); i++)
+    {
+        if (!charIsHex(s.at(i))) return false;
+    }
+    return true;
+}
+
+bool stringIs0xHex (const string &s)
+{
+    if (s.size() < 2)
+    {
+        return false;
+    }
+    if (s.at(0) != '0')
+    {
+        return false;
+    }
+    if (s.at(1) != 'x')
+    {
+        return false;
+    }
+    for (uint64_t i=2; i<s.size(); i++)
+    {
+        if (!charIsHex(s.at(i))) return false;
+    }
+    return true;
 }
 
 /* Keccak */

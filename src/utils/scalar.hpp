@@ -224,12 +224,28 @@ string fea2string (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldil
 
 /* Normalized strings */
 string Remove0xIfPresent      (const string &s);
+void   Remove0xIfPresentNoCopy(      string &s);
 string Add0xIfMissing         (const string &s);
 string PrependZeros           (const string &s, uint64_t n);
-void   PrependZeros           (      string &s, uint64_t n);
+void   PrependZerosNoCopy     (      string &s, uint64_t n);
 string NormalizeTo0xNFormat   (const string &s, uint64_t n);
 string NormalizeToNFormat     (const string &s, uint64_t n);
 string stringToLower          (const string &s);
+
+// Check that a char is an hex character
+inline bool charIsHex (char c)
+{
+    if ( (c >= '0') && (c <= '9') ) return true;
+    if ( (c >= 'a') && (c <= 'f') ) return true;
+    if ( (c >= 'A') && (c <= 'F') ) return true;
+    return false;
+}
+
+// Check that the string contains only hex characters
+bool stringIsHex (const string &s);
+
+// Check that the string contains only 0x + hex characters
+bool stringIs0xHex (const string &s);
 
 /* Keccak */
 void   keccak256 (const uint8_t *pInputData, uint64_t inputDataSize, uint8_t *pOutputData, uint64_t outputDataSize);
