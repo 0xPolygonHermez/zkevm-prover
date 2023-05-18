@@ -14,7 +14,7 @@ endif
 
 CXX := g++
 AS := nasm
-CXXFLAGS := -std=c++17 -Wall -pthread -flarge-source-files -Wno-unused-label -rdynamic -mavx2 -march=native
+CXXFLAGS := -std=c++17 -Wall -pthread -flarge-source-files -Wno-unused-label -rdynamic -mavx2 #-march=native
 LDFLAGS := -lprotobuf -lsodium -lgrpc -lgrpc++ -lgrpc++_reflection -lgpr -lpthread -lpqxx -lpq -lgmp -lstdc++ -lomp -lgmpxx -lsecp256k1 -lcrypto -luuid -L$(LIBOMP)
 CFLAGS := -fopenmp
 ASFLAGS := -felf64
@@ -26,12 +26,13 @@ else
       CXXFLAGS += -O3
 endif
 
-# Verify if AVX-512 is supoorted
-AVX512_SUPPORTED := $(shell cat /proc/cpuinfo | grep -E 'avx512' -m 1)
+# Verify if AVX-512 is supported
+# for now disabled, to enable it, you only need to uncomment these lines
+#AVX512_SUPPORTED := $(shell cat /proc/cpuinfo | grep -E 'avx512' -m 1)
 
-ifneq ($(AVX512_SUPPORTED),)
-	CXXFLAGS += -mavx512f -D__AVX512__
-endif
+#ifneq ($(AVX512_SUPPORTED),)
+#	CXXFLAGS += -mavx512f -D__AVX512__
+#endif
 
 INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
