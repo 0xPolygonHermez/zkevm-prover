@@ -34,6 +34,8 @@ public:
     vector<Opcode> call_trace;
     vector<Opcode> execution_trace;
     string lastError;
+    uint64_t numberOfOpcodesInThisTx;
+    uint64_t lastErrorOpcode;
     unordered_map<string, InfoReadWrite> read_write_addresses;
     ReturnFromCreate returnFromCreate;
 #ifdef LOG_TIME_STATISTICS
@@ -52,10 +54,10 @@ public:
     void onFinishBatch (Context &ctx, const RomCommand &cmd);
     void onOpcode (Context &ctx, const RomCommand &cmd);
     void addReadWriteAddress ( const Goldilocks::Element &address0, const Goldilocks::Element &address1, const Goldilocks::Element &address2, const Goldilocks::Element &faddress3, const Goldilocks::Element &address4, const Goldilocks::Element &address5, const Goldilocks::Element &address6, const Goldilocks::Element &address7,
-                               const Goldilocks::Element &keyType0, const Goldilocks::Element &keyType1, const Goldilocks::Element &keyType2, const Goldilocks::Element &keyType3, const Goldilocks::Element &keyType4, const Goldilocks::Element &keyType5, const Goldilocks::Element &keyType6, const Goldilocks::Element &keyType7,
-                               const mpz_class &value );
+                                   const Goldilocks::Element &keyType0, const Goldilocks::Element &keyType1, const Goldilocks::Element &keyType2, const Goldilocks::Element &keyType3, const Goldilocks::Element &keyType4, const Goldilocks::Element &keyType5, const Goldilocks::Element &keyType6, const Goldilocks::Element &keyType7,
+                                   const mpz_class &value );
 
-    FullTracer(Goldilocks &fr) : fr(fr), depth(1), initGas(0), txCount(0), txTime(0), accBatchGas(0) { };
+    FullTracer(Goldilocks &fr) : fr(fr), depth(1), initGas(0), txCount(0), txTime(0), accBatchGas(0), numberOfOpcodesInThisTx(0), lastErrorOpcode(0) { };
     ~FullTracer()
     {
 #ifdef LOG_TIME_STATISTICS

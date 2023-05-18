@@ -11,6 +11,7 @@
 #include "rlp.hpp"
 #include "utils.hpp"
 #include "timer.hpp"
+#include "zklog.hpp"
 
 using namespace std;
 
@@ -147,8 +148,8 @@ inline void getVarFromCtx(Context &ctx, bool global, uint64_t varOffset, mpz_cla
     {
         Fea value = memIterator->second;
         fea2scalar(ctx.fr, result, value.fe0, value.fe1, value.fe2, value.fe3, value.fe4, value.fe5, value.fe6, value.fe7);
+        }
     }
-}
 
 // Get the stored calldata in the stack
 inline void getCalldataFromStack(Context &ctx, uint64_t offset, uint64_t length, string &result)
@@ -224,7 +225,7 @@ inline void getTransactionHash( string    &to,
                                 string    &rlpTx )
 {
 #ifdef LOG_TX_HASH
-    cout << "FullTracer::getTransactionHash() to=" << to << " value=" << value << " nonce=" << nonce << " gasLimit=" << gasLimit << " gasPrice=" << gasPrice << " data=" << data << " r=0x" << r.get_str(16) << " s=0x" << s.get_str(16) << " v=" << v << endl;
+    zklog.info("FullTracer::getTransactionHash() to=" + to + " value=" + value.get_str(16) + " nonce=" + to_string(nonce) + " gasLimit=" + to_string(gasLimit) + " gasPrice=" + gasPrice.get_str(10) + " data=" + data + " r=0x" + r.get_str(16) + " s=0x" + s.get_str(16) + " v=" + to_string(v));
 #endif
 
     string raw;
@@ -234,13 +235,13 @@ inline void getTransactionHash( string    &to,
     encode(raw, gasLimit);
     if (!encodeHexData(raw, to))
     {
-        cout << "ERROR encoding to" << endl;
+        zklog.error("FullTracer::getTransactionHash() ERROR encoding to");
     }
     encode(raw, value);
 
     if (!encodeHexData(raw, data))
     {
-        cout << "ERROR encoding data" << endl;
+        zklog.error("FullTracer::getTransactionHash() ERROR encoding data");
     }
 
     encode(raw, v);
@@ -254,7 +255,7 @@ inline void getTransactionHash( string    &to,
     txHash = keccak256((const uint8_t *)(rlpTx.c_str()), rlpTx.length());
 
 #ifdef LOG_TX_HASH
-    cout << "FullTracer::getTransactionHash() keccak output txHash=" << txHash << " rlpTx=" << ba2string(rlpTx) << endl;
+    zklog.info("FullTracer::getTransactionHash() keccak output txHash=" + txHash + " rlpTx=" + ba2string(rlpTx));
 #endif
 }
 
@@ -264,6 +265,12 @@ inline void getTransactionHash( string    &to,
 
 zkresult FullTracer::handleEvent(Context &ctx, const RomCommand &cmd)
 {
+    // Full tracer should only be used during a process batch request
+    if (ctx.proverRequest.type != prt_processBatch)
+    {
+        return ZKR_SUCCESS;
+    }
+    
     if (cmd.function == f_storeLog)
     {
         // if (ctx.proverRequest.bNoCounters) return;
@@ -272,7 +279,7 @@ zkresult FullTracer::handleEvent(Context &ctx, const RomCommand &cmd)
     }
     if (cmd.params.size() == 0)
     {
-        cerr << "Error: FullTracer::handleEvent() got an invalid event with cmd.params.size()==0 cmd.function=" << function2String(cmd.function) << endl;
+        zklog.error("FullTracer::handleEvent() got an invalid event with cmd.params.size()==0 cmd.function=" + function2String(cmd.function));
         exitProcess();
     }
     if (cmd.params[0]->varName == "onError")
@@ -287,9 +294,9 @@ zkresult FullTracer::handleEvent(Context &ctx, const RomCommand &cmd)
     }
     if (cmd.params[0]->varName == "onFinishTx")
     {
-        if (ctx.totalTransferredBalance != 0)
+        if ( (oocErrors.find(lastError)==oocErrors.end()) && (ctx.totalTransferredBalance != 0) )
         {
-            cerr << "Error: FullTracer::handleEvent(onFinishTx) found ctx.totalTransferredBalance=" << ctx.totalTransferredBalance.get_str(10) << endl;
+            zklog.error("FullTracer::handleEvent(onFinishTx) found ctx.totalTransferredBalance=" + ctx.totalTransferredBalance.get_str(10));
             return ZKR_SM_MAIN_BALANCE_MISMATCH;
         }
         onFinishTx(ctx, cmd);
@@ -302,9 +309,9 @@ zkresult FullTracer::handleEvent(Context &ctx, const RomCommand &cmd)
     }
     if (cmd.params[0]->varName == "onFinishBatch")
     {
-        if (ctx.totalTransferredBalance != 0)
+        if ( (oocErrors.find(lastError)==oocErrors.end()) && (ctx.totalTransferredBalance != 0) )
         {
-            cerr << "Error: FullTracer::handleEvent(onFinishBatch) found ctx.totalTransferredBalance=" << ctx.totalTransferredBalance.get_str(10) << endl;
+            zklog.error("FullTracer::handleEvent(onFinishBatch) found ctx.totalTransferredBalance=" + ctx.totalTransferredBalance.get_str(10));
             return ZKR_SM_MAIN_BALANCE_MISMATCH;
         }
         onFinishBatch(ctx, cmd);
@@ -322,7 +329,7 @@ zkresult FullTracer::handleEvent(Context &ctx, const RomCommand &cmd)
         onUpdateStorage(ctx, *cmd.params[0]);
         return ZKR_SUCCESS;
     }
-    cerr << "Error: FullTracer::handleEvent() got an invalid event cmd.params[0]->varName=" << cmd.params[0]->varName << " cmd.function=" << function2String(cmd.function) << endl;
+    zklog.error("FullTracer::handleEvent() got an invalid event cmd.params[0]->varName=" + cmd.params[0]->varName + " cmd.function=" + function2String(cmd.function));
     exitProcess();
     return ZKR_INTERNAL_ERROR;
 }
@@ -335,12 +342,13 @@ void FullTracer::onError(Context &ctx, const RomCommand &cmd)
     // Check params size
     if (cmd.params.size() != 2)
     {
-        cerr << "Error: FullTracer::onError() got an invalid cmd.params.size()=" << cmd.params.size() << endl;
+        zklog.error("FullTracer::onError() got an invalid cmd.params.size()=" + to_string(cmd.params.size()));
         exitProcess();
     }
 
     // Store the error
     lastError = cmd.params[1]->varName;
+    lastErrorOpcode = numberOfOpcodesInThisTx;
 
     // Intrinsic error should be set at tx level (not opcode)
     if ( (responseErrors.find(lastError) != responseErrors.end()) ||
@@ -358,12 +366,12 @@ void FullTracer::onError(Context &ctx, const RomCommand &cmd)
         }
         else
         {
-            cerr << "Error: FullTracer::onError() got error=" << lastError << " with txCount=" << txCount << " but finalTrace.responses.size()=" << finalTrace.responses.size() << endl;
+            zklog.error("FullTracer::onError() got error=" + lastError + " with txCount=" + to_string(txCount) + " but finalTrace.responses.size()=" + to_string(finalTrace.responses.size()));
             exitProcess();
         }
     }
     else
-    {
+        {
         if (execution_trace.size() > 0)
         {
             execution_trace[execution_trace.size() - 1].error = lastError;
@@ -378,7 +386,7 @@ void FullTracer::onError(Context &ctx, const RomCommand &cmd)
     }
 
 #ifdef LOG_FULL_TRACER_ON_ERROR
-    cout << "FullTracer::onError() error=" << lastError << " zkPC=" << *ctx.pZKPC << " rom=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << endl;
+    zklog.info("FullTracer::onError() error=" + lastError + " zkPC=" + to_string(*ctx.pZKPC) + " rom=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr));
 #endif
 #ifdef LOG_TIME_STATISTICS
     tms.add("onError", TimeDiff(t));
@@ -441,14 +449,14 @@ void FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
     mpz_class auxScalar;
     getVarFromCtx(ctx, false, ctx.rom.storageAddrOffset, auxScalar);
     it->second.address = NormalizeTo0xNFormat(auxScalar.get_str(16), 40);
-    getVarFromCtx(ctx, false, ctx.rom.newNumBatchOffset, auxScalar);
+    getVarFromCtx(ctx, true, ctx.rom.newNumBatchOffset, auxScalar);
     it->second.batch_number = auxScalar.get_ui();
     it->second.tx_hash = finalTrace.responses[txCount].tx_hash;
     it->second.tx_index = txCount;
     it->second.index = indexLog;
 
 #ifdef LOG_FULL_TRACER
-    cout << "FullTracer::onStoreLog() CTX=" << to_string(CTX) << " indexLog=" << indexLog << " isTopic=" << to_string(isTopic) << " data=" << dataString << endl;
+    zklog.info("FullTracer::onStoreLog() CTX=" + to_string(CTX) + " indexLog=" + to_string(indexLog) + " isTopic=" + to_string(isTopic) + " data=" + dataString);
 #endif
 #ifdef LOG_TIME_STATISTICS
     tms.add("onStoreLog", TimeDiff(t));
@@ -574,7 +582,7 @@ void FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
     lastError = "";
 
 #ifdef LOG_FULL_TRACER
-    cout << "FullTracer::onProcessTx() finalTrace.responses.size()=" << finalTrace.responses.size() << endl;
+    zklog.info("FullTracer::onProcessTx() finalTrace.responses.size()=" + to_string(finalTrace.responses.size()));
 #endif
 #ifdef LOG_TIME_STATISTICS
     tms.add("onProcessTx", TimeDiff(t));
@@ -602,6 +610,7 @@ void FullTracer::onUpdateStorage(Context &ctx, const RomCommand &cmd)
         getRegFromCtx(ctx, cmd.params[1]->reg, regScalar);
         string value = PrependZeros(regScalar.get_str(16), 64);
 
+        // add key/value to deltaStorage, if undefined, create object
         if (deltaStorage.find(depth) == deltaStorage.end())
         {
             unordered_map<string, string> auxMap;
@@ -618,7 +627,7 @@ void FullTracer::onUpdateStorage(Context &ctx, const RomCommand &cmd)
         }
 
 #ifdef LOG_FULL_TRACER
-        cout << "FullTracer::onUpdateStorage() depth=" << depth << " key=" << key << " value=" << value << endl;
+        zklog.info("FullTracer::onUpdateStorage() depth=" + to_string(depth) + " key=" + key + " value=" + value);
 #endif
     }
 #ifdef LOG_TIME_STATISTICS
@@ -741,6 +750,14 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
             finalTrace.responses[finalTrace.responses.size() - 1].error = lastOpcodeExecution.error;
         }
     }
+        
+    if ( !ctx.proverRequest.input.traceConfig.bGenerateExecuteTrace && 
+         !ctx.proverRequest.input.traceConfig.bGenerateCallTrace && 
+         (numberOfOpcodesInThisTx != 0) &&
+         (lastErrorOpcode != numberOfOpcodesInThisTx) )
+    {
+        finalTrace.responses[finalTrace.responses.size() - 1].error = "";
+    }
 
     // Append to response logs
     unordered_map<uint64_t, std::unordered_map<uint64_t, Log>>::iterator logIt;
@@ -765,8 +782,12 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     execution_trace.clear();
     logs.clear(); // TODO: Should we remove logs?
 
+    // Reset opcodes counters
+    numberOfOpcodesInThisTx = 0;
+    lastErrorOpcode = 0;
+
 #ifdef LOG_FULL_TRACER
-    cout << "FullTracer::onFinishTx() txCount=" << txCount << " finalTrace.responses.size()=" << finalTrace.responses.size() << " create_address=" << response.create_address << " state_root=" << response.state_root << endl;
+    zklog.info("FullTracer::onFinishTx() txCount=" + to_string(txCount) + " finalTrace.responses.size()=" + to_string(finalTrace.responses.size()) + " create_address=" + response.create_address + " state_root=" + response.state_root);
 #endif
 #ifdef LOG_TIME_STATISTICS
     tms.add("onFinishTx", TimeDiff(t));
@@ -790,7 +811,7 @@ void FullTracer::onStartBatch(Context &ctx, const RomCommand &cmd)
     finalTrace.bInitialized = true;
 
 #ifdef LOG_FULL_TRACER
-    cout << "FullTracer::onStartBatch() old_state_root=" << finalTrace.old_state_root << endl;
+    zklog.info("FullTracer::onStartBatch()");
 #endif
 #ifdef LOG_TIME_STATISTICS
     tms.add("onStartBatch", TimeDiff(t));
@@ -833,7 +854,7 @@ void FullTracer::onFinishBatch(Context &ctx, const RomCommand &cmd)
     // finalTrace.new_batch_num = auxScalar.get_ui();
 
 #ifdef LOG_FULL_TRACER
-    cout << "FullTracer::onFinishBatch() new_state_root=" << finalTrace.new_state_root << endl;
+    zklog.info("FullTracer::onFinishBatch() new_state_root=" + finalTrace.new_state_root);
 #endif
 #ifdef LOG_TIME_STATISTICS
     tms.add("onFinishBatch", TimeDiff(t));
@@ -845,6 +866,10 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&t, NULL);
 #endif
+
+    // Increase opcodes counter
+    numberOfOpcodesInThisTx++;
+
     Opcode singleInfo;
 
     if (ctx.proverRequest.input.bNoCounters)
@@ -875,7 +900,7 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
             codeId = auxScalar.get_ui();
             break;
         default:
-            cerr << "Error: FullTracer::onOpcode() got invalid cmd.params=" << cmd.toString() << endl;
+            zklog.error("FullTracer::onOpcode() got invalid cmd.params=" + cmd.toString());
             exitProcess();
             exit(-1);
     }
@@ -1012,6 +1037,7 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
         singleInfo.depth = depth + 1;
         singleInfo.pc = fr.toU64(ctx.pols.PC[*ctx.pStep]);
         singleInfo.gas = fr.toU64(ctx.pols.GAS[*ctx.pStep]);
+        singleInfo.gas_cost = opcodeInfo[codeId].gas;
         gettimeofday(&singleInfo.startTime, NULL);
         getVarFromCtx(ctx, false, ctx.rom.gasRefundOffset, auxScalar);
         singleInfo.gas_refund = auxScalar.get_ui();
@@ -1299,8 +1325,8 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
  */
 
 void FullTracer::addReadWriteAddress ( const Goldilocks::Element &address0, const Goldilocks::Element &address1, const Goldilocks::Element &address2, const Goldilocks::Element &address3, const Goldilocks::Element &address4, const Goldilocks::Element &address5, const Goldilocks::Element &address6, const Goldilocks::Element &address7,
-                                       const Goldilocks::Element &keyType0, const Goldilocks::Element &keyType1, const Goldilocks::Element &keyType2, const Goldilocks::Element &keyType3, const Goldilocks::Element &keyType4, const Goldilocks::Element &keyType5, const Goldilocks::Element &keyType6, const Goldilocks::Element &keyType7,
-                                       const mpz_class &value )
+                                           const Goldilocks::Element &keyType0, const Goldilocks::Element &keyType1, const Goldilocks::Element &keyType2, const Goldilocks::Element &keyType3, const Goldilocks::Element &keyType4, const Goldilocks::Element &keyType5, const Goldilocks::Element &keyType6, const Goldilocks::Element &keyType7,
+                                           const mpz_class &value )
 {
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&t, NULL);

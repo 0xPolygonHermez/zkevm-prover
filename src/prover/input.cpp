@@ -341,12 +341,15 @@ void Input::saveGlobals (json &input) const
     input["noCounters"] = bNoCounters;
 
     // TraceConfig
-    input["disableStorage"] = traceConfig.bDisableStorage;
-    input["disableStack"] = traceConfig.bDisableStack;
-    input["enableMemory"] = traceConfig.bEnableMemory;
-    input["enableReturnData"] = traceConfig.bEnableReturnData;
-    input["txHashToGenerateExecuteTrace"] = traceConfig.txHashToGenerateExecuteTrace;
-    input["txHashToGenerateCallTrace"] = traceConfig.txHashToGenerateCallTrace;
+    if (traceConfig.bEnabled)
+    {
+        input["disableStorage"] = traceConfig.bDisableStorage;
+        input["disableStack"] = traceConfig.bDisableStack;
+        input["enableMemory"] = traceConfig.bEnableMemory;
+        input["enableReturnData"] = traceConfig.bEnableReturnData;
+        input["txHashToGenerateExecuteTrace"] = traceConfig.txHashToGenerateExecuteTrace;
+        input["txHashToGenerateCallTrace"] = traceConfig.txHashToGenerateCallTrace;
+    }
 }
 
 
@@ -389,7 +392,13 @@ void Input::loadDatabase (json &input)
             }
 
             // Get the key fe element
-            string key = NormalizeToNFormat(it.key(), 64);
+            string key = Remove0xIfPresent(it.key());
+            if (key.size() > 64)
+            {
+                zklog.error("Input::loadDatabase() found too big key size=" + to_string(key.size()));
+                exitProcess();
+            }
+            key = NormalizeToNFormat(key, 64);
 
             // Add the key:value pair to the context database
             db[key] = dbValue;
@@ -424,7 +433,13 @@ void Input::loadDatabase (json &input)
             }
 
             // Get the key fe element
-            string key = NormalizeToNFormat(it.key(), 64);
+            string key = Remove0xIfPresent(it.key());
+            if (key.size() > 64)
+            {
+                zklog.error("Input::loadDatabase() found too big key size=" + to_string(key.size()));
+                exitProcess();
+            }
+            key = NormalizeToNFormat(key, 64);
 
             // Add the key:value pair to the context database
             contractsBytecode[key] = dbValue;
