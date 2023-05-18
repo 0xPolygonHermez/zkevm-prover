@@ -1,7 +1,7 @@
 #ifndef EXECUTOR_SERVICE_HPP
 #define EXECUTOR_SERVICE_HPP
 
-#include "grpc/gen/executor.grpc.pb.h"
+#include "executor.grpc.pb.h"
 #include "proof_fflonk.hpp"
 #include "goldilocks_base_field.hpp"
 #include "prover.hpp"

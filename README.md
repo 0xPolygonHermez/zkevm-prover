@@ -54,11 +54,6 @@ $ rm config
 $ mv v1.1.0-rc.1-fork.4.tgz/config .
 ```
 
-Depending on your `protobuf` version, you may need to regenerate gRPC files:
-```sh
-$ make -C src/grpc
-```
-
 Run `make` to compile the project
 ```sh
 $ make clean
@@ -89,23 +84,23 @@ $ sudo docker run --rm --network host -ti -p 50051:50051 -p 50061:50061 -p 50071
 ## Usage
 To execute the Prover you need to provide a `config.json` file that contains the parameters that allow us to configure the different Prover options. By default, the Prover loads the `config.json`file located in the `testvectors`folder. The most relevant parameters are commented below with the default value for the provided `config.json` file:
 
-| Parameter | Description |
-| --------- | ----------- |
-| runStateDBServer | Enables StateDB GRPC service, provides SMT (Sparse Merkle Tree) and Database access |
-| runExecutorServer | Enables Executor GRPC service, provides a service to process transaction batches |
-| runAggregatorClient | Enables Aggregator GRPC client, connects to the Aggregator and process its requests |
-| aggregatorClientHost | IP address of the Aggregator server to which the Aggregator client must connect to |
-| runProverServer | Enables Prover GRPC service |
-| runFileProcessBatch | Processes a batch using as input a JSON file defined in the `"inputFile"` parameter |
-| runFileGenProof | Generates a proof using as input a JSON file defined in the `"inputFile"` parameter |
-| inputFile | Input JSON file with path relative to the `testvectors` folder |
-| outputPath | Output path folder to store the result files, with path relative to the `testvectors` folder |
-| databaseURL | Connection string for the PostgreSQL database used by the StateDB service. If the value is `"local"` then the service will not use a database and the data will be stored only in memory (no persistence). The PostgreSQL database connection string has the following format: `"postgresql://<user>:<password>@<ip>:<port>/<database>"`. For example: `"postgresql://statedb:statedb@127.0.0.1:5432/testdb"` |
-| stateDBURL | Connection string for the StateDB service. If the value is `"local"` then the GRPC StateDB service will not be used and local StateDB client will be used instead. The StateDB service connection string has the following format: `"<ip>:<port>"`. For example: `"127.0.0.1:50061"` |
-| saveRequestToFile | Saves service received requests to a text file |
-| saveResponseToFile | Saves service returned responses to a text file |
-| saveInputToFile | Saves service received input data to a JSON file |
-| saveOutputToFile | Saves service returned output data to a JSON file |
+| Parameter            | Description                                                                                                                                                                                                                                                                                                                                                                                                   |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| runStateDBServer     | Enables StateDB GRPC service, provides SMT (Sparse Merkle Tree) and Database access                                                                                                                                                                                                                                                                                                                           |
+| runExecutorServer    | Enables Executor GRPC service, provides a service to process transaction batches                                                                                                                                                                                                                                                                                                                              |
+| runAggregatorClient  | Enables Aggregator GRPC client, connects to the Aggregator and process its requests                                                                                                                                                                                                                                                                                                                           |
+| aggregatorClientHost | IP address of the Aggregator server to which the Aggregator client must connect to                                                                                                                                                                                                                                                                                                                            |
+| runProverServer      | Enables Prover GRPC service                                                                                                                                                                                                                                                                                                                                                                                   |
+| runFileProcessBatch  | Processes a batch using as input a JSON file defined in the `"inputFile"` parameter                                                                                                                                                                                                                                                                                                                           |
+| runFileGenProof      | Generates a proof using as input a JSON file defined in the `"inputFile"` parameter                                                                                                                                                                                                                                                                                                                           |
+| inputFile            | Input JSON file with path relative to the `testvectors` folder                                                                                                                                                                                                                                                                                                                                                |
+| outputPath           | Output path folder to store the result files, with path relative to the `testvectors` folder                                                                                                                                                                                                                                                                                                                  |
+| databaseURL          | Connection string for the PostgreSQL database used by the StateDB service. If the value is `"local"` then the service will not use a database and the data will be stored only in memory (no persistence). The PostgreSQL database connection string has the following format: `"postgresql://<user>:<password>@<ip>:<port>/<database>"`. For example: `"postgresql://statedb:statedb@127.0.0.1:5432/testdb"` |
+| stateDBURL           | Connection string for the StateDB service. If the value is `"local"` then the GRPC StateDB service will not be used and local StateDB client will be used instead. The StateDB service connection string has the following format: `"<ip>:<port>"`. For example: `"127.0.0.1:50061"`                                                                                                                          |
+| saveRequestToFile    | Saves service received requests to a text file                                                                                                                                                                                                                                                                                                                                                                |
+| saveResponseToFile   | Saves service returned responses to a text file                                                                                                                                                                                                                                                                                                                                                               |
+| saveInputToFile      | Saves service received input data to a JSON file                                                                                                                                                                                                                                                                                                                                                              |
+| saveOutputToFile     | Saves service returned output data to a JSON file                                                                                                                                                                                                                                                                                                                                                             |
 
 To run a proof test you must perform the following steps:
 - Edit the `config.json` file and set the parameter `"runFileGenProof"` to `"true"`. The rest of the parameters must be set to `"false"`. Also set the parameter `"databaseURL` to `"local"` if you don't want to use a postgreSQL database to run the test
