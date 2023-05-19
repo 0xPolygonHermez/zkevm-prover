@@ -316,14 +316,14 @@ namespace CircomRecursive2
     inStream.close();
     loadJsonImpl(ctx, j);
   }
-  void getCommitedPols(CommitPolsStarks *commitPols, const std::string zkevmVerifier, const std::string execFile, nlohmann::json &zkin, uint64_t N)
+  void getCommitedPols(CommitPolsStarks *commitPols, const std::string zkevmVerifier, const std::string execFile, nlohmann::json &zkin, uint64_t N, uint64_t nCols)
   {
     //-------------------------------------------
     // Verifier stark proof
     //-------------------------------------------
-    TimerStart(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_2);
+    TimerStart(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_RECURSIVE2);
     Circom_Circuit *circuit = loadCircuit(zkevmVerifier);
-    TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_2);
+    TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_BATCH_PROOF_RECURSIVE2);
     TimerStart(CIRCOM_LOAD_JSON_BATCH_PROOF);
     Circom_CalcWit *ctx = new Circom_CalcWit(circuit);
 
@@ -339,7 +339,7 @@ namespace CircomRecursive2
     //-------------------------------------------
     TimerStart(STARK_WITNESS_AND_COMMITED_POLS_BATCH_PROOF);
 
-    ExecFile exec(execFile);
+    ExecFile exec(execFile, nCols);
     uint64_t sizeWitness = get_size_of_witness();
     Goldilocks::Element *tmp = new Goldilocks::Element[exec.nAdds + sizeWitness];
     for (uint64_t i = 0; i < sizeWitness; i++)
@@ -368,10 +368,10 @@ namespace CircomRecursive2
     // #pragma omp parallel for
     for (uint i = 0; i < exec.nSMap; i++)
     {
-      for (uint j = 0; j < 12; j++)
+      for (uint j = 0; j < nCols; j++)
       {
         FrGElement aux;
-        FrG_toLongNormal(&aux, &exec.p_sMap[12 * i + j]);
+        FrG_toLongNormal(&aux, &exec.p_sMap[nCols * i + j]);
         uint64_t idx_1 = aux.longVal[0];
         if (idx_1 != 0)
         {
@@ -386,7 +386,7 @@ namespace CircomRecursive2
     }
     for (uint i = exec.nSMap; i < N; i++)
     {
-      for (uint j = 0; j < 12; j++)
+      for (uint j = 0; j < nCols; j++)
       {
         commitPols->Compressor.a[j][i] = Goldilocks::zero();
       }

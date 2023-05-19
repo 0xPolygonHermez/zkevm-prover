@@ -114,28 +114,28 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
 
     // Parse public inputs
 
-    string auxString;
-
-    auxString = ba2string(genBatchProofRequest.input().public_inputs().old_state_root());
-    if (auxString.size() > 64)
+    // Get oldStateRoot
+    if (genBatchProofRequest.input().public_inputs().old_state_root().size() > 32)
     {
-        zklog.error("AggregatorClient::GenProof() got oldStateRoot too long, size=" + to_string(auxString.size()));
+        zklog.error("AggregatorClient::GenProof() got oldStateRoot too long, size=" + to_string(genBatchProofRequest.input().public_inputs().old_state_root().size()));
         genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
-    pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot.set_str(auxString, 16);
+    ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot, genBatchProofRequest.input().public_inputs().old_state_root());
 
-    auxString = ba2string(genBatchProofRequest.input().public_inputs().old_acc_input_hash());
-    if (auxString.size() > 64)
+    // Get oldAccInputHash
+    if (genBatchProofRequest.input().public_inputs().old_acc_input_hash().size() > 32)
     {
-        zklog.error("AggregatorClient::GenProof() got oldAccInputHash too long, size=" + to_string(auxString.size()));
+        zklog.error("AggregatorClient::GenProof() got oldAccInputHash too long, size=" + to_string(genBatchProofRequest.input().public_inputs().old_acc_input_hash().size()));
         genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
-    pProverRequest->input.publicInputsExtended.publicInputs.oldAccInputHash.set_str(auxString, 16);
+    ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.oldAccInputHash, genBatchProofRequest.input().public_inputs().old_acc_input_hash());
 
+    // Get oldBatchNum
     pProverRequest->input.publicInputsExtended.publicInputs.oldBatchNum = genBatchProofRequest.input().public_inputs().old_batch_num();
 
+    // Get chain ID
     pProverRequest->input.publicInputsExtended.publicInputs.chainID = genBatchProofRequest.input().public_inputs().chain_id();
     if (pProverRequest->input.publicInputsExtended.publicInputs.chainID == 0)
     {
@@ -144,8 +144,8 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
         return false;
     }
 
+    // Get fork ID
     pProverRequest->input.publicInputsExtended.publicInputs.forkID = genBatchProofRequest.input().public_inputs().fork_id();
-
     if (pProverRequest->input.publicInputsExtended.publicInputs.forkID != PROVER_FORK_ID)
     {
         zklog.error("AggregatorClient::GenProof() got an invalid prover ID=" + to_string(pProverRequest->input.publicInputsExtended.publicInputs.forkID) + " different from expected=" + to_string(PROVER_FORK_ID));
@@ -162,14 +162,16 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
         return false;
     }
 
-    pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data = genBatchProofRequest.input().public_inputs().batch_l2_data();
-    if (pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data.size() > MAX_BATCH_L2_DATA_SIZE)
+    // Get batch L2 data
+    if (genBatchProofRequest.input().public_inputs().batch_l2_data().size() > MAX_BATCH_L2_DATA_SIZE)
     {
-        zklog.error("AggregatorClient::GenProof() found batchL2Data.size()=" + to_string(pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data.size()) + " > MAX_BATCH_L2_DATA_SIZE=" + to_string(MAX_BATCH_L2_DATA_SIZE));
+        zklog.error("AggregatorClient::GenProof() found batchL2Data.size()=" + to_string(genBatchProofRequest.input().public_inputs().batch_l2_data().size()) + " > MAX_BATCH_L2_DATA_SIZE=" + to_string(MAX_BATCH_L2_DATA_SIZE));
         genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
+    pProverRequest->input.publicInputsExtended.publicInputs.batchL2Data = genBatchProofRequest.input().public_inputs().batch_l2_data();
 
+    // Get global exit root
     if (genBatchProofRequest.input().public_inputs().global_exit_root().size() > 32)
     {
         zklog.error("AggregatorClient::GenProof() got globalExitRoot too long, size=" + to_string(genBatchProofRequest.input().public_inputs().global_exit_root().size()));
@@ -178,17 +180,26 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
     }
     ba2scalar(pProverRequest->input.publicInputsExtended.publicInputs.globalExitRoot, genBatchProofRequest.input().public_inputs().global_exit_root());
 
+    // Get timestamp
     pProverRequest->input.publicInputsExtended.publicInputs.timestamp = genBatchProofRequest.input().public_inputs().eth_timestamp();
 
-    auxString = Remove0xIfPresent(genBatchProofRequest.input().public_inputs().sequencer_addr());
+    // Get sequencer address
+    string auxString = Remove0xIfPresent(genBatchProofRequest.input().public_inputs().sequencer_addr());
     if (auxString.size() > 40)
     {
         zklog.error("AggregatorClient::GenProof() got sequencerAddr too long, size=" + to_string(auxString.size()));
         genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
+    if (!stringIsHex(auxString))
+    {
+        zklog.error("AggregatorClient::GenProof() got sequencer address not hex, sequencer_addr=" + auxString);
+        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return false;
+    }
     pProverRequest->input.publicInputsExtended.publicInputs.sequencerAddr.set_str(auxString, 16);
 
+    // Get aggregator address
     auxString = Remove0xIfPresent(genBatchProofRequest.input().public_inputs().aggregator_addr());
     if (auxString.size() > 40)
     {
@@ -196,22 +207,46 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
         genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
         return false;
     }
+    if (!stringIsHex(auxString))
+    {
+        zklog.error("AggregatorClient::GenProof() got aggregator address not hex, sequencer_addr=" + auxString);
+        genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+        return false;
+    }
     pProverRequest->input.publicInputsExtended.publicInputs.aggregatorAddress.set_str(auxString, 16);
 
     // Parse keys map
-    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > db;
-    db = genBatchProofRequest.input().db();
-    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >::iterator it;
+    const google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > &db = genBatchProofRequest.input().db();
+    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >::const_iterator it;
+    string key;
     for (it=db.begin(); it!=db.end(); it++)
     {
-        if (it->first.size() > (64))
+        // Get key
+        key = it->first;
+        Remove0xIfPresentNoCopy(key);
+        if (key.size() > 64)
         {
-            zklog.error("AggregatorClient::GenBatchProof() got db key too long, size=" + to_string(it->first.size()));
+            zklog.error("AggregatorClient::GenBatchProof() got db key too long, size=" + to_string(key.size()));
             genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
             return false;
         }
+        if (!stringIsHex(key))
+        {
+            zklog.error("AggregatorClient::GenBatchProof() got db key not hex, key=" + key);
+            genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+            return false;
+        }
+        PrependZerosNoCopy(key, 64);
+
+        // Get value
         vector<Goldilocks::Element> dbValue;
         string concatenatedValues = it->second;
+        if (!stringIsHex(concatenatedValues))
+        {
+            zklog.error("AggregatorClient::GenBatchProof() found db value not hex: " + concatenatedValues);
+            genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+            return false;
+        }
         if (concatenatedValues.size()%16!=0)
         {
             zklog.error("AggregatorClient::GenBatchProof() found invalid db value size: " + to_string(concatenatedValues.size()));
@@ -224,27 +259,49 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
             string2fe(fr, concatenatedValues.substr(i, 16), fe);
             dbValue.push_back(fe);
         }
-        pProverRequest->input.db[it->first] = dbValue;
+        
+        // Save key-value
+        pProverRequest->input.db[key] = dbValue;
     }
 
     // Parse contracts data
-    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > contractsBytecode;
-    contractsBytecode = genBatchProofRequest.input().contracts_bytecode();
-    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >::iterator itp;
+    const google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> > &contractsBytecode = genBatchProofRequest.input().contracts_bytecode();
+    google::protobuf::Map<std::__cxx11::basic_string<char>, std::__cxx11::basic_string<char> >::const_iterator itp;
     for (itp=contractsBytecode.begin(); itp!=contractsBytecode.end(); itp++)
     {
-        /*if (it->first.size() != (2+64))
+        // Get key
+        key = itp->first;
+        Remove0xIfPresentNoCopy(key);
+        if (key.size() > (64))
         {
-            zklog.error("ZKProverServiceImpl::GenProof() got contracts bytecode key too long, size=" + to_string(it->first.size()));
-            return Status::CANCELLED;
-        }*/
+            zklog.error("AggregatorClient::GenBatchProof() got contracts key too long, size=" + to_string(key.size()));
+            genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+            return false;
+        }
+        if (!stringIsHex(key))
+        {
+            zklog.error("AggregatorClient::GenBatchProof() got contracts key not hex, key=" + key);
+            genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+            return false;
+        }
+        PrependZerosNoCopy(key, 64);
+        
+        // Get value
+        if (!stringIsHex(itp->second))
+        {
+            zklog.error("AggregatorClient::GenBatchProof() got contracts value not hex, value=" + itp->second);
+            genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
+            return false;
+        }
         vector<uint8_t> dbValue;
         string contractValue = string2ba(itp->second);
         for (uint64_t i=0; i<contractValue.size(); i++)
         {
             dbValue.push_back(contractValue.at(i));
         }
-        pProverRequest->input.contractsBytecode[itp->first] = dbValue;
+
+        // Save key-value
+        pProverRequest->input.contractsBytecode[key] = dbValue;
     }
 
     // Submit the prover request
