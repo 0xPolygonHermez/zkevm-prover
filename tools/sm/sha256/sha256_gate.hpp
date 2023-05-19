@@ -1,6 +1,7 @@
 #ifndef SHA256_GATE_HPP
 #define SHA256_GATE_HPP
 
+#include <cstdint>
 #include <string>
 
 using namespace std;
