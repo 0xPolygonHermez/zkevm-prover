@@ -241,6 +241,7 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
         // Get value
         vector<Goldilocks::Element> dbValue;
         string concatenatedValues = it->second;
+        if (!stringIsHex(concatenatedValues))
         {
             zklog.error("AggregatorClient::GenBatchProof() found db value not hex: " + concatenatedValues);
             genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
