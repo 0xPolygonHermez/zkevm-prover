@@ -124,6 +124,8 @@ void eval_memAlignWR8_W0      (Context &ctx, const RomCommand &cmd, CommandResul
 
 zkresult eval_addReadWriteAddress (Context &ctx, const mpz_class value);
 
+mpz_class sqrtTonelliShanks ( const mpz_class &n, const mpz_class &p );
+
 } // namespace
 
 #endif
