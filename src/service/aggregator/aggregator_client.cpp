@@ -547,9 +547,18 @@ void* aggregatorClientThread(void* arg)
     string uuid;
     AggregatorClient *pAggregatorClient = (AggregatorClient *)arg;
     Watchdog watchdog;
+    uint64_t numberOfStreams = 0;
 
     while (true)
     {
+        // Control the number of streams does not exceed the maximum
+        if ((pAggregatorClient->config.aggregatorClientMaxStreams > 0) && (numberOfStreams > pAggregatorClient->config.aggregatorClientMaxStreams))
+        {
+            zklog.info("aggregatorClientThread() killing process since we reached the maximum number of streams=" + to_string(pAggregatorClient->config.aggregatorClientMaxStreams));
+            exitProcess();
+        }
+        numberOfStreams++;
+
         ::grpc::ClientContext context;
 
         std::unique_ptr<grpc::ClientReaderWriter<aggregator::v1::ProverMessage, aggregator::v1::AggregatorMessage>> readerWriter;
