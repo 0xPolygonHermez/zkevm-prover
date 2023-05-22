@@ -523,10 +523,6 @@ void eval_mul(Context &ctx, const RomCommand &cmd, CommandResult &cr)
     mpz_class b;
     cr2scalar(ctx, cr, b);
 
-    mpz_class mask256;
-    mpz_class one(1);
-    mask256 = (one << 256) - one;
-
     cr.type = crt_scalar;
     cr.scalar = a * b;
 }
@@ -2281,7 +2277,7 @@ void eval_sqrtFpEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     RawFec::Element pfe = ctx.fec.negOne();
     mpz_class p;
-    ctx.fec.toMpz(p.get_mpz_t(), pfe);
+    ctx.fec.toMpz(p.get_mpz_t(), pfe); // TODO: Avoid converting evry time, create a global value
     p++;
     mpz_class a = cr.scalar;
     cr.type = crt_scalar;
