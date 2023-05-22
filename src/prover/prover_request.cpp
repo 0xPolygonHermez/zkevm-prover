@@ -16,6 +16,8 @@ ProverRequest::ProverRequest (Goldilocks &fr, const Config &config, tProverReque
     endTime(0),
     type(type),
     input(fr),
+    flushId(0),
+    lastSentFlushId(0),
     dbReadLog(NULL),
     pFullTracer(NULL),
     bCompleted(false),

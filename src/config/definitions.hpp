@@ -48,7 +48,8 @@
 //#define LOG_HASH
 //#define LOG_DB_READ
 //#define LOG_DB_WRITE
-//#define LOG_STATEDB_SERVICE
+//#define LOG_DB_SENDER_THREAD
+//#define LOG_HASHDB_SERVICE
 //#define LOG_FULL_TRACER
 #define LOG_FULL_TRACER_ON_ERROR
 //#define LOG_TX_HASH
@@ -58,8 +59,8 @@
 //#define PROVER_USE_PROOF_GOOD_JSON
 //#define PROVER_INJECT_ZKIN_JSON
 
-/* State DB*/
-//#define STATEDB_LOCK // If defined, the StateDB class will use a lock in all its methods, i.e. they will be serialized
+/* Hash DB*/
+//#define HASHDB_LOCK // If defined, the HashDB class will use a lock in all its methods, i.e. they will be serialized
 //#define DATABASE_COMMIT // If defined, the Database class can be configured to autocommit, or explicitly commit(); used for testing only
 #define DATABASE_USE_CACHE // If defined, the Database class uses a cache
 

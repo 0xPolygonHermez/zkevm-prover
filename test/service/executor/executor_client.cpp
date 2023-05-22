@@ -129,6 +129,8 @@ bool ExecutorClient::ProcessBatch (void)
         (*request.mutable_contracts_bytecode())[key] = value;
     }
 
+    ::executor::v1::ProcessBatchResponse processBatchResponse;
+
     for (uint64_t i=0; i<config.executorClientLoops; i++)
     {
         if (i == 1)
@@ -137,8 +139,7 @@ bool ExecutorClient::ProcessBatch (void)
             request.clear_contracts_bytecode();
         }
         ::grpc::ClientContext context;
-        ::executor::v1::ProcessBatchResponse response;
-        ::grpc::Status grpcStatus = stub->ProcessBatch(&context, request, &response);
+        ::grpc::Status grpcStatus = stub->ProcessBatch(&context, request, &processBatchResponse);
         if (grpcStatus.error_code() != grpc::StatusCode::OK)
         {
             cerr << "Error: ExecutorClient::ProcessBatch() failed calling server i=" << i << endl;
@@ -148,6 +149,25 @@ bool ExecutorClient::ProcessBatch (void)
 #ifdef LOG_SERVICE
         cout << "ExecutorClient::ProcessBatch() got:\n" << response.DebugString() << endl;
 #endif
+    }
+
+    if (processBatchResponse.stored_flush_id() != processBatchResponse.flush_id())
+    {
+        executor::v1::GetFlushStatusResponse getFlushStatusResponse;
+        do
+        {
+            sleep(1);
+            google::protobuf::Empty request;
+            ::grpc::ClientContext context;
+            ::grpc::Status grpcStatus = stub->GetFlushStatus(&context, request, &getFlushStatusResponse);
+            if (grpcStatus.error_code() != grpc::StatusCode::OK)
+            {
+                cerr << "Error: ExecutorClient::ProcessBatch() failed calling GetFlushStatus()" << endl;
+                break;
+            }
+        } while (getFlushStatusResponse.stored_flush_id() < processBatchResponse.flush_id());
+        zklog.info("ExecutorClient::ProcessBatch() successfully stored returned flush id=" + to_string(processBatchResponse.flush_id()));
+        
     }
 
     TimerStopAndLog(EXECUTOR_CLIENT_PROCESS_BATCH);

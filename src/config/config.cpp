@@ -26,13 +26,13 @@ void Config::load(json &config)
     if (config.contains("runExecutorClientMultithread") && config["runExecutorClientMultithread"].is_boolean())
         runExecutorClientMultithread = config["runExecutorClientMultithread"];
 
-    runStateDBServer = false;
-    if (config.contains("runStateDBServer") && config["runStateDBServer"].is_boolean())
-        runStateDBServer = config["runStateDBServer"];
+    runHashDBServer = false;
+    if (config.contains("runHashDBServer") && config["runHashDBServer"].is_boolean())
+        runHashDBServer = config["runHashDBServer"];
 
-    runStateDBTest = false;
-    if (config.contains("runStateDBTest") && config["runStateDBTest"].is_boolean())
-        runStateDBTest = config["runStateDBTest"];
+    runHashDBTest = false;
+    if (config.contains("runHashDBTest") && config["runHashDBTest"].is_boolean())
+        runHashDBTest = config["runHashDBTest"];
 
     runAggregatorServer = false;
     if (config.contains("runAggregatorServer") && config["runAggregatorServer"].is_boolean())
@@ -99,6 +99,10 @@ void Config::load(json &config)
     runBlakeTest = false;
     if (config.contains("runBlakeTest") && config["runBlakeTest"].is_boolean())
         runBlakeTest = config["runBlakeTest"];
+
+    runECRecoverTest = false;
+    if (config.contains("runECRecoverTest") && config["runECRecoverTest"].is_boolean())
+        runECRecoverTest = config["runECRecoverTest"];
 
     useMainExecGenerated = false;
     if (config.contains("useMainExecGenerated") && config["useMainExecGenerated"].is_boolean())
@@ -212,13 +216,17 @@ void Config::load(json &config)
     if (config.contains("executorClientLoops") && config["executorClientLoops"].is_number())
         executorClientLoops = config["executorClientLoops"];
 
-    stateDBServerPort = 50061;
-    if (config.contains("stateDBServerPort") && config["stateDBServerPort"].is_number())
-        stateDBServerPort = config["stateDBServerPort"];
+    hashDBServerPort = 50061;
+    if (config.contains("hashDBServerPort") && config["hashDBServerPort"].is_number())
+        hashDBServerPort = config["hashDBServerPort"];
 
-    stateDBURL = "local";
-    if (config.contains("stateDBURL") && config["stateDBURL"].is_string())
-        stateDBURL = config["stateDBURL"];
+    hashDBURL = "local";
+    if (config.contains("hashDBURL") && config["hashDBURL"].is_string())
+        hashDBURL = config["hashDBURL"];
+
+    dbCacheSynchURL = "";
+    if (config.contains("dbCacheSynchURL") && config["dbCacheSynchURL"].is_string())
+        dbCacheSynchURL = config["dbCacheSynchURL"];
 
     aggregatorServerPort = 50071;
     if (config.contains("aggregatorServerPort") && config["aggregatorServerPort"].is_number())
@@ -239,6 +247,10 @@ void Config::load(json &config)
     aggregatorClientWatchdogTimeout = 60 * 1000 * 1000;
     if (config.contains("aggregatorClientWatchdogTimeout") && config["aggregatorClientWatchdogTimeout"].is_number())
         aggregatorClientWatchdogTimeout = config["aggregatorClientWatchdogTimeout"];
+
+    aggregatorClientMaxStreams = 0;
+    if (config.contains("aggregatorClientMaxStreams") && config["aggregatorClientMaxStreams"].is_number())
+        aggregatorClientMaxStreams = config["aggregatorClientMaxStreams"];
 
     if (config.contains("inputFile") && config["inputFile"].is_string())
         inputFile = config["inputFile"];
@@ -408,9 +420,6 @@ void Config::load(json &config)
     if (config.contains("recursivefStarkInfo") && config["recursivefStarkInfo"].is_string())
         recursivefStarkInfo = config["recursivefStarkInfo"];
 
-    if (config.contains("stateDBURL") && config["stateDBURL"].is_string())
-        stateDBURL = config["stateDBURL"];
-
     if (config.contains("databaseURL") && config["databaseURL"].is_string())
         databaseURL = config["databaseURL"];
 
@@ -423,10 +432,6 @@ void Config::load(json &config)
     dbMultiWrite = false;
     if (config.contains("dbMultiWrite") && config["dbMultiWrite"].is_boolean())
         dbMultiWrite = config["dbMultiWrite"];
-
-    dbFlushInParallel = false;
-    if (config.contains("dbFlushInParallel") && config["dbFlushInParallel"].is_boolean())
-        dbFlushInParallel = config["dbFlushInParallel"];
 
     dbConnectionsPool = false;
     if (config.contains("dbConnectionsPool") && config["dbConnectionsPool"].is_boolean())
@@ -470,9 +475,9 @@ void Config::load(json &config)
     if (config.contains("maxProverThreads") && config["maxProverThreads"].is_number())
         maxProverThreads = config["maxProverThreads"];
 
-    maxStateDBThreads = 16;
-    if (config.contains("maxStateDBThreads") && config["maxStateDBThreads"].is_number())
-        maxStateDBThreads = config["maxStateDBThreads"];
+    maxHashDBThreads = 16;
+    if (config.contains("maxHashDBThreads") && config["maxHashDBThreads"].is_number())
+        maxHashDBThreads = config["maxHashDBThreads"];
 
     proverName = "UNSPECIFIED";
     if (config.contains("proverName") && config["proverName"].is_string())
@@ -492,10 +497,10 @@ void Config::print(void)
         zklog.info("    runExecutorClient=true");
     if (runExecutorClientMultithread)
         zklog.info("    runExecutorClientMultithread=true");
-    if (runStateDBServer)
-        zklog.info("    runStateDBServer=true");
-    if (runStateDBTest)
-        zklog.info("    runStateDBTest=true");
+    if (runHashDBServer)
+        zklog.info("    runHashDBServer=true");
+    if (runHashDBTest)
+        zklog.info("    runHashDBTest=true");
     if (runAggregatorServer)
         zklog.info("    runAggregatorServer=true");
     if (runAggregatorClient)
@@ -529,6 +534,8 @@ void Config::print(void)
         zklog.info("    runSHA256Test=true");
     if (runBlakeTest)
         zklog.info("    runBlakeTest=true");
+    if (runECRecoverTest)
+        zklog.info("    runECRecoverTest=true");
 
     if (executeInParallel)
         zklog.info("    executeInParallel=true");
@@ -578,12 +585,15 @@ void Config::print(void)
     zklog.info("    executorClientPort=" + to_string(executorClientPort));
     zklog.info("    executorClientHost=" + executorClientHost);
     zklog.info("    executorClientLoops=" + to_string(executorClientLoops));
-    zklog.info("    stateDBServerPort=" + to_string(stateDBServerPort));
-    zklog.info("    stateDBURL=" + stateDBURL);
+    zklog.info("    hashDBServerPort=" + to_string(hashDBServerPort));
+    zklog.info("    hashDBURL=" + hashDBURL);
+    zklog.info("    dbCacheSynchURL=" + dbCacheSynchURL);
     zklog.info("    aggregatorServerPort=" + to_string(aggregatorServerPort));
     zklog.info("    aggregatorClientPort=" + to_string(aggregatorClientPort));
     zklog.info("    aggregatorClientHost=" + aggregatorClientHost);
     zklog.info("    aggregatorClientMockTimeout=" + to_string(aggregatorClientMockTimeout));
+    zklog.info("    aggregatorClientWatchdogTimeout=" + to_string(aggregatorClientWatchdogTimeout));
+    zklog.info("    aggregatorClientMaxStreams=" + to_string(aggregatorClientMaxStreams));
 
     zklog.info("    inputFile=" + inputFile);
     zklog.info("    inputFile2=" + inputFile2);
@@ -621,7 +631,6 @@ void Config::print(void)
     zklog.info("    dbNodesTableName=" + dbNodesTableName);
     zklog.info("    dbProgramTableName=" + dbProgramTableName);
     zklog.info("    dbMultiWrite=" + to_string(dbMultiWrite));
-    zklog.info("    dbFlushInParallel=" + to_string(dbFlushInParallel));
     zklog.info("    dbConnectionsPool=" + to_string(dbConnectionsPool));
     zklog.info("    dbNumberOfPoolConnections=" + to_string(dbNumberOfPoolConnections));
     zklog.info("    dbMetrics=" + to_string(dbMetrics));
@@ -633,7 +642,7 @@ void Config::print(void)
     zklog.info("    requestsPersistence=" + to_string(requestsPersistence));
     zklog.info("    maxExecutorThreads=" + to_string(maxExecutorThreads));
     zklog.info("    maxProverThreads=" + to_string(maxProverThreads));
-    zklog.info("    maxStateDBThreads=" + to_string(maxStateDBThreads));
+    zklog.info("    maxHashDBThreads=" + to_string(maxHashDBThreads));
     zklog.info("    dbMTCacheSize=" + to_string(dbMTCacheSize));
     zklog.info("    dbProgramCacheSize=" + to_string(dbProgramCacheSize));
     zklog.info("    loadDBToMemTimeout=" + to_string(loadDBToMemTimeout));

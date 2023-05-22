@@ -17,8 +17,8 @@ public:
     bool runExecutorServer;
     bool runExecutorClient;
     bool runExecutorClientMultithread;
-    bool runStateDBServer;
-    bool runStateDBTest;
+    bool runHashDBServer;
+    bool runHashDBTest;
     bool runAggregatorServer;
     bool runAggregatorClient;
     bool runAggregatorClientMock;    
@@ -37,6 +37,7 @@ public:
     bool runMemAlignSMTest;
     bool runSHA256Test;
     bool runBlakeTest;
+    bool runECRecoverTest;
     
     bool executeInParallel;
     bool useMainExecGenerated;
@@ -70,14 +71,16 @@ public:
     string executorClientHost;
     uint64_t executorClientLoops;
 
-    uint16_t stateDBServerPort;
-    string stateDBURL;
+    uint16_t hashDBServerPort;
+    string hashDBURL;
+    string dbCacheSynchURL;
 
     uint16_t aggregatorServerPort;
     uint16_t aggregatorClientPort;
     string aggregatorClientHost;
     uint64_t aggregatorClientMockTimeout;
     uint64_t aggregatorClientWatchdogTimeout;
+    uint64_t aggregatorClientMaxStreams; // Max number of streams, used to limit E2E test execution; if 0 then there is no limit
 
     string inputFile;
     string inputFile2; // Used as the second input in genAggregatedProof
@@ -127,7 +130,6 @@ public:
     string dbNodesTableName;
     string dbProgramTableName;
     bool dbMultiWrite;
-    bool dbFlushInParallel;
     bool dbConnectionsPool;
     uint64_t dbNumberOfPoolConnections;
     bool dbMetrics;
@@ -139,7 +141,7 @@ public:
     uint64_t requestsPersistence;
     uint64_t maxExecutorThreads;
     uint64_t maxProverThreads;
-    uint64_t maxStateDBThreads;
+    uint64_t maxHashDBThreads;
     string proverName;
     void load(json &config);
     bool generateProof(void) const { return runFileGenBatchProof || runFileGenAggregatedProof || runFileGenFinalProof || runAggregatorClient; }

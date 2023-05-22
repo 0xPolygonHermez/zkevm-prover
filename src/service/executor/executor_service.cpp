@@ -313,6 +313,9 @@ using grpc::Status;
     response->set_new_state_root(string2ba(proverRequest.pFullTracer->get_new_state_root()));
     response->set_new_acc_input_hash(string2ba(proverRequest.pFullTracer->get_new_acc_input_hash()));
     response->set_new_local_exit_root(string2ba(proverRequest.pFullTracer->get_new_local_exit_root()));
+    response->set_flush_id(proverRequest.flushId);
+    response->set_stored_flush_id(proverRequest.lastSentFlushId);
+    response->set_prover_id(config.proverID);
     
     unordered_map<string, InfoReadWrite> * p_read_write_addresses = proverRequest.pFullTracer->get_read_write_addresses();
     if (p_read_write_addresses != NULL)
@@ -451,7 +454,9 @@ using grpc::Status;
             " counters.memAlign=" + to_string(proverRequest.counters.memAlign) +
             " counters.arith=" + to_string(proverRequest.counters.arith) +
             " counters.binary=" + to_string(proverRequest.counters.binary) +
-             " nTxs=" + to_string(responses.size());
+            " flush_id=" + to_string(proverRequest.flushId) +
+            " last_sent_flush_id=" + to_string(proverRequest.lastSentFlushId) +
+            " nTxs=" + to_string(responses.size());
          if (config.logExecutorServerTxs)
          {
             for (uint64_t tx=0; tx<responses.size(); tx++)
@@ -573,6 +578,31 @@ using grpc::Status;
     return Status::OK;
 }
 
+::grpc::Status ExecutorServiceImpl::GetFlushStatus (::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::executor::v1::GetFlushStatusResponse* response)
+{
+    uint64_t storedFlushId;
+    uint64_t storingFlushId;
+    uint64_t lastFlushId;
+    uint64_t pendingToFlushNodes;
+    uint64_t pendingToFlushProgram;
+    uint64_t storingNodes;
+    uint64_t storingProgram;
+    string proverId;
+
+    pHashDB->getFlushStatus(storedFlushId, storingFlushId, lastFlushId, pendingToFlushNodes, pendingToFlushProgram, storingNodes, storingProgram, proverId);
+    
+    response->set_stored_flush_id(storedFlushId);
+    response->set_storing_flush_id(storingFlushId);
+    response->set_last_flush_id(lastFlushId);
+    response->set_pending_to_flush_nodes(pendingToFlushNodes);
+    response->set_pending_to_flush_program(pendingToFlushProgram);
+    response->set_storing_nodes(storingNodes);
+    response->set_storing_program(storingProgram);
+    response->set_prover_id(proverId);
+
+    return Status::OK;
+}
+
 #ifdef PROCESS_BATCH_STREAM
 
 ::grpc::Status ExecutorServiceImpl::ProcessBatchStream (::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::executor::v1::ProcessBatchResponse, ::executor::v1::ProcessBatchRequest>* stream)
@@ -674,5 +704,6 @@ using grpc::Status;
     if (result == ZKR_SM_MAIN_INVALID_FORK_ID ) return ::executor::v1::EXECUTOR_ERROR_UNSUPPORTED_FORK_ID;
     if (result == ZKR_SM_MAIN_BALANCE_MISMATCH) return ::executor::v1::EXECUTOR_ERROR_BALANCE_MISMATCH;
     if (result == ZKR_SM_MAIN_FEA2SCALAR      ) return ::executor::v1::EXECUTOR_ERROR_FEA2SCALAR;
+    if (result == ZKR_SM_MAIN_TOS32           ) return ::executor::v1::EXECUTOR_ERROR_TOS32;
     return ::executor::v1::EXECUTOR_ERROR_UNSPECIFIED;
 }

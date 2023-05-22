@@ -9,7 +9,7 @@
 #include "main_sm/fork_0/pols_generated/commit_pols.hpp"
 #include "main_sm/fork_0/main/main_exec_required.hpp"
 #include "scalar.hpp"
-#include "statedb_factory.hpp"
+#include "hashdb_factory.hpp"
 #include "poseidon_goldilocks.hpp"
 #include "counters.hpp"
 #include "sm/storage/smt_action.hpp"

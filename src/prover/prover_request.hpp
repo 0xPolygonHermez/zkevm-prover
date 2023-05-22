@@ -36,6 +36,10 @@ public:
     /* Input batch L2 data for processBatch, genProof and genBatchProof; */
     Input input;
 
+    /* Flush ID and last sent flush ID, to track when data reaches DB, i.e. batch trusted state */
+    uint64_t  flushId;
+    uint64_t  lastSentFlushId;
+
     /* genBatchProof output */
     nlohmann::ordered_json batchProofOutput;
 

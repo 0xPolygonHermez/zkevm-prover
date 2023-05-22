@@ -1928,10 +1928,10 @@ void eval_getBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
         // Get the contract from the database
         vector<uint8_t> bytecode;
-        zkresult zkResult = ctx.pStateDB->getProgram(key, bytecode, ctx.proverRequest.dbReadLog);
+        zkresult zkResult = ctx.pHashDB->getProgram(key, bytecode, ctx.proverRequest.dbReadLog);
         if (zkResult != ZKR_SUCCESS)
         {
-            cerr << "Error: eval_getBytecode() failed calling ctx.pStateDB->getProgram() with key=" << contractHash << " zkResult=" << zkResult << "=" << zkresult2string(zkResult) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+            cerr << "Error: eval_getBytecode() failed calling ctx.pHashDB->getProgram() with key=" << contractHash << " zkResult=" << zkResult << "=" << zkresult2string(zkResult) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
             cr.type = crt_fea;
             cr.fea0 = ctx.fr.zero();
             cr.fea1 = ctx.fr.zero();
