@@ -80,6 +80,7 @@ public:
     string aggregatorClientHost;
     uint64_t aggregatorClientMockTimeout;
     uint64_t aggregatorClientWatchdogTimeout;
+    uint64_t aggregatorClientMaxStreams; // Max number of streams, used to limit E2E test execution; if 0 then there is no limit
 
     string inputFile;
     string inputFile2; // Used as the second input in genAggregatedProof

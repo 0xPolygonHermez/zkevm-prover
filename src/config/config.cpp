@@ -248,6 +248,10 @@ void Config::load(json &config)
     if (config.contains("aggregatorClientWatchdogTimeout") && config["aggregatorClientWatchdogTimeout"].is_number())
         aggregatorClientWatchdogTimeout = config["aggregatorClientWatchdogTimeout"];
 
+    aggregatorClientMaxStreams = 0;
+    if (config.contains("aggregatorClientMaxStreams") && config["aggregatorClientMaxStreams"].is_number())
+        aggregatorClientMaxStreams = config["aggregatorClientMaxStreams"];
+
     if (config.contains("inputFile") && config["inputFile"].is_string())
         inputFile = config["inputFile"];
     if (config.contains("inputFile2") && config["inputFile2"].is_string())
@@ -588,6 +592,8 @@ void Config::print(void)
     zklog.info("    aggregatorClientPort=" + to_string(aggregatorClientPort));
     zklog.info("    aggregatorClientHost=" + aggregatorClientHost);
     zklog.info("    aggregatorClientMockTimeout=" + to_string(aggregatorClientMockTimeout));
+    zklog.info("    aggregatorClientWatchdogTimeout=" + to_string(aggregatorClientWatchdogTimeout));
+    zklog.info("    aggregatorClientMaxStreams=" + to_string(aggregatorClientMaxStreams));
 
     zklog.info("    inputFile=" + inputFile);
     zklog.info("    inputFile2=" + inputFile2);

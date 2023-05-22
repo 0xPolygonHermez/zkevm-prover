@@ -154,7 +154,7 @@ void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInp
     Polinomial xDivXSubWXi(NExtended, FIELD_EXTENSION);
     Polinomial challenges(NUM_CHALLENGES, FIELD_EXTENSION);
 
-    CommitPolsStarks cmPols(pAddress, starkInfo.mapDeg.section[eSection::cm1_n]);
+    CommitPolsStarks cmPols(pAddress, starkInfo.mapDeg.section[eSection::cm1_n], numCommited);
 
     RawFr::Element root0;
     RawFr::Element root1;
@@ -223,12 +223,11 @@ void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInp
     {
         Polinomial fPol = starkInfo.getPolinomial(mem, starkInfo.exp2pol[to_string(starkInfo.puCtx[i].fExpId)]);
         Polinomial tPol = starkInfo.getPolinomial(mem, starkInfo.exp2pol[to_string(starkInfo.puCtx[i].tExpId)]);
-        Polinomial h1 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited + i * 2]);
-        Polinomial h2 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited + i * 2 + 1]);
+        Polinomial h1 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited++]);
+        Polinomial h2 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited++]);
 
         Polinomial::calculateH1H2(h1, h2, fPol, tPol);
     }
-    numCommited = numCommited + starkInfo.puCtx.size() * 2;
     TimerStopAndLog(STARK_RECURSIVE_F_STEP_2_CALCULATEH1H2);
 
     TimerStart(STARK_RECURSIVE_F_STEP_2_LDE_AND_MERKLETREE);

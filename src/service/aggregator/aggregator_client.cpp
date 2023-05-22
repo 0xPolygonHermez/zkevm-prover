@@ -241,6 +241,7 @@ bool AggregatorClient::GenBatchProof (const aggregator::v1::GenBatchProofRequest
         // Get value
         vector<Goldilocks::Element> dbValue;
         string concatenatedValues = it->second;
+        if (!stringIsHex(concatenatedValues))
         {
             zklog.error("AggregatorClient::GenBatchProof() found db value not hex: " + concatenatedValues);
             genBatchProofResponse.set_result(aggregator::v1::Result::RESULT_ERROR);
@@ -546,9 +547,18 @@ void* aggregatorClientThread(void* arg)
     string uuid;
     AggregatorClient *pAggregatorClient = (AggregatorClient *)arg;
     Watchdog watchdog;
+    uint64_t numberOfStreams = 0;
 
     while (true)
     {
+        // Control the number of streams does not exceed the maximum
+        if ((pAggregatorClient->config.aggregatorClientMaxStreams > 0) && (numberOfStreams >= pAggregatorClient->config.aggregatorClientMaxStreams))
+        {
+            zklog.info("aggregatorClientThread() killing process since we reached the maximum number of streams=" + to_string(pAggregatorClient->config.aggregatorClientMaxStreams));
+            exit(0);
+        }
+        numberOfStreams++;
+
         ::grpc::ClientContext context;
 
         std::unique_ptr<grpc::ClientReaderWriter<aggregator::v1::ProverMessage, aggregator::v1::AggregatorMessage>> readerWriter;

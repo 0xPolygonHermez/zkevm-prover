@@ -59,8 +59,8 @@
     "mapConstPolsFile": false,
     "mapConstantsTreeFile": false,
 
-    "inputFile": "testvectors/aggregatedProof/recursive2.zkin.proof_01.json",
-    "inputFile2": "testvectors/aggregatedProof/recursive2.zkin.proof_23.json",
+    "inputFile": "testvectors/aggregatedProof/recursive1.zkin.proof_0.json",
+    "inputFile2": "testvectors/aggregatedProof/recursive1.zkin.proof_1.json",
 
     "outputPath": "runtime/output",
     "configPath": "config",
