@@ -24,6 +24,7 @@ namespace v1 {
 
 static const char* ExecutorService_method_names[] = {
   "/executor.v1.ExecutorService/ProcessBatch",
+  "/executor.v1.ExecutorService/GetFlushStatus",
 };
 
 std::unique_ptr< ExecutorService::Stub> ExecutorService::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
@@ -34,6 +35,7 @@ std::unique_ptr< ExecutorService::Stub> ExecutorService::NewStub(const std::shar
 
 ExecutorService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel)
   : channel_(channel), rpcmethod_ProcessBatch_(ExecutorService_method_names[0], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_GetFlushStatus_(ExecutorService_method_names[1], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status ExecutorService::Stub::ProcessBatch(::grpc::ClientContext* context, const ::executor::v1::ProcessBatchRequest& request, ::executor::v1::ProcessBatchResponse* response) {
@@ -64,6 +66,34 @@ void ExecutorService::Stub::experimental_async::ProcessBatch(::grpc::ClientConte
   return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::executor::v1::ProcessBatchResponse>::Create(channel_.get(), cq, rpcmethod_ProcessBatch_, context, request, false);
 }
 
+::grpc::Status ExecutorService::Stub::GetFlushStatus(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::executor::v1::GetFlushStatusResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_GetFlushStatus_, context, request, response);
+}
+
+void ExecutorService::Stub::experimental_async::GetFlushStatus(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::executor::v1::GetFlushStatusResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_GetFlushStatus_, context, request, response, std::move(f));
+}
+
+void ExecutorService::Stub::experimental_async::GetFlushStatus(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::executor::v1::GetFlushStatusResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_GetFlushStatus_, context, request, response, std::move(f));
+}
+
+void ExecutorService::Stub::experimental_async::GetFlushStatus(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::executor::v1::GetFlushStatusResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_GetFlushStatus_, context, request, response, reactor);
+}
+
+void ExecutorService::Stub::experimental_async::GetFlushStatus(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::executor::v1::GetFlushStatusResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_GetFlushStatus_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::executor::v1::GetFlushStatusResponse>* ExecutorService::Stub::AsyncGetFlushStatusRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::executor::v1::GetFlushStatusResponse>::Create(channel_.get(), cq, rpcmethod_GetFlushStatus_, context, request, true);
+}
+
+::grpc::ClientAsyncResponseReader< ::executor::v1::GetFlushStatusResponse>* ExecutorService::Stub::PrepareAsyncGetFlushStatusRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::executor::v1::GetFlushStatusResponse>::Create(channel_.get(), cq, rpcmethod_GetFlushStatus_, context, request, false);
+}
+
 ExecutorService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       ExecutorService_method_names[0],
@@ -75,12 +105,29 @@ ExecutorService::Service::Service() {
              ::executor::v1::ProcessBatchResponse* resp) {
                return service->ProcessBatch(ctx, req, resp);
              }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      ExecutorService_method_names[1],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< ExecutorService::Service, ::google::protobuf::Empty, ::executor::v1::GetFlushStatusResponse>(
+          [](ExecutorService::Service* service,
+             ::grpc_impl::ServerContext* ctx,
+             const ::google::protobuf::Empty* req,
+             ::executor::v1::GetFlushStatusResponse* resp) {
+               return service->GetFlushStatus(ctx, req, resp);
+             }, this)));
 }
 
 ExecutorService::Service::~Service() {
 }
 
 ::grpc::Status ExecutorService::Service::ProcessBatch(::grpc::ServerContext* context, const ::executor::v1::ProcessBatchRequest* request, ::executor::v1::ProcessBatchResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status ExecutorService::Service::GetFlushStatus(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::executor::v1::GetFlushStatusResponse* response) {
   (void) context;
   (void) request;
   (void) response;

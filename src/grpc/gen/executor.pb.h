@@ -36,6 +36,7 @@
 #include <google/protobuf/map_field_inl.h>
 #include <google/protobuf/generated_enum_reflection.h>
 #include <google/protobuf/unknown_field_set.h>
+#include <google/protobuf/empty.pb.h>
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
 #define PROTOBUF_INTERNAL_EXPORT_executor_2eproto
@@ -51,7 +52,7 @@ struct TableStruct_executor_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxillaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[15]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[16]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -72,6 +73,9 @@ extern ExecutionTraceStepDefaultTypeInternal _ExecutionTraceStep_default_instanc
 class ExecutionTraceStep_StorageEntry_DoNotUse;
 class ExecutionTraceStep_StorageEntry_DoNotUseDefaultTypeInternal;
 extern ExecutionTraceStep_StorageEntry_DoNotUseDefaultTypeInternal _ExecutionTraceStep_StorageEntry_DoNotUse_default_instance_;
+class GetFlushStatusResponse;
+class GetFlushStatusResponseDefaultTypeInternal;
+extern GetFlushStatusResponseDefaultTypeInternal _GetFlushStatusResponse_default_instance_;
 class InfoReadWrite;
 class InfoReadWriteDefaultTypeInternal;
 extern InfoReadWriteDefaultTypeInternal _InfoReadWrite_default_instance_;
@@ -112,6 +116,7 @@ template<> ::executor::v1::CallTrace* Arena::CreateMaybeMessage<::executor::v1::
 template<> ::executor::v1::Contract* Arena::CreateMaybeMessage<::executor::v1::Contract>(Arena*);
 template<> ::executor::v1::ExecutionTraceStep* Arena::CreateMaybeMessage<::executor::v1::ExecutionTraceStep>(Arena*);
 template<> ::executor::v1::ExecutionTraceStep_StorageEntry_DoNotUse* Arena::CreateMaybeMessage<::executor::v1::ExecutionTraceStep_StorageEntry_DoNotUse>(Arena*);
+template<> ::executor::v1::GetFlushStatusResponse* Arena::CreateMaybeMessage<::executor::v1::GetFlushStatusResponse>(Arena*);
 template<> ::executor::v1::InfoReadWrite* Arena::CreateMaybeMessage<::executor::v1::InfoReadWrite>(Arena*);
 template<> ::executor::v1::Log* Arena::CreateMaybeMessage<::executor::v1::Log>(Arena*);
 template<> ::executor::v1::ProcessBatchRequest* Arena::CreateMaybeMessage<::executor::v1::ProcessBatchRequest>(Arena*);
@@ -191,12 +196,13 @@ enum ExecutorError : int {
   EXECUTOR_ERROR_UNSUPPORTED_FORK_ID = 8,
   EXECUTOR_ERROR_BALANCE_MISMATCH = 9,
   EXECUTOR_ERROR_FEA2SCALAR = 10,
+  EXECUTOR_ERROR_TOS32 = 11,
   ExecutorError_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   ExecutorError_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool ExecutorError_IsValid(int value);
 constexpr ExecutorError ExecutorError_MIN = EXECUTOR_ERROR_UNSPECIFIED;
-constexpr ExecutorError ExecutorError_MAX = EXECUTOR_ERROR_FEA2SCALAR;
+constexpr ExecutorError ExecutorError_MAX = EXECUTOR_ERROR_TOS32;
 constexpr int ExecutorError_ARRAYSIZE = ExecutorError_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ExecutorError_descriptor();
@@ -857,6 +863,7 @@ class ProcessBatchResponse PROTOBUF_FINAL :
     kNewStateRootFieldNumber = 1,
     kNewAccInputHashFieldNumber = 2,
     kNewLocalExitRootFieldNumber = 3,
+    kProverIdFieldNumber = 18,
     kNewBatchNumFieldNumber = 4,
     kCntKeccakHashesFieldNumber = 5,
     kCntPoseidonHashesFieldNumber = 6,
@@ -867,6 +874,8 @@ class ProcessBatchResponse PROTOBUF_FINAL :
     kCumulativeGasUsedFieldNumber = 12,
     kCntStepsFieldNumber = 11,
     kErrorFieldNumber = 14,
+    kFlushIdFieldNumber = 16,
+    kStoredFlushIdFieldNumber = 17,
   };
   // repeated .executor.v1.ProcessTransactionResponse responses = 13;
   int responses_size() const;
@@ -978,6 +987,31 @@ class ProcessBatchResponse PROTOBUF_FINAL :
   std::string* _internal_mutable_new_local_exit_root();
   public:
 
+  // string prover_id = 18;
+  void clear_prover_id();
+  const std::string& prover_id() const;
+  void set_prover_id(const std::string& value);
+  void set_prover_id(std::string&& value);
+  void set_prover_id(const char* value);
+  void set_prover_id(const char* value, size_t size);
+  std::string* mutable_prover_id();
+  std::string* release_prover_id();
+  void set_allocated_prover_id(std::string* prover_id);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_prover_id();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_prover_id(
+      std::string* prover_id);
+  private:
+  const std::string& _internal_prover_id() const;
+  void _internal_set_prover_id(const std::string& value);
+  std::string* _internal_mutable_prover_id();
+  public:
+
   // uint64 new_batch_num = 4;
   void clear_new_batch_num();
   ::PROTOBUF_NAMESPACE_ID::uint64 new_batch_num() const;
@@ -1068,6 +1102,24 @@ class ProcessBatchResponse PROTOBUF_FINAL :
   void _internal_set_error(::executor::v1::ExecutorError value);
   public:
 
+  // uint64 flush_id = 16;
+  void clear_flush_id();
+  ::PROTOBUF_NAMESPACE_ID::uint64 flush_id() const;
+  void set_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_flush_id() const;
+  void _internal_set_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 stored_flush_id = 17;
+  void clear_stored_flush_id();
+  ::PROTOBUF_NAMESPACE_ID::uint64 stored_flush_id() const;
+  void set_stored_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_stored_flush_id() const;
+  void _internal_set_stored_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:executor.v1.ProcessBatchResponse)
  private:
   class _Internal;
@@ -1085,6 +1137,7 @@ class ProcessBatchResponse PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr new_state_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr new_acc_input_hash_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr new_local_exit_root_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr prover_id_;
   ::PROTOBUF_NAMESPACE_ID::uint64 new_batch_num_;
   ::PROTOBUF_NAMESPACE_ID::uint32 cnt_keccak_hashes_;
   ::PROTOBUF_NAMESPACE_ID::uint32 cnt_poseidon_hashes_;
@@ -1095,6 +1148,238 @@ class ProcessBatchResponse PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint64 cumulative_gas_used_;
   ::PROTOBUF_NAMESPACE_ID::uint32 cnt_steps_;
   int error_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 flush_id_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 stored_flush_id_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_executor_2eproto;
+};
+// -------------------------------------------------------------------
+
+class GetFlushStatusResponse PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:executor.v1.GetFlushStatusResponse) */ {
+ public:
+  inline GetFlushStatusResponse() : GetFlushStatusResponse(nullptr) {};
+  virtual ~GetFlushStatusResponse();
+
+  GetFlushStatusResponse(const GetFlushStatusResponse& from);
+  GetFlushStatusResponse(GetFlushStatusResponse&& from) noexcept
+    : GetFlushStatusResponse() {
+    *this = ::std::move(from);
+  }
+
+  inline GetFlushStatusResponse& operator=(const GetFlushStatusResponse& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline GetFlushStatusResponse& operator=(GetFlushStatusResponse&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const GetFlushStatusResponse& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const GetFlushStatusResponse* internal_default_instance() {
+    return reinterpret_cast<const GetFlushStatusResponse*>(
+               &_GetFlushStatusResponse_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    5;
+
+  friend void swap(GetFlushStatusResponse& a, GetFlushStatusResponse& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(GetFlushStatusResponse* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(GetFlushStatusResponse* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline GetFlushStatusResponse* New() const final {
+    return CreateMaybeMessage<GetFlushStatusResponse>(nullptr);
+  }
+
+  GetFlushStatusResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<GetFlushStatusResponse>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const GetFlushStatusResponse& from);
+  void MergeFrom(const GetFlushStatusResponse& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(GetFlushStatusResponse* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "executor.v1.GetFlushStatusResponse";
+  }
+  protected:
+  explicit GetFlushStatusResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
+    return ::descriptor_table_executor_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kProverIdFieldNumber = 8,
+    kStoredFlushIdFieldNumber = 1,
+    kStoringFlushIdFieldNumber = 2,
+    kLastFlushIdFieldNumber = 3,
+    kPendingToFlushNodesFieldNumber = 4,
+    kPendingToFlushProgramFieldNumber = 5,
+    kStoringNodesFieldNumber = 6,
+    kStoringProgramFieldNumber = 7,
+  };
+  // string prover_id = 8;
+  void clear_prover_id();
+  const std::string& prover_id() const;
+  void set_prover_id(const std::string& value);
+  void set_prover_id(std::string&& value);
+  void set_prover_id(const char* value);
+  void set_prover_id(const char* value, size_t size);
+  std::string* mutable_prover_id();
+  std::string* release_prover_id();
+  void set_allocated_prover_id(std::string* prover_id);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_prover_id();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_prover_id(
+      std::string* prover_id);
+  private:
+  const std::string& _internal_prover_id() const;
+  void _internal_set_prover_id(const std::string& value);
+  std::string* _internal_mutable_prover_id();
+  public:
+
+  // uint64 stored_flush_id = 1;
+  void clear_stored_flush_id();
+  ::PROTOBUF_NAMESPACE_ID::uint64 stored_flush_id() const;
+  void set_stored_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_stored_flush_id() const;
+  void _internal_set_stored_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 storing_flush_id = 2;
+  void clear_storing_flush_id();
+  ::PROTOBUF_NAMESPACE_ID::uint64 storing_flush_id() const;
+  void set_storing_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_storing_flush_id() const;
+  void _internal_set_storing_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 last_flush_id = 3;
+  void clear_last_flush_id();
+  ::PROTOBUF_NAMESPACE_ID::uint64 last_flush_id() const;
+  void set_last_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_last_flush_id() const;
+  void _internal_set_last_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 pending_to_flush_nodes = 4;
+  void clear_pending_to_flush_nodes();
+  ::PROTOBUF_NAMESPACE_ID::uint64 pending_to_flush_nodes() const;
+  void set_pending_to_flush_nodes(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_pending_to_flush_nodes() const;
+  void _internal_set_pending_to_flush_nodes(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 pending_to_flush_program = 5;
+  void clear_pending_to_flush_program();
+  ::PROTOBUF_NAMESPACE_ID::uint64 pending_to_flush_program() const;
+  void set_pending_to_flush_program(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_pending_to_flush_program() const;
+  void _internal_set_pending_to_flush_program(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 storing_nodes = 6;
+  void clear_storing_nodes();
+  ::PROTOBUF_NAMESPACE_ID::uint64 storing_nodes() const;
+  void set_storing_nodes(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_storing_nodes() const;
+  void _internal_set_storing_nodes(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 storing_program = 7;
+  void clear_storing_program();
+  ::PROTOBUF_NAMESPACE_ID::uint64 storing_program() const;
+  void set_storing_program(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_storing_program() const;
+  void _internal_set_storing_program(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:executor.v1.GetFlushStatusResponse)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr prover_id_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 stored_flush_id_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 storing_flush_id_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 last_flush_id_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 pending_to_flush_nodes_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 pending_to_flush_program_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 storing_nodes_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 storing_program_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
 };
@@ -1142,7 +1427,7 @@ class TraceConfig PROTOBUF_FINAL :
                &_TraceConfig_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    5;
+    6;
 
   friend void swap(TraceConfig& a, TraceConfig& b) {
     a.Swap(&b);
@@ -1366,7 +1651,7 @@ class InfoReadWrite PROTOBUF_FINAL :
                &_InfoReadWrite_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    6;
+    7;
 
   friend void swap(InfoReadWrite& a, InfoReadWrite& b) {
     a.Swap(&b);
@@ -1546,7 +1831,7 @@ class CallTrace PROTOBUF_FINAL :
                &_CallTrace_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    7;
+    8;
 
   friend void swap(CallTrace& a, CallTrace& b) {
     a.Swap(&b);
@@ -1712,7 +1997,7 @@ class TransactionContext PROTOBUF_FINAL :
                &_TransactionContext_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    8;
+    9;
 
   friend void swap(TransactionContext& a, TransactionContext& b) {
     a.Swap(&b);
@@ -2114,7 +2399,7 @@ class TransactionStep PROTOBUF_FINAL :
                &_TransactionStep_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    9;
+    10;
 
   friend void swap(TransactionStep& a, TransactionStep& b) {
     a.Swap(&b);
@@ -2444,7 +2729,7 @@ class Contract PROTOBUF_FINAL :
                &_Contract_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    10;
+    11;
 
   friend void swap(Contract& a, Contract& b) {
     a.Swap(&b);
@@ -2689,7 +2974,7 @@ class ProcessTransactionResponse PROTOBUF_FINAL :
                &_ProcessTransactionResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    11;
+    12;
 
   friend void swap(ProcessTransactionResponse& a, ProcessTransactionResponse& b) {
     a.Swap(&b);
@@ -3065,7 +3350,7 @@ class Log PROTOBUF_FINAL :
                &_Log_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    12;
+    13;
 
   friend void swap(Log& a, Log& b) {
     a.Swap(&b);
@@ -3342,7 +3627,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
-    return ::descriptor_table_executor_2eproto.file_level_metadata[13];
+    return ::descriptor_table_executor_2eproto.file_level_metadata[14];
   }
 
   public:
@@ -3392,7 +3677,7 @@ class ExecutionTraceStep PROTOBUF_FINAL :
                &_ExecutionTraceStep_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    14;
+    15;
 
   friend void swap(ExecutionTraceStep& a, ExecutionTraceStep& b) {
     a.Swap(&b);
@@ -4958,6 +5243,352 @@ inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::executor::v1::InfoReadWrite 
 ProcessBatchResponse::mutable_read_write_addresses() {
   // @@protoc_insertion_point(field_mutable_map:executor.v1.ProcessBatchResponse.read_write_addresses)
   return _internal_mutable_read_write_addresses();
+}
+
+// uint64 flush_id = 16;
+inline void ProcessBatchResponse::clear_flush_id() {
+  flush_id_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessBatchResponse::_internal_flush_id() const {
+  return flush_id_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessBatchResponse::flush_id() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchResponse.flush_id)
+  return _internal_flush_id();
+}
+inline void ProcessBatchResponse::_internal_set_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  flush_id_ = value;
+}
+inline void ProcessBatchResponse::set_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_flush_id(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponse.flush_id)
+}
+
+// uint64 stored_flush_id = 17;
+inline void ProcessBatchResponse::clear_stored_flush_id() {
+  stored_flush_id_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessBatchResponse::_internal_stored_flush_id() const {
+  return stored_flush_id_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessBatchResponse::stored_flush_id() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchResponse.stored_flush_id)
+  return _internal_stored_flush_id();
+}
+inline void ProcessBatchResponse::_internal_set_stored_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  stored_flush_id_ = value;
+}
+inline void ProcessBatchResponse::set_stored_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_stored_flush_id(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponse.stored_flush_id)
+}
+
+// string prover_id = 18;
+inline void ProcessBatchResponse::clear_prover_id() {
+  prover_id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& ProcessBatchResponse::prover_id() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchResponse.prover_id)
+  return _internal_prover_id();
+}
+inline void ProcessBatchResponse::set_prover_id(const std::string& value) {
+  _internal_set_prover_id(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponse.prover_id)
+}
+inline std::string* ProcessBatchResponse::mutable_prover_id() {
+  // @@protoc_insertion_point(field_mutable:executor.v1.ProcessBatchResponse.prover_id)
+  return _internal_mutable_prover_id();
+}
+inline const std::string& ProcessBatchResponse::_internal_prover_id() const {
+  return prover_id_.Get();
+}
+inline void ProcessBatchResponse::_internal_set_prover_id(const std::string& value) {
+  
+  prover_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void ProcessBatchResponse::set_prover_id(std::string&& value) {
+  
+  prover_id_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:executor.v1.ProcessBatchResponse.prover_id)
+}
+inline void ProcessBatchResponse::set_prover_id(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  prover_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:executor.v1.ProcessBatchResponse.prover_id)
+}
+inline void ProcessBatchResponse::set_prover_id(const char* value,
+    size_t size) {
+  
+  prover_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:executor.v1.ProcessBatchResponse.prover_id)
+}
+inline std::string* ProcessBatchResponse::_internal_mutable_prover_id() {
+  
+  return prover_id_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* ProcessBatchResponse::release_prover_id() {
+  // @@protoc_insertion_point(field_release:executor.v1.ProcessBatchResponse.prover_id)
+  return prover_id_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ProcessBatchResponse::set_allocated_prover_id(std::string* prover_id) {
+  if (prover_id != nullptr) {
+    
+  } else {
+    
+  }
+  prover_id_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), prover_id,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessBatchResponse.prover_id)
+}
+inline std::string* ProcessBatchResponse::unsafe_arena_release_prover_id() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.ProcessBatchResponse.prover_id)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return prover_id_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void ProcessBatchResponse::unsafe_arena_set_allocated_prover_id(
+    std::string* prover_id) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (prover_id != nullptr) {
+    
+  } else {
+    
+  }
+  prover_id_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      prover_id, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBatchResponse.prover_id)
+}
+
+// -------------------------------------------------------------------
+
+// GetFlushStatusResponse
+
+// uint64 stored_flush_id = 1;
+inline void GetFlushStatusResponse::clear_stored_flush_id() {
+  stored_flush_id_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetFlushStatusResponse::_internal_stored_flush_id() const {
+  return stored_flush_id_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetFlushStatusResponse::stored_flush_id() const {
+  // @@protoc_insertion_point(field_get:executor.v1.GetFlushStatusResponse.stored_flush_id)
+  return _internal_stored_flush_id();
+}
+inline void GetFlushStatusResponse::_internal_set_stored_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  stored_flush_id_ = value;
+}
+inline void GetFlushStatusResponse::set_stored_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_stored_flush_id(value);
+  // @@protoc_insertion_point(field_set:executor.v1.GetFlushStatusResponse.stored_flush_id)
+}
+
+// uint64 storing_flush_id = 2;
+inline void GetFlushStatusResponse::clear_storing_flush_id() {
+  storing_flush_id_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetFlushStatusResponse::_internal_storing_flush_id() const {
+  return storing_flush_id_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetFlushStatusResponse::storing_flush_id() const {
+  // @@protoc_insertion_point(field_get:executor.v1.GetFlushStatusResponse.storing_flush_id)
+  return _internal_storing_flush_id();
+}
+inline void GetFlushStatusResponse::_internal_set_storing_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  storing_flush_id_ = value;
+}
+inline void GetFlushStatusResponse::set_storing_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_storing_flush_id(value);
+  // @@protoc_insertion_point(field_set:executor.v1.GetFlushStatusResponse.storing_flush_id)
+}
+
+// uint64 last_flush_id = 3;
+inline void GetFlushStatusResponse::clear_last_flush_id() {
+  last_flush_id_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetFlushStatusResponse::_internal_last_flush_id() const {
+  return last_flush_id_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetFlushStatusResponse::last_flush_id() const {
+  // @@protoc_insertion_point(field_get:executor.v1.GetFlushStatusResponse.last_flush_id)
+  return _internal_last_flush_id();
+}
+inline void GetFlushStatusResponse::_internal_set_last_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  last_flush_id_ = value;
+}
+inline void GetFlushStatusResponse::set_last_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_last_flush_id(value);
+  // @@protoc_insertion_point(field_set:executor.v1.GetFlushStatusResponse.last_flush_id)
+}
+
+// uint64 pending_to_flush_nodes = 4;
+inline void GetFlushStatusResponse::clear_pending_to_flush_nodes() {
+  pending_to_flush_nodes_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetFlushStatusResponse::_internal_pending_to_flush_nodes() const {
+  return pending_to_flush_nodes_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetFlushStatusResponse::pending_to_flush_nodes() const {
+  // @@protoc_insertion_point(field_get:executor.v1.GetFlushStatusResponse.pending_to_flush_nodes)
+  return _internal_pending_to_flush_nodes();
+}
+inline void GetFlushStatusResponse::_internal_set_pending_to_flush_nodes(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  pending_to_flush_nodes_ = value;
+}
+inline void GetFlushStatusResponse::set_pending_to_flush_nodes(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_pending_to_flush_nodes(value);
+  // @@protoc_insertion_point(field_set:executor.v1.GetFlushStatusResponse.pending_to_flush_nodes)
+}
+
+// uint64 pending_to_flush_program = 5;
+inline void GetFlushStatusResponse::clear_pending_to_flush_program() {
+  pending_to_flush_program_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetFlushStatusResponse::_internal_pending_to_flush_program() const {
+  return pending_to_flush_program_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetFlushStatusResponse::pending_to_flush_program() const {
+  // @@protoc_insertion_point(field_get:executor.v1.GetFlushStatusResponse.pending_to_flush_program)
+  return _internal_pending_to_flush_program();
+}
+inline void GetFlushStatusResponse::_internal_set_pending_to_flush_program(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  pending_to_flush_program_ = value;
+}
+inline void GetFlushStatusResponse::set_pending_to_flush_program(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_pending_to_flush_program(value);
+  // @@protoc_insertion_point(field_set:executor.v1.GetFlushStatusResponse.pending_to_flush_program)
+}
+
+// uint64 storing_nodes = 6;
+inline void GetFlushStatusResponse::clear_storing_nodes() {
+  storing_nodes_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetFlushStatusResponse::_internal_storing_nodes() const {
+  return storing_nodes_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetFlushStatusResponse::storing_nodes() const {
+  // @@protoc_insertion_point(field_get:executor.v1.GetFlushStatusResponse.storing_nodes)
+  return _internal_storing_nodes();
+}
+inline void GetFlushStatusResponse::_internal_set_storing_nodes(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  storing_nodes_ = value;
+}
+inline void GetFlushStatusResponse::set_storing_nodes(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_storing_nodes(value);
+  // @@protoc_insertion_point(field_set:executor.v1.GetFlushStatusResponse.storing_nodes)
+}
+
+// uint64 storing_program = 7;
+inline void GetFlushStatusResponse::clear_storing_program() {
+  storing_program_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetFlushStatusResponse::_internal_storing_program() const {
+  return storing_program_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 GetFlushStatusResponse::storing_program() const {
+  // @@protoc_insertion_point(field_get:executor.v1.GetFlushStatusResponse.storing_program)
+  return _internal_storing_program();
+}
+inline void GetFlushStatusResponse::_internal_set_storing_program(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  storing_program_ = value;
+}
+inline void GetFlushStatusResponse::set_storing_program(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_storing_program(value);
+  // @@protoc_insertion_point(field_set:executor.v1.GetFlushStatusResponse.storing_program)
+}
+
+// string prover_id = 8;
+inline void GetFlushStatusResponse::clear_prover_id() {
+  prover_id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& GetFlushStatusResponse::prover_id() const {
+  // @@protoc_insertion_point(field_get:executor.v1.GetFlushStatusResponse.prover_id)
+  return _internal_prover_id();
+}
+inline void GetFlushStatusResponse::set_prover_id(const std::string& value) {
+  _internal_set_prover_id(value);
+  // @@protoc_insertion_point(field_set:executor.v1.GetFlushStatusResponse.prover_id)
+}
+inline std::string* GetFlushStatusResponse::mutable_prover_id() {
+  // @@protoc_insertion_point(field_mutable:executor.v1.GetFlushStatusResponse.prover_id)
+  return _internal_mutable_prover_id();
+}
+inline const std::string& GetFlushStatusResponse::_internal_prover_id() const {
+  return prover_id_.Get();
+}
+inline void GetFlushStatusResponse::_internal_set_prover_id(const std::string& value) {
+  
+  prover_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void GetFlushStatusResponse::set_prover_id(std::string&& value) {
+  
+  prover_id_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:executor.v1.GetFlushStatusResponse.prover_id)
+}
+inline void GetFlushStatusResponse::set_prover_id(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  prover_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:executor.v1.GetFlushStatusResponse.prover_id)
+}
+inline void GetFlushStatusResponse::set_prover_id(const char* value,
+    size_t size) {
+  
+  prover_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:executor.v1.GetFlushStatusResponse.prover_id)
+}
+inline std::string* GetFlushStatusResponse::_internal_mutable_prover_id() {
+  
+  return prover_id_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* GetFlushStatusResponse::release_prover_id() {
+  // @@protoc_insertion_point(field_release:executor.v1.GetFlushStatusResponse.prover_id)
+  return prover_id_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void GetFlushStatusResponse::set_allocated_prover_id(std::string* prover_id) {
+  if (prover_id != nullptr) {
+    
+  } else {
+    
+  }
+  prover_id_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), prover_id,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:executor.v1.GetFlushStatusResponse.prover_id)
+}
+inline std::string* GetFlushStatusResponse::unsafe_arena_release_prover_id() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.GetFlushStatusResponse.prover_id)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return prover_id_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void GetFlushStatusResponse::unsafe_arena_set_allocated_prover_id(
+    std::string* prover_id) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (prover_id != nullptr) {
+    
+  } else {
+    
+  }
+  prover_id_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      prover_id, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.GetFlushStatusResponse.prover_id)
 }
 
 // -------------------------------------------------------------------
@@ -8804,6 +9435,8 @@ inline void ExecutionTraceStep::set_error(::executor::v1::RomError value) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

@@ -26,13 +26,15 @@
 #include "sm/binary/binary_test.hpp"
 #include "sm/mem_align/mem_align_test.hpp"
 #include "timer.hpp"
-#include "statedb/statedb_server.hpp"
-#include "service/statedb/statedb_test.hpp"
-#include "service/statedb/statedb.hpp"
+#include "hashdb/hashdb_server.hpp"
+#include "service/hashdb/hashdb_test.hpp"
+#include "service/hashdb/hashdb.hpp"
 #include "sha256_test.hpp"
 #include "blake_test.hpp"
 #include "goldilocks_precomputed.hpp"
 #include "zklog.hpp"
+#include "ecrecover_test.hpp"
+#include "hashdb_singleton.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -477,6 +479,9 @@ int main(int argc, char **argv)
     // Create one instance of the Poseidon hash library
     PoseidonGoldilocks poseidon;
 
+    // Init the HashDB singleton
+    hashDBSingleton.init(fr, config);
+
     // Init goldilocks precomputed
     TimerStart(GOLDILOCKS_PRECOMPUTED_INIT);
     glp.init();
@@ -530,9 +535,15 @@ int main(int argc, char **argv)
         Blake2b256_Test(fr, config);
     }
 
+    // Test ECRecover
+    if (config.runECRecoverTest)
+    {
+        ECRecoverTest();
+    }
+
     // If there is nothing else to run, exit normally
     if (!config.runExecutorServer && !config.runExecutorClient && !config.runExecutorClientMultithread &&
-        !config.runStateDBServer && !config.runStateDBTest &&
+        !config.runHashDBServer && !config.runHashDBTest &&
         !config.runAggregatorServer && !config.runAggregatorClient && !config.runAggregatorClientMock &&
         !config.runFileGenBatchProof && !config.runFileGenAggregatedProof && !config.runFileGenFinalProof &&
         !config.runFileProcessBatch && !config.runFileProcessBatchMultithread && !config.runFileExecute)
@@ -568,7 +579,7 @@ int main(int argc, char **argv)
     if (config.databaseURL != "local") // remote DB
     {
 
-        if (config.loadDBToMemCache && (config.runAggregatorClient || config.runExecutorServer || config.runStateDBServer))
+        if (config.loadDBToMemCache && (config.runAggregatorClient || config.runExecutorServer || config.runHashDBServer))
         {
             TimerStart(DB_CACHE_LOAD);
             // if we have a db cache enabled
@@ -590,14 +601,14 @@ int main(int argc, char **argv)
 
     /* SERVERS */
 
-    // Create the StateDB server and run it, if configured
-    StateDBServer *pStateDBServer = NULL;
-    if (config.runStateDBServer)
+    // Create the HashDB server and run it, if configured
+    HashDBServer *pHashDBServer = NULL;
+    if (config.runHashDBServer)
     {
-        pStateDBServer = new StateDBServer(fr, config);
-        zkassert(pStateDBServer != NULL);
-        zklog.info("Launching StateDB server thread...");
-        pStateDBServer->runThread();
+        pHashDBServer = new HashDBServer(fr, config);
+        zkassert(pHashDBServer != NULL);
+        zklog.info("Launching HashDB server thread...");
+        pHashDBServer->runThread();
     }
 
     // Create the executor server and run it, if configured
@@ -754,11 +765,11 @@ int main(int argc, char **argv)
         pExecutorClient->runThreads();
     }
 
-    // Run the stateDB test, if configured
-    if (config.runStateDBTest)
+    // Run the hashDB test, if configured
+    if (config.runHashDBTest)
     {
-        zklog.info("Launching StateDB test thread...");
-        runStateDBTest(config);
+        zklog.info("Launching HashDB test thread...");
+        runHashDBTest(config);
     }
 
     // Create the aggregator client and run it, if configured
@@ -809,11 +820,11 @@ int main(int argc, char **argv)
         pExecutorServer->waitForThread();
     }
 
-    // Wait for StateDBServer thread to end
-    if (config.runStateDBServer && !config.runStateDBTest)
+    // Wait for HashDBServer thread to end
+    if (config.runHashDBServer && !config.runHashDBTest)
     {
-        zkassert(pStateDBServer != NULL);
-        pStateDBServer->waitForThread();
+        zkassert(pHashDBServer != NULL);
+        pHashDBServer->waitForThread();
     }
 
     // Wait for the aggregator client thread to end
@@ -857,10 +868,10 @@ int main(int argc, char **argv)
         delete pExecutorServer;
         pExecutorServer = NULL;
     }
-    if (pStateDBServer != NULL)
+    if (pHashDBServer != NULL)
     {
-        delete pStateDBServer;
-        pStateDBServer = NULL;
+        delete pHashDBServer;
+        pHashDBServer = NULL;
     }
     if (pAggregatorServer != NULL)
     {
