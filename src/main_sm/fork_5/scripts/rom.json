@@ -26077,42 +26077,6 @@
    "lineStr": "    SP - 2  => SP        :JMPN(stackUnderflow)"
   },
   {
-   "inGAS": "1",
-   "CONST": "-2301",
-   "JMPN": 1,
-   "useJmpAddr": 1,
-   "jmpAddr": 4671,
-   "useElseAddr": 1,
-   "elseAddr": 1856,
-   "line": 191,
-   "jmpAddrLabel": "outOfGas",
-   "elseAddrLabel": "next",
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    GAS - %SSTORE_ENTRY_EIP_2200_GAS - 1  :JMPN(outOfGas)"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setA": 1,
-   "offset": 33,
-   "mOp": 1,
-   "mWR": 0,
-   "JMPZ": 1,
-   "useJmpAddr": 1,
-   "jmpAddr": 1857,
-   "useElseAddr": 1,
-   "elseAddr": 4677,
-   "line": 193,
-   "offsetLabel": "isStaticCall",
-   "useCTX": 1,
-   "jmpAddrLabel": "next",
-   "elseAddrLabel": "invalidStaticTx",
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    $ => A          :MLOAD(isStaticCall), JMPNZ(invalidStaticTx)"
-  },
-  {
    "freeInTag": {
     "op": ""
    },
@@ -26127,7 +26091,7 @@
    "useCTX": 1,
    "mOp": 1,
    "mWR": 0,
-   "line": 195,
+   "line": 191,
    "fileName": "opcodes/storage-memory.zkasm",
    "lineStr": "    $ => C          :MLOAD(SP+1) ; [key => C]"
   },
@@ -26136,7 +26100,7 @@
    "offset": 47,
    "mOp": 1,
    "mWR": 1,
-   "line": 196,
+   "line": 192,
    "offsetLabel": "tmpVarCsstore",
    "useCTX": 0,
    "fileName": "opcodes/storage-memory.zkasm",
@@ -26157,753 +26121,7 @@
    "useCTX": 1,
    "mOp": 1,
    "mWR": 0,
-   "line": 197,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    $ => D          :MLOAD(SP) ; [value => D]"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setA": 1,
-   "offset": 13,
-   "mOp": 1,
-   "mWR": 0,
-   "JMPZ": 1,
-   "useJmpAddr": 1,
-   "jmpAddr": 1861,
-   "useElseAddr": 1,
-   "elseAddr": 1862,
-   "line": 199,
-   "offsetLabel": "isCreateContract",
-   "useCTX": 1,
-   "jmpAddrLabel": "next",
-   "elseAddrLabel": "deploymentSSTORE",
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    $ => A          :MLOAD(isCreateContract), JMPNZ(deploymentSSTORE)"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setA": 1,
-   "offset": 2,
-   "mOp": 1,
-   "mWR": 0,
-   "JMP": 1,
-   "useJmpAddr": 1,
-   "jmpAddr": 1863,
-   "line": 201,
-   "offsetLabel": "storageAddr",
-   "useCTX": 1,
-   "jmpAddrLabel": "opSSTOREinit",
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    $ => A          :MLOAD(storageAddr), JMP(opSSTOREinit)"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setA": 1,
-   "offset": 14,
-   "mOp": 1,
-   "mWR": 0,
-   "line": 205,
-   "offsetLabel": "createContractAddress",
-   "useCTX": 1,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    $ => A          :MLOAD(createContractAddress)"
-  },
-  {
-   "CONST": "3",
-   "setB": 1,
-   "line": 209,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    %SMT_KEY_SC_STORAGE => B"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setE": 1,
-   "sRD": 1,
-   "line": 210,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    $ => E          :SLOAD"
-  },
-  {
-   "inSR": "1",
-   "offset": 39,
-   "mOp": 1,
-   "mWR": 1,
-   "line": 212,
-   "offsetLabel": "auxSR",
-   "useCTX": 0,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    SR              :MSTORE(auxSR)"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setSR": 1,
-   "offset": 33,
-   "mOp": 1,
-   "mWR": 0,
-   "line": 213,
-   "offsetLabel": "originSR",
-   "useCTX": 0,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    $ => SR         :MLOAD(originSR)"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setB": 1,
-   "sRD": 1,
-   "line": 214,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    $ => B          :SLOAD ; origin value"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setSR": 1,
-   "offset": 39,
-   "mOp": 1,
-   "mWR": 0,
-   "JMP": 0,
-   "JMPC": 0,
-   "JMPN": 0,
-   "useJmpAddr": 1,
-   "jmpAddr": 3630,
-   "call": 1,
-   "line": 216,
-   "offsetLabel": "auxSR",
-   "useCTX": 0,
-   "jmpAddrLabel": "isColdSlot",
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    $ => SR         :MLOAD(auxSR), CALL(isColdSlot)"
-  },
-  {
-   "inB": "1",
-   "setC": 1,
-   "line": 217,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    B => C           ; origin value"
-  },
-  {
-   "inGAS": "1",
-   "inA": "-2100",
-   "setGAS": 1,
-   "JMPN": 1,
-   "useJmpAddr": 1,
-   "jmpAddr": 4671,
-   "useElseAddr": 1,
-   "elseAddr": 1871,
-   "line": 219,
-   "jmpAddrLabel": "outOfGas",
-   "elseAddrLabel": "next",
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    GAS - A*%COLD_SLOAD_COST => GAS    :JMPN(outOfGas)"
-  },
-  {
-   "inE": "1",
-   "setA": 1,
-   "line": 220,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    E => A"
-  },
-  {
-   "inD": "1",
-   "setB": 1,
-   "line": 221,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    D => B"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setA": 1,
-   "bin": 1,
-   "binOpcode": 4,
-   "JMPC": 1,
-   "useJmpAddr": 1,
-   "jmpAddr": 1874,
-   "useElseAddr": 1,
-   "elseAddr": 1875,
-   "line": 222,
-   "jmpAddrLabel": "next",
-   "elseAddrLabel": "opSSTOREdif",
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    $ => A          :EQ, JMPNC(opSSTOREdif)"
-  },
-  {
-   "inGAS": "1",
-   "CONST": "-100",
-   "setGAS": 1,
-   "JMPN": 1,
-   "useJmpAddr": 1,
-   "jmpAddr": 4671,
-   "useElseAddr": 1,
-   "elseAddr": 1912,
-   "line": 225,
-   "jmpAddrLabel": "outOfGas",
-   "elseAddrLabel": "opSSTOREend",
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    GAS - %SSTORE_DYNAMIC_GAS => GAS:JMPN(outOfGas, opSSTOREend)"
-  },
-  {
-   "inC": "1",
-   "setA": 1,
-   "line": 229,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    C => A"
-  },
-  {
-   "inE": "1",
-   "setB": 1,
-   "line": 230,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    E => B"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setA": 1,
-   "bin": 1,
-   "binOpcode": 4,
-   "JMPC": 1,
-   "useJmpAddr": 1,
-   "jmpAddr": 1878,
-   "useElseAddr": 1,
-   "elseAddr": 1882,
-   "line": 231,
-   "jmpAddrLabel": "next",
-   "elseAddrLabel": "opSSTOREdifA",
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    $ => A          :EQ, JMPNC(opSSTOREdifA)"
-  },
-  {
-   "CONST": "0",
-   "setA": 1,
-   "line": 233,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    0 => A"
-  },
-  {
-   "inC": "1",
-   "setB": 1,
-   "line": 234,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    C => B"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setA": 1,
-   "bin": 1,
-   "binOpcode": 4,
-   "JMPC": 1,
-   "useJmpAddr": 1,
-   "jmpAddr": 1881,
-   "useElseAddr": 1,
-   "elseAddr": 1905,
-   "line": 235,
-   "jmpAddrLabel": "next",
-   "elseAddrLabel": "opSSTOREdifB",
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    $ => A          :EQ, JMPNC(opSSTOREdifB)"
-  },
-  {
-   "inGAS": "1",
-   "CONST": "-20000",
-   "setGAS": 1,
-   "JMPN": 1,
-   "useJmpAddr": 1,
-   "jmpAddr": 4671,
-   "useElseAddr": 1,
-   "elseAddr": 1912,
-   "line": 238,
-   "jmpAddrLabel": "outOfGas",
-   "elseAddrLabel": "opSSTOREend",
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    GAS - %SSTORE_SET_GAS => GAS    :JMPN(outOfGas, opSSTOREend)"
-  },
-  {
-   "inGAS": "1",
-   "CONST": "-100",
-   "setGAS": 1,
-   "JMPN": 1,
-   "useJmpAddr": 1,
-   "jmpAddr": 4671,
-   "useElseAddr": 1,
-   "elseAddr": 1883,
-   "line": 242,
-   "jmpAddrLabel": "outOfGas",
-   "elseAddrLabel": "next",
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    GAS - %SSTORE_DYNAMIC_GAS => GAS:JMPN(outOfGas)"
-  },
-  {
-   "CONST": "0",
-   "setA": 1,
-   "line": 243,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    0 => A"
-  },
-  {
-   "inC": "1",
-   "setB": 1,
-   "line": 244,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    C => B"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setA": 1,
-   "bin": 1,
-   "binOpcode": 4,
-   "JMPC": 1,
-   "useJmpAddr": 1,
-   "jmpAddr": 1886,
-   "useElseAddr": 1,
-   "elseAddr": 1893,
-   "line": 245,
-   "jmpAddrLabel": "next",
-   "elseAddrLabel": "opSSTOREdifA1",
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    $ => A          :EQ, JMPNC(opSSTOREdifA1)"
-  },
-  {
-   "inD": "1",
-   "setA": 1,
-   "line": 250,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    D => A"
-  },
-  {
-   "inC": "1",
-   "setB": 1,
-   "line": 251,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    C => B"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setA": 1,
-   "bin": 1,
-   "binOpcode": 4,
-   "JMPC": 1,
-   "useJmpAddr": 1,
-   "jmpAddr": 1889,
-   "useElseAddr": 1,
-   "elseAddr": 1912,
-   "line": 252,
-   "jmpAddrLabel": "next",
-   "elseAddrLabel": "opSSTOREend",
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    $ => A          :EQ, JMPNC(opSSTOREend)"
-  },
-  {
-   "CONST": "0",
-   "setA": 1,
-   "line": 254,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    0 => A"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setA": 1,
-   "bin": 1,
-   "binOpcode": 4,
-   "JMPC": 1,
-   "useJmpAddr": 1,
-   "jmpAddr": 1891,
-   "useElseAddr": 1,
-   "elseAddr": 1903,
-   "line": 255,
-   "jmpAddrLabel": "next",
-   "elseAddrLabel": "opSSTOREdifA2",
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    $ => A          :EQ, JMPNC(opSSTOREdifA2)"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setA": 1,
-   "offset": 16,
-   "mOp": 1,
-   "mWR": 0,
-   "line": 257,
-   "offsetLabel": "gasRefund",
-   "useCTX": 1,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    $ => A          :MLOAD(gasRefund)"
-  },
-  {
-   "inA": "1",
-   "CONST": "19900",
-   "setA": 1,
-   "offset": 16,
-   "mOp": 1,
-   "mWR": 1,
-   "JMP": 1,
-   "useJmpAddr": 1,
-   "jmpAddr": 1912,
-   "line": 258,
-   "offsetLabel": "gasRefund",
-   "useCTX": 1,
-   "jmpAddrLabel": "opSSTOREend",
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    A + %SSTORE_SET_GAS_REDUCED => A  :MSTORE(gasRefund), JMP(opSSTOREend)"
-  },
-  {
-   "CONST": "0",
-   "setA": 1,
-   "line": 262,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    0 => A"
-  },
-  {
-   "inE": "1",
-   "setB": 1,
-   "line": 263,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    E => B"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setA": 1,
-   "bin": 1,
-   "binOpcode": 4,
-   "JMPC": 1,
-   "useJmpAddr": 1,
-   "jmpAddr": 1896,
-   "useElseAddr": 1,
-   "elseAddr": 1898,
-   "line": 264,
-   "jmpAddrLabel": "next",
-   "elseAddrLabel": "opSSTOREdifA12",
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    $ => A          :EQ, JMPNC(opSSTOREdifA12)"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setA": 1,
-   "offset": 16,
-   "mOp": 1,
-   "mWR": 0,
-   "line": 267,
-   "offsetLabel": "gasRefund",
-   "useCTX": 1,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    $ => A          :MLOAD(gasRefund)"
-  },
-  {
-   "inA": "1",
-   "CONST": "-15000",
-   "setA": 1,
-   "offset": 16,
-   "mOp": 1,
-   "mWR": 1,
-   "JMP": 1,
-   "useJmpAddr": 1,
-   "jmpAddr": 1886,
-   "line": 268,
-   "offsetLabel": "gasRefund",
-   "useCTX": 1,
-   "jmpAddrLabel": "opSSTOREdifAB",
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    A - %SSTORE_CLEARS_SCHEDULE => A  :MSTORE(gasRefund), JMP(opSSTOREdifAB)"
-  },
-  {
-   "CONST": "0",
-   "setA": 1,
-   "line": 271,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    0 => A"
-  },
-  {
-   "inD": "1",
-   "setB": 1,
-   "line": 272,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    D => B"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setA": 1,
-   "bin": 1,
-   "binOpcode": 4,
-   "JMPC": 1,
-   "useJmpAddr": 1,
-   "jmpAddr": 1901,
-   "useElseAddr": 1,
-   "elseAddr": 1886,
-   "line": 273,
-   "jmpAddrLabel": "next",
-   "elseAddrLabel": "opSSTOREdifAB",
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    $ => A          :EQ, JMPNC(opSSTOREdifAB)"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setA": 1,
-   "offset": 16,
-   "mOp": 1,
-   "mWR": 0,
-   "line": 276,
-   "offsetLabel": "gasRefund",
-   "useCTX": 1,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    $ => A          :MLOAD(gasRefund)"
-  },
-  {
-   "inA": "1",
-   "CONST": "15000",
-   "setA": 1,
-   "offset": 16,
-   "mOp": 1,
-   "mWR": 1,
-   "JMP": 1,
-   "useJmpAddr": 1,
-   "jmpAddr": 1886,
-   "line": 277,
-   "offsetLabel": "gasRefund",
-   "useCTX": 1,
-   "jmpAddrLabel": "opSSTOREdifAB",
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    A + %SSTORE_CLEARS_SCHEDULE => A  :MSTORE(gasRefund), JMP(opSSTOREdifAB)"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setA": 1,
-   "offset": 16,
-   "mOp": 1,
-   "mWR": 0,
-   "line": 282,
-   "offsetLabel": "gasRefund",
-   "useCTX": 1,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    $ => A          :MLOAD(gasRefund)"
-  },
-  {
-   "inA": "1",
-   "CONST": "2800",
-   "setA": 1,
-   "offset": 16,
-   "mOp": 1,
-   "mWR": 1,
-   "JMP": 1,
-   "useJmpAddr": 1,
-   "jmpAddr": 1912,
-   "line": 283,
-   "offsetLabel": "gasRefund",
-   "useCTX": 1,
-   "jmpAddrLabel": "opSSTOREend",
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    A + %SSTORE_RESET_GAS_REDUCED => A   :MSTORE(gasRefund), JMP(opSSTOREend)"
-  },
-  {
-   "inGAS": "1",
-   "CONST": "-2900",
-   "setGAS": 1,
-   "JMPN": 1,
-   "useJmpAddr": 1,
-   "jmpAddr": 4671,
-   "useElseAddr": 1,
-   "elseAddr": 1906,
-   "line": 288,
-   "jmpAddrLabel": "outOfGas",
-   "elseAddrLabel": "next",
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    GAS - %SSTORE_RESET_GAS => GAS    :JMPN(outOfGas)"
-  },
-  {
-   "CONST": "0",
-   "setA": 1,
-   "line": 289,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    0 => A"
-  },
-  {
-   "inD": "1",
-   "setB": 1,
-   "line": 290,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    D => B"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setA": 1,
-   "bin": 1,
-   "binOpcode": 4,
-   "JMPC": 1,
-   "useJmpAddr": 1,
-   "jmpAddr": 1909,
-   "useElseAddr": 1,
-   "elseAddr": 1912,
-   "line": 291,
-   "jmpAddrLabel": "next",
-   "elseAddrLabel": "opSSTOREend",
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    $ => A          :EQ, JMPNC(opSSTOREend)"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setA": 1,
-   "offset": 16,
-   "mOp": 1,
-   "mWR": 0,
-   "line": 294,
-   "offsetLabel": "gasRefund",
-   "useCTX": 1,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    $ => A          :MLOAD(gasRefund)"
-  },
-  {
-   "inA": "1",
-   "CONST": "15000",
-   "setA": 1,
-   "offset": 16,
-   "mOp": 1,
-   "mWR": 1,
-   "line": 295,
-   "offsetLabel": "gasRefund",
-   "useCTX": 1,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    A + %SSTORE_CLEARS_SCHEDULE => A  :MSTORE(gasRefund)"
-  },
-  {
-   "JMP": 1,
-   "useJmpAddr": 1,
-   "jmpAddr": 1912,
-   "line": 296,
-   "jmpAddrLabel": "opSSTOREend",
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "                    :JMP(opSSTOREend)"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setA": 1,
-   "offset": 13,
-   "mOp": 1,
-   "mWR": 0,
-   "JMPZ": 1,
-   "useJmpAddr": 1,
-   "jmpAddr": 1913,
-   "useElseAddr": 1,
-   "elseAddr": 1914,
-   "line": 299,
-   "offsetLabel": "isCreateContract",
-   "useCTX": 1,
-   "jmpAddrLabel": "next",
-   "elseAddrLabel": "mloadContract",
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    $ => A          :MLOAD(isCreateContract), JMPNZ(mloadContract)"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setA": 1,
-   "offset": 2,
-   "mOp": 1,
-   "mWR": 0,
-   "JMP": 1,
-   "useJmpAddr": 1,
-   "jmpAddr": 1915,
-   "line": 300,
-   "offsetLabel": "storageAddr",
-   "useCTX": 1,
-   "jmpAddrLabel": "opSSTOREsr",
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    $ => A          :MLOAD(storageAddr), JMP(opSSTOREsr)"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setA": 1,
-   "offset": 14,
-   "mOp": 1,
-   "mWR": 0,
-   "line": 304,
-   "offsetLabel": "createContractAddress",
-   "useCTX": 1,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    $ => A          :MLOAD(createContractAddress)"
-  },
-  {
-   "CONST": "3",
-   "setB": 1,
-   "line": 308,
-   "fileName": "opcodes/storage-memory.zkasm",
-   "lineStr": "    %SMT_KEY_SC_STORAGE => B"
-  },
-  {
-   "freeInTag": {
-    "op": ""
-   },
-   "inFREE": "1",
-   "setC": 1,
-   "offset": 47,
-   "mOp": 1,
-   "mWR": 0,
-   "line": 309,
+   "line": 193,
    "cmdAfter": [
     {
      "op": "functionCall",
@@ -26926,6 +26144,788 @@
      ]
     }
    ],
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    $ => D          :MLOAD(SP) ; [value => D]"
+  },
+  {
+   "inGAS": "1",
+   "CONST": "-2301",
+   "JMPN": 1,
+   "useJmpAddr": 1,
+   "jmpAddr": 4671,
+   "useElseAddr": 1,
+   "elseAddr": 1859,
+   "line": 198,
+   "jmpAddrLabel": "outOfGas",
+   "elseAddrLabel": "next",
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    GAS - %SSTORE_ENTRY_EIP_2200_GAS - 1  :JMPN(outOfGas)"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 33,
+   "mOp": 1,
+   "mWR": 0,
+   "JMPZ": 1,
+   "useJmpAddr": 1,
+   "jmpAddr": 1860,
+   "useElseAddr": 1,
+   "elseAddr": 4677,
+   "line": 200,
+   "offsetLabel": "isStaticCall",
+   "useCTX": 1,
+   "jmpAddrLabel": "next",
+   "elseAddrLabel": "invalidStaticTx",
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    $ => A          :MLOAD(isStaticCall), JMPNZ(invalidStaticTx)"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 13,
+   "mOp": 1,
+   "mWR": 0,
+   "JMPZ": 1,
+   "useJmpAddr": 1,
+   "jmpAddr": 1861,
+   "useElseAddr": 1,
+   "elseAddr": 1862,
+   "line": 202,
+   "offsetLabel": "isCreateContract",
+   "useCTX": 1,
+   "jmpAddrLabel": "next",
+   "elseAddrLabel": "deploymentSSTORE",
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    $ => A          :MLOAD(isCreateContract), JMPNZ(deploymentSSTORE)"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 2,
+   "mOp": 1,
+   "mWR": 0,
+   "JMP": 1,
+   "useJmpAddr": 1,
+   "jmpAddr": 1863,
+   "line": 204,
+   "offsetLabel": "storageAddr",
+   "useCTX": 1,
+   "jmpAddrLabel": "opSSTOREinit",
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    $ => A          :MLOAD(storageAddr), JMP(opSSTOREinit)"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 14,
+   "mOp": 1,
+   "mWR": 0,
+   "line": 208,
+   "offsetLabel": "createContractAddress",
+   "useCTX": 1,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    $ => A          :MLOAD(createContractAddress)"
+  },
+  {
+   "CONST": "3",
+   "setB": 1,
+   "line": 212,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    %SMT_KEY_SC_STORAGE => B"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setE": 1,
+   "sRD": 1,
+   "line": 213,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    $ => E          :SLOAD"
+  },
+  {
+   "inSR": "1",
+   "offset": 39,
+   "mOp": 1,
+   "mWR": 1,
+   "line": 215,
+   "offsetLabel": "auxSR",
+   "useCTX": 0,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    SR              :MSTORE(auxSR)"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setSR": 1,
+   "offset": 33,
+   "mOp": 1,
+   "mWR": 0,
+   "line": 216,
+   "offsetLabel": "originSR",
+   "useCTX": 0,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    $ => SR         :MLOAD(originSR)"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setB": 1,
+   "sRD": 1,
+   "line": 217,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    $ => B          :SLOAD ; origin value"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setSR": 1,
+   "offset": 39,
+   "mOp": 1,
+   "mWR": 0,
+   "JMP": 0,
+   "JMPC": 0,
+   "JMPN": 0,
+   "useJmpAddr": 1,
+   "jmpAddr": 3630,
+   "call": 1,
+   "line": 219,
+   "offsetLabel": "auxSR",
+   "useCTX": 0,
+   "jmpAddrLabel": "isColdSlot",
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    $ => SR         :MLOAD(auxSR), CALL(isColdSlot)"
+  },
+  {
+   "inB": "1",
+   "setC": 1,
+   "line": 220,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    B => C           ; origin value"
+  },
+  {
+   "inGAS": "1",
+   "inA": "-2100",
+   "setGAS": 1,
+   "JMPN": 1,
+   "useJmpAddr": 1,
+   "jmpAddr": 4671,
+   "useElseAddr": 1,
+   "elseAddr": 1871,
+   "line": 222,
+   "jmpAddrLabel": "outOfGas",
+   "elseAddrLabel": "next",
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    GAS - A*%COLD_SLOAD_COST => GAS    :JMPN(outOfGas)"
+  },
+  {
+   "inE": "1",
+   "setA": 1,
+   "line": 223,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    E => A"
+  },
+  {
+   "inD": "1",
+   "setB": 1,
+   "line": 224,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    D => B"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "bin": 1,
+   "binOpcode": 4,
+   "JMPC": 1,
+   "useJmpAddr": 1,
+   "jmpAddr": 1874,
+   "useElseAddr": 1,
+   "elseAddr": 1875,
+   "line": 225,
+   "jmpAddrLabel": "next",
+   "elseAddrLabel": "opSSTOREdif",
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    $ => A          :EQ, JMPNC(opSSTOREdif)"
+  },
+  {
+   "inGAS": "1",
+   "CONST": "-100",
+   "setGAS": 1,
+   "JMPN": 1,
+   "useJmpAddr": 1,
+   "jmpAddr": 4671,
+   "useElseAddr": 1,
+   "elseAddr": 1912,
+   "line": 228,
+   "jmpAddrLabel": "outOfGas",
+   "elseAddrLabel": "opSSTOREend",
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    GAS - %SSTORE_DYNAMIC_GAS => GAS:JMPN(outOfGas, opSSTOREend)"
+  },
+  {
+   "inC": "1",
+   "setA": 1,
+   "line": 232,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    C => A"
+  },
+  {
+   "inE": "1",
+   "setB": 1,
+   "line": 233,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    E => B"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "bin": 1,
+   "binOpcode": 4,
+   "JMPC": 1,
+   "useJmpAddr": 1,
+   "jmpAddr": 1878,
+   "useElseAddr": 1,
+   "elseAddr": 1882,
+   "line": 234,
+   "jmpAddrLabel": "next",
+   "elseAddrLabel": "opSSTOREdifA",
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    $ => A          :EQ, JMPNC(opSSTOREdifA)"
+  },
+  {
+   "CONST": "0",
+   "setA": 1,
+   "line": 236,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    0 => A"
+  },
+  {
+   "inC": "1",
+   "setB": 1,
+   "line": 237,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    C => B"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "bin": 1,
+   "binOpcode": 4,
+   "JMPC": 1,
+   "useJmpAddr": 1,
+   "jmpAddr": 1881,
+   "useElseAddr": 1,
+   "elseAddr": 1905,
+   "line": 238,
+   "jmpAddrLabel": "next",
+   "elseAddrLabel": "opSSTOREdifB",
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    $ => A          :EQ, JMPNC(opSSTOREdifB)"
+  },
+  {
+   "inGAS": "1",
+   "CONST": "-20000",
+   "setGAS": 1,
+   "JMPN": 1,
+   "useJmpAddr": 1,
+   "jmpAddr": 4671,
+   "useElseAddr": 1,
+   "elseAddr": 1912,
+   "line": 241,
+   "jmpAddrLabel": "outOfGas",
+   "elseAddrLabel": "opSSTOREend",
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    GAS - %SSTORE_SET_GAS => GAS    :JMPN(outOfGas, opSSTOREend)"
+  },
+  {
+   "inGAS": "1",
+   "CONST": "-100",
+   "setGAS": 1,
+   "JMPN": 1,
+   "useJmpAddr": 1,
+   "jmpAddr": 4671,
+   "useElseAddr": 1,
+   "elseAddr": 1883,
+   "line": 245,
+   "jmpAddrLabel": "outOfGas",
+   "elseAddrLabel": "next",
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    GAS - %SSTORE_DYNAMIC_GAS => GAS:JMPN(outOfGas)"
+  },
+  {
+   "CONST": "0",
+   "setA": 1,
+   "line": 246,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    0 => A"
+  },
+  {
+   "inC": "1",
+   "setB": 1,
+   "line": 247,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    C => B"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "bin": 1,
+   "binOpcode": 4,
+   "JMPC": 1,
+   "useJmpAddr": 1,
+   "jmpAddr": 1886,
+   "useElseAddr": 1,
+   "elseAddr": 1893,
+   "line": 248,
+   "jmpAddrLabel": "next",
+   "elseAddrLabel": "opSSTOREdifA1",
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    $ => A          :EQ, JMPNC(opSSTOREdifA1)"
+  },
+  {
+   "inD": "1",
+   "setA": 1,
+   "line": 253,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    D => A"
+  },
+  {
+   "inC": "1",
+   "setB": 1,
+   "line": 254,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    C => B"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "bin": 1,
+   "binOpcode": 4,
+   "JMPC": 1,
+   "useJmpAddr": 1,
+   "jmpAddr": 1889,
+   "useElseAddr": 1,
+   "elseAddr": 1912,
+   "line": 255,
+   "jmpAddrLabel": "next",
+   "elseAddrLabel": "opSSTOREend",
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    $ => A          :EQ, JMPNC(opSSTOREend)"
+  },
+  {
+   "CONST": "0",
+   "setA": 1,
+   "line": 257,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    0 => A"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "bin": 1,
+   "binOpcode": 4,
+   "JMPC": 1,
+   "useJmpAddr": 1,
+   "jmpAddr": 1891,
+   "useElseAddr": 1,
+   "elseAddr": 1903,
+   "line": 258,
+   "jmpAddrLabel": "next",
+   "elseAddrLabel": "opSSTOREdifA2",
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    $ => A          :EQ, JMPNC(opSSTOREdifA2)"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 16,
+   "mOp": 1,
+   "mWR": 0,
+   "line": 260,
+   "offsetLabel": "gasRefund",
+   "useCTX": 1,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    $ => A          :MLOAD(gasRefund)"
+  },
+  {
+   "inA": "1",
+   "CONST": "19900",
+   "setA": 1,
+   "offset": 16,
+   "mOp": 1,
+   "mWR": 1,
+   "JMP": 1,
+   "useJmpAddr": 1,
+   "jmpAddr": 1912,
+   "line": 261,
+   "offsetLabel": "gasRefund",
+   "useCTX": 1,
+   "jmpAddrLabel": "opSSTOREend",
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    A + %SSTORE_SET_GAS_REDUCED => A  :MSTORE(gasRefund), JMP(opSSTOREend)"
+  },
+  {
+   "CONST": "0",
+   "setA": 1,
+   "line": 265,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    0 => A"
+  },
+  {
+   "inE": "1",
+   "setB": 1,
+   "line": 266,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    E => B"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "bin": 1,
+   "binOpcode": 4,
+   "JMPC": 1,
+   "useJmpAddr": 1,
+   "jmpAddr": 1896,
+   "useElseAddr": 1,
+   "elseAddr": 1898,
+   "line": 267,
+   "jmpAddrLabel": "next",
+   "elseAddrLabel": "opSSTOREdifA12",
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    $ => A          :EQ, JMPNC(opSSTOREdifA12)"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 16,
+   "mOp": 1,
+   "mWR": 0,
+   "line": 270,
+   "offsetLabel": "gasRefund",
+   "useCTX": 1,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    $ => A          :MLOAD(gasRefund)"
+  },
+  {
+   "inA": "1",
+   "CONST": "-15000",
+   "setA": 1,
+   "offset": 16,
+   "mOp": 1,
+   "mWR": 1,
+   "JMP": 1,
+   "useJmpAddr": 1,
+   "jmpAddr": 1886,
+   "line": 271,
+   "offsetLabel": "gasRefund",
+   "useCTX": 1,
+   "jmpAddrLabel": "opSSTOREdifAB",
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    A - %SSTORE_CLEARS_SCHEDULE => A  :MSTORE(gasRefund), JMP(opSSTOREdifAB)"
+  },
+  {
+   "CONST": "0",
+   "setA": 1,
+   "line": 274,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    0 => A"
+  },
+  {
+   "inD": "1",
+   "setB": 1,
+   "line": 275,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    D => B"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "bin": 1,
+   "binOpcode": 4,
+   "JMPC": 1,
+   "useJmpAddr": 1,
+   "jmpAddr": 1901,
+   "useElseAddr": 1,
+   "elseAddr": 1886,
+   "line": 276,
+   "jmpAddrLabel": "next",
+   "elseAddrLabel": "opSSTOREdifAB",
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    $ => A          :EQ, JMPNC(opSSTOREdifAB)"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 16,
+   "mOp": 1,
+   "mWR": 0,
+   "line": 279,
+   "offsetLabel": "gasRefund",
+   "useCTX": 1,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    $ => A          :MLOAD(gasRefund)"
+  },
+  {
+   "inA": "1",
+   "CONST": "15000",
+   "setA": 1,
+   "offset": 16,
+   "mOp": 1,
+   "mWR": 1,
+   "JMP": 1,
+   "useJmpAddr": 1,
+   "jmpAddr": 1886,
+   "line": 280,
+   "offsetLabel": "gasRefund",
+   "useCTX": 1,
+   "jmpAddrLabel": "opSSTOREdifAB",
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    A + %SSTORE_CLEARS_SCHEDULE => A  :MSTORE(gasRefund), JMP(opSSTOREdifAB)"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 16,
+   "mOp": 1,
+   "mWR": 0,
+   "line": 285,
+   "offsetLabel": "gasRefund",
+   "useCTX": 1,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    $ => A          :MLOAD(gasRefund)"
+  },
+  {
+   "inA": "1",
+   "CONST": "2800",
+   "setA": 1,
+   "offset": 16,
+   "mOp": 1,
+   "mWR": 1,
+   "JMP": 1,
+   "useJmpAddr": 1,
+   "jmpAddr": 1912,
+   "line": 286,
+   "offsetLabel": "gasRefund",
+   "useCTX": 1,
+   "jmpAddrLabel": "opSSTOREend",
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    A + %SSTORE_RESET_GAS_REDUCED => A   :MSTORE(gasRefund), JMP(opSSTOREend)"
+  },
+  {
+   "inGAS": "1",
+   "CONST": "-2900",
+   "setGAS": 1,
+   "JMPN": 1,
+   "useJmpAddr": 1,
+   "jmpAddr": 4671,
+   "useElseAddr": 1,
+   "elseAddr": 1906,
+   "line": 291,
+   "jmpAddrLabel": "outOfGas",
+   "elseAddrLabel": "next",
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    GAS - %SSTORE_RESET_GAS => GAS    :JMPN(outOfGas)"
+  },
+  {
+   "CONST": "0",
+   "setA": 1,
+   "line": 292,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    0 => A"
+  },
+  {
+   "inD": "1",
+   "setB": 1,
+   "line": 293,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    D => B"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "bin": 1,
+   "binOpcode": 4,
+   "JMPC": 1,
+   "useJmpAddr": 1,
+   "jmpAddr": 1909,
+   "useElseAddr": 1,
+   "elseAddr": 1912,
+   "line": 294,
+   "jmpAddrLabel": "next",
+   "elseAddrLabel": "opSSTOREend",
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    $ => A          :EQ, JMPNC(opSSTOREend)"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 16,
+   "mOp": 1,
+   "mWR": 0,
+   "line": 297,
+   "offsetLabel": "gasRefund",
+   "useCTX": 1,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    $ => A          :MLOAD(gasRefund)"
+  },
+  {
+   "inA": "1",
+   "CONST": "15000",
+   "setA": 1,
+   "offset": 16,
+   "mOp": 1,
+   "mWR": 1,
+   "line": 298,
+   "offsetLabel": "gasRefund",
+   "useCTX": 1,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    A + %SSTORE_CLEARS_SCHEDULE => A  :MSTORE(gasRefund)"
+  },
+  {
+   "JMP": 1,
+   "useJmpAddr": 1,
+   "jmpAddr": 1912,
+   "line": 299,
+   "jmpAddrLabel": "opSSTOREend",
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "                    :JMP(opSSTOREend)"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 13,
+   "mOp": 1,
+   "mWR": 0,
+   "JMPZ": 1,
+   "useJmpAddr": 1,
+   "jmpAddr": 1913,
+   "useElseAddr": 1,
+   "elseAddr": 1914,
+   "line": 302,
+   "offsetLabel": "isCreateContract",
+   "useCTX": 1,
+   "jmpAddrLabel": "next",
+   "elseAddrLabel": "mloadContract",
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    $ => A          :MLOAD(isCreateContract), JMPNZ(mloadContract)"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 2,
+   "mOp": 1,
+   "mWR": 0,
+   "JMP": 1,
+   "useJmpAddr": 1,
+   "jmpAddr": 1915,
+   "line": 303,
+   "offsetLabel": "storageAddr",
+   "useCTX": 1,
+   "jmpAddrLabel": "opSSTOREsr",
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    $ => A          :MLOAD(storageAddr), JMP(opSSTOREsr)"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setA": 1,
+   "offset": 14,
+   "mOp": 1,
+   "mWR": 0,
+   "line": 307,
+   "offsetLabel": "createContractAddress",
+   "useCTX": 1,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    $ => A          :MLOAD(createContractAddress)"
+  },
+  {
+   "CONST": "3",
+   "setB": 1,
+   "line": 311,
+   "fileName": "opcodes/storage-memory.zkasm",
+   "lineStr": "    %SMT_KEY_SC_STORAGE => B"
+  },
+  {
+   "freeInTag": {
+    "op": ""
+   },
+   "inFREE": "1",
+   "setC": 1,
+   "offset": 47,
+   "mOp": 1,
+   "mWR": 0,
+   "line": 312,
    "offsetLabel": "tmpVarCsstore",
    "useCTX": 0,
    "fileName": "opcodes/storage-memory.zkasm",
@@ -26941,7 +26941,7 @@
    "JMP": 1,
    "useJmpAddr": 1,
    "jmpAddr": 4142,
-   "line": 311,
+   "line": 313,
    "jmpAddrLabel": "readCode",
    "fileName": "opcodes/storage-memory.zkasm",
    "lineStr": "    $ => SR         :SSTORE, JMP(readCode)"
