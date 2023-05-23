@@ -1267,9 +1267,9 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 
     // Check previous step
     Opcode * prevStep = NULL;
-    if (execution_trace.size() > 1)
+    if (execution_trace.size() > 0)
     {
-        prevStep = &execution_trace[execution_trace.size() - 2];
+        prevStep = &execution_trace[execution_trace.size() - 1];
         if (opIncContext.find(prevStep->opcode) != opIncContext.end())
         {
             // Create new call data entry
