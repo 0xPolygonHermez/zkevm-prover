@@ -18,6 +18,7 @@ public:
     mpz_class value;
     string data;
     uint64_t gas;
+    string type;
     OpcodeContract() : value(0), gas(0) {};
 };
 

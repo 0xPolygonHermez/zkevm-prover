@@ -17,13 +17,19 @@ namespace fork_4
 
 class Context;
 
+class ContextData
+{
+public:
+    string type;
+};
+
 class FullTracer: public FullTracerInterface
 {
 public:
     Goldilocks &fr;
     uint64_t depth;
     uint64_t initGas;
-    unordered_map<uint64_t,unordered_map<string,string>> deltaStorage;
+    unordered_map<string,unordered_map<string,string>> deltaStorage;
     FinalTrace finalTrace;
     unordered_map<uint64_t,TxGAS> txGAS;
     uint64_t txCount;
@@ -38,6 +44,7 @@ public:
     uint64_t lastErrorOpcode;
     unordered_map<string, InfoReadWrite> read_write_addresses;
     ReturnFromCreate returnFromCreate;
+    unordered_map<uint64_t, ContextData> callData;
 #ifdef LOG_TIME_STATISTICS
     TimeMetricStorage tms;
     struct timeval t;
@@ -84,6 +91,7 @@ public:
         call_trace      = other.call_trace;
         execution_trace = other.execution_trace;
         lastError       = other.lastError;
+        callData        = other.callData;
         return *this;
     }
 
