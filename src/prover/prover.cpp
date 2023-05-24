@@ -180,6 +180,7 @@ Prover::~Prover()
         delete starksC12a;
         delete starksRecursive1;
         delete starksRecursive2;
+        delete starksRecursiveF;
     }
 }
 
