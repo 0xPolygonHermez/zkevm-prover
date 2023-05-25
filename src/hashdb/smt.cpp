@@ -16,8 +16,8 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
     for (uint64_t i=0; i<4; i++) newRoot[i] = oldRoot[i];
 
     // Get a list of the bits of the key to navigate top-down through the tree
-    vector <uint64_t> keys;
-    splitKey(key, keys);
+    TreePosition treePosition;
+    splitKey(key, treePosition.keys);
 
     int64_t level = 0;
     uint64_t proofHashCounter = 0;
@@ -49,7 +49,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
         string rootString = fea2string(fr, r);
         vector<Goldilocks::Element> dbValue;
 
-        dbres = db.read(rootString, dbValue, dbReadLog, false, &keys, level);
+        dbres = db.read(rootString, dbValue, dbReadLog, false, &treePosition.keys, level);
         if (dbres != ZKR_SUCCESS)
         {
             zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + rootString);
@@ -99,13 +99,13 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
         else
         {
             // Take either the first 4 (keys[level]=0) or the second 4 (keys[level]=1) siblings as the hash of the next level
-            r[0] = siblings[level][keys[level]*4];
-            r[1] = siblings[level][keys[level]*4 + 1];
-            r[2] = siblings[level][keys[level]*4 + 2];
-            r[3] = siblings[level][keys[level]*4 + 3];
+            r[0] = siblings[level][treePosition.keys[level]*4];
+            r[1] = siblings[level][treePosition.keys[level]*4 + 1];
+            r[2] = siblings[level][treePosition.keys[level]*4 + 2];
+            r[3] = siblings[level][treePosition.keys[level]*4 + 3];
 
             // Store the used key bit in accKey
-            accKey.push_back(keys[level]);
+            accKey.push_back(treePosition.keys[level]);
 
 #ifdef LOG_SMT
             zklog.info("Smt::set() down 1 level=" + to_string(level) + " keys[level]=" + to_string(keys[level]) + " root/hash=" + fea2string(fr,r));
@@ -152,7 +152,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
 
                 // Save and get the new value hash
                 Goldilocks::Element newValH[4];
-                dbres = hashSave(db, v, c, persistent, newValH);
+                dbres = hashSave(db, v, c, persistent, newValH, NULL);
                 if (dbres != ZKR_SUCCESS)
                 {
                     return dbres;
@@ -167,7 +167,8 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
 
                 // Save and get the hash
                 Goldilocks::Element newLeafHash[4];
-                dbres = hashSave(db, v, c, persistent, newLeafHash);
+                treePosition.level = level + 1;
+                dbres = hashSave(db, v, c, persistent, newLeafHash, &treePosition);
                 if (dbres != ZKR_SUCCESS)
                 {
                     return dbres;
@@ -179,10 +180,10 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                 // If we are not at the top, the new leaf hash will become part of the higher level content, based on the keys[level] bit
                 if ( level >= 0 )
                 {
-                    siblings[level][keys[level]*4] = newLeafHash[0];
-                    siblings[level][keys[level]*4 + 1] = newLeafHash[1];
-                    siblings[level][keys[level]*4 + 2] = newLeafHash[2];
-                    siblings[level][keys[level]*4 + 3] = newLeafHash[3];
+                    siblings[level][treePosition.keys[level]*4] = newLeafHash[0];
+                    siblings[level][treePosition.keys[level]*4 + 1] = newLeafHash[1];
+                    siblings[level][treePosition.keys[level]*4 + 2] = newLeafHash[2];
+                    siblings[level][treePosition.keys[level]*4 + 3] = newLeafHash[3];
                 }
                 // If this is the top, then this is the new root
                 else
@@ -211,7 +212,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                 splitKey(foundKey, foundKeys);
 
                 // While the key bits are the same, increase the level; we want to find the first bit when the keys differ
-                while (keys[level2] == foundKeys[level2]) level2++;
+                while (treePosition.keys[level2] == foundKeys[level2]) level2++;
 
                 // Store the key of the old value at the new level
                 Goldilocks::Element oldKey[4];
@@ -229,7 +230,8 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
 
                 // Save and get the hash
                 Goldilocks::Element oldLeafHash[4];
-                dbres = hashSave(db, v, c, persistent, oldLeafHash);
+                treePosition.level = level2 + 1;
+                dbres = hashSave(db, v, c, persistent, oldLeafHash, &treePosition);
                 if (dbres != ZKR_SUCCESS)
                 {
                     return dbres;
@@ -260,9 +262,9 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                 // Capacity is marking the node as intermediate
                 c[0] = fr.zero();
 
-                // Create the intermediate node
+                // Create the value node
                 Goldilocks::Element newValH[4];
-                dbres = hashSave(db, valueFea, c, persistent, newValH);
+                dbres = hashSave(db, valueFea, c, persistent, newValH, NULL);
                 if (dbres != ZKR_SUCCESS)
                 {
                     return dbres;
@@ -277,9 +279,10 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                 // Capacity is marking the node as leaf
                 c[0] = fr.one();
 
-                // Create the node and store the hash in newLeafHash
+                // Create the leaf node and store the hash in newLeafHash
                 Goldilocks::Element newLeafHash[4];
-                dbres = hashSave(db, v, c, persistent, newLeafHash);
+                treePosition.level = level2 + 1;
+                dbres = hashSave(db, v, c, persistent, newLeafHash, &treePosition);
                 if (dbres != ZKR_SUCCESS)
                 {
                     return dbres;
@@ -291,16 +294,17 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                 Goldilocks::Element node[8];
                 for (uint64_t j=0; j<4; j++)
                 {
-                    node[keys[level2] * 4 + j] = newLeafHash[j];
+                    node[treePosition.keys[level2] * 4 + j] = newLeafHash[j];
                     node[foundKeys[level2] * 4 + j] = oldLeafHash[j];
                 }
 
                 // Capacity is marking the node as intermediate
                 c[0] = fr.zero();
 
-                // Create the node and store the calculated hash in r2
+                // Create the intermediate node and store the calculated hash in r2
                 Goldilocks::Element r2[4];
-                dbres = hashSave(db, node, c, persistent, r2);
+                treePosition.level = level2;
+                dbres = hashSave(db, node, c, persistent, r2, &treePosition);
                 if (dbres != ZKR_SUCCESS)
                 {
                     return dbres;
@@ -320,14 +324,15 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                     }
                     for (uint64_t j = 0; j < 4; j++)
                     {
-                        node[keys[level2] * 4 + j] = r2[j];
+                        node[treePosition.keys[level2] * 4 + j] = r2[j];
                     }
 
                     // Capacity is marking the node as intermediate
                     c[0] = fr.zero();
 
                     // Create the intermediate node and store the calculated hash in r2
-                    dbres = hashSave(db, node, c, persistent, r2);
+                    treePosition.level = level2;
+                    dbres = hashSave(db, node, c, persistent, r2, &treePosition);
                     if (dbres != ZKR_SUCCESS)
                     {
                         return dbres;
@@ -348,7 +353,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                 {
                     for (uint64_t j = 0; j < 4; j++)
                     {
-                        siblings[level][keys[level] * 4 + j] = r2[j];
+                        siblings[level][treePosition.keys[level] * 4 + j] = r2[j];
                     }
                 }
                 // If at the top of the tree, update newRoot
@@ -382,9 +387,9 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
             // Capacity mars the node as intermediate/value
             Goldilocks::Element c[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
 
-            // Create the node and store the calculated hash in newValH
+            // Create the value node and store the calculated hash in newValH
             Goldilocks::Element newValH[4];
-            dbres = hashSave(db, valueFea, c, persistent, newValH);
+            dbres = hashSave(db, valueFea, c, persistent, newValH, NULL);
             if (dbres != ZKR_SUCCESS)
             {
                 return dbres;
@@ -402,7 +407,8 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
 
             // Create the new leaf node and store the calculated hash in newLeafHash
             Goldilocks::Element newLeafHash[4];
-            dbres = hashSave(db, keyvalVector, c, persistent, newLeafHash);
+            treePosition.level = level + 1;
+            dbres = hashSave(db, keyvalVector, c, persistent, newLeafHash, &treePosition);
             if (dbres != ZKR_SUCCESS)
             {
                 return dbres;
@@ -415,7 +421,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
             {
                 for (uint64_t j=0; j<4; j++)
                 {
-                    siblings[level][keys[level]*4 + j] = newLeafHash[j];
+                    siblings[level][treePosition.keys[level]*4 + j] = newLeafHash[j];
                 }
             }
             // If at the top of the tree, update the new root
@@ -442,7 +448,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                 // Set the hash of the deleted node to zero
                 for (uint64_t j=0; j<4; j++)
                 {
-                    siblings[level][keys[level]*4 + j] = fr.zero();
+                    siblings[level][treePosition.keys[level]*4 + j] = fr.zero();
                 }
 
                 // Find if there is only one non-zero hash in the siblings list for this level
@@ -462,7 +468,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
 
                     // Read its 2 siblings
                     vector<Goldilocks::Element> dbValue;
-                    dbres = db.read(auxString, dbValue, dbReadLog, false, &keys, level);
+                    dbres = db.read(auxString, dbValue, dbReadLog, false, &treePosition.keys, level);
                     if ( dbres != ZKR_SUCCESS)
                     {
                         zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + auxString);
@@ -538,9 +544,10 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                         // Capacity marks the node as a leaf
                         Goldilocks::Element c[4] = {fr.one(), fr.zero(), fr.zero(), fr.zero()};
 
-                        // Create node and store computed hash in oldLeafHash
+                        // Create leaf node and store computed hash in oldLeafHash
                         Goldilocks::Element oldLeafHash[4];
-                        dbres = hashSave(db, a, c, persistent, oldLeafHash);
+                        treePosition.level = level + 1;
+                        dbres = hashSave(db, a, c, persistent, oldLeafHash, &treePosition);
                         if (dbres != ZKR_SUCCESS)
                         {
                             return dbres;
@@ -554,7 +561,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                         {
                             for (uint64_t j=0; j< 4; j++)
                             {
-                                siblings[level][keys[level]*4 + j] = oldLeafHash[j];
+                                siblings[level][treePosition.keys[level]*4 + j] = oldLeafHash[j];
                             }
                         }
                         // If we are at the top of the tree, then update new root
@@ -625,7 +632,8 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
         Goldilocks::Element a[8], c[4];
         for (uint64_t i=0; i<8; i++) a[i] = siblings[level][i];
         for (uint64_t i=0; i<4; i++) c[i] = siblings[level][8+i];
-        dbres = hashSave(db, a, c, persistent, newRoot);
+        treePosition.level = level;
+        dbres = hashSave(db, a, c, persistent, newRoot, /*&treePosition*/NULL);
         if (dbres != ZKR_SUCCESS)
         {
             return dbres;
@@ -641,7 +649,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
             // Overwrite the first or second 4 elements (based on keys[level] bit) with the new root hash from the lower level
             for (uint64_t j=0; j<4; j++)
             {
-                siblings[level][keys[level]*4 + j] = newRoot[j];
+                siblings[level][treePosition.keys[level]*4 + j] = newRoot[j];
             }
         }
     }
@@ -953,7 +961,7 @@ void Smt::removeKeyBits ( const Goldilocks::Element (&key)[4], uint64_t nBits, G
     }
 }
 
-zkresult Smt::hashSave ( Database &db, const Goldilocks::Element (&a)[8], const Goldilocks::Element (&c)[4], const bool persistent, Goldilocks::Element (&hash)[4])
+zkresult Smt::hashSave ( Database &db, const Goldilocks::Element (&a)[8], const Goldilocks::Element (&c)[4], const bool persistent, Goldilocks::Element (&hash)[4], const TreePosition (*pTreePosition))
 {
     // Calculate the poseidon hash of the vector of field elements: v = a | c
     Goldilocks::Element v[12];
@@ -969,7 +977,7 @@ zkresult Smt::hashSave ( Database &db, const Goldilocks::Element (&a)[8], const 
     for (uint64_t i=0; i<8; i++) dbValue.push_back(a[i]);
     for (uint64_t i=0; i<4; i++) dbValue.push_back(c[i]);
     zkresult zkr;
-    zkr = db.write(hashString, dbValue, persistent);
+    zkr = db.write(hashString, dbValue, persistent, false, pTreePosition);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("Smt::hashSave() failed calling db.write() key=" + hashString + " result=" + to_string(zkr) + "=" + zkresult2string(zkr));

@@ -3,6 +3,7 @@
 
 #include <string>
 #include "goldilocks_base_field.hpp"
+#include "tree_position.hpp"
 
 using namespace std;
 
@@ -11,6 +12,7 @@ class FlushData
 public:
     string key;
     string value;
+    TreePosition treePosition;
 };
 
 #endif

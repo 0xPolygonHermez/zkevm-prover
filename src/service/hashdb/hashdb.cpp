@@ -266,7 +266,7 @@ void HashDB::hashSave(const Goldilocks::Element (&a)[8], const Goldilocks::Eleme
     lock_guard<recursive_mutex> guard(mlock);
 #endif
 
-    smt.hashSave(db, a, c, persistent, hash);
+    smt.hashSave(db, a, c, persistent, hash, NULL);
 
 #ifdef LOG_TIME_STATISTICS_HASHDB
     tms.add("hashSave", TimeDiff(t));

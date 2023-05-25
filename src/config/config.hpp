@@ -137,6 +137,8 @@ public:
     bool dbGetTree;
     bool dbReadOnly;
     uint64_t dbReadRetryDelay;
+    bool dbMultiWriteSingleHash;
+    bool dbMultiWriteSinglePosition;
     uint64_t cleanerPollingPeriod;
     uint64_t requestsPersistence;
     uint64_t maxExecutorThreads;

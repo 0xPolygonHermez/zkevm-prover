@@ -246,7 +246,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
     return r;
 }
 
-zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent, const bool update)
+zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent, const bool update, const TreePosition * pTreePosition)
 {
     // Check that it has  been initialized before
     if (!bInitialized)
@@ -281,7 +281,7 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
             valueString += PrependZeros(fr.toString(value[i], 16), 16);
         }
 
-        r = writeRemote(false, key, valueString, update);
+        r = writeRemote(false, key, valueString, update, pTreePosition);
     }
     else
     {
@@ -524,6 +524,7 @@ zkresult Database::readRemote(bool bProgram, const string &key, string &value)
     catch (const std::exception &e)
     {
         zklog.error("Database::readRemote() table=" + tableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
+        disposeConnection(pDatabaseConnection);
         exitProcess();
     }
     
@@ -629,6 +630,7 @@ zkresult Database::readTreeRemote(const string &key, const vector<uint64_t> *key
     catch (const std::exception &e)
     {
         zklog.warning("Database::readTreeRemote() exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
+        disposeConnection(pDatabaseConnection);
         return ZKR_DB_ERROR;
     }
     
@@ -644,7 +646,7 @@ zkresult Database::readTreeRemote(const string &key, const vector<uint64_t> *key
     
 }
 
-zkresult Database::writeRemote(bool bProgram, const string &key, const string &value, const bool update)
+zkresult Database::writeRemote(bool bProgram, const string &key, const string &value, const bool update, const TreePosition * pTreePosition)
 {
     zkresult result = ZKR_SUCCESS;
 
@@ -661,13 +663,56 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
         else
         {
             multiWrite.Lock();
+
             vector<FlushData> &multiWriteFlushData =
                 bProgram ? (update ? multiWrite.data[multiWrite.pendingToFlushDataIndex].programUpdate : multiWrite.data[multiWrite.pendingToFlushDataIndex].program) :
                            (update ? multiWrite.data[multiWrite.pendingToFlushDataIndex].nodesUpdate   : multiWrite.data[multiWrite.pendingToFlushDataIndex].nodes);
-            FlushData auxFlushData;
-            auxFlushData.key = key;
-            auxFlushData.value = value;
-            multiWriteFlushData.push_back(auxFlushData);
+            
+            // Log if we found a compatible entry
+            bool bFound = false;
+            vector<FlushData>::iterator it;
+
+            // Check if we already have the same key, and therefore the same value
+            if (config.dbMultiWriteSingleHash)
+            {
+                for (it=multiWriteFlushData.begin(); it<multiWriteFlushData.end(); it++)
+                {
+                    if (it->key == key)
+                    {
+                        bFound = true;
+                        break;
+                    }
+                }
+            }
+
+            // If we have the position, check if we already have the same position; if so, overwrite key-value
+            if (!bFound && (pTreePosition != NULL) && config.dbMultiWriteSinglePosition)
+            {
+                for (it=multiWriteFlushData.begin(); it<multiWriteFlushData.end(); it++)
+                {
+                    if (it->treePosition == *pTreePosition)
+                    {
+                        it->key = key;
+                        it->value = value;
+                        bFound = true;
+                        break;
+                    }
+                }
+            }
+
+            // Else, add a new entry
+            if (!bFound)
+            {
+                FlushData auxFlushData;
+                auxFlushData.key = key;
+                auxFlushData.value = value;
+                if (pTreePosition != NULL)
+                {
+                    auxFlushData.treePosition = *pTreePosition;
+                }
+                multiWriteFlushData.push_back(auxFlushData);
+            }
+
             multiWrite.Unlock();       
         }
     }
@@ -688,7 +733,6 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
                 pqxx::work w(*(pDatabaseConnection->pConnection));
                 pqxx::result res = w.exec(query);
                 w.commit();
-                disposeConnection(pDatabaseConnection);
             }
 #ifdef DATABASE_COMMIT
             else
@@ -702,8 +746,11 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
         catch (const std::exception &e)
         {
             zklog.error("Database::writeRemote() table=" + tableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
+            disposeConnection(pDatabaseConnection);
             result = ZKR_DB_ERROR;
         }
+
+        disposeConnection(pDatabaseConnection);
     }
 
     return result;
@@ -863,7 +910,6 @@ zkresult Database::writeGetTreeFunction(void)
             pqxx::work w(*(pDatabaseConnection->pConnection));
             pqxx::result res = w.exec(query);
             w.commit();
-            disposeConnection(pDatabaseConnection);
         }
 #ifdef DATABASE_COMMIT
         else
@@ -877,8 +923,11 @@ zkresult Database::writeGetTreeFunction(void)
     catch (const std::exception &e)
     {
         zklog.error("Database::writeGetTreeFunction() exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
+        disposeConnection(pDatabaseConnection);
         result = ZKR_DB_ERROR;
     }
+    
+    disposeConnection(pDatabaseConnection);
 
     zklog.info("Database::writeGetTreeFunction() returns " + zkresult2string(result));
         
@@ -1212,6 +1261,7 @@ zkresult Database::sendData (void)
     {
         zklog.error("Database::sendData() execute query exception: " + string(e.what()));
         //zklog.error("Database::sendData() query=" + query);
+        disposeConnection(pDatabaseConnection);
         zkr = ZKR_DB_ERROR;
     }
 
