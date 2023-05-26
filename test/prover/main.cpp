@@ -1,17 +1,25 @@
 #include <stdio.h>
+#include <iostream>
 #include "starks.hpp"
 #include "proof2zkinStark.hpp"
 #include "zkevmSteps.hpp"
 
-int main()
+using namespace std;
+
+int main(int argc, char *argv[])
 {
+	if (argc != 5)
+	{
+		cout << "Usage: " << argv[0] << " <constants> <consttree> <starkinfo> <commits>" << endl;
+		return 1;
+	}
 
     Config config;
     config.runFileGenBatchProof = true;
-    config.zkevmConstPols = "config/zkevm/zkevm.const";
+    config.zkevmConstPols = argv[1];
     config.mapConstPolsFile = false;
-    config.zkevmConstantsTree = "config/zkevm/zkevm.consttree";
-    config.zkevmStarkInfo = "config/zkevm/zkevm.starkinfo.json";
+    config.zkevmConstantsTree = argv[2];
+    config.zkevmStarkInfo = argv[3];
 
     StarkInfo starkInfo(config, config.zkevmStarkInfo);
 
@@ -19,7 +27,7 @@ int main()
     uint64_t polBits = starkInfo.starkStruct.steps[starkInfo.starkStruct.steps.size() - 1].nBits;
     FRIProof fproof((1 << polBits), FIELD_EXTENSION, starkInfo.starkStruct.steps.size(), starkInfo.evMap.size(), starkInfo.nPublics);
 
-    void *pCommit = copyFile("config/zkevm/zkevm.commit", starkInfo.nCm1 * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
+    void *pCommit = copyFile(argv[4], starkInfo.nCm1 * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
     void *pAddress = (void *)calloc(starkInfo.mapTotalN + (starkInfo.mapSectionsN.section[eSection::cm1_n] * (1 << starkInfo.starkStruct.nBits) * FIELD_EXTENSION ), sizeof(uint64_t));
 
         Starks starks(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo},pAddress);
@@ -27,6 +35,8 @@ int main()
 
     std::memcpy(pAddress, pCommit, starkInfo.nCm1 * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
 
+    Goldilocks::Element publicInputs[0] = {};
+    /*
     Goldilocks::Element publicInputs[47] = {
         Goldilocks::fromU64(3248459814),
         Goldilocks::fromU64(1620587195),
@@ -75,12 +85,15 @@ int main()
         Goldilocks::fromU64(3393099452376483046ULL),
         Goldilocks::fromU64(13454683351222426301ULL),
         Goldilocks::fromU64(7169267199863900071ULL)};
+    */
 
     json publicStarkJson;
+    /*
     for (int i = 0; i < 47; i++)
     {
         publicStarkJson[i] = Goldilocks::toString(publicInputs[i]);
     }
+    */
     ZkevmSteps zkevmSteps;
     starks.genProof(fproof, &publicInputs[0], &zkevmSteps);
 

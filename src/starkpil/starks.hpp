@@ -81,7 +81,7 @@ public:
                                                                            pAddress(_pAddress),
                                                                            x(config.generateProof() ? N << (starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits) : 0, config.generateProof() ? FIELD_EXTENSION : 0)
     {
-        nrowsStepBatch = 1;
+        nrowsStepBatch = 0;
         // Avoid unnecessary initialization if we are not going to generate any proof
         if (!config.generateProof())
             return;
