@@ -202,7 +202,7 @@ zkresult HashDB::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushI
     return ZKR_SUCCESS;
 }
 
-zkresult HashDB::getFlushData(uint64_t flushId, uint64_t &lastSentFlushId, vector<FlushData> (&nodes), vector<FlushData> (&nodesUpdate), vector<FlushData> (&program), vector<FlushData> (&programUpdate), string &nodesStateRoot)
+zkresult HashDB::getFlushData(uint64_t flushId, uint64_t &lastSentFlushId, unordered_map<string, string> (&nodes), unordered_map<string, string> (&nodesUpdate), unordered_map<string, string> (&program), unordered_map<string, string> (&programUpdate), string &nodesStateRoot)
 {
     if (!config.dbMultiWrite)
     {
@@ -266,7 +266,7 @@ void HashDB::hashSave(const Goldilocks::Element (&a)[8], const Goldilocks::Eleme
     lock_guard<recursive_mutex> guard(mlock);
 #endif
 
-    smt.hashSave(db, a, c, persistent, hash, NULL);
+    smt.hashSave(db, a, c, persistent, hash);
 
 #ifdef LOG_TIME_STATISTICS_HASHDB
     tms.add("hashSave", TimeDiff(t));

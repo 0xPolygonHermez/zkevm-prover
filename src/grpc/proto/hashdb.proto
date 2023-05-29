@@ -242,10 +242,10 @@ message GetFlushStatusResponse {
  */
 message GetFlushDataResponse {
     uint64 stored_flush_id = 1;
-    repeated FlushData nodes = 2;
-    repeated FlushData nodes_update = 3;
-    repeated FlushData program = 4;
-    repeated FlushData program_update = 5;
+    map<string, string> nodes = 2;
+    map<string, string> nodes_update = 3;
+    map<string, string> program = 4;
+    map<string, string> program_update = 5;
     string nodes_state_root = 6;
     ResultCode result = 7;
 }
@@ -278,16 +278,6 @@ message FeList {
 */
 message SiblingList {
     repeated uint64 sibling = 1;
-}
-
-/**
- * @dev Flush Data
- * @param {key} - hash key
- * @param {value} - string value
-*/
-message FlushData {
-    string key = 1;
-    string value = 2;
 }
 
 /**

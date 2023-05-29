@@ -13,7 +13,6 @@
 #include "database_cache.hpp"
 #include "database_connection.hpp"
 #include "zkassert.hpp"
-#include "flush_data.hpp"
 #include "tree_position.hpp"
 #include "multi_write.hpp"
 
@@ -62,7 +61,7 @@ private:
     void initRemote(void);
     zkresult readRemote(bool bProgram, const string &key, string &value);
     zkresult readTreeRemote(const string &key, const vector<uint64_t> *keys, uint64_t level, uint64_t &numberOfFields);
-    zkresult writeRemote(bool bProgram, const string &key, const string &value, const bool update, const TreePosition * pTreePosition = NULL);
+    zkresult writeRemote(bool bProgram, const string &key, const string &value, const bool update);
     zkresult writeGetTreeFunction(void);
 
 public:
@@ -85,7 +84,7 @@ public:
     // Basic methods
     void init(void);
     zkresult read(const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, const bool update = false, const vector<uint64_t> *keys = NULL , uint64_t level=0);
-    zkresult write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent, const bool update = false, const TreePosition * pTreePosition = NULL);
+    zkresult write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent, const bool update = false);
     zkresult getProgram(const string &_key, vector<uint8_t> &value, DatabaseMap *dbReadLog, const bool update = false);
     zkresult setProgram(const string &_key, const vector<uint8_t> &value, const bool persistent, const bool update = false);
 
@@ -102,7 +101,10 @@ public:
     zkresult sendData(void);
 
     // Get flush data, written to database by dbSenderThread; it blocks
-    zkresult getFlushData(uint64_t flushId, uint64_t &lastSentFlushId, vector<FlushData> (&nodes), vector<FlushData> (&nodesUpdate), vector<FlushData> (&program), vector<FlushData> (&programUpdate), string &nodesStateRoot);
+    zkresult getFlushData(uint64_t flushId, uint64_t &lastSentFlushId, unordered_map<string, string> (&nodes), unordered_map<string, string> (&nodesUpdate), unordered_map<string, string> (&program), unordered_map<string, string> (&programUpdate), string &nodesStateRoot);
+
+    // Delete nodes
+    zkresult deleteNodes(const vector<string> (&nodesToDelete));
 
     // Print tree
     void printTree(const string &root, string prefix = "");

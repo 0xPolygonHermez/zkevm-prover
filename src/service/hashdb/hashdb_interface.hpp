@@ -8,7 +8,6 @@
 #include "smt.hpp"
 #include <mutex>
 #include "zkresult.hpp"
-#include "flush_data.hpp"
 
 class HashDBInterface
 {
@@ -22,7 +21,7 @@ public:
     virtual void loadProgramDB(const DatabaseMap::ProgramMap &input, const bool persistent) = 0;
     virtual zkresult flush(uint64_t &flushId, uint64_t &storedFlushId) = 0;
     virtual zkresult getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram, string &proverId) = 0;
-    virtual zkresult getFlushData(uint64_t flushId, uint64_t &storedFlushId, vector<FlushData> (&nodes), vector<FlushData> (&nodesUpdate), vector<FlushData> (&program), vector<FlushData> (&programUpdate), string &nodesStateRoot) = 0;
+    virtual zkresult getFlushData(uint64_t flushId, uint64_t &storedFlushId, unordered_map<string, string> (&nodes), unordered_map<string, string> (&nodesUpdate), unordered_map<string, string> (&program), unordered_map<string, string> (&programUpdate), string &nodesStateRoot) = 0;
     virtual void clearCache(void) = 0;
 };
 

@@ -246,7 +246,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
     return r;
 }
 
-zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent, const bool update, const TreePosition * pTreePosition)
+zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent, const bool update)
 {
     // Check that it has  been initialized before
     if (!bInitialized)
@@ -281,7 +281,7 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
             valueString += PrependZeros(fr.toString(value[i], 16), 16);
         }
 
-        r = writeRemote(false, key, valueString, update, pTreePosition);
+        r = writeRemote(false, key, valueString, update);
     }
     else
     {
@@ -646,7 +646,7 @@ zkresult Database::readTreeRemote(const string &key, const vector<uint64_t> *key
     
 }
 
-zkresult Database::writeRemote(bool bProgram, const string &key, const string &value, const bool update, const TreePosition * pTreePosition)
+zkresult Database::writeRemote(bool bProgram, const string &key, const string &value, const bool update)
 {
     zkresult result = ZKR_SUCCESS;
 
@@ -664,54 +664,11 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
         {
             multiWrite.Lock();
 
-            vector<FlushData> &multiWriteFlushData =
+            unordered_map<string, string> &multiWriteFlushData =
                 bProgram ? (update ? multiWrite.data[multiWrite.pendingToFlushDataIndex].programUpdate : multiWrite.data[multiWrite.pendingToFlushDataIndex].program) :
                            (update ? multiWrite.data[multiWrite.pendingToFlushDataIndex].nodesUpdate   : multiWrite.data[multiWrite.pendingToFlushDataIndex].nodes);
             
-            // Log if we found a compatible entry
-            bool bFound = false;
-            vector<FlushData>::iterator it;
-
-            // Check if we already have the same key, and therefore the same value
-            if (config.dbMultiWriteSingleHash)
-            {
-                for (it=multiWriteFlushData.begin(); it<multiWriteFlushData.end(); it++)
-                {
-                    if (it->key == key)
-                    {
-                        bFound = true;
-                        break;
-                    }
-                }
-            }
-
-            // If we have the position, check if we already have the same position; if so, overwrite key-value
-            if (!bFound && (pTreePosition != NULL) && config.dbMultiWriteSinglePosition)
-            {
-                for (it=multiWriteFlushData.begin(); it<multiWriteFlushData.end(); it++)
-                {
-                    if (it->treePosition == *pTreePosition)
-                    {
-                        it->key = key;
-                        it->value = value;
-                        bFound = true;
-                        break;
-                    }
-                }
-            }
-
-            // Else, add a new entry
-            if (!bFound)
-            {
-                FlushData auxFlushData;
-                auxFlushData.key = key;
-                auxFlushData.value = value;
-                if (pTreePosition != NULL)
-                {
-                    auxFlushData.treePosition = *pTreePosition;
-                }
-                multiWriteFlushData.push_back(auxFlushData);
-            }
+            multiWriteFlushData[key] = value;
 
             multiWrite.Unlock();       
         }
@@ -1147,20 +1104,20 @@ zkresult Database::sendData (void)
     try
     {
         if (config.dbMetrics) gettimeofday(&t, NULL);
-
+        unordered_map<string, string>::const_iterator it;
         if (data.query.size() == 0)
         {
             // If there are nodes add the corresponding query
             if (data.nodes.size() > 0)
             {
                 data.query += "INSERT INTO " + config.dbNodesTableName + " ( hash, data ) VALUES ";
-                for (uint64_t i=0; i<data.nodes.size(); i++)
+                for (it = data.nodes.begin(); it != data.nodes.end(); it++)
                 {
-                    if (i != 0)
+                    if (it != data.nodes.begin())
                     {
                         data.query += ", ";
                     }
-                    data.query += "( E\'\\\\x" + data.nodes[i].key + "\', E\'\\\\x" + data.nodes[i].value + "\' ) ";
+                    data.query += "( E\'\\\\x" + it->first + "\', E\'\\\\x" + it->second + "\' ) ";
                 }
                 data.query += " ON CONFLICT (hash) DO NOTHING;";
             }
@@ -1169,13 +1126,13 @@ zkresult Database::sendData (void)
             if (data.nodesUpdate.size() > 0)
             {
                 data.query += "INSERT INTO " + config.dbNodesTableName + " ( hash, data ) VALUES ";
-                for (uint64_t i=0; i<data.nodesUpdate.size(); i++)
+                for (it = data.nodesUpdate.begin(); it != data.nodesUpdate.end(); it++)
                 {
-                    if (i != 0)
+                    if (it != data.nodesUpdate.begin())
                     {
                         data.query += ", ";
                     }
-                    data.query += "( E\'\\\\x" + data.nodesUpdate[i].key + "\', E\'\\\\x" + data.nodesUpdate[i].value + "\' ) ";
+                    data.query += "( E\'\\\\x" + it->first + "\', E\'\\\\x" + it->second + "\' ) ";
                 }
                 data.query += " ON CONFLICT (hash) DO UPDATE SET data = EXCLUDED.data;";
             }
@@ -1185,12 +1142,13 @@ zkresult Database::sendData (void)
             {
                 data.query += "INSERT INTO " + config.dbProgramTableName + " ( hash, data ) VALUES ";
                 for (uint64_t i=0; i<data.program.size(); i++)
+                for (it = data.program.begin(); it != data.program.end(); it++)
                 {
-                    if (i != 0)
+                    if (it != data.program.begin())
                     {
                         data.query += ", ";
                     }
-                    data.query += "( E\'\\\\x" + data.program[i].key + "\', E\'\\\\x" + data.program[i].value + "\' ) ";
+                    data.query += "( E\'\\\\x" + it->first + "\', E\'\\\\x" + it->second + "\' ) ";
                 }
                 data.query += " ON CONFLICT (hash) DO NOTHING;";
             }
@@ -1199,13 +1157,13 @@ zkresult Database::sendData (void)
             if (data.programUpdate.size() > 0)
             {
                 data.query += "INSERT INTO " + config.dbProgramTableName + " ( hash, data ) VALUES ";
-                for (uint64_t i=0; i<data.programUpdate.size(); i++)
+                for (it = data.programUpdate.begin(); it != data.programUpdate.end(); it++)
                 {
-                    if (i != 0)
+                    if (it != data.programUpdate.begin())
                     {
                         data.query += ", ";
                     }
-                    data.query += "( E\'\\\\x" + data.programUpdate[i].key + "\', E\'\\\\x" + data.programUpdate[i].value + "\' ) ";
+                    data.query += "( E\'\\\\x" + it->first + "\', E\'\\\\x" + it->second + "\' ) ";
                 }
                 data.query += " ON CONFLICT (hash) DO UPDATE SET data = EXCLUDED.data;";
             }
@@ -1272,7 +1230,7 @@ zkresult Database::sendData (void)
 }
 
 // Get flush data, written to database by dbSenderThread; it blocks
-zkresult Database::getFlushData(uint64_t flushId, uint64_t &storedFlushId, vector<FlushData> (&nodes), vector<FlushData> (&nodesUpdate), vector<FlushData> (&program), vector<FlushData> (&programUpdate), string &nodesStateRoot)
+zkresult Database::getFlushData(uint64_t flushId, uint64_t &storedFlushId, unordered_map<string, string> (&nodes), unordered_map<string, string> (&nodesUpdate), unordered_map<string, string> (&program), unordered_map<string, string> (&programUpdate), string &nodesStateRoot)
 {
     //zklog.info("--> getFlushData()");
 
@@ -1331,6 +1289,33 @@ zkresult Database::getFlushData(uint64_t flushId, uint64_t &storedFlushId, vecto
 
     //zklog.info("<-- getFlushData()");
 
+    return ZKR_SUCCESS;
+}
+
+zkresult Database::deleteNodes(const vector<string> (&nodesToDelete))
+{
+    multiWrite.Lock();
+
+    // Keep a reference to the nodes data
+    unordered_map<string, string> &multiWriteFlushData = multiWrite.data[multiWrite.pendingToFlushDataIndex].nodes;
+
+    // For all entries in nodesToDelete
+    for (uint64_t i=0; i<nodesToDelete.size(); i++)
+    {
+        // Normalize key format
+        string key = NormalizeToNFormat(nodesToDelete[i], 64);
+        key = stringToLower(key);
+
+        // Delete it
+        size_t numberOfDeletedElements = multiWriteFlushData.erase(key);
+        if (numberOfDeletedElements != 1)
+        {
+            zklog.error("Database::deleteNodes() node not found i=" + to_string(i) + " hash=" + key + " numberOfDeletedElements=" + to_string(numberOfDeletedElements));
+            exitProcess();
+        }
+    }
+
+    multiWrite.Unlock();
     return ZKR_SUCCESS;
 }
 
@@ -1574,10 +1559,10 @@ void *dbCacheSynchThread (void *arg)
 
         while (true)
         {
-            vector<FlushData> nodes;
-            vector<FlushData> nodesUpdate;
-            vector<FlushData> program;
-            vector<FlushData> programUpdate;
+            unordered_map<string, string> nodes;
+            unordered_map<string, string> nodesUpdate;
+            unordered_map<string, string> program;
+            unordered_map<string, string> programUpdate;
             string nodesStateRoot;
             
             // Call getFlushData() remotelly
@@ -1599,46 +1584,47 @@ void *dbCacheSynchThread (void *arg)
             zklog.info("dbCacheSynchThread() called getFlushData() remotely and got: storedFlushId=" + to_string(storedFlushId) + " nodes=" + to_string(nodes.size()) + " nodesUpdate=" + to_string(nodesUpdate.size()) + " program=" + to_string(program.size()) + " programUpdate=" + to_string(programUpdate.size()) + " nodesStateRoot=" + nodesStateRoot);
 
             // Save nodes to cache
+            unordered_map<string, string>::const_iterator it;
             if (nodes.size() > 0)
             {
-                for (uint64_t i=0; i<nodes.size(); i++)
+                for (it = nodes.begin(); it != nodes.end(); it++)
                 {
                     vector<Goldilocks::Element> value;
-                    string2fea(pDatabase->fr, nodes[i].value, value);
-                    pDatabase->write(nodes[i].key, value, false, false);
+                    string2fea(pDatabase->fr, it->second, value);
+                    pDatabase->write(it->first, value, false, false);
                 }
             }
 
             // Save nodesUpdate to cache
             if (nodesUpdate.size() > 0)
             {
-                for (uint64_t i=0; i<nodesUpdate.size(); i++)
+                for (it = nodesUpdate.begin(); it != nodesUpdate.end(); it++)
                 {
                     vector<Goldilocks::Element> value;
-                    string2fea(pDatabase->fr, nodesUpdate[i].value, value);
-                    pDatabase->write(nodesUpdate[i].key, value, false, true);
+                    string2fea(pDatabase->fr, it->second, value);
+                    pDatabase->write(it->first, value, false, true);
                 }
             }
 
             // Save program to cache
             if (program.size() > 0)
             {
-                for (uint64_t i=0; i<program.size(); i++)
+                for (it = program.begin(); it != program.end(); it++)
                 {
                     vector<uint8_t> value;
-                    string2ba(program[i].value, value);
-                    pDatabase->setProgram(program[i].key, value, false, false);
+                    string2ba(it->second, value);
+                    pDatabase->setProgram(it->first, value, false, false);
                 }
             }
 
             // Save programUpdate to cache
             if (programUpdate.size() > 0)
             {
-                for (uint64_t i=0; i<programUpdate.size(); i++)
+                for (it = programUpdate.begin(); it != programUpdate.end(); it++)
                 {
                     vector<uint8_t> value;
-                    string2ba(programUpdate[i].value, value);
-                    pDatabase->setProgram(programUpdate[i].key, value, false, true);
+                    string2ba(it->second, value);
+                    pDatabase->setProgram(it->first, value, false, true);
                 }
             }
 

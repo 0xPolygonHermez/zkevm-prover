@@ -60,7 +60,7 @@ public:
     void splitKey(const Goldilocks::Element (&key)[4], vector<uint64_t> &result);
     void joinKey(const vector<uint64_t> &bits, const Goldilocks::Element (&rkey)[4], Goldilocks::Element (&key)[4]);
     void removeKeyBits(const Goldilocks::Element (&key)[4], uint64_t nBits, Goldilocks::Element (&rkey)[4]);
-    zkresult hashSave(Database &db, const Goldilocks::Element (&a)[8], const Goldilocks::Element (&c)[4], const bool persistent, Goldilocks::Element (&hash)[4], const TreePosition (*pTreePosition));
+    zkresult hashSave(Database &db, const Goldilocks::Element (&a)[8], const Goldilocks::Element (&c)[4], const bool persistent, Goldilocks::Element (&hash)[4]);
     zkresult saveStateRoot(Database &db, const Goldilocks::Element (&stateRoot)[4]);
     int64_t getUniqueSibling(vector<Goldilocks::Element> &a);
 };

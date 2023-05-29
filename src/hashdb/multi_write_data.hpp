@@ -1,9 +1,8 @@
 #ifndef MULTI_WRITE_DATA_HPP
 #define MULTI_WRITE_DATA_HPP
 
-#include <vector>
 #include <string>
-#include "flush_data.hpp"
+#include <unordered_map>
 
 using namespace std;
 
@@ -11,10 +10,10 @@ class MultiWriteData
 {
 public:
     // Flush data
-    vector<FlushData> program;
-    vector<FlushData> programUpdate;
-    vector<FlushData> nodes;
-    vector<FlushData> nodesUpdate;
+    unordered_map<string, string> program;
+    unordered_map<string, string> programUpdate;
+    unordered_map<string, string> nodes;
+    unordered_map<string, string> nodesUpdate;
     string nodesStateRoot;
 
     // SQL query including all data to store in database
