@@ -45,6 +45,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
 
     bool isOld0 = true;
     zkresult dbres;
+    vector<Goldilocks::Element> dbValue; // used to call db.read()
 
     // Start natigating the tree from the top: r = root
     // Go down while r!=0 (while there is branch) until we find the key
@@ -52,7 +53,6 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
     {
         // Read the content of db for entry r: siblings[level] = db.read(r)
         string rootString = fea2string(fr, r);
-        vector<Goldilocks::Element> dbValue;
 
         dbres = db.read(rootString, dbValue, dbReadLog, false, &keys, level);
         if (dbres != ZKR_SUCCESS)
@@ -73,7 +73,6 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
             foundValueHash[2] = siblings[level][6];
             foundValueHash[3] = siblings[level][7];
             foundValueHashString = fea2string(fr, foundValueHash);
-            vector<Goldilocks::Element> dbValue;
             dbres = db.read(foundValueHashString, dbValue, dbReadLog);
             if (dbres != ZKR_SUCCESS)
             {
@@ -153,12 +152,9 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                 Goldilocks::Element v[8];
                 scalar2fea(fr, value, v);
 
-                // Prepare the capacity = 0, 0, 0, 0
-                Goldilocks::Element c[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
-
                 // Save and get the new value hash
                 Goldilocks::Element newValH[4];
-                dbres = hashSave(db, v, c, persistent, newValH);
+                dbres = hashSaveZero(db, v, persistent, newValH);
                 if (dbres != ZKR_SUCCESS)
                 {
                     return dbres;
@@ -168,12 +164,9 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                 for (uint64_t i=0; i<4; i++) v[i] = foundRKey[i];
                 for (uint64_t i=0; i<4; i++) v[4+i] = newValH[i];
 
-                // Prepare the capacity = 1, 0, 0, 0
-                c[0] = fr.one();
-
                 // Save and get the new leaf node hash
                 Goldilocks::Element newLeafHash[4];
-                dbres = hashSave(db, v, c, persistent, newLeafHash);
+                dbres = hashSaveOne(db, v, persistent, newLeafHash);
                 if (dbres != ZKR_SUCCESS)
                 {
                     return dbres;
@@ -249,12 +242,9 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                 for (uint64_t i=0; i<4; i++) v[i] = oldKey[i];
                 for (uint64_t i=0; i<4; i++) v[4+i] = foundValueHash[i];
 
-                // Prepare the capacity = 1, 0, 0, 0
-                Goldilocks::Element c[4] = {fr.one(), fr.zero(), fr.zero(), fr.zero()};
-
                 // Save and get the hash
                 Goldilocks::Element oldLeafHash[4];
-                dbres = hashSave(db, v, c, persistent, oldLeafHash);
+                dbres = hashSaveOne(db, v, persistent, oldLeafHash);
                 if (dbres != ZKR_SUCCESS)
                 {
                     return dbres;
@@ -282,12 +272,9 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                 Goldilocks::Element valueFea[8];
                 scalar2fea(fr, value, valueFea);
 
-                // Capacity is marking the node as intermediate
-                c[0] = fr.zero();
-
                 // Create the value node
                 Goldilocks::Element newValH[4];
-                dbres = hashSave(db, valueFea, c, persistent, newValH);
+                dbres = hashSaveZero(db, valueFea, persistent, newValH);
                 if (dbres != ZKR_SUCCESS)
                 {
                     return dbres;
@@ -299,12 +286,9 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                 for (uint64_t i=0; i<4; i++) v[i] = newKey[i];
                 for (uint64_t i=0; i<4; i++) v[4+i] = newValH[i];
 
-                // Capacity is marking the node as leaf
-                c[0] = fr.one();
-
                 // Create the leaf node and store the hash in newLeafHash
                 Goldilocks::Element newLeafHash[4];
-                dbres = hashSave(db, v, c, persistent, newLeafHash);
+                dbres = hashSaveOne(db, v, persistent, newLeafHash);
                 if (dbres != ZKR_SUCCESS)
                 {
                     return dbres;
@@ -320,12 +304,9 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                     node[foundKeys[level2] * 4 + j] = oldLeafHash[j];
                 }
 
-                // Capacity is marking the node as intermediate
-                c[0] = fr.zero();
-
                 // Create the intermediate node and store the calculated hash in r2
                 Goldilocks::Element r2[4];
-                dbres = hashSave(db, node, c, persistent, r2);
+                dbres = hashSaveZero(db, node, persistent, r2);
                 if (dbres != ZKR_SUCCESS)
                 {
                     return dbres;
@@ -348,11 +329,8 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                         node[keys[level2] * 4 + j] = r2[j];
                     }
 
-                    // Capacity is marking the node as intermediate
-                    c[0] = fr.zero();
-
                     // Create the intermediate node and store the calculated hash in r2
-                    dbres = hashSave(db, node, c, persistent, r2);
+                    dbres = hashSaveZero(db, node, persistent, r2);
                     if (dbres != ZKR_SUCCESS)
                     {
                         return dbres;
@@ -404,12 +382,9 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
             Goldilocks::Element valueFea[8];
             scalar2fea(fr, value, valueFea);
 
-            // Capacity mars the node as intermediate/value
-            Goldilocks::Element c[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
-
             // Create the value node and store the calculated hash in newValH
             Goldilocks::Element newValH[4];
-            dbres = hashSave(db, valueFea, c, persistent, newValH);
+            dbres = hashSaveZero(db, valueFea, persistent, newValH);
             if (dbres != ZKR_SUCCESS)
             {
                 return dbres;
@@ -422,12 +397,9 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
             for (uint64_t i=0; i<4; i++) keyvalVector[i] = newKey[i];
             for (uint64_t i=0; i<4; i++) keyvalVector[4+i] = newValH[i];
 
-            // Capacity marks the node as leaf
-            c[0] = fr.one();
-
             // Create the new leaf node and store the calculated hash in newLeafHash
             Goldilocks::Element newLeafHash[4];
-            dbres = hashSave(db, keyvalVector, c, persistent, newLeafHash);
+            dbres = hashSaveOne(db, keyvalVector, persistent, newLeafHash);
             if (dbres != ZKR_SUCCESS)
             {
                 return dbres;
@@ -521,7 +493,6 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                     string auxString = fea2string(fr, auxFea);
 
                     // Read its 2 siblings
-                    vector<Goldilocks::Element> dbValue;
                     dbres = db.read(auxString, dbValue, dbReadLog, false, &keys, level);
                     if ( dbres != ZKR_SUCCESS)
                     {
@@ -541,7 +512,6 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                         string valHString = fea2string(fr, valH);
 
                         // Read its siblings
-                        vector<Goldilocks::Element> dbValue;
                         dbres = db.read(valHString, dbValue, dbReadLog);
                         if (dbres != ZKR_SUCCESS)
                         {
@@ -595,12 +565,9 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                         for (uint64_t i=0; i<4; i++) a[i] = oldKey[i];
                         for (uint64_t i=0; i<4; i++) a[4+i] = valH[i];
 
-                        // Capacity marks the node as a leaf
-                        Goldilocks::Element c[4] = {fr.one(), fr.zero(), fr.zero(), fr.zero()};
-
                         // Create leaf node and store computed hash in oldLeafHash
                         Goldilocks::Element oldLeafHash[4];
-                        dbres = hashSave(db, a, c, persistent, oldLeafHash);
+                        dbres = hashSaveOne(db, a, persistent, oldLeafHash);
                         if (dbres != ZKR_SUCCESS)
                         {
                             return dbres;
@@ -815,6 +782,7 @@ zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Gold
 
     bool isOld0 = true;
     zkresult dbres;
+    vector<Goldilocks::Element> dbValue; // used to call db.read()
 
 #ifdef LOG_SMT
     //zklog.info("Smt::get() found database content:");
@@ -827,7 +795,6 @@ zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Gold
     {
         // Read the content of db for entry r: siblings[level] = db.read(r)
         string rString = fea2string(fr, r);
-        vector<Goldilocks::Element> dbValue;
         dbres = db.read(rString, dbValue, dbReadLog, false, &keys, level);
         if (dbres != ZKR_SUCCESS)
         {
@@ -848,7 +815,6 @@ zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Gold
             valueHashFea[2] = siblings[level][6];
             valueHashFea[3] = siblings[level][7];
             string foundValueHashString = fea2string(fr, valueHashFea);
-            vector<Goldilocks::Element> dbValue;
             dbres = db.read(foundValueHashString, dbValue, dbReadLog);
             if (dbres != ZKR_SUCCESS)
             {
@@ -1042,12 +1008,9 @@ void Smt::removeKeyBits ( const Goldilocks::Element (&key)[4], uint64_t nBits, G
     }
 }
 
-zkresult Smt::hashSave ( Database &db, const Goldilocks::Element (&a)[8], const Goldilocks::Element (&c)[4], const bool persistent, Goldilocks::Element (&hash)[4])
+zkresult Smt::hashSave ( Database &db, const Goldilocks::Element (&v)[12], const bool persistent, Goldilocks::Element (&hash)[4])
 {
     // Calculate the poseidon hash of the vector of field elements: v = a | c
-    Goldilocks::Element v[12];
-    for (uint64_t i=0; i<8; i++) v[i] = a[i];
-    for (uint64_t i=0; i<4; i++) v[8+i] = c[i];
     poseidon.hash(hash, v);
 
     // Fill a database value with the field elements
@@ -1055,8 +1018,7 @@ zkresult Smt::hashSave ( Database &db, const Goldilocks::Element (&a)[8], const 
 
     // Add the key:value pair to the database, using the hash as a key
     vector<Goldilocks::Element> dbValue;
-    for (uint64_t i=0; i<8; i++) dbValue.push_back(a[i]);
-    for (uint64_t i=0; i<4; i++) dbValue.push_back(c[i]);
+    for (uint64_t i=0; i<12; i++) dbValue.push_back(v[i]);
     zkresult zkr;
     zkr = db.write(hashString, dbValue, persistent, false);
     if (zkr != ZKR_SUCCESS)
