@@ -87,6 +87,7 @@ public:
     zkresult write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent, const bool update = false);
     zkresult getProgram(const string &_key, vector<uint8_t> &value, DatabaseMap *dbReadLog, const bool update = false);
     zkresult setProgram(const string &_key, const vector<uint8_t> &value, const bool persistent, const bool update = false);
+    zkresult saveStateRoot(const Goldilocks::Element (&stateRoot)[4]);
 
 #ifdef DATABASE_COMMIT
     void setAutoCommit(const bool autoCommit);

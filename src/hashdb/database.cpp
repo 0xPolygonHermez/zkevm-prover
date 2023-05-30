@@ -713,6 +713,101 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
     return result;
 }
 
+zkresult Database::saveStateRoot(const Goldilocks::Element (&stateRoot)[4])
+{
+    
+    // Check that it has  been initialized before
+    if (!bInitialized)
+    {
+        zklog.error("Database::saveStateRoot() called uninitialized");
+        exitProcess();
+    }
+
+    // Copy the state root in the first 4 elements of dbValue
+    vector<Goldilocks::Element> value;
+    for (uint64_t i=0; i<4; i++) value.push_back(stateRoot[i]);
+    for (uint64_t i=0; i<8; i++) value.push_back(fr.zero());
+    
+    zkresult r = ZKR_SUCCESS;
+
+    if ( useRemoteDB )
+    {
+        // Prepare the query
+        string valueString = "";
+        string aux;
+        for (uint64_t i = 0; i < value.size(); i++)
+        {
+            valueString += PrependZeros(fr.toString(value[i], 16), 16);
+        }
+   
+        if (config.dbMultiWrite)
+        {
+            multiWrite.Lock();
+            multiWrite.data[multiWrite.pendingToFlushDataIndex].nodesStateRoot = valueString;
+            multiWrite.Unlock();    
+        }
+        else
+        {
+            string query = "INSERT INTO " + config.dbNodesTableName + " ( hash, data ) VALUES ( E\'\\\\x" + dbStateRootKey + "\', E\'\\\\x" + valueString + "\' ) " +
+                        "ON CONFLICT (hash) DO UPDATE SET data = EXCLUDED.data;";
+                
+            DatabaseConnection * pDatabaseConnection = getConnection();
+
+            try
+            {        
+
+    #ifdef DATABASE_COMMIT
+                if (autoCommit)
+    #endif
+                {
+                    pqxx::work w(*(pDatabaseConnection->pConnection));
+                    pqxx::result res = w.exec(query);
+                    w.commit();
+                }
+    #ifdef DATABASE_COMMIT
+                else
+                {
+                    if (transaction == NULL)
+                        transaction = new pqxx::work{*pConnectionWrite};
+                    pqxx::result res = transaction->exec(query);
+                }
+    #endif
+            }
+            catch (const std::exception &e)
+            {
+                zklog.error("Database::saveStateRoot() table=" + config.dbNodesTableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
+                disposeConnection(pDatabaseConnection);
+                r = ZKR_DB_ERROR;
+            }
+
+            disposeConnection(pDatabaseConnection);
+        }
+    }
+
+#ifdef DATABASE_USE_CACHE
+    if ((r == ZKR_SUCCESS) && dbMTCache.enabled())
+    {
+        // Create in memory cache
+        dbMTCache.add(dbStateRootKey, value, true);
+    }
+#endif
+
+#ifdef LOG_DB_WRITE
+    {
+        string s = "Database::saveStateRoot()";
+        if (r != ZKR_SUCCESS)
+            s += " ERROR=" + zkresult2string(r);
+        s += " key=" + dbStateRootKey;
+        s += " value=";
+        for (uint64_t i = 0; i < value.size(); i++)
+            s += fr.toString(value[i], 16) + ":";);
+        zklog.info(s);
+    }
+#endif
+
+    return r;
+}
+
 zkresult Database::writeGetTreeFunction(void)
 {
     if (!config.dbGetTree)
@@ -1022,7 +1117,7 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
 
     return r;
 }
-
+    
 zkresult Database::flush(uint64_t &thisBatch, uint64_t &lastSentBatch)
 {
     if (!config.dbMultiWrite)
