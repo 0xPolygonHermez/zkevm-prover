@@ -1186,8 +1186,8 @@ zkresult Database::sendData (void)
     
     // Time calculation variables
     struct timeval t;
-    uint64_t timeDiff;
-    uint64_t fields;
+    uint64_t timeDiff = 0;
+    uint64_t fields = 0;
 
     // Select proper data instance
     MultiWriteData &data = multiWrite.data[multiWrite.storingDataIndex];
