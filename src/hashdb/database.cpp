@@ -656,11 +656,11 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
 
         if (bProgram)
         {
-            multiWrite.data[multiWrite.pendingToFlushDataIndex].program[key] = value;
+            multiWrite.data[multiWrite.pendingToFlushDataIndex].programIntray[key] = value;
         }
         else
         {
-            multiWrite.data[multiWrite.pendingToFlushDataIndex].nodes[key] = value;
+            multiWrite.data[multiWrite.pendingToFlushDataIndex].nodesIntray[key] = value;
         }
 
         multiWrite.Unlock();
@@ -1132,6 +1132,9 @@ zkresult Database::flush(uint64_t &thisBatch, uint64_t &lastSentBatch)
 
     multiWrite.Lock();
 
+    // Accept all intray data
+    multiWrite.data[multiWrite.pendingToFlushDataIndex].acceptIntray();
+
     // Increase the last processed batch id and return the last sent batch id
     multiWrite.lastFlushId++;
     thisBatch = multiWrite.lastFlushId;
@@ -1145,6 +1148,22 @@ zkresult Database::flush(uint64_t &thisBatch, uint64_t &lastSentBatch)
     //zklog.info("Database::flush() thisBatch=" + to_string(thisBatch) + " lastSentBatch=" + to_string(lastSentBatch));
 
     return ZKR_SUCCESS;
+}
+
+void Database::semiFlush (void)
+{
+    if (!config.dbMultiWrite)
+    {
+        return;
+    }
+
+    multiWrite.Lock();
+
+    multiWrite.data[multiWrite.pendingToFlushDataIndex].acceptIntray();
+
+    multiWrite.Unlock();
+
+    //zklog.info("Database::semiFlush() called");
 }
 
 zkresult Database::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram)
@@ -1168,6 +1187,7 @@ zkresult Database::sendData (void)
     // Time calculation variables
     struct timeval t;
     uint64_t timeDiff;
+    uint64_t fields;
 
     // Select proper data instance
     MultiWriteData &data = multiWrite.data[multiWrite.storingDataIndex];
@@ -1240,6 +1260,16 @@ zkresult Database::sendData (void)
         }
         else
         {
+            if (config.dbMetrics)
+            {
+                fields = data.nodes.size() + data.program.size() + (data.nodesStateRoot.size() > 0 ? 1 : 0);
+                zklog.info("Database::sendData() dbMetrics multiWrite nodes=" + to_string(data.nodes.size()) +
+                    " program=" + to_string(data.program.size()) +
+                    " nodesStateRootCounter=" + to_string(data.nodesStateRoot.size() > 0 ? 1 : 0) +
+                    " query.size=" + to_string(data.query.size()) + "B=" + to_string(data.query.size()/zkmax(fields,1)) + "B/field" +
+                    " total=" + to_string(fields) + "fields");
+            }
+
             // Start a transaction
             pqxx::work w(*(pDatabaseConnection->pConnection));
 
@@ -1253,12 +1283,7 @@ zkresult Database::sendData (void)
             if (config.dbMetrics)
             {
                 timeDiff = TimeDiff(t);
-                uint64_t fields = data.nodes.size() + data.program.size() + (data.nodesStateRoot.size() > 0 ? 1 : 0);
-                zklog.info("Database::sendData() dbMetrics multiWrite nodes=" + to_string(data.nodes.size()) +
-                    " program=" + to_string(data.program.size()) +
-                    " nodesStateRootCounter=" + to_string(data.nodesStateRoot.size() > 0 ? 1 : 0) +
-                    " query.size=" + to_string(data.query.size()) + "B=" + to_string(data.query.size()/zkmax(fields,1)) + "B/field" +
-                    " total=" + to_string(fields) + "fields=" + to_string(timeDiff) + "us=" + to_string(timeDiff/zkmax(fields,1)) + "us/field");
+                zklog.info("Database::sendData() dbMetrics multiWrite total=" + to_string(fields) + "fields=" + to_string(timeDiff) + "us=" + to_string(timeDiff/zkmax(fields,1)) + "us/field");
             }
 
             // Update status
@@ -1274,7 +1299,7 @@ zkresult Database::sendData (void)
     catch (const std::exception &e)
     {
         zklog.error("Database::sendData() execute query exception: " + string(e.what()));
-        //zklog.error("Database::sendData() query=" + query);
+        zklog.error("Database::sendData() query.size=" + to_string(data.query.size()) + " query(<1024)=" + data.query.substr(0, 1024));
         disposeConnection(pDatabaseConnection);
         zkr = ZKR_DB_ERROR;
     }
@@ -1338,28 +1363,26 @@ zkresult Database::getFlushData(uint64_t flushId, uint64_t &storedFlushId, unord
 
 zkresult Database::deleteNodes(const vector<string> (&nodesToDelete))
 {
+    string key;
+
     multiWrite.Lock();
 
     // Keep a reference to the nodes data
-    unordered_map<string, string> &multiWriteFlushData = multiWrite.data[multiWrite.pendingToFlushDataIndex].nodes;
+    unordered_map<string, string> &multiWriteFlushData = multiWrite.data[multiWrite.pendingToFlushDataIndex].nodesIntray;
 
     // For all entries in nodesToDelete
     for (uint64_t i=0; i<nodesToDelete.size(); i++)
     {
         // Normalize key format
-        string key = NormalizeToNFormat(nodesToDelete[i], 64);
+        key = NormalizeToNFormat(nodesToDelete[i], 64);
         key = stringToLower(key);
 
-        // Delete it
-        size_t numberOfDeletedElements = multiWriteFlushData.erase(key);
-        if (numberOfDeletedElements != 1)
-        {
-            zklog.error("Database::deleteNodes() node not found i=" + to_string(i) + " hash=" + key + " numberOfDeletedElements=" + to_string(numberOfDeletedElements));
-            exitProcess();
-        }
+        // Delete it; they key can be present (just written) or not (read from database) and both cases are valid
+        multiWriteFlushData.erase(key);
     }
 
     multiWrite.Unlock();
+
     return ZKR_SUCCESS;
 }
 

@@ -177,6 +177,11 @@ zkresult HashDB::flush(uint64_t &flushId, uint64_t &storedFlushId)
     return result;
 }
 
+void HashDB::semiFlush (void)
+{
+    db.semiFlush();
+}
+
 zkresult HashDB::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram, string &proverId)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB

@@ -96,6 +96,7 @@ public:
 
     // Flush multi write pending requests
     zkresult flush(uint64_t &flushId, uint64_t &lastSentFlushId);
+    void semiFlush (void);
     zkresult getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram);
 
     // Send multi write data to remote database; called by dbSenderThread

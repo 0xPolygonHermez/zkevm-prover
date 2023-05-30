@@ -11,7 +11,9 @@ class MultiWriteData
 public:
     // Flush data
     unordered_map<string, string> program;
+    unordered_map<string, string> programIntray;
     unordered_map<string, string> nodes;
+    unordered_map<string, string> nodesIntray;
     string nodesStateRoot;
 
     // SQL query including all data to store in database
@@ -24,7 +26,9 @@ public:
     {
         // Reset strings
         program.clear();
+        programIntray.clear();
         nodes.clear();
+        nodesIntray.clear();
         nodesStateRoot.clear();
         query.clear();
         stored = false;
@@ -32,7 +36,25 @@ public:
 
     bool IsEmpty (void)
     {
-        return (nodes.size() == 0) && (nodesStateRoot.size() == 0) && (program.size() == 0);
+        return (nodes.size() == 0) &&
+               (nodesIntray.size() == 0) &&
+               (program.size() == 0) &&
+               (programIntray.size() == 0) &&
+               (nodesStateRoot.size() == 0);
+    }
+
+    void acceptIntray (void)
+    {
+        if (programIntray.size() > 0)
+        {
+            program.merge(programIntray);
+            programIntray.clear();
+        }
+        if (nodesIntray.size() > 0)
+        {
+            nodes.merge(nodesIntray);
+            nodesIntray.clear();
+        }
     }
 };
 

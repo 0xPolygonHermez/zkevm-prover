@@ -28,6 +28,7 @@ service HashDBService {
     rpc LoadDB(LoadDBRequest) returns (google.protobuf.Empty) {}
     rpc LoadProgramDB(LoadProgramDBRequest) returns (google.protobuf.Empty) {}
     rpc Flush (google.protobuf.Empty) returns (FlushResponse) {}
+    rpc SemiFlush (google.protobuf.Empty) returns (google.protobuf.Empty) {}
     rpc GetFlushStatus (google.protobuf.Empty) returns (GetFlushStatusResponse) {}
     rpc GetFlushData (GetFlushDataRequest) returns (GetFlushDataResponse) {}
 }

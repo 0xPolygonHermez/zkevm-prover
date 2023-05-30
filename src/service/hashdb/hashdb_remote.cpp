@@ -311,6 +311,14 @@ zkresult HashDBRemote::flush(uint64_t &flushId, uint64_t &storedFlushId)
     return static_cast<zkresult>(response.result().code());
 }
 
+void HashDBRemote::semiFlush (void)
+{
+    ::grpc::ClientContext context;
+    ::google::protobuf::Empty request;
+    ::google::protobuf::Empty response;
+    grpc::Status s = stub->SemiFlush(&context, request, &response);
+}
+
 zkresult HashDBRemote::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram, string &proverId)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE

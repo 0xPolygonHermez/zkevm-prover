@@ -911,7 +911,7 @@ const char descriptor_table_protodef_hashdb_2eproto[] PROTOBUF_SECTION_VARIABLE(
   "\"\225\001\n\004Code\022\024\n\020CODE_UNSPECIFIED\020\000\022\020\n\014CODE_"
   "SUCCESS\020\001\022\031\n\025CODE_DB_KEY_NOT_FOUND\020\002\022\021\n\r"
   "CODE_DB_ERROR\020\003\022\027\n\023CODE_INTERNAL_ERROR\020\004"
-  "\022\036\n\032CODE_SMT_INVALID_DATA_SIZE\020\0162\202\005\n\rHas"
+  "\022\036\n\032CODE_SMT_INVALID_DATA_SIZE\020\0162\301\005\n\rHas"
   "hDBService\0226\n\003Set\022\025.hashdb.v1.SetRequest"
   "\032\026.hashdb.v1.SetResponse\"\000\0226\n\003Get\022\025.hash"
   "db.v1.GetRequest\032\026.hashdb.v1.GetResponse"
@@ -923,13 +923,15 @@ const char descriptor_table_protodef_hashdb_2eproto[] PROTOBUF_SECTION_VARIABLE(
   "e.protobuf.Empty\"\000\022J\n\rLoadProgramDB\022\037.ha"
   "shdb.v1.LoadProgramDBRequest\032\026.google.pr"
   "otobuf.Empty\"\000\022;\n\005Flush\022\026.google.protobu"
-  "f.Empty\032\030.hashdb.v1.FlushResponse\"\000\022M\n\016G"
-  "etFlushStatus\022\026.google.protobuf.Empty\032!."
-  "hashdb.v1.GetFlushStatusResponse\"\000\022Q\n\014Ge"
-  "tFlushData\022\036.hashdb.v1.GetFlushDataReque"
-  "st\032\037.hashdb.v1.GetFlushDataResponse\"\000B5Z"
-  "3github.com/0xPolygonHermez/zkevm-node/m"
-  "erkletree/pbb\006proto3"
+  "f.Empty\032\030.hashdb.v1.FlushResponse\"\000\022=\n\tS"
+  "emiFlush\022\026.google.protobuf.Empty\032\026.googl"
+  "e.protobuf.Empty\"\000\022M\n\016GetFlushStatus\022\026.g"
+  "oogle.protobuf.Empty\032!.hashdb.v1.GetFlus"
+  "hStatusResponse\"\000\022Q\n\014GetFlushData\022\036.hash"
+  "db.v1.GetFlushDataRequest\032\037.hashdb.v1.Ge"
+  "tFlushDataResponse\"\000B5Z3github.com/0xPol"
+  "ygonHermez/zkevm-node/merkletree/pbb\006pro"
+  "to3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_hashdb_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2fempty_2eproto,
@@ -965,7 +967,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_has
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_hashdb_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_hashdb_2eproto = {
-  false, false, descriptor_table_protodef_hashdb_2eproto, "hashdb.proto", 3740,
+  false, false, descriptor_table_protodef_hashdb_2eproto, "hashdb.proto", 3803,
   &descriptor_table_hashdb_2eproto_once, descriptor_table_hashdb_2eproto_sccs, descriptor_table_hashdb_2eproto_deps, 27, 1,
   schemas, file_default_instances, TableStruct_hashdb_2eproto::offsets,
   file_level_metadata_hashdb_2eproto, 27, file_level_enum_descriptors_hashdb_2eproto, file_level_service_descriptors_hashdb_2eproto,

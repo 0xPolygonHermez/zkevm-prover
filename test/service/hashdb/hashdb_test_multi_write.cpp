@@ -79,6 +79,8 @@ void runHashDBTestMultiWrite (const Config& config)
             }
         }
 
+        pHashDB->semiFlush();
+
         zklog.info("runHashDBTest() after tree=" + to_string(tree) + " root=" + fea2string(fr, root));
     }
 
