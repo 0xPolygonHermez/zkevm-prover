@@ -517,6 +517,12 @@ void FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
     getVarFromCtx(ctx, false, ctx.rom.txGasPriceRLPOffset, auxScalar);
     response.call_trace.context.gas_price = auxScalar;
 
+    // Call data
+    uint64_t CTX = fr.toU64(ctx.pols.CTX[*ctx.pStep]);
+    ContextData contextData;
+    contextData.type = "CALL";
+    callData[CTX] = contextData;
+
     /* Fill response object */
     
     mpz_class r;
@@ -576,8 +582,6 @@ void FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
     // Reset values
     depth = 0;
     deltaStorage.clear();
-    unordered_map<string, string> auxMap;
-    deltaStorage[depth] = auxMap;
     txGAS[depth] = {response.call_trace.context.gas, 0};
     lastError = "";
 
@@ -600,30 +604,34 @@ void FullTracer::onUpdateStorage(Context &ctx, const RomCommand &cmd)
     {
         zkassert(cmd.params.size() == 2);
 
-        mpz_class regScalar;
+        mpz_class auxScalar;
 
         // The storage key is stored in C
-        getRegFromCtx(ctx, cmd.params[0]->reg, regScalar);
-        string key = PrependZeros(regScalar.get_str(16), 64);
+        getRegFromCtx(ctx, cmd.params[0]->reg, auxScalar);
+        string key = PrependZeros(auxScalar.get_str(16), 64);
 
         // The storage value is stored in D
-        getRegFromCtx(ctx, cmd.params[1]->reg, regScalar);
-        string value = PrependZeros(regScalar.get_str(16), 64);
+        getRegFromCtx(ctx, cmd.params[1]->reg, auxScalar);
+        string value = PrependZeros(auxScalar.get_str(16), 64);
+
+        // Delta storage is computed for the affected contract address
+        getVarFromCtx(ctx, false, ctx.rom.storageAddrOffset, auxScalar);
+        string storageAddress = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
 
         // add key/value to deltaStorage, if undefined, create object
-        if (deltaStorage.find(depth) == deltaStorage.end())
+        if (deltaStorage.find(storageAddress) == deltaStorage.end())
         {
             unordered_map<string, string> auxMap;
-            deltaStorage[depth] = auxMap;
+            deltaStorage[storageAddress] = auxMap;
         }
 
         // Add key/value to deltaStorage
-        deltaStorage[depth][key] = value;
+        deltaStorage[storageAddress][key] = value;
         
         // Add deltaStorage to current execution_trace opcode info
         if (execution_trace.size() > 0)
         {
-            execution_trace[execution_trace.size() - 1].storage = deltaStorage[depth];
+            execution_trace[execution_trace.size() - 1].storage = deltaStorage[storageAddress];
         }
 
 #ifdef LOG_FULL_TRACER
@@ -780,7 +788,8 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     // Clean aux array for next iteration
     call_trace.clear();
     execution_trace.clear();
-    logs.clear(); // TODO: Should we remove logs?
+    logs.clear();
+    callData.clear();
 
     // Reset opcodes counters
     numberOfOpcodesInThisTx = 0;
@@ -1075,6 +1084,8 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
         getCalldataFromStack(ctx, 0, txCalldataLen, singleInfo.contract.data);
         
         singleInfo.contract.gas = txGAS[depth].forwarded;
+
+        singleInfo.contract.type = "CALL";
     }
 
 #ifdef LOG_TIME_STATISTICS
@@ -1176,12 +1187,6 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
         singleInfo.memory_size = (auxScalar.get_ui() / 32) * 32;
     }
 
-    if (ctx.proverRequest.input.traceConfig.bGenerateStorage /*&& increaseDepth*/)
-    {
-        unordered_map<string, string> auxMap;
-        deltaStorage[depth + 1] = auxMap;
-    }
-
     // Return data
     if (ctx.proverRequest.input.traceConfig.bGenerateReturnData)
     {
@@ -1258,11 +1263,17 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 
     // Check previous step
     Opcode * prevStep = NULL;
-    if (execution_trace.size() > 1)
+    if (execution_trace.size() > 0)
     {
-        prevStep = &execution_trace[execution_trace.size() - 2];
+        prevStep = &execution_trace[execution_trace.size() - 1];
         if (opIncContext.find(prevStep->opcode) != opIncContext.end())
-        {            
+        {
+            // Create new call data entry
+            uint64_t CTX = fr.toU64(ctx.pols.CTX[*ctx.pStep]);
+            ContextData contextData;
+            contextData.type = prevStep->opcode;
+            callData[CTX] = contextData;
+
             getVarFromCtx(ctx, true, ctx.rom.gasCallOffset, auxScalar);
             TxGAS gas;
             gas.forwarded = 0;
@@ -1273,6 +1284,16 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
                 singleInfo.contract.gas = gas.remaining;
             }
         }
+    }
+
+    // Set contract params depending on current call type
+    uint64_t CTX = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
+    singleInfo.contract.type = callData[CTX].type;
+    if (singleInfo.contract.type == "DELEGATECALL")
+    {
+        mpz_class auxScalar;
+        getVarFromCtx(ctx, false, ctx.rom.storageAddrOffset, auxScalar);
+        singleInfo.contract.caller = NormalizeTo0xNFormat(auxScalar.get_str(16), 40);
     }
         
     // If is an ether transfer, don't add stop opcode to trace
