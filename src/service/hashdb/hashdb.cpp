@@ -202,7 +202,7 @@ zkresult HashDB::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushI
     return ZKR_SUCCESS;
 }
 
-zkresult HashDB::getFlushData(uint64_t flushId, uint64_t &lastSentFlushId, unordered_map<string, string> (&nodes), unordered_map<string, string> (&nodesUpdate), unordered_map<string, string> (&program), unordered_map<string, string> (&programUpdate), string &nodesStateRoot)
+zkresult HashDB::getFlushData(uint64_t flushId, uint64_t &lastSentFlushId, unordered_map<string, string> (&nodes), unordered_map<string, string> (&program), string &nodesStateRoot)
 {
     if (!config.dbMultiWrite)
     {
@@ -210,7 +210,7 @@ zkresult HashDB::getFlushData(uint64_t flushId, uint64_t &lastSentFlushId, unord
         return ZKR_DB_ERROR;
     }
 
-    return db.getFlushData(flushId, lastSentFlushId, nodes, nodesUpdate, program, programUpdate, nodesStateRoot);
+    return db.getFlushData(flushId, lastSentFlushId, nodes, program, nodesStateRoot);
 }
 
 void HashDB::clearCache(void)

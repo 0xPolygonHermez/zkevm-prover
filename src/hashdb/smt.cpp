@@ -1020,7 +1020,7 @@ zkresult Smt::hashSave ( Database &db, const Goldilocks::Element (&v)[12], const
     vector<Goldilocks::Element> dbValue;
     for (uint64_t i=0; i<12; i++) dbValue.push_back(v[i]);
     zkresult zkr;
-    zkr = db.write(hashString, dbValue, persistent, false);
+    zkr = db.write(hashString, dbValue, persistent);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("Smt::hashSave() failed calling db.write() key=" + hashString + " result=" + to_string(zkr) + "=" + zkresult2string(zkr));

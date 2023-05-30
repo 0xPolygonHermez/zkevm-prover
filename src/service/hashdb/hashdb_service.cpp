@@ -473,13 +473,11 @@ using grpc::Status;
         // Declare local variables to store the result
         uint64_t storedFlushId;
         unordered_map<string, string> nodes;
-        unordered_map<string, string> nodesUpdate;
         unordered_map<string, string> program;
-        unordered_map<string, string> programUpdate;
         string nodesStateRoot;
 
         // Call the local getFlushData method
-        pHashDB->getFlushData(request->flush_id(), storedFlushId, nodes, nodesUpdate, program, programUpdate, nodesStateRoot);
+        pHashDB->getFlushData(request->flush_id(), storedFlushId, nodes, program, nodesStateRoot);
 
         // Set the last sent flush ID
         response->set_stored_flush_id(storedFlushId);
@@ -491,22 +489,10 @@ using grpc::Status;
             (*response->mutable_nodes())[it->first] = it->second;
         }
 
-        // Set the nodes update
-        for (it = nodesUpdate.begin(); it != nodesUpdate.end(); it++)
-        {
-            (*response->mutable_nodes_update())[it->first] = it->second;
-        }
-
         // Set the program
         for (it = program.begin(); it != program.end(); it++)
         {
             (*response->mutable_program())[it->first] = it->second;
-        }
-
-        // Set the program update
-        for (it = programUpdate.begin(); it != programUpdate.end(); it++)
-        {
-            (*response->mutable_program_update())[it->first] = it->second;
         }
 
         // Set the nodes state root

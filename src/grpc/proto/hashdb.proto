@@ -234,20 +234,16 @@ message GetFlushStatusResponse {
  * @dev GetFlushDataResponse
  * @param {stored_flush_id} - id of the last flush data sent to database
  * @param {nodes} - data to insert in the nodes table
- * @param {nodes_update} - data to update in the nodes table
  * @param {program} - data to insert in the program table
- * @param {program_update} - data to update in the program table
  * @param {nodes_state_root} - nodes state root to update in the nodes table
  * @param {result} - result code
  */
 message GetFlushDataResponse {
     uint64 stored_flush_id = 1;
     map<string, string> nodes = 2;
-    map<string, string> nodes_update = 3;
-    map<string, string> program = 4;
-    map<string, string> program_update = 5;
-    string nodes_state_root = 6;
-    ResultCode result = 7;
+    map<string, string> program = 3;
+    string nodes_state_root = 4;
+    ResultCode result = 5;
 }
 
 /**

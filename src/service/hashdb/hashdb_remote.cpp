@@ -341,7 +341,7 @@ zkresult HashDBRemote::getFlushStatus(uint64_t &storedFlushId, uint64_t &storing
     return ZKR_SUCCESS;
 }
 
-zkresult HashDBRemote::getFlushData(uint64_t flushId, uint64_t &storedFlushId, unordered_map<string, string> (&nodes), unordered_map<string, string> (&nodesUpdate), unordered_map<string, string> (&program), unordered_map<string, string> (&programUpdate), string &nodesStateRoot)
+zkresult HashDBRemote::getFlushData(uint64_t flushId, uint64_t &storedFlushId, unordered_map<string, string> (&nodes), unordered_map<string, string> (&program), string &nodesStateRoot)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
     gettimeofday(&t, NULL);
@@ -373,25 +373,11 @@ zkresult HashDBRemote::getFlushData(uint64_t flushId, uint64_t &storedFlushId, u
         nodes[it->first] = it->second;
     }
 
-    // Copy the nodes update vector
-    nodesUpdate.clear();
-    for (it = response.nodes_update().begin(); it != response.nodes_update().end(); it++)
-    {
-        nodesUpdate[it->first] = it->second;
-    }
-
     // Copy the program vector
     program.clear();
     for (it = response.program().begin(); it != response.program().end(); it++)
     {
         program[it->first] = it->second;
-    }
-
-    // Copy the program update vector
-    programUpdate.clear();
-    for (it = response.program_update().begin(); it != response.program_update().end(); it++)
-    {
-        programUpdate[it->first] = it->second;
     }
 
     // Copy the nodes state root

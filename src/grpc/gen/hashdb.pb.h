@@ -52,7 +52,7 @@ struct TableStruct_hashdb_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxillaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[29]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[27]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -79,15 +79,9 @@ extern GetFlushDataResponseDefaultTypeInternal _GetFlushDataResponse_default_ins
 class GetFlushDataResponse_NodesEntry_DoNotUse;
 class GetFlushDataResponse_NodesEntry_DoNotUseDefaultTypeInternal;
 extern GetFlushDataResponse_NodesEntry_DoNotUseDefaultTypeInternal _GetFlushDataResponse_NodesEntry_DoNotUse_default_instance_;
-class GetFlushDataResponse_NodesUpdateEntry_DoNotUse;
-class GetFlushDataResponse_NodesUpdateEntry_DoNotUseDefaultTypeInternal;
-extern GetFlushDataResponse_NodesUpdateEntry_DoNotUseDefaultTypeInternal _GetFlushDataResponse_NodesUpdateEntry_DoNotUse_default_instance_;
 class GetFlushDataResponse_ProgramEntry_DoNotUse;
 class GetFlushDataResponse_ProgramEntry_DoNotUseDefaultTypeInternal;
 extern GetFlushDataResponse_ProgramEntry_DoNotUseDefaultTypeInternal _GetFlushDataResponse_ProgramEntry_DoNotUse_default_instance_;
-class GetFlushDataResponse_ProgramUpdateEntry_DoNotUse;
-class GetFlushDataResponse_ProgramUpdateEntry_DoNotUseDefaultTypeInternal;
-extern GetFlushDataResponse_ProgramUpdateEntry_DoNotUseDefaultTypeInternal _GetFlushDataResponse_ProgramUpdateEntry_DoNotUse_default_instance_;
 class GetFlushStatusResponse;
 class GetFlushStatusResponseDefaultTypeInternal;
 extern GetFlushStatusResponseDefaultTypeInternal _GetFlushStatusResponse_default_instance_;
@@ -157,9 +151,7 @@ template<> ::hashdb::v1::FlushResponse* Arena::CreateMaybeMessage<::hashdb::v1::
 template<> ::hashdb::v1::GetFlushDataRequest* Arena::CreateMaybeMessage<::hashdb::v1::GetFlushDataRequest>(Arena*);
 template<> ::hashdb::v1::GetFlushDataResponse* Arena::CreateMaybeMessage<::hashdb::v1::GetFlushDataResponse>(Arena*);
 template<> ::hashdb::v1::GetFlushDataResponse_NodesEntry_DoNotUse* Arena::CreateMaybeMessage<::hashdb::v1::GetFlushDataResponse_NodesEntry_DoNotUse>(Arena*);
-template<> ::hashdb::v1::GetFlushDataResponse_NodesUpdateEntry_DoNotUse* Arena::CreateMaybeMessage<::hashdb::v1::GetFlushDataResponse_NodesUpdateEntry_DoNotUse>(Arena*);
 template<> ::hashdb::v1::GetFlushDataResponse_ProgramEntry_DoNotUse* Arena::CreateMaybeMessage<::hashdb::v1::GetFlushDataResponse_ProgramEntry_DoNotUse>(Arena*);
-template<> ::hashdb::v1::GetFlushDataResponse_ProgramUpdateEntry_DoNotUse* Arena::CreateMaybeMessage<::hashdb::v1::GetFlushDataResponse_ProgramUpdateEntry_DoNotUse>(Arena*);
 template<> ::hashdb::v1::GetFlushStatusResponse* Arena::CreateMaybeMessage<::hashdb::v1::GetFlushStatusResponse>(Arena*);
 template<> ::hashdb::v1::GetProgramRequest* Arena::CreateMaybeMessage<::hashdb::v1::GetProgramRequest>(Arena*);
 template<> ::hashdb::v1::GetProgramResponse* Arena::CreateMaybeMessage<::hashdb::v1::GetProgramResponse>(Arena*);
@@ -3248,40 +3240,6 @@ public:
 
 // -------------------------------------------------------------------
 
-class GetFlushDataResponse_NodesUpdateEntry_DoNotUse : public ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<GetFlushDataResponse_NodesUpdateEntry_DoNotUse, 
-    std::string, std::string,
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-    0 > {
-public:
-  typedef ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<GetFlushDataResponse_NodesUpdateEntry_DoNotUse, 
-    std::string, std::string,
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-    0 > SuperType;
-  GetFlushDataResponse_NodesUpdateEntry_DoNotUse();
-  GetFlushDataResponse_NodesUpdateEntry_DoNotUse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  void MergeFrom(const GetFlushDataResponse_NodesUpdateEntry_DoNotUse& other);
-  static const GetFlushDataResponse_NodesUpdateEntry_DoNotUse* internal_default_instance() { return reinterpret_cast<const GetFlushDataResponse_NodesUpdateEntry_DoNotUse*>(&_GetFlushDataResponse_NodesUpdateEntry_DoNotUse_default_instance_); }
-  static bool ValidateKey(std::string* s) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "hashdb.v1.GetFlushDataResponse.NodesUpdateEntry.key");
- }
-  static bool ValidateValue(std::string* s) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "hashdb.v1.GetFlushDataResponse.NodesUpdateEntry.value");
- }
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& other) final;
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_hashdb_2eproto);
-    return ::descriptor_table_hashdb_2eproto.file_level_metadata[21];
-  }
-
-  public:
-};
-
-// -------------------------------------------------------------------
-
 class GetFlushDataResponse_ProgramEntry_DoNotUse : public ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<GetFlushDataResponse_ProgramEntry_DoNotUse, 
     std::string, std::string,
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
@@ -3308,41 +3266,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_hashdb_2eproto);
-    return ::descriptor_table_hashdb_2eproto.file_level_metadata[22];
-  }
-
-  public:
-};
-
-// -------------------------------------------------------------------
-
-class GetFlushDataResponse_ProgramUpdateEntry_DoNotUse : public ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<GetFlushDataResponse_ProgramUpdateEntry_DoNotUse, 
-    std::string, std::string,
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-    0 > {
-public:
-  typedef ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<GetFlushDataResponse_ProgramUpdateEntry_DoNotUse, 
-    std::string, std::string,
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-    0 > SuperType;
-  GetFlushDataResponse_ProgramUpdateEntry_DoNotUse();
-  GetFlushDataResponse_ProgramUpdateEntry_DoNotUse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  void MergeFrom(const GetFlushDataResponse_ProgramUpdateEntry_DoNotUse& other);
-  static const GetFlushDataResponse_ProgramUpdateEntry_DoNotUse* internal_default_instance() { return reinterpret_cast<const GetFlushDataResponse_ProgramUpdateEntry_DoNotUse*>(&_GetFlushDataResponse_ProgramUpdateEntry_DoNotUse_default_instance_); }
-  static bool ValidateKey(std::string* s) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "hashdb.v1.GetFlushDataResponse.ProgramUpdateEntry.key");
- }
-  static bool ValidateValue(std::string* s) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "hashdb.v1.GetFlushDataResponse.ProgramUpdateEntry.value");
- }
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& other) final;
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_hashdb_2eproto);
-    return ::descriptor_table_hashdb_2eproto.file_level_metadata[23];
+    return ::descriptor_table_hashdb_2eproto.file_level_metadata[21];
   }
 
   public:
@@ -3392,7 +3316,7 @@ class GetFlushDataResponse PROTOBUF_FINAL :
                &_GetFlushDataResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    24;
+    22;
 
   friend void swap(GetFlushDataResponse& a, GetFlushDataResponse& b) {
     a.Swap(&b);
@@ -3465,11 +3389,9 @@ class GetFlushDataResponse PROTOBUF_FINAL :
 
   enum : int {
     kNodesFieldNumber = 2,
-    kNodesUpdateFieldNumber = 3,
-    kProgramFieldNumber = 4,
-    kProgramUpdateFieldNumber = 5,
-    kNodesStateRootFieldNumber = 6,
-    kResultFieldNumber = 7,
+    kProgramFieldNumber = 3,
+    kNodesStateRootFieldNumber = 4,
+    kResultFieldNumber = 5,
     kStoredFlushIdFieldNumber = 1,
   };
   // map<string, string> nodes = 2;
@@ -3489,24 +3411,7 @@ class GetFlushDataResponse PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
       mutable_nodes();
 
-  // map<string, string> nodes_update = 3;
-  int nodes_update_size() const;
-  private:
-  int _internal_nodes_update_size() const;
-  public:
-  void clear_nodes_update();
-  private:
-  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
-      _internal_nodes_update() const;
-  ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
-      _internal_mutable_nodes_update();
-  public:
-  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
-      nodes_update() const;
-  ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
-      mutable_nodes_update();
-
-  // map<string, string> program = 4;
+  // map<string, string> program = 3;
   int program_size() const;
   private:
   int _internal_program_size() const;
@@ -3523,24 +3428,7 @@ class GetFlushDataResponse PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
       mutable_program();
 
-  // map<string, string> program_update = 5;
-  int program_update_size() const;
-  private:
-  int _internal_program_update_size() const;
-  public:
-  void clear_program_update();
-  private:
-  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
-      _internal_program_update() const;
-  ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
-      _internal_mutable_program_update();
-  public:
-  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
-      program_update() const;
-  ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
-      mutable_program_update();
-
-  // string nodes_state_root = 6;
+  // string nodes_state_root = 4;
   void clear_nodes_state_root();
   const std::string& nodes_state_root() const;
   void set_nodes_state_root(const std::string& value);
@@ -3565,7 +3453,7 @@ class GetFlushDataResponse PROTOBUF_FINAL :
   std::string* _internal_mutable_nodes_state_root();
   public:
 
-  // .hashdb.v1.ResultCode result = 7;
+  // .hashdb.v1.ResultCode result = 5;
   bool has_result() const;
   private:
   bool _internal_has_result() const;
@@ -3606,23 +3494,11 @@ class GetFlushDataResponse PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
       0 > nodes_;
   ::PROTOBUF_NAMESPACE_ID::internal::MapField<
-      GetFlushDataResponse_NodesUpdateEntry_DoNotUse,
-      std::string, std::string,
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-      0 > nodes_update_;
-  ::PROTOBUF_NAMESPACE_ID::internal::MapField<
       GetFlushDataResponse_ProgramEntry_DoNotUse,
       std::string, std::string,
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
       0 > program_;
-  ::PROTOBUF_NAMESPACE_ID::internal::MapField<
-      GetFlushDataResponse_ProgramUpdateEntry_DoNotUse,
-      std::string, std::string,
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-      0 > program_update_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr nodes_state_root_;
   ::hashdb::v1::ResultCode* result_;
   ::PROTOBUF_NAMESPACE_ID::uint64 stored_flush_id_;
@@ -3673,7 +3549,7 @@ class Fea PROTOBUF_FINAL :
                &_Fea_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    25;
+    23;
 
   friend void swap(Fea& a, Fea& b) {
     a.Swap(&b);
@@ -3843,7 +3719,7 @@ class FeList PROTOBUF_FINAL :
                &_FeList_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    26;
+    24;
 
   friend void swap(FeList& a, FeList& b) {
     a.Swap(&b);
@@ -3994,7 +3870,7 @@ class SiblingList PROTOBUF_FINAL :
                &_SiblingList_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    27;
+    25;
 
   friend void swap(SiblingList& a, SiblingList& b) {
     a.Swap(&b);
@@ -4145,7 +4021,7 @@ class ResultCode PROTOBUF_FINAL :
                &_ResultCode_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    28;
+    26;
 
   friend void swap(ResultCode& a, ResultCode& b) {
     a.Swap(&b);
@@ -7320,10 +7196,6 @@ inline void GetFlushStatusResponse::unsafe_arena_set_allocated_prover_id(
 
 // -------------------------------------------------------------------
 
-// -------------------------------------------------------------------
-
-// -------------------------------------------------------------------
-
 // GetFlushDataResponse
 
 // uint64 stored_flush_id = 1;
@@ -7375,36 +7247,7 @@ GetFlushDataResponse::mutable_nodes() {
   return _internal_mutable_nodes();
 }
 
-// map<string, string> nodes_update = 3;
-inline int GetFlushDataResponse::_internal_nodes_update_size() const {
-  return nodes_update_.size();
-}
-inline int GetFlushDataResponse::nodes_update_size() const {
-  return _internal_nodes_update_size();
-}
-inline void GetFlushDataResponse::clear_nodes_update() {
-  nodes_update_.Clear();
-}
-inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
-GetFlushDataResponse::_internal_nodes_update() const {
-  return nodes_update_.GetMap();
-}
-inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
-GetFlushDataResponse::nodes_update() const {
-  // @@protoc_insertion_point(field_map:hashdb.v1.GetFlushDataResponse.nodes_update)
-  return _internal_nodes_update();
-}
-inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
-GetFlushDataResponse::_internal_mutable_nodes_update() {
-  return nodes_update_.MutableMap();
-}
-inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
-GetFlushDataResponse::mutable_nodes_update() {
-  // @@protoc_insertion_point(field_mutable_map:hashdb.v1.GetFlushDataResponse.nodes_update)
-  return _internal_mutable_nodes_update();
-}
-
-// map<string, string> program = 4;
+// map<string, string> program = 3;
 inline int GetFlushDataResponse::_internal_program_size() const {
   return program_.size();
 }
@@ -7433,36 +7276,7 @@ GetFlushDataResponse::mutable_program() {
   return _internal_mutable_program();
 }
 
-// map<string, string> program_update = 5;
-inline int GetFlushDataResponse::_internal_program_update_size() const {
-  return program_update_.size();
-}
-inline int GetFlushDataResponse::program_update_size() const {
-  return _internal_program_update_size();
-}
-inline void GetFlushDataResponse::clear_program_update() {
-  program_update_.Clear();
-}
-inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
-GetFlushDataResponse::_internal_program_update() const {
-  return program_update_.GetMap();
-}
-inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
-GetFlushDataResponse::program_update() const {
-  // @@protoc_insertion_point(field_map:hashdb.v1.GetFlushDataResponse.program_update)
-  return _internal_program_update();
-}
-inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
-GetFlushDataResponse::_internal_mutable_program_update() {
-  return program_update_.MutableMap();
-}
-inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
-GetFlushDataResponse::mutable_program_update() {
-  // @@protoc_insertion_point(field_mutable_map:hashdb.v1.GetFlushDataResponse.program_update)
-  return _internal_mutable_program_update();
-}
-
-// string nodes_state_root = 6;
+// string nodes_state_root = 4;
 inline void GetFlushDataResponse::clear_nodes_state_root() {
   nodes_state_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -7543,7 +7357,7 @@ inline void GetFlushDataResponse::unsafe_arena_set_allocated_nodes_state_root(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:hashdb.v1.GetFlushDataResponse.nodes_state_root)
 }
 
-// .hashdb.v1.ResultCode result = 7;
+// .hashdb.v1.ResultCode result = 5;
 inline bool GetFlushDataResponse::_internal_has_result() const {
   return this != internal_default_instance() && result_ != nullptr;
 }
@@ -7837,10 +7651,6 @@ inline void ResultCode::set_code(::hashdb::v1::ResultCode_Code value) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
-// -------------------------------------------------------------------
-
-// -------------------------------------------------------------------
-
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
