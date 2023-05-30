@@ -1516,6 +1516,8 @@ void *dbSenderThread (void *arg)
         // Wait for the sending semaphore to be released, if there is no more data to send
         sem_wait(&pDatabase->senderSem);
 
+        multiWrite.Lock();
+
         bool bDataEmpty = false;
 
         // If sending data is not empty (it failed before) then try to send it again
