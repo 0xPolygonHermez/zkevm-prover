@@ -177,6 +177,11 @@ zkresult HashDB::flush(uint64_t &flushId, uint64_t &storedFlushId)
     return result;
 }
 
+void HashDB::semiFlush (void)
+{
+    db.semiFlush();
+}
+
 zkresult HashDB::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram, string &proverId)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB
@@ -202,7 +207,7 @@ zkresult HashDB::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushI
     return ZKR_SUCCESS;
 }
 
-zkresult HashDB::getFlushData(uint64_t flushId, uint64_t &lastSentFlushId, vector<FlushData> (&nodes), vector<FlushData> (&nodesUpdate), vector<FlushData> (&program), vector<FlushData> (&programUpdate), string &nodesStateRoot)
+zkresult HashDB::getFlushData(uint64_t flushId, uint64_t &lastSentFlushId, unordered_map<string, string> (&nodes), unordered_map<string, string> (&program), string &nodesStateRoot)
 {
     if (!config.dbMultiWrite)
     {
@@ -210,7 +215,7 @@ zkresult HashDB::getFlushData(uint64_t flushId, uint64_t &lastSentFlushId, vecto
         return ZKR_DB_ERROR;
     }
 
-    return db.getFlushData(flushId, lastSentFlushId, nodes, nodesUpdate, program, programUpdate, nodesStateRoot);
+    return db.getFlushData(flushId, lastSentFlushId, nodes, program, nodesStateRoot);
 }
 
 void HashDB::clearCache(void)

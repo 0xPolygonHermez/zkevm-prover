@@ -461,6 +461,10 @@ void Config::load(json &config)
     if (config.contains("dbReadRetryDelay") && config["dbReadRetryDelay"].is_number())
         dbReadRetryDelay = config["dbReadRetryDelay"];
 
+    dbMultiWriteSinglePosition = false;
+    if (config.contains("dbMultiWriteSinglePosition") && config["dbMultiWriteSinglePosition"].is_boolean())
+        dbMultiWriteSinglePosition = config["dbMultiWriteSinglePosition"];
+
     if (config.contains("cleanerPollingPeriod") && config["cleanerPollingPeriod"].is_number())
         cleanerPollingPeriod = config["cleanerPollingPeriod"];
 
@@ -638,6 +642,7 @@ void Config::print(void)
     zklog.info("    dbGetTree=" + to_string(dbGetTree));
     zklog.info("    dbReadOnly=" + to_string(dbReadOnly));
     zklog.info("    dbReadRetryDelay=" + to_string(dbReadRetryDelay));
+    zklog.info("    dbMultiWriteSinglePosition=" + to_string(dbMultiWriteSinglePosition));
     zklog.info("    cleanerPollingPeriod=" + to_string(cleanerPollingPeriod));
     zklog.info("    requestsPersistence=" + to_string(requestsPersistence));
     zklog.info("    maxExecutorThreads=" + to_string(maxExecutorThreads));

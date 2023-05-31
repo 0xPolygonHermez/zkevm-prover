@@ -311,6 +311,14 @@ zkresult HashDBRemote::flush(uint64_t &flushId, uint64_t &storedFlushId)
     return static_cast<zkresult>(response.result().code());
 }
 
+void HashDBRemote::semiFlush (void)
+{
+    ::grpc::ClientContext context;
+    ::google::protobuf::Empty request;
+    ::google::protobuf::Empty response;
+    grpc::Status s = stub->SemiFlush(&context, request, &response);
+}
+
 zkresult HashDBRemote::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram, string &proverId)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
@@ -341,7 +349,7 @@ zkresult HashDBRemote::getFlushStatus(uint64_t &storedFlushId, uint64_t &storing
     return ZKR_SUCCESS;
 }
 
-zkresult HashDBRemote::getFlushData(uint64_t flushId, uint64_t &storedFlushId, vector<FlushData> (&nodes), vector<FlushData> (&nodesUpdate), vector<FlushData> (&program), vector<FlushData> (&programUpdate), string &nodesStateRoot)
+zkresult HashDBRemote::getFlushData(uint64_t flushId, uint64_t &storedFlushId, unordered_map<string, string> (&nodes), unordered_map<string, string> (&program), string &nodesStateRoot)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
     gettimeofday(&t, NULL);
@@ -367,46 +375,17 @@ zkresult HashDBRemote::getFlushData(uint64_t flushId, uint64_t &storedFlushId, v
 
     // Copy the nodes vector
     nodes.clear();
-    for (int64_t i=0; i<response.nodes_size(); i++)
+    ::PROTOBUF_NAMESPACE_ID::Map<string, string>::const_iterator it;
+    for (it = response.nodes().begin(); it != response.nodes().end(); it++)
     {
-        const ::hashdb::v1::FlushData &flushDataResponse = response.nodes(i);
-        FlushData flushData;
-        flushData.key = flushDataResponse.key();
-        flushData.value = flushDataResponse.value();
-        nodes.push_back(flushData);
-    }
-
-    // Copy the nodes update vector
-    nodesUpdate.clear();
-    for (int64_t i=0; i<response.nodes_update_size(); i++)
-    {
-        const ::hashdb::v1::FlushData &flushDataResponse = response.nodes_update(i);
-        FlushData flushData;
-        flushData.key = flushDataResponse.key();
-        flushData.value = flushDataResponse.value();
-        nodesUpdate.push_back(flushData);
+        nodes[it->first] = it->second;
     }
 
     // Copy the program vector
     program.clear();
-    for (int64_t i=0; i<response.program_size(); i++)
+    for (it = response.program().begin(); it != response.program().end(); it++)
     {
-        const ::hashdb::v1::FlushData &flushDataResponse = response.program(i);
-        FlushData flushData;
-        flushData.key = flushDataResponse.key();
-        flushData.value = flushDataResponse.value();
-        program.push_back(flushData);
-    }
-
-    // Copy the program update vector
-    programUpdate.clear();
-    for (int64_t i=0; i<response.program_update_size(); i++)
-    {
-        const ::hashdb::v1::FlushData &flushDataResponse = response.program_update(i);
-        FlushData flushData;
-        flushData.key = flushDataResponse.key();
-        flushData.value = flushDataResponse.value();
-        programUpdate.push_back(flushData);
+        program[it->first] = it->second;
     }
 
     // Copy the nodes state root

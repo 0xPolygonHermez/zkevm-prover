@@ -943,6 +943,9 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     numberOfOpcodesInThisTx = 0;
     lastErrorOpcode = 0;
 
+    // Call semiFlush
+    ctx.pHashDB->semiFlush();
+
 #ifdef LOG_FULL_TRACER
     zklog.info("FullTracer::onFinishTx() txCount=" + to_string(txCount) + " finalTrace.responses.size()=" + to_string(finalTrace.responses.size()) + " create_address=" + response.create_address + " state_root=" + response.state_root);
 #endif
