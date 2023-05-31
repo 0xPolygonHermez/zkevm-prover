@@ -1234,7 +1234,6 @@ zkresult Database::sendData (void)
             if (data.program.size() > 0)
             {
                 data.query += "INSERT INTO " + config.dbProgramTableName + " ( hash, data ) VALUES ";
-                for (uint64_t i=0; i<data.program.size(); i++)
                 for (it = data.program.begin(); it != data.program.end(); it++)
                 {
                     if (it != data.program.begin())
