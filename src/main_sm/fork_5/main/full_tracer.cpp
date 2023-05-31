@@ -371,7 +371,7 @@ zkresult FullTracer::onError(Context &ctx, const RomCommand &cmd)
 
     // Intrinsic error should be set at tx level (not opcode)
     if ( (responseErrors.find(lastError) != responseErrors.end()) ||
-         (execution_trace.size() == 0) )
+         ((execution_trace.size() == 0) && call_trace.size() == 0) )
     {
         if (finalTrace.responses.size() > txCount)
         {
@@ -393,6 +393,11 @@ zkresult FullTracer::onError(Context &ctx, const RomCommand &cmd)
     if (execution_trace.size() > 0)
     {
         execution_trace[execution_trace.size() - 1].error = lastError;
+    }
+
+    if (call_trace.size() > 0)
+    {
+        call_trace[call_trace.size() - 1].error = lastError;
     }
 
     // Revert logs
@@ -1300,7 +1305,7 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
             return zkr;
         }
         
-        singleInfo.contract.gas = txGAS[depth].forwarded;
+        singleInfo.contract.gas = txGAS[depth].remaining;
 
         singleInfo.contract.type = "CALL";
     }
@@ -1596,8 +1601,7 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     // If is an ether transfer, don't add stop opcode to trace
     bool bAddOpcode = true;
     if ( (singleInfo.op == 0x00 /*STOP*/) &&
-         ( (prevStep==NULL) || (opIncContext.find(prevStep->opcode) != opIncContext.end()) ) &&
-         ( (prevStep==NULL) || (opCall.find(prevStep->opcode) != opCall.end()) || ( (opCreate.find(prevStep->opcode) != opCreate.end()) && (prevStep->gas_cost <= 32000))))
+         ( (prevStep==NULL) || ( (opCreate.find(prevStep->opcode) != opCreate.end()) && (prevStep->gas_cost <= 32000))))
     {
         zkr = getVarFromCtx(ctx, false, ctx.rom.bytecodeLengthOffset, auxScalar);
         if (zkr != ZKR_SUCCESS)
