@@ -252,7 +252,7 @@ using grpc::Status;
         PrependZerosNoCopy(key, 64);
 
         // Get value
-        if (!stringIsHex(itp->second))
+        if (!stringIsHex(Remove0xIfPresent(itp->second)))
         {
             zklog.error("ExecutorServiceImpl::ProcessBatch() got contracts value not hex, value=" + itp->second);
             TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
@@ -433,6 +433,7 @@ using grpc::Status;
                 pContract->set_value(Add0xIfMissing(responses[tx].call_trace.steps[step].contract.value.get_str(16)));
                 pContract->set_data(string2ba(responses[tx].call_trace.steps[step].contract.data));
                 pContract->set_gas(responses[tx].call_trace.steps[step].contract.gas);
+                pContract->set_type(responses[tx].call_trace.steps[step].contract.type);
                 pTransactionStep->set_error(string2error(responses[tx].call_trace.steps[step].error));
             }
             pProcessTransactionResponse->set_allocated_call_trace(pCallTrace);
