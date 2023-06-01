@@ -2804,6 +2804,7 @@ class Contract PROTOBUF_FINAL :
     kCallerFieldNumber = 2,
     kValueFieldNumber = 3,
     kDataFieldNumber = 4,
+    kTypeFieldNumber = 6,
     kGasFieldNumber = 5,
   };
   // string address = 1;
@@ -2906,6 +2907,31 @@ class Contract PROTOBUF_FINAL :
   std::string* _internal_mutable_data();
   public:
 
+  // string type = 6;
+  void clear_type();
+  const std::string& type() const;
+  void set_type(const std::string& value);
+  void set_type(std::string&& value);
+  void set_type(const char* value);
+  void set_type(const char* value, size_t size);
+  std::string* mutable_type();
+  std::string* release_type();
+  void set_allocated_type(std::string* type);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_type();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_type(
+      std::string* type);
+  private:
+  const std::string& _internal_type() const;
+  void _internal_set_type(const std::string& value);
+  std::string* _internal_mutable_type();
+  public:
+
   // uint64 gas = 5;
   void clear_gas();
   ::PROTOBUF_NAMESPACE_ID::uint64 gas() const;
@@ -2926,6 +2952,7 @@ class Contract PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr caller_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr value_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr data_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr type_;
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
@@ -7808,6 +7835,87 @@ inline void Contract::_internal_set_gas(::PROTOBUF_NAMESPACE_ID::uint64 value) {
 inline void Contract::set_gas(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   _internal_set_gas(value);
   // @@protoc_insertion_point(field_set:executor.v1.Contract.gas)
+}
+
+// string type = 6;
+inline void Contract::clear_type() {
+  type_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& Contract::type() const {
+  // @@protoc_insertion_point(field_get:executor.v1.Contract.type)
+  return _internal_type();
+}
+inline void Contract::set_type(const std::string& value) {
+  _internal_set_type(value);
+  // @@protoc_insertion_point(field_set:executor.v1.Contract.type)
+}
+inline std::string* Contract::mutable_type() {
+  // @@protoc_insertion_point(field_mutable:executor.v1.Contract.type)
+  return _internal_mutable_type();
+}
+inline const std::string& Contract::_internal_type() const {
+  return type_.Get();
+}
+inline void Contract::_internal_set_type(const std::string& value) {
+  
+  type_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void Contract::set_type(std::string&& value) {
+  
+  type_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:executor.v1.Contract.type)
+}
+inline void Contract::set_type(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  type_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:executor.v1.Contract.type)
+}
+inline void Contract::set_type(const char* value,
+    size_t size) {
+  
+  type_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:executor.v1.Contract.type)
+}
+inline std::string* Contract::_internal_mutable_type() {
+  
+  return type_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* Contract::release_type() {
+  // @@protoc_insertion_point(field_release:executor.v1.Contract.type)
+  return type_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void Contract::set_allocated_type(std::string* type) {
+  if (type != nullptr) {
+    
+  } else {
+    
+  }
+  type_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), type,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:executor.v1.Contract.type)
+}
+inline std::string* Contract::unsafe_arena_release_type() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.Contract.type)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return type_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void Contract::unsafe_arena_set_allocated_type(
+    std::string* type) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (type != nullptr) {
+    
+  } else {
+    
+  }
+  type_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      type, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.Contract.type)
 }
 
 // -------------------------------------------------------------------
