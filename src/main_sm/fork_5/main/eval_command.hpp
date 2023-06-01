@@ -122,6 +122,8 @@ void eval_memAlignWR_W0       (Context &ctx, const RomCommand &cmd, CommandResul
 void eval_memAlignWR_W1       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_memAlignWR8_W0      (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 
+zkresult AddPointEc (Context &ctx, bool dbl, const RawFec::Element &x1, const RawFec::Element &y1, const RawFec::Element &x2, const RawFec::Element &y2, RawFec::Element &x3, RawFec::Element &y3);
+
 zkresult eval_addReadWriteAddress (Context &ctx, const mpz_class value);
 
 mpz_class sqrtTonelliShanks ( const mpz_class &n, const mpz_class &p );

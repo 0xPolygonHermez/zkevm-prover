@@ -371,15 +371,12 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    mpz_class A, B, C, D, op;\n";
     code += "    mpz_class x1, y1, x2, y2, x3, y3;\n";
     code += "    ArithAction arithAction;\n";
-    code += "    RawFec::Element fecS, minuend, subtrahend;\n";
     code += "    mpz_class _x3, _y3;\n";
     code += "    mpz_class left;\n";
     code += "    mpz_class right;\n";
     code += "    bool x3eq;\n";
     code += "    bool y3eq;\n";
-    code += "    RawFec::Element numerator, denominator;\n";
-    code += "    RawFec::Element fecX1, fecY1, fecX2, fecY2, fecX3;\n";
-    code += "    RawFec::Element s_fec;\n";
+    code += "    RawFec::Element fecX1, fecY1, fecX2, fecY2, fecX3, fecY3;\n";
 
     if (!bFastMode)
         code += "    MemoryAccess memoryAccess;\n";
@@ -3141,7 +3138,6 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    mainExecutor.fec.fromMpz(fecY1, y1.get_mpz_t());\n";
                 code += "    mainExecutor.fec.fromMpz(fecX2, x2.get_mpz_t());\n";
                 code += "    mainExecutor.fec.fromMpz(fecY2, y2.get_mpz_t());\n";
-                code += "    mainExecutor.fec.fromMpz(fecX3, x3.get_mpz_t());\n";
 
                 bool dbl = false;
                 if ( (!rom["program"][zkPC].contains("arithEq0") || (rom["program"][zkPC]["arithEq0"]==0)) &&
@@ -3164,67 +3160,24 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
                 if (dbl)
                 {
-                    code += "    // s = 3*(x1^2)/(2*y1)\n";
-
-                    code += "    // numerator = 3*(x1^2)\n";
-                    code += "    mainExecutor.fec.mul(numerator, fecX1, fecX1);\n";
-                    code += "    mainExecutor.fec.fromUI(denominator, 3);\n";
-                    code += "    mainExecutor.fec.mul(numerator, numerator, denominator);\n";
-
-                    code += "    // denominator = 2*y1 = y1+y1\n";
-                    code += "    mainExecutor.fec.add(denominator, fecY1, fecY1);\n";
-
-                    code += "    if (mainExecutor.fec.isZero(denominator))\n";
-                    code += "    {\n";
-                    code += "        proverRequest.result = ZKR_SM_MAIN_ARITH;\n";
-                    code += "        zkPC=" + to_string(zkPC) +";\n";
-                    code += "        mainExecutor.logError(ctx, \"Denominator=0 in arith operation 1\");";
-                    code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
-                    code += "        return;\n";
-                    code += "    }\n";
-
-                    code += "    // s = numerator/denominator\n";
-                    code += "    mainExecutor.fec.div(s_fec, numerator, denominator);\n";
-
-                    // TODO: y1 == 0 => division by zero ==> how manage? Feli
+                    code += "    zkResult = AddPointEc(ctx, true, fecX1, fecY1, fecX1, fecY1, fecX3, fecY3);\n";
                 }
                 else
                 {
-                    code += "    // s = (y2-y1)/(x2-x1)\n";
-
-                    code += "    // numerator = y2-y1\n";
-                    code += "    mainExecutor.fec.sub(numerator, fecY2, fecY1);\n";
-
-                    code += "    // denominator = x2-x1\n";
-                    code += "    mainExecutor.fec.sub(denominator, fecX2, fecX1);\n";
-
-                    code += "    if (mainExecutor.fec.isZero(denominator))\n";
-                    code += "    {\n";
-                    code += "        proverRequest.result = ZKR_SM_MAIN_ARITH;\n";
-                    code += "        zkPC=" + to_string(zkPC) +";\n";
-                    code += "        mainExecutor.logError(ctx, \"Denominator=0 in arith operation 2\");";
-                    code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
-                    code += "        return;\n";
-                    code += "    }\n";
-
-                    code += "    // s = numerator/denominator\n";
-                    code += "    mainExecutor.fec.div(s_fec, numerator, denominator);\n";
-
-                    // TODO: x2-x1 == 0 => division by zero ==> how manage? Feli
+                    code += "    zkResult = AddPointEc(ctx, false, fecX1, fecY1, fecX2, fecY2, fecX3, fecY3);\n";
                 }
+                
+                code += "    if (zkResult != ZKR_SUCCESS)\n";
+                code += "    {\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_ARITH;\n";
+                code += "        zkPC=" + to_string(zkPC) +";\n";
+                code += "        mainExecutor.logError(ctx, \"Failed calling AddPointEc() in arith operation\");\n";
+                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        return;\n";
+                code += "    }\n";
 
-                code += "    // Calculate _x3 = s*s - x1 +(x1 if dbl, x2 otherwise)\n";
-                code += "    mainExecutor.fec.mul(minuend, s_fec, s_fec);\n";
-                code += "    mainExecutor.fec.add(subtrahend, fecX1, " + string(dbl?"fecX1":"fecX2") + ");\n";
-                code += "    mainExecutor.fec.sub(fecS, minuend, subtrahend);\n";
-                code += "    mainExecutor.fec.toMpz(_x3.get_mpz_t(), fecS);\n";
-
-                code += "    // Calculate _y3 = s*(x1-x3) - y1\n";
-                code += "    mainExecutor.fec.sub(subtrahend, fecX1, fecX3);\n";
-                code += "    mainExecutor.fec.mul(minuend, s_fec, subtrahend);\n";
-                code += "    mainExecutor.fec.fromMpz(subtrahend, y1.get_mpz_t());\n";
-                code += "    mainExecutor.fec.sub(fecS, minuend, subtrahend);\n";
-                code += "    mainExecutor.fec.toMpz(_y3.get_mpz_t(), fecS);\n";
+                code += "    mainExecutor.fec.toMpz(_x3.get_mpz_t(), fecX3);\n";
+                code += "    mainExecutor.fec.toMpz(_y3.get_mpz_t(), fecY3);\n";
 
                 code += "    // Compare\n";
                 code += "    x3eq = (x3 == _x3);\n";
