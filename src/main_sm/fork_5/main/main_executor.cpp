@@ -2798,13 +2798,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
 
                 // Convert to RawFec::Element
-                RawFec::Element fecX1, fecY1, fecX2, fecY2, fecX3;
+                RawFec::Element fecX1, fecY1, fecX2, fecY2;
                 fec.fromMpz(fecX1, x1.get_mpz_t());
                 fec.fromMpz(fecY1, y1.get_mpz_t());
                 fec.fromMpz(fecX2, x2.get_mpz_t());
                 fec.fromMpz(fecY2, y2.get_mpz_t());
-                fec.fromMpz(fecX3, x3.get_mpz_t());
 
+                // Check if this is a double operation
                 bool dbl = false;
                 if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==1 && rom.line[zkPC].arithEq2==0)
                 {
@@ -2820,67 +2820,21 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     exitProcess();
                 }
 
-                RawFec::Element s;
-                if (dbl)
+                // Add the elliptic curve points
+                RawFec::Element fecX3, fecY3;
+                zkresult r = AddPointEc(ctx, dbl, fecX1, fecY1, dbl?fecX1:fecX2, dbl?fecY1:fecY2, fecX3, fecY3);
+                if (r != ZKR_SUCCESS)
                 {
-                    // s = 3*(x1^2)/(2*y1)
-                    RawFec::Element numerator, denominator;
-
-                    // numerator = 3*(x1^2)
-                    fec.mul(numerator, fecX1, fecX1);
-                    fec.fromUI(denominator, 3);
-                    fec.mul(numerator, numerator, denominator);
-
-                    // denominator = 2*y1 = y1+y1
-                    fec.add(denominator, fecY1, fecY1);
-                    if (fec.isZero(denominator))
-                    {
-                        proverRequest.result = ZKR_SM_MAIN_ARITH;
-                        logError(ctx, "Denominator=0 in arith operation 1");
-                        HashDBClientFactory::freeHashDBClient(pHashDB);
-                        return;
-                    }
-
-                    // s = numerator/denominator
-                    fec.div(s, numerator, denominator);
-                }
-                else
-                {
-                    // s = (y2-y1)/(x2-x1)
-                    RawFec::Element numerator, denominator;
-
-                    // numerator = y2-y1
-                    fec.sub(numerator, fecY2, fecY1);
-
-                    // denominator = x2-x1
-                    fec.sub(denominator, fecX2, fecX1);
-                    if (fec.isZero(denominator))
-                    {
-                        proverRequest.result = ZKR_SM_MAIN_ARITH;
-                        logError(ctx, "Denominator=0 in arith operation 2");
-                        HashDBClientFactory::freeHashDBClient(pHashDB);
-                        return;
-                    }
-
-                    // s = numerator/denominator
-                    fec.div(s, numerator, denominator);
+                    proverRequest.result = ZKR_SM_MAIN_ARITH;
+                    logError(ctx, "Failed calling AddPointEc() in arith operation");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
                 }
 
-                RawFec::Element fecS, minuend, subtrahend;
+                // Convert to scalar
                 mpz_class _x3, _y3;
-
-                // Calculate _x3 = s*s - x1 +(x1 if dbl, x2 otherwise)
-                fec.mul(minuend, s, s);
-                fec.add(subtrahend, fecX1, dbl ? fecX1 : fecX2 );
-                fec.sub(fecS, minuend, subtrahend);
-                fec.toMpz(_x3.get_mpz_t(), fecS);
-
-                // Calculate _y3 = s*(x1-x3) - y1
-                fec.sub(subtrahend, fecX1, fecX3);
-                fec.mul(minuend, s, subtrahend);
-                fec.fromMpz(subtrahend, y1.get_mpz_t());
-                fec.sub(fecS, minuend, subtrahend);
-                fec.toMpz(_y3.get_mpz_t(), fecS);
+                fec.toMpz(_x3.get_mpz_t(), fecX3);
+                fec.toMpz(_y3.get_mpz_t(), fecY3);
 
                 // Compare
                 bool x3eq = (x3 == _x3);
