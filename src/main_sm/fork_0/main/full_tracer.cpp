@@ -701,7 +701,7 @@ void FullTracer::onStartBatch(Context &ctx, const RomCommand &cmd)
     finalTrace.bInitialized = true;
 
 #ifdef LOG_FULL_TRACER
-    cout << "FullTracer::onStartBatch() old_state_root=" << finalTrace.old_state_root << endl;
+    cout << "FullTracer::onStartBatch()" << endl;
 #endif
 #ifdef LOG_TIME_STATISTICS
     tms.add("onStartBatch", TimeDiff(t));
