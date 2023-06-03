@@ -30,8 +30,10 @@ mpz_class PROVER_FORK_NAMESPACE::sqrtTonelliShanks ( const mpz_class &n, const m
 
 void mulPointEc ( const mpz_class &mulPointEc_p1_x,
                   const mpz_class &mulPointEc_p1_y,
+                    const mpz_class &mulPointEc_k1,
                   const mpz_class &mulPointEc_p2_x, 
                   const mpz_class &mulPointEc_p2_y,
+                    const mpz_class &mulPointEc_k2,
                         mpz_class &mulPointEc_p3_x,
                         mpz_class &mulPointEc_p3_y);
 void AddPointEc ( const mpz_class &mulPointEc_p1_x,
@@ -45,7 +47,7 @@ void DblPointEc ( const mpz_class &mulPointEc_p1_x,
                         mpz_class &mulPointEc_p3_x,
                         mpz_class &mulPointEc_p3_y);
 
-ECRecoverResult ECRecover (mpz_class &hash, mpz_class &r, mpz_class &s, mpz_class &v, bool bPrecompiled)
+ECRecoverResult ECRecover (mpz_class &signature, mpz_class &r, mpz_class &s, mpz_class &v, bool bPrecompiled, mpz_class &address)
 {
     // Set the ECRecover s upper limit
     mpz_class ecrecover_s_upperlimit;
@@ -207,7 +209,7 @@ ecrecover_has_sqrt:
     mpz_class keccakHash;
 
     //; for address take only last 20 bytes
-    mpz_class address = keccakHash & ADDRESS_MASK;
+    address = keccakHash & ADDRESS_MASK;
 
     return ECR_NO_ERROR;
 }
@@ -281,8 +283,10 @@ mpz_class sqFpEc (const mpz_class &a)
 
 void mulPointEc ( const mpz_class &mulPointEc_p1_x,
                   const mpz_class &mulPointEc_p1_y,
+                    const mpz_class &mulPointEc_k1,
                   const mpz_class &mulPointEc_p2_x, 
                   const mpz_class &mulPointEc_p2_y,
+                    const mpz_class &mulPointEc_k2,
                         mpz_class &mulPointEc_p3_x,
                         mpz_class &mulPointEc_p3_y)
 {
