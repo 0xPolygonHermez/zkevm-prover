@@ -475,7 +475,8 @@ zkresult Database::readRemote(bool bProgram, const string &key, string &value)
     catch (const std::exception &e)
     {
         zklog.error("Database::readRemote() table=" + tableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
-        exitProcess();
+        disposeConnection(pDatabaseConnection);
+        return ZKR_DB_ERROR;
     }
     
     // Dispose the read db conneciton
@@ -580,6 +581,7 @@ zkresult Database::readTreeRemote(const string &key, const vector<uint64_t> *key
     catch (const std::exception &e)
     {
         zklog.warning("Database::readTreeRemote() exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
+        disposeConnection(pDatabaseConnection);
         return ZKR_DB_ERROR;
     }
     
@@ -644,7 +646,6 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
                 pqxx::work w(*(pDatabaseConnection->pConnection));
                 pqxx::result res = w.exec(query);
                 w.commit();
-                disposeConnection(pDatabaseConnection);
             }
 #ifdef DATABASE_COMMIT
             else
@@ -660,6 +661,7 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
             zklog.error("Database::writeRemote() table=" + tableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
             result = ZKR_DB_ERROR;
         }
+        disposeConnection(pDatabaseConnection);
     }
 
     return result;
@@ -819,7 +821,6 @@ zkresult Database::writeGetTreeFunction(void)
             pqxx::work w(*(pDatabaseConnection->pConnection));
             pqxx::result res = w.exec(query);
             w.commit();
-            disposeConnection(pDatabaseConnection);
         }
 #ifdef DATABASE_COMMIT
         else
@@ -835,6 +836,8 @@ zkresult Database::writeGetTreeFunction(void)
         zklog.error("Database::writeGetTreeFunction() exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
         result = ZKR_DB_ERROR;
     }
+
+    disposeConnection(pDatabaseConnection);
 
     zklog.info("Database::writeGetTreeFunction() returns " + zkresult2string(result));
         
