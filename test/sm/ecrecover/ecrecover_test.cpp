@@ -31,7 +31,6 @@ void ECRecoverTest (void)
     mpz_class signature, r, s, v, address;
 
     ECRecoverResult result;
-
     for (uint64_t i=0; i<1; i++)
     {
         signature.set_str(ecrecoverTestVectors[i].signature, 16);
@@ -46,9 +45,10 @@ void ECRecoverTest (void)
         {
             zklog.error("ECRecoverTest() failed i=" + to_string(i) + " signature=" + ecrecoverTestVectors[i].signature + " result=" + to_string(result) + " expectedResult=" + to_string(ecrecoverTestVectors[i].result));
         }
-        if (address.get_str() != ecrecoverTestVectors[i].address)
+        
+        if (address != mpz_class(ecrecoverTestVectors[i].address,16))
         {
-            zklog.error("ECRecoverTest() failed i=" + to_string(i) + " signature=" + ecrecoverTestVectors[i].signature + " address=" + address.get_str() + " expectedAddress=" + ecrecoverTestVectors[i].address);
+            zklog.error("ECRecoverTest() failed i=" + to_string(i) + " signature=" + ecrecoverTestVectors[i].signature + " address=" + address.get_str(16) + " expectedAddress=" + ecrecoverTestVectors[i].address);
         }
     }
 
