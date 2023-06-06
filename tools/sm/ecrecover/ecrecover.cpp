@@ -112,6 +112,20 @@ ECRecoverResult ECRecover (mpz_class &signature, mpz_class &r, mpz_class &s, mpz
     aux2 = mulFpEc(aux1, r);
     aux1 = 7;
     aux3 = addFpEc(aux2, aux1);
+    
+    if(aux3==0)
+    {
+        ecrecover_y = 0; /*rick: check this case*/
+    }
+    else
+    {
+        ecrecover_y = sqrtFpEc(aux3);
+        if(ecrecover_y==0)
+        {
+            zklog.error("ECRecover() found y^2 without root=" + aux3.get_str(16));
+            return ECR_NO_SQRT_Y;
+        }
+    }
     ecrecover_y = sqrtFpEc(aux3); //rick: expensive
     assert(ecrecover_y < FPEC);
 
