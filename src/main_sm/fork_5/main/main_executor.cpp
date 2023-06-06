@@ -4545,13 +4545,19 @@ void MainExecutor::assertOutputs(Context &ctx)
 
 void MainExecutor::logError(Context &ctx, const string &message)
 {
+    // Log the message, if provided
     if (message.size() > 0)
     {
         zklog.error("MainExecutor::logError() " + message);
     }
-    zklog.error(string("MainExecutor::logError() proverRequest.result=") + zkresult2string(ctx.proverRequest.result) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " rom.line={" + rom.line[*ctx.pZKPC].toString(fr) + "} uuid=" + ctx.proverRequest.uuid);
+
+    // Log details
+    zklog.error(string("MainExecutor::logError() proverRequest.result=") + zkresult2string(ctx.proverRequest.result) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " rom.line={" + rom.line[*ctx.pZKPC].toString(fr) + "} uuid=" + ctx.proverRequest.uuid + " externalRequestId=" + ctx.proverRequest.externalRequestId);
+
+    // Log registers
     ctx.printRegs();
     
+    // Log the input file content
     json inputJson;
     ctx.proverRequest.input.save(inputJson);
     zklog.error("Input=" + inputJson.dump());

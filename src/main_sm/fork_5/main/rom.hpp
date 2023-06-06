@@ -30,6 +30,7 @@ public:
     uint64_t txGasLimitOffset;
     uint64_t txValueOffset;
     uint64_t txNonceOffset;
+    uint64_t txGasPriceOffset;
     uint64_t txGasPriceRLPOffset;
     uint64_t txChainIdOffset;
     uint64_t txROffset;
@@ -56,6 +57,7 @@ public:
     uint64_t gasCTXOffset;
     uint64_t lastCtxUsedOffset;
     uint64_t isCreateOffset;
+    uint64_t effectivePercentageRLPOffset;
 
     /* Constants */
     uint64_t MAX_CNT_STEPS_LIMIT;
@@ -77,6 +79,7 @@ public:
             txGasLimitOffset(0),
             txValueOffset(0),
             txNonceOffset(0),
+            txGasPriceOffset(0),
             txGasPriceRLPOffset(0),
             txChainIdOffset(0),
             txROffset(0),
@@ -103,6 +106,7 @@ public:
             gasCTXOffset(0),
             lastCtxUsedOffset(0),
             isCreateOffset(0),
+            effectivePercentageRLPOffset(0),
             MAX_CNT_STEPS_LIMIT(0),
             MAX_CNT_ARITH_LIMIT(0),
             MAX_CNT_BINARY_LIMIT(0),
