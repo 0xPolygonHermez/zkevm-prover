@@ -4,6 +4,7 @@
 #include "proof.hpp"
 #include "zklog.hpp"
 #include <grpcpp/grpcpp.h>
+#include "exit_process.hpp"
 
 using grpc::Server;
 using grpc::ServerBuilder;
@@ -12,6 +13,12 @@ using grpc::Status;
 
 ::grpc::Status ExecutorServiceImpl::ProcessBatch(::grpc::ServerContext* context, const ::executor::v1::ProcessBatchRequest* request, ::executor::v1::ProcessBatchResponse* response)
 {
+    // If the process is exising, do not start new activities
+    if (bExitingProcess)
+    {
+        return Status::CANCELLED;
+    }
+
     TimerStart(EXECUTOR_PROCESS_BATCH);
 
 #ifdef LOG_SERVICE
@@ -581,6 +588,12 @@ using grpc::Status;
 
 ::grpc::Status ExecutorServiceImpl::GetFlushStatus (::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::executor::v1::GetFlushStatusResponse* response)
 {
+    // If the process is exising, do not start new activities
+    if (bExitingProcess)
+    {
+        return Status::CANCELLED;
+    }
+
     uint64_t storedFlushId;
     uint64_t storingFlushId;
     uint64_t lastFlushId;
@@ -608,6 +621,12 @@ using grpc::Status;
 
 ::grpc::Status ExecutorServiceImpl::ProcessBatchStream (::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::executor::v1::ProcessBatchResponse, ::executor::v1::ProcessBatchRequest>* stream)
 {
+    // If the process is exising, do not start new activities
+    if (bExitingProcess)
+    {
+        return Status::CANCELLED;
+    }
+
     TimerStart(PROCESS_BATCH_STREAM);
 
 #ifdef LOG_SERVICE
