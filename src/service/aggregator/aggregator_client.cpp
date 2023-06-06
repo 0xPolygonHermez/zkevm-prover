@@ -555,7 +555,7 @@ void* aggregatorClientThread(void* arg)
         if ((pAggregatorClient->config.aggregatorClientMaxStreams > 0) && (numberOfStreams >= pAggregatorClient->config.aggregatorClientMaxStreams))
         {
             zklog.info("aggregatorClientThread() killing process since we reached the maximum number of streams=" + to_string(pAggregatorClient->config.aggregatorClientMaxStreams));
-            exit(0);
+            exitProcess();
         }
         numberOfStreams++;
 
