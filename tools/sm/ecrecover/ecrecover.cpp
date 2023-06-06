@@ -5,6 +5,8 @@
 #include "exit_process.hpp"
 #include "definitions.hpp"
 #include "main_sm/fork_5/main/eval_command.hpp"
+#include "keccak_wrapper.hpp"
+
 
 RawFnec fnec;
 RawFec fec;
@@ -35,7 +37,7 @@ void mulPointEc ( const mpz_class &mulPointEc_p1_x,
                   const mpz_class &mulPointEc_p2_y,
                     const mpz_class &mulPointEc_k2,
                         mpz_class &mulPointEc_p3_x,
-                        mpz_class &mulPointEc_p3_y);
+                        mpz_class &mulPointEc_p3_y); 
 void AddPointEc ( const mpz_class &mulPointEc_p1_x,
                   const mpz_class &mulPointEc_p1_y,
                   const mpz_class &mulPointEc_p2_x, 
@@ -59,7 +61,6 @@ ECRecoverResult ECRecover (mpz_class &signature, mpz_class &r, mpz_class &s, mpz
     {
         ecrecover_s_upperlimit = FNEC_DIV_TWO;
     }
-
     // Check that r is in the range [1, FNEC-1]
     if (r == 0)
     {
@@ -89,7 +90,7 @@ ECRecoverResult ECRecover (mpz_class &signature, mpz_class &r, mpz_class &s, mpz
     ecrecover_r_inv = invFnEc(r);
 
     // Calculate the parity of v
-    mpz_class ecrecover_v_parity;
+    int ecrecover_v_parity;
     if (v == 0x1b)
     {
         ecrecover_v_parity = 0;
@@ -105,111 +106,53 @@ ECRecoverResult ECRecover (mpz_class &signature, mpz_class &r, mpz_class &s, mpz
     }
 
     // Curve is y^2 = x^3 + 7  -->  Calculate y from x=r
-    mpz_class ecrecover_y2;
+    mpz_class ecrecover_y;
     mpz_class aux1, aux2, aux3, aux4;
     aux1 = mulFpEc(r, r);
     aux2 = mulFpEc(aux1, r);
     aux1 = 7;
     aux3 = addFpEc(aux2, aux1);
-    ecrecover_y2 = sqrtFpEc(aux3);
+    ecrecover_y = sqrtFpEc(aux3); //rick: expensive
+    assert(ecrecover_y < FPEC);
 
-    // If it has root y ** (p-1)/2 = 1, if -1 => no root, not valid signature
-    /*if (ecrecover_y2 == FPEC_NON_SQRT)
+    // pending: check indeed y^2 has an square root
 
-        %FPEC_NON_SQRT => A
-        C => B
-        $ => E      :EQ,JMPNC(ecrecover_has_sqrt)
-
-        ; hasn't sqrt, now verify
-
-        $ => C      :MLOAD(ecrecover_y2),CALL(checkSqrtFpEc)
-        ; check must return on A register 1, because the root has no solution
-        1           :ASSERT,JMP(ecrecover_not_exists_sqrt_of_y)
-
-ecrecover_has_sqrt:
-*/
-
-//ecrecover_has_sqrt:
-    //    ; (v == 1b) ecrecover_y_parity = 0x00
-    //    ; (v == 1c) ecrecover_y_parity = 0x01
-
-    //    ; C,B: y = sqrt(y^2)
-    //    ; check B isn't an alias (B must be in [0, FPEC-1])
-
-        //%FPEC_MINUS_ONE => A
-        //0           :LT         ; assert to validate that B (y) isn't n alias.
-
-        // C,B: y = sqrtFpEc(y^2)
-
-        //0x01n => A
-        //$ => A      :AND
-        //$ => B      :MLOAD(ecrecover_v_parity)
-
-        //; ecrevover_y xor ecrecover_y_parity => 0 same parity, 1 different parity
-        //; ecrecover_y2  v parity
-        //; parity (A)       (B)      A+B-1
-        //;      0            0        -1     same parity
-        //;      0            1         0     different parity
-        //;      1            0         0     different parity
-        //;      1            1         1     same parity
-
-    mpz_class ecrecover_y;
-    if ( (ecrecover_y2 + ecrecover_v_parity - 1) == 0 )
+    // parity:
+    int bit0 = mpz_tstbit(ecrecover_y.get_mpz_t(), 0); 
+    if (bit0 + ecrecover_v_parity -1 == 0)
     {
-        ecrecover_y = ecrecover_y2;
-    }
-    else
-    {
-        //; calculate neg(ecrecover_y) C = (A:FPEC) - (B:ecrecovery_y)
-        ecrecover_y = FPEC - ecrecover_y2;
+        ecrecover_y = FPEC - ecrecover_y;
     }
 
-//ecrecover_v_y2_same_parity:
-
-    //; C = n - (hash * inv_r) % n
-    mpz_class mulPointEc_k1 = FNEC - mulFnEc(hash, ecrecover_r_inv);
-
-    //;   C = (s * inv_r) % n
+    // Calculate the point of the curve    
+    mpz_class mulPointEc_k1 = FNEC - mulFnEc(signature, ecrecover_r_inv);
     mpz_class mulPointEc_k2 = mulFnEc(s, ecrecover_r_inv);
-
+    
     mpz_class mulPointEc_p1_x = ECGX;
     mpz_class mulPointEc_p1_y = ECGY;
 
-    //; r isn't an alias because the range has been checked at beginning
     mpz_class mulPointEc_p2_x = r;
+    mpz_class mulPointEc_p2_y = ecrecover_y;
 
-    //; y isn't an alias because was checked before
-    //; (r,y) is a point of curve because it satisfacts the curve equation
-    //$ => A      :MLOAD(ecrecover_y)
-    //A           :MSTORE(mulPointEc_p2_y),CALL(mulPointEc)
+    mpz_class mulPointEc_p3_x;
+    mpz_class mulPointEc_p3_y;
 
-    //mpz_class mulPointEc_p2_y = mulPointEc(ecrecover_y, mulPointEc_p2_x);
+    mulPointEc(mulPointEc_p1_x, mulPointEc_p1_y, mulPointEc_k1, mulPointEc_p2_x, mulPointEc_p2_y, mulPointEc_k2, mulPointEc_p3_x, mulPointEc_p3_y);
 
+    assert(mulPointEc_p3_x < FPEC);
+    assert(mulPointEc_p3_y < FPEC);
 
-    //; generate keccak of public key to obtain ethereum address
-    /*$ => E         :MLOAD(lastHashKIdUsed)
-    E + 1 => E     :MSTORE(lastHashKIdUsed)
-    0 => HASHPOS
-    32 => D
-
-    %FPEC => B
-    $ => A         :MLOAD(mulPointEc_p3_x)
-    1              :LT                  ; alias assert, mulPointEc_p3_x must be in [0, FPEC - 1]
-
-    A              :HASHK(E)
-
-    $ => A         :MLOAD(mulPointEc_p3_y)
-    1              :LT                  ; alias assert, mulPointEc_p3_y must be in [0, FPEC - 1]
-
-    A              :HASHK(E)
-
-    64             :HASHKLEN(E)
-    $ => A         :HASHKDIGEST(E)*/
-
+    //generate keccak of public key to obtain ethereum address
+    unsigned char outputHash[32];
+    unsigned char inputHash[64];
+    mpz_export(inputHash, nullptr, 0, 1, 0, 0, mulPointEc_p3_x.get_mpz_t());
+    mpz_export(inputHash + 32, nullptr, 0, 1, 0, 0, mulPointEc_p3_y.get_mpz_t());
+    keccak(inputHash, 64, outputHash, 32);
     mpz_class keccakHash;
-
-    //; for address take only last 20 bytes
-    address = keccakHash & ADDRESS_MASK;
+    mpz_import(keccakHash.get_mpz_t(), 32, 0, 1, 0, 0, outputHash);
+        
+    //for address take only last 20 bytes
+    address = keccakHash & ADDRESS_MASK; 
 
     return ECR_NO_ERROR;
 }
@@ -296,25 +239,106 @@ void mulPointEc ( const mpz_class &mulPointEc_p1_x,
     mpz_class mulPointEc_p12_x;
     mpz_class mulPointEc_p12_y;
 
-    mpz_class mulPointEc_p12_empty = 0;
+    bool mulPointEc_p12_empty = 0;
 
     if (mulPointEc_p1_x != mulPointEc_p2_x)
     {
         // p2.x != p1.x ==> p2 != p1
-        mulPointEc_p12_empty = 0;
+        mulPointEc_p12_empty = false;
         AddPointEc(mulPointEc_p1_x, mulPointEc_p1_y, mulPointEc_p2_x, mulPointEc_p2_y, mulPointEc_p12_x, mulPointEc_p12_y);
     }    
     else if (mulPointEc_p1_y == mulPointEc_p2_y)
     {
         // p2 == p1
-        mulPointEc_p12_empty = 0;
+        mulPointEc_p12_empty = false;
         DblPointEc(mulPointEc_p1_x, mulPointEc_p1_y, mulPointEc_p12_x, mulPointEc_p12_y);
     }
     else
     {
         // p2 == -p1
-        mulPointEc_p12_empty = 1;
+        mulPointEc_p12_empty = true;
     }
+
+    // start the loop
+    mpz_t rawK1;
+    mpz_t rawK2;
+
+    mpz_init(rawK1);
+    mpz_init(rawK2);
+
+    mpz_set(rawK1, mulPointEc_k1.get_mpz_t());
+    mpz_set(rawK2, mulPointEc_k2.get_mpz_t());
+
+
+    bool mulPointEc_p3_empty = true;
+
+    for(int i=255; i>=0; --i){
+        
+        // take next bits
+        int bitk1 = mpz_tstbit(rawK1, i);
+        int bitk2 = mpz_tstbit(rawK2, i);
+        
+        // add contribution depending on bits
+        if( bitk1==1 && bitk2==0){
+            if(!mulPointEc_p3_empty){
+                if(mulPointEc_p3_x != mulPointEc_p1_x){
+                    AddPointEc(mulPointEc_p3_x, mulPointEc_p3_y, mulPointEc_p1_x, mulPointEc_p1_y, mulPointEc_p3_x, mulPointEc_p3_y);
+                }else{
+                    if(mulPointEc_p3_y != mulPointEc_p1_y){
+                        mulPointEc_p3_empty = true;
+                    }else{
+                        DblPointEc(mulPointEc_p3_x, mulPointEc_p3_y, mulPointEc_p3_x, mulPointEc_p3_y);
+                    }
+                }
+            }else{
+                mulPointEc_p3_empty = false;
+                mpz_set(mulPointEc_p3_x.get_mpz_t(), mulPointEc_p1_x.get_mpz_t());
+                mpz_set(mulPointEc_p3_y.get_mpz_t(), mulPointEc_p1_y.get_mpz_t());
+            }
+        }else if( bitk1==0 && bitk2==1){
+            if(!mulPointEc_p3_empty){
+                if(mulPointEc_p3_x != mulPointEc_p2_x){
+                    AddPointEc(mulPointEc_p3_x, mulPointEc_p3_y, mulPointEc_p2_x, mulPointEc_p2_y, mulPointEc_p3_x, mulPointEc_p3_y);
+                }else{
+                    if(mulPointEc_p3_y != mulPointEc_p2_y){
+                        mulPointEc_p3_empty = true;
+                    }else{
+                        DblPointEc(mulPointEc_p3_x, mulPointEc_p3_y, mulPointEc_p3_x, mulPointEc_p3_y);
+                    }
+                }
+            }else{
+                mulPointEc_p3_empty = false;
+                mpz_set(mulPointEc_p3_x.get_mpz_t(), mulPointEc_p2_x.get_mpz_t());
+                mpz_set(mulPointEc_p3_y.get_mpz_t(), mulPointEc_p2_y.get_mpz_t());
+            }
+        }else if( bitk1==1 && bitk2==1){
+            if(!mulPointEc_p12_empty){    
+                if(!mulPointEc_p3_empty){
+                    if(mulPointEc_p3_x != mulPointEc_p12_x){
+                        AddPointEc(mulPointEc_p3_x, mulPointEc_p3_y, mulPointEc_p12_x, mulPointEc_p12_y, mulPointEc_p3_x, mulPointEc_p3_y);
+                    }else{
+                        if(mulPointEc_p3_y != mulPointEc_p12_y){
+                            mulPointEc_p3_empty = true;
+                        }else{
+                            DblPointEc(mulPointEc_p3_x, mulPointEc_p3_y, mulPointEc_p3_x, mulPointEc_p3_y);
+                        }
+                    }
+                }else{
+                    mulPointEc_p3_empty = false;
+                    mpz_set(mulPointEc_p3_x.get_mpz_t(), mulPointEc_p12_x.get_mpz_t());
+                    mpz_set(mulPointEc_p3_y.get_mpz_t(), mulPointEc_p12_y.get_mpz_t());
+                }
+            }
+        }
+        // double p3
+        if(!mulPointEc_p3_empty and i!=0){
+            DblPointEc(mulPointEc_p3_x, mulPointEc_p3_y, mulPointEc_p3_x, mulPointEc_p3_y);
+        }
+        
+    }
+    mpz_clear(rawK1);
+    mpz_clear(rawK2);
+
 
 }
 
