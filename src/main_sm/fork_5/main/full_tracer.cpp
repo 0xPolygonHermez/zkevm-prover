@@ -656,14 +656,14 @@ zkresult FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
         v = auxScalar.get_ui() - 27 + chainId * 2 + 35;
     }
 
-    mpz_class nonceScalar;
-    zkr = getVarFromCtx(ctx, false, ctx.rom.txNonceOffset, nonceScalar);
+    // Get the TX nonce
+    zkr = getVarFromCtx(ctx, false, ctx.rom.txNonceOffset, auxScalar);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("FullTracer::onProcessTx() failed calling getVarFromCtx(ctx.rom.txNonceOffset)");
         return zkr;
     }
-    uint64_t nonce = nonceScalar.get_ui();
+    uint64_t nonce = auxScalar.get_ui();
 
     // TX hash
     getTransactionHash( response.call_trace.context.to,
@@ -688,6 +688,15 @@ zkresult FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
     response.logs.clear();
     response.call_trace.steps.clear();
     response.execution_trace.clear();
+
+    // Get effective percentage
+    zkr = getVarFromCtx(ctx, false, ctx.rom.effectivePercentageRLPOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onProcessTx() failed calling getVarFromCtx(ctx.rom.effectivePercentageRLPOffset)");
+        return zkr;
+    }
+    response.effective_percentage = auxScalar.get_ui();
 
     // Create current tx object
     finalTrace.responses.push_back(response);
@@ -785,6 +794,16 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     }
     response.call_trace.context.from = NormalizeTo0xNFormat(fromScalar.get_str(16), 40);
 
+    // Set effective gas price
+    mpz_class auxScalar;
+    zkr = getVarFromCtx(ctx, true, ctx.rom.txGasPriceOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onFinishTx() failed calling getVarFromCtx(ctx.rom.txGasPriceOffset)");
+        return zkr;
+    }
+    response.effective_gas_price = Add0xIfMissing(auxScalar.get_str(16));
+
     // Set consumed tx gas
     uint64_t polsGas = fr.toU64(ctx.pols.GAS[*ctx.pStep]);
     if (polsGas > response.gas_left)
@@ -843,7 +862,6 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     response.gas_left -= response.gas_used;
 
     // Set new State Root
-    mpz_class auxScalar;
     if (!fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]))
     {
         zklog.error("FullTracer::onFinishTx() failed calling fea2scalar(SR)");
@@ -1119,26 +1137,6 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     uint64_t numOpcodes = call_trace.size();
     Opcode * prevTraceCall = (numOpcodes > 0) ? &call_trace.at(numOpcodes - 1) : NULL;
     Opcode * prevTraceExecution = (numOpcodes > 0) ? &execution_trace.at(numOpcodes - 1) : NULL;
-
-    // If is an ether transfer, don't add stop opcode to trace
-    if ( (singleInfo.opcode == opcodeInfo[0x00/*STOP*/].pName) &&
-        ( (prevTraceCall == NULL) || (opIncContext.find(prevTraceCall->opcode) != opIncContext.end()) ) )
-    {
-        zkr = getVarFromCtx(ctx, false, ctx.rom.bytecodeLengthOffset, auxScalar);
-        if (zkr != ZKR_SUCCESS)
-        {
-            zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.bytecodeLengthOffset)");
-            return zkr;
-        }
-        if (auxScalar == 0)
-        {
-#ifdef LOG_TIME_STATISTICS
-            tmsop.add("getCodeName", TimeDiff(top));
-            tms.add("onOpcode", TimeDiff(t));
-#endif
-            return ZKR_SUCCESS;
-        }
-    }
 
 #ifdef LOG_TIME_STATISTICS
     tmsop.add("getCodeName", TimeDiff(top));

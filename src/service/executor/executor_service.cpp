@@ -37,6 +37,9 @@ using grpc::Status;
         string2file(request->DebugString(), proverRequest.filePrefix + "executor_request.txt");
     }
 
+    // Get external request ID
+    proverRequest.externalRequestId = request->external_request_id();
+
     // PUBLIC INPUTS
 
     // Get oldStateRoot
@@ -277,7 +280,8 @@ using grpc::Status;
     proverRequest.input.bNoCounters = request->no_counters();
 
 #ifdef LOG_SERVICE_EXECUTOR_INPUT
-    zklog.info("ExecutorServiceImpl::ProcessBatch() got sequencerAddr=" + proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16) +
+    zklog.info("ExecutorServiceImpl::ProcessBatch() got externalRequestId=" + proverRequest.externalRequestId +
+        " sequencerAddr=" + proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16) +
         " batchL2DataLength=" + to_string(request->batch_l2_data().size()) +
         " batchL2Data=0x" + ba2string(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(0, 10)) + "..." + ba2string(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(zkmax(int64_t(0),int64_t(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size())-10), proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size())) +
         " oldStateRoot=" + proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) +
@@ -345,6 +349,8 @@ using grpc::Status;
         pProcessTransactionResponse->set_error(string2error(responses[tx].error)); // Any error encountered during the execution
         pProcessTransactionResponse->set_create_address(responses[tx].create_address); // New SC Address in case of SC creation
         pProcessTransactionResponse->set_state_root(string2ba(responses[tx].state_root));
+        pProcessTransactionResponse->set_effective_percentage(responses[tx].effective_percentage);
+        pProcessTransactionResponse->set_effective_gas_price(responses[tx].effective_gas_price);
         for (uint64_t log=0; log<responses[tx].logs.size(); log++)
         {
             executor::v1::Log * pLog = pProcessTransactionResponse->add_logs();
@@ -457,6 +463,7 @@ using grpc::Status;
             " counters.binary=" + to_string(proverRequest.counters.binary) +
             " flush_id=" + to_string(proverRequest.flushId) +
             " last_sent_flush_id=" + to_string(proverRequest.lastSentFlushId) +
+            " externalRequestId=" + proverRequest.externalRequestId +
             " nTxs=" + to_string(responses.size());
          if (config.logExecutorServerTxs)
          {
