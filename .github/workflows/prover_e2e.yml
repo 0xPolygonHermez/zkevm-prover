@@ -1,0 +1,26 @@
+name: Prover e2e test
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main","develop" ]
+  pull_request:
+    branches: [ "main","develop" ]
+
+jobs:
+  build:
+
+    runs-on: [self-hosted]
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: 'true'
+    - name: make
+      run: make -j
+    - name: remove all config 
+      run: rm -rf config
+    - name: link files
+      run: ln -s /home/ubuntu/v2.0.0-RC1-fork.5/config/ config
+    - name: run e2e tests
+      run: ./build/zkProver -c testvectors/config_runFile_e2e.json 
