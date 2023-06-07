@@ -480,7 +480,7 @@ using grpc::Status;
         return Status::CANCELLED;
     }
 
-    requestID = proverMessage.gen_aggregated_proof_response().id();
+    requestID = proverMessage.gen_final_proof_response().id();
 
     return Status::OK;
 }
@@ -662,7 +662,7 @@ using grpc::Status;
     {
         return grpcStatus;
     }
-    cout << "AggregatorServiceImpl::GenAndGetFinalProof() called GenBatchProof() and got requestID=" << requestID << endl;
+    cout << "AggregatorServiceImpl::GenAndGetFinalProof() called GenFinalProof() and got requestID=" << requestID << endl;
 
     // Get batch proof 0
     for (i=0; i<AGGREGATOR_SERVER_NUMBER_OF_GET_PROOF_RETRIES; i++)
