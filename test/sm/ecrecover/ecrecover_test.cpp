@@ -5,6 +5,7 @@
 #include "zklog.hpp"
 #include "timer.hpp"
 #include <iostream>
+#include <cassert>
 
 using namespace std;
 
@@ -19,6 +20,16 @@ struct ECRecoverTestVector
     string address;
 
 };
+#define NTESTS 46
+#define REPETITIONS 1
+#define BENCHMAKR_MODE 1
+
+#if BENCHMAKR_MODE == 1
+#undef NTESTS
+#define NTESTS 30
+#undef REPETITIONS
+#define REPETITIONS 100
+#endif
 
 ECRecoverTestVector ecrecoverTestVectors[] = {
     //0 
@@ -306,26 +317,32 @@ void ECRecoverTest (void)
     mpz_class signature, r, s, v, address;
 
     ECRecoverResult result;
-    for (uint64_t i=0; i<46; i++)
-    {
-        signature.set_str(ecrecoverTestVectors[i].signature, 16);
-        r.set_str(ecrecoverTestVectors[i].r, 16);
-        s.set_str(ecrecoverTestVectors[i].s, 16);
-        v.set_str(ecrecoverTestVectors[i].v, 16);
-        address.set_str(ecrecoverTestVectors[i].address, 16);
-
-        result = ECRecover(signature, r, s, v, ecrecoverTestVectors[i].precompiled, address);
-        
-        if (result != ecrecoverTestVectors[i].result)
+    for (int k = 0; k < REPETITIONS; k++)
+        for (uint64_t i = 0; i < NTESTS; i++)
         {
-            zklog.error("ECRecoverTest() failed i=" + to_string(i) + " signature=" + ecrecoverTestVectors[i].signature + " result=" + to_string(result) + " expectedResult=" + to_string(ecrecoverTestVectors[i].result));
-        }
-        
-        if (address != mpz_class(ecrecoverTestVectors[i].address,16))
-        {
-            zklog.error("ECRecoverTest() failed i=" + to_string(i) + " signature=" + ecrecoverTestVectors[i].signature + " address=" + address.get_str(16) + " expectedAddress=" + ecrecoverTestVectors[i].address);
-        }
-    }
+            signature.set_str(ecrecoverTestVectors[i].signature, 16);
+            r.set_str(ecrecoverTestVectors[i].r, 16);
+            s.set_str(ecrecoverTestVectors[i].s, 16);
+            v.set_str(ecrecoverTestVectors[i].v, 16);
+            address.set_str(ecrecoverTestVectors[i].address, 16);
 
+            result = ECRecover(signature, r, s, v, ecrecoverTestVectors[i].precompiled, address);
+#if BENCHMAKR_MODE != 1
+            if (result != ecrecoverTestVectors[i].result)
+            {
+                zklog.error("ECRecoverTest() failed i=" + to_string(i) + " signature=" + ecrecoverTestVectors[i].signature + " result=" + to_string(result) + " expectedResult=" + to_string(ecrecoverTestVectors[i].result));
+            }
+
+            if (address != mpz_class(ecrecoverTestVectors[i].address, 16))
+            {
+                zklog.error("ECRecoverTest() failed i=" + to_string(i) + " signature=" + ecrecoverTestVectors[i].signature + " address=" + address.get_str(16) + " expectedAddress=" + ecrecoverTestVectors[i].address);
+            }
+#endif
+        }
     TimerStopAndLog(ECRECOVER_TEST);
+#if BENCHMAKR_MODE == 1
+    assert(result == 0);
+    uint64_t time_bench = TimeDiff(ECRECOVER_TEST_start, ECRECOVER_TEST_stop)/1000; 
+    zklog.info("    Benchmark: " + to_string( (double)time_bench/ (NTESTS * REPETITIONS)) + " ms per ECRecover()");
+#endif
 }
