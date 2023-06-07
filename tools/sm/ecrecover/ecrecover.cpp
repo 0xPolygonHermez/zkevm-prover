@@ -30,24 +30,24 @@ mpz_class sqrtFpEc (const mpz_class &a);
 mpz_class sqFpEc   (const mpz_class &a);
 mpz_class PROVER_FORK_NAMESPACE::sqrtTonelliShanks ( const mpz_class &n, const mpz_class &p );
 
-void mulPointEc ( const mpz_class &mulPointEc_p1_x,
-                  const mpz_class &mulPointEc_p1_y,
-                    const mpz_class &mulPointEc_k1,
-                  const mpz_class &mulPointEc_p2_x, 
-                  const mpz_class &mulPointEc_p2_y,
-                    const mpz_class &mulPointEc_k2,
-                        mpz_class &mulPointEc_p3_x,
-                        mpz_class &mulPointEc_p3_y); 
-void AddPointEc ( const mpz_class &mulPointEc_p1_x,
-                  const mpz_class &mulPointEc_p1_y,
-                  const mpz_class &mulPointEc_p2_x, 
-                  const mpz_class &mulPointEc_p2_y,
-                        mpz_class &mulPointEc_p3_x,
-                        mpz_class &mulPointEc_p3_y);
-void DblPointEc ( const mpz_class &mulPointEc_p1_x,
-                  const mpz_class &mulPointEc_p1_y,
-                        mpz_class &mulPointEc_p3_x,
-                        mpz_class &mulPointEc_p3_y);
+void mulPointEc ( const mpz_class &p1_x,
+                  const mpz_class &p1_y,
+                    const mpz_class &k1,
+                  const mpz_class &p2_x, 
+                  const mpz_class &p2_y,
+                    const mpz_class &k2,
+                        mpz_class &p3_x,
+                        mpz_class &p3_y); 
+void AddPointEc ( const mpz_class &p1_x,
+                  const mpz_class &p1_y,
+                  const mpz_class &p2_x, 
+                  const mpz_class &p2_y,
+                        mpz_class &p3_x,
+                        mpz_class &p3_y);
+void DblPointEc ( const mpz_class &p1_x,
+                  const mpz_class &p1_y,
+                        mpz_class &p3_x,
+                        mpz_class &p3_y);
 
 ECRecoverResult ECRecover (mpz_class &signature, mpz_class &r, mpz_class &s, mpz_class &v, bool bPrecompiled, mpz_class &address)
 {
@@ -104,7 +104,6 @@ ECRecoverResult ECRecover (mpz_class &signature, mpz_class &r, mpz_class &s, mpz
         zklog.error("ECRecover() found invalid v=" + v.get_str(16));
         return ECR_V_INVALID;
     }
-
     // Curve is y^2 = x^3 + 7  -->  Calculate y from x=r
     mpz_class ecrecover_y;
     mpz_class aux1, aux2, aux3, aux4;
@@ -126,7 +125,6 @@ ECRecoverResult ECRecover (mpz_class &signature, mpz_class &r, mpz_class &s, mpz
             return ECR_NO_SQRT_Y;
         }
     }
-    ecrecover_y = sqrtFpEc(aux3); //rick: expensive
     assert(ecrecover_y < FPEC);
 
     // pending: check indeed y^2 has an square root
@@ -139,28 +137,28 @@ ECRecoverResult ECRecover (mpz_class &signature, mpz_class &r, mpz_class &s, mpz
     }
 
     // Calculate the point of the curve    
-    mpz_class mulPointEc_k1 = FNEC - mulFnEc(signature, ecrecover_r_inv);
-    mpz_class mulPointEc_k2 = mulFnEc(s, ecrecover_r_inv);
+    mpz_class k1 = FNEC - mulFnEc(signature, ecrecover_r_inv);
+    mpz_class k2 = mulFnEc(s, ecrecover_r_inv);
     
-    mpz_class mulPointEc_p1_x = ECGX;
-    mpz_class mulPointEc_p1_y = ECGY;
+    mpz_class p1_x = ECGX;
+    mpz_class p1_y = ECGY;
 
-    mpz_class mulPointEc_p2_x = r;
-    mpz_class mulPointEc_p2_y = ecrecover_y;
+    mpz_class p2_x = r;
+    mpz_class p2_y = ecrecover_y;
 
-    mpz_class mulPointEc_p3_x;
-    mpz_class mulPointEc_p3_y;
+    mpz_class p3_x;
+    mpz_class p3_y;
 
-    mulPointEc(mulPointEc_p1_x, mulPointEc_p1_y, mulPointEc_k1, mulPointEc_p2_x, mulPointEc_p2_y, mulPointEc_k2, mulPointEc_p3_x, mulPointEc_p3_y);
+    mulPointEc(p1_x, p1_y, k1, p2_x, p2_y, k2, p3_x, p3_y);
 
-    assert(mulPointEc_p3_x < FPEC);
-    assert(mulPointEc_p3_y < FPEC);
+    assert(p3_x < FPEC);
+    assert(p3_y < FPEC);
 
     //generate keccak of public key to obtain ethereum address
     unsigned char outputHash[32];
     unsigned char inputHash[64];
-    mpz_export(inputHash, nullptr, 0, 1, 0, 0, mulPointEc_p3_x.get_mpz_t());
-    mpz_export(inputHash + 32, nullptr, 0, 1, 0, 0, mulPointEc_p3_y.get_mpz_t());
+    mpz_export(inputHash, nullptr, 0, 1, 0, 0, p3_x.get_mpz_t());
+    mpz_export(inputHash + 32, nullptr, 0, 1, 0, 0, p3_y.get_mpz_t());
     keccak(inputHash, 64, outputHash, 32);
     mpz_class keccakHash;
     mpz_import(keccakHash.get_mpz_t(), 32, 0, 1, 0, 0, outputHash);
@@ -238,34 +236,34 @@ mpz_class sqFpEc (const mpz_class &a)
     return (a*a)%FPEC;
 }
 
-void mulPointEc ( const mpz_class &mulPointEc_p1_x,
-                  const mpz_class &mulPointEc_p1_y,
-                    const mpz_class &mulPointEc_k1,
-                  const mpz_class &mulPointEc_p2_x, 
-                  const mpz_class &mulPointEc_p2_y,
-                    const mpz_class &mulPointEc_k2,
-                        mpz_class &mulPointEc_p3_x,
-                        mpz_class &mulPointEc_p3_y)
+void mulPointEc ( const mpz_class &p1_x,
+                  const mpz_class &p1_y,
+                    const mpz_class &k1,
+                  const mpz_class &p2_x, 
+                  const mpz_class &p2_y,
+                    const mpz_class &k2,
+                        mpz_class &p3_x,
+                        mpz_class &p3_y)
 {
-    mulPointEc_p3_x = 0;
-    mulPointEc_p3_y = 0;
+    p3_x = 0;
+    p3_y = 0;
 
     mpz_class mulPointEc_p12_x;
     mpz_class mulPointEc_p12_y;
 
     bool mulPointEc_p12_empty = 0;
 
-    if (mulPointEc_p1_x != mulPointEc_p2_x)
+    if (p1_x != p2_x)
     {
         // p2.x != p1.x ==> p2 != p1
         mulPointEc_p12_empty = false;
-        AddPointEc(mulPointEc_p1_x, mulPointEc_p1_y, mulPointEc_p2_x, mulPointEc_p2_y, mulPointEc_p12_x, mulPointEc_p12_y);
+        AddPointEc(p1_x, p1_y, p2_x, p2_y, mulPointEc_p12_x, mulPointEc_p12_y);
     }    
-    else if (mulPointEc_p1_y == mulPointEc_p2_y)
+    else if (p1_y == p2_y)
     {
         // p2 == p1
         mulPointEc_p12_empty = false;
-        DblPointEc(mulPointEc_p1_x, mulPointEc_p1_y, mulPointEc_p12_x, mulPointEc_p12_y);
+        DblPointEc(p1_x, p1_y, mulPointEc_p12_x, mulPointEc_p12_y);
     }
     else
     {
@@ -280,8 +278,8 @@ void mulPointEc ( const mpz_class &mulPointEc_p1_x,
     mpz_init(rawK1);
     mpz_init(rawK2);
 
-    mpz_set(rawK1, mulPointEc_k1.get_mpz_t());
-    mpz_set(rawK2, mulPointEc_k2.get_mpz_t());
+    mpz_set(rawK1, k1.get_mpz_t());
+    mpz_set(rawK2, k2.get_mpz_t());
 
 
     bool mulPointEc_p3_empty = true;
@@ -295,58 +293,58 @@ void mulPointEc ( const mpz_class &mulPointEc_p1_x,
         // add contribution depending on bits
         if( bitk1==1 && bitk2==0){
             if(!mulPointEc_p3_empty){
-                if(mulPointEc_p3_x != mulPointEc_p1_x){
-                    AddPointEc(mulPointEc_p3_x, mulPointEc_p3_y, mulPointEc_p1_x, mulPointEc_p1_y, mulPointEc_p3_x, mulPointEc_p3_y);
+                if(p3_x != p1_x){
+                    AddPointEc(p3_x, p3_y, p1_x, p1_y, p3_x, p3_y);
                 }else{
-                    if(mulPointEc_p3_y != mulPointEc_p1_y){
+                    if(p3_y != p1_y){
                         mulPointEc_p3_empty = true;
                     }else{
-                        DblPointEc(mulPointEc_p3_x, mulPointEc_p3_y, mulPointEc_p3_x, mulPointEc_p3_y);
+                        DblPointEc(p3_x, p3_y, p3_x, p3_y);
                     }
                 }
             }else{
                 mulPointEc_p3_empty = false;
-                mpz_set(mulPointEc_p3_x.get_mpz_t(), mulPointEc_p1_x.get_mpz_t());
-                mpz_set(mulPointEc_p3_y.get_mpz_t(), mulPointEc_p1_y.get_mpz_t());
+                mpz_set(p3_x.get_mpz_t(), p1_x.get_mpz_t());
+                mpz_set(p3_y.get_mpz_t(), p1_y.get_mpz_t());
             }
         }else if( bitk1==0 && bitk2==1){
             if(!mulPointEc_p3_empty){
-                if(mulPointEc_p3_x != mulPointEc_p2_x){
-                    AddPointEc(mulPointEc_p3_x, mulPointEc_p3_y, mulPointEc_p2_x, mulPointEc_p2_y, mulPointEc_p3_x, mulPointEc_p3_y);
+                if(p3_x != p2_x){
+                    AddPointEc(p3_x, p3_y, p2_x, p2_y, p3_x, p3_y);
                 }else{
-                    if(mulPointEc_p3_y != mulPointEc_p2_y){
+                    if(p3_y != p2_y){
                         mulPointEc_p3_empty = true;
                     }else{
-                        DblPointEc(mulPointEc_p3_x, mulPointEc_p3_y, mulPointEc_p3_x, mulPointEc_p3_y);
+                        DblPointEc(p3_x, p3_y, p3_x, p3_y);
                     }
                 }
             }else{
                 mulPointEc_p3_empty = false;
-                mpz_set(mulPointEc_p3_x.get_mpz_t(), mulPointEc_p2_x.get_mpz_t());
-                mpz_set(mulPointEc_p3_y.get_mpz_t(), mulPointEc_p2_y.get_mpz_t());
+                mpz_set(p3_x.get_mpz_t(), p2_x.get_mpz_t());
+                mpz_set(p3_y.get_mpz_t(), p2_y.get_mpz_t());
             }
         }else if( bitk1==1 && bitk2==1){
             if(!mulPointEc_p12_empty){    
                 if(!mulPointEc_p3_empty){
-                    if(mulPointEc_p3_x != mulPointEc_p12_x){
-                        AddPointEc(mulPointEc_p3_x, mulPointEc_p3_y, mulPointEc_p12_x, mulPointEc_p12_y, mulPointEc_p3_x, mulPointEc_p3_y);
+                    if(p3_x != mulPointEc_p12_x){
+                        AddPointEc(p3_x, p3_y, mulPointEc_p12_x, mulPointEc_p12_y, p3_x, p3_y);
                     }else{
-                        if(mulPointEc_p3_y != mulPointEc_p12_y){
+                        if(p3_y != mulPointEc_p12_y){
                             mulPointEc_p3_empty = true;
                         }else{
-                            DblPointEc(mulPointEc_p3_x, mulPointEc_p3_y, mulPointEc_p3_x, mulPointEc_p3_y);
+                            DblPointEc(p3_x, p3_y, p3_x, p3_y);
                         }
                     }
                 }else{
                     mulPointEc_p3_empty = false;
-                    mpz_set(mulPointEc_p3_x.get_mpz_t(), mulPointEc_p12_x.get_mpz_t());
-                    mpz_set(mulPointEc_p3_y.get_mpz_t(), mulPointEc_p12_y.get_mpz_t());
+                    mpz_set(p3_x.get_mpz_t(), mulPointEc_p12_x.get_mpz_t());
+                    mpz_set(p3_y.get_mpz_t(), mulPointEc_p12_y.get_mpz_t());
                 }
             }
         }
         // double p3
         if(!mulPointEc_p3_empty and i!=0){
-            DblPointEc(mulPointEc_p3_x, mulPointEc_p3_y, mulPointEc_p3_x, mulPointEc_p3_y);
+            DblPointEc(p3_x, p3_y, p3_x, p3_y);
         }
         
     }
@@ -356,18 +354,18 @@ void mulPointEc ( const mpz_class &mulPointEc_p1_x,
 
 }
 
-void AddPointEc ( const mpz_class &mulPointEc_p1_x,
-                  const mpz_class &mulPointEc_p1_y,
-                  const mpz_class &mulPointEc_p2_x, 
-                  const mpz_class &mulPointEc_p2_y,
-                        mpz_class &mulPointEc_p3_x,
-                        mpz_class &mulPointEc_p3_y)
+void AddPointEc ( const mpz_class &p1_x,
+                  const mpz_class &p1_y,
+                  const mpz_class &p2_x, 
+                  const mpz_class &p2_y,
+                        mpz_class &p3_x,
+                        mpz_class &p3_y)
 {
     RawFec::Element x1, y1, x2, y2, x3, y3;
-    fec.fromMpz(x1, mulPointEc_p1_x.get_mpz_t());
-    fec.fromMpz(y1, mulPointEc_p1_y.get_mpz_t());
-    fec.fromMpz(x2, mulPointEc_p2_x.get_mpz_t());
-    fec.fromMpz(y2, mulPointEc_p2_y.get_mpz_t());
+    fec.fromMpz(x1, p1_x.get_mpz_t());
+    fec.fromMpz(y1, p1_y.get_mpz_t());
+    fec.fromMpz(x2, p2_x.get_mpz_t());
+    fec.fromMpz(y2, p2_y.get_mpz_t());
 
     RawFec::Element aux1, aux2, s;
 
@@ -387,18 +385,18 @@ void AddPointEc ( const mpz_class &mulPointEc_p1_x,
     fec.mul(aux1, aux1, s);
     fec.sub(y3, aux1, y1);
 
-    fec.toMpz(mulPointEc_p3_x.get_mpz_t(), x3);
-    fec.toMpz(mulPointEc_p3_y.get_mpz_t(), y3);
+    fec.toMpz(p3_x.get_mpz_t(), x3);
+    fec.toMpz(p3_y.get_mpz_t(), y3);
 }
 
-void DblPointEc ( const mpz_class &mulPointEc_p1_x,
-                  const mpz_class &mulPointEc_p1_y,
-                        mpz_class &mulPointEc_p3_x,
-                        mpz_class &mulPointEc_p3_y)
+void DblPointEc ( const mpz_class &p1_x,
+                  const mpz_class &p1_y,
+                        mpz_class &p3_x,
+                        mpz_class &p3_y)
 {
     RawFec::Element x1, y1, x2, y2, x3, y3;
-    fec.fromMpz(x1, mulPointEc_p1_x.get_mpz_t());
-    fec.fromMpz(y1, mulPointEc_p1_y.get_mpz_t());
+    fec.fromMpz(x1, p1_x.get_mpz_t());
+    fec.fromMpz(y1, p1_y.get_mpz_t());
     x2 = x1;
     y2 = y1;
 
@@ -422,6 +420,6 @@ void DblPointEc ( const mpz_class &mulPointEc_p1_x,
     fec.mul(aux1, aux1, s);
     fec.sub(y3, aux1, y1);
     
-    fec.toMpz(mulPointEc_p3_x.get_mpz_t(), x3);
-    fec.toMpz(mulPointEc_p3_y.get_mpz_t(), y3);
+    fec.toMpz(p3_x.get_mpz_t(), x3);
+    fec.toMpz(p3_y.get_mpz_t(), y3);
 }
