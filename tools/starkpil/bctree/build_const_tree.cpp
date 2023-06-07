@@ -379,7 +379,7 @@ void buildConstTree(const string constFile, const string starkStructFile, const 
             numThreads = 1;
         }
         Goldilocks::parcpy(&constTree[header], constPolsArrayE, nPols * nExt, numThreads);
-        PoseidonGoldilocks::merkletree_batch(&constTree[numElementsCopy], constPolsArrayE, nPols, nExt, batchSize);
+        PoseidonGoldilocks::merkletree(&constTree[numElementsCopy], constPolsArrayE, nPols, nExt);
         TimerStopAndLog(MerkleTree_GL);
 
         cout << time() << " Generating files..." << endl;

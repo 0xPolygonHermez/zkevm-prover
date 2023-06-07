@@ -1120,26 +1120,6 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     Opcode * prevTraceCall = (numOpcodes > 0) ? &call_trace.at(numOpcodes - 1) : NULL;
     Opcode * prevTraceExecution = (numOpcodes > 0) ? &execution_trace.at(numOpcodes - 1) : NULL;
 
-    // If is an ether transfer, don't add stop opcode to trace
-    if ( (singleInfo.opcode == opcodeInfo[0x00/*STOP*/].pName) &&
-        ( (prevTraceCall == NULL) || (opIncContext.find(prevTraceCall->opcode) != opIncContext.end()) ) )
-    {
-        zkr = getVarFromCtx(ctx, false, ctx.rom.bytecodeLengthOffset, auxScalar);
-        if (zkr != ZKR_SUCCESS)
-        {
-            zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.bytecodeLengthOffset)");
-            return zkr;
-        }
-        if (auxScalar == 0)
-        {
-#ifdef LOG_TIME_STATISTICS
-            tmsop.add("getCodeName", TimeDiff(top));
-            tms.add("onOpcode", TimeDiff(t));
-#endif
-            return ZKR_SUCCESS;
-        }
-    }
-
 #ifdef LOG_TIME_STATISTICS
     tmsop.add("getCodeName", TimeDiff(top));
 #endif

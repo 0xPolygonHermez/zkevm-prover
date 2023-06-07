@@ -411,6 +411,7 @@ class ProcessBatchRequest PROTOBUF_FINAL :
     kGlobalExitRootFieldNumber = 7,
     kCoinbaseFieldNumber = 9,
     kFromFieldNumber = 12,
+    kExternalRequestIdFieldNumber = 16,
     kTraceConfigFieldNumber = 15,
     kOldBatchNumFieldNumber = 3,
     kChainIdFieldNumber = 4,
@@ -603,6 +604,31 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   std::string* _internal_mutable_from();
   public:
 
+  // string external_request_id = 16;
+  void clear_external_request_id();
+  const std::string& external_request_id() const;
+  void set_external_request_id(const std::string& value);
+  void set_external_request_id(std::string&& value);
+  void set_external_request_id(const char* value);
+  void set_external_request_id(const char* value, size_t size);
+  std::string* mutable_external_request_id();
+  std::string* release_external_request_id();
+  void set_allocated_external_request_id(std::string* external_request_id);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_external_request_id();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_external_request_id(
+      std::string* external_request_id);
+  private:
+  const std::string& _internal_external_request_id() const;
+  void _internal_set_external_request_id(const std::string& value);
+  std::string* _internal_mutable_external_request_id();
+  public:
+
   // .executor.v1.TraceConfig trace_config = 15;
   bool has_trace_config() const;
   private:
@@ -700,6 +726,7 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr global_exit_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr coinbase_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr from_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr external_request_id_;
   ::executor::v1::TraceConfig* trace_config_;
   ::PROTOBUF_NAMESPACE_ID::uint64 old_batch_num_;
   ::PROTOBUF_NAMESPACE_ID::uint64 chain_id_;
@@ -3079,12 +3106,14 @@ class ProcessTransactionResponse PROTOBUF_FINAL :
     kReturnValueFieldNumber = 4,
     kCreateAddressFieldNumber = 9,
     kStateRootFieldNumber = 10,
+    kEffectiveGasPriceFieldNumber = 15,
     kCallTraceFieldNumber = 14,
     kGasLeftFieldNumber = 5,
     kTypeFieldNumber = 3,
     kErrorFieldNumber = 8,
     kGasUsedFieldNumber = 6,
     kGasRefundedFieldNumber = 7,
+    kEffectivePercentageFieldNumber = 16,
   };
   // repeated .executor.v1.Log logs = 11;
   int logs_size() const;
@@ -3247,6 +3276,31 @@ class ProcessTransactionResponse PROTOBUF_FINAL :
   std::string* _internal_mutable_state_root();
   public:
 
+  // string effective_gas_price = 15;
+  void clear_effective_gas_price();
+  const std::string& effective_gas_price() const;
+  void set_effective_gas_price(const std::string& value);
+  void set_effective_gas_price(std::string&& value);
+  void set_effective_gas_price(const char* value);
+  void set_effective_gas_price(const char* value, size_t size);
+  std::string* mutable_effective_gas_price();
+  std::string* release_effective_gas_price();
+  void set_allocated_effective_gas_price(std::string* effective_gas_price);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_effective_gas_price();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_effective_gas_price(
+      std::string* effective_gas_price);
+  private:
+  const std::string& _internal_effective_gas_price() const;
+  void _internal_set_effective_gas_price(const std::string& value);
+  std::string* _internal_mutable_effective_gas_price();
+  public:
+
   // .executor.v1.CallTrace call_trace = 14;
   bool has_call_trace() const;
   private:
@@ -3310,6 +3364,15 @@ class ProcessTransactionResponse PROTOBUF_FINAL :
   void _internal_set_gas_refunded(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
+  // uint32 effective_percentage = 16;
+  void clear_effective_percentage();
+  ::PROTOBUF_NAMESPACE_ID::uint32 effective_percentage() const;
+  void set_effective_percentage(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_effective_percentage() const;
+  void _internal_set_effective_percentage(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:executor.v1.ProcessTransactionResponse)
  private:
   class _Internal;
@@ -3324,12 +3387,14 @@ class ProcessTransactionResponse PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr return_value_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr create_address_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr state_root_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr effective_gas_price_;
   ::executor::v1::CallTrace* call_trace_;
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_left_;
   ::PROTOBUF_NAMESPACE_ID::uint32 type_;
   int error_;
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_used_;
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_refunded_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 effective_percentage_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
 };
@@ -4753,6 +4818,87 @@ inline void ProcessBatchRequest::set_allocated_trace_config(::executor::v1::Trac
   }
   trace_config_ = trace_config;
   // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessBatchRequest.trace_config)
+}
+
+// string external_request_id = 16;
+inline void ProcessBatchRequest::clear_external_request_id() {
+  external_request_id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& ProcessBatchRequest::external_request_id() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchRequest.external_request_id)
+  return _internal_external_request_id();
+}
+inline void ProcessBatchRequest::set_external_request_id(const std::string& value) {
+  _internal_set_external_request_id(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequest.external_request_id)
+}
+inline std::string* ProcessBatchRequest::mutable_external_request_id() {
+  // @@protoc_insertion_point(field_mutable:executor.v1.ProcessBatchRequest.external_request_id)
+  return _internal_mutable_external_request_id();
+}
+inline const std::string& ProcessBatchRequest::_internal_external_request_id() const {
+  return external_request_id_.Get();
+}
+inline void ProcessBatchRequest::_internal_set_external_request_id(const std::string& value) {
+  
+  external_request_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void ProcessBatchRequest::set_external_request_id(std::string&& value) {
+  
+  external_request_id_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:executor.v1.ProcessBatchRequest.external_request_id)
+}
+inline void ProcessBatchRequest::set_external_request_id(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  external_request_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:executor.v1.ProcessBatchRequest.external_request_id)
+}
+inline void ProcessBatchRequest::set_external_request_id(const char* value,
+    size_t size) {
+  
+  external_request_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:executor.v1.ProcessBatchRequest.external_request_id)
+}
+inline std::string* ProcessBatchRequest::_internal_mutable_external_request_id() {
+  
+  return external_request_id_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* ProcessBatchRequest::release_external_request_id() {
+  // @@protoc_insertion_point(field_release:executor.v1.ProcessBatchRequest.external_request_id)
+  return external_request_id_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ProcessBatchRequest::set_allocated_external_request_id(std::string* external_request_id) {
+  if (external_request_id != nullptr) {
+    
+  } else {
+    
+  }
+  external_request_id_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), external_request_id,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessBatchRequest.external_request_id)
+}
+inline std::string* ProcessBatchRequest::unsafe_arena_release_external_request_id() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.ProcessBatchRequest.external_request_id)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return external_request_id_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void ProcessBatchRequest::unsafe_arena_set_allocated_external_request_id(
+    std::string* external_request_id) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (external_request_id != nullptr) {
+    
+  } else {
+    
+  }
+  external_request_id_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      external_request_id, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBatchRequest.external_request_id)
 }
 
 // -------------------------------------------------------------------
@@ -8584,6 +8730,107 @@ inline void ProcessTransactionResponse::set_allocated_call_trace(::executor::v1:
   }
   call_trace_ = call_trace;
   // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessTransactionResponse.call_trace)
+}
+
+// string effective_gas_price = 15;
+inline void ProcessTransactionResponse::clear_effective_gas_price() {
+  effective_gas_price_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& ProcessTransactionResponse::effective_gas_price() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessTransactionResponse.effective_gas_price)
+  return _internal_effective_gas_price();
+}
+inline void ProcessTransactionResponse::set_effective_gas_price(const std::string& value) {
+  _internal_set_effective_gas_price(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessTransactionResponse.effective_gas_price)
+}
+inline std::string* ProcessTransactionResponse::mutable_effective_gas_price() {
+  // @@protoc_insertion_point(field_mutable:executor.v1.ProcessTransactionResponse.effective_gas_price)
+  return _internal_mutable_effective_gas_price();
+}
+inline const std::string& ProcessTransactionResponse::_internal_effective_gas_price() const {
+  return effective_gas_price_.Get();
+}
+inline void ProcessTransactionResponse::_internal_set_effective_gas_price(const std::string& value) {
+  
+  effective_gas_price_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void ProcessTransactionResponse::set_effective_gas_price(std::string&& value) {
+  
+  effective_gas_price_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:executor.v1.ProcessTransactionResponse.effective_gas_price)
+}
+inline void ProcessTransactionResponse::set_effective_gas_price(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  effective_gas_price_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:executor.v1.ProcessTransactionResponse.effective_gas_price)
+}
+inline void ProcessTransactionResponse::set_effective_gas_price(const char* value,
+    size_t size) {
+  
+  effective_gas_price_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:executor.v1.ProcessTransactionResponse.effective_gas_price)
+}
+inline std::string* ProcessTransactionResponse::_internal_mutable_effective_gas_price() {
+  
+  return effective_gas_price_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* ProcessTransactionResponse::release_effective_gas_price() {
+  // @@protoc_insertion_point(field_release:executor.v1.ProcessTransactionResponse.effective_gas_price)
+  return effective_gas_price_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ProcessTransactionResponse::set_allocated_effective_gas_price(std::string* effective_gas_price) {
+  if (effective_gas_price != nullptr) {
+    
+  } else {
+    
+  }
+  effective_gas_price_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), effective_gas_price,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessTransactionResponse.effective_gas_price)
+}
+inline std::string* ProcessTransactionResponse::unsafe_arena_release_effective_gas_price() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.ProcessTransactionResponse.effective_gas_price)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return effective_gas_price_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void ProcessTransactionResponse::unsafe_arena_set_allocated_effective_gas_price(
+    std::string* effective_gas_price) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (effective_gas_price != nullptr) {
+    
+  } else {
+    
+  }
+  effective_gas_price_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      effective_gas_price, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessTransactionResponse.effective_gas_price)
+}
+
+// uint32 effective_percentage = 16;
+inline void ProcessTransactionResponse::clear_effective_percentage() {
+  effective_percentage_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessTransactionResponse::_internal_effective_percentage() const {
+  return effective_percentage_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessTransactionResponse::effective_percentage() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessTransactionResponse.effective_percentage)
+  return _internal_effective_percentage();
+}
+inline void ProcessTransactionResponse::_internal_set_effective_percentage(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  effective_percentage_ = value;
+}
+inline void ProcessTransactionResponse::set_effective_percentage(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_effective_percentage(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessTransactionResponse.effective_percentage)
 }
 
 // -------------------------------------------------------------------

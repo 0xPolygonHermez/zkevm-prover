@@ -183,6 +183,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     uint64_t nexti; // Next step, as it is used internally, set to 0 in fast mode to reuse the same evaluation all the time
     ctx.N = N; // Numer of evaluations
     ctx.pStep = &i; // ctx.pStep is used inside evaluateCommand() to find the current value of the registers, e.g. pols(A0)[ctx.step]
+    ctx.pEvaluation = &step;
     ctx.pZKPC = &zkPC; // Pointer to the zkPC
     Goldilocks::Element currentRCX = fr.zero();
 
@@ -4545,13 +4546,19 @@ void MainExecutor::assertOutputs(Context &ctx)
 
 void MainExecutor::logError(Context &ctx, const string &message)
 {
+    // Log the message, if provided
     if (message.size() > 0)
     {
         zklog.error("MainExecutor::logError() " + message);
     }
-    zklog.error(string("MainExecutor::logError() proverRequest.result=") + zkresult2string(ctx.proverRequest.result) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " rom.line={" + rom.line[*ctx.pZKPC].toString(fr) + "} uuid=" + ctx.proverRequest.uuid);
+
+    // Log details
+    zklog.error(string("MainExecutor::logError() proverRequest.result=") + zkresult2string(ctx.proverRequest.result) + " step=" + to_string(*ctx.pStep) + " eval=" + to_string(*ctx.pEvaluation) + " zkPC=" + to_string(*ctx.pZKPC) + " rom.line={" + rom.line[*ctx.pZKPC].toString(fr) + "} uuid=" + ctx.proverRequest.uuid + " externalRequestId=" + ctx.proverRequest.externalRequestId);
+
+    // Log registers
     ctx.printRegs();
     
+    // Log the input file content
     json inputJson;
     ctx.proverRequest.input.save(inputJson);
     zklog.error("Input=" + inputJson.dump());

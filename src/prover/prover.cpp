@@ -180,6 +180,7 @@ Prover::~Prover()
         delete starksC12a;
         delete starksRecursive1;
         delete starksRecursive2;
+        delete starksRecursiveF;
     }
 }
 
@@ -543,7 +544,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         starkZkevm->genProof(fproof, &publics[0], &zkevmSteps);
 
         TimerStopAndLog(STARK_PROOF_BATCH_PROOF);
-
+        TimerStart(STARK_GEN_AND_CALC_WITNESS_C12A);
         TimerStart(STARK_JSON_GENERATION_BATCH_PROOF);
 
         nlohmann::ordered_json jProof = fproof.proofs.proof2json();
@@ -565,6 +566,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         //-------------------------------------------
         /* Generate C12a stark proof             */
         //-------------------------------------------
+        TimerStopAndLog(STARK_GEN_AND_CALC_WITNESS_C12A);
         TimerStart(STARK_C12_A_PROOF_BATCH_PROOF);
         uint64_t polBitsC12 = starksC12a->starkInfo.starkStruct.steps[starksC12a->starkInfo.starkStruct.steps.size() - 1].nBits;
         FRIProof fproofC12a((1 << polBitsC12), FIELD_EXTENSION, starksC12a->starkInfo.starkStruct.steps.size(), starksC12a->starkInfo.evMap.size(), starksC12a->starkInfo.nPublics);

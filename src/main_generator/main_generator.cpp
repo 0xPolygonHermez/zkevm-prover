@@ -399,6 +399,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
     {
         code += "    ctx.pStep = &i; // ctx.pStep is used inside evaluateCommand() to find the current value of the registers, e.g. pols(A0)[ctx.step]\n";
     }
+    code += "    ctx.pEvaluation = &i;\n";
     code += "    ctx.pZKPC = &zkPC; // Pointer to the zkPC\n\n";
 
     // Declare currentRCX only if repeat instruction is used

@@ -4,6 +4,7 @@
 #include "proof.hpp"
 #include "zklog.hpp"
 #include <grpcpp/grpcpp.h>
+#include "exit_process.hpp"
 
 using grpc::Server;
 using grpc::ServerBuilder;
@@ -12,6 +13,12 @@ using grpc::Status;
 
 ::grpc::Status ExecutorServiceImpl::ProcessBatch(::grpc::ServerContext* context, const ::executor::v1::ProcessBatchRequest* request, ::executor::v1::ProcessBatchResponse* response)
 {
+    // If the process is exising, do not start new activities
+    if (bExitingProcess)
+    {
+        return Status::CANCELLED;
+    }
+
     TimerStart(EXECUTOR_PROCESS_BATCH);
 
 #ifdef LOG_SERVICE
@@ -36,6 +43,9 @@ using grpc::Status;
     {
         string2file(request->DebugString(), proverRequest.filePrefix + "executor_request.txt");
     }
+
+    // Get external request ID
+    proverRequest.externalRequestId = request->external_request_id();
 
     // PUBLIC INPUTS
 
@@ -277,7 +287,8 @@ using grpc::Status;
     proverRequest.input.bNoCounters = request->no_counters();
 
 #ifdef LOG_SERVICE_EXECUTOR_INPUT
-    zklog.info("ExecutorServiceImpl::ProcessBatch() got sequencerAddr=" + proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16) +
+    zklog.info("ExecutorServiceImpl::ProcessBatch() got externalRequestId=" + proverRequest.externalRequestId +
+        " sequencerAddr=" + proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16) +
         " batchL2DataLength=" + to_string(request->batch_l2_data().size()) +
         " batchL2Data=0x" + ba2string(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(0, 10)) + "..." + ba2string(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(zkmax(int64_t(0),int64_t(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size())-10), proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size())) +
         " oldStateRoot=" + proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) +
@@ -345,6 +356,8 @@ using grpc::Status;
         pProcessTransactionResponse->set_error(string2error(responses[tx].error)); // Any error encountered during the execution
         pProcessTransactionResponse->set_create_address(responses[tx].create_address); // New SC Address in case of SC creation
         pProcessTransactionResponse->set_state_root(string2ba(responses[tx].state_root));
+        pProcessTransactionResponse->set_effective_percentage(responses[tx].effective_percentage);
+        pProcessTransactionResponse->set_effective_gas_price(responses[tx].effective_gas_price);
         for (uint64_t log=0; log<responses[tx].logs.size(); log++)
         {
             executor::v1::Log * pLog = pProcessTransactionResponse->add_logs();
@@ -457,6 +470,7 @@ using grpc::Status;
             " counters.binary=" + to_string(proverRequest.counters.binary) +
             " flush_id=" + to_string(proverRequest.flushId) +
             " last_sent_flush_id=" + to_string(proverRequest.lastSentFlushId) +
+            " externalRequestId=" + proverRequest.externalRequestId +
             " nTxs=" + to_string(responses.size());
          if (config.logExecutorServerTxs)
          {
@@ -581,6 +595,12 @@ using grpc::Status;
 
 ::grpc::Status ExecutorServiceImpl::GetFlushStatus (::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::executor::v1::GetFlushStatusResponse* response)
 {
+    // If the process is exising, do not start new activities
+    if (bExitingProcess)
+    {
+        return Status::CANCELLED;
+    }
+
     uint64_t storedFlushId;
     uint64_t storingFlushId;
     uint64_t lastFlushId;
@@ -608,6 +628,12 @@ using grpc::Status;
 
 ::grpc::Status ExecutorServiceImpl::ProcessBatchStream (::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::executor::v1::ProcessBatchResponse, ::executor::v1::ProcessBatchRequest>* stream)
 {
+    // If the process is exising, do not start new activities
+    if (bExitingProcess)
+    {
+        return Status::CANCELLED;
+    }
+
     TimerStart(PROCESS_BATCH_STREAM);
 
 #ifdef LOG_SERVICE
