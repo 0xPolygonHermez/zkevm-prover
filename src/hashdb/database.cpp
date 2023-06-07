@@ -525,7 +525,7 @@ zkresult Database::readRemote(bool bProgram, const string &key, string &value)
     {
         zklog.error("Database::readRemote() table=" + tableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
         disposeConnection(pDatabaseConnection);
-        exitProcess();
+        return ZKR_DB_ERROR;
     }
     
     // Dispose the read db conneciton

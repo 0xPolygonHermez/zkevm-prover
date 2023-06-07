@@ -467,7 +467,7 @@ using grpc::Status;
     }
     
     // Check type
-    if (proverMessage.response_case() != aggregator::v1::ProverMessage::ResponseCase::kGenAggregatedProofResponse)
+    if (proverMessage.response_case() != aggregator::v1::ProverMessage::ResponseCase::kGenFinalProofResponse)
     {
         cerr << "Error: AggregatorServiceImpl::GenFinalProof() got proverMessage.response_case=" << proverMessage.response_case() << " instead of GEN_AGGREGATED_PROOF_RESPONSE" << endl;
         return Status::CANCELLED;
