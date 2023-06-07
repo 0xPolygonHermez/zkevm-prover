@@ -85,5 +85,6 @@
     "requestsPersistence": 3600,
     "maxExecutorThreads": 20,
     "maxProverThreads": 8,
-    "maxStateDBThreads": 8
+    "maxStateDBThreads": 8,
+    "aggregatorClientMaxStreams": 1
 }

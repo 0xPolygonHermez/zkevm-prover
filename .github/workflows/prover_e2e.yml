@@ -24,3 +24,5 @@ jobs:
       run: ln -s /home/ubuntu/v2.0.0-RC1-fork.5/config/ config
     - name: run e2e tests
       run: ./build/zkProver -c testvectors/config_runFile_e2e.json 
+    - name: run snarkjs verification
+      run: snarkjs ffv config/final/final.fflonk.verkey.json $(ls -t runtime/output/*.gen_final_proof_public.json | head -n1) $(ls -t runtime/output/*.final_proof.proof.json | head -n1)
