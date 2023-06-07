@@ -532,6 +532,9 @@ void FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
     contextData.type = "CALL";
     callData[CTX] = contextData;
 
+    // prevCTX
+    prevCTX = CTX;
+
     /* Fill response object */
     
     mpz_class r;
@@ -589,7 +592,7 @@ void FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
     txTime = getCurrentTime();
 
     // Reset values
-    depth = 0;
+    depth = 1;
     deltaStorage.clear();
     txGAS[depth] = {response.call_trace.context.gas, 0};
     lastError = "";
@@ -888,6 +891,18 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     // Increase opcodes counter
     numberOfOpcodesInThisTx++;
 
+    // Update depth if a variation in CTX is detected
+    uint64_t CTX = fr.toU64(ctx.pols.CTX[*ctx.pStep]);
+    if (prevCTX > CTX)
+    {
+        depth -= 1;
+    }
+    else if (prevCTX < CTX)
+    {
+        depth += 1;
+    }
+    prevCTX = CTX;
+
     Opcode singleInfo;
 
     if (ctx.proverRequest.input.bNoCounters)
@@ -1037,7 +1052,7 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 #endif
     if (ctx.proverRequest.input.traceConfig.bGenerateTrace)
     {
-        singleInfo.depth = depth + 1;
+        singleInfo.depth = depth ;
         singleInfo.pc = fr.toU64(ctx.pols.PC[*ctx.pStep]);
         singleInfo.gas = fr.toU64(ctx.pols.GAS[*ctx.pStep]);
         singleInfo.gas_cost = opcodeInfo[codeId].gas;
@@ -1260,10 +1275,9 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     if (execution_trace.size() > 0)
     {
         prevStep = &execution_trace[execution_trace.size() - 1];
-        if (opIncContext.find(prevStep->opcode) != opIncContext.end())
+        if (opIncContext.find(prevStep->opcode) != opIncContext.end() && (prevStep->depth != singleInfo.depth))
         {
             // Create new call data entry
-            uint64_t CTX = fr.toU64(ctx.pols.CTX[*ctx.pStep]);
             ContextData contextData;
             contextData.type = prevStep->opcode;
             callData[CTX] = contextData;
@@ -1281,7 +1295,6 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     }
 
     // Set contract params depending on current call type
-    uint64_t CTX = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
     singleInfo.contract.type = callData[CTX].type;
     if (singleInfo.contract.type == "DELEGATECALL")
     {
