@@ -108,6 +108,10 @@ void Config::load(json &config)
     if (config.contains("useMainExecGenerated") && config["useMainExecGenerated"].is_boolean())
         useMainExecGenerated = config["useMainExecGenerated"];
 
+    useMainExecC = false;
+    if (config.contains("useMainExecC") && config["useMainExecC"].is_boolean())
+        useMainExecC = config["useMainExecC"];
+
     executeInParallel = false;
     if (config.contains("executeInParallel") && config["executeInParallel"].is_boolean())
         executeInParallel = config["executeInParallel"];
@@ -545,6 +549,8 @@ void Config::print(void)
         zklog.info("    executeInParallel=true");
     if (useMainExecGenerated)
         zklog.info("    useMainExecGenerated=true");
+    if (useMainExecC)
+        zklog.info("    useMainExecC=true");
 
     if (executorROMLineTraces)
         zklog.info("    executorROMLineTraces=true");

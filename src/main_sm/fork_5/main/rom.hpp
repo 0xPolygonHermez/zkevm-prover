@@ -65,6 +65,12 @@ public:
     uint64_t MAX_CNT_KECCAK_F_LIMIT;
     uint64_t MAX_CNT_PADDING_PG_LIMIT;
     uint64_t MAX_CNT_POSEIDON_G_LIMIT;
+    uint64_t MAX_CNT_KECCAK_F;
+    uint64_t LAST_TX_STORAGE_POS;
+    uint64_t SMT_KEY_SC_STORAGE;
+
+    /* Scalar constants */
+    mpz_class ADDRESS_SYSTEM;
 
     /* Constructor */
     Rom (const Config &config) :
@@ -109,7 +115,10 @@ public:
             MAX_CNT_MEM_ALIGN_LIMIT(0),
             MAX_CNT_KECCAK_F_LIMIT(0),
             MAX_CNT_PADDING_PG_LIMIT(0),
-            MAX_CNT_POSEIDON_G_LIMIT(0)
+            MAX_CNT_POSEIDON_G_LIMIT(0),
+            MAX_CNT_KECCAK_F(0),
+            LAST_TX_STORAGE_POS(0),
+            SMT_KEY_SC_STORAGE(0)
             { };
 
     /* Destructor */
@@ -124,6 +133,7 @@ public:
     uint64_t getLabel(const string &label) const;
     uint64_t getMemoryOffset(const string &label) const;
     uint64_t getConstant(json &romJson, const string &constantName);
+    mpz_class getConstantL(json &romJson, const string &constantName);
 
 private:
     void loadProgram(Goldilocks &fr, json &romJson);

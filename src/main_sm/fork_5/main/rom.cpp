@@ -71,6 +71,12 @@ void Rom::load(Goldilocks &fr, json &romJson)
     MAX_CNT_KECCAK_F_LIMIT   = getConstant(romJson, "MAX_CNT_KECCAK_F_LIMIT");
     MAX_CNT_PADDING_PG_LIMIT = getConstant(romJson, "MAX_CNT_PADDING_PG_LIMIT");
     MAX_CNT_POSEIDON_G_LIMIT = getConstant(romJson, "MAX_CNT_POSEIDON_G_LIMIT");
+    MAX_CNT_KECCAK_F         = getConstant(romJson, "MAX_CNT_KECCAK_F");
+    LAST_TX_STORAGE_POS      = getConstant(romJson, "LAST_TX_STORAGE_POS");
+    SMT_KEY_SC_STORAGE       = getConstant(romJson, "SMT_KEY_SC_STORAGE");
+
+    // Load ROM scalar constants
+    ADDRESS_SYSTEM = getConstantL(romJson, "ADDRESS_SYSTEM");
 }
 
 void Rom::loadProgram(Goldilocks &fr, json &romJson)
@@ -323,19 +329,48 @@ uint64_t Rom::getConstant(json &romJson, const string &constantName)
     if (!romJson["constants"].contains(constantName) ||
         !romJson["constants"][constantName].is_object() )
     {
-        zklog.error("Rom::load() could not find constant " + constantName + " in rom json");
+        zklog.error("Rom::getConstant() could not find constant " + constantName + " in rom json");
         exitProcess();
     }
     if (!romJson["constants"][constantName].contains("value") ||
         !romJson["constants"][constantName]["value"].is_string() )
     {
-        zklog.error("Rom::load() could not find value for constant " + constantName + " in rom json");
+        zklog.error("Rom::getConstant() could not find value for constant " + constantName + " in rom json");
         exitProcess();
     }
     string auxString;
     auxString = romJson["constants"][constantName]["value"];
     //cout << "Rom::getConstant() " << constantName << "=" << auxString << endl;
     return atoi(auxString.c_str());
+}
+
+mpz_class Rom::getConstantL(json &romJson, const string &constantName)
+{
+    if (!romJson.contains("constants") ||
+        !romJson["constants"].is_object())
+    {
+        zklog.error("Rom::getConstantL() could not find constants in rom json");
+        exitProcess();
+    }
+    if (!romJson["constants"].contains(constantName) ||
+        !romJson["constants"][constantName].is_object() )
+    {
+        zklog.error("Rom::getConstantL() could not find constant " + constantName + " in rom json");
+        exitProcess();
+    }
+    if (!romJson["constants"][constantName].contains("value") ||
+        !romJson["constants"][constantName]["value"].is_string() )
+    {
+        zklog.error("Rom::getConstantL() could not find value for constant " + constantName + " in rom json");
+        exitProcess();
+    }
+    string auxString;
+    auxString = romJson["constants"][constantName]["value"];
+    //cout << "Rom::getConstantL() " << constantName << "=" << auxString << endl;
+
+    mpz_class value;
+    value.set_str(auxString, 10);
+    return value;
 }
 
 void Rom::unload(void)
