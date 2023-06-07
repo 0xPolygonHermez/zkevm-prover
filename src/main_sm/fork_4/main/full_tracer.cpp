@@ -1118,13 +1118,6 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     singleInfo.op = codeId;
 
     // Check depth changes and update depth
-    zkr = getVarFromCtx(ctx, true, ctx.rom.depthOffset, auxScalar);
-    if (zkr != ZKR_SUCCESS)
-    {
-        zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.depthOffset)");
-        return zkr;
-    }
-    depth = auxScalar.get_ui();
     singleInfo.depth = depth;
 
     // get previous opcode processed
@@ -1232,7 +1225,6 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 #endif
     if (ctx.proverRequest.input.traceConfig.bGenerateTrace)
     {
-        singleInfo.depth = depth + 1;
         singleInfo.pc = fr.toU64(ctx.pols.PC[*ctx.pStep]);
         singleInfo.gas = fr.toU64(ctx.pols.GAS[*ctx.pStep]);
         singleInfo.gas_cost = opcodeInfo[codeId].gas;

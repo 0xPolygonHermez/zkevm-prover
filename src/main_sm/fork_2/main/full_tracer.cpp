@@ -1052,7 +1052,7 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 #endif
     if (ctx.proverRequest.input.traceConfig.bGenerateTrace)
     {
-        singleInfo.depth = depth ;
+        singleInfo.depth = depth;
         singleInfo.pc = fr.toU64(ctx.pols.PC[*ctx.pStep]);
         singleInfo.gas = fr.toU64(ctx.pols.GAS[*ctx.pStep]);
         singleInfo.gas_cost = opcodeInfo[codeId].gas;
