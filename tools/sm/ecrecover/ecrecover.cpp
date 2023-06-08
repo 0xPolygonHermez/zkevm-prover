@@ -28,8 +28,8 @@ mpz_class mulFnEc  (const mpz_class &a, const mpz_class &b);
 mpz_class addFpEc  (const mpz_class &a, const mpz_class &b);
 mpz_class sqrtFpEc (const mpz_class &a);
 mpz_class sqFpEc   (const mpz_class &a);
+
 void Jacobian2Affine (const mpz_class &x, const mpz_class &y, const mpz_class &z, mpz_class &x_out, mpz_class &y_out);
-mpz_class PROVER_FORK_NAMESPACE::sqrtTonelliShanks ( const mpz_class &n, const mpz_class &p );
 
 void mulPointEc ( const mpz_class &p1_x, const mpz_class &p1_y, const mpz_class &k1, 
                   const mpz_class &p2_x, const mpz_class &p2_y, const mpz_class &k2, 
@@ -231,11 +231,11 @@ mpz_class addFpEc  (const mpz_class &a, const mpz_class &b)
 
 mpz_class sqrtFpEc (const mpz_class &a)
 {
-    RawFec::Element pfe = fec.negOne();
-    mpz_class p;
-    fec.toMpz(p.get_mpz_t(), pfe);
-    p++;
-    return PROVER_FORK_NAMESPACE::sqrtTonelliShanks(a, p);
+    //We use that p = 3 mod 4, so r = a^((p+1)/4) is a square root of a: https://www.rieselprime.de/ziki/Modular_square_root
+    mpz_class result;
+    mpz_class n = (FPEC + 1) / 4;
+    mpz_powm(result.get_mpz_t(), a.get_mpz_t(), n.get_mpz_t(), FPEC.get_mpz_t());
+    return result;
 }
 
 mpz_class sqFpEc (const mpz_class &a)
