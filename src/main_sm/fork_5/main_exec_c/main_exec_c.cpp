@@ -205,7 +205,7 @@ skipSetGlobalExitRoot:
         $ => D          :SLOAD
         D               :MSTORE(txCount)
 */
-    result = SLOAD(ctx, ctxc, ctx.rom.ADDRESS_SYSTEM, ctx.rom.SMT_KEY_SC_STORAGE, ctx.rom.LAST_TX_STORAGE_POS, ctxc.globalVars.txCount);
+    result = SLOAD(ctx, ctxc, ctx.rom.constants.ADDRESS_SYSTEM, ctx.rom.constants.SMT_KEY_SC_STORAGE, ctx.rom.constants.LAST_TX_STORAGE_POS, ctxc.globalVars.txCount);
     if (result != ZKR_SUCCESS)
     {
         zklog.error("MainExecutorC::execute() failed calling SLOAD() result=" + zkresult2string(result));
@@ -225,9 +225,119 @@ skipSetGlobalExitRoot:
         B + 1 + %MIN_CNT_KECCAK_BATCH => B      :MSTORE(cntKeccakPreProcess)
         %MAX_CNT_KECCAK_F - CNT_KECCAK_F - B    :JMPN(outOfCountersKeccak)
 */
-    if (((ctxc.globalVars.batchL2DataLength + 1) / 136) > (ctx.rom.MAX_CNT_KECCAK_F - ctxc.regs.CNT_KECCAK_F))
+    if (((ctxc.globalVars.batchL2DataLength + 1) / 136) > (ctx.rom.constants.MAX_CNT_KECCAK_F - ctxc.regs.CNT_KECCAK_F))
     {
         // Call onError(OOCK), onFinishTX(), onFinishBatch()
+    }
+
+
+/*
+
+;;;;;;;;;;;;;;;;;;
+;; C - Loop parsing RLP transactions
+;;      - Load transaction RLP data and ensure it has correct RLP encoding
+;;      - If an error is found in any transaction, the batch will not process any transaction
+;;;;;;;;;;;;;;;;;;
+
+        E+1 => E                            :MSTORE(lastHashKIdUsed)
+        0                                   :MSTORE(batchHashPos)
+        E                                   :MSTORE(batchHashDataId)
+        $ => A                              :MLOAD(lastCtxUsed)
+        A                                   :MSTORE(ctxTxToUse) ; Points at first context to be used when processing transactions */
+
+    ctxc.regs.E++;
+    ctxc.globalVars.lastHashKIdUsed = ctxc.regs.E;
+    ctxc.globalVars.batchHashPos = 0;
+    ctxc.globalVars.batchHashDataId = ctxc.regs.E;
+    ctxc.globalVars.ctxTxToUse = ctxc.globalVars.lastCtxUsed;
+
+        /*
+        $${var p = 0}
+        ; set flag isLoadingRLP to 1
+        1               :MSTORE(isLoadingRLP)*/
+    ctxc.globalVars.isLoadingRLP = 1;
+    /*
+txLoopRLP:
+        $ => A          :MLOAD(lastCtxUsed)
+        A+1 => CTX      :MSTORE(lastCtxUsed)*/
+    ctxc.globalVars.lastCtxUsed++;
+
+    while (ctxc.globalVars.batchL2DataLength > ctxc.globalVars.batchL2DataParsed)
+    {
+        // loadTx_rlp
+        /*
+        
+;;;;;;;;;;;;;;;;;;
+;; A - Initialization
+;;     - Data to parse: [rlp(nonce, gasprice, gaslimit, to, value, data, chainId, 0, 0)|r|s|v]
+;;     - Signed Ethereum transaction: H_keccak(rlp(nonce, gasprice, gaslimit, to, value, data, chainId, 0, 0))
+;;     - RLP encoding information: https://ethereum.org/en/developers/docs/data-structures-and-encoding/rlp
+;;     - Entire batch is discarded (no transaction is processed) if any error is found
+;;;;;;;;;;;;;;;;;;
+
+loadTx_rlp:
+        ; check one keccak is available to begin processing the RLP
+        $ => D                                          :MLOAD(cntKeccakPreProcess)
+        %MAX_CNT_KECCAK_F - CNT_KECCAK_F - 1 - D        :JMPN(outOfCountersKeccak)
+
+        ; A new hash with position 0 is started
+        0 => HASHPOS
+
+        ; We get a new hashId
+        $ => E                          :MLOAD(lastHashKIdUsed)
+        E+1 => E                        :MSTORE(lastHashKIdUsed)
+        ; Pointer to next RLP bytes to read
+        0 => C
+        */
+        if (ctxc.globalVars.cntKeccakPreProcess > (ctx.rom.constants.MAX_CNT_KECCAK_F - ctxc.regs.CNT_KECCAK_F))
+        {
+            //JMPN(outOfCountersKeccak)
+        }
+        ctxc.regs.HASHPOS = 0;
+        ctxc.globalVars.lastHashKIdUsed++;
+        ctxc.regs.C = 0;
+
+    }
+/*
+        $ => A          :MLOAD(batchL2DataLength)
+        $ => C          :MLOAD(batchL2DataParsed)
+        C - A           :JMPN(loadTx_rlp, endCheckRLP)
+
+endCheckRLP:
+        ; set flag isLoadingRLP to 0
+        0               :MSTORE(isLoadingRLP)
+                        :JMP(txLoop)
+*/
+    ctxc.globalVars.isLoadingRLP = 0;
+
+    /*
+    
+;;;;;;;;;;;;;;;;;;
+;; D - Loop processing transactions
+;;      - Load transaction data and interpret it
+;;;;;;;;;;;;;;;;;;
+
+txLoop:
+        $ => A          :MLOAD(pendingTxs)
+        A-1             :MSTORE(pendingTxs), JMPN(processTxsEnd)
+        $ => A          :MLOAD(ctxTxToUse) ; Load first context used by transaction
+        A+1 => CTX      :MSTORE(ctxTxToUse),JMP(processTx)
+processTxEnd:
+                        :CALL(updateSystemData)
+
+processTxFinished:
+        $${eventLog(onFinishTx)}   :JMP(txLoop)
+
+processTxsEnd:
+    
+    */
+    while (ctxc.globalVars.pendingTxs > 0)
+    {
+        ctxc.globalVars.pendingTxs--;
+        ctxc.globalVars.ctxTxToUse++;
+        // JMP processTX
+        // CALL updateSystemData
+        //eventLog(onFinishTx)}
     }
 
     proverRequest.result = ZKR_SUCCESS;
