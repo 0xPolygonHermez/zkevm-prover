@@ -17,8 +17,6 @@
 #include "main_sm/fork_5/main/rom.hpp"
 #include "main_sm/fork_5/main/context.hpp"
 #include "main_sm/fork_5/main/eval_command.hpp"
-#include "main_sm/fork_5/main/eth_opcodes.hpp"
-#include "main_sm/fork_5/main/opcode_address.hpp"
 #include "utils/time_metric.hpp"
 #include "input.hpp"
 #include "scalar.hpp"
@@ -85,18 +83,6 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     finalizeExecutionLabel  = rom.getLabel(string("finalizeExecution"));
     checkAndSaveFromLabel   = rom.getLabel(string("checkAndSaveFrom"));
     ecrecoverStoreArgsLabel = rom.getLabel(string("ecrecover_store_args"));
-
-    // Initialize the Ethereum opcode list: opcode=array position, operation=position content
-    ethOpcodeInit();
-
-    // Use the rom labels object to map every opcode to a ROM address
-    if (!romJson.contains("labels") ||
-        !romJson["labels"].is_object() )
-    {
-        zklog.error("Error: MainExecutor::MainExecutor() ROM file does not contain a labels object at root level");
-        exitProcess();
-    }
-    opcodeAddressInit(romJson["labels"]);
 
     TimerStopAndLog(ROM_LOAD);
 };
