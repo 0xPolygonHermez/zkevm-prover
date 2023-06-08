@@ -22,7 +22,7 @@ struct ECRecoverTestVector
 };
 #define NTESTS 46
 #define REPETITIONS 1
-#define BENCHMAKR_MODE 0
+#define BENCHMAKR_MODE 1 // 0: test mode, 1: benchmark mode
 
 #if BENCHMAKR_MODE == 1
 #undef NTESTS
@@ -346,10 +346,10 @@ void ECRecoverTest (void)
 #endif
         }
     TimerStopAndLog(ECRECOVER_TEST);
+#if BENCHMAKR_MODE == 0
     zklog.info("    Failed ECRECOVER_TEST " + to_string( failedTests ));
-
-#if BENCHMAKR_MODE == 1
-    assert(result == 0);
+#else 
+    assert(result == 0 && failedTests == 0); //to avoid warnings
     uint64_t time_bench = TimeDiff(ECRECOVER_TEST_start, ECRECOVER_TEST_stop)/1000; 
     zklog.info("    Benchmark: " + to_string( (double)time_bench/ (NTESTS * REPETITIONS)) + " ms per ECRecover()");
 #endif

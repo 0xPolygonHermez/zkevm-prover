@@ -114,7 +114,7 @@ ECRecoverResult ECRecover (mpz_class &signature, mpz_class &r, mpz_class &s, mpz
     
     if(aux3==0)
     {
-        ecrecover_y = 0; /*rick: check this case*/
+        ecrecover_y = 0; 
     }
     else
     {
@@ -235,6 +235,10 @@ mpz_class sqrtFpEc (const mpz_class &a)
     mpz_class result;
     mpz_class n = (FPEC + 1) / 4;
     mpz_powm(result.get_mpz_t(), a.get_mpz_t(), n.get_mpz_t(), FPEC.get_mpz_t());
+    if((result*result) % FPEC != a)
+    {
+        return 0;
+    }
     return result;
 }
 
