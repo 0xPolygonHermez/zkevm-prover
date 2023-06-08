@@ -317,6 +317,7 @@ void ECRecoverTest (void)
     mpz_class signature, r, s, v, address;
 
     ECRecoverResult result;
+    int failedTests = 0;
     for (int k = 0; k < REPETITIONS; k++)
         for (uint64_t i = 0; i < NTESTS; i++)
         {
@@ -328,18 +329,25 @@ void ECRecoverTest (void)
 
             result = ECRecover(signature, r, s, v, ecrecoverTestVectors[i].precompiled, address);
 #if BENCHMAKR_MODE != 1
+            bool failed = false;
             if (result != ecrecoverTestVectors[i].result)
             {
                 zklog.error("ECRecoverTest() failed i=" + to_string(i) + " signature=" + ecrecoverTestVectors[i].signature + " result=" + to_string(result) + " expectedResult=" + to_string(ecrecoverTestVectors[i].result));
+                failed = true;
             }
 
             if (address != mpz_class(ecrecoverTestVectors[i].address, 16))
             {
                 zklog.error("ECRecoverTest() failed i=" + to_string(i) + " signature=" + ecrecoverTestVectors[i].signature + " address=" + address.get_str(16) + " expectedAddress=" + ecrecoverTestVectors[i].address);
+                failed = true;
             }
+            if(failed)
+                failedTests++;
 #endif
         }
     TimerStopAndLog(ECRECOVER_TEST);
+    zklog.info("    Failed ECRECOVER_TEST " + to_string( failedTests ));
+
 #if BENCHMAKR_MODE == 1
     assert(result == 0);
     uint64_t time_bench = TimeDiff(ECRECOVER_TEST_start, ECRECOVER_TEST_stop)/1000; 
