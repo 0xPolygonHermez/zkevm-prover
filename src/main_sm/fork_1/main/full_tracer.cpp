@@ -528,6 +528,9 @@ void FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
     contextData.type = "CALL";
     callData[CTX] = contextData;
 
+    // prevCTX
+    prevCTX = CTX;
+
     /* Fill response object */
     
     mpz_class r;
@@ -585,7 +588,7 @@ void FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
     txTime = getCurrentTime();
 
     // Reset values
-    depth = 0;
+    depth = 1;
     deltaStorage.clear();
     txGAS[depth] = {response.call_trace.context.gas, 0};
     lastError = "";
@@ -887,6 +890,18 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     // Increase opcodes counter
     numberOfOpcodesInThisTx++;
 
+    // Update depth if a variation in CTX is detected
+    uint64_t CTX = fr.toU64(ctx.pols.CTX[*ctx.pStep]);
+    if (prevCTX > CTX)
+    {
+        depth -= 1;
+    }
+    else if (prevCTX < CTX)
+    {
+        depth += 1;
+    }
+    prevCTX = CTX;
+
     Opcode singleInfo;
 
     if (ctx.proverRequest.input.bNoCounters)
@@ -932,16 +947,6 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     singleInfo.opcode = opcodeInfo[codeId].pName;
     codeId = opcodeInfo[codeId].codeID;
     singleInfo.op = codeId;
-
-    // Check depth changes and update depth
-    getVarFromCtx(ctx, true, ctx.rom.depthOffset, auxScalar);
-    uint64_t newDepth = auxScalar.get_ui();
-    bool decreaseDepth = newDepth < depth;
-    bool increaseDepth = newDepth > depth;
-    if (decreaseDepth || increaseDepth)
-    {
-        depth = newDepth;
-    }
 
     // get previous opcode processed
     uint64_t numOpcodes = call_trace.size();
@@ -1036,7 +1041,7 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 #endif
     if (ctx.proverRequest.input.traceConfig.bGenerateTrace)
     {
-        singleInfo.depth = depth + 1;
+        singleInfo.depth = depth;
         singleInfo.pc = fr.toU64(ctx.pols.PC[*ctx.pStep]);
         singleInfo.gas = fr.toU64(ctx.pols.GAS[*ctx.pStep]);
         singleInfo.gas_cost = opcodeInfo[codeId].gas;
@@ -1046,20 +1051,6 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
         //singleInfo.error = "";
         fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]);
         singleInfo.state_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
-
-        // Set gas forwarded to a new context and save gas left in previous context
-        if (increaseDepth)
-        {
-            // get gas forwarded to current ctx
-            uint64_t gasForwarded = fr.toU64(ctx.pols.GAS[*ctx.pStep]);
-
-            // get gas remaining in origin context
-            getVarFromCtx(ctx, false, ctx.rom.originCTXOffset, auxScalar);
-            uint64_t originCTX = auxScalar.get_ui();
-            getVarFromCtx(ctx, false, ctx.rom.gasCTXOffset, auxScalar, &originCTX);
-            uint64_t gasRemaining = auxScalar.get_ui();
-            txGAS[depth] = {gasForwarded, gasRemaining};
-        }
 
         // Add contract info
         getVarFromCtx(ctx, false, ctx.rom.txDestAddrOffset, auxScalar);
@@ -1144,21 +1135,6 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
         }
 
         // cout << "info[info.size() - 1].gas_cost=" << info[info.size() - 1].gas_cost << endl;
-
-        // going to previous depth
-        if (decreaseDepth) {
-            // get gas cost consumed by current ctx except last opcode: gasForwarded - gasSecondLast
-            uint64_t gasConsumedExceptLastOpcode = txGAS[depth + 1].forwarded - prevTraceCall->gas;
-            // get gas remaining at the end of the previous context
-            uint64_t gasEndPreviousCtx = singleInfo.gas - txGAS[depth + 1].remaining;
-            // get gas spend by previous ctx
-            uint64_t gasSpendPreviousCtx = txGAS[depth + 1].forwarded - gasEndPreviousCtx;
-            // compute gas spend by the last opcode
-            uint64_t gasLastOpcode = gasSpendPreviousCtx - gasConsumedExceptLastOpcode;
-            // set opcode gas cost to traces
-            prevTraceCall->gas_cost = gasLastOpcode;
-            prevTraceExecution->gas_cost = gasLastOpcode;
-        }
 
         // Set gas refund for sstore opcode
         getVarFromCtx(ctx, false, ctx.rom.gasRefundOffset, auxScalar);
@@ -1259,10 +1235,9 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     if (execution_trace.size() > 0)
     {
         prevStep = &execution_trace[execution_trace.size() - 1];
-        if (opIncContext.find(prevStep->opcode) != opIncContext.end())
+        if (opIncContext.find(prevStep->opcode) != opIncContext.end() && (prevStep->depth != singleInfo.depth))
         {
             // Create new call data entry
-            uint64_t CTX = fr.toU64(ctx.pols.CTX[*ctx.pStep]);
             ContextData contextData;
             contextData.type = prevStep->opcode;
             callData[CTX] = contextData;
@@ -1280,13 +1255,12 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     }
 
     // Set contract params depending on current call type
-    uint64_t CTX = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
     singleInfo.contract.type = callData[CTX].type;
     if (singleInfo.contract.type == "DELEGATECALL")
     {
         mpz_class auxScalar;
         getVarFromCtx(ctx, false, ctx.rom.storageAddrOffset, auxScalar);
-        singleInfo.contract.caller = NormalizeTo0xNFormat(auxScalar.get_str(16), 40);
+        singleInfo.contract.caller = NormalizeToNFormat(auxScalar.get_str(16), 40);
     }
         
     // If is an ether transfer, don't add stop opcode to trace

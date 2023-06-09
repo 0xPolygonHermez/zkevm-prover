@@ -2,7 +2,6 @@
 #include "definitions.hpp"
 #include "config.hpp"
 #include "main_sm/fork_5/main/eval_command.hpp"
-#include "main_sm/fork_5/main/opcode_address.hpp"
 #include "scalar.hpp"
 #include "utils.hpp"
 #include "zkassert.hpp"
