@@ -388,8 +388,13 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
 // To be used only for testing, since it allocates a lot of memory
 void BinaryExecutor::execute (vector<BinaryAction> &action)
 {
-    void * pAddress = mapFile(config.zkevmCmPols, CommitPols::pilSize(), true);
+    void * pAddress = malloc(CommitPols::pilSize());
+    if (pAddress == NULL)
+    {
+        zklog.error("BinaryExecutor::execute() failed calling malloc() of size=" + to_string(CommitPols::pilSize()));
+        exitProcess();
+    }
     CommitPols cmPols(pAddress, CommitPols::pilDegree());
     execute(action, cmPols.Binary);
-    unmapFile(pAddress, CommitPols::pilSize());
+    free(pAddress);
 }

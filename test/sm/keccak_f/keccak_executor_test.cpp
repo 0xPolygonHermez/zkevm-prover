@@ -190,7 +190,12 @@ void KeccakSMTest3 (KeccakFExecutor &executor)
 
 void KeccakSMTest4 (Goldilocks &fr, const Config &config, KeccakFExecutor &executor)
 {    
-    void * pAddress = mapFile(config.zkevmCmPols, CommitPols::pilSize(), true);
+    void * pAddress = malloc(CommitPols::pilSize());
+    if (pAddress == NULL)
+    {
+        zklog.error("KeccakSMTest4() failed calling malloc() of size=" + to_string(CommitPols::pilSize()));
+        exitProcess();
+    }
     CommitPols cmPols(pAddress, CommitPols::pilDegree());
 
     uint64_t numberOfSlots = (cmPols.KeccakF.degree()-1)/158418;
@@ -281,10 +286,10 @@ void KeccakSMTest4 (Goldilocks &fr, const Config &config, KeccakFExecutor &execu
 
     free(pInput);
     delete[] pHash;
-    unmapFile(pAddress, CommitPols::pilSize());
+    free(pAddress);
 }
 
-void KeccakSMExecutorTest (Goldilocks &fr, const Config &config)
+uint64_t KeccakSMExecutorTest (Goldilocks &fr, const Config &config)
 {
     cout << "KeccakSMExecutorTest() starting" << endl;
 
@@ -295,4 +300,5 @@ void KeccakSMExecutorTest (Goldilocks &fr, const Config &config)
     KeccakSMTest4(fr, config, executor);
 
     cout << "KeccakSMExecutorTest() done" << endl;
+    return 0;
 }

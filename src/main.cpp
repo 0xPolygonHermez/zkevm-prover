@@ -35,6 +35,7 @@
 #include "zklog.hpp"
 #include "ecrecover_test.hpp"
 #include "hashdb_singleton.hpp"
+#include "unit_test.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -539,6 +540,12 @@ int main(int argc, char **argv)
     if (config.runECRecoverTest)
     {
         ECRecoverTest();
+    }
+
+    // Unit test
+    if (config.runUnitTest)
+    {
+        UnitTest(fr, poseidon, config);
     }
 
     // If there is nothing else to run, exit normally

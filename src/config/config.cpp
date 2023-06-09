@@ -104,6 +104,10 @@ void Config::load(json &config)
     if (config.contains("runECRecoverTest") && config["runECRecoverTest"].is_boolean())
         runECRecoverTest = config["runECRecoverTest"];
 
+    runUnitTest = false;
+    if (config.contains("runUnitTest") && config["runUnitTest"].is_boolean())
+        runUnitTest = config["runUnitTest"];
+
     useMainExecGenerated = false;
     if (config.contains("useMainExecGenerated") && config["useMainExecGenerated"].is_boolean())
         useMainExecGenerated = config["useMainExecGenerated"];
@@ -544,6 +548,8 @@ void Config::print(void)
         zklog.info("    runBlakeTest=true");
     if (runECRecoverTest)
         zklog.info("    runECRecoverTest=true");
+    if (runUnitTest)
+        zklog.info("    runUnitTest=true");
 
     if (executeInParallel)
         zklog.info("    executeInParallel=true");

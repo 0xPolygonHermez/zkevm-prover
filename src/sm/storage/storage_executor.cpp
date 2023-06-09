@@ -1227,9 +1227,14 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
 // To be used only for testing, since it allocates a lot of memory
 void StorageExecutor::execute (vector<SmtAction> &action)
 {
-    void * pAddress = mapFile(config.zkevmCmPols, CommitPols::pilSize(), true);
+    void * pAddress = malloc(CommitPols::pilSize());
+    if (pAddress == NULL)
+    {
+        zklog.error("StorageExecutor::execute() failed calling malloc() of size=" + to_string(CommitPols::pilSize()));
+        exitProcess();
+    }
     CommitPols cmPols(pAddress, CommitPols::pilDegree());
     vector<array<Goldilocks::Element, 17>> required;
     execute(action, cmPols.Storage, required);
-    unmapFile(pAddress, CommitPols::pilSize());
+    free(pAddress);
 }
