@@ -168,7 +168,7 @@ Prover::~Prover()
         }
         free(pAddressStarksRecursiveF);
 
-        if (prover != NULL)
+        if (Zkey::FFLONK_PROTOCOL_ID == protocolId)
             delete prover;
 
         delete starkZkevm;
