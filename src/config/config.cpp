@@ -1,4 +1,5 @@
 #include <string>
+#include <fstream>
 #include <nlohmann/json.hpp>
 #include "definitions.hpp"
 #include "config.hpp"
@@ -263,7 +264,13 @@ void Config::load(json &config)
     finalVerifier = configPath + "/final/final.verifier.dat";
     finalVerkey = configPath + "/final/final.fflonk.verkey.json";
     finalStarkZkey = configPath + "/final/final.fflonk.zkey";
-
+    // check if file exists
+    ifstream f;
+    f.open(finalVerkey);
+    if (f.fail()) {
+        finalVerkey = configPath + "/final/final.verkey.json";
+        finalStarkZkey = configPath + "/final/final.g16.0001.zkey";
+    }
 
     if (config.contains("rom") && config["rom"].is_string())
         rom = config["rom"];
