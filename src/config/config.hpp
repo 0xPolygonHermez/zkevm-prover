@@ -38,6 +38,7 @@ public:
     bool runSHA256Test;
     bool runBlakeTest;
     bool runECRecoverTest;
+    bool runUnitTest;
     
     bool executeInParallel;
     bool useMainExecGenerated;

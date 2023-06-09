@@ -8,20 +8,27 @@
 
 using namespace std;
 
-void compareValue (Goldilocks &fr, uint64_t index, const char* label, CommitPol t[8], mpz_class r) {
+uint64_t compareValue (Goldilocks &fr, uint64_t index, const char* label, CommitPol t[8], mpz_class r)
+{
     mpz_class value = 0;
-    for (uint8_t i = 0; i < 8; ++i) {
+    for (uint8_t i = 0; i < 8; ++i)
+    {
         value = (value << 32) + fr.toU64(t[7-i][(index+1) * 64]);
     }
     //cout << label << " on INPUT " << index << " " << r.get_str(16) << " " << value.get_str(16) << endl;
-    if (value != r) {
-        cout << "DIFF " << label << " on INPUT " << index << " " << r.get_str(16) << " " << value.get_str(16) << endl;
+    if (value != r)
+    {
+        zklog.error("MemAlignSMTest compareValue() DIFF " + string(label) + " on INPUT " + to_string(index) + " " + r.get_str(16) + " " + value.get_str(16));
+        return 1;
     }
+    return 0;
 }
 
-void MemAlignSMTest (Goldilocks &fr, Config &config)
+uint64_t MemAlignSMTest (Goldilocks &fr, const Config &config)
 {
-    cout << "MemAlignSMTest starting..." << endl;
+    uint64_t numberOfErrors = 0;
+
+    zklog.info("MemAlignSMTest starting...");
 
     Smt smt(fr);
     Database db(fr, config);
@@ -102,26 +109,34 @@ void MemAlignSMTest (Goldilocks &fr, Config &config)
     action.wr256 = 1;    
     input.push_back(action);    
 
-    void * pAddress = mapFile(config.zkevmCmPols, CommitPols::pilSize(), true);
+    void * pAddress = malloc(CommitPols::pilSize());
+    if (pAddress == NULL)
+    {
+        zklog.error("MemAlignSMTest() failed calling malloc() of size=" + CommitPols::pilSize());
+        exitProcess();
+    }
     CommitPols cmPols(pAddress, CommitPols::pilDegree());
 
     MemAlignExecutor memAlignExecutor(fr, config);
     memAlignExecutor.execute(input,cmPols.MemAlign);
 
     mpz_class value;
-    for (uint64_t index = 0; index < input.size(); index++) {
-        compareValue (fr, index, "m0", cmPols.MemAlign.m0, input[index].m0);
-        compareValue (fr, index, "m1", cmPols.MemAlign.m1, input[index].m1);
-        compareValue (fr, index, "v", cmPols.MemAlign.v, input[index].v);
+    for (uint64_t index = 0; index < input.size(); index++)
+    {
+        numberOfErrors += compareValue (fr, index, "m0", cmPols.MemAlign.m0, input[index].m0);
+        numberOfErrors += compareValue (fr, index, "m1", cmPols.MemAlign.m1, input[index].m1);
+        numberOfErrors += compareValue (fr, index, "v", cmPols.MemAlign.v, input[index].v);
 
-        if (input[index].wr256) {
-            compareValue (fr, index, "w0", cmPols.MemAlign.w0, input[index].w0);
-            compareValue (fr, index, "w1", cmPols.MemAlign.w1, input[index].w1);
+        if (input[index].wr256)
+        {
+            numberOfErrors += compareValue (fr, index, "w0", cmPols.MemAlign.w0, input[index].w0);
+            numberOfErrors += compareValue (fr, index, "w1", cmPols.MemAlign.w1, input[index].w1);
         }
     }
 
-    unmapFile(pAddress, CommitPols::pilSize());
+    free(pAddress);
 
-    cout << "MemAlignSMTest done" << endl;
+    zklog.info("MemAlignSMTest done with errors=" + to_string(numberOfErrors));
+    return numberOfErrors;
 };
 

@@ -15,8 +15,10 @@ vector<vector<string>> sha256TestVectors = {
     {"0x000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0f000102030405060708090a0b0c0d0e0fffffff", "0xe603b922cc427b9b171e8c6fd23fbfbcd775913b4ec9242411e1d0cb77d1ef06"},
     };
 
-void SHA256Test (Goldilocks &fr, Config &config)
+uint64_t SHA256Test (Goldilocks &fr, const Config &config)
 {
+    uint64_t numberOfErrors = 0;
+
     TimerStart(SHA256_TEST);
 
     for (uint64_t i=0; i<sha256TestVectors.size(); i++)
@@ -27,8 +29,8 @@ void SHA256Test (Goldilocks &fr, Config &config)
         SHA256String(input, hash);
         if (hash != expectedHash)
         {
-            cerr << "Error: SHA256Test() 1 failed, hash of " << input << " is " << hash << " instead of " << expectedHash << endl;
-            exitProcess();
+            zklog.error("SHA256Test() 1 failed, hash of " + input + " is " + hash + " instead of " + expectedHash);
+            numberOfErrors++;
         }
     }
 
@@ -44,12 +46,13 @@ void SHA256Test (Goldilocks &fr, Config &config)
         SHA256GateString(input, hash);
         if (hash != expectedHash)
         {
-            cerr << "Error: SHA256Test() 2 failed, hash of " << input << " is " << hash << " instead of " << expectedHash << endl;
-            exitProcess();
+            zklog.error("SHA256Test() 2 failed, hash of " + input + " is " + hash + " instead of " + expectedHash);
+            numberOfErrors++;
         }
     }
 
     TimerStopAndLog(SHA256_GATES_TEST);
 
-    cout << "SHA256Test() done" << endl;
+    zklog.info("SHA256Test() done with errors=" + to_string(numberOfErrors));
+    return numberOfErrors;
 }

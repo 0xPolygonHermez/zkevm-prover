@@ -4,6 +4,6 @@
 #include "goldilocks_base_field.hpp"
 #include "config.hpp"
 
-void Blake2b256_Test (Goldilocks &fr, Config &config);
+uint64_t Blake2b256_Test (Goldilocks &fr, const Config &config);
 
 #endif
