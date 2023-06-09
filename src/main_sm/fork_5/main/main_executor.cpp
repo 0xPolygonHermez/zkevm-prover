@@ -3677,9 +3677,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if ((rom.line[zkPC].arithEq0==1 || rom.line[zkPC].arithEq1==1 || rom.line[zkPC].arithEq2==1) && !proverRequest.input.bNoCounters) {
             pols.cntArith[nexti] = fr.inc(pols.cntArith[i]);
 #ifdef CHECK_MAX_CNT_ASAP
-            if (fr.toU64(pols.cntArith[nexti]) > rom.MAX_CNT_ARITH_LIMIT)
+            if (fr.toU64(pols.cntArith[nexti]) > rom.constants.MAX_CNT_ARITH_LIMIT)
             {
-                logError(ctx, "Main Executor found pols.cntArith[nexti]=" + fr.toString(pols.cntArith[nexti], 10) + " > MAX_CNT_ARITH_LIMIT_LIMIT=" + to_string(rom.MAX_CNT_ARITH_LIMIT));
+                logError(ctx, "Main Executor found pols.cntArith[nexti]=" + fr.toString(pols.cntArith[nexti], 10) + " > MAX_CNT_ARITH_LIMIT_LIMIT=" + to_string(rom.constants.MAX_CNT_ARITH_LIMIT));
                 if (bProcessBatch)
                 {
                     proverRequest.result = ZKR_SM_MAIN_OOC_ARITH;
@@ -3697,9 +3697,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if ((rom.line[zkPC].bin || rom.line[zkPC].sWR || rom.line[zkPC].hashPDigest ) && !proverRequest.input.bNoCounters) {
             pols.cntBinary[nexti] = fr.inc(pols.cntBinary[i]);
 #ifdef CHECK_MAX_CNT_ASAP
-            if (fr.toU64(pols.cntBinary[nexti]) > rom.MAX_CNT_BINARY_LIMIT)
+            if (fr.toU64(pols.cntBinary[nexti]) > rom.constants.MAX_CNT_BINARY_LIMIT)
             {
-                logError(ctx, "Main Executor found pols.cntBinary[nexti]=" + fr.toString(pols.cntBinary[nexti], 10) + " > MAX_CNT_BINARY_LIMIT=" + to_string(rom.MAX_CNT_BINARY_LIMIT));
+                logError(ctx, "Main Executor found pols.cntBinary[nexti]=" + fr.toString(pols.cntBinary[nexti], 10) + " > MAX_CNT_BINARY_LIMIT=" + to_string(rom.constants.MAX_CNT_BINARY_LIMIT));
                 if (bProcessBatch)
                 {
                     proverRequest.result = ZKR_SM_MAIN_OOC_BINARY;
@@ -3717,9 +3717,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if ( (rom.line[zkPC].memAlignRD || rom.line[zkPC].memAlignWR || rom.line[zkPC].memAlignWR8) && !proverRequest.input.bNoCounters) {
             pols.cntMemAlign[nexti] = fr.inc(pols.cntMemAlign[i]);
 #ifdef CHECK_MAX_CNT_ASAP
-            if (fr.toU64(pols.cntMemAlign[nexti]) > rom.MAX_CNT_MEM_ALIGN_LIMIT)
+            if (fr.toU64(pols.cntMemAlign[nexti]) > rom.constants.MAX_CNT_MEM_ALIGN_LIMIT)
             {
-                logError(ctx, "Main Executor found pols.cntMemAlign[nexti]=" + fr.toString(pols.cntMemAlign[nexti], 10) + " > MAX_CNT_MEM_ALIGN_LIMIT=" + to_string(rom.MAX_CNT_MEM_ALIGN_LIMIT));
+                logError(ctx, "Main Executor found pols.cntMemAlign[nexti]=" + fr.toString(pols.cntMemAlign[nexti], 10) + " > MAX_CNT_MEM_ALIGN_LIMIT=" + to_string(rom.constants.MAX_CNT_MEM_ALIGN_LIMIT));
                 if (bProcessBatch)
                 {
                     proverRequest.result = ZKR_SM_MAIN_OOC_MEM_ALIGN;
@@ -3984,9 +3984,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         {
             pols.cntKeccakF[nexti] = fr.add(pols.cntKeccakF[i], fr.fromU64(incCounter));
 #ifdef CHECK_MAX_CNT_ASAP
-            if (fr.toU64(pols.cntKeccakF[nexti]) > rom.MAX_CNT_KECCAK_F_LIMIT)
+            if (fr.toU64(pols.cntKeccakF[nexti]) > rom.constants.MAX_CNT_KECCAK_F_LIMIT)
             {
-                logError(ctx, "Main Executor found pols.cntKeccakF[nexti]=" + fr.toString(pols.cntKeccakF[nexti], 10) + " > MAX_CNT_KECCAK_F_LIMIT=" + to_string(rom.MAX_CNT_KECCAK_F_LIMIT));
+                logError(ctx, "Main Executor found pols.cntKeccakF[nexti]=" + fr.toString(pols.cntKeccakF[nexti], 10) + " > MAX_CNT_KECCAK_F_LIMIT=" + to_string(rom.constants.MAX_CNT_KECCAK_F_LIMIT));
                 if (bProcessBatch)
                 {
                     proverRequest.result = ZKR_SM_MAIN_OOC_KECCAK_F;
@@ -4006,9 +4006,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         {
             pols.cntPaddingPG[nexti] = fr.add(pols.cntPaddingPG[i], fr.fromU64(incCounter));
 #ifdef CHECK_MAX_CNT_ASAP
-            if (fr.toU64(pols.cntPaddingPG[nexti]) > rom.MAX_CNT_PADDING_PG_LIMIT)
+            if (fr.toU64(pols.cntPaddingPG[nexti]) > rom.constants.MAX_CNT_PADDING_PG_LIMIT)
             {
-                logError(ctx, "Main Executor found pols.cntPaddingPG[nexti]=" + fr.toString(pols.cntPaddingPG[nexti], 10) + " > MAX_CNT_PADDING_PG_LIMIT=" + to_string(rom.MAX_CNT_PADDING_PG_LIMIT));
+                logError(ctx, "Main Executor found pols.cntPaddingPG[nexti]=" + fr.toString(pols.cntPaddingPG[nexti], 10) + " > MAX_CNT_PADDING_PG_LIMIT=" + to_string(rom.constants.MAX_CNT_PADDING_PG_LIMIT));
                 if (bProcessBatch)
                 {
                     proverRequest.result = ZKR_SM_MAIN_OOC_PADDING_PG;
@@ -4028,9 +4028,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         {
             pols.cntPoseidonG[nexti] = fr.add(pols.cntPoseidonG[i], fr.fromU64(incCounter));
 #ifdef CHECK_MAX_CNT_ASAP
-            if (fr.toU64(pols.cntPoseidonG[nexti]) > rom.MAX_CNT_POSEIDON_G_LIMIT)
+            if (fr.toU64(pols.cntPoseidonG[nexti]) > rom.constants.MAX_CNT_POSEIDON_G_LIMIT)
             {
-                logError(ctx, "Main Executor found pols.cntPoseidonG[nexti]=" + fr.toString(pols.cntPoseidonG[nexti], 10) + " > MAX_CNT_POSEIDON_G_LIMIT=" + to_string(rom.MAX_CNT_POSEIDON_G_LIMIT));
+                logError(ctx, "Main Executor found pols.cntPoseidonG[nexti]=" + fr.toString(pols.cntPoseidonG[nexti], 10) + " > MAX_CNT_POSEIDON_G_LIMIT=" + to_string(rom.constants.MAX_CNT_POSEIDON_G_LIMIT));
                 if (bProcessBatch)
                 {
                     proverRequest.result = ZKR_SM_MAIN_OOC_POSEIDON_G;
@@ -4139,10 +4139,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             exitProcess();
         }
     }
-    if (ctx.lastStep > rom.MAX_CNT_STEPS_LIMIT)
+    if (ctx.lastStep > rom.constants.MAX_CNT_STEPS_LIMIT)
     {
         proverRequest.result = ZKR_SM_MAIN_OUT_OF_STEPS;
-        logError(ctx, "Found ctx.lastStep=" + to_string(ctx.lastStep) + " > MAX_CNT_STEPS_LIMIT=" + to_string(rom.MAX_CNT_STEPS_LIMIT));
+        logError(ctx, "Found ctx.lastStep=" + to_string(ctx.lastStep) + " > MAX_CNT_STEPS_LIMIT=" + to_string(rom.constants.MAX_CNT_STEPS_LIMIT));
         if (!bProcessBatch)
         {
             exitProcess();
@@ -4150,55 +4150,55 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     }
 
 #ifdef CHECK_MAX_CNT_AT_THE_END
-    if (fr.toU64(pols.cntArith[0]) > rom.MAX_CNT_ARITH_LIMIT)
+    if (fr.toU64(pols.cntArith[0]) > rom.constants.MAX_CNT_ARITH_LIMIT)
     {
         proverRequest.result = ZKR_SM_MAIN_OOC_ARITH;
-        logError(ctx, "Found pols.cntArith[0]=" + to_string(fr.toU64(pols.cntArith[0])) + " > MAX_CNT_ARITH_LIMIT=" + to_string(rom.MAX_CNT_ARITH_LIMIT));
+        logError(ctx, "Found pols.cntArith[0]=" + to_string(fr.toU64(pols.cntArith[0])) + " > MAX_CNT_ARITH_LIMIT=" + to_string(rom.constants.MAX_CNT_ARITH_LIMIT));
         if (!bProcessBatch)
         {
             exitProcess();
         }
     }
-    if (fr.toU64(pols.cntBinary[0]) > rom.MAX_CNT_BINARY_LIMIT)
+    if (fr.toU64(pols.cntBinary[0]) > rom.constants.MAX_CNT_BINARY_LIMIT)
     {
         proverRequest.result = ZKR_SM_MAIN_OOC_BINARY;
-        logError(ctx, "Found pols.cntBinary[0]=" + to_string(fr.toU64(pols.cntBinary[0])) + " > MAX_CNT_BINARY_LIMIT=" + to_string(rom.MAX_CNT_BINARY_LIMIT));
+        logError(ctx, "Found pols.cntBinary[0]=" + to_string(fr.toU64(pols.cntBinary[0])) + " > MAX_CNT_BINARY_LIMIT=" + to_string(rom.constants.MAX_CNT_BINARY_LIMIT));
         if (!bProcessBatch)
         {
             exitProcess();
         }
     }
-    if (fr.toU64(pols.cntMemAlign[0]) > rom.MAX_CNT_MEM_ALIGN_LIMIT)
+    if (fr.toU64(pols.cntMemAlign[0]) > rom.constants.MAX_CNT_MEM_ALIGN_LIMIT)
     {
         proverRequest.result = ZKR_SM_MAIN_OOC_MEM_ALIGN;
-        logError(ctx, "Found pols.cntMemAlign[0]=" + to_string(fr.toU64(pols.cntMemAlign[0])) + " > MAX_CNT_MEM_ALIGN_LIMIT=" + to_string(rom.MAX_CNT_MEM_ALIGN_LIMIT));
+        logError(ctx, "Found pols.cntMemAlign[0]=" + to_string(fr.toU64(pols.cntMemAlign[0])) + " > MAX_CNT_MEM_ALIGN_LIMIT=" + to_string(rom.constants.MAX_CNT_MEM_ALIGN_LIMIT));
         if (!bProcessBatch)
         {
             exitProcess();
         }
     }
-    if (fr.toU64(pols.cntKeccakF[0]) > rom.MAX_CNT_KECCAK_F_LIMIT)
+    if (fr.toU64(pols.cntKeccakF[0]) > rom.constants.MAX_CNT_KECCAK_F_LIMIT)
     {
         proverRequest.result = ZKR_SM_MAIN_OOC_KECCAK_F;
-        logError(ctx, "Found pols.cntKeccakF[0]=" + to_string(fr.toU64(pols.cntKeccakF[0])) + " > MAX_CNT_KECCAK_F_LIMIT=" + to_string(rom.MAX_CNT_KECCAK_F_LIMIT));
+        logError(ctx, "Found pols.cntKeccakF[0]=" + to_string(fr.toU64(pols.cntKeccakF[0])) + " > MAX_CNT_KECCAK_F_LIMIT=" + to_string(rom.constants.MAX_CNT_KECCAK_F_LIMIT));
         if (!bProcessBatch)
         {
             exitProcess();
         }
     }
-    if (fr.toU64(pols.cntPaddingPG[0]) > rom.MAX_CNT_PADDING_PG_LIMIT)
+    if (fr.toU64(pols.cntPaddingPG[0]) > rom.constants.MAX_CNT_PADDING_PG_LIMIT)
     {
         proverRequest.result = ZKR_SM_MAIN_OOC_PADDING_PG;
-        logError(ctx, "Found pols.cntPaddingPG[0]=" + to_string(fr.toU64(pols.cntPaddingPG[0])) + " > MAX_CNT_PADDING_PG_LLIMIT=" + to_string(rom.MAX_CNT_PADDING_PG_LIMIT));
+        logError(ctx, "Found pols.cntPaddingPG[0]=" + to_string(fr.toU64(pols.cntPaddingPG[0])) + " > MAX_CNT_PADDING_PG_LLIMIT=" + to_string(rom.constants.MAX_CNT_PADDING_PG_LIMIT));
         if (!bProcessBatch)
         {
             exitProcess();
         }
     }
-    if (fr.toU64(pols.cntPoseidonG[0]) > rom.MAX_CNT_POSEIDON_G_LIMIT)
+    if (fr.toU64(pols.cntPoseidonG[0]) > rom.constants.MAX_CNT_POSEIDON_G_LIMIT)
     {
         proverRequest.result = ZKR_SM_MAIN_OOC_POSEIDON_G;
-        logError(ctx, "Found pols.cntPoseidonG[0]=" + to_string(fr.toU64(pols.cntPoseidonG[0])) + " > MAX_CNT_POSEIDON_G_LIMIT=" + to_string(rom.MAX_CNT_POSEIDON_G_LIMIT));
+        logError(ctx, "Found pols.cntPoseidonG[0]=" + to_string(fr.toU64(pols.cntPoseidonG[0])) + " > MAX_CNT_POSEIDON_G_LIMIT=" + to_string(rom.constants.MAX_CNT_POSEIDON_G_LIMIT));
         if (!bProcessBatch)
         {
             exitProcess();

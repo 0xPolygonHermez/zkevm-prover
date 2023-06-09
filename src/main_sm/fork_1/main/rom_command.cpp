@@ -62,7 +62,6 @@ tFunction string2Function(string s)
     else if (s == "f_comp_gt")                      return f_comp_gt;
     else if (s == "f_comp_eq")                      return f_comp_eq;
     else if (s == "loadScalar")                     return f_loadScalar;
-    else if (s == "getGlobalExitRootManagerAddr")   return f_getGlobalExitRootManagerAddr;
     else if (s == "log")                            return f_log;
     else if (s == "exp")                            return f_exp;
     else if (s == "storeLog")                       return f_storeLog;
@@ -106,7 +105,6 @@ string function2String(tFunction f)
         case f_comp_gt:                         return "comp_gt";
         case f_comp_eq:                         return "comp_eq";
         case f_loadScalar:                      return "loadScalar";
-        case f_getGlobalExitRootManagerAddr:    return "getGlobalExitRootManagerAddr";
         case f_log:                             return "log";
         case f_exp:                             return "exp";
         case f_storeLog:                        return "storeLog";

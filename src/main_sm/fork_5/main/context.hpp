@@ -132,7 +132,7 @@ public:
     HashDBInterface *pHashDB;
     uint64_t lastStep;
     mpz_class totalTransferredBalance; // Total transferred balance of all accounts, which should be 0 after any transfer
-    EllipticCurveAddition lastECAdd;
+    EllipticCurveAddition lastECAdd; // Micro-cache of the last couple of added points, and the result
 
     // Evaluations data
     uint64_t * pZKPC; // Zero-knowledge program counter

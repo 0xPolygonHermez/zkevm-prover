@@ -12,6 +12,7 @@
 #include "main_sm/fork_4/main_exec_generated/main_exec_generated_fast.hpp"
 #include "main_sm/fork_5/main_exec_generated/main_exec_generated.hpp"
 #include "main_sm/fork_5/main_exec_generated/main_exec_generated_fast.hpp"
+#include "main_sm/fork_5/main_exec_c/main_exec_c.hpp"
 #include "timer.hpp"
 #include "zklog.hpp"
 
@@ -161,6 +162,10 @@ void Executor::process_batch (ProverRequest &proverRequest)
             if (config.useMainExecGenerated)
             {
                 fork_5::main_exec_generated_fast(mainExecutor_fork_5, proverRequest);
+            }
+            else if (config.useMainExecC)
+            {
+                mainExecutorC_fork_5.execute(proverRequest);
             }
             else
             {
