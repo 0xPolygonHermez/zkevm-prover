@@ -49,6 +49,12 @@ void addPointEcJacobian ( const mpz_class &p1_x, const mpz_class &p1_y, const mp
 void dblPointEcJacobian ( const mpz_class &p1_x, const mpz_class &p1_y, const mpz_class &p1_z,
                           mpz_class &p3_x, mpz_class &p3_y, mpz_class &p3_z);
 
+void addPointEcJacobian(const RawFec::Element &x1, const RawFec::Element &y1, const RawFec::Element &z1,
+                        const RawFec::Element &x2, const RawFec::Element &y2, const RawFec::Element &z2,
+                        RawFec::Element &x3, RawFec::Element &y3, RawFec::Element &z3);
+void dblPointEcJacobian(const RawFec::Element &x1, const RawFec::Element &y1, const RawFec::Element &z1,
+                        RawFec::Element &x3, RawFec::Element &y3, RawFec::Element &z3);
+
 ECRecoverResult ECRecover (mpz_class &signature, mpz_class &r, mpz_class &s, mpz_class &v, bool bPrecompiled, mpz_class &address)
 {
     // Set the ECRecover s upper limit
@@ -435,28 +441,41 @@ void mulPointEcJacobian ( const mpz_class &p1_x, const mpz_class &p1_y, const mp
                           const mpz_class &p2_x, const mpz_class &p2_y, const mpz_class &p2_z, const mpz_class &k2, 
                           mpz_class &p3_x, mpz_class &p3_y, mpz_class &p3_z){
 
-    mpz_class p12_x;
-    mpz_class p12_y;
-    mpz_class p12_z;
+    
+    RawFec::Element x1, y1, z1, x2, y2, z2;
+    RawFec::Element x12, y12, z12, x3, y3, z3;
+
+    fec.fromMpz(x1, p1_x.get_mpz_t());
+    fec.fromMpz(y1, p1_y.get_mpz_t());
+    fec.fromMpz(z1, p1_z.get_mpz_t());
+
+    fec.fromMpz(x2, p2_x.get_mpz_t());
+    fec.fromMpz(y2, p2_y.get_mpz_t());
+    fec.fromMpz(z2, p2_z.get_mpz_t()); 
+
+    fec.copy(x3, fec.zero());
+    fec.copy(y3, fec.zero());
+    fec.copy(z3, fec.zero());
 
     bool p12_empty = 0;
-    if (p1_x*p2_z != p2_x*p1_z)
+    if (fec.eq(fec.mul(x1,z2),fec.mul(x2,z1))==0)
     {
         // p2.x != p1.x ==> p2 != p1
         p12_empty = false;
-        addPointEcJacobian(p1_x, p1_y, p1_z, p2_x, p2_y, p2_z, p12_x, p12_y, p12_z);
+        addPointEcJacobian(x1, y1, z1, x2, y2, z2, x12, y12, z12);
 
     }    
-    else if (p1_y*p2_z == p2_y*p1_z)
+    else if (fec.eq(fec.mul(y1,z2),fec.mul(y2,z1))==0)
     {
-        // p2 == p1
-        p12_empty = false;
-        dblPointEcJacobian(p1_x, p1_y, p1_z, p12_x, p12_y, p12_z);
+         // p2 == -p1
+        p12_empty = true;
     }
     else
     {
-        // p2 == -p1
-        p12_empty = true;
+        // p2 == p1
+        p12_empty = false;
+        dblPointEcJacobian(x1, y1, z1, x12, y12, z12);
+       
     }
     
     // start the loop
@@ -469,10 +488,11 @@ void mulPointEcJacobian ( const mpz_class &p1_x, const mpz_class &p1_y, const mp
     mpz_set(rawK1, k1.get_mpz_t());
     mpz_set(rawK2, k2.get_mpz_t());
 
-
     bool mulPointEc_p3_empty = true;
-    
+
+
     for(int i=255; i>=0; --i){
+
         // take next bits
         int bitk1 = mpz_tstbit(rawK1, i);
         int bitk2 = mpz_tstbit(rawK2, i);
@@ -480,68 +500,76 @@ void mulPointEcJacobian ( const mpz_class &p1_x, const mpz_class &p1_y, const mp
         // add contribution depending on bits
         if( bitk1==1 && bitk2==0){
             if(!mulPointEc_p3_empty){
-                if(p3_x*p1_z != p1_x*p3_z){
-                    addPointEcJacobian(p3_x, p3_y, p3_z, p1_x, p1_y, p1_z, p3_x, p3_y, p3_z);
+                if(fec.eq(fec.mul(x3,z1),fec.mul(x1,z3))==0){
+                    addPointEcJacobian(x3, y3, z3, x1, y1, z1, x3, y3, z3);
                 }else{
-                    if(p3_y*p1_z != p1_y*p3_z){
+                    if(fec.eq(fec.mul(y3,z1),fec.mul(y1,z3))==0){
                         mulPointEc_p3_empty = true;
                     }else{
-                        dblPointEcJacobian(p3_x, p3_y, p3_z, p3_x, p3_y, p3_z);
+                        dblPointEcJacobian(x3, y3, z3, x3, y3, z3);
                     }
                 }
             }else{
                 mulPointEc_p3_empty = false;
-                mpz_set(p3_x.get_mpz_t(), p1_x.get_mpz_t());
-                mpz_set(p3_y.get_mpz_t(), p1_y.get_mpz_t());
-                mpz_set(p3_z.get_mpz_t(), p1_z.get_mpz_t());
+                fec.copy(x3, x1);
+                fec.copy(y3, y1);
+                fec.copy(z3, z1);
 
             }
         }else if( bitk1==0 && bitk2==1){
             if(!mulPointEc_p3_empty){
-                if(p3_x*p2_z != p2_x*p3_z){
-                    addPointEcJacobian(p3_x, p3_y, p3_z, p2_x, p2_y, p2_z, p3_x, p3_y, p3_z);
+                if(fec.eq(fec.mul(x3,z2),fec.mul(x2,z3))==0){
+                    addPointEcJacobian(x3, y3, z3, x2, y2, z2, x3, y3, z3);
                 }else{
-                    if(p3_y*p2_z != p2_y*p3_z){
+                    if(fec.eq(fec.mul(y3,z2),fec.mul(y2,z3))==0){
                         mulPointEc_p3_empty = true;
                     }else{
-                        dblPointEcJacobian(p3_x, p3_y, p3_z, p3_x, p3_y, p3_z);
+                        dblPointEcJacobian(x3, y3, z3, x3, y3, z3);
                     }
                 }
             }else{
                 mulPointEc_p3_empty = false;
-                mpz_set(p3_x.get_mpz_t(), p2_x.get_mpz_t());
-                mpz_set(p3_y.get_mpz_t(), p2_y.get_mpz_t());
-                mpz_set(p3_z.get_mpz_t(), p2_z.get_mpz_t());
+                fec.copy(x3, x2);
+                fec.copy(y3, y2);
+                fec.copy(z3, z2);
             }
         }else if( bitk1==1 && bitk2==1){
             if(!p12_empty){    
                 if(!mulPointEc_p3_empty){
-                    if(p3_x*p12_x != p12_x*p3_z){
-                        addPointEcJacobian(p3_x, p3_y, p3_z, p12_x, p12_y, p12_z, p3_x, p3_y, p3_z);
+                    if(fec.eq(fec.mul(x3,z12),fec.mul(x12,z3))==0){
+                        addPointEcJacobian(x3, y3, z3, x12, y12, z12, x3, y3, z3);
                     }else{
-                        if(p3_y*p12_z != p12_y*p3_z){
+                        if(fec.eq(fec.mul(y3,z12),fec.mul(y12,z3))==0){
                             mulPointEc_p3_empty = true;
                         }else{
-                            dblPointEcJacobian(p3_x, p3_y, p3_z, p3_x, p3_y, p3_z);
+                            dblPointEcJacobian(x3, y3, z3, x3, y3, z3);
                         }
                     }
                 }else{
                     mulPointEc_p3_empty = false;
-                    mpz_set(p3_x.get_mpz_t(), p12_x.get_mpz_t());
-                    mpz_set(p3_y.get_mpz_t(), p12_y.get_mpz_t());
-                    mpz_set(p3_z.get_mpz_t(), p12_z.get_mpz_t());
+                    fec.copy(x3, x12);
+                    fec.copy(y3, y12);
+                    fec.copy(z3, z12);
 
                 }
             }
         }
         // double p3
         if(!mulPointEc_p3_empty and i!=0){
-            dblPointEcJacobian(p3_x, p3_y, p3_z, p3_x, p3_y, p3_z);
+            RawFec::Element x3_, y3_, z3_;
+            fec.copy(x3_, x3);
+            fec.copy(y3_, y3);
+            fec.copy(z3_, z3);
+            dblPointEcJacobian(x3, y3, z3_, x3, y3, z3);
         }
-        
     }
     mpz_clear(rawK1);
     mpz_clear(rawK2);
+
+    // save results
+    fec.toMpz(p3_x.get_mpz_t(), x3);
+    fec.toMpz(p3_y.get_mpz_t(), y3);
+    fec.toMpz(p3_z.get_mpz_t(), z3);
 }
 
 // p3=p2+p1:  https://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#addition-add-2007-bl
@@ -556,6 +584,39 @@ void addPointEcJacobian ( const mpz_class &p1_x, const mpz_class &p1_y, const mp
     fec.fromMpz(x2, p2_x.get_mpz_t());
     fec.fromMpz(y2, p2_y.get_mpz_t());
     fec.fromMpz(z2, p2_z.get_mpz_t());
+
+    addPointEcJacobian(x1, y1, z1, x2, y2, z2, x3, y3, z3);
+
+    // save results
+    fec.toMpz(p3_x.get_mpz_t(), x3);
+    fec.toMpz(p3_y.get_mpz_t(), y3);
+    fec.toMpz(p3_z.get_mpz_t(), z3);
+
+}
+
+// p3=2*p1:  https://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#doubling-dbl-2009-l
+void dblPointEcJacobian ( const mpz_class &p1_x, const mpz_class &p1_y, const mpz_class &p1_z,
+                          mpz_class &p3_x, mpz_class &p3_y, mpz_class &p3_z){
+    
+    RawFec::Element x1, y1, z1, x3, y3, z3;
+    fec.fromMpz(x1, p1_x.get_mpz_t());
+    fec.fromMpz(y1, p1_y.get_mpz_t());
+    fec.fromMpz(z1, p1_z.get_mpz_t());
+
+    dblPointEcJacobian(x1, y1, z1, x3, y3, z3);
+
+    //save results
+    fec.toMpz(p3_x.get_mpz_t(), x3);
+    fec.toMpz(p3_y.get_mpz_t(), y3);
+    fec.toMpz(p3_z.get_mpz_t(), z3);
+                            
+}
+
+
+// p3=p2+p1:  https://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#addition-add-2007-bl
+void addPointEcJacobian ( const RawFec::Element &x1, const RawFec::Element &y1, const RawFec::Element &z1,
+                          const RawFec::Element &x2, const RawFec::Element &y2, const RawFec::Element &z2,
+                          RawFec::Element &x3, RawFec::Element &y3, RawFec::Element &z3){
 
     RawFec::Element z1z1, z2z2, u1, u2, s1, s2, h, i, j, r, v, rr, aux1, aux2;
 
@@ -599,25 +660,18 @@ void addPointEcJacobian ( const mpz_class &p1_x, const mpz_class &p1_y, const mp
     fec.sub(aux1, aux1, z2z2);
     fec.mul(z3, aux1, h);
 
-    //save results
-    fec.toMpz(p3_x.get_mpz_t(), x3);
-    fec.toMpz(p3_y.get_mpz_t(), y3);
-    fec.toMpz(p3_z.get_mpz_t(), z3);
-
 }
+
 // p3=2*p1:  https://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#doubling-dbl-2009-l
-void dblPointEcJacobian ( const mpz_class &p1_x, const mpz_class &p1_y, const mpz_class &p1_z,
-                          mpz_class &p3_x, mpz_class &p3_y, mpz_class &p3_z){
-    
-    RawFec::Element x1, y1, z1, x3, y3, z3;
-    fec.fromMpz(x1, p1_x.get_mpz_t());
-    fec.fromMpz(y1, p1_y.get_mpz_t());
-    fec.fromMpz(z1, p1_z.get_mpz_t());
+void dblPointEcJacobian ( const RawFec::Element &x1, const RawFec::Element &y1, const RawFec::Element &z1,
+                          RawFec::Element &x3, RawFec::Element &y3, RawFec::Element &z3){
 
     RawFec::Element a, b, c, d, e, f, aux1, aux2;
+    RawFec::Element y1_; // avoid errors when y3 is the same as y1
+    fec.copy(y1_, y1);
 
     fec.square(a, x1); //a
-    fec.square(b, y1); //b
+    fec.square(b, y1_); //b
     fec.square(c, b); //c
     //d
     fec.add(d, x1, b);
@@ -640,12 +694,8 @@ void dblPointEcJacobian ( const mpz_class &p1_x, const mpz_class &p1_y, const mp
     fec.mul(aux2, aux2, c);
     fec.sub(y3, aux1, aux2);
     //z3
-    fec.mul(z3, y1, z1);
-    fec.add(z3, z3,z3);
-
-    //save results
-    fec.toMpz(p3_x.get_mpz_t(), x3);
-    fec.toMpz(p3_y.get_mpz_t(), y3);
-    fec.toMpz(p3_z.get_mpz_t(), z3);
+    fec.mul(aux1, y1_, z1);
+    fec.add(z3, aux1,aux1);
                             
 }
+
