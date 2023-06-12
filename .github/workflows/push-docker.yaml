@@ -2,7 +2,7 @@ name: Build docker image and run node tests
 
 on:
   push:
-    branches: [ develop, main, trace_config ]
+    branches: [ develop, main, trace_config, fractasy/trace_encoder_2 ]
 
 jobs:
   build-docker:

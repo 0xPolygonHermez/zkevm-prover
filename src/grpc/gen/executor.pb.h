@@ -2188,15 +2188,17 @@ class TransactionStep PROTOBUF_FINAL :
     kStackFieldNumber = 8,
     kStateRootFieldNumber = 1,
     kMemoryFieldNumber = 9,
-    kReturnDataFieldNumber = 10,
-    kContractFieldNumber = 11,
+    kReturnDataFieldNumber = 12,
+    kContractFieldNumber = 13,
     kPcFieldNumber = 3,
     kGasFieldNumber = 4,
     kDepthFieldNumber = 2,
     kOpFieldNumber = 7,
     kGasCostFieldNumber = 5,
     kGasRefundFieldNumber = 6,
-    kErrorFieldNumber = 12,
+    kMemorySizeFieldNumber = 10,
+    kMemoryOffsetFieldNumber = 11,
+    kErrorFieldNumber = 14,
   };
   // repeated string stack = 8;
   int stack_size() const;
@@ -2272,7 +2274,7 @@ class TransactionStep PROTOBUF_FINAL :
   std::string* _internal_mutable_memory();
   public:
 
-  // bytes return_data = 10;
+  // bytes return_data = 12;
   void clear_return_data();
   const std::string& return_data() const;
   void set_return_data(const std::string& value);
@@ -2297,7 +2299,7 @@ class TransactionStep PROTOBUF_FINAL :
   std::string* _internal_mutable_return_data();
   public:
 
-  // .executor.v1.Contract contract = 11;
+  // .executor.v1.Contract contract = 13;
   bool has_contract() const;
   private:
   bool _internal_has_contract() const;
@@ -2369,7 +2371,25 @@ class TransactionStep PROTOBUF_FINAL :
   void _internal_set_gas_refund(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // .executor.v1.RomError error = 12;
+  // uint32 memory_size = 10;
+  void clear_memory_size();
+  ::PROTOBUF_NAMESPACE_ID::uint32 memory_size() const;
+  void set_memory_size(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_memory_size() const;
+  void _internal_set_memory_size(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // uint32 memory_offset = 11;
+  void clear_memory_offset();
+  ::PROTOBUF_NAMESPACE_ID::uint32 memory_offset() const;
+  void set_memory_offset(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_memory_offset() const;
+  void _internal_set_memory_offset(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // .executor.v1.RomError error = 14;
   void clear_error();
   ::executor::v1::RomError error() const;
   void set_error(::executor::v1::RomError value);
@@ -2396,6 +2416,8 @@ class TransactionStep PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint32 op_;
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_cost_;
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_refund_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 memory_size_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 memory_offset_;
   int error_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
@@ -3464,20 +3486,21 @@ class ExecutionTraceStep PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kStackFieldNumber = 7,
-    kStorageFieldNumber = 9,
+    kStackFieldNumber = 8,
+    kStorageFieldNumber = 10,
     kOpFieldNumber = 2,
     kMemoryFieldNumber = 5,
-    kReturnDataFieldNumber = 8,
+    kReturnDataFieldNumber = 9,
     kPcFieldNumber = 1,
     kRemainingGasFieldNumber = 3,
     kGasCostFieldNumber = 4,
     kMemorySizeFieldNumber = 6,
-    kDepthFieldNumber = 10,
-    kGasRefundFieldNumber = 11,
-    kErrorFieldNumber = 12,
+    kMemoryOffsetFieldNumber = 7,
+    kGasRefundFieldNumber = 12,
+    kDepthFieldNumber = 11,
+    kErrorFieldNumber = 13,
   };
-  // repeated string stack = 7;
+  // repeated string stack = 8;
   int stack_size() const;
   private:
   int _internal_stack_size() const;
@@ -3501,7 +3524,7 @@ class ExecutionTraceStep PROTOBUF_FINAL :
   std::string* _internal_add_stack();
   public:
 
-  // map<string, string> storage = 9;
+  // map<string, string> storage = 10;
   int storage_size() const;
   private:
   int _internal_storage_size() const;
@@ -3568,7 +3591,7 @@ class ExecutionTraceStep PROTOBUF_FINAL :
   std::string* _internal_mutable_memory();
   public:
 
-  // bytes return_data = 8;
+  // bytes return_data = 9;
   void clear_return_data();
   const std::string& return_data() const;
   void set_return_data(const std::string& value);
@@ -3629,16 +3652,16 @@ class ExecutionTraceStep PROTOBUF_FINAL :
   void _internal_set_memory_size(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
-  // uint32 depth = 10;
-  void clear_depth();
-  ::PROTOBUF_NAMESPACE_ID::uint32 depth() const;
-  void set_depth(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  // uint32 memory_offset = 7;
+  void clear_memory_offset();
+  ::PROTOBUF_NAMESPACE_ID::uint32 memory_offset() const;
+  void set_memory_offset(::PROTOBUF_NAMESPACE_ID::uint32 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_depth() const;
-  void _internal_set_depth(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_memory_offset() const;
+  void _internal_set_memory_offset(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
-  // uint64 gas_refund = 11;
+  // uint64 gas_refund = 12;
   void clear_gas_refund();
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_refund() const;
   void set_gas_refund(::PROTOBUF_NAMESPACE_ID::uint64 value);
@@ -3647,7 +3670,16 @@ class ExecutionTraceStep PROTOBUF_FINAL :
   void _internal_set_gas_refund(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // .executor.v1.RomError error = 12;
+  // uint32 depth = 11;
+  void clear_depth();
+  ::PROTOBUF_NAMESPACE_ID::uint32 depth() const;
+  void set_depth(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_depth() const;
+  void _internal_set_depth(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // .executor.v1.RomError error = 13;
   void clear_error();
   ::executor::v1::RomError error() const;
   void set_error(::executor::v1::RomError value);
@@ -3677,8 +3709,9 @@ class ExecutionTraceStep PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint64 remaining_gas_;
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_cost_;
   ::PROTOBUF_NAMESPACE_ID::uint32 memory_size_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 depth_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 memory_offset_;
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_refund_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 depth_;
   int error_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
@@ -6649,7 +6682,47 @@ inline void TransactionStep::unsafe_arena_set_allocated_memory(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.TransactionStep.memory)
 }
 
-// bytes return_data = 10;
+// uint32 memory_size = 10;
+inline void TransactionStep::clear_memory_size() {
+  memory_size_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 TransactionStep::_internal_memory_size() const {
+  return memory_size_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 TransactionStep::memory_size() const {
+  // @@protoc_insertion_point(field_get:executor.v1.TransactionStep.memory_size)
+  return _internal_memory_size();
+}
+inline void TransactionStep::_internal_set_memory_size(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  memory_size_ = value;
+}
+inline void TransactionStep::set_memory_size(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_memory_size(value);
+  // @@protoc_insertion_point(field_set:executor.v1.TransactionStep.memory_size)
+}
+
+// uint32 memory_offset = 11;
+inline void TransactionStep::clear_memory_offset() {
+  memory_offset_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 TransactionStep::_internal_memory_offset() const {
+  return memory_offset_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 TransactionStep::memory_offset() const {
+  // @@protoc_insertion_point(field_get:executor.v1.TransactionStep.memory_offset)
+  return _internal_memory_offset();
+}
+inline void TransactionStep::_internal_set_memory_offset(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  memory_offset_ = value;
+}
+inline void TransactionStep::set_memory_offset(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_memory_offset(value);
+  // @@protoc_insertion_point(field_set:executor.v1.TransactionStep.memory_offset)
+}
+
+// bytes return_data = 12;
 inline void TransactionStep::clear_return_data() {
   return_data_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -6730,7 +6803,7 @@ inline void TransactionStep::unsafe_arena_set_allocated_return_data(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.TransactionStep.return_data)
 }
 
-// .executor.v1.Contract contract = 11;
+// .executor.v1.Contract contract = 13;
 inline bool TransactionStep::_internal_has_contract() const {
   return this != internal_default_instance() && contract_ != nullptr;
 }
@@ -6811,7 +6884,7 @@ inline void TransactionStep::set_allocated_contract(::executor::v1::Contract* co
   // @@protoc_insertion_point(field_set_allocated:executor.v1.TransactionStep.contract)
 }
 
-// .executor.v1.RomError error = 12;
+// .executor.v1.RomError error = 14;
 inline void TransactionStep::clear_error() {
   error_ = 0;
 }
@@ -8557,7 +8630,27 @@ inline void ExecutionTraceStep::set_memory_size(::PROTOBUF_NAMESPACE_ID::uint32 
   // @@protoc_insertion_point(field_set:executor.v1.ExecutionTraceStep.memory_size)
 }
 
-// repeated string stack = 7;
+// uint32 memory_offset = 7;
+inline void ExecutionTraceStep::clear_memory_offset() {
+  memory_offset_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ExecutionTraceStep::_internal_memory_offset() const {
+  return memory_offset_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ExecutionTraceStep::memory_offset() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ExecutionTraceStep.memory_offset)
+  return _internal_memory_offset();
+}
+inline void ExecutionTraceStep::_internal_set_memory_offset(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  memory_offset_ = value;
+}
+inline void ExecutionTraceStep::set_memory_offset(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_memory_offset(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ExecutionTraceStep.memory_offset)
+}
+
+// repeated string stack = 8;
 inline int ExecutionTraceStep::_internal_stack_size() const {
   return stack_.size();
 }
@@ -8631,7 +8724,7 @@ ExecutionTraceStep::mutable_stack() {
   return &stack_;
 }
 
-// bytes return_data = 8;
+// bytes return_data = 9;
 inline void ExecutionTraceStep::clear_return_data() {
   return_data_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -8712,7 +8805,7 @@ inline void ExecutionTraceStep::unsafe_arena_set_allocated_return_data(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ExecutionTraceStep.return_data)
 }
 
-// map<string, string> storage = 9;
+// map<string, string> storage = 10;
 inline int ExecutionTraceStep::_internal_storage_size() const {
   return storage_.size();
 }
@@ -8741,7 +8834,7 @@ ExecutionTraceStep::mutable_storage() {
   return _internal_mutable_storage();
 }
 
-// uint32 depth = 10;
+// uint32 depth = 11;
 inline void ExecutionTraceStep::clear_depth() {
   depth_ = 0u;
 }
@@ -8761,7 +8854,7 @@ inline void ExecutionTraceStep::set_depth(::PROTOBUF_NAMESPACE_ID::uint32 value)
   // @@protoc_insertion_point(field_set:executor.v1.ExecutionTraceStep.depth)
 }
 
-// uint64 gas_refund = 11;
+// uint64 gas_refund = 12;
 inline void ExecutionTraceStep::clear_gas_refund() {
   gas_refund_ = PROTOBUF_ULONGLONG(0);
 }
@@ -8781,7 +8874,7 @@ inline void ExecutionTraceStep::set_gas_refund(::PROTOBUF_NAMESPACE_ID::uint64 v
   // @@protoc_insertion_point(field_set:executor.v1.ExecutionTraceStep.gas_refund)
 }
 
-// .executor.v1.RomError error = 12;
+// .executor.v1.RomError error = 13;
 inline void ExecutionTraceStep::clear_error() {
   error_ = 0;
 }
