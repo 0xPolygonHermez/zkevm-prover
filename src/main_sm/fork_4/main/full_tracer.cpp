@@ -727,11 +727,11 @@ zkresult FullTracer::onUpdateStorage(Context &ctx, const RomCommand &cmd)
 
         // The storage key is stored in C
         getRegFromCtx(ctx, cmd.params[0]->reg, auxScalar);
-        string key = PrependZeros(auxScalar.get_str(16), 64);
+        string key = auxScalar.get_str(16);
 
         // The storage value is stored in D
         getRegFromCtx(ctx, cmd.params[1]->reg, auxScalar);
-        string value = PrependZeros(auxScalar.get_str(16), 64);
+        string value = auxScalar.get_str(16);
 
         // Delta storage is computed for the affected contract address
         zkresult zkr = getVarFromCtx(ctx, false, ctx.rom.storageAddrOffset, auxScalar);
