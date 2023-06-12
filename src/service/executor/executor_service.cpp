@@ -73,7 +73,7 @@ void getStringIncrement(const string &oldString, const string &newString, uint64
         if (oldString[i] != newString[i])
         {
             length = i + 1 - offset;
-            break;
+            return;
         }
     }
 
