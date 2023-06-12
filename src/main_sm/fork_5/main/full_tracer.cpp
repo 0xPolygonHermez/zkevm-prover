@@ -941,12 +941,15 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     // Append to response logs
     unordered_map<uint64_t, std::unordered_map<uint64_t, Log>>::iterator logIt;
     unordered_map<uint64_t, Log>::const_iterator it;
+    uint64_t logIndex = 0;
     for (logIt=logs.begin(); logIt!=logs.end(); logIt++)
     {
         for (it = logIt->second.begin(); it != logIt->second.end(); it++)
         {
             Log log = it->second;
+            log.index = logIndex;
             finalTrace.responses[finalTrace.responses.size() - 1].logs.push_back(log);
+            logIndex++;
         }
     }
 
