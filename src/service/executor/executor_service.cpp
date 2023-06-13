@@ -10,6 +10,76 @@ using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
 
+void getStringIncrement(const string &oldString, const string &newString, uint64_t &offset, uint64_t &length)
+{
+    // If new string is shorter, return it all
+    if (oldString.size() > newString.size())
+    {
+        offset = 0;
+        length = newString.size();
+        return;
+    }
+    
+    // Find first different char, and assign it to offset
+    int64_t i = 0;
+    for (; i < (int64_t)oldString.size(); i++)
+    {
+        if (oldString[i] != newString[i])
+        {
+            break;
+        }
+    }
+    if (i == (int64_t)oldString.size())
+    {
+        if (oldString.size() == newString.size()) // Identical strings
+        {
+            offset = 0;
+            length = 0;
+            return;
+        }
+        for (; i < (int64_t)newString.size(); i++)
+        {
+            if (newString[i] != 0)
+            {
+                break;
+            }
+        }
+        if (i == (int64_t)newString.size()) // new string is all zeros
+        {
+            offset = 0;
+            length = 0;
+            return;
+        }
+    }
+    offset = i;
+
+    // If new string is longer, find last non-zero byte, if any
+    if (newString.size() > oldString.size())
+    {
+        for (i = (int64_t)newString.size()-1; i >= (int64_t)oldString.size(); i--)
+        {
+            if (newString[i] != 0)
+            {
+                length = i + 1 - offset;
+                return;
+            }
+        }     
+    }
+
+
+    // Find last different char, and calculate length
+    for (i = (int64_t)oldString.size() - 1; i >= 0; i--)
+    {
+        if (oldString[i] != newString[i])
+        {
+            length = i + 1 - offset;
+            return;
+        }
+    }
+
+    length = 0;
+}
+
 ::grpc::Status ExecutorServiceImpl::ProcessBatch(::grpc::ServerContext* context, const ::executor::v1::ProcessBatchRequest* request, ::executor::v1::ProcessBatchResponse* response)
 {
     TimerStart(EXECUTOR_PROCESS_BATCH);
@@ -298,6 +368,9 @@ using grpc::Status;
     vector<Response> &responses(proverRequest.pFullTracer->get_responses());
     for (uint64_t tx=0; tx<responses.size(); tx++)
     {
+        // Remember the previous memory sent for each TX, and send only increments
+        string previousMemory;
+
         executor::v1::ProcessTransactionResponse * pProcessTransactionResponse = response->add_responses();
         pProcessTransactionResponse->set_tx_hash(string2ba(responses[tx].tx_hash));
         pProcessTransactionResponse->set_rlp_tx(responses[tx].rlp_tx);
@@ -341,10 +414,22 @@ using grpc::Status;
                 }
                 pExecutionTraceStep->set_remaining_gas(responses[tx].execution_trace[step].gas);
                 pExecutionTraceStep->set_gas_cost(responses[tx].execution_trace[step].gas_cost); // Gas cost of the operation
-                pExecutionTraceStep->set_memory(string2ba(responses[tx].execution_trace[step].memory)); // Content of memory
-                pExecutionTraceStep->set_memory_size(responses[tx].execution_trace[step].memory_size);
+                string baMemory = string2ba(responses[tx].execution_trace[step].memory);
+                if (baMemory != previousMemory)
+                {
+                    uint64_t offset;
+                    uint64_t length;
+                    getStringIncrement(previousMemory, baMemory, offset, length);
+                    if (length > 0)
+                    {
+                        pExecutionTraceStep->set_memory_offset(offset);
+                        pExecutionTraceStep->set_memory(baMemory.substr(offset, length)); // Content of memory, incremental
+                    }
+                    previousMemory = baMemory;
+                }
+                pExecutionTraceStep->set_memory_size(baMemory.size());
                 for (uint64_t stack=0; stack<responses[tx].execution_trace[step].stack.size() ; stack++)
-                    pExecutionTraceStep->add_stack(PrependZeros(responses[tx].execution_trace[step].stack[stack].get_str(16), 64)); // Content of the stack
+                    pExecutionTraceStep->add_stack(responses[tx].execution_trace[step].stack[stack].get_str(16)); // Content of the stack
                 string dataConcatenated;
                 for (uint64_t data=0; data<responses[tx].execution_trace[step].return_data.size(); data++)
                     dataConcatenated += responses[tx].execution_trace[step].return_data[data];
@@ -385,8 +470,21 @@ using grpc::Status;
                 pTransactionStep->set_gas_refund(responses[tx].call_trace.steps[step].gas_refund); // Gas refunded during the operation
                 pTransactionStep->set_op(responses[tx].call_trace.steps[step].op); // Opcode
                 for (uint64_t stack=0; stack<responses[tx].call_trace.steps[step].stack.size() ; stack++)
-                    pTransactionStep->add_stack(PrependZeros(responses[tx].call_trace.steps[step].stack[stack].get_str(16), 64)); // Content of the stack
-                pTransactionStep->set_memory(string2ba(responses[tx].call_trace.steps[step].memory)); // Content of the memory
+                    pTransactionStep->add_stack(responses[tx].call_trace.steps[step].stack[stack].get_str(16)); // Content of the stack
+                string baMemory = string2ba(responses[tx].call_trace.steps[step].memory);
+                if (baMemory != previousMemory)
+                {
+                    uint64_t offset;
+                    uint64_t length;
+                    getStringIncrement(previousMemory, baMemory, offset, length);
+                    if (length > 0)
+                    {
+                        pTransactionStep->set_memory_offset(offset);
+                        pTransactionStep->set_memory(baMemory.substr(offset, length)); // Content of memory, incremental
+                    }
+                    previousMemory = baMemory;
+                }
+                pTransactionStep->set_memory_size(baMemory.size());
                 string dataConcatenated;
                 for (uint64_t data=0; data<responses[tx].call_trace.steps[step].return_data.size(); data++)
                     dataConcatenated += responses[tx].call_trace.steps[step].return_data[data];
@@ -418,7 +516,7 @@ using grpc::Status;
             " counters.memAlign=" + to_string(proverRequest.counters.memAlign) +
             " counters.arith=" + to_string(proverRequest.counters.arith) +
             " counters.binary=" + to_string(proverRequest.counters.binary) +
-             " nTxs=" + to_string(responses.size());
+            " nTxs=" + to_string(responses.size());
          if (config.logExecutorServerTxs)
          {
             for (uint64_t tx=0; tx<responses.size(); tx++)
@@ -444,6 +542,7 @@ using grpc::Status;
 
     if (config.saveResponseToFile)
     {
+        //zklog.info("ExecutorServiceImpl::ProcessBatch() returns response of size=" + to_string(response->ByteSizeLong()));
         string2file(response->DebugString(), proverRequest.filePrefix + "executor_response.txt");
     }
 

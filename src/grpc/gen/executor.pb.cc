@@ -438,6 +438,8 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_executor_2eproto::offsets[] PR
   PROTOBUF_FIELD_OFFSET(::executor::v1::TransactionStep, op_),
   PROTOBUF_FIELD_OFFSET(::executor::v1::TransactionStep, stack_),
   PROTOBUF_FIELD_OFFSET(::executor::v1::TransactionStep, memory_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::TransactionStep, memory_size_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::TransactionStep, memory_offset_),
   PROTOBUF_FIELD_OFFSET(::executor::v1::TransactionStep, return_data_),
   PROTOBUF_FIELD_OFFSET(::executor::v1::TransactionStep, contract_),
   PROTOBUF_FIELD_OFFSET(::executor::v1::TransactionStep, error_),
@@ -502,6 +504,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_executor_2eproto::offsets[] PR
   PROTOBUF_FIELD_OFFSET(::executor::v1::ExecutionTraceStep, gas_cost_),
   PROTOBUF_FIELD_OFFSET(::executor::v1::ExecutionTraceStep, memory_),
   PROTOBUF_FIELD_OFFSET(::executor::v1::ExecutionTraceStep, memory_size_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ExecutionTraceStep, memory_offset_),
   PROTOBUF_FIELD_OFFSET(::executor::v1::ExecutionTraceStep, stack_),
   PROTOBUF_FIELD_OFFSET(::executor::v1::ExecutionTraceStep, return_data_),
   PROTOBUF_FIELD_OFFSET(::executor::v1::ExecutionTraceStep, storage_),
@@ -520,11 +523,11 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 85, -1, sizeof(::executor::v1::CallTrace)},
   { 92, -1, sizeof(::executor::v1::TransactionContext)},
   { 109, -1, sizeof(::executor::v1::TransactionStep)},
-  { 126, -1, sizeof(::executor::v1::Contract)},
-  { 136, -1, sizeof(::executor::v1::ProcessTransactionResponse)},
-  { 154, -1, sizeof(::executor::v1::Log)},
-  { 167, 174, sizeof(::executor::v1::ExecutionTraceStep_StorageEntry_DoNotUse)},
-  { 176, -1, sizeof(::executor::v1::ExecutionTraceStep)},
+  { 128, -1, sizeof(::executor::v1::Contract)},
+  { 138, -1, sizeof(::executor::v1::ProcessTransactionResponse)},
+  { 156, -1, sizeof(::executor::v1::Log)},
+  { 169, 176, sizeof(::executor::v1::ExecutionTraceStep_StorageEntry_DoNotUse)},
+  { 178, -1, sizeof(::executor::v1::ExecutionTraceStep)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -590,80 +593,82 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "data\030\004 \001(\014\022\013\n\003gas\030\005 \001(\004\022\r\n\005value\030\006 \001(\t\022\r"
   "\n\005batch\030\007 \001(\014\022\016\n\006output\030\010 \001(\014\022\020\n\010gas_use"
   "d\030\t \001(\004\022\021\n\tgas_price\030\n \001(\t\022\026\n\016execution_"
-  "time\030\013 \001(\r\022\026\n\016old_state_root\030\014 \001(\014\"\202\002\n\017T"
+  "time\030\013 \001(\r\022\026\n\016old_state_root\030\014 \001(\014\"\256\002\n\017T"
   "ransactionStep\022\022\n\nstate_root\030\001 \001(\014\022\r\n\005de"
   "pth\030\002 \001(\r\022\n\n\002pc\030\003 \001(\004\022\013\n\003gas\030\004 \001(\004\022\020\n\010ga"
   "s_cost\030\005 \001(\004\022\022\n\ngas_refund\030\006 \001(\004\022\n\n\002op\030\007"
-  " \001(\r\022\r\n\005stack\030\010 \003(\t\022\016\n\006memory\030\t \001(\014\022\023\n\013r"
-  "eturn_data\030\n \001(\014\022\'\n\010contract\030\013 \001(\0132\025.exe"
-  "cutor.v1.Contract\022$\n\005error\030\014 \001(\0162\025.execu"
-  "tor.v1.RomError\"U\n\010Contract\022\017\n\007address\030\001"
-  " \001(\t\022\016\n\006caller\030\002 \001(\t\022\r\n\005value\030\003 \001(\t\022\014\n\004d"
-  "ata\030\004 \001(\014\022\013\n\003gas\030\005 \001(\004\"\363\002\n\032ProcessTransa"
-  "ctionResponse\022\017\n\007tx_hash\030\001 \001(\014\022\016\n\006rlp_tx"
-  "\030\002 \001(\014\022\014\n\004type\030\003 \001(\r\022\024\n\014return_value\030\004 \001"
-  "(\014\022\020\n\010gas_left\030\005 \001(\004\022\020\n\010gas_used\030\006 \001(\004\022\024"
-  "\n\014gas_refunded\030\007 \001(\004\022$\n\005error\030\010 \001(\0162\025.ex"
-  "ecutor.v1.RomError\022\026\n\016create_address\030\t \001"
-  "(\t\022\022\n\nstate_root\030\n \001(\014\022\036\n\004logs\030\013 \003(\0132\020.e"
-  "xecutor.v1.Log\0228\n\017execution_trace\030\r \003(\0132"
-  "\037.executor.v1.ExecutionTraceStep\022*\n\ncall"
-  "_trace\030\016 \001(\0132\026.executor.v1.CallTrace\"\220\001\n"
-  "\003Log\022\017\n\007address\030\001 \001(\t\022\016\n\006topics\030\002 \003(\014\022\014\n"
-  "\004data\030\003 \001(\014\022\024\n\014batch_number\030\004 \001(\004\022\017\n\007tx_"
-  "hash\030\005 \001(\014\022\020\n\010tx_index\030\006 \001(\r\022\022\n\nbatch_ha"
-  "sh\030\007 \001(\014\022\r\n\005index\030\010 \001(\r\"\326\002\n\022ExecutionTra"
-  "ceStep\022\n\n\002pc\030\001 \001(\004\022\n\n\002op\030\002 \001(\t\022\025\n\rremain"
-  "ing_gas\030\003 \001(\004\022\020\n\010gas_cost\030\004 \001(\004\022\016\n\006memor"
-  "y\030\005 \001(\014\022\023\n\013memory_size\030\006 \001(\r\022\r\n\005stack\030\007 "
-  "\003(\t\022\023\n\013return_data\030\010 \001(\014\022=\n\007storage\030\t \003("
-  "\0132,.executor.v1.ExecutionTraceStep.Stora"
-  "geEntry\022\r\n\005depth\030\n \001(\r\022\022\n\ngas_refund\030\013 \001"
-  "(\004\022$\n\005error\030\014 \001(\0162\025.executor.v1.RomError"
-  "\032.\n\014StorageEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002"
-  " \001(\t:\0028\001*\253\010\n\010RomError\022\031\n\025ROM_ERROR_UNSPE"
-  "CIFIED\020\000\022\026\n\022ROM_ERROR_NO_ERROR\020\001\022\030\n\024ROM_"
-  "ERROR_OUT_OF_GAS\020\002\022\034\n\030ROM_ERROR_STACK_OV"
-  "ERFLOW\020\003\022\035\n\031ROM_ERROR_STACK_UNDERFLOW\020\004\022"
-  "$\n ROM_ERROR_MAX_CODE_SIZE_EXCEEDED\020\005\022(\n"
-  "$ROM_ERROR_CONTRACT_ADDRESS_COLLISION\020\006\022"
-  " \n\034ROM_ERROR_EXECUTION_REVERTED\020\007\022\"\n\036ROM"
-  "_ERROR_OUT_OF_COUNTERS_STEP\020\010\022$\n ROM_ERR"
-  "OR_OUT_OF_COUNTERS_KECCAK\020\t\022$\n ROM_ERROR"
-  "_OUT_OF_COUNTERS_BINARY\020\n\022!\n\035ROM_ERROR_O"
-  "UT_OF_COUNTERS_MEM\020\013\022#\n\037ROM_ERROR_OUT_OF"
-  "_COUNTERS_ARITH\020\014\022%\n!ROM_ERROR_OUT_OF_CO"
-  "UNTERS_PADDING\020\r\022&\n\"ROM_ERROR_OUT_OF_COU"
-  "NTERS_POSEIDON\020\016\022\032\n\026ROM_ERROR_INVALID_JU"
-  "MP\020\017\022\034\n\030ROM_ERROR_INVALID_OPCODE\020\020\022\034\n\030RO"
-  "M_ERROR_INVALID_STATIC\020\021\022(\n$ROM_ERROR_IN"
-  "VALID_BYTECODE_STARTS_EF\020\022\022)\n%ROM_ERROR_"
-  "INTRINSIC_INVALID_SIGNATURE\020\023\022(\n$ROM_ERR"
-  "OR_INTRINSIC_INVALID_CHAIN_ID\020\024\022%\n!ROM_E"
-  "RROR_INTRINSIC_INVALID_NONCE\020\025\022)\n%ROM_ER"
-  "ROR_INTRINSIC_INVALID_GAS_LIMIT\020\026\022\'\n#ROM"
-  "_ERROR_INTRINSIC_INVALID_BALANCE\020\027\022/\n+RO"
-  "M_ERROR_INTRINSIC_INVALID_BATCH_GAS_LIMI"
-  "T\020\030\022+\n\'ROM_ERROR_INTRINSIC_INVALID_SENDE"
-  "R_CODE\020\031\022\'\n#ROM_ERROR_INTRINSIC_TX_GAS_O"
-  "VERFLOW\020\032\022 \n\034ROM_ERROR_BATCH_DATA_TOO_BI"
-  "G\020\033\022!\n\035ROM_ERROR_UNSUPPORTED_FORK_ID\020\034*\305"
-  "\003\n\rExecutorError\022\036\n\032EXECUTOR_ERROR_UNSPE"
-  "CIFIED\020\000\022\033\n\027EXECUTOR_ERROR_NO_ERROR\020\001\022+\n"
-  "\'EXECUTOR_ERROR_COUNTERS_OVERFLOW_KECCAK"
-  "\020\002\022+\n\'EXECUTOR_ERROR_COUNTERS_OVERFLOW_B"
-  "INARY\020\003\022(\n$EXECUTOR_ERROR_COUNTERS_OVERF"
-  "LOW_MEM\020\004\022*\n&EXECUTOR_ERROR_COUNTERS_OVE"
-  "RFLOW_ARITH\020\005\022,\n(EXECUTOR_ERROR_COUNTERS"
-  "_OVERFLOW_PADDING\020\006\022-\n)EXECUTOR_ERROR_CO"
-  "UNTERS_OVERFLOW_POSEIDON\020\007\022&\n\"EXECUTOR_E"
-  "RROR_UNSUPPORTED_FORK_ID\020\010\022#\n\037EXECUTOR_E"
-  "RROR_BALANCE_MISMATCH\020\t\022\035\n\031EXECUTOR_ERRO"
-  "R_FEA2SCALAR\020\n2h\n\017ExecutorService\022U\n\014Pro"
-  "cessBatch\022 .executor.v1.ProcessBatchRequ"
-  "est\032!.executor.v1.ProcessBatchResponse\"\000"
-  "BAZ\?github.com/0xPolygonHermez/zkevm-nod"
-  "e/state/runtime/executor/pbb\006proto3"
+  " \001(\r\022\r\n\005stack\030\010 \003(\t\022\016\n\006memory\030\t \001(\014\022\023\n\013m"
+  "emory_size\030\n \001(\r\022\025\n\rmemory_offset\030\013 \001(\r\022"
+  "\023\n\013return_data\030\014 \001(\014\022\'\n\010contract\030\r \001(\0132\025"
+  ".executor.v1.Contract\022$\n\005error\030\016 \001(\0162\025.e"
+  "xecutor.v1.RomError\"U\n\010Contract\022\017\n\007addre"
+  "ss\030\001 \001(\t\022\016\n\006caller\030\002 \001(\t\022\r\n\005value\030\003 \001(\t\022"
+  "\014\n\004data\030\004 \001(\014\022\013\n\003gas\030\005 \001(\004\"\363\002\n\032ProcessTr"
+  "ansactionResponse\022\017\n\007tx_hash\030\001 \001(\014\022\016\n\006rl"
+  "p_tx\030\002 \001(\014\022\014\n\004type\030\003 \001(\r\022\024\n\014return_value"
+  "\030\004 \001(\014\022\020\n\010gas_left\030\005 \001(\004\022\020\n\010gas_used\030\006 \001"
+  "(\004\022\024\n\014gas_refunded\030\007 \001(\004\022$\n\005error\030\010 \001(\0162"
+  "\025.executor.v1.RomError\022\026\n\016create_address"
+  "\030\t \001(\t\022\022\n\nstate_root\030\n \001(\014\022\036\n\004logs\030\013 \003(\013"
+  "2\020.executor.v1.Log\0228\n\017execution_trace\030\r "
+  "\003(\0132\037.executor.v1.ExecutionTraceStep\022*\n\n"
+  "call_trace\030\016 \001(\0132\026.executor.v1.CallTrace"
+  "\"\220\001\n\003Log\022\017\n\007address\030\001 \001(\t\022\016\n\006topics\030\002 \003("
+  "\014\022\014\n\004data\030\003 \001(\014\022\024\n\014batch_number\030\004 \001(\004\022\017\n"
+  "\007tx_hash\030\005 \001(\014\022\020\n\010tx_index\030\006 \001(\r\022\022\n\nbatc"
+  "h_hash\030\007 \001(\014\022\r\n\005index\030\010 \001(\r\"\355\002\n\022Executio"
+  "nTraceStep\022\n\n\002pc\030\001 \001(\004\022\n\n\002op\030\002 \001(\t\022\025\n\rre"
+  "maining_gas\030\003 \001(\004\022\020\n\010gas_cost\030\004 \001(\004\022\016\n\006m"
+  "emory\030\005 \001(\014\022\023\n\013memory_size\030\006 \001(\r\022\025\n\rmemo"
+  "ry_offset\030\007 \001(\r\022\r\n\005stack\030\010 \003(\t\022\023\n\013return"
+  "_data\030\t \001(\014\022=\n\007storage\030\n \003(\0132,.executor."
+  "v1.ExecutionTraceStep.StorageEntry\022\r\n\005de"
+  "pth\030\013 \001(\r\022\022\n\ngas_refund\030\014 \001(\004\022$\n\005error\030\r"
+  " \001(\0162\025.executor.v1.RomError\032.\n\014StorageEn"
+  "try\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001*\253\010\n\010"
+  "RomError\022\031\n\025ROM_ERROR_UNSPECIFIED\020\000\022\026\n\022R"
+  "OM_ERROR_NO_ERROR\020\001\022\030\n\024ROM_ERROR_OUT_OF_"
+  "GAS\020\002\022\034\n\030ROM_ERROR_STACK_OVERFLOW\020\003\022\035\n\031R"
+  "OM_ERROR_STACK_UNDERFLOW\020\004\022$\n ROM_ERROR_"
+  "MAX_CODE_SIZE_EXCEEDED\020\005\022(\n$ROM_ERROR_CO"
+  "NTRACT_ADDRESS_COLLISION\020\006\022 \n\034ROM_ERROR_"
+  "EXECUTION_REVERTED\020\007\022\"\n\036ROM_ERROR_OUT_OF"
+  "_COUNTERS_STEP\020\010\022$\n ROM_ERROR_OUT_OF_COU"
+  "NTERS_KECCAK\020\t\022$\n ROM_ERROR_OUT_OF_COUNT"
+  "ERS_BINARY\020\n\022!\n\035ROM_ERROR_OUT_OF_COUNTER"
+  "S_MEM\020\013\022#\n\037ROM_ERROR_OUT_OF_COUNTERS_ARI"
+  "TH\020\014\022%\n!ROM_ERROR_OUT_OF_COUNTERS_PADDIN"
+  "G\020\r\022&\n\"ROM_ERROR_OUT_OF_COUNTERS_POSEIDO"
+  "N\020\016\022\032\n\026ROM_ERROR_INVALID_JUMP\020\017\022\034\n\030ROM_E"
+  "RROR_INVALID_OPCODE\020\020\022\034\n\030ROM_ERROR_INVAL"
+  "ID_STATIC\020\021\022(\n$ROM_ERROR_INVALID_BYTECOD"
+  "E_STARTS_EF\020\022\022)\n%ROM_ERROR_INTRINSIC_INV"
+  "ALID_SIGNATURE\020\023\022(\n$ROM_ERROR_INTRINSIC_"
+  "INVALID_CHAIN_ID\020\024\022%\n!ROM_ERROR_INTRINSI"
+  "C_INVALID_NONCE\020\025\022)\n%ROM_ERROR_INTRINSIC"
+  "_INVALID_GAS_LIMIT\020\026\022\'\n#ROM_ERROR_INTRIN"
+  "SIC_INVALID_BALANCE\020\027\022/\n+ROM_ERROR_INTRI"
+  "NSIC_INVALID_BATCH_GAS_LIMIT\020\030\022+\n\'ROM_ER"
+  "ROR_INTRINSIC_INVALID_SENDER_CODE\020\031\022\'\n#R"
+  "OM_ERROR_INTRINSIC_TX_GAS_OVERFLOW\020\032\022 \n\034"
+  "ROM_ERROR_BATCH_DATA_TOO_BIG\020\033\022!\n\035ROM_ER"
+  "ROR_UNSUPPORTED_FORK_ID\020\034*\305\003\n\rExecutorEr"
+  "ror\022\036\n\032EXECUTOR_ERROR_UNSPECIFIED\020\000\022\033\n\027E"
+  "XECUTOR_ERROR_NO_ERROR\020\001\022+\n\'EXECUTOR_ERR"
+  "OR_COUNTERS_OVERFLOW_KECCAK\020\002\022+\n\'EXECUTO"
+  "R_ERROR_COUNTERS_OVERFLOW_BINARY\020\003\022(\n$EX"
+  "ECUTOR_ERROR_COUNTERS_OVERFLOW_MEM\020\004\022*\n&"
+  "EXECUTOR_ERROR_COUNTERS_OVERFLOW_ARITH\020\005"
+  "\022,\n(EXECUTOR_ERROR_COUNTERS_OVERFLOW_PAD"
+  "DING\020\006\022-\n)EXECUTOR_ERROR_COUNTERS_OVERFL"
+  "OW_POSEIDON\020\007\022&\n\"EXECUTOR_ERROR_UNSUPPOR"
+  "TED_FORK_ID\020\010\022#\n\037EXECUTOR_ERROR_BALANCE_"
+  "MISMATCH\020\t\022\035\n\031EXECUTOR_ERROR_FEA2SCALAR\020"
+  "\n2h\n\017ExecutorService\022U\n\014ProcessBatch\022 .e"
+  "xecutor.v1.ProcessBatchRequest\032!.executo"
+  "r.v1.ProcessBatchResponse\"\000BAZ\?github.co"
+  "m/0xPolygonHermez/zkevm-node/state/runti"
+  "me/executor/pbb\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_executor_2eproto_deps[1] = {
 };
@@ -686,7 +691,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_exe
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_executor_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_executor_2eproto = {
-  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 4715,
+  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 4782,
   &descriptor_table_executor_2eproto_once, descriptor_table_executor_2eproto_sccs, descriptor_table_executor_2eproto_deps, 15, 0,
   schemas, file_default_instances, TableStruct_executor_2eproto::offsets,
   file_level_metadata_executor_2eproto, 15, file_level_enum_descriptors_executor_2eproto, file_level_service_descriptors_executor_2eproto,
@@ -3749,24 +3754,38 @@ const char* TransactionStep::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPAC
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // bytes return_data = 10;
+      // uint32 memory_size = 10;
       case 10:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 82)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 80)) {
+          memory_size_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // uint32 memory_offset = 11;
+      case 11:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 88)) {
+          memory_offset_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // bytes return_data = 12;
+      case 12:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 98)) {
           auto str = _internal_mutable_return_data();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // .executor.v1.Contract contract = 11;
-      case 11:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 90)) {
+      // .executor.v1.Contract contract = 13;
+      case 13:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 106)) {
           ptr = ctx->ParseMessage(_internal_mutable_contract(), ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // .executor.v1.RomError error = 12;
-      case 12:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 96)) {
+      // .executor.v1.RomError error = 14;
+      case 14:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 112)) {
           ::PROTOBUF_NAMESPACE_ID::uint64 val = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
           _internal_set_error(static_cast<::executor::v1::RomError>(val));
@@ -3858,25 +3877,37 @@ failure:
         9, this->_internal_memory(), target);
   }
 
-  // bytes return_data = 10;
-  if (this->return_data().size() > 0) {
-    target = stream->WriteBytesMaybeAliased(
-        10, this->_internal_return_data(), target);
+  // uint32 memory_size = 10;
+  if (this->memory_size() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(10, this->_internal_memory_size(), target);
   }
 
-  // .executor.v1.Contract contract = 11;
+  // uint32 memory_offset = 11;
+  if (this->memory_offset() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(11, this->_internal_memory_offset(), target);
+  }
+
+  // bytes return_data = 12;
+  if (this->return_data().size() > 0) {
+    target = stream->WriteBytesMaybeAliased(
+        12, this->_internal_return_data(), target);
+  }
+
+  // .executor.v1.Contract contract = 13;
   if (this->has_contract()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
       InternalWriteMessage(
-        11, _Internal::contract(this), target, stream);
+        13, _Internal::contract(this), target, stream);
   }
 
-  // .executor.v1.RomError error = 12;
+  // .executor.v1.RomError error = 14;
   if (this->error() != 0) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteEnumToArray(
-      12, this->_internal_error(), target);
+      14, this->_internal_error(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -3917,14 +3948,14 @@ size_t TransactionStep::ByteSizeLong() const {
         this->_internal_memory());
   }
 
-  // bytes return_data = 10;
+  // bytes return_data = 12;
   if (this->return_data().size() > 0) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
         this->_internal_return_data());
   }
 
-  // .executor.v1.Contract contract = 11;
+  // .executor.v1.Contract contract = 13;
   if (this->has_contract()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
@@ -3973,7 +4004,21 @@ size_t TransactionStep::ByteSizeLong() const {
         this->_internal_gas_refund());
   }
 
-  // .executor.v1.RomError error = 12;
+  // uint32 memory_size = 10;
+  if (this->memory_size() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
+        this->_internal_memory_size());
+  }
+
+  // uint32 memory_offset = 11;
+  if (this->memory_offset() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
+        this->_internal_memory_offset());
+  }
+
+  // .executor.v1.RomError error = 14;
   if (this->error() != 0) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::EnumSize(this->_internal_error());
@@ -4040,6 +4085,12 @@ void TransactionStep::MergeFrom(const TransactionStep& from) {
   }
   if (from.gas_refund() != 0) {
     _internal_set_gas_refund(from._internal_gas_refund());
+  }
+  if (from.memory_size() != 0) {
+    _internal_set_memory_size(from._internal_memory_size());
+  }
+  if (from.memory_offset() != 0) {
+    _internal_set_memory_offset(from._internal_memory_offset());
   }
   if (from.error() != 0) {
     _internal_set_error(from._internal_error());
@@ -5598,9 +5649,16 @@ const char* ExecutionTraceStep::_InternalParse(const char* ptr, ::PROTOBUF_NAMES
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // repeated string stack = 7;
+      // uint32 memory_offset = 7;
       case 7:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 58)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 56)) {
+          memory_offset_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // repeated string stack = 8;
+      case 8:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 66)) {
           ptr -= 1;
           do {
             ptr += 1;
@@ -5609,46 +5667,46 @@ const char* ExecutionTraceStep::_InternalParse(const char* ptr, ::PROTOBUF_NAMES
             CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "executor.v1.ExecutionTraceStep.stack"));
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
-          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<58>(ptr));
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<66>(ptr));
         } else goto handle_unusual;
         continue;
-      // bytes return_data = 8;
-      case 8:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 66)) {
+      // bytes return_data = 9;
+      case 9:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 74)) {
           auto str = _internal_mutable_return_data();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // map<string, string> storage = 9;
-      case 9:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 74)) {
+      // map<string, string> storage = 10;
+      case 10:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 82)) {
           ptr -= 1;
           do {
             ptr += 1;
             ptr = ctx->ParseMessage(&storage_, ptr);
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
-          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<74>(ptr));
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<82>(ptr));
         } else goto handle_unusual;
         continue;
-      // uint32 depth = 10;
-      case 10:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 80)) {
+      // uint32 depth = 11;
+      case 11:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 88)) {
           depth_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // uint64 gas_refund = 11;
-      case 11:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 88)) {
+      // uint64 gas_refund = 12;
+      case 12:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 96)) {
           gas_refund_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // .executor.v1.RomError error = 12;
-      case 12:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 96)) {
+      // .executor.v1.RomError error = 13;
+      case 13:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 104)) {
           ::PROTOBUF_NAMESPACE_ID::uint64 val = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
           _internal_set_error(static_cast<::executor::v1::RomError>(val));
@@ -5722,23 +5780,29 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(6, this->_internal_memory_size(), target);
   }
 
-  // repeated string stack = 7;
+  // uint32 memory_offset = 7;
+  if (this->memory_offset() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(7, this->_internal_memory_offset(), target);
+  }
+
+  // repeated string stack = 8;
   for (int i = 0, n = this->_internal_stack_size(); i < n; i++) {
     const auto& s = this->_internal_stack(i);
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       s.data(), static_cast<int>(s.length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
       "executor.v1.ExecutionTraceStep.stack");
-    target = stream->WriteString(7, s, target);
+    target = stream->WriteString(8, s, target);
   }
 
-  // bytes return_data = 8;
+  // bytes return_data = 9;
   if (this->return_data().size() > 0) {
     target = stream->WriteBytesMaybeAliased(
-        8, this->_internal_return_data(), target);
+        9, this->_internal_return_data(), target);
   }
 
-  // map<string, string> storage = 9;
+  // map<string, string> storage = 10;
   if (!this->_internal_storage().empty()) {
     typedef ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >::const_pointer
         ConstPtr;
@@ -5770,36 +5834,36 @@ failure:
       }
       ::std::sort(&items[0], &items[static_cast<ptrdiff_t>(n)], Less());
       for (size_type i = 0; i < n; i++) {
-        target = ExecutionTraceStep_StorageEntry_DoNotUse::Funcs::InternalSerialize(9, items[static_cast<ptrdiff_t>(i)]->first, items[static_cast<ptrdiff_t>(i)]->second, target, stream);
+        target = ExecutionTraceStep_StorageEntry_DoNotUse::Funcs::InternalSerialize(10, items[static_cast<ptrdiff_t>(i)]->first, items[static_cast<ptrdiff_t>(i)]->second, target, stream);
         Utf8Check::Check(&(*items[static_cast<ptrdiff_t>(i)]));
       }
     } else {
       for (::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >::const_iterator
           it = this->_internal_storage().begin();
           it != this->_internal_storage().end(); ++it) {
-        target = ExecutionTraceStep_StorageEntry_DoNotUse::Funcs::InternalSerialize(9, it->first, it->second, target, stream);
+        target = ExecutionTraceStep_StorageEntry_DoNotUse::Funcs::InternalSerialize(10, it->first, it->second, target, stream);
         Utf8Check::Check(&(*it));
       }
     }
   }
 
-  // uint32 depth = 10;
+  // uint32 depth = 11;
   if (this->depth() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(10, this->_internal_depth(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(11, this->_internal_depth(), target);
   }
 
-  // uint64 gas_refund = 11;
+  // uint64 gas_refund = 12;
   if (this->gas_refund() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(11, this->_internal_gas_refund(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(12, this->_internal_gas_refund(), target);
   }
 
-  // .executor.v1.RomError error = 12;
+  // .executor.v1.RomError error = 13;
   if (this->error() != 0) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteEnumToArray(
-      12, this->_internal_error(), target);
+      13, this->_internal_error(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -5818,7 +5882,7 @@ size_t ExecutionTraceStep::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated string stack = 7;
+  // repeated string stack = 8;
   total_size += 1 *
       ::PROTOBUF_NAMESPACE_ID::internal::FromIntSize(stack_.size());
   for (int i = 0, n = stack_.size(); i < n; i++) {
@@ -5826,7 +5890,7 @@ size_t ExecutionTraceStep::ByteSizeLong() const {
       stack_.Get(i));
   }
 
-  // map<string, string> storage = 9;
+  // map<string, string> storage = 10;
   total_size += 1 *
       ::PROTOBUF_NAMESPACE_ID::internal::FromIntSize(this->_internal_storage_size());
   for (::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >::const_iterator
@@ -5849,7 +5913,7 @@ size_t ExecutionTraceStep::ByteSizeLong() const {
         this->_internal_memory());
   }
 
-  // bytes return_data = 8;
+  // bytes return_data = 9;
   if (this->return_data().size() > 0) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
@@ -5884,21 +5948,28 @@ size_t ExecutionTraceStep::ByteSizeLong() const {
         this->_internal_memory_size());
   }
 
-  // uint32 depth = 10;
-  if (this->depth() != 0) {
+  // uint32 memory_offset = 7;
+  if (this->memory_offset() != 0) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
-        this->_internal_depth());
+        this->_internal_memory_offset());
   }
 
-  // uint64 gas_refund = 11;
+  // uint64 gas_refund = 12;
   if (this->gas_refund() != 0) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
         this->_internal_gas_refund());
   }
 
-  // .executor.v1.RomError error = 12;
+  // uint32 depth = 11;
+  if (this->depth() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
+        this->_internal_depth());
+  }
+
+  // .executor.v1.RomError error = 13;
   if (this->error() != 0) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::EnumSize(this->_internal_error());
@@ -5958,11 +6029,14 @@ void ExecutionTraceStep::MergeFrom(const ExecutionTraceStep& from) {
   if (from.memory_size() != 0) {
     _internal_set_memory_size(from._internal_memory_size());
   }
-  if (from.depth() != 0) {
-    _internal_set_depth(from._internal_depth());
+  if (from.memory_offset() != 0) {
+    _internal_set_memory_offset(from._internal_memory_offset());
   }
   if (from.gas_refund() != 0) {
     _internal_set_gas_refund(from._internal_gas_refund());
+  }
+  if (from.depth() != 0) {
+    _internal_set_depth(from._internal_depth());
   }
   if (from.error() != 0) {
     _internal_set_error(from._internal_error());
