@@ -22,9 +22,9 @@ struct ECRecoverTestVector
 };
 #define NTESTS 46
 #define REPETITIONS 1
-#define BENCHMAKR_MODE 0 // 0: test mode, 1: benchmark mode
+#define BENCHMARK_MODE 0 // 0: test mode, 1: benchmark mode
 
-#if BENCHMAKR_MODE == 1
+#if BENCHMARK_MODE == 1
 #undef NTESTS
 #define NTESTS 30
 #undef REPETITIONS
@@ -328,7 +328,7 @@ void ECRecoverTest (void)
             address.set_str(ecrecoverTestVectors[i].address, 16);
 
             result = ECRecover(signature, r, s, v, ecrecoverTestVectors[i].precompiled, address);
-#if BENCHMAKR_MODE != 1
+#if BENCHMARK_MODE != 1
             bool failed = false;
             if (result != ecrecoverTestVectors[i].result)
             {
@@ -346,7 +346,7 @@ void ECRecoverTest (void)
 #endif
         }
     TimerStopAndLog(ECRECOVER_TEST);
-#if BENCHMAKR_MODE == 0
+#if BENCHMARK_MODE == 0
     zklog.info("    Failed ECRECOVER_TEST " + to_string( failedTests ));
 #else 
     assert(result == 0 && failedTests == 0); //to avoid warnings
