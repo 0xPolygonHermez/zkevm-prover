@@ -371,7 +371,7 @@ zkresult FullTracer::onError(Context &ctx, const RomCommand &cmd)
 
     // Intrinsic error should be set at tx level (not opcode)
     if ( (responseErrors.find(lastError) != responseErrors.end()) ||
-         (execution_trace.size() == 0) )
+         ((execution_trace.size() == 0) && call_trace.size() == 0) )
     {
         if (finalTrace.responses.size() > txCount)
         {
@@ -393,6 +393,11 @@ zkresult FullTracer::onError(Context &ctx, const RomCommand &cmd)
     if (execution_trace.size() > 0)
     {
         execution_trace[execution_trace.size() - 1].error = lastError;
+    }
+
+    if (call_trace.size() > 0)
+    {
+        call_trace[call_trace.size() - 1].error = lastError;
     }
 
     // Revert logs
@@ -607,6 +612,9 @@ zkresult FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
     contextData.type = "CALL";
     callData[CTX] = contextData;
 
+    // prevCTX
+    prevCTX = CTX;
+
     /* Fill response object */
     
     mpz_class r;
@@ -689,7 +697,7 @@ zkresult FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
     txTime = getCurrentTime();
 
     // Reset values
-    depth = 0;
+    depth = 1;
     deltaStorage.clear();
     txGAS[depth] = {response.call_trace.context.gas, 0};
     lastError = "";
@@ -719,11 +727,11 @@ zkresult FullTracer::onUpdateStorage(Context &ctx, const RomCommand &cmd)
 
         // The storage key is stored in C
         getRegFromCtx(ctx, cmd.params[0]->reg, auxScalar);
-        string key = PrependZeros(auxScalar.get_str(16), 64);
+        string key = auxScalar.get_str(16);
 
         // The storage value is stored in D
         getRegFromCtx(ctx, cmd.params[1]->reg, auxScalar);
-        string value = PrependZeros(auxScalar.get_str(16), 64);
+        string value = auxScalar.get_str(16);
 
         // Delta storage is computed for the affected contract address
         zkresult zkr = getVarFromCtx(ctx, false, ctx.rom.storageAddrOffset, auxScalar);
@@ -918,12 +926,15 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     // Append to response logs
     unordered_map<uint64_t, std::unordered_map<uint64_t, Log>>::iterator logIt;
     unordered_map<uint64_t, Log>::const_iterator it;
+    uint64_t logIndex = 0;
     for (logIt=logs.begin(); logIt!=logs.end(); logIt++)
     {
         for (it = logIt->second.begin(); it != logIt->second.end(); it++)
         {
             Log log = it->second;
+            log.index = logIndex;
             finalTrace.responses[finalTrace.responses.size() - 1].logs.push_back(log);
+            logIndex++;
         }
     }
 
@@ -942,6 +953,9 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     // Reset opcodes counters
     numberOfOpcodesInThisTx = 0;
     lastErrorOpcode = 0;
+
+    // Call semiFlush
+    ctx.pHashDB->semiFlush();
 
 #ifdef LOG_FULL_TRACER
     zklog.info("FullTracer::onFinishTx() txCount=" + to_string(txCount) + " finalTrace.responses.size()=" + to_string(finalTrace.responses.size()) + " create_address=" + response.create_address + " state_root=" + response.state_root);
@@ -1049,6 +1063,18 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     // Increase opcodes counter
     numberOfOpcodesInThisTx++;
 
+    // Update depth if a variation in CTX is detected
+    uint64_t CTX = fr.toU64(ctx.pols.CTX[*ctx.pStep]);
+    if (prevCTX > CTX)
+    {
+        depth -= 1;
+    }
+    else if (prevCTX < CTX)
+    {
+        depth += 1;
+    }
+    prevCTX = CTX;
+
     zkresult zkr;
 
     Opcode singleInfo;
@@ -1098,39 +1124,12 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     singleInfo.op = codeId;
 
     // Check depth changes and update depth
-    zkr = getVarFromCtx(ctx, true, ctx.rom.depthOffset, auxScalar);
-    if (zkr != ZKR_SUCCESS)
-    {
-        zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.depthOffset)");
-        return zkr;
-    }
-    depth = auxScalar.get_ui();
-    singleInfo.depth = depth + 1;
+    singleInfo.depth = depth;
 
     // get previous opcode processed
     uint64_t numOpcodes = call_trace.size();
     Opcode * prevTraceCall = (numOpcodes > 0) ? &call_trace.at(numOpcodes - 1) : NULL;
     Opcode * prevTraceExecution = (numOpcodes > 0) ? &execution_trace.at(numOpcodes - 1) : NULL;
-
-    // If is an ether transfer, don't add stop opcode to trace
-    if ( (singleInfo.opcode == opcodeInfo[0x00/*STOP*/].pName) &&
-        ( (prevTraceCall == NULL) || (opIncContext.find(prevTraceCall->opcode) != opIncContext.end()) ) )
-    {
-        zkr = getVarFromCtx(ctx, false, ctx.rom.bytecodeLengthOffset, auxScalar);
-        if (zkr != ZKR_SUCCESS)
-        {
-            zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.bytecodeLengthOffset)");
-            return zkr;
-        }
-        if (auxScalar == 0)
-        {
-#ifdef LOG_TIME_STATISTICS
-            tmsop.add("getCodeName", TimeDiff(top));
-            tms.add("onOpcode", TimeDiff(t));
-#endif
-            return ZKR_SUCCESS;
-        }
-    }
 
 #ifdef LOG_TIME_STATISTICS
     tmsop.add("getCodeName", TimeDiff(top));
@@ -1232,7 +1231,6 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 #endif
     if (ctx.proverRequest.input.traceConfig.bGenerateTrace)
     {
-        singleInfo.depth = depth + 1;
         singleInfo.pc = fr.toU64(ctx.pols.PC[*ctx.pStep]);
         singleInfo.gas = fr.toU64(ctx.pols.GAS[*ctx.pStep]);
         singleInfo.gas_cost = opcodeInfo[codeId].gas;
@@ -1297,7 +1295,7 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
             return zkr;
         }
         
-        singleInfo.contract.gas = txGAS[depth].forwarded;
+        singleInfo.contract.gas = txGAS[depth].remaining;
 
         singleInfo.contract.type = "CALL";
     }
@@ -1550,10 +1548,9 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     if (execution_trace.size() > 0)
     {
         prevStep = &execution_trace[execution_trace.size() - 1];
-        if (opIncContext.find(prevStep->opcode) != opIncContext.end())
+        if ((opIncContext.find(prevStep->opcode) != opIncContext.end()) && (prevStep->depth != singleInfo.depth))
         {
             // Create new call data entry
-            uint64_t CTX = fr.toU64(ctx.pols.CTX[*ctx.pStep]);
             ContextData contextData;
             contextData.type = prevStep->opcode;
             callData[CTX] = contextData;
@@ -1576,7 +1573,6 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     }
 
     // Set contract params depending on current call type
-    uint64_t CTX = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
     singleInfo.contract.type = callData[CTX].type;
     if (singleInfo.contract.type == "DELEGATECALL")
     {
@@ -1587,14 +1583,13 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
             zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.storageAddrOffset)");
             return zkr;
         }
-        singleInfo.contract.caller = NormalizeTo0xNFormat(auxScalar.get_str(16), 40);
+        singleInfo.contract.caller = NormalizeToNFormat(auxScalar.get_str(16), 40);
     }
         
     // If is an ether transfer, don't add stop opcode to trace
     bool bAddOpcode = true;
     if ( (singleInfo.op == 0x00 /*STOP*/) &&
-         ( (prevStep==NULL) || (opIncContext.find(prevStep->opcode) != opIncContext.end()) ) &&
-         ( (prevStep==NULL) || (opCall.find(prevStep->opcode) != opCall.end()) || ( (opCreate.find(prevStep->opcode) != opCreate.end()) && (prevStep->gas_cost <= 32000))))
+         ( (prevStep==NULL) || ( (opCreate.find(prevStep->opcode) != opCreate.end()) && (prevStep->gas_cost <= 32000))))
     {
         zkr = getVarFromCtx(ctx, false, ctx.rom.bytecodeLengthOffset, auxScalar);
         if (zkr != ZKR_SUCCESS)

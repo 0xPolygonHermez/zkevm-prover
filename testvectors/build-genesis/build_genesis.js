@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const ethers = require("ethers");
 const {
-    MemDB, ZkEVMDB, processorUtils, smtUtils, getPoseidon,
+    Database, ZkEVMDB, processorUtils, smtUtils, getPoseidon,
 } = require('@0xpolygonhermez/zkevm-commonjs');
 
 // paths files
@@ -44,7 +44,8 @@ async function main(){
     const customRawTx = processorUtils.rawTxToCustomRawTx(rawTxEthers);
 
     // create a zkEVMDB and build a batch
-    const db = new MemDB(F);
+    const db = new Database(F);
+
     const zkEVMDB = await ZkEVMDB.newZkEVM(
         db,
         poseidon,
@@ -53,7 +54,8 @@ async function main(){
         generateData.genesis,
         null,
         null,
-        generateData.chainID
+        generateData.chainID,
+        generateData.forkID
     );
 
     // start batch

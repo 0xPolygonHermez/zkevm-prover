@@ -38,9 +38,11 @@ public:
     bool runSHA256Test;
     bool runBlakeTest;
     bool runECRecoverTest;
+    bool runUnitTest;
     
     bool executeInParallel;
     bool useMainExecGenerated;
+    bool useMainExecC;
 
     bool saveRequestToFile; // Saves the grpc service request, in text format
     bool saveInputToFile; // Saves the grpc input data, in json format
@@ -137,6 +139,7 @@ public:
     bool dbGetTree;
     bool dbReadOnly;
     uint64_t dbReadRetryDelay;
+    bool dbMultiWriteSinglePosition;
     uint64_t cleanerPollingPeriod;
     uint64_t requestsPersistence;
     uint64_t maxExecutorThreads;

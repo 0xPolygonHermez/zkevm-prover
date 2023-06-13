@@ -4,6 +4,8 @@
 #include "proof.hpp"
 #include "zklog.hpp"
 #include <grpcpp/grpcpp.h>
+#include "exit_process.hpp"
+#include "utils.hpp"
 
 using grpc::Server;
 using grpc::ServerBuilder;
@@ -12,6 +14,12 @@ using grpc::Status;
 
 ::grpc::Status ExecutorServiceImpl::ProcessBatch(::grpc::ServerContext* context, const ::executor::v1::ProcessBatchRequest* request, ::executor::v1::ProcessBatchResponse* response)
 {
+    // If the process is exising, do not start new activities
+    if (bExitingProcess)
+    {
+        return Status::CANCELLED;
+    }
+
     TimerStart(EXECUTOR_PROCESS_BATCH);
 
 #ifdef LOG_SERVICE
@@ -36,6 +44,9 @@ using grpc::Status;
     {
         string2file(request->DebugString(), proverRequest.filePrefix + "executor_request.txt");
     }
+
+    // Get external request ID
+    proverRequest.externalRequestId = request->external_request_id();
 
     // PUBLIC INPUTS
 
@@ -252,7 +263,7 @@ using grpc::Status;
         PrependZerosNoCopy(key, 64);
 
         // Get value
-        if (!stringIsHex(itp->second))
+        if (!stringIsHex(Remove0xIfPresent(itp->second)))
         {
             zklog.error("ExecutorServiceImpl::ProcessBatch() got contracts value not hex, value=" + itp->second);
             TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
@@ -277,7 +288,8 @@ using grpc::Status;
     proverRequest.input.bNoCounters = request->no_counters();
 
 #ifdef LOG_SERVICE_EXECUTOR_INPUT
-    zklog.info("ExecutorServiceImpl::ProcessBatch() got sequencerAddr=" + proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16) +
+    zklog.info("ExecutorServiceImpl::ProcessBatch() got externalRequestId=" + proverRequest.externalRequestId +
+        " sequencerAddr=" + proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16) +
         " batchL2DataLength=" + to_string(request->batch_l2_data().size()) +
         " batchL2Data=0x" + ba2string(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(0, 10)) + "..." + ba2string(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(zkmax(int64_t(0),int64_t(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size())-10), proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size())) +
         " oldStateRoot=" + proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) +
@@ -295,6 +307,8 @@ using grpc::Status;
 #endif
 
     prover.processBatch(&proverRequest);
+
+    //TimerStart(EXECUTOR_PROCESS_BATCH_BUILD_RESPONSE);
 
     if (proverRequest.result != ZKR_SUCCESS)
     {
@@ -334,6 +348,9 @@ using grpc::Status;
     vector<Response> &responses(proverRequest.pFullTracer->get_responses());
     for (uint64_t tx=0; tx<responses.size(); tx++)
     {
+        // Remember the previous memory sent for each TX, and send only increments
+        string previousMemory;
+
         executor::v1::ProcessTransactionResponse * pProcessTransactionResponse = response->add_responses();
         pProcessTransactionResponse->set_tx_hash(string2ba(responses[tx].tx_hash));
         pProcessTransactionResponse->set_rlp_tx(responses[tx].rlp_tx);
@@ -345,6 +362,8 @@ using grpc::Status;
         pProcessTransactionResponse->set_error(string2error(responses[tx].error)); // Any error encountered during the execution
         pProcessTransactionResponse->set_create_address(responses[tx].create_address); // New SC Address in case of SC creation
         pProcessTransactionResponse->set_state_root(string2ba(responses[tx].state_root));
+        pProcessTransactionResponse->set_effective_percentage(responses[tx].effective_percentage);
+        pProcessTransactionResponse->set_effective_gas_price(responses[tx].effective_gas_price);
         for (uint64_t log=0; log<responses[tx].logs.size(); log++)
         {
             executor::v1::Log * pLog = pProcessTransactionResponse->add_logs();
@@ -377,10 +396,22 @@ using grpc::Status;
                 }
                 pExecutionTraceStep->set_remaining_gas(responses[tx].execution_trace[step].gas);
                 pExecutionTraceStep->set_gas_cost(responses[tx].execution_trace[step].gas_cost); // Gas cost of the operation
-                pExecutionTraceStep->set_memory(string2ba(responses[tx].execution_trace[step].memory)); // Content of memory
-                pExecutionTraceStep->set_memory_size(responses[tx].execution_trace[step].memory_size);
+                string baMemory = string2ba(responses[tx].execution_trace[step].memory);
+                if (baMemory != previousMemory)
+                {
+                    uint64_t offset;
+                    uint64_t length;
+                    getStringIncrement(previousMemory, baMemory, offset, length);
+                    if (length > 0)
+                    {
+                        pExecutionTraceStep->set_memory_offset(offset);
+                        pExecutionTraceStep->set_memory(baMemory.substr(offset, length)); // Content of memory, incremental
+                    }
+                    previousMemory = baMemory;
+                }
+                pExecutionTraceStep->set_memory_size(baMemory.size());
                 for (uint64_t stack=0; stack<responses[tx].execution_trace[step].stack.size() ; stack++)
-                    pExecutionTraceStep->add_stack(PrependZeros(responses[tx].execution_trace[step].stack[stack].get_str(16), 64)); // Content of the stack
+                    pExecutionTraceStep->add_stack(responses[tx].execution_trace[step].stack[stack].get_str(16)); // Content of the stack
                 string dataConcatenated;
                 for (uint64_t data=0; data<responses[tx].execution_trace[step].return_data.size(); data++)
                     dataConcatenated += responses[tx].execution_trace[step].return_data[data];
@@ -421,8 +452,21 @@ using grpc::Status;
                 pTransactionStep->set_gas_refund(responses[tx].call_trace.steps[step].gas_refund); // Gas refunded during the operation
                 pTransactionStep->set_op(responses[tx].call_trace.steps[step].op); // Opcode
                 for (uint64_t stack=0; stack<responses[tx].call_trace.steps[step].stack.size() ; stack++)
-                    pTransactionStep->add_stack(PrependZeros(responses[tx].call_trace.steps[step].stack[stack].get_str(16), 64)); // Content of the stack
-                pTransactionStep->set_memory(string2ba(responses[tx].call_trace.steps[step].memory)); // Content of the memory
+                    pTransactionStep->add_stack(responses[tx].call_trace.steps[step].stack[stack].get_str(16)); // Content of the stack
+                string baMemory = string2ba(responses[tx].call_trace.steps[step].memory);
+                if (baMemory != previousMemory)
+                {
+                    uint64_t offset;
+                    uint64_t length;
+                    getStringIncrement(previousMemory, baMemory, offset, length);
+                    if (length > 0)
+                    {
+                        pTransactionStep->set_memory_offset(offset);
+                        pTransactionStep->set_memory(baMemory.substr(offset, length)); // Content of memory, incremental
+                    }
+                    previousMemory = baMemory;
+                }
+                pTransactionStep->set_memory_size(baMemory.size());
                 string dataConcatenated;
                 for (uint64_t data=0; data<responses[tx].call_trace.steps[step].return_data.size(); data++)
                     dataConcatenated += responses[tx].call_trace.steps[step].return_data[data];
@@ -433,6 +477,7 @@ using grpc::Status;
                 pContract->set_value(Add0xIfMissing(responses[tx].call_trace.steps[step].contract.value.get_str(16)));
                 pContract->set_data(string2ba(responses[tx].call_trace.steps[step].contract.data));
                 pContract->set_gas(responses[tx].call_trace.steps[step].contract.gas);
+                pContract->set_type(responses[tx].call_trace.steps[step].contract.type);
                 pTransactionStep->set_error(string2error(responses[tx].call_trace.steps[step].error));
             }
             pProcessTransactionResponse->set_allocated_call_trace(pCallTrace);
@@ -456,6 +501,7 @@ using grpc::Status;
             " counters.binary=" + to_string(proverRequest.counters.binary) +
             " flush_id=" + to_string(proverRequest.flushId) +
             " last_sent_flush_id=" + to_string(proverRequest.lastSentFlushId) +
+            " externalRequestId=" + proverRequest.externalRequestId +
             " nTxs=" + to_string(responses.size());
          if (config.logExecutorServerTxs)
          {
@@ -478,11 +524,16 @@ using grpc::Status;
         zklog.info("ExecutorServiceImpl::ProcessBatch() returns:\n" + response->DebugString());
     }
 
+    //TimerStopAndLog(EXECUTOR_PROCESS_BATCH_BUILD_RESPONSE);
+    
     TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
 
     if (config.saveResponseToFile)
     {
+        //TimerStart(EXECUTOR_PROCESS_BATCH_SAVING_RESPONSE_TO_FILE);
+        //zklog.info("ExecutorServiceImpl::ProcessBatch() returns response of size=" + to_string(response->ByteSizeLong()));
         string2file(response->DebugString(), proverRequest.filePrefix + "executor_response.txt");
+        //TimerStopAndLog(EXECUTOR_PROCESS_BATCH_SAVING_RESPONSE_TO_FILE);
     }
 
     if (config.opcodeTracer)
@@ -580,6 +631,12 @@ using grpc::Status;
 
 ::grpc::Status ExecutorServiceImpl::GetFlushStatus (::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::executor::v1::GetFlushStatusResponse* response)
 {
+    // If the process is exising, do not start new activities
+    if (bExitingProcess)
+    {
+        return Status::CANCELLED;
+    }
+
     uint64_t storedFlushId;
     uint64_t storingFlushId;
     uint64_t lastFlushId;
@@ -607,6 +664,12 @@ using grpc::Status;
 
 ::grpc::Status ExecutorServiceImpl::ProcessBatchStream (::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::executor::v1::ProcessBatchResponse, ::executor::v1::ProcessBatchRequest>* stream)
 {
+    // If the process is exising, do not start new activities
+    if (bExitingProcess)
+    {
+        return Status::CANCELLED;
+    }
+
     TimerStart(PROCESS_BATCH_STREAM);
 
 #ifdef LOG_SERVICE

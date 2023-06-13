@@ -246,7 +246,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
     return r;
 }
 
-zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent, const bool update)
+zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent)
 {
     // Check that it has  been initialized before
     if (!bInitialized)
@@ -281,7 +281,7 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
             valueString += PrependZeros(fr.toString(value[i], 16), 16);
         }
 
-        r = writeRemote(false, key, valueString, update);
+        r = writeRemote(false, key, valueString);
     }
     else
     {
@@ -292,7 +292,7 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
     if ((r == ZKR_SUCCESS) && dbMTCache.enabled())
     {
         // Create in memory cache
-        dbMTCache.add(key, value, update);
+        dbMTCache.add(key, value, false);
     }
 #endif
 
@@ -305,7 +305,7 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
         s += " value=";
         for (uint64_t i = 0; i < value.size(); i++)
             s += fr.toString(value[i], 16) + ":";
-        s += " persistent=" + to_string(persistent) + " update=" + to_string(update);
+        s += " persistent=" + to_string(persistent);
         zklog.info(s);
     }
 #endif
@@ -524,7 +524,8 @@ zkresult Database::readRemote(bool bProgram, const string &key, string &value)
     catch (const std::exception &e)
     {
         zklog.error("Database::readRemote() table=" + tableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
-        exitProcess();
+        disposeConnection(pDatabaseConnection);
+        return ZKR_DB_ERROR;
     }
     
     // Dispose the read db conneciton
@@ -629,6 +630,7 @@ zkresult Database::readTreeRemote(const string &key, const vector<uint64_t> *key
     catch (const std::exception &e)
     {
         zklog.warning("Database::readTreeRemote() exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
+        disposeConnection(pDatabaseConnection);
         return ZKR_DB_ERROR;
     }
     
@@ -644,37 +646,30 @@ zkresult Database::readTreeRemote(const string &key, const vector<uint64_t> *key
     
 }
 
-zkresult Database::writeRemote(bool bProgram, const string &key, const string &value, const bool update)
+zkresult Database::writeRemote(bool bProgram, const string &key, const string &value)
 {
     zkresult result = ZKR_SUCCESS;
-
-    const string &tableName = (bProgram ? config.dbProgramTableName : config.dbNodesTableName);
     
     if (config.dbMultiWrite)
     {
-        if (update && (key==dbStateRootKey))
+        multiWrite.Lock();
+
+        if (bProgram)
         {
-            multiWrite.Lock();
-            multiWrite.data[multiWrite.pendingToFlushDataIndex].nodesStateRoot = value;
-            multiWrite.Unlock();
+            multiWrite.data[multiWrite.pendingToFlushDataIndex].programIntray[key] = value;
         }
         else
         {
-            multiWrite.Lock();
-            vector<FlushData> &multiWriteFlushData =
-                bProgram ? (update ? multiWrite.data[multiWrite.pendingToFlushDataIndex].programUpdate : multiWrite.data[multiWrite.pendingToFlushDataIndex].program) :
-                           (update ? multiWrite.data[multiWrite.pendingToFlushDataIndex].nodesUpdate   : multiWrite.data[multiWrite.pendingToFlushDataIndex].nodes);
-            FlushData auxFlushData;
-            auxFlushData.key = key;
-            auxFlushData.value = value;
-            multiWriteFlushData.push_back(auxFlushData);
-            multiWrite.Unlock();       
+            multiWrite.data[multiWrite.pendingToFlushDataIndex].nodesIntray[key] = value;
         }
+
+        multiWrite.Unlock();
     }
     else
     {
-        string query = "INSERT INTO " + tableName + " ( hash, data ) VALUES ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' ) " +
-                    (update ? "ON CONFLICT (hash) DO UPDATE SET data = EXCLUDED.data;" : "ON CONFLICT (hash) DO NOTHING;");
+        const string &tableName = (bProgram ? config.dbProgramTableName : config.dbNodesTableName);
+
+        string query = "INSERT INTO " + tableName + " ( hash, data ) VALUES ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' ) ON CONFLICT (hash) DO NOTHING;";
             
         DatabaseConnection * pDatabaseConnection = getConnection();
 
@@ -688,7 +683,6 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
                 pqxx::work w(*(pDatabaseConnection->pConnection));
                 pqxx::result res = w.exec(query);
                 w.commit();
-                disposeConnection(pDatabaseConnection);
             }
 #ifdef DATABASE_COMMIT
             else
@@ -702,11 +696,109 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
         catch (const std::exception &e)
         {
             zklog.error("Database::writeRemote() table=" + tableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
+            disposeConnection(pDatabaseConnection);
             result = ZKR_DB_ERROR;
         }
+
+        disposeConnection(pDatabaseConnection);
     }
 
     return result;
+}
+
+zkresult Database::saveStateRoot(const Goldilocks::Element (&stateRoot)[4])
+{
+    // Check that it has  been initialized before
+    if (!bInitialized)
+    {
+        zklog.error("Database::saveStateRoot() called uninitialized");
+        exitProcess();
+    }
+
+    // Copy the state root in the first 4 elements of dbValue
+    vector<Goldilocks::Element> value;
+    for (uint64_t i=0; i<4; i++) value.push_back(stateRoot[i]);
+    for (uint64_t i=0; i<8; i++) value.push_back(fr.zero());
+    
+    // Prepare the value string
+    string valueString = "";
+    string aux;
+    for (uint64_t i = 0; i < value.size(); i++)
+    {
+        valueString += PrependZeros(fr.toString(value[i], 16), 16);
+    }
+
+    zkresult r = ZKR_SUCCESS;
+
+    if ( useRemoteDB )
+    {
+        if (config.dbMultiWrite)
+        {
+            multiWrite.Lock();
+            multiWrite.data[multiWrite.pendingToFlushDataIndex].nodesStateRoot = valueString;
+            multiWrite.Unlock();    
+        }
+        else
+        {
+            // Prepare the query
+            string query = "INSERT INTO " + config.dbNodesTableName + " ( hash, data ) VALUES ( E\'\\\\x" + dbStateRootKey + "\', E\'\\\\x" + valueString + "\' ) " +
+                        "ON CONFLICT (hash) DO UPDATE SET data = EXCLUDED.data;";
+                
+            DatabaseConnection * pDatabaseConnection = getConnection();
+
+            try
+            {        
+
+    #ifdef DATABASE_COMMIT
+                if (autoCommit)
+    #endif
+                {
+                    pqxx::work w(*(pDatabaseConnection->pConnection));
+                    pqxx::result res = w.exec(query);
+                    w.commit();
+                }
+    #ifdef DATABASE_COMMIT
+                else
+                {
+                    if (transaction == NULL)
+                        transaction = new pqxx::work{*pConnectionWrite};
+                    pqxx::result res = transaction->exec(query);
+                }
+    #endif
+            }
+            catch (const std::exception &e)
+            {
+                zklog.error("Database::saveStateRoot() table=" + config.dbNodesTableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
+                disposeConnection(pDatabaseConnection);
+                r = ZKR_DB_ERROR;
+            }
+
+            disposeConnection(pDatabaseConnection);
+        }
+    }
+
+#ifdef DATABASE_USE_CACHE
+    if ((r == ZKR_SUCCESS) && dbMTCache.enabled())
+    {
+        // Create in memory cache
+        dbMTCache.add(dbStateRootKey, value, true);
+    }
+#endif
+
+#ifdef LOG_DB_WRITE
+    {
+        string s = "Database::saveStateRoot()";
+        if (r != ZKR_SUCCESS)
+            s += " ERROR=" + zkresult2string(r);
+        s += " key=" + dbStateRootKey;
+        s += " value=";
+        for (uint64_t i = 0; i < value.size(); i++)
+            s += fr.toString(value[i], 16) + ":";);
+        zklog.info(s);
+    }
+#endif
+
+    return r;
 }
 
 zkresult Database::writeGetTreeFunction(void)
@@ -863,7 +955,6 @@ zkresult Database::writeGetTreeFunction(void)
             pqxx::work w(*(pDatabaseConnection->pConnection));
             pqxx::result res = w.exec(query);
             w.commit();
-            disposeConnection(pDatabaseConnection);
         }
 #ifdef DATABASE_COMMIT
         else
@@ -877,15 +968,18 @@ zkresult Database::writeGetTreeFunction(void)
     catch (const std::exception &e)
     {
         zklog.error("Database::writeGetTreeFunction() exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
+        disposeConnection(pDatabaseConnection);
         result = ZKR_DB_ERROR;
     }
+    
+    disposeConnection(pDatabaseConnection);
 
     zklog.info("Database::writeGetTreeFunction() returns " + zkresult2string(result));
         
     return result;
 }
 
-zkresult Database::setProgram (const string &_key, const vector<uint8_t> &data, const bool persistent, const bool update)
+zkresult Database::setProgram (const string &_key, const vector<uint8_t> &data, const bool persistent)
 {
     // Check that it has been initialized before
     if (!bInitialized)
@@ -912,7 +1006,7 @@ zkresult Database::setProgram (const string &_key, const vector<uint8_t> &data, 
             sData += byte2string(data[i]);
         }
 
-        r = writeRemote(true, key, sData, update);
+        r = writeRemote(true, key, sData);
     }
     else
     {
@@ -923,7 +1017,7 @@ zkresult Database::setProgram (const string &_key, const vector<uint8_t> &data, 
     if ((r == ZKR_SUCCESS) && (dbProgramCache.enabled()))
     {
         // Create in memory cache
-        dbProgramCache.add(key, data, update);
+        dbProgramCache.add(key, data, false);
     }
 #endif
 
@@ -937,7 +1031,7 @@ zkresult Database::setProgram (const string &_key, const vector<uint8_t> &data, 
         for (uint64_t i = 0; (i < (data.size()) && (i < 100)); i++)
             s += byte2string(data[i]);
         if (data.size() > 100) s += "...";
-        s += " persistent=" + to_string(persistent) + " update=" + to_string(update);
+        s += " persistent=" + to_string(persistent);
         zklog.info(s);
     }
 #endif
@@ -945,7 +1039,7 @@ zkresult Database::setProgram (const string &_key, const vector<uint8_t> &data, 
     return r;
 }
 
-zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, DatabaseMap *dbReadLog, const bool update)
+zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, DatabaseMap *dbReadLog)
 {
     // Check that it has been initialized before
     if (!bInitialized)
@@ -965,7 +1059,7 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
 
 #ifdef DATABASE_USE_CACHE
     // If the key is found in local database (cached) simply return it
-    if (dbProgramCache.enabled() && !update && dbProgramCache.find(key, data))
+    if (dbProgramCache.enabled() && dbProgramCache.find(key, data))
     {
         // Add to the read log
         if (dbReadLog != NULL) dbReadLog->add(key, data, true, TimeDiff(t));
@@ -986,7 +1080,7 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
 
 #ifdef DATABASE_USE_CACHE
             // Store it locally to avoid any future remote access for this key
-            if (dbProgramCache.enabled()) dbProgramCache.add(key, data, update);
+            if (dbProgramCache.enabled()) dbProgramCache.add(key, data, false);
 #endif
 
             // Add to the read log
@@ -1016,7 +1110,7 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
 
     return r;
 }
-
+    
 zkresult Database::flush(uint64_t &thisBatch, uint64_t &lastSentBatch)
 {
     if (!config.dbMultiWrite)
@@ -1038,6 +1132,9 @@ zkresult Database::flush(uint64_t &thisBatch, uint64_t &lastSentBatch)
 
     multiWrite.Lock();
 
+    // Accept all intray data
+    multiWrite.data[multiWrite.pendingToFlushDataIndex].acceptIntray();
+
     // Increase the last processed batch id and return the last sent batch id
     multiWrite.lastFlushId++;
     thisBatch = multiWrite.lastFlushId;
@@ -1051,6 +1148,22 @@ zkresult Database::flush(uint64_t &thisBatch, uint64_t &lastSentBatch)
     //zklog.info("Database::flush() thisBatch=" + to_string(thisBatch) + " lastSentBatch=" + to_string(lastSentBatch));
 
     return ZKR_SUCCESS;
+}
+
+void Database::semiFlush (void)
+{
+    if (!config.dbMultiWrite)
+    {
+        return;
+    }
+
+    multiWrite.Lock();
+
+    multiWrite.data[multiWrite.pendingToFlushDataIndex].acceptIntray();
+
+    multiWrite.Unlock();
+
+    //zklog.info("Database::semiFlush() called");
 }
 
 zkresult Database::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram)
@@ -1073,7 +1186,8 @@ zkresult Database::sendData (void)
     
     // Time calculation variables
     struct timeval t;
-    uint64_t timeDiff;
+    uint64_t timeDiff = 0;
+    uint64_t fields = 0;
 
     // Select proper data instance
     MultiWriteData &data = multiWrite.data[multiWrite.storingDataIndex];
@@ -1098,67 +1212,37 @@ zkresult Database::sendData (void)
     try
     {
         if (config.dbMetrics) gettimeofday(&t, NULL);
-
+        unordered_map<string, string>::const_iterator it;
         if (data.query.size() == 0)
         {
             // If there are nodes add the corresponding query
             if (data.nodes.size() > 0)
             {
                 data.query += "INSERT INTO " + config.dbNodesTableName + " ( hash, data ) VALUES ";
-                for (uint64_t i=0; i<data.nodes.size(); i++)
+                for (it = data.nodes.begin(); it != data.nodes.end(); it++)
                 {
-                    if (i != 0)
+                    if (it != data.nodes.begin())
                     {
                         data.query += ", ";
                     }
-                    data.query += "( E\'\\\\x" + data.nodes[i].key + "\', E\'\\\\x" + data.nodes[i].value + "\' ) ";
+                    data.query += "( E\'\\\\x" + it->first + "\', E\'\\\\x" + it->second + "\' ) ";
                 }
                 data.query += " ON CONFLICT (hash) DO NOTHING;";
-            }
-
-            // If there is a nodes update query, add it
-            if (data.nodesUpdate.size() > 0)
-            {
-                data.query += "INSERT INTO " + config.dbNodesTableName + " ( hash, data ) VALUES ";
-                for (uint64_t i=0; i<data.nodesUpdate.size(); i++)
-                {
-                    if (i != 0)
-                    {
-                        data.query += ", ";
-                    }
-                    data.query += "( E\'\\\\x" + data.nodesUpdate[i].key + "\', E\'\\\\x" + data.nodesUpdate[i].value + "\' ) ";
-                }
-                data.query += " ON CONFLICT (hash) DO UPDATE SET data = EXCLUDED.data;";
             }
 
             // If there are program add the corresponding query
             if (data.program.size() > 0)
             {
                 data.query += "INSERT INTO " + config.dbProgramTableName + " ( hash, data ) VALUES ";
-                for (uint64_t i=0; i<data.program.size(); i++)
+                for (it = data.program.begin(); it != data.program.end(); it++)
                 {
-                    if (i != 0)
+                    if (it != data.program.begin())
                     {
                         data.query += ", ";
                     }
-                    data.query += "( E\'\\\\x" + data.program[i].key + "\', E\'\\\\x" + data.program[i].value + "\' ) ";
+                    data.query += "( E\'\\\\x" + it->first + "\', E\'\\\\x" + it->second + "\' ) ";
                 }
                 data.query += " ON CONFLICT (hash) DO NOTHING;";
-            }
-
-            // If there is a program update query, add it
-            if (data.programUpdate.size() > 0)
-            {
-                data.query += "INSERT INTO " + config.dbProgramTableName + " ( hash, data ) VALUES ";
-                for (uint64_t i=0; i<data.programUpdate.size(); i++)
-                {
-                    if (i != 0)
-                    {
-                        data.query += ", ";
-                    }
-                    data.query += "( E\'\\\\x" + data.programUpdate[i].key + "\', E\'\\\\x" + data.programUpdate[i].value + "\' ) ";
-                }
-                data.query += " ON CONFLICT (hash) DO UPDATE SET data = EXCLUDED.data;";
             }
 
             // If there is a nodes state root query, add it
@@ -1175,6 +1259,16 @@ zkresult Database::sendData (void)
         }
         else
         {
+            if (config.dbMetrics)
+            {
+                fields = data.nodes.size() + data.program.size() + (data.nodesStateRoot.size() > 0 ? 1 : 0);
+                zklog.info("Database::sendData() dbMetrics multiWrite nodes=" + to_string(data.nodes.size()) +
+                    " program=" + to_string(data.program.size()) +
+                    " nodesStateRootCounter=" + to_string(data.nodesStateRoot.size() > 0 ? 1 : 0) +
+                    " query.size=" + to_string(data.query.size()) + "B=" + to_string(data.query.size()/zkmax(fields,1)) + "B/field" +
+                    " total=" + to_string(fields) + "fields");
+            }
+
             // Start a transaction
             pqxx::work w(*(pDatabaseConnection->pConnection));
 
@@ -1188,14 +1282,7 @@ zkresult Database::sendData (void)
             if (config.dbMetrics)
             {
                 timeDiff = TimeDiff(t);
-                uint64_t fields = data.nodes.size() + data.nodesUpdate.size() + data.program.size() + data.programUpdate.size() + (data.nodesStateRoot.size() > 0 ? 1 : 0);
-                zklog.info("Database::sendData() dbMetrics multiWrite nodes=" + to_string(data.nodes.size()) +
-                    " nodesUpdate=" + to_string(data.nodesUpdate.size()) +
-                    " program=" + to_string(data.program.size()) +
-                    " programUpdate=" + to_string(data.programUpdate.size()) +
-                    " nodesStateRootCounter=" + to_string(data.nodesStateRoot.size() > 0 ? 1 : 0) +
-                    " query.size=" + to_string(data.query.size()) + "B=" + to_string(data.query.size()/zkmax(fields,1)) + "B/field" +
-                    " total=" + to_string(fields) + "fields=" + to_string(timeDiff) + "us=" + to_string(timeDiff/zkmax(fields,1)) + "us/field");
+                zklog.info("Database::sendData() dbMetrics multiWrite total=" + to_string(fields) + "fields=" + to_string(timeDiff) + "us=" + to_string(timeDiff/zkmax(fields,1)) + "us/field");
             }
 
             // Update status
@@ -1211,7 +1298,8 @@ zkresult Database::sendData (void)
     catch (const std::exception &e)
     {
         zklog.error("Database::sendData() execute query exception: " + string(e.what()));
-        //zklog.error("Database::sendData() query=" + query);
+        zklog.error("Database::sendData() query.size=" + to_string(data.query.size()) + " query(<1024)=" + data.query.substr(0, 1024));
+        disposeConnection(pDatabaseConnection);
         zkr = ZKR_DB_ERROR;
     }
 
@@ -1222,7 +1310,7 @@ zkresult Database::sendData (void)
 }
 
 // Get flush data, written to database by dbSenderThread; it blocks
-zkresult Database::getFlushData(uint64_t flushId, uint64_t &storedFlushId, vector<FlushData> (&nodes), vector<FlushData> (&nodesUpdate), vector<FlushData> (&program), vector<FlushData> (&programUpdate), string &nodesStateRoot)
+zkresult Database::getFlushData(uint64_t flushId, uint64_t &storedFlushId, unordered_map<string, string> (&nodes), unordered_map<string, string> (&program), string &nodesStateRoot)
 {
     //zklog.info("--> getFlushData()");
 
@@ -1247,9 +1335,7 @@ zkresult Database::getFlushData(uint64_t flushId, uint64_t &storedFlushId, vecto
         " storingDataIndex=" + to_string(multiWrite.storingDataIndex) +
         " synchronizingDataIndex=" + to_string(multiWrite.synchronizingDataIndex) +
         " nodes=" + to_string(data.nodes.size()) +
-        " nodesUpdate=" + to_string(data.nodesUpdate.size()) +
         " program=" + to_string(data.program.size()) +
-        " programUpdate=" + to_string(data.programUpdate.size()) +
         " nodesStateRoot=" + data.nodesStateRoot);
 
     if (data.nodes.size() > 0)
@@ -1257,19 +1343,9 @@ zkresult Database::getFlushData(uint64_t flushId, uint64_t &storedFlushId, vecto
         nodes = data.nodes;
     }
 
-    if (data.nodesUpdate.size() > 0)
-    {
-        nodesUpdate = data.nodesUpdate;
-    }
-
     if (data.program.size() > 0)
     {
         program = data.program;
-    }
-
-    if (data.programUpdate.size() > 0)
-    {
-        programUpdate = data.programUpdate;
     }
 
     if (data.nodesStateRoot.size() > 0)
@@ -1280,6 +1356,31 @@ zkresult Database::getFlushData(uint64_t flushId, uint64_t &storedFlushId, vecto
     multiWrite.Unlock();
 
     //zklog.info("<-- getFlushData()");
+
+    return ZKR_SUCCESS;
+}
+
+zkresult Database::deleteNodes(const vector<string> (&nodesToDelete))
+{
+    string key;
+
+    multiWrite.Lock();
+
+    // Keep a reference to the nodes data
+    unordered_map<string, string> &multiWriteFlushData = multiWrite.data[multiWrite.pendingToFlushDataIndex].nodesIntray;
+
+    // For all entries in nodesToDelete
+    for (uint64_t i=0; i<nodesToDelete.size(); i++)
+    {
+        // Normalize key format
+        key = NormalizeToNFormat(nodesToDelete[i], 64);
+        key = stringToLower(key);
+
+        // Delete it; they key can be present (just written) or not (read from database) and both cases are valid
+        multiWriteFlushData.erase(key);
+    }
+
+    multiWrite.Unlock();
 
     return ZKR_SUCCESS;
 }
@@ -1414,6 +1515,8 @@ void *dbSenderThread (void *arg)
         // Wait for the sending semaphore to be released, if there is no more data to send
         sem_wait(&pDatabase->senderSem);
 
+        multiWrite.Lock();
+
         bool bDataEmpty = false;
 
         // If sending data is not empty (it failed before) then try to send it again
@@ -1524,14 +1627,12 @@ void *dbCacheSynchThread (void *arg)
 
         while (true)
         {
-            vector<FlushData> nodes;
-            vector<FlushData> nodesUpdate;
-            vector<FlushData> program;
-            vector<FlushData> programUpdate;
+            unordered_map<string, string> nodes;
+            unordered_map<string, string> program;
             string nodesStateRoot;
             
             // Call getFlushData() remotelly
-            zkresult zkr = pHashDBRemote->getFlushData(storedFlushId, storedFlushId, nodes, nodesUpdate, program, programUpdate, nodesStateRoot);
+            zkresult zkr = pHashDBRemote->getFlushData(storedFlushId, storedFlushId, nodes, program, nodesStateRoot);
             if (zkr != ZKR_SUCCESS)
             {
                 zklog.error("dbCacheSynchThread() failed calling pHashDB->getFlushData() result=" + zkresult2string(zkr));
@@ -1539,56 +1640,35 @@ void *dbCacheSynchThread (void *arg)
                 break;
             }
 
-            if (nodes.size()==0 && nodesUpdate.size()==0 && program.size()==0 && programUpdate.size()==0 && nodesStateRoot.size()==0)
+            if (nodes.size()==0 && program.size()==0 && nodesStateRoot.size()==0)
             {
                 zklog.info("dbCacheSynchThread() called getFlushData() remotely and got no data: storedFlushId=" + to_string(storedFlushId));
                 continue;
             }
 
             TimerStart(DATABASE_CACHE_SYNCH);
-            zklog.info("dbCacheSynchThread() called getFlushData() remotely and got: storedFlushId=" + to_string(storedFlushId) + " nodes=" + to_string(nodes.size()) + " nodesUpdate=" + to_string(nodesUpdate.size()) + " program=" + to_string(program.size()) + " programUpdate=" + to_string(programUpdate.size()) + " nodesStateRoot=" + nodesStateRoot);
+            zklog.info("dbCacheSynchThread() called getFlushData() remotely and got: storedFlushId=" + to_string(storedFlushId) + " nodes=" + to_string(nodes.size()) + " program=" + to_string(program.size()) + " nodesStateRoot=" + nodesStateRoot);
 
             // Save nodes to cache
+            unordered_map<string, string>::const_iterator it;
             if (nodes.size() > 0)
             {
-                for (uint64_t i=0; i<nodes.size(); i++)
+                for (it = nodes.begin(); it != nodes.end(); it++)
                 {
                     vector<Goldilocks::Element> value;
-                    string2fea(pDatabase->fr, nodes[i].value, value);
-                    pDatabase->write(nodes[i].key, value, false, false);
-                }
-            }
-
-            // Save nodesUpdate to cache
-            if (nodesUpdate.size() > 0)
-            {
-                for (uint64_t i=0; i<nodesUpdate.size(); i++)
-                {
-                    vector<Goldilocks::Element> value;
-                    string2fea(pDatabase->fr, nodesUpdate[i].value, value);
-                    pDatabase->write(nodesUpdate[i].key, value, false, true);
+                    string2fea(pDatabase->fr, it->second, value);
+                    pDatabase->write(it->first, value, false);
                 }
             }
 
             // Save program to cache
             if (program.size() > 0)
             {
-                for (uint64_t i=0; i<program.size(); i++)
+                for (it = program.begin(); it != program.end(); it++)
                 {
                     vector<uint8_t> value;
-                    string2ba(program[i].value, value);
-                    pDatabase->setProgram(program[i].key, value, false, false);
-                }
-            }
-
-            // Save programUpdate to cache
-            if (programUpdate.size() > 0)
-            {
-                for (uint64_t i=0; i<programUpdate.size(); i++)
-                {
-                    vector<uint8_t> value;
-                    string2ba(programUpdate[i].value, value);
-                    pDatabase->setProgram(programUpdate[i].key, value, false, true);
+                    string2ba(it->second, value);
+                    pDatabase->setProgram(it->first, value, false);
                 }
             }
 
@@ -1596,8 +1676,19 @@ void *dbCacheSynchThread (void *arg)
             {
                 vector<Goldilocks::Element> value;
                 string2fea(pDatabase->fr, nodesStateRoot, value);
-                pDatabase->write(pDatabase->dbStateRootKey, value, false, true);
-
+                if (value.size() < 4)
+                {
+                    zklog.error("dbCacheSynchThread() got nodeStateRoot too short=" + nodesStateRoot);
+                }
+                else
+                {
+                    Goldilocks::Element stateRoot[4];
+                    for (uint64_t i=0; i<4; i++)
+                    {
+                        stateRoot[i] = value[i];
+                    }
+                    pDatabase->saveStateRoot(stateRoot);
+                }
             }
 
             TimerStopAndLog(DATABASE_CACHE_SYNCH);

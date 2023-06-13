@@ -36,10 +36,9 @@ void MerkleTreeGL::genMerkleProof(Goldilocks::Element *proof, uint64_t idx, uint
 
 void MerkleTreeGL::merkelize()
 {
-    uint64_t batch_size = std::max((uint64_t)8, (width + 3) / 4);
 #ifdef __AVX512__
-    PoseidonGoldilocks::merkletree_batch_avx512(nodes, source, width, height, batch_size);
+    PoseidonGoldilocks::merkletree_avx512(nodes, source, width, height);
 #else
-    PoseidonGoldilocks::merkletree_batch_avx(nodes, source, width, height, batch_size);
+    PoseidonGoldilocks::merkletree_avx(nodes, source, width, height);
 #endif
 }

@@ -16,6 +16,12 @@ using grpc::Status;
 
 ::grpc::Status HashDBServiceImpl::Set(::grpc::ServerContext* context, const ::hashdb::v1::SetRequest* request, ::hashdb::v1::SetResponse* response)
 {
+    // If the process is exising, do not start new activities
+    if (bExitingProcess)
+    {
+        return Status::CANCELLED;
+    }
+
     SmtSetResult r;
     try
     {
@@ -146,6 +152,12 @@ using grpc::Status;
 
 ::grpc::Status HashDBServiceImpl::Get(::grpc::ServerContext* context, const ::hashdb::v1::GetRequest* request, ::hashdb::v1::GetResponse* response)
 {
+    // If the process is exising, do not start new activities
+    if (bExitingProcess)
+    {
+        return Status::CANCELLED;
+    }
+
     SmtGetResult r;
     try
     {
@@ -248,6 +260,12 @@ using grpc::Status;
 
 ::grpc::Status HashDBServiceImpl::SetProgram(::grpc::ServerContext* context, const ::hashdb::v1::SetProgramRequest* request, ::hashdb::v1::SetProgramResponse* response)
 {
+    // If the process is exising, do not start new activities
+    if (bExitingProcess)
+    {
+        return Status::CANCELLED;
+    }
+
     try
     {
         // Get key
@@ -293,6 +311,12 @@ using grpc::Status;
 
 ::grpc::Status HashDBServiceImpl::GetProgram(::grpc::ServerContext* context, const ::hashdb::v1::GetProgramRequest* request, ::hashdb::v1::GetProgramResponse* response)
 {
+    // If the process is exising, do not start new activities
+    if (bExitingProcess)
+    {
+        return Status::CANCELLED;
+    }
+
     try
     {
         // Get key
@@ -340,6 +364,12 @@ using grpc::Status;
 
 ::grpc::Status HashDBServiceImpl::LoadDB(::grpc::ServerContext* context, const ::hashdb::v1::LoadDBRequest* request, ::google::protobuf::Empty* response)
 {
+    // If the process is exising, do not start new activities
+    if (bExitingProcess)
+    {
+        return Status::CANCELLED;
+    }
+
 #ifdef LOG_HASHDB_SERVICE
     zklog.info("HashDBServiceImpl::LoadDB called.");
 #endif
@@ -365,6 +395,12 @@ using grpc::Status;
 
 ::grpc::Status HashDBServiceImpl::LoadProgramDB(::grpc::ServerContext* context, const ::hashdb::v1::LoadProgramDBRequest* request, ::google::protobuf::Empty* response)
 {
+    // If the process is exising, do not start new activities
+    if (bExitingProcess)
+    {
+        return Status::CANCELLED;
+    }
+
 #ifdef LOG_HASHDB_SERVICE
     zklog.info("HashDBServiceImpl::LoadProgramDB called.");
 #endif
@@ -390,6 +426,12 @@ using grpc::Status;
 
 ::grpc::Status HashDBServiceImpl::Flush(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::FlushResponse* response)
 {
+    // If the process is exising, do not start new activities
+    if (bExitingProcess)
+    {
+        return Status::CANCELLED;
+    }
+
 #ifdef LOG_HASHDB_SERVICE
     zklog.info("HashDBServiceImpl::Flush called.");
 #endif
@@ -422,6 +464,12 @@ using grpc::Status;
 
 ::grpc::Status HashDBServiceImpl::GetFlushStatus (::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetFlushStatusResponse* response)
 {
+    // If the process is exising, do not start new activities
+    if (bExitingProcess)
+    {
+        return Status::CANCELLED;
+    }
+
 #ifdef LOG_HASHDB_SERVICE
     zklog.info("HashDBServiceImpl::GetFlushStatus called.");
 #endif
@@ -463,6 +511,11 @@ using grpc::Status;
 
 ::grpc::Status HashDBServiceImpl::GetFlushData (::grpc::ServerContext* context, const ::hashdb::v1::GetFlushDataRequest* request, ::hashdb::v1::GetFlushDataResponse* response)
 {
+    // If the process is exising, do not start new activities
+    if (bExitingProcess)
+    {
+        return Status::CANCELLED;
+    }
 
 #ifdef LOG_HASHDB_SERVICE
     zklog.info("HashDBServiceImpl::GetFlushData called.");
@@ -472,68 +525,27 @@ using grpc::Status;
     {
         // Declare local variables to store the result
         uint64_t storedFlushId;
-        vector<FlushData> nodes;
-        vector<FlushData> nodesUpdate;
-        vector<FlushData> program;
-        vector<FlushData> programUpdate;
+        unordered_map<string, string> nodes;
+        unordered_map<string, string> program;
         string nodesStateRoot;
 
         // Call the local getFlushData method
-        pHashDB->getFlushData(request->flush_id(), storedFlushId, nodes, nodesUpdate, program, programUpdate, nodesStateRoot);
+        pHashDB->getFlushData(request->flush_id(), storedFlushId, nodes, program, nodesStateRoot);
 
         // Set the last sent flush ID
         response->set_stored_flush_id(storedFlushId);
 
         // Set the nodes
-        for (uint64_t i=0; i<nodes.size(); i++)
+        unordered_map<string, string>::const_iterator it;
+        for (it = nodes.begin(); it != nodes.end(); it++)
         {
-            hashdb::v1::FlushData * pFlushData = response->add_nodes();
-            if (pFlushData == NULL)
-            {
-                zklog.error("HashDBServiceImpl::GetFlushData() failed calling response->add_nodes()");
-                exitProcess();
-            }
-            pFlushData->set_key(nodes[i].key);
-            pFlushData->set_value(nodes[i].value);
-        }
-
-        // Set the nodes update
-        for (uint64_t i=0; i<nodesUpdate.size(); i++)
-        {
-            hashdb::v1::FlushData * pFlushData = response->add_nodes_update();
-            if (pFlushData == NULL)
-            {
-                zklog.error("HashDBServiceImpl::GetFlushData() failed calling response->add_nodes_update()");
-                exitProcess();
-            }
-            pFlushData->set_key(nodes[i].key);
-            pFlushData->set_value(nodesUpdate[i].value);
+            (*response->mutable_nodes())[it->first] = it->second;
         }
 
         // Set the program
-        for (uint64_t i=0; i<program.size(); i++)
+        for (it = program.begin(); it != program.end(); it++)
         {
-            hashdb::v1::FlushData * pFlushData = response->add_program();
-            if (pFlushData == NULL)
-            {
-                zklog.error("HashDBServiceImpl::GetFlushData() failed calling response->add_program()");
-                exitProcess();
-            }
-            pFlushData->set_key(nodes[i].key);
-            pFlushData->set_value(program[i].value);
-        }
-
-        // Set the program update
-        for (uint64_t i=0; i<programUpdate.size(); i++)
-        {
-            hashdb::v1::FlushData * pFlushData = response->add_program_update();
-            if (pFlushData == NULL)
-            {
-                zklog.error("HashDBServiceImpl::GetFlushData() failed calling response->add_program_update()");
-                exitProcess();
-            }
-            pFlushData->set_key(nodes[i].key);
-            pFlushData->set_value(programUpdate[i].value);
+            (*response->mutable_program())[it->first] = it->second;
         }
 
         // Set the nodes state root

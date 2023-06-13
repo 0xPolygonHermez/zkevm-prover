@@ -2,7 +2,6 @@
 #include "definitions.hpp"
 #include "config.hpp"
 #include "main_sm/fork_5/main/eval_command.hpp"
-#include "main_sm/fork_5/main/opcode_address.hpp"
 #include "scalar.hpp"
 #include "utils.hpp"
 #include "zkassert.hpp"
@@ -43,7 +42,6 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             case f_comp_gt:                         return eval_comp_gt(ctx, cmd, cr);
             case f_comp_eq:                         return eval_comp_eq(ctx, cmd, cr);
             case f_loadScalar:                      return eval_loadScalar(ctx, cmd, cr);
-            case f_getGlobalExitRootManagerAddr:    return eval_getGlobalExitRootManagerAddr(ctx, cmd, cr);
             case f_log:                             return eval_log(ctx, cmd, cr);
             case f_exp:                             return eval_exp(ctx, cmd, cr);
             case f_storeLog:                        return eval_storeLog(ctx, cmd, cr);
@@ -1730,26 +1728,6 @@ void eval_loadScalar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     }
 }
 
-
-mpz_class globalExitRootManagerAddr(ADDRESS_GLOBAL_EXIT_ROOT_MANAGER_L2);
-
-// Will be replaced by hardcoding this address directly in the ROM once the CONST register can be 256 bits
-void eval_getGlobalExitRootManagerAddr (Context &ctx, const RomCommand &cmd, CommandResult &cr)
-{
-#ifdef CHECK_EVAL_COMMAND_PARAMETERS
-    // Check parameters list size
-    if (cmd.params.size() != 0)
-    {
-        zklog.error("eval_getGlobalExitRootManagerAddr() invalid number of parameters function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
-        exitProcess();
-    }
-#endif
-
-    // Return ctx.proverRequest.input.publicInputs.oldLocalExitRoot as a field element array
-    cr.type = crt_fea;
-    scalar2fea(ctx.fr, globalExitRootManagerAddr, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
-}
-
 /*************/
 /* Store log */
 /*************/
@@ -2410,6 +2388,23 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
         ctx.fec.fromMpz(y2, cr.scalar.get_mpz_t());
     }
 
+    cr.zkResult = AddPointEc(ctx, dbl, x1, y1, x2, y2, x3, y3);
+}
+
+zkresult AddPointEc (Context &ctx, bool dbl, const RawFec::Element &x1, const RawFec::Element &y1, const RawFec::Element &x2, const RawFec::Element &y2, RawFec::Element &x3, RawFec::Element &y3)
+{
+    // Check if we have just computed this operation
+    if ( (ctx.lastECAdd.bDouble == dbl) &&
+         ctx.fec.eq(ctx.lastECAdd.x1, x1) &&
+         ctx.fec.eq(ctx.lastECAdd.y1, y1) &&
+         ( dbl || (ctx.fec.eq(ctx.lastECAdd.x2, x2) && ctx.fec.eq(ctx.lastECAdd.y2, y2) ) ) )
+    {
+        //zklog.info("eval_AddPointEc() reading from cache");
+        x3 = ctx.lastECAdd.x3;
+        y3 = ctx.lastECAdd.y3;
+        return ZKR_SUCCESS;
+    }
+
     RawFec::Element aux1, aux2, s;
 
     if (dbl)
@@ -2419,16 +2414,24 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
         ctx.fec.fromUI(aux2, 3);
         ctx.fec.mul(aux1, aux1, aux2);
         ctx.fec.add(aux2, y1, y1);
+        if (ctx.fec.isZero(aux2))
+        {
+            zklog.error("AddPointEc() got denominator=0 1");
+            return ZKR_SM_MAIN_ARITH;
+        }
         ctx.fec.div(s, aux1, aux2);
-        // TODO: y1 == 0 => division by zero ==> how manage?
     }
     else
     {
         // s = (y2-y1)/(x2-x1)
         ctx.fec.sub(aux1, y2, y1);
         ctx.fec.sub(aux2, x2, x1);
+        if (ctx.fec.isZero(aux2))
+        {
+            zklog.error("AddPointEc() got denominator=0 2");
+            return ZKR_SM_MAIN_ARITH;
+        }
         ctx.fec.div(s, aux1, aux2);
-        // TODO: deltaX == 0 => division by zero ==> how manage?
     }
 
     // x3 = s*s - (x1+x2)
@@ -2440,6 +2443,17 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
     ctx.fec.sub(aux1, x1, x3);;
     ctx.fec.mul(aux1, aux1, s);
     ctx.fec.sub(y3, aux1, y1);
+
+    // Save parameters and result for later reuse
+    ctx.lastECAdd.bDouble = dbl;
+    ctx.lastECAdd.x1 = x1;
+    ctx.lastECAdd.y1 = y1;
+    ctx.lastECAdd.x2 = x2;
+    ctx.lastECAdd.y2 = y2;
+    ctx.lastECAdd.x3 = x3;
+    ctx.lastECAdd.y3 = y3;
+
+    return ZKR_SUCCESS;
 }
 
 zkresult eval_addReadWriteAddress (Context &ctx, const mpz_class value)

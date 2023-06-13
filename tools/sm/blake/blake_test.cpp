@@ -123,10 +123,12 @@ vector<vector<string>> blakeTestVectors = {
     {"0x30313233343536373839303132333435363738393031323334353637383930313233343536373839303132333435363738393031323334353637383930313233343536373839303132333435363738393031323334353637383930313233343536373839", "0xcd7d6f7e704dc181e217c07f97c61b4240483e30fc5509024f71eb236058e575"},
     };
 
-void Blake2b256_Test (Goldilocks &fr, Config &config)
+uint64_t Blake2b256_Test (Goldilocks &fr, const Config &config)
 {
     //PerformanceTest();
     //PerformanceTestFE();
+
+    uint64_t numberOfErrors = 0;
 
     TimerStart(BLAKE_2B_256_TEST);
     for (uint64_t i=0; i<blakeTestVectors.size(); i++)
@@ -139,10 +141,13 @@ void Blake2b256_Test (Goldilocks &fr, Config &config)
         
         if (hash != expectedHash)
         {
-            cerr << "Error: BlakeTest() 1 failed, hash of " << input << " is " << hash << " instead of " << expectedHash << endl;
-            exitProcess();
+            zklog.error("BlakeTest() 1 failed, hash of " + input + " is " + hash + " instead of " + expectedHash);
+            numberOfErrors++;
         }
-        cout << "Hash of \"" << input << "\" is " << hash << endl;
+        else
+        {
+            zklog.info("Hash of \"" + input + "\" is " + hash);
+        }
     }
     TimerStopAndLog(BLAKE_2B_256_TEST);
 
@@ -157,13 +162,16 @@ void Blake2b256_Test (Goldilocks &fr, Config &config)
         
         if (hash != expectedHash)
         {
-            cerr << "Error: BlakeTest() 2 failed, hash of " << input << " is " << hash << " instead of " << expectedHash << endl;
-            exitProcess();
+            zklog.error("BlakeTest() 2 failed, hash of " + input + " is " + hash + " instead of " + expectedHash);
+            numberOfErrors++;
         }
-        cout << "Hash of \"" << input << "\" is " << hash << endl;
+        else
+        {
+            zklog.info("Hash of \"" + input + "\" is " + hash);
+        }
     }
     TimerStopAndLog(BLAKE_2B_256_GATE_TEST);
 
-    cout << "BlakeTest() done" << endl;
-
+    zklog.info("BlakeTest() done, errors=" + to_string(numberOfErrors));
+    return numberOfErrors;
 }

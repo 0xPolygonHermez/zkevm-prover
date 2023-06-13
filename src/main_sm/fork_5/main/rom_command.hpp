@@ -38,7 +38,6 @@ typedef enum : int {
     f_comp_gt,
     f_comp_eq,
     f_loadScalar,
-    f_getGlobalExitRootManagerAddr,
     f_log,
     f_exp,
     f_storeLog,

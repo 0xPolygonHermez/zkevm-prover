@@ -5,6 +5,6 @@
 #include "goldilocks_base_field.hpp"
 #include "poseidon_goldilocks.hpp"
 
-void StorageSMTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, Config &config);
+uint64_t StorageSMTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config);
 
 #endif

@@ -31,6 +31,7 @@ message ProcessBatchRequest {
     map<string, string> db = 13;
     map<string, string> contracts_bytecode = 14; // For debug/testing purpposes only. Don't fill this on production
     TraceConfig trace_config = 15;
+    string external_request_id = 16;
 }
 
 message ProcessBatchResponse {
@@ -146,14 +147,19 @@ message TransactionStep {
     uint32 op = 7;
     // Content of the stack
     repeated string stack = 8;
-    // Content of the memory
+     // Content of memory, starting at memory_offset, showing only changes vs. previous step
     bytes memory = 9;
+    // Total size of memory
+    uint32 memory_size = 10;
+    // Offset of memory changes
+    uint32 memory_offset = 11;
+    // Content of the stack
     // Return Data
-    bytes return_data = 10;
+    bytes return_data = 12;
     // Contract information
-    Contract contract = 11;
+    Contract contract = 13;
     // Error
-    RomError error = 12;
+    RomError error = 14;
 }
 
 message Contract {
@@ -162,6 +168,8 @@ message Contract {
     string value = 3;
     bytes data = 4;
     uint64 gas = 5;
+    // Define type of internal call: CREATE, CREATE2, CALL, CALLCODE, DELEGATECALL, STATICCALL
+    string type = 6;
 }
 
 message ProcessTransactionResponse {
@@ -192,6 +200,9 @@ message ProcessTransactionResponse {
     // Trace
     repeated ExecutionTraceStep execution_trace = 13;
     CallTrace call_trace = 14;
+    // Efective Gas Price
+    string effective_gas_price = 15;
+    uint32 effective_percentage = 16;
 }
 
 message Log {
@@ -222,22 +233,24 @@ message ExecutionTraceStep {
     uint64 remaining_gas = 3;
     // Gas cost of the operation
     uint64 gas_cost = 4;
-    // Content of memory
+    // Content of memory, starting at memory_offset, showing only changes vs. previous step
     bytes memory = 5;
-    // Size of memory
+    // Total size of memory
     uint32 memory_size = 6;
+    // Offset of memory changes
+    uint32 memory_offset = 7;
     // Content of the stack
-    repeated string stack = 7;
+    repeated string stack = 8;
     // Returned data
-    bytes return_data = 8;
+    bytes return_data = 9;
     // Content of the storage
-    map<string, string> storage = 9;
+    map<string, string> storage = 10;
     // Call depth
-    uint32 depth = 10;
+    uint32 depth = 11;
     // Gas refund
-    uint64 gas_refund = 11;
+    uint64 gas_refund = 12;
     // Error
-    RomError error = 12;
+    RomError error = 13;
 }
 
 enum RomError {
@@ -324,5 +337,4 @@ enum ExecutorError {
     EXECUTOR_ERROR_FEA2SCALAR = 10;
     // EXECUTOR_ERROR_TOS32 indicates that there is a TOS32 error in the execution
     EXECUTOR_ERROR_TOS32 = 11;
-
 }

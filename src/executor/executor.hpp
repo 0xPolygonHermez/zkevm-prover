@@ -9,6 +9,7 @@
 #include "main_sm/fork_3/main/main_executor.hpp"
 #include "main_sm/fork_4/main/main_executor.hpp"
 #include "main_sm/fork_5/main/main_executor.hpp"
+#include "main_sm/fork_5/main_exec_c/main_exec_c.hpp"
 #include "sm/storage/storage_executor.hpp"
 #include "sm/memory/memory_executor.hpp"
 #include "sm/binary/binary_executor.hpp"
@@ -34,6 +35,7 @@ public:
     fork_3::MainExecutor mainExecutor_fork_3;
     fork_4::MainExecutor mainExecutor_fork_4;
     fork_5::MainExecutor mainExecutor_fork_5;
+    fork_5::MainExecutorC mainExecutorC_fork_5;
     StorageExecutor storageExecutor;
     MemoryExecutor memoryExecutor;
     BinaryExecutor binaryExecutor;
@@ -55,6 +57,7 @@ public:
         mainExecutor_fork_3(fr, poseidon, config),
         mainExecutor_fork_4(fr, poseidon, config),
         mainExecutor_fork_5(fr, poseidon, config),
+        mainExecutorC_fork_5(mainExecutor_fork_5),
         storageExecutor(fr, poseidon, config),
         memoryExecutor(fr, config),
         binaryExecutor(fr, config),

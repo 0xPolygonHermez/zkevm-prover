@@ -17,8 +17,6 @@
 #include "main_sm/fork_5/main/rom.hpp"
 #include "main_sm/fork_5/main/context.hpp"
 #include "main_sm/fork_5/main/eval_command.hpp"
-#include "main_sm/fork_5/main/eth_opcodes.hpp"
-#include "main_sm/fork_5/main/opcode_address.hpp"
 #include "utils/time_metric.hpp"
 #include "input.hpp"
 #include "scalar.hpp"
@@ -85,18 +83,6 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     finalizeExecutionLabel  = rom.getLabel(string("finalizeExecution"));
     checkAndSaveFromLabel   = rom.getLabel(string("checkAndSaveFrom"));
     ecrecoverStoreArgsLabel = rom.getLabel(string("ecrecover_store_args"));
-
-    // Initialize the Ethereum opcode list: opcode=array position, operation=position content
-    ethOpcodeInit();
-
-    // Use the rom labels object to map every opcode to a ROM address
-    if (!romJson.contains("labels") ||
-        !romJson["labels"].is_object() )
-    {
-        zklog.error("Error: MainExecutor::MainExecutor() ROM file does not contain a labels object at root level");
-        exitProcess();
-    }
-    opcodeAddressInit(romJson["labels"]);
 
     TimerStopAndLog(ROM_LOAD);
 };
@@ -183,6 +169,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     uint64_t nexti; // Next step, as it is used internally, set to 0 in fast mode to reuse the same evaluation all the time
     ctx.N = N; // Numer of evaluations
     ctx.pStep = &i; // ctx.pStep is used inside evaluateCommand() to find the current value of the registers, e.g. pols(A0)[ctx.step]
+    ctx.pEvaluation = &step;
     ctx.pZKPC = &zkPC; // Pointer to the zkPC
     Goldilocks::Element currentRCX = fr.zero();
 
@@ -2798,13 +2785,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
 
                 // Convert to RawFec::Element
-                RawFec::Element fecX1, fecY1, fecX2, fecY2, fecX3;
+                RawFec::Element fecX1, fecY1, fecX2, fecY2;
                 fec.fromMpz(fecX1, x1.get_mpz_t());
                 fec.fromMpz(fecY1, y1.get_mpz_t());
                 fec.fromMpz(fecX2, x2.get_mpz_t());
                 fec.fromMpz(fecY2, y2.get_mpz_t());
-                fec.fromMpz(fecX3, x3.get_mpz_t());
 
+                // Check if this is a double operation
                 bool dbl = false;
                 if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==1 && rom.line[zkPC].arithEq2==0)
                 {
@@ -2820,67 +2807,21 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     exitProcess();
                 }
 
-                RawFec::Element s;
-                if (dbl)
+                // Add the elliptic curve points
+                RawFec::Element fecX3, fecY3;
+                zkresult r = AddPointEc(ctx, dbl, fecX1, fecY1, dbl?fecX1:fecX2, dbl?fecY1:fecY2, fecX3, fecY3);
+                if (r != ZKR_SUCCESS)
                 {
-                    // s = 3*(x1^2)/(2*y1)
-                    RawFec::Element numerator, denominator;
-
-                    // numerator = 3*(x1^2)
-                    fec.mul(numerator, fecX1, fecX1);
-                    fec.fromUI(denominator, 3);
-                    fec.mul(numerator, numerator, denominator);
-
-                    // denominator = 2*y1 = y1+y1
-                    fec.add(denominator, fecY1, fecY1);
-                    if (fec.isZero(denominator))
-                    {
-                        proverRequest.result = ZKR_SM_MAIN_ARITH;
-                        logError(ctx, "Denominator=0 in arith operation 1");
-                        HashDBClientFactory::freeHashDBClient(pHashDB);
-                        return;
-                    }
-
-                    // s = numerator/denominator
-                    fec.div(s, numerator, denominator);
-                }
-                else
-                {
-                    // s = (y2-y1)/(x2-x1)
-                    RawFec::Element numerator, denominator;
-
-                    // numerator = y2-y1
-                    fec.sub(numerator, fecY2, fecY1);
-
-                    // denominator = x2-x1
-                    fec.sub(denominator, fecX2, fecX1);
-                    if (fec.isZero(denominator))
-                    {
-                        proverRequest.result = ZKR_SM_MAIN_ARITH;
-                        logError(ctx, "Denominator=0 in arith operation 2");
-                        HashDBClientFactory::freeHashDBClient(pHashDB);
-                        return;
-                    }
-
-                    // s = numerator/denominator
-                    fec.div(s, numerator, denominator);
+                    proverRequest.result = ZKR_SM_MAIN_ARITH;
+                    logError(ctx, "Failed calling AddPointEc() in arith operation");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
                 }
 
-                RawFec::Element fecS, minuend, subtrahend;
+                // Convert to scalar
                 mpz_class _x3, _y3;
-
-                // Calculate _x3 = s*s - x1 +(x1 if dbl, x2 otherwise)
-                fec.mul(minuend, s, s);
-                fec.add(subtrahend, fecX1, dbl ? fecX1 : fecX2 );
-                fec.sub(fecS, minuend, subtrahend);
-                fec.toMpz(_x3.get_mpz_t(), fecS);
-
-                // Calculate _y3 = s*(x1-x3) - y1
-                fec.sub(subtrahend, fecX1, fecX3);
-                fec.mul(minuend, s, subtrahend);
-                fec.fromMpz(subtrahend, y1.get_mpz_t());
-                fec.sub(fecS, minuend, subtrahend);
-                fec.toMpz(_y3.get_mpz_t(), fecS);
+                fec.toMpz(_x3.get_mpz_t(), fecX3);
+                fec.toMpz(_y3.get_mpz_t(), fecY3);
 
                 // Compare
                 bool x3eq = (x3 == _x3);
@@ -3736,9 +3677,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if ((rom.line[zkPC].arithEq0==1 || rom.line[zkPC].arithEq1==1 || rom.line[zkPC].arithEq2==1) && !proverRequest.input.bNoCounters) {
             pols.cntArith[nexti] = fr.inc(pols.cntArith[i]);
 #ifdef CHECK_MAX_CNT_ASAP
-            if (fr.toU64(pols.cntArith[nexti]) > rom.MAX_CNT_ARITH_LIMIT)
+            if (fr.toU64(pols.cntArith[nexti]) > rom.constants.MAX_CNT_ARITH_LIMIT)
             {
-                logError(ctx, "Main Executor found pols.cntArith[nexti]=" + fr.toString(pols.cntArith[nexti], 10) + " > MAX_CNT_ARITH_LIMIT_LIMIT=" + to_string(rom.MAX_CNT_ARITH_LIMIT));
+                logError(ctx, "Main Executor found pols.cntArith[nexti]=" + fr.toString(pols.cntArith[nexti], 10) + " > MAX_CNT_ARITH_LIMIT_LIMIT=" + to_string(rom.constants.MAX_CNT_ARITH_LIMIT));
                 if (bProcessBatch)
                 {
                     proverRequest.result = ZKR_SM_MAIN_OOC_ARITH;
@@ -3756,9 +3697,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if ((rom.line[zkPC].bin || rom.line[zkPC].sWR || rom.line[zkPC].hashPDigest ) && !proverRequest.input.bNoCounters) {
             pols.cntBinary[nexti] = fr.inc(pols.cntBinary[i]);
 #ifdef CHECK_MAX_CNT_ASAP
-            if (fr.toU64(pols.cntBinary[nexti]) > rom.MAX_CNT_BINARY_LIMIT)
+            if (fr.toU64(pols.cntBinary[nexti]) > rom.constants.MAX_CNT_BINARY_LIMIT)
             {
-                logError(ctx, "Main Executor found pols.cntBinary[nexti]=" + fr.toString(pols.cntBinary[nexti], 10) + " > MAX_CNT_BINARY_LIMIT=" + to_string(rom.MAX_CNT_BINARY_LIMIT));
+                logError(ctx, "Main Executor found pols.cntBinary[nexti]=" + fr.toString(pols.cntBinary[nexti], 10) + " > MAX_CNT_BINARY_LIMIT=" + to_string(rom.constants.MAX_CNT_BINARY_LIMIT));
                 if (bProcessBatch)
                 {
                     proverRequest.result = ZKR_SM_MAIN_OOC_BINARY;
@@ -3776,9 +3717,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if ( (rom.line[zkPC].memAlignRD || rom.line[zkPC].memAlignWR || rom.line[zkPC].memAlignWR8) && !proverRequest.input.bNoCounters) {
             pols.cntMemAlign[nexti] = fr.inc(pols.cntMemAlign[i]);
 #ifdef CHECK_MAX_CNT_ASAP
-            if (fr.toU64(pols.cntMemAlign[nexti]) > rom.MAX_CNT_MEM_ALIGN_LIMIT)
+            if (fr.toU64(pols.cntMemAlign[nexti]) > rom.constants.MAX_CNT_MEM_ALIGN_LIMIT)
             {
-                logError(ctx, "Main Executor found pols.cntMemAlign[nexti]=" + fr.toString(pols.cntMemAlign[nexti], 10) + " > MAX_CNT_MEM_ALIGN_LIMIT=" + to_string(rom.MAX_CNT_MEM_ALIGN_LIMIT));
+                logError(ctx, "Main Executor found pols.cntMemAlign[nexti]=" + fr.toString(pols.cntMemAlign[nexti], 10) + " > MAX_CNT_MEM_ALIGN_LIMIT=" + to_string(rom.constants.MAX_CNT_MEM_ALIGN_LIMIT));
                 if (bProcessBatch)
                 {
                     proverRequest.result = ZKR_SM_MAIN_OOC_MEM_ALIGN;
@@ -4043,9 +3984,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         {
             pols.cntKeccakF[nexti] = fr.add(pols.cntKeccakF[i], fr.fromU64(incCounter));
 #ifdef CHECK_MAX_CNT_ASAP
-            if (fr.toU64(pols.cntKeccakF[nexti]) > rom.MAX_CNT_KECCAK_F_LIMIT)
+            if (fr.toU64(pols.cntKeccakF[nexti]) > rom.constants.MAX_CNT_KECCAK_F_LIMIT)
             {
-                logError(ctx, "Main Executor found pols.cntKeccakF[nexti]=" + fr.toString(pols.cntKeccakF[nexti], 10) + " > MAX_CNT_KECCAK_F_LIMIT=" + to_string(rom.MAX_CNT_KECCAK_F_LIMIT));
+                logError(ctx, "Main Executor found pols.cntKeccakF[nexti]=" + fr.toString(pols.cntKeccakF[nexti], 10) + " > MAX_CNT_KECCAK_F_LIMIT=" + to_string(rom.constants.MAX_CNT_KECCAK_F_LIMIT));
                 if (bProcessBatch)
                 {
                     proverRequest.result = ZKR_SM_MAIN_OOC_KECCAK_F;
@@ -4065,9 +4006,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         {
             pols.cntPaddingPG[nexti] = fr.add(pols.cntPaddingPG[i], fr.fromU64(incCounter));
 #ifdef CHECK_MAX_CNT_ASAP
-            if (fr.toU64(pols.cntPaddingPG[nexti]) > rom.MAX_CNT_PADDING_PG_LIMIT)
+            if (fr.toU64(pols.cntPaddingPG[nexti]) > rom.constants.MAX_CNT_PADDING_PG_LIMIT)
             {
-                logError(ctx, "Main Executor found pols.cntPaddingPG[nexti]=" + fr.toString(pols.cntPaddingPG[nexti], 10) + " > MAX_CNT_PADDING_PG_LIMIT=" + to_string(rom.MAX_CNT_PADDING_PG_LIMIT));
+                logError(ctx, "Main Executor found pols.cntPaddingPG[nexti]=" + fr.toString(pols.cntPaddingPG[nexti], 10) + " > MAX_CNT_PADDING_PG_LIMIT=" + to_string(rom.constants.MAX_CNT_PADDING_PG_LIMIT));
                 if (bProcessBatch)
                 {
                     proverRequest.result = ZKR_SM_MAIN_OOC_PADDING_PG;
@@ -4087,9 +4028,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         {
             pols.cntPoseidonG[nexti] = fr.add(pols.cntPoseidonG[i], fr.fromU64(incCounter));
 #ifdef CHECK_MAX_CNT_ASAP
-            if (fr.toU64(pols.cntPoseidonG[nexti]) > rom.MAX_CNT_POSEIDON_G_LIMIT)
+            if (fr.toU64(pols.cntPoseidonG[nexti]) > rom.constants.MAX_CNT_POSEIDON_G_LIMIT)
             {
-                logError(ctx, "Main Executor found pols.cntPoseidonG[nexti]=" + fr.toString(pols.cntPoseidonG[nexti], 10) + " > MAX_CNT_POSEIDON_G_LIMIT=" + to_string(rom.MAX_CNT_POSEIDON_G_LIMIT));
+                logError(ctx, "Main Executor found pols.cntPoseidonG[nexti]=" + fr.toString(pols.cntPoseidonG[nexti], 10) + " > MAX_CNT_POSEIDON_G_LIMIT=" + to_string(rom.constants.MAX_CNT_POSEIDON_G_LIMIT));
                 if (bProcessBatch)
                 {
                     proverRequest.result = ZKR_SM_MAIN_OOC_POSEIDON_G;
@@ -4198,10 +4139,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             exitProcess();
         }
     }
-    if (ctx.lastStep > rom.MAX_CNT_STEPS_LIMIT)
+    if (ctx.lastStep > rom.constants.MAX_CNT_STEPS_LIMIT)
     {
         proverRequest.result = ZKR_SM_MAIN_OUT_OF_STEPS;
-        logError(ctx, "Found ctx.lastStep=" + to_string(ctx.lastStep) + " > MAX_CNT_STEPS_LIMIT=" + to_string(rom.MAX_CNT_STEPS_LIMIT));
+        logError(ctx, "Found ctx.lastStep=" + to_string(ctx.lastStep) + " > MAX_CNT_STEPS_LIMIT=" + to_string(rom.constants.MAX_CNT_STEPS_LIMIT));
         if (!bProcessBatch)
         {
             exitProcess();
@@ -4209,55 +4150,55 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     }
 
 #ifdef CHECK_MAX_CNT_AT_THE_END
-    if (fr.toU64(pols.cntArith[0]) > rom.MAX_CNT_ARITH_LIMIT)
+    if (fr.toU64(pols.cntArith[0]) > rom.constants.MAX_CNT_ARITH_LIMIT)
     {
         proverRequest.result = ZKR_SM_MAIN_OOC_ARITH;
-        logError(ctx, "Found pols.cntArith[0]=" + to_string(fr.toU64(pols.cntArith[0])) + " > MAX_CNT_ARITH_LIMIT=" + to_string(rom.MAX_CNT_ARITH_LIMIT));
+        logError(ctx, "Found pols.cntArith[0]=" + to_string(fr.toU64(pols.cntArith[0])) + " > MAX_CNT_ARITH_LIMIT=" + to_string(rom.constants.MAX_CNT_ARITH_LIMIT));
         if (!bProcessBatch)
         {
             exitProcess();
         }
     }
-    if (fr.toU64(pols.cntBinary[0]) > rom.MAX_CNT_BINARY_LIMIT)
+    if (fr.toU64(pols.cntBinary[0]) > rom.constants.MAX_CNT_BINARY_LIMIT)
     {
         proverRequest.result = ZKR_SM_MAIN_OOC_BINARY;
-        logError(ctx, "Found pols.cntBinary[0]=" + to_string(fr.toU64(pols.cntBinary[0])) + " > MAX_CNT_BINARY_LIMIT=" + to_string(rom.MAX_CNT_BINARY_LIMIT));
+        logError(ctx, "Found pols.cntBinary[0]=" + to_string(fr.toU64(pols.cntBinary[0])) + " > MAX_CNT_BINARY_LIMIT=" + to_string(rom.constants.MAX_CNT_BINARY_LIMIT));
         if (!bProcessBatch)
         {
             exitProcess();
         }
     }
-    if (fr.toU64(pols.cntMemAlign[0]) > rom.MAX_CNT_MEM_ALIGN_LIMIT)
+    if (fr.toU64(pols.cntMemAlign[0]) > rom.constants.MAX_CNT_MEM_ALIGN_LIMIT)
     {
         proverRequest.result = ZKR_SM_MAIN_OOC_MEM_ALIGN;
-        logError(ctx, "Found pols.cntMemAlign[0]=" + to_string(fr.toU64(pols.cntMemAlign[0])) + " > MAX_CNT_MEM_ALIGN_LIMIT=" + to_string(rom.MAX_CNT_MEM_ALIGN_LIMIT));
+        logError(ctx, "Found pols.cntMemAlign[0]=" + to_string(fr.toU64(pols.cntMemAlign[0])) + " > MAX_CNT_MEM_ALIGN_LIMIT=" + to_string(rom.constants.MAX_CNT_MEM_ALIGN_LIMIT));
         if (!bProcessBatch)
         {
             exitProcess();
         }
     }
-    if (fr.toU64(pols.cntKeccakF[0]) > rom.MAX_CNT_KECCAK_F_LIMIT)
+    if (fr.toU64(pols.cntKeccakF[0]) > rom.constants.MAX_CNT_KECCAK_F_LIMIT)
     {
         proverRequest.result = ZKR_SM_MAIN_OOC_KECCAK_F;
-        logError(ctx, "Found pols.cntKeccakF[0]=" + to_string(fr.toU64(pols.cntKeccakF[0])) + " > MAX_CNT_KECCAK_F_LIMIT=" + to_string(rom.MAX_CNT_KECCAK_F_LIMIT));
+        logError(ctx, "Found pols.cntKeccakF[0]=" + to_string(fr.toU64(pols.cntKeccakF[0])) + " > MAX_CNT_KECCAK_F_LIMIT=" + to_string(rom.constants.MAX_CNT_KECCAK_F_LIMIT));
         if (!bProcessBatch)
         {
             exitProcess();
         }
     }
-    if (fr.toU64(pols.cntPaddingPG[0]) > rom.MAX_CNT_PADDING_PG_LIMIT)
+    if (fr.toU64(pols.cntPaddingPG[0]) > rom.constants.MAX_CNT_PADDING_PG_LIMIT)
     {
         proverRequest.result = ZKR_SM_MAIN_OOC_PADDING_PG;
-        logError(ctx, "Found pols.cntPaddingPG[0]=" + to_string(fr.toU64(pols.cntPaddingPG[0])) + " > MAX_CNT_PADDING_PG_LLIMIT=" + to_string(rom.MAX_CNT_PADDING_PG_LIMIT));
+        logError(ctx, "Found pols.cntPaddingPG[0]=" + to_string(fr.toU64(pols.cntPaddingPG[0])) + " > MAX_CNT_PADDING_PG_LLIMIT=" + to_string(rom.constants.MAX_CNT_PADDING_PG_LIMIT));
         if (!bProcessBatch)
         {
             exitProcess();
         }
     }
-    if (fr.toU64(pols.cntPoseidonG[0]) > rom.MAX_CNT_POSEIDON_G_LIMIT)
+    if (fr.toU64(pols.cntPoseidonG[0]) > rom.constants.MAX_CNT_POSEIDON_G_LIMIT)
     {
         proverRequest.result = ZKR_SM_MAIN_OOC_POSEIDON_G;
-        logError(ctx, "Found pols.cntPoseidonG[0]=" + to_string(fr.toU64(pols.cntPoseidonG[0])) + " > MAX_CNT_POSEIDON_G_LIMIT=" + to_string(rom.MAX_CNT_POSEIDON_G_LIMIT));
+        logError(ctx, "Found pols.cntPoseidonG[0]=" + to_string(fr.toU64(pols.cntPoseidonG[0])) + " > MAX_CNT_POSEIDON_G_LIMIT=" + to_string(rom.constants.MAX_CNT_POSEIDON_G_LIMIT));
         if (!bProcessBatch)
         {
             exitProcess();
@@ -4591,13 +4532,19 @@ void MainExecutor::assertOutputs(Context &ctx)
 
 void MainExecutor::logError(Context &ctx, const string &message)
 {
+    // Log the message, if provided
     if (message.size() > 0)
     {
         zklog.error("MainExecutor::logError() " + message);
     }
-    zklog.error(string("MainExecutor::logError() proverRequest.result=") + zkresult2string(ctx.proverRequest.result) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " rom.line={" + rom.line[*ctx.pZKPC].toString(fr) + "} uuid=" + ctx.proverRequest.uuid);
+
+    // Log details
+    zklog.error(string("MainExecutor::logError() proverRequest.result=") + zkresult2string(ctx.proverRequest.result) + " step=" + to_string(*ctx.pStep) + " eval=" + to_string(*ctx.pEvaluation) + " zkPC=" + to_string(*ctx.pZKPC) + " rom.line={" + rom.line[*ctx.pZKPC].toString(fr) + "} uuid=" + ctx.proverRequest.uuid + " externalRequestId=" + ctx.proverRequest.externalRequestId);
+
+    // Log registers
     ctx.printRegs();
     
+    // Log the input file content
     json inputJson;
     ctx.proverRequest.input.save(inputJson);
     zklog.error("Input=" + inputJson.dump());

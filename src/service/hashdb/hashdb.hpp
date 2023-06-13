@@ -31,16 +31,19 @@ private:
 public:
     HashDB(Goldilocks &fr, const Config &config);
     ~HashDB();
-    zkresult set(const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, Goldilocks::Element (&newRoot)[4], SmtSetResult *result, DatabaseMap *dbReadLog);
-    zkresult get(const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtGetResult *result, DatabaseMap *dbReadLog);
-    zkresult setProgram(const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const bool persistent);
-    zkresult getProgram(const Goldilocks::Element (&key)[4], vector<uint8_t> &data, DatabaseMap *dbReadLog);
-    void loadDB(const DatabaseMap::MTMap &inputDB, const bool persistent);
-    void loadProgramDB(const DatabaseMap::ProgramMap &inputProgramDB, const bool persistent);
-    zkresult flush(uint64_t &flushId, uint64_t &storedFlushId);
-    zkresult getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram, string &proverId);
-    zkresult getFlushData(uint64_t flushId, uint64_t &storedFlushId, vector<FlushData> (&nodes), vector<FlushData> (&nodesUpdate), vector<FlushData> (&program), vector<FlushData> (&programUpdate), string &nodesStateRoot);
-    void clearCache(void);
+
+    // HashDBInterface methods
+    zkresult set            (const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, Goldilocks::Element (&newRoot)[4], SmtSetResult *result, DatabaseMap *dbReadLog);
+    zkresult get            (const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtGetResult *result, DatabaseMap *dbReadLog);
+    zkresult setProgram     (const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const bool persistent);
+    zkresult getProgram     (const Goldilocks::Element (&key)[4], vector<uint8_t> &data, DatabaseMap *dbReadLog);
+    void     loadDB         (const DatabaseMap::MTMap &inputDB, const bool persistent);
+    void     loadProgramDB  (const DatabaseMap::ProgramMap &inputProgramDB, const bool persistent);
+    zkresult flush          (uint64_t &flushId, uint64_t &storedFlushId);
+    void     semiFlush      (void);
+    zkresult getFlushStatus (uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram, string &proverId);
+    zkresult getFlushData   (uint64_t flushId, uint64_t &storedFlushId, unordered_map<string, string> (&nodes), unordered_map<string, string> (&program), string &nodesStateRoot);
+    void     clearCache     (void);
 
     // Methods added for testing purposes
     void setAutoCommit(const bool autoCommit);

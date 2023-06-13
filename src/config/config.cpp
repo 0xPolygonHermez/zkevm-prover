@@ -104,9 +104,17 @@ void Config::load(json &config)
     if (config.contains("runECRecoverTest") && config["runECRecoverTest"].is_boolean())
         runECRecoverTest = config["runECRecoverTest"];
 
+    runUnitTest = false;
+    if (config.contains("runUnitTest") && config["runUnitTest"].is_boolean())
+        runUnitTest = config["runUnitTest"];
+
     useMainExecGenerated = false;
     if (config.contains("useMainExecGenerated") && config["useMainExecGenerated"].is_boolean())
         useMainExecGenerated = config["useMainExecGenerated"];
+
+    useMainExecC = false;
+    if (config.contains("useMainExecC") && config["useMainExecC"].is_boolean())
+        useMainExecC = config["useMainExecC"];
 
     executeInParallel = false;
     if (config.contains("executeInParallel") && config["executeInParallel"].is_boolean())
@@ -461,6 +469,10 @@ void Config::load(json &config)
     if (config.contains("dbReadRetryDelay") && config["dbReadRetryDelay"].is_number())
         dbReadRetryDelay = config["dbReadRetryDelay"];
 
+    dbMultiWriteSinglePosition = false;
+    if (config.contains("dbMultiWriteSinglePosition") && config["dbMultiWriteSinglePosition"].is_boolean())
+        dbMultiWriteSinglePosition = config["dbMultiWriteSinglePosition"];
+
     if (config.contains("cleanerPollingPeriod") && config["cleanerPollingPeriod"].is_number())
         cleanerPollingPeriod = config["cleanerPollingPeriod"];
 
@@ -536,11 +548,15 @@ void Config::print(void)
         zklog.info("    runBlakeTest=true");
     if (runECRecoverTest)
         zklog.info("    runECRecoverTest=true");
+    if (runUnitTest)
+        zklog.info("    runUnitTest=true");
 
     if (executeInParallel)
         zklog.info("    executeInParallel=true");
     if (useMainExecGenerated)
         zklog.info("    useMainExecGenerated=true");
+    if (useMainExecC)
+        zklog.info("    useMainExecC=true");
 
     if (executorROMLineTraces)
         zklog.info("    executorROMLineTraces=true");
@@ -638,6 +654,7 @@ void Config::print(void)
     zklog.info("    dbGetTree=" + to_string(dbGetTree));
     zklog.info("    dbReadOnly=" + to_string(dbReadOnly));
     zklog.info("    dbReadRetryDelay=" + to_string(dbReadRetryDelay));
+    zklog.info("    dbMultiWriteSinglePosition=" + to_string(dbMultiWriteSinglePosition));
     zklog.info("    cleanerPollingPeriod=" + to_string(cleanerPollingPeriod));
     zklog.info("    requestsPersistence=" + to_string(requestsPersistence));
     zklog.info("    maxExecutorThreads=" + to_string(maxExecutorThreads));

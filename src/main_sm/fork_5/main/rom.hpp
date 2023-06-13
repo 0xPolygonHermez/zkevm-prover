@@ -4,6 +4,7 @@
 #include <nlohmann/json.hpp>
 #include <string>
 #include "main_sm/fork_5/main/rom_line.hpp"
+#include "main_sm/fork_5/main/rom_constants.hpp"
 #include "config.hpp"
 
 using json = nlohmann::json;
@@ -30,6 +31,7 @@ public:
     uint64_t txGasLimitOffset;
     uint64_t txValueOffset;
     uint64_t txNonceOffset;
+    uint64_t txGasPriceOffset;
     uint64_t txGasPriceRLPOffset;
     uint64_t txChainIdOffset;
     uint64_t txROffset;
@@ -56,15 +58,10 @@ public:
     uint64_t gasCTXOffset;
     uint64_t lastCtxUsedOffset;
     uint64_t isCreateOffset;
+    uint64_t effectivePercentageRLPOffset;
 
     /* Constants */
-    uint64_t MAX_CNT_STEPS_LIMIT;
-    uint64_t MAX_CNT_ARITH_LIMIT;
-    uint64_t MAX_CNT_BINARY_LIMIT;
-    uint64_t MAX_CNT_MEM_ALIGN_LIMIT;
-    uint64_t MAX_CNT_KECCAK_F_LIMIT;
-    uint64_t MAX_CNT_PADDING_PG_LIMIT;
-    uint64_t MAX_CNT_POSEIDON_G_LIMIT;
+    RomConstants constants;
 
     /* Constructor */
     Rom (const Config &config) :
@@ -77,6 +74,7 @@ public:
             txGasLimitOffset(0),
             txValueOffset(0),
             txNonceOffset(0),
+            txGasPriceOffset(0),
             txGasPriceRLPOffset(0),
             txChainIdOffset(0),
             txROffset(0),
@@ -103,13 +101,7 @@ public:
             gasCTXOffset(0),
             lastCtxUsedOffset(0),
             isCreateOffset(0),
-            MAX_CNT_STEPS_LIMIT(0),
-            MAX_CNT_ARITH_LIMIT(0),
-            MAX_CNT_BINARY_LIMIT(0),
-            MAX_CNT_MEM_ALIGN_LIMIT(0),
-            MAX_CNT_KECCAK_F_LIMIT(0),
-            MAX_CNT_PADDING_PG_LIMIT(0),
-            MAX_CNT_POSEIDON_G_LIMIT(0)
+            effectivePercentageRLPOffset(0)
             { };
 
     /* Destructor */
@@ -124,6 +116,7 @@ public:
     uint64_t getLabel(const string &label) const;
     uint64_t getMemoryOffset(const string &label) const;
     uint64_t getConstant(json &romJson, const string &constantName);
+    mpz_class getConstantL(json &romJson, const string &constantName);
 
 private:
     void loadProgram(Goldilocks &fr, json &romJson);

@@ -103,7 +103,9 @@ public:
     string state_root;
     vector<Log> logs;
     vector<Opcode> execution_trace;
-    Response() : type(0), gas_left(0), gas_used(0), gas_refunded(0) {};
+    string effective_gas_price;
+    uint32_t effective_percentage;
+    Response() : type(0), gas_left(0), gas_used(0), gas_refunded(0), effective_percentage(0) {};
 };
 
 class FinalTrace

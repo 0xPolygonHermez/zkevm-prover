@@ -103,6 +103,20 @@ public:
     uint32_t key;
 };
 
+// This class stores an elliptic curve addition operation result
+// [x3, y3] = [x1, y1] + [x2, y2]
+class EllipticCurveAddition
+{
+public:
+    bool bDouble;
+    RawFec::Element x1;
+    RawFec::Element y1;
+    RawFec::Element x2;
+    RawFec::Element y2;
+    RawFec::Element x3;
+    RawFec::Element y3;
+};
+
 class Context
 {
 public:
@@ -118,6 +132,17 @@ public:
     HashDBInterface *pHashDB;
     uint64_t lastStep;
     mpz_class totalTransferredBalance; // Total transferred balance of all accounts, which should be 0 after any transfer
+    EllipticCurveAddition lastECAdd; // Micro-cache of the last couple of added points, and the result
+
+    // Evaluations data
+    uint64_t * pZKPC; // Zero-knowledge program counter
+    uint64_t * pStep; // Polynomial evaluation counter (it is 0 in single-evaluation batch process)
+    uint64_t * pEvaluation; // Evaluation counter
+    uint64_t N; // Polynomials degree
+#ifdef LOG_FILENAME
+    string   fileName; // From ROM JSON file instruction
+    uint64_t line; // From ROM JSON file instruction
+#endif
 
     Context( Goldilocks &fr,
              const Config &config,
@@ -136,17 +161,20 @@ public:
         lastSWrite(fr),
         proverRequest(proverRequest),
         pHashDB(pHashDB),
-        lastStep(0)
-        {}; // Constructor, setting references
-
-    // Evaluations data
-    uint64_t * pZKPC; // Zero-knowledge program counter
-    uint64_t * pStep; // Iteration, instruction execution loop counter, polynomial evaluation counter
-    uint64_t N; // Polynomials degree
-#ifdef LOG_FILENAME
-    string   fileName; // From ROM JSON file instruction
-    uint64_t line; // From ROM JSON file instruction
-#endif
+        lastStep(0),
+        pZKPC(NULL),
+        pStep(NULL),
+        pEvaluation(NULL),
+        N(0)
+        {
+            lastECAdd.bDouble = false;
+            lastECAdd.x1 = fec.zero();
+            lastECAdd.y1 = fec.zero();
+            lastECAdd.x2 = fec.zero();
+            lastECAdd.y2 = fec.zero();
+            lastECAdd.x3 = fec.zero();
+            lastECAdd.y3 = fec.zero();
+        }; // Constructor, setting references
 
     // HashK database, used in hashK, hashKLen and hashKDigest
     unordered_map< uint64_t, HashValue > hashK;
