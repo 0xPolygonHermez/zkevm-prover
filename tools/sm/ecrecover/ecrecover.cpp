@@ -40,7 +40,15 @@ void addPointEc ( const mpz_class &p1_x, const mpz_class &p1_y,
 void dblPointEc ( const mpz_class &p1_x, const mpz_class &p1_y, 
                   mpz_class &p3_x, mpz_class &p3_y);
 
+void mulPointEcJacobian ( const mpz_class &p1_x, const mpz_class &p1_y, const mpz_class &k1, 
+                          const mpz_class &p2_x, const mpz_class &p2_y, const mpz_class &k2, 
+                          mpz_class &p3_x, mpz_class &p3_y);
+
 void mulPointEcJacobian ( const mpz_class &p1_x, const mpz_class &p1_y, const mpz_class &p1_z, const mpz_class &k1, 
+                          const mpz_class &p2_x, const mpz_class &p2_y, const mpz_class &p2_z, const mpz_class &k2, 
+                          mpz_class &p3_x, mpz_class &p3_y, mpz_class &p3_z); 
+
+void mulPointEcJacobian_ ( const mpz_class &p1_x, const mpz_class &p1_y, const mpz_class &p1_z, const mpz_class &k1, 
                           const mpz_class &p2_x, const mpz_class &p2_y, const mpz_class &p2_z, const mpz_class &k2, 
                           mpz_class &p3_x, mpz_class &p3_y, mpz_class &p3_z); 
 
@@ -169,8 +177,9 @@ ECRecoverResult ECRecover (mpz_class &signature, mpz_class &r, mpz_class &s, mpz
     mpz_class p1_z = 1;
     mpz_class p2_z = 1;
     mpz_class p3_z;
-    mulPointEcJacobian(p1_x, p1_y, p1_z, k1, p2_x, p2_y, p2_z, k2, p3_x, p3_y, p3_z);
-    Jacobian2Affine(p3_x, p3_y, p3_z, p3_x, p3_y);
+    mulPointEcJacobian(p1_x, p1_y, k1, p2_x, p2_y, k2, p3_x, p3_y);
+    //mulPointEcJacobian_(p1_x, p1_y, p1_z, k1, p2_x, p2_y, p2_z, k2, p3_x, p3_y, p3_z);
+    //Jacobian2Affine(p3_x, p3_y, p3_z, p3_x, p3_y);
 #endif
 
     assert(p3_x < FPEC);
@@ -458,6 +467,141 @@ void dblPointEc ( const mpz_class &p1_x, const mpz_class &p1_y,
     fec.toMpz(p3_y.get_mpz_t(), y3);
 }
 
+void mulPointEcJacobian ( const mpz_class &p1_x, const mpz_class &p1_y, const mpz_class &k1, 
+                          const mpz_class &p2_x, const mpz_class &p2_y, const mpz_class &k2, 
+                          mpz_class &p3_x, mpz_class &p3_y){
+
+    
+    RawFec::Element  x3, y3, z3;
+    RawFec::Element p[48];
+    bool isz[16];
+
+    //0000
+    isz[0] = true;
+
+    //0001
+    int id0 = 1;
+    int id1 = 3;
+    isz[id0] = false;
+    fec.fromMpz(p[id1], p1_x.get_mpz_t());
+    fec.fromMpz(p[id1+1], p1_y.get_mpz_t());
+    p[id1+2]=fec.one();
+
+    //0010
+    id0 = 2;
+    id1 = 6;
+    isz[id0] = false;
+    dblPointEcJacobian(p[3], p[4], p[5], p[id1], p[id1+1], p[id1+2]);
+
+    //0011
+    id0 = 3;
+    id1 = 9;
+    generalAddPointEcJacobian(p[3], p[4], p[5], isz[1], p[6], p[7], p[8], isz[2], p[id1], p[id1+1], p[id1+2], isz[id0]);
+
+    //0100
+    id0 = 4;
+    id1 = 12;
+    isz[id0] = false;
+    fec.fromMpz(p[id1], p2_x.get_mpz_t());
+    fec.fromMpz(p[id1+1], p2_y.get_mpz_t());
+    p[id1+2]=fec.one();
+
+    //0101
+    id0 = 5;
+    id1 = 15;
+    generalAddPointEcJacobian(p[3], p[4], p[5], isz[1], p[12], p[13], p[14], isz[4], p[id1], p[id1+1], p[id1+2], isz[id0]);
+
+    //0110
+    id0 = 6;
+    id1 = 18;
+    generalAddPointEcJacobian(p[6], p[7], p[8], isz[2], p[12], p[13], p[14], isz[4], p[id1], p[id1+1], p[id1+2], isz[id0]);
+
+    //0111
+    id0 = 7;
+    id1 = 21;
+    generalAddPointEcJacobian(p[9], p[10], p[11], isz[3], p[12], p[13], p[14], isz[4], p[id1], p[id1+1], p[id1+2], isz[id0]);
+
+    //1000
+    id0 = 8;
+    id1 = 24;
+    isz[id0] = false;
+    dblPointEcJacobian(p[12], p[13], p[14], p[id1], p[id1+1], p[id1+2]);
+
+    //1001
+    id0 = 9;
+    id1 = 27;
+    generalAddPointEcJacobian(p[3], p[4], p[5], isz[1], p[24], p[25], p[26], isz[8], p[id1], p[id1+1], p[id1+2], isz[id0]);
+
+    //1010
+    id0 = 10;
+    id1 = 30;
+    generalAddPointEcJacobian(p[6], p[7], p[8], isz[2], p[24], p[25], p[26], isz[8], p[id1], p[id1+1], p[id1+2], isz[id0]);
+
+    //1011
+    id0 = 11;
+    id1 = 33;
+    generalAddPointEcJacobian(p[9], p[10], p[11], isz[3], p[24], p[25], p[26], isz[8], p[id1], p[id1+1], p[id1+2], isz[id0]);
+
+    //1100
+    id0 = 12;
+    id1 = 36;
+    generalAddPointEcJacobian(p[12], p[13], p[14], isz[4], p[24], p[25], p[26], isz[8], p[id1], p[id1+1], p[id1+2], isz[id0]);
+
+    //1101
+    id0 = 13;
+    id1 = 39;
+    generalAddPointEcJacobian(p[3], p[4], p[5], isz[1], p[36], p[37], p[38], isz[12], p[id1], p[id1+1], p[id1+2], isz[id0]);
+
+    //1110
+    id0 = 14;
+    id1 = 42;
+    generalAddPointEcJacobian(p[6], p[7], p[8], isz[2], p[36], p[37], p[38], isz[12], p[id1], p[id1+1], p[id1+2], isz[id0]);
+
+    //1111
+    id0 = 15;
+    id1 = 45;
+    generalAddPointEcJacobian(p[9], p[10], p[11], isz[3], p[36], p[37], p[38], isz[12], p[id1], p[id1+1], p[id1+2], isz[id0]);
+
+    
+    // start the loop
+    mpz_t rawK1;
+    mpz_t rawK2;
+
+    mpz_init(rawK1);
+    mpz_init(rawK2);
+    mpz_set(rawK1, k1.get_mpz_t());
+    mpz_set(rawK2, k2.get_mpz_t());
+
+    bool p3_empty=true;
+
+    for(int i=255; i>=0; i-=2){
+
+        // double p3
+        if(!p3_empty){
+            dblPointEcJacobian(x3, y3, z3, x3, y3, z3);
+            dblPointEcJacobian(x3, y3, z3, x3, y3, z3);
+        }
+        // take next bits
+        int bitk10 = mpz_tstbit(rawK1, i-1);
+        int bitk11 = mpz_tstbit(rawK1, i);
+        int bitk20 = mpz_tstbit(rawK2, i-1);
+        int bitk21 = mpz_tstbit(rawK2, i);
+
+        int id0 = 8 * bitk21 + 4*bitk20 +  2*bitk11 + bitk10;
+        int id1 = 3 * id0;
+        generalAddPointEcJacobian(p[id1], p[id1+1], p[id1+2], isz[id0], x3, y3, z3, p3_empty, x3, y3, z3,p3_empty);        
+    }
+
+    mpz_clear(rawK1);
+    mpz_clear(rawK2);
+
+    // save results
+    Jacobian2Affine(x3, y3, z3, x3, y3);
+    fec.toMpz(p3_x.get_mpz_t(), x3);
+    fec.toMpz(p3_y.get_mpz_t(), y3);
+
+}
+
 void mulPointEcJacobian ( const mpz_class &p1_x, const mpz_class &p1_y, const mpz_class &p1_z, const mpz_class &k1, 
                           const mpz_class &p2_x, const mpz_class &p2_y, const mpz_class &p2_z, const mpz_class &k2, 
                           mpz_class &p3_x, mpz_class &p3_y, mpz_class &p3_z){
@@ -709,8 +853,9 @@ void dblPointEcJacobian ( const RawFec::Element &x1, const RawFec::Element &y1, 
     //y3
     fec.sub(aux1, d, x3);   
     fec.mul(aux1, aux1, e);
-    fec.fromString(aux2, "8",10);
-    fec.mul(aux2, aux2, c);
+    fec.add(aux2,  c, c);
+    fec.add(aux2,  aux2, aux2);
+    fec.add(aux2,  aux2, aux2);
     fec.sub(y3, aux1, aux2);
     //z3
     fec.mul(aux1, y1_, z1);
@@ -725,7 +870,7 @@ void dblPointEcJacobian ( const RawFec::Element &x1, const RawFec::Element &y1, 
                                 RawFec::Element &x3, RawFec::Element &y3, RawFec::Element &z3,
                                 bool & p3_empty){
 
-    if(p1_empty and p2_empty){
+    if(p1_empty && p2_empty){
         p3_empty = true;
         return;
     } else {
@@ -783,10 +928,6 @@ void mulPointEcJacobian_ ( const mpz_class &p1_x, const mpz_class &p1_y, const m
     fec.fromMpz(y2, p2_y.get_mpz_t());
     fec.fromMpz(z2, p2_z.get_mpz_t()); 
 
-    fec.copy(x3, fec.zero());
-    fec.copy(y3, fec.zero());
-    fec.copy(z3, fec.zero());
-
     bool p12_empty;
     generalAddPointEcJacobian(x1, y1, z1, false, x2, y2, z2, false, x12, y12, z12, p12_empty);
     
@@ -819,6 +960,7 @@ void mulPointEcJacobian_ ( const mpz_class &p1_x, const mpz_class &p1_y, const m
             dblPointEcJacobian(x3, y3, z3, x3, y3, z3);
         }
     }
+
     mpz_clear(rawK1);
     mpz_clear(rawK2);
 
