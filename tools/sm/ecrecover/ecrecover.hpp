@@ -15,6 +15,6 @@ typedef enum
     ECR_NO_SQRT_BUT_IT_HAS_SOLUTION = 100
 } ECRecoverResult;
 
-ECRecoverResult ECRecover (mpz_class &signature, mpz_class &r, mpz_class &s, mpz_class &v, bool bPrecompiled, mpz_class &address);
+ECRecoverResult ECRecover(mpz_class &signature, mpz_class &r, mpz_class &s, mpz_class &v, bool bPrecompiled, mpz_class &address);
 
 #endif
