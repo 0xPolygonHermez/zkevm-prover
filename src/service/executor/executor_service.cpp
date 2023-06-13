@@ -5,81 +5,12 @@
 #include "zklog.hpp"
 #include <grpcpp/grpcpp.h>
 #include "exit_process.hpp"
+#include "utils.hpp"
 
 using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
-
-void getStringIncrement(const string &oldString, const string &newString, uint64_t &offset, uint64_t &length)
-{
-    // If new string is shorter, return it all
-    if (oldString.size() > newString.size())
-    {
-        offset = 0;
-        length = newString.size();
-        return;
-    }
-    
-    // Find first different char, and assign it to offset
-    int64_t i = 0;
-    for (; i < (int64_t)oldString.size(); i++)
-    {
-        if (oldString[i] != newString[i])
-        {
-            break;
-        }
-    }
-    if (i == (int64_t)oldString.size())
-    {
-        if (oldString.size() == newString.size()) // Identical strings
-        {
-            offset = 0;
-            length = 0;
-            return;
-        }
-        for (; i < (int64_t)newString.size(); i++)
-        {
-            if (newString[i] != 0)
-            {
-                break;
-            }
-        }
-        if (i == (int64_t)newString.size()) // new string is all zeros
-        {
-            offset = 0;
-            length = 0;
-            return;
-        }
-    }
-    offset = i;
-
-    // If new string is longer, find last non-zero byte, if any
-    if (newString.size() > oldString.size())
-    {
-        for (i = (int64_t)newString.size()-1; i >= (int64_t)oldString.size(); i--)
-        {
-            if (newString[i] != 0)
-            {
-                length = i + 1 - offset;
-                return;
-            }
-        }     
-    }
-
-
-    // Find last different char, and calculate length
-    for (i = (int64_t)oldString.size() - 1; i >= 0; i--)
-    {
-        if (oldString[i] != newString[i])
-        {
-            length = i + 1 - offset;
-            break;
-        }
-    }
-
-    length = 0;
-}
 
 ::grpc::Status ExecutorServiceImpl::ProcessBatch(::grpc::ServerContext* context, const ::executor::v1::ProcessBatchRequest* request, ::executor::v1::ProcessBatchResponse* response)
 {
@@ -377,6 +308,8 @@ void getStringIncrement(const string &oldString, const string &newString, uint64
 
     prover.processBatch(&proverRequest);
 
+    //TimerStart(EXECUTOR_PROCESS_BATCH_BUILD_RESPONSE);
+
     if (proverRequest.result != ZKR_SUCCESS)
     {
         zklog.error("ExecutorServiceImpl::ProcessBatch() detected proverRequest.result=" + to_string(proverRequest.result) + "=" + zkresult2string(proverRequest.result));
@@ -591,12 +524,16 @@ void getStringIncrement(const string &oldString, const string &newString, uint64
         zklog.info("ExecutorServiceImpl::ProcessBatch() returns:\n" + response->DebugString());
     }
 
+    //TimerStopAndLog(EXECUTOR_PROCESS_BATCH_BUILD_RESPONSE);
+    
     TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
 
     if (config.saveResponseToFile)
     {
+        //TimerStart(EXECUTOR_PROCESS_BATCH_SAVING_RESPONSE_TO_FILE);
         //zklog.info("ExecutorServiceImpl::ProcessBatch() returns response of size=" + to_string(response->ByteSizeLong()));
         string2file(response->DebugString(), proverRequest.filePrefix + "executor_response.txt");
+        //TimerStopAndLog(EXECUTOR_PROCESS_BATCH_SAVING_RESPONSE_TO_FILE);
     }
 
     if (config.opcodeTracer)

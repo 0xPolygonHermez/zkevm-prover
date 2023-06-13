@@ -7,6 +7,7 @@
 #include "binary_test.hpp"
 #include "storage_test.hpp"
 #include "keccak_executor_test.hpp"
+#include "get_string_increment_test.hpp"
 
 uint64_t UnitTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config)
 {
@@ -37,6 +38,10 @@ uint64_t UnitTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &c
     //TimerStart(UNIT_TEST_KECCAKSM);
     //numberOfErrors += KeccakSMExecutorTest(fr, config);
     //TimerStopAndLog(UNIT_TEST_KECCAKSM);
+
+    TimerStart(UNIT_TEST_GET_STRING_INCREMENT);
+    numberOfErrors += GetStringIncrementTest();
+    TimerStopAndLog(UNIT_TEST_GET_STRING_INCREMENT);
     
     TimerStopAndLog(UNIT_TEST);
     
