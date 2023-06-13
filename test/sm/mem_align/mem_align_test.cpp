@@ -112,7 +112,7 @@ uint64_t MemAlignSMTest (Goldilocks &fr, const Config &config)
     void * pAddress = malloc(CommitPols::pilSize());
     if (pAddress == NULL)
     {
-        zklog.error("MemAlignSMTest() failed calling malloc() of size=" + CommitPols::pilSize());
+        zklog.error("MemAlignSMTest() failed calling malloc() of size=" + to_string(CommitPols::pilSize()));
         exitProcess();
     }
     CommitPols cmPols(pAddress, CommitPols::pilDegree());

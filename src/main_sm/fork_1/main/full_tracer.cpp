@@ -616,11 +616,11 @@ void FullTracer::onUpdateStorage(Context &ctx, const RomCommand &cmd)
 
         // The storage key is stored in C
         getRegFromCtx(ctx, cmd.params[0]->reg, auxScalar);
-        string key = PrependZeros(auxScalar.get_str(16), 64);
+        string key = auxScalar.get_str(16);
 
         // The storage value is stored in D
         getRegFromCtx(ctx, cmd.params[1]->reg, auxScalar);
-        string value = PrependZeros(auxScalar.get_str(16), 64);
+        string value = auxScalar.get_str(16);
 
         // Delta storage is computed for the affected contract address
         getVarFromCtx(ctx, false, ctx.rom.storageAddrOffset, auxScalar);
@@ -778,12 +778,15 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     // Append to response logs
     unordered_map<uint64_t, std::unordered_map<uint64_t, Log>>::iterator logIt;
     unordered_map<uint64_t, Log>::const_iterator it;
+    uint64_t logIndex = 0;
     for (logIt=logs.begin(); logIt!=logs.end(); logIt++)
     {
         for (it = logIt->second.begin(); it != logIt->second.end(); it++)
         {
             Log log = it->second;
+            log.index = logIndex;
             finalTrace.responses[finalTrace.responses.size() - 1].logs.push_back(log);
+            logIndex++;
         }
     }
 
