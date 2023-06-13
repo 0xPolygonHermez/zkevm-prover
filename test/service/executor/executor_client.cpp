@@ -9,8 +9,12 @@ ExecutorClient::ExecutorClient (Goldilocks &fr, const Config &config) :
     fr(fr),
     config(config)
 {
+    // Set channel option to receive large messages
+    grpc::ChannelArguments channelArguments;
+    channelArguments.SetMaxReceiveMessageSize(1024*1024*1024);
+
     // Create channel
-    std::shared_ptr<grpc_impl::Channel> channel = ::grpc::CreateChannel(config.executorClientHost + ":" + to_string(config.executorClientPort), grpc::InsecureChannelCredentials());
+    std::shared_ptr<grpc_impl::Channel> channel = grpc::CreateCustomChannel(config.executorClientHost + ":" + to_string(config.executorClientPort), grpc::InsecureChannelCredentials(), channelArguments);
 
     // Create stub (i.e. client)
     stub = new executor::v1::ExecutorService::Stub(channel);
