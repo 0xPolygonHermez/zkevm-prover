@@ -21,7 +21,7 @@ struct ECRecoverTestVector
 };
 #define NTESTS 46
 #define REPETITIONS 1
-#define BENCHMARK_MODE 1 // 0: test mode, 1: benchmark mode
+#define BENCHMARK_MODE 0 // 0: test mode, 1: benchmark mode
 
 #if BENCHMARK_MODE == 1
 #undef NTESTS
