@@ -1,6 +1,7 @@
 #include "main_sm/fork_5/main_exec_c/main_exec_c.hpp"
 #include "main_sm/fork_5/main_exec_c/context_c.hpp"
 #include "main_sm/fork_5/main_exec_c/variables_c.hpp"
+#include "main_sm/fork_5/main_exec_c/batch_decode.hpp"
 #include "main_sm/fork_5/main/eval_command.hpp"
 #include "main_sm/fork_5/main/context.hpp"
 #include "scalar.hpp"
@@ -88,6 +89,7 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
     {
         zklog.error("main_exec_c() called with invalid forkID=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID));
         proverRequest.result = ZKR_SM_MAIN_INVALID_FORK_ID;
+        HashDBClientFactory::freeHashDBClient(pHashDB);
         return;
     }
 
@@ -133,6 +135,17 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
     // Set batchL2DataLength
     ctxc.globalVars.batchL2DataLength = proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size();
 
+    BatchData batchData;
+    zkresult result = BatchDecode(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data, batchData);
+    if (result != ZKR_SUCCESS)
+    {
+        zklog.error("main_exec_c() failed calling BatchDecode()");
+        proverRequest.result = result;
+        HashDBClientFactory::freeHashDBClient(pHashDB);
+        return;
+    }
+
+
 /*
 
 ;;;;;;;;;;;;;;;;;;
@@ -144,7 +157,7 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
         $${eventLog(onStartBatch, C)}*/
 
     RomCommand cmd;
-    zkresult result = ((fork_5::FullTracer *)ctx.proverRequest.pFullTracer)->onStartBatch(ctx, cmd);
+    result = ((fork_5::FullTracer *)ctx.proverRequest.pFullTracer)->onStartBatch(ctx, cmd);
     if (result != ZKR_SUCCESS)
     {
         zklog.error("main_exec_c() failed calling onStartBatch()");
