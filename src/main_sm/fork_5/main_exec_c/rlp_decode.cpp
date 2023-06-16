@@ -1,5 +1,9 @@
 #include "rlp_decode.hpp"
 #include "scalar.hpp"
+#include "zklog.hpp"
+#include "utils.hpp"
+
+//#define RLP_LOGS
 
 namespace fork_5
 {
@@ -22,7 +26,9 @@ zkresult RLPStringToU64 (const string &input, uint64_t &output)
         output = 256*output + (uint8_t)input[i];
     }
 
+#ifdef RLP_LOGS
     zklog.info("RLPStringToU64() returns " + to_string(output));
+#endif
 
     return ZKR_SUCCESS;
 }
@@ -45,7 +51,9 @@ zkresult RLPStringToU160 (const string &input, mpz_class &output)
         output = 256*output + (uint8_t)input[i];
     }
 
+#ifdef RLP_LOGS
     zklog.info("RLPStringToU160() returns " + output.get_str());
+#endif
 
     return ZKR_SUCCESS;
 }
@@ -68,7 +76,9 @@ zkresult RLPStringToU256 (const string &input, mpz_class &output)
         output = 256*output + (uint8_t)input[i];
     }
 
+#ifdef RLP_LOGS
     zklog.info("RLPStringToU256() returns " + output.get_str());
+#endif
 
     return ZKR_SUCCESS;
 }
@@ -83,7 +93,9 @@ zkresult RLPDecodeLength (const string &input, uint64_t &offset, uint64_t &dataL
         return ZKR_UNSPECIFIED;
     }
     uint64_t prefix = (uint8_t)input[0];
-    //zklog.info("RLPDecodeLength() prefix=" + to_string(prefix) + "=0x" + byte2string(prefix) + " input.size=" + to_string(input.size()));
+#ifdef RLP_LOGS
+    zklog.info("RLPDecodeLength() prefix=" + to_string(prefix) + "=0x" + byte2string(prefix) + " input.size=" + to_string(input.size()));
+#endif
     if (prefix <= 0x7f)
     {
         offset = 0;
@@ -188,7 +200,9 @@ zkresult RLPDecode(const string &input, RLPType rlpType, vector<RLPData> (&outpu
             rlpData.type = rlpTypeString;
             rlpData.data = input.substr(offset, dataLength);
             output.push_back(rlpData);
+#ifdef RLP_LOGS
             zklog.info("RLPDecode() found string offset=" + to_string(offset) + " dataLength=" + to_string(dataLength) + " data=" + ba2string(rlpData.data));
+#endif
             consumedBytes += dataLength + 1;
             break;
         }
@@ -203,7 +217,9 @@ zkresult RLPDecode(const string &input, RLPType rlpType, vector<RLPData> (&outpu
             rlpData.type = rlpTypeList;
             rlpData.data = input.substr(offset, dataLength);
             output.push_back(rlpData);
+#ifdef RLP_LOGS
             zklog.info("RLPDecode() found list offset=" + to_string(offset) + " dataLength=" + to_string(dataLength));
+#endif
             uint64_t aux;
             result = RLPDecode(input.substr(offset, dataLength), rlpTypeUnknown, output[output.size()-1].rlpData, aux);
             if (result != ZKR_SUCCESS)
@@ -232,6 +248,5 @@ zkresult RLPDecode(const string &input, RLPType rlpType, vector<RLPData> (&outpu
     consumedBytes += dataLength;
     return result;
 }
-
 
 }

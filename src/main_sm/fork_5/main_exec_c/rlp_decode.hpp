@@ -3,29 +3,14 @@
 
 #include <string>
 #include <vector>
-#include "zklog.hpp"
+#include <gmpxx.h>
 #include "zkresult.hpp"
-#include "utils.hpp"
+#include "main_sm/fork_5/main_exec_c/rlp_data.hpp"
 
 using namespace std;
 
 namespace fork_5
 {
-
-enum RLPType
-{
-    rlpTypeUnknown = 0,
-    rlpTypeString = 1,
-    rlpTypeList = 2
-};
-
-class RLPData
-{
-public:
-    RLPType type;
-    string data;
-    vector<RLPData> rlpData;
-};
 
 // Convert a byte array string to an integer
 zkresult RLPStringToU64 (const string &input, uint64_t &output);
