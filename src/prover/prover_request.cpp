@@ -127,7 +127,7 @@ void ProverRequest::DestroyFullTracer(void)
 {
     if (pFullTracer == NULL)
     {
-        zklog.error("ProverRequest::CreateFullTracer() called with pFullTracer == NULL");
+        zklog.error("ProverRequest::DestroyFullTracer() called with pFullTracer == NULL");
         exitProcess();
     }
     switch (input.publicInputsExtended.publicInputs.forkID)

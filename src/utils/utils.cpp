@@ -89,19 +89,31 @@ void getMemoryInfo(MemoryInfo &info)
     meminfo.close();
 }
 
-void printMemoryInfo(bool compact)
+void parseProcSelfStat (double &vm, double &rss)
+{
+    string aux;
+    ifstream ifs("/proc/self/stat", ios_base::in);
+    ifs >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> vm >> rss;
+}
+
+void printMemoryInfo(bool compact, const char * pMessage)
 {
     string s;
 
     string endLine = (compact ? ", " : "\n");
     string tab = (compact ? "" : "    ");
 
-    s = "MEMORY INFO" + endLine;
+    s = "MEMORY INFO " + (pMessage==NULL?"":string(pMessage)) + endLine;
 
     constexpr double factorMB = 1024;
 
     MemoryInfo info;
     getMemoryInfo(info);
+
+    double vm, rss;
+    parseProcSelfStat(vm, rss);
+    vm /= 1024*1024;
+    rss /= 1024*1024;
 
     s += tab + "MemTotal: "+ to_string(info.total / factorMB) + " MB" + endLine;
     s += tab + "MemFree: " + to_string(info.free / factorMB) + " MB" + endLine;
@@ -110,7 +122,9 @@ void printMemoryInfo(bool compact)
     s += tab + "Cached: " + to_string(info.cached / factorMB) + " MB" + endLine;
     s += tab + "SwapCached: " + to_string(info.swapCached / factorMB) + " MB" + endLine;
     s += tab + "SwapTotal: " + to_string(info.swapTotal / factorMB) + " MB" + endLine;
-    s += tab + "SwapFree: " + to_string(info.swapFree / factorMB) + " MB";
+    s += tab + "SwapFree: " + to_string(info.swapFree / factorMB) + " MB" + endLine;
+    s += tab + "VM: " + to_string(vm) + " MB" + endLine;
+    s += tab + "RSS: " + to_string(rss) + " MB";
 
     zklog.info(s);
 }
@@ -551,4 +565,74 @@ void getIPAddress (string &ipAddress)
     }
 
     freeifaddrs(pIfaddrs);
+}
+
+void getStringIncrement(const string &oldString, const string &newString, uint64_t &offset, uint64_t &length)
+{
+    // If new string is shorter, return it all
+    if (oldString.size() > newString.size())
+    {
+        offset = 0;
+        length = newString.size();
+        return;
+    }
+    
+    // Find first different char, and assign it to offset
+    int64_t i = 0;
+    for (; i < (int64_t)oldString.size(); i++)
+    {
+        if (oldString[i] != newString[i])
+        {
+            break;
+        }
+    }
+    if (i == (int64_t)oldString.size())
+    {
+        if (oldString.size() == newString.size()) // Identical strings
+        {
+            offset = 0;
+            length = 0;
+            return;
+        }
+        for (; i < (int64_t)newString.size(); i++)
+        {
+            if (newString[i] != 0)
+            {
+                break;
+            }
+        }
+        if (i == (int64_t)newString.size()) // new string is all zeros
+        {
+            offset = 0;
+            length = 0;
+            return;
+        }
+    }
+    offset = i;
+
+    // If new string is longer, find last non-zero byte, if any
+    if (newString.size() > oldString.size())
+    {
+        for (i = (int64_t)newString.size()-1; i >= (int64_t)oldString.size(); i--)
+        {
+            if (newString[i] != 0)
+            {
+                length = i + 1 - offset;
+                return;
+            }
+        }     
+    }
+
+
+    // Find last different char, and calculate length
+    for (i = (int64_t)oldString.size() - 1; i >= 0; i--)
+    {
+        if (oldString[i] != newString[i])
+        {
+            length = i + 1 - offset;
+            return;
+        }
+    }
+
+    length = 0;
 }

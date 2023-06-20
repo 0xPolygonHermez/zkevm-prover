@@ -10,76 +10,6 @@ using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
 
-void getStringIncrement(const string &oldString, const string &newString, uint64_t &offset, uint64_t &length)
-{
-    // If new string is shorter, return it all
-    if (oldString.size() > newString.size())
-    {
-        offset = 0;
-        length = newString.size();
-        return;
-    }
-    
-    // Find first different char, and assign it to offset
-    int64_t i = 0;
-    for (; i < (int64_t)oldString.size(); i++)
-    {
-        if (oldString[i] != newString[i])
-        {
-            break;
-        }
-    }
-    if (i == (int64_t)oldString.size())
-    {
-        if (oldString.size() == newString.size()) // Identical strings
-        {
-            offset = 0;
-            length = 0;
-            return;
-        }
-        for (; i < (int64_t)newString.size(); i++)
-        {
-            if (newString[i] != 0)
-            {
-                break;
-            }
-        }
-        if (i == (int64_t)newString.size()) // new string is all zeros
-        {
-            offset = 0;
-            length = 0;
-            return;
-        }
-    }
-    offset = i;
-
-    // If new string is longer, find last non-zero byte, if any
-    if (newString.size() > oldString.size())
-    {
-        for (i = (int64_t)newString.size()-1; i >= (int64_t)oldString.size(); i--)
-        {
-            if (newString[i] != 0)
-            {
-                length = i + 1 - offset;
-                return;
-            }
-        }     
-    }
-
-
-    // Find last different char, and calculate length
-    for (i = (int64_t)oldString.size() - 1; i >= 0; i--)
-    {
-        if (oldString[i] != newString[i])
-        {
-            length = i + 1 - offset;
-            return;
-        }
-    }
-
-    length = 0;
-}
-
 ::grpc::Status ExecutorServiceImpl::ProcessBatch(::grpc::ServerContext* context, const ::executor::v1::ProcessBatchRequest* request, ::executor::v1::ProcessBatchResponse* response)
 {
     TimerStart(EXECUTOR_PROCESS_BATCH);
@@ -365,12 +295,9 @@ void getStringIncrement(const string &oldString, const string &newString, uint64
         }
     }
 
-    vector<Response> &responses(proverRequest.pFullTracer->get_responses());
+    vector<Response> &responses = proverRequest.pFullTracer->get_responses();
     for (uint64_t tx=0; tx<responses.size(); tx++)
     {
-        // Remember the previous memory sent for each TX, and send only increments
-        string previousMemory;
-
         executor::v1::ProcessTransactionResponse * pProcessTransactionResponse = response->add_responses();
         pProcessTransactionResponse->set_tx_hash(string2ba(responses[tx].tx_hash));
         pProcessTransactionResponse->set_rlp_tx(responses[tx].rlp_tx);
@@ -414,20 +341,9 @@ void getStringIncrement(const string &oldString, const string &newString, uint64
                 }
                 pExecutionTraceStep->set_remaining_gas(responses[tx].execution_trace[step].gas);
                 pExecutionTraceStep->set_gas_cost(responses[tx].execution_trace[step].gas_cost); // Gas cost of the operation
-                string baMemory = string2ba(responses[tx].execution_trace[step].memory);
-                if (baMemory != previousMemory)
-                {
-                    uint64_t offset;
-                    uint64_t length;
-                    getStringIncrement(previousMemory, baMemory, offset, length);
-                    if (length > 0)
-                    {
-                        pExecutionTraceStep->set_memory_offset(offset);
-                        pExecutionTraceStep->set_memory(baMemory.substr(offset, length)); // Content of memory, incremental
-                    }
-                    previousMemory = baMemory;
-                }
-                pExecutionTraceStep->set_memory_size(baMemory.size());
+                pExecutionTraceStep->set_memory_size(responses[tx].execution_trace[step].memory_size);
+                pExecutionTraceStep->set_memory_offset(responses[tx].execution_trace[step].memory_offset);
+                pExecutionTraceStep->set_memory(responses[tx].execution_trace[step].memory);
                 for (uint64_t stack=0; stack<responses[tx].execution_trace[step].stack.size() ; stack++)
                     pExecutionTraceStep->add_stack(responses[tx].execution_trace[step].stack[stack].get_str(16)); // Content of the stack
                 string dataConcatenated;
@@ -471,20 +387,9 @@ void getStringIncrement(const string &oldString, const string &newString, uint64
                 pTransactionStep->set_op(responses[tx].call_trace.steps[step].op); // Opcode
                 for (uint64_t stack=0; stack<responses[tx].call_trace.steps[step].stack.size() ; stack++)
                     pTransactionStep->add_stack(responses[tx].call_trace.steps[step].stack[stack].get_str(16)); // Content of the stack
-                string baMemory = string2ba(responses[tx].call_trace.steps[step].memory);
-                if (baMemory != previousMemory)
-                {
-                    uint64_t offset;
-                    uint64_t length;
-                    getStringIncrement(previousMemory, baMemory, offset, length);
-                    if (length > 0)
-                    {
-                        pTransactionStep->set_memory_offset(offset);
-                        pTransactionStep->set_memory(baMemory.substr(offset, length)); // Content of memory, incremental
-                    }
-                    previousMemory = baMemory;
-                }
-                pTransactionStep->set_memory_size(baMemory.size());
+                pTransactionStep->set_memory_size(responses[tx].call_trace.steps[step].memory_size);
+                pTransactionStep->set_memory_offset(responses[tx].call_trace.steps[step].memory_offset);
+                pTransactionStep->set_memory(responses[tx].call_trace.steps[step].memory);
                 string dataConcatenated;
                 for (uint64_t data=0; data<responses[tx].call_trace.steps[step].return_data.size(); data++)
                     dataConcatenated += responses[tx].call_trace.steps[step].return_data[data];
