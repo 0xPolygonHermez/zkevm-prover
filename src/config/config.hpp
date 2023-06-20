@@ -141,6 +141,9 @@ public:
     uint64_t maxProverThreads;
     uint64_t maxStateDBThreads;
     string proverName;
+
+    uint64_t fullTracerTraceReserveSize;
+
     void load(json &config);
     bool generateProof(void) const { return runFileGenBatchProof || runFileGenAggregatedProof || runFileGenFinalProof || runAggregatorClient; }
     void print(void);

@@ -589,6 +589,13 @@ void FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
 
     // Create current tx object
     finalTrace.responses.push_back(response);
+
+    // Clear temporary tx traces
+    execution_trace.clear();
+    execution_trace.reserve(ctx.config.fullTracerTraceReserveSize);
+    call_trace.clear();
+    call_trace.reserve(ctx.config.fullTracerTraceReserveSize);
+
     txTime = getCurrentTime();
 
     // Reset values
@@ -728,7 +735,7 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
             lastOpcodeExecution.gas_cost = lastOpcodeExecution.gas - fr.toU64(ctx.pols.GAS[*ctx.pStep]);
         }
 
-        response.execution_trace = execution_trace;
+        response.execution_trace.swap(execution_trace);
 
         if (response.error.size() == 0)
         {
@@ -754,7 +761,7 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
             lastOpcodeCall.gas_cost = lastOpcodeCall.gas - fr.toU64(ctx.pols.GAS[*ctx.pStep]);
         }
 
-        response.call_trace.steps = call_trace;
+        response.call_trace.steps.swap(call_trace);
 
         if (response.error.size() == 0)
         {
@@ -907,7 +914,7 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 
     if (ctx.proverRequest.input.bNoCounters)
     {
-        execution_trace.push_back(singleInfo);
+        execution_trace.emplace_back(singleInfo);
 #ifdef LOG_TIME_STATISTICS
         tms.add("onOpcode", TimeDiff(t));
 #endif
@@ -1281,13 +1288,13 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
         if (ctx.proverRequest.input.traceConfig.bGenerateCallTrace)
         {
             // Save output traces
-            call_trace.push_back(singleInfo);
+            call_trace.emplace_back(singleInfo);
         }
 
         if (ctx.proverRequest.input.traceConfig.bGenerateExecuteTrace)
         {
             // Save output traces
-            execution_trace.push_back(singleInfo);
+            execution_trace.emplace_back(singleInfo);
         }
     }
 

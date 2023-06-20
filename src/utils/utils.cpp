@@ -89,19 +89,31 @@ void getMemoryInfo(MemoryInfo &info)
     meminfo.close();
 }
 
-void printMemoryInfo(bool compact)
+void parseProcSelfStat (double &vm, double &rss)
+{
+    string aux;
+    ifstream ifs("/proc/self/stat", ios_base::in);
+    ifs >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> aux >> vm >> rss;
+}
+
+void printMemoryInfo(bool compact, const char * pMessage)
 {
     string s;
 
     string endLine = (compact ? ", " : "\n");
     string tab = (compact ? "" : "    ");
 
-    s = "MEMORY INFO" + endLine;
+    s = "MEMORY INFO " + (pMessage==NULL?"":string(pMessage)) + endLine;
 
     constexpr double factorMB = 1024;
 
     MemoryInfo info;
     getMemoryInfo(info);
+
+    double vm, rss;
+    parseProcSelfStat(vm, rss);
+    vm /= 1024*1024;
+    rss /= 1024*1024;
 
     s += tab + "MemTotal: "+ to_string(info.total / factorMB) + " MB" + endLine;
     s += tab + "MemFree: " + to_string(info.free / factorMB) + " MB" + endLine;
@@ -110,7 +122,9 @@ void printMemoryInfo(bool compact)
     s += tab + "Cached: " + to_string(info.cached / factorMB) + " MB" + endLine;
     s += tab + "SwapCached: " + to_string(info.swapCached / factorMB) + " MB" + endLine;
     s += tab + "SwapTotal: " + to_string(info.swapTotal / factorMB) + " MB" + endLine;
-    s += tab + "SwapFree: " + to_string(info.swapFree / factorMB) + " MB";
+    s += tab + "SwapFree: " + to_string(info.swapFree / factorMB) + " MB" + endLine;
+    s += tab + "VM: " + to_string(vm) + " MB" + endLine;
+    s += tab + "RSS: " + to_string(rss) + " MB";
 
     zklog.info(s);
 }

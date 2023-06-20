@@ -477,6 +477,10 @@ void Config::load(json &config)
     proverName = "UNSPECIFIED";
     if (config.contains("proverName") && config["proverName"].is_string())
         proverName = config["proverName"];
+
+    fullTracerTraceReserveSize = 256*1024;
+    if (config.contains("fullTracerTraceReserveSize") && config["fullTracerTraceReserveSize"].is_number())
+        fullTracerTraceReserveSize = config["fullTracerTraceReserveSize"];
 }
 
 void Config::print(void)

@@ -365,7 +365,7 @@ void getStringIncrement(const string &oldString, const string &newString, uint64
         }
     }
 
-    vector<Response> &responses(proverRequest.pFullTracer->get_responses());
+    vector<Response> &responses = proverRequest.pFullTracer->get_responses();
     for (uint64_t tx=0; tx<responses.size(); tx++)
     {
         // Remember the previous memory sent for each TX, and send only increments
