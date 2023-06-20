@@ -26,7 +26,7 @@ void printBa(uint8_t * pData, uint64_t dataSize, string name);
 void printBits(uint8_t * pData, uint64_t dataSize, string name);
 
 void getMemoryInfo(MemoryInfo &info);
-void printMemoryInfo(bool compact = false);
+void printMemoryInfo(bool compact = false, const char * pMessage = NULL);
 void printProcessInfo(bool compact = false);
 // Prints current call stack with function names (mangled)
 void printCallStack (void);
