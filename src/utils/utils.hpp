@@ -87,4 +87,8 @@ bool octalText2hexText (const string &octalText, string &hexText);
 // Get IP address
 void getIPAddress (string &ipAddress);
 
+// Gets the incremental of a string (old) vs. another (old), i.e. the set of chars that are different
+// If the new string is shorter than the old string, it returns the whole new string
+void getStringIncrement(const string &oldString, const string &newString, uint64_t &offset, uint64_t &length);
+
 #endif

@@ -591,6 +591,9 @@ void FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
     execution_trace.reserve(ctx.config.fullTracerTraceReserveSize);
     call_trace.clear();
     call_trace.reserve(ctx.config.fullTracerTraceReserveSize);
+
+    // Reset previous memory
+    previousMemory = "";
     
     txTime = getCurrentTime();
 
@@ -998,8 +1001,27 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
             fea2scalar(ctx.fr, auxScalar, memValue.fe0, memValue.fe1, memValue.fe2, memValue.fe3, memValue.fe4, memValue.fe5, memValue.fe6, memValue.fe7);
             finalMemory += PrependZeros(auxScalar.get_str(16), 64);
         }
-        
-        singleInfo.memory = finalMemory;
+
+        string baMemory = string2ba(finalMemory);
+
+        if (numOpcodes == 0)
+        {
+            singleInfo.memory_offset = 0;
+            singleInfo.memory = baMemory;
+        }
+        else if (baMemory != previousMemory)
+        {
+            uint64_t offset;
+            uint64_t length;
+            getStringIncrement(previousMemory, baMemory, offset, length);
+            if (length > 0)
+            {
+                singleInfo.memory_offset = offset;
+                singleInfo.memory = baMemory.substr(offset, length); // Content of memory, incremental
+            }
+            previousMemory = baMemory;
+        }
+        singleInfo.memory_size = baMemory.size();
     }
 
 #ifdef LOG_TIME_STATISTICS
@@ -1154,10 +1176,6 @@ void FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
         }
 
         prevTraceExecution->duration = TimeDiff(prevTraceExecution->startTime, singleInfo.startTime);
-
-        // Round up to next multiple of 32
-        getVarFromCtx(ctx, false, ctx.rom.memLengthOffset, auxScalar);
-        singleInfo.memory_size = (auxScalar.get_ui() / 32) * 32;
     }
 
     // Return data

@@ -46,6 +46,7 @@ public:
     unordered_map<string, InfoReadWrite> read_write_addresses;
     ReturnFromCreate returnFromCreate;
     unordered_map<uint64_t, ContextData> callData;
+    string previousMemory;
 #ifdef LOG_TIME_STATISTICS
     TimeMetricStorage tms;
     struct timeval t;

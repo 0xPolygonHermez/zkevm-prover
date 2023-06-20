@@ -566,3 +566,73 @@ void getIPAddress (string &ipAddress)
 
     freeifaddrs(pIfaddrs);
 }
+
+void getStringIncrement(const string &oldString, const string &newString, uint64_t &offset, uint64_t &length)
+{
+    // If new string is shorter, return it all
+    if (oldString.size() > newString.size())
+    {
+        offset = 0;
+        length = newString.size();
+        return;
+    }
+    
+    // Find first different char, and assign it to offset
+    int64_t i = 0;
+    for (; i < (int64_t)oldString.size(); i++)
+    {
+        if (oldString[i] != newString[i])
+        {
+            break;
+        }
+    }
+    if (i == (int64_t)oldString.size())
+    {
+        if (oldString.size() == newString.size()) // Identical strings
+        {
+            offset = 0;
+            length = 0;
+            return;
+        }
+        for (; i < (int64_t)newString.size(); i++)
+        {
+            if (newString[i] != 0)
+            {
+                break;
+            }
+        }
+        if (i == (int64_t)newString.size()) // new string is all zeros
+        {
+            offset = 0;
+            length = 0;
+            return;
+        }
+    }
+    offset = i;
+
+    // If new string is longer, find last non-zero byte, if any
+    if (newString.size() > oldString.size())
+    {
+        for (i = (int64_t)newString.size()-1; i >= (int64_t)oldString.size(); i--)
+        {
+            if (newString[i] != 0)
+            {
+                length = i + 1 - offset;
+                return;
+            }
+        }     
+    }
+
+
+    // Find last different char, and calculate length
+    for (i = (int64_t)oldString.size() - 1; i >= 0; i--)
+    {
+        if (oldString[i] != newString[i])
+        {
+            length = i + 1 - offset;
+            return;
+        }
+    }
+
+    length = 0;
+}

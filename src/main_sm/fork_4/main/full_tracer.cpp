@@ -700,6 +700,9 @@ zkresult FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
     execution_trace.reserve(ctx.config.fullTracerTraceReserveSize);
     call_trace.clear();
     call_trace.reserve(ctx.config.fullTracerTraceReserveSize);
+
+    // Reset previous memory
+    previousMemory = "";
     
     txTime = getCurrentTime();
 
@@ -1182,7 +1185,26 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
             finalMemory += PrependZeros(auxScalar.get_str(16), 64);
         }
         
-        singleInfo.memory = finalMemory;
+        string baMemory = string2ba(finalMemory);
+
+        if (numOpcodes == 0)
+        {
+            singleInfo.memory_offset = 0;
+            singleInfo.memory = baMemory;
+        }
+        else if (baMemory != previousMemory)
+        {
+            uint64_t offset;
+            uint64_t length;
+            getStringIncrement(previousMemory, baMemory, offset, length);
+            if (length > 0)
+            {
+                singleInfo.memory_offset = offset;
+                singleInfo.memory = baMemory.substr(offset, length); // Content of memory, incremental
+            }
+            previousMemory = baMemory;
+        }
+        singleInfo.memory_size = baMemory.size();
     }
 
 #ifdef LOG_TIME_STATISTICS
@@ -1409,15 +1431,6 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
         }
 
         prevTraceExecution->duration = TimeDiff(prevTraceExecution->startTime, singleInfo.startTime);
-
-        // Round up to next multiple of 32
-        zkr = getVarFromCtx(ctx, false, ctx.rom.memLengthOffset, auxScalar);
-        if (zkr != ZKR_SUCCESS)
-        {
-            zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.memLengthOffset)");
-            return zkr;
-        }
-        singleInfo.memory_size = (auxScalar.get_ui() / 32) * 32;
     }
 
     // Return data
