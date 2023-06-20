@@ -102,5 +102,7 @@
     "requestsPersistence": 3600,
     "maxExecutorThreads": 20,
     "maxProverThreads": 8,
-    "maxHashDBThreads": 8
+    "maxStateDBThreads": 8,
+
+    "fullTracerTraceReserveSize": 262144
 }
