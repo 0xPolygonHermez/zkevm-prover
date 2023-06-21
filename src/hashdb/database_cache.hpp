@@ -5,6 +5,7 @@
 #include "goldilocks_base_field.hpp"
 #include <nlohmann/json.hpp>
 #include <mutex>
+#include "zklog.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -41,9 +42,11 @@ protected:
     ~DatabaseCache();
     bool addKeyValue(const string &key, const void * value, const bool update); // returns true if cache is full
     bool findKey(const string &key, DatabaseCacheRecord* &record);
-    virtual DatabaseCacheRecord* allocRecord(const string key, const void * value) { return NULL;};
-    virtual void freeRecord(DatabaseCacheRecord* record) {};
-    virtual void updateRecord(DatabaseCacheRecord* record, const void * value) {};
+
+public:
+    virtual DatabaseCacheRecord* allocRecord(const string key, const void * value) = 0;
+    virtual void freeRecord(DatabaseCacheRecord* record) = 0;
+    virtual void updateRecord(DatabaseCacheRecord* record, const void * value) = 0;
 
 public:
     uint64_t getMaxSize(void) { return maxSize; };
@@ -57,22 +60,24 @@ public:
 
 class DatabaseMTCache : public DatabaseCache
 {
-public:  
+public:
+    ~DatabaseMTCache();
     bool add(const string &key, const vector<Goldilocks::Element> &value, const bool update); // returns true if cache is full
     bool find(const string &key, vector<Goldilocks::Element> &value);
-    DatabaseCacheRecord* allocRecord(const string key, const void * value);
-    void freeRecord(DatabaseCacheRecord* record);
-    void updateRecord(DatabaseCacheRecord* record, const void * value);
+    DatabaseCacheRecord* allocRecord(const string key, const void * value) override;
+    void freeRecord(DatabaseCacheRecord* record) override;
+    void updateRecord(DatabaseCacheRecord* record, const void * value) override;
 };
 
 class DatabaseProgramCache : public DatabaseCache
 {
 public:  
+    ~DatabaseProgramCache();
     bool add(const string &key, const vector<uint8_t> &value, const bool update); // returns true if cache is full
     bool find(const string &key, vector<uint8_t> &value);
-    DatabaseCacheRecord* allocRecord(const string key, const void * value);
-    void freeRecord(DatabaseCacheRecord* record);
-    void updateRecord(DatabaseCacheRecord* record, const void * value);
+    DatabaseCacheRecord* allocRecord(const string key, const void * value) override;
+    void freeRecord(DatabaseCacheRecord* record) override;
+    void updateRecord(DatabaseCacheRecord* record, const void * value) override;
 };
 
 #endif
