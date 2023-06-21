@@ -4554,7 +4554,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
     if (!bFastMode)
     code += "        exitProcess();\n";
     code += "    }\n";
-    code += "    if (ctx.lastStep > " + (string)rom["constants"]["MAX_CNT_STEPS_LIMIT"]["value"] + ")\n";
+    code += "    if (!proverRequest.input.bNoCounters && (ctx.lastStep > " + (string)rom["constants"]["MAX_CNT_STEPS_LIMIT"]["value"] + "))\n";
     code += "    {\n";
     code += "        proverRequest.result = ZKR_SM_MAIN_OUT_OF_STEPS;\n";
     code += "        mainExecutor.logError(ctx, \"Found ctx.lastStep=\" + to_string(ctx.lastStep) + \" > MAX_CNT_STEPS_LIMIT=" + (string)rom["constants"]["MAX_CNT_STEPS_LIMIT"]["value"] + "\");\n";
@@ -4565,42 +4565,42 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    }\n\n";
 
     code += "#ifdef CHECK_MAX_CNT_AT_THE_END\n";
-    code += "    if (fr.toU64(pols.cntArith[0]) > " + (string)rom["constants"]["MAX_CNT_ARITH_LIMIT"]["value"] + ")\n";
+    code += "    if (!proverRequest.input.bNoCounters && (fr.toU64(pols.cntArith[0]) > " + (string)rom["constants"]["MAX_CNT_ARITH_LIMIT"]["value"] + "))\n";
     code += "    {\n";
     code += "        proverRequest.result = ZKR_SM_MAIN_OOC_ARITH;\n";
     code += "        mainExecutor.logError(ctx, \"Found pols.cntArith[0]=\" + to_string(fr.toU64(pols.cntArith[0])) + \" > MAX_CNT_ARITH_LIMIT=" + (string)rom["constants"]["MAX_CNT_ARITH_LIMIT"]["value"] + "\");\n";
     if (!bFastMode)
         code += "        exitProcess();\n";
     code += "    }\n";
-    code += "    if (fr.toU64(pols.cntBinary[0]) > " + (string)rom["constants"]["MAX_CNT_BINARY_LIMIT"]["value"] + ")\n";
+    code += "    if (!proverRequest.input.bNoCounters && (fr.toU64(pols.cntBinary[0]) > " + (string)rom["constants"]["MAX_CNT_BINARY_LIMIT"]["value"] + "))\n";
     code += "    {\n";
     code += "        proverRequest.result = ZKR_SM_MAIN_OOC_BINARY;\n";
     code += "        mainExecutor.logError(ctx, \"Found pols.cntBinary[0]=\" + to_string(fr.toU64(pols.cntBinary[0])) + \" > MAX_CNT_BINARY_LIMIT=" + (string)rom["constants"]["MAX_CNT_BINARY_LIMIT"]["value"] + "\");\n";
     if (!bFastMode)
         code += "        exitProcess();\n";
     code += "    }\n";
-    code += "    if (fr.toU64(pols.cntMemAlign[0]) > " + (string)rom["constants"]["MAX_CNT_MEM_ALIGN_LIMIT"]["value"] + ")\n";
+    code += "    if (!proverRequest.input.bNoCounters && (fr.toU64(pols.cntMemAlign[0]) > " + (string)rom["constants"]["MAX_CNT_MEM_ALIGN_LIMIT"]["value"] + "))\n";
     code += "    {\n";
     code += "        proverRequest.result = ZKR_SM_MAIN_OOC_MEM_ALIGN;\n";
     code += "        mainExecutor.logError(ctx, \"Found pols.cntMemAlign[0]=\" + to_string(fr.toU64(pols.cntMemAlign[0])) + \" > MAX_CNT_MEM_ALIGN_LIMIT=" + (string)rom["constants"]["MAX_CNT_MEM_ALIGN_LIMIT"]["value"] + "\");\n";
     if (!bFastMode)
         code += "        exitProcess();\n";
     code += "    }\n";
-    code += "    if (fr.toU64(pols.cntKeccakF[0]) > " + (string)rom["constants"]["MAX_CNT_KECCAK_F_LIMIT"]["value"] + ")\n";
+    code += "    if (!proverRequest.input.bNoCounters && (fr.toU64(pols.cntKeccakF[0]) > " + (string)rom["constants"]["MAX_CNT_KECCAK_F_LIMIT"]["value"] + "))\n";
     code += "    {\n";
     code += "        proverRequest.result = ZKR_SM_MAIN_OOC_KECCAK_F;\n";
     code += "        mainExecutor.logError(ctx, \"Found pols.cntKeccakF[0]=\" + to_string(fr.toU64(pols.cntKeccakF[0])) + \" > MAX_CNT_KECCAK_F_LIMIT=" + (string)rom["constants"]["MAX_CNT_KECCAK_F_LIMIT"]["value"] + "\");\n";
     if (!bFastMode)
         code += "        exitProcess();\n";
     code += "    }\n";
-    code += "    if (fr.toU64(pols.cntPaddingPG[0]) > " + (string)rom["constants"]["MAX_CNT_PADDING_PG_LIMIT"]["value"] + ")\n";
+    code += "    if (!proverRequest.input.bNoCounters && (fr.toU64(pols.cntPaddingPG[0]) > " + (string)rom["constants"]["MAX_CNT_PADDING_PG_LIMIT"]["value"] + "))\n";
     code += "    {\n";
     code += "        proverRequest.result = ZKR_SM_MAIN_OOC_PADDING_PG;\n";
     code += "        mainExecutor.logError(ctx, \"Found pols.cntPaddingPG[0]=\" + to_string(fr.toU64(pols.cntPaddingPG[0])) + \" > MAX_CNT_PADDING_PG_LIMIT=" + (string)rom["constants"]["MAX_CNT_PADDING_PG_LIMIT"]["value"] + "\");\n";
     if (!bFastMode)
         code += "        exitProcess();\n";
     code += "    }\n";
-    code += "    if (fr.toU64(pols.cntPoseidonG[0]) > " + (string)rom["constants"]["MAX_CNT_POSEIDON_G_LIMIT"]["value"] + ")\n";
+    code += "    if (!proverRequest.input.bNoCounters && (fr.toU64(pols.cntPoseidonG[0]) > " + (string)rom["constants"]["MAX_CNT_POSEIDON_G_LIMIT"]["value"] + "))\n";
     code += "    {\n";
     code += "        proverRequest.result = ZKR_SM_MAIN_OOC_POSEIDON_G;\n";
     code += "        mainExecutor.logError(ctx, \"Found pols.cntPoseidonG[0]=\" + to_string(fr.toU64(pols.cntPoseidonG[0])) + \" > MAX_CNT_POSEIDON_G_LIMIT=" + (string)rom["constants"]["MAX_CNT_POSEIDON_G_LIMIT"]["value"] + "\");\n";
