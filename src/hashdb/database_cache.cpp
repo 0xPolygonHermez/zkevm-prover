@@ -3,6 +3,7 @@
 #include "scalar.hpp"
 #include "zklog.hpp"
 #include "zkmax.hpp"
+#include "timer.hpp"
 
 // DatabaseCache class implementation
 
@@ -58,11 +59,12 @@ bool DatabaseCache::addKeyValue(const string &key, const void * value, const boo
     currentSize += record->size;
     full = (currentSize > maxSize); 
     // remove lats records from the cache to be under maxSize
-    while (currentSize > maxSize) 
+
+    while ((currentSize > maxSize) && (last->prev != NULL))
     {
         // Set new last record
         DatabaseCacheRecord* tmp = last;
-        if (last->prev != NULL) last->prev->next = NULL;
+        last->prev->next = NULL;
         last = last->prev;
         
         // Free old last record
@@ -112,6 +114,7 @@ bool DatabaseCache::findKey(const string &key, DatabaseCacheRecord* &record)
 
 void DatabaseCache::print(bool printContent)
 {
+    zklog.info("DatabaseCache::print() printContent=" + to_string(printContent) + " name=" + name);
     zklog.info("Cache current size: " + to_string(currentSize));
     zklog.info("Cache max size: " + to_string(maxSize));
     zklog.info("Head: " + (head != NULL ? head->key : "NULL"));
@@ -124,7 +127,7 @@ void DatabaseCache::print(bool printContent)
     {
         if (printContent)
         {
-            zklog.info("key:" + record->key);
+            zklog.info("key:" + record->key + " size=" + to_string(record->size) + " prev=" + to_string((uint64_t)record->prev) + " next=" + to_string((uint64_t)record->next));
         }
         count++;
         size += record->size;
@@ -156,10 +159,20 @@ void DatabaseCache::clear(void)
 
 DatabaseCache::~DatabaseCache()
 {
-    clear();
+    TimerStart(DATABASE_CACHE_DESTRUCTOR);
+    //clear();
+    TimerStopAndLog(DATABASE_CACHE_DESTRUCTOR);
 }
 
 // DatabaseMTCache class implementation
+
+
+DatabaseMTCache::~DatabaseMTCache()
+{
+    TimerStart(DATABASE_MT_CACHE_DESTRUCTOR);
+    clear();
+    TimerStopAndLog(DATABASE_MT_CACHE_DESTRUCTOR);
+}
 
 // Add a record in the head of the MT cache. Returns true if the cache is full (or no cache), false otherwise
 bool DatabaseMTCache::add(const string &key, const vector<Goldilocks::Element> &value, const bool update)
@@ -230,6 +243,14 @@ void DatabaseMTCache::updateRecord(DatabaseCacheRecord* record, const void * val
 }
 
 // DatabaseProgramCache class implementation
+
+DatabaseProgramCache::~DatabaseProgramCache()
+{
+    TimerStart(DATABASE_PROGRAM_CACHE_DESTRUCTOR);
+    clear();
+    TimerStopAndLog(DATABASE_PROGRAM_CACHE_DESTRUCTOR);
+}
+
 // Add a record in the head of the Program cache. Returns true if the cache is full (or no cache), false otherwise
 bool DatabaseProgramCache::add(const string &key, const vector<uint8_t> &value, const bool update)
 {

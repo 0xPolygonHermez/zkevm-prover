@@ -142,6 +142,8 @@ Prover::Prover(Goldilocks &fr,
 
 Prover::~Prover()
 {
+    mpz_clear(altBbn128r);
+
     if (config.generateProof())
     {
         Groth16::Prover<AltBn128::Engine> *pGroth16 = groth16Prover.release();
@@ -158,8 +160,6 @@ Prover::~Prover()
         delete pGroth16;
         delete pZkey;
         delete pZkeyHeader;
-
-        mpz_clear(altBbn128r);
 
         uint64_t polsSize = starkZkevm->starkInfo.mapTotalN * sizeof(Goldilocks::Element) + starkZkevm->starkInfo.mapSectionsN.section[eSection::cm1_n] * (1 << starkZkevm->starkInfo.starkStruct.nBits) * FIELD_EXTENSION * sizeof(Goldilocks::Element);
 

@@ -36,6 +36,7 @@
 #include "ecrecover_test.hpp"
 #include "hashdb_singleton.hpp"
 #include "unit_test.hpp"
+#include "database_cache_test.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -542,6 +543,12 @@ int main(int argc, char **argv)
         ECRecoverTest();
     }
 
+    // Test Database cache
+    if (config.runDatabaseCacheTest)
+    {
+        DatabaseCacheTest();
+    }
+
     // Unit test
     if (config.runUnitTest)
     {
@@ -555,7 +562,7 @@ int main(int argc, char **argv)
         !config.runFileGenBatchProof && !config.runFileGenAggregatedProof && !config.runFileGenFinalProof &&
         !config.runFileProcessBatch && !config.runFileProcessBatchMultithread && !config.runFileExecute)
     {
-        exit(0);
+        return 0;
     }
 
 #if 0

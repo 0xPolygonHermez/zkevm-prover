@@ -8,6 +8,7 @@
 #include "storage_test.hpp"
 #include "keccak_executor_test.hpp"
 #include "get_string_increment_test.hpp"
+#include "database_cache_test.hpp"
 
 uint64_t UnitTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config)
 {
@@ -42,6 +43,10 @@ uint64_t UnitTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &c
     TimerStart(UNIT_TEST_GET_STRING_INCREMENT);
     numberOfErrors += GetStringIncrementTest();
     TimerStopAndLog(UNIT_TEST_GET_STRING_INCREMENT);
+
+    TimerStart(UNIT_TEST_DATABASE_CACHE);
+    numberOfErrors += DatabaseCacheTest();
+    TimerStopAndLog(UNIT_TEST_DATABASE_CACHE);
     
     TimerStopAndLog(UNIT_TEST);
     
