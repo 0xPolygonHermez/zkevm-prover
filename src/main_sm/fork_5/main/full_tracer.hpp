@@ -127,6 +127,18 @@ public:
     }
 };
 
+void getTransactionHash( string    &to,
+                         mpz_class value,
+                         uint64_t  nonce,
+                         uint64_t  gasLimit,
+                         mpz_class gasPrice,
+                         string    &data,
+                         mpz_class &r,
+                         mpz_class &s,
+                         uint64_t  v,
+                         string    &txHash,
+                         string    &rlpTx );
+                         
 } // namespace
 
 #endif

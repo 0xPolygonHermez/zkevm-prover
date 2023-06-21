@@ -159,13 +159,13 @@ void Executor::process_batch (ProverRequest &proverRequest)
         }
         case 5: // fork_5
         {
-            if (config.useMainExecGenerated)
-            {
-                fork_5::main_exec_generated_fast(mainExecutor_fork_5, proverRequest);
-            }
-            else if (config.useMainExecC)
+            if (config.useMainExecC)
             {
                 mainExecutorC_fork_5.execute(proverRequest);
+            }
+            else if (config.useMainExecGenerated)
+            {
+                fork_5::main_exec_generated_fast(mainExecutor_fork_5, proverRequest);
             }
             else
             {
