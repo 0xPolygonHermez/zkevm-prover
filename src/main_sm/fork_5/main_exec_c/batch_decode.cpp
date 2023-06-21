@@ -46,6 +46,9 @@ zkresult BatchDecode(const string &input, BatchData (&batchData))
         // TX data
         TXData txData;
 
+        // RLP data
+        txData.rlpData = rlpData[0].data;
+
         // Nonce
         if (rlpData[0].rlpData[0].type != rlpTypeString)
         {
@@ -117,7 +120,7 @@ zkresult BatchDecode(const string &input, BatchData (&batchData))
             zklog.error("BatchDecode() called RLPDecode() but found unexpected type");
             return ZKR_UNSPECIFIED;
         }
-        txData.data = rlpData[0].rlpData[5].data;
+        txData.data = "0x" + rlpData[0].rlpData[5].data;
 
         // Chain ID
         if (rlpData[0].rlpData[6].type != rlpTypeString)

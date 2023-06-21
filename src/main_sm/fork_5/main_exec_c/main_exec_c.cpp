@@ -161,6 +161,10 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
         zklog.info("main_exec_c() processing tx=" + to_string(tx));
         batchData.tx[tx].print();
 
+        // calculate tx hash
+        string signHash = batchData.tx[tx].signHash();
+        zklog.info("signHash=" + signHash);
+
         // Verify signature and obtain public from key
         //ecRecover(r, s, v, hash) -> obtain public key
 

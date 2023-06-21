@@ -18,6 +18,7 @@ public:
 
     // Batch L2 data is made of an RLP section followed by a set of concatenated binary values
     // Batch L2 data = RLPList(nonde, gasPrice, gasLimit, to, value, data, chainId, "", "") + r(32) + s(32) + v(1) + gasPercentage(1)
+    string rlpData; // Original RLP data, as present in batch L2 data
 
     // Data obtained from batch L2 data RLP section
     uint64_t nonce; // 64 bits max
@@ -35,22 +36,13 @@ public:
     uint8_t gasPercentage;
 
     // Print contents, for debugging purposes
-    void print (void)
-    {
-        zklog.info(
-            "TXData::print() nonce=" + to_string(nonce) +
-            " gasPrice=" + gasPrice.get_str(10) +
-            " gasLimit=" + to_string(gasLimit) +
-            " to=0x" + to.get_str(16) +
-            " value=" + value.get_str(10) +
-            " data=0x" + ba2string(data) +
-            " chainId=" + to_string(chainId) +
-            " r=0x" + r.get_str(16) +
-            " s=0x" + s.get_str(16) +
-            " v=" + to_string(v) +
-            " gasPercentage=" + to_string(gasPercentage)
-            );
-    }
+    void print (void);
+
+    // Gets tx hash
+    string txHash (void);
+
+    // Get signature hash, to be used to validate the signature and get the from public key
+    string signHash (void);
 };
 
 }

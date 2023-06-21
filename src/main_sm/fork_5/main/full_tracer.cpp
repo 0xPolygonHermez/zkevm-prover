@@ -237,17 +237,17 @@ inline uint64_t getCurrentTime (void)
 using namespace rlp;
 
 // Returns a transaction hash from transaction params
-inline void getTransactionHash( string    &to,
-                                mpz_class value,
-                                uint64_t  nonce,
-                                uint64_t  gasLimit,
-                                mpz_class gasPrice,
-                                string    &data,
-                                mpz_class &r,
-                                mpz_class &s,
-                                uint64_t  v,
-                                string    &txHash,
-                                string    &rlpTx )
+void getTransactionHash( string    &to,
+                         mpz_class value,
+                         uint64_t  nonce,
+                         uint64_t  gasLimit,
+                         mpz_class gasPrice,
+                         string    &data,
+                         mpz_class &r,
+                         mpz_class &s,
+                         uint64_t  v,
+                         string    &txHash,
+                         string    &rlpTx )
 {
 #ifdef LOG_TX_HASH
     zklog.info("FullTracer::getTransactionHash() to=" + to + " value=" + value.get_str(16) + " nonce=" + to_string(nonce) + " gasLimit=" + to_string(gasLimit) + " gasPrice=" + gasPrice.get_str(10) + " data=" + data + " r=0x" + r.get_str(16) + " s=0x" + s.get_str(16) + " v=" + to_string(v));

@@ -21,7 +21,7 @@ zkresult RLPStringToU64 (const string &input, uint64_t &output)
     }
 
     // Accumulate bytes into result
-    for (int64_t i = input.size()-1; i >= 0; i--)
+    for (uint64_t i=0; i<input.size(); i++)
     {
         output = 256*output + (uint8_t)input[i];
     }
@@ -46,7 +46,7 @@ zkresult RLPStringToU160 (const string &input, mpz_class &output)
     }
 
     // Accumulate bytes into result
-    for (int64_t i = input.size()-1; i >= 0; i--)
+    for (uint64_t i=0; i<input.size(); i++)
     {
         output = 256*output + (uint8_t)input[i];
     }
@@ -71,7 +71,7 @@ zkresult RLPStringToU256 (const string &input, mpz_class &output)
     }
 
     // Accumulate bytes into result
-    for (int64_t i = input.size()-1; i >= 0; i--)
+    for (uint64_t i=0; i<input.size(); i++)
     {
         output = 256*output + (uint8_t)input[i];
     }
