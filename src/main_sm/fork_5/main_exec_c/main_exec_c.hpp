@@ -32,8 +32,6 @@ public:
     };
 
     void execute (ProverRequest &proverRequest);
-
-    zkresult SLOAD(Context &ctx, ContextC &ctxc, const mpz_class &a, const mpz_class &b, const mpz_class &c, mpz_class &d);
 };
 
 }
