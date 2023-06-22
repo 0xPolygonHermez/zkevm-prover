@@ -104,6 +104,10 @@ void Config::load(json &config)
     if (config.contains("runECRecoverTest") && config["runECRecoverTest"].is_boolean())
         runECRecoverTest = config["runECRecoverTest"];
 
+    runDatabaseCacheTest = false;
+    if (config.contains("runDatabaseCacheTest") && config["runDatabaseCacheTest"].is_boolean())
+        runDatabaseCacheTest = config["runDatabaseCacheTest"];
+
     runUnitTest = false;
     if (config.contains("runUnitTest") && config["runUnitTest"].is_boolean())
         runUnitTest = config["runUnitTest"];
@@ -494,6 +498,10 @@ void Config::load(json &config)
     proverName = "UNSPECIFIED";
     if (config.contains("proverName") && config["proverName"].is_string())
         proverName = config["proverName"];
+
+    fullTracerTraceReserveSize = 256*1024;
+    if (config.contains("fullTracerTraceReserveSize") && config["fullTracerTraceReserveSize"].is_number())
+        fullTracerTraceReserveSize = config["fullTracerTraceReserveSize"];
 }
 
 void Config::print(void)
@@ -548,6 +556,8 @@ void Config::print(void)
         zklog.info("    runBlakeTest=true");
     if (runECRecoverTest)
         zklog.info("    runECRecoverTest=true");
+    if (runDatabaseCacheTest)
+        zklog.info("    runDatabaseCacheTest=true");
     if (runUnitTest)
         zklog.info("    runUnitTest=true");
 
@@ -663,4 +673,5 @@ void Config::print(void)
     zklog.info("    dbMTCacheSize=" + to_string(dbMTCacheSize));
     zklog.info("    dbProgramCacheSize=" + to_string(dbProgramCacheSize));
     zklog.info("    loadDBToMemTimeout=" + to_string(loadDBToMemTimeout));
+    zklog.info("    fullTracerTraceReserveSize=" + to_string(fullTracerTraceReserveSize));
 }

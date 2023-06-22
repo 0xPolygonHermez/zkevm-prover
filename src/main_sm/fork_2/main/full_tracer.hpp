@@ -37,7 +37,7 @@ public:
     uint64_t txTime; // in us
     vector<vector<mpz_class>> fullStack;// Stack of the transaction
     uint64_t accBatchGas;
-    unordered_map<uint64_t,unordered_map<uint64_t,Log>> logs;
+    map<uint64_t,map<uint64_t,Log>> logs;
     vector<Opcode> call_trace;
     vector<Opcode> execution_trace;
     string lastError;
@@ -46,6 +46,7 @@ public:
     unordered_map<string, InfoReadWrite> read_write_addresses;
     ReturnFromCreate returnFromCreate;
     unordered_map<uint64_t, ContextData> callData;
+    string previousMemory;
 #ifdef LOG_TIME_STATISTICS
     TimeMetricStorage tms;
     struct timeval t;

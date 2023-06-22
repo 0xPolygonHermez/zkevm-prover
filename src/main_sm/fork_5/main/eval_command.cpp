@@ -9,6 +9,10 @@
 
 namespace fork_5
 {
+    // As our field prime p, verifies p = 3 mod 4, for any r, sqrt(r) = r^((p+1)/4), check:
+    // https://www.rieselprime.de/ziki/Modular_square_root. FSQRT_EXP is (p+1)/4.
+    mpz_class FSQRTEXP("0x3fffffffffffffffffffffffffffffffffffffffffffffffffffffffbfffff0c");
+    mpz_class FPRIME("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F");
 
 #ifdef DEBUG
 #define CHECK_EVAL_COMMAND_PARAMETERS
@@ -1734,75 +1738,6 @@ void eval_loadScalar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
 void eval_storeLog (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
-#ifdef CHECK_EVAL_COMMAND_PARAMETERS
-    // Check parameters list size
-    if (cmd.params.size() != 3)
-    {
-        zklog.error("eval_storeLog() invalid number of parameters function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
-        exitProcess();
-    }
-#endif
-
-    // Get indexLog by executing cmd.params[0]
-    evalCommand(ctx, *cmd.params[0], cr);
-    if (cr.zkResult != ZKR_SUCCESS)
-    {
-        return;
-    }
-#ifdef CHECK_EVAL_COMMAND_PARAMETERS
-    if (cr.type != crt_scalar)
-    {
-        zklog.error("eval_storeLog() param 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
-        exitProcess();
-    }
-#endif
-    uint64_t indexLog = cr.scalar.get_ui();;
-
-    // Get isTopic by executing cmd.params[1]
-    evalCommand(ctx, *cmd.params[1], cr);
-    if (cr.zkResult != ZKR_SUCCESS)
-    {
-        return;
-    }
-#ifdef CHECK_EVAL_COMMAND_PARAMETERS
-    if (cr.type != crt_scalar)
-    {
-        zklog.error("eval_storeLog() param 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
-        exitProcess();
-    }
-#endif
-    uint32_t isTopic = cr.scalar.get_ui();
-
-    // Get isTopic by executing cmd.params[2]
-    evalCommand(ctx, *cmd.params[2], cr);
-    if (cr.zkResult != ZKR_SUCCESS)
-    {
-        return;
-    }
-#ifdef CHECK_EVAL_COMMAND_PARAMETERS
-    if (cr.type != crt_scalar)
-    {
-        zklog.error("eval_storeLog() param 2 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
-        exitProcess();
-    }
-#endif
-    mpz_class data = cr.scalar;
-
-    if (ctx.outLogs.find(indexLog) == ctx.outLogs.end())
-    {
-        OutLog outLog;
-        ctx.outLogs[indexLog] = outLog;
-    }
-
-    if (isTopic)
-    {
-        ctx.outLogs[indexLog].topics.push_back(data.get_str(16));
-    }
-    else
-    {
-        ctx.outLogs[indexLog].data.push_back(data.get_str(16));
-    }
-
     zkassert(ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID == 5); // fork_5
     cr.zkResult = ((fork_5::FullTracer *)ctx.proverRequest.pFullTracer)->handleEvent(ctx, cmd);
 
@@ -2253,13 +2188,20 @@ void eval_sqrtFpEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     }
 #endif
 
-    RawFec::Element pfe = ctx.fec.negOne();
-    mpz_class p;
-    ctx.fec.toMpz(p.get_mpz_t(), pfe); // TODO: Avoid converting evry time, create a global value
-    p++;
+    // We use that p = 3 mod 4, so r = a^((p+1)/4) is a square root of a
+    // https://www.rieselprime.de/ziki/Modular_square_root
     mpz_class a = cr.scalar;
     cr.type = crt_scalar;
-    cr.scalar = sqrtTonelliShanks(a, p);
+    mpz_class result;
+    mpz_powm(result.get_mpz_t(), a.get_mpz_t(), FSQRTEXP.get_mpz_t(), FPRIME.get_mpz_t());
+    if ((result * result) % FPRIME != a)
+    {
+        cr.scalar = 0;
+    }
+    else
+    {
+        cr.scalar = result;
+    }
 }
 
 /********************/

@@ -1,6 +1,7 @@
 #include "main_sm/fork_5/main_exec_c/main_exec_c.hpp"
 #include "main_sm/fork_5/main_exec_c/context_c.hpp"
 #include "main_sm/fork_5/main_exec_c/variables_c.hpp"
+#include "main_sm/fork_5/main_exec_c/batch_decode.hpp"
 #include "main_sm/fork_5/main/eval_command.hpp"
 #include "main_sm/fork_5/main/context.hpp"
 #include "scalar.hpp"
@@ -88,6 +89,7 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
     {
         zklog.error("main_exec_c() called with invalid forkID=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID));
         proverRequest.result = ZKR_SM_MAIN_INVALID_FORK_ID;
+        HashDBClientFactory::freeHashDBClient(pHashDB);
         return;
     }
 
@@ -133,212 +135,56 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
     // Set batchL2DataLength
     ctxc.globalVars.batchL2DataLength = proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size();
 
-/*
+    BatchData batchData;
+    zkresult result = BatchDecode(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data, batchData);
+    if (result != ZKR_SUCCESS)
+    {
+        zklog.error("main_exec_c() failed calling BatchDecode()");
+        proverRequest.result = result;
+        HashDBClientFactory::freeHashDBClient(pHashDB);
+        return;
+    }
 
-;;;;;;;;;;;;;;;;;;
-;; B - Set batch global variables
-;;     - set globalExitRoot in Bridge contract
-;;     - load transaction count from system smart contract
-;;     - compute keccaks needed to finish the batch
-;;;;;;;;;;;;;;;;;;
-        $${eventLog(onStartBatch, C)}*/
-
-    RomCommand cmd;
-    zkresult result = ((fork_5::FullTracer *)ctx.proverRequest.pFullTracer)->onStartBatch(ctx, cmd);
+    /*RomCommand cmd;
+    result = ((fork_5::FullTracer *)ctx.proverRequest.pFullTracer)->onStartBatch(ctx, cmd);
     if (result != ZKR_SUCCESS)
     {
         zklog.error("main_exec_c() failed calling onStartBatch()");
         proverRequest.result = result;
         HashDBClientFactory::freeHashDBClient(pHashDB);
         return;
-    }
+    }*/
 
-/*
-
-        $ => A                                  :MLOAD(globalExitRoot)
-        0 => B
-        $                                       :EQ, JMPC(skipSetGlobalExitRoot)
-*/
-    if (ctxc.globalVars.globalExitRoot != 0)
+    for (uint64_t tx=0; tx<batchData.tx.size(); tx++)
     {
-/*
-;; Set global exit root
-setGlobalExitRoot:
-        0 => HASHPOS
-        $ => E                                  :MLOAD(lastHashKIdUsed)
-        E+1 => E                                :MSTORE(lastHashKIdUsed)*/
+        // Log TX info
+        zklog.info("main_exec_c() processing tx=" + to_string(tx));
+        batchData.tx[tx].print();
 
+        // calculate tx hash
+        string signHash = batchData.tx[tx].signHash();
+        zklog.info("signHash=" + signHash);
 
-        // Set global exit root
-        ctxc.globalVars.lastHashKIdUsed++;  // TODO: reset vars to 0
-/*
-        32 => D
-        A                                       :HASHK(E)
-        %GLOBAL_EXIT_ROOT_STORAGE_POS           :HASHK(E) ; Storage position of the global exit root map
-        HASHPOS                                 :HASHKLEN(E)
-        $ => C                                  :HASHKDIGEST(E)
+        // Verify signature and obtain public from key
+        //ecRecover(r, s, v, hash) -> obtain public key
 
-        %ADDRESS_GLOBAL_EXIT_ROOT_MANAGER_L2 => A
-        %SMT_KEY_SC_STORAGE => B
+        // from.account.balance -= value + gas*gasPrice;
+        //SMT.get -> balance > x
+        //SMT.set -> balance = y = x - value - gas*gasPrice
 
-        ; read timestamp given the globalExitRoot
-        ; skip overwrite timestamp if it is different than 0
-        ; Since timestamp is enforced by the smart contract it is safe to compare only 32 bits in 'op0' with JMPNZ
-        $ => D                                  :SLOAD, JMPNZ(skipSetGlobalExitRoot)
-
-        $ => D                                  :MLOAD(timestamp)
-        $ => SR                                 :SSTORE ; Store 'timestamp' in storage position 'keccak256(globalExitRoot, 0)'
-*/
-
+        // to.account.balance += value
+        //SMT.get -> balance = x
+        //SMT.set -> balance = y = x + value
     }
-/*
-skipSetGlobalExitRoot:
-        SR                                      :MSTORE(batchSR) */
 
-    ctxc.globalVars.batchSR = ctxc.regs.SR;
-
-/*
-        ; Load current tx count
-        %LAST_TX_STORAGE_POS => C
-        %ADDRESS_SYSTEM => A
-        %SMT_KEY_SC_STORAGE => B
-        $ => D          :SLOAD
-        D               :MSTORE(txCount)
-*/
-    result = SLOAD(ctx, ctxc, ctx.rom.constants.ADDRESS_SYSTEM, ctx.rom.constants.SMT_KEY_SC_STORAGE, ctx.rom.constants.LAST_TX_STORAGE_POS, ctxc.globalVars.txCount);
+    /*result = ((fork_5::FullTracer *)ctx.proverRequest.pFullTracer)->onFinishBatch(ctx, cmd);
     if (result != ZKR_SUCCESS)
     {
-        zklog.error("MainExecutorC::execute() failed calling SLOAD() result=" + zkresult2string(result));
+        zklog.error("main_exec_c() failed calling onFinishBatch()");
         proverRequest.result = result;
         HashDBClientFactory::freeHashDBClient(pHashDB);
         return;
-    }
-/*
-        ; Compute necessary keccak counters to finish batch
-        $ => A          :MLOAD(batchL2DataLength)
-        ; Divide the total data length + 1 by 136 to obtain the keccak counter increment.
-        ; 136 is the value used by the prover to increment keccak counters
-        A + 1                                   :MSTORE(arithA)
-        136                                     :MSTORE(arithB), CALL(divARITH); in: [arithA, arithB] out: [arithRes1: arithA/arithB, arithRes2: arithA%arithB]
-        $ => B                                  :MLOAD(arithRes1)
-        ; Compute minimum necessary keccaks to finish the batch
-        B + 1 + %MIN_CNT_KECCAK_BATCH => B      :MSTORE(cntKeccakPreProcess)
-        %MAX_CNT_KECCAK_F - CNT_KECCAK_F - B    :JMPN(outOfCountersKeccak)
-*/
-    if (((ctxc.globalVars.batchL2DataLength + 1) / 136) > (ctx.rom.constants.MAX_CNT_KECCAK_F - ctxc.regs.CNT_KECCAK_F))
-    {
-        // Call onError(OOCK), onFinishTX(), onFinishBatch()
-    }
-
-
-/*
-
-;;;;;;;;;;;;;;;;;;
-;; C - Loop parsing RLP transactions
-;;      - Load transaction RLP data and ensure it has correct RLP encoding
-;;      - If an error is found in any transaction, the batch will not process any transaction
-;;;;;;;;;;;;;;;;;;
-
-        E+1 => E                            :MSTORE(lastHashKIdUsed)
-        0                                   :MSTORE(batchHashPos)
-        E                                   :MSTORE(batchHashDataId)
-        $ => A                              :MLOAD(lastCtxUsed)
-        A                                   :MSTORE(ctxTxToUse) ; Points at first context to be used when processing transactions */
-
-    ctxc.regs.E++;
-    ctxc.globalVars.lastHashKIdUsed = ctxc.regs.E;
-    ctxc.globalVars.batchHashPos = 0;
-    ctxc.globalVars.batchHashDataId = ctxc.regs.E;
-    ctxc.globalVars.ctxTxToUse = ctxc.globalVars.lastCtxUsed;
-
-        /*
-        $${var p = 0}
-        ; set flag isLoadingRLP to 1
-        1               :MSTORE(isLoadingRLP)*/
-    ctxc.globalVars.isLoadingRLP = 1;
-    /*
-txLoopRLP:
-        $ => A          :MLOAD(lastCtxUsed)
-        A+1 => CTX      :MSTORE(lastCtxUsed)*/
-    ctxc.globalVars.lastCtxUsed++;
-
-    while (ctxc.globalVars.batchL2DataLength > ctxc.globalVars.batchL2DataParsed)
-    {
-        // loadTx_rlp
-        /*
-        
-;;;;;;;;;;;;;;;;;;
-;; A - Initialization
-;;     - Data to parse: [rlp(nonce, gasprice, gaslimit, to, value, data, chainId, 0, 0)|r|s|v]
-;;     - Signed Ethereum transaction: H_keccak(rlp(nonce, gasprice, gaslimit, to, value, data, chainId, 0, 0))
-;;     - RLP encoding information: https://ethereum.org/en/developers/docs/data-structures-and-encoding/rlp
-;;     - Entire batch is discarded (no transaction is processed) if any error is found
-;;;;;;;;;;;;;;;;;;
-
-loadTx_rlp:
-        ; check one keccak is available to begin processing the RLP
-        $ => D                                          :MLOAD(cntKeccakPreProcess)
-        %MAX_CNT_KECCAK_F - CNT_KECCAK_F - 1 - D        :JMPN(outOfCountersKeccak)
-
-        ; A new hash with position 0 is started
-        0 => HASHPOS
-
-        ; We get a new hashId
-        $ => E                          :MLOAD(lastHashKIdUsed)
-        E+1 => E                        :MSTORE(lastHashKIdUsed)
-        ; Pointer to next RLP bytes to read
-        0 => C
-        */
-        if (ctxc.globalVars.cntKeccakPreProcess > (ctx.rom.constants.MAX_CNT_KECCAK_F - ctxc.regs.CNT_KECCAK_F))
-        {
-            //JMPN(outOfCountersKeccak)
-        }
-        ctxc.regs.HASHPOS = 0;
-        ctxc.globalVars.lastHashKIdUsed++;
-        ctxc.regs.C = 0;
-
-    }
-/*
-        $ => A          :MLOAD(batchL2DataLength)
-        $ => C          :MLOAD(batchL2DataParsed)
-        C - A           :JMPN(loadTx_rlp, endCheckRLP)
-
-endCheckRLP:
-        ; set flag isLoadingRLP to 0
-        0               :MSTORE(isLoadingRLP)
-                        :JMP(txLoop)
-*/
-    ctxc.globalVars.isLoadingRLP = 0;
-
-    /*
-    
-;;;;;;;;;;;;;;;;;;
-;; D - Loop processing transactions
-;;      - Load transaction data and interpret it
-;;;;;;;;;;;;;;;;;;
-
-txLoop:
-        $ => A          :MLOAD(pendingTxs)
-        A-1             :MSTORE(pendingTxs), JMPN(processTxsEnd)
-        $ => A          :MLOAD(ctxTxToUse) ; Load first context used by transaction
-        A+1 => CTX      :MSTORE(ctxTxToUse),JMP(processTx)
-processTxEnd:
-                        :CALL(updateSystemData)
-
-processTxFinished:
-        $${eventLog(onFinishTx)}   :JMP(txLoop)
-
-processTxsEnd:
-    
-    */
-    while (ctxc.globalVars.pendingTxs > 0)
-    {
-        ctxc.globalVars.pendingTxs--;
-        ctxc.globalVars.ctxTxToUse++;
-        // JMP processTX
-        // CALL updateSystemData
-        //eventLog(onFinishTx)}
-    }
+    }*/
 
     proverRequest.result = ZKR_SUCCESS;
     TimerStopAndLog(MAIN_EXEC_C);
