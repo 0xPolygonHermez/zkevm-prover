@@ -9,10 +9,6 @@
 
 namespace fork_5
 {
-    // As our field prime p, verifies p = 3 mod 4, for any r, sqrt(r) = r^((p+1)/4), check:
-    // https://www.rieselprime.de/ziki/Modular_square_root. FSQRT_EXP is (p+1)/4.
-    mpz_class FSQRTEXP("0x3fffffffffffffffffffffffffffffffffffffffffffffffffffffffbfffff0c");
-    mpz_class FPRIME("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F");
 
 #ifdef DEBUG
 #define CHECK_EVAL_COMMAND_PARAMETERS
@@ -2188,20 +2184,11 @@ void eval_sqrtFpEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     }
 #endif
 
-    // We use that p = 3 mod 4, so r = a^((p+1)/4) is a square root of a
-    // https://www.rieselprime.de/ziki/Modular_square_root
+    
     mpz_class a = cr.scalar;
     cr.type = crt_scalar;
-    mpz_class result;
-    mpz_powm(result.get_mpz_t(), a.get_mpz_t(), FSQRTEXP.get_mpz_t(), FPRIME.get_mpz_t());
-    if ((result * result) % FPRIME != a)
-    {
-        cr.scalar = 0;
-    }
-    else
-    {
-        cr.scalar = result;
-    }
+    sqrtF3mod4(cr.scalar, cr.scalar);
+
 }
 
 /********************/

@@ -17,4 +17,19 @@ typedef enum
 
 ECRecoverResult ECRecover(mpz_class &signature, mpz_class &r, mpz_class &s, mpz_class &v, bool bPrecompiled, mpz_class &address);
 
+
+// We use that p = 3 mod 4 => r = a^((p+1)/4) is a square root of a
+// https://www.rieselprime.de/ziki/Modular_square_root
+// n = p+1/4
+inline void sqrtF3mod4(mpz_class& r, const mpz_class &a){
+    mpz_class auxa = a;
+    mpz_class n("0x3fffffffffffffffffffffffffffffffffffffffffffffffffffffffbfffff0c");
+    mpz_class p("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F");
+    mpz_powm(r.get_mpz_t(), a.get_mpz_t(), n.get_mpz_t(), p.get_mpz_t());
+    if ((r * r) % p != auxa)
+    {
+        r = 0;
+    }
+}
+
 #endif

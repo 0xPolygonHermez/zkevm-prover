@@ -28,7 +28,6 @@ mpz_class invFnEc(const mpz_class &a);
 mpz_class mulFpEc(const mpz_class &a, const mpz_class &b);
 mpz_class mulFnEc(const mpz_class &a, const mpz_class &b);
 mpz_class addFpEc(const mpz_class &a, const mpz_class &b);
-mpz_class sqrtFpEc(const mpz_class &a);
 mpz_class sqFpEc(const mpz_class &a);
 
 //
@@ -176,7 +175,7 @@ ECRecoverResult ECRecover(mpz_class &signature, mpz_class &r, mpz_class &s, mpz_
     }
     else
     {
-        ecrecover_y = sqrtFpEc(aux3);
+        sqrtF3mod4(ecrecover_y, aux3);
         if (ecrecover_y == 0)
         {
             zklog.error("ECRecover() found y^2 without root=" + aux3.get_str(16));
@@ -293,19 +292,6 @@ mpz_class mulFnEc(const mpz_class &a, const mpz_class &b)
 mpz_class addFpEc(const mpz_class &a, const mpz_class &b)
 {
     return (a + b) % FPEC;
-}
-
-mpz_class sqrtFpEc(const mpz_class &a)
-{
-    // We use that p = 3 mod 4, so r = a^((p+1)/4) is a square root of a: https://www.rieselprime.de/ziki/Modular_square_root
-    mpz_class result;
-    mpz_class n = (FPEC + 1) / 4;
-    mpz_powm(result.get_mpz_t(), a.get_mpz_t(), n.get_mpz_t(), FPEC.get_mpz_t());
-    if ((result * result) % FPEC != a)
-    {
-        return 0;
-    }
-    return result;
 }
 
 mpz_class sqFpEc(const mpz_class &a)
