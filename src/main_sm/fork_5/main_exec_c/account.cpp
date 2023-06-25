@@ -4,6 +4,7 @@
 namespace fork_5
 {
 
+// TODO: init from main
 bool Account::bZeroKeyGenerated = false;
 Goldilocks::Element Account::zeroKey[4];
 
