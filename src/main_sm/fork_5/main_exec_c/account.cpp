@@ -4,6 +4,9 @@
 namespace fork_5
 {
 
+bool Account::bZeroKeyGenerated = false;
+Goldilocks::Element Account::zeroKey[4];
+
 void Account::GenerateZeroKey (Goldilocks::Element (&zeroKey)[4])
 {
     // TODO: Pre-calculate this value

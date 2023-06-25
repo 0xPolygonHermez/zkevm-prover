@@ -21,7 +21,8 @@ private:
     HashDBInterface &hashDB;
     mpz_class publicKey;
     bool bInitialized;
-    Goldilocks::Element zeroKey[4];
+    static bool bZeroKeyGenerated;
+    static Goldilocks::Element zeroKey[4];
     bool bBalanceKeyGenerated;
     Goldilocks::Element balanceKey[4];
     bool bNonceKeyGenerated;
@@ -37,7 +38,7 @@ public:
         bBalanceKeyGenerated(false),
         bNonceKeyGenerated(false)
     {
-        GenerateZeroKey(zeroKey);
+        CheckZeroKey();
     };
 
     // Initialization
@@ -58,10 +59,20 @@ public:
     };
 
 private:
+
     void GenerateZeroKey (Goldilocks::Element (&zeroKey)[4]);
     void GenerateBalanceKey (Goldilocks::Element (&balanceKey)[4]);
     void GenerateNonceKey (Goldilocks::Element (&nonceKey)[4]);
-    void CheckBalanceKey (void)
+
+    inline void CheckZeroKey (void)
+    {
+        if (!bZeroKeyGenerated)
+        {
+            GenerateZeroKey(zeroKey);
+            bZeroKeyGenerated = true;
+        }
+    }
+    inline void CheckBalanceKey (void)
     {
         if (!bBalanceKeyGenerated)
         {
@@ -69,7 +80,7 @@ private:
             bBalanceKeyGenerated = true;
         }
     }
-    void CheckNonceKey (void)
+    inline void CheckNonceKey (void)
     {
         if (!bNonceKeyGenerated)
         {
