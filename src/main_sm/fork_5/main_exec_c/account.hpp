@@ -21,15 +21,24 @@ private:
     HashDBInterface &hashDB;
     mpz_class publicKey;
     bool bInitialized;
-    Goldilocks::Element zeroKey[4];
+    static bool bZeroKeyGenerated;
+    static Goldilocks::Element zeroKey[4];
+    bool bBalanceKeyGenerated;
     Goldilocks::Element balanceKey[4];
+    bool bNonceKeyGenerated;
     Goldilocks::Element nonceKey[4];
 public:
     
     // Constructor
-    Account (Goldilocks &fr, PoseidonGoldilocks &poseidon, HashDBInterface &hashDB) : fr(fr), poseidon(poseidon), hashDB(hashDB), bInitialized(false)
+    Account (Goldilocks &fr, PoseidonGoldilocks &poseidon, HashDBInterface &hashDB) :
+        fr(fr), 
+        poseidon(poseidon), 
+        hashDB(hashDB), 
+        bInitialized(false),
+        bBalanceKeyGenerated(false),
+        bNonceKeyGenerated(false)
     {
-        GetZeroKey(zeroKey);
+        CheckZeroKey();
     };
 
     // Initialization
@@ -44,23 +53,55 @@ public:
             return ZKR_UNSPECIFIED;
         }
 
-        GetBalanceKey(balanceKey);
-        GetNonceKey(nonceKey);
-
         bInitialized = true;
 
         return ZKR_SUCCESS;
     };
 
 private:
-    void GetZeroKey (Goldilocks::Element (&zeroKey)[4]);
-    void GetBalanceKey (Goldilocks::Element (&balanceKey)[4]);
-    void GetNonceKey (Goldilocks::Element (&nonceKey)[4]);
+
+    void GenerateZeroKey (Goldilocks::Element (&zeroKey)[4]);
+    void GenerateBalanceKey (Goldilocks::Element (&balanceKey)[4]);
+    void GenerateNonceKey (Goldilocks::Element (&nonceKey)[4]);
+
+    inline void CheckZeroKey (void)
+    {
+        if (!bZeroKeyGenerated)
+        {
+            GenerateZeroKey(zeroKey);
+            bZeroKeyGenerated = true;
+        }
+    }
+    inline void CheckBalanceKey (void)
+    {
+        if (!bBalanceKeyGenerated)
+        {
+            GenerateBalanceKey(balanceKey);
+            bBalanceKeyGenerated = true;
+        }
+    }
+    inline void CheckNonceKey (void)
+    {
+        if (!bNonceKeyGenerated)
+        {
+            GenerateNonceKey(nonceKey);
+            bNonceKeyGenerated = true;
+        }
+    }
+   
 public:
-    zkresult GetBalance (Goldilocks::Element (&oldRoot)[4], mpz_class &balance);
-    zkresult SetBalance (mpz_class &balance);
-    zkresult GetNonce (uint64_t &nonce);
-    zkresult SetNonce (uint64_t &nonce);
+
+    // Get account balance value
+    zkresult GetBalance (const Goldilocks::Element (&root)[4], mpz_class &balance);
+
+    // Set account balance value; root is updated with new root
+    zkresult SetBalance (Goldilocks::Element (&root)[4], const mpz_class &balance);
+
+    // Get account nonce value
+    zkresult GetNonce (const Goldilocks::Element (&root)[4], uint64_t &nonce);
+
+    // Set account nonce value; root is updated with new root
+    zkresult SetNonce (Goldilocks::Element (&root)[4], const uint64_t &nonce);
 };
 
 }

@@ -4,7 +4,11 @@
 namespace fork_5
 {
 
-void Account::GetZeroKey (Goldilocks::Element (&zeroKey)[4])
+// TODO: init from main
+bool Account::bZeroKeyGenerated = false;
+Goldilocks::Element Account::zeroKey[4];
+
+void Account::GenerateZeroKey (Goldilocks::Element (&zeroKey)[4])
 {
     // TODO: Pre-calculate this value
     Goldilocks::Element Kin0[12];
@@ -25,7 +29,7 @@ void Account::GetZeroKey (Goldilocks::Element (&zeroKey)[4])
     poseidon.hash(zeroKey, Kin0);
 }
 
-void Account::GetBalanceKey (Goldilocks::Element (&balanceKey)[4])
+void Account::GenerateBalanceKey (Goldilocks::Element (&balanceKey)[4])
 {
     Goldilocks::Element Kin1[12];
 
@@ -45,7 +49,7 @@ void Account::GetBalanceKey (Goldilocks::Element (&balanceKey)[4])
     poseidon.hash(balanceKey, Kin1);
 }
 
-void Account::GetNonceKey (Goldilocks::Element (&nonceKey)[4])
+void Account::GenerateNonceKey (Goldilocks::Element (&nonceKey)[4])
 {
     Goldilocks::Element Kin1[12];
 
@@ -67,9 +71,12 @@ void Account::GetNonceKey (Goldilocks::Element (&nonceKey)[4])
     poseidon.hash(nonceKey, Kin1);
 }
 
-zkresult Account::GetBalance (Goldilocks::Element (&oldRoot)[4], mpz_class &balance)
+zkresult Account::GetBalance (const Goldilocks::Element (&root)[4], mpz_class &balance)
 {
-    zkresult zkResult = hashDB.get(oldRoot, balanceKey, balance, /*&smtGetResult*/NULL, NULL /*proverRequest.dbReadLog*/);
+    // Check that balance key has been generated
+    CheckBalanceKey();
+
+    zkresult zkResult = hashDB.get(root, balanceKey, balance, /*&smtGetResult*/NULL, NULL /*proverRequest.dbReadLog*/);
     if (zkResult != ZKR_SUCCESS)
     {
         zklog.error("Account::GetBalance() failed calling hashDB.get() result=" + zkresult2string(zkResult));
@@ -78,19 +85,54 @@ zkresult Account::GetBalance (Goldilocks::Element (&oldRoot)[4], mpz_class &bala
     return ZKR_SUCCESS;
 }
 
-zkresult Account::SetBalance (mpz_class &balance)
+zkresult Account::SetBalance (Goldilocks::Element (&root)[4], const mpz_class &balance)
 {
+    // Check that balance key has been generated
+    CheckBalanceKey();
+
+    zkresult zkResult = hashDB.set(root, balanceKey, balance, /*proverRequest.input.bUpdateMerkleTree*/false, root, /*&ctx.lastSWrite.res*/NULL, /*proverRequest.dbReadLog*/NULL);
+    if (zkResult != ZKR_SUCCESS)
+    {
+        zklog.error("Account::SetBalance()) failed calling hashDB.set() result=" + zkresult2string(zkResult));
+        return zkResult;
+    }
     return ZKR_SUCCESS;
 }
 
-zkresult Account::GetNonce (uint64_t &nonce)
+zkresult Account::GetNonce (const Goldilocks::Element (&root)[4], uint64_t &nonce)
 {
-    nonce = 0;
+    // Check that nonce key has been generated
+    CheckNonceKey();
+
+    mpz_class value;
+    zkresult zkResult = hashDB.get(root, balanceKey, value, /*&smtGetResult*/NULL, NULL /*proverRequest.dbReadLog*/);
+    if (zkResult != ZKR_SUCCESS)
+    {
+        zklog.error("Account::GetNonce() failed calling hashDB.get() result=" + zkresult2string(zkResult));
+        return zkResult;
+    }
+    if (value > mpz_class("0xFFFFFFFFFFFFFFFF")) //TODO: Precalculat.  Do this check only in debug?
+    {
+        zklog.error("Account::GetNonce() failed called hashDB.get() but nonce is too big =" + value.get_str(10));
+        return ZKR_UNSPECIFIED;
+    }
+
+    nonce = value.get_ui();
     return ZKR_SUCCESS;
 }
 
-zkresult Account::SetNonce (uint64_t &nonce)
+zkresult Account::SetNonce (Goldilocks::Element (&root)[4], const uint64_t &nonce)
 {
+    // Check that nonce key has been generated
+    CheckNonceKey();
+
+    mpz_class value = nonce;
+    zkresult zkResult = hashDB.set(root, balanceKey, value, /*proverRequest.input.bUpdateMerkleTree*/false, root, /*&ctx.lastSWrite.res*/NULL, /*proverRequest.dbReadLog*/NULL);
+    if (zkResult != ZKR_SUCCESS)
+    {
+        zklog.error("Account::SetNonce() failed calling hashDB.set() result=" + zkresult2string(zkResult));
+        return zkResult;
+    }
     return ZKR_SUCCESS;
 }
 

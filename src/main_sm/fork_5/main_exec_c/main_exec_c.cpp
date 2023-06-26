@@ -113,8 +113,8 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
 
     // Set initial state root
     ctxc.regs.SR = proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot;
-    Goldilocks::Element oldRoot[4];
-    scalar2fea(fr, proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot, oldRoot); // TODO: Check range?
+    Goldilocks::Element root[4];
+    scalar2fea(fr, proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot, root); // TODO: Check range?
 
     // Set oldAccInputHash
     ctxc.globalVars.oldAccInputHash = proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash;
@@ -192,9 +192,40 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
             return;
         }
 
+        // Get nonce of from account
+        uint64_t fromNonce;
+        result = fromAccount.GetNonce(root, fromNonce);
+        if (result != ZKR_SUCCESS)
+        {
+            zklog.error("main_exec_c() failed calling toAccount.GetNonce()");
+            proverRequest.result = result;
+            HashDBClientFactory::freeHashDBClient(pHashDB);
+            return;
+        }
+
+        // Check from account nonce against the one provided by the tx batch L2 data
+        if (fromNonce != batchData.tx[tx].nonce)
+        {
+            zklog.error("main_exec_c() found fromNonce=" + to_string(fromNonce) + " different from batch L2 Datan nonce=" + to_string(batchData.tx[tx].nonce));
+            proverRequest.result = ZKR_UNSPECIFIED;
+            HashDBClientFactory::freeHashDBClient(pHashDB);
+            return;
+        }
+
+        // Get new nonce = old nonce + 1
+        fromNonce++;
+        result = fromAccount.SetNonce(root, fromNonce);
+        if (result != ZKR_SUCCESS)
+        {
+            zklog.error("main_exec_c() failed calling toAccount.SetNonce()");
+            proverRequest.result = result;
+            HashDBClientFactory::freeHashDBClient(pHashDB);
+            return;
+        }
+
         // Get balance of from account
         mpz_class fromBalance;
-        result = fromAccount.GetBalance(oldRoot, fromBalance);
+        result = fromAccount.GetBalance(root, fromBalance);
         if (result != ZKR_SUCCESS)
         {
             zklog.error("main_exec_c() failed calling fromAccount.GetBalance()");
@@ -205,7 +236,7 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
 
         // Get balance of to account
         mpz_class toBalance;
-        result = toAccount.GetBalance(oldRoot, toBalance);
+        result = toAccount.GetBalance(root, toBalance);
         if (result != ZKR_SUCCESS)
         {
             zklog.error("main_exec_c() failed calling toAccount.GetBalance()");
@@ -221,13 +252,25 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
         if (gas > batchData.tx[tx].gasLimit)
         {
             zklog.error("main_exec_c() failed gas=" + gas.get_str(10) + " < gasLimit=" + to_string(batchData.tx[tx].gasLimit));
-            proverRequest.result = ZKR_UNSPECIFIED;
+            proverRequest.result = ZKR_UNSPECIFIED; // TODO: Review list of errors
             HashDBClientFactory::freeHashDBClient(pHashDB);
             return;
         }
 
+        // Calculate gas price: txGasPrice = Floor((gasPrice * (effectivePercentage + 1)) / 256)
+        mpz_class txGasPrice;
+        if (batchData.tx[tx].gasPercentage != 255)
+        {
+            uint64_t txGasPercentage = (uint64_t)batchData.tx[tx].gasPercentage;
+            txGasPrice = batchData.tx[tx].gasPrice * (txGasPercentage + 1) / 256;
+        }
+        else
+        {
+            txGasPrice = batchData.tx[tx].gasPrice;
+        }
+
         // Check that from account has enough balance to complete the transfer
-        mpz_class fromAmount = batchData.tx[tx].value + batchData.tx[tx].gasPrice*gas;
+        mpz_class fromAmount = batchData.tx[tx].value + gas * txGasPrice;
         if (fromBalance < fromAmount)
         {
             zklog.error("main_exec_c() failed fromBalance=" + fromBalance.get_str(10) + " < fromAmount=" + fromAmount.get_str(10));
@@ -238,7 +281,7 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
 
         // Update from account balance = balance - value - gas*gasPrice
         fromBalance -= fromAmount;
-        result = fromAccount.SetBalance(fromBalance);
+        result = fromAccount.SetBalance(root, fromBalance);
         if (result != ZKR_SUCCESS)
         {
             zklog.error("main_exec_c() failed calling fromAccount.SetBalance()");
@@ -249,7 +292,7 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
 
         // Update to account balance = balance + value
         toBalance += batchData.tx[tx].value;
-        result = toAccount.SetBalance(toBalance);
+        result = toAccount.SetBalance(root, toBalance);
         if (result != ZKR_SUCCESS)
         {
             zklog.error("main_exec_c() failed calling toAccount.SetBalance()");
