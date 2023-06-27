@@ -534,34 +534,25 @@ void getIPAddress (string &ipAddress)
         {
             continue;
         }
-        sa_family_t address_family = pEntry->ifa_addr->sa_family;
 
-        // Report IPv4 addresses
-        if (address_family == AF_INET)
-        {
-            if (pEntry->ifa_addr != NULL)
-            {
-                char buffer[INET_ADDRSTRLEN] = {0};
-                inet_ntop(address_family, &((struct sockaddr_in*)(pEntry->ifa_addr))->sin_addr, buffer, INET_ADDRSTRLEN);
-                if (ipAddress != "")
-                {
-                    ipAddress += ",";
-                }
-                ipAddress += buffer;
+        if (pEntry != NULL) {
+            if (pEntry->ifa_addr != NULL) {
+                sa_family_t address_family = pEntry->ifa_addr->sa_family;
+                if (address_family == AF_INET) {
+                    char buffer[INET_ADDRSTRLEN] = {0};
+                    inet_ntop(address_family, &((struct sockaddr_in*)(pEntry->ifa_addr))->sin_addr, buffer, INET_ADDRSTRLEN);
+                    if (ipAddress != "")
+                    {
+                        ipAddress += ",";
+                    }
+                    ipAddress += buffer;    // Code for IPv4 address handling
+                }/** else if (address_family == AF_INET6) {
+                    // Code for IPv6 address handling
+                } else {
+                    // Handle other address families if needed
+                }*/
             }
         }
-
-        // Report IPv6 addresses
-        /*else if (address_family == AF_INET6)
-        {
-            if ( pEntry->ifa_addr != nullptr )
-            {
-                char buffer[INET6_ADDRSTRLEN] = {0};
-                inet_ntop(address_family, &((struct sockaddr_in6*)(pEntry->ifa_addr))->sin6_addr, buffer, INET6_ADDRSTRLEN);
-                ipAddress += buffer;
-                ipAddress += " ";
-            }
-        }*/
     }
 
     freeifaddrs(pIfaddrs);
