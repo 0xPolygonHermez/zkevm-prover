@@ -115,7 +115,31 @@ public:
     RawFec::Element y2;
     RawFec::Element x3;
     RawFec::Element y3;
+
+    EllipticCurveAddition(RawFec &fec) : bDouble(false) {
+        x1 = fec.zero();
+        y1 = fec.zero();
+        x2 = fec.zero();
+        y2 = fec.zero();
+        x3 = fec.zero();
+        y3 = fec.zero();
+    };
 };
+
+class ECRecoverPrecalcBuffer
+{
+public:
+    bool filled;
+    int pos;
+    int posUsed;
+    RawFec::Element buffer[1026];  //2 + 256*4 maximum components stores in a single ECRecover
+
+    ECRecoverPrecalcBuffer() : filled(false), pos(0), posUsed(0) {};
+};
+
+
+
+//TODO: ADD CONSTRUCTOR
 
 class Context
 {
@@ -133,6 +157,7 @@ public:
     uint64_t lastStep;
     mpz_class totalTransferredBalance; // Total transferred balance of all accounts, which should be 0 after any transfer
     EllipticCurveAddition lastECAdd; // Micro-cache of the last couple of added points, and the result
+    ECRecoverPrecalcBuffer ecRecoverPrecalcBuffer; // Buffer for precalculated points for ECRecover
 
     // Evaluations data
     uint64_t * pZKPC; // Zero-knowledge program counter
@@ -162,19 +187,12 @@ public:
         proverRequest(proverRequest),
         pHashDB(pHashDB),
         lastStep(0),
+        lastECAdd(fec),
+        ecRecoverPrecalcBuffer(),
         pZKPC(NULL),
         pStep(NULL),
         pEvaluation(NULL),
-        N(0)
-        {
-            lastECAdd.bDouble = false;
-            lastECAdd.x1 = fec.zero();
-            lastECAdd.y1 = fec.zero();
-            lastECAdd.x2 = fec.zero();
-            lastECAdd.y2 = fec.zero();
-            lastECAdd.x3 = fec.zero();
-            lastECAdd.y3 = fec.zero();
-        }; // Constructor, setting references
+        N(0){}; // Constructor, setting references
 
     // HashK database, used in hashK, hashKLen and hashKDigest
     unordered_map< uint64_t, HashValue > hashK;

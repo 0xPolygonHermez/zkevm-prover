@@ -2200,17 +2200,25 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
 void eval_xAddPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     RawFec::Element x3;
-    RawFec::Element y3;
-    eval_AddPointEc(ctx, cmd, false, x3, y3);
+    if(ctx.ecRecoverPrecalcBuffer.filled == true){
+        x3 = ctx.ecRecoverPrecalcBuffer.buffer[ctx.ecRecoverPrecalcBuffer.pos++];
+    }else{
+        RawFec::Element y3;
+        eval_AddPointEc(ctx, cmd, false, x3, y3);    
+    }
     cr.type = crt_scalar;
     ctx.fec.toMpz(cr.scalar.get_mpz_t(), x3);
 }
 
 void eval_yAddPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
-    RawFec::Element x3;
     RawFec::Element y3;
-    eval_AddPointEc(ctx, cmd, false, x3, y3);
+    if(ctx.ecRecoverPrecalcBuffer.filled == true){
+        y3 = ctx.ecRecoverPrecalcBuffer.buffer[ctx.ecRecoverPrecalcBuffer.pos++];
+    }else{
+        RawFec::Element x3;
+        eval_AddPointEc(ctx, cmd, false, x3, y3);  
+    }
     cr.type = crt_scalar;
     ctx.fec.toMpz(cr.scalar.get_mpz_t(), y3);
 }
@@ -2218,17 +2226,25 @@ void eval_yAddPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 void eval_xDblPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     RawFec::Element x3;
-    RawFec::Element y3;
-    eval_AddPointEc(ctx, cmd, true, x3, y3);
+    if(ctx.ecRecoverPrecalcBuffer.filled == true){
+        x3 = ctx.ecRecoverPrecalcBuffer.buffer[ctx.ecRecoverPrecalcBuffer.pos++];
+    }else{
+        RawFec::Element y3;
+        eval_AddPointEc(ctx, cmd, true, x3, y3);    
+    }
     cr.type = crt_scalar;
     ctx.fec.toMpz(cr.scalar.get_mpz_t(), x3);
 }
 
 void eval_yDblPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
-    RawFec::Element x3;
     RawFec::Element y3;
-    eval_AddPointEc(ctx, cmd, true, x3, y3);
+    if(ctx.ecRecoverPrecalcBuffer.filled == true){
+        y3 = ctx.ecRecoverPrecalcBuffer.buffer[ctx.ecRecoverPrecalcBuffer.pos++];
+    }else{
+        RawFec::Element x3;
+        eval_AddPointEc(ctx, cmd, true, x3, y3);    
+    }
     cr.type = crt_scalar;
     ctx.fec.toMpz(cr.scalar.get_mpz_t(), y3);
 }
