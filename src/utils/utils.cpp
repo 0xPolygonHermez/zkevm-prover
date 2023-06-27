@@ -537,7 +537,7 @@ void getIPAddress (string &ipAddress)
 
         if (pEntry != NULL) 
         {
-            if (pEntry->ifa_addr != NULL) 
+            if (pEntry->ifa_addr != NULL)
             {
                 sa_family_t address_family = pEntry->ifa_addr->sa_family;
                 if (address_family == AF_INET) 
