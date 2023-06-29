@@ -236,6 +236,8 @@ ECRecoverResult ECRecover(mpz_class &signature, mpz_class &r, mpz_class &s, mpz_
 
 
 int ECRecover_precalc(mpz_class &signature, mpz_class &r, mpz_class &s, mpz_class &v, bool bPrecompiled, RawFec::Element* buffer, int nthreads){
+
+    std::cout << "aaaaaaaaaaa ECRecover_precalc() called" << std::endl;
     // Set the ECRecover s upper limit
     mpz_class ecrecover_s_upperlimit;
     if (bPrecompiled)
@@ -250,24 +252,24 @@ int ECRecover_precalc(mpz_class &signature, mpz_class &r, mpz_class &s, mpz_clas
     if (r == 0)
     {
         zklog.error("ECRecover() found r=0");
-        return ECR_R_IS_ZERO;
+        return -1; //ECR_R_IS_ZERO
     }
     if (r > FNEC_MINUS_ONE)
     {
         zklog.error("ECRecover() found r>FNEC_MINUS_ONE r=" + r.get_str(16));
-        return ECR_R_IS_TOO_BIG;
+        return -1; //ECR_R_IS_TOO_BIG;
     }
 
     // Check that s is in the range [1, ecrecover_s_upperlimit]
     if (s == 0)
     {
         zklog.error("ECRecover() found s=0");
-        return ECR_S_IS_ZERO;
+        return -1;//ECR_S_IS_ZERO;
     }
     if (s > ecrecover_s_upperlimit)
     {
         zklog.error("ECRecover() found s>ecrecover_s_upperlimit s=" + s.get_str(16) + " ecrecover_s_upperlimit=" + ecrecover_s_upperlimit.get_str(16));
-        return ECR_S_IS_TOO_BIG;
+        return -1;//ECR_S_IS_TOO_BIG;
     }
 
     // Calculate the inverse of r
@@ -287,7 +289,7 @@ int ECRecover_precalc(mpz_class &signature, mpz_class &r, mpz_class &s, mpz_clas
     else
     {
         zklog.error("ECRecover() found invalid v=" + v.get_str(16));
-        return ECR_V_INVALID;
+        return -1;//ECR_V_INVALID;
     }
     // Curve is y^2 = x^3 + 7  -->  Calculate y from x=r
     mpz_class ecrecover_y;
@@ -307,7 +309,7 @@ int ECRecover_precalc(mpz_class &signature, mpz_class &r, mpz_class &s, mpz_clas
         if (ecrecover_y == 0)
         {
             zklog.error("ECRecover() found y^2 without root=" + aux3.get_str(16));
-            return ECR_NO_SQRT_Y;
+            return -1;//ECR_NO_SQRT_Y;
         }
     }
     assert(ecrecover_y < FPEC);
