@@ -481,7 +481,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "       fea2scalar(fr, r_, pols.B0[0], pols.B1[0], pols.B2[0], pols.B3[0], pols.B4[0], pols.B5[0], pols.B6[0], pols.B7[0]);\n";
             code += "       fea2scalar(fr, s_, pols.C0[0], pols.C1[0], pols.C2[0], pols.C3[0], pols.C4[0], pols.C5[0], pols.C6[0], pols.C7[0]);\n";
             code += "       fea2scalar(fr, v_, pols.D0[0], pols.D1[0], pols.D2[0], pols.D3[0], pols.D4[0], pols.D5[0], pols.D6[0], pols.D7[0]);\n";
-            code += "       ctx.ecRecoverPrecalcBuffer.posUsed = ECRecover_precalc(signature_, r_, s_, v_, false, ctx.ecRecoverPrecalcBuffer.buffer);\n";
+            code += "       ctx.ecRecoverPrecalcBuffer.posUsed = ECRecover_precalc(signature_, r_, s_, v_, false, ctx.ecRecoverPrecalcBuffer.buffer, ctx.config.ECRecoverPrecalcNThreads);\n";
             code += "       ctx.ecRecoverPrecalcBuffer.pos=0;\n";
             code += "       ctx.ecRecoverPrecalcBuffer.filled = true;\n";
             code += "    }\n";

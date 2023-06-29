@@ -244,7 +244,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             fea2scalar(fr, r_, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
             fea2scalar(fr, s_, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]);
             fea2scalar(fr, v_, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
-            ctx.ecRecoverPrecalcBuffer.posUsed = ECRecover_precalc(signature_, r_, s_, v_, false, ctx.ecRecoverPrecalcBuffer.buffer);
+            ctx.ecRecoverPrecalcBuffer.posUsed = ECRecover_precalc(signature_, r_, s_, v_, false, ctx.ecRecoverPrecalcBuffer.buffer, ctx.config.ECRecoverPrecalcNThreads);
             ctx.ecRecoverPrecalcBuffer.pos=0;
             ctx.ecRecoverPrecalcBuffer.filled = true;
         }

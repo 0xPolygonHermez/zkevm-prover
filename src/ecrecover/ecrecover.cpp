@@ -93,11 +93,7 @@ void mulPointEcJacobian1bit(const mpz_class &p1_x, const mpz_class &p1_y, const 
 // double scalar multiplication, bit by bit SAVE 
 int mulPointEcJacobian1bit_save(const mpz_class &p1_x, const mpz_class &p1_y, const mpz_class &k1,
                             const mpz_class &p2_x, const mpz_class &p2_y, const mpz_class &k2,
-                            mpz_class &p3_x, mpz_class &p3_y, RawFec::Element* buffer); // Jacobian conversion inside
-// double scalar multiplication, bit by bit ASSERT
-void mulPointEcJacobian1bit_assert(const mpz_class &p1_x, const mpz_class &p1_y, const mpz_class &k1,
-                            const mpz_class &p2_x, const mpz_class &p2_y, const mpz_class &k2,
-                            mpz_class &p3_x, mpz_class &p3_y,RawFec::Element* buffer); // Jacobian conversion inside
+                            mpz_class &p3_x, mpz_class &p3_y, RawFec::Element* buffer, int nthreads = 16); // Jacobian conversion inside
 
 inline void Jacobian2Affine(const mpz_class &x, const mpz_class &y, const mpz_class &z, mpz_class &x_out, mpz_class &y_out);
 
@@ -239,7 +235,7 @@ ECRecoverResult ECRecover(mpz_class &signature, mpz_class &r, mpz_class &s, mpz_
 }
 
 
-int ECRecover_precalc(mpz_class &signature, mpz_class &r, mpz_class &s, mpz_class &v, bool bPrecompiled, RawFec::Element* buffer){
+int ECRecover_precalc(mpz_class &signature, mpz_class &r, mpz_class &s, mpz_class &v, bool bPrecompiled, RawFec::Element* buffer, int nthreads){
     // Set the ECRecover s upper limit
     mpz_class ecrecover_s_upperlimit;
     if (bPrecompiled)
@@ -344,7 +340,7 @@ int ECRecover_precalc(mpz_class &signature, mpz_class &r, mpz_class &s, mpz_clas
     /*RawFec::Element buffer[6+4+8*(512)]; // 6: p1_x, p1_y, p1_z, p2_x, p2_y, p2_z
                                          // 4: 0, p1, p2, p1+p2
                                          // 8*(512): 512 points of the curve*/
-    return mulPointEcJacobian1bit_save(p1_x, p1_y, k1, p2_x, p2_y, k2, p3_x, p3_y, buffer);
+    return mulPointEcJacobian1bit_save(p1_x, p1_y, k1, p2_x, p2_y, k2, p3_x, p3_y, buffer, nthreads);
    
 }
 
@@ -1543,7 +1539,7 @@ void mulPointEcJacobian1bit(const mpz_class &p1_x, const mpz_class &p1_y, const 
 
 int mulPointEcJacobian1bit_save(const mpz_class &p1_x, const mpz_class &p1_y, const mpz_class &k1,
                             const mpz_class &p2_x, const mpz_class &p2_y, const mpz_class &k2,
-                            mpz_class &p3_x, mpz_class &p3_y, RawFec::Element* buffer)
+                            mpz_class &p3_x, mpz_class &p3_y, RawFec::Element* buffer, int nthreads)
 {
 
     RawFec::Element x3, y3, z3;
@@ -1625,8 +1621,8 @@ int mulPointEcJacobian1bit_save(const mpz_class &p1_x, const mpz_class &p1_y, co
     mpz_clear(rawK2);
 
      // save results
-     
-#pragma omp parallel for num_threads(16)
+     if(nthreads < 1) nthreads = 1;
+#pragma omp parallel for num_threads(nthreads)
     for (int i = 0; i < npoint; i++)
     {
         int id1 = 3*i;
@@ -1635,100 +1631,6 @@ int mulPointEcJacobian1bit_save(const mpz_class &p1_x, const mpz_class &p1_y, co
         Jacobian2Affine(buffer_[id1 ], buffer_[id1 + 1], buffer_[id1 + 2], buffer[id2 ], buffer[id2 + 1]);
     }
     return 2*(npoint+npoint_p11);
-}
-
-void mulPointEcJacobian1bit_assert(const mpz_class &p1_x, const mpz_class &p1_y, const mpz_class &k1,
-                            const mpz_class &p2_x, const mpz_class &p2_y, const mpz_class &k2,
-                            mpz_class &p3_x, mpz_class &p3_y, RawFec::Element* buffer)
-{
-
-    RawFec::Element x3, y3, z3;
-    RawFec::Element x3_, y3_;
-
-    RawFec::Element p[12];
-    bool isz[4];
-    int pcont = 0;
-
-    // 00
-    isz[0] = true;
-
-    // 01
-    isz[1] = false;
-    int id = 3;
-    fec.fromMpz(p[id], p1_x.get_mpz_t());
-    fec.fromMpz(p[id + 1], p1_y.get_mpz_t());
-    p[id + 2]=fec.one();
-    assert(fec.eq(buffer[pcont++],p[id])==1);
-    assert(fec.eq(buffer[pcont++],p[id+1])==1);
-    pcont+=1;
-
-    // 10
-    isz[2] = false;
-    id = 6;
-    fec.fromMpz(p[id], p2_x.get_mpz_t());
-    fec.fromMpz(p[id + 1], p2_y.get_mpz_t());
-    p[id + 2] =fec.one();
-    assert(fec.eq(buffer[pcont++],p[id])==1);
-    assert(fec.eq(buffer[pcont++],p[id+1])==1);
-    pcont+=1;
-
-    // 11
-    generalAddPointEcJacobianZ2Is1(p[3], p[4], p[5], isz[1], p[6], p[7], p[8], isz[2], p[9], p[10], p[11], isz[3]);
-    if(!isz[3]){
-        Jacobian2Affine(p[9], p[10], p[11], p[9], p[10]);
-        p[11]=fec.one();
-    }
-    assert(fec.eq(buffer[pcont++],p[id])==1);
-    assert(fec.eq(buffer[pcont++],p[id+1])==1);
- 
-
-    // start the loop
-    mpz_t rawK1;
-    mpz_t rawK2;
-
-    mpz_init(rawK1);
-    mpz_init(rawK2);
-    mpz_set(rawK1, k1.get_mpz_t());
-    mpz_set(rawK2, k2.get_mpz_t());
-
-    bool p3_empty = true;
-
-    for (int i = 255; i >= 0; --i)
-    {
-        // double p3
-        if (!p3_empty)
-        {
-            dblPointEcJacobian(x3, y3, z3, x3, y3, z3);
-            Jacobian2Affine(x3,y3, z3, x3_, y3_);
-            assert(fec.eq(buffer[pcont++],x3_)==1);
-            assert(fec.eq(buffer[pcont++],y3_)==1);
-            pcont+=1;
-        }else{
-            pcont+=3;
-        }
-        // take next bits
-        int bitk1 = mpz_tstbit(rawK1, i);
-        int bitk2 = mpz_tstbit(rawK2, i);
-        int out0 = 2 * bitk2 + bitk1;
-        int out1 = 3 * out0;
-        generalAddPointEcJacobianZ2Is1( x3, y3, z3, p3_empty,p[out1], p[out1 + 1], p[out1 + 2], isz[out0], x3, y3, z3, p3_empty);
-        if (!p3_empty)
-        {
-            Jacobian2Affine(x3,y3, z3, x3_, y3_);
-            assert(fec.eq(buffer[pcont++],x3_)==1);
-            assert(fec.eq(buffer[pcont++],y3_)==1);
-            pcont+=1;
-        }else{
-            pcont+=3;
-        }
-    }
-    mpz_clear(rawK1);
-    mpz_clear(rawK2);
-
-    // save results
-    Jacobian2Affine(x3, y3, z3, x3, y3);
-    fec.toMpz(p3_x.get_mpz_t(), x3);
-    fec.toMpz(p3_y.get_mpz_t(), y3);
 }
 
 void Jacobian2Affine(const RawFec::Element &x, const RawFec::Element &y, const RawFec::Element &z, RawFec::Element &x_out, RawFec::Element &y_out)

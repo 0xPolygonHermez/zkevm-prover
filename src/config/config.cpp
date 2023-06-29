@@ -506,6 +506,10 @@ void Config::load(json &config)
     ECRecoverPrecalc = true;
     if (config.contains("ECRecoverPrecalc") && config["ECRecoverPrecalc"].is_boolean())
         ECRecoverPrecalc = config["ECRecoverPrecalc"];
+
+    ECRecoverPrecalcNThreads = 16;
+    if (config.contains("ECRecoverPrecalcNThreads") && config["ECRecoverPrecalcNThreads"].is_number())
+        ECRecoverPrecalcNThreads = config["ECRecoverPrecalcNThreads"];
 }
 
 void Config::print(void)
@@ -679,4 +683,7 @@ void Config::print(void)
     zklog.info("    loadDBToMemTimeout=" + to_string(loadDBToMemTimeout));
     zklog.info("    fullTracerTraceReserveSize=" + to_string(fullTracerTraceReserveSize));
     zklog.info("    ECRecoverPrecalc=" + to_string(ECRecoverPrecalc));
+    zklog.info("    ECRecoverPrecalcNThreads=" + to_string(ECRecoverPrecalcNThreads));
+
+
 }

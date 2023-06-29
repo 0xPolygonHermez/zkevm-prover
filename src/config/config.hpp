@@ -150,6 +150,8 @@ public:
 
     uint64_t fullTracerTraceReserveSize;
     bool ECRecoverPrecalc;
+    uint64_t ECRecoverPrecalcNThreads;
+
 
     void load(json &config);
     bool generateProof(void) const { return runFileGenBatchProof || runFileGenAggregatedProof || runFileGenFinalProof || runAggregatorClient; }
