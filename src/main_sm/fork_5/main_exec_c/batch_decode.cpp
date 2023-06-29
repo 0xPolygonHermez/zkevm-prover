@@ -47,7 +47,7 @@ zkresult BatchDecode(const string &input, BatchData (&batchData))
         TXData txData;
 
         // RLP data
-        txData.rlpData = rlpData[0].data;
+        txData.rlpData = rlpData[0].dataWithLength;
 
         // Nonce
         if (rlpData[0].rlpData[0].type != rlpTypeString)

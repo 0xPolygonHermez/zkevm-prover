@@ -21,7 +21,9 @@ class RLPData
 {
 public:
     RLPType type;
-    string data;
+    string data; // Data without length encoding prefix
+    string dataWithLength; // Data with length encoding prefix
+    // TODO: Store data without length for strings, and data with length for lists
     vector<RLPData> rlpData;
 };
 
