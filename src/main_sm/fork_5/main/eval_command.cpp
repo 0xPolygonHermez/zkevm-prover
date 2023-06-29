@@ -2341,6 +2341,10 @@ zkresult AddPointEc (Context &ctx, bool dbl, const RawFec::Element &x1, const Ra
     
     // Check if results are buffered
     if(ctx.ecRecoverPrecalcBuffer.filled == true){
+        if(ctx.ecRecoverPrecalcBuffer.pos < 2){
+            zklog.error("ecRecoverPrecalcBuffer.buffer buffer is not filled, but pos < 2 (pos=" + to_string(ctx.ecRecoverPrecalcBuffer.pos) + ")");
+            exitProcess();
+        }
         x3 = ctx.ecRecoverPrecalcBuffer.buffer[ctx.ecRecoverPrecalcBuffer.pos-2];
         y3 = ctx.ecRecoverPrecalcBuffer.buffer[ctx.ecRecoverPrecalcBuffer.pos-1];
         return ZKR_SUCCESS;
