@@ -1621,7 +1621,7 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
             zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.storageAddrOffset)");
             return zkr;
         }
-        singleInfo.contract.caller = NormalizeTo0xNFormat(auxScalar.get_str(16), 40);
+        singleInfo.contract.caller = NormalizeToNFormat(auxScalar.get_str(16), 40);
     }
         
     // If is an ether transfer, don't add stop opcode to trace
