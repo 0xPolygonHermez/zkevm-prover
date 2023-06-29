@@ -137,10 +137,6 @@ public:
     ECRecoverPrecalcBuffer() : filled(false), pos(0), posUsed(0) {};
 };
 
-
-
-//TODO: ADD CONSTRUCTOR
-
 class Context
 {
 public:

@@ -1625,7 +1625,8 @@ int mulPointEcJacobian1bit_save(const mpz_class &p1_x, const mpz_class &p1_y, co
     mpz_clear(rawK2);
 
      // save results
-#pragma omp parallel for num_threads(48)
+     
+#pragma omp parallel for num_threads(16)
     for (int i = 0; i < npoint; i++)
     {
         int id1 = 3*i;

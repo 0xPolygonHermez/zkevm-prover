@@ -2338,6 +2338,14 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
 
 zkresult AddPointEc (Context &ctx, bool dbl, const RawFec::Element &x1, const RawFec::Element &y1, const RawFec::Element &x2, const RawFec::Element &y2, RawFec::Element &x3, RawFec::Element &y3)
 {
+    
+    // Check if results are buffered
+    if(ctx.ecRecoverPrecalcBuffer.filled == true){
+        x3 = ctx.ecRecoverPrecalcBuffer.buffer[ctx.ecRecoverPrecalcBuffer.pos-2];
+        y3 = ctx.ecRecoverPrecalcBuffer.buffer[ctx.ecRecoverPrecalcBuffer.pos-1];
+        return ZKR_SUCCESS;
+    }
+
     // Check if we have just computed this operation
     if ( (ctx.lastECAdd.bDouble == dbl) &&
          ctx.fec.eq(ctx.lastECAdd.x1, x1) &&
