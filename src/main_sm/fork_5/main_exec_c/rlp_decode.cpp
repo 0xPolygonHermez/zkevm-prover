@@ -199,6 +199,7 @@ zkresult RLPDecode(const string &input, RLPType rlpType, vector<RLPData> (&outpu
             RLPData rlpData;
             rlpData.type = rlpTypeString;
             rlpData.data = input.substr(offset, dataLength);
+            rlpData.dataWithLength = input.substr(0, offset + dataLength);
             output.push_back(rlpData);
 #ifdef RLP_LOGS
             zklog.info("RLPDecode() found string offset=" + to_string(offset) + " dataLength=" + to_string(dataLength) + " data=" + ba2string(rlpData.data));
@@ -216,6 +217,7 @@ zkresult RLPDecode(const string &input, RLPType rlpType, vector<RLPData> (&outpu
             RLPData rlpData;
             rlpData.type = rlpTypeList;
             rlpData.data = input.substr(offset, dataLength);
+            rlpData.dataWithLength = input.substr(0, offset + dataLength);
             output.push_back(rlpData);
 #ifdef RLP_LOGS
             zklog.info("RLPDecode() found list offset=" + to_string(offset) + " dataLength=" + to_string(dataLength));
