@@ -304,6 +304,7 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
             HashDBClientFactory::freeHashDBClient(pHashDB);
             return;
         }
+        zklog.info("New root =" + fea2string(fr,root));
     }
 
     /*result = ((fork_5::FullTracer *)ctx.proverRequest.pFullTracer)->onFinishBatch(ctx, cmd);

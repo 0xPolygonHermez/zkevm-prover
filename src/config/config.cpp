@@ -502,6 +502,10 @@ void Config::load(json &config)
     fullTracerTraceReserveSize = 256*1024;
     if (config.contains("fullTracerTraceReserveSize") && config["fullTracerTraceReserveSize"].is_number())
         fullTracerTraceReserveSize = config["fullTracerTraceReserveSize"];
+
+    ECRecoverPrecalc = true;
+    if (config.contains("ECRecoverPrecalc") && config["ECRecoverPrecalc"].is_boolean())
+        ECRecoverPrecalc = config["ECRecoverPrecalc"];
 }
 
 void Config::print(void)
@@ -674,4 +678,5 @@ void Config::print(void)
     zklog.info("    dbProgramCacheSize=" + to_string(dbProgramCacheSize));
     zklog.info("    loadDBToMemTimeout=" + to_string(loadDBToMemTimeout));
     zklog.info("    fullTracerTraceReserveSize=" + to_string(fullTracerTraceReserveSize));
+    zklog.info("    ECRecoverPrecalc=" + to_string(ECRecoverPrecalc));
 }

@@ -149,6 +149,7 @@ public:
     string proverName;
 
     uint64_t fullTracerTraceReserveSize;
+    bool ECRecoverPrecalc;
 
     void load(json &config);
     bool generateProof(void) const { return runFileGenBatchProof || runFileGenAggregatedProof || runFileGenFinalProof || runAggregatorClient; }

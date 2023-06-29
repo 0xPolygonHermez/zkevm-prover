@@ -13,7 +13,7 @@ const string forkNamespace = PROVER_FORK_NAMESPACE_STRING;
 // Forward declaration
 void file2json (json &rom, string &romFileName);
 void string2file (const string & s, const string & fileName);
-string generate(const json &rom, const string &functionName, const string &fileName, bool bFastMode, bool bECRecoverPreCalc, bool bHeader);
+string generate(const json &rom, const string &functionName, const string &fileName, bool bFastMode, bool bHeader);
 string selector8 (const string &regName, const string &regValue, bool opInitialized, bool bFastMode);
 string selector1 (const string &regName, const string &regValue, bool opInitialized, bool bFastMode);
 string selectorConst (int64_t CONST, bool opInitialized, bool bFastMode);
@@ -37,15 +37,15 @@ int main(int argc, char **argv)
     json rom;
     file2json(rom, romFileName);
 
-    string code = generate(rom, functionName, fileName, false, true, false);
+    string code = generate(rom, functionName, fileName, false, false);
     string2file(code, directoryName + "/" + fileName + ".cpp");
-    string header = generate(rom, functionName, fileName, false, true, true);
+    string header = generate(rom, functionName, fileName, false,  true);
     string2file(header, directoryName + "/" + fileName + ".hpp");
     functionName += "_fast";
     fileName += "_fast";
-    string codeFast = generate(rom, functionName, fileName, true, true, false);
+    string codeFast = generate(rom, functionName, fileName, true, false);
     string2file(codeFast, directoryName + "/" + fileName + ".cpp");
-    string headerFast = generate(rom, functionName, fileName, true, true, true);
+    string headerFast = generate(rom, functionName, fileName, true,  true);
     string2file(headerFast, directoryName + "/" + fileName + ".hpp");
 
     return 0;
@@ -120,7 +120,7 @@ std::string removeDuplicateSpaces(std::string const &str)
     return s;
 }
 
-string generate(const json &rom, const string &functionName, const string &fileName, bool bFastMode, bool bECRecoverPreCalc, bool bHeader)
+string generate(const json &rom, const string &functionName, const string &fileName, bool bFastMode, bool bHeader)
 {
     //const Fr = new F1Field(0xffffffff00000001n);
 
@@ -183,8 +183,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += "#include \"zklog.hpp\"\n";
         if (!bFastMode)
             code += "#include \"goldilocks_precomputed.hpp\"\n";
-        if (bECRecoverPreCalc)
-            code += "#include \"ecrecover.hpp\"\n";
+        code += "#include \"ecrecover.hpp\"\n";
 
     }
     code += "\n";
@@ -473,31 +472,30 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += "#endif\n\n";
 
         // ECRECOVER PRE-CALCULATION 
-        if (bECRecoverPreCalc){
-            if(rom["labels"].contains("ecrecover_store_args") && zkPC == rom["labels"]["ecrecover_store_args"]){
+        if(rom["labels"].contains("ecrecover_store_args") && zkPC == rom["labels"]["ecrecover_store_args"]){
 
-                code += "    //ECRecover pre-calculation \n";
-                code += "    {\n";
-                code += "       mpz_class signature_, r_, s_, v_;\n";
-                code += "       fea2scalar(fr, signature_, pols.A0[0], pols.A1[0], pols.A2[0], pols.A3[0], pols.A4[0], pols.A5[0], pols.A6[0], pols.A7[0]);\n";
-                code += "       fea2scalar(fr, r_, pols.B0[0], pols.B1[0], pols.B2[0], pols.B3[0], pols.B4[0], pols.B5[0], pols.B6[0], pols.B7[0]);\n";
-                code += "       fea2scalar(fr, s_, pols.C0[0], pols.C1[0], pols.C2[0], pols.C3[0], pols.C4[0], pols.C5[0], pols.C6[0], pols.C7[0]);\n";
-                code += "       fea2scalar(fr, v_, pols.D0[0], pols.D1[0], pols.D2[0], pols.D3[0], pols.D4[0], pols.D5[0], pols.D6[0], pols.D7[0]);\n";
-                code += "       ctx.ecRecoverPrecalcBuffer.posUsed = ECRecover_precalc(signature_, r_, s_, v_, false, ctx.ecRecoverPrecalcBuffer.buffer);\n";
-                code += "       ctx.ecRecoverPrecalcBuffer.pos=0;\n";
-                code += "       ctx.ecRecoverPrecalcBuffer.filled = true;\n";
-                code += "    }\n";
+            code += "    //ECRecover pre-calculation \n";
+            code += "    if(mainExecutor.config.ECRecoverPrecalc){\n";
+            code += "       mpz_class signature_, r_, s_, v_;\n";
+            code += "       fea2scalar(fr, signature_, pols.A0[0], pols.A1[0], pols.A2[0], pols.A3[0], pols.A4[0], pols.A5[0], pols.A6[0], pols.A7[0]);\n";
+            code += "       fea2scalar(fr, r_, pols.B0[0], pols.B1[0], pols.B2[0], pols.B3[0], pols.B4[0], pols.B5[0], pols.B6[0], pols.B7[0]);\n";
+            code += "       fea2scalar(fr, s_, pols.C0[0], pols.C1[0], pols.C2[0], pols.C3[0], pols.C4[0], pols.C5[0], pols.C6[0], pols.C7[0]);\n";
+            code += "       fea2scalar(fr, v_, pols.D0[0], pols.D1[0], pols.D2[0], pols.D3[0], pols.D4[0], pols.D5[0], pols.D6[0], pols.D7[0]);\n";
+            code += "       ctx.ecRecoverPrecalcBuffer.posUsed = ECRecover_precalc(signature_, r_, s_, v_, false, ctx.ecRecoverPrecalcBuffer.buffer);\n";
+            code += "       ctx.ecRecoverPrecalcBuffer.pos=0;\n";
+            code += "       ctx.ecRecoverPrecalcBuffer.filled = true;\n";
+            code += "    }\n";
 
-            }       
-            if(rom["labels"].contains("ecrecover_end") && zkPC == rom["labels"]["ecrecover_end"]){
+        }       
+        if(rom["labels"].contains("ecrecover_end") && zkPC == rom["labels"]["ecrecover_end"]){
 
-                code += "    //ECRecover destroy pre-calculaiton buffer\n";
-                code += "    if( ctx.ecRecoverPrecalcBuffer.filled){\n";  
-                code += "       assert(ctx.ecRecoverPrecalcBuffer.pos == ctx.ecRecoverPrecalcBuffer.posUsed);\n";
-                code += "       ctx.ecRecoverPrecalcBuffer.filled = false;\n";
-                code += "    }\n";
-            }
+            code += "    //ECRecover destroy pre-calculaiton buffer\n";
+            code += "    if( ctx.ecRecoverPrecalcBuffer.filled){\n";  
+            code += "       assert(ctx.ecRecoverPrecalcBuffer.pos == ctx.ecRecoverPrecalcBuffer.posUsed);\n";
+            code += "       ctx.ecRecoverPrecalcBuffer.filled = false;\n";
+            code += "    }\n";
         }
+        
 
         // INITIALIZATION
 
