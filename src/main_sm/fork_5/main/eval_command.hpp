@@ -6,6 +6,7 @@
 #include "main_sm/fork_5/main/rom_command.hpp"
 #include "goldilocks_base_field.hpp"
 #include "zkresult.hpp"
+#include "ecrecover.hpp"
 
 namespace fork_5
 {
@@ -126,6 +127,7 @@ zkresult AddPointEc (Context &ctx, bool dbl, const RawFec::Element &x1, const Ra
 zkresult eval_addReadWriteAddress (Context &ctx, const mpz_class value);
 
 mpz_class sqrtTonelliShanks ( const mpz_class &n, const mpz_class &p );
+
 
 } // namespace
 

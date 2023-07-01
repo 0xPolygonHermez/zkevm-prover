@@ -14,6 +14,7 @@
 #include "poseidon_g_permutation.hpp"
 #include "utils/time_metric.hpp"
 #include "zklog.hpp"
+#include "ecrecover.hpp"
 
 namespace fork_5
 {
@@ -169,8 +170,11 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
         zklog.info("signHash=" + signHash);
 
         // Verify signature and obtain public from key
-        //ecRecover(r, s, v, hash) -> obtain public key
-        mpz_class fromPublicKey;  // TODO: Call ecrecover()
+        mpz_class v_ = batchData.tx[tx].v;
+        mpz_class fromPublicKey; 
+        mpz_class signature(signHash);
+        ECRecover(signature, batchData.tx[tx].r, batchData.tx[tx].s, v_, false, fromPublicKey);
+        zklog.info("fromPublicKey=" + fromPublicKey.get_str(16));
 
         // from.account.balance -= value + gas*gasPrice;
         Account fromAccount(fr, poseidon, *pHashDB);
@@ -300,6 +304,7 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
             HashDBClientFactory::freeHashDBClient(pHashDB);
             return;
         }
+        zklog.info("New root =" + fea2string(fr,root));
     }
 
     /*result = ((fork_5::FullTracer *)ctx.proverRequest.pFullTracer)->onFinishBatch(ctx, cmd);
