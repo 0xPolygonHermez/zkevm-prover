@@ -27,6 +27,10 @@ void Account::GenerateZeroKey (Goldilocks::Element (&zeroKey)[4])
 
     // Call poseidon and get the hash key
     poseidon.hash(zeroKey, Kin0);
+
+#ifdef LOG_ACCOUNT
+    zklog.info("zeroKey=" + fr.toString(zeroKey[3],16) + ":" + fr.toString(zeroKey[2],16) + ":" + fr.toString(zeroKey[1],16) + ":" + fr.toString(zeroKey[0],16));
+#endif
 }
 
 void Account::GenerateBalanceKey (Goldilocks::Element (&balanceKey)[4])
@@ -47,6 +51,10 @@ void Account::GenerateBalanceKey (Goldilocks::Element (&balanceKey)[4])
 
     // Call poseidon and get the hash key
     poseidon.hash(balanceKey, Kin1);
+
+#ifdef LOG_ACCOUNT
+    zklog.info("Account::GenerateBalanceKey() balance key=" + fea2string(fr, balanceKey));
+#endif
 }
 
 void Account::GenerateNonceKey (Goldilocks::Element (&nonceKey)[4])
@@ -69,6 +77,10 @@ void Account::GenerateNonceKey (Goldilocks::Element (&nonceKey)[4])
 
     // Call poseidon and get the hash key
     poseidon.hash(nonceKey, Kin1);
+
+#ifdef LOG_ACCOUNT
+    zklog.info("nonce key=" + fea2string(fr, nonceKey));
+#endif
 }
 
 zkresult Account::GetBalance (const Goldilocks::Element (&root)[4], mpz_class &balance)
@@ -82,6 +94,9 @@ zkresult Account::GetBalance (const Goldilocks::Element (&root)[4], mpz_class &b
         zklog.error("Account::GetBalance() failed calling hashDB.get() result=" + zkresult2string(zkResult));
         return zkResult;
     }
+
+    zklog.info("Account::GetBalance() publicKey=" + publicKey.get_str(16) + " balanceKey=" + fea2string(fr, balanceKey) + " balance=" + balance.get_str(10) + " root=" + fea2string(fr, root));
+
     return ZKR_SUCCESS;
 }
 
@@ -96,6 +111,9 @@ zkresult Account::SetBalance (Goldilocks::Element (&root)[4], const mpz_class &b
         zklog.error("Account::SetBalance()) failed calling hashDB.set() result=" + zkresult2string(zkResult));
         return zkResult;
     }
+
+    zklog.info("Account::SetBalance() publicKey=" + publicKey.get_str(16) + " balanceKey=" + fea2string(fr, balanceKey) + " balance=" + balance.get_str(10) + " root=" + fea2string(fr, root));
+
     return ZKR_SUCCESS;
 }
 
@@ -118,6 +136,9 @@ zkresult Account::GetNonce (const Goldilocks::Element (&root)[4], uint64_t &nonc
     }
 
     nonce = value.get_ui();
+
+    zklog.info("Account::GetNonce() publicKey=" + publicKey.get_str(16) + " nonceKey=" + fea2string(fr, nonceKey) + " nonce=" + to_string(nonce) + " root=" + fea2string(fr, root));
+    
     return ZKR_SUCCESS;
 }
 
@@ -133,6 +154,9 @@ zkresult Account::SetNonce (Goldilocks::Element (&root)[4], const uint64_t &nonc
         zklog.error("Account::SetNonce() failed calling hashDB.set() result=" + zkresult2string(zkResult));
         return zkResult;
     }
+    
+    zklog.info("Account::SetNonce() publicKey=" + publicKey.get_str(16) + " nonceKey=" + fea2string(fr, nonceKey) + " nonce=" + to_string(nonce) + " root=" + fea2string(fr, root));
+
     return ZKR_SUCCESS;
 }
 
