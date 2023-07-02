@@ -14,6 +14,7 @@
 #include "poseidon_g_permutation.hpp"
 #include "utils/time_metric.hpp"
 #include "zklog.hpp"
+#include "ecrecover.hpp"
 
 namespace fork_5
 {
@@ -186,9 +187,11 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
 #endif
 
         // Verify signature and obtain public from key
-        //ecRecover(r, s, v, hash) -> obtain public key
-        mpz_class fromPublicKey("0x617b3a3528f9cdd6630fd3301b9c8911f7bf063d");  // TODO: Call ecrecover()
-        zklog.info("from=" + fromPublicKey.get_str(16));
+        mpz_class v_ = batchData.tx[tx].v;
+        mpz_class fromPublicKey; 
+        mpz_class signature(signHash);
+        ECRecover(signature, batchData.tx[tx].r, batchData.tx[tx].s, v_, false, fromPublicKey);
+        zklog.info("fromPublicKey=" + fromPublicKey.get_str(16));
 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
         mainMetrics.add("ECRecover", TimeDiff(t));

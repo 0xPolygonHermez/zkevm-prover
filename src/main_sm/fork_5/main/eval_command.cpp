@@ -9,10 +9,6 @@
 
 namespace fork_5
 {
-    // As our field prime p, verifies p = 3 mod 4, for any r, sqrt(r) = r^((p+1)/4), check:
-    // https://www.rieselprime.de/ziki/Modular_square_root. FSQRT_EXP is (p+1)/4.
-    mpz_class FSQRTEXP("0x3fffffffffffffffffffffffffffffffffffffffffffffffffffffffbfffff0c");
-    mpz_class FPRIME("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F");
 
 #ifdef DEBUG
 #define CHECK_EVAL_COMMAND_PARAMETERS
@@ -2188,20 +2184,11 @@ void eval_sqrtFpEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     }
 #endif
 
-    // We use that p = 3 mod 4, so r = a^((p+1)/4) is a square root of a
-    // https://www.rieselprime.de/ziki/Modular_square_root
+    
     mpz_class a = cr.scalar;
     cr.type = crt_scalar;
-    mpz_class result;
-    mpz_powm(result.get_mpz_t(), a.get_mpz_t(), FSQRTEXP.get_mpz_t(), FPRIME.get_mpz_t());
-    if ((result * result) % FPRIME != a)
-    {
-        cr.scalar = 0;
-    }
-    else
-    {
-        cr.scalar = result;
-    }
+    sqrtF3mod4(cr.scalar, cr.scalar);
+
 }
 
 /********************/
@@ -2213,17 +2200,25 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
 void eval_xAddPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     RawFec::Element x3;
-    RawFec::Element y3;
-    eval_AddPointEc(ctx, cmd, false, x3, y3);
+    if(ctx.ecRecoverPrecalcBuffer.filled == true){
+        x3 = ctx.ecRecoverPrecalcBuffer.buffer[ctx.ecRecoverPrecalcBuffer.pos++];
+    }else{
+        RawFec::Element y3;
+        eval_AddPointEc(ctx, cmd, false, x3, y3);    
+    }
     cr.type = crt_scalar;
     ctx.fec.toMpz(cr.scalar.get_mpz_t(), x3);
 }
 
 void eval_yAddPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
-    RawFec::Element x3;
     RawFec::Element y3;
-    eval_AddPointEc(ctx, cmd, false, x3, y3);
+    if(ctx.ecRecoverPrecalcBuffer.filled == true){
+        y3 = ctx.ecRecoverPrecalcBuffer.buffer[ctx.ecRecoverPrecalcBuffer.pos++];
+    }else{
+        RawFec::Element x3;
+        eval_AddPointEc(ctx, cmd, false, x3, y3);  
+    }
     cr.type = crt_scalar;
     ctx.fec.toMpz(cr.scalar.get_mpz_t(), y3);
 }
@@ -2231,17 +2226,25 @@ void eval_yAddPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 void eval_xDblPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     RawFec::Element x3;
-    RawFec::Element y3;
-    eval_AddPointEc(ctx, cmd, true, x3, y3);
+    if(ctx.ecRecoverPrecalcBuffer.filled == true){
+        x3 = ctx.ecRecoverPrecalcBuffer.buffer[ctx.ecRecoverPrecalcBuffer.pos++];
+    }else{
+        RawFec::Element y3;
+        eval_AddPointEc(ctx, cmd, true, x3, y3);    
+    }
     cr.type = crt_scalar;
     ctx.fec.toMpz(cr.scalar.get_mpz_t(), x3);
 }
 
 void eval_yDblPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
-    RawFec::Element x3;
     RawFec::Element y3;
-    eval_AddPointEc(ctx, cmd, true, x3, y3);
+    if(ctx.ecRecoverPrecalcBuffer.filled == true){
+        y3 = ctx.ecRecoverPrecalcBuffer.buffer[ctx.ecRecoverPrecalcBuffer.pos++];
+    }else{
+        RawFec::Element x3;
+        eval_AddPointEc(ctx, cmd, true, x3, y3);    
+    }
     cr.type = crt_scalar;
     ctx.fec.toMpz(cr.scalar.get_mpz_t(), y3);
 }
@@ -2335,6 +2338,18 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
 
 zkresult AddPointEc (Context &ctx, bool dbl, const RawFec::Element &x1, const RawFec::Element &y1, const RawFec::Element &x2, const RawFec::Element &y2, RawFec::Element &x3, RawFec::Element &y3)
 {
+    
+    // Check if results are buffered
+    if(ctx.ecRecoverPrecalcBuffer.filled == true){
+        if(ctx.ecRecoverPrecalcBuffer.pos < 2){
+            zklog.error("ecRecoverPrecalcBuffer.buffer buffer is not filled, but pos < 2 (pos=" + to_string(ctx.ecRecoverPrecalcBuffer.pos) + ")");
+            exitProcess();
+        }
+        x3 = ctx.ecRecoverPrecalcBuffer.buffer[ctx.ecRecoverPrecalcBuffer.pos-2];
+        y3 = ctx.ecRecoverPrecalcBuffer.buffer[ctx.ecRecoverPrecalcBuffer.pos-1];
+        return ZKR_SUCCESS;
+    }
+
     // Check if we have just computed this operation
     if ( (ctx.lastECAdd.bDouble == dbl) &&
          ctx.fec.eq(ctx.lastECAdd.x1, x1) &&

@@ -39,13 +39,13 @@ int main(int argc, char **argv)
 
     string code = generate(rom, functionName, fileName, false, false);
     string2file(code, directoryName + "/" + fileName + ".cpp");
-    string header = generate(rom, functionName, fileName, false, true);
+    string header = generate(rom, functionName, fileName, false,  true);
     string2file(header, directoryName + "/" + fileName + ".hpp");
     functionName += "_fast";
     fileName += "_fast";
     string codeFast = generate(rom, functionName, fileName, true, false);
     string2file(codeFast, directoryName + "/" + fileName + ".cpp");
-    string headerFast = generate(rom, functionName, fileName, true, true);
+    string headerFast = generate(rom, functionName, fileName, true,  true);
     string2file(headerFast, directoryName + "/" + fileName + ".hpp");
 
     return 0;
@@ -183,6 +183,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += "#include \"zklog.hpp\"\n";
         if (!bFastMode)
             code += "#include \"goldilocks_precomputed.hpp\"\n";
+        code += "#include \"ecrecover.hpp\"\n";
 
     }
     code += "\n";
@@ -439,6 +440,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
     for (uint64_t zkPC=0; zkPC<rom["program"].size(); zkPC++)
     {
+
         // When bConditionalJump=true, the code will go to the proper label after all the work has been done based on the content of bJump
         bool bConditionalJump = false;
 
@@ -468,6 +470,40 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += "    outfile << \"--> Starting step=\" << i << \" zkPC=" + to_string(zkPC) + " instruction= \" << rom.line[" + to_string(zkPC) + "].toString(fr) << endl;\n";
         code += "    outfile.close();\n";
         code += "#endif\n\n";
+
+        // ECRECOVER PRE-CALCULATION 
+        if(rom["labels"].contains("ecrecover_store_args") && zkPC == rom["labels"]["ecrecover_store_args"]){
+            code += "    //ECRecover pre-calculation \n";
+            code += "    if(mainExecutor.config.ECRecoverPrecalc){\n";
+            code += "       mpz_class signature_, r_, s_, v_;\n";
+            if(bFastMode){   
+                code += "       fea2scalar(fr, signature_, pols.A0[0], pols.A1[0], pols.A2[0], pols.A3[0], pols.A4[0], pols.A5[0], pols.A6[0], pols.A7[0]);\n";
+                code += "       fea2scalar(fr, r_, pols.B0[0], pols.B1[0], pols.B2[0], pols.B3[0], pols.B4[0], pols.B5[0], pols.B6[0], pols.B7[0]);\n";
+                code += "       fea2scalar(fr, s_, pols.C0[0], pols.C1[0], pols.C2[0], pols.C3[0], pols.C4[0], pols.C5[0], pols.C6[0], pols.C7[0]);\n";
+                code += "       fea2scalar(fr, v_, pols.D0[0], pols.D1[0], pols.D2[0], pols.D3[0], pols.D4[0], pols.D5[0], pols.D6[0], pols.D7[0]);\n";
+                
+            }else{
+                code += "       fea2scalar(fr, signature_, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);\n";
+                code += "       fea2scalar(fr, r_, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);\n";
+                code += "       fea2scalar(fr, s_, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]);\n";
+                code += "       fea2scalar(fr, v_, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);\n";
+                
+            }
+            code += "       ctx.ecRecoverPrecalcBuffer.posUsed = ECRecoverPrecalc(signature_, r_, s_, v_, false, ctx.ecRecoverPrecalcBuffer.buffer, ctx.config.ECRecoverPrecalcNThreads);\n";
+            code += "       ctx.ecRecoverPrecalcBuffer.pos=0;\n";
+            code += "       if(ctx.ecRecoverPrecalcBuffer.posUsed > 0) ctx.ecRecoverPrecalcBuffer.filled = true;\n";
+            code += "    }\n";
+
+        }       
+        if(rom["labels"].contains("ecrecover_end") && zkPC == rom["labels"]["ecrecover_end"]){
+
+            code += "    //ECRecover destroy pre-calculaiton buffer\n";
+            code += "    if( ctx.ecRecoverPrecalcBuffer.filled){\n";  
+            code += "       assert(ctx.ecRecoverPrecalcBuffer.pos == ctx.ecRecoverPrecalcBuffer.posUsed);\n";
+            code += "       ctx.ecRecoverPrecalcBuffer.filled = false;\n";
+            code += "    }\n";
+        }
+        
 
         // INITIALIZATION
 
