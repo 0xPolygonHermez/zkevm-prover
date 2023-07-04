@@ -52,6 +52,7 @@
 #define LOG_FULL_TRACER_ON_ERROR
 //#define LOG_TX_HASH
 //#define LOG_INPUT
+//LOG_SMT_KEY_DETAILS
 
 /* Prover defines */
 //#define PROVER_USE_PROOF_GOOD_JSON

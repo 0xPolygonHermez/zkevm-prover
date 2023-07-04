@@ -860,6 +860,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         return;
                     }
                     incCounter = smtGetResult.proofHashCounter + 2;
+
+#ifdef LOG_SMT_KEY_DETAILS
+                    zklog.info("SMT get C=" + fea2string(fr, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]) +
+                        " A=" + fea2string(fr, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]) +
+                        " B=" + fea2string(fr, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]) +
+                        " Kin0Hash=" + fea2string(fr, Kin0Hash) +
+                        " Kin1Hash=" + fea2string(fr, Kin1Hash) +
+                        " oldRoot=" + fea2string(fr, oldRoot) +
+                        " value=" + value.get_str(10));
+#endif
                     //cout << "smt.get() returns value=" << smtGetResult.value.get_str(16) << endl;
 
                     if (bProcessBatch)
@@ -992,6 +1002,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     }
                     incCounter = ctx.lastSWrite.res.proofHashCounter + 2;
 
+#ifdef LOG_SMT_KEY_DETAILS
+                    zklog.info("SMT set C=" + fea2string(fr, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]) +
+                        " A=" + fea2string(fr, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]) +
+                        " B=" + fea2string(fr, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]) +
+                        " Kin0Hash=" + fea2string(fr, Kin0Hash) +
+                        " Kin1Hash=" + fea2string(fr, Kin1Hash) +
+                        " oldRoot=" + fea2string(fr, oldRoot) +
+                        " value=" + scalarD.get_str(10) +
+                        " newRoot=" + fea2string(fr, ctx.lastSWrite.newRoot));
+#endif
                     if (bProcessBatch)
                     {
                         zkResult = eval_addReadWriteAddress(ctx, scalarD);
