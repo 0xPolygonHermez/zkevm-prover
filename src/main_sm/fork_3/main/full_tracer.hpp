@@ -37,7 +37,7 @@ public:
     uint64_t txTime; // in us
     vector<vector<mpz_class>> fullStack;// Stack of the transaction
     uint64_t accBatchGas;
-    unordered_map<uint64_t,unordered_map<uint64_t,Log>> logs;
+    map<uint64_t,map<uint64_t,Log>> logs;
     vector<Opcode> call_trace;
     vector<Opcode> execution_trace;
     string lastError;

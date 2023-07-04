@@ -417,11 +417,11 @@ void FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
 
     // Init logs[CTX][indexLog], if required
     uint64_t CTX = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
-    unordered_map<uint64_t, std::unordered_map<uint64_t, Log>>::iterator itCTX;
+    map<uint64_t, map<uint64_t, Log>>::iterator itCTX;
     itCTX = logs.find(CTX);
     if (itCTX == logs.end())
     {
-        unordered_map<uint64_t, Log> aux;
+        map<uint64_t, Log> aux;
         Log log;
         aux[indexLog] = log;
         logs[CTX] = aux;
@@ -429,7 +429,7 @@ void FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
         zkassert(itCTX != logs.end());
     }
     
-    std::unordered_map<uint64_t, Log>::iterator it;
+    map<uint64_t, Log>::iterator it;
     it = itCTX->second.find(indexLog);
     if (it == itCTX->second.end())
     {
@@ -786,14 +786,17 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     }
 
     // Append to response logs
-    unordered_map<uint64_t, std::unordered_map<uint64_t, Log>>::iterator logIt;
-    unordered_map<uint64_t, Log>::const_iterator it;
+    map<uint64_t, map<uint64_t, Log>>::iterator logIt;
+    map<uint64_t, Log>::const_iterator it;
+    uint64_t logIndex = 0;
     for (logIt=logs.begin(); logIt!=logs.end(); logIt++)
     {
         for (it = logIt->second.begin(); it != logIt->second.end(); it++)
         {
             Log log = it->second;
+            log.index = logIndex;
             finalTrace.responses[finalTrace.responses.size() - 1].logs.push_back(log);
+            logIndex++;
         }
     }
 
