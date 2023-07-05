@@ -933,19 +933,26 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
         finalTrace.responses[finalTrace.responses.size() - 1].error = "";
     }
 
-    // Append to response logs
+    // Order all logs (from all CTX) in order of index
+    map<uint64_t, Log> auxLogs;
     map<uint64_t, map<uint64_t, Log>>::iterator logIt;
     map<uint64_t, Log>::const_iterator it;
-    uint64_t logIndex = 0;
     for (logIt=logs.begin(); logIt!=logs.end(); logIt++)
     {
         for (it = logIt->second.begin(); it != logIt->second.end(); it++)
         {
-            Log log = it->second;
-            log.index = logIndex;
-            finalTrace.responses[finalTrace.responses.size() - 1].logs.push_back(log);
-            logIndex++;
+            auxLogs[it->second.index] = it->second;
         }
+    }
+
+    // Append to response logs, overwriting log indexes to be sequential
+    uint64_t logIndex = 0;
+    map<uint64_t, Log>::iterator auxLogsIt;
+    for (auxLogsIt = auxLogs.begin(); auxLogsIt != auxLogs.end(); auxLogsIt++)
+    {
+        auxLogsIt->second.index = logIndex;
+        logIndex++;
+        finalTrace.responses[finalTrace.responses.size() - 1].logs.push_back(auxLogsIt->second);
     }
 
     // Clear logs array
