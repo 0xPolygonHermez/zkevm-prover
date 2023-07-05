@@ -753,6 +753,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
 
 zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], SmtGetResult &result, DatabaseMap *dbReadLog)
 {
+
 #ifdef LOG_SMT
     zklog.info("Smt::get() called with root=" + fea2string(fr,root) + " and key=" + fea2string(fr,key));
 #endif
@@ -938,16 +939,15 @@ void Smt::splitKey ( const Goldilocks::Element (&key)[4], vector<uint64_t> &resu
     {
         auxk[i] = fr.toU64(key[i]);
     }
-
+    result.resize(64*4);
     // Split the key in bits, taking one bit from a different scalar every time
+    int cont =0;
     for (uint64_t i=0; i<64; i++)
     {
         for (uint64_t j=0; j<4; j++)
         {
-            mpz_class aux;
-            aux = auxk[j] & 1;
-            result.push_back(aux.get_ui());
-            auxk[j] = auxk[j] >> 1;
+            result[cont]=mpz_tstbit(auxk[j].get_mpz_t(), i);
+            ++cont;
         }
     }
 }
