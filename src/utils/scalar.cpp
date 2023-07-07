@@ -534,12 +534,12 @@ void scalar2bytes(mpz_class &s, uint8_t (&bytes)[32])
     }
 }
 
-void scalar2bytesBE(mpz_class &s, uint8_t (&bytes)[32])
+void scalar2bytesBE(mpz_class &s, uint8_t *pBytes)
 {
     for (uint64_t i=0; i<32; i++)
     {
         mpz_class aux = s & ScalarMask8;
-        bytes[31 - i] = aux.get_ui();
+        pBytes[31 - i] = aux.get_ui();
         s = s >> 8;
     }
     if (s != ScalarZero)

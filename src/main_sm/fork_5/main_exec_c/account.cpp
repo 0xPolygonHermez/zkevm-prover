@@ -116,11 +116,9 @@ void Account::GenerateNonceKey(Goldilocks::Element (&nonceKey)[4])
 
 void Account::GenerateGlobalExitRootKey(const mpz_class &globalExitRoot, Goldilocks::Element (&globalExitRootKey)[4])
 {
-    uint8_t data32[32];
-    mpz_class auxScalar = globalExitRoot;
-    scalar2bytesBE(auxScalar, data32); // TODO: Avoid copies using pointer to uint8_t
     uint8_t data64[64];
-    memcpy(&data64[0], &data32[0], 32);
+    mpz_class auxScalar = globalExitRoot;
+    scalar2bytesBE(auxScalar, &data64[0]);
     memset(&data64[32], 0, 32);
 
     mpz_class keccakScalar;
@@ -235,14 +233,11 @@ void Account::GenerateBatchNumberKey(Goldilocks::Element (&batchNumberKey)[4])
 
 void Account::GenerateStateRootKey (uint64_t batchNumber, Goldilocks::Element (&stateRootKey)[4])
 {
-    uint8_t data32[32];
-    mpz_class auxScalar = batchNumber;
-    scalar2bytesBE(auxScalar, data32);
     uint8_t data64[64];
-    memcpy(&data64[0], &data32[0], 32);
+    mpz_class auxScalar = batchNumber;
+    scalar2bytesBE(auxScalar, &data64[0]);
     auxScalar = STATE_ROOT_STORAGE_POS;
-    scalar2bytesBE(auxScalar, data32);
-    memcpy(&data64[32], &data32[0], 32);
+    scalar2bytesBE(auxScalar, &data64[32]);
 
     mpz_class keccakScalar;
     keccak256(data64, 64, keccakScalar);

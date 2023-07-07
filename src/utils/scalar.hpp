@@ -323,7 +323,7 @@ inline void ba2fea (Goldilocks &fr, const uint8_t * pData, uint64_t len, Goldilo
 void scalar2ba(uint8_t *pData, uint64_t &dataSize, mpz_class s);
 void scalar2ba16(uint64_t *pData, uint64_t &dataSize, mpz_class s);
 void scalar2bytes(mpz_class &s, uint8_t (&bytes)[32]);
-void scalar2bytesBE(mpz_class &s, uint8_t (&bytes)[32]);
+void scalar2bytesBE(mpz_class &s, uint8_t *pBytes); // pBytes must be a 32-bytes array
 
 
 /* Scalar to byte array string conversion */
