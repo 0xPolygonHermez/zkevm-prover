@@ -17,6 +17,7 @@ mpz_class ScalarMask16  ("FFFF", 16);
 mpz_class ScalarMask20  ("FFFFF", 16);
 mpz_class ScalarMask32  ("FFFFFFFF", 16);
 mpz_class ScalarMask64  ("FFFFFFFFFFFFFFFF", 16);
+mpz_class ScalarMask160 ("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
 mpz_class ScalarMask256 ("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
 mpz_class ScalarTwoTo8  ("100", 16);
 mpz_class ScalarTwoTo16 ("10000", 16);
@@ -529,6 +530,21 @@ void scalar2bytes(mpz_class &s, uint8_t (&bytes)[32])
     if (s != ScalarZero)
     {
         zklog.error("scalar2bytes() run out of space of 32 bytes");
+        exitProcess();
+    }
+}
+
+void scalar2bytesBE(mpz_class &s, uint8_t *pBytes)
+{
+    for (uint64_t i=0; i<32; i++)
+    {
+        mpz_class aux = s & ScalarMask8;
+        pBytes[31 - i] = aux.get_ui();
+        s = s >> 8;
+    }
+    if (s != ScalarZero)
+    {
+        zklog.error("scalar2bytesBE() run out of space of 32 bytes");
         exitProcess();
     }
 }

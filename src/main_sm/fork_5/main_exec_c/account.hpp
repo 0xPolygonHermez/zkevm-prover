@@ -13,6 +13,10 @@ using namespace std;
 namespace fork_5
 {
 
+// Well-known addresses
+#define ADDRESS_GLOBAL_EXIT_ROOT_MANAGER_L2 "0xa40D5f56745a118D0906a34E69aeC8C0Db1cB8fA"
+#define ADDRESS_SYSTEM "0x000000000000000000000000000000005ca1ab1e"
+
 class Account
 {
 private:
@@ -27,6 +31,14 @@ private:
     Goldilocks::Element balanceKey[4];
     bool bNonceKeyGenerated;
     Goldilocks::Element nonceKey[4];
+    bool bGlobalExitRootKeyGenerated;
+    Goldilocks::Element globalExitRootKey[4];
+    bool bLocalExitRootKeyGenerated;
+    Goldilocks::Element localExitRootKey[4];
+    bool bTxCountKeyGenerated;
+    Goldilocks::Element txCountKey[4];
+    bool bStateRootKeyGenerated;
+    Goldilocks::Element stateRootKey[4];
 public:
     
     // Constructor
@@ -36,33 +48,27 @@ public:
         hashDB(hashDB), 
         bInitialized(false),
         bBalanceKeyGenerated(false),
-        bNonceKeyGenerated(false)
+        bNonceKeyGenerated(false),
+        bGlobalExitRootKeyGenerated(false),
+        bLocalExitRootKeyGenerated(false),
+        bTxCountKeyGenerated(false),
+        bStateRootKeyGenerated(false)
     {
         CheckZeroKey();
     };
 
     // Initialization
-    zkresult Init (const mpz_class &aux)
-    {
-        publicKey = aux;
-
-        // Check range
-        if (publicKey > mpz_class("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")) // TODO: make it a constant
-        {
-            zklog.error("Account::Init() received invalid publicKey, too big =" + publicKey.get_str(16));
-            return ZKR_UNSPECIFIED;
-        }
-
-        bInitialized = true;
-
-        return ZKR_SUCCESS;
-    };
+    zkresult Init (const mpz_class &publicKey_);
 
 private:
 
     void GenerateZeroKey (Goldilocks::Element (&zeroKey)[4]);
     void GenerateBalanceKey (Goldilocks::Element (&balanceKey)[4]);
     void GenerateNonceKey (Goldilocks::Element (&nonceKey)[4]);
+    void GenerateGlobalExitRootKey (const mpz_class &globalExitRoot, Goldilocks::Element (&globalExitRootKey)[4]);
+    void GenerateLocalExitRootKey (Goldilocks::Element (&localExitRootKey)[4]);
+    void GenerateTxCountKey (Goldilocks::Element (&txCountKey)[4]);
+    void GenerateStateRootKey (const mpz_class &txCount, Goldilocks::Element (&stateRootKey)[4]);
 
     inline void CheckZeroKey (void)
     {
@@ -88,6 +94,38 @@ private:
             bNonceKeyGenerated = true;
         }
     }
+    inline void CheckGlobalExitRootKey (const mpz_class &globalExitRoot)
+    {
+        if (!bGlobalExitRootKeyGenerated)
+        {
+            GenerateGlobalExitRootKey(globalExitRoot, globalExitRootKey);
+            bGlobalExitRootKeyGenerated = true;
+        }
+    }
+    inline void CheckLocalExitRootKey (void)
+    {
+        if (!bLocalExitRootKeyGenerated)
+        {
+            GenerateLocalExitRootKey(localExitRootKey);
+            bLocalExitRootKeyGenerated = true;
+        }
+    }
+    inline void CheckTxCountKey (void)
+    {
+        if (!bTxCountKeyGenerated)
+        {
+            GenerateTxCountKey(txCountKey);
+            bTxCountKeyGenerated = true;
+        }
+    }
+    inline void CheckStateRootKey (const mpz_class &txCount)
+    {
+        //if (!bStateRootKeyGenerated)
+        {
+            GenerateStateRootKey(txCount, stateRootKey);
+            bStateRootKeyGenerated = true;
+        }
+    }
    
 public:
 
@@ -102,6 +140,17 @@ public:
 
     // Set account nonce value; root is updated with new root
     zkresult SetNonce (Goldilocks::Element (&root)[4], const uint64_t &nonce);
+
+    zkresult SetGlobalExitRoot (Goldilocks::Element (&root)[4], const mpz_class &globalExitRoot, const mpz_class &value);
+    
+    // Get account batch number value
+    zkresult GetTxCount (const Goldilocks::Element (&root)[4], mpz_class &txCount); // TODO: oldBatchNumber and newBatchNumber are U32
+
+    // Set account TX count value; root is updated with new root
+    zkresult SetTxCount (Goldilocks::Element (&root)[4], const mpz_class &txCount);
+
+    // Set account state root value; root is updated with new root
+    zkresult SetStateRoot (Goldilocks::Element (&root)[4], const mpz_class &txCount, const mpz_class &stateRoot);
 };
 
 }

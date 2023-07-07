@@ -122,6 +122,7 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
     ctxc.regs.SR = proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot;
     Goldilocks::Element root[4];
     scalar2fea(fr, proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot, root); // TODO: Check range?
+    zklog.info("Old root=" + fea2string(fr, root));
 
     // Set oldAccInputHash
     ctxc.globalVars.oldAccInputHash = proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash;
@@ -146,6 +147,7 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
     // Set batchL2DataLength
     ctxc.globalVars.batchL2DataLength = proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size();
 
+    // Decode batch L2 data
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
     gettimeofday(&t, NULL);
 #endif
@@ -159,8 +161,9 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
         return;
     }
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-    mainMetrics.add("Batch decode", TimeDiff(t));
+    mainMetrics.add("Batch L2 data decode", TimeDiff(t));
 #endif
+
     /*RomCommand cmd;
     result = ((fork_5::FullTracer *)ctx.proverRequest.pFullTracer)->onStartBatch(ctx, cmd);
     if (result != ZKR_SUCCESS)
@@ -171,36 +174,71 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
         return;
     }*/
 
+    // Create global exit root manager L2 account
+    mpz_class globalExitRootManagerL2Address(ADDRESS_GLOBAL_EXIT_ROOT_MANAGER_L2);
+    Account globalExitRootManagerL2Account(fr, poseidon, *pHashDB);
+    result = globalExitRootManagerL2Account.Init(globalExitRootManagerL2Address);
+    if (result != ZKR_SUCCESS)
+    {
+        zklog.error("main_exec_c() failed calling globalExitRootManagerL2Account.Init()");
+        proverRequest.result = result;
+        HashDBClientFactory::freeHashDBClient(pHashDB);
+        return;
+    }
+
+    // Store global exit root
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+    gettimeofday(&t, NULL);
+#endif
+    result = globalExitRootManagerL2Account.SetGlobalExitRoot(root, proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot, mpz_class(proverRequest.input.publicInputsExtended.publicInputs.timestamp));
+    if (result != ZKR_SUCCESS)
+    {
+        zklog.error("main_exec_c() failed calling globalExitRootManagerL2Account.SetGlobalExitRoot()");
+        proverRequest.result = result;
+        HashDBClientFactory::freeHashDBClient(pHashDB);
+        return;
+    }
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+    mainMetrics.add("SMT set", TimeDiff(t));
+#endif
+
+    // Create system SC account
+    mpz_class systemAddress(ADDRESS_SYSTEM);
+    Account systemAccount(fr, poseidon, *pHashDB);
+    result = systemAccount.Init(systemAddress);
+    if (result != ZKR_SUCCESS)
+    {
+        zklog.error("main_exec_c() failed calling systemAccount.Init()");
+        proverRequest.result = result;
+        HashDBClientFactory::freeHashDBClient(pHashDB);
+        return;
+    }
+
+    // Process all transactions present in parsed batch L2 data
     for (uint64_t tx=0; tx<batchData.tx.size(); tx++)
     {
         // Log TX info
-        zklog.info("main_exec_c() processing tx=" + to_string(tx));
-        batchData.tx[tx].print();
+        //zklog.info("main_exec_c() processing tx=" + to_string(tx));
+        //batchData.tx[tx].print();
 
         // calculate tx hash
         string signHash = batchData.tx[tx].signHash();
-        zklog.info("signHash=" + signHash);
+        //zklog.info("signHash=" + signHash);
 
-
+        // Verify signature and obtain public from key
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
         gettimeofday(&t, NULL);
 #endif
-
-        // Verify signature and obtain public from key
         mpz_class v_ = batchData.tx[tx].v;
         mpz_class fromPublicKey; 
         mpz_class signature(signHash);
         ECRecover(signature, batchData.tx[tx].r, batchData.tx[tx].s, v_, false, fromPublicKey);
-        zklog.info("fromPublicKey=" + fromPublicKey.get_str(16));
-
+        //zklog.info("fromPublicKey=" + fromPublicKey.get_str(16));
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
         mainMetrics.add("ECRecover", TimeDiff(t));
 #endif
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        gettimeofday(&t, NULL);
-#endif
 
-        // from.account.balance -= value + gas*gasPrice;
+        // Create from, to and sequencer accounts
         Account fromAccount(fr, poseidon, *pHashDB);
         result = fromAccount.Init(fromPublicKey);
         if (result != ZKR_SUCCESS)
@@ -219,15 +257,20 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
             HashDBClientFactory::freeHashDBClient(pHashDB);
             return;
         }
+        Account sequencerAccount(fr, poseidon, *pHashDB);
+        result = sequencerAccount.Init(proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr);
+        if (result != ZKR_SUCCESS)
+        {
+            zklog.error("main_exec_c() failed calling sequencerAccount.Init()");
+            proverRequest.result = result;
+            HashDBClientFactory::freeHashDBClient(pHashDB);
+            return;
+        }
 
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        mainMetrics.add("Accounts initialization", TimeDiff(t));
-#endif
-
+        // Get nonce of from account
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
         gettimeofday(&t, NULL);
 #endif
-        // Get nonce of from account
         uint64_t fromNonce;
         result = fromAccount.GetNonce(root, fromNonce);
         if (result != ZKR_SUCCESS)
@@ -237,6 +280,9 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
             HashDBClientFactory::freeHashDBClient(pHashDB);
             return;
         }
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+        mainMetrics.add("SMT get", TimeDiff(t));
+#endif
 
         // Check from account nonce against the one provided by the tx batch L2 data
         if (fromNonce != batchData.tx[tx].nonce)
@@ -247,14 +293,10 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
             return;
         }
 
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        mainMetrics.add("From get nonce", TimeDiff(t));
-#endif
-
+        // Set new nonce = old nonce + 1
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
         gettimeofday(&t, NULL);
 #endif
-        // Set new nonce = old nonce + 1
         fromNonce++;
         result = fromAccount.SetNonce(root, fromNonce);
         if (result != ZKR_SUCCESS)
@@ -264,16 +306,14 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
             HashDBClientFactory::freeHashDBClient(pHashDB);
             return;
         }
-
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        mainMetrics.add("From set nonce", TimeDiff(t));
-#endif
-
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        gettimeofday(&t, NULL);
+        mainMetrics.add("SMT set", TimeDiff(t));
 #endif
 
         // Get balance of from account
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+        gettimeofday(&t, NULL);
+#endif
         mpz_class fromBalance;
         result = fromAccount.GetBalance(root, fromBalance);
         if (result != ZKR_SUCCESS)
@@ -283,16 +323,14 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
             HashDBClientFactory::freeHashDBClient(pHashDB);
             return;
         }
-
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        mainMetrics.add("From get balance", TimeDiff(t));
-#endif
-
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        gettimeofday(&t, NULL);
+        mainMetrics.add("SMT get", TimeDiff(t));
 #endif
 
         // Get balance of to account
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+        gettimeofday(&t, NULL);
+#endif
         mpz_class toBalance;
         result = toAccount.GetBalance(root, toBalance);
         if (result != ZKR_SUCCESS)
@@ -302,9 +340,8 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
             HashDBClientFactory::freeHashDBClient(pHashDB);
             return;
         }
-
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        mainMetrics.add("To get balance", TimeDiff(t));
+        mainMetrics.add("SMT get", TimeDiff(t));
 #endif
 
         // Calculate gas
@@ -331,8 +368,11 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
             txGasPrice = batchData.tx[tx].gasPrice;
         }
 
+        // Calculate fee
+        mpz_class fee = gas * txGasPrice;
+
         // Check that from account has enough balance to complete the transfer
-        mpz_class fromAmount = batchData.tx[tx].value + gas * txGasPrice;
+        mpz_class fromAmount = batchData.tx[tx].value + fee;
         if (fromBalance < fromAmount)
         {
             zklog.error("main_exec_c() failed fromBalance=" + fromBalance.get_str(10) + " < fromAmount=" + fromAmount.get_str(10));
@@ -341,11 +381,10 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
             return;
         }
 
+        // Update from account balance = balance - value - fee (gas*gasPrice)
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
         gettimeofday(&t, NULL);
 #endif
-
-        // Update from account balance = balance - value - gas*gasPrice
         fromBalance -= fromAmount;
         result = fromAccount.SetBalance(root, fromBalance);
         if (result != ZKR_SUCCESS)
@@ -355,16 +394,14 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
             HashDBClientFactory::freeHashDBClient(pHashDB);
             return;
         }
-
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        mainMetrics.add("From set balance", TimeDiff(t));
-#endif
-
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        gettimeofday(&t, NULL);
+        mainMetrics.add("SMT set", TimeDiff(t));
 #endif
 
         // Update to account balance = balance + value
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+        gettimeofday(&t, NULL);
+#endif
         toBalance += batchData.tx[tx].value;
         result = toAccount.SetBalance(root, toBalance);
         if (result != ZKR_SUCCESS)
@@ -374,13 +411,87 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
             HashDBClientFactory::freeHashDBClient(pHashDB);
             return;
         }
-
-        zklog.info("new root=" + fea2string(fr, root));
-
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        mainMetrics.add("To set balance", TimeDiff(t));
+        mainMetrics.add("SMT set", TimeDiff(t));
 #endif
+
+        // Get balance of sequencer account
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+        gettimeofday(&t, NULL);
+#endif
+        mpz_class sequencerBalance;
+        result = sequencerAccount.GetBalance(root, sequencerBalance);
+        if (result != ZKR_SUCCESS)
+        {
+            zklog.error("main_exec_c() failed calling sequencerAccount.GetBalance()");
+            proverRequest.result = result;
+            HashDBClientFactory::freeHashDBClient(pHashDB);
+            return;
+        }
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+        mainMetrics.add("SMT get", TimeDiff(t));
+#endif
+
+        // Update sequencer account balance = balance + fee
+        // TODO: if sequencer and from are the same, read and write only once
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+        gettimeofday(&t, NULL);
+#endif
+        sequencerBalance += fee;
+        result = sequencerAccount.SetBalance(root, sequencerBalance);
+        if (result != ZKR_SUCCESS)
+        {
+            zklog.error("main_exec_c() failed calling sequencerAccount.SetBalance()");
+            proverRequest.result = result;
+            HashDBClientFactory::freeHashDBClient(pHashDB);
+            return;
+        }
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+        mainMetrics.add("SMT set", TimeDiff(t));
+#endif
+
+        // Increase TX count
+        ctxc.globalVars.txCount++;
+
+    // Set new TX count in system account
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+        gettimeofday(&t, NULL);
+#endif
+        result = systemAccount.SetTxCount(root, ctxc.globalVars.txCount);
+        if (result != ZKR_SUCCESS)
+        {
+            zklog.error("main_exec_c() failed calling systemAccount.SetTxCount()");
+            proverRequest.result = result;
+            HashDBClientFactory::freeHashDBClient(pHashDB);
+            return;
+        }
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+        mainMetrics.add("SMT set", TimeDiff(t));
+#endif
+
+        // Set new state root in system account
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+        gettimeofday(&t, NULL);
+#endif
+        mpz_class auxScalar;
+        fea2scalar(fr, auxScalar, root);
+        result = systemAccount.SetStateRoot(root, ctxc.globalVars.txCount, auxScalar);
+        if (result != ZKR_SUCCESS)
+        {
+            zklog.error("main_exec_c() failed calling systemAccount.SetStateRoot()");
+            proverRequest.result = result;
+            HashDBClientFactory::freeHashDBClient(pHashDB);
+            return;
+        }
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+        mainMetrics.add("SMT set", TimeDiff(t));
+#endif
+
+        //zklog.info("Processed tx=" + to_string(tx) + " newStateRoot=" + fea2string(fr, root));
     }
+
+
+    zklog.info("new root=" + fea2string(fr, root));
 
     /*result = ((fork_5::FullTracer *)ctx.proverRequest.pFullTracer)->onFinishBatch(ctx, cmd);
     if (result != ZKR_SUCCESS)
@@ -391,6 +502,14 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
         return;
     }*/
 
+    result = pHashDB->flush(proverRequest.flushId, proverRequest.lastSentFlushId);
+    if (result != ZKR_SUCCESS)
+    {
+        proverRequest.result = result;
+        zklog.error("Failed calling pHashDB->flush() result=" + zkresult2string(result));
+        HashDBClientFactory::freeHashDBClient(pHashDB);
+        return;
+    }
     HashDBClientFactory::freeHashDBClient(pHashDB);
     proverRequest.result = ZKR_SUCCESS;
 
