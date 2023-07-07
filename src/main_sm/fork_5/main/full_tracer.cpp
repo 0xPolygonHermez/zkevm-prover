@@ -238,16 +238,16 @@ using namespace rlp;
 
 // Returns a transaction hash from transaction params
 void getTransactionHash( string    &to,
-                         mpz_class value,
-                         uint64_t  nonce,
-                         uint64_t  gasLimit,
-                         mpz_class gasPrice,
-                         string    &data,
-                         mpz_class &r,
-                         mpz_class &s,
-                         uint64_t  v,
-                         string    &txHash,
-                         string    &rlpTx )
+                                mpz_class value,
+                                uint64_t  nonce,
+                                uint64_t  gasLimit,
+                                mpz_class gasPrice,
+                                string    &data,
+                                mpz_class &r,
+                                mpz_class &s,
+                                uint64_t  v,
+                                string    &txHash,
+                                string    &rlpTx )
 {
 #ifdef LOG_TX_HASH
     zklog.info("FullTracer::getTransactionHash() to=" + to + " value=" + value.get_str(16) + " nonce=" + to_string(nonce) + " gasLimit=" + to_string(gasLimit) + " gasPrice=" + gasPrice.get_str(10) + " data=" + data + " r=0x" + r.get_str(16) + " s=0x" + s.get_str(16) + " v=" + to_string(v));
@@ -951,19 +951,26 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
         finalTrace.responses[finalTrace.responses.size() - 1].error = "";
     }
 
-    // Append to response logs
+    // Order all logs (from all CTX) in order of index
+    map<uint64_t, Log> auxLogs;
     map<uint64_t, map<uint64_t, Log>>::iterator logIt;
     map<uint64_t, Log>::const_iterator it;
-    uint64_t logIndex = 0;
     for (logIt=logs.begin(); logIt!=logs.end(); logIt++)
     {
         for (it = logIt->second.begin(); it != logIt->second.end(); it++)
         {
-            Log log = it->second;
-            log.index = logIndex;
-            finalTrace.responses[finalTrace.responses.size() - 1].logs.push_back(log);
-            logIndex++;
+            auxLogs[it->second.index] = it->second;
         }
+    }
+
+    // Append to response logs, overwriting log indexes to be sequential
+    uint64_t logIndex = 0;
+    map<uint64_t, Log>::iterator auxLogsIt;
+    for (auxLogsIt = auxLogs.begin(); auxLogsIt != auxLogs.end(); auxLogsIt++)
+    {
+        auxLogsIt->second.index = logIndex;
+        logIndex++;
+        finalTrace.responses[finalTrace.responses.size() - 1].logs.push_back(auxLogsIt->second);
     }
 
     // Clear logs array
