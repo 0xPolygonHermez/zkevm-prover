@@ -205,7 +205,7 @@ void Account::GenerateLocalExitRootKey(Goldilocks::Element (&localExitRootKey)[4
 #endif
 }
 
-void Account::GenerateBatchNumberKey(Goldilocks::Element (&batchNumberKey)[4])
+void Account::GenerateTxCountKey(Goldilocks::Element (&txCountKey)[4])
 {
     Goldilocks::Element Kin1[12];
 
@@ -224,14 +224,14 @@ void Account::GenerateBatchNumberKey(Goldilocks::Element (&batchNumberKey)[4])
     Kin1[11] = zeroKey[3];
 
     // Call poseidon and get the hash key
-    poseidon.hash(batchNumberKey, Kin1);
+    poseidon.hash(txCountKey, Kin1);
 
 #ifdef LOG_ACCOUNT
-    zklog.info("Accoung::GenerateBatchNumberKey() batchNumberKey=" + fea2string(fr, batchNumberKey));
+    zklog.info("Accoung::GenerateBatchNumberKey() txCountKey=" + fea2string(fr, txCountKey));
 #endif
 }
 
-void Account::GenerateStateRootKey (uint64_t batchNumber, Goldilocks::Element (&stateRootKey)[4])
+void Account::GenerateStateRootKey (const mpz_class &batchNumber, Goldilocks::Element (&stateRootKey)[4])
 {
     uint8_t data64[64];
     mpz_class auxScalar = batchNumber;
@@ -295,7 +295,9 @@ zkresult Account::GetBalance(const Goldilocks::Element (&root)[4], mpz_class &ba
         return zkResult;
     }
 
+#ifdef LOG_ACCOUNT
     zklog.info("Account::GetBalance() publicKey=" + publicKey.get_str(16) + " balanceKey=" + fea2string(fr, balanceKey) + " balance=" + balance.get_str(10) + " root=" + fea2string(fr, root));
+#endif
 
     return ZKR_SUCCESS;
 }
@@ -312,7 +314,9 @@ zkresult Account::SetBalance(Goldilocks::Element (&root)[4], const mpz_class &ba
         return zkResult;
     }
 
+#ifdef LOG_ACCOUNT
     zklog.info("Account::SetBalance() publicKey=" + publicKey.get_str(16) + " balanceKey=" + fea2string(fr, balanceKey) + " balance=" + balance.get_str(10) + " root=" + fea2string(fr, root));
+#endif
 
     return ZKR_SUCCESS;
 }
@@ -337,7 +341,9 @@ zkresult Account::GetNonce(const Goldilocks::Element (&root)[4], uint64_t &nonce
 
     nonce = value.get_ui();
 
+#ifdef LOG_ACCOUNT
     zklog.info("Account::GetNonce() publicKey=" + publicKey.get_str(16) + " nonceKey=" + fea2string(fr, nonceKey) + " nonce=" + to_string(nonce) + " root=" + fea2string(fr, root));
+#endif
 
     return ZKR_SUCCESS;
 }
@@ -355,7 +361,9 @@ zkresult Account::SetNonce(Goldilocks::Element (&root)[4], const uint64_t &nonce
         return zkResult;
     }
 
+#ifdef LOG_ACCOUNT
     zklog.info("Account::SetNonce() publicKey=" + publicKey.get_str(16) + " nonceKey=" + fea2string(fr, nonceKey) + " nonce=" + to_string(nonce) + " root=" + fea2string(fr, root));
+#endif
 
     return ZKR_SUCCESS;
 }
@@ -372,58 +380,60 @@ zkresult Account::SetGlobalExitRoot(Goldilocks::Element (&root)[4], const mpz_cl
         return zkResult;
     }
 
+#ifdef LOG_ACCOUNT
     zklog.info("Account::SetGlobalExitRoot() publicKey=" + publicKey.get_str(16) + " globalExitRootKey=" + fea2string(fr, globalExitRootKey) + " value=" + value.get_str(10) + " root=" + fea2string(fr, root));
+#endif
 
     return ZKR_SUCCESS;
 }
 
-zkresult Account::GetBatchNumber (const Goldilocks::Element (&root)[4], uint64_t &batchNumber)
+zkresult Account::GetTxCount (const Goldilocks::Element (&root)[4], mpz_class &txCount)
 {
     // Check that batch number key has been generated
-    CheckBatchNumberKey();
+    CheckTxCountKey();
 
-    mpz_class value;
-    zkresult zkResult = hashDB.get(root, batchNumberKey, value, /*&smtGetResult*/ NULL, NULL /*proverRequest.dbReadLog*/);
+    zkresult zkResult = hashDB.get(root, txCountKey, txCount, /*&smtGetResult*/ NULL, NULL /*proverRequest.dbReadLog*/);
     if (zkResult != ZKR_SUCCESS)
     {
         zklog.error("Account::GetBatchNumber() failed calling hashDB.get() result=" + zkresult2string(zkResult));
         return zkResult;
     }
-    if (value > mpz_class("0xFFFFFFFFFFFFFFFF")) // TODO: Precalculat.  Do this check only in debug?
+    if (txCount > mpz_class("0xFFFFFFFFFFFFFFFF")) // TODO: Precalculat.  Do this check only in debug?
     {
-        zklog.error("Account::GetBatchNumber() failed called hashDB.get() but nonce is too big =" + value.get_str(10));
+        zklog.error("Account::GetBatchNumber() failed called hashDB.get() but TX count is too big =" + txCount.get_str(10));
         return ZKR_UNSPECIFIED;
     }
 
-    batchNumber = value.get_ui();
-
-    zklog.info("Account::GetBatchNumber() publicKey=" + publicKey.get_str(16) + " batchNumberKey=" + fea2string(fr, batchNumberKey) + " batchNumber=" + to_string(batchNumber) + " root=" + fea2string(fr, root));
+#ifdef LOG_ACCOUNT
+    zklog.info("Account::GetBatchNumber() publicKey=" + publicKey.get_str(16) + " txCountKey=" + fea2string(fr, txCountKey) + " txCount=" + to_string(txCount) + " root=" + fea2string(fr, root));
+#endif
 
     return ZKR_SUCCESS;
 }
 
-zkresult Account::SetBatchNumber (Goldilocks::Element (&root)[4], const uint64_t &batchNumber)
+zkresult Account::SetTxCount (Goldilocks::Element (&root)[4], const mpz_class &txCount)
 {
     // Check that nonce key has been generated
-    CheckBatchNumberKey();
+    CheckTxCountKey();
 
-    mpz_class value = batchNumber;
-    zkresult zkResult = hashDB.set(root, batchNumberKey, value, /*proverRequest.input.bUpdateMerkleTree*/ false, root, /*&ctx.lastSWrite.res*/ NULL, /*proverRequest.dbReadLog*/ NULL);
+    zkresult zkResult = hashDB.set(root, txCountKey, txCount, /*proverRequest.input.bUpdateMerkleTree*/ false, root, /*&ctx.lastSWrite.res*/ NULL, /*proverRequest.dbReadLog*/ NULL);
     if (zkResult != ZKR_SUCCESS)
     {
         zklog.error("Account::SetBatchNumber() failed calling hashDB.set() result=" + zkresult2string(zkResult));
         return zkResult;
     }
 
-    zklog.info("Account::SetBatchNumber() publicKey=" + publicKey.get_str(16) + " batchNumberKey=" + fea2string(fr, batchNumberKey) + " batchNumber=" + to_string(batchNumber) + " root=" + fea2string(fr, root));
+#ifdef LOG_ACCOUNT
+    zklog.info("Account::SetBatchNumber() publicKey=" + publicKey.get_str(16) + " batchNumberKey=" + fea2string(fr, batchNumberKey) + " txCount=" + txCount.get_str(10) + " root=" + fea2string(fr, root));
+#endif
 
     return ZKR_SUCCESS;
 }
 
-zkresult Account::SetStateRoot (Goldilocks::Element (&root)[4], const uint64_t &batchNumber, const mpz_class &stateRoot)
+zkresult Account::SetStateRoot (Goldilocks::Element (&root)[4], const mpz_class &txCount, const mpz_class &stateRoot)
 {
     // Check that nonce key has been generated
-    CheckStateRootKey(batchNumber);
+    CheckStateRootKey(txCount);
 
     zkresult zkResult = hashDB.set(root, stateRootKey, stateRoot, /*proverRequest.input.bUpdateMerkleTree*/ false, root, /*&ctx.lastSWrite.res*/ NULL, /*proverRequest.dbReadLog*/ NULL);
     if (zkResult != ZKR_SUCCESS)
@@ -432,7 +442,9 @@ zkresult Account::SetStateRoot (Goldilocks::Element (&root)[4], const uint64_t &
         return zkResult;
     }
 
+#ifdef LOG_ACCOUNT
     zklog.info("Account::SetStateRoot() publicKey=" + publicKey.get_str(16) + " stateRootKey=" + fea2string(fr, stateRootKey) + " stateRoot=" + stateRoot.get_str(10) + " root=" + fea2string(fr, root));
+#endif
 
     return ZKR_SUCCESS;
 }

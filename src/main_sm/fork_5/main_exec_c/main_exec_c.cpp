@@ -218,12 +218,12 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
     for (uint64_t tx=0; tx<batchData.tx.size(); tx++)
     {
         // Log TX info
-        zklog.info("main_exec_c() processing tx=" + to_string(tx));
-        batchData.tx[tx].print();
+        //zklog.info("main_exec_c() processing tx=" + to_string(tx));
+        //batchData.tx[tx].print();
 
         // calculate tx hash
         string signHash = batchData.tx[tx].signHash();
-        zklog.info("signHash=" + signHash);
+        //zklog.info("signHash=" + signHash);
 
         // Verify signature and obtain public from key
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
@@ -233,7 +233,7 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
         mpz_class fromPublicKey; 
         mpz_class signature(signHash);
         ECRecover(signature, batchData.tx[tx].r, batchData.tx[tx].s, v_, false, fromPublicKey);
-        zklog.info("fromPublicKey=" + fromPublicKey.get_str(16));
+        //zklog.info("fromPublicKey=" + fromPublicKey.get_str(16));
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
         mainMetrics.add("ECRecover", TimeDiff(t));
 #endif
@@ -450,42 +450,46 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
         mainMetrics.add("SMT set", TimeDiff(t));
 #endif
 
-        zklog.info("new root=" + fea2string(fr, root));
+        // Increase TX count
+        ctxc.globalVars.txCount++;
+
+    // Set new TX count in system account
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+        gettimeofday(&t, NULL);
+#endif
+        result = systemAccount.SetTxCount(root, ctxc.globalVars.txCount);
+        if (result != ZKR_SUCCESS)
+        {
+            zklog.error("main_exec_c() failed calling systemAccount.SetTxCount()");
+            proverRequest.result = result;
+            HashDBClientFactory::freeHashDBClient(pHashDB);
+            return;
+        }
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+        mainMetrics.add("SMT set", TimeDiff(t));
+#endif
+
+        // Set new state root in system account
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+        gettimeofday(&t, NULL);
+#endif
+        mpz_class auxScalar;
+        fea2scalar(fr, auxScalar, root);
+        result = systemAccount.SetStateRoot(root, ctxc.globalVars.txCount, auxScalar);
+        if (result != ZKR_SUCCESS)
+        {
+            zklog.error("main_exec_c() failed calling systemAccount.SetStateRoot()");
+            proverRequest.result = result;
+            HashDBClientFactory::freeHashDBClient(pHashDB);
+            return;
+        }
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+        mainMetrics.add("SMT set", TimeDiff(t));
+#endif
+
+        //zklog.info("Processed tx=" + to_string(tx) + " newStateRoot=" + fea2string(fr, root));
     }
 
-    // Set new batch number in system account
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-    gettimeofday(&t, NULL);
-#endif
-    result = systemAccount.SetBatchNumber(root, proverRequest.input.publicInputsExtended.newBatchNum);
-    if (result != ZKR_SUCCESS)
-    {
-        zklog.error("main_exec_c() failed calling systemAccount.SetBatchNumber()");
-        proverRequest.result = result;
-        HashDBClientFactory::freeHashDBClient(pHashDB);
-        return;
-    }
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-    mainMetrics.add("SMT set", TimeDiff(t));
-#endif
-
-    // Set new state root in system account
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-    gettimeofday(&t, NULL);
-#endif
-    mpz_class auxScalar;
-    fea2scalar(fr, auxScalar, root);
-    result = systemAccount.SetStateRoot(root, proverRequest.input.publicInputsExtended.newBatchNum, auxScalar);
-    if (result != ZKR_SUCCESS)
-    {
-        zklog.error("main_exec_c() failed calling systemAccount.SetStateRoot()");
-        proverRequest.result = result;
-        HashDBClientFactory::freeHashDBClient(pHashDB);
-        return;
-    }
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-    mainMetrics.add("SMT set", TimeDiff(t));
-#endif
 
     zklog.info("new root=" + fea2string(fr, root));
 

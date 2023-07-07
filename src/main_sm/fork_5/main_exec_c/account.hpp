@@ -35,8 +35,8 @@ private:
     Goldilocks::Element globalExitRootKey[4];
     bool bLocalExitRootKeyGenerated;
     Goldilocks::Element localExitRootKey[4];
-    bool bBatchNumberKeyGenerated;
-    Goldilocks::Element batchNumberKey[4];
+    bool bTxCountKeyGenerated;
+    Goldilocks::Element txCountKey[4];
     bool bStateRootKeyGenerated;
     Goldilocks::Element stateRootKey[4];
 public:
@@ -51,7 +51,7 @@ public:
         bNonceKeyGenerated(false),
         bGlobalExitRootKeyGenerated(false),
         bLocalExitRootKeyGenerated(false),
-        bBatchNumberKeyGenerated(false),
+        bTxCountKeyGenerated(false),
         bStateRootKeyGenerated(false)
     {
         CheckZeroKey();
@@ -67,8 +67,8 @@ private:
     void GenerateNonceKey (Goldilocks::Element (&nonceKey)[4]);
     void GenerateGlobalExitRootKey (const mpz_class &globalExitRoot, Goldilocks::Element (&globalExitRootKey)[4]);
     void GenerateLocalExitRootKey (Goldilocks::Element (&localExitRootKey)[4]);
-    void GenerateBatchNumberKey (Goldilocks::Element (&batchNumberKey)[4]);
-    void GenerateStateRootKey (uint64_t batchNumber, Goldilocks::Element (&stateRootKey)[4]);
+    void GenerateTxCountKey (Goldilocks::Element (&txCountKey)[4]);
+    void GenerateStateRootKey (const mpz_class &txCount, Goldilocks::Element (&stateRootKey)[4]);
 
     inline void CheckZeroKey (void)
     {
@@ -110,19 +110,19 @@ private:
             bLocalExitRootKeyGenerated = true;
         }
     }
-    inline void CheckBatchNumberKey (void)
+    inline void CheckTxCountKey (void)
     {
-        if (!bBatchNumberKeyGenerated)
+        if (!bTxCountKeyGenerated)
         {
-            GenerateBatchNumberKey(batchNumberKey);
-            bBatchNumberKeyGenerated = true;
+            GenerateTxCountKey(txCountKey);
+            bTxCountKeyGenerated = true;
         }
     }
-    inline void CheckStateRootKey (uint64_t batchNumber)
+    inline void CheckStateRootKey (const mpz_class &txCount)
     {
-        if (!bStateRootKeyGenerated)
+        //if (!bStateRootKeyGenerated)
         {
-            GenerateStateRootKey(batchNumber, stateRootKey);
+            GenerateStateRootKey(txCount, stateRootKey);
             bStateRootKeyGenerated = true;
         }
     }
@@ -144,13 +144,13 @@ public:
     zkresult SetGlobalExitRoot (Goldilocks::Element (&root)[4], const mpz_class &globalExitRoot, const mpz_class &value);
     
     // Get account batch number value
-    zkresult GetBatchNumber (const Goldilocks::Element (&root)[4], uint64_t &batchNumber); // TODO: oldBatchNumber and newBatchNumber are U32
+    zkresult GetTxCount (const Goldilocks::Element (&root)[4], mpz_class &txCount); // TODO: oldBatchNumber and newBatchNumber are U32
 
-    // Set account batch number value; root is updated with new root
-    zkresult SetBatchNumber (Goldilocks::Element (&root)[4], const uint64_t &batchNumber);
+    // Set account TX count value; root is updated with new root
+    zkresult SetTxCount (Goldilocks::Element (&root)[4], const mpz_class &txCount);
 
     // Set account state root value; root is updated with new root
-    zkresult SetStateRoot (Goldilocks::Element (&root)[4], const uint64_t &batchNumber, const mpz_class &stateRoot);
+    zkresult SetStateRoot (Goldilocks::Element (&root)[4], const mpz_class &txCount, const mpz_class &stateRoot);
 };
 
 }
