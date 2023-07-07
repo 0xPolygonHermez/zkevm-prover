@@ -20,6 +20,7 @@ namespace fork_5
 class Account
 {
 private:
+
     Goldilocks &fr;
     PoseidonGoldilocks &poseidon;
     HashDBInterface &hashDB;
@@ -37,8 +38,7 @@ private:
     Goldilocks::Element localExitRootKey[4];
     bool bTxCountKeyGenerated;
     Goldilocks::Element txCountKey[4];
-    bool bStateRootKeyGenerated;
-    Goldilocks::Element stateRootKey[4];
+
 public:
     
     // Constructor
@@ -51,8 +51,7 @@ public:
         bNonceKeyGenerated(false),
         bGlobalExitRootKeyGenerated(false),
         bLocalExitRootKeyGenerated(false),
-        bTxCountKeyGenerated(false),
-        bStateRootKeyGenerated(false)
+        bTxCountKeyGenerated(false)
     {
         CheckZeroKey();
     };
@@ -62,19 +61,19 @@ public:
 
 private:
 
-    void GenerateZeroKey (Goldilocks::Element (&zeroKey)[4]);
-    void GenerateBalanceKey (Goldilocks::Element (&balanceKey)[4]);
-    void GenerateNonceKey (Goldilocks::Element (&nonceKey)[4]);
-    void GenerateGlobalExitRootKey (const mpz_class &globalExitRoot, Goldilocks::Element (&globalExitRootKey)[4]);
-    void GenerateLocalExitRootKey (Goldilocks::Element (&localExitRootKey)[4]);
-    void GenerateTxCountKey (Goldilocks::Element (&txCountKey)[4]);
-    void GenerateStateRootKey (const mpz_class &txCount, Goldilocks::Element (&stateRootKey)[4]);
+    void GenerateZeroKey           (void);
+    void GenerateBalanceKey        (void);
+    void GenerateNonceKey          (void);
+    void GenerateGlobalExitRootKey (const mpz_class &globalExitRoot);
+    void GenerateLocalExitRootKey  (void);
+    void GenerateTxCountKey        (void);
+    void GenerateStateRootKey      (const mpz_class &txCount, Goldilocks::Element (&stateRootKey)[4]);
 
     inline void CheckZeroKey (void)
     {
         if (!bZeroKeyGenerated)
         {
-            GenerateZeroKey(zeroKey);
+            GenerateZeroKey();
             bZeroKeyGenerated = true;
         }
     }
@@ -82,7 +81,7 @@ private:
     {
         if (!bBalanceKeyGenerated)
         {
-            GenerateBalanceKey(balanceKey);
+            GenerateBalanceKey();
             bBalanceKeyGenerated = true;
         }
     }
@@ -90,7 +89,7 @@ private:
     {
         if (!bNonceKeyGenerated)
         {
-            GenerateNonceKey(nonceKey);
+            GenerateNonceKey();
             bNonceKeyGenerated = true;
         }
     }
@@ -98,7 +97,7 @@ private:
     {
         if (!bGlobalExitRootKeyGenerated)
         {
-            GenerateGlobalExitRootKey(globalExitRoot, globalExitRootKey);
+            GenerateGlobalExitRootKey(globalExitRoot);
             bGlobalExitRootKeyGenerated = true;
         }
     }
@@ -106,7 +105,7 @@ private:
     {
         if (!bLocalExitRootKeyGenerated)
         {
-            GenerateLocalExitRootKey(localExitRootKey);
+            GenerateLocalExitRootKey();
             bLocalExitRootKeyGenerated = true;
         }
     }
@@ -114,16 +113,8 @@ private:
     {
         if (!bTxCountKeyGenerated)
         {
-            GenerateTxCountKey(txCountKey);
+            GenerateTxCountKey();
             bTxCountKeyGenerated = true;
-        }
-    }
-    inline void CheckStateRootKey (const mpz_class &txCount)
-    {
-        //if (!bStateRootKeyGenerated)
-        {
-            GenerateStateRootKey(txCount, stateRootKey);
-            bStateRootKeyGenerated = true;
         }
     }
    
@@ -132,24 +123,25 @@ public:
     // Get account balance value
     zkresult GetBalance (const Goldilocks::Element (&root)[4], mpz_class &balance);
 
-    // Set account balance value; root is updated with new root
+    // Set account balance value; root is updated with state new root
     zkresult SetBalance (Goldilocks::Element (&root)[4], const mpz_class &balance);
 
     // Get account nonce value
     zkresult GetNonce (const Goldilocks::Element (&root)[4], uint64_t &nonce);
 
-    // Set account nonce value; root is updated with new root
+    // Set account nonce value; root is updated with new state root
     zkresult SetNonce (Goldilocks::Element (&root)[4], const uint64_t &nonce);
 
+    // Set account global exit root; root is updated with new state root
     zkresult SetGlobalExitRoot (Goldilocks::Element (&root)[4], const mpz_class &globalExitRoot, const mpz_class &value);
     
     // Get account batch number value
-    zkresult GetTxCount (const Goldilocks::Element (&root)[4], mpz_class &txCount); // TODO: oldBatchNumber and newBatchNumber are U32
+    zkresult GetTxCount (const Goldilocks::Element (&root)[4], mpz_class &txCount);
 
-    // Set account TX count value; root is updated with new root
+    // Set account TX count value; root is updated with new state root
     zkresult SetTxCount (Goldilocks::Element (&root)[4], const mpz_class &txCount);
 
-    // Set account state root value; root is updated with new root
+    // Set account state root value; root is updated with new state root
     zkresult SetStateRoot (Goldilocks::Element (&root)[4], const mpz_class &txCount, const mpz_class &stateRoot);
 };
 

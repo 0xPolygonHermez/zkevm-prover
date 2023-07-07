@@ -453,7 +453,9 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
         // Increase TX count
         ctxc.globalVars.txCount++;
 
-    // Set new TX count in system account
+        // TODO: If we call GetTxCount, check range
+
+        // Set new TX count in system account
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
         gettimeofday(&t, NULL);
 #endif
