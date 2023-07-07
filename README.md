@@ -31,7 +31,7 @@ The zkEVM Prover process can provide up to 3 RPC services and clients:
 
 ### Clone repository
 ```sh
-$ git clone git@github.com:0xPolygonHermez/zkevm-prover.git
+$ git clone https://github.com/0xPolygonHermez/zkevm-prover.git
 $ cd zkevm-prover
 $ git submodule init
 $ git submodule update
@@ -40,7 +40,7 @@ $ git submodule update
 ### Compile
 The following packages must be installed.
 ```sh
-$ sudo apt update && sudo apt install build-essential libbenchmark-dev libomp-dev libgmp-dev nlohmann-json3-dev postgresql libpqxx-dev libpqxx-doc nasm libsecp256k1-dev grpc-proto libsodium-dev libprotobuf-dev libssl-dev cmake libgrpc++-dev protobuf-compiler protobuf-compiler-grpc uuid-dev
+$ sudo apt update && sudo apt install build-essential libbenchmark-dev libomp-dev libgmp-dev nlohmann-json3-dev postgresql libpqxx-dev libpqxx-doc nasm libsecp256k1-dev grpc-proto libsodium-dev libprotobuf-dev libssl-dev cmake libgrpc++-dev protobuf-compiler protobuf-compiler-grpc uuid-dev wget
 ```
 To download the files needed to run the prover, you have to execute the following command
 ```sh
