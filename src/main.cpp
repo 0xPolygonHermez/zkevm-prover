@@ -37,6 +37,7 @@
 #include "hashdb_singleton.hpp"
 #include "unit_test.hpp"
 #include "database_cache_test.hpp"
+#include "main_sm/fork_5/main_exec_c/account.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -480,6 +481,9 @@ int main(int argc, char **argv)
 
     // Create one instance of the Poseidon hash library
     PoseidonGoldilocks poseidon;
+
+    // Generate account zero keys
+    fork_5::Account::GenerateZeroKey(fr, poseidon);
 
     // Init the HashDB singleton
     hashDBSingleton.init(fr, config);

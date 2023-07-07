@@ -59,9 +59,11 @@ public:
     // Initialization
     zkresult Init (const mpz_class &publicKey_);
 
+    // Generate the static zero key, common for all account instances
+    static void GenerateZeroKey (Goldilocks &fr, PoseidonGoldilocks &poseidon);
+
 private:
 
-    void GenerateZeroKey           (void);
     void GenerateBalanceKey        (void);
     void GenerateNonceKey          (void);
     void GenerateGlobalExitRootKey (const mpz_class &globalExitRoot);
@@ -71,11 +73,7 @@ private:
 
     inline void CheckZeroKey (void)
     {
-        if (!bZeroKeyGenerated)
-        {
-            GenerateZeroKey();
-            bZeroKeyGenerated = true;
-        }
+        zkassert(bZeroKeyGenerated);
     }
     inline void CheckBalanceKey (void)
     {

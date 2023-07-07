@@ -39,8 +39,10 @@ zkresult Account::Init (const mpz_class &publicKey_)
     return ZKR_SUCCESS;
 };
 
-void Account::GenerateZeroKey (void)
+void Account::GenerateZeroKey (Goldilocks &fr, PoseidonGoldilocks &poseidon)
 {
+    zkassert(bZeroKeyGenerated == false);
+    
     // TODO: Pre-calculate this value
     Goldilocks::Element Kin0[12];
     Kin0[0] = fr.zero();
@@ -62,6 +64,8 @@ void Account::GenerateZeroKey (void)
 #ifdef LOG_ACCOUNT
     zklog.info("Account::GenerateZeroKey() zeroKey=" + fea2string(fr, zeroKey));
 #endif
+
+    bZeroKeyGenerated = true;
 }
 
 void Account::GenerateBalanceKey (void)
