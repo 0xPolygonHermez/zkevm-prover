@@ -214,6 +214,41 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
         return;
     }
 
+    // Create sequencer account
+    Account sequencerAccount(fr, poseidon, *pHashDB);
+    result = sequencerAccount.Init(proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr);
+    if (result != ZKR_SUCCESS)
+    {
+        zklog.error("main_exec_c() failed calling sequencerAccount.Init()");
+        proverRequest.result = result;
+        HashDBClientFactory::freeHashDBClient(pHashDB);
+        return;
+    }
+
+    /*************/
+    /* ECRecover */
+    /*************/
+
+    // ECRecover all transactions present in parsed batch L2 data, in parallel
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+    gettimeofday(&t, NULL);
+#endif
+#pragma omp parallel for
+    for (uint64_t tx=0; tx<batchData.tx.size(); tx++)
+    {
+        // Calculate tx hash
+        string signHash = batchData.tx[tx].signHash();
+        //zklog.info("signHash=" + signHash);
+
+        // Verify signature and obtain the from account public key
+        mpz_class v_ = batchData.tx[tx].v;
+        mpz_class signature(signHash);
+        batchData.tx[tx].ecRecoverResult = ECRecover(signature, batchData.tx[tx].r, batchData.tx[tx].s, v_, false, batchData.tx[tx].fromPublicKey);
+    }
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+    mainMetrics.add("ECRecover", TimeDiff(t));
+#endif
+
     // Process all transactions present in parsed batch L2 data
     for (uint64_t tx=0; tx<batchData.tx.size(); tx++)
     {
@@ -221,26 +256,18 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
         //zklog.info("main_exec_c() processing tx=" + to_string(tx));
         //batchData.tx[tx].print();
 
-        // calculate tx hash
-        string signHash = batchData.tx[tx].signHash();
-        //zklog.info("signHash=" + signHash);
-
-        // Verify signature and obtain public from key
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        gettimeofday(&t, NULL);
-#endif
-        mpz_class v_ = batchData.tx[tx].v;
-        mpz_class fromPublicKey; 
-        mpz_class signature(signHash);
-        ECRecover(signature, batchData.tx[tx].r, batchData.tx[tx].s, v_, false, fromPublicKey);
+        if (batchData.tx[tx].ecRecoverResult != ECR_NO_ERROR)
+        {
+            zklog.error("main_exec_c() failed calling ECRecover()");
+            proverRequest.result = ZKR_UNSPECIFIED;
+            HashDBClientFactory::freeHashDBClient(pHashDB);
+            return;
+        }
         //zklog.info("fromPublicKey=" + fromPublicKey.get_str(16));
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        mainMetrics.add("ECRecover", TimeDiff(t));
-#endif
 
-        // Create from, to and sequencer accounts
+        // Create from and to accounts
         Account fromAccount(fr, poseidon, *pHashDB);
-        result = fromAccount.Init(fromPublicKey);
+        result = fromAccount.Init(batchData.tx[tx].fromPublicKey);
         if (result != ZKR_SUCCESS)
         {
             zklog.error("main_exec_c() failed calling fromAccount.Init()");
@@ -257,15 +284,10 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
             HashDBClientFactory::freeHashDBClient(pHashDB);
             return;
         }
-        Account sequencerAccount(fr, poseidon, *pHashDB);
-        result = sequencerAccount.Init(proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr);
-        if (result != ZKR_SUCCESS)
-        {
-            zklog.error("main_exec_c() failed calling sequencerAccount.Init()");
-            proverRequest.result = result;
-            HashDBClientFactory::freeHashDBClient(pHashDB);
-            return;
-        }
+
+        /*******************************/
+        /* from.nonce = from.nonce + 1 */
+        /*******************************/
 
         // Get nonce of from account
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
@@ -293,11 +315,13 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
             return;
         }
 
-        // Set new nonce = old nonce + 1
+        // Increment from nonce
+        fromNonce++;
+
+        // Set new from nonce
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
         gettimeofday(&t, NULL);
 #endif
-        fromNonce++;
         result = fromAccount.SetNonce(root, fromNonce);
         if (result != ZKR_SUCCESS)
         {
@@ -319,23 +343,6 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
         if (result != ZKR_SUCCESS)
         {
             zklog.error("main_exec_c() failed calling fromAccount.GetBalance()");
-            proverRequest.result = result;
-            HashDBClientFactory::freeHashDBClient(pHashDB);
-            return;
-        }
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        mainMetrics.add("SMT get", TimeDiff(t));
-#endif
-
-        // Get balance of to account
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-        gettimeofday(&t, NULL);
-#endif
-        mpz_class toBalance;
-        result = toAccount.GetBalance(root, toBalance);
-        if (result != ZKR_SUCCESS)
-        {
-            zklog.error("main_exec_c() failed calling toAccount.GetBalance()");
             proverRequest.result = result;
             HashDBClientFactory::freeHashDBClient(pHashDB);
             return;
@@ -398,11 +405,34 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
         mainMetrics.add("SMT set", TimeDiff(t));
 #endif
 
-        // Update to account balance = balance + value
+        /***********************************/
+        /* to.balance = to.balance + value */
+        /***********************************/
+
+        // Get balance of to account
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
         gettimeofday(&t, NULL);
 #endif
+        mpz_class toBalance;
+        result = toAccount.GetBalance(root, toBalance);
+        if (result != ZKR_SUCCESS)
+        {
+            zklog.error("main_exec_c() failed calling toAccount.GetBalance()");
+            proverRequest.result = result;
+            HashDBClientFactory::freeHashDBClient(pHashDB);
+            return;
+        }
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+        mainMetrics.add("SMT get", TimeDiff(t));
+#endif
+
+        // Update to account balance = balance + value
         toBalance += batchData.tx[tx].value;
+
+        // Set account balance
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+        gettimeofday(&t, NULL);
+#endif
         result = toAccount.SetBalance(root, toBalance);
         if (result != ZKR_SUCCESS)
         {
@@ -414,6 +444,12 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
         mainMetrics.add("SMT set", TimeDiff(t));
 #endif
+
+        /***********************************************/
+        /* sequencer.balance = sequencer.balance + fee */
+        /***********************************************/
+
+        // TODO: if sequencer and from are the same, read and write only once
 
         // Get balance of sequencer account
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
@@ -432,12 +468,13 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
         mainMetrics.add("SMT get", TimeDiff(t));
 #endif
 
+        // sequencer.balance += fee
+        sequencerBalance += fee;
+
         // Update sequencer account balance = balance + fee
-        // TODO: if sequencer and from are the same, read and write only once
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
         gettimeofday(&t, NULL);
 #endif
-        sequencerBalance += fee;
         result = sequencerAccount.SetBalance(root, sequencerBalance);
         if (result != ZKR_SUCCESS)
         {

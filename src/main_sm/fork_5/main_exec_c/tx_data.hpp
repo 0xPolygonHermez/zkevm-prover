@@ -6,6 +6,7 @@
 #include <gmpxx.h>
 #include "scalar.hpp"
 #include "zklog.hpp"
+#include "ecrecover.hpp"
 
 using namespace std;
 
@@ -29,11 +30,15 @@ public:
     string data; // Max batch L2 data length limits this field
     uint64_t chainId; // 64 bits max
 
-    // Data obtained from batch  L2 data raw section (concatenated to RLP section)
+    // Data obtained from batch L2 data raw section (concatenated to RLP section)
     mpz_class r; // 256 bits max
     mpz_class s; // 256 bits max
     uint8_t v;
     uint8_t gasPercentage;
+
+    // Data obtained from call to ECRecover
+    ECRecoverResult ecRecoverResult;
+    mpz_class fromPublicKey;
 
     // Print contents, for debugging purposes
     void print (void);
