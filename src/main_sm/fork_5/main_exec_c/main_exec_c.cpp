@@ -233,7 +233,7 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
     gettimeofday(&t, NULL);
 #endif
-#pragma omp parallel for
+#pragma omp parallel for num_threads(16) //TODO: Make this configurable
     for (uint64_t tx=0; tx<batchData.tx.size(); tx++)
     {
         // Calculate tx hash
