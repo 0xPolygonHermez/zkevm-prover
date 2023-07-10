@@ -115,16 +115,16 @@ void MerkleTreeBN128::linearHash()
         {
             uint pending = width;
             Poseidon_opt p;
-            std::vector<RawFr::Element> elements(17);
+            std::vector<RawFr::Element> elements(MT_BN128_ARITY + 1);
             while (pending > 0)
             {
-                std::memset(&elements[0], 0, 17 * sizeof(RawFr::Element));
-                if (pending >= 16)
+                std::memset(&elements[0], 0, (MT_BN128_ARITY + 1) * sizeof(RawFr::Element));
+                if (pending >= MT_BN128_ARITY)
                 {
-                    std::memcpy(&elements[1], &buff[i * width + width - pending], 16 * sizeof(RawFr::Element));
+                    std::memcpy(&elements[1], &buff[i * width + width - pending], MT_BN128_ARITY * sizeof(RawFr::Element));
                     std::memcpy(&elements[0], &nodes[i], sizeof(RawFr::Element));
                     p.hash(elements, &nodes[i]);
-                    pending = pending - 16;
+                    pending = pending - MT_BN128_ARITY;
                 }
                 else
                 {
@@ -159,27 +159,26 @@ void MerkleTreeBN128::merkelize()
 
     RawFr::Element *cursor = &nodes[0];
     uint64_t n256 = height;
-    uint64_t nextN256 = floor((double)(n256 - 1) / 16) + 1;
-    RawFr::Element *cursorNext = &nodes[n256];
+    uint64_t nextN256 = floor((double)(n256 - 1) / MT_BN128_ARITY) + 1;
+    RawFr::Element *cursorNext = &nodes[nextN256 * MT_BN128_ARITY];
     while (n256 > 1)
     {
-        uint64_t batches = ceil((double)n256 / 16);
+        uint64_t batches = ceil((double)n256 / MT_BN128_ARITY);
 #pragma omp parallel for
         for (uint64_t i = 0; i < batches; i++)
         {
             Poseidon_opt p;
-            vector<RawFr::Element> elements(17);
-            std::memset(&elements[0], 0, 17 * sizeof(RawFr::Element));
-            uint numHashes = 16;
-            (batches == 1) ? numHashes = n256 : numHashes = 16;
-            std::memcpy(&elements[1], &cursor[i * 16], numHashes * sizeof(RawFr::Element));
+            vector<RawFr::Element> elements(MT_BN128_ARITY + 1);
+            std::memset(&elements[0], 0, (MT_BN128_ARITY + 1) * sizeof(RawFr::Element));
+            uint numHashes = (i == batches - 1) ? n256 - i*MT_BN128_ARITY : MT_BN128_ARITY;
+            std::memcpy(&elements[1], &cursor[i * MT_BN128_ARITY], numHashes * sizeof(RawFr::Element));
             p.hash(elements, &cursorNext[i]);
         }
 
         n256 = nextN256;
-        nextN256 = floor((double)(n256 - 1) / 16) + 1;
+        nextN256 = floor((double)(n256 - 1) / MT_BN128_ARITY) + 1;
         cursor = cursorNext;
-        cursorNext = &cursor[std::max(n256, (uint64_t)16)];
+        cursorNext = &cursor[nextN256 * MT_BN128_ARITY];
     }
 }
 
@@ -190,12 +189,12 @@ void MerkleTreeBN128::getRoot(RawFr::Element *root)
 
 uint64_t MerkleTreeBN128::getMerkleProofLength(uint64_t n)
 {
-    return ceil((double)log(n) / log(16));
+    return ceil((double)log(n) / log(MT_BN128_ARITY));
 }
 
 uint64_t MerkleTreeBN128::getMerkleProofSize(uint64_t n)
 {
-    return getMerkleProofLength(n) * 16 * sizeof(RawFr::Element);
+    return getMerkleProofLength(n) * MT_BN128_ARITY * sizeof(RawFr::Element);
 }
 
 void MerkleTreeBN128::getGroupProof(void *res, uint64_t idx)
@@ -226,10 +225,13 @@ void MerkleTreeBN128::merkle_genMerkleProof(RawFr::Element *proof, uint64_t idx,
 {
     if (n <= 1)
         return;
-    uint64_t nextIdx = idx >> 4;
-    uint64_t si = idx & 0xFFFFFFF0;
+    
+    uint64_t nBitsArity = std::ceil(std::log2(MT_BN128_ARITY));
 
-    std::memcpy(proof, &nodes[offset + si], 16 * sizeof(RawFr::Element));
-    uint64_t nextN = (std::floor((n - 1) / 16) + 1);
-    merkle_genMerkleProof(&proof[16], nextIdx, offset + nextN * 16, nextN);
+    uint64_t nextIdx = idx >> nBitsArity;
+    uint64_t si = idx ^ (idx & (MT_BN128_ARITY - 1));
+
+    std::memcpy(proof, &nodes[offset + si], MT_BN128_ARITY * sizeof(RawFr::Element));
+    uint64_t nextN = (std::floor((n - 1) / MT_BN128_ARITY) + 1);
+    merkle_genMerkleProof(&proof[MT_BN128_ARITY], nextIdx, offset + nextN * MT_BN128_ARITY, nextN);
 }

@@ -19,7 +19,6 @@
 #include "commit_pols_starks.hpp"
 #include "steps.hpp"
 
-#define BN128_ARITY 16
 #define STARK_RECURSIVE_F_NUM_TREES 5
 
 class StarkRecursiveF
@@ -68,16 +67,16 @@ public:
     uint64_t getConstTreeSize(uint64_t n, uint64_t pol)
     {
         uint n_tmp = n;
-        uint64_t nextN = floor(((double)(n_tmp - 1) / BN128_ARITY) + 1);
-        uint64_t acc = nextN * BN128_ARITY;
+        uint64_t nextN = floor(((double)(n_tmp - 1) / MT_BN128_ARITY) + 1);
+        uint64_t acc = nextN * MT_BN128_ARITY;
         while (n_tmp > 1)
         {
             // FIll with zeros if n nodes in the leve is not even
             n_tmp = nextN;
-            nextN = floor((n_tmp - 1) / BN128_ARITY) + 1;
+            nextN = floor((n_tmp - 1) / MT_BN128_ARITY) + 1;
             if (n_tmp > 1)
             {
-                acc += nextN * 16;
+                acc += nextN * MT_BN128_ARITY;
             }
             else
             {
@@ -93,16 +92,16 @@ public:
     uint64_t getTreeSize(uint64_t n, uint64_t pol)
     {
         uint n_tmp = n;
-        uint64_t nextN = floor(((double)(n_tmp - 1) / BN128_ARITY) + 1);
-        uint64_t acc = nextN * BN128_ARITY;
+        uint64_t nextN = floor(((double)(n_tmp - 1) / MT_BN128_ARITY) + 1);
+        uint64_t acc = nextN * MT_BN128_ARITY;
         while (n_tmp > 1)
         {
             // FIll with zeros if n nodes in the leve is not even
             n_tmp = nextN;
-            nextN = floor((n_tmp - 1) / BN128_ARITY) + 1;
+            nextN = floor((n_tmp - 1) / MT_BN128_ARITY) + 1;
             if (n_tmp > 1)
             {
-                acc += nextN * 16;
+                acc += nextN * MT_BN128_ARITY;
             }
             else
             {

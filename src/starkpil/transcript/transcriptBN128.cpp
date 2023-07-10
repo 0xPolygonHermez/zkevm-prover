@@ -25,7 +25,7 @@ void TranscriptBN128::_add1(RawFr::Element input)
 {
     pending.push_back(input);
     out.clear();
-    if (pending.size() == 16)
+    if (pending.size() == TRANSCRIPT_BN128_ARITY)
     {
         _updateState();
     }
@@ -76,7 +76,7 @@ uint64_t TranscriptBN128::getFields1()
 
 void TranscriptBN128::_updateState()
 {
-    while (pending.size() < 16)
+    while (pending.size() < TRANSCRIPT_BN128_ARITY)
     {
         pending.push_back(RawFr::field.zero());
     }
