@@ -6,9 +6,8 @@
 #include "goldilocks_base_field.hpp"
 #include "poseidon_opt.hpp"
 
-#define MT_BN128_ARITY 16
+#define MT_BN128_ARITY 4
 #define GOLDILOCKS_ELEMENTS 3
-#define HASH_SIZE 4
 
 class MerkleTreeBN128
 {
