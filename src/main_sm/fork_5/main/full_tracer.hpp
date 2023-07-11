@@ -6,6 +6,7 @@
 #include "main_sm/fork_5/main/context.hpp"
 #include "main_sm/fork_5/main/rom_command.hpp"
 #include "main_sm/fork_5/main/rom_line.hpp"
+#include "main_sm/fork_5/main_exec_c/context_c.hpp"
 #include "utils/time_metric.hpp"
 #include "goldilocks_base_field.hpp"
 #include "config.hpp"
@@ -54,13 +55,21 @@ public:
     struct timeval top;
 #endif
 public:
-    zkresult onError (Context &ctx, const RomCommand &cmd);
-    zkresult onStoreLog (Context &ctx, const RomCommand &cmd);
-    zkresult onProcessTx (Context &ctx, const RomCommand &cmd);
+    zkresult onError         (Context &ctx, const RomCommand &cmd);
+    zkresult onError         (ContextC &ctxc, const string &error);
+    zkresult onStoreLog      (Context &ctx, const RomCommand &cmd);
+    zkresult onStoreLog      (ContextC &ctxc);
+    zkresult onProcessTx     (Context &ctx, const RomCommand &cmd);
+    zkresult onProcessTx     (ContextC &ctxc);
     zkresult onUpdateStorage (Context &ctx, const RomCommand &cmd);
-    zkresult onFinishTx (Context &ctx, const RomCommand &cmd);
-    zkresult onStartBatch (Context &ctx, const RomCommand &cmd);
-    zkresult onFinishBatch (Context &ctx, const RomCommand &cmd);
+    zkresult onUpdateStorage (ContextC &ctxc);
+    zkresult onFinishTx      (Context &ctx, const RomCommand &cmd);
+    zkresult onFinishTx      (ContextC &ctxc);
+    zkresult onStartBatch    (Context &ctx, const RomCommand &cmd);
+    zkresult onStartBatch    (ContextC &ctxc);
+    zkresult onFinishBatch   (Context &ctx, const RomCommand &cmd);
+    zkresult onFinishBatch   (ContextC &ctxc);
+
     zkresult onOpcode (Context &ctx, const RomCommand &cmd);
     zkresult addReadWriteAddress ( const Goldilocks::Element &address0, const Goldilocks::Element &address1, const Goldilocks::Element &address2, const Goldilocks::Element &faddress3, const Goldilocks::Element &address4, const Goldilocks::Element &address5, const Goldilocks::Element &address6, const Goldilocks::Element &address7,
                                    const Goldilocks::Element &keyType0, const Goldilocks::Element &keyType1, const Goldilocks::Element &keyType2, const Goldilocks::Element &keyType3, const Goldilocks::Element &keyType4, const Goldilocks::Element &keyType5, const Goldilocks::Element &keyType6, const Goldilocks::Element &keyType7,
