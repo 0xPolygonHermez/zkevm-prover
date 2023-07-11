@@ -3,7 +3,9 @@
 
 #include <string>
 #include "main_sm/fork_5/main/main_executor.hpp"
-#include "main_sm/fork_5/main_exec_c/context_c.hpp"
+#include "fec.hpp"
+#include "fnec.hpp"
+#include "poseidon_goldilocks.hpp"
 
 namespace fork_5
 {

@@ -26,20 +26,21 @@ void TXData::print (void)
 
 string TXData::txHash (void)
 {
-    string txHash;
-    string rlpTx;
-    string toString = NormalizeTo0xNFormat(to.get_str(16), 40);
-    uint64_t v2;
-    if (chainId == 0)
+    if (!bTxHashGenerated)
     {
-        v2 = v;
+        string toString = NormalizeTo0xNFormat(to.get_str(16), 40);
+        uint64_t v2;
+        if (chainId == 0)
+        {
+            v2 = v;
+        }
+        else
+        {
+            v2 = v - 27 + chainId * 2 + 35;
+        }
+        getTransactionHash(toString, value, nonce, gasLimit, gasPrice, data, r, s, v2, txHashResult, txHashRlp);
     }
-    else
-    {
-        v2 = v - 27 + chainId * 2 + 35;
-    }
-    getTransactionHash(toString, value, nonce, gasLimit, gasPrice, data, r, s, v2, txHash, rlpTx);
-    return txHash;
+    return txHashResult;
 }
 
 string TXData::signHash (void)
