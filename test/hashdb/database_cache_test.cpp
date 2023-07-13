@@ -10,9 +10,9 @@ uint64_t DatabaseCacheTest (void)
     TimerStart(DATABASE_CACHE_TEST);
 
     uint64_t numberOfFailed = 0;
-
+#ifndef DATABASE_USE_ASSOCIATIVE_CACHE
     Database::dbMTCache.setMaxSize(2000000);
-
+#endif
     Goldilocks fr;
     mpz_class keyScalar;
     string keyString;
@@ -28,7 +28,12 @@ uint64_t DatabaseCacheTest (void)
             value.push_back(fr.fromU64(j));
         }
         bool update = false;
-        Database::dbMTCache.add(keyString, value, update);
+#ifndef DATABASE_USE_ASSOCIATIVE_CACHE
+        Database::dbMTCache.add(keyString, value,update);
+#else
+        Database::dbMTCache.add(keyString, value,update, " "," ");
+#endif
+
     }
 
     //Database::dbMTCache.print(true);
@@ -37,7 +42,9 @@ uint64_t DatabaseCacheTest (void)
     {
         keyScalar = i;
         keyString = PrependZeros(keyScalar.get_str(16), 64);
-        bResult = Database::dbMTCache.find(keyString, value);
+        string leftChildKey;
+        string rightChildKey;
+        bResult = Database::dbMTCache.find(keyString, value,leftChildKey,rightChildKey);
         if (!bResult)
         {
             zklog.error("DatabaseCacheTest() failed calling Database::dbMTCache.find() of key=" + keyString);

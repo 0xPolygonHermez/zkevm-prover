@@ -4,6 +4,7 @@
 #include "zkresult.hpp"
 #include "zkmax.hpp"
 #include "zklog.hpp"
+#include <bitset>
 
 zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, SmtSetResult &result, DatabaseMap *dbReadLog)
 {
@@ -16,6 +17,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
     for (uint64_t i=0; i<4; i++) newRoot[i] = oldRoot[i];
 
     // Get a list of the bits of the key to navigate top-down through the tree
+    //bool keys[256];
     vector<uint64_t> keys;
     splitKey(key, keys);
 
@@ -53,8 +55,9 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
     {
         // Read the content of db for entry r: siblings[level] = db.read(r)
         string rootString = fea2string(fr, r);
-
-        dbres = db.read(rootString, dbValue, dbReadLog, false, &keys, level);
+        string leftChildKey;
+        string righChildKey;
+        dbres = db.read(rootString, dbValue, dbReadLog, leftChildKey, righChildKey, false, &keys, level);
         if (dbres != ZKR_SUCCESS)
         {
             zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + rootString);
@@ -73,7 +76,9 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
             foundValueHash[2] = siblings[level][6];
             foundValueHash[3] = siblings[level][7];
             foundValueHashString = fea2string(fr, foundValueHash);
-            dbres = db.read(foundValueHashString, dbValue, dbReadLog);
+            string leftChildKey;
+            string righChildKey;
+            dbres = db.read(foundValueHashString, dbValue, dbReadLog, leftChildKey, righChildKey);
             if (dbres != ZKR_SUCCESS)
             {
                 zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") key:" + foundValueHashString);
@@ -493,7 +498,9 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                     string auxString = fea2string(fr, auxFea);
 
                     // Read its 2 siblings
-                    dbres = db.read(auxString, dbValue, dbReadLog, false, &keys, level);
+                    string leftChildKey;
+                    string righChildKey;
+                    dbres = db.read(auxString, dbValue, dbReadLog, leftChildKey, righChildKey, false, &keys, level);
                     if ( dbres != ZKR_SUCCESS)
                     {
                         zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + auxString);
@@ -512,7 +519,9 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                         string valHString = fea2string(fr, valH);
 
                         // Read its siblings
-                        dbres = db.read(valHString, dbValue, dbReadLog);
+                        string leftChildKey;
+                        string righChildKey;
+                        dbres = db.read(valHString, dbValue, dbReadLog, leftChildKey, righChildKey);
                         if (dbres != ZKR_SUCCESS)
                         {
                             zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + valHString);
@@ -764,6 +773,7 @@ zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Gold
     }
 
     // Get a list of the bits of the key to navigate top-down through the tree
+    //bool keys[256];
     vector <uint64_t> keys;
     splitKey(key, keys);
 
@@ -789,14 +799,18 @@ zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Gold
     //zklog.info("Smt::get() found database content:");
     //db.print();
 #endif
-
+    string leftChildKey;
+    string righChildKey;
     // Start natigating the tree from the top: r = root
     // Go down while r!=0 (while there is branch) until we find the key
-    while ( ( !fr.isZero(r[0]) || !fr.isZero(r[1]) || !fr.isZero(r[2]) || !fr.isZero(r[3]) ) && !bFoundKey )
+
+    string rString = fea2string(fr, r);  //rick
+    rString = NormalizeToNFormat(rString, 64);
+    while ( ( !fr.isZero(r[0]) || !fr.isZero(r[1]) || !fr.isZero(r[2]) || !fr.isZero(r[3]) ) && !bFoundKey)
     {
         // Read the content of db for entry r: siblings[level] = db.read(r)
-        string rString = fea2string(fr, r);
-        dbres = db.read(rString, dbValue, dbReadLog, false, &keys, level);
+        //string rString = fea2string(fr, r);
+        dbres = db.read(rString, dbValue, dbReadLog, leftChildKey, righChildKey, false, &keys, level);
         if (dbres != ZKR_SUCCESS)
         {
             zklog.error("Smt::get() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + rString);
@@ -816,7 +830,9 @@ zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Gold
             valueHashFea[2] = siblings[level][6];
             valueHashFea[3] = siblings[level][7];
             string foundValueHashString = fea2string(fr, valueHashFea);
-            dbres = db.read(foundValueHashString, dbValue, dbReadLog);
+            string leftChildKey;
+            string righChildKey;
+            dbres = db.read(foundValueHashString, dbValue, dbReadLog, leftChildKey, righChildKey);
             if (dbres != ZKR_SUCCESS)
             {
                 zklog.error("Smt::get() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + foundValueHashString);
@@ -849,13 +865,18 @@ zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Gold
         else
         {
             // Take either the first 4 (keys[level]=0) or the second 4 (keys[level]=1) siblings as the hash of the next level
-            r[0] = siblings[level][keys[level]*4];
+            /*r[0] = siblings[level][keys[level]*4];
             r[1] = siblings[level][keys[level]*4 + 1];
             r[2] = siblings[level][keys[level]*4 + 2];
-            r[3] = siblings[level][keys[level]*4 + 3];
+            r[3] = siblings[level][keys[level]*4 + 3];*/
 
             // Store the used key bit in accKey
             accKey.push_back(keys[level]);
+            if(keys[level]==0){
+                rString = leftChildKey;
+            }else{
+                rString = righChildKey;
+            }
 
 #ifdef LOG_SMT
             zklog.info("Smt::get() down 1 level=" + to_string(level) + " keys[level]=" + to_string(keys[level]) + " root/hash=" + fea2string(fr,r));
@@ -933,22 +954,42 @@ zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Gold
 // Split the fe key into 4-bits chuncks, e.g. 0x123456EF -> { 1, 2, 3, 4, 5, 6, E, F }
 void Smt::splitKey ( const Goldilocks::Element (&key)[4], vector<uint64_t> &result )
 {
-    // Copy the key to local variables
-    mpz_class auxk[4];
-    for (uint64_t i=0; i<4; i++)
-    {
-        auxk[i] = fr.toU64(key[i]);
-    }
+
+    bitset<64> auxb0(fr.toU64(key[0]));
+    bitset<64> auxb1(fr.toU64(key[1]));
+    bitset<64> auxb2(fr.toU64(key[2]));
+    bitset<64> auxb3(fr.toU64(key[3]));
+    
     result.resize(64*4);
     // Split the key in bits, taking one bit from a different scalar every time
-    int cont =0;
     for (uint64_t i=0; i<64; i++)
     {
-        for (uint64_t j=0; j<4; j++)
-        {
-            result[cont]=mpz_tstbit(auxk[j].get_mpz_t(), i);
-            ++cont;
-        }
+        int cont =i*4;
+        result[cont] = auxb0[i];
+        result[cont+1] = auxb1[i];
+        result[cont+2] = auxb2[i];
+        result[cont+3] = auxb3[i];
+    }
+}
+
+
+
+void Smt::splitKey( const Goldilocks::Element (&key)[4], bool (&result)[256])
+{
+    bitset<64> auxb0(fr.toU64(key[0]));
+    bitset<64> auxb1(fr.toU64(key[1]));
+    bitset<64> auxb2(fr.toU64(key[2]));
+    bitset<64> auxb3(fr.toU64(key[3]));
+    
+    // Split the key in bits, taking one bit from a different scalar every time
+    int cont = 0;
+    for (uint64_t i=0; i<64; i++)
+    {
+        result[cont] = auxb0[i];
+        result[cont+1] = auxb1[i];
+        result[cont+2] = auxb2[i];
+        result[cont+3] = auxb3[i];
+        cont+=4;
     }
 }
 

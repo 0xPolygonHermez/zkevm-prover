@@ -11,6 +11,7 @@
 #include "zkresult.hpp"
 #include "database_map.hpp"
 #include "database_cache.hpp"
+#include "database_associative_cache.hpp"
 #include "database_connection.hpp"
 #include "zkassert.hpp"
 #include "tree_position.hpp"
@@ -61,13 +62,18 @@ private:
     void initRemote(void);
     zkresult readRemote(bool bProgram, const string &key, string &value);
     zkresult readTreeRemote(const string &key, const vector<uint64_t> *keys, uint64_t level, uint64_t &numberOfFields);
+    zkresult readTreeRemote(const string &key, bool *keys, uint64_t level, uint64_t &numberOfFields);
     zkresult writeRemote(bool bProgram, const string &key, const string &value);
     zkresult writeGetTreeFunction(void);
 
 public:
 #ifdef DATABASE_USE_CACHE
     // Cache static instances
+#ifdef DATABASE_USE_ASSOCIATIVE_CACHE
+    static DatabaseMTAssociativeCache dbMTCache;
+#else
     static DatabaseMTCache dbMTCache;
+#endif
     static DatabaseProgramCache dbProgramCache;
 
     // This is a fixed key to store the latest state root hash, used to load it to the cache
@@ -83,7 +89,8 @@ public:
 
     // Basic methods
     void init(void);
-    zkresult read(const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, const bool update = false, const vector<uint64_t> *keys = NULL , uint64_t level=0);
+    /*zkresult read(const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, string & leftChildKey, string & rightChileKey, const bool update = false, bool *keys = NULL , uint64_t level=0);*/
+    zkresult read(const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, string & leftChildKey, string & rightChileKey, const bool update = false, const vector<uint64_t> *keys=NULL, uint64_t level=0);
     zkresult write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent);
     zkresult getProgram(const string &_key, vector<uint8_t> &value, DatabaseMap *dbReadLog);
     zkresult setProgram(const string &_key, const vector<uint8_t> &value, const bool persistent);

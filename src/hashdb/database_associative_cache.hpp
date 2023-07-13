@@ -12,6 +12,8 @@ using json = nlohmann::json;
 struct DatabaseAssociativeCacheRecord {
     string remainingKey; 
     void* value;
+    string leftChildKey;
+    string rightChildKey;
     uint64_t size;
 };
 
@@ -34,8 +36,8 @@ protected:
         hits(0)
         {}; 
     ~DatabaseAssociativeCache(){};
-    inline bool addKeyValue(const string &key, const void * value, const bool update); // returns true if cache is full
-    bool addKeyValue(const uint64_t index, const string &remainingKey, const void * value, const bool update);
+    inline bool addKeyValue(const string &key, const void * value, const bool update, const string& leftChildkey,const string& rightChildKey); // returns true if cache is full
+    bool addKeyValue(const uint64_t index, const string &remainingKey, const void * value, const bool update, const string& leftChildkey,const string& rightChildKey);
     inline bool findKey(const string &key, DatabaseAssociativeCacheRecord* &record); 
     bool findKey(const uint64_t index, const string &remainingKey, DatabaseAssociativeCacheRecord* &record);
     inline void splitKey(const string &key, string &remainingKey, uint64_t &index);
@@ -56,9 +58,9 @@ public:
             buffer.assign(size,NULL);
         };
     inline void postConstruct(int nKeyBits_, string name_);
-    virtual DatabaseAssociativeCacheRecord* allocRecord(const string remainingKey, const void * value) = 0;
+    virtual DatabaseAssociativeCacheRecord* allocRecord(const string remainingKey, const void * value, const string& leftChildkey,const string& rightChildKey) = 0;
     virtual void freeRecord(DatabaseAssociativeCacheRecord* record) = 0;
-    virtual void updateRecord(DatabaseAssociativeCacheRecord* record, const void * value) = 0;
+    virtual void updateRecord(DatabaseAssociativeCacheRecord* record, const void * value, const string& leftChildkey,const string& rightChildKey) = 0;
     inline uint64_t getSize(void) { return size; };
     bool enabled() {return (nKeyBits > 0);};
 };
@@ -67,22 +69,22 @@ class DatabaseMTAssociativeCache : public DatabaseAssociativeCache
 {
 public:
     ~DatabaseMTAssociativeCache(){};
-    inline bool add(const string &key, const vector<Goldilocks::Element> &value, const bool update); // returns true if cache is full
-    inline bool find(const string &key, vector<Goldilocks::Element> &value);
-    DatabaseAssociativeCacheRecord* allocRecord(const string key, const void * value) override;
+    inline bool add(const string &key, const vector<Goldilocks::Element> &value, const bool update, const string& leftChildkey,const string& rightChildKey); // returns true if cache is full
+    inline bool find(const string &key, vector<Goldilocks::Element> &value, string& leftChildkey, string& rightChildKey);
+    DatabaseAssociativeCacheRecord* allocRecord(const string key, const void * value, const string& leftChildkey,const string& rightChildKey) override;
     inline void freeRecord(DatabaseAssociativeCacheRecord* record) override;
-    inline void updateRecord(DatabaseAssociativeCacheRecord* record, const void * value) override;
+    inline void updateRecord(DatabaseAssociativeCacheRecord* record, const void * value, const string& leftChildkey,const string& rightChildKey) override;
 };
 
 class DatabaseProgramAssociativeCache : public DatabaseAssociativeCache
 {
 public:  
     ~DatabaseProgramAssociativeCache(){};
-    inline bool add(const string &key, const vector<uint8_t> &value, const bool update); // returns true if cache is full
-    inline bool find(const string &key, vector<uint8_t> &value);
-    DatabaseAssociativeCacheRecord* allocRecord(const string key, const void * value) override;
+    inline bool add(const string &key, const vector<uint8_t> &value, const bool update, const string& leftChildkey,const string& rightChildKey); // returns true if cache is full
+    inline bool find(const string &key, vector<uint8_t> &value, string& leftChildkey, string& rightChildKey);
+    DatabaseAssociativeCacheRecord* allocRecord(const string key, const void * value, const string& leftChildkey,const string& rightChildKey) override;
     inline void freeRecord(DatabaseAssociativeCacheRecord* record) override;
-    inline void updateRecord(DatabaseAssociativeCacheRecord* record, const void * value) override;
+    inline void updateRecord(DatabaseAssociativeCacheRecord* record, const void * value, const string& leftChildkey,const string& rightChildKey) override;
 };
 
 
@@ -113,11 +115,11 @@ void DatabaseAssociativeCache::splitKey(const string &key, string &remainingKey,
     //std::cout<<" Cache: "<<key<<" "<<remainingKey<<" "<<cachekey<<" "<<index<<std::endl;
 
 }
-bool DatabaseAssociativeCache::addKeyValue(const string &key, const void * value, const bool update){
+bool DatabaseAssociativeCache::addKeyValue(const string &key, const void * value, const bool update, const string& leftChildkey, const string& rightChildKey){
     string remainingKey;
     uint64_t index;
     splitKey(key, remainingKey, index);
-    return addKeyValue(index, remainingKey, value, update);
+    return addKeyValue(index, remainingKey, value, update, leftChildkey, rightChildKey);
 }
 bool DatabaseAssociativeCache::findKey(const string &key, DatabaseAssociativeCacheRecord* &record){
     string remainingKey;
@@ -127,12 +129,12 @@ bool DatabaseAssociativeCache::findKey(const string &key, DatabaseAssociativeCac
 }
 
 // DatabaseMTAssociativeCache inlines
-bool DatabaseMTAssociativeCache::add(const string &key, const vector<Goldilocks::Element> &value, const bool update)
+bool DatabaseMTAssociativeCache::add(const string &key, const vector<Goldilocks::Element> &value, const bool update, const string& leftChildkey,const string& rightChildKey)
 {
     lock_guard<recursive_mutex> guard(mlock); //rick: on es l'unlock?
-    return addKeyValue(key, (const void *)&value, update);
+    return addKeyValue(key, (const void *)&value, update, leftChildkey, rightChildKey);
 }
-bool DatabaseMTAssociativeCache::find(const string &key, vector<Goldilocks::Element> &value)
+bool DatabaseMTAssociativeCache::find(const string &key, vector<Goldilocks::Element> &value, string& leftChildkey, string& rightChildKey)
 {
     lock_guard<recursive_mutex> guard(mlock);
     DatabaseAssociativeCacheRecord* record;
@@ -141,6 +143,8 @@ bool DatabaseMTAssociativeCache::find(const string &key, vector<Goldilocks::Elem
     {
         value = *((vector<Goldilocks::Element>*) record->value);
     }
+    leftChildkey = record->leftChildKey;
+    rightChildKey = record->rightChildKey;
     return found;
 }
 void DatabaseMTAssociativeCache::freeRecord(DatabaseAssociativeCacheRecord* record)
@@ -148,18 +152,20 @@ void DatabaseMTAssociativeCache::freeRecord(DatabaseAssociativeCacheRecord* reco
     delete (vector<Goldilocks::Element>*)(record->value);
     delete record;
 }
-void DatabaseMTAssociativeCache::updateRecord(DatabaseAssociativeCacheRecord* record, const void * value)
+void DatabaseMTAssociativeCache::updateRecord(DatabaseAssociativeCacheRecord* record, const void * value, const string& leftChildkey,const string& rightChildKey)
 {
     *(vector<Goldilocks::Element>*)(record->value) = *(vector<Goldilocks::Element>*)(value);
+    record->leftChildKey = leftChildkey;
+    record->rightChildKey = rightChildKey;
 }
 
 // DatabaseProgramAssociativeCache inlines 
-bool DatabaseProgramAssociativeCache::add(const string &key, const vector<uint8_t> &value, const bool update)
+bool DatabaseProgramAssociativeCache::add(const string &key, const vector<uint8_t> &value, const bool update, const string& leftChildkey,const string& rightChildKey)
 {
     lock_guard<recursive_mutex> guard(mlock);
-    return addKeyValue(key, (const void *)&value, update);
+    return addKeyValue(key, (const void *)&value, update,leftChildkey, rightChildKey);
 }
-bool DatabaseProgramAssociativeCache::find(const string &key, vector<uint8_t> &value)
+bool DatabaseProgramAssociativeCache::find(const string &key, vector<uint8_t> &value, string& leftChildkey, string& rightChildKey)
 {
     lock_guard<recursive_mutex> guard(mlock);
     DatabaseAssociativeCacheRecord* record;
@@ -168,6 +174,8 @@ bool DatabaseProgramAssociativeCache::find(const string &key, vector<uint8_t> &v
     {
         value = *((vector<uint8_t>*) record->value);
     }
+    leftChildkey = record->leftChildKey;
+    rightChildKey = record->rightChildKey;
     return found;
 }
 void DatabaseProgramAssociativeCache::freeRecord(DatabaseAssociativeCacheRecord* record)
@@ -175,9 +183,11 @@ void DatabaseProgramAssociativeCache::freeRecord(DatabaseAssociativeCacheRecord*
     delete (vector<uint8_t>*)(record->value);
     delete record;
 }
-void DatabaseProgramAssociativeCache::updateRecord(DatabaseAssociativeCacheRecord* record, const void * value)
+void DatabaseProgramAssociativeCache::updateRecord(DatabaseAssociativeCacheRecord* record, const void * value, const string& leftChildkey,const string& rightChildKey)
 {
     *(vector<uint8_t>*)(record->value) = *(vector<uint8_t>*)(value);
+    record->leftChildKey = leftChildkey;
+    record->rightChildKey = rightChildKey;
 }
 #endif
 

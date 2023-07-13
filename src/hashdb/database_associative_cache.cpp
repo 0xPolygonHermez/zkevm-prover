@@ -7,7 +7,7 @@
 
 // DatabaseAssociativeCache class implementation
 // Add a record in the head of the cache. Returns true if the cache is full (or no cache), false otherwise
-bool DatabaseAssociativeCache::addKeyValue(const uint64_t index, const string &remainingKey, const void * value, const bool update){
+bool DatabaseAssociativeCache::addKeyValue(const uint64_t index, const string &remainingKey, const void * value, const bool update, const string& leftChildkey,const string& rightChildKey){
 
     if (nKeyBits == 0)
     {
@@ -20,13 +20,14 @@ bool DatabaseAssociativeCache::addKeyValue(const uint64_t index, const string &r
         zklog.info("DatabaseAssociativeCache::addKeyValue() name=" + name + " cacheSize=" + to_string(size) + " attempts=" + to_string(attempts) + " hits=" + to_string(hits) + " hit ratio=" + to_string(double(hits)*100.0/double(zkmax(attempts,1))) + "%");
     }
 
+    
     DatabaseAssociativeCacheRecord * record;
     // If key already exists in the cache return. The findKey also sets the record in the head of the cache
     if (findKey(index,remainingKey, record))
     {
         if (update)
         {
-            updateRecord(record, value);
+            updateRecord(record, value,leftChildkey,rightChildKey);
             return true;
         }
         else
@@ -36,8 +37,23 @@ bool DatabaseAssociativeCache::addKeyValue(const uint64_t index, const string &r
         }
     }
 
-    record = allocRecord(remainingKey, value);
+    record = allocRecord(remainingKey, value,leftChildkey,rightChildKey);
     buffer[index] = record;
+    /*vector<Goldilocks::Element> &auxvalue = *((vector<Goldilocks::Element>*) record->value);
+    Goldilocks fr;
+    string auxLeftChildKey = fea2string(fr, auxvalue[0], auxvalue[1], auxvalue[2], auxvalue[3]);
+    string auxRighChildKey = fea2string(fr, auxvalue[4], auxvalue[5], auxvalue[6], auxvalue[7]);
+    auxLeftChildKey = NormalizeToNFormat(auxLeftChildKey, 64);
+    auxLeftChildKey = stringToLower(auxLeftChildKey);
+    auxRighChildKey = NormalizeToNFormat(auxRighChildKey, 64);
+    auxRighChildKey = stringToLower(auxRighChildKey);
+    if(auxLeftChildKey != leftChildkey || auxRighChildKey != rightChildKey){
+        
+        zklog.error("DatabaseAssociativeCache::addKeyValue() leftChildKey=" + leftChildkey + " rightChildKey=" + rightChildKey);
+        zklog.error("DatabaseAssociativeCache::addKeyValue() auxLeftChildKey=" + auxLeftChildKey + " auxRighChildKey=" + auxRighChildKey);
+        //exitProcess();
+    }*/
+
     return true;
 } 
 bool DatabaseAssociativeCache::findKey(const uint64_t index, const string &remainingKey, DatabaseAssociativeCacheRecord* &record){
@@ -50,7 +66,7 @@ bool DatabaseAssociativeCache::findKey(const uint64_t index, const string &remai
 }
 
 // DatabaseMTAssociativeCach class implementation
-DatabaseAssociativeCacheRecord * DatabaseMTAssociativeCache::allocRecord(const string remainingKey, const void * value)
+DatabaseAssociativeCacheRecord * DatabaseMTAssociativeCache::allocRecord(const string remainingKey, const void * value, const string& leftChildkey,const string& rightChildKey)
 {
     // Allocate memory
     DatabaseAssociativeCacheRecord * pRecord = new(DatabaseAssociativeCacheRecord);
@@ -77,12 +93,14 @@ DatabaseAssociativeCacheRecord * DatabaseMTAssociativeCache::allocRecord(const s
         (pRecord->remainingKey.capacity()+1)+
         sizeof(vector<Goldilocks::Element>)+
         sizeof(Goldilocks::Element)*pValue->capacity() );
+    pRecord->leftChildKey = leftChildkey;
+    pRecord->rightChildKey = rightChildKey;
         
     return pRecord;
 }
 
 // DatabaseProgramAssociativeCache class implementation
-DatabaseAssociativeCacheRecord * DatabaseProgramAssociativeCache::allocRecord(const string remainingKey, const void * value)
+DatabaseAssociativeCacheRecord * DatabaseProgramAssociativeCache::allocRecord(const string remainingKey, const void * value, const string& leftChildkey,const string& rightChildKey)
 {
     // Allocate memory
     DatabaseAssociativeCacheRecord * pRecord = new(DatabaseAssociativeCacheRecord);
@@ -109,6 +127,8 @@ DatabaseAssociativeCacheRecord * DatabaseProgramAssociativeCache::allocRecord(co
         (pRecord->remainingKey.capacity()+1)+
         sizeof(vector<uint8_t>)+
         sizeof(uint8_t)*pValue->capacity() );
+    pRecord->leftChildKey = leftChildkey;
+    pRecord->rightChildKey = rightChildKey;
         
     return pRecord;
 }
@@ -117,3 +137,4 @@ DatabaseAssociativeCacheRecord * DatabaseProgramAssociativeCache::allocRecord(co
 // 1.Use ramaining key whenever possible
 // 2.Avoid using pointers in the cache, use templates instead
 // 3.Currently desctructor is not correct because it does not call the free function
+// 4.conflict: understand conflics in write orderings

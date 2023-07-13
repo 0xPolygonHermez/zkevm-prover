@@ -589,9 +589,14 @@ int main(int argc, char **argv)
 #ifdef DATABASE_USE_CACHE
 
     /* INIT DB CACHE */
+#ifdef DATABASE_USE_ASSOCIATIVE_CACHE
+    Database::dbMTCache.postConstruct(24,"MTCache"); //rick: add first paramter to configurable parameters
+#else
+
     Database::dbMTCache.setName("MTCache");
-    Database::dbProgramCache.setName("ProgramCache");
     Database::dbMTCache.setMaxSize(config.dbMTCacheSize*1024*1024);
+#endif
+    Database::dbProgramCache.setName("ProgramCache");
     Database::dbProgramCache.setMaxSize(config.dbProgramCacheSize*1024*1024);
 
     if (config.databaseURL != "local") // remote DB
