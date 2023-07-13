@@ -139,6 +139,7 @@ public:
     bool dbClearCache;
     bool dbGetTree;
     bool dbReadOnly;
+    uint64_t dbReadRetryCounter;
     uint64_t dbReadRetryDelay;
     bool dbMultiWriteSinglePosition;
     uint64_t cleanerPollingPeriod;

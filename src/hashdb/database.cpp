@@ -146,22 +146,26 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
             // Retry if failed, since read-only databases have a synchronization latency
             if ( (r != ZKR_SUCCESS) && (config.dbReadRetryDelay > 0) )
             {
-                zklog.warning("Database::read() failed calling readTreeRemote() with error=" + zkresult2string(r) + "; retrying after " + to_string(config.dbReadRetryDelay) + "us");
-
-                // Retry after dbReadRetryDelay us
-                usleep(config.dbReadRetryDelay);
-                r = readTreeRemote(key, keys, level, numberOfFields);
-
-                // Add to the read log, and restart the timer
-                if (dbReadLog != NULL)
+                for (uint64_t i=0; i<config.dbReadRetryCounter; i++)
                 {
-                    dbReadLog->addGetTree(TimeDiff(t), numberOfFields);
-                    gettimeofday(&t, NULL);
-                }
+                    zklog.warning("Database::read() failed calling readTreeRemote() with error=" + zkresult2string(r) + "; retrying after " + to_string(config.dbReadRetryDelay) + "us");
 
-                if (r != ZKR_SUCCESS)
-                {
-                    zklog.error("Database::read() retried readTreeRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r));
+                    // Retry after dbReadRetryDelay us
+                    usleep(config.dbReadRetryDelay);
+                    r = readTreeRemote(key, keys, level, numberOfFields);
+
+                    // Add to the read log, and restart the timer
+                    if (dbReadLog != NULL)
+                    {
+                        dbReadLog->addGetTree(TimeDiff(t), numberOfFields);
+                        gettimeofday(&t, NULL);
+                    }
+
+                    if (r == ZKR_SUCCESS)
+                    {
+                        break;
+                    }
+                    zklog.error("Database::read() retried readTreeRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r) + " counter=" + to_string(i));
                 }
             }
 
@@ -199,14 +203,18 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
         r = readRemote(false, key, sData);
         if ( (r != ZKR_SUCCESS) && (config.dbReadRetryDelay > 0) )
         {
-            zklog.warning("Database::read() failed calling readRemote() with error=" + zkresult2string(r) + "; retrying after " + to_string(config.dbReadRetryDelay) + "us");
-
-            // Retry after dbReadRetryDelay us
-            usleep(config.dbReadRetryDelay);
-            r = readRemote(false, key, sData);
-            if (r != ZKR_SUCCESS)
+            for (uint64_t i=0; i<config.dbReadRetryCounter; i++)
             {
-                zklog.error("Database::read() retried readRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r));
+                zklog.warning("Database::read() failed calling readRemote() with error=" + zkresult2string(r) + "; retrying after " + to_string(config.dbReadRetryDelay) + "us");
+
+                // Retry after dbReadRetryDelay us
+                usleep(config.dbReadRetryDelay);
+                r = readRemote(false, key, sData);
+                if (r == ZKR_SUCCESS)
+                {
+                    break;
+                }
+                zklog.error("Database::read() retried readRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r) + " counter=" + to_string(i));
             }
         }
         if (r == ZKR_SUCCESS)
