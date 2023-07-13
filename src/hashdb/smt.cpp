@@ -17,8 +17,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
     for (uint64_t i=0; i<4; i++) newRoot[i] = oldRoot[i];
 
     // Get a list of the bits of the key to navigate top-down through the tree
-    //bool keys[256];
-    vector<uint64_t> keys;
+    bool keys[256];
     splitKey(key, keys);
 
     int64_t level = 0;
@@ -57,7 +56,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
         string rootString = fea2string(fr, r);
         string leftChildKey;
         string righChildKey;
-        dbres = db.read(rootString, dbValue, dbReadLog, leftChildKey, righChildKey, false, &keys, level);
+        dbres = db.read(rootString, dbValue, dbReadLog, leftChildKey, righChildKey, false, keys, level);
         if (dbres != ZKR_SUCCESS)
         {
             zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + rootString);
@@ -230,7 +229,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                 int64_t level2 = level + 1;
 
                 // Split the found key in bits
-                vector <uint64_t> foundKeys;
+                bool foundKeys[256];
                 splitKey(foundKey, foundKeys);
 
                 // While the key bits are the same, increase the level; we want to find the first bit when the keys differ
@@ -500,7 +499,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                     // Read its 2 siblings
                     string leftChildKey;
                     string righChildKey;
-                    dbres = db.read(auxString, dbValue, dbReadLog, leftChildKey, righChildKey, false, &keys, level);
+                    dbres = db.read(auxString, dbValue, dbReadLog, leftChildKey, righChildKey, false, keys, level);
                     if ( dbres != ZKR_SUCCESS)
                     {
                         zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + auxString);
@@ -773,8 +772,7 @@ zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Gold
     }
 
     // Get a list of the bits of the key to navigate top-down through the tree
-    //bool keys[256];
-    vector <uint64_t> keys;
+    bool keys[256];
     splitKey(key, keys);
 
     uint64_t level = 0;
@@ -810,7 +808,7 @@ zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Gold
     {
         // Read the content of db for entry r: siblings[level] = db.read(r)
         //string rString = fea2string(fr, r);
-        dbres = db.read(rString, dbValue, dbReadLog, leftChildKey, righChildKey, false, &keys, level);
+        dbres = db.read(rString, dbValue, dbReadLog, leftChildKey, righChildKey, false, keys, level);
         if (dbres != ZKR_SUCCESS)
         {
             zklog.error("Smt::get() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + rString);
@@ -952,28 +950,6 @@ zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Gold
 }
 
 // Split the fe key into 4-bits chuncks, e.g. 0x123456EF -> { 1, 2, 3, 4, 5, 6, E, F }
-void Smt::splitKey ( const Goldilocks::Element (&key)[4], vector<uint64_t> &result )
-{
-
-    bitset<64> auxb0(fr.toU64(key[0]));
-    bitset<64> auxb1(fr.toU64(key[1]));
-    bitset<64> auxb2(fr.toU64(key[2]));
-    bitset<64> auxb3(fr.toU64(key[3]));
-    
-    result.resize(64*4);
-    // Split the key in bits, taking one bit from a different scalar every time
-    for (uint64_t i=0; i<64; i++)
-    {
-        int cont =i*4;
-        result[cont] = auxb0[i];
-        result[cont+1] = auxb1[i];
-        result[cont+2] = auxb2[i];
-        result[cont+3] = auxb3[i];
-    }
-}
-
-
-
 void Smt::splitKey( const Goldilocks::Element (&key)[4], bool (&result)[256])
 {
     bitset<64> auxb0(fr.toU64(key[0]));

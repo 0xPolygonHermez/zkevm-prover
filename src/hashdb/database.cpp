@@ -105,7 +105,7 @@ void Database::init(void)
     bInitialized = true;
 }
 
-zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, string& leftChildkey, string& rightChildKey, const bool update, const vector<uint64_t> *keys, uint64_t level)
+zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, string& leftChildkey, string& rightChildKey, const bool update,  bool *keys, uint64_t level)
 {
     // Check that it has been initialized before
     if (!bInitialized)

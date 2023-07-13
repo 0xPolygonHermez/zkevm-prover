@@ -89,8 +89,7 @@ public:
 
     // Basic methods
     void init(void);
-    /*zkresult read(const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, string & leftChildKey, string & rightChileKey, const bool update = false, bool *keys = NULL , uint64_t level=0);*/
-    zkresult read(const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, string & leftChildKey, string & rightChileKey, const bool update = false, const vector<uint64_t> *keys=NULL, uint64_t level=0);
+    zkresult read(const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, string & leftChildKey, string & rightChileKey, const bool update = false, bool *keys = NULL , uint64_t level=0);
     zkresult write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent);
     zkresult getProgram(const string &_key, vector<uint8_t> &value, DatabaseMap *dbReadLog);
     zkresult setProgram(const string &_key, const vector<uint8_t> &value, const bool persistent);
