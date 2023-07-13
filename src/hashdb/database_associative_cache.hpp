@@ -14,7 +14,6 @@ struct DatabaseAssociativeCacheRecord {
     void* value;
     string leftChildKey;
     string rightChildKey;
-    uint64_t size;
 };
 
 class DatabaseAssociativeCache

@@ -88,11 +88,6 @@ DatabaseAssociativeCacheRecord * DatabaseMTAssociativeCache::allocRecord(const s
     // Assign values to record
     pRecord->value = pValue;
     pRecord->remainingKey = remainingKey;
-    pRecord->size = 2*(                                 //rick:: what is this size used for?
-        sizeof(DatabaseAssociativeCacheRecord)+
-        (pRecord->remainingKey.capacity()+1)+
-        sizeof(vector<Goldilocks::Element>)+
-        sizeof(Goldilocks::Element)*pValue->capacity() );
     pRecord->leftChildKey = leftChildkey;
     pRecord->rightChildKey = rightChildKey;
         
@@ -122,11 +117,6 @@ DatabaseAssociativeCacheRecord * DatabaseProgramAssociativeCache::allocRecord(co
     // Assign values to record
     pRecord->value = pValue;
     pRecord->remainingKey = remainingKey;
-    pRecord->size = 2*(
-        sizeof(DatabaseAssociativeCacheRecord)+
-        (pRecord->remainingKey.capacity()+1)+
-        sizeof(vector<uint8_t>)+
-        sizeof(uint8_t)*pValue->capacity() );
     pRecord->leftChildKey = leftChildkey;
     pRecord->rightChildKey = rightChildKey;
         
