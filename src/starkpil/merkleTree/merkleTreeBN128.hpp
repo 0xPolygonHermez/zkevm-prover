@@ -8,6 +8,7 @@
 
 #define MT_BN128_ARITY 4
 #define GOLDILOCKS_ELEMENTS 3
+#define MT_BN128_CUSTOM true
 
 class MerkleTreeBN128
 {

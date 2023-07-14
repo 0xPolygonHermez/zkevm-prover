@@ -126,8 +126,15 @@ void MerkleTreeBN128::linearHash()
                     p.hash(elements, &nodes[i]);
                     pending = pending - MT_BN128_ARITY;
                 }
-                else
+                else if(MT_BN128_CUSTOM) 
                 {
+                    std::memcpy(&elements[1], &buff[i * width + width - pending], pending * sizeof(RawFr::Element));
+                    std::memcpy(&elements[0], &nodes[i], sizeof(RawFr::Element));
+                    p.hash(elements, &nodes[i]);
+                    pending = 0;
+                } 
+                else 
+                {  
                     std::vector<RawFr::Element> elements_last(pending + 1);
                     std::memcpy(&elements_last[1], &buff[i * width + width - pending], pending * sizeof(RawFr::Element));
                     std::memcpy(&elements_last[0], &nodes[i], sizeof(RawFr::Element));

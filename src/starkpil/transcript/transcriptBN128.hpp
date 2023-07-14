@@ -5,8 +5,7 @@
 #include "poseidon_opt.hpp"
 #include <cstring>
 #include "goldilocks_base_field.hpp"
-
-#define TRANSCRIPT_BN128_ARITY 16
+#include "merkleTreeBN128.hpp"
 
 // TODO: Pending to review and re-factor
 class TranscriptBN128
