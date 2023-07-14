@@ -305,6 +305,12 @@ using grpc::Status;
         " bNoCounters=" + to_string(proverRequest.input.bNoCounters) +
         " traceConfig=" + proverRequest.input.traceConfig.toString());
 #endif
+#ifdef LOG_SERVICE_EXECUTOR_INPUT_JSON
+    // Log the input file content
+    json inputJson;
+    proverRequest.input.save(inputJson);
+    zklog.info("ExecutorServiceImpl::ProcessBatch() Input=" + inputJson.dump());
+#endif
 
     prover.processBatch(&proverRequest);
 

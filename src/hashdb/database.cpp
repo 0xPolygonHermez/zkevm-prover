@@ -148,7 +148,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
             {
                 for (uint64_t i=0; i<config.dbReadRetryCounter; i++)
                 {
-                    zklog.warning("Database::read() failed calling readTreeRemote() with error=" + zkresult2string(r) + "; retrying after " + to_string(config.dbReadRetryDelay) + "us");
+                    zklog.warning("Database::read() failed calling readTreeRemote() with error=" + zkresult2string(r) + "; retrying after " + to_string(config.dbReadRetryDelay) + "us key=" + key);
 
                     // Retry after dbReadRetryDelay us
                     usleep(config.dbReadRetryDelay);
@@ -205,7 +205,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
         {
             for (uint64_t i=0; i<config.dbReadRetryCounter; i++)
             {
-                zklog.warning("Database::read() failed calling readRemote() with error=" + zkresult2string(r) + "; retrying after " + to_string(config.dbReadRetryDelay) + "us");
+                zklog.warning("Database::read() failed calling readRemote() with error=" + zkresult2string(r) + "; retrying after " + to_string(config.dbReadRetryDelay) + "us key=" + key);
 
                 // Retry after dbReadRetryDelay us
                 usleep(config.dbReadRetryDelay);
@@ -801,7 +801,7 @@ zkresult Database::saveStateRoot(const Goldilocks::Element (&stateRoot)[4])
         s += " key=" + dbStateRootKey;
         s += " value=";
         for (uint64_t i = 0; i < value.size(); i++)
-            s += fr.toString(value[i], 16) + ":";);
+            s += fr.toString(value[i], 16) + ":";
         zklog.info(s);
     }
 #endif
@@ -1111,7 +1111,6 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
         for (uint64_t i = 0; (i < (data.size()) && (i < 100)); i++)
             s += byte2string(data[i]);
         if (data.size() > 100) s += "...";
-        s += " update=" + to_string(update);
         zklog.info(s);
     }
 #endif
@@ -1234,6 +1233,9 @@ zkresult Database::sendData (void)
                         data.query += ", ";
                     }
                     data.query += "( E\'\\\\x" + it->first + "\', E\'\\\\x" + it->second + "\' ) ";
+#ifdef LOG_DB_SEND_DATA
+                    zklog.info("Database::sendData() inserting node key=" + it->first + " value=" + it->second);
+#endif
                 }
                 data.query += " ON CONFLICT (hash) DO NOTHING;";
             }
@@ -1249,6 +1251,9 @@ zkresult Database::sendData (void)
                         data.query += ", ";
                     }
                     data.query += "( E\'\\\\x" + it->first + "\', E\'\\\\x" + it->second + "\' ) ";
+#ifdef LOG_DB_SEND_DATA
+                    zklog.info("Database::sendData() inserting program key=" + it->first + " value=" + it->second);
+#endif
                 }
                 data.query += " ON CONFLICT (hash) DO NOTHING;";
             }
@@ -1257,6 +1262,9 @@ zkresult Database::sendData (void)
             if (data.nodesStateRoot.size() > 0)
             {
                 data.query += "INSERT INTO " + config.dbNodesTableName + " ( hash, data ) VALUES ( E\'\\\\x" + dbStateRootKey + "\', E\'\\\\x" + data.nodesStateRoot + "\' ) ON CONFLICT (hash) DO NOTHING;";
+#ifdef LOG_DB_SEND_DATA
+                zklog.info("Database::sendData() inserting root=" + data.nodesStateRoot);
+#endif
             }
         }
 
@@ -1292,6 +1300,10 @@ zkresult Database::sendData (void)
                 timeDiff = TimeDiff(t);
                 zklog.info("Database::sendData() dbMetrics multiWrite total=" + to_string(fields) + "fields=" + to_string(timeDiff) + "us=" + to_string(timeDiff/zkmax(fields,1)) + "us/field");
             }
+
+#ifdef LOG_DB_WRITE_QUERY
+            zklog.info("Database::sendData() write query=" + data.query);
+#endif
 
             // Update status
             data.query.clear();
@@ -1386,6 +1398,7 @@ zkresult Database::deleteNodes(const vector<string> (&nodesToDelete))
 
         // Delete it; they key can be present (just written) or not (read from database) and both cases are valid
         multiWriteFlushData.erase(key);
+        zklog.info("Database::deleteNode() deleted key=" + key + " i=" + to_string(i));
     }
 
     multiWrite.Unlock();

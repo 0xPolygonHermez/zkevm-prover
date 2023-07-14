@@ -32,6 +32,7 @@
 //#define LOG_TXS
 //#define LOG_SERVICE
 #define LOG_SERVICE_EXECUTOR_INPUT
+#define LOG_SERVICE_EXECUTOR_INPUT_JSON
 #define LOG_SERVICE_EXECUTOR_OUTPUT
 //#define LOG_BME
 //#define LOG_BME_HASH
@@ -44,8 +45,10 @@
 //#define LOG_BINARY_EXECUTOR
 //#define LOG_HASHK
 //#define LOG_HASH
-//#define LOG_DB_READ
-//#define LOG_DB_WRITE
+#define LOG_DB_READ
+#define LOG_DB_WRITE
+//#define LOG_DB_WRITE_QUERY
+#define LOG_DB_SEND_DATA
 //#define LOG_DB_SENDER_THREAD
 //#define LOG_HASHDB_SERVICE
 //#define LOG_FULL_TRACER
