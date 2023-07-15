@@ -807,7 +807,7 @@ zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Gold
     while ( ( !fr.isZero(r[0]) || !fr.isZero(r[1]) || !fr.isZero(r[2]) || !fr.isZero(r[3]) ) && !bFoundKey)
     {
         // Read the content of db for entry r: siblings[level] = db.read(r)
-        //string rString = fea2string(fr, r);
+        string rString = fea2string(fr, r);
         dbres = db.read(rString, r, dbValue, dbReadLog, leftChildKey, righChildKey, false, keys, level);
         if (dbres != ZKR_SUCCESS)
         {

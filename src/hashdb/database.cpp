@@ -104,7 +104,6 @@ void Database::init(void)
     // Mark the database as initialized
     bInitialized = true;
 }
-//rick
 zkresult Database::read(const string &_key, Goldilocks::Element (&vkey)[4], vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, string& leftChildkey, string& rightChildKey, const bool update,  bool *keys, uint64_t level)
 {
     // Check that it has been initialized before
@@ -128,8 +127,8 @@ zkresult Database::read(const string &_key, Goldilocks::Element (&vkey)[4], vect
     if (dbMTCache.enabled())
     {
         // If the key is present in the cache, get its value from there
-        //rick// if (dbMTCache.findKey(vkey,value))
-        if (dbMTCache.find(key, value, leftChildkey, rightChildKey))
+        if (dbMTCache.findKey(vkey,value))
+        //if (dbMTCache.find(key, value, leftChildkey, rightChildKey))
         {
             // Add to the read log
             if (dbReadLog != NULL) dbReadLog->add(" ", value, true, TimeDiff(t)); //rick
@@ -141,8 +140,8 @@ zkresult Database::read(const string &_key, Goldilocks::Element (&vkey)[4], vect
         {
             // Get the tree
             // Normalize key format
-            /*string key = NormalizeToNFormat(_key, 64);
-            key = stringToLower(key);*/ //rick
+            key = NormalizeToNFormat(_key, 64);
+            key = stringToLower(key);
             uint64_t numberOfFields;
             r = readTreeRemote(key, keys, level, numberOfFields);
 
@@ -178,8 +177,8 @@ zkresult Database::read(const string &_key, Goldilocks::Element (&vkey)[4], vect
             // If succeeded, now the value should be present in the cache
             if ( r == ZKR_SUCCESS)
             {
-                //rick// if (dbMTCache.findKey(vkey, value))
-                if (dbMTCache.find(key, value, leftChildkey, rightChildKey))
+                if (dbMTCache.findKey(vkey, value))
+                //if (dbMTCache.find(key, value, leftChildkey, rightChildKey))
                 {
                     // Add to the read log
                     if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
@@ -207,8 +206,8 @@ zkresult Database::read(const string &_key, Goldilocks::Element (&vkey)[4], vect
 
         // Otherwise, read it remotelly, up to two times
         // Normalize key format
-        //rick// string key = NormalizeToNFormat(_key, 64);
-        //rick // key = stringToLower(key);
+        key = NormalizeToNFormat(_key, 64);
+        key = stringToLower(key);
         string sData;
         r = readRemote(false, key, sData);
         if ( (r != ZKR_SUCCESS) && (config.dbReadRetryDelay > 0) )
@@ -229,8 +228,10 @@ zkresult Database::read(const string &_key, Goldilocks::Element (&vkey)[4], vect
 
 #ifdef DATABASE_USE_CACHE
             // Store it locally to avoid any future remote access for this key
-            if (dbMTCache.enabled()) dbMTCache.add(key, value, update, sData.substr(0, 64), sData.substr(64, 64));
-            //rick// if (dbMTCache.enabled()) dbMTCache.addKeyValue(vkey, value, update);
+            if (dbMTCache.enabled()){
+                //dbMTCache.add(key, value, update, sData.substr(0, 64), sData.substr(64, 64));
+                dbMTCache.addKeyValue(vkey, value, update);
+            }
 #endif
 
             // Add to the read log
@@ -311,8 +312,8 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
         string rightChildKey = fea2string(fr, value[4],value[5],value[6],value[7]);
         leftChildkey= NormalizeToNFormat(leftChildkey, 64);
         rightChildKey = NormalizeToNFormat(rightChildKey, 64);
-        dbMTCache.add(key, value, false, leftChildkey, rightChildKey);
-        /*Goldilocks::Element vkey_[4];
+        //dbMTCache.add(key, value, false, leftChildkey, rightChildKey);
+        Goldilocks::Element vkey_[4];
         Goldilocks::Element vkeyf[4];
         if(vkey==NULL){
             string2fea(fr, key, vkey_);
@@ -326,7 +327,7 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
             vkeyf[2] = vkey[2];
             vkeyf[3] = vkey[3];
         }
-        dbMTCache.addKeyValue(vkeyf, value, false);*/ //rick//
+        dbMTCache.addKeyValue(vkeyf, value, false); 
     }
 #endif
 
@@ -658,8 +659,8 @@ zkresult Database::readTreeRemote(const string &key, const vector<uint64_t> *key
             if (dbMTCache.enabled())
             {
                 //zklog.info("Database::readTreeRemote() adding hash=" + hash + " to dbMTCache");
-                dbMTCache.add(hash, value, false, data.substr(0,64),data.substr(64,64));
-                //rick// dbMTCache.addKeyValue(vhash, value, false);
+                //dbMTCache.add(hash, value, false, data.substr(0,64),data.substr(64,64));
+                dbMTCache.addKeyValue(vhash, value, false);
 
             }
 #endif
@@ -774,9 +775,8 @@ zkresult Database::readTreeRemote(const string &key, bool *keys, uint64_t level,
             if (dbMTCache.enabled())
             {
                 //zklog.info("Database::readTreeRemote() adding hash=" + hash + " to dbMTCache");
+                dbMTCache.addKeyValue(vhash, value, false);
                 //dbMTCache.add(hash, value, false, data.substr(0,64),data.substr(64,64));
-                //rick// dbMTCache.addKeyValue(vhash, value, false);
-                dbMTCache.add(hash, value, false, data.substr(0,64),data.substr(64,64));
             }
 #endif
         }
@@ -935,10 +935,9 @@ zkresult Database::saveStateRoot(const Goldilocks::Element (&stateRoot)[4])
     if ((r == ZKR_SUCCESS) && dbMTCache.enabled())
     {
         // Create in memory cache
+        Goldilocks::Element vKey[4]={0xFFFFFFFFFFFFFFFF,0xFFFFFFFFFFFFFFFF,0xFFFFFFFFFFFFFFFF,0xFFFFFFFFFFFFFFFF};
+        dbMTCache.addKeyValue(vKey, value, true);
         //dbMTCache.add(dbStateRootKey, value, true, valueString.substr(0,64), valueString.substr(64,64));
-        //rick// Goldilocks::Element vKey[4]={0xFFFFFFFFFFFFFFFF,0xFFFFFFFFFFFFFFFF,0xFFFFFFFFFFFFFFFF,0xFFFFFFFFFFFFFFFF}; //rick
-        //rick// dbMTCache.addKeyValue(vKey, value, true);
-        dbMTCache.add(dbStateRootKey, value, true, valueString.substr(0,64), valueString.substr(64,64));
 
     }
 #endif
