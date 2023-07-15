@@ -56,6 +56,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
         string rootString = fea2string(fr, r);
         string leftChildKey;
         string righChildKey;
+        /*dbres = db.read(rootString, r, dbValue, dbReadLog, leftChildKey, righChildKey, false, keys, level);*/ //rick
         dbres = db.read(rootString, dbValue, dbReadLog, leftChildKey, righChildKey, false, keys, level);
         if (dbres != ZKR_SUCCESS)
         {
@@ -77,6 +78,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
             foundValueHashString = fea2string(fr, foundValueHash);
             string leftChildKey;
             string righChildKey;
+            /*dbres = db.read(foundValueHashString, foundValueHash, dbValue, dbReadLog, leftChildKey, righChildKey);*/ //rick
             dbres = db.read(foundValueHashString, dbValue, dbReadLog, leftChildKey, righChildKey);
             if (dbres != ZKR_SUCCESS)
             {
@@ -499,6 +501,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                     // Read its 2 siblings
                     string leftChildKey;
                     string righChildKey;
+                    /*dbres = db.read(auxString, auxFea, dbValue, dbReadLog, leftChildKey, righChildKey, false, keys, level);*/ //rick
                     dbres = db.read(auxString, dbValue, dbReadLog, leftChildKey, righChildKey, false, keys, level);
                     if ( dbres != ZKR_SUCCESS)
                     {
@@ -520,6 +523,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                         // Read its siblings
                         string leftChildKey;
                         string righChildKey;
+                        /*dbres = db.read(valHString, valH, dbValue, dbReadLog, leftChildKey, righChildKey);*/
                         dbres = db.read(valHString, dbValue, dbReadLog, leftChildKey, righChildKey);
                         if (dbres != ZKR_SUCCESS)
                         {
@@ -808,6 +812,7 @@ zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Gold
     {
         // Read the content of db for entry r: siblings[level] = db.read(r)
         //string rString = fea2string(fr, r);
+        //dbres = db.read(rString, r, dbValue, dbReadLog, leftChildKey, righChildKey, false, keys, level); //rick
         dbres = db.read(rString, dbValue, dbReadLog, leftChildKey, righChildKey, false, keys, level);
         if (dbres != ZKR_SUCCESS)
         {
@@ -830,6 +835,7 @@ zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Gold
             string foundValueHashString = fea2string(fr, valueHashFea);
             string leftChildKey;
             string righChildKey;
+            /*dbres = db.read(foundValueHashString, valueHashFea, dbValue, dbReadLog, leftChildKey, righChildKey);*/
             dbres = db.read(foundValueHashString, dbValue, dbReadLog, leftChildKey, righChildKey);
             if (dbres != ZKR_SUCCESS)
             {
@@ -863,10 +869,10 @@ zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Gold
         else
         {
             // Take either the first 4 (keys[level]=0) or the second 4 (keys[level]=1) siblings as the hash of the next level
-            /*r[0] = siblings[level][keys[level]*4];
+            r[0] = siblings[level][keys[level]*4];
             r[1] = siblings[level][keys[level]*4 + 1];
             r[2] = siblings[level][keys[level]*4 + 2];
-            r[3] = siblings[level][keys[level]*4 + 3];*/
+            r[3] = siblings[level][keys[level]*4 + 3];
 
             // Store the used key bit in accKey
             accKey.push_back(keys[level]);
@@ -1037,7 +1043,7 @@ zkresult Smt::hashSave ( Database &db, const Goldilocks::Element (&v)[12], const
     vector<Goldilocks::Element> dbValue;
     for (uint64_t i=0; i<12; i++) dbValue.push_back(v[i]);
     zkresult zkr;
-    zkr = db.write(hashString, dbValue, persistent);
+    zkr = db.write(hashString, dbValue, persistent, hash);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("Smt::hashSave() failed calling db.write() key=" + hashString + " result=" + to_string(zkr) + "=" + zkresult2string(zkr));
