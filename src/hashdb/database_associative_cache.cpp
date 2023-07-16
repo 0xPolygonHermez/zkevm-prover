@@ -83,11 +83,14 @@ bool DatabaseAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], const 
     }
 
     uint32_t index = (uint32_t)(key[0].fe & indexMask);
-    uint32_t offset = index*16;
+    uint32_t offset = indices_[index]*16;
     bool isleaf = value.size() > 8;
     if(buffer_[offset] == key[0].fe && buffer_[offset+1] == key[1].fe && buffer_[offset+2] == key[2].fe && buffer_[offset+3] == key[3].fe){
         hits++; //rick: this part can be omited
     }else{
+        buffer_pos +=1;
+        indices_[index] = buffer_pos;
+        offset = indices_[index]*16;
         buffer_[offset] = key[0].fe;
         buffer_[offset+1] = key[1].fe;
         buffer_[offset+2] = key[2].fe;
@@ -114,7 +117,7 @@ bool DatabaseAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], const 
 bool DatabaseAssociativeCache::findKey(Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value)
 {
     uint32_t index = (uint32_t)(key[0].fe & indexMask);
-    uint32_t offset = index*16;
+    uint32_t offset = indices_[index]*16;
     if(buffer_[offset] == key[0].fe && buffer_[offset+1] == key[1].fe && buffer_[offset+2] == key[2].fe && buffer_[offset+3] == key[3].fe){
         ++hits;
         bool isleaf = (buffer_[offset+12] != 0xFFFFFFFFFFFFFFFF);

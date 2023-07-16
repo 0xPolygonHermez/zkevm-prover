@@ -26,7 +26,9 @@ protected:
     int nKeyBits;
     int size;
     vector<DatabaseAssociativeCacheRecord *> buffer;
-    uint64_t *buffer_;
+    uint32_t  *indices_;
+    uint64_t  *buffer_;
+    int buffer_pos;
 
     uint64_t attempts;
     uint64_t hits;
@@ -42,6 +44,7 @@ protected:
     };
     ~DatabaseAssociativeCache(){
         delete[] buffer_;
+        delete[] indices_;
     };
     inline bool addKeyValue(const string &key, const void *value, const bool update, const string &leftChildkey, const string &rightChildKey); // returns true if cache is full
     bool addKeyValue(const uint64_t index, const string &remainingKey, const void *value, const bool update, const string &leftChildkey, const string &rightChildKey);
@@ -56,6 +59,7 @@ public:
     DatabaseAssociativeCache(int nKeyBits_, string name_) : attempts(0),
                                                             hits(0)
     {
+        buffer_pos = 0;
         nKeyBits = nKeyBits_;
         if (nKeyBits % 4 != 0)
         {
@@ -65,7 +69,9 @@ public:
         name = name_;
         size = 1 << nKeyBits;
         // buffer.assign(size,NULL); //rick: això ho hauré de treure
-        buffer_ = new uint64_t[size * 16];
+        indices_ = new uint32_t[size * 16];
+        int buffer_size = 1<<16;
+        buffer_ = new uint64_t[buffer_size];
 
         indexMask = 0;
         for (int i = 0; i < nKeyBits; i++)
@@ -107,16 +113,15 @@ public:
 // DatabaseAssociativeCache inlines
 void DatabaseAssociativeCache::postConstruct(int nKeyBits_, string name_)
 {
+    buffer_pos = 0;
     nKeyBits = nKeyBits_;
-    /*if (nKeyBits % 4 != 0) // rick: això ho hauré de treure
-    {
-        zklog.error("DatabaseAssociativeCache::DatabaseAssociativeCache() nKeyBits must be a multiple of 4");
-        exit(1);
-    }*/
     name = name_;
     size = 1 << nKeyBits;
-    buffer.assign(size, NULL);
-    buffer_ = new uint64_t[size * 16];
+    indices_ = new uint32_t[size];
+    int buffer_size = 16*1<<16; //rick
+    buffer_ = new uint64_t[buffer_size*16];
+    for(int i=0; i<size; i++)
+        indices_[i] = 0;
 
     attempts = 0;
     hits = 0;
