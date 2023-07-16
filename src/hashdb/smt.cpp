@@ -53,7 +53,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
     while ( (!fr.isZero(r[0]) || !fr.isZero(r[1]) || !fr.isZero(r[2]) || !fr.isZero(r[3])) && !bFoundKey )
     {
         // Read the content of db for entry r: siblings[level] = db.read(r)
-        string rootString = fea2string(fr, r);
+        string rootString = " ";//fea2string(fr, r);
         string leftChildKey;
         string righChildKey;
         dbres = db.read(rootString, r, dbValue, dbReadLog, leftChildKey, righChildKey, false, keys, level);

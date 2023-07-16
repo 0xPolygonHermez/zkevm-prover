@@ -274,10 +274,7 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
     }
 
     zkresult r;
-
-    // Normalize key format
-    string key = NormalizeToNFormat(_key, 64);
-    key = stringToLower(key);
+    string key;
 
     if ( useRemoteDB
 #ifdef DATABASE_USE_CACHE
@@ -292,7 +289,9 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
         {
             valueString += PrependZeros(fr.toString(value[i], 16), 16);
         }
-
+        // Normalize key format
+        key = NormalizeToNFormat(_key, 64);
+        key = stringToLower(key);
         r = writeRemote(false, key, valueString);
     }
     else
@@ -304,15 +303,15 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
     if ((r == ZKR_SUCCESS) && dbMTCache.enabled())
     {
         // Create in memory cache
-        string leftChildkey = fea2string(fr, value[0],value[1],value[2],value[3]);
-        string rightChildKey = fea2string(fr, value[4],value[5],value[6],value[7]);
-        leftChildkey= NormalizeToNFormat(leftChildkey, 64);
-        rightChildKey = NormalizeToNFormat(rightChildKey, 64);
+        //string leftChildkey = fea2string(fr, value[0],value[1],value[2],value[3]);
+        //string rightChildKey = fea2string(fr, value[4],value[5],value[6],value[7]);
+        //leftChildkey= NormalizeToNFormat(leftChildkey, 64);
+        //rightChildKey = NormalizeToNFormat(rightChildKey, 64);
         //dbMTCache.add(key, value, false, leftChildkey, rightChildKey);
         Goldilocks::Element vkey_[4];
         Goldilocks::Element vkeyf[4];
         if(vkey==NULL){
-            string2fea(fr, key, vkey_);
+            string2fea(fr, _key, vkey_);
             vkeyf[0] = vkey_[3];
             vkeyf[1] = vkey_[2];
             vkeyf[2] = vkey_[1];
