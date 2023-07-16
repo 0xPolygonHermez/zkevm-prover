@@ -108,11 +108,11 @@ public:
 void DatabaseAssociativeCache::postConstruct(int nKeyBits_, string name_)
 {
     nKeyBits = nKeyBits_;
-    if (nKeyBits % 4 != 0) // rick: això ho hauré de treure
+    /*if (nKeyBits % 4 != 0) // rick: això ho hauré de treure
     {
         zklog.error("DatabaseAssociativeCache::DatabaseAssociativeCache() nKeyBits must be a multiple of 4");
         exit(1);
-    }
+    }*/
     name = name_;
     size = 1 << nKeyBits;
     buffer.assign(size, NULL);
@@ -159,13 +159,11 @@ bool DatabaseAssociativeCache::findKey(const string &key, DatabaseAssociativeCac
 // DatabaseMTAssociativeCache inlines
 bool DatabaseMTAssociativeCache::add(const string &key, const vector<Goldilocks::Element> &value, const bool update, const string &leftChildkey, const string &rightChildKey)
 {
-    assert(-1);
     lock_guard<recursive_mutex> guard(mlock); // rick: on es l'unlock?
     return addKeyValue(key, (const void *)&value, update, leftChildkey, rightChildKey);
 }
 bool DatabaseMTAssociativeCache::find(const string &key, vector<Goldilocks::Element> &value, string &leftChildkey, string &rightChildKey)
 {
-    assert(-1);
     lock_guard<recursive_mutex> guard(mlock);
     DatabaseAssociativeCacheRecord *record;
     bool found = findKey(key, record);
