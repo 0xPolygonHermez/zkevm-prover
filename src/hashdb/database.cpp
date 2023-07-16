@@ -118,10 +118,6 @@ zkresult Database::read(const string &_key, Goldilocks::Element (&vkey)[4], vect
 
     zkresult r = ZKR_UNSPECIFIED;
 
-    // Normalize key format
-    string key = NormalizeToNFormat(_key, 64);
-    key = stringToLower(key);
-
 #ifdef DATABASE_USE_CACHE
     // If the key is found in local database (cached) simply return it
     if (dbMTCache.enabled())
@@ -139,8 +135,8 @@ zkresult Database::read(const string &_key, Goldilocks::Element (&vkey)[4], vect
         else if (config.dbGetTree && (keys != NULL))
         {
             // Get the tree
-            // Normalize key format
-            key = NormalizeToNFormat(_key, 64);
+            string auxkey = fea2string(fr, vkey);;
+            string key = NormalizeToNFormat(auxkey, 64);
             key = stringToLower(key);
             uint64_t numberOfFields;
             r = readTreeRemote(key, keys, level, numberOfFields);
@@ -205,8 +201,8 @@ zkresult Database::read(const string &_key, Goldilocks::Element (&vkey)[4], vect
         }*/
 
         // Otherwise, read it remotelly, up to two times
-        // Normalize key format
-        key = NormalizeToNFormat(_key, 64);
+        string auxkey = fea2string(fr, vkey);;
+        string key = NormalizeToNFormat(auxkey, 64);
         key = stringToLower(key);
         string sData;
         r = readRemote(false, key, sData);

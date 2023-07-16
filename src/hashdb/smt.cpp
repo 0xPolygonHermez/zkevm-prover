@@ -802,16 +802,16 @@ zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Gold
     // Start natigating the tree from the top: r = root
     // Go down while r!=0 (while there is branch) until we find the key
 
-    string rString = fea2string(fr, r);  //rick
-    rString = NormalizeToNFormat(rString, 64);
+    //string rString = fea2string(fr, r);  //rick
+    //rString = NormalizeToNFormat(rString, 64);
     while ( ( !fr.isZero(r[0]) || !fr.isZero(r[1]) || !fr.isZero(r[2]) || !fr.isZero(r[3]) ) && !bFoundKey)
     {
         // Read the content of db for entry r: siblings[level] = db.read(r)
-        string rString = fea2string(fr, r);
-        dbres = db.read(rString, r, dbValue, dbReadLog, leftChildKey, righChildKey, false, keys, level);
+        //rString = "";
+        dbres = db.read(" ", r, dbValue, dbReadLog, leftChildKey, righChildKey, false, keys, level);
         if (dbres != ZKR_SUCCESS)
         {
-            zklog.error("Smt::get() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + rString);
+            zklog.error("Smt::get() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + " " );
             return dbres;
         }
 
@@ -870,11 +870,11 @@ zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Gold
 
             // Store the used key bit in accKey
             accKey.push_back(keys[level]);
-            if(keys[level]==0){
+            /*if(keys[level]==0){
                 rString = leftChildKey;
             }else{
                 rString = righChildKey;
-            }
+            }*/
 
 #ifdef LOG_SMT
             zklog.info("Smt::get() down 1 level=" + to_string(level) + " keys[level]=" + to_string(keys[level]) + " root/hash=" + fea2string(fr,r));
