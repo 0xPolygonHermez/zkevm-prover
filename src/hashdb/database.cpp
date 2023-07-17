@@ -257,7 +257,7 @@ zkresult Database::read(const string &_key, Goldilocks::Element (&vkey)[4], vect
 
     return r;
 }
-
+//rick: carefull with default arguments!!
 zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent, Goldilocks::Element* vkey)
 {
     // Check that it has  been initialized before
@@ -290,7 +290,18 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
             valueString += PrependZeros(fr.toString(value[i], 16), 16);
         }
         // Normalize key format
-        key = NormalizeToNFormat(_key, 64);
+        string aux1;
+        if("" == _key){
+            Goldilocks::Element vkeyf[4];
+            vkeyf[0] = vkey[0];
+            vkeyf[1] = vkey[1];
+            vkeyf[2] = vkey[2];
+            vkeyf[3] = vkey[3];
+            aux1 = fea2string(fr, vkeyf);
+        }else{
+            aux1 = _key;
+        }
+        key = NormalizeToNFormat(aux1, 64);
         key = stringToLower(key);
         r = writeRemote(false, key, valueString);
     }

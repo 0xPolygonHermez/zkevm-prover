@@ -74,7 +74,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
             foundValueHash[1] = siblings[level][5];
             foundValueHash[2] = siblings[level][6];
             foundValueHash[3] = siblings[level][7];
-            foundValueHashString = fea2string(fr, foundValueHash);
+            foundValueHashString = " ";//fea2string(fr, foundValueHash);
             string leftChildKey;
             string righChildKey;
             dbres = db.read(foundValueHashString, foundValueHash, dbValue, dbReadLog, leftChildKey, righChildKey);
@@ -494,7 +494,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                     // Calculate the key of the deleted element
                     Goldilocks::Element auxFea[4];
                     for (uint64_t i=0; i<4; i++) auxFea[i] = siblings[level][uKey*4+i];
-                    string auxString = fea2string(fr, auxFea);
+                    string auxString = "";//fea2string(fr, auxFea);
 
                     // Read its 2 siblings
                     string leftChildKey;
@@ -515,7 +515,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                         // Calculate the value hash
                         Goldilocks::Element valH[4];
                         for (uint64_t i=0; i<4; i++) valH[i] = siblings[level+1][4+i];
-                        string valHString = fea2string(fr, valH);
+                        string valHString = " ";//fea2string(fr, valH);
 
                         // Read its siblings
                         string leftChildKey;
@@ -827,7 +827,7 @@ zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Gold
             valueHashFea[1] = siblings[level][5];
             valueHashFea[2] = siblings[level][6];
             valueHashFea[3] = siblings[level][7];
-            string foundValueHashString = fea2string(fr, valueHashFea);
+            string foundValueHashString = "";//fea2string(fr, valueHashFea);
             string leftChildKey;
             string righChildKey;
             dbres = db.read(foundValueHashString, valueHashFea, dbValue, dbReadLog, leftChildKey, righChildKey);
@@ -1031,13 +1031,13 @@ zkresult Smt::hashSave ( Database &db, const Goldilocks::Element (&v)[12], const
     poseidon.hash(hash, v);
 
     // Fill a database value with the field elements
-    string hashString = fea2string(fr, hash);
+    string hashString = "";// fea2string(fr, hash);
 
     // Add the key:value pair to the database, using the hash as a key
     vector<Goldilocks::Element> dbValue;
     for (uint64_t i=0; i<12; i++) dbValue.push_back(v[i]);
     zkresult zkr;
-    zkr = db.write(hashString, dbValue, persistent, hash);
+    zkr = db.write(hashString, dbValue, persistent, hash); //rick: hash should be no optional
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("Smt::hashSave() failed calling db.write() key=" + hashString + " result=" + to_string(zkr) + "=" + zkresult2string(zkr));
