@@ -36,7 +36,7 @@ public:
     // Constructor
     Input (Goldilocks &fr) :
         fr(fr),
-        bUpdateMerkleTree(true),
+        bUpdateMerkleTree(false),
         bNoCounters(false) {};
 
     // Loads the input object data from a JSON object

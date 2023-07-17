@@ -1,6 +1,6 @@
 #ifndef ZKEVM_PROVER_VERSION_HPP
 #define ZKEVM_PROVER_VERSION_HPP
 
-#define ZKEVM_PROVER_VERSION "v1.1.4-fork.4-hotfix.1"
+#define ZKEVM_PROVER_VERSION "v1.1.4-fork.4-hotfix.2"
 
 #endif
