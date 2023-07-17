@@ -1127,6 +1127,7 @@ zkresult Database::flush()
             }
             if (multiWriteNodesStateRoot.size() > 0)
             {
+                /*
                 if (config.dbMetrics) gettimeofday(&t, NULL);
 
                 query = multiWriteNodesStateRoot + " ON CONFLICT (hash) DO UPDATE SET data = EXCLUDED.data;";
@@ -1146,6 +1147,7 @@ zkresult Database::flush()
                     timeDiff = TimeDiff(t);
                     zklog.info("Database::Flush() dbMetrics multiWriteNodesStateRoot " + to_string(multiWriteNodesStateRootCounter) + "fields=" + to_string(timeDiff) + "us=" + to_string(timeDiff/zkmax(multiWriteNodesStateRootCounter,1)) + "us/field");
                 }
+                */
 
                 // Delete the accumulated query data only if the query succeeded
                 multiWriteNodesStateRoot.clear();
