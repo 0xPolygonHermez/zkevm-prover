@@ -43,6 +43,15 @@ public:
     void Lock(void) { pthread_mutex_lock(&mutex); };
     void Unlock(void) { pthread_mutex_unlock(&mutex); };
     bool IsEmpty(void) { return data[0].IsEmpty() && data[1].IsEmpty() && data[2].IsEmpty(); };
+    string print(void)
+    {
+        return "lastFlushId=" + to_string(lastFlushId) +
+            " storedFlushId=" + to_string(storedFlushId) +
+            " storingFlushId=" + to_string(storingFlushId) +
+            " pendingToFlushDataIndex=" + to_string(pendingToFlushDataIndex) +
+            " storingDataIndex=" + to_string(storingDataIndex) +
+            " synchronizingDataIndex=" + to_string(synchronizingDataIndex);
+    }
 };
 
 #endif

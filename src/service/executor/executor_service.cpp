@@ -492,6 +492,7 @@ using grpc::Status;
             for (uint64_t tx=0; tx<responses.size(); tx++)
             {
                 s += " tx[" + to_string(tx) + "].hash=" + responses[tx].tx_hash +
+                    " stateRoot=" + responses[tx].state_root +
                     " gasUsed=" + to_string(responses[tx].gas_used) +
                     " gasLeft=" + to_string(responses[tx].gas_left) +
                     " gasUsed+gasLeft=" + to_string(responses[tx].gas_used + responses[tx].gas_left) +

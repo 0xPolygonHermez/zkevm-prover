@@ -665,6 +665,9 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
         if (bProgram)
         {
             multiWrite.data[multiWrite.pendingToFlushDataIndex].programIntray[key] = value;
+#ifdef LOG_DB_WRITE_REMOTE
+            zklog.info("Database::writeRemote() key=" + key + " multiWrite=[" + multiWrite.print() + "]");
+#endif
         }
         else
         {
@@ -976,7 +979,6 @@ zkresult Database::writeGetTreeFunction(void)
     catch (const std::exception &e)
     {
         zklog.error("Database::writeGetTreeFunction() exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
-        disposeConnection(pDatabaseConnection);
         result = ZKR_DB_ERROR;
     }
     
@@ -1147,13 +1149,14 @@ zkresult Database::flush(uint64_t &thisBatch, uint64_t &lastSentBatch)
     thisBatch = multiWrite.lastFlushId;
     lastSentBatch = multiWrite.storedFlushId;
 
+#ifdef LOG_DB_FLUSH
+    zklog.info("Database::flush() thisBatch=" + to_string(thisBatch) + " lastSentBatch=" + to_string(lastSentBatch) + " multiWrite=[" + multiWrite.print() + "]");
+#endif
+
     // Notify the thread
     sem_post(&senderSem);
 
     multiWrite.Unlock();
-
-    //zklog.info("Database::flush() thisBatch=" + to_string(thisBatch) + " lastSentBatch=" + to_string(lastSentBatch));
-
     return ZKR_SUCCESS;
 }
 
@@ -1168,9 +1171,11 @@ void Database::semiFlush (void)
 
     multiWrite.data[multiWrite.pendingToFlushDataIndex].acceptIntray();
 
-    multiWrite.Unlock();
+#ifdef LOG_DB_SEMI_FLUSH
+    zklog.info("Database::semiFlush() called multiWrite=[" + multiWrite.print() + "]");
+#endif
 
-    //zklog.info("Database::semiFlush() called");
+    multiWrite.Unlock();
 }
 
 zkresult Database::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram)
@@ -1261,7 +1266,7 @@ zkresult Database::sendData (void)
             // If there is a nodes state root query, add it
             if (data.nodesStateRoot.size() > 0)
             {
-                data.query += "INSERT INTO " + config.dbNodesTableName + " ( hash, data ) VALUES ( E\'\\\\x" + dbStateRootKey + "\', E\'\\\\x" + data.nodesStateRoot + "\' ) ON CONFLICT (hash) DO NOTHING;";
+                data.query += "INSERT INTO " + config.dbNodesTableName + " ( hash, data ) VALUES ( E\'\\\\x" + dbStateRootKey + "\', E\'\\\\x" + data.nodesStateRoot + "\' ) ON CONFLICT (hash) DO UPDATE SET data = EXCLUDED.data;";
 #ifdef LOG_DB_SEND_DATA
                 zklog.info("Database::sendData() inserting root=" + data.nodesStateRoot);
 #endif
@@ -1398,7 +1403,9 @@ zkresult Database::deleteNodes(const vector<string> (&nodesToDelete))
 
         // Delete it; they key can be present (just written) or not (read from database) and both cases are valid
         multiWriteFlushData.erase(key);
-        zklog.info("Database::deleteNode() deleted key=" + key + " i=" + to_string(i));
+#ifdef LOG_DB_DELETE_NODES
+        zklog.info("Database::deleteNodes() deleted key=" + key + " i=" + to_string(i) + " multiWrite=[" + multiWrite.print() + "]");
+#endif
     }
 
     multiWrite.Unlock();
@@ -1564,7 +1571,7 @@ void *dbSenderThread (void *arg)
             multiWrite.pendingToFlushDataIndex = (multiWrite.pendingToFlushDataIndex + 1) % 3;
             multiWrite.data[multiWrite.pendingToFlushDataIndex].Reset();
 #ifdef LOG_DB_SENDER_THREAD
-            zklog.info("dbSenderThread() updated: pendingToFlushDataIndex=" + to_string(multiWrite.pendingToFlushDataIndex) + " storingDataIndex=" + to_string(multiWrite.storingDataIndex) + " synchronizingDataIndex=" + to_string(multiWrite.synchronizingDataIndex));
+            zklog.info("dbSenderThread() updated: multiWrite=[" + multiWrite.print() + "]");
 #endif
 
             // Record the last processed batch included in this data set
@@ -1579,7 +1586,7 @@ void *dbSenderThread (void *arg)
                 // Advance synchronizing index
                 multiWrite.synchronizingDataIndex = (multiWrite.synchronizingDataIndex + 1) % 3;
 #ifdef LOG_DB_SENDER_THREAD
-                zklog.info("dbSenderThread() no data to send: pendingToFlushDataIndex=" + to_string(multiWrite.pendingToFlushDataIndex) + " storingDataIndex=" + to_string(multiWrite.storingDataIndex) + " synchronizingDataIndex=" + to_string(multiWrite.synchronizingDataIndex));
+                zklog.info("dbSenderThread() no data to send: multiWrite=[" + multiWrite.print() + "]");
 #endif
                 bDataEmpty = true;
             }
@@ -1592,7 +1599,7 @@ void *dbSenderThread (void *arg)
         if (!bDataEmpty)
         {
 #ifdef LOG_DB_SENDER_THREAD
-            zklog.info("dbSenderThread() starting to send data, storedFlushId=" + to_string(multiWrite.storedFlushId) + " storingFlushId=" + to_string(multiWrite.storingFlushId));
+            zklog.info("dbSenderThread() starting to send data, multiWrite=[" + multiWrite.print() + "]");
 #endif
             zkresult zkr;
             zkr = pDatabase->sendData();
@@ -1601,12 +1608,12 @@ void *dbSenderThread (void *arg)
                 multiWrite.Lock();
                 multiWrite.storedFlushId = multiWrite.storingFlushId;
 #ifdef LOG_DB_SENDER_THREAD
-                zklog.info("dbSenderThread() successfully sent data, storedFlushId=" + to_string(multiWrite.storedFlushId) + " storingFlushId=" + to_string(multiWrite.storingFlushId));
+                zklog.info("dbSenderThread() successfully sent data, multiWrite=[]" + multiWrite.print() + "]");
 #endif
                 // Advance synchronizing index
                 multiWrite.synchronizingDataIndex = (multiWrite.synchronizingDataIndex + 1) % 3;
 #ifdef LOG_DB_SENDER_THREAD
-                zklog.info("dbSenderThread() updated: pendingToFlushDataIndex=" + to_string(multiWrite.pendingToFlushDataIndex) + " storingDataIndex=" + to_string(multiWrite.storingDataIndex) + " synchronizingDataIndex=" + to_string(multiWrite.synchronizingDataIndex));
+                zklog.info("dbSenderThread() updated: multiWrite=[" + multiWrite.print() + "]");
 #endif
                 sem_post(&pDatabase->getFlushDataSem);
 #ifdef LOG_DB_SENDER_THREAD
