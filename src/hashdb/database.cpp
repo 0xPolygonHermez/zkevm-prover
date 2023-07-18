@@ -1566,6 +1566,9 @@ void *dbSenderThread (void *arg)
         // Else, switch data indexes
         else
         {
+            // Accept all intray data
+            multiWrite.data[multiWrite.pendingToFlushDataIndex].acceptIntray(true);
+
             // Advance processing and sending indexes
             multiWrite.storingDataIndex = (multiWrite.storingDataIndex + 1) % 3;
             multiWrite.pendingToFlushDataIndex = (multiWrite.pendingToFlushDataIndex + 1) % 3;
