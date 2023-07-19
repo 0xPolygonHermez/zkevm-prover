@@ -11,14 +11,18 @@
 #include "utils.hpp"
 #include "timer.hpp"
 
-void runHashDBTest (const Config& config)
+uint64_t HashDBTest (const Config& config)
 {
     std::this_thread::sleep_for(1500ms);
+
+    uint64_t numberOfFailedTests = 0;
 
     //runHashDBTestClient(config);
     //runHashDBTestLoad(config);
     //runHashDBPerfTest(config);
     //runHashDBBigTree(config);
-    runHashDBTestMultiWrite(config);
+    
+    numberOfFailedTests += HashDBTestMultiWrite(config);
+    return numberOfFailedTests;
 }
 

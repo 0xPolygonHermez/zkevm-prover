@@ -9,6 +9,7 @@
 #include "keccak_executor_test.hpp"
 #include "get_string_increment_test.hpp"
 #include "database_cache_test.hpp"
+#include "hashdb_test.hpp"
 
 uint64_t UnitTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config)
 {
@@ -47,6 +48,10 @@ uint64_t UnitTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &c
     TimerStart(UNIT_TEST_DATABASE_CACHE);
     numberOfErrors += DatabaseCacheTest();
     TimerStopAndLog(UNIT_TEST_DATABASE_CACHE);
+
+    TimerStart(UNIT_TEST_HASH_DB);
+    numberOfErrors += HashDBTest(config);
+    TimerStopAndLog(UNIT_TEST_HASH_DB);
     
     TimerStopAndLog(UNIT_TEST);
     

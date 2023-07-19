@@ -8,8 +8,10 @@
 #define HASH_DB_TEST_MULTI_WRITE_NUMBER_OF_TREES 10
 #define HASH_DB_TEST_MULTI_WRITE_NUMBER_OF_NODES 1000
 
-void runHashDBTestMultiWrite (const Config& config)
+uint64_t HashDBTestMultiWrite (const Config& config)
 {
+    uint64_t numberOfFailedTests = 0;
+
     Goldilocks fr;
     PoseidonGoldilocks poseidon;
     HashDBInterface * pHashDB = HashDBClientFactory::createHashDBClient(fr,config);
@@ -75,7 +77,7 @@ void runHashDBTestMultiWrite (const Config& config)
             zkresult zkr = pHashDB->set(root, key, value, true, root, NULL, NULL );
             if (zkr != ZKR_SUCCESS)
             {
-                zklog.error("runHashDBTest() set tree=" + to_string(tree) + " i=" + to_string(i) + " result=" + zkresult2string(zkr));
+                zklog.error("HashDBTestMultiWrite() set tree=" + to_string(tree) + " i=" + to_string(i) + " result=" + zkresult2string(zkr));
                 exitProcess();
             }
         }
@@ -86,7 +88,7 @@ void runHashDBTestMultiWrite (const Config& config)
         roots[tree][2] = root[2];
         roots[tree][3] = root[3];
 
-        zklog.info("runHashDBTest() after tree=" + to_string(tree) + " root=" + fea2string(fr, root));
+        zklog.info("HashDBTestMultiWrite() after tree=" + to_string(tree) + " root=" + fea2string(fr, root));
     }
 
     TimerStopAndLog(HASH_DB_TEST_MULTI_WRITE);
@@ -127,19 +129,21 @@ void runHashDBTestMultiWrite (const Config& config)
             zkresult zkr = pHashDB->get(roots[tree], key, readValue, NULL, NULL );
             if (zkr != ZKR_SUCCESS)
             {
-                zklog.error("runHashDBTest() get i=" + to_string(i) + " result=" + zkresult2string(zkr));
+                zklog.error("HashDBTestMultiWrite() get i=" + to_string(i) + " result=" + zkresult2string(zkr));
                 exitProcess();
             }
 
             // Check against the expected value
             if (!bRandomValues && (readValue != expectedValue))
             {
-                zklog.error("runHashDBTest() found readValue=" + readValue.get_str(16) + " different from expected value=" + expectedValue.get_str(16));
+                zklog.error("HashDBTestMultiWrite() found readValue=" + readValue.get_str(16) + " different from expected value=" + expectedValue.get_str(16));
                 exitProcess();
             }
             //zklog.info("runHashDBTest() verified i=" + to_string(i));
         }
-        zklog.info("runHashDBTest() verified tree=" + to_string(tree));
+        zklog.info("HashDBTestMultiWrite() verified tree=" + to_string(tree));
     }
+
+    return numberOfFailedTests;
 }
 
