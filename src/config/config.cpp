@@ -469,7 +469,7 @@ void Config::load(json &config)
     if (config.contains("dbReadOnly") && config["dbReadOnly"].is_boolean())
         dbReadOnly = config["dbReadOnly"];
 
-    dbReadRetryCounter = 5*60*10; // 5 minutes
+    dbReadRetryCounter = 10;
     if (config.contains("dbReadRetryCounter") && config["dbReadRetryCounter"].is_number())
         dbReadRetryCounter = config["dbReadRetryCounter"];
 

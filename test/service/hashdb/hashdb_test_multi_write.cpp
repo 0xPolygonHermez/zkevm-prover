@@ -8,8 +8,10 @@
 #define HASH_DB_TEST_MULTI_WRITE_NUMBER_OF_TREES 10
 #define HASH_DB_TEST_MULTI_WRITE_NUMBER_OF_NODES 1000
 
-void runHashDBTestMultiWrite (const Config& config)
+uint64_t HashDBTestMultiWrite (const Config& config)
 {
+    uint64_t numberOfFailedTests = 0;
+
     Goldilocks fr;
     PoseidonGoldilocks poseidon;
     HashDBInterface * pHashDB = HashDBClientFactory::createHashDBClient(fr,config);
@@ -18,6 +20,7 @@ void runHashDBTestMultiWrite (const Config& config)
     TimerStart(HASH_DB_TEST_MULTI_WRITE);
 
     Goldilocks::Element root[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
+    Goldilocks::Element roots[HASH_DB_TEST_MULTI_WRITE_NUMBER_OF_TREES][4];
     uint64_t tree;
     bool bRandomKeys = false;
     bool bRandomValues = false;
@@ -71,62 +74,78 @@ void runHashDBTestMultiWrite (const Config& config)
             //zklog.info("runHashDBTest() calling set with root=" + fea2string(fr, root) + " key=" + fea2string(fr, key) + " value=" + value.get_str(16));
 
             // Set the value
+            //zklog.info("HashDBTestMultiWrite() tree=" + to_string(tree) + " i=" + to_string(i) + " calling pHashDB->set with root=" + fea2string(fr, root) + " key=" + fea2string(fr,key));
             zkresult zkr = pHashDB->set(root, key, value, true, root, NULL, NULL );
             if (zkr != ZKR_SUCCESS)
             {
-                zklog.error("runHashDBTest() set tree=" + to_string(tree) + " i=" + to_string(i) + " result=" + zkresult2string(zkr));
+                zklog.error("HashDBTestMultiWrite() set tree=" + to_string(tree) + " i=" + to_string(i) + " result=" + zkresult2string(zkr));
                 exitProcess();
             }
+            //zklog.info("HashDBTestMultiWrite() tree=" + to_string(tree) + " i=" + to_string(i) + " called pHashDB->set and got root=" + fea2string(fr, root) + " key=" + fea2string(fr,key));
         }
 
-        pHashDB->semiFlush();
+        roots[tree][0] = root[0];
+        roots[tree][1] = root[1];
+        roots[tree][2] = root[2];
+        roots[tree][3] = root[3];
 
-        zklog.info("runHashDBTest() after tree=" + to_string(tree) + " root=" + fea2string(fr, root));
+        pHashDB->flush(flushId, storedFlushId);
+
+        zklog.info("HashDBTestMultiWrite() after tree=" + to_string(tree) + " root=" + fea2string(fr, root) + " flushId=" + to_string(flushId) + " storedFlushId=" + to_string(storedFlushId));
     }
 
     TimerStopAndLog(HASH_DB_TEST_MULTI_WRITE);
 
-    pHashDB->flush(flushId, storedFlushId);
     do
     {
         uint64_t storingFlushId, lastFlushId, pendingToFlushNodes, pendingToFlushProgram, storingNodes, storingProgram;
         string proverId;
         pHashDB->getFlushStatus(storedFlushId, storingFlushId, lastFlushId, pendingToFlushNodes, pendingToFlushProgram, storingNodes, storingProgram, proverId);
+        zklog.info("HashDBTestMultiWrite() after getFlushStatus() flushId=" + to_string(flushId) + " storedFlushId=" + to_string(storedFlushId));
         sleep(1);
     } while (storedFlushId < flushId);
 
+    // All data has been stored on database, so we can clear the cache
     pHashDB->clearCache();
 
-    tree = HASH_DB_TEST_MULTI_WRITE_NUMBER_OF_TREES - 1;
-    for (uint64_t i=0; i<HASH_DB_TEST_MULTI_WRITE_NUMBER_OF_NODES; i++)
+    for (tree=0; tree<HASH_DB_TEST_MULTI_WRITE_NUMBER_OF_TREES; tree++)
     {
-        // Build the expected value
-        mpz_class expectedValue;
-        expectedValue = tree + 10;
-        expectedValue = ScalarTwoTo64*expectedValue + tree + 10;
-        expectedValue = ScalarTwoTo64*expectedValue + tree + 10;
-        expectedValue = ScalarTwoTo64*expectedValue + tree + 10;
-
-        // Build the key
-        keyValue[0] = fr.fromU64(i);
-        poseidon.hash(key, keyValue);
-
-        // Read the value
-        mpz_class readValue;
-        zkresult zkr = pHashDB->get(root, key, readValue, NULL, NULL );
-        if (zkr != ZKR_SUCCESS)
+        for (uint64_t i=0; i<HASH_DB_TEST_MULTI_WRITE_NUMBER_OF_NODES; i++)
         {
-            zklog.error("runHashDBTest() get i=" + to_string(i) + " result=" + zkresult2string(zkr));
-            exitProcess();
-        }
+            // Build the expected value
+            mpz_class expectedValue;
+            if (!bRandomValues)
+            {
+                expectedValue = tree + 10;
+                expectedValue = ScalarTwoTo64*expectedValue + tree + 10;
+                expectedValue = ScalarTwoTo64*expectedValue + tree + 10;
+                expectedValue = ScalarTwoTo64*expectedValue + tree + 10;
+            }
 
-        // Check against the expected value
-        if (readValue != expectedValue)
-        {
-            zklog.error("runHashDBTest() found readValue=" + readValue.get_str(16) + " different from expected value=" + expectedValue.get_str(16));
-            exitProcess();
+            // Build the key
+            keyValue[0] = fr.fromU64(i);
+            poseidon.hash(key, keyValue);
+
+            // Read the value
+            mpz_class readValue;
+            zkresult zkr = pHashDB->get(roots[tree], key, readValue, NULL, NULL );
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("HashDBTestMultiWrite() get i=" + to_string(i) + " result=" + zkresult2string(zkr));
+                exitProcess();
+            }
+
+            // Check against the expected value
+            if (!bRandomValues && (readValue != expectedValue))
+            {
+                zklog.error("HashDBTestMultiWrite() found readValue=" + readValue.get_str(16) + " different from expected value=" + expectedValue.get_str(16));
+                exitProcess();
+            }
+            //zklog.info("runHashDBTest() verified i=" + to_string(i));
         }
-        //zklog.info("runHashDBTest() verified i=" + to_string(i));
+        zklog.info("HashDBTestMultiWrite() verified tree=" + to_string(tree));
     }
+
+    return numberOfFailedTests;
 }
 

@@ -46,6 +46,7 @@ public:
     uint64_t usedConnections;
     DatabaseConnection * getConnection (void);
     void disposeConnection (DatabaseConnection * pConnection);
+    void queryFailed (void);
 
     // Multi write attributes
 public:

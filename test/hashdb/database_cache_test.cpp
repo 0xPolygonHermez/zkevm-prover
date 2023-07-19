@@ -9,6 +9,9 @@ uint64_t DatabaseCacheTest (void)
 {
     TimerStart(DATABASE_CACHE_TEST);
 
+    
+    Database::dbMTCache.clear();
+    
     uint64_t numberOfFailed = 0;
 
     Database::dbMTCache.setMaxSize(2000000);
@@ -44,6 +47,9 @@ uint64_t DatabaseCacheTest (void)
             numberOfFailed++;
         }
     }
+    
+    Database::dbMTCache.clear();
+
     TimerStopAndLog(DATABASE_CACHE_TEST);
     return numberOfFailed;
 }

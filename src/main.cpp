@@ -787,7 +787,7 @@ int main(int argc, char **argv)
     if (config.runHashDBTest)
     {
         zklog.info("Launching HashDB test thread...");
-        runHashDBTest(config);
+        HashDBTest(config);
     }
 
     // Create the aggregator client and run it, if configured

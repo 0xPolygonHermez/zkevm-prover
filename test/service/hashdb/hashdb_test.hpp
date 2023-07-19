@@ -3,6 +3,7 @@
 
 #include "config.hpp"
 
-void runHashDBTest (const Config& config);
+// Returns number of failed tests
+uint64_t HashDBTest (const Config& config);
 
 #endif
