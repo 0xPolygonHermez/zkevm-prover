@@ -155,6 +155,7 @@ void DatabaseCache::clear(void)
     attempts = 0;
     hits = 0;
     cacheMap.clear();
+    currentSize = 0;
 }
 
 DatabaseCache::~DatabaseCache()

@@ -1,6 +1,7 @@
 #ifndef MULTI_WRITE_HPP
 #define MULTI_WRITE_HPP
 
+#include "goldilocks_base_field.hpp"
 #include "multi_write_data.hpp"
 
 using namespace std;
@@ -8,6 +9,7 @@ using namespace std;
 class MultiWrite
 {
 public:
+    Goldilocks &fr;
 
     uint64_t lastFlushId;
     uint64_t storedFlushId;
@@ -22,27 +24,16 @@ public:
     pthread_mutex_t mutex; // Mutex to protect the multi write queues
     
     // Constructor
-    MultiWrite() :
-        lastFlushId(0),
-        storedFlushId(0),
-        storingFlushId(0),
-        pendingToFlushDataIndex(0),
-        storingDataIndex(2),
-        synchronizingDataIndex(2)
-    {
-        // Init mutex
-        pthread_mutex_init(&mutex, NULL);
-
-        // Reset data
-        data[0].Reset();
-        data[1].Reset();
-        data[2].Reset();
-    };
+    MultiWrite(Goldilocks & fr);
 
     // Lock/Unlock
     void Lock(void) { pthread_mutex_lock(&mutex); };
     void Unlock(void) { pthread_mutex_unlock(&mutex); };
     bool IsEmpty(void) { return data[0].IsEmpty() && data[1].IsEmpty() && data[2].IsEmpty(); };
+    string print(void);
+
+    bool findNode(const string &key, vector<Goldilocks::Element> &value);
+    bool findProgram(const string &key, vector<uint8_t> &value);
 };
 
 #endif

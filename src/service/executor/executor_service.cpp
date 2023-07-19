@@ -305,6 +305,12 @@ using grpc::Status;
         " bNoCounters=" + to_string(proverRequest.input.bNoCounters) +
         " traceConfig=" + proverRequest.input.traceConfig.toString());
 #endif
+#ifdef LOG_SERVICE_EXECUTOR_INPUT_JSON
+    // Log the input file content
+    json inputJson;
+    proverRequest.input.save(inputJson);
+    zklog.info("ExecutorServiceImpl::ProcessBatch() Input=" + inputJson.dump());
+#endif
 
     prover.processBatch(&proverRequest);
 
@@ -486,6 +492,7 @@ using grpc::Status;
             for (uint64_t tx=0; tx<responses.size(); tx++)
             {
                 s += " tx[" + to_string(tx) + "].hash=" + responses[tx].tx_hash +
+                    " stateRoot=" + responses[tx].state_root +
                     " gasUsed=" + to_string(responses[tx].gas_used) +
                     " gasLeft=" + to_string(responses[tx].gas_left) +
                     " gasUsed+gasLeft=" + to_string(responses[tx].gas_used + responses[tx].gas_left) +

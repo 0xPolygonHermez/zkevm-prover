@@ -33,7 +33,8 @@ string removeBSXIfExists(string s) {return ((s.at(0) == '\\') && (s.at(1) == 'x'
 Database::Database (Goldilocks &fr, const Config &config) :
         fr(fr),
         config(config),
-        connectionsPool(NULL)
+        connectionsPool(NULL),
+        multiWrite(fr)
 {
     // Init mutex
     pthread_mutex_init(&connMutex, NULL);
@@ -129,6 +130,14 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
 
             r = ZKR_SUCCESS;
         }
+        // If the key is pending to be stored in database, but already deleted from cache
+        else if (config.dbMultiWrite && multiWrite.findNode(key, value))
+        {
+            // Add to the read log
+            if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
+
+            r = ZKR_SUCCESS;
+        }
         // If get tree is configured, read the tree from the branch (key hash) to the leaf (keys since level)
         else if (config.dbGetTree && (keys != NULL))
         {
@@ -148,7 +157,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
             {
                 for (uint64_t i=0; i<config.dbReadRetryCounter; i++)
                 {
-                    zklog.warning("Database::read() failed calling readTreeRemote() with error=" + zkresult2string(r) + "; retrying after " + to_string(config.dbReadRetryDelay) + "us");
+                    zklog.warning("Database::read() failed calling readTreeRemote() with error=" + zkresult2string(r) + "; retrying after " + to_string(config.dbReadRetryDelay) + "us key=" + key);
 
                     // Retry after dbReadRetryDelay us
                     usleep(config.dbReadRetryDelay);
@@ -165,7 +174,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
                     {
                         break;
                     }
-                    zklog.error("Database::read() retried readTreeRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r) + " counter=" + to_string(i));
+                    zklog.warning("Database::read() retried readTreeRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r) + " counter=" + to_string(i));
                 }
             }
 
@@ -205,7 +214,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
         {
             for (uint64_t i=0; i<config.dbReadRetryCounter; i++)
             {
-                zklog.warning("Database::read() failed calling readRemote() with error=" + zkresult2string(r) + "; retrying after " + to_string(config.dbReadRetryDelay) + "us");
+                zklog.warning("Database::read() failed calling readRemote() with error=" + zkresult2string(r) + "; retrying after " + to_string(config.dbReadRetryDelay) + "us key=" + key);
 
                 // Retry after dbReadRetryDelay us
                 usleep(config.dbReadRetryDelay);
@@ -214,7 +223,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
                 {
                     break;
                 }
-                zklog.error("Database::read() retried readRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r) + " counter=" + to_string(i));
+                zklog.warning("Database::read() retried readRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r) + " counter=" + to_string(i));
             }
         }
         if (r == ZKR_SUCCESS)
@@ -234,7 +243,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
     // If we could not find the value, report the error
     if (r == ZKR_UNSPECIFIED)
     {
-        zklog.error("Database::read() requested a key that does not exist: " + key);
+        zklog.error("Database::read() requested a key that does not exist (ZKR_DB_KEY_NOT_FOUND): " + key);
         r = ZKR_DB_KEY_NOT_FOUND;
     }
 
@@ -442,6 +451,11 @@ DatabaseConnection * Database::getConnection (void)
             nextConnection = 0;
         }
         usedConnections++;
+        if (pConnection->bDisconnect)
+        {
+            pConnection->pConnection->disconnect();
+            pConnection->bDisconnect = false;
+        }
         //zklog.info("Database::getWriteConnection() pConnection=" + to_string((uint64_t)pConnection) + " nextConnection=" + to_string(nextConnection) + " usedConnections=" + to_string(usedConnections));
         connUnlock();
         return pConnection;
@@ -478,6 +492,18 @@ void Database::disposeConnection (DatabaseConnection * pConnection)
 #endif
         connUnlock();
     }
+}
+
+void Database::queryFailed (void)
+{
+    connLock();
+
+    for (uint64_t i=0; i<config.dbNumberOfPoolConnections; i++)
+    {
+        connectionsPool[i].bDisconnect = true;
+    }
+
+    connUnlock();
 }
 
 zkresult Database::readRemote(bool bProgram, const string &key, string &value)
@@ -532,6 +558,7 @@ zkresult Database::readRemote(bool bProgram, const string &key, string &value)
     catch (const std::exception &e)
     {
         zklog.error("Database::readRemote() table=" + tableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
+        queryFailed();
         disposeConnection(pDatabaseConnection);
         return ZKR_DB_ERROR;
     }
@@ -638,6 +665,7 @@ zkresult Database::readTreeRemote(const string &key, const vector<uint64_t> *key
     catch (const std::exception &e)
     {
         zklog.warning("Database::readTreeRemote() exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
+        queryFailed();
         disposeConnection(pDatabaseConnection);
         return ZKR_DB_ERROR;
     }
@@ -665,6 +693,9 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
         if (bProgram)
         {
             multiWrite.data[multiWrite.pendingToFlushDataIndex].programIntray[key] = value;
+#ifdef LOG_DB_WRITE_REMOTE
+            zklog.info("Database::writeRemote() key=" + key + " multiWrite=[" + multiWrite.print() + "]");
+#endif
         }
         else
         {
@@ -704,8 +735,8 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
         catch (const std::exception &e)
         {
             zklog.error("Database::writeRemote() table=" + tableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
-            disposeConnection(pDatabaseConnection);
             result = ZKR_DB_ERROR;
+            queryFailed();
         }
 
         disposeConnection(pDatabaseConnection);
@@ -777,8 +808,8 @@ zkresult Database::saveStateRoot(const Goldilocks::Element (&stateRoot)[4])
             catch (const std::exception &e)
             {
                 zklog.error("Database::saveStateRoot() table=" + config.dbNodesTableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
-                disposeConnection(pDatabaseConnection);
                 r = ZKR_DB_ERROR;
+                queryFailed();
             }
 
             disposeConnection(pDatabaseConnection);
@@ -801,7 +832,7 @@ zkresult Database::saveStateRoot(const Goldilocks::Element (&stateRoot)[4])
         s += " key=" + dbStateRootKey;
         s += " value=";
         for (uint64_t i = 0; i < value.size(); i++)
-            s += fr.toString(value[i], 16) + ":";);
+            s += fr.toString(value[i], 16) + ":";
         zklog.info(s);
     }
 #endif
@@ -976,8 +1007,8 @@ zkresult Database::writeGetTreeFunction(void)
     catch (const std::exception &e)
     {
         zklog.error("Database::writeGetTreeFunction() exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
-        disposeConnection(pDatabaseConnection);
         result = ZKR_DB_ERROR;
+        queryFailed();
     }
     
     disposeConnection(pDatabaseConnection);
@@ -1074,6 +1105,14 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
 
         r = ZKR_SUCCESS;
     }
+    // If the key is pending to be stored on database, but already deleted from cache
+    else if (config.dbMultiWrite && multiWrite.findProgram(key, data))
+    {
+        // Add to the read log
+        if (dbReadLog != NULL) dbReadLog->add(key, data, true, TimeDiff(t));
+
+        r = ZKR_SUCCESS;
+    }
     else
 #endif
     if (useRemoteDB)
@@ -1111,7 +1150,6 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
         for (uint64_t i = 0; (i < (data.size()) && (i < 100)); i++)
             s += byte2string(data[i]);
         if (data.size() > 100) s += "...";
-        s += " update=" + to_string(update);
         zklog.info(s);
     }
 #endif
@@ -1148,13 +1186,14 @@ zkresult Database::flush(uint64_t &thisBatch, uint64_t &lastSentBatch)
     thisBatch = multiWrite.lastFlushId;
     lastSentBatch = multiWrite.storedFlushId;
 
+#ifdef LOG_DB_FLUSH
+    zklog.info("Database::flush() thisBatch=" + to_string(thisBatch) + " lastSentBatch=" + to_string(lastSentBatch) + " multiWrite=[" + multiWrite.print() + "]");
+#endif
+
     // Notify the thread
     sem_post(&senderSem);
 
     multiWrite.Unlock();
-
-    //zklog.info("Database::flush() thisBatch=" + to_string(thisBatch) + " lastSentBatch=" + to_string(lastSentBatch));
-
     return ZKR_SUCCESS;
 }
 
@@ -1169,9 +1208,11 @@ void Database::semiFlush (void)
 
     multiWrite.data[multiWrite.pendingToFlushDataIndex].acceptIntray();
 
-    multiWrite.Unlock();
+#ifdef LOG_DB_SEMI_FLUSH
+    zklog.info("Database::semiFlush() called multiWrite=[" + multiWrite.print() + "]");
+#endif
 
-    //zklog.info("Database::semiFlush() called");
+    multiWrite.Unlock();
 }
 
 zkresult Database::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram)
@@ -1234,6 +1275,9 @@ zkresult Database::sendData (void)
                         data.query += ", ";
                     }
                     data.query += "( E\'\\\\x" + it->first + "\', E\'\\\\x" + it->second + "\' ) ";
+#ifdef LOG_DB_SEND_DATA
+                    zklog.info("Database::sendData() inserting node key=" + it->first + " value=" + it->second);
+#endif
                 }
                 data.query += " ON CONFLICT (hash) DO NOTHING;";
             }
@@ -1249,6 +1293,9 @@ zkresult Database::sendData (void)
                         data.query += ", ";
                     }
                     data.query += "( E\'\\\\x" + it->first + "\', E\'\\\\x" + it->second + "\' ) ";
+#ifdef LOG_DB_SEND_DATA
+                    zklog.info("Database::sendData() inserting program key=" + it->first + " value=" + it->second);
+#endif
                 }
                 data.query += " ON CONFLICT (hash) DO NOTHING;";
             }
@@ -1256,7 +1303,10 @@ zkresult Database::sendData (void)
             // If there is a nodes state root query, add it
             if (data.nodesStateRoot.size() > 0)
             {
-                data.query += "INSERT INTO " + config.dbNodesTableName + " ( hash, data ) VALUES ( E\'\\\\x" + dbStateRootKey + "\', E\'\\\\x" + data.nodesStateRoot + "\' ) ON CONFLICT (hash) DO NOTHING;";
+                data.query += "INSERT INTO " + config.dbNodesTableName + " ( hash, data ) VALUES ( E\'\\\\x" + dbStateRootKey + "\', E\'\\\\x" + data.nodesStateRoot + "\' ) ON CONFLICT (hash) DO UPDATE SET data = EXCLUDED.data;";
+#ifdef LOG_DB_SEND_DATA
+                zklog.info("Database::sendData() inserting root=" + data.nodesStateRoot);
+#endif
             }
         }
 
@@ -1293,6 +1343,12 @@ zkresult Database::sendData (void)
                 zklog.info("Database::sendData() dbMetrics multiWrite total=" + to_string(fields) + "fields=" + to_string(timeDiff) + "us=" + to_string(timeDiff/zkmax(fields,1)) + "us/field");
             }
 
+#ifdef LOG_DB_WRITE_QUERY
+            zklog.info("Database::sendData() write query=" + data.query);
+#endif
+#ifdef LOG_DB_SEND_DATA
+            zklog.info("Database::sendData() successfully processed query of size= " + to_string(data.query.size()));
+#endif
             // Update status
             data.query.clear();
             data.stored = true;
@@ -1307,7 +1363,7 @@ zkresult Database::sendData (void)
     {
         zklog.error("Database::sendData() execute query exception: " + string(e.what()));
         zklog.error("Database::sendData() query.size=" + to_string(data.query.size()) + " query(<1024)=" + data.query.substr(0, 1024));
-        disposeConnection(pDatabaseConnection);
+        queryFailed();
         zkr = ZKR_DB_ERROR;
     }
 
@@ -1386,6 +1442,9 @@ zkresult Database::deleteNodes(const vector<string> (&nodesToDelete))
 
         // Delete it; they key can be present (just written) or not (read from database) and both cases are valid
         multiWriteFlushData.erase(key);
+#ifdef LOG_DB_DELETE_NODES
+        zklog.info("Database::deleteNodes() deleted key=" + key + " i=" + to_string(i) + " multiWrite=[" + multiWrite.print() + "]");
+#endif
     }
 
     multiWrite.Unlock();
@@ -1546,12 +1605,15 @@ void *dbSenderThread (void *arg)
         // Else, switch data indexes
         else
         {
+            // Accept all intray data
+            multiWrite.data[multiWrite.pendingToFlushDataIndex].acceptIntray(true);
+
             // Advance processing and sending indexes
             multiWrite.storingDataIndex = (multiWrite.storingDataIndex + 1) % 3;
             multiWrite.pendingToFlushDataIndex = (multiWrite.pendingToFlushDataIndex + 1) % 3;
             multiWrite.data[multiWrite.pendingToFlushDataIndex].Reset();
 #ifdef LOG_DB_SENDER_THREAD
-            zklog.info("dbSenderThread() updated: pendingToFlushDataIndex=" + to_string(multiWrite.pendingToFlushDataIndex) + " storingDataIndex=" + to_string(multiWrite.storingDataIndex) + " synchronizingDataIndex=" + to_string(multiWrite.synchronizingDataIndex));
+            zklog.info("dbSenderThread() updated: multiWrite=[" + multiWrite.print() + "]");
 #endif
 
             // Record the last processed batch included in this data set
@@ -1566,7 +1628,7 @@ void *dbSenderThread (void *arg)
                 // Advance synchronizing index
                 multiWrite.synchronizingDataIndex = (multiWrite.synchronizingDataIndex + 1) % 3;
 #ifdef LOG_DB_SENDER_THREAD
-                zklog.info("dbSenderThread() no data to send: pendingToFlushDataIndex=" + to_string(multiWrite.pendingToFlushDataIndex) + " storingDataIndex=" + to_string(multiWrite.storingDataIndex) + " synchronizingDataIndex=" + to_string(multiWrite.synchronizingDataIndex));
+                zklog.info("dbSenderThread() no data to send: multiWrite=[" + multiWrite.print() + "]");
 #endif
                 bDataEmpty = true;
             }
@@ -1579,7 +1641,7 @@ void *dbSenderThread (void *arg)
         if (!bDataEmpty)
         {
 #ifdef LOG_DB_SENDER_THREAD
-            zklog.info("dbSenderThread() starting to send data, storedFlushId=" + to_string(multiWrite.storedFlushId) + " storingFlushId=" + to_string(multiWrite.storingFlushId));
+            zklog.info("dbSenderThread() starting to send data, multiWrite=[" + multiWrite.print() + "]");
 #endif
             zkresult zkr;
             zkr = pDatabase->sendData();
@@ -1588,12 +1650,12 @@ void *dbSenderThread (void *arg)
                 multiWrite.Lock();
                 multiWrite.storedFlushId = multiWrite.storingFlushId;
 #ifdef LOG_DB_SENDER_THREAD
-                zklog.info("dbSenderThread() successfully sent data, storedFlushId=" + to_string(multiWrite.storedFlushId) + " storingFlushId=" + to_string(multiWrite.storingFlushId));
+                zklog.info("dbSenderThread() successfully sent data, multiWrite=[]" + multiWrite.print() + "]");
 #endif
                 // Advance synchronizing index
                 multiWrite.synchronizingDataIndex = (multiWrite.synchronizingDataIndex + 1) % 3;
 #ifdef LOG_DB_SENDER_THREAD
-                zklog.info("dbSenderThread() updated: pendingToFlushDataIndex=" + to_string(multiWrite.pendingToFlushDataIndex) + " storingDataIndex=" + to_string(multiWrite.storingDataIndex) + " synchronizingDataIndex=" + to_string(multiWrite.synchronizingDataIndex));
+                zklog.info("dbSenderThread() updated: multiWrite=[" + multiWrite.print() + "]");
 #endif
                 sem_post(&pDatabase->getFlushDataSem);
 #ifdef LOG_DB_SENDER_THREAD
