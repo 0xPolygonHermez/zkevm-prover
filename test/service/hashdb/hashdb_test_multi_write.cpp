@@ -23,7 +23,7 @@ uint64_t HashDBTestMultiWrite (const Config& config)
     Goldilocks::Element roots[HASH_DB_TEST_MULTI_WRITE_NUMBER_OF_TREES][4];
     uint64_t tree;
     bool bRandomKeys = false;
-    bool bRandomValues = true;
+    bool bRandomValues = false;
 
     Goldilocks::Element keyValue[12];
     for (uint64_t i=0; i<12; i++)
@@ -74,42 +74,44 @@ uint64_t HashDBTestMultiWrite (const Config& config)
             //zklog.info("runHashDBTest() calling set with root=" + fea2string(fr, root) + " key=" + fea2string(fr, key) + " value=" + value.get_str(16));
 
             // Set the value
+            //zklog.info("HashDBTestMultiWrite() tree=" + to_string(tree) + " i=" + to_string(i) + " calling pHashDB->set with root=" + fea2string(fr, root) + " key=" + fea2string(fr,key));
             zkresult zkr = pHashDB->set(root, key, value, true, root, NULL, NULL );
             if (zkr != ZKR_SUCCESS)
             {
                 zklog.error("HashDBTestMultiWrite() set tree=" + to_string(tree) + " i=" + to_string(i) + " result=" + zkresult2string(zkr));
                 exitProcess();
             }
+            //zklog.info("HashDBTestMultiWrite() tree=" + to_string(tree) + " i=" + to_string(i) + " called pHashDB->set and got root=" + fea2string(fr, root) + " key=" + fea2string(fr,key));
         }
 
-        pHashDB->semiFlush();
         roots[tree][0] = root[0];
         roots[tree][1] = root[1];
         roots[tree][2] = root[2];
         roots[tree][3] = root[3];
 
-        zklog.info("HashDBTestMultiWrite() after tree=" + to_string(tree) + " root=" + fea2string(fr, root));
+        pHashDB->flush(flushId, storedFlushId);
+
+        zklog.info("HashDBTestMultiWrite() after tree=" + to_string(tree) + " root=" + fea2string(fr, root) + " flushId=" + to_string(flushId) + " storedFlushId=" + to_string(storedFlushId));
     }
 
     TimerStopAndLog(HASH_DB_TEST_MULTI_WRITE);
 
-    pHashDB->flush(flushId, storedFlushId);
     do
     {
         uint64_t storingFlushId, lastFlushId, pendingToFlushNodes, pendingToFlushProgram, storingNodes, storingProgram;
         string proverId;
         pHashDB->getFlushStatus(storedFlushId, storingFlushId, lastFlushId, pendingToFlushNodes, pendingToFlushProgram, storingNodes, storingProgram, proverId);
+        zklog.info("HashDBTestMultiWrite() after getFlushStatus() flushId=" + to_string(flushId) + " storedFlushId=" + to_string(storedFlushId));
         sleep(1);
     } while (storedFlushId < flushId);
 
+    // All data has been stored on database, so we can clear the cache
     pHashDB->clearCache();
 
     for (tree=0; tree<HASH_DB_TEST_MULTI_WRITE_NUMBER_OF_TREES; tree++)
     {
         for (uint64_t i=0; i<HASH_DB_TEST_MULTI_WRITE_NUMBER_OF_NODES; i++)
         {
-            pHashDB->clearCache();
-
             // Build the expected value
             mpz_class expectedValue;
             if (!bRandomValues)

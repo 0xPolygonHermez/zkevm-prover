@@ -4,6 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include "definitions.hpp"
+#include "zklog.hpp"
 
 using namespace std;
 

@@ -33,7 +33,8 @@ string removeBSXIfExists(string s) {return ((s.at(0) == '\\') && (s.at(1) == 'x'
 Database::Database (Goldilocks &fr, const Config &config) :
         fr(fr),
         config(config),
-        connectionsPool(NULL)
+        connectionsPool(NULL),
+        multiWrite(fr)
 {
     // Init mutex
     pthread_mutex_init(&connMutex, NULL);
@@ -129,6 +130,14 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
 
             r = ZKR_SUCCESS;
         }
+        // If the key is pending to be stored in database, but already deleted from cache
+        else if (config.dbMultiWrite && multiWrite.findNode(key, value))
+        {
+            // Add to the read log
+            if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
+
+            r = ZKR_SUCCESS;
+        }
         // If get tree is configured, read the tree from the branch (key hash) to the leaf (keys since level)
         else if (config.dbGetTree && (keys != NULL))
         {
@@ -165,7 +174,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
                     {
                         break;
                     }
-                    zklog.error("Database::read() retried readTreeRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r) + " counter=" + to_string(i));
+                    zklog.warning("Database::read() retried readTreeRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r) + " counter=" + to_string(i));
                 }
             }
 
@@ -214,7 +223,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
                 {
                     break;
                 }
-                zklog.error("Database::read() retried readRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r) + " counter=" + to_string(i));
+                zklog.warning("Database::read() retried readRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r) + " counter=" + to_string(i));
             }
         }
         if (r == ZKR_SUCCESS)
@@ -234,7 +243,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
     // If we could not find the value, report the error
     if (r == ZKR_UNSPECIFIED)
     {
-        zklog.error("Database::read() requested a key that does not exist: " + key);
+        zklog.error("Database::read() requested a key that does not exist (ZKR_DB_KEY_NOT_FOUND): " + key);
         r = ZKR_DB_KEY_NOT_FOUND;
     }
 
@@ -442,6 +451,11 @@ DatabaseConnection * Database::getConnection (void)
             nextConnection = 0;
         }
         usedConnections++;
+        if (pConnection->bDisconnect)
+        {
+            pConnection->pConnection->disconnect();
+            pConnection->bDisconnect = false;
+        }
         //zklog.info("Database::getWriteConnection() pConnection=" + to_string((uint64_t)pConnection) + " nextConnection=" + to_string(nextConnection) + " usedConnections=" + to_string(usedConnections));
         connUnlock();
         return pConnection;
@@ -478,6 +492,18 @@ void Database::disposeConnection (DatabaseConnection * pConnection)
 #endif
         connUnlock();
     }
+}
+
+void Database::queryFailed (void)
+{
+    connLock();
+
+    for (uint64_t i=0; i<config.dbNumberOfPoolConnections; i++)
+    {
+        connectionsPool[i].bDisconnect = true;
+    }
+
+    connUnlock();
 }
 
 zkresult Database::readRemote(bool bProgram, const string &key, string &value)
@@ -532,6 +558,7 @@ zkresult Database::readRemote(bool bProgram, const string &key, string &value)
     catch (const std::exception &e)
     {
         zklog.error("Database::readRemote() table=" + tableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
+        queryFailed();
         disposeConnection(pDatabaseConnection);
         return ZKR_DB_ERROR;
     }
@@ -638,6 +665,7 @@ zkresult Database::readTreeRemote(const string &key, const vector<uint64_t> *key
     catch (const std::exception &e)
     {
         zklog.warning("Database::readTreeRemote() exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
+        queryFailed();
         disposeConnection(pDatabaseConnection);
         return ZKR_DB_ERROR;
     }
@@ -707,8 +735,8 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
         catch (const std::exception &e)
         {
             zklog.error("Database::writeRemote() table=" + tableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
-            disposeConnection(pDatabaseConnection);
             result = ZKR_DB_ERROR;
+            queryFailed();
         }
 
         disposeConnection(pDatabaseConnection);
@@ -780,8 +808,8 @@ zkresult Database::saveStateRoot(const Goldilocks::Element (&stateRoot)[4])
             catch (const std::exception &e)
             {
                 zklog.error("Database::saveStateRoot() table=" + config.dbNodesTableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
-                disposeConnection(pDatabaseConnection);
                 r = ZKR_DB_ERROR;
+                queryFailed();
             }
 
             disposeConnection(pDatabaseConnection);
@@ -980,6 +1008,7 @@ zkresult Database::writeGetTreeFunction(void)
     {
         zklog.error("Database::writeGetTreeFunction() exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
         result = ZKR_DB_ERROR;
+        queryFailed();
     }
     
     disposeConnection(pDatabaseConnection);
@@ -1070,6 +1099,14 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
 #ifdef DATABASE_USE_CACHE
     // If the key is found in local database (cached) simply return it
     if (dbProgramCache.enabled() && dbProgramCache.find(key, data))
+    {
+        // Add to the read log
+        if (dbReadLog != NULL) dbReadLog->add(key, data, true, TimeDiff(t));
+
+        r = ZKR_SUCCESS;
+    }
+    // If the key is pending to be stored on database, but already deleted from cache
+    else if (config.dbMultiWrite && multiWrite.findProgram(key, data))
     {
         // Add to the read log
         if (dbReadLog != NULL) dbReadLog->add(key, data, true, TimeDiff(t));
@@ -1309,7 +1346,9 @@ zkresult Database::sendData (void)
 #ifdef LOG_DB_WRITE_QUERY
             zklog.info("Database::sendData() write query=" + data.query);
 #endif
-
+#ifdef LOG_DB_SEND_DATA
+            zklog.info("Database::sendData() successfully processed query of size= " + to_string(data.query.size()));
+#endif
             // Update status
             data.query.clear();
             data.stored = true;
@@ -1324,7 +1363,7 @@ zkresult Database::sendData (void)
     {
         zklog.error("Database::sendData() execute query exception: " + string(e.what()));
         zklog.error("Database::sendData() query.size=" + to_string(data.query.size()) + " query(<1024)=" + data.query.substr(0, 1024));
-        disposeConnection(pDatabaseConnection);
+        queryFailed();
         zkr = ZKR_DB_ERROR;
     }
 

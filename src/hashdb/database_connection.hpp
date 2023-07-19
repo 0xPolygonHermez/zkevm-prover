@@ -8,7 +8,8 @@ class DatabaseConnection
 public:
     pqxx::connection * pConnection;
     bool bInUse;
-    DatabaseConnection() : pConnection(NULL), bInUse(false) {};
+    bool bDisconnect;
+    DatabaseConnection() : pConnection(NULL), bInUse(false), bDisconnect(false) {};
 };
 
 #endif
