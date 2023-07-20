@@ -676,7 +676,7 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "raceStep.StorageEntry\022\r\n\005depth\030\013 \001(\r\022\022\n\n"
   "gas_refund\030\014 \001(\004\022$\n\005error\030\r \001(\0162\025.execut"
   "or.v1.RomError\032.\n\014StorageEntry\022\013\n\003key\030\001 "
-  "\001(\t\022\r\n\005value\030\002 \001(\t:\0028\001*\253\010\n\010RomError\022\031\n\025R"
+  "\001(\t\022\r\n\005value\030\002 \001(\t:\0028\001*\306\010\n\010RomError\022\031\n\025R"
   "OM_ERROR_UNSPECIFIED\020\000\022\026\n\022ROM_ERROR_NO_E"
   "RROR\020\001\022\030\n\024ROM_ERROR_OUT_OF_GAS\020\002\022\034\n\030ROM_"
   "ERROR_STACK_OVERFLOW\020\003\022\035\n\031ROM_ERROR_STAC"
@@ -703,25 +703,26 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "_INVALID_SENDER_CODE\020\031\022\'\n#ROM_ERROR_INTR"
   "INSIC_TX_GAS_OVERFLOW\020\032\022 \n\034ROM_ERROR_BAT"
   "CH_DATA_TOO_BIG\020\033\022!\n\035ROM_ERROR_UNSUPPORT"
-  "ED_FORK_ID\020\034*\337\003\n\rExecutorError\022\036\n\032EXECUT"
-  "OR_ERROR_UNSPECIFIED\020\000\022\033\n\027EXECUTOR_ERROR"
-  "_NO_ERROR\020\001\022+\n\'EXECUTOR_ERROR_COUNTERS_O"
-  "VERFLOW_KECCAK\020\002\022+\n\'EXECUTOR_ERROR_COUNT"
-  "ERS_OVERFLOW_BINARY\020\003\022(\n$EXECUTOR_ERROR_"
-  "COUNTERS_OVERFLOW_MEM\020\004\022*\n&EXECUTOR_ERRO"
-  "R_COUNTERS_OVERFLOW_ARITH\020\005\022,\n(EXECUTOR_"
-  "ERROR_COUNTERS_OVERFLOW_PADDING\020\006\022-\n)EXE"
-  "CUTOR_ERROR_COUNTERS_OVERFLOW_POSEIDON\020\007"
-  "\022&\n\"EXECUTOR_ERROR_UNSUPPORTED_FORK_ID\020\010"
-  "\022#\n\037EXECUTOR_ERROR_BALANCE_MISMATCH\020\t\022\035\n"
-  "\031EXECUTOR_ERROR_FEA2SCALAR\020\n\022\030\n\024EXECUTOR"
-  "_ERROR_TOS32\020\0132\271\001\n\017ExecutorService\022U\n\014Pr"
-  "ocessBatch\022 .executor.v1.ProcessBatchReq"
-  "uest\032!.executor.v1.ProcessBatchResponse\""
-  "\000\022O\n\016GetFlushStatus\022\026.google.protobuf.Em"
-  "pty\032#.executor.v1.GetFlushStatusResponse"
-  "\"\000BAZ\?github.com/0xPolygonHermez/zkevm-n"
-  "ode/state/runtime/executor/pbb\006proto3"
+  "ED_FORK_ID\020\034\022\031\n\025ROM_ERROR_INVALID_RLP\020\035*"
+  "\337\003\n\rExecutorError\022\036\n\032EXECUTOR_ERROR_UNSP"
+  "ECIFIED\020\000\022\033\n\027EXECUTOR_ERROR_NO_ERROR\020\001\022+"
+  "\n\'EXECUTOR_ERROR_COUNTERS_OVERFLOW_KECCA"
+  "K\020\002\022+\n\'EXECUTOR_ERROR_COUNTERS_OVERFLOW_"
+  "BINARY\020\003\022(\n$EXECUTOR_ERROR_COUNTERS_OVER"
+  "FLOW_MEM\020\004\022*\n&EXECUTOR_ERROR_COUNTERS_OV"
+  "ERFLOW_ARITH\020\005\022,\n(EXECUTOR_ERROR_COUNTER"
+  "S_OVERFLOW_PADDING\020\006\022-\n)EXECUTOR_ERROR_C"
+  "OUNTERS_OVERFLOW_POSEIDON\020\007\022&\n\"EXECUTOR_"
+  "ERROR_UNSUPPORTED_FORK_ID\020\010\022#\n\037EXECUTOR_"
+  "ERROR_BALANCE_MISMATCH\020\t\022\035\n\031EXECUTOR_ERR"
+  "OR_FEA2SCALAR\020\n\022\030\n\024EXECUTOR_ERROR_TOS32\020"
+  "\0132\271\001\n\017ExecutorService\022U\n\014ProcessBatch\022 ."
+  "executor.v1.ProcessBatchRequest\032!.execut"
+  "or.v1.ProcessBatchResponse\"\000\022O\n\016GetFlush"
+  "Status\022\026.google.protobuf.Empty\032#.executo"
+  "r.v1.GetFlushStatusResponse\"\000BAZ\?github."
+  "com/0xPolygonHermez/zkevm-node/state/run"
+  "time/executor/pbb\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_executor_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2fempty_2eproto,
@@ -746,7 +747,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_exe
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_executor_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_executor_2eproto = {
-  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 5317,
+  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 5344,
   &descriptor_table_executor_2eproto_once, descriptor_table_executor_2eproto_sccs, descriptor_table_executor_2eproto_deps, 16, 1,
   schemas, file_default_instances, TableStruct_executor_2eproto::offsets,
   file_level_metadata_executor_2eproto, 16, file_level_enum_descriptors_executor_2eproto, file_level_service_descriptors_executor_2eproto,
@@ -791,6 +792,7 @@ bool RomError_IsValid(int value) {
     case 26:
     case 27:
     case 28:
+    case 29:
       return true;
     default:
       return false;
