@@ -63,7 +63,8 @@ set<string> responseErrors = {
     "intrinsic_invalid_gas_overflow",
     "intrinsic_invalid_balance",
     "intrinsic_invalid_batch_gas_limit",
-    "intrinsic_invalid_sender_code" };
+    "intrinsic_invalid_sender_code",
+    "invalidRLP" };
     
 set<string> oocErrors = {
     "OOCS",

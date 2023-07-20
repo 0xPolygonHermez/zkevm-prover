@@ -162,12 +162,13 @@ enum RomError : int {
   ROM_ERROR_INTRINSIC_TX_GAS_OVERFLOW = 26,
   ROM_ERROR_BATCH_DATA_TOO_BIG = 27,
   ROM_ERROR_UNSUPPORTED_FORK_ID = 28,
+  ROM_ERROR_INVALID_RLP = 29,
   RomError_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   RomError_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool RomError_IsValid(int value);
 constexpr RomError RomError_MIN = ROM_ERROR_UNSPECIFIED;
-constexpr RomError RomError_MAX = ROM_ERROR_UNSUPPORTED_FORK_ID;
+constexpr RomError RomError_MAX = ROM_ERROR_INVALID_RLP;
 constexpr int RomError_ARRAYSIZE = RomError_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* RomError_descriptor();
