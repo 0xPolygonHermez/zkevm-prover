@@ -856,8 +856,7 @@ zkresult Database::updateStateRoot(const Goldilocks::Element (&stateRoot)[4])
         else
         {
             // Prepare the query
-            string query = "INSERT INTO " + config.dbNodesTableName + " ( hash, data ) VALUES ( E\'\\\\x" + dbStateRootKey + "\', E\'\\\\x" + valueString + "\' ) " +
-                        "ON CONFLICT (hash) DO UPDATE SET data = EXCLUDED.data;";
+            string query = "UPDATE " + config.dbNodesTableName + " SET data = E\'\\\\x" + valueString + "\' WHERE  hash = E\'\\\\x" + dbStateRootKey + "\';";
                 
             DatabaseConnection * pDatabaseConnection = getConnection();
 
@@ -1379,7 +1378,7 @@ zkresult Database::sendData (void)
             // If there is a nodes state root query, add it
             if (data.nodesStateRoot.size() > 0)
             {
-                data.query += "INSERT INTO " + config.dbNodesTableName + " ( hash, data ) VALUES ( E\'\\\\x" + dbStateRootKey + "\', E\'\\\\x" + data.nodesStateRoot + "\' ) ON CONFLICT (hash) DO UPDATE SET data = EXCLUDED.data;";
+                data.query += "UPDATE " + config.dbNodesTableName + " SET data = E\'\\\\x" + data.nodesStateRoot + "\' WHERE hash = E\'\\\\x" + dbStateRootKey + "\';";
 #ifdef LOG_DB_SEND_DATA
                 zklog.info("Database::sendData() inserting root=" + data.nodesStateRoot);
 #endif
