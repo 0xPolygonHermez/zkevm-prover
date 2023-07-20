@@ -700,7 +700,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
             !fr.equal(oldRoot[3], newRoot[3])
         ) )
     {
-        dbres = saveStateRoot(db, newRoot);
+        dbres = updateStateRoot(db, newRoot);
         if (dbres != ZKR_SUCCESS)
         {
             return dbres;
@@ -1037,19 +1037,19 @@ zkresult Smt::hashSave ( Database &db, const Goldilocks::Element (&v)[12], const
     return zkr;
 }
 
-zkresult Smt::saveStateRoot(Database &db, const Goldilocks::Element (&stateRoot)[4])
+zkresult Smt::updateStateRoot(Database &db, const Goldilocks::Element (&stateRoot)[4])
 {
     // Write to db using the dbStateRootKey
     zkresult zkr;
-    zkr = db.saveStateRoot(stateRoot);
+    zkr = db.updateStateRoot(stateRoot);
     if (zkr != ZKR_SUCCESS)
     {
-        zklog.error("Smt::saveStateRoot() failed calling db.saveStateRoot() result=" + to_string(zkr) + "=" + zkresult2string(zkr));
+        zklog.error("Smt::updateeStateRoot() failed calling db.updateeStateRoot() result=" + to_string(zkr) + "=" + zkresult2string(zkr));
     }
 
 #ifdef LOG_SMT
     {
-        string s = "Smt::saveStateRoot() value=";
+        string s = "Smt::updateeStateRoot() value=";
         for (uint64_t i=0; i<4; i++) s += fr.toString(stateRoot[i],16) + ":";
         s += " zkr=" + zkresult2string(zkr);
         zklog.info(s);
