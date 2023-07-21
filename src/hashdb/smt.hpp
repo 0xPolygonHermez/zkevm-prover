@@ -96,7 +96,7 @@ public:
         return hashSave(db, a, capacityOne, persistent, hash);
     }
 
-    zkresult saveStateRoot(Database &db, const Goldilocks::Element (&stateRoot)[4]);
+    zkresult updateStateRoot(Database &db, const Goldilocks::Element (&stateRoot)[4]);
     int64_t getUniqueSibling(vector<Goldilocks::Element> &a);
 };
 

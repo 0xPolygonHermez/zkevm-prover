@@ -36,9 +36,21 @@ public:
     uint8_t v;
     uint8_t gasPercentage;
 
+    // Gas related data
+    mpz_class effectiveGasPrice;
+    mpz_class gas;
+    mpz_class fee;
+
+    // Data used to build the TX hash
+    bool bTxHashGenerated;
+    string txHashRlp;
+    string txHashResult;
+
     // Data obtained from call to ECRecover
     ECRecoverResult ecRecoverResult;
     mpz_class fromPublicKey;
+
+    TXData() : bTxHashGenerated(false) {};
 
     // Print contents, for debugging purposes
     void print (void);

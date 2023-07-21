@@ -47,6 +47,7 @@ public:
     uint64_t usedConnections;
     DatabaseConnection * getConnection (void);
     void disposeConnection (DatabaseConnection * pConnection);
+    void queryFailed (void);
 
     // Multi write attributes
 public:
@@ -94,7 +95,10 @@ public:
     zkresult write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent, Goldilocks::Element* vkey = NULL);
     zkresult getProgram(const string &_key, vector<uint8_t> &value, DatabaseMap *dbReadLog);
     zkresult setProgram(const string &_key, const vector<uint8_t> &value, const bool persistent);
-    zkresult saveStateRoot(const Goldilocks::Element (&stateRoot)[4]);
+private:
+    zkresult createStateRoot(void);
+public:
+    zkresult updateStateRoot(const Goldilocks::Element (&stateRoot)[4]);
 
 #ifdef DATABASE_COMMIT
     void setAutoCommit(const bool autoCommit);
