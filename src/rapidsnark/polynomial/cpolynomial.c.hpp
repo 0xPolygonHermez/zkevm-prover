@@ -30,10 +30,41 @@ u_int64_t CPolynomial<Engine>::getDegree() const {
     u_int64_t degree = 0;
     for (int i = 0; i < n; i++) {
         if (this->polynomials[i] != NULL) {
-            degree = std::max(degree, this->polynomials[i]->getDegree() * n + i);
+            degree = std::max(degree, this->polynomials[i]->getDegree() * n + i + 1);
         }
     }
     return degree;
+}
+
+template<typename Engine>
+Polynomial<Engine> *CPolynomial<Engine>::getPolynomial() const {
+    if(n == 1) {
+        Polynomial<Engine> *polynomial = Polynomial<Engine>::fromPolynomial(E, *polynomials[0]);
+        return polynomial;
+    }
+    u_int64_t degrees[n];
+
+    for (int i = 0; i < n; i++) {
+        degrees[i] = polynomials[i] == NULL ? 0 : polynomials[i]->getDegree();
+    }
+
+    u_int64_t maxDegree = this->getDegree();
+    u_int64_t lengthBuffer = maxDegree + 1;
+
+    Polynomial<Engine> *polynomial = new Polynomial<Engine>(E, lengthBuffer);
+
+    #pragma omp parallel for
+    for (u_int64_t i = 0; i < maxDegree + 1; i++) {
+        for (int j = 0; j < n; j++) {
+            if (polynomials[j] != NULL) {
+                if (degrees[j] >= 0 && i <= degrees[j]) polynomial->coef[i * n + j] = polynomials[j]->coef[i];
+            }
+        }
+    }
+
+    polynomial->fixDegree();
+
+    return polynomial;
 }
 
 template<typename Engine>
@@ -45,11 +76,12 @@ Polynomial<Engine> *CPolynomial<Engine>::getPolynomial(FrElement *reservedBuffer
     }
 
     u_int64_t maxDegree = this->getDegree();
-    u_int64_t lengthBuffer = std::pow(2, ((u_int64_t)log2(maxDegree - 1)) + 1);
+    u_int64_t lengthBuffer = maxDegree + 1;
+
     Polynomial<Engine> *polynomial = new Polynomial<Engine>(E, reservedBuffer, lengthBuffer);
 
     #pragma omp parallel for
-    for (u_int64_t i = 0; i < maxDegree+1; i++) {
+    for (u_int64_t i = 0; i < maxDegree + 1; i++) {
         for (int j = 0; j < n; j++) {
             if (polynomials[j] != NULL) {
                 if (i <= degrees[j]) polynomial->coef[i * n + j] = polynomials[j]->coef[i];

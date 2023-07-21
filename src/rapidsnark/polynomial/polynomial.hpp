@@ -9,6 +9,7 @@
 
 template<typename Engine>
 class Polynomial {
+
     using FrElement = typename Engine::FrElement;
     using G1Point = typename Engine::G1Point;
 
@@ -32,6 +33,8 @@ public:
     static Polynomial<Engine>* fromPolynomial(Engine &_E, Polynomial<Engine> &polynomial, u_int64_t blindLength = 0);
 
     static Polynomial<Engine>* fromPolynomial(Engine &_E, Polynomial<Engine> &polynomial, FrElement *reservedBuffer, u_int64_t blindLength = 0);
+
+    static Polynomial<Engine>* fromCoefficients(Engine &_E, FrElement* coefficients, u_int64_t length);
 
     // From evaluations
     static Polynomial<Engine>* fromEvaluations(Engine &_E, FFT<typename Engine::Fr> *fft, FrElement *evaluations, u_int64_t length, u_int64_t blindLength = 0);
@@ -85,13 +88,7 @@ public:
     // Euclidean division, returns reminder polygon
     Polynomial<Engine>* divBy(Polynomial<Engine> &polynomial);
 
-    void divByMonic(uint32_t m, FrElement beta);
-
-    Polynomial<Engine>* divByVanishing(uint32_t m, FrElement beta);
-
-    Polynomial<Engine>* divByVanishing(FrElement *reservedBuffer, uint64_t m, FrElement beta);
-
-    void fastDivByVanishing(FrElement *reservedBuffer, uint32_t m, FrElement beta);
+    void divByXSubValue(FrElement &value);
 
     void divZh(u_int64_t domainSize, int extension = 4);
 

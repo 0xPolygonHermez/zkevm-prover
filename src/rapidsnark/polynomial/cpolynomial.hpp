@@ -26,6 +26,8 @@ public:
 
     Polynomial<Engine> * getPolynomial(FrElement *reservedBuffer) const;
 
+    Polynomial<Engine> * getPolynomial() const;
+
     typename Engine::G1Point multiExponentiation(G1PointAffine *PTau) const;
 };
 
