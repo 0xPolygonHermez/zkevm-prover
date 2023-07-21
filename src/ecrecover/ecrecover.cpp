@@ -176,8 +176,6 @@ ECRecoverResult ECRecover(mpz_class &signature, mpz_class &r, mpz_class &s, mpz_
     }
     assert(ecrecover_y < FPEC);
 
-    // pending: check indeed y^2 has an square root
-
     // parity:
     int bit0 = mpz_tstbit(ecrecover_y.get_mpz_t(), 0);
     if (bit0 + ecrecover_v_parity - 1 == 0)
@@ -308,8 +306,6 @@ int ECRecoverPrecalc(mpz_class &signature, mpz_class &r, mpz_class &s, mpz_class
         }
     }
     assert(ecrecover_y < FPEC);
-
-    // pending: check indeed y^2 has an square root
 
     // parity:
     int bit0 = mpz_tstbit(ecrecover_y.get_mpz_t(), 0);
