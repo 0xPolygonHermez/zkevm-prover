@@ -10,7 +10,7 @@ uint64_t DatabaseCacheTest (void)
     TimerStart(DATABASE_CACHE_TEST);
 
     
-    Database::dbMTCache.clear();
+    //Database::dbMTCache.clear();  //rick pending
     
     uint64_t numberOfFailed = 0;
 #ifndef DATABASE_USE_ASSOCIATIVE_CACHE
@@ -55,7 +55,7 @@ uint64_t DatabaseCacheTest (void)
         }
     }
     
-    Database::dbMTCache.clear();
+    //Database::dbMTCache.clear(); //rick pending
 
     TimerStopAndLog(DATABASE_CACHE_TEST);
     return numberOfFailed;
