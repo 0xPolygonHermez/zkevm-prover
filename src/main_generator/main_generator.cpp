@@ -475,7 +475,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
         if(rom["labels"].contains("ecrecover_store_args") && zkPC == rom["labels"]["ecrecover_store_args"]){
             code += "    //ECRecover pre-calculation \n";
             code += "    if(mainExecutor.config.ECRecoverPrecalc){\n";
-            code += "       mpz_class signature_, r_, s_, v_;\n";
+            code += "        zkassert(ctx.ecRecoverPrecalcBuffer.filled == false);\n";
+            code += "        mpz_class signature_, r_, s_, v_;\n";
             if(bFastMode){   
                 code += "       fea2scalar(fr, signature_, pols.A0[0], pols.A1[0], pols.A2[0], pols.A3[0], pols.A4[0], pols.A5[0], pols.A6[0], pols.A7[0]);\n";
                 code += "       fea2scalar(fr, r_, pols.B0[0], pols.B1[0], pols.B2[0], pols.B3[0], pols.B4[0], pols.B5[0], pols.B6[0], pols.B7[0]);\n";
@@ -491,7 +492,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             }
             code += "       ctx.ecRecoverPrecalcBuffer.posUsed = ECRecoverPrecalc(signature_, r_, s_, v_, false, ctx.ecRecoverPrecalcBuffer.buffer, ctx.config.ECRecoverPrecalcNThreads);\n";
             code += "       ctx.ecRecoverPrecalcBuffer.pos=0;\n";
-            code += "       if(ctx.ecRecoverPrecalcBuffer.posUsed > 0) ctx.ecRecoverPrecalcBuffer.filled = true;\n";
+            code += "       if (ctx.ecRecoverPrecalcBuffer.posUsed > 0) ctx.ecRecoverPrecalcBuffer.filled = true;\n";
             code += "    }\n";
 
         }       
@@ -499,7 +500,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
             code += "    //ECRecover destroy pre-calculaiton buffer\n";
             code += "    if( ctx.ecRecoverPrecalcBuffer.filled){\n";  
-            code += "       assert(ctx.ecRecoverPrecalcBuffer.pos == ctx.ecRecoverPrecalcBuffer.posUsed);\n";
+            code += "       zkassert(ctx.ecRecoverPrecalcBuffer.pos == ctx.ecRecoverPrecalcBuffer.posUsed);\n";
             code += "       ctx.ecRecoverPrecalcBuffer.filled = false;\n";
             code += "    }\n";
         }
