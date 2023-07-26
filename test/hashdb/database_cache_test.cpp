@@ -14,6 +14,8 @@ uint64_t DatabaseCacheTest (void)
     
     uint64_t numberOfFailed = 0;
 #ifndef DATABASE_USE_ASSOCIATIVE_CACHE
+
+#ifndef DATABASE_USE_ASSOCIATIVE_CACHE
     Database::dbMTCache.setMaxSize(2000000);
 #endif
     Goldilocks fr;
@@ -56,7 +58,7 @@ uint64_t DatabaseCacheTest (void)
     }
     
     //Database::dbMTCache.clear(); //rick pending
-
+#endif
     TimerStopAndLog(DATABASE_CACHE_TEST);
     return numberOfFailed;
 }

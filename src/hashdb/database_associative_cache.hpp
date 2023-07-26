@@ -54,7 +54,7 @@ protected:
 
 public:
 
-    bool addKeyValue(Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, const bool update);
+    bool addKeyValue(Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, const bool update = true);
     bool findKey(Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value);
     DatabaseAssociativeCache(int nKeyBits_, string name_) : attempts(0),
                                                             hits(0)

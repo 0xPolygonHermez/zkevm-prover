@@ -5,6 +5,7 @@
 #include <nlohmann/json.hpp>
 #include <mutex>
 #include "zklog.hpp"
+#include "zkmax.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -19,8 +20,9 @@ private:
     int cacheSize;
 
     uint32_t *indices;
-    uint64_t *keys;
+    Goldilocks::Element *keys;
     T *values;
+    bool *isLeaf;
     int nextSlot;
 
     uint64_t attempts;
@@ -35,22 +37,23 @@ public:
     ~DatabaseAssociativeCache2();
 
     void postConstruct(int nKeyBits_, int cacheSize_, string name_);
-    void addKeyValue(Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value);
-    bool findKey(Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value);
+    void addKeyValue(Goldilocks::Element (&key)[4], const vector<T> &value);
+    bool findKey(Goldilocks::Element (&key)[4], vector<T> &value);
+    inline bool enabled() { return (nKeyBits > 0); };
 };
 
 // Methods:
 
 template <class T>
-DatabaseAssociativeCache2::DatabaseAssociativeCache2()
+DatabaseAssociativeCache2<T>::DatabaseAssociativeCache2()
 {
     nKeyBits = 0;
     indicesSize = 0;
-    logCacheSize = 0;
     cacheSize = 0;
     indices = NULL;
     keys = NULL;
     values = NULL;
+    isLeaf = NULL;
     nextSlot = 0;
     attempts = 0;
     hits = 0;
@@ -58,11 +61,13 @@ DatabaseAssociativeCache2::DatabaseAssociativeCache2()
 };
 
 template <class T>
-DatabaseAssociativeCache2::DatabaseAssociativeCache2(int nKeyBits_, int cacheSize_, string name_){
-    postConstruct(nKeyBits_, cacheSize_, name_)};
+DatabaseAssociativeCache2<T>::DatabaseAssociativeCache2(int nKeyBits_, int cacheSize_, string name_)
+{
+    postConstruct(nKeyBits_, cacheSize_, name_);
+};
 
 template <class T>
-DatabaseAssociativeCache2::~DatabaseAssociativeCache2()
+DatabaseAssociativeCache2<T>::~DatabaseAssociativeCache2()
 {
     if (indices != NULL)
         delete[] indices;
@@ -70,10 +75,12 @@ DatabaseAssociativeCache2::~DatabaseAssociativeCache2()
         delete[] keys;
     if (values != NULL)
         delete[] values;
+    if (isLeaf != NULL)
+        delete[] isLeaf;
 };
 
 template <class T>
-void DatabaseAssociativeCache2::postConstruct(int nKeyBits_, int cacheSize_, string name_)
+void DatabaseAssociativeCache2<T>::postConstruct(int nKeyBits_, int cacheSize_, string name_)
 {
     nKeyBits = nKeyBits_;
     if (nKeyBits_ > 64)
@@ -86,29 +93,24 @@ void DatabaseAssociativeCache2::postConstruct(int nKeyBits_, int cacheSize_, str
     indices = new uint32_t[indicesSize];
     uint32_t initValue = cacheSize + 1;
     memset(indices, initValue, sizeof(uint32_t) * indicesSize);
-    keys = new uint64_t[4 * cacheSize];
+    keys = new Goldilocks::Element[4 * cacheSize];
     values = new T[12 * cacheSize];
+    isLeaf = new bool[cacheSize];
     nextSlot = 0;
     attempts = 0;
     hits = 0;
     name = name_;
 
     indicesMask = 0;
-    for (int i = 0; i < nKeyBits - 1; i++)
+    for (int i = 0; i < nKeyBits; i++)
     {
         indicesMask = indicesMask << 1;
         indicesMask += 1;
     }
-    cacheMask = 0;
-    for (int i = 0; i < logCacheSize - 1; i++)
-    {
-        cacheMask = cacheMask << 1;
-        cacheMask += 1;
-    }
 };
 
 template <class T>
-void DatabaseAssociativeCache2::addKeyValue(Goldilocks::Element (&key)[4], const vector<T> &value)
+void DatabaseAssociativeCache2<T>::addKeyValue(Goldilocks::Element (&key)[4], const vector<T> &value)
 {
 
     attempts++; // must be atomic operation!! makes it sence? not really
@@ -120,7 +122,7 @@ void DatabaseAssociativeCache2::addKeyValue(Goldilocks::Element (&key)[4], const
     uint32_t offsetIndices = (uint32_t)(key[0].fe & indicesMask);
     uint32_t offsetKeys, offsetValues;
     bool update = false;
-    if (indices[offsetIndices] > cacheSize)
+    if (indices[offsetIndices] > (uint32_t)cacheSize)
     {
         update = true;
         indices[offsetIndices] = nextSlot; // must be atomic operation!!
@@ -136,7 +138,7 @@ void DatabaseAssociativeCache2::addKeyValue(Goldilocks::Element (&key)[4], const
     {
         offsetKeys = indices[offsetIndices] * 4;
         offsetValues = indices[offsetIndices] * 12;
-        if (keys[offsetKeys] == key[0].fe && keys[offsetKeys + 1] == key[1].fe && keys[offsetKeys + 2] == key[2].fe && keys[offsetKeys + 3] == key[3].fe)
+        if (keys[offsetKeys].fe == key[0].fe && keys[offsetKeys + 1].fe == key[1].fe && keys[offsetKeys + 2].fe == key[2].fe && keys[offsetKeys + 3].fe == key[3].fe)
         {
             hits++; // must be atomic operation!! makes is sence?
             update = false;
@@ -147,13 +149,13 @@ void DatabaseAssociativeCache2::addKeyValue(Goldilocks::Element (&key)[4], const
         }
     }
 
-    bool isleaf = value.size() > 8;
+    isLeaf[indices[offsetIndices]] = (value.size() > 8);
     if (update) // must be atomic operation!!
     {
-        keys[offsetKeys] = key[0].fe;
-        keys[offsetKeys + 1] = key[1].fe;
-        keys[offsetKeys + 2] = key[2].fe;
-        keys[offsetKeys + 3] = key[3].fe;
+        keys[offsetKeys].fe = key[0].fe;
+        keys[offsetKeys + 1].fe = key[1].fe;
+        keys[offsetKeys + 2].fe = key[2].fe;
+        keys[offsetKeys + 3].fe = key[3].fe;
         values[offsetValues] = value[0];
         values[offsetValues + 1] = value[1];
         values[offsetValues + 2] = value[2];
@@ -162,34 +164,30 @@ void DatabaseAssociativeCache2::addKeyValue(Goldilocks::Element (&key)[4], const
         values[offsetValues + 5] = value[5];
         values[offsetValues + 6] = value[6];
         values[offsetValues + 7] = value[7];
-        if (isleaf)
+        if (isLeaf[indices[offsetIndices]])
         {
             values[offsetValues + 8] = value[8];
             values[offsetValues + 9] = value[9];
             values[offsetValues + 10] = value[10];
             values[offsetValues + 11] = value[11];
         }
-        else
-        {
-            values[offsetValues + 8] = 0xFFFFFFFFFFFFFFFF;
-        }
     }
 }
 
 template <class T>
-bool DatabaseAssociativeCache2::findKey(Goldilocks::Element (&key)[4], vector<T> &value)
+bool DatabaseAssociativeCache2<T>::findKey(Goldilocks::Element (&key)[4], vector<T> &value)
 {
     uint32_t offsetIndices = (uint32_t)(key[0].fe & indicesMask);
-    if (indices[offsetIndices] > cacheSize)
+    if (indices[offsetIndices] > (uint32_t)cacheSize)
     {
         return false;
     }
     uint32_t offsetKeys = indices[offsetIndices] * 4;
-    if (keys[offsetKeys] == key[0].fe && keys[offsetKeys + 1] == key[1].fe && keys[offsetKeys + 2] == key[2].fe && keys[offsetKeys + 3] == key[3].fe)
+    if (keys[offsetKeys].fe == key[0].fe && keys[offsetKeys + 1].fe == key[1].fe && keys[offsetKeys + 2].fe == key[2].fe && keys[offsetKeys + 3].fe == key[3].fe)
     {
+        uint32_t offsetValues = indices[offsetIndices] * 12;
         ++hits; // must be atomic operation!! makes is sence?
-        bool isleaf = (buffer_[offset + 12] != 0xFFFFFFFFFFFFFFFF);
-        if (isleaf)
+        if (isLeaf[indices[offsetIndices]])
         {
             value.resize(12); // would like to avoid stl in the future...
         }
@@ -197,20 +195,20 @@ bool DatabaseAssociativeCache2::findKey(Goldilocks::Element (&key)[4], vector<T>
         {
             value.resize(8);
         }
-        value[0].fe = buffer_[offset];
-        value[1].fe = buffer_[offset + 1];
-        value[2].fe = buffer_[offset + 2];
-        value[3].fe = buffer_[offset + 3];
-        value[4].fe = buffer_[offset + 4];
-        value[5].fe = buffer_[offset + 5];
-        value[6].fe = buffer_[offset + 6];
-        value[7].fe = buffer_[offset + 7];
-        if (isleaf)
+        value[0] = values[offsetValues];
+        value[1] = values[offsetValues + 1];
+        value[2] = values[offsetValues + 2];
+        value[3] = values[offsetValues + 3];
+        value[4] = values[offsetValues + 4];
+        value[5] = values[offsetValues + 5];
+        value[6] = values[offsetValues + 6];
+        value[7] = values[offsetValues + 7];
+        if (isLeaf[indices[offsetIndices]])
         {
-            value[8].fe = buffer_[offset + 8];
-            value[9].fe = buffer_[offset + 9];
-            value[10].fe = buffer_[offset + 10];
-            value[11].fe = buffer_[offset + 11];
+            value[8] = values[offsetValues + 8];
+            value[9] = values[offsetValues + 9];
+            value[10] = values[offsetValues + 10];
+            value[11] = values[offsetValues + 11];
         }
         return true;
     }

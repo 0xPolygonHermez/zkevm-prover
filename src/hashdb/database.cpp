@@ -23,7 +23,9 @@
 // This will be used to store DB records in memory and it will be shared for all the instances of Database class
 // DatabaseCacheMT and DatabaseCacheProgram classes are thread-safe
 #ifdef DATABASE_USE_ASSOCIATIVE_CACHE
-DatabaseMTAssociativeCache Database::dbMTCache;
+DatabaseAssociativeCache2<Goldilocks::Element> Database::dbMTCache;
+//DatabaseMTAssociativeCache Database::dbMTCache;
+
 #else
 DatabaseMTCache Database::dbMTCache;
 #endif
@@ -127,6 +129,7 @@ zkresult Database::read(const string &_key, Goldilocks::Element (&vkey)[4], vect
         if (dbMTCache.findKey(vkey,value))
         //if (dbMTCache.find(key, value, leftChildkey, rightChildKey))
         {
+
             // Add to the read log
             if (dbReadLog != NULL) dbReadLog->add(" ", value, true, TimeDiff(t)); //rick
 
@@ -246,7 +249,7 @@ zkresult Database::read(const string &_key, Goldilocks::Element (&vkey)[4], vect
             // Store it locally to avoid any future remote access for this key
             if (dbMTCache.enabled()){
                 //dbMTCache.add(key, value, update, sData.substr(0, 64), sData.substr(64, 64));
-                dbMTCache.addKeyValue(vkey, value, update);
+                dbMTCache.addKeyValue(vkey, value); //, update);
             }
 #endif
 
@@ -356,7 +359,7 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
             vkeyf[2] = vkey[2];
             vkeyf[3] = vkey[3];
         }
-        dbMTCache.addKeyValue(vkeyf, value, false); 
+        dbMTCache.addKeyValue(vkeyf, value); //, false); 
     }
 #endif
 
@@ -713,7 +716,7 @@ zkresult Database::readTreeRemote(const string &key, const vector<uint64_t> *key
             {
                 //zklog.info("Database::readTreeRemote() adding hash=" + hash + " to dbMTCache");
                 //dbMTCache.add(hash, value, false, data.substr(0,64),data.substr(64,64));
-                dbMTCache.addKeyValue(vhash, value, false);
+                dbMTCache.addKeyValue(vhash, value); //, false);
 
             }
 #endif
@@ -828,7 +831,7 @@ zkresult Database::readTreeRemote(const string &key, bool *keys, uint64_t level,
             if (dbMTCache.enabled())
             {
                 //zklog.info("Database::readTreeRemote() adding hash=" + hash + " to dbMTCache");
-                dbMTCache.addKeyValue(vhash, value, false);
+                dbMTCache.addKeyValue(vhash, value); //, false);
                 //dbMTCache.add(hash, value, false, data.substr(0,64),data.substr(64,64));
             }
 #endif
@@ -1062,7 +1065,7 @@ zkresult Database::updateStateRoot(const Goldilocks::Element (&stateRoot)[4])
     {
         // Create in memory cache
         Goldilocks::Element vKey[4]={0xFFFFFFFFFFFFFFFF,0xFFFFFFFFFFFFFFFF,0xFFFFFFFFFFFFFFFF,0xFFFFFFFFFFFFFFFF};
-        dbMTCache.addKeyValue(vKey, value, true);
+        dbMTCache.addKeyValue(vKey, value);//, true);
         //dbMTCache.add(dbStateRootKey, value, true, valueString.substr(0,64), valueString.substr(64,64));
 
     }

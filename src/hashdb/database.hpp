@@ -16,6 +16,7 @@
 #include "zkassert.hpp"
 #include "tree_position.hpp"
 #include "multi_write.hpp"
+#include "database_associative_cache_2.hpp"
 
 using namespace std;
 
@@ -71,7 +72,9 @@ public:
 #ifdef DATABASE_USE_CACHE
     // Cache static instances
 #ifdef DATABASE_USE_ASSOCIATIVE_CACHE
-    static DatabaseMTAssociativeCache dbMTCache;
+    static DatabaseAssociativeCache2<Goldilocks::Element> dbMTCache;
+    //static DatabaseMTAssociativeCache dbMTCache;
+
 #else
     static DatabaseMTCache dbMTCache;
 #endif
