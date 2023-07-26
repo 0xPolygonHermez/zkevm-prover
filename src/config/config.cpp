@@ -188,6 +188,10 @@ void Config::load(json &config)
     if (config.contains("logExecutorServerInput") && config["logExecutorServerInput"].is_boolean())
         logExecutorServerInput = config["logExecutorServerInput"];
 
+    logExecutorServerInputJson = false;
+    if (config.contains("logExecutorServerInputJson") && config["logExecutorServerInputJson"].is_boolean())
+        logExecutorServerInputJson = config["logExecutorServerInputJson"];
+
     logExecutorServerInputGasThreshold = 0;
     if (config.contains("logExecutorServerInputGasThreshold") && config["logExecutorServerInputGasThreshold"].is_number())
         logExecutorServerInputGasThreshold = config["logExecutorServerInputGasThreshold"];
@@ -610,6 +614,8 @@ void Config::print(void)
         zklog.info("    logRemoteDbReads=true");
     if (logExecutorServerInput)
         zklog.info("    logExecutorServerInput=true");
+    if (logExecutorServerInputJson)
+        zklog.info("    logExecutorServerInputJson=true");
     if (logExecutorServerInputGasThreshold)
         zklog.info("    logExecutorServerInputGasThreshold=true");
     if (logExecutorServerResponses)

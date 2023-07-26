@@ -61,7 +61,8 @@ public:
     int64_t dbProgramCacheSize; // Size in MBytes for the cache to store Program (SC) records
     bool opcodeTracer;
     bool logRemoteDbReads;
-    bool logExecutorServerInput; // Logs all inputs; 
+    bool logExecutorServerInput; // Logs all inputs, before processing 
+    bool logExecutorServerInputJson; // Logs all inputs in input.json format, before processing
     uint64_t logExecutorServerInputGasThreshold; // Logs input if gas/s < this value, active if this value is > 0
     bool logExecutorServerResponses;
     bool logExecutorServerTxs;
