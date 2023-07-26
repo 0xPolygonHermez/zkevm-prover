@@ -16,6 +16,8 @@ private:
     // Log prefix
     string prefix;
 
+    string getThreadID (void);
+
 public:
     zkLog ();
     void setPrefix (const string &_prefix);
