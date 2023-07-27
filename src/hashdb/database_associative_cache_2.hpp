@@ -37,7 +37,7 @@ class DatabaseMTAssociativeCache2
         ~DatabaseMTAssociativeCache2();
 
         void postConstruct(int nKeyBits_, int cacheSize_, string name_);
-        void addKeyValue(Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, bool update = true);
+        void addKeyValue(Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, bool update);
         bool findKey(Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value);
         inline bool enabled() { return (nKeyBits > 0); };
 
