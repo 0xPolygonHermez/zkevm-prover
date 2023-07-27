@@ -72,7 +72,7 @@ public:
 #ifdef DATABASE_USE_CACHE
     // Cache static instances
 #ifdef DATABASE_USE_ASSOCIATIVE_CACHE
-    static DatabaseAssociativeCache2<Goldilocks::Element> dbMTCache;
+    static DatabaseMTAssociativeCache2 dbMTCache;
     //static DatabaseMTAssociativeCache dbMTCache;
 
 #else

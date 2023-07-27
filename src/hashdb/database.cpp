@@ -23,7 +23,7 @@
 // This will be used to store DB records in memory and it will be shared for all the instances of Database class
 // DatabaseCacheMT and DatabaseCacheProgram classes are thread-safe
 #ifdef DATABASE_USE_ASSOCIATIVE_CACHE
-DatabaseAssociativeCache2<Goldilocks::Element> Database::dbMTCache;
+DatabaseMTAssociativeCache2 Database::dbMTCache;
 //DatabaseMTAssociativeCache Database::dbMTCache;
 
 #else
