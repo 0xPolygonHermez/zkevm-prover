@@ -17,13 +17,13 @@ private:
 
     int nKeyBits;
     int indicesSize;
-    int cacheSize;
+    uint32_t cacheSize;
 
     uint32_t *indices;
     Goldilocks::Element *keys;
     T *values;
     bool *isLeaf;
-    int nextSlot;
+    uint32_t currentCacheIndex; // what happens if it overflows?
 
     uint64_t attempts;
     uint64_t hits;
@@ -37,9 +37,10 @@ public:
     ~DatabaseAssociativeCache2();
 
     void postConstruct(int nKeyBits_, int cacheSize_, string name_);
-    void addKeyValue(Goldilocks::Element (&key)[4], const vector<T> &value);
+    void addKeyValue(Goldilocks::Element (&key)[4], const vector<T> &value, bool update = true);
     bool findKey(Goldilocks::Element (&key)[4], vector<T> &value);
     inline bool enabled() { return (nKeyBits > 0); };
+    void forcedInsertion(uint32_t cacheIndex, int &iters);
 };
 
 // Methods:
@@ -54,7 +55,7 @@ DatabaseAssociativeCache2<T>::DatabaseAssociativeCache2()
     keys = NULL;
     values = NULL;
     isLeaf = NULL;
-    nextSlot = 0;
+    currentCacheIndex = 0;
     attempts = 0;
     hits = 0;
     name = "";
@@ -96,7 +97,7 @@ void DatabaseAssociativeCache2<T>::postConstruct(int nKeyBits_, int cacheSize_, 
     keys = new Goldilocks::Element[4 * cacheSize];
     values = new T[12 * cacheSize];
     isLeaf = new bool[cacheSize];
-    nextSlot = 0;
+    currentCacheIndex = 0;
     attempts = 0;
     hits = 0;
     name = name_;
@@ -110,113 +111,203 @@ void DatabaseAssociativeCache2<T>::postConstruct(int nKeyBits_, int cacheSize_, 
 };
 
 template <class T>
-void DatabaseAssociativeCache2<T>::addKeyValue(Goldilocks::Element (&key)[4], const vector<T> &value)
+void DatabaseAssociativeCache2<T>::addKeyValue(Goldilocks::Element (&key)[4], const vector<T> &value, bool update)
 {
-
+    //
+    //  Statistics
+    //
     attempts++; // must be atomic operation!! makes it sence? not really
     if (attempts << 44 == 0)
     {
         zklog.info("DatabaseAssociativeCache2::addKeyValue() name=" + name + " indicesSize=" + to_string(indicesSize) + " cacheSize=" + to_string(cacheSize) + " attempts=" + to_string(attempts) + " hits=" + to_string(hits) + " hit ratio=" + to_string(double(hits) * 100.0 / double(zkmax(attempts, 1))) + "%");
     }
 
-    uint32_t offsetIndices = (uint32_t)(key[0].fe & indicesMask);
-    uint32_t offsetKeys, offsetValues;
-    bool update = false;
-    if (indices[offsetIndices] > (uint32_t)cacheSize)
+    //
+    // Try to add in one of my 4 slots
+    //
+    for (int i = 0; i < 4; ++i)
     {
-        update = true;
-        indices[offsetIndices] = nextSlot; // must be atomic operation!!
-        nextSlot++;                        // must be atomic operation!!
-        if (nextSlot >= cacheSize)         // must be atomic operation!!
+        uint32_t tableIndex = (uint32_t)(key[i].fe & indicesMask);
+        uint32_t cacheIndex = indices[tableIndex];
+        uint32_t cacheIndexKey, cacheIndexValue;
+        bool write = false;
+
+        if (currentCacheIndex - cacheIndex > cacheSize ||
+            (currentCacheIndex < cacheSize && UINT32_MAX - cacheIndex + currentCacheIndex > cacheSize))
         {
-            nextSlot = 0;
-        }
-        offsetKeys = indices[offsetIndices] * 4;
-        offsetValues = indices[offsetIndices] * 12;
-    }
-    else
-    {
-        offsetKeys = indices[offsetIndices] * 4;
-        offsetValues = indices[offsetIndices] * 12;
-        if (keys[offsetKeys].fe == key[0].fe && keys[offsetKeys + 1].fe == key[1].fe && keys[offsetKeys + 2].fe == key[2].fe && keys[offsetKeys + 3].fe == key[3].fe)
-        {
-            hits++; // must be atomic operation!! makes is sence?
-            update = false;
+            write = true;
+            cacheIndex = currentCacheIndex;
+            currentCacheIndex = (currentCacheIndex == UINT32_MAX) ? 0 : (currentCacheIndex + 1); // atomic!
+            indices[tableIndex] = cacheIndex;
+            cacheIndexKey = cacheIndex * 4;
+            cacheIndexValue = cacheIndex * 12;
         }
         else
         {
-            update = true;
+            cacheIndexKey = cacheIndex * 4;
+            cacheIndexValue = cacheIndex * 12;
+
+            if (keys[cacheIndexKey + 0].fe == key[0].fe &&
+                keys[cacheIndexKey + 1].fe == key[1].fe &&
+                keys[cacheIndexKey + 2].fe == key[2].fe &&
+                keys[cacheIndexKey + 3].fe == key[3].fe)
+            {
+                hits++;
+                write = update;
+            }
+            else
+            {
+                continue;
+            }
         }
+        if (write) // must be atomic operation!!
+        {
+            isLeaf[cacheIndex] = (value.size() > 8);
+            keys[cacheIndexKey + 0].fe = key[0].fe;
+            keys[cacheIndexKey + 1].fe = key[1].fe;
+            keys[cacheIndexKey + 2].fe = key[2].fe;
+            keys[cacheIndexKey + 3].fe = key[3].fe;
+            values[cacheIndexValue + 0] = value[0];
+            values[cacheIndexValue + 1] = value[1];
+            values[cacheIndexValue + 2] = value[2];
+            values[cacheIndexValue + 3] = value[3];
+            values[cacheIndexValue + 4] = value[4];
+            values[cacheIndexValue + 5] = value[5];
+            values[cacheIndexValue + 6] = value[6];
+            values[cacheIndexValue + 7] = value[7];
+            if (isLeaf[indices[tableIndex]])
+            {
+                values[cacheIndexValue + 8] = value[8];
+                values[cacheIndexValue + 9] = value[9];
+                values[cacheIndexValue + 10] = value[10];
+                values[cacheIndexValue + 11] = value[11];
+            }
+            return;
+        }
+    }
+    //
+    // forced entry insertion
+    //
+    uint32_t cacheIndex = currentCacheIndex;
+    currentCacheIndex = (currentCacheIndex == UINT32_MAX) ? 0 : (currentCacheIndex + 1); // atomic!
+    uint32_t cacheIndexKey = cacheIndex * 4;
+    uint32_t cacheIndexValue = cacheIndex * 12;
+    isLeaf[cacheIndex] = (value.size() > 8);
+    keys[cacheIndexKey + 0].fe = key[0].fe;
+    keys[cacheIndexKey + 1].fe = key[1].fe;
+    keys[cacheIndexKey + 2].fe = key[2].fe;
+    keys[cacheIndexKey + 3].fe = key[3].fe;
+    values[cacheIndexValue + 0] = value[0];
+    values[cacheIndexValue + 1] = value[1];
+    values[cacheIndexValue + 2] = value[2];
+    values[cacheIndexValue + 3] = value[3];
+    values[cacheIndexValue + 4] = value[4];
+    values[cacheIndexValue + 5] = value[5];
+    values[cacheIndexValue + 6] = value[6];
+    values[cacheIndexValue + 7] = value[7];
+    if (isLeaf[cacheIndex])
+    {
+        values[cacheIndexValue + 8] = value[8];
+        values[cacheIndexValue + 9] = value[9];
+        values[cacheIndexValue + 10] = value[10];
+        values[cacheIndexValue + 11] = value[11];
+    }
+    //
+    // Forced index insertion
+    //
+    int iters = 0;
+    forcedInsertion(cacheIndex, iters);
+}
+
+template <class T>
+void DatabaseAssociativeCache2<T>::forcedInsertion(uint32_t index, int &iters)
+{
+    //
+    // avoid infinite loop
+    //
+    iters++;
+    if (iters > 5)
+    {
+        zkassertpermanent(0); // break it gracefully to start new executor.
     }
 
-    isLeaf[indices[offsetIndices]] = (value.size() > 8);
-    if (update) // must be atomic operation!!
+    //
+    // find a slot into my indices
+    //
+    Goldilocks::Element *key = &keys[index * 4];
+    uint32_t minCacheIndex = UINT32_MAX;
+    int pos = 0;
+
+    for (int i = 0; i < 4; ++i)
     {
-        keys[offsetKeys].fe = key[0].fe;
-        keys[offsetKeys + 1].fe = key[1].fe;
-        keys[offsetKeys + 2].fe = key[2].fe;
-        keys[offsetKeys + 3].fe = key[3].fe;
-        values[offsetValues] = value[0];
-        values[offsetValues + 1] = value[1];
-        values[offsetValues + 2] = value[2];
-        values[offsetValues + 3] = value[3];
-        values[offsetValues + 4] = value[4];
-        values[offsetValues + 5] = value[5];
-        values[offsetValues + 6] = value[6];
-        values[offsetValues + 7] = value[7];
-        if (isLeaf[indices[offsetIndices]])
+        uint32_t tableIndex = (uint32_t)(key[i].fe & indicesMask);
+        uint32_t cacheIndex = indices[tableIndex];
+        if (currentCacheIndex - cacheIndex > cacheSize ||
+            (currentCacheIndex < cacheSize && UINT32_MAX - cacheIndex + currentCacheIndex > cacheSize))
         {
-            values[offsetValues + 8] = value[8];
-            values[offsetValues + 9] = value[9];
-            values[offsetValues + 10] = value[10];
-            values[offsetValues + 11] = value[11];
+            indices[tableIndex] = index;
+            return;
+        }
+        else
+        {
+            if (cacheIndex < minCacheIndex && cacheIndex != index)
+            {
+                minCacheIndex = cacheIndex;
+                pos = i;
+            }
         }
     }
+    indices[(uint32_t)(key[pos].fe & indicesMask)] = index;
+    forcedInsertion(minCacheIndex, iters);
 }
 
 template <class T>
 bool DatabaseAssociativeCache2<T>::findKey(Goldilocks::Element (&key)[4], vector<T> &value)
 {
-    uint32_t offsetIndices = (uint32_t)(key[0].fe & indicesMask);
-    if (indices[offsetIndices] > (uint32_t)cacheSize)
+    for (int i = 0; i < 4; i++)
     {
-        return false;
-    }
-    uint32_t offsetKeys = indices[offsetIndices] * 4;
-    if (keys[offsetKeys].fe == key[0].fe && keys[offsetKeys + 1].fe == key[1].fe && keys[offsetKeys + 2].fe == key[2].fe && keys[offsetKeys + 3].fe == key[3].fe)
-    {
-        uint32_t offsetValues = indices[offsetIndices] * 12;
-        ++hits; // must be atomic operation!! makes is sence?
-        if (isLeaf[indices[offsetIndices]])
+        uint32_t tableIndex = (uint32_t)(key[i].fe & indicesMask);
+        uint32_t cacheIndex = indices[tableIndex];
+        if (currentCacheIndex - cacheIndex > cacheSize)
+            continue;
+        uint32_t cacheIndexKey = cacheIndex * 4;
+
+        if (keys[cacheIndexKey + 0].fe == key[0].fe &&
+            keys[cacheIndexKey + 1].fe == key[1].fe &&
+            keys[cacheIndexKey + 2].fe == key[2].fe &&
+            keys[cacheIndexKey + 3].fe == key[3].fe)
         {
-            value.resize(12); // would like to avoid stl in the future...
+            uint32_t cacheIndexValue = cacheIndex * 12;
+            ++hits; // must be atomic operation!! makes is sence?
+            if (isLeaf[cacheIndex])
+            {
+                value.resize(12); // would like to avoid stl in the future...
+            }
+            else
+            {
+                value.resize(8);
+            }
+            value[0] = values[cacheIndexValue];
+            value[1] = values[cacheIndexValue + 1];
+            value[2] = values[cacheIndexValue + 2];
+            value[3] = values[cacheIndexValue + 3];
+            value[4] = values[cacheIndexValue + 4];
+            value[5] = values[cacheIndexValue + 5];
+            value[6] = values[cacheIndexValue + 6];
+            value[7] = values[cacheIndexValue + 7];
+            if (isLeaf[indices[tableIndex]])
+            {
+                value[8] = values[cacheIndexValue + 8];
+                value[9] = values[cacheIndexValue + 9];
+                value[10] = values[cacheIndexValue + 10];
+                value[11] = values[cacheIndexValue + 11];
+            }
+            return true;
         }
-        else
-        {
-            value.resize(8);
-        }
-        value[0] = values[offsetValues];
-        value[1] = values[offsetValues + 1];
-        value[2] = values[offsetValues + 2];
-        value[3] = values[offsetValues + 3];
-        value[4] = values[offsetValues + 4];
-        value[5] = values[offsetValues + 5];
-        value[6] = values[offsetValues + 6];
-        value[7] = values[offsetValues + 7];
-        if (isLeaf[indices[offsetIndices]])
-        {
-            value[8] = values[offsetValues + 8];
-            value[9] = values[offsetValues + 9];
-            value[10] = values[offsetValues + 10];
-            value[11] = values[offsetValues + 11];
-        }
-        return true;
     }
     return false;
 }
 
 // TODO:
-// 5.understand when we use 8 or 12 values
-// 6.repassar tamany caches
-// 7.full understanding of atomics...
+// 5. vull carregar-me attempts y hits
 #endif
