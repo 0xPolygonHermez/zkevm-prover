@@ -226,8 +226,10 @@ bool DatabaseMTAssociativeCache2::findKey(Goldilocks::Element (&key)[4], vector<
     {
         uint32_t tableIndex = (uint32_t)(key[i].fe & indicesMask);
         uint32_t cacheIndex = indices[tableIndex];
-        if (currentCacheIndex - cacheIndex > cacheSize)
+        if (currentCacheIndex - cacheIndex > cacheSize ||
+            (currentCacheIndex < cacheSize && UINT32_MAX - cacheIndex + currentCacheIndex > cacheSize))
             continue;
+            
         uint32_t cacheIndexKey = cacheIndex * 4;
 
         if (keys[cacheIndexKey + 0].fe == key[0].fe &&
