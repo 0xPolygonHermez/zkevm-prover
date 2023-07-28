@@ -10,16 +10,18 @@ uint64_t DatabaseCacheTest (void)
     TimerStart(DATABASE_CACHE_TEST);
 
     
-    //Database::dbMTCache.clear();  //rick pending
+    //  //rick pending
     
     uint64_t numberOfFailed = 0;
-#ifndef DATABASE_USE_ASSOCIATIVE_CACHE
 
 #ifndef DATABASE_USE_ASSOCIATIVE_CACHE
+    Database::dbMTCache.clear();
     Database::dbMTCache.setMaxSize(2000000);
 #endif
     Goldilocks fr;
     mpz_class keyScalar;
+    Goldilocks::Element key[4];
+
     string keyString;
     vector<Goldilocks::Element> value;
     bool bResult;
@@ -34,9 +36,11 @@ uint64_t DatabaseCacheTest (void)
         }
         bool update = false;
 #ifndef DATABASE_USE_ASSOCIATIVE_CACHE
+        Database::dbMTCache.add(keyString, value, update);
         Database::dbMTCache.add(keyString, value,update);
 #else
-        Database::dbMTCache.add(keyString, value,update, " "," ");
+        scalar2fea(fr, keyScalar, key);
+        Database::dbMTCache.addKeyValue(key, value,update);
 #endif
 
     }
@@ -49,7 +53,12 @@ uint64_t DatabaseCacheTest (void)
         keyString = PrependZeros(keyScalar.get_str(16), 64);
         string leftChildKey;
         string rightChildKey;
-        bResult = Database::dbMTCache.find(keyString, value,leftChildKey,rightChildKey);
+#ifndef DATABASE_USE_ASSOCIATIVE_CACHE
+        bResult = Database::dbMTCache.find(keyString, value);
+#else
+        scalar2fea(fr, keyScalar, key);
+        bResult = Database::dbMTCache.findKey(key, value);
+#endif
         if (!bResult)
         {
             zklog.error("DatabaseCacheTest() failed calling Database::dbMTCache.find() of key=" + keyString);
@@ -58,7 +67,6 @@ uint64_t DatabaseCacheTest (void)
     }
     
     //Database::dbMTCache.clear(); //rick pending
-#endif
     TimerStopAndLog(DATABASE_CACHE_TEST);
     return numberOfFailed;
 }
