@@ -4,49 +4,7 @@
 #include "zklog.hpp"
 #include "zkmax.hpp"
 
-void DatabaseMap::add(const string key, vector<Goldilocks::Element> value, const bool cached, const uint64_t time)
-{
-    lock_guard<recursive_mutex> guard(mlock);
 
-    mtDB[key] = value;
-    if (cached)
-    {
-        mtCachedTimes += 1;
-        mtCachedTime += time;
-    }
-    else
-    {
-        mtDbTimes += 1;
-        mtDbTime += time;
-    }
-    if (callbackOnChange) onChangeCallback();
-}
-
-void DatabaseMap::add(const string key, vector<uint8_t> value, const bool cached, const uint64_t time)
-{
-    lock_guard<recursive_mutex> guard(mlock);
-
-    programDB[key] = value;
-    if (cached)
-    {
-        programCachedTimes += 1;
-        programCachedTime += time;
-    }
-    else
-    {
-        programDbTimes += 1;
-        programDbTime += time;
-    }
-    if (callbackOnChange) onChangeCallback();
-}
-
-void DatabaseMap::addGetTree(const uint64_t time, const uint64_t numberOfFields)
-{
-    lock_guard<recursive_mutex> guard(mlock);
-    getTreeTimes += 1;
-    getTreeTime += time;
-    getTreeFields += numberOfFields;
-}
 
 void DatabaseMap::add(MTMap &db)
 {
