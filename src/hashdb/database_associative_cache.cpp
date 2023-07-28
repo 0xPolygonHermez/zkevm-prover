@@ -9,7 +9,7 @@
 
 
 
-DatabaseMTAssociativeCache2::DatabaseMTAssociativeCache2()
+DatabaseMTAssociativeCache::DatabaseMTAssociativeCache()
 {
     nKeyBits = 0;
     indicesSize = 0;
@@ -24,12 +24,12 @@ DatabaseMTAssociativeCache2::DatabaseMTAssociativeCache2()
     name = "";
 };
 
-DatabaseMTAssociativeCache2::DatabaseMTAssociativeCache2(int nKeyBits_, int cacheSize_, string name_)
+DatabaseMTAssociativeCache::DatabaseMTAssociativeCache(int nKeyBits_, int cacheSize_, string name_)
 {
     postConstruct(nKeyBits_, cacheSize_, name_);
 };
 
-DatabaseMTAssociativeCache2::~DatabaseMTAssociativeCache2()
+DatabaseMTAssociativeCache::~DatabaseMTAssociativeCache()
 {
     if (indices != NULL)
         delete[] indices;
@@ -41,12 +41,12 @@ DatabaseMTAssociativeCache2::~DatabaseMTAssociativeCache2()
         delete[] isLeaf;
 };
 
-void DatabaseMTAssociativeCache2::postConstruct(int nKeyBits_, int cacheSize_, string name_)
+void DatabaseMTAssociativeCache::postConstruct(int nKeyBits_, int cacheSize_, string name_)
 {
     nKeyBits = nKeyBits_;
     if (nKeyBits_ > 64)
     {
-        zklog.error("DatabaseMTAssociativeCache2::DatabaseMTAssociativeCache2() nKeyBits_ > 64");
+        zklog.error("DatabaseMTAssociativeCache::DatabaseMTAssociativeCache() nKeyBits_ > 64");
         exit(1);
     }
     indicesSize = 1 << nKeyBits;
@@ -70,7 +70,7 @@ void DatabaseMTAssociativeCache2::postConstruct(int nKeyBits_, int cacheSize_, s
     }
 };
 
-void DatabaseMTAssociativeCache2::addKeyValue(Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, bool update)
+void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, bool update)
 {
     //
     //  Statistics
@@ -78,7 +78,7 @@ void DatabaseMTAssociativeCache2::addKeyValue(Goldilocks::Element (&key)[4], con
     attempts++; // must be atomic operation!! makes it sence? not really
     if (attempts << 44 == 0)
     {
-        zklog.info("DatabaseMTAssociativeCache2::addKeyValue() name=" + name + " indicesSize=" + to_string(indicesSize) + " cacheSize=" + to_string(cacheSize) + " attempts=" + to_string(attempts) + " hits=" + to_string(hits) + " hit ratio=" + to_string(double(hits) * 100.0 / double(zkmax(attempts, 1))) + "%");
+        zklog.info("DatabaseMTAssociativeCache::addKeyValue() name=" + name + " indicesSize=" + to_string(indicesSize) + " cacheSize=" + to_string(cacheSize) + " attempts=" + to_string(attempts) + " hits=" + to_string(hits) + " hit ratio=" + to_string(double(hits) * 100.0 / double(zkmax(attempts, 1))) + "%");
     }
 
     //
@@ -178,7 +178,7 @@ void DatabaseMTAssociativeCache2::addKeyValue(Goldilocks::Element (&key)[4], con
     forcedInsertion(cacheIndex, iters);
 }
 
-void DatabaseMTAssociativeCache2::forcedInsertion(uint32_t index, int &iters)
+void DatabaseMTAssociativeCache::forcedInsertion(uint32_t index, int &iters)
 {
     //
     // avoid infinite loop
@@ -220,7 +220,7 @@ void DatabaseMTAssociativeCache2::forcedInsertion(uint32_t index, int &iters)
     forcedInsertion(minCacheIndex, iters);
 }
 
-bool DatabaseMTAssociativeCache2::findKey(Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value)
+bool DatabaseMTAssociativeCache::findKey(Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value)
 {
     for (int i = 0; i < 4; i++)
     {

@@ -1,5 +1,5 @@
-#ifndef DATABASE_ASSOCIATIVE_CACHE_2_HPP
-#define DATABASE_ASSOCIATIVE_CACHE_2_HPP
+#ifndef DATABASE_ASSOCIATIVE_CACHE_HPP
+#define DATABASE_ASSOCIATIVE_CACHE_HPP
 #include <vector>
 #include "goldilocks_base_field.hpp"
 #include <nlohmann/json.hpp>
@@ -9,7 +9,7 @@
 
 using namespace std;
 using json = nlohmann::json;
-class DatabaseMTAssociativeCache2
+class DatabaseMTAssociativeCache
 {
     private:
         recursive_mutex mlock;
@@ -32,9 +32,9 @@ class DatabaseMTAssociativeCache2
 
     public:
 
-        DatabaseMTAssociativeCache2();
-        DatabaseMTAssociativeCache2(int nKeyBits_, int cacheSize_, string name_);
-        ~DatabaseMTAssociativeCache2();
+        DatabaseMTAssociativeCache();
+        DatabaseMTAssociativeCache(int nKeyBits_, int cacheSize_, string name_);
+        ~DatabaseMTAssociativeCache();
 
         void postConstruct(int nKeyBits_, int cacheSize_, string name_);
         void addKeyValue(Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, bool update);
