@@ -659,8 +659,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 addrRel += sp;
             }
-            // If addrRel is possitive, and the sum is too big, fail
-            if (addrRel>=0x20000 || ((rom.line[zkPC].isMem==1) && (addrRel >= 0x10000)))
+            // Check addrRel is not too big
+            if ( addrRel >= ( ( (rom.line[zkPC].isMem==1) ? 0x20000 : 0x10000) - 2048 ) )
+
             {
                 proverRequest.result = ZKR_SM_MAIN_ADDRESS;
                 logError(ctx, "addrRel too big addrRel=" + to_string(addrRel));
