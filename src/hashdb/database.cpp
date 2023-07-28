@@ -14,7 +14,6 @@
 #include "exit_process.hpp"
 #include "zkmax.hpp"
 #include "hashdb_remote.hpp"
-#include "database_associative_cache.hpp"
 
 
 #ifdef DATABASE_USE_CACHE

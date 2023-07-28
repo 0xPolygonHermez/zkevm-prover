@@ -11,7 +11,6 @@
 #include "zkresult.hpp"
 #include "database_map.hpp"
 #include "database_cache.hpp"
-#include "database_associative_cache.hpp"
 #include "database_connection.hpp"
 #include "zkassert.hpp"
 #include "tree_position.hpp"
