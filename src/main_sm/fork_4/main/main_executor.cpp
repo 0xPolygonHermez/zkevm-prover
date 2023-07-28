@@ -660,13 +660,28 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 addrRel += sp;
             }
             // If addrRel is possitive, and the sum is too big, fail
-            if (addrRel>=0x20000 || ((rom.line[zkPC].isMem==1) && (addrRel >= 0x10000)))
+            if (proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum > 382000)
             {
-                proverRequest.result = ZKR_SM_MAIN_ADDRESS;
-                logError(ctx, "addrRel too big addrRel=" + to_string(addrRel));
-                HashDBClientFactory::freeHashDBClient(pHashDB);
-                return;
+                if ( addrRel >= ( ( (rom.line[zkPC].isMem==1) ? 0x20000 : 0x10000) - 2048 ) )
+
+                {
+                    proverRequest.result = ZKR_SM_MAIN_ADDRESS;
+                    logError(ctx, "addrRel too big addrRel=" + to_string(addrRel));
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
             }
+            else
+            {
+                if (addrRel>=0x20000 || ((rom.line[zkPC].isMem==1) && (addrRel >= 0x10000)))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_ADDRESS;
+                    logError(ctx, "addrRel too big addrRel=" + to_string(addrRel));
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
+            }
+
             // If addrRel is negative, fail
             if (addrRel < 0)
             {
