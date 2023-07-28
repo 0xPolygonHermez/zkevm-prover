@@ -283,8 +283,82 @@ zkresult Database::read(Goldilocks::Element (&vkey)[4], vector<Goldilocks::Eleme
 
     return r;
 }
-//rick: carefull with default arguments!!
-zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent, Goldilocks::Element* vkey)
+
+zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent, const bool update)
+{
+    // Check that it has  been initialized before
+    if (!bInitialized)
+    {
+        zklog.error("Database::write() called uninitialized");
+        exitProcess();
+    }
+
+    if (config.dbMultiWrite && !dbMTCache.enabled() && !persistent)
+    {
+        zklog.error("Database::write() called with multi-write active, cache disabled and no persistance in database, so there is no place to store the date");
+        return ZKR_DB_ERROR;
+    }
+
+
+    zkresult r;
+
+    // Normalize key format
+    string key = NormalizeToNFormat(_key, 64);
+    key = stringToLower(key);
+
+    if ( useRemoteDB
+#ifdef DATABASE_USE_CACHE
+         && persistent
+#endif
+         )
+    {
+        // Prepare the query
+        string valueString = "";
+        string aux;
+        for (uint64_t i = 0; i < value.size(); i++)
+        {
+            valueString += PrependZeros(fr.toString(value[i], 16), 16);
+        }
+
+        r = writeRemote(false, key, valueString);
+    }
+    else
+    {
+        r = ZKR_SUCCESS;
+    }
+
+#ifdef DATABASE_USE_CACHE
+    if ((r == ZKR_SUCCESS) && dbMTCache.enabled())
+    {
+        Goldilocks::Element vkey_[4];
+        Goldilocks::Element vkeyf[4];
+        string2fea(fr, _key, vkey_);
+        vkeyf[0] = vkey_[3];
+        vkeyf[1] = vkey_[2];
+        vkeyf[2] = vkey_[1];
+        vkeyf[3] = vkey_[0];
+        dbMTCache.addKeyValue(vkeyf, value, false); 
+    }
+#endif
+
+#ifdef LOG_DB_WRITE
+    {
+        string s = "Database::write()";
+        if (r != ZKR_SUCCESS)
+            s += " ERROR=" + zkresult2string(r);
+        s += " key=" + key;
+        s += " value=";
+        for (uint64_t i = 0; i < value.size(); i++)
+            s += fr.toString(value[i], 16) + ":";
+        s += " persistent=" + to_string(persistent);
+        zklog.info(s);
+    }
+#endif
+
+    return r;
+}
+
+zkresult Database::write(const Goldilocks::Element* vkey, const vector<Goldilocks::Element> &value, const bool persistent, const bool update)
 {
     // Check that it has  been initialized before
     if (!bInitialized)
@@ -300,7 +374,11 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
     }
 
     zkresult r;
-    string key;
+    Goldilocks::Element vkeyf[4];
+    vkeyf[0] = vkey[0];
+    vkeyf[1] = vkey[1];
+    vkeyf[2] = vkey[2];
+    vkeyf[3] = vkey[3];
 
     if ( useRemoteDB
 #ifdef DATABASE_USE_CACHE
@@ -317,16 +395,9 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
         }
         // Normalize key format
         string aux1;
-        if("" == _key){
-            Goldilocks::Element vkeyf[4];
-            vkeyf[0] = vkey[0];
-            vkeyf[1] = vkey[1];
-            vkeyf[2] = vkey[2];
-            vkeyf[3] = vkey[3];
-            aux1 = fea2string(fr, vkeyf);
-        }else{
-            aux1 = _key;
-        }
+        string key;
+        
+        aux1 = fea2string(fr, vkeyf);
         key = NormalizeToNFormat(aux1, 64);
         key = stringToLower(key);
         r = writeRemote(false, key, valueString);
@@ -340,25 +411,6 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
     if ((r == ZKR_SUCCESS) && dbMTCache.enabled())
     {
         // Create in memory cache
-        //string leftChildkey = fea2string(fr, value[0],value[1],value[2],value[3]);
-        //string rightChildKey = fea2string(fr, value[4],value[5],value[6],value[7]);
-        //leftChildkey= NormalizeToNFormat(leftChildkey, 64);
-        //rightChildKey = NormalizeToNFormat(rightChildKey, 64);
-        //dbMTCache.add(key, value, false, leftChildkey, rightChildKey);
-        Goldilocks::Element vkey_[4];
-        Goldilocks::Element vkeyf[4];
-        if(vkey==NULL){
-            string2fea(fr, _key, vkey_);
-            vkeyf[0] = vkey_[3];
-            vkeyf[1] = vkey_[2];
-            vkeyf[2] = vkey_[1];
-            vkeyf[3] = vkey_[0];
-        }else{
-            vkeyf[0] = vkey[0];
-            vkeyf[1] = vkey[1];
-            vkeyf[2] = vkey[2];
-            vkeyf[3] = vkey[3];
-        }
         dbMTCache.addKeyValue(vkeyf, value, false); 
     }
 #endif
@@ -623,122 +675,6 @@ zkresult Database::readRemote(bool bProgram, const string &key, string &value)
     disposeConnection(pDatabaseConnection);
 
     return ZKR_SUCCESS;
-}
-
-zkresult Database::readTreeRemote(const string &key, const vector<uint64_t> *keys, uint64_t level, uint64_t &numberOfFields)
-{
-    zkassert(keys != NULL);
-
-    if (config.logRemoteDbReads)
-    {
-        zklog.info("Database::readTreeRemote() key=" + key);
-    }
-    string rkey;
-    for (uint64_t i=level; i<keys->size(); i++)
-    {
-        uint8_t auxByte = (*keys)[i];
-        if (auxByte > 1)
-        {
-            zklog.error("Database::readTreeRemote() found invalid keys value=" + to_string(auxByte) + " at position " + to_string(i));
-            return ZKR_DB_ERROR;
-        }
-        rkey.append(1, byte2char(auxByte >> 4));
-        rkey.append(1, byte2char(auxByte & 0x0F));
-    }
-
-    // Get a free read db connection
-    DatabaseConnection * pDatabaseConnection = getConnection();
-
-    numberOfFields = 0;
-
-    try
-    {
-        // Prepare the query
-        string query = "SELECT get_tree (E\'\\\\x" + key + "\', E\'\\\\x" + rkey + "\');";
-
-        pqxx::result rows;
-
-        // Start a transaction.
-        pqxx::nontransaction n(*(pDatabaseConnection->pConnection));
-
-        // Execute the query
-        rows = n.exec(query);
-
-        // Commit your transaction
-        n.commit();
-
-        // Process the result
-        numberOfFields = rows.size();
-        for (uint64_t i=0; i<numberOfFields; i++)
-        {
-            pqxx::row const row = rows[i];
-            if (row.size() != 1)
-            {
-                zklog.error("Database::readTreeRemote() got an invalid number of colums for the row: " + to_string(row.size()));
-                disposeConnection(pDatabaseConnection);
-                return ZKR_UNSPECIFIED;
-            }
-            pqxx::field const fieldData = row[0];
-            string fieldDataString = fieldData.c_str();
-            //zklog.info("got value=" + fieldDataString);
-            string hash, data;
-
-            string first = "(\"\\\\x";
-            string second = "\",\"\\\\x";
-            string third = "\")";
-
-            size_t firstPosition = fieldDataString.find(first);
-            size_t secondPosition = fieldDataString.find(second);
-            size_t thirdPosition = fieldDataString.find(third);
-
-            if ( (firstPosition != 0) ||
-                 (firstPosition + first.size() + 32*2 != secondPosition ) ||
-                 (secondPosition <= first.size()) ||
-                 (thirdPosition == 0) ||
-                 ( (secondPosition + second.size() + 12*8*2 != thirdPosition) &&
-                   (secondPosition + second.size() + 8*8*2 != thirdPosition) ))
-            {
-                zklog.error("Database::readTreeRemote() got an invalid field=" + fieldDataString);
-                disposeConnection(pDatabaseConnection);
-                return ZKR_UNSPECIFIED;
-            }
-
-            hash = fieldDataString.substr(firstPosition + first.size(), 32*2);
-            data = fieldDataString.substr(secondPosition + second.size(), thirdPosition - secondPosition - second.size());
-            vector<Goldilocks::Element> value;
-            string2fea(fr, data, value);
-            Goldilocks::Element vhash[4];
-            string2fea(fr, hash, vhash);
-
-#ifdef DATABASE_USE_CACHE
-            // Store it locally to avoid any future remote access for this key
-            if (dbMTCache.enabled())
-            {
-                //zklog.info("Database::readTreeRemote() adding hash=" + hash + " to dbMTCache");
-                //dbMTCache.add(hash, value, false, data.substr(0,64),data.substr(64,64));
-                dbMTCache.addKeyValue(vhash, value, false);
-
-            }
-#endif
-        }
-    }
-    catch (const std::exception &e)
-    {
-        zklog.warning("Database::readTreeRemote() exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
-        disposeConnection(pDatabaseConnection);
-        return ZKR_DB_ERROR;
-    }
-    
-    // Dispose the read db conneciton
-    disposeConnection(pDatabaseConnection);
-
-    if (config.logRemoteDbReads)
-    {
-        zklog.info("Database::readTreeRemote() key=" + key + " read " + to_string(numberOfFields));
-    }
-
-    return ZKR_SUCCESS;
-    
 }
 
 zkresult Database::readTreeRemote(const string &key, bool *keys, uint64_t level, uint64_t &numberOfFields)

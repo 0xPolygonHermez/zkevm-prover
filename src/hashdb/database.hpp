@@ -62,7 +62,6 @@ private:
     // Remote database based on Postgres (PostgreSQL)
     void initRemote(void);
     zkresult readRemote(bool bProgram, const string &key, string &value);
-    zkresult readTreeRemote(const string &key, const vector<uint64_t> *keys, uint64_t level, uint64_t &numberOfFields);
     zkresult readTreeRemote(const string &key, bool *keys, uint64_t level, uint64_t &numberOfFields);
     zkresult writeRemote(bool bProgram, const string &key, const string &value);
     zkresult writeGetTreeFunction(void);
@@ -72,8 +71,6 @@ public:
     // Cache static instances
 #ifdef DATABASE_USE_ASSOCIATIVE_CACHE
     static DatabaseMTAssociativeCache dbMTCache;
-    //static DatabaseMTAssociativeCache dbMTCache;
-
 #else
     static DatabaseMTCache dbMTCache;
 #endif
@@ -93,7 +90,10 @@ public:
     // Basic methods
     void init(void);
     zkresult read(Goldilocks::Element (&vkey)[4], vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, const bool update = false, bool *keys = NULL , uint64_t level=0);
-    zkresult write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent, Goldilocks::Element* vkey = NULL);
+    zkresult write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent, const bool update = false);
+    zkresult write(const Goldilocks::Element* vkey, const vector<Goldilocks::Element> &value, const bool persistent, const bool update = false);
+
+
     zkresult getProgram(const string &_key, vector<uint8_t> &value, DatabaseMap *dbReadLog);
     zkresult setProgram(const string &_key, const vector<uint8_t> &value, const bool persistent);
 private:
