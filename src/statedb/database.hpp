@@ -20,7 +20,8 @@ class DatabaseConnection
 public:
     pqxx::connection * pConnection;
     bool bInUse;
-    DatabaseConnection() : pConnection(NULL), bInUse(false) {};
+    bool bDisconnect;
+    DatabaseConnection() : pConnection(NULL), bInUse(false), bDisconnect(false) {};
 };
 
 class Database
@@ -53,6 +54,7 @@ private:
     uint64_t usedConnections;
     DatabaseConnection * getConnection (void);
     void disposeConnection (DatabaseConnection * pConnection);
+    void queryFailed (void);
 
     // Multi write attributes
     string multiWriteProgram;
