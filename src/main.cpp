@@ -590,10 +590,8 @@ int main(int argc, char **argv)
 
     /* INIT DB CACHE */
 #ifdef DATABASE_USE_ASSOCIATIVE_CACHE
-    Database::dbMTCache.postConstruct(24, 1 << 19, "MTCache"); // rick: add first paramter to configurable parameters
-    //Database::dbMTCache.postConstruct(24,"MTCache"); //rick: add first paramter to configurable parameters
+    Database::dbMTCache.postConstruct(24, 1 << 19, "MTCache"); // TODO: configurable
 #else
-
     Database::dbMTCache.setName("MTCache");
     Database::dbMTCache.setMaxSize(config.dbMTCacheSize*1024*1024);
 #endif

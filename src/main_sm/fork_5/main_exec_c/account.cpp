@@ -334,19 +334,6 @@ zkresult Account::GetNonce(const Goldilocks::Element (&root)[4], uint64_t &nonce
 
     mpz_class value;
     zkresult zkResult = hashDB.get(root, nonceKey, value, /*&smtGetResult*/ NULL, NULL /*proverRequest.dbReadLog*/);
-#if 0
-    //std::cout<<"========================================="<<std::endl;
-    zkresult zkResult;
-    /*int niters = 1000000;
-    double time1 = omp_get_wtime(); 
-    for(int k=0; k < niters; ++k){*/
-        zkResult = hashDB.get(root, nonceKey, value, /*&smtGetResult*/ NULL, NULL /*proverRequest.dbReadLog*/);
-    /*}
-    double time2 = omp_get_wtime(); 
-    std::cout<<"========================================="<<std::endl;
-    std::cout<<"Temps: "<<(time2-time1)/niters<<std::endl;
-    exit(0);*/
-#endif
     if (zkResult != ZKR_SUCCESS)
     {
         zklog.error("Account::GetNonce() failed calling hashDB.get() result=" + zkresult2string(zkResult));
