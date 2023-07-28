@@ -53,12 +53,11 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
     while ( (!fr.isZero(r[0]) || !fr.isZero(r[1]) || !fr.isZero(r[2]) || !fr.isZero(r[3])) && !bFoundKey )
     {
         // Read the content of db for entry r: siblings[level] = db.read(r)
-        string rootString = " ";//fea2string(fr, r);
-        string leftChildKey;
-        string righChildKey;
-        dbres = db.read(rootString, r, dbValue, dbReadLog, leftChildKey, righChildKey, false, keys, level);
+
+        dbres = db.read(r, dbValue, dbReadLog, false, keys, level);
         if (dbres != ZKR_SUCCESS)
         {
+            string rootString = fea2string(fr, r);
             zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + rootString);
             return dbres;
         }
@@ -74,10 +73,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
             foundValueHash[1] = siblings[level][5];
             foundValueHash[2] = siblings[level][6];
             foundValueHash[3] = siblings[level][7];
-            foundValueHashString = " ";//fea2string(fr, foundValueHash);
-            string leftChildKey;
-            string righChildKey;
-            dbres = db.read(foundValueHashString, foundValueHash, dbValue, dbReadLog, leftChildKey, righChildKey);
+            dbres = db.read(foundValueHash, dbValue, dbReadLog);
             if (dbres != ZKR_SUCCESS)
             {
                 zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") key:" + foundValueHashString);
@@ -497,9 +493,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                     string auxString = "";//fea2string(fr, auxFea);
 
                     // Read its 2 siblings
-                    string leftChildKey;
-                    string righChildKey;
-                    dbres = db.read(auxString, auxFea, dbValue, dbReadLog, leftChildKey, righChildKey, false, keys, level);
+                    dbres = db.read(auxFea, dbValue, dbReadLog, false, keys, level);
                     if ( dbres != ZKR_SUCCESS)
                     {
                         zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + auxString);
@@ -515,19 +509,20 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                         // Calculate the value hash
                         Goldilocks::Element valH[4];
                         for (uint64_t i=0; i<4; i++) valH[i] = siblings[level+1][4+i];
-                        string valHString = " ";//fea2string(fr, valH);
 
                         // Read its siblings
                         string leftChildKey;
                         string righChildKey;
-                        dbres = db.read(valHString, valH, dbValue, dbReadLog, leftChildKey, righChildKey);
+                        dbres = db.read(valH, dbValue, dbReadLog);
                         if (dbres != ZKR_SUCCESS)
                         {
+                            string valHString = fea2string(fr, valH);
                             zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + valHString);
                             return dbres;
                         }
                         else if (dbValue.size()<8)
                         {
+                            string valHString = fea2string(fr, valH);
                             zklog.error("Smt::set() dbValue.size()<8 root:" + valHString);
                             return ZKR_SMT_INVALID_DATA_SIZE;
                         }
@@ -808,7 +803,7 @@ zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Gold
     {
         // Read the content of db for entry r: siblings[level] = db.read(r)
         //rString = "";
-        dbres = db.read(" ", r, dbValue, dbReadLog, leftChildKey, righChildKey, false, keys, level);
+        dbres = db.read(r, dbValue, dbReadLog, false, keys, level);
         if (dbres != ZKR_SUCCESS)
         {
             zklog.error("Smt::get() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + " " );
@@ -827,12 +822,10 @@ zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Gold
             valueHashFea[1] = siblings[level][5];
             valueHashFea[2] = siblings[level][6];
             valueHashFea[3] = siblings[level][7];
-            string foundValueHashString = "";//fea2string(fr, valueHashFea);
-            string leftChildKey;
-            string righChildKey;
-            dbres = db.read(foundValueHashString, valueHashFea, dbValue, dbReadLog, leftChildKey, righChildKey);
+            dbres = db.read(valueHashFea, dbValue, dbReadLog);
             if (dbres != ZKR_SUCCESS)
             {
+                string foundValueHashString = fea2string(fr, valueHashFea);
                 zklog.error("Smt::get() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + foundValueHashString);
                 return dbres;
             }

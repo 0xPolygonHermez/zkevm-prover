@@ -106,7 +106,8 @@ void Database::init(void)
     // Mark the database as initialized
     bInitialized = true;
 }
-zkresult Database::read(const string &_key, Goldilocks::Element (&vkey)[4], vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, string& leftChildkey, string& rightChildKey, const bool update,  bool *keys, uint64_t level)
+
+zkresult Database::read(Goldilocks::Element (&vkey)[4], vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, const bool update,  bool *keys, uint64_t level)
 {
     // Check that it has been initialized before
     if (!bInitialized)
@@ -1730,7 +1731,7 @@ void Database::printTree(const string &root, string prefix)
     string leftChildKey;
     string righChildKey;
     Goldilocks::Element vKey[4]={0,1,2,3};
-    read(key, vKey,value, NULL, leftChildKey, righChildKey);
+    read(vKey,value, NULL);
     if (value.size() != 12)
     {
         zklog.error("Database::printTree() found value.size()=" + to_string(value.size()));
@@ -1772,7 +1773,7 @@ void Database::printTree(const string &root, string prefix)
         string leftChildKey;
         string righChildKey;
         Goldilocks::Element vKey[4]={value[4],value[5],value[6],value[7]};
-        read(hashValue, vKey, leafValue, NULL, leftChildKey, righChildKey);
+        read(vKey, leafValue, NULL);
         if (leafValue.size() == 12)
         {
             if (!fr.equal(leafValue[8], fr.zero()))
@@ -2042,10 +2043,8 @@ void loadDb2MemCache(const Config &config)
     HashDB * pHashDB = (HashDB *)hashDBSingleton.get();
 
     vector<Goldilocks::Element> dbValue;
-    string leftChildKey;
-    string righChildKey;
     Goldilocks::Element vStateRootKey[4]={0,1,2,3};
-    zkresult zkr = pHashDB->db.read(Database::dbStateRootKey, vStateRootKey, dbValue, NULL, leftChildKey, righChildKey, true);
+    zkresult zkr = pHashDB->db.read(vStateRootKey, dbValue, NULL, true);
     if (zkr == ZKR_DB_KEY_NOT_FOUND)
     {
         zklog.warning("loadDb2MemCache() dbStateRootKey=" +  Database::dbStateRootKey + " not found in database; normal only if database is empty");
@@ -2116,7 +2115,7 @@ void loadDb2MemCache(const Config &config)
             string leftChildKey;
             string righChildKey;
             Goldilocks::Element vhash[4]={4,3,2,1};
-            zkresult zkr = pHashDB->db.read(hash, vhash, dbValue, NULL, leftChildKey, righChildKey, true);
+            zkresult zkr = pHashDB->db.read(vhash, dbValue, NULL, true);
             if (zkr != ZKR_SUCCESS)
             {
                 zklog.error("loadDb2MemCache() failed calling db.read(" + hash + ") result=" + zkresult2string(zkr));
@@ -2167,9 +2166,7 @@ void loadDb2MemCache(const Config &config)
                         //zklog.info("loadDb2MemCache() level=" + to_string(level) + " found value rightHash=" + rightHash);
                         Goldilocks::Element vRightHash[4]={dbValue[4], dbValue[5], dbValue[6], dbValue[7]};
                         dbValue.clear();
-                        string leftChildKey;
-                        string righChildKey;
-                        zkresult zkr = pHashDB->db.read(rightHash,vRightHash, dbValue, NULL, leftChildKey, righChildKey, true);
+                        zkresult zkr = pHashDB->db.read(vRightHash, dbValue, NULL, true);
                         if (zkr != ZKR_SUCCESS)
                         {
                             zklog.error("loadDb2MemCache() failed calling db.read(" + rightHash + ") result=" + zkresult2string(zkr));
