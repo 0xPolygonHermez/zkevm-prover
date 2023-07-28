@@ -10,7 +10,6 @@ uint64_t DatabaseCacheTest (void)
     TimerStart(DATABASE_CACHE_TEST);
 
     
-    //  //rick pending
     
     uint64_t numberOfFailed = 0;
 
@@ -37,7 +36,6 @@ uint64_t DatabaseCacheTest (void)
         bool update = false;
 #ifndef DATABASE_USE_ASSOCIATIVE_CACHE
         Database::dbMTCache.add(keyString, value, update);
-        Database::dbMTCache.add(keyString, value,update);
 #else
         scalar2fea(fr, keyScalar, key);
         Database::dbMTCache.addKeyValue(key, value,update);
@@ -51,8 +49,6 @@ uint64_t DatabaseCacheTest (void)
     {
         keyScalar = i;
         keyString = PrependZeros(keyScalar.get_str(16), 64);
-        string leftChildKey;
-        string rightChildKey;
 #ifndef DATABASE_USE_ASSOCIATIVE_CACHE
         bResult = Database::dbMTCache.find(keyString, value);
 #else
@@ -65,8 +61,9 @@ uint64_t DatabaseCacheTest (void)
             numberOfFailed++;
         }
     }
-    
-    //Database::dbMTCache.clear(); //rick pending
+#ifndef DATABASE_USE_ASSOCIATIVE_CACHE
+    Database::dbMTCache.clear();
+#endif
     TimerStopAndLog(DATABASE_CACHE_TEST);
     return numberOfFailed;
 }
