@@ -523,20 +523,17 @@ void Config::print(void)
     zklog.info("    proverID=" + proverID);
     zklog.info("    proverName=" + proverName);
 
-    if (runExecutorServer)
-        zklog.info("    runExecutorServer=true");
+    zklog.info("    runExecutorServer=" + to_string(runExecutorServer));
     if (runExecutorClient)
         zklog.info("    runExecutorClient=true");
     if (runExecutorClientMultithread)
         zklog.info("    runExecutorClientMultithread=true");
-    if (runHashDBServer)
-        zklog.info("    runHashDBServer=true");
+    zklog.info("    runHashDBServer=" + to_string(runHashDBServer));
     if (runHashDBTest)
         zklog.info("    runHashDBTest=true");
     if (runAggregatorServer)
         zklog.info("    runAggregatorServer=true");
-    if (runAggregatorClient)
-        zklog.info("    runAggregatorClient=true");
+    zklog.info("    runAggregatorClient=" + to_string(runAggregatorClient));
     if (runAggregatorClientMock)        
         zklog.info("    runAggregatorClientMock=true");
     if (runFileGenBatchProof)
@@ -573,18 +570,14 @@ void Config::print(void)
     if (runUnitTest)
         zklog.info("    runUnitTest=true");
 
-    if (executeInParallel)
-        zklog.info("    executeInParallel=true");
-    if (useMainExecGenerated)
-        zklog.info("    useMainExecGenerated=true");
-    if (useMainExecC)
-        zklog.info("    useMainExecC=true");
+    zklog.info("    executeInParallel=" + to_string(executeInParallel));
+    zklog.info("    useMainExecGenerated=" + to_string(useMainExecGenerated));
+    zklog.info("    useMainExecC=" + to_string(useMainExecC));
 
     if (executorROMLineTraces)
         zklog.info("    executorROMLineTraces=true");
 
-    if (executorTimeStatistics)
-        zklog.info("    executorTimeStatistics=true");
+    zklog.info("    executorTimeStatistics=" + to_string(executorTimeStatistics));
 
     if (saveRequestToFile)
         zklog.info("    saveRequestToFile=true");
@@ -600,8 +593,7 @@ void Config::print(void)
         zklog.info("    saveProofToFile=true");
     if (saveResponseToFile)
         zklog.info("    saveResponseToFile=true");
-    if (loadDBToMemCache)
-        zklog.info("    loadDBToMemCache=true");
+    zklog.info("    loadDBToMemCache=" + to_string(loadDBToMemCache));
     if (loadDBToMemCacheInParallel)
         zklog.info("    loadDBToMemCacheInParallel=true");
     if (opcodeTracer)
@@ -643,12 +635,10 @@ void Config::print(void)
     zklog.info("    recursive1CmPols=" + recursive1CmPols);
     zklog.info("    zkevmConstPols=" + zkevmConstPols);
     zklog.info("    c12aConstPols=" + c12aConstPols);
-    if (mapConstPolsFile)
-        zklog.info("    mapConstPolsFile=true");
+    zklog.info("    mapConstPolsFile=" + to_string(mapConstPolsFile));
     zklog.info("    zkevmConstantsTree=" + zkevmConstantsTree);
     zklog.info("    c12aConstantsTree=" + c12aConstantsTree);
-    if (mapConstantsTreeFile)
-        zklog.info("    mapConstantsTreeFile=true");
+    zklog.info("    mapConstantsTreeFile=" + to_string(mapConstantsTreeFile));
     zklog.info("    finalVerkey=" + finalVerkey);
     zklog.info("    zkevmVerifier=" + zkevmVerifier);
     zklog.info("    recursive1Verifier=" + recursive1Verifier);
@@ -665,7 +655,7 @@ void Config::print(void)
     zklog.info("    storageRomFile=" + storageRomFile);
     zklog.info("    zkevmStarkInfo=" + zkevmStarkInfo);
     zklog.info("    c12aStarkInfo=" + c12aStarkInfo);
-    zklog.info("    databaseURL=" + databaseURL);
+    zklog.info("    databaseURL=" + databaseURL.substr(0, 5) + "...");
     zklog.info("    dbNodesTableName=" + dbNodesTableName);
     zklog.info("    dbProgramTableName=" + dbProgramTableName);
     zklog.info("    dbMultiWrite=" + to_string(dbMultiWrite));
