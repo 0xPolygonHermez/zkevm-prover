@@ -80,6 +80,7 @@ public:
     // This key is "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
     // This key cannot be the result of a hash because it is out of the Goldilocks Element range
     static string dbStateRootKey;
+    static Goldilocks::Element dbStateRootvKey[4];
 
 #endif
 
