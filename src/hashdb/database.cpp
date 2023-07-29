@@ -1692,13 +1692,10 @@ void Database::printTree(const string &root, string prefix)
     }
     string key = root;
     vector<Goldilocks::Element> value;
-#ifdef DATABASE_USE_ASSOCIATIVE_CACHE        
     Goldilocks::Element vKey[4];
-    string2fea(fr, key, vKey);
+    string2fea(fr, key, vKey);    
     read(vKey,value, NULL);
-#else
-    read(key, value, NULL);
-#endif
+
     if (value.size() != 12)
     {
         zklog.error("Database::printTree() found value.size()=" + to_string(value.size()));
@@ -1737,12 +1734,8 @@ void Database::printTree(const string &root, string prefix)
         string hashValue = fea2string(fr, value[4], value[5], value[6], value[7]);
         zklog.info(prefix + "hashValue=" + hashValue);
         vector<Goldilocks::Element> leafValue;
-#ifdef DATABASE_USE_ASSOCIATIVE_CACHE
         Goldilocks::Element vKey[4]={value[4],value[5],value[6],value[7]};
         read(vKey, leafValue, NULL);
-#else
-        read(hashValue, leafValue, NULL);
-#endif
         if (leafValue.size() == 12)
         {
             if (!fr.equal(leafValue[8], fr.zero()))
@@ -2011,12 +2004,8 @@ void loadDb2MemCache(const Config &config)
     HashDB * pHashDB = (HashDB *)hashDBSingleton.get();
 
     vector<Goldilocks::Element> dbValue;
-
-#ifdef DATABASE_USE_ASSOCIATIVE_CACHE
     zkresult zkr = pHashDB->db.read(Database::dbStateRootvKey, dbValue, NULL, true);
-#else
-    zkresult zkr = pHashDB->db.read(Database::dbStateRootKey, dbValue, NULL, true);
-#endif
+
     if (zkr == ZKR_DB_KEY_NOT_FOUND)
     {
         zklog.warning("loadDb2MemCache() dbStateRootKey=" +  Database::dbStateRootKey + " not found in database; normal only if database is empty");
@@ -2084,13 +2073,10 @@ void loadDb2MemCache(const Config &config)
 
             hash = treeMapIterator->second[i];
             dbValue.clear();
-#ifdef DATABASE_USE_ASSOCIATIVE_CACHE
             Goldilocks::Element vhash[4];
             string2fea(fr, hash, vhash);
             zkresult zkr = pHashDB->db.read(vhash, dbValue, NULL, true);
-#else
-            zkresult zkr = pHashDB->db.read(hash, dbValue, NULL, true);
-#endif
+
             if (zkr != ZKR_SUCCESS)
             {
                 zklog.error("loadDb2MemCache() failed calling db.read(" + hash + ") result=" + zkresult2string(zkr));
@@ -2140,13 +2126,8 @@ void loadDb2MemCache(const Config &config)
                         //zklog.info("loadDb2MemCache() level=" + to_string(level) + " found value rightHash=" + rightHash);
                         dbValue.clear();
 
-#ifdef DATABASE_USE_ASSOCIATIVE_CACHE                        
                         Goldilocks::Element vRightHash[4]={dbValue[4], dbValue[5], dbValue[6], dbValue[7]};
                         zkresult zkr = pHashDB->db.read(vRightHash, dbValue, NULL, true);
-#else
-                        
-                        zkresult zkr = pHashDB->db.read(rightHash, dbValue, NULL, true);
-#endif
                         if (zkr != ZKR_SUCCESS)
                         {
                             zklog.error("loadDb2MemCache() failed calling db.read(" + rightHash + ") result=" + zkresult2string(zkr));

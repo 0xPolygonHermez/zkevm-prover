@@ -28,7 +28,7 @@
 //#define LOG_TIME_STATISTICS_STATEDB_REMOTE // If defined, generates remote statedb statistics
 //#define LOG_TIME_STATISTICS_STATEDB // If defined, generates statedb statistics
 #define LOG_TIME_STATISTICS_MAIN_EXECUTOR
-//#define TIME_METRIC_TABLE
+#define TIME_METRIC_TABLE
 //#define LOG_TXS
 //#define LOG_SERVICE
 #define LOG_SERVICE_EXECUTOR_INPUT
@@ -70,6 +70,6 @@
 //#define HASHDB_LOCK // If defined, the HashDB class will use a lock in all its methods, i.e. they will be serialized
 //#define DATABASE_COMMIT // If defined, the Database class can be configured to autocommit, or explicitly commit(); used for testing only
 #define DATABASE_USE_CACHE // If defined, the Database class uses a cache
-#define DATABASE_USE_ASSOCIATIVE_CACHE // If defined, the Database class uses an associative cache
+//#define DATABASE_USE_ASSOCIATIVE_CACHE // If defined, the Database class uses an associative cache
 
 #endif
