@@ -60,21 +60,22 @@ public:
     {
 
     };
-    inline void add(const string key, vector<Goldilocks::Element> value, const bool cached, const uint64_t time);
-    inline void add(const string key, vector<uint8_t> value, const bool cached, const uint64_t time);
+    inline void add(const string& key, const vector<Goldilocks::Element>& value, const bool cached, const uint64_t time);
+    inline void add(const string& key, const vector<uint8_t>& value, const bool cached, const uint64_t time);
     inline void addGetTree(const uint64_t time, const uint64_t numberOfFields);
     void add(MTMap &db);
     void add(ProgramMap &db);
-    bool findMT(const string key, vector<Goldilocks::Element> &value);
-    bool findProgram(const string key, vector<uint8_t> &value);
+    bool findMT(const string& key, vector<Goldilocks::Element> &value);
+    bool findProgram(const string& key, vector<uint8_t> &value);
     MTMap getMTDB();
     ProgramMap getProgramDB();
     void setOnChangeCallback(void *instance, onChangeCallbackFunctionPtr function);
-    void setSaveKeys(const bool saveKeys_){ saveKeys = saveKeys_; };
+    inline void setSaveKeys(const bool saveKeys_){ saveKeys = saveKeys_; };
+    inline bool getSaveKeys(){ return saveKeys; };
     void print(void);
 };
 
-void DatabaseMap::add(const string key, vector<Goldilocks::Element> value, const bool cached, const uint64_t time)
+void DatabaseMap::add(const string& key, const vector<Goldilocks::Element>& value, const bool cached, const uint64_t time)
 {
     lock_guard<recursive_mutex> guard(mlock);
     if(saveKeys) mtDB[key] = value;
@@ -91,7 +92,7 @@ void DatabaseMap::add(const string key, vector<Goldilocks::Element> value, const
     if (callbackOnChange) onChangeCallback();
 }
 
-void DatabaseMap::add(const string key, vector<uint8_t> value, const bool cached, const uint64_t time)
+void DatabaseMap::add(const string& key, const vector<uint8_t>& value, const bool cached, const uint64_t time)
 {
     lock_guard<recursive_mutex> guard(mlock);
 

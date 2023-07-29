@@ -22,7 +22,7 @@ void DatabaseMap::add(ProgramMap &db)
     if (callbackOnChange) onChangeCallback();
 }
 
-bool DatabaseMap::findMT(const string key, vector<Goldilocks::Element> &value)
+bool DatabaseMap::findMT(const string& key, vector<Goldilocks::Element> &value)
 {
     lock_guard<recursive_mutex> guard(mlock);
 
@@ -37,7 +37,7 @@ bool DatabaseMap::findMT(const string key, vector<Goldilocks::Element> &value)
     return false;
 }
 
-bool DatabaseMap::findProgram(const string key, vector<uint8_t> &value)
+bool DatabaseMap::findProgram(const string& key, vector<uint8_t> &value)
 {
     lock_guard<recursive_mutex> guard(mlock);
 
