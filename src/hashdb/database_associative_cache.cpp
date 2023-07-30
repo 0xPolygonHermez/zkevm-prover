@@ -142,6 +142,8 @@ void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], cons
                 values[cacheIndexValue + 11] = value[11];
             }
             return;
+        }else{
+            return;
         }
     }
     //
@@ -186,7 +188,7 @@ void DatabaseMTAssociativeCache::forcedInsertion(uint32_t index, int &iters)
     iters++;
     if (iters > 5)
     {
-        zklog.error("forcedInsertion() more than 5 iterations required!");
+        zklog.error("forcedInsertion() more than 5 iterations required!" + to_string(index));
         exitProcess();
     }    
 

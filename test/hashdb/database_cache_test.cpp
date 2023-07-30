@@ -16,6 +16,8 @@ uint64_t DatabaseCacheTest (void)
 #ifndef DATABASE_USE_ASSOCIATIVE_CACHE
     Database::dbMTCache.clear();
     Database::dbMTCache.setMaxSize(2000000);
+#else
+    Goldilocks::Element key[4];
 #endif
     Goldilocks fr;
     mpz_class keyScalar;
@@ -36,7 +38,6 @@ uint64_t DatabaseCacheTest (void)
 #ifndef DATABASE_USE_ASSOCIATIVE_CACHE
         Database::dbMTCache.add(keyString, value, update);
 #else
-        Goldilocks::Element key[4];
         scalar2fea(fr, keyScalar, key);
         Database::dbMTCache.addKeyValue(key, value,update);
 #endif
