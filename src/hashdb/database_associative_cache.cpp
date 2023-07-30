@@ -13,6 +13,7 @@ DatabaseMTAssociativeCache::DatabaseMTAssociativeCache()
 {
     nKeyBits = 0;
     indicesSize = 0;
+    log2CacheSize = 0;
     cacheSize = 0;
     indices = NULL;
     keys = NULL;
@@ -41,26 +42,42 @@ DatabaseMTAssociativeCache::~DatabaseMTAssociativeCache()
         delete[] isLeaf;
 };
 
-void DatabaseMTAssociativeCache::postConstruct(int nKeyBits_, int cacheSize_, string name_)
+void DatabaseMTAssociativeCache::postConstruct(int nKeyBits_, int log2CacheSize_, string name_)
 {
     nKeyBits = nKeyBits_;
-    if (nKeyBits_ > 64)
+    if (nKeyBits_ > 32)
     {
-        zklog.error("DatabaseMTAssociativeCache::DatabaseMTAssociativeCache() nKeyBits_ > 64");
-        exit(1);
+        zklog.error("DatabaseMTAssociativeCache::DatabaseMTAssociativeCache() nKeyBits_ > 32");
+        exitProcess();
     }
     indicesSize = 1 << nKeyBits;
-    cacheSize = cacheSize_;
+
+    log2CacheSize = log2CacheSize_;
+    if (log2CacheSize_ > 32)
+    {
+        zklog.error("DatabaseMTAssociativeCache::DatabaseMTAssociativeCache() log2CacheSize_ > 32");
+        exitProcess();
+    }
+    cacheSize = 1 << log2CacheSize_;
+
     indices = new uint32_t[indicesSize];
-    uint32_t initValue = cacheSize + 1;
+    uint32_t initValue = UINT32_MAX-cacheSize-1;
     memset(indices, initValue, sizeof(uint32_t) * indicesSize);
     keys = new Goldilocks::Element[4 * cacheSize];
     values = new Goldilocks::Element[12 * cacheSize];
     isLeaf = new bool[cacheSize];
+
     currentCacheIndex = 0;
     attempts = 0;
     hits = 0;
     name = name_;
+
+    cacheMask = 0;
+    for (int i = 0; i < log2CacheSize; i++)
+    {
+        cacheMask = cacheMask << 1;
+        cacheMask += 1;
+    }
 
     indicesMask = 0;
     for (int i = 0; i < nKeyBits; i++)
@@ -87,7 +104,7 @@ void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], cons
     for (int i = 0; i < 4; ++i)
     {
         uint32_t tableIndex = (uint32_t)(key[i].fe & indicesMask);
-        uint32_t cacheIndex = indices[tableIndex];
+        uint32_t cacheIndex = (uint32_t)(indices[tableIndex] & cacheMask);
         uint32_t cacheIndexKey, cacheIndexValue;
         bool write = false;
 
@@ -95,7 +112,7 @@ void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], cons
             (currentCacheIndex < cacheSize && UINT32_MAX - cacheIndex + currentCacheIndex > cacheSize))
         {
             write = true;
-            cacheIndex = currentCacheIndex;
+            cacheIndex = (uint32_t)(currentCacheIndex & cacheMask);
             currentCacheIndex = (currentCacheIndex == UINT32_MAX) ? 0 : (currentCacheIndex + 1); // atomic!
             indices[tableIndex] = cacheIndex;
             cacheIndexKey = cacheIndex * 4;
@@ -149,7 +166,7 @@ void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], cons
     //
     // forced entry insertion
     //
-    uint32_t cacheIndex = currentCacheIndex;
+    uint32_t cacheIndex = (uint32_t)(currentCacheIndex & cacheMask);
     currentCacheIndex = (currentCacheIndex == UINT32_MAX) ? 0 : (currentCacheIndex + 1); // atomic!
     uint32_t cacheIndexKey = cacheIndex * 4;
     uint32_t cacheIndexValue = cacheIndex * 12;
@@ -202,7 +219,7 @@ void DatabaseMTAssociativeCache::forcedInsertion(uint32_t index, int &iters)
     for (int i = 0; i < 4; ++i)
     {
         uint32_t tableIndex = (uint32_t)(key[i].fe & indicesMask);
-        uint32_t cacheIndex = indices[tableIndex];
+        uint32_t cacheIndex = (uint32_t)(indices[tableIndex] & cacheMask);
         if (currentCacheIndex - cacheIndex > cacheSize ||
             (currentCacheIndex < cacheSize && UINT32_MAX - cacheIndex + currentCacheIndex > cacheSize))
         {
@@ -227,7 +244,7 @@ bool DatabaseMTAssociativeCache::findKey(Goldilocks::Element (&key)[4], vector<G
     for (int i = 0; i < 4; i++)
     {
         uint32_t tableIndex = (uint32_t)(key[i].fe & indicesMask);
-        uint32_t cacheIndex = indices[tableIndex];
+        uint32_t cacheIndex = (uint32_t)(indices[tableIndex] & cacheMask);
         if (currentCacheIndex - cacheIndex > cacheSize ||
             (currentCacheIndex < cacheSize && UINT32_MAX - cacheIndex + currentCacheIndex > cacheSize))
             continue;

@@ -15,7 +15,8 @@ class DatabaseMTAssociativeCache
         recursive_mutex mlock;
 
         int nKeyBits;
-        int indicesSize;
+        uint32_t indicesSize;
+        int log2CacheSize;
         uint32_t cacheSize;
 
         uint32_t *indices;
@@ -29,14 +30,16 @@ class DatabaseMTAssociativeCache
         string name;
 
         uint64_t indicesMask;
+        uint64_t cacheMask;
+
 
     public:
 
         DatabaseMTAssociativeCache();
-        DatabaseMTAssociativeCache(int nKeyBits_, int cacheSize_, string name_);
+        DatabaseMTAssociativeCache(int nKeyBits_, int log2CacheSize_, string name_);
         ~DatabaseMTAssociativeCache();
 
-        void postConstruct(int nKeyBits_, int cacheSize_, string name_);
+        void postConstruct(int nKeyBits_, int log2CacheSize_, string name_);
         void addKeyValue(Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, bool update);
         bool findKey(Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value);
         inline bool enabled() { return (nKeyBits > 0); };

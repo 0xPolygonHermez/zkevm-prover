@@ -171,6 +171,14 @@ void Config::load(json &config)
     dbMTCacheSize = 4*1024;
     if (config.contains("dbMTCacheSize") && config["dbMTCacheSize"].is_number())
         dbMTCacheSize = config["dbMTCacheSize"];
+    
+    log2DbMTAssociativeCacheSize = 20;
+    if (config.contains("log2DbMTAssociativeCacheSize") && config["log2DbMTAssociativeCacheSize"].is_number())
+        log2DbMTAssociativeCacheSize = config["log2DbMTAssociativeCacheSize"];
+    
+    log2DbMTAssociativeCacheIndicesSize = 23;
+    if (config.contains("log2DbMTAssociativeCacheIndicesSize") && config["log2DbMTAssociativeCacheIndicesSize"].is_number())
+        log2DbMTAssociativeCacheSize = config["log2DbMTAssociativeCacheIndicesSize"];
 
     dbProgramCacheSize = 1*1024;
     if (config.contains("dbProgramCacheSize") && config["dbProgramCacheSize"].is_number())
@@ -674,6 +682,8 @@ void Config::print(void)
     zklog.info("    maxProverThreads=" + to_string(maxProverThreads));
     zklog.info("    maxHashDBThreads=" + to_string(maxHashDBThreads));
     zklog.info("    dbMTCacheSize=" + to_string(dbMTCacheSize));
+    zklog.info("    log2DbMTAssociativeCacheSize=" + to_string(log2DbMTAssociativeCacheSize));
+    zklog.info("    log2DbMTAssociativeCacheIndicesSize=" + to_string(log2DbMTAssociativeCacheIndicesSize));
     zklog.info("    dbProgramCacheSize=" + to_string(dbProgramCacheSize));
     zklog.info("    loadDBToMemTimeout=" + to_string(loadDBToMemTimeout));
     zklog.info("    fullTracerTraceReserveSize=" + to_string(fullTracerTraceReserveSize));

@@ -58,6 +58,9 @@ public:
     bool loadDBToMemCacheInParallel;
     uint64_t loadDBToMemTimeout;
     int64_t dbMTCacheSize; // Size in MBytes for the cache to store MT records
+    int64_t log2DbMTAssociativeCacheSize; // log2 of the size in entries of the DatabaseMTAssociativeCache. Note 1 cache entry = 97 bytes
+    int64_t log2DbMTAssociativeCacheIndicesSize; // log2 of the size in entries of the DatabaseMTAssociativeCache indices. Note index entry = 4 bytes
+
     int64_t dbProgramCacheSize; // Size in MBytes for the cache to store Program (SC) records
     bool opcodeTracer;
     bool logRemoteDbReads;

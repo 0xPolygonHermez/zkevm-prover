@@ -590,7 +590,7 @@ int main(int argc, char **argv)
 
     /* INIT DB CACHE */
 #ifdef DATABASE_USE_ASSOCIATIVE_CACHE
-    Database::dbMTCache.postConstruct(23, 1 << 20, "MTCache"); // TODO: configurable
+    Database::dbMTCache.postConstruct(config.log2DbMTAssociativeCacheIndicesSize, config.log2DbMTAssociativeCacheSize, "MTCache"); // TODO: configurable
 #else
     Database::dbMTCache.setName("MTCache");
     Database::dbMTCache.setMaxSize(config.dbMTCacheSize*1024*1024);
