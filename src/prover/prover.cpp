@@ -119,8 +119,10 @@ Prover::Prover(Goldilocks &fr,
                 zklog.info("Prover::genBatchProof() successfully allocated " + to_string(polsSize) + " bytes");
             }
 
-            prover = new Fflonk::FflonkProver<AltBn128::Engine>(AltBn128::Engine::engine, pAddress, polsSize);
-            prover->setZkey(zkey.get());
+            if (Zkey::FFLONK_PROTOCOL_ID == protocolId) {
+                prover = new Fflonk::FflonkProver<AltBn128::Engine>(AltBn128::Engine::engine, pAddress, polsSize);
+                prover->setZkey(zkey.get());
+            }
 
             StarkInfo _starkInfoRecursiveF(config, config.recursivefStarkInfo);
             pAddressStarksRecursiveF = (void *)malloc(_starkInfoRecursiveF.mapTotalN * sizeof(Goldilocks::Element));
@@ -150,8 +152,6 @@ Prover::~Prover()
         BinFileUtils::BinFile *pZkey = zkey.release();
         ZKeyUtils::Header *pZkeyHeader = zkeyHeader.release();
 
-        assert(groth16Prover.get() == nullptr);
-        assert(groth16Prover == nullptr);
         assert(zkey.get() == nullptr);
         assert(zkey == nullptr);
         assert(zkeyHeader.get() == nullptr);
@@ -174,7 +174,8 @@ Prover::~Prover()
         }
         free(pAddressStarksRecursiveF);
 
-        delete prover;
+        if (Zkey::FFLONK_PROTOCOL_ID == protocolId)
+            delete prover;
 
         delete starkZkevm;
         delete starksC12a;
