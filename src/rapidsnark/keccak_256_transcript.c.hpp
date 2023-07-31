@@ -42,7 +42,7 @@ typename Engine::FrElement Keccak256Transcript<Engine>::getChallenge() {
             bytes += E.fr.toRprBE(element, data + bytes, E.fr.bytes());
         } else {
             G1Point element = std::any_cast<G1Point>(elements[i].element);
-            bytes += toRprBE(element, data, bytes, sizeof(element));
+            bytes += toRprBE(element, data, bytes, E.g1.F.bytes());
         }
     }
 

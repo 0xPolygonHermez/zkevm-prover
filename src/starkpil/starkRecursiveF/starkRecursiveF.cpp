@@ -5,20 +5,22 @@
 #include "fr.hpp"
 #include "poseidon_opt.hpp"
 #include "starkRecursiveFSteps.hpp"
+#include "zklog.hpp"
+#include "exit_process.hpp"
 
 #define NUM_CHALLENGES 8
 
 StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config(config),
-                                                         starkInfo(config, config.recursivefStarkInfo),
-                                                         zi(config.generateProof() ? starkInfo.starkStruct.nBits : 0,
-                                                            config.generateProof() ? starkInfo.starkStruct.nBitsExt : 0),
-                                                         N(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
-                                                         NExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
-                                                         ntt(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
-                                                         nttExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
-                                                         x_n(config.generateProof() ? N : 0, config.generateProof() ? 1 : 0),
-                                                         x_2ns(config.generateProof() ? NExtended : 0, config.generateProof() ? 1 : 0),
-                                                         pAddress(_pAddress)
+                                                                          starkInfo(config, config.recursivefStarkInfo),
+                                                                          zi(config.generateProof() ? starkInfo.starkStruct.nBits : 0,
+                                                                             config.generateProof() ? starkInfo.starkStruct.nBitsExt : 0),
+                                                                          N(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
+                                                                          NExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
+                                                                          ntt(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
+                                                                          nttExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
+                                                                          x_n(config.generateProof() ? N : 0, config.generateProof() ? 1 : 0),
+                                                                          x_2ns(config.generateProof() ? NExtended : 0, config.generateProof() ? 1 : 0),
+                                                                          pAddress(_pAddress)
 {
     // Avoid unnecessary initialization if we are not going to generate any proof
     if (!config.generateProof())
@@ -30,8 +32,8 @@ StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config
     pConstPolsAddress = NULL;
     if (config.recursivefConstPols.size() == 0)
     {
-        cerr << "Error: StarkRecursiveF::StarkRecursiveF() received an empty config.recursivefConstPols" << endl;
-        exit(-1);
+        zklog.error("StarkRecursiveF::StarkRecursiveF() received an empty config.recursivefConstPols");
+        exitProcess();
     }
     constPolsDegree = (1 << starkInfo.starkStruct.nBits);
     constPolsSize = starkInfo.nConstants * sizeof(Goldilocks::Element) * constPolsDegree;
@@ -39,12 +41,12 @@ StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config
     if (config.mapConstPolsFile)
     {
         pConstPolsAddress = mapFile(config.recursivefConstPols, constPolsSize, false);
-        cout << "StarkRecursiveF::StarkRecursiveF() successfully mapped " << constPolsSize << " bytes from constant file " << config.recursivefConstPols << endl;
+        zklog.info("StarkRecursiveF::StarkRecursiveF() successfully mapped " + to_string(constPolsSize) + " bytes from constant file " + config.recursivefConstPols);
     }
     else
     {
         pConstPolsAddress = copyFile(config.recursivefConstPols, constPolsSize);
-        cout << "StarkRecursiveF::StarkRecursiveF() successfully copied " << constPolsSize << " bytes from constant file " << config.recursivefConstPols << endl;
+        zklog.info("StarkRecursiveF::StarkRecursiveF() successfully copied " + to_string(constPolsSize) + " bytes from constant file " + config.recursivefConstPols);
     }
     pConstPols = new ConstantPolsStarks(pConstPolsAddress, constPolsDegree, starkInfo.nConstants);
     TimerStopAndLog(LOAD_RECURSIVE_F_CONST_POLS_TO_MEMORY);
@@ -55,19 +57,19 @@ StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config
     pConstTreeAddress = NULL;
     if (config.recursivefConstantsTree.size() == 0)
     {
-        cerr << "Error: StarkRecursiveF::StarkRecursiveF() received an empty config.recursivefConstantsTree" << endl;
-        exit(-1);
+        zklog.error("StarkRecursiveF::StarkRecursiveF() received an empty config.recursivefConstantsTree");
+        exitProcess();
     }
 
     if (config.mapConstantsTreeFile)
     {
         pConstTreeAddress = mapFile(config.recursivefConstantsTree, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants), false);
-        cout << "StarkRecursiveF::StarkRecursiveF() successfully mapped " << getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants) << " bytes from constant tree file " << config.recursivefConstantsTree << endl;
+        zklog.info("StarkRecursiveF::StarkRecursiveF() successfully mapped " + to_string(getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants)) + " bytes from constant tree file " + config.recursivefConstantsTree);
     }
     else
     {
         pConstTreeAddress = copyFile(config.recursivefConstantsTree, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants));
-        cout << "StarkRecursiveF::StarkRecursiveF() successfully copied " << getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants) << " bytes from constant file " << config.recursivefConstantsTree << endl;
+        zklog.info("StarkRecursiveF::StarkRecursiveF() successfully copied " + to_string(getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants)) + " bytes from constant file " + config.recursivefConstantsTree);
     }
     TimerStopAndLog(LOAD_RECURSIVE_F_CONST_TREE_TO_MEMORY);
 
@@ -107,7 +109,6 @@ StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config
     cm4_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm4_2ns]];
     p_q_2ns = &mem[starkInfo.mapOffsets.section[eSection::q_2ns]];
     p_f_2ns = &mem[starkInfo.mapOffsets.section[eSection::f_2ns]];
-
 }
 
 StarkRecursiveF::~StarkRecursiveF()
@@ -140,9 +141,9 @@ StarkRecursiveF::~StarkRecursiveF()
     free(pBuffer);
 }
 
-void StarkRecursiveF::genProof( FRIProofC12 &proof, Goldilocks::Element publicInputs[8])
+void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInputs[8])
 {
-    
+
     StarkRecursiveFSteps recurisveFsteps;
     StarkRecursiveFSteps *steps = &recurisveFsteps;
     // Initialize vars
@@ -153,9 +154,7 @@ void StarkRecursiveF::genProof( FRIProofC12 &proof, Goldilocks::Element publicIn
     Polinomial xDivXSubWXi(NExtended, FIELD_EXTENSION);
     Polinomial challenges(NUM_CHALLENGES, FIELD_EXTENSION);
 
-
-
-    CommitPolsStarks cmPols(pAddress, starkInfo.mapDeg.section[eSection::cm1_n]);
+    CommitPolsStarks cmPols(pAddress, starkInfo.mapDeg.section[eSection::cm1_n], numCommited);
 
     RawFr::Element root0;
     RawFr::Element root1;
@@ -196,7 +195,7 @@ void StarkRecursiveF::genProof( FRIProofC12 &proof, Goldilocks::Element publicIn
 
     treesBN128[0]->merkelize();
     treesBN128[0]->getRoot(&root0);
-    std::cout << "MerkleTree root 0: [ " << RawFr::field.toString(root0, 10) << " ]" << std::endl;
+    zklog.info("MerkleTree root 0: [ " + RawFr::field.toString(root0, 10) + " ]");
     transcript.put(&root0, 1);
 
     TimerStopAndLog(STARK_RECURSIVE_F_STEP_1_LDE);
@@ -224,12 +223,11 @@ void StarkRecursiveF::genProof( FRIProofC12 &proof, Goldilocks::Element publicIn
     {
         Polinomial fPol = starkInfo.getPolinomial(mem, starkInfo.exp2pol[to_string(starkInfo.puCtx[i].fExpId)]);
         Polinomial tPol = starkInfo.getPolinomial(mem, starkInfo.exp2pol[to_string(starkInfo.puCtx[i].tExpId)]);
-        Polinomial h1 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited + i * 2]);
-        Polinomial h2 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited + i * 2 + 1]);
+        Polinomial h1 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited++]);
+        Polinomial h2 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited++]);
 
         Polinomial::calculateH1H2(h1, h2, fPol, tPol);
     }
-    numCommited = numCommited + starkInfo.puCtx.size() * 2;
     TimerStopAndLog(STARK_RECURSIVE_F_STEP_2_CALCULATEH1H2);
 
     TimerStart(STARK_RECURSIVE_F_STEP_2_LDE_AND_MERKLETREE);
@@ -238,7 +236,7 @@ void StarkRecursiveF::genProof( FRIProofC12 &proof, Goldilocks::Element publicIn
 
     treesBN128[1]->merkelize();
     treesBN128[1]->getRoot(&root1);
-    std::cout << "MerkleTree root 1: [ " << RawFr::field.toString(root1, 10) << " ]" << std::endl;
+    zklog.info("MerkleTree root 1: [ " + RawFr::field.toString(root1, 10) + " ]");
     transcript.put(&root1, 1);
 
     TimerStopAndLog(STARK_RECURSIVE_F_STEP_2_LDE_AND_MERKLETREE);
@@ -251,13 +249,13 @@ void StarkRecursiveF::genProof( FRIProofC12 &proof, Goldilocks::Element publicIn
     transcript.getField((uint64_t *)challenges[2]); // gamma
     transcript.getField((uint64_t *)challenges[3]); // betta
 
-    TimerStart(STARK_RECURSIVE_F_STEP_3_CALCULATE_EXPS);
+    TimerStart(STARK_RECURSIVE_F_STEP_3_PREV_CALCULATE_EXPS);
 #pragma omp parallel for
     for (uint64_t i = 0; i < N; i++)
     {
         steps->step3prev_first(params, i);
     }
-    TimerStopAndLog(STARK_RECURSIVE_F_STEP_3_CALCULATE_EXPS);
+    TimerStopAndLog(STARK_RECURSIVE_F_STEP_3_PREV_CALCULATE_EXPS);
     TimerStart(STARK_RECURSIVE_F_STEP_3_CALCULATE_Z);
 
     for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
@@ -285,13 +283,21 @@ void StarkRecursiveF::genProof( FRIProofC12 &proof, Goldilocks::Element publicIn
     }
     TimerStopAndLog(STARK_RECURSIVE_F_STEP_3_CALCULATE_Z);
 
+    TimerStart(STARK_RECURSIVE_F_STEP_3_CALCULATE_EXPS);
+    #pragma omp parallel for
+    for (uint64_t i = 0; i < N; i++)
+    {
+        steps->step3_first(params, i);
+    }
+    TimerStopAndLog(STARK_RECURSIVE_F_STEP_3_CALCULATE_EXPS);
+
     TimerStart(STARK_RECURSIVE_F_STEP_3_LDE_AND_MERKLETREE);
 
     ntt.extendPol(p_cm3_2ns, p_cm3_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm3_n], pBuffer);
 
     treesBN128[2]->merkelize();
     treesBN128[2]->getRoot(&root2);
-    std::cout << "MerkleTree root 2: [ " << RawFr::field.toString(root2, 10) << " ]" << std::endl;
+    zklog.info("MerkleTree root 2: [ " + RawFr::field.toString(root2, 10) + " ]");
     transcript.put(&root2, 1);
 
     TimerStopAndLog(STARK_RECURSIVE_F_STEP_3_LDE_AND_MERKLETREE);
@@ -340,7 +346,7 @@ void StarkRecursiveF::genProof( FRIProofC12 &proof, Goldilocks::Element publicIn
 
     treesBN128[3]->merkelize();
     treesBN128[3]->getRoot(&root3);
-    std::cout << "MerkleTree root 3: [ " << RawFr::field.toString(root3, 10) << " ]" << std::endl;
+    zklog.info("MerkleTree root 3: [ " + RawFr::field.toString(root3, 10) + " ]");
     transcript.put(&root3, 1);
     TimerStopAndLog(STARK_RECURSIVE_F_STEP_4_MERKLETREE);
     TimerStopAndLog(STARK_RECURSIVE_F_STEP_4);
@@ -636,7 +642,7 @@ void StarkRecursiveF::genProof( FRIProofC12 &proof, Goldilocks::Element publicIn
     std::memcpy(&proof.proofs.root2[0], &root1, sizeof(RawFr::Element));
     std::memcpy(&proof.proofs.root3[0], &root2, sizeof(RawFr::Element));
     std::memcpy(&proof.proofs.root4[0], &root3, sizeof(RawFr::Element));
-    for (uint i = 0; i < 4; i++)
+    for (uint i = 0; i < 5; i++)
     {
         delete treesBN128[i];
     }

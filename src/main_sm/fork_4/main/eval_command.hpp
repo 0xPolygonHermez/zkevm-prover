@@ -114,14 +114,16 @@ void eval_comp_lt             (Context &ctx, const RomCommand &cmd, CommandResul
 void eval_comp_gt             (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_comp_eq             (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_loadScalar          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_getGlobalExitRootManagerAddr (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_log                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_exp                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_storeLog            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_memAlignWR_W0       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_memAlignWR_W1       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_memAlignWR8_W0      (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_addReadWriteAddress (Context &ctx, const mpz_class value);
+
+zkresult eval_addReadWriteAddress (Context &ctx, const mpz_class value);
+
+mpz_class sqrtTonelliShanks ( const mpz_class &n, const mpz_class &p );
 
 } // namespace
 

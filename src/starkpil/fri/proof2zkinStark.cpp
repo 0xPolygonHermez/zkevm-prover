@@ -81,7 +81,7 @@ ordered_json proof2zkinStark(ordered_json &proof)
     return zkinOut;
 };
 
-ordered_json joinzkin(ordered_json &zkin1, ordered_json &zkin2, ordered_json &verKey)
+ordered_json joinzkin(ordered_json &zkin1, ordered_json &zkin2, ordered_json &verKey, uint64_t steps)
 {
     ordered_json zkinOut = ordered_json::object();
 
@@ -135,18 +135,12 @@ ordered_json joinzkin(ordered_json &zkin1, ordered_json &zkin2, ordered_json &ve
     zkinOut["a_s0_siblings3"] = zkin1["s0_siblings3"];
     zkinOut["a_s0_siblings4"] = zkin1["s0_siblings4"];
     zkinOut["a_s0_siblingsC"] = zkin1["s0_siblingsC"];
-    zkinOut["a_s1_root"] = zkin1["s1_root"];
-    zkinOut["a_s2_root"] = zkin1["s2_root"];
-    zkinOut["a_s3_root"] = zkin1["s3_root"];
-    zkinOut["a_s4_root"] = zkin1["s4_root"];
-    zkinOut["a_s1_siblings"] = zkin1["s1_siblings"];
-    zkinOut["a_s2_siblings"] = zkin1["s2_siblings"];
-    zkinOut["a_s3_siblings"] = zkin1["s3_siblings"];
-    zkinOut["a_s4_siblings"] = zkin1["s4_siblings"];
-    zkinOut["a_s1_vals"] = zkin1["s1_vals"];
-    zkinOut["a_s2_vals"] = zkin1["s2_vals"];
-    zkinOut["a_s3_vals"] = zkin1["s3_vals"];
-    zkinOut["a_s4_vals"] = zkin1["s4_vals"];
+    for (uint64_t i = 1; i < steps; i++)
+    {
+        zkinOut["a_s" + std::to_string(i) + "_root"] = zkin1["s" + std::to_string(i) + "_root"];
+        zkinOut["a_s" + std::to_string(i) + "_siblings"] = zkin1["s" + std::to_string(i) + "_siblings"];
+        zkinOut["a_s" + std::to_string(i) + "_vals"] = zkin1["s" + std::to_string(i) + "_vals"];
+    }
     zkinOut["a_finalPol"] = zkin1["finalPol"];
 
     zkinOut["b_publics"] = zkin2["publics"];
@@ -163,18 +157,12 @@ ordered_json joinzkin(ordered_json &zkin1, ordered_json &zkin2, ordered_json &ve
     zkinOut["b_s0_siblings3"] = zkin2["s0_siblings3"];
     zkinOut["b_s0_siblings4"] = zkin2["s0_siblings4"];
     zkinOut["b_s0_siblingsC"] = zkin2["s0_siblingsC"];
-    zkinOut["b_s1_root"] = zkin2["s1_root"];
-    zkinOut["b_s2_root"] = zkin2["s2_root"];
-    zkinOut["b_s3_root"] = zkin2["s3_root"];
-    zkinOut["b_s4_root"] = zkin2["s4_root"];
-    zkinOut["b_s1_siblings"] = zkin2["s1_siblings"];
-    zkinOut["b_s2_siblings"] = zkin2["s2_siblings"];
-    zkinOut["b_s3_siblings"] = zkin2["s3_siblings"];
-    zkinOut["b_s4_siblings"] = zkin2["s4_siblings"];
-    zkinOut["b_s1_vals"] = zkin2["s1_vals"];
-    zkinOut["b_s2_vals"] = zkin2["s2_vals"];
-    zkinOut["b_s3_vals"] = zkin2["s3_vals"];
-    zkinOut["b_s4_vals"] = zkin2["s4_vals"];
+    for (uint64_t i = 1; i < steps; i++)
+    {
+        zkinOut["b_s" + std::to_string(i) + "_root"] = zkin2["s" + std::to_string(i) + "_root"];
+        zkinOut["b_s" + std::to_string(i) + "_siblings"] = zkin2["s" + std::to_string(i) + "_siblings"];
+        zkinOut["b_s" + std::to_string(i) + "_vals"] = zkin2["s" + std::to_string(i) + "_vals"];
+    }
     zkinOut["b_finalPol"] = zkin2["finalPol"];
 
     zkinOut["rootC"] = ordered_json::array();

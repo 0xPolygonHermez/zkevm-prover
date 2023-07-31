@@ -3,6 +3,7 @@
 #include "utils.hpp"
 #include "scalar.hpp"
 #include "timer.hpp"
+#include "zklog.hpp"
 
 using json = nlohmann::json;
 
@@ -15,7 +16,7 @@ void MemoryExecutor::execute (vector<MemoryAccess> &input, MemCommitPols &pols)
     // Check input size does not exceed the number of evaluations
     if (inputSize > N)
     {
-        cerr << "Error: MemoryExecutor::execute() Too many entries input.size()=" << input.size() << " > N=" << N << endl;
+        zklog.error("MemoryExecutor::execute() Too many entries input.size()=" + to_string(input.size()) + " > N=" + to_string(N));
         exitProcess();
     }
 
@@ -65,20 +66,20 @@ void MemoryExecutor::execute (vector<MemoryAccess> &input, MemCommitPols &pols)
 
 #ifdef LOG_MEMORY_EXECUTOR
         mpz_class addr = pols.addr[i];
-        cout << "Memory executor: i=" << i << 
-        " addr=" << addr.get_str(16) << 
-        " step=" << pols.step[i] << 
-        " mOp=" << pols.mOp[i] << 
-        " mWr=" << pols.mWr[i] <<
-        " val=" << fr.toString(pols.val[7][i],16) << 
-            ":" << fr.toString(pols.val[6][i],16) << 
-            ":" << fr.toString(pols.val[5][i],16) << 
-            ":" << fr.toString(pols.val[4][i],16) << 
-            ":" << fr.toString(pols.val[3][i],16) << 
-            ":" << fr.toString(pols.val[2][i],16) << 
-            ":" << fr.toString(pols.val[1][i],16) << 
-            ":" << fr.toString(pols.val[0][i],16) <<
-        " lastAccess=" << pols.lastAccess[i] << endl;
+        zklog.info( "Memory executor: i=" + to_string(i) + 
+        " addr=" + addr.get_str(16) +
+        " step=" + fr.toString(pols.step[i],10) + 
+        " mOp=" + fr.toString(pols.mOp[i],10) + 
+        " mWr=" + fr.toString(pols.mWr[i], 10) +
+        " val=" + fr.toString(pols.val[7][i],16) + 
+            ":" + fr.toString(pols.val[6][i],16) + 
+            ":" + fr.toString(pols.val[5][i],16) + 
+            ":" + fr.toString(pols.val[4][i],16) +
+            ":" + fr.toString(pols.val[3][i],16) + 
+            ":" + fr.toString(pols.val[2][i],16) + 
+            ":" + fr.toString(pols.val[1][i],16) + 
+            ":" + fr.toString(pols.val[0][i],16) +
+        " lastAccess=" + fr.toString(pols.lastAccess[i],10));
 #endif
     }
 
@@ -102,7 +103,7 @@ void MemoryExecutor::execute (vector<MemoryAccess> &input, MemCommitPols &pols)
     // pols.lastAccess = 1 in the last evaluation to ensure ciclical validation
     pols.lastAccess[N-1] = fr.one();
 
-    cout << "MemoryExecutor successfully processed " << access.size() << " memory accesses (" << (double(access.size())*100)/N << "%)" << endl;
+    zklog.info("MemoryExecutor successfully processed " + to_string(access.size()) + " memory accesses (" + to_string((double(access.size())*100)/N) + "%)");
 }
 
 class MemoryAccessCompare
@@ -140,9 +141,8 @@ void MemoryExecutor::print (const vector<MemoryAccess> &access, Goldilocks &fr)
     for (uint64_t i=0; i<access.size(); i++)
     {
         mpz_class aux = access[i].address;
-        cout << "Memory access i=" << i << " address=" << aux.get_str(16) << " pc=" << access[i].pc << " " << (access[i].bIsWrite?"WRITE":"READ") << " value="
-        << fr.toString(access[i].fe7,16) << ":" << fr.toString(access[i].fe6,16) << ":" << fr.toString(access[i].fe5,16) << ":" << fr.toString(access[i].fe4,16) << ":"
-        << fr.toString(access[i].fe3,16) << ":" << fr.toString(access[i].fe2,16) << ":" << fr.toString(access[i].fe1,16) << ":" << fr.toString(access[i].fe0,16)
-        << endl;
+        zklog.info("Memory access i=" + to_string(i) + " address=" + aux.get_str(16) + " pc=" + to_string(access[i].pc) + " " + (access[i].bIsWrite?"WRITE":"READ") + " value="
+        + fr.toString(access[i].fe7,16) + ":" + fr.toString(access[i].fe6,16) + ":" + fr.toString(access[i].fe5,16) + ":" + fr.toString(access[i].fe4,16) + ":"
+        + fr.toString(access[i].fe3,16) + ":" + fr.toString(access[i].fe2,16) + ":" + fr.toString(access[i].fe1,16) + ":" + fr.toString(access[i].fe0,16));
     }
 }

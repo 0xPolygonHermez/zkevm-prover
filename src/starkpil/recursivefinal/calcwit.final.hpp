@@ -10,7 +10,7 @@
 #include "circom.final.hpp"
 #include "fr.hpp"
 
-#define NMUTEXES 32 // 512
+#define NMUTEXES 160
 
 namespace CircomFinal
 {

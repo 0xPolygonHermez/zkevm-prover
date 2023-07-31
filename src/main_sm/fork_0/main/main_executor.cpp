@@ -22,7 +22,7 @@
 #include "input.hpp"
 #include "scalar.hpp"
 #include "utils.hpp"
-#include "statedb_factory.hpp"
+#include "hashdb_factory.hpp"
 #include "goldilocks_base_field.hpp"
 #include "ffiasm/fec.hpp"
 #include "ffiasm/fnec.hpp"
@@ -119,11 +119,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, fork_0::MainCommitPols
     TimeMetricStorage mainMetrics;
     TimeMetricStorage evalCommandMetrics;
 #endif
-    /* Get a StateDBInterface interface, according to the configuration */
-    StateDBInterface *pStateDB = StateDBClientFactory::createStateDBClient(fr, config);
-    if (pStateDB == NULL)
+    /* Get a HashDBInterface interface, according to the configuration */
+    HashDBInterface *pHashDB = HashDBClientFactory::createHashDBClient(fr, config);
+    if (pHashDB == NULL)
     {
-        cerr << "Error: MainExecutor::MainExecutor() failed calling StateDBClientFactory::createStateDBClient() uuid=" << proverRequest.uuid << endl;
+        cerr << "Error: MainExecutor::MainExecutor() failed calling HashDBClientFactory::createHashDBClient() uuid=" << proverRequest.uuid << endl;
         exitProcess();
     }
 
@@ -132,7 +132,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, fork_0::MainCommitPols
     bool bUnsignedTransaction = (proverRequest.input.from != "") && (proverRequest.input.from != "0x");
 
     // Create context and store a finite field reference in it
-    Context ctx(fr, config, fec, fnec, pols, rom, proverRequest, pStateDB);
+    Context ctx(fr, config, fec, fnec, pols, rom, proverRequest, pHashDB);
 
     // Init the state of the polynomials first evaluation
     initState(ctx);
@@ -143,11 +143,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, fork_0::MainCommitPols
 
     // Copy input database content into context database
     if (proverRequest.input.db.size() > 0)
-        pStateDB->loadDB(proverRequest.input.db, false);
+        pHashDB->loadDB(proverRequest.input.db, false);
 
     // Copy input contracts database content into context database (dbProgram)
     if (proverRequest.input.contractsBytecode.size() > 0)
-        pStateDB->loadProgramDB(proverRequest.input.contractsBytecode, false);
+        pHashDB->loadProgramDB(proverRequest.input.contractsBytecode, false);
 
     // opN are local, uncommitted polynomials
     Goldilocks::Element op0, op1, op2, op3, op4, op5, op6, op7;
@@ -833,10 +833,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, fork_0::MainCommitPols
 #endif
                     SmtGetResult smtGetResult;
                     mpz_class value;
-                    zkresult zkResult = pStateDB->get(oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);
+                    zkresult zkResult = pHashDB->get(oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);
                     if (zkResult != ZKR_SUCCESS)
                     {
-                        cerr << "Error: MainExecutor::Execute() failed calling pStateDB->get() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
+                        cerr << "Error: MainExecutor::Execute() failed calling pHashDB->get() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                         proverRequest.result = zkResult;
                         return;
                     }
@@ -955,10 +955,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, fork_0::MainCommitPols
                     Goldilocks::Element oldRoot[4];
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
-                    zkresult zkResult = pStateDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.input.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
+                    zkresult zkResult = pHashDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.input.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
                     if (zkResult != ZKR_SUCCESS)
                     {
-                        cerr << "Error: MainExecutor::Execute() failed calling pStateDB->set() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
+                        cerr << "Error: MainExecutor::Execute() failed calling pHashDB->set() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                         proverRequest.result = zkResult;
                         return;
                     }
@@ -971,7 +971,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, fork_0::MainCommitPols
                     sr4to8(fr, ctx.lastSWrite.newRoot[0], ctx.lastSWrite.newRoot[1], ctx.lastSWrite.newRoot[2], ctx.lastSWrite.newRoot[3], fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                     nHits++;
 #ifdef LOG_STORAGE
-                    cout << "Storage write sWR stored at key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " newRoot: " << fr.toString(res.newRoot, 16) << endl;
+                    cout << "Storage write sWR stored at key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " newRoot: " << fr.toString(ctx.lastSWrite.res.newRoot, 16) << endl;
 #endif
                 }
 
@@ -1581,10 +1581,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, fork_0::MainCommitPols
 #endif
             SmtGetResult smtGetResult;
             mpz_class value;
-            zkresult zkResult = pStateDB->get(oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);
+            zkresult zkResult = pHashDB->get(oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);
             if (zkResult != ZKR_SUCCESS)
             {
-                cerr << "Error: MainExecutor::Execute() failed calling pStateDB->get() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
+                cerr << "Error: MainExecutor::Execute() failed calling pHashDB->get() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 proverRequest.result = zkResult;
                 return;
             }
@@ -1693,10 +1693,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, fork_0::MainCommitPols
                 Goldilocks::Element oldRoot[4];
                 sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
-                zkresult zkResult = pStateDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.input.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
+                zkresult zkResult = pHashDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.input.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
                 if (zkResult != ZKR_SUCCESS)
                 {
-                    cerr << "Error: MainExecutor::Execute() failed calling pStateDB->set() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
+                    cerr << "Error: MainExecutor::Execute() failed calling pHashDB->set() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     proverRequest.result = zkResult;
                     return;
                 }
@@ -2186,10 +2186,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, fork_0::MainCommitPols
 #ifdef LOG_TIME_STATISTICS
                 gettimeofday(&t, NULL);
 #endif
-                zkresult zkResult = pStateDB->setProgram(result, hashPIterator->second.data, proverRequest.input.bUpdateMerkleTree);
+                zkresult zkResult = pHashDB->setProgram(result, hashPIterator->second.data, proverRequest.input.bUpdateMerkleTree);
                 if (zkResult != ZKR_SUCCESS)
                 {
-                    cerr << "Error: MainExecutor::Execute() failed calling pStateDB->setProgram() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
+                    cerr << "Error: MainExecutor::Execute() failed calling pHashDB->setProgram() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     proverRequest.result = zkResult;
                     return;
                 }
@@ -2226,10 +2226,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, fork_0::MainCommitPols
 #ifdef LOG_TIME_STATISTICS
                 gettimeofday(&t, NULL);
 #endif
-                zkresult zkResult = pStateDB->getProgram(aux, hashValue.data, proverRequest.dbReadLog);
+                zkresult zkResult = pHashDB->getProgram(aux, hashValue.data, proverRequest.dbReadLog);
                 if (zkResult != ZKR_SUCCESS)
                 {
-                    cerr << "Error: MainExecutor::Execute() failed calling pStateDB->getProgram() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
+                    cerr << "Error: MainExecutor::Execute() failed calling pHashDB->getProgram() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     proverRequest.result = zkResult;
                     return;
                 }
@@ -3642,7 +3642,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, fork_0::MainCommitPols
     evalCommandMetrics.print("Main Executor eval command calls");
 #endif
 
-    StateDBClientFactory::freeStateDBClient(pStateDB);
+    HashDBClientFactory::freeHashDBClient(pHashDB);
 
     cout << "MainExecutor::execute() done lastStep=" << ctx.lastStep << " (" << (double(ctx.lastStep)*100)/N << "%)" << endl;
 }

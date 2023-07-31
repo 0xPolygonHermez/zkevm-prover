@@ -2,6 +2,7 @@
 #include "bits2field_executor.hpp"
 #include "zkassert.hpp"
 #include "utils.hpp"
+#include "zklog.hpp"
 
 /*
     This SM inserts 44 bits of 44 different Keccak-f inputs/outputs in the lower bits of a field element.
@@ -52,7 +53,7 @@ void Bits2FieldExecutor::execute (vector<Bits2FieldExecutorInput> &input, Bits2F
        the capacity of the SM (the number of slots that fit into the evaluations multiplied by the number of bits per field element) */
     if (input.size() > nSlots*44)
     {
-        cerr << "Error: Bits2FieldExecutor::execute() too many entries input.size()=" << input.size() << " > nSlots*44=" << nSlots*44 << endl;
+        zklog.error("Bits2FieldExecutor::execute() too many entries input.size()=" + to_string(input.size()) + " > nSlots*44=" + to_string(nSlots*44));
         exitProcess();
     }
 
@@ -140,7 +141,7 @@ void Bits2FieldExecutor::execute (vector<Bits2FieldExecutorInput> &input, Bits2F
     /* Sanity check */
     zkassert(p <= N);
 
-    cout << "Bits2FieldExecutor successfully processed " << input.size() << " Keccak hashes (" << (double(input.size())*slotSize*100)/(44*N) << "%)" << endl;
+    zklog.info("Bits2FieldExecutor successfully processed " + to_string(input.size()) + " Keccak hashes (" + to_string((double(input.size())*slotSize*100)/(44*N)) + "%)");
 }
 
 Goldilocks::Element Bits2FieldExecutor::getBit (vector<Bits2FieldExecutorInput> &input, uint64_t block, bool isOutput, uint64_t pos)

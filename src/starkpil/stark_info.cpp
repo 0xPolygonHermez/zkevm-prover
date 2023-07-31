@@ -1,6 +1,8 @@
 #include "stark_info.hpp"
 #include "utils.hpp"
 #include "timer.hpp"
+#include "zklog.hpp"
+#include "exit_process.hpp"
 
 StarkInfo::StarkInfo(const Config &config, string file) : config(config)
 {
@@ -358,8 +360,8 @@ void StarkInfo::load(json j)
             op.op = StepOperation::copy;
         else
         {
-            cerr << "Error: StarkInfo::load() found invalid value of step operation: " << j["step52ns"]["first"][i]["op"] << endl;
-            exit(-1);
+            zklog.error("StarkInfo::load() found invalid value of step operation: " + j["step52ns"]["first"][i]["op"].dump());
+            exitProcess();
         }
 
         op.dest.setType(j["step52ns"]["first"][i]["dest"]["type"]); // Mandatory field
@@ -503,6 +505,7 @@ eSection string2section(const string s)
         return cm4_2ns;
     if (s == "q_2ns")
         return q_2ns;
-    cerr << "Error: string2section() found invalid string=" << s << endl;
+    zklog.error("string2section() found invalid string=" + s);
+    exitProcess();
     exit(-1);
 }

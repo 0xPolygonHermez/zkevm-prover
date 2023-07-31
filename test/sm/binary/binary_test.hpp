@@ -4,6 +4,6 @@
 #include "config.hpp"
 #include "goldilocks_base_field.hpp"
 
-void BinarySMTest (Goldilocks &fr, Config &config);
+uint64_t BinarySMTest (Goldilocks &fr, const Config &config);
 
 #endif

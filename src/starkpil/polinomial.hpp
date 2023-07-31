@@ -5,6 +5,8 @@
 #include "goldilocks_cubic_extension.hpp"
 #include "compare_fe.hpp"
 #include <math.h> /* log2 */
+#include "zklog.hpp"
+#include "exit_process.hpp"
 
 class Polinomial
 {
@@ -45,8 +47,8 @@ public:
         _pAddress = (Goldilocks::Element *)calloc(_degree * _dim, sizeof(Goldilocks::Element));
         if (_pAddress == NULL)
         {
-            std::cerr << "Error allocating polinomial with size: " << _degree * _dim * sizeof(Goldilocks::Element) << std::endl;
-            exit(-1);
+            zklog.error("Polinomial::Polinomial() failed allocating polinomial with size: " + to_string(_degree * _dim * sizeof(Goldilocks::Element)));
+            exitProcess();
         }
         _offset = _dim;
         _allocated = true;
@@ -271,8 +273,8 @@ public:
 
             if (idx_t.find(key) == idx_t.end())
             {
-                cerr << "Error: calculateH1H2() Number not included: " << Goldilocks::toString(fPol[i], 16) << endl;
-                exit(-1);
+                zklog.error("Polinomial::calculateH1H2() Number not included: " + Goldilocks::toString(fPol[i], 16));
+                exitProcess();
             }
             uint64_t idx = idx_t[key];
             s.insert(pair<vector<Goldilocks::Element>, uint64_t>(key, idx));
@@ -319,8 +321,8 @@ public:
             uint64_t indx = idx_t[key];
             if (indx == 0)
             {
-                cerr << "Error: calculateH1H2() Number not included: w=" << i << " plookup_number=" << pNumber << "\nPol:" << Goldilocks::toString(fPol[i], 16) << endl;
-                exit(-1);
+                zklog.error("Polynomial::calculateH1H2() Number not included: w=" + to_string(i) + " plookup_number=" + to_string(pNumber) + "\nPol:" + Goldilocks::toString(fPol[i], 16));
+                exitProcess();
             }
             ++counter[indx - 1];
         }
@@ -408,8 +410,8 @@ public:
             uint64_t ind = key % size_keys;
             if (!touched[ind])
             {
-                cerr << "Error: calculateH1H2() Number not included: w=" << i << " plookup_number=" << pNumber << "\nPol:" << Goldilocks::toString(fPol[i], 16) << endl;
-                exit(-1);
+                zklog.error("Polynomial::calculateH1H2() Number not included: w=" + to_string(i) + " plookup_number=" + to_string(pNumber) + "\nPol:" + Goldilocks::toString(fPol[i], 16));
+                exitProcess();
             }
             uint64_t pos_ = buffer[ind];
             bool exit_ = false;
@@ -429,8 +431,8 @@ public:
                     }
                     else
                     {
-                        cerr << "Error: calculateH1H2() Number not included: w=" << i << " plookup_number=" << pNumber << "\nPol:" << Goldilocks::toString(fPol[i], 16) << endl;
-                        exit(-1);
+                        zklog.error("Polynomial::calculateH1H2() Number not included: w=" + to_string(i) + " plookup_number=" + to_string(pNumber) + "\nPol:" + Goldilocks::toString(fPol[i], 16));
+                        exitProcess();
                     }
                 }
             } while (!exit_);
@@ -529,8 +531,8 @@ public:
             uint64_t ind = key[0] % size_keys;
             if (!touched[ind])
             {
-                cerr << "Error: calculateH1H2() Number not included: w=" << i << " plookup_number=" << pNumber << "\nPol:" << Goldilocks::toString(fPol[i], 16) << endl;
-                exit(-1);
+                zklog.error("Polinomial::calculateH1H2() Number not included: w=" + to_string(i) + " plookup_number=" + to_string(pNumber) + "\nPol:" + Goldilocks::toString(fPol[i], 16));
+                exitProcess();
             }
             uint64_t pos_ = buffer[ind];
             bool exit_ = false;
@@ -550,8 +552,8 @@ public:
                     }
                     else
                     {
-                        cerr << "Error: calculateH1H2() Number not included: w=" << i << " plookup_number=" << pNumber << "\nPol:" << Goldilocks::toString(fPol[i], 16) << endl;
-                        exit(-1);
+                        zklog.error("Polinomial::calculateH1H2() Number not included: w=" + to_string(i) + " plookup_number=" + to_string(pNumber) + "\nPol:" + Goldilocks::toString(fPol[i], 16));
+                        exitProcess();
                     }
                 }
             } while (!exit_);

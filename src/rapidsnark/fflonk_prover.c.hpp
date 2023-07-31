@@ -6,6 +6,8 @@
 #include <sodium.h>
 #include "thread_utils.hpp"
 #include "polynomial/cpolynomial.hpp"
+#include "zklog.hpp"
+#include "exit_process.hpp"
 
 #define ELPP_NO_DEFAULT_LOG_FILE
 #include "logger.hpp"
@@ -56,7 +58,6 @@ namespace Fflonk
         if(NULL == reservedMemoryPtr) {
             delete[] inverses;
             delete[] products;
-            for (auto const &x : mapBuffers) delete[] x.second;
             delete[] nonPrecomputedBigBuffer;
         }
 
@@ -125,7 +126,7 @@ namespace Fflonk
             // PRECOMPUTED BIG BUFFER
             ////////////////////////////////////////////////////
             // Precomputed 1 > polynomials buffer
-            lengthPrecomputedBigBuffer = 0;
+            uint64_t lengthPrecomputedBigBuffer = 0;
             lengthPrecomputedBigBuffer += zkey->domainSize * 1 * 8; // Polynomials QL, QR, QM, QO, QC, Sigma1, Sigma2 & Sigma3
             lengthPrecomputedBigBuffer += zkey->domainSize * 8 * 1; // Polynomial  C0
             // Precomputed 2 > evaluations buffer
@@ -284,7 +285,6 @@ namespace Fflonk
             LOG_TRACE("... Loading A, B & C map buffers");
 
             u_int64_t byteLength = sizeof(u_int32_t) * zkey->nConstraints;
-            lengthMapBuffers = std::ceil((float)(3 * byteLength) / sizeof(FrElement));
 
             mapBuffersBigBuffer = new u_int32_t[zkey->nConstraints * 3];
 
@@ -292,9 +292,7 @@ namespace Fflonk
             mapBuffers["B"] = mapBuffers["A"] + zkey->nConstraints;
             mapBuffers["C"] = mapBuffers["B"] + zkey->nConstraints;
 
-            lengthInternalWitnessBuffer = zkey->nAdditions;
-
-            buffInternalWitness = new FrElement[lengthInternalWitnessBuffer];
+            buffInternalWitness = new FrElement[zkey->nAdditions];
 
             LOG_TRACE("··· Loading additions");
             additionsBuff = (Zkey::Addition<Engine> *)fdZkey->getSectionData(Zkey::ZKEY_FF_ADDITIONS_SECTION);
@@ -356,9 +354,16 @@ namespace Fflonk
             if(NULL == this->reservedMemoryPtr) {
                 nonPrecomputedBigBuffer = new FrElement[lengthNonPrecomputedBigBuffer];
             } else {
+                if((lengthBatchInversesBuffer + lengthNonPrecomputedBigBuffer) * sizeof(FrElement) > reservedMemorySize) {
+                    ss.str("");
+                    ss << "Not enough reserved memory to generate a prove. Increase reserved memory size at least to "
+                        << (lengthBatchInversesBuffer + lengthNonPrecomputedBigBuffer) * sizeof(FrElement) << " bytes";
+                    throw std::runtime_error(ss.str());
+                }
+
                 nonPrecomputedBigBuffer = this->reservedMemoryPtr + lengthBatchInversesBuffer;
             }
-
+            
             polPtr["L"] = &nonPrecomputedBigBuffer[0];
             polPtr["C1"]  = polPtr["L"]  + zkey->domainSize * 16;
             polPtr["C2"]  = polPtr["C1"] + zkey->domainSize * 8;
@@ -397,8 +402,8 @@ namespace Fflonk
         }
         catch (const std::exception &e)
         {
-            std::cerr << "EXCEPTION: " << e.what() << "\n";
-            exit(EXIT_FAILURE);
+            zklog.error("Fflonk::setZkey() EXCEPTION: " + string(e.what()));
+            exitProcess();
         }
     }
 
@@ -587,8 +592,9 @@ namespace Fflonk
         }
         catch (const std::exception &e)
         {
-            std::cerr << "EXCEPTION: " << e.what() << "\n";
-            exit(EXIT_FAILURE);
+            zklog.error("Fflonk::prove() EXCEPTION: " + string(e.what()));
+            exitProcess();
+            exit(-1);
         }
     }
 
@@ -1566,26 +1572,11 @@ namespace Fflonk
         //     toInverse.yBatch -> Computed in round5, computeL()
 
         //   · denominator needed in the verifier when computing L_i^{S0}(X), L_i^{S1}(X) and L_i^{S2}(X)
-        for (uint i = 0; i < 8; i++)
-        {
-            ss.str("");
-            ss << "LiS0_" << (i + 1);
-            toInverse[ss.str()] = computeLiS0(i);
-        }
+        computeLiS0();
 
-        for (uint i = 0; i < 4; i++)
-        {
-            ss.str("");
-            ss << "LiS1_" << (i + 1);
-            toInverse[ss.str()] = computeLiS1(i);
-        }
+        computeLiS1();
 
-        for (uint i = 0; i < 6; i++)
-        {
-            ss.str("");
-            ss << "LiS2_" << (i + 1);
-            toInverse[ss.str()] = computeLiS2(i);
-        }
+        computeLiS2();
 
         //   · L_i i=1 to num public inputs, needed in step 6 and 7 of the verifier to compute L_1(xi) and PI(xi)
         u_int32_t size = std::max(1, (int)zkey->nPublic);
@@ -1596,8 +1587,7 @@ namespace Fflonk
             ss.str("");
             ss << "Li_" << (i + 1);
             toInverse[ss.str()] = E.fr.mul(E.fr.set(zkey->domainSize), E.fr.sub(challenges["xi"], w));
-
-            // w = E.fr.mul(w, zkey->w);
+            w = E.fr.mul(w, fft->root(zkeyPower, 1));
         }
 
         FrElement mulAccumulator = E.fr.one();
@@ -1611,50 +1601,74 @@ namespace Fflonk
     }
 
     template <typename Engine>
-    typename Engine::FrElement FflonkProver<Engine>::computeLiS0(u_int32_t i)
-    {
+    void FflonkProver<Engine>::computeLiS0()
+    {    
+        std::ostringstream ss;
+
+        FrElement den1 = E.fr.set(8);
+        for (u_int64_t i = 0; i < 6; i++)
+        {
+            den1 = E.fr.mul(den1, roots["S0h0"][0]);
+        }
+
         // Compute L_i^{(S0)}(y)
-        u_int32_t idx = i;
-        FrElement den = E.fr.one();
-        for (uint j = 0; j < 7; j++)
-        {
-            idx = (idx + 1) % 8;
+        for (uint j = 0; j < 8; j++) {
 
-            den = E.fr.mul(den, E.fr.sub(roots["S0h0"][i], roots["S0h0"][idx]));
+            FrElement den2 = roots["S0h0"][(7 * j) % 8];
+            FrElement den3 = E.fr.sub(challenges["y"], roots["S0h0"][j]);
+
+            ss.str("");
+            ss << "LiS0_" << (j + 1) << " ";
+            toInverse[ss.str()] = E.fr.mul(E.fr.mul(den1, den2), den3);
         }
-        return den;
+        return;
     }
 
     template <typename Engine>
-    typename Engine::FrElement FflonkProver<Engine>::computeLiS1(u_int32_t i)
-    {
-        // Compute L_i^{(S1)}(y)
-        u_int32_t idx = i;
-        FrElement den = E.fr.one();
-        for (uint j = 0; j < 3; j++)
-        {
-            idx = (idx + 1) % 4;
+    void FflonkProver<Engine>::computeLiS1()
+    {    
+        std::ostringstream ss;
 
-            den = E.fr.mul(den, E.fr.sub(roots["S1h1"][i], roots["S1h1"][idx]));
+        // Compute L_i^{(S1)}(y)
+        FrElement den1 = E.fr.mul(E.fr.set(4), E.fr.mul(roots["S1h1"][0], roots["S1h1"][0]));
+        for (uint j = 0; j < 4; j++) {
+
+            FrElement den2 = roots["S1h1"][(3 * j) % 4];
+            FrElement den3 = E.fr.sub(challenges["y"], roots["S1h1"][j]);
+
+            ss.str("");
+            ss << "LiS1_" << (j + 1) << " ";
+            toInverse[ss.str()] = E.fr.mul(E.fr.mul(den1, den2), den3);
         }
-        return den;
+        return;
     }
-
+    
     template <typename Engine>
-    typename Engine::FrElement FflonkProver<Engine>::computeLiS2(u_int32_t i)
-    {
-        // Compute L_i^{(S1)}(y)
-        u_int32_t idx = i;
-        FrElement den = E.fr.one();
-        for (uint j = 0; j < 5; j++)
-        {
-            idx = (idx + 1) % 6;
+    void FflonkProver<Engine>::computeLiS2()
+    {    
+        std::ostringstream ss;
 
-            FrElement root1 = i < 3 ? roots["S2h2"][i] : roots["S2h3"][i - 3];
-            FrElement root2 = idx < 3 ? roots["S2h2"][idx] : roots["S2h3"][idx - 3];
-            den = E.fr.mul(den, E.fr.sub(root1, root2));
+        // Compute L_i^{(S2)}(y)
+        FrElement den1 = E.fr.mul(E.fr.mul(E.fr.set(3), roots["S2h2"][0]), E.fr.sub(challenges["xi"], challenges["xiw"]));
+        for (uint j = 0; j < 3; j++) {
+            FrElement den2 = roots["S2h2"][2*j % 3];
+            FrElement den3 = E.fr.sub(challenges["y"], roots["S2h2"][j]);
+             
+            ss.str("");
+            ss << "LiS2_" << (j + 1) << " ";
+            toInverse[ss.str()] = E.fr.mul(E.fr.mul(den1, den2), den3);
         }
-        return den;
+
+        den1 = E.fr.mul(E.fr.mul(E.fr.set(3), roots["S2h3"][0]), E.fr.sub(challenges["xiw"], challenges["xi"]));
+        for (uint j = 0; j < 3; j++) {
+            FrElement den2 = roots["S2h3"][2*j % 3];
+            FrElement den3 = E.fr.sub(challenges["y"], roots["S2h3"][j]);
+             
+            ss.str("");
+            ss << "LiS2_" << (j + 1 + 3) << " ";
+            toInverse[ss.str()] = E.fr.mul(E.fr.mul(den1, den2), den3);
+        }
+        return;
     }
 
     template <typename Engine>

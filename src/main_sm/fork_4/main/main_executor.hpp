@@ -11,7 +11,7 @@
 #include "main_sm/fork_4/pols_generated/commit_pols.hpp"
 #include "main_sm/fork_4/main/main_exec_required.hpp"
 #include "scalar.hpp"
-#include "statedb_factory.hpp"
+#include "hashdb_factory.hpp"
 #include "poseidon_goldilocks.hpp"
 #include "counters.hpp"
 #include "goldilocks_base_field.hpp"
@@ -53,6 +53,7 @@ public:
     // ROM labels
     uint64_t finalizeExecutionLabel;
     uint64_t checkAndSaveFromLabel;
+    uint64_t ecrecoverStoreArgsLabel;
 
     // Constructor
     MainExecutor(Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config);
@@ -66,12 +67,8 @@ public:
     void initState(Context &ctx);
     void checkFinalState(Context &ctx);
     void assertOutputs(Context &ctx);
-    
-public:
-    void flushInParallel(StateDBInterface * pStateDB);
+    void logError(Context &ctx, const string &message = "");
 };
-
-void *mainExecutorFlushThread(void *arg);
 
 } // namespace
 

@@ -4,6 +4,7 @@
 #include "scalar.hpp"
 #include "database.hpp"
 #include "utils.hpp"
+#include "zklog.hpp"
 
 zkresult Input::load (json &input)
 {
@@ -37,13 +38,13 @@ void Input::loadGlobals (json &input)
     if ( !input.contains("oldStateRoot") ||
          !input["oldStateRoot"].is_string() )
     {
-        cerr << "Error: oldStateRoot key not found in input JSON file" << endl;
+        zklog.error("oldStateRoot key not found in input JSON file");
         exitProcess();
     }
     auxString = Remove0xIfPresent(input["oldStateRoot"]);
     publicInputsExtended.publicInputs.oldStateRoot.set_str(auxString, 16);
 #ifdef LOG_INPUT
-    cout << "loadGlobals(): oldStateRoot=" << publicInputsExtended.publicInputs.oldStateRoot.get_str(16) << endl;
+    zklog.info("loadGlobals(): oldStateRoot=" + publicInputsExtended.publicInputs.oldStateRoot.get_str(16));
 #endif
 
     // Input JSON file may contain a oldAccInputHash key at the root level
@@ -53,7 +54,7 @@ void Input::loadGlobals (json &input)
         auxString = Remove0xIfPresent(input["oldAccInputHash"]);
         publicInputsExtended.publicInputs.oldAccInputHash.set_str(auxString, 16);
 #ifdef LOG_INPUT
-        cout << "loadGlobals(): oldAccInputHash=" << publicInputsExtended.publicInputs.oldAccInputHash.get_str(16) << endl;
+        zklog.info("loadGlobals(): oldAccInputHash=" + publicInputsExtended.publicInputs.oldAccInputHash.get_str(16));
 #endif
     }
 
@@ -61,19 +62,19 @@ void Input::loadGlobals (json &input)
     if ( !input.contains("oldNumBatch") ||
          !input["oldNumBatch"].is_number_unsigned() )
     {
-        cerr << "Error: oldNumBatch key not found in input JSON file" << endl;
+        zklog.error("oldNumBatch key not found in input JSON file");
         exitProcess();
     }
     publicInputsExtended.publicInputs.oldBatchNum = input["oldNumBatch"];
 #ifdef LOG_INPUT
-    cout << "loadGlobals(): oldBatchNum=" << publicInputsExtended.publicInputs.oldBatchNum << endl;
+    zklog.info("loadGlobals(): oldBatchNum=" + to_string(publicInputsExtended.publicInputs.oldBatchNum));
 #endif
 
     // Input JSON file must contain a chainID key at the root level (it is mandatory)
     if ( !input.contains("chainID") ||
          !input["chainID"].is_number_unsigned() )
     {
-        cerr << "Error: chainID key not found in input JSON file" << endl;
+        zklog.error("chainID key not found in input JSON file");
         exitProcess();
     }
     else
@@ -81,7 +82,7 @@ void Input::loadGlobals (json &input)
         publicInputsExtended.publicInputs.chainID = input["chainID"];
     }
 #ifdef LOG_INPUT
-    cout << "loadGlobals(): chainID=" << publicInputsExtended.publicInputs.chainID << endl;
+    zklog.info("loadGlobals(): chainID=" + to_string(publicInputsExtended.publicInputs.chainID));
 #endif
 
     // Input JSON file could contain a forkID key at the root level (not mandatory, default is 0)
@@ -91,14 +92,14 @@ void Input::loadGlobals (json &input)
         publicInputsExtended.publicInputs.forkID = input["forkID"];
     }
 #ifdef LOG_INPUT
-    cout << "loadGlobals(): forkID=" << publicInputsExtended.publicInputs.forkID << endl;
+    zklog.info("loadGlobals(): forkID=" + to_string(publicInputsExtended.publicInputs.forkID));
 #endif
 
     // Input JSON file must contain a batchL2Data key at the root level
     if ( !input.contains("batchL2Data") ||
          !input["batchL2Data"].is_string() )
     {
-        cerr << "Error: batchL2Data key not found in input JSON file" << endl;
+        zklog.error("batchL2Data key not found in input JSON file");
         exitProcess();
     }
     publicInputsExtended.publicInputs.batchL2Data = string2ba(input["batchL2Data"]);
@@ -106,47 +107,47 @@ void Input::loadGlobals (json &input)
     // Check the batchL2Data length
     if (publicInputsExtended.publicInputs.batchL2Data.size() > (MAX_BATCH_L2_DATA_SIZE))
     {
-        cerr << "Error: Input::loadGlobals() found batchL2Data.size()=" << publicInputsExtended.publicInputs.batchL2Data.size() << " > MAX_BATCH_L2_DATA_SIZE=" << MAX_BATCH_L2_DATA_SIZE << endl;
+        zklog.error("Input::loadGlobals() found batchL2Data.size()=" + to_string(publicInputsExtended.publicInputs.batchL2Data.size()) + " > MAX_BATCH_L2_DATA_SIZE=" + to_string(MAX_BATCH_L2_DATA_SIZE));
         exitProcess();
     }
 #ifdef LOG_INPUT
-    cout << "loadGlobals(): batchL2Data=" << ba2string(publicInputsExtended.publicInputs.batchL2Data) << endl;
+    zklog.info("loadGlobals(): batchL2Data=" + ba2string(publicInputsExtended.publicInputs.batchL2Data));
 #endif
 
     // Input JSON file must contain a globalExitRoot key at the root level
     if ( !input.contains("globalExitRoot") ||
          !input["globalExitRoot"].is_string() )
     {
-        cerr << "Error: globalExitRoot key not found in input JSON file" << endl;
+        zklog.error("globalExitRoot key not found in input JSON file");
         exitProcess();
     }
     publicInputsExtended.publicInputs.globalExitRoot.set_str(Remove0xIfPresent(input["globalExitRoot"]), 16);
 #ifdef LOG_INPUT
-    cout << "loadGlobals(): globalExitRoot=" << publicInputsExtended.publicInputs.globalExitRoot.get_str(16) << endl;
+    zklog.info("loadGlobals(): globalExitRoot=" + publicInputsExtended.publicInputs.globalExitRoot.get_str(16));
 #endif
 
     // Input JSON file must contain a timestamp key at the root level
     if ( !input.contains("timestamp") ||
          !input["timestamp"].is_number_unsigned() )
     {
-        cerr << "Error: timestamp key not found in input JSON file" << endl;
+        zklog.error("timestamp key not found in input JSON file");
         exitProcess();
     }
     publicInputsExtended.publicInputs.timestamp = input["timestamp"];
 #ifdef LOG_INPUT
-    cout << "loadGlobals(): timestamp=" << publicInputsExtended.publicInputs.timestamp << endl;
+    zklog.info("loadGlobals(): timestamp=" + to_string(publicInputsExtended.publicInputs.timestamp));
 #endif
 
     // Input JSON file must contain a sequencerAddr key at the root level
     if ( !input.contains("sequencerAddr") ||
          !input["sequencerAddr"].is_string() )
     {
-        cerr << "Error: sequencerAddr key not found in input JSON file" << endl;
+        zklog.error("sequencerAddr key not found in input JSON file");
         exitProcess();
     }
     publicInputsExtended.publicInputs.sequencerAddr.set_str(Remove0xIfPresent(input["sequencerAddr"]), 16);
 #ifdef LOG_INPUT
-    cout << "loadGlobals(): sequencerAddr=" << publicInputsExtended.publicInputs.sequencerAddr.get_str(16) << endl;
+    zklog.info("loadGlobals(): sequencerAddr=" + publicInputsExtended.publicInputs.sequencerAddr.get_str(16));
 #endif
 
     // Input JSON file may contain a aggregatorAddress key at the root level
@@ -156,7 +157,7 @@ void Input::loadGlobals (json &input)
         auxString = Remove0xIfPresent(input["aggregatorAddress"]);
         publicInputsExtended.publicInputs.aggregatorAddress.set_str(auxString, 16);
 #ifdef LOG_INPUT
-        cout << "loadGlobals(): aggregatorAddress=" << publicInputsExtended.publicInputs.aggregatorAddress.get_str(16) << endl;
+        zklog.info("loadGlobals(): aggregatorAddress=" + publicInputsExtended.publicInputs.aggregatorAddress.get_str(16));
 #endif
     }
 
@@ -166,13 +167,13 @@ void Input::loadGlobals (json &input)
     if ( !input.contains("newStateRoot") ||
          !input["newStateRoot"].is_string() )
     {
-        cerr << "Error: newStateRoot key not found in input JSON file" << endl;
+        zklog.error("newStateRoot key not found in input JSON file");
         exitProcess();
     }
     auxString = Remove0xIfPresent(input["newStateRoot"]);
     publicInputsExtended.newStateRoot.set_str(auxString, 16);
 #ifdef LOG_INPUT
-    cout << "loadGlobals(): newStateRoot=" << publicInputsExtended.newStateRoot.get_str(16) << endl;
+    zklog.info("loadGlobals(): newStateRoot=" + publicInputsExtended.newStateRoot.get_str(16));
 #endif
 
     // Input JSON file may contain a newAccInputHash key at the root level
@@ -182,7 +183,7 @@ void Input::loadGlobals (json &input)
         auxString = Remove0xIfPresent(input["newAccInputHash"]);
         publicInputsExtended.newAccInputHash.set_str(auxString, 16);
 #ifdef LOG_INPUT
-        cout << "loadGlobals(): newAccInputHash=" << publicInputsExtended.newAccInputHash.get_str(16) << endl;
+        zklog.info("loadGlobals(): newAccInputHash=" + publicInputsExtended.newAccInputHash.get_str(16));
 #endif
     }
 
@@ -190,26 +191,26 @@ void Input::loadGlobals (json &input)
     if ( !input.contains("newLocalExitRoot") ||
          !input["newLocalExitRoot"].is_string() )
     {
-        cerr << "Error: newLocalExitRoot key not found in input JSON file" << endl;
+        zklog.error("newLocalExitRoot key not found in input JSON file");
         exitProcess();
     }
     auxString = Remove0xIfPresent(input["newLocalExitRoot"]);
     publicInputsExtended.newLocalExitRoot.set_str(auxString, 16);
 
 #ifdef LOG_INPUT
-    cout << "loadGlobals(): newLocalExitRoot=" << publicInputsExtended.newLocalExitRoot.get_str(16) << endl;
+    zklog.info("loadGlobals(): newLocalExitRoot=" + publicInputsExtended.newLocalExitRoot.get_str(16));
 #endif
 
     // Input JSON file must contain a numBatch key at the root level
     if ( !input.contains("newNumBatch") ||
          !input["newNumBatch"].is_number_unsigned() )
     {
-        cerr << "Error: newNumBatch key not found in input JSON file" << endl;
+        zklog.error("newNumBatch key not found in input JSON file");
         exitProcess();
     }
     publicInputsExtended.newBatchNum = input["newNumBatch"];
 #ifdef LOG_INPUT
-    cout << "loadGlobals(): newBatchNum=" << publicInputsExtended.newBatchNum << endl;
+    zklog.info("loadGlobals(): newBatchNum=" + to_string(publicInputsExtended.newBatchNum));
 #endif
 
     // ROOT
@@ -220,7 +221,7 @@ void Input::loadGlobals (json &input)
     {
         from = Add0xIfMissing(input["from"]);
 #ifdef LOG_INPUT
-        cout << "loadGlobals(): from=" << from << endl;
+        zklog.info("loadGlobals(): from=" + from);
 #endif
     }
 
@@ -230,7 +231,7 @@ void Input::loadGlobals (json &input)
     {
         bUpdateMerkleTree = input["updateMerkleTree"];
 #ifdef LOG_INPUT
-        cout << "loadGlobals(): updateMerkleTree=" << bUpdateMerkleTree << endl;
+        zklog.info("loadGlobals(): updateMerkleTree=" + to_string(bUpdateMerkleTree));
 #endif
     }
 
@@ -240,7 +241,7 @@ void Input::loadGlobals (json &input)
     {
         bNoCounters = input["noCounters"];
 #ifdef LOG_INPUT
-        cout << "loadGlobals(): noCounters=" << bNoCounters << endl;
+        zklog.info("loadGlobals(): noCounters=" + to_string(bNoCounters));
 #endif
     }
 
@@ -251,7 +252,7 @@ void Input::loadGlobals (json &input)
         traceConfig.bEnabled = true;
         traceConfig.bDisableStorage = input["disableStorage"];
 #ifdef LOG_INPUT
-        cout << "loadGlobals(): disableStorage=" << traceConfig.bDisableStorage << endl;
+        zklog.info("loadGlobals(): disableStorage=" + to_string(traceConfig.bDisableStorage));
 #endif
     }
 
@@ -262,7 +263,7 @@ void Input::loadGlobals (json &input)
         traceConfig.bEnabled = true;
         traceConfig.bDisableStack = input["disableStack"];
 #ifdef LOG_INPUT
-        cout << "loadGlobals(): disableStack=" << traceConfig.bDisableStack << endl;
+        zklog.info("loadGlobals(): disableStack=" + to_string(traceConfig.bDisableStack));
 #endif
     }
 
@@ -273,7 +274,7 @@ void Input::loadGlobals (json &input)
         traceConfig.bEnabled = true;
         traceConfig.bEnableMemory = input["enableMemory"];
 #ifdef LOG_INPUT
-        cout << "loadGlobals(): enableMemory=" << traceConfig.bEnableMemory << endl;
+        zklog.info("loadGlobals(): enableMemory=" + to_string(traceConfig.bEnableMemory));
 #endif
     }
 
@@ -284,7 +285,7 @@ void Input::loadGlobals (json &input)
         traceConfig.bEnabled = true;
         traceConfig.bEnableReturnData = input["enableReturnData"];
 #ifdef LOG_INPUT
-        cout << "loadGlobals(): enableReturnData=" << traceConfig.bEnableReturnData << endl;
+        zklog.info("loadGlobals(): enableReturnData=" + to_string(traceConfig.bEnableReturnData));
 #endif
     }
 
@@ -295,7 +296,7 @@ void Input::loadGlobals (json &input)
         traceConfig.bEnabled = true;
         traceConfig.txHashToGenerateExecuteTrace = Add0xIfMissing(input["txHashToGenerateExecuteTrace"]);
 #ifdef LOG_INPUT
-        cout << "loadGlobals(): txHashToGenerateExecuteTrace=" << txHashToGenerateExecuteTrace << endl;
+        zklog.info("loadGlobals(): txHashToGenerateExecuteTrace=" + traceConfig.txHashToGenerateExecuteTrace);
 #endif
     }
 
@@ -306,7 +307,7 @@ void Input::loadGlobals (json &input)
         traceConfig.bEnabled = true;
         traceConfig.txHashToGenerateCallTrace = Add0xIfMissing(input["txHashToGenerateCallTrace"]);
 #ifdef LOG_INPUT
-        cout << "loadGlobals(): txHashToGenerateCallTrace=" << txHashToGenerateCallTrace << endl;
+        zklog.info("loadGlobals(): txHashToGenerateCallTrace=" + traceConfig.txHashToGenerateCallTrace);
 #endif
     }
 
@@ -340,12 +341,15 @@ void Input::saveGlobals (json &input) const
     input["noCounters"] = bNoCounters;
 
     // TraceConfig
-    input["disableStorage"] = traceConfig.bDisableStorage;
-    input["disableStack"] = traceConfig.bDisableStack;
-    input["enableMemory"] = traceConfig.bEnableMemory;
-    input["enableReturnData"] = traceConfig.bEnableReturnData;
-    input["txHashToGenerateExecuteTrace"] = traceConfig.txHashToGenerateExecuteTrace;
-    input["txHashToGenerateCallTrace"] = traceConfig.txHashToGenerateCallTrace;
+    if (traceConfig.bEnabled)
+    {
+        input["disableStorage"] = traceConfig.bDisableStorage;
+        input["disableStack"] = traceConfig.bDisableStack;
+        input["enableMemory"] = traceConfig.bEnableMemory;
+        input["enableReturnData"] = traceConfig.bEnableReturnData;
+        input["txHashToGenerateExecuteTrace"] = traceConfig.txHashToGenerateExecuteTrace;
+        input["txHashToGenerateCallTrace"] = traceConfig.txHashToGenerateCallTrace;
+    }
 }
 
 
@@ -358,13 +362,13 @@ void Input::loadDatabase (json &input)
          !input["db"].is_structured() )
     {
 #ifdef LOG_INPUT
-        //cout << "Input::loadDatabase() warning: db key not found in input JSON file" << endl;
+        //zklog.info("Input::loadDatabase() warning: db key not found in input JSON file");
 #endif
     }
     else
     {
 #ifdef LOG_INPUT
-        cout << "loadDatabase() db content:" << endl;
+        zklog.info("loadDatabase() db content:");
 #endif
         for (json::iterator it = input["db"].begin(); it != input["db"].end(); ++it)
         {
@@ -374,7 +378,7 @@ void Input::loadDatabase (json &input)
             if (!it.value().is_array() ||
                 !((it.value().size()==12) || (it.value().size()==8)) )
             {
-                cerr << "Error: Input::loadDatabase() keys value array with invalid length in input JSON file: " << it.value() << endl;
+                zklog.error("Input::loadDatabase() keys value array with invalid length in input JSON file: " + it.value());
                 exitProcess();
             }*/
 
@@ -388,12 +392,19 @@ void Input::loadDatabase (json &input)
             }
 
             // Get the key fe element
-            string key = NormalizeToNFormat(it.key(), 64);
+            string key = Remove0xIfPresent(it.key());
+            if (key.size() > 64)
+            {
+                zklog.error("Input::loadDatabase() found too big key size=" + to_string(key.size()));
+                exitProcess();
+            }
+            key = NormalizeToNFormat(key, 64);
 
             // Add the key:value pair to the context database
             db[key] = dbValue;
 #ifdef LOG_INPUT
-            cout << "    key: " << it.key() << " value: " << it.value()[0] << " etc." << endl;
+            string s = it.value()[0];
+            zklog.info("    key: " + it.key() + " value: " + s + " etc.");
 #endif
         }
     }
@@ -403,13 +414,13 @@ void Input::loadDatabase (json &input)
          !input["contractsBytecode"].is_structured() )
     {
 #ifdef LOG_INPUT
-        //cout << "Input::loadDatabase() warning: contractsBytecode key not found in input JSON file" << endl;
+        //zklog.info("Input::loadDatabase() warning: contractsBytecode key not found in input JSON file");
 #endif
     }
     else
     {
 #ifdef LOG_INPUT
-        cout << "loadDatabase() contractsBytecode content:" << endl;
+        zklog.info("loadDatabase() contractsBytecode content:");
 #endif
         for (json::iterator it = input["contractsBytecode"].begin(); it != input["contractsBytecode"].end(); ++it)
         {
@@ -422,12 +433,19 @@ void Input::loadDatabase (json &input)
             }
 
             // Get the key fe element
-            string key = NormalizeToNFormat(it.key(), 64);
+            string key = Remove0xIfPresent(it.key());
+            if (key.size() > 64)
+            {
+                zklog.error("Input::loadDatabase() found too big key size=" + to_string(key.size()));
+                exitProcess();
+            }
+            key = NormalizeToNFormat(key, 64);
 
             // Add the key:value pair to the context database
             contractsBytecode[key] = dbValue;
 #ifdef LOG_INPUT
-            cout << "    key: " << it.key() << " value: " << it.value() << endl;
+            string s = it.value();
+            zklog.info("    key: " + it.key() + " value: " + s);
 #endif
         }
     }

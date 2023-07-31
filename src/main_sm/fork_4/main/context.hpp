@@ -18,7 +18,7 @@
 #include "ffiasm/fec.hpp"
 #include "ffiasm/fnec.hpp"
 #include "prover_request.hpp"
-#include "statedb_interface.hpp"
+#include "hashdb_interface.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -115,7 +115,7 @@ public:
     const Rom &rom; // Rom reference
     LastSWrite lastSWrite; // Keep track of the last storage write
     ProverRequest &proverRequest;
-    StateDBInterface *pStateDB;
+    HashDBInterface *pHashDB;
     uint64_t lastStep;
     mpz_class totalTransferredBalance; // Total transferred balance of all accounts, which should be 0 after any transfer
 
@@ -126,7 +126,7 @@ public:
              MainCommitPols &pols,
              const Rom &rom,
              ProverRequest &proverRequest,
-             StateDBInterface *pStateDB ) :
+             HashDBInterface *pHashDB ) :
         fr(fr),
         config(config),
         fec(fec),
@@ -135,7 +135,7 @@ public:
         rom(rom),
         lastSWrite(fr),
         proverRequest(proverRequest),
-        pStateDB(pStateDB),
+        pHashDB(pHashDB),
         lastStep(0)
         {}; // Constructor, setting references
 
@@ -171,7 +171,8 @@ public:
     void printRegs();
     void printVars();
     void printMem();
-    void printReg(string name, Goldilocks::Element &V, bool h = false, bool bShort = false);
+    void printReg(string name, Goldilocks::Element &fe);
+    void printReg(string name, Goldilocks::Element &fe0, Goldilocks::Element &fe1, Goldilocks::Element &fe2, Goldilocks::Element &fe3, Goldilocks::Element &fe4, Goldilocks::Element &fe5, Goldilocks::Element &fe6, Goldilocks::Element &fe7);
     void printU64(string name, uint64_t v);
     void printU32(string name, uint32_t v);
     void printU16(string name, uint16_t v);

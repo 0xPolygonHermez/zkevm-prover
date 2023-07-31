@@ -1,5 +1,6 @@
 #include "friProve.hpp"
 #include "timer.hpp"
+#include "zklog.hpp"
 
 void FRIProve::prove(FRIProof &fproof, MerkleTreeGL **treesGL, Transcript transcript, Polinomial &friPol, uint64_t polBits, StarkInfo starkInfo)
 {
@@ -120,7 +121,7 @@ void FRIProve::prove(FRIProof &fproof, MerkleTreeGL **treesGL, Transcript transc
             treesFRIGL[si + 1]->copySource(aux.address());
             treesFRIGL[si + 1]->merkelize();
             treesFRIGL[si + 1]->getRoot(rootGL.address());
-            std::cout << "rootGL[" << si + 1 << "]: " << rootGL.toString(4) << std::endl;
+            zklog.info("rootGL[" + to_string(si + 1) + "]: " + rootGL.toString(4));
             transcript.put(rootGL.address(), HASH_SIZE);
             fproof.proofs.fri.trees[si + 1].setRoot(rootGL.address());
         }

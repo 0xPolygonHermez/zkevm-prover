@@ -4,6 +4,6 @@
 #include "config.hpp"
 #include "goldilocks_base_field.hpp"
 
-void MemAlignSMTest(Goldilocks &fr, Config &config);
+uint64_t MemAlignSMTest (Goldilocks &fr, const Config &config);
 
 #endif
