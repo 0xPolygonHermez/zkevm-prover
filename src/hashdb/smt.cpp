@@ -205,7 +205,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                 // If we are not at the top, the new leaf hash will become part of the higher level content, based on the keys[level] bit
                 if ( level >= 0 )
                 {
-                    if (db.config.dbMultiWriteSinglePosition && (foundValue != value))
+                    if (bUseStateManager && (foundValue != value))
                     {
                         for (uint64_t j=0; j<4; j++)
                         {
@@ -217,10 +217,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                             nodeToDeleteString = fea2string(fr, nodeToDelete);
                             if (nodeToDeleteString != "0")
                             {
-                                if (bUseStateManager)
-                                {
-                                    stateManager.deleteNode(batchUUID, tx, nodeToDeleteString, persistence);
-                                }
+                                stateManager.deleteNode(batchUUID, tx, nodeToDeleteString, persistence);
                             }
                         }
                     }
@@ -440,7 +437,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
             // If not at the top of the tree, update siblings with the new leaf node hash
             if (level>=0)
             {
-                if (db.config.dbMultiWriteSinglePosition)
+                if (bUseStateManager)
                 {
                     for (uint64_t j=0; j<4; j++)
                     {
@@ -452,10 +449,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                         nodeToDeleteString = fea2string(fr, nodeToDelete);
                         if (nodeToDeleteString != "0")
                         {
-                            if (bUseStateManager)
-                            {
-                                stateManager.deleteNode(batchUUID, tx, nodeToDeleteString, persistence);
-                            }
+                            stateManager.deleteNode(batchUUID, tx, nodeToDeleteString, persistence);
                         }
                     }
                 }
@@ -489,7 +483,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
             if ( level >= 0)
             {
                 // Set the hash of the deleted node to zero
-                if (db.config.dbMultiWriteSinglePosition)
+                if (bUseStateManager)
                 {
                     for (uint64_t j=0; j<4; j++)
                     {
@@ -499,10 +493,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                     nodeToDeleteString = fea2string(fr, nodeToDelete);
                     if (nodeToDeleteString != "0")
                     {
-                        if (bUseStateManager)
-                        {
-                            stateManager.deleteNode(batchUUID, tx, nodeToDeleteString, persistence);
-                        }
+                        stateManager.deleteNode(batchUUID, tx, nodeToDeleteString, persistence);
                     }
                 }
                 else
@@ -718,7 +709,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
         if (level >= 0)
         {
             // Overwrite the first or second 4 elements (based on keys[level] bit) with the new root hash from the lower level
-            if (db.config.dbMultiWriteSinglePosition)
+            if (bUseStateManager)
             {
                 for (uint64_t j=0; j<4; j++)
                 {
@@ -730,10 +721,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                     nodeToDeleteString = fea2string(fr, nodeToDelete);
                     if (nodeToDeleteString != "0")
                     {
-                        if (bUseStateManager)
-                        {
-                            stateManager.deleteNode(batchUUID, tx, nodeToDeleteString, persistence);
-                        }
+                        stateManager.deleteNode(batchUUID, tx, nodeToDeleteString, persistence);
                     }
                 }
             }
