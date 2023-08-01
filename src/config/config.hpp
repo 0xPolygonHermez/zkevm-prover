@@ -143,6 +143,7 @@ public:
     uint64_t dbReadRetryCounter;
     uint64_t dbReadRetryDelay;
     bool dbMultiWriteSinglePosition;
+    bool stateManager;
     uint64_t cleanerPollingPeriod;
     uint64_t requestsPersistence;
     uint64_t maxExecutorThreads;

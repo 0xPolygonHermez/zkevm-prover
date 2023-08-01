@@ -46,8 +46,8 @@ using grpc::Status;
         }
         mpz_class value(request->value(), 16);
 
-        // Get persistent flag
-        bool persistent = request->persistent();
+        // Get persistence flag
+        Persistence persistence = (Persistence)request->persistence();
 
 #ifdef LOG_HASHDB_SERVICE
         zklog.info("HashDBServiceImpl::Set() called. odlRoot=" + fea2string(fr, oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]) +
@@ -67,9 +67,15 @@ using grpc::Status;
             }
         }
 
+        // Get batch UUID
+        string batchUUID = request->batch_uuid();
+
+        // Get TX number
+        uint64_t tx = request->tx();
+
         // Call SMT set
         Goldilocks::Element newRoot[4];
-        zkresult zkr = pHashDB->set(oldRoot, key, value, persistent, newRoot, &r, dbReadLog);
+        zkresult zkr = pHashDB->set(batchUUID, tx, oldRoot, key, value, persistence, newRoot, &r, dbReadLog);
 
         // Return database read log
         if (request->get_db_read_log())
@@ -186,9 +192,12 @@ using grpc::Status;
             }
         }
 
+        // Get batch uuid
+        string batchUUID = request->batch_uuid();
+
         // Call SMT get
         mpz_class value;
-        zkresult zkr = pHashDB->get(root, key, value, &r, dbReadLog);
+        zkresult zkr = pHashDB->get(batchUUID, root, key, value, &r, dbReadLog);
 
         // Return database read log
         if (request->get_db_read_log())
@@ -424,7 +433,7 @@ using grpc::Status;
     return Status::OK;
 }
 
-::grpc::Status HashDBServiceImpl::Flush(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::FlushResponse* response)
+::grpc::Status HashDBServiceImpl::Flush(::grpc::ServerContext* context, const ::hashdb::v1::FlushRequest* request, ::hashdb::v1::FlushResponse* response)
 {
     // If the process is exising, do not start new activities
     if (bExitingProcess)
@@ -440,7 +449,7 @@ using grpc::Status;
     {
         // Call the HashDB flush method
         uint64_t flushId, storedFlushId;
-        zkresult zkres = pHashDB->flush(flushId, storedFlushId);
+        zkresult zkres = pHashDB->flush(request->batch_uuid(), flushId, storedFlushId);
 
         // return the result in the response
         ::hashdb::v1::ResultCode* result = new ::hashdb::v1::ResultCode();

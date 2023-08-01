@@ -109,9 +109,6 @@ public:
     // Get flush data, written to database by dbSenderThread; it blocks
     zkresult getFlushData(uint64_t flushId, uint64_t &lastSentFlushId, unordered_map<string, string> (&nodes), unordered_map<string, string> (&program), string &nodesStateRoot);
 
-    // Delete nodes
-    zkresult deleteNodes(const vector<string> (&nodesToDelete));
-
     // Print tree
     void printTree(const string &root, string prefix = "");
 

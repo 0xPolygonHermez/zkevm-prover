@@ -288,7 +288,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    if (proverRequest.input.db.size() > 0)\n";
     code += "    {\n";
     code += "        pHashDB->loadDB(proverRequest.input.db, true);\n";
-    code += "        pHashDB->flush(flushId, lastSentFlushId);\n";
+    code += "        pHashDB->flush(emptyString, flushId, lastSentFlushId);\n";
     code += "        if (mainExecutor.config.dbClearCache && (mainExecutor.config.databaseURL != \"local\"))\n";
     code += "        {\n";
     code += "            pHashDB->clearCache();\n";
@@ -299,7 +299,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    if (proverRequest.input.contractsBytecode.size() > 0)\n";
     code += "    {\n";
     code += "        pHashDB->loadProgramDB(proverRequest.input.contractsBytecode, true);\n";
-    code += "        pHashDB->flush(flushId, lastSentFlushId);\n";
+    code += "        pHashDB->flush(emptyString, flushId, lastSentFlushId);\n";
     code += "        if (mainExecutor.config.dbClearCache && (mainExecutor.config.databaseURL != \"local\"))\n";
     code += "        {\n";
     code += "            pHashDB->clearCache();\n";
@@ -361,6 +361,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    mpz_class a, b, c, _a, _b;\n";
     code += "    mpz_class expectedC;\n";
     code += "    BinaryAction binaryAction;\n";
+
+    code += "    uint64_t b0;\n";
+    code += "    bool bIsTouchedAddressTree;\n";
 
     code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
     code += "    struct timeval t;\n";
@@ -1038,7 +1041,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
                     code += "    gettimeofday(&t, NULL);\n";
                     code += "#endif\n";
-                    code += "    zkResult = pHashDB->get(oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);\n";
+                    code += "    zkResult = pHashDB->get(proverRequest.uuid, oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);\n";
                     code += "    if (zkResult != ZKR_SUCCESS)\n";
                     code += "    {\n";
                     code += "        proverRequest.result = zkResult;\n";
@@ -1101,6 +1104,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    Kin1[5] = pols.A5[" + string(bFastMode?"0":"i") + "];\n";
                     code += "    Kin1[6] = pols.B0[" + string(bFastMode?"0":"i") + "];\n";
                     code += "    Kin1[7] = pols.B1[" + string(bFastMode?"0":"i") + "];\n";
+
+                    code += "    b0 = fr.toU64(pols.B0[" + string(bFastMode?"0":"i") + "]);;\n";
+                    code += "    bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);;\n";
 
                     code += "    if  ( !fr.isZero(pols.A5[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A6[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A7[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B2[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B3[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B4[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B5[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B6[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B7[" + string(bFastMode?"0":"i") + "]) )\n";
                     code += "    {\n";
@@ -1169,7 +1175,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "#endif\n";
                     code += "    sr8to4(fr, pols.SR0[" + string(bFastMode?"0":"i") + "], pols.SR1[" + string(bFastMode?"0":"i") + "], pols.SR2[" + string(bFastMode?"0":"i") + "], pols.SR3[" + string(bFastMode?"0":"i") + "], pols.SR4[" + string(bFastMode?"0":"i") + "], pols.SR5[" + string(bFastMode?"0":"i") + "], pols.SR6[" + string(bFastMode?"0":"i") + "], pols.SR7[" + string(bFastMode?"0":"i") + "], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);\n";
 
-                    code += "    zkResult = pHashDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.input.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);\n";
+                    code += "    zkResult = pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_responses().size(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : ( proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE ), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);\n";
                     code += "    if (zkResult != ZKR_SUCCESS)\n";
                     code += "    {\n";
                     code += "        proverRequest.result = zkResult;\n";
@@ -2145,7 +2151,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
             code += "    gettimeofday(&t, NULL);\n";
             code += "#endif\n";
-            code += "    zkResult = pHashDB->get(oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);\n";
+            code += "    zkResult = pHashDB->get(proverRequest.uuid, oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);\n";
             code += "    if (zkResult != ZKR_SUCCESS)\n";
             code += "    {\n";
             code += "        proverRequest.result = zkResult;\n";
@@ -2248,6 +2254,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        Kin1[6] = pols.B0[" + string(bFastMode?"0":"i") + "];\n";
             code += "        Kin1[7] = pols.B1[" + string(bFastMode?"0":"i") + "];\n";
 
+            code += "        b0 = fr.toU64(pols.B0[" + string(bFastMode?"0":"i") + "]);;\n";
+            code += "        bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);;\n";
+
             code += "        if  ( !fr.isZero(pols.A5[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A6[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A7[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B2[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B3[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B4[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B5[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B6[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B7[" + string(bFastMode?"0":"i") + "]) )\n";
             code += "        {\n";
             code += "            proverRequest.result = ZKR_SM_MAIN_STORAGE;\n";
@@ -2313,7 +2322,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
             code += "        sr8to4(fr, pols.SR0[" + string(bFastMode?"0":"i") + "], pols.SR1[" + string(bFastMode?"0":"i") + "], pols.SR2[" + string(bFastMode?"0":"i") + "], pols.SR3[" + string(bFastMode?"0":"i") + "], pols.SR4[" + string(bFastMode?"0":"i") + "], pols.SR5[" + string(bFastMode?"0":"i") + "], pols.SR6[" + string(bFastMode?"0":"i") + "], pols.SR7[" + string(bFastMode?"0":"i") + "], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);\n";
 
-            code += "        zkResult = pHashDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.input.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);\n";
+            code += "        zkResult = pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_responses().size(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : ( proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE ), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);\n";
             code += "        if (zkResult != ZKR_SUCCESS)\n";
             code += "        {\n";
             code += "            proverRequest.result = zkResult;\n";
@@ -4719,7 +4728,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    gettimeofday(&t, NULL);\n";
     code += "#endif\n";
     
-    code += "    zkresult zkr = pHashDB->flush(proverRequest.flushId, proverRequest.lastSentFlushId);\n";
+    code += "    zkresult zkr = pHashDB->flush(proverRequest.uuid, proverRequest.flushId, proverRequest.lastSentFlushId);\n";
     code += "    if (zkr != ZKR_SUCCESS)\n";
     code += "    {\n";
     code += "        proverRequest.result = zkr;\n";

@@ -11,6 +11,7 @@
 #include "database.hpp"
 #include "database_map.hpp"
 #include "zkresult.hpp"
+#include "persistence.hpp"
 
 using namespace std;
 
@@ -47,6 +48,22 @@ public:
     string toString (Goldilocks &fr);
 };
 
+class SmtContext
+{
+public:
+    Database &db;
+    bool bUseStateManager;
+    const string &batchUUID;
+    uint64_t tx;
+    const Persistence persistence;
+    SmtContext(Database &db, bool bUseStateManager, const string &batchUUID, uint64_t tx, const Persistence persistence) :
+        db(db),
+        bUseStateManager(bUseStateManager),
+        batchUUID(batchUUID),
+        tx(tx),
+        persistence(persistence) {};
+};
+
 // SMT class
 class Smt
 {
@@ -67,33 +84,33 @@ public:
         capacityOne[2] = fr.zero();
         capacityOne[3] = fr.zero();
     }
-    zkresult set(Database &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, SmtSetResult &result, DatabaseMap *dbReadLog = NULL);
-    zkresult get(Database &db, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], SmtGetResult &result, DatabaseMap *dbReadLog = NULL);
+    zkresult set(const string &batchUUID, uint64_t tx, Database &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, SmtSetResult &result, DatabaseMap *dbReadLog = NULL);
+    zkresult get(const string &batchUUID, Database &db, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], SmtGetResult &result, DatabaseMap *dbReadLog = NULL);
     void splitKey(const Goldilocks::Element (&key)[4], vector<uint64_t> &result);
     void joinKey(const vector<uint64_t> &bits, const Goldilocks::Element (&rkey)[4], Goldilocks::Element (&key)[4]);
     void removeKeyBits(const Goldilocks::Element (&key)[4], uint64_t nBits, Goldilocks::Element (&rkey)[4]);
-    zkresult hashSave(Database &db, const Goldilocks::Element (&v)[12], const bool persistent, Goldilocks::Element (&hash)[4]);
+    zkresult hashSave(const SmtContext &ctx, const Goldilocks::Element (&v)[12], Goldilocks::Element (&hash)[4]);
 
     // Consolidate value and capacity
-    zkresult hashSave(Database &db, const Goldilocks::Element (&a)[8], const Goldilocks::Element (&c)[4], const bool persistent, Goldilocks::Element (&hash)[4])
+    zkresult hashSave(const SmtContext &ctx, const Goldilocks::Element (&a)[8], const Goldilocks::Element (&c)[4], Goldilocks::Element (&hash)[4])
     {
         // Calculate the poseidon hash of the vector of field elements: v = a | c
         Goldilocks::Element v[12];
         for (uint64_t i=0; i<8; i++) v[i] = a[i];
         for (uint64_t i=0; i<4; i++) v[8+i] = c[i];
-        return hashSave(db, v, persistent, hash);
+        return hashSave(ctx, v, hash);
     }
     
     // Use capacity zero for intermediate nodes and value hashes
-    zkresult hashSaveZero(Database &db, const Goldilocks::Element (&a)[8], const bool persistent, Goldilocks::Element (&hash)[4])
+    zkresult hashSaveZero(const SmtContext &ctx, const Goldilocks::Element (&a)[8], Goldilocks::Element (&hash)[4])
     {
-        return hashSave(db, a, capacityZero, persistent, hash);
+        return hashSave(ctx, a, capacityZero, hash);
     }
     
     // Use capacity one for leaf nodes
-    zkresult hashSaveOne(Database &db, const Goldilocks::Element (&a)[8], const bool persistent, Goldilocks::Element (&hash)[4])
+    zkresult hashSaveOne(const SmtContext &ctx, const Goldilocks::Element (&a)[8], Goldilocks::Element (&hash)[4])
     {
-        return hashSave(db, a, capacityOne, persistent, hash);
+        return hashSave(ctx, a, capacityOne, hash);
     }
 
     zkresult updateStateRoot(Database &db, const Goldilocks::Element (&stateRoot)[4]);

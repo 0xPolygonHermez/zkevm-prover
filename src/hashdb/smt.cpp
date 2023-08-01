@@ -4,12 +4,23 @@
 #include "zkresult.hpp"
 #include "zkmax.hpp"
 #include "zklog.hpp"
+#include "state_manager.hpp"
 
-zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, SmtSetResult &result, DatabaseMap *dbReadLog)
+zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, SmtSetResult &result, DatabaseMap *dbReadLog)
 {
 #ifdef LOG_SMT
     zklog.info("Smt::set() called with oldRoot=" + fea2string(fr,oldRoot) + " key=" + fea2string(fr,key) + " value=" + value.get_str(16) + " persistent=" + to_string(persistent));
 #endif
+
+    bool bUseStateManager = db.config.stateManager && (batchUUID.size() > 0);
+
+    SmtContext ctx(db, bUseStateManager, batchUUID, tx, persistence);
+
+    if (bUseStateManager)
+    {
+        stateManager.setOldStateRoot(batchUUID, tx, fea2string(fr, oldRoot), persistence);
+    }
+
     Goldilocks::Element r[4];
     for (uint64_t i=0; i<4; i++) r[i] = oldRoot[i];
     Goldilocks::Element newRoot[4];
@@ -54,7 +65,15 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
         // Read the content of db for entry r: siblings[level] = db.read(r)
         string rootString = fea2string(fr, r);
 
-        dbres = db.read(rootString, dbValue, dbReadLog, false, &keys, level);
+        dbres = ZKR_UNSPECIFIED;
+        if (bUseStateManager)
+        {
+            dbres = stateManager.read(batchUUID, rootString, dbValue, dbReadLog);
+        }
+        if (dbres != ZKR_SUCCESS)
+        {
+            dbres = db.read(rootString, dbValue, dbReadLog, false, &keys, level);
+        }
         if (dbres != ZKR_SUCCESS)
         {
             zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + rootString);
@@ -73,7 +92,15 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
             foundValueHash[2] = siblings[level][6];
             foundValueHash[3] = siblings[level][7];
             foundValueHashString = fea2string(fr, foundValueHash);
-            dbres = db.read(foundValueHashString, dbValue, dbReadLog);
+            dbres = ZKR_UNSPECIFIED;
+            if (bUseStateManager)
+            {
+                dbres = stateManager.read(batchUUID, foundValueHashString, dbValue, dbReadLog);
+            }
+            if (dbres != ZKR_SUCCESS)
+            {
+                dbres = db.read(foundValueHashString, dbValue, dbReadLog);
+            }
             if (dbres != ZKR_SUCCESS)
             {
                 zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") key:" + foundValueHashString);
@@ -154,7 +181,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
 
                 // Save and get the new value hash
                 Goldilocks::Element newValH[4];
-                dbres = hashSaveZero(db, v, persistent, newValH);
+                dbres = hashSaveZero(ctx, v, newValH);
                 if (dbres != ZKR_SUCCESS)
                 {
                     return dbres;
@@ -166,7 +193,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
 
                 // Save and get the new leaf node hash
                 Goldilocks::Element newLeafHash[4];
-                dbres = hashSaveOne(db, v, persistent, newLeafHash);
+                dbres = hashSaveOne(ctx, v, newLeafHash);
                 if (dbres != ZKR_SUCCESS)
                 {
                     return dbres;
@@ -190,7 +217,10 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                             nodeToDeleteString = fea2string(fr, nodeToDelete);
                             if (nodeToDeleteString != "0")
                             {
-                                nodesToDelete.push_back(nodeToDeleteString);
+                                if (bUseStateManager)
+                                {
+                                    stateManager.deleteNode(batchUUID, tx, nodeToDeleteString, persistence);
+                                }
                             }
                         }
                     }
@@ -244,7 +274,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
 
                 // Save and get the hash
                 Goldilocks::Element oldLeafHash[4];
-                dbres = hashSaveOne(db, v, persistent, oldLeafHash);
+                dbres = hashSaveOne(ctx, v, oldLeafHash);
                 if (dbres != ZKR_SUCCESS)
                 {
                     return dbres;
@@ -274,7 +304,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
 
                 // Create the value node
                 Goldilocks::Element newValH[4];
-                dbres = hashSaveZero(db, valueFea, persistent, newValH);
+                dbres = hashSaveZero(ctx, valueFea, newValH);
                 if (dbres != ZKR_SUCCESS)
                 {
                     return dbres;
@@ -288,7 +318,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
 
                 // Create the leaf node and store the hash in newLeafHash
                 Goldilocks::Element newLeafHash[4];
-                dbres = hashSaveOne(db, v, persistent, newLeafHash);
+                dbres = hashSaveOne(ctx, v, newLeafHash);
                 if (dbres != ZKR_SUCCESS)
                 {
                     return dbres;
@@ -306,7 +336,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
 
                 // Create the intermediate node and store the calculated hash in r2
                 Goldilocks::Element r2[4];
-                dbres = hashSaveZero(db, node, persistent, r2);
+                dbres = hashSaveZero(ctx, node, r2);
                 if (dbres != ZKR_SUCCESS)
                 {
                     return dbres;
@@ -330,7 +360,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                     }
 
                     // Create the intermediate node and store the calculated hash in r2
-                    dbres = hashSaveZero(db, node, persistent, r2);
+                    dbres = hashSaveZero(ctx, node, r2);
                     if (dbres != ZKR_SUCCESS)
                     {
                         return dbres;
@@ -384,7 +414,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
 
             // Create the value node and store the calculated hash in newValH
             Goldilocks::Element newValH[4];
-            dbres = hashSaveZero(db, valueFea, persistent, newValH);
+            dbres = hashSaveZero(ctx, valueFea, newValH);
             if (dbres != ZKR_SUCCESS)
             {
                 return dbres;
@@ -399,7 +429,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
 
             // Create the new leaf node and store the calculated hash in newLeafHash
             Goldilocks::Element newLeafHash[4];
-            dbres = hashSaveOne(db, keyvalVector, persistent, newLeafHash);
+            dbres = hashSaveOne(ctx, keyvalVector, newLeafHash);
             if (dbres != ZKR_SUCCESS)
             {
                 return dbres;
@@ -422,7 +452,10 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                         nodeToDeleteString = fea2string(fr, nodeToDelete);
                         if (nodeToDeleteString != "0")
                         {
-                            nodesToDelete.push_back(nodeToDeleteString);
+                            if (bUseStateManager)
+                            {
+                                stateManager.deleteNode(batchUUID, tx, nodeToDeleteString, persistence);
+                            }
                         }
                     }
                 }
@@ -466,7 +499,10 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                     nodeToDeleteString = fea2string(fr, nodeToDelete);
                     if (nodeToDeleteString != "0")
                     {
-                        nodesToDelete.push_back(nodeToDeleteString);
+                        if (bUseStateManager)
+                        {
+                            stateManager.deleteNode(batchUUID, tx, nodeToDeleteString, persistence);
+                        }
                     }
                 }
                 else
@@ -493,7 +529,15 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                     string auxString = fea2string(fr, auxFea);
 
                     // Read its 2 siblings
-                    dbres = db.read(auxString, dbValue, dbReadLog, false, &keys, level);
+                    dbres = ZKR_UNSPECIFIED;
+                    if (bUseStateManager)
+                    {
+                        dbres = stateManager.read(batchUUID, auxString, dbValue, dbReadLog);
+                    }
+                    if (dbres != ZKR_SUCCESS)
+                    {
+                        dbres = db.read(auxString, dbValue, dbReadLog, false, &keys, level);
+                    }
                     if ( dbres != ZKR_SUCCESS)
                     {
                         zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + auxString);
@@ -512,7 +556,15 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                         string valHString = fea2string(fr, valH);
 
                         // Read its siblings
-                        dbres = db.read(valHString, dbValue, dbReadLog);
+                        dbres = ZKR_UNSPECIFIED;
+                        if (bUseStateManager)
+                        {
+                            dbres = stateManager.read(batchUUID, valHString, dbValue, dbReadLog);
+                        }
+                        if (dbres != ZKR_SUCCESS)
+                        {
+                            dbres = db.read(valHString, dbValue, dbReadLog);
+                        }
                         if (dbres != ZKR_SUCCESS)
                         {
                             zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + valHString);
@@ -567,7 +619,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
 
                         // Create leaf node and store computed hash in oldLeafHash
                         Goldilocks::Element oldLeafHash[4];
-                        dbres = hashSaveOne(db, a, persistent, oldLeafHash);
+                        dbres = hashSaveOne(ctx, a, oldLeafHash);
                         if (dbres != ZKR_SUCCESS)
                         {
                             return dbres;
@@ -652,7 +704,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
         Goldilocks::Element a[8], c[4];
         for (uint64_t i=0; i<8; i++) a[i] = siblings[level][i];
         for (uint64_t i=0; i<4; i++) c[i] = siblings[level][8+i];
-        dbres = hashSave(db, a, c, persistent, newRoot);
+        dbres = hashSave(ctx, a, c, newRoot);
         if (dbres != ZKR_SUCCESS)
         {
             return dbres;
@@ -678,7 +730,10 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
                     nodeToDeleteString = fea2string(fr, nodeToDelete);
                     if (nodeToDeleteString != "0")
                     {
-                        nodesToDelete.push_back(nodeToDeleteString);
+                        if (bUseStateManager)
+                        {
+                            stateManager.deleteNode(batchUUID, tx, nodeToDeleteString, persistence);
+                        }
                     }
                 }
             }
@@ -692,7 +747,12 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
         }
     }
 
-    if ( persistent &&
+    if (bUseStateManager)
+    {
+        stateManager.setNewStateRoot(batchUUID, tx, fea2string(fr, newRoot), persistence);
+    }
+
+    if ( (persistence == PERSISTENCE_DATABASE) &&
          (
             !fr.equal(oldRoot[0], newRoot[0]) ||
             !fr.equal(oldRoot[1], newRoot[1]) ||
@@ -731,16 +791,6 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
     result.mode       = mode;
     result.proofHashCounter = proofHashCounter;
 
-    if (db.config.dbMultiWriteSinglePosition && (nodesToDelete.size() > 0))
-    {
-        zkresult zkr = db.deleteNodes(nodesToDelete);
-        if (zkr != ZKR_SUCCESS)
-        {
-            zklog.error("Smt::Set() failed calling db.deleteNodes() result=" + zkresult2string(zkr));
-            //return zkr;
-        }
-    }
-
 #ifdef LOG_SMT
     zklog.info("Smt::set() returns isOld0=" + to_string(result.isOld0) + " insKey=" + fea2string(fr,result.insKey) + " oldValue=" + result.oldValue.get_str(16) + " newRoot=" + fea2string(fr,result.newRoot) + " mode=" + result.mode);
 #endif
@@ -751,11 +801,14 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
     return ZKR_SUCCESS;
 }
 
-zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], SmtGetResult &result, DatabaseMap *dbReadLog)
+zkresult Smt::get (const string &batchUUID, Database &db, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], SmtGetResult &result, DatabaseMap *dbReadLog)
 {
 #ifdef LOG_SMT
     zklog.info("Smt::get() called with root=" + fea2string(fr,root) + " and key=" + fea2string(fr,key));
 #endif
+
+    bool bUseStateManager = db.config.stateManager && (batchUUID.size() > 0);
+
     Goldilocks::Element r[4];
     for (uint64_t i=0; i<4; i++)
     {
@@ -795,7 +848,15 @@ zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Gold
     {
         // Read the content of db for entry r: siblings[level] = db.read(r)
         string rString = fea2string(fr, r);
-        dbres = db.read(rString, dbValue, dbReadLog, false, &keys, level);
+        dbres = ZKR_UNSPECIFIED;
+        if (bUseStateManager)
+        {
+            dbres = stateManager.read(batchUUID, rString, dbValue, dbReadLog);
+        }
+        if (dbres != ZKR_SUCCESS)
+        {
+            dbres = db.read(rString, dbValue, dbReadLog, false, &keys, level);
+        }
         if (dbres != ZKR_SUCCESS)
         {
             zklog.error("Smt::get() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + rString);
@@ -815,7 +876,15 @@ zkresult Smt::get(Database &db, const Goldilocks::Element (&root)[4], const Gold
             valueHashFea[2] = siblings[level][6];
             valueHashFea[3] = siblings[level][7];
             string foundValueHashString = fea2string(fr, valueHashFea);
-            dbres = db.read(foundValueHashString, dbValue, dbReadLog);
+            dbres = ZKR_UNSPECIFIED;
+            if (bUseStateManager)
+            {
+                dbres = stateManager.read(batchUUID, foundValueHashString, dbValue, dbReadLog);
+            }
+            if (dbres != ZKR_SUCCESS)
+            {
+                dbres = db.read(foundValueHashString, dbValue, dbReadLog);
+            }
             if (dbres != ZKR_SUCCESS)
             {
                 zklog.error("Smt::get() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + foundValueHashString);
@@ -1008,7 +1077,7 @@ void Smt::removeKeyBits ( const Goldilocks::Element (&key)[4], uint64_t nBits, G
     }
 }
 
-zkresult Smt::hashSave ( Database &db, const Goldilocks::Element (&v)[12], const bool persistent, Goldilocks::Element (&hash)[4])
+zkresult Smt::hashSave ( const SmtContext &ctx, const Goldilocks::Element (&v)[12], Goldilocks::Element (&hash)[4])
 {
     // Calculate the poseidon hash of the vector of field elements: v = a | c
     poseidon.hash(hash, v);
@@ -1020,10 +1089,22 @@ zkresult Smt::hashSave ( Database &db, const Goldilocks::Element (&v)[12], const
     vector<Goldilocks::Element> dbValue;
     for (uint64_t i=0; i<12; i++) dbValue.push_back(v[i]);
     zkresult zkr;
-    zkr = db.write(hashString, dbValue, persistent);
-    if (zkr != ZKR_SUCCESS)
+
+    if (ctx.bUseStateManager)
     {
-        zklog.error("Smt::hashSave() failed calling db.write() key=" + hashString + " result=" + to_string(zkr) + "=" + zkresult2string(zkr));
+        zkr = stateManager.write(ctx.batchUUID, ctx.tx, hashString, dbValue, ctx.persistence);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("Smt::hashSave() failed calling stateManager.write() key=" + hashString + " result=" + to_string(zkr) + "=" + zkresult2string(zkr));
+        }
+    }
+    else
+    {
+        zkr = ctx.db.write(hashString, dbValue, ctx.persistence == PERSISTENCE_DATABASE ? 1 : 0);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("Smt::hashSave() failed calling db.write() key=" + hashString + " result=" + to_string(zkr) + "=" + zkresult2string(zkr));
+        }
     }
     
 #ifdef LOG_SMT

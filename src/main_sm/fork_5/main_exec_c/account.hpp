@@ -119,28 +119,28 @@ private:
 public:
 
     // Get account balance value
-    zkresult GetBalance (const Goldilocks::Element (&root)[4], mpz_class &balance);
+    zkresult GetBalance (const string &batchUUID, const Goldilocks::Element (&root)[4], mpz_class &balance);
 
     // Set account balance value; root is updated with state new root
-    zkresult SetBalance (Goldilocks::Element (&root)[4], const mpz_class &balance);
+    zkresult SetBalance (const string &batchUUID, uint64_t tx, Goldilocks::Element (&root)[4], const mpz_class &balance);
 
     // Get account nonce value
-    zkresult GetNonce (const Goldilocks::Element (&root)[4], uint64_t &nonce);
+    zkresult GetNonce (const string &batchUUID, const Goldilocks::Element (&root)[4], uint64_t &nonce);
 
     // Set account nonce value; root is updated with new state root
-    zkresult SetNonce (Goldilocks::Element (&root)[4], const uint64_t &nonce);
+    zkresult SetNonce (const string &batchUUID, uint64_t tx, Goldilocks::Element (&root)[4], const uint64_t &nonce);
 
     // Set account global exit root; root is updated with new state root
-    zkresult SetGlobalExitRoot (Goldilocks::Element (&root)[4], const mpz_class &globalExitRoot, const mpz_class &value);
+    zkresult SetGlobalExitRoot (const string &batchUUID, uint64_t tx, Goldilocks::Element (&root)[4], const mpz_class &globalExitRoot, const mpz_class &value);
     
     // Get account batch number value
-    zkresult GetTxCount (const Goldilocks::Element (&root)[4], mpz_class &txCount);
+    zkresult GetTxCount (const string &batchUUID, const Goldilocks::Element (&root)[4], mpz_class &txCount);
 
     // Set account TX count value; root is updated with new state root
-    zkresult SetTxCount (Goldilocks::Element (&root)[4], const mpz_class &txCount);
+    zkresult SetTxCount (const string &batchUUID, uint64_t tx, Goldilocks::Element (&root)[4], const mpz_class &txCount);
 
     // Set account state root value; root is updated with new state root
-    zkresult SetStateRoot (Goldilocks::Element (&root)[4], const mpz_class &txCount, const mpz_class &stateRoot);
+    zkresult SetStateRoot (const string &batchUUID, uint64_t tx, Goldilocks::Element (&root)[4], const mpz_class &txCount, const mpz_class &stateRoot);
 };
 
 }

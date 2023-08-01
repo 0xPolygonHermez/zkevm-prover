@@ -13,6 +13,7 @@
 #include "hashdb_factory.hpp"
 #include "hashdb_test_perf.hpp"
 #include "hashdb_test_load.hpp"
+#include "utils.hpp"
 
 using namespace std;
 
@@ -30,6 +31,9 @@ void* hashDBPerfTestThread (const Config& config)
 {
     cout << "HashDB performance test started" << endl;
     Goldilocks fr;
+
+    string uuid = getUUID();
+    uint64_t tx = 0;
 
     string sTest;
     #if PERF_TEST == PERF_SET
@@ -90,7 +94,7 @@ void* hashDBPerfTestThread (const Config& config)
         value=i;
 
         #if PERF_TEST == PERF_SET
-            client->set(root, key, value, true, newRoot, &setResult, NULL);
+            client->set(uuid, tx, root, key, value, PERSISTENCE_DATABASE, newRoot, &setResult, NULL);
             for (int j=0; j<4; j++) root[j] = setResult.newRoot[j];
         #elif PERF_TEST == PERF_GET
             client->get(root, key, value, &getResult);
