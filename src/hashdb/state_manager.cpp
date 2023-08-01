@@ -288,6 +288,8 @@ zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &f
 
     TimerStart(STATE_MANAGER_FLUSH);
 
+    zkresult zkr;
+
     // Find batch state for this uuid
     unordered_map<string, BatchState>::iterator it;
     it = state.find(batchUUID);
@@ -305,10 +307,16 @@ zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &f
         {
             TxState &txState = batchState.txState[tx];
 
-            // Empty non-persistence states
-            if ((persistence == PERSISTENCE_TEMPORARY) || (persistence == PERSISTENCE_CACHE))
+            // Temporary data can be deleted at the end of a batch
+            if (persistence == PERSISTENCE_TEMPORARY)
             {
                 txState.persistence[persistence].subState.clear();
+                continue;
+            }
+
+            // If there's no data, there's nothing to do
+            if (txState.persistence[persistence].subState.size() == 0)
+            {
                 continue;
             }
 
@@ -392,9 +400,37 @@ zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &f
                 }
                 txState.persistence[persistence].subState[ss].dbDelete.clear();
             }
+
+            // Save data to database
+
+            // For all sub-states
+            for (uint64_t ss = 0; ss < txState.persistence[persistence].subState.size(); ss++)
+            {
+                // For all keys to write
+                unordered_map<string, vector<Goldilocks::Element>>::const_iterator writeIt;
+                for ( writeIt = txState.persistence[persistence].subState[ss].dbWrite.begin();
+                      writeIt != txState.persistence[persistence].subState[ss].dbWrite.end();
+                      writeIt++ )
+                {
+                    zkr = db.write(writeIt->first, writeIt->second, persistence == PERSISTENCE_DATABASE ? 1 : 0);
+                    if (zkr != ZKR_SUCCESS)
+                    {
+                        zklog.error("StateManager::flush() failed calling db.write() result=" + zkresult2string(zkr));
+                        //return zkr;
+                    }
+                }
+            }
         }
     }
+    
+    // Delete this batch UUID state
+    state.erase(it);
 
+    zkr = db.flush(flushId, lastSentFlushId);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("StateManager::flush() failed calling db.flush() result=" + zkresult2string(zkr));
+    }
 
 
     TimerStopAndLog(STATE_MANAGER_FLUSH);
@@ -402,11 +438,7 @@ zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &f
     //print(false);
     //print(true);
 
-
-    //print();
-    //print(true);
-
-    return ZKR_SUCCESS;
+    return zkr;
 }
 
 void StateManager::print (bool bDbContent)
