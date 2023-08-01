@@ -55,6 +55,7 @@
 //#define LOG_DB_WRITE_REMOTE
 //#define LOG_DB_ACCEPT_INTRAY
 //#define LOG_HASHDB_SERVICE
+//#define LOG_STATE_MANAGER
 //#define LOG_FULL_TRACER
 #define LOG_FULL_TRACER_ON_ERROR
 //#define LOG_TX_HASH
