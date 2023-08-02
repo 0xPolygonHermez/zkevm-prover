@@ -4,16 +4,19 @@ VERSION=v2.0.0-RC1-fork.5
 FORK_VERSION=$(sed -e 's/.*-fork.//g' <<< ${VERSION})
 FORK_ID=fork_$FORK_VERSION
 
-WORKING_DIR=/releases/${VERSION}
+WORKING_DIR=/home/edu/pilfflonk
 CONFIG_DIR=${WORKING_DIR}/config/
 C_FILES=${WORKING_DIR}/c_files
 CIRCOM_HEADER="#pragma GCC diagnostic push\n#pragma GCC diagnostic ignored \"-Wunused-variable\"\n#pragma GCC push_options\n#pragma GCC optimize (\"O0\")\n#include <stdio.h>\n#include <iostream>\n#include <assert.h>\n#include <cassert>\n"
+
+PILFFLONK=true
 
 ZKEVM_VERIFIER_CPP=./src/starkpil/zkevm/witness/zkevm.verifier.cpp
 RECURSIVE1_CPP=./src/starkpil/starkRecursive1/witness/recursive1.verifier.cpp
 RECURSIVE2_CPP=./src/starkpil/starkRecursive2/witness/recursive2.verifier.cpp
 RECURSIVEF_CPP=./src/starkpil/starkRecursiveF/witness/recursivef.verifier.cpp
 RECURSIVEFINAL_CPP=./src/starkpil/recursivefinal/final.verifier.cpp
+PILFFLONKFINAL_CPP=./src/pilfflonk/witness/verifier.cpp
 
 #Sync the config directory
 rsync -avz --progress ${CONFIG_DIR}/scripts/ config/scripts/
@@ -60,12 +63,28 @@ sed -i "1s/^/#include \"circom.recursiveF.hpp\"\n#include \"calcwit.recursiveF.h
 sed -i "1s/^/$CIRCOM_HEADER/" ${RECURSIVEF_CPP} 
 echo -e "}\n#pragma GCC diagnostic pop" >> ${RECURSIVEF_CPP}
 
-# Generate the final.verifier.cpp
-cp ${C_FILES}/final_cpp/final.cpp ${RECURSIVEFINAL_CPP}
-sed -i '1d;2d;3d;4d;5d' ${RECURSIVEFINAL_CPP}
-sed -i "1s/^/#include \"circom.final.hpp\"\n#include \"calcwit.final.hpp\"\nnamespace CircomFinal\n{\n/" ${RECURSIVEFINAL_CPP}
-sed -i "1s/^/$CIRCOM_HEADER/" ${RECURSIVEFINAL_CPP} 
-echo -e "}\n#pragma GCC diagnostic pop" >> ${RECURSIVEFINAL_CPP}
+if ${PILFFLONK}; then 
+    cp ${C_FILES}/pilfflonk_final.chelpers/pilfflonk.chelpers.constValues.cpp ./src/pilfflonk/chelpers/pilfflonk.chelpers.constValues.cpp
+    cp ${C_FILES}/pilfflonk_final.chelpers/pilfflonk.chelpers.publics.cpp ./src/pilfflonk/chelpers/pilfflonk.chelpers.publics.cpp
+    cp ${C_FILES}/pilfflonk_final.chelpers/pilfflonk.chelpers.step2.cpp ./src/pilfflonk/chelpers/pilfflonk.chelpers.step2.cpp
+    cp ${C_FILES}/pilfflonk_final.chelpers/pilfflonk.chelpers.step3.cpp ./src/pilfflonk/chelpers/pilfflonk.chelpers.step3.cpp
+    cp ${C_FILES}/pilfflonk_final.chelpers/pilfflonk.chelpers.step3prev.cpp ./src/pilfflonk/chelpers/pilfflonk.chelpers.step3prev.cpp
+    cp ${C_FILES}/pilfflonk_final.chelpers/pilfflonk.chelpers.step42ns.cpp ./src/pilfflonk/chelpers/pilfflonk.chelpers.step42ns.cpp
+
+    cp ${C_FILES}/final_cpp/final.cpp ${PILFFLONKFINAL_CPP}
+    sed -i '1d;2d;3d;4d;5d' ${PILFFLONKFINAL_CPP}
+    sed -i "1s/^/#include \"circom.pilfflonk.hpp\"\n#include \"calcwit.pilfflonk.hpp\"\nnamespace CircomPilFflonk\n{\n/" ${PILFFLONKFINAL_CPP}
+    sed -i "1s/^/$CIRCOM_HEADER/" ${PILFFLONKFINAL_CPP}
+    echo -e "}\n#pragma GCC diagnostic pop" >> ${PILFFLONKFINAL_CPP}
+else 
+    # Generate the final.verifier.cpp
+    cp ${C_FILES}/final_cpp/final.cpp ${RECURSIVEFINAL_CPP}
+    sed -i '1d;2d;3d;4d;5d' ${RECURSIVEFINAL_CPP}
+    sed -i "1s/^/#include \"circom.final.hpp\"\n#include \"calcwit.final.hpp\"\nnamespace CircomFinal\n{\n/" ${RECURSIVEFINAL_CPP}
+    sed -i "1s/^/$CIRCOM_HEADER/" ${RECURSIVEFINAL_CPP} 
+    echo -e "}\n#pragma GCC diagnostic pop" >> ${RECURSIVEFINAL_CPP}
+fi
+
 
 #Copy pols_generated files
 cp -r ${CONFIG_DIR}/scripts/* ./src/main_sm/$FORK_ID/scripts/

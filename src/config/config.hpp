@@ -77,7 +77,7 @@ public:
     uint16_t hashDBServerPort;
     string hashDBURL;
     string dbCacheSynchURL;
-
+    
     uint16_t aggregatorServerPort;
     uint16_t aggregatorClientPort;
     string aggregatorClientHost;
@@ -117,6 +117,10 @@ public:
     string recursive1Exec;
     string recursive2Exec;
     string recursivefExec;
+    string pilFflonkInfo;
+    string pilFflonkZkey;
+    string pilFflonkExec;
+    string pilFflonkVerifier;
     string finalStarkZkey;
     string publicsOutput;
     string proofFile;

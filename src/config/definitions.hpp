@@ -6,6 +6,8 @@
 #define PROVER_FORK_NAMESPACE_STRING "fork_5"
 #define USING_PROVER_FORK_NAMESPACE using namespace fork_5
 
+#define USE_PILFFLONK true
+
 /* Log traces selector: uncomment to enable the corresponding trace */
 //#define LOG_START_STEPS
 //#define LOG_COMPLETED_STEPS

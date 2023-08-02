@@ -54,36 +54,39 @@ Prover::Prover(Goldilocks &fr,
     {
         if (config.generateProof())
         {
-            zkey = BinFileUtils::openExisting(config.finalStarkZkey, "zkey", 1);
-            protocolId = Zkey::getProtocolIdFromZkey(zkey.get());
-            if (Zkey::GROTH16_PROTOCOL_ID == protocolId)
+            if(!USE_PILFFLONK) 
             {
-                zkeyHeader = ZKeyUtils::loadHeader(zkey.get());
-
-                if (mpz_cmp(zkeyHeader->rPrime, altBbn128r) != 0)
+                zkey = BinFileUtils::openExisting(config.finalStarkZkey, "zkey", 1);
+                protocolId = Zkey::getProtocolIdFromZkey(zkey.get());
+                if (Zkey::GROTH16_PROTOCOL_ID == protocolId)
                 {
-                    throw std::invalid_argument("zkey curve not supported");
+                    zkeyHeader = ZKeyUtils::loadHeader(zkey.get());
+
+                    if (mpz_cmp(zkeyHeader->rPrime, altBbn128r) != 0)
+                    {
+                        throw std::invalid_argument("zkey curve not supported");
+                    }
+
+                    groth16Prover = Groth16::makeProver<AltBn128::Engine>(
+                        zkeyHeader->nVars,
+                        zkeyHeader->nPublic,
+                        zkeyHeader->domainSize,
+                        zkeyHeader->nCoefs,
+                        zkeyHeader->vk_alpha1,
+                        zkeyHeader->vk_beta1,
+                        zkeyHeader->vk_beta2,
+                        zkeyHeader->vk_delta1,
+                        zkeyHeader->vk_delta2,
+                        zkey->getSectionData(4), // Coefs
+                        zkey->getSectionData(5), // pointsA
+                        zkey->getSectionData(6), // pointsB1
+                        zkey->getSectionData(7), // pointsB2
+                        zkey->getSectionData(8), // pointsC
+                        zkey->getSectionData(9)  // pointsH1
+                    );
                 }
-
-                groth16Prover = Groth16::makeProver<AltBn128::Engine>(
-                    zkeyHeader->nVars,
-                    zkeyHeader->nPublic,
-                    zkeyHeader->domainSize,
-                    zkeyHeader->nCoefs,
-                    zkeyHeader->vk_alpha1,
-                    zkeyHeader->vk_beta1,
-                    zkeyHeader->vk_beta2,
-                    zkeyHeader->vk_delta1,
-                    zkeyHeader->vk_delta2,
-                    zkey->getSectionData(4), // Coefs
-                    zkey->getSectionData(5), // pointsA
-                    zkey->getSectionData(6), // pointsB1
-                    zkey->getSectionData(7), // pointsB2
-                    zkey->getSectionData(8), // pointsC
-                    zkey->getSectionData(9)  // pointsH1
-                );
             }
-
+           
             lastComputedRequestEndTime = 0;
 
             sem_init(&pendingRequestSem, 0, 0);
@@ -119,9 +122,13 @@ Prover::Prover(Goldilocks &fr,
                 zklog.info("Prover::genBatchProof() successfully allocated " + to_string(polsSize) + " bytes");
             }
 
-            prover = new Fflonk::FflonkProver<AltBn128::Engine>(AltBn128::Engine::engine, pAddress, polsSize);
-            prover->setZkey(zkey.get());
-
+            if(!USE_PILFFLONK) {
+                prover = new Fflonk::FflonkProver<AltBn128::Engine>(AltBn128::Engine::engine, pAddress, polsSize);
+                prover->setZkey(zkey.get());
+            } else {
+                pilFflonkProver = new PilFflonk::PilFflonkProver(AltBn128::Engine::engine, config.pilFflonkZkey, config.pilFflonkInfo);
+            }
+           
             StarkInfo _starkInfoRecursiveF(config, config.recursivefStarkInfo);
             pAddressStarksRecursiveF = (void *)malloc(_starkInfoRecursiveF.mapTotalN * sizeof(Goldilocks::Element));
 
@@ -146,21 +153,6 @@ Prover::~Prover()
 
     if (config.generateProof())
     {
-        Groth16::Prover<AltBn128::Engine> *pGroth16 = groth16Prover.release();
-        BinFileUtils::BinFile *pZkey = zkey.release();
-        ZKeyUtils::Header *pZkeyHeader = zkeyHeader.release();
-
-        assert(groth16Prover.get() == nullptr);
-        assert(groth16Prover == nullptr);
-        assert(zkey.get() == nullptr);
-        assert(zkey == nullptr);
-        assert(zkeyHeader.get() == nullptr);
-        assert(zkeyHeader == nullptr);
-
-        delete pGroth16;
-        delete pZkey;
-        delete pZkeyHeader;
-
         uint64_t polsSize = starkZkevm->starkInfo.mapTotalN * sizeof(Goldilocks::Element) + starkZkevm->starkInfo.mapSectionsN.section[eSection::cm1_n] * (1 << starkZkevm->starkInfo.starkStruct.nBits) * FIELD_EXTENSION * sizeof(Goldilocks::Element);
 
         // Unmap committed polynomials address
@@ -174,7 +166,24 @@ Prover::~Prover()
         }
         free(pAddressStarksRecursiveF);
 
-        delete prover;
+        if(!USE_PILFFLONK) {
+            Groth16::Prover<AltBn128::Engine> *pGroth16 = groth16Prover.release();
+            BinFileUtils::BinFile *pZkey = zkey.release();
+            ZKeyUtils::Header *pZkeyHeader = zkeyHeader.release();
+
+            assert(groth16Prover.get() == nullptr);
+            assert(groth16Prover == nullptr);
+            assert(zkey.get() == nullptr);
+            assert(zkey == nullptr);
+            assert(zkeyHeader.get() == nullptr);
+            assert(zkeyHeader == nullptr);
+
+            delete pGroth16;
+            delete pZkey;
+            delete pZkeyHeader;
+
+            delete prover;
+        }
 
         delete starkZkevm;
         delete starksC12a;
@@ -845,106 +854,131 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
 
         jProofRecursiveF["publics"] = zkinRecursiveF["publics"];
         json2file(jProofRecursiveF, pProverRequest->filePrefix + "recursivef.proof.json");
+
+        json2file(zkinRecursiveF, pProverRequest->filePrefix + "recursivef.proof.zkin.json");
     }
 
     //  ----------------------------------------------
     //  Verifier final
     //  ----------------------------------------------
 
-    TimerStart(CIRCOM_LOAD_CIRCUIT_FINAL);
-    CircomFinal::Circom_Circuit *circuitFinal = CircomFinal::loadCircuit(config.finalVerifier);
-    TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_FINAL);
-
-    TimerStart(CIRCOM_FINAL_LOAD_JSON);
-    CircomFinal::Circom_CalcWit *ctxFinal = new CircomFinal::Circom_CalcWit(circuitFinal);
-
-    CircomFinal::loadJsonImpl(ctxFinal, zkinRecursiveF);
-    if (ctxFinal->getRemaingInputsToBeSet() != 0)
-    {
-        zklog.error("Prover::genProof() Not all inputs have been set. Only " + to_string(CircomFinal::get_main_input_signal_no() - ctxFinal->getRemaingInputsToBeSet()) + " out of " + to_string(CircomFinal::get_main_input_signal_no()));
-        exitProcess();
-    }
-    TimerStopAndLog(CIRCOM_FINAL_LOAD_JSON);
-
-    TimerStart(CIRCOM_GET_BIN_WITNESS_FINAL);
-    AltBn128::FrElement *pWitnessFinal = NULL;
-    uint64_t witnessSizeFinal = 0;
-    CircomFinal::getBinWitness(ctxFinal, pWitnessFinal, witnessSizeFinal);
-    CircomFinal::freeCircuit(circuitFinal);
-    delete ctxFinal;
-
-    TimerStopAndLog(CIRCOM_GET_BIN_WITNESS_FINAL);
-
-    TimerStart(SAVE_PUBLICS_JSON);
-    // Save public file
-    json publicJson;
-    AltBn128::FrElement aux;
-    AltBn128::Fr.toMontgomery(aux, pWitnessFinal[1]);
-    publicJson[0] = AltBn128::Fr.toString(aux);
-    json2file(publicJson, pProverRequest->publicsOutputFile());
-    TimerStopAndLog(SAVE_PUBLICS_JSON);
-
-    if (Zkey::GROTH16_PROTOCOL_ID != protocolId)
-    {
-        TimerStart(RAPID_SNARK);
+    if(USE_PILFFLONK) {
         try
         {
-            auto [jsonProof, publicSignalsJson] = prover->prove(pWitnessFinal);
+            TimerStart(PILFFLONK_PROOF);
+            auto [jsonProof, publicSignalsJson] = pilFflonkProver->prove(config.pilFflonkExec, config.pilFflonkVerifier, zkinRecursiveF);
+            // Save proof to file
+            if (config.saveProofToFile)
+            {
+                json2file(jsonProof, pProverRequest->filePrefix + "final_proof.json");
+                json2file(publicSignalsJson, pProverRequest->filePrefix + "final_publics.json");
+
+            }
+            TimerStopAndLog(PILFFLONK_PROOF);
+        }
+        catch (std::exception &e)
+        {
+            zklog.error("Prover::genProof() got exception in pilFflonk:" + string(e.what()));
+            exitProcess();
+        }
+    } else 
+    {
+        TimerStart(CIRCOM_LOAD_CIRCUIT_FINAL);
+        CircomFinal::Circom_Circuit *circuitFinal = CircomFinal::loadCircuit(config.finalVerifier);
+        TimerStopAndLog(CIRCOM_LOAD_CIRCUIT_FINAL);
+
+        TimerStart(CIRCOM_FINAL_LOAD_JSON);
+        CircomFinal::Circom_CalcWit *ctxFinal = new CircomFinal::Circom_CalcWit(circuitFinal);
+
+        CircomFinal::loadJsonImpl(ctxFinal, zkinRecursiveF);
+        if (ctxFinal->getRemaingInputsToBeSet() != 0)
+        {
+            zklog.error("Prover::genProof() Not all inputs have been set. Only " + to_string(CircomFinal::get_main_input_signal_no() - ctxFinal->getRemaingInputsToBeSet()) + " out of " + to_string(CircomFinal::get_main_input_signal_no()));
+            exitProcess();
+        }
+        TimerStopAndLog(CIRCOM_FINAL_LOAD_JSON);
+
+        TimerStart(CIRCOM_GET_BIN_WITNESS_FINAL);
+        AltBn128::FrElement *pWitnessFinal = NULL;
+        uint64_t witnessSizeFinal = 0;
+        CircomFinal::getBinWitness(ctxFinal, pWitnessFinal, witnessSizeFinal);
+        CircomFinal::freeCircuit(circuitFinal);
+        delete ctxFinal;
+
+        TimerStopAndLog(CIRCOM_GET_BIN_WITNESS_FINAL);
+
+        TimerStart(SAVE_PUBLICS_JSON);
+        // Save public file
+        json publicJson;
+        AltBn128::FrElement aux;
+        AltBn128::Fr.toMontgomery(aux, pWitnessFinal[1]);
+        publicJson[0] = AltBn128::Fr.toString(aux);
+        json2file(publicJson, pProverRequest->publicsOutputFile());
+        TimerStopAndLog(SAVE_PUBLICS_JSON);
+
+        if (Zkey::FFLONK_PROTOCOL_ID == protocolId)
+        {
+            TimerStart(RAPID_SNARK);
+            try
+            {
+                auto [jsonProof, publicSignalsJson] = prover->prove(pWitnessFinal);
+                // Save proof to file
+                if (config.saveProofToFile)
+                {
+                    json2file(jsonProof, pProverRequest->filePrefix + "final_proof.proof.json");
+                }
+                TimerStopAndLog(RAPID_SNARK);
+
+                // Populate Proof with the correct data
+                PublicInputsExtended publicInputsExtended;
+                publicInputsExtended.publicInputs = pProverRequest->input.publicInputsExtended.publicInputs;
+                pProverRequest->proof.load(jsonProof, publicSignalsJson);
+
+                pProverRequest->result = ZKR_SUCCESS;
+            }
+            catch (std::exception &e)
+            {
+                zklog.error("Prover::genProof() got exception in rapid SNARK:" + string(e.what()));
+                exitProcess();
+            }
+        }
+        else
+        {
+            // Generate Groth16 via rapid SNARK
+            TimerStart(RAPID_SNARK);
+            json jsonProof;
+            try
+            {
+                auto proof = groth16Prover->prove(pWitnessFinal);
+                jsonProof = proof->toJson();
+            }
+            catch (std::exception &e)
+            {
+                zklog.error("Prover::genProof() got exception in rapid SNARK:" + string(e.what()));
+                exitProcess();
+            }
+            TimerStopAndLog(RAPID_SNARK);
+
             // Save proof to file
             if (config.saveProofToFile)
             {
                 json2file(jsonProof, pProverRequest->filePrefix + "final_proof.proof.json");
             }
-            TimerStopAndLog(RAPID_SNARK);
-
             // Populate Proof with the correct data
             PublicInputsExtended publicInputsExtended;
             publicInputsExtended.publicInputs = pProverRequest->input.publicInputsExtended.publicInputs;
-            pProverRequest->proof.load(jsonProof, publicSignalsJson);
+            pProverRequest->proof.load(jsonProof, publicJson);
 
             pProverRequest->result = ZKR_SUCCESS;
         }
-        catch (std::exception &e)
-        {
-            zklog.error("Prover::genProof() got exception in rapid SNARK:" + string(e.what()));
-            exitProcess();
-        }
+
+        /***********/
+        /* Cleanup */
+        /***********/
+        free(pWitnessFinal);
+
     }
-    else
-    {
-        // Generate Groth16 via rapid SNARK
-        TimerStart(RAPID_SNARK);
-        json jsonProof;
-        try
-        {
-            auto proof = groth16Prover->prove(pWitnessFinal);
-            jsonProof = proof->toJson();
-        }
-        catch (std::exception &e)
-        {
-            zklog.error("Prover::genProof() got exception in rapid SNARK:" + string(e.what()));
-            exitProcess();
-        }
-        TimerStopAndLog(RAPID_SNARK);
-
-        // Save proof to file
-        if (config.saveProofToFile)
-        {
-            json2file(jsonProof, pProverRequest->filePrefix + "final_proof.proof.json");
-        }
-        // Populate Proof with the correct data
-        PublicInputsExtended publicInputsExtended;
-        publicInputsExtended.publicInputs = pProverRequest->input.publicInputsExtended.publicInputs;
-        pProverRequest->proof.load(jsonProof, publicJson);
-
-        pProverRequest->result = ZKR_SUCCESS;
-    }
-
-    /***********/
-    /* Cleanup */
-    /***********/
-    free(pWitnessFinal);
-
+    
     TimerStopAndLog(PROVER_FINAL_PROOF);
 }
 

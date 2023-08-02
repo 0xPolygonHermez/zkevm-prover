@@ -16,7 +16,7 @@
 #include "poseidon_goldilocks.hpp"
 #include "executor/executor.hpp"
 #include "sm/pols_generated/constant_pols.hpp"
-
+#include "pilfflonk_prover.hpp"
 
 #include "starkRecursiveF.hpp"
 #include "starkpil/stark_info.hpp"
@@ -37,6 +37,7 @@ class Prover
     Starks *starksRecursive2;
 
     Fflonk::FflonkProver<AltBn128::Engine> *prover;
+    PilFflonk::PilFflonkProver *pilFflonkProver;
     std::unique_ptr<Groth16::Prover<AltBn128::Engine>> groth16Prover;
     std::unique_ptr<BinFileUtils::BinFile> zkey;
     std::unique_ptr<ZKeyUtils::Header> zkeyHeader;

@@ -308,6 +308,10 @@ void Config::load(json &config)
     finalVerifier = configPath + "/final/final.verifier.dat";
     finalVerkey = configPath + "/final/final.fflonk.verkey.json";
     finalStarkZkey = configPath + "/final/final.fflonk.zkey";
+    pilFflonkZkey = configPath + "/pilfflonk_final/pilfflonk_final.zkey";
+    pilFflonkInfo = configPath + "/pilfflonk_final/pilfflonk_final.fflonkinfo.json";
+    pilFflonkExec = configPath + "/pilfflonk_final/pilfflonk_final.exec";
+    pilFflonkVerifier = configPath + "/pilfflonk_final/final.verifier.dat";
 
 
     if (config.contains("rom") && config["rom"].is_string())
