@@ -232,6 +232,10 @@ void Config::load(json &config)
     if (config.contains("executorClientLoops") && config["executorClientLoops"].is_number())
         executorClientLoops = config["executorClientLoops"];
 
+    executorClientCheckNewStateRoot = false;
+    if (config.contains("executorClientCheckNewStateRoot") && config["executorClientCheckNewStateRoot"].is_boolean())
+        executorClientCheckNewStateRoot = config["executorClientCheckNewStateRoot"];
+
     hashDBServerPort = 50061;
     if (config.contains("hashDBServerPort") && config["hashDBServerPort"].is_number())
         hashDBServerPort = config["hashDBServerPort"];
@@ -629,6 +633,7 @@ void Config::print(void)
     zklog.info("    executorClientPort=" + to_string(executorClientPort));
     zklog.info("    executorClientHost=" + executorClientHost);
     zklog.info("    executorClientLoops=" + to_string(executorClientLoops));
+    zklog.info("    executorClientCheckNewStateRoot=" + to_string(executorClientCheckNewStateRoot));
     zklog.info("    hashDBServerPort=" + to_string(hashDBServerPort));
     zklog.info("    hashDBURL=" + hashDBURL);
     zklog.info("    dbCacheSynchURL=" + dbCacheSynchURL);

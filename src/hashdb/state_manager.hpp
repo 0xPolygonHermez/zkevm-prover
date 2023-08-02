@@ -9,6 +9,7 @@
 #include "database_map.hpp"
 #include "persistence.hpp"
 #include "database.hpp"
+#include "utils/time_metric.hpp"
 
 using namespace std;
 
@@ -21,7 +22,11 @@ public:
     bool bValid;
     unordered_map<string, vector<Goldilocks::Element>> dbWrite;
     vector<string> dbDelete;
-    TxSubState() : previousSubState(0), bValid(false) {};
+    TxSubState() : previousSubState(0), bValid(false)
+    {
+        dbWrite.reserve(128);
+        dbDelete.reserve(128);
+    };
 };
 
 class TxPersistenceState
@@ -31,7 +36,10 @@ public:
     string newStateRoot;
     uint64_t currentSubState;
     vector<TxSubState> subState;
-    TxPersistenceState() : currentSubState(0) {};
+    TxPersistenceState() : currentSubState(0)
+    {
+        subState.reserve(128);
+    };
 };
 
 class TxState
@@ -47,13 +55,17 @@ public:
     string currentStateRoot;
     uint64_t currentTx;
     vector<TxState> txState;
-    BatchState() : currentTx(0) {};
+    BatchState() : currentTx(0)
+    {
+        txState.reserve(32);
+    };
 };
 
 class StateManager
 {
 private:
     unordered_map<string, BatchState> state;
+    TimeMetricStorage timeMetricStorage;
 public:
     StateManager () {;};
 private:

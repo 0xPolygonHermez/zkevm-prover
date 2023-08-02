@@ -74,6 +74,7 @@ public:
     uint16_t executorClientPort;
     string executorClientHost;
     uint64_t executorClientLoops;
+    bool executorClientCheckNewStateRoot;
 
     uint16_t hashDBServerPort;
     string hashDBURL;

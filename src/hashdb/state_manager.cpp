@@ -9,6 +9,9 @@ StateManager stateManager;
 
 zkresult StateManager::setStateRoot (const string &batchUUID, uint64_t tx, const string &_stateRoot, bool bIsOldStateRoot, const Persistence persistence)
 {
+    struct timeval t;
+    gettimeofday(&t, NULL);
+
     zkassert(persistence < PERSISTENCE_SIZE);
 
     // Normalize state root format
@@ -39,14 +42,15 @@ zkresult StateManager::setStateRoot (const string &batchUUID, uint64_t tx, const
     batchState.currentStateRoot = stateRoot;
 
     // Check tx range
-    if (tx > batchState.txState.size()) // TODO: Should we fill it up with missing txs?
+    uint64_t txsToCreate = 0;
+
+    if (tx >= batchState.txState.size())
     {
-        zklog.error("StateManager::setStateRoot() invalid tx=" + to_string(tx) + " txState.size=" + to_string(batchState.txState.size()) + " batchUUID=" + batchUUID);
-        return ZKR_UNSPECIFIED;
+        txsToCreate = batchState.txState.size() - tx + 1;
     }
 
     // Find tx state for this tx, or create it if not existing
-    if (tx == batchState.txState.size())
+    if (txsToCreate > 0)
     {
         if (!bIsOldStateRoot)
         {
@@ -58,7 +62,12 @@ zkresult StateManager::setStateRoot (const string &batchUUID, uint64_t tx, const
         TxState txState;
         
         // Insert TX state
-        batchState.txState.push_back(txState);
+        for (uint64_t i=0; i<txsToCreate; i++)
+        {
+            batchState.txState.emplace_back(txState);
+        }
+
+        // Set current TX
         batchState.currentTx = tx;
     }
 
@@ -86,7 +95,7 @@ zkresult StateManager::setStateRoot (const string &batchUUID, uint64_t tx, const
         txSubState.previousSubState = txState.persistence[persistence].currentSubState;
 
         // Insert it
-        txState.persistence[persistence].subState.push_back(txSubState);
+        txState.persistence[persistence].subState.emplace_back(txSubState);
         txState.persistence[persistence].currentSubState = txState.persistence[persistence].subState.size() - 1;
     }
     else
@@ -102,12 +111,17 @@ zkresult StateManager::setStateRoot (const string &batchUUID, uint64_t tx, const
         txState.persistence[persistence].newStateRoot = stateRoot;
     }
 
+    timeMetricStorage.add("setStateRoot", TimeDiff(t));
+
     return ZKR_SUCCESS;
 
 }
 
 zkresult StateManager::write (const string &batchUUID, uint64_t tx, const string &_key, const vector<Goldilocks::Element> &value, const Persistence persistence)
 {
+    struct timeval t;
+    gettimeofday(&t, NULL);
+
     zkassert(persistence < PERSISTENCE_SIZE);
 
     // Normalize key format
@@ -140,7 +154,7 @@ zkresult StateManager::write (const string &batchUUID, uint64_t tx, const string
     {
         TxState aux;
         aux.persistence[persistence].oldStateRoot = it->second.currentStateRoot;
-        it->second.txState.push_back(aux);
+        it->second.txState.emplace_back(aux);
     }
     TxState &txState = batchState.txState[tx];
 
@@ -150,17 +164,22 @@ zkresult StateManager::write (const string &batchUUID, uint64_t tx, const string
         TxSubState subState;
         subState.previousSubState = 0;
         subState.oldStateRoot = batchState.currentStateRoot;
-        txState.persistence[persistence].subState.push_back(subState);
+        txState.persistence[persistence].subState.emplace_back(subState);
         txState.persistence[persistence].currentSubState = 0;
     }
 
     txState.persistence[persistence].subState[txState.persistence[persistence].currentSubState].dbWrite[key] = value;
+
+    timeMetricStorage.add("write", TimeDiff(t));
 
     return ZKR_SUCCESS;
 }
 
 zkresult StateManager::deleteNode (const string &batchUUID, uint64_t tx, const string &_key, const Persistence persistence)
 {
+    struct timeval t;
+    gettimeofday(&t, NULL);
+
     zkassert(persistence < PERSISTENCE_SIZE);
 
     // Normalize key format
@@ -200,26 +219,29 @@ zkresult StateManager::deleteNode (const string &batchUUID, uint64_t tx, const s
     TxSubState &txSubState = txState.persistence[persistence].subState[txState.persistence[persistence].currentSubState];
 
     // Delete this key in the surrent TX sub-state
-    unordered_map<string, vector<Goldilocks::Element>>::iterator dbIt;
+    /*unordered_map<string, vector<Goldilocks::Element>>::iterator dbIt;
     dbIt = txSubState.dbWrite.find(key);
     if (dbIt != txSubState.dbWrite.end())
     {
         txSubState.dbWrite.erase(dbIt);
         zklog.info("StateManager::deleteNode() batchUUID=" + batchUUID + " tx=" + to_string(tx) + " key=" + key);
-    }
-    txSubState.dbDelete.push_back(key); // TODO: delete key
+    }*/
+
+    txSubState.dbDelete.emplace_back(key); // TODO: delete key
+
+    timeMetricStorage.add("deleteNodes", TimeDiff(t));
 
     return ZKR_SUCCESS;
 }
 
 zkresult StateManager::read(const string &batchUUID, const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog)
 {
+    struct timeval t;
+    gettimeofday(&t, NULL);
+
     // Normalize key format
     string key = NormalizeToNFormat(_key, 64);
     key = stringToLower(key);
-
-    struct timeval t;
-    if (dbReadLog != NULL) gettimeofday(&t, NULL);
 
     // Find batch state for this uuid
     unordered_map<string, BatchState>::iterator it;
@@ -252,11 +274,16 @@ zkresult StateManager::read(const string &batchUUID, const string &_key, vector<
 #ifdef LOG_STATE_MANAGER
                     zklog.info("StateManager::read() batchUUID=" + batchUUID + " key=" + key);
 #endif
+
+                    timeMetricStorage.add("read success", TimeDiff(t));
                     return ZKR_SUCCESS;
                 }
             }
         }
     }
+
+
+    timeMetricStorage.add("read not found", TimeDiff(t));
 
     return ZKR_DB_KEY_NOT_FOUND;
 }
@@ -268,6 +295,9 @@ bool IsInvalid(TxSubState &txSubState)
 
 zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &flushId, uint64_t &lastSentFlushId)
 {
+    struct timeval t;
+    gettimeofday(&t, NULL);
+
     // For every TX, track backwards from newStateRoot to oldStateRoot, marking sub-states as valid
     //print(false);
     //print(true);
@@ -412,6 +442,8 @@ zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &f
             }
         }
     }
+
+    //print(false);
     
     // Delete this batch UUID state
     state.erase(it);
@@ -424,6 +456,12 @@ zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &f
 
 
     TimerStopAndLog(STATE_MANAGER_FLUSH);
+
+
+
+    timeMetricStorage.add("flush", TimeDiff(t));
+
+    timeMetricStorage.print("State Manager calls");
 
     //print(false);
     //print(true);
