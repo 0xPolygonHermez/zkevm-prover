@@ -168,7 +168,11 @@ zkresult StateManager::write (const string &batchUUID, uint64_t tx, const string
         txState.persistence[persistence].currentSubState = 0;
     }
 
+    // Add to sub-state
     txState.persistence[persistence].subState[txState.persistence[persistence].currentSubState].dbWrite[key] = value;
+    
+    // Add to common write pool to speed up read
+    batchState.dbWrite[key] = value;
 
     timeMetricStorage.add("write", TimeDiff(t));
 
@@ -227,7 +231,7 @@ zkresult StateManager::deleteNode (const string &batchUUID, uint64_t tx, const s
         zklog.info("StateManager::deleteNode() batchUUID=" + batchUUID + " tx=" + to_string(tx) + " key=" + key);
     }*/
 
-    txSubState.dbDelete.emplace_back(key); // TODO: delete key
+    txSubState.dbDelete.emplace_back(key);
 
     timeMetricStorage.add("deleteNodes", TimeDiff(t));
 
@@ -253,6 +257,23 @@ zkresult StateManager::read(const string &batchUUID, const string &_key, vector<
     }
     BatchState &batchState = it->second;
 
+    unordered_map<string, vector<Goldilocks::Element>>::iterator dbIt;
+    dbIt = batchState.dbWrite.find(key);
+    if (dbIt != batchState.dbWrite.end())
+    {
+        value = dbIt->second;
+                        
+        // Add to the read log
+        if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
+
+#ifdef LOG_STATE_MANAGER
+        zklog.info("StateManager::read() batchUUID=" + batchUUID + " key=" + key);
+#endif
+
+        timeMetricStorage.add("read success", TimeDiff(t));
+        return ZKR_SUCCESS;
+    }
+/*
     // For all txs, search for this key
     for (uint64_t tx=0; tx<batchState.txState.size(); tx++)
     {
@@ -281,7 +302,7 @@ zkresult StateManager::read(const string &batchUUID, const string &_key, vector<
             }
         }
     }
-
+*/
 
     timeMetricStorage.add("read not found", TimeDiff(t));
 

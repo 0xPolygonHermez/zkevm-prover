@@ -55,9 +55,11 @@ public:
     string currentStateRoot;
     uint64_t currentTx;
     vector<TxState> txState;
+    unordered_map<string, vector<Goldilocks::Element>> dbWrite;
     BatchState() : currentTx(0)
     {
         txState.reserve(32);
+        dbWrite.reserve(1024);
     };
 };
 
