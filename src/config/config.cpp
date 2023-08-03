@@ -178,7 +178,7 @@ void Config::load(json &config)
     
     log2DbMTAssociativeCacheIndicesSize = 23;
     if (config.contains("log2DbMTAssociativeCacheIndicesSize") && config["log2DbMTAssociativeCacheIndicesSize"].is_number())
-        log2DbMTAssociativeCacheSize = config["log2DbMTAssociativeCacheIndicesSize"];
+        log2DbMTAssociativeCacheIndicesSize = config["log2DbMTAssociativeCacheIndicesSize"];
 
     dbProgramCacheSize = 1*1024;
     if (config.contains("dbProgramCacheSize") && config["dbProgramCacheSize"].is_number())
