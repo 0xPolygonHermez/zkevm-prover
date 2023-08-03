@@ -19,7 +19,7 @@ zkresult StateManager::setStateRoot (const string &batchUUID, uint64_t tx, const
     stateRoot = stringToLower(stateRoot);
 
 #ifdef LOG_STATE_MANAGER
-    zklog.info("StateManager::setStateRoot() batchUUID=" + batchUUID + " tx=" + to_string(tx) + " stateRoot=" + stateRoot + " bIsOldStateRoot=" + to_string(bIsOldStateRoot));
+    zklog.info("StateManager::setStateRoot() batchUUID=" + batchUUID + " tx=" + to_string(tx) + " stateRoot=" + stateRoot + " bIsOldStateRoot=" + to_string(bIsOldStateRoot) + " persistence=" + persistence2string(persistence));
 #endif
 
     unordered_map<string, BatchState>::iterator it;
@@ -46,7 +46,7 @@ zkresult StateManager::setStateRoot (const string &batchUUID, uint64_t tx, const
 
     if (tx >= batchState.txState.size())
     {
-        txsToCreate = batchState.txState.size() - tx + 1;
+        txsToCreate = tx - batchState.txState.size() + 1;
     }
 
     // Find tx state for this tx, or create it if not existing
