@@ -489,6 +489,10 @@ void Config::load(json &config)
     if (config.contains("stateManager") && config["stateManager"].is_boolean())
         stateManager = config["stateManager"];
 
+    stateManagerPurge = true;
+    if (config.contains("stateManagerPurge") && config["stateManagerPurge"].is_boolean())
+        stateManagerPurge = config["stateManagerPurge"];
+
     if (config.contains("cleanerPollingPeriod") && config["cleanerPollingPeriod"].is_number())
         cleanerPollingPeriod = config["cleanerPollingPeriod"];
 
@@ -689,6 +693,7 @@ void Config::print(void)
     zklog.info("    dbReadRetryCounter=" + to_string(dbReadRetryCounter));
     zklog.info("    dbReadRetryDelay=" + to_string(dbReadRetryDelay));
     zklog.info("    stateManager=" + to_string(stateManager));
+    zklog.info("    stateManagerPurge=" + to_string(stateManagerPurge));
     zklog.info("    cleanerPollingPeriod=" + to_string(cleanerPollingPeriod));
     zklog.info("    requestsPersistence=" + to_string(requestsPersistence));
     zklog.info("    maxExecutorThreads=" + to_string(maxExecutorThreads));

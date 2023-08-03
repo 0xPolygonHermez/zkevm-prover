@@ -459,29 +459,32 @@ zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &f
             }
 
             // Delete invalid TX sub-states
-            for (int64_t i = txState.persistence[persistence].subState.size()-1; i>=0; i--)
+            if (db.config.stateManagerPurge)
             {
-                if (!txState.persistence[persistence].subState[i].bValid)
+                for (int64_t i = txState.persistence[persistence].subState.size()-1; i>=0; i--)
                 {
-                    txState.persistence[persistence].subState.erase(txState.persistence[persistence].subState.begin() + i);
-                }
-            }
-
-            // Delete unneeded hashes: delete only hashes written previously to the deletion time
-
-            // For all sub-states
-            for (uint64_t ss = 0; ss < txState.persistence[persistence].subState.size(); ss++)
-            {
-                // For all keys to delete
-                for (uint64_t k = 0; k < txState.persistence[persistence].subState[ss].dbDelete.size(); k++)
-                {
-                    // For all previouse sub-states, previous to the current sub-state
-                    for (uint64_t pss = 0; pss < ss; pss++)
+                    if (!txState.persistence[persistence].subState[i].bValid)
                     {
-                        txState.persistence[persistence].subState[pss].dbWrite.erase(txState.persistence[persistence].subState[ss].dbDelete[k]);
+                        txState.persistence[persistence].subState.erase(txState.persistence[persistence].subState.begin() + i);
                     }
                 }
-                txState.persistence[persistence].subState[ss].dbDelete.clear();
+
+                // Delete unneeded hashes: delete only hashes written previously to the deletion time
+
+                // For all sub-states
+                for (uint64_t ss = 0; ss < txState.persistence[persistence].subState.size(); ss++)
+                {
+                    // For all keys to delete
+                    for (uint64_t k = 0; k < txState.persistence[persistence].subState[ss].dbDelete.size(); k++)
+                    {
+                        // For all previouse sub-states, previous to the current sub-state
+                        for (uint64_t pss = 0; pss < ss; pss++)
+                        {
+                            txState.persistence[persistence].subState[pss].dbWrite.erase(txState.persistence[persistence].subState[ss].dbDelete[k]);
+                        }
+                    }
+                    txState.persistence[persistence].subState[ss].dbDelete.clear();
+                }
             }
 
             // Save data to database
