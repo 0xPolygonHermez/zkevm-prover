@@ -378,8 +378,12 @@ zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &f
     it = state.find(batchUUID);
     if (it == state.end())
     {
-        zklog.error("StateManager::flush() found no batch state for batch UUID=" + batchUUID);
-        return ZKR_DB_KEY_NOT_FOUND;
+        zklog.warning("StateManager::flush() found no batch state for batch UUID=" + batchUUID + "; normal if no SMT activity happened");
+ 
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+        timeMetricStorage.add("flush UUID not found", TimeDiff(t));
+#endif
+        return ZKR_SUCCESS;
     }
     BatchState &batchState = it->second;
 
@@ -524,7 +528,7 @@ zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &f
     TimerStopAndLog(STATE_MANAGER_FLUSH);
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-    timeMetricStorage.add("flush", TimeDiff(t));
+    timeMetricStorage.add("flush success", TimeDiff(t));
     timeMetricStorage.print("State Manager calls");
 #endif
 
