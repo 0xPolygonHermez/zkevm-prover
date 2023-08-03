@@ -14,11 +14,16 @@ zkresult StateManager::setStateRoot (const string &batchUUID, uint64_t tx, const
     gettimeofday(&t, NULL);
 #endif
 
-    zkassert(persistence < PERSISTENCE_SIZE);
-
     // Normalize state root format
     string stateRoot = NormalizeToNFormat(_stateRoot, 64);
     stateRoot = stringToLower(stateRoot);
+
+    // Check persistence range
+    if (persistence >= PERSISTENCE_SIZE)
+    {
+        zklog.error("StateManager::setStateRoot() invalid persistence batchUUID=" + batchUUID + " tx=" + to_string(tx) + " stateRoot=" + stateRoot + " bIsOldStateRoot=" + to_string(bIsOldStateRoot) + " persistence=" + persistence2string(persistence));
+        return ZKR_STATE_MANAGER;
+    }
 
 #ifdef LOG_STATE_MANAGER
     zklog.info("StateManager::setStateRoot() batchUUID=" + batchUUID + " tx=" + to_string(tx) + " stateRoot=" + stateRoot + " bIsOldStateRoot=" + to_string(bIsOldStateRoot) + " persistence=" + persistence2string(persistence));
@@ -26,14 +31,14 @@ zkresult StateManager::setStateRoot (const string &batchUUID, uint64_t tx, const
 
     unordered_map<string, BatchState>::iterator it;
 
-    // Find batch state for this uuid, or create it if not existing
+    // Find batch state for this uuid, or create it if it does not exist
     it = state.find(batchUUID);
     if (it == state.end())
     {
         if (!bIsOldStateRoot)
         {
             zklog.error("StateManager::setStateRoot() called with bIsOldStateRoot=false, but batchUUID=" + batchUUID + " does not previously exist");
-            return ZKR_UNSPECIFIED;
+            return ZKR_STATE_MANAGER;
         }
         BatchState batchState;
         batchState.oldStateRoot = stateRoot;
@@ -41,26 +46,24 @@ zkresult StateManager::setStateRoot (const string &batchUUID, uint64_t tx, const
     }
     it = state.find(batchUUID);
     BatchState &batchState = it->second;
+
+    // Set the current state root
     batchState.currentStateRoot = stateRoot;
 
-    // Check tx range
-    uint64_t txsToCreate = 0;
-
+    // Create tx states, if needed
     if (tx >= batchState.txState.size())
     {
-        txsToCreate = tx - batchState.txState.size() + 1;
-    }
-
-    // Find tx state for this tx, or create it if not existing
-    if (txsToCreate > 0)
-    {
+        // If this is the first state of a new tx, check that it is the old state root
         if (!bIsOldStateRoot)
         {
             zklog.error("StateManager::setStateRoot() called with bIsOldStateRoot=false, but tx=" + to_string(tx) + " does not previously exist");
-            return ZKR_UNSPECIFIED;
+            return ZKR_STATE_MANAGER;
         }
 
-        // Create TX state
+        // Calculate the number of tx slots to create
+        uint64_t txsToCreate = tx - batchState.txState.size() + 1;
+
+        // Create TX state to insert
         TxState txState;
         
         // Insert TX state
@@ -73,24 +76,47 @@ zkresult StateManager::setStateRoot (const string &batchUUID, uint64_t tx, const
         batchState.currentTx = tx;
     }
 
+    // Get a reference to the tx state
     TxState &txState = batchState.txState[tx];
+
+    // Get the current sub-state list size
+    uint64_t currentSubStateSize = txState.persistence[persistence].subState.size();
     
+    // In case it is an old state root, we need to create a new sub-state, and check that everything makes sense
     if (bIsOldStateRoot)
     {
-        uint64_t currentSubStateSize = txState.persistence[persistence].subState.size();
-
+        // If this is the first sub-state of the tx state, record the tx old state root
         if ( currentSubStateSize == 0)
         {
+            // Check current sub-state
+            if (txState.persistence[persistence].currentSubState != 0)
+            {
+                zklog.error("StateManager::setStateRoot() currentSubState=" + to_string(txState.persistence[persistence].currentSubState) + "!=0 batchUUID=" + batchUUID + " tx=" + to_string(tx) + " stateRoot=" + stateRoot + " bIsOldStateRoot=" + to_string(bIsOldStateRoot) + " persistence=" + persistence2string(persistence));
+                return ZKR_STATE_MANAGER;
+            }
+
             // Record the old state root
             txState.persistence[persistence].oldStateRoot = stateRoot;
         }
+
+        // If it is not the first sub-state, it must have been called with the previous new state root
         else
         {
+            // Check current sub-state
+            if (txState.persistence[persistence].currentSubState >= currentSubStateSize)
+            {
+                zklog.error("StateManager::setStateRoot() currentSubState=" + to_string(txState.persistence[persistence].currentSubState) + " > currentSubStateSize=" + to_string(currentSubStateSize) + " batchUUID=" + batchUUID + " tx=" + to_string(tx) + " stateRoot=" + stateRoot + " bIsOldStateRoot=" + to_string(bIsOldStateRoot) + " persistence=" + persistence2string(persistence));
+                return ZKR_STATE_MANAGER;
+            }
+
+            // Check that new state root is empty
             if (txState.persistence[persistence].subState[currentSubStateSize-1].newStateRoot.size() == 0)
             {
-                zklog.error("StateManager::setStateRoot() oldStateRoot found newStateRoot empty");
+                zklog.error("StateManager::setStateRoot() oldStateRoot found previous newStateRoot empty");
+                return ZKR_STATE_MANAGER;
             }
         }
+
         // Create TX sub-state
         TxSubState txSubState;
         txSubState.oldStateRoot = stateRoot;
@@ -98,17 +124,28 @@ zkresult StateManager::setStateRoot (const string &batchUUID, uint64_t tx, const
 
         // Insert it
         txState.persistence[persistence].subState.emplace_back(txSubState);
+
+        // Record the current state
         txState.persistence[persistence].currentSubState = txState.persistence[persistence].subState.size() - 1;
     }
+
+    // If it is a new state root, we need to complete the current sub-state
     else
     {
+        if (txState.persistence[persistence].currentSubState >= currentSubStateSize)
+        {
+            zklog.error("StateManager::setStateRoot() currentSubState=" + to_string(txState.persistence[persistence].currentSubState) + " > currentSubStateSize=" + to_string(currentSubStateSize) + " batchUUID=" + batchUUID + " tx=" + to_string(tx) + " stateRoot=" + stateRoot + " bIsOldStateRoot=" + to_string(bIsOldStateRoot) + " persistence=" + persistence2string(persistence));
+            return ZKR_STATE_MANAGER;
+        }
+
+        // Check that the new state root is empty
         if (txState.persistence[persistence].subState[txState.persistence[persistence].currentSubState].newStateRoot.size() != 0)
         {
             zklog.error("StateManager::setStateRoot() found nesStateRoot busy");
-            return ZKR_UNSPECIFIED;
+            return ZKR_STATE_MANAGER;
         }
 
-        // Record the new state root
+        // Record the new state root in the tx sub-state, and in the tx state
         txState.persistence[persistence].subState[txState.persistence[persistence].currentSubState].newStateRoot = stateRoot;
         txState.persistence[persistence].newStateRoot = stateRoot;
     }
@@ -128,8 +165,6 @@ zkresult StateManager::write (const string &batchUUID, uint64_t tx, const string
     gettimeofday(&t, NULL);
 #endif
 
-    zkassert(persistence < PERSISTENCE_SIZE);
-
     // Normalize key format
     string key = NormalizeToNFormat(_key, 64);
     key = stringToLower(key);
@@ -138,13 +173,20 @@ zkresult StateManager::write (const string &batchUUID, uint64_t tx, const string
     zklog.info("StateManager::write() batchUUID=" + batchUUID + " tx=" + to_string(tx) + " key=" + key + " persistence=" + persistence2string(persistence));
 #endif
 
+    // Check persistence range
+    if (persistence >= PERSISTENCE_SIZE)
+    {
+        zklog.error("StateManager::write() wrong persistence batchUUID=" + batchUUID + " tx=" + to_string(tx) + " key=" + key + " persistence=" + persistence2string(persistence));
+        return ZKR_STATE_MANAGER;
+    }
+
     // Find batch state for this uuid
     unordered_map<string, BatchState>::iterator it;
     it = state.find(batchUUID);
     if (it == state.end())
     {
         zklog.error("StateManager::write() found no batch state for batch UUID=" + batchUUID);
-        return ZKR_UNSPECIFIED;
+        return ZKR_STATE_MANAGER;
     }
     BatchState &batchState = it->second;
 
@@ -152,7 +194,7 @@ zkresult StateManager::write (const string &batchUUID, uint64_t tx, const string
     if (tx > batchState.txState.size())
     {
         zklog.error("StateManager::write() got tx=" + to_string(tx) + " bigger than txState size=" + to_string(it->second.txState.size()));
-        return ZKR_UNSPECIFIED;
+        return ZKR_STATE_MANAGER;
     }
 
     // Create TxState, if not existing
@@ -194,8 +236,6 @@ zkresult StateManager::deleteNode (const string &batchUUID, uint64_t tx, const s
     gettimeofday(&t, NULL);
 #endif
 
-    zkassert(persistence < PERSISTENCE_SIZE);
-
     // Normalize key format
     string key = NormalizeToNFormat(_key, 64);
     key = stringToLower(key);
@@ -204,6 +244,13 @@ zkresult StateManager::deleteNode (const string &batchUUID, uint64_t tx, const s
     zklog.info("StateManager::deleteNode() batchUUID=" + batchUUID + " tx=" + to_string(tx) + " key=" + key + " persistence=" + persistence2string(persistence));
 #endif
 
+    // Check persistence range
+    if (persistence >= PERSISTENCE_SIZE)
+    {
+        zklog.error("StateManager::deleteNode() invalid persistence batchUUID=" + batchUUID + " tx=" + to_string(tx) + " key=" + key + " persistence=" + persistence2string(persistence));
+        return ZKR_STATE_MANAGER;
+    }
+
     unordered_map<string, BatchState>::iterator it;
 
     // Find batch state for this batch uuid
@@ -211,7 +258,7 @@ zkresult StateManager::deleteNode (const string &batchUUID, uint64_t tx, const s
     if (it == state.end())
     {
         zklog.error("StateManager::deleteNode() found no batch state for batch UUID=" + batchUUID);
-        return ZKR_UNSPECIFIED;
+        return ZKR_STATE_MANAGER;
     }
     BatchState &batchState = it->second;
 
@@ -219,7 +266,7 @@ zkresult StateManager::deleteNode (const string &batchUUID, uint64_t tx, const s
     if (tx >= batchState.txState.size())
     {
         zklog.error("StateManager::deleteNode() got tx=" + to_string(tx) + " bigger than txState size=" + to_string(it->second.txState.size()));
-        return ZKR_UNSPECIFIED;
+        return ZKR_STATE_MANAGER;
     }
 
     // Find TX state for this tx
@@ -228,7 +275,13 @@ zkresult StateManager::deleteNode (const string &batchUUID, uint64_t tx, const s
     // Find TX current sub-state
     if (txState.persistence[persistence].subState.size() == 0)
     {
-        return ZKR_SUCCESS;
+        zklog.error("StateManager::deleteNode() found subState.size=0 tx=" + to_string(tx) + " batchUUIDe=" + batchUUID);
+        return ZKR_STATE_MANAGER;
+    }
+    if (txState.persistence[persistence].currentSubState >= txState.persistence[persistence].subState.size())
+    {
+        zklog.error("StateManager::deleteNode() found currentSubState=" + to_string(txState.persistence[persistence].currentSubState) + " >= subState.size=" + to_string(txState.persistence[persistence].subState.size()) + " tx=" + to_string(tx) + " batchUUIDe=" + batchUUID);
+        return ZKR_STATE_MANAGER;
     }
     TxSubState &txSubState = txState.persistence[persistence].subState[txState.persistence[persistence].currentSubState];
 
@@ -269,6 +322,7 @@ zkresult StateManager::read(const string &batchUUID, const string &_key, vector<
     }
     BatchState &batchState = it->second;
 
+    // Search in the common write list
     unordered_map<string, vector<Goldilocks::Element>>::iterator dbIt;
     dbIt = batchState.dbWrite.find(key);
     if (dbIt != batchState.dbWrite.end())
@@ -287,36 +341,6 @@ zkresult StateManager::read(const string &batchUUID, const string &_key, vector<
 #endif
         return ZKR_SUCCESS;
     }
-/*
-    // For all txs, search for this key
-    for (uint64_t tx=0; tx<batchState.txState.size(); tx++)
-    {
-        TxState &txState = batchState.txState[tx];
-        for (uint64_t persistence=0; persistence<PERSISTENCE_SIZE; persistence++)
-        {
-            for (uint64_t i=0; i<txState.persistence[persistence].subState.size(); i++)
-            {
-                TxSubState &txSubState = txState.persistence[persistence].subState[i];
-                unordered_map<string, vector<Goldilocks::Element>>::iterator dbIt;
-                dbIt = txSubState.dbWrite.find(key);
-                if (dbIt != txSubState.dbWrite.end())
-                {
-                    value = dbIt->second;
-                        
-                    // Add to the read log
-                    if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
-
-#ifdef LOG_STATE_MANAGER
-                    zklog.info("StateManager::read() batchUUID=" + batchUUID + " key=" + key);
-#endif
-
-                    timeMetricStorage.add("read success", TimeDiff(t));
-                    return ZKR_SUCCESS;
-                }
-            }
-        }
-    }
-*/
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     timeMetricStorage.add("read not found", TimeDiff(t));
@@ -359,7 +383,7 @@ zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &f
     }
     BatchState &batchState = it->second;
 
-    // For all txs
+    // For all txs, purge the data to write
     for (uint64_t tx=0; tx<batchState.txState.size(); tx++)
     {
         for (uint64_t persistence = 0; persistence < PERSISTENCE_SIZE; persistence++)
@@ -386,7 +410,7 @@ zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &f
                     " tx=" + to_string(tx) + " txState.newStateRoot=" + txState.persistence[persistence].newStateRoot +
                     " currentSubState=" + to_string(txState.persistence[persistence].currentSubState) +
                     " substate.newStateRoot=" + txState.persistence[persistence].subState[txState.persistence[persistence].currentSubState].newStateRoot);
-                return ZKR_UNSPECIFIED;
+                return ZKR_STATE_MANAGER;
             }
 
             uint64_t currentSubState = txState.persistence[persistence].currentSubState;
@@ -401,7 +425,7 @@ zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &f
                             " tx=" + to_string(tx) + " txState.oldStateRoot=" + txState.persistence[persistence].oldStateRoot +
                             " currentSubState=" + to_string(txState.persistence[persistence].currentSubState) +
                             " substate.oldStateRoot=" + txState.persistence[persistence].subState[currentSubState].oldStateRoot);
-                        return ZKR_UNSPECIFIED;
+                        return ZKR_STATE_MANAGER;
                     }
                     break;
                 }
@@ -429,7 +453,7 @@ zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &f
                         " txState.oldStateRoot=" + txState.persistence[persistence].oldStateRoot +
                         " currentSubState=" + to_string(txState.persistence[persistence].currentSubState) +
                         " substate.oldStateRoot=" + txState.persistence[persistence].subState[currentSubState].oldStateRoot);
-                    return ZKR_UNSPECIFIED;
+                    return ZKR_STATE_MANAGER;
                 }
                 currentSubState = previousSubState;
             }

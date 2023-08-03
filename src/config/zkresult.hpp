@@ -39,6 +39,7 @@ typedef enum : int
     ZKR_SM_MAIN_TOS32 = 29, // Main state machine executor failed calling fr.toS32()
     ZKR_SM_MAIN_BATCH_INVALID_INPUT = 30, // Process batch input is incorrect
     ZKR_SM_MAIN_S33 = 31, // Main state machine executor failed getting an S33 value from op
+    ZKR_STATE_MANAGER = 32, // State root error
 } zkresult;
 
 string zkresult2string (int code);
