@@ -67,7 +67,9 @@ class StateManager
 {
 private:
     unordered_map<string, BatchState> state;
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     TimeMetricStorage timeMetricStorage;
+#endif
 public:
     StateManager () {;};
 private:

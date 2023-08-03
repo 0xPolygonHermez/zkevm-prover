@@ -9,8 +9,10 @@ StateManager stateManager;
 
 zkresult StateManager::setStateRoot (const string &batchUUID, uint64_t tx, const string &_stateRoot, bool bIsOldStateRoot, const Persistence persistence)
 {
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     struct timeval t;
     gettimeofday(&t, NULL);
+#endif
 
     zkassert(persistence < PERSISTENCE_SIZE);
 
@@ -111,7 +113,9 @@ zkresult StateManager::setStateRoot (const string &batchUUID, uint64_t tx, const
         txState.persistence[persistence].newStateRoot = stateRoot;
     }
 
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     timeMetricStorage.add("setStateRoot", TimeDiff(t));
+#endif
 
     return ZKR_SUCCESS;
 
@@ -119,8 +123,10 @@ zkresult StateManager::setStateRoot (const string &batchUUID, uint64_t tx, const
 
 zkresult StateManager::write (const string &batchUUID, uint64_t tx, const string &_key, const vector<Goldilocks::Element> &value, const Persistence persistence)
 {
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     struct timeval t;
     gettimeofday(&t, NULL);
+#endif
 
     zkassert(persistence < PERSISTENCE_SIZE);
 
@@ -174,15 +180,19 @@ zkresult StateManager::write (const string &batchUUID, uint64_t tx, const string
     // Add to common write pool to speed up read
     batchState.dbWrite[key] = value;
 
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     timeMetricStorage.add("write", TimeDiff(t));
+#endif
 
     return ZKR_SUCCESS;
 }
 
 zkresult StateManager::deleteNode (const string &batchUUID, uint64_t tx, const string &_key, const Persistence persistence)
 {
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     struct timeval t;
     gettimeofday(&t, NULL);
+#endif
 
     zkassert(persistence < PERSISTENCE_SIZE);
 
@@ -233,7 +243,9 @@ zkresult StateManager::deleteNode (const string &batchUUID, uint64_t tx, const s
 
     txSubState.dbDelete.emplace_back(key);
 
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     timeMetricStorage.add("deleteNodes", TimeDiff(t));
+#endif
 
     return ZKR_SUCCESS;
 }
@@ -270,7 +282,9 @@ zkresult StateManager::read(const string &batchUUID, const string &_key, vector<
         zklog.info("StateManager::read() batchUUID=" + batchUUID + " key=" + key);
 #endif
 
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
         timeMetricStorage.add("read success", TimeDiff(t));
+#endif
         return ZKR_SUCCESS;
     }
 /*
@@ -304,7 +318,9 @@ zkresult StateManager::read(const string &batchUUID, const string &_key, vector<
     }
 */
 
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     timeMetricStorage.add("read not found", TimeDiff(t));
+#endif
 
     return ZKR_DB_KEY_NOT_FOUND;
 }
@@ -316,8 +332,10 @@ bool IsInvalid(TxSubState &txSubState)
 
 zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &flushId, uint64_t &lastSentFlushId)
 {
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     struct timeval t;
     gettimeofday(&t, NULL);
+#endif
 
     // For every TX, track backwards from newStateRoot to oldStateRoot, marking sub-states as valid
     //print(false);
@@ -478,11 +496,10 @@ zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &f
 
     TimerStopAndLog(STATE_MANAGER_FLUSH);
 
-
-
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     timeMetricStorage.add("flush", TimeDiff(t));
-
     timeMetricStorage.print("State Manager calls");
+#endif
 
     //print(false);
     //print(true);
