@@ -185,9 +185,16 @@ zkresult HashDB::flush(const string &batchUUID, uint64_t &flushId, uint64_t &sto
     return result;
 }
 
-void HashDB::semiFlush (void)
+void HashDB::semiFlush (const string &batchUUID, const string &newStateRoot, const Persistence persistence)
 {
-    db.semiFlush();
+    if (db.config.stateManager && (batchUUID.size() != 0))
+    {
+        stateManager.semiFlush(batchUUID, newStateRoot, persistence);
+    }
+    else
+    {
+        db.semiFlush();
+    }
 }
 
 zkresult HashDB::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram, string &proverId)

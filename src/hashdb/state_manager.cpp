@@ -4,6 +4,7 @@
 #include "scalar.hpp"
 #include "timer.hpp"
 #include "persistence.hpp"
+#include "definitions.hpp"
 
 StateManager stateManager;
 
@@ -43,8 +44,9 @@ zkresult StateManager::setStateRoot (const string &batchUUID, uint64_t tx, const
         BatchState batchState;
         batchState.oldStateRoot = stateRoot;
         state[batchUUID] = batchState;
+        it = state.find(batchUUID);
+        zkassert(it != state.end());
     }
-    it = state.find(batchUUID);
     BatchState &batchState = it->second;
 
     // Set the current state root
@@ -303,7 +305,7 @@ zkresult StateManager::deleteNode (const string &batchUUID, uint64_t tx, const s
     return ZKR_SUCCESS;
 }
 
-zkresult StateManager::read(const string &batchUUID, const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog)
+zkresult StateManager::read (const string &batchUUID, const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog)
 {
     struct timeval t;
     gettimeofday(&t, NULL);
@@ -354,6 +356,104 @@ bool IsInvalid(TxSubState &txSubState)
     return !txSubState.bValid;
 }
 
+zkresult StateManager::semiFlush (const string &batchUUID, const string &_stateRoot, const Persistence persistence)
+{
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+    struct timeval t;
+    gettimeofday(&t, NULL);
+#endif
+
+    // Normalize state root format
+    string stateRoot = NormalizeToNFormat(_stateRoot, 64);
+    stateRoot = stringToLower(stateRoot);
+
+    // Check persistence range
+    if (persistence >= PERSISTENCE_SIZE)
+    {
+        zklog.error("StateManager::semiFlush() invalid persistence batchUUID=" + batchUUID + " stateRoot=" + stateRoot + " persistence=" + persistence2string(persistence));
+        return ZKR_STATE_MANAGER;
+    }
+
+#ifdef LOG_STATE_MANAGER
+    zklog.info("StateManager::semiFlush() batchUUID=" + batchUUID + " stateRoot=" + stateRoot + " persistence=" + persistence2string(persistence));
+#endif
+
+    unordered_map<string, BatchState>::iterator it;
+
+    // Find batch state for this uuid
+    it = state.find(batchUUID);
+    if (it == state.end())
+    {
+        zklog.warning("StateManager::semiFlush() found no batch state for batch UUID=" + batchUUID + "; normal if no SMT activity happened");
+ 
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+        timeMetricStorage.add("semiFlush UUID not found", TimeDiff(t));
+        timeMetricStorage.print("State Manager calls");
+#endif
+        return ZKR_SUCCESS;
+    }
+    BatchState &batchState = it->second;
+
+    // Check currentTx range
+    if (batchState.currentTx >= batchState.txState.size())
+    {
+        zklog.error("StateManager::semiFlush() found batchState.currentTx=" + to_string(batchState.currentTx) + " >= batchState.txState.size=" + to_string(batchState.txState.size()) + " batchUUID=" + batchUUID + " stateRoot=" + stateRoot + " persistence=" + persistence2string(persistence));
+        return ZKR_STATE_MANAGER;
+    }
+
+    // Get a reference to the tx state
+    TxState &txState = batchState.txState[batchState.currentTx];
+    TxPersistenceState &txPersistenceState = txState.persistence[persistence];
+
+    if (txPersistenceState.newStateRoot == stateRoot)
+    {
+        // This is the expected case
+    }
+    else if (txPersistenceState.oldStateRoot == stateRoot)
+    {
+        if (config.stateManagerPurge)
+        {
+            // The TX ended up with the same state root as the beginning, so we can delete all data
+            txPersistenceState.subState.clear();
+            txPersistenceState.newStateRoot = stateRoot;
+            txPersistenceState.currentSubState = 0;
+        }
+    }
+    else
+    {
+        if (config.stateManagerPurge)
+        {
+            // Search for the point at which we reach this state, and delete the rest
+            bool bFound = false;
+            uint64_t i=0;
+            uint64_t subStateSize = txPersistenceState.subState.size();
+            for (i=0; i<subStateSize; i++)
+            {
+                if (!bFound && txPersistenceState.subState[i].oldStateRoot == stateRoot)
+                {
+                    bFound = true;
+                    break;
+                }
+            }
+            if (bFound)
+            {
+                txPersistenceState.newStateRoot = stateRoot;
+                txPersistenceState.currentSubState = (i == 0) ? 0 : i-1;
+                for (; i<subStateSize; i++)
+                {
+                    txPersistenceState.subState.pop_back();
+                }
+            }
+        }
+    }
+    
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+    timeMetricStorage.add("semi flush", TimeDiff(t));
+#endif
+
+    return ZKR_SUCCESS;
+}
+
 zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &flushId, uint64_t &lastSentFlushId)
 {
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
@@ -361,16 +461,14 @@ zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &f
     gettimeofday(&t, NULL);
 #endif
 
-    // For every TX, track backwards from newStateRoot to oldStateRoot, marking sub-states as valid
-    //print(false);
-    //print(true);
-
     TimerStart(STATE_MANAGER_FLUSH);
 
 #ifdef LOG_STATE_MANAGER
     zklog.info("StateManager::flush() batchUUID=" + batchUUID);
 #endif
 
+    // For every TX, track backwards from newStateRoot to oldStateRoot, marking sub-states as valid
+    
     zkresult zkr;
 
     // Find batch state for this uuid
@@ -382,6 +480,7 @@ zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &f
  
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
         timeMetricStorage.add("flush UUID not found", TimeDiff(t));
+        timeMetricStorage.print("State Manager calls");
 #endif
         return ZKR_SUCCESS;
     }
@@ -398,6 +497,7 @@ zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &f
             if (persistence == PERSISTENCE_TEMPORARY)
             {
                 txState.persistence[persistence].subState.clear();
+                txState.persistence[persistence].currentSubState = 0;
                 continue;
             }
 
@@ -414,6 +514,11 @@ zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &f
                     " tx=" + to_string(tx) + " txState.newStateRoot=" + txState.persistence[persistence].newStateRoot +
                     " currentSubState=" + to_string(txState.persistence[persistence].currentSubState) +
                     " substate.newStateRoot=" + txState.persistence[persistence].subState[txState.persistence[persistence].currentSubState].newStateRoot);
+                     
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+                timeMetricStorage.add("flush UUID inconsistent new state roots", TimeDiff(t));
+                timeMetricStorage.print("State Manager calls");
+#endif
                 return ZKR_STATE_MANAGER;
             }
 
@@ -429,6 +534,11 @@ zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &f
                             " tx=" + to_string(tx) + " txState.oldStateRoot=" + txState.persistence[persistence].oldStateRoot +
                             " currentSubState=" + to_string(txState.persistence[persistence].currentSubState) +
                             " substate.oldStateRoot=" + txState.persistence[persistence].subState[currentSubState].oldStateRoot);
+
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+                        timeMetricStorage.add("flush UUID inconsistent old state roots", TimeDiff(t));
+                        timeMetricStorage.print("State Manager calls");
+#endif
                         return ZKR_STATE_MANAGER;
                     }
                     break;
@@ -457,6 +567,10 @@ zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &f
                         " txState.oldStateRoot=" + txState.persistence[persistence].oldStateRoot +
                         " currentSubState=" + to_string(txState.persistence[persistence].currentSubState) +
                         " substate.oldStateRoot=" + txState.persistence[persistence].subState[currentSubState].oldStateRoot);
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+                    timeMetricStorage.add("flush UUID cannot find previous tx sub-state", TimeDiff(t));
+                    timeMetricStorage.print("State Manager calls");
+#endif
                     return ZKR_STATE_MANAGER;
                 }
                 currentSubState = previousSubState;
@@ -524,16 +638,12 @@ zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &f
         zklog.error("StateManager::flush() failed calling db.flush() result=" + zkresult2string(zkr));
     }
 
-
     TimerStopAndLog(STATE_MANAGER_FLUSH);
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     timeMetricStorage.add("flush success", TimeDiff(t));
     timeMetricStorage.print("State Manager calls");
 #endif
-
-    //print(false);
-    //print(true);
 
     return zkr;
 }

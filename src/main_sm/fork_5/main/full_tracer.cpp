@@ -1347,7 +1347,7 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     lastErrorOpcode = 0;
 
     // Call semiFlush
-    ctx.pHashDB->semiFlush();
+    ctx.pHashDB->semiFlush(ctx.proverRequest.uuid, response.state_root, ctx.proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);
 
 #ifdef LOG_FULL_TRACER
     zklog.info("FullTracer::onFinishTx() txCount=" + to_string(txCount) + " finalTrace.responses.size()=" + to_string(finalTrace.responses.size()) + " create_address=" + response.create_address + " state_root=" + response.state_root);
@@ -1532,7 +1532,7 @@ zkresult FullTracer::onFinishTx (ContextC &ctxc)
     lastErrorOpcode = 0;
 
     // Call semiFlush
-    ctxc.pHashDB->semiFlush();
+    ctxc.pHashDB->semiFlush(ctxc.proverRequest.uuid, response.state_root, ctxc.proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);
 
 #ifdef LOG_FULL_TRACER
     zklog.info("FullTracer::onFinishTx() txCount=" + to_string(txCount) + " finalTrace.responses.size()=" + to_string(finalTrace.responses.size()) + " create_address=" + response.create_address + " state_root=" + response.state_root);
