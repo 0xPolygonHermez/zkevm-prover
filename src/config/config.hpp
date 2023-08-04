@@ -61,7 +61,8 @@ public:
     int64_t dbProgramCacheSize; // Size in MBytes for the cache to store Program (SC) records
     bool opcodeTracer;
     bool logRemoteDbReads;
-    bool logExecutorServerInput; // Logs all inputs; 
+    bool logExecutorServerInput; // Logs all inputs, before processing 
+    bool logExecutorServerInputJson; // Logs all inputs in input.json format, before processing
     uint64_t logExecutorServerInputGasThreshold; // Logs input if gas/s < this value, active if this value is > 0
     bool logExecutorServerResponses;
     bool logExecutorServerTxs;
@@ -73,6 +74,7 @@ public:
     uint16_t executorClientPort;
     string executorClientHost;
     uint64_t executorClientLoops;
+    bool executorClientCheckNewStateRoot;
 
     uint16_t hashDBServerPort;
     string hashDBURL;
@@ -141,7 +143,8 @@ public:
     bool dbReadOnly;
     uint64_t dbReadRetryCounter;
     uint64_t dbReadRetryDelay;
-    bool dbMultiWriteSinglePosition;
+    bool stateManager;
+    bool stateManagerPurge;
     uint64_t cleanerPollingPeriod;
     uint64_t requestsPersistence;
     uint64_t maxExecutorThreads;

@@ -159,6 +159,7 @@ public:
     virtual unordered_map<string, InfoReadWrite> * get_read_write_addresses(void) = 0;
     virtual vector<Response> & get_responses(void) = 0;
     virtual vector<Opcode> & get_info(void) = 0;
+    virtual uint64_t get_tx_number(void) = 0; // tx number = 0, 1, 2...
 };
 
 #endif

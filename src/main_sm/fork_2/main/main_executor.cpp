@@ -813,7 +813,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
                     SmtGetResult smtGetResult;
                     mpz_class value;
-                    zkresult zkResult = pHashDB->get(oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);
+                    zkresult zkResult = pHashDB->get(proverRequest.uuid, oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);
                     if (zkResult != ZKR_SUCCESS)
                     {
                         cerr << "Error: MainExecutor::Execute() failed calling pHashDB->get() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
@@ -869,6 +869,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     Kin1[5] = pols.A5[i];
                     Kin1[6] = pols.B0[i];
                     Kin1[7] = pols.B1[i];
+
+                    uint64_t b0 = fr.toU64(pols.B0[i]);
+                    bool bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);
 
                     if  ( !fr.isZero(pols.A5[i]) || !fr.isZero(pols.A6[i]) || !fr.isZero(pols.A7[i]) || !fr.isZero(pols.B2[i]) || !fr.isZero(pols.B3[i]) || !fr.isZero(pols.B4[i]) || !fr.isZero(pols.B5[i])|| !fr.isZero(pols.B6[i])|| !fr.isZero(pols.B7[i]) )
                     {
@@ -931,7 +934,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     Goldilocks::Element oldRoot[4];
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
-                    zkresult zkResult = pHashDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.input.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
+                    zkresult zkResult = pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_responses().size(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : (proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
                     if (zkResult != ZKR_SUCCESS)
                     {
                         cerr << "Error: MainExecutor::Execute() failed calling pHashDB->set() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
@@ -1627,7 +1630,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
             SmtGetResult smtGetResult;
             mpz_class value;
-            zkresult zkResult = pHashDB->get(oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);
+            zkresult zkResult = pHashDB->get(proverRequest.uuid, oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);
             if (zkResult != ZKR_SUCCESS)
             {
                 cerr << "Error: MainExecutor::Execute() failed calling pHashDB->get() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
@@ -1709,6 +1712,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 Kin1[6] = pols.B0[i];
                 Kin1[7] = pols.B1[i];
 
+                uint64_t b0 = fr.toU64(pols.B0[i]);
+                bool bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);
+
                 if  ( !fr.isZero(pols.A5[i]) || !fr.isZero(pols.A6[i]) || !fr.isZero(pols.A7[i]) || !fr.isZero(pols.B2[i]) || !fr.isZero(pols.B3[i]) || !fr.isZero(pols.B4[i]) || !fr.isZero(pols.B5[i])|| !fr.isZero(pols.B6[i])|| !fr.isZero(pols.B7[i]) )
                 {
                     cerr << "Error: MainExecutor::Execute() storage write instruction found non-zero A-B registers step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
@@ -1765,7 +1771,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 Goldilocks::Element oldRoot[4];
                 sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
-                zkresult zkResult = pHashDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.input.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
+                zkresult zkResult = pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_responses().size(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : (proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
                 if (zkResult != ZKR_SUCCESS)
                 {
                     cerr << "Error: MainExecutor::Execute() failed calling pHashDB->set() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
@@ -3850,7 +3856,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     evalCommandMetrics.print("Main Executor eval command calls");
 #endif
 
-    zkresult zkr = pHashDB->flush(proverRequest.flushId, proverRequest.lastSentFlushId);
+    zkresult zkr = pHashDB->flush(proverRequest.uuid, proverRequest.flushId, proverRequest.lastSentFlushId);
     if (zkr != ZKR_SUCCESS)
     {
         cerr << "Error: Main SM Executor: failed calling pHashDB->flush() result=" << zkr << " =" << zkresult2string(zkr) << endl;

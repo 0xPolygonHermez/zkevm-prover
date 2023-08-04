@@ -157,7 +157,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
             {
                 for (uint64_t i=0; i<config.dbReadRetryCounter; i++)
                 {
-                    zklog.warning("Database::read() failed calling readTreeRemote() with error=" + zkresult2string(r) + "; retrying after " + to_string(config.dbReadRetryDelay) + "us key=" + key);
+                    zklog.warning("Database::read() failed calling readTreeRemote() with error=" + zkresult2string(r) + "; will retry after " + to_string(config.dbReadRetryDelay) + "us key=" + key);
 
                     // Retry after dbReadRetryDelay us
                     usleep(config.dbReadRetryDelay);
@@ -174,7 +174,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
                     {
                         break;
                     }
-                    zklog.warning("Database::read() retried readTreeRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r) + " counter=" + to_string(i));
+                    zklog.warning("Database::read() retried readTreeRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r) + " i=" + to_string(i));
                 }
             }
 
@@ -214,7 +214,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
         {
             for (uint64_t i=0; i<config.dbReadRetryCounter; i++)
             {
-                zklog.warning("Database::read() failed calling readRemote() with error=" + zkresult2string(r) + "; retrying after " + to_string(config.dbReadRetryDelay) + "us key=" + key);
+                zklog.warning("Database::read() failed calling readRemote() with error=" + zkresult2string(r) + "; will retry after " + to_string(config.dbReadRetryDelay) + "us key=" + key + " i=" + to_string(i));
 
                 // Retry after dbReadRetryDelay us
                 usleep(config.dbReadRetryDelay);
@@ -223,7 +223,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
                 {
                     break;
                 }
-                zklog.warning("Database::read() retried readRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r) + " counter=" + to_string(i));
+                zklog.warning("Database::read() retried readRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r) + " i=" + to_string(i));
             }
         }
         if (r == ZKR_SUCCESS)
@@ -1495,34 +1495,6 @@ zkresult Database::getFlushData(uint64_t flushId, uint64_t &storedFlushId, unord
     multiWrite.Unlock();
 
     //zklog.info("<-- getFlushData()");
-
-    return ZKR_SUCCESS;
-}
-
-zkresult Database::deleteNodes(const vector<string> (&nodesToDelete))
-{
-    string key;
-
-    multiWrite.Lock();
-
-    // Keep a reference to the nodes data
-    unordered_map<string, string> &multiWriteFlushData = multiWrite.data[multiWrite.pendingToFlushDataIndex].nodesIntray;
-
-    // For all entries in nodesToDelete
-    for (uint64_t i=0; i<nodesToDelete.size(); i++)
-    {
-        // Normalize key format
-        key = NormalizeToNFormat(nodesToDelete[i], 64);
-        key = stringToLower(key);
-
-        // Delete it; they key can be present (just written) or not (read from database) and both cases are valid
-        multiWriteFlushData.erase(key);
-#ifdef LOG_DB_DELETE_NODES
-        zklog.info("Database::deleteNodes() deleted key=" + key + " i=" + to_string(i) + " multiWrite=[" + multiWrite.print() + "]");
-#endif
-    }
-
-    multiWrite.Unlock();
 
     return ZKR_SUCCESS;
 }

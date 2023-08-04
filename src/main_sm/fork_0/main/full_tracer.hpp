@@ -109,6 +109,12 @@ public:
     {
         return info;
     }
+    uint64_t get_tx_number(void)
+    {
+        uint64_t txNumber = finalTrace.responses.size();
+        if (txNumber > 0) txNumber--;
+        return txNumber;
+    }
 };
 
 } // namespace

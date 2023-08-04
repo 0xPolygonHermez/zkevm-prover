@@ -188,6 +188,10 @@ void Config::load(json &config)
     if (config.contains("logExecutorServerInput") && config["logExecutorServerInput"].is_boolean())
         logExecutorServerInput = config["logExecutorServerInput"];
 
+    logExecutorServerInputJson = false;
+    if (config.contains("logExecutorServerInputJson") && config["logExecutorServerInputJson"].is_boolean())
+        logExecutorServerInputJson = config["logExecutorServerInputJson"];
+
     logExecutorServerInputGasThreshold = 0;
     if (config.contains("logExecutorServerInputGasThreshold") && config["logExecutorServerInputGasThreshold"].is_number())
         logExecutorServerInputGasThreshold = config["logExecutorServerInputGasThreshold"];
@@ -227,6 +231,10 @@ void Config::load(json &config)
     executorClientLoops = 1;
     if (config.contains("executorClientLoops") && config["executorClientLoops"].is_number())
         executorClientLoops = config["executorClientLoops"];
+
+    executorClientCheckNewStateRoot = false;
+    if (config.contains("executorClientCheckNewStateRoot") && config["executorClientCheckNewStateRoot"].is_boolean())
+        executorClientCheckNewStateRoot = config["executorClientCheckNewStateRoot"];
 
     hashDBServerPort = 50061;
     if (config.contains("hashDBServerPort") && config["hashDBServerPort"].is_number())
@@ -477,9 +485,13 @@ void Config::load(json &config)
     if (config.contains("dbReadRetryDelay") && config["dbReadRetryDelay"].is_number())
         dbReadRetryDelay = config["dbReadRetryDelay"];
 
-    dbMultiWriteSinglePosition = false;
-    if (config.contains("dbMultiWriteSinglePosition") && config["dbMultiWriteSinglePosition"].is_boolean())
-        dbMultiWriteSinglePosition = config["dbMultiWriteSinglePosition"];
+    stateManager = false;
+    if (config.contains("stateManager") && config["stateManager"].is_boolean())
+        stateManager = config["stateManager"];
+
+    stateManagerPurge = true;
+    if (config.contains("stateManagerPurge") && config["stateManagerPurge"].is_boolean())
+        stateManagerPurge = config["stateManagerPurge"];
 
     if (config.contains("cleanerPollingPeriod") && config["cleanerPollingPeriod"].is_number())
         cleanerPollingPeriod = config["cleanerPollingPeriod"];
@@ -602,6 +614,8 @@ void Config::print(void)
         zklog.info("    logRemoteDbReads=true");
     if (logExecutorServerInput)
         zklog.info("    logExecutorServerInput=true");
+    if (logExecutorServerInputJson)
+        zklog.info("    logExecutorServerInputJson=true");
     if (logExecutorServerInputGasThreshold)
         zklog.info("    logExecutorServerInputGasThreshold=true");
     if (logExecutorServerResponses)
@@ -615,6 +629,7 @@ void Config::print(void)
     zklog.info("    executorClientPort=" + to_string(executorClientPort));
     zklog.info("    executorClientHost=" + executorClientHost);
     zklog.info("    executorClientLoops=" + to_string(executorClientLoops));
+    zklog.info("    executorClientCheckNewStateRoot=" + to_string(executorClientCheckNewStateRoot));
     zklog.info("    hashDBServerPort=" + to_string(hashDBServerPort));
     zklog.info("    hashDBURL=" + hashDBURL);
     zklog.info("    dbCacheSynchURL=" + dbCacheSynchURL);
@@ -667,7 +682,8 @@ void Config::print(void)
     zklog.info("    dbReadOnly=" + to_string(dbReadOnly));
     zklog.info("    dbReadRetryCounter=" + to_string(dbReadRetryCounter));
     zklog.info("    dbReadRetryDelay=" + to_string(dbReadRetryDelay));
-    zklog.info("    dbMultiWriteSinglePosition=" + to_string(dbMultiWriteSinglePosition));
+    zklog.info("    stateManager=" + to_string(stateManager));
+    zklog.info("    stateManagerPurge=" + to_string(stateManagerPurge));
     zklog.info("    cleanerPollingPeriod=" + to_string(cleanerPollingPeriod));
     zklog.info("    requestsPersistence=" + to_string(requestsPersistence));
     zklog.info("    maxExecutorThreads=" + to_string(maxExecutorThreads));

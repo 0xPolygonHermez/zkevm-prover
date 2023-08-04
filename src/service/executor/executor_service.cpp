@@ -305,12 +305,14 @@ using grpc::Status;
         " bNoCounters=" + to_string(proverRequest.input.bNoCounters) +
         " traceConfig=" + proverRequest.input.traceConfig.toString());
 #endif
-#ifdef LOG_SERVICE_EXECUTOR_INPUT_JSON
-    // Log the input file content
-    json inputJson;
-    proverRequest.input.save(inputJson);
-    zklog.info("ExecutorServiceImpl::ProcessBatch() Input=" + inputJson.dump());
-#endif
+
+    if (config.logExecutorServerInputJson)
+    {
+        // Log the input file content
+        json inputJson;
+        proverRequest.input.save(inputJson);
+        zklog.info("ExecutorServiceImpl::ProcessBatch() Input=" + inputJson.dump());
+    }
 
     prover.processBatch(&proverRequest);
 
@@ -470,11 +472,12 @@ using grpc::Status;
 
 #ifdef LOG_SERVICE_EXECUTOR_OUTPUT
     {
-        string s = "ExecutorServiceImpl::ProcessBatch() returns error=" + to_string(response->error()) +
+        string s = "ExecutorServiceImpl::ProcessBatch() returns result=" + to_string(response->error()) +
+            " old_state_root=" + proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) +
             " new_state_root=" + proverRequest.pFullTracer->get_new_state_root() +
             " new_acc_input_hash=" + proverRequest.pFullTracer->get_new_acc_input_hash() +
             " new_local_exit_root=" + proverRequest.pFullTracer->get_new_local_exit_root() +
-            //" new_batch_num=" + to_string(proverRequest.fullTracer.finalTrace.new_batch_num) +
+            " old_batch_num=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum) +
             " steps=" + to_string(proverRequest.counters.steps) +
             " gasUsed=" + to_string(proverRequest.pFullTracer->get_cumulative_gas_used()) +
             " counters.keccakF=" + to_string(proverRequest.counters.keccakF) +
@@ -497,7 +500,7 @@ using grpc::Status;
                     " gasLeft=" + to_string(responses[tx].gas_left) +
                     " gasUsed+gasLeft=" + to_string(responses[tx].gas_used + responses[tx].gas_left) +
                     " gasRefunded=" + to_string(responses[tx].gas_refunded) +
-                    " error=" + responses[tx].error;
+                    " result=" + responses[tx].error;
             }
          }
         zklog.info(s);

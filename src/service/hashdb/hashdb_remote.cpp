@@ -33,7 +33,7 @@ HashDBRemote::~HashDBRemote()
 #endif    
 }
 
-zkresult HashDBRemote::set (const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, Goldilocks::Element (&newRoot)[4], SmtSetResult *result, DatabaseMap *dbReadLog)
+zkresult HashDBRemote::set (const string &batchUUID, uint64_t tx, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, Goldilocks::Element (&newRoot)[4], SmtSetResult *result, DatabaseMap *dbReadLog)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
     gettimeofday(&t, NULL);
@@ -52,9 +52,11 @@ zkresult HashDBRemote::set (const Goldilocks::Element (&oldRoot)[4], const Goldi
     request.set_allocated_key(reqKey);
 
     request.set_value(value.get_str(16));
-    request.set_persistent(persistent);
+    request.set_persistence((hashdb::v1::SetRequest_Persistence)persistence);
     request.set_details(result != NULL);
     request.set_get_db_read_log((dbReadLog != NULL));
+    request.set_batch_uuid(batchUUID);
+    request.set_tx(tx);
 
     grpc::Status s = stub->Set(&context, request, &response);
     if (s.error_code() != grpc::StatusCode::OK) {
@@ -104,7 +106,7 @@ zkresult HashDBRemote::set (const Goldilocks::Element (&oldRoot)[4], const Goldi
     return static_cast<zkresult>(response.result().code());
 }
 
-zkresult HashDBRemote::get (const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtGetResult *result, DatabaseMap *dbReadLog)
+zkresult HashDBRemote::get (const string &batchUUID, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtGetResult *result, DatabaseMap *dbReadLog)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
     gettimeofday(&t, NULL);
@@ -123,6 +125,7 @@ zkresult HashDBRemote::get (const Goldilocks::Element (&root)[4], const Goldiloc
     request.set_allocated_key(reqKey);
     request.set_details(result != NULL);
     request.set_get_db_read_log((dbReadLog != NULL));
+    request.set_batch_uuid(batchUUID);
 
     grpc::Status s = stub->Get(&context, request, &response);
     if (s.error_code() != grpc::StatusCode::OK) {
@@ -290,13 +293,14 @@ void HashDBRemote::loadProgramDB(const DatabaseMap::ProgramMap &input, const boo
 #endif
 }
 
-zkresult HashDBRemote::flush(uint64_t &flushId, uint64_t &storedFlushId)
+zkresult HashDBRemote::flush(const string &batchUUID, uint64_t &flushId, uint64_t &storedFlushId)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
     gettimeofday(&t, NULL);
 #endif
     ::grpc::ClientContext context;
-    ::google::protobuf::Empty request;
+    ::hashdb::v1::FlushRequest request;
+    request.set_batch_uuid(batchUUID);
     ::hashdb::v1::FlushResponse response;
     grpc::Status s = stub->Flush(&context, request, &response);
     if (s.error_code() != grpc::StatusCode::OK) {
