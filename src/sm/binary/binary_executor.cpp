@@ -5,6 +5,7 @@
 #include "utils.hpp"
 #include "scalar.hpp"
 #include "timer.hpp"
+#include "zklog.hpp"
 
 using json = nlohmann::json;
 
@@ -83,7 +84,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
     // Check that we have enough room in polynomials  TODO: Do this check in JS
     if (action.size()*LATCH_SIZE > N)
     {
-        cerr << "Error: BinaryExecutor::execute() Too many Binary entries=" << action.size() << " > N/LATCH_SIZE=" << N/LATCH_SIZE << endl;
+        zklog.error("BinaryExecutor::execute() Too many Binary entries=" + to_string(action.size()) + " > N/LATCH_SIZE=" + to_string(N/LATCH_SIZE));
         exitProcess();
     }
 
@@ -104,7 +105,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
     uint32_t * c0Temp = (uint32_t *)calloc(N*sizeof(uint32_t),1);
     if (c0Temp == NULL)
     {
-        cerr << "Error: BinaryExecutor::execute() failed calling malloc() for c0Temp" << endl;
+        zklog.error("BinaryExecutor::execute() failed calling malloc() for c0Temp");
         exitProcess();
     }
 
@@ -115,7 +116,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
 #ifdef LOG_BINARY_EXECUTOR
         if (i%10000 == 0)
         {
-            cout << "Computing binary pols " << i << "/" << input.size() << endl;
+            zklog.info("Computing binary pols " + to_string(i) + "/" + to_string(input.size()));
         }
 #endif
 
@@ -381,14 +382,19 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
 
     free(c0Temp);
 
-    cout << "BinaryExecutor successfully processed " << action.size() << " binary actions (" << (double(action.size())*LATCH_SIZE*100)/N << "%)" << endl;
+    zklog.info("BinaryExecutor successfully processed " + to_string(action.size()) + " binary actions (" + to_string((double(action.size())*LATCH_SIZE*100)/N) + "%)");
 }
 
 // To be used only for testing, since it allocates a lot of memory
 void BinaryExecutor::execute (vector<BinaryAction> &action)
 {
-    void * pAddress = mapFile(config.zkevmCmPols, CommitPols::pilSize(), true);
+    void * pAddress = malloc(CommitPols::pilSize());
+    if (pAddress == NULL)
+    {
+        zklog.error("BinaryExecutor::execute() failed calling malloc() of size=" + to_string(CommitPols::pilSize()));
+        exitProcess();
+    }
     CommitPols cmPols(pAddress, CommitPols::pilDegree());
     execute(action, cmPols.Binary);
-    unmapFile(pAddress, CommitPols::pilSize());
+    free(pAddress);
 }

@@ -4,6 +4,6 @@
 #include "goldilocks_base_field.hpp"
 #include "config.hpp"
 
-void SHA256Test (Goldilocks &fr, Config &config);
+uint64_t SHA256Test (Goldilocks &fr, const Config &config);
 
 #endif

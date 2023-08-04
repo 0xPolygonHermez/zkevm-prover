@@ -4,6 +4,6 @@
 #include "config.hpp"
 #include "goldilocks_base_field.hpp"
 
-void KeccakSMExecutorTest (Goldilocks &fr, const Config &config);
+uint64_t KeccakSMExecutorTest (Goldilocks &fr, const Config &config);
 
 #endif

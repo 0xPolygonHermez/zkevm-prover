@@ -1,6 +1,7 @@
 #include <iostream>
 #include "gate_operation.hpp"
 #include "exit_process.hpp"
+#include "zklog.hpp"
 
 using namespace std;
 
@@ -18,7 +19,7 @@ string gateop2string (GateOperation op)
         case gop_and:
             return "and";
         default:
-            cerr << "gateop2string() found invalid op value:" << op << endl;
+            zklog.error("gateop2string() found invalid op value:" + to_string(op));
             exitProcess();
             return "UNKNOWN";
     }

@@ -26,12 +26,18 @@
 #include "sm/binary/binary_test.hpp"
 #include "sm/mem_align/mem_align_test.hpp"
 #include "timer.hpp"
-#include "statedb/statedb_server.hpp"
-#include "service/statedb/statedb_test.hpp"
-#include "service/statedb/statedb.hpp"
+#include "hashdb/hashdb_server.hpp"
+#include "service/hashdb/hashdb_test.hpp"
+#include "service/hashdb/hashdb.hpp"
 #include "sha256_test.hpp"
 #include "blake_test.hpp"
 #include "goldilocks_precomputed.hpp"
+#include "zklog.hpp"
+#include "ecrecover_test.hpp"
+#include "hashdb_singleton.hpp"
+#include "unit_test.hpp"
+#include "database_cache_test.hpp"
+#include "main_sm/fork_5/main_exec_c/account.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -76,7 +82,7 @@ void runFileGenBatchProof(Goldilocks fr, Prover &prover, Config &config)
         zkresult zkResult = proverRequest.input.load(inputJson);
         if (zkResult != ZKR_SUCCESS)
         {
-            cerr << "Error: runFileGenBatchProof() failed calling proverRequest.input.load() zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
+            zklog.error("runFileGenBatchProof() failed calling proverRequest.input.load() zkResult=" + to_string(zkResult) + "=" + zkresult2string(zkResult));
             exitProcess();
         }
     }
@@ -86,7 +92,7 @@ void runFileGenBatchProof(Goldilocks fr, Prover &prover, Config &config)
     proverRequest.CreateFullTracer();
     if (proverRequest.result != ZKR_SUCCESS)
     {
-        cerr << "Error: runFileGenBatchProof() failed calling proverRequest.CreateFullTracer() zkResult=" << proverRequest.result << "=" << zkresult2string(proverRequest.result) << endl;
+        zklog.error("runFileGenBatchProof() failed calling proverRequest.CreateFullTracer() zkResult=" + to_string(proverRequest.result) + "=" + zkresult2string(proverRequest.result));
         exitProcess();
     }
 
@@ -151,7 +157,7 @@ void runFileProcessBatch(Goldilocks fr, Prover &prover, Config &config)
         zkresult zkResult = proverRequest.input.load(inputJson);
         if (zkResult != ZKR_SUCCESS)
         {
-            cerr << "Error: runFileProcessBatch() failed calling proverRequest.input.load() zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
+            zklog.error("runFileProcessBatch() failed calling proverRequest.input.load() zkResult=" + to_string(zkResult) + "=" + zkresult2string(zkResult));
             exitProcess();
         }
     }
@@ -161,7 +167,7 @@ void runFileProcessBatch(Goldilocks fr, Prover &prover, Config &config)
     proverRequest.CreateFullTracer();
     if (proverRequest.result != ZKR_SUCCESS)
     {
-        cerr << "Error: runFileProcessBatch() failed calling proverRequest.CreateFullTracer() zkResult=" << proverRequest.result << "=" << zkresult2string(proverRequest.result) << endl;
+        zklog.error("runFileProcessBatch() failed calling proverRequest.CreateFullTracer() zkResult=" + to_string(proverRequest.result) + "=" + zkresult2string(proverRequest.result));
         exitProcess();
     }
 
@@ -176,21 +182,21 @@ void runFileProcessBatch(Goldilocks fr, Prover &prover, Config &config)
     processBatchTotalPoseidonG += proverRequest.counters.poseidonG;
     processBatchTotalSteps += proverRequest.counters.steps;
 
-    cout << "runFileProcessBatch(" << config.inputFile << ") got counters: arith=" << proverRequest.counters.arith <<
-        " binary=" << proverRequest.counters.binary <<
-        " keccakF=" << proverRequest.counters.keccakF <<
-        " memAlign=" << proverRequest.counters.memAlign <<
-        " paddingPG=" << proverRequest.counters.paddingPG <<
-        " poseidonG=" << proverRequest.counters.poseidonG <<
-        " steps=" << proverRequest.counters.steps <<
-        " totals:" <<
-        " arith=" << processBatchTotalArith <<
-        " binary=" << processBatchTotalBinary <<
-        " keccakF=" << processBatchTotalKeccakF <<
-        " memAlign=" << processBatchTotalMemAlign <<
-        " paddingPG=" << processBatchTotalPaddingPG <<
-        " poseidonG=" << processBatchTotalPoseidonG <<
-        " steps=" << processBatchTotalSteps << endl;
+    zklog.info("runFileProcessBatch(" + config.inputFile + ") got counters: arith=" + to_string(proverRequest.counters.arith) +
+        " binary=" + to_string(proverRequest.counters.binary) +
+        " keccakF=" + to_string(proverRequest.counters.keccakF) +
+        " memAlign=" + to_string(proverRequest.counters.memAlign) +
+        " paddingPG=" + to_string(proverRequest.counters.paddingPG) +
+        " poseidonG=" + to_string(proverRequest.counters.poseidonG) +
+        " steps=" + to_string(proverRequest.counters.steps) +
+        " totals:" +
+        " arith=" + to_string(processBatchTotalArith) +
+        " binary=" + to_string(processBatchTotalBinary) +
+        " keccakF=" + to_string(processBatchTotalKeccakF) +
+        " memAlign=" + to_string(processBatchTotalMemAlign) +
+        " paddingPG=" + to_string(processBatchTotalPaddingPG) +
+        " poseidonG=" + to_string(processBatchTotalPoseidonG) +
+        " steps=" + to_string(processBatchTotalSteps));
  }
 
 class RunFileThreadArguments
@@ -250,7 +256,7 @@ void runFileExecute(Goldilocks fr, Prover &prover, Config &config)
         zkresult zkResult = proverRequest.input.load(inputJson);
         if (zkResult != ZKR_SUCCESS)
         {
-            cerr << "Error: runFileExecute() failed calling proverRequest.input.load() zkResult=" << zkResult << "=" << zkresult2string(zkResult) << endl;
+            zklog.error("runFileExecute() failed calling proverRequest.input.load() zkResult=" + to_string(zkResult) + "=" + zkresult2string(zkResult));
             exitProcess();
         }
     }
@@ -260,7 +266,7 @@ void runFileExecute(Goldilocks fr, Prover &prover, Config &config)
     proverRequest.CreateFullTracer();
     if (proverRequest.result != ZKR_SUCCESS)
     {
-        cerr << "Error: runFileExecute() failed calling proverRequest.CreateFullTracer() zkResult=" << proverRequest.result << "=" << zkresult2string(proverRequest.result) << endl;
+        zklog.error("runFileExecute() failed calling proverRequest.CreateFullTracer() zkResult=" + to_string(proverRequest.result) + "=" + zkresult2string(proverRequest.result));
         exitProcess();
     }
 
@@ -272,24 +278,6 @@ int main(int argc, char **argv)
 {
     /* CONFIG */
 
-    // Print the zkProver version
-    cout << "Version: " << string(ZKEVM_PROVER_VERSION) << endl;
-
-    // Test that stderr is properly logged
-    cerr << "Error: Checking error channel; ignore this trace" << endl;
-
-    // Print the number of cores
-    cout << "Number of cores=" << getNumberOfCores() << endl;
-
-    // Print the hostname and the IP address
-    string ipAddress;
-    getIPAddress(ipAddress);
-    cout << "IP address=" << ipAddress << endl;
-
-#ifdef DEBUG
-    cout << "DEBUG defined" << endl;
-#endif
-
     if (argc == 2)
     {
         if ((strcmp(argv[1], "-v") == 0) || (strcmp(argv[1], "--version") == 0))
@@ -298,8 +286,6 @@ int main(int argc, char **argv)
             return 0;
         }
     }
-
-    TimerStart(WHOLE_PROCESS);
 
     // Parse the name of the configuration file
     char *pConfigFile = (char *)"config/config.json";
@@ -312,157 +298,178 @@ int main(int argc, char **argv)
     }
 
     // Create one instance of Config based on the contents of the file config.json
-    TimerStart(LOAD_CONFIG_JSON);
     json configJson;
     file2json(pConfigFile, configJson);
     Config config;
     config.load(configJson);
+    zklog.setPrefix(config.proverID.substr(0, 7) + " "); // Set the logs prefix
+
+    // Print the zkProver version
+    zklog.info("Version: " + string(ZKEVM_PROVER_VERSION));
+
+    // Test that stderr is properly logged
+    cerr << "Checking error channel; ignore this trace\n";
+    zklog.warning("Checking warning channel; ignore this trace");
+
+    // Print the number of cores
+    zklog.info("Number of cores=" + to_string(getNumberOfCores()));
+
+    // Print the hostname and the IP address
+    string ipAddress;
+    getIPAddress(ipAddress);
+    zklog.info("IP address=" + ipAddress);
+
+#ifdef DEBUG
+    zklog.info("DEBUG defined");
+#endif
+
     config.print();
-    TimerStopAndLog(LOAD_CONFIG_JSON);
+
+    TimerStart(WHOLE_PROCESS);
 
     // Check required files presence
     bool bError = false;
     if (!fileExists(config.rom))
     {
-        cerr << "Error: required file config.rom=" << config.rom << " does not exist" << endl;
+        zklog.error("Required file config.rom=" + config.rom + " does not exist");
         bError = true;
     }
     if (config.generateProof())
     {
         if (!fileExists(config.zkevmConstPols))
         {
-            cerr << "Error: required file config.zkevmConstPols=" << config.zkevmConstPols << " does not exist" << endl;
+            zklog.error("required file config.zkevmConstPols=" + config.zkevmConstPols + " does not exist");
             bError = true;
         }
         if (!fileExists(config.c12aConstPols))
         {
-            cerr << "Error: required file config.c12aConstPols=" << config.c12aConstPols << " does not exist" << endl;
+            zklog.error("required file config.c12aConstPols=" + config.c12aConstPols + " does not exist");
             bError = true;
         }
         if (!fileExists(config.recursive1ConstPols))
         {
-            cerr << "Error: required file config.recursive1ConstPols=" << config.recursive1ConstPols << " does not exist" << endl;
+            zklog.error("required file config.recursive1ConstPols=" + config.recursive1ConstPols + " does not exist");
             bError = true;
         }
         if (!fileExists(config.recursive2ConstPols))
         {
-            cerr << "Error: required file config.recursive2ConstPols=" << config.recursive2ConstPols << " does not exist" << endl;
+            zklog.error("required file config.recursive2ConstPols=" + config.recursive2ConstPols + " does not exist");
             bError = true;
         }
         if (!fileExists(config.recursivefConstPols))
         {
-            cerr << "Error: required file config.recursivefConstPols=" << config.recursivefConstPols << " does not exist" << endl;
+            zklog.error("required file config.recursivefConstPols=" + config.recursivefConstPols + " does not exist");
             bError = true;
         }
 
         if (!fileExists(config.zkevmConstantsTree))
         {
-            cerr << "Error: required file config.zkevmConstantsTree=" << config.zkevmConstantsTree << " does not exist" << endl;
+            zklog.error("required file config.zkevmConstantsTree=" + config.zkevmConstantsTree + " does not exist");
             bError = true;
         }
         if (!fileExists(config.c12aConstantsTree))
         {
-            cerr << "Error: required file config.c12aConstantsTree=" << config.c12aConstantsTree << " does not exist" << endl;
+            zklog.error("required file config.c12aConstantsTree=" + config.c12aConstantsTree + " does not exist");
             bError = true;
         }
         if (!fileExists(config.recursive1ConstantsTree))
         {
-            cerr << "Error: required file config.recursive1ConstantsTree=" << config.recursive1ConstantsTree << " does not exist" << endl;
+            zklog.error("required file config.recursive1ConstantsTree=" + config.recursive1ConstantsTree + " does not exist");
             bError = true;
         }
         if (!fileExists(config.recursive2ConstantsTree))
         {
-            cerr << "Error: required file config.recursive2ConstantsTree=" << config.recursive2ConstantsTree << " does not exist" << endl;
+            zklog.error("required file config.recursive2ConstantsTree=" + config.recursive2ConstantsTree + " does not exist");
             bError = true;
         }
         if (!fileExists(config.recursivefConstantsTree))
         {
-            cerr << "Error: required file config.recursivefConstantsTree=" << config.recursivefConstantsTree << " does not exist" << endl;
+            zklog.error("required file config.recursivefConstantsTree=" + config.recursivefConstantsTree + " does not exist");
             bError = true;
         }
         if (!fileExists(config.zkevmVerifier))
         {
-            cerr << "Error: required file config.zkevmVerifier=" << config.zkevmVerifier << " does not exist" << endl;
+            zklog.error("required file config.zkevmVerifier=" + config.zkevmVerifier + " does not exist");
             bError = true;
         }
         if (!fileExists(config.recursive1Verifier))
         {
-            cerr << "Error: required file config.recursive1Verifier=" << config.recursive1Verifier << " does not exist" << endl;
+            zklog.error("required file config.recursive1Verifier=" + config.recursive1Verifier + " does not exist");
             bError = true;
         }
         if (!fileExists(config.recursive2Verifier))
         {
-            cerr << "Error: required file config.recursive2Verifier=" << config.recursive2Verifier << " does not exist" << endl;
+            zklog.error("required file config.recursive2Verifier=" + config.recursive2Verifier + " does not exist");
             bError = true;
         }
         if (!fileExists(config.recursive2Verkey))
         {
-            cerr << "Error: required file config.recursive2Verkey=" << config.recursive2Verkey << " does not exist" << endl;
+            zklog.error("required file config.recursive2Verkey=" + config.recursive2Verkey + " does not exist");
             bError = true;
         }
         if (!fileExists(config.finalVerifier))
         {
-            cerr << "Error: required file config.finalVerifier=" << config.finalVerifier << " does not exist" << endl;
+            zklog.error("required file config.finalVerifier=" + config.finalVerifier + " does not exist");
             bError = true;
         }
         if (!fileExists(config.recursivefVerifier))
         {
-            cerr << "Error: required file config.recursivefVerifier=" << config.recursivefVerifier << " does not exist" << endl;
+            zklog.error("required file config.recursivefVerifier=" + config.recursivefVerifier + " does not exist");
             bError = true;
         }
         if (!fileExists(config.finalStarkZkey))
         {
-            cerr << "Error: required file config.finalStarkZkey=" << config.finalStarkZkey << " does not exist" << endl;
+            zklog.error("required file config.finalStarkZkey=" + config.finalStarkZkey + " does not exist");
             bError = true;
         }
         if (!fileExists(config.storageRomFile))
         {
-            cerr << "Error: required file config.storageRomFile=" << config.storageRomFile << " does not exist" << endl;
+            zklog.error("required file config.storageRomFile=" + config.storageRomFile + " does not exist");
             bError = true;
         }
         if (!fileExists(config.zkevmStarkInfo))
         {
-            cerr << "Error: required file config.zkevmStarkInfo=" << config.zkevmStarkInfo << " does not exist" << endl;
+            zklog.error("required file config.zkevmStarkInfo=" + config.zkevmStarkInfo + " does not exist");
             bError = true;
         }
         if (!fileExists(config.c12aStarkInfo))
         {
-            cerr << "Error: required file config.c12aStarkInfo=" << config.c12aStarkInfo << " does not exist" << endl;
+            zklog.error("required file config.c12aStarkInfo=" + config.c12aStarkInfo + " does not exist");
             bError = true;
         }
         if (!fileExists(config.recursive1StarkInfo))
         {
-            cerr << "Error: required file config.recursive1StarkInfo=" << config.recursive1StarkInfo << " does not exist" << endl;
+            zklog.error("required file config.recursive1StarkInfo=" + config.recursive1StarkInfo + " does not exist");
             bError = true;
         }
         if (!fileExists(config.recursive2StarkInfo))
         {
-            cerr << "Error: required file config.recursive2StarkInfo=" << config.recursive2StarkInfo << " does not exist" << endl;
+            zklog.error("required file config.recursive2StarkInfo=" + config.recursive2StarkInfo + " does not exist");
             bError = true;
         }
         if (!fileExists(config.recursivefStarkInfo))
         {
-            cerr << "Error: required file config.recursivefStarkInfo=" << config.recursivefStarkInfo << " does not exist" << endl;
+            zklog.error("required file config.recursivefStarkInfo=" + config.recursivefStarkInfo + " does not exist");
             bError = true;
         }
         if (!fileExists(config.c12aExec))
         {
-            cerr << "Error: required file config.c12aExec=" << config.c12aExec << " does not exist" << endl;
+            zklog.error("required file config.c12aExec=" + config.c12aExec + " does not exist");
             bError = true;
         }
         if (!fileExists(config.recursive1Exec))
         {
-            cerr << "Error: required file config.recursive1Exec=" << config.recursive1Exec << " does not exist" << endl;
+            zklog.error("required file config.recursive1Exec=" + config.recursive1Exec + " does not exist");
             bError = true;
         }
         if (!fileExists(config.recursive2Exec))
         {
-            cerr << "Error: required file config.recursive2Exec=" << config.recursive2Exec << " does not exist" << endl;
+            zklog.error("required file config.recursive2Exec=" + config.recursive2Exec + " does not exist");
             bError = true;
         }
         if (!fileExists(config.recursivefExec))
         {
-            cerr << "Error: required file config.recursivefExec=" << config.recursivefExec << " does not exist" << endl;
+            zklog.error("required file config.recursivefExec=" + config.recursivefExec + " does not exist");
             bError = true;
         }
     }
@@ -474,6 +481,12 @@ int main(int argc, char **argv)
 
     // Create one instance of the Poseidon hash library
     PoseidonGoldilocks poseidon;
+
+    // Generate account zero keys
+    fork_5::Account::GenerateZeroKey(fr, poseidon);
+
+    // Init the HashDB singleton
+    hashDBSingleton.init(fr, config);
 
     // Init goldilocks precomputed
     TimerStart(GOLDILOCKS_PRECOMPUTED_INIT);
@@ -528,14 +541,32 @@ int main(int argc, char **argv)
         Blake2b256_Test(fr, config);
     }
 
+    // Test ECRecover
+    if (config.runECRecoverTest)
+    {
+        ECRecoverTest();
+    }
+
+    // Test Database cache
+    if (config.runDatabaseCacheTest)
+    {
+        DatabaseCacheTest();
+    }
+
+    // Unit test
+    if (config.runUnitTest)
+    {
+        UnitTest(fr, poseidon, config);
+    }
+
     // If there is nothing else to run, exit normally
     if (!config.runExecutorServer && !config.runExecutorClient && !config.runExecutorClientMultithread &&
-        !config.runStateDBServer && !config.runStateDBTest &&
+        !config.runHashDBServer && !config.runHashDBTest &&
         !config.runAggregatorServer && !config.runAggregatorClient && !config.runAggregatorClientMock &&
         !config.runFileGenBatchProof && !config.runFileGenAggregatedProof && !config.runFileGenFinalProof &&
         !config.runFileProcessBatch && !config.runFileProcessBatchMultithread && !config.runFileExecute)
     {
-        exit(0);
+        return 0;
     }
 
 #if 0
@@ -566,7 +597,7 @@ int main(int argc, char **argv)
     if (config.databaseURL != "local") // remote DB
     {
 
-        if (config.loadDBToMemCache && (config.runAggregatorClient || config.runExecutorServer || config.runStateDBServer))
+        if (config.loadDBToMemCache && (config.runAggregatorClient || config.runExecutorServer || config.runHashDBServer))
         {
             TimerStart(DB_CACHE_LOAD);
             // if we have a db cache enabled
@@ -588,14 +619,14 @@ int main(int argc, char **argv)
 
     /* SERVERS */
 
-    // Create the StateDB server and run it, if configured
-    StateDBServer *pStateDBServer = NULL;
-    if (config.runStateDBServer)
+    // Create the HashDB server and run it, if configured
+    HashDBServer *pHashDBServer = NULL;
+    if (config.runHashDBServer)
     {
-        pStateDBServer = new StateDBServer(fr, config);
-        zkassert(pStateDBServer != NULL);
-        cout << "Launching StateDB server thread..." << endl;
-        pStateDBServer->runThread();
+        pHashDBServer = new HashDBServer(fr, config);
+        zkassert(pHashDBServer != NULL);
+        zklog.info("Launching HashDB server thread...");
+        pHashDBServer->runThread();
     }
 
     // Create the executor server and run it, if configured
@@ -604,7 +635,7 @@ int main(int argc, char **argv)
     {
         pExecutorServer = new ExecutorServer(fr, prover, config);
         zkassert(pExecutorServer != NULL);
-        cout << "Launching executor server thread..." << endl;
+        zklog.info("Launching executor server thread...");
         pExecutorServer->runThread();
     }
 
@@ -614,7 +645,7 @@ int main(int argc, char **argv)
     {
         pAggregatorServer = new AggregatorServer(fr, config);
         zkassert(pAggregatorServer != NULL);
-        cout << "Launching aggregator server thread..." << endl;
+        zklog.info("Launching aggregator server thread...");
         pAggregatorServer->runThread();
         sleep(5);
     }
@@ -633,7 +664,7 @@ int main(int argc, char **argv)
             for (size_t i = 0; i < files.size(); i++)
             {
                 tmpConfig.inputFile = config.inputFile + files[i];
-                cout << "runFileGenBatchProof inputFile=" << tmpConfig.inputFile << endl;
+                zklog.info("runFileGenBatchProof inputFile=" + tmpConfig.inputFile);
                 // Call the prover
                 runFileGenBatchProof(fr, prover, tmpConfig);
             }
@@ -657,7 +688,7 @@ int main(int argc, char **argv)
             for (size_t i = 0; i < files.size(); i++)
             {
                 tmpConfig.inputFile = config.inputFile + files[i];
-                cout << "runFileGenAggregatedProof inputFile=" << tmpConfig.inputFile << endl;
+                zklog.info("runFileGenAggregatedProof inputFile=" + tmpConfig.inputFile);
                 // Call the prover
                 runFileGenAggregatedProof(fr, prover, tmpConfig);
             }
@@ -681,7 +712,7 @@ int main(int argc, char **argv)
             for (size_t i = 0; i < files.size(); i++)
             {
                 tmpConfig.inputFile = config.inputFile + files[i];
-                cout << "runFileGenFinalProof inputFile=" << tmpConfig.inputFile << endl;
+                zklog.info("runFileGenFinalProof inputFile=" + tmpConfig.inputFile);
                 // Call the prover
                 runFileGenFinalProof(fr, prover, tmpConfig);
             }
@@ -705,7 +736,7 @@ int main(int argc, char **argv)
             for (size_t i = 0; i < files.size(); i++)
             {
                 tmpConfig.inputFile = config.inputFile + files[i];
-                cout << "runFileProcessBatch inputFile=" << tmpConfig.inputFile << endl;
+                zklog.info("runFileProcessBatch inputFile=" + tmpConfig.inputFile);
                 // Call the prover
                 runFileProcessBatch(fr, prover, tmpConfig);
             }
@@ -736,7 +767,7 @@ int main(int argc, char **argv)
     {
         pExecutorClient = new ExecutorClient(fr, config);
         zkassert(pExecutorClient != NULL);
-        cout << "Launching executor client thread..." << endl;
+        zklog.info("Launching executor client thread...");
         pExecutorClient->runThread();
     }
 
@@ -748,15 +779,15 @@ int main(int argc, char **argv)
             pExecutorClient = new ExecutorClient(fr, config);
             zkassert(pExecutorClient != NULL);
         }
-        cout << "Launching executor client threads..." << endl;
+        zklog.info("Launching executor client threads...");
         pExecutorClient->runThreads();
     }
 
-    // Run the stateDB test, if configured
-    if (config.runStateDBTest)
+    // Run the hashDB test, if configured
+    if (config.runHashDBTest)
     {
-        cout << "Launching StateDB test thread..." << endl;
-        runStateDBTest(config);
+        zklog.info("Launching HashDB test thread...");
+        HashDBTest(config);
     }
 
     // Create the aggregator client and run it, if configured
@@ -765,7 +796,7 @@ int main(int argc, char **argv)
     {
         pAggregatorClient = new AggregatorClient(fr, config, prover);
         zkassert(pAggregatorClient != NULL);
-        cout << "Launching aggregator client thread..." << endl;
+        zklog.info("Launching aggregator client thread...");
         pAggregatorClient->runThread();
     }
 
@@ -775,7 +806,7 @@ int main(int argc, char **argv)
     {
         pAggregatorClientMock = new AggregatorClientMock(fr, config);
         zkassert(pAggregatorClientMock != NULL);
-        cout << "Launching aggregator client mock thread..." << endl;
+        zklog.info("Launching aggregator client mock thread...");
         pAggregatorClientMock->runThread();
     }
 
@@ -795,7 +826,7 @@ int main(int argc, char **argv)
     {
         zkassert(pExecutorClient != NULL);
         pExecutorClient->waitForThreads();
-        cout << "All executor client threads have completed" << endl;
+        zklog.info("All executor client threads have completed");
         sleep(1);
         return 0;
     }
@@ -807,11 +838,11 @@ int main(int argc, char **argv)
         pExecutorServer->waitForThread();
     }
 
-    // Wait for StateDBServer thread to end
-    if (config.runStateDBServer && !config.runStateDBTest)
+    // Wait for HashDBServer thread to end
+    if (config.runHashDBServer && !config.runHashDBTest)
     {
-        zkassert(pStateDBServer != NULL);
-        pStateDBServer->waitForThread();
+        zkassert(pHashDBServer != NULL);
+        pHashDBServer->waitForThread();
     }
 
     // Wait for the aggregator client thread to end
@@ -855,10 +886,10 @@ int main(int argc, char **argv)
         delete pExecutorServer;
         pExecutorServer = NULL;
     }
-    if (pStateDBServer != NULL)
+    if (pHashDBServer != NULL)
     {
-        delete pStateDBServer;
-        pStateDBServer = NULL;
+        delete pHashDBServer;
+        pHashDBServer = NULL;
     }
     if (pAggregatorServer != NULL)
     {
@@ -868,5 +899,5 @@ int main(int argc, char **argv)
 
     TimerStopAndLog(WHOLE_PROCESS);
 
-    cout << "Done" << endl;
+    zklog.info("Done");
 }

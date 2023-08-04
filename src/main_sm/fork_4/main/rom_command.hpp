@@ -38,7 +38,6 @@ typedef enum : int {
     f_comp_gt,
     f_comp_eq,
     f_loadScalar,
-    f_getGlobalExitRootManagerAddr,
     f_log,
     f_exp,
     f_storeLog,
@@ -120,6 +119,7 @@ public:
     vector<RomCommand *> values;
     vector<RomCommand *> params;
     uint64_t offset;
+    string opAndFunction;
     RomCommand() : isPresent(false), op(op_empty), reg(reg_empty), function(f_empty), num(0), offset(0) {};
     string toString(void) const;
 };

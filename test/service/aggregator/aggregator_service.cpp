@@ -467,7 +467,7 @@ using grpc::Status;
     }
     
     // Check type
-    if (proverMessage.response_case() != aggregator::v1::ProverMessage::ResponseCase::kGenAggregatedProofResponse)
+    if (proverMessage.response_case() != aggregator::v1::ProverMessage::ResponseCase::kGenFinalProofResponse)
     {
         cerr << "Error: AggregatorServiceImpl::GenFinalProof() got proverMessage.response_case=" << proverMessage.response_case() << " instead of GEN_AGGREGATED_PROOF_RESPONSE" << endl;
         return Status::CANCELLED;
@@ -480,7 +480,7 @@ using grpc::Status;
         return Status::CANCELLED;
     }
 
-    requestID = proverMessage.gen_aggregated_proof_response().id();
+    requestID = proverMessage.gen_final_proof_response().id();
 
     return Status::OK;
 }
@@ -662,7 +662,7 @@ using grpc::Status;
     {
         return grpcStatus;
     }
-    cout << "AggregatorServiceImpl::GenAndGetFinalProof() called GenBatchProof() and got requestID=" << requestID << endl;
+    cout << "AggregatorServiceImpl::GenAndGetFinalProof() called GenFinalProof() and got requestID=" << requestID << endl;
 
     // Get batch proof 0
     for (i=0; i<AGGREGATOR_SERVER_NUMBER_OF_GET_PROOF_RETRIES; i++)

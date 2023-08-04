@@ -4,6 +4,7 @@
 #include "definitions.hpp"
 #include "Keccak-more-compact.hpp"
 #include "zkmax.hpp"
+#include "zklog.hpp"
 
 inline uint64_t getStateBit ( const uint8_t (&state)[200], uint64_t i )
 {
@@ -33,7 +34,7 @@ void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, Pa
     // Check that input size does not exeed the number of slots
     if (input.size() > nSlots)
     {
-        cerr << "Error: PaddingKKBitExecutor::execute() Too many entries input.size()=" << input.size() << " > nSlots=" << nSlots << endl;
+        zklog.error("PaddingKKBitExecutor::execute() Too many entries input.size()=" + to_string(input.size()) + " > nSlots=" + to_string(nSlots));
         exitProcess();
     }
 
@@ -155,9 +156,9 @@ void PaddingKKBitExecutor::execute (vector<PaddingKKBitExecutorInput> &input, Pa
         pp++;
     }
 
-    cout << "PaddingKKBitExecutor successfully processed " << input.size() << " Keccak actions p=" << p << " pDone=" << pDone << " (" << (double(pDone)*100)/N << "%)" << endl;
+    zklog.info("PaddingKKBitExecutor successfully processed " + to_string(input.size()) + " Keccak actions p=" + to_string(p) + " pDone=" + to_string(pDone) + " (" + to_string((double(pDone)*100)/N) + "%)");
 #ifdef LOG_TIME_STATISTICS
-    cout << "TIMER STATISTICS: PaddingKKBitExecutor: Keccak time: " << double(keccakTime)/1000 << " ms, called " << keccakTimes << " times, so " << keccakTime/zkmax(keccakTimes,(uint64_t)1) << " us/time" << endl;
+    zklog.info("TIMER STATISTICS: PaddingKKBitExecutor: Keccak time: " + to_string(double(keccakTime)/1000) + " ms, called " + to_string(keccakTimes) + " times, so " + to_string(keccakTime/zkmax(keccakTimes,(uint64_t)1)) + " us/time");
 #endif
 }
 

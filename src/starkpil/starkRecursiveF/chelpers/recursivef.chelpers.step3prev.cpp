@@ -95,19 +95,19 @@ void StarkRecursiveFSteps::step3prev_first(StepsParams &params, uint64_t i) {
      Goldilocks3::add(tmp_28, tmp_95, tmp_27);
      Goldilocks3::Element tmp_29;
      Goldilocks3::add(tmp_29, tmp_28, (Goldilocks3::Element &)*params.challenges[2]);
-     Goldilocks3::Element tmp_96;
-     Goldilocks3::mul(tmp_96, tmp_94, tmp_29);
-     Goldilocks::Element tmp_97;
-     Goldilocks::copy(tmp_97, params.pols[8 + i*12]);
+     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[1572879 + i*21]), tmp_94, tmp_29);
+     Goldilocks::Element tmp_96;
+     Goldilocks::copy(tmp_96, params.pols[8 + i*12]);
      Goldilocks3::Element tmp_30;
      Goldilocks3::mul(tmp_30, Goldilocks::fromU64(3688660304411827445ULL), (Goldilocks3::Element &)*params.challenges[3]);
      Goldilocks3::Element tmp_31;
      Goldilocks3::mul(tmp_31, (Goldilocks::Element &)*params.x_n[i], tmp_30);
      Goldilocks3::Element tmp_32;
-     Goldilocks3::add(tmp_32, tmp_97, tmp_31);
+     Goldilocks3::add(tmp_32, tmp_96, tmp_31);
      Goldilocks3::Element tmp_33;
      Goldilocks3::add(tmp_33, tmp_32, (Goldilocks3::Element &)*params.challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[6291459 + i*9]), tmp_96, tmp_33);
+     Goldilocks3::Element tmp_97;
+     Goldilocks3::mul(tmp_97, (Goldilocks3::Element &)(params.pols[1572879 + i*21]), tmp_33);
      Goldilocks::Element tmp_98;
      Goldilocks::copy(tmp_98, params.pols[9 + i*12]);
      Goldilocks3::Element tmp_34;
@@ -119,7 +119,7 @@ void StarkRecursiveFSteps::step3prev_first(StepsParams &params, uint64_t i) {
      Goldilocks3::Element tmp_37;
      Goldilocks3::add(tmp_37, tmp_36, (Goldilocks3::Element &)*params.challenges[2]);
      Goldilocks3::Element tmp_99;
-     Goldilocks3::mul(tmp_99, (Goldilocks3::Element &)(params.pols[6291459 + i*9]), tmp_37);
+     Goldilocks3::mul(tmp_99, tmp_97, tmp_37);
      Goldilocks::Element tmp_100;
      Goldilocks::copy(tmp_100, params.pols[10 + i*12]);
      Goldilocks3::Element tmp_38;
@@ -142,7 +142,7 @@ void StarkRecursiveFSteps::step3prev_first(StepsParams &params, uint64_t i) {
      Goldilocks3::add(tmp_44, tmp_102, tmp_43);
      Goldilocks3::Element tmp_45;
      Goldilocks3::add(tmp_45, tmp_44, (Goldilocks3::Element &)*params.challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[23592960 + i*6]), tmp_101, tmp_45);
+     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[7077888 + i*6]), tmp_101, tmp_45);
      Goldilocks::Element tmp_103;
      Goldilocks::copy(tmp_103,  params.pConstPols->getElement(4,i));
      Goldilocks3::Element tmp_46;
@@ -219,17 +219,17 @@ void StarkRecursiveFSteps::step3prev_first(StepsParams &params, uint64_t i) {
      Goldilocks3::add(tmp_67, tmp_95, tmp_66);
      Goldilocks3::Element tmp_68;
      Goldilocks3::add(tmp_68, tmp_67, (Goldilocks3::Element &)*params.challenges[2]);
-     Goldilocks3::Element tmp_118;
-     Goldilocks3::mul(tmp_118, tmp_116, tmp_68);
-     Goldilocks::Element tmp_119;
-     Goldilocks::copy(tmp_119,  params.pConstPols->getElement(12,i));
+     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[1572882 + i*21]), tmp_116, tmp_68);
+     Goldilocks::Element tmp_118;
+     Goldilocks::copy(tmp_118,  params.pConstPols->getElement(12,i));
      Goldilocks3::Element tmp_69;
-     Goldilocks3::mul(tmp_69, tmp_119, (Goldilocks3::Element &)*params.challenges[3]);
+     Goldilocks3::mul(tmp_69, tmp_118, (Goldilocks3::Element &)*params.challenges[3]);
      Goldilocks3::Element tmp_70;
-     Goldilocks3::add(tmp_70, tmp_97, tmp_69);
+     Goldilocks3::add(tmp_70, tmp_96, tmp_69);
      Goldilocks3::Element tmp_71;
      Goldilocks3::add(tmp_71, tmp_70, (Goldilocks3::Element &)*params.challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[6291462 + i*9]), tmp_118, tmp_71);
+     Goldilocks3::Element tmp_119;
+     Goldilocks3::mul(tmp_119, (Goldilocks3::Element &)(params.pols[1572882 + i*21]), tmp_71);
      Goldilocks::Element tmp_120;
      Goldilocks::copy(tmp_120,  params.pConstPols->getElement(13,i));
      Goldilocks3::Element tmp_72;
@@ -239,7 +239,7 @@ void StarkRecursiveFSteps::step3prev_first(StepsParams &params, uint64_t i) {
      Goldilocks3::Element tmp_74;
      Goldilocks3::add(tmp_74, tmp_73, (Goldilocks3::Element &)*params.challenges[2]);
      Goldilocks3::Element tmp_121;
-     Goldilocks3::mul(tmp_121, (Goldilocks3::Element &)(params.pols[6291462 + i*9]), tmp_74);
+     Goldilocks3::mul(tmp_121, tmp_119, tmp_74);
      Goldilocks::Element tmp_122;
      Goldilocks::copy(tmp_122,  params.pConstPols->getElement(14,i));
      Goldilocks3::Element tmp_75;
@@ -258,7 +258,7 @@ void StarkRecursiveFSteps::step3prev_first(StepsParams &params, uint64_t i) {
      Goldilocks3::add(tmp_79, tmp_102, tmp_78);
      Goldilocks3::Element tmp_80;
      Goldilocks3::add(tmp_80, tmp_79, (Goldilocks3::Element &)*params.challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[23592963 + i*6]), tmp_123, tmp_80);
+     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[7077891 + i*6]), tmp_123, tmp_80);
 }
 
 void StarkRecursiveFSteps::step3prev_i(StepsParams &params, uint64_t i) {
@@ -352,19 +352,19 @@ void StarkRecursiveFSteps::step3prev_i(StepsParams &params, uint64_t i) {
      Goldilocks3::add(tmp_28, tmp_95, tmp_27);
      Goldilocks3::Element tmp_29;
      Goldilocks3::add(tmp_29, tmp_28, (Goldilocks3::Element &)*params.challenges[2]);
-     Goldilocks3::Element tmp_96;
-     Goldilocks3::mul(tmp_96, tmp_94, tmp_29);
-     Goldilocks::Element tmp_97;
-     Goldilocks::copy(tmp_97, params.pols[8 + i*12]);
+     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[1572879 + i*21]), tmp_94, tmp_29);
+     Goldilocks::Element tmp_96;
+     Goldilocks::copy(tmp_96, params.pols[8 + i*12]);
      Goldilocks3::Element tmp_30;
      Goldilocks3::mul(tmp_30, Goldilocks::fromU64(3688660304411827445ULL), (Goldilocks3::Element &)*params.challenges[3]);
      Goldilocks3::Element tmp_31;
      Goldilocks3::mul(tmp_31, (Goldilocks::Element &)*params.x_n[i], tmp_30);
      Goldilocks3::Element tmp_32;
-     Goldilocks3::add(tmp_32, tmp_97, tmp_31);
+     Goldilocks3::add(tmp_32, tmp_96, tmp_31);
      Goldilocks3::Element tmp_33;
      Goldilocks3::add(tmp_33, tmp_32, (Goldilocks3::Element &)*params.challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[6291459 + i*9]), tmp_96, tmp_33);
+     Goldilocks3::Element tmp_97;
+     Goldilocks3::mul(tmp_97, (Goldilocks3::Element &)(params.pols[1572879 + i*21]), tmp_33);
      Goldilocks::Element tmp_98;
      Goldilocks::copy(tmp_98, params.pols[9 + i*12]);
      Goldilocks3::Element tmp_34;
@@ -376,7 +376,7 @@ void StarkRecursiveFSteps::step3prev_i(StepsParams &params, uint64_t i) {
      Goldilocks3::Element tmp_37;
      Goldilocks3::add(tmp_37, tmp_36, (Goldilocks3::Element &)*params.challenges[2]);
      Goldilocks3::Element tmp_99;
-     Goldilocks3::mul(tmp_99, (Goldilocks3::Element &)(params.pols[6291459 + i*9]), tmp_37);
+     Goldilocks3::mul(tmp_99, tmp_97, tmp_37);
      Goldilocks::Element tmp_100;
      Goldilocks::copy(tmp_100, params.pols[10 + i*12]);
      Goldilocks3::Element tmp_38;
@@ -399,7 +399,7 @@ void StarkRecursiveFSteps::step3prev_i(StepsParams &params, uint64_t i) {
      Goldilocks3::add(tmp_44, tmp_102, tmp_43);
      Goldilocks3::Element tmp_45;
      Goldilocks3::add(tmp_45, tmp_44, (Goldilocks3::Element &)*params.challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[23592960 + i*6]), tmp_101, tmp_45);
+     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[7077888 + i*6]), tmp_101, tmp_45);
      Goldilocks::Element tmp_103;
      Goldilocks::copy(tmp_103,  params.pConstPols->getElement(4,i));
      Goldilocks3::Element tmp_46;
@@ -476,17 +476,17 @@ void StarkRecursiveFSteps::step3prev_i(StepsParams &params, uint64_t i) {
      Goldilocks3::add(tmp_67, tmp_95, tmp_66);
      Goldilocks3::Element tmp_68;
      Goldilocks3::add(tmp_68, tmp_67, (Goldilocks3::Element &)*params.challenges[2]);
-     Goldilocks3::Element tmp_118;
-     Goldilocks3::mul(tmp_118, tmp_116, tmp_68);
-     Goldilocks::Element tmp_119;
-     Goldilocks::copy(tmp_119,  params.pConstPols->getElement(12,i));
+     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[1572882 + i*21]), tmp_116, tmp_68);
+     Goldilocks::Element tmp_118;
+     Goldilocks::copy(tmp_118,  params.pConstPols->getElement(12,i));
      Goldilocks3::Element tmp_69;
-     Goldilocks3::mul(tmp_69, tmp_119, (Goldilocks3::Element &)*params.challenges[3]);
+     Goldilocks3::mul(tmp_69, tmp_118, (Goldilocks3::Element &)*params.challenges[3]);
      Goldilocks3::Element tmp_70;
-     Goldilocks3::add(tmp_70, tmp_97, tmp_69);
+     Goldilocks3::add(tmp_70, tmp_96, tmp_69);
      Goldilocks3::Element tmp_71;
      Goldilocks3::add(tmp_71, tmp_70, (Goldilocks3::Element &)*params.challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[6291462 + i*9]), tmp_118, tmp_71);
+     Goldilocks3::Element tmp_119;
+     Goldilocks3::mul(tmp_119, (Goldilocks3::Element &)(params.pols[1572882 + i*21]), tmp_71);
      Goldilocks::Element tmp_120;
      Goldilocks::copy(tmp_120,  params.pConstPols->getElement(13,i));
      Goldilocks3::Element tmp_72;
@@ -496,7 +496,7 @@ void StarkRecursiveFSteps::step3prev_i(StepsParams &params, uint64_t i) {
      Goldilocks3::Element tmp_74;
      Goldilocks3::add(tmp_74, tmp_73, (Goldilocks3::Element &)*params.challenges[2]);
      Goldilocks3::Element tmp_121;
-     Goldilocks3::mul(tmp_121, (Goldilocks3::Element &)(params.pols[6291462 + i*9]), tmp_74);
+     Goldilocks3::mul(tmp_121, tmp_119, tmp_74);
      Goldilocks::Element tmp_122;
      Goldilocks::copy(tmp_122,  params.pConstPols->getElement(14,i));
      Goldilocks3::Element tmp_75;
@@ -515,7 +515,7 @@ void StarkRecursiveFSteps::step3prev_i(StepsParams &params, uint64_t i) {
      Goldilocks3::add(tmp_79, tmp_102, tmp_78);
      Goldilocks3::Element tmp_80;
      Goldilocks3::add(tmp_80, tmp_79, (Goldilocks3::Element &)*params.challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[23592963 + i*6]), tmp_123, tmp_80);
+     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[7077891 + i*6]), tmp_123, tmp_80);
 }
 
 void StarkRecursiveFSteps::step3prev_last(StepsParams &params, uint64_t i) {
@@ -609,19 +609,19 @@ void StarkRecursiveFSteps::step3prev_last(StepsParams &params, uint64_t i) {
      Goldilocks3::add(tmp_28, tmp_95, tmp_27);
      Goldilocks3::Element tmp_29;
      Goldilocks3::add(tmp_29, tmp_28, (Goldilocks3::Element &)*params.challenges[2]);
-     Goldilocks3::Element tmp_96;
-     Goldilocks3::mul(tmp_96, tmp_94, tmp_29);
-     Goldilocks::Element tmp_97;
-     Goldilocks::copy(tmp_97, params.pols[8 + i*12]);
+     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[1572879 + i*21]), tmp_94, tmp_29);
+     Goldilocks::Element tmp_96;
+     Goldilocks::copy(tmp_96, params.pols[8 + i*12]);
      Goldilocks3::Element tmp_30;
      Goldilocks3::mul(tmp_30, Goldilocks::fromU64(3688660304411827445ULL), (Goldilocks3::Element &)*params.challenges[3]);
      Goldilocks3::Element tmp_31;
      Goldilocks3::mul(tmp_31, (Goldilocks::Element &)*params.x_n[i], tmp_30);
      Goldilocks3::Element tmp_32;
-     Goldilocks3::add(tmp_32, tmp_97, tmp_31);
+     Goldilocks3::add(tmp_32, tmp_96, tmp_31);
      Goldilocks3::Element tmp_33;
      Goldilocks3::add(tmp_33, tmp_32, (Goldilocks3::Element &)*params.challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[6291459 + i*9]), tmp_96, tmp_33);
+     Goldilocks3::Element tmp_97;
+     Goldilocks3::mul(tmp_97, (Goldilocks3::Element &)(params.pols[1572879 + i*21]), tmp_33);
      Goldilocks::Element tmp_98;
      Goldilocks::copy(tmp_98, params.pols[9 + i*12]);
      Goldilocks3::Element tmp_34;
@@ -633,7 +633,7 @@ void StarkRecursiveFSteps::step3prev_last(StepsParams &params, uint64_t i) {
      Goldilocks3::Element tmp_37;
      Goldilocks3::add(tmp_37, tmp_36, (Goldilocks3::Element &)*params.challenges[2]);
      Goldilocks3::Element tmp_99;
-     Goldilocks3::mul(tmp_99, (Goldilocks3::Element &)(params.pols[6291459 + i*9]), tmp_37);
+     Goldilocks3::mul(tmp_99, tmp_97, tmp_37);
      Goldilocks::Element tmp_100;
      Goldilocks::copy(tmp_100, params.pols[10 + i*12]);
      Goldilocks3::Element tmp_38;
@@ -656,7 +656,7 @@ void StarkRecursiveFSteps::step3prev_last(StepsParams &params, uint64_t i) {
      Goldilocks3::add(tmp_44, tmp_102, tmp_43);
      Goldilocks3::Element tmp_45;
      Goldilocks3::add(tmp_45, tmp_44, (Goldilocks3::Element &)*params.challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[23592960 + i*6]), tmp_101, tmp_45);
+     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[7077888 + i*6]), tmp_101, tmp_45);
      Goldilocks::Element tmp_103;
      Goldilocks::copy(tmp_103,  params.pConstPols->getElement(4,i));
      Goldilocks3::Element tmp_46;
@@ -733,17 +733,17 @@ void StarkRecursiveFSteps::step3prev_last(StepsParams &params, uint64_t i) {
      Goldilocks3::add(tmp_67, tmp_95, tmp_66);
      Goldilocks3::Element tmp_68;
      Goldilocks3::add(tmp_68, tmp_67, (Goldilocks3::Element &)*params.challenges[2]);
-     Goldilocks3::Element tmp_118;
-     Goldilocks3::mul(tmp_118, tmp_116, tmp_68);
-     Goldilocks::Element tmp_119;
-     Goldilocks::copy(tmp_119,  params.pConstPols->getElement(12,i));
+     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[1572882 + i*21]), tmp_116, tmp_68);
+     Goldilocks::Element tmp_118;
+     Goldilocks::copy(tmp_118,  params.pConstPols->getElement(12,i));
      Goldilocks3::Element tmp_69;
-     Goldilocks3::mul(tmp_69, tmp_119, (Goldilocks3::Element &)*params.challenges[3]);
+     Goldilocks3::mul(tmp_69, tmp_118, (Goldilocks3::Element &)*params.challenges[3]);
      Goldilocks3::Element tmp_70;
-     Goldilocks3::add(tmp_70, tmp_97, tmp_69);
+     Goldilocks3::add(tmp_70, tmp_96, tmp_69);
      Goldilocks3::Element tmp_71;
      Goldilocks3::add(tmp_71, tmp_70, (Goldilocks3::Element &)*params.challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[6291462 + i*9]), tmp_118, tmp_71);
+     Goldilocks3::Element tmp_119;
+     Goldilocks3::mul(tmp_119, (Goldilocks3::Element &)(params.pols[1572882 + i*21]), tmp_71);
      Goldilocks::Element tmp_120;
      Goldilocks::copy(tmp_120,  params.pConstPols->getElement(13,i));
      Goldilocks3::Element tmp_72;
@@ -753,7 +753,7 @@ void StarkRecursiveFSteps::step3prev_last(StepsParams &params, uint64_t i) {
      Goldilocks3::Element tmp_74;
      Goldilocks3::add(tmp_74, tmp_73, (Goldilocks3::Element &)*params.challenges[2]);
      Goldilocks3::Element tmp_121;
-     Goldilocks3::mul(tmp_121, (Goldilocks3::Element &)(params.pols[6291462 + i*9]), tmp_74);
+     Goldilocks3::mul(tmp_121, tmp_119, tmp_74);
      Goldilocks::Element tmp_122;
      Goldilocks::copy(tmp_122,  params.pConstPols->getElement(14,i));
      Goldilocks3::Element tmp_75;
@@ -772,5 +772,5 @@ void StarkRecursiveFSteps::step3prev_last(StepsParams &params, uint64_t i) {
      Goldilocks3::add(tmp_79, tmp_102, tmp_78);
      Goldilocks3::Element tmp_80;
      Goldilocks3::add(tmp_80, tmp_79, (Goldilocks3::Element &)*params.challenges[2]);
-     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[23592963 + i*6]), tmp_123, tmp_80);
+     Goldilocks3::mul((Goldilocks3::Element &)(params.pols[7077891 + i*6]), tmp_123, tmp_80);
 }

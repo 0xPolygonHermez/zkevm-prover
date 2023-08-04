@@ -39,17 +39,13 @@ namespace Fflonk {
         FrElement *reservedMemoryPtr;
         uint64_t reservedMemorySize;
 
-        u_int64_t lengthPrecomputedBigBuffer;
         FrElement *precomputedBigBuffer;
         G1PointAffine *PTau;
 
         u_int64_t lengthNonPrecomputedBigBuffer;
         FrElement *nonPrecomputedBigBuffer;
 
-        u_int64_t lengthMapBuffers;
         u_int32_t *mapBuffersBigBuffer;
-
-        u_int64_t lengthInternalWitnessBuffer;
 
         FrElement *buffInternalWitness;
         FrElement *buffWitness;
@@ -152,11 +148,11 @@ namespace Fflonk {
 
         FrElement getMontgomeryBatchedInverse();
 
-        FrElement computeLiS0(u_int32_t i);
+        void computeLiS0();
 
-        FrElement computeLiS1(u_int32_t i);
+        void computeLiS1();
 
-        FrElement computeLiS2(u_int32_t i);
+        void computeLiS2();
 
         G1Point multiExponentiation(Polynomial<Engine> *polynomial);
 

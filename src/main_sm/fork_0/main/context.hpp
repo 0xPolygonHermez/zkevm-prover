@@ -18,7 +18,7 @@
 #include "ffiasm/fec.hpp"
 #include "ffiasm/fnec.hpp"
 #include "prover_request.hpp"
-#include "statedb_interface.hpp"
+#include "hashdb_interface.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -105,7 +105,7 @@ public:
     const Rom &rom; // Rom reference
     LastSWrite lastSWrite; // Keep track of the last storage write
     ProverRequest &proverRequest;
-    StateDBInterface *pStateDB;
+    HashDBInterface *pHashDB;
     uint64_t lastStep;
 
     Context( Goldilocks &fr,
@@ -115,7 +115,7 @@ public:
              MainCommitPols &pols,
              const Rom &rom,
              ProverRequest &proverRequest,
-             StateDBInterface *pStateDB ) :
+             HashDBInterface *pHashDB ) :
         fr(fr),
         config(config),
         fec(fec),
@@ -124,7 +124,7 @@ public:
         rom(rom),
         lastSWrite(fr),
         proverRequest(proverRequest),
-        pStateDB(pStateDB),
+        pHashDB(pHashDB),
         lastStep(0)
         {}; // Constructor, setting references
 

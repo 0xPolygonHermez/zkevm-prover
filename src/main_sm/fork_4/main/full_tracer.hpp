@@ -17,25 +17,36 @@ namespace fork_4
 
 class Context;
 
+class ContextData
+{
+public:
+    string type;
+};
+
 class FullTracer: public FullTracerInterface
 {
 public:
     Goldilocks &fr;
     uint64_t depth;
+    uint64_t prevCTX;
     uint64_t initGas;
-    unordered_map<uint64_t,unordered_map<string,string>> deltaStorage;
+    unordered_map<string,unordered_map<string,string>> deltaStorage;
     FinalTrace finalTrace;
     unordered_map<uint64_t,TxGAS> txGAS;
     uint64_t txCount;
     uint64_t txTime; // in us
     vector<vector<mpz_class>> fullStack;// Stack of the transaction
     uint64_t accBatchGas;
-    unordered_map<uint64_t,unordered_map<uint64_t,Log>> logs;
+    map<uint64_t,map<uint64_t,Log>> logs;
     vector<Opcode> call_trace;
     vector<Opcode> execution_trace;
     string lastError;
+    uint64_t numberOfOpcodesInThisTx;
+    uint64_t lastErrorOpcode;
     unordered_map<string, InfoReadWrite> read_write_addresses;
-    bool bOpcodeCalled;
+    ReturnFromCreate returnFromCreate;
+    unordered_map<uint64_t, ContextData> callData;
+    string previousMemory;
 #ifdef LOG_TIME_STATISTICS
     TimeMetricStorage tms;
     struct timeval t;
@@ -43,19 +54,19 @@ public:
     struct timeval top;
 #endif
 public:
-    void onError (Context &ctx, const RomCommand &cmd);
-    void onStoreLog (Context &ctx, const RomCommand &cmd);
-    void onProcessTx (Context &ctx, const RomCommand &cmd);
-    void onUpdateStorage (Context &ctx, const RomCommand &cmd);
-    void onFinishTx (Context &ctx, const RomCommand &cmd);
-    void onStartBatch (Context &ctx, const RomCommand &cmd);
-    void onFinishBatch (Context &ctx, const RomCommand &cmd);
-    void onOpcode (Context &ctx, const RomCommand &cmd);
-    void addReadWriteAddress ( const Goldilocks::Element &address0, const Goldilocks::Element &address1, const Goldilocks::Element &address2, const Goldilocks::Element &faddress3, const Goldilocks::Element &address4, const Goldilocks::Element &address5, const Goldilocks::Element &address6, const Goldilocks::Element &address7,
-                               const Goldilocks::Element &keyType0, const Goldilocks::Element &keyType1, const Goldilocks::Element &keyType2, const Goldilocks::Element &keyType3, const Goldilocks::Element &keyType4, const Goldilocks::Element &keyType5, const Goldilocks::Element &keyType6, const Goldilocks::Element &keyType7,
-                               const mpz_class &value );
+    zkresult onError (Context &ctx, const RomCommand &cmd);
+    zkresult onStoreLog (Context &ctx, const RomCommand &cmd);
+    zkresult onProcessTx (Context &ctx, const RomCommand &cmd);
+    zkresult onUpdateStorage (Context &ctx, const RomCommand &cmd);
+    zkresult onFinishTx (Context &ctx, const RomCommand &cmd);
+    zkresult onStartBatch (Context &ctx, const RomCommand &cmd);
+    zkresult onFinishBatch (Context &ctx, const RomCommand &cmd);
+    zkresult onOpcode (Context &ctx, const RomCommand &cmd);
+    zkresult addReadWriteAddress ( const Goldilocks::Element &address0, const Goldilocks::Element &address1, const Goldilocks::Element &address2, const Goldilocks::Element &faddress3, const Goldilocks::Element &address4, const Goldilocks::Element &address5, const Goldilocks::Element &address6, const Goldilocks::Element &address7,
+                                   const Goldilocks::Element &keyType0, const Goldilocks::Element &keyType1, const Goldilocks::Element &keyType2, const Goldilocks::Element &keyType3, const Goldilocks::Element &keyType4, const Goldilocks::Element &keyType5, const Goldilocks::Element &keyType6, const Goldilocks::Element &keyType7,
+                                   const mpz_class &value );
 
-    FullTracer(Goldilocks &fr) : fr(fr), depth(1), initGas(0), txCount(0), txTime(0), accBatchGas(0), bOpcodeCalled(false) { };
+    FullTracer(Goldilocks &fr) : fr(fr), depth(1), prevCTX(0), initGas(0), txCount(0), txTime(0), accBatchGas(0), numberOfOpcodesInThisTx(0), lastErrorOpcode(0) { };
     ~FullTracer()
     {
 #ifdef LOG_TIME_STATISTICS
@@ -82,6 +93,7 @@ public:
         call_trace      = other.call_trace;
         execution_trace = other.execution_trace;
         lastError       = other.lastError;
+        callData        = other.callData;
         return *this;
     }
 

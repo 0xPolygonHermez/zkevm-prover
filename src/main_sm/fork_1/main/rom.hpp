@@ -36,6 +36,7 @@ public:
     uint64_t txSOffset;
     uint64_t txVOffset;
     uint64_t txSrcOriginAddrOffset;
+    uint64_t retDataCTXOffset;
     uint64_t retDataOffsetOffset;
     uint64_t retDataLengthOffset;
     uint64_t newAccInputHashOffset;
@@ -51,7 +52,9 @@ public:
     uint64_t storageAddrOffset;
     uint64_t bytecodeLengthOffset;
     uint64_t originCTXOffset;
+    uint64_t currentCTXOffset;
     uint64_t gasCTXOffset;
+    uint64_t isCreateOffset;
 
 
     /* Constants */
@@ -80,6 +83,7 @@ public:
             txSOffset(0),
             txVOffset(0),
             txSrcOriginAddrOffset(0),
+            retDataCTXOffset(0),
             retDataOffsetOffset(0),
             retDataLengthOffset(0),
             newAccInputHashOffset(0),
@@ -91,6 +95,13 @@ public:
             txSrcAddrOffset(0),
             gasCallOffset(0),
             isPreEIP155Offset(0),
+            isCreateContractOffset(0),
+            storageAddrOffset(0),
+            bytecodeLengthOffset(0),
+            originCTXOffset(0),
+            currentCTXOffset(0),
+            gasCTXOffset(0),
+            isCreateOffset(0),
             MAX_CNT_STEPS_LIMIT(0),
             MAX_CNT_ARITH_LIMIT(0),
             MAX_CNT_BINARY_LIMIT(0),

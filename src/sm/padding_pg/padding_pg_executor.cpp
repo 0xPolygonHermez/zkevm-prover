@@ -4,6 +4,7 @@
 #include "utils.hpp"
 #include "poseidon_g_permutation.hpp"
 #include "goldilocks_precomputed.hpp"
+#include "zklog.hpp"
 
 using namespace std;
 
@@ -17,7 +18,7 @@ uint64_t PaddingPGExecutor::prepareInput (vector<PaddingPGExecutorInput> &input)
             // Make sure we got an even number of characters
             if ((input[i].data.length()%2) != 0)
             {
-                cerr << "Error: PaddingPGExecutor::prepareInput() detected at entry i=" << i << " a odd data string length=" << input[i].data.length() << endl;
+                zklog.error("PaddingPGExecutor::prepareInput() detected at entry i=" + to_string(i) + " a odd data string length=" + to_string(input[i].data.length()));
                 exitProcess();
             }
 
@@ -51,7 +52,7 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
     // Check input size
     if (totalInputBytes > N)
     {
-        cerr << "Error: PaddingPGExecutor::execute() Too many entries totalInputBytes=" << totalInputBytes << " > N=" << N << endl;
+        zklog.error("PaddingPGExecutor::execute() Too many entries totalInputBytes=" + to_string(totalInputBytes) + " > N=" + to_string(N));
         exitProcess();
     }
 
@@ -272,7 +273,7 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
         uint64_t bytesBlock = ((N-p) > bytesPerBlock) ? bytesPerBlock : (N-p);
         if (bytesBlock < 2)
         {
-            cerr << "Error: PaddingPGExecutor::execute() Alignment is not possible" << endl;
+            zklog.error("PaddingPGExecutor::execute() Alignment is not possible");
         }
         for (uint64_t j=0; j<bytesBlock; j++)
         {
@@ -310,5 +311,5 @@ void PaddingPGExecutor::execute (vector<PaddingPGExecutorInput> &input, PaddingP
         addr += 1;
     }
 
-    cout << "PaddingPGExecutor successfully processed " << input.size() << " Poseidon hashes p=" << p << " pDone=" << pDone << " (" << (double(pDone)*100)/N << "%)" << endl;
+    zklog.info("PaddingPGExecutor successfully processed " + to_string(input.size()) + " Poseidon hashes p=" + to_string(p) + " pDone=" + to_string(pDone) + " (" + to_string((double(pDone)*100)/N) + "%)");
 }

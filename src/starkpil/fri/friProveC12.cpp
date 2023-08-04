@@ -1,5 +1,6 @@
 #include "friProveC12.hpp"
 #include "timer.hpp"
+#include "zklog.hpp"
 
 void FRIProveC12::prove(FRIProofC12 &fproof, MerkleTreeBN128 **trees, TranscriptBN128 transcript, Polinomial &friPol, uint64_t polBits, StarkInfo starkInfo)
 {
@@ -123,7 +124,7 @@ void FRIProveC12::prove(FRIProofC12 &fproof, MerkleTreeBN128 **trees, Transcript
             RawFr::Element root;
             treesFRI[si + 1]->getRoot(&root);
 
-            std::cout << "root[" << si + 1 << "]: " << RawFr::field.toString(root, 10) << std::endl;
+            zklog.info("root[" + to_string(si + 1) + "]: " + RawFr::field.toString(root, 10));
             transcript.put(&root, 1);
 
             fproof.proofs.fri.trees[si + 1].setRoot(&root);

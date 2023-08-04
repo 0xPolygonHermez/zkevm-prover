@@ -9,8 +9,12 @@ ExecutorClient::ExecutorClient (Goldilocks &fr, const Config &config) :
     fr(fr),
     config(config)
 {
+    // Set channel option to receive large messages
+    grpc::ChannelArguments channelArguments;
+    channelArguments.SetMaxReceiveMessageSize(1024*1024*1024);
+
     // Create channel
-    std::shared_ptr<grpc_impl::Channel> channel = ::grpc::CreateChannel(config.executorClientHost + ":" + to_string(config.executorClientPort), grpc::InsecureChannelCredentials());
+    std::shared_ptr<grpc_impl::Channel> channel = grpc::CreateCustomChannel(config.executorClientHost + ":" + to_string(config.executorClientPort), grpc::InsecureChannelCredentials(), channelArguments);
 
     // Create stub (i.e. client)
     stub = new executor::v1::ExecutorService::Stub(channel);
@@ -62,7 +66,6 @@ bool ExecutorClient::ProcessBatch (void)
         cerr << "Error: ExecutorClient::ProcessBatch() found config.inputFile empty" << endl;
         exit(-1);
     }
-    ::grpc::ClientContext context;
     ::executor::v1::ProcessBatchRequest request;
     Input input(fr);
     json inputJson;
@@ -130,17 +133,46 @@ bool ExecutorClient::ProcessBatch (void)
         (*request.mutable_contracts_bytecode())[key] = value;
     }
 
-    ::executor::v1::ProcessBatchResponse response;
-    std::unique_ptr<grpc::ClientReaderWriter<executor::v1::ProcessBatchRequest, executor::v1::ProcessBatchResponse>> readerWriter;
-    ::grpc::Status grpcStatus = stub->ProcessBatch(&context, request, &response);
-    if (grpcStatus.error_code() != grpc::StatusCode::OK)
+    ::executor::v1::ProcessBatchResponse processBatchResponse;
+
+    for (uint64_t i=0; i<config.executorClientLoops; i++)
     {
-        cerr << "Error: ExecutorClient::ProcessBatch() failed calling server" << endl;
-    }
+        if (i == 1)
+        {
+            request.clear_db();
+            request.clear_contracts_bytecode();
+        }
+        ::grpc::ClientContext context;
+        ::grpc::Status grpcStatus = stub->ProcessBatch(&context, request, &processBatchResponse);
+        if (grpcStatus.error_code() != grpc::StatusCode::OK)
+        {
+            cerr << "Error: ExecutorClient::ProcessBatch() failed calling server i=" << i << " error=" << grpcStatus.error_code() << "=" << grpcStatus.error_message() << endl;
+            break;
+        }
 
 #ifdef LOG_SERVICE
-    cout << "ExecutorClient::ProcessBatch() got:\n" << response.DebugString() << endl;
+        cout << "ExecutorClient::ProcessBatch() got:\n" << response.DebugString() << endl;
 #endif
+    }
+
+    if (processBatchResponse.stored_flush_id() != processBatchResponse.flush_id())
+    {
+        executor::v1::GetFlushStatusResponse getFlushStatusResponse;
+        do
+        {
+            sleep(1);
+            google::protobuf::Empty request;
+            ::grpc::ClientContext context;
+            ::grpc::Status grpcStatus = stub->GetFlushStatus(&context, request, &getFlushStatusResponse);
+            if (grpcStatus.error_code() != grpc::StatusCode::OK)
+            {
+                cerr << "Error: ExecutorClient::ProcessBatch() failed calling GetFlushStatus()" << endl;
+                break;
+            }
+        } while (getFlushStatusResponse.stored_flush_id() < processBatchResponse.flush_id());
+        zklog.info("ExecutorClient::ProcessBatch() successfully stored returned flush id=" + to_string(processBatchResponse.flush_id()));
+        
+    }
 
     TimerStopAndLog(EXECUTOR_CLIENT_PROCESS_BATCH);
 

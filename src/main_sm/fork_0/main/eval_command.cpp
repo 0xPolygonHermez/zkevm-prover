@@ -44,7 +44,6 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             case f_comp_gt:                         return eval_comp_gt(ctx, cmd, cr);
             case f_comp_eq:                         return eval_comp_eq(ctx, cmd, cr);
             case f_loadScalar:                      return eval_loadScalar(ctx, cmd, cr);
-            case f_getGlobalExitRootManagerAddr:    return eval_getGlobalExitRootManagerAddr(ctx, cmd, cr);
             case f_log:                             return eval_log(ctx, cmd, cr);
             case f_exp:                             return eval_exp(ctx, cmd, cr);
             case f_storeLog:                        return eval_storeLog(ctx, cmd, cr);
@@ -1509,26 +1508,6 @@ void eval_loadScalar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     evalCommand(ctx, *cmd.params[0], cr);
 }
 
-
-mpz_class globalExitRootManagerAddr(ADDRESS_GLOBAL_EXIT_ROOT_MANAGER_L2);
-
-// Will be replaced by hardcoding this address directly in the ROM once the CONST register can be 256 bits
-void eval_getGlobalExitRootManagerAddr (Context &ctx, const RomCommand &cmd, CommandResult &cr)
-{
-#ifdef CHECK_EVAL_COMMAND_PARAMETERS
-    // Check parameters list size
-    if (cmd.params.size() != 0)
-    {
-        cerr << "Error: eval_getGlobalExitRootManagerAddr() invalid number of parameters function " << function2String(cmd.function) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
-        exitProcess();
-    }
-#endif
-
-    // Return ctx.proverRequest.input.publicInputs.oldLocalExitRoot as a field element array
-    cr.type = crt_fea;
-    scalar2fea(ctx.fr, globalExitRootManagerAddr, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
-}
-
 /*************/
 /* Store log */
 /*************/
@@ -1928,10 +1907,10 @@ void eval_getBytecode (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
         // Get the contract from the database
         vector<uint8_t> bytecode;
-        zkresult zkResult = ctx.pStateDB->getProgram(key, bytecode, ctx.proverRequest.dbReadLog);
+        zkresult zkResult = ctx.pHashDB->getProgram(key, bytecode, ctx.proverRequest.dbReadLog);
         if (zkResult != ZKR_SUCCESS)
         {
-            cerr << "Error: eval_getBytecode() failed calling ctx.pStateDB->getProgram() with key=" << contractHash << " zkResult=" << zkResult << "=" << zkresult2string(zkResult) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+            cerr << "Error: eval_getBytecode() failed calling ctx.pHashDB->getProgram() with key=" << contractHash << " zkResult=" << zkResult << "=" << zkresult2string(zkResult) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) << " uuid=" << ctx.proverRequest.uuid << endl;
             cr.type = crt_fea;
             cr.fea0 = ctx.fr.zero();
             cr.fea1 = ctx.fr.zero();

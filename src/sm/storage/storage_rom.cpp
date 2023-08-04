@@ -2,6 +2,7 @@
 #include "storage_rom.hpp"
 #include "utils.hpp"
 #include "exit_process.hpp"
+#include "zklog.hpp"
 
 void StorageRom::load(json &j)
 {
@@ -9,7 +10,7 @@ void StorageRom::load(json &j)
     if ( !j.contains("program") ||
          !j["program"].is_array() )
     {
-        cerr << "Error: StorageRom::load() could not find a root program array" << endl;
+        zklog.error("StorageRom::load() could not find a root program array");
         exitProcess();
     }
     for (uint64_t i=0; i<j["program"].size(); i++)

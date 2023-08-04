@@ -5,6 +5,7 @@
 #include <pthread.h>
 #include "goldilocks_base_field.hpp"
 #include "zkassert.hpp"
+#include "zklog.hpp"
 
 using namespace std;
 
@@ -40,7 +41,7 @@ public:
     {
 #ifdef GOLDILOCKS_PRECOMPUTED_DEBUG
         uint64_t invComputedSize = GOLDILOCKS_PRECOMPUTED_MAX * 8 * 2;
-        cout << "GoldilocksPrecomputed got inv() computed size= " << invComputedSize << " succeeded=" << succeeded << " failed=" << failed << " total=" << succeeded+failed << " percentage=" << double(succeeded)*100/(succeeded+failed) << "%" << endl;
+        zklog.info("GoldilocksPrecomputed got inv() computed size= " + to_string(invComputedSize) + " succeeded=" + to_string(succeeded) + " failed=" + to_string(failed) + " total=" + to_string(succeeded+failed) + " percentage=" + to_string(double(succeeded)*100/(succeeded+failed)) + "%");
 #endif
     }
 #ifdef GOLDILOCKS_PRECOMPUTED_DEBUG
@@ -62,7 +63,7 @@ public:
             unlock();
             if (!fr.equal(fr.inv(fe), invPos[fe.fe]))
             {
-                cerr << "Error: GoldilocksPrecomputed::inv() pos fe=" << fr.toString(fe,16) << " fr.inv(fe)=" << fr.toString(fr.inv(fe),16) << " invPos[fe.fe]=" << fr.toString(invPos[fe.fe],16) << endl;
+                zklog.error("GoldilocksPrecomputed::inv() pos fe=" + fr.toString(fe,16) + " fr.inv(fe)=" + fr.toString(fr.inv(fe),16) + " invPos[fe.fe]=" + fr.toString(invPos[fe.fe],16));
                 exit(-1);
             }
 #endif
@@ -76,7 +77,7 @@ public:
             unlock();
             if (!fr.equal(fr.inv(fe), invNeg[GOLDILOCKS_PRIME - fe.fe]))
             {
-                cerr << "Error: GoldilocksPrecomputed::inv() neg fe=" << fr.toString(fe,16) << " fr.inv(fe)=" << fr.toString(fr.inv(fe),16) << " invNeg[GOLDILOCKS_PRIME - fe.fe]=" << fr.toString(invNeg[GOLDILOCKS_PRIME - fe.fe],16) << endl;
+                zklog.error("GoldilocksPrecomputed::inv() neg fe=" + fr.toString(fe,16) + " fr.inv(fe)=" + fr.toString(fr.inv(fe),16) + " invNeg[GOLDILOCKS_PRIME - fe.fe]=" + fr.toString(invNeg[GOLDILOCKS_PRIME - fe.fe],16));
                 exit(-1);
             }
 #endif
@@ -86,7 +87,7 @@ public:
         lock();
         failed++;
         unlock();
-        //cout << "GoldilocksPrecomputed::inv() called with fe=" << fr.toString(fe,10) << endl;
+        //zklog.info("GoldilocksPrecomputed::inv() called with fe=" + fr.toString(fe,10));
 #endif
         return fr.inv(fe);
     }

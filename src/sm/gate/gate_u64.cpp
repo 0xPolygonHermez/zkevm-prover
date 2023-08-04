@@ -3,6 +3,7 @@
 #include "scalar.hpp"
 #include "zkassert.hpp"
 #include "exit_process.hpp"
+#include "zklog.hpp"
 
 using namespace std;
 
@@ -27,7 +28,7 @@ void GateU64::fromU64 (uint64_t value)
         }
         else
         {
-            cerr << "Error: GateU64::fromU64() got invalid bit value=" << value << " i=" << i << " bits[i]=" << bits[i] << endl;
+            zklog.error("GateU64::fromU64() got invalid bit value=" + to_string(value) + " i=" + to_string(i) + " bits[i]=" + to_string(bits[i]));
             exitProcess();
         }
     }
