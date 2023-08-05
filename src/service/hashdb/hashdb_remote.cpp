@@ -52,7 +52,7 @@ zkresult HashDBRemote::set (const string &batchUUID, uint64_t tx, const Goldiloc
     request.set_allocated_key(reqKey);
 
     request.set_value(value.get_str(16));
-    request.set_persistence((hashdb::v1::SetRequest_Persistence)persistence);
+    request.set_persistence((hashdb::v1::Persistence)persistence);
     request.set_details(result != NULL);
     request.set_get_db_read_log((dbReadLog != NULL));
     request.set_batch_uuid(batchUUID);
@@ -315,10 +315,13 @@ zkresult HashDBRemote::flush(const string &batchUUID, uint64_t &flushId, uint64_
     return static_cast<zkresult>(response.result().code());
 }
 
-void HashDBRemote::semiFlush (void)
+void HashDBRemote::semiFlush (const string &batchUUID, const string &newStateRoot, const Persistence persistence)
 {
     ::grpc::ClientContext context;
-    ::google::protobuf::Empty request;
+    ::hashdb::v1::SemiFlushRequest request;
+    request.set_batch_uuid(batchUUID);
+    request.set_new_state_root(newStateRoot);
+    request.set_persistence((hashdb::v1::Persistence)persistence);
     ::google::protobuf::Empty response;
     grpc::Status s = stub->SemiFlush(&context, request, &response);
 }
