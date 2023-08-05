@@ -70,9 +70,14 @@ private:
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     TimeMetricStorage timeMetricStorage;
     Config config;
+    pthread_mutex_t mutex; // Mutex to protect the multi write queues
 #endif
 public:
-    StateManager () {;};
+    StateManager ()
+    {        
+        // Init mutex
+        pthread_mutex_init(&mutex, NULL);
+    };
 private:
     zkresult setStateRoot (const string &batchUUID, uint64_t tx, const string &stateRoot, bool bIsOldStateRoot, const Persistence persistence);
 public:
@@ -94,6 +99,10 @@ public:
     zkresult semiFlush (const string &batchUUID, const string &newStateRoot, const Persistence persistence);
     zkresult flush (const string &batchUUID, Database &db, uint64_t &flushId, uint64_t &lastSentFlushId);
     void print (bool bDbContent = false);
+
+    // Lock/Unlock
+    void Lock(void) { pthread_mutex_lock(&mutex); };
+    void Unlock(void) { pthread_mutex_unlock(&mutex); };
 };
 
 extern StateManager stateManager;
