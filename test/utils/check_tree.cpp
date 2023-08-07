@@ -100,6 +100,10 @@ zkresult CheckTree (Database &db, const string &key, uint64_t level, CheckTreeCo
         }
         checkTreeCounters.maxLevel = zkmax(checkTreeCounters.maxLevel, level);
         checkTreeCounters.values++;
+        if (checkTreeCounters.values % 1000 == 0)
+        {
+            zklog.info("CheckTree() intermediateNodes=" + to_string(checkTreeCounters.intermediateNodes) + " leafNodes=" + to_string(checkTreeCounters.leafNodes) + " values=" + to_string(checkTreeCounters.values) + " maxLevel=" + to_string(checkTreeCounters.maxLevel));
+        }
         return ZKR_SUCCESS;
     }
     else

@@ -41,6 +41,7 @@ public:
     bool runDatabaseCacheTest;
     bool runCheckTreeTest;
     string checkTreeRoot;
+    bool runDatabasePerformanceTest;
     bool runUnitTest;
     
     bool executeInParallel;
