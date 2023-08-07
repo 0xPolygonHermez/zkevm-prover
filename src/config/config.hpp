@@ -39,6 +39,7 @@ public:
     bool runBlakeTest;
     bool runECRecoverTest;
     bool runDatabaseCacheTest;
+    bool runDatabasePerformanceTest;
     bool runUnitTest;
     
     bool executeInParallel;
