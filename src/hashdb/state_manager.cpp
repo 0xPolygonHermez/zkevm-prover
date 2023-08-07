@@ -516,14 +516,22 @@ zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &f
     it = state.find(batchUUID);
     if (it == state.end())
     {
-        zklog.warning("StateManager::flush() found no batch state for batch UUID=" + batchUUID + "; normal if no SMT activity happened");
+        //zklog.warning("StateManager::flush() found no batch state for batch UUID=" + batchUUID + "; normal if no SMT activity happened");
  
+        zkr = db.flush(flushId, lastSentFlushId);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("StateManager::flush() failed calling db.flush() result=" + zkresult2string(zkr));
+        }
+
+        TimerStopAndLog(STATE_MANAGER_FLUSH);
+
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
         timeMetricStorage.add("flush UUID not found", TimeDiff(t));
         timeMetricStorage.print("State Manager calls");
 #endif
         Unlock();
-        return ZKR_SUCCESS;
+        return zkr;
     }
     BatchState &batchState = it->second;
 
@@ -664,7 +672,16 @@ zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &f
                     if (zkr != ZKR_SUCCESS)
                     {
                         zklog.error("StateManager::flush() failed calling db.write() result=" + zkresult2string(zkr));
-                        //return zkr;
+                        state.erase(it);
+
+                        TimerStopAndLog(STATE_MANAGER_FLUSH);
+
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+                        timeMetricStorage.add("flush error db.write", TimeDiff(t));
+                        timeMetricStorage.print("State Manager calls");
+#endif
+                        Unlock();
+                        return zkr;
                     }
                 }
             }

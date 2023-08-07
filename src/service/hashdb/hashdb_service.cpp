@@ -448,7 +448,7 @@ using grpc::Status;
     try
     {
         // Call the HashDB flush method
-        uint64_t flushId, storedFlushId;
+        uint64_t flushId = 0, storedFlushId = 0;
         zkresult zkres = pHashDB->flush(request->batch_uuid(), flushId, storedFlushId);
 
         // return the result in the response
