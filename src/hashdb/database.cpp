@@ -105,7 +105,7 @@ void Database::init(void)
     bInitialized = true;
 }
 
-zkresult Database::read(Goldilocks::Element (&vkey)[4], vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, const bool update,  bool *keys, uint64_t level)
+zkresult Database::read(const string &_key, Goldilocks::Element (&vkey)[4], vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, const bool update,  bool *keys, uint64_t level)
 {
     // Check that it has been initialized before
     if (!bInitialized)
@@ -118,13 +118,10 @@ zkresult Database::read(Goldilocks::Element (&vkey)[4], vector<Goldilocks::Eleme
     if (dbReadLog != NULL) gettimeofday(&t, NULL);
 
     zkresult r = ZKR_UNSPECIFIED;
-    string key = "";
-#ifndef DATABASE_USE_ASSOCIATIVE_CACHE
+
     // Normalize key format
-    string auxKey = fea2string(fr, vkey);
-    key = NormalizeToNFormat(auxKey, 64);
+    string key = NormalizeToNFormat(_key, 64);
     key = stringToLower(key);
-#endif
 
 #ifdef DATABASE_USE_CACHE
     // If the key is found in local database (cached) simply return it
@@ -150,7 +147,7 @@ zkresult Database::read(Goldilocks::Element (&vkey)[4], vector<Goldilocks::Eleme
         // Store it locally to avoid any future remote access for this key
         if (dbMTCache.enabled()){
         #ifdef DATABASE_USE_ASSOCIATIVE_CACHE
-                dbMTCache.addKeyValue(vkey, value, false); //rick
+                dbMTCache.addKeyValue(vkey, value, false);
         #else
                 dbMTCache.add(key, value, false);
         #endif
@@ -1668,7 +1665,7 @@ void Database::printTree(const string &root, string prefix)
     vkeyf[1] = vKey[2];
     vkeyf[2] = vKey[1];
     vkeyf[3] = vKey[0];    
-    read(vkeyf,value, NULL);
+    read(key,vkeyf,value, NULL);
 
     if (value.size() != 12)
     {
@@ -1709,7 +1706,7 @@ void Database::printTree(const string &root, string prefix)
         zklog.info(prefix + "hashValue=" + hashValue);
         vector<Goldilocks::Element> leafValue;
         Goldilocks::Element vKey[4]={value[4],value[5],value[6],value[7]};
-        read(vKey, leafValue, NULL);
+        read(rKey, vKey, leafValue, NULL);
         if (leafValue.size() == 12)
         {
             if (!fr.equal(leafValue[8], fr.zero()))
@@ -1978,7 +1975,7 @@ void loadDb2MemCache(const Config &config)
     HashDB * pHashDB = (HashDB *)hashDBSingleton.get();
 
     vector<Goldilocks::Element> dbValue;
-    zkresult zkr = pHashDB->db.read(Database::dbStateRootvKey, dbValue, NULL, true);
+    zkresult zkr = pHashDB->db.read(Database::dbStateRootKey, Database::dbStateRootvKey, dbValue, NULL, true);
 
     if (zkr == ZKR_DB_KEY_NOT_FOUND)
     {
@@ -2053,7 +2050,7 @@ void loadDb2MemCache(const Config &config)
             vhashf[1]=vhash[2];
             vhashf[2]=vhash[1];
             vhashf[3]=vhash[0];
-            zkresult zkr = pHashDB->db.read(vhashf, dbValue, NULL, true);
+            zkresult zkr = pHashDB->db.read(hash, vhashf, dbValue, NULL, true);
 
             if (zkr != ZKR_SUCCESS)
             {
@@ -2076,7 +2073,7 @@ void loadDb2MemCache(const Config &config)
                     break;
                 }
 #endif
-
+            rightHash = fea2string(fr, dbValue[4], dbValue[5], dbValue[6], dbValue[7]);
             // If capaxity is X000
             if (fr.isZero(dbValue[9]) && fr.isZero(dbValue[10]) && fr.isZero(dbValue[11]))
             {
@@ -2089,7 +2086,6 @@ void loadDb2MemCache(const Config &config)
                         treeMap[level+1].push_back(leftHash);
                         //zklog.info("loadDb2MemCache() level=" + to_string(level) + " found leftHash=" + leftHash);
                     }
-                    rightHash = fea2string(fr, dbValue[4], dbValue[5], dbValue[6], dbValue[7]);
                     if (rightHash != "0")
                     {
                         treeMap[level+1].push_back(rightHash);
@@ -2105,7 +2101,7 @@ void loadDb2MemCache(const Config &config)
                         dbValue.clear();
 
                         Goldilocks::Element vRightHash[4]={dbValue[4], dbValue[5], dbValue[6], dbValue[7]};
-                        zkresult zkr = pHashDB->db.read(vRightHash, dbValue, NULL, true);
+                        zkresult zkr = pHashDB->db.read(rightHash, vRightHash, dbValue, NULL, true);
                         if (zkr != ZKR_SUCCESS)
                         {
                             zklog.error("loadDb2MemCache() failed calling db.read(" + rightHash + ") result=" + zkresult2string(zkr));

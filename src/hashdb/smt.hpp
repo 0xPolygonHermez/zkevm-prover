@@ -84,7 +84,6 @@ public:
         capacityOne[2] = fr.zero();
         capacityOne[3] = fr.zero();
     }
-    
     zkresult set(const string &batchUUID, uint64_t tx, Database &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, SmtSetResult &result, DatabaseMap *dbReadLog = NULL);
     zkresult get(const string &batchUUID, Database &db, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], SmtGetResult &result, DatabaseMap *dbReadLog = NULL);
     void splitKey(const Goldilocks::Element (&key)[4], bool (&result)[256]);

@@ -25,15 +25,14 @@ bool DatabaseCache::addKeyValue(const string &key, const void * value, const boo
     // If key already exists in the cache return. The findKey also sets the record in the head of the cache
     if (findKey(key, record))
     {
+        hits++;
         if (update)
         {
-            hits++;
             updateRecord(record, value);
             return true;
         }
         else
         {
-            hits++;
             return false;
         }
     }
@@ -181,7 +180,6 @@ DatabaseMTCache::~DatabaseMTCache()
 // Add a record in the head of the MT cache. Returns true if the cache is full (or no cache), false otherwise
 bool DatabaseMTCache::add(const string &key, const vector<Goldilocks::Element> &value, const bool update)
 {
-
     lock_guard<recursive_mutex> guard(mlock);
 
     if (maxSize == 0) return true;

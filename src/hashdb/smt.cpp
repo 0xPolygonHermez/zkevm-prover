@@ -66,7 +66,6 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
         // Read the content of db for entry r: siblings[level] = db.read(r)
         string rootString = fea2string(fr, r);
 
-        dbres = db.read(r, dbValue, dbReadLog, false, keys, level);
         dbres = ZKR_UNSPECIFIED;
         if (bUseStateManager)
         {
@@ -74,11 +73,10 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
         }
         if (dbres != ZKR_SUCCESS)
         {
-            dbres = db.read(r, dbValue, dbReadLog, false, keys, level);
+            dbres = db.read(rootString, r, dbValue, dbReadLog, false, keys, level);
         }
         if (dbres != ZKR_SUCCESS)
         {
-            string rootString = fea2string(fr, r);
             zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + rootString);
             return dbres;
         }
@@ -106,7 +104,6 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
             foundValueHash[1] = siblings[level][5];
             foundValueHash[2] = siblings[level][6];
             foundValueHash[3] = siblings[level][7];
-            
             foundValueHashString = fea2string(fr, foundValueHash);
             dbres = ZKR_UNSPECIFIED;
             if (bUseStateManager)
@@ -115,7 +112,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
             }
             if (dbres != ZKR_SUCCESS)
             {
-                dbres = db.read(foundValueHash, dbValue, dbReadLog);
+                dbres = db.read(foundValueHashString, foundValueHash, dbValue, dbReadLog);
             }
             if (dbres != ZKR_SUCCESS)
             {
@@ -536,7 +533,6 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                     string auxString = fea2string(fr, auxFea);
 
                     // Read its 2 siblings
-                    
                     dbres = ZKR_UNSPECIFIED;
                     if (bUseStateManager)
                     {
@@ -544,11 +540,10 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                     }
                     if (dbres != ZKR_SUCCESS)
                     {
-                        dbres = db.read(auxFea, dbValue, dbReadLog, false, keys, level);
+                        dbres = db.read(auxString, auxFea, dbValue, dbReadLog, false, keys, level);
                     }
                     if ( dbres != ZKR_SUCCESS)
                     {
-                        string auxString = fea2string(fr, auxFea);
                         zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + auxString);
                         return dbres;
                     }
@@ -563,7 +558,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                         Goldilocks::Element valH[4];
                         for (uint64_t i=0; i<4; i++) valH[i] = siblings[level+1][4+i];
                         string valHString = fea2string(fr, valH);
-                        
+
                         // Read its siblings
                         dbres = ZKR_UNSPECIFIED;
                         if (bUseStateManager)
@@ -572,17 +567,15 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                         }
                         if (dbres != ZKR_SUCCESS)
                         {
-                            dbres = db.read(valH, dbValue, dbReadLog);
+                            dbres = db.read(valHString, valH, dbValue, dbReadLog);
                         }
                         if (dbres != ZKR_SUCCESS)
                         {
-                            string valHString = fea2string(fr, valH);
                             zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + valHString);
                             return dbres;
                         }
                         else if (dbValue.size()<8)
                         {
-                            string valHString = fea2string(fr, valH);
                             zklog.error("Smt::set() dbValue.size()<8 root:" + valHString);
                             return ZKR_SMT_INVALID_DATA_SIZE;
                         }
@@ -863,11 +856,10 @@ zkresult Smt::get (const string &batchUUID, Database &db, const Goldilocks::Elem
         }
         if (dbres != ZKR_SUCCESS)
         {
-             dbres = db.read(r, dbValue, dbReadLog, false, keys, level);
+            dbres = db.read(rString, r, dbValue, dbReadLog, false, keys, level);
         }
         if (dbres != ZKR_SUCCESS)
         {
-            string rString = fea2string(fr, r);
             zklog.error("Smt::get() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + rString);
             return dbres;
         }
@@ -884,7 +876,6 @@ zkresult Smt::get (const string &batchUUID, Database &db, const Goldilocks::Elem
             valueHashFea[1] = siblings[level][5];
             valueHashFea[2] = siblings[level][6];
             valueHashFea[3] = siblings[level][7];
-            
             string foundValueHashString = fea2string(fr, valueHashFea);
             dbres = ZKR_UNSPECIFIED;
             if (bUseStateManager)
@@ -893,11 +884,10 @@ zkresult Smt::get (const string &batchUUID, Database &db, const Goldilocks::Elem
             }
             if (dbres != ZKR_SUCCESS)
             {
-                dbres = db.read(valueHashFea, dbValue, dbReadLog);
+                dbres = db.read(foundValueHashString, valueHashFea, dbValue, dbReadLog);
             }
             if (dbres != ZKR_SUCCESS)
             {
-                string foundValueHashString = fea2string(fr, valueHashFea);
                 zklog.error("Smt::get() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + foundValueHashString);
                 return dbres;
             }
@@ -1091,13 +1081,13 @@ zkresult Smt::hashSave ( const SmtContext &ctx, const Goldilocks::Element (&v)[1
     poseidon.hash(hash, v);
 
     // Fill a database value with the field elements
+    string hashString = fea2string(fr, hash);
 
     // Add the key:value pair to the database, using the hash as a key
     vector<Goldilocks::Element> dbValue;
     for (uint64_t i=0; i<12; i++) dbValue.push_back(v[i]);
     zkresult zkr;
-    
-    string hashString = fea2string(fr, hash);
+
     if (ctx.bUseStateManager)
     {
         zkr = stateManager.write(ctx.batchUUID, ctx.tx, hashString, dbValue, ctx.persistence);
