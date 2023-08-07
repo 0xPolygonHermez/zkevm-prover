@@ -39,6 +39,7 @@
 #include "database_cache_test.hpp"
 #include "main_sm/fork_5/main_exec_c/account.hpp"
 #include "state_manager.hpp"
+#include "check_tree_test.hpp"
 #include "database_performance_test.hpp"
 
 using namespace std;
@@ -558,6 +559,12 @@ int main(int argc, char **argv)
         DatabaseCacheTest();
     }
 
+    // Test check tree
+    if (config.runCheckTreeTest)
+    {
+        CheckTreeTest(config);
+    }
+    
     // Test Database performance
     if (config.runDatabasePerformanceTest)
     {

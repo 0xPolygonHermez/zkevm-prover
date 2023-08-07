@@ -108,6 +108,14 @@ void Config::load(json &config)
     if (config.contains("runDatabaseCacheTest") && config["runDatabaseCacheTest"].is_boolean())
         runDatabaseCacheTest = config["runDatabaseCacheTest"];
 
+    runCheckTreeTest = false;
+    if (config.contains("runCheckTreeTest") && config["runCheckTreeTest"].is_boolean())
+        runCheckTreeTest = config["runCheckTreeTest"];
+
+    checkTreeRoot = "auto";
+    if (config.contains("checkTreeRoot") && config["checkTreeRoot"].is_string())
+        checkTreeRoot = config["checkTreeRoot"];
+
     runDatabasePerformanceTest = false;
     if (config.contains("runDatabasePerformanceTest") && config["runDatabasePerformanceTest"].is_boolean())
         runDatabasePerformanceTest = config["runDatabasePerformanceTest"];
@@ -583,6 +591,11 @@ void Config::print(void)
         zklog.info("    runECRecoverTest=true");
     if (runDatabaseCacheTest)
         zklog.info("    runDatabaseCacheTest=true");
+    if (runCheckTreeTest)
+    {
+        zklog.info("    runCheckTreeTest=true");
+        zklog.info("    checkTreeRoot=" + checkTreeRoot);
+    }
     if (runDatabasePerformanceTest)
         zklog.info("    runDatabasePerformanceTest=true");
     if (runUnitTest)
