@@ -76,7 +76,7 @@ void string2fea(Goldilocks &fr, const string&os, vector<Goldilocks::Element> &fe
         fea.push_back(fe);
     }
 }
-void string2fea(Goldilocks &fr, const string& os, Goldilocks::Element (&fea)[4])
+void string2key(Goldilocks &fr, const string& os, Goldilocks::Element (&fea)[4])
 {
     Goldilocks::Element fe;
     if (os.size() != 64)
@@ -88,7 +88,7 @@ void string2fea(Goldilocks &fr, const string& os, Goldilocks::Element (&fea)[4])
     for (uint64_t i = 0; i < 64; i += 16)
     {  
         string2fe(fr, os.substr(i, 16), fe);
-        fea[ii]=fe;
+        fea[3-ii]=fe;
         ++ii;
     }
 }

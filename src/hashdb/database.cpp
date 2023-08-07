@@ -334,13 +334,8 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
     {
 #ifdef DATABASE_USE_ASSOCIATIVE_CACHE
         Goldilocks::Element vkey_[4];
-        Goldilocks::Element vkeyf[4];
-        string2fea(fr, _key, vkey_);
-        vkeyf[0] = vkey_[3];
-        vkeyf[1] = vkey_[2];
-        vkeyf[2] = vkey_[1];
-        vkeyf[3] = vkey_[0];
-        dbMTCache.addKeyValue(vkeyf, value, false);
+        string2key(fr, _key, vkey_);
+        dbMTCache.addKeyValue(vkey_, value, false);
 #else
         dbMTCache.add(key, value, false);
 #endif
@@ -780,13 +775,9 @@ zkresult Database::readTreeRemote(const string &key, bool *keys, uint64_t level,
             {
                 //zklog.info("Database::readTreeRemote() adding hash=" + hash + " to dbMTCache");
 #ifdef DATABASE_USE_ASSOCIATIVE_CACHE
-                Goldilocks::Element vhash[4], vhashf[4];
-                string2fea(fr, hash, vhash);
-                vhashf[0] = vhash[3];
-                vhashf[1] = vhash[2];
-                vhashf[2] = vhash[1];
-                vhashf[3] = vhash[0];    
-                dbMTCache.addKeyValue(vhashf, value, false);
+                Goldilocks::Element vhash[4];
+                string2key(fr, hash, vhash);   
+                dbMTCache.addKeyValue(vhash, value, false);
 #else
                 dbMTCache.add(hash, value, false);
 #endif
@@ -1659,13 +1650,8 @@ void Database::printTree(const string &root, string prefix)
     string key = root;
     vector<Goldilocks::Element> value;
     Goldilocks::Element vKey[4];
-    Goldilocks::Element vkeyf[4];
-    string2fea(fr, key, vKey);
-    vkeyf[0] = vKey[3];
-    vkeyf[1] = vKey[2];
-    vkeyf[2] = vKey[1];
-    vkeyf[3] = vKey[0];    
-    read(key,vkeyf,value, NULL);
+    string2key(fr, key, vKey);  
+    read(key,vKey,value, NULL);
 
     if (value.size() != 12)
     {
@@ -2044,13 +2030,9 @@ void loadDb2MemCache(const Config &config)
 
             hash = treeMapIterator->second[i];
             dbValue.clear();
-            Goldilocks::Element vhash[4], vhashf[4];
-            string2fea(fr, hash, vhash);
-            vhashf[0]=vhash[3];
-            vhashf[1]=vhash[2];
-            vhashf[2]=vhash[1];
-            vhashf[3]=vhash[0];
-            zkresult zkr = pHashDB->db.read(hash, vhashf, dbValue, NULL, true);
+            Goldilocks::Element vhash[4];
+            string2key(fr, hash, vhash);
+            zkresult zkr = pHashDB->db.read(hash, vhash, dbValue, NULL, true);
 
             if (zkr != ZKR_SUCCESS)
             {

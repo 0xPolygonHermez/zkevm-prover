@@ -218,16 +218,12 @@ bool ExecutorClient::ProcessBatch (void)
 zkresult CheckTree (Database &db, const string &key, uint64_t level, CheckTreeCounters &checkTreeCounters)
 {
     checkTreeCounters.maxLevel = zkmax(checkTreeCounters.maxLevel, level);
-    Goldilocks::Element vkey[4], vkeyf[4];
+    Goldilocks::Element vkey[4];
     Goldilocks fr;
-    string2fea(fr, key,vkey);
-    vkeyf[3] = vkey[0];
-    vkeyf[2] = vkey[1];
-    vkeyf[1] = vkey[2];
-    vkeyf[0] = vkey[3]; 
+    string2key(fr, key, vkey);
 
     vector<Goldilocks::Element> value;
-    zkresult result = db.read(key,vkeyf, value, NULL, false);
+    zkresult result = db.read(key, vkey, value, NULL, false);
     if (result != ZKR_SUCCESS)
     {
         zklog.error("CheckTree() failed key=" + key + " level=" + to_string(level));
