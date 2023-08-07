@@ -27,6 +27,7 @@ bool DatabaseCache::addKeyValue(const string &key, const void * value, const boo
     {
         if (update)
         {
+            hits++;
             updateRecord(record, value);
             return true;
         }
@@ -85,10 +86,12 @@ bool DatabaseCache::addKeyValue(const string &key, const void * value, const boo
 
 bool DatabaseCache::findKey(const string &key, DatabaseCacheRecord* &record) 
 {
+    attempts++;
     unordered_map<string, DatabaseCacheRecord*>::iterator it = cacheMap.find(key);
 
     if (it != cacheMap.end())
     {
+        hits++;
         record = (DatabaseCacheRecord*)it->second;
 
         // Move cache record to the top/head (if it's not the current head)
@@ -178,6 +181,7 @@ DatabaseMTCache::~DatabaseMTCache()
 // Add a record in the head of the MT cache. Returns true if the cache is full (or no cache), false otherwise
 bool DatabaseMTCache::add(const string &key, const vector<Goldilocks::Element> &value, const bool update)
 {
+
     lock_guard<recursive_mutex> guard(mlock);
 
     if (maxSize == 0) return true;

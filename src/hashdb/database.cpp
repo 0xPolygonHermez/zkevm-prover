@@ -151,7 +151,7 @@ zkresult Database::read(Goldilocks::Element (&vkey)[4], vector<Goldilocks::Eleme
             r = ZKR_SUCCESS;
         }
         else{
-            string auxkey = fea2string(fr, vkey);;
+            string auxkey = fea2string(fr, vkey);
             key = NormalizeToNFormat(auxkey, 64);
             key = stringToLower(key);
 
@@ -161,6 +161,11 @@ zkresult Database::read(Goldilocks::Element (&vkey)[4], vector<Goldilocks::Eleme
                 // Add to the read log
                 if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
                 r = ZKR_SUCCESS;
+#ifdef DATABASE_USE_ASSOCIATIVE_CACHE
+                dbMTCache.addKeyValue(vkey, value, false); //rick
+#else
+                dbMTCache.add(key, value, false);
+#endif
             }
             // If get tree is configured, read the tree from the branch (key hash) to the leaf (keys since level)
             else if (config.dbGetTree && (keys != NULL))
@@ -790,9 +795,13 @@ zkresult Database::readTreeRemote(const string &key, bool *keys, uint64_t level,
             {
                 //zklog.info("Database::readTreeRemote() adding hash=" + hash + " to dbMTCache");
 #ifdef DATABASE_USE_ASSOCIATIVE_CACHE
-                Goldilocks::Element vhash[4];
+                Goldilocks::Element vhash[4], vhashf[4];
                 string2fea(fr, hash, vhash);
-                dbMTCache.addKeyValue(vhash, value, false);
+                vhashf[0] = vhash[3];
+                vhashf[1] = vhash[2];
+                vhashf[2] = vhash[1];
+                vhashf[3] = vhash[0];    
+                dbMTCache.addKeyValue(vhashf, value, false);
 #else
                 dbMTCache.add(hash, value, false);
 #endif
@@ -1693,8 +1702,13 @@ void Database::printTree(const string &root, string prefix)
     string key = root;
     vector<Goldilocks::Element> value;
     Goldilocks::Element vKey[4];
-    string2fea(fr, key, vKey);    
-    read(vKey,value, NULL);
+    Goldilocks::Element vkeyf[4];
+    string2fea(fr, key, vKey);
+    vkeyf[0] = vKey[3];
+    vkeyf[1] = vKey[2];
+    vkeyf[2] = vKey[1];
+    vkeyf[3] = vKey[0];    
+    read(vkeyf,value, NULL);
 
     if (value.size() != 12)
     {
@@ -2073,9 +2087,13 @@ void loadDb2MemCache(const Config &config)
 
             hash = treeMapIterator->second[i];
             dbValue.clear();
-            Goldilocks::Element vhash[4];
+            Goldilocks::Element vhash[4], vhashf[4];
             string2fea(fr, hash, vhash);
-            zkresult zkr = pHashDB->db.read(vhash, dbValue, NULL, true);
+            vhashf[0]=vhash[3];
+            vhashf[1]=vhash[2];
+            vhashf[2]=vhash[1];
+            vhashf[3]=vhash[0];
+            zkresult zkr = pHashDB->db.read(vhashf, dbValue, NULL, true);
 
             if (zkr != ZKR_SUCCESS)
             {

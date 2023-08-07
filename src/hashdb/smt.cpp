@@ -46,7 +46,7 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
 
     bool isOld0 = true;
     zkresult dbres;
-    vector<Goldilocks::Element> dbValue; // used to call db.read()
+    vector<Goldilocks::Element> dbValue(12); // used to call db.read()
 
     // Start natigating the tree from the top: r = root
     // Go down while r!=0 (while there is branch) until we find the key
@@ -63,8 +63,20 @@ zkresult Smt::set(Database &db, const Goldilocks::Element (&oldRoot)[4], const G
         }
 
         // Get a copy of the content of this database entry, at the corresponding level: 0, 1...
-        siblings[level] = dbValue;
-
+        siblings[level].resize(12);
+        siblings[level][0].fe = dbValue[0].fe;
+        siblings[level][1].fe = dbValue[1].fe;
+        siblings[level][2].fe = dbValue[2].fe;
+        siblings[level][3].fe = dbValue[3].fe;
+        siblings[level][4].fe = dbValue[4].fe;
+        siblings[level][5].fe = dbValue[5].fe;
+        siblings[level][6].fe = dbValue[6].fe;
+        siblings[level][7].fe = dbValue[7].fe;
+        siblings[level][8].fe = dbValue[8].fe;
+        siblings[level][9].fe = dbValue[9].fe;
+        siblings[level][10].fe = dbValue[10].fe;
+        siblings[level][11].fe = dbValue[11].fe;
+        
         // if siblings[level][8]=1 then this is a leaf node
         if ( siblings[level].size()>8 && fr.equal(siblings[level][8], fr.one()) )
         {
