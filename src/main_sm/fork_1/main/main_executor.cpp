@@ -814,7 +814,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
                     SmtGetResult smtGetResult;
                     mpz_class value;
-                    zkresult zkResult = pHashDB->get(oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);
+                    zkresult zkResult = pHashDB->get(proverRequest.uuid, oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);
                     if (zkResult != ZKR_SUCCESS)
                     {
                         cerr << "Error: MainExecutor::Execute() failed calling pHashDB->get() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
@@ -871,6 +871,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     Kin1[6] = pols.B0[i];
                     Kin1[7] = pols.B1[i];
 
+                    uint64_t b0 = fr.toU64(pols.B0[i]);
+                    bool bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);
+
 #ifdef LOG_TIME_STATISTICS
                     gettimeofday(&t, NULL);
 #endif
@@ -924,7 +927,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     Goldilocks::Element oldRoot[4];
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
-                    zkresult zkResult = pHashDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.input.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
+                    zkresult zkResult = pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_responses().size(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : ( proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE ), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
                     if (zkResult != ZKR_SUCCESS)
                     {
                         cerr << "Error: MainExecutor::Execute() failed calling pHashDB->set() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
@@ -1612,7 +1615,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
             SmtGetResult smtGetResult;
             mpz_class value;
-            zkresult zkResult = pHashDB->get(oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);
+            zkresult zkResult = pHashDB->get(proverRequest.uuid, oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);
             if (zkResult != ZKR_SUCCESS)
             {
                 cerr << "Error: MainExecutor::Execute() failed calling pHashDB->get() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
@@ -1694,6 +1697,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 Kin1[6] = pols.B0[i];
                 Kin1[7] = pols.B1[i];
 
+                uint64_t b0 = fr.toU64(pols.B0[i]);
+                bool bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);
+
 #ifdef LOG_TIME_STATISTICS
                 gettimeofday(&t, NULL);
 #endif
@@ -1742,7 +1748,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 Goldilocks::Element oldRoot[4];
                 sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
-                zkresult zkResult = pHashDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.input.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
+                zkresult zkResult = pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_responses().size(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : ( proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE ), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
                 if (zkResult != ZKR_SUCCESS)
                 {
                     cerr << "Error: MainExecutor::Execute() failed calling pHashDB->set() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
@@ -3827,7 +3833,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     evalCommandMetrics.print("Main Executor eval command calls");
 #endif
 
-    pHashDB->flush(proverRequest.flushId, proverRequest.lastSentFlushId);
+    pHashDB->flush(proverRequest.uuid, proverRequest.flushId, proverRequest.lastSentFlushId);
     HashDBClientFactory::freeHashDBClient(pHashDB);
 
     cout << "MainExecutor::execute() done lastStep=" << ctx.lastStep << " (" << (double(ctx.lastStep)*100)/N << "%)" << endl;

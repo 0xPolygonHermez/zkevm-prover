@@ -633,3 +633,5 @@ void getStringIncrement(const string &oldString, const string &newString, uint64
 
     length = 0;
 }
+
+string emptyString;

@@ -52,7 +52,7 @@ struct TableStruct_hashdb_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxillaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[27]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[29]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -67,6 +67,9 @@ extern FeListDefaultTypeInternal _FeList_default_instance_;
 class Fea;
 class FeaDefaultTypeInternal;
 extern FeaDefaultTypeInternal _Fea_default_instance_;
+class FlushRequest;
+class FlushRequestDefaultTypeInternal;
+extern FlushRequestDefaultTypeInternal _FlushRequest_default_instance_;
 class FlushResponse;
 class FlushResponseDefaultTypeInternal;
 extern FlushResponseDefaultTypeInternal _FlushResponse_default_instance_;
@@ -118,6 +121,9 @@ extern LoadProgramDBRequest_InputProgramDbEntry_DoNotUseDefaultTypeInternal _Loa
 class ResultCode;
 class ResultCodeDefaultTypeInternal;
 extern ResultCodeDefaultTypeInternal _ResultCode_default_instance_;
+class SemiFlushRequest;
+class SemiFlushRequestDefaultTypeInternal;
+extern SemiFlushRequestDefaultTypeInternal _SemiFlushRequest_default_instance_;
 class SetProgramRequest;
 class SetProgramRequestDefaultTypeInternal;
 extern SetProgramRequestDefaultTypeInternal _SetProgramRequest_default_instance_;
@@ -147,6 +153,7 @@ extern VersionDefaultTypeInternal _Version_default_instance_;
 PROTOBUF_NAMESPACE_OPEN
 template<> ::hashdb::v1::FeList* Arena::CreateMaybeMessage<::hashdb::v1::FeList>(Arena*);
 template<> ::hashdb::v1::Fea* Arena::CreateMaybeMessage<::hashdb::v1::Fea>(Arena*);
+template<> ::hashdb::v1::FlushRequest* Arena::CreateMaybeMessage<::hashdb::v1::FlushRequest>(Arena*);
 template<> ::hashdb::v1::FlushResponse* Arena::CreateMaybeMessage<::hashdb::v1::FlushResponse>(Arena*);
 template<> ::hashdb::v1::GetFlushDataRequest* Arena::CreateMaybeMessage<::hashdb::v1::GetFlushDataRequest>(Arena*);
 template<> ::hashdb::v1::GetFlushDataResponse* Arena::CreateMaybeMessage<::hashdb::v1::GetFlushDataResponse>(Arena*);
@@ -164,6 +171,7 @@ template<> ::hashdb::v1::LoadDBRequest_InputDbEntry_DoNotUse* Arena::CreateMaybe
 template<> ::hashdb::v1::LoadProgramDBRequest* Arena::CreateMaybeMessage<::hashdb::v1::LoadProgramDBRequest>(Arena*);
 template<> ::hashdb::v1::LoadProgramDBRequest_InputProgramDbEntry_DoNotUse* Arena::CreateMaybeMessage<::hashdb::v1::LoadProgramDBRequest_InputProgramDbEntry_DoNotUse>(Arena*);
 template<> ::hashdb::v1::ResultCode* Arena::CreateMaybeMessage<::hashdb::v1::ResultCode>(Arena*);
+template<> ::hashdb::v1::SemiFlushRequest* Arena::CreateMaybeMessage<::hashdb::v1::SemiFlushRequest>(Arena*);
 template<> ::hashdb::v1::SetProgramRequest* Arena::CreateMaybeMessage<::hashdb::v1::SetProgramRequest>(Arena*);
 template<> ::hashdb::v1::SetProgramResponse* Arena::CreateMaybeMessage<::hashdb::v1::SetProgramResponse>(Arena*);
 template<> ::hashdb::v1::SetRequest* Arena::CreateMaybeMessage<::hashdb::v1::SetRequest>(Arena*);
@@ -204,6 +212,32 @@ inline bool ResultCode_Code_Parse(
     const std::string& name, ResultCode_Code* value) {
   return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<ResultCode_Code>(
     ResultCode_Code_descriptor(), name, value);
+}
+enum Persistence : int {
+  PERSISTENCE_CACHE_UNSPECIFIED = 0,
+  PERSISTENCE_DATABASE = 1,
+  PERSISTENCE_TEMPORARY = 2,
+  Persistence_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
+  Persistence_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
+};
+bool Persistence_IsValid(int value);
+constexpr Persistence Persistence_MIN = PERSISTENCE_CACHE_UNSPECIFIED;
+constexpr Persistence Persistence_MAX = PERSISTENCE_TEMPORARY;
+constexpr int Persistence_ARRAYSIZE = Persistence_MAX + 1;
+
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* Persistence_descriptor();
+template<typename T>
+inline const std::string& Persistence_Name(T enum_t_value) {
+  static_assert(::std::is_same<T, Persistence>::value ||
+    ::std::is_integral<T>::value,
+    "Incorrect type passed to function Persistence_Name.");
+  return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
+    Persistence_descriptor(), enum_t_value);
+}
+inline bool Persistence_Parse(
+    const std::string& name, Persistence* value) {
+  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<Persistence>(
+    Persistence_descriptor(), name, value);
 }
 // ===================================================================
 
@@ -474,11 +508,13 @@ class SetRequest PROTOBUF_FINAL :
 
   enum : int {
     kValueFieldNumber = 3,
+    kBatchUuidFieldNumber = 7,
     kOldRootFieldNumber = 1,
     kKeyFieldNumber = 2,
-    kPersistentFieldNumber = 4,
+    kPersistenceFieldNumber = 4,
     kDetailsFieldNumber = 5,
     kGetDbReadLogFieldNumber = 6,
+    kTxFieldNumber = 8,
   };
   // string value = 3;
   void clear_value();
@@ -503,6 +539,31 @@ class SetRequest PROTOBUF_FINAL :
   const std::string& _internal_value() const;
   void _internal_set_value(const std::string& value);
   std::string* _internal_mutable_value();
+  public:
+
+  // string batch_uuid = 7;
+  void clear_batch_uuid();
+  const std::string& batch_uuid() const;
+  void set_batch_uuid(const std::string& value);
+  void set_batch_uuid(std::string&& value);
+  void set_batch_uuid(const char* value);
+  void set_batch_uuid(const char* value, size_t size);
+  std::string* mutable_batch_uuid();
+  std::string* release_batch_uuid();
+  void set_allocated_batch_uuid(std::string* batch_uuid);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_batch_uuid();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_batch_uuid(
+      std::string* batch_uuid);
+  private:
+  const std::string& _internal_batch_uuid() const;
+  void _internal_set_batch_uuid(const std::string& value);
+  std::string* _internal_mutable_batch_uuid();
   public:
 
   // .hashdb.v1.Fea old_root = 1;
@@ -541,13 +602,13 @@ class SetRequest PROTOBUF_FINAL :
       ::hashdb::v1::Fea* key);
   ::hashdb::v1::Fea* unsafe_arena_release_key();
 
-  // bool persistent = 4;
-  void clear_persistent();
-  bool persistent() const;
-  void set_persistent(bool value);
+  // .hashdb.v1.Persistence persistence = 4;
+  void clear_persistence();
+  ::hashdb::v1::Persistence persistence() const;
+  void set_persistence(::hashdb::v1::Persistence value);
   private:
-  bool _internal_persistent() const;
-  void _internal_set_persistent(bool value);
+  ::hashdb::v1::Persistence _internal_persistence() const;
+  void _internal_set_persistence(::hashdb::v1::Persistence value);
   public:
 
   // bool details = 5;
@@ -568,6 +629,15 @@ class SetRequest PROTOBUF_FINAL :
   void _internal_set_get_db_read_log(bool value);
   public:
 
+  // uint64 tx = 8;
+  void clear_tx();
+  ::PROTOBUF_NAMESPACE_ID::uint64 tx() const;
+  void set_tx(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_tx() const;
+  void _internal_set_tx(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:hashdb.v1.SetRequest)
  private:
   class _Internal;
@@ -576,11 +646,13 @@ class SetRequest PROTOBUF_FINAL :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr value_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr batch_uuid_;
   ::hashdb::v1::Fea* old_root_;
   ::hashdb::v1::Fea* key_;
-  bool persistent_;
+  int persistence_;
   bool details_;
   bool get_db_read_log_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 tx_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_hashdb_2eproto;
 };
@@ -699,11 +771,37 @@ class GetRequest PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
+    kBatchUuidFieldNumber = 5,
     kRootFieldNumber = 1,
     kKeyFieldNumber = 2,
     kDetailsFieldNumber = 3,
     kGetDbReadLogFieldNumber = 4,
   };
+  // string batch_uuid = 5;
+  void clear_batch_uuid();
+  const std::string& batch_uuid() const;
+  void set_batch_uuid(const std::string& value);
+  void set_batch_uuid(std::string&& value);
+  void set_batch_uuid(const char* value);
+  void set_batch_uuid(const char* value, size_t size);
+  std::string* mutable_batch_uuid();
+  std::string* release_batch_uuid();
+  void set_allocated_batch_uuid(std::string* batch_uuid);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_batch_uuid();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_batch_uuid(
+      std::string* batch_uuid);
+  private:
+  const std::string& _internal_batch_uuid() const;
+  void _internal_set_batch_uuid(const std::string& value);
+  std::string* _internal_mutable_batch_uuid();
+  public:
+
   // .hashdb.v1.Fea root = 1;
   bool has_root() const;
   private:
@@ -765,6 +863,7 @@ class GetRequest PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr batch_uuid_;
   ::hashdb::v1::Fea* root_;
   ::hashdb::v1::Fea* key_;
   bool details_;
@@ -1492,6 +1591,350 @@ class LoadProgramDBRequest PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class FlushRequest PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:hashdb.v1.FlushRequest) */ {
+ public:
+  inline FlushRequest() : FlushRequest(nullptr) {};
+  virtual ~FlushRequest();
+
+  FlushRequest(const FlushRequest& from);
+  FlushRequest(FlushRequest&& from) noexcept
+    : FlushRequest() {
+    *this = ::std::move(from);
+  }
+
+  inline FlushRequest& operator=(const FlushRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline FlushRequest& operator=(FlushRequest&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const FlushRequest& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const FlushRequest* internal_default_instance() {
+    return reinterpret_cast<const FlushRequest*>(
+               &_FlushRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    9;
+
+  friend void swap(FlushRequest& a, FlushRequest& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(FlushRequest* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(FlushRequest* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline FlushRequest* New() const final {
+    return CreateMaybeMessage<FlushRequest>(nullptr);
+  }
+
+  FlushRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<FlushRequest>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const FlushRequest& from);
+  void MergeFrom(const FlushRequest& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(FlushRequest* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "hashdb.v1.FlushRequest";
+  }
+  protected:
+  explicit FlushRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_hashdb_2eproto);
+    return ::descriptor_table_hashdb_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kBatchUuidFieldNumber = 1,
+  };
+  // string batch_uuid = 1;
+  void clear_batch_uuid();
+  const std::string& batch_uuid() const;
+  void set_batch_uuid(const std::string& value);
+  void set_batch_uuid(std::string&& value);
+  void set_batch_uuid(const char* value);
+  void set_batch_uuid(const char* value, size_t size);
+  std::string* mutable_batch_uuid();
+  std::string* release_batch_uuid();
+  void set_allocated_batch_uuid(std::string* batch_uuid);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_batch_uuid();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_batch_uuid(
+      std::string* batch_uuid);
+  private:
+  const std::string& _internal_batch_uuid() const;
+  void _internal_set_batch_uuid(const std::string& value);
+  std::string* _internal_mutable_batch_uuid();
+  public:
+
+  // @@protoc_insertion_point(class_scope:hashdb.v1.FlushRequest)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr batch_uuid_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_hashdb_2eproto;
+};
+// -------------------------------------------------------------------
+
+class SemiFlushRequest PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:hashdb.v1.SemiFlushRequest) */ {
+ public:
+  inline SemiFlushRequest() : SemiFlushRequest(nullptr) {};
+  virtual ~SemiFlushRequest();
+
+  SemiFlushRequest(const SemiFlushRequest& from);
+  SemiFlushRequest(SemiFlushRequest&& from) noexcept
+    : SemiFlushRequest() {
+    *this = ::std::move(from);
+  }
+
+  inline SemiFlushRequest& operator=(const SemiFlushRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline SemiFlushRequest& operator=(SemiFlushRequest&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const SemiFlushRequest& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const SemiFlushRequest* internal_default_instance() {
+    return reinterpret_cast<const SemiFlushRequest*>(
+               &_SemiFlushRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    10;
+
+  friend void swap(SemiFlushRequest& a, SemiFlushRequest& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(SemiFlushRequest* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(SemiFlushRequest* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline SemiFlushRequest* New() const final {
+    return CreateMaybeMessage<SemiFlushRequest>(nullptr);
+  }
+
+  SemiFlushRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<SemiFlushRequest>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const SemiFlushRequest& from);
+  void MergeFrom(const SemiFlushRequest& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(SemiFlushRequest* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "hashdb.v1.SemiFlushRequest";
+  }
+  protected:
+  explicit SemiFlushRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_hashdb_2eproto);
+    return ::descriptor_table_hashdb_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kBatchUuidFieldNumber = 1,
+    kNewStateRootFieldNumber = 2,
+    kPersistenceFieldNumber = 3,
+  };
+  // string batch_uuid = 1;
+  void clear_batch_uuid();
+  const std::string& batch_uuid() const;
+  void set_batch_uuid(const std::string& value);
+  void set_batch_uuid(std::string&& value);
+  void set_batch_uuid(const char* value);
+  void set_batch_uuid(const char* value, size_t size);
+  std::string* mutable_batch_uuid();
+  std::string* release_batch_uuid();
+  void set_allocated_batch_uuid(std::string* batch_uuid);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_batch_uuid();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_batch_uuid(
+      std::string* batch_uuid);
+  private:
+  const std::string& _internal_batch_uuid() const;
+  void _internal_set_batch_uuid(const std::string& value);
+  std::string* _internal_mutable_batch_uuid();
+  public:
+
+  // string new_state_root = 2;
+  void clear_new_state_root();
+  const std::string& new_state_root() const;
+  void set_new_state_root(const std::string& value);
+  void set_new_state_root(std::string&& value);
+  void set_new_state_root(const char* value);
+  void set_new_state_root(const char* value, size_t size);
+  std::string* mutable_new_state_root();
+  std::string* release_new_state_root();
+  void set_allocated_new_state_root(std::string* new_state_root);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_new_state_root();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_new_state_root(
+      std::string* new_state_root);
+  private:
+  const std::string& _internal_new_state_root() const;
+  void _internal_set_new_state_root(const std::string& value);
+  std::string* _internal_mutable_new_state_root();
+  public:
+
+  // .hashdb.v1.Persistence persistence = 3;
+  void clear_persistence();
+  ::hashdb::v1::Persistence persistence() const;
+  void set_persistence(::hashdb::v1::Persistence value);
+  private:
+  ::hashdb::v1::Persistence _internal_persistence() const;
+  void _internal_set_persistence(::hashdb::v1::Persistence value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:hashdb.v1.SemiFlushRequest)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr batch_uuid_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr new_state_root_;
+  int persistence_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_hashdb_2eproto;
+};
+// -------------------------------------------------------------------
+
 class GetFlushDataRequest PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:hashdb.v1.GetFlushDataRequest) */ {
  public:
@@ -1534,7 +1977,7 @@ class GetFlushDataRequest PROTOBUF_FINAL :
                &_GetFlushDataRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    9;
+    11;
 
   friend void swap(GetFlushDataRequest& a, GetFlushDataRequest& b) {
     a.Swap(&b);
@@ -1651,7 +2094,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_hashdb_2eproto);
-    return ::descriptor_table_hashdb_2eproto.file_level_metadata[10];
+    return ::descriptor_table_hashdb_2eproto.file_level_metadata[12];
   }
 
   public:
@@ -1683,7 +2126,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_hashdb_2eproto);
-    return ::descriptor_table_hashdb_2eproto.file_level_metadata[11];
+    return ::descriptor_table_hashdb_2eproto.file_level_metadata[13];
   }
 
   public:
@@ -1733,7 +2176,7 @@ class SetResponse PROTOBUF_FINAL :
                &_SetResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    12;
+    14;
 
   friend void swap(SetResponse& a, SetResponse& b) {
     a.Swap(&b);
@@ -2118,7 +2561,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_hashdb_2eproto);
-    return ::descriptor_table_hashdb_2eproto.file_level_metadata[13];
+    return ::descriptor_table_hashdb_2eproto.file_level_metadata[15];
   }
 
   public:
@@ -2150,7 +2593,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_hashdb_2eproto);
-    return ::descriptor_table_hashdb_2eproto.file_level_metadata[14];
+    return ::descriptor_table_hashdb_2eproto.file_level_metadata[16];
   }
 
   public:
@@ -2200,7 +2643,7 @@ class GetResponse PROTOBUF_FINAL :
                &_GetResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    15;
+    17;
 
   friend void swap(GetResponse& a, GetResponse& b) {
     a.Swap(&b);
@@ -2531,7 +2974,7 @@ class SetProgramResponse PROTOBUF_FINAL :
                &_SetProgramResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    16;
+    18;
 
   friend void swap(SetProgramResponse& a, SetProgramResponse& b) {
     a.Swap(&b);
@@ -2677,7 +3120,7 @@ class GetProgramResponse PROTOBUF_FINAL :
                &_GetProgramResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    17;
+    19;
 
   friend void swap(GetProgramResponse& a, GetProgramResponse& b) {
     a.Swap(&b);
@@ -2850,7 +3293,7 @@ class FlushResponse PROTOBUF_FINAL :
                &_FlushResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    18;
+    20;
 
   friend void swap(FlushResponse& a, FlushResponse& b) {
     a.Swap(&b);
@@ -3018,7 +3461,7 @@ class GetFlushStatusResponse PROTOBUF_FINAL :
                &_GetFlushStatusResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    19;
+    21;
 
   friend void swap(GetFlushStatusResponse& a, GetFlushStatusResponse& b) {
     a.Swap(&b);
@@ -3232,7 +3675,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_hashdb_2eproto);
-    return ::descriptor_table_hashdb_2eproto.file_level_metadata[20];
+    return ::descriptor_table_hashdb_2eproto.file_level_metadata[22];
   }
 
   public:
@@ -3266,7 +3709,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_hashdb_2eproto);
-    return ::descriptor_table_hashdb_2eproto.file_level_metadata[21];
+    return ::descriptor_table_hashdb_2eproto.file_level_metadata[23];
   }
 
   public:
@@ -3316,7 +3759,7 @@ class GetFlushDataResponse PROTOBUF_FINAL :
                &_GetFlushDataResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    22;
+    24;
 
   friend void swap(GetFlushDataResponse& a, GetFlushDataResponse& b) {
     a.Swap(&b);
@@ -3549,7 +3992,7 @@ class Fea PROTOBUF_FINAL :
                &_Fea_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    23;
+    25;
 
   friend void swap(Fea& a, Fea& b) {
     a.Swap(&b);
@@ -3719,7 +4162,7 @@ class FeList PROTOBUF_FINAL :
                &_FeList_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    24;
+    26;
 
   friend void swap(FeList& a, FeList& b) {
     a.Swap(&b);
@@ -3870,7 +4313,7 @@ class SiblingList PROTOBUF_FINAL :
                &_SiblingList_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    25;
+    27;
 
   friend void swap(SiblingList& a, SiblingList& b) {
     a.Swap(&b);
@@ -4021,7 +4464,7 @@ class ResultCode PROTOBUF_FINAL :
                &_ResultCode_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    26;
+    28;
 
   friend void swap(ResultCode& a, ResultCode& b) {
     a.Swap(&b);
@@ -4491,24 +4934,24 @@ inline void SetRequest::unsafe_arena_set_allocated_value(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:hashdb.v1.SetRequest.value)
 }
 
-// bool persistent = 4;
-inline void SetRequest::clear_persistent() {
-  persistent_ = false;
+// .hashdb.v1.Persistence persistence = 4;
+inline void SetRequest::clear_persistence() {
+  persistence_ = 0;
 }
-inline bool SetRequest::_internal_persistent() const {
-  return persistent_;
+inline ::hashdb::v1::Persistence SetRequest::_internal_persistence() const {
+  return static_cast< ::hashdb::v1::Persistence >(persistence_);
 }
-inline bool SetRequest::persistent() const {
-  // @@protoc_insertion_point(field_get:hashdb.v1.SetRequest.persistent)
-  return _internal_persistent();
+inline ::hashdb::v1::Persistence SetRequest::persistence() const {
+  // @@protoc_insertion_point(field_get:hashdb.v1.SetRequest.persistence)
+  return _internal_persistence();
 }
-inline void SetRequest::_internal_set_persistent(bool value) {
+inline void SetRequest::_internal_set_persistence(::hashdb::v1::Persistence value) {
   
-  persistent_ = value;
+  persistence_ = value;
 }
-inline void SetRequest::set_persistent(bool value) {
-  _internal_set_persistent(value);
-  // @@protoc_insertion_point(field_set:hashdb.v1.SetRequest.persistent)
+inline void SetRequest::set_persistence(::hashdb::v1::Persistence value) {
+  _internal_set_persistence(value);
+  // @@protoc_insertion_point(field_set:hashdb.v1.SetRequest.persistence)
 }
 
 // bool details = 5;
@@ -4549,6 +4992,107 @@ inline void SetRequest::_internal_set_get_db_read_log(bool value) {
 inline void SetRequest::set_get_db_read_log(bool value) {
   _internal_set_get_db_read_log(value);
   // @@protoc_insertion_point(field_set:hashdb.v1.SetRequest.get_db_read_log)
+}
+
+// string batch_uuid = 7;
+inline void SetRequest::clear_batch_uuid() {
+  batch_uuid_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& SetRequest::batch_uuid() const {
+  // @@protoc_insertion_point(field_get:hashdb.v1.SetRequest.batch_uuid)
+  return _internal_batch_uuid();
+}
+inline void SetRequest::set_batch_uuid(const std::string& value) {
+  _internal_set_batch_uuid(value);
+  // @@protoc_insertion_point(field_set:hashdb.v1.SetRequest.batch_uuid)
+}
+inline std::string* SetRequest::mutable_batch_uuid() {
+  // @@protoc_insertion_point(field_mutable:hashdb.v1.SetRequest.batch_uuid)
+  return _internal_mutable_batch_uuid();
+}
+inline const std::string& SetRequest::_internal_batch_uuid() const {
+  return batch_uuid_.Get();
+}
+inline void SetRequest::_internal_set_batch_uuid(const std::string& value) {
+  
+  batch_uuid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void SetRequest::set_batch_uuid(std::string&& value) {
+  
+  batch_uuid_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:hashdb.v1.SetRequest.batch_uuid)
+}
+inline void SetRequest::set_batch_uuid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  batch_uuid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:hashdb.v1.SetRequest.batch_uuid)
+}
+inline void SetRequest::set_batch_uuid(const char* value,
+    size_t size) {
+  
+  batch_uuid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:hashdb.v1.SetRequest.batch_uuid)
+}
+inline std::string* SetRequest::_internal_mutable_batch_uuid() {
+  
+  return batch_uuid_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* SetRequest::release_batch_uuid() {
+  // @@protoc_insertion_point(field_release:hashdb.v1.SetRequest.batch_uuid)
+  return batch_uuid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SetRequest::set_allocated_batch_uuid(std::string* batch_uuid) {
+  if (batch_uuid != nullptr) {
+    
+  } else {
+    
+  }
+  batch_uuid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), batch_uuid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:hashdb.v1.SetRequest.batch_uuid)
+}
+inline std::string* SetRequest::unsafe_arena_release_batch_uuid() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:hashdb.v1.SetRequest.batch_uuid)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return batch_uuid_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void SetRequest::unsafe_arena_set_allocated_batch_uuid(
+    std::string* batch_uuid) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (batch_uuid != nullptr) {
+    
+  } else {
+    
+  }
+  batch_uuid_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      batch_uuid, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:hashdb.v1.SetRequest.batch_uuid)
+}
+
+// uint64 tx = 8;
+inline void SetRequest::clear_tx() {
+  tx_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 SetRequest::_internal_tx() const {
+  return tx_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 SetRequest::tx() const {
+  // @@protoc_insertion_point(field_get:hashdb.v1.SetRequest.tx)
+  return _internal_tx();
+}
+inline void SetRequest::_internal_set_tx(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  tx_ = value;
+}
+inline void SetRequest::set_tx(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_tx(value);
+  // @@protoc_insertion_point(field_set:hashdb.v1.SetRequest.tx)
 }
 
 // -------------------------------------------------------------------
@@ -4755,6 +5299,87 @@ inline void GetRequest::_internal_set_get_db_read_log(bool value) {
 inline void GetRequest::set_get_db_read_log(bool value) {
   _internal_set_get_db_read_log(value);
   // @@protoc_insertion_point(field_set:hashdb.v1.GetRequest.get_db_read_log)
+}
+
+// string batch_uuid = 5;
+inline void GetRequest::clear_batch_uuid() {
+  batch_uuid_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& GetRequest::batch_uuid() const {
+  // @@protoc_insertion_point(field_get:hashdb.v1.GetRequest.batch_uuid)
+  return _internal_batch_uuid();
+}
+inline void GetRequest::set_batch_uuid(const std::string& value) {
+  _internal_set_batch_uuid(value);
+  // @@protoc_insertion_point(field_set:hashdb.v1.GetRequest.batch_uuid)
+}
+inline std::string* GetRequest::mutable_batch_uuid() {
+  // @@protoc_insertion_point(field_mutable:hashdb.v1.GetRequest.batch_uuid)
+  return _internal_mutable_batch_uuid();
+}
+inline const std::string& GetRequest::_internal_batch_uuid() const {
+  return batch_uuid_.Get();
+}
+inline void GetRequest::_internal_set_batch_uuid(const std::string& value) {
+  
+  batch_uuid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void GetRequest::set_batch_uuid(std::string&& value) {
+  
+  batch_uuid_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:hashdb.v1.GetRequest.batch_uuid)
+}
+inline void GetRequest::set_batch_uuid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  batch_uuid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:hashdb.v1.GetRequest.batch_uuid)
+}
+inline void GetRequest::set_batch_uuid(const char* value,
+    size_t size) {
+  
+  batch_uuid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:hashdb.v1.GetRequest.batch_uuid)
+}
+inline std::string* GetRequest::_internal_mutable_batch_uuid() {
+  
+  return batch_uuid_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* GetRequest::release_batch_uuid() {
+  // @@protoc_insertion_point(field_release:hashdb.v1.GetRequest.batch_uuid)
+  return batch_uuid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void GetRequest::set_allocated_batch_uuid(std::string* batch_uuid) {
+  if (batch_uuid != nullptr) {
+    
+  } else {
+    
+  }
+  batch_uuid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), batch_uuid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:hashdb.v1.GetRequest.batch_uuid)
+}
+inline std::string* GetRequest::unsafe_arena_release_batch_uuid() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:hashdb.v1.GetRequest.batch_uuid)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return batch_uuid_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void GetRequest::unsafe_arena_set_allocated_batch_uuid(
+    std::string* batch_uuid) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (batch_uuid != nullptr) {
+    
+  } else {
+    
+  }
+  batch_uuid_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      batch_uuid, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:hashdb.v1.GetRequest.batch_uuid)
 }
 
 // -------------------------------------------------------------------
@@ -5136,6 +5761,277 @@ inline void LoadProgramDBRequest::_internal_set_persistent(bool value) {
 inline void LoadProgramDBRequest::set_persistent(bool value) {
   _internal_set_persistent(value);
   // @@protoc_insertion_point(field_set:hashdb.v1.LoadProgramDBRequest.persistent)
+}
+
+// -------------------------------------------------------------------
+
+// FlushRequest
+
+// string batch_uuid = 1;
+inline void FlushRequest::clear_batch_uuid() {
+  batch_uuid_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& FlushRequest::batch_uuid() const {
+  // @@protoc_insertion_point(field_get:hashdb.v1.FlushRequest.batch_uuid)
+  return _internal_batch_uuid();
+}
+inline void FlushRequest::set_batch_uuid(const std::string& value) {
+  _internal_set_batch_uuid(value);
+  // @@protoc_insertion_point(field_set:hashdb.v1.FlushRequest.batch_uuid)
+}
+inline std::string* FlushRequest::mutable_batch_uuid() {
+  // @@protoc_insertion_point(field_mutable:hashdb.v1.FlushRequest.batch_uuid)
+  return _internal_mutable_batch_uuid();
+}
+inline const std::string& FlushRequest::_internal_batch_uuid() const {
+  return batch_uuid_.Get();
+}
+inline void FlushRequest::_internal_set_batch_uuid(const std::string& value) {
+  
+  batch_uuid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void FlushRequest::set_batch_uuid(std::string&& value) {
+  
+  batch_uuid_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:hashdb.v1.FlushRequest.batch_uuid)
+}
+inline void FlushRequest::set_batch_uuid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  batch_uuid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:hashdb.v1.FlushRequest.batch_uuid)
+}
+inline void FlushRequest::set_batch_uuid(const char* value,
+    size_t size) {
+  
+  batch_uuid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:hashdb.v1.FlushRequest.batch_uuid)
+}
+inline std::string* FlushRequest::_internal_mutable_batch_uuid() {
+  
+  return batch_uuid_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* FlushRequest::release_batch_uuid() {
+  // @@protoc_insertion_point(field_release:hashdb.v1.FlushRequest.batch_uuid)
+  return batch_uuid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void FlushRequest::set_allocated_batch_uuid(std::string* batch_uuid) {
+  if (batch_uuid != nullptr) {
+    
+  } else {
+    
+  }
+  batch_uuid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), batch_uuid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:hashdb.v1.FlushRequest.batch_uuid)
+}
+inline std::string* FlushRequest::unsafe_arena_release_batch_uuid() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:hashdb.v1.FlushRequest.batch_uuid)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return batch_uuid_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void FlushRequest::unsafe_arena_set_allocated_batch_uuid(
+    std::string* batch_uuid) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (batch_uuid != nullptr) {
+    
+  } else {
+    
+  }
+  batch_uuid_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      batch_uuid, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:hashdb.v1.FlushRequest.batch_uuid)
+}
+
+// -------------------------------------------------------------------
+
+// SemiFlushRequest
+
+// string batch_uuid = 1;
+inline void SemiFlushRequest::clear_batch_uuid() {
+  batch_uuid_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& SemiFlushRequest::batch_uuid() const {
+  // @@protoc_insertion_point(field_get:hashdb.v1.SemiFlushRequest.batch_uuid)
+  return _internal_batch_uuid();
+}
+inline void SemiFlushRequest::set_batch_uuid(const std::string& value) {
+  _internal_set_batch_uuid(value);
+  // @@protoc_insertion_point(field_set:hashdb.v1.SemiFlushRequest.batch_uuid)
+}
+inline std::string* SemiFlushRequest::mutable_batch_uuid() {
+  // @@protoc_insertion_point(field_mutable:hashdb.v1.SemiFlushRequest.batch_uuid)
+  return _internal_mutable_batch_uuid();
+}
+inline const std::string& SemiFlushRequest::_internal_batch_uuid() const {
+  return batch_uuid_.Get();
+}
+inline void SemiFlushRequest::_internal_set_batch_uuid(const std::string& value) {
+  
+  batch_uuid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void SemiFlushRequest::set_batch_uuid(std::string&& value) {
+  
+  batch_uuid_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:hashdb.v1.SemiFlushRequest.batch_uuid)
+}
+inline void SemiFlushRequest::set_batch_uuid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  batch_uuid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:hashdb.v1.SemiFlushRequest.batch_uuid)
+}
+inline void SemiFlushRequest::set_batch_uuid(const char* value,
+    size_t size) {
+  
+  batch_uuid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:hashdb.v1.SemiFlushRequest.batch_uuid)
+}
+inline std::string* SemiFlushRequest::_internal_mutable_batch_uuid() {
+  
+  return batch_uuid_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* SemiFlushRequest::release_batch_uuid() {
+  // @@protoc_insertion_point(field_release:hashdb.v1.SemiFlushRequest.batch_uuid)
+  return batch_uuid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SemiFlushRequest::set_allocated_batch_uuid(std::string* batch_uuid) {
+  if (batch_uuid != nullptr) {
+    
+  } else {
+    
+  }
+  batch_uuid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), batch_uuid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:hashdb.v1.SemiFlushRequest.batch_uuid)
+}
+inline std::string* SemiFlushRequest::unsafe_arena_release_batch_uuid() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:hashdb.v1.SemiFlushRequest.batch_uuid)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return batch_uuid_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void SemiFlushRequest::unsafe_arena_set_allocated_batch_uuid(
+    std::string* batch_uuid) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (batch_uuid != nullptr) {
+    
+  } else {
+    
+  }
+  batch_uuid_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      batch_uuid, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:hashdb.v1.SemiFlushRequest.batch_uuid)
+}
+
+// string new_state_root = 2;
+inline void SemiFlushRequest::clear_new_state_root() {
+  new_state_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& SemiFlushRequest::new_state_root() const {
+  // @@protoc_insertion_point(field_get:hashdb.v1.SemiFlushRequest.new_state_root)
+  return _internal_new_state_root();
+}
+inline void SemiFlushRequest::set_new_state_root(const std::string& value) {
+  _internal_set_new_state_root(value);
+  // @@protoc_insertion_point(field_set:hashdb.v1.SemiFlushRequest.new_state_root)
+}
+inline std::string* SemiFlushRequest::mutable_new_state_root() {
+  // @@protoc_insertion_point(field_mutable:hashdb.v1.SemiFlushRequest.new_state_root)
+  return _internal_mutable_new_state_root();
+}
+inline const std::string& SemiFlushRequest::_internal_new_state_root() const {
+  return new_state_root_.Get();
+}
+inline void SemiFlushRequest::_internal_set_new_state_root(const std::string& value) {
+  
+  new_state_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void SemiFlushRequest::set_new_state_root(std::string&& value) {
+  
+  new_state_root_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:hashdb.v1.SemiFlushRequest.new_state_root)
+}
+inline void SemiFlushRequest::set_new_state_root(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  new_state_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:hashdb.v1.SemiFlushRequest.new_state_root)
+}
+inline void SemiFlushRequest::set_new_state_root(const char* value,
+    size_t size) {
+  
+  new_state_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:hashdb.v1.SemiFlushRequest.new_state_root)
+}
+inline std::string* SemiFlushRequest::_internal_mutable_new_state_root() {
+  
+  return new_state_root_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* SemiFlushRequest::release_new_state_root() {
+  // @@protoc_insertion_point(field_release:hashdb.v1.SemiFlushRequest.new_state_root)
+  return new_state_root_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SemiFlushRequest::set_allocated_new_state_root(std::string* new_state_root) {
+  if (new_state_root != nullptr) {
+    
+  } else {
+    
+  }
+  new_state_root_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), new_state_root,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:hashdb.v1.SemiFlushRequest.new_state_root)
+}
+inline std::string* SemiFlushRequest::unsafe_arena_release_new_state_root() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:hashdb.v1.SemiFlushRequest.new_state_root)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return new_state_root_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void SemiFlushRequest::unsafe_arena_set_allocated_new_state_root(
+    std::string* new_state_root) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (new_state_root != nullptr) {
+    
+  } else {
+    
+  }
+  new_state_root_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      new_state_root, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:hashdb.v1.SemiFlushRequest.new_state_root)
+}
+
+// .hashdb.v1.Persistence persistence = 3;
+inline void SemiFlushRequest::clear_persistence() {
+  persistence_ = 0;
+}
+inline ::hashdb::v1::Persistence SemiFlushRequest::_internal_persistence() const {
+  return static_cast< ::hashdb::v1::Persistence >(persistence_);
+}
+inline ::hashdb::v1::Persistence SemiFlushRequest::persistence() const {
+  // @@protoc_insertion_point(field_get:hashdb.v1.SemiFlushRequest.persistence)
+  return _internal_persistence();
+}
+inline void SemiFlushRequest::_internal_set_persistence(::hashdb::v1::Persistence value) {
+  
+  persistence_ = value;
+}
+inline void SemiFlushRequest::set_persistence(::hashdb::v1::Persistence value) {
+  _internal_set_persistence(value);
+  // @@protoc_insertion_point(field_set:hashdb.v1.SemiFlushRequest.persistence)
 }
 
 // -------------------------------------------------------------------
@@ -7703,6 +8599,10 @@ inline void ResultCode::set_code(::hashdb::v1::ResultCode_Code value) {
 
 // -------------------------------------------------------------------
 
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 
 // @@protoc_insertion_point(namespace_scope)
 
@@ -7715,6 +8615,11 @@ template <> struct is_proto_enum< ::hashdb::v1::ResultCode_Code> : ::std::true_t
 template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::hashdb::v1::ResultCode_Code>() {
   return ::hashdb::v1::ResultCode_Code_descriptor();
+}
+template <> struct is_proto_enum< ::hashdb::v1::Persistence> : ::std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::hashdb::v1::Persistence>() {
+  return ::hashdb::v1::Persistence_descriptor();
 }
 
 PROTOBUF_NAMESPACE_CLOSE

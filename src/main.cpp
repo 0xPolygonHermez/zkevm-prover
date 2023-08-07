@@ -38,6 +38,7 @@
 #include "unit_test.hpp"
 #include "database_cache_test.hpp"
 #include "main_sm/fork_5/main_exec_c/account.hpp"
+#include "state_manager.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -487,6 +488,9 @@ int main(int argc, char **argv)
 
     // Init the HashDB singleton
     hashDBSingleton.init(fr, config);
+
+    // Init the StateManager singleton
+    stateManager.init(config);
 
     // Init goldilocks precomputed
     TimerStart(GOLDILOCKS_PRECOMPUTED_INIT);

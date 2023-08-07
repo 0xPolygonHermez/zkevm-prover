@@ -44,7 +44,7 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
     {
         pHashDB->loadDB(proverRequest.input.db, true);
         uint64_t flushId, lastSentFlushId;
-        pHashDB->flush(flushId, lastSentFlushId);
+        pHashDB->flush(emptyString, flushId, lastSentFlushId);
         if (config.dbClearCache && (config.databaseURL != "local"))
         {
             pHashDB->clearCache();
@@ -56,7 +56,7 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
     {
         pHashDB->loadProgramDB(proverRequest.input.contractsBytecode, true);
         uint64_t flushId, lastSentFlushId;
-        pHashDB->flush(flushId, lastSentFlushId);
+        pHashDB->flush(emptyString, flushId, lastSentFlushId);
         if (config.dbClearCache && (config.databaseURL != "local"))
         {
             pHashDB->clearCache();
@@ -160,7 +160,8 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
     gettimeofday(&t, NULL);
 #endif
-    result = globalExitRootManagerL2Account.SetGlobalExitRoot(ctxc.root, proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot, mpz_class(proverRequest.input.publicInputsExtended.publicInputs.timestamp));
+    // TODO: What TX number should we use?  0?
+    result = globalExitRootManagerL2Account.SetGlobalExitRoot(proverRequest.uuid, 0, ctxc.root, proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot, mpz_class(proverRequest.input.publicInputsExtended.publicInputs.timestamp));
     if (result != ZKR_SUCCESS)
     {
         zklog.error("main_exec_c() failed calling globalExitRootManagerL2Account.SetGlobalExitRoot()");
@@ -279,7 +280,7 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
         gettimeofday(&t, NULL);
 #endif
         uint64_t fromNonce;
-        result = fromAccount.GetNonce(ctxc.root, fromNonce);
+        result = fromAccount.GetNonce(proverRequest.uuid, ctxc.root, fromNonce);
         if (result != ZKR_SUCCESS)
         {
             zklog.error("main_exec_c() failed calling toAccount.GetNonce()");
@@ -307,7 +308,7 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
         gettimeofday(&t, NULL);
 #endif
-        result = fromAccount.SetNonce(ctxc.root, fromNonce);
+        result = fromAccount.SetNonce(proverRequest.uuid, ctxc.tx, ctxc.root, fromNonce);
         if (result != ZKR_SUCCESS)
         {
             zklog.error("main_exec_c() failed calling toAccount.SetNonce()");
@@ -324,7 +325,7 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
         gettimeofday(&t, NULL);
 #endif
         mpz_class fromBalance;
-        result = fromAccount.GetBalance(ctxc.root, fromBalance);
+        result = fromAccount.GetBalance(proverRequest.uuid, ctxc.root, fromBalance);
         if (result != ZKR_SUCCESS)
         {
             zklog.error("main_exec_c() failed calling fromAccount.GetBalance()");
@@ -377,7 +378,7 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
         gettimeofday(&t, NULL);
 #endif
         fromBalance -= fromAmount;
-        result = fromAccount.SetBalance(ctxc.root, fromBalance);
+        result = fromAccount.SetBalance(proverRequest.uuid, ctxc.tx, ctxc.root, fromBalance);
         if (result != ZKR_SUCCESS)
         {
             zklog.error("main_exec_c() failed calling fromAccount.SetBalance()");
@@ -398,7 +399,7 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
         gettimeofday(&t, NULL);
 #endif
         mpz_class toBalance;
-        result = toAccount.GetBalance(ctxc.root, toBalance);
+        result = toAccount.GetBalance(proverRequest.uuid, ctxc.root, toBalance);
         if (result != ZKR_SUCCESS)
         {
             zklog.error("main_exec_c() failed calling toAccount.GetBalance()");
@@ -417,7 +418,7 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
         gettimeofday(&t, NULL);
 #endif
-        result = toAccount.SetBalance(ctxc.root, toBalance);
+        result = toAccount.SetBalance(proverRequest.uuid, ctxc.tx, ctxc.root, toBalance);
         if (result != ZKR_SUCCESS)
         {
             zklog.error("main_exec_c() failed calling toAccount.SetBalance()");
@@ -440,7 +441,7 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
         gettimeofday(&t, NULL);
 #endif
         mpz_class sequencerBalance;
-        result = sequencerAccount.GetBalance(ctxc.root, sequencerBalance);
+        result = sequencerAccount.GetBalance(proverRequest.uuid, ctxc.root, sequencerBalance);
         if (result != ZKR_SUCCESS)
         {
             zklog.error("main_exec_c() failed calling sequencerAccount.GetBalance()");
@@ -459,7 +460,7 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
         gettimeofday(&t, NULL);
 #endif
-        result = sequencerAccount.SetBalance(ctxc.root, sequencerBalance);
+        result = sequencerAccount.SetBalance(proverRequest.uuid, ctxc.tx, ctxc.root, sequencerBalance);
         if (result != ZKR_SUCCESS)
         {
             zklog.error("main_exec_c() failed calling sequencerAccount.SetBalance()");
@@ -480,7 +481,7 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
         gettimeofday(&t, NULL);
 #endif
-        result = systemAccount.SetTxCount(ctxc.root, ctxc.globalVars.txCount);
+        result = systemAccount.SetTxCount(proverRequest.uuid, ctxc.tx, ctxc.root, ctxc.globalVars.txCount);
         if (result != ZKR_SUCCESS)
         {
             zklog.error("main_exec_c() failed calling systemAccount.SetTxCount()");
@@ -498,7 +499,7 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
 #endif
         mpz_class auxScalar;
         fea2scalar(fr, auxScalar, ctxc.root);
-        result = systemAccount.SetStateRoot(ctxc.root, ctxc.globalVars.txCount, auxScalar);
+        result = systemAccount.SetStateRoot(proverRequest.uuid, ctxc.tx, ctxc.root, ctxc.globalVars.txCount, auxScalar);
         if (result != ZKR_SUCCESS)
         {
             zklog.error("main_exec_c() failed calling systemAccount.SetStateRoot()");
@@ -549,7 +550,7 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
     gettimeofday(&t, NULL);
 #endif
-    result = pHashDB->flush(proverRequest.flushId, proverRequest.lastSentFlushId);
+    result = pHashDB->flush(proverRequest.uuid, proverRequest.flushId, proverRequest.lastSentFlushId);
     if (result != ZKR_SUCCESS)
     {
         proverRequest.result = result;

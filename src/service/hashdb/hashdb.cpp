@@ -7,6 +7,7 @@
 #include "scalar.hpp"
 #include "zkresult.hpp"
 #include "database_map.hpp"
+#include "state_manager.hpp"
 
 HashDB::HashDB(Goldilocks &fr, const Config &config) : fr(fr), config(config), db(fr, config), smt(fr)
 {
@@ -20,7 +21,7 @@ HashDB::~HashDB()
 #endif    
 }
 
-zkresult HashDB::set(const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent, Goldilocks::Element (&newRoot)[4], SmtSetResult *result, DatabaseMap *dbReadLog)
+zkresult HashDB::set (const string &batchUUID, uint64_t tx, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, Goldilocks::Element (&newRoot)[4], SmtSetResult *result, DatabaseMap *dbReadLog)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB
     gettimeofday(&t, NULL);
@@ -34,7 +35,7 @@ zkresult HashDB::set(const Goldilocks::Element (&oldRoot)[4], const Goldilocks::
     if (result == NULL) r = new SmtSetResult;
     else r = result;
 
-    zkresult zkr = smt.set(db, oldRoot, key, value, persistent, *r, dbReadLog);
+    zkresult zkr = smt.set(batchUUID, tx, db, oldRoot, key, value, persistence, *r, dbReadLog);
     for (int i = 0; i < 4; i++) newRoot[i] = r->newRoot[i];
 
     if (result == NULL) delete r;
@@ -46,7 +47,7 @@ zkresult HashDB::set(const Goldilocks::Element (&oldRoot)[4], const Goldilocks::
     return zkr;
 }
 
-zkresult HashDB::get(const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtGetResult *result, DatabaseMap *dbReadLog)
+zkresult HashDB::get (const string &batchUUID, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtGetResult *result, DatabaseMap *dbReadLog)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB
     gettimeofday(&t, NULL);
@@ -60,7 +61,7 @@ zkresult HashDB::get(const Goldilocks::Element (&root)[4], const Goldilocks::Ele
     if (result == NULL) r = new SmtGetResult;
     else r = result;
 
-    zkresult zkr = smt.get(db, root, key, *r, dbReadLog);
+    zkresult zkr = smt.get(batchUUID, db, root, key, *r, dbReadLog);
 
     value = r->value;
 
@@ -155,7 +156,7 @@ void HashDB::loadProgramDB(const DatabaseMap::ProgramMap &input, const bool pers
 #endif
 }
 
-zkresult HashDB::flush(uint64_t &flushId, uint64_t &storedFlushId)
+zkresult HashDB::flush(const string &batchUUID, uint64_t &flushId, uint64_t &storedFlushId)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB
     gettimeofday(&t, NULL);
@@ -166,7 +167,14 @@ zkresult HashDB::flush(uint64_t &flushId, uint64_t &storedFlushId)
 #endif
 
     zkresult result;
-    result = db.flush(flushId, storedFlushId);
+    if (db.config.stateManager && (batchUUID.size() != 0))
+    {
+        result = stateManager.flush(batchUUID, db, flushId, storedFlushId);
+    }
+    else
+    {
+        result = db.flush(flushId, storedFlushId);
+    }
 
 #ifdef LOG_TIME_STATISTICS_HASHDB
     tms.add("flush", TimeDiff(t));
@@ -177,9 +185,16 @@ zkresult HashDB::flush(uint64_t &flushId, uint64_t &storedFlushId)
     return result;
 }
 
-void HashDB::semiFlush (void)
+void HashDB::semiFlush (const string &batchUUID, const string &newStateRoot, const Persistence persistence)
 {
-    db.semiFlush();
+    if (db.config.stateManager && (batchUUID.size() != 0))
+    {
+        stateManager.semiFlush(batchUUID, newStateRoot, persistence);
+    }
+    else
+    {
+        db.semiFlush();
+    }
 }
 
 zkresult HashDB::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram, string &proverId)
@@ -261,7 +276,7 @@ void HashDB::commit()
 #endif
 }
 
-void HashDB::hashSave(const Goldilocks::Element (&a)[8], const Goldilocks::Element (&c)[4], const bool persistent, Goldilocks::Element (&hash)[4])
+void HashDB::hashSave(const Goldilocks::Element (&a)[8], const Goldilocks::Element (&c)[4], const Persistence persistence, Goldilocks::Element (&hash)[4])
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB
     gettimeofday(&t, NULL);
@@ -270,8 +285,9 @@ void HashDB::hashSave(const Goldilocks::Element (&a)[8], const Goldilocks::Eleme
 #ifdef HASHDB_LOCK
     lock_guard<recursive_mutex> guard(mlock);
 #endif
+    SmtContext ctx(db, false, "", 0, persistence);
 
-    smt.hashSave(db, a, c, persistent, hash);
+    smt.hashSave(ctx, a, c, hash);
 
 #ifdef LOG_TIME_STATISTICS_HASHDB
     tms.add("hashSave", TimeDiff(t));

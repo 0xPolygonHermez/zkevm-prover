@@ -128,50 +128,59 @@ zkresult Database::read(Goldilocks::Element (&vkey)[4], vector<Goldilocks::Eleme
 
 #ifdef DATABASE_USE_CACHE
     // If the key is found in local database (cached) simply return it
-    if (dbMTCache.enabled())
-    {
-        // If the key is present in the cache, get its value from there
 #ifdef DATABASE_USE_ASSOCIATIVE_CACHE
-        if (dbMTCache.findKey(vkey,value))
+        if (dbMTCache.findKey(vkey,value)){
 #else
-        if (dbMTCache.find(key, value))
-#endif
-        {
-            // Add to the read log
-            if (dbReadLog != NULL){
-#ifdef DATABASE_USE_ASSOCIATIVE_CACHE
-                if(dbReadLog->getSaveKeys()){ 
-                    string auxkey = fea2string(fr, vkey);;
-                    key = NormalizeToNFormat(auxkey, 64);
-                    key = stringToLower(key);              
-                }
-#endif
-                dbReadLog->add(key, value, true, TimeDiff(t));
-            }
-            r = ZKR_SUCCESS;
-        }
-        else{
-            string auxkey = fea2string(fr, vkey);
-            key = NormalizeToNFormat(auxkey, 64);
-            key = stringToLower(key);
+        if (dbMTCache.find(key, value)){
+#endif    
+        // Add to the read log
+        if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
 
-            // If the key is pending to be stored in database, but already deleted from cache
-            if (config.dbMultiWrite && multiWrite.findNode(key, value))
-            {
-                // Add to the read log
-                if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
-                r = ZKR_SUCCESS;
-#ifdef DATABASE_USE_ASSOCIATIVE_CACHE
-                dbMTCache.addKeyValue(vkey, value, false); //rick
-#else
-                dbMTCache.add(key, value, false);
+        r = ZKR_SUCCESS;
+    }
+    else
 #endif
-            }
-            // If get tree is configured, read the tree from the branch (key hash) to the leaf (keys since level)
-            else if (config.dbGetTree && (keys != NULL))
+    // If the key is pending to be stored in database, but already deleted from cache
+    if (config.dbMultiWrite && multiWrite.findNode(key, value))
+    {
+        // Add to the read log
+        if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
+
+#ifdef DATABASE_USE_CACHE
+        // Store it locally to avoid any future remote access for this key
+        if (dbMTCache.enabled()){
+        #ifdef DATABASE_USE_ASSOCIATIVE_CACHE
+                dbMTCache.addKeyValue(vkey, value, false); //rick
+        #else
+                dbMTCache.add(key, value, false);
+        #endif
+        }
+#endif
+        r = ZKR_SUCCESS;
+    }
+    // If get tree is configured, read the tree from the branch (key hash) to the leaf (keys since level)
+    else if (config.dbGetTree && (keys != NULL))
+    {
+        // Get the tree
+        uint64_t numberOfFields;
+        r = readTreeRemote(key, keys, level, numberOfFields);
+
+        // Add to the read log, and restart the timer
+        if (dbReadLog != NULL)
+        {
+            dbReadLog->addGetTree(TimeDiff(t), numberOfFields);
+            gettimeofday(&t, NULL);
+        }
+
+        // Retry if failed, since read-only databases have a synchronization latency
+        if ( (r != ZKR_SUCCESS) && (config.dbReadRetryDelay > 0) )
+        {
+            for (uint64_t i=0; i<config.dbReadRetryCounter; i++)
             {
-                // Get the tree
-                uint64_t numberOfFields;
+                zklog.warning("Database::read() failed calling readTreeRemote() with error=" + zkresult2string(r) + "; will retry after " + to_string(config.dbReadRetryDelay) + "us key=" + key);
+
+                // Retry after dbReadRetryDelay us
+                usleep(config.dbReadRetryDelay);
                 r = readTreeRemote(key, keys, level, numberOfFields);
 
                 // Add to the read log, and restart the timer
@@ -181,56 +190,35 @@ zkresult Database::read(Goldilocks::Element (&vkey)[4], vector<Goldilocks::Eleme
                     gettimeofday(&t, NULL);
                 }
 
-                // Retry if failed, since read-only databases have a synchronization latency
-                if ( (r != ZKR_SUCCESS) && (config.dbReadRetryDelay > 0) )
+                if (r == ZKR_SUCCESS)
                 {
-                    for (uint64_t i=0; i<config.dbReadRetryCounter; i++)
-                    {
-                        zklog.warning("Database::read() failed calling readTreeRemote() with error=" + zkresult2string(r) + "; retrying after " + to_string(config.dbReadRetryDelay) + "us key=" + key);
-
-                        // Retry after dbReadRetryDelay us
-                        usleep(config.dbReadRetryDelay);
-                        r = readTreeRemote(key, keys, level, numberOfFields);
-
-                        // Add to the read log, and restart the timer
-                        if (dbReadLog != NULL)
-                        {
-                            dbReadLog->addGetTree(TimeDiff(t), numberOfFields);
-                            gettimeofday(&t, NULL);
-                        }
-
-                        if (r == ZKR_SUCCESS)
-                        {
-                            break;
-                        }
-                        zklog.warning("Database::read() retried readTreeRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r) + " counter=" + to_string(i));
-                    }
+                    break;
                 }
+                zklog.warning("Database::read() retried readTreeRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r) + " i=" + to_string(i));
             }
-
-            // If succeeded, now the value should be present in the cache
-            if ( r == ZKR_SUCCESS)
-            {
-#ifdef DATABASE_USE_ASSOCIATIVE_CACHE
-                if (dbMTCache.findKey(vkey, value))
-#else                
-                if(dbMTCache.find(key, value))
-#endif
-                {
-                    // Add to the read log
-                    if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
-                    r = ZKR_SUCCESS;
-                }
-                else
-                {
-                    zklog.warning("Database::read() called readTreeRemote() but key=" + key + " is not present");
-                    r = ZKR_UNSPECIFIED;
-                }
-            }
-            else r = ZKR_UNSPECIFIED;
         }
+
+        // If succeeded, now the value should be present in the cache
+        if ( r == ZKR_SUCCESS)
+        {
+            #ifdef DATABASE_USE_ASSOCIATIVE_CACHE
+        if (dbMTCache.findKey(vkey,value)){
+#else
+        if (dbMTCache.find(key, value)){
+#endif  
+                // Add to the read log
+                if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
+
+                r = ZKR_SUCCESS;
+            }
+            else
+            {
+                zklog.warning("Database::read() called readTreeRemote() but key=" + key + " is not present");
+                r = ZKR_UNSPECIFIED;
+            }
+        }
+        else r = ZKR_UNSPECIFIED;
     }
-#endif
     if (useRemoteDB && (r == ZKR_UNSPECIFIED))
     {
         // If multi write is enabled, flush pending data, since some previously written keys
@@ -247,7 +235,7 @@ zkresult Database::read(Goldilocks::Element (&vkey)[4], vector<Goldilocks::Eleme
         {
             for (uint64_t i=0; i<config.dbReadRetryCounter; i++)
             {
-                zklog.warning("Database::read() failed calling readRemote() with error=" + zkresult2string(r) + "; retrying after " + to_string(config.dbReadRetryDelay) + "us key=" + key);
+                zklog.warning("Database::read() failed calling readRemote() with error=" + zkresult2string(r) + "; will retry after " + to_string(config.dbReadRetryDelay) + "us key=" + key + " i=" + to_string(i));
 
                 // Retry after dbReadRetryDelay us
                 usleep(config.dbReadRetryDelay);
@@ -256,7 +244,7 @@ zkresult Database::read(Goldilocks::Element (&vkey)[4], vector<Goldilocks::Eleme
                 {
                     break;
                 }
-                zklog.warning("Database::read() retried readRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r) + " counter=" + to_string(i));
+                zklog.warning("Database::read() retried readRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r) + " i=" + to_string(i));
             }
         }
         if (r == ZKR_SUCCESS)
@@ -1640,34 +1628,6 @@ zkresult Database::getFlushData(uint64_t flushId, uint64_t &storedFlushId, unord
     multiWrite.Unlock();
 
     //zklog.info("<-- getFlushData()");
-
-    return ZKR_SUCCESS;
-}
-
-zkresult Database::deleteNodes(const vector<string> (&nodesToDelete))
-{
-    string key;
-
-    multiWrite.Lock();
-
-    // Keep a reference to the nodes data
-    unordered_map<string, string> &multiWriteFlushData = multiWrite.data[multiWrite.pendingToFlushDataIndex].nodesIntray;
-
-    // For all entries in nodesToDelete
-    for (uint64_t i=0; i<nodesToDelete.size(); i++)
-    {
-        // Normalize key format
-        key = NormalizeToNFormat(nodesToDelete[i], 64);
-        key = stringToLower(key);
-
-        // Delete it; they key can be present (just written) or not (read from database) and both cases are valid
-        multiWriteFlushData.erase(key);
-#ifdef LOG_DB_DELETE_NODES
-        zklog.info("Database::deleteNodes() deleted key=" + key + " i=" + to_string(i) + " multiWrite=[" + multiWrite.print() + "]");
-#endif
-    }
-
-    multiWrite.Unlock();
 
     return ZKR_SUCCESS;
 }
