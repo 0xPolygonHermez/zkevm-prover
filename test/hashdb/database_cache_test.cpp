@@ -9,14 +9,15 @@ uint64_t DatabaseCacheTest (void)
 {
     TimerStart(DATABASE_CACHE_TEST);
 
-    uint64_t numberOfFailed = 0;
+    
     Database::dbMTCache.clear();
+    
+    uint64_t numberOfFailed = 0;
+
     Database::dbMTCache.setMaxSize(2000000);
-  
 
     Goldilocks fr;
     mpz_class keyScalar;
-
     string keyString;
     vector<Goldilocks::Element> value;
     bool bResult;
@@ -40,14 +41,15 @@ uint64_t DatabaseCacheTest (void)
         keyScalar = i;
         keyString = PrependZeros(keyScalar.get_str(16), 64);
         bResult = Database::dbMTCache.find(keyString, value);
-
         if (!bResult)
         {
             zklog.error("DatabaseCacheTest() failed calling Database::dbMTCache.find() of key=" + keyString);
             numberOfFailed++;
         }
     }
+    
     Database::dbMTCache.clear();
+
     TimerStopAndLog(DATABASE_CACHE_TEST);
     return numberOfFailed;
 }

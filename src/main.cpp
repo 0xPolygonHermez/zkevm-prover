@@ -619,6 +619,7 @@ int main(int argc, char **argv)
         Database::dbMTACache.postConstruct(config.log2DbMTAssociativeCacheIndicesSize, config.log2DbMTAssociativeCacheSize, "MTACache");
     }
     else{
+        Database::useAssociativeCache = false;
         Database::dbMTCache.setName("MTCache");
         Database::dbMTCache.setMaxSize(config.dbMTCacheSize*1024*1024);
     }

@@ -69,10 +69,10 @@ private:
 public:
 #ifdef DATABASE_USE_CACHE
     // Cache static instances
+    static bool useAssociativeCache;
     static DatabaseMTAssociativeCache dbMTACache;
     static DatabaseMTCache dbMTCache;
     static DatabaseProgramCache dbProgramCache;
-    static bool useAssociativeCache;
 
     // This is a fixed key to store the latest state root hash, used to load it to the cache
     // This key is "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
@@ -89,8 +89,7 @@ public:
     // Basic methods
     void init(void);
     zkresult read(const string &_key, Goldilocks::Element (&vkey)[4], vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, const bool update = false, bool *keys = NULL , uint64_t level=0);
-    zkresult write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent);
-    zkresult write(const Goldilocks::Element* vkey, const vector<Goldilocks::Element> &value, const bool persistent);
+    zkresult write(const string &_key, const Goldilocks::Element* vkey, const vector<Goldilocks::Element> &value, const bool persistent);
     zkresult getProgram(const string &_key, vector<uint8_t> &value, DatabaseMap *dbReadLog);
     zkresult setProgram(const string &_key, const vector<uint8_t> &value, const bool persistent);
     inline bool usingAssociativeCache(void){ return useAssociativeCache; };

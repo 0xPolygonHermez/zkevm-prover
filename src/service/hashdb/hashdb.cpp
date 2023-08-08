@@ -126,7 +126,7 @@ void HashDB::loadDB(const DatabaseMap::MTMap &input, const bool persistent)
     DatabaseMap::MTMap::const_iterator it;
     for (it = input.begin(); it != input.end(); it++)
     {
-        db.write(it->first, it->second, persistent);
+        db.write(it->first, NULL, it->second, persistent);
     }
 
 #ifdef LOG_TIME_STATISTICS_HASHDB

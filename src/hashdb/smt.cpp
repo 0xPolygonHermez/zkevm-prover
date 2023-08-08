@@ -1098,7 +1098,7 @@ zkresult Smt::hashSave ( const SmtContext &ctx, const Goldilocks::Element (&v)[1
     }
     else
     {
-        zkr = ctx.db.write(hash, dbValue, ctx.persistence == PERSISTENCE_DATABASE ? 1 : 0);
+        zkr = ctx.db.write(hashString, hash, dbValue, ctx.persistence == PERSISTENCE_DATABASE ? 1 : 0);
         if (zkr != ZKR_SUCCESS)
         {
             zklog.error("Smt::hashSave() failed calling db.write() key=" + hashString + " result=" + to_string(zkr) + "=" + zkresult2string(zkr));

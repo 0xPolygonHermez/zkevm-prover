@@ -192,11 +192,11 @@ void Config::load(json &config)
     if (config.contains("useAssociativeCache") && config["useAssociativeCache"].is_boolean())
         useAssociativeCache = config["useAssociativeCache"];
 
-    log2DbMTAssociativeCacheSize = 20;
+    log2DbMTAssociativeCacheSize = 24;
     if (config.contains("log2DbMTAssociativeCacheSize") && config["log2DbMTAssociativeCacheSize"].is_number())
         log2DbMTAssociativeCacheSize = config["log2DbMTAssociativeCacheSize"];
     
-    log2DbMTAssociativeCacheIndicesSize = 23;
+    log2DbMTAssociativeCacheIndicesSize = 28;
     if (config.contains("log2DbMTAssociativeCacheIndicesSize") && config["log2DbMTAssociativeCacheIndicesSize"].is_number())
         log2DbMTAssociativeCacheIndicesSize = config["log2DbMTAssociativeCacheIndicesSize"];
 

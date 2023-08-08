@@ -23,6 +23,7 @@
 DatabaseMTAssociativeCache Database::dbMTACache;
 DatabaseMTCache Database::dbMTCache;
 DatabaseProgramCache Database::dbProgramCache;
+
 string Database::dbStateRootKey("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // 64 f's
 Goldilocks::Element Database::dbStateRootvKey[4] = {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF};
 bool Database::useAssociativeCache = false;
@@ -279,7 +280,7 @@ zkresult Database::read(const string &_key, Goldilocks::Element (&vkey)[4], vect
     return r;
 }
 
-zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent)
+zkresult Database::write(const string &_key, const Goldilocks::Element* vkey, const vector<Goldilocks::Element> &value, const bool persistent)
 {
     // Check that it has  been initialized before
     if (!bInitialized)
@@ -325,93 +326,17 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
     if ((r == ZKR_SUCCESS) && (dbMTCache.enabled() || dbMTACache.enabled()))
     {
         if(usingAssociativeCache()){
-            Goldilocks::Element vkey_[4];
-            string2key(fr, _key, vkey_);
-            dbMTACache.addKeyValue(vkey_, value, false);
-        }else{
-            dbMTCache.add(key, value, false);
-        }
-    }
-#endif
-
-#ifdef LOG_DB_WRITE
-    {
-        string s = "Database::write()";
-        if (r != ZKR_SUCCESS)
-            s += " ERROR=" + zkresult2string(r);
-        s += " key=" + key;
-        s += " value=";
-        for (uint64_t i = 0; i < value.size(); i++)
-            s += fr.toString(value[i], 16) + ":";
-        s += " persistent=" + to_string(persistent);
-        zklog.info(s);
-    }
-#endif
-
-    return r;
-}
-
-zkresult Database::write(const Goldilocks::Element* vkey, const vector<Goldilocks::Element> &value, const bool persistent)
-{
-    // Check that it has  been initialized before
-    if (!bInitialized)
-    {
-        zklog.error("Database::write() called uninitialized");
-        exitProcess();
-    }
-
-    if (config.dbMultiWrite && !(dbMTCache.enabled() && dbMTACache.enabled()) && !persistent)
-    {
-        zklog.error("Database::write() called with multi-write active, cache disabled and no persistance in database, so there is no place to store the date");
-        return ZKR_DB_ERROR;
-    }
-
-    zkresult r;
-    // From dynamic pointer to static pointer
-    Goldilocks::Element vkeyf[4];
-    vkeyf[0] = vkey[0];
-    vkeyf[1] = vkey[1];
-    vkeyf[2] = vkey[2];
-    vkeyf[3] = vkey[3];
-    string key="";
-
-    if ( useRemoteDB
-#ifdef DATABASE_USE_CACHE
-         && persistent
-#endif
-         )
-    {
-        // Prepare the query
-        string valueString = "";
-        string aux;
-        for (uint64_t i = 0; i < value.size(); i++)
-        {
-            valueString += PrependZeros(fr.toString(value[i], 16), 16);
-        }
-        // Normalize key format
-        string auxKey = fea2string(fr, vkeyf);
-        key = NormalizeToNFormat(auxKey, 64);
-        key = stringToLower(key);
-        r = writeRemote(false, key, valueString);
-    }
-    else
-    {
-        r = ZKR_SUCCESS;
-    }
-
-#ifdef DATABASE_USE_CACHE
-    if ((r == ZKR_SUCCESS) && (dbMTCache.enabled() || dbMTACache.enabled()))
-    {
-        // Create in memory cache
-        if(usingAssociativeCache()){
+            Goldilocks::Element vkeyf[4];
+            if(vkey == NULL){
+                string2key(fr, _key, vkeyf);
+            }else{
+                vkeyf[0] = vkey[0];
+                vkeyf[1] = vkey[1];
+                vkeyf[2] = vkey[2];
+                vkeyf[3] = vkey[3];
+            }
             dbMTACache.addKeyValue(vkeyf, value, false);
         }else{
-   
-            if(key==""){
-                string auxKey = fea2string(fr, vkeyf);
-                key = NormalizeToNFormat(auxKey, 64);
-                key = stringToLower(key);
-            }
             dbMTCache.add(key, value, false);
         }
     }
@@ -1643,7 +1568,7 @@ void Database::printTree(const string &root, string prefix)
     string key = root;
     vector<Goldilocks::Element> value;
     Goldilocks::Element vKey[4];
-    string2key(fr, key, vKey);  
+    if(Database::useAssociativeCache) string2key(fr, key, vKey);  
     read(key,vKey,value, NULL);
 
     if (value.size() != 12)
@@ -1892,7 +1817,7 @@ void *dbCacheSynchThread (void *arg)
                 {
                     vector<Goldilocks::Element> value;
                     string2fea(pDatabase->fr, it->second, value);
-                    pDatabase->write(it->first, value, false);
+                    pDatabase->write(it->first, NULL, value, false);
                 }
             }
 
@@ -2022,7 +1947,7 @@ void loadDb2MemCache(const Config &config)
             hash = treeMapIterator->second[i];
             dbValue.clear();
             Goldilocks::Element vhash[4];
-            string2key(fr, hash, vhash);
+            if(pHashDB->db.usingAssociativeCache()) string2key(fr, hash, vhash);
             zkresult zkr = pHashDB->db.read(hash, vhash, dbValue, NULL, true);
 
             if (zkr != ZKR_SUCCESS)
@@ -2046,7 +1971,6 @@ void loadDb2MemCache(const Config &config)
                     break;
                 }
             }
-            rightHash = fea2string(fr, dbValue[4], dbValue[5], dbValue[6], dbValue[7]);
             // If capaxity is X000
             if (fr.isZero(dbValue[9]) && fr.isZero(dbValue[10]) && fr.isZero(dbValue[11]))
             {
@@ -2059,6 +1983,7 @@ void loadDb2MemCache(const Config &config)
                         treeMap[level+1].push_back(leftHash);
                         //zklog.info("loadDb2MemCache() level=" + to_string(level) + " found leftHash=" + leftHash);
                     }
+                    rightHash = fea2string(fr, dbValue[4], dbValue[5], dbValue[6], dbValue[7]);
                     if (rightHash != "0")
                     {
                         treeMap[level+1].push_back(rightHash);
@@ -2068,11 +1993,11 @@ void loadDb2MemCache(const Config &config)
                 // If capacity is 1000, this is a leaf node that contains right hash of the value node
                 else if (fr.isOne(dbValue[8]))
                 {
+                    rightHash = fea2string(fr, dbValue[4], dbValue[5], dbValue[6], dbValue[7]);
                     if (rightHash != "0")
                     {
                         //zklog.info("loadDb2MemCache() level=" + to_string(level) + " found value rightHash=" + rightHash);
                         dbValue.clear();
-
                         Goldilocks::Element vRightHash[4]={dbValue[4], dbValue[5], dbValue[6], dbValue[7]};
                         zkresult zkr = pHashDB->db.read(rightHash, vRightHash, dbValue, NULL, true);
                         if (zkr != ZKR_SUCCESS)
