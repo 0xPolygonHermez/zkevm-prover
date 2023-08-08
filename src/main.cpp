@@ -616,7 +616,7 @@ int main(int argc, char **argv)
     /* INIT DB CACHE */
     if(config.useAssociativeCache){
         Database::useAssociativeCache = true;
-        Database::dbMTACache.postConstruct(config.log2DbMTAssociativeCacheIndicesSize, config.log2DbMTAssociativeCacheSize, "MTACache");
+        Database::dbMTACache.postConstruct(config.log2DbMTAssociativeCacheIndexesSize, config.log2DbMTAssociativeCacheSize, "MTACache");
     }
     else{
         Database::useAssociativeCache = false;

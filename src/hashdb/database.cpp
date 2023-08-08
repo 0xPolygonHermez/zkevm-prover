@@ -613,7 +613,7 @@ zkresult Database::readTreeRemote(const string &key, bool *keys, uint64_t level,
         zklog.info("Database::readTreeRemote() key=" + key);
     }
     string rkey;
-    for (uint64_t i=level; i<256; i++) //rick: carefull, is 256 right?
+    for (uint64_t i=level; i<256; i++)
     {
         uint8_t auxByte = (uint8_t)(keys[i]);
         if (auxByte > 1)

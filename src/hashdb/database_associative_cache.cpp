@@ -106,7 +106,6 @@ void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], cons
     //
     //  Statistics
     //
-    attempts++; // must be atomic operation!! makes it sence? not really
     if (attempts%1000000 == 0)
     {
         zklog.info("DatabaseMTAssociativeCache::addKeyValue() name=" + name + " indexesSize=" + to_string(indexesSize) + " cacheSize=" + to_string(cacheSize) + " attempts=" + to_string(attempts) + " hits=" + to_string(hits) + " hit ratio=" + to_string(double(hits) * 100.0 / double(zkmax(attempts, 1))) + "%");
@@ -144,7 +143,6 @@ void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], cons
                 keys[cacheIndexKey + 2].fe == key[2].fe &&
                 keys[cacheIndexKey + 3].fe == key[3].fe)
             {
-                hits++;
                 write = update;
             }
             else
@@ -215,15 +213,15 @@ void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], cons
     // Forced index insertion
     //
     int iters = 0;
-    uint32_t rawCacheIndices[10];
-    rawCacheIndices[0] = currentCacheIndex-1;
-    forcedInsertion(rawCacheIndices, iters);
+    uint32_t rawCacheIndexes[10];
+    rawCacheIndexes[0] = currentCacheIndex-1;
+    forcedInsertion(rawCacheIndexes, iters);
 
 }
 
-void DatabaseMTAssociativeCache::forcedInsertion(uint32_t (&rawCacheIndices)[10], int &iters)
+void DatabaseMTAssociativeCache::forcedInsertion(uint32_t (&rawCacheIndexes)[10], int &iters)
 {
-    uint32_t rawCacheIndex = rawCacheIndices[iters];
+    uint32_t rawCacheIndex = rawCacheIndexes[iters];
     //
     // avoid infinite loop
     //
@@ -256,7 +254,7 @@ void DatabaseMTAssociativeCache::forcedInsertion(uint32_t (&rawCacheIndices)[10]
         {
             bool used = false;
             for(int k=0; k<iters; k++){
-                if(rawCacheIndices[k] == rawCacheIndex_){
+                if(rawCacheIndexes[k] == rawCacheIndex_){
                     used = true;
                     break;
                 }
@@ -275,8 +273,8 @@ void DatabaseMTAssociativeCache::forcedInsertion(uint32_t (&rawCacheIndices)[10]
         exitProcess();
     }  
     indexes[(uint32_t)(key[pos].fe & indexesMask)] = rawCacheIndex;
-    rawCacheIndices[iters] = minRawCacheIndex;
-    forcedInsertion(rawCacheIndices, iters);
+    rawCacheIndexes[iters] = minRawCacheIndex;
+    forcedInsertion(rawCacheIndexes, iters);
     
 }
 

@@ -47,7 +47,7 @@ class DatabaseMTAssociativeCache
         inline uint32_t getIndexesSize() const { return indexesSize; };
 
     private:
-        void forcedInsertion(uint32_t (&rawCacheIndices)[10], int &iters);
+        void forcedInsertion(uint32_t (&rawCacheIndexes)[10], int &iters);
 };
 #endif
 

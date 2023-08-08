@@ -15,7 +15,6 @@ bool DatabaseCache::addKeyValue(const string &key, const void * value, const boo
         return true;
     }
 
-    attempts++;
     if (attempts%1000000 == 0)
     {
         zklog.info("DatabaseCache::addKeyValue() name=" + name + " count=" + to_string(cacheMap.size()) + " maxSize=" + to_string(maxSize) + " currentSize=" + to_string(currentSize) + " attempts=" + to_string(attempts) + " hits=" + to_string(hits) + " hit ratio=" + to_string(double(hits)*100.0/double(zkmax(attempts,1))) + "%");
@@ -25,7 +24,6 @@ bool DatabaseCache::addKeyValue(const string &key, const void * value, const boo
     // If key already exists in the cache return. The findKey also sets the record in the head of the cache
     if (findKey(key, record))
     {
-        hits++;
         if (update)
         {
             updateRecord(record, value);
