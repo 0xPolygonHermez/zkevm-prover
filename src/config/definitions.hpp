@@ -71,6 +71,5 @@
 //#define HASHDB_LOCK // If defined, the HashDB class will use a lock in all its methods, i.e. they will be serialized
 //#define DATABASE_COMMIT // If defined, the Database class can be configured to autocommit, or explicitly commit(); used for testing only
 #define DATABASE_USE_CACHE // If defined, the Database class uses a cache
-#define DATABASE_USE_ASSOCIATIVE_CACHE // If defined, the Database class uses an associative cache
 
 #endif

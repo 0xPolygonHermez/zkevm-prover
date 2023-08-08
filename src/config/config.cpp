@@ -107,6 +107,10 @@ void Config::load(json &config)
     runDatabaseCacheTest = false;
     if (config.contains("runDatabaseCacheTest") && config["runDatabaseCacheTest"].is_boolean())
         runDatabaseCacheTest = config["runDatabaseCacheTest"];
+    
+    runDatabaseAssociativeCacheTest = false;
+    if (config.contains("runDatabaseAssociativeCacheTest") && config["runDatabaseAssociativeCacheTest"].is_boolean())
+        runDatabaseAssociativeCacheTest = config["runDatabaseAssociativeCacheTest"];
 
     runCheckTreeTest = false;
     if (config.contains("runCheckTreeTest") && config["runCheckTreeTest"].is_boolean())
@@ -184,6 +188,10 @@ void Config::load(json &config)
     if (config.contains("dbMTCacheSize") && config["dbMTCacheSize"].is_number())
         dbMTCacheSize = config["dbMTCacheSize"];
     
+    useAssociativeCache = false;
+    if (config.contains("useAssociativeCache") && config["useAssociativeCache"].is_boolean())
+        useAssociativeCache = config["useAssociativeCache"];
+
     log2DbMTAssociativeCacheSize = 20;
     if (config.contains("log2DbMTAssociativeCacheSize") && config["log2DbMTAssociativeCacheSize"].is_number())
         log2DbMTAssociativeCacheSize = config["log2DbMTAssociativeCacheSize"];
@@ -599,6 +607,8 @@ void Config::print(void)
         zklog.info("    runECRecoverTest=true");
     if (runDatabaseCacheTest)
         zklog.info("    runDatabaseCacheTest=true");
+    if (runDatabaseAssociativeCacheTest)
+        zklog.info("    runDatabaseAssociativeCacheTest=true");
     if (runCheckTreeTest)
     {
         zklog.info("    runCheckTreeTest=true");
@@ -717,6 +727,7 @@ void Config::print(void)
     zklog.info("    maxProverThreads=" + to_string(maxProverThreads));
     zklog.info("    maxHashDBThreads=" + to_string(maxHashDBThreads));
     zklog.info("    dbMTCacheSize=" + to_string(dbMTCacheSize));
+    zklog.info("    useAssociativeCache=" + to_string(useAssociativeCache));
     zklog.info("    log2DbMTAssociativeCacheSize=" + to_string(log2DbMTAssociativeCacheSize));
     zklog.info("    log2DbMTAssociativeCacheIndicesSize=" + to_string(log2DbMTAssociativeCacheIndicesSize));
     zklog.info("    dbProgramCacheSize=" + to_string(dbProgramCacheSize));

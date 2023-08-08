@@ -107,7 +107,7 @@ void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], cons
     //  Statistics
     //
     attempts++; // must be atomic operation!! makes it sence? not really
-    if (attempts << 40 == 0)
+    if (attempts%1000000 == 0)
     {
         zklog.info("DatabaseMTAssociativeCache::addKeyValue() name=" + name + " indexesSize=" + to_string(indexesSize) + " cacheSize=" + to_string(cacheSize) + " attempts=" + to_string(attempts) + " hits=" + to_string(hits) + " hit ratio=" + to_string(double(hits) * 100.0 / double(zkmax(attempts, 1))) + "%");
     }

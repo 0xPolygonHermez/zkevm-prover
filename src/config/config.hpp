@@ -39,6 +39,7 @@ public:
     bool runBlakeTest;
     bool runECRecoverTest;
     bool runDatabaseCacheTest;
+    bool runDatabaseAssociativeCacheTest;
     bool runCheckTreeTest;
     string checkTreeRoot;
     bool runDatabasePerformanceTest;
@@ -61,6 +62,7 @@ public:
     bool loadDBToMemCacheInParallel;
     uint64_t loadDBToMemTimeout;
     int64_t dbMTCacheSize; // Size in MBytes for the cache to store MT records
+    bool useAssociativeCache; // Use the associative cache for MT records?
     int64_t log2DbMTAssociativeCacheSize; // log2 of the size in entries of the DatabaseMTAssociativeCache. Note 1 cache entry = 97 bytes
     int64_t log2DbMTAssociativeCacheIndicesSize; // log2 of the size in entries of the DatabaseMTAssociativeCache indices. Note index entry = 4 bytes
 

@@ -1,18 +1,17 @@
-#include "database_cache_test.hpp"
+#include "database_associative_cache_test.hpp"
 #include "hashdb/database.hpp"
 #include "timer.hpp"
 #include "scalar.hpp"
 
 #define NUMBER_OF_DB_CACHE_ADDS 1000
 
-uint64_t DatabaseCacheTest (void)
+uint64_t DatabaseAssociativeCacheTest (void)
 {
-    TimerStart(DATABASE_CACHE_TEST);
+    TimerStart(DATABASE_ASSOCIATIVE_CACHE_TEST);
 
     uint64_t numberOfFailed = 0;
-    Database::dbMTCache.clear();
-    Database::dbMTCache.setMaxSize(2000000);
-  
+    Database::dbMTACache.postConstruct(20,17,"MTACache");
+    Goldilocks::Element key[4];
 
     Goldilocks fr;
     mpz_class keyScalar;
@@ -30,7 +29,8 @@ uint64_t DatabaseCacheTest (void)
             value.push_back(fr.fromU64(j));
         }
         bool update = false;
-        Database::dbMTCache.add(keyString, value, update);
+        scalar2fea(fr, keyScalar, key);
+        Database::dbMTACache.addKeyValue(key, value,update);
     }
 
     //Database::dbMTCache.print(true);
@@ -39,7 +39,8 @@ uint64_t DatabaseCacheTest (void)
     {
         keyScalar = i;
         keyString = PrependZeros(keyScalar.get_str(16), 64);
-        bResult = Database::dbMTCache.find(keyString, value);
+        scalar2fea(fr, keyScalar, key);
+        bResult = Database::dbMTACache.findKey(key, value);
 
         if (!bResult)
         {
@@ -48,6 +49,6 @@ uint64_t DatabaseCacheTest (void)
         }
     }
     Database::dbMTCache.clear();
-    TimerStopAndLog(DATABASE_CACHE_TEST);
+    TimerStopAndLog(DATABASE_ASSOCIATIVE_CACHE_TEST);
     return numberOfFailed;
 }
