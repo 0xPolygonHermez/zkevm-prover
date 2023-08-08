@@ -46,8 +46,15 @@ ProverRequest::ProverRequest (Goldilocks &fr, const Config &config, tProverReque
     if (config.saveDbReadsToFile || config.dbMetrics)
     {
         dbReadLog = new DatabaseMap();
+        dbReadLog->setSaveKeys(false);
+
+        if (config.saveDbReadsToFile){              
+            dbReadLog->setSaveKeys(true);
+        }
+        
         if (config.saveDbReadsToFileOnChange)
         {
+            dbReadLog->setSaveKeys(true);
             dbReadLog->setOnChangeCallback(this, ProverRequest::onDBReadLogChangeCallback);
         }
     }

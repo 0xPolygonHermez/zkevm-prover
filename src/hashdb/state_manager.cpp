@@ -668,7 +668,7 @@ zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &f
                       writeIt != txState.persistence[persistence].subState[ss].dbWrite.end();
                       writeIt++ )
                 {
-                    zkr = db.write(writeIt->first, writeIt->second, persistence == PERSISTENCE_DATABASE ? 1 : 0);
+                    zkr = db.write(writeIt->first, NULL, writeIt->second, persistence == PERSISTENCE_DATABASE ? 1 : 0);
                     if (zkr != ZKR_SUCCESS)
                     {
                         zklog.error("StateManager::flush() failed calling db.write() result=" + zkresult2string(zkr));

@@ -15,6 +15,7 @@
 #include "zkassert.hpp"
 #include "tree_position.hpp"
 #include "multi_write.hpp"
+#include "database_associative_cache.hpp"
 
 using namespace std;
 
@@ -61,13 +62,15 @@ private:
     // Remote database based on Postgres (PostgreSQL)
     void initRemote(void);
     zkresult readRemote(bool bProgram, const string &key, string &value);
-    zkresult readTreeRemote(const string &key, const vector<uint64_t> *keys, uint64_t level, uint64_t &numberOfFields);
+    zkresult readTreeRemote(const string &key, bool *keys, uint64_t level, uint64_t &numberOfFields);
     zkresult writeRemote(bool bProgram, const string &key, const string &value);
     zkresult writeGetTreeFunction(void);
 
 public:
 #ifdef DATABASE_USE_CACHE
     // Cache static instances
+    static bool useAssociativeCache;
+    static DatabaseMTAssociativeCache dbMTACache;
     static DatabaseMTCache dbMTCache;
     static DatabaseProgramCache dbProgramCache;
 
@@ -75,6 +78,7 @@ public:
     // This key is "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
     // This key cannot be the result of a hash because it is out of the Goldilocks Element range
     static string dbStateRootKey;
+    static Goldilocks::Element dbStateRootvKey[4];
 
 #endif
 
@@ -84,10 +88,12 @@ public:
 
     // Basic methods
     void init(void);
-    zkresult read(const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, const bool update = false, const vector<uint64_t> *keys = NULL , uint64_t level=0);
-    zkresult write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent);
+    zkresult read(const string &_key, Goldilocks::Element (&vkey)[4], vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, const bool update = false, bool *keys = NULL , uint64_t level=0);
+    zkresult write(const string &_key, const Goldilocks::Element* vkey, const vector<Goldilocks::Element> &value, const bool persistent);
     zkresult getProgram(const string &_key, vector<uint8_t> &value, DatabaseMap *dbReadLog);
     zkresult setProgram(const string &_key, const vector<uint8_t> &value, const bool persistent);
+    inline bool usingAssociativeCache(void){ return useAssociativeCache; };
+
 private:
     zkresult createStateRoot(void);
 public:

@@ -7,7 +7,9 @@ zkresult CheckTree (Database &db, const string &key, uint64_t level, CheckTreeCo
     checkTreeCounters.maxLevel = zkmax(checkTreeCounters.maxLevel, level);
 
     vector<Goldilocks::Element> value;
-    zkresult result = db.read(key, value, NULL, false);
+    Goldilocks::Element vKey[4];
+    if(db.useAssociativeCache) string2key(db.fr, key, vKey);
+    zkresult result = db.read(key, vKey, value, NULL, false);
     if (result != ZKR_SUCCESS)
     {
         zklog.error("CheckTree() failed key=" + key + " level=" + to_string(level));
@@ -67,8 +69,9 @@ zkresult CheckTree (Database &db, const string &key, uint64_t level, CheckTreeCo
 
         level++;
         string valueHash = fea2string(db.fr, value[4], value[5], value[6], value[7]);
+        Goldilocks::Element vHash[4]={value[4], value[5], value[6], value[7]};
         value.clear();
-        zkresult result = db.read(valueHash, value, NULL, false);
+        zkresult result = db.read(valueHash, vHash, value, NULL, false);
         if (result != ZKR_SUCCESS)
         {
             zklog.error("CheckTree() failed key=" + valueHash + " level=" + to_string(level));

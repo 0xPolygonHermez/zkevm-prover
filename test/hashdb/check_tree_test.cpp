@@ -19,7 +19,7 @@ uint64_t CheckTreeTest (Config &config)
     if (root == "auto")
     {
         vector<Goldilocks::Element> value;
-        zkr = db.read(db.dbStateRootKey, value, NULL, true);
+        zkr = db.read(db.dbStateRootKey, db.dbStateRootvKey, value, NULL, true);
         if (zkr != ZKR_SUCCESS)
         {
             zklog.error("CheckTreeTest() failed calling db.read(stateRootKey) zkr=" + zkresult2string(zkr));

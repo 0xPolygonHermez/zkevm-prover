@@ -20,10 +20,14 @@
 // Create static Database::dbMTCache and DatabaseCacheProgram objects
 // This will be used to store DB records in memory and it will be shared for all the instances of Database class
 // DatabaseCacheMT and DatabaseCacheProgram classes are thread-safe
+DatabaseMTAssociativeCache Database::dbMTACache;
 DatabaseMTCache Database::dbMTCache;
 DatabaseProgramCache Database::dbProgramCache;
 
 string Database::dbStateRootKey("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // 64 f's
+Goldilocks::Element Database::dbStateRootvKey[4] = {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF};
+bool Database::useAssociativeCache = false;
+
 
 #endif
 
@@ -100,7 +104,7 @@ void Database::init(void)
     bInitialized = true;
 }
 
-zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, const bool update, const vector<uint64_t> *keys, uint64_t level)
+zkresult Database::read(const string &_key, Goldilocks::Element (&vkey)[4], vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, const bool update,  bool *keys, uint64_t level)
 {
     // Check that it has been initialized before
     if (!bInitialized)
@@ -120,11 +124,14 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
 
 #ifdef DATABASE_USE_CACHE
     // If the key is found in local database (cached) simply return it
-    if (dbMTCache.enabled() && dbMTCache.find(key, value))
-    {
-        // Add to the read log
-        if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
+    if(usingAssociativeCache() && dbMTACache.findKey(vkey,value)){
 
+        if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
+        r = ZKR_SUCCESS;
+
+    } else if( dbMTCache.enabled() && dbMTCache.find(key, value)){
+        
+        if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
         r = ZKR_SUCCESS;
     }
     else
@@ -137,7 +144,12 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
 
 #ifdef DATABASE_USE_CACHE
         // Store it locally to avoid any future remote access for this key
-        if (dbMTCache.enabled()) dbMTCache.add(key, value, update);
+        if(usingAssociativeCache()){
+            dbMTACache.addKeyValue(vkey, value, false);
+        }
+        else if(dbMTCache.enabled()){                
+            dbMTCache.add(key, value, false);
+        }
 #endif
         r = ZKR_SUCCESS;
     }
@@ -184,12 +196,12 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
         // If succeeded, now the value should be present in the cache
         if ( r == ZKR_SUCCESS)
         {
-            if (dbMTCache.find(key, value))
-            {
-                // Add to the read log
+            if (usingAssociativeCache() && dbMTACache.findKey(vkey,value)){
                 if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
-
                 r = ZKR_SUCCESS;
+            }else if(dbMTCache.enabled() && dbMTCache.find(key, value)){
+                if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
+                r = ZKR_SUCCESS;                
             }
             else
             {
@@ -233,7 +245,11 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
 
 #ifdef DATABASE_USE_CACHE
             // Store it locally to avoid any future remote access for this key
-            if (dbMTCache.enabled()) dbMTCache.add(key, value, update);
+            if(usingAssociativeCache()){
+                dbMTACache.addKeyValue(vkey, value, update);
+            }else if (dbMTCache.enabled()){
+                dbMTCache.add(key, value, update);
+            }
 #endif
 
             // Add to the read log
@@ -264,7 +280,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
     return r;
 }
 
-zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent)
+zkresult Database::write(const string &_key, const Goldilocks::Element* vkey, const vector<Goldilocks::Element> &value, const bool persistent)
 {
     // Check that it has  been initialized before
     if (!bInitialized)
@@ -273,7 +289,7 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
         exitProcess();
     }
 
-    if (config.dbMultiWrite && !dbMTCache.enabled() && !persistent)
+    if (config.dbMultiWrite && !(dbMTCache.enabled() || dbMTACache.enabled()) && !persistent)
     {
         zklog.error("Database::write() called with multi-write active, cache disabled and no persistance in database, so there is no place to store the date");
         return ZKR_DB_ERROR;
@@ -307,10 +323,22 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
     }
 
 #ifdef DATABASE_USE_CACHE
-    if ((r == ZKR_SUCCESS) && dbMTCache.enabled())
+    if ((r == ZKR_SUCCESS) && (dbMTCache.enabled() || dbMTACache.enabled()))
     {
-        // Create in memory cache
-        dbMTCache.add(key, value, false);
+        if(usingAssociativeCache()){
+            Goldilocks::Element vkeyf[4];
+            if(vkey == NULL){
+                string2key(fr, _key, vkeyf);
+            }else{
+                vkeyf[0] = vkey[0];
+                vkeyf[1] = vkey[1];
+                vkeyf[2] = vkey[2];
+                vkeyf[3] = vkey[3];
+            }
+            dbMTACache.addKeyValue(vkeyf, value, false);
+        }else{
+            dbMTCache.add(key, value, false);
+        }
     }
 #endif
 
@@ -576,7 +604,7 @@ zkresult Database::readRemote(bool bProgram, const string &key, string &value)
     return ZKR_SUCCESS;
 }
 
-zkresult Database::readTreeRemote(const string &key, const vector<uint64_t> *keys, uint64_t level, uint64_t &numberOfFields)
+zkresult Database::readTreeRemote(const string &key, bool *keys, uint64_t level, uint64_t &numberOfFields)
 {
     zkassert(keys != NULL);
 
@@ -585,9 +613,9 @@ zkresult Database::readTreeRemote(const string &key, const vector<uint64_t> *key
         zklog.info("Database::readTreeRemote() key=" + key);
     }
     string rkey;
-    for (uint64_t i=level; i<keys->size(); i++)
+    for (uint64_t i=level; i<256; i++)
     {
-        uint8_t auxByte = (*keys)[i];
+        uint8_t auxByte = (uint8_t)(keys[i]);
         if (auxByte > 1)
         {
             zklog.error("Database::readTreeRemote() found invalid keys value=" + to_string(auxByte) + " at position " + to_string(i));
@@ -661,10 +689,16 @@ zkresult Database::readTreeRemote(const string &key, const vector<uint64_t> *key
 
 #ifdef DATABASE_USE_CACHE
             // Store it locally to avoid any future remote access for this key
-            if (dbMTCache.enabled())
+            if (dbMTCache.enabled() || dbMTACache.enabled())
             {
                 //zklog.info("Database::readTreeRemote() adding hash=" + hash + " to dbMTCache");
-                dbMTCache.add(hash, value, false);
+                if(usingAssociativeCache()){
+                    Goldilocks::Element vhash[4];
+                    string2key(fr, hash, vhash);   
+                    dbMTACache.addKeyValue(vhash, value, false);
+                }else{
+                    dbMTCache.add(hash, value, false);
+              }
             }
 #endif
         }
@@ -893,10 +927,14 @@ zkresult Database::updateStateRoot(const Goldilocks::Element (&stateRoot)[4])
     }
 
 #ifdef DATABASE_USE_CACHE
-    if ((r == ZKR_SUCCESS) && dbMTCache.enabled())
+    if ((r == ZKR_SUCCESS) && (dbMTCache.enabled() || dbMTACache.enabled()))
     {
         // Create in memory cache
-        dbMTCache.add(dbStateRootKey, value, true);
+        if(usingAssociativeCache()){
+                dbMTACache.addKeyValue(dbStateRootvKey, value, true);
+        }else{
+                dbMTCache.add(dbStateRootKey, value, true);
+        }
     }
 #endif
 
@@ -1529,7 +1567,10 @@ void Database::printTree(const string &root, string prefix)
     }
     string key = root;
     vector<Goldilocks::Element> value;
-    read(key, value, NULL);
+    Goldilocks::Element vKey[4];
+    if(Database::useAssociativeCache) string2key(fr, key, vKey);  
+    read(key,vKey,value, NULL);
+
     if (value.size() != 12)
     {
         zklog.error("Database::printTree() found value.size()=" + to_string(value.size()));
@@ -1568,7 +1609,8 @@ void Database::printTree(const string &root, string prefix)
         string hashValue = fea2string(fr, value[4], value[5], value[6], value[7]);
         zklog.info(prefix + "hashValue=" + hashValue);
         vector<Goldilocks::Element> leafValue;
-        read(hashValue, leafValue, NULL);
+        Goldilocks::Element vKey[4]={value[4],value[5],value[6],value[7]};
+        read(rKey, vKey, leafValue, NULL);
         if (leafValue.size() == 12)
         {
             if (!fr.equal(leafValue[8], fr.zero()))
@@ -1775,7 +1817,7 @@ void *dbCacheSynchThread (void *arg)
                 {
                     vector<Goldilocks::Element> value;
                     string2fea(pDatabase->fr, it->second, value);
-                    pDatabase->write(it->first, value, false);
+                    pDatabase->write(it->first, NULL, value, false);
                 }
             }
 
@@ -1835,8 +1877,8 @@ void loadDb2MemCache(const Config &config)
     HashDB * pHashDB = (HashDB *)hashDBSingleton.get();
 
     vector<Goldilocks::Element> dbValue;
+    zkresult zkr = pHashDB->db.read(Database::dbStateRootKey, Database::dbStateRootvKey, dbValue, NULL, true);
 
-    zkresult zkr = pHashDB->db.read(Database::dbStateRootKey, dbValue, NULL, true);
     if (zkr == ZKR_DB_KEY_NOT_FOUND)
     {
         zklog.warning("loadDb2MemCache() dbStateRootKey=" +  Database::dbStateRootKey + " not found in database; normal only if database is empty");
@@ -1904,7 +1946,10 @@ void loadDb2MemCache(const Config &config)
 
             hash = treeMapIterator->second[i];
             dbValue.clear();
-            zkresult zkr = pHashDB->db.read(hash, dbValue, NULL, true);
+            Goldilocks::Element vhash[4];
+            if(pHashDB->db.usingAssociativeCache()) string2key(fr, hash, vhash);
+            zkresult zkr = pHashDB->db.read(hash, vhash, dbValue, NULL, true);
+
             if (zkr != ZKR_SUCCESS)
             {
                 zklog.error("loadDb2MemCache() failed calling db.read(" + hash + ") result=" + zkresult2string(zkr));
@@ -1918,13 +1963,14 @@ void loadDb2MemCache(const Config &config)
                 return;
             }
             counter++;
-            double sizePercentage = double(Database::dbMTCache.getCurrentSize())*100.0/double(Database::dbMTCache.getMaxSize());
-            if ( sizePercentage > 90 )
-            {
-                zklog.info("loadDb2MemCache() stopping since size percentage=" + to_string(sizePercentage));
-                break;
+            if(Database::dbMTCache.enabled()){
+                double sizePercentage = double(Database::dbMTCache.getCurrentSize())*100.0/double(Database::dbMTCache.getMaxSize());
+                if ( sizePercentage > 90 )
+                {
+                    zklog.info("loadDb2MemCache() stopping since size percentage=" + to_string(sizePercentage));
+                    break;
+                }
             }
-
             // If capaxity is X000
             if (fr.isZero(dbValue[9]) && fr.isZero(dbValue[10]) && fr.isZero(dbValue[11]))
             {
@@ -1952,7 +1998,8 @@ void loadDb2MemCache(const Config &config)
                     {
                         //zklog.info("loadDb2MemCache() level=" + to_string(level) + " found value rightHash=" + rightHash);
                         dbValue.clear();
-                        zkresult zkr = pHashDB->db.read(rightHash, dbValue, NULL, true);
+                        Goldilocks::Element vRightHash[4]={dbValue[4], dbValue[5], dbValue[6], dbValue[7]};
+                        zkresult zkr = pHashDB->db.read(rightHash, vRightHash, dbValue, NULL, true);
                         if (zkr != ZKR_SUCCESS)
                         {
                             zklog.error("loadDb2MemCache() failed calling db.read(" + rightHash + ") result=" + zkresult2string(zkr));
@@ -1966,8 +2013,9 @@ void loadDb2MemCache(const Config &config)
         }
     }
 
-    zklog.info("loadDb2MemCache() done counter=" + to_string(counter) + " cache at " + to_string((double(Database::dbMTCache.getCurrentSize())/double(Database::dbMTCache.getMaxSize()))*100) + "%");
-
+    if(Database::dbMTCache.enabled()){
+        zklog.info("loadDb2MemCache() done counter=" + to_string(counter) + " cache at " + to_string((double(Database::dbMTCache.getCurrentSize())/double(Database::dbMTCache.getMaxSize()))*100) + "%");
+    }
     TimerStopAndLog(LOAD_DB_TO_CACHE);
 
 #endif

@@ -4,6 +4,7 @@
 #include "zkresult.hpp"
 #include "zkmax.hpp"
 #include "zklog.hpp"
+#include <bitset>
 #include "state_manager.hpp"
 
 zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, SmtSetResult &result, DatabaseMap *dbReadLog)
@@ -27,7 +28,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
     for (uint64_t i=0; i<4; i++) newRoot[i] = oldRoot[i];
 
     // Get a list of the bits of the key to navigate top-down through the tree
-    vector<uint64_t> keys;
+    bool keys[256];
     splitKey(key, keys);
 
     int64_t level = 0;
@@ -56,7 +57,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
 
     bool isOld0 = true;
     zkresult dbres;
-    vector<Goldilocks::Element> dbValue; // used to call db.read()
+    vector<Goldilocks::Element> dbValue(12); // used to call db.read()
 
     // Start natigating the tree from the top: r = root
     // Go down while r!=0 (while there is branch) until we find the key
@@ -72,7 +73,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
         }
         if (dbres != ZKR_SUCCESS)
         {
-            dbres = db.read(rootString, dbValue, dbReadLog, false, &keys, level);
+            dbres = db.read(rootString, r, dbValue, dbReadLog, false, keys, level);
         }
         if (dbres != ZKR_SUCCESS)
         {
@@ -81,8 +82,20 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
         }
 
         // Get a copy of the content of this database entry, at the corresponding level: 0, 1...
-        siblings[level] = dbValue;
-
+        siblings[level].resize(12);
+        siblings[level][0].fe = dbValue[0].fe;
+        siblings[level][1].fe = dbValue[1].fe;
+        siblings[level][2].fe = dbValue[2].fe;
+        siblings[level][3].fe = dbValue[3].fe;
+        siblings[level][4].fe = dbValue[4].fe;
+        siblings[level][5].fe = dbValue[5].fe;
+        siblings[level][6].fe = dbValue[6].fe;
+        siblings[level][7].fe = dbValue[7].fe;
+        siblings[level][8].fe = dbValue[8].fe;
+        siblings[level][9].fe = dbValue[9].fe;
+        siblings[level][10].fe = dbValue[10].fe;
+        siblings[level][11].fe = dbValue[11].fe;
+        
         // if siblings[level][8]=1 then this is a leaf node
         if ( siblings[level].size()>8 && fr.equal(siblings[level][8], fr.one()) )
         {
@@ -99,7 +112,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
             }
             if (dbres != ZKR_SUCCESS)
             {
-                dbres = db.read(foundValueHashString, dbValue, dbReadLog);
+                dbres = db.read(foundValueHashString, foundValueHash, dbValue, dbReadLog);
             }
             if (dbres != ZKR_SUCCESS)
             {
@@ -252,7 +265,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                 int64_t level2 = level + 1;
 
                 // Split the found key in bits
-                vector <uint64_t> foundKeys;
+                bool foundKeys[256];
                 splitKey(foundKey, foundKeys);
 
                 // While the key bits are the same, increase the level; we want to find the first bit when the keys differ
@@ -527,7 +540,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                     }
                     if (dbres != ZKR_SUCCESS)
                     {
-                        dbres = db.read(auxString, dbValue, dbReadLog, false, &keys, level);
+                        dbres = db.read(auxString, auxFea, dbValue, dbReadLog, false, keys, level);
                     }
                     if ( dbres != ZKR_SUCCESS)
                     {
@@ -554,7 +567,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                         }
                         if (dbres != ZKR_SUCCESS)
                         {
-                            dbres = db.read(valHString, dbValue, dbReadLog);
+                            dbres = db.read(valHString, valH, dbValue, dbReadLog);
                         }
                         if (dbres != ZKR_SUCCESS)
                         {
@@ -804,7 +817,7 @@ zkresult Smt::get (const string &batchUUID, Database &db, const Goldilocks::Elem
     }
 
     // Get a list of the bits of the key to navigate top-down through the tree
-    vector <uint64_t> keys;
+    bool keys[256];
     splitKey(key, keys);
 
     uint64_t level = 0;
@@ -843,7 +856,7 @@ zkresult Smt::get (const string &batchUUID, Database &db, const Goldilocks::Elem
         }
         if (dbres != ZKR_SUCCESS)
         {
-            dbres = db.read(rString, dbValue, dbReadLog, false, &keys, level);
+            dbres = db.read(rString, r, dbValue, dbReadLog, false, keys, level);
         }
         if (dbres != ZKR_SUCCESS)
         {
@@ -871,7 +884,7 @@ zkresult Smt::get (const string &batchUUID, Database &db, const Goldilocks::Elem
             }
             if (dbres != ZKR_SUCCESS)
             {
-                dbres = db.read(foundValueHashString, dbValue, dbReadLog);
+                dbres = db.read(foundValueHashString, valueHashFea, dbValue, dbReadLog);
             }
             if (dbres != ZKR_SUCCESS)
             {
@@ -987,25 +1000,22 @@ zkresult Smt::get (const string &batchUUID, Database &db, const Goldilocks::Elem
 }
 
 // Split the fe key into 4-bits chuncks, e.g. 0x123456EF -> { 1, 2, 3, 4, 5, 6, E, F }
-void Smt::splitKey ( const Goldilocks::Element (&key)[4], vector<uint64_t> &result )
+void Smt::splitKey( const Goldilocks::Element (&key)[4], bool (&result)[256])
 {
-    // Copy the key to local variables
-    mpz_class auxk[4];
-    for (uint64_t i=0; i<4; i++)
-    {
-        auxk[i] = fr.toU64(key[i]);
-    }
-
+    bitset<64> auxb0(fr.toU64(key[0]));
+    bitset<64> auxb1(fr.toU64(key[1]));
+    bitset<64> auxb2(fr.toU64(key[2]));
+    bitset<64> auxb3(fr.toU64(key[3]));
+    
     // Split the key in bits, taking one bit from a different scalar every time
+    int cont = 0;
     for (uint64_t i=0; i<64; i++)
     {
-        for (uint64_t j=0; j<4; j++)
-        {
-            mpz_class aux;
-            aux = auxk[j] & 1;
-            result.push_back(aux.get_ui());
-            auxk[j] = auxk[j] >> 1;
-        }
+        result[cont] = auxb0[i];
+        result[cont+1] = auxb1[i];
+        result[cont+2] = auxb2[i];
+        result[cont+3] = auxb3[i];
+        cont+=4;
     }
 }
 
@@ -1088,7 +1098,7 @@ zkresult Smt::hashSave ( const SmtContext &ctx, const Goldilocks::Element (&v)[1
     }
     else
     {
-        zkr = ctx.db.write(hashString, dbValue, ctx.persistence == PERSISTENCE_DATABASE ? 1 : 0);
+        zkr = ctx.db.write(hashString, hash, dbValue, ctx.persistence == PERSISTENCE_DATABASE ? 1 : 0);
         if (zkr != ZKR_SUCCESS)
         {
             zklog.error("Smt::hashSave() failed calling db.write() key=" + hashString + " result=" + to_string(zkr) + "=" + zkresult2string(zkr));

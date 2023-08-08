@@ -25,6 +25,7 @@ private:
     MTMap mtDB;
     ProgramMap programDB;
     bool callbackOnChange = false;
+    bool saveKeys = false;
     onChangeCallbackFunctionPtr cbFunction = NULL;
     void *cbInstance = NULL;
 
@@ -59,17 +60,62 @@ public:
     {
 
     };
-    void add(const string key, vector<Goldilocks::Element> value, const bool cached, const uint64_t time);
-    void add(const string key, vector<uint8_t> value, const bool cached, const uint64_t time);
-    void addGetTree(const uint64_t time, const uint64_t numberOfFields);
+    inline void add(const string& key, const vector<Goldilocks::Element>& value, const bool cached, const uint64_t time);
+    inline void add(const string& key, const vector<uint8_t>& value, const bool cached, const uint64_t time);
+    inline void addGetTree(const uint64_t time, const uint64_t numberOfFields);
     void add(MTMap &db);
     void add(ProgramMap &db);
-    bool findMT(const string key, vector<Goldilocks::Element> &value);
-    bool findProgram(const string key, vector<uint8_t> &value);
+    bool findMT(const string& key, vector<Goldilocks::Element> &value);
+    bool findProgram(const string& key, vector<uint8_t> &value);
     MTMap getMTDB();
     ProgramMap getProgramDB();
     void setOnChangeCallback(void *instance, onChangeCallbackFunctionPtr function);
+    inline void setSaveKeys(const bool saveKeys_){ saveKeys = saveKeys_; };
+    inline bool getSaveKeys(){ return saveKeys; };
     void print(void);
 };
+
+void DatabaseMap::add(const string& key, const vector<Goldilocks::Element>& value, const bool cached, const uint64_t time)
+{
+    lock_guard<recursive_mutex> guard(mlock);
+    if(saveKeys) mtDB[key] = value;
+    if (cached)
+    {
+        mtCachedTimes += 1;
+        mtCachedTime += time;
+    }
+    else
+    {
+        mtDbTimes += 1;
+        mtDbTime += time;
+    }
+    if (callbackOnChange) onChangeCallback();
+}
+
+void DatabaseMap::add(const string& key, const vector<uint8_t>& value, const bool cached, const uint64_t time)
+{
+    lock_guard<recursive_mutex> guard(mlock);
+
+    if(saveKeys) programDB[key] = value;
+    if (cached)
+    {
+        programCachedTimes += 1;
+        programCachedTime += time;
+    }
+    else
+    {
+        programDbTimes += 1;
+        programDbTime += time;
+    }
+    if (callbackOnChange) onChangeCallback();
+}
+
+void DatabaseMap::addGetTree(const uint64_t time, const uint64_t numberOfFields)
+{
+    lock_guard<recursive_mutex> guard(mlock);
+    getTreeTimes += 1;
+    getTreeTime += time;
+    getTreeFields += numberOfFields;
+}
 
 #endif

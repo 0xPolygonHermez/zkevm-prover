@@ -59,7 +59,7 @@ uint64_t DatabasePerformanceTestSendValues (uint64_t valueSize)
 
     for (uint64_t i=0; i<DATABASE_PERFORMANCE_TEST_SIZE; i++)
     {
-        zkr = db.write(pKeyString[i], *(pValue + i), true);
+        zkr = db.write(pKeyString[i], NULL, *(pValue + i), true);
         if (zkr != ZKR_SUCCESS)
         {
             cerr << "Error: i=" << i << " zkr=" << zkr << "=" << zkresult2string(zkr) << endl;

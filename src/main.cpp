@@ -37,6 +37,7 @@
 #include "hashdb_singleton.hpp"
 #include "unit_test.hpp"
 #include "database_cache_test.hpp"
+#include "database_associative_cache_test.hpp"
 #include "main_sm/fork_5/main_exec_c/account.hpp"
 #include "state_manager.hpp"
 #include "check_tree_test.hpp"
@@ -559,6 +560,12 @@ int main(int argc, char **argv)
         DatabaseCacheTest();
     }
 
+    // Test Associative Database cache
+    if (config.runDatabaseAssociativeCacheTest)
+    {
+        DatabaseAssociativeCacheTest();
+    }
+
     // Test check tree
     if (config.runCheckTreeTest)
     {
@@ -607,9 +614,16 @@ int main(int argc, char **argv)
 #ifdef DATABASE_USE_CACHE
 
     /* INIT DB CACHE */
-    Database::dbMTCache.setName("MTCache");
+    if(config.useAssociativeCache){
+        Database::useAssociativeCache = true;
+        Database::dbMTACache.postConstruct(config.log2DbMTAssociativeCacheIndexesSize, config.log2DbMTAssociativeCacheSize, "MTACache");
+    }
+    else{
+        Database::useAssociativeCache = false;
+        Database::dbMTCache.setName("MTCache");
+        Database::dbMTCache.setMaxSize(config.dbMTCacheSize*1024*1024);
+    }
     Database::dbProgramCache.setName("ProgramCache");
-    Database::dbMTCache.setMaxSize(config.dbMTCacheSize*1024*1024);
     Database::dbProgramCache.setMaxSize(config.dbProgramCacheSize*1024*1024);
 
     if (config.databaseURL != "local") // remote DB
@@ -619,7 +633,7 @@ int main(int argc, char **argv)
         {
             TimerStart(DB_CACHE_LOAD);
             // if we have a db cache enabled
-            if ((Database::dbMTCache.enabled()) || (Database::dbProgramCache.enabled()))
+            if ((Database::dbMTCache.enabled()) || (Database::dbProgramCache.enabled()) || (Database::dbMTACache.enabled()))
             {
                 if (config.loadDBToMemCacheInParallel) {
                     // Run thread that loads the DB into the dbCache
