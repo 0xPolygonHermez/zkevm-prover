@@ -685,6 +685,48 @@ zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &f
                     }
                 }
             }
+
+            if (persistence == PERSISTENCE_DATABASE)
+            {
+                vector<Goldilocks::Element> fea;
+                string2fea(db.fr, txState.persistence[persistence].newStateRoot, fea);
+                if (fea.size() != 4)
+                {
+                    zklog.error("StateManager::flush() failed calling string2fea() fea.size=" + to_string(fea.size()));
+                    state.erase(it);
+
+                    TimerStopAndLog(STATE_MANAGER_FLUSH);
+
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+                    timeMetricStorage.add("flush error string2fea", TimeDiff(t));
+                    timeMetricStorage.print("State Manager calls");
+#endif
+                    Unlock();
+                    return zkr;
+
+                }
+                Goldilocks::Element newStateRootFea[4];
+                newStateRootFea[0] = fea[0];
+                newStateRootFea[1] = fea[1];
+                newStateRootFea[2] = fea[2];
+                newStateRootFea[3] = fea[3];
+
+                zkr = db.updateStateRoot(newStateRootFea);
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("StateManager::flush() failed calling db.updateStateRoot() result=" + zkresult2string(zkr));
+                    state.erase(it);
+
+                    TimerStopAndLog(STATE_MANAGER_FLUSH);
+
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+                    timeMetricStorage.add("flush error db.updateStateRoot", TimeDiff(t));
+                    timeMetricStorage.print("State Manager calls");
+#endif
+                    Unlock();
+                    return zkr;
+                }
+            }
         }
     }
     

@@ -752,8 +752,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
     {
         stateManager.setNewStateRoot(batchUUID, tx, fea2string(fr, newRoot), persistence);
     }
-
-    if ( (persistence == PERSISTENCE_DATABASE) &&
+    else if ( (persistence == PERSISTENCE_DATABASE) &&
          (
             !fr.equal(oldRoot[0], newRoot[0]) ||
             !fr.equal(oldRoot[1], newRoot[1]) ||

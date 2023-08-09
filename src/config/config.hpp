@@ -143,6 +143,7 @@ public:
     string dbNodesTableName;
     string dbProgramTableName;
     bool dbMultiWrite;
+    uint64_t dbMultiWriteSingleQuerySize;
     bool dbConnectionsPool;
     uint64_t dbNumberOfPoolConnections;
     bool dbMetrics;

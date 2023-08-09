@@ -481,6 +481,10 @@ void Config::load(json &config)
     if (config.contains("dbMultiWrite") && config["dbMultiWrite"].is_boolean())
         dbMultiWrite = config["dbMultiWrite"];
 
+    dbMultiWriteSingleQuerySize = 20*1024*1024;
+    if (config.contains("dbMultiWriteSingleQuerySize") && config["dbMultiWriteSingleQuerySize"].is_number())
+        dbMultiWriteSingleQuerySize = config["dbMultiWriteSingleQuerySize"];
+
     dbConnectionsPool = false;
     if (config.contains("dbConnectionsPool") && config["dbConnectionsPool"].is_boolean())
         dbConnectionsPool = config["dbConnectionsPool"];
@@ -711,6 +715,7 @@ void Config::print(void)
     zklog.info("    dbNodesTableName=" + dbNodesTableName);
     zklog.info("    dbProgramTableName=" + dbProgramTableName);
     zklog.info("    dbMultiWrite=" + to_string(dbMultiWrite));
+    zklog.info("    dbMultiWriteSingleQuerySize=" + to_string(dbMultiWriteSingleQuerySize));
     zklog.info("    dbConnectionsPool=" + to_string(dbConnectionsPool));
     zklog.info("    dbNumberOfPoolConnections=" + to_string(dbNumberOfPoolConnections));
     zklog.info("    dbMetrics=" + to_string(dbMetrics));
