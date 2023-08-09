@@ -2,7 +2,6 @@
 #include "definitions.hpp"
 #include "config.hpp"
 #include "main_sm/fork_4/main/eval_command.hpp"
-#include "main_sm/fork_4/main/opcode_address.hpp"
 #include "scalar.hpp"
 #include "utils.hpp"
 #include "zkassert.hpp"
@@ -1735,75 +1734,6 @@ void eval_loadScalar (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
 void eval_storeLog (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
-#ifdef CHECK_EVAL_COMMAND_PARAMETERS
-    // Check parameters list size
-    if (cmd.params.size() != 3)
-    {
-        zklog.error("eval_storeLog() invalid number of parameters function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
-        exitProcess();
-    }
-#endif
-
-    // Get indexLog by executing cmd.params[0]
-    evalCommand(ctx, *cmd.params[0], cr);
-    if (cr.zkResult != ZKR_SUCCESS)
-    {
-        return;
-    }
-#ifdef CHECK_EVAL_COMMAND_PARAMETERS
-    if (cr.type != crt_scalar)
-    {
-        zklog.error("eval_storeLog() param 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
-        exitProcess();
-    }
-#endif
-    uint64_t indexLog = cr.scalar.get_ui();;
-
-    // Get isTopic by executing cmd.params[1]
-    evalCommand(ctx, *cmd.params[1], cr);
-    if (cr.zkResult != ZKR_SUCCESS)
-    {
-        return;
-    }
-#ifdef CHECK_EVAL_COMMAND_PARAMETERS
-    if (cr.type != crt_scalar)
-    {
-        zklog.error("eval_storeLog() param 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
-        exitProcess();
-    }
-#endif
-    uint32_t isTopic = cr.scalar.get_ui();
-
-    // Get isTopic by executing cmd.params[2]
-    evalCommand(ctx, *cmd.params[2], cr);
-    if (cr.zkResult != ZKR_SUCCESS)
-    {
-        return;
-    }
-#ifdef CHECK_EVAL_COMMAND_PARAMETERS
-    if (cr.type != crt_scalar)
-    {
-        zklog.error("eval_storeLog() param 2 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
-        exitProcess();
-    }
-#endif
-    mpz_class data = cr.scalar;
-
-    if (ctx.outLogs.find(indexLog) == ctx.outLogs.end())
-    {
-        OutLog outLog;
-        ctx.outLogs[indexLog] = outLog;
-    }
-
-    if (isTopic)
-    {
-        ctx.outLogs[indexLog].topics.push_back(data.get_str(16));
-    }
-    else
-    {
-        ctx.outLogs[indexLog].data.push_back(data.get_str(16));
-    }
-
     zkassert(ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID == 4); // fork_4
     cr.zkResult = ((fork_4::FullTracer *)ctx.proverRequest.pFullTracer)->handleEvent(ctx, cmd);
 
@@ -2254,13 +2184,11 @@ void eval_sqrtFpEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     }
 #endif
 
-    RawFec::Element pfe = ctx.fec.negOne();
-    mpz_class p;
-    ctx.fec.toMpz(p.get_mpz_t(), pfe); // TODO: Avoid converting evry time, create a global value
-    p++;
+    
     mpz_class a = cr.scalar;
     cr.type = crt_scalar;
-    cr.scalar = sqrtTonelliShanks(a, p);
+    sqrtF3mod4(cr.scalar, cr.scalar);
+
 }
 
 /********************/
@@ -2272,17 +2200,25 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
 void eval_xAddPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     RawFec::Element x3;
-    RawFec::Element y3;
-    eval_AddPointEc(ctx, cmd, false, x3, y3);
+    if(ctx.ecRecoverPrecalcBuffer.filled == true){
+        x3 = ctx.ecRecoverPrecalcBuffer.buffer[ctx.ecRecoverPrecalcBuffer.pos++];
+    }else{
+        RawFec::Element y3;
+        eval_AddPointEc(ctx, cmd, false, x3, y3);    
+    }
     cr.type = crt_scalar;
     ctx.fec.toMpz(cr.scalar.get_mpz_t(), x3);
 }
 
 void eval_yAddPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
-    RawFec::Element x3;
     RawFec::Element y3;
-    eval_AddPointEc(ctx, cmd, false, x3, y3);
+    if(ctx.ecRecoverPrecalcBuffer.filled == true){
+        y3 = ctx.ecRecoverPrecalcBuffer.buffer[ctx.ecRecoverPrecalcBuffer.pos++];
+    }else{
+        RawFec::Element x3;
+        eval_AddPointEc(ctx, cmd, false, x3, y3);  
+    }
     cr.type = crt_scalar;
     ctx.fec.toMpz(cr.scalar.get_mpz_t(), y3);
 }
@@ -2290,17 +2226,25 @@ void eval_yAddPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 void eval_xDblPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     RawFec::Element x3;
-    RawFec::Element y3;
-    eval_AddPointEc(ctx, cmd, true, x3, y3);
+    if(ctx.ecRecoverPrecalcBuffer.filled == true){
+        x3 = ctx.ecRecoverPrecalcBuffer.buffer[ctx.ecRecoverPrecalcBuffer.pos++];
+    }else{
+        RawFec::Element y3;
+        eval_AddPointEc(ctx, cmd, true, x3, y3);    
+    }
     cr.type = crt_scalar;
     ctx.fec.toMpz(cr.scalar.get_mpz_t(), x3);
 }
 
 void eval_yDblPointEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
-    RawFec::Element x3;
     RawFec::Element y3;
-    eval_AddPointEc(ctx, cmd, true, x3, y3);
+    if(ctx.ecRecoverPrecalcBuffer.filled == true){
+        y3 = ctx.ecRecoverPrecalcBuffer.buffer[ctx.ecRecoverPrecalcBuffer.pos++];
+    }else{
+        RawFec::Element x3;
+        eval_AddPointEc(ctx, cmd, true, x3, y3);    
+    }
     cr.type = crt_scalar;
     ctx.fec.toMpz(cr.scalar.get_mpz_t(), y3);
 }
@@ -2389,6 +2333,35 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
         ctx.fec.fromMpz(y2, cr.scalar.get_mpz_t());
     }
 
+    cr.zkResult = AddPointEc(ctx, dbl, x1, y1, x2, y2, x3, y3);
+}
+
+zkresult AddPointEc (Context &ctx, bool dbl, const RawFec::Element &x1, const RawFec::Element &y1, const RawFec::Element &x2, const RawFec::Element &y2, RawFec::Element &x3, RawFec::Element &y3)
+{
+    
+    // Check if results are buffered
+    if(ctx.ecRecoverPrecalcBuffer.filled == true){
+        if(ctx.ecRecoverPrecalcBuffer.pos < 2){
+            zklog.error("ecRecoverPrecalcBuffer.buffer buffer is not filled, but pos < 2 (pos=" + to_string(ctx.ecRecoverPrecalcBuffer.pos) + ")");
+            exitProcess();
+        }
+        x3 = ctx.ecRecoverPrecalcBuffer.buffer[ctx.ecRecoverPrecalcBuffer.pos-2];
+        y3 = ctx.ecRecoverPrecalcBuffer.buffer[ctx.ecRecoverPrecalcBuffer.pos-1];
+        return ZKR_SUCCESS;
+    }
+
+    // Check if we have just computed this operation
+    if ( (ctx.lastECAdd.bDouble == dbl) &&
+         ctx.fec.eq(ctx.lastECAdd.x1, x1) &&
+         ctx.fec.eq(ctx.lastECAdd.y1, y1) &&
+         ( dbl || (ctx.fec.eq(ctx.lastECAdd.x2, x2) && ctx.fec.eq(ctx.lastECAdd.y2, y2) ) ) )
+    {
+        //zklog.info("eval_AddPointEc() reading from cache");
+        x3 = ctx.lastECAdd.x3;
+        y3 = ctx.lastECAdd.y3;
+        return ZKR_SUCCESS;
+    }
+
     RawFec::Element aux1, aux2, s;
 
     if (dbl)
@@ -2398,16 +2371,24 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
         ctx.fec.fromUI(aux2, 3);
         ctx.fec.mul(aux1, aux1, aux2);
         ctx.fec.add(aux2, y1, y1);
+        if (ctx.fec.isZero(aux2))
+        {
+            zklog.error("AddPointEc() got denominator=0 1");
+            return ZKR_SM_MAIN_ARITH;
+        }
         ctx.fec.div(s, aux1, aux2);
-        // TODO: y1 == 0 => division by zero ==> how manage?
     }
     else
     {
         // s = (y2-y1)/(x2-x1)
         ctx.fec.sub(aux1, y2, y1);
         ctx.fec.sub(aux2, x2, x1);
+        if (ctx.fec.isZero(aux2))
+        {
+            zklog.error("AddPointEc() got denominator=0 2");
+            return ZKR_SM_MAIN_ARITH;
+        }
         ctx.fec.div(s, aux1, aux2);
-        // TODO: deltaX == 0 => division by zero ==> how manage?
     }
 
     // x3 = s*s - (x1+x2)
@@ -2419,6 +2400,17 @@ void eval_AddPointEc (Context &ctx, const RomCommand &cmd, bool dbl, RawFec::Ele
     ctx.fec.sub(aux1, x1, x3);;
     ctx.fec.mul(aux1, aux1, s);
     ctx.fec.sub(y3, aux1, y1);
+
+    // Save parameters and result for later reuse
+    ctx.lastECAdd.bDouble = dbl;
+    ctx.lastECAdd.x1 = x1;
+    ctx.lastECAdd.y1 = y1;
+    ctx.lastECAdd.x2 = x2;
+    ctx.lastECAdd.y2 = y2;
+    ctx.lastECAdd.x3 = x3;
+    ctx.lastECAdd.y3 = y3;
+
+    return ZKR_SUCCESS;
 }
 
 zkresult eval_addReadWriteAddress (Context &ctx, const mpz_class value)

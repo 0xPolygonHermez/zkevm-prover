@@ -132,11 +132,11 @@ void Executor::process_batch (ProverRequest &proverRequest)
         }
         case 4: // fork_4
         {
-            /*if (config.useMainExecGenerated)
+            if (config.useMainExecGenerated)
             {
                 fork_4::main_exec_generated_fast(mainExecutor_fork_4, proverRequest);
             }
-            else*/
+            else
             {
                 // Allocate committed polynomials for only 1 evaluation
                 void * pAddress = calloc(fork_4::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
