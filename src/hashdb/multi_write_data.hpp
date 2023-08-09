@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include "definitions.hpp"
 #include "zklog.hpp"
+#include "multi_query.hpp"
 
 using namespace std;
 
@@ -18,8 +19,8 @@ public:
     unordered_map<string, string> nodesIntray;
     string nodesStateRoot;
 
-    // SQL query including all data to store in database
-    string query;
+    // SQL queries, including all data to store in database
+    MultiQuery multiQuery;
 
     // Indicates if data has been already stored in database
     bool stored;
@@ -32,7 +33,7 @@ public:
         nodes.clear();
         nodesIntray.clear();
         nodesStateRoot.clear();
-        query.clear();
+        multiQuery.reset();
         stored = false;
     }
 

@@ -1376,55 +1376,110 @@ zkresult Database::sendData (void)
     {
         if (config.dbMetrics) gettimeofday(&t, NULL);
         unordered_map<string, string>::const_iterator it;
-        if (data.query.size() == 0)
+        if (data.multiQuery.isEmpty())
         {
+            // Current query number
+            uint64_t currentQuery = 0;
+            bool firstValue = false;
+
             // If there are nodes add the corresponding query
             if (data.nodes.size() > 0)
             {
-                data.query += "INSERT INTO " + config.dbNodesTableName + " ( hash, data ) VALUES ";
-                for (it = data.nodes.begin(); it != data.nodes.end(); it++)
+                it = data.nodes.begin();
+                while (it != data.nodes.end())
                 {
-                    if (it != data.nodes.begin())
+                    // If queries is empty or last query is full, add a new query
+                    if ( (data.multiQuery.queries.size() == 0) || (data.multiQuery.queries[currentQuery].full))
                     {
-                        data.query += ", ";
+                        SingleQuery query;
+                        data.multiQuery.queries.emplace_back(query);
+                        currentQuery = data.multiQuery.queries.size() - 1;
                     }
-                    data.query += "( E\'\\\\x" + it->first + "\', E\'\\\\x" + it->second + "\' ) ";
+
+                    data.multiQuery.queries[currentQuery].query += "INSERT INTO " + config.dbNodesTableName + " ( hash, data ) VALUES ";
+                    firstValue = true;
+                    for (; it != data.nodes.end(); it++)
+                    {
+                        if (!firstValue)
+                        {
+                            data.multiQuery.queries[currentQuery].query += ", ";
+                        }
+                        firstValue = false;
+                        data.multiQuery.queries[currentQuery].query += "( E\'\\\\x" + it->first + "\', E\'\\\\x" + it->second + "\' ) ";
 #ifdef LOG_DB_SEND_DATA
-                    zklog.info("Database::sendData() inserting node key=" + it->first + " value=" + it->second);
+                        zklog.info("Database::sendData() inserting node key=" + it->first + " value=" + it->second);
 #endif
+                        if (data.multiQuery.queries[currentQuery].query.size() >= config.dbMultiWriteSingleQuerySize)
+                        {
+                            // Mark query as full
+                            data.multiQuery.queries[currentQuery].full = true;
+                            break;
+                        }
+                    }
+                    data.multiQuery.queries[currentQuery].query += " ON CONFLICT (hash) DO NOTHING;";
                 }
-                data.query += " ON CONFLICT (hash) DO NOTHING;";
             }
 
             // If there are program add the corresponding query
             if (data.program.size() > 0)
             {
-                data.query += "INSERT INTO " + config.dbProgramTableName + " ( hash, data ) VALUES ";
-                for (it = data.program.begin(); it != data.program.end(); it++)
+                it = data.program.begin();
+                while (it != data.program.end())
                 {
-                    if (it != data.program.begin())
+                    // If queries is empty or last query is full, add a new query
+                    if ( (data.multiQuery.queries.size() == 0) || (data.multiQuery.queries[currentQuery].full))
                     {
-                        data.query += ", ";
+                        SingleQuery query;
+                        data.multiQuery.queries.emplace_back(query);
+                        currentQuery = data.multiQuery.queries.size() - 1;
                     }
-                    data.query += "( E\'\\\\x" + it->first + "\', E\'\\\\x" + it->second + "\' ) ";
+
+                    data.multiQuery.queries[currentQuery].query += "INSERT INTO " + config.dbProgramTableName + " ( hash, data ) VALUES ";
+                    firstValue = true;
+                    for (; it != data.program.end(); it++)
+                    {
+                        if (!firstValue)
+                        {
+                            data.multiQuery.queries[currentQuery].query += ", ";
+                        }
+                        firstValue = false;
+                        data.multiQuery.queries[currentQuery].query += "( E\'\\\\x" + it->first + "\', E\'\\\\x" + it->second + "\' ) ";
 #ifdef LOG_DB_SEND_DATA
-                    zklog.info("Database::sendData() inserting program key=" + it->first + " value=" + it->second);
+                        zklog.info("Database::sendData() inserting program key=" + it->first + " value=" + it->second);
 #endif
+                        if (data.multiQuery.queries[currentQuery].query.size() >= config.dbMultiWriteSingleQuerySize)
+                        {
+                            // Mark query as full
+                            data.multiQuery.queries[currentQuery].full = true;
+                            break;
+                        }
+                    }
+                    data.multiQuery.queries[currentQuery].query += " ON CONFLICT (hash) DO NOTHING;";
                 }
-                data.query += " ON CONFLICT (hash) DO NOTHING;";
             }
 
             // If there is a nodes state root query, add it
             if (data.nodesStateRoot.size() > 0)
             {
-                data.query += "UPDATE " + config.dbNodesTableName + " SET data = E\'\\\\x" + data.nodesStateRoot + "\' WHERE hash = E\'\\\\x" + dbStateRootKey + "\';";
+                // If queries is empty or last query is full, add a new query
+                if ( (data.multiQuery.queries.size() == 0) || (data.multiQuery.queries[currentQuery].full))
+                {
+                    SingleQuery query;
+                    data.multiQuery.queries.emplace_back(query);
+                    currentQuery = data.multiQuery.queries.size() - 1;
+                }
+
+                data.multiQuery.queries[currentQuery].query += "UPDATE " + config.dbNodesTableName + " SET data = E\'\\\\x" + data.nodesStateRoot + "\' WHERE hash = E\'\\\\x" + dbStateRootKey + "\';";
+
+                // Mark query as full
+                data.multiQuery.queries[currentQuery].full = true;
 #ifdef LOG_DB_SEND_DATA
                 zklog.info("Database::sendData() inserting root=" + data.nodesStateRoot);
 #endif
             }
         }
 
-        if (data.query.size() == 0)
+        if (data.multiQuery.isEmpty())
         {
             zklog.warning("Database::sendData() called without any data to send");
             data.stored = true;
@@ -1437,18 +1492,32 @@ zkresult Database::sendData (void)
                 zklog.info("Database::sendData() dbMetrics multiWrite nodes=" + to_string(data.nodes.size()) +
                     " program=" + to_string(data.program.size()) +
                     " nodesStateRootCounter=" + to_string(data.nodesStateRoot.size() > 0 ? 1 : 0) +
-                    " query.size=" + to_string(data.query.size()) + "B=" + to_string(data.query.size()/zkmax(fields,1)) + "B/field" +
+                    " query.size=" + to_string(data.multiQuery.size()) + "B=" + to_string(data.multiQuery.size()/zkmax(fields,1)) + "B/field" +
+                    " queries.size=" + to_string(data.multiQuery.queries.size()) +
                     " total=" + to_string(fields) + "fields");
             }
 
-            // Start a transaction
-            pqxx::work w(*(pDatabaseConnection->pConnection));
+            // Send all unsent queries to database
+            for (uint64_t i=0; i<data.multiQuery.queries.size(); i++)
+            {
+                // Skip sent queries
+                if (data.multiQuery.queries[i].sent)
+                {
+                    continue;
+                }
 
-            // Execute the query
-            pqxx::result res = w.exec(data.query);
+                // Start a transaction
+                pqxx::work w(*(pDatabaseConnection->pConnection));
 
-            // Commit your transaction
-            w.commit();
+                // Execute the query
+                pqxx::result res = w.exec(data.multiQuery.queries[i].query);
+
+                // Commit your transaction
+                w.commit();
+
+                // Mask as sent
+                data.multiQuery.queries[i].sent = true;
+            }
 
             //zklog.info("Database::flush() sent query=" + query);
             if (config.dbMetrics)
@@ -1464,7 +1533,7 @@ zkresult Database::sendData (void)
             zklog.info("Database::sendData() successfully processed query of size= " + to_string(data.query.size()));
 #endif
             // Update status
-            data.query.clear();
+            data.multiQuery.reset();
             data.stored = true;
         }
 
@@ -1476,7 +1545,7 @@ zkresult Database::sendData (void)
     catch (const std::exception &e)
     {
         zklog.error("Database::sendData() execute query exception: " + string(e.what()));
-        zklog.error("Database::sendData() query.size=" + to_string(data.query.size()) + " query(<1024)=" + data.query.substr(0, 1024));
+        zklog.error("Database::sendData() query.size=" + to_string(data.multiQuery.queries.size()) + (data.multiQuery.isEmpty() ? "" : (" query(<1024)=" + data.multiQuery.queries[0].query.substr(0, 1024))));
         queryFailed();
         zkr = ZKR_DB_ERROR;
     }
@@ -1670,20 +1739,31 @@ void *dbSenderThread (void *arg)
     while (true)
     {
         // Wait for the sending semaphore to be released, if there is no more data to send
-        sem_wait(&pDatabase->senderSem);
+        struct timespec currentTime;
+        int iResult = clock_gettime(CLOCK_REALTIME, &currentTime);
+        if (iResult == -1)
+        {
+            zklog.error("dbSenderThread() failed calling clock_gettime()");
+            exitProcess();
+        }
+
+        currentTime.tv_sec += 5;
+        sem_timedwait(&pDatabase->senderSem, &currentTime);
 
         multiWrite.Lock();
 
         bool bDataEmpty = false;
 
         // If sending data is not empty (it failed before) then try to send it again
-        if (multiWrite.data[multiWrite.storingDataIndex].query.size() > 0)
+        if (!multiWrite.data[multiWrite.storingDataIndex].multiQuery.isEmpty())
         {
             zklog.warning("dbSenderThread() found sending data index not empty, probably because of a previous error; resuming...");
         }
         // If processing data is empty, then simply pretend to have sent data
         else if (multiWrite.data[multiWrite.pendingToFlushDataIndex].IsEmpty())
         {
+            //zklog.warning("dbSenderThread() found pending to flush data empty");
+
             // Mark as if we sent all batches
             multiWrite.storedFlushId = multiWrite.lastFlushId;
 #ifdef LOG_DB_SENDER_THREAD
