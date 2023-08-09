@@ -35,6 +35,8 @@
 #include "poseidon_g_permutation.hpp"
 #include "goldilocks_precomputed.hpp"
 #include "zklog.hpp"
+#include "ecrecover.hpp"
+
 
 using namespace std;
 using json = nlohmann::json;
@@ -85,18 +87,7 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     finalizeExecutionLabel  = rom.getLabel(string("finalizeExecution"));
     checkAndSaveFromLabel   = rom.getLabel(string("checkAndSaveFrom"));
     ecrecoverStoreArgsLabel = rom.getLabel(string("ecrecover_store_args"));
-
-    // Initialize the Ethereum opcode list: opcode=array position, operation=position content
-    ethOpcodeInit();
-
-    // Use the rom labels object to map every opcode to a ROM address
-    if (!romJson.contains("labels") ||
-        !romJson["labels"].is_object() )
-    {
-        zklog.error("Error: MainExecutor::MainExecutor() ROM file does not contain a labels object at root level");
-        exitProcess();
-    }
-    opcodeAddressInit(romJson["labels"]);
+    ecrecoverEndLabel = rom.getLabel(string("ecrecover_end"));
 
     TimerStopAndLog(ROM_LOAD);
 };
@@ -183,6 +174,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     uint64_t nexti; // Next step, as it is used internally, set to 0 in fast mode to reuse the same evaluation all the time
     ctx.N = N; // Numer of evaluations
     ctx.pStep = &i; // ctx.pStep is used inside evaluateCommand() to find the current value of the registers, e.g. pols(A0)[ctx.step]
+    ctx.pEvaluation = &step;
     ctx.pZKPC = &zkPC; // Pointer to the zkPC
     Goldilocks::Element currentRCX = fr.zero();
 
@@ -247,19 +239,29 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 #endif
 
-        /*if (zkPC == ecrecoverStoreArgsLabel)
+        if (zkPC == ecrecoverStoreArgsLabel && config.ECRecoverPrecalc)
         {
-            mpz_class auxScalar;
-
-            fea2scalar(fr, auxScalar, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-            zklog.info("ecrecover_store_args hash=" + auxScalar.get_str(16));
-            fea2scalar(fr, auxScalar, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
-            zklog.info("ecrecover_store_args r=" + auxScalar.get_str(16));
-            fea2scalar(fr, auxScalar, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]);
-            zklog.info("ecrecover_store_args s=" + auxScalar.get_str(16));
-            fea2scalar(fr, auxScalar, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
-            zklog.info("ecrecover_store_args v=" + auxScalar.get_str(16));
-        }*/
+            zkassert(ctx.ecRecoverPrecalcBuffer.filled == false);
+            mpz_class signature_, r_, s_, v_;
+            fea2scalar(fr, signature_, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
+            fea2scalar(fr, r_, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
+            fea2scalar(fr, s_, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]);
+            fea2scalar(fr, v_, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
+            ctx.ecRecoverPrecalcBuffer.posUsed = ECRecoverPrecalc(signature_, r_, s_, v_, false, ctx.ecRecoverPrecalcBuffer.buffer, ctx.config.ECRecoverPrecalcNThreads);
+            ctx.ecRecoverPrecalcBuffer.pos = 0;
+            if (ctx.ecRecoverPrecalcBuffer.posUsed > 0)
+            {
+                ctx.ecRecoverPrecalcBuffer.filled = true;
+            }
+        }
+        if (zkPC == ecrecoverEndLabel)
+        {
+            if ( ctx.ecRecoverPrecalcBuffer.filled)
+            {  
+                zkassert(ctx.ecRecoverPrecalcBuffer.pos == ctx.ecRecoverPrecalcBuffer.posUsed);
+                ctx.ecRecoverPrecalcBuffer.filled = false;
+            }
+        }
 
 #ifdef LOG_FILENAME
         // Store fileName and line
@@ -880,6 +882,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         return;
                     }
                     incCounter = smtGetResult.proofHashCounter + 2;
+
+#ifdef LOG_SMT_KEY_DETAILS
+                    zklog.info("SMT get C=" + fea2string(fr, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]) +
+                        " A=" + fea2string(fr, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]) +
+                        " B=" + fea2string(fr, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]) +
+                        " Kin0Hash=" + fea2string(fr, Kin0Hash) +
+                        " Kin1Hash=" + fea2string(fr, Kin1Hash) +
+                        " oldRoot=" + fea2string(fr, oldRoot) +
+                        " value=" + value.get_str(10));
+#endif
                     //cout << "smt.get() returns value=" << smtGetResult.value.get_str(16) << endl;
 
                     if (bProcessBatch)
@@ -1015,6 +1027,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     }
                     incCounter = ctx.lastSWrite.res.proofHashCounter + 2;
 
+#ifdef LOG_SMT_KEY_DETAILS
+                    zklog.info("SMT set C=" + fea2string(fr, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]) +
+                        " A=" + fea2string(fr, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]) +
+                        " B=" + fea2string(fr, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]) +
+                        " Kin0Hash=" + fea2string(fr, Kin0Hash) +
+                        " Kin1Hash=" + fea2string(fr, Kin1Hash) +
+                        " oldRoot=" + fea2string(fr, oldRoot) +
+                        " value=" + scalarD.get_str(10) +
+                        " newRoot=" + fea2string(fr, ctx.lastSWrite.newRoot));
+#endif
                     if (bProcessBatch)
                     {
                         zkResult = eval_addReadWriteAddress(ctx, scalarD);
@@ -2819,13 +2841,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
 
                 // Convert to RawFec::Element
-                RawFec::Element fecX1, fecY1, fecX2, fecY2, fecX3;
+                RawFec::Element fecX1, fecY1, fecX2, fecY2;
                 fec.fromMpz(fecX1, x1.get_mpz_t());
                 fec.fromMpz(fecY1, y1.get_mpz_t());
                 fec.fromMpz(fecX2, x2.get_mpz_t());
                 fec.fromMpz(fecY2, y2.get_mpz_t());
-                fec.fromMpz(fecX3, x3.get_mpz_t());
 
+                // Check if this is a double operation
                 bool dbl = false;
                 if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==1 && rom.line[zkPC].arithEq2==0)
                 {
@@ -2841,67 +2863,21 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     exitProcess();
                 }
 
-                RawFec::Element s;
-                if (dbl)
+                // Add the elliptic curve points
+                RawFec::Element fecX3, fecY3;
+                zkresult r = AddPointEc(ctx, dbl, fecX1, fecY1, dbl?fecX1:fecX2, dbl?fecY1:fecY2, fecX3, fecY3);
+                if (r != ZKR_SUCCESS)
                 {
-                    // s = 3*(x1^2)/(2*y1)
-                    RawFec::Element numerator, denominator;
-
-                    // numerator = 3*(x1^2)
-                    fec.mul(numerator, fecX1, fecX1);
-                    fec.fromUI(denominator, 3);
-                    fec.mul(numerator, numerator, denominator);
-
-                    // denominator = 2*y1 = y1+y1
-                    fec.add(denominator, fecY1, fecY1);
-                    if (fec.isZero(denominator))
-                    {
-                        proverRequest.result = ZKR_SM_MAIN_ARITH;
-                        logError(ctx, "Denominator=0 in arith operation 1");
-                        HashDBClientFactory::freeHashDBClient(pHashDB);
-                        return;
-                    }
-
-                    // s = numerator/denominator
-                    fec.div(s, numerator, denominator);
-                }
-                else
-                {
-                    // s = (y2-y1)/(x2-x1)
-                    RawFec::Element numerator, denominator;
-
-                    // numerator = y2-y1
-                    fec.sub(numerator, fecY2, fecY1);
-
-                    // denominator = x2-x1
-                    fec.sub(denominator, fecX2, fecX1);
-                    if (fec.isZero(denominator))
-                    {
-                        proverRequest.result = ZKR_SM_MAIN_ARITH;
-                        logError(ctx, "Denominator=0 in arith operation 2");
-                        HashDBClientFactory::freeHashDBClient(pHashDB);
-                        return;
-                    }
-
-                    // s = numerator/denominator
-                    fec.div(s, numerator, denominator);
+                    proverRequest.result = ZKR_SM_MAIN_ARITH;
+                    logError(ctx, "Failed calling AddPointEc() in arith operation");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
                 }
 
-                RawFec::Element fecS, minuend, subtrahend;
+                // Convert to scalar
                 mpz_class _x3, _y3;
-
-                // Calculate _x3 = s*s - x1 +(x1 if dbl, x2 otherwise)
-                fec.mul(minuend, s, s);
-                fec.add(subtrahend, fecX1, dbl ? fecX1 : fecX2 );
-                fec.sub(fecS, minuend, subtrahend);
-                fec.toMpz(_x3.get_mpz_t(), fecS);
-
-                // Calculate _y3 = s*(x1-x3) - y1
-                fec.sub(subtrahend, fecX1, fecX3);
-                fec.mul(minuend, s, subtrahend);
-                fec.fromMpz(subtrahend, y1.get_mpz_t());
-                fec.sub(fecS, minuend, subtrahend);
-                fec.toMpz(_y3.get_mpz_t(), fecS);
+                fec.toMpz(_x3.get_mpz_t(), fecX3);
+                fec.toMpz(_y3.get_mpz_t(), fecY3);
 
                 // Compare
                 bool x3eq = (x3 == _x3);
@@ -4612,13 +4588,19 @@ void MainExecutor::assertOutputs(Context &ctx)
 
 void MainExecutor::logError(Context &ctx, const string &message)
 {
+    // Log the message, if provided
     if (message.size() > 0)
     {
         zklog.error("MainExecutor::logError() " + message);
     }
-    zklog.error(string("MainExecutor::logError() proverRequest.result=") + zkresult2string(ctx.proverRequest.result) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " rom.line={" + rom.line[*ctx.pZKPC].toString(fr) + "} uuid=" + ctx.proverRequest.uuid);
+
+    // Log details
+    zklog.error(string("MainExecutor::logError() proverRequest.result=") + zkresult2string(ctx.proverRequest.result) + " step=" + to_string(*ctx.pStep) + " eval=" + to_string(*ctx.pEvaluation) + " zkPC=" + to_string(*ctx.pZKPC) + " rom.line={" + rom.line[*ctx.pZKPC].toString(fr) + "} uuid=" + ctx.proverRequest.uuid + " externalRequestId=" + ctx.proverRequest.externalRequestId);
+
+    // Log registers
     ctx.printRegs();
     
+    // Log the input file content
     json inputJson;
     ctx.proverRequest.input.save(inputJson);
     zklog.error("Input=" + inputJson.dump());
