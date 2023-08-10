@@ -823,7 +823,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             if (bAddrRel)
             {
                 code += "    // If addrRel is possitive, and the sum is too big, fail\n";
-                code += "    if (addrRel>=0x20000 || ((rom.line[" + to_string(zkPC) + "].isMem==1) && (addrRel >= 0x10000)))\n";
+                code += "    if ( addrRel >= " + to_string( ( (rom["program"][zkPC].contains("isMem") && (rom["program"][zkPC]["isMem"]  == 1) ) ? 0x20000 : 0x10000 ) - 2048 ) + ")\n";
                 code += "    {\n";
                 code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
@@ -1105,8 +1105,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    Kin1[6] = pols.B0[" + string(bFastMode?"0":"i") + "];\n";
                     code += "    Kin1[7] = pols.B1[" + string(bFastMode?"0":"i") + "];\n";
 
-                    code += "    b0 = fr.toU64(pols.B0[" + string(bFastMode?"0":"i") + "]);;\n";
-                    code += "    bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);;\n";
+                    code += "    b0 = fr.toU64(pols.B0[" + string(bFastMode?"0":"i") + "]);\n";
+                    code += "    bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);\n";
 
                     code += "    if  ( !fr.isZero(pols.A5[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A6[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A7[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B2[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B3[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B4[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B5[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B6[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B7[" + string(bFastMode?"0":"i") + "]) )\n";
                     code += "    {\n";
