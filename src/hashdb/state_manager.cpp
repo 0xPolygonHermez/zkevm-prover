@@ -706,10 +706,10 @@ zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &f
 
                 }
                 Goldilocks::Element newStateRootFea[4];
-                newStateRootFea[0] = fea[0];
-                newStateRootFea[1] = fea[1];
-                newStateRootFea[2] = fea[2];
-                newStateRootFea[3] = fea[3];
+                newStateRootFea[0] = fea[3];
+                newStateRootFea[1] = fea[2];
+                newStateRootFea[2] = fea[1];
+                newStateRootFea[3] = fea[0];
 
                 zkr = db.updateStateRoot(newStateRootFea);
                 if (zkr != ZKR_SUCCESS)

@@ -30,6 +30,8 @@ void Executor::process_batch (ProverRequest &proverRequest)
             }
             else*/
             {
+                zklog.info("Executor::process_batch() fork 0 native");
+
                 // Allocate committed polynomials for only 1 evaluation
                 void * pAddress = calloc(fork_0::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
                 if (pAddress == NULL)
@@ -57,6 +59,8 @@ void Executor::process_batch (ProverRequest &proverRequest)
             }
             else*/
             {
+                zklog.info("Executor::process_batch() fork 1 native");
+
                 // Allocate committed polynomials for only 1 evaluation
                 void * pAddress = calloc(fork_1::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
                 if (pAddress == NULL)
@@ -84,6 +88,8 @@ void Executor::process_batch (ProverRequest &proverRequest)
             }
             else*/
             {
+                zklog.info("Executor::process_batch() fork 2 native");
+
                 // Allocate committed polynomials for only 1 evaluation
                 void * pAddress = calloc(fork_2::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
                 if (pAddress == NULL)
@@ -111,6 +117,8 @@ void Executor::process_batch (ProverRequest &proverRequest)
             }
             else*/
             {
+                zklog.info("Executor::process_batch() fork 3 native");
+
                 // Allocate committed polynomials for only 1 evaluation
                 void * pAddress = calloc(fork_3::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
                 if (pAddress == NULL)
@@ -134,10 +142,13 @@ void Executor::process_batch (ProverRequest &proverRequest)
         {
             if (config.useMainExecGenerated)
             {
+                zklog.info("Executor::process_batch() fork 4 generated");
                 fork_4::main_exec_generated_fast(mainExecutor_fork_4, proverRequest);
             }
             else
             {
+                zklog.info("Executor::process_batch() fork 4 native");
+
                 // Allocate committed polynomials for only 1 evaluation
                 void * pAddress = calloc(fork_4::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
                 if (pAddress == NULL)
@@ -161,14 +172,18 @@ void Executor::process_batch (ProverRequest &proverRequest)
         {
             if (config.useMainExecC)
             {
+                zklog.info("Executor::process_batch() fork 5 C");
                 mainExecutorC_fork_5.execute(proverRequest);
             }
             else if (config.useMainExecGenerated)
             {
+                zklog.info("Executor::process_batch() fork 5 generated");
                 fork_5::main_exec_generated_fast(mainExecutor_fork_5, proverRequest);
             }
             else
             {
+                zklog.info("Executor::process_batch() fork 5 native");
+
                 // Allocate committed polynomials for only 1 evaluation
                 void * pAddress = calloc(fork_5::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
                 if (pAddress == NULL)
