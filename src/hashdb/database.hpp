@@ -13,7 +13,6 @@
 #include "database_cache.hpp"
 #include "database_connection.hpp"
 #include "zkassert.hpp"
-#include "tree_position.hpp"
 #include "multi_write.hpp"
 #include "database_associative_cache.hpp"
 
