@@ -3,8 +3,10 @@
 
 #include "goldilocks_base_field.hpp"
 #include "database.hpp"
+#include "database_64.hpp"
 #include "config.hpp"
 #include "smt.hpp"
+#include "smt_64.hpp"
 #include "hashdb_interface.hpp"
 #include "zkresult.hpp"
 #include "utils/time_metric.hpp"
@@ -16,8 +18,10 @@ private:
     const Config &config;
 public:
     Database db;
+    Database64 db64;
 private:
     Smt smt;
+    Smt64 smt64;
 
 #ifdef HASHDB_LOCK
     recursive_mutex mlock;

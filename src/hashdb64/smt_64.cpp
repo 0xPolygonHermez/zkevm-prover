@@ -1,25 +1,25 @@
-#include "smt.hpp"
+#include "smt_64.hpp"
 #include "scalar.hpp"
 #include "utils.hpp"
 #include "zkresult.hpp"
 #include "zkmax.hpp"
 #include "zklog.hpp"
 #include <bitset>
-#include "state_manager.hpp"
+#include "state_manager_64.hpp"
 
-zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, SmtSetResult &result, DatabaseMap *dbReadLog)
+zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, SmtSetResult &result, DatabaseMap *dbReadLog)
 {
 #ifdef LOG_SMT
-    zklog.info("Smt::set() called with oldRoot=" + fea2string(fr,oldRoot) + " key=" + fea2string(fr,key) + " value=" + value.get_str(16) + " persistent=" + to_string(persistent));
+    zklog.info("Smt64::set() called with oldRoot=" + fea2string(fr,oldRoot) + " key=" + fea2string(fr,key) + " value=" + value.get_str(16) + " persistent=" + to_string(persistent));
 #endif
 
     bool bUseStateManager = db.config.stateManager && (batchUUID.size() > 0);
 
-    SmtContext ctx(db, bUseStateManager, batchUUID, tx, persistence);
+    SmtContext64 ctx(db, bUseStateManager, batchUUID, tx, persistence);
 
     if (bUseStateManager)
     {
-        stateManager.setOldStateRoot(batchUUID, tx, fea2string(fr, oldRoot), persistence);
+        stateManager64.setOldStateRoot(batchUUID, tx, fea2string(fr, oldRoot), persistence);
     }
 
     Goldilocks::Element r[4];
@@ -69,7 +69,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
         dbres = ZKR_UNSPECIFIED;
         if (bUseStateManager)
         {
-            dbres = stateManager.read(batchUUID, rootString, dbValue, dbReadLog);
+            dbres = stateManager64.read(batchUUID, rootString, dbValue, dbReadLog);
         }
         if (dbres != ZKR_SUCCESS)
         {
@@ -77,7 +77,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
         }
         if (dbres != ZKR_SUCCESS)
         {
-            zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + rootString);
+            zklog.error("Smt64::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + rootString);
             return dbres;
         }
 
@@ -108,7 +108,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
             dbres = ZKR_UNSPECIFIED;
             if (bUseStateManager)
             {
-                dbres = stateManager.read(batchUUID, foundValueHashString, dbValue, dbReadLog);
+                dbres = stateManager64.read(batchUUID, foundValueHashString, dbValue, dbReadLog);
             }
             if (dbres != ZKR_SUCCESS)
             {
@@ -116,7 +116,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
             }
             if (dbres != ZKR_SUCCESS)
             {
-                zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") key:" + foundValueHashString);
+                zklog.error("Smt64::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") key:" + foundValueHashString);
                 return dbres;
             }
 
@@ -136,7 +136,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
             bFoundKey = true;
 
 #ifdef LOG_SMT
-            zklog.info("Smt::set() found at level=" + to_string(level) + " foundValue=" + foundValue.get_str(16) + " foundKey=" + fea2string(fr,foundKey) + " foundRKey=" + fea2string(fr,foundRKey));
+            zklog.info("Smt64::set() found at level=" + to_string(level) + " foundValue=" + foundValue.get_str(16) + " foundKey=" + fea2string(fr,foundKey) + " foundRKey=" + fea2string(fr,foundRKey));
 #endif
         }
         // This is an intermediate node
@@ -152,7 +152,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
             accKey.push_back(keys[level]);
 
 #ifdef LOG_SMT
-            zklog.info("Smt::set() down 1 level=" + to_string(level) + " keys[level]=" + to_string(keys[level]) + " root/hash=" + fea2string(fr,r));
+            zklog.info("Smt64::set() down 1 level=" + to_string(level) + " keys[level]=" + to_string(keys[level]) + " root/hash=" + fea2string(fr,r));
 #endif
             // Increase the level
             level++;
@@ -184,7 +184,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
             {
                 mode = "update";
 #ifdef LOG_SMT
-                zklog.info("Smt::set() mode=" + mode);
+                zklog.info("Smt64::set() mode=" + mode);
 #endif
                 oldValue = foundValue;
 
@@ -230,7 +230,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                             nodeToDeleteString = fea2string(fr, nodeToDelete);
                             if (nodeToDeleteString != "0")
                             {
-                                stateManager.deleteNode(batchUUID, tx, nodeToDeleteString, persistence);
+                                stateManager64.deleteNode(batchUUID, tx, nodeToDeleteString, persistence);
                             }
                         }
                     }
@@ -251,14 +251,14 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                     newRoot[3] = newLeafHash[3];
                 }
 #ifdef LOG_SMT
-                zklog.info("Smt::set() updated an existing node at level=" + to_string(level) + " leaf node hash=" + fea2string(fr,newLeafHash) + " value hash=" + fea2string(fr,newValH));
+                zklog.info("Smt64::set() updated an existing node at level=" + to_string(level) + " leaf node hash=" + fea2string(fr,newLeafHash) + " value hash=" + fea2string(fr,newValH));
 #endif
             }
             else // keys are not equal, so insert with foundKey
             {
                 mode = "insertFound";
 #ifdef LOG_SMT
-                zklog.info("Smt::set() mode=" + mode);
+                zklog.info("Smt64::set() mode=" + mode);
 #endif
 
                 // Increase the level since we need to create a new leaf node
@@ -299,7 +299,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                 isOld0 = false;
 
 #ifdef LOG_SMT
-                zklog.info("Smt::set() stored leaf node insValue=" + insValue.get_str(16) + " insKey=" + fea2string(fr,insKey));
+                zklog.info("Smt64::set() stored leaf node insValue=" + insValue.get_str(16) + " insKey=" + fea2string(fr,insKey));
 #endif
 
                 // Insert a new value node for the new value, and store the calculated hash in newValH
@@ -354,7 +354,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                 proofHashCounter += 4;
                 level2--;
 #ifdef LOG_SMT
-                zklog.info("Smt::set() inserted a new intermediate node level=" + to_string(level2) + " leaf node hash=" + fea2string(fr,r2));
+                zklog.info("Smt64::set() inserted a new intermediate node level=" + to_string(level2) + " leaf node hash=" + fea2string(fr,r2));
 #endif
                 // Climb the branch up to the level where the key bits were common
                 while (level2!=level)
@@ -379,7 +379,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                     proofHashCounter += 1;
 
 #ifdef LOG_SMT
-                    zklog.info("Smt::set() inserted a new intermediate level=" + to_string(level2) + " leaf node hash=" + fea2string(fr,r2));
+                    zklog.info("Smt64::set() inserted a new intermediate level=" + to_string(level2) + " leaf node hash=" + fea2string(fr,r2));
 #endif
 
                     // Climb the branch
@@ -408,7 +408,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
         {
             mode = "insertNotFound";
 #ifdef LOG_SMT
-            zklog.info("Smt::set() mode=" + mode);
+            zklog.info("Smt64::set() mode=" + mode);
 #endif
             // We could not find any key with any bit in common, so we need to create a new intermediate node, and a new leaf node
 
@@ -462,7 +462,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                         nodeToDeleteString = fea2string(fr, nodeToDelete);
                         if (nodeToDeleteString != "0")
                         {
-                            stateManager.deleteNode(batchUUID, tx, nodeToDeleteString, persistence);
+                            stateManager64.deleteNode(batchUUID, tx, nodeToDeleteString, persistence);
                         }
                     }
                 }
@@ -506,7 +506,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                     nodeToDeleteString = fea2string(fr, nodeToDelete);
                     if (nodeToDeleteString != "0")
                     {
-                        stateManager.deleteNode(batchUUID, tx, nodeToDeleteString, persistence);
+                        stateManager64.deleteNode(batchUUID, tx, nodeToDeleteString, persistence);
                     }
                 }
                 else
@@ -525,7 +525,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                 {
                     mode = "deleteFound";
 #ifdef LOG_SMT
-                    zklog.info("Smt::set() mode=" + mode);
+                    zklog.info("Smt64::set() mode=" + mode);
 #endif
                     // Calculate the key of the deleted element
                     Goldilocks::Element auxFea[4];
@@ -536,7 +536,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                     dbres = ZKR_UNSPECIFIED;
                     if (bUseStateManager)
                     {
-                        dbres = stateManager.read(batchUUID, auxString, dbValue, dbReadLog);
+                        dbres = stateManager64.read(batchUUID, auxString, dbValue, dbReadLog);
                     }
                     if (dbres != ZKR_SUCCESS)
                     {
@@ -544,7 +544,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                     }
                     if ( dbres != ZKR_SUCCESS)
                     {
-                        zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + auxString);
+                        zklog.error("Smt64::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + auxString);
                         return dbres;
                     }
 
@@ -563,7 +563,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                         dbres = ZKR_UNSPECIFIED;
                         if (bUseStateManager)
                         {
-                            dbres = stateManager.read(batchUUID, valHString, dbValue, dbReadLog);
+                            dbres = stateManager64.read(batchUUID, valHString, dbValue, dbReadLog);
                         }
                         if (dbres != ZKR_SUCCESS)
                         {
@@ -571,12 +571,12 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                         }
                         if (dbres != ZKR_SUCCESS)
                         {
-                            zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + valHString);
+                            zklog.error("Smt64::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + valHString);
                             return dbres;
                         }
                         else if (dbValue.size()<8)
                         {
-                            zklog.error("Smt::set() dbValue.size()<8 root:" + valHString);
+                            zklog.error("Smt64::set() dbValue.size()<8 root:" + valHString);
                             return ZKR_SMT_INVALID_DATA_SIZE;
                         }
 
@@ -654,7 +654,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                     {
                         mode = "deleteNotFound";
 #ifdef LOG_SMT
-                        zklog.info("Smt::set() mode=" + mode);
+                        zklog.info("Smt64::set() mode=" + mode);
 #endif
                     }
                 }
@@ -663,7 +663,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                 {
                     mode = "deleteNotFound";
 #ifdef LOG_SMT
-                    zklog.info("Smt::set() mode=" + mode);
+                    zklog.info("Smt64::set() mode=" + mode);
 #endif
                 }
             }
@@ -672,7 +672,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
             {
                 mode = "deleteLast";
 #ifdef LOG_SMT
-                zklog.info("Smt::set() mode=" + mode);
+                zklog.info("Smt64::set() mode=" + mode);
 #endif
                 newRoot[0] = fr.zero();
                 newRoot[1] = fr.zero();
@@ -691,7 +691,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                 isOld0 = false;
             }
 #ifdef LOG_SMT
-            zklog.info("Smt::set() mode=" + mode);
+            zklog.info("Smt64::set() mode=" + mode);
 #endif
         }
     }
@@ -734,7 +734,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                     nodeToDeleteString = fea2string(fr, nodeToDelete);
                     if (nodeToDeleteString != "0")
                     {
-                        stateManager.deleteNode(batchUUID, tx, nodeToDeleteString, persistence);
+                        stateManager64.deleteNode(batchUUID, tx, nodeToDeleteString, persistence);
                     }
                 }
             }
@@ -750,7 +750,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
 
     if (bUseStateManager)
     {
-        stateManager.setNewStateRoot(batchUUID, tx, fea2string(fr, newRoot), persistence);
+        stateManager64.setNewStateRoot(batchUUID, tx, fea2string(fr, newRoot), persistence);
     }
     else if ( (persistence == PERSISTENCE_DATABASE) &&
          (
@@ -792,7 +792,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
     result.proofHashCounter = proofHashCounter;
 
 #ifdef LOG_SMT
-    zklog.info("Smt::set() returns isOld0=" + to_string(result.isOld0) + " insKey=" + fea2string(fr,result.insKey) + " oldValue=" + result.oldValue.get_str(16) + " newRoot=" + fea2string(fr,result.newRoot) + " mode=" + result.mode);
+    zklog.info("Smt64::set() returns isOld0=" + to_string(result.isOld0) + " insKey=" + fea2string(fr,result.insKey) + " oldValue=" + result.oldValue.get_str(16) + " newRoot=" + fea2string(fr,result.newRoot) + " mode=" + result.mode);
 #endif
 #ifdef LOG_SMT_SET_PRINT_TREE
     db.printTree(fea2string(fr,result.newRoot));
@@ -801,10 +801,10 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
     return ZKR_SUCCESS;
 }
 
-zkresult Smt::get (const string &batchUUID, Database &db, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], SmtGetResult &result, DatabaseMap *dbReadLog)
+zkresult Smt64::get (const string &batchUUID, Database64 &db, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], SmtGetResult &result, DatabaseMap *dbReadLog)
 {
 #ifdef LOG_SMT
-    zklog.info("Smt::get() called with root=" + fea2string(fr,root) + " and key=" + fea2string(fr,key));
+    zklog.info("Smt64::get() called with root=" + fea2string(fr,root) + " and key=" + fea2string(fr,key));
 #endif
 
     bool bUseStateManager = db.config.stateManager && (batchUUID.size() > 0);
@@ -838,7 +838,7 @@ zkresult Smt::get (const string &batchUUID, Database &db, const Goldilocks::Elem
     vector<Goldilocks::Element> dbValue; // used to call db.read()
 
 #ifdef LOG_SMT
-    //zklog.info("Smt::get() found database content:");
+    //zklog.info("Smt64::get() found database content:");
     //db.print();
 #endif
 
@@ -851,7 +851,7 @@ zkresult Smt::get (const string &batchUUID, Database &db, const Goldilocks::Elem
         dbres = ZKR_UNSPECIFIED;
         if (bUseStateManager)
         {
-            dbres = stateManager.read(batchUUID, rString, dbValue, dbReadLog);
+            dbres = stateManager64.read(batchUUID, rString, dbValue, dbReadLog);
         }
         if (dbres != ZKR_SUCCESS)
         {
@@ -859,7 +859,7 @@ zkresult Smt::get (const string &batchUUID, Database &db, const Goldilocks::Elem
         }
         if (dbres != ZKR_SUCCESS)
         {
-            zklog.error("Smt::get() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + rString);
+            zklog.error("Smt64::get() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + rString);
             return dbres;
         }
 
@@ -879,7 +879,7 @@ zkresult Smt::get (const string &batchUUID, Database &db, const Goldilocks::Elem
             dbres = ZKR_UNSPECIFIED;
             if (bUseStateManager)
             {
-                dbres = stateManager.read(batchUUID, foundValueHashString, dbValue, dbReadLog);
+                dbres = stateManager64.read(batchUUID, foundValueHashString, dbValue, dbReadLog);
             }
             if (dbres != ZKR_SUCCESS)
             {
@@ -887,7 +887,7 @@ zkresult Smt::get (const string &batchUUID, Database &db, const Goldilocks::Elem
             }
             if (dbres != ZKR_SUCCESS)
             {
-                zklog.error("Smt::get() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + foundValueHashString);
+                zklog.error("Smt64::get() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + foundValueHashString);
                 return dbres;
             }
 
@@ -910,7 +910,7 @@ zkresult Smt::get (const string &batchUUID, Database &db, const Goldilocks::Elem
             joinKey(accKey, foundRKey, foundKey);
             bFoundKey = true;
 #ifdef LOG_SMT
-            zklog.info("Smt::get() found at level=" + to_string(level) + " value/hash=" + fea2string(fr,valueHashFea) + " foundKey=" + fea2string(fr, foundKey) + " value=" + foundValue.get_str(16));
+            zklog.info("Smt64::get() found at level=" + to_string(level) + " value/hash=" + fea2string(fr,valueHashFea) + " foundKey=" + fea2string(fr, foundKey) + " value=" + foundValue.get_str(16));
 #endif
         }
         // If this is an intermediate node
@@ -926,7 +926,7 @@ zkresult Smt::get (const string &batchUUID, Database &db, const Goldilocks::Elem
             accKey.push_back(keys[level]);
 
 #ifdef LOG_SMT
-            zklog.info("Smt::get() down 1 level=" + to_string(level) + " keys[level]=" + to_string(keys[level]) + " root/hash=" + fea2string(fr,r));
+            zklog.info("Smt64::get() down 1 level=" + to_string(level) + " keys[level]=" + to_string(keys[level]) + " root/hash=" + fea2string(fr,r));
 #endif
             // Increase the level
             level++;
@@ -992,14 +992,14 @@ zkresult Smt::get (const string &batchUUID, Database &db, const Goldilocks::Elem
     }
 
 #ifdef LOG_SMT
-    zklog.info("Smt::get() returns isOld0=" + to_string(result.isOld0) + " insKey=" + fea2string(fr,result.insKey) + " and value=" + result.value.get_str(16));
+    zklog.info("Smt64::get() returns isOld0=" + to_string(result.isOld0) + " insKey=" + fea2string(fr,result.insKey) + " and value=" + result.value.get_str(16));
 #endif
 
     return ZKR_SUCCESS;
 }
 
 // Split the fe key into 4-bits chuncks, e.g. 0x123456EF -> { 1, 2, 3, 4, 5, 6, E, F }
-void Smt::splitKey( const Goldilocks::Element (&key)[4], bool (&result)[256])
+void Smt64::splitKey( const Goldilocks::Element (&key)[4], bool (&result)[256])
 {
     bitset<64> auxb0(fr.toU64(key[0]));
     bitset<64> auxb1(fr.toU64(key[1]));
@@ -1022,7 +1022,7 @@ void Smt::splitKey( const Goldilocks::Element (&key)[4], bool (&result)[256])
 // bits = key path used
 // rkey = remaining key
 // key = full key (returned)
-void Smt::joinKey ( const vector<uint64_t> &bits, const Goldilocks::Element (&rkey)[4], Goldilocks::Element (&key)[4] )
+void Smt64::joinKey ( const vector<uint64_t> &bits, const Goldilocks::Element (&rkey)[4], Goldilocks::Element (&key)[4] )
 {
     uint64_t n[4] = {0, 0, 0, 0};
     mpz_class accs[4] = {0, 0, 0, 0};
@@ -1051,7 +1051,7 @@ void Smt::joinKey ( const vector<uint64_t> &bits, const Goldilocks::Element (&rk
  * nBits - bits to remove
  * returns rkey - remaining key bits to store
  */
-void Smt::removeKeyBits ( const Goldilocks::Element (&key)[4], uint64_t nBits, Goldilocks::Element (&rkey)[4] )
+void Smt64::removeKeyBits ( const Goldilocks::Element (&key)[4], uint64_t nBits, Goldilocks::Element (&rkey)[4] )
 {
     uint64_t fullLevels = nBits / 4;
     mpz_class auxk[4];
@@ -1074,7 +1074,7 @@ void Smt::removeKeyBits ( const Goldilocks::Element (&key)[4], uint64_t nBits, G
     }
 }
 
-zkresult Smt::hashSave ( const SmtContext &ctx, const Goldilocks::Element (&v)[12], Goldilocks::Element (&hash)[4])
+zkresult Smt64::hashSave ( const SmtContext64 &ctx, const Goldilocks::Element (&v)[12], Goldilocks::Element (&hash)[4])
 {
     // Calculate the poseidon hash of the vector of field elements: v = a | c
     poseidon.hash(hash, v);
@@ -1089,10 +1089,10 @@ zkresult Smt::hashSave ( const SmtContext &ctx, const Goldilocks::Element (&v)[1
 
     if (ctx.bUseStateManager)
     {
-        zkr = stateManager.write(ctx.batchUUID, ctx.tx, hashString, dbValue, ctx.persistence);
+        zkr = stateManager64.write(ctx.batchUUID, ctx.tx, hashString, dbValue, ctx.persistence);
         if (zkr != ZKR_SUCCESS)
         {
-            zklog.error("Smt::hashSave() failed calling stateManager.write() key=" + hashString + " result=" + to_string(zkr) + "=" + zkresult2string(zkr));
+            zklog.error("Smt64::hashSave() failed calling stateManager.write() key=" + hashString + " result=" + to_string(zkr) + "=" + zkresult2string(zkr));
         }
     }
     else
@@ -1100,13 +1100,13 @@ zkresult Smt::hashSave ( const SmtContext &ctx, const Goldilocks::Element (&v)[1
         zkr = ctx.db.write(hashString, hash, dbValue, ctx.persistence == PERSISTENCE_DATABASE ? 1 : 0);
         if (zkr != ZKR_SUCCESS)
         {
-            zklog.error("Smt::hashSave() failed calling db.write() key=" + hashString + " result=" + to_string(zkr) + "=" + zkresult2string(zkr));
+            zklog.error("Smt64::hashSave() failed calling db.write() key=" + hashString + " result=" + to_string(zkr) + "=" + zkresult2string(zkr));
         }
     }
     
 #ifdef LOG_SMT
     {
-        string s = "Smt::hashSave() key=" + hashString + " value=";
+        string s = "Smt64::hashSave() key=" + hashString + " value=";
         for (uint64_t i=0; i<12; i++) s += fr.toString(dbValue[i],16) + ":";
         s += " zkr=" + zkresult2string(zkr);
         zklog.info(s);
@@ -1115,19 +1115,19 @@ zkresult Smt::hashSave ( const SmtContext &ctx, const Goldilocks::Element (&v)[1
     return zkr;
 }
 
-zkresult Smt::updateStateRoot(Database &db, const Goldilocks::Element (&stateRoot)[4])
+zkresult Smt64::updateStateRoot(Database64 &db, const Goldilocks::Element (&stateRoot)[4])
 {
     // Write to db using the dbStateRootKey
     zkresult zkr;
     zkr = db.updateStateRoot(stateRoot);
     if (zkr != ZKR_SUCCESS)
     {
-        zklog.error("Smt::updateeStateRoot() failed calling db.updateeStateRoot() result=" + to_string(zkr) + "=" + zkresult2string(zkr));
+        zklog.error("Smt64::updateeStateRoot() failed calling db.updateeStateRoot() result=" + to_string(zkr) + "=" + zkresult2string(zkr));
     }
 
 #ifdef LOG_SMT
     {
-        string s = "Smt::updateeStateRoot() value=";
+        string s = "Smt64::updateeStateRoot() value=";
         for (uint64_t i=0; i<4; i++) s += fr.toString(stateRoot[i],16) + ":";
         s += " zkr=" + zkresult2string(zkr);
         zklog.info(s);
@@ -1136,7 +1136,7 @@ zkresult Smt::updateStateRoot(Database &db, const Goldilocks::Element (&stateRoo
     return zkr;
 }
 
-int64_t Smt::getUniqueSibling(vector<Goldilocks::Element> &a)
+int64_t Smt64::getUniqueSibling(vector<Goldilocks::Element> &a)
 {
     // Search for a unique, zero field element in vector a
     uint64_t nFound = 0;

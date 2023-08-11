@@ -1,6 +1,6 @@
 #include <iostream>
 #include <thread>
-#include "database.hpp"
+#include "database_64.hpp"
 #include "config.hpp"
 #include "scalar.hpp"
 #include "zkassert.hpp"
@@ -17,24 +17,24 @@
 
 #ifdef DATABASE_USE_CACHE
 
-// Create static Database::dbMTCache and DatabaseCacheProgram objects
+// Create static Database64::dbMTCache and DatabaseCacheProgram objects
 // This will be used to store DB records in memory and it will be shared for all the instances of Database class
 // DatabaseCacheMT and DatabaseCacheProgram classes are thread-safe
-DatabaseMTAssociativeCache Database::dbMTACache;
-DatabaseMTCache Database::dbMTCache;
-DatabaseProgramCache Database::dbProgramCache;
+DatabaseMTAssociativeCache64 Database64::dbMTACache;
+DatabaseMTCache64 Database64::dbMTCache;
+DatabaseProgramCache64 Database64::dbProgramCache;
 
-string Database::dbStateRootKey("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // 64 f's
-Goldilocks::Element Database::dbStateRootvKey[4] = {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF};
-bool Database::useAssociativeCache = false;
+string Database64::dbStateRootKey("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // 64 f's
+Goldilocks::Element Database64::dbStateRootvKey[4] = {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF};
+bool Database64::useAssociativeCache = false;
 
 
 #endif
 
 // Helper functions
-string removeBSXIfExists(string s) {return ((s.at(0) == '\\') && (s.at(1) == 'x')) ? s.substr(2) : s;}
+string removeBSXIfExists64(string s) {return ((s.at(0) == '\\') && (s.at(1) == 'x')) ? s.substr(2) : s;}
 
-Database::Database (Goldilocks &fr, const Config &config) :
+Database64::Database64 (Goldilocks &fr, const Config &config) :
         fr(fr),
         config(config),
         connectionsPool(NULL),
@@ -48,7 +48,7 @@ Database::Database (Goldilocks &fr, const Config &config) :
     sem_init(&getFlushDataSem, 0, 0);
 };
 
-Database::~Database()
+Database64::~Database64()
 {
     if (config.dbConnectionsPool)
     {
@@ -58,7 +58,7 @@ Database::~Database()
             {
                 if (connectionsPool[i].pConnection != NULL)
                 {
-                    //zklog.info("Database::~Database() deleting writeConnectionsPool[" + to_string(i) + "].pConnection=" + to_string((uint64_t)writeConnectionsPool[i].pConnection));
+                    //zklog.info("Database64::~Database64() deleting writeConnectionsPool[" + to_string(i) + "].pConnection=" + to_string((uint64_t)writeConnectionsPool[i].pConnection));
                     delete[] connectionsPool[i].pConnection;
                 }
             }
@@ -74,13 +74,13 @@ Database::~Database()
     }
 }
 
-// Database class implementation
-void Database::init(void)
+// Database64 class implementation
+void Database64::init(void)
 {
     // Check that it has not been initialized before
     if (bInitialized)
     {
-        zklog.error("Database::init() called when already initialized");
+        zklog.error("Database64::init() called when already initialized");
         exitProcess();
     }
 
@@ -88,12 +88,12 @@ void Database::init(void)
     if (config.databaseURL != "local")
     {
         // Sender thread creation
-        pthread_create(&senderPthread, NULL, dbSenderThread, this);
+        pthread_create(&senderPthread, NULL, dbSenderThread64, this);
 
         // Cache synchronization thread creation
         if (config.dbCacheSynchURL.size() > 0)
         {
-            pthread_create(&cacheSynchPthread, NULL, dbCacheSynchThread, this);
+            pthread_create(&cacheSynchPthread, NULL, dbCacheSynchThread64, this);
 
         }
 
@@ -109,12 +109,12 @@ void Database::init(void)
     bInitialized = true;
 }
 
-zkresult Database::read(const string &_key, Goldilocks::Element (&vkey)[4], vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, const bool update,  bool *keys, uint64_t level)
+zkresult Database64::read(const string &_key, Goldilocks::Element (&vkey)[4], vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, const bool update,  bool *keys, uint64_t level)
 {
     // Check that it has been initialized before
     if (!bInitialized)
     {
-        zklog.error("Database::read() called uninitialized");
+        zklog.error("Database64::read() called uninitialized");
         exitProcess();
     }
 
@@ -177,7 +177,7 @@ zkresult Database::read(const string &_key, Goldilocks::Element (&vkey)[4], vect
         {
             for (uint64_t i=0; i<config.dbReadRetryCounter; i++)
             {
-                zklog.warning("Database::read() failed calling readTreeRemote() with error=" + zkresult2string(r) + "; will retry after " + to_string(config.dbReadRetryDelay) + "us key=" + key);
+                zklog.warning("Database64::read() failed calling readTreeRemote() with error=" + zkresult2string(r) + "; will retry after " + to_string(config.dbReadRetryDelay) + "us key=" + key);
 
                 // Retry after dbReadRetryDelay us
                 usleep(config.dbReadRetryDelay);
@@ -194,7 +194,7 @@ zkresult Database::read(const string &_key, Goldilocks::Element (&vkey)[4], vect
                 {
                     break;
                 }
-                zklog.warning("Database::read() retried readTreeRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r) + " i=" + to_string(i));
+                zklog.warning("Database64::read() retried readTreeRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r) + " i=" + to_string(i));
             }
         }
 
@@ -210,7 +210,7 @@ zkresult Database::read(const string &_key, Goldilocks::Element (&vkey)[4], vect
             }
             else
             {
-                zklog.warning("Database::read() called readTreeRemote() but key=" + key + " is not present");
+                zklog.warning("Database64::read() called readTreeRemote() but key=" + key + " is not present");
                 r = ZKR_UNSPECIFIED;
             }
         }
@@ -232,7 +232,7 @@ zkresult Database::read(const string &_key, Goldilocks::Element (&vkey)[4], vect
         {
             for (uint64_t i=0; i<config.dbReadRetryCounter; i++)
             {
-                zklog.warning("Database::read() failed calling readRemote() with error=" + zkresult2string(r) + "; will retry after " + to_string(config.dbReadRetryDelay) + "us key=" + key + " i=" + to_string(i));
+                zklog.warning("Database64::read() failed calling readRemote() with error=" + zkresult2string(r) + "; will retry after " + to_string(config.dbReadRetryDelay) + "us key=" + key + " i=" + to_string(i));
 
                 // Retry after dbReadRetryDelay us
                 usleep(config.dbReadRetryDelay);
@@ -241,7 +241,7 @@ zkresult Database::read(const string &_key, Goldilocks::Element (&vkey)[4], vect
                 {
                     break;
                 }
-                zklog.warning("Database::read() retried readRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r) + " i=" + to_string(i));
+                zklog.warning("Database64::read() retried readRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r) + " i=" + to_string(i));
             }
         }
         if (r == ZKR_SUCCESS)
@@ -265,13 +265,13 @@ zkresult Database::read(const string &_key, Goldilocks::Element (&vkey)[4], vect
     // If we could not find the value, report the error
     if (r == ZKR_UNSPECIFIED)
     {
-        zklog.error("Database::read() requested a key that does not exist (ZKR_DB_KEY_NOT_FOUND): " + key);
+        zklog.error("Database64::read() requested a key that does not exist (ZKR_DB_KEY_NOT_FOUND): " + key);
         r = ZKR_DB_KEY_NOT_FOUND;
     }
 
 #ifdef LOG_DB_READ
     {
-        string s = "Database::read()";
+        string s = "Database64::read()";
         if (r != ZKR_SUCCESS)
             s += " ERROR=" + zkresult2string(r);
         s += " key=" + key;
@@ -285,18 +285,18 @@ zkresult Database::read(const string &_key, Goldilocks::Element (&vkey)[4], vect
     return r;
 }
 
-zkresult Database::write(const string &_key, const Goldilocks::Element* vkey, const vector<Goldilocks::Element> &value, const bool persistent)
+zkresult Database64::write(const string &_key, const Goldilocks::Element* vkey, const vector<Goldilocks::Element> &value, const bool persistent)
 {
     // Check that it has  been initialized before
     if (!bInitialized)
     {
-        zklog.error("Database::write() called uninitialized");
+        zklog.error("Database64::write() called uninitialized");
         exitProcess();
     }
 
     if (config.dbMultiWrite && !(dbMTCache.enabled() || dbMTACache.enabled()) && !persistent)
     {
-        zklog.error("Database::write() called with multi-write active, cache disabled and no persistance in database, so there is no place to store the date");
+        zklog.error("Database64::write() called with multi-write active, cache disabled and no persistance in database, so there is no place to store the date");
         return ZKR_DB_ERROR;
     }
 
@@ -349,7 +349,7 @@ zkresult Database::write(const string &_key, const Goldilocks::Element* vkey, co
 
 #ifdef LOG_DB_WRITE
     {
-        string s = "Database::write()";
+        string s = "Database64::write()";
         if (r != ZKR_SUCCESS)
             s += " ERROR=" + zkresult2string(r);
         s += " key=" + key;
@@ -364,7 +364,7 @@ zkresult Database::write(const string &_key, const Goldilocks::Element* vkey, co
     return r;
 }
 
-void Database::initRemote(void)
+void Database64::initRemote(void)
 {
     TimerStart(DB_INIT_REMOTE);
 
@@ -372,7 +372,7 @@ void Database::initRemote(void)
     {
         // Build the remote database URI
         string uri = config.databaseURL;
-        //zklog.info("Database URI: " + uri);
+        //zklog.info("Database64 URI: " + uri);
 
         // Create the database connections
         connLock();
@@ -382,22 +382,22 @@ void Database::initRemote(void)
             // Check that we don't support more threads than available connections, including the sender thread
             if (config.dbNumberOfPoolConnections == 0)
             {
-                zklog.error("Database::initRemote() found config.dbNumberOfPoolConnections=" + to_string(config.dbNumberOfPoolConnections));
+                zklog.error("Database64::initRemote() found config.dbNumberOfPoolConnections=" + to_string(config.dbNumberOfPoolConnections));
                 exitProcess();
             }
             if ( config.runHashDBServer && ((config.maxHashDBThreads + 1) > config.dbNumberOfPoolConnections) )
             {
-                zklog.error("Database::initRemote() found config.maxHashDBThreads + 1=" + to_string(config.maxHashDBThreads + 1) + " > config.dbNumberOfPoolConnections=" + to_string(config.dbNumberOfPoolConnections));
+                zklog.error("Database64::initRemote() found config.maxHashDBThreads + 1=" + to_string(config.maxHashDBThreads + 1) + " > config.dbNumberOfPoolConnections=" + to_string(config.dbNumberOfPoolConnections));
                 exitProcess();
             }
             if ( config.runExecutorServer && ((config.maxExecutorThreads + 1) > config.dbNumberOfPoolConnections) )
             {
-                zklog.error("Database::initRemote() found config.maxExecutorThreads + 1=" + to_string(config.maxExecutorThreads + 1) + " > config.dbNumberOfPoolConnections=" + to_string(config.dbNumberOfPoolConnections));
+                zklog.error("Database64::initRemote() found config.maxExecutorThreads + 1=" + to_string(config.maxExecutorThreads + 1) + " > config.dbNumberOfPoolConnections=" + to_string(config.dbNumberOfPoolConnections));
                 exitProcess();
             }
             if ( config.runHashDBServer && config.runExecutorServer && ((config.maxHashDBThreads + config.maxExecutorThreads + 1) > config.dbNumberOfPoolConnections) )
             {
-                zklog.error("Database::initRemote() found config.maxHashDBThreads + config.maxExecutorThreads + 1=" + to_string(config.maxHashDBThreads + config.maxExecutorThreads + 1) + " > config.dbNumberOfPoolConnections=" + to_string(config.dbNumberOfPoolConnections));
+                zklog.error("Database64::initRemote() found config.maxHashDBThreads + config.maxExecutorThreads + 1=" + to_string(config.maxHashDBThreads + config.maxExecutorThreads + 1) + " > config.dbNumberOfPoolConnections=" + to_string(config.dbNumberOfPoolConnections));
                 exitProcess();
             }
 
@@ -405,7 +405,7 @@ void Database::initRemote(void)
             connectionsPool = new DatabaseConnection[config.dbNumberOfPoolConnections];
             if (connectionsPool == NULL)
             {
-                zklog.error("Database::initRemote() failed creating write connection pool of size " + to_string(config.dbNumberOfPoolConnections));
+                zklog.error("Database64::initRemote() failed creating write connection pool of size " + to_string(config.dbNumberOfPoolConnections));
                 exitProcess();
             }
 
@@ -415,11 +415,11 @@ void Database::initRemote(void)
                 connectionsPool[i].pConnection = new pqxx::connection{uri};
                 if (connectionsPool[i].pConnection == NULL)
                 {
-                    zklog.error("Database::initRemote() failed creating write connection " + to_string(i));
+                    zklog.error("Database64::initRemote() failed creating write connection " + to_string(i));
                     exitProcess();
                 }
                 connectionsPool[i].bInUse = false;
-                //zklog.info("Database::initRemote() created write connection i=" + to_string(i) + " connectionsPool[i]=" + to_string((uint64_t)connectionsPool[i].pConnection));
+                //zklog.info("Database64::initRemote() created write connection i=" + to_string(i) + " connectionsPool[i]=" + to_string((uint64_t)connectionsPool[i].pConnection));
             }
 
             // Reset counters
@@ -431,7 +431,7 @@ void Database::initRemote(void)
             connection.pConnection = new pqxx::connection{uri};
             if (connection.pConnection == NULL)
             {
-                zklog.error("Database::initRemote() failed creating unique connection");
+                zklog.error("Database64::initRemote() failed creating unique connection");
                 exitProcess();
             }
             connection.bInUse = false;
@@ -441,7 +441,7 @@ void Database::initRemote(void)
     }
     catch (const std::exception &e)
     {
-        zklog.error("Database::initRemote() exception: " + string(e.what()));
+        zklog.error("Database64::initRemote() exception: " + string(e.what()));
         exitProcess();
     }
 
@@ -460,7 +460,7 @@ void Database::initRemote(void)
     TimerStopAndLog(DB_INIT_REMOTE);
 }
 
-DatabaseConnection * Database::getConnection (void)
+DatabaseConnection * Database64::getConnection (void)
 {
     if (config.dbConnectionsPool)
     {
@@ -478,7 +478,7 @@ DatabaseConnection * Database::getConnection (void)
         }
         if (i==config.dbNumberOfPoolConnections)
         {
-            zklog.error("Database::getWriteConnection() run out of free connections");
+            zklog.error("Database64::getWriteConnection() run out of free connections");
             exitProcess();
         }
 
@@ -496,7 +496,7 @@ DatabaseConnection * Database::getConnection (void)
             pConnection->pConnection->disconnect();
             pConnection->bDisconnect = false;
         }
-        //zklog.info("Database::getWriteConnection() pConnection=" + to_string((uint64_t)pConnection) + " nextConnection=" + to_string(nextConnection) + " usedConnections=" + to_string(usedConnections));
+        //zklog.info("Database64::getWriteConnection() pConnection=" + to_string((uint64_t)pConnection) + " nextConnection=" + to_string(nextConnection) + " usedConnections=" + to_string(usedConnections));
         connUnlock();
         return pConnection;
     }
@@ -511,7 +511,7 @@ DatabaseConnection * Database::getConnection (void)
     }
 }
 
-void Database::disposeConnection (DatabaseConnection * pConnection)
+void Database64::disposeConnection (DatabaseConnection * pConnection)
 {
     if (config.dbConnectionsPool)
     {
@@ -520,7 +520,7 @@ void Database::disposeConnection (DatabaseConnection * pConnection)
         pConnection->bInUse = false;
         zkassert(usedConnections > 0);
         usedConnections--;
-        //zklog.info("Database::disposeWriteConnection() pConnection=" + to_string((uint64_t)pConnection) + " nextConnection=" + to_string(nextConnection) + " usedConnections=" + to_string(usedConnections));
+        //zklog.info("Database64::disposeWriteConnection() pConnection=" + to_string((uint64_t)pConnection) + " nextConnection=" + to_string(nextConnection) + " usedConnections=" + to_string(usedConnections));
         connUnlock();
     }
     else
@@ -534,7 +534,7 @@ void Database::disposeConnection (DatabaseConnection * pConnection)
     }
 }
 
-void Database::queryFailed (void)
+void Database64::queryFailed (void)
 {
     connLock();
 
@@ -546,13 +546,13 @@ void Database::queryFailed (void)
     connUnlock();
 }
 
-zkresult Database::readRemote(bool bProgram, const string &key, string &value)
+zkresult Database64::readRemote(bool bProgram, const string &key, string &value)
 {
     const string &tableName = (bProgram ? config.dbProgramTableName : config.dbNodesTableName);
 
     if (config.logRemoteDbReads)
     {
-        zklog.info("Database::readRemote() table=" + tableName + " key=" + key);
+        zklog.info("Database64::readRemote() table=" + tableName + " key=" + key);
     }
 
     // Get a free read db connection
@@ -582,22 +582,22 @@ zkresult Database::readRemote(bool bProgram, const string &key, string &value)
         }
         else if (rows.size() > 1)
         {
-            zklog.error("Database::readRemote() table=" + tableName + " got more than one row for the same key: " + to_string(rows.size()));
+            zklog.error("Database64::readRemote() table=" + tableName + " got more than one row for the same key: " + to_string(rows.size()));
             exitProcess();
         }
 
         pqxx::row const row = rows[0];
         if (row.size() != 2)
         {
-            zklog.error("Database::readRemote() table=" + tableName + " got an invalid number of colums for the row: " + to_string(row.size()));
+            zklog.error("Database64::readRemote() table=" + tableName + " got an invalid number of colums for the row: " + to_string(row.size()));
             exitProcess();
         }
         pqxx::field const fieldData = row[1];
-        value = removeBSXIfExists(fieldData.c_str());
+        value = removeBSXIfExists64(fieldData.c_str());
     }
     catch (const std::exception &e)
     {
-        zklog.error("Database::readRemote() table=" + tableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
+        zklog.error("Database64::readRemote() table=" + tableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
         queryFailed();
         disposeConnection(pDatabaseConnection);
         return ZKR_DB_ERROR;
@@ -609,13 +609,13 @@ zkresult Database::readRemote(bool bProgram, const string &key, string &value)
     return ZKR_SUCCESS;
 }
 
-zkresult Database::readTreeRemote(const string &key, bool *keys, uint64_t level, uint64_t &numberOfFields)
+zkresult Database64::readTreeRemote(const string &key, bool *keys, uint64_t level, uint64_t &numberOfFields)
 {
     zkassert(keys != NULL);
 
     if (config.logRemoteDbReads)
     {
-        zklog.info("Database::readTreeRemote() key=" + key);
+        zklog.info("Database64::readTreeRemote() key=" + key);
     }
     string rkey;
     for (uint64_t i=level; i<256; i++)
@@ -623,7 +623,7 @@ zkresult Database::readTreeRemote(const string &key, bool *keys, uint64_t level,
         uint8_t auxByte = (uint8_t)(keys[i]);
         if (auxByte > 1)
         {
-            zklog.error("Database::readTreeRemote() found invalid keys value=" + to_string(auxByte) + " at position " + to_string(i));
+            zklog.error("Database64::readTreeRemote() found invalid keys value=" + to_string(auxByte) + " at position " + to_string(i));
             return ZKR_DB_ERROR;
         }
         rkey.append(1, byte2char(auxByte >> 4));
@@ -658,7 +658,7 @@ zkresult Database::readTreeRemote(const string &key, bool *keys, uint64_t level,
             pqxx::row const row = rows[i];
             if (row.size() != 1)
             {
-                zklog.error("Database::readTreeRemote() got an invalid number of colums for the row: " + to_string(row.size()));
+                zklog.error("Database64::readTreeRemote() got an invalid number of colums for the row: " + to_string(row.size()));
                 disposeConnection(pDatabaseConnection);
                 return ZKR_UNSPECIFIED;
             }
@@ -682,7 +682,7 @@ zkresult Database::readTreeRemote(const string &key, bool *keys, uint64_t level,
                  ( (secondPosition + second.size() + 12*8*2 != thirdPosition) &&
                    (secondPosition + second.size() + 8*8*2 != thirdPosition) ))
             {
-                zklog.error("Database::readTreeRemote() got an invalid field=" + fieldDataString);
+                zklog.error("Database64::readTreeRemote() got an invalid field=" + fieldDataString);
                 disposeConnection(pDatabaseConnection);
                 return ZKR_UNSPECIFIED;
             }
@@ -696,7 +696,7 @@ zkresult Database::readTreeRemote(const string &key, bool *keys, uint64_t level,
             // Store it locally to avoid any future remote access for this key
             if (dbMTCache.enabled() || dbMTACache.enabled())
             {
-                //zklog.info("Database::readTreeRemote() adding hash=" + hash + " to dbMTCache");
+                //zklog.info("Database64::readTreeRemote() adding hash=" + hash + " to dbMTCache");
                 if(usingAssociativeCache()){
                     Goldilocks::Element vhash[4];
                     string2key(fr, hash, vhash);   
@@ -710,7 +710,7 @@ zkresult Database::readTreeRemote(const string &key, bool *keys, uint64_t level,
     }
     catch (const std::exception &e)
     {
-        zklog.warning("Database::readTreeRemote() exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
+        zklog.warning("Database64::readTreeRemote() exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
         queryFailed();
         disposeConnection(pDatabaseConnection);
         return ZKR_DB_ERROR;
@@ -721,14 +721,14 @@ zkresult Database::readTreeRemote(const string &key, bool *keys, uint64_t level,
 
     if (config.logRemoteDbReads)
     {
-        zklog.info("Database::readTreeRemote() key=" + key + " read " + to_string(numberOfFields));
+        zklog.info("Database64::readTreeRemote() key=" + key + " read " + to_string(numberOfFields));
     }
 
     return ZKR_SUCCESS;
     
 }
 
-zkresult Database::writeRemote(bool bProgram, const string &key, const string &value)
+zkresult Database64::writeRemote(bool bProgram, const string &key, const string &value)
 {
     zkresult result = ZKR_SUCCESS;
     
@@ -740,7 +740,7 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
         {
             multiWrite.data[multiWrite.pendingToFlushDataIndex].programIntray[key] = value;
 #ifdef LOG_DB_WRITE_REMOTE
-            zklog.info("Database::writeRemote() key=" + key + " multiWrite=[" + multiWrite.print() + "]");
+            zklog.info("Database64::writeRemote() key=" + key + " multiWrite=[" + multiWrite.print() + "]");
 #endif
         }
         else
@@ -780,7 +780,7 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
         }
         catch (const std::exception &e)
         {
-            zklog.error("Database::writeRemote() table=" + tableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
+            zklog.error("Database64::writeRemote() table=" + tableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
             result = ZKR_DB_ERROR;
             queryFailed();
         }
@@ -791,7 +791,7 @@ zkresult Database::writeRemote(bool bProgram, const string &key, const string &v
     return result;
 }
 
-zkresult Database::createStateRoot(void)
+zkresult Database64::createStateRoot(void)
 {
     // Copy the state root in the first 4 elements of dbValue
     vector<Goldilocks::Element> value;
@@ -837,7 +837,7 @@ zkresult Database::createStateRoot(void)
         }
         catch (const std::exception &e)
         {
-            zklog.error("Database::createStateRoot() table=" + config.dbNodesTableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
+            zklog.error("Database64::createStateRoot() table=" + config.dbNodesTableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
             r = ZKR_DB_ERROR;
             queryFailed();
         }
@@ -847,7 +847,7 @@ zkresult Database::createStateRoot(void)
 
 #ifdef LOG_DB_WRITE
     {
-        string s = "Database::createStateRoot()";
+        string s = "Database64::createStateRoot()";
         if (r != ZKR_SUCCESS)
             s += " ERROR=" + zkresult2string(r);
         s += " key=" + dbStateRootKey;
@@ -861,12 +861,12 @@ zkresult Database::createStateRoot(void)
     return r;
 }
 
-zkresult Database::updateStateRoot(const Goldilocks::Element (&stateRoot)[4])
+zkresult Database64::updateStateRoot(const Goldilocks::Element (&stateRoot)[4])
 {
     // Check that it has  been initialized before
     if (!bInitialized)
     {
-        zklog.error("Database::updateStateRoot() called uninitialized");
+        zklog.error("Database64::updateStateRoot() called uninitialized");
         exitProcess();
     }
 
@@ -922,7 +922,7 @@ zkresult Database::updateStateRoot(const Goldilocks::Element (&stateRoot)[4])
             }
             catch (const std::exception &e)
             {
-                zklog.error("Database::updateStateRoot() table=" + config.dbNodesTableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
+                zklog.error("Database64::updateStateRoot() table=" + config.dbNodesTableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
                 r = ZKR_DB_ERROR;
                 queryFailed();
             }
@@ -945,7 +945,7 @@ zkresult Database::updateStateRoot(const Goldilocks::Element (&stateRoot)[4])
 
 #ifdef LOG_DB_WRITE
     {
-        string s = "Database::updateStateRoot()";
+        string s = "Database64::updateStateRoot()";
         if (r != ZKR_SUCCESS)
             s += " ERROR=" + zkresult2string(r);
         s += " key=" + dbStateRootKey;
@@ -959,17 +959,17 @@ zkresult Database::updateStateRoot(const Goldilocks::Element (&stateRoot)[4])
     return r;
 }
 
-zkresult Database::writeGetTreeFunction(void)
+zkresult Database64::writeGetTreeFunction(void)
 {
     if (!config.dbGetTree)
     {
-        zklog.error("Database::writeGetTreeFunction() dalled with config.dbGetTree=false");
+        zklog.error("Database64::writeGetTreeFunction() dalled with config.dbGetTree=false");
         return ZKR_DB_ERROR;
     }
     
     if (config.databaseURL == "local")
     {
-        zklog.error("Database::writeGetTreeFunction() dalled with config.databaseURL=local");
+        zklog.error("Database64::writeGetTreeFunction() dalled with config.databaseURL=local");
         return ZKR_DB_ERROR;
     }
 
@@ -1125,24 +1125,24 @@ zkresult Database::writeGetTreeFunction(void)
     }
     catch (const std::exception &e)
     {
-        zklog.error("Database::writeGetTreeFunction() exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
+        zklog.error("Database64::writeGetTreeFunction() exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
         result = ZKR_DB_ERROR;
         queryFailed();
     }
     
     disposeConnection(pDatabaseConnection);
 
-    zklog.info("Database::writeGetTreeFunction() returns " + zkresult2string(result));
+    zklog.info("Database64::writeGetTreeFunction() returns " + zkresult2string(result));
         
     return result;
 }
 
-zkresult Database::setProgram (const string &_key, const vector<uint8_t> &data, const bool persistent)
+zkresult Database64::setProgram (const string &_key, const vector<uint8_t> &data, const bool persistent)
 {
     // Check that it has been initialized before
     if (!bInitialized)
     {
-        zklog.error("Database::setProgram() called uninitialized");
+        zklog.error("Database64::setProgram() called uninitialized");
         exitProcess();
     }
 
@@ -1181,7 +1181,7 @@ zkresult Database::setProgram (const string &_key, const vector<uint8_t> &data, 
 
 #ifdef LOG_DB_WRITE
     {
-        string s = "Database::setProgram()";
+        string s = "Database64::setProgram()";
         if (r != ZKR_SUCCESS)
             s += " ERROR=" + zkresult2string(r);
         s += " key=" + key;
@@ -1197,12 +1197,12 @@ zkresult Database::setProgram (const string &_key, const vector<uint8_t> &data, 
     return r;
 }
 
-zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, DatabaseMap *dbReadLog)
+zkresult Database64::getProgram(const string &_key, vector<uint8_t> &data, DatabaseMap *dbReadLog)
 {
     // Check that it has been initialized before
     if (!bInitialized)
     {
-        zklog.error("Database::getProgram() called uninitialized");
+        zklog.error("Database64::getProgram() called uninitialized");
         exitProcess();
     }
 
@@ -1255,13 +1255,13 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
     }
     else
     {
-        zklog.error("Database::getProgram() requested a key that does not exist: " + key);
+        zklog.error("Database64::getProgram() requested a key that does not exist: " + key);
         r = ZKR_DB_KEY_NOT_FOUND;
     }
 
 #ifdef LOG_DB_READ
     {
-        string s = "Database::getProgram()";
+        string s = "Database64::getProgram()";
         if (r != ZKR_SUCCESS)
             s += " ERROR=" + zkresult2string(r);
         s += " key=" + key;
@@ -1276,7 +1276,7 @@ zkresult Database::getProgram(const string &_key, vector<uint8_t> &data, Databas
     return r;
 }
     
-zkresult Database::flush(uint64_t &thisBatch, uint64_t &lastSentBatch)
+zkresult Database64::flush(uint64_t &thisBatch, uint64_t &lastSentBatch)
 {
     if (!config.dbMultiWrite)
     {
@@ -1306,7 +1306,7 @@ zkresult Database::flush(uint64_t &thisBatch, uint64_t &lastSentBatch)
     lastSentBatch = multiWrite.storedFlushId;
 
 #ifdef LOG_DB_FLUSH
-    zklog.info("Database::flush() thisBatch=" + to_string(thisBatch) + " lastSentBatch=" + to_string(lastSentBatch) + " multiWrite=[" + multiWrite.print() + "]");
+    zklog.info("Database64::flush() thisBatch=" + to_string(thisBatch) + " lastSentBatch=" + to_string(lastSentBatch) + " multiWrite=[" + multiWrite.print() + "]");
 #endif
 
     // Notify the thread
@@ -1316,7 +1316,7 @@ zkresult Database::flush(uint64_t &thisBatch, uint64_t &lastSentBatch)
     return ZKR_SUCCESS;
 }
 
-void Database::semiFlush (void)
+void Database64::semiFlush (void)
 {
     if (!config.dbMultiWrite)
     {
@@ -1328,13 +1328,13 @@ void Database::semiFlush (void)
     multiWrite.data[multiWrite.pendingToFlushDataIndex].acceptIntray();
 
 #ifdef LOG_DB_SEMI_FLUSH
-    zklog.info("Database::semiFlush() called multiWrite=[" + multiWrite.print() + "]");
+    zklog.info("Database64::semiFlush() called multiWrite=[" + multiWrite.print() + "]");
 #endif
 
     multiWrite.Unlock();
 }
 
-zkresult Database::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram)
+zkresult Database64::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram)
 {
     multiWrite.Lock();
     storedFlushId = multiWrite.storedFlushId;
@@ -1348,7 +1348,7 @@ zkresult Database::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlus
     return ZKR_SUCCESS;
 }
 
-zkresult Database::sendData (void)
+zkresult Database64::sendData (void)
 {
     zkresult zkr = ZKR_SUCCESS;
     
@@ -1358,19 +1358,19 @@ zkresult Database::sendData (void)
     uint64_t fields = 0;
 
     // Select proper data instance
-    MultiWriteData &data = multiWrite.data[multiWrite.storingDataIndex];
+    MultiWriteData64 &data = multiWrite.data[multiWrite.storingDataIndex];
 
     // Check if there is data
     if (data.IsEmpty())
     {
-        zklog.warning("Database::sendData() called with empty data");
+        zklog.warning("Database64::sendData() called with empty data");
         return ZKR_SUCCESS;
     }
 
     // Check if it has already been stored to database
     if (data.stored)
     {
-        zklog.warning("Database::sendData() called with stored=true");
+        zklog.warning("Database64::sendData() called with stored=true");
         return ZKR_SUCCESS;
     }
 
@@ -1412,7 +1412,7 @@ zkresult Database::sendData (void)
                         firstValue = false;
                         data.multiQuery.queries[currentQuery].query += "( E\'\\\\x" + it->first + "\', E\'\\\\x" + it->second + "\' ) ";
 #ifdef LOG_DB_SEND_DATA
-                        zklog.info("Database::sendData() inserting node key=" + it->first + " value=" + it->second);
+                        zklog.info("Database64::sendData() inserting node key=" + it->first + " value=" + it->second);
 #endif
                         if (data.multiQuery.queries[currentQuery].query.size() >= config.dbMultiWriteSingleQuerySize)
                         {
@@ -1450,7 +1450,7 @@ zkresult Database::sendData (void)
                         firstValue = false;
                         data.multiQuery.queries[currentQuery].query += "( E\'\\\\x" + it->first + "\', E\'\\\\x" + it->second + "\' ) ";
 #ifdef LOG_DB_SEND_DATA
-                        zklog.info("Database::sendData() inserting program key=" + it->first + " value=" + it->second);
+                        zklog.info("Database64::sendData() inserting program key=" + it->first + " value=" + it->second);
 #endif
                         if (data.multiQuery.queries[currentQuery].query.size() >= config.dbMultiWriteSingleQuerySize)
                         {
@@ -1479,14 +1479,14 @@ zkresult Database::sendData (void)
                 // Mark query as full
                 data.multiQuery.queries[currentQuery].full = true;
 #ifdef LOG_DB_SEND_DATA
-                zklog.info("Database::sendData() inserting root=" + data.nodesStateRoot);
+                zklog.info("Database64::sendData() inserting root=" + data.nodesStateRoot);
 #endif
             }
         }
 
         if (data.multiQuery.isEmpty())
         {
-            zklog.warning("Database::sendData() called without any data to send");
+            zklog.warning("Database64::sendData() called without any data to send");
             data.stored = true;
         }
         else
@@ -1494,7 +1494,7 @@ zkresult Database::sendData (void)
             if (config.dbMetrics)
             {
                 fields = data.nodes.size() + data.program.size() + (data.nodesStateRoot.size() > 0 ? 1 : 0);
-                zklog.info("Database::sendData() dbMetrics multiWrite nodes=" + to_string(data.nodes.size()) +
+                zklog.info("Database64::sendData() dbMetrics multiWrite nodes=" + to_string(data.nodes.size()) +
                     " program=" + to_string(data.program.size()) +
                     " nodesStateRootCounter=" + to_string(data.nodesStateRoot.size() > 0 ? 1 : 0) +
                     " query.size=" + to_string(data.multiQuery.size()) + "B=" + to_string(data.multiQuery.size()/zkmax(fields,1)) + "B/field" +
@@ -1524,11 +1524,11 @@ zkresult Database::sendData (void)
                 data.multiQuery.queries[i].sent = true;
             }
 
-            //zklog.info("Database::flush() sent query=" + query);
+            //zklog.info("Database64::flush() sent query=" + query);
             if (config.dbMetrics)
             {
                 timeDiff = TimeDiff(t);
-                zklog.info("Database::sendData() dbMetrics multiWrite total=" + to_string(fields) + "fields=" + to_string(timeDiff) + "us=" + to_string(timeDiff/zkmax(fields,1)) + "us/field");
+                zklog.info("Database64::sendData() dbMetrics multiWrite total=" + to_string(fields) + "fields=" + to_string(timeDiff) + "us=" + to_string(timeDiff/zkmax(fields,1)) + "us/field");
             }
 
 #ifdef LOG_DB_WRITE_QUERY
@@ -1538,11 +1538,11 @@ zkresult Database::sendData (void)
                 {
                     query += data.multiQuery.queries[i].query;
                 }
-                zklog.info("Database::sendData() write query=" + query);
+                zklog.info("Database64::sendData() write query=" + query);
             }
 #endif
 #ifdef LOG_DB_SEND_DATA
-            zklog.info("Database::sendData() successfully processed query of size= " + to_string(data.multiQuery.size()));
+            zklog.info("Database64::sendData() successfully processed query of size= " + to_string(data.multiQuery.size()));
 #endif
             // Update status
             data.multiQuery.reset();
@@ -1556,8 +1556,8 @@ zkresult Database::sendData (void)
     }
     catch (const std::exception &e)
     {
-        zklog.error("Database::sendData() execute query exception: " + string(e.what()));
-        zklog.error("Database::sendData() query.size=" + to_string(data.multiQuery.queries.size()) + (data.multiQuery.isEmpty() ? "" : (" query(<1024)=" + data.multiQuery.queries[0].query.substr(0, 1024))));
+        zklog.error("Database64::sendData() execute query exception: " + string(e.what()));
+        zklog.error("Database64::sendData() query.size=" + to_string(data.multiQuery.queries.size()) + (data.multiQuery.isEmpty() ? "" : (" query(<1024)=" + data.multiQuery.queries[0].query.substr(0, 1024))));
         queryFailed();
         zkr = ZKR_DB_ERROR;
     }
@@ -1569,7 +1569,7 @@ zkresult Database::sendData (void)
 }
 
 // Get flush data, written to database by dbSenderThread; it blocks
-zkresult Database::getFlushData(uint64_t flushId, uint64_t &storedFlushId, unordered_map<string, string> (&nodes), unordered_map<string, string> (&program), string &nodesStateRoot)
+zkresult Database64::getFlushData(uint64_t flushId, uint64_t &storedFlushId, unordered_map<string, string> (&nodes), unordered_map<string, string> (&program), string &nodesStateRoot)
 {
     //zklog.info("--> getFlushData()");
 
@@ -1583,14 +1583,14 @@ zkresult Database::getFlushData(uint64_t flushId, uint64_t &storedFlushId, unord
     iResult = sem_timedwait(&getFlushDataSem, &deadline);
     if (iResult != 0)
     {
-        zklog.info("Database::getFlushData() timed out");
+        zklog.info("Database64::getFlushData() timed out");
         return ZKR_SUCCESS;
     }
 
     multiWrite.Lock();
-    MultiWriteData &data = multiWrite.data[multiWrite.synchronizingDataIndex];
+    MultiWriteData64 &data = multiWrite.data[multiWrite.synchronizingDataIndex];
 
-    zklog.info("Database::getFlushData woke up: pendingToFlushDataIndex=" + to_string(multiWrite.pendingToFlushDataIndex) +
+    zklog.info("Database64::getFlushData woke up: pendingToFlushDataIndex=" + to_string(multiWrite.pendingToFlushDataIndex) +
         " storingDataIndex=" + to_string(multiWrite.storingDataIndex) +
         " synchronizingDataIndex=" + to_string(multiWrite.synchronizingDataIndex) +
         " nodes=" + to_string(data.nodes.size()) +
@@ -1621,14 +1621,14 @@ zkresult Database::getFlushData(uint64_t flushId, uint64_t &storedFlushId, unord
 
 #ifdef DATABASE_COMMIT
 
-void Database::setAutoCommit(const bool ac)
+void Database64::setAutoCommit(const bool ac)
 {
     if (ac && !autoCommit)
         commit();
     autoCommit = ac;
 }
 
-void Database::commit()
+void Database64::commit()
 {
     if ((!autoCommit) && (transaction != NULL))
     {
@@ -1640,7 +1640,7 @@ void Database::commit()
 
 #endif
 
-void Database::printTree(const string &root, string prefix)
+void Database64::printTree(const string &root, string prefix)
 {
     if (prefix == "")
     {
@@ -1649,27 +1649,27 @@ void Database::printTree(const string &root, string prefix)
     string key = root;
     vector<Goldilocks::Element> value;
     Goldilocks::Element vKey[4];
-    if(Database::useAssociativeCache) string2key(fr, key, vKey);  
+    if(Database64::useAssociativeCache) string2key(fr, key, vKey);  
     read(key,vKey,value, NULL);
 
     if (value.size() != 12)
     {
-        zklog.error("Database::printTree() found value.size()=" + to_string(value.size()));
+        zklog.error("Database64::printTree() found value.size()=" + to_string(value.size()));
         return;
     }
     if (!fr.equal(value[11], fr.zero()))
     {
-        zklog.error("Database::printTree() found value[11]=" + fr.toString(value[11], 16));
+        zklog.error("Database64::printTree() found value[11]=" + fr.toString(value[11], 16));
         return;
     }
     if (!fr.equal(value[10], fr.zero()))
     {
-        zklog.error("Database::printTree() found value[10]=" + fr.toString(value[10], 16));
+        zklog.error("Database64::printTree() found value[10]=" + fr.toString(value[10], 16));
         return;
     }
     if (!fr.equal(value[9], fr.zero()))
     {
-        zklog.error("Database::printTree() found value[9]=" + fr.toString(value[9], 16));
+        zklog.error("Database64::printTree() found value[9]=" + fr.toString(value[9], 16));
         return;
     }
     if (fr.equal(value[8], fr.zero())) // Intermediate node
@@ -1696,22 +1696,22 @@ void Database::printTree(const string &root, string prefix)
         {
             if (!fr.equal(leafValue[8], fr.zero()))
             {
-                zklog.error("Database::printTree() found leafValue[8]=" + fr.toString(leafValue[8], 16));
+                zklog.error("Database64::printTree() found leafValue[8]=" + fr.toString(leafValue[8], 16));
                 return;
             }
             if (!fr.equal(leafValue[9], fr.zero()))
             {
-                zklog.error("Database::printTree() found leafValue[9]=" + fr.toString(leafValue[9], 16));
+                zklog.error("Database64::printTree() found leafValue[9]=" + fr.toString(leafValue[9], 16));
                 return;
             }
             if (!fr.equal(leafValue[10], fr.zero()))
             {
-                zklog.error("Database::printTree() found leafValue[10]=" + fr.toString(leafValue[10], 16));
+                zklog.error("Database64::printTree() found leafValue[10]=" + fr.toString(leafValue[10], 16));
                 return;
             }
             if (!fr.equal(leafValue[11], fr.zero()))
             {
-                zklog.error("Database::printTree() found leafValue[11]=" + fr.toString(leafValue[11], 16));
+                zklog.error("Database64::printTree() found leafValue[11]=" + fr.toString(leafValue[11], 16));
                 return;
             }
         }
@@ -1721,7 +1721,7 @@ void Database::printTree(const string &root, string prefix)
         }
         else
         {
-            zklog.error("Database::printTree() found lleafValue.size()=" + to_string(leafValue.size()));
+            zklog.error("Database64::printTree() found lleafValue.size()=" + to_string(leafValue.size()));
             return;
         }
         mpz_class scalarValue;
@@ -1730,23 +1730,23 @@ void Database::printTree(const string &root, string prefix)
     }
     else
     {
-        zklog.error("Database::printTree() found value[8]=" + fr.toString(value[8], 16));
+        zklog.error("Database64::printTree() found value[8]=" + fr.toString(value[8], 16));
         return;
     }
     if (prefix == "") zklog.info("");
 }
 
-void Database::clearCache (void)
+void Database64::clearCache (void)
 {
     dbMTCache.clear();
     dbProgramCache.clear();
 }
 
-void *dbSenderThread (void *arg)
+void *dbSenderThread64 (void *arg)
 {
-    Database *pDatabase = (Database *)arg;
-    zklog.info("dbSenderThread() started");
-    MultiWrite &multiWrite = pDatabase->multiWrite;
+    Database64 *pDatabase = (Database64 *)arg;
+    zklog.info("dbSenderThread64() started");
+    MultiWrite64 &multiWrite = pDatabase->multiWrite;
 
     while (true)
     {
@@ -1755,7 +1755,7 @@ void *dbSenderThread (void *arg)
         int iResult = clock_gettime(CLOCK_REALTIME, &currentTime);
         if (iResult == -1)
         {
-            zklog.error("dbSenderThread() failed calling clock_gettime()");
+            zklog.error("dbSenderThread64() failed calling clock_gettime()");
             exitProcess();
         }
 
@@ -1769,7 +1769,7 @@ void *dbSenderThread (void *arg)
         // If sending data is not empty (it failed before) then try to send it again
         if (!multiWrite.data[multiWrite.storingDataIndex].multiQuery.isEmpty())
         {
-            zklog.warning("dbSenderThread() found sending data index not empty, probably because of a previous error; resuming...");
+            zklog.warning("dbSenderThread64() found sending data index not empty, probably because of a previous error; resuming...");
         }
         // If processing data is empty, then simply pretend to have sent data
         else if (multiWrite.data[multiWrite.pendingToFlushDataIndex].IsEmpty())
@@ -1779,7 +1779,7 @@ void *dbSenderThread (void *arg)
             // Mark as if we sent all batches
             multiWrite.storedFlushId = multiWrite.lastFlushId;
 #ifdef LOG_DB_SENDER_THREAD
-            zklog.info("dbSenderThread() found multi write processing data empty, so ignoring");
+            zklog.info("dbSenderThread64() found multi write processing data empty, so ignoring");
 #endif
             multiWrite.Unlock();
             continue;
@@ -1795,7 +1795,7 @@ void *dbSenderThread (void *arg)
             multiWrite.pendingToFlushDataIndex = (multiWrite.pendingToFlushDataIndex + 1) % 3;
             multiWrite.data[multiWrite.pendingToFlushDataIndex].Reset();
 #ifdef LOG_DB_SENDER_THREAD
-            zklog.info("dbSenderThread() updated: multiWrite=[" + multiWrite.print() + "]");
+            zklog.info("dbSenderThread64() updated: multiWrite=[" + multiWrite.print() + "]");
 #endif
 
             // Record the last processed batch included in this data set
@@ -1810,7 +1810,7 @@ void *dbSenderThread (void *arg)
                 // Advance synchronizing index
                 multiWrite.synchronizingDataIndex = (multiWrite.synchronizingDataIndex + 1) % 3;
 #ifdef LOG_DB_SENDER_THREAD
-                zklog.info("dbSenderThread() no data to send: multiWrite=[" + multiWrite.print() + "]");
+                zklog.info("dbSenderThread64() no data to send: multiWrite=[" + multiWrite.print() + "]");
 #endif
                 bDataEmpty = true;
             }
@@ -1823,7 +1823,7 @@ void *dbSenderThread (void *arg)
         if (!bDataEmpty)
         {
 #ifdef LOG_DB_SENDER_THREAD
-            zklog.info("dbSenderThread() starting to send data, multiWrite=[" + multiWrite.print() + "]");
+            zklog.info("dbSenderThread64() starting to send data, multiWrite=[" + multiWrite.print() + "]");
 #endif
             zkresult zkr;
             zkr = pDatabase->sendData();
@@ -1832,35 +1832,35 @@ void *dbSenderThread (void *arg)
                 multiWrite.Lock();
                 multiWrite.storedFlushId = multiWrite.storingFlushId;
 #ifdef LOG_DB_SENDER_THREAD
-                zklog.info("dbSenderThread() successfully sent data, multiWrite=[]" + multiWrite.print() + "]");
+                zklog.info("dbSenderThread64() successfully sent data, multiWrite=[]" + multiWrite.print() + "]");
 #endif
                 // Advance synchronizing index
                 multiWrite.synchronizingDataIndex = (multiWrite.synchronizingDataIndex + 1) % 3;
 #ifdef LOG_DB_SENDER_THREAD
-                zklog.info("dbSenderThread() updated: multiWrite=[" + multiWrite.print() + "]");
+                zklog.info("dbSenderThread64() updated: multiWrite=[" + multiWrite.print() + "]");
 #endif
                 sem_post(&pDatabase->getFlushDataSem);
 #ifdef LOG_DB_SENDER_THREAD
-                zklog.info("dbSenderThread() successfully called sem_post(&pDatabase->getFlushDataSem)");
+                zklog.info("dbSenderThread64() successfully called sem_post(&pDatabase->getFlushDataSem)");
 #endif
                 multiWrite.Unlock();
             }
             else
             {
-                zklog.error("dbSenderThread() failed calling sendData() error=" + zkresult2string(zkr));
+                zklog.error("dbSenderThread64() failed calling sendData() error=" + zkresult2string(zkr));
                 usleep(1000000);
             }
         }
     }
 
-    zklog.info("dbSenderThread() done");
+    zklog.info("dbSenderThread64() done");
     return NULL;
 }
 
-void *dbCacheSynchThread (void *arg)
+void *dbCacheSynchThread64 (void *arg)
 {
     Database *pDatabase = (Database *)arg;
-    zklog.info("dbCacheSynchThread() started");
+    zklog.info("dbCacheSynchThread64() started");
 
     uint64_t storedFlushId = 0;
 
@@ -1872,7 +1872,7 @@ void *dbCacheSynchThread (void *arg)
         HashDBInterface *pHashDBRemote = new HashDBRemote (pDatabase->fr, config);
         if (pHashDBRemote == NULL)
         {
-            zklog.error("dbCacheSynchThread() failed calling new HashDBRemote()");
+            zklog.error("dbCacheSynchThread64() failed calling new HashDBRemote()");
             sleep(10);
             continue;
         }
@@ -1887,19 +1887,19 @@ void *dbCacheSynchThread (void *arg)
             zkresult zkr = pHashDBRemote->getFlushData(storedFlushId, storedFlushId, nodes, program, nodesStateRoot);
             if (zkr != ZKR_SUCCESS)
             {
-                zklog.error("dbCacheSynchThread() failed calling pHashDB->getFlushData() result=" + zkresult2string(zkr));
+                zklog.error("dbCacheSynchThread64() failed calling pHashDB->getFlushData() result=" + zkresult2string(zkr));
                 sleep(10);
                 break;
             }
 
             if (nodes.size()==0 && program.size()==0 && nodesStateRoot.size()==0)
             {
-                zklog.info("dbCacheSynchThread() called getFlushData() remotely and got no data: storedFlushId=" + to_string(storedFlushId));
+                zklog.info("dbCacheSynchThread64() called getFlushData() remotely and got no data: storedFlushId=" + to_string(storedFlushId));
                 continue;
             }
 
             TimerStart(DATABASE_CACHE_SYNCH);
-            zklog.info("dbCacheSynchThread() called getFlushData() remotely and got: storedFlushId=" + to_string(storedFlushId) + " nodes=" + to_string(nodes.size()) + " program=" + to_string(program.size()) + " nodesStateRoot=" + nodesStateRoot);
+            zklog.info("dbCacheSynchThread64() called getFlushData() remotely and got: storedFlushId=" + to_string(storedFlushId) + " nodes=" + to_string(nodes.size()) + " program=" + to_string(program.size()) + " nodesStateRoot=" + nodesStateRoot);
 
             // Save nodes to cache
             unordered_map<string, string>::const_iterator it;
@@ -1949,15 +1949,15 @@ void *dbCacheSynchThread (void *arg)
         delete pHashDBRemote;
     }
 
-    zklog.info("dbCacheSynchThread() done");
+    zklog.info("dbCacheSynchThread64() done");
     return NULL;
 }
 
-void loadDb2MemCache(const Config &config)
+void loadDb2MemCache64 (const Config &config)
 {
     if (config.databaseURL == "local")
     {
-        zklog.error("loadDb2MemCache() called with config.databaseURL==local");
+        zklog.error("loadDb2MemCache64() called with config.databaseURL==local");
         exitProcess();
     }
 
@@ -1969,27 +1969,27 @@ void loadDb2MemCache(const Config &config)
     HashDB * pHashDB = (HashDB *)hashDBSingleton.get();
 
     vector<Goldilocks::Element> dbValue;
-    zkresult zkr = pHashDB->db.read(Database::dbStateRootKey, Database::dbStateRootvKey, dbValue, NULL, true);
+    zkresult zkr = pHashDB->db.read(Database64::dbStateRootKey, Database64::dbStateRootvKey, dbValue, NULL, true);
 
     if (zkr == ZKR_DB_KEY_NOT_FOUND)
     {
-        zklog.warning("loadDb2MemCache() dbStateRootKey=" +  Database::dbStateRootKey + " not found in database; normal only if database is empty");
+        zklog.warning("loadDb2MemCache64() dbStateRootKey=" +  Database64::dbStateRootKey + " not found in database; normal only if database is empty");
         TimerStopAndLog(LOAD_DB_TO_CACHE);
         return;
     }
     else if (zkr != ZKR_SUCCESS)
     {
-        zklog.error("loadDb2MemCache() failed calling db.read result=" + zkresult2string(zkr));
+        zklog.error("loadDb2MemCache64() failed calling db.read result=" + zkresult2string(zkr));
         TimerStopAndLog(LOAD_DB_TO_CACHE);
         return;
     }
     
     string stateRootKey = fea2string(fr, dbValue[0], dbValue[1], dbValue[2], dbValue[3]);
-    zklog.info("loadDb2MemCache() found state root=" + stateRootKey);
+    zklog.info("loadDb2MemCache64() found state root=" + stateRootKey);
 
     if (stateRootKey == "0")
     {
-        zklog.warning("loadDb2MemCache() found an empty tree");
+        zklog.warning("loadDb2MemCache64() found an empty tree");
         TimerStopAndLog(LOAD_DB_TO_CACHE);
         return;
     }
@@ -2044,22 +2044,22 @@ void loadDb2MemCache(const Config &config)
 
             if (zkr != ZKR_SUCCESS)
             {
-                zklog.error("loadDb2MemCache() failed calling db.read(" + hash + ") result=" + zkresult2string(zkr));
+                zklog.error("loadDb2MemCache64() failed calling db.read(" + hash + ") result=" + zkresult2string(zkr));
                 TimerStopAndLog(LOAD_DB_TO_CACHE);
                 return;
             }
             if (dbValue.size() != 12)
             {
-                zklog.error("loadDb2MemCache() failed calling db.read(" + hash + ") dbValue.size()=" + to_string(dbValue.size()));
+                zklog.error("loadDb2MemCache64() failed calling db.read(" + hash + ") dbValue.size()=" + to_string(dbValue.size()));
                 TimerStopAndLog(LOAD_DB_TO_CACHE);
                 return;
             }
             counter++;
-            if(Database::dbMTCache.enabled()){
-                double sizePercentage = double(Database::dbMTCache.getCurrentSize())*100.0/double(Database::dbMTCache.getMaxSize());
+            if(Database64::dbMTCache.enabled()){
+                double sizePercentage = double(Database64::dbMTCache.getCurrentSize())*100.0/double(Database64::dbMTCache.getMaxSize());
                 if ( sizePercentage > 90 )
                 {
-                    zklog.info("loadDb2MemCache() stopping since size percentage=" + to_string(sizePercentage));
+                    zklog.info("loadDb2MemCache64() stopping since size percentage=" + to_string(sizePercentage));
                     break;
                 }
             }
@@ -2094,7 +2094,7 @@ void loadDb2MemCache(const Config &config)
                         zkresult zkr = pHashDB->db.read(rightHash, vRightHash, dbValue, NULL, true);
                         if (zkr != ZKR_SUCCESS)
                         {
-                            zklog.error("loadDb2MemCache() failed calling db.read(" + rightHash + ") result=" + zkresult2string(zkr));
+                            zklog.error("loadDb2MemCache64() failed calling db.read(" + rightHash + ") result=" + zkresult2string(zkr));
                             TimerStopAndLog(LOAD_DB_TO_CACHE);
                             return;
                         }
@@ -2105,8 +2105,8 @@ void loadDb2MemCache(const Config &config)
         }
     }
 
-    if(Database::dbMTCache.enabled()){
-        zklog.info("loadDb2MemCache() done counter=" + to_string(counter) + " cache at " + to_string((double(Database::dbMTCache.getCurrentSize())/double(Database::dbMTCache.getMaxSize()))*100) + "%");
+    if(Database64::dbMTCache.enabled()){
+        zklog.info("loadDb2MemCache64() done counter=" + to_string(counter) + " cache at " + to_string((double(Database64::dbMTCache.getCurrentSize())/double(Database64::dbMTCache.getMaxSize()))*100) + "%");
     }
     TimerStopAndLog(LOAD_DB_TO_CACHE);
 
