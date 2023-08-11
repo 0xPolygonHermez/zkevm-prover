@@ -315,6 +315,10 @@ int main(int argc, char **argv)
     cerr << "Checking error channel; ignore this trace\n";
     zklog.warning("Checking warning channel; ignore this trace");
 
+    // Print the configuration file name
+    string configFileName = pConfigFile;
+    zklog.info("Config file: " + configFileName);
+
     // Print the number of cores
     zklog.info("Number of cores=" + to_string(getNumberOfCores()));
 
