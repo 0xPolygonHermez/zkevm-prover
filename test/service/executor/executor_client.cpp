@@ -4,6 +4,7 @@
 #include "hashdb_singleton.hpp"
 #include "zkmax.hpp"
 #include "check_tree.hpp"
+#include "check_tree_64.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -189,22 +190,45 @@ bool ExecutorClient::ProcessBatch (void)
         }
 
         HashDB &hashDB = *hashDBSingleton.get();
-        Database &db = hashDB.db;
-        db.clearCache();
 
-        CheckTreeCounters checkTreeCounters;
-
-        zkresult result = CheckTree(db, newStateRoot, 0, checkTreeCounters);
-        if (result != ZKR_SUCCESS)
+        if (config.hashDB64)
         {
-            zklog.error("ExecutorClient::ProcessBatch() failed calling ClimbTree() result=" + zkresult2string(result));
-            return false;
-        }
+            Database64 &db = hashDB.db64;
+            db.clearCache();
 
-        zklog.info("intermediateNodes=" + to_string(checkTreeCounters.intermediateNodes));
-        zklog.info("leafNodes=" + to_string(checkTreeCounters.leafNodes));
-        zklog.info("values=" + to_string(checkTreeCounters.values));
-        zklog.info("maxLevel=" + to_string(checkTreeCounters.maxLevel));
+            CheckTreeCounters64 checkTreeCounters;
+
+            zkresult result = CheckTree64(db, newStateRoot, 0, checkTreeCounters);
+            if (result != ZKR_SUCCESS)
+            {
+                zklog.error("ExecutorClient::ProcessBatch() failed calling ClimbTree64() result=" + zkresult2string(result));
+                return false;
+            }
+
+            zklog.info("intermediateNodes=" + to_string(checkTreeCounters.intermediateNodes));
+            zklog.info("leafNodes=" + to_string(checkTreeCounters.leafNodes));
+            zklog.info("values=" + to_string(checkTreeCounters.values));
+            zklog.info("maxLevel=" + to_string(checkTreeCounters.maxLevel));
+        }
+        else
+        {
+            Database &db = hashDB.db;
+            db.clearCache();
+
+            CheckTreeCounters checkTreeCounters;
+
+            zkresult result = CheckTree(db, newStateRoot, 0, checkTreeCounters);
+            if (result != ZKR_SUCCESS)
+            {
+                zklog.error("ExecutorClient::ProcessBatch() failed calling ClimbTree() result=" + zkresult2string(result));
+                return false;
+            }
+
+            zklog.info("intermediateNodes=" + to_string(checkTreeCounters.intermediateNodes));
+            zklog.info("leafNodes=" + to_string(checkTreeCounters.leafNodes));
+            zklog.info("values=" + to_string(checkTreeCounters.values));
+            zklog.info("maxLevel=" + to_string(checkTreeCounters.maxLevel));
+        }
 
         TimerStopAndLog(CHECK_NEW_STATE_ROOT);
 

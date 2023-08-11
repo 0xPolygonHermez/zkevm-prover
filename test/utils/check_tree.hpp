@@ -18,5 +18,4 @@ public:
 
 zkresult CheckTree (Database &db, const string &key, uint64_t level, CheckTreeCounters &checkTreeCounters);
 
-
 #endif

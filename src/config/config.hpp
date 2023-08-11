@@ -86,6 +86,7 @@ public:
 
     uint16_t hashDBServerPort;
     string hashDBURL;
+    bool hashDB64;
     string dbCacheSynchURL;
 
     uint16_t aggregatorServerPort;
@@ -164,7 +165,6 @@ public:
     uint64_t fullTracerTraceReserveSize;
     bool ECRecoverPrecalc;
     uint64_t ECRecoverPrecalcNThreads;
-
 
     void load(json &config);
     bool generateProof(void) const { return runFileGenBatchProof || runFileGenAggregatedProof || runFileGenFinalProof || runAggregatorClient; }

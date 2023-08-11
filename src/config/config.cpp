@@ -272,6 +272,10 @@ void Config::load(json &config)
     if (config.contains("hashDBURL") && config["hashDBURL"].is_string())
         hashDBURL = config["hashDBURL"];
 
+    hashDB64 = false;
+    if (config.contains("hashDB64") && config["hashDB64"].is_boolean())
+        hashDB64 = config["hashDB64"];
+
     dbCacheSynchURL = "";
     if (config.contains("dbCacheSynchURL") && config["dbCacheSynchURL"].is_string())
         dbCacheSynchURL = config["dbCacheSynchURL"];
@@ -673,6 +677,7 @@ void Config::print(void)
     zklog.info("    executorClientCheckNewStateRoot=" + to_string(executorClientCheckNewStateRoot));
     zklog.info("    hashDBServerPort=" + to_string(hashDBServerPort));
     zklog.info("    hashDBURL=" + hashDBURL);
+    zklog.info("    hashDB64=" + to_string(hashDB64));
     zklog.info("    dbCacheSynchURL=" + dbCacheSynchURL);
     zklog.info("    aggregatorServerPort=" + to_string(aggregatorServerPort));
     zklog.info("    aggregatorClientPort=" + to_string(aggregatorClientPort));

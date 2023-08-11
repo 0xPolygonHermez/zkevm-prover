@@ -40,6 +40,7 @@
 #include "database_associative_cache_test.hpp"
 #include "main_sm/fork_5/main_exec_c/account.hpp"
 #include "state_manager.hpp"
+#include "state_manager_64.hpp"
 #include "check_tree_test.hpp"
 #include "database_performance_test.hpp"
 
@@ -497,7 +498,14 @@ int main(int argc, char **argv)
     hashDBSingleton.init(fr, config);
 
     // Init the StateManager singleton
-    stateManager.init(config);
+    if (config.hashDB64)
+    {
+        stateManager64.init(config);
+    }
+    else
+    {
+        stateManager.init(config);
+    }
 
     // Init goldilocks precomputed
     TimerStart(GOLDILOCKS_PRECOMPUTED_INIT);
