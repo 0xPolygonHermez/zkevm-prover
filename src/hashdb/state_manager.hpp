@@ -69,6 +69,8 @@ private:
     unordered_map<string, BatchState> state;
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     TimeMetricStorage timeMetricStorage;
+
+#endif
     Config config;
     pthread_mutex_t mutex; // Mutex to protect the multi write queues
 #endif
