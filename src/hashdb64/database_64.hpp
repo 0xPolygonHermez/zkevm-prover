@@ -14,7 +14,6 @@
 #include "database_connection.hpp"
 #include "zkassert.hpp"
 #include "multi_write_64.hpp"
-#include "database_associative_cache_64.hpp"
 
 using namespace std;
 
@@ -68,8 +67,6 @@ private:
 public:
 #ifdef DATABASE_USE_CACHE
     // Cache static instances
-    static bool useAssociativeCache;
-    static DatabaseMTAssociativeCache64 dbMTACache;
     static DatabaseMTCache64 dbMTCache;
     static DatabaseProgramCache64 dbProgramCache;
 
@@ -91,7 +88,6 @@ public:
     zkresult write(const string &_key, const Goldilocks::Element* vkey, const vector<Goldilocks::Element> &value, const bool persistent);
     zkresult getProgram(const string &_key, vector<uint8_t> &value, DatabaseMap *dbReadLog);
     zkresult setProgram(const string &_key, const vector<uint8_t> &value, const bool persistent);
-    inline bool usingAssociativeCache(void){ return useAssociativeCache; };
 
 private:
     zkresult createStateRoot(void);

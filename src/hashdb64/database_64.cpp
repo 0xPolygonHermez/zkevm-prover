@@ -20,13 +20,11 @@
 // Create static Database64::dbMTCache and DatabaseCacheProgram objects
 // This will be used to store DB records in memory and it will be shared for all the instances of Database class
 // DatabaseCacheMT and DatabaseCacheProgram classes are thread-safe
-DatabaseMTAssociativeCache64 Database64::dbMTACache;
 DatabaseMTCache64 Database64::dbMTCache;
 DatabaseProgramCache64 Database64::dbProgramCache;
 
 string Database64::dbStateRootKey("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // 64 f's
 Goldilocks::Element Database64::dbStateRootvKey[4] = {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF};
-bool Database64::useAssociativeCache = false;
 
 
 #endif
@@ -129,12 +127,7 @@ zkresult Database64::read(const string &_key, Goldilocks::Element (&vkey)[4], ve
 
 #ifdef DATABASE_USE_CACHE
     // If the key is found in local database (cached) simply return it
-    if(usingAssociativeCache() && dbMTACache.findKey(vkey,value)){
-
-        if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
-        r = ZKR_SUCCESS;
-
-    } else if( dbMTCache.enabled() && dbMTCache.find(key, value)){
+    if( dbMTCache.enabled() && dbMTCache.find(key, value)){
         
         if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
         r = ZKR_SUCCESS;
@@ -149,10 +142,7 @@ zkresult Database64::read(const string &_key, Goldilocks::Element (&vkey)[4], ve
 
 #ifdef DATABASE_USE_CACHE
         // Store it locally to avoid any future remote access for this key
-        if(usingAssociativeCache()){
-            dbMTACache.addKeyValue(vkey, value, false);
-        }
-        else if(dbMTCache.enabled()){                
+        if(dbMTCache.enabled()){                
             dbMTCache.add(key, value, false);
         }
 #endif
@@ -201,10 +191,7 @@ zkresult Database64::read(const string &_key, Goldilocks::Element (&vkey)[4], ve
         // If succeeded, now the value should be present in the cache
         if ( r == ZKR_SUCCESS)
         {
-            if (usingAssociativeCache() && dbMTACache.findKey(vkey,value)){
-                if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
-                r = ZKR_SUCCESS;
-            }else if(dbMTCache.enabled() && dbMTCache.find(key, value)){
+            if(dbMTCache.enabled() && dbMTCache.find(key, value)){
                 if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
                 r = ZKR_SUCCESS;                
             }
@@ -250,9 +237,8 @@ zkresult Database64::read(const string &_key, Goldilocks::Element (&vkey)[4], ve
 
 #ifdef DATABASE_USE_CACHE
             // Store it locally to avoid any future remote access for this key
-            if(usingAssociativeCache()){
-                dbMTACache.addKeyValue(vkey, value, update);
-            }else if (dbMTCache.enabled()){
+            if (dbMTCache.enabled())
+            {
                 dbMTCache.add(key, value, update);
             }
 #endif
@@ -294,7 +280,7 @@ zkresult Database64::write(const string &_key, const Goldilocks::Element* vkey, 
         exitProcess();
     }
 
-    if (config.dbMultiWrite && !(dbMTCache.enabled() || dbMTACache.enabled()) && !persistent)
+    if (config.dbMultiWrite && !dbMTCache.enabled() && !persistent)
     {
         zklog.error("Database64::write() called with multi-write active, cache disabled and no persistance in database, so there is no place to store the date");
         return ZKR_DB_ERROR;
@@ -328,22 +314,9 @@ zkresult Database64::write(const string &_key, const Goldilocks::Element* vkey, 
     }
 
 #ifdef DATABASE_USE_CACHE
-    if ((r == ZKR_SUCCESS) && (dbMTCache.enabled() || dbMTACache.enabled()))
+    if ((r == ZKR_SUCCESS) && dbMTCache.enabled() )
     {
-        if(usingAssociativeCache()){
-            Goldilocks::Element vkeyf[4];
-            if(vkey == NULL){
-                string2key(fr, _key, vkeyf);
-            }else{
-                vkeyf[0] = vkey[0];
-                vkeyf[1] = vkey[1];
-                vkeyf[2] = vkey[2];
-                vkeyf[3] = vkey[3];
-            }
-            dbMTACache.addKeyValue(vkeyf, value, false);
-        }else{
-            dbMTCache.add(key, value, false);
-        }
+        dbMTCache.add(key, value, false);
     }
 #endif
 
@@ -694,16 +667,10 @@ zkresult Database64::readTreeRemote(const string &key, bool *keys, uint64_t leve
 
 #ifdef DATABASE_USE_CACHE
             // Store it locally to avoid any future remote access for this key
-            if (dbMTCache.enabled() || dbMTACache.enabled())
+            if (dbMTCache.enabled())
             {
                 //zklog.info("Database64::readTreeRemote() adding hash=" + hash + " to dbMTCache");
-                if(usingAssociativeCache()){
-                    Goldilocks::Element vhash[4];
-                    string2key(fr, hash, vhash);   
-                    dbMTACache.addKeyValue(vhash, value, false);
-                }else{
-                    dbMTCache.add(hash, value, false);
-              }
+                dbMTCache.add(hash, value, false);
             }
 #endif
         }
@@ -932,14 +899,10 @@ zkresult Database64::updateStateRoot(const Goldilocks::Element (&stateRoot)[4])
     }
 
 #ifdef DATABASE_USE_CACHE
-    if ((r == ZKR_SUCCESS) && (dbMTCache.enabled() || dbMTACache.enabled()))
+    if ((r == ZKR_SUCCESS) && dbMTCache.enabled())
     {
         // Create in memory cache
-        if(usingAssociativeCache()){
-                dbMTACache.addKeyValue(dbStateRootvKey, value, true);
-        }else{
-                dbMTCache.add(dbStateRootKey, value, true);
-        }
+        dbMTCache.add(dbStateRootKey, value, true);
     }
 #endif
 
@@ -1649,7 +1612,7 @@ void Database64::printTree(const string &root, string prefix)
     string key = root;
     vector<Goldilocks::Element> value;
     Goldilocks::Element vKey[4];
-    if(Database64::useAssociativeCache) string2key(fr, key, vKey);  
+    string2key(fr, key, vKey);  
     read(key,vKey,value, NULL);
 
     if (value.size() != 12)

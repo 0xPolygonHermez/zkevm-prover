@@ -8,7 +8,7 @@ zkresult CheckTree64 (Database64 &db, const string &key, uint64_t level, CheckTr
 
     vector<Goldilocks::Element> value;
     Goldilocks::Element vKey[4];
-    if(db.useAssociativeCache) string2key(db.fr, key, vKey);
+    string2key(db.fr, key, vKey);
     zkresult result = db.read(key, vKey, value, NULL, false);
     if (result != ZKR_SUCCESS)
     {
