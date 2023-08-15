@@ -84,11 +84,15 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     // Load ROM data from JSON data
     rom.load(fr, romJson);
 
+    // Get labels
     finalizeExecutionLabel  = rom.getLabel(string("finalizeExecution"));
     checkAndSaveFromLabel   = rom.getLabel(string("checkAndSaveFrom"));
     ecrecoverStoreArgsLabel = rom.getLabel(string("ecrecover_store_args"));
-    ecrecoverEndLabel = rom.getLabel(string("ecrecover_end"));
+    ecrecoverEndLabel       = rom.getLabel(string("ecrecover_end"));
 
+    // Init labels mutex
+    pthread_mutex_init(&labelsMutex, NULL);
+    
     TimerStopAndLog(ROM_LOAD);
 };
 

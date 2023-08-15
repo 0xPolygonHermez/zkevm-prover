@@ -245,13 +245,15 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    uint64_t lastSentFlushId;\n";
     code += "\n";
 
+    code += "    mainExecutor.labelsLock();\n";
     code += "    if (" + functionName + "_labels.size()==0)\n";
     code += "    {\n";
     for (uint64_t zkPC=0; zkPC<rom["program"].size(); zkPC++)
     {
         code += "        " + functionName + "_labels.push_back(&&" + functionName + "_rom_line_" + to_string(zkPC) + ");\n";
     }
-    code += "    }\n\n";
+    code += "    }\n";
+    code += "    mainExecutor.labelsUnlock();\n\n";
 
     code += "    // Get a HashDBInterface interface, according to the configuration\n";
     code += "    HashDBInterface *pHashDB = HashDBClientFactory::createHashDBClient(fr, mainExecutor.config);\n";
