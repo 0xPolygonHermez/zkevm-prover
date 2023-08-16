@@ -62,8 +62,8 @@ class DatabaseMTCache64 : public DatabaseCache64
 {
 public:
     ~DatabaseMTCache64();
-    bool add(const string &key, const vector<Goldilocks::Element> &value, const bool update); // returns true if cache is full
-    bool find(const string &key, vector<Goldilocks::Element> &value);
+    bool add(const string &key, const string &value, const bool update); // returns true if cache is full; value is a byte array (binary) string
+    bool find(const string &key, string &value); // value is a byte array (binary) string
     DatabaseCacheRecord64* allocRecord(const string key, const void * value) override;
     void freeRecord(DatabaseCacheRecord64* record) override;
     void updateRecord(DatabaseCacheRecord64* record, const void * value) override;

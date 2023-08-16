@@ -107,7 +107,7 @@ void Database64::init(void)
     bInitialized = true;
 }
 
-zkresult Database64::read(const string &_key, Goldilocks::Element (&vkey)[4], vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, const bool update,  bool *keys, uint64_t level)
+zkresult Database64::read (const string &_key, Goldilocks::Element (&vkey)[4], string &value, DatabaseMap *dbReadLog, const bool update,  bool *keys, uint64_t level)
 {
     // Check that it has been initialized before
     if (!bInitialized)
@@ -213,8 +213,7 @@ zkresult Database64::read(const string &_key, Goldilocks::Element (&vkey)[4], ve
         }*/
 
         // Otherwise, read it remotelly, up to two times
-        string sData;
-        r = readRemote(false, key, sData);
+        r = readRemote(false, key, value);
         if ( (r != ZKR_SUCCESS) && (config.dbReadRetryDelay > 0) )
         {
             for (uint64_t i=0; i<config.dbReadRetryCounter; i++)
@@ -223,7 +222,7 @@ zkresult Database64::read(const string &_key, Goldilocks::Element (&vkey)[4], ve
 
                 // Retry after dbReadRetryDelay us
                 usleep(config.dbReadRetryDelay);
-                r = readRemote(false, key, sData);
+                r = readRemote(false, key, value);
                 if (r == ZKR_SUCCESS)
                 {
                     break;
@@ -233,8 +232,6 @@ zkresult Database64::read(const string &_key, Goldilocks::Element (&vkey)[4], ve
         }
         if (r == ZKR_SUCCESS)
         {
-            string2fea(fr, sData, value);
-
 #ifdef DATABASE_USE_CACHE
             // Store it locally to avoid any future remote access for this key
             if (dbMTCache.enabled())
@@ -271,7 +268,7 @@ zkresult Database64::read(const string &_key, Goldilocks::Element (&vkey)[4], ve
     return r;
 }
 
-zkresult Database64::write(const string &_key, const Goldilocks::Element* vkey, const vector<Goldilocks::Element> &value, const bool persistent)
+zkresult Database64::write(const string &_key, const Goldilocks::Element* vkey, const string &value, const bool persistent)
 {
     // Check that it has  been initialized before
     if (!bInitialized)
@@ -298,15 +295,7 @@ zkresult Database64::write(const string &_key, const Goldilocks::Element* vkey, 
 #endif
          )
     {
-        // Prepare the query
-        string valueString = "";
-        string aux;
-        for (uint64_t i = 0; i < value.size(); i++)
-        {
-            valueString += PrependZeros(fr.toString(value[i], 16), 16);
-        }
-
-        r = writeRemote(false, key, valueString);
+        r = writeRemote(false, key, value);
     }
     else
     {
@@ -662,15 +651,13 @@ zkresult Database64::readTreeRemote(const string &key, bool *keys, uint64_t leve
 
             hash = fieldDataString.substr(firstPosition + first.size(), 32*2);
             data = fieldDataString.substr(secondPosition + second.size(), thirdPosition - secondPosition - second.size());
-            vector<Goldilocks::Element> value;
-            string2fea(fr, data, value);
 
 #ifdef DATABASE_USE_CACHE
             // Store it locally to avoid any future remote access for this key
             if (dbMTCache.enabled())
             {
                 //zklog.info("Database64::readTreeRemote() adding hash=" + hash + " to dbMTCache");
-                dbMTCache.add(hash, value, false);
+                dbMTCache.add(hash, data, false);
             }
 #endif
         }
@@ -836,18 +823,13 @@ zkresult Database64::updateStateRoot(const Goldilocks::Element (&stateRoot)[4])
         zklog.error("Database64::updateStateRoot() called uninitialized");
         exitProcess();
     }
-
-    // Copy the state root in the first 4 elements of dbValue
-    vector<Goldilocks::Element> value;
-    for (uint64_t i=0; i<4; i++) value.push_back(stateRoot[i]);
-    for (uint64_t i=0; i<8; i++) value.push_back(fr.zero());
     
     // Prepare the value string
     string valueString = "";
     string aux;
-    for (uint64_t i = 0; i < value.size(); i++)
+    for (uint64_t i = 0; i < 4; i++)
     {
-        valueString += PrependZeros(fr.toString(value[i], 16), 16);
+        valueString += PrependZeros(fr.toString(stateRoot[i], 16), 16);
     }
 
     zkresult r = ZKR_SUCCESS;
@@ -902,7 +884,7 @@ zkresult Database64::updateStateRoot(const Goldilocks::Element (&stateRoot)[4])
     if ((r == ZKR_SUCCESS) && dbMTCache.enabled())
     {
         // Create in memory cache
-        dbMTCache.add(dbStateRootKey, value, true);
+        dbMTCache.add(dbStateRootKey, valueString, true);
     }
 #endif
 
@@ -1605,6 +1587,7 @@ void Database64::commit()
 
 void Database64::printTree(const string &root, string prefix)
 {
+    /*
     if (prefix == "")
     {
         zklog.info("Printint tree of root=" + root);
@@ -1697,6 +1680,7 @@ void Database64::printTree(const string &root, string prefix)
         return;
     }
     if (prefix == "") zklog.info("");
+    */
 }
 
 void Database64::clearCache (void)

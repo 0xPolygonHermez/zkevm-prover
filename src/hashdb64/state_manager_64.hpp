@@ -20,7 +20,7 @@ public:
     string newStateRoot;
     uint64_t previousSubState;
     bool bValid;
-    unordered_map<string, vector<Goldilocks::Element>> dbWrite;
+    unordered_map<string, string> dbWrite;
     vector<string> dbDelete;
     TxSubState64() : previousSubState(0), bValid(false)
     {
@@ -55,7 +55,7 @@ public:
     string currentStateRoot;
     uint64_t currentTx;
     vector<TxState64> txState;
-    unordered_map<string, vector<Goldilocks::Element>> dbWrite;
+    unordered_map<string, string> dbWrite;
     BatchState64() : currentTx(0)
     {
         txState.reserve(32);
@@ -93,9 +93,9 @@ public:
     {
         return setStateRoot(batchUUID, tx, stateRoot, false, persistence);
     }
-    zkresult write (const string &batchUUID, uint64_t tx, const string &_key, const vector<Goldilocks::Element> &value, const Persistence persistence);
+    zkresult write (const string &batchUUID, uint64_t tx, const string &_key, const string &value, const Persistence persistence);
     zkresult deleteNode (const string &batchUUID, uint64_t tx, const string &_key, const Persistence persistence);
-    zkresult read (const string &batchUUID, const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog);
+    zkresult read (const string &batchUUID, const string &_key, string &value, DatabaseMap *dbReadLog);
     zkresult semiFlush (const string &batchUUID, const string &newStateRoot, const Persistence persistence);
     zkresult flush (const string &batchUUID, Database64 &db, uint64_t &flushId, uint64_t &lastSentFlushId);
     void print (bool bDbContent = false);

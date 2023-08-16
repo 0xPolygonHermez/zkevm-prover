@@ -171,7 +171,7 @@ zkresult StateManager64::setStateRoot (const string &batchUUID, uint64_t tx, con
 
 }
 
-zkresult StateManager64::write (const string &batchUUID, uint64_t tx, const string &_key, const vector<Goldilocks::Element> &value, const Persistence persistence)
+zkresult StateManager64::write (const string &batchUUID, uint64_t tx, const string &_key, const string &value, const Persistence persistence)
 {
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     struct timeval t;
@@ -330,7 +330,7 @@ zkresult StateManager64::deleteNode (const string &batchUUID, uint64_t tx, const
     return ZKR_SUCCESS;
 }
 
-zkresult StateManager64::read (const string &batchUUID, const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog)
+zkresult StateManager64::read (const string &batchUUID, const string &_key, string &value, DatabaseMap *dbReadLog)
 {
     struct timeval t;
     gettimeofday(&t, NULL);
@@ -353,7 +353,7 @@ zkresult StateManager64::read (const string &batchUUID, const string &_key, vect
     BatchState64 &batchState = it->second;
 
     // Search in the common write list
-    unordered_map<string, vector<Goldilocks::Element>>::iterator dbIt;
+    unordered_map<string, string>::iterator dbIt;
     dbIt = batchState.dbWrite.find(key);
     if (dbIt != batchState.dbWrite.end())
     {
@@ -663,7 +663,7 @@ zkresult StateManager64::flush (const string &batchUUID, Database64 &db, uint64_
             for (uint64_t ss = 0; ss < txState.persistence[persistence].subState.size(); ss++)
             {
                 // For all keys to write
-                unordered_map<string, vector<Goldilocks::Element>>::const_iterator writeIt;
+                unordered_map<string, string>::const_iterator writeIt;
                 for ( writeIt = txState.persistence[persistence].subState[ss].dbWrite.begin();
                       writeIt != txState.persistence[persistence].subState[ss].dbWrite.end();
                       writeIt++ )
@@ -795,7 +795,7 @@ void StateManager64::print (bool bDbContent)
                     totalDbWrites[persistence] += txSubState.dbWrite.size();
                     if (bDbContent)
                     {
-                        unordered_map<string, vector<Goldilocks::Element>>::const_iterator dbIt;
+                        unordered_map<string, string>::const_iterator dbIt;
                         for (dbIt = txSubState.dbWrite.begin(); dbIt != txSubState.dbWrite.end(); dbIt++)
                         {
                             zklog.info("              " + dbIt->first);

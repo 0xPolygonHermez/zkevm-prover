@@ -32,7 +32,7 @@ string MultiWrite64::print(void)
         " synchronizingDataIndex=" + to_string(synchronizingDataIndex);
 }
 
-bool MultiWrite64::findNode(const string &key, vector<Goldilocks::Element> &value)
+bool MultiWrite64::findNode(const string &key, string &value)
 {
     value.clear();
     bool bResult = false;
@@ -46,23 +46,12 @@ bool MultiWrite64::findNode(const string &key, vector<Goldilocks::Element> &valu
         it = data[pendingToFlushDataIndex].nodes.find(key);
         if (it != data[pendingToFlushDataIndex].nodes.end())
         {
-            if ((it->second.size() % 16) != 0)
-            {
-                zklog.error("MultiWrite64::findNode() data[pendingToFlushDataIndex].nodes found invalid node size=" + to_string(it->second.size()) + " for key=" + key);
-            }
-            else
-            {
-                for (uint64_t i=0; i<it->second.size(); i+=16)
-                {
-                    Goldilocks::Element fe = fr.fromString(it->second.substr(i, 16), 16);
-                    value.push_back(fe);
-                }
-                bResult = true;
+            value = it->second;
+            bResult = true;
 
 #ifdef LOG_DB_MULTI_WRITE_FIND_NODES
-                zklog.info("MultiWrite64::findNodes() data[pendingToFlushDataIndex].nodes found key=" + key + " value=" + it->second);
+            zklog.info("MultiWrite64::findNodes() data[pendingToFlushDataIndex].nodes found key=" + key + " value=" + it->second);
 #endif
-            }
         }
     }
 
@@ -72,23 +61,12 @@ bool MultiWrite64::findNode(const string &key, vector<Goldilocks::Element> &valu
         it = data[pendingToFlushDataIndex].nodesIntray.find(key);
         if (it != data[pendingToFlushDataIndex].nodesIntray.end())
         {
-            if ((it->second.size() % 16) != 0)
-            {
-                zklog.error("MultiWrite64::findNode() data[pendingToFlushDataIndex].nodesIntray found invalid node size=" + to_string(it->second.size()) + " for key=" + key);
-            }
-            else
-            {
-                for (uint64_t i=0; i<it->second.size(); i+=16)
-                {
-                    Goldilocks::Element fe = fr.fromString(it->second.substr(i, 16), 16);
-                    value.push_back(fe);
-                }
-                bResult = true;
+            value = it->second;
+            bResult = true;
 
 #ifdef LOG_DB_MULTI_WRITE_FIND_NODES
-                zklog.info("MultiWrite64::findNodes() data[pendingToFlushDataIndex].nodesIntray found key=" + key + " value=" + it->second);
+            zklog.info("MultiWrite64::findNodes() data[pendingToFlushDataIndex].nodesIntray found key=" + key + " value=" + it->second);
 #endif
-            }
         }
     }
 
@@ -102,22 +80,11 @@ bool MultiWrite64::findNode(const string &key, vector<Goldilocks::Element> &valu
             it = data[storingDataIndex].nodes.find(key);
             if (it != data[storingDataIndex].nodes.end())
             {
-                if ((it->second.size() % 16) != 0)
-                {
-                    zklog.error("MultiWrite64::findNode() data[storingDataIndex].nodes found invalid node size=" + to_string(it->second.size()) + " for key=" + key);
-                }
-                else
-                {
-                    for (uint64_t i=0; i<it->second.size(); i+=16)
-                    {
-                        Goldilocks::Element fe = fr.fromString(it->second.substr(i, 16), 16);
-                        value.push_back(fe);
-                    }
-                    bResult = true;
+                value = it->second;
+                bResult = true;
 #ifdef LOG_DB_MULTI_WRITE_FIND_NODES
-                    zklog.info("MultiWrite64::findNodes() data[pendingToFlushDataIndex].nodes found key=" + key + " value=" + it->second);
+                zklog.info("MultiWrite64::findNodes() data[pendingToFlushDataIndex].nodes found key=" + key + " value=" + it->second);
 #endif
-                }
             }
         }
 

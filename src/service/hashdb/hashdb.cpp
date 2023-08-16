@@ -170,7 +170,7 @@ void HashDB::loadDB(const DatabaseMap::MTMap &input, const bool persistent)
     {
         for (it = input.begin(); it != input.end(); it++)
         {
-            db64.write(it->first, NULL, it->second, persistent);
+            // TODO: db64.write(it->first, NULL, it->second, persistent);
         }
     }
     else
