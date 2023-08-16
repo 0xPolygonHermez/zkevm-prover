@@ -56,6 +56,9 @@ public:
     uint64_t currentTx;
     vector<TxState> txState;
     unordered_map<string, vector<Goldilocks::Element>> dbWrite;
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+    TimeMetricStorage timeMetricStorage;
+#endif
     BatchState() : currentTx(0)
     {
         txState.reserve(32);
@@ -67,9 +70,6 @@ class StateManager
 {
 private:
     unordered_map<string, BatchState> state;
-#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-    TimeMetricStorage timeMetricStorage;
-#endif
     Config config;
     pthread_mutex_t mutex; // Mutex to protect the multi write queues
 
