@@ -209,6 +209,11 @@ void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], cons
         values[cacheIndexValue + 9] = value[9];
         values[cacheIndexValue + 10] = value[10];
         values[cacheIndexValue + 11] = value[11];
+    }else{
+        values[cacheIndexValue + 8] = Goldilocks::zero();
+        values[cacheIndexValue + 9] = Goldilocks::zero();
+        values[cacheIndexValue + 10] = Goldilocks::zero();
+        values[cacheIndexValue + 11] = Goldilocks::zero();
     }
     //
     // Forced index insertion
