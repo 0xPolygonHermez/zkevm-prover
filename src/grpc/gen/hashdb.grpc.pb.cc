@@ -6,19 +6,19 @@
 #include "hashdb.grpc.pb.h"
 
 #include <functional>
-#include <grpcpp/support/async_stream.h>
-#include <grpcpp/support/async_unary_call.h>
-#include <grpcpp/impl/channel_interface.h>
-#include <grpcpp/impl/client_unary_call.h>
-#include <grpcpp/support/client_callback.h>
-#include <grpcpp/support/message_allocator.h>
-#include <grpcpp/support/method_handler.h>
-#include <grpcpp/impl/rpc_service_method.h>
-#include <grpcpp/support/server_callback.h>
-#include <grpcpp/impl/server_callback_handlers.h>
-#include <grpcpp/server_context.h>
-#include <grpcpp/impl/service_type.h>
-#include <grpcpp/support/sync_stream.h>
+#include <grpcpp/impl/codegen/async_stream.h>
+#include <grpcpp/impl/codegen/async_unary_call.h>
+#include <grpcpp/impl/codegen/channel_interface.h>
+#include <grpcpp/impl/codegen/client_unary_call.h>
+#include <grpcpp/impl/codegen/client_callback.h>
+#include <grpcpp/impl/codegen/message_allocator.h>
+#include <grpcpp/impl/codegen/method_handler.h>
+#include <grpcpp/impl/codegen/rpc_service_method.h>
+#include <grpcpp/impl/codegen/server_callback.h>
+#include <grpcpp/impl/codegen/server_callback_handlers.h>
+#include <grpcpp/impl/codegen/server_context.h>
+#include <grpcpp/impl/codegen/service_type.h>
+#include <grpcpp/impl/codegen/sync_stream.h>
 namespace hashdb {
 namespace v1 {
 
@@ -37,260 +37,310 @@ static const char* HashDBService_method_names[] = {
 
 std::unique_ptr< HashDBService::Stub> HashDBService::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
   (void)options;
-  std::unique_ptr< HashDBService::Stub> stub(new HashDBService::Stub(channel, options));
+  std::unique_ptr< HashDBService::Stub> stub(new HashDBService::Stub(channel));
   return stub;
 }
 
-HashDBService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options)
-  : channel_(channel), rpcmethod_Set_(HashDBService_method_names[0], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_Get_(HashDBService_method_names[1], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_SetProgram_(HashDBService_method_names[2], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_GetProgram_(HashDBService_method_names[3], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_LoadDB_(HashDBService_method_names[4], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_LoadProgramDB_(HashDBService_method_names[5], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_Flush_(HashDBService_method_names[6], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_SemiFlush_(HashDBService_method_names[7], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_GetFlushStatus_(HashDBService_method_names[8], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_GetFlushData_(HashDBService_method_names[9], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+HashDBService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel)
+  : channel_(channel), rpcmethod_Set_(HashDBService_method_names[0], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_Get_(HashDBService_method_names[1], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SetProgram_(HashDBService_method_names[2], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_GetProgram_(HashDBService_method_names[3], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_LoadDB_(HashDBService_method_names[4], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_LoadProgramDB_(HashDBService_method_names[5], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_Flush_(HashDBService_method_names[6], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SemiFlush_(HashDBService_method_names[7], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_GetFlushStatus_(HashDBService_method_names[8], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_GetFlushData_(HashDBService_method_names[9], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status HashDBService::Stub::Set(::grpc::ClientContext* context, const ::hashdb::v1::SetRequest& request, ::hashdb::v1::SetResponse* response) {
-  return ::grpc::internal::BlockingUnaryCall< ::hashdb::v1::SetRequest, ::hashdb::v1::SetResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_Set_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_Set_, context, request, response);
 }
 
-void HashDBService::Stub::async::Set(::grpc::ClientContext* context, const ::hashdb::v1::SetRequest* request, ::hashdb::v1::SetResponse* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall< ::hashdb::v1::SetRequest, ::hashdb::v1::SetResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_Set_, context, request, response, std::move(f));
+void HashDBService::Stub::experimental_async::Set(::grpc::ClientContext* context, const ::hashdb::v1::SetRequest* request, ::hashdb::v1::SetResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_Set_, context, request, response, std::move(f));
 }
 
-void HashDBService::Stub::async::Set(::grpc::ClientContext* context, const ::hashdb::v1::SetRequest* request, ::hashdb::v1::SetResponse* response, ::grpc::ClientUnaryReactor* reactor) {
-  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_Set_, context, request, response, reactor);
+void HashDBService::Stub::experimental_async::Set(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::SetResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_Set_, context, request, response, std::move(f));
 }
 
-::grpc::ClientAsyncResponseReader< ::hashdb::v1::SetResponse>* HashDBService::Stub::PrepareAsyncSetRaw(::grpc::ClientContext* context, const ::hashdb::v1::SetRequest& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::hashdb::v1::SetResponse, ::hashdb::v1::SetRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_Set_, context, request);
+void HashDBService::Stub::experimental_async::Set(::grpc::ClientContext* context, const ::hashdb::v1::SetRequest* request, ::hashdb::v1::SetResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_Set_, context, request, response, reactor);
+}
+
+void HashDBService::Stub::experimental_async::Set(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::SetResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_Set_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::hashdb::v1::SetResponse>* HashDBService::Stub::AsyncSetRaw(::grpc::ClientContext* context, const ::hashdb::v1::SetRequest& request, ::grpc::CompletionQueue* cq) {
-  auto* result =
-    this->PrepareAsyncSetRaw(context, request, cq);
-  result->StartCall();
-  return result;
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::hashdb::v1::SetResponse>::Create(channel_.get(), cq, rpcmethod_Set_, context, request, true);
+}
+
+::grpc::ClientAsyncResponseReader< ::hashdb::v1::SetResponse>* HashDBService::Stub::PrepareAsyncSetRaw(::grpc::ClientContext* context, const ::hashdb::v1::SetRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::hashdb::v1::SetResponse>::Create(channel_.get(), cq, rpcmethod_Set_, context, request, false);
 }
 
 ::grpc::Status HashDBService::Stub::Get(::grpc::ClientContext* context, const ::hashdb::v1::GetRequest& request, ::hashdb::v1::GetResponse* response) {
-  return ::grpc::internal::BlockingUnaryCall< ::hashdb::v1::GetRequest, ::hashdb::v1::GetResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_Get_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_Get_, context, request, response);
 }
 
-void HashDBService::Stub::async::Get(::grpc::ClientContext* context, const ::hashdb::v1::GetRequest* request, ::hashdb::v1::GetResponse* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall< ::hashdb::v1::GetRequest, ::hashdb::v1::GetResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_Get_, context, request, response, std::move(f));
+void HashDBService::Stub::experimental_async::Get(::grpc::ClientContext* context, const ::hashdb::v1::GetRequest* request, ::hashdb::v1::GetResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_Get_, context, request, response, std::move(f));
 }
 
-void HashDBService::Stub::async::Get(::grpc::ClientContext* context, const ::hashdb::v1::GetRequest* request, ::hashdb::v1::GetResponse* response, ::grpc::ClientUnaryReactor* reactor) {
-  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_Get_, context, request, response, reactor);
+void HashDBService::Stub::experimental_async::Get(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_Get_, context, request, response, std::move(f));
 }
 
-::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetResponse>* HashDBService::Stub::PrepareAsyncGetRaw(::grpc::ClientContext* context, const ::hashdb::v1::GetRequest& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::hashdb::v1::GetResponse, ::hashdb::v1::GetRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_Get_, context, request);
+void HashDBService::Stub::experimental_async::Get(::grpc::ClientContext* context, const ::hashdb::v1::GetRequest* request, ::hashdb::v1::GetResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_Get_, context, request, response, reactor);
+}
+
+void HashDBService::Stub::experimental_async::Get(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_Get_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetResponse>* HashDBService::Stub::AsyncGetRaw(::grpc::ClientContext* context, const ::hashdb::v1::GetRequest& request, ::grpc::CompletionQueue* cq) {
-  auto* result =
-    this->PrepareAsyncGetRaw(context, request, cq);
-  result->StartCall();
-  return result;
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::hashdb::v1::GetResponse>::Create(channel_.get(), cq, rpcmethod_Get_, context, request, true);
+}
+
+::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetResponse>* HashDBService::Stub::PrepareAsyncGetRaw(::grpc::ClientContext* context, const ::hashdb::v1::GetRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::hashdb::v1::GetResponse>::Create(channel_.get(), cq, rpcmethod_Get_, context, request, false);
 }
 
 ::grpc::Status HashDBService::Stub::SetProgram(::grpc::ClientContext* context, const ::hashdb::v1::SetProgramRequest& request, ::hashdb::v1::SetProgramResponse* response) {
-  return ::grpc::internal::BlockingUnaryCall< ::hashdb::v1::SetProgramRequest, ::hashdb::v1::SetProgramResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_SetProgram_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_SetProgram_, context, request, response);
 }
 
-void HashDBService::Stub::async::SetProgram(::grpc::ClientContext* context, const ::hashdb::v1::SetProgramRequest* request, ::hashdb::v1::SetProgramResponse* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall< ::hashdb::v1::SetProgramRequest, ::hashdb::v1::SetProgramResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SetProgram_, context, request, response, std::move(f));
+void HashDBService::Stub::experimental_async::SetProgram(::grpc::ClientContext* context, const ::hashdb::v1::SetProgramRequest* request, ::hashdb::v1::SetProgramResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_SetProgram_, context, request, response, std::move(f));
 }
 
-void HashDBService::Stub::async::SetProgram(::grpc::ClientContext* context, const ::hashdb::v1::SetProgramRequest* request, ::hashdb::v1::SetProgramResponse* response, ::grpc::ClientUnaryReactor* reactor) {
-  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SetProgram_, context, request, response, reactor);
+void HashDBService::Stub::experimental_async::SetProgram(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::SetProgramResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_SetProgram_, context, request, response, std::move(f));
 }
 
-::grpc::ClientAsyncResponseReader< ::hashdb::v1::SetProgramResponse>* HashDBService::Stub::PrepareAsyncSetProgramRaw(::grpc::ClientContext* context, const ::hashdb::v1::SetProgramRequest& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::hashdb::v1::SetProgramResponse, ::hashdb::v1::SetProgramRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_SetProgram_, context, request);
+void HashDBService::Stub::experimental_async::SetProgram(::grpc::ClientContext* context, const ::hashdb::v1::SetProgramRequest* request, ::hashdb::v1::SetProgramResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_SetProgram_, context, request, response, reactor);
+}
+
+void HashDBService::Stub::experimental_async::SetProgram(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::SetProgramResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_SetProgram_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::hashdb::v1::SetProgramResponse>* HashDBService::Stub::AsyncSetProgramRaw(::grpc::ClientContext* context, const ::hashdb::v1::SetProgramRequest& request, ::grpc::CompletionQueue* cq) {
-  auto* result =
-    this->PrepareAsyncSetProgramRaw(context, request, cq);
-  result->StartCall();
-  return result;
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::hashdb::v1::SetProgramResponse>::Create(channel_.get(), cq, rpcmethod_SetProgram_, context, request, true);
+}
+
+::grpc::ClientAsyncResponseReader< ::hashdb::v1::SetProgramResponse>* HashDBService::Stub::PrepareAsyncSetProgramRaw(::grpc::ClientContext* context, const ::hashdb::v1::SetProgramRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::hashdb::v1::SetProgramResponse>::Create(channel_.get(), cq, rpcmethod_SetProgram_, context, request, false);
 }
 
 ::grpc::Status HashDBService::Stub::GetProgram(::grpc::ClientContext* context, const ::hashdb::v1::GetProgramRequest& request, ::hashdb::v1::GetProgramResponse* response) {
-  return ::grpc::internal::BlockingUnaryCall< ::hashdb::v1::GetProgramRequest, ::hashdb::v1::GetProgramResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_GetProgram_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_GetProgram_, context, request, response);
 }
 
-void HashDBService::Stub::async::GetProgram(::grpc::ClientContext* context, const ::hashdb::v1::GetProgramRequest* request, ::hashdb::v1::GetProgramResponse* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall< ::hashdb::v1::GetProgramRequest, ::hashdb::v1::GetProgramResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_GetProgram_, context, request, response, std::move(f));
+void HashDBService::Stub::experimental_async::GetProgram(::grpc::ClientContext* context, const ::hashdb::v1::GetProgramRequest* request, ::hashdb::v1::GetProgramResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_GetProgram_, context, request, response, std::move(f));
 }
 
-void HashDBService::Stub::async::GetProgram(::grpc::ClientContext* context, const ::hashdb::v1::GetProgramRequest* request, ::hashdb::v1::GetProgramResponse* response, ::grpc::ClientUnaryReactor* reactor) {
-  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_GetProgram_, context, request, response, reactor);
+void HashDBService::Stub::experimental_async::GetProgram(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetProgramResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_GetProgram_, context, request, response, std::move(f));
 }
 
-::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetProgramResponse>* HashDBService::Stub::PrepareAsyncGetProgramRaw(::grpc::ClientContext* context, const ::hashdb::v1::GetProgramRequest& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::hashdb::v1::GetProgramResponse, ::hashdb::v1::GetProgramRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_GetProgram_, context, request);
+void HashDBService::Stub::experimental_async::GetProgram(::grpc::ClientContext* context, const ::hashdb::v1::GetProgramRequest* request, ::hashdb::v1::GetProgramResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_GetProgram_, context, request, response, reactor);
+}
+
+void HashDBService::Stub::experimental_async::GetProgram(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetProgramResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_GetProgram_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetProgramResponse>* HashDBService::Stub::AsyncGetProgramRaw(::grpc::ClientContext* context, const ::hashdb::v1::GetProgramRequest& request, ::grpc::CompletionQueue* cq) {
-  auto* result =
-    this->PrepareAsyncGetProgramRaw(context, request, cq);
-  result->StartCall();
-  return result;
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::hashdb::v1::GetProgramResponse>::Create(channel_.get(), cq, rpcmethod_GetProgram_, context, request, true);
+}
+
+::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetProgramResponse>* HashDBService::Stub::PrepareAsyncGetProgramRaw(::grpc::ClientContext* context, const ::hashdb::v1::GetProgramRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::hashdb::v1::GetProgramResponse>::Create(channel_.get(), cq, rpcmethod_GetProgram_, context, request, false);
 }
 
 ::grpc::Status HashDBService::Stub::LoadDB(::grpc::ClientContext* context, const ::hashdb::v1::LoadDBRequest& request, ::google::protobuf::Empty* response) {
-  return ::grpc::internal::BlockingUnaryCall< ::hashdb::v1::LoadDBRequest, ::google::protobuf::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_LoadDB_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_LoadDB_, context, request, response);
 }
 
-void HashDBService::Stub::async::LoadDB(::grpc::ClientContext* context, const ::hashdb::v1::LoadDBRequest* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall< ::hashdb::v1::LoadDBRequest, ::google::protobuf::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_LoadDB_, context, request, response, std::move(f));
+void HashDBService::Stub::experimental_async::LoadDB(::grpc::ClientContext* context, const ::hashdb::v1::LoadDBRequest* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_LoadDB_, context, request, response, std::move(f));
 }
 
-void HashDBService::Stub::async::LoadDB(::grpc::ClientContext* context, const ::hashdb::v1::LoadDBRequest* request, ::google::protobuf::Empty* response, ::grpc::ClientUnaryReactor* reactor) {
-  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_LoadDB_, context, request, response, reactor);
+void HashDBService::Stub::experimental_async::LoadDB(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_LoadDB_, context, request, response, std::move(f));
 }
 
-::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* HashDBService::Stub::PrepareAsyncLoadDBRaw(::grpc::ClientContext* context, const ::hashdb::v1::LoadDBRequest& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::google::protobuf::Empty, ::hashdb::v1::LoadDBRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_LoadDB_, context, request);
+void HashDBService::Stub::experimental_async::LoadDB(::grpc::ClientContext* context, const ::hashdb::v1::LoadDBRequest* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_LoadDB_, context, request, response, reactor);
+}
+
+void HashDBService::Stub::experimental_async::LoadDB(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_LoadDB_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* HashDBService::Stub::AsyncLoadDBRaw(::grpc::ClientContext* context, const ::hashdb::v1::LoadDBRequest& request, ::grpc::CompletionQueue* cq) {
-  auto* result =
-    this->PrepareAsyncLoadDBRaw(context, request, cq);
-  result->StartCall();
-  return result;
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::google::protobuf::Empty>::Create(channel_.get(), cq, rpcmethod_LoadDB_, context, request, true);
+}
+
+::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* HashDBService::Stub::PrepareAsyncLoadDBRaw(::grpc::ClientContext* context, const ::hashdb::v1::LoadDBRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::google::protobuf::Empty>::Create(channel_.get(), cq, rpcmethod_LoadDB_, context, request, false);
 }
 
 ::grpc::Status HashDBService::Stub::LoadProgramDB(::grpc::ClientContext* context, const ::hashdb::v1::LoadProgramDBRequest& request, ::google::protobuf::Empty* response) {
-  return ::grpc::internal::BlockingUnaryCall< ::hashdb::v1::LoadProgramDBRequest, ::google::protobuf::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_LoadProgramDB_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_LoadProgramDB_, context, request, response);
 }
 
-void HashDBService::Stub::async::LoadProgramDB(::grpc::ClientContext* context, const ::hashdb::v1::LoadProgramDBRequest* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall< ::hashdb::v1::LoadProgramDBRequest, ::google::protobuf::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_LoadProgramDB_, context, request, response, std::move(f));
+void HashDBService::Stub::experimental_async::LoadProgramDB(::grpc::ClientContext* context, const ::hashdb::v1::LoadProgramDBRequest* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_LoadProgramDB_, context, request, response, std::move(f));
 }
 
-void HashDBService::Stub::async::LoadProgramDB(::grpc::ClientContext* context, const ::hashdb::v1::LoadProgramDBRequest* request, ::google::protobuf::Empty* response, ::grpc::ClientUnaryReactor* reactor) {
-  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_LoadProgramDB_, context, request, response, reactor);
+void HashDBService::Stub::experimental_async::LoadProgramDB(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_LoadProgramDB_, context, request, response, std::move(f));
 }
 
-::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* HashDBService::Stub::PrepareAsyncLoadProgramDBRaw(::grpc::ClientContext* context, const ::hashdb::v1::LoadProgramDBRequest& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::google::protobuf::Empty, ::hashdb::v1::LoadProgramDBRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_LoadProgramDB_, context, request);
+void HashDBService::Stub::experimental_async::LoadProgramDB(::grpc::ClientContext* context, const ::hashdb::v1::LoadProgramDBRequest* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_LoadProgramDB_, context, request, response, reactor);
+}
+
+void HashDBService::Stub::experimental_async::LoadProgramDB(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_LoadProgramDB_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* HashDBService::Stub::AsyncLoadProgramDBRaw(::grpc::ClientContext* context, const ::hashdb::v1::LoadProgramDBRequest& request, ::grpc::CompletionQueue* cq) {
-  auto* result =
-    this->PrepareAsyncLoadProgramDBRaw(context, request, cq);
-  result->StartCall();
-  return result;
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::google::protobuf::Empty>::Create(channel_.get(), cq, rpcmethod_LoadProgramDB_, context, request, true);
+}
+
+::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* HashDBService::Stub::PrepareAsyncLoadProgramDBRaw(::grpc::ClientContext* context, const ::hashdb::v1::LoadProgramDBRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::google::protobuf::Empty>::Create(channel_.get(), cq, rpcmethod_LoadProgramDB_, context, request, false);
 }
 
 ::grpc::Status HashDBService::Stub::Flush(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::hashdb::v1::FlushResponse* response) {
-  return ::grpc::internal::BlockingUnaryCall< ::google::protobuf::Empty, ::hashdb::v1::FlushResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_Flush_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_Flush_, context, request, response);
 }
 
-void HashDBService::Stub::async::Flush(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::FlushResponse* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall< ::google::protobuf::Empty, ::hashdb::v1::FlushResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_Flush_, context, request, response, std::move(f));
+void HashDBService::Stub::experimental_async::Flush(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::FlushResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_Flush_, context, request, response, std::move(f));
 }
 
-void HashDBService::Stub::async::Flush(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::FlushResponse* response, ::grpc::ClientUnaryReactor* reactor) {
-  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_Flush_, context, request, response, reactor);
+void HashDBService::Stub::experimental_async::Flush(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::FlushResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_Flush_, context, request, response, std::move(f));
 }
 
-::grpc::ClientAsyncResponseReader< ::hashdb::v1::FlushResponse>* HashDBService::Stub::PrepareAsyncFlushRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::hashdb::v1::FlushResponse, ::google::protobuf::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_Flush_, context, request);
+void HashDBService::Stub::experimental_async::Flush(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::FlushResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_Flush_, context, request, response, reactor);
+}
+
+void HashDBService::Stub::experimental_async::Flush(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::FlushResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_Flush_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::hashdb::v1::FlushResponse>* HashDBService::Stub::AsyncFlushRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
-  auto* result =
-    this->PrepareAsyncFlushRaw(context, request, cq);
-  result->StartCall();
-  return result;
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::hashdb::v1::FlushResponse>::Create(channel_.get(), cq, rpcmethod_Flush_, context, request, true);
+}
+
+::grpc::ClientAsyncResponseReader< ::hashdb::v1::FlushResponse>* HashDBService::Stub::PrepareAsyncFlushRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::hashdb::v1::FlushResponse>::Create(channel_.get(), cq, rpcmethod_Flush_, context, request, false);
 }
 
 ::grpc::Status HashDBService::Stub::SemiFlush(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::google::protobuf::Empty* response) {
-  return ::grpc::internal::BlockingUnaryCall< ::google::protobuf::Empty, ::google::protobuf::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_SemiFlush_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_SemiFlush_, context, request, response);
 }
 
-void HashDBService::Stub::async::SemiFlush(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall< ::google::protobuf::Empty, ::google::protobuf::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SemiFlush_, context, request, response, std::move(f));
+void HashDBService::Stub::experimental_async::SemiFlush(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_SemiFlush_, context, request, response, std::move(f));
 }
 
-void HashDBService::Stub::async::SemiFlush(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::google::protobuf::Empty* response, ::grpc::ClientUnaryReactor* reactor) {
-  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SemiFlush_, context, request, response, reactor);
+void HashDBService::Stub::experimental_async::SemiFlush(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_SemiFlush_, context, request, response, std::move(f));
 }
 
-::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* HashDBService::Stub::PrepareAsyncSemiFlushRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::google::protobuf::Empty, ::google::protobuf::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_SemiFlush_, context, request);
+void HashDBService::Stub::experimental_async::SemiFlush(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_SemiFlush_, context, request, response, reactor);
+}
+
+void HashDBService::Stub::experimental_async::SemiFlush(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_SemiFlush_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* HashDBService::Stub::AsyncSemiFlushRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
-  auto* result =
-    this->PrepareAsyncSemiFlushRaw(context, request, cq);
-  result->StartCall();
-  return result;
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::google::protobuf::Empty>::Create(channel_.get(), cq, rpcmethod_SemiFlush_, context, request, true);
+}
+
+::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* HashDBService::Stub::PrepareAsyncSemiFlushRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::google::protobuf::Empty>::Create(channel_.get(), cq, rpcmethod_SemiFlush_, context, request, false);
 }
 
 ::grpc::Status HashDBService::Stub::GetFlushStatus(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::hashdb::v1::GetFlushStatusResponse* response) {
-  return ::grpc::internal::BlockingUnaryCall< ::google::protobuf::Empty, ::hashdb::v1::GetFlushStatusResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_GetFlushStatus_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_GetFlushStatus_, context, request, response);
 }
 
-void HashDBService::Stub::async::GetFlushStatus(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetFlushStatusResponse* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall< ::google::protobuf::Empty, ::hashdb::v1::GetFlushStatusResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_GetFlushStatus_, context, request, response, std::move(f));
+void HashDBService::Stub::experimental_async::GetFlushStatus(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetFlushStatusResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_GetFlushStatus_, context, request, response, std::move(f));
 }
 
-void HashDBService::Stub::async::GetFlushStatus(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetFlushStatusResponse* response, ::grpc::ClientUnaryReactor* reactor) {
-  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_GetFlushStatus_, context, request, response, reactor);
+void HashDBService::Stub::experimental_async::GetFlushStatus(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetFlushStatusResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_GetFlushStatus_, context, request, response, std::move(f));
 }
 
-::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetFlushStatusResponse>* HashDBService::Stub::PrepareAsyncGetFlushStatusRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::hashdb::v1::GetFlushStatusResponse, ::google::protobuf::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_GetFlushStatus_, context, request);
+void HashDBService::Stub::experimental_async::GetFlushStatus(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetFlushStatusResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_GetFlushStatus_, context, request, response, reactor);
+}
+
+void HashDBService::Stub::experimental_async::GetFlushStatus(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetFlushStatusResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_GetFlushStatus_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetFlushStatusResponse>* HashDBService::Stub::AsyncGetFlushStatusRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
-  auto* result =
-    this->PrepareAsyncGetFlushStatusRaw(context, request, cq);
-  result->StartCall();
-  return result;
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::hashdb::v1::GetFlushStatusResponse>::Create(channel_.get(), cq, rpcmethod_GetFlushStatus_, context, request, true);
+}
+
+::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetFlushStatusResponse>* HashDBService::Stub::PrepareAsyncGetFlushStatusRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::hashdb::v1::GetFlushStatusResponse>::Create(channel_.get(), cq, rpcmethod_GetFlushStatus_, context, request, false);
 }
 
 ::grpc::Status HashDBService::Stub::GetFlushData(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest& request, ::hashdb::v1::GetFlushDataResponse* response) {
-  return ::grpc::internal::BlockingUnaryCall< ::hashdb::v1::GetFlushDataRequest, ::hashdb::v1::GetFlushDataResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_GetFlushData_, context, request, response);
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_GetFlushData_, context, request, response);
 }
 
-void HashDBService::Stub::async::GetFlushData(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest* request, ::hashdb::v1::GetFlushDataResponse* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall< ::hashdb::v1::GetFlushDataRequest, ::hashdb::v1::GetFlushDataResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_GetFlushData_, context, request, response, std::move(f));
+void HashDBService::Stub::experimental_async::GetFlushData(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest* request, ::hashdb::v1::GetFlushDataResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_GetFlushData_, context, request, response, std::move(f));
 }
 
-void HashDBService::Stub::async::GetFlushData(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest* request, ::hashdb::v1::GetFlushDataResponse* response, ::grpc::ClientUnaryReactor* reactor) {
-  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_GetFlushData_, context, request, response, reactor);
+void HashDBService::Stub::experimental_async::GetFlushData(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetFlushDataResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_GetFlushData_, context, request, response, std::move(f));
 }
 
-::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetFlushDataResponse>* HashDBService::Stub::PrepareAsyncGetFlushDataRaw(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::hashdb::v1::GetFlushDataResponse, ::hashdb::v1::GetFlushDataRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_GetFlushData_, context, request);
+void HashDBService::Stub::experimental_async::GetFlushData(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest* request, ::hashdb::v1::GetFlushDataResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_GetFlushData_, context, request, response, reactor);
+}
+
+void HashDBService::Stub::experimental_async::GetFlushData(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetFlushDataResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_GetFlushData_, context, request, response, reactor);
 }
 
 ::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetFlushDataResponse>* HashDBService::Stub::AsyncGetFlushDataRaw(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest& request, ::grpc::CompletionQueue* cq) {
-  auto* result =
-    this->PrepareAsyncGetFlushDataRaw(context, request, cq);
-  result->StartCall();
-  return result;
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::hashdb::v1::GetFlushDataResponse>::Create(channel_.get(), cq, rpcmethod_GetFlushData_, context, request, true);
+}
+
+::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetFlushDataResponse>* HashDBService::Stub::PrepareAsyncGetFlushDataRaw(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::hashdb::v1::GetFlushDataResponse>::Create(channel_.get(), cq, rpcmethod_GetFlushData_, context, request, false);
 }
 
 HashDBService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       HashDBService_method_names[0],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::SetRequest, ::hashdb::v1::SetResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+      new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::SetRequest, ::hashdb::v1::SetResponse>(
           [](HashDBService::Service* service,
-             ::grpc::ServerContext* ctx,
+             ::grpc_impl::ServerContext* ctx,
              const ::hashdb::v1::SetRequest* req,
              ::hashdb::v1::SetResponse* resp) {
                return service->Set(ctx, req, resp);
@@ -298,9 +348,9 @@ HashDBService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       HashDBService_method_names[1],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::GetRequest, ::hashdb::v1::GetResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+      new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::GetRequest, ::hashdb::v1::GetResponse>(
           [](HashDBService::Service* service,
-             ::grpc::ServerContext* ctx,
+             ::grpc_impl::ServerContext* ctx,
              const ::hashdb::v1::GetRequest* req,
              ::hashdb::v1::GetResponse* resp) {
                return service->Get(ctx, req, resp);
@@ -308,9 +358,9 @@ HashDBService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       HashDBService_method_names[2],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::SetProgramRequest, ::hashdb::v1::SetProgramResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+      new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::SetProgramRequest, ::hashdb::v1::SetProgramResponse>(
           [](HashDBService::Service* service,
-             ::grpc::ServerContext* ctx,
+             ::grpc_impl::ServerContext* ctx,
              const ::hashdb::v1::SetProgramRequest* req,
              ::hashdb::v1::SetProgramResponse* resp) {
                return service->SetProgram(ctx, req, resp);
@@ -318,9 +368,9 @@ HashDBService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       HashDBService_method_names[3],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::GetProgramRequest, ::hashdb::v1::GetProgramResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+      new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::GetProgramRequest, ::hashdb::v1::GetProgramResponse>(
           [](HashDBService::Service* service,
-             ::grpc::ServerContext* ctx,
+             ::grpc_impl::ServerContext* ctx,
              const ::hashdb::v1::GetProgramRequest* req,
              ::hashdb::v1::GetProgramResponse* resp) {
                return service->GetProgram(ctx, req, resp);
@@ -328,9 +378,9 @@ HashDBService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       HashDBService_method_names[4],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::LoadDBRequest, ::google::protobuf::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+      new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::LoadDBRequest, ::google::protobuf::Empty>(
           [](HashDBService::Service* service,
-             ::grpc::ServerContext* ctx,
+             ::grpc_impl::ServerContext* ctx,
              const ::hashdb::v1::LoadDBRequest* req,
              ::google::protobuf::Empty* resp) {
                return service->LoadDB(ctx, req, resp);
@@ -338,9 +388,9 @@ HashDBService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       HashDBService_method_names[5],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::LoadProgramDBRequest, ::google::protobuf::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+      new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::LoadProgramDBRequest, ::google::protobuf::Empty>(
           [](HashDBService::Service* service,
-             ::grpc::ServerContext* ctx,
+             ::grpc_impl::ServerContext* ctx,
              const ::hashdb::v1::LoadProgramDBRequest* req,
              ::google::protobuf::Empty* resp) {
                return service->LoadProgramDB(ctx, req, resp);
@@ -348,9 +398,9 @@ HashDBService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       HashDBService_method_names[6],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::google::protobuf::Empty, ::hashdb::v1::FlushResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+      new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::google::protobuf::Empty, ::hashdb::v1::FlushResponse>(
           [](HashDBService::Service* service,
-             ::grpc::ServerContext* ctx,
+             ::grpc_impl::ServerContext* ctx,
              const ::google::protobuf::Empty* req,
              ::hashdb::v1::FlushResponse* resp) {
                return service->Flush(ctx, req, resp);
@@ -358,9 +408,9 @@ HashDBService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       HashDBService_method_names[7],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::google::protobuf::Empty, ::google::protobuf::Empty, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+      new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::google::protobuf::Empty, ::google::protobuf::Empty>(
           [](HashDBService::Service* service,
-             ::grpc::ServerContext* ctx,
+             ::grpc_impl::ServerContext* ctx,
              const ::google::protobuf::Empty* req,
              ::google::protobuf::Empty* resp) {
                return service->SemiFlush(ctx, req, resp);
@@ -368,9 +418,9 @@ HashDBService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       HashDBService_method_names[8],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::google::protobuf::Empty, ::hashdb::v1::GetFlushStatusResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+      new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::google::protobuf::Empty, ::hashdb::v1::GetFlushStatusResponse>(
           [](HashDBService::Service* service,
-             ::grpc::ServerContext* ctx,
+             ::grpc_impl::ServerContext* ctx,
              const ::google::protobuf::Empty* req,
              ::hashdb::v1::GetFlushStatusResponse* resp) {
                return service->GetFlushStatus(ctx, req, resp);
@@ -378,9 +428,9 @@ HashDBService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       HashDBService_method_names[9],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::GetFlushDataRequest, ::hashdb::v1::GetFlushDataResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+      new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::GetFlushDataRequest, ::hashdb::v1::GetFlushDataResponse>(
           [](HashDBService::Service* service,
-             ::grpc::ServerContext* ctx,
+             ::grpc_impl::ServerContext* ctx,
              const ::hashdb::v1::GetFlushDataRequest* req,
              ::hashdb::v1::GetFlushDataResponse* resp) {
                return service->GetFlushData(ctx, req, resp);
