@@ -46,6 +46,7 @@ DatabaseMTAssociativeCache::~DatabaseMTAssociativeCache()
 
 void DatabaseMTAssociativeCache::postConstruct(int nKeyBits_, int log2CacheSize_, string name_)
 {
+    lock_guard<recursive_mutex> guard(mlock);
     nKeyBits = nKeyBits_;
     if (nKeyBits_ > 32)
     {
@@ -102,7 +103,7 @@ void DatabaseMTAssociativeCache::postConstruct(int nKeyBits_, int log2CacheSize_
 
 void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, bool update)
 {
-
+    lock_guard<recursive_mutex> guard(mlock);
     //
     //  Statistics
     //
@@ -208,6 +209,11 @@ void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], cons
         values[cacheIndexValue + 9] = value[9];
         values[cacheIndexValue + 10] = value[10];
         values[cacheIndexValue + 11] = value[11];
+    }else{
+        values[cacheIndexValue + 8] = Goldilocks::zero();
+        values[cacheIndexValue + 9] = Goldilocks::zero();
+        values[cacheIndexValue + 10] = Goldilocks::zero();
+        values[cacheIndexValue + 11] = Goldilocks::zero();
     }
     //
     // Forced index insertion
@@ -280,6 +286,7 @@ void DatabaseMTAssociativeCache::forcedInsertion(uint32_t (&rawCacheIndexes)[10]
 
 bool DatabaseMTAssociativeCache::findKey(Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value)
 {
+    lock_guard<recursive_mutex> guard(mlock);
     attempts++; 
     for (int i = 0; i < 4; i++)
     {
