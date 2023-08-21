@@ -430,7 +430,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    {\n";
     code += "        if (!bProcessBatch)\n";
     code += "        {\n";
-    code += "            proverRequest.result = ZKR_SM_MAIN_BATCH_INVALID_INPUT;;\n";
+    code += "            proverRequest.result = ZKR_SM_MAIN_INVALID_NO_COUNTERS;;\n";
     code += "            mainExecutor.logError(ctx, \"" + functionName + "()) found proverRequest.bNoCounters=true and bProcessBatch=false\");\n";
     code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
     code += "            return;\n";
@@ -827,7 +827,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    // If addrRel is possitive, and the sum is too big, fail\n";
                 code += "    if ( addrRel >= " + to_string( ( (rom["program"][zkPC].contains("isMem") && (rom["program"][zkPC]["isMem"]  == 1) ) ? 0x20000 : 0x10000 ) - 2048 ) + ")\n";
                 code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS;\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS_OUT_OF_RANGE;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"addrRel too big addrRel=\" + to_string(addrRel));\n";
                 code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -836,7 +836,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    // If addrRel is negative, fail\n";
                 code += "    if (addrRel < 0)\n";
                 code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS;\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS_NEGATIVE;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"addrRel<0 addrRel=\" + to_string(addrRel));\n";
                 code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -1005,7 +1005,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     
                     code += "    if  ( !fr.isZero(pols.A5[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A6[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A7[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B2[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B3[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B4[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B5[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B6[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B7[" + string(bFastMode?"0":"i") + "]) )\n";
                     code += "    {\n";
-                    code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE;\n";
+                    code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE_INVALID_KEY;\n";
                     code += "        zkPC=" + to_string(zkPC) +";\n";
                     code += "        mainExecutor.logError(ctx, \"Storage read free in found non-zero A-B storage registers\");\n";
                     code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -1112,7 +1112,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
                     code += "    if  ( !fr.isZero(pols.A5[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A6[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A7[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B2[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B3[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B4[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B5[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B6[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B7[" + string(bFastMode?"0":"i") + "]) )\n";
                     code += "    {\n";
-                    code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE;\n";
+                    code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE_INVALID_KEY;\n";
                     code += "        zkPC=" + to_string(zkPC) +";\n";
                     code += "        mainExecutor.logError(ctx, \"Storage write free in found non-zero A-B registers\");\n";
                     code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -1239,7 +1239,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "    size = fr.toU64(pols.D0[" + string(bFastMode?"0":"i") + "]);\n";
                         code += "    if (size>32)\n";
                         code += "    {\n";
-                        code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+                        code += "        proverRequest.result = ZKR_SM_MAIN_HASHK_SIZE_OUT_OF_RANGE;\n";
                         code += "        zkPC=" + to_string(zkPC) +";\n";
                         code += "        mainExecutor.logError(ctx, \"Invalid size>32 for hashK 1: pols.D0[" + string(bFastMode?"0":"i") + "]=\" + fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16) + \" size=\" + to_string(size));\n";
                         code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -1255,7 +1255,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    fr.toS64(iPos, pols.HASHPOS[" + string(bFastMode?"0":"i") + "]);\n";
                     code += "    if (iPos < 0)\n";
                     code += "    {\n";
-                    code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+                    code += "        proverRequest.result = ZKR_SM_MAIN_HASHK_POSITION_NEGATIVE;\n";
                     code += "        zkPC=" + to_string(zkPC) +";\n";
                     code += "        mainExecutor.logError(ctx, \"Invalid pos<0 for HashK 1: pols.HASHPOS[" + string(bFastMode?"0":"i") + "]=\" + fr.toString(pols.HASHPOS[" + string(bFastMode?"0":"i") + "], 16) + \" pos=\" + to_string(iPos));\n";
                     code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -1266,7 +1266,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    // Check that pos+size do not exceed data size\n";
                     code += "    if ( (pos+size) > hashIterator->second.data.size())\n";
                     code += "    {\n";
-                    code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+                    code += "        proverRequest.result = ZKR_SM_MAIN_HASHK_POSITION_PLUS_SIZE_OUT_OF_RANGE;\n";
                     code += "        zkPC=" + to_string(zkPC) +";\n";
                     code += "        mainExecutor.logError(ctx, \"HashK 1 invalid size of hash: pos=\" + to_string(pos) + \" + size=\" + to_string(size) + \" > data.size=\" + to_string(hashIterator->second.data.size()));\n";
                     code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -1297,7 +1297,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    hashIterator = ctx.hashK.find(addr);\n";
                     code += "    if (hashIterator == ctx.hashK.end())\n";
                     code += "    {\n";
-                    code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+                    code += "        proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_ADDRESS_NOT_FOUND;\n";
                     code += "        zkPC=" + to_string(zkPC) +";\n";
                     code += "        mainExecutor.logError(ctx, \"HashKDigest 1: digest not defined for addr=\" + to_string(addr));\n";
                     code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -1307,7 +1307,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    // If digest was not calculated, this is an error\n";
                     code += "    if (!hashIterator->second.lenCalled)\n";
                     code += "    {\n";
-                    code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+                    code += "        proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_NOT_COMPLETED;\n";
                     code += "        zkPC=" + to_string(zkPC) +";\n";
                     code += "        mainExecutor.logError(ctx, \"HashKDigest 1: digest not calculated for addr=\" + to_string(addr) + \".  Call hashKLen to finish digest.\");\n";
                     code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -1344,7 +1344,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "    size = fr.toU64(pols.D0[" + string(bFastMode?"0":"i") + "]);\n";
                         code += "    if (size>32)\n";
                         code += "    {\n";
-                        code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+                        code += "        proverRequest.result = ZKR_SM_MAIN_HASHP_SIZE_OUT_OF_RANGE;\n";
                         code += "        zkPC=" + to_string(zkPC) +";\n";
                         code += "        mainExecutor.logError(ctx, \"Invalid size>32 for hashP 1: pols.D0[" + string(bFastMode?"0":"i") + "]=\" + fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16) + \" size=\" + to_string(size));\n";
                         code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -1360,7 +1360,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    fr.toS64(iPos, pols.HASHPOS[" + string(bFastMode?"0":"i") + "]);\n";
                     code += "    if (iPos < 0)\n";
                     code += "    {\n";
-                    code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+                    code += "        proverRequest.result = ZKR_SM_MAIN_HASHP_POSITION_NEGATIVE;\n";
                     code += "        zkPC=" + to_string(zkPC) +";\n";
                     code += "        mainExecutor.logError(ctx, \"Invalid pos<0 for HashP 1: pols.HASHPOS[" + string(bFastMode?"0":"i") + "]=\" + fr.toString(pols.HASHPOS[" + string(bFastMode?"0":"i") + "], 16) + \" pos=\" + to_string(iPos));\n";
                     code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -1371,7 +1371,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    // Check that pos+size do not exceed data size\n";
                     code += "    if ( (pos+size) > hashIterator->second.data.size())\n";
                     code += "    {\n";
-                    code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+                    code += "        proverRequest.result = ZKR_SM_MAIN_HASHP_POSITION_PLUS_SIZE_OUT_OF_RANGE;\n";
                     code += "        zkPC=" + to_string(zkPC) +";\n";
                     code += "        mainExecutor.logError(ctx, \"HashP 1 invalid size of hash: pos=\" + to_string(pos) + \" size=\" + to_string(size) + \" data.size=\" + to_string(ctx.hashP[addr].data.size()));\n";
                     code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -1398,7 +1398,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    hashIterator = ctx.hashP.find(addr);\n";
                     code += "    if (hashIterator == ctx.hashP.end())\n";
                     code += "    {\n";
-                    code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+                    code += "        proverRequest.result = ZKR_SM_MAIN_HASHPDIGEST_ADDRESS_NOT_FOUND;\n";
                     code += "        zkPC=" + to_string(zkPC) +";\n";
                     code += "        mainExecutor.logError(ctx, \"HashPDigest 1: digest not defined addr=\" + to_string(addr));\n";
                     code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -1407,7 +1407,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    // If digest was not calculated, this is an error\n";
                     code += "    if (!hashIterator->second.lenCalled)\n";
                     code += "    {\n";
-                    code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+                    code += "        proverRequest.result = ZKR_SM_MAIN_HASHPDIGEST_NOT_COMPLETED;\n";
                     code += "        zkPC=" + to_string(zkPC) +";\n";
                     code += "        mainExecutor.logError(ctx, \"HashPDigest 1: digest not calculated.  Call hashPLen to finish digest.\");\n";
                     code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -1645,7 +1645,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    }\n";
                     code += "    if (offsetScalar<0 || offsetScalar>32)\n";
                     code += "    {\n";
-                    code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN;\n";
+                    code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN_OFFSET_OUT_OF_RANGE;\n";
                     code += "        mainExecutor.logError(ctx, \"MemAlign out of range offset=\" + offsetScalar.get_str());\n";
                     code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
                     code += "        return;\n";
@@ -2089,7 +2089,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
             code += "    if  ( !fr.isZero(pols.A5[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A6[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A7[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B2[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B3[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B4[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B5[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B6[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B7[" + string(bFastMode?"0":"i") + "]) )\n";
             code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE;\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE_INVALID_KEY;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"Storage read instruction found non-zero A-B registers\");\n";
             code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -2201,7 +2201,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    }\n";
             code += "    if (smtGetResult.value != opScalar)\n";
             code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE;\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE_READ_MISMATCH;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"Storage read does not match: smtGetResult.value=\" + smtGetResult.value.get_str() + \" opScalar=\" + opScalar.get_str());\n";
             code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -2261,7 +2261,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
             code += "        if  ( !fr.isZero(pols.A5[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A6[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A7[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B2[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B3[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B4[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B5[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B6[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B7[" + string(bFastMode?"0":"i") + "]) )\n";
             code += "        {\n";
-            code += "            proverRequest.result = ZKR_SM_MAIN_STORAGE;\n";
+            code += "            proverRequest.result = ZKR_SM_MAIN_STORAGE_INVALID_KEY;\n";
             code += "            zkPC=" + to_string(zkPC) +";\n";
             code += "            mainExecutor.logError(ctx, \"Storage write instruction found non-zero A-B registers\");\n";
             code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -2393,7 +2393,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "         !fr.equal(ctx.lastSWrite.newRoot[2], oldRoot[2]) ||\n";
             code += "         !fr.equal(ctx.lastSWrite.newRoot[3], oldRoot[3]) )\n";
             code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE;\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE_WRITE_MISMATCH;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"Storage write does not match: ctx.lastSWrite.newRoot: \" + fr.toString(ctx.lastSWrite.newRoot[3], 16) + \":\" + fr.toString(ctx.lastSWrite.newRoot[2], 16) + \":\" + fr.toString(ctx.lastSWrite.newRoot[1], 16) + \":\" + fr.toString(ctx.lastSWrite.newRoot[0], 16) + \" oldRoot: \" + fr.toString(oldRoot[3], 16) + \":\" + fr.toString(oldRoot[2], 16) + \":\" + fr.toString(oldRoot[1], 16) + \":\" + fr.toString(oldRoot[0], 16));\n";
             code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -2406,7 +2406,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "         !fr.equal(ctx.lastSWrite.newRoot[2], fea[2]) ||\n";
             code += "         !fr.equal(ctx.lastSWrite.newRoot[3], fea[3]) )\n";
             code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE;\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE_WRITE_MISMATCH;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"Storage write does not match: ctx.lastSWrite.newRoot=\" + fea2string(fr, ctx.lastSWrite.newRoot) + \" op=\" + fea2string(fr, fea));\n";
             code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -2455,7 +2455,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    size = fr.toU64(pols.D0[" + string(bFastMode?"0":"i") + "]);\n";
                 code += "    if (size>32)\n";
                 code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_HASHK_SIZE_OUT_OF_RANGE;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Invalid size>32 for hashK 2: pols.D0[" + string(bFastMode?"0":"i") + "]=\" + fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16));\n";
                 code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -2471,7 +2471,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    fr.toS64(iPos, pols.HASHPOS[" + string(bFastMode?"0":"i") + "]);\n";
             code += "    if (iPos < 0)\n";
             code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_HASHK_POSITION_NEGATIVE;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"Invalid pos<0 for HashK 2: pols.HASHPOS[" + string(bFastMode?"0":"i") + "]=\" + fr.toString(pols.HASHPOS[" + string(bFastMode?"0":"i") + "], 16) + \" pos=\" + to_string(iPos));\n";
             code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -2500,7 +2500,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        }\n";
             code += "        else if (hashIterator->second.data.size() < (pos+j))\n";
             code += "        {\n";
-            code += "            proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+            code += "            proverRequest.result = ZKR_SM_MAIN_HASHK_POSITION_PLUS_SIZE_OUT_OF_RANGE;\n";
             code += "            zkPC=" + to_string(zkPC) +";\n";
             code += "            mainExecutor.logError(ctx, \"HashK 2: trying to insert data in a position:\" + to_string(pos+j) + \" higher than current data size:\" + to_string(ctx.hashK[addr].data.size()));\n";
             code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -2512,7 +2512,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "            bh = hashIterator->second.data[pos+j];\n";
             code += "            if (bm != bh)\n";
             code += "            {\n";
-            code += "                proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+            code += "                proverRequest.result = ZKR_SM_MAIN_HASHK_VALUE_MISMATCH;\n";
             code += "                zkPC=" + to_string(zkPC) +";\n";
             code += "                mainExecutor.logError(ctx, \"HashK 2 bytes do not match: addr=\" + to_string(addr) + \" pos+j=\" + to_string(pos+j) + \" is bm=\" + to_string(bm) + \" and it should be bh=\" + to_string(bh));\n";
             code += "                HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -2525,7 +2525,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    paddingA = a >> (size*8);\n";
             code += "    if (paddingA != 0)\n";
             code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_HASHK_PADDING_MISMATCH;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"HashK 2 incoherent size=\" + to_string(size) + \" a=\" + a.get_str(16) + \" paddingA=\" + paddingA.get_str(16));\n";
             code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -2538,7 +2538,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    {\n";
             code += "         if ( readsIterator->second != size )\n";
             code += "        {\n";
-            code += "            proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+            code += "            proverRequest.result = ZKR_SM_MAIN_HASHK_SIZE_MISMATCH;\n";
             code += "            zkPC=" + to_string(zkPC) +";\n";
             code += "            mainExecutor.logError(ctx, \"HashK 2 different read sizes in the same position addr=\" + to_string(addr) + \" pos=\" + to_string(pos) + \" ctx.hashK[addr].reads[pos]=\" + to_string(ctx.hashK[addr].reads[pos]) + \" size=\" + to_string(size));\n";
             code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -2579,7 +2579,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        // Check that length = 0\n";
             code += "        if (lm != 0)\n";
             code += "        {\n";
-            code += "            proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+            code += "            proverRequest.result = ZKR_SM_MAIN_HASHKLEN_LENGTH_MISMATCH;\n";
             code += "            zkPC=" + to_string(zkPC) +";\n";
             code += "            mainExecutor.logError(ctx, \"HashKLen 2 hashK[addr] is empty but lm is not 0 addr=\" + to_string(addr) + \" lm=\" + to_string(lm));\n";
             code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -2589,15 +2589,12 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        // Create an empty entry in this address slot\n";
             code += "        ctx.hashK[addr] = emptyHashValue;\n";
             code += "        hashIterator = ctx.hashK.find(addr);\n";
-            code += "        zkassert(hashIterator != ctx.hashK.end());\n\n";
-
-            code += "        // Calculate the hash of an empty string\n";
-            code += "        keccak256(hashIterator->second.data.data(), hashIterator->second.data.size(), hashIterator->second.digest);\n";
+            code += "        zkassert(hashIterator != ctx.hashK.end());\n";
             code += "    }\n";
 
             code += "    if (ctx.hashK[addr].lenCalled)\n";
             code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_HASHKLEN_CALLED_TWICE;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"HashKLen 2 called more than once addr=\" + to_string(addr));\n";
             code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -2608,7 +2605,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    lh = hashIterator->second.data.size();\n";
             code += "    if (lm != lh)\n";
             code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_HASHKLEN_LENGTH_MISMATCH;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"HashKLen 2 length does not match addr=\" + to_string(addr) + \" is lm=\" + to_string(lm) + \" and it should be lh=\" + to_string(lh));\n";
             code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -2650,7 +2647,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    hashIterator = ctx.hashK.find(addr);\n";
             code += "    if (hashIterator == ctx.hashK.end())\n";
             code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_NOT_FOUND;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"HashKDigest 2 could not find entry for addr=\" + to_string(addr));\n";
             code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -2669,7 +2666,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
             code += "    if (dg != hashIterator->second.digest)\n";
             code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_DIGEST_MISMATCH;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"HashKDigest 2: Digest does not match op\");\n";
             code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -2678,7 +2675,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
             code += "    if (ctx.hashK[addr].digestCalled)\n";
             code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_CALLED_TWICE;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"HashKDigest 2 called more than once addr=\" + to_string(addr));\n";
             code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -2726,7 +2723,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    size = fr.toU64(pols.D0[" + string(bFastMode?"0":"i") + "]);\n";
                 code += "    if (size>32)\n";
                 code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_HASHP_SIZE_OUT_OF_RANGE;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Invalid size>32 for hashP 2: pols.D0[" + string(bFastMode?"0":"i") + "]=\" + fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16) + \" size=\" + to_string(size));\n";
                 code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -2742,7 +2739,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    fr.toS64(iPos, pols.HASHPOS[" + string(bFastMode?"0":"i") + "]);\n";
             code += "    if (iPos < 0)\n";
             code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_HASHP_POSITION_NEGATIVE;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"Invalid pos<0 for HashP 2: pols.HASHPOS[" + string(bFastMode?"0":"i") + "]=\" + fr.toString(pols.HASHPOS[" + string(bFastMode?"0":"i") + "], 16) + \" pos=\" + to_string(iPos));\n";
             code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -2770,7 +2767,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        }\n";
             code += "        else if (hashIterator->second.data.size() < (pos+j))\n";
             code += "        {\n";
-            code += "            proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+            code += "            proverRequest.result = ZKR_SM_MAIN_HASHP_POSITION_PLUS_SIZE_OUT_OF_RANGE;\n";
             code += "            zkPC=" + to_string(zkPC) +";\n";
             code += "            mainExecutor.logError(ctx, \"HashP 2: trying to insert data in a position:\" + to_string(pos+j) + \" higher than current data size:\" + to_string(ctx.hashP[addr].data.size()));\n";
             code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -2782,7 +2779,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "            bh = hashIterator->second.data[pos+j];\n";
             code += "            if (bm != bh)\n";
             code += "            {\n";
-            code += "                proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+            code += "                proverRequest.result = ZKR_SM_MAIN_HASHP_VALUE_MISMATCH;\n";
             code += "                zkPC=" + to_string(zkPC) +";\n";
             code += "                mainExecutor.logError(ctx, \"HashP 2 bytes do not match: addr=\" + to_string(addr) + \" pos+j=\" + to_string(pos+j) + \" is bm=\" + to_string(bm) + \" and it should be bh=\" + to_string(bh));\n";
             code += "                HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -2795,7 +2792,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    paddingA = a >> (size*8);\n";
             code += "    if (paddingA != 0)\n";
             code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_HASHP_PADDING_MISMATCH;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"HashP2 incoherent size=\" + to_string(size) + \" a=\" + a.get_str(16) + \" paddingA=\" + paddingA.get_str(16));\n";
             code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -2808,7 +2805,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    {\n";
             code += "        if ( readsIterator->second != size )\n";
             code += "        {\n";
-            code += "            proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+            code += "            proverRequest.result = ZKR_SM_MAIN_HASHP_SIZE_MISMATCH;\n";
             code += "            zkPC=" + to_string(zkPC) +";\n";
             code += "            mainExecutor.logError(ctx, \"HashP 2 diferent read sizes in the same position addr=\" + to_string(addr) + \" pos=\" + to_string(pos));\n";
             code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -2845,7 +2842,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        // Check that length = 0\n";
             code += "        if (lm != 0)\n";
             code += "        {\n";
-            code += "            proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+            code += "            proverRequest.result = ZKR_SM_MAIN_HASHPLEN_LENGTH_MISMATCH;\n";
             code += "            zkPC=" + to_string(zkPC) +";\n";
             code += "            mainExecutor.logError(ctx, \"HashPLen 2 hashP[addr] is empty but lm is not 0 addr=\" + to_string(addr) + \" lm=\" + to_string(lm));\n";
             code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -2855,15 +2852,12 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        // Create an empty entry in this address slot\n";
             code += "        ctx.hashP[addr] = emptyHashValue;\n";
             code += "        hashIterator = ctx.hashP.find(addr);\n";
-            code += "        zkassert(hashIterator != ctx.hashP.end());\n\n";
-
-            code += "        // Calculate the hash of an empty string\n";
-            code += "        keccak256(hashIterator->second.data.data(), hashIterator->second.data.size(), hashIterator->second.digest);\n";
+            code += "        zkassert(hashIterator != ctx.hashP.end());\n";
             code += "    }\n";
 
             code += "    if (ctx.hashP[addr].lenCalled)\n";
             code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_HASHPLEN_CALLED_TWICE;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"HashPLen 2 called more than once addr=\" + to_string(addr));\n";
             code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -2874,7 +2868,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    lh = hashIterator->second.data.size();\n";
             code += "    if (lm != lh)\n";
             code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_HASHPLEN_LENGTH_MISMATCH;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"HashPLen 2 does not match match addr=\" + to_string(addr) + \" is lm=\" + to_string(lm) + \" and it should be lh=\" + to_string(lh));\n";
             code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -2882,14 +2876,6 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    }\n";
             code += "    if (!hashIterator->second.digestCalled)\n";
             code += "    {\n";
-            code += "        if (hashIterator->second.data.size() == 0)\n";
-            code += "        {\n";
-            code += "            proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
-            code += "            zkPC=" + to_string(zkPC) +";\n";
-            code += "            mainExecutor.logError(ctx, \"HashPLen 2 found data empty\");\n";
-            code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
-            code += "            return;\n";
-            code += "        }\n";
 
             code += "        // Get a local copy of the bytes vector\n";
             code += "        vector<uint8_t> data = hashIterator->second.data;\n";
@@ -3000,7 +2986,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
             code += "    if (ctx.hashP[addr].digestCalled)\n";
             code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_HASHPDIGEST_CALLED_TWICE;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"HashPDigest 2 called more than once addr=\" + to_string(addr));\n";
             code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -3013,7 +2999,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    // Check that digest equals op\n";
             code += "    if (dg != hashIterator->second.digest)\n";
             code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_HASHPDIGEST_DIGEST_MISMATCH;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"HashPDigest 2: ctx.hashP[addr].digest=\" + ctx.hashP[addr].digest.get_str(16) + \" does not match op=\" + dg.get_str(16));\n";
             code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -3100,7 +3086,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    // Check the condition\n";
                 code += "    if ( (A*B) + C != (D<<256) + op )\n";
                 code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_ARITH;\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_ARITH_MISMATCH;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        left = (A*B) + C;\n";
                 code += "        right = (D<<256) + op;\n";
@@ -3218,7 +3204,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 
                 code += "    if (zkResult != ZKR_SUCCESS)\n";
                 code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_ARITH;\n";
+                code += "        proverRequest.result = zkResult;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling AddPointEc() in arith operation\");\n";
                 code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -3234,7 +3220,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
                 code += "    if (!x3eq || !y3eq)\n";
                 code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_ARITH;\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_ARITH_ECRECOVER_MISMATCH;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, string(\"Arithmetic curve " + string(dbl?"dbl":"add") + " point does not match x1=\") + x1.get_str() + \" y1=\" + y1.get_str() + \" x2=\" + x2.get_str() + \" y2=\" + y2.get_str() + \" x3=\" + x3.get_str() + \" y3=\" + y3.get_str() + \"_x3=\" + _x3.get_str() + \"_y3=\" + _y3.get_str());\n";
                 code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -3298,7 +3284,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    expectedC = (a + b) & ScalarMask256;\n";
                 code += "    if (c != expectedC)\n";
                 code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_BINARY_ADD_MISMATCH;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Binary ADD operation does not match c=op=\" + c.get_str(16) + \" expectedC=(a + b) & ScalarMask256=\" + expectedC.get_str(16));\n";
                 code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -3352,7 +3338,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    expectedC = (a - b + ScalarTwoTo256) & ScalarMask256;\n";
                 code += "    if (c != expectedC)\n";
                 code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_BINARY_SUB_MISMATCH;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Binary SUB operation does not match c=op=\" + c.get_str(16) + \" expectedC=(a - b + ScalarTwoTo256) & ScalarMask256=\" + expectedC.get_str(16));\n";
                 code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -3406,7 +3392,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    expectedC = (a < b);\n";
                 code += "    if (c != expectedC)\n";
                 code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_BINARY_LT_MISMATCH;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Binary LT operation does not match c=op=\" + c.get_str(16) + \" expectedC=(a < b)=\" + expectedC.get_str(16));\n";
                 code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -3464,7 +3450,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    expectedC = (_a < _b);\n";
                 code += "    if (c != expectedC)\n";
                 code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_BINARY_SLT_MISMATCH;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Binary SLT operation does not match a=\" + a.get_str(16) + \" b=\" + b.get_str(16) + \" c=\" + c.get_str(16) + \" _a=\" + _a.get_str(16) + \" _b=\" + _b.get_str(16) + \" expectedC=\" + expectedC.get_str(16));\n";
                 code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -3518,7 +3504,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    expectedC = (a == b);\n";
                 code += "    if (c != expectedC)\n";
                 code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_BINARY_EQ_MISMATCH;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError( ctx, \"Binary EQ operation does not match c=op=\" + c.get_str(16) + \" expectedC=(a==b)=\" + expectedC.get_str(16));\n";
                 code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -3572,7 +3558,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    expectedC = (a & b);\n";
                 code += "    if (c != expectedC)\n";
                 code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_BINARY_AND_MISMATCH;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Binary AND operation does not match c=op=\" + c.get_str(16) + \" expectedC=(a&b)=\" + expectedC.get_str(16));\n";
                 code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -3627,7 +3613,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    expectedC = (a | b);\n";
                 code += "    if (c != expectedC)\n";
                 code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_BINARY_OR_MISMATCH;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Binary OR operation does not match c=op=\" + c.get_str(16) + \" expectedC=(a|b)=\" + expectedC.get_str(16));\n";
                 code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -3679,7 +3665,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    expectedC = (a ^ b);\n";
                 code += "    if (c != expectedC)\n";
                 code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_BINARY;\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_BINARY_XOR_MISMATCH;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Binary XOR operation does not match c=op=\" + c.get_str(16) + \" expectedC=(a^b)=\" + expectedC.get_str(16));\n";
                 code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -3751,7 +3737,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    }\n";
             code += "    if (offsetScalar<0 || offsetScalar>32)\n";
             code += "    {\n";
-            code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN;\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN_OFFSET_OUT_OF_RANGE;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"MemAlign out of range offset=\" + offsetScalar.get_str());\n";
             code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -3786,7 +3772,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    _W1 = (m1 & (ScalarMask256 >> offset*8)) | ((v << (256 - offset*8)) & ScalarMask256);\n";
                 code += "    if ( (w0 != _W0) || (w1 != _W1) )\n";
                 code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN;\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN_WRITE_MISMATCH;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"MemAlign w0, w1 invalid: w0=\" + w0.get_str(16) + \" w1=\" + w1.get_str(16) + \" _W0=\" + _W0.get_str(16) + \" _W1=\" + _W1.get_str(16) + \" m0=\" + m0.get_str(16) + \" m1=\" + m1.get_str(16) + \" offset=\" + to_string(offset) + \" v=\" + v.get_str(16));\n";
                 code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -3824,7 +3810,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    _W0 = (m0 & (byteMaskOn256 >> (offset*8))) | ((v & 0xFF) << ((31-offset)*8));\n";
                 code += "    if (w0 != _W0)\n";
                 code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN;\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN_WRITE8_MISMATCH;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Error: MemAlign w0 invalid: w0=\" + w0.get_str(16) + \" _W0=\" + _W0.get_str(16) + \" m0=\" + m0.get_str(16) + \" offset=\" + to_string(offset) + \" v=\" + v.get_str(16));\n";
                 code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -3855,7 +3841,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "    _V = leftV | rightV;\n";
                 code += "    if (v != _V)\n";
                 code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN;\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN_READ_MISMATCH;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"MemAlign v invalid: v=\" + v.get_str(16) + \" _V=\" + _V.get_str(16) + \" m0=\" + m0.get_str(16) + \" m1=\" + m1.get_str(16) + \" offset=\" + to_string(offset));\n";
                 code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
@@ -4684,7 +4670,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += "        }\n";
         code += "        if (p != ctx.hashK[i].data.size())\n";
         code += "        {\n";
-        code += "            proverRequest.result = ZKR_SM_MAIN_HASHK;\n";
+        code += "            proverRequest.result = ZKR_SM_MAIN_HASHK_READ_OUT_OF_RANGE;\n";
         code += "            mainExecutor.logError(ctx, \"Reading hashK out of limits: i=\" + to_string(i) + \" p=\" + to_string(p) + \" ctx.hashK[i].data.size()=\" + to_string(ctx.hashK[i].data.size()));\n";
         code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
         code += "            return;\n";
@@ -4715,7 +4701,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += "        }\n";
         code += "        if (p != ctx.hashP[i].data.size())\n";
         code += "        {\n";
-        code += "            proverRequest.result = ZKR_SM_MAIN_HASHP;\n";
+        code += "            proverRequest.result = ZKR_SM_MAIN_HASHP_READ_OUT_OF_RANGE;\n";
         code += "            mainExecutor.logError(ctx, \"Reading hashP out of limits: i=\" + to_string(i) + \" p=\" + to_string(p) + \" ctx.hashP[i].data.size()=\" + to_string(ctx.hashP[i].data.size()));\n";
         code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
         code += "            return;\n";

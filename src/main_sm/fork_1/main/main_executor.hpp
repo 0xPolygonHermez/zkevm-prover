@@ -66,6 +66,7 @@ public:
     void initState(Context &ctx);
     void checkFinalState(Context &ctx);
     void assertOutputs(Context &ctx);
+    void logError(Context &ctx, const string &message = "");
 
 private:
     // Flush

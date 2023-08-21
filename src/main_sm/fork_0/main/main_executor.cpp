@@ -1613,7 +1613,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, fork_0::MainCommitPols
             if (smtGetResult.value != opScalar)
             {
                 cerr << "Error: Storage read does not match: smtGetResult.value=" << smtGetResult.value.get_str() << " opScalar=" << opScalar.get_str() << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                proverRequest.result = ZKR_SM_MAIN_STORAGE;
+                proverRequest.result = ZKR_SM_MAIN_STORAGE_READ_MISMATCH;
                 return;
             }
 
@@ -1733,7 +1733,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, fork_0::MainCommitPols
                 cerr << "Error: Storage write does not match" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid <<
                     " ctx.lastSWrite.newRoot: " << fr.toString(ctx.lastSWrite.newRoot[3], 16) << ":" << fr.toString(ctx.lastSWrite.newRoot[2], 16) << ":" << fr.toString(ctx.lastSWrite.newRoot[1], 16) << ":" << fr.toString(ctx.lastSWrite.newRoot[0], 16) <<
                     " oldRoot: " << fr.toString(oldRoot[3], 16) << ":" << fr.toString(oldRoot[2], 16) << ":" << fr.toString(oldRoot[1], 16) << ":" << fr.toString(oldRoot[0], 16) << endl;
-                proverRequest.result = ZKR_SM_MAIN_STORAGE;
+                proverRequest.result = ZKR_SM_MAIN_STORAGE_WRITE_MISMATCH;
                 return;
             }
 
@@ -1745,7 +1745,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, fork_0::MainCommitPols
                  !fr.equal(ctx.lastSWrite.newRoot[3], fea[3]) )
             {
                 cerr << "Error: Storage write does not match: ctx.lastSWrite.newRoot=" << fea2string(fr, ctx.lastSWrite.newRoot) << " op=" << fea << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                proverRequest.result = ZKR_SM_MAIN_STORAGE;
+                proverRequest.result = ZKR_SM_MAIN_STORAGE_WRITE_MISMATCH;
                 return;
             }
 
