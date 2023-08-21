@@ -59,6 +59,8 @@ public:
     uint64_t lastCtxUsedOffset;
     uint64_t isCreateOffset;
     uint64_t effectivePercentageRLPOffset;
+    uint64_t calldataCTXOffset;
+    uint64_t calldataOffsetOffset;
 
     /* Constants */
     RomConstants constants;
