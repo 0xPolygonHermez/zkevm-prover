@@ -13,7 +13,7 @@
 
 DatabaseMTAssociativeCache::DatabaseMTAssociativeCache()
 {
-    nKeyBits = 0;
+    log2IndexesSize = 0;
     indexesSize = 0;
     log2CacheSize = 0;
     cacheSize = 0;
@@ -26,9 +26,9 @@ DatabaseMTAssociativeCache::DatabaseMTAssociativeCache()
     name = "";
 };
 
-DatabaseMTAssociativeCache::DatabaseMTAssociativeCache(int nKeyBits_, int cacheSize_, string name_)
+DatabaseMTAssociativeCache::DatabaseMTAssociativeCache(int log2IndexesSize_, int cacheSize_, string name_)
 {
-    postConstruct(nKeyBits_, cacheSize_, name_);
+    postConstruct(log2IndexesSize_, cacheSize_, name_);
 };
 
 DatabaseMTAssociativeCache::~DatabaseMTAssociativeCache()
@@ -42,16 +42,16 @@ DatabaseMTAssociativeCache::~DatabaseMTAssociativeCache()
 
 };
 
-void DatabaseMTAssociativeCache::postConstruct(int nKeyBits_, int log2CacheSize_, string name_)
+void DatabaseMTAssociativeCache::postConstruct(int log2IndexesSize_, int log2CacheSize_, string name_)
 {
     lock_guard<recursive_mutex> guard(mlock);
-    nKeyBits = nKeyBits_;
-    if (nKeyBits_ > 32)
+    log2IndexesSize = log2IndexesSize_;
+    if (log2IndexesSize_ > 32)
     {
-        zklog.error("DatabaseMTAssociativeCache::DatabaseMTAssociativeCache() nKeyBits_ > 32");
+        zklog.error("DatabaseMTAssociativeCache::DatabaseMTAssociativeCache() log2IndexesSize_ > 32");
         exitProcess();
     }
-    indexesSize = 1 << nKeyBits;
+    indexesSize = 1 << log2IndexesSize;
 
     log2CacheSize = log2CacheSize_;
     if (log2CacheSize_ > 32)
@@ -112,10 +112,11 @@ void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], cons
         {
             write = true;
             indexes[tableIndex] = currentCacheIndex;
-            cacheIndex = currentCacheIndex & cacheMask;
+            currentCacheIndex = (currentCacheIndex == UINT32_MAX) ? 0 : (currentCacheIndex + 1);
+
+            cacheIndex = indexes[tableIndex] & cacheMask;
             cacheIndexKey = cacheIndex * 4;
             cacheIndexValue = cacheIndex * 12;
-            currentCacheIndex = (currentCacheIndex == UINT32_MAX) ? 0 : (currentCacheIndex + 1); 
         }
         else
         {
@@ -222,8 +223,7 @@ void DatabaseMTAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIndexes)
     //
     // find a slot into my indexes
     //
-    uint32_t inputCacheIndex = (uint32_t)(inputRawCacheIndex & cacheMask);
-    Goldilocks::Element *inputKey = &keys[inputCacheIndex * 4];
+    Goldilocks::Element *inputKey = &keys[(inputRawCacheIndex & cacheMask) * 4];
     uint32_t minRawCacheIndex = UINT32_MAX;
     int pos = -1;
 
@@ -238,6 +238,7 @@ void DatabaseMTAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIndexes)
         }
         else
         {
+            //consider minimum not used rawCacheIndex_
             bool used = false;
             for(int k=0; k<iters; k++){
                 if(usedRawCacheIndexes[k] == rawCacheIndex_){
@@ -257,9 +258,9 @@ void DatabaseMTAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIndexes)
     {
         zklog.error("forcedInsertion() could not continue the recursion: " + to_string(inputRawCacheIndex));
         exitProcess();
-    }  
+    } 
     indexes[(uint32_t)(inputKey[pos].fe & indexesMask)] = inputRawCacheIndex;
-    usedRawCacheIndexes[iters] = minRawCacheIndex;
+    usedRawCacheIndexes[iters] = minRawCacheIndex; //new cache element to add in the indexes table
     forcedInsertion(usedRawCacheIndexes, iters);
     
 }
@@ -270,8 +271,7 @@ bool DatabaseMTAssociativeCache::findKey(Goldilocks::Element (&key)[4], vector<G
     attempts++; 
     for (int i = 0; i < 4; i++)
     {
-        uint32_t tableIndex = (uint32_t)(key[i].fe & indexesMask);
-        uint32_t cacheIndexRaw = (uint32_t)(indexes[tableIndex]);
+        uint32_t cacheIndexRaw = indexes[key[i].fe & indexesMask];
         if (emptyCacheSlot(cacheIndexRaw)) continue;
         
         uint32_t cacheIndex = cacheIndexRaw  & cacheMask;
