@@ -187,7 +187,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     {
         if (!bProcessBatch)
         {
-            proverRequest.result = ZKR_SM_MAIN_BATCH_INVALID_INPUT;
+            proverRequest.result = ZKR_SM_MAIN_INVALID_NO_COUNTERS;
             logError(ctx, "MainExecutor::execute() found proverRequest.bNoCounters=true and bProcessBatch=false");
             HashDBClientFactory::freeHashDBClient(pHashDB);
             return;
@@ -671,7 +671,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if ( addrRel >= ( ( (rom.line[zkPC].isMem==1) ? 0x20000 : 0x10000) - 2048 ) )
 
                 {
-                    proverRequest.result = ZKR_SM_MAIN_ADDRESS;
+                    proverRequest.result = ZKR_SM_MAIN_ADDRESS_OUT_OF_RANGE;
                     logError(ctx, "addrRel too big addrRel=" + to_string(addrRel));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
@@ -681,7 +681,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             {
                 if (addrRel>=0x20000 || ((rom.line[zkPC].isMem==1) && (addrRel >= 0x10000)))
                 {
-                    proverRequest.result = ZKR_SM_MAIN_ADDRESS;
+                    proverRequest.result = ZKR_SM_MAIN_ADDRESS_OUT_OF_RANGE;
                     logError(ctx, "addrRel too big addrRel=" + to_string(addrRel));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
@@ -691,7 +691,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             // If addrRel is negative, fail
             if (addrRel < 0)
             {
-                proverRequest.result = ZKR_SM_MAIN_ADDRESS;
+                proverRequest.result = ZKR_SM_MAIN_ADDRESS_NEGATIVE;
                 logError(ctx, "addrRel<0 addrRel=" + to_string(addrRel));
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
@@ -834,7 +834,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                     if  ( !fr.isZero(pols.A5[i]) || !fr.isZero(pols.A6[i]) || !fr.isZero(pols.A7[i]) || !fr.isZero(pols.B2[i]) || !fr.isZero(pols.B3[i]) || !fr.isZero(pols.B4[i]) || !fr.isZero(pols.B5[i])|| !fr.isZero(pols.B6[i])|| !fr.isZero(pols.B7[i]) )
                     {
-                        proverRequest.result = ZKR_SM_MAIN_STORAGE;
+                        proverRequest.result = ZKR_SM_MAIN_STORAGE_INVALID_KEY;
                         logError(ctx, "Storage read free in found non-zero A-B storage registers");
                         HashDBClientFactory::freeHashDBClient(pHashDB);
                         return;
@@ -956,7 +956,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                     if  ( !fr.isZero(pols.A5[i]) || !fr.isZero(pols.A6[i]) || !fr.isZero(pols.A7[i]) || !fr.isZero(pols.B2[i]) || !fr.isZero(pols.B3[i]) || !fr.isZero(pols.B4[i]) || !fr.isZero(pols.B5[i])|| !fr.isZero(pols.B6[i])|| !fr.isZero(pols.B7[i]) )
                     {
-                        proverRequest.result = ZKR_SM_MAIN_STORAGE;
+                        proverRequest.result = ZKR_SM_MAIN_STORAGE_INVALID_KEY;
                         logError(ctx, "Storage write free in found non-zero A-B registers");
                         HashDBClientFactory::freeHashDBClient(pHashDB);
                         return;
@@ -1098,7 +1098,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         size = fr.toU64(pols.D0[i]);
                         if (size>32)
                         {
-                            proverRequest.result = ZKR_SM_MAIN_HASHK;
+                            proverRequest.result = ZKR_SM_MAIN_HASHK_SIZE_OUT_OF_RANGE;
                             logError(ctx, "Invalid size>32 for hashK 1: pols.D0[i]=" + fr.toString(pols.D0[i], 16) + " size=" + to_string(size));
                             HashDBClientFactory::freeHashDBClient(pHashDB);
                             return;
@@ -1110,7 +1110,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     fr.toS64(iPos, pols.HASHPOS[i]);
                     if (iPos < 0)
                     {
-                        proverRequest.result = ZKR_SM_MAIN_HASHK;
+                        proverRequest.result = ZKR_SM_MAIN_HASHK_POSITION_NEGATIVE;
                         logError(ctx, "Invalid pos<0 for HashK 1: pols.HASHPOS[i]=" + fr.toString(pols.HASHPOS[i], 16) + " pos=" + to_string(iPos));
                         HashDBClientFactory::freeHashDBClient(pHashDB);
                         return;
@@ -1120,7 +1120,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // Check that pos+size do not exceed data size
                     if ( (pos+size) > hashKIterator->second.data.size())
                     {
-                        proverRequest.result = ZKR_SM_MAIN_HASHK;
+                        proverRequest.result = ZKR_SM_MAIN_HASHK_POSITION_PLUS_SIZE_OUT_OF_RANGE;
                         logError(ctx, "HashK 1 invalid size of hash: pos=" + to_string(pos) + " + size=" + to_string(size) + " > data.size=" + to_string(hashKIterator->second.data.size()));
                         HashDBClientFactory::freeHashDBClient(pHashDB);
                         return;
@@ -1151,7 +1151,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     hashKIterator = ctx.hashK.find(addr);
                     if (hashKIterator == ctx.hashK.end())
                     {
-                        proverRequest.result = ZKR_SM_MAIN_HASHK;
+                        proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_ADDRESS_NOT_FOUND;
                         logError(ctx, "HashKDigest 1: digest not defined for addr=" + to_string(addr));
                         HashDBClientFactory::freeHashDBClient(pHashDB);
                         return;
@@ -1160,7 +1160,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // If digest was not calculated, this is an error
                     if (!hashKIterator->second.lenCalled)
                     {
-                        proverRequest.result = ZKR_SM_MAIN_HASHK;
+                        proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_NOT_COMPLETED;
                         logError(ctx, "HashKDigest 1: digest not calculated for addr=" + to_string(addr) + ".  Call hashKLen to finish digest.");
                         HashDBClientFactory::freeHashDBClient(pHashDB);
                         return;
@@ -1198,7 +1198,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         size = fr.toU64(pols.D0[i]);
                         if (size>32)
                         {
-                            proverRequest.result = ZKR_SM_MAIN_HASHP;
+                            proverRequest.result = ZKR_SM_MAIN_HASHP_SIZE_OUT_OF_RANGE;
                             logError(ctx, "Invalid size>32 for hashP 1: pols.D0[i]=" + fr.toString(pols.D0[i], 16) + " size=" + to_string(size));
                             HashDBClientFactory::freeHashDBClient(pHashDB);
                             return;
@@ -1210,7 +1210,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     fr.toS64(iPos, pols.HASHPOS[i]);
                     if (iPos < 0)
                     {
-                        proverRequest.result = ZKR_SM_MAIN_HASHP;
+                        proverRequest.result = ZKR_SM_MAIN_HASHP_POSITION_NEGATIVE;
                         logError(ctx, "Invalid pos<0 for HashP 1: pols.HASHPOS[i]=" + fr.toString(pols.HASHPOS[i], 16) + " pos=" + to_string(iPos));
                         HashDBClientFactory::freeHashDBClient(pHashDB);
                         return;
@@ -1220,7 +1220,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // Check that pos+size do not exceed data size
                     if ( (pos+size) > hashPIterator->second.data.size())
                     {
-                        proverRequest.result = ZKR_SM_MAIN_HASHP;
+                        proverRequest.result = ZKR_SM_MAIN_HASHP_POSITION_PLUS_SIZE_OUT_OF_RANGE;
                         logError(ctx, "HashP 1 invalid size of hash: pos=" + to_string(pos) + " size=" + to_string(size) + " data.size=" + to_string(ctx.hashP[addr].data.size()));
                         HashDBClientFactory::freeHashDBClient(pHashDB);
                         return;
@@ -1247,7 +1247,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     hashPIterator = ctx.hashP.find(addr);
                     if (hashPIterator == ctx.hashP.end())
                     {
-                        proverRequest.result = ZKR_SM_MAIN_HASHP;
+                        proverRequest.result = ZKR_SM_MAIN_HASHPDIGEST_ADDRESS_NOT_FOUND;
                         logError(ctx, "HashPDigest 1: digest not defined addr=" + to_string(addr));
                         HashDBClientFactory::freeHashDBClient(pHashDB);
                         return;
@@ -1256,7 +1256,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // If digest was not calculated, this is an error
                     if (!hashPIterator->second.lenCalled)
                     {
-                        proverRequest.result = ZKR_SM_MAIN_HASHP;
+                        proverRequest.result = ZKR_SM_MAIN_HASHPDIGEST_NOT_COMPLETED;
                         logError(ctx, "HashPDigest 1: digest not calculated.  Call hashPLen to finish digest.");
                         HashDBClientFactory::freeHashDBClient(pHashDB);
                         return;
@@ -1477,7 +1477,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     }
                     if (offsetScalar<0 || offsetScalar>32)
                     {
-                        proverRequest.result = ZKR_SM_MAIN_MEMALIGN;
+                        proverRequest.result = ZKR_SM_MAIN_MEMALIGN_OFFSET_OUT_OF_RANGE;
                         logError(ctx, "MemAlign out of range offset=" + offsetScalar.get_str());
                         HashDBClientFactory::freeHashDBClient(pHashDB);
                         return;
@@ -1496,8 +1496,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 // Check that one and only one instruction has been requested
                 if (nHits != 1)
                 {
+                    proverRequest.result = ZKR_SM_MAIN_MULTIPLE_FREEIN;
                     logError(ctx, "Empty freeIn without just one instruction: nHits=" + to_string(nHits));
-                    exitProcess();
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
                 }
             }
             // If freeInTag.op!="", then evaluate the requested command (recursively)
@@ -1775,7 +1777,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             if  ( !fr.isZero(pols.A5[i]) || !fr.isZero(pols.A6[i]) || !fr.isZero(pols.A7[i]) || !fr.isZero(pols.B2[i]) || !fr.isZero(pols.B3[i]) || !fr.isZero(pols.B4[i]) || !fr.isZero(pols.B5[i])|| !fr.isZero(pols.B6[i])|| !fr.isZero(pols.B7[i]) )
             {
-                proverRequest.result = ZKR_SM_MAIN_STORAGE;
+                proverRequest.result = ZKR_SM_MAIN_STORAGE_INVALID_KEY;
                 logError(ctx, "Storage read instruction found non-zero A-B registers");
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
@@ -1901,7 +1903,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             if (smtGetResult.value != opScalar)
             {
-                proverRequest.result = ZKR_SM_MAIN_STORAGE;
+                proverRequest.result = ZKR_SM_MAIN_STORAGE_READ_MISMATCH;
                 logError(ctx, "Storage read does not match: smtGetResult.value=" + smtGetResult.value.get_str() + " opScalar=" + opScalar.get_str());
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
@@ -1954,7 +1956,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                 if  ( !fr.isZero(pols.A5[i]) || !fr.isZero(pols.A6[i]) || !fr.isZero(pols.A7[i]) || !fr.isZero(pols.B2[i]) || !fr.isZero(pols.B3[i]) || !fr.isZero(pols.B4[i]) || !fr.isZero(pols.B5[i])|| !fr.isZero(pols.B6[i])|| !fr.isZero(pols.B7[i]) )
                 {
-                    proverRequest.result = ZKR_SM_MAIN_STORAGE;
+                    proverRequest.result = ZKR_SM_MAIN_STORAGE_INVALID_KEY;
                     logError(ctx, "Storage write instruction found non-zero A-B registers");
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
@@ -2098,7 +2100,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                  !fr.equal(ctx.lastSWrite.newRoot[2], oldRoot[2]) ||
                  !fr.equal(ctx.lastSWrite.newRoot[3], oldRoot[3]) )
             {
-                proverRequest.result = ZKR_SM_MAIN_STORAGE;
+                proverRequest.result = ZKR_SM_MAIN_STORAGE_WRITE_MISMATCH;
                 logError(ctx, "Storage write does not match: ctx.lastSWrite.newRoot: " + fr.toString(ctx.lastSWrite.newRoot[3], 16) + ":" + fr.toString(ctx.lastSWrite.newRoot[2], 16) + ":" + fr.toString(ctx.lastSWrite.newRoot[1], 16) + ":" + fr.toString(ctx.lastSWrite.newRoot[0], 16) +
                     " oldRoot: " + fr.toString(oldRoot[3], 16) + ":" + fr.toString(oldRoot[2], 16) + ":" + fr.toString(oldRoot[1], 16) + ":" + fr.toString(oldRoot[0], 16));
                 HashDBClientFactory::freeHashDBClient(pHashDB);
@@ -2112,7 +2114,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                  !fr.equal(ctx.lastSWrite.newRoot[2], fea[2]) ||
                  !fr.equal(ctx.lastSWrite.newRoot[3], fea[3]) )
             {
-                proverRequest.result = ZKR_SM_MAIN_STORAGE;
+                proverRequest.result = ZKR_SM_MAIN_STORAGE_WRITE_MISMATCH;
                 logError(ctx, "Storage write does not match: ctx.lastSWrite.newRoot=" + fea2string(fr, ctx.lastSWrite.newRoot) + " op=" + fea2string(fr, fea));
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
@@ -2159,7 +2161,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 size = fr.toU64(pols.D0[i]);
                 if (size>32)
                 {
-                    proverRequest.result = ZKR_SM_MAIN_HASHK;
+                    proverRequest.result = ZKR_SM_MAIN_HASHK_SIZE_OUT_OF_RANGE;
                     logError(ctx, "Invalid size>32 for hashK 2: pols.D0[i]=" + fr.toString(pols.D0[i], 16));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
@@ -2171,7 +2173,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             fr.toS64(iPos, pols.HASHPOS[i]);
             if (iPos < 0)
             {
-                proverRequest.result = ZKR_SM_MAIN_HASHK;
+                proverRequest.result = ZKR_SM_MAIN_HASHK_POSITION_NEGATIVE;
                 logError(ctx, string("Invalid pos<0 for HashK 2: pols.HASHPOS[i]=") + fr.toString(pols.HASHPOS[i], 16) + " pos=" + to_string(iPos));
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
@@ -2200,7 +2202,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 else if (hashKIterator->second.data.size() < (pos+j))
                 {
-                    proverRequest.result = ZKR_SM_MAIN_HASHK;
+                    proverRequest.result = ZKR_SM_MAIN_HASHK_POSITION_PLUS_SIZE_OUT_OF_RANGE;
                     logError(ctx, "HashK 2: trying to insert data in a position:" + to_string(pos+j) + " higher than current data size:" + to_string(ctx.hashK[addr].data.size()));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
@@ -2211,7 +2213,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     bh = hashKIterator->second.data[pos+j];
                     if (bm != bh)
                     {
-                        proverRequest.result = ZKR_SM_MAIN_HASHK;
+                        proverRequest.result = ZKR_SM_MAIN_HASHK_VALUE_MISMATCH;
                         logError(ctx, "HashK 2 bytes do not match: addr=" + to_string(addr) + " pos+j=" + to_string(pos+j) + " is bm=" + to_string(bm) + " and it should be bh=" + to_string(bh));
                         HashDBClientFactory::freeHashDBClient(pHashDB);
                         return;
@@ -2223,7 +2225,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             mpz_class paddingA = a >> (size*8);
             if (paddingA != 0)
             {
-                proverRequest.result = ZKR_SM_MAIN_HASHK;
+                proverRequest.result = ZKR_SM_MAIN_HASHK_PADDING_MISMATCH;
                 logError(ctx, "HashK 2 incoherent size=" + to_string(size) + " a=" + a.get_str(16) + " paddingA=" + paddingA.get_str(16));
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
@@ -2236,7 +2238,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             {
                 if (readsIterator->second != size)
                 {
-                    proverRequest.result = ZKR_SM_MAIN_HASHK;
+                    proverRequest.result = ZKR_SM_MAIN_HASHK_SIZE_MISMATCH;
                     logError(ctx, "HashK 2 different read sizes in the same position addr=" + to_string(addr) + " pos=" + to_string(pos) + " ctx.hashK[addr].reads[pos]=" + to_string(ctx.hashK[addr].reads[pos]) + " size=" + to_string(size));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
@@ -2274,7 +2276,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 // Check that length = 0
                 if (lm != 0)
                 {
-                    proverRequest.result = ZKR_SM_MAIN_HASHK;
+                    proverRequest.result = ZKR_SM_MAIN_HASHKLEN_LENGTH_MISMATCH;
                     logError(ctx, "HashKLen 2 hashK[addr] is empty but lm is not 0 addr=" + to_string(addr) + " lm=" + to_string(lm));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
@@ -2285,14 +2287,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 ctx.hashK[addr] = hashValue;
                 hashKIterator = ctx.hashK.find(addr);
                 zkassert(hashKIterator != ctx.hashK.end());
-
-                // Calculate the hash of an empty string
-                keccak256(hashKIterator->second.data.data(), hashKIterator->second.data.size(), hashKIterator->second.digest);
             }
 
             if (ctx.hashK[addr].lenCalled)
             {
-                proverRequest.result = ZKR_SM_MAIN_HASHK;
+                proverRequest.result = ZKR_SM_MAIN_HASHKLEN_CALLED_TWICE;
                 logError(ctx, "HashKLen 2 called more than once addr=" + to_string(addr));
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
@@ -2302,7 +2301,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             uint64_t lh = hashKIterator->second.data.size();
             if (lm != lh)
             {
-                proverRequest.result = ZKR_SM_MAIN_HASHK;
+                proverRequest.result = ZKR_SM_MAIN_HASHKLEN_LENGTH_MISMATCH;
                 logError(ctx, "HashKLen 2 length does not match addr=" + to_string(addr) + " is lm=" + to_string(lm) + " and it should be lh=" + to_string(lh));
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
@@ -2342,7 +2341,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             hashKIterator = ctx.hashK.find(addr);
             if (hashKIterator == ctx.hashK.end())
             {
-                proverRequest.result = ZKR_SM_MAIN_HASHK;
+                proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_NOT_FOUND;
                 logError(ctx, "HashKDigest 2 could not find entry for addr=" + to_string(addr));
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
@@ -2360,7 +2359,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             if (dg != hashKIterator->second.digest)
             {
-                proverRequest.result = ZKR_SM_MAIN_HASHK;
+                proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_DIGEST_MISMATCH;
                 logError(ctx, "HashKDigest 2: Digest does not match op");
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
@@ -2368,7 +2367,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             if (ctx.hashK[addr].digestCalled)
             {
-                proverRequest.result = ZKR_SM_MAIN_HASHK;
+                proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_CALLED_TWICE;
                 logError(ctx, "HashKDigest 2 called more than once addr=" + to_string(addr));
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
@@ -2416,7 +2415,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 size = fr.toU64(pols.D0[i]);
                 if (size>32)
                 {
-                    proverRequest.result = ZKR_SM_MAIN_HASHP;
+                    proverRequest.result = ZKR_SM_MAIN_HASHP_SIZE_OUT_OF_RANGE;
                     logError(ctx, "Invalid size>32 for hashP 2: pols.D0[i]=" + fr.toString(pols.D0[i], 16) + " size=" + to_string(size));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
@@ -2428,7 +2427,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             fr.toS64(iPos, pols.HASHPOS[i]);
             if (iPos < 0)
             {
-                proverRequest.result = ZKR_SM_MAIN_HASHP;
+                proverRequest.result = ZKR_SM_MAIN_HASHP_POSITION_NEGATIVE;
                 logError(ctx, "Invalid pos<0 for HashP 2: pols.HASHPOS[i]=" + fr.toString(pols.HASHPOS[i], 16) + " pos=" + to_string(iPos));
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
@@ -2456,7 +2455,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 else if (hashPIterator->second.data.size() < (pos+j))
                 {
-                    proverRequest.result = ZKR_SM_MAIN_HASHP;
+                    proverRequest.result = ZKR_SM_MAIN_HASHP_POSITION_PLUS_SIZE_OUT_OF_RANGE;
                     logError(ctx, "HashP 2: trying to insert data in a position:" + to_string(pos+j) + " higher than current data size:" + to_string(ctx.hashP[addr].data.size()));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
@@ -2467,7 +2466,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     bh = hashPIterator->second.data[pos+j];
                     if (bm != bh)
                     {
-                        proverRequest.result = ZKR_SM_MAIN_HASHP;
+                        proverRequest.result = ZKR_SM_MAIN_HASHP_VALUE_MISMATCH;
                         logError(ctx, "HashP 2 bytes do not match: addr=" + to_string(addr) + " pos+j=" + to_string(pos+j) + " is bm=" + to_string(bm) + " and it should be bh=" + to_string(bh));
                         HashDBClientFactory::freeHashDBClient(pHashDB);
                         return;
@@ -2479,7 +2478,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             mpz_class paddingA = a >> (size*8);
             if (paddingA != 0)
             {
-                proverRequest.result = ZKR_SM_MAIN_HASHP;
+                proverRequest.result = ZKR_SM_MAIN_HASHP_PADDING_MISMATCH;
                 logError(ctx, "HashP2 incoherent size=" + to_string(size) + " a=" + a.get_str(16) + " paddingA=" + paddingA.get_str(16));
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
@@ -2492,7 +2491,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             {
                 if (readsIterator->second != size)
                 {
-                    proverRequest.result = ZKR_SM_MAIN_HASHP;
+                    proverRequest.result = ZKR_SM_MAIN_HASHP_SIZE_MISMATCH;
                     logError(ctx, "HashP 2 diferent read sizes in the same position addr=" + to_string(addr) + " pos=" + to_string(pos));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
@@ -2526,7 +2525,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 // Check that length = 0
                 if (lm != 0)
                 {
-                    proverRequest.result = ZKR_SM_MAIN_HASHP;
+                    proverRequest.result = ZKR_SM_MAIN_HASHPLEN_LENGTH_MISMATCH;
                     logError(ctx, "HashPLen 2 hashP[addr] is empty but lm is not 0 addr=" + to_string(addr) + " lm=" + to_string(lm));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
@@ -2537,14 +2536,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 ctx.hashP[addr] = hashValue;
                 hashPIterator = ctx.hashP.find(addr);
                 zkassert(hashPIterator != ctx.hashP.end());
-
-                // Calculate the hash of an empty string
-                keccak256(hashPIterator->second.data.data(), hashPIterator->second.data.size(), hashPIterator->second.digest);
             }
 
             if (ctx.hashP[addr].lenCalled)
             {
-                proverRequest.result = ZKR_SM_MAIN_HASHP;
+                proverRequest.result = ZKR_SM_MAIN_HASHPLEN_CALLED_TWICE;
                 logError(ctx, "HashPLen 2 called more than once addr=" + to_string(addr));
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
@@ -2554,21 +2550,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             uint64_t lh = hashPIterator->second.data.size();
             if (lm != lh)
             {
-                proverRequest.result = ZKR_SM_MAIN_HASHP;
+                proverRequest.result = ZKR_SM_MAIN_HASHPLEN_LENGTH_MISMATCH;
                 logError(ctx, "HashPLen 2 does not match match addr=" + to_string(addr) + " is lm=" + to_string(lm) + " and it should be lh=" + to_string(lh));
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
             }
             if (!hashPIterator->second.digestCalled)
             {
-                if (hashPIterator->second.data.size() == 0)
-                {
-                    proverRequest.result = ZKR_SM_MAIN_HASHP;
-                    logError(ctx, "HashPLen 2 found data empty");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-
                 // Get a local copy of the bytes vector
                 vector<uint8_t> data = hashPIterator->second.data;
 
@@ -2680,7 +2668,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             if (ctx.hashP[addr].digestCalled)
             {
-                proverRequest.result = ZKR_SM_MAIN_HASHP;
+                proverRequest.result = ZKR_SM_MAIN_HASHPDIGEST_CALLED_TWICE;
                 logError(ctx, "HashPDigest 2 called more than once addr=" + to_string(addr));
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
@@ -2692,7 +2680,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             // Check that digest equals op
             if (dg != hashPIterator->second.digest)
             {
-                proverRequest.result = ZKR_SM_MAIN_HASHP;
+                proverRequest.result = ZKR_SM_MAIN_HASHPDIGEST_DIGEST_MISMATCH;
                 logError(ctx, "HashPDigest 2: ctx.hashP[addr].digest=" + ctx.hashP[addr].digest.get_str(16) + " does not match op=" + dg.get_str(16));
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
@@ -2768,7 +2756,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 // Check the condition
                 if ( (A*B) + C != (D<<256) + op )
                 {
-                    proverRequest.result = ZKR_SM_MAIN_ARITH;
+                    proverRequest.result = ZKR_SM_MAIN_ARITH_MISMATCH;
                     mpz_class left = (A*B) + C;
                     mpz_class right = (D<<256) + op;
                     logError(ctx, "Arithmetic does not match: (A*B) + C = " + left.get_str(16) + ", (D<<256) + op = " + right.get_str(16));
@@ -2872,7 +2860,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 zkresult r = AddPointEc(ctx, dbl, fecX1, fecY1, dbl?fecX1:fecX2, dbl?fecY1:fecY2, fecX3, fecY3);
                 if (r != ZKR_SUCCESS)
                 {
-                    proverRequest.result = ZKR_SM_MAIN_ARITH;
+                    proverRequest.result = r;
                     logError(ctx, "Failed calling AddPointEc() in arith operation");
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
@@ -2889,7 +2877,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                 if (!x3eq || !y3eq)
                 {
-                    proverRequest.result = ZKR_SM_MAIN_ARITH;
+                    proverRequest.result = ZKR_SM_MAIN_ARITH_ECRECOVER_MISMATCH;
                     logError(ctx, string("Arithmetic curve ") + (dbl?"dbl":"add") + " point does not match" +
                         " x1=" + x1.get_str() +
                         " y1=" + y1.get_str() +
@@ -2959,7 +2947,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 expectedC = (a + b) & ScalarMask256;
                 if (c != expectedC)
                 {
-                    proverRequest.result = ZKR_SM_MAIN_BINARY;
+                    proverRequest.result = ZKR_SM_MAIN_BINARY_ADD_MISMATCH;
                     logError(ctx, "Binary ADD operation does not match c=op=" + c.get_str(16) + " expectedC=(a + b) & ScalarMask256=" + expectedC.get_str(16));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
@@ -3010,7 +2998,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 expectedC = (a - b + ScalarTwoTo256) & ScalarMask256;
                 if (c != expectedC)
                 {
-                    proverRequest.result = ZKR_SM_MAIN_BINARY;
+                    proverRequest.result = ZKR_SM_MAIN_BINARY_SUB_MISMATCH;
                     logError(ctx, "Binary SUB operation does not match c=op=" + c.get_str(16) + " expectedC=(a - b + ScalarTwoTo256) & ScalarMask256=" + expectedC.get_str(16));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
@@ -3061,7 +3049,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 expectedC = (a < b);
                 if (c != expectedC)
                 {
-                    proverRequest.result = ZKR_SM_MAIN_BINARY;
+                    proverRequest.result = ZKR_SM_MAIN_BINARY_LT_MISMATCH;
                     logError(ctx, "Binary LY operation does not match c=op=" + c.get_str(16) + " expectedC=(a < b)=" + expectedC.get_str(16));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
@@ -3118,7 +3106,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 expectedC = (_a < _b);
                 if (c != expectedC)
                 {
-                    proverRequest.result = ZKR_SM_MAIN_BINARY;
+                    proverRequest.result = ZKR_SM_MAIN_BINARY_SLT_MISMATCH;
                     logError(ctx, "Binary SLT operation does not match a=" + a.get_str(16) + " b=" + b.get_str(16) + " c=" + c.get_str(16) + " _a=" + _a.get_str(16) + " _b=" + _b.get_str(16) + " expectedC=" + expectedC.get_str(16));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
@@ -3169,7 +3157,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 expectedC = (a == b);
                 if (c != expectedC)
                 {
-                    proverRequest.result = ZKR_SM_MAIN_BINARY;
+                    proverRequest.result = ZKR_SM_MAIN_BINARY_EQ_MISMATCH;
                     logError( ctx, "Binary EQ operation does not match c=op=" + c.get_str(16) + " expectedC=(a==b)=" + expectedC.get_str(16));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
@@ -3220,7 +3208,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 expectedC = (a & b);
                 if (c != expectedC)
                 {
-                    proverRequest.result = ZKR_SM_MAIN_BINARY;
+                    proverRequest.result = ZKR_SM_MAIN_BINARY_AND_MISMATCH;
                     logError(ctx, "Binary AND operation does not match c=op=" + c.get_str(16) + " expectedC=(a&b)=" + expectedC.get_str(16));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
@@ -3274,7 +3262,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 expectedC = (a | b);
                 if (c != expectedC)
                 {
-                    proverRequest.result = ZKR_SM_MAIN_BINARY;
+                    proverRequest.result = ZKR_SM_MAIN_BINARY_OR_MISMATCH;
                     logError(ctx, "Binary OR operation does not match c=op=" + c.get_str(16) + " expectedC=(a|b)=" + expectedC.get_str(16));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
@@ -3323,7 +3311,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 expectedC = (a ^ b);
                 if (c != expectedC)
                 {
-                    proverRequest.result = ZKR_SM_MAIN_BINARY;
+                    proverRequest.result = ZKR_SM_MAIN_BINARY_XOR_MISMATCH;
                     logError(ctx, "Binary XOR operation does not match c=op=" + c.get_str(16) + " expectedC=(a^b)=" + expectedC.get_str(16));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
@@ -3345,10 +3333,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             else
             {
-                proverRequest.result = ZKR_SM_MAIN_BINARY;
                 logError(ctx, "Invalid binary operation opcode=" + rom.line[zkPC].binOpcode);
-                HashDBClientFactory::freeHashDBClient(pHashDB);
-                return;
+                exitProcess();
             }
             pols.bin[i] = fr.one();
         }
@@ -3390,7 +3376,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             if (offsetScalar<0 || offsetScalar>32)
             {
-                proverRequest.result = ZKR_SM_MAIN_MEMALIGN;
+                proverRequest.result = ZKR_SM_MAIN_MEMALIGN_OFFSET_OUT_OF_RANGE;
                 logError(ctx, "MemAlign out of range offset=" + offsetScalar.get_str());
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
@@ -3423,7 +3409,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 _W1 = (m1 & (ScalarMask256 >> offset*8)) | ((v << (256 - offset*8)) & ScalarMask256);
                 if ( (w0 != _W0) || (w1 != _W1) )
                 {
-                    proverRequest.result = ZKR_SM_MAIN_MEMALIGN;
+                    proverRequest.result = ZKR_SM_MAIN_MEMALIGN_WRITE_MISMATCH;
                     logError(ctx, "MemAlign w0, w1 invalid: w0=" + w0.get_str(16) + " w1=" + w1.get_str(16) + " _W0=" + _W0.get_str(16) + " _W1=" + _W1.get_str(16) + " m0=" + m0.get_str(16) + " m1=" + m1.get_str(16) + " offset=" + to_string(offset) + " v=" + v.get_str(16));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
@@ -3460,7 +3446,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 _W0 = (m0 & (byteMaskOn256 >> (offset*8))) | ((v & 0xFF) << ((31-offset)*8));
                 if (w0 != _W0)
                 {
-                    proverRequest.result = ZKR_SM_MAIN_MEMALIGN;
+                    proverRequest.result = ZKR_SM_MAIN_MEMALIGN_WRITE8_MISMATCH;
                     logError(ctx, "MemAlign w0 invalid: w0=" + w0.get_str(16) + " _W0=" + _W0.get_str(16) + " m0=" + m0.get_str(16) + " offset=" + to_string(offset) + " v=" + v.get_str(16));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
@@ -3492,7 +3478,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 _V = leftV | rightV;
                 if (v != _V)
                 {
-                    proverRequest.result = ZKR_SM_MAIN_MEMALIGN;
+                    proverRequest.result = ZKR_SM_MAIN_MEMALIGN_READ_MISMATCH;
                     logError(ctx, "MemAlign v invalid: v=" + v.get_str(16) + " _V=" + _V.get_str(16) + " m0=" + m0.get_str(16) + " m1=" + m1.get_str(16) + " offset=" + to_string(offset));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
@@ -4299,7 +4285,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             if (p != ctx.hashK[i].data.size())
             {
-                proverRequest.result = ZKR_SM_MAIN_HASHK;
+                proverRequest.result = ZKR_SM_MAIN_HASHK_READ_OUT_OF_RANGE;
                 logError(ctx, "Reading hashK out of limits: i=" + to_string(i) + " p=" + to_string(p) + " ctx.hashK[i].data.size()=" + to_string(ctx.hashK[i].data.size()));
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
@@ -4330,7 +4316,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             if (p != ctx.hashP[i].data.size())
             {
-                proverRequest.result = ZKR_SM_MAIN_HASHP;
+                proverRequest.result = ZKR_SM_MAIN_HASHP_READ_OUT_OF_RANGE;
                 logError(ctx, "Reading hashP out of limits: i=" + to_string(i) + " p=" + to_string(p) + " ctx.hashP[i].data.size()=" + to_string(ctx.hashP[i].data.size()));
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
