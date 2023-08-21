@@ -22,7 +22,6 @@ class DatabaseMTAssociativeCache
         uint32_t *indexes;
         Goldilocks::Element *keys;
         Goldilocks::Element *values;
-        bool *isLeaf;
         uint32_t currentCacheIndex; 
 
         uint64_t attempts;
@@ -47,9 +46,10 @@ class DatabaseMTAssociativeCache
         inline uint32_t getIndexesSize() const { return indexesSize; };
 
     private:
-        void forcedInsertion(uint32_t (&rawCacheIndexes)[10], int &iters);
+        inline bool emptyCacheSlot(uint32_t cacheIndexRaw) const { 
+            return (currentCacheIndex >= cacheIndexRaw &&  currentCacheIndex - cacheIndexRaw > cacheSize) ||
+            (currentCacheIndex < cacheIndexRaw && UINT32_MAX - cacheIndexRaw + currentCacheIndex > cacheSize);
+         };
+        void forcedInsertion(uint32_t (&usedRawCacheIndexes)[10], int &iters);
 };
 #endif
-
-// TODO:
-// 5. Put attempts and hits in a higher level
