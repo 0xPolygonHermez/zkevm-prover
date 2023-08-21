@@ -40,30 +40,22 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 
-PROTOC = protoc
 GRPC_CPP_PLUGIN = grpc_cpp_plugin
 GRPC_CPP_PLUGIN_PATH ?= `which $(GRPC_CPP_PLUGIN)`
 
-PROTOS_PATH = ./src/grpc
-
-PROTO_SRCS := $(shell find $(PROTOS_PATH) -name *.proto)
-PROTO_CC   := $(PROTO_SRCS:%.proto=$(BUILD_DIR)/gen/%.pb.cc) $(PROTO_SRCS:%.proto=$(BUILD_DIR)/gen/%.grpc.pb.cc)
-PROTO_H    := $(PROTO_SRCS:%.proto=$(BUILD_DIR)/gen/%.pb.h) $(PROTO_SRCS:%.proto=$(BUILD_DIR)/gen/%.grpc.pb.h)
-PROTO_OBJS := $(PROTO_CC:%=$(BUILD_DIR)/%.o)
-
-INC_DIRS := $(shell find $(SRC_DIRS) -type d) $(sort $(dir $(PROTO_H)))
+INC_DIRS := $(shell find $(SRC_DIRS) -type d) $(sort $(dir))
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 SRCS_ZKP := $(shell find $(SRC_DIRS) ! -path "./tools/starkpil/bctree/*" ! -path "./test/prover/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" ! -path "./src/main_generator/*" ! -path "./src/pols_generator/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
-OBJS_ZKP := $(SRCS_ZKP:%=$(BUILD_DIR)/%.o) $(PROTO_OBJS)
+OBJS_ZKP := $(SRCS_ZKP:%=$(BUILD_DIR)/%.o)
 DEPS_ZKP := $(OBJS_ZKP:.o=.d)
 
 SRCS_BCT := $(shell find $(SRC_DIRS) ! -path "./src/main.cpp" ! -path "./test/prover/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" ! -path "./src/main_generator/*" ! -path "./src/pols_generator/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
-OBJS_BCT := $(SRCS_BCT:%=$(BUILD_DIR)/%.o) $(PROTO_OBJS)
+OBJS_BCT := $(SRCS_BCT:%=$(BUILD_DIR)/%.o
 DEPS_BCT := $(OBJS_BCT:.o=.d)
 
 SRCS_TEST := $(shell find $(SRC_DIRS) ! -path "./src/main.cpp" ! -path "./tools/starkpil/bctree/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" ! -path "./src/main_generator/*" ! -path "./src/pols_generator/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
-OBJS_TEST := $(SRCS_TEST:%=$(BUILD_DIR)/%.o) $(PROTO_OBJS)
+OBJS_TEST := $(SRCS_TEST:%=$(BUILD_DIR)/%.o)
 DEPS_TEST := $(OBJS_TEST:.o=.d)
 
 all: $(BUILD_DIR)/$(TARGET_ZKP)
