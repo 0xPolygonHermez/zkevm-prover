@@ -18,7 +18,7 @@ HashDBRemote::HashDBRemote (Goldilocks &fr, const Config &config) : fr(fr), conf
     channelArguments.SetMaxReceiveMessageSize(100*1024*1024);
 
     // Create channel
-    std::shared_ptr<grpc_impl::Channel> channel = ::grpc::CreateCustomChannel(config.hashDBURL, grpc::InsecureChannelCredentials(), channelArguments);
+    std::shared_ptr<grpc::Channel> channel = ::grpc::CreateCustomChannel(config.hashDBURL, grpc::InsecureChannelCredentials(), channelArguments);
 
     // Create stub (i.e. client)
     stub = new hashdb::v1::HashDBService::Stub(channel);

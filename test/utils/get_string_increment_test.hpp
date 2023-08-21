@@ -2,6 +2,7 @@
 #define KECCAK_SM_EXECUTOGET_STRING_INCREMENT_TEST_HPPR_TEST_HPP
 
 #include <string>
+#include <stdint.h>
 
 using namespace std;
 

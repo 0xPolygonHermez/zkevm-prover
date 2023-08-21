@@ -1,6 +1,7 @@
 #ifndef STORAGE_ROM_LINE_HPP
 #define STORAGE_ROM_LINE_HPP
 
+#include <stdint.h>
 #include <vector>
 
 using namespace std;
