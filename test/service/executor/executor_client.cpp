@@ -18,7 +18,7 @@ ExecutorClient::ExecutorClient (Goldilocks &fr, const Config &config) :
     channelArguments.SetMaxReceiveMessageSize(1024*1024*1024);
 
     // Create channel
-    std::shared_ptr<grpc_impl::Channel> channel = grpc::CreateCustomChannel(config.executorClientHost + ":" + to_string(config.executorClientPort), grpc::InsecureChannelCredentials(), channelArguments);
+    std::shared_ptr<grpc::Channel> channel = grpc::CreateCustomChannel(config.executorClientHost + ":" + to_string(config.executorClientPort), grpc::InsecureChannelCredentials(), channelArguments);
 
     // Create stub (i.e. client)
     stub = new executor::v1::ExecutorService::Stub(channel);
