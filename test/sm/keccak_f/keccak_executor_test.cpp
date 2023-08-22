@@ -3,7 +3,7 @@
 #include "timer.hpp"
 
 #if 0
-void KeccakSMTest1 (KeccakFExecutor &executor)
+void KeccakTest1 (KeccakFExecutor &executor)
 {
     /* Use a well-known input */
     uint8_t input[188] = {
@@ -47,7 +47,7 @@ void KeccakSMTest1 (KeccakFExecutor &executor)
 }
 #endif
 
-void KeccakSMTest2 (KeccakFExecutor &executor)
+void KeccakTest2 (KeccakFExecutor &executor)
 {
     cout << "Starting 54-slots testing..." << endl;
     uint8_t Sin[Keccak_NumberOfSlots][136];
@@ -115,7 +115,7 @@ void KeccakSMTest2 (KeccakFExecutor &executor)
     free(bit);
 }
 
-void KeccakSMTest3 (KeccakFExecutor &executor)
+void KeccakTest3 (KeccakFExecutor &executor)
 {
     cout << "Starting 54x9 slots test..." << endl;
     KeccakFExecuteInput * pInput;
@@ -188,12 +188,12 @@ void KeccakSMTest3 (KeccakFExecutor &executor)
     delete pOutput;
 }
 
-void KeccakSMTest4 (Goldilocks &fr, const Config &config, KeccakFExecutor &executor)
+void KeccakTest4 (Goldilocks &fr, const Config &config, KeccakFExecutor &executor)
 {    
     void * pAddress = malloc(CommitPols::pilSize());
     if (pAddress == NULL)
     {
-        zklog.error("KeccakSMTest4() failed calling malloc() of size=" + to_string(CommitPols::pilSize()));
+        zklog.error("KeccakTest4() failed calling malloc() of size=" + to_string(CommitPols::pilSize()));
         exitProcess();
     }
     CommitPols cmPols(pAddress, CommitPols::pilDegree());
@@ -294,10 +294,10 @@ uint64_t KeccakSMExecutorTest (Goldilocks &fr, const Config &config)
     cout << "KeccakSMExecutorTest() starting" << endl;
 
     KeccakFExecutor executor(fr, config);
-    //KeccakSMTest1(executor);
-    KeccakSMTest2(executor);
-    KeccakSMTest3(executor);
-    KeccakSMTest4(fr, config, executor);
+    //KeccakTest1(executor);
+    KeccakTest2(executor);
+    KeccakTest3(executor);
+    KeccakTest4(fr, config, executor);
 
     cout << "KeccakSMExecutorTest() done" << endl;
     return 0;
