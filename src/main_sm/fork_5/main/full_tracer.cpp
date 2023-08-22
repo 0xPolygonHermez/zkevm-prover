@@ -141,6 +141,8 @@ inline zkresult getFromMemory(Context &ctx, mpz_class &offset, mpz_class &length
         result += hexStringEnd.substr(0, bytesToRetrieve * 2);
     }
 
+    result = result.substr(0, length.get_ui()*2);
+    
     return ZKR_SUCCESS;
 }
 
