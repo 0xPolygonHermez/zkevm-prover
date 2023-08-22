@@ -20,9 +20,10 @@ void KeccakF (KeccakState &S);
     Input is a buffer of any length, including 0
     Output is 256 bits long buffer containing the 32 bytes keccak hash of the input
 */
-void Keccak (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput, string scriptFile="", string polsFile="", string connectionsFile="");
+void Keccak (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput);
 
 /* Generate script */
+void KeccakGen (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput, string scriptFile="", string polsFile="", string connectionsFile="");
 void KeccakGenerateScript (const Config &config);
 
 /* Unit test */
