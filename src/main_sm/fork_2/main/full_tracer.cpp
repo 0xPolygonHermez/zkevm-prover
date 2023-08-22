@@ -127,6 +127,9 @@ inline void getFromMemory(Context &ctx, mpz_class &offset, mpz_class &length, st
         uint64_t bytesToRetrieve = (end - double(endFloor)) * 32;
         result += hexStringEnd.substr(0, bytesToRetrieve * 2);
     }
+
+    // Limit result memory length in case it is a chunk contained in one single slot
+    result = result.substr(0, length.get_ui()*2);
 }
 
 // Get a global or context variable
