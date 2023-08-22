@@ -825,14 +825,45 @@ string generate(const json &rom, const string &functionName, const string &fileN
             if (bAddrRel)
             {
                 code += "    // If addrRel is possitive, and the sum is too big, fail\n";
-                code += "    if ( addrRel >= " + to_string( ( (rom["program"][zkPC].contains("isMem") && (rom["program"][zkPC]["isMem"]  == 1) ) ? 0x20000 : 0x10000 ) - 2048 ) + ")\n";
-                code += "    {\n";
-                code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS_OUT_OF_RANGE;\n";
-                code += "        zkPC=" + to_string(zkPC) +";\n";
-                code += "        mainExecutor.logError(ctx, \"addrRel too big addrRel=\" + to_string(addrRel));\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
-                code += "        return;\n";
-                code += "    }\n";
+
+                if (forkNamespace == "fork_4")
+                {
+
+                    code += "    if (proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum > 382000)\n";
+                    code += "    {\n";
+                    code += "        if ( addrRel >= " + to_string( ( (rom["program"][zkPC].contains("isMem") && (rom["program"][zkPC]["isMem"]  == 1) ) ? 0x20000 : 0x10000 ) - 2048 ) + ")\n";
+                    code += "        {\n";
+                    code += "           proverRequest.result = ZKR_SM_MAIN_ADDRESS_OUT_OF_RANGE;\n";
+                    code += "           zkPC=" + to_string(zkPC) +";\n";
+                    code += "           mainExecutor.logError(ctx, \"addrRel too big addrRel=\" + to_string(addrRel));\n";
+                    code += "           HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                    code += "           return;\n";
+                    code += "       }\n";
+                    code += "    }\n";
+                    code += "    else\n";
+                    code += "    {\n";
+                    code += "        if (addrRel>=0x20000 || ((rom.line[" + to_string(zkPC) + "].isMem==1) && (addrRel >= 0x10000)))\n";
+                    code += "        {\n";
+                    code += "           proverRequest.result = ZKR_SM_MAIN_ADDRESS_OUT_OF_RANGE;\n";
+                    code += "           zkPC=" + to_string(zkPC) +";\n";
+                    code += "           mainExecutor.logError(ctx, \"addrRel too big addrRel=\" + to_string(addrRel));\n";
+                    code += "           HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                    code += "           return;\n";
+                    code += "       }\n";
+                    code += "    }\n";
+                }
+                else
+                {
+                    code += "    if ( addrRel >= " + to_string( ( (rom["program"][zkPC].contains("isMem") && (rom["program"][zkPC]["isMem"]  == 1) ) ? 0x20000 : 0x10000 ) - 2048 ) + ")\n";
+                    code += "    {\n";
+                    code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS_OUT_OF_RANGE;\n";
+                    code += "        zkPC=" + to_string(zkPC) +";\n";
+                    code += "        mainExecutor.logError(ctx, \"addrRel too big addrRel=\" + to_string(addrRel));\n";
+                    code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                    code += "        return;\n";
+                    code += "    }\n";
+                }
+                
                 code += "    // If addrRel is negative, fail\n";
                 code += "    if (addrRel < 0)\n";
                 code += "    {\n";
@@ -2876,7 +2907,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    }\n";
             code += "    if (!hashIterator->second.digestCalled)\n";
             code += "    {\n";
-
+            
             code += "        // Get a local copy of the bytes vector\n";
             code += "        vector<uint8_t> data = hashIterator->second.data;\n";
 
