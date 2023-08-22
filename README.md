@@ -51,7 +51,7 @@ Download this **very large archive (~75GB)**. It's a good idea to start this dow
 ./tools/download_archive.sh
 ```
 
-The archive will take up an additional 115GB of space once extracted.| 
+The archive will take up an additional 115GB of space once extracted.
 
 ### Install dependencies
 
