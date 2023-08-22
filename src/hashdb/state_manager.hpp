@@ -98,7 +98,7 @@ public:
     zkresult deleteNode (const string &batchUUID, uint64_t tx, const string &_key, const Persistence persistence);
     zkresult read (const string &batchUUID, const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog);
     zkresult semiFlush (const string &batchUUID, const string &newStateRoot, const Persistence persistence);
-    zkresult flush (const string &batchUUID, Database &db, uint64_t &flushId, uint64_t &lastSentFlushId);
+    zkresult flush (const string &batchUUID, const string &newStateRoot, const Persistence persistence, Database &db, uint64_t &flushId, uint64_t &lastSentFlushId);
     void print (bool bDbContent = false);
 
     // Lock/Unlock

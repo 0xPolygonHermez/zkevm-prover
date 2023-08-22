@@ -492,7 +492,7 @@ zkresult StateManager::semiFlush (const string &batchUUID, const string &_stateR
     return ZKR_SUCCESS;
 }
 
-zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &flushId, uint64_t &lastSentFlushId)
+zkresult StateManager::flush (const string &batchUUID, const string &_newStateRoot, const Persistence _persistence, Database &db, uint64_t &flushId, uint64_t &lastSentFlushId)
 {
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     struct timeval t;
@@ -535,7 +535,33 @@ zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &f
     }
     BatchState &batchState = it->second;
 
-    // For all txs, purge the data to write
+    // For all txs, delete the ones that are not part of the final state root chain
+    if (config.stateManagerPurgeTxs && (_newStateRoot.size() > 0) && (_persistence == PERSISTENCE_DATABASE))
+    {
+        string newStateRoot = NormalizeToNFormat(_newStateRoot, 64);
+
+        int64_t tx = -1;
+        for (tx=batchState.txState.size()-1; tx>=0; tx--)
+        {
+            if (batchState.txState[tx].persistence[PERSISTENCE_DATABASE].newStateRoot == newStateRoot)
+            {
+                break;
+            }
+        }
+        if (tx < 0)
+        {
+            zklog.error("StateManager::flush() called with newStateRoot=" + newStateRoot + " but could not find it");
+        }
+        else
+        {
+            while ((int64_t)batchState.txState.size() > (tx + 1))
+            {
+                batchState.txState.pop_back();
+            }
+        }
+    }
+
+    // For all tx sub-states, purge the data to write
     for (uint64_t tx=0; tx<batchState.txState.size(); tx++)
     {
         for (uint64_t persistence = 0; persistence < PERSISTENCE_SIZE; persistence++)
@@ -631,9 +657,11 @@ zkresult StateManager::flush (const string &batchUUID, Database &db, uint64_t &f
             // Delete invalid TX sub-states
             if (db.config.stateManagerPurge)
             {
+                // Delete all substates that are not valid or that did not change the state root (i.e. SMT set update in which new value was equal to old value)
                 for (int64_t i = txState.persistence[persistence].subState.size()-1; i>=0; i--)
                 {
-                    if (!txState.persistence[persistence].subState[i].bValid)
+                    if (!txState.persistence[persistence].subState[i].bValid ||
+                        (txState.persistence[persistence].subState[i].oldStateRoot == txState.persistence[persistence].subState[i].newStateRoot) )
                     {
                         txState.persistence[persistence].subState.erase(txState.persistence[persistence].subState.begin() + i);
                     }
