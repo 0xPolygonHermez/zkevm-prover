@@ -90,14 +90,6 @@ void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], cons
 {
     lock_guard<recursive_mutex> guard(mlock);
     //
-    //  Statistics
-    //
-    if (attempts<<44 == 0)
-    {
-        zklog.info("DatabaseMTAssociativeCache::addKeyValue() name=" + name + " indexesSize=" + to_string(indexesSize) + " cacheSize=" + to_string(cacheSize) + " attempts=" + to_string(attempts) + " hits=" + to_string(hits) + " hit ratio=" + to_string(double(hits) * 100.0 / double(zkmax(attempts, 1))) + "%");
-    }
-
-    //
     // Try to add in one of my 4 slots
     //
     for (int i = 0; i < 4; ++i)
@@ -219,7 +211,6 @@ void DatabaseMTAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIndexes)
         zklog.error("forcedInsertion() more than 10 iterations required. Index: " + to_string(inputRawCacheIndex));
         exitProcess();
     }    
-
     //
     // find a slot into my indexes
     //
@@ -269,6 +260,16 @@ bool DatabaseMTAssociativeCache::findKey(Goldilocks::Element (&key)[4], vector<G
 {
     lock_guard<recursive_mutex> guard(mlock);
     attempts++; 
+    //
+    //  Statistics
+    //
+    if (attempts<<40 == 0)
+    {
+        zklog.info("DatabaseMTAssociativeCache::addKeyValue() name=" + name + " indexesSize=" + to_string(indexesSize) + " cacheSize=" + to_string(cacheSize) + " attempts=" + to_string(attempts) + " hits=" + to_string(hits) + " hit ratio=" + to_string(double(hits) * 100.0 / double(zkmax(attempts, 1))) + "%");
+    }
+    //
+    // Find the value
+    //
     for (int i = 0; i < 4; i++)
     {
         uint32_t cacheIndexRaw = indexes[key[i].fe & indexesMask];
