@@ -16,7 +16,7 @@ Built to interface with Ethereum Virtual Machines (EVM), the prover provides cri
   - The Prover component amalgamates the results of two previously computed batch or aggregated proofs, supplied by the Aggregator, to create an aggregated proof.
 - When tasked by the Aggregator service to produce a final proof:
   - The Prover component uses the outcome of a prior aggregated proof, supplied by the Aggregator, to formulate a conclusive proof that can be validated.
-- The server interface for this service is delineated in the file named aggregator.proto.
+- The server interface for this service is delineated in the file named `aggregator.proto`.
 
 ### Executor service
 
