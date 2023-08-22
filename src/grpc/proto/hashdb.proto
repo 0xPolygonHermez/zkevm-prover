@@ -4,7 +4,7 @@ import "google/protobuf/empty.proto";
 
 package hashdb.v1;
 
-option go_package = "github.com/0xPolygonHermez/zkevm-node/merkletree/pb";
+option go_package = "github.com/0xPolygonHermez/zkevm-node/merkletree/hashdb";
 
 message Version {
     string v0_0_1 = 1;
@@ -126,10 +126,12 @@ message LoadProgramDBRequest {
  * @dev FlushRequest
  * @param {batch_uuid} - indicates a unique identifier of the current batch or session which data will be flushed to cache (and database if required)
  * @param {new_state_root} - state root at this point of the execution
+ * @param {persistence} - indicates if it should be stored only in CACHE, in the SQL DATABASE, or it is just TEMPORARY and should be deleted at the flush of this batch UUID
  */
 message FlushRequest {
     string batch_uuid = 1;
     string new_state_root = 2;
+    Persistence persistence = 3;
 }
 
 /**

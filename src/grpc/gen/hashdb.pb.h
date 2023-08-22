@@ -1706,6 +1706,7 @@ class FlushRequest PROTOBUF_FINAL :
   enum : int {
     kBatchUuidFieldNumber = 1,
     kNewStateRootFieldNumber = 2,
+    kPersistenceFieldNumber = 3,
   };
   // string batch_uuid = 1;
   void clear_batch_uuid();
@@ -1757,6 +1758,15 @@ class FlushRequest PROTOBUF_FINAL :
   std::string* _internal_mutable_new_state_root();
   public:
 
+  // .hashdb.v1.Persistence persistence = 3;
+  void clear_persistence();
+  ::hashdb::v1::Persistence persistence() const;
+  void set_persistence(::hashdb::v1::Persistence value);
+  private:
+  ::hashdb::v1::Persistence _internal_persistence() const;
+  void _internal_set_persistence(::hashdb::v1::Persistence value);
+  public:
+
   // @@protoc_insertion_point(class_scope:hashdb.v1.FlushRequest)
  private:
   class _Internal;
@@ -1766,6 +1776,7 @@ class FlushRequest PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr batch_uuid_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr new_state_root_;
+  int persistence_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_hashdb_2eproto;
 };
@@ -5954,6 +5965,26 @@ inline void FlushRequest::unsafe_arena_set_allocated_new_state_root(
   new_state_root_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       new_state_root, GetArena());
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:hashdb.v1.FlushRequest.new_state_root)
+}
+
+// .hashdb.v1.Persistence persistence = 3;
+inline void FlushRequest::clear_persistence() {
+  persistence_ = 0;
+}
+inline ::hashdb::v1::Persistence FlushRequest::_internal_persistence() const {
+  return static_cast< ::hashdb::v1::Persistence >(persistence_);
+}
+inline ::hashdb::v1::Persistence FlushRequest::persistence() const {
+  // @@protoc_insertion_point(field_get:hashdb.v1.FlushRequest.persistence)
+  return _internal_persistence();
+}
+inline void FlushRequest::_internal_set_persistence(::hashdb::v1::Persistence value) {
+  
+  persistence_ = value;
+}
+inline void FlushRequest::set_persistence(::hashdb::v1::Persistence value) {
+  _internal_set_persistence(value);
+  // @@protoc_insertion_point(field_set:hashdb.v1.FlushRequest.persistence)
 }
 
 // -------------------------------------------------------------------

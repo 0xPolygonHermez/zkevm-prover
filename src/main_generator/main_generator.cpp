@@ -290,7 +290,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    if (proverRequest.input.db.size() > 0)\n";
     code += "    {\n";
     code += "        pHashDB->loadDB(proverRequest.input.db, true);\n";
-    code += "        pHashDB->flush(emptyString, emptyString, flushId, lastSentFlushId);\n";
+    code += "        pHashDB->flush(emptyString, emptyString, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, flushId, lastSentFlushId);\n";
     code += "        if (mainExecutor.config.dbClearCache && (mainExecutor.config.databaseURL != \"local\"))\n";
     code += "        {\n";
     code += "            pHashDB->clearCache();\n";
@@ -301,7 +301,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    if (proverRequest.input.contractsBytecode.size() > 0)\n";
     code += "    {\n";
     code += "        pHashDB->loadProgramDB(proverRequest.input.contractsBytecode, true);\n";
-    code += "        pHashDB->flush(emptyString, emptyString, flushId, lastSentFlushId);\n";
+    code += "        pHashDB->flush(emptyString, emptyString, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, flushId, lastSentFlushId);\n";
     code += "        if (mainExecutor.config.dbClearCache && (mainExecutor.config.databaseURL != \"local\"))\n";
     code += "        {\n";
     code += "            pHashDB->clearCache();\n";
@@ -4747,7 +4747,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    gettimeofday(&t, NULL);\n";
     code += "#endif\n";
     
-    code += "    zkresult zkr = pHashDB->flush(proverRequest.uuid, proverRequest.pFullTracer->get_new_state_root(), proverRequest.flushId, proverRequest.lastSentFlushId);\n";
+    code += "    zkresult zkr = pHashDB->flush(proverRequest.uuid, proverRequest.pFullTracer->get_new_state_root(), proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, proverRequest.flushId, proverRequest.lastSentFlushId);\n";
     code += "    if (zkr != ZKR_SUCCESS)\n";
     code += "    {\n";
     code += "        proverRequest.result = zkr;\n";

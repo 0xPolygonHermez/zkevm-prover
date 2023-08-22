@@ -44,7 +44,7 @@ void runHashDBTestBigTree (const Config& config)
         }
         if (i%100==0)
         {
-            pHashDB->flush(uuid, fea2string(fr, root), flushId, lastSentFlushId);
+            pHashDB->flush(uuid, fea2string(fr, root), PERSISTENCE_DATABASE, flushId, lastSentFlushId);
         }
     }
 }

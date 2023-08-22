@@ -91,7 +91,7 @@ uint64_t HashDBTestMultiWrite (const Config& config)
         roots[tree][2] = root[2];
         roots[tree][3] = root[3];
 
-        pHashDB->flush(uuid, fea2string(fr, root), flushId, storedFlushId);
+        pHashDB->flush(uuid, fea2string(fr, root), PERSISTENCE_DATABASE, flushId, storedFlushId);
 
         zklog.info("HashDBTestMultiWrite() after tree=" + to_string(tree) + " root=" + fea2string(fr, root) + " flushId=" + to_string(flushId) + " storedFlushId=" + to_string(storedFlushId));
     }
