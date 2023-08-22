@@ -1705,6 +1705,7 @@ class FlushRequest PROTOBUF_FINAL :
 
   enum : int {
     kBatchUuidFieldNumber = 1,
+    kNewStateRootFieldNumber = 2,
   };
   // string batch_uuid = 1;
   void clear_batch_uuid();
@@ -1731,6 +1732,31 @@ class FlushRequest PROTOBUF_FINAL :
   std::string* _internal_mutable_batch_uuid();
   public:
 
+  // string new_state_root = 2;
+  void clear_new_state_root();
+  const std::string& new_state_root() const;
+  void set_new_state_root(const std::string& value);
+  void set_new_state_root(std::string&& value);
+  void set_new_state_root(const char* value);
+  void set_new_state_root(const char* value, size_t size);
+  std::string* mutable_new_state_root();
+  std::string* release_new_state_root();
+  void set_allocated_new_state_root(std::string* new_state_root);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_new_state_root();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_new_state_root(
+      std::string* new_state_root);
+  private:
+  const std::string& _internal_new_state_root() const;
+  void _internal_set_new_state_root(const std::string& value);
+  std::string* _internal_mutable_new_state_root();
+  public:
+
   // @@protoc_insertion_point(class_scope:hashdb.v1.FlushRequest)
  private:
   class _Internal;
@@ -1739,6 +1765,7 @@ class FlushRequest PROTOBUF_FINAL :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr batch_uuid_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr new_state_root_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_hashdb_2eproto;
 };
@@ -5846,6 +5873,87 @@ inline void FlushRequest::unsafe_arena_set_allocated_batch_uuid(
   batch_uuid_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       batch_uuid, GetArena());
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:hashdb.v1.FlushRequest.batch_uuid)
+}
+
+// string new_state_root = 2;
+inline void FlushRequest::clear_new_state_root() {
+  new_state_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& FlushRequest::new_state_root() const {
+  // @@protoc_insertion_point(field_get:hashdb.v1.FlushRequest.new_state_root)
+  return _internal_new_state_root();
+}
+inline void FlushRequest::set_new_state_root(const std::string& value) {
+  _internal_set_new_state_root(value);
+  // @@protoc_insertion_point(field_set:hashdb.v1.FlushRequest.new_state_root)
+}
+inline std::string* FlushRequest::mutable_new_state_root() {
+  // @@protoc_insertion_point(field_mutable:hashdb.v1.FlushRequest.new_state_root)
+  return _internal_mutable_new_state_root();
+}
+inline const std::string& FlushRequest::_internal_new_state_root() const {
+  return new_state_root_.Get();
+}
+inline void FlushRequest::_internal_set_new_state_root(const std::string& value) {
+  
+  new_state_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void FlushRequest::set_new_state_root(std::string&& value) {
+  
+  new_state_root_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:hashdb.v1.FlushRequest.new_state_root)
+}
+inline void FlushRequest::set_new_state_root(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  new_state_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:hashdb.v1.FlushRequest.new_state_root)
+}
+inline void FlushRequest::set_new_state_root(const char* value,
+    size_t size) {
+  
+  new_state_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:hashdb.v1.FlushRequest.new_state_root)
+}
+inline std::string* FlushRequest::_internal_mutable_new_state_root() {
+  
+  return new_state_root_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* FlushRequest::release_new_state_root() {
+  // @@protoc_insertion_point(field_release:hashdb.v1.FlushRequest.new_state_root)
+  return new_state_root_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void FlushRequest::set_allocated_new_state_root(std::string* new_state_root) {
+  if (new_state_root != nullptr) {
+    
+  } else {
+    
+  }
+  new_state_root_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), new_state_root,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:hashdb.v1.FlushRequest.new_state_root)
+}
+inline std::string* FlushRequest::unsafe_arena_release_new_state_root() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:hashdb.v1.FlushRequest.new_state_root)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return new_state_root_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void FlushRequest::unsafe_arena_set_allocated_new_state_root(
+    std::string* new_state_root) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (new_state_root != nullptr) {
+    
+  } else {
+    
+  }
+  new_state_root_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      new_state_root, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:hashdb.v1.FlushRequest.new_state_root)
 }
 
 // -------------------------------------------------------------------

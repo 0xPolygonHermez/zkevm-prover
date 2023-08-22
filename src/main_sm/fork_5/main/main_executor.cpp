@@ -148,7 +148,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     {
         pHashDB->loadDB(proverRequest.input.db, true);
         uint64_t flushId, lastSentFlushId;
-        pHashDB->flush(emptyString, flushId, lastSentFlushId);
+        pHashDB->flush(emptyString, emptyString, flushId, lastSentFlushId);
         if (config.dbClearCache && (config.databaseURL != "local"))
         {
             pHashDB->clearCache();
@@ -160,7 +160,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     {
         pHashDB->loadProgramDB(proverRequest.input.contractsBytecode, true);
         uint64_t flushId, lastSentFlushId;
-        pHashDB->flush(emptyString, flushId, lastSentFlushId);
+        pHashDB->flush(emptyString, emptyString, flushId, lastSentFlushId);
         if (config.dbClearCache && (config.databaseURL != "local"))
         {
             pHashDB->clearCache();
@@ -4315,7 +4315,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     gettimeofday(&t, NULL);
 #endif
 
-    zkresult zkr = pHashDB->flush(proverRequest.uuid, proverRequest.flushId, proverRequest.lastSentFlushId);
+    zkresult zkr = pHashDB->flush(proverRequest.uuid, proverRequest.pFullTracer->get_new_state_root(), proverRequest.flushId, proverRequest.lastSentFlushId);
     if (zkr != ZKR_SUCCESS)
     {
         proverRequest.result = zkr;

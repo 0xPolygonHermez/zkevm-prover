@@ -43,7 +43,7 @@ public:
     zkresult getProgram     (const Goldilocks::Element (&key)[4], vector<uint8_t> &data, DatabaseMap *dbReadLog);
     void     loadDB         (const DatabaseMap::MTMap &inputDB, const bool persistent);
     void     loadProgramDB  (const DatabaseMap::ProgramMap &inputProgramDB, const bool persistent);
-    zkresult flush          (const string &batchUUID, uint64_t &flushId, uint64_t &storedFlushId);
+    zkresult flush          (const string &batchUUID, const string &newStateRoot, uint64_t &flushId, uint64_t &storedFlushId);
     void     semiFlush      (const string &batchUUID, const string &newStateRoot, const Persistence persistence);
     zkresult getFlushStatus (uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram, string &proverId);
     zkresult getFlushData   (uint64_t flushId, uint64_t &storedFlushId, unordered_map<string, string> (&nodes), unordered_map<string, string> (&program), string &nodesStateRoot);

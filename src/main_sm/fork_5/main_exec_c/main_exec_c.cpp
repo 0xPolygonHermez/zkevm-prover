@@ -44,7 +44,7 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
     {
         pHashDB->loadDB(proverRequest.input.db, true);
         uint64_t flushId, lastSentFlushId;
-        pHashDB->flush(emptyString, flushId, lastSentFlushId);
+        pHashDB->flush(emptyString, emptyString, flushId, lastSentFlushId);
         if (config.dbClearCache && (config.databaseURL != "local"))
         {
             pHashDB->clearCache();
@@ -56,7 +56,7 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
     {
         pHashDB->loadProgramDB(proverRequest.input.contractsBytecode, true);
         uint64_t flushId, lastSentFlushId;
-        pHashDB->flush(emptyString, flushId, lastSentFlushId);
+        pHashDB->flush(emptyString, emptyString, flushId, lastSentFlushId);
         if (config.dbClearCache && (config.databaseURL != "local"))
         {
             pHashDB->clearCache();
@@ -550,7 +550,7 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
     gettimeofday(&t, NULL);
 #endif
-    result = pHashDB->flush(proverRequest.uuid, proverRequest.flushId, proverRequest.lastSentFlushId);
+    result = pHashDB->flush(proverRequest.uuid, fea2string(fr, ctxc.root), proverRequest.flushId, proverRequest.lastSentFlushId);
     if (result != ZKR_SUCCESS)
     {
         proverRequest.result = result;

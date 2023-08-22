@@ -218,7 +218,7 @@ void HashDB::loadProgramDB(const DatabaseMap::ProgramMap &input, const bool pers
 #endif
 }
 
-zkresult HashDB::flush(const string &batchUUID, uint64_t &flushId, uint64_t &storedFlushId)
+zkresult HashDB::flush(const string &batchUUID, const string &newStateRoot, uint64_t &flushId, uint64_t &storedFlushId)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB
     gettimeofday(&t, NULL);
