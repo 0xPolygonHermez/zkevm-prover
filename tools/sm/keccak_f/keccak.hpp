@@ -27,6 +27,6 @@ void KeccakGen (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput, s
 void KeccakGenerateScript (const Config &config);
 
 /* Unit test */
-void KeccakSMTest (void);
+void KeccakTest (void);
 
 #endif
