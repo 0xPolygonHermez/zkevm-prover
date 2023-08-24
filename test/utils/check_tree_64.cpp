@@ -26,20 +26,20 @@ zkresult CheckTree64 (Database64 &db, const string &key, uint64_t level, CheckTr
 
     for (uint64_t i=0; i<TREE_CHUNK_WIDTH; i++)
     {
-        if (treeChunk.children[i].type == ZERO) // Zero
+        if (treeChunk.children64[i].type == ZERO) // Zero
         {
             continue;
         }
-        else if (treeChunk.children[i].type == INTERMEDIATE) // Intermediate node
+        else if (treeChunk.children64[i].type == INTERMEDIATE) // Intermediate node
         {
             checkTreeCounters.intermediateNodes++;
-            result = CheckTree64(db, fea2string(db.fr, treeChunk.children[i].intermediate.hash), level+1, checkTreeCounters);
+            result = CheckTree64(db, fea2string(db.fr, treeChunk.children64[i].intermediate.hash), level+1, checkTreeCounters);
             if (zkr != ZKR_SUCCESS)
             {
                 return zkr;
             }
         }
-        else if (treeChunk.children[i].type == LEAF) // Leaf node
+        else if (treeChunk.children64[i].type == LEAF) // Leaf node
         {
             checkTreeCounters.leafNodes++;
             checkTreeCounters.maxLevel = zkmax(checkTreeCounters.maxLevel, level);
@@ -52,7 +52,7 @@ zkresult CheckTree64 (Database64 &db, const string &key, uint64_t level, CheckTr
         }
         else
         {
-            zklog.error("CheckTree() failed key=" + key + " level=" + to_string(level) + " invalid type=" + to_string(treeChunk.children[i].type));
+            zklog.error("CheckTree() failed key=" + key + " level=" + to_string(level) + " invalid type=" + to_string(treeChunk.children64[i].type));
             exitProcess();
         }
     }
