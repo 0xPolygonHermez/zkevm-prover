@@ -1,6 +1,7 @@
 #include "keccak.hpp"
 #include "timer.hpp"
 #include "keccak_input.hpp"
+#include "keccak_config.hpp"
 
 void KeccakGen (
     const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput,
@@ -8,14 +9,14 @@ void KeccakGen (
 {
     KeccakInput input;
     input.init(pInput, inputSize);
-    KeccakState S;
+    GateState S(KeccakGateConfig);
 
     uint8_t r[1088];
     while (input.getNextBits(r))
     {
         for (uint64_t i=0; i<1088; i++)
         {
-            S.gate[SinRef0 + i*44].pin[pin_a].bit ^= r[i];
+            S.gate[S.gateConfig.sinRef0 + i*44].pin[pin_a].bit ^= r[i];
         }
         KeccakF(S);
         S.printCounters();

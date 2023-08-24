@@ -81,7 +81,7 @@ void KeccakTest2 (KeccakFExecutor &executor)
             byte2bits(Sin[slot][i], aux);
             for (uint64_t j=0; j<8; j++)
             {
-                bit[relRef2AbsRef(SinRef0 + (i*8 + j)*9, slot)] = aux[j];
+                bit[KeccakGateConfig.relRef2AbsRef(KeccakGateConfig.sinRef0 + (i*8 + j)*9, slot)] = aux[j];
             }
         }
     }
@@ -95,7 +95,7 @@ void KeccakTest2 (KeccakFExecutor &executor)
             uint8_t aux[8];
             for (uint64_t j=0; j<8; j++)
             {
-                aux[j] = bit[relRef2AbsRef(SoutRef0 + (i*8 + j)*9, slot)];
+                aux[j] = bit[KeccakGateConfig.relRef2AbsRef(KeccakGateConfig.soutRef0 + (i*8 + j)*9, slot)];
             }
 
             bits2byte(aux, hashSout[slot][i]);
@@ -155,11 +155,11 @@ void KeccakTest3 (KeccakFExecutor &executor)
             uint8_t aux[256];
             for (uint64_t i=0; i<256; i++)
             {
-                if ( ( pOutput->pol[pin_a][relRef2AbsRef(SoutRef0+i*9, slot)] & (~Keccak_Mask) ) != 0 )
+                if ( ( pOutput->pol[pin_a][KeccakGateConfig.relRef2AbsRef(KeccakGateConfig.soutRef0+i*9, slot)] & (~Keccak_Mask) ) != 0 )
                 {
                     cerr << "Error: output pin a is not normalized at slot=" << slot << " bit=" << i << endl;
                 }
-                if ( ( pOutput->pol[pin_a][relRef2AbsRef(SoutRef0+i*9, slot)] & (uint64_t(1)<<(row*7)) ) == 0)
+                if ( ( pOutput->pol[pin_a][KeccakGateConfig.relRef2AbsRef(KeccakGateConfig.soutRef0+i*9, slot)] & (uint64_t(1)<<(row*7)) ) == 0)
                 {
                     aux[i] = 0;
                 }
@@ -253,11 +253,11 @@ void KeccakTest4 (Goldilocks &fr, const Config &config, KeccakFExecutor &executo
             uint8_t aux[256];
             for (uint64_t i=0; i<256; i++)
             {
-                if ( ( executor.getPol(cmPols.KeccakF.a, relRef2AbsRef(SoutRef0+i*44, slot)) & (~Keccak_Mask) ) != 0 )
+                if ( ( executor.getPol(cmPols.KeccakF.a, KeccakGateConfig.relRef2AbsRef(KeccakGateConfig.soutRef0+i*44, slot)) & (~Keccak_Mask) ) != 0 )
                 {
                     cerr << "Error: output pin a is not normalized at slot=" << slot << " bit=" << i << endl;
                 }
-                if ( ( executor.getPol(cmPols.KeccakF.a, relRef2AbsRef(SoutRef0+i*44, slot)) & (uint64_t(1)<<row) ) == 0)
+                if ( ( executor.getPol(cmPols.KeccakF.a, KeccakGateConfig.relRef2AbsRef(KeccakGateConfig.soutRef0+i*44, slot)) & (uint64_t(1)<<row) ) == 0)
                 {
                     aux[i] = 0;
                 }

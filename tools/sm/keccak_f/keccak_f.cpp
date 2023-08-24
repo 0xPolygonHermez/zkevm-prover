@@ -1,6 +1,6 @@
 #include "keccak.hpp"
 
-void KeccakF (KeccakState &S)
+void KeccakF (GateState &S)
 {
     // Rnd(A, ir) = ι( χ( π( ρ( θ(A) ) ) ), ir)
     for (uint64_t ir=0; ir<24; ir++ )
@@ -28,8 +28,8 @@ void KeccakF (KeccakState &S)
     for (uint64_t i=0; i<1600; i++)
     {
         uint64_t aux;
-        aux = SoutRef0 + 44*i;
-        S.XOR( S.SoutRefs[i], pin_r, ZeroRef, pin_a, aux );
+        aux = S.gateConfig.soutRef0 + 44*i;
+        S.XOR( S.SoutRefs[i], pin_r, S.gateConfig.zeroRef, pin_a, aux );
         S.SoutRefs[i] = aux;
         //cout << "KeccakF() i=" << i << " aux=" << aux << " pin_a=" << (uint64_t)S.gate[S.SoutRefs[i]].pin[pin_a].bit << " pin_r=" << (uint64_t)S.gate[S.SoutRefs[i]].pin[pin_r].bit << endl;
     }
