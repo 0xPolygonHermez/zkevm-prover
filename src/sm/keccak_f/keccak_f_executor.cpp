@@ -27,7 +27,7 @@ void KeccakFExecutor::loadScript (json j)
         }
         if ( !j["program"][i].contains("ref") ||
              !j["program"][i]["ref"].is_number_unsigned() ||
-              j["program"][i]["ref"]>=maxRefs )
+              j["program"][i]["ref"]>=KeccakGateConfig.maxRefs )
         {
             zklog.error("KeccakFExecutor::loadEvals() found JSON array's element does not contain unsigned number ref field");
             exitProcess();
@@ -87,7 +87,7 @@ void KeccakFExecutor::loadScript (json j)
         else if (typea=="input")
         {
             uint64_t bit = j["program"][i]["a"]["bit"];
-            instruction.refa = SinRef0 + bit*44;
+            instruction.refa = KeccakGateConfig.sinRef0 + bit*44;
             instruction.pina = PinId::pin_a;
         }
         else
@@ -107,7 +107,7 @@ void KeccakFExecutor::loadScript (json j)
         else if (typeb=="input")
         {
             uint64_t bit = j["program"][i]["b"]["bit"];
-            instruction.refb = SinRef0 + bit*44;
+            instruction.refb = KeccakGateConfig.sinRef0 + bit*44;
             instruction.pinb = PinId::pin_a;
         }
         else
@@ -124,7 +124,7 @@ void KeccakFExecutor::loadScript (json j)
     bLoaded = true;
 }
 
-void KeccakFExecutor::execute (KeccakState &S)
+void KeccakFExecutor::execute (GateState &S)
 {
     zkassert(bLoaded);
 
@@ -164,13 +164,13 @@ void KeccakFExecutor::execute (uint8_t * bit)
     }
 
     // Init the array
-    gate[ZeroRef].pin[pin_a].bit = 0;
-    gate[ZeroRef].pin[pin_b].bit = 1;
+    gate[KeccakGateConfig.zeroRef].pin[pin_a].bit = 0;
+    gate[KeccakGateConfig.zeroRef].pin[pin_b].bit = 1;
     for (uint64_t slot=0; slot<Keccak_NumberOfSlots; slot++)
     {
         for (uint64_t i=0; i<1088; i++)
         {
-            gate[relRef2AbsRef(SinRef0+i*44, slot)].pin[pin_a].bit = bit[relRef2AbsRef(SinRef0+i*44, slot)];
+            gate[KeccakGateConfig.relRef2AbsRef(KeccakGateConfig.sinRef0+i*44, slot)].pin[pin_a].bit = bit[KeccakGateConfig.relRef2AbsRef(KeccakGateConfig.sinRef0+i*44, slot)];
         }
     }
 
@@ -179,9 +179,9 @@ void KeccakFExecutor::execute (uint8_t * bit)
     {
         for (uint64_t i=0; i<program.size(); i++)
         {
-            uint64_t absRefa = relRef2AbsRef(program[i].refa, slot);
-            uint64_t absRefb = relRef2AbsRef(program[i].refb, slot);
-            uint64_t absRefr = relRef2AbsRef(program[i].refr, slot);
+            uint64_t absRefa = KeccakGateConfig.relRef2AbsRef(program[i].refa, slot);
+            uint64_t absRefb = KeccakGateConfig.relRef2AbsRef(program[i].refb, slot);
+            uint64_t absRefr = KeccakGateConfig.relRef2AbsRef(program[i].refr, slot);
 
             /*if (program[i].refr==(3200*44+1) || program[i].refr==((3200*44)+2) || program[i].refr==1 || program[i].refr==Keccak_SlotSize )
             {
@@ -209,7 +209,7 @@ void KeccakFExecutor::execute (uint8_t * bit)
     {
         for (uint64_t i=0; i<1600; i++)
         {
-            bit[relRef2AbsRef(SoutRef0+i*44, slot)] = gate[relRef2AbsRef(SoutRef0+i*44, slot)].pin[pin_r].bit;
+            bit[KeccakGateConfig.relRef2AbsRef(KeccakGateConfig.soutRef0+i*44, slot)] = gate[KeccakGateConfig.relRef2AbsRef(KeccakGateConfig.soutRef0+i*44, slot)].pin[pin_r].bit;
         }
     }
 
@@ -221,9 +221,9 @@ void KeccakFExecutor::execute (KeccakFExecuteInput &input, KeccakFExecuteOutput 
     // Reset polynomials
     memset(output.pol, 0 , sizeof(output.pol));
 
-    // Set ZeroRef values
-    output.pol[pin_a][ZeroRef] = 0;
-    output.pol[pin_b][ZeroRef] = Keccak_Mask;
+    // Set KeccakGateConfig.zeroRef values
+    output.pol[pin_a][KeccakGateConfig.zeroRef] = 0;
+    output.pol[pin_b][KeccakGateConfig.zeroRef] = Keccak_Mask;
 
     // Set Sin and Rin values
     for (uint64_t slot=0; slot<Keccak_NumberOfSlots; slot++)
@@ -235,7 +235,7 @@ void KeccakFExecutor::execute (KeccakFExecuteInput &input, KeccakFExecuteOutput 
             {
                 if (input.Sin[slot][row][i]==1)
                 {
-                    output.pol[pin_a][relRef2AbsRef(SinRef0+i*44, slot)] |= mask;
+                    output.pol[pin_a][KeccakGateConfig.relRef2AbsRef(KeccakGateConfig.sinRef0+i*44, slot)] |= mask;
                 }
             }
         }
@@ -248,9 +248,9 @@ void KeccakFExecutor::execute (KeccakFExecuteInput &input, KeccakFExecuteOutput 
         for (uint64_t i=0; i<program.size(); i++)
         {
             instruction = program[i];
-            uint64_t absRefa = relRef2AbsRef(instruction.refa, slot);
-            uint64_t absRefb = relRef2AbsRef(instruction.refb, slot);
-            uint64_t absRefr = relRef2AbsRef(instruction.refr, slot);
+            uint64_t absRefa = KeccakGateConfig.relRef2AbsRef(instruction.refa, slot);
+            uint64_t absRefb = KeccakGateConfig.relRef2AbsRef(instruction.refb, slot);
+            uint64_t absRefr = KeccakGateConfig.relRef2AbsRef(instruction.refr, slot);
 
             output.pol[pin_a][absRefr] = output.pol[instruction.pina][absRefa];
             output.pol[pin_b][absRefr] = output.pol[instruction.pinb][absRefb];
@@ -319,12 +319,12 @@ void KeccakFExecutor::execute (const vector<vector<Goldilocks::Element>> &input,
         }
     }
 
-    // Set ZeroRef values
+    // Set KeccakGateConfig.zeroRef values
     for (uint64_t i=0; i < 4; i++)
     {
-        pols.a[i][ZeroRef] = fr.zero();
-        pols.b[i][ZeroRef] = fr.fromU64(0x7FF);
-        pols.c[i][ZeroRef] = fr.fromU64( fr.toU64(pols.a[i][ZeroRef]) ^ fr.toU64(pols.b[i][ZeroRef]) );
+        pols.a[i][KeccakGateConfig.zeroRef] = fr.zero();
+        pols.b[i][KeccakGateConfig.zeroRef] = fr.fromU64(0x7FF);
+        pols.c[i][KeccakGateConfig.zeroRef] = fr.fromU64( fr.toU64(pols.a[i][KeccakGateConfig.zeroRef]) ^ fr.toU64(pols.b[i][KeccakGateConfig.zeroRef]) );
     }
 
     // Set Sin values
@@ -332,7 +332,7 @@ void KeccakFExecutor::execute (const vector<vector<Goldilocks::Element>> &input,
     {
         for (uint64_t i=0; i<1600; i++)
         {
-            setPol(pols.a, relRef2AbsRef(SinRef0 + i*44, slot), fr.toU64(input[slot][i]));
+            setPol(pols.a, KeccakGateConfig.relRef2AbsRef(KeccakGateConfig.sinRef0 + i*44, slot), fr.toU64(input[slot][i]));
         }
     }
 
@@ -342,9 +342,9 @@ void KeccakFExecutor::execute (const vector<vector<Goldilocks::Element>> &input,
     {
         for (uint64_t i=0; i<program.size(); i++)
         {
-            uint64_t absRefa = relRef2AbsRef(program[i].refa, slot);
-            uint64_t absRefb = relRef2AbsRef(program[i].refb, slot);
-            uint64_t absRefr = relRef2AbsRef(program[i].refr, slot);
+            uint64_t absRefa = KeccakGateConfig.relRef2AbsRef(program[i].refa, slot);
+            uint64_t absRefb = KeccakGateConfig.relRef2AbsRef(program[i].refb, slot);
+            uint64_t absRefr = KeccakGateConfig.relRef2AbsRef(program[i].refr, slot);
             
             switch (program[i].pina)
             {
@@ -426,14 +426,14 @@ uint64_t KeccakFExecutor::getPol (CommitPol (&pol)[4], uint64_t index)
 {
     Keccak2Input input;
     input.init(pInput, inputSize);
-    KeccakState S;
+    GateState S;
 
     uint8_t r[1088];
     while (input.getNextBits(r))
     {
         for (uint64_t i=0; i<1088; i++)
         {
-            S.gate[SinRef0 + i*44].pin[pin_a].bit ^= r[i];
+            S.gate[KeccakGateConfig.sinRef0 + i*44].pin[pin_a].bit ^= r[i];
         }
         execute(S);
         S.copySoutToSinAndResetRefs();

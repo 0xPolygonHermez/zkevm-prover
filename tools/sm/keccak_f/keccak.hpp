@@ -1,20 +1,20 @@
 #ifndef KECCAK_SM_HPP
 #define KECCAK_SM_HPP
 
-#include "sm/keccak_f/keccak_state.hpp"
 #include "utils.hpp"
 #include "scalar.hpp"
 #include "config.hpp"
+#include "gate_state.hpp"
 
 /* Transformations */
-void KeccakTheta (KeccakState &S, uint64_t ir);
-void KeccakRho   (KeccakState &S);
-void KeccakPi    (KeccakState &S);
-void KeccakChi   (KeccakState &S, uint64_t ir);
-void KeccakIota  (KeccakState &S, uint64_t ir);
+void KeccakTheta (GateState &S, uint64_t ir);
+void KeccakRho   (GateState &S);
+void KeccakPi    (GateState &S);
+void KeccakChi   (GateState &S, uint64_t ir);
+void KeccakIota  (GateState &S, uint64_t ir);
 
 /* Keccak F 1600 */
-void KeccakF (KeccakState &S);
+void KeccakF (GateState &S);
 
 /*
     Input is a buffer of any length, including 0

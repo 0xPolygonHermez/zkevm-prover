@@ -4,11 +4,12 @@
 #include <array>
 #include "definitions.hpp"
 #include "config.hpp"
-#include "sm/keccak_f/keccak_state.hpp"
 //#include "keccak2/keccak2.hpp"
 #include "keccak_instruction.hpp"
 #include "sm/pols_generated/commit_pols.hpp"
 #include "timer.hpp"
+#include "gate_state.hpp"
+#include "keccak_config.hpp"
 
 USING_PROVER_FORK_NAMESPACE;
 
@@ -63,7 +64,7 @@ public:
     void loadScript (json j);
 
     /* Executs Keccak-f() over the provided state */
-    void execute (KeccakState &S);
+    void execute (GateState &S);
 
     /* bit must be a 2^23 array, with 54 sequences of Sin[1600],Sout[1600] starting at position 1 */
     void execute (uint8_t * bit);
@@ -80,7 +81,7 @@ public:
     uint64_t getPol (PROVER_FORK_NAMESPACE::CommitPol (&pol)[4], uint64_t index);
 
     /* Calculates keccak hash of input data.  Output must be 32-bytes long. */
-    /* Internally, it calls execute(KeccakState) */
+    /* Internally, it calls execute(GateState) */
     //void Keccak (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput);
 };
 
