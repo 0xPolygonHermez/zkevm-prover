@@ -527,7 +527,7 @@ int main(int argc, char **argv)
     if (config.runKeccakTest)
     {
         // Keccak2Test();
-        KeccakSMTest();
+        KeccakTest();
         KeccakSMExecutorTest(fr, config);
     }
 
