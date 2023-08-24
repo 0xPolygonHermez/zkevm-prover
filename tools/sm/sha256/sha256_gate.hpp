@@ -2,6 +2,7 @@
 #define SHA256_GATE_HPP
 
 #include <string>
+#include <stdint.h>
 
 using namespace std;
 
