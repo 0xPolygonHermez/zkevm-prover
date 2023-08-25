@@ -17,6 +17,47 @@
 
 using namespace std;
 
+/*
+
+A Tree (state) is made of a set of TreeChunks:
+
+      /\
+     /__\
+        /\
+       /__\
+          /\
+         /__\
+        /\ 
+       /__\
+
+When we call SMT.get(root, key, value):
+    - we want to read [key, value]
+    - we call db.read(treeChunk.hash, treeChunk.data) starting from the root until we reach the [key, value] leaf node
+
+When we call SMT.set(oldStateRoot, key, newValue, newStateRoot)
+    - we want to write a new leaf node [key, newValue] and get the resulting newStateRoot
+    - we calculate the new position of [key, newValue], creating new chunks if needed
+    - we recalculate the hashes of all the modified and new chunks
+    - we call db.write(treeChunk.hash, treeChunk.data) of all the modified and new chunks
+
+Every time we call SMT.set(), we are potentially creating a new Tree = SUM(TreeChunks)
+Every new Tree is a newer version of the state
+Many Trees (states) coexist in the same Forest (state history)
+Every executor.processBatch() can potentially create several new Trees (states)
+The Forest takes note of the latest Tree hash to keep track of the current state:
+
+     SR1      SR2      SR3      SR4
+     /\       /\       /\       /\
+    /__\     /__\     /__\     /__\
+                /\       /\       /\
+               /__\     /__\     /__\
+                           /\       /\
+                          /__\     /__\
+                                  /\ 
+                                 /__\
+
+*/
+
 class SmtContext64
 {
 public:
@@ -55,9 +96,6 @@ public:
     }
     zkresult set(const string &batchUUID, uint64_t tx, Database64 &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, SmtSetResult &result, DatabaseMap *dbReadLog = NULL);
     zkresult get(const string &batchUUID, Database64 &db, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], SmtGetResult &result, DatabaseMap *dbReadLog = NULL);
-    void splitKey(const Goldilocks::Element (&key)[4], bool (&result)[256]);
-    void joinKey(const vector<uint64_t> &bits, const Goldilocks::Element (&rkey)[4], Goldilocks::Element (&key)[4]);
-    void removeKeyBits(const Goldilocks::Element (&key)[4], uint64_t nBits, Goldilocks::Element (&rkey)[4]);
     zkresult hashSave(const SmtContext64 &ctx, const Goldilocks::Element (&v)[12], Goldilocks::Element (&hash)[4]);
 
     // Consolidate value and capacity

@@ -3,8 +3,47 @@
 #include "scalar.hpp"
 #include "timer.hpp"
 
+
+zkresult TreeChunk::readDataFromDb (const Goldilocks::Element (&_hash)[4])
+{
+    // Copy the hash
+    hash[0] = _hash[0];
+    hash[1] = _hash[1];
+    hash[2] = _hash[2];
+    hash[3] = _hash[3];
+    bHashValid = true;
+
+    // Reset children flags
+    bChildren64Valid = false;
+    bChildrenRestValid = false;
+
+    // Get the hash string
+    string hashString;
+    hashString = fea2string(fr, hash);
+
+    // Call the database
+    zkresult zkr;
+    zkr = db.read(hashString, hash, data, NULL);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("TreeChunk::readDataFromDb() failed calling db.read() result=" + zkresult2string(zkr) + " hash=" + hashString);
+        bDataValid = false;
+    }
+    else
+    {
+        bDataValid = true;
+    }
+
+    return zkr;
+}
+
 zkresult TreeChunk::data2children (void)
 {
+    if (bChildren64Valid)
+    {
+        return ZKR_SUCCESS;
+    }
+
     const uint8_t * pData = (const uint8_t *)data.c_str();
     uint64_t dataSize = data.size();
 
@@ -35,7 +74,7 @@ zkresult TreeChunk::data2children (void)
             // Check there is enough remaining data
             if ((dataSize - decodedSize) < 64)
             {
-                zklog.error("TreeChunk::data2children() unexpectedly run out of data dataSize=" + to_string(dataSize) + " decodedSize=" + to_string(decodedSize) + " hash=" + fea2string(db.fr, hash));
+                zklog.error("TreeChunk::data2children() unexpectedly run out of data dataSize=" + to_string(dataSize) + " decodedSize=" + to_string(decodedSize) + " hash=" + fea2string(fr, hash));
                 return ZKR_UNSPECIFIED;
             }
 
@@ -45,7 +84,7 @@ zkresult TreeChunk::data2children (void)
             // Decode the leaf key
             mpz_class auxScalar;
             ba2scalar(pData + decodedSize, 32, auxScalar);
-            scalar2fea(db.fr, auxScalar, children64[i].leaf.key);
+            scalar2fea(fr, auxScalar, children64[i].leaf.key);
 
             // Increase decoded size
             decodedSize += 32;
@@ -63,7 +102,7 @@ zkresult TreeChunk::data2children (void)
             // Check there is enough remaining data
             if ((dataSize - decodedSize) < 32)
             {
-                zklog.error("TreeChunk::data2children() unexpectedly run out of data dataSize=" + to_string(dataSize) + " decodedSize=" + to_string(decodedSize) + " hash=" + fea2string(db.fr, hash));
+                zklog.error("TreeChunk::data2children() unexpectedly run out of data dataSize=" + to_string(dataSize) + " decodedSize=" + to_string(decodedSize) + " hash=" + fea2string(fr, hash));
                 return ZKR_UNSPECIFIED;
             }
 
@@ -73,7 +112,7 @@ zkresult TreeChunk::data2children (void)
             // Decode the intermediate hash
             mpz_class auxScalar;
             ba2scalar(pData + decodedSize, 32, auxScalar);
-            scalar2fea(db.fr, auxScalar, children64[i].intermediate.hash);
+            scalar2fea(fr, auxScalar, children64[i].intermediate.hash);
 
             // Increase decoded size
             decodedSize += 32;
@@ -83,11 +122,19 @@ zkresult TreeChunk::data2children (void)
         mask = mask << 1;
     }
 
+    // Set children64 as valid
+    bChildren64Valid = true;
+
     return ZKR_SUCCESS;
 }
 
 zkresult TreeChunk::children2data (void)
 {
+    if (bDataValid)
+    {
+        return ZKR_SUCCESS;
+    }
+
     uint64_t isZero = 0;
     uint64_t isLeaf = 0;
     uint64_t encodedSize = 2*sizeof(uint64_t); // Skip the first 2 bitmaps
@@ -116,13 +163,13 @@ zkresult TreeChunk::children2data (void)
             // Check there is enough remaining data
             if ((TREE_CHUNK_MAX_DATA_SIZE - encodedSize) < 64)
             {
-                zklog.error("TreeChunk::children2data() unexpectedly run out of data encodedSize=" + to_string(encodedSize) + " hash=" + fea2string(db.fr, hash));
+                zklog.error("TreeChunk::children2data() unexpectedly run out of data encodedSize=" + to_string(encodedSize) + " hash=" + fea2string(fr, hash));
                 return ZKR_UNSPECIFIED;
             }
 
             // Encode the leaf key
             mpz_class auxScalar;
-            fea2scalar(db.fr, auxScalar, children64[i].leaf.key);
+            fea2scalar(fr, auxScalar, children64[i].leaf.key);
             scalar2bytesBE(auxScalar, pData + encodedSize);
 
             // Increase decoded size
@@ -141,13 +188,13 @@ zkresult TreeChunk::children2data (void)
             // Check there is enough remaining data
             if ((TREE_CHUNK_MAX_DATA_SIZE - encodedSize) < 32)
             {
-                zklog.error("TreeChunk::children2data() unexpectedly run out of data encodedSize=" + to_string(encodedSize) + " hash=" + fea2string(db.fr, hash));
+                zklog.error("TreeChunk::children2data() unexpectedly run out of data encodedSize=" + to_string(encodedSize) + " hash=" + fea2string(fr, hash));
                 return ZKR_UNSPECIFIED;
             }
 
             // Encode the intermediate hash
             mpz_class auxScalar;
-            fea2scalar(db.fr, auxScalar, children64[i].intermediate.hash);
+            fea2scalar(fr, auxScalar, children64[i].intermediate.hash);
             scalar2bytesBE(auxScalar, pData + encodedSize);
 
             // Increase decoded size
@@ -163,11 +210,19 @@ zkresult TreeChunk::children2data (void)
     data.clear();
     data.append((const char *)pData, encodedSize);
 
+    bDataValid = true;
+
     return ZKR_SUCCESS;
 }
 
 zkresult TreeChunk::calculateHash (void)
 {
+    if (bHashValid && bChildrenRestValid)
+    {
+        return ZKR_SUCCESS;
+    }
+    bChildrenRestValid = false;
+
     TimerStart(TREE_CHUNK_CALCULATE_HASH);
 
     if (level%6 != 0)
@@ -225,10 +280,14 @@ zkresult TreeChunk::calculateHash (void)
         case ZERO:
         {
             // Set hash to zero
-            hash[0] = db.fr.zero();
-            hash[1] = db.fr.zero();
-            hash[2] = db.fr.zero();
-            hash[3] = db.fr.zero();
+            hash[0] = fr.zero();
+            hash[1] = fr.zero();
+            hash[2] = fr.zero();
+            hash[3] = fr.zero();
+
+            // Set flags
+            bHashValid = true;
+            bChildrenRestValid = true;
 
             TimerStopAndLog(TREE_CHUNK_CALCULATE_HASH);
 
@@ -242,6 +301,10 @@ zkresult TreeChunk::calculateHash (void)
             hash[2] = child1.leaf.hash[2];
             hash[3] = child1.leaf.hash[3];
 
+            // Set flags
+            bHashValid = true;
+            bChildrenRestValid = true;
+
             TimerStopAndLog(TREE_CHUNK_CALCULATE_HASH);
 
             return ZKR_SUCCESS;
@@ -253,6 +316,10 @@ zkresult TreeChunk::calculateHash (void)
             hash[1] = child1.intermediate.hash[1];
             hash[2] = child1.intermediate.hash[2];
             hash[3] = child1.intermediate.hash[3];
+
+            // Set flags
+            bHashValid = true;
+            bChildrenRestValid = true;
 
             TimerStopAndLog(TREE_CHUNK_CALCULATE_HASH);
 

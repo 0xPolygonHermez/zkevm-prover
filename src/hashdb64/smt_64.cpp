@@ -6,6 +6,8 @@
 #include "zklog.hpp"
 #include <bitset>
 #include "state_manager_64.hpp"
+#include "key.hpp"
+#include "tree_chunk.hpp"
 
 zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, SmtSetResult &result, DatabaseMap *dbReadLog)
 {
@@ -29,7 +31,7 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
 
     // Get a list of the bits of the key to navigate top-down through the tree
     bool keys[256];
-    splitKey(key, keys);
+    splitKey(fr, key, keys);
 
     int64_t level = 0;
     uint64_t proofHashCounter = 0;
@@ -132,7 +134,7 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
             foundRKey[3] = siblings[level][3];
 
             // Joining the consumed key bits, we have the complete found key of the old value
-            joinKey(accKey, foundRKey, foundKey);
+            joinKey(fr, accKey, foundRKey, foundKey);
             bFoundKey = true;
 
 #ifdef LOG_SMT
@@ -266,14 +268,14 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
 
                 // Split the found key in bits
                 bool foundKeys[256];
-                splitKey(foundKey, foundKeys);
+                splitKey(fr, foundKey, foundKeys);
 
                 // While the key bits are the same, increase the level; we want to find the first bit when the keys differ
                 while (keys[level2] == foundKeys[level2]) level2++;
 
                 // Store the key of the old value at the new level
                 Goldilocks::Element oldKey[4];
-                removeKeyBits(foundKey, level2+1, oldKey);
+                removeKeyBits(fr, foundKey, level2+1, oldKey);
 
                 // Insert a new leaf node for the old value, and store the hash in oldLeafHash
 
@@ -306,7 +308,7 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
 
                 // Calculate the key of the new leaf node of the new value
                 Goldilocks::Element newKey[4];
-                removeKeyBits(key, level2 + 1, newKey);
+                removeKeyBits(fr, key, level2 + 1, newKey);
 
                 // Convert the value scalar to an array of field elements
                 Goldilocks::Element valueFea[8];
@@ -416,7 +418,7 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
 
             // Build the new remaining key
             Goldilocks::Element newKey[4];
-            removeKeyBits(key, level+1, newKey);
+            removeKeyBits(fr, key, level+1, newKey);
 
             // Convert the scalar value to an array of 8 field elements
             Goldilocks::Element valueFea[8];
@@ -597,7 +599,7 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
                         vector<uint64_t> auxBits;
                         auxBits = accKey;
                         auxBits.push_back(uKey);
-                        joinKey(auxBits, rKey, insKey );
+                        joinKey(fr, auxBits, rKey, insKey );
 
                         insValue = val;
                         isOld0 = false;
@@ -614,7 +616,7 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
 
                         // Calculate the old remaining key
                         Goldilocks::Element oldKey[4];
-                        removeKeyBits(insKey, level+1, oldKey);
+                        removeKeyBits(fr, insKey, level+1, oldKey);
 
                         // Create the old leaf node
                         Goldilocks::Element a[8];
@@ -809,6 +811,8 @@ zkresult Smt64::get (const string &batchUUID, Database64 &db, const Goldilocks::
 
     bool bUseStateManager = db.config.stateManager && (batchUUID.size() > 0);
 
+    zkresult zkr;
+
     Goldilocks::Element r[4];
     for (uint64_t i=0; i<4; i++)
     {
@@ -816,8 +820,8 @@ zkresult Smt64::get (const string &batchUUID, Database64 &db, const Goldilocks::
     }
 
     // Get a list of the bits of the key to navigate top-down through the tree
-    bool keys[256];
-    splitKey(key, keys);
+    bool keyBits[256];
+    splitKey(fr, key, keyBits);
 
     uint64_t level = 0;
 
@@ -835,7 +839,7 @@ zkresult Smt64::get (const string &batchUUID, Database64 &db, const Goldilocks::
 
     bool isOld0 = true;
     zkresult dbres;
-    vector<Goldilocks::Element> dbValue; // used to call db.read()
+    string dbValue; // used to call db.read()
 
 #ifdef LOG_SMT
     //zklog.info("Smt64::get() found database content:");
@@ -855,13 +859,92 @@ zkresult Smt64::get (const string &batchUUID, Database64 &db, const Goldilocks::
         }
         if (dbres != ZKR_SUCCESS)
         {
-            dbres = db.read(rString, r, dbValue, dbReadLog, false, keys, level);
+            dbres = db.read(rString, r, dbValue, dbReadLog, false, keyBits, level);
         }
         if (dbres != ZKR_SUCCESS)
         {
             zklog.error("Smt64::get() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + rString);
             return dbres;
         }
+
+        // TODO: store the processed tree chunks in a cache or similar, so that we don't have to recalculate hashes for this tree chunk
+        TreeChunk treeChunk(db);
+        treeChunk.hash[0] = r[0];
+        treeChunk.hash[1] = r[1];
+        treeChunk.hash[2] = r[2];
+        treeChunk.hash[3] = r[3];
+        treeChunk.data = dbValue;
+        zkr = treeChunk.data2children();
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("Smt64::get() failed calling treeChunk.data2children() result=" + zkresult2string(zkr) + " hash=" + rString);
+            return zkr;
+        }
+        zkr = treeChunk.calculateHash();
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("Smt64::get() failed calling treeChunk.calculateHash() result=" + zkresult2string(zkr) + " hash=" + rString);
+            return zkr;
+        }
+        if (!fr.equal(treeChunk.hash[0], r[0]) || !fr.equal(treeChunk.hash[1], r[1]) || !fr.equal(treeChunk.hash[2], r[2]) || !fr.equal(treeChunk.hash[3], r[3]))
+        {
+            zklog.error("Smt64::get() found calculated hash=" + fea2string(fr, treeChunk.hash) + " different from expected hash=" + fea2string(fr, r));
+            return ZKR_UNSPECIFIED;
+        }
+
+        // Calculate the children64 index corresponding to this level and key
+        uint64_t children64Position;
+        children64Position = keyBits[level] + 2*keyBits[level+1] + 4*keyBits[level+2] + 8*keyBits[level+3] + 16*keyBits[level+4] + 32*keyBits[level+5];
+
+        // Check what we find in this position
+        switch (treeChunk.children64[children64Position].type)
+        {
+            case ZERO:
+            {
+                r[0] = fr.zero();
+                r[1] = fr.zero();
+                r[2] = fr.zero();
+                r[3] = fr.zero();
+                // TODO: get siblings
+            }
+            case LEAF:
+            {
+                // Copy the found value
+                foundValue = treeChunk.children64[children64Position].leaf.value;
+
+                // Copy the found key
+                foundKey[0] = treeChunk.children64[children64Position].leaf.key[0];
+                foundKey[1] = treeChunk.children64[children64Position].leaf.key[1];
+                foundKey[2] = treeChunk.children64[children64Position].leaf.key[2];
+                foundKey[3] = treeChunk.children64[children64Position].leaf.key[3];
+
+                // Record that we found a key
+                bFoundKey = true;
+                // TODO: get siblings
+            }
+            case INTERMEDIATE:
+            {
+                // Copy the hash of the next tree chunk
+                r[0] = treeChunk.children64[children64Position].intermediate.hash[0];
+                r[1] = treeChunk.children64[children64Position].intermediate.hash[1];
+                r[2] = treeChunk.children64[children64Position].intermediate.hash[2];
+                r[3] = treeChunk.children64[children64Position].intermediate.hash[3];
+
+                // Increase level
+                level += 6;
+
+                // TODO: get siblings
+                break;
+            }
+            default:
+            {
+                zklog.error("Forest::Read() found invalid type=" + to_string(treeChunk.children64[children64Position].type));
+                return ZKR_UNSPECIFIED;
+            }
+        }
+
+#if 0
+
 
         // Get a copy of the content of this database entry, at the corresponding level: 0, 1...
         siblings[level] = dbValue;
@@ -907,7 +990,7 @@ zkresult Smt64::get (const string &batchUUID, Database64 &db, const Goldilocks::
             fea2scalar(fr, foundValue, fea);
 
             // We construct the whole key of that value in the database, and we call it foundKey
-            joinKey(accKey, foundRKey, foundKey);
+            joinKey(fr, accKey, foundRKey, foundKey);
             bFoundKey = true;
 #ifdef LOG_SMT
             zklog.info("Smt64::get() found at level=" + to_string(level) + " value/hash=" + fea2string(fr,valueHashFea) + " foundKey=" + fea2string(fr, foundKey) + " value=" + foundValue.get_str(16));
@@ -929,8 +1012,9 @@ zkresult Smt64::get (const string &batchUUID, Database64 &db, const Goldilocks::
             zklog.info("Smt64::get() down 1 level=" + to_string(level) + " keys[level]=" + to_string(keys[level]) + " root/hash=" + fea2string(fr,r));
 #endif
             // Increase the level
-            level++;
+            level += 6;
         }
+#endif
     }
 
     // One step back
@@ -941,7 +1025,10 @@ zkresult Smt64::get (const string &batchUUID, Database64 &db, const Goldilocks::
     if (bFoundKey)
     {
         // if foundKey==key, then foundValue is what we were looking for
-        if ( fr.equal(key[0], foundKey[0]) && fr.equal(key[1], foundKey[1]) && fr.equal(key[2], foundKey[2]) && fr.equal(key[3], foundKey[3]) )
+        if ( fr.equal(key[0], foundKey[0]) &&
+             fr.equal(key[1], foundKey[1]) &&
+             fr.equal(key[2], foundKey[2]) &&
+             fr.equal(key[3], foundKey[3]) )
         {
             value = foundValue;
         }
@@ -958,9 +1045,10 @@ zkresult Smt64::get (const string &batchUUID, Database64 &db, const Goldilocks::
     }
 
     // We leave the siblings only up to the leaf node level
-    map< uint64_t, vector<Goldilocks::Element> >::iterator it;
-    it = siblings.find(level+1);
-    siblings.erase(it, siblings.end());
+    // TODO manage siblings
+    //map< uint64_t, vector<Goldilocks::Element> >::iterator it;
+    //it = siblings.find(level+1);
+    //siblings.erase(it, siblings.end());
 
     result.root[0]   = root[0];
     result.root[1]   = root[1];
@@ -996,82 +1084,6 @@ zkresult Smt64::get (const string &batchUUID, Database64 &db, const Goldilocks::
 #endif
 
     return ZKR_SUCCESS;
-}
-
-// Split the fe key into 4-bits chuncks, e.g. 0x123456EF -> { 1, 2, 3, 4, 5, 6, E, F }
-void Smt64::splitKey( const Goldilocks::Element (&key)[4], bool (&result)[256])
-{
-    bitset<64> auxb0(fr.toU64(key[0]));
-    bitset<64> auxb1(fr.toU64(key[1]));
-    bitset<64> auxb2(fr.toU64(key[2]));
-    bitset<64> auxb3(fr.toU64(key[3]));
-    
-    // Split the key in bits, taking one bit from a different scalar every time
-    int cont = 0;
-    for (uint64_t i=0; i<64; i++)
-    {
-        result[cont] = auxb0[i];
-        result[cont+1] = auxb1[i];
-        result[cont+2] = auxb2[i];
-        result[cont+3] = auxb3[i];
-        cont+=4;
-    }
-}
-
-// Joins full key from remaining key and path already used
-// bits = key path used
-// rkey = remaining key
-// key = full key (returned)
-void Smt64::joinKey ( const vector<uint64_t> &bits, const Goldilocks::Element (&rkey)[4], Goldilocks::Element (&key)[4] )
-{
-    uint64_t n[4] = {0, 0, 0, 0};
-    mpz_class accs[4] = {0, 0, 0, 0};
-    for (uint64_t i=0; i<bits.size(); i++)
-    {
-        if (bits[i])
-        {
-            accs[i%4] = (accs[i%4] | (mpz_class(1)<<n[i%4]))/*%fr.prime()*/;
-        }
-        n[i%4] += 1;
-    }
-    Goldilocks::Element auxk[4];
-    for (uint64_t i=0; i<4; i++) auxk[i] = rkey[i];
-    for (uint64_t i=0; i<4; i++)
-    {
-        mpz_class aux = fr.toU64(auxk[i]);
-        aux = ((aux<<n[i]) | accs[i])/*%mpz_class(fr.prime())*/;
-        auxk[i] = fr.fromU64(aux.get_ui());
-    }
-    for (uint64_t i=0; i<4; i++) key[i] = auxk[i];
-}
-
-/**
- * Removes bits from the key depending on the smt level
- * key -key
- * nBits - bits to remove
- * returns rkey - remaining key bits to store
- */
-void Smt64::removeKeyBits ( const Goldilocks::Element (&key)[4], uint64_t nBits, Goldilocks::Element (&rkey)[4] )
-{
-    uint64_t fullLevels = nBits / 4;
-    mpz_class auxk[4];
-
-    for (uint64_t i=0; i<4; i++)
-    {
-        auxk[i] = fr.toU64(key[i]);
-    }
-
-    for (uint64_t i = 0; i < 4; i++)
-    {
-        uint64_t n = fullLevels;
-        if (fullLevels * 4 + i < nBits) n += 1;
-        auxk[i] = auxk[i] >> n;
-    }
-
-    for (uint64_t i=0; i<4; i++)
-    {
-        scalar2fe(fr, auxk[i], rkey[i]);
-    }
 }
 
 zkresult Smt64::hashSave ( const SmtContext64 &ctx, const Goldilocks::Element (&v)[12], Goldilocks::Element (&hash)[4])

@@ -3,6 +3,7 @@
 #include "poseidon_goldilocks.hpp"
 #include "goldilocks_base_field.hpp"
 #include "smt_64.hpp"
+#include "key.hpp"
 
 Goldilocks fr;
 PoseidonGoldilocks poseidon;
@@ -23,7 +24,7 @@ void LeafNode::calculateHash (void)
 
     // Calculate the remaining key
     Goldilocks::Element rkey[4];
-    calculateRkey(rkey);
+    removeKeyBits(fr, key, level, rkey);
 
     // Prepare input = [rkey, valueHash, 1000]
     input[0] = rkey[0];
@@ -41,9 +42,4 @@ void LeafNode::calculateHash (void)
 
     // Calculate the leaf node hash
     poseidon.hash(hash, input);
-}
-
-void LeafNode::calculateRkey (Goldilocks::Element (&rkey)[4])
-{
-    Smt64::removeKeyBits(key, level, rkey);
 }

@@ -13,7 +13,6 @@ public:
     Goldilocks::Element hash[4]; // = Poseidon(rkey + Poseidon(value, 0000) + 1000)
 
     void calculateHash (void);
-    void calculateRkey (Goldilocks::Element (&rkey)[4]);
 };
 
 #endif

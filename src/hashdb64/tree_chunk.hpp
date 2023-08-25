@@ -40,6 +40,7 @@ During a process batch, we need to:
 #define TREE_CHUNK_WIDTH 64
 #define TREE_CHUNK_MAX_DATA_SIZE (TREE_CHUNK_WIDTH*(32+32) + 16 + 16) // All leaves = 64*(key+value) + isZero + isLeaf
 
+
 class TreeChunk
 {
 private:
@@ -60,8 +61,23 @@ public:
     // Encoded data
     string              data;
 
+    // Flags
+    bool bHashValid;
+    bool bChildrenRestValid;
+    bool bChildren64Valid;
+    bool bDataValid;
+
     // Constructor
-    TreeChunk(Database64 &db) : db(db), fr(db.fr) {};
+    TreeChunk(Database64 &db) :
+        db(db),
+        fr(db.fr),
+        bHashValid(false),
+        bChildrenRestValid(false),
+        bChildren64Valid(false),
+        bDataValid(false) {};
+
+    // Read from database
+    zkresult readDataFromDb (const Goldilocks::Element (&hash)[4]);
 
     // Encode/decode data functions
     zkresult data2children (void); // Decodde data and store result into children64
