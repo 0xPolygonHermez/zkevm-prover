@@ -874,6 +874,7 @@ zkresult Smt64::get (const string &batchUUID, Database64 &db, const Goldilocks::
         treeChunk.hash[2] = r[2];
         treeChunk.hash[3] = r[3];
         treeChunk.data = dbValue;
+        treeChunk.level = level;
         zkr = treeChunk.data2children();
         if (zkr != ZKR_SUCCESS)
         {
@@ -886,6 +887,8 @@ zkresult Smt64::get (const string &batchUUID, Database64 &db, const Goldilocks::
             zklog.error("Smt64::get() failed calling treeChunk.calculateHash() result=" + zkresult2string(zkr) + " hash=" + rString);
             return zkr;
         }
+
+        // Check that the resulting hash is the same we used to get the data from the database
         if (!fr.equal(treeChunk.hash[0], r[0]) || !fr.equal(treeChunk.hash[1], r[1]) || !fr.equal(treeChunk.hash[2], r[2]) || !fr.equal(treeChunk.hash[3], r[3]))
         {
             zklog.error("Smt64::get() found calculated hash=" + fea2string(fr, treeChunk.hash) + " different from expected hash=" + fea2string(fr, r));
@@ -894,7 +897,12 @@ zkresult Smt64::get (const string &batchUUID, Database64 &db, const Goldilocks::
 
         // Calculate the children64 index corresponding to this level and key
         uint64_t children64Position;
-        children64Position = keyBits[level] + 2*keyBits[level+1] + 4*keyBits[level+2] + 8*keyBits[level+3] + 16*keyBits[level+4] + 32*keyBits[level+5];
+        children64Position =    keyBits[level] +
+                              2*keyBits[level+1] +
+                              4*keyBits[level+2] +
+                              8*keyBits[level+3] +
+                             16*keyBits[level+4] +
+                             32*keyBits[level+5];
 
         // Check what we find in this position
         switch (treeChunk.children64[children64Position].type)
@@ -905,7 +913,7 @@ zkresult Smt64::get (const string &batchUUID, Database64 &db, const Goldilocks::
                 r[1] = fr.zero();
                 r[2] = fr.zero();
                 r[3] = fr.zero();
-                // TODO: get siblings
+                // TODO: get siblings?
             }
             case LEAF:
             {
