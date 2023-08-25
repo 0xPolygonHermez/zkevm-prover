@@ -2,6 +2,7 @@
 #define LEAF_NODE_HPP
 
 #include "goldilocks_base_field.hpp"
+#include "poseidon_goldilocks.hpp"
 #include "zkresult.hpp"
 
 class LeafNode
@@ -12,7 +13,7 @@ public:
     mpz_class           value; // 256 bits
     Goldilocks::Element hash[4]; // = Poseidon(rkey + Poseidon(value, 0000) + 1000)
 
-    void calculateHash (void);
+    void calculateHash (Goldilocks &fr, PoseidonGoldilocks &poseidon);
 };
 
 #endif

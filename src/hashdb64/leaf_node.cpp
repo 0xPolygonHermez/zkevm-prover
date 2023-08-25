@@ -5,10 +5,7 @@
 #include "smt_64.hpp"
 #include "key.hpp"
 
-Goldilocks fr;
-PoseidonGoldilocks poseidon;
-
-void LeafNode::calculateHash (void)
+void LeafNode::calculateHash (Goldilocks &fr, PoseidonGoldilocks &poseidon)
 {
     // Prepare input = [value8, 0000]
     Goldilocks::Element input[12];

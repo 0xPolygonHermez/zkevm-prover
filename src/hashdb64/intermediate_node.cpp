@@ -4,7 +4,7 @@
 Goldilocks fr;
 PoseidonGoldilocks poseidon;
 
-void IntermediateNode::calculateHash (const Goldilocks::Element (&leftHash)[4], const Goldilocks::Element (&rightHash)[4])
+void IntermediateNode::calculateHash (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Goldilocks::Element (&leftHash)[4], const Goldilocks::Element (&rightHash)[4])
 {
     // Prepare input = [leftHash, rightHash, 0000]
     Goldilocks::Element input[12];

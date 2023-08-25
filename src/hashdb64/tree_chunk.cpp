@@ -367,7 +367,7 @@ zkresult TreeChunk::calculateChild (const uint64_t level, Child &leftChild, Chil
         case LEAF:
         {
             // Calculate left leaf node hash
-            leftChild.leaf.calculateHash();
+            leftChild.leaf.calculateHash(fr, poseidon);
 
             pLeftHash = &leftChild.leaf.hash;
         }
@@ -394,7 +394,7 @@ zkresult TreeChunk::calculateChild (const uint64_t level, Child &leftChild, Chil
         case LEAF:
         {
             // Calculate right leaf node hash
-            rightChild.leaf.calculateHash();
+            rightChild.leaf.calculateHash(fr, poseidon);
 
             pRightHash = &rightChild.leaf.hash;
         }
@@ -411,7 +411,7 @@ zkresult TreeChunk::calculateChild (const uint64_t level, Child &leftChild, Chil
 
     // Calculate intermediate node hash
     outputChild.type = INTERMEDIATE;
-    outputChild.intermediate.calculateHash(*pLeftHash, *pRightHash);
+    outputChild.intermediate.calculateHash(fr, poseidon, *pLeftHash, *pRightHash);
 
     return ZKR_SUCCESS;
 }

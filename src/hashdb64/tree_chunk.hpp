@@ -3,6 +3,7 @@
 
 #include <string>
 #include "goldilocks_base_field.hpp"
+#include "poseidon_goldilocks.hpp"
 #include "zkresult.hpp"
 #include "database_64.hpp"
 #include "leaf_node.hpp"
@@ -46,6 +47,7 @@ class TreeChunk
 private:
     Database64          &db;
     Goldilocks          &fr;
+    PoseidonGoldilocks  &poseidon;
 public:
     uint64_t            level; // Level of the top hash of the chunk: 0, 6, 12, 18, 24, etc.
     uint8_t             key; // 6 bits portion of the total key at this level of the SMT tree
@@ -68,9 +70,10 @@ public:
     bool bDataValid;
 
     // Constructor
-    TreeChunk(Database64 &db) :
+    TreeChunk(Database64 &db, PoseidonGoldilocks &poseidon) :
         db(db),
         fr(db.fr),
+        poseidon(poseidon),
         bHashValid(false),
         bChildrenRestValid(false),
         bChildren64Valid(false),

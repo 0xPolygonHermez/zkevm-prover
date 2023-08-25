@@ -59,7 +59,7 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
 
     bool isOld0 = true;
     zkresult dbres;
-    vector<Goldilocks::Element> dbValue(12); // used to call db.read()
+    string dbValue; // used to call db.read()
 
     // Start natigating the tree from the top: r = root
     // Go down while r!=0 (while there is branch) until we find the key
@@ -84,7 +84,7 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
         }
 
         // Get a copy of the content of this database entry, at the corresponding level: 0, 1...
-        siblings[level].resize(12);
+        /*siblings[level].resize(12);
         siblings[level][0].fe = dbValue[0].fe;
         siblings[level][1].fe = dbValue[1].fe;
         siblings[level][2].fe = dbValue[2].fe;
@@ -96,7 +96,7 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
         siblings[level][8].fe = dbValue[8].fe;
         siblings[level][9].fe = dbValue[9].fe;
         siblings[level][10].fe = dbValue[10].fe;
-        siblings[level][11].fe = dbValue[11].fe;
+        siblings[level][11].fe = dbValue[11].fe;*/
         
         // if siblings[level][8]=1 then this is a leaf node
         if ( siblings[level].size()>8 && fr.equal(siblings[level][8], fr.one()) )
@@ -123,9 +123,9 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
             }
 
             // Convert the 8 found value fields to a foundValue scalar
-            Goldilocks::Element valueFea[8];
-            for (uint64_t i=0; i<8; i++) valueFea[i] = dbValue[i];
-            fea2scalar(fr, foundValue, valueFea);
+            //Goldilocks::Element valueFea[8];
+            //for (uint64_t i=0; i<8; i++) valueFea[i] = dbValue[i];
+            //fea2scalar(fr, foundValue, valueFea);
 
             // First 4 elements are the remaining key of the old value
             foundRKey[0] = siblings[level][0];
@@ -551,7 +551,7 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
                     }
 
                     // Store them in siblings
-                    siblings[level+1] = dbValue;
+                    //siblings[level+1] = dbValue;
 
                     // If it is a leaf node
                     if ( siblings[level+1].size()>8 && fr.equal( siblings[level+1][8], fr.one() ) )
@@ -584,7 +584,7 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
 
                         // Store the value as a scalar in val
                         Goldilocks::Element valA[8];
-                        for (uint64_t i=0; i<8; i++) valA[i] = dbValue[i];
+                        //for (uint64_t i=0; i<8; i++) valA[i] = dbValue[i];
                         mpz_class val;
                         fea2scalar(fr, val, valA);
 
@@ -868,7 +868,7 @@ zkresult Smt64::get (const string &batchUUID, Database64 &db, const Goldilocks::
         }
 
         // TODO: store the processed tree chunks in a cache or similar, so that we don't have to recalculate hashes for this tree chunk
-        TreeChunk treeChunk(db);
+        TreeChunk treeChunk(db, poseidon);
         treeChunk.hash[0] = r[0];
         treeChunk.hash[1] = r[1];
         treeChunk.hash[2] = r[2];
@@ -1096,6 +1096,7 @@ zkresult Smt64::get (const string &batchUUID, Database64 &db, const Goldilocks::
 
 zkresult Smt64::hashSave ( const SmtContext64 &ctx, const Goldilocks::Element (&v)[12], Goldilocks::Element (&hash)[4])
 {
+    /*
     // Calculate the poseidon hash of the vector of field elements: v = a | c
     poseidon.hash(hash, v);
 
@@ -1132,7 +1133,8 @@ zkresult Smt64::hashSave ( const SmtContext64 &ctx, const Goldilocks::Element (&
         zklog.info(s);
     }
 #endif
-    return zkr;
+    return zkr;*/
+    return ZKR_UNSPECIFIED;
 }
 
 zkresult Smt64::updateStateRoot(Database64 &db, const Goldilocks::Element (&stateRoot)[4])

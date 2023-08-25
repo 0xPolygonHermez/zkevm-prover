@@ -7,7 +7,9 @@ zkresult CheckTree64 (Database64 &db, const string &key, uint64_t level, CheckTr
 {
     checkTreeCounters.maxLevel = zkmax(checkTreeCounters.maxLevel, level);
 
-    TreeChunk treeChunk(db);
+    PoseidonGoldilocks poseidon;
+
+    TreeChunk treeChunk(db, poseidon);
     string2key(db.fr, key, treeChunk.hash);
     zkresult result = db.read(key, treeChunk.hash, treeChunk.data, NULL, false);
     if (result != ZKR_SUCCESS)
