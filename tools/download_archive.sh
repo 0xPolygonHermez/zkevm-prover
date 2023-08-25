@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
 
 echo "Please ensure that you run this script from the root of the zkevm-prover repository."
