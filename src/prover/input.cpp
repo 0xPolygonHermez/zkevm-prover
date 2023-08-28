@@ -391,6 +391,15 @@ void Input::loadDatabase (json &input)
                 dbValue.push_back(fe);
             }
 
+            // Add padding zeros for value hashes to match database format, where capacity is written always
+            if (dbValue.size() == 8)
+            {
+                dbValue.push_back(fr.zero());
+                dbValue.push_back(fr.zero());
+                dbValue.push_back(fr.zero());
+                dbValue.push_back(fr.zero());
+            }
+
             // Get the key fe element
             string key = Remove0xIfPresent(it.key());
             if (key.size() > 64)

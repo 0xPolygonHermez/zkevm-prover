@@ -3,7 +3,6 @@
 
 #include "config.hpp"
 #include "goldilocks_base_field.hpp"
-#include "main_sm/fork_0/main/main_executor.hpp"
 #include "main_sm/fork_1/main/main_executor.hpp"
 #include "main_sm/fork_2/main/main_executor.hpp"
 #include "main_sm/fork_3/main/main_executor.hpp"
@@ -29,7 +28,6 @@ public:
     Goldilocks &fr;
     const Config &config;
     
-    fork_0::MainExecutor mainExecutor_fork_0;
     fork_1::MainExecutor mainExecutor_fork_1;
     fork_2::MainExecutor mainExecutor_fork_2;
     fork_3::MainExecutor mainExecutor_fork_3;
@@ -51,7 +49,6 @@ public:
     Executor(Goldilocks &fr, const Config &config, PoseidonGoldilocks &poseidon) :
         fr(fr),
         config(config),
-        mainExecutor_fork_0(fr, poseidon, config),
         mainExecutor_fork_1(fr, poseidon, config),
         mainExecutor_fork_2(fr, poseidon, config),
         mainExecutor_fork_3(fr, poseidon, config),

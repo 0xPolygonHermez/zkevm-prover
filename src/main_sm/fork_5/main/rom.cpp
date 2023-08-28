@@ -63,10 +63,11 @@ void Rom::load(Goldilocks &fr, json &romJson)
         lastCtxUsedOffset            = getMemoryOffset("lastCtxUsed");
         isCreateOffset               = getMemoryOffset("isCreate");
         effectivePercentageRLPOffset = getMemoryOffset("effectivePercentageRLP");
+        calldataCTXOffset            = getMemoryOffset("calldataCTX");
+        calldataOffsetOffset         = getMemoryOffset("calldataOffset");
     }
 
     // Load ROM integer constants
-    constants.CALLDATA_OFFSET                   = getConstant(romJson, "CALLDATA_OFFSET");
     constants.BATCH_DIFFICULTY                  = getConstant(romJson, "BATCH_DIFFICULTY");
     constants.TX_GAS_LIMIT                      = getConstant(romJson, "TX_GAS_LIMIT");
     constants.GLOBAL_EXIT_ROOT_STORAGE_POS      = getConstant(romJson, "GLOBAL_EXIT_ROOT_STORAGE_POS");

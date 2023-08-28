@@ -126,6 +126,10 @@ public:
     {
         return execution_trace;
     }
+    uint64_t get_tx_number(void)
+    {
+        return finalTrace.responses.size();
+    }
 };
 
 } // namespace

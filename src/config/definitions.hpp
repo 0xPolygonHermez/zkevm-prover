@@ -28,11 +28,11 @@
 //#define LOG_TIME_STATISTICS_STATEDB_REMOTE // If defined, generates remote statedb statistics
 //#define LOG_TIME_STATISTICS_STATEDB // If defined, generates statedb statistics
 #define LOG_TIME_STATISTICS_MAIN_EXECUTOR
+#define LOG_TIME_STATISTICS_STATE_MANAGER
 //#define TIME_METRIC_TABLE
 //#define LOG_TXS
 //#define LOG_SERVICE
 #define LOG_SERVICE_EXECUTOR_INPUT
-//#define LOG_SERVICE_EXECUTOR_INPUT_JSON
 #define LOG_SERVICE_EXECUTOR_OUTPUT
 //#define LOG_BME
 //#define LOG_BME_HASH
@@ -56,6 +56,7 @@
 //#define LOG_DB_WRITE_REMOTE
 //#define LOG_DB_ACCEPT_INTRAY
 //#define LOG_HASHDB_SERVICE
+//#define LOG_STATE_MANAGER
 //#define LOG_FULL_TRACER
 #define LOG_FULL_TRACER_ON_ERROR
 //#define LOG_TX_HASH

@@ -37,7 +37,12 @@
 #include "hashdb_singleton.hpp"
 #include "unit_test.hpp"
 #include "database_cache_test.hpp"
+#include "database_associative_cache_test.hpp"
 #include "main_sm/fork_5/main_exec_c/account.hpp"
+#include "state_manager.hpp"
+#include "state_manager_64.hpp"
+#include "check_tree_test.hpp"
+#include "database_performance_test.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -208,8 +213,8 @@ public:
     RunFileThreadArguments(Goldilocks &fr, Prover &prover, Config &config) : fr(fr), prover(prover), config(config){};
 };
 
-#define RUN_FILE_MULTITHREAD_N_THREADS 100
-#define RUN_FILE_MULTITHREAD_N_FILES 100
+#define RUN_FILE_MULTITHREAD_N_THREADS 10
+#define RUN_FILE_MULTITHREAD_N_FILES 10
 
 void *runFileProcessBatchThread(void *arg)
 {
@@ -310,6 +315,10 @@ int main(int argc, char **argv)
     // Test that stderr is properly logged
     cerr << "Checking error channel; ignore this trace\n";
     zklog.warning("Checking warning channel; ignore this trace");
+
+    // Print the configuration file name
+    string configFileName = pConfigFile;
+    zklog.info("Config file: " + configFileName);
 
     // Print the number of cores
     zklog.info("Number of cores=" + to_string(getNumberOfCores()));
@@ -488,6 +497,16 @@ int main(int argc, char **argv)
     // Init the HashDB singleton
     hashDBSingleton.init(fr, config);
 
+    // Init the StateManager singleton
+    if (config.hashDB64)
+    {
+        stateManager64.init(config);
+    }
+    else
+    {
+        stateManager.init(config);
+    }
+
     // Init goldilocks precomputed
     TimerStart(GOLDILOCKS_PRECOMPUTED_INIT);
     glp.init();
@@ -553,6 +572,24 @@ int main(int argc, char **argv)
         DatabaseCacheTest();
     }
 
+    // Test Associative Database cache
+    if (config.runDatabaseAssociativeCacheTest)
+    {
+        DatabaseAssociativeCacheTest();
+    }
+
+    // Test check tree
+    if (config.runCheckTreeTest)
+    {
+        CheckTreeTest(config);
+    }
+    
+    // Test Database performance
+    if (config.runDatabasePerformanceTest)
+    {
+        DatabasePerformanceTest();
+    }
+
     // Unit test
     if (config.runUnitTest)
     {
@@ -589,9 +626,16 @@ int main(int argc, char **argv)
 #ifdef DATABASE_USE_CACHE
 
     /* INIT DB CACHE */
-    Database::dbMTCache.setName("MTCache");
+    if(config.useAssociativeCache){
+        Database::useAssociativeCache = true;
+        Database::dbMTACache.postConstruct(config.log2DbMTAssociativeCacheIndexesSize, config.log2DbMTAssociativeCacheSize, "MTACache");
+    }
+    else{
+        Database::useAssociativeCache = false;
+        Database::dbMTCache.setName("MTCache");
+        Database::dbMTCache.setMaxSize(config.dbMTCacheSize*1024*1024);
+    }
     Database::dbProgramCache.setName("ProgramCache");
-    Database::dbMTCache.setMaxSize(config.dbMTCacheSize*1024*1024);
     Database::dbProgramCache.setMaxSize(config.dbProgramCacheSize*1024*1024);
 
     if (config.databaseURL != "local") // remote DB
@@ -601,7 +645,7 @@ int main(int argc, char **argv)
         {
             TimerStart(DB_CACHE_LOAD);
             // if we have a db cache enabled
-            if ((Database::dbMTCache.enabled()) || (Database::dbProgramCache.enabled()))
+            if ((Database::dbMTCache.enabled()) || (Database::dbProgramCache.enabled()) || (Database::dbMTACache.enabled()))
             {
                 if (config.loadDBToMemCacheInParallel) {
                     // Run thread that loads the DB into the dbCache

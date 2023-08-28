@@ -2,6 +2,7 @@
 #define ZKLOG_HPP
 
 #include <string>
+#include <pthread.h>
 
 using namespace std;
 
@@ -15,6 +16,8 @@ private:
 
     // Log prefix
     string prefix;
+
+    string getThreadID (void);
 
 public:
     zkLog ();

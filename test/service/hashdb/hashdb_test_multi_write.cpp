@@ -12,6 +12,8 @@ uint64_t HashDBTestMultiWrite (const Config& config)
 {
     uint64_t numberOfFailedTests = 0;
 
+    string uuid = getUUID();
+    uint64_t tx = 0;
     Goldilocks fr;
     PoseidonGoldilocks poseidon;
     HashDBInterface * pHashDB = HashDBClientFactory::createHashDBClient(fr,config);
@@ -75,7 +77,7 @@ uint64_t HashDBTestMultiWrite (const Config& config)
 
             // Set the value
             //zklog.info("HashDBTestMultiWrite() tree=" + to_string(tree) + " i=" + to_string(i) + " calling pHashDB->set with root=" + fea2string(fr, root) + " key=" + fea2string(fr,key));
-            zkresult zkr = pHashDB->set(root, key, value, true, root, NULL, NULL );
+            zkresult zkr = pHashDB->set(uuid, tx, root, key, value, PERSISTENCE_DATABASE, root, NULL, NULL );
             if (zkr != ZKR_SUCCESS)
             {
                 zklog.error("HashDBTestMultiWrite() set tree=" + to_string(tree) + " i=" + to_string(i) + " result=" + zkresult2string(zkr));
@@ -89,7 +91,7 @@ uint64_t HashDBTestMultiWrite (const Config& config)
         roots[tree][2] = root[2];
         roots[tree][3] = root[3];
 
-        pHashDB->flush(flushId, storedFlushId);
+        pHashDB->flush(uuid, fea2string(fr, root), PERSISTENCE_DATABASE, flushId, storedFlushId);
 
         zklog.info("HashDBTestMultiWrite() after tree=" + to_string(tree) + " root=" + fea2string(fr, root) + " flushId=" + to_string(flushId) + " storedFlushId=" + to_string(storedFlushId));
     }
@@ -128,7 +130,7 @@ uint64_t HashDBTestMultiWrite (const Config& config)
 
             // Read the value
             mpz_class readValue;
-            zkresult zkr = pHashDB->get(roots[tree], key, readValue, NULL, NULL );
+            zkresult zkr = pHashDB->get(uuid, roots[tree], key, readValue, NULL, NULL );
             if (zkr != ZKR_SUCCESS)
             {
                 zklog.error("HashDBTestMultiWrite() get i=" + to_string(i) + " result=" + zkresult2string(zkr));

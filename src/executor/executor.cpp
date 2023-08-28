@@ -1,7 +1,5 @@
 #include "executor.hpp"
 #include "utils.hpp"
-#include "main_sm/fork_0/main_exec_generated/main_exec_generated.hpp"
-#include "main_sm/fork_0/main_exec_generated/main_exec_generated_fast.hpp"
 #include "main_sm/fork_1/main_exec_generated/main_exec_generated.hpp"
 #include "main_sm/fork_1/main_exec_generated/main_exec_generated_fast.hpp"
 #include "main_sm/fork_2/main_exec_generated/main_exec_generated.hpp"
@@ -22,33 +20,6 @@ void Executor::process_batch (ProverRequest &proverRequest)
     // Execute the Main State Machine
     switch (proverRequest.input.publicInputsExtended.publicInputs.forkID)
     {
-        case 0: // fork_0
-        {
-            /*if (config.useMainExecGenerated) // Generated code has been disabled in old forks
-            {
-                fork_0::main_exec_generated_fast(mainExecutor_fork_0, proverRequest);
-            }
-            else*/
-            {
-                // Allocate committed polynomials for only 1 evaluation
-                void * pAddress = calloc(fork_0::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
-                if (pAddress == NULL)
-                {
-                    zklog.error("Executor::process_batch() failed calling calloc(" + to_string(fork_0::CommitPols::pilSize()) + ")");
-                    exitProcess();
-                }
-                fork_0::CommitPols commitPols(pAddress,1);
-
-                // This instance will store all data required to execute the rest of State Machines
-                fork_0::MainExecRequired required;
-
-                mainExecutor_fork_0.execute(proverRequest, commitPols.Main, required);
-
-                // Free committed polynomials address space
-                free(pAddress);
-            }
-            return;
-        }
         case 1: // fork_1
         {
             /*if (config.useMainExecGenerated) // Generated code has been disabled in old forks
@@ -57,6 +28,8 @@ void Executor::process_batch (ProverRequest &proverRequest)
             }
             else*/
             {
+                zklog.info("Executor::process_batch() fork 1 native");
+
                 // Allocate committed polynomials for only 1 evaluation
                 void * pAddress = calloc(fork_1::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
                 if (pAddress == NULL)
@@ -84,6 +57,8 @@ void Executor::process_batch (ProverRequest &proverRequest)
             }
             else*/
             {
+                zklog.info("Executor::process_batch() fork 2 native");
+
                 // Allocate committed polynomials for only 1 evaluation
                 void * pAddress = calloc(fork_2::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
                 if (pAddress == NULL)
@@ -111,6 +86,8 @@ void Executor::process_batch (ProverRequest &proverRequest)
             }
             else*/
             {
+                zklog.info("Executor::process_batch() fork 3 native");
+
                 // Allocate committed polynomials for only 1 evaluation
                 void * pAddress = calloc(fork_3::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
                 if (pAddress == NULL)
@@ -132,12 +109,15 @@ void Executor::process_batch (ProverRequest &proverRequest)
         }
         case 4: // fork_4
         {
-            /*if (config.useMainExecGenerated)
+            if (config.useMainExecGenerated)
             {
+                zklog.info("Executor::process_batch() fork 4 generated");
                 fork_4::main_exec_generated_fast(mainExecutor_fork_4, proverRequest);
             }
-            else*/
+            else
             {
+                zklog.info("Executor::process_batch() fork 4 native");
+
                 // Allocate committed polynomials for only 1 evaluation
                 void * pAddress = calloc(fork_4::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
                 if (pAddress == NULL)
@@ -161,14 +141,18 @@ void Executor::process_batch (ProverRequest &proverRequest)
         {
             if (config.useMainExecC)
             {
+                zklog.info("Executor::process_batch() fork 5 C");
                 mainExecutorC_fork_5.execute(proverRequest);
             }
             else if (config.useMainExecGenerated)
             {
+                zklog.info("Executor::process_batch() fork 5 generated");
                 fork_5::main_exec_generated_fast(mainExecutor_fork_5, proverRequest);
             }
             else
             {
+                zklog.info("Executor::process_batch() fork 5 native");
+
                 // Allocate committed polynomials for only 1 evaluation
                 void * pAddress = calloc(fork_5::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
                 if (pAddress == NULL)

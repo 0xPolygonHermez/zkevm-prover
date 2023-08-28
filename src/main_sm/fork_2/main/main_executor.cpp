@@ -34,6 +34,7 @@
 #include "zkassert.hpp"
 #include "poseidon_g_permutation.hpp"
 #include "goldilocks_precomputed.hpp"
+#include "zklog.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -70,7 +71,7 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     // Check rom file name
     if (config.rom.size()==0)
     {
-        cerr << "Error: ROM file name is empty" << endl;
+        zklog.error("Error: MainExecutor::MainExecutor() ROM file name is empty");
         exitProcess();
     }
 
@@ -110,7 +111,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 {
     TimerStart(MAIN_EXECUTOR_EXECUTE);
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
     struct timeval t;
     TimeMetricStorage mainMetrics;
     TimeMetricStorage evalCommandMetrics;
@@ -119,8 +120,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     HashDBInterface *pHashDB = HashDBClientFactory::createHashDBClient(fr, config);
     if (pHashDB == NULL)
     {
-        cerr << "Error: MainExecutor::MainExecutor() failed calling HashDBClientFactory::createHashDBClient() uuid=" << proverRequest.uuid << endl;
-        exitProcess();
+        zklog.error("MainExecutor::execute() failed calling HashDBClientFactory::createHashDBClient() uuid=" + proverRequest.uuid);
+        proverRequest.result = ZKR_DB_ERROR;
+        return;
     }
 
     // Init execution flags
@@ -131,8 +133,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     // In prover mode, we cannot accept unsigned transactions, since the proof would not meet the PIL constrains
     if (bUnsignedTransaction && !bProcessBatch)
     {
-        cerr << "Error: MainExecutor::MainExecutor() failed called with bUnsignedTransaction=true but bProcessBatch=false" << endl;
         proverRequest.result = ZKR_SM_MAIN_INVALID_UNSIGNED_TX;
+        zklog.error("MainExecutor::execute() failed called with bUnsignedTransaction=true but bProcessBatch=false");
         HashDBClientFactory::freeHashDBClient(pHashDB);
         return;
     }
@@ -149,11 +151,27 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
     // Copy input database content into context database
     if (proverRequest.input.db.size() > 0)
-        pHashDB->loadDB(proverRequest.input.db, false);
+    {
+        pHashDB->loadDB(proverRequest.input.db, true);
+        uint64_t flushId, lastSentFlushId;
+        pHashDB->flush(emptyString, emptyString, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, flushId, lastSentFlushId);
+        if (config.dbClearCache && (config.databaseURL != "local"))
+        {
+            pHashDB->clearCache();
+        }
+    }
 
     // Copy input contracts database content into context database (dbProgram)
     if (proverRequest.input.contractsBytecode.size() > 0)
-        pHashDB->loadProgramDB(proverRequest.input.contractsBytecode, false);
+    {
+        pHashDB->loadProgramDB(proverRequest.input.contractsBytecode, true);
+        uint64_t flushId, lastSentFlushId;
+        pHashDB->flush(emptyString, emptyString, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, flushId, lastSentFlushId);
+        if (config.dbClearCache && (config.databaseURL != "local"))
+        {
+            pHashDB->clearCache();
+        }
+    }
 
     // opN are local, uncommitted polynomials
     Goldilocks::Element op0, op1, op2, op3, op4, op5, op6, op7;
@@ -172,8 +190,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     {
         if (!bProcessBatch)
         {
-            cerr << "Error: MainExecutor::execute() found proverRequest.bNoCounters=true and bProcessBatch=false uuid=" << proverRequest.uuid << endl;
-            exitProcess();
+            proverRequest.result = ZKR_SM_MAIN_INVALID_NO_COUNTERS;
+            logError(ctx, "MainExecutor::execute() found proverRequest.bNoCounters=true and bProcessBatch=false");
+            HashDBClientFactory::freeHashDBClient(pHashDB);
+            return;
         }
         N_Max = N_NoCounters;
     }
@@ -211,11 +231,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         uint64_t incCounter = 0;
 
 #ifdef LOG_START_STEPS
-        cout << "--> Starting step=" << step << " zkPC=" << zkPC << " zkasm=" << rom.line[zkPC].lineStr << endl;
+        zklog.info("--> Starting step=" + to_string(step) + " zkPC=" + to_string(zkPC) + " zkasm=" + rom.line[zkPC].lineStr);
 #endif
         if (config.executorROMLineTraces)
         {
-            cout << "step=" << step << " rom.line[" << zkPC << "] =[" << rom.line[zkPC].toString(fr) << "]" << endl;
+            zklog.info("step=" + to_string(step) + " rom.line[" + to_string(zkPC) + "] =[" + rom.line[zkPC].toString(fr) + "]");
         }
 #ifdef LOG_START_STEPS_TO_FILE
         {
@@ -235,13 +255,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // Evaluate the list cmdBefore commands, and any children command, recursively
         for (uint64_t j=0; j<rom.line[zkPC].cmdBefore.size(); j++)
         {
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             gettimeofday(&t, NULL);
 #endif
             CommandResult cr;
             evalCommand(ctx, *rom.line[zkPC].cmdBefore[j], cr);
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             mainMetrics.add("Eval command", TimeDiff(t));
             RomCommand &cmd = *rom.line[zkPC].cmdBefore[j];
             string cmdString = op2String(cmd.op) + "[" + function2String(cmd.function) + "]";
@@ -251,7 +271,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (cr.zkResult != ZKR_SUCCESS)
             {
                 proverRequest.result = cr.zkResult;
-                cerr << "Error: Main exec failed calling evalCommand() before, result=" << proverRequest.result << "=" << zkresult2string(proverRequest.result) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
+                logError(ctx, string("Failed calling evalCommand() before, result=") + zkresult2string(proverRequest.result));
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
             }
@@ -290,7 +310,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.inA[i] = rom.line[zkPC].inA;
 
 #ifdef LOG_INX
-            cout << "inA op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inA op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -309,7 +329,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.inB[i] = rom.line[zkPC].inB;
 
 #ifdef LOG_INX
-            cout << "inB op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inB op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -328,7 +348,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.inC[i] = rom.line[zkPC].inC;
 
 #ifdef LOG_INX
-            cout << "inC op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inC op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -347,7 +367,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.inD[i] = rom.line[zkPC].inD;
 
 #ifdef LOG_INX
-            cout << "inD op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inD op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -366,7 +386,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.inE[i] = rom.line[zkPC].inE;
 
 #ifdef LOG_INX
-            cout << "inE op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inE op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -385,7 +405,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.inSR[i] = rom.line[zkPC].inSR;
 
 #ifdef LOG_INX
-            cout << "inSR op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inSR op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -395,7 +415,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, fr.mul(rom.line[zkPC].inCTX, pols.CTX[i]));
             pols.inCTX[i] = rom.line[zkPC].inCTX;
 #ifdef LOG_INX
-            cout << "inCTX op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inCTX op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -405,7 +425,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, fr.mul(rom.line[zkPC].inSP, pols.SP[i]));
             pols.inSP[i] = rom.line[zkPC].inSP;
 #ifdef LOG_INX
-            cout << "inSP op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inSP op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -415,7 +435,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, fr.mul(rom.line[zkPC].inPC, pols.PC[i]));
             pols.inPC[i] = rom.line[zkPC].inPC;
 #ifdef LOG_INX
-            cout << "inPC op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inPC op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -425,7 +445,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, fr.mul(rom.line[zkPC].inGAS, pols.GAS[i]));
             pols.inGAS[i] = rom.line[zkPC].inGAS;
 #ifdef LOG_INX
-            cout << "inGAS op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inGAS op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -435,7 +455,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, fr.mul( rom.line[zkPC].inSTEP, fr.fromU64(proverRequest.input.bNoCounters ? 0 : step) ));
             pols.inSTEP[i] = rom.line[zkPC].inSTEP;
 #ifdef LOG_INX
-            cout << "inSTEP op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inSTEP op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -445,7 +465,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, fr.mul(rom.line[zkPC].inRR, pols.RR[i]));
             pols.inRR[i] = rom.line[zkPC].inRR;
 #ifdef LOG_INX
-            cout << "inRR op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inRR op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -455,7 +475,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, fr.mul(rom.line[zkPC].inHASHPOS, pols.HASHPOS[i]));
             pols.inHASHPOS[i] = rom.line[zkPC].inHASHPOS;
 #ifdef LOG_INX
-            cout << "inHASHPOS op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inHASHPOS op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -465,7 +485,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, fr.mul(rom.line[zkPC].inCntArith, pols.cntArith[i]));
             pols.inCntArith[i] = rom.line[zkPC].inCntArith;
 #ifdef LOG_INX
-            cout << "inCntArith op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inCntArith op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -475,7 +495,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, fr.mul(rom.line[zkPC].inCntBinary, pols.cntBinary[i]));
             pols.inCntBinary[i] = rom.line[zkPC].inCntBinary;
 #ifdef LOG_INX
-            cout << "inCntBinary op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inCntBinary op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -485,7 +505,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, fr.mul(rom.line[zkPC].inCntMemAlign, pols.cntMemAlign[i]));
             pols.inCntMemAlign[i] = rom.line[zkPC].inCntMemAlign;
 #ifdef LOG_INX
-            cout << "inCntMemAlign op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inCntMemAlign op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -495,7 +515,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, fr.mul(rom.line[zkPC].inCntKeccakF, pols.cntKeccakF[i]));
             pols.inCntKeccakF[i] = rom.line[zkPC].inCntKeccakF;
 #ifdef LOG_INX
-            cout << "inCntKeccakF op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inCntKeccakF op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -505,7 +525,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, fr.mul(rom.line[zkPC].inCntPoseidonG, pols.cntPoseidonG[i]));
             pols.inCntPoseidonG[i] = rom.line[zkPC].inCntPoseidonG;
 #ifdef LOG_INX
-            cout << "inCntPoseidonG op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inCntPoseidonG op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -515,7 +535,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, fr.mul(rom.line[zkPC].inCntPaddingPG, pols.cntPaddingPG[i]));
             pols.inCntPaddingPG[i] = rom.line[zkPC].inCntPaddingPG;
 #ifdef LOG_INX
-            cout << "inCntPaddingPG op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inCntPaddingPG op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -540,7 +560,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, fr.mul(rom.line[zkPC].inRCX, pols.RCX[i]));
             pols.inRCX[i] = rom.line[zkPC].inRCX;
 #ifdef LOG_INX
-            cout << "inCntPaddingPG op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("inCntPaddingPG op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -557,7 +577,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.CONST6[i] = op6;
             pols.CONST7[i] = op7;
 #ifdef LOG_INX
-            cout << "CONSTL op=" << rom.line[zkPC].CONSTL.get_str(16) << endl;
+            zklog.info("CONSTL op=" + rom.line[zkPC].CONSTL.get_str(16));
 #endif
         }
         else if (rom.line[zkPC].bConstPresent)
@@ -565,7 +585,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             op0 = fr.add(op0, rom.line[zkPC].CONST);
             pols.CONST0[i] = rom.line[zkPC].CONST;
 #ifdef LOG_INX
-            cout << "CONST op=" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0, 16) << endl;
+            zklog.info("CONST op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
 #endif
         }
 
@@ -594,16 +614,20 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             {
                 if (!fr.toS32(addrRel, pols.E0[i]))
                 {
-                    cerr << "Error: failed calling fr.toS32() with pols.E0[i]=" << fr.toString(pols.E0[i], 16) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                    exitProcess();
+                    proverRequest.result = ZKR_SM_MAIN_TOS32;
+                    logError(ctx, "Failed calling fr.toS32() with pols.E0[i]=" + fr.toString(pols.E0[i], 16));
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
                 }
             }
             if (rom.line[zkPC].indRR == 1)
             {
                 if (!fr.toS32(addrRel, pols.RR[i]))
                 {
-                    cerr << "Error: failed calling fr.toS32() with pols.RR[i]=" << fr.toString(pols.RR[i], 16) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                    exitProcess();
+                    proverRequest.result = ZKR_SM_MAIN_TOS32;
+                    logError(ctx, "Failed calling fr.toS32() with pols.RR[i]=" + fr.toString(pols.RR[i], 16));
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
                 }
             }
             if (rom.line[zkPC].bOffsetPresent && rom.line[zkPC].offset!=0)
@@ -615,58 +639,63 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 int32_t sp;
                 if (!fr.toS32(sp, pols.SP[i]))
                 {
-                    cerr << "Error: failed calling fr.toS32(sp, pols.SP[i])" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                    exitProcess();
+                    proverRequest.result = ZKR_SM_MAIN_TOS32;
+                    logError(ctx, "failed calling fr.toS32(sp, pols.SP[i])=" + fr.toString(pols.SP[i], 16));
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
                 }
                 addrRel += sp;
             }
             // If addrRel is possitive, and the sum is too big, fail
             if (addrRel>=0x20000 || ((rom.line[zkPC].isMem==1) && (addrRel >= 0x10000)))
             {
-                cerr << "Error: addrRel too big addrRel=" << addrRel << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                proverRequest.result = ZKR_SM_MAIN_ADDRESS;
+                proverRequest.result = ZKR_SM_MAIN_ADDRESS_OUT_OF_RANGE;
+                logError(ctx, "addrRel too big addrRel=" + to_string(addrRel));
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
             }
             // If addrRel is negative, fail
             if (addrRel < 0)
             {
-                cerr << "Error: addrRel<0 addrRel=" << addrRel << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                proverRequest.result = ZKR_SM_MAIN_ADDRESS;
+                proverRequest.result = ZKR_SM_MAIN_ADDRESS_NEGATIVE;
+                logError(ctx, "addrRel<0 addrRel=" + to_string(addrRel));
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
             }
 
             addr = addrRel;
 #ifdef LOG_ADDR
-            cout << "Any addr=" << addr << endl;
+            zklog.info("Any addr=" + to_string(addr));
 #endif
         }
 
         // If useCTX, addr = addr + CTX*CTX_OFFSET
-        if (rom.line[zkPC].useCTX == 1) {
+        if (rom.line[zkPC].useCTX == 1)
+        {
             addr += fr.toU64(pols.CTX[i])*CTX_OFFSET;
             pols.useCTX[i] = fr.one();
 #ifdef LOG_ADDR
-            cout << "useCTX addr=" << addr << endl;
+            zklog.info("useCTX addr=" + to_string(addr));
 #endif
         }
 
         // If isStack, addr = addr + STACK_OFFSET
-        if (rom.line[zkPC].isStack == 1) {
+        if (rom.line[zkPC].isStack == 1)
+        {
             addr += STACK_OFFSET;
             pols.isStack[i] = fr.one();
 #ifdef LOG_ADDR
-            cout << "isStack addr=" << addr << endl;
+            zklog.info("isStack addr=" + to_string(addr));
 #endif
         }
 
         // If isMem, addr = addr + MEM_OFFSET
-        if (rom.line[zkPC].isMem == 1) {
+        if (rom.line[zkPC].isMem == 1)
+        {
             addr += MEM_OFFSET;
             pols.isMem[i] = fr.one();
 #ifdef LOG_ADDR
-            cout << "isMem addr=" << addr << endl;
+            zklog.info("isMem addr=" + to_string(addr));
 #endif
         }
 
@@ -698,8 +727,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if (!fr.isZero(rom.line[zkPC].inFREE))
         {
             // freeInTag must be present
-            if (rom.line[zkPC].freeInTag.isPresent == false) {
-                cerr << "Error: Instruction with freeIn without freeInTag:" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
+            if (rom.line[zkPC].freeInTag.isPresent == false)
+            {
+                logError(ctx, "Instruction with freeIn without freeInTag");
                 exitProcess();
             }
 
@@ -717,7 +747,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     memIterator = ctx.mem.find(addr);
                     if (memIterator != ctx.mem.end()) {
 #ifdef LOG_MEMORY
-                        cout << "Memory read mRD: addr:" << addr << " " << printFea(ctx, ctx.mem[addr]) << endl;
+                        zklog.info("Memory read mRD: addr:" + to_string(addr) + " " + fea2string(fr, ctx.mem[addr].fe0, ctx.mem[addr].fe1, ctx.mem[addr].fe2, ctx.mem[addr].fe3, ctx.mem[addr].fe4, ctx.mem[addr].fe5, ctx.mem[addr].fe6, ctx.mem[addr].fe7));
 #endif
                         fi0 = memIterator->second.fe0;
                         fi1 = memIterator->second.fe1;
@@ -770,13 +800,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                     if  ( !fr.isZero(pols.A5[i]) || !fr.isZero(pols.A6[i]) || !fr.isZero(pols.A7[i]) || !fr.isZero(pols.B2[i]) || !fr.isZero(pols.B3[i]) || !fr.isZero(pols.B4[i]) || !fr.isZero(pols.B5[i])|| !fr.isZero(pols.B6[i])|| !fr.isZero(pols.B7[i]) )
                     {
-                        cerr << "Error: MainExecutor::Execute() storage read free in found non-zero A-B storage registers step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                        proverRequest.result = ZKR_SM_MAIN_STORAGE;
+                        proverRequest.result = ZKR_SM_MAIN_STORAGE_INVALID_KEY;
+                        logError(ctx, "Storage read free in found non-zero A-B storage registers");
                         HashDBClientFactory::freeHashDBClient(pHashDB);
                         return;
                     }
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                     gettimeofday(&t, NULL);
 #endif
                     // Call poseidon and get the hash key
@@ -798,30 +828,40 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     key[1] = Kin1Hash[1];
                     key[2] = Kin1Hash[2];
                     key[3] = Kin1Hash[3];
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                     mainMetrics.add("Poseidon", TimeDiff(t), 3);
 #endif
 
 #ifdef LOG_STORAGE
-                    cout << "Storage read sRD got poseidon key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << endl;
+                    zklog.info("Storage read sRD got poseidon key: " + ctx.fr.toString(ctx.lastSWrite.key, 16));
 #endif
                     Goldilocks::Element oldRoot[4];
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                     gettimeofday(&t, NULL);
 #endif
                     SmtGetResult smtGetResult;
                     mpz_class value;
-                    zkresult zkResult = pHashDB->get(oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);
+                    zkresult zkResult = pHashDB->get(proverRequest.uuid, oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);
                     if (zkResult != ZKR_SUCCESS)
                     {
-                        cerr << "Error: MainExecutor::Execute() failed calling pHashDB->get() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                         proverRequest.result = zkResult;
+                        logError(ctx, string("Failed calling pHashDB->get() result=") + zkresult2string(zkResult));
                         HashDBClientFactory::freeHashDBClient(pHashDB);
                         return;
                     }
                     incCounter = smtGetResult.proofHashCounter + 2;
+
+#ifdef LOG_SMT_KEY_DETAILS
+                    zklog.info("SMT get C=" + fea2string(fr, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]) +
+                        " A=" + fea2string(fr, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]) +
+                        " B=" + fea2string(fr, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]) +
+                        " Kin0Hash=" + fea2string(fr, Kin0Hash) +
+                        " Kin1Hash=" + fea2string(fr, Kin1Hash) +
+                        " oldRoot=" + fea2string(fr, oldRoot) +
+                        " value=" + value.get_str(10));
+#endif
                     //cout << "smt.get() returns value=" << smtGetResult.value.get_str(16) << endl;
 
                     if (bProcessBatch)
@@ -829,7 +869,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         eval_addReadWriteAddress(ctx, smtGetResult.value);
                     }
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                     mainMetrics.add("SMT Get", TimeDiff(t));
 #endif
 
@@ -837,7 +877,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                     nHits++;
 #ifdef LOG_STORAGE
-                    cout << "Storage read sRD read from key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " value:" << fr.toString(fi3, 16) << ":" << fr.toString(fi2, 16) << ":" << fr.toString(fi1, 16) << ":" << fr.toString(fi0, 16) << endl;
+                    zklog.info("Storage read sRD read from key: " + ctx.fr.toString(ctx.lastSWrite.key, 16) + " value:" + fr.toString(fi3, 16) + ":" + fr.toString(fi2, 16) + ":" + fr.toString(fi1, 16) + ":" + fr.toString(fi0, 16));
 #endif
                 }
 
@@ -870,15 +910,18 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     Kin1[6] = pols.B0[i];
                     Kin1[7] = pols.B1[i];
 
+                    uint64_t b0 = fr.toU64(pols.B0[i]);
+                    bool bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);
+
                     if  ( !fr.isZero(pols.A5[i]) || !fr.isZero(pols.A6[i]) || !fr.isZero(pols.A7[i]) || !fr.isZero(pols.B2[i]) || !fr.isZero(pols.B3[i]) || !fr.isZero(pols.B4[i]) || !fr.isZero(pols.B5[i])|| !fr.isZero(pols.B6[i])|| !fr.isZero(pols.B7[i]) )
                     {
-                        cerr << "Error: MainExecutor::Execute() storage write free in found non-zero A-B registers step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                        proverRequest.result = ZKR_SM_MAIN_STORAGE;
+                        proverRequest.result = ZKR_SM_MAIN_STORAGE_INVALID_KEY;
+                        logError(ctx, "Storage write free in found non-zero A-B registers");
                         HashDBClientFactory::freeHashDBClient(pHashDB);
                         return;
                     }
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                     gettimeofday(&t, NULL);
 #endif
                     // Call poseidon and get the hash key
@@ -915,32 +958,48 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         ctx.lastSWrite.key[j] = Kin1Hash[j];
                     }
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                     mainMetrics.add("Poseidon", TimeDiff(t));
 #endif
 
 #ifdef LOG_STORAGE
-                    cout << "Storage write sWR got poseidon key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << endl;
+                    zklog.info("Storage write sWR got poseidon key: " + ctx.fr.toString(ctx.lastSWrite.key, 16));
 #endif
                     // Call SMT to get the new Merkel Tree root hash
                     mpz_class scalarD;
-                    fea2scalar(fr, scalarD, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
-#ifdef LOG_TIME_STATISTICS
+                    if (!fea2scalar(fr, scalarD, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]))
+                    {
+                        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                        logError(ctx, "Failed calling fea2scalar()");
+                        HashDBClientFactory::freeHashDBClient(pHashDB);
+                        return;
+                    }
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                     gettimeofday(&t, NULL);
 #endif
                     Goldilocks::Element oldRoot[4];
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
-                    zkresult zkResult = pHashDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.input.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
+                    zkresult zkResult = pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : ( proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE ), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
                     if (zkResult != ZKR_SUCCESS)
                     {
-                        cerr << "Error: MainExecutor::Execute() failed calling pHashDB->set() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                         proverRequest.result = zkResult;
+                        logError(ctx, string("Failed calling pHashDB->set() result=") + zkresult2string(zkResult));
                         HashDBClientFactory::freeHashDBClient(pHashDB);
                         return;
                     }
                     incCounter = ctx.lastSWrite.res.proofHashCounter + 2;
 
+#ifdef LOG_SMT_KEY_DETAILS
+                    zklog.info("SMT set C=" + fea2string(fr, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]) +
+                        " A=" + fea2string(fr, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]) +
+                        " B=" + fea2string(fr, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]) +
+                        " Kin0Hash=" + fea2string(fr, Kin0Hash) +
+                        " Kin1Hash=" + fea2string(fr, Kin1Hash) +
+                        " oldRoot=" + fea2string(fr, oldRoot) +
+                        " value=" + scalarD.get_str(10) +
+                        " newRoot=" + fea2string(fr, ctx.lastSWrite.newRoot));
+#endif
                     if (bProcessBatch)
                     {
                         eval_addReadWriteAddress(ctx, scalarD);
@@ -957,7 +1016,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         //        " total=" << ctx.totalTransferredBalance.get_str(10) << endl;
                     }
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                     mainMetrics.add("SMT Set", TimeDiff(t));
 #endif
                     ctx.lastSWrite.step = i;
@@ -965,7 +1024,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     sr4to8(fr, ctx.lastSWrite.newRoot[0], ctx.lastSWrite.newRoot[1], ctx.lastSWrite.newRoot[2], ctx.lastSWrite.newRoot[3], fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                     nHits++;
 #ifdef LOG_STORAGE
-                    cout << "Storage write sWR stored at key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " newRoot: " << fr.toString(ctx.lastSWrite.res.newRoot, 16) << endl;
+                    zklog.info("Storage write sWR stored at key: " + ctx.fr.toString(ctx.lastSWrite.key, 16) + " newRoot: " + fr.toString(ctx.lastSWrite.res.newRoot, 16));
 #endif
                 }
 
@@ -991,8 +1050,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         size = fr.toU64(pols.D0[i]);
                         if (size>32)
                         {
-                            cerr << "Error: Invalid size>32 for hashK 1: pols.D0[i]=" << fr.toString(pols.D0[i], 16) << " size=" << size << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                            exitProcess();
+                            proverRequest.result = ZKR_SM_MAIN_HASHK_SIZE_OUT_OF_RANGE;
+                            logError(ctx, "Invalid size>32 for hashK 1: pols.D0[i]=" + fr.toString(pols.D0[i], 16) + " size=" + to_string(size));
+                            HashDBClientFactory::freeHashDBClient(pHashDB);
+                            return;
                         }
                     }
 
@@ -1001,16 +1062,18 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     fr.toS64(iPos, pols.HASHPOS[i]);
                     if (iPos < 0)
                     {
-                        cerr << "Error: Invalid pos<0 for HashK 1: pols.HASHPOS[i]=" << fr.toString(pols.HASHPOS[i], 16) << " pos=" << iPos << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                        exitProcess();
+                        proverRequest.result = ZKR_SM_MAIN_HASHK_POSITION_NEGATIVE;
+                        logError(ctx, "Invalid pos<0 for HashK 1: pols.HASHPOS[i]=" + fr.toString(pols.HASHPOS[i], 16) + " pos=" + to_string(iPos));
+                        HashDBClientFactory::freeHashDBClient(pHashDB);
+                        return;
                     }
                     uint64_t pos = iPos;
 
                     // Check that pos+size do not exceed data size
                     if ( (pos+size) > hashKIterator->second.data.size())
                     {
-                        cerr << "Error: hashK 1 invalid size of hash: pos=" << pos << " size=" << size << " data.size=" << ctx.hashK[addr].data.size() << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                        proverRequest.result = ZKR_SM_MAIN_HASHK;
+                        proverRequest.result = ZKR_SM_MAIN_HASHK_POSITION_PLUS_SIZE_OUT_OF_RANGE;
+                        logError(ctx, "HashK 1 invalid size of hash: pos=" + to_string(pos) + " + size=" + to_string(size) + " > data.size=" + to_string(hashKIterator->second.data.size()));
                         HashDBClientFactory::freeHashDBClient(pHashDB);
                         return;
                     }
@@ -1027,7 +1090,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     nHits++;
 
 #ifdef LOG_HASHK
-                    cout << "hashK 1 i=" << i << " zkPC=" << zkPC << " addr=" << addr << " pos=" << pos << " size=" << size << " data=" << s.get_str(16) << endl;
+                    zklog.info("hashK 1 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr) + " pos=" + to_string(pos) + " size=" + to_string(size) + " data=" + s.get_str(16));
 #endif
                 }
 
@@ -1040,8 +1103,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     hashKIterator = ctx.hashK.find(addr);
                     if (hashKIterator == ctx.hashK.end())
                     {
-                        cerr << "Error: hashKDigest 1: digest not defined for addr=" << addr << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                        proverRequest.result = ZKR_SM_MAIN_HASHK;
+                        proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_ADDRESS_NOT_FOUND;
+                        logError(ctx, "HashKDigest 1: digest not defined for addr=" + to_string(addr));
                         HashDBClientFactory::freeHashDBClient(pHashDB);
                         return;
                     }
@@ -1049,8 +1112,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // If digest was not calculated, this is an error
                     if (!hashKIterator->second.lenCalled)
                     {
-                        cerr << "Error: hashKDigest 1: digest not calculated for addr=" << addr << ".  Call hashKLen to finish digest." << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                        proverRequest.result = ZKR_SM_MAIN_HASHK;
+                        proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_NOT_COMPLETED;
+                        logError(ctx, "HashKDigest 1: digest not calculated for addr=" + to_string(addr) + ".  Call hashKLen to finish digest.");
                         HashDBClientFactory::freeHashDBClient(pHashDB);
                         return;
                     }
@@ -1061,7 +1124,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     nHits++;
 
 #ifdef LOG_HASHK
-                    cout << "hashKDigest 1 i=" << i << " zkPC=" << zkPC << " addr=" << addr << " digest=" << ctx.hashK[addr].digest.get_str(16) << endl;
+                    zklog.info("hashKDigest 1 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr) + " digest=" + ctx.hashK[addr].digest.get_str(16));
 #endif
                 }
 
@@ -1087,8 +1150,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         size = fr.toU64(pols.D0[i]);
                         if (size>32)
                         {
-                            cerr << "Error: Invalid size>32 for hashP 1: pols.D0[i]=" << fr.toString(pols.D0[i], 16) << " size=" << size << " step=" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                            exitProcess();
+                            proverRequest.result = ZKR_SM_MAIN_HASHP_SIZE_OUT_OF_RANGE;
+                            logError(ctx, "Invalid size>32 for hashP 1: pols.D0[i]=" + fr.toString(pols.D0[i], 16) + " size=" + to_string(size));
+                            HashDBClientFactory::freeHashDBClient(pHashDB);
+                            return;
                         }
                     }
 
@@ -1097,16 +1162,18 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     fr.toS64(iPos, pols.HASHPOS[i]);
                     if (iPos < 0)
                     {
-                        cerr << "Error: Invalid pos<0 for HashP 1: pols.HASHPOS[i]=" << fr.toString(pols.HASHPOS[i], 16) << " pos=" << iPos << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                        exitProcess();
+                        proverRequest.result = ZKR_SM_MAIN_HASHP_POSITION_NEGATIVE;
+                        logError(ctx, "Invalid pos<0 for HashP 1: pols.HASHPOS[i]=" + fr.toString(pols.HASHPOS[i], 16) + " pos=" + to_string(iPos));
+                        HashDBClientFactory::freeHashDBClient(pHashDB);
+                        return;
                     }
                     uint64_t pos = iPos;
 
                     // Check that pos+size do not exceed data size
                     if ( (pos+size) > hashPIterator->second.data.size())
                     {
-                        cerr << "Error: hashP 1 invalid size of hash: pos=" << pos << " size=" << size << " data.size=" << ctx.hashP[addr].data.size() << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                        proverRequest.result = ZKR_SM_MAIN_HASHP;
+                        proverRequest.result = ZKR_SM_MAIN_HASHP_POSITION_PLUS_SIZE_OUT_OF_RANGE;
+                        logError(ctx, "HashP 1 invalid size of hash: pos=" + to_string(pos) + " size=" + to_string(size) + " data.size=" + to_string(ctx.hashP[addr].data.size()));
                         HashDBClientFactory::freeHashDBClient(pHashDB);
                         return;
                     }
@@ -1132,8 +1199,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     hashPIterator = ctx.hashP.find(addr);
                     if (hashPIterator == ctx.hashP.end())
                     {
-                        cerr << "Error: hashPDigest 1: digest not defined" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                        proverRequest.result = ZKR_SM_MAIN_HASHP;
+                        proverRequest.result = ZKR_SM_MAIN_HASHPDIGEST_ADDRESS_NOT_FOUND;
+                        logError(ctx, "HashPDigest 1: digest not defined addr=" + to_string(addr));
                         HashDBClientFactory::freeHashDBClient(pHashDB);
                         return;
                     }
@@ -1141,8 +1208,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // If digest was not calculated, this is an error
                     if (!hashPIterator->second.lenCalled)
                     {
-                        cerr << "Error: hashPDigest 1: digest not calculated.  Call hashPLen to finish digest." << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                        proverRequest.result = ZKR_SM_MAIN_HASHP;
+                        proverRequest.result = ZKR_SM_MAIN_HASHPDIGEST_NOT_COMPLETED;
+                        logError(ctx, "HashPDigest 1: digest not calculated.  Call hashPLen to finish digest.");
                         HashDBClientFactory::freeHashDBClient(pHashDB);
                         return;
                     }
@@ -1159,8 +1226,20 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     if (rom.line[zkPC].binOpcode == 0) // ADD
                     {
                         mpz_class a, b, c;
-                        fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-                        fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
+                        if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.A)");
+                            HashDBClientFactory::freeHashDBClient(pHashDB);
+                            return;
+                        }
+                        if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.B)");
+                            HashDBClientFactory::freeHashDBClient(pHashDB);
+                            return;
+                        }
                         c = (a + b) & ScalarMask256;
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                         nHits++;
@@ -1168,8 +1247,20 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     else if (rom.line[zkPC].binOpcode == 1) // SUB
                     {
                         mpz_class a, b, c;
-                        fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-                        fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
+                        if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.A)");
+                            HashDBClientFactory::freeHashDBClient(pHashDB);
+                            return;
+                        }
+                        if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.B)");
+                            HashDBClientFactory::freeHashDBClient(pHashDB);
+                            return;
+                        }
                         c = (a - b + ScalarTwoTo256) & ScalarMask256;
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                         nHits++;
@@ -1177,8 +1268,20 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     else if (rom.line[zkPC].binOpcode == 2) // LT
                     {
                         mpz_class a, b, c;
-                        fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-                        fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
+                        if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.A)");
+                            HashDBClientFactory::freeHashDBClient(pHashDB);
+                            return;
+                        }
+                        if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.B)");
+                            HashDBClientFactory::freeHashDBClient(pHashDB);
+                            return;
+                        }
                         c = (a < b);
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                         nHits++;
@@ -1186,8 +1289,20 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     else if (rom.line[zkPC].binOpcode == 3) // SLT
                     {
                         mpz_class a, b, c;
-                        fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-                        fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
+                        if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.A)");
+                            HashDBClientFactory::freeHashDBClient(pHashDB);
+                            return;
+                        }
+                        if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.B)");
+                            HashDBClientFactory::freeHashDBClient(pHashDB);
+                            return;
+                        }
                         if (a >= ScalarTwoTo255) a = a - ScalarTwoTo256;
                         if (b >= ScalarTwoTo255) b = b - ScalarTwoTo256;
                         c = (a < b);
@@ -1197,8 +1312,20 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     else if (rom.line[zkPC].binOpcode == 4) // EQ
                     {
                         mpz_class a, b, c;
-                        fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-                        fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
+                        if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.A)");
+                            HashDBClientFactory::freeHashDBClient(pHashDB);
+                            return;
+                        }
+                        if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.B)");
+                            HashDBClientFactory::freeHashDBClient(pHashDB);
+                            return;
+                        }
                         c = (a == b);
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                         nHits++;
@@ -1206,8 +1333,20 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     else if (rom.line[zkPC].binOpcode == 5) // AND
                     {
                         mpz_class a, b, c;
-                        fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-                        fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
+                        if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.A)");
+                            HashDBClientFactory::freeHashDBClient(pHashDB);
+                            return;
+                        }
+                        if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.B)");
+                            HashDBClientFactory::freeHashDBClient(pHashDB);
+                            return;
+                        }
                         c = (a & b);
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                         nHits++;
@@ -1215,8 +1354,20 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     else if (rom.line[zkPC].binOpcode == 6) // OR
                     {
                         mpz_class a, b, c;
-                        fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-                        fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
+                        if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.A)");
+                            HashDBClientFactory::freeHashDBClient(pHashDB);
+                            return;
+                        }
+                        if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.B)");
+                            HashDBClientFactory::freeHashDBClient(pHashDB);
+                            return;
+                        }
                         c = (a | b);
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                         nHits++;
@@ -1224,15 +1375,27 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     else if (rom.line[zkPC].binOpcode == 7) // XOR
                     {
                         mpz_class a, b, c;
-                        fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-                        fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
+                        if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.A)");
+                            HashDBClientFactory::freeHashDBClient(pHashDB);
+                            return;
+                        }
+                        if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.B)");
+                            HashDBClientFactory::freeHashDBClient(pHashDB);
+                            return;
+                        }
                         c = (a ^ b);
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                         nHits++;
                     }
                     else
                     {
-                        cerr << "Error: Invalid binary operation: opcode=" << rom.line[zkPC].binOpcode << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
+                        logError(ctx, "Invalid binary operation: opcode=" + to_string(rom.line[zkPC].binOpcode));
                         exitProcess();
                     }
                 }
@@ -1241,15 +1404,33 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (rom.line[zkPC].memAlignRD==1)
                 {
                     mpz_class m0;
-                    fea2scalar(fr, m0, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
+                    if (!fea2scalar(fr, m0, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                    {
+                        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                        logError(ctx, "Failed calling fea2scalar(pols.A)");
+                        HashDBClientFactory::freeHashDBClient(pHashDB);
+                        return;
+                    }
                     mpz_class m1;
-                    fea2scalar(fr, m1, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
+                    if (!fea2scalar(fr, m1, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                    {
+                        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                        logError(ctx, "Failed calling fea2scalar(pols.B)");
+                        HashDBClientFactory::freeHashDBClient(pHashDB);
+                        return;
+                    }
                     mpz_class offsetScalar;
-                    fea2scalar(fr, offsetScalar, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]);
+                    if (!fea2scalar(fr, offsetScalar, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]))
+                    {
+                        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                        logError(ctx, "Failed calling fea2scalar(pols.C)");
+                        HashDBClientFactory::freeHashDBClient(pHashDB);
+                        return;
+                    }
                     if (offsetScalar<0 || offsetScalar>32)
                     {
-                        cerr << "Error: MemAlign out of range offset=" << offsetScalar.get_str() << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                        proverRequest.result = ZKR_SM_MAIN_MEMALIGN;
+                        proverRequest.result = ZKR_SM_MAIN_MEMALIGN_OFFSET_OUT_OF_RANGE;
+                        logError(ctx, "MemAlign out of range offset=" + offsetScalar.get_str());
                         HashDBClientFactory::freeHashDBClient(pHashDB);
                         return;
                     }
@@ -1267,21 +1448,23 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 // Check that one and only one instruction has been requested
                 if (nHits != 1)
                 {
-                    cerr << "Error: Empty freeIn without just one instruction: nHits=" << nHits << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                    exitProcess();
+                    proverRequest.result = ZKR_SM_MAIN_MULTIPLE_FREEIN;
+                    logError(ctx, "Empty freeIn without just one instruction: nHits=" + to_string(nHits));
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
                 }
             }
             // If freeInTag.op!="", then evaluate the requested command (recursively)
             else
             {
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 gettimeofday(&t, NULL);
 #endif
                 // Call evalCommand()
                 CommandResult cr;
                 evalCommand(ctx, rom.line[zkPC].freeInTag, cr);
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 mainMetrics.add("Eval command", TimeDiff(t));
                 RomCommand &cmd = rom.line[zkPC].freeInTag;
                 string cmdString = op2String(cmd.op) + "[" + function2String(cmd.function) + "]";
@@ -1291,7 +1474,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (cr.zkResult != ZKR_SUCCESS)
                 {
                     proverRequest.result = cr.zkResult;
-                    cerr << "Error: Main exec failed calling evalCommand() result=" << proverRequest.result << "=" << zkresult2string(proverRequest.result) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
+                    logError(ctx, string("Main exec failed calling evalCommand() result=") + zkresult2string(proverRequest.result));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
                 }
@@ -1358,7 +1541,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 else
                 {
-                    cerr << "Error: unexpected command result type: " << cr.type << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
+                    logError(ctx, "Unexpected command result type: " + to_string(cr.type));
                     exitProcess();
                 }
             }
@@ -1408,16 +1591,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                  (!fr.equal(pols.A6[i], op6)) ||
                  (!fr.equal(pols.A7[i], op7)) )
             {
-                cerr << "Error: ROM assert failed: AN!=opN" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                cerr << "A: " << fr.toString(pols.A7[i], 16) << ":" << fr.toString(pols.A6[i], 16) << ":" << fr.toString(pols.A5[i], 16) << ":" << fr.toString(pols.A4[i], 16) << ":" << fr.toString(pols.A3[i], 16) << ":" << fr.toString(pols.A2[i], 16) << ":" << fr.toString(pols.A1[i], 16) << ":" << fr.toString(pols.A0[i], 16) << endl;
-                cerr << "OP:" << fr.toString(op7, 16) << ":" << fr.toString(op6, 16) << ":" << fr.toString(op5, 16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3, 16) << ":" << fr.toString(op2, 16) << ":" << fr.toString(op1, 16) << ":" << fr.toString(op0,16) << endl;
                 proverRequest.result = ZKR_SM_MAIN_ASSERT;
+                logError(ctx, string("ROM assert failed: AN!=opN") +
+                " A:" + fr.toString(pols.A7[i], 16) + ":" + fr.toString(pols.A6[i], 16) + ":" + fr.toString(pols.A5[i], 16) + ":" + fr.toString(pols.A4[i], 16) + ":" + fr.toString(pols.A3[i], 16) + ":" + fr.toString(pols.A2[i], 16) + ":" + fr.toString(pols.A1[i], 16) + ":" + fr.toString(pols.A0[i], 16) +
+                " OP:" + fr.toString(op7, 16) + ":" + fr.toString(op6, 16) + ":" + fr.toString(op5, 16) + ":" + fr.toString(op4,16) + ":" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0,16));
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
             }
             pols.assert_pol[i] = fr.one();
 #ifdef LOG_ASSERT
-            cout << "assert" << endl;
+            zklog.info("assert");
 #endif
         }
 
@@ -1458,7 +1641,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
 
 #ifdef LOG_MEMORY
-                cout << "Memory write mWR: addr:" << addr << " " << printFea(ctx, ctx.mem[addr]) << endl;
+                zklog.info("Memory write mWR: addr:" + to_string(addr) + " " + fea2string(fr, ctx.mem[addr].fe0, ctx.mem[addr].fe1, ctx.mem[addr].fe2, ctx.mem[addr].fe3, ctx.mem[addr].fe4, ctx.mem[addr].fe5, ctx.mem[addr].fe6, ctx.mem[addr].fe7));
 #endif
             }
             else
@@ -1491,8 +1674,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                          (!fr.equal(ctx.mem[addr].fe6, op6)) ||
                          (!fr.equal(ctx.mem[addr].fe7, op7)) )
                     {
-                        cerr << "Error: Memory Read does not match" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                         proverRequest.result = ZKR_SM_MAIN_MEMORY;
+                        logError(ctx, "Memory Read does not match");
                         HashDBClientFactory::freeHashDBClient(pHashDB);
                         return;
                     }
@@ -1508,8 +1691,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                          (!fr.isZero(op6)) ||
                          (!fr.isZero(op7)) )
                     {
-                        cerr << "Error: Memory Read does not match (op!=0)" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                         proverRequest.result = ZKR_SM_MAIN_MEMORY;
+                        logError(ctx, "Memory Read does not match (op!=0)");
                         HashDBClientFactory::freeHashDBClient(pHashDB);
                         return;
                     }
@@ -1548,13 +1731,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             if  ( !fr.isZero(pols.A5[i]) || !fr.isZero(pols.A6[i]) || !fr.isZero(pols.A7[i]) || !fr.isZero(pols.B2[i]) || !fr.isZero(pols.B3[i]) || !fr.isZero(pols.B4[i]) || !fr.isZero(pols.B5[i])|| !fr.isZero(pols.B6[i])|| !fr.isZero(pols.B7[i]) )
             {
-                cerr << "Error: MainExecutor::Execute() storage read instruction found non-zero A-B registers step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                proverRequest.result = ZKR_SM_MAIN_STORAGE;
+                proverRequest.result = ZKR_SM_MAIN_STORAGE_INVALID_KEY;
+                logError(ctx, "Storage read instruction found non-zero A-B registers");
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
             }
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             gettimeofday(&t, NULL);
 #endif
             // Call poseidon and get the hash key
@@ -1612,26 +1795,26 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             key[2] = Kin1Hash[2];
             key[3] = Kin1Hash[3];
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             mainMetrics.add("Poseidon", TimeDiff(t), 3);
 #endif
 
 #ifdef LOG_STORAGE
-            cout << "Storage read sRD got poseidon key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << endl;
+            zklog.info("Storage read sRD got poseidon key: " + ctx.fr.toString(ctx.lastSWrite.key, 16));
 #endif
             Goldilocks::Element oldRoot[4];
             sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             gettimeofday(&t, NULL);
 #endif
             SmtGetResult smtGetResult;
             mpz_class value;
-            zkresult zkResult = pHashDB->get(oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);
+            zkresult zkResult = pHashDB->get(proverRequest.uuid, oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);
             if (zkResult != ZKR_SUCCESS)
             {
-                cerr << "Error: MainExecutor::Execute() failed calling pHashDB->get() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                 proverRequest.result = zkResult;
+                logError(ctx, string("Failed calling pHashDB->get() result=") + zkresult2string(zkResult));
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
             }
@@ -1643,7 +1826,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 eval_addReadWriteAddress(ctx, smtGetResult.value);
             }
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             mainMetrics.add("SMT Get", TimeDiff(t));
 #endif
             if (!bProcessBatch)
@@ -1655,14 +1838,20 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
 
 #ifdef LOG_STORAGE
-            cout << "Storage read sRD read from key: " << ctx.fr.toString(ctx.lastSWrite.key, 16) << " value:" << fr.toString(fi3, 16) << ":" << fr.toString(fi2, 16) << ":" << fr.toString(fi1, 16) << ":" << fr.toString(fi0, 16) << endl;
+            zklog.info("Storage read sRD read from key: " + ctx.fr.toString(ctx.lastSWrite.key, 16) + " value:" + value.get_str(16));
 #endif
             mpz_class opScalar;
-            fea2scalar(fr, opScalar, op0, op1, op2, op3, op4, op5, op6, op7);
+            if (!fea2scalar(fr, opScalar, op0, op1, op2, op3, op4, op5, op6, op7))
+            {
+                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                logError(ctx, "Failed calling fea2scalar(op)");
+                HashDBClientFactory::freeHashDBClient(pHashDB);
+                return;
+            }
             if (smtGetResult.value != opScalar)
             {
-                cerr << "Error: Storage read does not match: smtGetResult.value=" << smtGetResult.value.get_str() << " opScalar=" << opScalar.get_str() << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                proverRequest.result = ZKR_SM_MAIN_STORAGE;
+                proverRequest.result = ZKR_SM_MAIN_STORAGE_READ_MISMATCH;
+                logError(ctx, "Storage read does not match: smtGetResult.value=" + smtGetResult.value.get_str() + " opScalar=" + opScalar.get_str());
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
             }
@@ -1709,15 +1898,18 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 Kin1[6] = pols.B0[i];
                 Kin1[7] = pols.B1[i];
 
+                uint64_t b0 = fr.toU64(pols.B0[i]);
+                bool bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);
+
                 if  ( !fr.isZero(pols.A5[i]) || !fr.isZero(pols.A6[i]) || !fr.isZero(pols.A7[i]) || !fr.isZero(pols.B2[i]) || !fr.isZero(pols.B3[i]) || !fr.isZero(pols.B4[i]) || !fr.isZero(pols.B5[i])|| !fr.isZero(pols.B6[i])|| !fr.isZero(pols.B7[i]) )
                 {
-                    cerr << "Error: MainExecutor::Execute() storage write instruction found non-zero A-B registers step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                    proverRequest.result = ZKR_SM_MAIN_STORAGE;
+                    proverRequest.result = ZKR_SM_MAIN_STORAGE_INVALID_KEY;
+                    logError(ctx, "Storage write instruction found non-zero A-B registers");
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
                 }
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 gettimeofday(&t, NULL);
 #endif
                 // Call poseidon and get the hash key
@@ -1753,23 +1945,29 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     ctx.lastSWrite.key[j] = Kin1Hash[j];
                 }
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 mainMetrics.add("Poseidon", TimeDiff(t));
 #endif
                 // Call SMT to get the new Merkel Tree root hash
                 mpz_class scalarD;
-                fea2scalar(fr, scalarD, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
-#ifdef LOG_TIME_STATISTICS
+                if (!fea2scalar(fr, scalarD, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.D)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 gettimeofday(&t, NULL);
 #endif
                 Goldilocks::Element oldRoot[4];
                 sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
-                zkresult zkResult = pHashDB->set(oldRoot, ctx.lastSWrite.key, scalarD, proverRequest.input.bUpdateMerkleTree, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
+                zkresult zkResult = pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : (proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
                 if (zkResult != ZKR_SUCCESS)
                 {
-                    cerr << "Error: MainExecutor::Execute() failed calling pHashDB->set() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     proverRequest.result = zkResult;
+                    logError(ctx, string("Failed calling pHashDB->set() result=") + zkresult2string(zkResult));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
                 }
@@ -1788,7 +1986,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     ctx.totalTransferredBalance += balanceDifference;
                 }
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 mainMetrics.add("SMT Set", TimeDiff(t));
 #endif
                 ctx.lastSWrite.step = i;
@@ -1842,10 +2040,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                  !fr.equal(ctx.lastSWrite.newRoot[2], oldRoot[2]) ||
                  !fr.equal(ctx.lastSWrite.newRoot[3], oldRoot[3]) )
             {
-                cerr << "Error: Storage write does not match" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid <<
-                    " ctx.lastSWrite.newRoot: " << fr.toString(ctx.lastSWrite.newRoot[3], 16) << ":" << fr.toString(ctx.lastSWrite.newRoot[2], 16) << ":" << fr.toString(ctx.lastSWrite.newRoot[1], 16) << ":" << fr.toString(ctx.lastSWrite.newRoot[0], 16) <<
-                    " oldRoot: " << fr.toString(oldRoot[3], 16) << ":" << fr.toString(oldRoot[2], 16) << ":" << fr.toString(oldRoot[1], 16) << ":" << fr.toString(oldRoot[0], 16) << endl;
-                proverRequest.result = ZKR_SM_MAIN_STORAGE;
+                proverRequest.result = ZKR_SM_MAIN_STORAGE_WRITE_MISMATCH;
+                logError(ctx, "Storage write does not match: ctx.lastSWrite.newRoot: " + fr.toString(ctx.lastSWrite.newRoot[3], 16) + ":" + fr.toString(ctx.lastSWrite.newRoot[2], 16) + ":" + fr.toString(ctx.lastSWrite.newRoot[1], 16) + ":" + fr.toString(ctx.lastSWrite.newRoot[0], 16) +
+                    " oldRoot: " + fr.toString(oldRoot[3], 16) + ":" + fr.toString(oldRoot[2], 16) + ":" + fr.toString(oldRoot[1], 16) + ":" + fr.toString(oldRoot[0], 16));
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
             }
@@ -1857,8 +2054,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                  !fr.equal(ctx.lastSWrite.newRoot[2], fea[2]) ||
                  !fr.equal(ctx.lastSWrite.newRoot[3], fea[3]) )
             {
-                cerr << "Error: Storage write does not match: ctx.lastSWrite.newRoot=" << fea2string(fr, ctx.lastSWrite.newRoot) << " op=" << fea << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                proverRequest.result = ZKR_SM_MAIN_STORAGE;
+                proverRequest.result = ZKR_SM_MAIN_STORAGE_WRITE_MISMATCH;
+                logError(ctx, "Storage write does not match: ctx.lastSWrite.newRoot=" + fea2string(fr, ctx.lastSWrite.newRoot) + " op=" + fea2string(fr, fea));
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
             }
@@ -1904,8 +2101,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 size = fr.toU64(pols.D0[i]);
                 if (size>32)
                 {
-                    cerr << "Error: Invalid size>32 for hashK 2: pols.D0[i]=" << fr.toString(pols.D0[i], 16) << " size=" << size << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                    exitProcess();
+                    proverRequest.result = ZKR_SM_MAIN_HASHK_SIZE_OUT_OF_RANGE;
+                    logError(ctx, "Invalid size>32 for hashK 2: pols.D0[i]=" + fr.toString(pols.D0[i], 16));
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
                 }
             }
 
@@ -1914,14 +2113,22 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             fr.toS64(iPos, pols.HASHPOS[i]);
             if (iPos < 0)
             {
-                cerr << "Error: Invalid pos<0 for HashK 2: pols.HASHPOS[i]=" << fr.toString(pols.HASHPOS[i], 16) << " pos=" << iPos << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                exitProcess();
+                proverRequest.result = ZKR_SM_MAIN_HASHK_POSITION_NEGATIVE;
+                logError(ctx, string("Invalid pos<0 for HashK 2: pols.HASHPOS[i]=") + fr.toString(pols.HASHPOS[i], 16) + " pos=" + to_string(iPos));
+                HashDBClientFactory::freeHashDBClient(pHashDB);
+                return;
             }
             uint64_t pos = iPos;
 
             // Get contents of opN into a
             mpz_class a;
-            fea2scalar(fr, a, op0, op1, op2, op3, op4, op5, op6, op7);
+            if (!fea2scalar(fr, a, op0, op1, op2, op3, op4, op5, op6, op7))
+            {
+                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                logError(ctx, "Failed calling fea2scalar(op)");
+                HashDBClientFactory::freeHashDBClient(pHashDB);
+                return;
+            }
 
             // Fill the hash data vector with chunks of the scalar value
             mpz_class result;
@@ -1935,8 +2142,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 else if (hashKIterator->second.data.size() < (pos+j))
                 {
-                    cerr << "Error: hashK 2: trying to insert data in a position:" << (pos+j) << " higher than current data size:" << ctx.hashK[addr].data.size() << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                    proverRequest.result = ZKR_SM_MAIN_HASHK;
+                    proverRequest.result = ZKR_SM_MAIN_HASHK_POSITION_PLUS_SIZE_OUT_OF_RANGE;
+                    logError(ctx, "HashK 2: trying to insert data in a position:" + to_string(pos+j) + " higher than current data size:" + to_string(ctx.hashK[addr].data.size()));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
                 }
@@ -1946,8 +2153,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     bh = hashKIterator->second.data[pos+j];
                     if (bm != bh)
                     {
-                        cerr << "Error: HashK 2 bytes do not match: addr=" << addr << " pos+j=" << pos+j << " is bm=" << bm << " and it should be bh=" << bh << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                        proverRequest.result = ZKR_SM_MAIN_HASHK;
+                        proverRequest.result = ZKR_SM_MAIN_HASHK_VALUE_MISMATCH;
+                        logError(ctx, "HashK 2 bytes do not match: addr=" + to_string(addr) + " pos+j=" + to_string(pos+j) + " is bm=" + to_string(bm) + " and it should be bh=" + to_string(bh));
                         HashDBClientFactory::freeHashDBClient(pHashDB);
                         return;
                     }
@@ -1958,8 +2165,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             mpz_class paddingA = a >> (size*8);
             if (paddingA != 0)
             {
-                cerr << "Error: HashK 2 incoherent size=" << size << " a=" << a.get_str(16) << " paddingA=" << paddingA.get_str(16) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                exitProcess();
+                proverRequest.result = ZKR_SM_MAIN_HASHK_PADDING_MISMATCH;
+                logError(ctx, "HashK 2 incoherent size=" + to_string(size) + " a=" + a.get_str(16) + " paddingA=" + paddingA.get_str(16));
+                HashDBClientFactory::freeHashDBClient(pHashDB);
+                return;
             }
 
             // Record the read operation
@@ -1969,8 +2178,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             {
                 if (readsIterator->second != size)
                 {
-                    cerr << "Error: HashK 2 different read sizes in the same position addr=" << addr << " pos=" << pos << " ctx.hashK[addr].reads[pos]=" << ctx.hashK[addr].reads[pos] << " size=" << size << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                    proverRequest.result = ZKR_SM_MAIN_HASHK;
+                    proverRequest.result = ZKR_SM_MAIN_HASHK_SIZE_MISMATCH;
+                    logError(ctx, "HashK 2 different read sizes in the same position addr=" + to_string(addr) + " pos=" + to_string(pos) + " ctx.hashK[addr].reads[pos]=" + to_string(ctx.hashK[addr].reads[pos]) + " size=" + to_string(size));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
                 }
@@ -1984,7 +2193,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             incHashPos = size;
 
 #ifdef LOG_HASHK
-            cout << "hashK 2 i=" << i << " zkPC=" << zkPC << " addr=" << addr << " pos=" << pos << " size=" << size << " data=" << a.get_str(16) << endl;
+            zklog.info("hashK 2 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr) + " pos=" + to_string(pos) + " size=" + to_string(size) + " data=" + a.get_str(16));
 #endif
         }
 
@@ -2007,8 +2216,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 // Check that length = 0
                 if (lm != 0)
                 {
-                    cerr << "Error: hashKLen 2 hashK[addr] is empty but lm is not 0 addr=" << addr << " lm=" << lm << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                    proverRequest.result = ZKR_SM_MAIN_HASHK;
+                    proverRequest.result = ZKR_SM_MAIN_HASHKLEN_LENGTH_MISMATCH;
+                    logError(ctx, "HashKLen 2 hashK[addr] is empty but lm is not 0 addr=" + to_string(addr) + " lm=" + to_string(lm));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
                 }
@@ -2018,45 +2227,46 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 ctx.hashK[addr] = hashValue;
                 hashKIterator = ctx.hashK.find(addr);
                 zkassert(hashKIterator != ctx.hashK.end());
-
-                // Calculate the hash of an empty string
-                keccak256(hashKIterator->second.data.data(), hashKIterator->second.data.size(), hashKIterator->second.digest);
             }
 
             if (ctx.hashK[addr].lenCalled)
             {
-                cerr << "Error: hashKLen 2 called more than once addr=" << addr << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                exitProcess();
+                proverRequest.result = ZKR_SM_MAIN_HASHKLEN_CALLED_TWICE;
+                logError(ctx, "HashKLen 2 called more than once addr=" + to_string(addr));
+                HashDBClientFactory::freeHashDBClient(pHashDB);
+                return;
             }
             ctx.hashK[addr].lenCalled = true;
 
             uint64_t lh = hashKIterator->second.data.size();
             if (lm != lh)
             {
-                cerr << "Error: hashKLen 2 length does not match addr=" << addr << " is lm=" << lm << " and it should be lh=" << lh << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                proverRequest.result = ZKR_SM_MAIN_HASHK;
+                proverRequest.result = ZKR_SM_MAIN_HASHKLEN_LENGTH_MISMATCH;
+                logError(ctx, "HashKLen 2 length does not match addr=" + to_string(addr) + " is lm=" + to_string(lm) + " and it should be lh=" + to_string(lh));
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
             }
             if (!hashKIterator->second.digestCalled)
             {
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 gettimeofday(&t, NULL);
 #endif
                 keccak256(hashKIterator->second.data.data(), hashKIterator->second.data.size(), hashKIterator->second.digest);
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 mainMetrics.add("Keccak", TimeDiff(t));
 #endif
 
 #ifdef LOG_HASHK
-                cout << "hashKLen 2 calculate hashKLen: addr:" << addr << " hash:" << ctx.hashK[addr].digest.get_str(16) << " size:" << ctx.hashK[addr].data.size() << " data:";
-                for (uint64_t k=0; k<ctx.hashK[addr].data.size(); k++) cout << byte2string(ctx.hashK[addr].data[k]) << ":";
-                cout << endl;
+                {
+                    string s = "hashKLen 2 calculate hashKLen: addr:" + to_string(addr) + " hash:" + ctx.hashK[addr].digest.get_str(16) + " size:" + to_string(ctx.hashK[addr].data.size()) + " data:";
+                    for (uint64_t k=0; k<ctx.hashK[addr].data.size(); k++) s += byte2string(ctx.hashK[addr].data[k]) + ":";
+                    zklog.info(s);
+                }
 #endif
             }
 
 #ifdef LOG_HASHK
-            cout << "hashKLen 2 i=" << i << " zkPC=" << zkPC << " addr=" << addr << endl;
+            zklog.info("hashKLen 2 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr));
 #endif
         }
 
@@ -2071,35 +2281,43 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             hashKIterator = ctx.hashK.find(addr);
             if (hashKIterator == ctx.hashK.end())
             {
-                cerr << "Error: hashKDigest 2 could not find entry for addr=" << addr << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                proverRequest.result = ZKR_SM_MAIN_HASHK;
+                proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_NOT_FOUND;
+                logError(ctx, "HashKDigest 2 could not find entry for addr=" + to_string(addr));
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
             }
 
             // Get contents of op into dg
             mpz_class dg;
-            fea2scalar(fr, dg, op0, op1, op2, op3, op4, op5, op6, op7);
+            if (!fea2scalar(fr, dg, op0, op1, op2, op3, op4, op5, op6, op7))
+            {
+                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                logError(ctx, "Failed calling fea2scalar(op)");
+                HashDBClientFactory::freeHashDBClient(pHashDB);
+                return;
+            }
 
             if (dg != hashKIterator->second.digest)
             {
-                cerr << "Error: hashKDigest 2: Digest does not match op" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                proverRequest.result = ZKR_SM_MAIN_HASHK;
+                proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_DIGEST_MISMATCH;
+                logError(ctx, "HashKDigest 2: Digest does not match op");
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
             }
 
             if (ctx.hashK[addr].digestCalled)
             {
-                cerr << "Error: hashKDigest 2 called more than once addr=" << addr << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                exitProcess();
+                proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_CALLED_TWICE;
+                logError(ctx, "HashKDigest 2 called more than once addr=" + to_string(addr));
+                HashDBClientFactory::freeHashDBClient(pHashDB);
+                return;
             }
             ctx.hashK[addr].digestCalled = true;
 
             incCounter = ceil((double(hashKIterator->second.data.size()) + double(1)) / double(136));
 
 #ifdef LOG_HASHK
-            cout << "hashKDigest 2 i=" << i << " zkPC=" << zkPC << " addr=" << addr << " digest=" << ctx.hashK[addr].digest.get_str(16) << endl;
+            zklog.info("hashKDigest 2 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr) + " digest=" + ctx.hashK[addr].digest.get_str(16));
 #endif
         }
 
@@ -2137,8 +2355,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 size = fr.toU64(pols.D0[i]);
                 if (size>32)
                 {
-                    cerr << "Error: Invalid size>32 for hashP 2: pols.D0[i]=" << fr.toString(pols.D0[i], 16) << " size=" << size << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                    exitProcess();
+                    proverRequest.result = ZKR_SM_MAIN_HASHP_SIZE_OUT_OF_RANGE;
+                    logError(ctx, "Invalid size>32 for hashP 2: pols.D0[i]=" + fr.toString(pols.D0[i], 16) + " size=" + to_string(size));
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
                 }
             }
 
@@ -2147,14 +2367,22 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             fr.toS64(iPos, pols.HASHPOS[i]);
             if (iPos < 0)
             {
-                cerr << "Error: Invalid pos<0 for HashP 2: pols.HASHPOS[i]=" << fr.toString(pols.HASHPOS[i], 16) << " pos=" << iPos << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                exitProcess();
+                proverRequest.result = ZKR_SM_MAIN_HASHP_POSITION_NEGATIVE;
+                logError(ctx, "Invalid pos<0 for HashP 2: pols.HASHPOS[i]=" + fr.toString(pols.HASHPOS[i], 16) + " pos=" + to_string(iPos));
+                HashDBClientFactory::freeHashDBClient(pHashDB);
+                return;
             }
             uint64_t pos = iPos;
 
             // Get contents of opN into a
             mpz_class a;
-            fea2scalar(fr, a, op0, op1, op2, op3, op4, op5, op6, op7);
+            if (!fea2scalar(fr, a, op0, op1, op2, op3, op4, op5, op6, op7))
+            {
+                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                logError(ctx, "Failed calling fea2scalar(op)");
+                HashDBClientFactory::freeHashDBClient(pHashDB);
+                return;
+            }
 
             // Fill the hash data vector with chunks of the scalar value
             mpz_class result;
@@ -2167,8 +2395,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 else if (hashPIterator->second.data.size() < (pos+j))
                 {
-                    cerr << "Error: hashP 2: trying to insert data in a position:" << (pos+j) << " higher than current data size:" << ctx.hashP[addr].data.size() << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                    proverRequest.result = ZKR_SM_MAIN_HASHP;
+                    proverRequest.result = ZKR_SM_MAIN_HASHP_POSITION_PLUS_SIZE_OUT_OF_RANGE;
+                    logError(ctx, "HashP 2: trying to insert data in a position:" + to_string(pos+j) + " higher than current data size:" + to_string(ctx.hashP[addr].data.size()));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
                 }
@@ -2178,8 +2406,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     bh = hashPIterator->second.data[pos+j];
                     if (bm != bh)
                     {
-                        cerr << "Error: HashP 2 bytes do not match: addr=" << addr << " pos+j=" << pos+j << " is bm=" << bm << " and it should be bh=" << bh << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                        proverRequest.result = ZKR_SM_MAIN_HASHP;
+                        proverRequest.result = ZKR_SM_MAIN_HASHP_VALUE_MISMATCH;
+                        logError(ctx, "HashP 2 bytes do not match: addr=" + to_string(addr) + " pos+j=" + to_string(pos+j) + " is bm=" + to_string(bm) + " and it should be bh=" + to_string(bh));
                         HashDBClientFactory::freeHashDBClient(pHashDB);
                         return;
                     }
@@ -2190,8 +2418,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             mpz_class paddingA = a >> (size*8);
             if (paddingA != 0)
             {
-                cerr << "Error: HashP2 incoherent size=" << size << " a=" << a.get_str(16) << " paddingA=" << paddingA.get_str(16) << " step=" << step << " zkPC=" << zkPC << " instruction=" << rom.line[zkPC].toString(fr) << endl;
-                exitProcess();
+                proverRequest.result = ZKR_SM_MAIN_HASHP_PADDING_MISMATCH;
+                logError(ctx, "HashP2 incoherent size=" + to_string(size) + " a=" + a.get_str(16) + " paddingA=" + paddingA.get_str(16));
+                HashDBClientFactory::freeHashDBClient(pHashDB);
+                return;
             }
 
             // Record the read operation
@@ -2201,8 +2431,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             {
                 if (readsIterator->second != size)
                 {
-                    cerr << "Error: HashP 2 diferent read sizes in the same position addr=" << addr << " pos=" << pos << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                    proverRequest.result = ZKR_SM_MAIN_HASHP;
+                    proverRequest.result = ZKR_SM_MAIN_HASHP_SIZE_MISMATCH;
+                    logError(ctx, "HashP 2 diferent read sizes in the same position addr=" + to_string(addr) + " pos=" + to_string(pos));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
                 }
@@ -2235,8 +2465,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 // Check that length = 0
                 if (lm != 0)
                 {
-                    cerr << "Error: hashPLen 2 hashP[addr] is empty but lm is not 0 addr=" << addr << " lm=" << lm << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                    proverRequest.result = ZKR_SM_MAIN_HASHK;
+                    proverRequest.result = ZKR_SM_MAIN_HASHPLEN_LENGTH_MISMATCH;
+                    logError(ctx, "HashPLen 2 hashP[addr] is empty but lm is not 0 addr=" + to_string(addr) + " lm=" + to_string(lm));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
                 }
@@ -2246,36 +2476,27 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 ctx.hashP[addr] = hashValue;
                 hashPIterator = ctx.hashP.find(addr);
                 zkassert(hashPIterator != ctx.hashP.end());
-
-                // Calculate the hash of an empty string
-                keccak256(hashPIterator->second.data.data(), hashPIterator->second.data.size(), hashPIterator->second.digest);
             }
 
             if (ctx.hashP[addr].lenCalled)
             {
-                cerr << "Error: hashPLen 2 called more than once addr=" << addr << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                exitProcess();
+                proverRequest.result = ZKR_SM_MAIN_HASHPLEN_CALLED_TWICE;
+                logError(ctx, "HashPLen 2 called more than once addr=" + to_string(addr));
+                HashDBClientFactory::freeHashDBClient(pHashDB);
+                return;
             }
             ctx.hashP[addr].lenCalled = true;
 
             uint64_t lh = hashPIterator->second.data.size();
             if (lm != lh)
             {
-                cerr << "Error: hashPLen 2 does not match match addr=" << addr << " is lm=" << lm << " and it should be lh=" << lh << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                proverRequest.result = ZKR_SM_MAIN_HASHP;
+                proverRequest.result = ZKR_SM_MAIN_HASHPLEN_LENGTH_MISMATCH;
+                logError(ctx, "HashPLen 2 does not match match addr=" + to_string(addr) + " is lm=" + to_string(lm) + " and it should be lh=" + to_string(lh));
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
             }
             if (!hashPIterator->second.digestCalled)
             {
-                if (hashPIterator->second.data.size() == 0)
-                {
-                    cerr << "Error: hashPLen 2 found data empty" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                    proverRequest.result = ZKR_SM_MAIN_HASHP;
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-
                 // Get a local copy of the bytes vector
                 vector<uint8_t> data = hashPIterator->second.data;
 
@@ -2289,7 +2510,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 Goldilocks::Element * pBuffer = new Goldilocks::Element[bufferSize];
                 if (pBuffer == NULL)
                 {
-                    cerr << "Error: hashPLen 2 failed allocating memory of " << bufferSize << " field elements" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
+                    logError(ctx, "hashPLen 2 failed allocating memory of " + to_string(bufferSize) + " field elements");
                     exitProcess();
                 }
                 for (uint64_t j=0; j<bufferSize; j++) pBuffer[j] = fr.zero();
@@ -2303,39 +2524,41 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     //cout << "fePos=" << fePos << " data=" << to_string(data[j]) << " shifted=" << shifted << " fe=" << fr.toString(pBuffer[fePos],16) << endl;
                 }
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 gettimeofday(&t, NULL);
 #endif
                 Goldilocks::Element result[4];
                 poseidon.linear_hash(result, pBuffer, bufferSize);
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 mainMetrics.add("Poseidon", TimeDiff(t));
 #endif
                 fea2scalar(fr, hashPIterator->second.digest, result);
                 //cout << "ctx.hashP[" << addr << "].digest=" << ctx.hashP[addr].digest.get_str(16) << endl;
                 delete[] pBuffer;
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 gettimeofday(&t, NULL);
 #endif
                 zkresult zkResult = pHashDB->setProgram(result, hashPIterator->second.data, proverRequest.input.bUpdateMerkleTree);
                 if (zkResult != ZKR_SUCCESS)
                 {
-                    cerr << "Error: MainExecutor::Execute() failed calling pHashDB->setProgram() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     proverRequest.result = zkResult;
+                    logError(ctx, string("Failed calling pHashDB->setProgram() result=") + zkresult2string(zkResult));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
                 }
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 mainMetrics.add("Set program", TimeDiff(t));
 #endif
 
 #ifdef LOG_HASH
-                cout << "Hash calculate hashPLen 2: addr:" << addr << " hash:" << ctx.hashP[addr].digest.get_str(16) << " size:" << ctx.hashP[addr].data.size() << " data:";
-                for (uint64_t k=0; k<ctx.hashP[addr].data.size(); k++) cout << byte2string(ctx.hashP[addr].data[k]) << ":";
-                cout << endl;
+                {
+                    string s = "Hash calculate hashPLen 2: addr:" + to_string(addr) + " hash:" + ctx.hashP[addr].digest.get_str(16) + " size:" + to_string(ctx.hashP[addr].data.size()) + " data:";
+                    for (uint64_t k=0; k<ctx.hashP[addr].data.size(); k++) s += byte2string(ctx.hashP[addr].data[k]) + ":";
+                    zklog.info(s);
+                }
 #endif
             }
         }
@@ -2347,7 +2570,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             // Get contents of op into dg
             mpz_class dg;
-            fea2scalar(fr, dg, op0, op1, op2, op3, op4, op5, op6, op7);
+            if (!fea2scalar(fr, dg, op0, op1, op2, op3, op4, op5, op6, op7))
+            {
+                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                logError(ctx, "Failed calling fea2scalar(op)");
+                HashDBClientFactory::freeHashDBClient(pHashDB);
+                return;
+            }
 
             unordered_map< uint64_t, HashValue >::iterator hashPIterator;
             hashPIterator = ctx.hashP.find(addr);
@@ -2357,19 +2586,19 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 hashValue.digest = dg;
                 Goldilocks::Element aux[4];
                 scalar2fea(fr, dg, aux);
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 gettimeofday(&t, NULL);
 #endif
                 zkresult zkResult = pHashDB->getProgram(aux, hashValue.data, proverRequest.dbReadLog);
                 if (zkResult != ZKR_SUCCESS)
                 {
-                    cerr << "Error: MainExecutor::Execute() failed calling pHashDB->getProgram() result=" << zkresult2string(zkResult) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
                     proverRequest.result = zkResult;
+                    logError(ctx, string("Failed calling pHashDB->getProgram() result=") + zkresult2string(zkResult));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
                 }
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 mainMetrics.add("Get program", TimeDiff(t));
 #endif
                 ctx.hashP[addr] = hashValue;
@@ -2379,8 +2608,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             if (ctx.hashP[addr].digestCalled)
             {
-                cerr << "Error: hashPDigest 2 called more than once addr=" << addr << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                exitProcess();
+                proverRequest.result = ZKR_SM_MAIN_HASHPDIGEST_CALLED_TWICE;
+                logError(ctx, "HashPDigest 2 called more than once addr=" + to_string(addr));
+                HashDBClientFactory::freeHashDBClient(pHashDB);
+                return;
             }
             ctx.hashP[addr].digestCalled = true;
 
@@ -2389,8 +2620,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             // Check that digest equals op
             if (dg != hashPIterator->second.digest)
             {
-                cerr << "Error: hashPDigest 2: ctx.hashP[addr].digest=" << ctx.hashP[addr].digest.get_str(16) << " does not match op=" << dg.get_str(16) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                proverRequest.result = ZKR_SM_MAIN_HASHP;
+                proverRequest.result = ZKR_SM_MAIN_HASHPDIGEST_DIGEST_MISMATCH;
+                logError(ctx, "HashPDigest 2: ctx.hashP[addr].digest=" + ctx.hashP[addr].digest.get_str(16) + " does not match op=" + dg.get_str(16));
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
             }
@@ -2400,7 +2631,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if (!bProcessBatch && (rom.line[zkPC].hashPDigest || rom.line[zkPC].sWR))
         {
             mpz_class op;
-            fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7);
+            if (!fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7))
+            {
+                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                logError(ctx, "Failed calling fea2scalar(op)");
+                HashDBClientFactory::freeHashDBClient(pHashDB);
+                return;
+            }
 
             // Store the binary action to execute it later with the binary SM
             BinaryAction binaryAction;
@@ -2420,20 +2657,49 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             {
                 // Convert to scalar
                 mpz_class A, B, C, D, op;
-                fea2scalar(fr, A, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-                fea2scalar(fr, B, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
-                fea2scalar(fr, C, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]);
-                fea2scalar(fr, D, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
-                fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7);
+                if (!fea2scalar(fr, A, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.A)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
+                if (!fea2scalar(fr, B, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.B)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
+                if (!fea2scalar(fr, C, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.C)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
+                if (!fea2scalar(fr, D, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.D)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
+                if (!fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(op)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
 
                 // Check the condition
-                if ( (A*B) + C != (D<<256) + op ) {
-                    cerr << "Error: Arithmetic does not match:" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
+                if ( (A*B) + C != (D<<256) + op )
+                {
+                    proverRequest.result = ZKR_SM_MAIN_ARITH_MISMATCH;
                     mpz_class left = (A*B) + C;
                     mpz_class right = (D<<256) + op;
-                    cerr << "(A*B) + C = " << left.get_str(16) << endl;
-                    cerr << "(D<<256) + op = " << right.get_str(16) << endl;
-                    proverRequest.result = ZKR_SM_MAIN_ARITH;
+                    logError(ctx, "Arithmetic does not match: (A*B) + C = " + left.get_str(16) + ", (D<<256) + op = " + right.get_str(16));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
                 }
@@ -2463,12 +2729,48 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             {
                 // Convert to scalar
                 mpz_class x1, y1, x2, y2, x3, y3;
-                fea2scalar(fr, x1, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-                fea2scalar(fr, y1, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
-                fea2scalar(fr, x2, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]);
-                fea2scalar(fr, y2, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
-                fea2scalar(fr, x3, pols.E0[i], pols.E1[i], pols.E2[i], pols.E3[i], pols.E4[i], pols.E5[i], pols.E6[i], pols.E7[i]);
-                fea2scalar(fr, y3, op0, op1, op2, op3, op4, op5, op6, op7);
+                if (!fea2scalar(fr, x1, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.A)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
+                if (!fea2scalar(fr, y1, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.B)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
+                if (!fea2scalar(fr, x2, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.C)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
+                if (!fea2scalar(fr, y2, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.D)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
+                if (!fea2scalar(fr, x3, pols.E0[i], pols.E1[i], pols.E2[i], pols.E3[i], pols.E4[i], pols.E5[i], pols.E6[i], pols.E7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.E)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
+                if (!fea2scalar(fr, y3, op0, op1, op2, op3, op4, op5, op6, op7))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(op)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
 
                 // Convert to RawFec::Element
                 RawFec::Element fecX1, fecY1, fecX2, fecY2, fecX3;
@@ -2478,6 +2780,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 fec.fromMpz(fecY2, y2.get_mpz_t());
                 fec.fromMpz(fecX3, x3.get_mpz_t());
 
+// Check if this is a double operation
                 bool dbl = false;
                 if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==1 && rom.line[zkPC].arithEq2==0)
                 {
@@ -2489,7 +2792,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
                 else
                 {
-                    cerr << "Error: Invalid arithmetic op" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
+                    logError(ctx, "Invalid arithmetic op");
                     exitProcess();
                 }
 
@@ -2557,16 +2860,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                 if (!x3eq || !y3eq)
                 {
-                    cerr << "Error: Arithmetic curve " << (dbl?"dbl":"add") << " point does not match" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                    cerr << " x1=" << x1.get_str() << endl;
-                    cerr << " y1=" << y1.get_str() << endl;
-                    cerr << " x2=" << x2.get_str() << endl;
-                    cerr << " y2=" << y2.get_str() << endl;
-                    cerr << " x3=" << x3.get_str() << endl;
-                    cerr << " y3=" << y3.get_str() << endl;
-                    cerr << "_x3=" << _x3.get_str() << endl;
-                    cerr << "_y3=" << _y3.get_str() << endl;
-                    proverRequest.result = ZKR_SM_MAIN_ARITH;
+                    proverRequest.result = ZKR_SM_MAIN_ARITH_ECRECOVER_MISMATCH;
+                    logError(ctx, string("Arithmetic curve ") + (dbl?"dbl":"add") + " point does not match" +
+                        " x1=" + x1.get_str() +
+                        " y1=" + y1.get_str() +
+                        " x2=" + x2.get_str() +
+                        " y2=" + y2.get_str() +
+                        " x3=" + x3.get_str() +
+                        " y3=" + y3.get_str() +
+                        "_x3=" + _x3.get_str() +
+                        "_y3=" + _y3.get_str());
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
                 }
@@ -2601,16 +2904,34 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (rom.line[zkPC].binOpcode == 0) // ADD
             {
                 mpz_class a, b, c;
-                fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-                fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
-                fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);
+                if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.A)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
+                if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.B)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
+                if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(op)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
 
                 mpz_class expectedC;
                 expectedC = (a + b) & ScalarMask256;
                 if (c != expectedC)
                 {
-                    cerr << "Error: Binary ADD operation does not match" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                    proverRequest.result = ZKR_SM_MAIN_BINARY;
+                    proverRequest.result = ZKR_SM_MAIN_BINARY_ADD_MISMATCH;
+                    logError(ctx, "Binary ADD operation does not match c=op=" + c.get_str(16) + " expectedC=(a + b) & ScalarMask256=" + expectedC.get_str(16));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
                 }
@@ -2634,16 +2955,34 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             else if (rom.line[zkPC].binOpcode == 1) // SUB
             {
                 mpz_class a, b, c;
-                fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-                fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
-                fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);
+                if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.A)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
+                if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.B)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
+                if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(op)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
 
                 mpz_class expectedC;
                 expectedC = (a - b + ScalarTwoTo256) & ScalarMask256;
                 if (c != expectedC)
                 {
-                    cerr << "Error: Binary SUB operation does not match" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                    proverRequest.result = ZKR_SM_MAIN_BINARY;
+                    proverRequest.result = ZKR_SM_MAIN_BINARY_SUB_MISMATCH;
+                    logError(ctx, "Binary SUB operation does not match c=op=" + c.get_str(16) + " expectedC=(a - b + ScalarTwoTo256) & ScalarMask256=" + expectedC.get_str(16));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
                 }
@@ -2667,16 +3006,34 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             else if (rom.line[zkPC].binOpcode == 2) // LT
             {
                 mpz_class a, b, c;
-                fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-                fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
-                fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);
+                if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.A)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
+                if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.B)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
+                if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(op)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
 
                 mpz_class expectedC;
                 expectedC = (a < b);
                 if (c != expectedC)
                 {
-                    cerr << "Error: Binary LT operation does not match" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                    proverRequest.result = ZKR_SM_MAIN_BINARY;
+                    proverRequest.result = ZKR_SM_MAIN_BINARY_LT_MISMATCH;
+                    logError(ctx, "Binary LY operation does not match c=op=" + c.get_str(16) + " expectedC=(a < b)=" + expectedC.get_str(16));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
                 }
@@ -2700,9 +3057,27 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             else if (rom.line[zkPC].binOpcode == 3) // SLT
             {
                 mpz_class a, b, c, _a, _b;
-                fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-                fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
-                fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);
+                if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.A)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
+                if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.B)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
+                if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(op)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
                 _a = a;
                 _b = b;
 
@@ -2714,9 +3089,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 expectedC = (_a < _b);
                 if (c != expectedC)
                 {
-                    cerr << "Error: Binary SLT operation does not match" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                    cerr << "a=" << a << " b=" << b << " c=" << c << " _a=" << _a << " _b=" << _b << " expectedC=" << expectedC << endl;
-                    proverRequest.result = ZKR_SM_MAIN_BINARY;
+                    proverRequest.result = ZKR_SM_MAIN_BINARY_SLT_MISMATCH;
+                    logError(ctx, "Binary SLT operation does not match a=" + a.get_str(16) + " b=" + b.get_str(16) + " c=" + c.get_str(16) + " _a=" + _a.get_str(16) + " _b=" + _b.get_str(16) + " expectedC=" + expectedC.get_str(16));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
                 }
@@ -2740,16 +3114,34 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             else if (rom.line[zkPC].binOpcode == 4) // EQ
             {
                 mpz_class a, b, c;
-                fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-                fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
-                fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);
+                if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.A)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
+                if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.B)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
+                if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(op)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
 
                 mpz_class expectedC;
                 expectedC = (a == b);
                 if (c != expectedC)
                 {
-                    cerr << "Error: Binary EQ operation does not match" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                    proverRequest.result = ZKR_SM_MAIN_BINARY;
+                    proverRequest.result = ZKR_SM_MAIN_BINARY_EQ_MISMATCH;
+                    logError( ctx, "Binary EQ operation does not match c=op=" + c.get_str(16) + " expectedC=(a==b)=" + expectedC.get_str(16));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
                 }
@@ -2773,16 +3165,34 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             else if (rom.line[zkPC].binOpcode == 5) // AND
             {
                 mpz_class a, b, c;
-                fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-                fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
-                fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);
+                if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.A)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
+                if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.B)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
+                if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(op)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
 
                 mpz_class expectedC;
                 expectedC = (a & b);
                 if (c != expectedC)
                 {
-                    cerr << "Error: Binary AND operation does not match" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                    proverRequest.result = ZKR_SM_MAIN_BINARY;
+                    proverRequest.result = ZKR_SM_MAIN_BINARY_AND_MISMATCH;
+                    logError(ctx, "Binary AND operation does not match c=op=" + c.get_str(16) + " expectedC=(a&b)=" + expectedC.get_str(16));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
                 }
@@ -2809,16 +3219,34 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             else if (rom.line[zkPC].binOpcode == 6) // OR
             {
                 mpz_class a, b, c;
-                fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-                fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
-                fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);
+                if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.A)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
+                if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.B)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
+                if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(op)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
 
                 mpz_class expectedC;
                 expectedC = (a | b);
                 if (c != expectedC)
                 {
-                    cerr << "Error: Binary OR operation does not match" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                    proverRequest.result = ZKR_SM_MAIN_BINARY;
+                    proverRequest.result = ZKR_SM_MAIN_BINARY_OR_MISMATCH;
+                    logError(ctx, "Binary OR operation does not match c=op=" + c.get_str(16) + " expectedC=(a|b)=" + expectedC.get_str(16));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
                 }
@@ -2840,16 +3268,34 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             else if (rom.line[zkPC].binOpcode == 7) // XOR
             {
                 mpz_class a, b, c;
-                fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
-                fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
-                fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);
+                if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.A)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
+                if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.B)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
+                if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(op)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
 
                 mpz_class expectedC;
                 expectedC = (a ^ b);
                 if (c != expectedC)
                 {
-                    cerr << "Error: Binary XOR operation does not match" << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                    proverRequest.result = ZKR_SM_MAIN_BINARY;
+                    proverRequest.result = ZKR_SM_MAIN_BINARY_XOR_MISMATCH;
+                    logError(ctx, "Binary XOR operation does not match c=op=" + c.get_str(16) + " expectedC=(a^b)=" + expectedC.get_str(16));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
                 }
@@ -2870,10 +3316,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             else
             {
-                cerr << "Error: Invalid binary operation opcode=" << rom.line[zkPC].binOpcode << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                proverRequest.result = ZKR_SM_MAIN_BINARY;
-                HashDBClientFactory::freeHashDBClient(pHashDB);
-                return;
+                logError(ctx, "Invalid binary operation opcode=" + rom.line[zkPC].binOpcode);
+                exitProcess();
             }
             pols.bin[i] = fr.one();
         }
@@ -2882,17 +3326,41 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if ( (rom.line[zkPC].memAlignRD==1) || (rom.line[zkPC].memAlignWR==1) || (rom.line[zkPC].memAlignWR8==1) )
         {
             mpz_class m0;
-            fea2scalar(fr, m0, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
+            if (!fea2scalar(fr, m0, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+            {
+                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                logError(ctx, "Failed calling fea2scalar(pols.A)");
+                HashDBClientFactory::freeHashDBClient(pHashDB);
+                return;
+            }
             mpz_class m1;
-            fea2scalar(fr, m1, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
+            if (!fea2scalar(fr, m1, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+            {
+                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                logError(ctx, "Failed calling fea2scalar(pols.B)");
+                HashDBClientFactory::freeHashDBClient(pHashDB);
+                return;
+            }
             mpz_class v;
-            fea2scalar(fr, v, op0, op1, op2, op3, op4, op5, op6, op7);
+            if (!fea2scalar(fr, v, op0, op1, op2, op3, op4, op5, op6, op7))
+            {
+                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                logError(ctx, "Failed calling fea2scalar(op)");
+                HashDBClientFactory::freeHashDBClient(pHashDB);
+                return;
+            }
             mpz_class offsetScalar;
-            fea2scalar(fr, offsetScalar, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]);
+            if (!fea2scalar(fr, offsetScalar, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]))
+            {
+                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                logError(ctx, "Failed calling fea2scalar(pols.C)");
+                HashDBClientFactory::freeHashDBClient(pHashDB);
+                return;
+            }
             if (offsetScalar<0 || offsetScalar>32)
             {
-                cerr << "Error: MemAlign out of range offset=" << offsetScalar.get_str() << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                proverRequest.result = ZKR_SM_MAIN_MEMALIGN;
+                proverRequest.result = ZKR_SM_MAIN_MEMALIGN_OFFSET_OUT_OF_RANGE;
+                logError(ctx, "MemAlign out of range offset=" + offsetScalar.get_str());
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
             }
@@ -2903,17 +3371,29 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 pols.memAlignWR[i] = fr.one();
 
                 mpz_class w0;
-                fea2scalar(fr, w0, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
+                if (!fea2scalar(fr, w0, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.D)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
                 mpz_class w1;
-                fea2scalar(fr, w1, pols.E0[i], pols.E1[i], pols.E2[i], pols.E3[i], pols.E4[i], pols.E5[i], pols.E6[i], pols.E7[i]);
+                if (!fea2scalar(fr, w1, pols.E0[i], pols.E1[i], pols.E2[i], pols.E3[i], pols.E4[i], pols.E5[i], pols.E6[i], pols.E7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.E)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
                 mpz_class _W0;
                 _W0 = (m0 & (ScalarTwoTo256 - (ScalarOne << (256-offset*8)))) | (v >> offset*8);
                 mpz_class _W1;
                 _W1 = (m1 & (ScalarMask256 >> offset*8)) | ((v << (256 - offset*8)) & ScalarMask256);
                 if ( (w0 != _W0) || (w1 != _W1) )
                 {
-                    cerr << "Error: MemAlign w0, w1 invalid: w0=" << w0.get_str(16) << " w1=" << w1.get_str(16) << " _W0=" << _W0.get_str(16) << " _W1=" << _W1.get_str(16) << " m0=" << m0.get_str(16) << " m1=" << m1.get_str(16) << " offset=" << offset << " v=" << v.get_str(16) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                    proverRequest.result = ZKR_SM_MAIN_MEMALIGN;
+                    proverRequest.result = ZKR_SM_MAIN_MEMALIGN_WRITE_MISMATCH;
+                    logError(ctx, "MemAlign w0, w1 invalid: w0=" + w0.get_str(16) + " w1=" + w1.get_str(16) + " _W0=" + _W0.get_str(16) + " _W1=" + _W1.get_str(16) + " m0=" + m0.get_str(16) + " m1=" + m1.get_str(16) + " offset=" + to_string(offset) + " v=" + v.get_str(16));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
                 }
@@ -2937,14 +3417,20 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 pols.memAlignWR8[i] = fr.one();
 
                 mpz_class w0;
-                fea2scalar(fr, w0, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
+                if (!fea2scalar(fr, w0, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.D)");
+                    HashDBClientFactory::freeHashDBClient(pHashDB);
+                    return;
+                }
                 mpz_class _W0;
                 mpz_class byteMaskOn256("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
                 _W0 = (m0 & (byteMaskOn256 >> (offset*8))) | ((v & 0xFF) << ((31-offset)*8));
                 if (w0 != _W0)
                 {
-                    cerr << "Error: MemAlign w0 invalid: w0=" << w0.get_str(16) << " _W0=" << _W0.get_str(16) << " m0=" << m0.get_str(16) << " offset=" << offset << " v=" << v.get_str(16) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                    proverRequest.result = ZKR_SM_MAIN_MEMALIGN;
+                    proverRequest.result = ZKR_SM_MAIN_MEMALIGN_WRITE8_MISMATCH;
+                    logError(ctx, "MemAlign w0 invalid: w0=" + w0.get_str(16) + " _W0=" + _W0.get_str(16) + " m0=" + m0.get_str(16) + " offset=" + to_string(offset) + " v=" + v.get_str(16));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
                 }
@@ -2975,8 +3461,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 _V = leftV | rightV;
                 if (v != _V)
                 {
-                    cerr << "Error: MemAlign v invalid: v=" << v.get_str(16) << " _V=" << _V.get_str(16) << " m0=" << m0.get_str(16) << " m1=" << m1.get_str(16) << " offset=" << offset << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                    proverRequest.result = ZKR_SM_MAIN_MEMALIGN;
+                    proverRequest.result = ZKR_SM_MAIN_MEMALIGN_READ_MISMATCH;
+                    logError(ctx, "MemAlign v invalid: v=" + v.get_str(16) + " _V=" + _V.get_str(16) + " m0=" + m0.get_str(16) + " m1=" + m1.get_str(16) + " offset=" + to_string(offset));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
                 }
@@ -2997,7 +3483,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             else
             {
-                cerr << "Error: Invalid memAlign operation zpPC=" << zkPC << " memAlignRD=" << rom.line[zkPC].memAlignRD << " memAlignWR=" << rom.line[zkPC].memAlignWR << " memAlignWR8=" << rom.line[zkPC].memAlignWR8 << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
+                logError(ctx, "Invalid memAlign operation");
                 exitProcess();
             }
         }
@@ -3024,7 +3510,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.A7[nexti] = op7;
             pols.setA[i] = fr.one();
 #ifdef LOG_SETX
-            cout << "setA A[nexti]=" << pols.A3[nexti] << ":" << pols.A2[nexti] << ":" << pols.A1[nexti] << ":" << fr.toString(pols.A0[nexti], 16) << endl;
+            zklog.info("setA A[nexti]=" + fea2string(fr, pols.A0[nexti], pols.A1[nexti], pols.A2[nexti], pols.A3[nexti], pols.A4[nexti], pols.A5[nexti], pols.A6[nexti], pols.A7[nexti]));
 #endif
         } else if (bUnsignedTransaction && (zkPC == checkAndSaveFromLabel)) {
             // Set A register with input.from to process unsigned transactions
@@ -3053,7 +3539,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.B7[nexti] = op7;
             pols.setB[i] = fr.one();
 #ifdef LOG_SETX
-            cout << "setB B[nexti]=" << pols.B3[nexti] << ":" << pols.B2[nexti] << ":" << pols.B1[nexti] << ":" << fr.toString(pols.B0[nexti], 16) << endl;
+            zklog.info("setB B[nexti]=" + fea2string(fr, pols.B0[nexti], pols.B1[nexti], pols.B2[nexti], pols.B3[nexti], pols.B4[nexti], pols.B5[nexti], pols.B6[nexti], pols.B7[nexti]));
 #endif
         } else {
             pols.B0[nexti] = pols.B0[i];
@@ -3078,7 +3564,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.C7[nexti] = op7;
             pols.setC[i] = fr.one();
 #ifdef LOG_SETX
-            cout << "setC C[nexti]=" << pols.C3[nexti] << ":" << pols.C2[nexti] << ":" << pols.C1[nexti] << ":" << fr.toString(pols.C0[nexti], 16) << endl;
+            zklog.info("setC C[nexti]=" + fea2string(fr, pols.C0[nexti], pols.C1[nexti], pols.C2[nexti], pols.C3[nexti], pols.C4[nexti], pols.C5[nexti], pols.C6[nexti], pols.C7[nexti]));
 #endif
         } else {
             pols.C0[nexti] = pols.C0[i];
@@ -3103,7 +3589,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.D7[nexti] = op7;
             pols.setD[i] = fr.one();
 #ifdef LOG_SETX
-            cout << "setD D[nexti]=" << pols.D3[nexti] << ":" << pols.D2[nexti] << ":" << pols.D1[nexti] << ":" << fr.toString(pols.D0[nexti], 16) << endl;
+            zklog.info("setD D[nexti]=" + fea2string(fr, pols.D0[nexti], pols.D1[nexti], pols.D2[nexti], pols.D3[nexti], pols.D4[nexti], pols.D5[nexti], pols.D6[nexti], pols.D7[nexti]));
 #endif
         } else {
             pols.D0[nexti] = pols.D0[i];
@@ -3128,7 +3614,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.E7[nexti] = op7;
             pols.setE[i] = fr.one();
 #ifdef LOG_SETX
-            cout << "setE E[nexti]=" << pols.E3[nexti] << ":" << pols.E2[nexti] << ":" << pols.E1[nexti] << ":" << fr.toString(pols.E0[nexti] ,16) << endl;
+            zklog.info("setE E[nexti]=" + fea2string(fr, pols.E0[nexti], pols.E1[nexti], pols.E2[nexti], pols.E3[nexti], pols.E4[nexti], pols.E5[nexti], pols.E6[nexti], pols.E7[nexti]));
 #endif
         } else {
             pols.E0[nexti] = pols.E0[i];
@@ -3153,7 +3639,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.SR7[nexti] = op7;
             pols.setSR[i] = fr.one();
 #ifdef LOG_SETX
-            cout << "setSR SR[nexti]=" << fr.toString(pols.SR[nexti], 16) << endl;
+            zklog.info("setSR SR[nexti]=" + fea2string(fr, pols.SR0[nexti], pols.SR1[nexti], pols.SR2[nexti], pols.SR3[nexti], pols.SR4[nexti], pols.SR5[nexti], pols.SR6[nexti], pols.SR7[nexti]));
 #endif
         } else {
             pols.SR0[nexti] = pols.SR0[i];
@@ -3171,7 +3657,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.CTX[nexti] = op0;
             pols.setCTX[i] = fr.one();
 #ifdef LOG_SETX
-            cout << "setCTX CTX[nexti]=" << pols.CTX[nexti] << endl;
+            zklog.info("setCTX CTX[nexti]=" + fr.toString(pols.CTX[nexti], 16));
 #endif
         } else {
             pols.CTX[nexti] = pols.CTX[i];
@@ -3182,7 +3668,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.SP[nexti] = op0;
             pols.setSP[i] = fr.one();
 #ifdef LOG_SETX
-            cout << "setSP SP[nexti]=" << pols.SP[nexti] << endl;
+            zklog.info("setSP SP[nexti]=" + fr.toString(pols.SP[nexti], 16));
 #endif
         } else {
             // SP' = SP + incStack
@@ -3194,7 +3680,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.PC[nexti] = op0;
             pols.setPC[i] = fr.one();
 #ifdef LOG_SETX
-            cout << "setPC PC[nexti]=" << pols.PC[nexti] << endl;
+            zklog.info("setPC PC[nexti]=" + fr.toString(pols.PC[nexti], 16));
 #endif
         } else {
             // PC' = PC
@@ -3222,7 +3708,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef CHECK_MAX_CNT_ASAP
             if (fr.toU64(pols.cntArith[nexti]) > rom.MAX_CNT_ARITH_LIMIT)
             {
-                cerr << "Error: Main Executor found pols.cntArith[nexti]=" << fr.toU64(pols.cntArith[nexti]) << " > MAX_CNT_ARITH_LIMIT_LIMIT=" << rom.MAX_CNT_ARITH_LIMIT << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
+                logError(ctx, "Main Executor found pols.cntArith[nexti]=" + fr.toString(pols.cntArith[nexti], 10) + " > MAX_CNT_ARITH_LIMIT_LIMIT=" + to_string(rom.MAX_CNT_ARITH_LIMIT));
                 if (bProcessBatch)
                 {
                     proverRequest.result = ZKR_SM_MAIN_OOC_ARITH;
@@ -3242,7 +3728,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef CHECK_MAX_CNT_ASAP
             if (fr.toU64(pols.cntBinary[nexti]) > rom.MAX_CNT_BINARY_LIMIT)
             {
-                cerr << "Error: Main Executor found pols.cntBinary[nexti]=" << fr.toU64(pols.cntBinary[nexti]) << " > MAX_CNT_BINARY_LIMIT=" << rom.MAX_CNT_BINARY_LIMIT << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
+                logError(ctx, "Main Executor found pols.cntBinary[nexti]=" + fr.toString(pols.cntBinary[nexti], 10) + " > MAX_CNT_BINARY_LIMIT=" + to_string(rom.MAX_CNT_BINARY_LIMIT));
                 if (bProcessBatch)
                 {
                     proverRequest.result = ZKR_SM_MAIN_OOC_BINARY;
@@ -3262,7 +3748,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef CHECK_MAX_CNT_ASAP
             if (fr.toU64(pols.cntMemAlign[nexti]) > rom.MAX_CNT_MEM_ALIGN_LIMIT)
             {
-                cerr << "Error: Main Executor found pols.cntMemAlign[nexti]=" << fr.toU64(pols.cntMemAlign[nexti]) << " > MAX_CNT_MEM_ALIGN_LIMIT=" << rom.MAX_CNT_MEM_ALIGN_LIMIT << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
+                logError(ctx, "Main Executor found pols.cntMemAlign[nexti]=" + fr.toString(pols.cntMemAlign[nexti], 10) + " > MAX_CNT_MEM_ALIGN_LIMIT=" + to_string(rom.MAX_CNT_MEM_ALIGN_LIMIT));
                 if (bProcessBatch)
                 {
                     proverRequest.result = ZKR_SM_MAIN_OOC_MEM_ALIGN;
@@ -3335,7 +3821,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if (rom.line[zkPC].JMPN == 1)
         {
 #ifdef LOG_JMP
-            cout << "JMPN: op0=" << fr.toString(op0) << endl;
+            zklog.info("JMPN: op0=" + fr.toString(op0));
 #endif
             uint64_t jmpnCondValue = fr.toU64(op0);
 
@@ -3349,7 +3835,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     pols.zkPC[nexti] = fr.fromU64(addr);
                 jmpnCondValue = fr.toU64(fr.add(op0, fr.fromU64(0x100000000)));
 #ifdef LOG_JMP
-                cout << "JMPN next zkPC(1)=" << pols.zkPC[nexti] << endl;
+                zklog.info("JMPN next zkPC(1)=" + fr.toString(pols.zkPC[nexti]));
 #endif
             }
             // If op>=0, simply increase zkPC'=zkPC+1
@@ -3371,13 +3857,15 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     pols.zkPC[nexti] = fr.inc(pols.zkPC[i]);
                 }
 #ifdef LOG_JMP
-                cout << "JMPN next zkPC(2)=" << pols.zkPC[nexti] << endl;
+                zklog.info("JMPN next zkPC(2)=" + fr.toString(pols.zkPC[nexti]));
 #endif
             }
             else
             {
-                cerr << "Error: MainExecutor::execute() JMPN invalid S33 value op0=" << jmpnCondValue << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
-                exitProcess();
+                proverRequest.result = ZKR_SM_MAIN_S33;
+                logError(ctx, "JMPN invalid S33 value op0=" + to_string(jmpnCondValue));
+                HashDBClientFactory::freeHashDBClient(pHashDB);
+                return;
             }
             pols.lJmpnCondValue[i] = fr.fromU64(jmpnCondValue & 0x7FFFFF);
             jmpnCondValue = jmpnCondValue >> 23;
@@ -3399,7 +3887,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 else
                     pols.zkPC[nexti] = fr.fromU64(addr);
 #ifdef LOG_JMP
-               cout << "JMPC next zkPC(3)=" << pols.zkPC[nexti] << endl;
+               zklog.info("JMPC next zkPC(3)=" + fr.toString(pols.zkPC[nexti]));
 #endif
             }
             // If not carry, simply increase zkPC'=zkPC+1
@@ -3421,7 +3909,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     pols.zkPC[nexti] = fr.inc(pols.zkPC[i]);
                 }
 #ifdef LOG_JMP
-                cout << "JMPC next zkPC(4)=" << pols.zkPC[nexti] << endl;
+                zklog.info("JMPC next zkPC(4)=" + fr.toString(pols.zkPC[nexti]));
 #endif
             }
             pols.JMPC[i] = fr.one();
@@ -3464,7 +3952,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             else
                 pols.zkPC[nexti] = fr.fromU64(addr);
 #ifdef LOG_JMP
-            cout << "JMP next zkPC(5)=" << pols.zkPC[nexti] << endl;
+            zklog.info("JMP next zkPC(5)=" + fr.toString(pols.zkPC[nexti]));
 #endif
             pols.JMP[i] = fr.one();
         }
@@ -3499,7 +3987,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.GAS[nexti] = op0;
             pols.setGAS[i] = fr.one();
 #ifdef LOG_SETX
-            cout << "setGAS GAS[nexti]=" << pols.GAS[nexti] << endl;
+            zklog.info("setGAS GAS[nexti]=" + fr.toString(pols.GAS[nexti]));
 #endif
         } else {
             pols.GAS[nexti] = pols.GAS[i];
@@ -3527,7 +4015,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef CHECK_MAX_CNT_ASAP
             if (fr.toU64(pols.cntKeccakF[nexti]) > rom.MAX_CNT_KECCAK_F_LIMIT)
             {
-                cerr << "Error: Main Executor found pols.cntKeccakF[nexti]=" << fr.toU64(pols.cntKeccakF[nexti]) << " > MAX_CNT_KECCAK_F_LIMIT=" << rom.MAX_CNT_KECCAK_F_LIMIT << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
+                logError(ctx, "Main Executor found pols.cntKeccakF[nexti]=" + fr.toString(pols.cntKeccakF[nexti], 10) + " > MAX_CNT_KECCAK_F_LIMIT=" + to_string(rom.MAX_CNT_KECCAK_F_LIMIT));
                 if (bProcessBatch)
                 {
                     proverRequest.result = ZKR_SM_MAIN_OOC_KECCAK_F;
@@ -3549,7 +4037,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef CHECK_MAX_CNT_ASAP
             if (fr.toU64(pols.cntPaddingPG[nexti]) > rom.MAX_CNT_PADDING_PG_LIMIT)
             {
-                cerr << "Error: Main Executor found pols.cntPaddingPG[nexti]=" << fr.toU64(pols.cntPaddingPG[nexti]) << " > MAX_CNT_PADDING_PG_LIMIT=" << rom.MAX_CNT_PADDING_PG_LIMIT << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
+                logError(ctx, "Main Executor found pols.cntPaddingPG[nexti]=" + fr.toString(pols.cntPaddingPG[nexti], 10) + " > MAX_CNT_PADDING_PG_LIMIT=" + to_string(rom.MAX_CNT_PADDING_PG_LIMIT));
                 if (bProcessBatch)
                 {
                     proverRequest.result = ZKR_SM_MAIN_OOC_PADDING_PG;
@@ -3571,7 +4059,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef CHECK_MAX_CNT_ASAP
             if (fr.toU64(pols.cntPoseidonG[nexti]) > rom.MAX_CNT_POSEIDON_G_LIMIT)
             {
-                cerr << "Error: Main Executor found pols.cntPoseidonG[nexti]=" << fr.toU64(pols.cntPoseidonG[nexti]) << " > MAX_CNT_POSEIDON_G_LIMIT=" << rom.MAX_CNT_POSEIDON_G_LIMIT << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
+                logError(ctx, "Main Executor found pols.cntPoseidonG[nexti]=" + fr.toString(pols.cntPoseidonG[nexti], 10) + " > MAX_CNT_POSEIDON_G_LIMIT=" + to_string(rom.MAX_CNT_POSEIDON_G_LIMIT));
                 if (bProcessBatch)
                 {
                     proverRequest.result = ZKR_SM_MAIN_OOC_POSEIDON_G;
@@ -3594,13 +4082,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (!bProcessBatch) i++;
             for (uint64_t j=0; j<rom.line[zkPC].cmdAfter.size(); j++)
             {
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 gettimeofday(&t, NULL);
 #endif
                 CommandResult cr;
                 evalCommand(ctx, *rom.line[zkPC].cmdAfter[j], cr);
 
-#ifdef LOG_TIME_STATISTICS
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 mainMetrics.add("Eval command", TimeDiff(t));
                 RomCommand &cmd = *rom.line[zkPC].cmdAfter[j];
                 string cmdString = op2String(cmd.op) + "[" + function2String(cmd.function) + "]";
@@ -3610,7 +4098,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (cr.zkResult != ZKR_SUCCESS)
                 {
                     proverRequest.result = cr.zkResult;
-                    cerr << "Error: Main exec failed calling evalCommand() after result=" << proverRequest.result << "=" << zkresult2string(proverRequest.result) << " step=" << step << " zkPC=" << zkPC << " line=" << rom.line[zkPC].toString(fr) << " uuid=" << proverRequest.uuid << endl;
+                    logError(ctx, string("Failed calling evalCommand() after result=") + zkresult2string(proverRequest.result));
                     HashDBClientFactory::freeHashDBClient(pHashDB);
                     return;
                 }
@@ -3619,7 +4107,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
 #ifdef LOG_COMPLETED_STEPS
-        cout << "<-- Completed step=" << step << " zkPC=" << zkPC << " op=" << fr.toString(op7,16) << ":" << fr.toString(op6,16) << ":" << fr.toString(op5,16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3,16) << ":" << fr.toString(op2,16) << ":" << fr.toString(op1,16) << ":" << fr.toString(op0,16) << " ABCDE0=" << fr.toString(pols.A0[i],16) << ":" << fr.toString(pols.B0[i],16) << ":" << fr.toString(pols.C0[i],16) << ":" << fr.toString(pols.D0[i],16) << ":" << fr.toString(pols.E0[i],16) << " FREE0:7=" << fr.toString(pols.FREE0[i],16) << ":" << fr.toString(pols.FREE7[i],16) << " addr=" << addr << endl;
+        zklog.info("<-- Completed step=" + to_string(step) +
+            " zkPC=" + to_string(zkPC) +
+            " op=" + fr.toString(op7,16) + ":" + fr.toString(op6,16) + ":" + fr.toString(op5,16) + ":" + fr.toString(op4,16) + ":" + fr.toString(op3,16) + ":" + fr.toString(op2,16) + ":" + fr.toString(op1,16) + ":" + fr.toString(op0,16) +
+            " ABCDE0=" + fr.toString(pols.A0[i],16) + ":" + fr.toString(pols.B0[i],16) + ":" + fr.toString(pols.C0[i],16) + ":" + fr.toString(pols.D0[i],16) + ":" + fr.toString(pols.E0[i],16) +
+            " FREE0:7=" + fr.toString(pols.FREE0[i],16) + ":" + fr.toString(pols.FREE7[i],16) +
+            " addr=" + to_string(addr));
 #endif
 #ifdef LOG_COMPLETED_STEPS_TO_FILE
         std::ofstream outfile;
@@ -3643,7 +4136,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         {
             if (ctx.lastStep != 0)
             {
-                cerr << "Error: MainExecutor::execute() called finalizeExecutionLabel with a non-zero ctx.lastStep=" << ctx.lastStep << endl;
+                logError(ctx, "Called finalizeExecutionLabel with a non-zero ctx.lastStep=" + to_string(ctx.lastStep));
                 exitProcess();
             }
             ctx.lastStep = step;
@@ -3670,24 +4163,18 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     // Check that we did not run out of steps during the execution
     if (ctx.lastStep == 0)
     {
-        cerr << "Error: Main executor found ctx.lastStep=0, so execution was not complete" << endl;
-        if (bProcessBatch)
-        {
-            proverRequest.result = ZKR_SM_MAIN_OUT_OF_STEPS;
-        }
-        else
+        proverRequest.result = ZKR_SM_MAIN_OUT_OF_STEPS;
+        logError(ctx, "Found ctx.lastStep=0, so execution was not complete");
+        if (!bProcessBatch)
         {
             exitProcess();
         }
     }
     if (!proverRequest.input.bNoCounters && (ctx.lastStep > rom.MAX_CNT_STEPS_LIMIT))
     {
-        cerr << "Error: Main executor found ctx.lastStep=" << ctx.lastStep << " > MAX_CNT_STEPS_LIMIT=" << rom.MAX_CNT_STEPS_LIMIT << endl;
-        if (bProcessBatch)
-        {
-            proverRequest.result = ZKR_SM_MAIN_OUT_OF_STEPS;
-        }
-        else
+        proverRequest.result = ZKR_SM_MAIN_OUT_OF_STEPS;
+        logError(ctx, "Found ctx.lastStep=" + to_string(ctx.lastStep) + " > MAX_CNT_STEPS_LIMIT=" + to_string(rom.MAX_CNT_STEPS_LIMIT));
+        if (!bProcessBatch)
         {
             exitProcess();
         }
@@ -3696,72 +4183,54 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef CHECK_MAX_CNT_AT_THE_END
     if (!proverRequest.input.bNoCounters && (fr.toU64(pols.cntArith[0]) > rom.MAX_CNT_ARITH_LIMIT))
     {
-        cerr << "Error: Main Executor found pols.cntArith[0]=" << fr.toU64(pols.cntArith[0]) << " > MAX_CNT_ARITH_LIMIT=" << rom.MAX_CNT_ARITH_LIMIT << " uuid=" << proverRequest.uuid << endl;
-        if (bProcessBatch)
-        {
-            proverRequest.result = ZKR_SM_MAIN_OOC_ARITH;
-        }
-        else
+        proverRequest.result = ZKR_SM_MAIN_OOC_ARITH;
+        logError(ctx, "Found pols.cntArith[0]=" + to_string(fr.toU64(pols.cntArith[0])) + " > MAX_CNT_ARITH_LIMIT=" + to_string(rom.MAX_CNT_ARITH_LIMIT));
+        if (!bProcessBatch)
         {
             exitProcess();
         }
     }
     if (!proverRequest.input.bNoCounters && (fr.toU64(pols.cntBinary[0]) > rom.MAX_CNT_BINARY_LIMIT))
     {
-        cerr << "Error: Main Executor found pols.cntBinary[0]=" << fr.toU64(pols.cntBinary[0]) << " > MAX_CNT_BINARY_LIMIT=" << rom.MAX_CNT_BINARY_LIMIT << " uuid=" << proverRequest.uuid << endl;
-        if (bProcessBatch)
-        {
-            proverRequest.result = ZKR_SM_MAIN_OOC_BINARY;
-        }
-        else
+        proverRequest.result = ZKR_SM_MAIN_OOC_BINARY;
+        logError(ctx, "Found pols.cntBinary[0]=" + to_string(fr.toU64(pols.cntBinary[0])) + " > MAX_CNT_BINARY_LIMIT=" + to_string(rom.MAX_CNT_BINARY_LIMIT));
+        if (!bProcessBatch)
         {
             exitProcess();
         }
     }
     if (!proverRequest.input.bNoCounters && (fr.toU64(pols.cntMemAlign[0]) > rom.MAX_CNT_MEM_ALIGN_LIMIT))
     {
-        cerr << "Error: Main Executor found pols.cntMemAlign[0]=" << fr.toU64(pols.cntMemAlign[0]) << " > MAX_CNT_MEM_ALIGN_LIMIT=" << rom.MAX_CNT_MEM_ALIGN_LIMIT << " uuid=" << proverRequest.uuid << endl;
-        if (bProcessBatch)
-        {
-            proverRequest.result = ZKR_SM_MAIN_OOC_MEM_ALIGN;
-        }
-        else
+        proverRequest.result = ZKR_SM_MAIN_OOC_MEM_ALIGN;
+        logError(ctx, "Found pols.cntMemAlign[0]=" + to_string(fr.toU64(pols.cntMemAlign[0])) + " > MAX_CNT_MEM_ALIGN_LIMIT=" + to_string(rom.MAX_CNT_MEM_ALIGN_LIMIT));
+        if (!bProcessBatch)
         {
             exitProcess();
         }
     }
     if (!proverRequest.input.bNoCounters && (fr.toU64(pols.cntKeccakF[0]) > rom.MAX_CNT_KECCAK_F_LIMIT))
     {
-        cerr << "Error: Main Executor found pols.cntKeccakF[0]=" << fr.toU64(pols.cntKeccakF[0]) << " > MAX_CNT_KECCAK_F_LIMIT=" << rom.MAX_CNT_KECCAK_F_LIMIT << " uuid=" << proverRequest.uuid << endl;
-        if (bProcessBatch)
-        {
-            proverRequest.result = ZKR_SM_MAIN_OOC_KECCAK_F;
-        }
-        else
+        proverRequest.result = ZKR_SM_MAIN_OOC_KECCAK_F;
+        logError(ctx, "Found pols.cntKeccakF[0]=" + to_string(fr.toU64(pols.cntKeccakF[0])) + " > MAX_CNT_KECCAK_F_LIMIT=" + to_string(rom.MAX_CNT_KECCAK_F_LIMIT));
+        if (!bProcessBatch)
         {
             exitProcess();
         }
     }
     if (!proverRequest.input.bNoCounters && (fr.toU64(pols.cntPaddingPG[0]) > rom.MAX_CNT_PADDING_PG_LIMIT))
     {
-        cerr << "Error: Main Executor found pols.cntPaddingPG[0]=" << fr.toU64(pols.cntPaddingPG[0]) << " > MAX_CNT_PADDING_PG_LLIMIT=" << rom.MAX_CNT_PADDING_PG_LIMIT << " uuid=" << proverRequest.uuid << endl;
-        if (bProcessBatch)
-        {
-            proverRequest.result = ZKR_SM_MAIN_OOC_PADDING_PG;
-        }
-        else
+        proverRequest.result = ZKR_SM_MAIN_OOC_PADDING_PG;
+        logError(ctx, "Found pols.cntPaddingPG[0]=" + to_string(fr.toU64(pols.cntPaddingPG[0])) + " > MAX_CNT_PADDING_PG_LLIMIT=" + to_string(rom.MAX_CNT_PADDING_PG_LIMIT));
+        if (!bProcessBatch)
         {
             exitProcess();
         }
     }
     if (!proverRequest.input.bNoCounters && (fr.toU64(pols.cntPoseidonG[0]) > rom.MAX_CNT_POSEIDON_G_LIMIT))
     {
-        cerr << "Error: Main Executor found pols.cntPoseidonG[0]=" << fr.toU64(pols.cntPoseidonG[0]) << " > MAX_CNT_POSEIDON_G_LIMIT=" << rom.MAX_CNT_POSEIDON_G_LIMIT << " uuid=" << proverRequest.uuid << endl;
-        if (bProcessBatch)
-        {
-            proverRequest.result = ZKR_SM_MAIN_OOC_POSEIDON_G;
-        }
-        else
+        proverRequest.result = ZKR_SM_MAIN_OOC_POSEIDON_G;
+        logError(ctx, "Found pols.cntPoseidonG[0]=" + to_string(fr.toU64(pols.cntPoseidonG[0])) + " > MAX_CNT_POSEIDON_G_LIMIT=" + to_string(rom.MAX_CNT_POSEIDON_G_LIMIT));
+        if (!bProcessBatch)
         {
             exitProcess();
         }
@@ -3801,8 +4270,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             if (p != ctx.hashK[i].data.size())
             {
-                cerr << "Error: Main SM Executor: Reading hashK out of limits: i=" << i << " p=" << p << " ctx.hashK[i].data.size()=" << ctx.hashK[i].data.size() << " uuid=" << proverRequest.uuid << endl;
-                proverRequest.result = ZKR_SM_MAIN_HASHK;
+                proverRequest.result = ZKR_SM_MAIN_HASHK_READ_OUT_OF_RANGE;
+                logError(ctx, "Reading hashK out of limits: i=" + to_string(i) + " p=" + to_string(p) + " ctx.hashK[i].data.size()=" + to_string(ctx.hashK[i].data.size()));
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
             }
@@ -3832,8 +4301,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             if (p != ctx.hashP[i].data.size())
             {
-                cerr << "Error: Main SM Executor: Reading hashP out of limits: i=" << i << " p=" << p << " ctx.hashP[i].data.size()=" << ctx.hashP[i].data.size() << " uuid=" << proverRequest.uuid << endl;
-                proverRequest.result = ZKR_SM_MAIN_HASHP;
+                proverRequest.result = ZKR_SM_MAIN_HASHP_READ_OUT_OF_RANGE;
+                logError(ctx, "Reading hashP out of limits: i=" + to_string(i) + " p=" + to_string(p) + " ctx.hashP[i].data.size()=" + to_string(ctx.hashP[i].data.size()));
                 HashDBClientFactory::freeHashDBClient(pHashDB);
                 return;
             }
@@ -3843,24 +4312,40 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
     }
 
-    TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
-
-#ifdef LOG_TIME_STATISTICS
-    mainMetrics.print("Main Executor calls");
-    evalCommandMetrics.print("Main Executor eval command calls");
+    #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+    gettimeofday(&t, NULL);
 #endif
 
-    zkresult zkr = pHashDB->flush(proverRequest.flushId, proverRequest.lastSentFlushId);
+    zkresult zkr = pHashDB->flush(proverRequest.uuid, proverRequest.pFullTracer->get_new_state_root(), proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, proverRequest.flushId, proverRequest.lastSentFlushId);
     if (zkr != ZKR_SUCCESS)
     {
-        cerr << "Error: Main SM Executor: failed calling pHashDB->flush() result=" << zkr << " =" << zkresult2string(zkr) << endl;
         proverRequest.result = zkr;
+        logError(ctx, string("Failed calling pHashDB->flush() result=") + zkresult2string(zkr));
         HashDBClientFactory::freeHashDBClient(pHashDB);
         return;
     }
     HashDBClientFactory::freeHashDBClient(pHashDB);
 
-    cout << "MainExecutor::execute() done lastStep=" << ctx.lastStep << " (" << (double(ctx.lastStep)*100)/N << "%)" << endl;
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+    mainMetrics.add("Flush", TimeDiff(t));
+#endif
+
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+    if (config.executorTimeStatistics)
+    {
+        mainMetrics.print("Main Executor calls");
+        evalCommandMetrics.print("Main Executor eval command calls");
+}
+#endif
+
+    if (config.dbMetrics)
+    {
+        proverRequest.dbReadLog->print();
+    }
+
+    zklog.info("MainExecutor::execute() done lastStep=" + to_string(ctx.lastStep) + " (" + to_string((double(ctx.lastStep)*100)/N) + "%)");
+    
+    TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
 }
 
 // Initialize the first evaluation
@@ -3922,7 +4407,7 @@ void MainExecutor::checkFinalState(Context &ctx)
         (!fr.isZero(ctx.pols.zkPC[0]))
     )
     {
-        cerr << "Error: MainExecutor::checkFinalState() Program terminated with registers A, D, E, SR, CTX, PC, zkPC not set to zero" << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << rom.line[*ctx.pZKPC].toString(fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+        logError(ctx, "MainExecutor::checkFinalState() Program terminated with registers A, D, E, SR, CTX, PC, zkPC not set to zero");
         exitProcess();
     }
 
@@ -3939,8 +4424,11 @@ void MainExecutor::checkFinalState(Context &ctx)
         (!fr.equal(ctx.pols.B7[0], feaOldStateRoot[7])) )
     {
         mpz_class bScalar;
-        fea2scalar(ctx.fr, bScalar, ctx.pols.B0[0], ctx.pols.B1[0], ctx.pols.B2[0], ctx.pols.B3[0], ctx.pols.B4[0], ctx.pols.B5[0], ctx.pols.B6[0], ctx.pols.B7[0]);
-        cerr << "Error:: MainExecutor::checkFinalState() Register B=" << bScalar.get_str(16) << " not terminated equal as its initial value=" << ctx.proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << rom.line[*ctx.pZKPC].toString(fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+        if (!fea2scalar(ctx.fr, bScalar, ctx.pols.B0[0], ctx.pols.B1[0], ctx.pols.B2[0], ctx.pols.B3[0], ctx.pols.B4[0], ctx.pols.B5[0], ctx.pols.B6[0], ctx.pols.B7[0]))
+        {
+            logError(ctx, "MainExecutor::checkFinalState() failed calling fea2scalar(pols.B)");
+        }
+        logError(ctx, "MainExecutor::checkFinalState() Register B=" + bScalar.get_str(16) + " not terminated equal as its initial value=" + ctx.proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16));
         exitProcess();
     }
 
@@ -3957,26 +4445,29 @@ void MainExecutor::checkFinalState(Context &ctx)
         (!fr.equal(ctx.pols.C7[0], feaOldAccInputHash[7])) )
     {
         mpz_class cScalar;
-        fea2scalar(ctx.fr, cScalar, ctx.pols.C0[0], ctx.pols.C1[0], ctx.pols.C2[0], ctx.pols.C3[0], ctx.pols.C4[0], ctx.pols.C5[0], ctx.pols.C6[0], ctx.pols.C7[0]);
-        cerr << "Error:: MainExecutor::checkFinalState() Register C=" << cScalar.get_str(16) << " not terminated equal as its initial value=" << ctx.proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16) << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << rom.line[*ctx.pZKPC].toString(fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+        if (!fea2scalar(ctx.fr, cScalar, ctx.pols.C0[0], ctx.pols.C1[0], ctx.pols.C2[0], ctx.pols.C3[0], ctx.pols.C4[0], ctx.pols.C5[0], ctx.pols.C6[0], ctx.pols.C7[0]))
+        {
+            logError(ctx, "MainExecutor::checkFinalState() failed calling fea2scalar(pols.C)");
+        }
+        logError(ctx, "MainExecutor::checkFinalState() Register C=" + cScalar.get_str(16) + " not terminated equal as its initial value=" + ctx.proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16));
         exitProcess();
     }
     
     if (!fr.equal(ctx.pols.SP[0], fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum)))
     {
-        cerr << "Error:: MainExecutor::checkFinalState() Register SP not terminated equal as its initial value" << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << rom.line[*ctx.pZKPC].toString(fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+        logError(ctx, "MainExecutor::checkFinalState() Register SP not terminated equal as its initial value");
         exitProcess();
     }
 
     if (!fr.equal(ctx.pols.GAS[0], fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.chainID)))
     {
-        cerr << "Error:: MainExecutor::checkFinalState() Register GAS not terminated equal as its initial value" << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << rom.line[*ctx.pZKPC].toString(fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+        logError(ctx, "MainExecutor::checkFinalState() Register GAS not terminated equal as its initial value");
         exitProcess();
     }
 
     if (!fr.equal(ctx.pols.CTX[0], fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.forkID)))
     {
-        cerr << "Error:: MainExecutor::checkFinalState() Register CTX not terminated equal as its initial value" << " step=" << *ctx.pStep << " zkPC=" << *ctx.pZKPC << " line=" << rom.line[*ctx.pZKPC].toString(fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+        logError(ctx, "MainExecutor::checkFinalState() Register CTX not terminated equal as its initial value");
         exitProcess();
     }
 }
@@ -4001,8 +4492,11 @@ void MainExecutor::assertOutputs(Context &ctx)
             (!fr.equal(ctx.pols.SR7[step], feaNewStateRoot[7])) )
         {
             mpz_class auxScalar;
-            fea2scalar(fr, auxScalar, ctx.pols.SR0[step], ctx.pols.SR1[step], ctx.pols.SR2[step], ctx.pols.SR3[step], ctx.pols.SR4[step], ctx.pols.SR5[step], ctx.pols.SR6[step], ctx.pols.SR7[step] );
-            cerr << "Error:: MainExecutor::assertOutputs() Register SR=" << auxScalar.get_str(16) << " not terminated equal to newStateRoot=" << ctx.proverRequest.input.publicInputsExtended.newStateRoot.get_str(16) << " step=" << step << " zkPC=" << *ctx.pZKPC << " line=" << rom.line[*ctx.pZKPC].toString(fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+            if (!fea2scalar(fr, auxScalar, ctx.pols.SR0[step], ctx.pols.SR1[step], ctx.pols.SR2[step], ctx.pols.SR3[step], ctx.pols.SR4[step], ctx.pols.SR5[step], ctx.pols.SR6[step], ctx.pols.SR7[step]))
+            {
+                logError(ctx, "MainExecutor::assertOutputs() failed calling fea2scalar(pols.SR)");
+            }
+            logError(ctx, "MainExecutor::assertOutputs() Register SR=" + auxScalar.get_str(16) + " not terminated equal to newStateRoot=" + ctx.proverRequest.input.publicInputsExtended.newStateRoot.get_str(16));
             exitProcess();
         }
     }
@@ -4023,8 +4517,11 @@ void MainExecutor::assertOutputs(Context &ctx)
             (!fr.equal(ctx.pols.D7[step], feaNewAccInputHash[7])) )
         {
             mpz_class auxScalar;
-            fea2scalar(fr, auxScalar, ctx.pols.D0[step], ctx.pols.D1[step], ctx.pols.D2[step], ctx.pols.D3[step], ctx.pols.D4[step], ctx.pols.D5[step], ctx.pols.D6[step], ctx.pols.D7[step] );
-            cerr << "Error:: MainExecutor::assertOutputs() Register D=" << auxScalar.get_str(16) << " not terminated equal to newAccInputHash=" << ctx.proverRequest.input.publicInputsExtended.newAccInputHash.get_str(16) << " step=" << step << " zkPC=" << *ctx.pZKPC << " line=" << rom.line[*ctx.pZKPC].toString(fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+            if (!fea2scalar(fr, auxScalar, ctx.pols.D0[step], ctx.pols.D1[step], ctx.pols.D2[step], ctx.pols.D3[step], ctx.pols.D4[step], ctx.pols.D5[step], ctx.pols.D6[step], ctx.pols.D7[step]))
+            {
+                logError(ctx, "MainExecutor::assertOutputs() failed calling fea2scalar(pols.D)");
+            }
+            logError(ctx, "MainExecutor::assertOutputs() Register D=" + auxScalar.get_str(16) + " not terminated equal to newAccInputHash=" + ctx.proverRequest.input.publicInputsExtended.newAccInputHash.get_str(16));
             exitProcess();
         }
     }
@@ -4045,8 +4542,11 @@ void MainExecutor::assertOutputs(Context &ctx)
             (!fr.equal(ctx.pols.E7[step], feaNewLocalExitRoot[7])) )
         {
             mpz_class auxScalar;
-            fea2scalar(fr, auxScalar, ctx.pols.E0[step], ctx.pols.E1[step], ctx.pols.E2[step], ctx.pols.E3[step], ctx.pols.E4[step], ctx.pols.E5[step], ctx.pols.E6[step], ctx.pols.E7[step] );
-            cerr << "Error:: MainExecutor::assertOutputs() Register E=" << auxScalar.get_str(16) << " not terminated equal to newLocalExitRoot=" << ctx.proverRequest.input.publicInputsExtended.newLocalExitRoot.get_str(16) << " step=" << step << " zkPC=" << *ctx.pZKPC << " line=" << rom.line[*ctx.pZKPC].toString(fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+            if (!fea2scalar(fr, auxScalar, ctx.pols.E0[step], ctx.pols.E1[step], ctx.pols.E2[step], ctx.pols.E3[step], ctx.pols.E4[step], ctx.pols.E5[step], ctx.pols.E6[step], ctx.pols.E7[step]))
+            {
+                logError(ctx, "MainExecutor::assertOutputs() failed calling fea2scalar(pols.E)");
+            }
+            logError(ctx, "MainExecutor::assertOutputs() Register E=" + auxScalar.get_str(16) + " not terminated equal to newLocalExitRoot=" + ctx.proverRequest.input.publicInputsExtended.newLocalExitRoot.get_str(16));
             exitProcess();
         }
     }
@@ -4055,10 +4555,30 @@ void MainExecutor::assertOutputs(Context &ctx)
     {
         if (!fr.equal(ctx.pols.PC[step], fr.fromU64(ctx.proverRequest.input.publicInputsExtended.newBatchNum)))
         {
-            cerr << "Error:: MainExecutor::assertOutputs() Register PC=" << fr.toU64(ctx.pols.PC[step]) << " not terminated equal to newBatchNum=" << ctx.proverRequest.input.publicInputsExtended.newBatchNum << " step=" << step << " zkPC=" << *ctx.pZKPC << " line=" << rom.line[*ctx.pZKPC].toString(fr) << " uuid=" << ctx.proverRequest.uuid << endl;
+            logError(ctx, "MainExecutor::assertOutputs() Register PC=" + to_string(fr.toU64(ctx.pols.PC[step])) + " not terminated equal to newBatchNum=" + to_string(ctx.proverRequest.input.publicInputsExtended.newBatchNum));
             exitProcess();
         }
     }
+}
+
+void MainExecutor::logError(Context &ctx, const string &message)
+{
+    // Log the message, if provided
+    if (message.size() > 0)
+    {
+        zklog.error("MainExecutor::logError() " + message);
+    }
+
+    // Log details
+    zklog.error(string("MainExecutor::logError() proverRequest.result=") + zkresult2string(ctx.proverRequest.result) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " rom.line={" + rom.line[*ctx.pZKPC].toString(fr) + "} uuid=" + ctx.proverRequest.uuid + " externalRequestId=" + ctx.proverRequest.externalRequestId);
+
+    // Log registers
+    ctx.printRegs();
+    
+    // Log the input file content
+    json inputJson;
+    ctx.proverRequest.input.save(inputJson);
+    zklog.error("Input=" + inputJson.dump());
 }
 
 } // namespace

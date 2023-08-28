@@ -20,10 +20,14 @@
 // Create static Database::dbMTCache and DatabaseCacheProgram objects
 // This will be used to store DB records in memory and it will be shared for all the instances of Database class
 // DatabaseCacheMT and DatabaseCacheProgram classes are thread-safe
+DatabaseMTAssociativeCache Database::dbMTACache;
 DatabaseMTCache Database::dbMTCache;
 DatabaseProgramCache Database::dbProgramCache;
 
 string Database::dbStateRootKey("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // 64 f's
+Goldilocks::Element Database::dbStateRootvKey[4] = {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF};
+bool Database::useAssociativeCache = false;
+
 
 #endif
 
@@ -42,15 +46,6 @@ Database::Database (Goldilocks &fr, const Config &config) :
     // Initialize semaphores
     sem_init(&senderSem, 0, 0);
     sem_init(&getFlushDataSem, 0, 0);
-
-    // Sender thread creation
-    pthread_create(&senderPthread, NULL, dbSenderThread, this);
-
-    if (config.dbCacheSynchURL.size() > 0)
-    {
-        pthread_create(&cacheSynchPthread, NULL, dbCacheSynchThread, this);
-
-    }
 };
 
 Database::~Database()
@@ -92,15 +87,29 @@ void Database::init(void)
     // Configure the server, if configuration is provided
     if (config.databaseURL != "local")
     {
+        // Sender thread creation
+        pthread_create(&senderPthread, NULL, dbSenderThread, this);
+
+        // Cache synchronization thread creation
+        if (config.dbCacheSynchURL.size() > 0)
+        {
+            pthread_create(&cacheSynchPthread, NULL, dbCacheSynchThread, this);
+
+        }
+
         initRemote();
         useRemoteDB = true;
-    } else useRemoteDB = false;
+    }
+    else
+    {
+        useRemoteDB = false;
+    }
 
     // Mark the database as initialized
     bInitialized = true;
 }
 
-zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, const bool update, const vector<uint64_t> *keys, uint64_t level)
+zkresult Database::read(const string &_key, Goldilocks::Element (&vkey)[4], vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, const bool update,  bool *keys, uint64_t level)
 {
     // Check that it has been initialized before
     if (!bInitialized)
@@ -120,84 +129,93 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
 
 #ifdef DATABASE_USE_CACHE
     // If the key is found in local database (cached) simply return it
-    if (dbMTCache.enabled())
-    {
-        // If the key is present in the cache, get its value from there
-        if (dbMTCache.find(key, value))
-        {
-            // Add to the read log
-            if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
+    if(usingAssociativeCache() && dbMTACache.findKey(vkey,value)){
 
-            r = ZKR_SUCCESS;
-        }
-        // If the key is pending to be stored in database, but already deleted from cache
-        else if (config.dbMultiWrite && multiWrite.findNode(key, value))
-        {
-            // Add to the read log
-            if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
+        if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
+        r = ZKR_SUCCESS;
 
-            r = ZKR_SUCCESS;
-        }
-        // If get tree is configured, read the tree from the branch (key hash) to the leaf (keys since level)
-        else if (config.dbGetTree && (keys != NULL))
-        {
-            // Get the tree
-            uint64_t numberOfFields;
-            r = readTreeRemote(key, keys, level, numberOfFields);
-
-            // Add to the read log, and restart the timer
-            if (dbReadLog != NULL)
-            {
-                dbReadLog->addGetTree(TimeDiff(t), numberOfFields);
-                gettimeofday(&t, NULL);
-            }
-
-            // Retry if failed, since read-only databases have a synchronization latency
-            if ( (r != ZKR_SUCCESS) && (config.dbReadRetryDelay > 0) )
-            {
-                for (uint64_t i=0; i<config.dbReadRetryCounter; i++)
-                {
-                    zklog.warning("Database::read() failed calling readTreeRemote() with error=" + zkresult2string(r) + "; retrying after " + to_string(config.dbReadRetryDelay) + "us key=" + key);
-
-                    // Retry after dbReadRetryDelay us
-                    usleep(config.dbReadRetryDelay);
-                    r = readTreeRemote(key, keys, level, numberOfFields);
-
-                    // Add to the read log, and restart the timer
-                    if (dbReadLog != NULL)
-                    {
-                        dbReadLog->addGetTree(TimeDiff(t), numberOfFields);
-                        gettimeofday(&t, NULL);
-                    }
-
-                    if (r == ZKR_SUCCESS)
-                    {
-                        break;
-                    }
-                    zklog.warning("Database::read() retried readTreeRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r) + " counter=" + to_string(i));
-                }
-            }
-
-            // If succeeded, now the value should be present in the cache
-            if ( r == ZKR_SUCCESS)
-            {
-                if (dbMTCache.find(key, value))
-                {
-                    // Add to the read log
-                    if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
-
-                    r = ZKR_SUCCESS;
-                }
-                else
-                {
-                    zklog.warning("Database::read() called readTreeRemote() but key=" + key + " is not present");
-                    r = ZKR_UNSPECIFIED;
-                }
-            }
-            else r = ZKR_UNSPECIFIED;
-        }
+    } else if( dbMTCache.enabled() && dbMTCache.find(key, value)){
+        
+        if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
+        r = ZKR_SUCCESS;
     }
+    else
 #endif
+    // If the key is pending to be stored in database, but already deleted from cache
+    if (config.dbMultiWrite && multiWrite.findNode(key, value))
+    {
+        // Add to the read log
+        if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
+
+#ifdef DATABASE_USE_CACHE
+        // Store it locally to avoid any future remote access for this key
+        if(usingAssociativeCache()){
+            dbMTACache.addKeyValue(vkey, value, false);
+        }
+        else if(dbMTCache.enabled()){                
+            dbMTCache.add(key, value, false);
+        }
+#endif
+        r = ZKR_SUCCESS;
+    }
+    // If get tree is configured, read the tree from the branch (key hash) to the leaf (keys since level)
+    else if (config.dbGetTree && (keys != NULL))
+    {
+        // Get the tree
+        uint64_t numberOfFields;
+        r = readTreeRemote(key, keys, level, numberOfFields);
+
+        // Add to the read log, and restart the timer
+        if (dbReadLog != NULL)
+        {
+            dbReadLog->addGetTree(TimeDiff(t), numberOfFields);
+            gettimeofday(&t, NULL);
+        }
+
+        // Retry if failed, since read-only databases have a synchronization latency
+        if ( (r != ZKR_SUCCESS) && (config.dbReadRetryDelay > 0) )
+        {
+            for (uint64_t i=0; i<config.dbReadRetryCounter; i++)
+            {
+                zklog.warning("Database::read() failed calling readTreeRemote() with error=" + zkresult2string(r) + "; will retry after " + to_string(config.dbReadRetryDelay) + "us key=" + key);
+
+                // Retry after dbReadRetryDelay us
+                usleep(config.dbReadRetryDelay);
+                r = readTreeRemote(key, keys, level, numberOfFields);
+
+                // Add to the read log, and restart the timer
+                if (dbReadLog != NULL)
+                {
+                    dbReadLog->addGetTree(TimeDiff(t), numberOfFields);
+                    gettimeofday(&t, NULL);
+                }
+
+                if (r == ZKR_SUCCESS)
+                {
+                    break;
+                }
+                zklog.warning("Database::read() retried readTreeRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r) + " i=" + to_string(i));
+            }
+        }
+
+        // If succeeded, now the value should be present in the cache
+        if ( r == ZKR_SUCCESS)
+        {
+            if (usingAssociativeCache() && dbMTACache.findKey(vkey,value)){
+                if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
+                r = ZKR_SUCCESS;
+            }else if(dbMTCache.enabled() && dbMTCache.find(key, value)){
+                if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
+                r = ZKR_SUCCESS;                
+            }
+            else
+            {
+                zklog.warning("Database::read() called readTreeRemote() but key=" + key + " is not present");
+                r = ZKR_UNSPECIFIED;
+            }
+        }
+        else r = ZKR_UNSPECIFIED;
+    }
     if (useRemoteDB && (r == ZKR_UNSPECIFIED))
     {
         // If multi write is enabled, flush pending data, since some previously written keys
@@ -214,7 +232,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
         {
             for (uint64_t i=0; i<config.dbReadRetryCounter; i++)
             {
-                zklog.warning("Database::read() failed calling readRemote() with error=" + zkresult2string(r) + "; retrying after " + to_string(config.dbReadRetryDelay) + "us key=" + key);
+                zklog.warning("Database::read() failed calling readRemote() with error=" + zkresult2string(r) + "; will retry after " + to_string(config.dbReadRetryDelay) + "us key=" + key + " i=" + to_string(i));
 
                 // Retry after dbReadRetryDelay us
                 usleep(config.dbReadRetryDelay);
@@ -223,7 +241,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
                 {
                     break;
                 }
-                zklog.warning("Database::read() retried readRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r) + " counter=" + to_string(i));
+                zklog.warning("Database::read() retried readRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r) + " i=" + to_string(i));
             }
         }
         if (r == ZKR_SUCCESS)
@@ -232,7 +250,11 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
 
 #ifdef DATABASE_USE_CACHE
             // Store it locally to avoid any future remote access for this key
-            if (dbMTCache.enabled()) dbMTCache.add(key, value, update);
+            if(usingAssociativeCache()){
+                dbMTACache.addKeyValue(vkey, value, update);
+            }else if (dbMTCache.enabled()){
+                dbMTCache.add(key, value, update);
+            }
 #endif
 
             // Add to the read log
@@ -263,7 +285,7 @@ zkresult Database::read(const string &_key, vector<Goldilocks::Element> &value, 
     return r;
 }
 
-zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &value, const bool persistent)
+zkresult Database::write(const string &_key, const Goldilocks::Element* vkey, const vector<Goldilocks::Element> &value, const bool persistent)
 {
     // Check that it has  been initialized before
     if (!bInitialized)
@@ -272,7 +294,7 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
         exitProcess();
     }
 
-    if (config.dbMultiWrite && !dbMTCache.enabled() && !persistent)
+    if (config.dbMultiWrite && !(dbMTCache.enabled() || dbMTACache.enabled()) && !persistent)
     {
         zklog.error("Database::write() called with multi-write active, cache disabled and no persistance in database, so there is no place to store the date");
         return ZKR_DB_ERROR;
@@ -306,10 +328,22 @@ zkresult Database::write(const string &_key, const vector<Goldilocks::Element> &
     }
 
 #ifdef DATABASE_USE_CACHE
-    if ((r == ZKR_SUCCESS) && dbMTCache.enabled())
+    if ((r == ZKR_SUCCESS) && (dbMTCache.enabled() || dbMTACache.enabled()))
     {
-        // Create in memory cache
-        dbMTCache.add(key, value, false);
+        if(usingAssociativeCache()){
+            Goldilocks::Element vkeyf[4];
+            if(vkey == NULL){
+                string2key(fr, _key, vkeyf);
+            }else{
+                vkeyf[0] = vkey[0];
+                vkeyf[1] = vkey[1];
+                vkeyf[2] = vkey[2];
+                vkeyf[3] = vkey[3];
+            }
+            dbMTACache.addKeyValue(vkeyf, value, false);
+        }else{
+            dbMTCache.add(key, value, false);
+        }
     }
 #endif
 
@@ -575,7 +609,7 @@ zkresult Database::readRemote(bool bProgram, const string &key, string &value)
     return ZKR_SUCCESS;
 }
 
-zkresult Database::readTreeRemote(const string &key, const vector<uint64_t> *keys, uint64_t level, uint64_t &numberOfFields)
+zkresult Database::readTreeRemote(const string &key, bool *keys, uint64_t level, uint64_t &numberOfFields)
 {
     zkassert(keys != NULL);
 
@@ -584,9 +618,9 @@ zkresult Database::readTreeRemote(const string &key, const vector<uint64_t> *key
         zklog.info("Database::readTreeRemote() key=" + key);
     }
     string rkey;
-    for (uint64_t i=level; i<keys->size(); i++)
+    for (uint64_t i=level; i<256; i++)
     {
-        uint8_t auxByte = (*keys)[i];
+        uint8_t auxByte = (uint8_t)(keys[i]);
         if (auxByte > 1)
         {
             zklog.error("Database::readTreeRemote() found invalid keys value=" + to_string(auxByte) + " at position " + to_string(i));
@@ -660,10 +694,16 @@ zkresult Database::readTreeRemote(const string &key, const vector<uint64_t> *key
 
 #ifdef DATABASE_USE_CACHE
             // Store it locally to avoid any future remote access for this key
-            if (dbMTCache.enabled())
+            if (dbMTCache.enabled() || dbMTACache.enabled())
             {
                 //zklog.info("Database::readTreeRemote() adding hash=" + hash + " to dbMTCache");
-                dbMTCache.add(hash, value, false);
+                if(usingAssociativeCache()){
+                    Goldilocks::Element vhash[4];
+                    string2key(fr, hash, vhash);   
+                    dbMTACache.addKeyValue(vhash, value, false);
+                }else{
+                    dbMTCache.add(hash, value, false);
+              }
             }
 #endif
         }
@@ -892,10 +932,14 @@ zkresult Database::updateStateRoot(const Goldilocks::Element (&stateRoot)[4])
     }
 
 #ifdef DATABASE_USE_CACHE
-    if ((r == ZKR_SUCCESS) && dbMTCache.enabled())
+    if ((r == ZKR_SUCCESS) && (dbMTCache.enabled() || dbMTACache.enabled()))
     {
         // Create in memory cache
-        dbMTCache.add(dbStateRootKey, value, true);
+        if(usingAssociativeCache()){
+                dbMTACache.addKeyValue(dbStateRootvKey, value, true);
+        }else{
+                dbMTCache.add(dbStateRootKey, value, true);
+        }
     }
 #endif
 
@@ -1337,55 +1381,110 @@ zkresult Database::sendData (void)
     {
         if (config.dbMetrics) gettimeofday(&t, NULL);
         unordered_map<string, string>::const_iterator it;
-        if (data.query.size() == 0)
+        if (data.multiQuery.isEmpty())
         {
+            // Current query number
+            uint64_t currentQuery = 0;
+            bool firstValue = false;
+
             // If there are nodes add the corresponding query
             if (data.nodes.size() > 0)
             {
-                data.query += "INSERT INTO " + config.dbNodesTableName + " ( hash, data ) VALUES ";
-                for (it = data.nodes.begin(); it != data.nodes.end(); it++)
+                it = data.nodes.begin();
+                while (it != data.nodes.end())
                 {
-                    if (it != data.nodes.begin())
+                    // If queries is empty or last query is full, add a new query
+                    if ( (data.multiQuery.queries.size() == 0) || (data.multiQuery.queries[currentQuery].full))
                     {
-                        data.query += ", ";
+                        SingleQuery query;
+                        data.multiQuery.queries.emplace_back(query);
+                        currentQuery = data.multiQuery.queries.size() - 1;
                     }
-                    data.query += "( E\'\\\\x" + it->first + "\', E\'\\\\x" + it->second + "\' ) ";
+
+                    data.multiQuery.queries[currentQuery].query += "INSERT INTO " + config.dbNodesTableName + " ( hash, data ) VALUES ";
+                    firstValue = true;
+                    for (; it != data.nodes.end(); it++)
+                    {
+                        if (!firstValue)
+                        {
+                            data.multiQuery.queries[currentQuery].query += ", ";
+                        }
+                        firstValue = false;
+                        data.multiQuery.queries[currentQuery].query += "( E\'\\\\x" + it->first + "\', E\'\\\\x" + it->second + "\' ) ";
 #ifdef LOG_DB_SEND_DATA
-                    zklog.info("Database::sendData() inserting node key=" + it->first + " value=" + it->second);
+                        zklog.info("Database::sendData() inserting node key=" + it->first + " value=" + it->second);
 #endif
+                        if (data.multiQuery.queries[currentQuery].query.size() >= config.dbMultiWriteSingleQuerySize)
+                        {
+                            // Mark query as full
+                            data.multiQuery.queries[currentQuery].full = true;
+                            break;
+                        }
+                    }
+                    data.multiQuery.queries[currentQuery].query += " ON CONFLICT (hash) DO NOTHING;";
                 }
-                data.query += " ON CONFLICT (hash) DO NOTHING;";
             }
 
             // If there are program add the corresponding query
             if (data.program.size() > 0)
             {
-                data.query += "INSERT INTO " + config.dbProgramTableName + " ( hash, data ) VALUES ";
-                for (it = data.program.begin(); it != data.program.end(); it++)
+                it = data.program.begin();
+                while (it != data.program.end())
                 {
-                    if (it != data.program.begin())
+                    // If queries is empty or last query is full, add a new query
+                    if ( (data.multiQuery.queries.size() == 0) || (data.multiQuery.queries[currentQuery].full))
                     {
-                        data.query += ", ";
+                        SingleQuery query;
+                        data.multiQuery.queries.emplace_back(query);
+                        currentQuery = data.multiQuery.queries.size() - 1;
                     }
-                    data.query += "( E\'\\\\x" + it->first + "\', E\'\\\\x" + it->second + "\' ) ";
+
+                    data.multiQuery.queries[currentQuery].query += "INSERT INTO " + config.dbProgramTableName + " ( hash, data ) VALUES ";
+                    firstValue = true;
+                    for (; it != data.program.end(); it++)
+                    {
+                        if (!firstValue)
+                        {
+                            data.multiQuery.queries[currentQuery].query += ", ";
+                        }
+                        firstValue = false;
+                        data.multiQuery.queries[currentQuery].query += "( E\'\\\\x" + it->first + "\', E\'\\\\x" + it->second + "\' ) ";
 #ifdef LOG_DB_SEND_DATA
-                    zklog.info("Database::sendData() inserting program key=" + it->first + " value=" + it->second);
+                        zklog.info("Database::sendData() inserting program key=" + it->first + " value=" + it->second);
 #endif
+                        if (data.multiQuery.queries[currentQuery].query.size() >= config.dbMultiWriteSingleQuerySize)
+                        {
+                            // Mark query as full
+                            data.multiQuery.queries[currentQuery].full = true;
+                            break;
+                        }
+                    }
+                    data.multiQuery.queries[currentQuery].query += " ON CONFLICT (hash) DO NOTHING;";
                 }
-                data.query += " ON CONFLICT (hash) DO NOTHING;";
             }
 
             // If there is a nodes state root query, add it
             if (data.nodesStateRoot.size() > 0)
             {
-                data.query += "UPDATE " + config.dbNodesTableName + " SET data = E\'\\\\x" + data.nodesStateRoot + "\' WHERE hash = E\'\\\\x" + dbStateRootKey + "\';";
+                // If queries is empty or last query is full, add a new query
+                if ( (data.multiQuery.queries.size() == 0) || (data.multiQuery.queries[currentQuery].full))
+                {
+                    SingleQuery query;
+                    data.multiQuery.queries.emplace_back(query);
+                    currentQuery = data.multiQuery.queries.size() - 1;
+                }
+
+                data.multiQuery.queries[currentQuery].query += "UPDATE " + config.dbNodesTableName + " SET data = E\'\\\\x" + data.nodesStateRoot + "\' WHERE hash = E\'\\\\x" + dbStateRootKey + "\';";
+
+                // Mark query as full
+                data.multiQuery.queries[currentQuery].full = true;
 #ifdef LOG_DB_SEND_DATA
                 zklog.info("Database::sendData() inserting root=" + data.nodesStateRoot);
 #endif
             }
         }
 
-        if (data.query.size() == 0)
+        if (data.multiQuery.isEmpty())
         {
             zklog.warning("Database::sendData() called without any data to send");
             data.stored = true;
@@ -1398,18 +1497,32 @@ zkresult Database::sendData (void)
                 zklog.info("Database::sendData() dbMetrics multiWrite nodes=" + to_string(data.nodes.size()) +
                     " program=" + to_string(data.program.size()) +
                     " nodesStateRootCounter=" + to_string(data.nodesStateRoot.size() > 0 ? 1 : 0) +
-                    " query.size=" + to_string(data.query.size()) + "B=" + to_string(data.query.size()/zkmax(fields,1)) + "B/field" +
+                    " query.size=" + to_string(data.multiQuery.size()) + "B=" + to_string(data.multiQuery.size()/zkmax(fields,1)) + "B/field" +
+                    " queries.size=" + to_string(data.multiQuery.queries.size()) +
                     " total=" + to_string(fields) + "fields");
             }
 
-            // Start a transaction
-            pqxx::work w(*(pDatabaseConnection->pConnection));
+            // Send all unsent queries to database
+            for (uint64_t i=0; i<data.multiQuery.queries.size(); i++)
+            {
+                // Skip sent queries
+                if (data.multiQuery.queries[i].sent)
+                {
+                    continue;
+                }
 
-            // Execute the query
-            pqxx::result res = w.exec(data.query);
+                // Start a transaction
+                pqxx::work w(*(pDatabaseConnection->pConnection));
 
-            // Commit your transaction
-            w.commit();
+                // Execute the query
+                pqxx::result res = w.exec(data.multiQuery.queries[i].query);
+
+                // Commit your transaction
+                w.commit();
+
+                // Mask as sent
+                data.multiQuery.queries[i].sent = true;
+            }
 
             //zklog.info("Database::flush() sent query=" + query);
             if (config.dbMetrics)
@@ -1419,13 +1532,20 @@ zkresult Database::sendData (void)
             }
 
 #ifdef LOG_DB_WRITE_QUERY
-            zklog.info("Database::sendData() write query=" + data.query);
+            {
+                string query;
+                for (uint64_t i=0; i<data.multiQuery.queries.size(); i++)
+                {
+                    query += data.multiQuery.queries[i].query;
+                }
+                zklog.info("Database::sendData() write query=" + query);
+            }
 #endif
 #ifdef LOG_DB_SEND_DATA
-            zklog.info("Database::sendData() successfully processed query of size= " + to_string(data.query.size()));
+            zklog.info("Database::sendData() successfully processed query of size= " + to_string(data.multiQuery.size()));
 #endif
             // Update status
-            data.query.clear();
+            data.multiQuery.reset();
             data.stored = true;
         }
 
@@ -1437,7 +1557,7 @@ zkresult Database::sendData (void)
     catch (const std::exception &e)
     {
         zklog.error("Database::sendData() execute query exception: " + string(e.what()));
-        zklog.error("Database::sendData() query.size=" + to_string(data.query.size()) + " query(<1024)=" + data.query.substr(0, 1024));
+        zklog.error("Database::sendData() query.size=" + to_string(data.multiQuery.queries.size()) + (data.multiQuery.isEmpty() ? "" : (" query(<1024)=" + data.multiQuery.queries[0].query.substr(0, 1024))));
         queryFailed();
         zkr = ZKR_DB_ERROR;
     }
@@ -1463,14 +1583,14 @@ zkresult Database::getFlushData(uint64_t flushId, uint64_t &storedFlushId, unord
     iResult = sem_timedwait(&getFlushDataSem, &deadline);
     if (iResult != 0)
     {
-        zklog.info("<-- getFlushData() timed out");
+        zklog.info("Database::getFlushData() timed out");
         return ZKR_SUCCESS;
     }
 
     multiWrite.Lock();
     MultiWriteData &data = multiWrite.data[multiWrite.synchronizingDataIndex];
 
-    zklog.info("getFlushData woke up: pendingToFlushDataIndex=" + to_string(multiWrite.pendingToFlushDataIndex) +
+    zklog.info("Database::getFlushData woke up: pendingToFlushDataIndex=" + to_string(multiWrite.pendingToFlushDataIndex) +
         " storingDataIndex=" + to_string(multiWrite.storingDataIndex) +
         " synchronizingDataIndex=" + to_string(multiWrite.synchronizingDataIndex) +
         " nodes=" + to_string(data.nodes.size()) +
@@ -1495,34 +1615,6 @@ zkresult Database::getFlushData(uint64_t flushId, uint64_t &storedFlushId, unord
     multiWrite.Unlock();
 
     //zklog.info("<-- getFlushData()");
-
-    return ZKR_SUCCESS;
-}
-
-zkresult Database::deleteNodes(const vector<string> (&nodesToDelete))
-{
-    string key;
-
-    multiWrite.Lock();
-
-    // Keep a reference to the nodes data
-    unordered_map<string, string> &multiWriteFlushData = multiWrite.data[multiWrite.pendingToFlushDataIndex].nodesIntray;
-
-    // For all entries in nodesToDelete
-    for (uint64_t i=0; i<nodesToDelete.size(); i++)
-    {
-        // Normalize key format
-        key = NormalizeToNFormat(nodesToDelete[i], 64);
-        key = stringToLower(key);
-
-        // Delete it; they key can be present (just written) or not (read from database) and both cases are valid
-        multiWriteFlushData.erase(key);
-#ifdef LOG_DB_DELETE_NODES
-        zklog.info("Database::deleteNodes() deleted key=" + key + " i=" + to_string(i) + " multiWrite=[" + multiWrite.print() + "]");
-#endif
-    }
-
-    multiWrite.Unlock();
 
     return ZKR_SUCCESS;
 }
@@ -1556,7 +1648,10 @@ void Database::printTree(const string &root, string prefix)
     }
     string key = root;
     vector<Goldilocks::Element> value;
-    read(key, value, NULL);
+    Goldilocks::Element vKey[4];
+    if(Database::useAssociativeCache) string2key(fr, key, vKey);  
+    read(key,vKey,value, NULL);
+
     if (value.size() != 12)
     {
         zklog.error("Database::printTree() found value.size()=" + to_string(value.size()));
@@ -1595,7 +1690,8 @@ void Database::printTree(const string &root, string prefix)
         string hashValue = fea2string(fr, value[4], value[5], value[6], value[7]);
         zklog.info(prefix + "hashValue=" + hashValue);
         vector<Goldilocks::Element> leafValue;
-        read(hashValue, leafValue, NULL);
+        Goldilocks::Element vKey[4]={value[4],value[5],value[6],value[7]};
+        read(rKey, vKey, leafValue, NULL);
         if (leafValue.size() == 12)
         {
             if (!fr.equal(leafValue[8], fr.zero()))
@@ -1655,20 +1751,31 @@ void *dbSenderThread (void *arg)
     while (true)
     {
         // Wait for the sending semaphore to be released, if there is no more data to send
-        sem_wait(&pDatabase->senderSem);
+        struct timespec currentTime;
+        int iResult = clock_gettime(CLOCK_REALTIME, &currentTime);
+        if (iResult == -1)
+        {
+            zklog.error("dbSenderThread() failed calling clock_gettime()");
+            exitProcess();
+        }
+
+        currentTime.tv_sec += 5;
+        sem_timedwait(&pDatabase->senderSem, &currentTime);
 
         multiWrite.Lock();
 
         bool bDataEmpty = false;
 
         // If sending data is not empty (it failed before) then try to send it again
-        if (multiWrite.data[multiWrite.storingDataIndex].query.size() > 0)
+        if (!multiWrite.data[multiWrite.storingDataIndex].multiQuery.isEmpty())
         {
             zklog.warning("dbSenderThread() found sending data index not empty, probably because of a previous error; resuming...");
         }
         // If processing data is empty, then simply pretend to have sent data
         else if (multiWrite.data[multiWrite.pendingToFlushDataIndex].IsEmpty())
         {
+            //zklog.warning("dbSenderThread() found pending to flush data empty");
+
             // Mark as if we sent all batches
             multiWrite.storedFlushId = multiWrite.lastFlushId;
 #ifdef LOG_DB_SENDER_THREAD
@@ -1802,7 +1909,7 @@ void *dbCacheSynchThread (void *arg)
                 {
                     vector<Goldilocks::Element> value;
                     string2fea(pDatabase->fr, it->second, value);
-                    pDatabase->write(it->first, value, false);
+                    pDatabase->write(it->first, NULL, value, false);
                 }
             }
 
@@ -1862,8 +1969,8 @@ void loadDb2MemCache(const Config &config)
     HashDB * pHashDB = (HashDB *)hashDBSingleton.get();
 
     vector<Goldilocks::Element> dbValue;
+    zkresult zkr = pHashDB->db.read(Database::dbStateRootKey, Database::dbStateRootvKey, dbValue, NULL, true);
 
-    zkresult zkr = pHashDB->db.read(Database::dbStateRootKey, dbValue, NULL, true);
     if (zkr == ZKR_DB_KEY_NOT_FOUND)
     {
         zklog.warning("loadDb2MemCache() dbStateRootKey=" +  Database::dbStateRootKey + " not found in database; normal only if database is empty");
@@ -1931,7 +2038,10 @@ void loadDb2MemCache(const Config &config)
 
             hash = treeMapIterator->second[i];
             dbValue.clear();
-            zkresult zkr = pHashDB->db.read(hash, dbValue, NULL, true);
+            Goldilocks::Element vhash[4];
+            if(pHashDB->db.usingAssociativeCache()) string2key(fr, hash, vhash);
+            zkresult zkr = pHashDB->db.read(hash, vhash, dbValue, NULL, true);
+
             if (zkr != ZKR_SUCCESS)
             {
                 zklog.error("loadDb2MemCache() failed calling db.read(" + hash + ") result=" + zkresult2string(zkr));
@@ -1945,13 +2055,14 @@ void loadDb2MemCache(const Config &config)
                 return;
             }
             counter++;
-            double sizePercentage = double(Database::dbMTCache.getCurrentSize())*100.0/double(Database::dbMTCache.getMaxSize());
-            if ( sizePercentage > 90 )
-            {
-                zklog.info("loadDb2MemCache() stopping since size percentage=" + to_string(sizePercentage));
-                break;
+            if(Database::dbMTCache.enabled()){
+                double sizePercentage = double(Database::dbMTCache.getCurrentSize())*100.0/double(Database::dbMTCache.getMaxSize());
+                if ( sizePercentage > 90 )
+                {
+                    zklog.info("loadDb2MemCache() stopping since size percentage=" + to_string(sizePercentage));
+                    break;
+                }
             }
-
             // If capaxity is X000
             if (fr.isZero(dbValue[9]) && fr.isZero(dbValue[10]) && fr.isZero(dbValue[11]))
             {
@@ -1979,7 +2090,8 @@ void loadDb2MemCache(const Config &config)
                     {
                         //zklog.info("loadDb2MemCache() level=" + to_string(level) + " found value rightHash=" + rightHash);
                         dbValue.clear();
-                        zkresult zkr = pHashDB->db.read(rightHash, dbValue, NULL, true);
+                        Goldilocks::Element vRightHash[4]={dbValue[4], dbValue[5], dbValue[6], dbValue[7]};
+                        zkresult zkr = pHashDB->db.read(rightHash, vRightHash, dbValue, NULL, true);
                         if (zkr != ZKR_SUCCESS)
                         {
                             zklog.error("loadDb2MemCache() failed calling db.read(" + rightHash + ") result=" + zkresult2string(zkr));
@@ -1993,8 +2105,9 @@ void loadDb2MemCache(const Config &config)
         }
     }
 
-    zklog.info("loadDb2MemCache() done counter=" + to_string(counter) + " cache at " + to_string((double(Database::dbMTCache.getCurrentSize())/double(Database::dbMTCache.getMaxSize()))*100) + "%");
-
+    if(Database::dbMTCache.enabled()){
+        zklog.info("loadDb2MemCache() done counter=" + to_string(counter) + " cache at " + to_string((double(Database::dbMTCache.getCurrentSize())/double(Database::dbMTCache.getMaxSize()))*100) + "%");
+    }
     TimerStopAndLog(LOAD_DB_TO_CACHE);
 
 #endif

@@ -91,4 +91,6 @@ void getIPAddress (string &ipAddress);
 // If the new string is shorter than the old string, it returns the whole new string
 void getStringIncrement(const string &oldString, const string &newString, uint64_t &offset, uint64_t &length);
 
+extern string emptyString;
+
 #endif

@@ -15,7 +15,6 @@ bool DatabaseCache::addKeyValue(const string &key, const void * value, const boo
         return true;
     }
 
-    attempts++;
     if (attempts%1000000 == 0)
     {
         zklog.info("DatabaseCache::addKeyValue() name=" + name + " count=" + to_string(cacheMap.size()) + " maxSize=" + to_string(maxSize) + " currentSize=" + to_string(currentSize) + " attempts=" + to_string(attempts) + " hits=" + to_string(hits) + " hit ratio=" + to_string(double(hits)*100.0/double(zkmax(attempts,1))) + "%");
@@ -32,7 +31,6 @@ bool DatabaseCache::addKeyValue(const string &key, const void * value, const boo
         }
         else
         {
-            hits++;
             return false;
         }
     }
@@ -85,10 +83,12 @@ bool DatabaseCache::addKeyValue(const string &key, const void * value, const boo
 
 bool DatabaseCache::findKey(const string &key, DatabaseCacheRecord* &record) 
 {
+    attempts++;
     unordered_map<string, DatabaseCacheRecord*>::iterator it = cacheMap.find(key);
 
     if (it != cacheMap.end())
     {
+        hits++;
         record = (DatabaseCacheRecord*)it->second;
 
         // Move cache record to the top/head (if it's not the current head)
