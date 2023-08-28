@@ -14,6 +14,7 @@
 #include "persistence.hpp"
 #include "smt_set_result.hpp"
 #include "smt_get_result.hpp"
+#include "tree_chunk.hpp"
 
 using namespace std;
 
@@ -96,29 +97,7 @@ public:
     }
     zkresult set(const string &batchUUID, uint64_t tx, Database64 &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, SmtSetResult &result, DatabaseMap *dbReadLog = NULL);
     zkresult get(const string &batchUUID, Database64 &db, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], SmtGetResult &result, DatabaseMap *dbReadLog = NULL);
-    zkresult hashSave(const SmtContext64 &ctx, const Goldilocks::Element (&v)[12], Goldilocks::Element (&hash)[4]);
-
-    // Consolidate value and capacity
-    zkresult hashSave(const SmtContext64 &ctx, const Goldilocks::Element (&a)[8], const Goldilocks::Element (&c)[4], Goldilocks::Element (&hash)[4])
-    {
-        // Calculate the poseidon hash of the vector of field elements: v = a | c
-        Goldilocks::Element v[12];
-        for (uint64_t i=0; i<8; i++) v[i] = a[i];
-        for (uint64_t i=0; i<4; i++) v[8+i] = c[i];
-        return hashSave(ctx, v, hash);
-    }
-    
-    // Use capacity zero for intermediate nodes and value hashes
-    zkresult hashSaveZero(const SmtContext64 &ctx, const Goldilocks::Element (&a)[8], Goldilocks::Element (&hash)[4])
-    {
-        return hashSave(ctx, a, capacityZero, hash);
-    }
-    
-    // Use capacity one for leaf nodes
-    zkresult hashSaveOne(const SmtContext64 &ctx, const Goldilocks::Element (&a)[8], Goldilocks::Element (&hash)[4])
-    {
-        return hashSave(ctx, a, capacityOne, hash);
-    }
+    zkresult hashSave(const SmtContext64 &ctx, const TreeChunk &treeChunk);
 
     zkresult updateStateRoot(Database64 &db, const Goldilocks::Element (&stateRoot)[4]);
     int64_t getUniqueSibling(vector<Goldilocks::Element> &a);

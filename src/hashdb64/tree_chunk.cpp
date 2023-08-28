@@ -65,6 +65,10 @@ zkresult TreeChunk::data2children (void)
         if ((isZero & mask) != 0)
         {
             children64[i].type = ZERO;
+
+            // Move mask bit
+            mask = mask << 1;
+
             continue;
         }
 
@@ -151,6 +155,10 @@ zkresult TreeChunk::children2data (void)
         if (children64[i].type == ZERO)
         {
             isZero |= mask;
+
+            // Move mask bit
+            mask = mask << 1;
+
             continue;
         }
 
@@ -200,7 +208,11 @@ zkresult TreeChunk::children2data (void)
             // Increase decoded size
             encodedSize += 32;
         }
+        
         data.resize(encodedSize);
+
+        // Move mask bit
+        mask = mask << 1;
     }
 
     // Save the first 2 bitmaps
@@ -213,6 +225,45 @@ zkresult TreeChunk::children2data (void)
     bDataValid = true;
 
     return ZKR_SUCCESS;
+}
+
+uint64_t TreeChunk::numberOfNonZeroChildren (void)
+{
+    uint64_t numberOfNonZero = 0;
+    if (bDataValid)
+    {
+        const char *pData = data.c_str();
+        uint64_t isZero = ((const uint64_t *)pData)[0];
+
+        // Parse the 64 children
+        uint64_t mask = 1;
+        for (uint64_t i=0; i<TREE_CHUNK_WIDTH; i++)
+        {
+            // If this is a zero child, simply take note of it
+            if ((isZero & mask) == 0)
+            {
+                numberOfNonZero++;
+            }
+            mask = mask << 1;
+        }
+    }
+    else if (bChildren64Valid)
+    {
+        for (uint64_t i=0; i<TREE_CHUNK_WIDTH; i++)
+        {
+            if (children64[i].type != ZERO)
+            {
+                numberOfNonZero++;
+            }
+        }
+    }
+    else
+    {
+        zklog.error("TreeChunk::numberOfNonZeroChildren() found bDataValid=bChildren64Valid=false");
+        exitProcess();
+    }
+    
+    return numberOfNonZero;
 }
 
 zkresult TreeChunk::calculateHash (void)
@@ -246,7 +297,6 @@ zkresult TreeChunk::calculateHash (void)
         zklog.error("TreeChunk::calculateHash() failed calling calculateChildren(children32, children16, 32) result=" + zkresult2string(zkr));
         return zkr;
     }
-
     zkr = calculateChildren(level+3, children16, children8, 8);
     if (zkr != ZKR_SUCCESS)
     {
@@ -370,10 +420,14 @@ zkresult TreeChunk::calculateChild (const uint64_t level, Child &leftChild, Chil
             leftChild.leaf.calculateHash(fr, poseidon);
 
             pLeftHash = &leftChild.leaf.hash;
+
+            break;
         }
         case INTERMEDIATE:
         {
             pLeftHash = &leftChild.intermediate.hash;
+
+            break;
         }
         default:
         {
@@ -397,10 +451,14 @@ zkresult TreeChunk::calculateChild (const uint64_t level, Child &leftChild, Chil
             rightChild.leaf.calculateHash(fr, poseidon);
 
             pRightHash = &rightChild.leaf.hash;
+
+            break;
         }
         case INTERMEDIATE:
         {
             pRightHash = &rightChild.intermediate.hash;
+
+            break;
         }
         default:
         {
@@ -414,4 +472,41 @@ zkresult TreeChunk::calculateChild (const uint64_t level, Child &leftChild, Chil
     outputChild.intermediate.calculateHash(fr, poseidon, *pLeftHash, *pRightHash);
 
     return ZKR_SUCCESS;
+}
+
+void TreeChunk::print(void) const
+{
+    zklog.info("TreeChunk::print():");
+    zklog.info("  level=" + to_string(level));
+    zklog.info("  bHashValid=" + to_string(bHashValid));
+    zklog.info("  hash=" + fea2string(fr, hash));
+    zklog.info("  bChildrenRestValid=" + to_string(bChildrenRestValid));
+    zklog.info("  child1=" + child1.print(fr));
+    for (uint64_t i=0; i<2; i++)
+    {
+        zklog.info( "  children2[" + to_string(i) + "]=" + children2[i].print(fr));
+    }
+    for (uint64_t i=0; i<4; i++)
+    {
+        zklog.info( "  children4[" + to_string(i) + "]=" + children4[i].print(fr));
+    }
+    for (uint64_t i=0; i<8; i++)
+    {
+        zklog.info( "  children8[" + to_string(i) + "]=" + children8[i].print(fr));
+    }
+    for (uint64_t i=0; i<16; i++)
+    {
+        zklog.info( "  children16[" + to_string(i) + "]=" + children16[i].print(fr));
+    }
+    for (uint64_t i=0; i<32; i++)
+    {
+        zklog.info( "  children32[" + to_string(i) + "]=" + children32[i].print(fr));
+    }
+    zklog.info("  bChildren64Valid=" + to_string(bChildren64Valid));
+    for (uint64_t i=0; i<64; i++)
+    {
+        zklog.info( "  children64[" + to_string(i) + "]=" + children64[i].print(fr));
+    }
+    zklog.info("  bDataValid=" + to_string(bDataValid));
+    zklog.info("  data.size=" + to_string(data.size()));
 }

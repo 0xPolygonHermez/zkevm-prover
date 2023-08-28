@@ -53,6 +53,8 @@ public:
             }
         }
     }
+
+    string print (Goldilocks &fr) const;
 };
 
 #endif

@@ -403,7 +403,8 @@ void HashDB::hashSave(const Goldilocks::Element (&a)[8], const Goldilocks::Eleme
     if (config.hashDB64)
     {
         SmtContext64 ctx(db64, false, "", 0, persistence);
-        smt64.hashSave(ctx, a, c, hash);
+        //smt64.hashSave(ctx, a, c, hash);
+        // TODO: change the way we hashSave() in hashDB64
     }
     else
     {

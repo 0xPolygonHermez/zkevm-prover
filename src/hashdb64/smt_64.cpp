@@ -15,6 +15,8 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
     zklog.info("Smt64::set() called with oldRoot=" + fea2string(fr,oldRoot) + " key=" + fea2string(fr,key) + " value=" + value.get_str(16) + " persistent=" + to_string(persistent));
 #endif
 
+    zkresult zkr;
+
     bool bUseStateManager = db.config.stateManager && (batchUUID.size() > 0);
 
     SmtContext64 ctx(db, bUseStateManager, batchUUID, tx, persistence);
@@ -40,19 +42,21 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
     mpz_class lastAccKey = 0;
     bool bFoundKey = false;
     Goldilocks::Element foundKey[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
-    Goldilocks::Element foundRKey[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
+    //Goldilocks::Element foundRKey[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
     Goldilocks::Element insKey[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
 
     map< uint64_t, vector<Goldilocks::Element> > siblings;
 
+    vector<TreeChunk *> chunks;
+
     vector<string> nodesToDelete; // vector to store all nodes keys to delete because they are no longer part of the tree
-    Goldilocks::Element nodeToDelete[4]; // key, in field element format, of a node to delete
+    //Goldilocks::Element nodeToDelete[4]; // key, in field element format, of a node to delete
     string nodeToDeleteString; // key, in string format, of a node to delete
 
     mpz_class insValue = 0;
     mpz_class oldValue = 0;
     mpz_class foundValue = 0;
-    Goldilocks::Element foundValueHash[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
+    //Goldilocks::Element foundValueHash[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
     string foundValueHashString;
 
     string mode;
@@ -83,6 +87,20 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
             return dbres;
         }
 
+        TreeChunk * pTreeChunk = new TreeChunk(db, poseidon);
+        chunks.emplace_back(pTreeChunk);
+        pTreeChunk->level = level;
+        pTreeChunk->data = dbValue;
+        pTreeChunk->bDataValid = true;
+        zkr = pTreeChunk->data2children();
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("Smt64::set() failed calling treeChunk.data2children() result=" + zkresult2string(zkr));
+            return zkr;
+        }
+        uint64_t children64Position = getKeyChildren64Position(keys, level);
+
+
         // Get a copy of the content of this database entry, at the corresponding level: 0, 1...
         /*siblings[level].resize(12);
         siblings[level][0].fe = dbValue[0].fe;
@@ -99,10 +117,11 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
         siblings[level][11].fe = dbValue[11].fe;*/
         
         // if siblings[level][8]=1 then this is a leaf node
-        if ( siblings[level].size()>8 && fr.equal(siblings[level][8], fr.one()) )
+        //if ( siblings[level].size()>8 && fr.equal(siblings[level][8], fr.one()) )
+        if (pTreeChunk->children64[children64Position].type == LEAF)
         {
             // Second 4 elements are the hash of the old value, so we can get old value=db(valueHash)
-            foundValueHash[0] = siblings[level][4];
+            /*foundValueHash[0] = siblings[level][4];
             foundValueHash[1] = siblings[level][5];
             foundValueHash[2] = siblings[level][6];
             foundValueHash[3] = siblings[level][7];
@@ -120,50 +139,60 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
             {
                 zklog.error("Smt64::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") key:" + foundValueHashString);
                 return dbres;
-            }
+            }*/
 
             // Convert the 8 found value fields to a foundValue scalar
             //Goldilocks::Element valueFea[8];
             //for (uint64_t i=0; i<8; i++) valueFea[i] = dbValue[i];
             //fea2scalar(fr, foundValue, valueFea);
+            foundValue = pTreeChunk->children64[children64Position].leaf.value;
 
             // First 4 elements are the remaining key of the old value
-            foundRKey[0] = siblings[level][0];
-            foundRKey[1] = siblings[level][1];
-            foundRKey[2] = siblings[level][2];
-            foundRKey[3] = siblings[level][3];
+            //foundRKey[0] = siblings[level][0];
+            //foundRKey[1] = siblings[level][1];
+            //foundRKey[2] = siblings[level][2];
+            //foundRKey[3] = siblings[level][3];
 
             // Joining the consumed key bits, we have the complete found key of the old value
-            joinKey(fr, accKey, foundRKey, foundKey);
+            //joinKey(fr, accKey, foundRKey, foundKey);
+            foundKey[0] = pTreeChunk->children64[children64Position].leaf.key[0];
+            foundKey[1] = pTreeChunk->children64[children64Position].leaf.key[1];
+            foundKey[2] = pTreeChunk->children64[children64Position].leaf.key[2];
+            foundKey[3] = pTreeChunk->children64[children64Position].leaf.key[3];
             bFoundKey = true;
 
 #ifdef LOG_SMT
             zklog.info("Smt64::set() found at level=" + to_string(level) + " foundValue=" + foundValue.get_str(16) + " foundKey=" + fea2string(fr,foundKey) + " foundRKey=" + fea2string(fr,foundRKey));
 #endif
         }
+        // This is a zero node
+        else if (pTreeChunk->children64[children64Position].type == ZERO)
+        {
+            bFoundKey = true;
+        }
         // This is an intermediate node
         else
         {
             // Take either the first 4 (keys[level]=0) or the second 4 (keys[level]=1) siblings as the hash of the next level
-            r[0] = siblings[level][keys[level]*4];
-            r[1] = siblings[level][keys[level]*4 + 1];
-            r[2] = siblings[level][keys[level]*4 + 2];
-            r[3] = siblings[level][keys[level]*4 + 3];
+            //r[0] = siblings[level][keys[level]*4];
+            //r[1] = siblings[level][keys[level]*4 + 1];
+            //r[2] = siblings[level][keys[level]*4 + 2];
+            //r[3] = siblings[level][keys[level]*4 + 3];
 
             // Store the used key bit in accKey
-            accKey.push_back(keys[level]);
+            //accKey.push_back(keys[level]);
 
 #ifdef LOG_SMT
             zklog.info("Smt64::set() down 1 level=" + to_string(level) + " keys[level]=" + to_string(keys[level]) + " root/hash=" + fea2string(fr,r));
 #endif
             // Increase the level
-            level++;
+            level += 6;
         }
     }
 
     // One step back
-    level--;
-    accKey.pop_back();
+    //level--;
+    //accKey.pop_back();
 
     // Calculate the number of hashes needed so far
     if (!fr.isZero(oldRoot[0]) || !fr.isZero(oldRoot[1]) || !fr.isZero(oldRoot[2]) || !fr.isZero(oldRoot[3]))
@@ -191,12 +220,12 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
                 oldValue = foundValue;
 
                 // First, we create the db entry for the new VALUE, and store the calculated hash in newValH
-                Goldilocks::Element v[8];
+                /*Goldilocks::Element v[8];
                 scalar2fea(fr, value, v);
 
                 // Save and get the new value hash
                 Goldilocks::Element newValH[4];
-                dbres = hashSaveZero(ctx, v, newValH);
+                //dbres = hashSaveZero(ctx, v, newValH);
                 if (dbres != ZKR_SUCCESS)
                 {
                     return dbres;
@@ -208,7 +237,7 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
 
                 // Save and get the new leaf node hash
                 Goldilocks::Element newLeafHash[4];
-                dbres = hashSaveOne(ctx, v, newLeafHash);
+                //dbres = hashSaveOne(ctx, v, newLeafHash);
                 if (dbres != ZKR_SUCCESS)
                 {
                     return dbres;
@@ -251,7 +280,40 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
                     newRoot[1] = newLeafHash[1];
                     newRoot[2] = newLeafHash[2];
                     newRoot[3] = newLeafHash[3];
+                }*/
+
+                uint64_t children64Position = getKeyChildren64Position(keys, level);
+
+                chunks[chunks.size()-1]->children64[children64Position].leaf.value = value;
+                chunks[chunks.size()-1]->bChildrenRestValid = false;
+                chunks[chunks.size()-1]->bHashValid = false;
+                chunks[chunks.size()-1]->bDataValid = false;
+                zkr = chunks[chunks.size()-1]->calculateHash();
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("Smt64::set() failed calling chunks[chunks.size()-1]->calculateHash() zkr=" + zkresult2string(zkr));
+                    // TODO: delete chunks
+                    return zkr;
                 }
+                zkr = chunks[chunks.size()-1]->children2data();
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("Smt64::set() failed calling chunks[chunks.size()-1]->children2data() zkr=" + zkresult2string(zkr));
+                    // TODO: delete chunks
+                    return zkr;
+                }
+
+                zkr = hashSave(ctx, *chunks[chunks.size()-1]);
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("SMT64::Set() failed calling hashSave() result=" + zkresult2string(zkr));
+                    return zkr;
+                }
+                newRoot[0] = chunks[chunks.size()-1]->hash[0];
+                newRoot[1] = chunks[chunks.size()-1]->hash[1];
+                newRoot[2] = chunks[chunks.size()-1]->hash[2];
+                newRoot[3] = chunks[chunks.size()-1]->hash[3];
+
 #ifdef LOG_SMT
                 zklog.info("Smt64::set() updated an existing node at level=" + to_string(level) + " leaf node hash=" + fea2string(fr,newLeafHash) + " value hash=" + fea2string(fr,newValH));
 #endif
@@ -262,9 +324,45 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
 #ifdef LOG_SMT
                 zklog.info("Smt64::set() mode=" + mode);
 #endif
+                uint64_t children64Position = getKeyChildren64Position(keys, level);
+
+                chunks[chunks.size()-1]->children64[children64Position].type = LEAF;
+                chunks[chunks.size()-1]->children64[children64Position].leaf.key[0] = key[0];
+                chunks[chunks.size()-1]->children64[children64Position].leaf.key[1] = key[1];
+                chunks[chunks.size()-1]->children64[children64Position].leaf.key[2] = key[2];
+                chunks[chunks.size()-1]->children64[children64Position].leaf.key[3] = key[3];
+                chunks[chunks.size()-1]->children64[children64Position].leaf.value = value;
+                chunks[chunks.size()-1]->bChildrenRestValid = false;
+                chunks[chunks.size()-1]->bHashValid = false;
+                chunks[chunks.size()-1]->bDataValid = false;
+                zkr = chunks[chunks.size()-1]->calculateHash();
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("Smt64::set() failed calling chunks[chunks.size()-1]->calculateHash() zkr=" + zkresult2string(zkr));
+                    // TODO: delete chunks
+                    return zkr;
+                }
+                zkr = chunks[chunks.size()-1]->children2data();
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("Smt64::set() failed calling chunks[chunks.size()-1]->children2data() zkr=" + zkresult2string(zkr));
+                    // TODO: delete chunks
+                    return zkr;
+                }
+
+                zkr = hashSave(ctx, *chunks[chunks.size()-1]);
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("SMT64::Set() failed calling hashSave() result=" + zkresult2string(zkr));
+                    return zkr;
+                }
+                newRoot[0] = chunks[chunks.size()-1]->hash[0];
+                newRoot[1] = chunks[chunks.size()-1]->hash[1];
+                newRoot[2] = chunks[chunks.size()-1]->hash[2];
+                newRoot[3] = chunks[chunks.size()-1]->hash[3];
 
                 // Increase the level since we need to create a new leaf node
-                int64_t level2 = level + 1;
+                /*int64_t level2 = level + 1;
 
                 // Split the found key in bits
                 bool foundKeys[256];
@@ -286,7 +384,7 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
 
                 // Save and get the hash
                 Goldilocks::Element oldLeafHash[4];
-                dbres = hashSaveOne(ctx, v, oldLeafHash);
+                //dbres = hashSaveOne(ctx, v, oldLeafHash);
                 if (dbres != ZKR_SUCCESS)
                 {
                     return dbres;
@@ -316,7 +414,7 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
 
                 // Create the value node
                 Goldilocks::Element newValH[4];
-                dbres = hashSaveZero(ctx, valueFea, newValH);
+                //dbres = hashSaveZero(ctx, valueFea, newValH);
                 if (dbres != ZKR_SUCCESS)
                 {
                     return dbres;
@@ -330,7 +428,7 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
 
                 // Create the leaf node and store the hash in newLeafHash
                 Goldilocks::Element newLeafHash[4];
-                dbres = hashSaveOne(ctx, v, newLeafHash);
+                //dbres = hashSaveOne(ctx, v, newLeafHash);
                 if (dbres != ZKR_SUCCESS)
                 {
                     return dbres;
@@ -348,7 +446,7 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
 
                 // Create the intermediate node and store the calculated hash in r2
                 Goldilocks::Element r2[4];
-                dbres = hashSaveZero(ctx, node, r2);
+                //dbres = hashSaveZero(ctx, node, r2);
                 if (dbres != ZKR_SUCCESS)
                 {
                     return dbres;
@@ -372,7 +470,7 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
                     }
 
                     // Create the intermediate node and store the calculated hash in r2
-                    dbres = hashSaveZero(ctx, node, r2);
+                    //dbres = hashSaveZero(ctx, node, r2);
                     if (dbres != ZKR_SUCCESS)
                     {
                         return dbres;
@@ -403,7 +501,7 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
                     newRoot[1] = r2[1];
                     newRoot[2] = r2[2];
                     newRoot[3] = r2[3];
-                }
+                }*/
             }
         }
         else // insert without foundKey
@@ -415,7 +513,7 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
             // We could not find any key with any bit in common, so we need to create a new intermediate node, and a new leaf node
 
             // Value node creation
-
+/*
             // Build the new remaining key
             Goldilocks::Element newKey[4];
             removeKeyBits(fr, key, level+1, newKey);
@@ -448,10 +546,13 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
             }
 
             proofHashCounter += 2;
+            */
 
             // If not at the top of the tree, update siblings with the new leaf node hash
-            if (level>=0)
+            //if (level>=0)
+            if (level > 0)
             {
+                /*
                 if (bUseStateManager)
                 {
                     for (uint64_t j=0; j<4; j++)
@@ -475,14 +576,52 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
                         siblings[level][keys[level]*4 + j] = newLeafHash[j];
                     }
                 }
+                */
             }
             // If at the top of the tree, update the new root
             else
             {
-                newRoot[0] = newLeafHash[0];
-                newRoot[1] = newLeafHash[1];
-                newRoot[2] = newLeafHash[2];
-                newRoot[3] = newLeafHash[3];
+                TreeChunk treeChunk(db, poseidon);
+                treeChunk.level = 0;
+                for (uint64_t child=0; child<64; child++)
+                {
+                    treeChunk.children64[child].type = ZERO;
+                }
+                uint64_t children64Position = getKeyChildren64Position(keys, level);
+                treeChunk.children64[children64Position].type = LEAF;
+                treeChunk.children64[children64Position].leaf.key[0] = key[0];
+                treeChunk.children64[children64Position].leaf.key[1] = key[1];
+                treeChunk.children64[children64Position].leaf.key[2] = key[2];
+                treeChunk.children64[children64Position].leaf.key[3] = key[3];
+                treeChunk.children64[children64Position].leaf.level = 0;
+                treeChunk.children64[children64Position].leaf.value = value;
+                treeChunk.children64[children64Position].leaf.calculateHash(fr, poseidon);
+                treeChunk.bChildren64Valid = true;
+                zkr = treeChunk.calculateHash();
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("SMT64::Set() failed calling treeChunk.calculateHash() result=" + zkresult2string(zkr));
+                    return zkr;
+                }
+                //treeChunk.print();
+
+                zkr = treeChunk.children2data();
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("SMT64::Set() failed calling treeChunk.children2data() result=" + zkresult2string(zkr));
+                    return zkr;
+                }
+                zkr = hashSave(ctx, treeChunk);
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("SMT64::Set() failed calling hashSave() result=" + zkresult2string(zkr));
+                    return zkr;
+                }
+
+                newRoot[0] = treeChunk.hash[0];
+                newRoot[1] = treeChunk.hash[1];
+                newRoot[2] = treeChunk.hash[2];
+                newRoot[3] = treeChunk.hash[3];
             }
         }
     }
@@ -494,11 +633,42 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
         {
             oldValue = foundValue;
 
-            // If level > 0, we are going to delete and existing node (not the root node)
-            if ( level >= 0)
+            // If level > 0, we are going to delete an existing node (not the root node)
+            //if ( level >= 0)
+            if (chunks[chunks.size()-1]->numberOfNonZeroChildren() > 1)
             {
+                uint64_t children64Positon = getKeyChildren64Position(keys, level);
+                chunks[chunks.size()-1]->children64[children64Positon].type = ZERO;
+                chunks[chunks.size()-1]->bDataValid = false;
+                chunks[chunks.size()-1]->bChildrenRestValid = false;
+                chunks[chunks.size()-1]->bHashValid = false;
+                zkr = chunks[chunks.size()-1]->calculateHash();
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("SMT64::Set() failed calling treeChunk.calculateHash() result=" + zkresult2string(zkr));
+                    return zkr;
+                }
+                //treeChunk.print();
+
+                zkr = chunks[chunks.size()-1]->children2data();
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("SMT64::Set() failed calling treeChunk.children2data() result=" + zkresult2string(zkr));
+                    return zkr;
+                }
+                zkr = hashSave(ctx, *chunks[chunks.size()-1]);
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("SMT64::Set() failed calling hashSave() result=" + zkresult2string(zkr));
+                    return zkr;
+                }
+
+                newRoot[0] = chunks[chunks.size()-1]->hash[0];
+                newRoot[1] = chunks[chunks.size()-1]->hash[1];
+                newRoot[2] = chunks[chunks.size()-1]->hash[2];
+                newRoot[3] = chunks[chunks.size()-1]->hash[3];
                 // Set the hash of the deleted node to zero
-                if (bUseStateManager)
+                /*if (bUseStateManager)
                 {
                     for (uint64_t j=0; j<4; j++)
                     {
@@ -517,21 +687,23 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
                     {
                         siblings[level][keys[level]*4 + j] = fr.zero();
                     }
-                }
+                }*/
 
                 // Find if there is only one non-zero hash in the siblings list for this level
-                int64_t uKey = getUniqueSibling(siblings[level]);
+                //int64_t uKey = getUniqueSibling(siblings[level]);
 
                 // If there is only one, it is the new deleted one
-                if (uKey >= 0)
-                {
+                //if (uKey >= 0)
+                //if (true)
+                //{
                     mode = "deleteFound";
 #ifdef LOG_SMT
                     zklog.info("Smt64::set() mode=" + mode);
 #endif
+#if 0
                     // Calculate the key of the deleted element
                     Goldilocks::Element auxFea[4];
-                    for (uint64_t i=0; i<4; i++) auxFea[i] = siblings[level][uKey*4+i];
+                    //for (uint64_t i=0; i<4; i++) auxFea[i] = siblings[level][uKey*4+i];
                     string auxString = fea2string(fr, auxFea);
 
                     // Read its 2 siblings
@@ -598,21 +770,21 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
                         // Calculate the insKey
                         vector<uint64_t> auxBits;
                         auxBits = accKey;
-                        auxBits.push_back(uKey);
+                        //auxBits.push_back(uKey);
                         joinKey(fr, auxBits, rKey, insKey );
 
                         insValue = val;
                         isOld0 = false;
 
                         // Climb the branch until there are two siblings
-                        while (uKey>=0 && level>=0)
+                        /*while (uKey>=0 && level>=0)
                         {
                             level--;
                             if (level >= 0)
                             {
                                 uKey = getUniqueSibling(siblings[level]);
                             }
-                        }
+                        }*/
 
                         // Calculate the old remaining key
                         Goldilocks::Element oldKey[4];
@@ -625,7 +797,7 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
 
                         // Create leaf node and store computed hash in oldLeafHash
                         Goldilocks::Element oldLeafHash[4];
-                        dbres = hashSaveOne(ctx, a, oldLeafHash);
+                        //dbres = hashSaveOne(ctx, a, oldLeafHash);
                         if (dbres != ZKR_SUCCESS)
                         {
                             return dbres;
@@ -650,7 +822,8 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
                             newRoot[2] = oldLeafHash[2];
                             newRoot[3] = oldLeafHash[3];
                         }
-                    }
+        #endif
+                    /*}
                     // Not a leaf node
                     else
                     {
@@ -658,8 +831,8 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
 #ifdef LOG_SMT
                         zklog.info("Smt64::set() mode=" + mode);
 #endif
-                    }
-                }
+                    }*/
+                /*}
                 // 2 siblings found
                 else
                 {
@@ -667,7 +840,7 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
 #ifdef LOG_SMT
                     zklog.info("Smt64::set() mode=" + mode);
 #endif
-                }
+                }*/
             }
             // If level=0, this means we are deleting the root node
             else
@@ -704,13 +877,13 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
     siblings.erase(it, siblings.end());
 
     // Go up the tree creating all intermediate nodes up to the new root
-    while (level >= 0)
+    /*while (level >= 0)
     {
         // Write the siblings and get the calculated db entry hash in newRoot
         Goldilocks::Element a[8], c[4];
         for (uint64_t i=0; i<8; i++) a[i] = siblings[level][i];
         for (uint64_t i=0; i<4; i++) c[i] = siblings[level][8+i];
-        dbres = hashSave(ctx, a, c, newRoot);
+        //dbres = hashSave(ctx, a, c, newRoot);
         if (dbres != ZKR_SUCCESS)
         {
             return dbres;
@@ -748,7 +921,7 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
                 }
             }
         }
-    }
+    }*/
 
     if (bUseStateManager)
     {
@@ -793,6 +966,10 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
     result.mode       = mode;
     result.proofHashCounter = proofHashCounter;
 
+    for (uint64_t i=0; i<chunks.size(); i++)
+    {
+        delete chunks[i];
+    }
 #ifdef LOG_SMT
     zklog.info("Smt64::set() returns isOld0=" + to_string(result.isOld0) + " insKey=" + fea2string(fr,result.insKey) + " oldValue=" + result.oldValue.get_str(16) + " newRoot=" + fea2string(fr,result.newRoot) + " mode=" + result.mode);
 #endif
@@ -874,6 +1051,7 @@ zkresult Smt64::get (const string &batchUUID, Database64 &db, const Goldilocks::
         treeChunk.hash[2] = r[2];
         treeChunk.hash[3] = r[3];
         treeChunk.data = dbValue;
+        treeChunk.bDataValid = true;
         treeChunk.level = level;
         zkr = treeChunk.data2children();
         if (zkr != ZKR_SUCCESS)
@@ -891,7 +1069,8 @@ zkresult Smt64::get (const string &batchUUID, Database64 &db, const Goldilocks::
         // Check that the resulting hash is the same we used to get the data from the database
         if (!fr.equal(treeChunk.hash[0], r[0]) || !fr.equal(treeChunk.hash[1], r[1]) || !fr.equal(treeChunk.hash[2], r[2]) || !fr.equal(treeChunk.hash[3], r[3]))
         {
-            zklog.error("Smt64::get() found calculated hash=" + fea2string(fr, treeChunk.hash) + " different from expected hash=" + fea2string(fr, r));
+            //treeChunk.print();
+            zklog.error("Smt64::get() found calculated hash=" + fea2string(fr, treeChunk.hash) + " different from expected hash=" + fea2string(fr, r) + " data.size=" + to_string(treeChunk.data.size()) + " data=" + ba2string(treeChunk.data));
             return ZKR_UNSPECIFIED;
         }
 
@@ -1094,8 +1273,20 @@ zkresult Smt64::get (const string &batchUUID, Database64 &db, const Goldilocks::
     return ZKR_SUCCESS;
 }
 
-zkresult Smt64::hashSave ( const SmtContext64 &ctx, const Goldilocks::Element (&v)[12], Goldilocks::Element (&hash)[4])
+zkresult Smt64::hashSave ( const SmtContext64 &ctx, const TreeChunk &treeChunk)
 {
+    if (!treeChunk.bDataValid)
+    {
+        zklog.error("Smt64::hashSave() found treeChunk.bDataValid=false");
+        return ZKR_UNSPECIFIED;
+    }
+
+    if (!treeChunk.bHashValid)
+    {
+        zklog.error("Smt64::hashSave() found treeChunk.bHashValid=false");
+        return ZKR_UNSPECIFIED;
+    }
+
     /*
     // Calculate the poseidon hash of the vector of field elements: v = a | c
     poseidon.hash(hash, v);
@@ -1106,35 +1297,39 @@ zkresult Smt64::hashSave ( const SmtContext64 &ctx, const Goldilocks::Element (&
     // Add the key:value pair to the database, using the hash as a key
     vector<Goldilocks::Element> dbValue;
     for (uint64_t i=0; i<12; i++) dbValue.push_back(v[i]);
+    zkresult zkr;*/
+
     zkresult zkr;
+
+    string hashString = NormalizeToNFormat(fea2string(fr, treeChunk.hash), 64);
 
     if (ctx.bUseStateManager)
     {
-        zkr = stateManager64.write(ctx.batchUUID, ctx.tx, hashString, dbValue, ctx.persistence);
+        zkr = stateManager64.write(ctx.batchUUID, ctx.tx, hashString, treeChunk.data, ctx.persistence);
         if (zkr != ZKR_SUCCESS)
         {
             zklog.error("Smt64::hashSave() failed calling stateManager.write() key=" + hashString + " result=" + to_string(zkr) + "=" + zkresult2string(zkr));
         }
+        else
+        {
+            //treeChunk.print();
+        }
     }
     else
     {
-        zkr = ctx.db.write(hashString, hash, dbValue, ctx.persistence == PERSISTENCE_DATABASE ? 1 : 0);
+        zkr = ctx.db.write(hashString, NULL, treeChunk.data, ctx.persistence == PERSISTENCE_DATABASE ? 1 : 0);
         if (zkr != ZKR_SUCCESS)
         {
             zklog.error("Smt64::hashSave() failed calling db.write() key=" + hashString + " result=" + to_string(zkr) + "=" + zkresult2string(zkr));
         }
     }
     
-#ifdef LOG_SMT
+//#ifdef LOG_SMT
     {
-        string s = "Smt64::hashSave() key=" + hashString + " value=";
-        for (uint64_t i=0; i<12; i++) s += fr.toString(dbValue[i],16) + ":";
-        s += " zkr=" + zkresult2string(zkr);
-        zklog.info(s);
+        zklog.info("Smt64::hashSave() key=" + hashString + " data.size=" + to_string(treeChunk.data.size()) + " data=" + ba2string(treeChunk.data));
     }
-#endif
-    return zkr;*/
-    return ZKR_UNSPECIFIED;
+//#endif
+    return zkr;
 }
 
 zkresult Smt64::updateStateRoot(Database64 &db, const Goldilocks::Element (&stateRoot)[4])

@@ -77,7 +77,13 @@ public:
         bHashValid(false),
         bChildrenRestValid(false),
         bChildren64Valid(false),
-        bDataValid(false) {};
+        bDataValid(false)
+    {
+        hash[0] = fr.zero();
+        hash[1] = fr.zero();
+        hash[2] = fr.zero();
+        hash[3] = fr.zero();
+    };
 
     // Read from database
     zkresult readDataFromDb (const Goldilocks::Element (&hash)[4]);
@@ -85,11 +91,14 @@ public:
     // Encode/decode data functions
     zkresult data2children (void); // Decodde data and store result into children64
     zkresult children2data (void); // Encode children64 into data
+    uint64_t numberOfNonZeroChildren (void);
 
     // Calculate hash functions
     zkresult calculateHash (void); // Calculate the hash of the chunk based on the (new) values of children64
     zkresult calculateChildren (const uint64_t level, Child * inputChildren, Child * outputChildren, uint64_t outputSize); // Calculates outputSize output children, as a result of combining outputSize*2 input children
     zkresult calculateChild (const uint64_t level, Child &leftChild, Child &rightChild, Child &outputChild);
+
+    void print (void) const;
 };
 
 #endif

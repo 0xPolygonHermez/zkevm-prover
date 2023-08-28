@@ -1,6 +1,8 @@
 #include <bitset>
 #include "key.hpp"
 #include "scalar.hpp"
+#include "zklog.hpp"
+#include "exit_process.hpp"
 
 using namespace std;
 
@@ -78,4 +80,21 @@ void removeKeyBits (Goldilocks &fr, const Goldilocks::Element (&key)[4], uint64_
     {
         scalar2fe(fr, auxk[i], rkey[i]);
     }
+}
+
+uint64_t getKeyChildren64Position (const bool (&keys)[256], uint64_t level)
+{
+    if (level > 250)
+    {
+        zklog.error("getKeyChildren64Position() got invalid level=" + to_string(level));
+        exitProcess();
+    }
+    uint64_t result = 0;
+    if (keys[level + 0]) result += 1;
+    if (keys[level + 1]) result += 2;
+    if (keys[level + 2]) result += 4;
+    if (keys[level + 3]) result += 8;
+    if (keys[level + 4]) result += 16;
+    if (keys[level + 5]) result += 32;
+    return result;
 }
