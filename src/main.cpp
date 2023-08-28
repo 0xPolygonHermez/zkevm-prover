@@ -43,6 +43,7 @@
 #include "state_manager_64.hpp"
 #include "check_tree_test.hpp"
 #include "database_performance_test.hpp"
+#include "sha256.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -518,6 +519,12 @@ int main(int argc, char **argv)
     if (config.runKeccakScriptGenerator)
     {
         KeccakGenerateScript(config);
+    }
+
+    // Generate SHA256 SM script
+    if (config.runSHA256ScriptGenerator)
+    {
+        SHA256GenerateScript(config);
     }
 
     /* TESTS */

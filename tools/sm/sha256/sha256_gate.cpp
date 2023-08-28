@@ -13,7 +13,9 @@ void SHA256GateString (const string &s, string &hash)
     SHA256Gate((uint8_t *)ba.c_str(), ba.size(), hash);
 }
 
-void SHA256Gate (const uint8_t * pData, uint64_t dataSize, string &hash)
+void SHA256Gate (
+    const uint8_t * pData, uint64_t dataSize, string &hash,
+    string scriptFile, string polsFile, string connectionsFile)
 {
     // Initialize hash values:
     // (first 32 bits of the fractional parts of the square roots of the first 8 primes 2..19):
@@ -309,6 +311,35 @@ void SHA256Gate (const uint8_t * pData, uint64_t dataSize, string &hash)
         }
 
         S.printCounters();
+        if (chunk == 0 && scriptFile.size() > 0)
+        {
+            json j;
+            S.saveScriptToJson(j);
+            cout << "Generating SHA256 script file: " << scriptFile << endl;
+            json2file(j, scriptFile);
+            cout << "Generated SHA256 script file: " << scriptFile << endl;
+            scriptFile = "";
+        }
+
+        if (chunk == 0 && polsFile.size() > 0)
+        {
+            json j;
+            S.savePolsToJson(j);
+            cout << "Generating SHA256 polynomials file: " << polsFile << endl;
+            json2file(j, polsFile);
+            cout << "Generated SHA256 polynomials file: " << polsFile << endl;
+            polsFile = "";
+        }
+
+        if (chunk == 0 && connectionsFile.size() > 0)
+        {
+            json j;
+            S.saveConnectionsToJson(j);
+            cout << "Generating SHA256 connections file: " << connectionsFile << endl;
+            json2file(j, connectionsFile);
+            cout << "Generated SHA256 connections file: " << connectionsFile << endl;
+            connectionsFile = "";
+        }
     }
 
     mpz_class hashScalar;

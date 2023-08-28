@@ -76,6 +76,10 @@ void Config::load(json &config)
     if (config.contains("runKeccakScriptGenerator") && config["runKeccakScriptGenerator"].is_boolean())
         runKeccakScriptGenerator = config["runKeccakScriptGenerator"];
 
+    runSHA256ScriptGenerator = false;
+    if (config.contains("runSHA256ScriptGenerator") && config["runSHA256ScriptGenerator"].is_boolean())
+        runSHA256ScriptGenerator = config["runSHA256ScriptGenerator"];
+
     runKeccakTest = false;
     if (config.contains("runKeccakTest") && config["runKeccakTest"].is_boolean())
         runKeccakTest = config["runKeccakTest"];
@@ -320,6 +324,11 @@ void Config::load(json &config)
     // Set default config files names
     rom = string("src/main_sm/") + string(PROVER_FORK_NAMESPACE_STRING) + string("/scripts/rom.json");
     keccakScriptFile = configPath + "/scripts/keccak_script.json";
+    keccakPolsFile = configPath + "/scripts/keccak_pols.json";
+    keccakConnectionsFile = configPath + "/scripts/keccak_connections.json";
+    sha256ScriptFile = configPath + "/scripts/sha256_script.json";
+    sha256PolsFile = configPath + "/scripts/sha256_pols.json";
+    sha256ConnectionsFile = configPath + "/scripts/sha256_connections.json";
     storageRomFile = configPath + "/scripts/storage_sm_rom.json";
     zkevmConstPols = configPath + "/zkevm/zkevm.const";
     zkevmConstantsTree = configPath + "/zkevm/zkevm.consttree";
@@ -448,11 +457,20 @@ void Config::load(json &config)
     if (config.contains("keccakScriptFile") && config["keccakScriptFile"].is_string())
         keccakScriptFile = config["keccakScriptFile"];
 
+    if (config.contains("sha256ScriptFile") && config["sha256ScriptFile"].is_string())
+        sha256ScriptFile = config["sha256ScriptFile"];
+
     if (config.contains("keccakPolsFile") && config["keccakPolsFile"].is_string())
         keccakPolsFile = config["keccakPolsFile"];
 
+    if (config.contains("sha256PolsFile") && config["sha256PolsFile"].is_string())
+        sha256PolsFile = config["sha256PolsFile"];
+
     if (config.contains("keccakConnectionsFile") && config["keccakConnectionsFile"].is_string())
         keccakConnectionsFile = config["keccakConnectionsFile"];
+
+    if (config.contains("sha256ConnectionsFile") && config["sha256ConnectionsFile"].is_string())
+        sha256ConnectionsFile = config["sha256ConnectionsFile"];
 
     if (config.contains("storageRomFile") && config["storageRomFile"].is_string())
         storageRomFile = config["storageRomFile"];
@@ -599,6 +617,8 @@ void Config::print(void)
 
     if (runKeccakScriptGenerator)
         zklog.info("    runKeccakScriptGenerator=true");
+    if (runSHA256ScriptGenerator)
+        zklog.info("    runSHA256ScriptGenerator=true");
     if (runKeccakTest)
         zklog.info("    runKeccakTest=true");
     if (runStorageSMTest)
@@ -711,7 +731,9 @@ void Config::print(void)
     zklog.info("    publicsOutput=" + publicsOutput);
     zklog.info("    proofFile=" + proofFile);
     zklog.info("    keccakScriptFile=" + keccakScriptFile);
+    zklog.info("    sha256ScriptFile=" + sha256ScriptFile);
     zklog.info("    keccakPolsFile=" + keccakPolsFile);
+    zklog.info("    sha256PolsFile=" + sha256PolsFile);
     zklog.info("    keccakConnectionsFile=" + keccakConnectionsFile);
     zklog.info("    storageRomFile=" + storageRomFile);
     zklog.info("    zkevmStarkInfo=" + zkevmStarkInfo);

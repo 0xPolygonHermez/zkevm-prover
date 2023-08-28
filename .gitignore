@@ -18,5 +18,3 @@ config/zkevm/*
 config/tmp
 runtime/*
 !runtime/README.md
-v1.1.0-rc.1-fork.4.tgz
-v1.1.0-rc.1-fork.4
