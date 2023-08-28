@@ -16,6 +16,9 @@ echo "Creating table state.merkletree..."
 PGPASSWORD=$3 psql -U $2 -h 127.0.0.1 -p 5432 -d $1 -c 'create schema state;'
 PGPASSWORD=$3 psql -U $2 -h 127.0.0.1 -p 5432 -d $1 -c 'create table state.nodes (hash bytea primary key, data bytea not null);'
 PGPASSWORD=$3 psql -U $2 -h 127.0.0.1 -p 5432 -d $1 -c 'create table state.program (hash bytea primary key, data bytea not null);'
+PGPASSWORD=$3 psql -U $2 -h 127.0.0.1 -p 5432 -d $1 -c 'create table state.nodesKV (key bytea, data bytea not null, version integer not null);'
+PGPASSWORD=$3 psql -U $2 -h 127.0.0.1 -p 5432 -d $1 -c 'create table state.versionKV (version integer not null, hash bytea primary key, block integer not null);'
+
 if [ $# == 4 ]
     then
         PGPASSWORD=$3 psql -U $2 -h 127.0.0.1 -p 5432 -d $1 -f $4
