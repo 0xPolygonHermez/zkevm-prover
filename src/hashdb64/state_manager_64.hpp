@@ -56,6 +56,9 @@ public:
     uint64_t currentTx;
     vector<TxState64> txState;
     unordered_map<string, string> dbWrite;
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+    TimeMetricStorage timeMetricStorage;
+#endif
     BatchState64() : currentTx(0)
     {
         txState.reserve(32);
@@ -67,11 +70,8 @@ class StateManager64
 {
 private:
     unordered_map<string, BatchState64> state;
-#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-    TimeMetricStorage timeMetricStorage;
     Config config;
     pthread_mutex_t mutex; // Mutex to protect the multi write queues
-#endif
 public:
     StateManager64 ()
     {        

@@ -11,7 +11,6 @@ class RomConstants
 {
 public:
     /* Integer constants */
-    uint64_t CALLDATA_OFFSET;
     uint64_t BATCH_DIFFICULTY;
     uint64_t TX_GAS_LIMIT;
     uint64_t GLOBAL_EXIT_ROOT_STORAGE_POS;
@@ -108,7 +107,6 @@ public:
     mpz_class P2_96;
 
     RomConstants() :
-        CALLDATA_OFFSET(0),
         BATCH_DIFFICULTY(0),
         TX_GAS_LIMIT(0),
         GLOBAL_EXIT_ROOT_STORAGE_POS(0),

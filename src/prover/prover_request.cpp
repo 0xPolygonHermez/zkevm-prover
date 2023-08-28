@@ -1,7 +1,6 @@
 #include "prover_request.hpp"
 #include "utils.hpp"
 #include "exit_process.hpp"
-#include "main_sm/fork_0/main/full_tracer.hpp"
 #include "main_sm/fork_1/main/full_tracer.hpp"
 #include "main_sm/fork_2/main/full_tracer.hpp"
 #include "main_sm/fork_3/main/full_tracer.hpp"
@@ -69,17 +68,6 @@ void ProverRequest::CreateFullTracer(void)
     }
     switch (input.publicInputsExtended.publicInputs.forkID)
     {
-        case 0: // fork_0
-        {
-            pFullTracer = new fork_0::FullTracer(fr);
-            if (pFullTracer == NULL)
-            {
-                zklog.error("ProverRequest::CreateFullTracer() failed calling new fork_0::FullTracer()");
-                exitProcess();
-            }
-            result = ZKR_SUCCESS;
-            return;
-        }
         case 1: // fork_1
         {
             pFullTracer = new fork_1::FullTracer(fr);
@@ -153,12 +141,6 @@ void ProverRequest::DestroyFullTracer(void)
     }
     switch (input.publicInputsExtended.publicInputs.forkID)
     {
-        case 0: // fork_0
-        {
-            delete pFullTracer;
-            pFullTracer = NULL; 
-            break;
-        }
         case 1: // fork_1
         {
             delete pFullTracer;

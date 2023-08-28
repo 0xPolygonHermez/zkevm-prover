@@ -18,7 +18,7 @@ HashDBRemote::HashDBRemote (Goldilocks &fr, const Config &config) : fr(fr), conf
     channelArguments.SetMaxReceiveMessageSize(100*1024*1024);
 
     // Create channel
-    std::shared_ptr<grpc_impl::Channel> channel = ::grpc::CreateCustomChannel(config.hashDBURL, grpc::InsecureChannelCredentials(), channelArguments);
+    std::shared_ptr<grpc::Channel> channel = ::grpc::CreateCustomChannel(config.hashDBURL, grpc::InsecureChannelCredentials(), channelArguments);
 
     // Create stub (i.e. client)
     stub = new hashdb::v1::HashDBService::Stub(channel);
@@ -293,7 +293,7 @@ void HashDBRemote::loadProgramDB(const DatabaseMap::ProgramMap &input, const boo
 #endif
 }
 
-zkresult HashDBRemote::flush(const string &batchUUID, uint64_t &flushId, uint64_t &storedFlushId)
+zkresult HashDBRemote::flush(const string &batchUUID, const string &newStateRoot, const Persistence persistence, uint64_t &flushId, uint64_t &storedFlushId)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
     gettimeofday(&t, NULL);
@@ -301,6 +301,8 @@ zkresult HashDBRemote::flush(const string &batchUUID, uint64_t &flushId, uint64_
     ::grpc::ClientContext context;
     ::hashdb::v1::FlushRequest request;
     request.set_batch_uuid(batchUUID);
+    request.set_new_state_root(newStateRoot);
+    request.set_persistence((hashdb::v1::Persistence)persistence);
     ::hashdb::v1::FlushResponse response;
     grpc::Status s = stub->Flush(&context, request, &response);
     if (s.error_code() != grpc::StatusCode::OK) {

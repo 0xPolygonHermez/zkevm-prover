@@ -3,6 +3,7 @@
 
 #include "goldilocks_base_field.hpp"
 #include "multi_write_data.hpp"
+#include <vector>
 
 using namespace std;
 

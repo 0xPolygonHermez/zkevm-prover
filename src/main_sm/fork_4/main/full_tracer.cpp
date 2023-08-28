@@ -140,6 +140,9 @@ inline zkresult getFromMemory(Context &ctx, mpz_class &offset, mpz_class &length
         result += hexStringEnd.substr(0, bytesToRetrieve * 2);
     }
 
+    // Limit result memory length in case it is a chunk contained in one single slot
+    result = result.substr(0, length.get_ui()*2);
+
     return ZKR_SUCCESS;
 }
 

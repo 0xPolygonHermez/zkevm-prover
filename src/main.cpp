@@ -213,8 +213,8 @@ public:
     RunFileThreadArguments(Goldilocks &fr, Prover &prover, Config &config) : fr(fr), prover(prover), config(config){};
 };
 
-#define RUN_FILE_MULTITHREAD_N_THREADS 100
-#define RUN_FILE_MULTITHREAD_N_FILES 100
+#define RUN_FILE_MULTITHREAD_N_THREADS 10
+#define RUN_FILE_MULTITHREAD_N_FILES 10
 
 void *runFileProcessBatchThread(void *arg)
 {

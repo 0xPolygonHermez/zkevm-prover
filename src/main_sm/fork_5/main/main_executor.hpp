@@ -56,6 +56,8 @@ public:
     uint64_t ecrecoverStoreArgsLabel;
     uint64_t ecrecoverEndLabel;
 
+    // Labels lock
+    pthread_mutex_t labelsMutex;    // Mutex to protect the labels vector
 
     // Constructor
     MainExecutor(Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config);
@@ -70,6 +72,10 @@ public:
     void checkFinalState(Context &ctx);
     void assertOutputs(Context &ctx);
     void logError(Context &ctx, const string &message = "");
+
+    // Labels lock / unlock
+    void labelsLock(void) { pthread_mutex_lock(&labelsMutex); };
+    void labelsUnlock(void) { pthread_mutex_unlock(&labelsMutex); };
 };
 
 } // namespace

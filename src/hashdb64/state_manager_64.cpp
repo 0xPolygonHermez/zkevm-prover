@@ -162,7 +162,7 @@ zkresult StateManager64::setStateRoot (const string &batchUUID, uint64_t tx, con
     }
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-    timeMetricStorage.add("setStateRoot", TimeDiff(t));
+    batchState.timeMetricStorage.add("setStateRoot", TimeDiff(t));
 #endif
 
     Unlock();
@@ -240,7 +240,7 @@ zkresult StateManager64::write (const string &batchUUID, uint64_t tx, const stri
     batchState.dbWrite[key] = value;
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-    timeMetricStorage.add("write", TimeDiff(t));
+    batchState.timeMetricStorage.add("write", TimeDiff(t));
 #endif
 
     Unlock();
@@ -322,7 +322,7 @@ zkresult StateManager64::deleteNode (const string &batchUUID, uint64_t tx, const
     txSubState.dbDelete.emplace_back(key);
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-    timeMetricStorage.add("deleteNodes", TimeDiff(t));
+    batchState.timeMetricStorage.add("deleteNodes", TimeDiff(t));
 #endif
 
     Unlock();
@@ -367,7 +367,7 @@ zkresult StateManager64::read (const string &batchUUID, const string &_key, stri
 #endif
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-        timeMetricStorage.add("read success", TimeDiff(t));
+        batchState.timeMetricStorage.add("read success", TimeDiff(t));
 #endif
         Unlock();
 
@@ -375,7 +375,7 @@ zkresult StateManager64::read (const string &batchUUID, const string &_key, stri
     }
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-    timeMetricStorage.add("read not found", TimeDiff(t));
+    batchState.timeMetricStorage.add("read not found", TimeDiff(t));
 #endif
 
     Unlock();
@@ -421,8 +421,8 @@ zkresult StateManager64::semiFlush (const string &batchUUID, const string &_stat
         zklog.warning("StateManager64::semiFlush() found no batch state for batch UUID=" + batchUUID + "; normal if no SMT activity happened");
  
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-        timeMetricStorage.add("semiFlush UUID not found", TimeDiff(t));
-        timeMetricStorage.print("State Manager calls");
+        //timeMetricStorage.add("semiFlush UUID not found", TimeDiff(t));
+        //timeMetricStorage.print("State Manager calls");
 #endif
         Unlock();
         return ZKR_SUCCESS;
@@ -484,7 +484,7 @@ zkresult StateManager64::semiFlush (const string &batchUUID, const string &_stat
     }
     
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-    timeMetricStorage.add("semi flush", TimeDiff(t));
+    batchState.timeMetricStorage.add("semi flush", TimeDiff(t));
 #endif
 
     Unlock();
@@ -527,8 +527,8 @@ zkresult StateManager64::flush (const string &batchUUID, Database64 &db, uint64_
         TimerStopAndLog(STATE_MANAGER_FLUSH);
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-        timeMetricStorage.add("flush UUID not found", TimeDiff(t));
-        timeMetricStorage.print("State Manager calls");
+        //timeMetricStorage.add("flush UUID not found", TimeDiff(t));
+        //timeMetricStorage.print("State Manager calls");
 #endif
         Unlock();
         return zkr;
@@ -565,8 +565,8 @@ zkresult StateManager64::flush (const string &batchUUID, Database64 &db, uint64_
                     " substate.newStateRoot=" + txState.persistence[persistence].subState[txState.persistence[persistence].currentSubState].newStateRoot);
                      
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-                timeMetricStorage.add("flush UUID inconsistent new state roots", TimeDiff(t));
-                timeMetricStorage.print("State Manager calls");
+                batchState.timeMetricStorage.add("flush UUID inconsistent new state roots", TimeDiff(t));
+                batchState.timeMetricStorage.print("State Manager calls");
 #endif
                 Unlock();
                 return ZKR_STATE_MANAGER;
@@ -586,8 +586,8 @@ zkresult StateManager64::flush (const string &batchUUID, Database64 &db, uint64_
                             " substate.oldStateRoot=" + txState.persistence[persistence].subState[currentSubState].oldStateRoot);
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-                        timeMetricStorage.add("flush UUID inconsistent old state roots", TimeDiff(t));
-                        timeMetricStorage.print("State Manager calls");
+                        batchState.timeMetricStorage.add("flush UUID inconsistent old state roots", TimeDiff(t));
+                        batchState.timeMetricStorage.print("State Manager calls");
 #endif
                         Unlock();
                         return ZKR_STATE_MANAGER;
@@ -619,8 +619,8 @@ zkresult StateManager64::flush (const string &batchUUID, Database64 &db, uint64_
                         " currentSubState=" + to_string(txState.persistence[persistence].currentSubState) +
                         " substate.oldStateRoot=" + txState.persistence[persistence].subState[currentSubState].oldStateRoot);
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-                    timeMetricStorage.add("flush UUID cannot find previous tx sub-state", TimeDiff(t));
-                    timeMetricStorage.print("State Manager calls");
+                    batchState.timeMetricStorage.add("flush UUID cannot find previous tx sub-state", TimeDiff(t));
+                    batchState.timeMetricStorage.print("State Manager calls");
 #endif
                     Unlock();
                     return ZKR_STATE_MANAGER;
@@ -677,8 +677,8 @@ zkresult StateManager64::flush (const string &batchUUID, Database64 &db, uint64_
                         TimerStopAndLog(STATE_MANAGER_FLUSH);
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-                        timeMetricStorage.add("flush error db.write", TimeDiff(t));
-                        timeMetricStorage.print("State Manager calls");
+                        batchState.timeMetricStorage.add("flush error db.write", TimeDiff(t));
+                        batchState.timeMetricStorage.print("State Manager calls");
 #endif
                         Unlock();
                         return zkr;
@@ -698,8 +698,8 @@ zkresult StateManager64::flush (const string &batchUUID, Database64 &db, uint64_
                     TimerStopAndLog(STATE_MANAGER_FLUSH);
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-                    timeMetricStorage.add("flush error string2fea", TimeDiff(t));
-                    timeMetricStorage.print("State Manager calls");
+                    batchState.timeMetricStorage.add("flush error string2fea", TimeDiff(t));
+                    batchState.timeMetricStorage.print("State Manager calls");
 #endif
                     Unlock();
                     return zkr;
@@ -720,8 +720,8 @@ zkresult StateManager64::flush (const string &batchUUID, Database64 &db, uint64_
                     TimerStopAndLog(STATE_MANAGER_FLUSH);
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-                    timeMetricStorage.add("flush error db.updateStateRoot", TimeDiff(t));
-                    timeMetricStorage.print("State Manager calls");
+                    batchState.timeMetricStorage.add("flush error db.updateStateRoot", TimeDiff(t));
+                    batchState.timeMetricStorage.print("State Manager calls");
 #endif
                     Unlock();
                     return zkr;
@@ -729,9 +729,6 @@ zkresult StateManager64::flush (const string &batchUUID, Database64 &db, uint64_
             }
         }
     }
-    
-    // Delete this batch UUID state
-    state.erase(it);
 
     zkr = db.flush(flushId, lastSentFlushId);
     if (zkr != ZKR_SUCCESS)
@@ -739,14 +736,17 @@ zkresult StateManager64::flush (const string &batchUUID, Database64 &db, uint64_
         zklog.error("StateManager64::flush() failed calling db.flush() result=" + zkresult2string(zkr));
     }
 
-    TimerStopAndLog(STATE_MANAGER_FLUSH);
-
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-    timeMetricStorage.add("flush success", TimeDiff(t));
-    timeMetricStorage.print("State Manager calls");
+    batchState.timeMetricStorage.add("flush success", TimeDiff(t));
+    batchState.timeMetricStorage.print("State Manager calls");
 #endif
+    
+    // Delete this batch UUID state
+    state.erase(it);
 
     Unlock();
+
+    TimerStopAndLog(STATE_MANAGER_FLUSH);
 
     return zkr;
 }
