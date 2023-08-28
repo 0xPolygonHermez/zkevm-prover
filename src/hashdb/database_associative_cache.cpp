@@ -265,7 +265,7 @@ bool DatabaseMTAssociativeCache::findKey(Goldilocks::Element (&key)[4], vector<G
     //
     if (attempts<<40 == 0)
     {
-        zklog.info("DatabaseMTAssociativeCache::addKeyValue() name=" + name + " indexesSize=" + to_string(indexesSize) + " cacheSize=" + to_string(cacheSize) + " attempts=" + to_string(attempts) + " hits=" + to_string(hits) + " hit ratio=" + to_string(double(hits) * 100.0 / double(zkmax(attempts, 1))) + "%");
+        zklog.info("DatabaseMTAssociativeCache::findKey() name=" + name + " indexesSize=" + to_string(indexesSize) + " cacheSize=" + to_string(cacheSize) + " attempts=" + to_string(attempts) + " hits=" + to_string(hits) + " hit ratio=" + to_string(double(hits) * 100.0 / double(zkmax(attempts, 1))) + "%");
     }
     //
     // Find the value

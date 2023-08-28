@@ -333,7 +333,7 @@ zkresult Database::write(const string &_key, const Goldilocks::Element* vkey, co
         if(usingAssociativeCache()){
             Goldilocks::Element vkeyf[4];
             if(vkey == NULL){
-                string2key(fr, _key, vkeyf);
+                string2key(fr, key, vkeyf);
             }else{
                 vkeyf[0] = vkey[0];
                 vkeyf[1] = vkey[1];
@@ -2039,7 +2039,8 @@ void loadDb2MemCache(const Config &config)
             hash = treeMapIterator->second[i];
             dbValue.clear();
             Goldilocks::Element vhash[4];
-            if(pHashDB->db.usingAssociativeCache()) string2key(fr, hash, vhash);
+            string hashNorm = NormalizeToNFormat(hash, 64);
+            if(pHashDB->db.usingAssociativeCache()) string2key(fr, hashNorm, vhash);
             zkresult zkr = pHashDB->db.read(hash, vhash, dbValue, NULL, true);
 
             if (zkr != ZKR_SUCCESS)
