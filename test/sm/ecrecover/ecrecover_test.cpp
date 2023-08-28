@@ -339,6 +339,22 @@ void ECRecoverTest(void)
                 zklog.error("ECRecoverTest() failed i=" + to_string(i) + " signature=" + ecrecoverTestVectors[i].signature + " address=" + address.get_str(16) + " expectedAddress=" + ecrecoverTestVectors[i].address);
                 failed = true;
             }
+            RawFec::Element buffer[1026];
+            int precres = ECRecoverPrecalc(signature, r, s, v, ecrecoverTestVectors[i].precompiled, buffer, 2);
+            if(result != ECR_NO_ERROR )
+            {   
+                if(precres != -1)
+                {
+                    zklog.error("ECRecoverPrecalc() failed i=" + to_string(i) + " signature=" + ecrecoverTestVectors[i].signature + " result=" + to_string(precres) + " expectedResult= -1" );
+                    failed = true;
+                }
+            }else{
+                if(precres < 1)
+                {
+                    zklog.error("ECRecoverPrecalc() failed i=" + to_string(i) + " signature=" + ecrecoverTestVectors[i].signature + " result=" + to_string(precres) + " expectedResult > 0" );
+                    failed = true;
+                }
+            }
             if (failed)
                 failedTests++;
 #endif
