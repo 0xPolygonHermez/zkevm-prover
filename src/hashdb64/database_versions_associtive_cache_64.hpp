@@ -1,5 +1,5 @@
-#ifndef DATABASE_ASSOCIATIVE_CACHE_HPP
-#define DATABASE_ASSOCIATIVE_CACHE_HPP
+#ifndef DATABASE_VERSIONS_ASSOCIATIVE_CACHE_HPP
+#define DATABASE_VERSIONS_ASSOCIATIVE_CACHE_HPP
 #include <vector>
 #include "goldilocks_base_field.hpp"
 #include <nlohmann/json.hpp>
@@ -8,7 +8,7 @@
 #include "zkmax.hpp"
 
 using namespace std;
-class DatabaseMTAssociativeCache
+class DatabaseVersionsAssociativeCache
 {
     private:
         recursive_mutex mlock;
@@ -20,7 +20,7 @@ class DatabaseMTAssociativeCache
 
         uint32_t *indexes;
         Goldilocks::Element *keys;
-        Goldilocks::Element *values;
+        uint64_t *versionBlock;
         uint32_t currentCacheIndex; 
 
         uint64_t attempts;
@@ -33,13 +33,13 @@ class DatabaseMTAssociativeCache
 
     public:
 
-        DatabaseMTAssociativeCache();
-        DatabaseMTAssociativeCache(int log2IndexesSize_, int log2CacheSize_, string name_);
-        ~DatabaseMTAssociativeCache();
+        DatabaseVersionsAssociativeCache();
+        DatabaseVersionsAssociativeCache(int log2IndexesSize_, int log2CacheSize_, string name_);
+        ~DatabaseVersionsAssociativeCache();
 
         void postConstruct(int log2IndexesSize_, int log2CacheSize_, string name_);
-        void addKeyValue(Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, bool update);
-        bool findKey(Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value);
+        void addKeyVersionBlock(Goldilocks::Element (&key)[4], const uint64_t (&vb)[2], bool update);
+        bool findKey(Goldilocks::Element (&key)[4], uint64_t (&vb)[2]);
         inline bool enabled() const { return (log2IndexesSize > 0); };
         inline uint32_t getCacheSize()  const { return cacheSize; };
         inline uint32_t getIndexesSize() const { return indexesSize; };
@@ -52,3 +52,4 @@ class DatabaseMTAssociativeCache
         void forcedInsertion(uint32_t (&usedRawCacheIndexes)[10], int &iters);
 };
 #endif
+
