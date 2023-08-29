@@ -89,82 +89,53 @@ void DatabaseMTAssociativeCache::postConstruct(int log2IndexesSize_, int log2Cac
 void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, bool update)
 {
     lock_guard<recursive_mutex> guard(mlock);
+    bool emptySlot = false;
+    bool present = false;
+    uint32_t cacheIndex;
+    uint32_t tableIndexEmpty=0;
+
     //
-    // Try to add in one of my 4 slots
+    // Check if present in one of the four slots
     //
     for (int i = 0; i < 4; ++i)
     {
         uint32_t tableIndex = (uint32_t)(key[i].fe & indexesMask);
         uint32_t cacheIndexRaw = indexes[tableIndex];
-        uint32_t cacheIndex = cacheIndexRaw & cacheMask;
-        uint32_t cacheIndexKey, cacheIndexValue;
-        bool write = false;
+        cacheIndex = cacheIndexRaw & cacheMask;
+        uint32_t cacheIndexKey = cacheIndex * 4;
 
-        if (emptyCacheSlot(cacheIndexRaw))
-        {
-            write = true;
-            indexes[tableIndex] = currentCacheIndex;
-            currentCacheIndex = (currentCacheIndex == UINT32_MAX) ? 0 : (currentCacheIndex + 1);
-
-            cacheIndex = indexes[tableIndex] & cacheMask;
-            cacheIndexKey = cacheIndex * 4;
-            cacheIndexValue = cacheIndex * 12;
-        }
-        else
-        {
-            cacheIndexKey = cacheIndex * 4;
-            cacheIndexValue = cacheIndex * 12;
-
-            if (keys[cacheIndexKey + 0].fe == key[0].fe &&
+        if (!emptyCacheSlot(cacheIndexRaw)){
+            if( keys[cacheIndexKey + 0].fe == key[0].fe &&
                 keys[cacheIndexKey + 1].fe == key[1].fe &&
                 keys[cacheIndexKey + 2].fe == key[2].fe &&
-                keys[cacheIndexKey + 3].fe == key[3].fe)
-            {
-                write = update;
+                keys[cacheIndexKey + 3].fe == key[3].fe){
+                    if(update == false) return;
+                    present = true;
+                    break;
             }
-            else
-            {
-                continue;
-            }
-        }
-        if (write) 
-        {
-            keys[cacheIndexKey + 0].fe = key[0].fe;
-            keys[cacheIndexKey + 1].fe = key[1].fe;
-            keys[cacheIndexKey + 2].fe = key[2].fe;
-            keys[cacheIndexKey + 3].fe = key[3].fe;
-            values[cacheIndexValue + 0] = value[0];
-            values[cacheIndexValue + 1] = value[1];
-            values[cacheIndexValue + 2] = value[2];
-            values[cacheIndexValue + 3] = value[3];
-            values[cacheIndexValue + 4] = value[4];
-            values[cacheIndexValue + 5] = value[5];
-            values[cacheIndexValue + 6] = value[6];
-            values[cacheIndexValue + 7] = value[7];
-            if (value.size() > 8)
-            {
-                values[cacheIndexValue + 8] = value[8];
-                values[cacheIndexValue + 9] = value[9];
-                values[cacheIndexValue + 10] = value[10];
-                values[cacheIndexValue + 11] = value[11];
-            }else{
-                values[cacheIndexValue + 8] = Goldilocks::zero();
-                values[cacheIndexValue + 9] = Goldilocks::zero();
-                values[cacheIndexValue + 10] = Goldilocks::zero();
-                values[cacheIndexValue + 11] = Goldilocks::zero();
-            }
-            return;
-        }else{
-            return;
+        }else if (emptySlot == false){
+            emptySlot = true;
+            tableIndexEmpty = tableIndex;
         }
     }
+
     //
-    // forced entry insertion
+    // Evaluate cacheIndexKey and 
     //
-    uint32_t cacheIndex = (uint32_t)(currentCacheIndex & cacheMask);
-    currentCacheIndex = (currentCacheIndex == UINT32_MAX) ? 0 : (currentCacheIndex + 1);
-    uint32_t cacheIndexKey = cacheIndex * 4;
-    uint32_t cacheIndexValue = cacheIndex * 12;
+    if(!present){
+        if(emptySlot == true){
+            indexes[tableIndexEmpty] = currentCacheIndex;
+        }
+        cacheIndex = (uint32_t)(currentCacheIndex & cacheMask);
+        currentCacheIndex = (currentCacheIndex == UINT32_MAX) ? 0 : (currentCacheIndex + 1);
+    }
+    uint64_t cacheIndexKey, cacheIndexValue;
+    cacheIndexKey = cacheIndex * 4;
+    cacheIndexValue = cacheIndex * 12;
+    
+    //
+    // Add value
+    //
     keys[cacheIndexKey + 0].fe = key[0].fe;
     keys[cacheIndexKey + 1].fe = key[1].fe;
     keys[cacheIndexKey + 2].fe = key[2].fe;
@@ -189,14 +160,16 @@ void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], cons
         values[cacheIndexValue + 10] = Goldilocks::zero();
         values[cacheIndexValue + 11] = Goldilocks::zero();
     }
+            
     //
     // Forced index insertion
     //
-    int iters = 0;
-    uint32_t usedRawCacheIndexes[10];
-    usedRawCacheIndexes[0] = currentCacheIndex-1;
-    forcedInsertion(usedRawCacheIndexes, iters);
-
+    if(!present && !emptySlot){
+        int iters = 0;
+        uint32_t usedRawCacheIndexes[10];
+        usedRawCacheIndexes[0] = currentCacheIndex-1;
+        forcedInsertion(usedRawCacheIndexes, iters);
+    }
 }
 
 void DatabaseMTAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIndexes)[10], int &iters)
@@ -256,7 +229,7 @@ void DatabaseMTAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIndexes)
     
 }
 
-bool DatabaseMTAssociativeCache::findKey(Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value)
+bool DatabaseMTAssociativeCache::findKey(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value)
 {
     lock_guard<recursive_mutex> guard(mlock);
     attempts++; 
