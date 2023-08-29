@@ -40,7 +40,7 @@ class DatabaseMTAssociativeCache
 
         void postConstruct(int log2IndexesSize_, int log2CacheSize_, string name_);
         void addKeyValue(Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, bool update);
-        bool findKey(Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value);
+        bool findKey(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value);
         inline bool enabled() const { return (log2IndexesSize > 0); };
         inline uint32_t getCacheSize()  const { return cacheSize; };
         inline uint32_t getIndexesSize() const { return indexesSize; };
