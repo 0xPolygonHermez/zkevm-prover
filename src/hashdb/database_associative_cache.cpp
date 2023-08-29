@@ -119,7 +119,7 @@ void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], cons
     }
 
     //
-    // Try to add in one empty slot
+    // If exists, add it in one empty slot
     //
     if(force == true){
         for (int i = 0; i < 4; ++i)
