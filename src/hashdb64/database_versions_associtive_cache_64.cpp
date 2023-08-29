@@ -16,7 +16,7 @@ DatabaseVersionsAssociativeCache::DatabaseVersionsAssociativeCache()
     cacheSize = 0;
     indexes = NULL;
     keys = NULL;
-    versionBlock = NULL;
+    versions = NULL;
     currentCacheIndex = 0;
     attempts = 0;
     hits = 0;
@@ -34,8 +34,8 @@ DatabaseVersionsAssociativeCache::~DatabaseVersionsAssociativeCache()
         delete[] indexes;
     if (keys != NULL)
         delete[] keys;
-    if (versionBlock != NULL)
-        delete[] versionBlock;
+    if (versions != NULL)
+        delete[] versions;
 
 };
 
@@ -70,8 +70,8 @@ void DatabaseVersionsAssociativeCache::postConstruct(int log2IndexesSize_, int l
     if(keys != NULL) delete[] keys;
     keys = new Goldilocks::Element[4 * cacheSize];
 
-    if(versionBlock != NULL) delete[] versionBlock;
-    versionBlock = new uint64_t[2 * cacheSize];
+    if(versions != NULL) delete[] versions;
+    versions = new uint64_t[2 * cacheSize];
 
     currentCacheIndex = 0;
     attempts = 0;
@@ -83,82 +83,72 @@ void DatabaseVersionsAssociativeCache::postConstruct(int log2IndexesSize_, int l
     indexesMask = indexesSize - 1;
 };
 
-void DatabaseVersionsAssociativeCache::addKeyVersionBlock(Goldilocks::Element (&key)[4], const uint64_t (&vb)[2], bool update)
+void DatabaseVersionsAssociativeCache::addKeyVersion(Goldilocks::Element (&key)[4], const uint64_t version, const bool update)
 {
+    
     lock_guard<recursive_mutex> guard(mlock);
+    bool emptySlot = false;
+    bool present = false;
+    uint32_t cacheIndex;
+    uint32_t tableIndexEmpty=0;
+
     //
-    // Try to add in one of my 4 slots
+    // Check if present in one of the four slots
     //
     for (int i = 0; i < 4; ++i)
     {
         uint32_t tableIndex = (uint32_t)(key[i].fe & indexesMask);
         uint32_t cacheIndexRaw = indexes[tableIndex];
-        uint32_t cacheIndex = cacheIndexRaw & cacheMask;
-        uint32_t cacheIndexKey, cacheIndexValue;
-        bool write = false;
+        cacheIndex = cacheIndexRaw & cacheMask;
+        uint32_t cacheIndexKey = cacheIndex * 4;
 
-        if (emptyCacheSlot(cacheIndexRaw))
-        {
-            write = true;
-            indexes[tableIndex] = currentCacheIndex;
-            currentCacheIndex = (currentCacheIndex == UINT32_MAX) ? 0 : (currentCacheIndex + 1);
-
-            cacheIndex = indexes[tableIndex] & cacheMask;
-            cacheIndexKey = cacheIndex * 4;
-            cacheIndexValue = cacheIndex * 2;
-        }
-        else
-        {
-            cacheIndexKey = cacheIndex * 4;
-            cacheIndexValue = cacheIndex * 2;
-
-            if (keys[cacheIndexKey + 0].fe == key[0].fe &&
+        if (!emptyCacheSlot(cacheIndexRaw)){
+            if( keys[cacheIndexKey + 0].fe == key[0].fe &&
                 keys[cacheIndexKey + 1].fe == key[1].fe &&
                 keys[cacheIndexKey + 2].fe == key[2].fe &&
-                keys[cacheIndexKey + 3].fe == key[3].fe)
-            {
-                write = update;
+                keys[cacheIndexKey + 3].fe == key[3].fe){
+                    if(update == false) return;
+                    present = true;
+                    break;
             }
-            else
-            {
-                continue;
-            }
-        }
-        if (write) 
-        {
-            keys[cacheIndexKey + 0].fe = key[0].fe;
-            keys[cacheIndexKey + 1].fe = key[1].fe;
-            keys[cacheIndexKey + 2].fe = key[2].fe;
-            keys[cacheIndexKey + 3].fe = key[3].fe;
-            versionBlock[cacheIndexValue + 0] = vb[0];
-            versionBlock[cacheIndexValue + 1] = vb[1];
-           
-            return;
-        }else{
-            return;
+        }else if (emptySlot == false){
+            emptySlot = true;
+            tableIndexEmpty = tableIndex;
         }
     }
+
     //
-    // forced entry insertion
+    // Evaluate cacheIndexKey and 
     //
-    uint32_t cacheIndex = (uint32_t)(currentCacheIndex & cacheMask);
-    currentCacheIndex = (currentCacheIndex == UINT32_MAX) ? 0 : (currentCacheIndex + 1);
-    uint32_t cacheIndexKey = cacheIndex * 4;
-    uint32_t cacheIndexValue = cacheIndex * 2;
+    if(!present){
+        if(emptySlot == true){
+            indexes[tableIndexEmpty] = currentCacheIndex;
+        }
+        cacheIndex = (uint32_t)(currentCacheIndex & cacheMask);
+        currentCacheIndex = (currentCacheIndex == UINT32_MAX) ? 0 : (currentCacheIndex + 1);
+    }
+    uint64_t cacheIndexKey, cacheIndexValue;
+    cacheIndexKey = cacheIndex * 4;
+    cacheIndexValue = cacheIndex;
+    
+    //
+    // Add value
+    //
     keys[cacheIndexKey + 0].fe = key[0].fe;
     keys[cacheIndexKey + 1].fe = key[1].fe;
     keys[cacheIndexKey + 2].fe = key[2].fe;
     keys[cacheIndexKey + 3].fe = key[3].fe;
-    versionBlock[cacheIndexValue + 0] = vb[0];
-    versionBlock[cacheIndexValue + 1] = vb[1];
+    versions[cacheIndexValue ] = version;         
+
     //
     // Forced index insertion
     //
-    int iters = 0;
-    uint32_t usedRawCacheIndexes[10];
-    usedRawCacheIndexes[0] = currentCacheIndex-1;
-    forcedInsertion(usedRawCacheIndexes, iters);
-
+    if(!present && !emptySlot){
+        int iters = 0;
+        uint32_t usedRawCacheIndexes[10];
+        usedRawCacheIndexes[0] = currentCacheIndex-1;
+        forcedInsertion(usedRawCacheIndexes, iters);
+    }
 }
 
 void DatabaseVersionsAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIndexes)[10], int &iters)
@@ -218,7 +208,7 @@ void DatabaseVersionsAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIn
     
 }
 
-bool DatabaseVersionsAssociativeCache::findKey(const Goldilocks::Element (&key)[4], uint64_t (&vb)[2])
+bool DatabaseVersionsAssociativeCache::findKey(const Goldilocks::Element (&key)[4], uint64_t &version)
 {
     lock_guard<recursive_mutex> guard(mlock);
     attempts++; 
@@ -245,10 +235,8 @@ bool DatabaseVersionsAssociativeCache::findKey(const Goldilocks::Element (&key)[
             keys[cacheIndexKey + 2].fe == key[2].fe &&
             keys[cacheIndexKey + 3].fe == key[3].fe)
         {
-            uint32_t cacheIndexValue = cacheIndex * 2;
             ++hits;
-            vb[0] = versionBlock[cacheIndexValue];
-            vb[1] = versionBlock[cacheIndexValue + 1];
+            version = versions[cacheIndex];
             return true;
         }
     }

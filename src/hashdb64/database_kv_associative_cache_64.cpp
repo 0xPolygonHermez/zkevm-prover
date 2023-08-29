@@ -1,4 +1,4 @@
-#include "database_kv_associative_cache.hpp"
+#include "database_kv_associative_cache_64.hpp"
 #include <vector>
 #include "goldilocks_base_field.hpp"
 #include <nlohmann/json.hpp>
@@ -8,15 +8,13 @@
 #include "exit_process.hpp"
 #include "scalar.hpp"
 
-
-
-
 DatabaseKVAssociativeCache::DatabaseKVAssociativeCache()
 {
     log2IndexesSize = 0;
     indexesSize = 0;
     log2CacheSize = 0;
     cacheSize = 0;
+    maxVersions = 100; //rick: as parameter
     indexes = NULL;
     keys = NULL;
     values = NULL;
@@ -63,6 +61,8 @@ void DatabaseKVAssociativeCache::postConstruct(int log2IndexesSize_, int log2Cac
         exitProcess();
     }
     cacheSize = 1 << log2CacheSize_;
+    maxVersions = 100; //rick: as parameter
+
 
     if(indexes != NULL) delete[] indexes;
     indexes = new uint32_t[indexesSize];
@@ -79,6 +79,9 @@ void DatabaseKVAssociativeCache::postConstruct(int log2IndexesSize_, int log2Cac
     if(values != NULL) delete[] values;
     values = new Goldilocks::Element[8 * cacheSize];
 
+    if(versions != NULL) delete[] versions;
+    versions = new uint64_t[2 * cacheSize];
+
     currentCacheIndex = 0;
     attempts = 0;
     hits = 0;
@@ -89,73 +92,65 @@ void DatabaseKVAssociativeCache::postConstruct(int log2IndexesSize_, int log2Cac
     indexesMask = indexesSize - 1;
 };
 
-void DatabaseKVAssociativeCache::aaddKeyValueVersion(Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, uint64_t version, bool update)
-{
+void DatabaseKVAssociativeCache::addKeyValueVersion(Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, uint64_t version, bool update){
+    
     lock_guard<recursive_mutex> guard(mlock);
+    bool emptySlot = false;
+    bool present = false;
+    bool presentSameVersion = false;
+    uint32_t cacheIndex;
+    uint32_t tableIndexEmpty=0;
+    uint32_t cacheIndexPrev;
+
+
     //
-    // Try to add in one of my 4 slots
+    // Check if present in one of the four slots
     //
     for (int i = 0; i < 4; ++i)
     {
         uint32_t tableIndex = (uint32_t)(key[i].fe & indexesMask);
         uint32_t cacheIndexRaw = indexes[tableIndex];
-        uint32_t cacheIndex = cacheIndexRaw & cacheMask;
-        uint32_t cacheIndexKey, cacheIndexValue;
-        bool write = false;
+        cacheIndex = cacheIndexRaw & cacheMask;
+        uint32_t cacheIndexKey = cacheIndex * 4;
+        uint32_t cacheIndexVersions = cacheIndex * 2;
 
-        if (emptyCacheSlot(cacheIndexRaw))
-        {
-            write = true;
-            indexes[tableIndex] = currentCacheIndex;
-            currentCacheIndex = (currentCacheIndex == UINT32_MAX) ? 0 : (currentCacheIndex + 1);
-
-            cacheIndex = indexes[tableIndex] & cacheMask;
-            cacheIndexKey = cacheIndex * 4;
-            cacheIndexValue = cacheIndex * 8;
-        }
-        else
-        {
-            cacheIndexKey = cacheIndex * 4;
-            cacheIndexValue = cacheIndex * 8;
-
-            if (keys[cacheIndexKey + 0].fe == key[0].fe &&
+        if (!emptyCacheSlot(cacheIndexRaw)){
+            if( keys[cacheIndexKey + 0].fe == key[0].fe &&
                 keys[cacheIndexKey + 1].fe == key[1].fe &&
                 keys[cacheIndexKey + 2].fe == key[2].fe &&
-                keys[cacheIndexKey + 3].fe == key[3].fe)
-            {
-                write = update;
+                keys[cacheIndexKey + 3].fe == key[3].fe){
+                    present = true;
+                    if(versions[cacheIndexVersions] == version){
+                        presentSameVersion = true;
+                        if(update == false) return;
+                    }
+                    cacheIndexPrev = cacheIndex;
+                    break;
             }
-            else
-            {
-                continue;
-            }
-        }
-        if (write) 
-        {
-            keys[cacheIndexKey + 0].fe = key[0].fe;
-            keys[cacheIndexKey + 1].fe = key[1].fe;
-            keys[cacheIndexKey + 2].fe = key[2].fe;
-            keys[cacheIndexKey + 3].fe = key[3].fe;
-            values[cacheIndexValue + 0] = value[0];
-            values[cacheIndexValue + 1] = value[1];
-            values[cacheIndexValue + 2] = value[2];
-            values[cacheIndexValue + 3] = value[3];
-            values[cacheIndexValue + 4] = value[4];
-            values[cacheIndexValue + 5] = value[5];
-            values[cacheIndexValue + 6] = value[6];
-            values[cacheIndexValue + 7] = value[7];
-            return;
-        }else{
-            return;
+        }else if (emptySlot == false){
+            emptySlot = true;
+            tableIndexEmpty = tableIndex;
         }
     }
+
     //
-    // forced entry insertion
+    // Evaluate cacheIndexKey and 
     //
-    uint32_t cacheIndex = (uint32_t)(currentCacheIndex & cacheMask);
-    currentCacheIndex = (currentCacheIndex == UINT32_MAX) ? 0 : (currentCacheIndex + 1);
-    uint32_t cacheIndexKey = cacheIndex * 4;
-    uint32_t cacheIndexValue = cacheIndex * 8;
+    if(!presentSameVersion){
+        if(emptySlot == true){
+            indexes[tableIndexEmpty] = currentCacheIndex;
+        }
+        cacheIndex = (uint32_t)(currentCacheIndex & cacheMask);
+        currentCacheIndex = (currentCacheIndex == UINT32_MAX) ? 0 : (currentCacheIndex + 1);
+    }
+    uint64_t cacheIndexKey, cacheIndexValue, cacheIndexVersions;
+    cacheIndexKey = cacheIndex * 4;
+    cacheIndexValue = cacheIndex * 8;
+    cacheIndexVersions = cacheIndex * 2;
+    
+    //
+    // Add value
+    //
     keys[cacheIndexKey + 0].fe = key[0].fe;
     keys[cacheIndexKey + 1].fe = key[1].fe;
     keys[cacheIndexKey + 2].fe = key[2].fe;
@@ -168,14 +163,19 @@ void DatabaseKVAssociativeCache::aaddKeyValueVersion(Goldilocks::Element (&key)[
     values[cacheIndexValue + 5] = value[5];
     values[cacheIndexValue + 6] = value[6];
     values[cacheIndexValue + 7] = value[7];
+    versions[cacheIndexVersions] = version;
+    if(present & !presentSameVersion){
+        versions[cacheIndexVersions+1] = cacheIndexPrev;
+    }
     //
     // Forced index insertion
     //
-    int iters = 0;
-    uint32_t usedRawCacheIndexes[10];
-    usedRawCacheIndexes[0] = currentCacheIndex-1;
-    forcedInsertion(usedRawCacheIndexes, iters);
-
+    if(!present && !emptySlot){
+        int iters = 0;
+        uint32_t usedRawCacheIndexes[10];
+        usedRawCacheIndexes[0] = currentCacheIndex-1;
+        forcedInsertion(usedRawCacheIndexes, iters);
+    }
 }
 
 void DatabaseKVAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIndexes)[10], int &iters)
@@ -235,7 +235,7 @@ void DatabaseKVAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIndexes)
     
 }
 
-bool DatabaseKVAssociativeCache::findKey(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value)
+bool DatabaseKVAssociativeCache::findKey(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value, const bool last, const uint64_t version)
 {
     lock_guard<recursive_mutex> guard(mlock);
     attempts++; 
@@ -256,28 +256,43 @@ bool DatabaseKVAssociativeCache::findKey(const Goldilocks::Element (&key)[4], ve
         
         uint32_t cacheIndex = cacheIndexRaw  & cacheMask;
         uint32_t cacheIndexKey = cacheIndex * 4;
+        uint32_t cacheIndexVersions = cacheIndex * 2;
 
-        if (keys[cacheIndexKey + 0].fe == key[0].fe &&
-            keys[cacheIndexKey + 1].fe == key[1].fe &&
-            keys[cacheIndexKey + 2].fe == key[2].fe &&
-            keys[cacheIndexKey + 3].fe == key[3].fe)
-        {
-            uint32_t cacheIndexValue = cacheIndex * 8;
-            ++hits;
-            value.resize(8);
-            value[0] = values[cacheIndexValue];
-            value[1] = values[cacheIndexValue + 1];
-            value[2] = values[cacheIndexValue + 2];
-            value[3] = values[cacheIndexValue + 3];
-            value[4] = values[cacheIndexValue + 4];
-            value[5] = values[cacheIndexValue + 5];
-            value[6] = values[cacheIndexValue + 6];
-            value[7] = values[cacheIndexValue + 7];
-            value[8] = values[cacheIndexValue + 8];
-            value[9] = values[cacheIndexValue + 9];
-            value[10] = values[cacheIndexValue + 10];
-            value[11] = values[cacheIndexValue + 11];
-            return true;
+        for(int j=0; j<maxVersions; j++){
+            if (keys[cacheIndexKey + 0].fe == key[0].fe &&
+                keys[cacheIndexKey + 1].fe == key[1].fe &&
+                keys[cacheIndexKey + 2].fe == key[2].fe &&
+                keys[cacheIndexKey + 3].fe == key[3].fe){
+
+                if(last || versions[cacheIndexVersions] == version){
+                    uint32_t cacheIndexValue = cacheIndex * 8;
+                    ++hits;
+                    value.resize(8);
+                    value[0] = values[cacheIndexValue];
+                    value[1] = values[cacheIndexValue + 1];
+                    value[2] = values[cacheIndexValue + 2];
+                    value[3] = values[cacheIndexValue + 3];
+                    value[4] = values[cacheIndexValue + 4];
+                    value[5] = values[cacheIndexValue + 5];
+                    value[6] = values[cacheIndexValue + 6];
+                    value[7] = values[cacheIndexValue + 7];
+                    value[8] = values[cacheIndexValue + 8];
+                    value[9] = values[cacheIndexValue + 9];
+                    value[10] = values[cacheIndexValue + 10];
+                    value[11] = values[cacheIndexValue + 11];
+                    return true;
+                }
+                cacheIndex = versions[cacheIndexVersions+1] & cacheMask;
+                cacheIndexKey = cacheIndex * 4;
+                cacheIndexVersions = cacheIndex * 2;
+
+            }else{
+                if(j>0){
+                    return false;
+                }else{
+                    break;
+                }
+            }
         }
     }
     return false;
