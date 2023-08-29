@@ -1,5 +1,5 @@
-#ifndef DATABASE_VERSIONS_ASSOCIATIVE_CACHE_HPP
-#define DATABASE_VERSIONS_ASSOCIATIVE_CACHE_HPP
+#ifndef DATABASE_KV_ASSOCIATIVE_CACHE_HPP
+#define DATABASE_KV_ASSOCIATIVE_CACHE_HPP
 #include <vector>
 #include "goldilocks_base_field.hpp"
 #include <nlohmann/json.hpp>
@@ -8,7 +8,7 @@
 #include "zkmax.hpp"
 
 using namespace std;
-class DatabaseVersionsAssociativeCache
+class DatabaseKVAssociativeCache
 {
     private:
         recursive_mutex mlock;
@@ -20,7 +20,8 @@ class DatabaseVersionsAssociativeCache
 
         uint32_t *indexes;
         Goldilocks::Element *keys;
-        uint64_t *versionBlock;
+        Goldilocks::Element *values;
+        uint64_t * versions;
         uint32_t currentCacheIndex; 
 
         uint64_t attempts;
@@ -33,13 +34,13 @@ class DatabaseVersionsAssociativeCache
 
     public:
 
-        DatabaseVersionsAssociativeCache();
-        DatabaseVersionsAssociativeCache(int log2IndexesSize_, int log2CacheSize_, string name_);
-        ~DatabaseVersionsAssociativeCache();
+        DatabaseKVAssociativeCache();
+        DatabaseKVAssociativeCache(int log2IndexesSize_, int log2CacheSize_, string name_);
+        ~DatabaseKVAssociativeCache();
 
         void postConstruct(int log2IndexesSize_, int log2CacheSize_, string name_);
-        void addKeyVersionBlock(Goldilocks::Element (&key)[4], const uint64_t (&vb)[2], const bool update);
-        bool findKey(const Goldilocks::Element (&key)[4], uint64_t (&vb)[2]);
+        void addKeyValueVersion(Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, uint64_t version, bool update);
+        bool findKey(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value, bool last = true, uint64_t version=0);
         inline bool enabled() const { return (log2IndexesSize > 0); };
         inline uint32_t getCacheSize()  const { return cacheSize; };
         inline uint32_t getIndexesSize() const { return indexesSize; };
@@ -52,4 +53,3 @@ class DatabaseVersionsAssociativeCache
         void forcedInsertion(uint32_t (&usedRawCacheIndexes)[10], int &iters);
 };
 #endif
-
