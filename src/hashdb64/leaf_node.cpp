@@ -3,7 +3,7 @@
 #include "poseidon_goldilocks.hpp"
 #include "goldilocks_base_field.hpp"
 #include "smt_64.hpp"
-#include "key.hpp"
+#include "key_utils.hpp"
 
 void LeafNode::calculateHash (Goldilocks &fr, PoseidonGoldilocks &poseidon)
 {

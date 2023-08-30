@@ -43,6 +43,7 @@
 #include "state_manager_64.hpp"
 #include "check_tree_test.hpp"
 #include "database_performance_test.hpp"
+#include "smt_64_test.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -588,6 +589,12 @@ int main(int argc, char **argv)
     if (config.runDatabasePerformanceTest)
     {
         DatabasePerformanceTest();
+    }
+    
+    // Test SMT64
+    if (config.runSMT64Test)
+    {
+        Smt64Test(config);
     }
 
     // Unit test

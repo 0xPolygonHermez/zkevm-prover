@@ -6,7 +6,7 @@
 #include "zklog.hpp"
 #include <bitset>
 #include "state_manager.hpp"
-#include "key.hpp"
+#include "key_utils.hpp"
 
 zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, SmtSetResult &result, DatabaseMap *dbReadLog)
 {

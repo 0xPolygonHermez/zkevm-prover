@@ -1,5 +1,5 @@
-#ifndef KEY_HPP
-#define KEY_HPP
+#ifndef KEY_UTILS_HPP
+#define KEY_UTILS_HPP
 
 #include <vector>
 #include "goldilocks_base_field.hpp"

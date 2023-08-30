@@ -17,6 +17,21 @@
 
 using namespace std;
 
+class DB64Query
+{
+public:
+    string key;
+    Goldilocks::Element keyFea[4];
+    string &value; // value can be an input in multiWrite(), or an output in multiRead()
+    DB64Query(const string &_key, const Goldilocks::Element (&_keyFea)[4], string &_value) : key(_key), value(_value)
+    {
+        keyFea[0] = _keyFea[0];
+        keyFea[1] = _keyFea[1];
+        keyFea[2] = _keyFea[2];
+        keyFea[3] = _keyFea[3];
+    }
+};
+
 class Database64
 {
 public:
@@ -84,9 +99,11 @@ public:
 
     // Basic methods
     void init(void);
-    zkresult read(const string &_key, Goldilocks::Element (&vkey)[4], string &value, DatabaseMap *dbReadLog, const bool update = false, bool *keys = NULL , uint64_t level=0);
+    zkresult read(const string &_key, const Goldilocks::Element (&vkey)[4], string &value, DatabaseMap *dbReadLog, const bool update = false, bool *keys = NULL , uint64_t level=0);
+    zkresult read(vector<DB64Query> &dbQueries);
     zkresult write(const string &_key, const Goldilocks::Element* vkey, const string &value, const bool persistent);
-    zkresult getProgram(const string &_key, vector<uint8_t> &value, DatabaseMap *dbReadLog);
+    zkresult write(vector<DB64Query> &dbQueries, const bool persistent);
+     zkresult getProgram(const string &_key, vector<uint8_t> &value, DatabaseMap *dbReadLog);
     zkresult setProgram(const string &_key, const vector<uint8_t> &value, const bool persistent);
 
 private:

@@ -19,7 +19,7 @@ string Child::print (Goldilocks &fr) const
         }
         case INTERMEDIATE:
         {
-            return "INTERMEDIATE hash=" + fea2string(fr, leaf.hash);
+            return "INTERMEDIATE hash=" + fea2string(fr, intermediate.hash);
         }
         default:
         {

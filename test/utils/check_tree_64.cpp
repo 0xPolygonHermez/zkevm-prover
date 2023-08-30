@@ -10,8 +10,9 @@ zkresult CheckTree64 (Database64 &db, const string &key, uint64_t level, CheckTr
     PoseidonGoldilocks poseidon;
 
     TreeChunk treeChunk(db, poseidon);
-    string2key(db.fr, key, treeChunk.hash);
-    zkresult result = db.read(key, treeChunk.hash, treeChunk.data, NULL, false);
+    Goldilocks::Element keyFea[4];
+    string2key(db.fr, key, keyFea);
+    zkresult result = db.read(key, keyFea, treeChunk.data, NULL, false);
     if (result != ZKR_SUCCESS)
     {
         zklog.error("CheckTree() failed key=" + key + " level=" + to_string(level));
@@ -28,34 +29,38 @@ zkresult CheckTree64 (Database64 &db, const string &key, uint64_t level, CheckTr
 
     for (uint64_t i=0; i<TREE_CHUNK_WIDTH; i++)
     {
-        if (treeChunk.children64[i].type == ZERO) // Zero
+        switch (treeChunk.getChild(i).type)
         {
-            continue;
-        }
-        else if (treeChunk.children64[i].type == INTERMEDIATE) // Intermediate node
-        {
-            checkTreeCounters.intermediateNodes++;
-            result = CheckTree64(db, fea2string(db.fr, treeChunk.children64[i].intermediate.hash), level+1, checkTreeCounters);
-            if (zkr != ZKR_SUCCESS)
+            case ZERO:
             {
-                return zkr;
+                continue;
             }
-        }
-        else if (treeChunk.children64[i].type == LEAF) // Leaf node
-        {
-            checkTreeCounters.leafNodes++;
-            checkTreeCounters.maxLevel = zkmax(checkTreeCounters.maxLevel, level);
-            checkTreeCounters.values++;
-            if (checkTreeCounters.values % 1000 == 0)
+            case INTERMEDIATE:
             {
-                zklog.info("CheckTree() intermediateNodes=" + to_string(checkTreeCounters.intermediateNodes) + " leafNodes=" + to_string(checkTreeCounters.leafNodes) + " values=" + to_string(checkTreeCounters.values) + " maxLevel=" + to_string(checkTreeCounters.maxLevel));
+                checkTreeCounters.intermediateNodes++;
+                result = CheckTree64(db, fea2string(db.fr, treeChunk.getChild(i).intermediate.hash), level+1, checkTreeCounters);
+                if (zkr != ZKR_SUCCESS)
+                {
+                    return zkr;
+                }
+                continue;
             }
-            return ZKR_SUCCESS;
-        }
-        else
-        {
-            zklog.error("CheckTree() failed key=" + key + " level=" + to_string(level) + " invalid type=" + to_string(treeChunk.children64[i].type));
-            exitProcess();
+            case LEAF:
+            {
+                checkTreeCounters.leafNodes++;
+                checkTreeCounters.maxLevel = zkmax(checkTreeCounters.maxLevel, level);
+                checkTreeCounters.values++;
+                if (checkTreeCounters.values % 1000 == 0)
+                {
+                    zklog.info("CheckTree() intermediateNodes=" + to_string(checkTreeCounters.intermediateNodes) + " leafNodes=" + to_string(checkTreeCounters.leafNodes) + " values=" + to_string(checkTreeCounters.values) + " maxLevel=" + to_string(checkTreeCounters.maxLevel));
+                }
+                return ZKR_SUCCESS;
+            }
+            default:
+            {
+                zklog.error("CheckTree() failed key=" + key + " level=" + to_string(level) + " invalid type=" + to_string(treeChunk.getChild(i).type));
+                exitProcess();
+            }
         }
     }
 

@@ -3,6 +3,7 @@
 #include "scalar.hpp"
 #include "timer.hpp"
 
+Goldilocks::Element zeroHash[4] = {0, 0, 0, 0};
 
 zkresult TreeChunk::readDataFromDb (const Goldilocks::Element (&_hash)[4])
 {
@@ -405,107 +406,202 @@ zkresult TreeChunk::calculateChildren (const uint64_t level, Child * inputChildr
 
 zkresult TreeChunk::calculateChild (const uint64_t level, Child &leftChild, Child &rightChild, Child &outputChild)
 {
-    // Get the left hash
-    const Goldilocks::Element (* pLeftHash)[4] = NULL;
     switch (leftChild.type)
     {
         case ZERO:
         {
-            outputChild = rightChild;
-            return ZKR_SUCCESS;
+            switch (rightChild.type)
+            {
+                case ZERO:
+                {
+                    outputChild = rightChild;
+                    return ZKR_SUCCESS;
+                }
+                case LEAF:
+                {
+                    if (level == 0)
+                    {
+                        rightChild.leaf.level = level;
+                        rightChild.leaf.calculateHash(fr, poseidon);
+                    }
+                    outputChild = rightChild;
+                    return ZKR_SUCCESS;
+                }
+                case INTERMEDIATE:
+                {
+                    outputChild.type = INTERMEDIATE;
+                    outputChild.intermediate.calculateHash(fr, poseidon, zeroHash, rightChild.intermediate.hash);
+                    return ZKR_SUCCESS;
+                }
+                default:
+                {
+                    zklog.error("TreeChunk::calculateChild() found invalid rightChild.type=" + to_string(rightChild.type));
+                    exitProcess();
+                }
+            }
         }
         case LEAF:
         {
-            // Calculate left leaf node hash
-            leftChild.leaf.calculateHash(fr, poseidon);
-
-            pLeftHash = &leftChild.leaf.hash;
-
-            break;
+            switch (rightChild.type)
+            {
+                case ZERO:
+                {
+                    if (level == 0)
+                    {
+                        leftChild.leaf.level = level;
+                        leftChild.leaf.calculateHash(fr, poseidon);
+                    }
+                    outputChild = leftChild;
+                    return ZKR_SUCCESS;
+                }
+                case LEAF:
+                {
+                    leftChild.leaf.level = level + 1;
+                    leftChild.leaf.calculateHash(fr, poseidon);
+                    rightChild.leaf.level = level + 1;
+                    rightChild.leaf.calculateHash(fr, poseidon);
+                    outputChild.type = INTERMEDIATE;
+                    outputChild.intermediate.calculateHash(fr, poseidon, leftChild.leaf.hash, rightChild.leaf.hash);
+                    return ZKR_SUCCESS;
+                }
+                case INTERMEDIATE:
+                {
+                    leftChild.leaf.level = level + 1;
+                    leftChild.leaf.calculateHash(fr, poseidon);
+                    outputChild.type = INTERMEDIATE;
+                    outputChild.intermediate.calculateHash(fr, poseidon, leftChild.leaf.hash, rightChild.intermediate.hash);
+                    return ZKR_SUCCESS;
+                }
+                default:
+                {
+                    zklog.error("TreeChunk::calculateChild() found invalid rightChild.type=" + to_string(rightChild.type));
+                    exitProcess();
+                }
+            }
         }
         case INTERMEDIATE:
         {
-            pLeftHash = &leftChild.intermediate.hash;
-
-            break;
+            switch (rightChild.type)
+            {
+                case ZERO:
+                {
+                    outputChild.type = INTERMEDIATE;
+                    outputChild.intermediate.calculateHash(fr, poseidon, leftChild.intermediate.hash, zeroHash);
+                    return ZKR_SUCCESS;
+                }
+                case LEAF:
+                {
+                    rightChild.leaf.level = level + 1;
+                    rightChild.leaf.calculateHash(fr, poseidon);
+                    outputChild.type = INTERMEDIATE;
+                    outputChild.intermediate.calculateHash(fr, poseidon, leftChild.intermediate.hash, rightChild.leaf.hash);
+                    return ZKR_SUCCESS;
+                }
+                case INTERMEDIATE:
+                {
+                    outputChild.type = INTERMEDIATE;
+                    outputChild.intermediate.calculateHash(fr, poseidon, leftChild.intermediate.hash, rightChild.intermediate.hash);
+                    return ZKR_SUCCESS;
+                }
+                default:
+                {
+                    zklog.error("TreeChunk::calculateChild() found invalid rightChild.type=" + to_string(rightChild.type));
+                    exitProcess();
+                }
+            }
         }
         default:
         {
             zklog.error("TreeChunk::calculateChild() found invalid leftChild.type=" + to_string(leftChild.type));
-            return ZKR_UNSPECIFIED;
+            exitProcess();
         }
     }
 
-    // Get the right hash
-    const Goldilocks::Element (* pRightHash)[4] = NULL;
-    switch (rightChild.type)
-    {
-        case ZERO:
-        {
-            outputChild = leftChild;
-            return ZKR_SUCCESS;
-        }
-        case LEAF:
-        {
-            // Calculate right leaf node hash
-            rightChild.leaf.calculateHash(fr, poseidon);
-
-            pRightHash = &rightChild.leaf.hash;
-
-            break;
-        }
-        case INTERMEDIATE:
-        {
-            pRightHash = &rightChild.intermediate.hash;
-
-            break;
-        }
-        default:
-        {
-            zklog.error("TreeChunk::calculateChild() found invalid rightChild.type=" + to_string(rightChild.type));
-            return ZKR_UNSPECIFIED;
-        }
-    }
-
-    // Calculate intermediate node hash
-    outputChild.type = INTERMEDIATE;
-    outputChild.intermediate.calculateHash(fr, poseidon, *pLeftHash, *pRightHash);
-
-    return ZKR_SUCCESS;
+    return ZKR_UNSPECIFIED;
 }
 
 void TreeChunk::print(void) const
 {
+    string aux = "";
     zklog.info("TreeChunk::print():");
     zklog.info("  level=" + to_string(level));
     zklog.info("  bHashValid=" + to_string(bHashValid));
     zklog.info("  hash=" + fea2string(fr, hash));
     zklog.info("  bChildrenRestValid=" + to_string(bChildrenRestValid));
     zklog.info("  child1=" + child1.print(fr));
+
+    aux = "";
+    for (uint64_t i=0; i<2; i++) aux += children2[i].getTypeLetter();
+    zklog.info("  children2=" + aux);
+
     for (uint64_t i=0; i<2; i++)
     {
-        zklog.info( "  children2[" + to_string(i) + "]=" + children2[i].print(fr));
+        if (children2[i].type != ZERO)
+        {
+            zklog.info( "    children2[" + to_string(i) + "]=" + children2[i].print(fr));
+        }
     }
+
+    aux = "";
+    for (uint64_t i=0; i<4; i++) aux += children4[i].getTypeLetter();
+    zklog.info("  children4=" + aux);
+
     for (uint64_t i=0; i<4; i++)
     {
-        zklog.info( "  children4[" + to_string(i) + "]=" + children4[i].print(fr));
+        if (children4[i].type != ZERO)
+        {
+            zklog.info( "    children4[" + to_string(i) + "]=" + children4[i].print(fr));
+        }
     }
+
+    aux = "";
+    for (uint64_t i=0; i<8; i++) aux += children8[i].getTypeLetter();
+    zklog.info("  children8=" + aux);
+
     for (uint64_t i=0; i<8; i++)
     {
-        zklog.info( "  children8[" + to_string(i) + "]=" + children8[i].print(fr));
+        if (children8[i].type != ZERO)
+        {
+            zklog.info( "    children8[" + to_string(i) + "]=" + children8[i].print(fr));
+        }
     }
+
+    aux = "";
+    for (uint64_t i=0; i<16; i++) aux += children16[i].getTypeLetter();
+    zklog.info("  children16=" + aux);
+
     for (uint64_t i=0; i<16; i++)
     {
-        zklog.info( "  children16[" + to_string(i) + "]=" + children16[i].print(fr));
+        if (children16[i].type != ZERO)
+        {
+            zklog.info( "    children16[" + to_string(i) + "]=" + children16[i].print(fr));
+        }
     }
+
+    aux = "";
+    for (uint64_t i=0; i<32; i++) aux += children32[i].getTypeLetter();
+    zklog.info("  children32=" + aux);
+
     for (uint64_t i=0; i<32; i++)
     {
-        zklog.info( "  children32[" + to_string(i) + "]=" + children32[i].print(fr));
+        if (children32[i].type != ZERO)
+        {
+            zklog.info( "    children32[" + to_string(i) + "]=" + children32[i].print(fr));
+        }
     }
+
     zklog.info("  bChildren64Valid=" + to_string(bChildren64Valid));
+
+    aux = "";
+    for (uint64_t i=0; i<64; i++) aux += children64[i].getTypeLetter();
+    zklog.info("  children64=" + aux);
+
     for (uint64_t i=0; i<64; i++)
     {
-        zklog.info( "  children64[" + to_string(i) + "]=" + children64[i].print(fr));
+        if (children64[i].type != ZERO)
+        {
+            zklog.info( "    children64[" + to_string(i) + "]=" + children64[i].print(fr));
+        }
     }
     zklog.info("  bDataValid=" + to_string(bDataValid));
     zklog.info("  data.size=" + to_string(data.size()));

@@ -90,11 +90,11 @@ uint64_t getKeyChildren64Position (const bool (&keys)[256], uint64_t level)
         exitProcess();
     }
     uint64_t result = 0;
-    if (keys[level + 0]) result += 1;
-    if (keys[level + 1]) result += 2;
-    if (keys[level + 2]) result += 4;
-    if (keys[level + 3]) result += 8;
-    if (keys[level + 4]) result += 16;
-    if (keys[level + 5]) result += 32;
+    if (keys[level + 0]) result += 32;
+    if (keys[level + 1]) result += 16;
+    if (keys[level + 2]) result += 8;
+    if (keys[level + 3]) result += 4;
+    if (keys[level + 4]) result += 2;
+    if (keys[level + 5]) result += 1;
     return result;
 }

@@ -107,7 +107,7 @@ void Database64::init(void)
     bInitialized = true;
 }
 
-zkresult Database64::read (const string &_key, Goldilocks::Element (&vkey)[4], string &value, DatabaseMap *dbReadLog, const bool update,  bool *keys, uint64_t level)
+zkresult Database64::read (const string &_key, const Goldilocks::Element (&vkey)[4], string &value, DatabaseMap *dbReadLog, const bool update,  bool *keys, uint64_t level)
 {
     // Check that it has been initialized before
     if (!bInitialized)
@@ -268,6 +268,21 @@ zkresult Database64::read (const string &_key, Goldilocks::Element (&vkey)[4], s
     return r;
 }
 
+zkresult Database64::read (vector<DB64Query> &dbQueries)
+{
+    zkresult zkr;
+    for (uint64_t i=0; i<dbQueries.size(); i++)
+    {
+        zkr = read(dbQueries[i].key, dbQueries[i].keyFea, dbQueries[i].value, NULL);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("Database64::read(DBQueries) failed calling read() result=" + zkresult(zkr));
+            return zkr;
+        }
+    }
+    return ZKR_SUCCESS;
+}
+
 zkresult Database64::write(const string &_key, const Goldilocks::Element* vkey, const string &value, const bool persistent)
 {
     // Check that it has  been initialized before
@@ -324,6 +339,21 @@ zkresult Database64::write(const string &_key, const Goldilocks::Element* vkey, 
 #endif
 
     return r;
+}
+
+zkresult Database64::write (vector<DB64Query> &dbQueries, const bool persistent)
+{
+    zkresult zkr;
+    for (uint64_t i=0; i<dbQueries.size(); i++)
+    {
+        zkr = write(dbQueries[i].key, dbQueries[i].keyFea, dbQueries[i].value, persistent);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("Database64::write(DBQuery) failed calling write() result=" + zkresult(zkr));
+            return zkr;
+        }
+    }
+    return ZKR_SUCCESS;
 }
 
 void Database64::initRemote(void)

@@ -15,6 +15,8 @@
 #include "smt_set_result.hpp"
 #include "smt_get_result.hpp"
 #include "tree_chunk.hpp"
+#include "key.hpp"
+#include "key_value.hpp"
 
 using namespace std;
 
@@ -95,6 +97,13 @@ public:
         capacityOne[2] = fr.zero();
         capacityOne[3] = fr.zero();
     }
+
+    zkresult writeTree(Database64 &db, const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> keyValues, Goldilocks::Element (&newRoot)[4]);
+    zkresult calculateHash (Child &result, std::vector<TreeChunk *> &chunks, vector<DB64Query> &dbQueries, int idChunk, int level);
+
+    // TODO: return a flush ID, store to DB in background
+    zkresult readTree(Database64 &db, const Goldilocks::Element (&root)[4], const vector<Key> keys, vector<KeyValue> (&keyValues));
+
     zkresult set(const string &batchUUID, uint64_t tx, Database64 &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, SmtSetResult &result, DatabaseMap *dbReadLog = NULL);
     zkresult get(const string &batchUUID, Database64 &db, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], SmtGetResult &result, DatabaseMap *dbReadLog = NULL);
     zkresult hashSave(const SmtContext64 &ctx, const TreeChunk &treeChunk);

@@ -9,6 +9,7 @@
 #include "leaf_node.hpp"
 #include "intermediate_node.hpp"
 #include "child.hpp"
+#include "key_value.hpp"
 
 using namespace std;
 
@@ -48,7 +49,7 @@ private:
     Database64          &db;
     Goldilocks          &fr;
     PoseidonGoldilocks  &poseidon;
-public:
+private:
     uint64_t            level; // Level of the top hash of the chunk: 0, 6, 12, 18, 24, etc.
     uint8_t             key; // 6 bits portion of the total key at this level of the SMT tree
     Goldilocks::Element hash[4];
@@ -60,14 +61,18 @@ public:
     Child               children32[32];
     Child               children64[TREE_CHUNK_WIDTH];
 
-    // Encoded data
-    string              data;
-
     // Flags
     bool bHashValid;
     bool bChildrenRestValid;
     bool bChildren64Valid;
     bool bDataValid;
+
+public:
+    // Encoded data
+    string              data;
+    vector<KeyValue>    list;
+
+public:
 
     // Constructor
     TreeChunk(Database64 &db, PoseidonGoldilocks &poseidon) :
@@ -97,6 +102,77 @@ public:
     zkresult calculateHash (void); // Calculate the hash of the chunk based on the (new) values of children64
     zkresult calculateChildren (const uint64_t level, Child * inputChildren, Child * outputChildren, uint64_t outputSize); // Calculates outputSize output children, as a result of combining outputSize*2 input children
     zkresult calculateChild (const uint64_t level, Child &leftChild, Child &rightChild, Child &outputChild);
+
+    // Children access
+    const Child & getChild (uint64_t position)
+    {
+        return children64[position];
+    };
+    const Child & getChild1 (void)
+    {
+        return child1;
+    };
+
+    void setChild (uint64_t position, const Child & child)
+    {
+        children64[position] = child;
+        bChildrenRestValid = false;
+        bHashValid = false;
+        bDataValid = false;
+    };
+    void setLeafChild (uint64_t position, Goldilocks::Element (&key)[4], mpz_class &value)
+    {
+        children64[position].type = LEAF;
+        children64[position].leaf.key[0] = key[0];
+        children64[position].leaf.key[1] = key[1];
+        children64[position].leaf.key[2] = key[2];
+        children64[position].leaf.key[3] = key[3];
+        children64[position].leaf.value = value;
+        bChildrenRestValid = false;
+        bHashValid = false;
+        bDataValid = false;
+    }
+    void setZeroChild (uint64_t position)
+    {
+        children64[position].type = ZERO;
+        bChildrenRestValid = false;
+        bHashValid = false;
+        bDataValid = false;
+    }
+    void setTreeChunkChild (uint64_t position, uint64_t id)
+    {
+        children64[position].type = TREE_CHUNK;
+        children64[position].treeChunkId = id;
+        bChildrenRestValid = false;
+        bHashValid = false;
+        bDataValid = false;
+    }
+    bool getDataValid (void)
+    {
+        return bDataValid;
+    }
+
+    void setLevel (uint64_t _level)
+    {
+        level = _level;
+    }
+
+    void resetToZero (uint64_t _level)
+    {
+        level = _level;
+        hash[0] = fr.zero();
+        hash[1] = fr.zero();
+        hash[2] = fr.zero();
+        hash[3] = fr.zero();
+        for (uint64_t i=0; i<64; i++)
+        {
+            children64[i].type = ZERO;
+        }
+        bDataValid = false;
+        bChildren64Valid = true;
+        bChildrenRestValid = false;
+        bHashValid = true;
+    }
 
     void print (void) const;
 };
