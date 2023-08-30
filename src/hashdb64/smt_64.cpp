@@ -10,7 +10,7 @@
 #include "key_utils.hpp"
 #include "tree_chunk.hpp"
 
-zkresult Smt64::writeTree(Database64 &db, const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> keyValues, Goldilocks::Element (&newRoot)[4])
+zkresult Smt64::writeTree (Database64 &db, const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> keyValues, Goldilocks::Element (&newRoot)[4], uint64_t &flushId, uint64_t &lastSentFlushId)
 {
     zkresult zkr;
 
@@ -250,6 +250,15 @@ zkresult Smt64::writeTree(Database64 &db, const Goldilocks::Element (&oldRoot)[4
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("Smt64::MultiWrite() failed calling db.write() result=" + zkresult2string(zkr));
+        for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
+        return zkr;
+    }
+
+    // Flush written data to database
+    zkr = db.flush(flushId, lastSentFlushId);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("Smt64::MultiWrite() failed calling db.flush() result=" + zkresult2string(zkr));
         for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
         return zkr;
     }

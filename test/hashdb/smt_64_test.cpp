@@ -33,8 +33,10 @@ uint64_t Smt64Test (const Config &config)
         Smt64 smt64(fr);
         Database64 db64(fr, config);
         db64.init();
+        uint64_t flushId = 0;
+        uint64_t lastSentFlushId = 0;
 
-        zkr = smt64.writeTree(db64, root, keyValues, root);
+        zkr = smt64.writeTree(db64, root, keyValues, root, flushId, lastSentFlushId);
         if (zkr != ZKR_SUCCESS)
         {
             zklog.error("Smt64Test() failed calling smt64.writeTree() result=" + zkresult2string(zkr));
