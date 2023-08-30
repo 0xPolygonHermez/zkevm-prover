@@ -176,7 +176,7 @@ DatabaseMTCache64::~DatabaseMTCache64()
 }
 
 // Add a record in the head of the MT cache. Returns true if the cache is full (or no cache), false otherwise
-bool DatabaseMTCache64::add(const string &key, const vector<Goldilocks::Element> &value, const bool update)
+bool DatabaseMTCache64::add(const string &key, const string &value, const bool update)
 {
     lock_guard<recursive_mutex> guard(mlock);
 
@@ -185,7 +185,7 @@ bool DatabaseMTCache64::add(const string &key, const vector<Goldilocks::Element>
     return addKeyValue(key, (const void *)&value, update);
 }
 
-bool DatabaseMTCache64::find(const string &key, vector<Goldilocks::Element> &value)
+bool DatabaseMTCache64::find(const string &key, string &value)
 {
     lock_guard<recursive_mutex> guard(mlock);
 
@@ -195,7 +195,7 @@ bool DatabaseMTCache64::find(const string &key, vector<Goldilocks::Element> &val
     bool found = findKey(key, record);
     if (found) 
     {
-        value = *((vector<Goldilocks::Element>*) record->value);
+        value = *((string *) record->value);
     }
 
     return found;

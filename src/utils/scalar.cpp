@@ -461,6 +461,17 @@ string ba2string (const string &baString)
     return result;
 }
 
+void ba2ba (const string &baString, vector<uint8_t> (&baVector))
+{
+    baVector.clear();
+    baVector.reserve(baString.size());
+    for (uint64_t i=0; i<baString.size(); i++)
+    {
+        uint8_t aux = (uint8_t)baString[i];
+        baVector.emplace_back(aux);
+    }
+}
+
 /* Byte array of exactly 2 bytes conversion */
 
 void ba2u16 (const uint8_t *pData, uint16_t &n)

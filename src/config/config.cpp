@@ -146,6 +146,7 @@ void Config::load(json &config)
     ParseBool(config, "runCheckTreeTest", "RUN_CHECK_TREE_TEST", runCheckTreeTest, false);
     ParseString(config, "checkTreeRoot", "CHECK_TREE_ROOT", checkTreeRoot, "auto");
     ParseBool(config, "runDatabasePerformanceTest", "RUN_DATABASE_PERFORMANCE_TEST", runDatabasePerformanceTest, false);
+    ParseBool(config, "runSMT64Test", "RUN_SMT64_TEST", runSMT64Test, false);
     ParseBool(config, "runUnitTest", "RUN_UNIT_TEST", runUnitTest, false);
 
     // Main SM executor
@@ -352,6 +353,8 @@ void Config::print(void)
     }
     if (runDatabasePerformanceTest)
         zklog.info("    runDatabasePerformanceTest=true");
+    if (runSMT64Test)
+        zklog.info("    runSMT64Test=true");
     if (runUnitTest)
         zklog.info("    runUnitTest=true");
 

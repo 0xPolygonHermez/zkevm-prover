@@ -14,9 +14,23 @@
 #include "database_connection.hpp"
 #include "zkassert.hpp"
 #include "multi_write_64.hpp"
-#include "database_associative_cache_64.hpp"
 
 using namespace std;
+
+class DB64Query
+{
+public:
+    string key;
+    Goldilocks::Element keyFea[4];
+    string &value; // value can be an input in multiWrite(), or an output in multiRead()
+    DB64Query(const string &_key, const Goldilocks::Element (&_keyFea)[4], string &_value) : key(_key), value(_value)
+    {
+        keyFea[0] = _keyFea[0];
+        keyFea[1] = _keyFea[1];
+        keyFea[2] = _keyFea[2];
+        keyFea[3] = _keyFea[3];
+    }
+};
 
 class Database64
 {
@@ -68,8 +82,6 @@ private:
 public:
 #ifdef DATABASE_USE_CACHE
     // Cache static instances
-    static bool useAssociativeCache;
-    static DatabaseMTAssociativeCache64 dbMTACache;
     static DatabaseMTCache64 dbMTCache;
     static DatabaseProgramCache64 dbProgramCache;
 
@@ -87,11 +99,12 @@ public:
 
     // Basic methods
     void init(void);
-    zkresult read(const string &_key, Goldilocks::Element (&vkey)[4], vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, const bool update = false, bool *keys = NULL , uint64_t level=0);
-    zkresult write(const string &_key, const Goldilocks::Element* vkey, const vector<Goldilocks::Element> &value, const bool persistent);
-    zkresult getProgram(const string &_key, vector<uint8_t> &value, DatabaseMap *dbReadLog);
+    zkresult read(const string &_key, const Goldilocks::Element (&vkey)[4], string &value, DatabaseMap *dbReadLog, const bool update = false, bool *keys = NULL , uint64_t level=0);
+    zkresult read(vector<DB64Query> &dbQueries);
+    zkresult write(const string &_key, const Goldilocks::Element* vkey, const string &value, const bool persistent);
+    zkresult write(vector<DB64Query> &dbQueries, const bool persistent);
+     zkresult getProgram(const string &_key, vector<uint8_t> &value, DatabaseMap *dbReadLog);
     zkresult setProgram(const string &_key, const vector<uint8_t> &value, const bool persistent);
-    inline bool usingAssociativeCache(void){ return useAssociativeCache; };
 
 private:
     zkresult createStateRoot(void);

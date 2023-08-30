@@ -16,6 +16,7 @@ class DatabaseMap
 {
 public:
     typedef unordered_map<string, vector<Goldilocks::Element>> MTMap;
+    typedef unordered_map<string, string> MT64Map;
     typedef unordered_map<string, vector<uint8_t>> ProgramMap;
 
 private:
@@ -23,6 +24,7 @@ private:
 
     recursive_mutex mlock;
     MTMap mtDB;
+    MT64Map mt64DB;
     ProgramMap programDB;
     bool callbackOnChange = false;
     bool saveKeys = false;
@@ -33,6 +35,10 @@ private:
     uint64_t mtCachedTime;
     uint64_t mtDbTimes;
     uint64_t mtDbTime;
+    uint64_t mt64CachedTimes;
+    uint64_t mt64CachedTime;
+    uint64_t mt64DbTimes;
+    uint64_t mt64DbTime;
     uint64_t programCachedTimes;
     uint64_t programCachedTime;
     uint64_t programDbTimes;
@@ -50,6 +56,10 @@ public:
         mtCachedTime(0),
         mtDbTimes(0),
         mtDbTime(0),
+        mt64CachedTimes(0),
+        mt64CachedTime(0),
+        mt64DbTimes(0),
+        mt64DbTime(0),
         programCachedTimes(0),
         programCachedTime(0),
         programDbTimes(0),
@@ -61,6 +71,7 @@ public:
 
     };
     inline void add(const string& key, const vector<Goldilocks::Element>& value, const bool cached, const uint64_t time);
+    inline void add(const string& key, const string& value, const bool cached, const uint64_t time);
     inline void add(const string& key, const vector<uint8_t>& value, const bool cached, const uint64_t time);
     inline void addGetTree(const uint64_t time, const uint64_t numberOfFields);
     void add(MTMap &db);
@@ -88,6 +99,23 @@ void DatabaseMap::add(const string& key, const vector<Goldilocks::Element>& valu
     {
         mtDbTimes += 1;
         mtDbTime += time;
+    }
+    if (callbackOnChange) onChangeCallback();
+}
+
+void DatabaseMap::add(const string& key, const string &value, const bool cached, const uint64_t time)
+{
+    lock_guard<recursive_mutex> guard(mlock);
+    if(saveKeys) mt64DB[key] = value;
+    if (cached)
+    {
+        mt64CachedTimes += 1;
+        mt64CachedTime += time;
+    }
+    else
+    {
+        mt64DbTimes += 1;
+        mt64DbTime += time;
     }
     if (callbackOnChange) onChangeCallback();
 }
