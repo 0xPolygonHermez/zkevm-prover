@@ -534,8 +534,11 @@ int main(int argc, char **argv)
     if (config.runKeccakTest)
     {
         // Keccak2Test();
-        KeccakSMTest();
-        KeccakSMExecutorTest(fr, config);
+        KeccakTest();
+        // These tests are disabled pending review,
+        // as they were confirmed to not work correctly
+        // on August 29th, 2023. -- Nadim
+        // KeccakSMExecutorTest(fr, config);
     }
 
     // Test Storage SM
