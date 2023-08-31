@@ -1,6 +1,5 @@
 #include <string>
 #include <cstdlib>
-#include <cstdlib>
 #include <nlohmann/json.hpp>
 #include "definitions.hpp"
 #include "config.hpp"
@@ -8,108 +7,9 @@
 #include "utils.hpp"
 #include "zklog.hpp"
 #include "scalar.hpp"
-#include "scalar.hpp"
 
 using namespace std;
 using json = nlohmann::json;
-
-void ParseEnvironmentBool (const char *pEnv, bool &variable)
-{
-    const char * pInput = getenv(pEnv);
-    if (pInput != NULL)
-    {
-        string input(pInput);
-        if (stringToLower(input) == "true") variable = true;
-        else if (stringToLower(input) == "false") variable = false;
-        else zklog.error("ParseEnvironmentBool() found invalid environment name=" + string(pEnv) + " value=" + input);
-    }
-}
-
-void ParseEnvironmentString (const char *pEnv, string &variable)
-{
-    const char * pInput = getenv(pEnv);
-    if (pInput != NULL)
-    {
-        variable = pInput;
-    }
-}
-
-void ParseEnvironmentU64 (const char *pEnv, uint64_t &variable)
-{
-    const char * pInput = getenv(pEnv);
-    if (pInput != NULL)
-    {
-        variable = atoi(pInput);
-    }
-}
-
-void ParseEnvironmentS64 (const char *pEnv, int64_t &variable)
-{
-    const char * pInput = getenv(pEnv);
-    if (pInput != NULL)
-    {
-        variable = atoi(pInput);
-    }
-}
-
-void ParseEnvironmentU16 (const char *pEnv, uint16_t &variable)
-{
-    const char * pInput = getenv(pEnv);
-    if (pInput != NULL)
-    {
-        variable = atoi(pInput);
-    }
-}
-
-void ParseBool (const json & config, const char *pJsonName, const char *pEnv, bool &variable, bool defaultValue)
-{
-    variable = defaultValue;
-    if (config.contains(pJsonName) && config[pJsonName].is_boolean())
-    {
-        variable = config[pJsonName];
-    }
-    ParseEnvironmentBool(pEnv, variable);
-}
-
-void ParseString (const json & config, const char *pJsonName, const char *pEnv, string &variable, const string &defaultValue)
-{
-    variable = defaultValue;
-    if (config.contains(pJsonName) && config[pJsonName].is_string())
-    {
-        variable = config[pJsonName];
-    }
-    ParseEnvironmentString(pEnv, variable);
-}
-
-void ParseU64 (const json & config, const char *pJsonName, const char *pEnv, uint64_t &variable, const uint64_t &defaultValue)
-{
-    variable = defaultValue;
-    if (config.contains(pJsonName) && config[pJsonName].is_number())
-    {
-        variable = config[pJsonName];
-    }
-    ParseEnvironmentU64(pEnv, variable);
-}
-
-void ParseS64 (const json & config, const char *pJsonName, const char *pEnv, int64_t &variable, const int64_t &defaultValue)
-{
-    variable = defaultValue;
-    if (config.contains(pJsonName) && config[pJsonName].is_number())
-    {
-        variable = config[pJsonName];
-    }
-    ParseEnvironmentS64(pEnv, variable);
-}
-
-void ParseU16 (const json & config, const char *pJsonName, const char *pEnv, uint16_t &variable, const uint16_t &defaultValue)
-{
-    variable = defaultValue;
-    if (config.contains(pJsonName) && config[pJsonName].is_number())
-    {
-        variable = config[pJsonName];
-    }
-    ParseEnvironmentU16(pEnv, variable);
-}
 
 void ParseEnvironmentBool (const char *pEnv, bool &variable)
 {
@@ -223,23 +123,7 @@ void Config::load(json &config)
     ParseBool(config, "runAggregatorServer", "RUN_AGGREGATOR_SERVER", runAggregatorServer, false);
     ParseBool(config, "runAggregatorClient", "RUN_AGGREGATOR_CLIENT", runAggregatorClient, false);
     ParseBool(config, "runAggregatorClientMock", "RUN_AGGREGATOR_CLIENT_MOCK", runAggregatorClientMock, false);
-    // Servers and clients
-    ParseBool(config, "runExecutorServer", "RUN_EXECUTOR_SERVER", runExecutorServer, true);
-    ParseBool(config, "runExecutorClient", "RUN_EXECUTOR_CLIENT", runExecutorClient, false);
-    ParseBool(config, "runExecutorClientMultithread", "RUN_EXECUTOR_CLIENT_MULTITHREAD", runExecutorClientMultithread, false);
-    ParseBool(config, "runHashDBServer", "RUN_HASHDB_SERVER", runHashDBServer, true);
-    ParseBool(config, "runHashDBTest", "RUN_HASHDB_TEST", runHashDBTest, false);
-    ParseBool(config, "runAggregatorServer", "RUN_AGGREGATOR_SERVER", runAggregatorServer, false);
-    ParseBool(config, "runAggregatorClient", "RUN_AGGREGATOR_CLIENT", runAggregatorClient, false);
-    ParseBool(config, "runAggregatorClientMock", "RUN_AGGREGATOR_CLIENT_MOCK", runAggregatorClientMock, false);
 
-    // Run file
-    ParseBool(config, "runFileGenBatchProof", "RUN_FILE_GEN_BATCH_PROOF", runFileGenBatchProof, false);
-    ParseBool(config, "runFileGenAggregatedProof", "RUN_FILE_GEN_AGGREGATED_PROOF", runFileGenAggregatedProof, false);
-    ParseBool(config, "runFileGenFinalProof", "RUN_FILE_GEN_FINAL_PROOF", runFileGenFinalProof, false);
-    ParseBool(config, "runFileProcessBatch", "RUN_FILE_PROCESS_BATCH", runFileProcessBatch, false);
-    ParseBool(config, "runFileProcessBatchMultithread", "RUN_FILE_PROCESS_BATCH_MULTITHREAD", runFileProcessBatchMultithread, false);
-    ParseBool(config, "runFileExecute", "RUN_FILE_EXECUTE", runFileExecute, false);
     // Run file
     ParseBool(config, "runFileGenBatchProof", "RUN_FILE_GEN_BATCH_PROOF", runFileGenBatchProof, false);
     ParseBool(config, "runFileGenAggregatedProof", "RUN_FILE_GEN_AGGREGATED_PROOF", runFileGenAggregatedProof, false);
@@ -264,27 +148,7 @@ void Config::load(json &config)
     ParseBool(config, "runDatabasePerformanceTest", "RUN_DATABASE_PERFORMANCE_TEST", runDatabasePerformanceTest, false);
     ParseBool(config, "runSMT64Test", "RUN_SMT64_TEST", runSMT64Test, false);
     ParseBool(config, "runUnitTest", "RUN_UNIT_TEST", runUnitTest, false);
-    // Tests
-    ParseBool(config, "runKeccakScriptGenerator", "RUN_KECCAK_SCRIPT_GENERATOR", runKeccakScriptGenerator, false);
-    ParseBool(config, "runKeccakTest", "RUN_KECCAK_TEST", runKeccakTest, false);
-    ParseBool(config, "runStorageSMTest", "RUN_STORAGE_SM_TEST", runStorageSMTest, false);
-    ParseBool(config, "runBinarySMTest", "RUN_BINARY_SM_TEST", runBinarySMTest, false);
-    ParseBool(config, "runMemAlignSMTest", "RUN_MEM_ALIGN_SM_TEST", runMemAlignSMTest, false);
-    ParseBool(config, "runSHA256Test", "RUN_SHA256_TEST", runSHA256Test, false);
-    ParseBool(config, "runBlakeTest", "RUN_BLAKE_TEST", runBlakeTest, false);
-    ParseBool(config, "runECRecoverTest", "RUN_ECRECOVER_TEST", runECRecoverTest, false);
-    ParseBool(config, "runDatabaseCacheTest", "RUN_DATABASE_CACHE_TEST", runDatabaseCacheTest, false);
-    ParseBool(config, "runDatabaseAssociativeCacheTest", "RUN_DATABASE_ASSOCIATIVE_CACHE_TEST", runDatabaseAssociativeCacheTest, false);
-    ParseBool(config, "runCheckTreeTest", "RUN_CHECK_TREE_TEST", runCheckTreeTest, false);
-    ParseString(config, "checkTreeRoot", "CHECK_TREE_ROOT", checkTreeRoot, "auto");
-    ParseBool(config, "runDatabasePerformanceTest", "RUN_DATABASE_PERFORMANCE_TEST", runDatabasePerformanceTest, false);
-    ParseBool(config, "runSMT64Test", "RUN_SMT64_TEST", runSMT64Test, false);
-    ParseBool(config, "runUnitTest", "RUN_UNIT_TEST", runUnitTest, false);
 
-    // Main SM executor
-    ParseBool(config, "useMainExecGenerated", "USE_MAIN_EXEC_GENERATED", useMainExecGenerated, true);
-    ParseBool(config, "useMainExecC", "USE_MAIN_EXEC_C", useMainExecC, false);
-    ParseBool(config, "executeInParallel", "EXECUTE_IN_PARALLEL", executeInParallel, true);
     // Main SM executor
     ParseBool(config, "useMainExecGenerated", "USE_MAIN_EXEC_GENERATED", useMainExecGenerated, true);
     ParseBool(config, "useMainExecC", "USE_MAIN_EXEC_C", useMainExecC, false);
@@ -299,20 +163,7 @@ void Config::load(json &config)
     ParseBool(config, "saveOutputToFile", "SAVE_OUTPUT_TO_FILE", saveOutputToFile, false);
     ParseBool(config, "saveProofToFile", "SAVE_PROOF_TO_FILE", saveProofToFile, false);
     ParseBool(config, "saveFilesInSubfolders", "SAVE_FILES_IN_SUBFOLDERS", saveFilesInSubfolders, false);
-    // Save to file
-    ParseBool(config, "saveDbReadsToFile", "SAVE_DB_READS_TO_FILE", saveDbReadsToFile, false);
-    ParseBool(config, "saveRequestToFile", "SAVE_REQUESTS_TO_FILE", saveRequestToFile, false);
-    ParseBool(config, "saveDbReadsToFileOnChange", "SAVE_DB_READS_TO_FILE_ON_CHANGE", saveDbReadsToFileOnChange, false);
-    ParseBool(config, "saveInputToFile", "SAVE_INPUT_TO_FILE", saveInputToFile, false);
-    ParseBool(config, "saveResponseToFile", "SAVE_RESPONSE_TO_FILE", saveResponseToFile, false);
-    ParseBool(config, "saveOutputToFile", "SAVE_OUTPUT_TO_FILE", saveOutputToFile, false);
-    ParseBool(config, "saveProofToFile", "SAVE_PROOF_TO_FILE", saveProofToFile, false);
-    ParseBool(config, "saveFilesInSubfolders", "SAVE_FILES_IN_SUBFOLDERS", saveFilesInSubfolders, false);
 
-    // Load DB to mem cache TODO: Discontinue this functionality
-    ParseBool(config, "loadDBToMemCache", "LOAD_DB_TO_MEM_CACHE", loadDBToMemCache, false);
-    ParseBool(config, "loadDBToMemCacheInParallel", "LOAD_DB_TO_MEM_CACHE_IN_PARALLEL", loadDBToMemCacheInParallel, false);
-    ParseU64(config, "loadDBToMemTimeout", "LOAD_DB_TO_MEM_TIMEOUT", loadDBToMemTimeout, 30*1000*1000); // Default = 30 seconds
     // Load DB to mem cache TODO: Discontinue this functionality
     ParseBool(config, "loadDBToMemCache", "LOAD_DB_TO_MEM_CACHE", loadDBToMemCache, false);
     ParseBool(config, "loadDBToMemCacheInParallel", "LOAD_DB_TO_MEM_CACHE_IN_PARALLEL", loadDBToMemCacheInParallel, false);
@@ -334,25 +185,7 @@ void Config::load(json &config)
     ParseU64(config, "aggregatorClientMockTimeout", "AGGREGATOR_CLIENT_MOCK_TIMEOUT", aggregatorClientMockTimeout, 60 * 1000 * 1000);
     ParseU64(config, "aggregatorClientWatchdogTimeout", "AGGREGATOR_CLIENT_WATCHDOG_TIMEOUT", aggregatorClientWatchdogTimeout, 60 * 1000 * 1000);
     ParseU64(config, "aggregatorClientMaxStreams", "AGGREGATOR_CLIENT_MAX_STREAMS", aggregatorClientMaxStreams, 0);
-    // Server and client ports, hosts, etc.
-    ParseU16(config, "executorServerPort", "EXECUTOR_SERVER_PORT", executorServerPort, 50071);
-    ParseU16(config, "executorClientPort", "EXECUTOR_CLIENT_PORT", executorClientPort, 50071);
-    ParseString(config, "executorClientHost", "EXECUTOR_CLIENT_HOST", executorClientHost, "127.0.0.1");
-    ParseU64(config, "executorClientLoops", "EXECUTOR_CLIENT_LOOPS", executorClientLoops, 1);
-    ParseBool(config, "executorClientCheckNewStateRoot", "EXECUTOR_CLIENT_CHECK_NEW_STATE_ROOT", executorClientCheckNewStateRoot, false);
-    ParseU16(config, "hashDBServerPort", "HASHDB_SERVER_PORT", hashDBServerPort, 50061);
-    ParseString(config, "hashDBURL", "HASHDB_URL", hashDBURL, "local");
-    ParseBool(config, "hashDB64", "HASHDB64", hashDB64, false);
-    ParseString(config, "dbCacheSynchURL", "DB_CACHE_SYNCH_URL", dbCacheSynchURL, "");
-    ParseU16(config, "aggregatorServerPort", "AGGREGATOR_SERVER_PORT", aggregatorServerPort, 50081);
-    ParseU16(config, "aggregatorClientPort", "AGGREGATOR_CLIENT_PORT", aggregatorClientPort, 50081);
-    ParseString(config, "aggregatorClientHost", "AGGREGATOR_CLIENT_HOST", aggregatorClientHost, "127.0.0.1");
-    ParseU64(config, "aggregatorClientMockTimeout", "AGGREGATOR_CLIENT_MOCK_TIMEOUT", aggregatorClientMockTimeout, 60 * 1000 * 1000);
-    ParseU64(config, "aggregatorClientWatchdogTimeout", "AGGREGATOR_CLIENT_WATCHDOG_TIMEOUT", aggregatorClientWatchdogTimeout, 60 * 1000 * 1000);
-    ParseU64(config, "aggregatorClientMaxStreams", "AGGREGATOR_CLIENT_MAX_STREAMS", aggregatorClientMaxStreams, 0);
 
-    // MT cache
-    ParseS64(config, "dbMTCacheSize", "DB_MT_CACHE_SIZE", dbMTCacheSize, 8*1024); // Default = 8 GB
     // MT cache
     ParseS64(config, "dbMTCacheSize", "DB_MT_CACHE_SIZE", dbMTCacheSize, 8*1024); // Default = 8 GB
 
@@ -522,8 +355,6 @@ void Config::print(void)
         zklog.info("    runDatabasePerformanceTest=true");
     if (runSMT64Test)
         zklog.info("    runSMT64Test=true");
-    if (runSMT64Test)
-        zklog.info("    runSMT64Test=true");
     if (runUnitTest)
         zklog.info("    runUnitTest=true");
 
@@ -633,7 +464,6 @@ void Config::print(void)
     zklog.info("    dbReadRetryDelay=" + to_string(dbReadRetryDelay));
     zklog.info("    stateManager=" + to_string(stateManager));
     zklog.info("    stateManagerPurge=" + to_string(stateManagerPurge));
-    zklog.info("    stateManagerPurgeTxs=" + to_string(stateManagerPurgeTxs));
     zklog.info("    stateManagerPurgeTxs=" + to_string(stateManagerPurgeTxs));
     zklog.info("    cleanerPollingPeriod=" + to_string(cleanerPollingPeriod));
     zklog.info("    requestsPersistence=" + to_string(requestsPersistence));
