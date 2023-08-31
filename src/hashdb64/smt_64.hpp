@@ -98,11 +98,10 @@ public:
         capacityOne[3] = fr.zero();
     }
 
-    zkresult writeTree(Database64 &db, const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> keyValues, Goldilocks::Element (&newRoot)[4]);
+    zkresult writeTree(Database64 &db, const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> &keyValues, Goldilocks::Element (&newRoot)[4], uint64_t &flushId, uint64_t &lastSentFlushId);
     zkresult calculateHash (Child &result, std::vector<TreeChunk *> &chunks, vector<DB64Query> &dbQueries, int idChunk, int level);
 
-    // TODO: return a flush ID, store to DB in background
-    zkresult readTree(Database64 &db, const Goldilocks::Element (&root)[4], const vector<Key> keys, vector<KeyValue> (&keyValues));
+    zkresult readTree(Database64 &db, const Goldilocks::Element (&root)[4], vector<KeyValue> &keyValues);
 
     zkresult set(const string &batchUUID, uint64_t tx, Database64 &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, SmtSetResult &result, DatabaseMap *dbReadLog = NULL);
     zkresult get(const string &batchUUID, Database64 &db, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], SmtGetResult &result, DatabaseMap *dbReadLog = NULL);

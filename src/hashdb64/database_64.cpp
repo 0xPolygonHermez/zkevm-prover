@@ -346,6 +346,7 @@ zkresult Database64::write (vector<DB64Query> &dbQueries, const bool persistent)
     zkresult zkr;
     for (uint64_t i=0; i<dbQueries.size(); i++)
     {
+        //zklog.info("Database64::write() writing hash=" + dbQueries[i].key + " size=" + to_string(dbQueries[i].value.size()) + " data=" + ba2string(dbQueries[i].value));
         zkr = write(dbQueries[i].key, dbQueries[i].keyFea, dbQueries[i].value, persistent);
         if (zkr != ZKR_SUCCESS)
         {
@@ -585,7 +586,7 @@ zkresult Database64::readRemote(bool bProgram, const string &key, string &value)
             exitProcess();
         }
         pqxx::field const fieldData = row[1];
-        value = removeBSXIfExists64(fieldData.c_str());
+        value = string2ba(removeBSXIfExists64(fieldData.c_str()));
     }
     catch (const std::exception &e)
     {
@@ -1385,7 +1386,7 @@ zkresult Database64::sendData (void)
                             data.multiQuery.queries[currentQuery].query += ", ";
                         }
                         firstValue = false;
-                        data.multiQuery.queries[currentQuery].query += "( E\'\\\\x" + it->first + "\', E\'\\\\x" + it->second + "\' ) ";
+                        data.multiQuery.queries[currentQuery].query += "( E\'\\\\x" + it->first + "\', E\'\\\\x" + ba2string(it->second) + "\' ) ";
 #ifdef LOG_DB_SEND_DATA
                         zklog.info("Database64::sendData() inserting node key=" + it->first + " value=" + it->second);
 #endif
