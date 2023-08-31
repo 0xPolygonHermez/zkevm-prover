@@ -69,6 +69,7 @@ public:
     {
         switch (type)
         {
+            case UNSPECIFIED: return "U";
             case ZERO: return "z";
             case LEAF: return "L";
             case INTERMEDIATE: return "I";

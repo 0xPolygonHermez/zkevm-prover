@@ -174,6 +174,19 @@ public:
         bHashValid = true;
     }
 
+    void getHash (Goldilocks::Element (&result)[4])
+    {
+        if (!bHashValid)
+        {
+            zklog.error("TreeChunk::getHash() called with bHashValid=false");
+            exitProcess();
+        }
+        result[0] = hash[0];
+        result[1] = hash[1];
+        result[2] = hash[2];
+        result[3] = hash[3];
+    }
+
     void print (void) const;
 };
 
