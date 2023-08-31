@@ -9,6 +9,8 @@
 #include <mutex>
 #include "zkresult.hpp"
 #include "persistence.hpp"
+#include "database_64.hpp"
+#include "key_value.hpp"
 
 class HashDBInterface
 {
@@ -27,6 +29,9 @@ public:
     virtual zkresult getFlushStatus (uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram, string &proverId) = 0;
     virtual zkresult getFlushData   (uint64_t flushId, uint64_t &storedFlushId, unordered_map<string, string> (&nodes), unordered_map<string, string> (&program), string &nodesStateRoot) = 0;
     virtual void     clearCache     (void) = 0;
+    virtual zkresult readTree       (const Goldilocks::Element (&root)[4], vector<KeyValue> &keyValues) = 0;
+    virtual zkresult writeTree      (const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> &keyValues, Goldilocks::Element (&newRoot)[4], uint64_t &flushId, uint64_t &lastSentFlushId) = 0;
+
 };
 
 #endif

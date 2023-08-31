@@ -48,6 +48,8 @@ public:
     zkresult getFlushStatus (uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram, string &proverId);
     zkresult getFlushData   (uint64_t flushId, uint64_t &storedFlushId, unordered_map<string, string> (&nodes), unordered_map<string, string> (&program), string &nodesStateRoot);
     void     clearCache     (void);
+    zkresult readTree       (const Goldilocks::Element (&root)[4], vector<KeyValue> &keyValues);
+    zkresult writeTree      (const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> &keyValues, Goldilocks::Element (&newRoot)[4], uint64_t &flushId, uint64_t &lastSentFlushId);
 
     // Methods added for testing purposes
     void setAutoCommit(const bool autoCommit);
