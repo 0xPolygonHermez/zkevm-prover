@@ -1,5 +1,6 @@
 #include <string>
 #include <cstdlib>
+#include <cstdlib>
 #include <nlohmann/json.hpp>
 #include "definitions.hpp"
 #include "config.hpp"
@@ -7,9 +8,108 @@
 #include "utils.hpp"
 #include "zklog.hpp"
 #include "scalar.hpp"
+#include "scalar.hpp"
 
 using namespace std;
 using json = nlohmann::json;
+
+void ParseEnvironmentBool (const char *pEnv, bool &variable)
+{
+    const char * pInput = getenv(pEnv);
+    if (pInput != NULL)
+    {
+        string input(pInput);
+        if (stringToLower(input) == "true") variable = true;
+        else if (stringToLower(input) == "false") variable = false;
+        else zklog.error("ParseEnvironmentBool() found invalid environment name=" + string(pEnv) + " value=" + input);
+    }
+}
+
+void ParseEnvironmentString (const char *pEnv, string &variable)
+{
+    const char * pInput = getenv(pEnv);
+    if (pInput != NULL)
+    {
+        variable = pInput;
+    }
+}
+
+void ParseEnvironmentU64 (const char *pEnv, uint64_t &variable)
+{
+    const char * pInput = getenv(pEnv);
+    if (pInput != NULL)
+    {
+        variable = atoi(pInput);
+    }
+}
+
+void ParseEnvironmentS64 (const char *pEnv, int64_t &variable)
+{
+    const char * pInput = getenv(pEnv);
+    if (pInput != NULL)
+    {
+        variable = atoi(pInput);
+    }
+}
+
+void ParseEnvironmentU16 (const char *pEnv, uint16_t &variable)
+{
+    const char * pInput = getenv(pEnv);
+    if (pInput != NULL)
+    {
+        variable = atoi(pInput);
+    }
+}
+
+void ParseBool (const json & config, const char *pJsonName, const char *pEnv, bool &variable, bool defaultValue)
+{
+    variable = defaultValue;
+    if (config.contains(pJsonName) && config[pJsonName].is_boolean())
+    {
+        variable = config[pJsonName];
+    }
+    ParseEnvironmentBool(pEnv, variable);
+}
+
+void ParseString (const json & config, const char *pJsonName, const char *pEnv, string &variable, const string &defaultValue)
+{
+    variable = defaultValue;
+    if (config.contains(pJsonName) && config[pJsonName].is_string())
+    {
+        variable = config[pJsonName];
+    }
+    ParseEnvironmentString(pEnv, variable);
+}
+
+void ParseU64 (const json & config, const char *pJsonName, const char *pEnv, uint64_t &variable, const uint64_t &defaultValue)
+{
+    variable = defaultValue;
+    if (config.contains(pJsonName) && config[pJsonName].is_number())
+    {
+        variable = config[pJsonName];
+    }
+    ParseEnvironmentU64(pEnv, variable);
+}
+
+void ParseS64 (const json & config, const char *pJsonName, const char *pEnv, int64_t &variable, const int64_t &defaultValue)
+{
+    variable = defaultValue;
+    if (config.contains(pJsonName) && config[pJsonName].is_number())
+    {
+        variable = config[pJsonName];
+    }
+    ParseEnvironmentS64(pEnv, variable);
+}
+
+void ParseU16 (const json & config, const char *pJsonName, const char *pEnv, uint16_t &variable, const uint16_t &defaultValue)
+{
+    variable = defaultValue;
+    if (config.contains(pJsonName) && config[pJsonName].is_number())
+    {
+        variable = config[pJsonName];
+    }
+    ParseEnvironmentU16(pEnv, variable);
+}
 
 void ParseEnvironmentBool (const char *pEnv, bool &variable)
 {
@@ -123,7 +223,23 @@ void Config::load(json &config)
     ParseBool(config, "runAggregatorServer", "RUN_AGGREGATOR_SERVER", runAggregatorServer, false);
     ParseBool(config, "runAggregatorClient", "RUN_AGGREGATOR_CLIENT", runAggregatorClient, false);
     ParseBool(config, "runAggregatorClientMock", "RUN_AGGREGATOR_CLIENT_MOCK", runAggregatorClientMock, false);
+    // Servers and clients
+    ParseBool(config, "runExecutorServer", "RUN_EXECUTOR_SERVER", runExecutorServer, true);
+    ParseBool(config, "runExecutorClient", "RUN_EXECUTOR_CLIENT", runExecutorClient, false);
+    ParseBool(config, "runExecutorClientMultithread", "RUN_EXECUTOR_CLIENT_MULTITHREAD", runExecutorClientMultithread, false);
+    ParseBool(config, "runHashDBServer", "RUN_HASHDB_SERVER", runHashDBServer, true);
+    ParseBool(config, "runHashDBTest", "RUN_HASHDB_TEST", runHashDBTest, false);
+    ParseBool(config, "runAggregatorServer", "RUN_AGGREGATOR_SERVER", runAggregatorServer, false);
+    ParseBool(config, "runAggregatorClient", "RUN_AGGREGATOR_CLIENT", runAggregatorClient, false);
+    ParseBool(config, "runAggregatorClientMock", "RUN_AGGREGATOR_CLIENT_MOCK", runAggregatorClientMock, false);
 
+    // Run file
+    ParseBool(config, "runFileGenBatchProof", "RUN_FILE_GEN_BATCH_PROOF", runFileGenBatchProof, false);
+    ParseBool(config, "runFileGenAggregatedProof", "RUN_FILE_GEN_AGGREGATED_PROOF", runFileGenAggregatedProof, false);
+    ParseBool(config, "runFileGenFinalProof", "RUN_FILE_GEN_FINAL_PROOF", runFileGenFinalProof, false);
+    ParseBool(config, "runFileProcessBatch", "RUN_FILE_PROCESS_BATCH", runFileProcessBatch, false);
+    ParseBool(config, "runFileProcessBatchMultithread", "RUN_FILE_PROCESS_BATCH_MULTITHREAD", runFileProcessBatchMultithread, false);
+    ParseBool(config, "runFileExecute", "RUN_FILE_EXECUTE", runFileExecute, false);
     // Run file
     ParseBool(config, "runFileGenBatchProof", "RUN_FILE_GEN_BATCH_PROOF", runFileGenBatchProof, false);
     ParseBool(config, "runFileGenAggregatedProof", "RUN_FILE_GEN_AGGREGATED_PROOF", runFileGenAggregatedProof, false);
@@ -148,7 +264,27 @@ void Config::load(json &config)
     ParseBool(config, "runDatabasePerformanceTest", "RUN_DATABASE_PERFORMANCE_TEST", runDatabasePerformanceTest, false);
     ParseBool(config, "runSMT64Test", "RUN_SMT64_TEST", runSMT64Test, false);
     ParseBool(config, "runUnitTest", "RUN_UNIT_TEST", runUnitTest, false);
+    // Tests
+    ParseBool(config, "runKeccakScriptGenerator", "RUN_KECCAK_SCRIPT_GENERATOR", runKeccakScriptGenerator, false);
+    ParseBool(config, "runKeccakTest", "RUN_KECCAK_TEST", runKeccakTest, false);
+    ParseBool(config, "runStorageSMTest", "RUN_STORAGE_SM_TEST", runStorageSMTest, false);
+    ParseBool(config, "runBinarySMTest", "RUN_BINARY_SM_TEST", runBinarySMTest, false);
+    ParseBool(config, "runMemAlignSMTest", "RUN_MEM_ALIGN_SM_TEST", runMemAlignSMTest, false);
+    ParseBool(config, "runSHA256Test", "RUN_SHA256_TEST", runSHA256Test, false);
+    ParseBool(config, "runBlakeTest", "RUN_BLAKE_TEST", runBlakeTest, false);
+    ParseBool(config, "runECRecoverTest", "RUN_ECRECOVER_TEST", runECRecoverTest, false);
+    ParseBool(config, "runDatabaseCacheTest", "RUN_DATABASE_CACHE_TEST", runDatabaseCacheTest, false);
+    ParseBool(config, "runDatabaseAssociativeCacheTest", "RUN_DATABASE_ASSOCIATIVE_CACHE_TEST", runDatabaseAssociativeCacheTest, false);
+    ParseBool(config, "runCheckTreeTest", "RUN_CHECK_TREE_TEST", runCheckTreeTest, false);
+    ParseString(config, "checkTreeRoot", "CHECK_TREE_ROOT", checkTreeRoot, "auto");
+    ParseBool(config, "runDatabasePerformanceTest", "RUN_DATABASE_PERFORMANCE_TEST", runDatabasePerformanceTest, false);
+    ParseBool(config, "runSMT64Test", "RUN_SMT64_TEST", runSMT64Test, false);
+    ParseBool(config, "runUnitTest", "RUN_UNIT_TEST", runUnitTest, false);
 
+    // Main SM executor
+    ParseBool(config, "useMainExecGenerated", "USE_MAIN_EXEC_GENERATED", useMainExecGenerated, true);
+    ParseBool(config, "useMainExecC", "USE_MAIN_EXEC_C", useMainExecC, false);
+    ParseBool(config, "executeInParallel", "EXECUTE_IN_PARALLEL", executeInParallel, true);
     // Main SM executor
     ParseBool(config, "useMainExecGenerated", "USE_MAIN_EXEC_GENERATED", useMainExecGenerated, true);
     ParseBool(config, "useMainExecC", "USE_MAIN_EXEC_C", useMainExecC, false);
@@ -163,7 +299,20 @@ void Config::load(json &config)
     ParseBool(config, "saveOutputToFile", "SAVE_OUTPUT_TO_FILE", saveOutputToFile, false);
     ParseBool(config, "saveProofToFile", "SAVE_PROOF_TO_FILE", saveProofToFile, false);
     ParseBool(config, "saveFilesInSubfolders", "SAVE_FILES_IN_SUBFOLDERS", saveFilesInSubfolders, false);
+    // Save to file
+    ParseBool(config, "saveDbReadsToFile", "SAVE_DB_READS_TO_FILE", saveDbReadsToFile, false);
+    ParseBool(config, "saveRequestToFile", "SAVE_REQUESTS_TO_FILE", saveRequestToFile, false);
+    ParseBool(config, "saveDbReadsToFileOnChange", "SAVE_DB_READS_TO_FILE_ON_CHANGE", saveDbReadsToFileOnChange, false);
+    ParseBool(config, "saveInputToFile", "SAVE_INPUT_TO_FILE", saveInputToFile, false);
+    ParseBool(config, "saveResponseToFile", "SAVE_RESPONSE_TO_FILE", saveResponseToFile, false);
+    ParseBool(config, "saveOutputToFile", "SAVE_OUTPUT_TO_FILE", saveOutputToFile, false);
+    ParseBool(config, "saveProofToFile", "SAVE_PROOF_TO_FILE", saveProofToFile, false);
+    ParseBool(config, "saveFilesInSubfolders", "SAVE_FILES_IN_SUBFOLDERS", saveFilesInSubfolders, false);
 
+    // Load DB to mem cache TODO: Discontinue this functionality
+    ParseBool(config, "loadDBToMemCache", "LOAD_DB_TO_MEM_CACHE", loadDBToMemCache, false);
+    ParseBool(config, "loadDBToMemCacheInParallel", "LOAD_DB_TO_MEM_CACHE_IN_PARALLEL", loadDBToMemCacheInParallel, false);
+    ParseU64(config, "loadDBToMemTimeout", "LOAD_DB_TO_MEM_TIMEOUT", loadDBToMemTimeout, 30*1000*1000); // Default = 30 seconds
     // Load DB to mem cache TODO: Discontinue this functionality
     ParseBool(config, "loadDBToMemCache", "LOAD_DB_TO_MEM_CACHE", loadDBToMemCache, false);
     ParseBool(config, "loadDBToMemCacheInParallel", "LOAD_DB_TO_MEM_CACHE_IN_PARALLEL", loadDBToMemCacheInParallel, false);
@@ -185,7 +334,25 @@ void Config::load(json &config)
     ParseU64(config, "aggregatorClientMockTimeout", "AGGREGATOR_CLIENT_MOCK_TIMEOUT", aggregatorClientMockTimeout, 60 * 1000 * 1000);
     ParseU64(config, "aggregatorClientWatchdogTimeout", "AGGREGATOR_CLIENT_WATCHDOG_TIMEOUT", aggregatorClientWatchdogTimeout, 60 * 1000 * 1000);
     ParseU64(config, "aggregatorClientMaxStreams", "AGGREGATOR_CLIENT_MAX_STREAMS", aggregatorClientMaxStreams, 0);
+    // Server and client ports, hosts, etc.
+    ParseU16(config, "executorServerPort", "EXECUTOR_SERVER_PORT", executorServerPort, 50071);
+    ParseU16(config, "executorClientPort", "EXECUTOR_CLIENT_PORT", executorClientPort, 50071);
+    ParseString(config, "executorClientHost", "EXECUTOR_CLIENT_HOST", executorClientHost, "127.0.0.1");
+    ParseU64(config, "executorClientLoops", "EXECUTOR_CLIENT_LOOPS", executorClientLoops, 1);
+    ParseBool(config, "executorClientCheckNewStateRoot", "EXECUTOR_CLIENT_CHECK_NEW_STATE_ROOT", executorClientCheckNewStateRoot, false);
+    ParseU16(config, "hashDBServerPort", "HASHDB_SERVER_PORT", hashDBServerPort, 50061);
+    ParseString(config, "hashDBURL", "HASHDB_URL", hashDBURL, "local");
+    ParseBool(config, "hashDB64", "HASHDB64", hashDB64, false);
+    ParseString(config, "dbCacheSynchURL", "DB_CACHE_SYNCH_URL", dbCacheSynchURL, "");
+    ParseU16(config, "aggregatorServerPort", "AGGREGATOR_SERVER_PORT", aggregatorServerPort, 50081);
+    ParseU16(config, "aggregatorClientPort", "AGGREGATOR_CLIENT_PORT", aggregatorClientPort, 50081);
+    ParseString(config, "aggregatorClientHost", "AGGREGATOR_CLIENT_HOST", aggregatorClientHost, "127.0.0.1");
+    ParseU64(config, "aggregatorClientMockTimeout", "AGGREGATOR_CLIENT_MOCK_TIMEOUT", aggregatorClientMockTimeout, 60 * 1000 * 1000);
+    ParseU64(config, "aggregatorClientWatchdogTimeout", "AGGREGATOR_CLIENT_WATCHDOG_TIMEOUT", aggregatorClientWatchdogTimeout, 60 * 1000 * 1000);
+    ParseU64(config, "aggregatorClientMaxStreams", "AGGREGATOR_CLIENT_MAX_STREAMS", aggregatorClientMaxStreams, 0);
 
+    // MT cache
+    ParseS64(config, "dbMTCacheSize", "DB_MT_CACHE_SIZE", dbMTCacheSize, 8*1024); // Default = 8 GB
     // MT cache
     ParseS64(config, "dbMTCacheSize", "DB_MT_CACHE_SIZE", dbMTCacheSize, 8*1024); // Default = 8 GB
 
@@ -291,540 +458,6 @@ void Config::load(json &config)
     // ECRecover
     ParseBool(config, "ECRecoverPrecalc", "ECRECOVER_PRECALC", ECRecoverPrecalc, false);
     ParseU64(config, "ECRecoverPrecalcNThreads", "ECRECOVER_PRECALC_N_THREADS", ECRecoverPrecalcNThreads, 16);
-        
-    runFileGenBatchProof = false;
-    if (config.contains("runFileGenBatchProof") && config["runFileGenBatchProof"].is_boolean())
-        runFileGenBatchProof = config["runFileGenBatchProof"];
-
-    runFileGenAggregatedProof = false;
-    if (config.contains("runFileGenAggregatedProof") && config["runFileGenAggregatedProof"].is_boolean())
-        runFileGenAggregatedProof = config["runFileGenAggregatedProof"];
-
-    runFileGenFinalProof = false;
-    if (config.contains("runFileGenFinalProof") && config["runFileGenFinalProof"].is_boolean())
-        runFileGenFinalProof = config["runFileGenFinalProof"];
-
-    runFileProcessBatch = false;
-    if (config.contains("runFileProcessBatch") && config["runFileProcessBatch"].is_boolean())
-        runFileProcessBatch = config["runFileProcessBatch"];
-
-    runFileProcessBatchMultithread = false;
-    if (config.contains("runFileProcessBatchMultithread") && config["runFileProcessBatchMultithread"].is_boolean())
-        runFileProcessBatchMultithread = config["runFileProcessBatchMultithread"];
-
-    runFileExecute = false;
-    if (config.contains("runFileExecute") && config["runFileExecute"].is_boolean())
-        runFileExecute = config["runFileExecute"];
-
-
-    runKeccakScriptGenerator = false;
-    if (config.contains("runKeccakScriptGenerator") && config["runKeccakScriptGenerator"].is_boolean())
-        runKeccakScriptGenerator = config["runKeccakScriptGenerator"];
-
-    runSHA256ScriptGenerator = false;
-    if (config.contains("runSHA256ScriptGenerator") && config["runSHA256ScriptGenerator"].is_boolean())
-        runSHA256ScriptGenerator = config["runSHA256ScriptGenerator"];
-
-    runKeccakTest = false;
-    if (config.contains("runKeccakTest") && config["runKeccakTest"].is_boolean())
-        runKeccakTest = config["runKeccakTest"];
-
-    runStorageSMTest = false;
-    if (config.contains("runStorageSMTest") && config["runStorageSMTest"].is_boolean())
-        runStorageSMTest = config["runStorageSMTest"];
-
-    runBinarySMTest = false;
-    if (config.contains("runBinarySMTest") && config["runBinarySMTest"].is_boolean())
-        runBinarySMTest = config["runBinarySMTest"];
-
-    runMemAlignSMTest = false;
-    if (config.contains("runMemAlignSMTest") && config["runMemAlignSMTest"].is_boolean())
-        runMemAlignSMTest = config["runMemAlignSMTest"];
-
-    runSHA256Test = false;
-    if (config.contains("runSHA256Test") && config["runSHA256Test"].is_boolean())
-        runSHA256Test = config["runSHA256Test"];
-
-    runBlakeTest = false;
-    if (config.contains("runBlakeTest") && config["runBlakeTest"].is_boolean())
-        runBlakeTest = config["runBlakeTest"];
-
-    runECRecoverTest = false;
-    if (config.contains("runECRecoverTest") && config["runECRecoverTest"].is_boolean())
-        runECRecoverTest = config["runECRecoverTest"];
-
-    runDatabaseCacheTest = false;
-    if (config.contains("runDatabaseCacheTest") && config["runDatabaseCacheTest"].is_boolean())
-        runDatabaseCacheTest = config["runDatabaseCacheTest"];
-    
-    runDatabaseAssociativeCacheTest = false;
-    if (config.contains("runDatabaseAssociativeCacheTest") && config["runDatabaseAssociativeCacheTest"].is_boolean())
-        runDatabaseAssociativeCacheTest = config["runDatabaseAssociativeCacheTest"];
-
-    runCheckTreeTest = false;
-    if (config.contains("runCheckTreeTest") && config["runCheckTreeTest"].is_boolean())
-        runCheckTreeTest = config["runCheckTreeTest"];
-
-    checkTreeRoot = "auto";
-    if (config.contains("checkTreeRoot") && config["checkTreeRoot"].is_string())
-        checkTreeRoot = config["checkTreeRoot"];
-
-    runDatabasePerformanceTest = false;
-    if (config.contains("runDatabasePerformanceTest") && config["runDatabasePerformanceTest"].is_boolean())
-        runDatabasePerformanceTest = config["runDatabasePerformanceTest"];
-
-    runUnitTest = false;
-    if (config.contains("runUnitTest") && config["runUnitTest"].is_boolean())
-        runUnitTest = config["runUnitTest"];
-
-    useMainExecGenerated = false;
-    if (config.contains("useMainExecGenerated") && config["useMainExecGenerated"].is_boolean())
-        useMainExecGenerated = config["useMainExecGenerated"];
-
-    useMainExecC = false;
-    if (config.contains("useMainExecC") && config["useMainExecC"].is_boolean())
-        useMainExecC = config["useMainExecC"];
-
-    executeInParallel = false;
-    if (config.contains("executeInParallel") && config["executeInParallel"].is_boolean())
-        executeInParallel = config["executeInParallel"];
-
-    saveDbReadsToFile = false;
-    if (config.contains("saveDbReadsToFile") && config["saveDbReadsToFile"].is_boolean())
-        saveDbReadsToFile = config["saveDbReadsToFile"];
-
-    saveRequestToFile = false;
-    if (config.contains("saveRequestToFile") && config["saveRequestToFile"].is_boolean())
-        saveRequestToFile = config["saveRequestToFile"];
-
-    saveDbReadsToFileOnChange = false;
-    if (config.contains("saveDbReadsToFileOnChange") && config["saveDbReadsToFileOnChange"].is_boolean())
-        saveDbReadsToFileOnChange = config["saveDbReadsToFileOnChange"];
-
-    saveInputToFile = false;
-    if (config.contains("saveInputToFile") && config["saveInputToFile"].is_boolean())
-        saveInputToFile = config["saveInputToFile"];
-
-    saveResponseToFile = false;
-    if (config.contains("saveResponseToFile") && config["saveResponseToFile"].is_boolean())
-        saveResponseToFile = config["saveResponseToFile"];
-
-    saveOutputToFile = false;
-    if (config.contains("saveOutputToFile") && config["saveOutputToFile"].is_boolean())
-        saveOutputToFile = config["saveOutputToFile"];
-
-    saveProofToFile = false;
-    if (config.contains("saveProofToFile") && config["saveProofToFile"].is_boolean())
-        saveProofToFile = config["saveProofToFile"];
-
-    saveFilesInSubfolders = false;
-    if (config.contains("saveFilesInSubfolders") && config["saveFilesInSubfolders"].is_boolean())
-        saveFilesInSubfolders = config["saveFilesInSubfolders"];
-
-    loadDBToMemCache = false;
-    if (config.contains("loadDBToMemCache") && config["loadDBToMemCache"].is_boolean())
-        loadDBToMemCache = config["loadDBToMemCache"];
-
-    loadDBToMemCacheInParallel = false;
-    if (config.contains("loadDBToMemCacheInParallel") && config["loadDBToMemCacheInParallel"].is_boolean())
-        loadDBToMemCacheInParallel = config["loadDBToMemCacheInParallel"];
-
-    loadDBToMemTimeout = 30*1000*1000; // Default = 30 seconds
-    if (config.contains("loadDBToMemTimeout") && config["loadDBToMemTimeout"].is_number())
-        loadDBToMemTimeout = config["loadDBToMemTimeout"];
-
-    dbMTCacheSize = 4*1024;
-    if (config.contains("dbMTCacheSize") && config["dbMTCacheSize"].is_number())
-        dbMTCacheSize = config["dbMTCacheSize"];
-    
-    useAssociativeCache = false;
-    if (config.contains("useAssociativeCache") && config["useAssociativeCache"].is_boolean())
-        useAssociativeCache = config["useAssociativeCache"];
-
-    log2DbMTAssociativeCacheSize = 24;
-    if (config.contains("log2DbMTAssociativeCacheSize") && config["log2DbMTAssociativeCacheSize"].is_number())
-        log2DbMTAssociativeCacheSize = config["log2DbMTAssociativeCacheSize"];
-    
-    log2DbMTAssociativeCacheIndexesSize = 28;
-    if (config.contains("log2DbMTAssociativeCacheIndexesSize") && config["log2DbMTAssociativeCacheIndexesSize"].is_number())
-        log2DbMTAssociativeCacheIndexesSize = config["log2DbMTAssociativeCacheIndexesSize"];
-
-    dbProgramCacheSize = 1*1024;
-    if (config.contains("dbProgramCacheSize") && config["dbProgramCacheSize"].is_number())
-        dbProgramCacheSize = config["dbProgramCacheSize"];
-
-    opcodeTracer = false;
-    if (config.contains("opcodeTracer") && config["opcodeTracer"].is_boolean())
-        opcodeTracer = config["opcodeTracer"];
-
-    logRemoteDbReads = false;
-    if (config.contains("logRemoteDbReads") && config["logRemoteDbReads"].is_boolean())
-        logRemoteDbReads = config["logRemoteDbReads"];
-
-    logExecutorServerInput = false;
-    if (config.contains("logExecutorServerInput") && config["logExecutorServerInput"].is_boolean())
-        logExecutorServerInput = config["logExecutorServerInput"];
-
-    logExecutorServerInputJson = false;
-    if (config.contains("logExecutorServerInputJson") && config["logExecutorServerInputJson"].is_boolean())
-        logExecutorServerInputJson = config["logExecutorServerInputJson"];
-
-    logExecutorServerInputGasThreshold = 0;
-    if (config.contains("logExecutorServerInputGasThreshold") && config["logExecutorServerInputGasThreshold"].is_number())
-        logExecutorServerInputGasThreshold = config["logExecutorServerInputGasThreshold"];
-
-    logExecutorServerResponses = false;
-    if (config.contains("logExecutorServerResponses") && config["logExecutorServerResponses"].is_boolean())
-        logExecutorServerResponses = config["logExecutorServerResponses"];
-
-    logExecutorServerTxs = true;
-    if (config.contains("logExecutorServerTxs") && config["logExecutorServerTxs"].is_boolean())
-        logExecutorServerTxs = config["logExecutorServerTxs"];
-
-    dontLoadRomOffsets = false;
-    if (config.contains("dontLoadRomOffsets") && config["dontLoadRomOffsets"].is_boolean())
-        dontLoadRomOffsets = config["dontLoadRomOffsets"];
-
-    executorServerPort = 50071;
-    if (config.contains("executorServerPort") && config["executorServerPort"].is_number())
-        executorServerPort = config["executorServerPort"];
-
-    executorROMLineTraces = false;
-    if (config.contains("executorROMLineTraces") && config["executorROMLineTraces"].is_boolean())
-        executorROMLineTraces = config["executorROMLineTraces"];
-
-    executorTimeStatistics = false;
-    if (config.contains("executorTimeStatistics") && config["executorTimeStatistics"].is_boolean())
-        executorTimeStatistics = config["executorTimeStatistics"];
-
-    executorClientPort = 50071;
-    if (config.contains("executorClientPort") && config["executorClientPort"].is_number())
-        executorClientPort = config["executorClientPort"];
-
-    executorClientHost = "127.0.0.1";
-    if (config.contains("executorClientHost") && config["executorClientHost"].is_string())
-        executorClientHost = config["executorClientHost"];
-
-    executorClientLoops = 1;
-    if (config.contains("executorClientLoops") && config["executorClientLoops"].is_number())
-        executorClientLoops = config["executorClientLoops"];
-
-    executorClientCheckNewStateRoot = false;
-    if (config.contains("executorClientCheckNewStateRoot") && config["executorClientCheckNewStateRoot"].is_boolean())
-        executorClientCheckNewStateRoot = config["executorClientCheckNewStateRoot"];
-
-    hashDBServerPort = 50061;
-    if (config.contains("hashDBServerPort") && config["hashDBServerPort"].is_number())
-        hashDBServerPort = config["hashDBServerPort"];
-
-    hashDBURL = "local";
-    if (config.contains("hashDBURL") && config["hashDBURL"].is_string())
-        hashDBURL = config["hashDBURL"];
-
-    hashDB64 = false;
-    if (config.contains("hashDB64") && config["hashDB64"].is_boolean())
-        hashDB64 = config["hashDB64"];
-
-    dbCacheSynchURL = "";
-    if (config.contains("dbCacheSynchURL") && config["dbCacheSynchURL"].is_string())
-        dbCacheSynchURL = config["dbCacheSynchURL"];
-
-    aggregatorServerPort = 50071;
-    if (config.contains("aggregatorServerPort") && config["aggregatorServerPort"].is_number())
-        aggregatorServerPort = config["aggregatorServerPort"];
-
-    aggregatorClientPort = 50071;
-    if (config.contains("aggregatorClientPort") && config["aggregatorClientPort"].is_number())
-        aggregatorClientPort = config["aggregatorClientPort"];
-
-    aggregatorClientHost = "127.0.0.1";
-    if (config.contains("aggregatorClientHost") && config["aggregatorClientHost"].is_string())
-        aggregatorClientHost = config["aggregatorClientHost"];
-
-    aggregatorClientMockTimeout = 60 * 1000 * 1000;
-    if (config.contains("aggregatorClientMockTimeout") && config["aggregatorClientMockTimeout"].is_number())
-        aggregatorClientMockTimeout = config["aggregatorClientMockTimeout"];
-
-    aggregatorClientWatchdogTimeout = 60 * 1000 * 1000;
-    if (config.contains("aggregatorClientWatchdogTimeout") && config["aggregatorClientWatchdogTimeout"].is_number())
-        aggregatorClientWatchdogTimeout = config["aggregatorClientWatchdogTimeout"];
-
-    aggregatorClientMaxStreams = 0;
-    if (config.contains("aggregatorClientMaxStreams") && config["aggregatorClientMaxStreams"].is_number())
-        aggregatorClientMaxStreams = config["aggregatorClientMaxStreams"];
-
-    if (config.contains("inputFile") && config["inputFile"].is_string())
-        inputFile = config["inputFile"];
-    if (config.contains("inputFile2") && config["inputFile2"].is_string())
-        inputFile2 = config["inputFile2"];
-
-    if (config.contains("outputPath") && config["outputPath"].is_string())
-        outputPath = config["outputPath"];
-
-    // Set default config path, and update it if specified
-    configPath = "config";
-    if (config.contains("configPath") && config["configPath"].is_string())
-        configPath = config["configPath"];
-
-    // Set default config files names
-    rom = string("src/main_sm/") + string(PROVER_FORK_NAMESPACE_STRING) + string("/scripts/rom.json");
-    keccakScriptFile = configPath + "/scripts/keccak_script.json";
-    keccakPolsFile = configPath + "/scripts/keccak_pols.json";
-    keccakConnectionsFile = configPath + "/scripts/keccak_connections.json";
-    sha256ScriptFile = configPath + "/scripts/sha256_script.json";
-    sha256PolsFile = configPath + "/scripts/sha256_pols.json";
-    sha256ConnectionsFile = configPath + "/scripts/sha256_connections.json";
-    storageRomFile = configPath + "/scripts/storage_sm_rom.json";
-    zkevmConstPols = configPath + "/zkevm/zkevm.const";
-    zkevmConstantsTree = configPath + "/zkevm/zkevm.consttree";
-    zkevmStarkInfo = configPath + "/zkevm/zkevm.starkinfo.json";
-    zkevmVerifier = configPath + "/zkevm/zkevm.verifier.dat";
-    c12aConstPols = configPath + "/c12a/c12a.const";
-    c12aConstantsTree = configPath + "/c12a/c12a.consttree";
-    c12aExec = configPath + "/c12a/c12a.exec";
-    c12aStarkInfo = configPath + "/c12a/c12a.starkinfo.json";
-    recursive1ConstPols = configPath + "/recursive1/recursive1.const";
-    recursive1ConstantsTree = configPath + "/recursive1/recursive1.consttree";
-    recursive1Exec = configPath + "/recursive1/recursive1.exec";
-    recursive1StarkInfo = configPath + "/recursive1/recursive1.starkinfo.json";
-    recursive1Verifier = configPath + "/recursive1/recursive1.verifier.dat";
-    recursive2ConstPols = configPath + "/recursive2/recursive2.const";
-    recursive2ConstantsTree = configPath + "/recursive2/recursive2.consttree";
-    recursive2Exec = configPath + "/recursive2/recursive2.exec";
-    recursive2StarkInfo = configPath + "/recursive2/recursive2.starkinfo.json";
-    recursive2Verifier = configPath + "/recursive2/recursive2.verifier.dat";
-    recursive2Verkey = configPath + "/recursive2/recursive2.verkey.json";
-    recursivefConstPols = configPath + "/recursivef/recursivef.const";
-    recursivefConstantsTree = configPath + "/recursivef/recursivef.consttree";
-    recursivefExec = configPath + "/recursivef/recursivef.exec";
-    recursivefStarkInfo = configPath + "/recursivef/recursivef.starkinfo.json";
-    recursivefVerifier = configPath + "/recursivef/recursivef.verifier.dat";
-    finalVerifier = configPath + "/final/final.verifier.dat";
-    finalVerkey = configPath + "/final/final.fflonk.verkey.json";
-    finalStarkZkey = configPath + "/final/final.fflonk.zkey";
-
-
-    if (config.contains("rom") && config["rom"].is_string())
-        rom = config["rom"];
-
-    if (config.contains("zkevmCmPols") && config["zkevmCmPols"].is_string())
-        zkevmCmPols = config["zkevmCmPols"];
-
-    if (config.contains("zkevmCmPolsAfterExecutor") && config["zkevmCmPolsAfterExecutor"].is_string())
-        zkevmCmPolsAfterExecutor = config["zkevmCmPolsAfterExecutor"];
-
-    if (config.contains("c12aCmPols") && config["c12aCmPols"].is_string())
-        c12aCmPols = config["c12aCmPols"];
-
-    if (config.contains("recursive1CmPols") && config["recursive1CmPols"].is_string())
-        recursive1CmPols = config["recursive1CmPols"];
-
-    if (config.contains("zkevmConstPols") && config["zkevmConstPols"].is_string())
-        zkevmConstPols = config["zkevmConstPols"];
-
-    if (config.contains("c12aConstPols") && config["c12aConstPols"].is_string())
-        c12aConstPols = config["c12aConstPols"];
-
-    if (config.contains("recursive1ConstPols") && config["recursive1ConstPols"].is_string())
-        recursive1ConstPols = config["recursive1ConstPols"];
-    
-    if (config.contains("recursive2ConstPols") && config["recursive2ConstPols"].is_string())
-        recursive2ConstPols = config["recursive2ConstPols"];
-    
-    if (config.contains("recursivefConstPols") && config["recursivefConstPols"].is_string())
-        recursivefConstPols = config["recursivefConstPols"];
-
-    mapConstPolsFile = true;
-    if (config.contains("mapConstPolsFile") && config["mapConstPolsFile"].is_boolean())
-        mapConstPolsFile = config["mapConstPolsFile"];
-
-    if (config.contains("zkevmConstantsTree") && config["zkevmConstantsTree"].is_string())
-        zkevmConstantsTree = config["zkevmConstantsTree"];
-
-    if (config.contains("c12aConstantsTree") && config["c12aConstantsTree"].is_string())
-        c12aConstantsTree = config["c12aConstantsTree"];
-
-    if (config.contains("recursive1ConstantsTree") && config["recursive1ConstantsTree"].is_string())
-        recursive1ConstantsTree = config["recursive1ConstantsTree"];
-
-    if (config.contains("recursive2ConstantsTree") && config["recursive2ConstantsTree"].is_string())
-        recursive2ConstantsTree = config["recursive2ConstantsTree"];
-
-    if (config.contains("recursivefConstantsTree") && config["recursivefConstantsTree"].is_string())
-        recursivefConstantsTree = config["recursivefConstantsTree"];
-
-    mapConstantsTreeFile = true;
-    if (config.contains("mapConstantsTreeFile") && config["mapConstantsTreeFile"].is_boolean())
-        mapConstantsTreeFile = config["mapConstantsTreeFile"];
-
-    if (config.contains("finalVerkey") && config["finalVerkey"].is_string())
-        finalVerkey = config["finalVerkey"];
-
-    if (config.contains("zkevmVerifier") && config["zkevmVerifier"].is_string())
-        zkevmVerifier = config["zkevmVerifier"];
-
-    if (config.contains("recursive1Verifier") && config["recursive1Verifier"].is_string())
-        recursive1Verifier = config["recursive1Verifier"];
-
-    if (config.contains("recursive2Verifier") && config["recursive2Verifier"].is_string())
-        recursive2Verifier = config["recursive2Verifier"];
-    
-    if (config.contains("recursive2Verkey") && config["recursive2Verkey"].is_string())
-        recursive2Verkey = config["recursive2Verkey"];
-
-    if (config.contains("finalVerifier") && config["finalVerifier"].is_string())
-        finalVerifier = config["finalVerifier"];
-
-    if (config.contains("recursivefVerifier") && config["recursivefVerifier"].is_string())
-        recursivefVerifier = config["recursivefVerifier"];
-
-    if (config.contains("c12aExec") && config["c12aExec"].is_string())
-        c12aExec = config["c12aExec"];
-
-    if (config.contains("recursive1Exec") && config["recursive1Exec"].is_string())
-        recursive1Exec = config["recursive1Exec"];
-    
-    if (config.contains("recursive2Exec") && config["recursive2Exec"].is_string())
-        recursive2Exec = config["recursive2Exec"];
-    
-    if (config.contains("recursivefExec") && config["recursivefExec"].is_string())
-        recursivefExec = config["recursivefExec"];
-
-    if (config.contains("finalStarkZkey") && config["finalStarkZkey"].is_string())
-        finalStarkZkey = config["finalStarkZkey"];
-
-    if (config.contains("proofFile") && config["proofFile"].is_string())
-        proofFile = config["proofFile"];
-
-    if (config.contains("publicsOutput") && config["publicsOutput"].is_string())
-        publicsOutput = config["publicsOutput"];
-
-    if (config.contains("keccakScriptFile") && config["keccakScriptFile"].is_string())
-        keccakScriptFile = config["keccakScriptFile"];
-
-    if (config.contains("sha256ScriptFile") && config["sha256ScriptFile"].is_string())
-        sha256ScriptFile = config["sha256ScriptFile"];
-
-    if (config.contains("keccakPolsFile") && config["keccakPolsFile"].is_string())
-        keccakPolsFile = config["keccakPolsFile"];
-
-    if (config.contains("sha256PolsFile") && config["sha256PolsFile"].is_string())
-        sha256PolsFile = config["sha256PolsFile"];
-
-    if (config.contains("keccakConnectionsFile") && config["keccakConnectionsFile"].is_string())
-        keccakConnectionsFile = config["keccakConnectionsFile"];
-
-    if (config.contains("sha256ConnectionsFile") && config["sha256ConnectionsFile"].is_string())
-        sha256ConnectionsFile = config["sha256ConnectionsFile"];
-
-    if (config.contains("storageRomFile") && config["storageRomFile"].is_string())
-        storageRomFile = config["storageRomFile"];
-
-    if (config.contains("zkevmStarkInfo") && config["zkevmStarkInfo"].is_string())
-        zkevmStarkInfo = config["zkevmStarkInfo"];
-
-    if (config.contains("c12aStarkInfo") && config["c12aStarkInfo"].is_string())
-        c12aStarkInfo = config["c12aStarkInfo"];
-
-    if (config.contains("recursive1StarkInfo") && config["recursive1StarkInfo"].is_string())
-        recursive1StarkInfo = config["recursive1StarkInfo"];
-
-    if (config.contains("recursive2StarkInfo") && config["recursive2StarkInfo"].is_string())
-        recursive2StarkInfo = config["recursive2StarkInfo"];
-
-    if (config.contains("recursivefStarkInfo") && config["recursivefStarkInfo"].is_string())
-        recursivefStarkInfo = config["recursivefStarkInfo"];
-
-    if (config.contains("databaseURL") && config["databaseURL"].is_string())
-        databaseURL = config["databaseURL"];
-
-    if (config.contains("dbNodesTableName") && config["dbNodesTableName"].is_string())
-        dbNodesTableName = config["dbNodesTableName"];
-
-    if (config.contains("dbProgramTableName") && config["dbProgramTableName"].is_string())
-        dbProgramTableName = config["dbProgramTableName"];
-
-    dbMultiWrite = false;
-    if (config.contains("dbMultiWrite") && config["dbMultiWrite"].is_boolean())
-        dbMultiWrite = config["dbMultiWrite"];
-
-    dbMultiWriteSingleQuerySize = 20*1024*1024;
-    if (config.contains("dbMultiWriteSingleQuerySize") && config["dbMultiWriteSingleQuerySize"].is_number())
-        dbMultiWriteSingleQuerySize = config["dbMultiWriteSingleQuerySize"];
-
-    dbConnectionsPool = false;
-    if (config.contains("dbConnectionsPool") && config["dbConnectionsPool"].is_boolean())
-        dbConnectionsPool = config["dbConnectionsPool"];
-
-    dbNumberOfPoolConnections = 25;
-    if (config.contains("dbNumberOfPoolConnections") && config["dbNumberOfPoolConnections"].is_number())
-        dbNumberOfPoolConnections = config["dbNumberOfPoolConnections"];
-
-    dbMetrics = false;
-    if (config.contains("dbMetrics") && config["dbMetrics"].is_boolean())
-        dbMetrics = config["dbMetrics"];
-
-    dbClearCache = false;
-    if (config.contains("dbClearCache") && config["dbClearCache"].is_boolean())
-        dbClearCache = config["dbClearCache"];
-
-    dbGetTree = false;
-    if (config.contains("dbGetTree") && config["dbGetTree"].is_boolean())
-        dbGetTree = config["dbGetTree"];
-
-    dbReadOnly = false;
-    if (config.contains("dbReadOnly") && config["dbReadOnly"].is_boolean())
-        dbReadOnly = config["dbReadOnly"];
-
-    dbReadRetryCounter = 10;
-    if (config.contains("dbReadRetryCounter") && config["dbReadRetryCounter"].is_number())
-        dbReadRetryCounter = config["dbReadRetryCounter"];
-
-    dbReadRetryDelay = 100*1000;
-    if (config.contains("dbReadRetryDelay") && config["dbReadRetryDelay"].is_number())
-        dbReadRetryDelay = config["dbReadRetryDelay"];
-
-    stateManager = false;
-    if (config.contains("stateManager") && config["stateManager"].is_boolean())
-        stateManager = config["stateManager"];
-
-    stateManagerPurge = true;
-    if (config.contains("stateManagerPurge") && config["stateManagerPurge"].is_boolean())
-        stateManagerPurge = config["stateManagerPurge"];
-
-    if (config.contains("cleanerPollingPeriod") && config["cleanerPollingPeriod"].is_number())
-        cleanerPollingPeriod = config["cleanerPollingPeriod"];
-
-    if (config.contains("requestsPersistence") && config["requestsPersistence"].is_number())
-        requestsPersistence = config["requestsPersistence"];
-
-    maxExecutorThreads = 16;
-    if (config.contains("maxExecutorThreads") && config["maxExecutorThreads"].is_number())
-        maxExecutorThreads = config["maxExecutorThreads"];
-
-    maxProverThreads = 16;
-    if (config.contains("maxProverThreads") && config["maxProverThreads"].is_number())
-        maxProverThreads = config["maxProverThreads"];
-
-    maxHashDBThreads = 16;
-    if (config.contains("maxHashDBThreads") && config["maxHashDBThreads"].is_number())
-        maxHashDBThreads = config["maxHashDBThreads"];
-
-    proverName = "UNSPECIFIED";
-    if (config.contains("proverName") && config["proverName"].is_string())
-        proverName = config["proverName"];
-
-    fullTracerTraceReserveSize = 256*1024;
-    if (config.contains("fullTracerTraceReserveSize") && config["fullTracerTraceReserveSize"].is_number())
-        fullTracerTraceReserveSize = config["fullTracerTraceReserveSize"];
-
-    ECRecoverPrecalc = true;
-    if (config.contains("ECRecoverPrecalc") && config["ECRecoverPrecalc"].is_boolean())
-        ECRecoverPrecalc = config["ECRecoverPrecalc"];
-
-    ECRecoverPrecalcNThreads = 16;
-    if (config.contains("ECRecoverPrecalcNThreads") && config["ECRecoverPrecalcNThreads"].is_number())
-        ECRecoverPrecalcNThreads = config["ECRecoverPrecalcNThreads"];
 }
 
 void Config::print(void)
@@ -862,8 +495,6 @@ void Config::print(void)
 
     if (runKeccakScriptGenerator)
         zklog.info("    runKeccakScriptGenerator=true");
-    if (runSHA256ScriptGenerator)
-        zklog.info("    runSHA256ScriptGenerator=true");
     if (runKeccakTest)
         zklog.info("    runKeccakTest=true");
     if (runStorageSMTest)
@@ -889,6 +520,8 @@ void Config::print(void)
     }
     if (runDatabasePerformanceTest)
         zklog.info("    runDatabasePerformanceTest=true");
+    if (runSMT64Test)
+        zklog.info("    runSMT64Test=true");
     if (runSMT64Test)
         zklog.info("    runSMT64Test=true");
     if (runUnitTest)
@@ -1000,6 +633,7 @@ void Config::print(void)
     zklog.info("    dbReadRetryDelay=" + to_string(dbReadRetryDelay));
     zklog.info("    stateManager=" + to_string(stateManager));
     zklog.info("    stateManagerPurge=" + to_string(stateManagerPurge));
+    zklog.info("    stateManagerPurgeTxs=" + to_string(stateManagerPurgeTxs));
     zklog.info("    stateManagerPurgeTxs=" + to_string(stateManagerPurgeTxs));
     zklog.info("    cleanerPollingPeriod=" + to_string(cleanerPollingPeriod));
     zklog.info("    requestsPersistence=" + to_string(requestsPersistence));

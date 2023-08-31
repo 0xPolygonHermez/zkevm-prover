@@ -44,7 +44,6 @@ public:
     // Converts relative references to absolute references, based on the slot
     inline uint64_t relRef2AbsRef (uint64_t ref, uint64_t slot)
     {
-        uint64_t result;
 
         // ZeroRef is the same for all the slots, and it is at reference 0
         if (ref==zeroRef) return zeroRef;
