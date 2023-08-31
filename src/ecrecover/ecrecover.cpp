@@ -993,7 +993,7 @@ void generalAddPointEcJacobian(const RawFec::Element &x1, const RawFec::Element 
     RawFec::Element z1_2 = fec.mul(z1, z1);
     RawFec::Element z2_2 = fec.mul(z2, z2);
     RawFec::Element z1_3 = fec.mul(z1_2, z1);
-    RawFec::Element z2_3 = fec.mul(z2_3, z2);
+    RawFec::Element z2_3 = fec.mul(z2_2, z2);
 
     if (p1_empty && p2_empty)
     {
