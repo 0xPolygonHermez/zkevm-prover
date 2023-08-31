@@ -49,7 +49,7 @@ zkresult TreeChunk::data2children (void)
     uint64_t dataSize = data.size();
 
     // Parse first 2 64-bit integers
-    if (dataSize < 2)
+    if (dataSize < 2*sizeof(uint64_t))
     {
         zklog.error("TreeChunk::data2children() failed invalid data.size=" + to_string(dataSize));
         return ZKR_UNSPECIFIED;
@@ -66,11 +66,6 @@ zkresult TreeChunk::data2children (void)
         if ((isZero & mask) != 0)
         {
             children64[i].type = ZERO;
-
-            // Move mask bit
-            mask = mask << 1;
-
-            continue;
         }
 
         // If this is a leaf child, parse the key and value
@@ -536,7 +531,7 @@ void TreeChunk::print(void) const
 
     for (uint64_t i=0; i<2; i++)
     {
-        if (children2[i].type != ZERO)
+        if ((children2[i].type != ZERO) && (children2[i].type != UNSPECIFIED) )
         {
             zklog.info( "    children2[" + to_string(i) + "]=" + children2[i].print(fr));
         }
@@ -548,7 +543,7 @@ void TreeChunk::print(void) const
 
     for (uint64_t i=0; i<4; i++)
     {
-        if (children4[i].type != ZERO)
+        if ((children4[i].type != ZERO) && (children4[i].type != UNSPECIFIED))
         {
             zklog.info( "    children4[" + to_string(i) + "]=" + children4[i].print(fr));
         }
@@ -560,7 +555,7 @@ void TreeChunk::print(void) const
 
     for (uint64_t i=0; i<8; i++)
     {
-        if (children8[i].type != ZERO)
+        if ((children8[i].type != ZERO) && (children8[i].type != UNSPECIFIED))
         {
             zklog.info( "    children8[" + to_string(i) + "]=" + children8[i].print(fr));
         }
@@ -572,7 +567,7 @@ void TreeChunk::print(void) const
 
     for (uint64_t i=0; i<16; i++)
     {
-        if (children16[i].type != ZERO)
+        if ((children16[i].type != ZERO) && (children16[i].type != UNSPECIFIED))
         {
             zklog.info( "    children16[" + to_string(i) + "]=" + children16[i].print(fr));
         }
@@ -584,7 +579,7 @@ void TreeChunk::print(void) const
 
     for (uint64_t i=0; i<32; i++)
     {
-        if (children32[i].type != ZERO)
+        if ((children32[i].type != ZERO) && (children32[i].type != UNSPECIFIED))
         {
             zklog.info( "    children32[" + to_string(i) + "]=" + children32[i].print(fr));
         }
@@ -598,7 +593,7 @@ void TreeChunk::print(void) const
 
     for (uint64_t i=0; i<64; i++)
     {
-        if (children64[i].type != ZERO)
+        if ((children64[i].type != ZERO) && (children64[i].type != UNSPECIFIED))
         {
             zklog.info( "    children64[" + to_string(i) + "]=" + children64[i].print(fr));
         }
