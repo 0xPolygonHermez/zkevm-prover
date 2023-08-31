@@ -837,6 +837,10 @@ void generalAddPointEcJacobian(const RawFec::Element &x1, const RawFec::Element 
                                RawFec::Element &x3, RawFec::Element &y3, RawFec::Element &z3,
                                bool &p3_empty)
 {
+    RawFec::Element z1_2 = fec.mul(z1, z1);
+    RawFec::Element z2_2 = fec.mul(z2, z2);
+    RawFec::Element z1_3 = fec.mul(z1_2, z1);
+    RawFec::Element z2_3 = fec.mul(z2_2, z2);
 
     if (p1_empty && p2_empty)
     {
@@ -865,7 +869,7 @@ void generalAddPointEcJacobian(const RawFec::Element &x1, const RawFec::Element 
             }
             else
             {
-                if (fec.eq(fec.mul(x1, z2), fec.mul(x2, z1)) == 0)
+                if (fec.eq(fec.mul(x1, z2_2), fec.mul(x2, z1_2)) == 0)
                 {
                     addPointEcJacobian(x1, y1, z1, x2, y2, z2, x3, y3, z3);
                     if (fec.isZero(z3) == 1)
@@ -879,7 +883,7 @@ void generalAddPointEcJacobian(const RawFec::Element &x1, const RawFec::Element 
                 }
                 else
                 {
-                    if (fec.eq(fec.mul(y1, z2), fec.mul(y2, z1)) == 0)
+                    if (fec.eq(fec.mul(y1, z2_3), fec.mul(y2, z1_3)) == 0)
                     {
                         p3_empty = true;
                     }
@@ -909,6 +913,11 @@ void generalAddPointEcJacobianZ2Is1(const RawFec::Element &x1, const RawFec::Ele
                                bool &p3_empty)
 {
 
+    RawFec::Element z1_2 = fec.mul(z1, z1);
+    RawFec::Element z2_2 = fec.mul(z2, z2);
+    RawFec::Element z1_3 = fec.mul(z1_2, z1);
+    RawFec::Element z2_3 = fec.mul(z2_2, z2);
+
     if (p1_empty && p2_empty)
     {
         p3_empty = true;
@@ -936,7 +945,7 @@ void generalAddPointEcJacobianZ2Is1(const RawFec::Element &x1, const RawFec::Ele
             }
             else
             {
-                if (fec.eq(fec.mul(x1, z2), fec.mul(x2, z1)) == 0)
+                if (fec.eq(fec.mul(x1, z2_2), fec.mul(x2, z1_2)) == 0)
                 {
                     addPointEcJacobianZ2Is1(x1, y1, z1, x2, y2, z2, x3, y3, z3);
                     if (fec.isZero(z3) == 1)
@@ -950,7 +959,7 @@ void generalAddPointEcJacobianZ2Is1(const RawFec::Element &x1, const RawFec::Ele
                 }
                 else
                 {
-                    if (fec.eq(fec.mul(y1, z2), fec.mul(y2, z1)) == 0)
+                    if (fec.eq(fec.mul(y1, z2_3), fec.mul(y2, z1_3)) == 0)
                     {
                         p3_empty = true;
                     }
@@ -981,6 +990,11 @@ void generalAddPointEcJacobian(const RawFec::Element &x1, const RawFec::Element 
                                bool &p3_empty)
 {
 
+    RawFec::Element z1_2 = fec.mul(z1, z1);
+    RawFec::Element z2_2 = fec.mul(z2, z2);
+    RawFec::Element z1_3 = fec.mul(z1_2, z1);
+    RawFec::Element z2_3 = fec.mul(z2_3, z2);
+
     if (p1_empty && p2_empty)
     {
         p3_empty = true;
@@ -1008,7 +1022,7 @@ void generalAddPointEcJacobian(const RawFec::Element &x1, const RawFec::Element 
             }
             else
             {
-                if (fec.eq(fec.mul(x1, z2), fec.mul(x2, z1)) == 0)
+                if (fec.eq(fec.mul(x1, z2_2), fec.mul(x2, z1_2)) == 0)
                 {
                     addPointEcJacobian(x1, y1, z1, zz1, zzz1, x2, y2, z2, x3, y3, z3);
                     if (fec.isZero(z3) == 1)
@@ -1022,7 +1036,7 @@ void generalAddPointEcJacobian(const RawFec::Element &x1, const RawFec::Element 
                 }
                 else
                 {
-                    if (fec.eq(fec.mul(y1, z2), fec.mul(y2, z1)) == 0)
+                    if (fec.eq(fec.mul(y1, z2_3), fec.mul(y2, z1_3)) == 0)
                     {
                         p3_empty = true;
                     }
