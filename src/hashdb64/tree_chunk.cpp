@@ -270,7 +270,7 @@ zkresult TreeChunk::calculateHash (void)
     }
     bChildrenRestValid = false;
 
-    TimerStart(TREE_CHUNK_CALCULATE_HASH);
+    //TimerStart(TREE_CHUNK_CALCULATE_HASH);
 
     if (level%6 != 0)
     {
@@ -335,7 +335,7 @@ zkresult TreeChunk::calculateHash (void)
             bHashValid = true;
             bChildrenRestValid = true;
 
-            TimerStopAndLog(TREE_CHUNK_CALCULATE_HASH);
+            //TimerStopAndLog(TREE_CHUNK_CALCULATE_HASH);
 
             return ZKR_SUCCESS;
         }
@@ -351,7 +351,7 @@ zkresult TreeChunk::calculateHash (void)
             bHashValid = true;
             bChildrenRestValid = true;
 
-            TimerStopAndLog(TREE_CHUNK_CALCULATE_HASH);
+            //TimerStopAndLog(TREE_CHUNK_CALCULATE_HASH);
 
             return ZKR_SUCCESS;
         }
@@ -367,14 +367,14 @@ zkresult TreeChunk::calculateHash (void)
             bHashValid = true;
             bChildrenRestValid = true;
 
-            TimerStopAndLog(TREE_CHUNK_CALCULATE_HASH);
+            //TimerStopAndLog(TREE_CHUNK_CALCULATE_HASH);
 
             return ZKR_SUCCESS;
         }
         default:
         {
             zklog.error("TreeChunk::calculateHash() found unexpected child1.type=" + to_string(child1.type));
-            TimerStopAndLog(TREE_CHUNK_CALCULATE_HASH);
+            //TimerStopAndLog(TREE_CHUNK_CALCULATE_HASH);
             return ZKR_UNSPECIFIED;
         }
     }

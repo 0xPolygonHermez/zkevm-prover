@@ -353,6 +353,32 @@ void HashDB::clearCache(void)
     }
 }
 
+zkresult HashDB::readTree (const Goldilocks::Element (&root)[4], vector<KeyValue> &keyValues)
+{
+    if (config.hashDB64)
+    {
+        return smt64.readTree(db64, root, keyValues);
+    }
+    else
+    {
+        zklog.error("HashDB::readTree() called with config.hashDB64=false");
+        return ZKR_UNSPECIFIED;
+    }
+}
+
+zkresult HashDB::writeTree (const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> &keyValues, Goldilocks::Element (&newRoot)[4], uint64_t &flushId, uint64_t &lastSentFlushId)
+{
+    if (config.hashDB64)
+    {
+        return smt64.writeTree(db64, oldRoot, keyValues, newRoot, flushId, lastSentFlushId);
+    }
+    else
+    {
+        zklog.error("HashDB::writeTree() called with config.hashDB64=false");
+        return ZKR_UNSPECIFIED;
+    }
+}
+
 void HashDB::setAutoCommit(const bool autoCommit)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB

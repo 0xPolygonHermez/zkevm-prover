@@ -10,6 +10,8 @@
 #include "key_utils.hpp"
 #include "tree_chunk.hpp"
 
+//#define SMT64_PRINT_TREE_CHUNKS
+
 zkresult Smt64::writeTree (Database64 &db, const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> &keyValues, Goldilocks::Element (&newRoot)[4], uint64_t &flushId, uint64_t &lastSentFlushId)
 {
     zkresult zkr;
@@ -260,12 +262,14 @@ zkresult Smt64::writeTree (Database64 &db, const Goldilocks::Element (&oldRoot)[
         return zkr;
     }
 
+#ifdef SMT64_PRINT_TREE_CHUNKS
     // Print chunks
     for (uint c = 0; c < chunks.size(); c++)
     {
         zklog.info("Smt64::writeTree() chunk " + to_string(c));
         chunks[c]->print();
     }
+#endif
 
     // Free memory
     for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
@@ -491,12 +495,14 @@ zkresult Smt64::readTree (Database64 &db, const Goldilocks::Element (&root)[4], 
 
     dbQueries.clear();
 
+#ifdef SMT64_PRINT_TREE_CHUNKS
     // Print chunks
     for (uint c = 0; c < chunks.size(); c++)
     {
         zklog.info("Smt64::readTree() chunk " + to_string(c));
         chunks[c]->print();
     }
+#endif
 
     // Free memory
     for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
