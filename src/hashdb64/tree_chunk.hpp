@@ -70,7 +70,7 @@ private:
 public:
     // Encoded data
     string              data;
-    vector<KeyValue>    list;
+    vector<uint64_t>    list; // List of IDs to KeyValue instances to write or to read
 
 public:
 
@@ -120,7 +120,7 @@ public:
         bHashValid = false;
         bDataValid = false;
     };
-    void setLeafChild (uint64_t position, Goldilocks::Element (&key)[4], mpz_class &value)
+    void setLeafChild (uint64_t position, const Goldilocks::Element (&key)[4], const mpz_class &value)
     {
         children64[position].type = LEAF;
         children64[position].leaf.key[0] = key[0];

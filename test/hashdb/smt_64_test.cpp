@@ -5,7 +5,10 @@
 #include "unistd.h"
 #include "hashdb_factory.hpp"
 
-#define SMT64_TEST_NUMBER_OF_KEYS 10
+#define SMT64_TEST_NUMBER_OF_WRITES 100
+#define SMT64_TEST_KEYS_PER_WRITE 10
+#define SMT64_TEST_NUMBER_OF_KEYS (SMT64_TEST_NUMBER_OF_WRITES*SMT64_TEST_KEYS_PER_WRITE)
+
 
 uint64_t Smt64Test (const Config &config)
 {
@@ -14,8 +17,15 @@ uint64_t Smt64Test (const Config &config)
     uint64_t numberOfFailedTests = 0;
     Goldilocks::Element root[4] = {0, 0, 0, 0};
     Goldilocks fr;
+    PoseidonGoldilocks poseidon;
     zkresult zkr;
-    vector<KeyValue> keyValues;
+    bool bRandomKeys = true;
+    
+    Goldilocks::Element keyValue[12];
+    for (uint64_t i=0; i<12; i++)
+    {
+        keyValue[i] = fr.zero();
+    }
 
     HashDBInterface *pHashDB = HashDBClientFactory::createHashDBClient(fr, config);
     if (pHashDB == NULL)
@@ -24,31 +34,58 @@ uint64_t Smt64Test (const Config &config)
         return 1;
     }
 
+    TimerStart(SMT64_TEST_KEYVALUES_GENERATION);
+
+    vector<KeyValue> keyValues[SMT64_TEST_NUMBER_OF_WRITES];
+
     // Init the keyValues
     for (uint64_t i=0; i<SMT64_TEST_NUMBER_OF_KEYS; i++)
     {
         KeyValue kv;
-        kv.key.fe[0] = fr.fromU64(i);
-        kv.key.fe[1] = fr.zero();
-        kv.key.fe[2] = fr.zero();
-        kv.key.fe[3] = fr.zero();
+        if (bRandomKeys)
+        {
+            keyValue[0] = fr.fromU64(i);
+            poseidon.hash(kv.key.fe, keyValue);
+        }
+        else
+        {
+            kv.key.fe[0] = fr.fromU64(i);
+            kv.key.fe[1] = fr.zero();
+            kv.key.fe[2] = fr.zero();
+            kv.key.fe[3] = fr.zero();
+        }
         kv.value = i;
-        keyValues.emplace_back(kv);
+        keyValues[i/SMT64_TEST_KEYS_PER_WRITE].emplace_back(kv);
     }
+    for (uint64_t i=0; i<SMT64_TEST_NUMBER_OF_WRITES; i++)
+    {
+        zkassertpermanent(keyValues[i].size() == SMT64_TEST_KEYS_PER_WRITE);
+    }
+
+    TimerStopAndLog(SMT64_TEST_KEYVALUES_GENERATION);
 
     // Perform the test, based on the configuration
     if (config.hashDB64)
     {
+        TimerStart(SMT64_TEST_WRITE_TREE);
+
         // Call writeTree()
         uint64_t flushId = 0;
         uint64_t lastSentFlushId = 0;
-        zkr = pHashDB->writeTree(root, keyValues, root, flushId, lastSentFlushId);
-        if (zkr != ZKR_SUCCESS)
+        for (int64_t i=0; i<SMT64_TEST_NUMBER_OF_WRITES; i++)
         {
-            zklog.error("Smt64Test() failed calling smt64.writeTree() result=" + zkresult2string(zkr));
-            return 1;
+            zkr = pHashDB->writeTree(root, keyValues[i], root, flushId, lastSentFlushId);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("Smt64Test() failed calling smt64.writeTree() result=" + zkresult2string(zkr));
+                return 1;
+            }
+            //zklog.info("Smt64Test() smt64.writeTree() returned root=" + fea2string(fr, root) + " flushId=" + to_string(flushId));
         }
-        //zklog.info("Smt64Test() smt64.writeTree() returned root=" + fea2string(fr, root) + " flushId=" + to_string(flushId));
+
+        TimerStopAndLog(SMT64_TEST_WRITE_TREE);
+
+        TimerStart(SMT64_TEST_WAIT_FOR_FLUSH);
 
         // Wait for the returned flush ID to be sent
         do
@@ -68,42 +105,61 @@ uint64_t Smt64Test (const Config &config)
             }
             sleep(1);
         } while (true);
+
+        TimerStopAndLog(SMT64_TEST_WAIT_FOR_FLUSH);
         
-        // Make a copy of the key values, overwriting the value with an invalid value
-        vector<KeyValue> readKeyValues = keyValues;
-        for (uint64_t i=0; i<readKeyValues.size(); i++)
+        TimerStart(SMT64_TEST_READ_TREE);
+
+        vector<KeyValue> readKeyValues[SMT64_TEST_NUMBER_OF_WRITES];
+
+        for (int64_t i=0; i<SMT64_TEST_NUMBER_OF_WRITES; i++)
         {
-            readKeyValues[i].value = 0xFFFFFFFFFFFFFFFF;
+            // Make a copy of the key values, overwriting the value with an invalid value
+            readKeyValues[i] = keyValues[i];
+            zkassertpermanent(readKeyValues[i].size() == SMT64_TEST_KEYS_PER_WRITE);
+            for (uint64_t j=0; j<readKeyValues[i].size(); j++)
+            {
+                readKeyValues[i][j].value = 0xFFFFFFFFFFFFFFFF;
+            }
+
+            // Call readTree() with the returned root
+            zkr = pHashDB->readTree(root, readKeyValues[i]);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("Smt64Test() failed calling smt64.readTree() result=" + zkresult2string(zkr));
+                return 1;
+            }
         }
 
-        // Call readTree() with the returned root
-        zkr = pHashDB->readTree(root, readKeyValues);
-        if (zkr != ZKR_SUCCESS)
-        {
-            zklog.error("Smt64Test() failed calling smt64.readTree() result=" + zkresult2string(zkr));
-            return 1;
-        }
+        TimerStopAndLog(SMT64_TEST_READ_TREE);
+
+        TimerStart(SMT64_TEST_CHECK_READ_TREE_RESULT);
 
         // Check that both keys and values match the ones we wrote
-        for (uint64_t i=0; i<SMT64_TEST_NUMBER_OF_KEYS; i++)
+        for (uint64_t i=0; i<SMT64_TEST_NUMBER_OF_WRITES; i++)
         {
-            // Check that the key is still the same
-            if ( !fr.equal(readKeyValues[i].key.fe[0], keyValues[i].key.fe[0]) ||
-                 !fr.equal(readKeyValues[i].key.fe[1], keyValues[i].key.fe[1]) ||
-                 !fr.equal(readKeyValues[i].key.fe[2], keyValues[i].key.fe[2]) ||
-                 !fr.equal(readKeyValues[i].key.fe[3], keyValues[i].key.fe[3]) )
+            for (uint64_t j=0; j<SMT64_TEST_KEYS_PER_WRITE; j++)
             {
-                zklog.error("Smt64Test() read different key at i=" + to_string(i) + " read=" + fea2string(fr, readKeyValues[i].key.fe) + " expected=" + fea2string(fr, keyValues[i].key.fe));
-                numberOfFailedTests++;
-            }
+                // Check that the key is still the same
+                if ( !fr.equal(readKeyValues[i][j].key.fe[0], keyValues[i][j].key.fe[0]) ||
+                     !fr.equal(readKeyValues[i][j].key.fe[1], keyValues[i][j].key.fe[1]) ||
+                     !fr.equal(readKeyValues[i][j].key.fe[2], keyValues[i][j].key.fe[2]) ||
+                     !fr.equal(readKeyValues[i][j].key.fe[3], keyValues[i][j].key.fe[3]) )
+                {
+                    zklog.error("Smt64Test() read different key at i=" + to_string(i) + " read=" + fea2string(fr, readKeyValues[i][j].key.fe) + " expected=" + fea2string(fr, keyValues[i][j].key.fe));
+                    numberOfFailedTests++;
+                }
 
-            // Check that the value is the expected one
-            if (readKeyValues[i].value != keyValues[i].value)
-            {
-                zklog.error("Smt64Test() read different key at i=" + to_string(i) + " read=" + readKeyValues[i].value.get_str(10) + " expected=" + keyValues[i].value.get_str(10));
-                numberOfFailedTests++;
+                // Check that the value is the expected one
+                if (readKeyValues[i][j].value != keyValues[i][j].value)
+                {
+                    zklog.error("Smt64Test() read different key at i=" + to_string(i) + " read=" + readKeyValues[i][j].value.get_str(10) + " expected=" + keyValues[i][j].value.get_str(10));
+                    numberOfFailedTests++;
+                }
             }
         }
+
+        TimerStopAndLog(SMT64_TEST_CHECK_READ_TREE_RESULT);
 
         // Announce the success
         if (numberOfFailedTests==0)
@@ -113,15 +169,18 @@ uint64_t Smt64Test (const Config &config)
     }
     else
     {
-        for (uint64_t i=0; i<SMT64_TEST_NUMBER_OF_KEYS; i++)
+        for (uint64_t i=0; i<SMT64_TEST_NUMBER_OF_WRITES; i++)
         {
-            zkr = pHashDB->set("", 0, root, keyValues[i].key.fe, keyValues[i].value, PERSISTENCE_DATABASE, root, NULL, NULL);
-            if (zkr != ZKR_SUCCESS)
+            for (uint64_t j=0; j<SMT64_TEST_KEYS_PER_WRITE; j++)
             {
-                zklog.error("Smt64Test() failed calling pHashDB->set() result=" + zkresult2string(zkr));
-                return 1;
+                zkr = pHashDB->set("", 0, root, keyValues[i][j].key.fe, keyValues[i][j].value, PERSISTENCE_DATABASE, root, NULL, NULL);
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("Smt64Test() failed calling pHashDB->set() result=" + zkresult2string(zkr));
+                    return 1;
+                }
+                zklog.info("Smt64Test() pHashDB->set() i=" + to_string(i) + " returned root=" + fea2string(fr, root));
             }
-            zklog.info("Smt64Test() pHashDB->set() i=" + to_string(i) + " returned root=" + fea2string(fr, root));
         }
     }
 
