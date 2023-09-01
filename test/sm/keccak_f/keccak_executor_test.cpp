@@ -3,7 +3,7 @@
 #include "timer.hpp"
 
 #if 0
-void KeccakSMTest1 (KeccakFExecutor &executor)
+void KeccakTest1 (KeccakFExecutor &executor)
 {
     /* Use a well-known input */
     uint8_t input[188] = {
@@ -47,7 +47,7 @@ void KeccakSMTest1 (KeccakFExecutor &executor)
 }
 #endif
 
-void KeccakSMTest2 (KeccakFExecutor &executor)
+void KeccakTest2 (KeccakFExecutor &executor)
 {
     cout << "Starting 54-slots testing..." << endl;
     uint8_t Sin[Keccak_NumberOfSlots][136];
@@ -81,7 +81,7 @@ void KeccakSMTest2 (KeccakFExecutor &executor)
             byte2bits(Sin[slot][i], aux);
             for (uint64_t j=0; j<8; j++)
             {
-                bit[relRef2AbsRef(SinRef0 + (i*8 + j)*9, slot)] = aux[j];
+                bit[KeccakGateConfig.relRef2AbsRef(KeccakGateConfig.sinRef0 + (i*8 + j)*9, slot)] = aux[j];
             }
         }
     }
@@ -95,7 +95,7 @@ void KeccakSMTest2 (KeccakFExecutor &executor)
             uint8_t aux[8];
             for (uint64_t j=0; j<8; j++)
             {
-                aux[j] = bit[relRef2AbsRef(SoutRef0 + (i*8 + j)*9, slot)];
+                aux[j] = bit[KeccakGateConfig.relRef2AbsRef(KeccakGateConfig.soutRef0 + (i*8 + j)*9, slot)];
             }
 
             bits2byte(aux, hashSout[slot][i]);
@@ -115,7 +115,7 @@ void KeccakSMTest2 (KeccakFExecutor &executor)
     free(bit);
 }
 
-void KeccakSMTest3 (KeccakFExecutor &executor)
+void KeccakTest3 (KeccakFExecutor &executor)
 {
     cout << "Starting 54x9 slots test..." << endl;
     KeccakFExecuteInput * pInput;
@@ -155,11 +155,11 @@ void KeccakSMTest3 (KeccakFExecutor &executor)
             uint8_t aux[256];
             for (uint64_t i=0; i<256; i++)
             {
-                if ( ( pOutput->pol[pin_a][relRef2AbsRef(SoutRef0+i*9, slot)] & (~Keccak_Mask) ) != 0 )
+                if ( ( pOutput->pol[pin_a][KeccakGateConfig.relRef2AbsRef(KeccakGateConfig.soutRef0+i*9, slot)] & (~Keccak_Mask) ) != 0 )
                 {
                     cerr << "Error: output pin a is not normalized at slot=" << slot << " bit=" << i << endl;
                 }
-                if ( ( pOutput->pol[pin_a][relRef2AbsRef(SoutRef0+i*9, slot)] & (uint64_t(1)<<(row*7)) ) == 0)
+                if ( ( pOutput->pol[pin_a][KeccakGateConfig.relRef2AbsRef(KeccakGateConfig.soutRef0+i*9, slot)] & (uint64_t(1)<<(row*7)) ) == 0)
                 {
                     aux[i] = 0;
                 }
@@ -188,12 +188,12 @@ void KeccakSMTest3 (KeccakFExecutor &executor)
     delete pOutput;
 }
 
-void KeccakSMTest4 (Goldilocks &fr, const Config &config, KeccakFExecutor &executor)
+void KeccakTest4 (Goldilocks &fr, const Config &config, KeccakFExecutor &executor)
 {    
     void * pAddress = malloc(CommitPols::pilSize());
     if (pAddress == NULL)
     {
-        zklog.error("KeccakSMTest4() failed calling malloc() of size=" + to_string(CommitPols::pilSize()));
+        zklog.error("KeccakTest4() failed calling malloc() of size=" + to_string(CommitPols::pilSize()));
         exitProcess();
     }
     CommitPols cmPols(pAddress, CommitPols::pilDegree());
@@ -253,11 +253,11 @@ void KeccakSMTest4 (Goldilocks &fr, const Config &config, KeccakFExecutor &execu
             uint8_t aux[256];
             for (uint64_t i=0; i<256; i++)
             {
-                if ( ( executor.getPol(cmPols.KeccakF.a, relRef2AbsRef(SoutRef0+i*44, slot)) & (~Keccak_Mask) ) != 0 )
+                if ( ( executor.getPol(cmPols.KeccakF.a, KeccakGateConfig.relRef2AbsRef(KeccakGateConfig.soutRef0+i*44, slot)) & (~Keccak_Mask) ) != 0 )
                 {
                     cerr << "Error: output pin a is not normalized at slot=" << slot << " bit=" << i << endl;
                 }
-                if ( ( executor.getPol(cmPols.KeccakF.a, relRef2AbsRef(SoutRef0+i*44, slot)) & (uint64_t(1)<<row) ) == 0)
+                if ( ( executor.getPol(cmPols.KeccakF.a, KeccakGateConfig.relRef2AbsRef(KeccakGateConfig.soutRef0+i*44, slot)) & (uint64_t(1)<<row) ) == 0)
                 {
                     aux[i] = 0;
                 }
@@ -294,10 +294,10 @@ uint64_t KeccakSMExecutorTest (Goldilocks &fr, const Config &config)
     cout << "KeccakSMExecutorTest() starting" << endl;
 
     KeccakFExecutor executor(fr, config);
-    //KeccakSMTest1(executor);
-    KeccakSMTest2(executor);
-    KeccakSMTest3(executor);
-    KeccakSMTest4(fr, config, executor);
+    //KeccakTest1(executor);
+    KeccakTest2(executor);
+    KeccakTest3(executor);
+    KeccakTest4(fr, config, executor);
 
     cout << "KeccakSMExecutorTest() done" << endl;
     return 0;

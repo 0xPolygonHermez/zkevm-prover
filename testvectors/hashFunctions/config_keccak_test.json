@@ -1,0 +1,89 @@
+{
+    "runExecutorServer": false,
+    "runExecutorClient": false,
+    "runExecutorClientMultithread": false,
+
+    "runStateDBServer": false,
+    "runStateDBTest": false,
+
+    "runAggregatorServer": false,
+    "runAggregatorClient": false,
+    "runAggregatorClientMock": false, 
+    
+    "runFileGenBatchProof": false,
+    "runFileGenAggregatedProof": false,
+    "runFileGenFinalProof": false,
+    "runFileProcessBatch": false,
+    "runFileProcessBatchMultithread": false,
+
+    "runKeccakScriptGenerator": false,
+    "runKeccakTest": true,
+    "runStorageSMTest": false,
+    "runBinarySMTest": false,
+    "runMemAlignSMTest": false,
+    "runSHA256Test": false,
+    "runBlakeTest": false,
+
+    "executeInParallel": false,
+    "useMainExecGenerated": true,
+    "saveRequestToFile": false,
+    "saveInputToFile": false,
+    "saveDbReadsToFile": false,
+    "saveDbReadsToFileOnChange": false,
+    "saveOutputToFile": true,
+    "saveProofToFile": true,
+    "saveResponseToFile": false,
+    "loadDBToMemCache": true,
+    "opcodeTracer": false,
+    "logRemoteDbReads": false,
+    "logExecutorServerResponses": false,
+
+    "proverServerPort": 50051,
+    "proverServerMockPort": 50052,
+    "proverServerMockTimeout": 10000000,
+    "proverClientPort": 50051,
+    "proverClientHost": "127.0.0.1",
+
+    "executorServerPort": 50071,
+    "executorROMLineTraces": false,
+    "executorClientPort": 50071,
+    "executorClientHost": "127.0.0.1",
+
+    "stateDBServerPort": 50061,
+    "stateDBURL": "local",
+
+    "aggregatorServerPort": 50081,
+    "aggregatorClientPort": 50081,
+    "aggregatorClientHost": "127.0.0.1",
+
+    "mapConstPolsFile": false,
+    "mapConstantsTreeFile": false,
+
+    "inputFile": "testvectors/batchProof/input_executor_3.json",
+    "inputFile2": "testvectors/batchProof/input_executor_1.json",
+
+    "outputPath": "runtime/output",
+    "configPath": "config",
+
+    "zkevmCmPolsAfterExecutor": "",
+    "zkevmCmPols_disabled": "runtime/zkevm.commit",
+    "c12aCmPols": "runtime/c12a.commit",
+    "recursive1CmPols_disabled": "runtime/recursive1.commit",
+    "recursive2CmPols_disabled": "runtime/recursive2.commit",
+    "recursivefCmPols_disabled": "runtime/recursivef.commit",
+    "finalCmPols_disabled": "runtime/final.commit",
+
+    "publicsOutput": "public.json",
+    "proofFile": "proof.json",
+
+    "databaseURL": "local",
+    "databaseURL_disabled": "postgresql://statedb:statedb@127.0.0.1:5432/testdb",
+    "dbNodesTableName": "state.nodes",
+    "dbProgramTableName": "state.program",
+    "dbAsyncWrite": false,
+    "cleanerPollingPeriod": 600,
+    "requestsPersistence": 3600,
+    "maxExecutorThreads": 20,
+    "maxProverThreads": 8,
+    "maxStateDBThreads": 8
+}
