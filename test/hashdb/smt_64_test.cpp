@@ -133,6 +133,8 @@ uint64_t Smt64Test (const Config &config)
 
         TimerStopAndLog(SMT64_TEST_READ_TREE);
 
+        TimerStart(SMT64_TEST_CHECK_READ_TREE_RESULT);
+
         // Check that both keys and values match the ones we wrote
         for (uint64_t i=0; i<SMT64_TEST_NUMBER_OF_WRITES; i++)
         {
@@ -156,6 +158,8 @@ uint64_t Smt64Test (const Config &config)
                 }
             }
         }
+
+        TimerStopAndLog(SMT64_TEST_CHECK_READ_TREE_RESULT);
 
         // Announce the success
         if (numberOfFailedTests==0)
