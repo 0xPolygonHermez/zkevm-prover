@@ -65,6 +65,7 @@ zkresult Smt64::writeTree (Database64 &db, const Goldilocks::Element (&oldRoot)[
 
         for (int i=chunksProcessed; i<chunksToProcess; i++)
         {
+            chunks[i]->setLevel(level);
             if (chunks[i]->data.size() > 0)
             {
                 zkr = chunks[i]->data2children();
@@ -382,6 +383,7 @@ zkresult Smt64::readTree (Database64 &db, const Goldilocks::Element (&root)[4], 
 
         for (int i=chunksProcessed; i<chunksToProcess; i++)
         {
+            chunks[i]->setLevel(level);
             if (chunks[i]->data.size() > 0)
             {
                 zkr = chunks[i]->data2children();
