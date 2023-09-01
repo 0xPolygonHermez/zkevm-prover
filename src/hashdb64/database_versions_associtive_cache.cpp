@@ -7,6 +7,7 @@
 #include "zkmax.hpp"
 #include "exit_process.hpp"
 #include "scalar.hpp"
+#include "zkassert.hpp"
 
 DatabaseVersionsAssociativeCache::DatabaseVersionsAssociativeCache()
 {
@@ -83,7 +84,7 @@ void DatabaseVersionsAssociativeCache::postConstruct(int log2IndexesSize_, int l
     indexesMask = indexesSize - 1;
 };
 
-void DatabaseVersionsAssociativeCache::addKeyVersion(Goldilocks::Element (&key)[4], const uint64_t version, const bool update)
+void DatabaseVersionsAssociativeCache::addKeyVersion(Goldilocks::Element (&key)[4], const uint64_t version)
 {
     
     lock_guard<recursive_mutex> guard(mlock);
@@ -107,9 +108,12 @@ void DatabaseVersionsAssociativeCache::addKeyVersion(Goldilocks::Element (&key)[
                 keys[cacheIndexKey + 1].fe == key[1].fe &&
                 keys[cacheIndexKey + 2].fe == key[2].fe &&
                 keys[cacheIndexKey + 3].fe == key[3].fe){
-                    if(update == false) return;
-                    present = true;
-                    break;
+                    if(versions[cacheIndex] != version){
+                        zklog.error("DatabaseVersionsAssociativeCache::addKeyVersion() version mismatch");
+                        exitProcess();
+                    }
+                    return;
+                    //rick: assert no error
             }
         }else if (emptySlot == false){
             emptySlot = true;

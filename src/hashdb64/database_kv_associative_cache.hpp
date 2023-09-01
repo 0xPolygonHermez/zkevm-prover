@@ -22,7 +22,7 @@ class DatabaseKVAssociativeCache
         uint32_t *indexes;
         Goldilocks::Element *keys;
         uint64_t *versions;
-        Goldilocks::Element *values;
+        mpz_class *values; //rick: this I do not like
         uint32_t currentCacheIndex; 
 
         uint64_t attempts;
@@ -36,11 +36,12 @@ class DatabaseKVAssociativeCache
     public:
 
         DatabaseKVAssociativeCache();
-        DatabaseKVAssociativeCache(int log2IndexesSize_, int log2CacheSize_, string name_);~DatabaseKVAssociativeCache();
+        DatabaseKVAssociativeCache(int log2IndexesSize_, int log2CacheSize_, string name_);
+        ~DatabaseKVAssociativeCache();
         void postConstruct(int log2IndexesSize_, int log2CacheSize_, string name_);
 
-        void addKeyValueVersion(Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, uint64_t version, bool update);
-        bool findKey(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value, const bool last = true, const uint64_t version=0);
+        void addKeyValueVersion(const uint64_t version, const Goldilocks::Element (&key)[4], const mpz_class &value, bool update);
+        bool findKey( const uint64_t version, const Goldilocks::Element (&key)[4], mpz_class &value);
 
         inline bool enabled() const { return (log2IndexesSize > 0); };
         inline uint32_t getCacheSize()  const { return cacheSize; };

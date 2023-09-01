@@ -294,7 +294,7 @@ zkresult Database::write(const string &_key, const Goldilocks::Element* vkey, co
         exitProcess();
     }
 
-    if (config.dbMultiWrite && !(dbMTCache.enabled() || dbMTACache.enabled()) && !persistent)
+    if (config.dbMultiWrite && !(dbMTCache.enabled() && dbMTACache.enabled()) && !persistent)
     {
         zklog.error("Database::write() called with multi-write active, cache disabled and no persistance in database, so there is no place to store the date");
         return ZKR_DB_ERROR;
