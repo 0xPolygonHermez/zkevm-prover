@@ -5,7 +5,7 @@
 #include "unistd.h"
 #include "hashdb_factory.hpp"
 
-#define SMT64_TEST_NUMBER_OF_KEYS 10
+#define SMT64_TEST_NUMBER_OF_KEYS 1000
 
 uint64_t Smt64Test (const Config &config)
 {
@@ -14,8 +14,16 @@ uint64_t Smt64Test (const Config &config)
     uint64_t numberOfFailedTests = 0;
     Goldilocks::Element root[4] = {0, 0, 0, 0};
     Goldilocks fr;
+    PoseidonGoldilocks poseidon;
     zkresult zkr;
     vector<KeyValue> keyValues;
+    bool bRandomKeys = true;
+    
+    Goldilocks::Element keyValue[12];
+    for (uint64_t i=0; i<12; i++)
+    {
+        keyValue[i] = fr.zero();
+    }
 
     HashDBInterface *pHashDB = HashDBClientFactory::createHashDBClient(fr, config);
     if (pHashDB == NULL)
@@ -24,21 +32,35 @@ uint64_t Smt64Test (const Config &config)
         return 1;
     }
 
+    TimerStart(SMT64_TEST_KEYVALUES_GENERATION);
+
     // Init the keyValues
     for (uint64_t i=0; i<SMT64_TEST_NUMBER_OF_KEYS; i++)
     {
         KeyValue kv;
-        kv.key.fe[0] = fr.fromU64(i);
-        kv.key.fe[1] = fr.zero();
-        kv.key.fe[2] = fr.zero();
-        kv.key.fe[3] = fr.zero();
+        if (bRandomKeys)
+        {
+            keyValue[0] = fr.fromU64(i);
+            poseidon.hash(kv.key.fe, keyValue);
+        }
+        else
+        {
+            kv.key.fe[0] = fr.fromU64(i);
+            kv.key.fe[1] = fr.zero();
+            kv.key.fe[2] = fr.zero();
+            kv.key.fe[3] = fr.zero();
+        }
         kv.value = i;
         keyValues.emplace_back(kv);
     }
 
+    TimerStopAndLog(SMT64_TEST_KEYVALUES_GENERATION);
+
     // Perform the test, based on the configuration
     if (config.hashDB64)
     {
+        TimerStart(SMT64_TEST_WRITE_TREE);
+
         // Call writeTree()
         uint64_t flushId = 0;
         uint64_t lastSentFlushId = 0;
@@ -49,6 +71,10 @@ uint64_t Smt64Test (const Config &config)
             return 1;
         }
         //zklog.info("Smt64Test() smt64.writeTree() returned root=" + fea2string(fr, root) + " flushId=" + to_string(flushId));
+
+        TimerStopAndLog(SMT64_TEST_WRITE_TREE);
+
+        TimerStart(SMT64_TEST_WAIT_FOR_FLUSH);
 
         // Wait for the returned flush ID to be sent
         do
@@ -68,6 +94,8 @@ uint64_t Smt64Test (const Config &config)
             }
             sleep(1);
         } while (true);
+
+        TimerStopAndLog(SMT64_TEST_WAIT_FOR_FLUSH);
         
         // Make a copy of the key values, overwriting the value with an invalid value
         vector<KeyValue> readKeyValues = keyValues;
@@ -76,6 +104,8 @@ uint64_t Smt64Test (const Config &config)
             readKeyValues[i].value = 0xFFFFFFFFFFFFFFFF;
         }
 
+        TimerStart(SMT64_TEST_READ_TREE);
+
         // Call readTree() with the returned root
         zkr = pHashDB->readTree(root, readKeyValues);
         if (zkr != ZKR_SUCCESS)
@@ -83,6 +113,8 @@ uint64_t Smt64Test (const Config &config)
             zklog.error("Smt64Test() failed calling smt64.readTree() result=" + zkresult2string(zkr));
             return 1;
         }
+
+        TimerStopAndLog(SMT64_TEST_READ_TREE);
 
         // Check that both keys and values match the ones we wrote
         for (uint64_t i=0; i<SMT64_TEST_NUMBER_OF_KEYS; i++)
