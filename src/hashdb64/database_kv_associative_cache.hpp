@@ -22,7 +22,7 @@ class DatabaseKVAssociativeCache
         uint32_t *indexes;
         Goldilocks::Element *keys;
         uint64_t *versions;
-        mpz_class *values; //rick: this I do not like
+        mpz_class *values;
         uint32_t currentCacheIndex; 
 
         uint64_t attempts;

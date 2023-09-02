@@ -84,7 +84,7 @@ void DatabaseVersionsAssociativeCache::postConstruct(int log2IndexesSize_, int l
     indexesMask = indexesSize - 1;
 };
 
-void DatabaseVersionsAssociativeCache::addKeyVersion(Goldilocks::Element (&key)[4], const uint64_t version)
+void DatabaseVersionsAssociativeCache::addKeyVersion(const Goldilocks::Element (&key)[4], const uint64_t version)
 {
     
     lock_guard<recursive_mutex> guard(mlock);

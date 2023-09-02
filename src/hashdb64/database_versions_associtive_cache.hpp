@@ -38,7 +38,7 @@ class DatabaseVersionsAssociativeCache
         ~DatabaseVersionsAssociativeCache();
         void postConstruct(int log2IndexesSize_, int log2CacheSize_, string name_);
 
-        void addKeyVersion(Goldilocks::Element (&key)[4], const uint64_t version); //rick: no update!
+        void addKeyVersion(const Goldilocks::Element (&key)[4], const uint64_t version); //rick: no update!
         bool findKey(const Goldilocks::Element (&key)[4], uint64_t &version);
         
         inline bool enabled() const { return (log2IndexesSize > 0); };

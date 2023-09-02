@@ -14,6 +14,9 @@
 #include "database_connection.hpp"
 #include "zkassert.hpp"
 #include "multi_write_64.hpp"
+#include "database_versions_associtive_cache.hpp"
+#include "database_kv_associative_cache.hpp"
+#include "key_value.hpp"
 
 using namespace std;
 
@@ -70,6 +73,7 @@ public:
 private:
     pthread_t senderPthread; // Database sender thread
     pthread_t cacheSynchPthread; // Cache synchronization thread
+    int maxVersions; // Maximum number of versions to store in the database KV
 
 private:
     // Remote database based on Postgres (PostgreSQL)
@@ -79,11 +83,20 @@ private:
     zkresult writeRemote(bool bProgram, const string &key, const string &value);
     zkresult writeGetTreeFunction(void);
 
+    zkresult readRemoteKV(const uint64_t version, const Goldilocks::Element (&key)[4],  mpz_class value); 
+    zkresult writeRemoteKV(const uint64_t version, const Goldilocks::Element (&key)[4], const mpz_class &value);
+    zkresult readRemoteVersion(const Goldilocks::Element (&root)[4], uint64_t version);
+    zkresult writeRemoteVersion(const Goldilocks::Element (&root)[4], const uint64_t version); 
+
+    bool extractVersion(const pqxx::field& fieldData, const uint64_t version, mpz_class &value);
+
 public:
 #ifdef DATABASE_USE_CACHE
     // Cache static instances
     static DatabaseMTCache64 dbMTCache;
     static DatabaseProgramCache64 dbProgramCache;
+    static DatabaseKVAssociativeCache dbKVACache;
+    static DatabaseVersionsAssociativeCache dbVersionACache;
 
     // This is a fixed key to store the latest state root hash, used to load it to the cache
     // This key is "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
@@ -103,8 +116,15 @@ public:
     zkresult read(vector<DB64Query> &dbQueries);
     zkresult write(const string &_key, const Goldilocks::Element* vkey, const string &value, const bool persistent);
     zkresult write(vector<DB64Query> &dbQueries, const bool persistent);
-     zkresult getProgram(const string &_key, vector<uint8_t> &value, DatabaseMap *dbReadLog);
+    zkresult getProgram(const string &_key, vector<uint8_t> &value, DatabaseMap *dbReadLog);
     zkresult setProgram(const string &_key, const vector<uint8_t> &value, const bool persistent);
+    zkresult readKV(const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, DatabaseMap *dbReadLog); 
+    zkresult readKV(const Goldilocks::Element (&root)[4], vector<KeyValue> &KVs, DatabaseMap *dbReadLog);
+    zkresult writeKV(const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, bool persistent);
+    zkresult writeKV(const Goldilocks::Element (&root)[4], const vector<KeyValue> &KVs, bool persistent);
+    zkresult readVersion(const Goldilocks::Element (&root)[4], uint64_t& version, DatabaseMap *dbReadLog);
+    zkresult writeVersion(const Goldilocks::Element (&root)[4], const uint64_t version, bool persistent);
+
 
 private:
     zkresult createStateRoot(void);
