@@ -14,6 +14,7 @@
 #include "exit_process.hpp"
 #include "zkmax.hpp"
 #include "hashdb_remote.hpp"
+#include "key_value.hpp"
 
 #ifdef DATABASE_USE_CACHE
 
@@ -380,6 +381,7 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
         string keyStr_ = fea2string(fr, key[0], key[1], key[2], key[3]); 
         keyStr = NormalizeToNFormat(keyStr_, 64);
     }
+    KeyValue mwEntry;
     
     uint64_t version;
     rv = readVersion(root, version, dbReadLog);
@@ -393,23 +395,17 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
             rkv = ZKR_SUCCESS;
 
         } 
-        #if 0 //MULTIWRITE PART
         // If the key is pending to be stored in database, but already deleted from cache
-        else if (config.dbMultiWrite && multiWrite.findNode(key, value))
+        else if (config.dbMultiWrite && multiWrite.findKeyValue(version, mwEntry))
         {
+            value = mwEntry.value;
             // Add to the read log
-            if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
+            if (dbReadLog != NULL) dbReadLog->add(keyStr, value, true, TimeDiff(t));
 
             // Store it locally to avoid any future remote access for this key
-            if(usingAssociativeCache()){
-                dbMTACache.addKeyValue(vkey, value, false);
-            }
-            else if(dbMTCache.enabled()){                
-                dbMTCache.add(key, value, false);
-            }
-            r = ZKR_SUCCESS;
+            dbKVACache.addKeyValueVersion(version, key, value, false);                
+            rkv = ZKR_SUCCESS;
         }
-        #endif
         else if(useRemoteDB)
         {
         
@@ -441,20 +437,20 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
                 if (dbReadLog != NULL) dbReadLog->add(keyStr, value, false, TimeDiff(t));
             }
         }
-        // If we could not find the value, report the error
-        if (rv != ZKR_SUCCESS || rkv != ZKR_SUCCESS)
-        {
-            zklog.warning("Database64::readKV() requested a key that does not exist (ZKR_DB_KEY_NOT_FOUND): " + keyStr + ", now trying to read from the hasDB");
-            string valueStr;
-            rkv = read(keyStr, key, valueStr, dbReadLog);
-            if(rkv == ZKR_SUCCESS){
-                value = mpz_class(valueStr, 16);
-                writeKV(root, key, value, true);
-                if (dbReadLog != NULL) dbReadLog->add(keyStr, value, false, TimeDiff(t));
-            }else{
-                zklog.error("Database64::readKV() requested a key in that does not exist even in hasdb (ZKR_DB_KEY_NOT_FOUND): " + keyStr);
-                rkv = ZKR_DB_KEY_NOT_FOUND;
-            }
+    }
+    // If we could not find the value, report the error
+    if (rv != ZKR_SUCCESS || rkv != ZKR_SUCCESS)
+    {
+        zklog.warning("Database64::readKV() requested a key that does not exist (ZKR_DB_KEY_NOT_FOUND): " + keyStr + ", now trying to read from the hasDB");
+        string valueStr;
+        rkv = read(keyStr, key, valueStr, dbReadLog);
+        if(rkv == ZKR_SUCCESS){
+            value = mpz_class(valueStr, 16);
+            writeKV(root, key, value, true);
+            if (dbReadLog != NULL) dbReadLog->add(keyStr, value, false, TimeDiff(t));
+        }else{
+            zklog.error("Database64::readKV() requested a key in that does not exist even in hasdb (ZKR_DB_KEY_NOT_FOUND): " + keyStr);
+            rkv = ZKR_DB_KEY_NOT_FOUND;
         }
     }
 #ifdef LOG_DB_READ
@@ -585,57 +581,49 @@ zkresult Database64::readVersion(const Goldilocks::Element (&root)[4], uint64_t&
         if (dbReadLog != NULL) dbReadLog->add(rootStr, version, true, TimeDiff(t));
         r = ZKR_SUCCESS;
 
-    } 
-#if 0 //MULTIWRITE PART
-    // If the key is pending to be stored in database, but already deleted from cache
-    else if (config.dbMultiWrite && multiWrite.findNode(key, value))
-    {
-        // Add to the read log
-        if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
-
-        // Store it locally to avoid any future remote access for this key
-        if(usingAssociativeCache()){
-            dbMTACache.addKeyValue(vkey, value, false);
-        }
-        else if(dbMTCache.enabled()){                
-            dbMTCache.add(key, value, false);
-        }
-        r = ZKR_SUCCESS;
-    }
-#endif
-    else if(useRemoteDB)
-    {
-    
-        r = readRemoteVersion(root, version);
-        if ( (r != ZKR_SUCCESS) && (config.dbReadRetryDelay > 0) )
+    }else{
+        if(!dbReadLog->getSaveKeys()){
+            string rootStr_ = fea2string(fr, root[0], root[1], root[2], root[3]); 
+            rootStr = NormalizeToNFormat(rootStr_, 64);
+        } 
+        // If the key is pending to be stored in database, but already deleted from cache
+        if (config.dbMultiWrite && multiWrite.findVersion(rootStr, version))
         {
-            for (uint64_t i=0; i<config.dbReadRetryCounter; i++)
-            {
-                if(!dbReadLog->getSaveKeys()){
-                    string rootStr_ = fea2string(fr, root[0], root[1], root[2], root[3]); 
-                    rootStr = NormalizeToNFormat(rootStr_, 64);
-                }
-                zklog.warning("Database64::readVersion() failed calling readRemote() with error=" + zkresult2string(r) + "; will retry after " + to_string(config.dbReadRetryDelay) + "us key=" + rootStr + " i=" + to_string(i));
-
-                // Retry after dbReadRetryDelay us
-                usleep(config.dbReadRetryDelay);
-                r = readRemoteVersion(root, version);
-                if (r == ZKR_SUCCESS)
-                {
-                    break;
-                }
-                zklog.warning("Database64::readVersion() retried readRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r) + " i=" + to_string(i));
-            }
-        }        
-        if (r == ZKR_SUCCESS)
-        {
-            dbVersionACache.addKeyVersion(root, version);
-            
             // Add to the read log
-            if (dbReadLog != NULL) dbReadLog->add(rootStr, version, false, TimeDiff(t));
+            if (dbReadLog != NULL) dbReadLog->add(rootStr, version, true, TimeDiff(t));
+
+            // Store it locally to avoid any future remote access for this key
+            
+            r = ZKR_SUCCESS;
+
+        }else if(useRemoteDB){
+        
+            r = readRemoteVersion(root, version);
+            if ( (r != ZKR_SUCCESS) && (config.dbReadRetryDelay > 0) )
+            {
+                for (uint64_t i=0; i<config.dbReadRetryCounter; i++)
+                {
+                    zklog.warning("Database64::readVersion() failed calling readRemote() with error=" + zkresult2string(r) + "; will retry after " + to_string(config.dbReadRetryDelay) + "us key=" + rootStr + " i=" + to_string(i));
+
+                    // Retry after dbReadRetryDelay us
+                    usleep(config.dbReadRetryDelay);
+                    r = readRemoteVersion(root, version);
+                    if (r == ZKR_SUCCESS)
+                    {
+                        break;
+                    }
+                    zklog.warning("Database64::readVersion() retried readRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r) + " i=" + to_string(i));
+                }
+            }        
+            if (r == ZKR_SUCCESS)
+            {
+                dbVersionACache.addKeyVersion(root, version);
+                
+                // Add to the read log
+                if (dbReadLog != NULL) dbReadLog->add(rootStr, version, false, TimeDiff(t));
+            }
         }
     }
-
     // If we could not find the value, report the error
     if (r == ZKR_UNSPECIFIED)
     {
@@ -1230,28 +1218,29 @@ bool Database64::extractVersion(const pqxx::field& fieldData, const uint64_t ver
     return false;
 }
 
-zkresult Database64::writeRemoteKV(const uint64_t version, const Goldilocks::Element (&key)[4], const mpz_class &value)
+zkresult Database64::writeRemoteKV(const uint64_t version, const Goldilocks::Element (&key)[4], const mpz_class &value, bool noMultiWrite)
 {
-    zkresult result = ZKR_SUCCESS;
-    
-    
-    if (config.dbMultiWrite)
+    zkresult result = ZKR_SUCCESS; 
+    if (config.dbMultiWrite && !noMultiWrite)
     {
         multiWrite.Lock();
-
-        /*
-            PENDING: rick
-        */
-
+        KeyValue auxKV;
+        auxKV.key.fe[0] = key[0];
+        auxKV.key.fe[1] = key[1];
+        auxKV.key.fe[2] = key[2];
+        auxKV.key.fe[3] = key[3];
+        auxKV.value = value;
+        multiWrite.data[multiWrite.pendingToFlushDataIndex].keyValueIntray[version] = auxKV;
+#ifdef LOG_DB_WRITE_REMOTE
+            zklog.info("Database64::writeRemote() version=" + to_string(version) + " multiWrite=[" + multiWrite.print() + "]");
+#endif
         multiWrite.Unlock();
     }
     else
     {
         const string &tableName = config.dbKeyValueTableName;
-
         string keyStr_ = fea2string(fr, key[0], key[1], key[2], key[3]); 
         string keyStr = NormalizeToNFormat(keyStr_, 64);
-        
         string insertStr = to_string(version) + value.get_str(16);
         assert(insertStr.size() == 80);
 
@@ -1426,15 +1415,13 @@ zkresult Database64::writeRemoteVersion(const Goldilocks::Element (&root)[4], co
     string rootStr_ = fea2string(fr, root[0], root[1], root[2], root[3]); 
     string rootStr = NormalizeToNFormat(rootStr_, 64);
     
-    
     if (config.dbMultiWrite)
     {
         multiWrite.Lock();
-
-        /*
-            rick: pending
-        */
-
+        multiWrite.data[multiWrite.pendingToFlushDataIndex].versionIntray[rootStr] = version;
+#ifdef LOG_DB_WRITE_REMOTE
+            zklog.info("Database64::writeRemote() root=" + rootStr + " version " + to_string(version) + " multiWrite=[" + multiWrite.print() + "]");
+#endif
         multiWrite.Unlock();
     }
     else
@@ -2098,6 +2085,54 @@ zkresult Database64::sendData (void)
                         }
                     }
                     data.multiQuery.queries[currentQuery].query += " ON CONFLICT (hash) DO NOTHING;";
+                }
+            }
+
+            // If there are keyValues add to db
+            if (data.keyValue.size() > 0)
+            {
+                unordered_map<uint64_t, KeyValue>::const_iterator it=data.keyValue.begin();
+                while (it != data.keyValue.end())
+                {
+                   writeRemoteKV(it->first,it->second.key.fe,it->second.value, true);
+                }
+            }
+            // If there are versions add to db
+            if (data.version.size() > 0)
+            {
+                unordered_map<string, uint64_t>::const_iterator it=data.version.begin();
+                while (it != data.version.end())
+                {
+                    // If queries is empty or last query is full, add a new query
+                    if ( (data.multiQuery.queries.size() == 0) || (data.multiQuery.queries[currentQuery].full))
+                    {
+                        SingleQuery query;
+                        data.multiQuery.queries.emplace_back(query);
+                        currentQuery = data.multiQuery.queries.size() - 1;
+                    }
+
+                    data.multiQuery.queries[currentQuery].query += "INSERT INTO " + config.dbVersionTableName + " ( hash, version ) VALUES ";
+                    firstValue = true;
+                    for (; it != data.version.end(); it++)
+                    {
+                        if (!firstValue)
+                        {
+                            data.multiQuery.queries[currentQuery].query += ", ";
+                        }
+                        firstValue = false;
+                        data.multiQuery.queries[currentQuery].query += "( E\'\\\\x" + it->first + "\'," + to_string(it->second) +"  ) ";
+#ifdef LOG_DB_SEND_DATA
+                        zklog.info("Database64::sendData() inserting version key=" + it->first + " version=" + to_string(it->second));
+#endif
+                        if (data.multiQuery.queries[currentQuery].query.size() >= config.dbMultiWriteSingleQuerySize)
+                        {
+                            // Mark query as full
+                            data.multiQuery.queries[currentQuery].full = true;
+                            break;
+                        }
+                    }
+                    data.multiQuery.queries[currentQuery].query += " ON CONFLICT (hash) DO NOTHING;";
+                   
                 }
             }
 

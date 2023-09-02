@@ -84,7 +84,7 @@ private:
     zkresult writeGetTreeFunction(void);
 
     zkresult readRemoteKV(const uint64_t version, const Goldilocks::Element (&key)[4],  mpz_class value); 
-    zkresult writeRemoteKV(const uint64_t version, const Goldilocks::Element (&key)[4], const mpz_class &value);
+    zkresult writeRemoteKV(const uint64_t version, const Goldilocks::Element (&key)[4], const mpz_class &value, bool noMultiWrite = false);
     zkresult readRemoteVersion(const Goldilocks::Element (&root)[4], uint64_t version);
     zkresult writeRemoteVersion(const Goldilocks::Element (&root)[4], const uint64_t version); 
 
