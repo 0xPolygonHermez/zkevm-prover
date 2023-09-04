@@ -134,7 +134,7 @@ zkresult Database::read(const string &_key, Goldilocks::Element (&vkey)[4], vect
         if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
         r = ZKR_SUCCESS;
 
-    } else if( dbMTCache.enabled() || dbMTCache.find(key, value)){
+    } else if( dbMTCache.enabled() && dbMTCache.find(key, value)){
         
         if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
         r = ZKR_SUCCESS;
@@ -294,7 +294,7 @@ zkresult Database::write(const string &_key, const Goldilocks::Element* vkey, co
         exitProcess();
     }
 
-    if (config.dbMultiWrite && !(dbMTCache.enabled() && dbMTACache.enabled()) && !persistent)
+    if (config.dbMultiWrite && !(dbMTCache.enabled() || dbMTACache.enabled()) && !persistent)
     {
         zklog.error("Database::write() called with multi-write active, cache disabled and no persistance in database, so there is no place to store the date");
         return ZKR_DB_ERROR;
