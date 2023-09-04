@@ -25,6 +25,8 @@ DatabaseMTCache64 Database64::dbMTCache;
 DatabaseProgramCache64 Database64::dbProgramCache;
 DatabaseKVAssociativeCache Database64::dbKVACache;
 DatabaseVersionsAssociativeCache Database64::dbVersionACache;
+uint64_t Database64::latestVersionCache=1;
+
 
 string Database64::dbStateRootKey("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // 64 f's
 Goldilocks::Element Database64::dbStateRootvKey[4] = {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF};
@@ -758,6 +760,46 @@ zkresult Database64::writeVersion(const Goldilocks::Element (&root)[4], const ui
     }
 #endif
 
+    return r;
+}
+
+zkresult Database64::readLatestVersion(uint64_t &version){
+
+    if (!bInitialized)
+    {
+        zklog.error("Database64::readLatestVersion() called uninitialized");
+        exitProcess();
+    }
+    version = latestVersionCache;
+    return ZKR_SUCCESS;
+}
+
+zkresult Database64::createLatestVersion(uint64_t &version, bool persistent)
+{
+
+    if (!bInitialized)
+    {
+        zklog.error("Database64::createLatestVersion() called uninitialized");
+        exitProcess();
+    }
+    
+    zkresult r;
+
+    if ( useRemoteDB && persistent)
+    {
+        
+        r = createRemoteLatestVersion(version);
+    }
+    else
+    {
+        r = ZKR_SUCCESS;
+    }
+
+    if (r == ZKR_SUCCESS)
+    {
+        latestVersionCache=version;
+        
+    }
     return r;
 }
 
@@ -1524,6 +1566,123 @@ zkresult Database64::writeRemoteVersion(const Goldilocks::Element (&root)[4], co
     }
 
     return result;
+}
+
+zkresult Database64::readRemoteLatestVersion(uint64_t &version){
+    
+    const string &tableName = config.dbLatestVersionTableName;
+
+
+    if (config.logRemoteDbReads)
+    {
+        zklog.info("Database64::readRemoteLatestVersion() table=" + tableName );
+    }
+
+    // Get a free read db connection
+    DatabaseConnection * pDatabaseConnection = getConnection();
+
+    try
+    {
+        // Prepare the query
+        string query = "SELECT * FROM " + tableName + ";";
+
+        pqxx::result rows;
+
+        // Start a transaction.
+        pqxx::nontransaction n(*(pDatabaseConnection->pConnection));
+
+        // Execute the query
+        rows = n.exec(query);
+
+        // Commit your transaction
+        n.commit();
+
+        // Process the result
+        if (rows.size() == 0)
+        {
+            disposeConnection(pDatabaseConnection);
+            return ZKR_DB_KEY_NOT_FOUND;
+        }
+        else if (rows.size() > 1)
+        {
+            zklog.error("Database64::readRemoteLatestVersion() table=" + tableName + " got more than one row;" );
+            exitProcess();
+        }
+
+        pqxx::row const row = rows[0];
+        if (row.size() != 1)
+        {
+            zklog.error("DatabaseKV::readRemoteLatestVersion() table=" + tableName + " got an invalid number of colums;");
+            exitProcess();
+        }
+        pqxx::field const fieldData = row[0];
+        if (!fieldData.is_null()) {
+            fieldData.as<uint64_t>(version);
+        } else {
+            zklog.error("DatabaseKV::readRemoteLatestVersion() table=" + tableName + " got a null version;");
+        }
+    }
+    catch (const std::exception &e)
+    {
+        zklog.error("Database64::readRemoteLatestVersion() table=" + tableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
+        queryFailed();
+        disposeConnection(pDatabaseConnection);
+        return ZKR_DB_ERROR;
+    }
+    
+    // Dispose the read db conneciton
+    disposeConnection(pDatabaseConnection);
+
+    return ZKR_SUCCESS;
+}
+zkresult Database64::createRemoteLatestVersion(uint64_t &version){
+    
+    
+    zkresult rr = readLatestVersion(version);
+    if (rr != ZKR_SUCCESS)
+    {
+        zklog.error("Database64::createRemoteLatestVersion() readRemoteLatestVersion() failed with error=" + zkresult2string(rr));
+        return rr;
+    }
+    uint64_t newVersion = version+1;
+
+    zkresult rw = ZKR_SUCCESS;    
+
+    const string &tableName =  config.dbLatestVersionTableName;
+    string query = "UPDATE " + tableName + " ( version ) VALUES ( " + to_string(newVersion) +");";
+    DatabaseConnection * pDatabaseConnection = getConnection();
+
+    try
+    {        
+
+#ifdef DATABASE_COMMIT
+        if (autoCommit)
+#endif
+        {
+            pqxx::work w(*(pDatabaseConnection->pConnection));
+            pqxx::result res = w.exec(query);
+            w.commit();
+        }
+#ifdef DATABASE_COMMIT
+        else
+        {
+            if (transaction == NULL)
+                transaction = new pqxx::work{*pConnectionWrite};
+            pqxx::result res = transaction->exec(query);
+        }
+#endif
+    }
+    catch (const std::exception &e)
+    {
+        zklog.error("Database::writeRemoteVersion() table=" + tableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
+        rw = ZKR_DB_ERROR;
+        queryFailed();
+    }
+
+    disposeConnection(pDatabaseConnection);
+    
+
+    return rw;
 }
 
 zkresult Database64::createStateRoot(void)

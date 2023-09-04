@@ -18,6 +18,8 @@ PGPASSWORD=$3 psql -U $2 -h 127.0.0.1 -p 5432 -d $1 -c 'create table state.nodes
 PGPASSWORD=$3 psql -U $2 -h 127.0.0.1 -p 5432 -d $1 -c 'create table state.program (hash bytea primary key, data bytea not null);'
 PGPASSWORD=$3 psql -U $2 -h 127.0.0.1 -p 5432 -d $1 -c 'create table state.keyvalue (key bytea primary key, data bytea);'
 PGPASSWORD=$3 psql -U $2 -h 127.0.0.1 -p 5432 -d $1 -c 'create table state.version (hash bytea primary key, version bigint);'
+PGPASSWORD=$3 psql -U $2 -h 127.0.0.1 -p 5432 -d $1 -c 'create table state.latestVersion (version bigint);'
+
 
 if [ $# == 4 ]
     then

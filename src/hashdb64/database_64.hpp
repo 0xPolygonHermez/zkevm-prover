@@ -87,6 +87,8 @@ private:
     zkresult writeRemoteKV(const uint64_t version, const Goldilocks::Element (&key)[4], const mpz_class &value, bool noMultiWrite = false);
     zkresult readRemoteVersion(const Goldilocks::Element (&root)[4], uint64_t version);
     zkresult writeRemoteVersion(const Goldilocks::Element (&root)[4], const uint64_t version); 
+    zkresult readRemoteLatestVersion(uint64_t &version);
+    zkresult createRemoteLatestVersion(uint64_t &version);
 
     bool extractVersion(const pqxx::field& fieldData, const uint64_t version, mpz_class &value);
 
@@ -97,6 +99,7 @@ public:
     static DatabaseProgramCache64 dbProgramCache;
     static DatabaseKVAssociativeCache dbKVACache;
     static DatabaseVersionsAssociativeCache dbVersionACache;
+    static uint64_t latestVersionCache;
 
     // This is a fixed key to store the latest state root hash, used to load it to the cache
     // This key is "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
@@ -126,7 +129,8 @@ public:
     zkresult writeKV(const uint64_t& version, const vector<KeyValue> &KVs, bool persistent);
     zkresult readVersion(const Goldilocks::Element (&root)[4], uint64_t& version, DatabaseMap *dbReadLog);
     zkresult writeVersion(const Goldilocks::Element (&root)[4], const uint64_t version, bool persistent);
-
+    zkresult readLatestVersion(uint64_t &version);
+    zkresult createLatestVersion(uint64_t &version, bool persistent);
 
 private:
     zkresult createStateRoot(void);

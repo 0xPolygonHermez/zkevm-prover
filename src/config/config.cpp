@@ -262,6 +262,7 @@ void Config::load(json &config)
     ParseString(config, "dbProgramTableName", "DB_PROGRAM_TABLE_NAME", dbProgramTableName, "state.program");
     ParseString(config, "dbKeyValueTableName", "DB_KEYVALUE_TABLE_NAME", dbKeyValueTableName, "state.keyvalue");
     ParseString(config, "dbKeyVersionTableName", "DB_VERSION_TABLE_NAME", dbVersionTableName, "state.version");
+    ParseString(config, "dbLatestVersionTableName", "DB_LATEST_VERSION_TABLE_NAME", dbLatestVersionTableName, "state.latestVersion");
     ParseBool(config, "dbMultiWrite", "DB_MULTIWRITE", dbMultiWrite, true);
     ParseU64(config, "dbMultiWriteSingleQuerySize", "DB_MULTIWRITE_SINGLE_QUERY_SIZE", dbMultiWriteSingleQuerySize, 20*1024*1024);
     ParseBool(config, "dbConnectionsPool", "DB_CONNECTIONS_POOL", dbConnectionsPool, true);
@@ -456,6 +457,7 @@ void Config::print(void)
     zklog.info("    dbProgramTableName=" + dbProgramTableName);
     zklog.info("    dbKeyValueTableName=" + dbKeyValueTableName);
     zklog.info("    dbVersionTableName=" + dbVersionTableName);
+    zklog.info("    dbLatestVersionTableName=" + dbLatestVersionTableName);
     zklog.info("    dbMultiWrite=" + to_string(dbMultiWrite));
     zklog.info("    dbMultiWriteSingleQuerySize=" + to_string(dbMultiWriteSingleQuerySize));
     zklog.info("    dbConnectionsPool=" + to_string(dbConnectionsPool));
