@@ -25,7 +25,7 @@ DatabaseMTCache64 Database64::dbMTCache;
 DatabaseProgramCache64 Database64::dbProgramCache;
 DatabaseKVAssociativeCache Database64::dbKVACache;
 DatabaseVersionsAssociativeCache Database64::dbVersionACache;
-uint64_t Database64::latestVersionCache=1;
+uint64_t Database64::latestVersionCache=0;
 
 
 string Database64::dbStateRootKey("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // 64 f's
