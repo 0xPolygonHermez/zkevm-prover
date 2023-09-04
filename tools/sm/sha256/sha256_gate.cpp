@@ -16,7 +16,8 @@ GateConfig SHA256GateConfig = GateConfig(
 	uint64_t(44),
 	uint64_t((45+(768*44))),
 	uint64_t(256),
-	uint64_t(44)
+	uint64_t(44),
+    uint64_t(1<<23) // TODO
 );
 
 void SHA256GateString (const string &s, string &hash)

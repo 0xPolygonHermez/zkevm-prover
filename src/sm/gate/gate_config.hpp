@@ -16,6 +16,7 @@ public:
     uint64_t soutRef0;
     uint64_t soutRefNumber;
     uint64_t soutRefDistance;
+    uint64_t polLength;
 
     GateConfig() :
         zeroRef(0),
@@ -27,9 +28,10 @@ public:
         sinRefDistance(0),
         soutRef0(0),
         soutRefNumber(0),
-        soutRefDistance(0) {};
+        soutRefDistance(0),
+        polLength(0) {};
 
-    GateConfig(uint64_t zeroRef, uint64_t slotSize, uint64_t maxRefs, uint64_t firstNextRef, uint64_t sinRef0, uint64_t sinRefNumber, uint64_t sinRefDistance, uint64_t soutRef0, uint64_t soutRefNumber, uint64_t soutRefDistance) :
+    GateConfig(uint64_t zeroRef, uint64_t slotSize, uint64_t maxRefs, uint64_t firstNextRef, uint64_t sinRef0, uint64_t sinRefNumber, uint64_t sinRefDistance, uint64_t soutRef0, uint64_t soutRefNumber, uint64_t soutRefDistance, uint64_t polLength) :
         zeroRef(zeroRef),
         slotSize(slotSize),
         maxRefs(maxRefs),
@@ -39,7 +41,8 @@ public:
         sinRefDistance(sinRefDistance),
         soutRef0(soutRef0),
         soutRefNumber(soutRefNumber),
-        soutRefDistance(soutRefDistance) {};
+        soutRefDistance(soutRefDistance),
+        polLength(polLength) {};
 
     // Converts relative references to absolute references, based on the slot
     inline uint64_t relRef2AbsRef (uint64_t ref, uint64_t slot)

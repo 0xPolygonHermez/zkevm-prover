@@ -13,7 +13,8 @@ GateConfig KeccakGateConfig = GateConfig(
 	uint64_t(44),
 	uint64_t(45+(1600*44)),
 	uint64_t(1600),
-	uint64_t(44)
+	uint64_t(44),
+    uint64_t(1<<23)
 );
 
 /*

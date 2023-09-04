@@ -535,10 +535,7 @@ int main(int argc, char **argv)
     {
         // Keccak2Test();
         KeccakTest();
-        // These tests are disabled pending review,
-        // as they were confirmed to not work correctly
-        // on August 29th, 2023. -- Nadim
-        // KeccakSMExecutorTest(fr, config);
+        KeccakSMExecutorTest(fr, config);
     }
 
     // Test Storage SM

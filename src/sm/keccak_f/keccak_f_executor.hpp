@@ -9,7 +9,7 @@
 #include "sm/pols_generated/commit_pols.hpp"
 #include "timer.hpp"
 #include "gate_state.hpp"
-#include "keccak_config.hpp"
+#include "keccak.hpp"
 
 USING_PROVER_FORK_NAMESPACE;
 
@@ -18,7 +18,7 @@ using namespace std;
 class KeccakFExecuteInput
 {
 public:
-    uint8_t Sin[Keccak_NumberOfSlots][9][1600];
+    uint8_t Sin[54][9][1600];
     KeccakFExecuteInput ()
     {
         memset(Sin, 0, sizeof(Sin));
@@ -28,7 +28,7 @@ public:
 class KeccakFExecuteOutput
 {
 public:
-    uint64_t pol[3][Keccak_PolLength];
+    uint64_t pol[3][1<<23];
 };
 
 class KeccakFExecutor
@@ -46,7 +46,7 @@ public:
         fr(fr),
         config(config),
         N(PROVER_FORK_NAMESPACE::KeccakFCommitPols::pilDegree()),
-        numberOfSlots((N-1)/Keccak_SlotSize)
+        numberOfSlots((N-1)/KeccakGateConfig.slotSize)
     {
         bLoaded = false;
 
