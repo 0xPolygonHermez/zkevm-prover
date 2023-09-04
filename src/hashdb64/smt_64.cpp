@@ -508,6 +508,43 @@ zkresult Smt64::readTree (Database64 &db, const Goldilocks::Element (&root)[4], 
 
 zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, SmtSetResult &result, DatabaseMap *dbReadLog)
 {
+#ifdef LOG_SMT
+    zklog.info("Smt64::set() called with oldRoot=" + fea2string(fr,oldRoot) + " key=" + fea2string(fr,key) + " value=" + value.get_str(16) + " persistent=" + to_string(persistent));
+#endif
+
+    zkresult zkr;
+
+    bool bUseStateManager = db.config.stateManager && (batchUUID.size() > 0);
+
+    if (bUseStateManager)
+    {
+        // Set the old state root
+        string oldRootString;
+        oldRootString = fea2string(fr, oldRoot);
+        bool bIsVirtual = stateManager64.isVirtualStateRoot(oldRootString);
+        stateManager64.setOldStateRoot(batchUUID, tx, oldRootString, bIsVirtual, persistence);
+
+        // Write the key-value pair
+        string hashString = NormalizeToNFormat(fea2string(fr, key), 64);
+        zkr = stateManager64.write(batchUUID, tx, hashString, value, persistence);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("Smt64::set() failed calling stateManager.write() key=" + hashString + " result=" + to_string(zkr) + "=" + zkresult2string(zkr));
+        }
+
+        // Get a new state root
+        Goldilocks::Element newRoot[4]; // TODO: Get a new state root
+        string newRootString;
+        stateManager64.getVirtualStateRoot(newRoot, newRootString);
+
+        // Set the new sttae root
+        stateManager64.setNewStateRoot(batchUUID, tx, newRootString, true, persistence);
+    }
+    else
+    {
+        // TODO: implementation
+    }
+
 #if 0
 #ifdef LOG_SMT
     zklog.info("Smt64::set() called with oldRoot=" + fea2string(fr,oldRoot) + " key=" + fea2string(fr,key) + " value=" + value.get_str(16) + " persistent=" + to_string(persistent));

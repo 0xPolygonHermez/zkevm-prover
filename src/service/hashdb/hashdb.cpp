@@ -233,7 +233,7 @@ zkresult HashDB::flush (const string &batchUUID, const string &newStateRoot, con
     {
         if (config.stateManager && (batchUUID.size() != 0))
         {
-            result = stateManager64.flush(batchUUID, db64, flushId, storedFlushId);
+            result = stateManager64.flush(batchUUID, newStateRoot, persistence, db64, flushId, storedFlushId);
         }
         else
         {
