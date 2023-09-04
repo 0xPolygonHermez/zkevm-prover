@@ -1517,6 +1517,34 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
 
 zkresult Smt64::get (const string &batchUUID, Database64 &db, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], SmtGetResult &result, DatabaseMap *dbReadLog)
 {
+#ifdef LOG_SMT
+    zklog.info("Smt64::get() called with root=" + fea2string(fr,root) + " and key=" + fea2string(fr,key));
+#endif
+
+    bool bUseStateManager = db.config.stateManager && (batchUUID.size() > 0);
+
+    // Read the content of db for entry r: siblings[level] = db.read(r)
+    string rootString = fea2string(fr, root);
+    mpz_class value;
+    zkresult zkr = ZKR_UNSPECIFIED;
+    if (bUseStateManager)
+    {
+        zkr = stateManager64.read(batchUUID, rootString, value, dbReadLog);
+    }
+    if (zkr != ZKR_SUCCESS)
+    {
+        zkr = db.readKV(root, key, value, dbReadLog);
+    }
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("Smt64::get() db.read error: " + to_string(zkr) + " (" + zkresult2string(zkr) + ") root:" + rootString);
+        return zkr;
+    }
+    
+    result.value = value;
+
+    return ZKR_SUCCESS;
+
 #if 0
 #ifdef LOG_SMT
     zklog.info("Smt64::get() called with root=" + fea2string(fr,root) + " and key=" + fea2string(fr,key));
