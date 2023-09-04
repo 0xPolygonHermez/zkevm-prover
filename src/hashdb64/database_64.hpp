@@ -121,7 +121,9 @@ public:
     zkresult readKV(const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, DatabaseMap *dbReadLog); 
     zkresult readKV(const Goldilocks::Element (&root)[4], vector<KeyValue> &KVs, DatabaseMap *dbReadLog);
     zkresult writeKV(const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, bool persistent);
+    zkresult writeKV(const uint64_t& version, const Goldilocks::Element (&key)[4], const mpz_class &value, bool persistent);
     zkresult writeKV(const Goldilocks::Element (&root)[4], const vector<KeyValue> &KVs, bool persistent);
+    zkresult writeKV(const uint64_t& version, const vector<KeyValue> &KVs, bool persistent);
     zkresult readVersion(const Goldilocks::Element (&root)[4], uint64_t& version, DatabaseMap *dbReadLog);
     zkresult writeVersion(const Goldilocks::Element (&root)[4], const uint64_t version, bool persistent);
 

@@ -541,11 +541,74 @@ zkresult Database64::writeKV(const Goldilocks::Element (&root)[4], const Goldilo
     return rkv;
 }
 
+zkresult Database64::writeKV(const uint64_t& version, const Goldilocks::Element (&key)[4], const mpz_class &value, bool persistent)
+{
+
+    // Check that it has  been initialized before
+    if (!bInitialized)
+    {
+        zklog.error("Database64::writeKV() called uninitialized");
+        exitProcess();
+    }
+    if (config.dbMultiWrite && !dbKVACache.enabled() && !persistent)
+    {
+        zklog.error("Database64::writeKV() called with multi-write active, cache disabled and no persistance in database, so there is no place to store the date");
+        return ZKR_DB_ERROR;
+    }
+    zkresult rkv = ZKR_UNSPECIFIED;
+    if ( useRemoteDB && persistent)
+    {
+        
+        rkv = writeRemoteKV(version, key, value);
+    }
+    else
+    {
+        rkv = ZKR_SUCCESS;
+    }
+
+    if (rkv == ZKR_SUCCESS)
+    {
+        dbKVACache.addKeyValueVersion(version, key, value, false);
+        
+    }
+
+#ifdef LOG_DB_WRITE
+    {
+        string keyStr_ = fea2string(fr, key[0], key[1], key[2], key[3]); 
+        string keyStr = NormalizeToNFormat(keyStr_, 64);
+        string s = "Database64::writeKV()";
+        if (rkv != ZKR_SUCCESS)
+            s += " ERROR=" + zkresult2string(rkv);
+        s += " key=" + keyStr;
+        s += " value=";
+        s += value.get_str(16);
+        s += " persistent=" + to_string(persistent);
+        zklog.info(s);
+    }
+#endif
+
+    return rkv;
+}
+
 zkresult Database64::writeKV(const Goldilocks::Element (&root)[4], const vector<KeyValue> &KVs, bool persistent){
     zkresult zkr;
     for (uint64_t i=0; i<KVs.size(); i++)
     {
         zkr = writeKV(root, KVs[i].key.fe, KVs[i].value, persistent);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("Database64::writeKV(KBs) failed calling write() result=" + zkresult2string(zkr) + " key=" + fea2string(fr, KVs[i].key.fe[0], KVs[i].key.fe[1], KVs[i].key.fe[2], KVs[i].key.fe[3]) );
+            return zkr;
+        }
+    }
+    return ZKR_SUCCESS;
+}
+
+zkresult Database64::writeKV(const uint64_t& version, const vector<KeyValue> &KVs, bool persistent){
+    zkresult zkr;
+    for (uint64_t i=0; i<KVs.size(); i++)
+    {
+        zkr = writeKV(version, KVs[i].key.fe, KVs[i].value, persistent);
         if (zkr != ZKR_SUCCESS)
         {
             zklog.error("Database64::writeKV(KBs) failed calling write() result=" + zkresult2string(zkr) + " key=" + fea2string(fr, KVs[i].key.fe[0], KVs[i].key.fe[1], KVs[i].key.fe[2], KVs[i].key.fe[3]) );

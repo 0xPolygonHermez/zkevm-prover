@@ -134,7 +134,7 @@ zkresult Database::read(const string &_key, Goldilocks::Element (&vkey)[4], vect
         if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
         r = ZKR_SUCCESS;
 
-    } else if( dbMTCache.enabled() && dbMTCache.find(key, value)){
+    } else if( dbMTCache.enabled() || dbMTCache.find(key, value)){
         
         if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
         r = ZKR_SUCCESS;
