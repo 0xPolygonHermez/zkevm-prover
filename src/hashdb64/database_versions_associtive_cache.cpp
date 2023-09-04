@@ -1,4 +1,4 @@
-#include "database_associative_cache.hpp"
+#include "database_versions_associtive_cache.hpp"
 #include <vector>
 #include "goldilocks_base_field.hpp"
 #include <nlohmann/json.hpp>
@@ -7,11 +7,9 @@
 #include "zkmax.hpp"
 #include "exit_process.hpp"
 #include "scalar.hpp"
+#include "zkassert.hpp"
 
-
-
-
-DatabaseMTAssociativeCache::DatabaseMTAssociativeCache()
+DatabaseVersionsAssociativeCache::DatabaseVersionsAssociativeCache()
 {
     log2IndexesSize = 0;
     indexesSize = 0;
@@ -19,36 +17,36 @@ DatabaseMTAssociativeCache::DatabaseMTAssociativeCache()
     cacheSize = 0;
     indexes = NULL;
     keys = NULL;
-    values = NULL;
+    versions = NULL;
     currentCacheIndex = 0;
     attempts = 0;
     hits = 0;
     name = "";
 };
 
-DatabaseMTAssociativeCache::DatabaseMTAssociativeCache(int log2IndexesSize_, int cacheSize_, string name_)
+DatabaseVersionsAssociativeCache::DatabaseVersionsAssociativeCache(int log2IndexesSize_, int cacheSize_, string name_)
 {
     postConstruct(log2IndexesSize_, cacheSize_, name_);
 };
 
-DatabaseMTAssociativeCache::~DatabaseMTAssociativeCache()
+DatabaseVersionsAssociativeCache::~DatabaseVersionsAssociativeCache()
 {
     if (indexes != NULL)
         delete[] indexes;
     if (keys != NULL)
         delete[] keys;
-    if (values != NULL)
-        delete[] values;
+    if (versions != NULL)
+        delete[] versions;
 
 };
 
-void DatabaseMTAssociativeCache::postConstruct(int log2IndexesSize_, int log2CacheSize_, string name_)
+void DatabaseVersionsAssociativeCache::postConstruct(int log2IndexesSize_, int log2CacheSize_, string name_)
 {
     lock_guard<recursive_mutex> guard(mlock);
     log2IndexesSize = log2IndexesSize_;
     if (log2IndexesSize_ > 32)
     {
-        zklog.error("DatabaseMTAssociativeCache::DatabaseMTAssociativeCache() log2IndexesSize_ > 32");
+        zklog.error("DatabaseVersionsAssociativeCache::DatabaseVersionsAssociativeCache() log2IndexesSize_ > 32");
         exitProcess();
     }
     indexesSize = 1 << log2IndexesSize;
@@ -56,7 +54,7 @@ void DatabaseMTAssociativeCache::postConstruct(int log2IndexesSize_, int log2Cac
     log2CacheSize = log2CacheSize_;
     if (log2CacheSize_ > 32)
     {
-        zklog.error("DatabaseMTAssociativeCache::DatabaseMTAssociativeCache() log2CacheSize_ > 32");
+        zklog.error("DatabaseVersionsAssociativeCache::DatabaseVersionsAssociativeCache() log2CacheSize_ > 32");
         exitProcess();
     }
     cacheSize = 1 << log2CacheSize_;
@@ -73,8 +71,8 @@ void DatabaseMTAssociativeCache::postConstruct(int log2IndexesSize_, int log2Cac
     if(keys != NULL) delete[] keys;
     keys = new Goldilocks::Element[4 * cacheSize];
 
-    if(values != NULL) delete[] values;
-    values = new Goldilocks::Element[12 * cacheSize];
+    if(versions != NULL) delete[] versions;
+    versions = new uint64_t[2 * cacheSize];
 
     currentCacheIndex = 0;
     attempts = 0;
@@ -86,8 +84,9 @@ void DatabaseMTAssociativeCache::postConstruct(int log2IndexesSize_, int log2Cac
     indexesMask = indexesSize - 1;
 };
 
-void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, bool update)
+void DatabaseVersionsAssociativeCache::addKeyVersion(const Goldilocks::Element (&key)[4], const uint64_t version)
 {
+    
     lock_guard<recursive_mutex> guard(mlock);
     bool emptySlot = false;
     bool present = false;
@@ -109,9 +108,12 @@ void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], cons
                 keys[cacheIndexKey + 1].fe == key[1].fe &&
                 keys[cacheIndexKey + 2].fe == key[2].fe &&
                 keys[cacheIndexKey + 3].fe == key[3].fe){
-                    if(update == false) return;
-                    present = true;
-                    break;
+                    if(versions[cacheIndex] != version){
+                        zklog.error("DatabaseVersionsAssociativeCache::addKeyVersion() version mismatch");
+                        exitProcess();
+                    }
+                    return;
+                    //rick: assert no error
             }
         }else if (emptySlot == false){
             emptySlot = true;
@@ -131,7 +133,7 @@ void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], cons
     }
     uint64_t cacheIndexKey, cacheIndexValue;
     cacheIndexKey = cacheIndex * 4;
-    cacheIndexValue = cacheIndex * 12;
+    cacheIndexValue = cacheIndex;
     
     //
     // Add value
@@ -140,27 +142,8 @@ void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], cons
     keys[cacheIndexKey + 1].fe = key[1].fe;
     keys[cacheIndexKey + 2].fe = key[2].fe;
     keys[cacheIndexKey + 3].fe = key[3].fe;
-    values[cacheIndexValue + 0] = value[0];
-    values[cacheIndexValue + 1] = value[1];
-    values[cacheIndexValue + 2] = value[2];
-    values[cacheIndexValue + 3] = value[3];
-    values[cacheIndexValue + 4] = value[4];
-    values[cacheIndexValue + 5] = value[5];
-    values[cacheIndexValue + 6] = value[6];
-    values[cacheIndexValue + 7] = value[7];
-    if (value.size() > 8)
-    {
-        values[cacheIndexValue + 8] = value[8];
-        values[cacheIndexValue + 9] = value[9];
-        values[cacheIndexValue + 10] = value[10];
-        values[cacheIndexValue + 11] = value[11];
-    }else{
-        values[cacheIndexValue + 8] = Goldilocks::zero();
-        values[cacheIndexValue + 9] = Goldilocks::zero();
-        values[cacheIndexValue + 10] = Goldilocks::zero();
-        values[cacheIndexValue + 11] = Goldilocks::zero();
-    }
-            
+    versions[cacheIndexValue ] = version;         
+
     //
     // Forced index insertion
     //
@@ -172,7 +155,7 @@ void DatabaseMTAssociativeCache::addKeyValue(Goldilocks::Element (&key)[4], cons
     }
 }
 
-void DatabaseMTAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIndexes)[10], int &iters)
+void DatabaseVersionsAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIndexes)[10], int &iters)
 {
     uint32_t inputRawCacheIndex = usedRawCacheIndexes[iters];
     //
@@ -229,7 +212,7 @@ void DatabaseMTAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIndexes)
     
 }
 
-bool DatabaseMTAssociativeCache::findKey(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value)
+bool DatabaseVersionsAssociativeCache::findKey(const Goldilocks::Element (&key)[4], uint64_t &version)
 {
     lock_guard<recursive_mutex> guard(mlock);
     attempts++; 
@@ -238,7 +221,7 @@ bool DatabaseMTAssociativeCache::findKey(const Goldilocks::Element (&key)[4], ve
     //
     if (attempts<<40 == 0)
     {
-        zklog.info("DatabaseMTAssociativeCache::findKey() name=" + name + " indexesSize=" + to_string(indexesSize) + " cacheSize=" + to_string(cacheSize) + " attempts=" + to_string(attempts) + " hits=" + to_string(hits) + " hit ratio=" + to_string(double(hits) * 100.0 / double(zkmax(attempts, 1))) + "%");
+        zklog.info("DatabaseVersionsAssociativeCache::findKey() name=" + name + " indexesSize=" + to_string(indexesSize) + " cacheSize=" + to_string(cacheSize) + " attempts=" + to_string(attempts) + " hits=" + to_string(hits) + " hit ratio=" + to_string(double(hits) * 100.0 / double(zkmax(attempts, 1))) + "%");
     }
     //
     // Find the value
@@ -256,21 +239,8 @@ bool DatabaseMTAssociativeCache::findKey(const Goldilocks::Element (&key)[4], ve
             keys[cacheIndexKey + 2].fe == key[2].fe &&
             keys[cacheIndexKey + 3].fe == key[3].fe)
         {
-            uint32_t cacheIndexValue = cacheIndex * 12;
             ++hits;
-            value.resize(12);
-            value[0] = values[cacheIndexValue];
-            value[1] = values[cacheIndexValue + 1];
-            value[2] = values[cacheIndexValue + 2];
-            value[3] = values[cacheIndexValue + 3];
-            value[4] = values[cacheIndexValue + 4];
-            value[5] = values[cacheIndexValue + 5];
-            value[6] = values[cacheIndexValue + 6];
-            value[7] = values[cacheIndexValue + 7];
-            value[8] = values[cacheIndexValue + 8];
-            value[9] = values[cacheIndexValue + 9];
-            value[10] = values[cacheIndexValue + 10];
-            value[11] = values[cacheIndexValue + 11];
+            version = versions[cacheIndex];
             return true;
         }
     }

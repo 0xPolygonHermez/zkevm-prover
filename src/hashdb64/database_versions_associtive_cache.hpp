@@ -1,5 +1,5 @@
-#ifndef DATABASE_ASSOCIATIVE_CACHE_HPP
-#define DATABASE_ASSOCIATIVE_CACHE_HPP
+#ifndef DATABASE_VERSIONS_ASSOCIATIVE_CACHE_HPP
+#define DATABASE_VERSIONS_ASSOCIATIVE_CACHE_HPP
 #include <vector>
 #include "goldilocks_base_field.hpp"
 #include <nlohmann/json.hpp>
@@ -8,7 +8,7 @@
 #include "zkmax.hpp"
 
 using namespace std;
-class DatabaseMTAssociativeCache
+class DatabaseVersionsAssociativeCache
 {
     private:
         recursive_mutex mlock;
@@ -20,7 +20,7 @@ class DatabaseMTAssociativeCache
 
         uint32_t *indexes;
         Goldilocks::Element *keys;
-        Goldilocks::Element *values;
+        uint64_t *versions;
         uint32_t currentCacheIndex; 
 
         uint64_t attempts;
@@ -33,18 +33,20 @@ class DatabaseMTAssociativeCache
 
     public:
 
-        DatabaseMTAssociativeCache();
-        DatabaseMTAssociativeCache(int log2IndexesSize_, int log2CacheSize_, string name_);
-        ~DatabaseMTAssociativeCache();
-
+        DatabaseVersionsAssociativeCache();
+        DatabaseVersionsAssociativeCache(int log2IndexesSize_, int log2CacheSize_, string name_);
+        ~DatabaseVersionsAssociativeCache();
         void postConstruct(int log2IndexesSize_, int log2CacheSize_, string name_);
-        void addKeyValue(Goldilocks::Element (&key)[4], const vector<Goldilocks::Element> &value, bool update);
-        bool findKey(const Goldilocks::Element (&key)[4], vector<Goldilocks::Element> &value);
+
+        void addKeyVersion(const Goldilocks::Element (&key)[4], const uint64_t version); //rick: no update!
+        bool findKey(const Goldilocks::Element (&key)[4], uint64_t &version);
+        
         inline bool enabled() const { return (log2IndexesSize > 0); };
         inline uint32_t getCacheSize()  const { return cacheSize; };
         inline uint32_t getIndexesSize() const { return indexesSize; };
 
     private:
+        
         inline bool emptyCacheSlot(uint32_t cacheIndexRaw) const { 
             return (currentCacheIndex >= cacheIndexRaw &&  currentCacheIndex - cacheIndexRaw > cacheSize) ||
             (currentCacheIndex < cacheIndexRaw && UINT32_MAX - cacheIndexRaw + currentCacheIndex > cacheSize);
@@ -52,3 +54,4 @@ class DatabaseMTAssociativeCache
         void forcedInsertion(uint32_t (&usedRawCacheIndexes)[10], int &iters);
 };
 #endif
+

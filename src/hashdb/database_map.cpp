@@ -14,6 +14,30 @@ void DatabaseMap::add(MTMap &db)
     if (callbackOnChange) onChangeCallback();
 }
 
+void DatabaseMap::add(MT64Map &db)
+{
+    lock_guard<recursive_mutex> guard(mlock);
+
+    mt64DB.insert(db.begin(), db.end());
+    if (callbackOnChange) onChangeCallback();
+}
+
+void DatabaseMap::add(MT64KVMap &db)
+{
+    lock_guard<recursive_mutex> guard(mlock);
+
+    mt64KVDB.insert(db.begin(), db.end());
+    if (callbackOnChange) onChangeCallback();
+}
+
+void DatabaseMap::add(MT64VersionMap &db)
+{
+    lock_guard<recursive_mutex> guard(mlock);
+
+    mt64VersionDB.insert(db.begin(), db.end());
+    if (callbackOnChange) onChangeCallback();
+}
+
 void DatabaseMap::add(ProgramMap &db)
 {
     lock_guard<recursive_mutex> guard(mlock);
@@ -29,6 +53,51 @@ bool DatabaseMap::findMT(const string& key, vector<Goldilocks::Element> &value)
     DatabaseMap::MTMap::iterator it = mtDB.find(key);
 
     if (it != mtDB.end())
+    {
+        value = it->second;
+        return true;
+    }
+
+    return false;
+}
+
+bool DatabaseMap::findMT64(const string& key, string &value)
+{
+    lock_guard<recursive_mutex> guard(mlock);
+
+    DatabaseMap::MT64Map::iterator it = mt64DB.find(key);
+
+    if (it != mt64DB.end())
+    {
+        value = it->second;
+        return true;
+    }
+
+    return false;
+}
+
+bool DatabaseMap::findMT64KV(const string& key, mpz_class &value)
+{
+    lock_guard<recursive_mutex> guard(mlock);
+
+    DatabaseMap::MT64KVMap::iterator it = mt64KVDB.find(key);
+
+    if (it != mt64KVDB.end())
+    {
+        value = it->second;
+        return true;
+    }
+
+    return false;
+}
+
+bool DatabaseMap::findMT64Version(const string& key, uint64_t &value)
+{
+    lock_guard<recursive_mutex> guard(mlock);
+
+    DatabaseMap::MT64VersionMap::iterator it = mt64VersionDB.find(key);
+
+    if (it != mt64VersionDB.end())
     {
         value = it->second;
         return true;
@@ -57,6 +126,27 @@ DatabaseMap::MTMap DatabaseMap::getMTDB()
     lock_guard<recursive_mutex> guard(mlock);
 
     return mtDB;
+}
+
+DatabaseMap::MT64Map DatabaseMap::getMT64DB()
+{
+    lock_guard<recursive_mutex> guard(mlock);
+
+    return mt64DB;
+}
+
+DatabaseMap::MT64KVMap DatabaseMap::getMT64KVDB()
+{
+    lock_guard<recursive_mutex> guard(mlock);
+
+    return mt64KVDB;
+}
+
+DatabaseMap::MT64VersionMap DatabaseMap::getMT64VersionDB()
+{
+    lock_guard<recursive_mutex> guard(mlock);
+
+    return mt64VersionDB;
 }
 
 DatabaseMap::ProgramMap DatabaseMap::getProgramDB()

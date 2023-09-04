@@ -178,6 +178,7 @@ void Config::load(json &config)
     ParseU16(config, "hashDBServerPort", "HASHDB_SERVER_PORT", hashDBServerPort, 50061);
     ParseString(config, "hashDBURL", "HASHDB_URL", hashDBURL, "local");
     ParseBool(config, "hashDB64", "HASHDB64", hashDB64, false);
+    ParseU64(config, "kvDBMaxVersions", "HASHDB64_MAX_VERSIONS", kvDBMaxVersions, 131072);
     ParseString(config, "dbCacheSynchURL", "DB_CACHE_SYNCH_URL", dbCacheSynchURL, "");
     ParseU16(config, "aggregatorServerPort", "AGGREGATOR_SERVER_PORT", aggregatorServerPort, 50081);
     ParseU16(config, "aggregatorClientPort", "AGGREGATOR_CLIENT_PORT", aggregatorClientPort, 50081);
@@ -793,6 +794,9 @@ void Config::load(json &config)
     ParseString(config, "databaseURL", "DATABASE_URL", databaseURL, "local");
     ParseString(config, "dbNodesTableName", "DB_NODES_TABLE_NAME", dbNodesTableName, "state.nodes");
     ParseString(config, "dbProgramTableName", "DB_PROGRAM_TABLE_NAME", dbProgramTableName, "state.program");
+    ParseString(config, "dbKeyValueTableName", "DB_KEYVALUE_TABLE_NAME", dbKeyValueTableName, "state.keyvalue");
+    ParseString(config, "dbKeyVersionTableName", "DB_VERSION_TABLE_NAME", dbVersionTableName, "state.version");
+    ParseString(config, "dbLatestVersionTableName", "DB_LATEST_VERSION_TABLE_NAME", dbLatestVersionTableName, "state.latestversion");
     ParseBool(config, "dbMultiWrite", "DB_MULTIWRITE", dbMultiWrite, true);
     ParseU64(config, "dbMultiWriteSingleQuerySize", "DB_MULTIWRITE_SINGLE_QUERY_SIZE", dbMultiWriteSingleQuerySize, 20*1024*1024);
     ParseBool(config, "dbConnectionsPool", "DB_CONNECTIONS_POOL", dbConnectionsPool, true);
@@ -945,6 +949,7 @@ void Config::print(void)
     zklog.info("    hashDBServerPort=" + to_string(hashDBServerPort));
     zklog.info("    hashDBURL=" + hashDBURL);
     zklog.info("    hashDB64=" + to_string(hashDB64));
+    zklog.info("    kvDBMaxVersions=" + to_string(kvDBMaxVersions));
     zklog.info("    dbCacheSynchURL=" + dbCacheSynchURL);
     zklog.info("    aggregatorServerPort=" + to_string(aggregatorServerPort));
     zklog.info("    aggregatorClientPort=" + to_string(aggregatorClientPort));
@@ -990,6 +995,9 @@ void Config::print(void)
     zklog.info("    databaseURL=" + databaseURL.substr(0, 5) + "...");
     zklog.info("    dbNodesTableName=" + dbNodesTableName);
     zklog.info("    dbProgramTableName=" + dbProgramTableName);
+    zklog.info("    dbKeyValueTableName=" + dbKeyValueTableName);
+    zklog.info("    dbVersionTableName=" + dbVersionTableName);
+    zklog.info("    dbLatestVersionTableName=" + dbLatestVersionTableName);
     zklog.info("    dbMultiWrite=" + to_string(dbMultiWrite));
     zklog.info("    dbMultiWriteSingleQuerySize=" + to_string(dbMultiWriteSingleQuerySize));
     zklog.info("    dbConnectionsPool=" + to_string(dbConnectionsPool));
