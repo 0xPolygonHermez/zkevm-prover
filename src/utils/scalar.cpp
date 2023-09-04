@@ -81,7 +81,7 @@ void string2key(Goldilocks &fr, const string& os, Goldilocks::Element (&fea)[4])
     Goldilocks::Element fe;
     if (os.size() != 64)
     {
-        zklog.error("Database::string2fea() found incorrect DATA column size: " + to_string(os.size()));
+        zklog.error("Database::string2key() found incorrect DATA column size: " + to_string(os.size()));
         exitProcess();
     }
     int ii=0;

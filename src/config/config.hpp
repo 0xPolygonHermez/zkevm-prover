@@ -31,6 +31,7 @@ public:
     bool runFileExecute;                    // Executor (all SMs)
 
     bool runKeccakScriptGenerator;
+    bool runSHA256ScriptGenerator;
     bool runKeccakTest;
     bool runStorageSMTest;
     bool runBinarySMTest;
@@ -88,6 +89,7 @@ public:
     uint16_t hashDBServerPort;
     string hashDBURL;
     bool hashDB64;
+    uint64_t kvDBMaxVersions;
     string dbCacheSynchURL;
 
     uint16_t aggregatorServerPort;
@@ -133,8 +135,11 @@ public:
     string publicsOutput;
     string proofFile;
     string keccakScriptFile;
+    string sha256ScriptFile;
     string keccakPolsFile;
+    string sha256PolsFile;
     string keccakConnectionsFile;
+    string sha256ConnectionsFile;
     string storageRomFile;
     string zkevmStarkInfo;
     string c12aStarkInfo;
@@ -144,6 +149,9 @@ public:
     string databaseURL;
     string dbNodesTableName;
     string dbProgramTableName;
+    string dbKeyValueTableName;
+    string dbVersionTableName;
+    string dbLatestVersionTableName;
     bool dbMultiWrite;
     uint64_t dbMultiWriteSingleQuerySize;
     bool dbConnectionsPool;

@@ -3,6 +3,7 @@
 
 #include <gmpxx.h>
 #include <string>
+#include <vector>
 #include "goldilocks_base_field.hpp"
 #include "ffiasm/fec.hpp"
 #include "exit_process.hpp"

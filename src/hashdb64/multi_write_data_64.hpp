@@ -6,6 +6,7 @@
 #include "definitions.hpp"
 #include "zklog.hpp"
 #include "multi_query.hpp"
+#include "key_value.hpp"
 
 using namespace std;
 
@@ -17,6 +18,10 @@ public:
     unordered_map<string, string> programIntray;
     unordered_map<string, string> nodes;
     unordered_map<string, string> nodesIntray;
+    unordered_map<uint64_t, KeyValue> keyValue;
+    unordered_map<uint64_t, KeyValue> keyValueIntray;
+    unordered_map<string, uint64_t> version;
+    unordered_map<string, uint64_t> versionIntray;
     string nodesStateRoot;
 
     // SQL queries, including all data to store in database
@@ -32,6 +37,10 @@ public:
         programIntray.clear();
         nodes.clear();
         nodesIntray.clear();
+        keyValue.clear();
+        keyValueIntray.clear();
+        version.clear();
+        versionIntray.clear();
         nodesStateRoot.clear();
         multiQuery.reset();
         stored = false;
@@ -43,7 +52,11 @@ public:
                (nodesIntray.size() == 0) &&
                (program.size() == 0) &&
                (programIntray.size() == 0) &&
-               (nodesStateRoot.size() == 0);
+               (nodesStateRoot.size() == 0) &&
+               (keyValue.size() == 0) &&
+               (keyValueIntray.size() == 0) &&
+               (version.size() == 0) &&
+               (versionIntray.size() == 0);
     }
 
     void acceptIntray (bool bSenderCalling = false)
@@ -69,6 +82,28 @@ public:
 #endif
             nodes.merge(nodesIntray);
             nodesIntray.clear();
+        }
+        if (keyValueIntray.size() > 0)
+        {
+#ifdef LOG_DB_ACCEPT_INTRAY
+            if (bSenderCalling)
+            {
+                zklog.info("MultiWriteData64::acceptIntray() rescuing " + to_string(keyValueIntray.size()) + " keyValue pairs");
+            }
+#endif
+            keyValue.merge(keyValueIntray);
+            keyValueIntray.clear();
+        }
+        if (versionIntray.size() > 0)
+        {
+#ifdef LOG_DB_ACCEPT_INTRAY
+            if (bSenderCalling)
+            {
+                zklog.info("MultiWriteData64::acceptIntray() rescuing " + to_string(versionIntray.size()) + " versions");
+            }   
+#endif
+            version.merge(versionIntray);
+            versionIntray.clear();
         }
     }
 };

@@ -88,6 +88,8 @@ typedef enum : int
     ZKR_SM_MAIN_MEMALIGN_READ_MISMATCH = 78, // Main state memory align read ROM operation check failed
     ZKR_SM_MAIN_HASHK_READ_OUT_OF_RANGE = 79, // Main state Keccak hash check found read out of range
     ZKR_SM_MAIN_HASHP_READ_OUT_OF_RANGE = 80, // Main state Poseidon hash check found read out of range
+    ZKR_DB_VERSION_NOT_FOUND = 81, // Version not found in KeyValue database
+    
 } zkresult;
 
 string zkresult2string (int code);

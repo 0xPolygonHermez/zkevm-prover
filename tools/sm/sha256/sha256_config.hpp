@@ -1,16 +1,9 @@
 #ifndef SHA256_CONFIG_HPP
 #define SHA256_CONFIG_HPP
 
-#define SHA256_ZeroRef         (0)
-#define SHA256_SlotSize        (160480)
-#define SHA256_MaxRefs         (170000)
-#define SHA256_FirstNextRef    (1)
-#define SHA256_SinRef0         (45)
-#define SHA256_SinRefNumber    (768)
-#define SHA256_SinRefDistance  (44)
-#define SHA256_SoutRef0        (SHA256_SinRef0+(SHA256_SinRefNumber*SHA256_SinRefDistance))
-#define SHA256_SoutRefNumber   (256)
-#define SHA256_SoutRefDistance (44)
+#include "gate_config.hpp"
+
+extern GateConfig SHA256GateConfig;
 
 /*
 

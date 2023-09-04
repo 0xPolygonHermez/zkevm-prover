@@ -333,7 +333,7 @@ zkresult Database::write(const string &_key, const Goldilocks::Element* vkey, co
         if(usingAssociativeCache()){
             Goldilocks::Element vkeyf[4];
             if(vkey == NULL){
-                string2key(fr, _key, vkeyf);
+                string2key(fr, key, vkeyf);
             }else{
                 vkeyf[0] = vkey[0];
                 vkeyf[1] = vkey[1];
@@ -586,13 +586,13 @@ zkresult Database::readRemote(bool bProgram, const string &key, string &value)
             exitProcess();
         }
 
-        pqxx::row const row = rows[0];
+        const pqxx::row& row = rows[0];
         if (row.size() != 2)
         {
             zklog.error("Database::readRemote() table=" + tableName + " got an invalid number of colums for the row: " + to_string(row.size()));
             exitProcess();
         }
-        pqxx::field const fieldData = row[1];
+        const pqxx::field& fieldData = row[1];
         value = removeBSXIfExists(fieldData.c_str());
     }
     catch (const std::exception &e)
@@ -2039,7 +2039,8 @@ void loadDb2MemCache(const Config &config)
             hash = treeMapIterator->second[i];
             dbValue.clear();
             Goldilocks::Element vhash[4];
-            if(pHashDB->db.usingAssociativeCache()) string2key(fr, hash, vhash);
+            string hashNorm = NormalizeToNFormat(hash, 64);
+            if(pHashDB->db.usingAssociativeCache()) string2key(fr, hashNorm, vhash);
             zkresult zkr = pHashDB->db.read(hash, vhash, dbValue, NULL, true);
 
             if (zkr != ZKR_SUCCESS)
