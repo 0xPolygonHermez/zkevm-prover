@@ -976,13 +976,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
                     // Call SMT to get the new Merkel Tree root hash
                     mpz_class scalarD;
-                    if (!fea2scalar(fr, scalarD, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]))
-                    {
-                        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                        logError(ctx, "Failed calling fea2scalar()");
-                        HashDBClientFactory::freeHashDBClient(pHashDB);
-                        return;
-                    }
+                    fea2scalar(fr, scalarD, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
+                    
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                     gettimeofday(&t, NULL);
 #endif
@@ -1235,20 +1230,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     if (rom.line[zkPC].binOpcode == 0) // ADD
                     {
                         mpz_class a, b, c;
-                        if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
-                        {
-                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                            logError(ctx, "Failed calling fea2scalar(pols.A)");
-                            HashDBClientFactory::freeHashDBClient(pHashDB);
-                            return;
-                        }
-                        if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
-                        {
-                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                            logError(ctx, "Failed calling fea2scalar(pols.B)");
-                            HashDBClientFactory::freeHashDBClient(pHashDB);
-                            return;
-                        }
+                        fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
+                        fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
                         c = (a + b) & ScalarMask256;
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                         nHits++;
@@ -1256,20 +1239,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     else if (rom.line[zkPC].binOpcode == 1) // SUB
                     {
                         mpz_class a, b, c;
-                        if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
-                        {
-                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                            logError(ctx, "Failed calling fea2scalar(pols.A)");
-                            HashDBClientFactory::freeHashDBClient(pHashDB);
-                            return;
-                        }
-                        if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
-                        {
-                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                            logError(ctx, "Failed calling fea2scalar(pols.B)");
-                            HashDBClientFactory::freeHashDBClient(pHashDB);
-                            return;
-                        }
+                        fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
+                        fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
                         c = (a - b + ScalarTwoTo256) & ScalarMask256;
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                         nHits++;
@@ -1277,20 +1248,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     else if (rom.line[zkPC].binOpcode == 2) // LT
                     {
                         mpz_class a, b, c;
-                        if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
-                        {
-                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                            logError(ctx, "Failed calling fea2scalar(pols.A)");
-                            HashDBClientFactory::freeHashDBClient(pHashDB);
-                            return;
-                        }
-                        if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
-                        {
-                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                            logError(ctx, "Failed calling fea2scalar(pols.B)");
-                            HashDBClientFactory::freeHashDBClient(pHashDB);
-                            return;
-                        }
+                        fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
+                        fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
                         c = (a < b);
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                         nHits++;
@@ -1298,20 +1257,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     else if (rom.line[zkPC].binOpcode == 3) // SLT
                     {
                         mpz_class a, b, c;
-                        if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
-                        {
-                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                            logError(ctx, "Failed calling fea2scalar(pols.A)");
-                            HashDBClientFactory::freeHashDBClient(pHashDB);
-                            return;
-                        }
-                        if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
-                        {
-                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                            logError(ctx, "Failed calling fea2scalar(pols.B)");
-                            HashDBClientFactory::freeHashDBClient(pHashDB);
-                            return;
-                        }
+                        fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
+                        fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
                         if (a >= ScalarTwoTo255) a = a - ScalarTwoTo256;
                         if (b >= ScalarTwoTo255) b = b - ScalarTwoTo256;
                         c = (a < b);
@@ -1321,20 +1268,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     else if (rom.line[zkPC].binOpcode == 4) // EQ
                     {
                         mpz_class a, b, c;
-                        if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
-                        {
-                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                            logError(ctx, "Failed calling fea2scalar(pols.A)");
-                            HashDBClientFactory::freeHashDBClient(pHashDB);
-                            return;
-                        }
-                        if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
-                        {
-                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                            logError(ctx, "Failed calling fea2scalar(pols.B)");
-                            HashDBClientFactory::freeHashDBClient(pHashDB);
-                            return;
-                        }
+                        fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
+                        fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
                         c = (a == b);
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                         nHits++;
@@ -1342,20 +1277,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     else if (rom.line[zkPC].binOpcode == 5) // AND
                     {
                         mpz_class a, b, c;
-                        if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
-                        {
-                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                            logError(ctx, "Failed calling fea2scalar(pols.A)");
-                            HashDBClientFactory::freeHashDBClient(pHashDB);
-                            return;
-                        }
-                        if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
-                        {
-                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                            logError(ctx, "Failed calling fea2scalar(pols.B)");
-                            HashDBClientFactory::freeHashDBClient(pHashDB);
-                            return;
-                        }
+                        fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
+                        fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
                         c = (a & b);
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                         nHits++;
@@ -1363,20 +1286,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     else if (rom.line[zkPC].binOpcode == 6) // OR
                     {
                         mpz_class a, b, c;
-                        if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
-                        {
-                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                            logError(ctx, "Failed calling fea2scalar(pols.A)");
-                            HashDBClientFactory::freeHashDBClient(pHashDB);
-                            return;
-                        }
-                        if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
-                        {
-                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                            logError(ctx, "Failed calling fea2scalar(pols.B)");
-                            HashDBClientFactory::freeHashDBClient(pHashDB);
-                            return;
-                        }
+                        fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
+                        fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
                         c = (a | b);
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                         nHits++;
@@ -1384,20 +1295,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     else if (rom.line[zkPC].binOpcode == 7) // XOR
                     {
                         mpz_class a, b, c;
-                        if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
-                        {
-                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                            logError(ctx, "Failed calling fea2scalar(pols.A)");
-                            HashDBClientFactory::freeHashDBClient(pHashDB);
-                            return;
-                        }
-                        if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
-                        {
-                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                            logError(ctx, "Failed calling fea2scalar(pols.B)");
-                            HashDBClientFactory::freeHashDBClient(pHashDB);
-                            return;
-                        }
+                        fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
+                        fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
                         c = (a ^ b);
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                         nHits++;
@@ -1413,29 +1312,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (rom.line[zkPC].memAlignRD==1)
                 {
                     mpz_class m0;
-                    if (!fea2scalar(fr, m0, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
-                    {
-                        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                        logError(ctx, "Failed calling fea2scalar(pols.A)");
-                        HashDBClientFactory::freeHashDBClient(pHashDB);
-                        return;
-                    }
+                    fea2scalar(fr, m0, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
                     mpz_class m1;
-                    if (!fea2scalar(fr, m1, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
-                    {
-                        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                        logError(ctx, "Failed calling fea2scalar(pols.B)");
-                        HashDBClientFactory::freeHashDBClient(pHashDB);
-                        return;
-                    }
+                    fea2scalar(fr, m1, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
                     mpz_class offsetScalar;
-                    if (!fea2scalar(fr, offsetScalar, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]))
-                    {
-                        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                        logError(ctx, "Failed calling fea2scalar(pols.C)");
-                        HashDBClientFactory::freeHashDBClient(pHashDB);
-                        return;
-                    }
+                    fea2scalar(fr, offsetScalar, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]);
                     if (offsetScalar<0 || offsetScalar>32)
                     {
                         proverRequest.result = ZKR_SM_MAIN_MEMALIGN_OFFSET_OUT_OF_RANGE;
@@ -1850,13 +1731,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             zklog.info("Storage read sRD read from key: " + ctx.fr.toString(ctx.lastSWrite.key, 16) + " value:" + value.get_str(16));
 #endif
             mpz_class opScalar;
-            if (!fea2scalar(fr, opScalar, op0, op1, op2, op3, op4, op5, op6, op7))
-            {
-                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                logError(ctx, "Failed calling fea2scalar(op)");
-                HashDBClientFactory::freeHashDBClient(pHashDB);
-                return;
-            }
+            fea2scalar(fr, opScalar, op0, op1, op2, op3, op4, op5, op6, op7);
             if (smtGetResult.value != opScalar)
             {
                 proverRequest.result = ZKR_SM_MAIN_STORAGE_READ_MISMATCH;
@@ -1959,13 +1834,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
                 // Call SMT to get the new Merkel Tree root hash
                 mpz_class scalarD;
-                if (!fea2scalar(fr, scalarD, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.D)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
+                fea2scalar(fr, scalarD, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
+                
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 gettimeofday(&t, NULL);
 #endif
@@ -2131,14 +2001,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             // Get contents of opN into a
             mpz_class a;
-            if (!fea2scalar(fr, a, op0, op1, op2, op3, op4, op5, op6, op7))
-            {
-                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                logError(ctx, "Failed calling fea2scalar(op)");
-                HashDBClientFactory::freeHashDBClient(pHashDB);
-                return;
-            }
-
+            fea2scalar(fr, a, op0, op1, op2, op3, op4, op5, op6, op7);
+            
             // Fill the hash data vector with chunks of the scalar value
             mpz_class result;
             for (uint64_t j=0; j<size; j++)
@@ -2298,14 +2162,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             // Get contents of op into dg
             mpz_class dg;
-            if (!fea2scalar(fr, dg, op0, op1, op2, op3, op4, op5, op6, op7))
-            {
-                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                logError(ctx, "Failed calling fea2scalar(op)");
-                HashDBClientFactory::freeHashDBClient(pHashDB);
-                return;
-            }
-
+            fea2scalar(fr, dg, op0, op1, op2, op3, op4, op5, op6, op7);
+            
             if (dg != hashKIterator->second.digest)
             {
                 proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_DIGEST_MISMATCH;
@@ -2385,14 +2243,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             // Get contents of opN into a
             mpz_class a;
-            if (!fea2scalar(fr, a, op0, op1, op2, op3, op4, op5, op6, op7))
-            {
-                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                logError(ctx, "Failed calling fea2scalar(op)");
-                HashDBClientFactory::freeHashDBClient(pHashDB);
-                return;
-            }
-
+            fea2scalar(fr, a, op0, op1, op2, op3, op4, op5, op6, op7);
+            
             // Fill the hash data vector with chunks of the scalar value
             mpz_class result;
             for (uint64_t j=0; j<size; j++) {
@@ -2579,14 +2431,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             // Get contents of op into dg
             mpz_class dg;
-            if (!fea2scalar(fr, dg, op0, op1, op2, op3, op4, op5, op6, op7))
-            {
-                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                logError(ctx, "Failed calling fea2scalar(op)");
-                HashDBClientFactory::freeHashDBClient(pHashDB);
-                return;
-            }
-
+            fea2scalar(fr, dg, op0, op1, op2, op3, op4, op5, op6, op7);
+            
             unordered_map< uint64_t, HashValue >::iterator hashPIterator;
             hashPIterator = ctx.hashP.find(addr);
             if (hashPIterator == ctx.hashP.end())
@@ -2640,14 +2486,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if (!bProcessBatch && (rom.line[zkPC].hashPDigest || rom.line[zkPC].sWR))
         {
             mpz_class op;
-            if (!fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7))
-            {
-                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                logError(ctx, "Failed calling fea2scalar(op)");
-                HashDBClientFactory::freeHashDBClient(pHashDB);
-                return;
-            }
-
+            fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7);
+            
             // Store the binary action to execute it later with the binary SM
             BinaryAction binaryAction;
             binaryAction.a = op;
@@ -2666,42 +2506,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             {
                 // Convert to scalar
                 mpz_class A, B, C, D, op;
-                if (!fea2scalar(fr, A, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.A)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-                if (!fea2scalar(fr, B, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.B)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-                if (!fea2scalar(fr, C, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.C)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-                if (!fea2scalar(fr, D, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.D)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-                if (!fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(op)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-
+                fea2scalar(fr, A, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
+                fea2scalar(fr, B, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
+                fea2scalar(fr, C, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]);
+                fea2scalar(fr, D, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
+                fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7);
+                
                 // Check the condition
                 if ( (A*B) + C != (D<<256) + op )
                 {
@@ -2738,49 +2548,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             {
                 // Convert to scalar
                 mpz_class x1, y1, x2, y2, x3, y3;
-                if (!fea2scalar(fr, x1, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.A)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-                if (!fea2scalar(fr, y1, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.B)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-                if (!fea2scalar(fr, x2, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.C)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-                if (!fea2scalar(fr, y2, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.D)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-                if (!fea2scalar(fr, x3, pols.E0[i], pols.E1[i], pols.E2[i], pols.E3[i], pols.E4[i], pols.E5[i], pols.E6[i], pols.E7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.E)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-                if (!fea2scalar(fr, y3, op0, op1, op2, op3, op4, op5, op6, op7))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(op)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-
+                fea2scalar(fr, x1, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
+                fea2scalar(fr, y1, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
+                fea2scalar(fr, x2, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]);
+                fea2scalar(fr, y2, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
+                fea2scalar(fr, x3, pols.E0[i], pols.E1[i], pols.E2[i], pols.E3[i], pols.E4[i], pols.E5[i], pols.E6[i], pols.E7[i]);
+                fea2scalar(fr, y3, op0, op1, op2, op3, op4, op5, op6, op7);
+                
                 // Convert to RawFec::Element
                 RawFec::Element fecX1, fecY1, fecX2, fecY2, fecX3;
                 fec.fromMpz(fecX1, x1.get_mpz_t());
@@ -2913,27 +2687,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             if (rom.line[zkPC].binOpcode == 0) // ADD
             {
                 mpz_class a, b, c;
-                if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.A)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-                if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.B)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-                if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(op)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
+                fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
+                fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
+                fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);
 
                 mpz_class expectedC;
                 expectedC = (a + b) & ScalarMask256;
@@ -2964,27 +2720,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             else if (rom.line[zkPC].binOpcode == 1) // SUB
             {
                 mpz_class a, b, c;
-                if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.A)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-                if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.B)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-                if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(op)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
+                fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
+                fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
+                fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);
 
                 mpz_class expectedC;
                 expectedC = (a - b + ScalarTwoTo256) & ScalarMask256;
@@ -3015,27 +2753,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             else if (rom.line[zkPC].binOpcode == 2) // LT
             {
                 mpz_class a, b, c;
-                if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.A)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-                if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.B)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-                if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(op)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
+                fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
+                fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
+                fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);
 
                 mpz_class expectedC;
                 expectedC = (a < b);
@@ -3066,27 +2786,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             else if (rom.line[zkPC].binOpcode == 3) // SLT
             {
                 mpz_class a, b, c, _a, _b;
-                if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.A)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-                if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.B)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-                if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(op)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
+                fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
+                fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
+                fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);
                 _a = a;
                 _b = b;
 
@@ -3123,28 +2825,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             else if (rom.line[zkPC].binOpcode == 4) // EQ
             {
                 mpz_class a, b, c;
-                if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.A)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-                if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.B)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-                if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(op)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-
+                fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
+                fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
+                fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);
+                
                 mpz_class expectedC;
                 expectedC = (a == b);
                 if (c != expectedC)
@@ -3174,28 +2858,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             else if (rom.line[zkPC].binOpcode == 5) // AND
             {
                 mpz_class a, b, c;
-                if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.A)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-                if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.B)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-                if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(op)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-
+                fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
+                fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
+                fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);
+                
                 mpz_class expectedC;
                 expectedC = (a & b);
                 if (c != expectedC)
@@ -3228,28 +2894,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             else if (rom.line[zkPC].binOpcode == 6) // OR
             {
                 mpz_class a, b, c;
-                if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.A)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-                if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.B)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-                if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(op)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-
+                fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
+                fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
+                fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);
+                
                 mpz_class expectedC;
                 expectedC = (a | b);
                 if (c != expectedC)
@@ -3277,27 +2925,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             else if (rom.line[zkPC].binOpcode == 7) // XOR
             {
                 mpz_class a, b, c;
-                if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.A)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-                if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.B)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
-                if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(op)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
+                fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
+                fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
+                fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7);
 
                 mpz_class expectedC;
                 expectedC = (a ^ b);
@@ -3335,37 +2965,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if ( (rom.line[zkPC].memAlignRD==1) || (rom.line[zkPC].memAlignWR==1) || (rom.line[zkPC].memAlignWR8==1) )
         {
             mpz_class m0;
-            if (!fea2scalar(fr, m0, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
-            {
-                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                logError(ctx, "Failed calling fea2scalar(pols.A)");
-                HashDBClientFactory::freeHashDBClient(pHashDB);
-                return;
-            }
+            fea2scalar(fr, m0, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]);
             mpz_class m1;
-            if (!fea2scalar(fr, m1, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
-            {
-                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                logError(ctx, "Failed calling fea2scalar(pols.B)");
-                HashDBClientFactory::freeHashDBClient(pHashDB);
-                return;
-            }
+            fea2scalar(fr, m1, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]);
             mpz_class v;
-            if (!fea2scalar(fr, v, op0, op1, op2, op3, op4, op5, op6, op7))
-            {
-                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                logError(ctx, "Failed calling fea2scalar(op)");
-                HashDBClientFactory::freeHashDBClient(pHashDB);
-                return;
-            }
+            fea2scalar(fr, v, op0, op1, op2, op3, op4, op5, op6, op7);
             mpz_class offsetScalar;
-            if (!fea2scalar(fr, offsetScalar, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]))
-            {
-                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                logError(ctx, "Failed calling fea2scalar(pols.C)");
-                HashDBClientFactory::freeHashDBClient(pHashDB);
-                return;
-            }
+            fea2scalar(fr, offsetScalar, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]);
             if (offsetScalar<0 || offsetScalar>32)
             {
                 proverRequest.result = ZKR_SM_MAIN_MEMALIGN_OFFSET_OUT_OF_RANGE;
@@ -3380,21 +2986,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 pols.memAlignWR[i] = fr.one();
 
                 mpz_class w0;
-                if (!fea2scalar(fr, w0, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.D)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
+                fea2scalar(fr, w0, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
                 mpz_class w1;
-                if (!fea2scalar(fr, w1, pols.E0[i], pols.E1[i], pols.E2[i], pols.E3[i], pols.E4[i], pols.E5[i], pols.E6[i], pols.E7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.E)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
+                fea2scalar(fr, w1, pols.E0[i], pols.E1[i], pols.E2[i], pols.E3[i], pols.E4[i], pols.E5[i], pols.E6[i], pols.E7[i]);
                 mpz_class _W0;
                 _W0 = (m0 & (ScalarTwoTo256 - (ScalarOne << (256-offset*8)))) | (v >> offset*8);
                 mpz_class _W1;
@@ -3426,13 +3020,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 pols.memAlignWR8[i] = fr.one();
 
                 mpz_class w0;
-                if (!fea2scalar(fr, w0, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
-                    logError(ctx, "Failed calling fea2scalar(pols.D)");
-                    HashDBClientFactory::freeHashDBClient(pHashDB);
-                    return;
-                }
+                fea2scalar(fr, w0, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
                 mpz_class _W0;
                 mpz_class byteMaskOn256("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", 16);
                 _W0 = (m0 & (byteMaskOn256 >> (offset*8))) | ((v & 0xFF) << ((31-offset)*8));
@@ -4433,10 +4021,7 @@ void MainExecutor::checkFinalState(Context &ctx)
         (!fr.equal(ctx.pols.B7[0], feaOldStateRoot[7])) )
     {
         mpz_class bScalar;
-        if (!fea2scalar(ctx.fr, bScalar, ctx.pols.B0[0], ctx.pols.B1[0], ctx.pols.B2[0], ctx.pols.B3[0], ctx.pols.B4[0], ctx.pols.B5[0], ctx.pols.B6[0], ctx.pols.B7[0]))
-        {
-            logError(ctx, "MainExecutor::checkFinalState() failed calling fea2scalar(pols.B)");
-        }
+        fea2scalar(ctx.fr, bScalar, ctx.pols.B0[0], ctx.pols.B1[0], ctx.pols.B2[0], ctx.pols.B3[0], ctx.pols.B4[0], ctx.pols.B5[0], ctx.pols.B6[0], ctx.pols.B7[0]);
         logError(ctx, "MainExecutor::checkFinalState() Register B=" + bScalar.get_str(16) + " not terminated equal as its initial value=" + ctx.proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16));
         exitProcess();
     }
@@ -4454,10 +4039,7 @@ void MainExecutor::checkFinalState(Context &ctx)
         (!fr.equal(ctx.pols.C7[0], feaOldAccInputHash[7])) )
     {
         mpz_class cScalar;
-        if (!fea2scalar(ctx.fr, cScalar, ctx.pols.C0[0], ctx.pols.C1[0], ctx.pols.C2[0], ctx.pols.C3[0], ctx.pols.C4[0], ctx.pols.C5[0], ctx.pols.C6[0], ctx.pols.C7[0]))
-        {
-            logError(ctx, "MainExecutor::checkFinalState() failed calling fea2scalar(pols.C)");
-        }
+        fea2scalar(ctx.fr, cScalar, ctx.pols.C0[0], ctx.pols.C1[0], ctx.pols.C2[0], ctx.pols.C3[0], ctx.pols.C4[0], ctx.pols.C5[0], ctx.pols.C6[0], ctx.pols.C7[0]);
         logError(ctx, "MainExecutor::checkFinalState() Register C=" + cScalar.get_str(16) + " not terminated equal as its initial value=" + ctx.proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16));
         exitProcess();
     }
@@ -4501,10 +4083,7 @@ void MainExecutor::assertOutputs(Context &ctx)
             (!fr.equal(ctx.pols.SR7[step], feaNewStateRoot[7])) )
         {
             mpz_class auxScalar;
-            if (!fea2scalar(fr, auxScalar, ctx.pols.SR0[step], ctx.pols.SR1[step], ctx.pols.SR2[step], ctx.pols.SR3[step], ctx.pols.SR4[step], ctx.pols.SR5[step], ctx.pols.SR6[step], ctx.pols.SR7[step]))
-            {
-                logError(ctx, "MainExecutor::assertOutputs() failed calling fea2scalar(pols.SR)");
-            }
+            fea2scalar(fr, auxScalar, ctx.pols.SR0[step], ctx.pols.SR1[step], ctx.pols.SR2[step], ctx.pols.SR3[step], ctx.pols.SR4[step], ctx.pols.SR5[step], ctx.pols.SR6[step], ctx.pols.SR7[step]);
             logError(ctx, "MainExecutor::assertOutputs() Register SR=" + auxScalar.get_str(16) + " not terminated equal to newStateRoot=" + ctx.proverRequest.input.publicInputsExtended.newStateRoot.get_str(16));
             exitProcess();
         }
@@ -4526,10 +4105,7 @@ void MainExecutor::assertOutputs(Context &ctx)
             (!fr.equal(ctx.pols.D7[step], feaNewAccInputHash[7])) )
         {
             mpz_class auxScalar;
-            if (!fea2scalar(fr, auxScalar, ctx.pols.D0[step], ctx.pols.D1[step], ctx.pols.D2[step], ctx.pols.D3[step], ctx.pols.D4[step], ctx.pols.D5[step], ctx.pols.D6[step], ctx.pols.D7[step]))
-            {
-                logError(ctx, "MainExecutor::assertOutputs() failed calling fea2scalar(pols.D)");
-            }
+            fea2scalar(fr, auxScalar, ctx.pols.D0[step], ctx.pols.D1[step], ctx.pols.D2[step], ctx.pols.D3[step], ctx.pols.D4[step], ctx.pols.D5[step], ctx.pols.D6[step], ctx.pols.D7[step]);
             logError(ctx, "MainExecutor::assertOutputs() Register D=" + auxScalar.get_str(16) + " not terminated equal to newAccInputHash=" + ctx.proverRequest.input.publicInputsExtended.newAccInputHash.get_str(16));
             exitProcess();
         }
@@ -4551,10 +4127,7 @@ void MainExecutor::assertOutputs(Context &ctx)
             (!fr.equal(ctx.pols.E7[step], feaNewLocalExitRoot[7])) )
         {
             mpz_class auxScalar;
-            if (!fea2scalar(fr, auxScalar, ctx.pols.E0[step], ctx.pols.E1[step], ctx.pols.E2[step], ctx.pols.E3[step], ctx.pols.E4[step], ctx.pols.E5[step], ctx.pols.E6[step], ctx.pols.E7[step]))
-            {
-                logError(ctx, "MainExecutor::assertOutputs() failed calling fea2scalar(pols.E)");
-            }
+            fea2scalar(fr, auxScalar, ctx.pols.E0[step], ctx.pols.E1[step], ctx.pols.E2[step], ctx.pols.E3[step], ctx.pols.E4[step], ctx.pols.E5[step], ctx.pols.E6[step], ctx.pols.E7[step]);
             logError(ctx, "MainExecutor::assertOutputs() Register E=" + auxScalar.get_str(16) + " not terminated equal to newLocalExitRoot=" + ctx.proverRequest.input.publicInputsExtended.newLocalExitRoot.get_str(16));
             exitProcess();
         }
