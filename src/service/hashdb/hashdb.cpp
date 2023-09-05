@@ -366,11 +366,11 @@ zkresult HashDB::readTree (const Goldilocks::Element (&root)[4], vector<KeyValue
     }
 }
 
-zkresult HashDB::writeTree (const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> &keyValues, Goldilocks::Element (&newRoot)[4], uint64_t &flushId, uint64_t &lastSentFlushId)
+zkresult HashDB::writeTree (const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> &keyValues, Goldilocks::Element (&newRoot)[4])
 {
     if (config.hashDB64)
     {
-        return smt64.writeTree(db64, oldRoot, keyValues, newRoot, flushId, lastSentFlushId);
+        return smt64.writeTree(db64, oldRoot, keyValues, newRoot);
     }
     else
     {

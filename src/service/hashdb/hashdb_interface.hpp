@@ -30,7 +30,7 @@ public:
     virtual zkresult getFlushData   (uint64_t flushId, uint64_t &storedFlushId, unordered_map<string, string> (&nodes), unordered_map<string, string> (&program), string &nodesStateRoot) = 0;
     virtual void     clearCache     (void) = 0;
     virtual zkresult readTree       (const Goldilocks::Element (&root)[4], vector<KeyValue> &keyValues) = 0;
-    virtual zkresult writeTree      (const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> &keyValues, Goldilocks::Element (&newRoot)[4], uint64_t &flushId, uint64_t &lastSentFlushId) = 0;
+    virtual zkresult writeTree      (const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> &keyValues, Goldilocks::Element (&newRoot)[4]) = 0;
 
 };
 

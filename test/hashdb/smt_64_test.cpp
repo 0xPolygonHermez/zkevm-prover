@@ -73,11 +73,9 @@ uint64_t Smt64Test (const Config &config)
         TimerStart(SMT64_TEST_WRITE_TREE);
 
         // Call writeTree()
-        uint64_t flushId = 0;
-        uint64_t lastSentFlushId = 0;
         for (int64_t i=0; i<SMT64_TEST_NUMBER_OF_WRITES; i++)
         {
-            zkr = pHashDB->writeTree(root, keyValues[i], root, flushId, lastSentFlushId);
+            zkr = pHashDB->writeTree(root, keyValues[i], root);
             if (zkr != ZKR_SUCCESS)
             {
                 zklog.error("Smt64Test() failed calling smt64.writeTree() result=" + zkresult2string(zkr));
@@ -90,6 +88,8 @@ uint64_t Smt64Test (const Config &config)
 
         TimerStart(SMT64_TEST_FLUSH);
         
+        uint64_t flushId = 0;
+        uint64_t lastSentFlushId = 0;
         zkr = pHashDB->flush(emptyString, fea2string(fr, root), PERSISTENCE_DATABASE, flushId, lastSentFlushId);
         if (zkr != ZKR_SUCCESS)
         {

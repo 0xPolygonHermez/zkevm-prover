@@ -43,7 +43,7 @@ public:
     zkresult getFlushData   (uint64_t flushId, uint64_t &storedFlushId, unordered_map<string, string> (&nodes), unordered_map<string, string> (&program), string &nodesStateRoot);
     void     clearCache     (void) {};
     zkresult readTree       (const Goldilocks::Element (&root)[4], vector<KeyValue> &keyValues);
-    zkresult writeTree      (const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> &keyValues, Goldilocks::Element (&newRoot)[4], uint64_t &flushId, uint64_t &lastSentFlushId);
+    zkresult writeTree      (const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> &keyValues, Goldilocks::Element (&newRoot)[4]);
 };
 
 #endif

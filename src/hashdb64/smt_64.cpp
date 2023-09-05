@@ -12,7 +12,7 @@
 
 //#define SMT64_PRINT_TREE_CHUNKS
 
-zkresult Smt64::writeTree (Database64 &db, const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> &_keyValues, Goldilocks::Element (&newRoot)[4], uint64_t &flushId, uint64_t &lastSentFlushId)
+zkresult Smt64::writeTree (Database64 &db, const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> &_keyValues, Goldilocks::Element (&newRoot)[4])
 {
     zkresult zkr;
 
@@ -258,15 +258,6 @@ zkresult Smt64::writeTree (Database64 &db, const Goldilocks::Element (&oldRoot)[
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("Smt64::writeTree() failed calling db.write() result=" + zkresult2string(zkr));
-        for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
-        return zkr;
-    }
-
-    // Flush written data to database
-    zkr = db.flush(flushId, lastSentFlushId);
-    if (zkr != ZKR_SUCCESS)
-    {
-        zklog.error("Smt64::writeTree() failed calling db.flush() result=" + zkresult2string(zkr));
         for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
         return zkr;
     }

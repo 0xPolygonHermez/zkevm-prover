@@ -98,7 +98,7 @@ public:
         capacityOne[3] = fr.zero();
     }
 
-    zkresult writeTree(Database64 &db, const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> &keyValues, Goldilocks::Element (&newRoot)[4], uint64_t &flushId, uint64_t &lastSentFlushId);
+    zkresult writeTree(Database64 &db, const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> &keyValues, Goldilocks::Element (&newRoot)[4]);
     zkresult calculateHash (Child &result, std::vector<TreeChunk *> &chunks, vector<DB64Query> &dbQueries, int idChunk, int level);
 
     zkresult readTree(Database64 &db, const Goldilocks::Element (&root)[4], vector<KeyValue> &keyValues);
