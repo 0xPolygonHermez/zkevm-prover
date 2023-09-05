@@ -292,10 +292,6 @@ bool stringIs0xHex (const string &s)
 
 /* Keccak */
 
-void keccak256(const uint8_t *pInputData, uint64_t inputDataSize, uint8_t *pOutputData, uint64_t outputDataSize)
-{
-    Keccak(1088, 512, pInputData, inputDataSize, 0x1, pOutputData, outputDataSize);
-}
 
 void keccak256 (const uint8_t *pInputData, uint64_t inputDataSize, uint8_t (&hash)[32])
 {

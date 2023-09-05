@@ -124,97 +124,12 @@ void KeccakFExecutor::loadScript(json j)
     bLoaded = true;
 }
 
-void KeccakFExecutor::execute(KeccakFExecuteInput &input, KeccakFExecuteOutput &output)
-{
-    // Reset polynomials
-    memset(output.pol, 0, sizeof(output.pol));
-
-    const uint64_t numberOfSlots = ((KeccakGateConfig.polLength - 1) / KeccakGateConfig.slotSize);
-    const uint64_t keccakMask = 0xFFFFFFFFFFF;
-
-    // Set KeccakGateConfig.zeroRef values
-    output.pol[pin_a][KeccakGateConfig.zeroRef] = 0;
-    output.pol[pin_b][KeccakGateConfig.zeroRef] = keccakMask;
-
-    // Set Sin and Rin values
-    for (uint64_t slot = 0; slot < numberOfSlots; slot++)
-    {
-        for (uint64_t row = 0; row < 9; row++)
-        {
-            uint64_t mask = uint64_t(1) << row;
-            for (uint64_t i = 0; i < 1600; i++)
-            {
-                if (input.Sin[slot][row][i] == 1)
-                {
-                    output.pol[pin_a][KeccakGateConfig.relRef2AbsRef(KeccakGateConfig.sinRef0 + i * 44, slot)] |= mask;
-                }
-            }
-        }
-    }
-
-    // Execute the program
-    KeccakInstruction instruction;
-    for (uint64_t slot = 0; slot < numberOfSlots; slot++)
-    {
-        for (uint64_t i = 0; i < program.size(); i++)
-        {
-            instruction = program[i];
-            uint64_t absRefa = KeccakGateConfig.relRef2AbsRef(instruction.refa, slot);
-            uint64_t absRefb = KeccakGateConfig.relRef2AbsRef(instruction.refb, slot);
-            uint64_t absRefr = KeccakGateConfig.relRef2AbsRef(instruction.refr, slot);
-
-            output.pol[pin_a][absRefr] = output.pol[instruction.pina][absRefa];
-            output.pol[pin_b][absRefr] = output.pol[instruction.pinb][absRefb];
-
-            /*if (instruction.refr==(3200*44+1) || instruction.refr==((3200*44)+2) || instruction.refr==1 || instruction.refr==KeccakGateConfig.slotSize)
-            {
-                zklog.info("slot=" + to_string(slot) + " i=" + to_string(i) + "/" + to_string(program.size()) + " refa=" + to_string(instruction.refa) + " absRefa=" + to_string(absRefa) + " refb=" + to_string(instruction.refb) + " absRefb=" + to_string(absRefb) + " refr=" + to_string(instruction.refr) + " absRefr=" + to_string(absRefr));
-            }*/
-
-            switch (program[i].op)
-            {
-            case gop_xor:
-                output.pol[pin_r][absRefr] = (output.pol[instruction.pina][absRefa] ^ output.pol[instruction.pinb][absRefb]) & keccakMask;
-                break;
-
-            case gop_andp:
-                output.pol[pin_r][absRefr] = ((~output.pol[instruction.pina][absRefa]) & output.pol[instruction.pinb][absRefb]) & keccakMask;
-                break;
-
-            default:
-                zklog.error("KeccakFExecutor::execute() found invalid op: " + to_string(program[i].op) + " in evaluation: " + to_string(i));
-                exitProcess();
-            }
-        }
-    }
-}
-
-/* Input is fe[54][1600], output is KeccakPols */
-void KeccakFExecutor::execute(const Goldilocks::Element *input, const uint64_t inputLength, KeccakFCommitPols &pols)
-{
-    if (inputLength != numberOfSlots * 1600)
-    {
-        zklog.error("KeccakFExecutor::execute() got input size=" + to_string(inputLength) + " different from numberOfSlots=" + to_string(numberOfSlots) + "x1600");
-        exitProcess();
-    }
-    vector<vector<Goldilocks::Element>> inputVector;
-    for (uint64_t slot = 0; slot < numberOfSlots; slot++)
-    {
-        vector<Goldilocks::Element> aux;
-        for (uint64_t i = 0; i < 1600; i++)
-        {
-            aux.push_back(input[slot * 1600 + i]);
-        }
-        inputVector.push_back(aux);
-    }
-    execute(inputVector, pols);
-}
-
 /* Input is a vector of numberOfSlots*1600 fe, output is KeccakPols */
 void KeccakFExecutor::execute(const vector<vector<Goldilocks::Element>> &input, KeccakFCommitPols &pols)
 {
+    zkassertpermanent(bLoaded);
     const uint64_t keccakMask = 0xFFFFFFFFFFF;
-    
+
     // Check input size
     if (input.size() != numberOfSlots)
     {
@@ -289,11 +204,6 @@ void KeccakFExecutor::execute(const vector<vector<Goldilocks::Element>> &input, 
                 zklog.error("KeccakFExecutor() found invalid program[i].pinb=" + to_string(program[i].pinb));
                 exitProcess();
             }
-
-            /*if (program[i].refr==(3200*44+1) || program[i].refr==((3200*44)+2) || program[i].refr==1 || program[i].refr==KeccakGateConfig.slotSize)
-            {
-                zklog.info("slot=" + to_string(slot) + " i=" + to_string(i) + "/" + to_string(program.size()) + " refa=" + to_string(program[i].refa) + " absRefa=" + to_string(absRefa) + " refb=" + to_string(program[i].refb) + " absRefb=" + to_string(absRefb) + " refr=" + to_string(program[i].refr) + " absRefr=" + to_string(absRefr));
-            }*/
 
             switch (program[i].op)
             {
