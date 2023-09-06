@@ -768,12 +768,12 @@ zkresult StateManager64::flush(const string &batchUUID, const string &_newStateR
                 batchState.newStateRoot.realStateRoot = newRootString;
             }
 
-            // Create a new version
+            // Create a new version, i.e. read latest version and increment it
             uint64_t version;
-            zkr = db.createLatestVersion(version, persistence == PERSISTENCE_DATABASE ? true : false);
+            zkr = db.readLatestVersion(version);
             if (zkr != ZKR_SUCCESS)
             {
-                zklog.error("StateManager64::flush() failed calling db.createLatestVersion zkr=" + zkresult2string(zkr) +
+                zklog.error("StateManager64::flush() failed calling db.readLatestVersion zkr=" + zkresult2string(zkr) +
                             " tx=" + to_string(tx) +
                             " txState.oldStateRoot=" + txState.persistence[persistence].oldStateRoot.toString());
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
@@ -783,6 +783,7 @@ zkresult StateManager64::flush(const string &batchUUID, const string &_newStateR
                 Unlock();
                 return ZKR_STATE_MANAGER;
             }
+            version++;
 
             // Save the key-values
             zkr = db.writeKV(version, keyValues, persistence == PERSISTENCE_DATABASE ? true : false);
@@ -808,6 +809,21 @@ zkresult StateManager64::flush(const string &batchUUID, const string &_newStateR
                             " txState.oldStateRoot=" + txState.persistence[persistence].oldStateRoot.toString());
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
                 batchState.timeMetricStorage.add("db.writeVersion failed", TimeDiff(t));
+                batchState.timeMetricStorage.print("State Manager calls");
+#endif
+                Unlock();
+                return ZKR_STATE_MANAGER;
+            }
+
+            // Write the latest version
+            zkr = db.writeLatestVersion(version, persistence == PERSISTENCE_DATABASE ? true : false);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("StateManager64::flush() failed calling db.writeLatestVersion zkr=" + zkresult2string(zkr) +
+                            " tx=" + to_string(tx) +
+                            " txState.oldStateRoot=" + txState.persistence[persistence].oldStateRoot.toString());
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+                batchState.timeMetricStorage.add("db.writeLatestVersion failed", TimeDiff(t));
                 batchState.timeMetricStorage.print("State Manager calls");
 #endif
                 Unlock();
