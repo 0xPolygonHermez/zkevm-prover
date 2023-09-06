@@ -1649,7 +1649,7 @@ zkresult Database64::createRemoteLatestVersion(uint64_t &version){
     zkresult rw = ZKR_SUCCESS;    
 
     const string &tableName =  config.dbLatestVersionTableName;
-    string query = "UPDATE " + tableName + " ( version ) VALUES ( " + to_string(newVersion) +");";
+    string query = "UPDATE " + tableName + " SET version = " + to_string(newVersion) + ";";
     DatabaseConnection * pDatabaseConnection = getConnection();
 
     try
