@@ -245,15 +245,12 @@ zkresult Tree64::WriteTree (Database64 &db, const Goldilocks::Element (&oldRoot)
     }
 
     // Save chunks data to database
-    if (persistent)
+    zkr = db.write(dbQueries, persistent);
+    if (zkr != ZKR_SUCCESS)
     {
-        zkr = db.write(dbQueries, true);
-        if (zkr != ZKR_SUCCESS)
-        {
-            zklog.error("Tree64::WriteTree() failed calling db.write() result=" + zkresult2string(zkr));
-            for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
-            return zkr;
-        }
+        zklog.error("Tree64::WriteTree() failed calling db.write() result=" + zkresult2string(zkr));
+        for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
+        return zkr;
     }
 
 #ifdef SMT64_PRINT_TREE_CHUNKS
