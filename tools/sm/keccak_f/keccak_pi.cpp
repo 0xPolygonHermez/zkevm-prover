@@ -1,5 +1,5 @@
 #include "gate_state.hpp"
-#include "keccak_config.hpp"
+#include "keccak.hpp"
 
 /*
 Keccak-f Pi permutation.

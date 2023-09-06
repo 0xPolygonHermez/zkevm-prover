@@ -6,6 +6,11 @@
 #include "config.hpp"
 #include "gate_state.hpp"
 
+/* Gets the 0...1599 position of the bit (x,y,z), as per Keccak spec */
+#define Bit(x,y,z)   (64*(x) + 320*(y) + (z))
+
+extern GateConfig KeccakGateConfig;
+
 /* Transformations */
 void KeccakTheta (GateState &S, uint64_t ir);
 void KeccakRho   (GateState &S);

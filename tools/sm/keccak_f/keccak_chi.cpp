@@ -1,4 +1,4 @@
-#include "keccak_config.hpp"
+#include "keccak.hpp"
 #include "keccak_rc.hpp"
 #include "gate_state.hpp"
 
