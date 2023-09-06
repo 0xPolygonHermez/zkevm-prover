@@ -23,11 +23,9 @@ public:
     uint64_t previousSubState;
     bool bValid;
     unordered_map<string, mpz_class> dbWrite;
-    vector<string> dbDelete;
     TxSubState64() : previousSubState(0), bValid(false)
     {
         dbWrite.reserve(128);
-        dbDelete.reserve(128);
     };
 };
 
@@ -55,6 +53,7 @@ class BatchState64
 public:
     StateRoot oldStateRoot;
     StateRoot currentStateRoot;
+    StateRoot newStateRoot;
     uint64_t currentTx;
     vector<TxState64> txState;
     unordered_map<string, mpz_class> dbWrite;
@@ -78,6 +77,7 @@ private:
     pthread_mutex_t mutex; // Mutex to protect the multi write queues
     uint64_t lastVirtualStateRoot;
     unordered_map<string, uint64_t> virtualStateRoots;
+    string lastVirtualStateRootString;
 public:
     StateManager64(Goldilocks &fr, PoseidonGoldilocks &poseidon) : fr(fr), poseidon(poseidon), lastVirtualStateRoot(0)
     {        
@@ -100,7 +100,6 @@ public:
         return setStateRoot(batchUUID, tx, stateRoot, false, bIsVirtual, persistence);
     }
     zkresult write (const string &batchUUID, uint64_t tx, const string &_key, const mpz_class &value, const Persistence persistence);
-    zkresult deleteNode (const string &batchUUID, uint64_t tx, const string &_key, const Persistence persistence);
     zkresult read (const string &batchUUID, const string &_key, mpz_class &value, DatabaseMap *dbReadLog);
     zkresult semiFlush (const string &batchUUID, const string &newStateRoot, const Persistence persistence);
     zkresult flush (const string &batchUUID, const string &_newStateRoot, const Persistence _persistence, Database64 &db, uint64_t &flushId, uint64_t &lastSentFlushId);

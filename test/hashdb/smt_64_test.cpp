@@ -23,6 +23,7 @@ uint64_t Smt64Test (const Config &config)
     PoseidonGoldilocks poseidon;
     zkresult zkr;
     bool bRandomKeys = true;
+    bool persistent = true;
     
     Goldilocks::Element keyValue[12];
     for (uint64_t i=0; i<12; i++)
@@ -75,7 +76,7 @@ uint64_t Smt64Test (const Config &config)
         // Call writeTree()
         for (int64_t i=0; i<SMT64_TEST_NUMBER_OF_WRITES; i++)
         {
-            zkr = pHashDB->writeTree(root, keyValues[i], root);
+            zkr = pHashDB->writeTree(root, keyValues[i], root, persistent);
             if (zkr != ZKR_SUCCESS)
             {
                 zklog.error("Smt64Test() failed calling smt64.writeTree() result=" + zkresult2string(zkr));

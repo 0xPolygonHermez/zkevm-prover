@@ -9,6 +9,7 @@
 #include "database_map.hpp"
 #include "state_manager.hpp"
 #include "state_manager_64.hpp"
+#include "tree_64.hpp"
 
 HashDB::HashDB(Goldilocks &fr, const Config &config) : fr(fr), config(config), db(fr, config), db64(fr, config), smt(fr), smt64(fr)
 {
@@ -357,7 +358,7 @@ zkresult HashDB::readTree (const Goldilocks::Element (&root)[4], vector<KeyValue
 {
     if (config.hashDB64)
     {
-        return smt64.readTree(db64, root, keyValues);
+        return tree64.ReadTree(db64, root, keyValues);
     }
     else
     {
@@ -366,11 +367,11 @@ zkresult HashDB::readTree (const Goldilocks::Element (&root)[4], vector<KeyValue
     }
 }
 
-zkresult HashDB::writeTree (const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> &keyValues, Goldilocks::Element (&newRoot)[4])
+zkresult HashDB::writeTree (const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> &keyValues, Goldilocks::Element (&newRoot)[4], const bool persistent)
 {
     if (config.hashDB64)
     {
-        return smt64.writeTree(db64, oldRoot, keyValues, newRoot);
+        return tree64.WriteTree(db64, oldRoot, keyValues, newRoot, persistent);
     }
     else
     {
