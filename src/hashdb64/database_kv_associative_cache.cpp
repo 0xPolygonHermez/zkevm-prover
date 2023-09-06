@@ -99,7 +99,7 @@ void DatabaseKVAssociativeCache::addKeyValueVersion(const uint64_t version, cons
     bool present = false;
     bool presentSameVersion = false;
     uint32_t cacheIndex;
-    uint32_t tableIndexEmpty=0;
+    uint32_t tableIndexUse=0;
     uint32_t cacheIndexPrev;
 
     //
@@ -123,12 +123,13 @@ void DatabaseKVAssociativeCache::addKeyValueVersion(const uint64_t version, cons
                         presentSameVersion = true;
                         if(update == false) return;
                     }
+                    tableIndexUse = tableIndex;
                     cacheIndexPrev = cacheIndex;
                     break;
             }
         }else if (emptySlot == false){
             emptySlot = true;
-            tableIndexEmpty = tableIndex;
+            tableIndexUse = tableIndex;
         }
     }
 
@@ -136,8 +137,8 @@ void DatabaseKVAssociativeCache::addKeyValueVersion(const uint64_t version, cons
     // Evaluate cacheIndexKey and 
     //
     if(!presentSameVersion){
-        if(emptySlot == true){
-            indexes[tableIndexEmpty] = currentCacheIndex;
+        if(emptySlot == true || present){
+            indexes[tableIndexUse] = currentCacheIndex;
         }
         cacheIndex = (uint32_t)(currentCacheIndex & cacheMask);
         currentCacheIndex = (currentCacheIndex == UINT32_MAX) ? 0 : (currentCacheIndex + 1);
@@ -158,6 +159,8 @@ void DatabaseKVAssociativeCache::addKeyValueVersion(const uint64_t version, cons
     versions[cacheIndexVersions] = version;
     if(present & !presentSameVersion){
         versions[cacheIndexVersions+1] = cacheIndexPrev;
+    }else{
+        versions[cacheIndexVersions+1] = 0;
     }
     //
     // Forced index insertion
