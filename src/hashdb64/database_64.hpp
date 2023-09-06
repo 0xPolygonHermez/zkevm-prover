@@ -88,7 +88,7 @@ private:
     zkresult readRemoteVersion(const Goldilocks::Element (&root)[4], uint64_t version);
     zkresult writeRemoteVersion(const Goldilocks::Element (&root)[4], const uint64_t version); 
     zkresult readRemoteLatestVersion(uint64_t &version);
-    zkresult createRemoteLatestVersion(uint64_t &version);
+    zkresult writeRemoteLatestVersion(const uint64_t version);
 
     bool extractVersion(const pqxx::field& fieldData, const uint64_t version, mpz_class &value);
 
@@ -130,7 +130,7 @@ public:
     zkresult readVersion(const Goldilocks::Element (&root)[4], uint64_t& version, DatabaseMap *dbReadLog);
     zkresult writeVersion(const Goldilocks::Element (&root)[4], const uint64_t version, bool persistent);
     zkresult readLatestVersion(uint64_t &version);
-    zkresult createLatestVersion(uint64_t &version, bool persistent);
+    zkresult writeLatestVersion(const uint64_t version, const bool persistent);
 
 private:
     zkresult createStateRoot(void);

@@ -22,6 +22,7 @@ public:
     unordered_map<uint64_t, KeyValue> keyValueIntray;
     unordered_map<string, uint64_t> version;
     unordered_map<string, uint64_t> versionIntray;
+    uint64_t latestVersion;
     string nodesStateRoot;
 
     // SQL queries, including all data to store in database
