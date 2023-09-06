@@ -445,15 +445,8 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
     {
         zklog.warning("Database64::readKV() requested a key that does not exist (ZKR_DB_KEY_NOT_FOUND): " + keyStr + ", now trying to read from the hasDB");
         string valueStr;
-        rkv = read(keyStr, key, valueStr, dbReadLog);
-        if(rkv == ZKR_SUCCESS){
-            value = mpz_class(valueStr, 16);
-            writeKV(root, key, value, true);
-            if (dbReadLog != NULL) dbReadLog->add(keyStr, value, false, TimeDiff(t));
-        }else{
-            zklog.error("Database64::readKV() requested a key in that does not exist even in hasdb (ZKR_DB_KEY_NOT_FOUND): " + keyStr);
-            rkv = ZKR_DB_KEY_NOT_FOUND;
-        }
+        rkv = ZKR_DB_KEY_NOT_FOUND;
+        /* Pending*/
     }
 #ifdef LOG_DB_READ
     {
@@ -765,21 +758,31 @@ zkresult Database64::writeVersion(const Goldilocks::Element (&root)[4], const ui
 
 zkresult Database64::readLatestVersion(uint64_t &version){
 
+    zkresult r=ZKR_UNSPECIFIED;
     if (!bInitialized)
     {
         zklog.error("Database64::readLatestVersion() called uninitialized");
         exitProcess();
     }
-    version = latestVersionCache;
+    if(latestVersionCache != 0){
+        version = latestVersionCache;
+        return ZKR_SUCCESS;
+    }else{
+        r = readRemoteLatestVersion(version);
+        if(r == ZKR_SUCCESS){
+            latestVersionCache = version;
+        }
+        return r;
+    }
     return ZKR_SUCCESS;
 }
 
-zkresult Database64::createLatestVersion(uint64_t &version, bool persistent)
+zkresult Database64::writeLatestVersion(const uint64_t version, const bool persistent)
 {
 
     if (!bInitialized)
     {
-        zklog.error("Database64::createLatestVersion() called uninitialized");
+        zklog.error("Database64::writeLatestVersion() called uninitialized");
         exitProcess();
     }
     
@@ -788,7 +791,7 @@ zkresult Database64::createLatestVersion(uint64_t &version, bool persistent)
     if ( useRemoteDB && persistent)
     {
         
-        r = createRemoteLatestVersion(version);
+        r = writeRemoteLatestVersion(version);
     }
     else
     {
@@ -1635,53 +1638,53 @@ zkresult Database64::readRemoteLatestVersion(uint64_t &version){
 
     return ZKR_SUCCESS;
 }
-zkresult Database64::createRemoteLatestVersion(uint64_t &version){
+zkresult Database64::writeRemoteLatestVersion(const uint64_t version){
     
-    
-    zkresult rr = readLatestVersion(version);
-    if (rr != ZKR_SUCCESS)
-    {
-        zklog.error("Database64::createRemoteLatestVersion() readRemoteLatestVersion() failed with error=" + zkresult2string(rr));
-        return rr;
-    }
-    uint64_t newVersion = version+1;
-
     zkresult rw = ZKR_SUCCESS;    
 
-    const string &tableName =  config.dbLatestVersionTableName;
-    string query = "UPDATE " + tableName + " SET version = " + to_string(newVersion) + ";";
-    DatabaseConnection * pDatabaseConnection = getConnection();
-
-    try
-    {        
-
-#ifdef DATABASE_COMMIT
-        if (autoCommit)
-#endif
-        {
-            pqxx::work w(*(pDatabaseConnection->pConnection));
-            pqxx::result res = w.exec(query);
-            w.commit();
-        }
-#ifdef DATABASE_COMMIT
-        else
-        {
-            if (transaction == NULL)
-                transaction = new pqxx::work{*pConnectionWrite};
-            pqxx::result res = transaction->exec(query);
-        }
-#endif
-    }
-    catch (const std::exception &e)
+    if (config.dbMultiWrite)
     {
-        zklog.error("Database::writeRemoteVersion() table=" + tableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
-        rw = ZKR_DB_ERROR;
-        queryFailed();
-    }
+        multiWrite.Lock();
+        multiWrite.data[multiWrite.pendingToFlushDataIndex].latestVersion = version;
+#ifdef LOG_DB_WRITE_REMOTE
+            zklog.info("Database64::writeRemote() root=" + rootStr + " version " + to_string(version) + " multiWrite=[" + multiWrite.print() + "]");
+#endif
+        multiWrite.Unlock();
 
-    disposeConnection(pDatabaseConnection);
+    }else{
+
+        const string &tableName =  config.dbLatestVersionTableName;
+        string query = "UPDATE " + tableName + " SET version = " + to_string(version) + ";";
+        DatabaseConnection * pDatabaseConnection = getConnection();
+
+        try
+        {        
+#ifdef DATABASE_COMMIT
+            if (autoCommit)
+#endif
+            {
+                pqxx::work w(*(pDatabaseConnection->pConnection));
+                pqxx::result res = w.exec(query);
+                w.commit();
+            }
+#ifdef DATABASE_COMMIT
+            else
+            {
+                if (transaction == NULL)
+                    transaction = new pqxx::work{*pConnectionWrite};
+                pqxx::result res = transaction->exec(query);
+            }
+#endif
+        }
+        catch (const std::exception &e)
+        {
+            zklog.error("Database::writeRemoteVersion() table=" + tableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
+            rw = ZKR_DB_ERROR;
+            queryFailed();
+        }
+        disposeConnection(pDatabaseConnection);
     
-
+    }
     return rw;
 }
 
