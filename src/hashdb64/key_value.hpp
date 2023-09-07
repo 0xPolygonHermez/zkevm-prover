@@ -1,13 +1,12 @@
 #ifndef KEY_VALUE_HPP
 #define KEY_VALUE_HPP
 
-#include "key.hpp"
 #include "scalar.hpp"
 
 class KeyValue
 {
 public:
-    Key key;
+    Goldilocks::Element key[4];
     mpz_class value;
 };
 

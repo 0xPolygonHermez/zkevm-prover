@@ -15,7 +15,6 @@
 #include "smt_set_result.hpp"
 #include "smt_get_result.hpp"
 #include "tree_chunk.hpp"
-#include "key.hpp"
 #include "key_value.hpp"
 
 using namespace std;

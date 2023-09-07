@@ -49,14 +49,14 @@ uint64_t Smt64Test (const Config &config)
         if (bRandomKeys)
         {
             keyValue[0] = fr.fromU64(i);
-            poseidon.hash(kv.key.fe, keyValue);
+            poseidon.hash(kv.key, keyValue);
         }
         else
         {
-            kv.key.fe[0] = fr.fromU64(i);
-            kv.key.fe[1] = fr.zero();
-            kv.key.fe[2] = fr.zero();
-            kv.key.fe[3] = fr.zero();
+            kv.key[0] = fr.fromU64(i);
+            kv.key[1] = fr.zero();
+            kv.key[2] = fr.zero();
+            kv.key[3] = fr.zero();
         }
         kv.value = i;
         keyValues[i/SMT64_TEST_KEYS_PER_WRITE].emplace_back(kv);
@@ -156,12 +156,12 @@ uint64_t Smt64Test (const Config &config)
             for (uint64_t j=0; j<SMT64_TEST_KEYS_PER_WRITE; j++)
             {
                 // Check that the key is still the same
-                if ( !fr.equal(readKeyValues[i][j].key.fe[0], keyValues[i][j].key.fe[0]) ||
-                     !fr.equal(readKeyValues[i][j].key.fe[1], keyValues[i][j].key.fe[1]) ||
-                     !fr.equal(readKeyValues[i][j].key.fe[2], keyValues[i][j].key.fe[2]) ||
-                     !fr.equal(readKeyValues[i][j].key.fe[3], keyValues[i][j].key.fe[3]) )
+                if ( !fr.equal(readKeyValues[i][j].key[0], keyValues[i][j].key[0]) ||
+                     !fr.equal(readKeyValues[i][j].key[1], keyValues[i][j].key[1]) ||
+                     !fr.equal(readKeyValues[i][j].key[2], keyValues[i][j].key[2]) ||
+                     !fr.equal(readKeyValues[i][j].key[3], keyValues[i][j].key[3]) )
                 {
-                    zklog.error("Smt64Test() read different key at i=" + to_string(i) + " read=" + fea2string(fr, readKeyValues[i][j].key.fe) + " expected=" + fea2string(fr, keyValues[i][j].key.fe));
+                    zklog.error("Smt64Test() read different key at i=" + to_string(i) + " read=" + fea2string(fr, readKeyValues[i][j].key) + " expected=" + fea2string(fr, keyValues[i][j].key));
                     numberOfFailedTests++;
                 }
 
@@ -188,7 +188,7 @@ uint64_t Smt64Test (const Config &config)
         {
             for (uint64_t j=0; j<SMT64_TEST_KEYS_PER_WRITE; j++)
             {
-                zkr = pHashDB->set("", 0, root, keyValues[i][j].key.fe, keyValues[i][j].value, PERSISTENCE_DATABASE, root, NULL, NULL);
+                zkr = pHashDB->set("", 0, root, keyValues[i][j].key, keyValues[i][j].value, PERSISTENCE_DATABASE, root, NULL, NULL);
                 if (zkr != ZKR_SUCCESS)
                 {
                     zklog.error("Smt64Test() failed calling pHashDB->set() result=" + zkresult2string(zkr));

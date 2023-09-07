@@ -76,7 +76,7 @@ zkresult Tree64::WriteTree (Database64 &db, const Goldilocks::Element (&oldRoot)
             for (uint64_t j=0; j<chunks[i]->list.size(); j++)
             {
                 bool keyBits[256];
-                splitKey(fr, keyValues[chunks[i]->list[j]].key.fe, keyBits);
+                splitKey(fr, keyValues[chunks[i]->list[j]].key, keyBits);
                 uint64_t k = getKeyChildren64Position(keyBits, level);
                 switch (chunks[i]->getChild(k).type)
                 {
@@ -84,17 +84,17 @@ zkresult Tree64::WriteTree (Database64 &db, const Goldilocks::Element (&oldRoot)
                     {
                         if (keyValues[chunks[i]->list[j]].value != 0)
                         {
-                            chunks[i]->setLeafChild(k, keyValues[chunks[i]->list[j]].key.fe, keyValues[chunks[i]->list[j]].value);                  
+                            chunks[i]->setLeafChild(k, keyValues[chunks[i]->list[j]].key, keyValues[chunks[i]->list[j]].value);                  
                         }
                         break;
                     }
                     case LEAF:
                     {
                         // If the key is the same, then check the value
-                        if (fr.equal(chunks[i]->getChild(k).leaf.key[0], keyValues[chunks[i]->list[j]].key.fe[0]) &&
-                            fr.equal(chunks[i]->getChild(k).leaf.key[1], keyValues[chunks[i]->list[j]].key.fe[1]) &&
-                            fr.equal(chunks[i]->getChild(k).leaf.key[2], keyValues[chunks[i]->list[j]].key.fe[2]) &&
-                            fr.equal(chunks[i]->getChild(k).leaf.key[3], keyValues[chunks[i]->list[j]].key.fe[3]))
+                        if (fr.equal(chunks[i]->getChild(k).leaf.key[0], keyValues[chunks[i]->list[j]].key[0]) &&
+                            fr.equal(chunks[i]->getChild(k).leaf.key[1], keyValues[chunks[i]->list[j]].key[1]) &&
+                            fr.equal(chunks[i]->getChild(k).leaf.key[2], keyValues[chunks[i]->list[j]].key[2]) &&
+                            fr.equal(chunks[i]->getChild(k).leaf.key[3], keyValues[chunks[i]->list[j]].key[3]))
                         {
                             // If value is different, copy it
                             if (chunks[i]->getChild(k).leaf.value != keyValues[chunks[i]->list[j]].value)
@@ -105,7 +105,7 @@ zkresult Tree64::WriteTree (Database64 &db, const Goldilocks::Element (&oldRoot)
                                 }
                                 else
                                 {
-                                    chunks[i]->setLeafChild(k, keyValues[chunks[i]->list[j]].key.fe, keyValues[chunks[i]->list[j]].value);
+                                    chunks[i]->setLeafChild(k, keyValues[chunks[i]->list[j]].key, keyValues[chunks[i]->list[j]].value);
                                 }
                             }
                         }
@@ -124,10 +124,10 @@ zkresult Tree64::WriteTree (Database64 &db, const Goldilocks::Element (&oldRoot)
 
                             // We create a KeyValue from the original leaf node
                             KeyValue kv;
-                            kv.key.fe[0] = chunks[i]->getChild(k).leaf.key[0];
-                            kv.key.fe[1] = chunks[i]->getChild(k).leaf.key[1];
-                            kv.key.fe[2] = chunks[i]->getChild(k).leaf.key[2];
-                            kv.key.fe[3] = chunks[i]->getChild(k).leaf.key[3];
+                            kv.key[0] = chunks[i]->getChild(k).leaf.key[0];
+                            kv.key[1] = chunks[i]->getChild(k).leaf.key[1];
+                            kv.key[2] = chunks[i]->getChild(k).leaf.key[2];
+                            kv.key[3] = chunks[i]->getChild(k).leaf.key[3];
                             kv.value = chunks[i]->getChild(k).leaf.value;
 
                             // We add to the list the original leaf node
@@ -391,7 +391,7 @@ zkresult Tree64::ReadTree (Database64 &db, const Goldilocks::Element (&root)[4],
             for (uint64_t j=0; j<chunks[i]->list.size(); j++)
             {
                 bool keyBits[256];
-                splitKey(fr, keyValues[chunks[i]->list[j]].key.fe, keyBits);
+                splitKey(fr, keyValues[chunks[i]->list[j]].key, keyBits);
                 uint64_t k = getKeyChildren64Position(keyBits, level);
                 switch (chunks[i]->getChild(k).type)
                 {
@@ -399,10 +399,10 @@ zkresult Tree64::ReadTree (Database64 &db, const Goldilocks::Element (&root)[4],
                     {
                         for (uint64_t kv=0; kv<keyValues.size(); kv++)
                         {
-                            if (fr.equal(keyValues[kv].key.fe[0], keyValues[chunks[i]->list[j]].key.fe[0]) &&
-                                fr.equal(keyValues[kv].key.fe[1], keyValues[chunks[i]->list[j]].key.fe[1]) &&
-                                fr.equal(keyValues[kv].key.fe[2], keyValues[chunks[i]->list[j]].key.fe[2]) &&
-                                fr.equal(keyValues[kv].key.fe[3], keyValues[chunks[i]->list[j]].key.fe[3]))
+                            if (fr.equal(keyValues[kv].key[0], keyValues[chunks[i]->list[j]].key[0]) &&
+                                fr.equal(keyValues[kv].key[1], keyValues[chunks[i]->list[j]].key[1]) &&
+                                fr.equal(keyValues[kv].key[2], keyValues[chunks[i]->list[j]].key[2]) &&
+                                fr.equal(keyValues[kv].key[3], keyValues[chunks[i]->list[j]].key[3]))
                             {
                                 keyValues[kv].value = 0;
                             }
@@ -412,10 +412,10 @@ zkresult Tree64::ReadTree (Database64 &db, const Goldilocks::Element (&root)[4],
                     case LEAF:
                     {
                         // If the key is the same, then check the value
-                        if (fr.equal(chunks[i]->getChild(k).leaf.key[0], keyValues[chunks[i]->list[j]].key.fe[0]) &&
-                            fr.equal(chunks[i]->getChild(k).leaf.key[1], keyValues[chunks[i]->list[j]].key.fe[1]) &&
-                            fr.equal(chunks[i]->getChild(k).leaf.key[2], keyValues[chunks[i]->list[j]].key.fe[2]) &&
-                            fr.equal(chunks[i]->getChild(k).leaf.key[3], keyValues[chunks[i]->list[j]].key.fe[3]))
+                        if (fr.equal(chunks[i]->getChild(k).leaf.key[0], keyValues[chunks[i]->list[j]].key[0]) &&
+                            fr.equal(chunks[i]->getChild(k).leaf.key[1], keyValues[chunks[i]->list[j]].key[1]) &&
+                            fr.equal(chunks[i]->getChild(k).leaf.key[2], keyValues[chunks[i]->list[j]].key[2]) &&
+                            fr.equal(chunks[i]->getChild(k).leaf.key[3], keyValues[chunks[i]->list[j]].key[3]))
                         {
                             keyValues[chunks[i]->list[j]].value = chunks[i]->getChild(k).leaf.value;
                         }

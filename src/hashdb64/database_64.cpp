@@ -468,10 +468,10 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], vector<KeyValu
     zkresult zkr;
     for (uint64_t i=0; i<KVs.size(); i++)
     {
-        zkr = readKV(root, KVs[i].key.fe, KVs[i].value, dbReadLog);
+        zkr = readKV(root, KVs[i].key, KVs[i].value, dbReadLog);
         if (zkr != ZKR_SUCCESS)
         {
-            zklog.error("Database64::readKV(KBs) failed calling read() result=" + zkresult2string(zkr) + " key=" + fea2string(fr, KVs[i].key.fe[0], KVs[i].key.fe[1], KVs[i].key.fe[2], KVs[i].key.fe[3]) );
+            zklog.error("Database64::readKV(KBs) failed calling read() result=" + zkresult2string(zkr) + " key=" + fea2string(fr, KVs[i].key) );
             return zkr;
         }
     }
@@ -590,10 +590,10 @@ zkresult Database64::writeKV(const Goldilocks::Element (&root)[4], const vector<
     zkresult zkr;
     for (uint64_t i=0; i<KVs.size(); i++)
     {
-        zkr = writeKV(root, KVs[i].key.fe, KVs[i].value, persistent);
+        zkr = writeKV(root, KVs[i].key, KVs[i].value, persistent);
         if (zkr != ZKR_SUCCESS)
         {
-            zklog.error("Database64::writeKV(KBs) failed calling write() result=" + zkresult2string(zkr) + " key=" + fea2string(fr, KVs[i].key.fe[0], KVs[i].key.fe[1], KVs[i].key.fe[2], KVs[i].key.fe[3]) );
+            zklog.error("Database64::writeKV(KBs) failed calling write() result=" + zkresult2string(zkr) + " key=" + fea2string(fr, KVs[i].key) );
             return zkr;
         }
     }
@@ -604,10 +604,10 @@ zkresult Database64::writeKV(const uint64_t& version, const vector<KeyValue> &KV
     zkresult zkr;
     for (uint64_t i=0; i<KVs.size(); i++)
     {
-        zkr = writeKV(version, KVs[i].key.fe, KVs[i].value, persistent);
+        zkr = writeKV(version, KVs[i].key, KVs[i].value, persistent);
         if (zkr != ZKR_SUCCESS)
         {
-            zklog.error("Database64::writeKV(KBs) failed calling write() result=" + zkresult2string(zkr) + " key=" + fea2string(fr, KVs[i].key.fe[0], KVs[i].key.fe[1], KVs[i].key.fe[2], KVs[i].key.fe[3]) );
+            zklog.error("Database64::writeKV(KBs) failed calling write() result=" + zkresult2string(zkr) + " key=" + fea2string(fr, KVs[i].key) );
             return zkr;
         }
     }
@@ -1341,10 +1341,10 @@ zkresult Database64::writeRemoteKV(const uint64_t version, const Goldilocks::Ele
     {
         multiWrite.Lock();
         KeyValue auxKV;
-        auxKV.key.fe[0] = key[0];
-        auxKV.key.fe[1] = key[1];
-        auxKV.key.fe[2] = key[2];
-        auxKV.key.fe[3] = key[3];
+        auxKV.key[0] = key[0];
+        auxKV.key[1] = key[1];
+        auxKV.key[2] = key[2];
+        auxKV.key[3] = key[3];
         auxKV.value = value;
         multiWrite.data[multiWrite.pendingToFlushDataIndex].keyValueIntray[version] = auxKV;
 #ifdef LOG_DB_WRITE_REMOTE
@@ -2329,7 +2329,7 @@ zkresult Database64::sendData (void)
                 unordered_map<uint64_t, KeyValue>::const_iterator it=data.keyValue.begin();
                 while (it != data.keyValue.end())
                 {
-                   writeRemoteKV(it->first,it->second.key.fe,it->second.value, true);
+                   writeRemoteKV(it->first,it->second.key,it->second.value, true);
                 }
             }
             // If there are versions add to db
