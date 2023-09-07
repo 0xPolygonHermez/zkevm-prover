@@ -6,6 +6,8 @@
 #include <mutex>
 #include "zklog.hpp"
 #include "zkmax.hpp"
+#include "poseidon_goldilocks.hpp"
+
 
 using namespace std;
 class DatabaseKVAssociativeCache
@@ -54,5 +56,26 @@ class DatabaseKVAssociativeCache
             (currentCacheIndex < cacheIndexRaw && UINT32_MAX - cacheIndexRaw + currentCacheIndex > cacheSize);
          };
         void forcedInsertion(uint32_t (&usedRawCacheIndexes)[10], int &iters);
+        inline void hashKey(Goldilocks::Element (&keyOut)[4], const Goldilocks::Element (&keyIn)[4]) const{
+            Goldilocks::Element key_hash_imput[12];
+            for(int i=0; i<4; i++){
+                key_hash_imput[i] = keyIn[i];
+                key_hash_imput[i+4] = keyIn[i];
+                key_hash_imput[i+8] = keyIn[i];
+            }   
+            PoseidonGoldilocks pg;
+            pg.hash_seq(keyOut, key_hash_imput);
+        };
+        inline void hashKey_p(Goldilocks::Element (&keyOut)[4], const Goldilocks::Element * keyIn) const{ //rick: convertir
+            Goldilocks::Element key_hash_imput[12];
+            for(int i=0; i<4; i++){
+                key_hash_imput[i] = keyIn[i];
+                key_hash_imput[i+4] = keyIn[i];
+                key_hash_imput[i+8] = keyIn[i];
+            }   
+            PoseidonGoldilocks pg;
+            pg.hash_seq(keyOut, key_hash_imput);
+        };
+        
 };
 #endif

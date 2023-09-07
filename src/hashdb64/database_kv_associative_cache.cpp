@@ -105,9 +105,11 @@ void DatabaseKVAssociativeCache::addKeyValueVersion(const uint64_t version, cons
     //
     // Check if present in one of the four slots
     //
+    Goldilocks::Element key_hashed[4];
+    hashKey(key_hashed, key);
     for (int i = 0; i < 4; ++i)
     {
-        uint32_t tableIndex = (uint32_t)(key[i].fe & indexesMask);
+        uint32_t tableIndex = (uint32_t)(key_hashed[i].fe & indexesMask);
         uint32_t cacheIndexRaw = indexes[tableIndex];
         cacheIndex = cacheIndexRaw & cacheMask;
         uint32_t cacheIndexKey = cacheIndex * 4;
@@ -188,7 +190,9 @@ void DatabaseKVAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIndexes)
     //
     // find a slot into my indexes
     //
-    Goldilocks::Element *inputKey = &keys[(inputRawCacheIndex & cacheMask) * 4];
+    Goldilocks::Element key_hashed[4];
+    hashKey_p(key_hashed, &keys[(inputRawCacheIndex & cacheMask) * 4]);
+    Goldilocks::Element *inputKey = &key_hashed[0];
     uint32_t minRawCacheIndex = UINT32_MAX;
     int pos = -1;
 
@@ -244,9 +248,11 @@ bool DatabaseKVAssociativeCache::findKey( const uint64_t version, const Goldiloc
     //
     // Find the value
     //
+    Goldilocks::Element key_hashed[4];
+    hashKey(key_hashed, key);
     for (int i = 0; i < 4; i++)
     {
-        uint32_t cacheIndexRaw = indexes[key[i].fe & indexesMask];
+        uint32_t cacheIndexRaw = indexes[key_hashed[i].fe & indexesMask];
         if (emptyCacheSlot(cacheIndexRaw)) continue;
         
         uint32_t cacheIndex = cacheIndexRaw  & cacheMask;
