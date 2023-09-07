@@ -90,7 +90,7 @@ private:
     zkresult readRemoteLatestVersion(uint64_t &version);
     zkresult writeRemoteLatestVersion(const uint64_t version);
 
-    bool extractVersion(const pqxx::field& fieldData, const uint64_t version, mpz_class &value);
+    zkresult extractVersion(const pqxx::field& fieldData, const uint64_t version, mpz_class &value);
 
 public:
 #ifdef DATABASE_USE_CACHE
