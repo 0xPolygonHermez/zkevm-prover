@@ -11,15 +11,14 @@
 #include "database_64.hpp"
 #include "utils/time_metric.hpp"
 #include "poseidon_goldilocks.hpp"
-#include "state_root.hpp"
 
 using namespace std;
 
 class TxSubState64
 {
 public:
-    StateRoot oldStateRoot;
-    StateRoot newStateRoot;
+    string oldStateRoot;
+    string newStateRoot;
     uint64_t previousSubState;
     bool bValid;
     unordered_map<string, mpz_class> dbWrite;
@@ -32,8 +31,8 @@ public:
 class TxPersistenceState64
 {
 public:
-    StateRoot oldStateRoot;
-    StateRoot newStateRoot;
+    string oldStateRoot;
+    string newStateRoot;
     uint64_t currentSubState;
     vector<TxSubState64> subState;
     TxPersistenceState64() : currentSubState(0)
@@ -51,9 +50,9 @@ public:
 class BatchState64
 {
 public:
-    StateRoot oldStateRoot;
-    StateRoot currentStateRoot;
-    StateRoot newStateRoot;
+    string oldStateRoot;
+    string currentStateRoot;
+    string newStateRoot;
     uint64_t currentTx;
     vector<TxState64> txState;
     unordered_map<string, mpz_class> dbWrite;
@@ -76,8 +75,6 @@ private:
     Config config;
     pthread_mutex_t mutex; // Mutex to protect the multi write queues
     uint64_t lastVirtualStateRoot;
-    unordered_map<string, uint64_t> virtualStateRoots;
-    string lastVirtualStateRootString;
 public:
     StateManager64(Goldilocks &fr, PoseidonGoldilocks &poseidon) : fr(fr), poseidon(poseidon), lastVirtualStateRoot(0)
     {        
@@ -85,19 +82,19 @@ public:
         pthread_mutex_init(&mutex, NULL);
     };
 private:
-    zkresult setStateRoot (const string &batchUUID, uint64_t tx, const string &stateRoot, const bool bIsOldStateRoot, const bool bIsVirtual, const Persistence persistence);
+    zkresult setStateRoot (const string &batchUUID, uint64_t tx, const string &stateRoot, const bool bIsOldStateRoot, const Persistence persistence);
 public:
     void init (const Config &_config)
     {
         config = _config;
     }
-    zkresult setOldStateRoot (const string &batchUUID, uint64_t tx, const string &stateRoot, const bool bIsVirtual, const Persistence persistence)
+    zkresult setOldStateRoot (const string &batchUUID, uint64_t tx, const string &stateRoot, const Persistence persistence)
     {
-        return setStateRoot(batchUUID, tx, stateRoot, true, bIsVirtual, persistence);
+        return setStateRoot(batchUUID, tx, stateRoot, true, persistence);
     }
-    zkresult setNewStateRoot (const string &batchUUID, uint64_t tx, const string &stateRoot, const bool bIsVirtual, const Persistence persistence)
+    zkresult setNewStateRoot (const string &batchUUID, uint64_t tx, const string &stateRoot, const Persistence persistence)
     {
-        return setStateRoot(batchUUID, tx, stateRoot, false, bIsVirtual, persistence);
+        return setStateRoot(batchUUID, tx, stateRoot, false, persistence);
     }
     zkresult write (const string &batchUUID, uint64_t tx, const string &_key, const mpz_class &value, const Persistence persistence);
     zkresult read (const string &batchUUID, const string &_key, mpz_class &value, DatabaseMap *dbReadLog);

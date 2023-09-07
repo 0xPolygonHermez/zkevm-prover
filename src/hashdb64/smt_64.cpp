@@ -28,8 +28,7 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
         // Set the old state root
         string oldRootString;
         oldRootString = fea2string(fr, oldRoot);
-        bool bIsVirtual = stateManager64.isVirtualStateRoot(oldRootString);
-        stateManager64.setOldStateRoot(batchUUID, tx, oldRootString, bIsVirtual, persistence);
+        stateManager64.setOldStateRoot(batchUUID, tx, oldRootString, persistence);
 
         // Write the key-value pair
         string hashString = NormalizeToNFormat(fea2string(fr, key), 64);
@@ -45,7 +44,7 @@ zkresult Smt64::set (const string &batchUUID, uint64_t tx, Database64 &db, const
         stateManager64.getVirtualStateRoot(newRoot, newRootString);
 
         // Set the new sttae root
-        stateManager64.setNewStateRoot(batchUUID, tx, newRootString, true, persistence);
+        stateManager64.setNewStateRoot(batchUUID, tx, newRootString, persistence);
 
         result.newRoot[0] = newRoot[0];
         result.newRoot[1] = newRoot[1];
