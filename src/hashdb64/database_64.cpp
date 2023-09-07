@@ -443,10 +443,11 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
     // If we could not find the value, report the error
     if (rv != ZKR_SUCCESS || rkv != ZKR_SUCCESS)
     {
-        zklog.warning("Database64::readKV() requested a key that does not exist (ZKR_DB_KEY_NOT_FOUND): " + keyStr + ", now trying to read from the hasDB");
+        zklog.warning("Database64::readKV() requested a key that does not exist (ZKR_DB_KEY_NOT_FOUND): " + keyStr);
         string valueStr;
-        rkv = ZKR_DB_KEY_NOT_FOUND;
-        /* Pending*/
+        if( rkv == ZKR_DB_VERSION_NOT_FOUND){
+            //Pending 
+        }
     }
 #ifdef LOG_DB_READ
     {
@@ -1274,10 +1275,8 @@ zkresult Database64::readRemoteKV(const uint64_t version, const Goldilocks::Elem
             zklog.error("DatabaseKV::readRemoteKV() table=" + tableName + " got an invalid number of colums for the row: " + to_string(row.size()) + "for key=" + keyStr);
             exitProcess();
         }
-        bool foundVersion = extractVersion(row[1], version, value); 
-        if(foundVersion==false){
-            return ZKR_DB_VERSION_NOT_FOUND;
-        }
+        return extractVersion(row[1], version, value); 
+        
 
     }
     catch (const std::exception &e)
@@ -1294,11 +1293,12 @@ zkresult Database64::readRemoteKV(const uint64_t version, const Goldilocks::Elem
     return ZKR_SUCCESS;
 }
 
-bool Database64::extractVersion(const pqxx::field& fieldData, const uint64_t version, mpz_class &value){
+zkresult Database64::extractVersion(const pqxx::field& fieldData, const uint64_t version, mpz_class &value){
 
+    int data_size = 0;
     if(!fieldData.is_null()){
         string data = removeBSXIfExists64(fieldData.c_str());
-        int data_size = data.size();
+        data_size = data.size();
         zkassert(data_size % 80 == 0);
         for (int i = 0; i < data_size; i += 80)
         {
@@ -1307,7 +1307,7 @@ bool Database64::extractVersion(const pqxx::field& fieldData, const uint64_t ver
             uint64_t version_ = aux.get_ui();
             if(version_==version){
                 value = mpz_class(data.substr(i + 16, 64), 16);
-                return true;
+                return ZKR_SUCCESS;
             }
         }
     }
@@ -1323,7 +1323,15 @@ bool Database64::extractVersion(const pqxx::field& fieldData, const uint64_t ver
             return true;
         }
     }*/
-    return false;
+    if(data_size < 80*maxVersions){
+        return ZKR_DB_VERSION_NOT_FOUND_GLOBAL;
+    }else{
+        if(data_size != 80*maxVersions){
+            zklog.error("Database64::extractVersion() got an invalid data size: " + to_string(data_size));
+            exitProcess();
+        }
+        return ZKR_DB_VERSION_NOT_FOUND;
+    }
 }
 
 zkresult Database64::writeRemoteKV(const uint64_t version, const Goldilocks::Element (&key)[4], const mpz_class &value, bool noMultiWrite)
@@ -1349,7 +1357,9 @@ zkresult Database64::writeRemoteKV(const uint64_t version, const Goldilocks::Ele
         const string &tableName = config.dbKeyValueTableName;
         string keyStr_ = fea2string(fr, key[0], key[1], key[2], key[3]); 
         string keyStr = NormalizeToNFormat(keyStr_, 64);
-        string insertStr = to_string(version) + value.get_str(16);
+        string valueStr = NormalizeToNFormat(value.get_str(16),64);
+        string versionStr = NormalizeToNFormat(U64toString(version,16),16); 
+        string insertStr = versionStr + valueStr;
         assert(insertStr.size() == 80);
 
         if (config.logRemoteDbReads)
@@ -1498,7 +1508,7 @@ zkresult Database64::readRemoteVersion(const Goldilocks::Element (&root)[4], uin
         }
         pqxx::field const fieldData = row[1];
         if (!fieldData.is_null()) {
-            fieldData.as<uint64_t>(version);
+            version = fieldData.as<uint64_t>();
         } else {
             zklog.error("DatabaseKV::readRemoteVersion() table=" + tableName + " got a null version for root: " + rootStr);
         }
@@ -1535,7 +1545,7 @@ zkresult Database64::writeRemoteVersion(const Goldilocks::Element (&root)[4], co
     else
     {
         const string &tableName =  config.dbVersionTableName;
-        string query = "INSERT INTO " + tableName + " ( hash, version ) VALUES ( E\'\\\\x" + rootStr + "\', E\'\\\\x" + to_string(version) + "\' ) ON CONFLICT (hash) DO NOTHING;";
+        string query = "INSERT INTO " + tableName + " ( hash, version ) VALUES ( E\'\\\\x" + rootStr + "\', " + to_string(version) + " ) ON CONFLICT (hash) DO NOTHING;";
         DatabaseConnection * pDatabaseConnection = getConnection();
 
         try
@@ -1620,7 +1630,7 @@ zkresult Database64::readRemoteLatestVersion(uint64_t &version){
         }
         pqxx::field const fieldData = row[0];
         if (!fieldData.is_null()) {
-            fieldData.as<uint64_t>(version);
+            version = fieldData.as<uint64_t>();
         } else {
             zklog.error("DatabaseKV::readRemoteLatestVersion() table=" + tableName + " got a null version;");
         }
