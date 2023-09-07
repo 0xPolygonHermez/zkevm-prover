@@ -1350,6 +1350,17 @@ zkresult Database::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlus
 
 zkresult Database::sendData (void)
 {
+    // If we have read-only access to database, just pretend to have sent all data
+    if (config.dbReadOnly)
+    {
+        // If we succeeded, update last sent batch
+        multiWrite.Lock();
+        multiWrite.storedFlushId = multiWrite.storingFlushId;
+        multiWrite.Unlock();
+
+        return ZKR_SUCCESS;
+    }
+
     zkresult zkr = ZKR_SUCCESS;
     
     // Time calculation variables
