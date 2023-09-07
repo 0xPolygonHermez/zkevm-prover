@@ -147,6 +147,7 @@ void Config::load(json &config)
     ParseString(config, "checkTreeRoot", "CHECK_TREE_ROOT", checkTreeRoot, "auto");
     ParseBool(config, "runDatabasePerformanceTest", "RUN_DATABASE_PERFORMANCE_TEST", runDatabasePerformanceTest, false);
     ParseBool(config, "runSMT64Test", "RUN_SMT64_TEST", runSMT64Test, false);
+    ParseBool(config, "runDbKVRemoteTest", "RUN_DBKV_REMOTE_TEST", runDbKVRemoteTest, false);
     ParseBool(config, "runUnitTest", "RUN_UNIT_TEST", runUnitTest, false);
 
     // Main SM executor
@@ -340,13 +341,21 @@ void Config::load(json &config)
     if (config.contains("useAssociativeCache") && config["useAssociativeCache"].is_boolean())
         useAssociativeCache = config["useAssociativeCache"];
 
-    log2DbMTAssociativeCacheSize = 24;
+    log2DbMTAssociativeCacheSize = 25;
     if (config.contains("log2DbMTAssociativeCacheSize") && config["log2DbMTAssociativeCacheSize"].is_number())
         log2DbMTAssociativeCacheSize = config["log2DbMTAssociativeCacheSize"];
     
     log2DbMTAssociativeCacheIndexesSize = 28;
     if (config.contains("log2DbMTAssociativeCacheIndexesSize") && config["log2DbMTAssociativeCacheIndexesSize"].is_number())
         log2DbMTAssociativeCacheIndexesSize = config["log2DbMTAssociativeCacheIndexesSize"];
+
+    log2DbKVAssociativeCacheSize = 25;
+    if (config.contains("log2DbKVAssociativeCacheSize") && config["log2DbKVAssociativeCacheSize"].is_number())
+        log2DbKVAssociativeCacheSize = config["log2DbKVAssociativeCacheSize"];
+    
+    log2DbKVAssociativeCacheIndexesSize = 28;
+    if (config.contains("log2DbKVAssociativeCacheIndexesSize") && config["log2DbKVAssociativeCacheIndexesSize"].is_number())
+        log2DbKVAssociativeCacheIndexesSize = config["log2DbKVAssociativeCacheIndexesSize"];
 
     dbProgramCacheSize = 1*1024;
     if (config.contains("dbProgramCacheSize") && config["dbProgramCacheSize"].is_number())
@@ -726,8 +735,10 @@ void Config::load(json &config)
         ECRecoverPrecalcNThreads = config["ECRecoverPrecalcNThreads"];
     // MT associative cache
     ParseBool(config, "useAssociativeCache", "USE_ASSOCIATIVE_CACHE", useAssociativeCache, false);
-    ParseS64(config, "log2DbMTAssociativeCacheSize", "LOG2_DB_MT_ASSOCIATIVE_CACHE_SIZE", log2DbMTAssociativeCacheSize, 24);
+    ParseS64(config, "log2DbMTAssociativeCacheSize", "LOG2_DB_MT_ASSOCIATIVE_CACHE_SIZE", log2DbMTAssociativeCacheSize, 25);
     ParseS64(config, "log2DbMTAssociativeCacheIndexesSize", "LOG2_DB_MT_ASSOCIATIVE_CACHE_INDEXES_SIZE", log2DbMTAssociativeCacheIndexesSize, 28);
+    ParseS64(config, "log2DbKVAssociativeCacheSize", "LOG2_DB_KV_ASSOCIATIVE_CACHE_SIZE", log2DbKVAssociativeCacheSize, 25);
+    ParseS64(config, "log2DbMTAssociativeCacheIndexesSize", "LOG2_DB_KV_ASSOCIATIVE_CACHE_INDEXES_SIZE", log2DbKVAssociativeCacheIndexesSize, 28);
 
     // Program (SC) cache
     ParseS64(config, "dbProgramCacheSize", "DB_PROGRAM_CACHE_SIZE", dbProgramCacheSize, 1*1024); // Default = 1 GB
@@ -895,6 +906,8 @@ void Config::print(void)
         zklog.info("    runDatabasePerformanceTest=true");
     if (runSMT64Test)
         zklog.info("    runSMT64Test=true");
+    if (runDbKVRemoteTest)
+        zklog.info("    runDbKVRemoteTest=true");
     if (runUnitTest)
         zklog.info("    runUnitTest=true");
 
@@ -1020,6 +1033,8 @@ void Config::print(void)
     zklog.info("    useAssociativeCache=" + to_string(useAssociativeCache));
     zklog.info("    log2DbMTAssociativeCacheSize=" + to_string(log2DbMTAssociativeCacheSize));
     zklog.info("    log2DbMTAssociativeCacheIndexesSize=" + to_string(log2DbMTAssociativeCacheIndexesSize));
+    zklog.info("    log2DbKVAssociativeCacheSize=" + to_string(log2DbKVAssociativeCacheSize));
+    zklog.info("    log2DbKVAssociativeCacheIndexesSize=" + to_string(log2DbKVAssociativeCacheIndexesSize));
     zklog.info("    dbProgramCacheSize=" + to_string(dbProgramCacheSize));
     zklog.info("    loadDBToMemTimeout=" + to_string(loadDBToMemTimeout));
     zklog.info("    fullTracerTraceReserveSize=" + to_string(fullTracerTraceReserveSize));

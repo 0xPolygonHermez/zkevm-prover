@@ -45,6 +45,7 @@
 #include "database_performance_test.hpp"
 #include "smt_64_test.hpp"
 #include "sha256.hpp"
+#include "database_kv_remote_test.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -597,6 +598,11 @@ int main(int argc, char **argv)
     {
         DatabasePerformanceTest();
     }
+    // Test DbKVRemote
+    if (config.runDbKVRemoteTest)
+    {
+        DatabaseKVRemoteTest(config);
+    }
     
     // Test SMT64
     if (config.runSMT64Test)
@@ -650,8 +656,8 @@ int main(int argc, char **argv)
         Database::dbMTCache.setMaxSize(config.dbMTCacheSize*1024*1024);
     }
     if(config.hashDB64){
-        Database64::dbKVACache.postConstruct(config.log2DbMTAssociativeCacheIndexesSize, config.log2DbMTAssociativeCacheSize, "KVACache");
-        Database64::dbVersionACache.postConstruct(config.log2DbMTAssociativeCacheIndexesSize, config.log2DbMTAssociativeCacheSize, "VersionACache");
+        Database64::dbKVACache.postConstruct(config.log2DbMTAssociativeCacheIndexesSize, config.log2DbKVAssociativeCacheSize, "KVACache");
+        Database64::dbVersionACache.postConstruct(config.log2DbMTAssociativeCacheIndexesSize, config.log2DbKVAssociativeCacheSize, "VersionACache");
     }
     Database::dbProgramCache.setName("ProgramCache");
     Database::dbProgramCache.setMaxSize(config.dbProgramCacheSize*1024*1024);

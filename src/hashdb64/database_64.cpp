@@ -1620,7 +1620,7 @@ zkresult Database64::readRemoteLatestVersion(uint64_t &version){
         }
         pqxx::field const fieldData = row[0];
         if (!fieldData.is_null()) {
-            fieldData.as<uint64_t>(version);
+            version = fieldData.as<uint64_t>();
         } else {
             zklog.error("DatabaseKV::readRemoteLatestVersion() table=" + tableName + " got a null version;");
         }
