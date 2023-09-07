@@ -2977,7 +2977,7 @@ void loadDb2MemCache64 (const Config &config)
             hash = treeMapIterator->second[i];
             dbValue.clear();
             Goldilocks::Element vhash[4];
-            if(pHashDB->db.usingAssociativeCache()) string2key(fr, hash, vhash);
+            if(pHashDB->db.usingAssociativeCache()) string2fea(fr, hash, vhash);
             zkresult zkr = pHashDB->db.read(hash, vhash, dbValue, NULL, true);
 
             if (zkr != ZKR_SUCCESS)

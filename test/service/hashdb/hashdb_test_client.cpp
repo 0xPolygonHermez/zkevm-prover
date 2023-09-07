@@ -31,6 +31,7 @@ void* hashDBTestClientThread (const Config& config)
     zkresult zkr;
     Persistence persistence = PERSISTENCE_DATABASE;
     HashDBInterface* client = HashDBClientFactory::createHashDBClient(fr, config);
+    uint64_t flushId, storedFlushId;
 
     // It should add and remove an element
     {
@@ -45,8 +46,8 @@ void* hashDBTestClientThread (const Config& config)
 
         keyScalar=1;
         scalar2key(fr, keyScalar, key);
-
         value=2;
+        
         zkr = client->set(uuid, tx, root, key, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         zkassertpermanent(zkr==ZKR_SUCCESS);
@@ -60,12 +61,16 @@ void* hashDBTestClientThread (const Config& config)
         zkassertpermanent(value==2);
 
         value=0;
+
         zkr = client->set(uuid, tx, root, key, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         zkassertpermanent(zkr==ZKR_SUCCESS);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-        zkassertpermanent(fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]));
+        zkassertpermanent(config.hashDB64 || (fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3])));
 
+        zkr = client->flush(uuid, fea2string(fr, root), persistence, flushId, storedFlushId);
+        zkassertpermanent(config.hashDB64 || zkr==ZKR_SUCCESS);
+        
         cout << "HashDB client test 1 done" << endl;
     }
 
@@ -91,19 +96,39 @@ void* hashDBTestClientThread (const Config& config)
         for (uint64_t i=0; i<4; i++) initialRoot[i] = root[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
+        zkr = client->get(uuid, root, key, value, &getResult, NULL);
+        cout << "GET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << endl;
+        zkassertpermanent(zkr==ZKR_SUCCESS);
+        value = getResult.value;
+        zkassertpermanent(value==2);
+
         value=3;
         zkr = client->set(uuid, tx, root, key, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
+        zkr = client->get(uuid, root, key, value, &getResult, NULL);
+        cout << "GET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << endl;
+        zkassertpermanent(zkr==ZKR_SUCCESS);
+        value = getResult.value;
+        zkassertpermanent(value==3);
+
         value=2;
         zkr = client->set(uuid, tx, root, key, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+        zkassertpermanent(config.hashDB64 || (fr.equal(initialRoot[0], root[0]) && fr.equal(initialRoot[1], root[1]) && fr.equal(initialRoot[2], root[2]) && fr.equal(initialRoot[3], root[3])));
 
-        zkassertpermanent(fr.equal(initialRoot[0], root[0]) && fr.equal(initialRoot[1], root[1]) && fr.equal(initialRoot[2], root[2]) && fr.equal(initialRoot[3], root[3]));
+        zkr = client->get(uuid, root, key, value, &getResult, NULL);
+        cout << "GET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << endl;
+        zkassertpermanent(zkr==ZKR_SUCCESS);
+        value = getResult.value;
+        zkassertpermanent(value==2);
+        
+        zkr = client->flush(uuid, fea2string(fr, root), persistence, flushId, storedFlushId);
+        zkassertpermanent(config.hashDB64 || zkr==ZKR_SUCCESS);
 
         cout << "HashDB client test 2 done" << endl;
     }

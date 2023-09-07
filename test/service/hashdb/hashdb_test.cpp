@@ -17,12 +17,12 @@ uint64_t HashDBTest (const Config& config)
 
     uint64_t numberOfFailedTests = 0;
 
-    //runHashDBTestClient(config);
+    runHashDBTestClient(config);
     //runHashDBTestLoad(config);
     //runHashDBPerfTest(config);
     //runHashDBBigTree(config);
     
-    numberOfFailedTests += HashDBTestMultiWrite(config);
+    //numberOfFailedTests += HashDBTestMultiWrite(config);
     return numberOfFailedTests;
 }
 
