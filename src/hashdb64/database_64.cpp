@@ -1358,7 +1358,8 @@ zkresult Database64::writeRemoteKV(const uint64_t version, const Goldilocks::Ele
         string keyStr_ = fea2string(fr, key[0], key[1], key[2], key[3]); 
         string keyStr = NormalizeToNFormat(keyStr_, 64);
         string valueStr = NormalizeToNFormat(value.get_str(16),64);
-        string insertStr = to_string(version) + valueStr;
+        string versionStr = NormalizeToNFormat(U64toString(version,16),16); 
+        string insertStr = versionStr + valueStr;
         assert(insertStr.size() == 80);
 
         if (config.logRemoteDbReads)
@@ -1544,7 +1545,7 @@ zkresult Database64::writeRemoteVersion(const Goldilocks::Element (&root)[4], co
     else
     {
         const string &tableName =  config.dbVersionTableName;
-        string query = "INSERT INTO " + tableName + " ( hash, version ) VALUES ( E\'\\\\x" + rootStr + "\', E\'\\\\x" + to_string(version) + "\' ) ON CONFLICT (hash) DO NOTHING;";
+        string query = "INSERT INTO " + tableName + " ( hash, version ) VALUES ( E\'\\\\x" + rootStr + "\', " + to_string(version) + " ) ON CONFLICT (hash) DO NOTHING;";
         DatabaseConnection * pDatabaseConnection = getConnection();
 
         try

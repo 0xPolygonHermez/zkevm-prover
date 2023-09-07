@@ -398,6 +398,20 @@ void bytes2u32 (const uint8_t * pInput, uint32_t &output, bool bBigEndian);
 /* Array of bytes to unsigned 64.  pInput must be 8 bytes long */
 void bytes2u64 (const uint8_t * pInput, uint64_t &output, bool bBigEndian);
 
+/* unsigned64 to string*/
+inline void U64toString(std::string &result, const uint64_t in1, const int radix)
+{
+    mpz_class aux = in1;
+    result = aux.get_str(radix);
+}
+
+/* unsigned64 to string*/
+inline std::string U64toString( const uint64_t in1, const int radix)
+{
+    mpz_class aux = in1;
+    string result = aux.get_str(radix);
+    return result;
+}
 /* Swap bytes, e.g. little to big endian, and vice-versa */
 uint64_t swapBytes64 (uint64_t input);
 
