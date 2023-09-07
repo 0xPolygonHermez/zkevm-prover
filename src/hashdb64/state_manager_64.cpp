@@ -729,7 +729,7 @@ zkresult StateManager64::flush(const string &batchUUID, const string &_newStateR
             for (it = dbWrite.begin(); it != dbWrite.end(); it++)
             {
                 KeyValue keyValue;
-                string2fea(fr, it->first, keyValue.key.fe);
+                string2fea(fr, it->first, keyValue.key);
                 keyValue.value = it->second;
                 keyValues.emplace_back(keyValue);
             }

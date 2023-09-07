@@ -1,5 +1,4 @@
 #include <bitset>
-#include "key.hpp"
 #include "scalar.hpp"
 #include "zklog.hpp"
 #include "exit_process.hpp"

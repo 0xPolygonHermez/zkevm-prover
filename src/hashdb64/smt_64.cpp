@@ -6,7 +6,6 @@
 #include "zklog.hpp"
 #include <bitset>
 #include "state_manager_64.hpp"
-#include "key.hpp"
 #include "key_utils.hpp"
 #include "tree_chunk.hpp"
 
