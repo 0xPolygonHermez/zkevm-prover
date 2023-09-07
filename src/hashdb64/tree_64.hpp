@@ -1,5 +1,5 @@
-#ifndef SMT_64_HPP
-#define SMT_64_HPP
+#ifndef TREE_64_HPP
+#define TREE_64_HPP
 
 #include <vector>
 #include <map>
@@ -61,49 +61,16 @@ The Forest takes note of the latest Tree hash to keep track of the current state
 
 */
 
-class SmtContext64
+class Tree64
 {
-public:
-    Database64 &db;
-    bool bUseStateManager;
-    const string &batchUUID;
-    uint64_t tx;
-    const Persistence persistence;
-    SmtContext64(Database64 &db, bool bUseStateManager, const string &batchUUID, uint64_t tx, const Persistence persistence) :
-        db(db),
-        bUseStateManager(bUseStateManager),
-        batchUUID(batchUUID),
-        tx(tx),
-        persistence(persistence) {};
-};
-
-// SMT class
-class Smt64
-{
-private:
-    Goldilocks  &fr;
+    Goldilocks fr;
     PoseidonGoldilocks poseidon;
-    Goldilocks::Element capacityZero[4];
-    Goldilocks::Element capacityOne[4];
 public:
-    Smt64(Goldilocks &fr) : fr(fr)
-    {
-        capacityZero[0] = fr.zero();
-        capacityZero[1] = fr.zero();
-        capacityZero[2] = fr.zero();
-        capacityZero[3] = fr.zero();
-        capacityOne[0] = fr.one();
-        capacityOne[1] = fr.zero();
-        capacityOne[2] = fr.zero();
-        capacityOne[3] = fr.zero();
-    }
-
-    zkresult set(const string &batchUUID, uint64_t tx, Database64 &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, SmtSetResult &result, DatabaseMap *dbReadLog = NULL);
-    zkresult get(const string &batchUUID, Database64 &db, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], SmtGetResult &result, DatabaseMap *dbReadLog = NULL);
-    zkresult hashSave(const SmtContext64 &ctx, const TreeChunk &treeChunk);
-
-    zkresult updateStateRoot(Database64 &db, const Goldilocks::Element (&stateRoot)[4]);
-    int64_t getUniqueSibling(vector<Goldilocks::Element> &a);
+    zkresult WriteTree (Database64 &db, const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> &keyValues, Goldilocks::Element (&newRoot)[4], const bool persistent);
+    zkresult CalculateHash (Child &result, std::vector<TreeChunk *> &chunks, vector<DB64Query> &dbQueries, int idChunk, int level);
+    zkresult ReadTree (Database64 &db, const Goldilocks::Element (&root)[4], vector<KeyValue> &keyValues);
 };
+
+extern Tree64 tree64;
 
 #endif

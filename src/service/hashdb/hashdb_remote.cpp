@@ -413,7 +413,7 @@ zkresult HashDBRemote::readTree (const Goldilocks::Element (&root)[4], vector<Ke
     return ZKR_UNSPECIFIED;
 }
 
-zkresult HashDBRemote::writeTree (const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> &keyValues, Goldilocks::Element (&newRoot)[4], uint64_t &flushId, uint64_t &lastSentFlushId)
+zkresult HashDBRemote::writeTree (const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> &keyValues, Goldilocks::Element (&newRoot)[4], const bool persistent)
 {
     zklog.error("HashDBRemote::writeTree() called, but this method is only allowed locally");
     return ZKR_UNSPECIFIED;

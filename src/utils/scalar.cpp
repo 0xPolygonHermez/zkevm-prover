@@ -76,7 +76,7 @@ void string2fea(Goldilocks &fr, const string&os, vector<Goldilocks::Element> &fe
         fea.push_back(fe);
     }
 }
-void string2key(Goldilocks &fr, const string& os, Goldilocks::Element (&fea)[4])
+void string2fea(Goldilocks &fr, const string& os, Goldilocks::Element (&fea)[4])
 {
     Goldilocks::Element fe;
     if (os.size() != 64)
