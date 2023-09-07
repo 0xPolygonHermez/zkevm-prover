@@ -356,6 +356,14 @@ void Config::load(json &config)
     log2DbKVAssociativeCacheIndexesSize = 28;
     if (config.contains("log2DbKVAssociativeCacheIndexesSize") && config["log2DbKVAssociativeCacheIndexesSize"].is_number())
         log2DbKVAssociativeCacheIndexesSize = config["log2DbKVAssociativeCacheIndexesSize"];
+    
+    log2DbVersionsAssociativeCacheSize = 25;
+    if (config.contains("log2DbVersionsAssociativeCacheSize") && config["log2DbVersionsAssociativeCacheSize"].is_number())
+        log2DbVersionsAssociativeCacheSize = config["log2DbVersionsAssociativeCacheSize"];
+    
+    log2DbVersionsAssociativeCacheIndexesSize = 28;
+    if (config.contains("log2DbVersionsAssociativeCacheIndexesSize") && config["log2DbVersionsAssociativeCacheIndexesSize"].is_number())
+        log2DbVersionsAssociativeCacheIndexesSize = config["log2DbVersionsAssociativeCacheIndexesSize"];
 
     dbProgramCacheSize = 1*1024;
     if (config.contains("dbProgramCacheSize") && config["dbProgramCacheSize"].is_number())
@@ -738,8 +746,9 @@ void Config::load(json &config)
     ParseS64(config, "log2DbMTAssociativeCacheSize", "LOG2_DB_MT_ASSOCIATIVE_CACHE_SIZE", log2DbMTAssociativeCacheSize, 25);
     ParseS64(config, "log2DbMTAssociativeCacheIndexesSize", "LOG2_DB_MT_ASSOCIATIVE_CACHE_INDEXES_SIZE", log2DbMTAssociativeCacheIndexesSize, 28);
     ParseS64(config, "log2DbKVAssociativeCacheSize", "LOG2_DB_KV_ASSOCIATIVE_CACHE_SIZE", log2DbKVAssociativeCacheSize, 25);
-    ParseS64(config, "log2DbMTAssociativeCacheIndexesSize", "LOG2_DB_KV_ASSOCIATIVE_CACHE_INDEXES_SIZE", log2DbKVAssociativeCacheIndexesSize, 28);
-
+    ParseS64(config, "log2DbKVAssociativeCacheIndexesSize", "LOG2_DB_KV_ASSOCIATIVE_CACHE_INDEXES_SIZE", log2DbKVAssociativeCacheIndexesSize, 28);
+    ParseS64(config, "log2DbVersionsAssociativeCacheSize", "LOG2_DB_VERSIONS_ASSOCIATIVE_CACHE_SIZE", log2DbVersionsAssociativeCacheSize, 25);
+    ParseS64(config, "log2DbVersionsAssociativeCacheIndexesSize", "LOG2_DB_VERSIONS_ASSOCIATIVE_CACHE_INDEXES_SIZE", log2DbVersionsAssociativeCacheIndexesSize, 28);
     // Program (SC) cache
     ParseS64(config, "dbProgramCacheSize", "DB_PROGRAM_CACHE_SIZE", dbProgramCacheSize, 1*1024); // Default = 1 GB
 
@@ -1035,6 +1044,8 @@ void Config::print(void)
     zklog.info("    log2DbMTAssociativeCacheIndexesSize=" + to_string(log2DbMTAssociativeCacheIndexesSize));
     zklog.info("    log2DbKVAssociativeCacheSize=" + to_string(log2DbKVAssociativeCacheSize));
     zklog.info("    log2DbKVAssociativeCacheIndexesSize=" + to_string(log2DbKVAssociativeCacheIndexesSize));
+    zklog.info("    log2DbVersionsAssociativeCacheSize=" + to_string(log2DbVersionsAssociativeCacheSize));
+    zklog.info("    log2DbVersionsAssociativeCacheIndexesSize=" + to_string(log2DbVersionsAssociativeCacheIndexesSize));
     zklog.info("    dbProgramCacheSize=" + to_string(dbProgramCacheSize));
     zklog.info("    loadDBToMemTimeout=" + to_string(loadDBToMemTimeout));
     zklog.info("    fullTracerTraceReserveSize=" + to_string(fullTracerTraceReserveSize));

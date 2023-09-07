@@ -656,8 +656,8 @@ int main(int argc, char **argv)
         Database::dbMTCache.setMaxSize(config.dbMTCacheSize*1024*1024);
     }
     if(config.hashDB64){
-        Database64::dbKVACache.postConstruct(config.log2DbMTAssociativeCacheIndexesSize, config.log2DbKVAssociativeCacheSize, "KVACache");
-        Database64::dbVersionACache.postConstruct(config.log2DbMTAssociativeCacheIndexesSize, config.log2DbKVAssociativeCacheSize, "VersionACache");
+        Database64::dbKVACache.postConstruct(config.log2DbKVAssociativeCacheIndexesSize, config.log2DbKVAssociativeCacheSize, "KVACache");
+        Database64::dbVersionACache.postConstruct(config.log2DbVersionsAssociativeCacheIndexesSize, config.log2DbVersionsAssociativeCacheSize, "VersionACache");
     }
     Database::dbProgramCache.setName("ProgramCache");
     Database::dbProgramCache.setMaxSize(config.dbProgramCacheSize*1024*1024);
