@@ -134,6 +134,7 @@ void Config::load(json &config)
 
     // Tests
     ParseBool(config, "runKeccakScriptGenerator", "RUN_KECCAK_SCRIPT_GENERATOR", runKeccakScriptGenerator, false);
+    ParseBool(config, "runSHA256ScriptGenerator", "RUN_KECCAK_SCRIPT_GENERATOR", runSHA256ScriptGenerator, false);
     ParseBool(config, "runKeccakTest", "RUN_KECCAK_TEST", runKeccakTest, false);
     ParseBool(config, "runStorageSMTest", "RUN_STORAGE_SM_TEST", runStorageSMTest, false);
     ParseBool(config, "runBinarySMTest", "RUN_BINARY_SM_TEST", runBinarySMTest, false);
@@ -385,6 +386,8 @@ void Config::print(void)
         zklog.info("    saveOutputToFile=true");
     if (saveProofToFile)
         zklog.info("    saveProofToFile=true");
+    if (saveFilesInSubfolders)
+        zklog.info("    saveFilesInSubfolders=true");
     if (saveResponseToFile)
         zklog.info("    saveResponseToFile=true");
     zklog.info("    loadDBToMemCache=" + to_string(loadDBToMemCache));
