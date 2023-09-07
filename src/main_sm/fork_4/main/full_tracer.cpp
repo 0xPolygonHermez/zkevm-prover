@@ -1319,19 +1319,22 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
         }
         singleInfo.contract.value = auxScalar;
 
-        zkr = getVarFromCtx(ctx, false, ctx.rom.txCalldataLenOffset, auxScalar);
-        if (zkr != ZKR_SUCCESS)
+        if ((prevTraceCall != NULL) && ((opIncContext.find(prevTraceCall->opcode) != opIncContext.end()) || (zeroCostOp.find(prevTraceCall->opcode) != zeroCostOp.end())))
         {
-            zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.txCalldataLenOffset)");
-            return zkr;
-        }
-        uint64_t txCalldataLen  = auxScalar.get_ui();
+            zkr = getVarFromCtx(ctx, false, ctx.rom.txCalldataLenOffset, auxScalar);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("FullTracer::onOpcode() failed calling getVarFromCtx(ctx.rom.txCalldataLenOffset)");
+                return zkr;
+            }
+            uint64_t txCalldataLen  = auxScalar.get_ui();
 
-        zkr = getCalldataFromStack(ctx, 0, txCalldataLen, singleInfo.contract.data);
-        if (zkr != ZKR_SUCCESS)
-        {
-            zklog.error("FullTracer::onOpcode() failed calling getCalldataFromStack()");
-            return zkr;
+            zkr = getCalldataFromStack(ctx, 0, txCalldataLen, singleInfo.contract.data);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("FullTracer::onOpcode() failed calling getCalldataFromStack()");
+                return zkr;
+            }
         }
         
         singleInfo.contract.gas = txGAS[depth].remaining;
