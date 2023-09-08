@@ -1,7 +1,6 @@
 #include "keccak.hpp"
 #include "timer.hpp"
 #include "keccak_input.hpp"
-#include "keccak_config.hpp"
 
 void KeccakGen (
     const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput,

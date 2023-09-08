@@ -45,6 +45,7 @@
 #include "database_performance_test.hpp"
 #include "smt_64_test.hpp"
 #include "sha256.hpp"
+#include "database_kv_remote_test.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -535,10 +536,7 @@ int main(int argc, char **argv)
     {
         // Keccak2Test();
         KeccakTest();
-        // These tests are disabled pending review,
-        // as they were confirmed to not work correctly
-        // on August 29th, 2023. -- Nadim
-        // KeccakSMExecutorTest(fr, config);
+        KeccakSMExecutorTest(fr, config);
     }
 
     // Test Storage SM
@@ -600,6 +598,11 @@ int main(int argc, char **argv)
     {
         DatabasePerformanceTest();
     }
+    // Test DbKVRemote
+    if (config.runDbKVRemoteTest)
+    {
+        DatabaseKVRemoteTest(config);
+    }
     
     // Test SMT64
     if (config.runSMT64Test)
@@ -651,6 +654,10 @@ int main(int argc, char **argv)
         Database::useAssociativeCache = false;
         Database::dbMTCache.setName("MTCache");
         Database::dbMTCache.setMaxSize(config.dbMTCacheSize*1024*1024);
+    }
+    if(config.hashDB64){
+        Database64::dbKVACache.postConstruct(config.log2DbKVAssociativeCacheIndexesSize, config.log2DbKVAssociativeCacheSize, "KVACache");
+        Database64::dbVersionACache.postConstruct(config.log2DbVersionsAssociativeCacheIndexesSize, config.log2DbVersionsAssociativeCacheSize, "VersionACache");
     }
     Database::dbProgramCache.setName("ProgramCache");
     Database::dbProgramCache.setMaxSize(config.dbProgramCacheSize*1024*1024);

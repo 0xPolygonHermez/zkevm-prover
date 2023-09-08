@@ -443,16 +443,10 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
     // If we could not find the value, report the error
     if (rv != ZKR_SUCCESS || rkv != ZKR_SUCCESS)
     {
-        zklog.warning("Database64::readKV() requested a key that does not exist (ZKR_DB_KEY_NOT_FOUND): " + keyStr + ", now trying to read from the hasDB");
+        zklog.warning("Database64::readKV() requested a key that does not exist (ZKR_DB_KEY_NOT_FOUND): " + keyStr);
         string valueStr;
-        rkv = read(keyStr, key, valueStr, dbReadLog);
-        if(rkv == ZKR_SUCCESS){
-            value = mpz_class(valueStr, 16);
-            writeKV(root, key, value, true);
-            if (dbReadLog != NULL) dbReadLog->add(keyStr, value, false, TimeDiff(t));
-        }else{
-            zklog.error("Database64::readKV() requested a key in that does not exist even in hasdb (ZKR_DB_KEY_NOT_FOUND): " + keyStr);
-            rkv = ZKR_DB_KEY_NOT_FOUND;
+        if( rkv == ZKR_DB_VERSION_NOT_FOUND){
+            //Pending 
         }
     }
 #ifdef LOG_DB_READ
@@ -474,10 +468,10 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], vector<KeyValu
     zkresult zkr;
     for (uint64_t i=0; i<KVs.size(); i++)
     {
-        zkr = readKV(root, KVs[i].key.fe, KVs[i].value, dbReadLog);
+        zkr = readKV(root, KVs[i].key, KVs[i].value, dbReadLog);
         if (zkr != ZKR_SUCCESS)
         {
-            zklog.error("Database64::readKV(KBs) failed calling read() result=" + zkresult2string(zkr) + " key=" + fea2string(fr, KVs[i].key.fe[0], KVs[i].key.fe[1], KVs[i].key.fe[2], KVs[i].key.fe[3]) );
+            zklog.error("Database64::readKV(KBs) failed calling read() result=" + zkresult2string(zkr) + " key=" + fea2string(fr, KVs[i].key) );
             return zkr;
         }
     }
@@ -596,10 +590,10 @@ zkresult Database64::writeKV(const Goldilocks::Element (&root)[4], const vector<
     zkresult zkr;
     for (uint64_t i=0; i<KVs.size(); i++)
     {
-        zkr = writeKV(root, KVs[i].key.fe, KVs[i].value, persistent);
+        zkr = writeKV(root, KVs[i].key, KVs[i].value, persistent);
         if (zkr != ZKR_SUCCESS)
         {
-            zklog.error("Database64::writeKV(KBs) failed calling write() result=" + zkresult2string(zkr) + " key=" + fea2string(fr, KVs[i].key.fe[0], KVs[i].key.fe[1], KVs[i].key.fe[2], KVs[i].key.fe[3]) );
+            zklog.error("Database64::writeKV(KBs) failed calling write() result=" + zkresult2string(zkr) + " key=" + fea2string(fr, KVs[i].key) );
             return zkr;
         }
     }
@@ -610,10 +604,10 @@ zkresult Database64::writeKV(const uint64_t& version, const vector<KeyValue> &KV
     zkresult zkr;
     for (uint64_t i=0; i<KVs.size(); i++)
     {
-        zkr = writeKV(version, KVs[i].key.fe, KVs[i].value, persistent);
+        zkr = writeKV(version, KVs[i].key, KVs[i].value, persistent);
         if (zkr != ZKR_SUCCESS)
         {
-            zklog.error("Database64::writeKV(KBs) failed calling write() result=" + zkresult2string(zkr) + " key=" + fea2string(fr, KVs[i].key.fe[0], KVs[i].key.fe[1], KVs[i].key.fe[2], KVs[i].key.fe[3]) );
+            zklog.error("Database64::writeKV(KBs) failed calling write() result=" + zkresult2string(zkr) + " key=" + fea2string(fr, KVs[i].key) );
             return zkr;
         }
     }
@@ -765,21 +759,31 @@ zkresult Database64::writeVersion(const Goldilocks::Element (&root)[4], const ui
 
 zkresult Database64::readLatestVersion(uint64_t &version){
 
+    zkresult r=ZKR_UNSPECIFIED;
     if (!bInitialized)
     {
         zklog.error("Database64::readLatestVersion() called uninitialized");
         exitProcess();
     }
-    version = latestVersionCache;
+    if(latestVersionCache != 0){
+        version = latestVersionCache;
+        return ZKR_SUCCESS;
+    }else{
+        r = readRemoteLatestVersion(version);
+        if(r == ZKR_SUCCESS){
+            latestVersionCache = version;
+        }
+        return r;
+    }
     return ZKR_SUCCESS;
 }
 
-zkresult Database64::createLatestVersion(uint64_t &version, bool persistent)
+zkresult Database64::writeLatestVersion(const uint64_t version, const bool persistent)
 {
 
     if (!bInitialized)
     {
-        zklog.error("Database64::createLatestVersion() called uninitialized");
+        zklog.error("Database64::writeLatestVersion() called uninitialized");
         exitProcess();
     }
     
@@ -788,7 +792,7 @@ zkresult Database64::createLatestVersion(uint64_t &version, bool persistent)
     if ( useRemoteDB && persistent)
     {
         
-        r = createRemoteLatestVersion(version);
+        r = writeRemoteLatestVersion(version);
     }
     else
     {
@@ -1271,10 +1275,8 @@ zkresult Database64::readRemoteKV(const uint64_t version, const Goldilocks::Elem
             zklog.error("DatabaseKV::readRemoteKV() table=" + tableName + " got an invalid number of colums for the row: " + to_string(row.size()) + "for key=" + keyStr);
             exitProcess();
         }
-        bool foundVersion = extractVersion(row[1], version, value); 
-        if(foundVersion==false){
-            return ZKR_DB_VERSION_NOT_FOUND;
-        }
+        return extractVersion(row[1], version, value); 
+        
 
     }
     catch (const std::exception &e)
@@ -1291,11 +1293,12 @@ zkresult Database64::readRemoteKV(const uint64_t version, const Goldilocks::Elem
     return ZKR_SUCCESS;
 }
 
-bool Database64::extractVersion(const pqxx::field& fieldData, const uint64_t version, mpz_class &value){
+zkresult Database64::extractVersion(const pqxx::field& fieldData, const uint64_t version, mpz_class &value){
 
+    int data_size = 0;
     if(!fieldData.is_null()){
         string data = removeBSXIfExists64(fieldData.c_str());
-        int data_size = data.size();
+        data_size = data.size();
         zkassert(data_size % 80 == 0);
         for (int i = 0; i < data_size; i += 80)
         {
@@ -1304,7 +1307,7 @@ bool Database64::extractVersion(const pqxx::field& fieldData, const uint64_t ver
             uint64_t version_ = aux.get_ui();
             if(version_==version){
                 value = mpz_class(data.substr(i + 16, 64), 16);
-                return true;
+                return ZKR_SUCCESS;
             }
         }
     }
@@ -1320,7 +1323,15 @@ bool Database64::extractVersion(const pqxx::field& fieldData, const uint64_t ver
             return true;
         }
     }*/
-    return false;
+    if(data_size < 80*maxVersions){
+        return ZKR_DB_VERSION_NOT_FOUND_GLOBAL;
+    }else{
+        if(data_size != 80*maxVersions){
+            zklog.error("Database64::extractVersion() got an invalid data size: " + to_string(data_size));
+            exitProcess();
+        }
+        return ZKR_DB_VERSION_NOT_FOUND;
+    }
 }
 
 zkresult Database64::writeRemoteKV(const uint64_t version, const Goldilocks::Element (&key)[4], const mpz_class &value, bool noMultiWrite)
@@ -1330,10 +1341,10 @@ zkresult Database64::writeRemoteKV(const uint64_t version, const Goldilocks::Ele
     {
         multiWrite.Lock();
         KeyValue auxKV;
-        auxKV.key.fe[0] = key[0];
-        auxKV.key.fe[1] = key[1];
-        auxKV.key.fe[2] = key[2];
-        auxKV.key.fe[3] = key[3];
+        auxKV.key[0] = key[0];
+        auxKV.key[1] = key[1];
+        auxKV.key[2] = key[2];
+        auxKV.key[3] = key[3];
         auxKV.value = value;
         multiWrite.data[multiWrite.pendingToFlushDataIndex].keyValueIntray[version] = auxKV;
 #ifdef LOG_DB_WRITE_REMOTE
@@ -1346,7 +1357,9 @@ zkresult Database64::writeRemoteKV(const uint64_t version, const Goldilocks::Ele
         const string &tableName = config.dbKeyValueTableName;
         string keyStr_ = fea2string(fr, key[0], key[1], key[2], key[3]); 
         string keyStr = NormalizeToNFormat(keyStr_, 64);
-        string insertStr = to_string(version) + value.get_str(16);
+        string valueStr = NormalizeToNFormat(value.get_str(16),64);
+        string versionStr = NormalizeToNFormat(U64toString(version,16),16); 
+        string insertStr = versionStr + valueStr;
         assert(insertStr.size() == 80);
 
         if (config.logRemoteDbReads)
@@ -1495,7 +1508,7 @@ zkresult Database64::readRemoteVersion(const Goldilocks::Element (&root)[4], uin
         }
         pqxx::field const fieldData = row[1];
         if (!fieldData.is_null()) {
-            fieldData.as<uint64_t>(version);
+            version = fieldData.as<uint64_t>();
         } else {
             zklog.error("DatabaseKV::readRemoteVersion() table=" + tableName + " got a null version for root: " + rootStr);
         }
@@ -1532,7 +1545,7 @@ zkresult Database64::writeRemoteVersion(const Goldilocks::Element (&root)[4], co
     else
     {
         const string &tableName =  config.dbVersionTableName;
-        string query = "INSERT INTO " + tableName + " ( hash, version ) VALUES ( E\'\\\\x" + rootStr + "\', E\'\\\\x" + to_string(version) + "\' ) ON CONFLICT (hash) DO NOTHING;";
+        string query = "INSERT INTO " + tableName + " ( hash, version ) VALUES ( E\'\\\\x" + rootStr + "\', " + to_string(version) + " ) ON CONFLICT (hash) DO NOTHING;";
         DatabaseConnection * pDatabaseConnection = getConnection();
 
         try
@@ -1617,7 +1630,7 @@ zkresult Database64::readRemoteLatestVersion(uint64_t &version){
         }
         pqxx::field const fieldData = row[0];
         if (!fieldData.is_null()) {
-            fieldData.as<uint64_t>(version);
+            version = fieldData.as<uint64_t>();
         } else {
             zklog.error("DatabaseKV::readRemoteLatestVersion() table=" + tableName + " got a null version;");
         }
@@ -1635,53 +1648,53 @@ zkresult Database64::readRemoteLatestVersion(uint64_t &version){
 
     return ZKR_SUCCESS;
 }
-zkresult Database64::createRemoteLatestVersion(uint64_t &version){
+zkresult Database64::writeRemoteLatestVersion(const uint64_t version){
     
-    
-    zkresult rr = readLatestVersion(version);
-    if (rr != ZKR_SUCCESS)
-    {
-        zklog.error("Database64::createRemoteLatestVersion() readRemoteLatestVersion() failed with error=" + zkresult2string(rr));
-        return rr;
-    }
-    uint64_t newVersion = version+1;
-
     zkresult rw = ZKR_SUCCESS;    
 
-    const string &tableName =  config.dbLatestVersionTableName;
-    string query = "UPDATE " + tableName + " SET version = " + to_string(newVersion) + ";";
-    DatabaseConnection * pDatabaseConnection = getConnection();
-
-    try
-    {        
-
-#ifdef DATABASE_COMMIT
-        if (autoCommit)
-#endif
-        {
-            pqxx::work w(*(pDatabaseConnection->pConnection));
-            pqxx::result res = w.exec(query);
-            w.commit();
-        }
-#ifdef DATABASE_COMMIT
-        else
-        {
-            if (transaction == NULL)
-                transaction = new pqxx::work{*pConnectionWrite};
-            pqxx::result res = transaction->exec(query);
-        }
-#endif
-    }
-    catch (const std::exception &e)
+    if (config.dbMultiWrite)
     {
-        zklog.error("Database::writeRemoteVersion() table=" + tableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
-        rw = ZKR_DB_ERROR;
-        queryFailed();
-    }
+        multiWrite.Lock();
+        multiWrite.data[multiWrite.pendingToFlushDataIndex].latestVersion = version;
+#ifdef LOG_DB_WRITE_REMOTE
+            zklog.info("Database64::writeRemote() root=" + rootStr + " version " + to_string(version) + " multiWrite=[" + multiWrite.print() + "]");
+#endif
+        multiWrite.Unlock();
 
-    disposeConnection(pDatabaseConnection);
+    }else{
+
+        const string &tableName =  config.dbLatestVersionTableName;
+        string query = "UPDATE " + tableName + " SET version = " + to_string(version) + ";";
+        DatabaseConnection * pDatabaseConnection = getConnection();
+
+        try
+        {        
+#ifdef DATABASE_COMMIT
+            if (autoCommit)
+#endif
+            {
+                pqxx::work w(*(pDatabaseConnection->pConnection));
+                pqxx::result res = w.exec(query);
+                w.commit();
+            }
+#ifdef DATABASE_COMMIT
+            else
+            {
+                if (transaction == NULL)
+                    transaction = new pqxx::work{*pConnectionWrite};
+                pqxx::result res = transaction->exec(query);
+            }
+#endif
+        }
+        catch (const std::exception &e)
+        {
+            zklog.error("Database::writeRemoteVersion() table=" + tableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
+            rw = ZKR_DB_ERROR;
+            queryFailed();
+        }
+        disposeConnection(pDatabaseConnection);
     
-
+    }
     return rw;
 }
 
@@ -2316,7 +2329,7 @@ zkresult Database64::sendData (void)
                 unordered_map<uint64_t, KeyValue>::const_iterator it=data.keyValue.begin();
                 while (it != data.keyValue.end())
                 {
-                   writeRemoteKV(it->first,it->second.key.fe,it->second.value, true);
+                   writeRemoteKV(it->first,it->second.key,it->second.value, true);
                 }
             }
             // If there are versions add to db
@@ -2974,7 +2987,7 @@ void loadDb2MemCache64 (const Config &config)
             hash = treeMapIterator->second[i];
             dbValue.clear();
             Goldilocks::Element vhash[4];
-            if(pHashDB->db.usingAssociativeCache()) string2key(fr, hash, vhash);
+            if(pHashDB->db.usingAssociativeCache()) string2fea(fr, hash, vhash);
             zkresult zkr = pHashDB->db.read(hash, vhash, dbValue, NULL, true);
 
             if (zkr != ZKR_SUCCESS)

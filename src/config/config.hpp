@@ -45,6 +45,7 @@ public:
     string checkTreeRoot;
     bool runDatabasePerformanceTest;
     bool runSMT64Test;
+    bool runDbKVRemoteTest;
     bool runUnitTest;
     
     bool executeInParallel;
@@ -65,8 +66,12 @@ public:
     uint64_t loadDBToMemTimeout;
     int64_t dbMTCacheSize; // Size in MBytes for the cache to store MT records
     bool useAssociativeCache; // Use the associative cache for MT records?
-    int64_t log2DbMTAssociativeCacheSize; // log2 of the size in entries of the DatabaseMTAssociativeCache. Note 1 cache entry = 97 bytes
+    int64_t log2DbMTAssociativeCacheSize; // log2 of the size in entries of the DatabaseMTAssociativeCache. Note 1 cache entry = 128 bytes
     int64_t log2DbMTAssociativeCacheIndexesSize; // log2 of the size in entries of the DatabaseMTAssociativeCache indices. Note index entry = 4 bytes
+    int64_t log2DbKVAssociativeCacheSize; // log2 of the size in entries of the DatabaseKVAssociativeCache. Note 1 cache entry = 80 bytes
+    int64_t log2DbKVAssociativeCacheIndexesSize; // log2 of the size in entries of the DatabaseKVAssociativeCache indices. Note index entry = 4 bytes
+    int64_t log2DbVersionsAssociativeCacheSize; // log2 of the size in entries of the DatabaseKVAssociativeCache. Note 1 cache entry = 40 bytes
+    int64_t log2DbVersionsAssociativeCacheIndexesSize; // log2 of the size in entries of the DatabaseKVAssociativeCache indices. Note index entry = 4 bytes
 
     int64_t dbProgramCacheSize; // Size in MBytes for the cache to store Program (SC) records
     bool opcodeTracer;

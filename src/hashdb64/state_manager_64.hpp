@@ -10,6 +10,7 @@
 #include "persistence.hpp"
 #include "database_64.hpp"
 #include "utils/time_metric.hpp"
+#include "poseidon_goldilocks.hpp"
 
 using namespace std;
 
@@ -20,12 +21,10 @@ public:
     string newStateRoot;
     uint64_t previousSubState;
     bool bValid;
-    unordered_map<string, string> dbWrite;
-    vector<string> dbDelete;
+    unordered_map<string, mpz_class> dbWrite;
     TxSubState64() : previousSubState(0), bValid(false)
     {
         dbWrite.reserve(128);
-        dbDelete.reserve(128);
     };
 };
 
@@ -53,9 +52,10 @@ class BatchState64
 public:
     string oldStateRoot;
     string currentStateRoot;
+    string newStateRoot;
     uint64_t currentTx;
     vector<TxState64> txState;
-    unordered_map<string, string> dbWrite;
+    unordered_map<string, mpz_class> dbWrite;
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     TimeMetricStorage timeMetricStorage;
 #endif
@@ -69,17 +69,20 @@ public:
 class StateManager64
 {
 private:
+    Goldilocks &fr;
+    PoseidonGoldilocks &poseidon;
     unordered_map<string, BatchState64> state;
     Config config;
     pthread_mutex_t mutex; // Mutex to protect the multi write queues
+    uint64_t lastVirtualStateRoot;
 public:
-    StateManager64 ()
+    StateManager64(Goldilocks &fr, PoseidonGoldilocks &poseidon) : fr(fr), poseidon(poseidon), lastVirtualStateRoot(0)
     {        
         // Init mutex
         pthread_mutex_init(&mutex, NULL);
     };
 private:
-    zkresult setStateRoot (const string &batchUUID, uint64_t tx, const string &stateRoot, bool bIsOldStateRoot, const Persistence persistence);
+    zkresult setStateRoot (const string &batchUUID, uint64_t tx, const string &stateRoot, const bool bIsOldStateRoot, const Persistence persistence);
 public:
     void init (const Config &_config)
     {
@@ -93,12 +96,13 @@ public:
     {
         return setStateRoot(batchUUID, tx, stateRoot, false, persistence);
     }
-    zkresult write (const string &batchUUID, uint64_t tx, const string &_key, const string &value, const Persistence persistence);
-    zkresult deleteNode (const string &batchUUID, uint64_t tx, const string &_key, const Persistence persistence);
-    zkresult read (const string &batchUUID, const string &_key, string &value, DatabaseMap *dbReadLog);
+    zkresult write (const string &batchUUID, uint64_t tx, const string &_key, const mpz_class &value, const Persistence persistence);
+    zkresult read (const string &batchUUID, const string &_key, mpz_class &value, DatabaseMap *dbReadLog);
     zkresult semiFlush (const string &batchUUID, const string &newStateRoot, const Persistence persistence);
-    zkresult flush (const string &batchUUID, Database64 &db, uint64_t &flushId, uint64_t &lastSentFlushId);
+    zkresult flush (const string &batchUUID, const string &_newStateRoot, const Persistence _persistence, Database64 &db, uint64_t &flushId, uint64_t &lastSentFlushId);
     void print (bool bDbContent = false);
+    void getVirtualStateRoot(Goldilocks::Element (&newStateRoot)[4], string &newStateRootString);
+    bool isVirtualStateRoot(const string &stateRoot);
 
     // Lock/Unlock
     void Lock(void) { pthread_mutex_lock(&mutex); };

@@ -76,7 +76,7 @@ void string2fea(Goldilocks &fr, const string&os, vector<Goldilocks::Element> &fe
         fea.push_back(fe);
     }
 }
-void string2key(Goldilocks &fr, const string& os, Goldilocks::Element (&fea)[4])
+void string2fea(Goldilocks &fr, const string& os, Goldilocks::Element (&fea)[4])
 {
     Goldilocks::Element fe;
     if (os.size() != 64)
@@ -292,10 +292,6 @@ bool stringIs0xHex (const string &s)
 
 /* Keccak */
 
-void keccak256(const uint8_t *pInputData, uint64_t inputDataSize, uint8_t *pOutputData, uint64_t outputDataSize)
-{
-    Keccak(1088, 512, pInputData, inputDataSize, 0x1, pOutputData, outputDataSize);
-}
 
 void keccak256 (const uint8_t *pInputData, uint64_t inputDataSize, uint8_t (&hash)[32])
 {

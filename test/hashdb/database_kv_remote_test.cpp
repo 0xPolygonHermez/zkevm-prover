@@ -8,6 +8,9 @@
 
 uint64_t DatabaseKVRemoteTest (const Config &config){
     
+    
+    uint64_t numberOfFailedTests = 0;
+    
     TimerStart(DATABASE_KV_REMOTE_TEST);
 
     if(config.dbMultiWrite == true){
@@ -21,57 +24,26 @@ uint64_t DatabaseKVRemoteTest (const Config &config){
         exitProcess();
     }
     Database64 * pDatabase64 = &pHashDB->db64;
-
-    uint64_t numberOfFailedTests = 0;
-    Goldilocks fr;
+    pDatabase64->init(); //problematic!
     
     //
     // Lattest version
     //
-    uint64_t version = 33;
+    uint64_t version = 1;
     pDatabase64->writeLatestVersion(version, true);
-    pDatabase64->readLatestVersion(version);
-    if(version != 33)
+    version = pDatabase64->readLatestVersion(version);
+    if(version != 1)
     {
         zklog.error("DatabaseKVRemoteTest() failed calling Database64.readLatestVersion()");
         numberOfFailedTests += 1;
     }
     pDatabase64->writeLatestVersion(0, false);
-    pDatabase64->readLatestVersion(version);
-    if(version != 33)
+    version = pDatabase64->readLatestVersion(version);
+    if(version != 1)
     {
         zklog.error("DatabaseKVRemoteTest() failed calling Database64.readLatestVersion()");
         numberOfFailedTests += 1;
     }
-    //
-    // Version
-    //
-    Goldilocks::Element root[4];
-
-    mpz_class rootScalar;
-    string rootString;
-    version = 1;
-
-    for (uint64_t i=0; i<DBKV_REMOTE_TEST_NUMBER_OF_WRITES; i++)
-    {
-        rootScalar = i;
-        scalar2fea(fr, rootScalar, root);
-        pDatabase64->writeVersion(root, version, true);
-        version+=1;
-    }
-    /*for (uint64_t i=0; i<NUMBER_OF_DB_CACHE_ADDS; i++)
-    {
-        rootScalar = i;
-        rootString = PrependZeros(rootScalar.get_str(16), 64);
-        scalar2fea(fr, rootScalar, root);
-        bResult = dbVersionACache.findKey(root, version);
-        
-        if (!bResult || version != i+1)
-        {
-            zklog.error("DatabaseAssociativeCacheTest() failed calling DatabaseVersionsAssociativeCache.find() of root=" + rootString + " version=" + to_string(version));
-            numberOfFailed++;
-        }
-    }*/
 
     //
     // Check number of failed tests
