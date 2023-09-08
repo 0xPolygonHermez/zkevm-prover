@@ -173,7 +173,7 @@ void DatabaseVersionsAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIn
     // find a slot into my indexes
     //
     Goldilocks::Element key_hashed[4];
-    hashKey_p(key_hashed, &keys[(inputRawCacheIndex & cacheMask) * 4]);
+    hashKey(key_hashed, (Goldilocks::Element(&)[4])keys[(inputRawCacheIndex & cacheMask) * 4]);
     Goldilocks::Element *inputKey = &key_hashed[0];    
     uint32_t minRawCacheIndex = UINT32_MAX;
     int pos = -1;
