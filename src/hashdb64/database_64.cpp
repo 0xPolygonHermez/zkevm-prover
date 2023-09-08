@@ -15,6 +15,7 @@
 #include "zkmax.hpp"
 #include "hashdb_remote.hpp"
 #include "key_value.hpp"
+#include "tree_64.hpp"
 
 #ifdef DATABASE_USE_CACHE
 
@@ -377,6 +378,7 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
 
     zkresult rkv = ZKR_UNSPECIFIED;
     zkresult rv = ZKR_UNSPECIFIED;
+    zkresult rout = ZKR_UNSPECIFIED;
 
     string keyStr = "";
     if(dbReadLog->getSaveKeys()){
@@ -411,56 +413,47 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
         else if(useRemoteDB)
         {
         
-            rkv = readRemoteKV(version, key, value);
-            if ( (rkv != ZKR_SUCCESS) && (config.dbReadRetryDelay > 0) )
-            {
-                if(!dbReadLog->getSaveKeys()){
-                    string keyStr_ = fea2string(fr, key[0], key[1], key[2], key[3]); 
-                    keyStr = NormalizeToNFormat(keyStr_, 64);
-                }
-                for (uint64_t i=0; i<config.dbReadRetryCounter; i++)
-                {
-                    
-                    zklog.warning("Database64::readKV() failed calling readRemote() with error=" + zkresult2string(rkv) + "; will retry after " + to_string(config.dbReadRetryDelay) + "us key=" + keyStr + " i=" + to_string(i));
-
-                    // Retry after dbReadRetryDelay us
-                    usleep(config.dbReadRetryDelay);
-                    rkv = readRemoteKV(version, key, value);
-                    if (rkv == ZKR_SUCCESS)
-                    {
-                        break;
-                    }
-                    zklog.warning("Database64::readKV() retried readRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(rkv) + " i=" + to_string(i));
-                }
-            }        
+            rkv = readRemoteKV(version, key, value);       
             if (rkv == ZKR_SUCCESS)
             {
                 dbKVACache.addKeyValueVersion(version, key, value, false);                
                 if (dbReadLog != NULL) dbReadLog->add(keyStr, value, false, TimeDiff(t));
+            } else {
+                
+                if( rkv == ZKR_DB_VERSION_NOT_FOUND_GLOBAL){
+                    value = 0;
+                    rout = rkv;
+                }else{
+                    zkresult rtree = ZKR_UNSPECIFIED;
+                    vector<KeyValue> keyValues(1);
+                    keyValues[0].key[0] = key[0];
+                    keyValues[0].key[1] = key[1];
+                    keyValues[0].key[2] = key[2];
+                    keyValues[0].key[3] = key[3];
+                    rtree = tree64.ReadTree(*this, root, keyValues);
+                    value = keyValues[0].value;
+                    rout = rtree;      
+                }
             }
         }
+    } else {
+        zklog.warning("Database64::readKV() requested a root that does not exist in the table statedb.version " + keyStr + " , "
+        + zkresult2string(rv) );
+        rout = rv;
     }
-    // If we could not find the value, report the error
-    if (rv != ZKR_SUCCESS || rkv != ZKR_SUCCESS)
-    {
-        zklog.warning("Database64::readKV() requested a key that does not exist (ZKR_DB_KEY_NOT_FOUND): " + keyStr);
-        string valueStr;
-        if( rkv == ZKR_DB_VERSION_NOT_FOUND){
-            //Pending 
-        }
-    }
+    
 #ifdef LOG_DB_READ
     {
         string s = "Database64::readKV()";
-        if (rkv != ZKR_SUCCESS)
-            s += " ERROR=" + zkresult2string(rkv);
+        if (rout != ZKR_SUCCESS)
+            s += " ERROR=" + zkresult2string(rout);
         s += " key=" + keyStr;
         s += " value=";
         s += value.get_str(16) + ";";
         zklog.info(s);
     }
 #endif
-    return rkv;
+    return rout;
 
 }
 
@@ -1261,7 +1254,7 @@ zkresult Database64::readRemoteKV(const uint64_t version, const Goldilocks::Elem
         if (rows.size() == 0)
         {
             disposeConnection(pDatabaseConnection);
-            return ZKR_DB_KEY_NOT_FOUND;
+            return ZKR_DB_VERSION_NOT_FOUND_GLOBAL;
         }
         else if (rows.size() > 1)
         {
@@ -1275,6 +1268,9 @@ zkresult Database64::readRemoteKV(const uint64_t version, const Goldilocks::Elem
             zklog.error("DatabaseKV::readRemoteKV() table=" + tableName + " got an invalid number of colums for the row: " + to_string(row.size()) + "for key=" + keyStr);
             exitProcess();
         }
+
+        // Dispose the read db conneciton
+        disposeConnection(pDatabaseConnection);
         return extractVersion(row[1], version, value); 
         
 
@@ -1290,7 +1286,7 @@ zkresult Database64::readRemoteKV(const uint64_t version, const Goldilocks::Elem
     // Dispose the read db conneciton
     disposeConnection(pDatabaseConnection);
 
-    return ZKR_SUCCESS;
+    return ZKR_DB_ERROR;//should never return here
 }
 
 zkresult Database64::extractVersion(const pqxx::field& fieldData, const uint64_t version, mpz_class &value){
@@ -1330,7 +1326,7 @@ zkresult Database64::extractVersion(const pqxx::field& fieldData, const uint64_t
             zklog.error("Database64::extractVersion() got an invalid data size: " + to_string(data_size));
             exitProcess();
         }
-        return ZKR_DB_VERSION_NOT_FOUND;
+        return ZKR_DB_VERSION_NOT_FOUND_KVDB;
     }
 }
 
@@ -1387,33 +1383,30 @@ zkresult Database64::writeRemoteKV(const uint64_t version, const Goldilocks::Ele
             n.commit();
 
             // Process the result
-            if (rows.size() == 0)
-            {
-                disposeConnection(pDatabaseConnection);
-                return ZKR_DB_KEY_NOT_FOUND;
-            }
-            else if (rows.size() > 1)
-            {
-                zklog.error("Database64::writeRemoteKV() table=" + tableName + " got more than one row for the same key: " + to_string(rows.size()) + "for key=" + keyStr);
-                exitProcess();
-            }
-
-            const pqxx::row&  row = rows[0];
-            if (row.size() != 2)
-            {
-                zklog.error("DatabaseKV::writeRemoteKV() table=" + tableName + " got an invalid number of colums for the row: " + to_string(row.size()) + "for key=" + keyStr);
-                exitProcess();
-            }
-            const pqxx::field& fieldData = row[1];
-            //processar insert;
-            if(!fieldData.is_null()){
-                string data = removeBSXIfExists64(fieldData.c_str());
-                int data_size = data.size();
-                if(data_size == maxVersions*80){
-                    data = data.substr(0, data_size - 80);
+            if(rows.size() > 0){
+                if (rows.size() > 1)
+                {
+                    zklog.error("Database64::writeRemoteKV() table=" + tableName + " got more than one row for the same key: " + to_string(rows.size()) + "for key=" + keyStr);
+                    exitProcess();
                 }
-                insertStr = insertStr + data;
-            }
+
+                const pqxx::row&  row = rows[0];
+                if (row.size() != 2)
+                {
+                    zklog.error("DatabaseKV::writeRemoteKV() table=" + tableName + " got an invalid number of colums for the row: " + to_string(row.size()) + "for key=" + keyStr);
+                    exitProcess();
+                }
+                const pqxx::field& fieldData = row[1];
+                //processar insert;
+                if(!fieldData.is_null()){
+                    string data = removeBSXIfExists64(fieldData.c_str());
+                    int data_size = data.size();
+                    if(data_size == maxVersions*80){
+                        data = data.substr(0, data_size - 80);
+                    }
+                    insertStr = insertStr + data;
+                }
+            } 
         }
         catch (const std::exception &e)
         {
