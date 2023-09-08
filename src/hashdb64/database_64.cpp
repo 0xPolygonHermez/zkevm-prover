@@ -385,7 +385,6 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
         string keyStr_ = fea2string(fr, key[0], key[1], key[2], key[3]); 
         keyStr = NormalizeToNFormat(keyStr_, 64);
     }
-    KeyValue mwEntry;
     
     uint64_t version;
     rv = readVersion(root, version, dbReadLog);
@@ -400,14 +399,13 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
 
         } 
         // If the key is pending to be stored in database, but already deleted from cache
-        else if (config.dbMultiWrite && multiWrite.findKeyValue(version, mwEntry))
+        else if (config.dbMultiWrite && multiWrite.findKeyValue(version, key, value))
         {
-            value = mwEntry.value;
             // Add to the read log
             if (dbReadLog != NULL) dbReadLog->add(keyStr, value, true, TimeDiff(t));
 
             // Store it locally to avoid any future remote access for this key
-            dbKVACache.addKeyValueVersion(version, key, value, false);                
+            dbKVACache.addKeyValueVersion(version, key, value, false); //rick problematic                
             rkv = ZKR_SUCCESS;
         }
         else if(useRemoteDB)
@@ -416,7 +414,7 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
             rkv = readRemoteKV(version, key, value);       
             if (rkv == ZKR_SUCCESS)
             {
-                dbKVACache.addKeyValueVersion(version, key, value, false);                
+                dbKVACache.addKeyValueVersion(version, key, value, false); //rick problematic                
                 if (dbReadLog != NULL) dbReadLog->add(keyStr, value, false, TimeDiff(t));
             } else {
                 
@@ -424,7 +422,7 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
                     value = 0;
                     rout = rkv;
                     mpz_class   zero(0);
-                    dbKVACache.addKeyValueVersion(version, key, zero, false);  
+                    dbKVACache.addKeyValueVersion(version, key, zero, false); //rick problematic
                 }else{
                     zkresult rtree = ZKR_UNSPECIFIED;
                     vector<KeyValue> keyValues(1);
@@ -1332,10 +1330,10 @@ zkresult Database64::extractVersion(const pqxx::field& fieldData, const uint64_t
     }
 }
 
-zkresult Database64::writeRemoteKV(const uint64_t version, const Goldilocks::Element (&key)[4], const mpz_class &value, bool noMultiWrite)
+zkresult Database64::writeRemoteKV(const uint64_t version, const Goldilocks::Element (&key)[4], const mpz_class &value, bool useMultiWrite)
 {
     zkresult result = ZKR_SUCCESS; 
-    if (config.dbMultiWrite && !noMultiWrite)
+    if (config.dbMultiWrite && useMultiWrite)
     {
         multiWrite.Lock();
         KeyValue auxKV;
@@ -1344,7 +1342,10 @@ zkresult Database64::writeRemoteKV(const uint64_t version, const Goldilocks::Ele
         auxKV.key[2] = key[2];
         auxKV.key[3] = key[3];
         auxKV.value = value;
-        multiWrite.data[multiWrite.pendingToFlushDataIndex].keyValueIntray[version] = auxKV;
+        multiWrite.data[multiWrite.pendingToFlushDataIndex].keyValueAIntray[version].push_back(auxKV);
+        string keyStr_ = fea2string(fr, key[0], key[1], key[2], key[3]);
+        string keyStr = NormalizeToNFormat(keyStr_, 64);
+        multiWrite.data[multiWrite.pendingToFlushDataIndex].keyVersionsIntray[keyStr].push_back(version);
 #ifdef LOG_DB_WRITE_REMOTE
             zklog.info("Database64::writeRemote() version=" + to_string(version) + " multiWrite=[" + multiWrite.print() + "]");
 #endif
@@ -2325,12 +2326,15 @@ zkresult Database64::sendData (void)
             }
 
             // If there are keyValues add to db
-            if (data.keyValue.size() > 0)
+            if (data.keyValueA.size() > 0)
             {
-                unordered_map<uint64_t, KeyValue>::const_iterator it=data.keyValue.begin();
-                while (it != data.keyValue.end())
+                map<uint64_t, vector<KeyValue>>::const_iterator it=data.keyValueA.begin();
+                while (it != data.keyValueA.end())
                 {
-                   writeRemoteKV(it->first,it->second.key,it->second.value, true);
+                    for(auto it2=it->second.begin(); it2!=it->second.end(); it2++)
+                    {   
+                        writeRemoteKV(it->first,it2->key,it2->value, false);
+                    }
                 }
             }
             // If there are versions add to db
