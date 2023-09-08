@@ -114,6 +114,7 @@ void DatabaseKVAssociativeCache::addKeyValueVersion(const uint64_t version, cons
         cacheIndex = cacheIndexRaw & cacheMask;
         uint32_t cacheIndexKey = cacheIndex * 4;
         uint32_t cacheIndexVersions = cacheIndex * 2;
+        uint32_t cacheIndexValue = cacheIndex;
 
         if (!emptyCacheSlot(cacheIndexRaw)){
             if( keys[cacheIndexKey + 0].fe == key[0].fe &&
@@ -124,7 +125,15 @@ void DatabaseKVAssociativeCache::addKeyValueVersion(const uint64_t version, cons
                     if(versions[cacheIndexVersions] == version){
                         presentSameVersion = true;
                         if(update == false) return;
+                    } else if (versions[cacheIndexVersions] > version){
+                        zklog.error("DatabaseKVAssociativeCache::addKeyValueVersion() adding lower version than the current one");
+                        exitProcess();
+                    } else {
+                        if(value==values[cacheIndexValue]){
+                            return;
+                        }
                     }
+
                     tableIndexUse = tableIndex;
                     cacheIndexPrev = cacheIndex;
                     break;
