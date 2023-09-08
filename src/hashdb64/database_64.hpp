@@ -79,9 +79,7 @@ private:
     // Remote database based on Postgres (PostgreSQL)
     void initRemote(void);
     zkresult readRemote(bool bProgram, const string &key, string &value);
-    zkresult readTreeRemote(const string &key, bool *keys, uint64_t level, uint64_t &numberOfFields);
     zkresult writeRemote(bool bProgram, const string &key, const string &value);
-    zkresult writeGetTreeFunction(void);
 
     zkresult readRemoteKV(const uint64_t version, const Goldilocks::Element (&key)[4],  mpz_class value); 
     zkresult writeRemoteKV(const uint64_t version, const Goldilocks::Element (&key)[4], const mpz_class &value, bool noMultiWrite = false);

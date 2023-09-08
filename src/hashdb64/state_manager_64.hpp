@@ -100,6 +100,8 @@ public:
     zkresult read (const string &batchUUID, const string &_key, mpz_class &value, DatabaseMap *dbReadLog);
     zkresult semiFlush (const string &batchUUID, const string &newStateRoot, const Persistence persistence);
     zkresult flush (const string &batchUUID, const string &_newStateRoot, const Persistence _persistence, Database64 &db, uint64_t &flushId, uint64_t &lastSentFlushId);
+    zkresult consolidateVirtualState(const string &newStateRoot, Database64 &db, uint64_t &flushId, uint64_t &lastSentFlushId);
+    
     void print (bool bDbContent = false);
     void getVirtualStateRoot(Goldilocks::Element (&newStateRoot)[4], string &newStateRootString);
     bool isVirtualStateRoot(const string &stateRoot);
