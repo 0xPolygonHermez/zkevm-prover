@@ -423,6 +423,8 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
                 if( rkv == ZKR_DB_VERSION_NOT_FOUND_GLOBAL){
                     value = 0;
                     rout = rkv;
+                    mpz_class   zero(0);
+                    dbKVACache.addKeyValueVersion(version, key, zero, false);  
                 }else{
                     zkresult rtree = ZKR_UNSPECIFIED;
                     vector<KeyValue> keyValues(1);
@@ -1406,7 +1408,13 @@ zkresult Database64::writeRemoteKV(const uint64_t version, const Goldilocks::Ele
                     }
                     insertStr = insertStr + data;
                 }
-            } 
+            } else{
+                if(version > 1){
+                    //this must be reproduced into multiwrite
+                    mpz_class   zero(0);
+                    dbKVACache.addKeyValueVersion(version-1, key, zero, false);                
+                }
+            }
         }
         catch (const std::exception &e)
         {
