@@ -262,7 +262,7 @@ uint64_t TreeChunk::numberOfNonZeroChildren (void)
     return numberOfNonZero;
 }
 
-zkresult TreeChunk::calculateHash (void)
+zkresult TreeChunk::calculateHash (vector<HashValueGL> *hashValues)
 {
     if (bHashValid && bChildrenRestValid)
     {
@@ -280,41 +280,41 @@ zkresult TreeChunk::calculateHash (void)
 
     zkresult zkr;
 
-    zkr = calculateChildren(level+5, children64, children32, 32);
+    zkr = calculateChildren(level+5, children64, children32, 32, hashValues);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("TreeChunk::calculateHash() failed calling calculateChildren(children64, children32, 64) result=" + zkresult2string(zkr));
         return zkr;
     }
 
-    zkr = calculateChildren(level+4, children32, children16, 16);
+    zkr = calculateChildren(level+4, children32, children16, 16, hashValues);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("TreeChunk::calculateHash() failed calling calculateChildren(children32, children16, 32) result=" + zkresult2string(zkr));
         return zkr;
     }
-    zkr = calculateChildren(level+3, children16, children8, 8);
+    zkr = calculateChildren(level+3, children16, children8, 8, hashValues);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("TreeChunk::calculateHash() failed calling calculateChildren(children16, children8, 16) result=" + zkresult2string(zkr));
         return zkr;
     }
 
-    zkr = calculateChildren(level+2, children8, children4, 4);
+    zkr = calculateChildren(level+2, children8, children4, 4, hashValues);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("TreeChunk::calculateHash() failed calling calculateChildren(children8, children4, 8) result=" + zkresult2string(zkr));
         return zkr;
     }
 
-    zkr = calculateChildren(level+1, children4, children2, 2);
+    zkr = calculateChildren(level+1, children4, children2, 2, hashValues);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("TreeChunk::calculateHash() failed calling calculateChildren(children4, children2, 4) result=" + zkresult2string(zkr));
         return zkr;
     }
 
-    zkr = calculateChildren(level, children2, &child1, 1);
+    zkr = calculateChildren(level, children2, &child1, 1, hashValues);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("TreeChunk::calculateHash() failed calling calculateChildren(children2, &child1, 2) result=" + zkresult2string(zkr));
@@ -380,7 +380,7 @@ zkresult TreeChunk::calculateHash (void)
     }
 }
 
-zkresult TreeChunk::calculateChildren (const uint64_t level, Child * inputChildren, Child * outputChildren, uint64_t outputSize)
+zkresult TreeChunk::calculateChildren (const uint64_t level, Child * inputChildren, Child * outputChildren, uint64_t outputSize, vector<HashValueGL> *hashValues)
 {
     zkassert(inputChildren != NULL);
     zkassert(outputChildren != NULL);
@@ -389,7 +389,7 @@ zkresult TreeChunk::calculateChildren (const uint64_t level, Child * inputChildr
 // TODO: parallelize this for
     for (uint64_t i=0; i<outputSize; i++)
     {
-        zkr = calculateChild (level, *(inputChildren + 2*i), *(inputChildren + 2*i + 1), *(outputChildren + i));
+        zkr = calculateChild (level, *(inputChildren + 2*i), *(inputChildren + 2*i + 1), *(outputChildren + i), hashValues);
         if (zkr != ZKR_SUCCESS)
         {
             zklog.error("TreeChunk::calculateChildren() failed calling calculateChild() outputSize=" + to_string(outputSize) + " i=" + to_string(i) + " result=" + zkresult2string(zkr));
@@ -399,7 +399,7 @@ zkresult TreeChunk::calculateChildren (const uint64_t level, Child * inputChildr
     return ZKR_SUCCESS;
 }
 
-zkresult TreeChunk::calculateChild (const uint64_t level, Child &leftChild, Child &rightChild, Child &outputChild)
+zkresult TreeChunk::calculateChild (const uint64_t level, Child &leftChild, Child &rightChild, Child &outputChild, vector<HashValueGL> *hashValues)
 {
     switch (leftChild.type)
     {
@@ -417,7 +417,7 @@ zkresult TreeChunk::calculateChild (const uint64_t level, Child &leftChild, Chil
                     if (level == 0)
                     {
                         rightChild.leaf.level = level;
-                        rightChild.leaf.calculateHash(fr, poseidon);
+                        rightChild.leaf.calculateHash(fr, poseidon, hashValues);
                     }
                     outputChild = rightChild;
                     return ZKR_SUCCESS;
@@ -425,7 +425,7 @@ zkresult TreeChunk::calculateChild (const uint64_t level, Child &leftChild, Chil
                 case INTERMEDIATE:
                 {
                     outputChild.type = INTERMEDIATE;
-                    outputChild.intermediate.calculateHash(fr, poseidon, zeroHash, rightChild.intermediate.hash);
+                    outputChild.intermediate.calculateHash(fr, poseidon, zeroHash, rightChild.intermediate.hash, hashValues);
                     return ZKR_SUCCESS;
                 }
                 default:
@@ -444,7 +444,7 @@ zkresult TreeChunk::calculateChild (const uint64_t level, Child &leftChild, Chil
                     if (level == 0)
                     {
                         leftChild.leaf.level = level;
-                        leftChild.leaf.calculateHash(fr, poseidon);
+                        leftChild.leaf.calculateHash(fr, poseidon, hashValues);
                     }
                     outputChild = leftChild;
                     return ZKR_SUCCESS;
@@ -452,19 +452,19 @@ zkresult TreeChunk::calculateChild (const uint64_t level, Child &leftChild, Chil
                 case LEAF:
                 {
                     leftChild.leaf.level = level + 1;
-                    leftChild.leaf.calculateHash(fr, poseidon);
+                    leftChild.leaf.calculateHash(fr, poseidon, hashValues);
                     rightChild.leaf.level = level + 1;
-                    rightChild.leaf.calculateHash(fr, poseidon);
+                    rightChild.leaf.calculateHash(fr, poseidon, hashValues);
                     outputChild.type = INTERMEDIATE;
-                    outputChild.intermediate.calculateHash(fr, poseidon, leftChild.leaf.hash, rightChild.leaf.hash);
+                    outputChild.intermediate.calculateHash(fr, poseidon, leftChild.leaf.hash, rightChild.leaf.hash, hashValues);
                     return ZKR_SUCCESS;
                 }
                 case INTERMEDIATE:
                 {
                     leftChild.leaf.level = level + 1;
-                    leftChild.leaf.calculateHash(fr, poseidon);
+                    leftChild.leaf.calculateHash(fr, poseidon, hashValues);
                     outputChild.type = INTERMEDIATE;
-                    outputChild.intermediate.calculateHash(fr, poseidon, leftChild.leaf.hash, rightChild.intermediate.hash);
+                    outputChild.intermediate.calculateHash(fr, poseidon, leftChild.leaf.hash, rightChild.intermediate.hash, hashValues);
                     return ZKR_SUCCESS;
                 }
                 default:
@@ -481,21 +481,21 @@ zkresult TreeChunk::calculateChild (const uint64_t level, Child &leftChild, Chil
                 case ZERO:
                 {
                     outputChild.type = INTERMEDIATE;
-                    outputChild.intermediate.calculateHash(fr, poseidon, leftChild.intermediate.hash, zeroHash);
+                    outputChild.intermediate.calculateHash(fr, poseidon, leftChild.intermediate.hash, zeroHash, hashValues);
                     return ZKR_SUCCESS;
                 }
                 case LEAF:
                 {
                     rightChild.leaf.level = level + 1;
-                    rightChild.leaf.calculateHash(fr, poseidon);
+                    rightChild.leaf.calculateHash(fr, poseidon, hashValues);
                     outputChild.type = INTERMEDIATE;
-                    outputChild.intermediate.calculateHash(fr, poseidon, leftChild.intermediate.hash, rightChild.leaf.hash);
+                    outputChild.intermediate.calculateHash(fr, poseidon, leftChild.intermediate.hash, rightChild.leaf.hash, hashValues);
                     return ZKR_SUCCESS;
                 }
                 case INTERMEDIATE:
                 {
                     outputChild.type = INTERMEDIATE;
-                    outputChild.intermediate.calculateHash(fr, poseidon, leftChild.intermediate.hash, rightChild.intermediate.hash);
+                    outputChild.intermediate.calculateHash(fr, poseidon, leftChild.intermediate.hash, rightChild.intermediate.hash, hashValues);
                     return ZKR_SUCCESS;
                 }
                 default:

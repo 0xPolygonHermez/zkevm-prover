@@ -59,14 +59,16 @@ zkresult HashDBRemote::set (const string &batchUUID, uint64_t tx, const Goldiloc
     request.set_tx(tx);
 
     grpc::Status s = stub->Set(&context, request, &response);
-    if (s.error_code() != grpc::StatusCode::OK) {
+    if (s.error_code() != grpc::StatusCode::OK)
+    {
         zklog.error("HashDBRemote::set() GRPC error(" + to_string(s.error_code()) + "): " + s.error_message());
         return ZKR_HASHDB_GRPC_ERROR;
     }
 
     grpc2fea(fr, response.new_root(), newRoot);
 
-    if (result != NULL) {
+    if (result != NULL)
+    {
         grpc2fea(fr, response.old_root(), result->oldRoot);
         grpc2fea(fr, response.key(), result->key);
         grpc2fea(fr, response.new_root(), result->newRoot);
@@ -78,7 +80,8 @@ zkresult HashDBRemote::set (const string &batchUUID, uint64_t tx, const Goldiloc
         for (it=siblings.begin(); it!=siblings.end(); it++)
         {
             vector<Goldilocks::Element> list;
-            for (int i=0; i<it->second.sibling_size(); i++) {
+            for (int i=0; i<it->second.sibling_size(); i++)
+            {
                 list.push_back(fr.fromU64(it->second.sibling(i)));
             }
             result->siblings[it->first]=list;
@@ -93,7 +96,8 @@ zkresult HashDBRemote::set (const string &batchUUID, uint64_t tx, const Goldiloc
         result->proofHashCounter = response.proof_hash_counter();
     }
 
-    if (dbReadLog != NULL) {
+    if (dbReadLog != NULL)
+    {
         DatabaseMap::MTMap mtMap;
         grpc2mtMap(fr, *response.mutable_db_read_log(), mtMap);
         dbReadLog->add(mtMap);
@@ -128,14 +132,16 @@ zkresult HashDBRemote::get (const string &batchUUID, const Goldilocks::Element (
     request.set_batch_uuid(batchUUID);
 
     grpc::Status s = stub->Get(&context, request, &response);
-    if (s.error_code() != grpc::StatusCode::OK) {
+    if (s.error_code() != grpc::StatusCode::OK)
+    {
         zklog.error("HashDBRemote::get() GRPC error(" + to_string(s.error_code()) + "): " + s.error_message());
         return ZKR_HASHDB_GRPC_ERROR;
     }
 
     value.set_str(response.value(),16);
 
-    if (result != NULL) {
+    if (result != NULL)
+    {
         grpc2fea(fr, response.root(), result->root);
         grpc2fea(fr, response.key(), result->key);
         result->value.set_str(response.value(),16);
@@ -160,7 +166,8 @@ zkresult HashDBRemote::get (const string &batchUUID, const Goldilocks::Element (
         result->proofHashCounter = response.proof_hash_counter();
     }
 
-    if (dbReadLog != NULL) {
+    if (dbReadLog != NULL)
+    {
         DatabaseMap::MTMap mtMap;
         grpc2mtMap(fr, *response.mutable_db_read_log(), mtMap);
         dbReadLog->add(mtMap);
@@ -188,7 +195,8 @@ zkresult HashDBRemote::setProgram (const Goldilocks::Element (&key)[4], const ve
     request.set_allocated_key(reqKey);
 
     std::string sData;
-    for (uint64_t i=0; i<data.size(); i++) {
+    for (uint64_t i=0; i<data.size(); i++)
+    {
         sData.push_back((char)data.at(i));
     }
     request.set_data(sData);
@@ -196,7 +204,8 @@ zkresult HashDBRemote::setProgram (const Goldilocks::Element (&key)[4], const ve
     request.set_persistent(persistent);
 
     grpc::Status s = stub->SetProgram(&context, request, &response);
-    if (s.error_code() != grpc::StatusCode::OK) {
+    if (s.error_code() != grpc::StatusCode::OK)
+    {
         zklog.error("HashDBRemote::setProgram() GRPC error(" + to_string(s.error_code()) + "): " + s.error_message());
         return ZKR_HASHDB_GRPC_ERROR;
     }
@@ -223,7 +232,8 @@ zkresult HashDBRemote::getProgram (const Goldilocks::Element (&key)[4], vector<u
     request.set_allocated_key(reqKey);
 
     grpc::Status s = stub->GetProgram(&context, request, &response);
-    if (s.error_code() != grpc::StatusCode::OK) {
+    if (s.error_code() != grpc::StatusCode::OK)
+    {
         zklog.error("HashDBRemote::getProgram() GRPC error(" + to_string(s.error_code()) + "): " + s.error_message());
         return ZKR_HASHDB_GRPC_ERROR;
     }
@@ -232,11 +242,13 @@ zkresult HashDBRemote::getProgram (const Goldilocks::Element (&key)[4], vector<u
 
     sData = response.data();
     data.clear();
-    for (uint64_t i=0; i<sData.size(); i++) {
+    for (uint64_t i=0; i<sData.size(); i++)
+    {
         data.push_back(sData.at(i));
     }
 
-    if (dbReadLog != NULL) {
+    if (dbReadLog != NULL)
+    {
         dbReadLog->add(fea2string(fr, key), data, false, 0);
     }
 
@@ -261,7 +273,8 @@ void HashDBRemote::loadDB(const DatabaseMap::MTMap &input, const bool persistent
     request.set_persistent(persistent);
 
     grpc::Status s = stub->LoadDB(&context, request, &response);
-    if (s.error_code() != grpc::StatusCode::OK) {
+    if (s.error_code() != grpc::StatusCode::OK)
+    {
         zklog.error("HashDBRemote:loadDB() GRPC error(" + to_string(s.error_code()) + "): " + s.error_message());
     }
 
@@ -284,7 +297,8 @@ void HashDBRemote::loadProgramDB(const DatabaseMap::ProgramMap &input, const boo
     request.set_persistent(persistent);
 
     grpc::Status s = stub->LoadProgramDB(&context, request, &response);
-    if (s.error_code() != grpc::StatusCode::OK) {
+    if (s.error_code() != grpc::StatusCode::OK)
+    {
         zklog.error("HashDBRemote:loadProgramDB() GRPC error(" + to_string(s.error_code()) + "): " + s.error_message());
     }
 
@@ -305,7 +319,8 @@ zkresult HashDBRemote::flush(const string &batchUUID, const string &newStateRoot
     request.set_persistence((hashdb::v1::Persistence)persistence);
     ::hashdb::v1::FlushResponse response;
     grpc::Status s = stub->Flush(&context, request, &response);
-    if (s.error_code() != grpc::StatusCode::OK) {
+    if (s.error_code() != grpc::StatusCode::OK)
+    {
         zklog.error("HashDBRemote:flush() GRPC error(" + to_string(s.error_code()) + "): " + s.error_message());
     }
     flushId = response.flush_id();
@@ -328,6 +343,54 @@ void HashDBRemote::semiFlush (const string &batchUUID, const string &newStateRoo
     grpc::Status s = stub->SemiFlush(&context, request, &response);
 }
 
+zkresult HashDBRemote::purge(const string &batchUUID, const string &newStateRoot, const Persistence persistence)
+{
+#ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
+    gettimeofday(&t, NULL);
+#endif
+    ::grpc::ClientContext context;
+    ::hashdb::v1::PurgeRequest request;
+    request.set_batch_uuid(batchUUID);
+    request.set_new_state_root(newStateRoot);
+    request.set_persistence((hashdb::v1::Persistence)persistence);
+    ::hashdb::v1::PurgeResponse response;
+    grpc::Status s = stub->Purge(&context, request, &response);
+    if (s.error_code() != grpc::StatusCode::OK)
+    {
+        zklog.error("HashDBRemote:purge() GRPC error(" + to_string(s.error_code()) + "): " + s.error_message());
+    }
+
+#ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
+    tms.add("purge", TimeDiff(t));
+#endif
+    return static_cast<zkresult>(response.result().code());
+}
+
+zkresult HashDBRemote::consolidateState (const string &virtualStateRoot, const Persistence persistence, string &consolidatedStateRoot, uint64_t &flushId, uint64_t &storedFlushId)
+{
+#ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
+    gettimeofday(&t, NULL);
+#endif
+    ::grpc::ClientContext context;
+    ::hashdb::v1::ConsolidateStateRequest request;
+    request.set_virtual_state_root(virtualStateRoot);
+    request.set_persistence((hashdb::v1::Persistence)persistence);
+    ::hashdb::v1::ConsolidateStateResponse response;
+    grpc::Status s = stub->ConsolidateState(&context, request, &response);
+    if (s.error_code() != grpc::StatusCode::OK)
+    {
+        zklog.error("HashDBRemote:consolidateState() GRPC error(" + to_string(s.error_code()) + "): " + s.error_message());
+    }
+    consolidatedStateRoot = response.consolidated_state_root();
+    flushId = response.flush_id();
+    storedFlushId = response.stored_flush_id();
+
+#ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
+    tms.add("consolidateState", TimeDiff(t));
+#endif
+    return static_cast<zkresult>(response.result().code());
+}
+
 zkresult HashDBRemote::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram, string &proverId)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
@@ -337,7 +400,8 @@ zkresult HashDBRemote::getFlushStatus(uint64_t &storedFlushId, uint64_t &storing
     ::google::protobuf::Empty request;
     ::hashdb::v1::GetFlushStatusResponse response;
     grpc::Status s = stub->GetFlushStatus(&context, request, &response);
-    if (s.error_code() != grpc::StatusCode::OK) {
+    if (s.error_code() != grpc::StatusCode::OK)
+    {
         zklog.error("HashDBRemote:getFlushStatus() GRPC error(" + to_string(s.error_code()) + "): " + s.error_message());
         return ZKR_HASHDB_GRPC_ERROR;
     }
@@ -374,7 +438,8 @@ zkresult HashDBRemote::getFlushData(uint64_t flushId, uint64_t &storedFlushId, u
 
     // Call the gRPC GetFlushData method
     grpc::Status s = stub->GetFlushData(&context, request, &response);
-    if (s.error_code() != grpc::StatusCode::OK) {
+    if (s.error_code() != grpc::StatusCode::OK)
+    {
         zklog.error("HashDBRemote:getFlushData() GRPC error(" + to_string(s.error_code()) + "): " + s.error_message());
         return ZKR_HASHDB_GRPC_ERROR;
     }

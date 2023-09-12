@@ -234,7 +234,8 @@ zkresult HashDB::flush (const string &batchUUID, const string &newStateRoot, con
     {
         if (config.stateManager && (batchUUID.size() != 0))
         {
-            result = stateManager64.flush(batchUUID, newStateRoot, persistence, db64, flushId, storedFlushId);
+            zklog.error("HashDB::flush() called with config.hashDB64=true and config.stateManager=false");
+            return ZKR_UNSPECIFIED;
         }
         else
         {
@@ -286,6 +287,72 @@ void HashDB::semiFlush (const string &batchUUID, const string &newStateRoot, con
             db.semiFlush();
         }
     }
+}
+
+zkresult HashDB::purge (const string &batchUUID, const string &newStateRoot, const Persistence persistence)
+{
+#ifdef LOG_TIME_STATISTICS_HASHDB
+    gettimeofday(&t, NULL);
+#endif
+
+#ifdef HASHDB_LOCK
+    lock_guard<recursive_mutex> guard(mlock);
+#endif
+
+    zkresult result;
+    if (config.hashDB64 && config.stateManager && (batchUUID.size() != 0))
+    {
+        result = stateManager64.purge(batchUUID, newStateRoot, persistence, db64);
+    }
+    else
+    {
+        zklog.error("HashDB::purge() called with invalid configuration");
+        result = ZKR_STATE_MANAGER;
+    }
+
+#ifdef LOG_TIME_STATISTICS_HASHDB
+    tms.add("purge", TimeDiff(t));
+#endif
+
+    return result;
+}
+
+zkresult HashDB::consolidateState (const string &virtualStateRoot, const Persistence persistence, string &consolidatedStateRoot, uint64_t &flushId, uint64_t &storedFlushId)
+{
+#ifdef LOG_TIME_STATISTICS_HASHDB
+    gettimeofday(&t, NULL);
+#endif
+
+#ifdef HASHDB_LOCK
+    lock_guard<recursive_mutex> guard(mlock);
+#endif
+
+    zkresult result;
+    if (config.hashDB64)
+    {
+        if (config.stateManager)
+        {
+            result = stateManager64.consolidateState(virtualStateRoot, persistence, consolidatedStateRoot, db64, flushId, storedFlushId);
+        }
+        else
+        {
+            zklog.error("HashDB::consolidateState() called with config.stateManager=false");
+            return ZKR_UNSPECIFIED;
+        }
+    }
+    else
+    {
+        zklog.error("HashDB::consolidateState() called with config.hashDB64=false");
+        return ZKR_UNSPECIFIED;
+    }
+
+#ifdef LOG_TIME_STATISTICS_HASHDB
+    tms.add("consolidateState", TimeDiff(t));
+    tms.print("HashDB");
+    tms.clear();
+#endif
+
+    return result;
 }
 
 zkresult HashDB::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram, string &proverId)
@@ -358,7 +425,7 @@ zkresult HashDB::readTree (const Goldilocks::Element (&root)[4], vector<KeyValue
 {
     if (config.hashDB64)
     {
-        return tree64.ReadTree(db64, root, keyValues);
+        return tree64.ReadTree(db64, root, keyValues, NULL);
     }
     else
     {

@@ -573,6 +573,45 @@ using grpc::Status;
     return Status::OK;
 }
 
+::grpc::Status HashDBServiceImpl::ConsolidateState (::grpc::ServerContext* context, const ::hashdb::v1::ConsolidateStateRequest* request, ::hashdb::v1::ConsolidateStateResponse* response)
+{
+    // If the process is exising, do not start new activities
+    if (bExitingProcess)
+    {
+        return Status::CANCELLED;
+    }
+
+#ifdef LOG_HASHDB_SERVICE
+    zklog.info("HashDBServiceImpl::ConsolidateState called.");
+#endif
+
+    try
+    {
+        // Call the HashDB flush method
+        uint64_t flushId = 0, storedFlushId = 0;
+        string consolidatedStateRoot;
+        zkresult zkres = pHashDB->consolidateState(request->virtual_state_root(), (Persistence)(uint64_t)request->persistence(), consolidatedStateRoot, flushId, storedFlushId);
+
+        // return the result in the response
+        ::hashdb::v1::ResultCode* result = new ::hashdb::v1::ResultCode();
+        result->set_code(static_cast<::hashdb::v1::ResultCode_Code>(zkres));
+        response->set_allocated_result(result);
+        response->set_flush_id(flushId);
+        response->set_stored_flush_id(storedFlushId);
+        response->set_consolidated_state_root(consolidatedStateRoot);
+    }
+    catch (const std::exception &e)
+    {
+        zklog.error("HashDBServiceImpl::ConsolidateState() exception: " + string(e.what()));
+        return Status::CANCELLED;
+    }
+
+#ifdef LOG_HASHDB_SERVICE
+    zklog.info("HashDBServiceImpl::ConsolidateState() completed.");
+#endif
+
+    return Status::OK;
+}
 
 
 

@@ -33,6 +33,8 @@ static const char* HashDBService_method_names[] = {
   "/hashdb.v1.HashDBService/SemiFlush",
   "/hashdb.v1.HashDBService/GetFlushStatus",
   "/hashdb.v1.HashDBService/GetFlushData",
+  "/hashdb.v1.HashDBService/ConsolidateState",
+  "/hashdb.v1.HashDBService/Purge",
 };
 
 std::unique_ptr< HashDBService::Stub> HashDBService::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
@@ -52,6 +54,8 @@ HashDBService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& chan
   , rpcmethod_SemiFlush_(HashDBService_method_names[7], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_GetFlushStatus_(HashDBService_method_names[8], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_GetFlushData_(HashDBService_method_names[9], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_ConsolidateState_(HashDBService_method_names[10], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_Purge_(HashDBService_method_names[11], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status HashDBService::Stub::Set(::grpc::ClientContext* context, const ::hashdb::v1::SetRequest& request, ::hashdb::v1::SetResponse* response) {
@@ -334,6 +338,62 @@ void HashDBService::Stub::experimental_async::GetFlushData(::grpc::ClientContext
   return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::hashdb::v1::GetFlushDataResponse>::Create(channel_.get(), cq, rpcmethod_GetFlushData_, context, request, false);
 }
 
+::grpc::Status HashDBService::Stub::ConsolidateState(::grpc::ClientContext* context, const ::hashdb::v1::ConsolidateStateRequest& request, ::hashdb::v1::ConsolidateStateResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_ConsolidateState_, context, request, response);
+}
+
+void HashDBService::Stub::experimental_async::ConsolidateState(::grpc::ClientContext* context, const ::hashdb::v1::ConsolidateStateRequest* request, ::hashdb::v1::ConsolidateStateResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_ConsolidateState_, context, request, response, std::move(f));
+}
+
+void HashDBService::Stub::experimental_async::ConsolidateState(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ConsolidateStateResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_ConsolidateState_, context, request, response, std::move(f));
+}
+
+void HashDBService::Stub::experimental_async::ConsolidateState(::grpc::ClientContext* context, const ::hashdb::v1::ConsolidateStateRequest* request, ::hashdb::v1::ConsolidateStateResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_ConsolidateState_, context, request, response, reactor);
+}
+
+void HashDBService::Stub::experimental_async::ConsolidateState(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ConsolidateStateResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_ConsolidateState_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::hashdb::v1::ConsolidateStateResponse>* HashDBService::Stub::AsyncConsolidateStateRaw(::grpc::ClientContext* context, const ::hashdb::v1::ConsolidateStateRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::hashdb::v1::ConsolidateStateResponse>::Create(channel_.get(), cq, rpcmethod_ConsolidateState_, context, request, true);
+}
+
+::grpc::ClientAsyncResponseReader< ::hashdb::v1::ConsolidateStateResponse>* HashDBService::Stub::PrepareAsyncConsolidateStateRaw(::grpc::ClientContext* context, const ::hashdb::v1::ConsolidateStateRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::hashdb::v1::ConsolidateStateResponse>::Create(channel_.get(), cq, rpcmethod_ConsolidateState_, context, request, false);
+}
+
+::grpc::Status HashDBService::Stub::Purge(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest& request, ::hashdb::v1::PurgeResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_Purge_, context, request, response);
+}
+
+void HashDBService::Stub::experimental_async::Purge(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest* request, ::hashdb::v1::PurgeResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_Purge_, context, request, response, std::move(f));
+}
+
+void HashDBService::Stub::experimental_async::Purge(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::PurgeResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_Purge_, context, request, response, std::move(f));
+}
+
+void HashDBService::Stub::experimental_async::Purge(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest* request, ::hashdb::v1::PurgeResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_Purge_, context, request, response, reactor);
+}
+
+void HashDBService::Stub::experimental_async::Purge(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::PurgeResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_Purge_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::hashdb::v1::PurgeResponse>* HashDBService::Stub::AsyncPurgeRaw(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::hashdb::v1::PurgeResponse>::Create(channel_.get(), cq, rpcmethod_Purge_, context, request, true);
+}
+
+::grpc::ClientAsyncResponseReader< ::hashdb::v1::PurgeResponse>* HashDBService::Stub::PrepareAsyncPurgeRaw(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::hashdb::v1::PurgeResponse>::Create(channel_.get(), cq, rpcmethod_Purge_, context, request, false);
+}
+
 HashDBService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       HashDBService_method_names[0],
@@ -435,6 +495,26 @@ HashDBService::Service::Service() {
              ::hashdb::v1::GetFlushDataResponse* resp) {
                return service->GetFlushData(ctx, req, resp);
              }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      HashDBService_method_names[10],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::ConsolidateStateRequest, ::hashdb::v1::ConsolidateStateResponse>(
+          [](HashDBService::Service* service,
+             ::grpc_impl::ServerContext* ctx,
+             const ::hashdb::v1::ConsolidateStateRequest* req,
+             ::hashdb::v1::ConsolidateStateResponse* resp) {
+               return service->ConsolidateState(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      HashDBService_method_names[11],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::PurgeRequest, ::hashdb::v1::PurgeResponse>(
+          [](HashDBService::Service* service,
+             ::grpc_impl::ServerContext* ctx,
+             const ::hashdb::v1::PurgeRequest* req,
+             ::hashdb::v1::PurgeResponse* resp) {
+               return service->Purge(ctx, req, resp);
+             }, this)));
 }
 
 HashDBService::Service::~Service() {
@@ -504,6 +584,20 @@ HashDBService::Service::~Service() {
 }
 
 ::grpc::Status HashDBService::Service::GetFlushData(::grpc::ServerContext* context, const ::hashdb::v1::GetFlushDataRequest* request, ::hashdb::v1::GetFlushDataResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status HashDBService::Service::ConsolidateState(::grpc::ServerContext* context, const ::hashdb::v1::ConsolidateStateRequest* request, ::hashdb::v1::ConsolidateStateResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status HashDBService::Service::Purge(::grpc::ServerContext* context, const ::hashdb::v1::PurgeRequest* request, ::hashdb::v1::PurgeResponse* response) {
   (void) context;
   (void) request;
   (void) response;

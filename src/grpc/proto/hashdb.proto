@@ -31,6 +31,8 @@ service HashDBService {
     rpc SemiFlush (SemiFlushRequest) returns (google.protobuf.Empty) {}
     rpc GetFlushStatus (google.protobuf.Empty) returns (GetFlushStatusResponse) {}
     rpc GetFlushData (GetFlushDataRequest) returns (GetFlushDataResponse) {}
+    rpc ConsolidateState (ConsolidateStateRequest) returns (ConsolidateStateResponse) {}
+    rpc Purge (PurgeRequest) returns (PurgeResponse) {}
 }
 
 ///////////////////
@@ -152,6 +154,28 @@ message SemiFlushRequest {
  */
 message GetFlushDataRequest {
     uint64 flush_id = 1;
+}
+
+/**
+ * @dev ConsolidateStateRequest
+ * @param {virtual_state_root} - virtual state root to consolidate (and previous virtual state roots, too)
+ * @param {persistence} - indicates if it should be stored only in CACHE, in the SQL DATABASE, or it is just TEMPORARY and should be deleted at the flush of this batch UUID
+ */
+message ConsolidateStateRequest {
+    string virtual_state_root = 1;
+    Persistence persistence = 2;
+}
+
+/**
+ * @dev PurgeRequest
+ * @param {batch_uuid} - indicates a unique identifier of the current batch or session which data will be purged
+ * @param {new_state_root} - state root at this point of the execution
+ * @param {persistence} - indicates if it should be stored only in CACHE, in the SQL DATABASE, or it is just TEMPORARY and should be deleted at the flush of this batch UUID
+ */
+message PurgeRequest {
+    string batch_uuid = 1;
+    string new_state_root = 2;
+    Persistence persistence = 3;
 }
 
 /////////////////////
@@ -282,6 +306,28 @@ message GetFlushDataResponse {
     map<string, string> program = 3;
     string nodes_state_root = 4;
     ResultCode result = 5;
+}
+
+/**
+ * @dev ConsolidateStateResponse
+ * @param {consolidated_state_root} - consolidated state root at the point of the execution of virtual_state_root
+ * @param {flush_id} - id assigned to this flush data
+ * @param {stored_flush_id} - id of the last flush data sent to database
+ * @param {result} - result code
+ */
+message ConsolidateStateResponse {
+    string consolidated_state_root = 1;
+    uint64 flush_id = 2;
+    uint64 stored_flush_id = 3;
+    ResultCode result = 4;
+}
+
+/**
+ * @dev PurgeResponse
+ * @param {result} - result code
+ */
+message PurgeResponse {
+    ResultCode result = 1;
 }
 
 /**

@@ -193,7 +193,7 @@ zkresult Tree64::WriteTree (Database64 &db, const Goldilocks::Element (&oldRoot)
 
     // Calculate the new root hash of the whole tree
     Child result;
-    zkr = CalculateHash(result, chunks, dbQueries, 0, 0);
+    zkr = CalculateHash(result, chunks, dbQueries, 0, 0, NULL);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("Tree64::WriteTree() failed calling calculateHash() result=" + zkresult2string(zkr));
@@ -268,7 +268,7 @@ zkresult Tree64::WriteTree (Database64 &db, const Goldilocks::Element (&oldRoot)
     return ZKR_SUCCESS;
 }
 
-zkresult Tree64::CalculateHash (Child &result, vector<TreeChunk *> &chunks, vector<DB64Query> &dbQueries, int chunkId, int level)
+zkresult Tree64::CalculateHash (Child &result, vector<TreeChunk *> &chunks, vector<DB64Query> &dbQueries, int chunkId, int level, vector<HashValueGL> *hashValues)
 {
     zkresult zkr;
     vector<Child> results(64);
@@ -279,13 +279,13 @@ zkresult Tree64::CalculateHash (Child &result, vector<TreeChunk *> &chunks, vect
     {
         if (chunks[chunkId]->getChild(i).type == TREE_CHUNK)
         {
-            CalculateHash(result, chunks, dbQueries, chunks[chunkId]->getChild(i).treeChunkId, level + 6);
+            CalculateHash(result, chunks, dbQueries, chunks[chunkId]->getChild(i).treeChunkId, level + 6, hashValues);
             chunks[chunkId]->setChild(i, result);
         }
     }
 
     // Calculate the hash of this chunk
-    zkr = chunks[chunkId]->calculateHash();
+    zkr = chunks[chunkId]->calculateHash(hashValues);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("Tree64::CalculateHash() failed calling chunks[chunkId]->calculateHash() result=" + zkresult2string(zkr));
@@ -315,7 +315,7 @@ zkresult Tree64::CalculateHash (Child &result, vector<TreeChunk *> &chunks, vect
     return ZKR_SUCCESS;
 }
 
-zkresult Tree64::ReadTree (Database64 &db, const Goldilocks::Element (&root)[4], vector<KeyValue> &keyValues)
+zkresult Tree64::ReadTree (Database64 &db, const Goldilocks::Element (&root)[4], vector<KeyValue> &keyValues, vector<HashValueGL> *hashValues)
 {
     zkresult zkr;
 
@@ -472,6 +472,63 @@ zkresult Tree64::ReadTree (Database64 &db, const Goldilocks::Element (&root)[4],
     }
 
     dbQueries.clear();
+
+    if (hashValues != NULL)
+    {
+        // Calculate the new root hash of the whole tree
+        Child result;
+        zkr = CalculateHash(result, chunks, dbQueries, 0, 0, hashValues);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("Tree64::WriteTree() failed calling calculateHash() result=" + zkresult2string(zkr));
+            for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
+            return zkr;
+        }
+
+        // Based on the result, calculate the new root hash
+        /*if (result.type == LEAF)
+        {
+            newRoot[0] = result.leaf.hash[0];
+            newRoot[1] = result.leaf.hash[1];
+            newRoot[2] = result.leaf.hash[2];
+            newRoot[3] = result.leaf.hash[3];
+            string newRootString = fea2string(fr, newRoot);
+
+            if (!chunks[0]->getDataValid())
+            {
+                zkr = chunks[0]->children2data();
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("Tree64::WriteTree() failed calling chunks[0]->children2data() result=" + zkresult2string(zkr));
+                    for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
+                    return zkr;
+                }
+                DB64Query dbQuery(newRootString, newRoot, chunks[0]->data);
+                dbQueries.push_back(dbQuery);
+            }
+        }
+        else if (result.type == INTERMEDIATE)
+        {
+            newRoot[0] = result.intermediate.hash[0];
+            newRoot[1] = result.intermediate.hash[1];
+            newRoot[2] = result.intermediate.hash[2];
+            newRoot[3] = result.intermediate.hash[3];
+        }
+        else if (result.type == ZERO)
+        { 
+            newRoot[0] = fr.zero();
+            newRoot[1] = fr.zero();
+            newRoot[2] = fr.zero();
+            newRoot[3] = fr.zero();
+        }
+        else
+        {
+            zklog.error("Tree64::WriteTree() found invalid result.type=" + to_string(result.type));
+            for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
+            return zkr;
+        }*/
+        
+    }
 
 #ifdef SMT64_PRINT_TREE_CHUNKS
     // Print chunks

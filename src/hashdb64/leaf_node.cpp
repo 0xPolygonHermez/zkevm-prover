@@ -5,7 +5,7 @@
 #include "smt_64.hpp"
 #include "key_utils.hpp"
 
-void LeafNode::calculateHash (Goldilocks &fr, PoseidonGoldilocks &poseidon)
+void LeafNode::calculateHash (Goldilocks &fr, PoseidonGoldilocks &poseidon, vector<HashValueGL> *hashValues)
 {
     // Prepare input = [value8, 0000]
     Goldilocks::Element input[12];
@@ -18,6 +18,15 @@ void LeafNode::calculateHash (Goldilocks &fr, PoseidonGoldilocks &poseidon)
     // Calculate the value hash
     Goldilocks::Element valueHash[4];
     poseidon.hash(valueHash, input);
+
+    // Return the hash-value pair, if requested
+    if (hashValues != NULL)
+    {
+        HashValueGL hashValue;
+        for (uint64_t i=0; i<4; i++) hashValue.hash[i] = valueHash[i];
+        for (uint64_t i=0; i<12; i++) hashValue.value[i] = input[i];
+        hashValues->emplace_back(hashValue);
+    }
 
     // Calculate the remaining key
     Goldilocks::Element rkey[4];
@@ -39,4 +48,13 @@ void LeafNode::calculateHash (Goldilocks &fr, PoseidonGoldilocks &poseidon)
 
     // Calculate the leaf node hash
     poseidon.hash(hash, input);
+
+    // Return the hash-value pair, if requested
+    if (hashValues != NULL)
+    {
+        HashValueGL hashValue;
+        for (uint64_t i=0; i<4; i++) hashValue.hash[i] = hash[i];
+        for (uint64_t i=0; i<12; i++) hashValue.value[i] = input[i];
+        hashValues->emplace_back(hashValue);
+    }
 }
