@@ -43,7 +43,8 @@ Database64::Database64 (Goldilocks &fr, const Config &config) :
         config(config),
         connectionsPool(NULL),
         multiWrite(fr),
-        maxVersions(config.kvDBMaxVersions)
+        maxVersions(config.kvDBMaxVersions),
+        maxVersionsUpload(10) //add into config if needed
 {
     // Init mutex
     pthread_mutex_init(&connMutex, NULL);
@@ -403,15 +404,13 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
         {
             // Add to the read log
             if (dbReadLog != NULL) dbReadLog->add(keyStr, value, true, TimeDiff(t));
-
-            // Store it locally to avoid any future remote access for this key
-            dbKVACache.addKeyValueVersion(version, key, value, false); //rick problematic                
+            // We do not store into cache as we do not want to manage the chain of versions
             rkv = ZKR_SUCCESS;
         }
         else if(useRemoteDB)
         {
-        
-            rkv = readRemoteKV(version, key, value);       
+            vector<VersionValue> upstremVersionValues;
+            rkv = readRemoteKV(version, key, value, upstremVersionValues);       
             if (rkv == ZKR_SUCCESS)
             {
                 dbKVACache.addKeyValueVersion(version, key, value, false); //rick problematic                
@@ -422,7 +421,8 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
                     value = 0;
                     rout = rkv;
                     mpz_class   zero(0);
-                    dbKVACache.addKeyValueVersion(version, key, zero, false); //rick problematic
+                    // Add a zero into the cache to avoid future remote access for this key (not problematic management of versions as there is only one version)
+                    dbKVACache.addKeyValueVersion(version, key, zero, false);
                 }else{
                     zkresult rtree = ZKR_UNSPECIFIED;
                     vector<KeyValue> keyValues(1);
@@ -474,54 +474,28 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], vector<KeyValu
 zkresult Database64::writeKV(const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, bool persistent)
 {
 
-    // Check that it has  been initialized before
-    if (!bInitialized)
-    {
-        zklog.error("Database64::writeKV() called uninitialized");
-        exitProcess();
-    }
-    if (config.dbMultiWrite && !dbKVACache.enabled() && !persistent)
-    {
-        zklog.error("Database64::writeKV() called with multi-write active, cache disabled and no persistance in database, so there is no place to store the date");
-        return ZKR_DB_ERROR;
-    }
+    
     zkresult rkv = ZKR_UNSPECIFIED;
     zkresult rv = ZKR_UNSPECIFIED;
 
     uint64_t version;
     rv = readVersion(root, version, NULL);
-
     if( rv == ZKR_SUCCESS){
-
-        if ( useRemoteDB && persistent)
-        {
-            
-            rkv = writeRemoteKV(version, key, value);
-        }
-        else
-        {
-            rkv = ZKR_SUCCESS;
-        }
-
-        if (rkv == ZKR_SUCCESS)
-        {
-            dbKVACache.addKeyValueVersion(version, key, value, false);
-            
-        }
+        writeKV(version, key, value, persistent);
     }else{
        rkv=rv;
     }
 
 #ifdef LOG_DB_WRITE
     {
-        string keyStr_ = fea2string(fr, key[0], key[1], key[2], key[3]); 
-        string keyStr = NormalizeToNFormat(keyStr_, 64);
+        string rootStr_ = fea2string(fr, root[0], root[1], root[2], root[3]); 
+        string rootStr = NormalizeToNFormat(rootStr_, 64);
         string s = "Database64::writeKV()";
         if (rkv != ZKR_SUCCESS)
             s += " ERROR=" + zkresult2string(rkv);
-        s += " key=" + keyStr;
-        s += " value=";
-        s += value.get_str(16);
+        s += " key=" + rootStr;
+        s += " version=";
+        s += to_string(version) + ":";
         s += " persistent=" + to_string(persistent);
         zklog.info(s);
     }
@@ -1219,7 +1193,7 @@ zkresult Database64::writeRemote(bool bProgram, const string &key, const string 
     return result;
 }
 
-zkresult Database64::readRemoteKV(const uint64_t version, const Goldilocks::Element (&key)[4],  mpz_class value)
+zkresult Database64::readRemoteKV(const uint64_t version, const Goldilocks::Element (&key)[4],  mpz_class value, vector<VersionValue> &upstreamVersionValues)
 {
     const string &tableName = config.dbKeyValueTableName;
 
@@ -1271,7 +1245,7 @@ zkresult Database64::readRemoteKV(const uint64_t version, const Goldilocks::Elem
 
         // Dispose the read db conneciton
         disposeConnection(pDatabaseConnection);
-        return extractVersion(row[1], version, value); 
+        return extractVersion(row[1], version, value, upstreamVersionValues); 
         
 
     }
@@ -1289,22 +1263,32 @@ zkresult Database64::readRemoteKV(const uint64_t version, const Goldilocks::Elem
     return ZKR_DB_ERROR;//should never return here
 }
 
-zkresult Database64::extractVersion(const pqxx::field& fieldData, const uint64_t version, mpz_class &value){
+zkresult Database64::extractVersion(const pqxx::field& fieldData, const uint64_t version, mpz_class &value, vector<VersionValue> &upstreamVersionValues){
 
+    upstreamVersionValues.clear();
     int data_size = 0;
     if(!fieldData.is_null()){
         string data = removeBSXIfExists64(fieldData.c_str());
         data_size = data.size();
         zkassert(data_size % 80 == 0);
+        int nUpstreams = 0;
         for (int i = 0; i < data_size; i += 80)
         {
+
             string versionStr = data.substr(i, 16);
             mpz_class aux(versionStr, 16);
             uint64_t version_ = aux.get_ui();
+            if(nUpstreams < maxVersions){
+                VersionValue vv;
+                vv.version = version_;
+                vv.value = mpz_class(data.substr(i + 16, 64), 16);
+                upstreamVersionValues.push_back(vv);
+            }
             if(version_==version){
                 value = mpz_class(data.substr(i + 16, 64), 16);
                 return ZKR_SUCCESS;
             }
+            ++nUpstreams;
         }
     }
     /*const char * data = fieldData.c_str();
@@ -1411,7 +1395,6 @@ zkresult Database64::writeRemoteKV(const uint64_t version, const Goldilocks::Ele
                 }
             } else{
                 if(version > 1){
-                    //this must be reproduced into multiwrite
                     mpz_class   zero(0);
                     dbKVACache.addKeyValueVersion(version-1, key, zero, false);                
                 }
