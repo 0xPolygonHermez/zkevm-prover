@@ -81,6 +81,11 @@ void DatabaseKVAssociativeCache::postConstruct(int log2IndexesSize_, int log2Cac
 
     if(versions != NULL) delete[] versions;
     versions = new uint64_t[2 * cacheSize];
+    #pragma omp parallel for schedule(static) num_threads(4)
+    for (size_t i = 0; i < cacheSize; i++)
+    {
+        indexes[i*2+1] = UINT64_MAX;
+    }
 
     currentCacheIndex = 0;
     attempts = 0;
@@ -92,7 +97,7 @@ void DatabaseKVAssociativeCache::postConstruct(int log2IndexesSize_, int log2Cac
     indexesMask = indexesSize - 1;
 };
 
-void DatabaseKVAssociativeCache::addKeyValueVersion(const uint64_t version, const Goldilocks::Element (&key)[4], const mpz_class &value, bool update){
+void DatabaseKVAssociativeCache::addKeyValueVersion(const uint64_t version, const Goldilocks::Element (&key)[4], const mpz_class &value, bool link){
     
     lock_guard<recursive_mutex> guard(mlock);
     bool emptySlot = false;
@@ -124,7 +129,7 @@ void DatabaseKVAssociativeCache::addKeyValueVersion(const uint64_t version, cons
                     present = true;
                     if(versions[cacheIndexVersions] == version){
                         presentSameVersion = true;
-                        if(update == false) return;
+                        return;
                     } else if (versions[cacheIndexVersions] > version){
                         zklog.error("DatabaseKVAssociativeCache::addKeyValueVersion() adding lower version than the current one");
                         exitProcess();
@@ -168,10 +173,10 @@ void DatabaseKVAssociativeCache::addKeyValueVersion(const uint64_t version, cons
     keys[cacheIndexKey + 3].fe = key[3].fe;
     values[cacheIndexValue] = value;
     versions[cacheIndexVersions] = version;
-    if(present & !presentSameVersion){
+    if(present && !presentSameVersion && link){
         versions[cacheIndexVersions+1] = cacheIndexPrev;
     }else{
-        versions[cacheIndexVersions+1] = 0;
+        versions[cacheIndexVersions+1] = UINT64_MAX;
     }
     //
     // Forced index insertion
@@ -274,16 +279,17 @@ bool DatabaseKVAssociativeCache::findKey( const uint64_t version, const Goldiloc
                 keys[cacheIndexKey + 2].fe == key[2].fe &&
                 keys[cacheIndexKey + 3].fe == key[3].fe){
 
-                if( versions[cacheIndexVersions] <= version){ //rick: I assume they are ordered
+                if( versions[cacheIndexVersions] <= version){ //We assume they are ordered
                     uint32_t cacheIndexValue = cacheIndex;
                     ++hits;
                     value = values[cacheIndexValue];
                     return true;
                 }
+                if(versions[cacheIndexVersions+1]==UINT64_MAX) return false; //No more versions
                 cacheIndex = versions[cacheIndexVersions+1] & cacheMask;
                 cacheIndexKey = cacheIndex * 4;
                 cacheIndexVersions = cacheIndex * 2;
-
+                
             }else{
                 if(j>0){
                     return false;

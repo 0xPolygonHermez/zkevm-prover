@@ -7,6 +7,7 @@
 #include "zklog.hpp"
 #include "zkmax.hpp"
 #include "poseidon_goldilocks.hpp"
+#include "version_value.hpp"
 
 
 using namespace std;
@@ -42,7 +43,7 @@ class DatabaseKVAssociativeCache
         ~DatabaseKVAssociativeCache();
         void postConstruct(int log2IndexesSize_, int log2CacheSize_, string name_);
 
-        void addKeyValueVersion(const uint64_t version, const Goldilocks::Element (&key)[4], const mpz_class &value, bool update);
+        void addKeyValueVersion(const uint64_t version, const Goldilocks::Element (&key)[4], const mpz_class &value, bool link = true);
         bool findKey( const uint64_t version, const Goldilocks::Element (&key)[4], mpz_class &value);
 
         inline bool enabled() const { return (log2IndexesSize > 0); };
