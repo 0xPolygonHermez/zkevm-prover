@@ -126,6 +126,7 @@ uint64_t Smt64Test (const Config &config)
         TimerStart(SMT64_TEST_READ_TREE);
 
         vector<KeyValue> readKeyValues[SMT64_TEST_NUMBER_OF_WRITES];
+        vector<HashValueGL> readHashValues[SMT64_TEST_NUMBER_OF_WRITES];
 
         for (int64_t i=0; i<SMT64_TEST_NUMBER_OF_WRITES; i++)
         {
@@ -138,7 +139,7 @@ uint64_t Smt64Test (const Config &config)
             }
 
             // Call readTree() with the returned root
-            zkr = pHashDB->readTree(root, readKeyValues[i]);
+            zkr = pHashDB->readTree(root, readKeyValues[i], readHashValues[i]);
             if (zkr != ZKR_SUCCESS)
             {
                 zklog.error("Smt64Test() failed calling smt64.readTree() result=" + zkresult2string(zkr));

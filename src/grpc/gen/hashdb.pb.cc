@@ -16,10 +16,13 @@
 #include <google/protobuf/port_def.inc>
 extern PROTOBUF_INTERNAL_EXPORT_hashdb_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_FeList_hashdb_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_hashdb_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_Fea_hashdb_2eproto;
+extern PROTOBUF_INTERNAL_EXPORT_hashdb_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_Fea12_hashdb_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_hashdb_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_GetFlushDataResponse_NodesEntry_DoNotUse_hashdb_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_hashdb_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_GetFlushDataResponse_ProgramEntry_DoNotUse_hashdb_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_hashdb_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_GetResponse_DbReadLogEntry_DoNotUse_hashdb_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_hashdb_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_GetResponse_SiblingsEntry_DoNotUse_hashdb_2eproto;
+extern PROTOBUF_INTERNAL_EXPORT_hashdb_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_HashValueGL_hashdb_2eproto;
+extern PROTOBUF_INTERNAL_EXPORT_hashdb_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_KeyValue_hashdb_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_hashdb_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_LoadDBRequest_InputDbEntry_DoNotUse_hashdb_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_hashdb_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_LoadProgramDBRequest_InputProgramDbEntry_DoNotUse_hashdb_2eproto;
 extern PROTOBUF_INTERNAL_EXPORT_hashdb_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_ResultCode_hashdb_2eproto;
@@ -84,6 +87,10 @@ class PurgeRequestDefaultTypeInternal {
  public:
   ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<PurgeRequest> _instance;
 } _PurgeRequest_default_instance_;
+class ReadTreeRequestDefaultTypeInternal {
+ public:
+  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<ReadTreeRequest> _instance;
+} _ReadTreeRequest_default_instance_;
 class SetResponse_SiblingsEntry_DoNotUseDefaultTypeInternal {
  public:
   ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<SetResponse_SiblingsEntry_DoNotUse> _instance;
@@ -144,10 +151,26 @@ class PurgeResponseDefaultTypeInternal {
  public:
   ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<PurgeResponse> _instance;
 } _PurgeResponse_default_instance_;
+class ReadTreeResponseDefaultTypeInternal {
+ public:
+  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<ReadTreeResponse> _instance;
+} _ReadTreeResponse_default_instance_;
 class FeaDefaultTypeInternal {
  public:
   ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<Fea> _instance;
 } _Fea_default_instance_;
+class Fea12DefaultTypeInternal {
+ public:
+  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<Fea12> _instance;
+} _Fea12_default_instance_;
+class HashValueGLDefaultTypeInternal {
+ public:
+  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<HashValueGL> _instance;
+} _HashValueGL_default_instance_;
+class KeyValueDefaultTypeInternal {
+ public:
+  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<KeyValue> _instance;
+} _KeyValue_default_instance_;
 class FeListDefaultTypeInternal {
  public:
   ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<FeList> _instance;
@@ -173,8 +196,9 @@ static void InitDefaultsscc_info_ConsolidateStateRequest_hashdb_2eproto() {
   ::hashdb::v1::ConsolidateStateRequest::InitAsDefaultInstance();
 }
 
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_ConsolidateStateRequest_hashdb_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_ConsolidateStateRequest_hashdb_2eproto}, {}};
+::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_ConsolidateStateRequest_hashdb_2eproto =
+    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_ConsolidateStateRequest_hashdb_2eproto}, {
+      &scc_info_Fea_hashdb_2eproto.base,}};
 
 static void InitDefaultsscc_info_ConsolidateStateResponse_hashdb_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -187,8 +211,9 @@ static void InitDefaultsscc_info_ConsolidateStateResponse_hashdb_2eproto() {
   ::hashdb::v1::ConsolidateStateResponse::InitAsDefaultInstance();
 }
 
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_ConsolidateStateResponse_hashdb_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_ConsolidateStateResponse_hashdb_2eproto}, {
+::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_ConsolidateStateResponse_hashdb_2eproto =
+    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 2, 0, InitDefaultsscc_info_ConsolidateStateResponse_hashdb_2eproto}, {
+      &scc_info_Fea_hashdb_2eproto.base,
       &scc_info_ResultCode_hashdb_2eproto.base,}};
 
 static void InitDefaultsscc_info_FeList_hashdb_2eproto() {
@@ -218,6 +243,20 @@ static void InitDefaultsscc_info_Fea_hashdb_2eproto() {
 
 ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_Fea_hashdb_2eproto =
     {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_Fea_hashdb_2eproto}, {}};
+
+static void InitDefaultsscc_info_Fea12_hashdb_2eproto() {
+  GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+  {
+    void* ptr = &::hashdb::v1::_Fea12_default_instance_;
+    new (ptr) ::hashdb::v1::Fea12();
+    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
+  }
+  ::hashdb::v1::Fea12::InitAsDefaultInstance();
+}
+
+::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_Fea12_hashdb_2eproto =
+    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_Fea12_hashdb_2eproto}, {}};
 
 static void InitDefaultsscc_info_FlushRequest_hashdb_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -410,6 +449,37 @@ static void InitDefaultsscc_info_GetResponse_SiblingsEntry_DoNotUse_hashdb_2epro
     {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_GetResponse_SiblingsEntry_DoNotUse_hashdb_2eproto}, {
       &scc_info_SiblingList_hashdb_2eproto.base,}};
 
+static void InitDefaultsscc_info_HashValueGL_hashdb_2eproto() {
+  GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+  {
+    void* ptr = &::hashdb::v1::_HashValueGL_default_instance_;
+    new (ptr) ::hashdb::v1::HashValueGL();
+    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
+  }
+  ::hashdb::v1::HashValueGL::InitAsDefaultInstance();
+}
+
+::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_HashValueGL_hashdb_2eproto =
+    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 2, 0, InitDefaultsscc_info_HashValueGL_hashdb_2eproto}, {
+      &scc_info_Fea_hashdb_2eproto.base,
+      &scc_info_Fea12_hashdb_2eproto.base,}};
+
+static void InitDefaultsscc_info_KeyValue_hashdb_2eproto() {
+  GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+  {
+    void* ptr = &::hashdb::v1::_KeyValue_default_instance_;
+    new (ptr) ::hashdb::v1::KeyValue();
+    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
+  }
+  ::hashdb::v1::KeyValue::InitAsDefaultInstance();
+}
+
+::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_KeyValue_hashdb_2eproto =
+    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_KeyValue_hashdb_2eproto}, {
+      &scc_info_Fea_hashdb_2eproto.base,}};
+
 static void InitDefaultsscc_info_LoadDBRequest_hashdb_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
@@ -478,8 +548,9 @@ static void InitDefaultsscc_info_PurgeRequest_hashdb_2eproto() {
   ::hashdb::v1::PurgeRequest::InitAsDefaultInstance();
 }
 
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_PurgeRequest_hashdb_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_PurgeRequest_hashdb_2eproto}, {}};
+::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_PurgeRequest_hashdb_2eproto =
+    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_PurgeRequest_hashdb_2eproto}, {
+      &scc_info_Fea_hashdb_2eproto.base,}};
 
 static void InitDefaultsscc_info_PurgeResponse_hashdb_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -494,6 +565,38 @@ static void InitDefaultsscc_info_PurgeResponse_hashdb_2eproto() {
 
 ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_PurgeResponse_hashdb_2eproto =
     {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_PurgeResponse_hashdb_2eproto}, {
+      &scc_info_ResultCode_hashdb_2eproto.base,}};
+
+static void InitDefaultsscc_info_ReadTreeRequest_hashdb_2eproto() {
+  GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+  {
+    void* ptr = &::hashdb::v1::_ReadTreeRequest_default_instance_;
+    new (ptr) ::hashdb::v1::ReadTreeRequest();
+    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
+  }
+  ::hashdb::v1::ReadTreeRequest::InitAsDefaultInstance();
+}
+
+::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_ReadTreeRequest_hashdb_2eproto =
+    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_ReadTreeRequest_hashdb_2eproto}, {
+      &scc_info_Fea_hashdb_2eproto.base,}};
+
+static void InitDefaultsscc_info_ReadTreeResponse_hashdb_2eproto() {
+  GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+  {
+    void* ptr = &::hashdb::v1::_ReadTreeResponse_default_instance_;
+    new (ptr) ::hashdb::v1::ReadTreeResponse();
+    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
+  }
+  ::hashdb::v1::ReadTreeResponse::InitAsDefaultInstance();
+}
+
+::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<3> scc_info_ReadTreeResponse_hashdb_2eproto =
+    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 3, 0, InitDefaultsscc_info_ReadTreeResponse_hashdb_2eproto}, {
+      &scc_info_KeyValue_hashdb_2eproto.base,
+      &scc_info_HashValueGL_hashdb_2eproto.base,
       &scc_info_ResultCode_hashdb_2eproto.base,}};
 
 static void InitDefaultsscc_info_ResultCode_hashdb_2eproto() {
@@ -643,7 +746,7 @@ static void InitDefaultsscc_info_Version_hashdb_2eproto() {
 ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_Version_hashdb_2eproto =
     {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_Version_hashdb_2eproto}, {}};
 
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_hashdb_2eproto[33];
+static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_hashdb_2eproto[38];
 static const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* file_level_enum_descriptors_hashdb_2eproto[2];
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_hashdb_2eproto = nullptr;
 
@@ -760,6 +863,13 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_hashdb_2eproto::offsets[] PROT
   PROTOBUF_FIELD_OFFSET(::hashdb::v1::PurgeRequest, batch_uuid_),
   PROTOBUF_FIELD_OFFSET(::hashdb::v1::PurgeRequest, new_state_root_),
   PROTOBUF_FIELD_OFFSET(::hashdb::v1::PurgeRequest, persistence_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::ReadTreeRequest, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::ReadTreeRequest, state_root_),
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::ReadTreeRequest, keys_),
   PROTOBUF_FIELD_OFFSET(::hashdb::v1::SetResponse_SiblingsEntry_DoNotUse, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::hashdb::v1::SetResponse_SiblingsEntry_DoNotUse, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -907,6 +1017,14 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_hashdb_2eproto::offsets[] PROT
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::hashdb::v1::PurgeResponse, result_),
   ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::ReadTreeResponse, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::ReadTreeResponse, key_value_),
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::ReadTreeResponse, hash_value_),
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::ReadTreeResponse, result_),
+  ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::hashdb::v1::Fea, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
@@ -915,6 +1033,37 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_hashdb_2eproto::offsets[] PROT
   PROTOBUF_FIELD_OFFSET(::hashdb::v1::Fea, fe1_),
   PROTOBUF_FIELD_OFFSET(::hashdb::v1::Fea, fe2_),
   PROTOBUF_FIELD_OFFSET(::hashdb::v1::Fea, fe3_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::Fea12, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::Fea12, fe0_),
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::Fea12, fe1_),
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::Fea12, fe2_),
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::Fea12, fe3_),
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::Fea12, fe4_),
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::Fea12, fe5_),
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::Fea12, fe6_),
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::Fea12, fe7_),
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::Fea12, fe8_),
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::Fea12, fe9_),
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::Fea12, fe10_),
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::Fea12, fe11_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::HashValueGL, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::HashValueGL, hash_),
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::HashValueGL, value_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::KeyValue, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::KeyValue, key_),
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::KeyValue, value_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::hashdb::v1::FeList, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -949,25 +1098,30 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 91, -1, sizeof(::hashdb::v1::GetFlushDataRequest)},
   { 97, -1, sizeof(::hashdb::v1::ConsolidateStateRequest)},
   { 104, -1, sizeof(::hashdb::v1::PurgeRequest)},
-  { 112, 119, sizeof(::hashdb::v1::SetResponse_SiblingsEntry_DoNotUse)},
-  { 121, 128, sizeof(::hashdb::v1::SetResponse_DbReadLogEntry_DoNotUse)},
-  { 130, -1, sizeof(::hashdb::v1::SetResponse)},
-  { 148, 155, sizeof(::hashdb::v1::GetResponse_SiblingsEntry_DoNotUse)},
-  { 157, 164, sizeof(::hashdb::v1::GetResponse_DbReadLogEntry_DoNotUse)},
-  { 166, -1, sizeof(::hashdb::v1::GetResponse)},
-  { 181, -1, sizeof(::hashdb::v1::SetProgramResponse)},
-  { 187, -1, sizeof(::hashdb::v1::GetProgramResponse)},
-  { 194, -1, sizeof(::hashdb::v1::FlushResponse)},
-  { 202, -1, sizeof(::hashdb::v1::GetFlushStatusResponse)},
-  { 215, 222, sizeof(::hashdb::v1::GetFlushDataResponse_NodesEntry_DoNotUse)},
-  { 224, 231, sizeof(::hashdb::v1::GetFlushDataResponse_ProgramEntry_DoNotUse)},
-  { 233, -1, sizeof(::hashdb::v1::GetFlushDataResponse)},
-  { 243, -1, sizeof(::hashdb::v1::ConsolidateStateResponse)},
-  { 252, -1, sizeof(::hashdb::v1::PurgeResponse)},
-  { 258, -1, sizeof(::hashdb::v1::Fea)},
-  { 267, -1, sizeof(::hashdb::v1::FeList)},
-  { 273, -1, sizeof(::hashdb::v1::SiblingList)},
-  { 279, -1, sizeof(::hashdb::v1::ResultCode)},
+  { 112, -1, sizeof(::hashdb::v1::ReadTreeRequest)},
+  { 119, 126, sizeof(::hashdb::v1::SetResponse_SiblingsEntry_DoNotUse)},
+  { 128, 135, sizeof(::hashdb::v1::SetResponse_DbReadLogEntry_DoNotUse)},
+  { 137, -1, sizeof(::hashdb::v1::SetResponse)},
+  { 155, 162, sizeof(::hashdb::v1::GetResponse_SiblingsEntry_DoNotUse)},
+  { 164, 171, sizeof(::hashdb::v1::GetResponse_DbReadLogEntry_DoNotUse)},
+  { 173, -1, sizeof(::hashdb::v1::GetResponse)},
+  { 188, -1, sizeof(::hashdb::v1::SetProgramResponse)},
+  { 194, -1, sizeof(::hashdb::v1::GetProgramResponse)},
+  { 201, -1, sizeof(::hashdb::v1::FlushResponse)},
+  { 209, -1, sizeof(::hashdb::v1::GetFlushStatusResponse)},
+  { 222, 229, sizeof(::hashdb::v1::GetFlushDataResponse_NodesEntry_DoNotUse)},
+  { 231, 238, sizeof(::hashdb::v1::GetFlushDataResponse_ProgramEntry_DoNotUse)},
+  { 240, -1, sizeof(::hashdb::v1::GetFlushDataResponse)},
+  { 250, -1, sizeof(::hashdb::v1::ConsolidateStateResponse)},
+  { 259, -1, sizeof(::hashdb::v1::PurgeResponse)},
+  { 265, -1, sizeof(::hashdb::v1::ReadTreeResponse)},
+  { 273, -1, sizeof(::hashdb::v1::Fea)},
+  { 282, -1, sizeof(::hashdb::v1::Fea12)},
+  { 299, -1, sizeof(::hashdb::v1::HashValueGL)},
+  { 306, -1, sizeof(::hashdb::v1::KeyValue)},
+  { 313, -1, sizeof(::hashdb::v1::FeList)},
+  { 319, -1, sizeof(::hashdb::v1::SiblingList)},
+  { 325, -1, sizeof(::hashdb::v1::ResultCode)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -985,6 +1139,7 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::hashdb::v1::_GetFlushDataRequest_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::hashdb::v1::_ConsolidateStateRequest_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::hashdb::v1::_PurgeRequest_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::hashdb::v1::_ReadTreeRequest_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::hashdb::v1::_SetResponse_SiblingsEntry_DoNotUse_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::hashdb::v1::_SetResponse_DbReadLogEntry_DoNotUse_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::hashdb::v1::_SetResponse_default_instance_),
@@ -1000,7 +1155,11 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::hashdb::v1::_GetFlushDataResponse_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::hashdb::v1::_ConsolidateStateResponse_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::hashdb::v1::_PurgeResponse_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::hashdb::v1::_ReadTreeResponse_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::hashdb::v1::_Fea_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::hashdb::v1::_Fea12_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::hashdb::v1::_HashValueGL_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::hashdb::v1::_KeyValue_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::hashdb::v1::_FeList_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::hashdb::v1::_SiblingList_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::hashdb::v1::_ResultCode_default_instance_),
@@ -1036,106 +1195,123 @@ const char descriptor_table_protodef_hashdb_2eproto[] PROTOBUF_SECTION_VARIABLE(
   "uid\030\001 \001(\t\022\026\n\016new_state_root\030\002 \001(\t\022+\n\013per"
   "sistence\030\003 \001(\0162\026.hashdb.v1.Persistence\"\'"
   "\n\023GetFlushDataRequest\022\020\n\010flush_id\030\001 \001(\004\""
-  "b\n\027ConsolidateStateRequest\022\032\n\022virtual_st"
-  "ate_root\030\001 \001(\t\022+\n\013persistence\030\002 \001(\0162\026.ha"
-  "shdb.v1.Persistence\"g\n\014PurgeRequest\022\022\n\nb"
-  "atch_uuid\030\001 \001(\t\022\026\n\016new_state_root\030\002 \001(\t\022"
-  "+\n\013persistence\030\003 \001(\0162\026.hashdb.v1.Persist"
-  "ence\"\254\004\n\013SetResponse\022 \n\010old_root\030\001 \001(\0132\016"
-  ".hashdb.v1.Fea\022 \n\010new_root\030\002 \001(\0132\016.hashd"
-  "b.v1.Fea\022\033\n\003key\030\003 \001(\0132\016.hashdb.v1.Fea\0226\n"
-  "\010siblings\030\004 \003(\0132$.hashdb.v1.SetResponse."
-  "SiblingsEntry\022\037\n\007ins_key\030\005 \001(\0132\016.hashdb."
-  "v1.Fea\022\021\n\tins_value\030\006 \001(\t\022\017\n\007is_old0\030\007 \001"
-  "(\010\022\021\n\told_value\030\010 \001(\t\022\021\n\tnew_value\030\t \001(\t"
-  "\022\014\n\004mode\030\n \001(\t\022\032\n\022proof_hash_counter\030\013 \001"
-  "(\004\022:\n\013db_read_log\030\014 \003(\0132%.hashdb.v1.SetR"
-  "esponse.DbReadLogEntry\022%\n\006result\030\r \001(\0132\025"
-  ".hashdb.v1.ResultCode\032G\n\rSiblingsEntry\022\013"
-  "\n\003key\030\001 \001(\004\022%\n\005value\030\002 \001(\0132\026.hashdb.v1.S"
-  "iblingList:\0028\001\032C\n\016DbReadLogEntry\022\013\n\003key\030"
-  "\001 \001(\t\022 \n\005value\030\002 \001(\0132\021.hashdb.v1.FeList:"
-  "\0028\001\"\341\003\n\013GetResponse\022\034\n\004root\030\001 \001(\0132\016.hash"
-  "db.v1.Fea\022\033\n\003key\030\002 \001(\0132\016.hashdb.v1.Fea\0226"
-  "\n\010siblings\030\003 \003(\0132$.hashdb.v1.GetResponse"
-  ".SiblingsEntry\022\037\n\007ins_key\030\004 \001(\0132\016.hashdb"
-  ".v1.Fea\022\021\n\tins_value\030\005 \001(\t\022\017\n\007is_old0\030\006 "
-  "\001(\010\022\r\n\005value\030\007 \001(\t\022\032\n\022proof_hash_counter"
-  "\030\010 \001(\004\022:\n\013db_read_log\030\t \003(\0132%.hashdb.v1."
-  "GetResponse.DbReadLogEntry\022%\n\006result\030\n \001"
-  "(\0132\025.hashdb.v1.ResultCode\032G\n\rSiblingsEnt"
-  "ry\022\013\n\003key\030\001 \001(\004\022%\n\005value\030\002 \001(\0132\026.hashdb."
-  "v1.SiblingList:\0028\001\032C\n\016DbReadLogEntry\022\013\n\003"
-  "key\030\001 \001(\t\022 \n\005value\030\002 \001(\0132\021.hashdb.v1.FeL"
-  "ist:\0028\001\";\n\022SetProgramResponse\022%\n\006result\030"
-  "\001 \001(\0132\025.hashdb.v1.ResultCode\"I\n\022GetProgr"
-  "amResponse\022\014\n\004data\030\001 \001(\014\022%\n\006result\030\002 \001(\013"
-  "2\025.hashdb.v1.ResultCode\"a\n\rFlushResponse"
-  "\022\020\n\010flush_id\030\001 \001(\004\022\027\n\017stored_flush_id\030\002 "
-  "\001(\004\022%\n\006result\030\003 \001(\0132\025.hashdb.v1.ResultCo"
-  "de\"\347\001\n\026GetFlushStatusResponse\022\027\n\017stored_"
-  "flush_id\030\001 \001(\004\022\030\n\020storing_flush_id\030\002 \001(\004"
-  "\022\025\n\rlast_flush_id\030\003 \001(\004\022\036\n\026pending_to_fl"
-  "ush_nodes\030\004 \001(\004\022 \n\030pending_to_flush_prog"
-  "ram\030\005 \001(\004\022\025\n\rstoring_nodes\030\006 \001(\004\022\027\n\017stor"
-  "ing_program\030\007 \001(\004\022\021\n\tprover_id\030\010 \001(\t\"\310\002\n"
-  "\024GetFlushDataResponse\022\027\n\017stored_flush_id"
-  "\030\001 \001(\004\0229\n\005nodes\030\002 \003(\0132*.hashdb.v1.GetFlu"
-  "shDataResponse.NodesEntry\022=\n\007program\030\003 \003"
-  "(\0132,.hashdb.v1.GetFlushDataResponse.Prog"
-  "ramEntry\022\030\n\020nodes_state_root\030\004 \001(\t\022%\n\006re"
-  "sult\030\005 \001(\0132\025.hashdb.v1.ResultCode\032,\n\nNod"
-  "esEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\032"
-  ".\n\014ProgramEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 "
-  "\001(\t:\0028\001\"\215\001\n\030ConsolidateStateResponse\022\037\n\027"
-  "consolidated_state_root\030\001 \001(\t\022\020\n\010flush_i"
-  "d\030\002 \001(\004\022\027\n\017stored_flush_id\030\003 \001(\004\022%\n\006resu"
-  "lt\030\004 \001(\0132\025.hashdb.v1.ResultCode\"6\n\rPurge"
-  "Response\022%\n\006result\030\001 \001(\0132\025.hashdb.v1.Res"
-  "ultCode\"9\n\003Fea\022\013\n\003fe0\030\001 \001(\004\022\013\n\003fe1\030\002 \001(\004"
-  "\022\013\n\003fe2\030\003 \001(\004\022\013\n\003fe3\030\004 \001(\004\"\024\n\006FeList\022\n\n\002"
-  "fe\030\001 \003(\004\"\036\n\013SiblingList\022\017\n\007sibling\030\001 \003(\004"
-  "\"\316\001\n\nResultCode\022(\n\004code\030\001 \001(\0162\032.hashdb.v"
-  "1.ResultCode.Code\"\225\001\n\004Code\022\024\n\020CODE_UNSPE"
-  "CIFIED\020\000\022\020\n\014CODE_SUCCESS\020\001\022\031\n\025CODE_DB_KE"
-  "Y_NOT_FOUND\020\002\022\021\n\rCODE_DB_ERROR\020\003\022\027\n\023CODE"
-  "_INTERNAL_ERROR\020\004\022\036\n\032CODE_SMT_INVALID_DA"
-  "TA_SIZE\020\016*e\n\013Persistence\022!\n\035PERSISTENCE_"
-  "CACHE_UNSPECIFIED\020\000\022\030\n\024PERSISTENCE_DATAB"
-  "ASE\020\001\022\031\n\025PERSISTENCE_TEMPORARY\020\0022\344\006\n\rHas"
-  "hDBService\0226\n\003Set\022\025.hashdb.v1.SetRequest"
-  "\032\026.hashdb.v1.SetResponse\"\000\0226\n\003Get\022\025.hash"
-  "db.v1.GetRequest\032\026.hashdb.v1.GetResponse"
-  "\"\000\022K\n\nSetProgram\022\034.hashdb.v1.SetProgramR"
-  "equest\032\035.hashdb.v1.SetProgramResponse\"\000\022"
-  "K\n\nGetProgram\022\034.hashdb.v1.GetProgramRequ"
-  "est\032\035.hashdb.v1.GetProgramResponse\"\000\022<\n\006"
-  "LoadDB\022\030.hashdb.v1.LoadDBRequest\032\026.googl"
-  "e.protobuf.Empty\"\000\022J\n\rLoadProgramDB\022\037.ha"
-  "shdb.v1.LoadProgramDBRequest\032\026.google.pr"
-  "otobuf.Empty\"\000\022<\n\005Flush\022\027.hashdb.v1.Flus"
-  "hRequest\032\030.hashdb.v1.FlushResponse\"\000\022B\n\t"
-  "SemiFlush\022\033.hashdb.v1.SemiFlushRequest\032\026"
-  ".google.protobuf.Empty\"\000\022M\n\016GetFlushStat"
-  "us\022\026.google.protobuf.Empty\032!.hashdb.v1.G"
-  "etFlushStatusResponse\"\000\022Q\n\014GetFlushData\022"
-  "\036.hashdb.v1.GetFlushDataRequest\032\037.hashdb"
-  ".v1.GetFlushDataResponse\"\000\022]\n\020Consolidat"
-  "eState\022\".hashdb.v1.ConsolidateStateReque"
-  "st\032#.hashdb.v1.ConsolidateStateResponse\""
-  "\000\022<\n\005Purge\022\027.hashdb.v1.PurgeRequest\032\030.ha"
-  "shdb.v1.PurgeResponse\"\000B9Z7github.com/0x"
-  "PolygonHermez/zkevm-node/merkletree/hash"
-  "dbb\006proto3"
+  "r\n\027ConsolidateStateRequest\022*\n\022virtual_st"
+  "ate_root\030\001 \001(\0132\016.hashdb.v1.Fea\022+\n\013persis"
+  "tence\030\002 \001(\0162\026.hashdb.v1.Persistence\"w\n\014P"
+  "urgeRequest\022\022\n\nbatch_uuid\030\001 \001(\t\022&\n\016new_s"
+  "tate_root\030\002 \001(\0132\016.hashdb.v1.Fea\022+\n\013persi"
+  "stence\030\003 \001(\0162\026.hashdb.v1.Persistence\"S\n\017"
+  "ReadTreeRequest\022\"\n\nstate_root\030\001 \001(\0132\016.ha"
+  "shdb.v1.Fea\022\034\n\004keys\030\002 \003(\0132\016.hashdb.v1.Fe"
+  "a\"\254\004\n\013SetResponse\022 \n\010old_root\030\001 \001(\0132\016.ha"
+  "shdb.v1.Fea\022 \n\010new_root\030\002 \001(\0132\016.hashdb.v"
+  "1.Fea\022\033\n\003key\030\003 \001(\0132\016.hashdb.v1.Fea\0226\n\010si"
+  "blings\030\004 \003(\0132$.hashdb.v1.SetResponse.Sib"
+  "lingsEntry\022\037\n\007ins_key\030\005 \001(\0132\016.hashdb.v1."
+  "Fea\022\021\n\tins_value\030\006 \001(\t\022\017\n\007is_old0\030\007 \001(\010\022"
+  "\021\n\told_value\030\010 \001(\t\022\021\n\tnew_value\030\t \001(\t\022\014\n"
+  "\004mode\030\n \001(\t\022\032\n\022proof_hash_counter\030\013 \001(\004\022"
+  ":\n\013db_read_log\030\014 \003(\0132%.hashdb.v1.SetResp"
+  "onse.DbReadLogEntry\022%\n\006result\030\r \001(\0132\025.ha"
+  "shdb.v1.ResultCode\032G\n\rSiblingsEntry\022\013\n\003k"
+  "ey\030\001 \001(\004\022%\n\005value\030\002 \001(\0132\026.hashdb.v1.Sibl"
+  "ingList:\0028\001\032C\n\016DbReadLogEntry\022\013\n\003key\030\001 \001"
+  "(\t\022 \n\005value\030\002 \001(\0132\021.hashdb.v1.FeList:\0028\001"
+  "\"\341\003\n\013GetResponse\022\034\n\004root\030\001 \001(\0132\016.hashdb."
+  "v1.Fea\022\033\n\003key\030\002 \001(\0132\016.hashdb.v1.Fea\0226\n\010s"
+  "iblings\030\003 \003(\0132$.hashdb.v1.GetResponse.Si"
+  "blingsEntry\022\037\n\007ins_key\030\004 \001(\0132\016.hashdb.v1"
+  ".Fea\022\021\n\tins_value\030\005 \001(\t\022\017\n\007is_old0\030\006 \001(\010"
+  "\022\r\n\005value\030\007 \001(\t\022\032\n\022proof_hash_counter\030\010 "
+  "\001(\004\022:\n\013db_read_log\030\t \003(\0132%.hashdb.v1.Get"
+  "Response.DbReadLogEntry\022%\n\006result\030\n \001(\0132"
+  "\025.hashdb.v1.ResultCode\032G\n\rSiblingsEntry\022"
+  "\013\n\003key\030\001 \001(\004\022%\n\005value\030\002 \001(\0132\026.hashdb.v1."
+  "SiblingList:\0028\001\032C\n\016DbReadLogEntry\022\013\n\003key"
+  "\030\001 \001(\t\022 \n\005value\030\002 \001(\0132\021.hashdb.v1.FeList"
+  ":\0028\001\";\n\022SetProgramResponse\022%\n\006result\030\001 \001"
+  "(\0132\025.hashdb.v1.ResultCode\"I\n\022GetProgramR"
+  "esponse\022\014\n\004data\030\001 \001(\014\022%\n\006result\030\002 \001(\0132\025."
+  "hashdb.v1.ResultCode\"a\n\rFlushResponse\022\020\n"
+  "\010flush_id\030\001 \001(\004\022\027\n\017stored_flush_id\030\002 \001(\004"
+  "\022%\n\006result\030\003 \001(\0132\025.hashdb.v1.ResultCode\""
+  "\347\001\n\026GetFlushStatusResponse\022\027\n\017stored_flu"
+  "sh_id\030\001 \001(\004\022\030\n\020storing_flush_id\030\002 \001(\004\022\025\n"
+  "\rlast_flush_id\030\003 \001(\004\022\036\n\026pending_to_flush"
+  "_nodes\030\004 \001(\004\022 \n\030pending_to_flush_program"
+  "\030\005 \001(\004\022\025\n\rstoring_nodes\030\006 \001(\004\022\027\n\017storing"
+  "_program\030\007 \001(\004\022\021\n\tprover_id\030\010 \001(\t\"\310\002\n\024Ge"
+  "tFlushDataResponse\022\027\n\017stored_flush_id\030\001 "
+  "\001(\004\0229\n\005nodes\030\002 \003(\0132*.hashdb.v1.GetFlushD"
+  "ataResponse.NodesEntry\022=\n\007program\030\003 \003(\0132"
+  ",.hashdb.v1.GetFlushDataResponse.Program"
+  "Entry\022\030\n\020nodes_state_root\030\004 \001(\t\022%\n\006resul"
+  "t\030\005 \001(\0132\025.hashdb.v1.ResultCode\032,\n\nNodesE"
+  "ntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\032.\n\014"
+  "ProgramEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t"
+  ":\0028\001\"\235\001\n\030ConsolidateStateResponse\022/\n\027con"
+  "solidated_state_root\030\001 \001(\0132\016.hashdb.v1.F"
+  "ea\022\020\n\010flush_id\030\002 \001(\004\022\027\n\017stored_flush_id\030"
+  "\003 \001(\004\022%\n\006result\030\004 \001(\0132\025.hashdb.v1.Result"
+  "Code\"6\n\rPurgeResponse\022%\n\006result\030\001 \001(\0132\025."
+  "hashdb.v1.ResultCode\"\215\001\n\020ReadTreeRespons"
+  "e\022&\n\tkey_value\030\001 \003(\0132\023.hashdb.v1.KeyValu"
+  "e\022*\n\nhash_value\030\002 \003(\0132\026.hashdb.v1.HashVa"
+  "lueGL\022%\n\006result\030\003 \001(\0132\025.hashdb.v1.Result"
+  "Code\"9\n\003Fea\022\013\n\003fe0\030\001 \001(\004\022\013\n\003fe1\030\002 \001(\004\022\013\n"
+  "\003fe2\030\003 \001(\004\022\013\n\003fe3\030\004 \001(\004\"\245\001\n\005Fea12\022\013\n\003fe0"
+  "\030\001 \001(\004\022\013\n\003fe1\030\002 \001(\004\022\013\n\003fe2\030\003 \001(\004\022\013\n\003fe3\030"
+  "\004 \001(\004\022\013\n\003fe4\030\005 \001(\004\022\013\n\003fe5\030\006 \001(\004\022\013\n\003fe6\030\007"
+  " \001(\004\022\013\n\003fe7\030\010 \001(\004\022\013\n\003fe8\030\t \001(\004\022\013\n\003fe9\030\n "
+  "\001(\004\022\014\n\004fe10\030\013 \001(\004\022\014\n\004fe11\030\014 \001(\004\"L\n\013HashV"
+  "alueGL\022\034\n\004hash\030\001 \001(\0132\016.hashdb.v1.Fea\022\037\n\005"
+  "value\030\002 \001(\0132\020.hashdb.v1.Fea12\"6\n\010KeyValu"
+  "e\022\033\n\003key\030\001 \001(\0132\016.hashdb.v1.Fea\022\r\n\005value\030"
+  "\002 \001(\t\"\024\n\006FeList\022\n\n\002fe\030\001 \003(\004\"\036\n\013SiblingLi"
+  "st\022\017\n\007sibling\030\001 \003(\004\"\316\001\n\nResultCode\022(\n\004co"
+  "de\030\001 \001(\0162\032.hashdb.v1.ResultCode.Code\"\225\001\n"
+  "\004Code\022\024\n\020CODE_UNSPECIFIED\020\000\022\020\n\014CODE_SUCC"
+  "ESS\020\001\022\031\n\025CODE_DB_KEY_NOT_FOUND\020\002\022\021\n\rCODE"
+  "_DB_ERROR\020\003\022\027\n\023CODE_INTERNAL_ERROR\020\004\022\036\n\032"
+  "CODE_SMT_INVALID_DATA_SIZE\020\016*e\n\013Persiste"
+  "nce\022!\n\035PERSISTENCE_CACHE_UNSPECIFIED\020\000\022\030"
+  "\n\024PERSISTENCE_DATABASE\020\001\022\031\n\025PERSISTENCE_"
+  "TEMPORARY\020\0022\253\007\n\rHashDBService\0226\n\003Set\022\025.h"
+  "ashdb.v1.SetRequest\032\026.hashdb.v1.SetRespo"
+  "nse\"\000\0226\n\003Get\022\025.hashdb.v1.GetRequest\032\026.ha"
+  "shdb.v1.GetResponse\"\000\022K\n\nSetProgram\022\034.ha"
+  "shdb.v1.SetProgramRequest\032\035.hashdb.v1.Se"
+  "tProgramResponse\"\000\022K\n\nGetProgram\022\034.hashd"
+  "b.v1.GetProgramRequest\032\035.hashdb.v1.GetPr"
+  "ogramResponse\"\000\022<\n\006LoadDB\022\030.hashdb.v1.Lo"
+  "adDBRequest\032\026.google.protobuf.Empty\"\000\022J\n"
+  "\rLoadProgramDB\022\037.hashdb.v1.LoadProgramDB"
+  "Request\032\026.google.protobuf.Empty\"\000\022<\n\005Flu"
+  "sh\022\027.hashdb.v1.FlushRequest\032\030.hashdb.v1."
+  "FlushResponse\"\000\022B\n\tSemiFlush\022\033.hashdb.v1"
+  ".SemiFlushRequest\032\026.google.protobuf.Empt"
+  "y\"\000\022M\n\016GetFlushStatus\022\026.google.protobuf."
+  "Empty\032!.hashdb.v1.GetFlushStatusResponse"
+  "\"\000\022Q\n\014GetFlushData\022\036.hashdb.v1.GetFlushD"
+  "ataRequest\032\037.hashdb.v1.GetFlushDataRespo"
+  "nse\"\000\022]\n\020ConsolidateState\022\".hashdb.v1.Co"
+  "nsolidateStateRequest\032#.hashdb.v1.Consol"
+  "idateStateResponse\"\000\022<\n\005Purge\022\027.hashdb.v"
+  "1.PurgeRequest\032\030.hashdb.v1.PurgeResponse"
+  "\"\000\022E\n\010ReadTree\022\032.hashdb.v1.ReadTreeReque"
+  "st\032\033.hashdb.v1.ReadTreeResponse\"\000B9Z7git"
+  "hub.com/0xPolygonHermez/zkevm-node/merkl"
+  "etree/hashdbb\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_hashdb_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2fempty_2eproto,
 };
-static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_hashdb_2eproto_sccs[33] = {
+static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_hashdb_2eproto_sccs[38] = {
   &scc_info_ConsolidateStateRequest_hashdb_2eproto.base,
   &scc_info_ConsolidateStateResponse_hashdb_2eproto.base,
   &scc_info_FeList_hashdb_2eproto.base,
   &scc_info_Fea_hashdb_2eproto.base,
+  &scc_info_Fea12_hashdb_2eproto.base,
   &scc_info_FlushRequest_hashdb_2eproto.base,
   &scc_info_FlushResponse_hashdb_2eproto.base,
   &scc_info_GetFlushDataRequest_hashdb_2eproto.base,
@@ -1149,12 +1325,16 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_has
   &scc_info_GetResponse_hashdb_2eproto.base,
   &scc_info_GetResponse_DbReadLogEntry_DoNotUse_hashdb_2eproto.base,
   &scc_info_GetResponse_SiblingsEntry_DoNotUse_hashdb_2eproto.base,
+  &scc_info_HashValueGL_hashdb_2eproto.base,
+  &scc_info_KeyValue_hashdb_2eproto.base,
   &scc_info_LoadDBRequest_hashdb_2eproto.base,
   &scc_info_LoadDBRequest_InputDbEntry_DoNotUse_hashdb_2eproto.base,
   &scc_info_LoadProgramDBRequest_hashdb_2eproto.base,
   &scc_info_LoadProgramDBRequest_InputProgramDbEntry_DoNotUse_hashdb_2eproto.base,
   &scc_info_PurgeRequest_hashdb_2eproto.base,
   &scc_info_PurgeResponse_hashdb_2eproto.base,
+  &scc_info_ReadTreeRequest_hashdb_2eproto.base,
+  &scc_info_ReadTreeResponse_hashdb_2eproto.base,
   &scc_info_ResultCode_hashdb_2eproto.base,
   &scc_info_SemiFlushRequest_hashdb_2eproto.base,
   &scc_info_SetProgramRequest_hashdb_2eproto.base,
@@ -1168,10 +1348,10 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_has
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_hashdb_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_hashdb_2eproto = {
-  false, false, descriptor_table_protodef_hashdb_2eproto, "hashdb.proto", 4770,
-  &descriptor_table_hashdb_2eproto_once, descriptor_table_hashdb_2eproto_sccs, descriptor_table_hashdb_2eproto_deps, 33, 1,
+  false, false, descriptor_table_protodef_hashdb_2eproto, "hashdb.proto", 5420,
+  &descriptor_table_hashdb_2eproto_once, descriptor_table_hashdb_2eproto_sccs, descriptor_table_hashdb_2eproto_deps, 38, 1,
   schemas, file_default_instances, TableStruct_hashdb_2eproto::offsets,
-  file_level_metadata_hashdb_2eproto, 33, file_level_enum_descriptors_hashdb_2eproto, file_level_service_descriptors_hashdb_2eproto,
+  file_level_metadata_hashdb_2eproto, 38, file_level_enum_descriptors_hashdb_2eproto, file_level_service_descriptors_hashdb_2eproto,
 };
 
 // Force running AddDescriptors() at dynamic initialization time.
@@ -4020,11 +4200,18 @@ void GetFlushDataRequest::InternalSwap(GetFlushDataRequest* other) {
 // ===================================================================
 
 void ConsolidateStateRequest::InitAsDefaultInstance() {
+  ::hashdb::v1::_ConsolidateStateRequest_default_instance_._instance.get_mutable()->virtual_state_root_ = const_cast< ::hashdb::v1::Fea*>(
+      ::hashdb::v1::Fea::internal_default_instance());
 }
 class ConsolidateStateRequest::_Internal {
  public:
+  static const ::hashdb::v1::Fea& virtual_state_root(const ConsolidateStateRequest* msg);
 };
 
+const ::hashdb::v1::Fea&
+ConsolidateStateRequest::_Internal::virtual_state_root(const ConsolidateStateRequest* msg) {
+  return *msg->virtual_state_root_;
+}
 ConsolidateStateRequest::ConsolidateStateRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
@@ -4034,10 +4221,10 @@ ConsolidateStateRequest::ConsolidateStateRequest(::PROTOBUF_NAMESPACE_ID::Arena*
 ConsolidateStateRequest::ConsolidateStateRequest(const ConsolidateStateRequest& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  virtual_state_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (!from._internal_virtual_state_root().empty()) {
-    virtual_state_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_virtual_state_root(),
-      GetArena());
+  if (from._internal_has_virtual_state_root()) {
+    virtual_state_root_ = new ::hashdb::v1::Fea(*from.virtual_state_root_);
+  } else {
+    virtual_state_root_ = nullptr;
   }
   persistence_ = from.persistence_;
   // @@protoc_insertion_point(copy_constructor:hashdb.v1.ConsolidateStateRequest)
@@ -4045,8 +4232,9 @@ ConsolidateStateRequest::ConsolidateStateRequest(const ConsolidateStateRequest& 
 
 void ConsolidateStateRequest::SharedCtor() {
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_ConsolidateStateRequest_hashdb_2eproto.base);
-  virtual_state_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  persistence_ = 0;
+  ::memset(&virtual_state_root_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&persistence_) -
+      reinterpret_cast<char*>(&virtual_state_root_)) + sizeof(persistence_));
 }
 
 ConsolidateStateRequest::~ConsolidateStateRequest() {
@@ -4057,7 +4245,7 @@ ConsolidateStateRequest::~ConsolidateStateRequest() {
 
 void ConsolidateStateRequest::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
-  virtual_state_root_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (this != internal_default_instance()) delete virtual_state_root_;
 }
 
 void ConsolidateStateRequest::ArenaDtor(void* object) {
@@ -4081,7 +4269,10 @@ void ConsolidateStateRequest::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  virtual_state_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  if (GetArena() == nullptr && virtual_state_root_ != nullptr) {
+    delete virtual_state_root_;
+  }
+  virtual_state_root_ = nullptr;
   persistence_ = 0;
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
@@ -4094,12 +4285,10 @@ const char* ConsolidateStateRequest::_InternalParse(const char* ptr, ::PROTOBUF_
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     CHK_(ptr);
     switch (tag >> 3) {
-      // string virtual_state_root = 1;
+      // .hashdb.v1.Fea virtual_state_root = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
-          auto str = _internal_mutable_virtual_state_root();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "hashdb.v1.ConsolidateStateRequest.virtual_state_root"));
+          ptr = ctx->ParseMessage(_internal_mutable_virtual_state_root(), ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -4139,14 +4328,12 @@ failure:
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // string virtual_state_root = 1;
-  if (this->virtual_state_root().size() > 0) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_virtual_state_root().data(), static_cast<int>(this->_internal_virtual_state_root().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "hashdb.v1.ConsolidateStateRequest.virtual_state_root");
-    target = stream->WriteStringMaybeAliased(
-        1, this->_internal_virtual_state_root(), target);
+  // .hashdb.v1.Fea virtual_state_root = 1;
+  if (this->has_virtual_state_root()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        1, _Internal::virtual_state_root(this), target, stream);
   }
 
   // .hashdb.v1.Persistence persistence = 2;
@@ -4172,11 +4359,11 @@ size_t ConsolidateStateRequest::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // string virtual_state_root = 1;
-  if (this->virtual_state_root().size() > 0) {
+  // .hashdb.v1.Fea virtual_state_root = 1;
+  if (this->has_virtual_state_root()) {
     total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_virtual_state_root());
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *virtual_state_root_);
   }
 
   // .hashdb.v1.Persistence persistence = 2;
@@ -4216,8 +4403,8 @@ void ConsolidateStateRequest::MergeFrom(const ConsolidateStateRequest& from) {
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from.virtual_state_root().size() > 0) {
-    _internal_set_virtual_state_root(from._internal_virtual_state_root());
+  if (from.has_virtual_state_root()) {
+    _internal_mutable_virtual_state_root()->::hashdb::v1::Fea::MergeFrom(from._internal_virtual_state_root());
   }
   if (from.persistence() != 0) {
     _internal_set_persistence(from._internal_persistence());
@@ -4245,8 +4432,12 @@ bool ConsolidateStateRequest::IsInitialized() const {
 void ConsolidateStateRequest::InternalSwap(ConsolidateStateRequest* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
-  virtual_state_root_.Swap(&other->virtual_state_root_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  swap(persistence_, other->persistence_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(ConsolidateStateRequest, persistence_)
+      + sizeof(ConsolidateStateRequest::persistence_)
+      - PROTOBUF_FIELD_OFFSET(ConsolidateStateRequest, virtual_state_root_)>(
+          reinterpret_cast<char*>(&virtual_state_root_),
+          reinterpret_cast<char*>(&other->virtual_state_root_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata ConsolidateStateRequest::GetMetadata() const {
@@ -4257,11 +4448,18 @@ void ConsolidateStateRequest::InternalSwap(ConsolidateStateRequest* other) {
 // ===================================================================
 
 void PurgeRequest::InitAsDefaultInstance() {
+  ::hashdb::v1::_PurgeRequest_default_instance_._instance.get_mutable()->new_state_root_ = const_cast< ::hashdb::v1::Fea*>(
+      ::hashdb::v1::Fea::internal_default_instance());
 }
 class PurgeRequest::_Internal {
  public:
+  static const ::hashdb::v1::Fea& new_state_root(const PurgeRequest* msg);
 };
 
+const ::hashdb::v1::Fea&
+PurgeRequest::_Internal::new_state_root(const PurgeRequest* msg) {
+  return *msg->new_state_root_;
+}
 PurgeRequest::PurgeRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
@@ -4276,10 +4474,10 @@ PurgeRequest::PurgeRequest(const PurgeRequest& from)
     batch_uuid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_batch_uuid(),
       GetArena());
   }
-  new_state_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (!from._internal_new_state_root().empty()) {
-    new_state_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_new_state_root(),
-      GetArena());
+  if (from._internal_has_new_state_root()) {
+    new_state_root_ = new ::hashdb::v1::Fea(*from.new_state_root_);
+  } else {
+    new_state_root_ = nullptr;
   }
   persistence_ = from.persistence_;
   // @@protoc_insertion_point(copy_constructor:hashdb.v1.PurgeRequest)
@@ -4288,8 +4486,9 @@ PurgeRequest::PurgeRequest(const PurgeRequest& from)
 void PurgeRequest::SharedCtor() {
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_PurgeRequest_hashdb_2eproto.base);
   batch_uuid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  new_state_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  persistence_ = 0;
+  ::memset(&new_state_root_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&persistence_) -
+      reinterpret_cast<char*>(&new_state_root_)) + sizeof(persistence_));
 }
 
 PurgeRequest::~PurgeRequest() {
@@ -4301,7 +4500,7 @@ PurgeRequest::~PurgeRequest() {
 void PurgeRequest::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
   batch_uuid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  new_state_root_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (this != internal_default_instance()) delete new_state_root_;
 }
 
 void PurgeRequest::ArenaDtor(void* object) {
@@ -4326,7 +4525,10 @@ void PurgeRequest::Clear() {
   (void) cached_has_bits;
 
   batch_uuid_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  new_state_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  if (GetArena() == nullptr && new_state_root_ != nullptr) {
+    delete new_state_root_;
+  }
+  new_state_root_ = nullptr;
   persistence_ = 0;
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
@@ -4348,12 +4550,10 @@ const char* PurgeRequest::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_I
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // string new_state_root = 2;
+      // .hashdb.v1.Fea new_state_root = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
-          auto str = _internal_mutable_new_state_root();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "hashdb.v1.PurgeRequest.new_state_root"));
+          ptr = ctx->ParseMessage(_internal_mutable_new_state_root(), ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -4403,14 +4603,12 @@ failure:
         1, this->_internal_batch_uuid(), target);
   }
 
-  // string new_state_root = 2;
-  if (this->new_state_root().size() > 0) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_new_state_root().data(), static_cast<int>(this->_internal_new_state_root().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "hashdb.v1.PurgeRequest.new_state_root");
-    target = stream->WriteStringMaybeAliased(
-        2, this->_internal_new_state_root(), target);
+  // .hashdb.v1.Fea new_state_root = 2;
+  if (this->has_new_state_root()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        2, _Internal::new_state_root(this), target, stream);
   }
 
   // .hashdb.v1.Persistence persistence = 3;
@@ -4443,11 +4641,11 @@ size_t PurgeRequest::ByteSizeLong() const {
         this->_internal_batch_uuid());
   }
 
-  // string new_state_root = 2;
-  if (this->new_state_root().size() > 0) {
+  // .hashdb.v1.Fea new_state_root = 2;
+  if (this->has_new_state_root()) {
     total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_new_state_root());
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *new_state_root_);
   }
 
   // .hashdb.v1.Persistence persistence = 3;
@@ -4490,8 +4688,8 @@ void PurgeRequest::MergeFrom(const PurgeRequest& from) {
   if (from.batch_uuid().size() > 0) {
     _internal_set_batch_uuid(from._internal_batch_uuid());
   }
-  if (from.new_state_root().size() > 0) {
-    _internal_set_new_state_root(from._internal_new_state_root());
+  if (from.has_new_state_root()) {
+    _internal_mutable_new_state_root()->::hashdb::v1::Fea::MergeFrom(from._internal_new_state_root());
   }
   if (from.persistence() != 0) {
     _internal_set_persistence(from._internal_persistence());
@@ -4520,11 +4718,262 @@ void PurgeRequest::InternalSwap(PurgeRequest* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   batch_uuid_.Swap(&other->batch_uuid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  new_state_root_.Swap(&other->new_state_root_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  swap(persistence_, other->persistence_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(PurgeRequest, persistence_)
+      + sizeof(PurgeRequest::persistence_)
+      - PROTOBUF_FIELD_OFFSET(PurgeRequest, new_state_root_)>(
+          reinterpret_cast<char*>(&new_state_root_),
+          reinterpret_cast<char*>(&other->new_state_root_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata PurgeRequest::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
+void ReadTreeRequest::InitAsDefaultInstance() {
+  ::hashdb::v1::_ReadTreeRequest_default_instance_._instance.get_mutable()->state_root_ = const_cast< ::hashdb::v1::Fea*>(
+      ::hashdb::v1::Fea::internal_default_instance());
+}
+class ReadTreeRequest::_Internal {
+ public:
+  static const ::hashdb::v1::Fea& state_root(const ReadTreeRequest* msg);
+};
+
+const ::hashdb::v1::Fea&
+ReadTreeRequest::_Internal::state_root(const ReadTreeRequest* msg) {
+  return *msg->state_root_;
+}
+ReadTreeRequest::ReadTreeRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena),
+  keys_(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:hashdb.v1.ReadTreeRequest)
+}
+ReadTreeRequest::ReadTreeRequest(const ReadTreeRequest& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message(),
+      keys_(from.keys_) {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  if (from._internal_has_state_root()) {
+    state_root_ = new ::hashdb::v1::Fea(*from.state_root_);
+  } else {
+    state_root_ = nullptr;
+  }
+  // @@protoc_insertion_point(copy_constructor:hashdb.v1.ReadTreeRequest)
+}
+
+void ReadTreeRequest::SharedCtor() {
+  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_ReadTreeRequest_hashdb_2eproto.base);
+  state_root_ = nullptr;
+}
+
+ReadTreeRequest::~ReadTreeRequest() {
+  // @@protoc_insertion_point(destructor:hashdb.v1.ReadTreeRequest)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void ReadTreeRequest::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  if (this != internal_default_instance()) delete state_root_;
+}
+
+void ReadTreeRequest::ArenaDtor(void* object) {
+  ReadTreeRequest* _this = reinterpret_cast< ReadTreeRequest* >(object);
+  (void)_this;
+}
+void ReadTreeRequest::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void ReadTreeRequest::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+const ReadTreeRequest& ReadTreeRequest::default_instance() {
+  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_ReadTreeRequest_hashdb_2eproto.base);
+  return *internal_default_instance();
+}
+
+
+void ReadTreeRequest::Clear() {
+// @@protoc_insertion_point(message_clear_start:hashdb.v1.ReadTreeRequest)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  keys_.Clear();
+  if (GetArena() == nullptr && state_root_ != nullptr) {
+    delete state_root_;
+  }
+  state_root_ = nullptr;
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* ReadTreeRequest::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // .hashdb.v1.Fea state_root = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          ptr = ctx->ParseMessage(_internal_mutable_state_root(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // repeated .hashdb.v1.Fea keys = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+          ptr -= 1;
+          do {
+            ptr += 1;
+            ptr = ctx->ParseMessage(_internal_add_keys(), ptr);
+            CHK_(ptr);
+            if (!ctx->DataAvailable(ptr)) break;
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<18>(ptr));
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* ReadTreeRequest::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:hashdb.v1.ReadTreeRequest)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // .hashdb.v1.Fea state_root = 1;
+  if (this->has_state_root()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        1, _Internal::state_root(this), target, stream);
+  }
+
+  // repeated .hashdb.v1.Fea keys = 2;
+  for (unsigned int i = 0,
+      n = static_cast<unsigned int>(this->_internal_keys_size()); i < n; i++) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(2, this->_internal_keys(i), target, stream);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:hashdb.v1.ReadTreeRequest)
+  return target;
+}
+
+size_t ReadTreeRequest::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:hashdb.v1.ReadTreeRequest)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // repeated .hashdb.v1.Fea keys = 2;
+  total_size += 1UL * this->_internal_keys_size();
+  for (const auto& msg : this->keys_) {
+    total_size +=
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
+  }
+
+  // .hashdb.v1.Fea state_root = 1;
+  if (this->has_state_root()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *state_root_);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void ReadTreeRequest::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:hashdb.v1.ReadTreeRequest)
+  GOOGLE_DCHECK_NE(&from, this);
+  const ReadTreeRequest* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<ReadTreeRequest>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:hashdb.v1.ReadTreeRequest)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:hashdb.v1.ReadTreeRequest)
+    MergeFrom(*source);
+  }
+}
+
+void ReadTreeRequest::MergeFrom(const ReadTreeRequest& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:hashdb.v1.ReadTreeRequest)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  keys_.MergeFrom(from.keys_);
+  if (from.has_state_root()) {
+    _internal_mutable_state_root()->::hashdb::v1::Fea::MergeFrom(from._internal_state_root());
+  }
+}
+
+void ReadTreeRequest::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:hashdb.v1.ReadTreeRequest)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void ReadTreeRequest::CopyFrom(const ReadTreeRequest& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:hashdb.v1.ReadTreeRequest)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool ReadTreeRequest::IsInitialized() const {
+  return true;
+}
+
+void ReadTreeRequest::InternalSwap(ReadTreeRequest* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  keys_.InternalSwap(&other->keys_);
+  swap(state_root_, other->state_root_);
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata ReadTreeRequest::GetMetadata() const {
   return GetMetadataStatic();
 }
 
@@ -7497,14 +7946,21 @@ void GetFlushDataResponse::InternalSwap(GetFlushDataResponse* other) {
 // ===================================================================
 
 void ConsolidateStateResponse::InitAsDefaultInstance() {
+  ::hashdb::v1::_ConsolidateStateResponse_default_instance_._instance.get_mutable()->consolidated_state_root_ = const_cast< ::hashdb::v1::Fea*>(
+      ::hashdb::v1::Fea::internal_default_instance());
   ::hashdb::v1::_ConsolidateStateResponse_default_instance_._instance.get_mutable()->result_ = const_cast< ::hashdb::v1::ResultCode*>(
       ::hashdb::v1::ResultCode::internal_default_instance());
 }
 class ConsolidateStateResponse::_Internal {
  public:
+  static const ::hashdb::v1::Fea& consolidated_state_root(const ConsolidateStateResponse* msg);
   static const ::hashdb::v1::ResultCode& result(const ConsolidateStateResponse* msg);
 };
 
+const ::hashdb::v1::Fea&
+ConsolidateStateResponse::_Internal::consolidated_state_root(const ConsolidateStateResponse* msg) {
+  return *msg->consolidated_state_root_;
+}
 const ::hashdb::v1::ResultCode&
 ConsolidateStateResponse::_Internal::result(const ConsolidateStateResponse* msg) {
   return *msg->result_;
@@ -7518,10 +7974,10 @@ ConsolidateStateResponse::ConsolidateStateResponse(::PROTOBUF_NAMESPACE_ID::Aren
 ConsolidateStateResponse::ConsolidateStateResponse(const ConsolidateStateResponse& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  consolidated_state_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (!from._internal_consolidated_state_root().empty()) {
-    consolidated_state_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_consolidated_state_root(),
-      GetArena());
+  if (from._internal_has_consolidated_state_root()) {
+    consolidated_state_root_ = new ::hashdb::v1::Fea(*from.consolidated_state_root_);
+  } else {
+    consolidated_state_root_ = nullptr;
   }
   if (from._internal_has_result()) {
     result_ = new ::hashdb::v1::ResultCode(*from.result_);
@@ -7536,10 +7992,9 @@ ConsolidateStateResponse::ConsolidateStateResponse(const ConsolidateStateRespons
 
 void ConsolidateStateResponse::SharedCtor() {
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_ConsolidateStateResponse_hashdb_2eproto.base);
-  consolidated_state_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  ::memset(&result_, 0, static_cast<size_t>(
+  ::memset(&consolidated_state_root_, 0, static_cast<size_t>(
       reinterpret_cast<char*>(&stored_flush_id_) -
-      reinterpret_cast<char*>(&result_)) + sizeof(stored_flush_id_));
+      reinterpret_cast<char*>(&consolidated_state_root_)) + sizeof(stored_flush_id_));
 }
 
 ConsolidateStateResponse::~ConsolidateStateResponse() {
@@ -7550,7 +8005,7 @@ ConsolidateStateResponse::~ConsolidateStateResponse() {
 
 void ConsolidateStateResponse::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
-  consolidated_state_root_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (this != internal_default_instance()) delete consolidated_state_root_;
   if (this != internal_default_instance()) delete result_;
 }
 
@@ -7575,7 +8030,10 @@ void ConsolidateStateResponse::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  consolidated_state_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  if (GetArena() == nullptr && consolidated_state_root_ != nullptr) {
+    delete consolidated_state_root_;
+  }
+  consolidated_state_root_ = nullptr;
   if (GetArena() == nullptr && result_ != nullptr) {
     delete result_;
   }
@@ -7594,12 +8052,10 @@ const char* ConsolidateStateResponse::_InternalParse(const char* ptr, ::PROTOBUF
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     CHK_(ptr);
     switch (tag >> 3) {
-      // string consolidated_state_root = 1;
+      // .hashdb.v1.Fea consolidated_state_root = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
-          auto str = _internal_mutable_consolidated_state_root();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "hashdb.v1.ConsolidateStateResponse.consolidated_state_root"));
+          ptr = ctx->ParseMessage(_internal_mutable_consolidated_state_root(), ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -7652,14 +8108,12 @@ failure:
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // string consolidated_state_root = 1;
-  if (this->consolidated_state_root().size() > 0) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_consolidated_state_root().data(), static_cast<int>(this->_internal_consolidated_state_root().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "hashdb.v1.ConsolidateStateResponse.consolidated_state_root");
-    target = stream->WriteStringMaybeAliased(
-        1, this->_internal_consolidated_state_root(), target);
+  // .hashdb.v1.Fea consolidated_state_root = 1;
+  if (this->has_consolidated_state_root()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        1, _Internal::consolidated_state_root(this), target, stream);
   }
 
   // uint64 flush_id = 2;
@@ -7698,11 +8152,11 @@ size_t ConsolidateStateResponse::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // string consolidated_state_root = 1;
-  if (this->consolidated_state_root().size() > 0) {
+  // .hashdb.v1.Fea consolidated_state_root = 1;
+  if (this->has_consolidated_state_root()) {
     total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_consolidated_state_root());
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *consolidated_state_root_);
   }
 
   // .hashdb.v1.ResultCode result = 4;
@@ -7757,8 +8211,8 @@ void ConsolidateStateResponse::MergeFrom(const ConsolidateStateResponse& from) {
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from.consolidated_state_root().size() > 0) {
-    _internal_set_consolidated_state_root(from._internal_consolidated_state_root());
+  if (from.has_consolidated_state_root()) {
+    _internal_mutable_consolidated_state_root()->::hashdb::v1::Fea::MergeFrom(from._internal_consolidated_state_root());
   }
   if (from.has_result()) {
     _internal_mutable_result()->::hashdb::v1::ResultCode::MergeFrom(from._internal_result());
@@ -7792,13 +8246,12 @@ bool ConsolidateStateResponse::IsInitialized() const {
 void ConsolidateStateResponse::InternalSwap(ConsolidateStateResponse* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
-  consolidated_state_root_.Swap(&other->consolidated_state_root_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
       PROTOBUF_FIELD_OFFSET(ConsolidateStateResponse, stored_flush_id_)
       + sizeof(ConsolidateStateResponse::stored_flush_id_)
-      - PROTOBUF_FIELD_OFFSET(ConsolidateStateResponse, result_)>(
-          reinterpret_cast<char*>(&result_),
-          reinterpret_cast<char*>(&other->result_));
+      - PROTOBUF_FIELD_OFFSET(ConsolidateStateResponse, consolidated_state_root_)>(
+          reinterpret_cast<char*>(&consolidated_state_root_),
+          reinterpret_cast<char*>(&other->consolidated_state_root_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata ConsolidateStateResponse::GetMetadata() const {
@@ -8017,6 +8470,285 @@ void PurgeResponse::InternalSwap(PurgeResponse* other) {
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata PurgeResponse::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
+void ReadTreeResponse::InitAsDefaultInstance() {
+  ::hashdb::v1::_ReadTreeResponse_default_instance_._instance.get_mutable()->result_ = const_cast< ::hashdb::v1::ResultCode*>(
+      ::hashdb::v1::ResultCode::internal_default_instance());
+}
+class ReadTreeResponse::_Internal {
+ public:
+  static const ::hashdb::v1::ResultCode& result(const ReadTreeResponse* msg);
+};
+
+const ::hashdb::v1::ResultCode&
+ReadTreeResponse::_Internal::result(const ReadTreeResponse* msg) {
+  return *msg->result_;
+}
+ReadTreeResponse::ReadTreeResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena),
+  key_value_(arena),
+  hash_value_(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:hashdb.v1.ReadTreeResponse)
+}
+ReadTreeResponse::ReadTreeResponse(const ReadTreeResponse& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message(),
+      key_value_(from.key_value_),
+      hash_value_(from.hash_value_) {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  if (from._internal_has_result()) {
+    result_ = new ::hashdb::v1::ResultCode(*from.result_);
+  } else {
+    result_ = nullptr;
+  }
+  // @@protoc_insertion_point(copy_constructor:hashdb.v1.ReadTreeResponse)
+}
+
+void ReadTreeResponse::SharedCtor() {
+  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_ReadTreeResponse_hashdb_2eproto.base);
+  result_ = nullptr;
+}
+
+ReadTreeResponse::~ReadTreeResponse() {
+  // @@protoc_insertion_point(destructor:hashdb.v1.ReadTreeResponse)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void ReadTreeResponse::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  if (this != internal_default_instance()) delete result_;
+}
+
+void ReadTreeResponse::ArenaDtor(void* object) {
+  ReadTreeResponse* _this = reinterpret_cast< ReadTreeResponse* >(object);
+  (void)_this;
+}
+void ReadTreeResponse::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void ReadTreeResponse::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+const ReadTreeResponse& ReadTreeResponse::default_instance() {
+  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_ReadTreeResponse_hashdb_2eproto.base);
+  return *internal_default_instance();
+}
+
+
+void ReadTreeResponse::Clear() {
+// @@protoc_insertion_point(message_clear_start:hashdb.v1.ReadTreeResponse)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  key_value_.Clear();
+  hash_value_.Clear();
+  if (GetArena() == nullptr && result_ != nullptr) {
+    delete result_;
+  }
+  result_ = nullptr;
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* ReadTreeResponse::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // repeated .hashdb.v1.KeyValue key_value = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          ptr -= 1;
+          do {
+            ptr += 1;
+            ptr = ctx->ParseMessage(_internal_add_key_value(), ptr);
+            CHK_(ptr);
+            if (!ctx->DataAvailable(ptr)) break;
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<10>(ptr));
+        } else goto handle_unusual;
+        continue;
+      // repeated .hashdb.v1.HashValueGL hash_value = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+          ptr -= 1;
+          do {
+            ptr += 1;
+            ptr = ctx->ParseMessage(_internal_add_hash_value(), ptr);
+            CHK_(ptr);
+            if (!ctx->DataAvailable(ptr)) break;
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<18>(ptr));
+        } else goto handle_unusual;
+        continue;
+      // .hashdb.v1.ResultCode result = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+          ptr = ctx->ParseMessage(_internal_mutable_result(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* ReadTreeResponse::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:hashdb.v1.ReadTreeResponse)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // repeated .hashdb.v1.KeyValue key_value = 1;
+  for (unsigned int i = 0,
+      n = static_cast<unsigned int>(this->_internal_key_value_size()); i < n; i++) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(1, this->_internal_key_value(i), target, stream);
+  }
+
+  // repeated .hashdb.v1.HashValueGL hash_value = 2;
+  for (unsigned int i = 0,
+      n = static_cast<unsigned int>(this->_internal_hash_value_size()); i < n; i++) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(2, this->_internal_hash_value(i), target, stream);
+  }
+
+  // .hashdb.v1.ResultCode result = 3;
+  if (this->has_result()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        3, _Internal::result(this), target, stream);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:hashdb.v1.ReadTreeResponse)
+  return target;
+}
+
+size_t ReadTreeResponse::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:hashdb.v1.ReadTreeResponse)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // repeated .hashdb.v1.KeyValue key_value = 1;
+  total_size += 1UL * this->_internal_key_value_size();
+  for (const auto& msg : this->key_value_) {
+    total_size +=
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
+  }
+
+  // repeated .hashdb.v1.HashValueGL hash_value = 2;
+  total_size += 1UL * this->_internal_hash_value_size();
+  for (const auto& msg : this->hash_value_) {
+    total_size +=
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
+  }
+
+  // .hashdb.v1.ResultCode result = 3;
+  if (this->has_result()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *result_);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void ReadTreeResponse::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:hashdb.v1.ReadTreeResponse)
+  GOOGLE_DCHECK_NE(&from, this);
+  const ReadTreeResponse* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<ReadTreeResponse>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:hashdb.v1.ReadTreeResponse)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:hashdb.v1.ReadTreeResponse)
+    MergeFrom(*source);
+  }
+}
+
+void ReadTreeResponse::MergeFrom(const ReadTreeResponse& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:hashdb.v1.ReadTreeResponse)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  key_value_.MergeFrom(from.key_value_);
+  hash_value_.MergeFrom(from.hash_value_);
+  if (from.has_result()) {
+    _internal_mutable_result()->::hashdb::v1::ResultCode::MergeFrom(from._internal_result());
+  }
+}
+
+void ReadTreeResponse::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:hashdb.v1.ReadTreeResponse)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void ReadTreeResponse::CopyFrom(const ReadTreeResponse& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:hashdb.v1.ReadTreeResponse)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool ReadTreeResponse::IsInitialized() const {
+  return true;
+}
+
+void ReadTreeResponse::InternalSwap(ReadTreeResponse* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  key_value_.InternalSwap(&other->key_value_);
+  hash_value_.InternalSwap(&other->hash_value_);
+  swap(result_, other->result_);
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata ReadTreeResponse::GetMetadata() const {
   return GetMetadataStatic();
 }
 
@@ -8294,6 +9026,984 @@ void Fea::InternalSwap(Fea* other) {
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata Fea::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
+void Fea12::InitAsDefaultInstance() {
+}
+class Fea12::_Internal {
+ public:
+};
+
+Fea12::Fea12(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:hashdb.v1.Fea12)
+}
+Fea12::Fea12(const Fea12& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::memcpy(&fe0_, &from.fe0_,
+    static_cast<size_t>(reinterpret_cast<char*>(&fe11_) -
+    reinterpret_cast<char*>(&fe0_)) + sizeof(fe11_));
+  // @@protoc_insertion_point(copy_constructor:hashdb.v1.Fea12)
+}
+
+void Fea12::SharedCtor() {
+  ::memset(&fe0_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&fe11_) -
+      reinterpret_cast<char*>(&fe0_)) + sizeof(fe11_));
+}
+
+Fea12::~Fea12() {
+  // @@protoc_insertion_point(destructor:hashdb.v1.Fea12)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void Fea12::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+}
+
+void Fea12::ArenaDtor(void* object) {
+  Fea12* _this = reinterpret_cast< Fea12* >(object);
+  (void)_this;
+}
+void Fea12::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void Fea12::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+const Fea12& Fea12::default_instance() {
+  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_Fea12_hashdb_2eproto.base);
+  return *internal_default_instance();
+}
+
+
+void Fea12::Clear() {
+// @@protoc_insertion_point(message_clear_start:hashdb.v1.Fea12)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  ::memset(&fe0_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&fe11_) -
+      reinterpret_cast<char*>(&fe0_)) + sizeof(fe11_));
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* Fea12::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // uint64 fe0 = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
+          fe0_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // uint64 fe1 = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
+          fe1_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // uint64 fe2 = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
+          fe2_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // uint64 fe3 = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
+          fe3_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // uint64 fe4 = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 40)) {
+          fe4_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // uint64 fe5 = 6;
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 48)) {
+          fe5_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // uint64 fe6 = 7;
+      case 7:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 56)) {
+          fe6_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // uint64 fe7 = 8;
+      case 8:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 64)) {
+          fe7_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // uint64 fe8 = 9;
+      case 9:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 72)) {
+          fe8_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // uint64 fe9 = 10;
+      case 10:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 80)) {
+          fe9_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // uint64 fe10 = 11;
+      case 11:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 88)) {
+          fe10_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // uint64 fe11 = 12;
+      case 12:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 96)) {
+          fe11_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* Fea12::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:hashdb.v1.Fea12)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // uint64 fe0 = 1;
+  if (this->fe0() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_fe0(), target);
+  }
+
+  // uint64 fe1 = 2;
+  if (this->fe1() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(2, this->_internal_fe1(), target);
+  }
+
+  // uint64 fe2 = 3;
+  if (this->fe2() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(3, this->_internal_fe2(), target);
+  }
+
+  // uint64 fe3 = 4;
+  if (this->fe3() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(4, this->_internal_fe3(), target);
+  }
+
+  // uint64 fe4 = 5;
+  if (this->fe4() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(5, this->_internal_fe4(), target);
+  }
+
+  // uint64 fe5 = 6;
+  if (this->fe5() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(6, this->_internal_fe5(), target);
+  }
+
+  // uint64 fe6 = 7;
+  if (this->fe6() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(7, this->_internal_fe6(), target);
+  }
+
+  // uint64 fe7 = 8;
+  if (this->fe7() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(8, this->_internal_fe7(), target);
+  }
+
+  // uint64 fe8 = 9;
+  if (this->fe8() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(9, this->_internal_fe8(), target);
+  }
+
+  // uint64 fe9 = 10;
+  if (this->fe9() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(10, this->_internal_fe9(), target);
+  }
+
+  // uint64 fe10 = 11;
+  if (this->fe10() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(11, this->_internal_fe10(), target);
+  }
+
+  // uint64 fe11 = 12;
+  if (this->fe11() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(12, this->_internal_fe11(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:hashdb.v1.Fea12)
+  return target;
+}
+
+size_t Fea12::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:hashdb.v1.Fea12)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // uint64 fe0 = 1;
+  if (this->fe0() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_fe0());
+  }
+
+  // uint64 fe1 = 2;
+  if (this->fe1() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_fe1());
+  }
+
+  // uint64 fe2 = 3;
+  if (this->fe2() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_fe2());
+  }
+
+  // uint64 fe3 = 4;
+  if (this->fe3() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_fe3());
+  }
+
+  // uint64 fe4 = 5;
+  if (this->fe4() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_fe4());
+  }
+
+  // uint64 fe5 = 6;
+  if (this->fe5() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_fe5());
+  }
+
+  // uint64 fe6 = 7;
+  if (this->fe6() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_fe6());
+  }
+
+  // uint64 fe7 = 8;
+  if (this->fe7() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_fe7());
+  }
+
+  // uint64 fe8 = 9;
+  if (this->fe8() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_fe8());
+  }
+
+  // uint64 fe9 = 10;
+  if (this->fe9() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_fe9());
+  }
+
+  // uint64 fe10 = 11;
+  if (this->fe10() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_fe10());
+  }
+
+  // uint64 fe11 = 12;
+  if (this->fe11() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_fe11());
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void Fea12::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:hashdb.v1.Fea12)
+  GOOGLE_DCHECK_NE(&from, this);
+  const Fea12* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<Fea12>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:hashdb.v1.Fea12)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:hashdb.v1.Fea12)
+    MergeFrom(*source);
+  }
+}
+
+void Fea12::MergeFrom(const Fea12& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:hashdb.v1.Fea12)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from.fe0() != 0) {
+    _internal_set_fe0(from._internal_fe0());
+  }
+  if (from.fe1() != 0) {
+    _internal_set_fe1(from._internal_fe1());
+  }
+  if (from.fe2() != 0) {
+    _internal_set_fe2(from._internal_fe2());
+  }
+  if (from.fe3() != 0) {
+    _internal_set_fe3(from._internal_fe3());
+  }
+  if (from.fe4() != 0) {
+    _internal_set_fe4(from._internal_fe4());
+  }
+  if (from.fe5() != 0) {
+    _internal_set_fe5(from._internal_fe5());
+  }
+  if (from.fe6() != 0) {
+    _internal_set_fe6(from._internal_fe6());
+  }
+  if (from.fe7() != 0) {
+    _internal_set_fe7(from._internal_fe7());
+  }
+  if (from.fe8() != 0) {
+    _internal_set_fe8(from._internal_fe8());
+  }
+  if (from.fe9() != 0) {
+    _internal_set_fe9(from._internal_fe9());
+  }
+  if (from.fe10() != 0) {
+    _internal_set_fe10(from._internal_fe10());
+  }
+  if (from.fe11() != 0) {
+    _internal_set_fe11(from._internal_fe11());
+  }
+}
+
+void Fea12::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:hashdb.v1.Fea12)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void Fea12::CopyFrom(const Fea12& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:hashdb.v1.Fea12)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool Fea12::IsInitialized() const {
+  return true;
+}
+
+void Fea12::InternalSwap(Fea12* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(Fea12, fe11_)
+      + sizeof(Fea12::fe11_)
+      - PROTOBUF_FIELD_OFFSET(Fea12, fe0_)>(
+          reinterpret_cast<char*>(&fe0_),
+          reinterpret_cast<char*>(&other->fe0_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata Fea12::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
+void HashValueGL::InitAsDefaultInstance() {
+  ::hashdb::v1::_HashValueGL_default_instance_._instance.get_mutable()->hash_ = const_cast< ::hashdb::v1::Fea*>(
+      ::hashdb::v1::Fea::internal_default_instance());
+  ::hashdb::v1::_HashValueGL_default_instance_._instance.get_mutable()->value_ = const_cast< ::hashdb::v1::Fea12*>(
+      ::hashdb::v1::Fea12::internal_default_instance());
+}
+class HashValueGL::_Internal {
+ public:
+  static const ::hashdb::v1::Fea& hash(const HashValueGL* msg);
+  static const ::hashdb::v1::Fea12& value(const HashValueGL* msg);
+};
+
+const ::hashdb::v1::Fea&
+HashValueGL::_Internal::hash(const HashValueGL* msg) {
+  return *msg->hash_;
+}
+const ::hashdb::v1::Fea12&
+HashValueGL::_Internal::value(const HashValueGL* msg) {
+  return *msg->value_;
+}
+HashValueGL::HashValueGL(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:hashdb.v1.HashValueGL)
+}
+HashValueGL::HashValueGL(const HashValueGL& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  if (from._internal_has_hash()) {
+    hash_ = new ::hashdb::v1::Fea(*from.hash_);
+  } else {
+    hash_ = nullptr;
+  }
+  if (from._internal_has_value()) {
+    value_ = new ::hashdb::v1::Fea12(*from.value_);
+  } else {
+    value_ = nullptr;
+  }
+  // @@protoc_insertion_point(copy_constructor:hashdb.v1.HashValueGL)
+}
+
+void HashValueGL::SharedCtor() {
+  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_HashValueGL_hashdb_2eproto.base);
+  ::memset(&hash_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&value_) -
+      reinterpret_cast<char*>(&hash_)) + sizeof(value_));
+}
+
+HashValueGL::~HashValueGL() {
+  // @@protoc_insertion_point(destructor:hashdb.v1.HashValueGL)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void HashValueGL::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  if (this != internal_default_instance()) delete hash_;
+  if (this != internal_default_instance()) delete value_;
+}
+
+void HashValueGL::ArenaDtor(void* object) {
+  HashValueGL* _this = reinterpret_cast< HashValueGL* >(object);
+  (void)_this;
+}
+void HashValueGL::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void HashValueGL::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+const HashValueGL& HashValueGL::default_instance() {
+  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_HashValueGL_hashdb_2eproto.base);
+  return *internal_default_instance();
+}
+
+
+void HashValueGL::Clear() {
+// @@protoc_insertion_point(message_clear_start:hashdb.v1.HashValueGL)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  if (GetArena() == nullptr && hash_ != nullptr) {
+    delete hash_;
+  }
+  hash_ = nullptr;
+  if (GetArena() == nullptr && value_ != nullptr) {
+    delete value_;
+  }
+  value_ = nullptr;
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* HashValueGL::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // .hashdb.v1.Fea hash = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          ptr = ctx->ParseMessage(_internal_mutable_hash(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // .hashdb.v1.Fea12 value = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+          ptr = ctx->ParseMessage(_internal_mutable_value(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* HashValueGL::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:hashdb.v1.HashValueGL)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // .hashdb.v1.Fea hash = 1;
+  if (this->has_hash()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        1, _Internal::hash(this), target, stream);
+  }
+
+  // .hashdb.v1.Fea12 value = 2;
+  if (this->has_value()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        2, _Internal::value(this), target, stream);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:hashdb.v1.HashValueGL)
+  return target;
+}
+
+size_t HashValueGL::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:hashdb.v1.HashValueGL)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // .hashdb.v1.Fea hash = 1;
+  if (this->has_hash()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *hash_);
+  }
+
+  // .hashdb.v1.Fea12 value = 2;
+  if (this->has_value()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *value_);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void HashValueGL::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:hashdb.v1.HashValueGL)
+  GOOGLE_DCHECK_NE(&from, this);
+  const HashValueGL* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<HashValueGL>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:hashdb.v1.HashValueGL)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:hashdb.v1.HashValueGL)
+    MergeFrom(*source);
+  }
+}
+
+void HashValueGL::MergeFrom(const HashValueGL& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:hashdb.v1.HashValueGL)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from.has_hash()) {
+    _internal_mutable_hash()->::hashdb::v1::Fea::MergeFrom(from._internal_hash());
+  }
+  if (from.has_value()) {
+    _internal_mutable_value()->::hashdb::v1::Fea12::MergeFrom(from._internal_value());
+  }
+}
+
+void HashValueGL::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:hashdb.v1.HashValueGL)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void HashValueGL::CopyFrom(const HashValueGL& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:hashdb.v1.HashValueGL)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool HashValueGL::IsInitialized() const {
+  return true;
+}
+
+void HashValueGL::InternalSwap(HashValueGL* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(HashValueGL, value_)
+      + sizeof(HashValueGL::value_)
+      - PROTOBUF_FIELD_OFFSET(HashValueGL, hash_)>(
+          reinterpret_cast<char*>(&hash_),
+          reinterpret_cast<char*>(&other->hash_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata HashValueGL::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
+void KeyValue::InitAsDefaultInstance() {
+  ::hashdb::v1::_KeyValue_default_instance_._instance.get_mutable()->key_ = const_cast< ::hashdb::v1::Fea*>(
+      ::hashdb::v1::Fea::internal_default_instance());
+}
+class KeyValue::_Internal {
+ public:
+  static const ::hashdb::v1::Fea& key(const KeyValue* msg);
+};
+
+const ::hashdb::v1::Fea&
+KeyValue::_Internal::key(const KeyValue* msg) {
+  return *msg->key_;
+}
+KeyValue::KeyValue(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:hashdb.v1.KeyValue)
+}
+KeyValue::KeyValue(const KeyValue& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  value_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_value().empty()) {
+    value_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_value(),
+      GetArena());
+  }
+  if (from._internal_has_key()) {
+    key_ = new ::hashdb::v1::Fea(*from.key_);
+  } else {
+    key_ = nullptr;
+  }
+  // @@protoc_insertion_point(copy_constructor:hashdb.v1.KeyValue)
+}
+
+void KeyValue::SharedCtor() {
+  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_KeyValue_hashdb_2eproto.base);
+  value_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  key_ = nullptr;
+}
+
+KeyValue::~KeyValue() {
+  // @@protoc_insertion_point(destructor:hashdb.v1.KeyValue)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void KeyValue::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  value_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (this != internal_default_instance()) delete key_;
+}
+
+void KeyValue::ArenaDtor(void* object) {
+  KeyValue* _this = reinterpret_cast< KeyValue* >(object);
+  (void)_this;
+}
+void KeyValue::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void KeyValue::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+const KeyValue& KeyValue::default_instance() {
+  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_KeyValue_hashdb_2eproto.base);
+  return *internal_default_instance();
+}
+
+
+void KeyValue::Clear() {
+// @@protoc_insertion_point(message_clear_start:hashdb.v1.KeyValue)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  value_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  if (GetArena() == nullptr && key_ != nullptr) {
+    delete key_;
+  }
+  key_ = nullptr;
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* KeyValue::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // .hashdb.v1.Fea key = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          ptr = ctx->ParseMessage(_internal_mutable_key(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string value = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+          auto str = _internal_mutable_value();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "hashdb.v1.KeyValue.value"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* KeyValue::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:hashdb.v1.KeyValue)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // .hashdb.v1.Fea key = 1;
+  if (this->has_key()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        1, _Internal::key(this), target, stream);
+  }
+
+  // string value = 2;
+  if (this->value().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_value().data(), static_cast<int>(this->_internal_value().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "hashdb.v1.KeyValue.value");
+    target = stream->WriteStringMaybeAliased(
+        2, this->_internal_value(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:hashdb.v1.KeyValue)
+  return target;
+}
+
+size_t KeyValue::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:hashdb.v1.KeyValue)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // string value = 2;
+  if (this->value().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_value());
+  }
+
+  // .hashdb.v1.Fea key = 1;
+  if (this->has_key()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *key_);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void KeyValue::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:hashdb.v1.KeyValue)
+  GOOGLE_DCHECK_NE(&from, this);
+  const KeyValue* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<KeyValue>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:hashdb.v1.KeyValue)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:hashdb.v1.KeyValue)
+    MergeFrom(*source);
+  }
+}
+
+void KeyValue::MergeFrom(const KeyValue& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:hashdb.v1.KeyValue)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from.value().size() > 0) {
+    _internal_set_value(from._internal_value());
+  }
+  if (from.has_key()) {
+    _internal_mutable_key()->::hashdb::v1::Fea::MergeFrom(from._internal_key());
+  }
+}
+
+void KeyValue::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:hashdb.v1.KeyValue)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void KeyValue::CopyFrom(const KeyValue& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:hashdb.v1.KeyValue)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool KeyValue::IsInitialized() const {
+  return true;
+}
+
+void KeyValue::InternalSwap(KeyValue* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  value_.Swap(&other->value_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  swap(key_, other->key_);
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata KeyValue::GetMetadata() const {
   return GetMetadataStatic();
 }
 
@@ -8960,6 +10670,9 @@ template<> PROTOBUF_NOINLINE ::hashdb::v1::ConsolidateStateRequest* Arena::Creat
 template<> PROTOBUF_NOINLINE ::hashdb::v1::PurgeRequest* Arena::CreateMaybeMessage< ::hashdb::v1::PurgeRequest >(Arena* arena) {
   return Arena::CreateMessageInternal< ::hashdb::v1::PurgeRequest >(arena);
 }
+template<> PROTOBUF_NOINLINE ::hashdb::v1::ReadTreeRequest* Arena::CreateMaybeMessage< ::hashdb::v1::ReadTreeRequest >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::hashdb::v1::ReadTreeRequest >(arena);
+}
 template<> PROTOBUF_NOINLINE ::hashdb::v1::SetResponse_SiblingsEntry_DoNotUse* Arena::CreateMaybeMessage< ::hashdb::v1::SetResponse_SiblingsEntry_DoNotUse >(Arena* arena) {
   return Arena::CreateMessageInternal< ::hashdb::v1::SetResponse_SiblingsEntry_DoNotUse >(arena);
 }
@@ -9005,8 +10718,20 @@ template<> PROTOBUF_NOINLINE ::hashdb::v1::ConsolidateStateResponse* Arena::Crea
 template<> PROTOBUF_NOINLINE ::hashdb::v1::PurgeResponse* Arena::CreateMaybeMessage< ::hashdb::v1::PurgeResponse >(Arena* arena) {
   return Arena::CreateMessageInternal< ::hashdb::v1::PurgeResponse >(arena);
 }
+template<> PROTOBUF_NOINLINE ::hashdb::v1::ReadTreeResponse* Arena::CreateMaybeMessage< ::hashdb::v1::ReadTreeResponse >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::hashdb::v1::ReadTreeResponse >(arena);
+}
 template<> PROTOBUF_NOINLINE ::hashdb::v1::Fea* Arena::CreateMaybeMessage< ::hashdb::v1::Fea >(Arena* arena) {
   return Arena::CreateMessageInternal< ::hashdb::v1::Fea >(arena);
+}
+template<> PROTOBUF_NOINLINE ::hashdb::v1::Fea12* Arena::CreateMaybeMessage< ::hashdb::v1::Fea12 >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::hashdb::v1::Fea12 >(arena);
+}
+template<> PROTOBUF_NOINLINE ::hashdb::v1::HashValueGL* Arena::CreateMaybeMessage< ::hashdb::v1::HashValueGL >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::hashdb::v1::HashValueGL >(arena);
+}
+template<> PROTOBUF_NOINLINE ::hashdb::v1::KeyValue* Arena::CreateMaybeMessage< ::hashdb::v1::KeyValue >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::hashdb::v1::KeyValue >(arena);
 }
 template<> PROTOBUF_NOINLINE ::hashdb::v1::FeList* Arena::CreateMaybeMessage< ::hashdb::v1::FeList >(Arena* arena) {
   return Arena::CreateMessageInternal< ::hashdb::v1::FeList >(arena);

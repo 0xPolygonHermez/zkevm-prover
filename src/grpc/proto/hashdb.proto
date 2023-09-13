@@ -33,6 +33,7 @@ service HashDBService {
     rpc GetFlushData (GetFlushDataRequest) returns (GetFlushDataResponse) {}
     rpc ConsolidateState (ConsolidateStateRequest) returns (ConsolidateStateResponse) {}
     rpc Purge (PurgeRequest) returns (PurgeResponse) {}
+    rpc ReadTree (ReadTreeRequest) returns (ReadTreeResponse) {}
 }
 
 ///////////////////
@@ -162,7 +163,7 @@ message GetFlushDataRequest {
  * @param {persistence} - indicates if it should be stored only in CACHE, in the SQL DATABASE, or it is just TEMPORARY and should be deleted at the flush of this batch UUID
  */
 message ConsolidateStateRequest {
-    string virtual_state_root = 1;
+    Fea virtual_state_root = 1;
     Persistence persistence = 2;
 }
 
@@ -174,8 +175,18 @@ message ConsolidateStateRequest {
  */
 message PurgeRequest {
     string batch_uuid = 1;
-    string new_state_root = 2;
+    Fea new_state_root = 2;
     Persistence persistence = 3;
+}
+
+/**
+ * @dev ReadTreeRequest
+ * @param {state_root} - state root at this point of the execution
+ * @param {keys} - list of keys to get their values for
+ */
+message ReadTreeRequest {
+    Fea state_root = 1;
+    repeated Fea keys = 2;
 }
 
 /////////////////////
@@ -316,7 +327,7 @@ message GetFlushDataResponse {
  * @param {result} - result code
  */
 message ConsolidateStateResponse {
-    string consolidated_state_root = 1;
+    Fea consolidated_state_root = 1;
     uint64 flush_id = 2;
     uint64 stored_flush_id = 3;
     ResultCode result = 4;
@@ -331,6 +342,18 @@ message PurgeResponse {
 }
 
 /**
+ * @dev ReadTreeResponse
+ * @param {key_value} - list of key-value pairs requested to be read
+ * @param {hash_value} - list of hash-value pairs required to get the key-value pairs
+ * @param {result} - result code
+ */
+message ReadTreeResponse {
+    repeated KeyValue key_value = 1;
+    repeated HashValueGL hash_value = 2;
+    ResultCode result = 3;
+}
+
+/**
  * @dev Array of 4 FE
  * @param {fe0} - Field Element value for pos 0
  * @param {fe1} - Field Element value for pos 1
@@ -342,6 +365,45 @@ message Fea {
     uint64 fe1 = 2;
     uint64 fe2 = 3;
     uint64 fe3 = 4;
+}
+
+/**
+ * @dev Array of 12 FE
+ * @param {fex} - Field Element value for pos x
+*/
+message Fea12 {
+    uint64 fe0  = 1;
+    uint64 fe1  = 2;
+    uint64 fe2  = 3;
+    uint64 fe3  = 4;
+    uint64 fe4  = 5;
+    uint64 fe5  = 6;
+    uint64 fe6  = 7;
+    uint64 fe7  = 8;
+    uint64 fe8  = 9;
+    uint64 fe9  = 10;
+    uint64 fe10 = 11;
+    uint64 fe11 = 12;
+}
+
+/**
+ * @dev HashValueGL
+ * @param {hash} - Hash
+ * @param {value} - Value
+*/
+message HashValueGL {
+    Fea hash = 1;
+    Fea12 value = 2;
+}
+
+/**
+ * @dev KeyValue
+ * @param {key} - key
+ * @param {value} - Value
+*/
+message KeyValue {
+    Fea key = 1;
+    string value = 2;
 }
 
 /**

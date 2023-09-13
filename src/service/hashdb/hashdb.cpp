@@ -289,7 +289,7 @@ void HashDB::semiFlush (const string &batchUUID, const string &newStateRoot, con
     }
 }
 
-zkresult HashDB::purge (const string &batchUUID, const string &newStateRoot, const Persistence persistence)
+zkresult HashDB::purge (const string &batchUUID, const Goldilocks::Element (&newStateRoot)[4], const Persistence persistence)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB
     gettimeofday(&t, NULL);
@@ -302,7 +302,7 @@ zkresult HashDB::purge (const string &batchUUID, const string &newStateRoot, con
     zkresult result;
     if (config.hashDB64 && config.stateManager && (batchUUID.size() != 0))
     {
-        result = stateManager64.purge(batchUUID, newStateRoot, persistence, db64);
+        result = stateManager64.purge(batchUUID, fea2string(fr, newStateRoot), persistence, db64);
     }
     else
     {
@@ -317,7 +317,7 @@ zkresult HashDB::purge (const string &batchUUID, const string &newStateRoot, con
     return result;
 }
 
-zkresult HashDB::consolidateState (const string &virtualStateRoot, const Persistence persistence, string &consolidatedStateRoot, uint64_t &flushId, uint64_t &storedFlushId)
+zkresult HashDB::consolidateState (const Goldilocks::Element (&virtualStateRoot)[4], const Persistence persistence, Goldilocks::Element (&consolidatedStateRoot)[4], uint64_t &flushId, uint64_t &storedFlushId)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB
     gettimeofday(&t, NULL);
@@ -332,7 +332,12 @@ zkresult HashDB::consolidateState (const string &virtualStateRoot, const Persist
     {
         if (config.stateManager)
         {
-            result = stateManager64.consolidateState(virtualStateRoot, persistence, consolidatedStateRoot, db64, flushId, storedFlushId);
+            string consolidatedStateRootString;
+            result = stateManager64.consolidateState(fea2string(fr, virtualStateRoot), persistence, consolidatedStateRootString, db64, flushId, storedFlushId);
+            if (result == ZKR_SUCCESS)
+            {
+                string2fea(fr, consolidatedStateRootString, consolidatedStateRoot);
+            }
         }
         else
         {
@@ -421,30 +426,26 @@ void HashDB::clearCache(void)
     }
 }
 
-zkresult HashDB::readTree (const Goldilocks::Element (&root)[4], vector<KeyValue> &keyValues)
+zkresult HashDB::readTree (const Goldilocks::Element (&root)[4], vector<KeyValue> &keyValues, vector<HashValueGL> &hashValues)
 {
-    if (config.hashDB64)
-    {
-        return tree64.ReadTree(db64, root, keyValues, NULL);
-    }
-    else
+    if (!config.hashDB64)
     {
         zklog.error("HashDB::readTree() called with config.hashDB64=false");
         return ZKR_UNSPECIFIED;
     }
+
+    return tree64.ReadTree(db64, root, keyValues, &hashValues);
 }
 
 zkresult HashDB::writeTree (const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> &keyValues, Goldilocks::Element (&newRoot)[4], const bool persistent)
 {
     if (config.hashDB64)
     {
-        return tree64.WriteTree(db64, oldRoot, keyValues, newRoot, persistent);
-    }
-    else
-    {
         zklog.error("HashDB::writeTree() called with config.hashDB64=false");
         return ZKR_UNSPECIFIED;
     }
+
+    return tree64.WriteTree(db64, oldRoot, keyValues, newRoot, persistent);
 }
 
 void HashDB::setAutoCommit(const bool autoCommit)

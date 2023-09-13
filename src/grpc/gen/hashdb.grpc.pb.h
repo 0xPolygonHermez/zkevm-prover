@@ -130,6 +130,13 @@ class HashDBService final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::PurgeResponse>> PrepareAsyncPurge(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::PurgeResponse>>(PrepareAsyncPurgeRaw(context, request, cq));
     }
+    virtual ::grpc::Status ReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest& request, ::hashdb::v1::ReadTreeResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::ReadTreeResponse>> AsyncReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::ReadTreeResponse>>(AsyncReadTreeRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::ReadTreeResponse>> PrepareAsyncReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::ReadTreeResponse>>(PrepareAsyncReadTreeRaw(context, request, cq));
+    }
     class experimental_async_interface {
      public:
       virtual ~experimental_async_interface() {}
@@ -277,6 +284,18 @@ class HashDBService final {
       #else
       virtual void Purge(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::PurgeResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
       #endif
+      virtual void ReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void ReadTree(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ReadTreeResponse* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void ReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void ReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void ReadTree(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ReadTreeResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void ReadTree(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ReadTreeResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
     };
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     typedef class experimental_async_interface async_interface;
@@ -310,6 +329,8 @@ class HashDBService final {
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::ConsolidateStateResponse>* PrepareAsyncConsolidateStateRaw(::grpc::ClientContext* context, const ::hashdb::v1::ConsolidateStateRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::PurgeResponse>* AsyncPurgeRaw(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::PurgeResponse>* PrepareAsyncPurgeRaw(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::ReadTreeResponse>* AsyncReadTreeRaw(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::ReadTreeResponse>* PrepareAsyncReadTreeRaw(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest& request, ::grpc::CompletionQueue* cq) = 0;
   };
   class Stub final : public StubInterface {
    public:
@@ -397,6 +418,13 @@ class HashDBService final {
     }
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::PurgeResponse>> PrepareAsyncPurge(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::PurgeResponse>>(PrepareAsyncPurgeRaw(context, request, cq));
+    }
+    ::grpc::Status ReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest& request, ::hashdb::v1::ReadTreeResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::ReadTreeResponse>> AsyncReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::ReadTreeResponse>>(AsyncReadTreeRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::ReadTreeResponse>> PrepareAsyncReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::ReadTreeResponse>>(PrepareAsyncReadTreeRaw(context, request, cq));
     }
     class experimental_async final :
       public StubInterface::experimental_async_interface {
@@ -545,6 +573,18 @@ class HashDBService final {
       #else
       void Purge(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::PurgeResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
       #endif
+      void ReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response, std::function<void(::grpc::Status)>) override;
+      void ReadTree(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ReadTreeResponse* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void ReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void ReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void ReadTree(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ReadTreeResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void ReadTree(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ReadTreeResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
      private:
       friend class Stub;
       explicit experimental_async(Stub* stub): stub_(stub) { }
@@ -580,6 +620,8 @@ class HashDBService final {
     ::grpc::ClientAsyncResponseReader< ::hashdb::v1::ConsolidateStateResponse>* PrepareAsyncConsolidateStateRaw(::grpc::ClientContext* context, const ::hashdb::v1::ConsolidateStateRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::hashdb::v1::PurgeResponse>* AsyncPurgeRaw(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::hashdb::v1::PurgeResponse>* PrepareAsyncPurgeRaw(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::hashdb::v1::ReadTreeResponse>* AsyncReadTreeRaw(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::hashdb::v1::ReadTreeResponse>* PrepareAsyncReadTreeRaw(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest& request, ::grpc::CompletionQueue* cq) override;
     const ::grpc::internal::RpcMethod rpcmethod_Set_;
     const ::grpc::internal::RpcMethod rpcmethod_Get_;
     const ::grpc::internal::RpcMethod rpcmethod_SetProgram_;
@@ -592,6 +634,7 @@ class HashDBService final {
     const ::grpc::internal::RpcMethod rpcmethod_GetFlushData_;
     const ::grpc::internal::RpcMethod rpcmethod_ConsolidateState_;
     const ::grpc::internal::RpcMethod rpcmethod_Purge_;
+    const ::grpc::internal::RpcMethod rpcmethod_ReadTree_;
   };
   static std::unique_ptr<Stub> NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
 
@@ -611,6 +654,7 @@ class HashDBService final {
     virtual ::grpc::Status GetFlushData(::grpc::ServerContext* context, const ::hashdb::v1::GetFlushDataRequest* request, ::hashdb::v1::GetFlushDataResponse* response);
     virtual ::grpc::Status ConsolidateState(::grpc::ServerContext* context, const ::hashdb::v1::ConsolidateStateRequest* request, ::hashdb::v1::ConsolidateStateResponse* response);
     virtual ::grpc::Status Purge(::grpc::ServerContext* context, const ::hashdb::v1::PurgeRequest* request, ::hashdb::v1::PurgeResponse* response);
+    virtual ::grpc::Status ReadTree(::grpc::ServerContext* context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response);
   };
   template <class BaseClass>
   class WithAsyncMethod_Set : public BaseClass {
@@ -852,7 +896,27 @@ class HashDBService final {
       ::grpc::Service::RequestAsyncUnary(11, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
-  typedef WithAsyncMethod_Set<WithAsyncMethod_Get<WithAsyncMethod_SetProgram<WithAsyncMethod_GetProgram<WithAsyncMethod_LoadDB<WithAsyncMethod_LoadProgramDB<WithAsyncMethod_Flush<WithAsyncMethod_SemiFlush<WithAsyncMethod_GetFlushStatus<WithAsyncMethod_GetFlushData<WithAsyncMethod_ConsolidateState<WithAsyncMethod_Purge<Service > > > > > > > > > > > > AsyncService;
+  template <class BaseClass>
+  class WithAsyncMethod_ReadTree : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_ReadTree() {
+      ::grpc::Service::MarkMethodAsync(12);
+    }
+    ~WithAsyncMethod_ReadTree() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ReadTree(::grpc::ServerContext* /*context*/, const ::hashdb::v1::ReadTreeRequest* /*request*/, ::hashdb::v1::ReadTreeResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestReadTree(::grpc::ServerContext* context, ::hashdb::v1::ReadTreeRequest* request, ::grpc::ServerAsyncResponseWriter< ::hashdb::v1::ReadTreeResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(12, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  typedef WithAsyncMethod_Set<WithAsyncMethod_Get<WithAsyncMethod_SetProgram<WithAsyncMethod_GetProgram<WithAsyncMethod_LoadDB<WithAsyncMethod_LoadProgramDB<WithAsyncMethod_Flush<WithAsyncMethod_SemiFlush<WithAsyncMethod_GetFlushStatus<WithAsyncMethod_GetFlushData<WithAsyncMethod_ConsolidateState<WithAsyncMethod_Purge<WithAsyncMethod_ReadTree<Service > > > > > > > > > > > > > AsyncService;
   template <class BaseClass>
   class ExperimentalWithCallbackMethod_Set : public BaseClass {
    private:
@@ -1417,11 +1481,58 @@ class HashDBService final {
     #endif
       { return nullptr; }
   };
+  template <class BaseClass>
+  class ExperimentalWithCallbackMethod_ReadTree : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithCallbackMethod_ReadTree() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(12,
+          new ::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::ReadTreeRequest, ::hashdb::v1::ReadTreeResponse>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response) { return this->ReadTree(context, request, response); }));}
+    void SetMessageAllocatorFor_ReadTree(
+        ::grpc::experimental::MessageAllocator< ::hashdb::v1::ReadTreeRequest, ::hashdb::v1::ReadTreeResponse>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(12);
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(12);
+    #endif
+      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::ReadTreeRequest, ::hashdb::v1::ReadTreeResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~ExperimentalWithCallbackMethod_ReadTree() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ReadTree(::grpc::ServerContext* /*context*/, const ::hashdb::v1::ReadTreeRequest* /*request*/, ::hashdb::v1::ReadTreeResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* ReadTree(
+      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::ReadTreeRequest* /*request*/, ::hashdb::v1::ReadTreeResponse* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* ReadTree(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::hashdb::v1::ReadTreeRequest* /*request*/, ::hashdb::v1::ReadTreeResponse* /*response*/)
+    #endif
+      { return nullptr; }
+  };
   #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-  typedef ExperimentalWithCallbackMethod_Set<ExperimentalWithCallbackMethod_Get<ExperimentalWithCallbackMethod_SetProgram<ExperimentalWithCallbackMethod_GetProgram<ExperimentalWithCallbackMethod_LoadDB<ExperimentalWithCallbackMethod_LoadProgramDB<ExperimentalWithCallbackMethod_Flush<ExperimentalWithCallbackMethod_SemiFlush<ExperimentalWithCallbackMethod_GetFlushStatus<ExperimentalWithCallbackMethod_GetFlushData<ExperimentalWithCallbackMethod_ConsolidateState<ExperimentalWithCallbackMethod_Purge<Service > > > > > > > > > > > > CallbackService;
+  typedef ExperimentalWithCallbackMethod_Set<ExperimentalWithCallbackMethod_Get<ExperimentalWithCallbackMethod_SetProgram<ExperimentalWithCallbackMethod_GetProgram<ExperimentalWithCallbackMethod_LoadDB<ExperimentalWithCallbackMethod_LoadProgramDB<ExperimentalWithCallbackMethod_Flush<ExperimentalWithCallbackMethod_SemiFlush<ExperimentalWithCallbackMethod_GetFlushStatus<ExperimentalWithCallbackMethod_GetFlushData<ExperimentalWithCallbackMethod_ConsolidateState<ExperimentalWithCallbackMethod_Purge<ExperimentalWithCallbackMethod_ReadTree<Service > > > > > > > > > > > > > CallbackService;
   #endif
 
-  typedef ExperimentalWithCallbackMethod_Set<ExperimentalWithCallbackMethod_Get<ExperimentalWithCallbackMethod_SetProgram<ExperimentalWithCallbackMethod_GetProgram<ExperimentalWithCallbackMethod_LoadDB<ExperimentalWithCallbackMethod_LoadProgramDB<ExperimentalWithCallbackMethod_Flush<ExperimentalWithCallbackMethod_SemiFlush<ExperimentalWithCallbackMethod_GetFlushStatus<ExperimentalWithCallbackMethod_GetFlushData<ExperimentalWithCallbackMethod_ConsolidateState<ExperimentalWithCallbackMethod_Purge<Service > > > > > > > > > > > > ExperimentalCallbackService;
+  typedef ExperimentalWithCallbackMethod_Set<ExperimentalWithCallbackMethod_Get<ExperimentalWithCallbackMethod_SetProgram<ExperimentalWithCallbackMethod_GetProgram<ExperimentalWithCallbackMethod_LoadDB<ExperimentalWithCallbackMethod_LoadProgramDB<ExperimentalWithCallbackMethod_Flush<ExperimentalWithCallbackMethod_SemiFlush<ExperimentalWithCallbackMethod_GetFlushStatus<ExperimentalWithCallbackMethod_GetFlushData<ExperimentalWithCallbackMethod_ConsolidateState<ExperimentalWithCallbackMethod_Purge<ExperimentalWithCallbackMethod_ReadTree<Service > > > > > > > > > > > > > ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_Set : public BaseClass {
    private:
@@ -1622,6 +1733,23 @@ class HashDBService final {
     }
     // disable synchronous version of this method
     ::grpc::Status Purge(::grpc::ServerContext* /*context*/, const ::hashdb::v1::PurgeRequest* /*request*/, ::hashdb::v1::PurgeResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_ReadTree : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_ReadTree() {
+      ::grpc::Service::MarkMethodGeneric(12);
+    }
+    ~WithGenericMethod_ReadTree() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ReadTree(::grpc::ServerContext* /*context*/, const ::hashdb::v1::ReadTreeRequest* /*request*/, ::hashdb::v1::ReadTreeResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1864,6 +1992,26 @@ class HashDBService final {
     }
     void RequestPurge(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
       ::grpc::Service::RequestAsyncUnary(11, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_ReadTree : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_ReadTree() {
+      ::grpc::Service::MarkMethodRaw(12);
+    }
+    ~WithRawMethod_ReadTree() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ReadTree(::grpc::ServerContext* /*context*/, const ::hashdb::v1::ReadTreeRequest* /*request*/, ::hashdb::v1::ReadTreeResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestReadTree(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(12, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -2323,6 +2471,44 @@ class HashDBService final {
       { return nullptr; }
   };
   template <class BaseClass>
+  class ExperimentalWithRawCallbackMethod_ReadTree : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithRawCallbackMethod_ReadTree() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(12,
+          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->ReadTree(context, request, response); }));
+    }
+    ~ExperimentalWithRawCallbackMethod_ReadTree() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ReadTree(::grpc::ServerContext* /*context*/, const ::hashdb::v1::ReadTreeRequest* /*request*/, ::hashdb::v1::ReadTreeResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* ReadTree(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* ReadTree(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
   class WithStreamedUnaryMethod_Set : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
@@ -2646,9 +2832,36 @@ class HashDBService final {
     // replace default version of method with streamed unary
     virtual ::grpc::Status StreamedPurge(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::hashdb::v1::PurgeRequest,::hashdb::v1::PurgeResponse>* server_unary_streamer) = 0;
   };
-  typedef WithStreamedUnaryMethod_Set<WithStreamedUnaryMethod_Get<WithStreamedUnaryMethod_SetProgram<WithStreamedUnaryMethod_GetProgram<WithStreamedUnaryMethod_LoadDB<WithStreamedUnaryMethod_LoadProgramDB<WithStreamedUnaryMethod_Flush<WithStreamedUnaryMethod_SemiFlush<WithStreamedUnaryMethod_GetFlushStatus<WithStreamedUnaryMethod_GetFlushData<WithStreamedUnaryMethod_ConsolidateState<WithStreamedUnaryMethod_Purge<Service > > > > > > > > > > > > StreamedUnaryService;
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_ReadTree : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_ReadTree() {
+      ::grpc::Service::MarkMethodStreamed(12,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::hashdb::v1::ReadTreeRequest, ::hashdb::v1::ReadTreeResponse>(
+            [this](::grpc_impl::ServerContext* context,
+                   ::grpc_impl::ServerUnaryStreamer<
+                     ::hashdb::v1::ReadTreeRequest, ::hashdb::v1::ReadTreeResponse>* streamer) {
+                       return this->StreamedReadTree(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_ReadTree() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status ReadTree(::grpc::ServerContext* /*context*/, const ::hashdb::v1::ReadTreeRequest* /*request*/, ::hashdb::v1::ReadTreeResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedReadTree(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::hashdb::v1::ReadTreeRequest,::hashdb::v1::ReadTreeResponse>* server_unary_streamer) = 0;
+  };
+  typedef WithStreamedUnaryMethod_Set<WithStreamedUnaryMethod_Get<WithStreamedUnaryMethod_SetProgram<WithStreamedUnaryMethod_GetProgram<WithStreamedUnaryMethod_LoadDB<WithStreamedUnaryMethod_LoadProgramDB<WithStreamedUnaryMethod_Flush<WithStreamedUnaryMethod_SemiFlush<WithStreamedUnaryMethod_GetFlushStatus<WithStreamedUnaryMethod_GetFlushData<WithStreamedUnaryMethod_ConsolidateState<WithStreamedUnaryMethod_Purge<WithStreamedUnaryMethod_ReadTree<Service > > > > > > > > > > > > > StreamedUnaryService;
   typedef Service SplitStreamedService;
-  typedef WithStreamedUnaryMethod_Set<WithStreamedUnaryMethod_Get<WithStreamedUnaryMethod_SetProgram<WithStreamedUnaryMethod_GetProgram<WithStreamedUnaryMethod_LoadDB<WithStreamedUnaryMethod_LoadProgramDB<WithStreamedUnaryMethod_Flush<WithStreamedUnaryMethod_SemiFlush<WithStreamedUnaryMethod_GetFlushStatus<WithStreamedUnaryMethod_GetFlushData<WithStreamedUnaryMethod_ConsolidateState<WithStreamedUnaryMethod_Purge<Service > > > > > > > > > > > > StreamedService;
+  typedef WithStreamedUnaryMethod_Set<WithStreamedUnaryMethod_Get<WithStreamedUnaryMethod_SetProgram<WithStreamedUnaryMethod_GetProgram<WithStreamedUnaryMethod_LoadDB<WithStreamedUnaryMethod_LoadProgramDB<WithStreamedUnaryMethod_Flush<WithStreamedUnaryMethod_SemiFlush<WithStreamedUnaryMethod_GetFlushStatus<WithStreamedUnaryMethod_GetFlushData<WithStreamedUnaryMethod_ConsolidateState<WithStreamedUnaryMethod_Purge<WithStreamedUnaryMethod_ReadTree<Service > > > > > > > > > > > > > StreamedService;
 };
 
 }  // namespace v1

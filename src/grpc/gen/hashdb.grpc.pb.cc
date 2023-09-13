@@ -35,6 +35,7 @@ static const char* HashDBService_method_names[] = {
   "/hashdb.v1.HashDBService/GetFlushData",
   "/hashdb.v1.HashDBService/ConsolidateState",
   "/hashdb.v1.HashDBService/Purge",
+  "/hashdb.v1.HashDBService/ReadTree",
 };
 
 std::unique_ptr< HashDBService::Stub> HashDBService::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
@@ -56,6 +57,7 @@ HashDBService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& chan
   , rpcmethod_GetFlushData_(HashDBService_method_names[9], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_ConsolidateState_(HashDBService_method_names[10], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_Purge_(HashDBService_method_names[11], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_ReadTree_(HashDBService_method_names[12], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status HashDBService::Stub::Set(::grpc::ClientContext* context, const ::hashdb::v1::SetRequest& request, ::hashdb::v1::SetResponse* response) {
@@ -394,6 +396,34 @@ void HashDBService::Stub::experimental_async::Purge(::grpc::ClientContext* conte
   return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::hashdb::v1::PurgeResponse>::Create(channel_.get(), cq, rpcmethod_Purge_, context, request, false);
 }
 
+::grpc::Status HashDBService::Stub::ReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest& request, ::hashdb::v1::ReadTreeResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_ReadTree_, context, request, response);
+}
+
+void HashDBService::Stub::experimental_async::ReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_ReadTree_, context, request, response, std::move(f));
+}
+
+void HashDBService::Stub::experimental_async::ReadTree(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ReadTreeResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_ReadTree_, context, request, response, std::move(f));
+}
+
+void HashDBService::Stub::experimental_async::ReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_ReadTree_, context, request, response, reactor);
+}
+
+void HashDBService::Stub::experimental_async::ReadTree(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ReadTreeResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_ReadTree_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::hashdb::v1::ReadTreeResponse>* HashDBService::Stub::AsyncReadTreeRaw(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::hashdb::v1::ReadTreeResponse>::Create(channel_.get(), cq, rpcmethod_ReadTree_, context, request, true);
+}
+
+::grpc::ClientAsyncResponseReader< ::hashdb::v1::ReadTreeResponse>* HashDBService::Stub::PrepareAsyncReadTreeRaw(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::hashdb::v1::ReadTreeResponse>::Create(channel_.get(), cq, rpcmethod_ReadTree_, context, request, false);
+}
+
 HashDBService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       HashDBService_method_names[0],
@@ -515,6 +545,16 @@ HashDBService::Service::Service() {
              ::hashdb::v1::PurgeResponse* resp) {
                return service->Purge(ctx, req, resp);
              }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      HashDBService_method_names[12],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::ReadTreeRequest, ::hashdb::v1::ReadTreeResponse>(
+          [](HashDBService::Service* service,
+             ::grpc_impl::ServerContext* ctx,
+             const ::hashdb::v1::ReadTreeRequest* req,
+             ::hashdb::v1::ReadTreeResponse* resp) {
+               return service->ReadTree(ctx, req, resp);
+             }, this)));
 }
 
 HashDBService::Service::~Service() {
@@ -598,6 +638,13 @@ HashDBService::Service::~Service() {
 }
 
 ::grpc::Status HashDBService::Service::Purge(::grpc::ServerContext* context, const ::hashdb::v1::PurgeRequest* request, ::hashdb::v1::PurgeResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status HashDBService::Service::ReadTree(::grpc::ServerContext* context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response) {
   (void) context;
   (void) request;
   (void) response;
