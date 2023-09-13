@@ -632,209 +632,25 @@ zkresult StateManager64::flush(const string &batchUUID, const string &_newStateR
                 }
             }
 
-            // Save data to database
-
-            // For all sub-states
-            /*for (uint64_t ss = 0; ss < txState.persistence[persistence].subState.size(); ss++)
-            {
-                // For all keys to write
-                unordered_map<string, mpz_class>::const_iterator writeIt;
-                for (writeIt = txState.persistence[persistence].subState[ss].dbWrite.begin();
-                     writeIt != txState.persistence[persistence].subState[ss].dbWrite.end();
-                     writeIt++)
-                {
-                    // TODO: write all key-values at once
-                    // zkr = db.write(writeIt->first, NULL, writeIt->second, persistence == PERSISTENCE_DATABASE ? 1 : 0);
-                    zkr = ZKR_SUCCESS;
-                    if (zkr != ZKR_SUCCESS)
-                    {
-                        zklog.error("StateManager64::flush() failed calling db.write() result=" + zkresult2string(zkr));
-                        state.erase(it);
-
-                        TimerStopAndLog(STATE_MANAGER_FLUSH);
-
-#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-                        batchState.timeMetricStorage.add("flush error db.write", TimeDiff(t));
-                        batchState.timeMetricStorage.print("State Manager calls");
-#endif
-                        Unlock();
-                        return zkr;
-                    }
-                }
-            }*/
-
-            /*if (persistence == PERSISTENCE_DATABASE)
-            {
-                if (txState.persistence[persistence].newStateRoot.realStateRoot.size() == 0)
-                {
-                    zklog.error("StateManager64::flush() failed txState.persistence[persistence].newStateRoot.realStateRoot.size()=0");
-                    state.erase(it);
-
-                    TimerStopAndLog(STATE_MANAGER_FLUSH);
-
-#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-                    batchState.timeMetricStorage.add("flush error realStateRoot.size", TimeDiff(t));
-                    batchState.timeMetricStorage.print("State Manager calls");
-#endif
-                    Unlock();
-                    return zkr;
-                }
-                vector<Goldilocks::Element> fea;
-                string2fea(db.fr, txState.persistence[persistence].newStateRoot.realStateRoot, fea);
-                if (fea.size() != 4)
-                {
-                    zklog.error("StateManager64::flush() failed calling string2fea() fea.size=" + to_string(fea.size()));
-                    state.erase(it);
-
-                    TimerStopAndLog(STATE_MANAGER_FLUSH);
-
-#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-                    batchState.timeMetricStorage.add("flush error string2fea", TimeDiff(t));
-                    batchState.timeMetricStorage.print("State Manager calls");
-#endif
-                    Unlock();
-                    return zkr;
-                }
-                Goldilocks::Element newStateRootFea[4];
-                newStateRootFea[0] = fea[3];
-                newStateRootFea[1] = fea[2];
-                newStateRootFea[2] = fea[1];
-                newStateRootFea[3] = fea[0];
-
-                zkr = db.updateStateRoot(newStateRootFea);
-                if (zkr != ZKR_SUCCESS)
-                {
-                    zklog.error("StateManager64::flush() failed calling db.updateStateRoot() result=" + zkresult2string(zkr));
-                    state.erase(it);
-
-                    TimerStopAndLog(STATE_MANAGER_FLUSH);
-
-#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-                    batchState.timeMetricStorage.add("flush error db.updateStateRoot", TimeDiff(t));
-                    batchState.timeMetricStorage.print("State Manager calls");
-#endif
-                    Unlock();
-                    return zkr;
-                }
-            }*/
-
-            // Get old state root for this tx
-            Goldilocks::Element oldRoot[4];
-            string2fea(fr, txState.persistence[persistence].oldStateRoot, oldRoot);
-
-            // Get the key-values for this tx
-            vector<KeyValue> keyValues;
-            unordered_map<string, mpz_class> &dbWrite = txState.persistence[persistence].subState[txState.persistence[persistence].subState.size() - 1].dbWrite;
-            unordered_map<string, mpz_class>::const_iterator it;
-            for (it = dbWrite.begin(); it != dbWrite.end(); it++)
-            {
-                KeyValue keyValue;
-                string2fea(fr, it->first, keyValue.key);
-                keyValue.value = it->second;
-                keyValues.emplace_back(keyValue);
-            }
-
-            // Call WriteTree and get the new state root
-            Goldilocks::Element newRoot[4];
-            zkr = tree64.WriteTree(db, oldRoot, keyValues, newRoot, persistence == PERSISTENCE_DATABASE ? true : false);
-            if (zkr != ZKR_SUCCESS)
-            {
-                zklog.error("StateManager64::flush() failed calling WriteTree zkr=" + zkresult2string(zkr) +
-                            " tx=" + to_string(tx) +
-                            " txState.oldStateRoot=" + txState.persistence[persistence].oldStateRoot);
-#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-                batchState.timeMetricStorage.add("WriteTree failed", TimeDiff(t));
-                batchState.timeMetricStorage.print("State Manager calls");
-#endif
-                Unlock();
-                return ZKR_STATE_MANAGER;
-            }
-
-            // Save the real state root of this tx
-            string newRootString = fea2string(fr, newRoot);
-            txState.persistence[persistence].newStateRoot = newRootString;
-
-            // Save the old state root of the next tx, if any
-            if (tx < batchState.txState.size() - 1)
-            {
-                batchState.txState[tx+1].persistence[persistence].oldStateRoot = newRootString;
-            }
-            // If this is the last tx, then save the new state root of the batch
-            else
-            {
-                batchState.newStateRoot = newRootString;
-            }
-
-            // Create a new version, i.e. read latest version and increment it
-            uint64_t version;
-            zkr = db.readLatestVersion(version);
-            if (zkr != ZKR_SUCCESS)
-            {
-                zklog.error("StateManager64::flush() failed calling db.readLatestVersion zkr=" + zkresult2string(zkr) +
-                            " tx=" + to_string(tx) +
-                            " txState.oldStateRoot=" + txState.persistence[persistence].oldStateRoot);
-#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-                batchState.timeMetricStorage.add("db.createLatestVersion failed", TimeDiff(t));
-                batchState.timeMetricStorage.print("State Manager calls");
-#endif
-                Unlock();
-                return ZKR_STATE_MANAGER;
-            }
-            version++;
-
-            // Save the key-values
-            zkr = db.writeKV(version, keyValues, persistence == PERSISTENCE_DATABASE ? true : false);
-            if (zkr != ZKR_SUCCESS)
-            {
-                zklog.error("StateManager64::flush() failed calling db.writeKV zkr=" + zkresult2string(zkr) +
-                            " tx=" + to_string(tx) +
-                            " txState.oldStateRoot=" + txState.persistence[persistence].oldStateRoot);
-#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-                batchState.timeMetricStorage.add("db.writeKV failed", TimeDiff(t));
-                batchState.timeMetricStorage.print("State Manager calls");
-#endif
-                Unlock();
-                return ZKR_STATE_MANAGER;
-            }
-
-            // Write the new version, associated with the new root
-            zkr = db.writeVersion(newRoot, version, persistence == PERSISTENCE_DATABASE ? true : false);
-            if (zkr != ZKR_SUCCESS)
-            {
-                zklog.error("StateManager64::flush() failed calling db.writeVersion zkr=" + zkresult2string(zkr) +
-                            " tx=" + to_string(tx) +
-                            " txState.oldStateRoot=" + txState.persistence[persistence].oldStateRoot);
-#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-                batchState.timeMetricStorage.add("db.writeVersion failed", TimeDiff(t));
-                batchState.timeMetricStorage.print("State Manager calls");
-#endif
-                Unlock();
-                return ZKR_STATE_MANAGER;
-            }
-
-            // Write the latest version
-            zkr = db.writeLatestVersion(version, persistence == PERSISTENCE_DATABASE ? true : false);
-            if (zkr != ZKR_SUCCESS)
-            {
-                zklog.error("StateManager64::flush() failed calling db.writeLatestVersion zkr=" + zkresult2string(zkr) +
-                            " tx=" + to_string(tx) +
-                            " txState.oldStateRoot=" + txState.persistence[persistence].oldStateRoot);
-#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-                batchState.timeMetricStorage.add("db.writeLatestVersion failed", TimeDiff(t));
-                batchState.timeMetricStorage.print("State Manager calls");
-#endif
-                Unlock();
-                return ZKR_STATE_MANAGER;
-            }
-
         } // For all persistences
 
     } // For all transactions
 
-    zkr = db.flush(flushId, lastSentFlushId);
+    // Take note of the batch new state root
+    batchState.newStateRoot = newStateRoot;
+
+    Unlock();
+
+    zkr = consolidateVirtualState(newStateRoot, db, flushId, lastSentFlushId);
     if (zkr != ZKR_SUCCESS)
     {
-        zklog.error("StateManager64::flush() failed calling db.flush() result=" + zkresult2string(zkr));
+        zklog.error("StateManager64::flush() failed calling consolidateVirtualState() result=" + zkresult2string(zkr));
+
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+        batchState.timeMetricStorage.add("db.writeLatestVersion failed", TimeDiff(t));
+        batchState.timeMetricStorage.print("State Manager calls");
+#endif
+        return ZKR_STATE_MANAGER;
     }
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
@@ -842,15 +658,222 @@ zkresult StateManager64::flush(const string &batchUUID, const string &_newStateR
     batchState.timeMetricStorage.print("State Manager calls");
 #endif
 
-    // Delete this batch UUID state
-    state.erase(it);
-
-    Unlock();
-
     TimerStopAndLog(STATE_MANAGER_FLUSH);
 
     return zkr;
 }
+
+zkresult StateManager64::consolidateVirtualState(const string &_newStateRoot, Database64 &db, uint64_t &flushId, uint64_t &lastSentFlushId)
+{
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+    struct timeval t;
+    gettimeofday(&t, NULL);
+#endif
+
+    TimerStart(STATE_MANAGER_CONSOLIDATE_VIRTUAL_STATE);
+
+    // Format the new state root
+    string newStateRoot = NormalizeToNFormat(_newStateRoot, 64);
+
+#ifdef LOG_STATE_MANAGER
+    zklog.info("StateManager64::consolidateVirtualState() newStateRoot=" + newStateRoot);
+#endif
+
+    // For every TX, track backwards from newStateRoot to oldStateRoot, marking sub-states as valid
+
+    Lock();
+
+    zkresult zkr;
+
+    // Find batch state for this uuid
+    // If it does not exist, we call db.flush() directly
+    unordered_map<string, BatchState64>::iterator it;
+    for (it = state.begin(); it != state.end(); it++)
+    {
+        if (it->second.newStateRoot == newStateRoot)
+        {
+            break;
+        }
+    }
+    if (it == state.end())
+    {
+        zklog.error("StateManager64::consolidateVirtualState() found no batch state for newStateRoot=" + newStateRoot);
+        TimerStopAndLog(STATE_MANAGER_CONSOLIDATE_VIRTUAL_STATE);        
+        Unlock();
+        return ZKR_STATE_MANAGER;
+    }
+    BatchState64 &batchState = it->second;
+
+    // Get the persistence
+    Persistence persistence;
+    if (batchState.txState.size() == 0)
+    {
+        zklog.error("StateManager64::consolidateVirtualState() found no tx state for newStateRoot=" + newStateRoot);
+        TimerStopAndLog(STATE_MANAGER_CONSOLIDATE_VIRTUAL_STATE);        
+        Unlock();
+        return ZKR_STATE_MANAGER;
+    }
+    if (batchState.txState[batchState.txState.size() - 1].persistence[PERSISTENCE_DATABASE].newStateRoot == newStateRoot)
+    {
+        persistence = PERSISTENCE_DATABASE;
+    }
+    else if (batchState.txState[batchState.txState.size() - 1].persistence[PERSISTENCE_CACHE].newStateRoot == newStateRoot)
+    {
+        persistence = PERSISTENCE_CACHE;
+    }
+    else
+    {
+        zklog.error("StateManager64::consolidateVirtualState() found no persistence for newStateRoot=" + newStateRoot);
+        TimerStopAndLog(STATE_MANAGER_CONSOLIDATE_VIRTUAL_STATE);        
+        Unlock();
+        return ZKR_STATE_MANAGER;
+    }
+
+    // Find the batch that ends up with the newStateRoot
+
+    // Determine the chain of state roots (i.e. previous batches) that leads to newStateRoot
+
+    // Delete previous batches that are not part of the chain
+
+    // Calculate the real state roots, and write them to the database
+
+    // For all transactions
+    for (uint64_t tx = 0; tx < batchState.txState.size(); tx++)
+    {
+        // Get a reference to the current transaction state
+        TxState64 &txState = batchState.txState[tx];
+
+        // Get old state root for this tx
+        Goldilocks::Element oldRoot[4];
+        string2fea(fr, txState.persistence[persistence].oldStateRoot, oldRoot);
+
+        // Get the key-values for this tx
+        vector<KeyValue> keyValues;
+        unordered_map<string, mpz_class> &dbWrite = txState.persistence[persistence].subState[txState.persistence[persistence].subState.size() - 1].dbWrite;
+        unordered_map<string, mpz_class>::const_iterator it;
+        for (it = dbWrite.begin(); it != dbWrite.end(); it++)
+        {
+            KeyValue keyValue;
+            string2fea(fr, it->first, keyValue.key);
+            keyValue.value = it->second;
+            keyValues.emplace_back(keyValue);
+        }
+
+        // Call WriteTree and get the new state root
+        Goldilocks::Element newRoot[4];
+        zkr = tree64.WriteTree(db, oldRoot, keyValues, newRoot, persistence == PERSISTENCE_DATABASE ? true : false);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("StateManager64::consolidateVirtualState() failed calling WriteTree zkr=" + zkresult2string(zkr) +
+                        " tx=" + to_string(tx) +
+                        " txState.oldStateRoot=" + txState.persistence[persistence].oldStateRoot);
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+            batchState.timeMetricStorage.add("consolidateVirtualState WriteTree failed", TimeDiff(t));
+            batchState.timeMetricStorage.print("State Manager calls");
+#endif
+            Unlock();
+            return ZKR_STATE_MANAGER;
+        }
+
+        // Save the real state root of this tx
+        string newRootString = fea2string(fr, newRoot);
+        txState.persistence[persistence].newStateRoot = newRootString;
+
+        // Save the old state root of the next tx, if any
+        if (tx < batchState.txState.size() - 1)
+        {
+            batchState.txState[tx+1].persistence[persistence].oldStateRoot = newRootString;
+        }
+        // If this is the last tx, then save the new state root of the batch
+        else
+        {
+            batchState.newStateRoot = newRootString;
+        }
+
+        // Create a new version, i.e. read latest version and increment it
+        uint64_t version;
+        zkr = db.readLatestVersion(version);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("StateManager64::consolidateVirtualState() failed calling db.readLatestVersion zkr=" + zkresult2string(zkr) +
+                        " tx=" + to_string(tx) +
+                        " txState.oldStateRoot=" + txState.persistence[persistence].oldStateRoot);
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+            batchState.timeMetricStorage.add("consolidateVirtualState db.createLatestVersion failed", TimeDiff(t));
+            batchState.timeMetricStorage.print("State Manager calls");
+#endif
+            Unlock();
+            return ZKR_STATE_MANAGER;
+        }
+        version++;
+
+        // Save the key-values
+        zkr = db.writeKV(version, keyValues, persistence == PERSISTENCE_DATABASE ? true : false);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("StateManager64::consolidateVirtualState() failed calling db.writeKV zkr=" + zkresult2string(zkr) +
+                        " tx=" + to_string(tx) +
+                        " txState.oldStateRoot=" + txState.persistence[persistence].oldStateRoot);
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+            batchState.timeMetricStorage.add("consolidateVirtualStatedb.writeKV failed", TimeDiff(t));
+            batchState.timeMetricStorage.print("State Manager calls");
+#endif
+            Unlock();
+            return ZKR_STATE_MANAGER;
+        }
+
+        // Write the new version, associated with the new root
+        zkr = db.writeVersion(newRoot, version, persistence == PERSISTENCE_DATABASE ? true : false);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("StateManager64::consolidateVirtualState() failed calling db.writeVersion zkr=" + zkresult2string(zkr) +
+                        " tx=" + to_string(tx) +
+                        " txState.oldStateRoot=" + txState.persistence[persistence].oldStateRoot);
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+            batchState.timeMetricStorage.add("consolidateVirtualState db.writeVersion failed", TimeDiff(t));
+            batchState.timeMetricStorage.print("State Manager calls");
+#endif
+            Unlock();
+            return ZKR_STATE_MANAGER;
+        }
+
+        // Write the latest version
+        zkr = db.writeLatestVersion(version, persistence == PERSISTENCE_DATABASE ? true : false);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("StateManager64::consolidateVirtualState() failed calling db.writeLatestVersion zkr=" + zkresult2string(zkr) +
+                        " tx=" + to_string(tx) +
+                        " txState.oldStateRoot=" + txState.persistence[persistence].oldStateRoot);
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+            batchState.timeMetricStorage.add("consolidateVirtualState db.writeLatestVersion failed", TimeDiff(t));
+            batchState.timeMetricStorage.print("State Manager calls");
+#endif
+            Unlock();
+            return ZKR_STATE_MANAGER;
+        }
+
+    } // For all transactions
+
+    // Call flush and get the flush ID
+
+    zkr = db.flush(flushId, lastSentFlushId);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("StateManager64::consolidateVirtualState() failed calling db.flush() result=" + zkresult2string(zkr));
+    }
+
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+    batchState.timeMetricStorage.add("consolidateVirtualState success", TimeDiff(t));
+    batchState.timeMetricStorage.print("State Manager calls");
+#endif
+
+    Unlock();
+
+    TimerStopAndLog(STATE_MANAGER_CONSOLIDATE_VIRTUAL_STATE);
+
+    return zkr;
+}
+
 
 void StateManager64::print(bool bDbContent)
 {
