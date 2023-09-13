@@ -704,7 +704,7 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "INSIC_TX_GAS_OVERFLOW\020\032\022 \n\034ROM_ERROR_BAT"
   "CH_DATA_TOO_BIG\020\033\022!\n\035ROM_ERROR_UNSUPPORT"
   "ED_FORK_ID\020\034\022\031\n\025ROM_ERROR_INVALID_RLP\020\035*"
-  "\242\032\n\rExecutorError\022\036\n\032EXECUTOR_ERROR_UNSP"
+  "\356\035\n\rExecutorError\022\036\n\032EXECUTOR_ERROR_UNSP"
   "ECIFIED\020\000\022\033\n\027EXECUTOR_ERROR_NO_ERROR\020\001\022\033"
   "\n\027EXECUTOR_ERROR_DB_ERROR\020\002\0222\n.EXECUTOR_"
   "ERROR_SM_MAIN_COUNTERS_OVERFLOW_STEPS\020\003\022"
@@ -788,13 +788,25 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "_JMPN_OUT_OF_RANGE\020B\0222\n.EXECUTOR_ERROR_S"
   "M_MAIN_HASHK_READ_OUT_OF_RANGE\020C\0222\n.EXEC"
   "UTOR_ERROR_SM_MAIN_HASHP_READ_OUT_OF_RAN"
-  "GE\020D2\271\001\n\017ExecutorService\022U\n\014ProcessBatch"
-  "\022 .executor.v1.ProcessBatchRequest\032!.exe"
-  "cutor.v1.ProcessBatchResponse\"\000\022O\n\016GetFl"
-  "ushStatus\022\026.google.protobuf.Empty\032#.exec"
-  "utor.v1.GetFlushStatusResponse\"\000B>Z<gith"
-  "ub.com/0xPolygonHermez/zkevm-node/state/"
-  "runtime/executorb\006proto3"
+  "GE\020D\022)\n%EXECUTOR_ERROR_INVALID_OLD_STATE"
+  "_ROOT\020E\022-\n)EXECUTOR_ERROR_INVALID_OLD_AC"
+  "C_INPUT_HASH\020F\022#\n\037EXECUTOR_ERROR_INVALID"
+  "_CHAIN_ID\020G\022(\n$EXECUTOR_ERROR_INVALID_BA"
+  "TCH_L2_DATA\020H\022+\n\'EXECUTOR_ERROR_INVALID_"
+  "GLOBAL_EXIT_ROOT\020I\022#\n\037EXECUTOR_ERROR_INV"
+  "ALID_COINBASE\020J\022\037\n\033EXECUTOR_ERROR_INVALI"
+  "D_FROM\020K\022!\n\035EXECUTOR_ERROR_INVALID_DB_KE"
+  "Y\020L\022#\n\037EXECUTOR_ERROR_INVALID_DB_VALUE\020M"
+  "\0221\n-EXECUTOR_ERROR_INVALID_CONTRACTS_BYT"
+  "ECODE_KEY\020N\0223\n/EXECUTOR_ERROR_INVALID_CO"
+  "NTRACTS_BYTECODE_VALUE\020O2\271\001\n\017ExecutorSer"
+  "vice\022U\n\014ProcessBatch\022 .executor.v1.Proce"
+  "ssBatchRequest\032!.executor.v1.ProcessBatc"
+  "hResponse\"\000\022O\n\016GetFlushStatus\022\026.google.p"
+  "rotobuf.Empty\032#.executor.v1.GetFlushStat"
+  "usResponse\"\000B>Z<github.com/0xPolygonHerm"
+  "ez/zkevm-node/state/runtime/executorb\006pr"
+  "oto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_executor_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2fempty_2eproto,
@@ -819,7 +831,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_exe
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_executor_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_executor_2eproto = {
-  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 8224,
+  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 8684,
   &descriptor_table_executor_2eproto_once, descriptor_table_executor_2eproto_sccs, descriptor_table_executor_2eproto_deps, 16, 1,
   schemas, file_default_instances, TableStruct_executor_2eproto::offsets,
   file_level_metadata_executor_2eproto, 16, file_level_enum_descriptors_executor_2eproto, file_level_service_descriptors_executor_2eproto,
@@ -946,6 +958,17 @@ bool ExecutorError_IsValid(int value) {
     case 66:
     case 67:
     case 68:
+    case 69:
+    case 70:
+    case 71:
+    case 72:
+    case 73:
+    case 74:
+    case 75:
+    case 76:
+    case 77:
+    case 78:
+    case 79:
       return true;
     default:
       return false;
