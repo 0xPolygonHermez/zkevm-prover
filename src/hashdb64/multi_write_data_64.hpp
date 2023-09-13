@@ -61,6 +61,8 @@ public:
                (nodesStateRoot.size() == 0) &&
                (keyValueA.size() == 0) &&
                (keyValueAIntray.size() == 0) &&
+               (keyVersions.size() == 0) &&
+               (keyVersionsIntray.size() == 0) &&
                (version.size() == 0) &&
                (versionIntray.size() == 0);
     }

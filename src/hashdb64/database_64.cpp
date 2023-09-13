@@ -368,9 +368,7 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
                     mpz_class   zero(0);
                     dbKVACache.addKeyValueVersion(0, key, zero);
                 }else if( rkv == ZKR_DB_VERSION_NOT_FOUND_GLOBAL){
-                    value = 0;
                     rout = rkv;
-                    mpz_class   zero(0);
                     // Add a zero into the cache to avoid future remote access for this key (not problematic management of versions as there is only one version)
                     dbKVACache.uploadKeyValueVersions(key, upstremVersionValues);
                 }else{
@@ -1117,7 +1115,7 @@ zkresult Database64::extractVersion(const pqxx::field& fieldData, const uint64_t
                 vv.value = mpz_class(data.substr(i + 16, 64), 16);
                 upstreamVersionValues.push_back(vv);
             }
-            if(version_==version){
+            if(version >= version_){
                 value = mpz_class(data.substr(i + 16, 64), 16);
                 return ZKR_SUCCESS;
             }
@@ -1976,6 +1974,7 @@ zkresult Database64::sendData (void)
                     {   
                         writeRemoteKV(it->first,it2->key,it2->value, false);
                     }
+                    ++it;
                 }
             }
             // If there are versions add to db

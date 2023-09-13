@@ -6,10 +6,10 @@ using namespace std;
 
 uint64_t previousAvailableVersion(const uint64_t versionIn, const vector<uint64_t> &versions)
 {
-    uint64_t versionOut = 0;
+    uint64_t versionOut = UINT64_MAX;
     for (auto it = versions.begin(); it != versions.end(); ++it)
     {
-        if (*it < versionIn && *it > versionOut)
+        if (*it <= versionIn)
         {
             versionOut = *it;
         }
@@ -187,39 +187,15 @@ bool MultiWrite64::findKeyValue(const uint64_t version,const Goldilocks::Element
     Lock();
     string keyStr_ = fea2string(fr, key[0], key[1], key[2], key[3]);
     string keyStr = NormalizeToNFormat(keyStr_, 64); 
-
-
-    map<uint64_t, vector<KeyValue>>::const_iterator it;
-
-    // Search in data[pendingToFlushDataIndex].keyValueA
-    if (bResult == false)
-    {
-        uint64_t versionPrevious = previousAvailableVersion(version, data[pendingToFlushDataIndex].keyVersions[keyStr]);
-        if(versionPrevious != 0){
-            it = data[pendingToFlushDataIndex].keyValueA.find(versionPrevious);
-            if (it != data[pendingToFlushDataIndex].keyValueA.end())
-            {
-                for(auto it2 = it->second.begin(); it2 != it->second.end(); ++it2){
-                    if(it2->key[0]==key[0] && it2->key[1]==key[1] && it2->key[2]==key[2] && it2->key[3]==key[3]){
-                        value = it2->value;
-                        bResult = true;
-                        break;
-                    }
-                }
-
-    #ifdef LOG_DB_MULTI_WRITE_FIND_NODES
-                zklog.info("MultiWrite64::findkeyValueA() data[pendingToFlushDataIndex].keyValueA found version=" + to_string(version) + " key=" + keyStr + " value=" + value.get_str());
-    #endif
-            }
-        }
-    }
+    
     unordered_map<uint64_t, vector<KeyValue>>::const_iterator it_;
 
     // Search in data[pendingToFlushDataIndex].keyValueAIntray
+    // Very important to start locking for intray first since in has newever versions
     if (bResult == false)
     {
         uint64_t versionPrevious = previousAvailableVersion(version, data[pendingToFlushDataIndex].keyVersionsIntray[keyStr]);
-        if(versionPrevious != 0){
+        if(versionPrevious != UINT64_MAX){
             it_ = data[pendingToFlushDataIndex].keyValueAIntray.find(versionPrevious);
             if (it_ != data[pendingToFlushDataIndex].keyValueAIntray.end())
             {
@@ -238,6 +214,32 @@ bool MultiWrite64::findKeyValue(const uint64_t version,const Goldilocks::Element
         }
     }
 
+    map<uint64_t, vector<KeyValue>>::const_iterator it;
+
+    // Search in data[pendingToFlushDataIndex].keyValueA
+    if (bResult == false)
+    {
+        uint64_t versionPrevious = previousAvailableVersion(version, data[pendingToFlushDataIndex].keyVersions[keyStr]);
+        if(versionPrevious != UINT64_MAX){
+            it = data[pendingToFlushDataIndex].keyValueA.find(versionPrevious);
+            if (it != data[pendingToFlushDataIndex].keyValueA.end())
+            {
+                for(auto it2 = it->second.begin(); it2 != it->second.end(); ++it2){
+                    if(it2->key[0]==key[0] && it2->key[1]==key[1] && it2->key[2]==key[2] && it2->key[3]==key[3]){
+                        value = it2->value;
+                        bResult = true;
+                        break;
+                    }
+                }
+
+    #ifdef LOG_DB_MULTI_WRITE_FIND_NODES
+                zklog.info("MultiWrite64::findkeyValueA() data[pendingToFlushDataIndex].keyValueA found version=" + to_string(version) + " key=" + keyStr + " value=" + value.get_str());
+    #endif
+            }
+        }
+    }
+   
+
     // If there is still some data pending to be stored on database
     if (storingFlushId != storedFlushId)
     {
@@ -246,7 +248,7 @@ bool MultiWrite64::findKeyValue(const uint64_t version,const Goldilocks::Element
         if (bResult == false)
         {
             uint64_t versionPrevious = previousAvailableVersion(version, data[storingDataIndex].keyVersions[keyStr]);
-            if(versionPrevious != 0){
+            if(versionPrevious != UINT64_MAX){
                 it = data[storingDataIndex].keyValueA.find(versionPrevious);
                 if (it != data[storingDataIndex].keyValueA.end())
                 {

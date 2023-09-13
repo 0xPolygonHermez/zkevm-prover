@@ -14,7 +14,7 @@ DatabaseKVAssociativeCache::DatabaseKVAssociativeCache()
     indexesSize = 0;
     log2CacheSize = 0;
     cacheSize = 0;
-    maxVersions = 100; //rick: as parameter
+    maxVersions = 0; 
     indexes = NULL;
     keys = NULL;
     values = NULL;
@@ -61,8 +61,7 @@ void DatabaseKVAssociativeCache::postConstruct(int log2IndexesSize_, int log2Cac
         exitProcess();
     }
     cacheSize = 1 << log2CacheSize_;
-    maxVersions = 100; //rick: as parameter
-
+    maxVersions = cacheSize;
 
     if(indexes != NULL) delete[] indexes;
     indexes = new uint32_t[indexesSize];
@@ -102,7 +101,6 @@ void DatabaseKVAssociativeCache::addKeyValueVersion(const uint64_t version, cons
     lock_guard<recursive_mutex> guard(mlock);
     bool emptySlot = false;
     bool present = false;
-    bool presentSameVersion = false;
     uint32_t cacheIndex;
     uint32_t tableIndexUse=0;
     uint64_t cacheIndexPrev=UINT64_MAX;
@@ -128,9 +126,8 @@ void DatabaseKVAssociativeCache::addKeyValueVersion(const uint64_t version, cons
                 keys[cacheIndexKey + 3].fe == key[3].fe){
                     present = true;
                     if(versions[cacheIndexVersions] == version){
-                        presentSameVersion = true;
-                        return;
-                    } else if (versions[cacheIndexVersions] > version){
+                        return; //no update
+                    } else if (version < versions[cacheIndexVersions]){
                         zklog.error("DatabaseKVAssociativeCache::addKeyValueVersion() adding lower version than the current one");
                         exitProcess();
                     } else {
@@ -152,13 +149,12 @@ void DatabaseKVAssociativeCache::addKeyValueVersion(const uint64_t version, cons
     //
     // Evaluate cacheIndexKey and 
     //
-    if(!presentSameVersion){
-        if(emptySlot == true || present){
-            indexes[tableIndexUse] = currentCacheIndex;
-        }
-        cacheIndex = (uint32_t)(currentCacheIndex & cacheMask);
-        currentCacheIndex = (currentCacheIndex == UINT32_MAX) ? 0 : (currentCacheIndex + 1);
+    if(emptySlot == true || present){
+        indexes[tableIndexUse] = currentCacheIndex;
     }
+    cacheIndex = (uint32_t)(currentCacheIndex & cacheMask);
+    currentCacheIndex = (currentCacheIndex == UINT32_MAX) ? 0 : (currentCacheIndex + 1);
+    
     uint64_t cacheIndexKey, cacheIndexValue, cacheIndexVersions;
     cacheIndexKey = cacheIndex * 4;
     cacheIndexValue = cacheIndex;
@@ -173,7 +169,7 @@ void DatabaseKVAssociativeCache::addKeyValueVersion(const uint64_t version, cons
     keys[cacheIndexKey + 3].fe = key[3].fe;
     values[cacheIndexValue] = value;
     versions[cacheIndexVersions] = version;
-    if(present && !presentSameVersion){
+    if(present){
         versions[cacheIndexVersions+1] = cacheIndexPrev;
     }else{
         versions[cacheIndexVersions+1] = UINT64_MAX;
@@ -191,19 +187,15 @@ void DatabaseKVAssociativeCache::addKeyValueVersion(const uint64_t version, cons
 
 void DatabaseKVAssociativeCache::downstreamAddKeyZeroVersion(const uint64_t version, const Goldilocks::Element (&key)[4]){
 
-    if(version<2){
-
-        zklog.error("DatabaseKVAssociativeCache::downstreamAddKeyZeroVersion() version must be greater than 1");
-        return;
-    }
     lock_guard<recursive_mutex> guard(mlock);
     bool presentSameVersion = false;
-    uint32_t cacheIndexZero;
+    uint32_t cacheIndexZero = 0;
     //
     // Check if present in one of the four slots
     //
     Goldilocks::Element key_hashed[4];
     hashKey(key_hashed, key);
+    bool breakOuterLoop = false;
     for (int i = 0; i < 4; ++i)
     {
         uint32_t tableIndex = (uint32_t)(key_hashed[i].fe & indexesMask);
@@ -213,19 +205,37 @@ void DatabaseKVAssociativeCache::downstreamAddKeyZeroVersion(const uint64_t vers
         uint32_t cacheIndexVersions = cacheIndex * 2;
 
         if (!emptyCacheSlot(cacheIndexRaw)){
-            if( keys[cacheIndexKey + 0].fe == key[0].fe &&
-                keys[cacheIndexKey + 1].fe == key[1].fe &&
-                keys[cacheIndexKey + 2].fe == key[2].fe &&
-                keys[cacheIndexKey + 3].fe == key[3].fe &&
-                versions[cacheIndexVersions] == version &&
-                versions[cacheIndexVersions+1] == UINT64_MAX){ //if linked zero can not be added  
-                    presentSameVersion = true;
-                    cacheIndexZero = currentCacheIndex & cacheMask;
-                    currentCacheIndex = (currentCacheIndex == UINT32_MAX) ? 0 : (currentCacheIndex + 1);
-                    versions[cacheIndexVersions+1] = cacheIndexZero;
-                    break;
+            for(int j=0; j<maxVersions; j++){
+                if (keys[cacheIndexKey + 0].fe == key[0].fe &&
+                    keys[cacheIndexKey + 1].fe == key[1].fe &&
+                    keys[cacheIndexKey + 2].fe == key[2].fe &&
+                    keys[cacheIndexKey + 3].fe == key[3].fe){ 
+                    
+                        if( versions[cacheIndexVersions] == version &&
+                            versions[cacheIndexVersions+1] == UINT64_MAX){ //if linked zero can not be added){
+
+                            presentSameVersion = true;
+                            cacheIndexZero = currentCacheIndex & cacheMask;
+                            currentCacheIndex = (currentCacheIndex == UINT32_MAX) ? 0 : (currentCacheIndex + 1);
+                            versions[cacheIndexVersions+1] = cacheIndexZero;
+                            breakOuterLoop = true;
+                            break;
+                        }
+                        if(versions[cacheIndexVersions+1]==UINT64_MAX) return; //No more versions
+                        cacheIndex = versions[cacheIndexVersions+1] & cacheMask;
+                        cacheIndexKey = cacheIndex * 4;
+                        cacheIndexVersions = cacheIndex * 2;
+                    
+                }else{
+                    if(j>0){
+                        return;
+                    }else{
+                        break;
+                    }
+                }
             }
         }
+        if(breakOuterLoop) break;
     }
 
     //
@@ -245,7 +255,7 @@ void DatabaseKVAssociativeCache::downstreamAddKeyZeroVersion(const uint64_t vers
         keys[cacheIndexKey + 2].fe = key[2].fe;
         keys[cacheIndexKey + 3].fe = key[3].fe;
         values[cacheIndexValue] = 0;
-        versions[cacheIndexVersions] = version-1;
+        versions[cacheIndexVersions] = 0;
         versions[cacheIndexVersions+1] = UINT64_MAX;
     }
     return;
@@ -264,7 +274,7 @@ void DatabaseKVAssociativeCache::uploadKeyValueVersions(const Goldilocks::Elemen
         }
     }else{
         vector<VersionValue>::const_iterator it = versionsValues.begin();
-        for(vector<uint64_t>::const_iterator it2 = versions.begin(); it2 != versions.end(); ++it2){
+        for(vector<uint64_t>::const_iterator it2 = versions.begin(); it2 != versions.end(); ++it2, ++it){
             if(*it2 != it->version){
                 zklog.error("DatabaseKVAssociativeCache::uploadKeyValueVersions() versions mismatch between cache and db");
                 exitProcess();
@@ -274,7 +284,7 @@ void DatabaseKVAssociativeCache::uploadKeyValueVersions(const Goldilocks::Elemen
     }
 }
 
-void DatabaseKVAssociativeCache::getLastCachedVersions(const Goldilocks::Element (&key)[4], vector<uint64_t> &versions, const int maxVersions){
+void DatabaseKVAssociativeCache::getLastCachedVersions(const Goldilocks::Element (&key)[4], vector<uint64_t> &versions, const int maxVersionsOut){
     
     versions.clear();
     lock_guard<recursive_mutex> guard(mlock);
@@ -292,7 +302,7 @@ void DatabaseKVAssociativeCache::getLastCachedVersions(const Goldilocks::Element
         uint32_t cacheIndexKey = cacheIndex * 4;
         uint32_t cacheIndexVersions = cacheIndex * 2;
 
-        for(int j=0; j<maxVersions; j++){
+        for(int j=0; j<maxVersionsOut; j++){
             if (keys[cacheIndexKey + 0].fe == key[0].fe &&
                 keys[cacheIndexKey + 1].fe == key[1].fe &&
                 keys[cacheIndexKey + 2].fe == key[2].fe &&
@@ -407,7 +417,7 @@ bool DatabaseKVAssociativeCache::findKey( const uint64_t version, const Goldiloc
                 keys[cacheIndexKey + 2].fe == key[2].fe &&
                 keys[cacheIndexKey + 3].fe == key[3].fe){
 
-                if( versions[cacheIndexVersions] <= version){ //We assume they are ordered
+                if( version >= versions[cacheIndexVersions] ){
                     uint32_t cacheIndexValue = cacheIndex;
                     ++hits;
                     value = values[cacheIndexValue];
