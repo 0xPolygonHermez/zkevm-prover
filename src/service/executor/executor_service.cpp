@@ -54,8 +54,9 @@ using grpc::Status;
     if (request->old_state_root().size() > 32)
     {
         zklog.error("ExecutorServiceImpl::ProcessBatch() got oldStateRoot too long, size=" + to_string(request->old_state_root().size()));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_OLD_STATE_ROOT);
         TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
-        return Status::CANCELLED;
+        return Status::OK;
     }
     ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot, request->old_state_root());
 
@@ -63,8 +64,9 @@ using grpc::Status;
     if (request->old_acc_input_hash().size() > 32)
     {
         zklog.error("ExecutorServiceImpl::ProcessBatch() got oldAccInputHash too long, size=" + to_string(request->old_acc_input_hash().size()));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_OLD_ACC_INPUT_HASH);
         TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
-        return Status::CANCELLED;
+        return Status::OK;
     }
     ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash, request->old_acc_input_hash());
 
@@ -76,8 +78,9 @@ using grpc::Status;
     if (proverRequest.input.publicInputsExtended.publicInputs.chainID == 0)
     {
         zklog.error("ExecutorServiceImpl::ProcessBatch() got chainID = 0");
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_CHAIN_ID);
         TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
-        return Status::CANCELLED;
+        return Status::OK;
     }
 
     // Get fork ID
@@ -96,8 +99,9 @@ using grpc::Status;
     if (request->batch_l2_data().size() > MAX_BATCH_L2_DATA_SIZE)
     {
         zklog.error("ExecutorServiceImpl::ProcessBatch() found batchL2Data.size()=" + to_string(request->batch_l2_data().size()) + " > MAX_BATCH_L2_DATA_SIZE=" + to_string(MAX_BATCH_L2_DATA_SIZE));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_BATCH_L2_DATA);
         TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
-        return Status::CANCELLED;
+        return Status::OK;
     }
     proverRequest.input.publicInputsExtended.publicInputs.batchL2Data = request->batch_l2_data();
 
@@ -105,8 +109,9 @@ using grpc::Status;
     if (request->global_exit_root().size() > 32)
     {
         zklog.error("ExecutorServiceImpl::ProcessBatch() got globalExitRoot too long, size=" + to_string(request->global_exit_root().size()));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_GLOBAL_EXIT_ROOT);
         TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
-        return Status::CANCELLED;
+        return Status::OK;
     }
     ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot, request->global_exit_root());
 
@@ -118,14 +123,16 @@ using grpc::Status;
     if (auxString.size() > 40)
     {
         zklog.error("ExecutorServiceImpl::ProcessBatch() got sequencer address too long, size=" + to_string(auxString.size()));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_COINBASE);
         TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
-        return Status::CANCELLED;
+        return Status::OK;
     }
     if (!stringIsHex(auxString))
     {
         zklog.error("ExecutorServiceImpl::ProcessBatch() got sequencer address not hex, coinbase=" + auxString);
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_COINBASE);
         TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
-        return Status::CANCELLED;
+        return Status::OK;
     }
     proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.set_str(auxString, 16);
 
@@ -136,14 +143,16 @@ using grpc::Status;
     if (proverRequest.input.from.size() > (2 + 40))
     {
         zklog.error("ExecutorServiceImpl::ProcessBatch() got from too long, size=" + to_string(proverRequest.input.from.size()));
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_FROM);
         TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
-        return Status::CANCELLED;
+        return Status::OK;
     }
     if (!stringIs0xHex(proverRequest.input.from))
     {
         zklog.error("ExecutorServiceImpl::ProcessBatch() got from not hex, size=" + proverRequest.input.from);
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_FROM);
         TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
-        return Status::CANCELLED;
+        return Status::OK;
     }
 
     // Flags
@@ -199,14 +208,16 @@ using grpc::Status;
         if (key.size() > 64)
         {
             zklog.error("ExecutorServiceImpl::ProcessBatch() got db key too long, size=" + to_string(key.size()));
+            response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_KEY);
             TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
-            return Status::CANCELLED;
+            return Status::OK;
         }
         if (!stringIsHex(key))
         {
             zklog.error("ExecutorServiceImpl::ProcessBatch() got db key not hex, key=" + key);
+            response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_KEY);
             TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
-            return Status::CANCELLED;
+            return Status::OK;
         }
         PrependZerosNoCopy(key, 64);
 
@@ -216,14 +227,16 @@ using grpc::Status;
         if (!stringIsHex(concatenatedValues))
         {
             zklog.error("ExecutorServiceImpl::ProcessBatch() found db value not hex: " + concatenatedValues);
+            response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
             TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
-            return Status::CANCELLED;
+            return Status::OK;
         }
         if (concatenatedValues.size()%16!=0)
         {
             zklog.error("ExecutorServiceImpl::ProcessBatch() found invalid db value size: " + to_string(concatenatedValues.size()));
+            response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
             TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
-            return Status::CANCELLED;
+            return Status::OK;
         }
         for (uint64_t i=0; i<concatenatedValues.size(); i+=16)
         {
@@ -251,14 +264,16 @@ using grpc::Status;
         if (key.size() > (64))
         {
             zklog.error("ExecutorServiceImpl::ProcessBatch() got contracts key too long, size=" + to_string(key.size()));
+            response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_CONTRACTS_BYTECODE_KEY);
             TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
-            return Status::CANCELLED;
+            return Status::OK;
         }
         if (!stringIsHex(key))
         {
             zklog.error("ExecutorServiceImpl::ProcessBatch() got contracts key not hex, key=" + key);
+            response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_CONTRACTS_BYTECODE_KEY);
             TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
-            return Status::CANCELLED;
+            return Status::OK;
         }
         PrependZerosNoCopy(key, 64);
 
@@ -266,8 +281,9 @@ using grpc::Status;
         if (!stringIsHex(Remove0xIfPresent(itp->second)))
         {
             zklog.error("ExecutorServiceImpl::ProcessBatch() got contracts value not hex, value=" + itp->second);
+            response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_CONTRACTS_BYTECODE_VALUE);
             TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
-            return Status::CANCELLED;
+            return Status::OK;
         }
         vector<uint8_t> dbValue;
         string contractValue = string2ba(itp->second);
