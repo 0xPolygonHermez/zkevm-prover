@@ -84,7 +84,7 @@ void DatabaseKVAssociativeCache::postConstruct(int log2IndexesSize_, int log2Cac
     #pragma omp parallel for schedule(static) num_threads(4)
     for (size_t i = 0; i < cacheSize; i++)
     {
-        indexes[i*2+1] = UINT64_MAX;
+        versions[i*2+1] = UINT64_MAX;
     }
 
     currentCacheIndex = 0;
@@ -105,7 +105,7 @@ void DatabaseKVAssociativeCache::addKeyValueVersion(const uint64_t version, cons
     bool presentSameVersion = false;
     uint32_t cacheIndex;
     uint32_t tableIndexUse=0;
-    uint32_t cacheIndexPrev;
+    uint64_t cacheIndexPrev=UINT64_MAX;
 
     //
     // Check if present in one of the four slots
@@ -187,6 +187,129 @@ void DatabaseKVAssociativeCache::addKeyValueVersion(const uint64_t version, cons
         usedRawCacheIndexes[0] = currentCacheIndex-1;
         forcedInsertion(usedRawCacheIndexes, iters);
     }
+}
+
+void DatabaseKVAssociativeCache::downstreamAddKeyZeroVersion(const uint64_t version, const Goldilocks::Element (&key)[4]){
+
+    if(version<2){
+
+        zklog.error("DatabaseKVAssociativeCache::downstreamAddKeyZeroVersion() version must be greater than 1");
+        return;
+    }
+    lock_guard<recursive_mutex> guard(mlock);
+    bool presentSameVersion = false;
+    uint32_t cacheIndexZero;
+    //
+    // Check if present in one of the four slots
+    //
+    Goldilocks::Element key_hashed[4];
+    hashKey(key_hashed, key);
+    for (int i = 0; i < 4; ++i)
+    {
+        uint32_t tableIndex = (uint32_t)(key_hashed[i].fe & indexesMask);
+        uint32_t cacheIndexRaw = indexes[tableIndex];
+        uint32_t cacheIndex = cacheIndexRaw & cacheMask;
+        uint32_t cacheIndexKey = cacheIndex * 4;
+        uint32_t cacheIndexVersions = cacheIndex * 2;
+
+        if (!emptyCacheSlot(cacheIndexRaw)){
+            if( keys[cacheIndexKey + 0].fe == key[0].fe &&
+                keys[cacheIndexKey + 1].fe == key[1].fe &&
+                keys[cacheIndexKey + 2].fe == key[2].fe &&
+                keys[cacheIndexKey + 3].fe == key[3].fe &&
+                versions[cacheIndexVersions] == version &&
+                versions[cacheIndexVersions+1] == UINT64_MAX){ //if linked zero can not be added  
+                    presentSameVersion = true;
+                    cacheIndexZero = currentCacheIndex & cacheMask;
+                    currentCacheIndex = (currentCacheIndex == UINT32_MAX) ? 0 : (currentCacheIndex + 1);
+                    versions[cacheIndexVersions+1] = cacheIndexZero;
+                    break;
+            }
+        }
+    }
+
+    //
+    // Evaluate cacheIndexKey and 
+    //
+    if(presentSameVersion){
+    
+        uint64_t cacheIndexKey = cacheIndexZero * 4;
+        uint64_t cacheIndexValue = cacheIndexZero;
+        uint64_t cacheIndexVersions = cacheIndexZero * 2;
+        
+        //
+        // Add value
+        //
+        keys[cacheIndexKey + 0].fe = key[0].fe;
+        keys[cacheIndexKey + 1].fe = key[1].fe;
+        keys[cacheIndexKey + 2].fe = key[2].fe;
+        keys[cacheIndexKey + 3].fe = key[3].fe;
+        values[cacheIndexValue] = 0;
+        versions[cacheIndexVersions] = version-1;
+        versions[cacheIndexVersions+1] = UINT64_MAX;
+    }
+    return;
+
+}
+
+void DatabaseKVAssociativeCache::uploadKeyValueVersions(const Goldilocks::Element (&key)[4], vector<VersionValue> &versionsValues){
+    
+
+    //Get last version for the key
+    uint64_t lastVersion = getLastCachedVersion(key);
+    if(lastVersion == UINT64_MAX){
+        for (std::vector<VersionValue>::reverse_iterator it = versionsValues.rbegin(); it != versionsValues.rend(); ++it) {
+            addKeyValueVersion(it->version, key, it->value, true);
+        }
+    }else{
+        //rick: but this situation is not tolerable no??
+        
+        //Find the verison in my vector and add from there
+        bool found = false;
+        for(std::vector<VersionValue>::reverse_iterator it = versionsValues.rbegin(); it != versionsValues.rend(); ++it) {
+            if(found){
+                addKeyValueVersion(it->version, key, it->value, true);
+            }
+            if(it->version == lastVersion){
+                found = true;
+            }
+        }
+        if(!found){
+            bool linked = false;
+            for (std::vector<VersionValue>::reverse_iterator it = versionsValues.rbegin(); it != versionsValues.rend(); ++it) {
+                addKeyValueVersion(it->version, key, it->value, linked);
+                linked = true;
+            }
+        }
+    }
+}
+
+
+uint64_t DatabaseKVAssociativeCache::getLastCachedVersion(const Goldilocks::Element (&key)[4]){
+    lock_guard<recursive_mutex> guard(mlock);
+    //
+    // Check if present in one of the four slots
+    //
+    Goldilocks::Element key_hashed[4];
+    hashKey(key_hashed, key);
+    for (int i = 0; i < 4; ++i)
+    {
+        uint32_t tableIndex = (uint32_t)(key_hashed[i].fe & indexesMask);
+        uint32_t cacheIndexRaw = indexes[tableIndex];
+        uint32_t cacheIndex = cacheIndexRaw & cacheMask;
+        uint32_t cacheIndexKey = cacheIndex * 4;
+        uint32_t cacheIndexVersions = cacheIndex * 2;
+
+        if (!emptyCacheSlot(cacheIndexRaw)){
+            if( keys[cacheIndexKey + 0].fe == key[0].fe &&
+                keys[cacheIndexKey + 1].fe == key[1].fe &&
+                keys[cacheIndexKey + 2].fe == key[2].fe &&
+                keys[cacheIndexKey + 3].fe == key[3].fe){
+                    return versions[cacheIndexVersions];
+            }
+        }
+    }
+    return UINT64_MAX;
 }
 
 void DatabaseKVAssociativeCache::forcedInsertion(uint32_t (&usedRawCacheIndexes)[10], int &iters)

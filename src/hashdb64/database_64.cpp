@@ -1224,7 +1224,7 @@ zkresult Database64::writeRemoteKV(const uint64_t version, const Goldilocks::Ele
             } else{
                 if(version > 1){
                     mpz_class   zero(0);
-                    dbKVACache.addKeyValueVersion(version-1, key, zero, false);                
+                    dbKVACache.downstreamAddKeyZeroVersion(version, key);                
                 }
             }
         }
