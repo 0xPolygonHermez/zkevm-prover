@@ -95,7 +95,7 @@ uint64_t DatabaseAssociativeCacheTest (void)
             keyScalar = i;
             scalar2fea(fr, keyScalar, key);
             valueScalar = (version/2)*NUMBER_OF_DB_CACHE_ADDS + i;
-            dbKVACache.addKeyValueVersion(version, key, valueScalar,update);
+            dbKVACache.addKeyValueVersion(version, key, valueScalar);
         }
     }
     for(version=0; version<=10; version++){

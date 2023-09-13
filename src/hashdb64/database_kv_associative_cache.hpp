@@ -43,11 +43,12 @@ class DatabaseKVAssociativeCache
         ~DatabaseKVAssociativeCache();
         void postConstruct(int log2IndexesSize_, int log2CacheSize_, string name_);
 
-        void addKeyValueVersion(const uint64_t version, const Goldilocks::Element (&key)[4], const mpz_class &value, bool link = true);
+        void addKeyValueVersion(const uint64_t version, const Goldilocks::Element (&key)[4], const mpz_class &value);
         void downstreamAddKeyZeroVersion(const uint64_t version, const Goldilocks::Element (&key)[4]);
         void uploadKeyValueVersions(const Goldilocks::Element (&key)[4], vector<VersionValue> &versionsValues);
         bool findKey( const uint64_t version, const Goldilocks::Element (&key)[4], mpz_class &value);
-        uint64_t getLastCachedVersion(const Goldilocks::Element (&key)[4]);
+        void getLastCachedVersions(const Goldilocks::Element (&key)[4], vector<uint64_t> &versions, const int maxVersions);
+        
 
         inline bool enabled() const { return (log2IndexesSize > 0); };
         inline uint32_t getCacheSize()  const { return cacheSize; };

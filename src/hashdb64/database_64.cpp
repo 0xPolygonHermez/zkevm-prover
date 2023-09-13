@@ -358,16 +358,21 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
             rkv = readRemoteKV(version, key, value, upstremVersionValues);       
             if (rkv == ZKR_SUCCESS)
             {
-                dbKVACache.addKeyValueVersion(version, key, value, false); //rick problematic                
+                dbKVACache.uploadKeyValueVersions(key, upstremVersionValues);               
                 if (dbReadLog != NULL) dbReadLog->add(keyStr, value, false, TimeDiff(t));
             } else {
                 
-                if( rkv == ZKR_DB_VERSION_NOT_FOUND_GLOBAL){
+                if( rkv == ZKR_DB_KEY_NOT_FOUND){
+                    rout = rkv;
+                    // Add a zero into the cache to avoid future remote access for this key (not problematic management of versions as there is only one version)
+                    mpz_class   zero(0);
+                    dbKVACache.addKeyValueVersion(0, key, zero);
+                }else if( rkv == ZKR_DB_VERSION_NOT_FOUND_GLOBAL){
                     value = 0;
                     rout = rkv;
                     mpz_class   zero(0);
                     // Add a zero into the cache to avoid future remote access for this key (not problematic management of versions as there is only one version)
-                    dbKVACache.addKeyValueVersion(version, key, zero, false);
+                    dbKVACache.uploadKeyValueVersions(key, upstremVersionValues);
                 }else{
                     zkresult rtree = ZKR_UNSPECIFIED;
                     vector<KeyValue> keyValues(1);
@@ -476,7 +481,7 @@ zkresult Database64::writeKV(const uint64_t& version, const Goldilocks::Element 
 
     if (rkv == ZKR_SUCCESS)
     {
-        dbKVACache.addKeyValueVersion(version, key, value, false);
+        dbKVACache.addKeyValueVersion(version, key, value);
         
     }
 
@@ -1056,7 +1061,7 @@ zkresult Database64::readRemoteKV(const uint64_t version, const Goldilocks::Elem
         if (rows.size() == 0)
         {
             disposeConnection(pDatabaseConnection);
-            return ZKR_DB_VERSION_NOT_FOUND_GLOBAL;
+            return ZKR_DB_KEY_NOT_FOUND;
         }
         else if (rows.size() > 1)
         {
@@ -1222,10 +1227,13 @@ zkresult Database64::writeRemoteKV(const uint64_t version, const Goldilocks::Ele
                     insertStr = insertStr + data;
                 }
             } else{
-                if(version > 1){
-                    mpz_class   zero(0);
-                    dbKVACache.downstreamAddKeyZeroVersion(version, key);                
-                }
+                string valueZero = NormalizeToNFormat("0",64);
+                string versionZero = NormalizeToNFormat(U64toString(0,16),16); 
+                string insertZero = versionStr + valueStr;
+                insertStr = insertStr + versionZero + valueZero;
+                mpz_class   zero(0);
+                dbKVACache.downstreamAddKeyZeroVersion(version, key);                
+                
             }
         }
         catch (const std::exception &e)
