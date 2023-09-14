@@ -7,6 +7,7 @@
 #include "zklog.hpp"
 #include "zkmax.hpp"
 #include "poseidon_goldilocks.hpp"
+#include "version_value.hpp"
 
 
 using namespace std;
@@ -42,8 +43,12 @@ class DatabaseKVAssociativeCache
         ~DatabaseKVAssociativeCache();
         void postConstruct(int log2IndexesSize_, int log2CacheSize_, string name_);
 
-        void addKeyValueVersion(const uint64_t version, const Goldilocks::Element (&key)[4], const mpz_class &value, bool update);
+        void addKeyValueVersion(const uint64_t version, const Goldilocks::Element (&key)[4], const mpz_class &value);
+        void downstreamAddKeyZeroVersion(const uint64_t version, const Goldilocks::Element (&key)[4]);
+        void uploadKeyValueVersions(const Goldilocks::Element (&key)[4], vector<VersionValue> &versionsValues);
         bool findKey( const uint64_t version, const Goldilocks::Element (&key)[4], mpz_class &value);
+        void getLastCachedVersions(const Goldilocks::Element (&key)[4], vector<uint64_t> &versions, const int maxVersions);
+        
 
         inline bool enabled() const { return (log2IndexesSize > 0); };
         inline uint32_t getCacheSize()  const { return cacheSize; };
@@ -57,16 +62,6 @@ class DatabaseKVAssociativeCache
          };
         void forcedInsertion(uint32_t (&usedRawCacheIndexes)[10], int &iters);
         inline void hashKey(Goldilocks::Element (&keyOut)[4], const Goldilocks::Element (&keyIn)[4]) const{
-            Goldilocks::Element key_hash_imput[12];
-            for(int i=0; i<4; i++){
-                key_hash_imput[i] = keyIn[i];
-                key_hash_imput[i+4] = keyIn[i];
-                key_hash_imput[i+8] = keyIn[i];
-            }   
-            PoseidonGoldilocks pg;
-            pg.hash_seq(keyOut, key_hash_imput);
-        };
-        inline void hashKey_p(Goldilocks::Element (&keyOut)[4], const Goldilocks::Element * keyIn) const{ //rick: convertir
             Goldilocks::Element key_hash_imput[12];
             for(int i=0; i<4; i++){
                 key_hash_imput[i] = keyIn[i];

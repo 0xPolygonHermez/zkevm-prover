@@ -74,6 +74,7 @@ private:
     pthread_t senderPthread; // Database sender thread
     pthread_t cacheSynchPthread; // Cache synchronization thread
     int maxVersions; // Maximum number of versions to store in the database KV
+    int maxVersionsUpload; // Maximum number of versions to upload from the database KV to the cache when there is a cache miss
 
 private:
     // Remote database based on Postgres (PostgreSQL)
@@ -81,14 +82,14 @@ private:
     zkresult readRemote(bool bProgram, const string &key, string &value);
     zkresult writeRemote(bool bProgram, const string &key, const string &value);
 
-    zkresult readRemoteKV(const uint64_t version, const Goldilocks::Element (&key)[4],  mpz_class value); 
-    zkresult writeRemoteKV(const uint64_t version, const Goldilocks::Element (&key)[4], const mpz_class &value, bool noMultiWrite = false);
+    zkresult readRemoteKV(const uint64_t version, const Goldilocks::Element (&key)[4],  mpz_class value, vector<VersionValue> &upstreamVersionValues); 
+    zkresult writeRemoteKV(const uint64_t version, const Goldilocks::Element (&key)[4], const mpz_class &value, bool useMultiWrite = true);
     zkresult readRemoteVersion(const Goldilocks::Element (&root)[4], uint64_t version);
     zkresult writeRemoteVersion(const Goldilocks::Element (&root)[4], const uint64_t version); 
     zkresult readRemoteLatestVersion(uint64_t &version);
     zkresult writeRemoteLatestVersion(const uint64_t version);
 
-    zkresult extractVersion(const pqxx::field& fieldData, const uint64_t version, mpz_class &value);
+    zkresult extractVersion(const pqxx::field& fieldData, const uint64_t version, mpz_class &value, vector<VersionValue> &upstreamVersionValues);
 
 public:
 #ifdef DATABASE_USE_CACHE

@@ -4,6 +4,19 @@
 
 using namespace std;
 
+uint64_t previousAvailableVersion(const uint64_t versionIn, const vector<uint64_t> &versions)
+{
+    uint64_t versionOut = UINT64_MAX;
+    for (auto it = versions.begin(); it != versions.end(); ++it)
+    {
+        if (*it <= versionIn)
+        {
+            versionOut = *it;
+        }
+    }
+    return versionOut;
+}
+
 MultiWrite64::MultiWrite64(Goldilocks & fr) :
     fr(fr),
     lastFlushId(0),
@@ -167,62 +180,96 @@ bool MultiWrite64::findProgram(const string &key, vector<uint8_t> &value)
     return bResult;
 }
 
-bool MultiWrite64::findKeyValue(const uint64_t version, KeyValue &kv){
+bool MultiWrite64::findKeyValue(const uint64_t version,const Goldilocks::Element (&key)[4], mpz_class &value){
+
 
     bool bResult = false;
     Lock();
+    string keyStr_ = fea2string(fr, key[0], key[1], key[2], key[3]);
+    string keyStr = NormalizeToNFormat(keyStr_, 64); 
+    
+    unordered_map<uint64_t, vector<KeyValue>>::const_iterator it_;
 
-    unordered_map<uint64_t, KeyValue>::const_iterator it;
-
-    // Search in data[pendingToFlushDataIndex].keyValue
+    // Search in data[pendingToFlushDataIndex].keyValueAIntray
+    // Very important to start locking for intray first since in has newever versions
     if (bResult == false)
     {
-        it = data[pendingToFlushDataIndex].keyValue.find(version);
-        if (it != data[pendingToFlushDataIndex].keyValue.end())
-        {
-            kv = it->second;
-            bResult = true;
+        uint64_t versionPrevious = previousAvailableVersion(version, data[pendingToFlushDataIndex].keyVersionsIntray[keyStr]);
+        if(versionPrevious != UINT64_MAX){
+            it_ = data[pendingToFlushDataIndex].keyValueAIntray.find(versionPrevious);
+            if (it_ != data[pendingToFlushDataIndex].keyValueAIntray.end())
+            {
+                for(auto it2 = it_->second.begin(); it2 != it_->second.end(); ++it2){
+                    if(it2->key[0]==key[0] && it2->key[1]==key[1] && it2->key[2]==key[2] && it2->key[3]==key[3]){
+                        value = it2->value;
+                        bResult = true;
+                        break;
+                    }
+                }
 
-#ifdef LOG_DB_MULTI_WRITE_FIND_NODES
-            zklog.info("MultiWrite64::findKeyValue() data[pendingToFlushDataIndex].keyValue found version=" + to_string(version) + " key=" + fea2string(fr, it->second.key.fe) + " value=" + it->second.value.get_str());
-#endif
+    #ifdef LOG_DB_MULTI_WRITE_FIND_NODES
+                zklog.info("MultiWrite64::findkeyValueAIntray() data[pendingToFlushDataIndex].keyValueAIntray found version=" + to_string(version) + " key=" + keyStr + " value=" + value.get_str());
+    #endif
+            }
         }
     }
 
-    // Search in data[pendingToFlushDataIndex].nodesIntray
+    map<uint64_t, vector<KeyValue>>::const_iterator it;
+
+    // Search in data[pendingToFlushDataIndex].keyValueA
     if (bResult == false)
     {
-        it = data[pendingToFlushDataIndex].keyValueIntray.find(version);
-        if (it != data[pendingToFlushDataIndex].keyValueIntray.end())
-        {
-            kv = it->second;
-            bResult = true;
+        uint64_t versionPrevious = previousAvailableVersion(version, data[pendingToFlushDataIndex].keyVersions[keyStr]);
+        if(versionPrevious != UINT64_MAX){
+            it = data[pendingToFlushDataIndex].keyValueA.find(versionPrevious);
+            if (it != data[pendingToFlushDataIndex].keyValueA.end())
+            {
+                for(auto it2 = it->second.begin(); it2 != it->second.end(); ++it2){
+                    if(it2->key[0]==key[0] && it2->key[1]==key[1] && it2->key[2]==key[2] && it2->key[3]==key[3]){
+                        value = it2->value;
+                        bResult = true;
+                        break;
+                    }
+                }
 
-#ifdef LOG_DB_MULTI_WRITE_FIND_NODES
-            zklog.info("MultiWrite64::findKeyValue() data[pendingToFlushDataIndex].keyValueIntray found version=" + to_string(version) + " key=" + fea2string(fr, it->second.key.fe) + " value=" + it->second.value.get_str());
-#endif
+    #ifdef LOG_DB_MULTI_WRITE_FIND_NODES
+                zklog.info("MultiWrite64::findkeyValueA() data[pendingToFlushDataIndex].keyValueA found version=" + to_string(version) + " key=" + keyStr + " value=" + value.get_str());
+    #endif
+            }
         }
     }
+   
 
     // If there is still some data pending to be stored on database
     if (storingFlushId != storedFlushId)
     {
-        // Search in data[storingDataIndex].keyValue
+
+        // Search in data[storingDataIndex].keyValueA
         if (bResult == false)
         {
-            it = data[storingDataIndex].keyValue.find(version);
-            if (it != data[storingDataIndex].keyValue.end())
-            {
-                kv = it->second;
-                bResult = true;
-#ifdef LOG_DB_MULTI_WRITE_FIND_NODES
-                zklog.info("MultiWrite64::findKeyValue() data[storingDataIndex].keyValueIntray found version=" + to_string(version) + " key=" + fea2string(fr, it->second.key.fe) + " value=" + it->second.value.get_str());
-#endif
+            uint64_t versionPrevious = previousAvailableVersion(version, data[storingDataIndex].keyVersions[keyStr]);
+            if(versionPrevious != UINT64_MAX){
+                it = data[storingDataIndex].keyValueA.find(versionPrevious);
+                if (it != data[storingDataIndex].keyValueA.end())
+                {
+                    for(auto it2 = it->second.begin(); it2 != it->second.end(); ++it2){
+                        if(it2->key[0]==key[0] && it2->key[1]==key[1] && it2->key[2]==key[2] && it2->key[3]==key[3]){
+                            value = it2->value;
+                            bResult = true;
+                            break;
+                        }
+                    }
+
+        #ifdef LOG_DB_MULTI_WRITE_FIND_NODES
+                    zklog.info("MultiWrite64::findkeyValueA() data[storingDataIndex].keyValueA found version=" + to_string(version) + " key=" + keyStr + " value=" + value.get_str());
+        #endif
+                }
             }
         }
+        
 
-        // data[storingDataIndex].nodesIntray must be empty
-        zkassert(data[storingDataIndex].keyValueIntray.size() == 0);
+        // data[storingDataIndex].keyValueIntray must be empty
+        zkassert(data[storingDataIndex].keyValueAIntray.size() == 0);
     }
 
     Unlock();
