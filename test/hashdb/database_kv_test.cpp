@@ -1,4 +1,4 @@
-#include "database_kv_remote_test.hpp"
+#include "database_kv_test.hpp"
 #include "goldilocks_base_field.hpp"
 #include "hashdb.hpp"
 #include "hashdb_singleton.hpp"
@@ -6,7 +6,7 @@
 #define DBKV_REMOTE_TEST_NUMBER_OF_WRITES 1000
 
 
-uint64_t DatabaseKVRemoteTest (const Config &config){
+uint64_t DatabaseKVTest (const Config &config){
     
     Goldilocks fr;
     uint64_t numberOfFailedTests = 0;
@@ -14,13 +14,13 @@ uint64_t DatabaseKVRemoteTest (const Config &config){
     TimerStart(DATABASE_KV_REMOTE_TEST);
 
     if(config.dbMultiWrite == true){
-        zklog.error("DatabaseKVRemoteTest() this test must be run with config.dbMultiWrite=false");
+        zklog.error("DatabaseKVTest() this test must be run with config.dbMultiWrite=false");
         exitProcess();
     }
     HashDB * pHashDB = (HashDB *)hashDBSingleton.get();
     if (pHashDB == NULL)
     {
-        zklog.error("DatabaseKVRemoteTest() failed calling HashDBSingleton::get()");
+        zklog.error("DatabaseKVTest() failed calling HashDBSingleton::get()");
         exitProcess();
     }
     Database64 * pDatabase64 = &pHashDB->db64;    
@@ -33,14 +33,14 @@ uint64_t DatabaseKVRemoteTest (const Config &config){
     pDatabase64->readLatestVersion(versionOut);
     if(versionOut != versionIn)
     {
-        zklog.error("DatabaseKVRemoteTest() failed calling Database64.readLatestVersion()");
+        zklog.error("DatabaseKVTest() failed calling Database64.readLatestVersion()");
         numberOfFailedTests += 1;
     }
     pDatabase64->clearCache(); 
     pDatabase64->readLatestVersion(versionOut);
     if(versionOut != versionIn)
     {
-        zklog.error("DatabaseKVRemoteTest() failed calling Database64.readLatestVersion()");
+        zklog.error("DatabaseKVTest() failed calling Database64.readLatestVersion()");
         numberOfFailedTests += 1;
     }
     //
@@ -54,14 +54,14 @@ uint64_t DatabaseKVRemoteTest (const Config &config){
     pDatabase64->readVersion(root, versionOut, NULL);
     if(versionOut != versionIn)
     {
-        zklog.error("DatabaseKVRemoteTest() failed calling Database64.readVersion()");
+        zklog.error("DatabaseKVTest() failed calling Database64.readVersion()");
         numberOfFailedTests += 1;
     }
     pDatabase64->clearCache(); 
     pDatabase64->readVersion(root, versionOut, NULL);
     if(versionOut != versionIn)
     {
-        zklog.error("DatabaseKVRemoteTest() failed calling Database64.readVersion()");
+        zklog.error("DatabaseKVTest() failed calling Database64.readVersion()");
         numberOfFailedTests += 1;
     }
     //
@@ -93,27 +93,27 @@ uint64_t DatabaseKVRemoteTest (const Config &config){
     pDatabase64->readKV(root2, key, valueOut, NULL);
     if(valueOut != valueIn)
     {
-        zklog.error("DatabaseKVRemoteTest() failed calling Database64.readKV()");
+        zklog.error("DatabaseKVTest() failed calling Database64.readKV()");
         numberOfFailedTests += 1;
     }
     pDatabase64->clearCache();
     pDatabase64->readKV(root2, key, valueOut, NULL);
     if(valueOut != valueIn)
     {
-        zklog.error("DatabaseKVRemoteTest() failed calling Database64.readKV() no cache");
+        zklog.error("DatabaseKVTest() failed calling Database64.readKV() no cache");
         numberOfFailedTests += 1;
     }
 
     pDatabase64->readKV(root1, key, valueOut, NULL);
     if(valueOut != valueZero)
     {
-        zklog.error("DatabaseKVRemoteTest() failed calling Database64.readKV() should not be found");
+        zklog.error("DatabaseKVTest() failed calling Database64.readKV() should not be found");
         numberOfFailedTests += 1;
     }
     pDatabase64->readKV(root3, key, valueOut, NULL);
     if(valueOut != valueIn)
     {
-        zklog.error("DatabaseKVRemoteTest() failed calling Database64.readKV() should be found with latter version");
+        zklog.error("DatabaseKVTest() failed calling Database64.readKV() should be found with latter version");
         numberOfFailedTests += 1;
     }
 
@@ -122,7 +122,7 @@ uint64_t DatabaseKVRemoteTest (const Config &config){
     //
     if(numberOfFailedTests != 0)
     {
-        zklog.error("DatabaseKVRemoteTest() failed with " + to_string(numberOfFailedTests) + " errors"); 
+        zklog.error("DatabaseKVTest() failed with " + to_string(numberOfFailedTests) + " errors"); 
         exitProcess();   
     }
    
