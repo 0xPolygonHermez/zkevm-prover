@@ -327,7 +327,7 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
     zkresult rout = ZKR_UNSPECIFIED;
 
     string keyStr = "";
-    if(dbReadLog->getSaveKeys()){
+    if(dbReadLog != NULL && dbReadLog->getSaveKeys()){
         string keyStr_ = fea2string(fr, key[0], key[1], key[2], key[3]); 
         keyStr = NormalizeToNFormat(keyStr_, 64);
     }
@@ -544,7 +544,7 @@ zkresult Database64::readVersion(const Goldilocks::Element (&root)[4], uint64_t&
     zkresult r = ZKR_UNSPECIFIED;
 
     string rootStr = "";
-    if(dbReadLog->getSaveKeys()){
+    if(dbReadLog != NULL &&  dbReadLog->getSaveKeys()){
         string rootStr_ = fea2string(fr, root[0], root[1], root[2], root[3]); 
         rootStr = NormalizeToNFormat(rootStr_, 64);
     }
@@ -556,7 +556,7 @@ zkresult Database64::readVersion(const Goldilocks::Element (&root)[4], uint64_t&
         r = ZKR_SUCCESS;
 
     }else{
-        if(!dbReadLog->getSaveKeys()){
+        if(dbReadLog==NULL || !dbReadLog->getSaveKeys()){
             string rootStr_ = fea2string(fr, root[0], root[1], root[2], root[3]); 
             rootStr = NormalizeToNFormat(rootStr_, 64);
         } 
@@ -2333,6 +2333,9 @@ void Database64::clearCache (void)
 {
     dbMTCache.clear();
     dbProgramCache.clear();
+    dbKVACache.clear();
+    dbVersionACache.clear();
+    latestVersionCache=0;
 }
 
 void *dbSenderThread64 (void *arg)

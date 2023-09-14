@@ -53,6 +53,11 @@ class DatabaseKVAssociativeCache
         inline bool enabled() const { return (log2IndexesSize > 0); };
         inline uint32_t getCacheSize()  const { return cacheSize; };
         inline uint32_t getIndexesSize() const { return indexesSize; };
+        inline void clear(){
+            if(enabled()){
+                postConstruct(log2IndexesSize, log2CacheSize, name);                
+            }
+        }
 
     private:
     

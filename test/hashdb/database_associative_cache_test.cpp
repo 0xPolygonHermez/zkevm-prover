@@ -52,6 +52,21 @@ uint64_t DatabaseAssociativeCacheTest (void)
         }
     }
 
+    dbMTACache.clear();
+    for (uint64_t i=0; i<NUMBER_OF_DB_CACHE_ADDS; i++)
+    {
+        keyScalar = i;
+        keyString = PrependZeros(keyScalar.get_str(16), 64);
+        scalar2fea(fr, keyScalar, key);
+        bResult = dbMTACache.findKey(key, value);
+        if (bResult )
+        {
+            zklog.error("DatabaseAssociativeCacheTest() failed calling DatabaseMTAssociativeCache.find() the cache should be empty");
+            numberOfFailed++;
+        }
+    }
+
+
     //
     // Test DatabaseVersionsAssociativeCache
     //
@@ -83,7 +98,20 @@ uint64_t DatabaseAssociativeCacheTest (void)
             numberOfFailed++;
         }
     }
-    //
+    dbVersionACache.clear();
+    for (uint64_t i=0; i<NUMBER_OF_DB_CACHE_ADDS; i++)
+    {
+        rootScalar = i;
+        rootString = PrependZeros(rootScalar.get_str(16), 64);
+        scalar2fea(fr, rootScalar, root);
+        bResult = dbVersionACache.findKey(root, version);
+        
+        if (bResult)
+        {    
+            zklog.error("DatabaseAssociativeCacheTest() failed calling DatabaseVersionsAssociativeCache.find() the cache should be empty");
+            numberOfFailed++;
+        }
+    }
     // Test DatabaseKVAssociativeCache
     //
     DatabaseKVAssociativeCache dbKVACache;
@@ -111,7 +139,23 @@ uint64_t DatabaseAssociativeCacheTest (void)
             }
         }
     }
+    dbKVACache.clear();
+    for(version=0; version<=10; version++){
+        for (uint64_t i=0; i<NUMBER_OF_DB_CACHE_ADDS; i++){
+            keyScalar = i;
+            scalar2fea(fr, keyScalar, key);
+            bResult = dbKVACache.findKey(version,key, valueScalar);
+            if (bResult)
+            {
+                zklog.error("DatabaseAssociativeCacheTest() failed calling DatabaseKVAssociativeCache.find() the cache should be empty");
+                numberOfFailed++;
+            }
+        }
+    }
 
+    //
+    // Final result
+    //
     if(numberOfFailed != 0)
     {
         zklog.error("DatabaseAssociativeCacheTest() failed with " + to_string(numberOfFailed) + " errors"); 

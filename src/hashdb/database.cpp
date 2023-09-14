@@ -1751,6 +1751,7 @@ void Database::clearCache (void)
 {
     dbMTCache.clear();
     dbProgramCache.clear();
+    dbMTACache.clear();
 }
 
 void *dbSenderThread (void *arg)
