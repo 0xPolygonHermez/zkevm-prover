@@ -670,7 +670,7 @@ using grpc::Status;
         response->set_allocated_result(result);
 
         // Return the key-value pairs in the response
-        for (int64_t i=0; i<keyValues.size(); i++)
+        for (uint64_t i=0; i<keyValues.size(); i++)
         {
             hashdb::v1::Fea *pKey = new hashdb::v1::Fea();
             zkassertpermanent(pKey != NULL);
@@ -685,7 +685,7 @@ using grpc::Status;
         }
 
         // Return the hash-value pairs in the response
-        for (int64_t i=0; i<hashValues.size(); i++)
+        for (uint64_t i=0; i<hashValues.size(); i++)
         {
             hashdb::v1::Fea *pHash = new hashdb::v1::Fea();
             zkassertpermanent(pHash != NULL);

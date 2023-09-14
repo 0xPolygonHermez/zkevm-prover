@@ -157,6 +157,16 @@ using grpc::Status;
 
     // Flags
     proverRequest.input.bUpdateMerkleTree = request->update_merkle_tree();
+    proverRequest.input.bGetKeys = request->get_keys();
+    if (proverRequest.input.bGetKeys && (proverRequest.input.publicInputsExtended.publicInputs.forkID < 5))
+    {
+        zklog.error("ExecutorServiceImpl::ProcessBatch() got get_keys=true but fork_id=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID) + "<5");
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_GET_KEY);
+        TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+        return Status::OK;
+
+    }
+
 
     // Trace config
     if (request->has_trace_config())
@@ -483,6 +493,20 @@ using grpc::Status;
                 pTransactionStep->set_error(string2error(responses[tx].call_trace.steps[step].error));
             }
             pProcessTransactionResponse->set_allocated_call_trace(pCallTrace);
+        }
+    }
+
+    // Return accessed keys, if requested
+    if (proverRequest.input.bGetKeys)
+    {
+        unordered_set<string>::const_iterator it;
+        for (it = proverRequest.nodesKeys.begin(); it != proverRequest.nodesKeys.end(); it++)
+        {
+            response->add_nodes_keys(string2ba(it->c_str()));
+        }
+        for (it = proverRequest.programKeys.begin(); it != proverRequest.programKeys.end(); it++)
+        {
+            response->add_program_keys(string2ba(it->c_str()));
         }
     }
 
