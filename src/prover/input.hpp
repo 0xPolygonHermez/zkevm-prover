@@ -31,13 +31,15 @@ public:
     // These fields are only used if this is an executor process batch
     bool bUpdateMerkleTree; // if true, save DB writes to SQL database
     bool bNoCounters; // if true, do not increase counters nor limit evaluations
+    bool bGetKeys; // if true, return the keys used to read or write storage data
     TraceConfig traceConfig; // FullTracer configuration
 
     // Constructor
     Input (Goldilocks &fr) :
         fr(fr),
         bUpdateMerkleTree(false),
-        bNoCounters(false) {};
+        bNoCounters(false),
+        bGetKeys(false) {};
 
     // Loads the input object data from a JSON object
     zkresult load (json &input);

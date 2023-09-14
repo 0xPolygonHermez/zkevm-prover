@@ -266,12 +266,13 @@ enum ExecutorError : int {
   EXECUTOR_ERROR_INVALID_DB_VALUE = 77,
   EXECUTOR_ERROR_INVALID_CONTRACTS_BYTECODE_KEY = 78,
   EXECUTOR_ERROR_INVALID_CONTRACTS_BYTECODE_VALUE = 79,
+  EXECUTOR_ERROR_INVALID_GET_KEY = 80,
   ExecutorError_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   ExecutorError_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool ExecutorError_IsValid(int value);
 constexpr ExecutorError ExecutorError_MIN = EXECUTOR_ERROR_UNSPECIFIED;
-constexpr ExecutorError ExecutorError_MAX = EXECUTOR_ERROR_INVALID_CONTRACTS_BYTECODE_VALUE;
+constexpr ExecutorError ExecutorError_MAX = EXECUTOR_ERROR_INVALID_GET_KEY;
 constexpr int ExecutorError_ARRAYSIZE = ExecutorError_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ExecutorError_descriptor();
@@ -488,6 +489,7 @@ class ProcessBatchRequest PROTOBUF_FINAL :
     kEthTimestampFieldNumber = 8,
     kNoCountersFieldNumber = 11,
     kUpdateMerkleTreeFieldNumber = 10,
+    kGetKeysFieldNumber = 17,
   };
   // map<string, string> db = 13;
   int db_size() const;
@@ -770,6 +772,15 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   void _internal_set_update_merkle_tree(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
+  // uint32 get_keys = 17;
+  void clear_get_keys();
+  ::PROTOBUF_NAMESPACE_ID::uint32 get_keys() const;
+  void set_get_keys(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_get_keys() const;
+  void _internal_set_get_keys(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:executor.v1.ProcessBatchRequest)
  private:
   class _Internal;
@@ -803,6 +814,7 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint64 eth_timestamp_;
   ::PROTOBUF_NAMESPACE_ID::uint64 no_counters_;
   ::PROTOBUF_NAMESPACE_ID::uint32 update_merkle_tree_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 get_keys_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
 };
@@ -956,6 +968,8 @@ class ProcessBatchResponse PROTOBUF_FINAL :
   enum : int {
     kResponsesFieldNumber = 13,
     kReadWriteAddressesFieldNumber = 15,
+    kNodesKeysFieldNumber = 19,
+    kProgramKeysFieldNumber = 20,
     kNewStateRootFieldNumber = 1,
     kNewAccInputHashFieldNumber = 2,
     kNewLocalExitRootFieldNumber = 3,
@@ -1007,6 +1021,54 @@ class ProcessBatchResponse PROTOBUF_FINAL :
       read_write_addresses() const;
   ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::executor::v1::InfoReadWrite >*
       mutable_read_write_addresses();
+
+  // repeated bytes nodes_keys = 19;
+  int nodes_keys_size() const;
+  private:
+  int _internal_nodes_keys_size() const;
+  public:
+  void clear_nodes_keys();
+  const std::string& nodes_keys(int index) const;
+  std::string* mutable_nodes_keys(int index);
+  void set_nodes_keys(int index, const std::string& value);
+  void set_nodes_keys(int index, std::string&& value);
+  void set_nodes_keys(int index, const char* value);
+  void set_nodes_keys(int index, const void* value, size_t size);
+  std::string* add_nodes_keys();
+  void add_nodes_keys(const std::string& value);
+  void add_nodes_keys(std::string&& value);
+  void add_nodes_keys(const char* value);
+  void add_nodes_keys(const void* value, size_t size);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& nodes_keys() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_nodes_keys();
+  private:
+  const std::string& _internal_nodes_keys(int index) const;
+  std::string* _internal_add_nodes_keys();
+  public:
+
+  // repeated bytes program_keys = 20;
+  int program_keys_size() const;
+  private:
+  int _internal_program_keys_size() const;
+  public:
+  void clear_program_keys();
+  const std::string& program_keys(int index) const;
+  std::string* mutable_program_keys(int index);
+  void set_program_keys(int index, const std::string& value);
+  void set_program_keys(int index, std::string&& value);
+  void set_program_keys(int index, const char* value);
+  void set_program_keys(int index, const void* value, size_t size);
+  std::string* add_program_keys();
+  void add_program_keys(const std::string& value);
+  void add_program_keys(std::string&& value);
+  void add_program_keys(const char* value);
+  void add_program_keys(const void* value, size_t size);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& program_keys() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_program_keys();
+  private:
+  const std::string& _internal_program_keys(int index) const;
+  std::string* _internal_add_program_keys();
+  public:
 
   // bytes new_state_root = 1;
   void clear_new_state_root();
@@ -1230,6 +1292,8 @@ class ProcessBatchResponse PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_MESSAGE,
       0 > read_write_addresses_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> nodes_keys_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> program_keys_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr new_state_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr new_acc_input_hash_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr new_local_exit_root_;
@@ -5003,6 +5067,26 @@ inline void ProcessBatchRequest::unsafe_arena_set_allocated_external_request_id(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBatchRequest.external_request_id)
 }
 
+// uint32 get_keys = 17;
+inline void ProcessBatchRequest::clear_get_keys() {
+  get_keys_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchRequest::_internal_get_keys() const {
+  return get_keys_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchRequest::get_keys() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchRequest.get_keys)
+  return _internal_get_keys();
+}
+inline void ProcessBatchRequest::_internal_set_get_keys(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  get_keys_ = value;
+}
+inline void ProcessBatchRequest::set_get_keys(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_get_keys(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequest.get_keys)
+}
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
@@ -5639,6 +5723,154 @@ inline void ProcessBatchResponse::unsafe_arena_set_allocated_prover_id(
   prover_id_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       prover_id, GetArena());
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBatchResponse.prover_id)
+}
+
+// repeated bytes nodes_keys = 19;
+inline int ProcessBatchResponse::_internal_nodes_keys_size() const {
+  return nodes_keys_.size();
+}
+inline int ProcessBatchResponse::nodes_keys_size() const {
+  return _internal_nodes_keys_size();
+}
+inline void ProcessBatchResponse::clear_nodes_keys() {
+  nodes_keys_.Clear();
+}
+inline std::string* ProcessBatchResponse::add_nodes_keys() {
+  // @@protoc_insertion_point(field_add_mutable:executor.v1.ProcessBatchResponse.nodes_keys)
+  return _internal_add_nodes_keys();
+}
+inline const std::string& ProcessBatchResponse::_internal_nodes_keys(int index) const {
+  return nodes_keys_.Get(index);
+}
+inline const std::string& ProcessBatchResponse::nodes_keys(int index) const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchResponse.nodes_keys)
+  return _internal_nodes_keys(index);
+}
+inline std::string* ProcessBatchResponse::mutable_nodes_keys(int index) {
+  // @@protoc_insertion_point(field_mutable:executor.v1.ProcessBatchResponse.nodes_keys)
+  return nodes_keys_.Mutable(index);
+}
+inline void ProcessBatchResponse::set_nodes_keys(int index, const std::string& value) {
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponse.nodes_keys)
+  nodes_keys_.Mutable(index)->assign(value);
+}
+inline void ProcessBatchResponse::set_nodes_keys(int index, std::string&& value) {
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponse.nodes_keys)
+  nodes_keys_.Mutable(index)->assign(std::move(value));
+}
+inline void ProcessBatchResponse::set_nodes_keys(int index, const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  nodes_keys_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:executor.v1.ProcessBatchResponse.nodes_keys)
+}
+inline void ProcessBatchResponse::set_nodes_keys(int index, const void* value, size_t size) {
+  nodes_keys_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:executor.v1.ProcessBatchResponse.nodes_keys)
+}
+inline std::string* ProcessBatchResponse::_internal_add_nodes_keys() {
+  return nodes_keys_.Add();
+}
+inline void ProcessBatchResponse::add_nodes_keys(const std::string& value) {
+  nodes_keys_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add:executor.v1.ProcessBatchResponse.nodes_keys)
+}
+inline void ProcessBatchResponse::add_nodes_keys(std::string&& value) {
+  nodes_keys_.Add(std::move(value));
+  // @@protoc_insertion_point(field_add:executor.v1.ProcessBatchResponse.nodes_keys)
+}
+inline void ProcessBatchResponse::add_nodes_keys(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  nodes_keys_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:executor.v1.ProcessBatchResponse.nodes_keys)
+}
+inline void ProcessBatchResponse::add_nodes_keys(const void* value, size_t size) {
+  nodes_keys_.Add()->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:executor.v1.ProcessBatchResponse.nodes_keys)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>&
+ProcessBatchResponse::nodes_keys() const {
+  // @@protoc_insertion_point(field_list:executor.v1.ProcessBatchResponse.nodes_keys)
+  return nodes_keys_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
+ProcessBatchResponse::mutable_nodes_keys() {
+  // @@protoc_insertion_point(field_mutable_list:executor.v1.ProcessBatchResponse.nodes_keys)
+  return &nodes_keys_;
+}
+
+// repeated bytes program_keys = 20;
+inline int ProcessBatchResponse::_internal_program_keys_size() const {
+  return program_keys_.size();
+}
+inline int ProcessBatchResponse::program_keys_size() const {
+  return _internal_program_keys_size();
+}
+inline void ProcessBatchResponse::clear_program_keys() {
+  program_keys_.Clear();
+}
+inline std::string* ProcessBatchResponse::add_program_keys() {
+  // @@protoc_insertion_point(field_add_mutable:executor.v1.ProcessBatchResponse.program_keys)
+  return _internal_add_program_keys();
+}
+inline const std::string& ProcessBatchResponse::_internal_program_keys(int index) const {
+  return program_keys_.Get(index);
+}
+inline const std::string& ProcessBatchResponse::program_keys(int index) const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchResponse.program_keys)
+  return _internal_program_keys(index);
+}
+inline std::string* ProcessBatchResponse::mutable_program_keys(int index) {
+  // @@protoc_insertion_point(field_mutable:executor.v1.ProcessBatchResponse.program_keys)
+  return program_keys_.Mutable(index);
+}
+inline void ProcessBatchResponse::set_program_keys(int index, const std::string& value) {
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponse.program_keys)
+  program_keys_.Mutable(index)->assign(value);
+}
+inline void ProcessBatchResponse::set_program_keys(int index, std::string&& value) {
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponse.program_keys)
+  program_keys_.Mutable(index)->assign(std::move(value));
+}
+inline void ProcessBatchResponse::set_program_keys(int index, const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  program_keys_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:executor.v1.ProcessBatchResponse.program_keys)
+}
+inline void ProcessBatchResponse::set_program_keys(int index, const void* value, size_t size) {
+  program_keys_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:executor.v1.ProcessBatchResponse.program_keys)
+}
+inline std::string* ProcessBatchResponse::_internal_add_program_keys() {
+  return program_keys_.Add();
+}
+inline void ProcessBatchResponse::add_program_keys(const std::string& value) {
+  program_keys_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add:executor.v1.ProcessBatchResponse.program_keys)
+}
+inline void ProcessBatchResponse::add_program_keys(std::string&& value) {
+  program_keys_.Add(std::move(value));
+  // @@protoc_insertion_point(field_add:executor.v1.ProcessBatchResponse.program_keys)
+}
+inline void ProcessBatchResponse::add_program_keys(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  program_keys_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:executor.v1.ProcessBatchResponse.program_keys)
+}
+inline void ProcessBatchResponse::add_program_keys(const void* value, size_t size) {
+  program_keys_.Add()->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:executor.v1.ProcessBatchResponse.program_keys)
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>&
+ProcessBatchResponse::program_keys() const {
+  // @@protoc_insertion_point(field_list:executor.v1.ProcessBatchResponse.program_keys)
+  return program_keys_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
+ProcessBatchResponse::mutable_program_keys() {
+  // @@protoc_insertion_point(field_mutable_list:executor.v1.ProcessBatchResponse.program_keys)
+  return &program_keys_;
 }
 
 // -------------------------------------------------------------------

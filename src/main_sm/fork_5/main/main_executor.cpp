@@ -816,6 +816,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     Kin1[6] = pols.B0[i];
                     Kin1[7] = pols.B1[i];
 
+                    uint64_t b0 = fr.toU64(pols.B0[i]);
+                    bool bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);
+
                     if  ( !fr.isZero(pols.A5[i]) || !fr.isZero(pols.A6[i]) || !fr.isZero(pols.A7[i]) || !fr.isZero(pols.B2[i]) || !fr.isZero(pols.B3[i]) || !fr.isZero(pols.B4[i]) || !fr.isZero(pols.B5[i])|| !fr.isZero(pols.B6[i])|| !fr.isZero(pols.B7[i]) )
                     {
                         proverRequest.result = ZKR_SM_MAIN_STORAGE_INVALID_KEY;
@@ -859,6 +862,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                     gettimeofday(&t, NULL);
 #endif
+
+                    // Collect the keys used to read or write store data
+                    if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)
+                    {
+                        proverRequest.nodesKeys.insert(NormalizeToNFormat(fea2string(fr, key), 64));
+                    }
+
                     SmtGetResult smtGetResult;
                     mpz_class value;
                     zkresult zkResult = pHashDB->get(proverRequest.uuid, oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);
@@ -1004,6 +1014,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
                     Goldilocks::Element oldRoot[4];
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
+
+                    // Collect the keys used to read or write store data
+                    if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)
+                    {
+                        proverRequest.nodesKeys.insert(NormalizeToNFormat(fea2string(fr, ctx.lastSWrite.key), 64));
+                    }
 
                     zkresult zkResult = pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : ( proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE ), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
                     if (zkResult != ZKR_SUCCESS)
@@ -1759,6 +1775,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             Kin1[6] = pols.B0[i];
             Kin1[7] = pols.B1[i];
 
+            uint64_t b0 = fr.toU64(pols.B0[i]);
+            bool bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);
+
             if  ( !fr.isZero(pols.A5[i]) || !fr.isZero(pols.A6[i]) || !fr.isZero(pols.A7[i]) || !fr.isZero(pols.B2[i]) || !fr.isZero(pols.B3[i]) || !fr.isZero(pols.B4[i]) || !fr.isZero(pols.B5[i])|| !fr.isZero(pols.B6[i])|| !fr.isZero(pols.B7[i]) )
             {
                 proverRequest.result = ZKR_SM_MAIN_STORAGE_INVALID_KEY;
@@ -1838,6 +1857,13 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
             gettimeofday(&t, NULL);
 #endif
+
+            // Collect the keys used to read or write store data
+            if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)
+            {
+                proverRequest.nodesKeys.insert(NormalizeToNFormat(fea2string(fr, key), 64));
+            }
+
             SmtGetResult smtGetResult;
             mpz_class value;
             zkresult zkResult = pHashDB->get(proverRequest.uuid, oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);
@@ -1999,6 +2025,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
                 Goldilocks::Element oldRoot[4];
                 sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
+
+                // Collect the keys used to read or write store data
+                if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)
+                {
+                    proverRequest.nodesKeys.insert(NormalizeToNFormat(fea2string(fr, ctx.lastSWrite.key), 64));
+                }
 
                 zkresult zkResult = pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : (proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
                 if (zkResult != ZKR_SUCCESS)
@@ -2584,6 +2616,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 gettimeofday(&t, NULL);
 #endif
+                // Collect the keys used to read or write program data
+                if (proverRequest.input.bGetKeys)
+                {
+                    proverRequest.programKeys.insert(NormalizeToNFormat(fea2string(fr, result), 64));
+                }
+
                 zkresult zkResult = pHashDB->setProgram(result, hashPIterator->second.data, proverRequest.input.bUpdateMerkleTree);
                 if (zkResult != ZKR_SUCCESS)
                 {
@@ -2633,6 +2671,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 gettimeofday(&t, NULL);
 #endif
+                // Collect the keys used to read or write store data
+                if (proverRequest.input.bGetKeys)
+                {
+                    proverRequest.programKeys.insert(NormalizeToNFormat(fea2string(fr, aux), 64));
+                }
+
                 zkresult zkResult = pHashDB->getProgram(aux, hashValue.data, proverRequest.dbReadLog);
                 if (zkResult != ZKR_SUCCESS)
                 {
