@@ -69,7 +69,11 @@ void* hashDBTestClientThread (const Config& config)
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(config.hashDB64 || (fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3])));
 
-        zkr = client->flush(uuid, fea2string(fr, root), persistence, flushId, storedFlushId);
+        zkr = client->purge(uuid, root, persistence);
+        zkassertpermanent(zkr==ZKR_SUCCESS);
+
+        Goldilocks::Element consolidatedStateRoot[4];
+        zkr = client->consolidateState(root, persistence, consolidatedStateRoot, flushId, storedFlushId);
         zkassertpermanent(zkr==ZKR_SUCCESS);
         
         cout << "HashDB client test 1 done" << endl;

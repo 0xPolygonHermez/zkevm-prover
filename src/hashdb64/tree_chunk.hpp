@@ -2,6 +2,7 @@
 #define TREE_CHUNK_HPP
 
 #include <string>
+#include <vector>
 #include "goldilocks_base_field.hpp"
 #include "poseidon_goldilocks.hpp"
 #include "zkresult.hpp"
@@ -10,6 +11,7 @@
 #include "intermediate_node.hpp"
 #include "child.hpp"
 #include "key_value.hpp"
+#include "hash_value_gl.hpp"
 
 using namespace std;
 
@@ -99,9 +101,9 @@ public:
     uint64_t numberOfNonZeroChildren (void);
 
     // Calculate hash functions
-    zkresult calculateHash (void); // Calculate the hash of the chunk based on the (new) values of children64
-    zkresult calculateChildren (const uint64_t level, Child * inputChildren, Child * outputChildren, uint64_t outputSize); // Calculates outputSize output children, as a result of combining outputSize*2 input children
-    zkresult calculateChild (const uint64_t level, Child &leftChild, Child &rightChild, Child &outputChild);
+    zkresult calculateHash (vector<HashValueGL> *hashValues); // Calculate the hash of the chunk based on the (new) values of children64
+    zkresult calculateChildren (const uint64_t level, Child * inputChildren, Child * outputChildren, uint64_t outputSize, vector<HashValueGL> *hashValues); // Calculates outputSize output children, as a result of combining outputSize*2 input children
+    zkresult calculateChild (const uint64_t level, Child &leftChild, Child &rightChild, Child &outputChild, vector<HashValueGL> *hashValues);
 
     // Children access
     const Child & getChild (uint64_t position)

@@ -4,7 +4,7 @@
 Goldilocks fr;
 PoseidonGoldilocks poseidon;
 
-void IntermediateNode::calculateHash (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Goldilocks::Element (&leftHash)[4], const Goldilocks::Element (&rightHash)[4])
+void IntermediateNode::calculateHash (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Goldilocks::Element (&leftHash)[4], const Goldilocks::Element (&rightHash)[4], vector<HashValueGL> *hashValues)
 {
     // Prepare input = [leftHash, rightHash, 0000]
     Goldilocks::Element input[12];
@@ -23,4 +23,13 @@ void IntermediateNode::calculateHash (Goldilocks &fr, PoseidonGoldilocks &poseid
 
     // Calculate the poseidon hash
     poseidon.hash(hash, input);
+
+    // Return the hash-value pair, if requested
+    if (hashValues != NULL)
+    {
+        HashValueGL hashValue;
+        for (uint64_t i=0; i<4; i++) hashValue.hash[i] = hash[i];
+        for (uint64_t i=0; i<12; i++) hashValue.value[i] = input[i];
+        hashValues->emplace_back(hashValue);
+    }
 }

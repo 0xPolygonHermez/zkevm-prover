@@ -529,6 +529,48 @@ int main(int argc, char **argv)
         SHA256GenerateScript(config);
     }
 
+#ifdef DATABASE_USE_CACHE
+
+    /* INIT DB CACHE */
+    if(config.useAssociativeCache){
+        Database::useAssociativeCache = true;
+        Database::dbMTACache.postConstruct(config.log2DbMTAssociativeCacheIndexesSize, config.log2DbMTAssociativeCacheSize, "MTACache");
+    }
+    else{
+        Database::useAssociativeCache = false;
+        Database::dbMTCache.setName("MTCache");
+        Database::dbMTCache.setMaxSize(config.dbMTCacheSize*1024*1024);
+    }
+    if(config.hashDB64){
+        Database64::dbKVACache.postConstruct(config.log2DbKVAssociativeCacheIndexesSize, config.log2DbKVAssociativeCacheSize, "KVACache");
+        Database64::dbVersionACache.postConstruct(config.log2DbVersionsAssociativeCacheIndexesSize, config.log2DbVersionsAssociativeCacheSize, "VersionACache");
+    }
+    Database::dbProgramCache.setName("ProgramCache");
+    Database::dbProgramCache.setMaxSize(config.dbProgramCacheSize*1024*1024);
+
+    if (config.databaseURL != "local") // remote DB
+    {
+
+        if (config.loadDBToMemCache && (config.runAggregatorClient || config.runExecutorServer || config.runHashDBServer))
+        {
+            TimerStart(DB_CACHE_LOAD);
+            // if we have a db cache enabled
+            if ((Database::dbMTCache.enabled()) || (Database::dbProgramCache.enabled()) || (Database::dbMTACache.enabled()))
+            {
+                if (config.loadDBToMemCacheInParallel) {
+                    // Run thread that loads the DB into the dbCache
+                    std::thread loadDBThread (loadDb2MemCache, config);
+                    loadDBThread.detach();
+                } else {
+                    loadDb2MemCache(config);
+                }
+            }
+            TimerStopAndLog(DB_CACHE_LOAD);
+        }
+    }
+    
+#endif // DATABASE_USE_CACHE
+
     /* TESTS */
 
     // Test Keccak SM
@@ -642,48 +684,6 @@ int main(int argc, char **argv)
                   poseidon,
                   config);
     TimerStopAndLog(PROVER_CONSTRUCTOR);
-
-#ifdef DATABASE_USE_CACHE
-
-    /* INIT DB CACHE */
-    if(config.useAssociativeCache){
-        Database::useAssociativeCache = true;
-        Database::dbMTACache.postConstruct(config.log2DbMTAssociativeCacheIndexesSize, config.log2DbMTAssociativeCacheSize, "MTACache");
-    }
-    else{
-        Database::useAssociativeCache = false;
-        Database::dbMTCache.setName("MTCache");
-        Database::dbMTCache.setMaxSize(config.dbMTCacheSize*1024*1024);
-    }
-    if(config.hashDB64){
-        Database64::dbKVACache.postConstruct(config.log2DbKVAssociativeCacheIndexesSize, config.log2DbKVAssociativeCacheSize, "KVACache");
-        Database64::dbVersionACache.postConstruct(config.log2DbVersionsAssociativeCacheIndexesSize, config.log2DbVersionsAssociativeCacheSize, "VersionACache");
-    }
-    Database::dbProgramCache.setName("ProgramCache");
-    Database::dbProgramCache.setMaxSize(config.dbProgramCacheSize*1024*1024);
-
-    if (config.databaseURL != "local") // remote DB
-    {
-
-        if (config.loadDBToMemCache && (config.runAggregatorClient || config.runExecutorServer || config.runHashDBServer))
-        {
-            TimerStart(DB_CACHE_LOAD);
-            // if we have a db cache enabled
-            if ((Database::dbMTCache.enabled()) || (Database::dbProgramCache.enabled()) || (Database::dbMTACache.enabled()))
-            {
-                if (config.loadDBToMemCacheInParallel) {
-                    // Run thread that loads the DB into the dbCache
-                    std::thread loadDBThread (loadDb2MemCache, config);
-                    loadDBThread.detach();
-                } else {
-                    loadDb2MemCache(config);
-                }
-            }
-            TimerStopAndLog(DB_CACHE_LOAD);
-        }
-    }
-    
-#endif // DATABASE_USE_CACHE
 
     /* SERVERS */
 

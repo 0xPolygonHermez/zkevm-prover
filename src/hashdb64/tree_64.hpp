@@ -16,6 +16,7 @@
 #include "smt_get_result.hpp"
 #include "tree_chunk.hpp"
 #include "key_value.hpp"
+#include "hash_value_gl.hpp"
 
 using namespace std;
 
@@ -64,8 +65,8 @@ class Tree64
     PoseidonGoldilocks poseidon;
 public:
     zkresult WriteTree (Database64 &db, const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> &keyValues, Goldilocks::Element (&newRoot)[4], const bool persistent);
-    zkresult CalculateHash (Child &result, std::vector<TreeChunk *> &chunks, vector<DB64Query> &dbQueries, int idChunk, int level);
-    zkresult ReadTree (Database64 &db, const Goldilocks::Element (&root)[4], vector<KeyValue> &keyValues);
+    zkresult CalculateHash (Child &result, std::vector<TreeChunk *> &chunks, vector<DB64Query> &dbQueries, int idChunk, int level, vector<HashValueGL> *hashValues);
+    zkresult ReadTree (Database64 &db, const Goldilocks::Element (&root)[4], vector<KeyValue> &keyValues, vector<HashValueGL> *hashValues);
 };
 
 extern Tree64 tree64;
