@@ -1033,6 +1033,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    Kin1[5] = pols.A5[" + string(bFastMode?"0":"i") + "];\n";
                     code += "    Kin1[6] = pols.B0[" + string(bFastMode?"0":"i") + "];\n";
                     code += "    Kin1[7] = pols.B1[" + string(bFastMode?"0":"i") + "];\n";
+
+                    code += "    b0 = fr.toU64(pols.B0[" + string(bFastMode?"0":"i") + "]);\n";
+                    code += "    bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);\n";
                     
                     code += "    if  ( !fr.isZero(pols.A5[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A6[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A7[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B2[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B3[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B4[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B5[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B6[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B7[" + string(bFastMode?"0":"i") + "]) )\n";
                     code += "    {\n";
@@ -1071,6 +1074,13 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    zklog.info(\"Storage read sRD got poseidon key: \" + ctx.fr.toString(ctx.lastSWrite.key, 16));\n";
                     code += "#endif\n";
                     code += "    sr8to4(fr, pols.SR0[" + string(bFastMode?"0":"i") + "], pols.SR1[" + string(bFastMode?"0":"i") + "], pols.SR2[" + string(bFastMode?"0":"i") + "], pols.SR3[" + string(bFastMode?"0":"i") + "], pols.SR4[" + string(bFastMode?"0":"i") + "], pols.SR5[" + string(bFastMode?"0":"i") + "], pols.SR6[" + string(bFastMode?"0":"i") + "], pols.SR7[" + string(bFastMode?"0":"i") + "], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);\n";
+
+                    code += "    // Collect the keys used to read or write store data\n";
+                    code += "    if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)\n";
+                    code += "    {\n";
+                    code += "        proverRequest.nodesKeys.insert(NormalizeToNFormat(fea2string(fr, key), 64));\n";
+                    code += "    }\n";
+
                     code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
                     code += "    gettimeofday(&t, NULL);\n";
                     code += "#endif\n";
@@ -1207,6 +1217,12 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    gettimeofday(&t, NULL);\n";
                     code += "#endif\n";
                     code += "    sr8to4(fr, pols.SR0[" + string(bFastMode?"0":"i") + "], pols.SR1[" + string(bFastMode?"0":"i") + "], pols.SR2[" + string(bFastMode?"0":"i") + "], pols.SR3[" + string(bFastMode?"0":"i") + "], pols.SR4[" + string(bFastMode?"0":"i") + "], pols.SR5[" + string(bFastMode?"0":"i") + "], pols.SR6[" + string(bFastMode?"0":"i") + "], pols.SR7[" + string(bFastMode?"0":"i") + "], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);\n";
+
+                    code += "    // Collect the keys used to read or write store data\n";
+                    code += "    if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)\n";
+                    code += "    {\n";
+                    code += "        proverRequest.nodesKeys.insert(NormalizeToNFormat(fea2string(fr, ctx.lastSWrite.key), 64));\n";
+                    code += "    }\n";
 
                     code += "    zkResult = pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : ( proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE ), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);\n";
                     code += "    if (zkResult != ZKR_SUCCESS)\n";
@@ -2118,6 +2134,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    Kin1[6] = pols.B0[" + string(bFastMode?"0":"i") + "];\n";
             code += "    Kin1[7] = pols.B1[" + string(bFastMode?"0":"i") + "];\n";
 
+            code += "    b0 = fr.toU64(pols.B0[" + string(bFastMode?"0":"i") + "]);\n";
+            code += "    bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);\n";
+
             code += "    if  ( !fr.isZero(pols.A5[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A6[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A7[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B2[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B3[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B4[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B5[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B6[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B7[" + string(bFastMode?"0":"i") + "]) )\n";
             code += "    {\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE_INVALID_KEY;\n";
@@ -2180,6 +2199,12 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "#endif\n";
 
             code += "    sr8to4(fr, pols.SR0[" + string(bFastMode?"0":"i") + "], pols.SR1[" + string(bFastMode?"0":"i") + "], pols.SR2[" + string(bFastMode?"0":"i") + "], pols.SR3[" + string(bFastMode?"0":"i") + "], pols.SR4[" + string(bFastMode?"0":"i") + "], pols.SR5[" + string(bFastMode?"0":"i") + "], pols.SR6[" + string(bFastMode?"0":"i") + "], pols.SR7[" + string(bFastMode?"0":"i") + "], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);\n";
+
+            code += "    // Collect the keys used to read or write store data\n";
+            code += "    if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)\n";
+            code += "    {\n";
+            code += "        proverRequest.nodesKeys.insert(NormalizeToNFormat(fea2string(fr, key), 64));\n";
+            code += "    }\n";
 
             code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
             code += "    gettimeofday(&t, NULL);\n";
@@ -2354,6 +2379,12 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "#endif\n";
 
             code += "        sr8to4(fr, pols.SR0[" + string(bFastMode?"0":"i") + "], pols.SR1[" + string(bFastMode?"0":"i") + "], pols.SR2[" + string(bFastMode?"0":"i") + "], pols.SR3[" + string(bFastMode?"0":"i") + "], pols.SR4[" + string(bFastMode?"0":"i") + "], pols.SR5[" + string(bFastMode?"0":"i") + "], pols.SR6[" + string(bFastMode?"0":"i") + "], pols.SR7[" + string(bFastMode?"0":"i") + "], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);\n";
+
+            code += "        // Collect the keys used to read or write store data\n";
+            code += "        if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)\n";
+            code += "        {\n";
+            code += "            proverRequest.nodesKeys.insert(NormalizeToNFormat(fea2string(fr, ctx.lastSWrite.key), 64));\n";
+            code += "        }\n";
 
             code += "        zkResult = pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : ( proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE ), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);\n";
             code += "        if (zkResult != ZKR_SUCCESS)\n";
@@ -2945,6 +2976,13 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "#endif\n";
             code += "        fea2scalar(fr, hashIterator->second.digest, result);\n";
             code += "        delete[] pBuffer;\n";
+
+            code += "        // Collect the keys used to read or write store data\n";
+            code += "        if (proverRequest.input.bGetKeys)\n";
+            code += "        {\n";
+            code += "            proverRequest.programKeys.insert(NormalizeToNFormat(fea2string(fr, result), 64));\n";
+            code += "        }\n";
+
             code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
             code += "        gettimeofday(&t, NULL);\n";
             code += "#endif\n";
@@ -2995,6 +3033,13 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        hashValue.digest = dg;\n";
             code += "        Goldilocks::Element aux[4];\n";
             code += "        scalar2fea(fr, dg, aux);\n";
+
+            code += "        // Collect the keys used to read or write store data\n";
+            code += "        if (proverRequest.input.bGetKeys)\n";
+            code += "        {\n";
+            code += "            proverRequest.programKeys.insert(NormalizeToNFormat(fea2string(fr, aux), 64));\n";
+            code += "        }\n";
+
             code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
             code += "        gettimeofday(&t, NULL);\n";
             code += "#endif\n";

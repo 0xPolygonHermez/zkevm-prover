@@ -32,6 +32,7 @@ message ProcessBatchRequest {
     map<string, string> contracts_bytecode = 14; // For debug/testing purpposes only. Don't fill this on production
     TraceConfig trace_config = 15;
     string external_request_id = 16;
+    uint32 get_keys = 17; // if 1, the keys used to read or write storage values will be returned
 }
 
 message ProcessBatchResponse {
@@ -53,6 +54,8 @@ message ProcessBatchResponse {
     uint64 flush_id = 16;
     uint64 stored_flush_id = 17;
     string prover_id = 18;
+    repeated bytes nodes_keys = 19;
+    repeated bytes program_keys = 20;
 }
 
 /**
@@ -475,4 +478,6 @@ enum ExecutorError {
     EXECUTOR_ERROR_INVALID_CONTRACTS_BYTECODE_KEY = 78;
     // EXECUTOR_ERROR_INVALID_CONTRACTS_BYTECODE_VALUE indicates that the input parameter contracts_bytecode value is invalid
     EXECUTOR_ERROR_INVALID_CONTRACTS_BYTECODE_VALUE = 79;
+    // EXECUTOR_ERROR_INVALID_GET_KEY indicates that the input parameter get key is invalid, e.g. is true but fork_id<5
+    EXECUTOR_ERROR_INVALID_GET_KEY = 80;
 }

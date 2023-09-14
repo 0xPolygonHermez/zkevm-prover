@@ -2,6 +2,7 @@
 #define PROVER_REQUEST_HPP
 
 #include <semaphore.h>
+#include <unordered_set>
 #include "input.hpp"
 #include "proof_fflonk.hpp"
 #include "counters.hpp"
@@ -70,6 +71,10 @@ public:
     /* Executor EVM events */
     vector<string> receipts;
     vector<string> logs;
+
+    /* Keys */
+    unordered_set<string> nodesKeys;
+    unordered_set<string> programKeys;
 
     /* Constructor */
     ProverRequest (Goldilocks &fr, const Config &config, tProverRequestType type);
