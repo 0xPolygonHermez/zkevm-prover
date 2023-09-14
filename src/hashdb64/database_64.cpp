@@ -378,7 +378,7 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
                     keyValues[0].key[1] = key[1];
                     keyValues[0].key[2] = key[2];
                     keyValues[0].key[3] = key[3];
-                    rtree = tree64.ReadTree(*this, root, keyValues);
+                    rtree = tree64.ReadTree(*this, root, keyValues, NULL);
                     value = keyValues[0].value;
                     rout = rtree;      
                 }
