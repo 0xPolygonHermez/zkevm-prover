@@ -79,12 +79,12 @@ private:
 private:
     // Remote database based on Postgres (PostgreSQL)
     void initRemote(void);
-    zkresult readRemote(bool bProgram, const string &key, string &value);
-    zkresult writeRemote(bool bProgram, const string &key, const string &value);
+    zkresult readRemote(const bool bProgram, const string &key, string &value);
+    zkresult writeRemote(const bool bProgram, const string &key, const string &value);
 
-    zkresult readRemoteKV(const uint64_t version, const Goldilocks::Element (&key)[4],  mpz_class value, vector<VersionValue> &upstreamVersionValues); 
-    zkresult writeRemoteKV(const uint64_t version, const Goldilocks::Element (&key)[4], const mpz_class &value, bool useMultiWrite = true);
-    zkresult readRemoteVersion(const Goldilocks::Element (&root)[4], uint64_t version);
+    zkresult readRemoteKV(const uint64_t version, const Goldilocks::Element (&key)[4],  mpz_class& value, vector<VersionValue> &upstreamVersionValues); 
+    zkresult writeRemoteKV(const uint64_t version, const Goldilocks::Element (&key)[4], const mpz_class &value, const bool useMultiWrite = true);
+    zkresult readRemoteVersion(const Goldilocks::Element (&root)[4], uint64_t& version);
     zkresult writeRemoteVersion(const Goldilocks::Element (&root)[4], const uint64_t version); 
     zkresult readRemoteLatestVersion(uint64_t &version);
     zkresult writeRemoteLatestVersion(const uint64_t version);
@@ -114,20 +114,20 @@ public:
 
     // Basic methods
     void init(void);
-    zkresult read(const string &_key, const Goldilocks::Element (&vkey)[4], string &value, DatabaseMap *dbReadLog, const bool update = false, bool *keys = NULL , uint64_t level=0);
+    zkresult read(const string &_key, const Goldilocks::Element (&vkey)[4], string &value, DatabaseMap *dbReadLog, const bool update = false, const bool *keys = NULL , const uint64_t level=0);
     zkresult read(vector<DB64Query> &dbQueries);
     zkresult write(const string &_key, const Goldilocks::Element* vkey, const string &value, const bool persistent);
-    zkresult write(vector<DB64Query> &dbQueries, const bool persistent);
+    zkresult write(const vector<DB64Query> &dbQueries, const bool persistent);
     zkresult getProgram(const string &_key, vector<uint8_t> &value, DatabaseMap *dbReadLog);
     zkresult setProgram(const string &_key, const vector<uint8_t> &value, const bool persistent);
     zkresult readKV(const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, DatabaseMap *dbReadLog); 
     zkresult readKV(const Goldilocks::Element (&root)[4], vector<KeyValue> &KVs, DatabaseMap *dbReadLog);
-    zkresult writeKV(const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, bool persistent);
-    zkresult writeKV(const uint64_t& version, const Goldilocks::Element (&key)[4], const mpz_class &value, bool persistent);
-    zkresult writeKV(const Goldilocks::Element (&root)[4], const vector<KeyValue> &KVs, bool persistent);
-    zkresult writeKV(const uint64_t& version, const vector<KeyValue> &KVs, bool persistent);
+    zkresult writeKV(const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent);
+    zkresult writeKV(const uint64_t& version, const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent);
+    zkresult writeKV(const Goldilocks::Element (&root)[4], const vector<KeyValue> &KVs, const bool persistent);
+    zkresult writeKV(const uint64_t& version, const vector<KeyValue> &KVs, const bool persistent);
     zkresult readVersion(const Goldilocks::Element (&root)[4], uint64_t& version, DatabaseMap *dbReadLog);
-    zkresult writeVersion(const Goldilocks::Element (&root)[4], const uint64_t version, bool persistent);
+    zkresult writeVersion(const Goldilocks::Element (&root)[4], const uint64_t version, const bool persistent);
     zkresult readLatestVersion(uint64_t &version);
     zkresult writeLatestVersion(const uint64_t version, const bool persistent);
 
