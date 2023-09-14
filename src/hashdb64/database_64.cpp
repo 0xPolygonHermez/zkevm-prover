@@ -115,7 +115,7 @@ void Database64::init(void)
     bInitialized = true;
 }
 
-zkresult Database64::read (const string &_key, const Goldilocks::Element (&vkey)[4], string &value, DatabaseMap *dbReadLog, const bool update,  bool *keys, uint64_t level)
+zkresult Database64::read (const string &_key, const Goldilocks::Element (&vkey)[4], string &value, DatabaseMap *dbReadLog, const bool update,  const bool *keys, const uint64_t level)
 {
     // Check that it has been initialized before
     if (!bInitialized)
@@ -294,7 +294,7 @@ zkresult Database64::write(const string &_key, const Goldilocks::Element* vkey, 
     return r;
 }
 
-zkresult Database64::write(vector<DB64Query> &dbQueries, const bool persistent)
+zkresult Database64::write(const vector<DB64Query> &dbQueries, const bool persistent)
 {
     zkresult zkr;
     for (uint64_t i=0; i<dbQueries.size(); i++)
@@ -354,11 +354,11 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
         }
         else if(useRemoteDB)
         {
-            vector<VersionValue> upstremVersionValues;
-            rkv = readRemoteKV(version, key, value, upstremVersionValues);       
+            vector<VersionValue> upstreamVersionValues;
+            rkv = readRemoteKV(version, key, value, upstreamVersionValues);       
             if (rkv == ZKR_SUCCESS)
             {
-                dbKVACache.uploadKeyValueVersions(key, upstremVersionValues);               
+                dbKVACache.uploadKeyValueVersions(key, upstreamVersionValues);               
                 if (dbReadLog != NULL) dbReadLog->add(keyStr, value, false, TimeDiff(t));
             } else {
                 
@@ -370,7 +370,7 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
                 }else if( rkv == ZKR_DB_VERSION_NOT_FOUND_GLOBAL){
                     rout = rkv;
                     // Add a zero into the cache to avoid future remote access for this key (not problematic management of versions as there is only one version)
-                    dbKVACache.uploadKeyValueVersions(key, upstremVersionValues);
+                    dbKVACache.uploadKeyValueVersions(key, upstreamVersionValues);
                 }else{
                     zkresult rtree = ZKR_UNSPECIFIED;
                     vector<KeyValue> keyValues(1);
@@ -1024,7 +1024,7 @@ zkresult Database64::writeRemote(bool bProgram, const string &key, const string 
     return result;
 }
 
-zkresult Database64::readRemoteKV(const uint64_t version, const Goldilocks::Element (&key)[4],  mpz_class value, vector<VersionValue> &upstreamVersionValues)
+zkresult Database64::readRemoteKV(const uint64_t version, const Goldilocks::Element (&key)[4],  mpz_class& value, vector<VersionValue> &upstreamVersionValues)
 {
     const string &tableName = config.dbKeyValueTableName;
 
@@ -1109,7 +1109,7 @@ zkresult Database64::extractVersion(const pqxx::field& fieldData, const uint64_t
             string versionStr = data.substr(i, 16);
             mpz_class aux(versionStr, 16);
             uint64_t version_ = aux.get_ui();
-            if(nUpstreams < maxVersions){
+            if(nUpstreams < maxVersionsUpload){
                 VersionValue vv;
                 vv.version = version_;
                 vv.value = mpz_class(data.substr(i + 16, 64), 16);
@@ -1229,6 +1229,7 @@ zkresult Database64::writeRemoteKV(const uint64_t version, const Goldilocks::Ele
                 string versionZero = NormalizeToNFormat(U64toString(0,16),16); 
                 string insertZero = versionStr + valueStr;
                 insertStr = insertStr + versionZero + valueZero;
+                assert(insertStr.size() == 160);
                 mpz_class   zero(0);
                 dbKVACache.downstreamAddKeyZeroVersion(version, key);                
                 
@@ -1276,7 +1277,7 @@ zkresult Database64::writeRemoteKV(const uint64_t version, const Goldilocks::Ele
     return result;
 }
 
-zkresult Database64::readRemoteVersion(const Goldilocks::Element (&root)[4], uint64_t version){
+zkresult Database64::readRemoteVersion(const Goldilocks::Element (&root)[4], uint64_t& version){
     
     const string &tableName = config.dbVersionTableName;
 

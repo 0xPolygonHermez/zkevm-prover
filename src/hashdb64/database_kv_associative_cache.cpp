@@ -284,9 +284,9 @@ void DatabaseKVAssociativeCache::uploadKeyValueVersions(const Goldilocks::Elemen
     }
 }
 
-void DatabaseKVAssociativeCache::getLastCachedVersions(const Goldilocks::Element (&key)[4], vector<uint64_t> &versions, const int maxVersionsOut){
+void DatabaseKVAssociativeCache::getLastCachedVersions(const Goldilocks::Element (&key)[4], vector<uint64_t> &versionsOut, const int maxVersionsOut){
     
-    versions.clear();
+    versionsOut.clear();
     lock_guard<recursive_mutex> guard(mlock);
     //
     // Find the value
@@ -308,7 +308,7 @@ void DatabaseKVAssociativeCache::getLastCachedVersions(const Goldilocks::Element
                 keys[cacheIndexKey + 2].fe == key[2].fe &&
                 keys[cacheIndexKey + 3].fe == key[3].fe){
 
-                versions.push_back(versions[cacheIndexVersions]);
+                versionsOut.push_back(versions[cacheIndexVersions]);
                 if(versions[cacheIndexVersions+1]==UINT64_MAX) return; //No more versions
                 cacheIndex = versions[cacheIndexVersions+1] & cacheMask;
                 cacheIndexKey = cacheIndex * 4;

@@ -47,7 +47,7 @@ class DatabaseKVAssociativeCache
         void downstreamAddKeyZeroVersion(const uint64_t version, const Goldilocks::Element (&key)[4]);
         void uploadKeyValueVersions(const Goldilocks::Element (&key)[4], vector<VersionValue> &versionsValues);
         bool findKey( const uint64_t version, const Goldilocks::Element (&key)[4], mpz_class &value);
-        void getLastCachedVersions(const Goldilocks::Element (&key)[4], vector<uint64_t> &versions, const int maxVersions);
+        void getLastCachedVersions(const Goldilocks::Element (&key)[4], vector<uint64_t> &versionsOut, const int maxVersions);
         
 
         inline bool enabled() const { return (log2IndexesSize > 0); };
