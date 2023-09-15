@@ -47,7 +47,7 @@ void zkLog::log (const zkLogType type, const string &message)
                 exitProcess();
             }
         }
-        s += ",\"ts\":\"" + getTimestamp() + "\"";
+        s += ",\"ts\":\"" + getTimestampWithPeriod() + "\"";
         s += ",\"msg\":\"" + message + "\"";
         s += ",\"pid\":\"" + pid + "\"";
         s += ",\"tid\":\"" + getThreadID() + "\"";
