@@ -27,7 +27,7 @@
 //#define LOG_TIME_STATISTICS // If defined, generates main executor statistics for main operations
 //#define LOG_TIME_STATISTICS_STATEDB_REMOTE // If defined, generates remote statedb statistics
 //#define LOG_TIME_STATISTICS_STATEDB // If defined, generates statedb statistics
-#define LOG_TIME_STATISTICS_MAIN_EXECUTOR
+//#define LOG_TIME_STATISTICS_MAIN_EXECUTOR
 //#define LOG_TIME_STATISTICS_STATE_MANAGER
 //#define TIME_METRIC_TABLE
 //#define LOG_TXS
