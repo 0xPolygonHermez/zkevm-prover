@@ -24,7 +24,8 @@ uint64_t HashDB64WorkflowTest (const Config& config)
     
 
     const uint64_t numberOfSetsPerTx = 10;
-    const uint64_t numberOfTxsPerBatch = 100;
+    const uint64_t numberOfTxsPerBatch = 10;
+    const uint64_t numberOfLoops = 3;
 
     SmtSetResult setResult;
     SmtGetResult getResult;
@@ -36,85 +37,92 @@ uint64_t HashDB64WorkflowTest (const Config& config)
     mpz_class value = 0;
     mpz_class keyScalar = 0;
 
-    // Start batch
-    string batchUUID = getUUID();
-    Goldilocks::Element batchOldStateRoot[4];
-    for (uint64_t i=0; i<4; i++) batchOldStateRoot[i] = root[i];
-    vector<KeyValue> keyValues;
-
-    // Set TXs
-    for (uint64_t tx=0; tx<numberOfTxsPerBatch; tx++)
+    for (uint64_t loop=0; loop<numberOfLoops; loop++)
     {
-        for (uint64_t set=0; set<numberOfSetsPerTx; set++)
+        zklog.info("STARTING LOOP=" + to_string(loop));
+
+        // Start batch
+        string batchUUID = getUUID();
+        Goldilocks::Element batchOldStateRoot[4];
+        for (uint64_t i=0; i<4; i++) batchOldStateRoot[i] = root[i];
+        vector<KeyValue> keyValues;
+
+        // Set TXs
+        for (uint64_t tx=0; tx<numberOfTxsPerBatch; tx++)
         {
-            keyScalar++;
-            keyfea[0] = fr.fromU64(keyScalar.get_ui());
-            poseidon.hash(key, keyfea);
-            //scalar2key(fr, keyScalar, key);
-            value++;
-            
-            zkr = pHashDB->set(batchUUID, tx, root, key, value, persistence, newRoot, &setResult, NULL);
-            //zklog.info("SET zkr=" + zkresult2string(zkr) + " root=" + fea2string(fr, root) + " key=" + fea2string(fr, key) + " value=" + value.get_str() + " newRoot=" + fea2string(fr, newRoot));
-            zkassertpermanent(zkr==ZKR_SUCCESS);
-            for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-            zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+            for (uint64_t set=0; set<numberOfSetsPerTx; set++)
+            {
+                keyScalar++;
+                keyfea[0] = fr.fromU64(keyScalar.get_ui());
+                poseidon.hash(key, keyfea);
+                //scalar2key(fr, keyScalar, key);
+                value++;
+                
+                zkr = pHashDB->set(batchUUID, tx, root, key, value, persistence, newRoot, &setResult, NULL);
+                zklog.info("SET zkr=" + zkresult2string(zkr) + " root=" + fea2string(fr, root) + " key=" + fea2string(fr, key) + " value=" + value.get_str() + " newRoot=" + fea2string(fr, newRoot));
+                zkassertpermanent(zkr==ZKR_SUCCESS);
+                for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
+                zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
-            zkr = pHashDB->get(batchUUID, root, key, value, &getResult, NULL);
-            //zklog.info("GET zkr=" + zkresult2string(zkr) + " root=" + fea2string(fr, root) + " key=" + fea2string(fr, key) + " value=" + value.get_str());
-            zkassertpermanent(zkr==ZKR_SUCCESS);
-            zkassertpermanent(value==getResult.value);
+                zkr = pHashDB->get(batchUUID, root, key, value, &getResult, NULL);
+                //zklog.info("GET zkr=" + zkresult2string(zkr) + " root=" + fea2string(fr, root) + " key=" + fea2string(fr, key) + " value=" + value.get_str());
+                zkassertpermanent(zkr==ZKR_SUCCESS);
+                zkassertpermanent(value==getResult.value);
 
-            // Take note of the key we used
-            KeyValue keyValue;
-            for (uint64_t i=0; i<4; i++) keyValue.key[i] = key[i];
-            keyValues.emplace_back(keyValue);
+                // Take note of the key we used
+                KeyValue keyValue;
+                for (uint64_t i=0; i<4; i++) keyValue.key[i] = key[i];
+                keyValues.emplace_back(keyValue);
+            }
+
+            pHashDB->semiFlush(batchUUID, fea2string(fr, root), persistence);
         }
 
-        pHashDB->semiFlush(batchUUID, fea2string(fr, root), persistence);
-    }
-
-    // Purge
-    zkr = pHashDB->purge(batchUUID, root, persistence);
-    zkassertpermanent(zkr==ZKR_SUCCESS);
-    zklog.info("PURGE zkr=" + zkresult2string(zkr) + " root=" + fea2string(fr, root) + " flushId=" + to_string(flushId) + " storedFlushId=" + to_string(storedFlushId));
-
-    // Consolidate state root
-    Goldilocks::Element consolidatedStateRoot[4];
-    zkr = pHashDB->consolidateState(root, persistence, consolidatedStateRoot, flushId, storedFlushId);
-    zkassertpermanent(zkr==ZKR_SUCCESS);
-    zklog.info("CONSOLIDATE zkr=" + zkresult2string(zkr) + " virtualRoot=" + fea2string(fr, root) + " consolidatedRoot=" + fea2string(fr, consolidatedStateRoot) + " flushId=" + to_string(flushId) + " storedFlushId=" + to_string(storedFlushId));
-
-    // New state root
-    Goldilocks::Element batchNewStateRoot[4];
-    for (uint64_t i=0; i<4; i++) batchNewStateRoot[i] = consolidatedStateRoot[i];
-
-    // Wait for data to be sent
-    while (true)
-    {
-        uint64_t storedFlushId, storingFlushId, lastFlushId, pendingToFlushNodes, pendingToFlushProgram, storingNodes, storingProgram;
-        string proverId;
-        zkr = pHashDB->getFlushStatus(storedFlushId, storingFlushId, lastFlushId, pendingToFlushNodes, pendingToFlushProgram, storingNodes, storingProgram, proverId);
+        // Purge
+        zkr = pHashDB->purge(batchUUID, root, persistence);
         zkassertpermanent(zkr==ZKR_SUCCESS);
-        zklog.info("GET FLUSH STATUS storedFlushId=" + to_string(storedFlushId));
-        if (storedFlushId >= flushId)
+        zklog.info("PURGE zkr=" + zkresult2string(zkr) + " root=" + fea2string(fr, root) + " flushId=" + to_string(flushId) + " storedFlushId=" + to_string(storedFlushId));
+
+        // Consolidate state root
+        Goldilocks::Element consolidatedStateRoot[4];
+        zkr = pHashDB->consolidateState(root, persistence, consolidatedStateRoot, flushId, storedFlushId);
+        zkassertpermanent(zkr==ZKR_SUCCESS);
+        zklog.info("CONSOLIDATE zkr=" + zkresult2string(zkr) + " virtualRoot=" + fea2string(fr, root) + " consolidatedRoot=" + fea2string(fr, consolidatedStateRoot) + " flushId=" + to_string(flushId) + " storedFlushId=" + to_string(storedFlushId));
+
+        // New state root
+        Goldilocks::Element batchNewStateRoot[4];
+        for (uint64_t i=0; i<4; i++) batchNewStateRoot[i] = consolidatedStateRoot[i];
+        for (uint64_t i=0; i<4; i++) root[i] = consolidatedStateRoot[i];
+
+        // Wait for data to be sent
+        while (true)
         {
-            break;
+            uint64_t storedFlushId, storingFlushId, lastFlushId, pendingToFlushNodes, pendingToFlushProgram, storingNodes, storingProgram;
+            string proverId;
+            zkr = pHashDB->getFlushStatus(storedFlushId, storingFlushId, lastFlushId, pendingToFlushNodes, pendingToFlushProgram, storingNodes, storingProgram, proverId);
+            zkassertpermanent(zkr==ZKR_SUCCESS);
+            zklog.info("GET FLUSH STATUS storedFlushId=" + to_string(storedFlushId));
+            if (storedFlushId >= flushId)
+            {
+                break;
+            }
+            sleep(1);
         }
-        sleep(1);
+        zklog.info("FLUSHED");
+
+        // Call ReadTree with the old state root to get the hashes of the initial values of all read or written keys
+        vector<HashValueGL> oldHashValues;
+        zkr = pHashDB->readTree(batchOldStateRoot, keyValues, oldHashValues);
+        zkassertpermanent(zkr==ZKR_SUCCESS);
+        zklog.info("READ TREE batchOldStateRoot=" + fea2string(fr, batchOldStateRoot) + " keyValues.size=" + to_string(keyValues.size()) + " hashValues.size=" + to_string(oldHashValues.size()));
+
+        // Call ReadTree with the new state root to get the hashes of the initial values of all read or written keys
+        vector<HashValueGL> hashValues;
+        zkr = pHashDB->readTree(batchNewStateRoot, keyValues, hashValues);
+        zkassertpermanent(zkr==ZKR_SUCCESS);
+        zklog.info("READ TREE batchNewStateRoot=" + fea2string(fr, batchNewStateRoot) + " keyValues.size=" + to_string(keyValues.size()) + " hashValues.size=" + to_string(hashValues.size()));
+
     }
-    zklog.info("FLUSHED");
-
-    // Call ReadTree with the old state root to get the hashes of the initial values of all read or written keys
-    vector<HashValueGL> oldHashValues;
-    zkr = pHashDB->readTree(batchOldStateRoot, keyValues, oldHashValues);
-    zkassertpermanent(zkr==ZKR_SUCCESS);
-    zklog.info("READ TREE batchOldStateRoot=" + fea2string(fr, batchOldStateRoot) + " keyValues.size=" + to_string(keyValues.size()) + " hashValues.size=" + to_string(oldHashValues.size()));
-
-    // Call ReadTree with the new state root to get the hashes of the initial values of all read or written keys
-    vector<HashValueGL> hashValues;
-    zkr = pHashDB->readTree(batchNewStateRoot, keyValues, hashValues);
-    zkassertpermanent(zkr==ZKR_SUCCESS);
-    zklog.info("READ TREE batchNewStateRoot=" + fea2string(fr, batchNewStateRoot) + " keyValues.size=" + to_string(keyValues.size()) + " hashValues.size=" + to_string(hashValues.size()));
 
     TimerStopAndLog(HASHDB64_WORKFLOW_TEST);
 

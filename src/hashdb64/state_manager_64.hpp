@@ -72,6 +72,7 @@ private:
     Goldilocks &fr;
     PoseidonGoldilocks &poseidon;
     unordered_map<string, BatchState64> state;
+    vector<string> stateOrder;
     Config config;
     pthread_mutex_t mutex; // Mutex to protect the multi write queues
     uint64_t lastVirtualStateRoot;
