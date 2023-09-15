@@ -5,6 +5,13 @@
 
 using namespace std;
 
+enum zkLogType
+{
+    logTypeInfo = 0,
+    logTypeWarning = 1,
+    logTypeError = 2
+};
+
 class zkLog
 {
 private:
@@ -13,17 +20,24 @@ private:
     void lock(void) { pthread_mutex_lock(&mutex); };
     void unlock(void) { pthread_mutex_unlock(&mutex); };
 
-    // Log prefix
-    string prefix;
+    // Log pid
+    string pid;
+
+    // Configuration
+    bool jsonLogs;
 
     string getThreadID (void);
 
+    void log (const zkLogType type, const string &message);
+
 public:
     zkLog ();
-    void setPrefix (const string &_prefix);
-    void info      (const string &message);
-    void warning   (const string &message);
-    void error     (const string &message);
+    void setPID (const string &_pid) { pid = _pid; };
+    void setJsonLogs (bool bJsonLogs) { jsonLogs = bJsonLogs; };
+
+    void info      (const string &message) { log(logTypeInfo,    message); };
+    void warning   (const string &message) { log(logTypeWarning, message); };
+    void error     (const string &message) { log(logTypeError,   message); };
 };
 
 extern zkLog zklog;
