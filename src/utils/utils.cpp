@@ -181,7 +181,7 @@ string getTimestampWithPeriod(void)
     struct timeval tv;
     gettimeofday(&tv, NULL);
     char buf[256];
-    snprintf(buf, sizeof(buf), "%d.%06ld", tv.tv_sec, tv.tv_usec);
+    snprintf(buf, sizeof(buf), "%ld.%06ld", tv.tv_sec, tv.tv_usec);
     return buf;
 }
 
