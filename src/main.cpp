@@ -310,7 +310,8 @@ int main(int argc, char **argv)
     file2json(pConfigFile, configJson);
     Config config;
     config.load(configJson);
-    zklog.setPrefix(config.proverID.substr(0, 7) + " "); // Set the logs prefix
+    zklog.setJsonLogs(config.jsonLogs);
+    zklog.setPID(config.proverID.substr(0, 7)); // Set the logs prefix
 
     // Print the zkProver version
     zklog.info("Version: " + string(ZKEVM_PROVER_VERSION));

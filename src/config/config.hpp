@@ -181,6 +181,8 @@ public:
     bool ECRecoverPrecalc;
     uint64_t ECRecoverPrecalcNThreads;
 
+    bool jsonLogs;
+
     void load(json &config);
     bool generateProof(void) const { return runFileGenBatchProof || runFileGenAggregatedProof || runFileGenFinalProof || runAggregatorClient; }
     void print(void);

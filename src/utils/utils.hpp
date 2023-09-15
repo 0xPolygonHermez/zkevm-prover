@@ -34,6 +34,9 @@ void printCallStack (void);
 // Returns timestamp in UTC, e.g. "20230110_173200_128863"
 string getTimestamp(void);
 
+// Returns timestamp in UTC, e.g. "1653327845.128863"
+string getTimestampWithPeriod(void);
+
 // Returns timestamp in UTC with slashes up to the hour, e.g. "2023/01/10/17/3200_128863"
 void getTimestampWithSlashes(string &timestamp, string &folder, string &file);
 
