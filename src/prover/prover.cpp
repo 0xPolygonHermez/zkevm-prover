@@ -355,7 +355,7 @@ ProverRequest *Prover::waitForRequestToComplete(const string &uuid, const uint64
 
 void Prover::processBatch(ProverRequest *pProverRequest)
 {
-    TimerStart(PROVER_PROCESS_BATCH);
+    //TimerStart(PROVER_PROCESS_BATCH);
     zkassert(pProverRequest != NULL);
     zkassert(pProverRequest->type == prt_processBatch);
 
@@ -388,7 +388,7 @@ void Prover::processBatch(ProverRequest *pProverRequest)
         json2file(inputJsonEx, pProverRequest->inputDbFile());
     }
 
-    TimerStopAndLog(PROVER_PROCESS_BATCH);
+    //TimerStopAndLog(PROVER_PROCESS_BATCH);
 }
 
 void Prover::genBatchProof(ProverRequest *pProverRequest)
