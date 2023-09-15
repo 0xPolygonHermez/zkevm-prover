@@ -359,7 +359,10 @@ void Prover::processBatch(ProverRequest *pProverRequest)
     zkassert(pProverRequest != NULL);
     zkassert(pProverRequest->type == prt_processBatch);
 
-    zklog.info("Prover::processBatch() timestamp=" + pProverRequest->timestamp + " UUID=" + pProverRequest->uuid);
+    if (config.runAggregatorClient)
+    {
+        zklog.info("Prover::processBatch() timestamp=" + pProverRequest->timestamp + " UUID=" + pProverRequest->uuid);
+    }
 
     // Save input to <timestamp>.input.json, as provided by client
     if (config.saveInputToFile)
