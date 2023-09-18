@@ -4359,13 +4359,31 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     gettimeofday(&t, NULL);
 #endif
 
-    zkresult zkr = pHashDB->flush(proverRequest.uuid, proverRequest.pFullTracer->get_new_state_root(), proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, proverRequest.flushId, proverRequest.lastSentFlushId);
-    if (zkr != ZKR_SUCCESS)
+    if (config.hashDB64)
     {
-        proverRequest.result = zkr;
-        logError(ctx, string("Failed calling pHashDB->flush() result=") + zkresult2string(zkr));
-        HashDBClientFactory::freeHashDBClient(pHashDB);
-        return;
+        Goldilocks::Element newStateRoot[4];
+        string2fea(fr, proverRequest.pFullTracer->get_new_state_root(), newStateRoot);
+        zkresult zkr = pHashDB->purge(proverRequest.uuid, newStateRoot, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);
+        if (zkr != ZKR_SUCCESS)
+        {
+            proverRequest.result = zkr;
+            logError(ctx, string("Failed calling pHashDB->purge() result=") + zkresult2string(zkr));
+            HashDBClientFactory::freeHashDBClient(pHashDB);
+            return;
+        }
+        proverRequest.flushId = 0;
+        proverRequest.lastSentFlushId = 0;
+    }
+    else
+    {
+        zkresult zkr = pHashDB->flush(proverRequest.uuid, proverRequest.pFullTracer->get_new_state_root(), proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, proverRequest.flushId, proverRequest.lastSentFlushId);
+        if (zkr != ZKR_SUCCESS)
+        {
+            proverRequest.result = zkr;
+            logError(ctx, string("Failed calling pHashDB->flush() result=") + zkresult2string(zkr));
+            HashDBClientFactory::freeHashDBClient(pHashDB);
+            return;
+        }
     }
     HashDBClientFactory::freeHashDBClient(pHashDB);
         
