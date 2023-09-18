@@ -8,6 +8,7 @@
 #include "zklog.hpp"
 #include "multi_query.hpp"
 #include "key_value.hpp"
+#include "version_value.hpp"
 
 using namespace std;
 
@@ -21,8 +22,8 @@ public:
     unordered_map<string, string> nodesIntray;
     map<uint64_t, vector<KeyValue>> keyValueA; //keyValue must be inserted to the db in order with respect to version!
     unordered_map<uint64_t, vector<KeyValue>> keyValueAIntray;
-    unordered_map<string, vector<uint64_t>>  keyVersions;
-    unordered_map<string, vector<uint64_t>>  keyVersionsIntray;
+    unordered_map<string, vector<VersionValue>>  keyVersionsValue;
+    unordered_map<string, vector<VersionValue>>  keyVersionsValueIntray;
     unordered_map<string, uint64_t> version;
     unordered_map<string, uint64_t> versionIntray;
     uint64_t latestVersion=0;
@@ -43,8 +44,8 @@ public:
         nodesIntray.clear();
         keyValueA.clear();
         keyValueAIntray.clear();
-        keyVersions.clear();
-        keyVersionsIntray.clear();
+        keyVersionsValue.clear();
+        keyVersionsValueIntray.clear();
         version.clear();
         versionIntray.clear();
         nodesStateRoot.clear();
@@ -62,8 +63,8 @@ public:
                (nodesStateRoot.size() == 0) &&
                (keyValueA.size() == 0) &&
                (keyValueAIntray.size() == 0) &&
-               (keyVersions.size() == 0) &&
-               (keyVersionsIntray.size() == 0) &&
+               (keyVersionsValue.size() == 0) &&
+               (keyVersionsValueIntray.size() == 0) &&
                (version.size() == 0) &&
                (versionIntray.size() == 0);
     }
@@ -120,22 +121,22 @@ public:
             version.merge(versionIntray);
             versionIntray.clear();
         }
-        if (keyVersionsIntray.size() > 0)
+        if (keyVersionsValueIntray.size() > 0)
         {
 #ifdef LOG_DB_ACCEPT_INTRAY
             if (bSenderCalling)
             {
-                zklog.info("MultiWriteData64::acceptIntray() rescuing " + to_string(keyVersionsIntray.size()) + " keyVersions");
+                zklog.info("MultiWriteData64::acceptIntray() rescuing " + to_string(keyVersionsValueIntray.size()) + " keyVersionsValue");
             }
 #endif
-            for(auto it = keyVersionsIntray.begin(); it != keyVersionsIntray.end(); ++it){
-                if(keyVersions.find(it->first) == keyVersions.end()){
-                    keyVersions[it->first] = it->second;
+            for(auto it = keyVersionsValueIntray.begin(); it != keyVersionsValueIntray.end(); ++it){
+                if(keyVersionsValue.find(it->first) == keyVersionsValue.end()){
+                    keyVersionsValue[it->first] = it->second;
                 }else{
-                    keyVersions[it->first].insert(keyVersions[it->first].end(), it->second.begin(), it->second.end());
+                    keyVersionsValue[it->first].insert(keyVersionsValue[it->first].end(), it->second.begin(), it->second.end());
                 }
             }
-            keyVersionsIntray.clear();
+            keyVersionsValueIntray.clear();
         }
     }
 };

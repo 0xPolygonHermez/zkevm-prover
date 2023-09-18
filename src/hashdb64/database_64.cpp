@@ -1160,8 +1160,11 @@ zkresult Database64::writeRemoteKV(const uint64_t version, const Goldilocks::Ele
         multiWrite.data[multiWrite.pendingToFlushDataIndex].keyValueAIntray[version].push_back(auxKV);
         string keyStr_ = fea2string(fr, key[0], key[1], key[2], key[3]);
         string keyStr = NormalizeToNFormat(keyStr_, 64);
-        multiWrite.data[multiWrite.pendingToFlushDataIndex].keyVersionsIntray[keyStr].push_back(version);
-#ifdef LOG_DB_WRITE_REMOTE
+        VersionValue vV;
+        vV.version = version;
+        vV.value = value;
+        multiWrite.data[multiWrite.pendingToFlushDataIndex].keyVersionsValueIntray[keyStr].push_back(vV);
+        #ifdef LOG_DB_WRITE_REMOTE
             zklog.info("Database64::writeRemote() version=" + to_string(version) + " multiWrite=[" + multiWrite.print() + "]");
 #endif
         multiWrite.Unlock();
