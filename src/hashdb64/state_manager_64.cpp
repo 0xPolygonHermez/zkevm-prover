@@ -52,6 +52,7 @@ zkresult StateManager64::setStateRoot(const string &batchUUID, uint64_t tx, cons
         state[batchUUID] = batchState;
         it = state.find(batchUUID);
         zkassert(it != state.end());
+        stateOrder.emplace_back(batchUUID);
     }
     BatchState64 &batchState = it->second;
 
@@ -658,6 +659,8 @@ zkresult StateManager64::consolidateState(const string &_virtualStateRoot, const
 
     Lock();
 
+    //print(false);
+
     zkresult zkr;
 
     // Find batch state for this uuid
@@ -891,6 +894,12 @@ void StateManager64::print(bool bDbContent)
         totalWrites += totalDbWrites[persistence];
     }
     zklog.info("total writes=" + to_string(totalWrites));
+
+    zklog.info("stateOrder.size=" + to_string(stateOrder.size()));
+    for (uint64_t i=0; i<stateOrder.size(); i++)
+    {
+        zklog.info("  uuid=" + stateOrder[i]);
+    }
 }
 
 void StateManager64::getVirtualStateRoot(Goldilocks::Element (&newStateRoot)[4], string &newStateRootString)

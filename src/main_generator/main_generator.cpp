@@ -4791,14 +4791,32 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
     code += "    gettimeofday(&t, NULL);\n";
     code += "#endif\n";
-    
-    code += "    zkresult zkr = pHashDB->flush(proverRequest.uuid, proverRequest.pFullTracer->get_new_state_root(), proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, proverRequest.flushId, proverRequest.lastSentFlushId);\n";
-    code += "    if (zkr != ZKR_SUCCESS)\n";
+
+    code += "    if (ctx.config.hashDB64)\n";
     code += "    {\n";
-    code += "        proverRequest.result = zkr;\n";
-    code += "        mainExecutor.logError(ctx, string(\"Failed calling pHashDB->flush() result=\") + zkresult2string(zkr));\n";
-    code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
-    code += "        return;\n";
+    code += "        Goldilocks::Element newStateRoot[4];\n";
+    code += "        string2fea(fr, proverRequest.pFullTracer->get_new_state_root(), newStateRoot);\n";
+    code += "        zkresult zkr = pHashDB->purge(proverRequest.uuid, newStateRoot, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);\n";
+    code += "        if (zkr != ZKR_SUCCESS)\n";
+    code += "        {\n";
+    code += "            proverRequest.result = zkr;\n";
+    code += "            mainExecutor.logError(ctx, string(\"Failed calling pHashDB->purge() result=\") + zkresult2string(zkr));\n";
+    code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+    code += "            return;\n";
+    code += "        }\n";
+    code += "        proverRequest.flushId = 0;\n";
+    code += "        proverRequest.lastSentFlushId = 0;\n";
+    code += "    }\n";
+    code += "    else\n";
+    code += "    {\n";
+    code += "        zkresult zkr = pHashDB->flush(proverRequest.uuid, proverRequest.pFullTracer->get_new_state_root(), proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, proverRequest.flushId, proverRequest.lastSentFlushId);\n";
+    code += "        if (zkr != ZKR_SUCCESS)\n";
+    code += "        {\n";
+    code += "            proverRequest.result = zkr;\n";
+    code += "            mainExecutor.logError(ctx, string(\"Failed calling pHashDB->flush() result=\") + zkresult2string(zkr));\n";
+    code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+    code += "            return;\n";
+    code += "        }\n";
     code += "    }\n";
     code += "    HashDBClientFactory::freeHashDBClient(pHashDB);\n\n";
 
