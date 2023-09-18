@@ -17,7 +17,7 @@ public:
     void     rotateRight (uint64_t pos);
     void     shiftRight  (uint64_t pos);
 
-    GateU32 & operator =(const uint32_t & value)
+    GateU32 & operator = (const uint32_t & value)
     {
         fromU32(value);
         return *this;

@@ -21,6 +21,7 @@
 #include "service/aggregator/aggregator_client_mock.hpp"
 #include "sm/keccak_f/keccak.hpp"
 #include "sm/keccak_f/keccak_executor_test.hpp"
+#include "sm/sha256/sha256_executor_test.hpp"
 #include "sm/storage/storage_executor.hpp"
 #include "sm/storage/storage_test.hpp"
 #include "sm/binary/binary_test.hpp"
@@ -577,7 +578,6 @@ int main(int argc, char **argv)
     // Test Keccak SM
     if (config.runKeccakTest)
     {
-        // Keccak2Test();
         KeccakTest();
         KeccakSMExecutorTest(fr, config);
     }
@@ -604,6 +604,7 @@ int main(int argc, char **argv)
     if (config.runSHA256Test)
     {
         SHA256Test(fr, config);
+        SHA256SMExecutorTest(fr, config);
     }
 
     // Test Blake

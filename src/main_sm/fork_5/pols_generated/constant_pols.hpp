@@ -15,7 +15,7 @@ private:
     uint64_t _index;
 public:
     ConstantPol(Goldilocks::Element * pAddress, uint64_t degree, uint64_t index) : _pAddress(pAddress), _degree(degree), _index(index) {};
-    inline Goldilocks::Element & operator[](uint64_t i) { return _pAddress[i*218]; };
+    inline Goldilocks::Element & operator[](uint64_t i) { return _pAddress[i*225]; };
     inline Goldilocks::Element * operator=(Goldilocks::Element * pAddress) { _pAddress = pAddress; return _pAddress; };
 
     inline Goldilocks::Element * address (void) { return _pAddress; }
@@ -648,6 +648,43 @@ public:
     inline uint64_t size (void) { return _degree*6*sizeof(Goldilocks::Element); }
 };
 
+class Sha256ConstantPols
+{
+public:
+    ConstantPol KOP;
+    ConstantPol INPUT[2];
+    ConstantPol OUTPUT[2];
+    ConstantPol OP;
+    ConstantPol CARRY_ENABLED;
+private:
+    void * _pAddress;
+    uint64_t _degree;
+public:
+
+    Sha256ConstantPols (void * pAddress, uint64_t degree) :
+        KOP((Goldilocks::Element *)((uint8_t *)pAddress + 1744), degree, 218),
+        INPUT{
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1752), degree, 219),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1760), degree, 220)
+        },
+        OUTPUT{
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1768), degree, 221),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1776), degree, 222)
+        },
+        OP((Goldilocks::Element *)((uint8_t *)pAddress + 1784), degree, 223),
+        CARRY_ENABLED((Goldilocks::Element *)((uint8_t *)pAddress + 1792), degree, 224),
+        _pAddress(pAddress),
+        _degree(degree) {};
+
+    inline static uint64_t pilDegree (void) { return 8388608; }
+    inline static uint64_t pilSize (void) { return 56; }
+    inline static uint64_t numPols (void) { return 7; }
+
+    inline void * address (void) { return _pAddress; }
+    inline uint64_t degree (void) { return _degree; }
+    inline uint64_t size (void) { return _degree*7*sizeof(Goldilocks::Element); }
+};
+
 class ConstantPols
 {
 public:
@@ -663,6 +700,7 @@ public:
     Bits2FieldConstantPols Bits2Field;
     PaddingKKBitConstantPols PaddingKKBit;
     PaddingKKConstantPols PaddingKK;
+    Sha256ConstantPols Sha256;
 private:
     void * _pAddress;
     uint64_t _degree;
@@ -681,16 +719,17 @@ public:
         Bits2Field(pAddress, degree),
         PaddingKKBit(pAddress, degree),
         PaddingKK(pAddress, degree),
+        Sha256(pAddress, degree),
         _pAddress(pAddress),
         _degree(degree) {}
 
-    inline static uint64_t pilSize (void) { return 14629732352; }
+    inline static uint64_t pilSize (void) { return 15099494400; }
     inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t numPols (void) { return 218; }
+    inline static uint64_t numPols (void) { return 225; }
 
     inline void * address (void) { return _pAddress; }
     inline uint64_t degree (void) { return _degree; }
-    inline uint64_t size (void) { return _degree*218*sizeof(Goldilocks::Element); }
+    inline uint64_t size (void) { return _degree*225*sizeof(Goldilocks::Element); }
 
     inline Goldilocks::Element &getElement (uint64_t pol, uint64_t evaluation)
     {

@@ -222,6 +222,7 @@ void Config::load(json &config)
     ParseString(config, "configPath", "CONFIG_PATH", configPath, "config");
     ParseString(config, "rom", "ROM", rom, string("src/main_sm/") + string(PROVER_FORK_NAMESPACE_STRING) + string("/scripts/rom.json"));
     ParseString(config, "keccakScriptFile", "KECCAK_SCRIPT_FILE", keccakScriptFile, configPath + "/scripts/keccak_script.json");
+    ParseString(config, "sha256ScriptFile", "SHA256_SCRIPT_FILE", sha256ScriptFile, configPath + "/scripts/sha256_script.json");
     ParseString(config, "storageRomFile", "STORAGE_ROM_FILE", storageRomFile, configPath + "/scripts/storage_sm_rom.json");
     ParseString(config, "zkevmConstPols", "ZKEVM_CONST_POLS", zkevmConstPols, configPath + "/zkevm/zkevm.const");
     ParseString(config, "zkevmConstantsTree", "ZKEVM_CONSTANTS_TREE", zkevmConstantsTree, configPath + "/zkevm/zkevm.consttree");
@@ -258,8 +259,10 @@ void Config::load(json &config)
     ParseBool(config, "mapConstantsTreeFile", "MAP_CONSTANTS_TREE_FILE", mapConstantsTreeFile, false);
     ParseString(config, "proofFile", "PROOF_FILE", proofFile, "proof.json");
     ParseString(config, "publicsOutput", "PUBLICS_OUTPUT", publicsOutput, "public.json");
-    ParseString(config, "keccakPolsFile", "KECCAK_POLS_FILE", keccakPolsFile, "keccak_pols.json");
-    ParseString(config, "keccakConnectionsFile", "KECCAK_CONNECTIONS_FILE", keccakConnectionsFile, "keccak_connections.json");
+    ParseString(config, "keccakPolsFile", "KECCAK_POLS_FILE", keccakPolsFile, configPath + "/scripts/keccak_pols.json");
+    ParseString(config, "keccakConnectionsFile", "KECCAK_CONNECTIONS_FILE", keccakConnectionsFile, configPath + "/scripts/keccak_connections.json");
+    ParseString(config, "sha256PolsFile", "SHA256_POLS_FILE", sha256PolsFile, configPath + "/scripts/sha256_pols.json");
+    ParseString(config, "sha256ConnectionsFile", "SHA256_CONNECTIONS_FILE", sha256ConnectionsFile, configPath + "/scripts/sha256_connections.json");
 
     // Database
     ParseString(config, "databaseURL", "DATABASE_URL", databaseURL, "local");
@@ -465,6 +468,7 @@ void Config::print(void)
     zklog.info("    keccakPolsFile=" + keccakPolsFile);
     zklog.info("    sha256PolsFile=" + sha256PolsFile);
     zklog.info("    keccakConnectionsFile=" + keccakConnectionsFile);
+    zklog.info("    sha256ConnectionsFile=" + sha256ConnectionsFile);
     zklog.info("    storageRomFile=" + storageRomFile);
     zklog.info("    zkevmStarkInfo=" + zkevmStarkInfo);
     zklog.info("    c12aStarkInfo=" + c12aStarkInfo);

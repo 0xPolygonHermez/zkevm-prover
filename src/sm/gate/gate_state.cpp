@@ -282,7 +282,6 @@ void GateState::OP(GateOperation op, uint64_t refA, PinId pinA, uint64_t refB, P
         zklog.error("GateState::OP() got invalid op=" + to_string(op));
         exitProcess();
     }
-
     // Increase the operands fan-out counters and add r to their connections
     if (refA != refR)
     {

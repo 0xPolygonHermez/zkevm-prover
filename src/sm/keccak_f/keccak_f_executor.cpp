@@ -87,7 +87,7 @@ void KeccakFExecutor::loadScript(json j)
         else if (typea == "input")
         {
             uint64_t bit = j["program"][i]["a"]["bit"];
-            instruction.refa = KeccakGateConfig.sinRef0 + bit * 44;
+            instruction.refa = KeccakGateConfig.sinRef0 + bit * KeccakGateConfig.sinRefDistance;
             instruction.pina = PinId::pin_a;
         }
         else
@@ -107,7 +107,7 @@ void KeccakFExecutor::loadScript(json j)
         else if (typeb == "input")
         {
             uint64_t bit = j["program"][i]["b"]["bit"];
-            instruction.refb = KeccakGateConfig.sinRef0 + bit * 44;
+            instruction.refb = KeccakGateConfig.sinRef0 + bit * KeccakGateConfig.sinRefDistance;
             instruction.pinb = PinId::pin_a;
         }
         else
@@ -124,7 +124,7 @@ void KeccakFExecutor::loadScript(json j)
     bLoaded = true;
 }
 
-/* Input is a vector of numberOfSlots*1600 fe, output is KeccakPols */
+/* Input is a vector of numberOfSlots*sinRefNumber fe, output is KeccakPols */
 void KeccakFExecutor::execute(const vector<vector<Goldilocks::Element>> &input, KeccakFCommitPols &pols)
 {
     zkassertpermanent(bLoaded);
@@ -140,9 +140,9 @@ void KeccakFExecutor::execute(const vector<vector<Goldilocks::Element>> &input, 
     // Check number of slots, per input
     for (uint64_t i = 0; i < numberOfSlots; i++)
     {
-        if (input[i].size() != 1600)
+        if (input[i].size() != KeccakGateConfig.sinRefNumber)
         {
-            zklog.error("KeccakFExecutor::execute() got input i=" + to_string(i) + " size=" + to_string(input[i].size()) + " different from 1600");
+            zklog.error("KeccakFExecutor::execute() got input i=" + to_string(i) + " size=" + to_string(input[i].size()) + " different from KeccakGateConfig.sinRefNumber");
             exitProcess();
         }
     }
@@ -151,16 +151,16 @@ void KeccakFExecutor::execute(const vector<vector<Goldilocks::Element>> &input, 
     for (uint64_t i = 0; i < 4; i++)
     {
         pols.a[i][KeccakGateConfig.zeroRef] = fr.zero();
-        pols.b[i][KeccakGateConfig.zeroRef] = fr.fromU64(0x7FF);
+        pols.b[i][KeccakGateConfig.zeroRef] = fr.one();
         pols.c[i][KeccakGateConfig.zeroRef] = fr.fromU64(fr.toU64(pols.a[i][KeccakGateConfig.zeroRef]) ^ fr.toU64(pols.b[i][KeccakGateConfig.zeroRef]));
     }
 
     // Set Sin values
     for (uint64_t slot = 0; slot < numberOfSlots; slot++)
     {
-        for (uint64_t i = 0; i < 1600; i++)
+        for (uint64_t i = 0; i < KeccakGateConfig.sinRefNumber; i++)
         {
-            setPol(pols.a, KeccakGateConfig.relRef2AbsRef(KeccakGateConfig.sinRef0 + i * 44, slot), fr.toU64(input[slot][i]));
+            setPol(pols.a, KeccakGateConfig.relRef2AbsRef(KeccakGateConfig.sinRef0 + i * KeccakGateConfig.sinRefDistance, slot), fr.toU64(input[slot][i]));
         }
     }
 

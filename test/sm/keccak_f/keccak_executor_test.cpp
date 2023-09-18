@@ -7,15 +7,6 @@
 #include "keccak_executor_test.hpp"
 #include "timer.hpp"
 
-bool getBit(uint8_t byte, int position)
-{
-	// Create a bitmask with a 1 at the desired position
-	uint8_t mask = 1 << position;
-
-	// Perform bitwise AND and check if the result is zero or not
-	return (byte & mask) != 0;
-}
-
 void KeccakSMTest(Goldilocks &fr, KeccakFExecutor &executor)
 {
 	void *pAddress = malloc(CommitPols::pilSize());
@@ -33,7 +24,6 @@ void KeccakSMTest(Goldilocks &fr, KeccakFExecutor &executor)
 	// 4. We compare the hashes.
 
 	const uint64_t numberOfSlots = ((KeccakGateConfig.polLength - 1) / KeccakGateConfig.slotSize);
-	const uint64_t keccakBitratePlusCapacity = 1600;
 	const uint64_t randomByteCount = 135;
 
 	string *pHash = new string[numberOfSlots];
@@ -70,8 +60,8 @@ void KeccakSMTest(Goldilocks &fr, KeccakFExecutor &executor)
 		}
 		pHash[slot] = hashString;
 
-		// Create an input slot for the Keccak executor of size keccakBitratePlusCapacity.
-		std::vector<Goldilocks::Element> pInputSlot(keccakBitratePlusCapacity);
+		// Create an input slot for the Keccak executor of size KeccakGateConfig.sinRefNumber.
+		std::vector<Goldilocks::Element> pInputSlot(KeccakGateConfig.sinRefNumber);
 
 		// Fill the executor input slot with the generated random byte test vector, bit by bit.
 		// Note that we're filling it with (randomByteCount + 1), because the last byte is a
@@ -85,7 +75,8 @@ void KeccakSMTest(Goldilocks &fr, KeccakFExecutor &executor)
 				{
 					// Fill the bits normally from the test vector, with each bit being replaced with an equivalent
 					// bit initialized as a Goldilocks finite field element.
-					pInputSlot[(byte * 8) + bit] = getBit(randomTestVector[byte], bit) ? fr.one() : fr.zero();
+					uint8_t mask = 1 << bit;
+					pInputSlot[(byte * 8) + bit] = ((randomTestVector[byte] & mask) != 0) ? fr.one() : fr.zero();
 				}
 				else if (byte == randomByteCount)
 				{
@@ -111,11 +102,11 @@ void KeccakSMTest(Goldilocks &fr, KeccakFExecutor &executor)
 		// For each slot, we must extract the output of the executor bit by bit.
 		// Each bit is represented by a polynomial. We must get these bits by specifying their position in
 		// the executor's output buffer for this slot, which starts at the distance of soutRef0.
-		// Each output bit is separated by a multiple of 44.
+		// Each output bit is separated by a multiple of KeccakGateConfig.soutRefDistance.
 		// Once we get the polynomial, we AND it with 1 to extract the bit.
 		for (uint64_t i = 0; i < 256; i++)
 		{
-			uint64_t bitIndex = KeccakGateConfig.relRef2AbsRef(KeccakGateConfig.soutRef0 + i * 44, slot);
+			uint64_t bitIndex = KeccakGateConfig.relRef2AbsRef(KeccakGateConfig.soutRef0 + KeccakGateConfig.soutRefDistance * i, slot);
 			uint64_t pol = executor.getPol(cmPols.KeccakF.a, bitIndex);
 			aux[i] = ((pol & uint64_t(1)) == 0)? 0 : 1;
 		}

@@ -27,9 +27,11 @@ uint64_t SHA256Test (Goldilocks &fr, const Config &config)
         string expectedHash = sha256TestVectors[i][1];
         string hash;
         SHA256String(input, hash);
-        if (hash != expectedHash)
+        if (hash == expectedHash)
         {
-            zklog.error("SHA256Test() 1 failed, hash of " + input + " is " + hash + " instead of " + expectedHash);
+            zklog.info("SHA256Test() PASSED, hash of " + input);
+        } else {
+            zklog.error("SHA256Test() failed, hash of " + input + " is " + hash + " instead of " + expectedHash);
             numberOfErrors++;
         }
     }
@@ -37,19 +39,6 @@ uint64_t SHA256Test (Goldilocks &fr, const Config &config)
     TimerStopAndLog(SHA256_TEST);
 
     TimerStart(SHA256_GATES_TEST);
-
-    for (uint64_t i=0; i<sha256TestVectors.size(); i++)
-    {
-        string input = sha256TestVectors[i][0];
-        string expectedHash = sha256TestVectors[i][1];
-        string hash;
-        SHA256GateString(input, hash);
-        if (hash != expectedHash)
-        {
-            zklog.error("SHA256Test() 2 failed, hash of " + input + " is " + hash + " instead of " + expectedHash);
-            numberOfErrors++;
-        }
-    }
 
     TimerStopAndLog(SHA256_GATES_TEST);
 

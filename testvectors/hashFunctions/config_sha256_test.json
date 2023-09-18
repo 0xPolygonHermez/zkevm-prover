@@ -21,7 +21,7 @@
     "runStorageSMTest": false,
     "runBinarySMTest": false,
     "runMemAlignSMTest": false,
-    "runSHA256ScriptGenerator": true,
+    "runSHA256ScriptGenerator": false,
     "runSHA256Test": true,
     "runBlakeTest": false,
 

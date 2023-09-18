@@ -4,9 +4,10 @@
 #include <string>
 #include <stdint.h>
 
+#include "gate_state.hpp"
+
 using namespace std;
 
-void SHA256Gate (const uint8_t * pData, uint64_t dataSize, string &hash, string scriptFile="", string polsFile="", string connectionsFile="");
-void SHA256GateString (const string &s, string &hash);
+void SHA256Gate (GateState S, const uint8_t * chunkBytes, string scriptFile="", string polsFile="", string connectionsFile="");
 
 #endif
