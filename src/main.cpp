@@ -46,6 +46,8 @@
 #include "smt_64_test.hpp"
 #include "sha256.hpp"
 #include "database_kv_test.hpp"
+#include "database_kv_multiwrite_test.hpp"
+
 
 using namespace std;
 using json = nlohmann::json;
@@ -640,10 +642,15 @@ int main(int argc, char **argv)
     {
         DatabasePerformanceTest();
     }
-    // Test DbKVRemote
-    if (config.runDbKVRemoteTest)
+    // Test DbKV
+    if (config.runDbKVTest)
     {
         DatabaseKVTest(config);
+    }
+    // Test DbKVMultiwrite
+    if (config.runDbKVMultiWriteTest)
+    {
+        DatabaseKVMultiWriteTest(config);
     }
     
     // Test SMT64

@@ -36,6 +36,7 @@ public:
     bool findProgram(const string &key, vector<uint8_t> &value);
     bool findKeyValue(const uint64_t version,const Goldilocks::Element (&key)[4], mpz_class &value);
     bool findVersion(const string &key, uint64_t &version);
+    bool findLatestVersion(uint64_t &version);
 };
 
 #endif

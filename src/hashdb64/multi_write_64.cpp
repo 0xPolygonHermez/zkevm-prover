@@ -338,3 +338,24 @@ bool MultiWrite64::findVersion(const string &key, uint64_t &version){
         return bResult;
 
 }
+
+bool MultiWrite64::findLatestVersion(uint64_t &version)
+{
+    bool bResult = false;
+    Lock();
+
+    // Search in data[pendingToFlushDataIndex].latestVersion
+    if (bResult == false)
+    {
+        if (data[pendingToFlushDataIndex].latestVersion != 0)
+        {
+            version = data[pendingToFlushDataIndex].latestVersion;
+            bResult = true;
+#ifdef LOG_DB_MULTI_WRITE_FIND_NODES
+            zklog.info("MultiWrite64::findLatestVersion() data[pendingToFlushDataIndex].latestVersion found version=" + to_string(version));
+#endif
+        }
+    }
+    Unlock();
+    return bResult;
+}

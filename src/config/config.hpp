@@ -45,7 +45,8 @@ public:
     string checkTreeRoot;
     bool runDatabasePerformanceTest;
     bool runSMT64Test;
-    bool runDbKVRemoteTest;
+    bool runDbKVTest;
+    bool runDbKVMultiWriteTest;
     bool runUnitTest;
     
     bool executeInParallel;

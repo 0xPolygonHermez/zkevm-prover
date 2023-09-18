@@ -3,15 +3,12 @@
 #include "hashdb.hpp"
 #include "hashdb_singleton.hpp"
 
-#define DBKV_REMOTE_TEST_NUMBER_OF_WRITES 1000
-
-
 uint64_t DatabaseKVTest (const Config &config){
     
     Goldilocks fr;
     uint64_t numberOfFailedTests = 0;
     
-    TimerStart(DATABASE_KV_REMOTE_TEST);
+    TimerStart(DATABASE_KV_TEST);
 
     if(config.dbMultiWrite == true){
         zklog.error("DatabaseKVTest() this test must be run with config.dbMultiWrite=false");
@@ -126,7 +123,7 @@ uint64_t DatabaseKVTest (const Config &config){
         exitProcess();   
     }
    
-    TimerStopAndLog(DATABASE_KV_REMOTE_TEST);
+    TimerStopAndLog(DATABASE_KV_TEST);
     return numberOfFailedTests;
 }
 

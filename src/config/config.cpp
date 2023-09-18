@@ -148,7 +148,8 @@ void Config::load(json &config)
     ParseString(config, "checkTreeRoot", "CHECK_TREE_ROOT", checkTreeRoot, "auto");
     ParseBool(config, "runDatabasePerformanceTest", "RUN_DATABASE_PERFORMANCE_TEST", runDatabasePerformanceTest, false);
     ParseBool(config, "runSMT64Test", "RUN_SMT64_TEST", runSMT64Test, false);
-    ParseBool(config, "runDbKVRemoteTest", "RUN_DBKV_REMOTE_TEST", runDbKVRemoteTest, false);
+    ParseBool(config, "runDbKVTest", "RUN_DBKV_TEST", runDbKVTest, false);
+    ParseBool(config, "runDbKVMultiWriteTest", "RUN_DBKV_MULTIWRITE_TEST", runDbKVMultiWriteTest, false);
     ParseBool(config, "runUnitTest", "RUN_UNIT_TEST", runUnitTest, false);
 
     // Main SM executor
@@ -366,8 +367,10 @@ void Config::print(void)
         zklog.info("    runDatabasePerformanceTest=true");
     if (runSMT64Test)
         zklog.info("    runSMT64Test=true");
-    if (runDbKVRemoteTest)
-        zklog.info("    runDbKVRemoteTest=true");
+    if (runDbKVTest)
+        zklog.info("    runDbKVTest=true");
+    if (runDbKVMultiWriteTest)      
+        zklog.info("    runDbKVMultiWriteTest=true");
     if (runUnitTest)
         zklog.info("    runUnitTest=true");
 
