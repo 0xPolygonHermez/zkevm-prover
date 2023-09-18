@@ -23,9 +23,9 @@ uint64_t HashDB64WorkflowTest (const Config& config)
     uint64_t flushId, storedFlushId;
     
 
-    const uint64_t numberOfSetsPerTx = 10;
-    const uint64_t numberOfTxsPerBatch = 10;
-    const uint64_t numberOfLoops = 3;
+    const uint64_t numberOfSetsPerTx = 3;
+    const uint64_t numberOfTxsPerBatch = 3;
+    const uint64_t numberOfBatches = 10;
 
     SmtSetResult setResult;
     SmtGetResult getResult;
@@ -37,9 +37,9 @@ uint64_t HashDB64WorkflowTest (const Config& config)
     mpz_class value = 0;
     mpz_class keyScalar = 0;
 
-    for (uint64_t loop=0; loop<numberOfLoops; loop++)
+    for (uint64_t batch=0; batch<numberOfBatches; batch++)
     {
-        zklog.info("STARTING LOOP=" + to_string(loop));
+        zklog.info("STARTING LOOP=" + to_string(batch));
 
         // Start batch
         string batchUUID = getUUID();
@@ -83,45 +83,57 @@ uint64_t HashDB64WorkflowTest (const Config& config)
         zkassertpermanent(zkr==ZKR_SUCCESS);
         zklog.info("PURGE zkr=" + zkresult2string(zkr) + " root=" + fea2string(fr, root) + " flushId=" + to_string(flushId) + " storedFlushId=" + to_string(storedFlushId));
 
-        // Consolidate state root
-        Goldilocks::Element consolidatedStateRoot[4];
-        zkr = pHashDB->consolidateState(root, persistence, consolidatedStateRoot, flushId, storedFlushId);
-        zkassertpermanent(zkr==ZKR_SUCCESS);
-        zklog.info("CONSOLIDATE zkr=" + zkresult2string(zkr) + " virtualRoot=" + fea2string(fr, root) + " consolidatedRoot=" + fea2string(fr, consolidatedStateRoot) + " flushId=" + to_string(flushId) + " storedFlushId=" + to_string(storedFlushId));
-
-        // New state root
+        // Consolidate state root every 5 batches
         Goldilocks::Element batchNewStateRoot[4];
-        for (uint64_t i=0; i<4; i++) batchNewStateRoot[i] = consolidatedStateRoot[i];
-        for (uint64_t i=0; i<4; i++) root[i] = consolidatedStateRoot[i];
-
-        // Wait for data to be sent
-        while (true)
+        if (((batch+1) % 5) == 0)
         {
-            uint64_t storedFlushId, storingFlushId, lastFlushId, pendingToFlushNodes, pendingToFlushProgram, storingNodes, storingProgram;
-            string proverId;
-            zkr = pHashDB->getFlushStatus(storedFlushId, storingFlushId, lastFlushId, pendingToFlushNodes, pendingToFlushProgram, storingNodes, storingProgram, proverId);
+            Goldilocks::Element consolidatedStateRoot[4];
+            zkr = pHashDB->consolidateState(root, persistence, consolidatedStateRoot, flushId, storedFlushId);
             zkassertpermanent(zkr==ZKR_SUCCESS);
-            zklog.info("GET FLUSH STATUS storedFlushId=" + to_string(storedFlushId));
-            if (storedFlushId >= flushId)
+            zklog.info("CONSOLIDATE zkr=" + zkresult2string(zkr) + " virtualRoot=" + fea2string(fr, root) + " consolidatedRoot=" + fea2string(fr, consolidatedStateRoot) + " flushId=" + to_string(flushId) + " storedFlushId=" + to_string(storedFlushId));
+
+            // New state root
+            for (uint64_t i=0; i<4; i++) batchNewStateRoot[i] = consolidatedStateRoot[i];
+            for (uint64_t i=0; i<4; i++) root[i] = consolidatedStateRoot[i];
+
+            // Wait for data to be sent
+            while (true)
             {
-                break;
+                uint64_t storedFlushId, storingFlushId, lastFlushId, pendingToFlushNodes, pendingToFlushProgram, storingNodes, storingProgram;
+                string proverId;
+                zkr = pHashDB->getFlushStatus(storedFlushId, storingFlushId, lastFlushId, pendingToFlushNodes, pendingToFlushProgram, storingNodes, storingProgram, proverId);
+                zkassertpermanent(zkr==ZKR_SUCCESS);
+                zklog.info("GET FLUSH STATUS storedFlushId=" + to_string(storedFlushId));
+                if (storedFlushId >= flushId)
+                {
+                    break;
+                }
+                sleep(1);
             }
-            sleep(1);
+            zklog.info("FLUSHED");
+
+            // Call ReadTree with the old state root to get the hashes of the initial values of all read or written keys
+            vector<HashValueGL> oldHashValues;
+            zkr = pHashDB->readTree(batchOldStateRoot, keyValues, oldHashValues);
+            zkassertpermanent(zkr==ZKR_SUCCESS);
+            zklog.info("READ TREE batchOldStateRoot=" + fea2string(fr, batchOldStateRoot) + " keyValues.size=" + to_string(keyValues.size()) + " hashValues.size=" + to_string(oldHashValues.size()));
+
+            // Call ReadTree with the new state root to get the hashes of the initial values of all read or written keys
+            vector<HashValueGL> hashValues;
+            zkr = pHashDB->readTree(batchNewStateRoot, keyValues, hashValues);
+            zkassertpermanent(zkr==ZKR_SUCCESS);
+            zklog.info("READ TREE batchNewStateRoot=" + fea2string(fr, batchNewStateRoot) + " keyValues.size=" + to_string(keyValues.size()) + " hashValues.size=" + to_string(hashValues.size()));
         }
-        zklog.info("FLUSHED");
+        else
+        {
+            for (uint64_t i=0; i<4; i++) batchNewStateRoot[i] = root[i];
+        }
 
-        // Call ReadTree with the old state root to get the hashes of the initial values of all read or written keys
-        vector<HashValueGL> oldHashValues;
-        zkr = pHashDB->readTree(batchOldStateRoot, keyValues, oldHashValues);
-        zkassertpermanent(zkr==ZKR_SUCCESS);
-        zklog.info("READ TREE batchOldStateRoot=" + fea2string(fr, batchOldStateRoot) + " keyValues.size=" + to_string(keyValues.size()) + " hashValues.size=" + to_string(oldHashValues.size()));
-
-        // Call ReadTree with the new state root to get the hashes of the initial values of all read or written keys
-        vector<HashValueGL> hashValues;
-        zkr = pHashDB->readTree(batchNewStateRoot, keyValues, hashValues);
-        zkassertpermanent(zkr==ZKR_SUCCESS);
-        zklog.info("READ TREE batchNewStateRoot=" + fea2string(fr, batchNewStateRoot) + " keyValues.size=" + to_string(keyValues.size()) + " hashValues.size=" + to_string(hashValues.size()));
-
+        // Discard some of the batches
+        if (((batch+4) % 5) == 0)
+        {
+            for (uint64_t i=0; i<4; i++) root[i] = batchOldStateRoot[i];
+        }
     }
 
     TimerStopAndLog(HASHDB64_WORKFLOW_TEST);
