@@ -481,7 +481,7 @@ class ProcessBatchRequest PROTOBUF_FINAL :
     kGlobalExitRootFieldNumber = 7,
     kCoinbaseFieldNumber = 9,
     kFromFieldNumber = 12,
-    kExternalRequestIdFieldNumber = 16,
+    kContextIdFieldNumber = 16,
     kTraceConfigFieldNumber = 15,
     kOldBatchNumFieldNumber = 3,
     kChainIdFieldNumber = 4,
@@ -675,29 +675,29 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   std::string* _internal_mutable_from();
   public:
 
-  // string external_request_id = 16;
-  void clear_external_request_id();
-  const std::string& external_request_id() const;
-  void set_external_request_id(const std::string& value);
-  void set_external_request_id(std::string&& value);
-  void set_external_request_id(const char* value);
-  void set_external_request_id(const char* value, size_t size);
-  std::string* mutable_external_request_id();
-  std::string* release_external_request_id();
-  void set_allocated_external_request_id(std::string* external_request_id);
+  // string context_id = 16;
+  void clear_context_id();
+  const std::string& context_id() const;
+  void set_context_id(const std::string& value);
+  void set_context_id(std::string&& value);
+  void set_context_id(const char* value);
+  void set_context_id(const char* value, size_t size);
+  std::string* mutable_context_id();
+  std::string* release_context_id();
+  void set_allocated_context_id(std::string* context_id);
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  std::string* unsafe_arena_release_external_request_id();
+  std::string* unsafe_arena_release_context_id();
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  void unsafe_arena_set_allocated_external_request_id(
-      std::string* external_request_id);
+  void unsafe_arena_set_allocated_context_id(
+      std::string* context_id);
   private:
-  const std::string& _internal_external_request_id() const;
-  void _internal_set_external_request_id(const std::string& value);
-  std::string* _internal_mutable_external_request_id();
+  const std::string& _internal_context_id() const;
+  void _internal_set_context_id(const std::string& value);
+  std::string* _internal_mutable_context_id();
   public:
 
   // .executor.v1.TraceConfig trace_config = 15;
@@ -806,7 +806,7 @@ class ProcessBatchRequest PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr global_exit_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr coinbase_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr from_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr external_request_id_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr context_id_;
   ::executor::v1::TraceConfig* trace_config_;
   ::PROTOBUF_NAMESPACE_ID::uint64 old_batch_num_;
   ::PROTOBUF_NAMESPACE_ID::uint64 chain_id_;
@@ -4986,85 +4986,85 @@ inline void ProcessBatchRequest::set_allocated_trace_config(::executor::v1::Trac
   // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessBatchRequest.trace_config)
 }
 
-// string external_request_id = 16;
-inline void ProcessBatchRequest::clear_external_request_id() {
-  external_request_id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+// string context_id = 16;
+inline void ProcessBatchRequest::clear_context_id() {
+  context_id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline const std::string& ProcessBatchRequest::external_request_id() const {
-  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchRequest.external_request_id)
-  return _internal_external_request_id();
+inline const std::string& ProcessBatchRequest::context_id() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchRequest.context_id)
+  return _internal_context_id();
 }
-inline void ProcessBatchRequest::set_external_request_id(const std::string& value) {
-  _internal_set_external_request_id(value);
-  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequest.external_request_id)
+inline void ProcessBatchRequest::set_context_id(const std::string& value) {
+  _internal_set_context_id(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequest.context_id)
 }
-inline std::string* ProcessBatchRequest::mutable_external_request_id() {
-  // @@protoc_insertion_point(field_mutable:executor.v1.ProcessBatchRequest.external_request_id)
-  return _internal_mutable_external_request_id();
+inline std::string* ProcessBatchRequest::mutable_context_id() {
+  // @@protoc_insertion_point(field_mutable:executor.v1.ProcessBatchRequest.context_id)
+  return _internal_mutable_context_id();
 }
-inline const std::string& ProcessBatchRequest::_internal_external_request_id() const {
-  return external_request_id_.Get();
+inline const std::string& ProcessBatchRequest::_internal_context_id() const {
+  return context_id_.Get();
 }
-inline void ProcessBatchRequest::_internal_set_external_request_id(const std::string& value) {
+inline void ProcessBatchRequest::_internal_set_context_id(const std::string& value) {
   
-  external_request_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+  context_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
 }
-inline void ProcessBatchRequest::set_external_request_id(std::string&& value) {
+inline void ProcessBatchRequest::set_context_id(std::string&& value) {
   
-  external_request_id_.Set(
+  context_id_.Set(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:executor.v1.ProcessBatchRequest.external_request_id)
+  // @@protoc_insertion_point(field_set_rvalue:executor.v1.ProcessBatchRequest.context_id)
 }
-inline void ProcessBatchRequest::set_external_request_id(const char* value) {
+inline void ProcessBatchRequest::set_context_id(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   
-  external_request_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+  context_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
               GetArena());
-  // @@protoc_insertion_point(field_set_char:executor.v1.ProcessBatchRequest.external_request_id)
+  // @@protoc_insertion_point(field_set_char:executor.v1.ProcessBatchRequest.context_id)
 }
-inline void ProcessBatchRequest::set_external_request_id(const char* value,
+inline void ProcessBatchRequest::set_context_id(const char* value,
     size_t size) {
   
-  external_request_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+  context_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:executor.v1.ProcessBatchRequest.external_request_id)
+  // @@protoc_insertion_point(field_set_pointer:executor.v1.ProcessBatchRequest.context_id)
 }
-inline std::string* ProcessBatchRequest::_internal_mutable_external_request_id() {
+inline std::string* ProcessBatchRequest::_internal_mutable_context_id() {
   
-  return external_request_id_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  return context_id_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline std::string* ProcessBatchRequest::release_external_request_id() {
-  // @@protoc_insertion_point(field_release:executor.v1.ProcessBatchRequest.external_request_id)
-  return external_request_id_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+inline std::string* ProcessBatchRequest::release_context_id() {
+  // @@protoc_insertion_point(field_release:executor.v1.ProcessBatchRequest.context_id)
+  return context_id_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void ProcessBatchRequest::set_allocated_external_request_id(std::string* external_request_id) {
-  if (external_request_id != nullptr) {
+inline void ProcessBatchRequest::set_allocated_context_id(std::string* context_id) {
+  if (context_id != nullptr) {
     
   } else {
     
   }
-  external_request_id_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), external_request_id,
+  context_id_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), context_id,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessBatchRequest.external_request_id)
+  // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessBatchRequest.context_id)
 }
-inline std::string* ProcessBatchRequest::unsafe_arena_release_external_request_id() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.ProcessBatchRequest.external_request_id)
+inline std::string* ProcessBatchRequest::unsafe_arena_release_context_id() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.ProcessBatchRequest.context_id)
   GOOGLE_DCHECK(GetArena() != nullptr);
   
-  return external_request_id_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+  return context_id_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       GetArena());
 }
-inline void ProcessBatchRequest::unsafe_arena_set_allocated_external_request_id(
-    std::string* external_request_id) {
+inline void ProcessBatchRequest::unsafe_arena_set_allocated_context_id(
+    std::string* context_id) {
   GOOGLE_DCHECK(GetArena() != nullptr);
-  if (external_request_id != nullptr) {
+  if (context_id != nullptr) {
     
   } else {
     
   }
-  external_request_id_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      external_request_id, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBatchRequest.external_request_id)
+  context_id_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      context_id, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBatchRequest.context_id)
 }
 
 // uint32 get_keys = 17;
