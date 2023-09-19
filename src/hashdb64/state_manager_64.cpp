@@ -910,7 +910,6 @@ zkresult StateManager64::consolidateState(const string &_virtualStateRoot, const
     return zkr;
 }
 
-
 void StateManager64::print(bool bDbContent)
 {
     uint64_t totalDbWrites[PERSISTENCE_SIZE] = {0, 0, 0};

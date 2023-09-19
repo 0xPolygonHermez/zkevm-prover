@@ -83,7 +83,7 @@ uint64_t HashDB64WorkflowTest (const Config& config)
         zkassertpermanent(zkr==ZKR_SUCCESS);
         zklog.info("PURGE zkr=" + zkresult2string(zkr) + " root=" + fea2string(fr, root) + " flushId=" + to_string(flushId) + " storedFlushId=" + to_string(storedFlushId));
 
-        // Consolidate state root every 5 batches
+        // Consolidate state root every 5 batches, at batches 4, 9, 14, 19...
         Goldilocks::Element batchNewStateRoot[4];
         if (((batch+1) % 5) == 0)
         {
@@ -113,10 +113,10 @@ uint64_t HashDB64WorkflowTest (const Config& config)
             zklog.info("FLUSHED");
 
             // Call ReadTree with the old state root to get the hashes of the initial values of all read or written keys
-            vector<HashValueGL> oldHashValues;
+            /*vector<HashValueGL> oldHashValues;
             zkr = pHashDB->readTree(batchOldStateRoot, keyValues, oldHashValues);
             zkassertpermanent(zkr==ZKR_SUCCESS);
-            zklog.info("READ TREE batchOldStateRoot=" + fea2string(fr, batchOldStateRoot) + " keyValues.size=" + to_string(keyValues.size()) + " hashValues.size=" + to_string(oldHashValues.size()));
+            zklog.info("READ TREE batchOldStateRoot=" + fea2string(fr, batchOldStateRoot) + " keyValues.size=" + to_string(keyValues.size()) + " hashValues.size=" + to_string(oldHashValues.size()));*/
 
             // Call ReadTree with the new state root to get the hashes of the initial values of all read or written keys
             vector<HashValueGL> hashValues;
