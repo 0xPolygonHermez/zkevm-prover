@@ -108,15 +108,16 @@ void TranscriptBN128::getPermutations(uint64_t *res, uint64_t n, uint64_t nBits)
 
     uint64_t curField = 0;
     uint64_t curBit = 0;
+    mpz_t n;
+    mpz_init(n);
     for (uint64_t i = 0; i < n; i++)
     {
         uint64_t a = 0;
         for (uint64_t j = 0; j < nBits; j++)
         {
-            mpz_t n;
-            mpz_init(n);
             RawFr::field.toMpz(n, fields[curField]);
             uint64_t bit = mpz_tstbit(n, curBit);
+
             if (bit)
                 a = a + (1 << j);
             curBit++;
@@ -128,4 +129,5 @@ void TranscriptBN128::getPermutations(uint64_t *res, uint64_t n, uint64_t nBits)
         }
         res[i] = a;
     }
+    mpz_clear(n);
 }
