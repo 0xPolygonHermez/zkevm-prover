@@ -24,7 +24,8 @@ private:
 public:
     /* IDs */
     string uuid;
-    string externalRequestId;
+    string contextId; // Externally provided context ID
+    vector<LogTag> tags; // Tags used in logs
     string timestamp; // Timestamp, when requested, used as a prefix in the output files
     time_t startTime; // Time when the request started being processed
     time_t endTime; // Time when the request ended

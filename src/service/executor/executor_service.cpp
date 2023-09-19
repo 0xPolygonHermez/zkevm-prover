@@ -48,14 +48,18 @@ using grpc::Status;
     }
 
     // Get external request ID
-    proverRequest.externalRequestId = request->external_request_id();
+    proverRequest.contextId = request->context_id();
+
+    // Build log tags
+    LogTag logTag("context_id", proverRequest.contextId);
+    proverRequest.tags.emplace_back(logTag);
 
     // PUBLIC INPUTS
 
     // Get oldStateRoot
     if (request->old_state_root().size() > 32)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBatch() got oldStateRoot too long, size=" + to_string(request->old_state_root().size()));
+        zklog.error("ExecutorServiceImpl::ProcessBatch() got oldStateRoot too long, size=" + to_string(request->old_state_root().size()), &proverRequest.tags);
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_OLD_STATE_ROOT);
         //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::OK;
@@ -65,7 +69,7 @@ using grpc::Status;
     // Get oldAccInputHash
     if (request->old_acc_input_hash().size() > 32)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBatch() got oldAccInputHash too long, size=" + to_string(request->old_acc_input_hash().size()));
+        zklog.error("ExecutorServiceImpl::ProcessBatch() got oldAccInputHash too long, size=" + to_string(request->old_acc_input_hash().size()), &proverRequest.tags);
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_OLD_ACC_INPUT_HASH);
         //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::OK;
@@ -79,7 +83,7 @@ using grpc::Status;
     proverRequest.input.publicInputsExtended.publicInputs.chainID = request->chain_id();
     if (proverRequest.input.publicInputsExtended.publicInputs.chainID == 0)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBatch() got chainID = 0");
+        zklog.error("ExecutorServiceImpl::ProcessBatch() got chainID = 0", &proverRequest.tags);
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_CHAIN_ID);
         //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::OK;
@@ -100,7 +104,7 @@ using grpc::Status;
     // Get batchL2Data
     if (request->batch_l2_data().size() > MAX_BATCH_L2_DATA_SIZE)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBatch() found batchL2Data.size()=" + to_string(request->batch_l2_data().size()) + " > MAX_BATCH_L2_DATA_SIZE=" + to_string(MAX_BATCH_L2_DATA_SIZE));
+        zklog.error("ExecutorServiceImpl::ProcessBatch() found batchL2Data.size()=" + to_string(request->batch_l2_data().size()) + " > MAX_BATCH_L2_DATA_SIZE=" + to_string(MAX_BATCH_L2_DATA_SIZE), &proverRequest.tags);
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_BATCH_L2_DATA);
         //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::OK;
@@ -110,7 +114,7 @@ using grpc::Status;
     // Get globalExitRoot
     if (request->global_exit_root().size() > 32)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBatch() got globalExitRoot too long, size=" + to_string(request->global_exit_root().size()));
+        zklog.error("ExecutorServiceImpl::ProcessBatch() got globalExitRoot too long, size=" + to_string(request->global_exit_root().size()), &proverRequest.tags);
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_GLOBAL_EXIT_ROOT);
         //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::OK;
@@ -124,14 +128,14 @@ using grpc::Status;
     string auxString = Remove0xIfPresent(request->coinbase());
     if (auxString.size() > 40)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBatch() got sequencer address too long, size=" + to_string(auxString.size()));
+        zklog.error("ExecutorServiceImpl::ProcessBatch() got sequencer address too long, size=" + to_string(auxString.size()), &proverRequest.tags);
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_COINBASE);
         //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::OK;
     }
     if (!stringIsHex(auxString))
     {
-        zklog.error("ExecutorServiceImpl::ProcessBatch() got sequencer address not hex, coinbase=" + auxString);
+        zklog.error("ExecutorServiceImpl::ProcessBatch() got sequencer address not hex, coinbase=" + auxString, &proverRequest.tags);
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_COINBASE);
         //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::OK;
@@ -144,14 +148,14 @@ using grpc::Status;
     proverRequest.input.from = Add0xIfMissing(request->from());
     if (proverRequest.input.from.size() > (2 + 40))
     {
-        zklog.error("ExecutorServiceImpl::ProcessBatch() got from too long, size=" + to_string(proverRequest.input.from.size()));
+        zklog.error("ExecutorServiceImpl::ProcessBatch() got from too long, size=" + to_string(proverRequest.input.from.size()), &proverRequest.tags);
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_FROM);
         //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::OK;
     }
     if (!stringIs0xHex(proverRequest.input.from))
     {
-        zklog.error("ExecutorServiceImpl::ProcessBatch() got from not hex, size=" + proverRequest.input.from);
+        zklog.error("ExecutorServiceImpl::ProcessBatch() got from not hex, size=" + proverRequest.input.from, &proverRequest.tags);
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_FROM);
         //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::OK;
@@ -162,7 +166,7 @@ using grpc::Status;
     proverRequest.input.bGetKeys = request->get_keys();
     if (proverRequest.input.bGetKeys && (proverRequest.input.publicInputsExtended.publicInputs.forkID < 5))
     {
-        zklog.error("ExecutorServiceImpl::ProcessBatch() got get_keys=true but fork_id=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID) + "<5");
+        zklog.error("ExecutorServiceImpl::ProcessBatch() got get_keys=true but fork_id=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID) + "<5", &proverRequest.tags);
         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_GET_KEY);
         TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
         return Status::OK;
@@ -219,14 +223,14 @@ using grpc::Status;
         Remove0xIfPresentNoCopy(key);
         if (key.size() > 64)
         {
-            zklog.error("ExecutorServiceImpl::ProcessBatch() got db key too long, size=" + to_string(key.size()));
+            zklog.error("ExecutorServiceImpl::ProcessBatch() got db key too long, size=" + to_string(key.size()), &proverRequest.tags);
             response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_KEY);
             //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
             return Status::OK;
         }
         if (!stringIsHex(key))
         {
-            zklog.error("ExecutorServiceImpl::ProcessBatch() got db key not hex, key=" + key);
+            zklog.error("ExecutorServiceImpl::ProcessBatch() got db key not hex, key=" + key, &proverRequest.tags);
             response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_KEY);
             //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
             return Status::OK;
@@ -238,14 +242,14 @@ using grpc::Status;
         string concatenatedValues = it->second;
         if (!stringIsHex(concatenatedValues))
         {
-            zklog.error("ExecutorServiceImpl::ProcessBatch() found db value not hex: " + concatenatedValues);
+            zklog.error("ExecutorServiceImpl::ProcessBatch() found db value not hex: " + concatenatedValues, &proverRequest.tags);
             response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
             //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
             return Status::OK;
         }
         if (concatenatedValues.size()%16!=0)
         {
-            zklog.error("ExecutorServiceImpl::ProcessBatch() found invalid db value size: " + to_string(concatenatedValues.size()));
+            zklog.error("ExecutorServiceImpl::ProcessBatch() found invalid db value size: " + to_string(concatenatedValues.size()), &proverRequest.tags);
             response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
             //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
             return Status::OK;
@@ -261,7 +265,7 @@ using grpc::Status;
         proverRequest.input.db[key] = dbValue;
 
 #ifdef LOG_SERVICE_EXECUTOR_INPUT
-        //zklog.info("input.db[" + key + "]: " + proverRequest.input.db[key]);
+        //zklog.info("input.db[" + key + "]: " + proverRequest.input.db[key], &proverRequest.tags);
 #endif
     }
 
@@ -275,14 +279,14 @@ using grpc::Status;
         Remove0xIfPresentNoCopy(key);
         if (key.size() > (64))
         {
-            zklog.error("ExecutorServiceImpl::ProcessBatch() got contracts key too long, size=" + to_string(key.size()));
+            zklog.error("ExecutorServiceImpl::ProcessBatch() got contracts key too long, size=" + to_string(key.size()), &proverRequest.tags);
             response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_CONTRACTS_BYTECODE_KEY);
             //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
             return Status::OK;
         }
         if (!stringIsHex(key))
         {
-            zklog.error("ExecutorServiceImpl::ProcessBatch() got contracts key not hex, key=" + key);
+            zklog.error("ExecutorServiceImpl::ProcessBatch() got contracts key not hex, key=" + key, &proverRequest.tags);
             response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_CONTRACTS_BYTECODE_KEY);
             //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
             return Status::OK;
@@ -292,7 +296,7 @@ using grpc::Status;
         // Get value
         if (!stringIsHex(Remove0xIfPresent(itp->second)))
         {
-            zklog.error("ExecutorServiceImpl::ProcessBatch() got contracts value not hex, value=" + itp->second);
+            zklog.error("ExecutorServiceImpl::ProcessBatch() got contracts value not hex, value=" + itp->second, &proverRequest.tags);
             response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_CONTRACTS_BYTECODE_VALUE);
             //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
             return Status::OK;
@@ -308,7 +312,7 @@ using grpc::Status;
         proverRequest.input.contractsBytecode[key] = dbValue;
 
 #ifdef LOG_SERVICE_EXECUTOR_INPUT
-        //zklog.info("proverRequest.input.contractsBytecode[" + itp->first + "]: " + itp->second);
+        //zklog.info("proverRequest.input.contractsBytecode[" + itp->first + "]: " + itp->second, &proverRequest.tags);
 #endif
     }
 
@@ -316,7 +320,7 @@ using grpc::Status;
     proverRequest.input.bNoCounters = request->no_counters();
 
 #ifdef LOG_SERVICE_EXECUTOR_INPUT
-    zklog.info("ExecutorServiceImpl::ProcessBatch() got externalRequestId=" + proverRequest.externalRequestId +
+    zklog.info(string("ExecutorServiceImpl::ProcessBatch() got") +
         " sequencerAddr=" + proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16) +
         " batchL2DataLength=" + to_string(request->batch_l2_data().size()) +
         " batchL2Data=0x" + ba2string(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(0, 10)) + "..." + ba2string(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.substr(zkmax(int64_t(0),int64_t(proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size())-10), proverRequest.input.publicInputsExtended.publicInputs.batchL2Data.size())) +
@@ -333,7 +337,7 @@ using grpc::Status;
         " bUpdateMerkleTree=" + to_string(proverRequest.input.bUpdateMerkleTree) +
         " bNoCounters=" + to_string(proverRequest.input.bNoCounters) +
         " traceConfig=" + proverRequest.input.traceConfig.toString() +
-        " UUID=" + proverRequest.uuid);
+        " UUID=" + proverRequest.uuid, &proverRequest.tags);
 #endif
 
     if (config.logExecutorServerInputJson)
@@ -341,7 +345,7 @@ using grpc::Status;
         // Log the input file content
         json inputJson;
         proverRequest.input.save(inputJson);
-        zklog.info("ExecutorServiceImpl::ProcessBatch() Input=" + inputJson.dump());
+        zklog.info("ExecutorServiceImpl::ProcessBatch() Input=" + inputJson.dump(), &proverRequest.tags);
     }
 
     prover.processBatch(&proverRequest);
@@ -350,7 +354,7 @@ using grpc::Status;
 
     if (proverRequest.result != ZKR_SUCCESS)
     {
-        zklog.error("ExecutorServiceImpl::ProcessBatch() detected proverRequest.result=" + to_string(proverRequest.result) + "=" + zkresult2string(proverRequest.result));
+        zklog.error("ExecutorServiceImpl::ProcessBatch() detected proverRequest.result=" + to_string(proverRequest.result) + "=" + zkresult2string(proverRequest.result), &proverRequest.tags);
     }
     
     response->set_error(zkresult2error(proverRequest.result));
@@ -532,7 +536,6 @@ using grpc::Status;
             " counters.binary=" + to_string(proverRequest.counters.binary) +
             " flush_id=" + to_string(proverRequest.flushId) +
             " last_sent_flush_id=" + to_string(proverRequest.lastSentFlushId) +
-            " externalRequestId=" + proverRequest.externalRequestId +
             " nTxs=" + to_string(responses.size());
          if (config.logExecutorServerTxs)
          {
@@ -547,13 +550,13 @@ using grpc::Status;
                     " result=" + responses[tx].error;
             }
          }
-        zklog.info(s);
+        zklog.info(s, &proverRequest.tags);
     }
 #endif
 
     if (config.logExecutorServerResponses)
     {
-        zklog.info("ExecutorServiceImpl::ProcessBatch() returns:\n" + response->DebugString());
+        zklog.info("ExecutorServiceImpl::ProcessBatch() returns:\n" + response->DebugString(), &proverRequest.tags);
     }
 
     //TimerStopAndLog(EXECUTOR_PROCESS_BATCH_BUILD_RESPONSE);
@@ -565,7 +568,7 @@ using grpc::Status;
     if (config.saveResponseToFile)
     {
         //TimerStart(EXECUTOR_PROCESS_BATCH_SAVING_RESPONSE_TO_FILE);
-        //zklog.info("ExecutorServiceImpl::ProcessBatch() returns response of size=" + to_string(response->ByteSizeLong()));
+        //zklog.info("ExecutorServiceImpl::ProcessBatch() returns response of size=" + to_string(response->ByteSizeLong()), &proverRequest.tags);
         string2file(response->DebugString(), proverRequest.filePrefix + "executor_response.txt");
         //TimerStopAndLog(EXECUTOR_PROCESS_BATCH_SAVING_RESPONSE_TO_FILE);
     }
@@ -574,7 +577,7 @@ using grpc::Status;
     {
         map<uint8_t, vector<Opcode>> opcodeMap;
         vector<Opcode> &info(proverRequest.pFullTracer->get_info());
-        zklog.info("Received " + to_string(info.size()) + " opcodes:");
+        zklog.info("Received " + to_string(info.size()) + " opcodes:", &proverRequest.tags);
         for (uint64_t i=0; i<info.size(); i++)
         {
             if (opcodeMap.find(info[i].op) == opcodeMap.end())
@@ -608,7 +611,7 @@ using grpc::Status;
 
             s += " TP=" + to_string((double(opcodeTotalGas)*1000000)/double(opcodeTotalDuration)) + "gas/s";
         }
-        zklog.info(s);
+        zklog.info(s, &proverRequest.tags);
     }
 
     // Calculate the throughput, for this ProcessBatch call, and for all calls
@@ -648,14 +651,15 @@ using grpc::Status;
         " totalTP(10s)=" + to_string(totalTPB) + "B/s=" + to_string(totalTPTX) + "TX/s=" + to_string(totalTPG) + "gas/s=" + to_string(totalTPG/zkmax(1,totalTPB)) + "gas/B" +
         " totalTP(ever)=" + to_string(TPB) + "B/s=" + to_string(TPTX) + "TX/s=" + to_string(TPG) + "gas/s=" + to_string(TPG/zkmax(1,TPB)) + "gas/B" +
         " totalTime=" + to_string(totalTime) +
-        " filedesc=" + to_string(nfd));
+        " filedesc=" + to_string(nfd),
+        &proverRequest.tags);
     
     // If the TP in gas/s is < threshold, log the input, unless it has been done before
     if (!config.logExecutorServerInput && (config.logExecutorServerInputGasThreshold > 0) && ((double(execGas)/execTime) < config.logExecutorServerInputGasThreshold))
     {
         json inputJson;
         proverRequest.input.save(inputJson);
-        zklog.info("TP=" + to_string(double(execGas)/execTime) + "gas/s Input=" + inputJson.dump());
+        zklog.info("TP=" + to_string(double(execGas)/execTime) + "gas/s Input=" + inputJson.dump(), &proverRequest.tags);
     }
     unlock();
 #endif

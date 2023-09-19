@@ -4834,7 +4834,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
     
     code += "    if (mainExecutor.config.dbMetrics) proverRequest.dbReadLog->print();\n\n";
 
-    code += "    zklog.info(\"" + functionName + "() done lastStep=\" + to_string(ctx.lastStep) + \" (\" + to_string((double(ctx.lastStep)*100)/mainExecutor.N) + \"%)\");\n\n";
+    code += "    zklog.info(\"" + functionName + "() done lastStep=\" + to_string(ctx.lastStep) + \" (\" + to_string((double(ctx.lastStep)*100)/mainExecutor.N) + \"%)\", &proverRequest.tags);\n\n";
 
     code += "    return;\n\n";
 

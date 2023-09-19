@@ -3,6 +3,7 @@
 
 #include <string>
 #include <pthread.h>
+#include <vector>
 
 using namespace std;
 
@@ -11,6 +12,14 @@ enum zkLogType
     logTypeInfo = 0,
     logTypeWarning = 1,
     logTypeError = 2
+};
+
+class LogTag
+{
+public:
+    string name;
+    string value;
+    LogTag(const char * name, string&value) : name(name), value(value) {;};
 };
 
 class zkLog
@@ -29,16 +38,16 @@ private:
 
     string getThreadID (void);
 
-    void log (const zkLogType type, const string &message);
+    void log (const zkLogType type, const string &message, const vector<LogTag> *tags);
 
 public:
     zkLog ();
     void setPID (const string &_pid) { pid = _pid; };
     void setJsonLogs (bool bJsonLogs) { jsonLogs = bJsonLogs; };
 
-    void info      (const string &message) { log(logTypeInfo,    message); };
-    void warning   (const string &message) { log(logTypeWarning, message); };
-    void error     (const string &message) { log(logTypeError,   message); };
+    void info      (const string &message, const vector<LogTag> *tags = NULL) { log(logTypeInfo,    message, tags); };
+    void warning   (const string &message, const vector<LogTag> *tags = NULL) { log(logTypeWarning, message, tags); };
+    void error     (const string &message, const vector<LogTag> *tags = NULL) { log(logTypeError,   message, tags); };
 };
 
 extern zkLog zklog;

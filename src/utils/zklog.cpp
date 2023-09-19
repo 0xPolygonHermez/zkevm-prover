@@ -18,7 +18,7 @@ zkLog::zkLog () : jsonLogs(true)
     pthread_mutex_init(&mutex, NULL);
 }
 
-void zkLog::log (const zkLogType type, const string &message)
+void zkLog::log (const zkLogType type, const string &message, const vector<LogTag> *tags)
 {
     lock();
     if (jsonLogs)
@@ -52,6 +52,13 @@ void zkLog::log (const zkLogType type, const string &message)
         s += ",\"pid\":\"" + pid + "\"";
         s += ",\"tid\":\"" + getThreadID() + "\"";
         s += ",\"version\":\"" ZKEVM_PROVER_VERSION "\"";
+        if (tags != NULL)
+        {
+            for (uint64_t i=0; i<tags->size(); i++)
+            {
+                s += ",\"" + (*tags)[i].name + "\":\"" + (*tags)[i].value + "\"";
+            }
+        }
         s += "}";
 
         if (type == logTypeError)
