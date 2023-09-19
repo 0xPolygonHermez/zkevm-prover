@@ -69,6 +69,7 @@ zkresult Smt64::get (const string &batchUUID, Database64 &db, const Goldilocks::
     // Read the content of db for entry r: siblings[level] = db.read(r)
     string keyString = fea2string(fr, key);
     mpz_class value;
+    uint64_t level = 0;
     zkresult zkr = ZKR_UNSPECIFIED;
     if (bUseStateManager)
     {
@@ -76,7 +77,7 @@ zkresult Smt64::get (const string &batchUUID, Database64 &db, const Goldilocks::
     }
     if (zkr != ZKR_SUCCESS)
     {
-        zkr = db.readKV(root, key, value, dbReadLog);
+        zkr = db.readKV(root, key, value, level, dbReadLog);
     }
     if (zkr != ZKR_SUCCESS)
     {

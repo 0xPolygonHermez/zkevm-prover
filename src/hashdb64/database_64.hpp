@@ -17,6 +17,7 @@
 #include "database_versions_associtive_cache.hpp"
 #include "database_kv_associative_cache.hpp"
 #include "key_value.hpp"
+#include "key_value_level.hpp"
 
 using namespace std;
 
@@ -120,8 +121,9 @@ public:
     zkresult write(const vector<DB64Query> &dbQueries, const bool persistent);
     zkresult getProgram(const string &_key, vector<uint8_t> &value, DatabaseMap *dbReadLog);
     zkresult setProgram(const string &_key, const vector<uint8_t> &value, const bool persistent);
-    zkresult readKV(const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, DatabaseMap *dbReadLog); 
-    zkresult readKV(const Goldilocks::Element (&root)[4], vector<KeyValue> &KVs, DatabaseMap *dbReadLog);
+    zkresult readKV(const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value,  uint64_t &level, DatabaseMap *dbReadLog);
+    zkresult readKV(const Goldilocks::Element (&root)[4], vector<KeyValueLevel> &KVLs, DatabaseMap *dbReadLog);
+    zkresult readLevel(const Goldilocks::Element (&key)[4], uint64_t &level){ level=128; return ZKR_SUCCESS;}
     zkresult writeKV(const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent);
     zkresult writeKV(const uint64_t& version, const Goldilocks::Element (&key)[4], const mpz_class &value, const bool persistent);
     zkresult writeKV(const Goldilocks::Element (&root)[4], const vector<KeyValue> &KVs, const bool persistent);
