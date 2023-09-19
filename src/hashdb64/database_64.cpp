@@ -1920,6 +1920,34 @@ zkresult Database64::sendData (void)
     // Get a free write db connection
     DatabaseConnection * pDatabaseConnection = getConnection();
 
+
+
+    //
+    // First we read the KV table to insert the new values into the bytea
+    //
+    unordered_map<string, string> keyStringPreComputed;
+    if(data.keyVersionsValue.size() > 0){
+        try{
+            if (config.dbMetrics) gettimeofday(&t, NULL);
+             if (data.multiQueryKVRead.isEmpty())
+            {
+               /*
+                    pending
+               */
+            }
+
+        }
+        catch (const std::exception &e)
+        {
+            zklog.error("Database64::sendData() execute query exception in initial KV read: " + string(e.what()));
+            zklog.error("Database64::sendData() query.size=" + to_string(data.multiQueryKVRead.queries.size()) + (data.multiQueryKVRead.isEmpty() ? "" : (" query(<1024)=" + data.multiQueryKVRead.queries[0].query.substr(0, 1024))));
+            queryFailed();
+            zkr = ZKR_DB_ERROR;
+        }
+    }
+    //
+    // Now we can perform all the inserts in a transacitonal way
+    //
     try
     {
         if (config.dbMetrics) gettimeofday(&t, NULL);
@@ -2101,6 +2129,9 @@ zkresult Database64::sendData (void)
                     " total=" + to_string(fields) + "fields");
             }
 
+            // Start a transaction
+            pqxx::work w(*(pDatabaseConnection->pConnection));
+
             // Send all unsent queries to database
             for (uint64_t i=0; i<data.multiQuery.queries.size(); i++)
             {
@@ -2110,18 +2141,15 @@ zkresult Database64::sendData (void)
                     continue;
                 }
 
-                // Start a transaction
-                pqxx::work w(*(pDatabaseConnection->pConnection));
-
                 // Execute the query
                 pqxx::result res = w.exec(data.multiQuery.queries[i].query);
-
-                // Commit your transaction
-                w.commit();
-
+                
                 // Mask as sent
                 data.multiQuery.queries[i].sent = true;
             }
+            // Commit your transaction
+            w.commit();
+
 
             //zklog.info("Database64::flush() sent query=" + query);
             if (config.dbMetrics)
@@ -2363,7 +2391,7 @@ void *dbSenderThread64 (void *arg)
             exitProcess();
         }
 
-        currentTime.tv_sec += 5;
+        currentTime.tv_sec += 5; //rick: is not too high?
         sem_timedwait(&pDatabase->senderSem, &currentTime);
 
         multiWrite.Lock();
@@ -2371,7 +2399,7 @@ void *dbSenderThread64 (void *arg)
         bool bDataEmpty = false;
 
         // If sending data is not empty (it failed before) then try to send it again
-        if (!multiWrite.data[multiWrite.storingDataIndex].multiQuery.isEmpty())
+        if (!multiWrite.data[multiWrite.storingDataIndex].multiQuery.isEmpty() || !multiWrite.data[multiWrite.storingDataIndex].multiQueryKVRead.isEmpty())
         {
             zklog.warning("dbSenderThread64() found sending data index not empty, probably because of a previous error; resuming...");
         }

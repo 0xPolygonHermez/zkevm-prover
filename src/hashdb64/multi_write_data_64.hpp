@@ -31,6 +31,7 @@ public:
 
     // SQL queries, including all data to store in database
     MultiQuery multiQuery;
+    MultiQuery multiQueryKVRead;
 
     // Indicates if data has been already stored in database
     bool stored;
@@ -50,6 +51,7 @@ public:
         versionIntray.clear();
         nodesStateRoot.clear();
         multiQuery.reset();
+        multiQueryKVRead.reset();
         stored = false;
         latestVersion = 0;
     }
