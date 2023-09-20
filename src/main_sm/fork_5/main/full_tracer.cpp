@@ -1330,6 +1330,10 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
         finalTrace.responses[finalTrace.responses.size() - 1].error = "";
     }
 
+    // set flags has_gasprice_opcode and has_balance_opcode
+    finalTrace.responses[finalTrace.responses.size() - 1].has_gasprice_opcode = hasGaspriceOpcode;
+    finalTrace.responses[finalTrace.responses.size() - 1].has_balance_opcode = hasBalanceOpcode;
+
     // Order all logs (from all CTX) in order of index
     map<uint64_t, Log> auxLogs;
     map<uint64_t, map<uint64_t, Log>>::iterator logIt;
@@ -1803,6 +1807,18 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
     singleInfo.opcode = opcodeInfo[codeId].pName;
     codeId = opcodeInfo[codeId].codeID;
     singleInfo.op = codeId;
+
+    // set flag 'has_gasprice_opcode' if opcode is GASPRICE
+    if (codeId == 0x3a /*GASPRICE*/)
+    {
+        hasGaspriceOpcode = true;
+    }
+
+    // set flag 'has_balance_opcode' if opcode is BALANCE
+    if (codeId == 0x31 /*BALANCE*/)
+    {
+        hasBalanceOpcode = true;
+    }
 
     // Check depth changes and update depth
     singleInfo.depth = depth;

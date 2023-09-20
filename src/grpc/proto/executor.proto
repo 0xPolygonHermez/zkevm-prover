@@ -206,6 +206,10 @@ message ProcessTransactionResponse {
     // Efective Gas Price
     string effective_gas_price = 15;
     uint32 effective_percentage = 16;
+    // Flag to indicate if opcode 'GASPRICE' has been called
+    uint32 has_gasprice_opcode = 17;
+    // Flag to indicate if opcode 'BALANCE' has been called
+    uint32 has_balance_opcode = 18;
 }
 
 message Log {

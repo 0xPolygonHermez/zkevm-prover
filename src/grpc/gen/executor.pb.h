@@ -3269,6 +3269,8 @@ class ProcessTransactionResponse PROTOBUF_FINAL :
     kGasUsedFieldNumber = 6,
     kGasRefundedFieldNumber = 7,
     kEffectivePercentageFieldNumber = 16,
+    kHasGaspriceOpcodeFieldNumber = 17,
+    kHasBalanceOpcodeFieldNumber = 18,
   };
   // repeated .executor.v1.Log logs = 11;
   int logs_size() const;
@@ -3528,6 +3530,24 @@ class ProcessTransactionResponse PROTOBUF_FINAL :
   void _internal_set_effective_percentage(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
+  // uint32 has_gasprice_opcode = 17;
+  void clear_has_gasprice_opcode();
+  ::PROTOBUF_NAMESPACE_ID::uint32 has_gasprice_opcode() const;
+  void set_has_gasprice_opcode(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_has_gasprice_opcode() const;
+  void _internal_set_has_gasprice_opcode(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // uint32 has_balance_opcode = 18;
+  void clear_has_balance_opcode();
+  ::PROTOBUF_NAMESPACE_ID::uint32 has_balance_opcode() const;
+  void set_has_balance_opcode(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_has_balance_opcode() const;
+  void _internal_set_has_balance_opcode(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:executor.v1.ProcessTransactionResponse)
  private:
   class _Internal;
@@ -3550,6 +3570,8 @@ class ProcessTransactionResponse PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_used_;
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_refunded_;
   ::PROTOBUF_NAMESPACE_ID::uint32 effective_percentage_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 has_gasprice_opcode_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 has_balance_opcode_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
 };
@@ -9205,6 +9227,46 @@ inline void ProcessTransactionResponse::_internal_set_effective_percentage(::PRO
 inline void ProcessTransactionResponse::set_effective_percentage(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   _internal_set_effective_percentage(value);
   // @@protoc_insertion_point(field_set:executor.v1.ProcessTransactionResponse.effective_percentage)
+}
+
+// uint32 has_gasprice_opcode = 17;
+inline void ProcessTransactionResponse::clear_has_gasprice_opcode() {
+  has_gasprice_opcode_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessTransactionResponse::_internal_has_gasprice_opcode() const {
+  return has_gasprice_opcode_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessTransactionResponse::has_gasprice_opcode() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessTransactionResponse.has_gasprice_opcode)
+  return _internal_has_gasprice_opcode();
+}
+inline void ProcessTransactionResponse::_internal_set_has_gasprice_opcode(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  has_gasprice_opcode_ = value;
+}
+inline void ProcessTransactionResponse::set_has_gasprice_opcode(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_has_gasprice_opcode(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessTransactionResponse.has_gasprice_opcode)
+}
+
+// uint32 has_balance_opcode = 18;
+inline void ProcessTransactionResponse::clear_has_balance_opcode() {
+  has_balance_opcode_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessTransactionResponse::_internal_has_balance_opcode() const {
+  return has_balance_opcode_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessTransactionResponse::has_balance_opcode() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessTransactionResponse.has_balance_opcode)
+  return _internal_has_balance_opcode();
+}
+inline void ProcessTransactionResponse::_internal_set_has_balance_opcode(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  has_balance_opcode_ = value;
+}
+inline void ProcessTransactionResponse::set_has_balance_opcode(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_has_balance_opcode(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessTransactionResponse.has_balance_opcode)
 }
 
 // -------------------------------------------------------------------

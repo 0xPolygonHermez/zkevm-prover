@@ -106,7 +106,9 @@ public:
     vector<Opcode> execution_trace;
     string effective_gas_price;
     uint32_t effective_percentage;
-    Response() : type(0), gas_left(0), gas_used(0), gas_refunded(0), effective_percentage(0) {};
+    bool has_gasprice_opcode;
+    bool has_balance_opcode;
+    Response() : type(0), gas_left(0), gas_used(0), gas_refunded(0), effective_percentage(0), has_gasprice_opcode(false), has_balance_opcode(false) {};
 };
 
 class FinalTrace
