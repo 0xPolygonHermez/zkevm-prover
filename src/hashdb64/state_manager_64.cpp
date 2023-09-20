@@ -902,6 +902,40 @@ zkresult StateManager64::consolidateState(const string &_virtualStateRoot, const
     return zkr;
 }
 
+zkresult StateManager64::cancelBatch (const string &batchUUID)
+{
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+    struct timeval t;
+    gettimeofday(&t, NULL);
+#endif
+
+    TimerStart(STATE_MANAGER_CANCEL_BATCH);
+
+#ifdef LOG_STATE_MANAGER
+    zklog.info("StateManager64::cancelBatch() batchUUID=" + batchUUID);
+#endif
+
+    Lock();
+
+    // Find batch state for this uuid
+    unordered_map<string, BatchState64>::iterator it;
+    it = state.find(batchUUID);
+    if (it == state.end())
+    {
+        zklog.warning("StateManager64::cancelBatch() found no batch state for batch UUID=" + batchUUID + "; normal if no SMT activity happened");
+        TimerStopAndLog(STATE_MANAGER_CANCEL_BATCH);
+        Unlock();
+        return ZKR_STATE_MANAGER;
+    }
+    state.erase(it);
+
+    Unlock();
+
+    TimerStopAndLog(STATE_MANAGER_CANCEL_BATCH);
+
+    return ZKR_SUCCESS;
+}
+
 void StateManager64::print(bool bDbContent)
 {
     uint64_t totalDbWrites[PERSISTENCE_SIZE] = {0, 0, 0};

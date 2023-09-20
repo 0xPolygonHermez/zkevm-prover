@@ -104,7 +104,8 @@ public:
     zkresult semiFlush (const string &batchUUID, const string &newStateRoot, const Persistence persistence);
     zkresult purge (const string &batchUUID, const string &_newStateRoot, const Persistence _persistence, Database64 &db);
     zkresult consolidateState (const string &newStateRoot, const Persistence _persistence, string & consolidatedStateRoot, Database64 &db, uint64_t &flushId, uint64_t &lastSentFlushId);
-    
+    zkresult cancelBatch (const string &batchUUID);
+
     void print (bool bDbContent = false);
     void getVirtualStateRoot (Goldilocks::Element (&newStateRoot)[4], string &newStateRootString);
     bool isVirtualStateRoot (const string &stateRoot);

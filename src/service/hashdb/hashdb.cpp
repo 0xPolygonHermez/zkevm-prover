@@ -448,6 +448,34 @@ zkresult HashDB::writeTree (const Goldilocks::Element (&oldRoot)[4], const vecto
     return tree64.WriteTree(db64, oldRoot, keyValues, newRoot, persistent);
 }
 
+zkresult HashDB::cancelBatch (const string &batchUUID)
+{
+#ifdef LOG_TIME_STATISTICS_HASHDB
+    gettimeofday(&t, NULL);
+#endif
+
+#ifdef HASHDB_LOCK
+    lock_guard<recursive_mutex> guard(mlock);
+#endif
+
+    zkresult result;
+    if (config.hashDB64 && config.stateManager && (batchUUID.size() != 0))
+    {
+        result = stateManager64.cancelBatch(batchUUID);
+    }
+    else
+    {
+        zklog.error("HashDB::cancelBatch() called with invalid configuration");
+        result = ZKR_STATE_MANAGER;
+    }
+
+#ifdef LOG_TIME_STATISTICS_HASHDB
+    tms.add("cancelBatch", TimeDiff(t));
+#endif
+
+    return result;
+}
+
 void HashDB::setAutoCommit(const bool autoCommit)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB
