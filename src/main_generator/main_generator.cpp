@@ -1078,7 +1078,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    // Collect the keys used to read or write store data\n";
                     code += "    if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)\n";
                     code += "    {\n";
-                    code += "        proverRequest.nodesKeys.insert(NormalizeToNFormat(fea2string(fr, key), 64));\n";
+                    code += "        proverRequest.nodesKeys.insert(fea2string(fr, key));\n";
                     code += "    }\n";
 
                     code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
@@ -1221,7 +1221,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    // Collect the keys used to read or write store data\n";
                     code += "    if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)\n";
                     code += "    {\n";
-                    code += "        proverRequest.nodesKeys.insert(NormalizeToNFormat(fea2string(fr, ctx.lastSWrite.key), 64));\n";
+                    code += "        proverRequest.nodesKeys.insert(fea2string(fr, ctx.lastSWrite.key));\n";
                     code += "    }\n";
 
                     code += "    zkResult = pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : ( proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE ), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);\n";
@@ -2203,7 +2203,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    // Collect the keys used to read or write store data\n";
             code += "    if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)\n";
             code += "    {\n";
-            code += "        proverRequest.nodesKeys.insert(NormalizeToNFormat(fea2string(fr, key), 64));\n";
+            code += "        proverRequest.nodesKeys.insert(fea2string(fr, key));\n";
             code += "    }\n";
 
             code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
@@ -2383,7 +2383,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        // Collect the keys used to read or write store data\n";
             code += "        if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)\n";
             code += "        {\n";
-            code += "            proverRequest.nodesKeys.insert(NormalizeToNFormat(fea2string(fr, ctx.lastSWrite.key), 64));\n";
+            code += "            proverRequest.nodesKeys.insert(fea2string(fr, ctx.lastSWrite.key));\n";
             code += "        }\n";
 
             code += "        zkResult = pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : ( proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE ), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);\n";
@@ -2980,7 +2980,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        // Collect the keys used to read or write store data\n";
             code += "        if (proverRequest.input.bGetKeys)\n";
             code += "        {\n";
-            code += "            proverRequest.programKeys.insert(NormalizeToNFormat(fea2string(fr, result), 64));\n";
+            code += "            proverRequest.programKeys.insert(fea2string(fr, result));\n";
             code += "        }\n";
 
             code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
@@ -3037,7 +3037,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        // Collect the keys used to read or write store data\n";
             code += "        if (proverRequest.input.bGetKeys)\n";
             code += "        {\n";
-            code += "            proverRequest.programKeys.insert(NormalizeToNFormat(fea2string(fr, aux), 64));\n";
+            code += "            proverRequest.programKeys.insert(fea2string(fr, aux));\n";
             code += "        }\n";
 
             code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";

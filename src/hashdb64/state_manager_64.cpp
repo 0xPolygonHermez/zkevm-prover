@@ -734,7 +734,7 @@ zkresult StateManager64::consolidateState(const string &_virtualStateRoot, const
 
         if (batch > 0)
         {
-            string newStateRootString = NormalizeToNFormat(fea2string(fr, newRoot), 64);
+            string newStateRootString = fea2string(fr, newRoot);
             batchState.oldStateRoot = newStateRootString;
             if (batchState.txState.size() > 0)
             {
@@ -780,7 +780,7 @@ zkresult StateManager64::consolidateState(const string &_virtualStateRoot, const
             }
 
             // Save the real state root of this tx
-            string newRootString = NormalizeToNFormat(fea2string(fr, newRoot), 64);
+            string newRootString = fea2string(fr, newRoot);
             txState.persistence[persistence].newStateRoot = newRootString;
 
             // Save the old state root of the next tx, if any
@@ -866,7 +866,7 @@ zkresult StateManager64::consolidateState(const string &_virtualStateRoot, const
     } // For all batches
 
     // Return the consolidated state root
-    consolidatedStateRoot = NormalizeToNFormat(fea2string(fr, newRoot), 64);
+    consolidatedStateRoot = fea2string(fr, newRoot);
 
     // Call flush and get the flush ID
 
@@ -978,7 +978,7 @@ void StateManager64::getVirtualStateRoot(Goldilocks::Element (&newStateRoot)[4],
     newStateRoot[1] = fr.zero();
     newStateRoot[2] = fr.zero();
     newStateRoot[3] = fr.zero();
-    newStateRootString = NormalizeToNFormat(fea2string(fr, newStateRoot), 64);
+    newStateRootString = fea2string(fr, newStateRoot);
 }
 
 bool StateManager64::isVirtualStateRoot(const string &stateRoot)
@@ -1006,7 +1006,7 @@ zkresult StateManager64::set (const string &batchUUID, uint64_t tx, Database64 &
         stateManager64.setOldStateRoot(batchUUID, tx, oldRootString, persistence);
 
         // Write the key-value pair
-        string hashString = NormalizeToNFormat(fea2string(fr, key), 64);
+        string hashString = fea2string(fr, key);
         zkr = stateManager64.write(batchUUID, tx, hashString, value, persistence);
         if (zkr != ZKR_SUCCESS)
         {
