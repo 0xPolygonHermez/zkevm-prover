@@ -866,7 +866,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // Collect the keys used to read or write store data
                     if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)
                     {
-                        proverRequest.nodesKeys.insert(NormalizeToNFormat(fea2string(fr, key), 64));
+                        proverRequest.nodesKeys.insert(fea2string(fr, key));
                     }
 
                     SmtGetResult smtGetResult;
@@ -1018,7 +1018,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     // Collect the keys used to read or write store data
                     if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)
                     {
-                        proverRequest.nodesKeys.insert(NormalizeToNFormat(fea2string(fr, ctx.lastSWrite.key), 64));
+                        proverRequest.nodesKeys.insert(fea2string(fr, ctx.lastSWrite.key));
                     }
 
                     zkresult zkResult = pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : ( proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE ), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
@@ -1861,7 +1861,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             // Collect the keys used to read or write store data
             if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)
             {
-                proverRequest.nodesKeys.insert(NormalizeToNFormat(fea2string(fr, key), 64));
+                proverRequest.nodesKeys.insert(fea2string(fr, key));
             }
 
             SmtGetResult smtGetResult;
@@ -2029,7 +2029,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 // Collect the keys used to read or write store data
                 if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)
                 {
-                    proverRequest.nodesKeys.insert(NormalizeToNFormat(fea2string(fr, ctx.lastSWrite.key), 64));
+                    proverRequest.nodesKeys.insert(fea2string(fr, ctx.lastSWrite.key));
                 }
 
                 zkresult zkResult = pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : (proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
@@ -2619,7 +2619,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 // Collect the keys used to read or write program data
                 if (proverRequest.input.bGetKeys)
                 {
-                    proverRequest.programKeys.insert(NormalizeToNFormat(fea2string(fr, result), 64));
+                    proverRequest.programKeys.insert(fea2string(fr, result));
                 }
 
                 zkresult zkResult = pHashDB->setProgram(result, hashPIterator->second.data, proverRequest.input.bUpdateMerkleTree);
@@ -2674,7 +2674,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 // Collect the keys used to read or write store data
                 if (proverRequest.input.bGetKeys)
                 {
-                    proverRequest.programKeys.insert(NormalizeToNFormat(fea2string(fr, aux), 64));
+                    proverRequest.programKeys.insert(fea2string(fr, aux));
                 }
 
                 zkresult zkResult = pHashDB->getProgram(aux, hashValue.data, proverRequest.dbReadLog);
