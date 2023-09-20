@@ -30,7 +30,7 @@ zkresult Tree64::WriteTree (Database64 &db, const Goldilocks::Element (&oldRoot)
     string oldRootString = fea2string(fr, oldRoot);
 
     // If old root is zero, init chunks[0] as an empty tree chunk
-    if (oldRootString == "0")
+    if (fr.isZero(oldRoot[0]) && fr.isZero(oldRoot[1]) && fr.isZero(oldRoot[2]) && fr.isZero(oldRoot[3]))
     {
         chunks[0]->resetToZero(level);
     }

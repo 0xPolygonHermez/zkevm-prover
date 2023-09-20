@@ -184,16 +184,12 @@ zkresult StateManager64::setStateRoot(const string &batchUUID, uint64_t tx, cons
     return ZKR_SUCCESS;
 }
 
-zkresult StateManager64::write(const string &batchUUID, uint64_t tx, const string &_key, const mpz_class &value, const Persistence persistence)
+zkresult StateManager64::write (const string &batchUUID, uint64_t tx, const string &key, const mpz_class &value, const Persistence persistence)
 {
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     struct timeval t;
     gettimeofday(&t, NULL);
 #endif
-
-    // Normalize key format
-    string key = NormalizeToNFormat(_key, 64);
-    key = stringToLower(key);
 
 #ifdef LOG_STATE_MANAGER
     zklog.info("StateManager64::write() batchUUID=" + batchUUID + " tx=" + to_string(tx) + " key=" + key + " persistence=" + persistence2string(persistence));
@@ -261,14 +257,10 @@ zkresult StateManager64::write(const string &batchUUID, uint64_t tx, const strin
     return ZKR_SUCCESS;
 }
 
-zkresult StateManager64::read(const string &batchUUID, const string &_key, mpz_class &value, DatabaseMap *dbReadLog)
+zkresult StateManager64::read(const string &batchUUID, const string &key, mpz_class &value, DatabaseMap *dbReadLog)
 {
     struct timeval t;
     gettimeofday(&t, NULL);
-
-    // Normalize key format
-    string key = NormalizeToNFormat(_key, 64);
-    key = stringToLower(key);
 
     Lock();
 
