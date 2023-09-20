@@ -502,6 +502,162 @@ void Config::print(void)
     zklog.info("    fullTracerTraceReserveSize=" + to_string(fullTracerTraceReserveSize));
     zklog.info("    ECRecoverPrecalc=" + to_string(ECRecoverPrecalc));
     zklog.info("    ECRecoverPrecalcNThreads=" + to_string(ECRecoverPrecalcNThreads));
+}
 
+bool Config::check (void)
+{
+    // Check required files presence
+    bool bError = false;
+    if (!fileExists(rom))
+    {
+        zklog.error("Required file config.rom=" + rom + " does not exist");
+        bError = true;
+    }
+    if (generateProof())
+    {
+        if (!fileExists(zkevmConstPols))
+        {
+            zklog.error("required file config.zkevmConstPols=" + zkevmConstPols + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(c12aConstPols))
+        {
+            zklog.error("required file config.c12aConstPols=" + c12aConstPols + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(recursive1ConstPols))
+        {
+            zklog.error("required file config.recursive1ConstPols=" + recursive1ConstPols + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(recursive2ConstPols))
+        {
+            zklog.error("required file config.recursive2ConstPols=" + recursive2ConstPols + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(recursivefConstPols))
+        {
+            zklog.error("required file config.recursivefConstPols=" + recursivefConstPols + " does not exist");
+            bError = true;
+        }
 
+        if (!fileExists(zkevmConstantsTree))
+        {
+            zklog.error("required file config.zkevmConstantsTree=" + zkevmConstantsTree + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(c12aConstantsTree))
+        {
+            zklog.error("required file config.c12aConstantsTree=" + c12aConstantsTree + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(recursive1ConstantsTree))
+        {
+            zklog.error("required file config.recursive1ConstantsTree=" + recursive1ConstantsTree + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(recursive2ConstantsTree))
+        {
+            zklog.error("required file config.recursive2ConstantsTree=" + recursive2ConstantsTree + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(recursivefConstantsTree))
+        {
+            zklog.error("required file config.recursivefConstantsTree=" + recursivefConstantsTree + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(zkevmVerifier))
+        {
+            zklog.error("required file config.zkevmVerifier=" + zkevmVerifier + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(recursive1Verifier))
+        {
+            zklog.error("required file config.recursive1Verifier=" + recursive1Verifier + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(recursive2Verifier))
+        {
+            zklog.error("required file config.recursive2Verifier=" + recursive2Verifier + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(recursive2Verkey))
+        {
+            zklog.error("required file config.recursive2Verkey=" + recursive2Verkey + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(finalVerifier))
+        {
+            zklog.error("required file config.finalVerifier=" + finalVerifier + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(recursivefVerifier))
+        {
+            zklog.error("required file config.recursivefVerifier=" + recursivefVerifier + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(finalStarkZkey))
+        {
+            zklog.error("required file config.finalStarkZkey=" + finalStarkZkey + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(storageRomFile))
+        {
+            zklog.error("required file config.storageRomFile=" + storageRomFile + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(zkevmStarkInfo))
+        {
+            zklog.error("required file config.zkevmStarkInfo=" + zkevmStarkInfo + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(c12aStarkInfo))
+        {
+            zklog.error("required file config.c12aStarkInfo=" + c12aStarkInfo + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(recursive1StarkInfo))
+        {
+            zklog.error("required file config.recursive1StarkInfo=" + recursive1StarkInfo + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(recursive2StarkInfo))
+        {
+            zklog.error("required file config.recursive2StarkInfo=" + recursive2StarkInfo + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(recursivefStarkInfo))
+        {
+            zklog.error("required file config.recursivefStarkInfo=" + recursivefStarkInfo + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(c12aExec))
+        {
+            zklog.error("required file config.c12aExec=" + c12aExec + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(recursive1Exec))
+        {
+            zklog.error("required file config.recursive1Exec=" + recursive1Exec + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(recursive2Exec))
+        {
+            zklog.error("required file config.recursive2Exec=" + recursive2Exec + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(recursivefExec))
+        {
+            zklog.error("required file config.recursivefExec=" + recursivefExec + " does not exist");
+            bError = true;
+        }
+    }
+
+    if (hashDB64 && !stateManager)
+    {
+        zklog.error("hashDB64=true but stateManager=false");
+        bError = true;
+    }
+
+    return bError;
 }
