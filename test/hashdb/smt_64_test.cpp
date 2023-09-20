@@ -1,5 +1,4 @@
 #include "smt_64_test.hpp"
-#include "smt_64.hpp"
 #include "smt.hpp"
 #include "hashdb_singleton.hpp"
 #include "unistd.h"

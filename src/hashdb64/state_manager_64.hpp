@@ -11,6 +11,8 @@
 #include "database_64.hpp"
 #include "utils/time_metric.hpp"
 #include "poseidon_goldilocks.hpp"
+#include "smt_get_result.hpp"
+#include "smt_set_result.hpp"
 
 using namespace std;
 
@@ -110,6 +112,10 @@ public:
     // Lock/Unlock
     void Lock(void) { pthread_mutex_lock(&mutex); };
     void Unlock(void) { pthread_mutex_unlock(&mutex); };
+
+    zkresult set(const string &batchUUID, uint64_t tx, Database64 &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, SmtSetResult &result, DatabaseMap *dbReadLog = NULL);
+    zkresult get(const string &batchUUID, Database64 &db, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], SmtGetResult &result, DatabaseMap *dbReadLog = NULL);
+
 };
 
 extern StateManager64 stateManager64;
