@@ -46,6 +46,8 @@
 #include "smt_64_test.hpp"
 #include "sha256.hpp"
 #include "database_kv_test.hpp"
+#include "database_kv_multiwrite_test.hpp"
+
 
 using namespace std;
 using json = nlohmann::json;
@@ -340,154 +342,11 @@ int main(int argc, char **argv)
 
     TimerStart(WHOLE_PROCESS);
 
-    // Check required files presence
-    bool bError = false;
-    if (!fileExists(config.rom))
+    if (config.check())
     {
-        zklog.error("Required file config.rom=" + config.rom + " does not exist");
-        bError = true;
-    }
-    if (config.generateProof())
-    {
-        if (!fileExists(config.zkevmConstPols))
-        {
-            zklog.error("required file config.zkevmConstPols=" + config.zkevmConstPols + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.c12aConstPols))
-        {
-            zklog.error("required file config.c12aConstPols=" + config.c12aConstPols + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursive1ConstPols))
-        {
-            zklog.error("required file config.recursive1ConstPols=" + config.recursive1ConstPols + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursive2ConstPols))
-        {
-            zklog.error("required file config.recursive2ConstPols=" + config.recursive2ConstPols + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursivefConstPols))
-        {
-            zklog.error("required file config.recursivefConstPols=" + config.recursivefConstPols + " does not exist");
-            bError = true;
-        }
-
-        if (!fileExists(config.zkevmConstantsTree))
-        {
-            zklog.error("required file config.zkevmConstantsTree=" + config.zkevmConstantsTree + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.c12aConstantsTree))
-        {
-            zklog.error("required file config.c12aConstantsTree=" + config.c12aConstantsTree + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursive1ConstantsTree))
-        {
-            zklog.error("required file config.recursive1ConstantsTree=" + config.recursive1ConstantsTree + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursive2ConstantsTree))
-        {
-            zklog.error("required file config.recursive2ConstantsTree=" + config.recursive2ConstantsTree + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursivefConstantsTree))
-        {
-            zklog.error("required file config.recursivefConstantsTree=" + config.recursivefConstantsTree + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.zkevmVerifier))
-        {
-            zklog.error("required file config.zkevmVerifier=" + config.zkevmVerifier + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursive1Verifier))
-        {
-            zklog.error("required file config.recursive1Verifier=" + config.recursive1Verifier + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursive2Verifier))
-        {
-            zklog.error("required file config.recursive2Verifier=" + config.recursive2Verifier + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursive2Verkey))
-        {
-            zklog.error("required file config.recursive2Verkey=" + config.recursive2Verkey + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.finalVerifier))
-        {
-            zklog.error("required file config.finalVerifier=" + config.finalVerifier + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursivefVerifier))
-        {
-            zklog.error("required file config.recursivefVerifier=" + config.recursivefVerifier + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.finalStarkZkey))
-        {
-            zklog.error("required file config.finalStarkZkey=" + config.finalStarkZkey + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.storageRomFile))
-        {
-            zklog.error("required file config.storageRomFile=" + config.storageRomFile + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.zkevmStarkInfo))
-        {
-            zklog.error("required file config.zkevmStarkInfo=" + config.zkevmStarkInfo + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.c12aStarkInfo))
-        {
-            zklog.error("required file config.c12aStarkInfo=" + config.c12aStarkInfo + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursive1StarkInfo))
-        {
-            zklog.error("required file config.recursive1StarkInfo=" + config.recursive1StarkInfo + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursive2StarkInfo))
-        {
-            zklog.error("required file config.recursive2StarkInfo=" + config.recursive2StarkInfo + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursivefStarkInfo))
-        {
-            zklog.error("required file config.recursivefStarkInfo=" + config.recursivefStarkInfo + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.c12aExec))
-        {
-            zklog.error("required file config.c12aExec=" + config.c12aExec + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursive1Exec))
-        {
-            zklog.error("required file config.recursive1Exec=" + config.recursive1Exec + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursive2Exec))
-        {
-            zklog.error("required file config.recursive2Exec=" + config.recursive2Exec + " does not exist");
-            bError = true;
-        }
-        if (!fileExists(config.recursivefExec))
-        {
-            zklog.error("required file config.recursivefExec=" + config.recursivefExec + " does not exist");
-            bError = true;
-        }
-    }
-    if (bError)
+        zklog.error("main() failed calling config.check()");
         exitProcess();
+    }
 
     // Create one instance of the Goldilocks finite field instance
     Goldilocks fr;
@@ -641,10 +500,15 @@ int main(int argc, char **argv)
     {
         DatabasePerformanceTest();
     }
-    // Test DbKVRemote
-    if (config.runDbKVRemoteTest)
+    // Test DbKV
+    if (config.runDbKVTest)
     {
         DatabaseKVTest(config);
+    }
+    // Test DbKVMultiwrite
+    if (config.runDbKVMultiWriteTest)
+    {
+        DatabaseKVMultiWriteTest(config);
     }
     
     // Test SMT64

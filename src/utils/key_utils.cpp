@@ -32,12 +32,12 @@ void splitKey (Goldilocks &fr, const Goldilocks::Element (&key)[4], bool (&resul
 void joinKey (Goldilocks &fr, const vector<uint64_t> &bits, const Goldilocks::Element (&rkey)[4], Goldilocks::Element (&key)[4])
 {
     uint64_t n[4] = {0, 0, 0, 0};
-    mpz_class accs[4] = {0, 0, 0, 0};
+    uint64_t accs[4] = {0, 0, 0, 0};
     for (uint64_t i=0; i<bits.size(); i++)
     {
         if (bits[i])
         {
-            accs[i%4] = (accs[i%4] | (mpz_class(1)<<n[i%4]))/*%fr.prime()*/;
+            accs[i%4] = (accs[i%4] | (uint64_t(1)<<n[i%4]));
         }
         n[i%4] += 1;
     }
@@ -45,9 +45,9 @@ void joinKey (Goldilocks &fr, const vector<uint64_t> &bits, const Goldilocks::El
     for (uint64_t i=0; i<4; i++) auxk[i] = rkey[i];
     for (uint64_t i=0; i<4; i++)
     {
-        mpz_class aux = fr.toU64(auxk[i]);
-        aux = ((aux<<n[i]) | accs[i])/*%mpz_class(fr.prime())*/;
-        auxk[i] = fr.fromU64(aux.get_ui());
+        uint64_t aux = fr.toU64(auxk[i]);
+        aux = ((aux<<n[i]) | accs[i]);
+        auxk[i] = fr.fromU64(aux);
     }
     for (uint64_t i=0; i<4; i++) key[i] = auxk[i];
 }
@@ -61,7 +61,7 @@ void joinKey (Goldilocks &fr, const vector<uint64_t> &bits, const Goldilocks::El
 void removeKeyBits (Goldilocks &fr, const Goldilocks::Element (&key)[4], uint64_t nBits, Goldilocks::Element (&rkey)[4])
 {
     uint64_t fullLevels = nBits / 4;
-    mpz_class auxk[4];
+    uint64_t auxk[4];
 
     for (uint64_t i=0; i<4; i++)
     {
@@ -77,7 +77,7 @@ void removeKeyBits (Goldilocks &fr, const Goldilocks::Element (&key)[4], uint64_
 
     for (uint64_t i=0; i<4; i++)
     {
-        scalar2fe(fr, auxk[i], rkey[i]);
+        rkey[i] = fr.fromU64(auxk[i]);
     }
 }
 

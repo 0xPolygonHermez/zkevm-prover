@@ -45,7 +45,8 @@ public:
     string checkTreeRoot;
     bool runDatabasePerformanceTest;
     bool runSMT64Test;
-    bool runDbKVRemoteTest;
+    bool runDbKVTest;
+    bool runDbKVMultiWriteTest;
     bool runUnitTest;
     
     bool executeInParallel;
@@ -186,6 +187,7 @@ public:
     void load(json &config);
     bool generateProof(void) const { return runFileGenBatchProof || runFileGenAggregatedProof || runFileGenFinalProof || runAggregatorClient; }
     void print(void);
+    bool check(void); // Checks that the loaded configuration is correct; returns true if there is at least one error
 };
 
 #endif

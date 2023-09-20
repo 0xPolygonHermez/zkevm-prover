@@ -48,6 +48,8 @@ public:
     ReturnFromCreate returnFromCreate;
     unordered_map<uint64_t, ContextData> callData;
     string previousMemory;
+    bool hasGaspriceOpcode;
+    bool hasBalanceOpcode;
 #ifdef LOG_TIME_STATISTICS
     TimeMetricStorage tms;
     struct timeval t;
@@ -75,7 +77,7 @@ public:
                                    const Goldilocks::Element &keyType0, const Goldilocks::Element &keyType1, const Goldilocks::Element &keyType2, const Goldilocks::Element &keyType3, const Goldilocks::Element &keyType4, const Goldilocks::Element &keyType5, const Goldilocks::Element &keyType6, const Goldilocks::Element &keyType7,
                                    const mpz_class &value );
 
-    FullTracer(Goldilocks &fr) : fr(fr), depth(1), prevCTX(0), initGas(0), txCount(0), txTime(0), accBatchGas(0), numberOfOpcodesInThisTx(0), lastErrorOpcode(0) { };
+    FullTracer(Goldilocks &fr) : fr(fr), depth(1), prevCTX(0), initGas(0), txCount(0), txTime(0), accBatchGas(0), numberOfOpcodesInThisTx(0), lastErrorOpcode(0), hasGaspriceOpcode(false), hasBalanceOpcode(false) { };
     ~FullTracer()
     {
 #ifdef LOG_TIME_STATISTICS

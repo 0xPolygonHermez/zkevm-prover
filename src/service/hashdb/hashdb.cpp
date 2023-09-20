@@ -11,7 +11,7 @@
 #include "state_manager_64.hpp"
 #include "tree_64.hpp"
 
-HashDB::HashDB(Goldilocks &fr, const Config &config) : fr(fr), config(config), db(fr, config), db64(fr, config), smt(fr), smt64(fr)
+HashDB::HashDB(Goldilocks &fr, const Config &config) : fr(fr), config(config), db(fr, config), db64(fr, config), smt(fr)
 {
     if (config.hashDB64)
     {
@@ -48,7 +48,7 @@ zkresult HashDB::set (const string &batchUUID, uint64_t tx, const Goldilocks::El
 
     if (config.hashDB64)
     {
-        zkr = smt64.set(batchUUID, tx, db64, oldRoot, key, value, persistence, *r, dbReadLog);
+        zkr = stateManager64.set(batchUUID, tx, db64, oldRoot, key, value, persistence, *r, dbReadLog);
     }
     else
     {
@@ -83,7 +83,7 @@ zkresult HashDB::get (const string &batchUUID, const Goldilocks::Element (&root)
     
     if (config.hashDB64)
     {
-        zkr = smt64.get(batchUUID, db64, root, key, *r, dbReadLog);
+        zkr = stateManager64.get(batchUUID, db64, root, key, *r, dbReadLog);
     }
     else
     {
