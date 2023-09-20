@@ -1981,6 +1981,7 @@ zkresult Database64::sendData (void)
             // If there are versions add to db
             if (data.version.size() > 0)
             {
+                uint64_t maxWritingVersion = 0;
                 unordered_map<string, uint64_t>::const_iterator it=data.version.begin();
                 while (it != data.version.end())
                 {
@@ -1996,6 +1997,7 @@ zkresult Database64::sendData (void)
                     firstValue = true;
                     for (; it != data.version.end(); it++)
                     {
+                        if(it->second > maxWritingVersion) maxWritingVersion = it->second;
                         if (!firstValue)
                         {
                             data.multiQuery.queries[currentQuery].query += ", ";
@@ -2015,6 +2017,8 @@ zkresult Database64::sendData (void)
                     data.multiQuery.queries[currentQuery].query += " ON CONFLICT (hash) DO NOTHING;";
                    
                 }
+                zkassertpermanent(maxWritingVersion == data.latestVersion);
+                data.multiQuery.queries[currentQuery].query += "UPDATE " + config.dbLatestVersionTableName + " SET version = " + to_string(data.latestVersion) + ";";
             }
 
             // If there are program add the corresponding query

@@ -25,7 +25,7 @@ public:
     unordered_map<string, vector<uint64_t>>  keyVersionsIntray;
     unordered_map<string, uint64_t> version;
     unordered_map<string, uint64_t> versionIntray;
-    uint64_t latestVersion;
+    uint64_t latestVersion=0;
     string nodesStateRoot;
 
     // SQL queries, including all data to store in database
@@ -50,6 +50,7 @@ public:
         nodesStateRoot.clear();
         multiQuery.reset();
         stored = false;
+        latestVersion = 0;
     }
 
     bool IsEmpty (void)
