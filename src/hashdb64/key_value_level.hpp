@@ -8,7 +8,7 @@ class KeyValueLevel
 public:
     Goldilocks::Element key[4];
     mpz_class value;
-    uint64_t& level;
+    uint64_t level;
 };
 
 #endif

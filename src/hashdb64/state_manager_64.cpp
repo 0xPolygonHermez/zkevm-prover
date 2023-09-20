@@ -424,7 +424,7 @@ zkresult StateManager64::semiFlush(const string &batchUUID, const string &_state
     return ZKR_SUCCESS;
 }
 
-zkresult StateManager64::purge (const string &batchUUID, const string &_newStateRoot, const Persistence persistence, Database64 &db)
+zkresult StateManager64::purge(const string &batchUUID, const string &_newStateRoot, const Persistence persistence, Database64 &db)
 {
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     struct timeval t;
@@ -441,7 +441,7 @@ zkresult StateManager64::purge (const string &batchUUID, const string &_newState
 
     Lock();
 
-    //print(false);
+    // print(false);
 
     // Format the new state root
     string newStateRoot = NormalizeToNFormat(_newStateRoot, 64);
@@ -633,7 +633,7 @@ zkresult StateManager64::purge (const string &batchUUID, const string &_newState
     return ZKR_SUCCESS;
 }
 
-zkresult StateManager64::consolidateState(const string &_virtualStateRoot, const Persistence persistence, string & consolidatedStateRoot, Database64 &db, uint64_t &flushId, uint64_t &lastSentFlushId)
+zkresult StateManager64::consolidateState(const string &_virtualStateRoot, const Persistence persistence, string &consolidatedStateRoot, Database64 &db, uint64_t &flushId, uint64_t &lastSentFlushId)
 {
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     struct timeval t;
@@ -659,7 +659,7 @@ zkresult StateManager64::consolidateState(const string &_virtualStateRoot, const
 
     Lock();
 
-    //print(false);
+    // print(false);
 
     zkresult zkr;
 
@@ -673,7 +673,7 @@ zkresult StateManager64::consolidateState(const string &_virtualStateRoot, const
         if (it == state.end())
         {
             zklog.error("StateManager64::consolidateState() found unmatching state i=" + to_string(virtualStatePosition) + " batchUUI=" + stateOrder[virtualStatePosition]);
-            TimerStopAndLog(STATE_MANAGER_CONSOLIDATE_STATE);        
+            TimerStopAndLog(STATE_MANAGER_CONSOLIDATE_STATE);
             Unlock();
             return ZKR_STATE_MANAGER;
         }
@@ -686,7 +686,7 @@ zkresult StateManager64::consolidateState(const string &_virtualStateRoot, const
     if (virtualStatePosition == stateOrder.size())
     {
         zklog.error("StateManager64::consolidateState() could not find a matching virtual state=" + virtualStateRoot);
-        TimerStopAndLog(STATE_MANAGER_CONSOLIDATE_STATE);        
+        TimerStopAndLog(STATE_MANAGER_CONSOLIDATE_STATE);
         Unlock();
         return ZKR_STATE_MANAGER;
     }
@@ -701,7 +701,7 @@ zkresult StateManager64::consolidateState(const string &_virtualStateRoot, const
         if (it == state.end())
         {
             zklog.error("StateManager64::consolidateState() could not find a matching virtual state=" + stateOrder[i]);
-            TimerStopAndLog(STATE_MANAGER_CONSOLIDATE_STATE);        
+            TimerStopAndLog(STATE_MANAGER_CONSOLIDATE_STATE);
             Unlock();
             return ZKR_STATE_MANAGER;
         }
@@ -733,7 +733,7 @@ zkresult StateManager64::consolidateState(const string &_virtualStateRoot, const
         if (it == state.end())
         {
             zklog.error("StateManager64::consolidateState() could not find a matching virtual state=" + stateOrder[batch]);
-            TimerStopAndLog(STATE_MANAGER_CONSOLIDATE_STATE);        
+            TimerStopAndLog(STATE_MANAGER_CONSOLIDATE_STATE);
             Unlock();
             return ZKR_STATE_MANAGER;
         }
@@ -779,10 +779,10 @@ zkresult StateManager64::consolidateState(const string &_virtualStateRoot, const
                 zklog.error("StateManager64::consolidateState() failed calling WriteTree zkr=" + zkresult2string(zkr) +
                             " tx=" + to_string(tx) +
                             " txState.oldStateRoot=" + txState.persistence[persistence].oldStateRoot);
-    #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
                 batchState.timeMetricStorage.add("consolidateState WriteTree failed", TimeDiff(t));
                 batchState.timeMetricStorage.print("State Manager calls");
-    #endif
+#endif
                 Unlock();
                 return ZKR_STATE_MANAGER;
             }
@@ -794,7 +794,7 @@ zkresult StateManager64::consolidateState(const string &_virtualStateRoot, const
             // Save the old state root of the next tx, if any
             if (tx < batchState.txState.size() - 1)
             {
-                batchState.txState[tx+1].persistence[persistence].oldStateRoot = newRootString;
+                batchState.txState[tx + 1].persistence[persistence].oldStateRoot = newRootString;
             }
             // If this is the last tx, then save the new state root of the batch
             else
@@ -810,10 +810,10 @@ zkresult StateManager64::consolidateState(const string &_virtualStateRoot, const
                 zklog.error("StateManager64::consolidateState() failed calling db.readLatestVersion zkr=" + zkresult2string(zkr) +
                             " tx=" + to_string(tx) +
                             " txState.oldStateRoot=" + txState.persistence[persistence].oldStateRoot);
-    #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
                 batchState.timeMetricStorage.add("consolidateState db.createLatestVersion failed", TimeDiff(t));
                 batchState.timeMetricStorage.print("State Manager calls");
-    #endif
+#endif
                 Unlock();
                 return ZKR_STATE_MANAGER;
             }
@@ -826,10 +826,10 @@ zkresult StateManager64::consolidateState(const string &_virtualStateRoot, const
                 zklog.error("StateManager64::consolidateState() failed calling db.writeKV zkr=" + zkresult2string(zkr) +
                             " tx=" + to_string(tx) +
                             " txState.oldStateRoot=" + txState.persistence[persistence].oldStateRoot);
-    #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
                 batchState.timeMetricStorage.add("consolidateStatedb.writeKV failed", TimeDiff(t));
                 batchState.timeMetricStorage.print("State Manager calls");
-    #endif
+#endif
                 Unlock();
                 return ZKR_STATE_MANAGER;
             }
@@ -841,10 +841,10 @@ zkresult StateManager64::consolidateState(const string &_virtualStateRoot, const
                 zklog.error("StateManager64::consolidateState() failed calling db.writeVersion zkr=" + zkresult2string(zkr) +
                             " tx=" + to_string(tx) +
                             " txState.oldStateRoot=" + txState.persistence[persistence].oldStateRoot);
-    #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
                 batchState.timeMetricStorage.add("consolidateState db.writeVersion failed", TimeDiff(t));
                 batchState.timeMetricStorage.print("State Manager calls");
-    #endif
+#endif
                 Unlock();
                 return ZKR_STATE_MANAGER;
             }
@@ -856,10 +856,10 @@ zkresult StateManager64::consolidateState(const string &_virtualStateRoot, const
                 zklog.error("StateManager64::consolidateState() failed calling db.writeLatestVersion zkr=" + zkresult2string(zkr) +
                             " tx=" + to_string(tx) +
                             " txState.oldStateRoot=" + txState.persistence[persistence].oldStateRoot);
-    #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
                 batchState.timeMetricStorage.add("consolidateState db.writeLatestVersion failed", TimeDiff(t));
                 batchState.timeMetricStorage.print("State Manager calls");
-    #endif
+#endif
                 Unlock();
                 return ZKR_STATE_MANAGER;
             }
@@ -893,7 +893,7 @@ zkresult StateManager64::consolidateState(const string &_virtualStateRoot, const
         if (it == state.end())
         {
             zklog.error("StateManager64::consolidateState() could not find a matching virtual state=" + stateOrder[i]);
-            TimerStopAndLog(STATE_MANAGER_CONSOLIDATE_STATE);        
+            TimerStopAndLog(STATE_MANAGER_CONSOLIDATE_STATE);
             Unlock();
             return ZKR_STATE_MANAGER;
         }
@@ -973,7 +973,7 @@ void StateManager64::print(bool bDbContent)
     zklog.info("total writes=" + to_string(totalWrites));
 
     zklog.info("stateOrder.size=" + to_string(stateOrder.size()));
-    for (uint64_t i=0; i<stateOrder.size(); i++)
+    for (uint64_t i = 0; i < stateOrder.size(); i++)
     {
         zklog.info("  uuid=" + stateOrder[i]);
     }
@@ -996,10 +996,10 @@ bool StateManager64::isVirtualStateRoot(const string &stateRoot)
     return fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]);
 }
 
-zkresult StateManager64::set (const string &batchUUID, uint64_t tx, Database64 &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, SmtSetResult &result, DatabaseMap *dbReadLog)
+zkresult StateManager64::set(const string &batchUUID, uint64_t tx, Database64 &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, SmtSetResult &result, DatabaseMap *dbReadLog)
 {
 #ifdef LOG_STATE_MANAGER
-    zklog.info("StateManager64::set() called with oldRoot=" + fea2string(fr,oldRoot) + " key=" + fea2string(fr,key) + " value=" + value.get_str(16) + " persistent=" + to_string(persistent));
+    zklog.info("StateManager64::set() called with oldRoot=" + fea2string(fr, oldRoot) + " key=" + fea2string(fr, key) + " value=" + value.get_str(16) + " persistent=" + to_string(persistent));
 #endif
 
     zkresult zkr;
@@ -1042,10 +1042,10 @@ zkresult StateManager64::set (const string &batchUUID, uint64_t tx, Database64 &
     return ZKR_SUCCESS;
 }
 
-zkresult StateManager64::get (const string &batchUUID, Database64 &db, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], SmtGetResult &result, DatabaseMap *dbReadLog)
+zkresult StateManager64::get(const string &batchUUID, Database64 &db, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], SmtGetResult &result, DatabaseMap *dbReadLog)
 {
 #ifdef LOG_STATE_MANAGER
-    zklog.info("StateManager64::get() called with root=" + fea2string(fr,root) + " and key=" + fea2string(fr,key));
+    zklog.info("StateManager64::get() called with root=" + fea2string(fr, root) + " and key=" + fea2string(fr, key));
 #endif
 
     bool bUseStateManager = db.config.stateManager && (batchUUID.size() > 0);
@@ -1054,20 +1054,21 @@ zkresult StateManager64::get (const string &batchUUID, Database64 &db, const Gol
     string keyString = fea2string(fr, key);
     mpz_class value;
     zkresult zkr = ZKR_UNSPECIFIED;
+    uint64_t level = 0;
     if (bUseStateManager)
     {
         zkr = stateManager64.read(batchUUID, keyString, value, dbReadLog);
     }
     if (zkr != ZKR_SUCCESS)
     {
-        zkr = db.readKV(root, key, value, dbReadLog);
+        zkr = db.readKV(root, key, value, level, dbReadLog);
     }
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("StateManager64::get() db.read error: " + to_string(zkr) + " (" + zkresult2string(zkr) + ") root:" + fea2string(fr, root));
         return zkr;
     }
-    
+
     result.value = value;
 
     return ZKR_SUCCESS;
