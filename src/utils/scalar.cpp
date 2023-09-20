@@ -97,7 +97,9 @@ string fea2string (Goldilocks &fr, const Goldilocks::Element(&fea)[4])
 {
     mpz_class auxScalar;
     fea2scalar(fr, auxScalar, fea);
-    return auxScalar.get_str(16);
+    string s = auxScalar.get_str(16);
+    PrependZerosNoCopy(s, 64);
+    return s;
 }
 
 string fea2string (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldilocks::Element &fea1, const Goldilocks::Element &fea2, const Goldilocks::Element &fea3)
@@ -110,7 +112,9 @@ string fea2string (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldil
 {
     mpz_class auxScalar;
     fea2scalar(fr, auxScalar, fea0, fea1, fea2, fea3, fea4, fea5, fea6, fea7);
-    return auxScalar.get_str(16);
+    string s = auxScalar.get_str(16);
+    PrependZerosNoCopy(s, 64);
+    return s;
 }
 
 /* Normalized strings */

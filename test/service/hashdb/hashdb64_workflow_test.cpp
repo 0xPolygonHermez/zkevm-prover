@@ -81,7 +81,7 @@ uint64_t HashDB64WorkflowTest (const Config& config)
         // Purge
         zkr = pHashDB->purge(batchUUID, root, persistence);
         zkassertpermanent(zkr==ZKR_SUCCESS);
-        zklog.info("PURGE zkr=" + zkresult2string(zkr) + " root=" + fea2string(fr, root) + " flushId=" + to_string(flushId) + " storedFlushId=" + to_string(storedFlushId));
+        zklog.info("PURGE zkr=" + zkresult2string(zkr) + " root=" + fea2string(fr, root));
 
         // Consolidate state root every 5 batches, at batches 4, 9, 14, 19...
         Goldilocks::Element batchNewStateRoot[4];
