@@ -570,3 +570,24 @@ zkresult HashDBRemote::writeTree (const Goldilocks::Element (&oldRoot)[4], const
     zklog.error("HashDBRemote::writeTree() called, but this method is only allowed locally");
     return ZKR_UNSPECIFIED;
 }
+
+zkresult HashDBRemote::cancelBatch (const string &batchUUID)
+{
+#ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
+    gettimeofday(&t, NULL);
+#endif
+    ::grpc::ClientContext context;
+    ::hashdb::v1::CancelBatchRequest request;
+    request.set_batch_uuid(batchUUID);
+    ::hashdb::v1::CancelBatchResponse response;
+    grpc::Status s = stub->CancelBatch(&context, request, &response);
+    if (s.error_code() != grpc::StatusCode::OK)
+    {
+        zklog.error("HashDBRemote:cancelBatch() GRPC error(" + to_string(s.error_code()) + "): " + s.error_message());
+    }
+
+#ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
+    tms.add("cancelBatch", TimeDiff(t));
+#endif
+    return static_cast<zkresult>(response.result().code());
+}

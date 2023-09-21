@@ -34,6 +34,7 @@ service HashDBService {
     rpc ConsolidateState (ConsolidateStateRequest) returns (ConsolidateStateResponse) {}
     rpc Purge (PurgeRequest) returns (PurgeResponse) {}
     rpc ReadTree (ReadTreeRequest) returns (ReadTreeResponse) {}
+    rpc CancelBatch (CancelBatchRequest) returns (CancelBatchResponse) {}
 }
 
 ///////////////////
@@ -187,6 +188,14 @@ message PurgeRequest {
 message ReadTreeRequest {
     Fea state_root = 1;
     repeated Fea keys = 2;
+}
+
+/**
+ * @dev CancelBatchRequest
+ * @param {batch_uuid} - indicates a unique identifier of the current batch or session which data will be deleted
+ */
+message CancelBatchRequest {
+    string batch_uuid = 1;
 }
 
 /////////////////////
@@ -351,6 +360,14 @@ message ReadTreeResponse {
     repeated KeyValue key_value = 1;
     repeated HashValueGL hash_value = 2;
     ResultCode result = 3;
+}
+
+/**
+ * @dev CancelBatchResponse
+ * @param {result} - result code
+ */
+message CancelBatchResponse {
+    ResultCode result = 1;
 }
 
 /**
