@@ -184,8 +184,10 @@ zkresult StateManager64::setStateRoot(const string &batchUUID, uint64_t tx, cons
     return ZKR_SUCCESS;
 }
 
-zkresult StateManager64::write (const string &batchUUID, uint64_t tx, const string &key, const mpz_class &value, const Persistence persistence)
+zkresult StateManager64::write (const string &batchUUID, uint64_t tx, const string &key, const mpz_class &value, const Persistence persistence, uint64_t &level)
 {
+    level = 128;
+
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     struct timeval t;
     gettimeofday(&t, NULL);
@@ -257,8 +259,10 @@ zkresult StateManager64::write (const string &batchUUID, uint64_t tx, const stri
     return ZKR_SUCCESS;
 }
 
-zkresult StateManager64::read(const string &batchUUID, const string &key, mpz_class &value, DatabaseMap *dbReadLog)
+zkresult StateManager64::read(const string &batchUUID, const string &key, mpz_class &value, uint64_t &level, DatabaseMap *dbReadLog)
 {
+    level = 128;
+
     struct timeval t;
     gettimeofday(&t, NULL);
 
@@ -1041,10 +1045,27 @@ zkresult StateManager64::set (const string &batchUUID, uint64_t tx, Database64 &
 
         // Write the key-value pair
         string hashString = fea2string(fr, key);
-        zkr = stateManager64.write(batchUUID, tx, hashString, value, persistence);
+        uint64_t level;
+        uint64_t stateManagerLevel;
+        uint64_t databaseLevel;
+        zkr = stateManager64.write(batchUUID, tx, hashString, value, persistence, stateManagerLevel);
         if (zkr != ZKR_SUCCESS)
         {
             zklog.error("StateManager64::set() failed calling stateManager.write() key=" + hashString + " result=" + to_string(zkr) + "=" + zkresult2string(zkr));
+        }
+        else
+        {
+            zkresult dbzkr = db.readLevel(key, databaseLevel);
+            if (dbzkr != ZKR_SUCCESS)
+            {
+                zklog.error("StateManager64::set() failed calling db.readLevel() key=" + hashString + " result=" + to_string(dbzkr) + "=" + zkresult2string(dbzkr));
+                level = 128;
+            }
+            else
+            {
+                level = zkmax(stateManagerLevel, databaseLevel);
+            }
+
         }
 
         // Get a new state root
@@ -1059,6 +1080,7 @@ zkresult StateManager64::set (const string &batchUUID, uint64_t tx, Database64 &
         result.newRoot[1] = newRoot[1];
         result.newRoot[2] = newRoot[2];
         result.newRoot[3] = newRoot[3];
+        result.proofHashCounter = level + 2;
     }
     else
     {
@@ -1076,14 +1098,28 @@ zkresult StateManager64::get (const string &batchUUID, Database64 &db, const Gol
 
     bool bUseStateManager = db.config.stateManager && (batchUUID.size() > 0);
 
-    // Read the content of db for entry r: siblings[level] = db.read(r)
     string keyString = fea2string(fr, key);
     mpz_class value;
     zkresult zkr = ZKR_UNSPECIFIED;
     uint64_t level = 0;
     if (bUseStateManager)
     {
-        zkr = stateManager64.read(batchUUID, keyString, value, dbReadLog);
+        uint64_t stateManagerLevel;
+        uint64_t databaseLevel;
+        zkr = stateManager64.read(batchUUID, keyString, value, stateManagerLevel, dbReadLog);
+        if (zkr == ZKR_SUCCESS)
+        {
+            zkresult dbzkr = db.readLevel(key, databaseLevel);
+            if (dbzkr != ZKR_SUCCESS)
+            {
+                zklog.error("StateManager64::get() failed calling db.readLevel() result=" + zkresult2string(dbzkr));
+                level = 128;
+            }
+            else
+            {
+                level = zkmax(stateManagerLevel, databaseLevel);
+            }
+        }
     }
     if (zkr != ZKR_SUCCESS)
     {
@@ -1096,6 +1132,7 @@ zkresult StateManager64::get (const string &batchUUID, Database64 &db, const Gol
     }
     
     result.value = value;
+    result.proofHashCounter = level + 2;
 
     return ZKR_SUCCESS;
 }

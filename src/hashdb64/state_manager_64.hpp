@@ -99,8 +99,8 @@ public:
     {
         return setStateRoot(batchUUID, tx, stateRoot, false, persistence);
     }
-    zkresult write (const string &batchUUID, uint64_t tx, const string &_key, const mpz_class &value, const Persistence persistence);
-    zkresult read (const string &batchUUID, const string &_key, mpz_class &value, DatabaseMap *dbReadLog);
+    zkresult write (const string &batchUUID, uint64_t tx, const string &_key, const mpz_class &value, const Persistence persistence, uint64_t &level);
+    zkresult read (const string &batchUUID, const string &_key, mpz_class &value, uint64_t &level, DatabaseMap *dbReadLog);
     zkresult semiFlush (const string &batchUUID, const string &newStateRoot, const Persistence persistence);
     zkresult purge (const string &batchUUID, const string &_newStateRoot, const Persistence _persistence, Database64 &db);
     zkresult consolidateState (const string &newStateRoot, const Persistence _persistence, string & consolidatedStateRoot, Database64 &db, uint64_t &flushId, uint64_t &lastSentFlushId);
