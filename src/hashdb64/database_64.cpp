@@ -323,8 +323,6 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
     struct timeval t;
     if (dbReadLog != NULL) gettimeofday(&t, NULL);
 
-    zkresult rkv = ZKR_UNSPECIFIED;
-    zkresult rv = ZKR_UNSPECIFIED;
     zkresult rout = ZKR_UNSPECIFIED;
 
     string keyStr = "";
@@ -334,17 +332,15 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
     }
     
     uint64_t version;
-    rv = readVersion(root, version, dbReadLog);
+    rout = readVersion(root, version, dbReadLog);
 
-    if( rv == ZKR_SUCCESS){
-       
+    if( rout == ZKR_SUCCESS){
+
         // If the key is found in local database (cached) simply return it
         if(dbKVACache.findKey(version, key, value)){
 
             if (dbReadLog != NULL) dbReadLog->add(keyStr, value, true, TimeDiff(t));
-            rkv = ZKR_SUCCESS;
-            rout = rkv;
-
+            rout = ZKR_SUCCESS;
         } 
         // If the key is pending to be stored in database, but already deleted from cache
         else if (config.dbMultiWrite && multiWrite.findKeyValue(version, key, value))
@@ -352,25 +348,23 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
             // Add to the read log
             if (dbReadLog != NULL) dbReadLog->add(keyStr, value, true, TimeDiff(t));
             // We do not store into cache as we do not want to manage the chain of versions
-            rkv = ZKR_SUCCESS;
+            rout = ZKR_SUCCESS;
         }
         else if(useRemoteDB)
         {
             vector<VersionValue> upstreamVersionValues;
-            rkv = readRemoteKV(version, key, value, upstreamVersionValues);       
-            if (rkv == ZKR_SUCCESS)
+            rout = readRemoteKV(version, key, value, upstreamVersionValues);       
+            if (rout == ZKR_SUCCESS)
             {
                 dbKVACache.uploadKeyValueVersions(key, upstreamVersionValues);               
                 if (dbReadLog != NULL) dbReadLog->add(keyStr, value, false, TimeDiff(t));
             } else {
                 
-                if( rkv == ZKR_DB_KEY_NOT_FOUND){
-                    rout = rkv;
+                if( rout == ZKR_DB_KEY_NOT_FOUND){
                     // Add a zero into the cache to avoid future remote access for this key (not problematic management of versions as there is only one version)
                     mpz_class   zero(0);
                     dbKVACache.addKeyValueVersion(0, key, zero);
-                }else if( rkv == ZKR_DB_VERSION_NOT_FOUND_GLOBAL){
-                    rout = rkv;
+                }else if( rout == ZKR_DB_VERSION_NOT_FOUND_GLOBAL){
                     // Add a zero into the cache to avoid future remote access for this key (not problematic management of versions as there is only one version)
                     dbKVACache.uploadKeyValueVersions(key, upstreamVersionValues);
                 }else{
@@ -388,8 +382,7 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
         }
     } else {
         zklog.warning("Database64::readKV() requested a root that does not exist in the table statedb.version " + keyStr + " , "
-        + zkresult2string(rv) );
-        rout = rv;
+        + zkresult2string(rout) );
     }
     
 #ifdef LOG_DB_READ
@@ -425,15 +418,12 @@ zkresult Database64::writeKV(const Goldilocks::Element (&root)[4], const Goldilo
 {
 
     
-    zkresult rkv = ZKR_UNSPECIFIED;
-    zkresult rv = ZKR_UNSPECIFIED;
+    zkresult rout = ZKR_UNSPECIFIED;
 
     uint64_t version;
-    rv = readVersion(root, version, NULL);
-    if( rv == ZKR_SUCCESS){
-        writeKV(version, key, value, persistent);
-    }else{
-       rkv=rv;
+    rout = readVersion(root, version, NULL);
+    if( rout == ZKR_SUCCESS){
+        rout = writeKV(version, key, value, persistent);
     }
 
 #ifdef LOG_DB_WRITE
@@ -451,7 +441,7 @@ zkresult Database64::writeKV(const Goldilocks::Element (&root)[4], const Goldilo
     }
 #endif
 
-    return rkv;
+    return rout;
 }
 
 zkresult Database64::writeKV(const uint64_t& version, const Goldilocks::Element (&key)[4], const mpz_class &value, bool persistent)
