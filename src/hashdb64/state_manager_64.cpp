@@ -1067,7 +1067,7 @@ zkresult StateManager64::set (const string &batchUUID, uint64_t tx, Database64 &
 
         // Write the key-value pair
         string hashString = fea2string(fr, key);
-        uint64_t level;
+        uint64_t level=0;
         uint64_t stateManagerLevel;
         uint64_t databaseLevel;
         zkr = stateManager64.write(batchUUID, tx, hashString, value, persistence, stateManagerLevel);
