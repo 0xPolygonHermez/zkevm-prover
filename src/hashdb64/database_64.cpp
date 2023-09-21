@@ -310,8 +310,9 @@ zkresult Database64::write(const vector<DB64Query> &dbQueries, const bool persis
     return ZKR_SUCCESS;
 }
 
-zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, DatabaseMap *dbReadLog)
+zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, uint64_t &level ,DatabaseMap *dbReadLog)
 {
+    level = 128;
     // Check that it has been initialized before
     if (!bInitialized)
     {
@@ -405,14 +406,14 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
 
 }
 
-zkresult Database64::readKV(const Goldilocks::Element (&root)[4], vector<KeyValue> &KVs, DatabaseMap *dbReadLog){
+zkresult Database64::readKV(const Goldilocks::Element (&root)[4], vector<KeyValueLevel> &KVLs, DatabaseMap *dbReadLog){
     zkresult zkr;
-    for (uint64_t i=0; i<KVs.size(); i++)
+    for (uint64_t i=0; i<KVLs.size(); i++)
     {
-        zkr = readKV(root, KVs[i].key, KVs[i].value, dbReadLog);
+        zkr = readKV(root, KVLs[i].key, KVLs[i].value, KVLs[i].level, dbReadLog);
         if (zkr != ZKR_SUCCESS)
         {
-            zklog.error("Database64::readKV(KBs) failed calling read() result=" + zkresult2string(zkr) + " key=" + fea2string(fr, KVs[i].key) );
+            zklog.error("Database64::readKV(KBs) failed calling read() result=" + zkresult2string(zkr) + " key=" + fea2string(fr, KVLs[i].key) );
             return zkr;
         }
     }
@@ -1981,6 +1982,7 @@ zkresult Database64::sendData (void)
             // If there are versions add to db
             if (data.version.size() > 0)
             {
+                uint64_t maxWritingVersion = 0;
                 unordered_map<string, uint64_t>::const_iterator it=data.version.begin();
                 while (it != data.version.end())
                 {
@@ -1996,6 +1998,7 @@ zkresult Database64::sendData (void)
                     firstValue = true;
                     for (; it != data.version.end(); it++)
                     {
+                        if(it->second > maxWritingVersion) maxWritingVersion = it->second;
                         if (!firstValue)
                         {
                             data.multiQuery.queries[currentQuery].query += ", ";
@@ -2015,6 +2018,8 @@ zkresult Database64::sendData (void)
                     data.multiQuery.queries[currentQuery].query += " ON CONFLICT (hash) DO NOTHING;";
                    
                 }
+                zkassertpermanent(maxWritingVersion == data.latestVersion);
+                data.multiQuery.queries[currentQuery].query += "UPDATE " + config.dbLatestVersionTableName + " SET version = " + to_string(data.latestVersion) + ";";
             }
 
             // If there are program add the corresponding query

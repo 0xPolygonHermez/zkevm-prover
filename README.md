@@ -53,7 +53,9 @@ The archive will take up an additional 115GB of space once extracted.
 
 ### Install dependencies
 
-The following packages must be installed:
+The following packages must be installed.
+
+**Important dependency note**: you must install [`libpqxx` version 6.4.5](https://github.com/jtv/libpqxx/releases/tag/6.4.5). If your distribution installs a newer version, please [compile `libpqxx` 6.4.5](https://github.com/jtv/libpqxx/releases/tag/6.4.5) and install it manually instead.
 
 #### Ubuntu/Debian
 
@@ -68,6 +70,13 @@ zypper addrepo https://download.opensuse.org/repositories/network:cryptocurrenci
 zypper refresh
 zypper install -t pattern devel_basis
 zypper install libbenchmark1 libomp16-devel libgmp10 nlohmann_json-devel postgresql libpqxx-devel ghc-postgresql-libpq-devel nasm libsecp256k1-devel grpc-devel libsodium-devel libprotobuf-c-devel libssl53 cmake libgrpc++1_57 protobuf-devel uuid-devel llvm llvm-devel libopenssl-devel
+```
+
+#### Fedora
+```
+dnf group install "C Development Tools and Libraries" "Development Tools"
+dnf config-manager --add-repo https://terra.fyralabs.com/terra.repo
+dnf install google-benchmark-devel libomp-devel gmp gmp-devel gmp-c++ nlohmann-json-devel postgresql libpqxx-devel nasm libsecp256k1-devel grpc-devel libsodium-devel cmake grpc grpc-devel grpc-cpp protobuf-devel protobuf-c-devel uuid-devel libuuid-devel uuid-c++ llvm llvm-devel openssl-devel 
 ```
 
 #### Arch

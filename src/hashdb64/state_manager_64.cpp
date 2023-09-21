@@ -1080,13 +1080,14 @@ zkresult StateManager64::get (const string &batchUUID, Database64 &db, const Gol
     string keyString = fea2string(fr, key);
     mpz_class value;
     zkresult zkr = ZKR_UNSPECIFIED;
+    uint64_t level = 0;
     if (bUseStateManager)
     {
         zkr = stateManager64.read(batchUUID, keyString, value, dbReadLog);
     }
     if (zkr != ZKR_SUCCESS)
     {
-        zkr = db.readKV(root, key, value, dbReadLog);
+        zkr = db.readKV(root, key, value, level, dbReadLog);
     }
     if (zkr != ZKR_SUCCESS)
     {

@@ -3,15 +3,13 @@
 #include "hashdb.hpp"
 #include "hashdb_singleton.hpp"
 
-#define DBKV_REMOTE_TEST_NUMBER_OF_WRITES 1000
-
-
 uint64_t DatabaseKVTest (const Config &config){
     
     Goldilocks fr;
     uint64_t numberOfFailedTests = 0;
+    uint64_t level;
     
-    TimerStart(DATABASE_KV_REMOTE_TEST);
+    TimerStart(DATABASE_KV_TEST);
 
     if(config.dbMultiWrite == true){
         zklog.error("DatabaseKVTest() this test must be run with config.dbMultiWrite=false");
@@ -90,27 +88,27 @@ uint64_t DatabaseKVTest (const Config &config){
     mpz_class valueZero(0);
     mpz_class valueOut;
     pDatabase64->writeKV(root2, key, valueIn, true);
-    pDatabase64->readKV(root2, key, valueOut, NULL);
+    pDatabase64->readKV(root2, key, valueOut, level, NULL);
     if(valueOut != valueIn)
     {
         zklog.error("DatabaseKVTest() failed calling Database64.readKV()");
         numberOfFailedTests += 1;
     }
     pDatabase64->clearCache();
-    pDatabase64->readKV(root2, key, valueOut, NULL);
+    pDatabase64->readKV(root2, key, valueOut, level, NULL);
     if(valueOut != valueIn)
     {
         zklog.error("DatabaseKVTest() failed calling Database64.readKV() no cache");
         numberOfFailedTests += 1;
     }
 
-    pDatabase64->readKV(root1, key, valueOut, NULL);
+    pDatabase64->readKV(root1, key, valueOut, level, NULL);
     if(valueOut != valueZero)
     {
         zklog.error("DatabaseKVTest() failed calling Database64.readKV() should not be found");
         numberOfFailedTests += 1;
     }
-    pDatabase64->readKV(root3, key, valueOut, NULL);
+    pDatabase64->readKV(root3, key, valueOut, level, NULL);
     if(valueOut != valueIn)
     {
         zklog.error("DatabaseKVTest() failed calling Database64.readKV() should be found with latter version");
@@ -126,7 +124,7 @@ uint64_t DatabaseKVTest (const Config &config){
         exitProcess();   
     }
    
-    TimerStopAndLog(DATABASE_KV_REMOTE_TEST);
+    TimerStopAndLog(DATABASE_KV_TEST);
     return numberOfFailedTests;
 }
 

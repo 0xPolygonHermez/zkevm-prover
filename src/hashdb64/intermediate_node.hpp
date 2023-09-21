@@ -5,6 +5,7 @@
 #include "poseidon_goldilocks.hpp"
 #include "zkresult.hpp"
 #include "hash_value_gl.hpp"
+#include <vector>
 
 class IntermediateNode
 {

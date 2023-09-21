@@ -355,11 +355,14 @@ ProverRequest *Prover::waitForRequestToComplete(const string &uuid, const uint64
 
 void Prover::processBatch(ProverRequest *pProverRequest)
 {
-    TimerStart(PROVER_PROCESS_BATCH);
+    //TimerStart(PROVER_PROCESS_BATCH);
     zkassert(pProverRequest != NULL);
     zkassert(pProverRequest->type == prt_processBatch);
 
-    zklog.info("Prover::processBatch() timestamp=" + pProverRequest->timestamp + " UUID=" + pProverRequest->uuid);
+    if (config.runAggregatorClient)
+    {
+        zklog.info("Prover::processBatch() timestamp=" + pProverRequest->timestamp + " UUID=" + pProverRequest->uuid);
+    }
 
     // Save input to <timestamp>.input.json, as provided by client
     if (config.saveInputToFile)
@@ -388,7 +391,7 @@ void Prover::processBatch(ProverRequest *pProverRequest)
         json2file(inputJsonEx, pProverRequest->inputDbFile());
     }
 
-    TimerStopAndLog(PROVER_PROCESS_BATCH);
+    //TimerStopAndLog(PROVER_PROCESS_BATCH);
 }
 
 void Prover::genBatchProof(ProverRequest *pProverRequest)
