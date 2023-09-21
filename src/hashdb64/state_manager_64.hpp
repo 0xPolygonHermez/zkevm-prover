@@ -78,11 +78,17 @@ private:
     Config config;
     pthread_mutex_t mutex; // Mutex to protect the multi write queues
     uint64_t lastVirtualStateRoot;
+    Goldilocks::Element lastConsolidatedStateRoot[4];
+    string lastConsolidatedStateRootString;
 public:
     StateManager64(Goldilocks &fr, PoseidonGoldilocks &poseidon) : fr(fr), poseidon(poseidon), lastVirtualStateRoot(0)
     {        
         // Init mutex
         pthread_mutex_init(&mutex, NULL);
+        lastConsolidatedStateRoot[0] = fr.zero();
+        lastConsolidatedStateRoot[1] = fr.zero();
+        lastConsolidatedStateRoot[2] = fr.zero();
+        lastConsolidatedStateRoot[3] = fr.zero();
     };
 private:
     zkresult setStateRoot (const string &batchUUID, uint64_t tx, const string &stateRoot, const bool bIsOldStateRoot, const Persistence persistence);

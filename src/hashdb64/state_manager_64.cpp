@@ -52,6 +52,20 @@ zkresult StateManager64::setStateRoot(const string &batchUUID, uint64_t tx, cons
         state[batchUUID] = batchState;
         it = state.find(batchUUID);
         zkassert(it != state.end());
+
+        // Copy the previous batch state dbWrite map
+        for (int64_t i = stateOrder.size() - 1; i >= 0; i--)
+        {
+            unordered_map<string, BatchState64>::iterator previt;
+            previt = state.find(stateOrder[i]);
+            zkassert(previt != state.end());
+            if (previt->second.currentStateRoot == stateRoot)
+            {
+                it->second.dbWrite = previt->second.dbWrite;
+                break;
+            }
+        }
+
         stateOrder.emplace_back(batchUUID);
     }
     BatchState64 &batchState = it->second;
@@ -872,6 +886,14 @@ zkresult StateManager64::consolidateState(const string &_virtualStateRoot, const
     // Return the consolidated state root
     consolidatedStateRoot = fea2string(fr, newRoot);
 
+    // Copy it to use it when reading a KV that is not in the StateManager,
+    // and we have to read it from database using a consolidated state root
+    lastConsolidatedStateRoot[0] = newRoot[0];
+    lastConsolidatedStateRoot[1] = newRoot[1];
+    lastConsolidatedStateRoot[2] = newRoot[2];
+    lastConsolidatedStateRoot[3] = newRoot[3];
+    lastConsolidatedStateRootString = consolidatedStateRoot;
+
     // Call flush and get the flush ID
 
     zkr = db.flush(flushId, lastSentFlushId);
@@ -1123,11 +1145,11 @@ zkresult StateManager64::get (const string &batchUUID, Database64 &db, const Gol
     }
     if (zkr != ZKR_SUCCESS)
     {
-        zkr = db.readKV(root, key, value, level, dbReadLog);
+        zkr = db.readKV(lastConsolidatedStateRoot, key, value, level, dbReadLog);
     }
     if (zkr != ZKR_SUCCESS)
     {
-        zklog.error("StateManager64::get() db.read error: " + to_string(zkr) + " (" + zkresult2string(zkr) + ") root:" + fea2string(fr, root));
+        zklog.error("StateManager64::get() db.read error=" + zkresult2string(zkr) + " root=" + fea2string(fr, lastConsolidatedStateRoot) + " key=" + fea2string(fr, key));
         return zkr;
     }
     
