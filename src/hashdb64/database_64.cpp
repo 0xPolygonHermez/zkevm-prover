@@ -343,6 +343,7 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
 
             if (dbReadLog != NULL) dbReadLog->add(keyStr, value, true, TimeDiff(t));
             rkv = ZKR_SUCCESS;
+            rout = rkv;
 
         } 
         // If the key is pending to be stored in database, but already deleted from cache

@@ -23,9 +23,11 @@ uint64_t HashDB64WorkflowTest (const Config& config)
     uint64_t flushId, storedFlushId;
     
 
-    const uint64_t numberOfSetsPerTx = 3;
-    const uint64_t numberOfTxsPerBatch = 3;
     const uint64_t numberOfBatches = 10;
+    const uint64_t numberOfTxsPerBatch = 3;
+    const uint64_t numberOfSetsPerTx = 3;
+
+    zklog.info("HashDB64WorkflowTest() numberOfBatches=" + to_string(numberOfBatches) + " numberOfTxsPerBatch=" + to_string(numberOfTxsPerBatch) + " numberOfSetsPerTx=" + to_string(numberOfSetsPerTx));
 
     SmtSetResult setResult;
     SmtGetResult getResult;
@@ -36,10 +38,11 @@ uint64_t HashDB64WorkflowTest (const Config& config)
     Goldilocks::Element keyfea[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     mpz_class value = 0;
     mpz_class keyScalar = 0;
+    vector<KeyValue> allKeyValues;
 
     for (uint64_t batch=0; batch<numberOfBatches; batch++)
     {
-        zklog.info("STARTING LOOP=" + to_string(batch));
+        zklog.info("STARTING BATCH=" + to_string(batch));
 
         // Start batch
         string batchUUID = getUUID();
@@ -72,6 +75,7 @@ uint64_t HashDB64WorkflowTest (const Config& config)
                 // Take note of the key we used
                 KeyValue keyValue;
                 for (uint64_t i=0; i<4; i++) keyValue.key[i] = key[i];
+                keyValue.value = value;
                 keyValues.emplace_back(keyValue);
             }
 
@@ -82,6 +86,25 @@ uint64_t HashDB64WorkflowTest (const Config& config)
         zkr = pHashDB->purge(batchUUID, root, persistence);
         zkassertpermanent(zkr==ZKR_SUCCESS);
         zklog.info("PURGE zkr=" + zkresult2string(zkr) + " root=" + fea2string(fr, root));
+
+        for (uint64_t i=0; i<allKeyValues.size(); i++)
+        {
+            //zklog.info("allKeyValues[" + to_string(i) + "].key=" + fea2string(fr, allKeyValues[i].key) + " .value=" + allKeyValues[i].value.get_str(10));
+            mpz_class auxValue;
+            zkr = pHashDB->get(batchUUID, root, allKeyValues[i].key, auxValue, &getResult, NULL);
+            zkassertpermanent(zkr==ZKR_SUCCESS);
+            zkassertpermanent(auxValue==allKeyValues[i].value);
+        }
+
+        // Discard some of the batches, and accumulate the key values in the rest
+        if (((batch+4) % 5) == 0)
+        {
+            for (uint64_t i=0; i<4; i++) root[i] = batchOldStateRoot[i];
+        }
+        else
+        {
+            allKeyValues.insert(allKeyValues.end(), keyValues.begin(), keyValues.end());
+        }
 
         // Consolidate state root every 5 batches, at batches 4, 9, 14, 19...
         Goldilocks::Element batchNewStateRoot[4];
@@ -120,19 +143,30 @@ uint64_t HashDB64WorkflowTest (const Config& config)
 
             // Call ReadTree with the new state root to get the hashes of the initial values of all read or written keys
             vector<HashValueGL> hashValues;
-            zkr = pHashDB->readTree(batchNewStateRoot, keyValues, hashValues);
+            vector<KeyValue> auxKeyValues = allKeyValues;
+            for (uint64_t i=0; i<auxKeyValues.size(); i++)
+            {
+                auxKeyValues[i].value = 0;
+            }
+            zkr = pHashDB->readTree(batchNewStateRoot, auxKeyValues, hashValues);
             zkassertpermanent(zkr==ZKR_SUCCESS);
-            zklog.info("READ TREE batchNewStateRoot=" + fea2string(fr, batchNewStateRoot) + " keyValues.size=" + to_string(keyValues.size()) + " hashValues.size=" + to_string(hashValues.size()));
+            zklog.info("READ TREE batchNewStateRoot=" + fea2string(fr, batchNewStateRoot) + " keyValues.size=" + to_string(auxKeyValues.size()) + " hashValues.size=" + to_string(hashValues.size()));
+
+            zkassertpermanent(auxKeyValues.size() == allKeyValues.size());
+            for (uint64_t i=0; i<auxKeyValues.size(); i++)
+            {
+                //zklog.info("auxKeyValues[" + to_string(i) + "].key=" + fea2string(fr, auxKeyValues[i].key) + " .value=" + auxKeyValues[i].value.get_str(10));
+                //zklog.info("allKeyValues[i].key=" + fea2string(fr, allKeyValues[i].key) + " .value=" + allKeyValues[i].value.get_str(10));
+                zkassertpermanent(auxKeyValues[i].value == allKeyValues[i].value);
+                zkassertpermanent( fr.equal(auxKeyValues[i].key[0], allKeyValues[i].key[0]) &&
+                                   fr.equal(auxKeyValues[i].key[1], allKeyValues[i].key[1]) &&
+                                   fr.equal(auxKeyValues[i].key[2], allKeyValues[i].key[2]) &&
+                                   fr.equal(auxKeyValues[i].key[3], allKeyValues[i].key[3]) );
+            }
         }
         else
         {
             for (uint64_t i=0; i<4; i++) batchNewStateRoot[i] = root[i];
-        }
-
-        // Discard some of the batches
-        if (((batch+4) % 5) == 0)
-        {
-            for (uint64_t i=0; i<4; i++) root[i] = batchOldStateRoot[i];
         }
     }
 
