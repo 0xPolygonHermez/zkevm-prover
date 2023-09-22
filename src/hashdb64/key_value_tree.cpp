@@ -2,11 +2,17 @@
 #include "scalar.hpp"
 #include "exit_process.hpp"
 
+Goldilocks kvtfr;
 
 zkresult KeyValueTree::write (const Goldilocks::Element (&key)[4], const mpz_class &value, uint64_t &level)
 {
-    string keyString = fea2string(fr, key);
+    string keyString = fea2string(kvtfr, key);
 
+    return write(keyString, value, level);
+}
+
+zkresult KeyValueTree::write (const string &keyString, const mpz_class &value, uint64_t &level)
+{
     keys[keyString].emplace_back(value);
 
     // Hardcode the level (temporary) (TODO)
@@ -17,8 +23,12 @@ zkresult KeyValueTree::write (const Goldilocks::Element (&key)[4], const mpz_cla
 
 zkresult KeyValueTree::read (const Goldilocks::Element (&key)[4], mpz_class &value, uint64_t &level)
 {
-    string keyString = fea2string(fr, key);
+    string keyString = fea2string(kvtfr, key);
+    return read(keyString, value, level);
+}
 
+zkresult KeyValueTree::read (const string &keyString, mpz_class &value, uint64_t &level)
+{
     // Find the map entry
     unordered_map< string, vector<mpz_class> >::const_iterator it;
     it = keys.find(keyString);
@@ -45,8 +55,12 @@ zkresult KeyValueTree::read (const Goldilocks::Element (&key)[4], mpz_class &val
 
 zkresult KeyValueTree::extract (const Goldilocks::Element (&key)[4], const mpz_class &value)
 {
-    string keyString = fea2string(fr, key);
+    string keyString = fea2string(kvtfr, key);
+    return extract(keyString, value);
+}
 
+zkresult KeyValueTree::extract (const string &keyString, const mpz_class &value)
+{
     // Find the map entry
     unordered_map< string, vector<mpz_class> >::iterator it;
     it = keys.find(keyString);
