@@ -18,6 +18,8 @@ zkresult StateManager64::setStateRoot(const string &batchUUID, uint64_t tx, cons
     gettimeofday(&t, NULL);
 #endif
 
+    zkresult zkr;
+
     // Normalize state root format
     string stateRoot = NormalizeToNFormat(_stateRoot, 64);
     stateRoot = stringToLower(stateRoot);
@@ -53,7 +55,7 @@ zkresult StateManager64::setStateRoot(const string &batchUUID, uint64_t tx, cons
         it = state.find(batchUUID);
         zkassert(it != state.end());
 
-        // Copy the previous batch state dbWrite map
+        // Copy the previous batch state keyValueTree
         for (int64_t i = stateOrder.size() - 1; i >= 0; i--)
         {
             unordered_map<string, BatchState64>::iterator previt;
@@ -61,7 +63,7 @@ zkresult StateManager64::setStateRoot(const string &batchUUID, uint64_t tx, cons
             zkassert(previt != state.end());
             if (previt->second.currentStateRoot == stateRoot)
             {
-                it->second.dbWrite = previt->second.dbWrite;
+                it->second.keyValueTree = previt->second.keyValueTree;
                 break;
             }
         }
@@ -149,13 +151,27 @@ zkresult StateManager64::setStateRoot(const string &batchUUID, uint64_t tx, cons
         txSubState.oldStateRoot = stateRoot;
         txSubState.previousSubState = txState.persistence[persistence].currentSubState;
 
-        // Copy the key-value data from the previous state, if it exists
+        // Find the previous state, if it exists
         for (uint64_t i = 0; i < currentSubStateSize; i++)
         {
             if (txState.persistence[persistence].subState[i].newStateRoot == stateRoot)
             {
-                txSubState.dbWrite = txState.persistence[persistence].subState[i].dbWrite;
-                break;
+                // Delete the keys of the rest of sub states
+                for (uint64_t j = i+1; j < currentSubStateSize; j++)
+                {
+                    unordered_map<string, mpz_class> &dbWrite = txState.persistence[persistence].subState[j].dbWrite;
+                    unordered_map<string, mpz_class>::const_iterator it;
+                    for (it = dbWrite.begin(); it != dbWrite.end(); it++)
+                    {
+                        zkr = batchState.keyValueTree.extract(it->first, it->second);
+                        if (zkr != ZKR_SUCCESS)
+                        {
+                            zklog.error("StateManager64::setStateRoot() failed calling batchState.keyValueTree.extract()");
+                            Unlock();
+                            return ZKR_STATE_MANAGER;
+                        }
+                    }
+                }
             }
         }
 
@@ -200,8 +216,6 @@ zkresult StateManager64::setStateRoot(const string &batchUUID, uint64_t tx, cons
 
 zkresult StateManager64::write (const string &batchUUID, uint64_t tx, const string &key, const mpz_class &value, const Persistence persistence, uint64_t &level)
 {
-    level = 128;
-
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     struct timeval t;
     gettimeofday(&t, NULL);
@@ -262,7 +276,7 @@ zkresult StateManager64::write (const string &batchUUID, uint64_t tx, const stri
     txState.persistence[persistence].subState[txState.persistence[persistence].currentSubState].dbWrite[key] = value;
 
     // Add to common write pool to speed up read
-    batchState.dbWrite[key] = value;
+    batchState.keyValueTree.write(key, value, level);
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     batchState.timeMetricStorage.add("write", TimeDiff(t));
@@ -275,8 +289,6 @@ zkresult StateManager64::write (const string &batchUUID, uint64_t tx, const stri
 
 zkresult StateManager64::read(const string &batchUUID, const string &key, mpz_class &value, uint64_t &level, DatabaseMap *dbReadLog)
 {
-    level = 128;
-
     struct timeval t;
     gettimeofday(&t, NULL);
 
@@ -293,13 +305,10 @@ zkresult StateManager64::read(const string &batchUUID, const string &key, mpz_cl
     }
     BatchState64 &batchState = it->second;
 
-    // Search in the common write list
-    unordered_map<string, mpz_class>::iterator dbIt;
-    dbIt = batchState.dbWrite.find(key);
-    if (dbIt != batchState.dbWrite.end())
+    // Search in the common key-value tree
+    zkresult zkr = batchState.keyValueTree.read(key, value, level);
+    if (zkr == ZKR_SUCCESS)
     {
-        value = dbIt->second;
-
         // Add to the read log
         if (dbReadLog != NULL)
             dbReadLog->add(key, value.get_str(16), true, TimeDiff(t));
@@ -785,14 +794,17 @@ zkresult StateManager64::consolidateState(const string &_virtualStateRoot, const
 
             // Get the key-values for this tx
             vector<KeyValue> keyValues;
-            unordered_map<string, mpz_class> &dbWrite = txState.persistence[persistence].subState[txState.persistence[persistence].subState.size() - 1].dbWrite;
-            unordered_map<string, mpz_class>::const_iterator it;
-            for (it = dbWrite.begin(); it != dbWrite.end(); it++)
+            for (uint64_t i=0; i<txState.persistence[persistence].subState.size(); i++)
             {
-                KeyValue keyValue;
-                string2fea(fr, it->first, keyValue.key);
-                keyValue.value = it->second;
-                keyValues.emplace_back(keyValue);
+                unordered_map<string, mpz_class> &dbWrite = txState.persistence[persistence].subState[i].dbWrite;
+                unordered_map<string, mpz_class>::const_iterator it;
+                for (it = dbWrite.begin(); it != dbWrite.end(); it++)
+                {
+                    KeyValue keyValue;
+                    string2fea(fr, it->first, keyValue.key);
+                    keyValue.value = it->second;
+                    keyValues.emplace_back(keyValue);
+                }
             }
 
             // Call WriteTree and get the new state root

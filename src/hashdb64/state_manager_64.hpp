@@ -13,6 +13,7 @@
 #include "poseidon_goldilocks.hpp"
 #include "smt_get_result.hpp"
 #include "smt_set_result.hpp"
+#include "key_value_tree.hpp"
 
 using namespace std;
 
@@ -26,7 +27,7 @@ public:
     unordered_map<string, mpz_class> dbWrite;
     TxSubState64() : previousSubState(0), bValid(false)
     {
-        dbWrite.reserve(128);
+        dbWrite.reserve(1);
     };
 };
 
@@ -57,14 +58,13 @@ public:
     string newStateRoot;
     uint64_t currentTx;
     vector<TxState64> txState;
-    unordered_map<string, mpz_class> dbWrite;
+    KeyValueTree keyValueTree;
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     TimeMetricStorage timeMetricStorage;
 #endif
     BatchState64() : currentTx(0)
     {
         txState.reserve(32);
-        dbWrite.reserve(1024);
     };
 };
 
