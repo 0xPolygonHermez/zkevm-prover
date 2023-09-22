@@ -434,14 +434,135 @@ zkresult StateManager64::semiFlush(const string &batchUUID, const string &_state
     return ZKR_SUCCESS;
 }
 
+zkresult StateManager64::purgeBatch (BatchState64 &batchState, const string &newStateRoot)
+{
+    zkassert(config.stateManagerPurgeTxs == true);
+    zkassert(newStateRoot.size() > 0);
+
+    // For all txs, delete the ones that are not part of the final state root chain
+
+    // Start searching from the last TX, and when a tx with the same new state root is found,
+    // delete the ones after this one (typically fruit of an out-of-counters condition)
+    int64_t tx = -1;
+    for (tx = batchState.txState.size() - 1; tx >= 0; tx--)
+    {
+        if (batchState.txState[tx].persistence[PERSISTENCE_DATABASE].newStateRoot == newStateRoot)
+        {
+            break;
+        }
+    }
+
+    // Check if we found the last valid TX
+    if (tx < 0)
+    {
+        zklog.error("StateManager::purgeBatch() called with newStateRoot=" + newStateRoot + " but could not find it");
+        return ZKR_STATE_MANAGER;
+    }
+
+    // Delete the TXs after this one
+    while ((int64_t)batchState.txState.size() > (tx + 1))
+    {
+        batchState.txState.pop_back();
+    }
+
+    return ZKR_SUCCESS;
+}
+
+zkresult StateManager64::purgeTxPersistence (TxPersistenceState64 &txPersistence, const Config &config)
+{
+    // Check that current sub-state newStateRoot matches the TX one,
+    // i.e. that setNewStateRoot() was called before flush()
+    if (txPersistence.subState[txPersistence.currentSubState].newStateRoot != txPersistence.newStateRoot)
+    {
+        zklog.error("StateManager64::purgeTxPersistence() found inconsistent new state roots: currentSubState=" + to_string(txPersistence.currentSubState) +
+                    " substate.newStateRoot=" + txPersistence.subState[txPersistence.currentSubState].newStateRoot +
+                    " txPersistence.newStateRoot=" + txPersistence.newStateRoot);
+        return ZKR_STATE_MANAGER;
+    }
+
+    uint64_t currentSubState = txPersistence.currentSubState;
+
+    // TODO: check that currentSubState == size(), or simply don't use it
+
+    // Search for the chain of sub-states that end with this new state root
+    // Mark the ones that are part of the chain with bValid = true
+    while (true)
+    {
+        // Mark it as a valid sub-state
+        txPersistence.subState[currentSubState].bValid = true;
+
+        // If we went back to the first sub-state, we are done, as long as the old state roots match
+        if (currentSubState == 0)
+        {
+            // Check that both old state roots match
+            if (txPersistence.subState[currentSubState].oldStateRoot != txPersistence.oldStateRoot)
+            {
+                zklog.error("StateManager64::purgeTxPersistence() found inconsistent old state roots: txState.oldStateRoot=" + txPersistence.oldStateRoot +
+                            " currentSubState=" + to_string(txPersistence.currentSubState) +
+                            " substate.oldStateRoot=" + txPersistence.subState[currentSubState].oldStateRoot);
+                return ZKR_STATE_MANAGER;
+            }
+
+            // We are done
+            break;
+        }
+
+        // If the previous sub-state ended the same way this sub-state started, then it is part of the chain
+        uint64_t previousSubState = txPersistence.subState[currentSubState].previousSubState;
+        if (txPersistence.subState[previousSubState].newStateRoot == txPersistence.subState[currentSubState].oldStateRoot)
+        {
+            currentSubState = previousSubState;
+            continue;
+        }
+
+        // Otherwise, we resumed the chain from a previous state, maybe due to a revert
+        // Search for the previous state that ends the same way this sub-state starts
+        uint64_t i = 0;
+        for (; i < currentSubState; i++)
+        {
+            if (txPersistence.subState[i].newStateRoot == txPersistence.subState[currentSubState].oldStateRoot)
+            {
+                previousSubState = i;
+                break;
+            }
+        }
+
+        // Check that we actually found it
+        if (i == currentSubState)
+        {
+            zklog.error("StateManager64::purgeTxPersistence() could not find previous tx sub-state: txState.oldStateRoot=" + txPersistence.oldStateRoot +
+                        " currentSubState=" + to_string(txPersistence.currentSubState) +
+                        " substate.oldStateRoot=" + txPersistence.subState[currentSubState].oldStateRoot);
+            return ZKR_STATE_MANAGER;
+        }
+
+        // Iterate with the previous state
+        currentSubState = previousSubState;
+    }
+
+    // Delete invalid TX sub-states, i.e. the ones with bValid = false
+    if (config.stateManagerPurge)
+    {
+        // Delete all substates that are not valid or that did not change the state root (i.e. SMT set update in which new value was equal to old value)
+        for (int64_t i = txPersistence.subState.size() - 1; i >= 0; i--)
+        {
+            if (!txPersistence.subState[i].bValid ||
+                (txPersistence.subState[i].oldStateRoot == txPersistence.subState[i].newStateRoot))
+            {
+                txPersistence.subState.erase(txPersistence.subState.begin() + i);
+            }
+        }
+    }
+
+    return ZKR_SUCCESS;
+}
+
 zkresult StateManager64::purge (const string &batchUUID, const string &_newStateRoot, const Persistence persistence, Database64 &db)
 {
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     struct timeval t;
     gettimeofday(&t, NULL);
 #endif
-
-    TimerStart(STATE_MANAGER_FLUSH);
 
 #ifdef LOG_STATE_MANAGER
     zklog.info("StateManager64::purge() batchUUID=" + batchUUID);
@@ -455,6 +576,7 @@ zkresult StateManager64::purge (const string &batchUUID, const string &_newState
 
     // Format the new state root
     string newStateRoot = NormalizeToNFormat(_newStateRoot, 64);
+    newStateRoot = stringToLower(newStateRoot);
 
     // Find batch state for this uuid
     // If it does not exist, we call db.flush() directly
@@ -463,36 +585,19 @@ zkresult StateManager64::purge (const string &batchUUID, const string &_newState
     if (it == state.end())
     {
         zklog.warning("StateManager64::purge() found no batch state for batch UUID=" + batchUUID + "; normal if no SMT activity happened");
-        TimerStopAndLog(STATE_MANAGER_FLUSH);
         Unlock();
         return ZKR_STATE_MANAGER;
     }
     BatchState64 &batchState = it->second;
 
-    // For all txs, delete the ones that are not part of the final state root chain
-    // Start searching from the last TX, and when a tx with the same new state root is found,
-    // delete the rest (typically fruit of an out-of-counters condition)
-
+    // Purge the batch from unneeded TXs
+    zkresult zkr;
     if (config.stateManagerPurgeTxs && (_newStateRoot.size() > 0) && (persistence == PERSISTENCE_DATABASE))
     {
-        int64_t tx = -1;
-        for (tx = batchState.txState.size() - 1; tx >= 0; tx--)
+        zkr = purgeBatch(batchState, newStateRoot);
+        if (zkr != ZKR_SUCCESS)
         {
-            if (batchState.txState[tx].persistence[PERSISTENCE_DATABASE].newStateRoot == newStateRoot)
-            {
-                break;
-            }
-        }
-        if (tx < 0)
-        {
-            zklog.error("StateManager::purge() called with newStateRoot=" + newStateRoot + " but could not find it");
-        }
-        else
-        {
-            while ((int64_t)batchState.txState.size() > (tx + 1))
-            {
-                batchState.txState.pop_back();
-            }
+            zklog.error("StateManager64::purge() failed calling purgeBatch() zkr=" + zkresult2string(zkr));
         }
     }
 
@@ -510,7 +615,7 @@ zkresult StateManager64::purge (const string &batchUUID, const string &_newState
         // For all persistences
         for (uint64_t persistence = 0; persistence < PERSISTENCE_SIZE; persistence++)
         {
-            // If there's no data, there's nothing to do
+            // If there's no data, then no purge is required
             if (txState.persistence[persistence].subState.size() == 0)
             {
                 continue;
@@ -524,109 +629,19 @@ zkresult StateManager64::purge (const string &batchUUID, const string &_newState
                 continue;
             }
 
-            // Check that current sub-state newStateRoot matches the TX one,
-            // i.e. that setNewStateRoot() was called before flush()
-            if (txState.persistence[persistence].subState[txState.persistence[persistence].currentSubState].newStateRoot != txState.persistence[persistence].newStateRoot)
+            zkr = purgeTxPersistence(txState.persistence[persistence], db.config);
+            if (zkr != ZKR_SUCCESS)
             {
-                zklog.error("StateManager64::purge() found inconsistent new state roots: batchUUID=" + batchUUID +
-                            " tx=" + to_string(tx) + " txState.newStateRoot=" + txState.persistence[persistence].newStateRoot +
-                            " currentSubState=" + to_string(txState.persistence[persistence].currentSubState) +
-                            " substate.newStateRoot=" + txState.persistence[persistence].subState[txState.persistence[persistence].currentSubState].newStateRoot);
-
+                zklog.error("StateManager64::purge() failed calling purgeTxPersistence() zkr=" + zkresult2string(zkr) +
+                            " batchUUID=" + batchUUID +
+                            " tx=" + to_string(tx));
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-                batchState.timeMetricStorage.add("purge UUID inconsistent new state roots", TimeDiff(t));
+                batchState.timeMetricStorage.add("purgeTxPersistence failed", TimeDiff(t));
                 batchState.timeMetricStorage.print("State Manager calls");
 #endif
                 Unlock();
-                return ZKR_STATE_MANAGER;
-            }
+                return zkr;
 
-            uint64_t currentSubState = txState.persistence[persistence].currentSubState;
-
-            // TODO: check that currentSubState == size(), or simply don't use it
-
-            // Search for the chain of sub-states that end with this new state root
-            // Mark the ones that are part of the chain with bValid = true
-            while (true)
-            {
-                // Mark it as a valid sub-state
-                txState.persistence[persistence].subState[currentSubState].bValid = true;
-
-                // If we went back to the first sub-state, we are done, as long as the old state roots match
-                if (currentSubState == 0)
-                {
-                    // Check that both old state roots match
-                    if (txState.persistence[persistence].subState[currentSubState].oldStateRoot != txState.persistence[persistence].oldStateRoot)
-                    {
-                        zklog.error("StateManager64::purge() found inconsistent old state roots: batchUUID=" + batchUUID +
-                                    " tx=" + to_string(tx) + " txState.oldStateRoot=" + txState.persistence[persistence].oldStateRoot +
-                                    " currentSubState=" + to_string(txState.persistence[persistence].currentSubState) +
-                                    " substate.oldStateRoot=" + txState.persistence[persistence].subState[currentSubState].oldStateRoot);
-
-#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-                        batchState.timeMetricStorage.add("purge UUID inconsistent old state roots", TimeDiff(t));
-                        batchState.timeMetricStorage.print("State Manager calls");
-#endif
-                        Unlock();
-                        return ZKR_STATE_MANAGER;
-                    }
-
-                    // We are done
-                    break;
-                }
-
-                // If the previous sub-state ended the same way this sub-state started, then it is part of the chain
-                uint64_t previousSubState = txState.persistence[persistence].subState[currentSubState].previousSubState;
-                if (txState.persistence[persistence].subState[previousSubState].newStateRoot == txState.persistence[persistence].subState[currentSubState].oldStateRoot)
-                {
-                    currentSubState = previousSubState;
-                    continue;
-                }
-
-                // Otherwise, we resumed the chain from a previous state, maybe due to a revert
-                // Search for the previous state that ends the same way this sub-state starts
-                uint64_t i = 0;
-                for (; i < currentSubState; i++)
-                {
-                    if (txState.persistence[persistence].subState[i].newStateRoot == txState.persistence[persistence].subState[currentSubState].oldStateRoot)
-                    {
-                        previousSubState = i;
-                        break;
-                    }
-                }
-
-                // Check that we actually found it
-                if (i == currentSubState)
-                {
-                    zklog.error("StateManager64::purge() could not find previous tx sub-state: batchUUID=" + batchUUID +
-                                " tx=" + to_string(tx) +
-                                " txState.oldStateRoot=" + txState.persistence[persistence].oldStateRoot +
-                                " currentSubState=" + to_string(txState.persistence[persistence].currentSubState) +
-                                " substate.oldStateRoot=" + txState.persistence[persistence].subState[currentSubState].oldStateRoot);
-#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-                    batchState.timeMetricStorage.add("purge UUID cannot find previous tx sub-state", TimeDiff(t));
-                    batchState.timeMetricStorage.print("State Manager calls");
-#endif
-                    Unlock();
-                    return ZKR_STATE_MANAGER;
-                }
-
-                // Iterate with the previous state
-                currentSubState = previousSubState;
-            }
-
-            // Delete invalid TX sub-states, i.e. the ones with bValid = false
-            if (db.config.stateManagerPurge)
-            {
-                // Delete all substates that are not valid or that did not change the state root (i.e. SMT set update in which new value was equal to old value)
-                for (int64_t i = txState.persistence[persistence].subState.size() - 1; i >= 0; i--)
-                {
-                    if (!txState.persistence[persistence].subState[i].bValid ||
-                        (txState.persistence[persistence].subState[i].oldStateRoot == txState.persistence[persistence].subState[i].newStateRoot))
-                    {
-                        txState.persistence[persistence].subState.erase(txState.persistence[persistence].subState.begin() + i);
-                    }
-                }
             }
 
         } // For all persistences
@@ -637,8 +652,6 @@ zkresult StateManager64::purge (const string &batchUUID, const string &_newState
     batchState.newStateRoot = newStateRoot;
 
     Unlock();
-
-    TimerStopAndLog(STATE_MANAGER_FLUSH);
 
     return ZKR_SUCCESS;
 }
