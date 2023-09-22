@@ -92,6 +92,9 @@ public:
     };
 private:
     zkresult setStateRoot (const string &batchUUID, uint64_t tx, const string &stateRoot, const bool bIsOldStateRoot, const Persistence persistence);
+    zkresult purgeBatch (BatchState64 &batchState, const string &newStateRoot);
+    zkresult purgeTxPersistence (TxPersistenceState64 &txPersistence, const Config &config);
+
 public:
     void init (const Config &_config)
     {

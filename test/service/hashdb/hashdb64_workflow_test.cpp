@@ -62,7 +62,7 @@ uint64_t HashDB64WorkflowTest (const Config& config)
                 value++;
                 
                 zkr = pHashDB->set(batchUUID, tx, root, key, value, persistence, newRoot, &setResult, NULL);
-                zklog.info("SET zkr=" + zkresult2string(zkr) + " root=" + fea2string(fr, root) + " key=" + fea2string(fr, key) + " value=" + value.get_str() + " newRoot=" + fea2string(fr, newRoot));
+                //zklog.info("SET zkr=" + zkresult2string(zkr) + " root=" + fea2string(fr, root) + " key=" + fea2string(fr, key) + " value=" + value.get_str() + " newRoot=" + fea2string(fr, newRoot));
                 zkassertpermanent(zkr==ZKR_SUCCESS);
                 for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
                 zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
