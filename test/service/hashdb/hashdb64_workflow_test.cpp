@@ -64,19 +64,28 @@ uint64_t HashDB64WorkflowTest (const Config& config)
                 zkr = pHashDB->set(batchUUID, tx, root, key, value, persistence, newRoot, &setResult, NULL);
                 //zklog.info("SET zkr=" + zkresult2string(zkr) + " root=" + fea2string(fr, root) + " key=" + fea2string(fr, key) + " value=" + value.get_str() + " newRoot=" + fea2string(fr, newRoot));
                 zkassertpermanent(zkr==ZKR_SUCCESS);
-                for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-                zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
+                zkassertpermanent(!fr.isZero(newRoot[0]) || !fr.isZero(newRoot[1]) || !fr.isZero(newRoot[2]) || !fr.isZero(newRoot[3]));
 
-                zkr = pHashDB->get(batchUUID, root, key, value, &getResult, NULL);
+                zkr = pHashDB->get(batchUUID, newRoot, key, value, &getResult, NULL);
                 //zklog.info("GET zkr=" + zkresult2string(zkr) + " root=" + fea2string(fr, root) + " key=" + fea2string(fr, key) + " value=" + value.get_str());
                 zkassertpermanent(zkr==ZKR_SUCCESS);
                 zkassertpermanent(value==getResult.value);
 
-                // Take note of the key we used
-                KeyValue keyValue;
-                for (uint64_t i=0; i<4; i++) keyValue.key[i] = key[i];
-                keyValue.value = value;
-                keyValues.emplace_back(keyValue);
+                if (set == 1)
+                {
+                    // We "revert" this sub-state, i.e. we dont advance the state root and we discard this key
+                }
+                else
+                {
+                    // Advance in the state root chain
+                    for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
+
+                    // Take note of the key we used
+                    KeyValue keyValue;
+                    for (uint64_t i=0; i<4; i++) keyValue.key[i] = key[i];
+                    keyValue.value = value;
+                    keyValues.emplace_back(keyValue);
+                }
             }
 
             pHashDB->semiFlush(batchUUID, fea2string(fr, root), persistence);
