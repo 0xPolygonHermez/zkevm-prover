@@ -17,16 +17,13 @@ void SHA256SMTest(Goldilocks &fr, Sha256Executor &executor)
 	}
 	CommitPols cmPols(pAddress, CommitPols::pilDegree());
 
-	/*
-
 	// How this test works:
-	// 1. We generate 54 test vectors, each is 135 random bytes.
-	// 2. We hash these test vectors using the standard Keccak256 reference implementation.
-	// 3. We also pack them into 54 "slots" to feed the Keccak executor and hash the slots too.
+	// 1. We generate numberOfSlots test vectors, each is 135 random bytes.
+	// 2. We hash these test vectors using the standard SHA256 reference implementation.
+	// 3. We also pack them into numberOfSlots "slots" to feed the SHA256 executor and hash the slots too.
 	// 4. We compare the hashes.
 
-	const uint64_t numberOfSlots = ((KeccakGateConfig.polLength - 1) / KeccakGateConfig.slotSize);
-	const uint64_t keccakBitratePlusCapacity = 1600;
+	const uint64_t numberOfSlots = ((SHA256GateConfig.polLength - 1) / SHA256GateConfig.slotSize);
 	const uint64_t randomByteCount = 135;
 
 	string *pHash = new string[numberOfSlots];
@@ -37,7 +34,7 @@ void SHA256SMTest(Goldilocks &fr, Sha256Executor &executor)
 	for (uint64_t slot = 0; slot < numberOfSlots; slot++)
 	{
 		// Generate the 135 random bytes for the test vector.
-		std::vector<uint8_t> randomTestVector(randomByteCount);
+		uint8_t randomTestVector[randomByteCount];
 		std::random_device rd;
 		std::mt19937 gen(rd());
 		std::uniform_int_distribution<> dis(0, 255);
@@ -46,39 +43,28 @@ void SHA256SMTest(Goldilocks &fr, Sha256Executor &executor)
 			randomTestVector[i] = static_cast<uint8_t>(dis(gen));
 		}
 
-		// Calculate the reference hash through a reference implementation of Keccak.
-		mpz_class hash = 0;
-		keccak256(randomTestVector, hash);
-
-		// Convert the output into a hex string, for comparison later.
-		// We might need to add some missing leading zeroes
-		// to the resulting hex string so that it's 64 characters.
-		char *hashChars = new char[64];
-		mpz_get_str(hashChars, 16, hash.get_mpz_t());
-		std::string hashString(hashChars, 64);
-		if (std::strlen(hashChars) < 64)
-		{
-			int missingLeadingZeroes = 64 - std::strlen(hashChars);
-			hashString.insert(0, missingLeadingZeroes, '0');
-		}
+		// Calculate the reference hash through a reference implementation of SHA256.
+		string hashString;
+		SHA256(randomTestVector, randomByteCount, hashString);
 		pHash[slot] = hashString;
 
-		// Create an input slot for the Keccak executor of size keccakBitratePlusCapacity.
-		std::vector<Goldilocks::Element> pInputSlot(keccakBitratePlusCapacity);
+		// Create an input slot for the SHA256 executor of size SHA256GateConfig.sinRefNumber.
+		std::vector<Goldilocks::Element> pInputSlot(SHA256GateConfig.sinRefNumber);
 
 		// Fill the executor input slot with the generated random byte test vector, bit by bit.
 		// Note that we're filling it with (randomByteCount + 1), because the last byte is a
 		// special "padding byte", which must be passed to the executor input but not to the
-		// reference Keccak implementation used above.
+		// reference SHA256 implementation used above.
 		for (uint64_t byte = 0; byte < (randomByteCount + 1); byte++)
 		{
-			for (uint64_t bitKeccakSMTest = 0; bit < 8; bit++)
+			for (uint64_t bit = 0; bit < 8; bit++)
 			{
 				if (byte < randomByteCount)
 				{
 					// Fill the bits normally from the test vector, with each bit being replaced with an equivalent
 					// bit initialized as a Goldilocks finite field element.
-					pInputSlot[(byte * 8) + bit] = getBit(randomTestVector[byte], bit) ? fr.one() : fr.zero();
+					uint8_t mask = 1 << bit;
+					pInputSlot[(byte * 8) + bit] = ((randomTestVector[byte] & mask) != 0) ? fr.one() : fr.zero();
 				}
 				else if (byte == randomByteCount)
 				{
@@ -88,14 +74,14 @@ void SHA256SMTest(Goldilocks &fr, Sha256Executor &executor)
 				}
 			}
 		}
-		// Push the exector input slot into the vector of 54 slots.
+		// Push the exector input slot into the vector of numberOfSlots slots.
 		pInput[slot] = pInputSlot;
 	}
 
 	// Run the executor.
-	TimerStart(KECCAK_SM_EXECUTOR_FE);
-	executor.execute(pInput, cmPols.KeccakF);
-	TimerStopAndLog(KECCAK_SM_EXECUTOR_FE);
+	TimerStart(SHA256_SM_EXECUTOR_FE);
+	executor.execute(pInput, cmPols.Sha256);
+	TimerStopAndLog(SHA256_SM_EXECUTOR_FE);
 
 	for (uint64_t slot = 0; slot < numberOfSlots; slot++)
 	{
@@ -104,12 +90,12 @@ void SHA256SMTest(Goldilocks &fr, Sha256Executor &executor)
 		// For each slot, we must extract the output of the executor bit by bit.
 		// Each bit is represented by a polynomial. We must get these bits by specifying their position in
 		// the executor's output buffer for this slot, which starts at the distance of soutRef0.
-		// Each output bit is separated by a multiple of 44.
+		// Each output bit is separated by a multiple of SHA256GateConfig.soutRefDistance.
 		// Once we get the polynomial, we AND it with 1 to extract the bit.
 		for (uint64_t i = 0; i < 256; i++)
 		{
-			uint64_t bitIndex = KeccakGateConfig.relRef2AbsRef(KeccakGateConfig.soutRef0 + i * 44, slot);
-			uint64_t pol = executor.getPol(cmPols.KeccakF.a, bitIndex);
+			uint64_t bitIndex = SHA256GateConfig.relRef2AbsRef(SHA256GateConfig.soutRef0 + i * SHA256GateConfig.soutRefDistance, slot);
+			uint64_t pol = executor.getPol(cmPols.Sha256.output, bitIndex);
 			aux[i] = ((pol & uint64_t(1)) == 0)? 0 : 1;
 		}
 
@@ -136,7 +122,6 @@ void SHA256SMTest(Goldilocks &fr, Sha256Executor &executor)
 		}
 	}
 	free(pAddress);
-	*/
 }
 
 uint64_t SHA256SMExecutorTest(Goldilocks &fr, const Config &config)

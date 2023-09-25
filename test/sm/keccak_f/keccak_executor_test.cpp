@@ -7,15 +7,6 @@
 #include "keccak_executor_test.hpp"
 #include "timer.hpp"
 
-bool getBit(uint8_t byte, int position)
-{
-	// Create a bitmask with a 1 at the desired position
-	uint8_t mask = 1 << position;
-
-	// Perform bitwise AND and check if the result is zero or not
-	return (byte & mask) != 0;
-}
-
 void KeccakSMTest(Goldilocks &fr, KeccakFExecutor &executor)
 {
 	void *pAddress = malloc(CommitPols::pilSize());
@@ -84,7 +75,8 @@ void KeccakSMTest(Goldilocks &fr, KeccakFExecutor &executor)
 				{
 					// Fill the bits normally from the test vector, with each bit being replaced with an equivalent
 					// bit initialized as a Goldilocks finite field element.
-					pInputSlot[(byte * 8) + bit] = getBit(randomTestVector[byte], bit) ? fr.one() : fr.zero();
+					uint8_t mask = 1 << bit;
+					pInputSlot[(byte * 8) + bit] = ((randomTestVector[byte] & mask) != 0) ? fr.one() : fr.zero();
 				}
 				else if (byte == randomByteCount)
 				{
