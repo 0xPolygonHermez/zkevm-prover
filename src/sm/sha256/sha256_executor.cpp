@@ -211,7 +211,7 @@ void Sha256Executor::execute(const vector<vector<Goldilocks::Element>> &input, S
                 setPol(pols.inputs[2], absRefr, (getPol(pols.inputs[0], absRefr) ^ getPol(pols.inputs[1], absRefr)) & sha256Mask);
                 break;
             }
-            case gop_andp:
+            case gop_and:
             {
                 setPol(pols.inputs[2], absRefr, ((~getPol(pols.inputs[0], absRefr)) & getPol(pols.inputs[2], absRefr)) & sha256Mask);
                 break;

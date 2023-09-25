@@ -18,13 +18,13 @@ void SHA256SMTest(Goldilocks &fr, Sha256Executor &executor)
 	CommitPols cmPols(pAddress, CommitPols::pilDegree());
 
 	// How this test works:
-	// 1. We generate numberOfSlots test vectors, each is 135 random bytes.
+	// 1. We generate numberOfSlots test vectors, each is randomByteCount random bytes.
 	// 2. We hash these test vectors using the standard SHA256 reference implementation.
 	// 3. We also pack them into numberOfSlots "slots" to feed the SHA256 executor and hash the slots too.
 	// 4. We compare the hashes.
 
 	const uint64_t numberOfSlots = ((SHA256GateConfig.polLength - 1) / SHA256GateConfig.slotSize);
-	const uint64_t randomByteCount = 135;
+	const uint64_t randomByteCount = 32;
 
 	string *pHash = new string[numberOfSlots];
 	std::vector<std::vector<Goldilocks::Element>> pInput(numberOfSlots);
@@ -33,7 +33,7 @@ void SHA256SMTest(Goldilocks &fr, Sha256Executor &executor)
 
 	for (uint64_t slot = 0; slot < numberOfSlots; slot++)
 	{
-		// Generate the 135 random bytes for the test vector.
+		// Generate the randomByteCount random bytes for the test vector.
 		uint8_t randomTestVector[randomByteCount];
 		std::random_device rd;
 		std::mt19937 gen(rd());
@@ -42,9 +42,8 @@ void SHA256SMTest(Goldilocks &fr, Sha256Executor &executor)
 		{
 			randomTestVector[i] = static_cast<uint8_t>(dis(gen));
 		}
-
 		// Calculate the reference hash through a reference implementation of SHA256.
-		string hashString;
+		std::string hashString = "";
 		SHA256(randomTestVector, randomByteCount, hashString);
 		pHash[slot] = hashString;
 
@@ -59,21 +58,13 @@ void SHA256SMTest(Goldilocks &fr, Sha256Executor &executor)
 		{
 			for (uint64_t bit = 0; bit < 8; bit++)
 			{
-				if (byte < randomByteCount)
-				{
-					// Fill the bits normally from the test vector, with each bit being replaced with an equivalent
-					// bit initialized as a Goldilocks finite field element.
-					uint8_t mask = 1 << bit;
-					pInputSlot[(byte * 8) + bit] = ((randomTestVector[byte] & mask) != 0) ? fr.one() : fr.zero();
-				}
-				else if (byte == randomByteCount)
-				{
-					// Looks like we're at the final padding byte. This padding byte must have the form
-					// 10000001. So we only set the first and last bit.
-					pInputSlot[(byte * 8) + bit] = (bit == 0 || bit == 7) ? fr.one() : fr.zero();
-				}
+				// Fill the bits normally from the test vector, with each bit being replaced with an equivalent
+				// bit initialized as a Goldilocks finite field element.
+				uint8_t mask = 1 << bit;
+				pInputSlot[(byte * 8) + bit] = ((randomTestVector[byte] & mask) != 0) ? fr.one() : fr.zero();
 			}
 		}
+
 		// Push the exector input slot into the vector of numberOfSlots slots.
 		pInput[slot] = pInputSlot;
 	}

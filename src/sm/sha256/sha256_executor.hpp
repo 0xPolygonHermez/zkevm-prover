@@ -18,7 +18,7 @@ using namespace std;
 class Sha256ExecuteInput
 {
 public:
-    uint8_t Sin[54][9][1600];
+    uint8_t Sin[52][9][768];
     Sha256ExecuteInput ()
     {
         memset(Sin, 0, sizeof(Sin));
@@ -28,7 +28,7 @@ public:
 class Sha256ExecuteOutput
 {
 public:
-    uint64_t pol[3][1<<23];
+    uint64_t pol[1<<23];
 };
 
 class Sha256Executor
