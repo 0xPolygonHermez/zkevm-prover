@@ -66,8 +66,8 @@ public:
     /* Input is a vector of numberOfSlots*1600 fe, output is Sha256Pols */
     void execute (const vector<vector<Goldilocks::Element>> &input, PROVER_FORK_NAMESPACE::Sha256CommitPols &pols);
 
-    void setPol (PROVER_FORK_NAMESPACE::CommitPol (&pol)[4], uint64_t index, uint64_t value);
-    uint64_t getPol (PROVER_FORK_NAMESPACE::CommitPol (&pol)[4], uint64_t index);
+    void setPol (PROVER_FORK_NAMESPACE::CommitPol (&pol), uint64_t index, uint64_t value);
+    uint64_t getPol (PROVER_FORK_NAMESPACE::CommitPol (&pol), uint64_t index);
 };
 
 #endif

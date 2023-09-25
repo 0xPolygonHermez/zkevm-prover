@@ -149,11 +149,9 @@ void Sha256Executor::execute(const vector<vector<Goldilocks::Element>> &input, S
     }
 
     // Set SHA256GateConfig.zeroRef values
-    for (uint64_t i = 0; i < 4; i++)
+    for (uint64_t i = 0; i < 3; i++)
     {
-        pols.a[i][SHA256GateConfig.zeroRef] = fr.zero();
-        pols.b[i][SHA256GateConfig.zeroRef] = fr.fromU64(0x7FF);
-        pols.c[i][SHA256GateConfig.zeroRef] = fr.fromU64(fr.toU64(pols.a[i][SHA256GateConfig.zeroRef]) ^ fr.toU64(pols.b[i][SHA256GateConfig.zeroRef]));
+        pols.inputs[i][SHA256GateConfig.zeroRef] = fr.zero();
     }
 
     // Set Sin values
@@ -161,7 +159,7 @@ void Sha256Executor::execute(const vector<vector<Goldilocks::Element>> &input, S
     {
         for (uint64_t i = 0; i < SHA256GateConfig.sinRefNumber; i++)
         {
-            setPol(pols.a, SHA256GateConfig.relRef2AbsRef(SHA256GateConfig.sinRef0 + i * SHA256GateConfig.sinRefDistance, slot), fr.toU64(input[slot][i]));
+            setPol(pols.inputs[0], SHA256GateConfig.relRef2AbsRef(SHA256GateConfig.sinRef0 + i * SHA256GateConfig.sinRefDistance, slot), fr.toU64(input[slot][i]));
         }
     }
 
@@ -178,13 +176,13 @@ void Sha256Executor::execute(const vector<vector<Goldilocks::Element>> &input, S
             switch (program[i].pina)
             {
             case pin_a:
-                setPol(pols.a, absRefr, getPol(pols.a, absRefa));
+                setPol(pols.inputs[0], absRefr, getPol(pols.inputs[0], absRefa));
                 break;
             case pin_b:
-                setPol(pols.a, absRefr, getPol(pols.b, absRefa));
+                setPol(pols.inputs[0], absRefr, getPol(pols.inputs[1], absRefa));
                 break;
             case pin_r:
-                setPol(pols.a, absRefr, getPol(pols.c, absRefa));
+                setPol(pols.inputs[0], absRefr, getPol(pols.inputs[2], absRefa));
                 break;
             default:
                 zklog.error("Sha256Executor() found invalid program[i].pina=" + to_string(program[i].pina));
@@ -193,13 +191,13 @@ void Sha256Executor::execute(const vector<vector<Goldilocks::Element>> &input, S
             switch (program[i].pinb)
             {
             case pin_a:
-                setPol(pols.b, absRefr, getPol(pols.a, absRefb));
+                setPol(pols.inputs[1], absRefr, getPol(pols.inputs[0], absRefb));
                 break;
             case pin_b:
-                setPol(pols.b, absRefr, getPol(pols.b, absRefb));
+                setPol(pols.inputs[1], absRefr, getPol(pols.inputs[1], absRefb));
                 break;
             case pin_r:
-                setPol(pols.b, absRefr, getPol(pols.c, absRefb));
+                setPol(pols.inputs[1], absRefr, getPol(pols.inputs[2], absRefb));
                 break;
             default:
                 zklog.error("Sha256Executor() found invalid program[i].pinb=" + to_string(program[i].pinb));
@@ -210,12 +208,12 @@ void Sha256Executor::execute(const vector<vector<Goldilocks::Element>> &input, S
             {
             case gop_xor:
             {
-                setPol(pols.c, absRefr, (getPol(pols.a, absRefr) ^ getPol(pols.b, absRefr)) & sha256Mask);
+                setPol(pols.inputs[2], absRefr, (getPol(pols.inputs[0], absRefr) ^ getPol(pols.inputs[1], absRefr)) & sha256Mask);
                 break;
             }
             case gop_andp:
             {
-                setPol(pols.c, absRefr, ((~getPol(pols.a, absRefr)) & getPol(pols.b, absRefr)) & sha256Mask);
+                setPol(pols.inputs[2], absRefr, ((~getPol(pols.inputs[0], absRefr)) & getPol(pols.inputs[2], absRefr)) & sha256Mask);
                 break;
             }
             default:
@@ -231,18 +229,12 @@ void Sha256Executor::execute(const vector<vector<Goldilocks::Element>> &input, S
 }
 #endif
 
-void Sha256Executor::setPol(CommitPol (&pol)[4], uint64_t index, uint64_t value)
+void Sha256Executor::setPol(CommitPol (&pol), uint64_t index, uint64_t value)
 {
-    pol[0][index] = fr.fromU64(value & 0x7FF);
-    value = value >> 11;
-    pol[1][index] = fr.fromU64(value & 0x7FF);
-    value = value >> 11;
-    pol[2][index] = fr.fromU64(value & 0x7FF);
-    value = value >> 11;
-    pol[3][index] = fr.fromU64(value & 0x7FF);
+    pol[index] = fr.fromU64(value & 0x7FF);
 }
 
-uint64_t Sha256Executor::getPol(CommitPol (&pol)[4], uint64_t index)
+uint64_t Sha256Executor::getPol(CommitPol (&pol), uint64_t index)
 {
-    return (uint64_t(1) << 33) * fr.toU64(pol[3][index]) + (uint64_t(1) << 22) * fr.toU64(pol[2][index]) + (uint64_t(1) << 11) * fr.toU64(pol[1][index]) + fr.toU64(pol[0][index]);
+    return fr.toU64(pol[index]);
 }
