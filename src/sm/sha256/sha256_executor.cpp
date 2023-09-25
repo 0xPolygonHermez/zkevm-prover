@@ -129,7 +129,7 @@ void Sha256Executor::loadScript(json j)
 void Sha256Executor::execute(const vector<vector<Goldilocks::Element>> &input, Sha256CommitPols &pols)
 {
     zkassertpermanent(bLoaded);
-    const uint64_t sha256Mask = 0xFFFFFFFFFFF;
+    const uint64_t sha256Mask = 0x7FF;
 
     // Check input size
     if (input.size() != numberOfSlots)
@@ -149,10 +149,9 @@ void Sha256Executor::execute(const vector<vector<Goldilocks::Element>> &input, S
     }
 
     // Set SHA256GateConfig.zeroRef values
-    for (uint64_t i = 0; i < 3; i++)
-    {
-        pols.inputs[i][SHA256GateConfig.zeroRef] = fr.zero();
-    }
+	pols.inputs[0][SHA256GateConfig.zeroRef] = fr.zero();
+    pols.inputs[1][SHA256GateConfig.zeroRef] = fr.fromU64(sha256Mask);
+	pols.output[SHA256GateConfig.zeroRef] = fr.fromU64(fr.toU64(pols.inputs[0][SHA256GateConfig.zeroRef]) ^ fr.toU64(pols.inputs[1][SHA256GateConfig.zeroRef]));
 
     // Set Sin values
     for (uint64_t slot = 0; slot < numberOfSlots; slot++)
@@ -182,7 +181,7 @@ void Sha256Executor::execute(const vector<vector<Goldilocks::Element>> &input, S
                 setPol(pols.inputs[0], absRefr, getPol(pols.inputs[1], absRefa));
                 break;
             case pin_r:
-                setPol(pols.inputs[0], absRefr, getPol(pols.inputs[2], absRefa));
+                setPol(pols.inputs[0], absRefr, getPol(pols.output, absRefa));
                 break;
             default:
                 zklog.error("Sha256Executor() found invalid program[i].pina=" + to_string(program[i].pina));
@@ -197,7 +196,7 @@ void Sha256Executor::execute(const vector<vector<Goldilocks::Element>> &input, S
                 setPol(pols.inputs[1], absRefr, getPol(pols.inputs[1], absRefb));
                 break;
             case pin_r:
-                setPol(pols.inputs[1], absRefr, getPol(pols.inputs[2], absRefb));
+                setPol(pols.inputs[1], absRefr, getPol(pols.output, absRefb));
                 break;
             default:
                 zklog.error("Sha256Executor() found invalid program[i].pinb=" + to_string(program[i].pinb));
@@ -208,12 +207,12 @@ void Sha256Executor::execute(const vector<vector<Goldilocks::Element>> &input, S
             {
             case gop_xor:
             {
-                setPol(pols.inputs[2], absRefr, (getPol(pols.inputs[0], absRefr) ^ getPol(pols.inputs[1], absRefr)) & sha256Mask);
+                setPol(pols.output, absRefr, (getPol(pols.inputs[0], absRefr) ^ getPol(pols.inputs[1], absRefr)) & sha256Mask);
                 break;
             }
             case gop_and:
             {
-                setPol(pols.inputs[2], absRefr, ((~getPol(pols.inputs[0], absRefr)) & getPol(pols.inputs[2], absRefr)) & sha256Mask);
+                setPol(pols.output, absRefr, ((getPol(pols.inputs[0], absRefr)) & getPol(pols.output, absRefr)) & sha256Mask);
                 break;
             }
             default:

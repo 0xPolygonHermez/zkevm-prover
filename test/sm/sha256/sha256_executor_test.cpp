@@ -5,6 +5,7 @@
 #include <functional>
 #include "sha256_executor.hpp"
 #include "sha256_executor_test.hpp"
+#include "sha256_gate.hpp"
 #include "timer.hpp"
 
 void SHA256SMTest(Goldilocks &fr, Sha256Executor &executor)
@@ -27,6 +28,7 @@ void SHA256SMTest(Goldilocks &fr, Sha256Executor &executor)
 	const uint64_t randomByteCount = 32;
 
 	string *pHash = new string[numberOfSlots];
+	string *pHashGate = new string[numberOfSlots];
 	std::vector<std::vector<Goldilocks::Element>> pInput(numberOfSlots);
 
 	cout << "Starting FE " << numberOfSlots << " slots test..." << endl;
@@ -46,6 +48,11 @@ void SHA256SMTest(Goldilocks &fr, Sha256Executor &executor)
 		std::string hashString = "";
 		SHA256(randomTestVector, randomByteCount, hashString);
 		pHash[slot] = hashString;
+
+		// Calculate a second reference hash, through SHA256Gate itself, directly.
+		std::string hashGateString = "";
+		SHA256Gate(randomTestVector, randomByteCount, hashGateString);
+		pHashGate[slot] = hashGateString;
 
 		// Create an input slot for the SHA256 executor of size SHA256GateConfig.sinRefNumber.
 		std::vector<Goldilocks::Element> pInputSlot(SHA256GateConfig.sinRefNumber);
@@ -109,7 +116,7 @@ void SHA256SMTest(Goldilocks &fr, Sha256Executor &executor)
 		}
 		else
 		{
-			cerr << "Error: slot=" << slot << " Sout=" << aux3 << " does not match hash=" << pHash[slot] << endl;
+			cerr << "Error: slot=" << slot << " Sout=" << aux3 << " does not match hash=" << pHash[slot] << " (" << pHashGate[slot] << ")" << endl;
 		}
 	}
 	free(pAddress);
