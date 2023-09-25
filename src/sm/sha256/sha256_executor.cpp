@@ -64,9 +64,9 @@ void Sha256Executor::loadScript(json j)
         {
             instruction.op = gop_xor;
         }
-        else if (j["program"][i]["op"] == "andp")
+        else if (j["program"][i]["op"] == "and")
         {
-            instruction.op = gop_andp;
+            instruction.op = gop_and;
         }
         else
         {
