@@ -87,7 +87,7 @@ void Sha256Executor::loadScript(json j)
         else if (typea == "input")
         {
             uint64_t bit = j["program"][i]["a"]["bit"];
-            instruction.refa = SHA256GateConfig.sinRef0 + bit * 44;
+            instruction.refa = SHA256GateConfig.sinRef0 + bit * SHA256GateConfig.sinRefDistance;
             instruction.pina = PinId::pin_a;
         }
         else
@@ -107,7 +107,7 @@ void Sha256Executor::loadScript(json j)
         else if (typeb == "input")
         {
             uint64_t bit = j["program"][i]["b"]["bit"];
-            instruction.refb = SHA256GateConfig.sinRef0 + bit * 44;
+            instruction.refb = SHA256GateConfig.sinRef0 + bit * SHA256GateConfig.sinRefDistance;
             instruction.pinb = PinId::pin_a;
         }
         else
@@ -124,8 +124,8 @@ void Sha256Executor::loadScript(json j)
     bLoaded = true;
 }
 
-#if 0
-/* Input is a vector of numberOfSlots*1600 fe, output is Sha256Pols */
+#if 1
+/* Input is a vector of numberOfSlots*SHA256GateConfig.sinRefNumber fe, output is Sha256Pols */
 void Sha256Executor::execute(const vector<vector<Goldilocks::Element>> &input, Sha256CommitPols &pols)
 {
     zkassertpermanent(bLoaded);
@@ -141,9 +141,9 @@ void Sha256Executor::execute(const vector<vector<Goldilocks::Element>> &input, S
     // Check number of slots, per input
     for (uint64_t i = 0; i < numberOfSlots; i++)
     {
-        if (input[i].size() != 1600)
+        if (input[i].size() != SHA256GateConfig.sinRefNumber)
         {
-            zklog.error("Sha256Executor::execute() got input i=" + to_string(i) + " size=" + to_string(input[i].size()) + " different from 1600");
+            zklog.error("Sha256Executor::execute() got input i=" + to_string(i) + " size=" + to_string(input[i].size()) + " different from SHA256GateConfig.sinRefNumber");
             exitProcess();
         }
     }
@@ -159,9 +159,9 @@ void Sha256Executor::execute(const vector<vector<Goldilocks::Element>> &input, S
     // Set Sin values
     for (uint64_t slot = 0; slot < numberOfSlots; slot++)
     {
-        for (uint64_t i = 0; i < 1600; i++)
+        for (uint64_t i = 0; i < SHA256GateConfig.sinRefNumber; i++)
         {
-            setPol(pols.a, SHA256GateConfig.relRef2AbsRef(SHA256GateConfig.sinRef0 + i * 44, slot), fr.toU64(input[slot][i]));
+            setPol(pols.a, SHA256GateConfig.relRef2AbsRef(SHA256GateConfig.sinRef0 + i * SHA256GateConfig.sinRefDistance, slot), fr.toU64(input[slot][i]));
         }
     }
 
