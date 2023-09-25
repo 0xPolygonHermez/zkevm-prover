@@ -42,7 +42,7 @@ void SHA256SMTest(Goldilocks &fr, Sha256Executor &executor)
 		std::uniform_int_distribution<> dis(0, 255);
 		for (size_t i = 0; i < randomByteCount; ++i)
 		{
-			randomTestVector[i] = static_cast<uint8_t>(dis(gen));
+			//randomTestVector[i] = static_cast<uint8_t>(dis(gen));
 		}
 		// Calculate the reference hash through a reference implementation of SHA256.
 		std::string hashString = "";
@@ -93,7 +93,7 @@ void SHA256SMTest(Goldilocks &fr, Sha256Executor &executor)
 		for (uint64_t i = 0; i < 256; i++)
 		{
 			uint64_t bitIndex = SHA256GateConfig.relRef2AbsRef(SHA256GateConfig.soutRef0 + i * SHA256GateConfig.soutRefDistance, slot);
-			uint64_t pol = executor.getPol(cmPols.Sha256.inputs[0], bitIndex);
+			uint64_t pol = executor.getPol(cmPols.Sha256.output, bitIndex);
 			aux[i] = ((pol & uint64_t(1)) == 0)? 0 : 1;
 		}
 
