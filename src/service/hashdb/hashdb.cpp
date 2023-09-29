@@ -9,7 +9,6 @@
 #include "database_map.hpp"
 #include "state_manager.hpp"
 #include "state_manager_64.hpp"
-#include "tree_64.hpp"
 
 HashDB::HashDB(Goldilocks &fr, const Config &config) : fr(fr), config(config), db(fr, config), db64(fr, config), smt(fr)
 {
@@ -271,10 +270,6 @@ void HashDB::semiFlush (const string &batchUUID, const string &newStateRoot, con
         {
             stateManager64.semiFlush(batchUUID, newStateRoot, persistence);
         }
-        else
-        {
-            db64.semiFlush();
-        }
     }
     else
     {
@@ -434,7 +429,7 @@ zkresult HashDB::readTree (const Goldilocks::Element (&root)[4], vector<KeyValue
         return ZKR_UNSPECIFIED;
     }
 
-    return tree64.ReadTree(db64, root, keyValues, &hashValues);
+    return db64.ReadTree(root, keyValues, &hashValues);
 }
 
 zkresult HashDB::writeTree (const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> &keyValues, Goldilocks::Element (&newRoot)[4], const bool persistent)
@@ -445,7 +440,7 @@ zkresult HashDB::writeTree (const Goldilocks::Element (&oldRoot)[4], const vecto
         return ZKR_UNSPECIFIED;
     }
 
-    return tree64.WriteTree(db64, oldRoot, keyValues, newRoot, persistent);
+    return db64.WriteTree(oldRoot, keyValues, newRoot, persistent);
 }
 
 zkresult HashDB::cancelBatch (const string &batchUUID)

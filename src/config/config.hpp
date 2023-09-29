@@ -40,13 +40,10 @@ public:
     bool runBlakeTest;
     bool runECRecoverTest;
     bool runDatabaseCacheTest;
-    bool runDatabaseAssociativeCacheTest;
     bool runCheckTreeTest;
     string checkTreeRoot;
     bool runDatabasePerformanceTest;
     bool runSMT64Test;
-    bool runDbKVTest;
-    bool runDbKVMultiWriteTest;
     bool runUnitTest;
     
     bool executeInParallel;

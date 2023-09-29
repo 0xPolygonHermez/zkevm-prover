@@ -4,7 +4,6 @@
 #include "zkresult.hpp"
 #include "hashdb_factory.hpp"
 #include "utils.hpp"
-#include "tree_64.hpp"
 #include "hashdb_singleton.hpp"
 #include "timer.hpp"
 

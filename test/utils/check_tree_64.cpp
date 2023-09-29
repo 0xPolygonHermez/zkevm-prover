@@ -12,7 +12,7 @@ zkresult CheckTree64 (Database64 &db, const string &key, uint64_t level, CheckTr
     TreeChunk treeChunk(db, poseidon);
     Goldilocks::Element keyFea[4];
     string2fea(db.fr, key, keyFea);
-    zkresult result = db.read(key, keyFea, treeChunk.data, NULL, false);
+    zkresult result = ZKR_UNSPECIFIED; // = db.read(key, keyFea, treeChunk.data, NULL, false);
     if (result != ZKR_SUCCESS)
     {
         zklog.error("CheckTree() failed key=" + key + " level=" + to_string(level));

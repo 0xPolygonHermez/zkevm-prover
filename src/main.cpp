@@ -37,7 +37,6 @@
 #include "hashdb_singleton.hpp"
 #include "unit_test.hpp"
 #include "database_cache_test.hpp"
-#include "database_associative_cache_test.hpp"
 #include "main_sm/fork_5/main_exec_c/account.hpp"
 #include "state_manager.hpp"
 #include "state_manager_64.hpp"
@@ -45,9 +44,6 @@
 #include "database_performance_test.hpp"
 #include "smt_64_test.hpp"
 #include "sha256.hpp"
-#include "database_kv_test.hpp"
-#include "database_kv_multiwrite_test.hpp"
-
 
 using namespace std;
 using json = nlohmann::json;
@@ -401,10 +397,6 @@ int main(int argc, char **argv)
         Database::dbMTCache.setName("MTCache");
         Database::dbMTCache.setMaxSize(config.dbMTCacheSize*1024*1024);
     }
-    if(config.hashDB64){
-        Database64::dbKVACache.postConstruct(config.log2DbKVAssociativeCacheIndexesSize, config.log2DbKVAssociativeCacheSize, "KVACache");
-        Database64::dbVersionACache.postConstruct(config.log2DbVersionsAssociativeCacheIndexesSize, config.log2DbVersionsAssociativeCacheSize, "VersionACache");
-    }
     Database::dbProgramCache.setName("ProgramCache");
     Database::dbProgramCache.setMaxSize(config.dbProgramCacheSize*1024*1024);
 
@@ -483,12 +475,6 @@ int main(int argc, char **argv)
         DatabaseCacheTest();
     }
 
-    // Test Associative Database cache
-    if (config.runDatabaseAssociativeCacheTest)
-    {
-        DatabaseAssociativeCacheTest();
-    }
-
     // Test check tree
     if (config.runCheckTreeTest)
     {
@@ -499,16 +485,6 @@ int main(int argc, char **argv)
     if (config.runDatabasePerformanceTest)
     {
         DatabasePerformanceTest();
-    }
-    // Test DbKV
-    if (config.runDbKVTest)
-    {
-        DatabaseKVTest(config);
-    }
-    // Test DbKVMultiwrite
-    if (config.runDbKVMultiWriteTest)
-    {
-        DatabaseKVMultiWriteTest(config);
     }
     
     // Test SMT64
