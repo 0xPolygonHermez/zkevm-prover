@@ -5,7 +5,6 @@
 #include "timer.hpp"
 #include "persistence.hpp"
 #include "definitions.hpp"
-#include "tree_64.hpp"
 
 Goldilocks frSM64;
 PoseidonGoldilocks poseidonSM64;
@@ -277,6 +276,7 @@ zkresult StateManager64::write (const string &batchUUID, uint64_t tx, const stri
 
     // Add to common write pool to speed up read
     batchState.keyValueTree.write(key, value, level);
+    // TODO: Get level from DB and return the max
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     batchState.timeMetricStorage.add("write", TimeDiff(t));
@@ -808,7 +808,7 @@ zkresult StateManager64::consolidateState(const string &_virtualStateRoot, const
             }
 
             // Call WriteTree and get the new state root
-            zkr = tree64.WriteTree(db, oldRoot, keyValues, newRoot, persistence == PERSISTENCE_DATABASE ? true : false);
+            zkr = db.WriteTree(oldRoot, keyValues, newRoot, persistence == PERSISTENCE_DATABASE ? true : false);
             if (zkr != ZKR_SUCCESS)
             {
                 zklog.error("StateManager64::consolidateState() failed calling WriteTree zkr=" + zkresult2string(zkr) +
@@ -835,68 +835,6 @@ zkresult StateManager64::consolidateState(const string &_virtualStateRoot, const
             else
             {
                 batchState.newStateRoot = newRootString;
-            }
-
-            // Create a new version, i.e. read latest version and increment it
-            uint64_t version;
-            zkr = db.readLatestVersion(version);
-            if (zkr != ZKR_SUCCESS)
-            {
-                zklog.error("StateManager64::consolidateState() failed calling db.readLatestVersion zkr=" + zkresult2string(zkr) +
-                            " tx=" + to_string(tx) +
-                            " txState.oldStateRoot=" + txState.persistence[persistence].oldStateRoot);
-    #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-                batchState.timeMetricStorage.add("consolidateState db.createLatestVersion failed", TimeDiff(t));
-                batchState.timeMetricStorage.print("State Manager calls");
-    #endif
-                Unlock();
-                return ZKR_STATE_MANAGER;
-            }
-            version++;
-
-            // Save the key-values
-            zkr = db.writeKV(version, keyValues, persistence == PERSISTENCE_DATABASE ? true : false);
-            if (zkr != ZKR_SUCCESS)
-            {
-                zklog.error("StateManager64::consolidateState() failed calling db.writeKV zkr=" + zkresult2string(zkr) +
-                            " tx=" + to_string(tx) +
-                            " txState.oldStateRoot=" + txState.persistence[persistence].oldStateRoot);
-    #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-                batchState.timeMetricStorage.add("consolidateStatedb.writeKV failed", TimeDiff(t));
-                batchState.timeMetricStorage.print("State Manager calls");
-    #endif
-                Unlock();
-                return ZKR_STATE_MANAGER;
-            }
-
-            // Write the new version, associated with the new root
-            zkr = db.writeVersion(newRoot, version, persistence == PERSISTENCE_DATABASE ? true : false);
-            if (zkr != ZKR_SUCCESS)
-            {
-                zklog.error("StateManager64::consolidateState() failed calling db.writeVersion zkr=" + zkresult2string(zkr) +
-                            " tx=" + to_string(tx) +
-                            " txState.oldStateRoot=" + txState.persistence[persistence].oldStateRoot);
-    #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-                batchState.timeMetricStorage.add("consolidateState db.writeVersion failed", TimeDiff(t));
-                batchState.timeMetricStorage.print("State Manager calls");
-    #endif
-                Unlock();
-                return ZKR_STATE_MANAGER;
-            }
-
-            // Write the latest version
-            zkr = db.writeLatestVersion(version, persistence == PERSISTENCE_DATABASE ? true : false);
-            if (zkr != ZKR_SUCCESS)
-            {
-                zklog.error("StateManager64::consolidateState() failed calling db.writeLatestVersion zkr=" + zkresult2string(zkr) +
-                            " tx=" + to_string(tx) +
-                            " txState.oldStateRoot=" + txState.persistence[persistence].oldStateRoot);
-    #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-                batchState.timeMetricStorage.add("consolidateState db.writeLatestVersion failed", TimeDiff(t));
-                batchState.timeMetricStorage.print("State Manager calls");
-    #endif
-                Unlock();
-                return ZKR_STATE_MANAGER;
             }
 
         } // For all transactions

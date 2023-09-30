@@ -23,8 +23,8 @@ zkresult TreeChunk::readDataFromDb (const Goldilocks::Element (&_hash)[4])
     hashString = fea2string(fr, hash);
 
     // Call the database
-    zkresult zkr;
-    zkr = db.read(hashString, hash, data, NULL);
+    zkresult zkr = ZKR_UNSPECIFIED;
+    //zkr = db.read(hashString, hash, data, NULL);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("TreeChunk::readDataFromDb() failed calling db.read() result=" + zkresult2string(zkr) + " hash=" + hashString);

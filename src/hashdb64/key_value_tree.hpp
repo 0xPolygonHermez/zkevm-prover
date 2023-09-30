@@ -4,7 +4,6 @@
 #include <unistd.h>
 #include <unordered_map>
 #include <vector>
-#include "level_tree.hpp"
 #include "zkresult.hpp"
 #include "goldilocks_base_field.hpp"
 
