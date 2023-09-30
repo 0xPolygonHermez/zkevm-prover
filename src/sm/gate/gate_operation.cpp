@@ -18,6 +18,8 @@ string gateop2string (GateOperation op)
             return "andp";
         case gop_and:
             return "and";
+		case gop_add:
+			return "add";
         default:
             zklog.error("gateop2string() found invalid op value:" + to_string(op));
             exitProcess();

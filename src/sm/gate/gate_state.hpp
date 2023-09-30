@@ -22,7 +22,7 @@ public:
     uint64_t * SinRefs;
     uint64_t * SoutRefs;
 
-    // Evaluations, i.e. a chronological list of operations to implement a keccak-f()
+    // Evaluations, i.e. a chronological list of operations to implement a program or function
     vector<Gate *> program;
 
     // Gates, i.e. an ordered list of gates
@@ -33,6 +33,7 @@ public:
     uint64_t ors;
     uint64_t andps;
     uint64_t ands;
+    uint64_t adds;
 
     GateState (const GateConfig &gateConfig);
     ~GateState ();
@@ -63,7 +64,7 @@ public:
     void XOR (uint64_t refA, PinId pinA, uint64_t refB, PinId pinB, uint64_t refR) { OP(gop_xor, refA, pinA, refB, pinB, refR); };
     void XOR (uint64_t refA, uint64_t refB, uint64_t refR) { XOR(refA, pin_r, refB, pin_r, refR); };
 
-    // ANDP operation: r = AND( NOT(a), b), r.value = !a.value && b.value
+    // ANDP operation: r = AND(NOT(a), b), r.value = !a.value && b.value
     void ANDP (uint64_t refA, PinId pinA, uint64_t refB, PinId pinB, uint64_t refR) { OP(gop_andp, refA, pinA, refB, pinB, refR); };
     void ANDP (uint64_t refA, uint64_t refB, uint64_t refR) { ANDP(refA, pin_r, refB, pin_r, refR); };
 
@@ -71,7 +72,7 @@ public:
     void OR (uint64_t refA, PinId pinA, uint64_t refB, PinId pinB, uint64_t refR) { OP(gop_or, refA, pinA, refB, pinB, refR); };
     void OR (uint64_t refA, uint64_t refB, uint64_t refR) { OR(refA, pin_r, refB, pin_r, refR); };
 
-    // AND operation: r = AND( a, b), r.value = a.value && b.value
+    // AND operation: r = AND(a, b), r.value = a.value && b.value
     void AND (uint64_t refA, PinId pinA, uint64_t refB, PinId pinB, uint64_t refR) { OP(gop_and, refA, pinA, refB, pinB, refR); };
     void AND (uint64_t refA, uint64_t refB, uint64_t refR) { AND(refA, pin_r, refB, pin_r, refR); };
 

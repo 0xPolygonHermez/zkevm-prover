@@ -43,6 +43,7 @@ void SHA256SMTest(Goldilocks &fr, Sha256Executor &executor)
 		for (size_t i = 0; i < randomByteCount; ++i)
 		{
 			//randomTestVector[i] = static_cast<uint8_t>(dis(gen));
+			randomTestVector[i] = 0;
 		}
 		// Calculate the reference hash through a reference implementation of SHA256.
 		std::string hashString = "";
@@ -57,11 +58,31 @@ void SHA256SMTest(Goldilocks &fr, Sha256Executor &executor)
 		// Create an input slot for the SHA256 executor of size SHA256GateConfig.sinRefNumber.
 		std::vector<Goldilocks::Element> pInputSlot(SHA256GateConfig.sinRefNumber);
 
+		// Padding:
+		// original message of length L bits
+		// padded message: <original message of length L> 1 bit <K zero bits> <L as 64 bit integer>
+		// (the number of bits will be a multiple of 512)
+
+		// padded data = pData[dataSize] + 0x80 + paddedZeros*0x00 + dataSize[8]
+		uint64_t paddedSizeInBitsMin = randomByteCount*8 + 1 + 64;
+		uint64_t paddedSizeInBits = ((paddedSizeInBitsMin / 512) + 1)*512;
+		uint64_t paddedSize = paddedSizeInBits / 8;
+		uint64_t paddedZeros = (paddedSizeInBits - paddedSizeInBitsMin)/8;
+
+		// Create the padding data buffer
+		uint8_t padding[64] = {0};
+		u642bytes(dataSize*8, &padding[56], true);
+		uint64_t onePosition = 64 - 8 - paddedZeros - 1;
+		// padding[onePosition] = 0x80;
+		uint64_t dataPosition = (dataSize/64)*64;
+		for (uint64_t i=0; i<dataSize%64; i++)
+		{
+			padding[i] = pData[dataPosition+i];
+		}
+
 		// Fill the executor input slot with the generated random byte test vector, bit by bit.
-		// Note that we're filling it with (randomByteCount + 1), because the last byte is a
-		// special "padding byte", which must be passed to the executor input but not to the
-		// reference SHA256 implementation used above.
-		for (uint64_t byte = 0; byte < (randomByteCount + 1); byte++)
+		// Note that we're filling it with randomByteCount.
+		for (uint64_t byte = 0; byte < randomByteCount; byte++)
 		{
 			for (uint64_t bit = 0; bit < 8; bit++)
 			{
@@ -70,7 +91,7 @@ void SHA256SMTest(Goldilocks &fr, Sha256Executor &executor)
 				uint8_t mask = 1 << bit;
 				pInputSlot[(byte * 8) + bit] = ((randomTestVector[byte] & mask) != 0) ? fr.one() : fr.zero();
 			}
-		}
+		}	
 
 		// Push the exector input slot into the vector of numberOfSlots slots.
 		pInput[slot] = pInputSlot;

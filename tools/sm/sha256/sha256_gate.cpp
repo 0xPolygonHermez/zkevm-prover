@@ -125,7 +125,7 @@ void SHA256Gate (
             zkassert(bits.size() == 32);
             for (uint64_t j=0; j<32; j++)
             {
-                uint64_t ref = SHA256GateConfig.sinRef0 + (i*32 + j)*44;
+                uint64_t ref = SHA256GateConfig.sinRef0 + (i*32 + j) * SHA256GateConfig.sinRefDistance;
                 S.gate[ref].pin[pin_a].bit = bits[j];
                 S.gate[ref].pin[pin_a].source = external;
                 w[i].bit[j].ref = ref;
@@ -145,7 +145,7 @@ void SHA256Gate (
             zkassert(bits.size() == 32);
             for (uint64_t j=0; j<32; j++)
             {
-                uint64_t ref = SHA256GateConfig.sinRef0 + (512 + i*32 + j)*44;
+                uint64_t ref = SHA256GateConfig.sinRef0 + (512 + i*32 + j) * SHA256GateConfig.sinRefDistance;
                 S.gate[ref].pin[pin_a].bit = bits[j];
                 S.gate[ref].pin[pin_a].source = external;
                 h32[i].bit[j].ref = ref;

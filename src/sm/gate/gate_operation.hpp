@@ -12,6 +12,7 @@ enum GateOperation
     gop_andp    = 2, // r = ANDP(a,b) = AND(NOT(a),b)
     gop_or      = 3, // r = OR(a,b)
     gop_and     = 4, // r = AND(a,b)
+	gop_add     = 5, // r = ADD(a,b)
 };
 
 // Map an operation code into a string

@@ -68,6 +68,10 @@ void Sha256Executor::loadScript(json j)
         {
             instruction.op = gop_and;
         }
+		else if (j["program"][i]["op"] == "add")
+        {
+            instruction.op = gop_add;
+        }
         else
         {
             string opString = j[i]["op"];
@@ -163,7 +167,7 @@ void Sha256Executor::execute(const vector<vector<Goldilocks::Element>> &input, S
     }
 
     // Execute the program
-#pragma omp parallel for
+	uint64_t nadimStupidCounter = 0;
     for (uint64_t slot = 0; slot < numberOfSlots; slot++)
     {
         for (uint64_t i = 0; i < program.size(); i++)
@@ -215,12 +219,28 @@ void Sha256Executor::execute(const vector<vector<Goldilocks::Element>> &input, S
                 setPol(pols.output, absRefr, ((getPol(pols.inputs[0], absRefr)) & getPol(pols.inputs[1], absRefr)) & sha256Mask);
                 break;
             }
+			case gop_add:
+            {
+                setPol(pols.output, absRefr, ((getPol(pols.inputs[0], absRefr)) + getPol(pols.inputs[1], absRefr)) & sha256Mask);
+				// TODO: Carry bit
+                break;
+            }
             default:
             {
                 zklog.error("Sha256Executor::execute() found invalid op: " + to_string(program[i].op) + " in evaluation: " + to_string(i));
                 exitProcess();
             }
             }
+
+			if (true) {
+				if (getPol(pols.inputs[0], absRefa) == 1) {  
+				cout << nadimStupidCounter << ": " << gateop2string(program[i].op) << endl;
+				cout << "pinA = " << program[i].pina << " | refA = " << program[i].refa << " || " << to_string(getPol(pols.inputs[0], absRefr)) << endl;
+				cout << "pinB = " << program[i].pinb << " | refB = " << program[i].refb << " || " << to_string(getPol(pols.inputs[1], absRefr)) << endl;
+				cout << "pinR = " << "x" << " | refR = " << program[i].refr << " || " << to_string(getPol(pols.output, absRefr)) << endl;
+				nadimStupidCounter++;
+			}
+			}
         }
     }
 

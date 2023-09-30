@@ -71,6 +71,7 @@ void GateState::resetBitsAndCounters(void)
     ors = 0;
     andps = 0;
     ands = 0;
+    adds = 0;
 
     // Init ZeroRef and OneRef gates as 1 = XOR(0,1)
     gate[gateConfig.zeroRef].op = gop_xor;
@@ -193,6 +194,8 @@ void GateState::copySoutRefsToSinRefs(void)
     }
 }
 
+uint64_t nadimStupidCounter = 0;
+
 // Copy Sout data to Sin buffer, and reset
 void GateState::copySoutToSinAndResetRefs(void)
 {
@@ -241,7 +244,7 @@ void GateState::OP(GateOperation op, uint64_t refA, PinId pinA, uint64_t refB, P
     zkassert(gate[refB].pin[pinB].bit <= 1);
     zkassert(gate[refR].pin[pin_r].bit <= 1);
     // zkassert(refA==refR || refB==refR || gate[refR].op == gop_xor);
-    zkassert(op == gop_xor || op == gop_or || op == gop_andp || op == gop_and);
+    zkassert(op == gop_xor || op == gop_or || op == gop_andp || op == gop_and || op == gop_add);
 
     // Update gate type and connections
     gate[refR].op = op;
@@ -278,11 +281,22 @@ void GateState::OP(GateOperation op, uint64_t refA, PinId pinA, uint64_t refB, P
         gate[refR].pin[pin_r].bit = gate[refA].pin[pinA].bit & gate[refB].pin[pinB].bit;
         ands++;
         break;
+	case gop_add:
+        // r = ADD(a,b)
+        gate[refR].pin[pin_r].bit = gate[refA].pin[pinA].bit + gate[refB].pin[pinB].bit;
+        adds++;
+        break;
     default:
         zklog.error("GateState::OP() got invalid op=" + to_string(op));
         exitProcess();
     }
-
+	if (false && nadimStupidCounter < 10000) {
+		cout << nadimStupidCounter << ": " << gateop2string(op) << endl;
+		cout << "pinA = " << pinA << " | refA = " << refA << " || " << to_string(gate[refA].pin[pinA].bit) << endl;
+		cout << "pinB = " << pinB << " | refB = " << refB << " || " << to_string(gate[refB].pin[pinB].bit) << endl;
+		cout << "pinR = " << "x" << " | refR = " << refR << " || " << to_string(gate[refR].pin[pin_r].bit) << endl;
+		nadimStupidCounter++;
+	}
     // Increase the operands fan-out counters and add r to their connections
     if (refA != refR)
     {
@@ -302,11 +316,12 @@ void GateState::OP(GateOperation op, uint64_t refA, PinId pinA, uint64_t refB, P
 // Print statistics, for development purposes
 void GateState::printCounters(void)
 {
-    double totalOperations = xors + ors + andps + ands;
+    double totalOperations = xors + ors + andps + ands + adds;
     zklog.info("xors      = " + to_string(xors) + " = " + to_string(double(xors) * 100 / totalOperations) + "%");
     zklog.info("ors       = " + to_string(ors) + " = " + to_string(double(ors) * 100 / totalOperations) + "%");
     zklog.info("andps     = " + to_string(andps) + " = " + to_string(double(andps) * 100 / totalOperations) + "%");
     zklog.info("ands      = " + to_string(ands) + " = " + to_string(double(ands) * 100 / totalOperations) + "%");
+    zklog.info("adds      = " + to_string(adds) + " = " + to_string(double(adds) * 100 / totalOperations) + "%");
     zklog.info("nextRef-1 = " + to_string(nextRef - 1));
 }
 
@@ -406,6 +421,7 @@ void GateState::saveScriptToJson(json &j)
     j["ors"] = ors;
     j["andps"] = andps;
     j["ands"] = ands;
+    j["adds"] = adds;
 }
 
 // Generate a JSON object containing all a, b, r, and op polynomials values
