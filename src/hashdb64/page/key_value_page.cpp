@@ -8,8 +8,6 @@
 
 zkresult KeyValuePage::InitEmptyPage (const uint64_t pageNumber)
 {
-    KeyValueStruct * page = (KeyValueStruct *)(pageNumber*4096);
-    memset(page, 0, 4096);
     return ZKR_SUCCESS;
 }
 
@@ -20,7 +18,7 @@ zkresult KeyValuePage::Read (const uint64_t pageNumber, const string &key, const
     zkassert(level < 42);
 
     // Get the data from this page
-    KeyValueStruct * page = (KeyValueStruct *)(pageNumber*4096);
+    KeyValueStruct * page = (KeyValueStruct *)pageManager.getPage(pageNumber);
     uint64_t hashPage1Number = page->hashPage1AndHistoryCounter & 0xFFFFFF;
     uint64_t historyCounter = page->hashPage1AndHistoryCounter >> 48;
     uint64_t hashPage2Number = page->hashPage2AndPadding & 0xFFFFFF;
@@ -79,7 +77,7 @@ zkresult KeyValuePage::Write (uint64_t &pageNumber, const string &key, const str
     zkassert(level < 42);
 
     // Get the data from this page
-    KeyValueStruct * page = (KeyValueStruct *)(pageNumber*4096);
+    KeyValueStruct * page = (KeyValueStruct *)pageManager.getPage(pageNumber);
     uint64_t hashPage1Number = page->hashPage1AndHistoryCounter & 0xFFFFFF;
     uint64_t historyCounter = page->hashPage1AndHistoryCounter >> 48;
     uint64_t hashPage2Number = page->hashPage2AndPadding & 0xFFFFFF;
@@ -135,7 +133,7 @@ void KeyValuePage::Print (const uint64_t pageNumber, bool details)
     zklog.info("KeyValuePage::Print() pageNumber=" + to_string(pageNumber));
 
     // Get the data from this page
-    KeyValueStruct * page = (KeyValueStruct *)(pageNumber*4096);
+    KeyValueStruct * page = (KeyValueStruct *)pageManager.getPage(pageNumber);
     uint64_t hashPage1Number = page->hashPage1AndHistoryCounter & 0xFFFFFF;
     uint64_t historyCounter = page->hashPage1AndHistoryCounter >> 48;
     uint64_t hashPage2Number = page->hashPage2AndPadding & 0xFFFFFF;

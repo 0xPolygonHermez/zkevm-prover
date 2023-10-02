@@ -7,8 +7,6 @@
 
 zkresult RootVersionPage::InitEmptyPage (const uint64_t pageNumber)
 {
-    RootVersionStruct * page = (RootVersionStruct *)(pageNumber*4096);
-    memset(page, 0, 4096);
     return ZKR_SUCCESS;
 }
 
@@ -18,7 +16,7 @@ zkresult RootVersionPage::Read (const uint64_t pageNumber, const string &root, u
     zkassert(level < 32);
 
     // Get the data from this page
-    RootVersionStruct * page = (RootVersionStruct *)(pageNumber*4096);
+    RootVersionStruct * page = (RootVersionStruct *)pageManager.getPage(pageNumber);
     uint8_t levelBits = root[level];
     uint64_t versionAndControl = page->versionAndControl[levelBits];
     uint64_t foundVersion = versionAndControl & 0xFFFFFF;
@@ -54,7 +52,7 @@ zkresult RootVersionPage::Write (uint64_t &pageNumber, const string &root, const
     zkassert(level < 32);
 
     // Get the data from this page
-    RootVersionStruct * page = (RootVersionStruct *)(pageNumber*4096);
+    RootVersionStruct * page = (RootVersionStruct *)pageManager.getPage(pageNumber);
     uint8_t levelBits = root[level];
     uint64_t versionAndControl = page->versionAndControl[levelBits];
     uint64_t foundVersion = versionAndControl & 0xFFFFFF;
@@ -97,7 +95,7 @@ zkresult RootVersionPage::Write (uint64_t &pageNumber, const string &root, const
 
 void RootVersionPage::Print (const uint64_t pageNumber, bool details)
 {
-    RootVersionStruct * page = (RootVersionStruct *)(pageNumber*4096);
+    RootVersionStruct * page = (RootVersionStruct *)pageManager.getPage(pageNumber);
 
     zklog.info("RootVersionPage::Print() pageNumber=" + to_string(pageNumber));
 

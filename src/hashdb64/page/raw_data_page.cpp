@@ -9,8 +9,6 @@
 
 zkresult RawDataPage::InitEmptyPage (const uint64_t pageNumber)
 {
-    RawDataStruct * page = (RawDataStruct *)(pageNumber*4096);
-    memset(page, 0, 4096);
     return ZKR_SUCCESS;
 }
 
@@ -26,14 +24,14 @@ zkresult RawDataPage::Read (const uint64_t _pageNumber, const uint64_t _position
         // If we run out of data in the current page, get the next one
         if (position == maxPosition)
         {
-            RawDataStruct * page = (RawDataStruct *)(pageNumber*4096);
+            RawDataStruct * page = (RawDataStruct *)pageManager.getPage(pageNumber);
             zkassert(page->nextPageNumber != 0);
             pageNumber = page->nextPageNumber;
             position = minPosition;
         }
 
         // Get the pointer corresponding to the current page number
-        RawDataStruct * page = (RawDataStruct *)(pageNumber*4096);
+        RawDataStruct * page = (RawDataStruct *)pageManager.getPage(pageNumber);
 
         // Calculate the amount of bytes to copy this time
         uint64_t pageRemainingBytes = maxPosition - position;
@@ -64,8 +62,8 @@ zkresult RawDataPage::Write (uint64_t &pageNumber, uint64_t &position, const str
         {
             uint64_t nextPageNumber = pageManager.getFreePage();
             InitEmptyPage(nextPageNumber);
-            RawDataStruct * nextPage = (RawDataStruct *)(nextPageNumber*4096);
-            RawDataStruct * page = (RawDataStruct *)(pageNumber*4096);
+            RawDataStruct * nextPage = (RawDataStruct *)pageManager.getPage(nextPageNumber);
+            RawDataStruct * page = (RawDataStruct *)pageManager.getPage(pageNumber);
             page->nextPageNumber = nextPageNumber;
             nextPage->previousPageNumber = pageNumber;
             pageNumber = nextPageNumber;
@@ -73,7 +71,7 @@ zkresult RawDataPage::Write (uint64_t &pageNumber, uint64_t &position, const str
         }
 
         // Get the pointer corresponding to the current page number
-        RawDataStruct * page = (RawDataStruct *)(pageNumber*4096);
+        RawDataStruct * page = (RawDataStruct *)pageManager.getPage(pageNumber);
 
         // Calculate the amount of bytes to write this time
         uint64_t pageRemainingBytes = maxPosition - position;
@@ -97,7 +95,7 @@ void RawDataPage::Print (const uint64_t pageNumber, bool details)
     zklog.info("RawDataPage::Print() pageNumber=" + to_string(pageNumber));
     if (details)
     {
-        RawDataStruct * page = (RawDataStruct *)(pageNumber*4096);
+        RawDataStruct * page = (RawDataStruct *)pageManager.getPage(pageNumber);
         zklog.info("  previousPageNumber=" + to_string(page->previousPageNumber) + "  nextPageNumber=" + to_string(page->nextPageNumber));
     }
 }
