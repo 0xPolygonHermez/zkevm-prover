@@ -1,30 +1,58 @@
 #include "page_manager.hpp"
 #include "zklog.hpp"
 #include "exit_process.hpp"
+#include "zkassert.hpp"
+#include <cstring>
 
 PageManager pageManager;
 
-// TODO: Init: alloc 1MB, find 4kBxN addresses, generate page numbers, store in freeMemoryPages
-
-uint64_t PageManager::getFreeMemoryPage (void)
+PageManager::PageManager()
 {
-    // TODO: allocate a large amount of memory in the constructor/init and build a list of free and busy pages
-    void * address = calloc(1, 4096*2);
-    if (address == NULL)
+    nPages = 0;
+    pages = NULL;
+    AddPages(1024);
+}
+
+PageManager::PageManager(const uint64_t nPages_)
+{
+    nPages = 0;
+    pages = NULL;
+    AddPages(nPages_);
+}
+PageManager::~PageManager(void)
+{
+    if (pages != NULL)
+        free(pages);
+}
+zkresult PageManager::AddPages(const uint64_t nPages_)
+{
+    char *auxPages = NULL;
+    auxPages = (char *)realloc(pages, nPages + nPages_ * 4096);
+    if (auxPages != NULL)
     {
-        zklog.error("PageManager::getFreeMemoryPage() failed calling calloc()");
+        pages = auxPages;
+        memset(pages + nPages * 4096, 0, nPages_ * 4096);
+        nPages += nPages_;
+        for (uint64_t i = 0; i < nPages_; i++)
+            freePages.push_back(nPages + i);
+    }
+    else
+    {
+        zklog.error("PageManager::AddPages() failed calling realloc()");
         exitProcess();
     }
-    uint64_t pageNumber = ((uint64_t)address + 4095)/4096;
-    
-    // TODO: Check that freePages.size() > 0; exit process otherwise
-    // TODO: pageNumber = freePages.pop_back();
+    return zkresult::ZKR_SUCCESS;
+}
 
+uint64_t PageManager::getFreePage(void)
+{
+    uint32_t pageNumber = freePages.front();
+    freePages.pop_front();
     return pageNumber;
 }
 
-void PageManager::releaseMemoryPage (const uint64_t pageNumber)
+void PageManager::releasePage(const uint64_t pageNumber)
 {
-    // TODO: add pageNumber to list of free pages
-    // TODO: freePages.push_back(pageNumber);
+    memset(getPage(pageNumber), 0, 4096);
+    freePages.push_back(pageNumber);
 }

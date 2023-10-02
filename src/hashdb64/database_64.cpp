@@ -29,7 +29,7 @@ Database64::Database64 (Goldilocks &fr, const Config &config) :
         headerPage(0)
 {
     zkresult zkr;
-    headerPage = pageManager.getFreeMemoryPage();
+    headerPage = pageManager.getFreePage();
     zkr = HeaderPage::InitEmptyPage(headerPage);
     if (zkr != ZKR_SUCCESS)
     {
