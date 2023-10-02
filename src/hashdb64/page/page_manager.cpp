@@ -10,11 +10,13 @@ PageManager::PageManager()
 {
     nPages = 0;
     pages = NULL;
+    AddPages(1024);
 }
 
 PageManager::PageManager(const uint64_t nPages_)
 {
     nPages = 0;
+    pages = NULL;
     AddPages(nPages_);
 }
 PageManager::~PageManager(void)
