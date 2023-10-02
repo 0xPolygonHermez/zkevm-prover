@@ -57,7 +57,7 @@ zkresult RootVersionPage::Write (uint64_t &pageNumber, const string &root, uint6
     }
 
     // Allocate a new page and link it to the current page
-    uint64_t newPageNumber = pageManager.getFreeMemoryPage();
+    uint64_t newPageNumber = pageManager.getFreePage();
     RootVersionStruct * newPage = (RootVersionStruct *)(newPageNumber*4096);
     newPage->nextPage = (uint64_t)page/4096;
 
