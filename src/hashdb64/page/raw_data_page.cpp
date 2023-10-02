@@ -62,7 +62,7 @@ zkresult RawDataPage::Write (uint64_t &pageNumber, uint64_t &position, const str
         // If we run out of space in the current page, get a new one
         if (position == maxPosition)
         {
-            uint64_t nextPageNumber = pageManager.getFreeMemoryPage();
+            uint64_t nextPageNumber = pageManager.getFreePage();
             InitEmptyPage(nextPageNumber);
             RawDataStruct * nextPage = (RawDataStruct *)(nextPageNumber*4096);
             RawDataStruct * page = (RawDataStruct *)(pageNumber*4096);
