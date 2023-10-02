@@ -8,67 +8,114 @@
 zkresult RootVersionPage::InitEmptyPage (const uint64_t pageNumber)
 {
     RootVersionStruct * page = (RootVersionStruct *)(pageNumber*4096);
-    page->nextPage = 0;
-    page->size = headerSize;
+    memset(page, 0, 4096);
     return ZKR_SUCCESS;
+}
+
+zkresult RootVersionPage::Read (const uint64_t pageNumber, const string &root, uint64_t &version, const uint64_t level)
+{
+    zkassert(root.size() == 32);
+    zkassert(level < 32);
+
+    // Get the data from this page
+    RootVersionStruct * page = (RootVersionStruct *)(pageNumber*4096);
+    uint8_t levelBits = root[level];
+    uint64_t versionAndControl = page->versionAndControl[levelBits];
+    uint64_t foundVersion = versionAndControl & 0xFFFFFF;
+    uint64_t control = versionAndControl >> 24;
+
+    // Leaf node
+    if (control == 1)
+    {
+        version = foundVersion;
+        return ZKR_SUCCESS;
+    }
+
+    // Intermediate node
+    if (control == 2)
+    {
+        return Read(pageNumber, root, version, level+1);
+    }
+
+    // Not found
+    return ZKR_DB_KEY_NOT_FOUND;
 }
 
 zkresult RootVersionPage::Read (const uint64_t pageNumber, const string &root, uint64_t &version)
 {
     zkassert(root.size() == 32);
+
+    return Read(pageNumber, root, version, 0);
+}
+
+zkresult RootVersionPage::Write (uint64_t &pageNumber, const string &root, const uint64_t version, const uint64_t level)
+{
+    zkassert(root.size() == 32);
+    zkassert(level < 32);
+
+    // Get the data from this page
     RootVersionStruct * page = (RootVersionStruct *)(pageNumber*4096);
+    uint8_t levelBits = root[level];
+    uint64_t versionAndControl = page->versionAndControl[levelBits];
+    uint64_t foundVersion = versionAndControl & 0xFFFFFF;
+    uint64_t control = versionAndControl >> 48;
 
-    // search in page->version from the last entry to the first entry, i.e. in reverse order
-    for (int64_t i=(page->size-16)/entrySize; i > 0; i--)
+    // Check control
+    switch (control)
     {
-        RootVersion *rootVersion = (RootVersion *)((uint8_t *)page + headerSize + entrySize*i);
-        if (root == rootVersion->root)
+        // Empty slot
+        case 0:
         {
-            version = rootVersion->version;
-            return ZKR_SUCCESS;
+            
         }
-    }
+        // Leaf node
+        case 1:
+        {
 
-    // if not found, search in nextPage (older versions)
-    if (page->nextPage != 0)
-    {
-        return Read(page->nextPage, root, version);
-    }
-    else
-    {
-        zklog.error("RootVersionPage::Read() could not find root=" + ba2string(root));
-        return ZKR_DB_KEY_NOT_FOUND;
+        }
+
+        // Intermediate node
+        case 2:
+        {
+            return Write(pageNumber, root, version, level+1);
+        }
+        default:
+        {
+            zklog.error("RootVersionPage::Write() found invalid control=" + to_string(control) + " pageNumber=" + to_string(pageNumber));
+            return ZKR_DB_ERROR;
+        }
     }
 }
 
-zkresult RootVersionPage::Write (uint64_t &pageNumber, const string &root, uint64_t version)
+zkresult RootVersionPage::Write (uint64_t &pageNumber, const string &root, const uint64_t version)
 {
     zkassert(root.size() == 32);
+
+    // Start searching with level 0
+    return Write(pageNumber, root, version, 0);
+}
+
+void RootVersionPage::Print (const uint64_t pageNumber, bool details)
+{
     RootVersionStruct * page = (RootVersionStruct *)(pageNumber*4096);
 
-    // If there is room for a new entry in this page, we use it
-    if (page->size < maxSize)
+    zklog.info("RootVersionPage::Print() pageNumber=" + to_string(pageNumber));
+
+    // Print entries
+    if (details)
     {
-        RootVersion *rootVersion = (RootVersion *)((uint8_t *)page + page->size);
-        memcpy(rootVersion->root, root.c_str(), 32);
-        rootVersion->version = version;
-        page->size += entrySize;
-        return ZKR_SUCCESS;
+        for (uint64_t i=0; i<128; i++)
+        {
+            uint64_t versionAndControl = page->versionAndControl[i];
+            uint64_t version = versionAndControl & 0xFFFFFF;
+            uint64_t control = versionAndControl >> 24;
+            zklog.info("  i=" + to_string(i) + " control=" + to_string(control) + " version=" + to_string(version));
+        }
     }
 
-    // Allocate a new page and link it to the current page
-    uint64_t newPageNumber = pageManager.getFreeMemoryPage();
-    RootVersionStruct * newPage = (RootVersionStruct *)(newPageNumber*4096);
-    newPage->nextPage = (uint64_t)page/4096;
-
-    // Create a new entry in the first position
-    RootVersion *rootVersion = (RootVersion *)((uint8_t *)newPage + headerSize);
-    memcpy(rootVersion->root, root.c_str(), 32);
-    rootVersion->version = version;
-    newPage->size = headerSize + entrySize;
-
-    // Overwrite the page number with the new one
-    pageNumber = newPageNumber;
-
-    return ZKR_SUCCESS;
+    // Iterate over the next page
+    if (page->nextPage != 0)
+    {
+        Print(page->nextPage, details);
+    }
 }

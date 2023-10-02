@@ -16,6 +16,8 @@ class HeaderPage
 {
 public:
     static zkresult InitEmptyPage (const uint64_t pageNumber);
+
+    static void Print (const uint64_t pageNumber, bool details);
 };
 
 #endif

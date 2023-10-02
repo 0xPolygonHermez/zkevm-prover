@@ -9,3 +9,10 @@ zkresult HeaderPage::InitEmptyPage (const uint64_t pageNumber)
     page->rootVersionPage = 0;
     return ZKR_SUCCESS;
 }
+
+void HeaderPage::Print (const uint64_t pageNumber, bool details)
+{
+    HeaderStruct * page = (HeaderStruct *)(pageNumber*4096);
+    zklog.info("HeaderPage::Print() pageNumber=" + to_string(pageNumber));
+    zklog.info("  rootVersionPage=" + to_string(page->rootVersionPage));
+}
