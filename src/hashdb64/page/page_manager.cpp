@@ -3,6 +3,8 @@
 #include "exit_process.hpp"
 #include "zkassert.hpp"
 #include <cstring>
+#include <cassert>
+
 PageManager pageManager;
 PageManager::PageManager()
 {
@@ -12,6 +14,7 @@ PageManager::PageManager()
 }
 PageManager::PageManager(const uint64_t nPages_)
 {
+    assert(nPages_ >= 2);
     nPages = 0;
     pages = NULL;
     AddPages(nPages_);
@@ -29,7 +32,7 @@ zkresult PageManager::AddPages(const uint64_t nPages_)
     {
         pages = auxPages;
         memset(pages + nPages * 4096, 0, nPages_ * 4096);
-        for (uint64_t i = 0; i < nPages_; i++)
+        for (uint64_t i = 2; i < nPages_; i++) //0 and 1 are reserved pages
             freePages.push_back(nPages + i);
         nPages += nPages_;
     }
@@ -52,12 +55,17 @@ uint64_t PageManager::getFreePage(void)
 }
 void PageManager::releasePage(const uint64_t pageNumber)
 {
+    assert(pageNumber >= 2); //first two pages cannot be released
     memset(getPageAddress(pageNumber), 0, 4096);
     freePages.push_back(pageNumber);
 }
 
 uint32_t PageManager::editPage(const uint32_t pageNumber)
 {
+    assert(pageNumber != 1); //page 1 cannot be edited is the page used to edit the header
+    if(pageNumber == 0){
+        return 1;
+    }
     std::pair<std::unordered_set<uint32_t>::iterator,bool> res = editedPages.insert(pageNumber);
     uint32_t pageNumber_ = pageNumber;
     if(res.second == true)
@@ -69,6 +77,7 @@ uint32_t PageManager::editPage(const uint32_t pageNumber)
 }
 
 void PageManager::flushPages(){
+    memcpy(getPageAddress(0), getPageAddress(1), 4096); // copy tmp header to header
     for(unordered_set<uint32_t>::const_iterator it = editedPages.begin(); it != editedPages.end(); it++){
         releasePage(*it);
     }
