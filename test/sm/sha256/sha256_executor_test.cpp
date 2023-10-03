@@ -42,56 +42,52 @@ void SHA256SMTest(Goldilocks &fr, Sha256Executor &executor)
 		std::uniform_int_distribution<> dis(0, 255);
 		for (size_t i = 0; i < randomByteCount; ++i)
 		{
-			//randomTestVector[i] = static_cast<uint8_t>(dis(gen));
+			// randomTestVector[i] = static_cast<uint8_t>(dis(gen));
 			randomTestVector[i] = 0;
 		}
+
 		// Calculate the reference hash through a reference implementation of SHA256.
 		std::string hashString = "";
 		SHA256(randomTestVector, randomByteCount, hashString);
 		pHash[slot] = hashString;
 
-		// Calculate a second reference hash, through SHA256Gate itself, directly.
-		std::string hashGateString = "";
-		SHA256Gate(randomTestVector, randomByteCount, hashGateString);
-		pHashGate[slot] = hashGateString;
-
 		// Create an input slot for the SHA256 executor of size SHA256GateConfig.sinRefNumber.
 		std::vector<Goldilocks::Element> pInputSlot(SHA256GateConfig.sinRefNumber);
 
-		// Padding:
-		// original message of length L bits
-		// padded message: <original message of length L> 1 bit <K zero bits> <L as 64 bit integer>
-		// (the number of bits will be a multiple of 512)
-
-		// padded data = pData[dataSize] + 0x80 + paddedZeros*0x00 + dataSize[8]
-		uint64_t paddedSizeInBitsMin = randomByteCount*8 + 1 + 64;
-		uint64_t paddedSizeInBits = ((paddedSizeInBitsMin / 512) + 1)*512;
+		// padded data = randomTestVector[randomByteCount] + 0x80 + paddedZeros*0x00 + randomByteCount[8]
+		uint64_t paddedSizeInBitsMin = randomByteCount * 8 + 1 + 64;
+		uint64_t paddedSizeInBits = ((paddedSizeInBitsMin / 512) + 1) * 512;
 		uint64_t paddedSize = paddedSizeInBits / 8;
-		uint64_t paddedZeros = (paddedSizeInBits - paddedSizeInBitsMin)/8;
-
-		// Create the padding data buffer
+		uint64_t paddedZeros = (paddedSizeInBits - paddedSizeInBitsMin) / 8;
 		uint8_t padding[64] = {0};
-		u642bytes(dataSize*8, &padding[56], true);
+		u642bytes(randomByteCount * 8, &padding[56], true);
 		uint64_t onePosition = 64 - 8 - paddedZeros - 1;
-		// padding[onePosition] = 0x80;
-		uint64_t dataPosition = (dataSize/64)*64;
-		for (uint64_t i=0; i<dataSize%64; i++)
+		padding[onePosition] = 0x80;
+		uint8_t randomTestVectorPadded[paddedSize];
+		for (uint64_t i = 0; i < randomByteCount; i++)
 		{
-			padding[i] = pData[dataPosition+i];
+			randomTestVectorPadded[i] = randomTestVector[i];
 		}
+		for (uint64_t i = 0; i < (paddedSize - randomByteCount); i++)
+		{
+			randomTestVectorPadded[randomByteCount + i] = padding[onePosition + i];
+		}
+
+		GateState S(SHA256GateConfig);
+		SHA256Gate(S, randomTestVectorPadded);
 
 		// Fill the executor input slot with the generated random byte test vector, bit by bit.
 		// Note that we're filling it with randomByteCount.
-		for (uint64_t byte = 0; byte < randomByteCount; byte++)
+		for (uint64_t byte = 0; byte < paddedSize; byte++)
 		{
 			for (uint64_t bit = 0; bit < 8; bit++)
 			{
 				// Fill the bits normally from the test vector, with each bit being replaced with an equivalent
 				// bit initialized as a Goldilocks finite field element.
 				uint8_t mask = 1 << bit;
-				pInputSlot[(byte * 8) + bit] = ((randomTestVector[byte] & mask) != 0) ? fr.one() : fr.zero();
+				pInputSlot[(byte * 8) + bit] = ((randomTestVectorPadded[byte] & mask) != 0) ? fr.one() : fr.zero();
 			}
-		}	
+		}
 
 		// Push the exector input slot into the vector of numberOfSlots slots.
 		pInput[slot] = pInputSlot;
@@ -115,7 +111,7 @@ void SHA256SMTest(Goldilocks &fr, Sha256Executor &executor)
 		{
 			uint64_t bitIndex = SHA256GateConfig.relRef2AbsRef(SHA256GateConfig.soutRef0 + i * SHA256GateConfig.soutRefDistance, slot);
 			uint64_t pol = executor.getPol(cmPols.Sha256.output, bitIndex);
-			aux[i] = ((pol & uint64_t(1)) == 0)? 0 : 1;
+			aux[i] = ((pol & uint64_t(1)) == 0) ? 0 : 1;
 		}
 
 		// We have retrieved all the bits from the executor.

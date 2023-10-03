@@ -7,7 +7,7 @@
 
 using namespace std;
 
-void GateU32::fromU32 (uint32_t value)
+void GateU32::fromU32(uint32_t value)
 {
     // Convert U32 value to an array of bits
     vector<uint8_t> bits;
@@ -15,7 +15,7 @@ void GateU32::fromU32 (uint32_t value)
     zkassert(bits.size() == 32);
 
     // Assign the proper reference
-    for (uint64_t i=0; i<32; i++)
+    for (uint64_t i = 0; i < 32; i++)
     {
         bit[i].ref = S.gateConfig.zeroRef;
         if (bits[i] == 0)
@@ -34,11 +34,11 @@ void GateU32::fromU32 (uint32_t value)
     }
 }
 
-uint32_t GateU32::toU32 (void)
+uint32_t GateU32::toU32(void)
 {
     // Collect bits
     vector<uint8_t> bits;
-    for (uint64_t i=0; i<32; i++)
+    for (uint64_t i = 0; i < 32; i++)
     {
         bits.push_back(S.gate[bit[i].ref].pin[bit[i].pin].bit);
     }
@@ -47,47 +47,47 @@ uint32_t GateU32::toU32 (void)
     return bits2u32(bits);
 }
 
-string GateU32::toString (void)
+string GateU32::toString(void)
 {
     mpz_class aux = toU32();
     return aux.get_str(16);
 }
 
-void GateU32::rotateRight (uint64_t pos)
+void GateU32::rotateRight(uint64_t pos)
 {
     // Store the rotated value on a temporary variable
     GateBit auxBit[32];
-    for (uint64_t i=0; i<32; i++)
+    for (uint64_t i = 0; i < 32; i++)
     {
-        auxBit[i] = bit[(i+pos)%32];
+        auxBit[i] = bit[(i + pos) % 32];
     }
 
     // Copy the temporary variable into ref
-    for (uint64_t i=0; i<32; i++)
+    for (uint64_t i = 0; i < 32; i++)
     {
         bit[i] = auxBit[i];
     }
 }
 
-void GateU32::shiftRight (uint64_t pos)
+void GateU32::shiftRight(uint64_t pos)
 {
     // Store the shifted value on a temporary variable
     GateBit auxBit[32] = {0};
     uint64_t i = 0;
-    for (; i<(32-pos); i++)
+    for (; i < (32 - pos); i++)
     {
-        auxBit[i] = bit[(i+pos)%32];
+        auxBit[i] = bit[(i + pos) % 32];
     }
 
     // Set rest of pins to zero
-    for (; i<32; i++)
+    for (; i < 32; i++)
     {
         auxBit[i].ref = S.gateConfig.zeroRef;
         auxBit[i].pin = pin_a;
     }
 
     // Copy the temporary variable into ref
-    for (uint64_t i=0; i<32; i++)
+    for (uint64_t i = 0; i < 32; i++)
     {
         bit[i] = auxBit[i];
     }
@@ -95,9 +95,9 @@ void GateU32::shiftRight (uint64_t pos)
 
 /* r = xor(a,b), for every individual bit */
 
-void GateU32_xor (GateState &S, const GateU32 &a, const GateU32 &b, GateU32 &r)
+void GateU32_xor(GateState &S, const GateU32 &a, const GateU32 &b, GateU32 &r)
 {
-    for (uint64_t i=0; i<32; i++)
+    for (uint64_t i = 0; i < 32; i++)
     {
         r.bit[i].ref = S.getFreeRef();
         S.XOR(a.bit[i].ref, a.bit[i].pin, b.bit[i].ref, b.bit[i].pin, r.bit[i].ref);
@@ -107,9 +107,9 @@ void GateU32_xor (GateState &S, const GateU32 &a, const GateU32 &b, GateU32 &r)
 
 /* r = and(a,b), for every individual bit */
 
-void GateU32_and (GateState &S, const GateU32 &a, const GateU32 &b, GateU32 &r)
+void GateU32_and(GateState &S, const GateU32 &a, const GateU32 &b, GateU32 &r)
 {
-    for (uint64_t i=0; i<32; i++)
+    for (uint64_t i = 0; i < 32; i++)
     {
         r.bit[i].ref = S.getFreeRef();
         S.AND(a.bit[i].ref, a.bit[i].pin, b.bit[i].ref, b.bit[i].pin, r.bit[i].ref);
@@ -119,9 +119,9 @@ void GateU32_and (GateState &S, const GateU32 &a, const GateU32 &b, GateU32 &r)
 
 /* r = not(a), for every individual bit */
 
-void GateU32_not (GateState &S, const GateU32 &a, GateU32 &r)
+void GateU32_not(GateState &S, const GateU32 &a, GateU32 &r)
 {
-    for (uint64_t i=0; i<32; i++)
+    for (uint64_t i = 0; i < 32; i++)
     {
         r.bit[i].ref = S.getFreeRef();
         // NOT(a) is the same operation as XOR(a,1)
@@ -151,14 +151,14 @@ void GateU32_not (GateState &S, const GateU32 &a, GateU32 &r)
    bit 31:  r = 1 (a) + 1 (b) + 1 (carry) = 1 = xor(xor(a,b),carry))  carry is not needed any more
 */
 
-void GateU32_add (GateState &S, const GateU32 &a, const GateU32 &b, GateU32 &r)
+void GateU32_add(GateState &S, const GateU32 &a, const GateU32 &b, GateU32 &r)
 {
     // Carry bit; set default to zero
     GateBit carry;
     carry.ref = S.gateConfig.zeroRef;
     carry.pin = pin_a;
 
-    for (uint64_t i=0; i<32; i++)
+    for (uint64_t i = 0; i < 32; i++)
     {
         // Calculate the result bit
 
@@ -195,11 +195,11 @@ void GateU32_add (GateState &S, const GateU32 &a, const GateU32 &b, GateU32 &r)
             // andRef1 = and(a,b)
             uint64_t andRef1 = S.getFreeRef();
             S.AND(a.bit[i].ref, a.bit[i].pin, b.bit[i].ref, b.bit[i].pin, andRef1);
-            
+
             // andRef2 = and(b,carry)
             uint64_t andRef2 = S.getFreeRef();
             S.AND(carry.ref, carry.pin, b.bit[i].ref, b.bit[i].pin, andRef2);
-            
+
             // andRef3 = and(a,carry)
             uint64_t andRef3 = S.getFreeRef();
             S.AND(a.bit[i].ref, a.bit[i].pin, carry.ref, carry.pin, andRef3);
