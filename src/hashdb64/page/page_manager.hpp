@@ -14,21 +14,25 @@ public:
     PageManager();
     PageManager(const uint64_t nPages_);
     ~PageManager();
-    inline char *getPageAddress(const uint64_t pageNumber)
-    {
-        return pages + pageNumber * 4096;
-    };
+    
 
     uint64_t getFreePage();
     void releasePage(const uint64_t pageNumber);
     uint32_t editPage(const uint32_t pageNumber);
     void flushPages();
 
+    inline uint32_t getNumFreePages(){
+        return freePages.size();
+    };
+    inline char *getPageAddress(const uint64_t pageNumber)
+    {
+        return pages + pageNumber * 4096;
+    };
 
 private:
     uint32_t nPages;
     char *pages;
-    
+
     std::list<uint32_t> freePages;
     std::unordered_set<uint32_t> editedPages;
 
