@@ -7,6 +7,8 @@
 
 zkresult RootVersionPage::InitEmptyPage (const uint64_t pageNumber)
 {
+    RootVersionStruct * page = (RootVersionStruct *)pageManager.getPage(pageNumber);
+    memset((void *)page, 0, 4096);
     return ZKR_SUCCESS;
 }
 
@@ -20,7 +22,7 @@ zkresult RootVersionPage::Read (const uint64_t pageNumber, const string &root, u
     uint8_t levelBits = root[level];
     uint64_t versionAndControl = page->versionAndControl[levelBits];
     uint64_t foundVersion = versionAndControl & 0xFFFFFF;
-    uint64_t control = versionAndControl >> 24;
+    uint64_t control = versionAndControl >> 48;
 
     // Leaf node
     if (control == 1)
@@ -106,8 +108,11 @@ void RootVersionPage::Print (const uint64_t pageNumber, bool details)
         {
             uint64_t versionAndControl = page->versionAndControl[i];
             uint64_t version = versionAndControl & 0xFFFFFF;
-            uint64_t control = versionAndControl >> 24;
-            zklog.info("  i=" + to_string(i) + " control=" + to_string(control) + " version=" + to_string(version));
+            uint64_t control = versionAndControl >> 48;
+            if (control != 0)
+            {
+                zklog.info("  i=" + to_string(i) + " control=" + to_string(control) + " version=" + to_string(version));
+            }
         }
     }
 

@@ -5,6 +5,29 @@
 #include "zkresult.hpp"
 #include "zkassert.hpp"
 
+/*
+    Example with 3 raw pages:
+
+    First page:
+        previousPageNumber = 0;
+        nextPageNumber = second page
+
+    Second page:
+        previousPageNumber = first page
+        nextPageNumber = third page
+
+    Third page: (current page)
+        previousPageNumber = second page
+        nextPageNumber = 0;
+
+    Header contains:
+        first page (0)
+        current page (3)
+        current offset (n)
+
+    You can append data to the raw data list, but you cannot modify data that has been previously appended
+*/
+
 struct RawDataStruct
 {
     uint64_t previousPageNumber;

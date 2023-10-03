@@ -10,7 +10,7 @@ PageManager::PageManager()
 {
     nPages = 0;
     pages = NULL;
-    AddPages(1024);
+    AddPages(10240);
 }
 
 PageManager::PageManager(const uint64_t nPages_)
@@ -27,14 +27,14 @@ PageManager::~PageManager(void)
 zkresult PageManager::AddPages(const uint64_t nPages_)
 {
     char *auxPages = NULL;
-    auxPages = (char *)realloc(pages, nPages + nPages_ * 4096);
+    auxPages = (char *)realloc(pages, (nPages + nPages_) * 4096);
     if (auxPages != NULL)
     {
         pages = auxPages;
         memset(pages + nPages * 4096, 0, nPages_ * 4096);
-        nPages += nPages_;
         for (uint64_t i = 0; i < nPages_; i++)
             freePages.push_back(nPages + i);
+        nPages += nPages_;
     }
     else
     {

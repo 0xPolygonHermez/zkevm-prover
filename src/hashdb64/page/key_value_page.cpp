@@ -8,6 +8,17 @@
 
 zkresult KeyValuePage::InitEmptyPage (const uint64_t pageNumber)
 {
+    KeyValueStruct * page = (KeyValueStruct *)pageManager.getPage(pageNumber);
+    memset((void *)page, 0, 4096);
+
+    // Create the 2 associated hash pages
+    uint64_t hashPage1 = pageManager.getFreePage();
+    HashPage::InitEmptyPage(hashPage1);
+    uint64_t hashPage2 = pageManager.getFreePage();
+    HashPage::InitEmptyPage(hashPage2);
+    page->hashPage1AndHistoryCounter = hashPage1;
+    page->hashPage2AndPadding = hashPage2;
+    
     return ZKR_SUCCESS;
 }
 

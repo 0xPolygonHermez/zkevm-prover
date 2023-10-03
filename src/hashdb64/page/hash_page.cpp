@@ -8,6 +8,8 @@
 
 zkresult HashPage::InitEmptyPage (const uint64_t pageNumber)
 {
+    HashStruct * page = (HashStruct *)pageManager.getPage(pageNumber);
+    memset((void *)page, 0, 4096);
     return ZKR_SUCCESS;
 }
 
@@ -34,22 +36,20 @@ void HashPage::Print (const uint64_t pageNumber, bool details)
     if (details)
     {
         // Create a string with 32 zeros
-        char zeroString[32] = {0};
+        string zeroString;
+        for (uint64_t i=0; i<32; i++) zeroString += (char)0;
 
         // For each entry of the page
         HashStruct * page = (HashStruct *)pageManager.getPage(pageNumber);
         for (uint64_t i=0; i<128; i++)
         {
-            // Discard zero hashes
-            if (memcmp(zeroString, page->hash[i], 32) == 0)
-            {
-                continue;
-            }
-
             // Print hash
             string hash;
-            hash.copy((char *)page->hash[i], 32, 0);
-            zklog.info("  i=" + to_string(i) + " hash=" + ba2string(hash));            
+            hash.append((char *)page->hash[i], 32);
+            if (hash != zeroString)
+            {
+                zklog.info("  i=" + to_string(i) + " hash=" + ba2string(hash));
+            }     
         }
     }
 }

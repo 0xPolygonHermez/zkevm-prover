@@ -7,7 +7,7 @@
 
 struct HashStruct
 {
-    uint64_t hash[128][32]; // 128 hashes of 32B each
+    uint8_t hash[128][32]; // 128 hashes of 32B each
 };
 
 class HashPage

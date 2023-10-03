@@ -9,6 +9,8 @@
 
 zkresult RawDataPage::InitEmptyPage (const uint64_t pageNumber)
 {
+    RawDataStruct * page = (RawDataStruct *)pageManager.getPage(pageNumber);
+    memset((void *)page, 0, 4096);
     return ZKR_SUCCESS;
 }
 
@@ -16,7 +18,8 @@ zkresult RawDataPage::Read (const uint64_t _pageNumber, const uint64_t _position
 {
     uint64_t pageNumber = _pageNumber;
     uint64_t position = _position;
-    zkassert(position < 128);
+    zkassert(position >= minPosition);
+    zkassert(position <= maxPosition);
 
     uint64_t copiedBytes = 0;
     while (copiedBytes < length)
@@ -40,7 +43,7 @@ zkresult RawDataPage::Read (const uint64_t _pageNumber, const uint64_t _position
         uint64_t bytesToCopy = zkmin(pageRemainingBytes, length - copiedBytes);
 
         // Copy data
-        data.copy((char *)page + position, bytesToCopy, copiedBytes);
+        data.append((char *)page + position, bytesToCopy);
 
         // Update counters
         position += bytesToCopy;
@@ -52,8 +55,18 @@ zkresult RawDataPage::Read (const uint64_t _pageNumber, const uint64_t _position
 
 zkresult RawDataPage::Write (uint64_t &pageNumber, uint64_t &position, const string &data)
 {
-    zkassert(position >= minPosition);
-    zkassert(position <= maxPosition);
+    // Check input parameters
+    if (position < minPosition)
+    {
+        zklog.error("RawDataPage::Write() got invalid position=" + to_string(position) + " pageNumber=" + to_string(pageNumber) + " length=" + to_string(data.size()));
+        return ZKR_DB_ERROR;
+    }
+    if (position > maxPosition)
+    {
+        zklog.error("RawDataPage::Write() got invalid position=" + to_string(position) + " pageNumber=" + to_string(pageNumber) + " length=" + to_string(data.size()));
+        return ZKR_DB_ERROR;
+    }
+
     uint64_t copiedBytes = 0;
     while (copiedBytes < data.size())
     {

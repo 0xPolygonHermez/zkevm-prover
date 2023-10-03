@@ -8,8 +8,8 @@
 
 struct KeyValueStruct
 {
-    uint64_t hashPage1AndHistoryCounter; // hashPage1 (6B) + historyCounter (2B)
-    uint64_t hashPage2AndPadding; // hashPage2 (6B) + padding (2B)
+    uint64_t hashPage1AndHistoryCounter; // historyCounter (2B) + hashPage1 (6B)
+    uint64_t hashPage2AndPadding; // padding (2B) + hashPage2 (6B)
     uint8_t keyValueEntry[64][16]; // pageNumber (6B) + control (2B) + version (6B) + previousVersionOffset (2B) of the 64 key-values corresponding to this level
                                    // If control == 0, then this position is empty, i.e. value = 0
                                    // If control == 1, then this is a version (leaf node)
