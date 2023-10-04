@@ -21,7 +21,7 @@ PageManager::PageManager()
 }
 PageManager::PageManager(const uint64_t nPages_)
 {
-    assert(nPages_ >= 2);
+    zkassertpermanent(nPages_ >= 2);
     mappedFile = false;
     nPages = 0;
     pages = NULL;
@@ -48,11 +48,13 @@ PageManager::PageManager(const string fileName_){
 
     fileSize = file_stat.st_size;
     nPages = fileSize / 4096;
-    assert(nPages >= 2);
+    zkassertpermanent(nPages >= 2);
     pages = (char *)mmap(NULL, fileSize, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_POPULATE, fd, 0);
     if (pages == MAP_FAILED) {
         zklog.error("Failed to mmap file: " + (string)strerror(errno));
     }
+    for (uint64_t i = 2; i < nPages; i++) //0 and 1 are reserved pages
+        freePages.push_back(i);
 }
 PageManager::~PageManager(void)
 {
@@ -87,14 +89,14 @@ zkresult PageManager::AddPages(const uint64_t nPages_)
 
 uint64_t PageManager::getFreePage(void)
 {
-    
+    zkassertpermanent(freePages.size() > 0);
     uint32_t pageNumber = freePages.front();
     freePages.pop_front();
     return pageNumber;
 }
 void PageManager::releasePage(const uint64_t pageNumber)
 {
-    assert(pageNumber >= 2); //first two pages cannot be released
+    zkassert(pageNumber >= 2 && pageNumber<nPages); //first two pages cannot be released
     memset(getPageAddress(pageNumber), 0, 4096);
     freePages.push_back(pageNumber);
 }
@@ -109,6 +111,7 @@ uint32_t PageManager::editPage(const uint32_t pageNumber)
         pageNumber_ = getFreePage();
         memcpy(getPageAddress(pageNumber_),getPageAddress(pageNumber) , 4096);
         editedPages[pageNumber] = pageNumber_;
+        editedPages[pageNumber_] = pageNumber_;
     }else{
         pageNumber_ = it->second;
     }
@@ -126,10 +129,12 @@ void PageManager::flushPages(){
             exitProcess();
         }
         ssize_t write_size =write(fd, getPageAddress(1), 4096); //how transactional is this?
-        assert(write_size == 4096);
+        zkassertpermanent(write_size == 4096);
     }
     for(unordered_map<uint32_t, uint32_t>::const_iterator it = editedPages.begin(); it != editedPages.end(); it++){
-        releasePage(it->second);
+        if(it->first != it->second){
+            releasePage(it->first);
+        }
     }
     editedPages.clear();
 }

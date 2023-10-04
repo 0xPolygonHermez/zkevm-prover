@@ -44,6 +44,7 @@
 #include "database_performance_test.hpp"
 #include "smt_64_test.hpp"
 #include "sha256.hpp"
+#include "page_manager_test.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -485,6 +486,11 @@ int main(int argc, char **argv)
     if (config.runDatabasePerformanceTest)
     {
         DatabasePerformanceTest();
+    }
+    // Test PageManager
+    if (config.runPageManagerTest)
+    {
+        PageManagerTest();
     }
     
     // Test SMT64

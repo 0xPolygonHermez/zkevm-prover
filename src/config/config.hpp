@@ -43,6 +43,7 @@ public:
     bool runCheckTreeTest;
     string checkTreeRoot;
     bool runDatabasePerformanceTest;
+    bool runPageManagerTest;
     bool runSMT64Test;
     bool runUnitTest;
     
