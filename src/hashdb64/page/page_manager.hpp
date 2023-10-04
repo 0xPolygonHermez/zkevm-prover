@@ -6,13 +6,14 @@
 #include "exit_process.hpp"
 #include "zkresult.hpp"
 #include <list>
-#include <unordered_set>
+#include <unordered_map>
 
 class PageManager
 {
 public:
     PageManager();
     PageManager(const uint64_t nPages_);
+    PageManager(const string fileName_);
     ~PageManager();
     
 
@@ -30,11 +31,17 @@ public:
     };
 
 private:
+
+    bool mappedFile;
+    string fileName;
+    uint64_t fileSize;
+    int fd;
+
     uint32_t nPages;
     char *pages;
 
     std::list<uint32_t> freePages;
-    std::unordered_set<uint32_t> editedPages;
+    std::unordered_map<uint32_t, uint32_t> editedPages;
 
     zkresult AddPages(const uint64_t nPages_);
 
