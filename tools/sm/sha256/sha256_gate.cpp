@@ -7,17 +7,17 @@
 #include "zkassert.hpp"
 
 GateConfig SHA256GateConfig = GateConfig(
-    uint64_t(0),
-    uint64_t(160480),
-    uint64_t(170000),
-    uint64_t(1),
-    uint64_t(45),
-    uint64_t(768),
-    uint64_t(44),
-    uint64_t((45 + (768 * 44))),
-    uint64_t(256),
-    uint64_t(44),
-    uint64_t(1 << 23));
+    uint64_t(0), // zeroRef 
+    uint64_t(160480), // slotSize
+    uint64_t(170000), // maxRefs
+    uint64_t(1), // firstNextRef
+    uint64_t(45), // sinRef0
+    uint64_t(768), // sinRefNumber 
+    uint64_t(44), // sinRefDistance 
+    uint64_t((45 + (768 * 44))), // soutRef0 
+    uint64_t(256), // soutRefNumber
+    uint64_t(44), // soutRefDistance
+    uint64_t(1 << 23)); // polLength
 
 void SHA256GateString(const string &s, string &hash)
 {
@@ -75,7 +75,6 @@ void SHA256Gate(
     // copy the 64 data bytes (512 bits) into Sin[0..511] and into w[0..15]
     for (uint64_t i = 0; i < 16; i++)
     {
-        // bytes2u32(pChunkBytes + 4*i, w[i], true);
         uint32_t aux;
         bytes2u32(chunkBytes + 4 * i, aux, true);
         vector<uint8_t> bits;
@@ -285,6 +284,25 @@ void SHA256Gate(
             // cout << "SHA256() i=" << i << " aux=" << aux << " pin_a=" << (uint64_t)S.gate[S.SoutRefs[i]].pin[pin_a].bit << " pin_r=" << (uint64_t)S.gate[S.SoutRefs[i]].pin[pin_r].bit << endl;
         }
     }
+
+    mpz_class hashScalar;
+    hashScalar = h[0];
+    hashScalar = hashScalar << 32;
+    hashScalar += h[1];
+    hashScalar = hashScalar << 32;
+    hashScalar += h[2];
+    hashScalar = hashScalar << 32;
+    hashScalar += h[3];
+    hashScalar = hashScalar << 32;
+    hashScalar += h[4];
+    hashScalar = hashScalar << 32;
+    hashScalar += h[5];
+    hashScalar = hashScalar << 32;
+    hashScalar += h[6];
+    hashScalar = hashScalar << 32;
+    hashScalar += h[7];
+
+    cout << hashScalar.get_str(16) << endl;
 
     S.printCounters();
     if (scriptFile.size() > 0)

@@ -159,11 +159,14 @@ void Sha256Executor::execute(const vector<vector<Goldilocks::Element>> &input, S
         for (uint64_t i = 0; i < SHA256GateConfig.sinRefNumber; i++)
         {
             setPol(pols.inputs[0], SHA256GateConfig.relRef2AbsRef(SHA256GateConfig.sinRef0 + i * SHA256GateConfig.sinRefDistance, slot), fr.toU64(input[slot][i]));
+            if (!fr.isZero(input[slot][i]) && (slot == 0)) {
+                cout << "1 at " << i << endl; 
+            }
         }
     }
 
     // Execute the program
-    uint64_t nadimStupidCounter = 0;
+    uint64_t debugCounter = 0;
     for (uint64_t slot = 0; slot < numberOfSlots; slot++)
     {
         for (uint64_t i = 0; i < program.size(); i++)
@@ -222,18 +225,15 @@ void Sha256Executor::execute(const vector<vector<Goldilocks::Element>> &input, S
             }
             }
 
-            if (false && nadimStupidCounter < 10000)
+            if (true && (debugCounter < 10000))
             {
-                if (getPol(pols.inputs[0], absRefa) == 1)
-                {
-                    cout << nadimStupidCounter << ": " << gateop2string(program[i].op) << endl;
-                    cout << "pinA = " << program[i].pina << " | refA = " << program[i].refa << " || " << to_string(getPol(pols.inputs[0], absRefr)) << endl;
-                    cout << "pinB = " << program[i].pinb << " | refB = " << program[i].refb << " || " << to_string(getPol(pols.inputs[1], absRefr)) << endl;
-                    cout << "pinR = "
-                         << "x"
-                         << " | refR = " << program[i].refr << " || " << to_string(getPol(pols.output, absRefr)) << endl;
-                    nadimStupidCounter++;
-                }
+                cout << debugCounter << ": " << gateop2string(program[i].op) << endl;
+                cout << "pinA = " << program[i].pina << " | refA = " << program[i].refa << " || " << to_string(getPol(pols.inputs[0], absRefr)) << endl;
+                cout << "pinB = " << program[i].pinb << " | refB = " << program[i].refb << " || " << to_string(getPol(pols.inputs[1], absRefr)) << endl;
+                cout << "pinR = "
+                        << "x"
+                        << " | refR = " << program[i].refr << " || " << to_string(getPol(pols.output, absRefr)) << endl;
+                debugCounter++;
             }
         }
     }

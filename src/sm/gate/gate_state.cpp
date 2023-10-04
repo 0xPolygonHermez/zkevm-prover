@@ -193,7 +193,7 @@ void GateState::copySoutRefsToSinRefs(void)
     }
 }
 
-uint64_t nadimStupidCounter = 0;
+uint64_t debugCounter = 0;
 
 // Copy Sout data to Sin buffer, and reset
 void GateState::copySoutToSinAndResetRefs(void)
@@ -284,15 +284,15 @@ void GateState::OP(GateOperation op, uint64_t refA, PinId pinA, uint64_t refB, P
         zklog.error("GateState::OP() got invalid op=" + to_string(op));
         exitProcess();
     }
-    if (true && nadimStupidCounter < 10000)
+    if (true && (debugCounter < 10000))
     {
-        cout << nadimStupidCounter << ": " << gateop2string(op) << endl;
+        cout << debugCounter << ": " << gateop2string(op) << endl;
         cout << "pinA = " << pinA << " | refA = " << refA << " || " << to_string(gate[refA].pin[pinA].bit) << endl;
         cout << "pinB = " << pinB << " | refB = " << refB << " || " << to_string(gate[refB].pin[pinB].bit) << endl;
         cout << "pinR = "
              << "x"
              << " | refR = " << refR << " || " << to_string(gate[refR].pin[pin_r].bit) << endl;
-        nadimStupidCounter++;
+        debugCounter++;
     }
     // Increase the operands fan-out counters and add r to their connections
     if (refA != refR)

@@ -74,12 +74,16 @@ void SHA256SMTest(Goldilocks &fr, Sha256Executor &executor)
 		}
 
 		GateState S(SHA256GateConfig);
-		SHA256Gate(S, randomTestVectorPadded);
+		// SHA256Gate(S, randomTestVectorPadded);
 
 		// Fill the executor input slot with the generated random byte test vector, bit by bit.
-		// Note that we're filling it with randomByteCount.
+		// Note that we're filling it with paddedSize.
 		for (uint64_t byte = 0; byte < paddedSize; byte++)
 		{
+			if (slot == 0)
+			{
+				cout << byte << ": " << uint64_t(randomTestVectorPadded[byte]) << endl;
+			}
 			for (uint64_t bit = 0; bit < 8; bit++)
 			{
 				// Fill the bits normally from the test vector, with each bit being replaced with an equivalent
