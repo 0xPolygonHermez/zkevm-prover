@@ -124,10 +124,10 @@ zkresult ProgramPage::Write (const uint64_t pageNumber, const string &key, const
             // Get header page data
             HeaderStruct * headerPage = (HeaderStruct *)pageManager.getPage(headerPageNumber);
             uint64_t rawDataPage = headerPage->rawDataPage;
-            uint64_t rawDataOffset = headerPage->rawDataOffset;
+            uint64_t rawDataOffset = RawDataPage::GetOffset(headerPage->rawDataPage);
 
             // Write to raw data page list
-            zkr = RawDataPage::Write(rawDataPage, rawDataOffset, keyAndProgram);
+            zkr = RawDataPage::Write(rawDataPage, keyAndProgram);
             if (zkr != ZKR_SUCCESS)
             {
                 zklog.error("ProgramPage::Write() failed calling RawDataPage::Write() result=" + zkresult2string(zkr) + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index) + " level=" + to_string(level) + " key=" + ba2string(key));
@@ -142,7 +142,7 @@ zkresult ProgramPage::Write (const uint64_t pageNumber, const string &key, const
                     " level=" + to_string(level) +
                     " key=" + ba2string(key) +
                     " rawDataPage=" + to_string(headerPage->rawDataPage) +
-                    " rawDataOffset=" + to_string(headerPage->rawDataOffset) +
+                    " rawDataOffset=" + to_string(rawDataOffset) +
                     " leaving headerPage->rawDataPage=" + to_string(rawDataPage) +
                     " headerPage->rawDataOffset=" + to_string(rawDataOffset));
             }
@@ -150,12 +150,10 @@ zkresult ProgramPage::Write (const uint64_t pageNumber, const string &key, const
 
             // Update this entry as a leaf node (control = 1)
             page->key[index][0] = length | (uint64_t(1)<<48);
-            page->key[index][1] = headerPage->rawDataPage | (headerPage->rawDataOffset << 48);
+            page->key[index][1] = headerPage->rawDataPage | (rawDataOffset << 48);
 
             // Update header page data
             headerPage->rawDataPage = rawDataPage;
-            headerPage->rawDataOffset = rawDataOffset;
-
 
             return ZKR_SUCCESS;
         }

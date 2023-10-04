@@ -11,59 +11,80 @@ zkresult RawDataPage::InitEmptyPage (const uint64_t pageNumber)
 {
     RawDataStruct * page = (RawDataStruct *)pageManager.getPage(pageNumber);
     memset((void *)page, 0, 4096);
+    page->nextPageNumberAndOffset = minOffset << 48;
     return ZKR_SUCCESS;
 }
 
-zkresult RawDataPage::Read (const uint64_t _pageNumber, const uint64_t _position, const uint64_t length, string &data)
+zkresult RawDataPage::Read (const uint64_t _pageNumber, const uint64_t _offset, const uint64_t length, string &data)
 {
     uint64_t pageNumber = _pageNumber;
-    uint64_t position = _position;
-    zkassert(position >= minPosition);
-    zkassert(position <= maxPosition);
+    uint64_t offset = _offset;
+    RawDataStruct * page = (RawDataStruct *)pageManager.getPage(pageNumber);
+    uint64_t pageOffset = page->nextPageNumberAndOffset >> 48;
+    zkassert(pageOffset >= minOffset);
+    zkassert(pageOffset <= maxOffset);
+    zkassert(offset >= minOffset);
+    zkassert(offset <= maxOffset);
+    zkassert(offset <= pageOffset);
 
     uint64_t copiedBytes = 0;
     while (copiedBytes < length)
     {
         // If we run out of data in the current page, get the next one
-        if (position == maxPosition)
-        {
+        if (offset == maxOffset)
+        { 
             RawDataStruct * page = (RawDataStruct *)pageManager.getPage(pageNumber);
-            zkassert(page->nextPageNumber != 0);
-            pageNumber = page->nextPageNumber;
-            position = minPosition;
+            uint64_t nextPageNumber = page->nextPageNumberAndOffset & 0xFFFFFF;
+            uint64_t nextPageOffset = page->nextPageNumberAndOffset >> 48;
+            zkassert(nextPageNumber != 0);
+            zkassert((nextPageOffset == maxOffset) || ((nextPageOffset - minOffset) >= (length - copiedBytes)));
+            pageNumber = nextPageNumber;
+            offset = minOffset;
         }
 
         // Get the pointer corresponding to the current page number
         RawDataStruct * page = (RawDataStruct *)pageManager.getPage(pageNumber);
 
         // Calculate the amount of bytes to copy this time
-        uint64_t pageRemainingBytes = maxPosition - position;
+        uint64_t pageRemainingBytes = maxOffset - offset;
         zkassert(pageRemainingBytes > 0);
         zkassert(copiedBytes < length);
         uint64_t bytesToCopy = zkmin(pageRemainingBytes, length - copiedBytes);
 
         // Copy data
-        data.append((char *)page + position, bytesToCopy);
+        data.append((char *)page + offset, bytesToCopy);
 
         // Update counters
-        position += bytesToCopy;
+        offset += bytesToCopy;
         copiedBytes += bytesToCopy;
     }
 
     return ZKR_SUCCESS;
 }
 
-zkresult RawDataPage::Write (uint64_t &pageNumber, uint64_t &position, const string &data)
+zkresult RawDataPage::Write (uint64_t &pageNumber, const string &data)
 {
-    // Check input parameters
-    if (position < minPosition)
+    // Get the pointer corresponding to the current page number
+    RawDataStruct * page = (RawDataStruct *)pageManager.getPage(pageNumber);
+
+    // Get page attributes
+    uint64_t offset = page->nextPageNumberAndOffset >> 48;
+    uint64_t nextPage = page->nextPageNumberAndOffset & 0xFFFFFF;
+
+    // Check attributes
+    if (nextPage != 0)
     {
-        zklog.error("RawDataPage::Write() got invalid position=" + to_string(position) + " pageNumber=" + to_string(pageNumber) + " length=" + to_string(data.size()));
+        zklog.error("RawDataPage::Write() found non-zero nextPage=" + to_string(nextPage) + " pageNumber=" + to_string(pageNumber) + " length=" + to_string(data.size()));
         return ZKR_DB_ERROR;
     }
-    if (position > maxPosition)
+    if (offset < minOffset)
     {
-        zklog.error("RawDataPage::Write() got invalid position=" + to_string(position) + " pageNumber=" + to_string(pageNumber) + " length=" + to_string(data.size()));
+        zklog.error("RawDataPage::Write() found too-small offset=" + to_string(offset) + " pageNumber=" + to_string(pageNumber) + " length=" + to_string(data.size()));
+        return ZKR_DB_ERROR;
+    }
+    if (offset > maxOffset)
+    {
+        zklog.error("RawDataPage::Write() found too-big offset=" + to_string(offset) + " pageNumber=" + to_string(pageNumber) + " length=" + to_string(data.size()));
         return ZKR_DB_ERROR;
     }
 
@@ -71,36 +92,46 @@ zkresult RawDataPage::Write (uint64_t &pageNumber, uint64_t &position, const str
     while (copiedBytes < data.size())
     {
         // If we run out of space in the current page, get a new one
-        if (position == maxPosition)
+        if (offset == maxOffset)
         {
             uint64_t nextPageNumber = pageManager.getFreePage();
             InitEmptyPage(nextPageNumber);
             RawDataStruct * nextPage = (RawDataStruct *)pageManager.getPage(nextPageNumber);
             RawDataStruct * page = (RawDataStruct *)pageManager.getPage(pageNumber);
-            page->nextPageNumber = nextPageNumber;
+            page->nextPageNumberAndOffset = nextPageNumber | (maxOffset << 48);
             nextPage->previousPageNumber = pageNumber;
             pageNumber = nextPageNumber;
-            position = minPosition;
+            offset = minOffset;
         }
 
         // Get the pointer corresponding to the current page number
         RawDataStruct * page = (RawDataStruct *)pageManager.getPage(pageNumber);
 
         // Calculate the amount of bytes to write this time
-        uint64_t pageRemainingBytes = maxPosition - position;
+        uint64_t pageRemainingBytes = maxOffset - offset;
         zkassert(pageRemainingBytes > 0);
         zkassert(copiedBytes < data.size());
         uint64_t bytesToCopy = zkmin(pageRemainingBytes, data.size() - copiedBytes);
 
         // Copy data
-        memcpy((char *)page + position, data.c_str() + copiedBytes, bytesToCopy);
+        memcpy((char *)page + offset, data.c_str() + copiedBytes, bytesToCopy);
 
         // Update counters
-        position += bytesToCopy;
+        offset += bytesToCopy;
         copiedBytes += bytesToCopy;
+        page->nextPageNumberAndOffset = offset << 48;
     }
 
     return ZKR_SUCCESS;
+}
+
+uint64_t RawDataPage::GetOffset (const uint64_t pageNumber)
+{
+    RawDataStruct * page = (RawDataStruct *)pageManager.getPage(pageNumber);
+    uint64_t offset = page->nextPageNumberAndOffset >> 48;
+    zkassert(offset >= minOffset);
+    zkassert(offset <= maxOffset);
+    return offset;
 }
 
 void RawDataPage::Print (const uint64_t pageNumber, bool details)
@@ -109,6 +140,6 @@ void RawDataPage::Print (const uint64_t pageNumber, bool details)
     if (details)
     {
         RawDataStruct * page = (RawDataStruct *)pageManager.getPage(pageNumber);
-        zklog.info("  previousPageNumber=" + to_string(page->previousPageNumber) + "  nextPageNumber=" + to_string(page->nextPageNumber));
+        zklog.info("  previousPageNumber=" + to_string(page->previousPageNumber) + "  nextPageNumber=" + to_string(page->nextPageNumberAndOffset & 0xFFFFFF) + " offset=" + to_string(page->nextPageNumberAndOffset >> 48));
     }
 }

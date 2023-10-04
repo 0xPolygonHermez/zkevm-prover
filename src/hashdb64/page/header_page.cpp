@@ -43,7 +43,6 @@ zkresult HeaderPage::InitEmptyPage (const uint64_t pageNumber)
         return zkr;
     }
     page->rawDataPage = page->firstRawDataPage;
-    page->rawDataOffset = RawDataPage::minPosition;
 
     // Create the program page, and init it
     page->programPage = pageManager.getFreePage();
@@ -95,7 +94,7 @@ void HeaderPage::Print (const uint64_t pageNumber, bool details)
     // Print raw data
     zklog.info("  firstRawDataPage=" + to_string(page->firstRawDataPage) + "=" + to_string((uint64_t)pageManager.getPage(page->firstRawDataPage)));
     zklog.info("  rawDataPage=" + to_string(page->rawDataPage) + "=" + to_string((uint64_t)pageManager.getPage(page->rawDataPage)));
-    zklog.info("  rawDataOffset=" + to_string(page->rawDataOffset));
+    RawDataPage::Print(page->rawDataPage, details);
 
     // Program page
     zklog.info("  programPage=" + to_string(page->programPage) + "=" + to_string((uint64_t)pageManager.getPage(page->programPage)));

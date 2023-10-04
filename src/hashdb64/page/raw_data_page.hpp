@@ -30,20 +30,23 @@
 
 struct RawDataStruct
 {
-    uint64_t previousPageNumber;
-    uint64_t nextPageNumber;
+    uint64_t previousPageNumber; // reserved (2B) + previousPageNumber (6B)
+    uint64_t nextPageNumberAndOffset; // offset (2B) + nextPageNumber (6B)
 };
 
 class RawDataPage
 {
 public:
 
-    static const uint64_t minPosition = 16; // This means that the page is completely empty
-    static const uint64_t maxPosition = 4096; // This means that the page is completely full
+    static const uint64_t minOffset= 16; // This means that the page is completely empty
+    static const uint64_t maxOffset = 4096; // This means that the page is completely full
+    static const uint64_t allignment = 8; // The data will be written in an address alligned with these many bytes
 
     static zkresult InitEmptyPage (const uint64_t  pageNumber);
-    static zkresult Read          (const uint64_t  pageNumber, const uint64_t  position, const uint64_t length,      string &data);
-    static zkresult Write         (      uint64_t &pageNumber,       uint64_t &position,                       const string &data);
+    static zkresult Read          (const uint64_t  pageNumber, const uint64_t offset, const uint64_t length,       string &data);
+    static zkresult Write         (      uint64_t &pageNumber,                                               const string &data);
+    
+    static uint64_t GetOffset     (const uint64_t  pageNumber);
     
     static void Print (const uint64_t pageNumber, bool details);
 };

@@ -17,7 +17,6 @@ struct HeaderStruct
     // Raw data
     uint64_t firstRawDataPage;
     uint64_t rawDataPage;
-    uint64_t rawDataOffset;
 
     // Program page list
     uint64_t programPage;
