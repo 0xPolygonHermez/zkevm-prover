@@ -68,6 +68,7 @@ PageManager::~PageManager(void)
 }
 zkresult PageManager::AddPages(const uint64_t nPages_)
 {
+    lock_guard<recursive_mutex> guard(mlock);
     assert(mappedFile == false);
     char *auxPages = NULL;
     auxPages = (char *)realloc(pages, (nPages + nPages_) * 4096);
@@ -87,6 +88,7 @@ zkresult PageManager::AddPages(const uint64_t nPages_)
 
 uint64_t PageManager::getFreePage(void)
 {
+    lock_guard<recursive_mutex> guard(mlock);
     uint32_t pageNumber;
     if(freePages.size() > 0){
         pageNumber = freePages.front();
@@ -103,12 +105,14 @@ uint64_t PageManager::getFreePage(void)
 }
 void PageManager::releasePage(const uint64_t pageNumber)
 {
+    lock_guard<recursive_mutex> guard(mlock);
     zkassertpermanent(pageNumber >= 2 && pageNumber<firstUnusedPage); //first two pages cannot be released
     memset(getPageAddress(pageNumber), 0, 4096);
     freePages.push_back(pageNumber);
 }
 uint32_t PageManager::editPage(const uint32_t pageNumber)
 {
+    lock_guard<recursive_mutex> guard(mlock);
     if(pageNumber <= 1){
         return 1;
     }
@@ -125,7 +129,8 @@ uint32_t PageManager::editPage(const uint32_t pageNumber)
     return pageNumber_;
 }
 void PageManager::flushPages(){
-
+    
+    lock_guard<recursive_mutex> guard(mlock);
     if(!mappedFile){
         memcpy(getPageAddress(0), getPageAddress(1), 4096); // copy tmp header to header
     }else{

@@ -7,6 +7,8 @@
 #include "zkresult.hpp"
 #include <list>
 #include <unordered_map>
+#include <mutex>
+
 
 class PageManager
 {
@@ -31,6 +33,8 @@ public:
     };
 
 private:
+
+    recursive_mutex mlock;
 
     bool mappedFile;
     string fileName;
