@@ -21,7 +21,8 @@ PageManager::PageManager()
 }
 PageManager::PageManager(const uint64_t nPages_)
 {
-    zkassertpermanent(nPages_ >= 2);
+    zkassertpermanent(nPages_ > 2);
+    firstUnusedPage = 2;
     mappedFile = false;
     nPages = 0;
     pages = NULL;
@@ -48,13 +49,12 @@ PageManager::PageManager(const string fileName_){
 
     fileSize = file_stat.st_size;
     nPages = fileSize / 4096;
-    zkassertpermanent(nPages >= 2);
+    zkassertpermanent(nPages > 2);
     pages = (char *)mmap(NULL, fileSize, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_POPULATE, fd, 0);
     if (pages == MAP_FAILED) {
         zklog.error("Failed to mmap file: " + (string)strerror(errno));
     }
-    for (uint64_t i = 2; i < nPages; i++) //0 and 1 are reserved pages
-        freePages.push_back(i);
+    firstUnusedPage = 2;
 }
 PageManager::~PageManager(void)
 {
@@ -75,8 +75,6 @@ zkresult PageManager::AddPages(const uint64_t nPages_)
     {
         pages = auxPages;
         memset(pages + nPages * 4096, 0, nPages_ * 4096);
-        for (uint64_t i = 2; i < nPages_; i++) //0 and 1 are reserved pages
-            freePages.push_back(nPages + i);
         nPages += nPages_;
     }
     else
@@ -89,14 +87,23 @@ zkresult PageManager::AddPages(const uint64_t nPages_)
 
 uint64_t PageManager::getFreePage(void)
 {
-    zkassertpermanent(freePages.size() > 0);
-    uint32_t pageNumber = freePages.front();
-    freePages.pop_front();
+    uint32_t pageNumber;
+    if(freePages.size() > 0){
+        pageNumber = freePages.front();
+        freePages.pop_front();
+    }else{
+        pageNumber = firstUnusedPage;
+        firstUnusedPage++;
+        if(pageNumber >= nPages){
+            zklog.error("PageManager::getFreePage() failed, no more pages available");
+            exitProcess();
+        }
+    }
     return pageNumber;
 }
 void PageManager::releasePage(const uint64_t pageNumber)
 {
-    zkassert(pageNumber >= 2 && pageNumber<nPages); //first two pages cannot be released
+    zkassertpermanent(pageNumber >= 2 && pageNumber<firstUnusedPage); //first two pages cannot be released
     memset(getPageAddress(pageNumber), 0, 4096);
     freePages.push_back(pageNumber);
 }

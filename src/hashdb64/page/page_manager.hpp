@@ -23,7 +23,7 @@ public:
     void flushPages();
 
     inline uint32_t getNumFreePages(){
-        return freePages.size();
+        return freePages.size()+nPages-firstUnusedPage;
     };
     inline char *getPageAddress(const uint64_t pageNumber)
     {
@@ -40,6 +40,7 @@ private:
     uint32_t nPages;
     char *pages;
 
+    uint32_t firstUnusedPage;
     std::list<uint32_t> freePages;
     std::unordered_map<uint32_t, uint32_t> editedPages;
 
