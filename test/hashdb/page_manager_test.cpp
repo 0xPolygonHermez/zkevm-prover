@@ -9,14 +9,6 @@
 #include <unordered_set>
 #include <fcntl.h>
 
-/*
-    uint64_t getFreePage();
-    void releasePage(const uint64_t pageNumber);
-    uint32_t editPage(const uint32_t pageNumber);
-    void flushPages();
-    inline uint32_t getNumFreePages();
-*/
-
 uint64_t PageManagerTest (void)
 {
     TimerStart(PAGE_MANAGER_TEST);
@@ -163,7 +155,7 @@ uint64_t PageManagerTest (void)
     for(uint64_t i=0; i<256;++i){
         zkassertpermanent(page4Data[i] == i);
     }
-    
+
     //delete file
     std::remove(fileName.c_str());
 
