@@ -1,12 +1,12 @@
-#ifndef RAW_DATA_PAGE_HPP
-#define RAW_DATA_PAGE_HPP
+#ifndef PAGE_LIST_PAGE_HPP
+#define PAGE_LIST_PAGE_HPP
 
 #include <unistd.h>
 #include "zkresult.hpp"
 #include "zkassert.hpp"
 
 /*
-    Example with 3 raw pages:
+    Example with 3 page list pages:
 
     First page:
         previousPageNumber = 0;
@@ -20,32 +20,26 @@
         previousPageNumber = second page
         nextPageNumber = 0;
 
-    Header contains:
-        first page (0)
-        current page (3)
-
-    You can append data to the raw data list, but you cannot modify data that has been previously appended
+    You can insert a page to the page list, creating a new pages if the current one is full
+    You can remove a page from the page list, feeing the current pages when empty
 */
 
-struct RawDataStruct
+struct PageListStruct
 {
     uint64_t previousPageNumber; // reserved (2B) + previousPageNumber (6B)
     uint64_t nextPageNumberAndOffset; // offset (2B) + nextPageNumber (6B)
 };
 
-class RawDataPage
+class PageListPage
 {
 public:
 
     static const uint64_t minOffset= 16; // This means that the page is completely empty
     static const uint64_t maxOffset = 4096; // This means that the page is completely full
-    static const uint64_t allignment = 8; // The data will be written in an address alligned with these many bytes
 
     static zkresult InitEmptyPage (const uint64_t  pageNumber);
-    static zkresult Read          (const uint64_t  pageNumber, const uint64_t offset, const uint64_t length,       string &data);
-    static zkresult Write         (      uint64_t &pageNumber,                                               const string &data);
-    
-    static uint64_t GetOffset     (const uint64_t  pageNumber);
+    static zkresult InsertPage    (      uint64_t &pageNumber, const uint64_t pageNumberToInsert);
+    static zkresult ExtractPage   (      uint64_t &pageNumber,       uint64_t &extractedPageNumber);
     
     static void Print (const uint64_t pageNumber, bool details);
 };
