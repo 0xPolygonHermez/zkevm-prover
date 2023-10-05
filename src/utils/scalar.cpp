@@ -492,6 +492,25 @@ void ba2ba (string &baString, const uint64_t ba)
     }
 }
 
+uint64_t ba2ba (const string &baString)
+{
+    if (baString.size() != 8)
+    {
+        zklog.error("ba2ba() found invalid baString.size()=" + to_string(baString.size()) + "!=2");
+        exitProcess();
+    }
+    uint64_t result;
+    result = (uint64_t(uint8_t(baString[0]))<<56) |
+             (uint64_t(uint8_t(baString[1]))<<48) |
+             (uint64_t(uint8_t(baString[2]))<<40) |
+             (uint64_t(uint8_t(baString[3]))<<32) |
+             (uint64_t(uint8_t(baString[4]))<<24) |
+             (uint64_t(uint8_t(baString[5]))<<16) |
+             (uint64_t(uint8_t(baString[6]))<< 8) |
+             (uint64_t(uint8_t(baString[7]))    );
+    return result;
+}
+
 /* Byte array of exactly 2 bytes conversion */
 
 void ba2u16 (const uint8_t *pData, uint16_t &n)
