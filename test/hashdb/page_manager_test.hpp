@@ -4,5 +4,7 @@
 #include <cstdint>
 
 uint64_t PageManagerTest (void);
+uint64_t PageManagerAccuracyTest (void);
+uint64_t PageManagerPerformanceTest (void);
 
 #endif

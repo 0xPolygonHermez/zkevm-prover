@@ -8,12 +8,95 @@
 #include "page_manager.hpp"
 #include <unordered_set>
 #include <fcntl.h>
+#include "page_manager_test.hpp"
+#include "omp.h"
+#include <random>
+#include <unordered_set>
+
 
 uint64_t PageManagerTest (void)
 {
+    PageManagerAccuracyTest();
+    PageManagerPerformanceTest();
+    return 0;
+}
+
+uint64_t PageManagerPerformanceTest(void){
+
+    std::cout << "PageManagerPerformanceTest" << std::endl;
+    string fileName = "benchmark_file.bin";
+
+    // Create the state manager
+    double start = omp_get_wtime();
+    PageManager pageManagerFile(fileName);
+    double end = omp_get_wtime();
+    std::cout << "Time to construct the PageManager: " << end - start << " seconds" << std::endl;
+
+    // Evaluate 20K different random positions in the range [0,numPages)
+    uint32_t numPages = pageManagerFile.getNumFreePages() +2;
+    uint32_t numPositions = 20000;
+    uint32_t *position = (uint32_t *)malloc(numPositions * sizeof(uint32_t));
+    std::random_device rd;
+    std::mt19937 rng(rd());
+
+    unordered_set<uint32_t> positionsSet;
+    for (uint32_t i = 0; i < numPositions; ++i) {
+        uint32_t pos = 0;
+        while (positionsSet.size() != i+1){
+            pos = std::uniform_int_distribution<uint32_t>(0, numPages - 1)(rng);
+            positionsSet.insert(pos);
+        }
+        position[i] = pos;
+    }
+
+    
+    std::cout << std::endl << "Number of pages modified: " << positionsSet.size() << std::endl;
+
+    //Change first value of each page
+    start = omp_get_wtime();
+    for (uint32_t i = 0; i < numPositions; ++i) {
+        uint32_t* pageData = (uint32_t *)pageManagerFile.getPageAddress(position[i]);
+        pageData[0] = i;    
+    }
+    end = omp_get_wtime();
+    std::cout << "Time to change first value of each page: " << end - start << " seconds" << std::endl;
+
+    //Change second value of each page
+    start = omp_get_wtime();
+    for (uint32_t i = 0; i < numPositions; ++i) {
+        uint32_t* pageData = (uint32_t *)pageManagerFile.getPageAddress(position[i]);
+        assert(pageData[0] == i );
+        pageData[1] = i;    
+    }
+    end = omp_get_wtime();
+    std::cout << "Time to change the second value of each page: " << end - start << " seconds (cache efects)" << std::endl;
+
+    //flushPAges
+    start = omp_get_wtime();
+    pageManagerFile.flushPages();
+    end = omp_get_wtime();
+    
+    std::cout << "Time to flush "<<numPositions<<" pages: " << end - start << " seconds" << std::endl;
+    double numGBytes = (numPositions * 4096.0) / (1024.0  * 1024.0);
+    double time = end - start;
+    std::cout << "Throughput: "<< numGBytes / time << " MBytes/s" << std::endl << std::endl;
+    
+    //Check that positions are in the file
+    PageManager pageManagerFile2(fileName);
+    for (uint32_t i = 0; i < numPositions; ++i) {
+        uint32_t* pageData = (uint32_t *)pageManagerFile2.getPageAddress(position[i]);
+        assert(pageData[0] == i );
+        assert(pageData[1] == i );
+    }
+    
+
+    return 0;
+}
+uint64_t PageManagerAccuracyTest (void)
+{
     TimerStart(PAGE_MANAGER_TEST);
 
-    std::cout << "PageManagerTest" << std::endl;
+    std::cout << "PageManagerAccuracyTest" << std::endl;
     //
     // Memory version
     //
