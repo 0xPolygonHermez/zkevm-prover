@@ -477,8 +477,10 @@ zkresult Database64::WriteTree (const Goldilocks::Element (&oldRoot)[4], const v
     // Get the old root as a string
     string oldRootString = fea2string(fr, oldRoot);
 
-    //uint64_t currentVersion = 0;
-    //uint64_t newVersion = HeaderPage::GetLastVersion(headerPage) + 1;
+    uint64_t currentVersion = HeaderPage::GetLastVersion(headerPage);
+    uint64_t version = currentVersion + 1;
+    HeaderPage::SetLastVersion(headerPage, version);
+    HeaderPage::Print(headerPage, false);
 
     // If old root is zero, init chunks[0] as an empty tree chunk
     if (fr.isZero(oldRoot[0]) && fr.isZero(oldRoot[1]) && fr.isZero(oldRoot[2]) && fr.isZero(oldRoot[3]))

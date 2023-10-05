@@ -9,6 +9,10 @@
 
 struct HeaderStruct
 {
+    // Raw data
+    uint64_t firstRawDataPage;
+    uint64_t rawDataPage;
+
     // Root -> version
     uint64_t lastVersion;
     uint64_t rootVersionPage;
@@ -19,10 +23,6 @@ struct HeaderStruct
     // Key -> value history
     uint64_t keyValueHistoryPage;
 
-    // Raw data
-    uint64_t firstRawDataPage;
-    uint64_t rawDataPage;
-
     // Program page list
     uint64_t programPage;
 };
@@ -30,9 +30,12 @@ struct HeaderStruct
 class HeaderPage
 {
 public:
-    static zkresult InitEmptyPage (const uint64_t pageNumber);
+    // Header-only methods
+    static zkresult InitEmptyPage  (const uint64_t pageNumber);
     static uint64_t GetLastVersion (const uint64_t pageNumber);
-    static void     SetLastVersion (const uint64_t pageNumber, const uint64_t lastVersion);
+    static void     SetLastVersion (uint64_t &pageNumber, const uint64_t lastVersion);
+
+
 
     static void Print (const uint64_t pageNumber, bool details);
 };
