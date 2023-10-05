@@ -138,7 +138,7 @@ zkresult Database64::setProgram (const string &key, const vector<uint8_t> &data,
     string program;
     ba2ba(data, program);
 
-    HeaderStruct * header = (HeaderStruct *)pageManager.getPage(headerPage);
+    HeaderStruct * header = (HeaderStruct *)pageManager.getPageAddress(headerPage);
     zkr = KeyValuePage::Write(header->programPage, string2ba(key), program, headerPage);
     if (zkr != ZKR_SUCCESS)
     {
@@ -179,7 +179,7 @@ zkresult Database64::getProgram(const string &key, vector<uint8_t> &data, Databa
 
     string program;
 
-    HeaderStruct * header = (HeaderStruct *)pageManager.getPage(headerPage);
+    HeaderStruct * header = (HeaderStruct *)pageManager.getPageAddress(headerPage);
     zkr = KeyValuePage::Read(header->programPage, string2ba(key), program);
     if (zkr != ZKR_SUCCESS)
     {

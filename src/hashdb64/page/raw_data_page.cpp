@@ -9,7 +9,7 @@
 
 zkresult RawDataPage::InitEmptyPage (const uint64_t pageNumber)
 {
-    RawDataStruct * page = (RawDataStruct *)pageManager.getPage(pageNumber);
+    RawDataStruct * page = (RawDataStruct *)pageManager.getPageAddress(pageNumber);
     memset((void *)page, 0, 4096);
     page->nextPageNumberAndOffset = minOffset << 48;
     return ZKR_SUCCESS;
@@ -19,7 +19,7 @@ zkresult RawDataPage::Read (const uint64_t _pageNumber, const uint64_t _offset, 
 {
     uint64_t pageNumber = _pageNumber;
     uint64_t offset = _offset;
-    RawDataStruct * page = (RawDataStruct *)pageManager.getPage(pageNumber);
+    RawDataStruct * page = (RawDataStruct *)pageManager.getPageAddress(pageNumber);
     uint64_t pageOffset = page->nextPageNumberAndOffset >> 48;
     zkassert(pageOffset >= minOffset);
     zkassert(pageOffset <= maxOffset);
@@ -33,7 +33,7 @@ zkresult RawDataPage::Read (const uint64_t _pageNumber, const uint64_t _offset, 
         // If we run out of data in the current page, get the next one
         if (offset == maxOffset)
         { 
-            RawDataStruct * page = (RawDataStruct *)pageManager.getPage(pageNumber);
+            RawDataStruct * page = (RawDataStruct *)pageManager.getPageAddress(pageNumber);
             uint64_t nextPageNumber = page->nextPageNumberAndOffset & 0xFFFFFF;
             uint64_t nextPageOffset = page->nextPageNumberAndOffset >> 48;
             zkassert(nextPageNumber != 0);
@@ -43,7 +43,7 @@ zkresult RawDataPage::Read (const uint64_t _pageNumber, const uint64_t _offset, 
         }
 
         // Get the pointer corresponding to the current page number
-        RawDataStruct * page = (RawDataStruct *)pageManager.getPage(pageNumber);
+        RawDataStruct * page = (RawDataStruct *)pageManager.getPageAddress(pageNumber);
 
         // Calculate the amount of bytes to copy this time
         uint64_t pageRemainingBytes = maxOffset - offset;
@@ -65,7 +65,7 @@ zkresult RawDataPage::Read (const uint64_t _pageNumber, const uint64_t _offset, 
 zkresult RawDataPage::Write (uint64_t &pageNumber, const string &data)
 {
     // Get the pointer corresponding to the current page number
-    RawDataStruct * page = (RawDataStruct *)pageManager.getPage(pageNumber);
+    RawDataStruct * page = (RawDataStruct *)pageManager.getPageAddress(pageNumber);
 
     // Get page attributes
     uint64_t offset = page->nextPageNumberAndOffset >> 48;
@@ -96,8 +96,8 @@ zkresult RawDataPage::Write (uint64_t &pageNumber, const string &data)
         {
             uint64_t nextPageNumber = pageManager.getFreePage();
             InitEmptyPage(nextPageNumber);
-            RawDataStruct * nextPage = (RawDataStruct *)pageManager.getPage(nextPageNumber);
-            RawDataStruct * page = (RawDataStruct *)pageManager.getPage(pageNumber);
+            RawDataStruct * nextPage = (RawDataStruct *)pageManager.getPageAddress(nextPageNumber);
+            RawDataStruct * page = (RawDataStruct *)pageManager.getPageAddress(pageNumber);
             page->nextPageNumberAndOffset = nextPageNumber | (maxOffset << 48);
             nextPage->previousPageNumber = pageNumber;
             pageNumber = nextPageNumber;
@@ -105,7 +105,7 @@ zkresult RawDataPage::Write (uint64_t &pageNumber, const string &data)
         }
 
         // Get the pointer corresponding to the current page number
-        RawDataStruct * page = (RawDataStruct *)pageManager.getPage(pageNumber);
+        RawDataStruct * page = (RawDataStruct *)pageManager.getPageAddress(pageNumber);
 
         // Calculate the amount of bytes to write this time
         uint64_t pageRemainingBytes = maxOffset - offset;
@@ -127,7 +127,7 @@ zkresult RawDataPage::Write (uint64_t &pageNumber, const string &data)
 
 uint64_t RawDataPage::GetOffset (const uint64_t pageNumber)
 {
-    RawDataStruct * page = (RawDataStruct *)pageManager.getPage(pageNumber);
+    RawDataStruct * page = (RawDataStruct *)pageManager.getPageAddress(pageNumber);
     uint64_t offset = page->nextPageNumberAndOffset >> 48;
     zkassert(offset >= minOffset);
     zkassert(offset <= maxOffset);
@@ -139,7 +139,7 @@ void RawDataPage::Print (const uint64_t pageNumber, bool details)
     zklog.info("RawDataPage::Print() pageNumber=" + to_string(pageNumber));
     if (details)
     {
-        RawDataStruct * page = (RawDataStruct *)pageManager.getPage(pageNumber);
+        RawDataStruct * page = (RawDataStruct *)pageManager.getPageAddress(pageNumber);
         zklog.info("  previousPageNumber=" + to_string(page->previousPageNumber) + "  nextPageNumber=" + to_string(page->nextPageNumberAndOffset & 0xFFFFFF) + " offset=" + to_string(page->nextPageNumberAndOffset >> 48));
     }
 }

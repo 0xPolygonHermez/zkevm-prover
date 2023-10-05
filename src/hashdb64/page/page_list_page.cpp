@@ -9,7 +9,7 @@
 
 zkresult PageListPage::InitEmptyPage (const uint64_t pageNumber)
 {
-    PageListStruct * page = (PageListStruct *)pageManager.getPage(pageNumber);
+    PageListStruct * page = (PageListStruct *)pageManager.getPageAddress(pageNumber);
     memset((void *)page, 0, 4096);
     page->nextPageNumberAndOffset = minOffset << 48;
     return ZKR_SUCCESS;
@@ -18,7 +18,7 @@ zkresult PageListPage::InitEmptyPage (const uint64_t pageNumber)
 zkresult PageListPage::InsertPage (uint64_t &pageNumber, const uint64_t pageNumberToInsert)
 {
     // Get page
-    PageListStruct * page = (PageListStruct *)pageManager.getPage(pageNumber);
+    PageListStruct * page = (PageListStruct *)pageManager.getPageAddress(pageNumber);
 
     // Check page attributes
     uint64_t offset = page->nextPageNumberAndOffset >> 48;
@@ -32,11 +32,11 @@ zkresult PageListPage::InsertPage (uint64_t &pageNumber, const uint64_t pageNumb
     if (offset == maxOffset)
     {
         uint64_t nextPageNumber = pageManager.getFreePage();
-        PageListStruct * nextPage = (PageListStruct *)pageManager.getPage(nextPageNumber);
+        PageListStruct * nextPage = (PageListStruct *)pageManager.getPageAddress(nextPageNumber);
         nextPage->previousPageNumber = pageNumber;
         page->nextPageNumberAndOffset = nextPageNumber | (maxOffset << 48);
         pageNumber = nextPageNumber;
-        page = (PageListStruct *)pageManager.getPage(pageNumber);
+        page = (PageListStruct *)pageManager.getPageAddress(pageNumber);
     }
 
     // Check page attributes
@@ -59,7 +59,7 @@ zkresult PageListPage::InsertPage (uint64_t &pageNumber, const uint64_t pageNumb
 zkresult PageListPage::ExtractPage (uint64_t &pageNumber, uint64_t &extractedPageNumber)
 {
     // Get page
-    PageListStruct * page = (PageListStruct *)pageManager.getPage(pageNumber);
+    PageListStruct * page = (PageListStruct *)pageManager.getPageAddress(pageNumber);
 
     // Check page attributes
     uint64_t offset = page->nextPageNumberAndOffset >> 48;
@@ -86,7 +86,7 @@ zkresult PageListPage::ExtractPage (uint64_t &pageNumber, uint64_t &extractedPag
 
         // Replace page
         pageNumber = previousPageNumber;
-        page = (PageListStruct *)pageManager.getPage(pageNumber);
+        page = (PageListStruct *)pageManager.getPageAddress(pageNumber);
         offset = page->nextPageNumberAndOffset >> 48;
     }
 
@@ -112,7 +112,7 @@ zkresult PageListPage::ExtractPage (uint64_t &pageNumber, uint64_t &extractedPag
 
         // Replace page
         pageNumber = previousPageNumber;
-        page = (PageListStruct *)pageManager.getPage(pageNumber);
+        page = (PageListStruct *)pageManager.getPageAddress(pageNumber);
         offset = page->nextPageNumberAndOffset >> 48;
     }
 
@@ -124,7 +124,7 @@ void PageListPage::Print (const uint64_t pageNumber, bool details)
     zklog.info("PageListPage::Print() pageNumber=" + to_string(pageNumber));
     if (details)
     {
-        PageListStruct * page = (PageListStruct *)pageManager.getPage(pageNumber);
+        PageListStruct * page = (PageListStruct *)pageManager.getPageAddress(pageNumber);
         zklog.info("  previousPageNumber=" + to_string(page->previousPageNumber) + "  nextPageNumber=" + to_string(page->nextPageNumberAndOffset & 0xFFFFFF) + " offset=" + to_string(page->nextPageNumberAndOffset >> 48));
     }
 }

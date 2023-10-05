@@ -8,7 +8,7 @@
 
 zkresult HashPage::InitEmptyPage (const uint64_t pageNumber)
 {
-    HashStruct * page = (HashStruct *)pageManager.getPage(pageNumber);
+    HashStruct * page = (HashStruct *)pageManager.getPageAddress(pageNumber);
     memset((void *)page, 0, 4096);
     return ZKR_SUCCESS;
 }
@@ -16,7 +16,7 @@ zkresult HashPage::InitEmptyPage (const uint64_t pageNumber)
 zkresult HashPage::Read (const uint64_t pageNumber, const uint64_t position, string &hash)
 {
     zkassert(position < 128);
-    HashStruct * page = (HashStruct *)pageManager.getPage(pageNumber);
+    HashStruct * page = (HashStruct *)pageManager.getPageAddress(pageNumber);
     hash.copy((char *)page->hash[position], 32, 0);
     return ZKR_SUCCESS;
 }
@@ -25,7 +25,7 @@ zkresult HashPage::Write (const uint64_t pageNumber, const uint64_t position, co
 {
     zkassert(position < 128);
     zkassert(hash.size() == 32);
-    HashStruct * page = (HashStruct *)pageManager.getPage(pageNumber);
+    HashStruct * page = (HashStruct *)pageManager.getPageAddress(pageNumber);
     memcpy((uint8_t *)page->hash[position], hash.c_str(), 32);
     return ZKR_SUCCESS;
 }
@@ -40,7 +40,7 @@ void HashPage::Print (const uint64_t pageNumber, bool details)
         for (uint64_t i=0; i<32; i++) zeroString += (char)0;
 
         // For each entry of the page
-        HashStruct * page = (HashStruct *)pageManager.getPage(pageNumber);
+        HashStruct * page = (HashStruct *)pageManager.getPageAddress(pageNumber);
         for (uint64_t i=0; i<128; i++)
         {
             // Print hash

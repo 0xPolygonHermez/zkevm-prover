@@ -8,7 +8,7 @@
 
 zkresult KeyValueHistoryPage::InitEmptyPage (const uint64_t pageNumber)
 {
-    KeyValueHistoryStruct * page = (KeyValueHistoryStruct *)pageManager.getPage(pageNumber);
+    KeyValueHistoryStruct * page = (KeyValueHistoryStruct *)pageManager.getPageAddress(pageNumber);
     memset((void *)page, 0, 4096);
 
     // Create the 2 associated hash pages
@@ -29,7 +29,7 @@ zkresult KeyValueHistoryPage::Read (const uint64_t pageNumber, const string &key
     zkassert(level < 42);
 
     // Get the data from this page
-    KeyValueHistoryStruct * page = (KeyValueHistoryStruct *)pageManager.getPage(pageNumber);
+    KeyValueHistoryStruct * page = (KeyValueHistoryStruct *)pageManager.getPageAddress(pageNumber);
     uint64_t hashPage1Number = page->hashPage1AndHistoryCounter & 0xFFFFFF;
     uint64_t historyCounter = page->hashPage1AndHistoryCounter >> 48;
     uint64_t hashPage2Number = page->hashPage2AndPadding & 0xFFFFFF;
@@ -88,7 +88,7 @@ zkresult KeyValueHistoryPage::Write (uint64_t &pageNumber, const string &key, co
     zkassert(level < 42);
 
     // Get the data from this page
-    KeyValueHistoryStruct * page = (KeyValueHistoryStruct *)pageManager.getPage(pageNumber);
+    KeyValueHistoryStruct * page = (KeyValueHistoryStruct *)pageManager.getPageAddress(pageNumber);
     uint64_t hashPage1Number = page->hashPage1AndHistoryCounter & 0xFFFFFF;
     uint64_t historyCounter = page->hashPage1AndHistoryCounter >> 48;
     uint64_t hashPage2Number = page->hashPage2AndPadding & 0xFFFFFF;
@@ -144,7 +144,7 @@ void KeyValueHistoryPage::Print (const uint64_t pageNumber, bool details)
     zklog.info("KeyValuePage::Print() pageNumber=" + to_string(pageNumber));
 
     // Get the data from this page
-    KeyValueHistoryStruct * page = (KeyValueHistoryStruct *)pageManager.getPage(pageNumber);
+    KeyValueHistoryStruct * page = (KeyValueHistoryStruct *)pageManager.getPageAddress(pageNumber);
     uint64_t hashPage1Number = page->hashPage1AndHistoryCounter & 0xFFFFFF;
     uint64_t historyCounter = page->hashPage1AndHistoryCounter >> 48;
     uint64_t hashPage2Number = page->hashPage2AndPadding & 0xFFFFFF;

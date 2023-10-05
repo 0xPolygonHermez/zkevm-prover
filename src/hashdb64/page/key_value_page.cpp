@@ -10,7 +10,7 @@
 
 zkresult KeyValuePage::InitEmptyPage (const uint64_t pageNumber)
 {
-    KeyValueStruct * page = (KeyValueStruct *)pageManager.getPage(pageNumber);
+    KeyValueStruct * page = (KeyValueStruct *)pageManager.getPageAddress(pageNumber);
     memset((void *)page, 0, 4096);
     return ZKR_SUCCESS;
 }
@@ -21,7 +21,7 @@ zkresult KeyValuePage::Read (const uint64_t pageNumber, const string &key, strin
     zkassert(level < 32);
 
     zkresult zkr;
-    KeyValueStruct * page = (KeyValueStruct *)pageManager.getPage(pageNumber);
+    KeyValueStruct * page = (KeyValueStruct *)pageManager.getPageAddress(pageNumber);
     uint8_t index = key[level];
 
     uint64_t control = page->key[index][0] >> 48;
@@ -107,7 +107,7 @@ zkresult KeyValuePage::Write (const uint64_t pageNumber, const string &key, cons
     zkassert(value.size() + 32 <= 0xFFFFFF);
 
     zkresult zkr;
-    KeyValueStruct * page = (KeyValueStruct *)pageManager.getPage(pageNumber);
+    KeyValueStruct * page = (KeyValueStruct *)pageManager.getPageAddress(pageNumber);
     uint8_t index = key[level];
 
     uint64_t control = page->key[index][0] >> 48;
@@ -122,7 +122,7 @@ zkresult KeyValuePage::Write (const uint64_t pageNumber, const string &key, cons
             uint64_t length = keyAndValue.size();
 
             // Get header page data
-            HeaderStruct * headerPage = (HeaderStruct *)pageManager.getPage(headerPageNumber);
+            HeaderStruct * headerPage = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
             uint64_t rawDataPage = headerPage->rawDataPage;
             uint64_t rawDataOffset = RawDataPage::GetOffset(headerPage->rawDataPage);
 
@@ -218,7 +218,7 @@ zkresult KeyValuePage::Write (const uint64_t pageNumber, const string &key, cons
             // If keys are different, create a new page, move the existing key one level down, and call Write(level+1)
             uint64_t newPageNumber = pageManager.getFreePage();
             KeyValuePage::InitEmptyPage(newPageNumber);
-            KeyValueStruct * newPage = (KeyValueStruct *)pageManager.getPage(newPageNumber);
+            KeyValueStruct * newPage = (KeyValueStruct *)pageManager.getPageAddress(newPageNumber);
             uint8_t newIndex = existingKey[level+1];
             newPage->key[newIndex][0] = page->key[index][0];
             newPage->key[newIndex][1] = page->key[index][1];
@@ -264,7 +264,7 @@ void KeyValuePage::Print (const uint64_t pageNumber, bool details)
         vector<uint64_t> nextKeyValuePages;
 
         // For each entry of the page
-        KeyValueStruct * page = (KeyValueStruct *)pageManager.getPage(pageNumber);
+        KeyValueStruct * page = (KeyValueStruct *)pageManager.getPageAddress(pageNumber);
         for (uint64_t i=0; i<256; i++)
         {
             uint64_t control = page->key[i][0] >> 48;
