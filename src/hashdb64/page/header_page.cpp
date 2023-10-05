@@ -6,7 +6,7 @@
 
 zkresult HeaderPage::InitEmptyPage (const uint64_t pageNumber)
 {
-    HeaderStruct * page = (HeaderStruct *)(pageManager.getPage(pageNumber));
+    HeaderStruct * page = (HeaderStruct *)(pageManager.getPageAddress(pageNumber));
     page->rootVersionPage = 0;
     return ZKR_SUCCESS;
 }
