@@ -86,6 +86,10 @@ void HeaderPage::Print (const uint64_t pageNumber, bool details)
     zklog.info("  rootVersionPage=" + to_string(page->rootVersionPage) + "=" + to_string((uint64_t)pageManager.getPageAddress(page->rootVersionPage)));
     KeyValuePage::Print(page->rootVersionPage, details);
 
+    // Print version-versionData page list
+    zklog.info("  versionDataPage=" + to_string(page->versionDataPage) + "=" + to_string((uint64_t)pageManager.getPageAddress(page->versionDataPage)));
+    KeyValuePage::Print(page->versionDataPage, details);
+
     // Print key-value page list
     zklog.info("  keyValueHistoryPage=" + to_string(page->keyValueHistoryPage) + "=" + to_string((uint64_t)pageManager.getPageAddress(page->keyValueHistoryPage)));
     KeyValueHistoryPage::Print(page->keyValueHistoryPage, details);

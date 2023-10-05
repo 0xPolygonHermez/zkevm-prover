@@ -9,9 +9,14 @@
 
 struct HeaderStruct
 {
+    // Root -> version
     uint64_t lastVersion;
     uint64_t rootVersionPage;
-    // uint64_t versionVersionDataPage;
+
+    // Version -> version data
+    uint64_t versionDataPage;
+
+    // Key -> value history
     uint64_t keyValueHistoryPage;
 
     // Raw data
