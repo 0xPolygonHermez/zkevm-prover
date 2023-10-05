@@ -19,6 +19,7 @@
 #include "page_manager.hpp"
 #include "header_page.hpp"
 #include "tree_chunk.hpp"
+#include "key_value_page.hpp"
 
 // Helper functions
 string removeBSXIfExists64(string s) {return ((s.at(0) == '\\') && (s.at(1) == 'x')) ? s.substr(2) : s;}
@@ -123,7 +124,7 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], vector<KeyValu
     return ZKR_SUCCESS;
 }*/
 
-zkresult Database64::setProgram (const string &_key, const vector<uint8_t> &data, const bool persistent)
+zkresult Database64::setProgram (const string &key, const vector<uint8_t> &data, const bool persistent)
 {
     // Check that it has been initialized before
     if (!bInitialized)
@@ -132,16 +133,22 @@ zkresult Database64::setProgram (const string &_key, const vector<uint8_t> &data
         exitProcess();
     }
 
-    zkresult r = ZKR_UNSPECIFIED;
+    zkresult zkr;
 
-    // Normalize key format
-    string key = NormalizeToNFormat(_key, 64);
-    key = stringToLower(key);
+    string program;
+    ba2ba(data, program);
+
+    HeaderStruct * header = (HeaderStruct *)pageManager.getPageAddress(headerPage);
+    zkr = KeyValuePage::Write(header->programPage, string2ba(key), program, headerPage);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("Database64::setProgram() failed calling KeyValuePage::Write() result=" + zkresult2string(zkr));
+    }
 
 #ifdef LOG_DB_WRITE
     {
         string s = "Database64::setProgram()";
-        if (r != ZKR_SUCCESS)
+        if (zkr != ZKR_SUCCESS)
             s += " ERROR=" + zkresult2string(r);
         s += " key=" + key;
         s += " data=";
@@ -153,10 +160,10 @@ zkresult Database64::setProgram (const string &_key, const vector<uint8_t> &data
     }
 #endif
 
-    return r;
+    return zkr;
 }
 
-zkresult Database64::getProgram(const string &_key, vector<uint8_t> &data, DatabaseMap *dbReadLog)
+zkresult Database64::getProgram(const string &key, vector<uint8_t> &data, DatabaseMap *dbReadLog)
 {
     // Check that it has been initialized before
     if (!bInitialized)
@@ -170,21 +177,24 @@ zkresult Database64::getProgram(const string &_key, vector<uint8_t> &data, Datab
     struct timeval t;
     if (dbReadLog != NULL) gettimeofday(&t, NULL);
 
-    // Normalize key format
-    string key = NormalizeToNFormat(_key, 64);
-    key = stringToLower(key);
+    string program;
 
+    HeaderStruct * header = (HeaderStruct *)pageManager.getPageAddress(headerPage);
+    zkr = KeyValuePage::Read(header->programPage, string2ba(key), program);
     if (zkr != ZKR_SUCCESS)
     {
-        zklog.error("Database64::getProgram() requested a key that does not exist: " + key);
-        zkr = ZKR_DB_KEY_NOT_FOUND;
+        zklog.error("Database64::getProgram() failed calling KeyValuePage::Read() result=" + zkresult2string(zkr));
+    }
+    else
+    {
+        ba2ba(program, data);
     }
 
 #ifdef LOG_DB_READ
     {
         string s = "Database64::getProgram()";
-        if (r != ZKR_SUCCESS)
-            s += " ERROR=" + zkresult2string(r);
+        if (zkr != ZKR_SUCCESS)
+            s += " ERROR=" + zkresult2string(zkr);
         s += " key=" + key;
         s += " data=";
         for (uint64_t i = 0; (i < (data.size()) && (i < 100)); i++)
@@ -443,6 +453,8 @@ zkresult Database64::WriteTree (const Goldilocks::Element (&oldRoot)[4], const v
 {
     zkresult zkr;
 
+    //HeaderPage::Print(headerPage, true);
+
     vector<KeyValue> keyValues(_keyValues);
 
     vector<TreeChunk *> chunks;
@@ -465,10 +477,14 @@ zkresult Database64::WriteTree (const Goldilocks::Element (&oldRoot)[4], const v
     // Get the old root as a string
     string oldRootString = fea2string(fr, oldRoot);
 
+    //uint64_t currentVersion = 0;
+    //uint64_t newVersion = HeaderPage::GetLastVersion(headerPage) + 1;
+
     // If old root is zero, init chunks[0] as an empty tree chunk
     if (fr.isZero(oldRoot[0]) && fr.isZero(oldRoot[1]) && fr.isZero(oldRoot[2]) && fr.isZero(oldRoot[3]))
     {
         chunks[0]->resetToZero(level);
+        //currentVersion = 0;
     }
     else
     {
@@ -486,14 +502,14 @@ zkresult Database64::WriteTree (const Goldilocks::Element (&oldRoot)[4], const v
 
     while (chunksProcessed < chunks.size())
     {
-        //zkr = db.read(dbQueries);
+        /*zkr = db.read(dbQueries);
         if (zkr != ZKR_SUCCESS)
         {
             zklog.error("Database64::WriteTree() failed calling db.multiRead() result=" + zkresult2string(zkr));
             for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
             return zkr;
         }
-        dbQueries.clear();
+        dbQueries.clear();*/
 
         int chunksToProcess = chunks.size();
 

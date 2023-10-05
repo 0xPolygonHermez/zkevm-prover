@@ -275,6 +275,8 @@ string   ba2string (const uint8_t *pData, uint64_t dataSize);
 void     ba2string (const string &baString, string &textString);
 string   ba2string (const string &baString);
 void     ba2ba     (const string &baString, vector<uint8_t> (&baVector));
+void     ba2ba     (const vector<uint8_t> (&baVector), string &baString);
+void     ba2ba     (string &baString, const uint64_t ba);
 
 /* Byte array of exactly 2 bytes conversion */
 void ba2u16(const uint8_t *pData, uint16_t &n);
