@@ -24,6 +24,7 @@ zkresult PageListPage::InsertPage (uint64_t &pageNumber, const uint64_t pageNumb
     uint64_t offset = page->nextPageNumberAndOffset >> 48;
     zkassert(offset >= minOffset);
     zkassert(offset <= maxOffset);
+    zkassert((offset & 0x7) == 0);
     uint64_t nextPageNumber = page->nextPageNumberAndOffset & 0xFFFFFF;
     zkassert(nextPageNumber == 0);
 
@@ -42,6 +43,7 @@ zkresult PageListPage::InsertPage (uint64_t &pageNumber, const uint64_t pageNumb
     offset = page->nextPageNumberAndOffset >> 48;
     zkassert(offset >= minOffset);
     zkassert(offset <= maxOffset);
+    zkassert((offset & 0x7) == 0);
     nextPageNumber = page->nextPageNumberAndOffset & 0xFFFFFF;
     zkassert(nextPageNumber == 0);
 

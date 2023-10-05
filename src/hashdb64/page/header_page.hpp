@@ -12,7 +12,7 @@ struct HeaderStruct
     uint64_t lastVersion;
     uint64_t rootVersionPage;
     // uint64_t versionVersionDataPage;
-    uint64_t keyValuePage;
+    uint64_t keyValueHistoryPage;
 
     // Raw data
     uint64_t firstRawDataPage;

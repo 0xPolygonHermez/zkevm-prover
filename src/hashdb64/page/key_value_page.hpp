@@ -4,31 +4,30 @@
 #include <unistd.h>
 #include "zkresult.hpp"
 #include "zkassert.hpp"
-#include "scalar.hpp"
 
 struct KeyValueStruct
 {
-    uint64_t hashPage1AndHistoryCounter; // historyCounter (2B) + hashPage1 (6B)
-    uint64_t hashPage2AndPadding; // padding (2B) + hashPage2 (6B)
-    uint8_t keyValueEntry[64][16]; // pageNumber (6B) + control (2B) + version (6B) + previousVersionOffset (2B) of the 64 key-values corresponding to this level
-                                   // If control == 0, then this position is empty, i.e. value = 0
-                                   // If control == 1, then this is a version (leaf node)
-                                   // If control == 2, then this is the page number of the next level page (intermediate node)
-    uint8_t historyEntry[191][16]; // history entries    
+    uint64_t key[256][2]; // 256 hashes of 16B each, being the first 2B the control
+    // if control == 0 --> empty slot
+    // if control == 1 --> leaf node = control (2B) + length (6B) + rawPageOffset (2B) + rawPageNumber (6B)
+    // if control == 2 --> intermediate node = control (2B) + nextKeyValuePage (6B) + reserved (8B)
+    // Raw data contains: key (32B) + program (xB)
 };
 
 class KeyValuePage
 {
 private:
-    static zkresult Read          (const uint64_t pageNumber,  const string &key, const string &keyBits,       mpz_class &value, const uint64_t level);
-    static zkresult Write         (      uint64_t &pageNumber, const string &key, const string &keyBits, const mpz_class &value, const uint64_t level);
+
+    static zkresult Read          (const uint64_t pageNumber, const string &key,       string &value, const uint64_t level);
+    static zkresult Write         (const uint64_t pageNumber, const string &key, const string &value, const uint64_t level, const uint64_t headerPageNumber);
+
 public:
 
     static zkresult InitEmptyPage (const uint64_t pageNumber);
-    static zkresult Read          (const uint64_t pageNumber,  const string &key,       mpz_class &value);
-    static zkresult Write         (      uint64_t &pageNumber, const string &key, const mpz_class &value);
+    static zkresult Read          (const uint64_t pageNumber, const string &key,       string &value);
+    static zkresult Write         (const uint64_t pageNumber, const string &key, const string &value, const uint64_t headerPageNumber);
     
-    static void Print (const uint64_t pageNumber, bool details);
+    static void     Print         (const uint64_t pageNumber, bool details);
 };
 
 #endif

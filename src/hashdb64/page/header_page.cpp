@@ -3,10 +3,9 @@
 #include "exit_process.hpp"
 #include "zkassert.hpp"
 #include "page_manager.hpp"
-#include "root_version_page.hpp"
-#include "key_value_page.hpp"
+#include "key_value_history_page.hpp"
 #include "raw_data_page.hpp"
-#include "program_page.hpp"
+#include "key_value_page.hpp"
 
 zkresult HeaderPage::InitEmptyPage (const uint64_t pageNumber)
 {
@@ -18,19 +17,19 @@ zkresult HeaderPage::InitEmptyPage (const uint64_t pageNumber)
 
     // Create the root version page, and init it
     page->rootVersionPage = pageManager.getFreePage();
-    zkr = RootVersionPage::InitEmptyPage(page->rootVersionPage);
+    zkr = KeyValuePage::InitEmptyPage(page->rootVersionPage);
     if (zkr != ZKR_SUCCESS)
     {
-        zklog.error("HeaderPage::InitEmptyPage() failed calling RootVersionPage::InitEmptyPage() result=" + zkresult2string(zkr));
+        zklog.error("HeaderPage::InitEmptyPage() failed calling KeyVersionPage::InitEmptyPage() result=" + zkresult2string(zkr));
         return zkr;
     }
 
     // Create the key value page, and init it
-    page->keyValuePage = pageManager.getFreePage();
-    zkr = KeyValuePage::InitEmptyPage(page->keyValuePage);
+    page->keyValueHistoryPage = pageManager.getFreePage();
+    zkr = KeyValueHistoryPage::InitEmptyPage(page->keyValueHistoryPage);
     if (zkr != ZKR_SUCCESS)
     {
-        zklog.error("HeaderPage::InitEmptyPage() failed calling KeyValuePage::InitEmptyPage() result=" + zkresult2string(zkr));
+        zklog.error("HeaderPage::InitEmptyPage() failed calling KeyValueHistoryPage::InitEmptyPage() result=" + zkresult2string(zkr));
         return zkr;
     }
 
@@ -46,10 +45,10 @@ zkresult HeaderPage::InitEmptyPage (const uint64_t pageNumber)
 
     // Create the program page, and init it
     page->programPage = pageManager.getFreePage();
-    zkr = ProgramPage::InitEmptyPage(page->programPage);
+    zkr = KeyValuePage::InitEmptyPage(page->programPage);
     if (zkr != ZKR_SUCCESS)
     {
-        zklog.error("HeaderPage::InitEmptyPage() failed calling ProgramPage::InitEmptyPage() result=" + zkresult2string(zkr));
+        zklog.error("HeaderPage::InitEmptyPage() failed calling KeyValuePage::InitEmptyPage() result=" + zkresult2string(zkr));
         return zkr;
     }
     
@@ -85,11 +84,11 @@ void HeaderPage::Print (const uint64_t pageNumber, bool details)
 
     // Print root-version page list
     zklog.info("  rootVersionPage=" + to_string(page->rootVersionPage) + "=" + to_string((uint64_t)pageManager.getPage(page->rootVersionPage)));
-    RootVersionPage::Print(page->rootVersionPage, details);
+    KeyValuePage::Print(page->rootVersionPage, details);
 
     // Print key-value page list
-    zklog.info("  keyValuePage=" + to_string(page->keyValuePage) + "=" + to_string((uint64_t)pageManager.getPage(page->keyValuePage)));
-    KeyValuePage::Print(page->keyValuePage, details);
+    zklog.info("  keyValueHistoryPage=" + to_string(page->keyValueHistoryPage) + "=" + to_string((uint64_t)pageManager.getPage(page->keyValueHistoryPage)));
+    KeyValueHistoryPage::Print(page->keyValueHistoryPage, details);
 
     // Print raw data
     zklog.info("  firstRawDataPage=" + to_string(page->firstRawDataPage) + "=" + to_string((uint64_t)pageManager.getPage(page->firstRawDataPage)));
@@ -98,5 +97,5 @@ void HeaderPage::Print (const uint64_t pageNumber, bool details)
 
     // Program page
     zklog.info("  programPage=" + to_string(page->programPage) + "=" + to_string((uint64_t)pageManager.getPage(page->programPage)));
-    ProgramPage::Print(page->programPage, details);
+    KeyValuePage::Print(page->programPage, details);
 }

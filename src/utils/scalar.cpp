@@ -482,6 +482,16 @@ void ba2ba (const vector<uint8_t> (&baVector), string &baString)
     }
 }
 
+void ba2ba (string &baString, const uint64_t ba)
+{
+    baString = "";
+    for (uint64_t i=0; i<8; i++)
+    {
+        uint8_t byte = (ba >> (56 - i*8));
+        baString.append(1, byte);
+    }
+}
+
 /* Byte array of exactly 2 bytes conversion */
 
 void ba2u16 (const uint8_t *pData, uint16_t &n)
