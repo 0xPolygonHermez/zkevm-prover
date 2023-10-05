@@ -13,7 +13,7 @@ string gateop2string(GateOperation op)
     case gop_xor:
         return "xor";
     case gop_or:
-        return "xor";
+        return "or";
     case gop_andp:
         return "andp";
     case gop_and:
