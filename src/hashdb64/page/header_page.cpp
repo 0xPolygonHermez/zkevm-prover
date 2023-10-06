@@ -6,13 +6,14 @@
 #include "key_value_history_page.hpp"
 #include "raw_data_page.hpp"
 #include "key_value_page.hpp"
+#include "page_list_page.hpp"
 
-zkresult HeaderPage::InitEmptyPage (const uint64_t pageNumber)
+zkresult HeaderPage::InitEmptyPage (const uint64_t headerPageNumber)
 {
     zkresult zkr;
 
     // Get the header page
-    HeaderStruct * page = (HeaderStruct *)pageManager.getPageAddress(pageNumber);
+    HeaderStruct * page = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
     memset((void *)page, 0, 4096);
 
     // Create the raw data page, and init it
@@ -60,25 +61,34 @@ zkresult HeaderPage::InitEmptyPage (const uint64_t pageNumber)
         zklog.error("HeaderPage::InitEmptyPage() failed calling KeyValuePage::InitEmptyPage() result=" + zkresult2string(zkr));
         return zkr;
     }
+
+    // Create the free pages page, and init it
+    page->freePages = pageManager.getFreePage();
+    zkr = PageListPage::InitEmptyPage(page->freePages);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("HeaderPage::InitEmptyPage() failed calling PageListPage::InitEmptyPage(freePages) result=" + zkresult2string(zkr));
+        return zkr;
+    }
     
     return ZKR_SUCCESS;
 }
 
-uint64_t HeaderPage::GetLastVersion (const uint64_t pageNumber)
+uint64_t HeaderPage::GetLastVersion (const uint64_t headerPageNumber)
 {
     // Get the header page
-    HeaderStruct * page = (HeaderStruct *)pageManager.getPageAddress(pageNumber);
+    HeaderStruct * page = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
 
     return page->lastVersion;
 }
 
-void HeaderPage::SetLastVersion (uint64_t &pageNumber, const uint64_t lastVersion)
+void HeaderPage::SetLastVersion (uint64_t &headerPageNumber, const uint64_t lastVersion)
 {
     // Get an editable page
-    pageNumber = pageManager.editPage(pageNumber);
+    headerPageNumber = pageManager.editPage(headerPageNumber);
 
     // Get the header page
-    HeaderStruct * page = (HeaderStruct *)pageManager.getPageAddress(pageNumber);
+    HeaderStruct * page = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
 
     // Check that version is incrementing
     if (lastVersion != page->lastVersion + 1)
@@ -91,11 +101,29 @@ void HeaderPage::SetLastVersion (uint64_t &pageNumber, const uint64_t lastVersio
     page->lastVersion = lastVersion;
 }
 
-void HeaderPage::Print (const uint64_t pageNumber, bool details)
+zkresult HeaderPage::GetFreePages (const uint64_t headerPageNumber, vector<uint64_t> (&containerPages), vector<uint64_t> (&containedPages))
 {
     // Get page
-    HeaderStruct * page = (HeaderStruct *)pageManager.getPageAddress(pageNumber);
-    zklog.info("HeaderPage::Print() pageNumber=" + to_string(pageNumber));
+    HeaderStruct * page = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
+
+    // Call the specific method
+    return PageListPage::GetPages(page->freePages, containerPages, containedPages);
+}
+
+zkresult CreateFreePages (uint64_t &headerPageNumber, vector<uint64_t> (&freePages), vector<uint64_t> (&containerPages), vector<uint64_t> (&containedPages))
+{
+    // Get page
+    HeaderStruct * page = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
+
+    // Call the specific method
+    return PageListPage::CreatePages(page->freePages, freePages, containerPages, containedPages);
+}
+
+void HeaderPage::Print (const uint64_t headerPageNumber, bool details)
+{
+    // Get page
+    HeaderStruct * page = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
+    zklog.info("HeaderPage::Print() headerPageNumber=" + to_string(headerPageNumber));
 
     // Print raw data
     zklog.info("  firstRawDataPage=" + to_string(page->firstRawDataPage) + "=" + to_string((uint64_t)pageManager.getPageAddress(page->firstRawDataPage)));
@@ -120,4 +148,8 @@ void HeaderPage::Print (const uint64_t pageNumber, bool details)
     // Program page
     zklog.info("  programPage=" + to_string(page->programPage) + "=" + to_string((uint64_t)pageManager.getPageAddress(page->programPage)));
     KeyValuePage::Print(page->programPage, details);
+
+    // Free pages
+    zklog.info("  freePages=" + to_string(page->freePages) + "=" + to_string((uint64_t)pageManager.getPageAddress(page->freePages)));
+    PageListPage::Print(page->freePages, details);
 }

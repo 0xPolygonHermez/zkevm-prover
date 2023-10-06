@@ -45,6 +45,7 @@
 #include "smt_64_test.hpp"
 #include "sha256.hpp"
 #include "page_manager_test.hpp"
+#include "zkglobals.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -307,7 +308,6 @@ int main(int argc, char **argv)
     // Create one instance of Config based on the contents of the file config.json
     json configJson;
     file2json(pConfigFile, configJson);
-    Config config;
     config.load(configJson);
     zklog.setJsonLogs(config.jsonLogs);
     zklog.setPID(config.proverID.substr(0, 7)); // Set the logs prefix

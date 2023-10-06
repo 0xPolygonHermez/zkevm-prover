@@ -119,6 +119,96 @@ zkresult PageListPage::ExtractPage (uint64_t &pageNumber, uint64_t &extractedPag
     return ZKR_SUCCESS;
 }
 
+zkresult PageListPage::GetPages (const uint64_t pageNumber, vector<uint64_t> (&containerPages), vector<uint64_t> (&containedPages))
+{
+    // Get page
+    PageListStruct * page = (PageListStruct *)pageManager.getPageAddress(pageNumber);
+
+    // Get the previous pages
+    if (page->previousPageNumber != 0)
+    {
+        // Call GetPages of previous page number
+        zkresult zkr;
+        zkr = GetPages(page->previousPageNumber, containerPages, containedPages);
+        if (zkr != ZKR_SUCCESS)
+        {
+            return zkr;
+        }
+    }
+
+    // Get offset
+    uint64_t offset = page->nextPageNumberAndOffset >> 48;
+    zkassert(offset >= minOffset);
+    zkassert(offset <= maxOffset);
+    zkassert((offset & 0x7) == 0);
+
+    // Add all pages contained in this page
+    for (uint64_t i = minOffset; i < offset; i += 8)
+    {
+        containedPages.emplace_back(*(uint64_t *)((uint8_t *)page + offset));
+    }
+
+    // Add this page number to container pages
+    containerPages.emplace_back(pageNumber);
+}
+
+zkresult PageListPage::CreatePages (uint64_t &pageNumber, vector<uint64_t> (&freePages), vector<uint64_t> (&containerPages), vector<uint64_t> (&containedPages))
+{
+    if (freePages.size() == 0)
+    {
+        pageNumber = 0;
+        return ZKR_SUCCESS;
+    }
+
+    // Create a new container page
+    pageNumber = freePages[freePages.size() - 1];
+    freePages.pop_back();
+    containerPages.emplace_back(pageNumber);
+
+    // Init the page
+    zkresult zkr = PageListPage::InitEmptyPage(pageNumber);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("PageListPage::CreatePages() failed calling PageListPage::InitEmptyPage() result=" + zkresult2string(zkr) + " pageNumber=" + to_string(pageNumber));
+        return zkr;
+    }
+
+    // Get page
+    PageListStruct * page = (PageListStruct *)pageManager.getPageAddress(pageNumber);
+
+    // Get offset
+    uint64_t offset = page->nextPageNumberAndOffset >> 48;
+    zkassert(offset >= minOffset);
+    zkassert(offset <= maxOffset);
+    zkassert((offset & 0x7) == 0);
+
+    // Insert as many pages as possible
+    while ((freePages.size() > 0) && (offset < maxOffset))
+    {
+        // Insert a new contained page
+        uint64_t containedPageNumber = freePages[freePages.size() - 1];
+        freePages.pop_back();
+        containedPages.emplace_back(containedPageNumber);
+
+        // Insert the page number
+        *(uint64_t *)((uint8_t *)page + offset) = containedPageNumber;
+
+        // Increase offset
+        offset += 8;
+    }
+
+    // Update the page offset
+    page->nextPageNumberAndOffset = (offset + 8) << 48;
+
+    // If there are more pages left, fill the previous page
+    if (freePages.size() > 0)
+    {
+        return CreatePages(page->previousPageNumber, freePages, containerPages, containedPages);
+    }
+
+    return ZKR_SUCCESS;
+}
+
 void PageListPage::Print (const uint64_t pageNumber, bool details)
 {
     zklog.info("PageListPage::Print() pageNumber=" + to_string(pageNumber));

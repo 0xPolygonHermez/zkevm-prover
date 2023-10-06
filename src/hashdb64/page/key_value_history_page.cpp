@@ -5,6 +5,8 @@
 #include "scalar.hpp"
 #include "page_manager.hpp"
 #include "hash_page.hpp"
+#include "key_utils.hpp"
+#include "zkglobals.hpp"
 
 zkresult KeyValueHistoryPage::InitEmptyPage (const uint64_t pageNumber)
 {
@@ -75,8 +77,13 @@ zkresult KeyValueHistoryPage::Read (const uint64_t pageNumber, const string &key
 {
     zkassert(key.size() == 32);
 
-    // TODO: split the key in 256/6=42 bytes, and pass it to the other Read() method
+    // Get 256 key bits in SMT order, in sets of 6 bits
+    Goldilocks::Element keyFea[4];
+    string2fea(fr, key, keyFea);
+    uint8_t keyBitsArray[43];
+    splitKey6(fr, keyFea, keyBitsArray);
     string keyBits;
+    keyBits.append((char *)keyBitsArray, 43);
 
     return Read(pageNumber, key, keyBits, value, 0);
 }
@@ -131,8 +138,13 @@ zkresult KeyValueHistoryPage::Write (uint64_t &pageNumber, const string &key, co
 {
     zkassert(key.size() == 32);
 
-    // TODO: split the key in 256/6=42 bytes, and pass it to the other Write() method
+    // Get 256 key bits in SMT order, in sets of 6 bits
+    Goldilocks::Element keyFea[4];
+    string2fea(fr, key, keyFea);
+    uint8_t keyBitsArray[43];
+    splitKey6(fr, keyFea, keyBitsArray);
     string keyBits;
+    keyBits.append((char *)keyBitsArray, 43);
 
     // Start searching with level 0
     return Write(pageNumber, key, keyBits, value, 0);

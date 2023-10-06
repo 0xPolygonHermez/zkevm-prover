@@ -25,19 +25,24 @@ struct HeaderStruct
 
     // Program page list
     uint64_t programPage;
+
+    // Free pages list
+    uint64_t freePages;
 };
 
 class HeaderPage
 {
 public:
     // Header-only methods
-    static zkresult InitEmptyPage  (const uint64_t pageNumber);
-    static uint64_t GetLastVersion (const uint64_t pageNumber);
-    static void     SetLastVersion (uint64_t &pageNumber, const uint64_t lastVersion);
+    static zkresult InitEmptyPage  (const uint64_t  headerPageNumber);
+    static uint64_t GetLastVersion (const uint64_t  headerPageNumber);
+    static void     SetLastVersion (      uint64_t &headerPageNumber, const uint64_t lastVersion);
 
+    // Free pages list methods
+    static zkresult GetFreePages    (const uint64_t  headerPageNumber,                                      vector<uint64_t> (&containerPages), vector<uint64_t> (&containedPages));
+    static zkresult CreateFreePages (      uint64_t &headerPageNumber, const vector<uint64_t> (&freePages), vector<uint64_t> (&containerPages), vector<uint64_t> (&containedPages));
 
-
-    static void Print (const uint64_t pageNumber, bool details);
+    static void Print (const uint64_t headerPageNumber, bool details);
 };
 
 #endif
