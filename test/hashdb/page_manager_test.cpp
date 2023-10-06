@@ -24,72 +24,105 @@ uint64_t PageManagerTest (void)
 uint64_t PageManagerPerformanceTest(void){
 
     std::cout << "PageManagerPerformanceTest" << std::endl;
-    string fileName = "benchmark_file.bin";
+    string fileName = "benchmark_file";
+    uint64_t fileSize = 1ULL<<37;
+    uint64_t nFiles = 2;
+    string folderName = "db";
 
     // Create the state manager
     double start = omp_get_wtime();
-    PageManager pageManagerFile(fileName);
+    PageManager pageManagerFile(fileName, fileSize, nFiles, folderName);
     double end = omp_get_wtime();
-    std::cout << "Time to construct the PageManager: " << end - start << " seconds" << std::endl;
+    std::cout << std::endl << "Time to construct the PageManager: " << end - start << " seconds" << std::endl;
 
     // Evaluate 20K different random positions in the range [0,numPages)
-    uint32_t numPages = pageManagerFile.getNumFreePages() +2;
-    uint32_t numPositions = 20000;
-    uint32_t *position = (uint32_t *)malloc(numPositions * sizeof(uint32_t));
+    uint64_t numPages = pageManagerFile.getNumFreePages() +2;
+    uint64_t numPositions = 20000;
+    uint64_t *position = (uint64_t *)malloc(numPositions * sizeof(uint64_t));
     std::random_device rd;
     std::mt19937 rng(rd());
 
-    unordered_set<uint32_t> positionsSet;
-    for (uint32_t i = 0; i < numPositions; ++i) {
-        uint32_t pos = 0;
-        while (positionsSet.size() != i+1){
-            pos = std::uniform_int_distribution<uint32_t>(0, numPages - 1)(rng);
-            positionsSet.insert(pos);
-        }
-        position[i] = pos;
-    }
-
+    std::cout  << "Total number of pages: " << numPages << std::endl;
+    std::cout  << "Number of pages modified: " << numPositions << std::endl << std::endl;
     
-    std::cout << std::endl << "Number of pages modified: " << positionsSet.size() << std::endl;
-
-    //Change first value of each page
-    start = omp_get_wtime();
-    for (uint32_t i = 0; i < numPositions; ++i) {
-        uint32_t* pageData = (uint32_t *)pageManagerFile.getPageAddress(position[i]);
-        pageData[0] = i;    
-    }
-    end = omp_get_wtime();
-    std::cout << "Time to change first value of each page: " << end - start << " seconds" << std::endl;
-
-    //Change second value of each page
-    start = omp_get_wtime();
-    for (uint32_t i = 0; i < numPositions; ++i) {
-        uint32_t* pageData = (uint32_t *)pageManagerFile.getPageAddress(position[i]);
-        assert(pageData[0] == i );
-        pageData[1] = i;    
-    }
-    end = omp_get_wtime();
-    std::cout << "Time to change the second value of each page: " << end - start << " seconds (cache efects)" << std::endl;
-
-    //flushPAges
-    start = omp_get_wtime();
-    pageManagerFile.flushPages();
-    end = omp_get_wtime();
-    
-    std::cout << "Time to flush "<<numPositions<<" pages: " << end - start << " seconds" << std::endl;
     double numGBytes = (numPositions * 4096.0) / (1024.0  * 1024.0);
-    double time = end - start;
-    std::cout << "Throughput: "<< numGBytes / time << " MBytes/s" << std::endl << std::endl;
+    double avgTimeFistWrite = 0;
+    double avgTimeSecondWrite = 0;
+    double avgTimeFlush = 0;
+    double avgThroughputFirstWrite = 0;
+    double avgThroughputSecondWrite = 0;
+    double avgThroughputFlush = 0;
+    double throughput = 0;
+    uint64_t numReps = 100;
+    uint64_t printFreq = 10;
     
-    //Check that positions are in the file
-    PageManager pageManagerFile2(fileName);
-    for (uint32_t i = 0; i < numPositions; ++i) {
-        uint32_t* pageData = (uint32_t *)pageManagerFile2.getPageAddress(position[i]);
-        assert(pageData[0] == i );
-        assert(pageData[1] == i );
-    }
-    
+    for(uint64_t k=0; k<numReps;++k){
 
+        //Generate randoms
+        for (uint64_t i = 0; i < numPositions; i++) {
+            
+            position[i] = std::uniform_int_distribution<uint64_t>(0, numPages - 1)(rng);
+            assert(position[i] < numPages);
+        }
+
+        //Change first value of each page
+        start = omp_get_wtime();
+        for (uint64_t i = 0; i < numPositions; ++i) {
+            uint64_t* pageData = (uint64_t *)pageManagerFile.getPageAddress(position[i]);
+            pageData[0] = position[i];
+        }
+        end = omp_get_wtime();
+        //if(k%printFreq == 0) std::cout << "Time to change first value of each page: " << end - start << " seconds" << std::endl;
+        throughput = numGBytes / (end-start);
+        //if(k%printFreq == 0) std::cout << "Throughput: "<< throughput << " MBytes/s" << std::endl;
+        avgThroughputFirstWrite += throughput;
+        avgTimeFistWrite += end - start;
+
+        //Change second value of each page
+        start = omp_get_wtime();
+        for (uint64_t i = 0; i < numPositions; ++i) {
+            uint64_t* pageData = (uint64_t *)pageManagerFile.getPageAddress(position[i]);
+            assert(pageData[0] == position[i] );
+            pageData[1] = position[i];    
+        }
+        end = omp_get_wtime();
+        //if(k%printFreq == 0) std::cout << "Time to change the second value of each page: " << end - start << " seconds (cache efects)" << std::endl;
+        throughput = numGBytes / (end-start);
+        //if(k%printFreq == 0) std::cout << "Throughput: "<< throughput << " MBytes/s" << std::endl;
+        avgThroughputSecondWrite += throughput;
+        avgTimeSecondWrite += end - start;
+
+        //flushPAges
+        start = omp_get_wtime();
+        pageManagerFile.flushPages();
+        end = omp_get_wtime();
+        
+        //if(k%printFreq == 0) std::cout << "Time to flush "<<numPositions<<" pages: " << end - start << " seconds" << std::endl;
+        throughput = numGBytes / (end-start);
+        //if(k%printFreq == 0) std::cout << "Throughput: "<< throughput << " MBytes/s" << std::endl << std::endl;
+        avgThroughputFlush += throughput;
+        avgTimeFlush += end - start;
+        
+        //Check that positions are in the file
+        PageManager pageManagerFile2(fileName, fileSize, nFiles, folderName);
+        for (uint64_t i = 0; i < numPositions; ++i) {
+            uint64_t* pageData = (uint64_t *)pageManagerFile2.getPageAddress(position[i]);
+            if(position[i] != 0){
+                assert(pageData[0] == position[i] );
+                assert(pageData[1] == position[i] );
+            }
+        }
+        if(k%printFreq == 0 && k>0){
+
+            std::cout << "Iteration: " << k << std::endl;
+            std::cout << "Average time first write: " << avgTimeFistWrite/k << " seconds" << std::endl;
+            std::cout << "Average throughput first write: " << avgThroughputFirstWrite/k << " MBytes/s" << std::endl;
+            std::cout << "Average time second write: " << avgTimeSecondWrite/k << " seconds" << std::endl;
+            std::cout << "Average throughput second write: " << avgThroughputSecondWrite/k << " MBytes/s" << std::endl;
+            std::cout << "Average time flush: " << avgTimeFlush/k << " seconds" << std::endl;
+            std::cout << "Average throughput flush: " << avgThroughputFlush/k << " MBytes/s" << std::endl << std::endl;
+        }
+    }
     return 0;
 }
 uint64_t PageManagerAccuracyTest (void)
@@ -101,10 +134,10 @@ uint64_t PageManagerAccuracyTest (void)
     // Memory version
     //
     PageManager pageManagerMem(100);
-    uint32_t page1 = pageManagerMem.getFreePage();
+    uint64_t page1 = pageManagerMem.getFreePage();
     zkassertpermanent(page1 == 2);
     zkassertpermanent(pageManagerMem.getNumFreePages() == 97);
-    uint32_t page2 = pageManagerMem.getFreePage();
+    uint64_t page2 = pageManagerMem.getFreePage();
     zkassertpermanent(page2 == 3);
     zkassertpermanent(pageManagerMem.getNumFreePages() == 96);
     pageManagerMem.releasePage(page1);
@@ -112,7 +145,7 @@ uint64_t PageManagerAccuracyTest (void)
     pageManagerMem.releasePage(page2);
     zkassertpermanent(pageManagerMem.getNumFreePages() == 98);
 
-    unordered_set<uint32_t> pages; 
+    unordered_set<uint64_t> pages; 
     for(int i=0; i<98;++i){
         pages.insert(pageManagerMem.getFreePage());
     }
@@ -124,12 +157,12 @@ uint64_t PageManagerAccuracyTest (void)
     }
     zkassertpermanent(pageManagerMem.getNumFreePages() == 98);
     
-    uint32_t page3=pageManagerMem.getFreePage();
+    uint64_t page3=pageManagerMem.getFreePage();
     uint64_t * page3Data = (uint64_t *)pageManagerMem.getPageAddress(page3);
     for(uint64_t i=0; i<256;++i){
         page3Data[i] = i;
     }
-    uint32_t page4 = pageManagerMem.editPage(page3);
+    uint64_t page4 = pageManagerMem.editPage(page3);
     zkassertpermanent(page4 != page3);
     uint64_t * page4Data = (uint64_t *)pageManagerMem.getPageAddress(page4);
     for(uint64_t i=0; i<256;++i){
@@ -156,11 +189,12 @@ uint64_t PageManagerAccuracyTest (void)
     //
 
     //generate a file with 100 pages
-    const string fileName = "page_manager_test.bin";
+    const string fileName = "page_manager_test";
+    const string fineNameAll = fileName + "_0.db";
     const int file_size = 4096 * 100;  
 
     // Create a binary file and fill it with zeros
-    int fd = open(fileName.c_str(), O_RDWR | O_CREAT, 0644);
+    int fd = open(fineNameAll.c_str(), O_RDWR | O_CREAT, 0644);
     if (fd == -1) {
         zklog.error("Failed to open file: " + (string)strerror(errno));
         exitProcess();
@@ -177,7 +211,7 @@ uint64_t PageManagerAccuracyTest (void)
     free(buffer);
 
     // Same tests than with memory version:
-    PageManager pageManagerFile(fileName);
+    PageManager pageManagerFile(fileName, file_size, 1,"");
     page1 = pageManagerFile.getFreePage();
     zkassertpermanent(page1 == 2);
     zkassertpermanent(pageManagerFile.getNumFreePages() == 97);
@@ -229,7 +263,7 @@ uint64_t PageManagerAccuracyTest (void)
     }
 
     //Let's check persistence of file
-    PageManager pageManagerFile2(fileName);
+    PageManager pageManagerFile2(fileName, file_size, 1,"");
     page3Data = (uint64_t *)pageManagerFile2.getPageAddress(page3);
     page4Data = (uint64_t *)pageManagerFile2.getPageAddress(page4);
     for(uint64_t i=0; i<256;++i){
