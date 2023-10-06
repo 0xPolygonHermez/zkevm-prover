@@ -7,11 +7,12 @@
 
 struct KeyValueStruct
 {
-    uint64_t key[256][2]; // 256 hashes of 16B each, being the first 2B the control
+    uint64_t key[256][2]; // 256 entries, each of which is 16B long, being the first 2 bytes of the entry the control
     // if control == 0 --> empty slot
     // if control == 1 --> leaf node = control (2B) + length (6B) + rawPageOffset (2B) + rawPageNumber (6B)
     // if control == 2 --> intermediate node = control (2B) + nextKeyValuePage (6B) + reserved (8B)
-    // Raw data contains: key (32B) + program (xB)
+    // Raw data contains: key (xB) + value (yB)
+    // For the same KeyValuePage, the length of the key must always be the same, e.g.: 32B for a root-version, 8B for a version-versionData, 32B for a program page, etc.
 };
 
 class KeyValuePage

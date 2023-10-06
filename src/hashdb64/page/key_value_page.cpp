@@ -17,8 +17,12 @@ zkresult KeyValuePage::InitEmptyPage (const uint64_t pageNumber)
 
 zkresult KeyValuePage::Read (const uint64_t pageNumber, const string &key, string &value, const uint64_t level)
 {
-    zkassert(key.size() == 32);
-    zkassert(level < 32);
+    // Check input parameters
+    if (level >= key.size())
+    {
+        zklog.error("KeyValuePage::Read() got invalid level=" + to_string(level) + " > key.size=" + to_string(key.size()));
+        return ZKR_DB_ERROR;
+    }
 
     zkresult zkr;
     KeyValueStruct * page = (KeyValueStruct *)pageManager.getPageAddress(pageNumber);
@@ -49,13 +53,13 @@ zkresult KeyValuePage::Read (const uint64_t pageNumber, const string &key, strin
                 return zkr;
             }
 
-            if (rawdata.size() < 32)
+            if (rawdata.size() < key.size())
             {
                 zklog.error("KeyValuePage::Read() called RawDataPage::Read() and got invalid raw data size=" + to_string(rawdata.size()) + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index) + " level=" + to_string(level) + " key=" + ba2string(key));
                 return ZKR_DB_ERROR;
             }
 
-            if (memcmp(rawdata.c_str(), key.c_str(), 32) != 0)
+            if (memcmp(rawdata.c_str(), key.c_str(), key.size()) != 0)
             {
                 zklog.error("KeyValuePage::Read() called RawDataPage::Read() and got different keys pageNumber=" + to_string(pageNumber) + " index=" + to_string(index) + " level=" + to_string(level) + " key=" + ba2string(key));
                 return ZKR_DB_KEY_NOT_FOUND;
@@ -70,7 +74,7 @@ zkresult KeyValuePage::Read (const uint64_t pageNumber, const string &key, strin
                 " rawDataPage=" + to_string(rawDataPage) +
                 " rawDataOffset=" + to_string(rawDataOffset));
             
-            value = rawdata.substr(32);
+            value = rawdata.substr(key.size());
 
             return ZKR_SUCCESS;
         }
@@ -95,16 +99,27 @@ zkresult KeyValuePage::Read (const uint64_t pageNumber, const string &key, strin
 
 zkresult KeyValuePage::Read (const uint64_t pageNumber, const string &key, string &value)
 {
-    zkassert(key.size() == 32);
-    zkassert(value.size() == 0);
+    // Clear value
+    value.clear();
+
+    // Call Read with level=0
     return Read(pageNumber, key, value, 0);
 }
 
 zkresult KeyValuePage::Write (const uint64_t pageNumber, const string &key, const string &value, const uint64_t level, const uint64_t headerPageNumber)
 {
-    zkassert(key.size() == 32);
-    zkassert(level < 32);
-    zkassert(value.size() + 32 <= 0xFFFFFF);
+    // Check input parameters
+    if (level >= key.size())
+    {
+        zklog.error("KeyValuePage::write() got invalid level=" + to_string(level) + " > key.size=" + to_string(key.size()));
+        return ZKR_DB_ERROR;
+    }
+
+    if (key.size() + value.size() > 0xFFFFFF)
+    {
+        zklog.error("KeyValuePage::write() got invalid value.size=" + to_string(value.size()) + " + key.size=" + to_string(key.size()) + " > 0xFFFFFF");
+        return ZKR_DB_ERROR;
+    }
 
     zkresult zkr;
     KeyValueStruct * page = (KeyValueStruct *)pageManager.getPageAddress(pageNumber);
@@ -166,7 +181,7 @@ zkresult KeyValuePage::Write (const uint64_t pageNumber, const string &key, cons
             uint64_t rawPageNumber = page->key[index][1] & 0xFFFFFF;
             uint64_t rawPageOffset = page->key[index][1] >> 48;
 
-            if (length < 32)
+            if (length < key.size())
             {
                 zklog.error("KeyValuePage::Write() found invalid length=" + to_string(length) + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index) + " level=" + to_string(level) + " key=" + ba2string(key));
                 exitProcess();
@@ -174,7 +189,7 @@ zkresult KeyValuePage::Write (const uint64_t pageNumber, const string &key, cons
 
             // Get the existing key
             string existingKey;
-            zkr = RawDataPage::Read(rawPageNumber, rawPageOffset, 32, existingKey);
+            zkr = RawDataPage::Read(rawPageNumber, rawPageOffset, key.size(), existingKey);
             if (zkr != ZKR_SUCCESS)
             {
                 zklog.error("KeyValuePage::Write() failed calling RawDataPage::Read() result=" + zkresult2string(zkr) + " length=" + to_string(length) + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index) + " level=" + to_string(level) + " key=" + ba2string(key));
@@ -185,9 +200,9 @@ zkresult KeyValuePage::Write (const uint64_t pageNumber, const string &key, cons
             if (existingKey == key)
             {
                 // Compare total length
-                if (length != value.size() + 32)
+                if (length != key.size() + value.size())
                 {
-                    zklog.error("KeyValuePage::Write() found not matching length=" + to_string(length) + " value.size()+32=" + to_string(value.size() + 32) + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index) + " level=" + to_string(level) + " key=" + ba2string(key));
+                    zklog.error("KeyValuePage::Write() found not matching length=" + to_string(length) + " != key.size+value.size=" + to_string(key.size() + value.size()) + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index) + " level=" + to_string(level) + " key=" + ba2string(key));
                     exitProcess();
                 }
 
@@ -201,12 +216,12 @@ zkresult KeyValuePage::Write (const uint64_t pageNumber, const string &key, cons
                 }
 
                 // Compare programs
-                if (existingKeyAndValue.size() != value.size() + 32)
+                if (existingKeyAndValue.size() != key.size() + value.size())
                 {
-                    zklog.error("KeyValuePage::Write() found not matching existingKeyAndValue.size()=" + to_string(existingKeyAndValue.size()) + " value.size()+32=" + to_string(value.size() + 32) + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index) + " level=" + to_string(level) + " key=" + ba2string(key));
+                    zklog.error("KeyValuePage::Write() found not matching existingKeyAndValue.size()=" + to_string(existingKeyAndValue.size()) + " != key.size+value.size=" + to_string(key.size() + value.size()) + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index) + " level=" + to_string(level) + " key=" + ba2string(key));
                     exitProcess();
                 }
-                if (value.compare(existingKeyAndValue.substr(32)) != 0)
+                if (value.compare(existingKeyAndValue.substr(key.size())) != 0)
                 {
                     zklog.error("KeyValuePage::Write() found not matching value of size=" + to_string(value.size()) + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index) + " level=" + to_string(level) + " key=" + ba2string(key));
                     exitProcess();
@@ -251,8 +266,14 @@ zkresult KeyValuePage::Write (const uint64_t pageNumber, const string &key, cons
 
 zkresult KeyValuePage::Write (const uint64_t pageNumber, const string &key, const string &value, const uint64_t headerPageNumber)
 {
-    zkassert(key.size() == 32);
-    zkassert(value.size() != 0);
+    // Check input parameters
+    if (key.size() == 0)
+    {
+        zklog.error("KeyValuePage::Write() found key.size=0 pageNumber=" + to_string(pageNumber));
+        exitProcess();
+    }
+
+    // Call Write with level=0
     return Write(pageNumber, key, value, 0, headerPageNumber);
 }
 
