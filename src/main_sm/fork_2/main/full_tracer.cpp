@@ -127,6 +127,9 @@ inline void getFromMemory(Context &ctx, mpz_class &offset, mpz_class &length, st
         uint64_t bytesToRetrieve = (end - double(endFloor)) * 32;
         result += hexStringEnd.substr(0, bytesToRetrieve * 2);
     }
+
+    // Limit result memory length in case it is a chunk contained in one single slot
+    result = result.substr(0, length.get_ui()*2);
 }
 
 // Get a global or context variable
@@ -828,7 +831,7 @@ void FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     lastErrorOpcode = 0;
 
     // Call semiFlush
-    ctx.pHashDB->semiFlush();
+    ctx.pHashDB->semiFlush(ctx.proverRequest.uuid, response.state_root, ctx.proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);
 
 #ifdef LOG_FULL_TRACER
     zklog.info("FullTracer::onFinishTx() txCount=" + to_string(txCount) + " finalTrace.responses.size()=" + to_string(finalTrace.responses.size()) + " create_address=" + response.create_address + " state_root=" + response.state_root);

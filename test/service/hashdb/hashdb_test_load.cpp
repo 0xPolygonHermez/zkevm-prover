@@ -12,6 +12,7 @@
 #include "goldilocks_base_field.hpp"
 #include "hashdb.hpp"
 #include "hashdb_test_load.hpp"
+#include "utils.hpp"
 
 using namespace std;
 
@@ -29,6 +30,9 @@ const bool BASIC_TEST = true;
 
 void runHashDBTestLoad (const Config& config)
 {
+    string uuid = getUUID();
+    uint64_t tx = 0;
+
     Goldilocks fr;
     HashDB client (fr, config);
 
@@ -75,7 +79,7 @@ void runHashDBTestLoad (const Config& config)
 
             // Save and get the new hash for branch 0
             Goldilocks::Element hash0[4];
-            client.hashSave(h,c,true,hash0);
+            client.hashSave(h,c,PERSISTENCE_DATABASE,hash0);
 
             //Store in h the hashes for branch 01 and 11
             for (int i=0; i<4; i++) h[i] = roots[1][i]; // hash0 = hash branch 01
@@ -83,7 +87,7 @@ void runHashDBTestLoad (const Config& config)
 
             // Save and get the new hash for branch 1
             Goldilocks::Element hash1[4];
-            client.hashSave(h,c,true,hash1);
+            client.hashSave(h,c,PERSISTENCE_DATABASE,hash1);
 
             //Store in h the hashes for branch 0 and 1
             for (int i=0; i<4; i++) h[i] = hash0[i]; // hash0 = hash branch 0
@@ -91,7 +95,7 @@ void runHashDBTestLoad (const Config& config)
 
             // Save and get the root of the tree
             Goldilocks::Element newRoot[4];
-            client.hashSave(h,c,true, newRoot);
+            client.hashSave(h,c,PERSISTENCE_DATABASE, newRoot);
 
             saveRoot (fr, pConnection, 100, newRoot);
 
@@ -154,16 +158,16 @@ void runHashDBTestLoad (const Config& config)
         scalar2key(fr, keyScalar, key);
         //hashDB.setDBDebug(true);
         value=2;
-        client.set (oldRoot, key, value, true, newRoot, &setResult, NULL);
+        client.set(uuid, tx, oldRoot, key, value, PERSISTENCE_DATABASE, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
-        client.get (root, key, value, &getResult, NULL);
+        client.get(uuid, root, key, value, &getResult, NULL);
         value = getResult.value;
         zkassertpermanent(value==2);
 
         value=0;
-        client.set (root, key, value, true, newRoot, &setResult, NULL);
+        client.set(uuid, tx, root, key, value, PERSISTENCE_DATABASE, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(fr.equal(oldRoot[0],root[0]) && fr.equal(oldRoot[1],root[1]) && fr.equal(oldRoot[2],root[2]) && fr.equal(oldRoot[3],root[3]));
 
@@ -238,6 +242,9 @@ void* hashDBTestLoadThread (const Config& config, uint8_t idBranch)
     const uint64_t testItems = 10000;
     const string stestItems = std::to_string(testItems);
 
+    string uuid = getUUID();
+    uint64_t tx = 0;
+
     Goldilocks fr;
 
     SmtSetResult setResult;
@@ -289,8 +296,7 @@ void* hashDBTestLoadThread (const Config& config, uint8_t idBranch)
         }
         scalar2key(fr, keyScalar, key);
 
-        client.set(root, key, i, true, 
-        newRoot, &setResult, NULL);
+        client.set(uuid, tx, root, key, i, PERSISTENCE_DATABASE, newRoot, &setResult, NULL);
 
         for (int j=0; j<4; j++) root[j] = setResult.newRoot[j];
         if ((i)%(testItems*0.05)==0) {

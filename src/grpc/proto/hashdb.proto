@@ -4,7 +4,7 @@ import "google/protobuf/empty.proto";
 
 package hashdb.v1;
 
-option go_package = "github.com/0xPolygonHermez/zkevm-node/merkletree/pb";
+option go_package = "github.com/0xPolygonHermez/zkevm-node/merkletree/hashdb";
 
 message Version {
     string v0_0_1 = 1;
@@ -27,8 +27,8 @@ service HashDBService {
     rpc GetProgram(GetProgramRequest) returns (GetProgramResponse) {}
     rpc LoadDB(LoadDBRequest) returns (google.protobuf.Empty) {}
     rpc LoadProgramDB(LoadProgramDBRequest) returns (google.protobuf.Empty) {}
-    rpc Flush (google.protobuf.Empty) returns (FlushResponse) {}
-    rpc SemiFlush (google.protobuf.Empty) returns (google.protobuf.Empty) {}
+    rpc Flush (FlushRequest) returns (FlushResponse) {}
+    rpc SemiFlush (SemiFlushRequest) returns (google.protobuf.Empty) {}
     rpc GetFlushStatus (google.protobuf.Empty) returns (GetFlushStatusResponse) {}
     rpc GetFlushData (GetFlushDataRequest) returns (GetFlushDataResponse) {}
 }
@@ -37,22 +37,33 @@ service HashDBService {
 // Request messages
 ///////////////////
 
+enum Persistence {
+    PERSISTENCE_CACHE_UNSPECIFIED = 0;
+    PERSISTENCE_DATABASE = 1;
+    PERSISTENCE_TEMPORARY = 2;
+}
+
 /**
  * @dev SetRequest
  * @param {old_root} - merkle-tree root
  * @param {key} - key to set
  * @param {value} - scalar value to set (HEX string format)
- * @param {persistent} - indicates if it should be stored in the SQL database (true) or only in the memory cache (false)
+ * @param {persistence} - indicates if it should be stored only in CACHE, in the SQL DATABASE, or it is just TEMPORARY and should be deleted at the flush of this batch UUID
  * @param {details} - indicates if it should return all response parameters (true) or just the new root (false)
  * @param {get_db_read_log} - indicates if it should return the DB reads generated during the execution of the request
+ * @param {batch_uuid} - indicates a unique identifier of the current batch or session; data for this batch can be stored in memory until flushed to database
+ * @param {tx} - current transaction ordinal number: 0, 1, 2...
  */
 message SetRequest {
     Fea old_root = 1;
     Fea key = 2;
     string value = 3;
-    bool persistent = 4;
+    Persistence persistence = 4;
     bool details = 5;
     bool get_db_read_log = 6;
+    string batch_uuid = 7;
+    uint64 tx = 8;
+
 }
 
 /**
@@ -61,12 +72,14 @@ message SetRequest {
  * @param {key} - key to look for
  * @param {details} - indicates if it should return all response parameters (true) or just the new root (false)
  * @param {get_db_read_log} - indicates if it should return the DB reads generated during the execution of the request
+ * @param {batch_uuid} - indicates a unique identifier of the current batch or session; data for this batch can be stored in memory until flushed to database
  */
 message GetRequest {
     Fea root = 1;
     Fea key = 2;
     bool details = 3;
     bool get_db_read_log = 4;
+    string batch_uuid = 5;
 }
 
 /**
@@ -107,6 +120,30 @@ message LoadDBRequest {
 message LoadProgramDBRequest {
     map<string, bytes> input_program_db = 1;
     bool persistent = 2;
+}
+
+/**
+ * @dev FlushRequest
+ * @param {batch_uuid} - indicates a unique identifier of the current batch or session which data will be flushed to cache (and database if required)
+ * @param {new_state_root} - state root at this point of the execution
+ * @param {persistence} - indicates if it should be stored only in CACHE, in the SQL DATABASE, or it is just TEMPORARY and should be deleted at the flush of this batch UUID
+ */
+message FlushRequest {
+    string batch_uuid = 1;
+    string new_state_root = 2;
+    Persistence persistence = 3;
+}
+
+/**
+ * @dev SemiFlushRequest
+ * @param {batch_uuid} - indicates a unique identifier of the current batch or session which data will be semi-flushed
+ * @param {new_state_root} - state root at this point of the execution
+ * @param {persistence} - indicates if it should be stored only in CACHE, in the SQL DATABASE, or it is just TEMPORARY and should be deleted at the flush of this batch UUID
+ */
+message SemiFlushRequest {
+    string batch_uuid = 1;
+    string new_state_root = 2;
+    Persistence persistence = 3;
 }
 
 /**

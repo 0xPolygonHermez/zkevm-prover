@@ -2374,7 +2374,7 @@ zkresult AddPointEc (Context &ctx, bool dbl, const RawFec::Element &x1, const Ra
         if (ctx.fec.isZero(aux2))
         {
             zklog.error("AddPointEc() got denominator=0 1");
-            return ZKR_SM_MAIN_ARITH;
+            return ZKR_SM_MAIN_ARITH_ECRECOVER_DIVIDE_BY_ZERO;
         }
         ctx.fec.div(s, aux1, aux2);
     }
@@ -2386,7 +2386,7 @@ zkresult AddPointEc (Context &ctx, bool dbl, const RawFec::Element &x1, const Ra
         if (ctx.fec.isZero(aux2))
         {
             zklog.error("AddPointEc() got denominator=0 2");
-            return ZKR_SM_MAIN_ARITH;
+            return ZKR_SM_MAIN_ARITH_ECRECOVER_DIVIDE_BY_ZERO;
         }
         ctx.fec.div(s, aux1, aux2);
     }

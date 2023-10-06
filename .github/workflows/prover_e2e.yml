@@ -22,13 +22,13 @@ jobs:
     - name: Install snarkjs
       run: npm -g install snarkjs
     - name: make
-      run: make -j
+      run: cd src/grpc && make && cd ../.. && make -j
     - name: remove all config 
       run: rm -rf config
     - name: remove old proofs
       run: rm -rf runtime/output/*
     - name: link files
-      run: ln -s /home/ubuntu/v2.0.0-RC1-fork.5/config/ config
+      run: ln -s /root/v2.0.0-RC4-fork.5/config/ config
     - name: run e2e tests
       run: ./build/zkProver -c testvectors/config_runFile_e2e.json 
     - name: run snarkjs verification

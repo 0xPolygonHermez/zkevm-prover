@@ -218,7 +218,8 @@ void scalar2key (Goldilocks &fr, mpz_class &s, Goldilocks::Element (&key)[4]);
 
 /* Hexa string to/from field element (array) conversion */
 void string2fe  (Goldilocks &fr, const string &s, Goldilocks::Element &fe);
-void string2fea (Goldilocks &fr, const string os, vector<Goldilocks::Element> &fea);
+void string2fea (Goldilocks &fr, const string& os, vector<Goldilocks::Element> &fea);
+void string2key(Goldilocks &fr, const string& os, Goldilocks::Element (&fea)[4]);
 string fea2string (Goldilocks &fr, const Goldilocks::Element(&fea)[4]);
 string fea2string (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldilocks::Element &fea1, const Goldilocks::Element &fea2, const Goldilocks::Element &fea3);
 string fea2string (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldilocks::Element &fea1, const Goldilocks::Element &fea2, const Goldilocks::Element &fea3, const Goldilocks::Element &fea4, const Goldilocks::Element &fea5, const Goldilocks::Element &fea6, const Goldilocks::Element &fea7);

@@ -1,5 +1,3 @@
-#if 0 // Generated code has been disabled in old forks
-
 #ifndef MAIN_EXEC_GENERATED_FAST_HPP_fork_4
 #define MAIN_EXEC_GENERATED_FAST_HPP_fork_4
 
@@ -13,4 +11,3 @@ void main_exec_generated_fast (fork_4::MainExecutor &mainExecutor, ProverRequest
 
 #endif
 
-#endif

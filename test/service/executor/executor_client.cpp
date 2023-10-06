@@ -1,6 +1,10 @@
 
 #include <nlohmann/json.hpp>
 #include "executor_client.hpp"
+#include "hashdb_singleton.hpp"
+#include "zkmax.hpp"
+#include "check_tree.hpp"
+#include "check_tree_64.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -134,7 +138,7 @@ bool ExecutorClient::ProcessBatch (void)
     }
 
     ::executor::v1::ProcessBatchResponse processBatchResponse;
-
+    string newStateRoot;
     for (uint64_t i=0; i<config.executorClientLoops; i++)
     {
         if (i == 1)
@@ -149,6 +153,7 @@ bool ExecutorClient::ProcessBatch (void)
             cerr << "Error: ExecutorClient::ProcessBatch() failed calling server i=" << i << " error=" << grpcStatus.error_code() << "=" << grpcStatus.error_message() << endl;
             break;
         }
+        newStateRoot = ba2string(processBatchResponse.new_state_root());
 
 #ifdef LOG_SERVICE
         cout << "ExecutorClient::ProcessBatch() got:\n" << response.DebugString() << endl;
@@ -172,6 +177,61 @@ bool ExecutorClient::ProcessBatch (void)
         } while (getFlushStatusResponse.stored_flush_id() < processBatchResponse.flush_id());
         zklog.info("ExecutorClient::ProcessBatch() successfully stored returned flush id=" + to_string(processBatchResponse.flush_id()));
         
+    }
+
+    if (config.executorClientCheckNewStateRoot)
+    {
+        TimerStart(CHECK_NEW_STATE_ROOT);
+
+        if (newStateRoot.size() == 0)
+        {
+            zklog.error("ExecutorClient::ProcessBatch() found newStateRoot emty");
+            return false;
+        }
+
+        HashDB &hashDB = *hashDBSingleton.get();
+
+        if (config.hashDB64)
+        {
+            Database64 &db = hashDB.db64;
+            db.clearCache();
+
+            CheckTreeCounters64 checkTreeCounters;
+
+            zkresult result = CheckTree64(db, newStateRoot, 0, checkTreeCounters);
+            if (result != ZKR_SUCCESS)
+            {
+                zklog.error("ExecutorClient::ProcessBatch() failed calling ClimbTree64() result=" + zkresult2string(result));
+                return false;
+            }
+
+            zklog.info("intermediateNodes=" + to_string(checkTreeCounters.intermediateNodes));
+            zklog.info("leafNodes=" + to_string(checkTreeCounters.leafNodes));
+            zklog.info("values=" + to_string(checkTreeCounters.values));
+            zklog.info("maxLevel=" + to_string(checkTreeCounters.maxLevel));
+        }
+        else
+        {
+            Database &db = hashDB.db;
+            db.clearCache();
+
+            CheckTreeCounters checkTreeCounters;
+
+            zkresult result = CheckTree(db, newStateRoot, 0, checkTreeCounters);
+            if (result != ZKR_SUCCESS)
+            {
+                zklog.error("ExecutorClient::ProcessBatch() failed calling ClimbTree() result=" + zkresult2string(result));
+                return false;
+            }
+
+            zklog.info("intermediateNodes=" + to_string(checkTreeCounters.intermediateNodes));
+            zklog.info("leafNodes=" + to_string(checkTreeCounters.leafNodes));
+            zklog.info("values=" + to_string(checkTreeCounters.values));
+            zklog.info("maxLevel=" + to_string(checkTreeCounters.maxLevel));
+        }
+
+        TimerStopAndLog(CHECK_NEW_STATE_ROOT);
+
     }
 
     TimerStopAndLog(EXECUTOR_CLIENT_PROCESS_BATCH);

@@ -62,7 +62,7 @@ void string2fe (Goldilocks &fr, const string &s, Goldilocks::Element &fe)
     fr.fromString(fe, Remove0xIfPresent(s), 16);
 }
 
-void string2fea(Goldilocks &fr, const string os, vector<Goldilocks::Element> &fea)
+void string2fea(Goldilocks &fr, const string&os, vector<Goldilocks::Element> &fea)
 {
     Goldilocks::Element fe;
     for (uint64_t i = 0; i < os.size(); i += 16)
@@ -74,6 +74,22 @@ void string2fea(Goldilocks &fr, const string os, vector<Goldilocks::Element> &fe
         }
         string2fe(fr, os.substr(i, 16), fe);
         fea.push_back(fe);
+    }
+}
+void string2key(Goldilocks &fr, const string& os, Goldilocks::Element (&fea)[4])
+{
+    Goldilocks::Element fe;
+    if (os.size() != 64)
+    {
+        zklog.error("Database::string2fea() found incorrect DATA column size: " + to_string(os.size()));
+        exitProcess();
+    }
+    int ii=0;
+    for (uint64_t i = 0; i < 64; i += 16)
+    {  
+        string2fe(fr, os.substr(i, 16), fe);
+        fea[3-ii]=fe;
+        ++ii;
     }
 }
 
