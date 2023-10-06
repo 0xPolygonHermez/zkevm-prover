@@ -1,5 +1,6 @@
 #include "zklog.hpp"
 #include "utils.hpp"
+#include "version.hpp"
 
 zkLog zklog;
 
@@ -12,33 +13,92 @@ string zkLog::getThreadID (void)
     return selfThreadIDString.substr(offset, 7);
 }
 
-zkLog::zkLog ()
+zkLog::zkLog () : jsonLogs(true)
 {
     pthread_mutex_init(&mutex, NULL);
 }
 
-void zkLog::setPrefix ( const string &_prefix)
-{
-    prefix = _prefix;
-}
-
-void zkLog::info (const string &message)
+void zkLog::log (const zkLogType type, const string &message, const vector<LogTag> *tags)
 {
     lock();
-    cout << getTimestamp() << " " << prefix << getThreadID() << " " << message << endl;
-    unlock();
-}
+    if (jsonLogs)
+    {
+        string s = "{";
+        switch (type)
+        {
+            case logTypeInfo:
+            {
+                s+= "\"level\":\"info\"";
+                break;
+            }
+            case logTypeWarning:
+            {
+                s+= "\"level\":\"warn\"";
+                break;
+            }
+            case logTypeError:
+            {
+                s+= "\"level\":\"error\"";
+                break;
+            }
+            default:
+            {
+                cerr << "zkLog::log() invalid type=" << type << endl << flush;
+                exitProcess();
+            }
+        }
+        s += ",\"ts\":\"" + getTimestampWithPeriod() + "\"";
+        s += ",\"msg\":\"" + message + "\"";
+        s += ",\"pid\":\"" + pid + "\"";
+        s += ",\"tid\":\"" + getThreadID() + "\"";
+        s += ",\"version\":\"" ZKEVM_PROVER_VERSION "\"";
+        if (tags != NULL)
+        {
+            for (uint64_t i=0; i<tags->size(); i++)
+            {
+                s += ",\"" + (*tags)[i].name + "\":\"" + (*tags)[i].value + "\"";
+            }
+        }
+        s += "}";
 
-void zkLog::warning (const string &message)
-{
-    lock();
-    cout << getTimestamp() << " " << prefix << getThreadID() << " " << "zkWarning: " << message << endl;
-    unlock();
-}
-
-void zkLog::error (const string &message)
-{
-    lock();
-    cerr << getTimestamp() << " " << prefix << getThreadID() << " " << "zkError: " << message << endl << flush;
+        if (type == logTypeError)
+        {
+            cerr << s << endl << flush;
+        }
+        else
+        {
+            cout << s << endl << flush;
+        }
+    }
+    else
+    {
+        string s = getTimestamp() + " " + pid + " " + getThreadID() + " ";
+        switch (type)
+        {
+            case logTypeInfo:
+            {
+                s += message;
+                cout << s << endl << flush;
+                break;
+            }
+            case logTypeWarning:
+            {
+                s += "zkWarning: " + message;
+                cout << s << endl << flush;
+                break;
+            }
+            case logTypeError:
+            {
+                s += "zkError: " + message;
+                cerr << s << endl << flush;
+                break;
+            }
+            default:
+            {
+                cerr << "zkLog::log() invalid type=" << type << endl << flush;
+                exitProcess();
+            }
+        }
+    }
     unlock();
 }

@@ -116,6 +116,34 @@ class HashDBService final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::GetFlushDataResponse>> PrepareAsyncGetFlushData(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::GetFlushDataResponse>>(PrepareAsyncGetFlushDataRaw(context, request, cq));
     }
+    virtual ::grpc::Status ConsolidateState(::grpc::ClientContext* context, const ::hashdb::v1::ConsolidateStateRequest& request, ::hashdb::v1::ConsolidateStateResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::ConsolidateStateResponse>> AsyncConsolidateState(::grpc::ClientContext* context, const ::hashdb::v1::ConsolidateStateRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::ConsolidateStateResponse>>(AsyncConsolidateStateRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::ConsolidateStateResponse>> PrepareAsyncConsolidateState(::grpc::ClientContext* context, const ::hashdb::v1::ConsolidateStateRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::ConsolidateStateResponse>>(PrepareAsyncConsolidateStateRaw(context, request, cq));
+    }
+    virtual ::grpc::Status Purge(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest& request, ::hashdb::v1::PurgeResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::PurgeResponse>> AsyncPurge(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::PurgeResponse>>(AsyncPurgeRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::PurgeResponse>> PrepareAsyncPurge(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::PurgeResponse>>(PrepareAsyncPurgeRaw(context, request, cq));
+    }
+    virtual ::grpc::Status ReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest& request, ::hashdb::v1::ReadTreeResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::ReadTreeResponse>> AsyncReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::ReadTreeResponse>>(AsyncReadTreeRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::ReadTreeResponse>> PrepareAsyncReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::ReadTreeResponse>>(PrepareAsyncReadTreeRaw(context, request, cq));
+    }
+    virtual ::grpc::Status CancelBatch(::grpc::ClientContext* context, const ::hashdb::v1::CancelBatchRequest& request, ::hashdb::v1::CancelBatchResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::CancelBatchResponse>> AsyncCancelBatch(::grpc::ClientContext* context, const ::hashdb::v1::CancelBatchRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::CancelBatchResponse>>(AsyncCancelBatchRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::CancelBatchResponse>> PrepareAsyncCancelBatch(::grpc::ClientContext* context, const ::hashdb::v1::CancelBatchRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::CancelBatchResponse>>(PrepareAsyncCancelBatchRaw(context, request, cq));
+    }
     class experimental_async_interface {
      public:
       virtual ~experimental_async_interface() {}
@@ -239,6 +267,54 @@ class HashDBService final {
       #else
       virtual void GetFlushData(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetFlushDataResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
       #endif
+      virtual void ConsolidateState(::grpc::ClientContext* context, const ::hashdb::v1::ConsolidateStateRequest* request, ::hashdb::v1::ConsolidateStateResponse* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void ConsolidateState(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ConsolidateStateResponse* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void ConsolidateState(::grpc::ClientContext* context, const ::hashdb::v1::ConsolidateStateRequest* request, ::hashdb::v1::ConsolidateStateResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void ConsolidateState(::grpc::ClientContext* context, const ::hashdb::v1::ConsolidateStateRequest* request, ::hashdb::v1::ConsolidateStateResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void ConsolidateState(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ConsolidateStateResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void ConsolidateState(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ConsolidateStateResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
+      virtual void Purge(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest* request, ::hashdb::v1::PurgeResponse* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void Purge(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::PurgeResponse* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void Purge(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest* request, ::hashdb::v1::PurgeResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void Purge(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest* request, ::hashdb::v1::PurgeResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void Purge(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::PurgeResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void Purge(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::PurgeResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
+      virtual void ReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void ReadTree(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ReadTreeResponse* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void ReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void ReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void ReadTree(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ReadTreeResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void ReadTree(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ReadTreeResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
+      virtual void CancelBatch(::grpc::ClientContext* context, const ::hashdb::v1::CancelBatchRequest* request, ::hashdb::v1::CancelBatchResponse* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void CancelBatch(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::CancelBatchResponse* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void CancelBatch(::grpc::ClientContext* context, const ::hashdb::v1::CancelBatchRequest* request, ::hashdb::v1::CancelBatchResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void CancelBatch(::grpc::ClientContext* context, const ::hashdb::v1::CancelBatchRequest* request, ::hashdb::v1::CancelBatchResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void CancelBatch(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::CancelBatchResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void CancelBatch(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::CancelBatchResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
     };
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     typedef class experimental_async_interface async_interface;
@@ -268,6 +344,14 @@ class HashDBService final {
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::GetFlushStatusResponse>* PrepareAsyncGetFlushStatusRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::GetFlushDataResponse>* AsyncGetFlushDataRaw(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::GetFlushDataResponse>* PrepareAsyncGetFlushDataRaw(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::ConsolidateStateResponse>* AsyncConsolidateStateRaw(::grpc::ClientContext* context, const ::hashdb::v1::ConsolidateStateRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::ConsolidateStateResponse>* PrepareAsyncConsolidateStateRaw(::grpc::ClientContext* context, const ::hashdb::v1::ConsolidateStateRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::PurgeResponse>* AsyncPurgeRaw(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::PurgeResponse>* PrepareAsyncPurgeRaw(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::ReadTreeResponse>* AsyncReadTreeRaw(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::ReadTreeResponse>* PrepareAsyncReadTreeRaw(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::CancelBatchResponse>* AsyncCancelBatchRaw(::grpc::ClientContext* context, const ::hashdb::v1::CancelBatchRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::hashdb::v1::CancelBatchResponse>* PrepareAsyncCancelBatchRaw(::grpc::ClientContext* context, const ::hashdb::v1::CancelBatchRequest& request, ::grpc::CompletionQueue* cq) = 0;
   };
   class Stub final : public StubInterface {
    public:
@@ -341,6 +425,34 @@ class HashDBService final {
     }
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetFlushDataResponse>> PrepareAsyncGetFlushData(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetFlushDataResponse>>(PrepareAsyncGetFlushDataRaw(context, request, cq));
+    }
+    ::grpc::Status ConsolidateState(::grpc::ClientContext* context, const ::hashdb::v1::ConsolidateStateRequest& request, ::hashdb::v1::ConsolidateStateResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::ConsolidateStateResponse>> AsyncConsolidateState(::grpc::ClientContext* context, const ::hashdb::v1::ConsolidateStateRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::ConsolidateStateResponse>>(AsyncConsolidateStateRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::ConsolidateStateResponse>> PrepareAsyncConsolidateState(::grpc::ClientContext* context, const ::hashdb::v1::ConsolidateStateRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::ConsolidateStateResponse>>(PrepareAsyncConsolidateStateRaw(context, request, cq));
+    }
+    ::grpc::Status Purge(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest& request, ::hashdb::v1::PurgeResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::PurgeResponse>> AsyncPurge(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::PurgeResponse>>(AsyncPurgeRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::PurgeResponse>> PrepareAsyncPurge(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::PurgeResponse>>(PrepareAsyncPurgeRaw(context, request, cq));
+    }
+    ::grpc::Status ReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest& request, ::hashdb::v1::ReadTreeResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::ReadTreeResponse>> AsyncReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::ReadTreeResponse>>(AsyncReadTreeRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::ReadTreeResponse>> PrepareAsyncReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::ReadTreeResponse>>(PrepareAsyncReadTreeRaw(context, request, cq));
+    }
+    ::grpc::Status CancelBatch(::grpc::ClientContext* context, const ::hashdb::v1::CancelBatchRequest& request, ::hashdb::v1::CancelBatchResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::CancelBatchResponse>> AsyncCancelBatch(::grpc::ClientContext* context, const ::hashdb::v1::CancelBatchRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::CancelBatchResponse>>(AsyncCancelBatchRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::CancelBatchResponse>> PrepareAsyncCancelBatch(::grpc::ClientContext* context, const ::hashdb::v1::CancelBatchRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::hashdb::v1::CancelBatchResponse>>(PrepareAsyncCancelBatchRaw(context, request, cq));
     }
     class experimental_async final :
       public StubInterface::experimental_async_interface {
@@ -465,6 +577,54 @@ class HashDBService final {
       #else
       void GetFlushData(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetFlushDataResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
       #endif
+      void ConsolidateState(::grpc::ClientContext* context, const ::hashdb::v1::ConsolidateStateRequest* request, ::hashdb::v1::ConsolidateStateResponse* response, std::function<void(::grpc::Status)>) override;
+      void ConsolidateState(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ConsolidateStateResponse* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void ConsolidateState(::grpc::ClientContext* context, const ::hashdb::v1::ConsolidateStateRequest* request, ::hashdb::v1::ConsolidateStateResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void ConsolidateState(::grpc::ClientContext* context, const ::hashdb::v1::ConsolidateStateRequest* request, ::hashdb::v1::ConsolidateStateResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void ConsolidateState(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ConsolidateStateResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void ConsolidateState(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ConsolidateStateResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
+      void Purge(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest* request, ::hashdb::v1::PurgeResponse* response, std::function<void(::grpc::Status)>) override;
+      void Purge(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::PurgeResponse* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void Purge(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest* request, ::hashdb::v1::PurgeResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void Purge(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest* request, ::hashdb::v1::PurgeResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void Purge(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::PurgeResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void Purge(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::PurgeResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
+      void ReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response, std::function<void(::grpc::Status)>) override;
+      void ReadTree(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ReadTreeResponse* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void ReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void ReadTree(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void ReadTree(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ReadTreeResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void ReadTree(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ReadTreeResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
+      void CancelBatch(::grpc::ClientContext* context, const ::hashdb::v1::CancelBatchRequest* request, ::hashdb::v1::CancelBatchResponse* response, std::function<void(::grpc::Status)>) override;
+      void CancelBatch(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::CancelBatchResponse* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void CancelBatch(::grpc::ClientContext* context, const ::hashdb::v1::CancelBatchRequest* request, ::hashdb::v1::CancelBatchResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void CancelBatch(::grpc::ClientContext* context, const ::hashdb::v1::CancelBatchRequest* request, ::hashdb::v1::CancelBatchResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void CancelBatch(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::CancelBatchResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void CancelBatch(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::CancelBatchResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
      private:
       friend class Stub;
       explicit experimental_async(Stub* stub): stub_(stub) { }
@@ -496,6 +656,14 @@ class HashDBService final {
     ::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetFlushStatusResponse>* PrepareAsyncGetFlushStatusRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetFlushDataResponse>* AsyncGetFlushDataRaw(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetFlushDataResponse>* PrepareAsyncGetFlushDataRaw(::grpc::ClientContext* context, const ::hashdb::v1::GetFlushDataRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::hashdb::v1::ConsolidateStateResponse>* AsyncConsolidateStateRaw(::grpc::ClientContext* context, const ::hashdb::v1::ConsolidateStateRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::hashdb::v1::ConsolidateStateResponse>* PrepareAsyncConsolidateStateRaw(::grpc::ClientContext* context, const ::hashdb::v1::ConsolidateStateRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::hashdb::v1::PurgeResponse>* AsyncPurgeRaw(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::hashdb::v1::PurgeResponse>* PrepareAsyncPurgeRaw(::grpc::ClientContext* context, const ::hashdb::v1::PurgeRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::hashdb::v1::ReadTreeResponse>* AsyncReadTreeRaw(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::hashdb::v1::ReadTreeResponse>* PrepareAsyncReadTreeRaw(::grpc::ClientContext* context, const ::hashdb::v1::ReadTreeRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::hashdb::v1::CancelBatchResponse>* AsyncCancelBatchRaw(::grpc::ClientContext* context, const ::hashdb::v1::CancelBatchRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::hashdb::v1::CancelBatchResponse>* PrepareAsyncCancelBatchRaw(::grpc::ClientContext* context, const ::hashdb::v1::CancelBatchRequest& request, ::grpc::CompletionQueue* cq) override;
     const ::grpc::internal::RpcMethod rpcmethod_Set_;
     const ::grpc::internal::RpcMethod rpcmethod_Get_;
     const ::grpc::internal::RpcMethod rpcmethod_SetProgram_;
@@ -506,6 +674,10 @@ class HashDBService final {
     const ::grpc::internal::RpcMethod rpcmethod_SemiFlush_;
     const ::grpc::internal::RpcMethod rpcmethod_GetFlushStatus_;
     const ::grpc::internal::RpcMethod rpcmethod_GetFlushData_;
+    const ::grpc::internal::RpcMethod rpcmethod_ConsolidateState_;
+    const ::grpc::internal::RpcMethod rpcmethod_Purge_;
+    const ::grpc::internal::RpcMethod rpcmethod_ReadTree_;
+    const ::grpc::internal::RpcMethod rpcmethod_CancelBatch_;
   };
   static std::unique_ptr<Stub> NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
 
@@ -523,6 +695,10 @@ class HashDBService final {
     virtual ::grpc::Status SemiFlush(::grpc::ServerContext* context, const ::hashdb::v1::SemiFlushRequest* request, ::google::protobuf::Empty* response);
     virtual ::grpc::Status GetFlushStatus(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetFlushStatusResponse* response);
     virtual ::grpc::Status GetFlushData(::grpc::ServerContext* context, const ::hashdb::v1::GetFlushDataRequest* request, ::hashdb::v1::GetFlushDataResponse* response);
+    virtual ::grpc::Status ConsolidateState(::grpc::ServerContext* context, const ::hashdb::v1::ConsolidateStateRequest* request, ::hashdb::v1::ConsolidateStateResponse* response);
+    virtual ::grpc::Status Purge(::grpc::ServerContext* context, const ::hashdb::v1::PurgeRequest* request, ::hashdb::v1::PurgeResponse* response);
+    virtual ::grpc::Status ReadTree(::grpc::ServerContext* context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response);
+    virtual ::grpc::Status CancelBatch(::grpc::ServerContext* context, const ::hashdb::v1::CancelBatchRequest* request, ::hashdb::v1::CancelBatchResponse* response);
   };
   template <class BaseClass>
   class WithAsyncMethod_Set : public BaseClass {
@@ -724,7 +900,87 @@ class HashDBService final {
       ::grpc::Service::RequestAsyncUnary(9, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
-  typedef WithAsyncMethod_Set<WithAsyncMethod_Get<WithAsyncMethod_SetProgram<WithAsyncMethod_GetProgram<WithAsyncMethod_LoadDB<WithAsyncMethod_LoadProgramDB<WithAsyncMethod_Flush<WithAsyncMethod_SemiFlush<WithAsyncMethod_GetFlushStatus<WithAsyncMethod_GetFlushData<Service > > > > > > > > > > AsyncService;
+  template <class BaseClass>
+  class WithAsyncMethod_ConsolidateState : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_ConsolidateState() {
+      ::grpc::Service::MarkMethodAsync(10);
+    }
+    ~WithAsyncMethod_ConsolidateState() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ConsolidateState(::grpc::ServerContext* /*context*/, const ::hashdb::v1::ConsolidateStateRequest* /*request*/, ::hashdb::v1::ConsolidateStateResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestConsolidateState(::grpc::ServerContext* context, ::hashdb::v1::ConsolidateStateRequest* request, ::grpc::ServerAsyncResponseWriter< ::hashdb::v1::ConsolidateStateResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(10, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithAsyncMethod_Purge : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_Purge() {
+      ::grpc::Service::MarkMethodAsync(11);
+    }
+    ~WithAsyncMethod_Purge() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status Purge(::grpc::ServerContext* /*context*/, const ::hashdb::v1::PurgeRequest* /*request*/, ::hashdb::v1::PurgeResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestPurge(::grpc::ServerContext* context, ::hashdb::v1::PurgeRequest* request, ::grpc::ServerAsyncResponseWriter< ::hashdb::v1::PurgeResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(11, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithAsyncMethod_ReadTree : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_ReadTree() {
+      ::grpc::Service::MarkMethodAsync(12);
+    }
+    ~WithAsyncMethod_ReadTree() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ReadTree(::grpc::ServerContext* /*context*/, const ::hashdb::v1::ReadTreeRequest* /*request*/, ::hashdb::v1::ReadTreeResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestReadTree(::grpc::ServerContext* context, ::hashdb::v1::ReadTreeRequest* request, ::grpc::ServerAsyncResponseWriter< ::hashdb::v1::ReadTreeResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(12, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithAsyncMethod_CancelBatch : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_CancelBatch() {
+      ::grpc::Service::MarkMethodAsync(13);
+    }
+    ~WithAsyncMethod_CancelBatch() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status CancelBatch(::grpc::ServerContext* /*context*/, const ::hashdb::v1::CancelBatchRequest* /*request*/, ::hashdb::v1::CancelBatchResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestCancelBatch(::grpc::ServerContext* context, ::hashdb::v1::CancelBatchRequest* request, ::grpc::ServerAsyncResponseWriter< ::hashdb::v1::CancelBatchResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(13, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  typedef WithAsyncMethod_Set<WithAsyncMethod_Get<WithAsyncMethod_SetProgram<WithAsyncMethod_GetProgram<WithAsyncMethod_LoadDB<WithAsyncMethod_LoadProgramDB<WithAsyncMethod_Flush<WithAsyncMethod_SemiFlush<WithAsyncMethod_GetFlushStatus<WithAsyncMethod_GetFlushData<WithAsyncMethod_ConsolidateState<WithAsyncMethod_Purge<WithAsyncMethod_ReadTree<WithAsyncMethod_CancelBatch<Service > > > > > > > > > > > > > > AsyncService;
   template <class BaseClass>
   class ExperimentalWithCallbackMethod_Set : public BaseClass {
    private:
@@ -1195,11 +1451,199 @@ class HashDBService final {
     #endif
       { return nullptr; }
   };
+  template <class BaseClass>
+  class ExperimentalWithCallbackMethod_ConsolidateState : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithCallbackMethod_ConsolidateState() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(10,
+          new ::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::ConsolidateStateRequest, ::hashdb::v1::ConsolidateStateResponse>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::hashdb::v1::ConsolidateStateRequest* request, ::hashdb::v1::ConsolidateStateResponse* response) { return this->ConsolidateState(context, request, response); }));}
+    void SetMessageAllocatorFor_ConsolidateState(
+        ::grpc::experimental::MessageAllocator< ::hashdb::v1::ConsolidateStateRequest, ::hashdb::v1::ConsolidateStateResponse>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(10);
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(10);
+    #endif
+      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::ConsolidateStateRequest, ::hashdb::v1::ConsolidateStateResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~ExperimentalWithCallbackMethod_ConsolidateState() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ConsolidateState(::grpc::ServerContext* /*context*/, const ::hashdb::v1::ConsolidateStateRequest* /*request*/, ::hashdb::v1::ConsolidateStateResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* ConsolidateState(
+      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::ConsolidateStateRequest* /*request*/, ::hashdb::v1::ConsolidateStateResponse* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* ConsolidateState(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::hashdb::v1::ConsolidateStateRequest* /*request*/, ::hashdb::v1::ConsolidateStateResponse* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
+  class ExperimentalWithCallbackMethod_Purge : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithCallbackMethod_Purge() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(11,
+          new ::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::PurgeRequest, ::hashdb::v1::PurgeResponse>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::hashdb::v1::PurgeRequest* request, ::hashdb::v1::PurgeResponse* response) { return this->Purge(context, request, response); }));}
+    void SetMessageAllocatorFor_Purge(
+        ::grpc::experimental::MessageAllocator< ::hashdb::v1::PurgeRequest, ::hashdb::v1::PurgeResponse>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(11);
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(11);
+    #endif
+      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::PurgeRequest, ::hashdb::v1::PurgeResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~ExperimentalWithCallbackMethod_Purge() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status Purge(::grpc::ServerContext* /*context*/, const ::hashdb::v1::PurgeRequest* /*request*/, ::hashdb::v1::PurgeResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* Purge(
+      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::PurgeRequest* /*request*/, ::hashdb::v1::PurgeResponse* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* Purge(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::hashdb::v1::PurgeRequest* /*request*/, ::hashdb::v1::PurgeResponse* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
+  class ExperimentalWithCallbackMethod_ReadTree : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithCallbackMethod_ReadTree() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(12,
+          new ::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::ReadTreeRequest, ::hashdb::v1::ReadTreeResponse>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response) { return this->ReadTree(context, request, response); }));}
+    void SetMessageAllocatorFor_ReadTree(
+        ::grpc::experimental::MessageAllocator< ::hashdb::v1::ReadTreeRequest, ::hashdb::v1::ReadTreeResponse>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(12);
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(12);
+    #endif
+      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::ReadTreeRequest, ::hashdb::v1::ReadTreeResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~ExperimentalWithCallbackMethod_ReadTree() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ReadTree(::grpc::ServerContext* /*context*/, const ::hashdb::v1::ReadTreeRequest* /*request*/, ::hashdb::v1::ReadTreeResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* ReadTree(
+      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::ReadTreeRequest* /*request*/, ::hashdb::v1::ReadTreeResponse* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* ReadTree(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::hashdb::v1::ReadTreeRequest* /*request*/, ::hashdb::v1::ReadTreeResponse* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
+  class ExperimentalWithCallbackMethod_CancelBatch : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithCallbackMethod_CancelBatch() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(13,
+          new ::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::CancelBatchRequest, ::hashdb::v1::CancelBatchResponse>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::hashdb::v1::CancelBatchRequest* request, ::hashdb::v1::CancelBatchResponse* response) { return this->CancelBatch(context, request, response); }));}
+    void SetMessageAllocatorFor_CancelBatch(
+        ::grpc::experimental::MessageAllocator< ::hashdb::v1::CancelBatchRequest, ::hashdb::v1::CancelBatchResponse>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(13);
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(13);
+    #endif
+      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::hashdb::v1::CancelBatchRequest, ::hashdb::v1::CancelBatchResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~ExperimentalWithCallbackMethod_CancelBatch() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status CancelBatch(::grpc::ServerContext* /*context*/, const ::hashdb::v1::CancelBatchRequest* /*request*/, ::hashdb::v1::CancelBatchResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* CancelBatch(
+      ::grpc::CallbackServerContext* /*context*/, const ::hashdb::v1::CancelBatchRequest* /*request*/, ::hashdb::v1::CancelBatchResponse* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* CancelBatch(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::hashdb::v1::CancelBatchRequest* /*request*/, ::hashdb::v1::CancelBatchResponse* /*response*/)
+    #endif
+      { return nullptr; }
+  };
   #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-  typedef ExperimentalWithCallbackMethod_Set<ExperimentalWithCallbackMethod_Get<ExperimentalWithCallbackMethod_SetProgram<ExperimentalWithCallbackMethod_GetProgram<ExperimentalWithCallbackMethod_LoadDB<ExperimentalWithCallbackMethod_LoadProgramDB<ExperimentalWithCallbackMethod_Flush<ExperimentalWithCallbackMethod_SemiFlush<ExperimentalWithCallbackMethod_GetFlushStatus<ExperimentalWithCallbackMethod_GetFlushData<Service > > > > > > > > > > CallbackService;
+  typedef ExperimentalWithCallbackMethod_Set<ExperimentalWithCallbackMethod_Get<ExperimentalWithCallbackMethod_SetProgram<ExperimentalWithCallbackMethod_GetProgram<ExperimentalWithCallbackMethod_LoadDB<ExperimentalWithCallbackMethod_LoadProgramDB<ExperimentalWithCallbackMethod_Flush<ExperimentalWithCallbackMethod_SemiFlush<ExperimentalWithCallbackMethod_GetFlushStatus<ExperimentalWithCallbackMethod_GetFlushData<ExperimentalWithCallbackMethod_ConsolidateState<ExperimentalWithCallbackMethod_Purge<ExperimentalWithCallbackMethod_ReadTree<ExperimentalWithCallbackMethod_CancelBatch<Service > > > > > > > > > > > > > > CallbackService;
   #endif
 
-  typedef ExperimentalWithCallbackMethod_Set<ExperimentalWithCallbackMethod_Get<ExperimentalWithCallbackMethod_SetProgram<ExperimentalWithCallbackMethod_GetProgram<ExperimentalWithCallbackMethod_LoadDB<ExperimentalWithCallbackMethod_LoadProgramDB<ExperimentalWithCallbackMethod_Flush<ExperimentalWithCallbackMethod_SemiFlush<ExperimentalWithCallbackMethod_GetFlushStatus<ExperimentalWithCallbackMethod_GetFlushData<Service > > > > > > > > > > ExperimentalCallbackService;
+  typedef ExperimentalWithCallbackMethod_Set<ExperimentalWithCallbackMethod_Get<ExperimentalWithCallbackMethod_SetProgram<ExperimentalWithCallbackMethod_GetProgram<ExperimentalWithCallbackMethod_LoadDB<ExperimentalWithCallbackMethod_LoadProgramDB<ExperimentalWithCallbackMethod_Flush<ExperimentalWithCallbackMethod_SemiFlush<ExperimentalWithCallbackMethod_GetFlushStatus<ExperimentalWithCallbackMethod_GetFlushData<ExperimentalWithCallbackMethod_ConsolidateState<ExperimentalWithCallbackMethod_Purge<ExperimentalWithCallbackMethod_ReadTree<ExperimentalWithCallbackMethod_CancelBatch<Service > > > > > > > > > > > > > > ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_Set : public BaseClass {
    private:
@@ -1366,6 +1810,74 @@ class HashDBService final {
     }
     // disable synchronous version of this method
     ::grpc::Status GetFlushData(::grpc::ServerContext* /*context*/, const ::hashdb::v1::GetFlushDataRequest* /*request*/, ::hashdb::v1::GetFlushDataResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_ConsolidateState : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_ConsolidateState() {
+      ::grpc::Service::MarkMethodGeneric(10);
+    }
+    ~WithGenericMethod_ConsolidateState() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ConsolidateState(::grpc::ServerContext* /*context*/, const ::hashdb::v1::ConsolidateStateRequest* /*request*/, ::hashdb::v1::ConsolidateStateResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_Purge : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_Purge() {
+      ::grpc::Service::MarkMethodGeneric(11);
+    }
+    ~WithGenericMethod_Purge() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status Purge(::grpc::ServerContext* /*context*/, const ::hashdb::v1::PurgeRequest* /*request*/, ::hashdb::v1::PurgeResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_ReadTree : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_ReadTree() {
+      ::grpc::Service::MarkMethodGeneric(12);
+    }
+    ~WithGenericMethod_ReadTree() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ReadTree(::grpc::ServerContext* /*context*/, const ::hashdb::v1::ReadTreeRequest* /*request*/, ::hashdb::v1::ReadTreeResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_CancelBatch : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_CancelBatch() {
+      ::grpc::Service::MarkMethodGeneric(13);
+    }
+    ~WithGenericMethod_CancelBatch() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status CancelBatch(::grpc::ServerContext* /*context*/, const ::hashdb::v1::CancelBatchRequest* /*request*/, ::hashdb::v1::CancelBatchResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -1568,6 +2080,86 @@ class HashDBService final {
     }
     void RequestGetFlushData(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
       ::grpc::Service::RequestAsyncUnary(9, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_ConsolidateState : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_ConsolidateState() {
+      ::grpc::Service::MarkMethodRaw(10);
+    }
+    ~WithRawMethod_ConsolidateState() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ConsolidateState(::grpc::ServerContext* /*context*/, const ::hashdb::v1::ConsolidateStateRequest* /*request*/, ::hashdb::v1::ConsolidateStateResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestConsolidateState(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(10, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_Purge : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_Purge() {
+      ::grpc::Service::MarkMethodRaw(11);
+    }
+    ~WithRawMethod_Purge() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status Purge(::grpc::ServerContext* /*context*/, const ::hashdb::v1::PurgeRequest* /*request*/, ::hashdb::v1::PurgeResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestPurge(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(11, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_ReadTree : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_ReadTree() {
+      ::grpc::Service::MarkMethodRaw(12);
+    }
+    ~WithRawMethod_ReadTree() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ReadTree(::grpc::ServerContext* /*context*/, const ::hashdb::v1::ReadTreeRequest* /*request*/, ::hashdb::v1::ReadTreeResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestReadTree(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(12, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_CancelBatch : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_CancelBatch() {
+      ::grpc::Service::MarkMethodRaw(13);
+    }
+    ~WithRawMethod_CancelBatch() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status CancelBatch(::grpc::ServerContext* /*context*/, const ::hashdb::v1::CancelBatchRequest* /*request*/, ::hashdb::v1::CancelBatchResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestCancelBatch(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(13, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -1951,6 +2543,158 @@ class HashDBService final {
       { return nullptr; }
   };
   template <class BaseClass>
+  class ExperimentalWithRawCallbackMethod_ConsolidateState : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithRawCallbackMethod_ConsolidateState() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(10,
+          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->ConsolidateState(context, request, response); }));
+    }
+    ~ExperimentalWithRawCallbackMethod_ConsolidateState() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ConsolidateState(::grpc::ServerContext* /*context*/, const ::hashdb::v1::ConsolidateStateRequest* /*request*/, ::hashdb::v1::ConsolidateStateResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* ConsolidateState(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* ConsolidateState(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
+  class ExperimentalWithRawCallbackMethod_Purge : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithRawCallbackMethod_Purge() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(11,
+          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->Purge(context, request, response); }));
+    }
+    ~ExperimentalWithRawCallbackMethod_Purge() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status Purge(::grpc::ServerContext* /*context*/, const ::hashdb::v1::PurgeRequest* /*request*/, ::hashdb::v1::PurgeResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* Purge(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* Purge(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
+  class ExperimentalWithRawCallbackMethod_ReadTree : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithRawCallbackMethod_ReadTree() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(12,
+          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->ReadTree(context, request, response); }));
+    }
+    ~ExperimentalWithRawCallbackMethod_ReadTree() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ReadTree(::grpc::ServerContext* /*context*/, const ::hashdb::v1::ReadTreeRequest* /*request*/, ::hashdb::v1::ReadTreeResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* ReadTree(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* ReadTree(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
+  class ExperimentalWithRawCallbackMethod_CancelBatch : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithRawCallbackMethod_CancelBatch() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(13,
+          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->CancelBatch(context, request, response); }));
+    }
+    ~ExperimentalWithRawCallbackMethod_CancelBatch() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status CancelBatch(::grpc::ServerContext* /*context*/, const ::hashdb::v1::CancelBatchRequest* /*request*/, ::hashdb::v1::CancelBatchResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* CancelBatch(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* CancelBatch(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
   class WithStreamedUnaryMethod_Set : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
@@ -2220,9 +2964,117 @@ class HashDBService final {
     // replace default version of method with streamed unary
     virtual ::grpc::Status StreamedGetFlushData(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::hashdb::v1::GetFlushDataRequest,::hashdb::v1::GetFlushDataResponse>* server_unary_streamer) = 0;
   };
-  typedef WithStreamedUnaryMethod_Set<WithStreamedUnaryMethod_Get<WithStreamedUnaryMethod_SetProgram<WithStreamedUnaryMethod_GetProgram<WithStreamedUnaryMethod_LoadDB<WithStreamedUnaryMethod_LoadProgramDB<WithStreamedUnaryMethod_Flush<WithStreamedUnaryMethod_SemiFlush<WithStreamedUnaryMethod_GetFlushStatus<WithStreamedUnaryMethod_GetFlushData<Service > > > > > > > > > > StreamedUnaryService;
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_ConsolidateState : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_ConsolidateState() {
+      ::grpc::Service::MarkMethodStreamed(10,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::hashdb::v1::ConsolidateStateRequest, ::hashdb::v1::ConsolidateStateResponse>(
+            [this](::grpc_impl::ServerContext* context,
+                   ::grpc_impl::ServerUnaryStreamer<
+                     ::hashdb::v1::ConsolidateStateRequest, ::hashdb::v1::ConsolidateStateResponse>* streamer) {
+                       return this->StreamedConsolidateState(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_ConsolidateState() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status ConsolidateState(::grpc::ServerContext* /*context*/, const ::hashdb::v1::ConsolidateStateRequest* /*request*/, ::hashdb::v1::ConsolidateStateResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedConsolidateState(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::hashdb::v1::ConsolidateStateRequest,::hashdb::v1::ConsolidateStateResponse>* server_unary_streamer) = 0;
+  };
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_Purge : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_Purge() {
+      ::grpc::Service::MarkMethodStreamed(11,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::hashdb::v1::PurgeRequest, ::hashdb::v1::PurgeResponse>(
+            [this](::grpc_impl::ServerContext* context,
+                   ::grpc_impl::ServerUnaryStreamer<
+                     ::hashdb::v1::PurgeRequest, ::hashdb::v1::PurgeResponse>* streamer) {
+                       return this->StreamedPurge(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_Purge() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status Purge(::grpc::ServerContext* /*context*/, const ::hashdb::v1::PurgeRequest* /*request*/, ::hashdb::v1::PurgeResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedPurge(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::hashdb::v1::PurgeRequest,::hashdb::v1::PurgeResponse>* server_unary_streamer) = 0;
+  };
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_ReadTree : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_ReadTree() {
+      ::grpc::Service::MarkMethodStreamed(12,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::hashdb::v1::ReadTreeRequest, ::hashdb::v1::ReadTreeResponse>(
+            [this](::grpc_impl::ServerContext* context,
+                   ::grpc_impl::ServerUnaryStreamer<
+                     ::hashdb::v1::ReadTreeRequest, ::hashdb::v1::ReadTreeResponse>* streamer) {
+                       return this->StreamedReadTree(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_ReadTree() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status ReadTree(::grpc::ServerContext* /*context*/, const ::hashdb::v1::ReadTreeRequest* /*request*/, ::hashdb::v1::ReadTreeResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedReadTree(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::hashdb::v1::ReadTreeRequest,::hashdb::v1::ReadTreeResponse>* server_unary_streamer) = 0;
+  };
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_CancelBatch : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_CancelBatch() {
+      ::grpc::Service::MarkMethodStreamed(13,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::hashdb::v1::CancelBatchRequest, ::hashdb::v1::CancelBatchResponse>(
+            [this](::grpc_impl::ServerContext* context,
+                   ::grpc_impl::ServerUnaryStreamer<
+                     ::hashdb::v1::CancelBatchRequest, ::hashdb::v1::CancelBatchResponse>* streamer) {
+                       return this->StreamedCancelBatch(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_CancelBatch() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status CancelBatch(::grpc::ServerContext* /*context*/, const ::hashdb::v1::CancelBatchRequest* /*request*/, ::hashdb::v1::CancelBatchResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedCancelBatch(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::hashdb::v1::CancelBatchRequest,::hashdb::v1::CancelBatchResponse>* server_unary_streamer) = 0;
+  };
+  typedef WithStreamedUnaryMethod_Set<WithStreamedUnaryMethod_Get<WithStreamedUnaryMethod_SetProgram<WithStreamedUnaryMethod_GetProgram<WithStreamedUnaryMethod_LoadDB<WithStreamedUnaryMethod_LoadProgramDB<WithStreamedUnaryMethod_Flush<WithStreamedUnaryMethod_SemiFlush<WithStreamedUnaryMethod_GetFlushStatus<WithStreamedUnaryMethod_GetFlushData<WithStreamedUnaryMethod_ConsolidateState<WithStreamedUnaryMethod_Purge<WithStreamedUnaryMethod_ReadTree<WithStreamedUnaryMethod_CancelBatch<Service > > > > > > > > > > > > > > StreamedUnaryService;
   typedef Service SplitStreamedService;
-  typedef WithStreamedUnaryMethod_Set<WithStreamedUnaryMethod_Get<WithStreamedUnaryMethod_SetProgram<WithStreamedUnaryMethod_GetProgram<WithStreamedUnaryMethod_LoadDB<WithStreamedUnaryMethod_LoadProgramDB<WithStreamedUnaryMethod_Flush<WithStreamedUnaryMethod_SemiFlush<WithStreamedUnaryMethod_GetFlushStatus<WithStreamedUnaryMethod_GetFlushData<Service > > > > > > > > > > StreamedService;
+  typedef WithStreamedUnaryMethod_Set<WithStreamedUnaryMethod_Get<WithStreamedUnaryMethod_SetProgram<WithStreamedUnaryMethod_GetProgram<WithStreamedUnaryMethod_LoadDB<WithStreamedUnaryMethod_LoadProgramDB<WithStreamedUnaryMethod_Flush<WithStreamedUnaryMethod_SemiFlush<WithStreamedUnaryMethod_GetFlushStatus<WithStreamedUnaryMethod_GetFlushData<WithStreamedUnaryMethod_ConsolidateState<WithStreamedUnaryMethod_Purge<WithStreamedUnaryMethod_ReadTree<WithStreamedUnaryMethod_CancelBatch<Service > > > > > > > > > > > > > > StreamedService;
 };
 
 }  // namespace v1

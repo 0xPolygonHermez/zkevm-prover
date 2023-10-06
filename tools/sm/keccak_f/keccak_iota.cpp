@@ -1,5 +1,6 @@
-#include "keccak_state.hpp"
+#include "keccak.hpp"
 #include "keccak_rc.hpp"
+#include "gate_state.hpp"
 
 /*
 Keccak-f Iota permutation.
@@ -11,7 +12,7 @@ Steps:
 5. Return A′
 */
 
-void KeccakIota (KeccakState &S, uint64_t ir)
+void KeccakIota (GateState &S, uint64_t ir)
 {
     // Init KeccakRC, if required
     KeccakRCInit();
@@ -41,22 +42,22 @@ void KeccakIota (KeccakState &S, uint64_t ir)
         {
             if (ir==23)
             {
-                S.XOR( ZeroRef, pin_b, S.SoutRefs[Bit(0, 0, z)], pin_r, aux );
+                S.XOR(S.gateConfig.zeroRef, pin_b, S.SoutRefs[Bit(0, 0, z)], pin_r, aux );
             }
             else
             {
-                S.XOR( ZeroRef, pin_b, S.SoutRefs[Bit(0, 0, z)], pin_r, aux );
+                S.XOR(S.gateConfig.zeroRef, pin_b, S.SoutRefs[Bit(0, 0, z)], pin_r, aux );
             }
         }
         else
         {
             if (ir==23)
             {
-                S.XOR( ZeroRef, pin_a, S.SoutRefs[Bit(0, 0, z)], pin_r, aux );
+                S.XOR(S.gateConfig.zeroRef, pin_a, S.SoutRefs[Bit(0, 0, z)], pin_r, aux );
             }
             else
             {
-                S.XOR( ZeroRef, pin_a, S.SoutRefs[Bit(0, 0, z)], pin_r, aux );
+                S.XOR(S.gateConfig.zeroRef, pin_a, S.SoutRefs[Bit(0, 0, z)], pin_r, aux );
             }
         }
         S.SoutRefs[Bit(0, 0, z)] = aux;

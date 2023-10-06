@@ -6,6 +6,7 @@
 #include <gmpxx.h>
 #include "zkresult.hpp"
 #include "main_sm/fork_5/main_exec_c/rlp_data.hpp"
+#include <stdint.h>
 
 using namespace std;
 

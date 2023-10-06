@@ -1,5 +1,6 @@
-#include "keccak_state.hpp"
+#include "keccak.hpp"
 #include "zkassert.hpp"
+#include "gate_state.hpp"
 
 /*
 Keccak-f Theta permutation.
@@ -12,7 +13,7 @@ Steps:
     A′[x, y, z] = A[x, y, z] ⊕ D[x, z]
 */
 
-void KeccakTheta (KeccakState &S, uint64_t ir)
+void KeccakTheta (GateState &S, uint64_t ir)
 {
     // C[x, z] = A[x, 0, z] ⊕ A[x, 1, z] ⊕ A[x, 2, z] ⊕ A[x, 3, z] ⊕ A[x, 4, z]
     uint64_t C[5][64];
@@ -28,8 +29,8 @@ void KeccakTheta (KeccakState &S, uint64_t ir)
             aux1 = S.getFreeRef();
             if (ir==0) // First time we use pin_a input directly
             {
-                zkassert(S.SinRefs[Bit(x, 0, z)] == SinRef0 + 44*Bit(x, 0, z));
-                zkassert(S.SinRefs[Bit(x, 1, z)] == SinRef0 + 44*Bit(x, 1, z));
+                zkassert(S.SinRefs[Bit(x, 0, z)] == S.gateConfig.sinRef0 + 44*Bit(x, 0, z));
+                zkassert(S.SinRefs[Bit(x, 1, z)] == S.gateConfig.sinRef0 + 44*Bit(x, 1, z));
                 S.XOR(S.SinRefs[Bit(x, 0, z)], pin_a, S.SinRefs[Bit(x, 1, z)], pin_a, aux1);
             }
             else
@@ -41,7 +42,7 @@ void KeccakTheta (KeccakState &S, uint64_t ir)
             aux2 = S.getFreeRef();
             if (ir==0) // First time we use pin_a input directly
             {
-                zkassert(S.SinRefs[Bit(x, 2, z)] == SinRef0 + 44*Bit(x, 2, z));
+                zkassert(S.SinRefs[Bit(x, 2, z)] == S.gateConfig.sinRef0 + 44*Bit(x, 2, z));
                 S.XOR(S.SinRefs[Bit(x, 2, z)], pin_a, aux1, pin_r, aux2);
             }
             else
@@ -53,7 +54,7 @@ void KeccakTheta (KeccakState &S, uint64_t ir)
             aux3 = S.getFreeRef();
             if (ir==0) // First time we use pin_a input directly
             {
-                zkassert(S.SinRefs[Bit(x, 3, z)] == SinRef0 + 44*Bit(x, 3, z));
+                zkassert(S.SinRefs[Bit(x, 3, z)] == S.gateConfig.sinRef0 + 44*Bit(x, 3, z));
                 S.XOR(S.SinRefs[Bit(x, 3, z)], pin_a, aux2, pin_r, aux3);
             }
             else
@@ -66,7 +67,7 @@ void KeccakTheta (KeccakState &S, uint64_t ir)
             C[x][z] = S.getFreeRef();
             if (ir==0) // First time we use pin_a input directly
             {
-                zkassert(S.SinRefs[Bit(x, 4, z)] == SinRef0 + 44*Bit(x, 4, z));
+                zkassert(S.SinRefs[Bit(x, 4, z)] == S.gateConfig.sinRef0 + 44*Bit(x, 4, z));
                 S.XOR(S.SinRefs[Bit(x, 4, z)], pin_a, aux3, pin_r, C[x][z]);
             }
             else
@@ -97,7 +98,7 @@ void KeccakTheta (KeccakState &S, uint64_t ir)
                 uint64_t aux;
                 if (ir==0) // First time we use the first 1600 Sin bit slots to store these gates
                 {
-                    aux = SinRef0 + 44*Bit(x, y, z);
+                    aux = S.gateConfig.sinRef0 + 44*Bit(x, y, z);
                     zkassert(S.SinRefs[Bit(x, y, z)] == aux);
                     S.XOR(aux, pin_a, D[x][z], pin_r, aux);
                 }
