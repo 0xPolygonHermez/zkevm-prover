@@ -76,20 +76,27 @@ void SHA256SMTest(Goldilocks &fr, Sha256Executor &executor)
 		GateState S(SHA256GateConfig);
 		// SHA256Gate(S, randomTestVectorPadded);
 
-		// Fill the executor input slot with the generated random byte test vector, bit by bit.
-		// Note that we're filling it with paddedSize.
-		for (uint64_t byte = 0; byte < paddedSize; byte++)
+		for (uint64_t word = 0; word < 16; word++)
 		{
-			if (slot == 0)
-			{
-				cout << byte << ": " << uint64_t(randomTestVectorPadded[byte]) << endl;
-			}
-			for (uint64_t bit = 0; bit < 8; bit++)
+			uint32_t wordBuffer;
+			bytes2u32(randomTestVectorPadded + 4 * word, wordBuffer, true);
+			vector<uint8_t> bits;
+			u322bits(wordBuffer, bits);
+			for (uint64_t bit = 0; bit < 32; bit++)
 			{
 				// Fill the bits normally from the test vector, with each bit being replaced with an equivalent
 				// bit initialized as a Goldilocks finite field element.
-				uint8_t mask = 1 << bit;
-				pInputSlot[(byte * 8) + bit] = ((randomTestVectorPadded[byte] & mask) != 0) ? fr.one() : fr.zero();
+				pInputSlot[(word * 32) + bit] = (bits[bit] != 0) ? fr.one() : fr.zero();
+			}
+		}
+		uint32_t h[8] = {0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19};
+		for (uint64_t word = 0; word < 8; word++)
+		{
+			vector<uint8_t> bits;
+			u322bits(h[word], bits);
+			for (uint64_t bit = 0; bit < 32; bit++)
+			{
+				pInputSlot[512 + (word * 32) + bit] = (bits[bit] != 0) ? fr.one() : fr.zero();
 			}
 		}
 
@@ -113,8 +120,8 @@ void SHA256SMTest(Goldilocks &fr, Sha256Executor &executor)
 		// Once we get the polynomial, we AND it with 1 to extract the bit.
 		for (uint64_t i = 0; i < 256; i++)
 		{
-			uint64_t bitIndex = SHA256GateConfig.relRef2AbsRef(SHA256GateConfig.soutRef0 + i * SHA256GateConfig.soutRefDistance, slot);
-			uint64_t pol = executor.getPol(cmPols.Sha256.output, bitIndex);
+			uint64_t bitIndex = SHA256GateConfig.relRef2AbsRef(SHA256GateConfig.soutRef0 + SHA256GateConfig.soutRefDistance + i, slot);
+			uint64_t pol = executor.getPol(cmPols.Sha256.inputs[0], bitIndex);
 			aux[i] = ((pol & uint64_t(1)) == 0) ? 0 : 1;
 		}
 

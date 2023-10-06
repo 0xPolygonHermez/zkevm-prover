@@ -60,7 +60,7 @@ public:
     // Perform the gate operation
     void OP(GateOperation op, uint64_t refA, PinId pinA, uint64_t refB, PinId pinB, uint64_t refR);
 
-    // XOR operation: r = XOR(a,b), r.value = a.value + b.value
+    // XOR operation: r = XOR(a,b), r.value = a.value ^ b.value
     void XOR(uint64_t refA, PinId pinA, uint64_t refB, PinId pinB, uint64_t refR) { OP(gop_xor, refA, pinA, refB, pinB, refR); };
     void XOR(uint64_t refA, uint64_t refB, uint64_t refR) { XOR(refA, pin_r, refB, pin_r, refR); };
 

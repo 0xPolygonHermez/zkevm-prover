@@ -68,6 +68,10 @@ void Sha256Executor::loadScript(json j)
         {
             instruction.op = gop_and;
         }
+        else if (j["program"][i]["op"] == "or")
+        {
+            instruction.op = gop_or;
+        }
         else
         {
             string opString = j[i]["op"];
@@ -159,9 +163,6 @@ void Sha256Executor::execute(const vector<vector<Goldilocks::Element>> &input, S
         for (uint64_t i = 0; i < SHA256GateConfig.sinRefNumber; i++)
         {
             setPol(pols.inputs[0], SHA256GateConfig.relRef2AbsRef(SHA256GateConfig.sinRef0 + i * SHA256GateConfig.sinRefDistance, slot), fr.toU64(input[slot][i]));
-            if (!fr.isZero(input[slot][i]) && (slot == 0)) {
-                cout << "1 at " << i << endl; 
-            }
         }
     }
 
@@ -218,6 +219,11 @@ void Sha256Executor::execute(const vector<vector<Goldilocks::Element>> &input, S
                 setPol(pols.output, absRefr, ((getPol(pols.inputs[0], absRefr)) & getPol(pols.inputs[1], absRefr)) & sha256Mask);
                 break;
             }
+            case gop_or:
+            {
+                setPol(pols.output, absRefr, ((getPol(pols.inputs[0], absRefr)) | getPol(pols.inputs[1], absRefr)) & sha256Mask);
+                break;
+            }
             default:
             {
                 zklog.error("Sha256Executor::execute() found invalid op: " + to_string(program[i].op) + " in evaluation: " + to_string(i));
@@ -225,7 +231,7 @@ void Sha256Executor::execute(const vector<vector<Goldilocks::Element>> &input, S
             }
             }
 
-            if (true && (debugCounter < 10000))
+            if (false && (slot == 0))
             {
                 cout << debugCounter << ": " << gateop2string(program[i].op) << endl;
                 cout << "pinA = " << program[i].pina << " | refA = " << program[i].refa << " || " << to_string(getPol(pols.inputs[0], absRefr)) << endl;
@@ -249,5 +255,8 @@ void Sha256Executor::setPol(CommitPol(&pol), uint64_t index, uint64_t value)
 
 uint64_t Sha256Executor::getPol(CommitPol(&pol), uint64_t index)
 {
-    return fr.toU64(pol[index]);
+    if (fr.toU64(pol[index]) == 0) {
+        return 0;
+    }
+    return 1;
 }

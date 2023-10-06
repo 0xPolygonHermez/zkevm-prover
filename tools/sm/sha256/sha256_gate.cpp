@@ -7,17 +7,17 @@
 #include "zkassert.hpp"
 
 GateConfig SHA256GateConfig = GateConfig(
-    uint64_t(0), // zeroRef 
-    uint64_t(160480), // slotSize
-    uint64_t(170000), // maxRefs
-    uint64_t(1), // firstNextRef
-    uint64_t(45), // sinRef0
-    uint64_t(768), // sinRefNumber 
-    uint64_t(44), // sinRefDistance 
-    uint64_t((45 + (768 * 44))), // soutRef0 
-    uint64_t(256), // soutRefNumber
-    uint64_t(44), // soutRefDistance
-    uint64_t(1 << 23)); // polLength
+    uint64_t(0),                 // zeroRef
+    uint64_t(160480),            // slotSize
+    uint64_t(170000),            // maxRefs
+    uint64_t(1),                 // firstNextRef
+    uint64_t(45),                // sinRef0
+    uint64_t(768),               // sinRefNumber
+    uint64_t(44),                // sinRefDistance
+    uint64_t((45 + (768 * 44))), // soutRef0
+    uint64_t(256),               // soutRefNumber
+    uint64_t(44),                // soutRefDistance
+    uint64_t(1 << 23));          // polLength
 
 void SHA256GateString(const string &s, string &hash)
 {

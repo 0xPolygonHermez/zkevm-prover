@@ -284,7 +284,7 @@ void GateState::OP(GateOperation op, uint64_t refA, PinId pinA, uint64_t refB, P
         zklog.error("GateState::OP() got invalid op=" + to_string(op));
         exitProcess();
     }
-    if (true && (debugCounter < 10000))
+    if (false)
     {
         cout << debugCounter << ": " << gateop2string(op) << endl;
         cout << "pinA = " << pinA << " | refA = " << refA << " || " << to_string(gate[refA].pin[pinA].bit) << endl;
