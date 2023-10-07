@@ -16,14 +16,15 @@
 
 uint64_t PageManagerTest (void)
 {
+    TimerStart(PAGE_MANAGER_TEST);
     PageManagerAccuracyTest();
     PageManagerPerformanceTest();
+    TimerStopAndLog(PAGE_MANAGER_TEST);
     return 0;
 }
 
 uint64_t PageManagerPerformanceTest(void){
 
-    std::cout << "PageManagerPerformanceTest" << std::endl;
     string fileName = "benchmark_file";
     uint64_t fileSize = 1ULL<<37;
     uint64_t nFiles = 1;
@@ -130,9 +131,7 @@ uint64_t PageManagerPerformanceTest(void){
 }
 uint64_t PageManagerAccuracyTest (void)
 {
-    TimerStart(PAGE_MANAGER_TEST);
 
-    std::cout << "PageManagerAccuracyTest" << std::endl;
     //
     // Memory version
     //
@@ -159,12 +158,13 @@ uint64_t PageManagerAccuracyTest (void)
         pageManagerMem.releasePage(i);
     }
     zkassertpermanent(pageManagerMem.getNumFreePages() == 98);
-    
+
     uint64_t page3=pageManagerMem.getFreePage();
     uint64_t * page3Data = (uint64_t *)pageManagerMem.getPageAddress(page3);
     for(uint64_t i=0; i<256;++i){
         page3Data[i] = i;
     }
+
     uint64_t page4 = pageManagerMem.editPage(page3);
     zkassertpermanent(page4 != page3);
     uint64_t * page4Data = (uint64_t *)pageManagerMem.getPageAddress(page4);
@@ -232,7 +232,6 @@ uint64_t PageManagerAccuracyTest (void)
     }
     zkassertpermanent(pages.size() == 98);
     zkassertpermanent(pageManagerFile.getNumFreePages() == 0);
-
     for(int i=2; i<100;++i){
         pageManagerFile.releasePage(i);
     }
@@ -279,6 +278,5 @@ uint64_t PageManagerAccuracyTest (void)
     //delete file
     std::remove(fileName.c_str());
 
-    TimerStopAndLog(PAGE_MANAGER_TEST);
     return 0;   
 }

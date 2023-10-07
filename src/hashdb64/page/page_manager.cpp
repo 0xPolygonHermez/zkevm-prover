@@ -27,7 +27,6 @@ PageManager::PageManager(const uint64_t nPages_)
     mappedFile = false;
     nPages = 0;
     pages.resize(1);
-    firstUnusedPage = 2;
     AddPages(nPages_);
 }
 PageManager::PageManager(const string fileName_, const uint64_t fileSize_, const uint64_t nFiles_, const string folderName_){
@@ -160,7 +159,7 @@ void PageManager::flushPages(){
         zkassertpermanent(write_size == 4096);
     }
     for(unordered_map<uint64_t, uint64_t>::const_iterator it = editedPages.begin(); it != editedPages.end(); it++){
-        if(it->first != it->second){
+        if(it->first != it->second && it->first >= 2){
             releasePage(it->first);
         }
     }
