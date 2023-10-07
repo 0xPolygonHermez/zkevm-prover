@@ -29,6 +29,7 @@ uint64_t PageManagerPerformanceTest(void){
     uint64_t fileSize = 1ULL<<37;
     uint64_t nFiles = 1;
     string folderName = "db";
+    uint64_t numPositions = 20000;
 
     // Create the state manager
     double start = omp_get_wtime();
@@ -36,9 +37,8 @@ uint64_t PageManagerPerformanceTest(void){
     double end = omp_get_wtime();
     std::cout << std::endl << "Time to construct the PageManager: " << end - start << " seconds" << std::endl;
 
-    // Evaluate 20K different random positions in the range [0,numPages)
+    // Evaluate numPositions different random positions in the range [0,numPages)
     uint64_t numPages = pageManagerFile.getNumFreePages() +2;
-    uint64_t numPositions = 20000;
     uint64_t *position = (uint64_t *)malloc(numPositions * sizeof(uint64_t));
     std::random_device rd;
     std::mt19937 rng(rd());
