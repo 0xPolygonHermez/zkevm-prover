@@ -1,34 +1,15 @@
 #ifndef ROOT_VERSION_PAGE_HPP
-#define ROOT_VERSION_PAGE_HPP
+#define ROOT_VERSION_PAGE_NPP
 
-#include <unistd.h>
-#include "zkresult.hpp"
-#include "zkassert.hpp"
+#include <string>
 
-struct RootVersion
-{
-    char root[32];
-    uint64_t version;
-};
+using namespace std;
 
-struct RootVersionStruct
-{
-    uint64_t nextPage; // page number of the next page in the list
-    uint64_t size; // offset to current page next root version; size=4096 if the page is full
-};
+/* Root version page is built on top of a generic KeyValuePage,
+   in which the value is a U64 version converted to/from a string */
 
-class RootVersionPage
-{
-public:
-    
-    static const uint64_t headerSize = 2*sizeof(uint64_t);
-    static const uint64_t entrySize = sizeof(RootVersion);
-    static const uint64_t maxEntries = (4096 - headerSize)/entrySize;
-    static const uint64_t maxSize = headerSize + maxEntries*entrySize;
+string version2value (const uint64_t version);
 
-    static zkresult InitEmptyPage (const uint64_t pageNumber);
-    static zkresult Read          (const uint64_t pageNumber,  const string &root, uint64_t &version);
-    static zkresult Write         (      uint64_t &pageNumber, const string &root, uint64_t version);
-};
+uint64_t value2version (const string &value);
 
 #endif

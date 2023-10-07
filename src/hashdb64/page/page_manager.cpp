@@ -126,13 +126,10 @@ void PageManager::releasePage(const uint64_t pageNumber)
 uint64_t PageManager::editPage(const uint64_t pageNumber)
 {
     lock_guard<recursive_mutex> guard(mlock);
-    if(pageNumber <= 1){
-        return 1;
-    }
-    uint64_t pageNumber_;
+    uint32_t pageNumber_;
     unordered_map<uint64_t, uint64_t>::const_iterator it = editedPages.find(pageNumber);
     if(it == editedPages.end()){
-        pageNumber_ = getFreePage();
+        pageNumber_ = ( pageNumber == 0 ? 1 : getFreePage() );
         memcpy(getPageAddress(pageNumber_),getPageAddress(pageNumber) , 4096);
         editedPages[pageNumber] = pageNumber_;
         editedPages[pageNumber_] = pageNumber_;
