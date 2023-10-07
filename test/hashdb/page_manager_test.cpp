@@ -26,7 +26,7 @@ uint64_t PageManagerPerformanceTest(void){
     std::cout << "PageManagerPerformanceTest" << std::endl;
     string fileName = "benchmark_file";
     uint64_t fileSize = 1ULL<<37;
-    uint64_t nFiles = 2;
+    uint64_t nFiles = 1;
     string folderName = "db";
 
     // Create the state manager
@@ -52,8 +52,11 @@ uint64_t PageManagerPerformanceTest(void){
     double avgThroughputFirstWrite = 0;
     double avgThroughputSecondWrite = 0;
     double avgThroughputFlush = 0;
+    double avgThroughputFirstWriteLast = 0;
+    double avgThroughputSecondWriteLast = 0;
+    double avgThroughputFlushLast = 0;
     double throughput = 0;
-    uint64_t numReps = 100;
+    uint64_t numReps = 200;
     uint64_t printFreq = 10;
     
     for(uint64_t k=0; k<numReps;++k){
@@ -69,27 +72,25 @@ uint64_t PageManagerPerformanceTest(void){
         start = omp_get_wtime();
         for (uint64_t i = 0; i < numPositions; ++i) {
             uint64_t* pageData = (uint64_t *)pageManagerFile.getPageAddress(position[i]);
-            pageData[0] = position[i];
+            pageData[0] = pageData[2] + position[i];
         }
         end = omp_get_wtime();
-        //if(k%printFreq == 0) std::cout << "Time to change first value of each page: " << end - start << " seconds" << std::endl;
         throughput = numGBytes / (end-start);
-        //if(k%printFreq == 0) std::cout << "Throughput: "<< throughput << " MBytes/s" << std::endl;
         avgThroughputFirstWrite += throughput;
+        avgThroughputFirstWriteLast += throughput;
         avgTimeFistWrite += end - start;
 
         //Change second value of each page
         start = omp_get_wtime();
         for (uint64_t i = 0; i < numPositions; ++i) {
             uint64_t* pageData = (uint64_t *)pageManagerFile.getPageAddress(position[i]);
-            assert(pageData[0] == position[i] );
+            assert(pageData[0] == (pageData[2] + position[i]) );
             pageData[1] = position[i];    
         }
         end = omp_get_wtime();
-        //if(k%printFreq == 0) std::cout << "Time to change the second value of each page: " << end - start << " seconds (cache efects)" << std::endl;
         throughput = numGBytes / (end-start);
-        //if(k%printFreq == 0) std::cout << "Throughput: "<< throughput << " MBytes/s" << std::endl;
         avgThroughputSecondWrite += throughput;
+        avgThroughputSecondWriteLast += throughput;
         avgTimeSecondWrite += end - start;
 
         //flushPAges
@@ -97,10 +98,9 @@ uint64_t PageManagerPerformanceTest(void){
         pageManagerFile.flushPages();
         end = omp_get_wtime();
         
-        //if(k%printFreq == 0) std::cout << "Time to flush "<<numPositions<<" pages: " << end - start << " seconds" << std::endl;
         throughput = numGBytes / (end-start);
-        //if(k%printFreq == 0) std::cout << "Throughput: "<< throughput << " MBytes/s" << std::endl << std::endl;
         avgThroughputFlush += throughput;
+        avgThroughputFlushLast += throughput;
         avgTimeFlush += end - start;
         
         //Check that positions are in the file
@@ -108,19 +108,22 @@ uint64_t PageManagerPerformanceTest(void){
         for (uint64_t i = 0; i < numPositions; ++i) {
             uint64_t* pageData = (uint64_t *)pageManagerFile2.getPageAddress(position[i]);
             if(position[i] != 0){
-                assert(pageData[0] == position[i] );
+                assert(pageData[0] == (pageData[2] + position[i]) );
                 assert(pageData[1] == position[i] );
             }
         }
         if(k%printFreq == 0 && k>0){
 
             std::cout << "Iteration: " << k << std::endl;
-            std::cout << "Average time first write: " << avgTimeFistWrite/k << " seconds" << std::endl;
-            std::cout << "Average throughput first write: " << avgThroughputFirstWrite/k << " MBytes/s" << std::endl;
-            std::cout << "Average time second write: " << avgTimeSecondWrite/k << " seconds" << std::endl;
-            std::cout << "Average throughput second write: " << avgThroughputSecondWrite/k << " MBytes/s" << std::endl;
+            std::cout << "Average time first read/write: " << avgTimeFistWrite/k << " seconds" << std::endl;
+            std::cout << "Average throughput first read/write (last): " << avgThroughputFirstWrite/k << "( "<< avgThroughputFirstWriteLast/printFreq <<") MBytes/s" << std::endl;
+            std::cout << "Average time second read/write: " << avgTimeSecondWrite/k << " seconds" << std::endl;
+            std::cout << "Average throughput second read/write (last): " << avgThroughputSecondWrite/k << "( "<< avgThroughputSecondWriteLast/printFreq <<") MBytes/s" << std::endl;
             std::cout << "Average time flush: " << avgTimeFlush/k << " seconds" << std::endl;
-            std::cout << "Average throughput flush: " << avgThroughputFlush/k << " MBytes/s" << std::endl << std::endl;
+            std::cout << "Average throughput flush (last): " << avgThroughputFlush/k << "( "<< avgThroughputFlushLast/printFreq <<") MBytes/s" << std::endl << std::endl;
+            avgThroughputFirstWriteLast = 0;
+            avgThroughputSecondWriteLast = 0;
+            avgThroughputFlushLast = 0;
         }
     }
     return 0;
