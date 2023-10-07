@@ -17,6 +17,7 @@ PageManager::PageManager()
     nPages = 0;
     mappedFile = false;
     pages.resize(1);
+    firstUnusedPage = 2;
     AddPages(131072);
 }
 PageManager::PageManager(const uint64_t nPages_)
@@ -26,6 +27,7 @@ PageManager::PageManager(const uint64_t nPages_)
     mappedFile = false;
     nPages = 0;
     pages.resize(1);
+    firstUnusedPage = 2;
     AddPages(nPages_);
 }
 PageManager::PageManager(const string fileName_, const uint64_t fileSize_, const uint64_t nFiles_, const string folderName_){
