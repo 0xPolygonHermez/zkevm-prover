@@ -76,6 +76,7 @@ uint64_t PageManagerPerformanceTest(void){
             pageData[0] = pageData[2] + position[i];
         }
         end = omp_get_wtime();
+
         throughput = numGBytes / (end-start);
         avgThroughputFirstWrite += throughput;
         avgThroughputFirstWriteLast += throughput;
@@ -89,6 +90,7 @@ uint64_t PageManagerPerformanceTest(void){
             pageData[1] = position[i];    
         }
         end = omp_get_wtime();
+
         throughput = numGBytes / (end-start);
         avgThroughputSecondWrite += throughput;
         avgThroughputSecondWriteLast += throughput;
@@ -113,6 +115,7 @@ uint64_t PageManagerPerformanceTest(void){
                 assert(pageData[1] == position[i] );
             }
         }
+        
         if(k%printFreq == 0 && k>0){
 
             std::cout << "Iteration: " << k << std::endl;
