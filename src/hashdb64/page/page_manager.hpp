@@ -8,29 +8,37 @@
 #include <list>
 #include <unordered_map>
 #include <mutex>
+#include <vector>
+#include "zkassert.hpp"
+#include <cassert>
 
 
 class PageManager
 {
 public:
+
     PageManager();
     PageManager(const uint64_t nPages_);
-    PageManager(const string fileName_);
+    PageManager(const string fileName_, const uint64_t fileSize_= 1ULL<<37, const uint64_t nFiles_=1, const string folderName_="db");
     ~PageManager();
     
 
     uint64_t getFreePage();
     void releasePage(const uint64_t pageNumber);
-    uint32_t editPage(const uint32_t pageNumber);
+    uint64_t editPage(const uint64_t pageNumber);
     void flushPages();
 
-    inline uint32_t getNumFreePages(){
+    inline uint64_t getNumFreePages(){
         return freePages.size()+nPages-firstUnusedPage;
     };
     inline char *getPageAddress(const uint64_t pageNumber)
     {
-        return pages + pageNumber * 4096;
+        assert(pageNumber < nPages);
+        uint64_t fileId = pageNumber/pagesPerFile;
+        uint64_t pageInFile = pageNumber % pagesPerFile;
+        return pages[fileId] + pageInFile * (uint64_t)4096;
     };
+
 
 private:
 
@@ -38,15 +46,19 @@ private:
 
     bool mappedFile;
     string fileName;
+    string folderName;
     uint64_t fileSize;
-    int fd;
+    uint64_t pagesPerFile;
+    uint64_t nFiles;
+    int file0Descriptor;
 
-    uint32_t nPages;
-    char *pages;
+    uint64_t nPages;
+    vector<char *> pages;
 
-    uint32_t firstUnusedPage;
-    std::list<uint32_t> freePages;
-    std::unordered_map<uint32_t, uint32_t> editedPages;
+
+    uint64_t firstUnusedPage;
+    std::list<uint64_t> freePages;
+    std::unordered_map<uint64_t, uint64_t> editedPages;
 
     zkresult AddPages(const uint64_t nPages_);
 

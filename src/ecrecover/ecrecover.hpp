@@ -3,6 +3,7 @@
 
 #include <gmpxx.h>
 #include "ffiasm/fec.hpp"
+#include "scalar.hpp"
 
 typedef enum
 {
@@ -29,7 +30,7 @@ inline void sqrtF3mod4(mpz_class& r, const mpz_class &a){
     mpz_powm(r.get_mpz_t(), a.get_mpz_t(), n.get_mpz_t(), p.get_mpz_t());
     if ((r * r) % p != auxa)
     {
-        r = 0;
+        r = ScalarMask256;
     }
 }
 
