@@ -42,6 +42,11 @@ public:
     static zkresult GetFreePages    (const uint64_t  headerPageNumber,                                      vector<uint64_t> (&containerPages), vector<uint64_t> (&containedPages));
     static zkresult CreateFreePages (      uint64_t &headerPageNumber, const vector<uint64_t> (&freePages), vector<uint64_t> (&containerPages), vector<uint64_t> (&containedPages));
 
+    // Program page methods
+    static zkresult ReadProgram  (const uint64_t  headerPageNumber, const string &key,       string &value);
+    static zkresult WriteProgram (      uint64_t &headerPageNumber, const string &key, const string &value);
+
+
     static void Print (const uint64_t headerPageNumber, bool details);
 };
 

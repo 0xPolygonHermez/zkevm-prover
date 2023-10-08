@@ -19,16 +19,16 @@ class KeyValuePage
 {
 private:
 
-    static zkresult Read          (const uint64_t pageNumber, const string &key,       string &value, const uint64_t level);
-    static zkresult Write         (const uint64_t pageNumber, const string &key, const string &value, const uint64_t level, const uint64_t headerPageNumber);
+    static zkresult Read          (const uint64_t  pageNumber, const string &key,       string &value, const uint64_t level);
+    static zkresult Write         (      uint64_t &pageNumber, const string &key, const string &value, const uint64_t level, const uint64_t headerPageNumber);
 
 public:
 
-    static zkresult InitEmptyPage (const uint64_t pageNumber);
-    static zkresult Read          (const uint64_t pageNumber, const string &key,       string &value);
-    static zkresult Write         (const uint64_t pageNumber, const string &key, const string &value, const uint64_t headerPageNumber);
+    static zkresult InitEmptyPage (const uint64_t  pageNumber);
+    static zkresult Read          (const uint64_t  pageNumber, const string &key,       string &value);
+    static zkresult Write         (      uint64_t &pageNumber, const string &key, const string &value, const uint64_t headerPageNumber);
     
-    static void     Print         (const uint64_t pageNumber, bool details);
+    static void     Print         (const uint64_t pageNumber, bool details, const string &prefix);
 };
 
 #endif

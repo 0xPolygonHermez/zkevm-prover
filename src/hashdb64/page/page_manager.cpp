@@ -17,6 +17,7 @@ PageManager::PageManager()
     nPages = 0;
     pages = NULL;
     mappedFile = false;
+    firstUnusedPage = 2;
     AddPages(131072);
 }
 PageManager::PageManager(const uint64_t nPages_)

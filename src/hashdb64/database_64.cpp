@@ -133,16 +133,12 @@ zkresult Database64::setProgram (const string &key, const vector<uint8_t> &data,
         exitProcess();
     }
 
-    zkresult zkr;
-
     string program;
     ba2ba(data, program);
-
-    HeaderStruct * header = (HeaderStruct *)pageManager.getPageAddress(headerPage);
-    zkr = KeyValuePage::Write(header->programPage, string2ba(key), program, headerPage);
+    zkresult zkr = HeaderPage::WriteProgram(headerPage, string2ba(key), program);
     if (zkr != ZKR_SUCCESS)
     {
-        zklog.error("Database64::setProgram() failed calling KeyValuePage::Write() result=" + zkresult2string(zkr));
+        zklog.error("Database64::setProgram() failed calling HeaderPage::WriteProgram() result=" + zkresult2string(zkr));
     }
 
 #ifdef LOG_DB_WRITE
@@ -172,18 +168,14 @@ zkresult Database64::getProgram(const string &key, vector<uint8_t> &data, Databa
         exitProcess();
     }
 
-    zkresult zkr = ZKR_UNSPECIFIED;
-
     struct timeval t;
     if (dbReadLog != NULL) gettimeofday(&t, NULL);
 
     string program;
-
-    HeaderStruct * header = (HeaderStruct *)pageManager.getPageAddress(headerPage);
-    zkr = KeyValuePage::Read(header->programPage, string2ba(key), program);
+    zkresult zkr = HeaderPage::ReadProgram(headerPage, string2ba(key), program);
     if (zkr != ZKR_SUCCESS)
     {
-        zklog.error("Database64::getProgram() failed calling KeyValuePage::Read() result=" + zkresult2string(zkr));
+        zklog.error("Database64::getProgram() failed calling HeaderPage::ReadProgram() result=" + zkresult2string(zkr));
     }
     else
     {
