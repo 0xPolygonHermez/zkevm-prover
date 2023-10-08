@@ -5,7 +5,7 @@
 #include "zklog.hpp"
 #include "exit_process.hpp"
 #include "zkresult.hpp"
-#include <list>
+#include <vector>
 #include <unordered_map>
 #include <mutex>
 #include <vector>
@@ -29,7 +29,7 @@ public:
     void flushPages();
 
     inline uint64_t getNumFreePages(){
-        return freePages.size()+nPages-firstUnusedPage;
+        return numFreePages+nPages-firstUnusedPage;
     };
     inline char *getPageAddress(const uint64_t pageNumber)
     {
@@ -57,7 +57,8 @@ private:
 
 
     uint64_t firstUnusedPage;
-    std::list<uint64_t> freePages;
+    uint64_t numFreePages;
+    vector<uint64_t> freePages;
     std::unordered_map<uint64_t, uint64_t> editedPages;
 
     zkresult AddPages(const uint64_t nPages_);

@@ -30,6 +30,7 @@ uint64_t PageManagerPerformanceTest(void){
     uint64_t nFiles = 1;
     string folderName = "db";
     uint64_t numPositions = 20000;
+    uint64_t numReps = 100;
 
     // Create the state manager
     double start = omp_get_wtime();
@@ -57,7 +58,6 @@ uint64_t PageManagerPerformanceTest(void){
     double avgThroughputSecondWriteLast = 0;
     double avgThroughputFlushLast = 0;
     double throughput = 0;
-    uint64_t numReps = 200;
     uint64_t printFreq = 10;
     
     for(uint64_t k=0; k<numReps;++k){

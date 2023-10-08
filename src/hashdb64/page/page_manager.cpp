@@ -18,6 +18,8 @@ PageManager::PageManager()
     mappedFile = false;
     pages.resize(1);
     firstUnusedPage = 2;
+    numFreePages = 0;
+    freePages.resize(16384);
     AddPages(131072);
 }
 PageManager::PageManager(const uint64_t nPages_)
@@ -27,6 +29,8 @@ PageManager::PageManager(const uint64_t nPages_)
     mappedFile = false;
     nPages = 0;
     pages.resize(1);
+    numFreePages = 0;
+    freePages.resize(16384);
     AddPages(nPages_);
 }
 PageManager::PageManager(const string fileName_, const uint64_t fileSize_, const uint64_t nFiles_, const string folderName_){
@@ -36,6 +40,8 @@ PageManager::PageManager(const string fileName_, const uint64_t fileSize_, const
     nFiles = nFiles_;
     folderName = folderName_;
     pagesPerFile = fileSize >> 12;
+    numFreePages = 0;
+    freePages.resize(16384);
 
     mappedFile = true;
     struct stat file_stat;
@@ -104,9 +110,9 @@ uint64_t PageManager::getFreePage(void)
 {
     lock_guard<recursive_mutex> guard(mlock);
     uint64_t pageNumber;
-    if(freePages.size() > 0){
-        pageNumber = freePages.front();
-        freePages.pop_front();
+    if(numFreePages > 0){
+        pageNumber = freePages[numFreePages-1];
+        --numFreePages;
     }else{
         pageNumber = firstUnusedPage;
         firstUnusedPage++;
@@ -122,7 +128,11 @@ void PageManager::releasePage(const uint64_t pageNumber)
     lock_guard<recursive_mutex> guard(mlock);
     zkassertpermanent(pageNumber >= 2 && pageNumber<firstUnusedPage); //first two pages cannot be released
     memset(getPageAddress(pageNumber), 0, 4096);
-    freePages.push_back(pageNumber);
+    if(numFreePages == freePages.size()){
+        freePages.resize(freePages.size()*2);
+    }
+    freePages[numFreePages]=pageNumber;
+    ++numFreePages;
 }
 uint64_t PageManager::editPage(const uint64_t pageNumber)
 {
