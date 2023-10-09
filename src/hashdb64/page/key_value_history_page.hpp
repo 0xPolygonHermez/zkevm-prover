@@ -21,13 +21,13 @@ struct KeyValueHistoryStruct
 class KeyValueHistoryPage
 {
 private:
-    static zkresult Read          (const uint64_t pageNumber,  const string &key, const string &keyBits,       mpz_class &value, const uint64_t level);
-    static zkresult Write         (      uint64_t &pageNumber, const string &key, const string &keyBits, const mpz_class &value, const uint64_t level);
+    static zkresult Read          (const uint64_t pageNumber,  const string &key, const string &keyBits, const uint64_t version,       mpz_class &value, const uint64_t level);
+    static zkresult Write         (      uint64_t &pageNumber, const string &key, const string &keyBits, const uint64_t version, const mpz_class &value, const uint64_t level, const uint64_t headerPageNumber);
 public:
 
     static zkresult InitEmptyPage (const uint64_t pageNumber);
-    static zkresult Read          (const uint64_t pageNumber,  const string &key,       mpz_class &value);
-    static zkresult Write         (      uint64_t &pageNumber, const string &key, const mpz_class &value);
+    static zkresult Read          (const uint64_t pageNumber,  const string &key, const uint64_t version,       mpz_class &value);
+    static zkresult Write         (      uint64_t &pageNumber, const string &key, const uint64_t version, const mpz_class &value, const uint64_t headerPageNumber);
     
     static void Print (const uint64_t pageNumber, bool details);
 };

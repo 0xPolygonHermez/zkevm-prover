@@ -7,6 +7,7 @@
 #include "raw_data_page.hpp"
 #include "key_value_page.hpp"
 #include "page_list_page.hpp"
+#include "root_version_page.hpp"
 
 zkresult HeaderPage::InitEmptyPage (const uint64_t headerPageNumber)
 {
@@ -119,13 +120,90 @@ zkresult CreateFreePages (uint64_t &headerPageNumber, vector<uint64_t> (&freePag
     return PageListPage::CreatePages(page->freePages, freePages, containerPages, containedPages);
 }
 
-zkresult HeaderPage::ReadProgram (const uint64_t headerPageNumber, const string &key, string &value)
+zkresult ReadRootVersion (const uint64_t headerPageNumber, const string &root, uint64_t &version)
 {
     // Get header page
     HeaderStruct * page = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
 
     // Call the specific method
-    return KeyValuePage::Read(page->programPage, key, value);
+    string value;
+    zkresult zkr = KeyValuePage::Read(page->rootVersionPage, root, value);
+    if (zkr == ZKR_SUCCESS)
+    {
+        version = value2version(value);
+    }
+
+    return zkr;
+}
+
+zkresult WriteRootVersion (uint64_t &headerPageNumber, const string &root, const uint64_t &version)
+{
+    // Get an editable page
+    headerPageNumber = pageManager.editPage(headerPageNumber);
+    
+    // Get header page
+    HeaderStruct * headerPage = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
+
+    // Call the specific method
+    return KeyValuePage::Write(headerPage->programPage, root, version2value(version), headerPageNumber);
+}
+
+zkresult ReadVersionData (const uint64_t headerPageNumber, const uint64_t &version, VersionDataStruct &versionData)
+{
+    // Get header page
+    HeaderStruct * headerPage = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
+
+    // Call the specific method
+    string value;
+    zkresult zkr = KeyValuePage::Read(headerPage->programPage, version2key(version), value);
+    if (zkr == ZKR_SUCCESS)
+    {
+        value2versionData(versionData, value);
+    }
+
+    return zkr;
+}
+
+zkresult WriteVersionData (uint64_t &headerPageNumber, const uint64_t &version, const VersionDataStruct &versionData)
+{
+    // Get an editable page
+    headerPageNumber = pageManager.editPage(headerPageNumber);
+    
+    // Get header page
+    HeaderStruct * headerPage = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
+
+    // Call the specific method
+    return KeyValuePage::Write(headerPage->programPage, version2key(version), versionData2value(versionData), headerPageNumber);
+}
+
+zkresult HeaderPage::KeyValueHistoryRead (const uint64_t headerPageNumber, const string &key, const uint64_t version, mpz_class &value)
+{
+    // Get header page
+    HeaderStruct * headerPage = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
+
+    // Call the specific method
+    return KeyValueHistoryPage::Read(headerPage->keyValueHistoryPage, key, version, value);
+}
+
+zkresult HeaderPage::KeyValueHistoryWrite (uint64_t &headerPageNumber, const string &key, const uint64_t version, const mpz_class &value)
+{
+    // Get an editable page
+    headerPageNumber = pageManager.editPage(headerPageNumber);
+    
+    // Get header page
+    HeaderStruct * headerPage = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
+
+    // Call the specific method
+    return KeyValueHistoryPage::Write(headerPage->keyValueHistoryPage, key, version, value, headerPageNumber);
+}
+
+zkresult HeaderPage::ReadProgram (const uint64_t headerPageNumber, const string &key, string &value)
+{
+    // Get header page
+    HeaderStruct * headerPage = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
+
+    // Call the specific method
+    return KeyValuePage::Read(headerPage->programPage, key, value);
 }
 
 zkresult HeaderPage::WriteProgram (uint64_t &headerPageNumber, const string &key, const string &value)
@@ -134,10 +212,10 @@ zkresult HeaderPage::WriteProgram (uint64_t &headerPageNumber, const string &key
     headerPageNumber = pageManager.editPage(headerPageNumber);
     
     // Get header page
-    HeaderStruct * page = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
+    HeaderStruct * headerPage = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
 
     // Call the specific method
-    return KeyValuePage::Write(page->programPage, key, value, headerPageNumber);
+    return KeyValuePage::Write(headerPage->programPage, key, value, headerPageNumber);
 }
 
 void HeaderPage::Print (const uint64_t headerPageNumber, bool details)

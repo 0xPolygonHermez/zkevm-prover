@@ -6,6 +6,8 @@
 #include "zklog.hpp"
 #include "exit_process.hpp"
 #include "zkassert.hpp"
+#include "version_data_page.hpp"
+#include "scalar.hpp"
 
 struct HeaderStruct
 {
@@ -41,6 +43,18 @@ public:
     // Free pages list methods
     static zkresult GetFreePages    (const uint64_t  headerPageNumber,                                      vector<uint64_t> (&containerPages), vector<uint64_t> (&containedPages));
     static zkresult CreateFreePages (      uint64_t &headerPageNumber, const vector<uint64_t> (&freePages), vector<uint64_t> (&containerPages), vector<uint64_t> (&containedPages));
+
+    // Root version methods
+    static zkresult ReadRootVersion  (const uint64_t  headerPageNumber, const string &root,       uint64_t &version);
+    static zkresult WriteRootVersion (      uint64_t &headerPageNumber, const string &root, const uint64_t &version);
+
+    // Version data methods
+    static zkresult ReadVersionData  (const uint64_t  headerPageNumber, const uint64_t &version,       VersionDataStruct &versionData);
+    static zkresult WriteVersionData (      uint64_t &headerPageNumber, const uint64_t &version, const VersionDataStruct &versionData);
+
+    // Key-Value-History methods
+    static zkresult KeyValueHistoryRead  (const uint64_t headerPageNumber,  const string &key, const uint64_t version,       mpz_class &value);
+    static zkresult KeyValueHistoryWrite (      uint64_t &headerPageNumber, const string &key, const uint64_t version, const mpz_class &value);
 
     // Program page methods
     static zkresult ReadProgram  (const uint64_t  headerPageNumber, const string &key,       string &value);
