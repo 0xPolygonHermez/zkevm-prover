@@ -402,9 +402,24 @@ int main(int argc, char **argv)
             zklog.error("required file config.zkevmVerifier=" + config.zkevmVerifier + " does not exist");
             bError = true;
         }
+        if (!fileExists(config.zkevmVerkey))
+        {
+            zklog.error("required file config.zkevmVerkey=" + config.zkevmVerkey + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(config.c12aVerkey))
+        {
+            zklog.error("required file config.c12aVerkey=" + config.c12aVerkey + " does not exist");
+            bError = true;
+        }
         if (!fileExists(config.recursive1Verifier))
         {
             zklog.error("required file config.recursive1Verifier=" + config.recursive1Verifier + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(config.recursive1Verkey))
+        {
+            zklog.error("required file config.recursive1Verkey=" + config.recursive1Verkey + " does not exist");
             bError = true;
         }
         if (!fileExists(config.recursive2Verifier))
@@ -425,6 +440,11 @@ int main(int argc, char **argv)
         if (!fileExists(config.recursivefVerifier))
         {
             zklog.error("required file config.recursivefVerifier=" + config.recursivefVerifier + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(config.recursivefVerkey))
+        {
+            zklog.error("required file config.recursivefVerkey=" + config.recursivefVerkey + " does not exist");
             bError = true;
         }
         if (!fileExists(config.finalStarkZkey))

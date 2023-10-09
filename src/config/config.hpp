@@ -122,7 +122,11 @@ public:
     string recursive1Verifier;
     string recursive2Verifier;
     string recursivefVerifier;
+    string zkevmVerkey;    
+    string c12aVerkey;    
+    string recursive1Verkey;    
     string recursive2Verkey;    
+    string recursivefVerkey;    
     string finalVerifier;
     string c12aExec;
     string recursive1Exec;
