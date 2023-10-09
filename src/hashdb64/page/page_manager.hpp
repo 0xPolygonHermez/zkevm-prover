@@ -13,6 +13,7 @@
 #include "zkassert.hpp"
 #include <cassert>
 
+#define MULTIPLE_WRITES 0
 
 class PageManager
 {
@@ -30,8 +31,10 @@ public:
     void flushPages();
 
     inline uint64_t getNumFreePages(){
+#if MULTIPLE_WRITES
         lock_guard<mutex> guard(freePagesLock);
         shared_lock<shared_mutex> guard2(pagesLock);
+#endif
         return numFreePages+nPages-firstUnusedPage;
     };
     inline char *getPageAddress(const uint64_t pageNumber)
