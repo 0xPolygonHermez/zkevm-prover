@@ -5,6 +5,8 @@
 #include "scalar.hpp"
 #include "page_manager.hpp"
 #include "hash_page.hpp"
+#include "key_utils.hpp"
+#include "zkglobals.hpp"
 
 zkresult KeyValueHistoryPage::InitEmptyPage (const uint64_t pageNumber)
 {
@@ -22,7 +24,7 @@ zkresult KeyValueHistoryPage::InitEmptyPage (const uint64_t pageNumber)
     return ZKR_SUCCESS;
 }
 
-zkresult KeyValueHistoryPage::Read (const uint64_t pageNumber, const string &key, const string &keyBits, mpz_class &value, const uint64_t level)
+zkresult KeyValueHistoryPage::Read (const uint64_t pageNumber, const string &key, const string &keyBits, const uint64_t version, mpz_class &value, const uint64_t level)
 {
     zkassert(key.size() == 32);
     zkassert(keyBits.size() == 42);
@@ -38,7 +40,7 @@ zkresult KeyValueHistoryPage::Read (const uint64_t pageNumber, const string &key
     uint8_t * keyValueEntry = page->keyValueEntry[levelBits];
     uint64_t entryPageNumber = (*(uint64_t *)keyValueEntry) & 0xFFFFFF;
     uint64_t control = (*(uint64_t *)keyValueEntry) >> 48;
-    uint64_t version = (*(uint64_t *)(keyValueEntry + 8)) & 0xFFFFFF;
+    uint64_t foundVersion = (*(uint64_t *)(keyValueEntry + 8)) & 0xFFFFFF;
     uint64_t previousVersionOffset = (*(uint64_t *)(keyValueEntry + 8)) >> 48;
 
     // Check control
@@ -58,7 +60,7 @@ zkresult KeyValueHistoryPage::Read (const uint64_t pageNumber, const string &key
         // Intermediate node
         case 2:
         {
-            return Read(pageNumber, key, keyBits, value, level + 1);
+            return Read(pageNumber, key, keyBits, version, value, level + 1);
         }
         default:
         {
@@ -71,17 +73,22 @@ zkresult KeyValueHistoryPage::Read (const uint64_t pageNumber, const string &key
     return ZKR_DB_KEY_NOT_FOUND;
 }
 
-zkresult KeyValueHistoryPage::Read (const uint64_t pageNumber, const string &key, mpz_class &value)
+zkresult KeyValueHistoryPage::Read (const uint64_t pageNumber, const string &key, const uint64_t version, mpz_class &value)
 {
     zkassert(key.size() == 32);
 
-    // TODO: split the key in 256/6=42 bytes, and pass it to the other Read() method
+    // Get 256 key bits in SMT order, in sets of 6 bits
+    Goldilocks::Element keyFea[4];
+    string2fea(fr, key, keyFea);
+    uint8_t keyBitsArray[43];
+    splitKey6(fr, keyFea, keyBitsArray);
     string keyBits;
+    keyBits.append((char *)keyBitsArray, 43);
 
-    return Read(pageNumber, key, keyBits, value, 0);
+    return Read(pageNumber, key, keyBits, version, value, 0);
 }
 
-zkresult KeyValueHistoryPage::Write (uint64_t &pageNumber, const string &key, const string &keyBits, const mpz_class &value, const uint64_t level)
+zkresult KeyValueHistoryPage::Write (uint64_t &pageNumber, const string &key, const string &keyBits, const uint64_t version, const mpz_class &value, const uint64_t level, const uint64_t headerPageNumber)
 {
     zkassert(key.size() == 32);
     zkassert(keyBits.size() == 42);
@@ -97,7 +104,7 @@ zkresult KeyValueHistoryPage::Write (uint64_t &pageNumber, const string &key, co
     uint8_t * keyValueEntry = page->keyValueEntry[levelBits];
     uint64_t entryPageNumber = (*(uint64_t *)keyValueEntry) & 0xFFFFFF;
     uint64_t control = (*(uint64_t *)keyValueEntry) >> 48;
-    uint64_t version = (*(uint64_t *)(keyValueEntry + 8)) & 0xFFFFFF;
+    uint64_t foundVersion = (*(uint64_t *)(keyValueEntry + 8)) & 0xFFFFFF;
     uint64_t previousVersionOffset = (*(uint64_t *)(keyValueEntry + 8)) >> 48;
 
     // Check control
@@ -117,7 +124,7 @@ zkresult KeyValueHistoryPage::Write (uint64_t &pageNumber, const string &key, co
         // Intermediate node
         case 2:
         {
-            return Write(pageNumber, key, keyBits, value, level + 1);
+            return Write(pageNumber, key, keyBits, version, value, level + 1, headerPageNumber);
         }
         default:
         {
@@ -127,15 +134,20 @@ zkresult KeyValueHistoryPage::Write (uint64_t &pageNumber, const string &key, co
     }
 }
 
-zkresult KeyValueHistoryPage::Write (uint64_t &pageNumber, const string &key, const mpz_class &value)
+zkresult KeyValueHistoryPage::Write (uint64_t &pageNumber, const string &key, const uint64_t version, const mpz_class &value, const uint64_t headerPageNumber)
 {
     zkassert(key.size() == 32);
 
-    // TODO: split the key in 256/6=42 bytes, and pass it to the other Write() method
+    // Get 256 key bits in SMT order, in sets of 6 bits
+    Goldilocks::Element keyFea[4];
+    string2fea(fr, key, keyFea);
+    uint8_t keyBitsArray[43];
+    splitKey6(fr, keyFea, keyBitsArray);
     string keyBits;
+    keyBits.append((char *)keyBitsArray, 43);
 
     // Start searching with level 0
-    return Write(pageNumber, key, keyBits, value, 0);
+    return Write(pageNumber, key, keyBits, version, value, 0, headerPageNumber);
 }
 
 
