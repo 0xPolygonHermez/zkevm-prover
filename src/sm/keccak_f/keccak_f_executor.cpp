@@ -151,7 +151,7 @@ void KeccakFExecutor::execute(const vector<vector<Goldilocks::Element>> &input, 
     for (uint64_t i = 0; i < 4; i++)
     {
         pols.a[i][KeccakGateConfig.zeroRef] = fr.zero();
-        pols.b[i][KeccakGateConfig.zeroRef] = fr.fromU64(0x7FF);
+        pols.b[i][KeccakGateConfig.zeroRef] = fr.one();
         pols.c[i][KeccakGateConfig.zeroRef] = fr.fromU64(fr.toU64(pols.a[i][KeccakGateConfig.zeroRef]) ^ fr.toU64(pols.b[i][KeccakGateConfig.zeroRef]));
     }
 

@@ -111,40 +111,52 @@ void SHA256SMTest(Goldilocks &fr, Sha256Executor &executor)
 
 	for (uint64_t slot = 0; slot < numberOfSlots; slot++)
 	{
-		uint8_t aux[256];
-
 		// For each slot, we must extract the output of the executor bit by bit.
 		// Each bit is represented by a polynomial. We must get these bits by specifying their position in
 		// the executor's output buffer for this slot, which starts at the distance of soutRef0.
 		// Each output bit is separated by a multiple of SHA256GateConfig.soutRefDistance.
 		// Once we get the polynomial, we AND it with 1 to extract the bit.
-		for (uint64_t i = 0; i < 256; i++)
+		uint32_t h[8] = {0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19};
+		for (uint64_t i = 0; i < 8; i++)
 		{
-			uint64_t bitIndex = SHA256GateConfig.relRef2AbsRef(SHA256GateConfig.soutRef0 + SHA256GateConfig.soutRefDistance + i, slot);
-			uint64_t pol = executor.getPol(cmPols.Sha256.inputs[0], bitIndex);
-			aux[i] = ((pol & uint64_t(1)) == 0) ? 0 : 1;
+			vector<uint8_t> bits;
+			for (int j = 0; j < 32; j++)
+			{
+				uint64_t bitIndex = SHA256GateConfig.relRef2AbsRef(SHA256GateConfig.soutRef0 + SHA256GateConfig.soutRefDistance * ((i * 32) + j), slot);
+				uint64_t pol = executor.getPol(cmPols.Sha256.output, bitIndex);
+				bits.push_back(((pol & uint64_t(1)) == 0) ? 0 : 1);
+			}
+			h[i] = h[i] + bits2u32(bits);
 		}
 
-		// We have retrieved all the bits from the executor.
-		// We now convert them into a byte array,
-		// and then convert the byte array into a hex string for comparison.
-		uint8_t aux2[32];
-		for (uint64_t i = 0; i < 32; i++)
-		{
-			bits2byte(&aux[i * 8], aux2[i]);
-		}
-		string aux3;
-		ba2string(aux3, aux2, 32);
+		mpz_class hashScalar;
+		hashScalar = h[0];
+		hashScalar = hashScalar << 32;
+		hashScalar += h[1];
+		hashScalar = hashScalar << 32;
+		hashScalar += h[2];
+		hashScalar = hashScalar << 32;
+		hashScalar += h[3];
+		hashScalar = hashScalar << 32;
+		hashScalar += h[4];
+		hashScalar = hashScalar << 32;
+		hashScalar += h[5];
+		hashScalar = hashScalar << 32;
+		hashScalar += h[6];
+		hashScalar = hashScalar << 32;
+		hashScalar += h[7];
+
+		std::string hashScalarString = "0x" + hashScalar.get_str(16);
 
 		// Compare the reference hash to the executor's hash,
 		// both represented as hex strings.
-		if (aux3 == pHash[slot].substr(0, 64))
+		if (hashScalarString == pHash[slot].substr(0, 64))
 		{
-			cout << "Pass: slot=" << slot << " Sout=" << aux3 << endl;
+			cout << "Pass: slot=" << slot << " Sout=" << hashScalarString << endl;
 		}
 		else
 		{
-			cerr << "Error: slot=" << slot << " Sout=" << aux3 << " does not match hash=" << pHash[slot] << " (" << pHashGate[slot] << ")" << endl;
+			cerr << "RESULT: slot=" << slot << " Sout=" << hashScalarString << " = " << pHash[slot] << " (" << pHashGate[slot] << ")" << endl;
 		}
 	}
 	free(pAddress);

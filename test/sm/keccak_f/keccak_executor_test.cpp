@@ -106,7 +106,7 @@ void KeccakSMTest(Goldilocks &fr, KeccakFExecutor &executor)
 		// Once we get the polynomial, we AND it with 1 to extract the bit.
 		for (uint64_t i = 0; i < 256; i++)
 		{
-			uint64_t bitIndex = KeccakGateConfig.relRef2AbsRef(KeccakGateConfig.soutRef0 + i * KeccakGateConfig.soutRefDistance, slot);
+			uint64_t bitIndex = KeccakGateConfig.relRef2AbsRef(KeccakGateConfig.soutRef0 + KeccakGateConfig.soutRefDistance * i, slot);
 			uint64_t pol = executor.getPol(cmPols.KeccakF.a, bitIndex);
 			aux[i] = ((pol & uint64_t(1)) == 0)? 0 : 1;
 		}

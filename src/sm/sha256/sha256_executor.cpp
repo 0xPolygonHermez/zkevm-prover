@@ -154,7 +154,7 @@ void Sha256Executor::execute(const vector<vector<Goldilocks::Element>> &input, S
 
     // Set SHA256GateConfig.zeroRef values
     pols.inputs[0][SHA256GateConfig.zeroRef] = fr.zero();
-    pols.inputs[1][SHA256GateConfig.zeroRef] = fr.fromU64(sha256Mask);
+    pols.inputs[1][SHA256GateConfig.zeroRef] = fr.one();
     pols.output[SHA256GateConfig.zeroRef] = fr.fromU64(fr.toU64(pols.inputs[0][SHA256GateConfig.zeroRef]) ^ fr.toU64(pols.inputs[1][SHA256GateConfig.zeroRef]));
 
     // Set Sin values
@@ -255,8 +255,5 @@ void Sha256Executor::setPol(CommitPol(&pol), uint64_t index, uint64_t value)
 
 uint64_t Sha256Executor::getPol(CommitPol(&pol), uint64_t index)
 {
-    if (fr.toU64(pol[index]) == 0) {
-        return 0;
-    }
-    return 1;
+    return ((fr.toU64(pol[index]) == 0)? 0 : 1);
 }

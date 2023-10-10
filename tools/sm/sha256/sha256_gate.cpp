@@ -276,12 +276,12 @@ void SHA256Gate(
         default:
             zkassert(false);
         }
-        for (uint64_t j = 0; j < 32; j++)
+        for (int j = 0; j < 32; j++)
         {
-            uint64_t aux = SHA256GateConfig.soutRef0 + SHA256GateConfig.soutRefDistance * (32 * i + j);
-            S.XOR(pGateU32->bit[j].ref, pGateU32->bit[i].pin, SHA256GateConfig.zeroRef, pin_a, aux);
-            S.SoutRefs[32 * i + j] = aux;
-            // cout << "SHA256() i=" << i << " aux=" << aux << " pin_a=" << (uint64_t)S.gate[S.SoutRefs[i]].pin[pin_a].bit << " pin_r=" << (uint64_t)S.gate[S.SoutRefs[i]].pin[pin_r].bit << endl;
+            uint64_t aux;
+            aux = SHA256GateConfig.soutRef0 + SHA256GateConfig.soutRefDistance * ((i * 32) + j);
+            S.XOR(pGateU32->bit[j].ref, pGateU32->bit[j].pin, SHA256GateConfig.zeroRef, pin_a, aux);
+            S.SoutRefs[((i * 32) + j)] = aux;
         }
     }
 

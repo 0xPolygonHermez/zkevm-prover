@@ -24,9 +24,9 @@ void KeccakF(GateState &S)
         // if (ir==0) S.printRefs(S.SinRefs, "After iota");
     }
 
-    // Add sinRefNumber more gates to make sure that Sout is located in the expected gates,
+    // Add soutRefNumber more gates to make sure that Sout is located in the expected gates,
     // both in pin a and r
-    for (uint64_t i = 0; i < KeccakGateConfig.sinRefNumber; i++)
+    for (uint64_t i = 0; i < KeccakGateConfig.soutRefNumber; i++)
     {
         uint64_t aux;
         aux = S.gateConfig.soutRef0 + KeccakGateConfig.soutRefDistance * i;
