@@ -127,6 +127,10 @@ uint64_t PageManager::getFreePage(void)
             exitProcess();
         }
     }
+    #if MULTIPLE_WRITES
+        std::lock_guard<std::mutex> lock(editedPagesLock);
+    #endif
+    editedPages[pageNumber] = pageNumber;
     return pageNumber;
 }
 void PageManager::releasePage(const uint64_t pageNumber)
@@ -150,10 +154,9 @@ uint64_t PageManager::editPage(const uint64_t pageNumber)
 #endif
     unordered_map<uint64_t, uint64_t>::const_iterator it = editedPages.find(pageNumber);
     if(it == editedPages.end()){
-        pageNumber_ = ( pageNumber == 0 ? 1 : getFreePage() );
+        pageNumber_ = ( pageNumber <= 1 ? 1 : getFreePage() );
         memcpy(getPageAddress(pageNumber_),getPageAddress(pageNumber) , 4096);
         editedPages[pageNumber] = pageNumber_;
-        editedPages[pageNumber_] = pageNumber_;
     }else{
         pageNumber_ = it->second;
     }

@@ -167,7 +167,11 @@ uint64_t PageManagerAccuracyTest (void)
     for(uint64_t i=0; i<256;++i){
         page3Data[i] = i;
     }
-
+    pageManagerMem.flushPages();
+    zkassertpermanent(pageManagerMem.getNumFreePages() == 97);
+    for(uint64_t i=0; i<256;++i){
+        zkassertpermanent(page3Data[i] == i);
+    }
     uint64_t page4 = pageManagerMem.editPage(page3);
     zkassertpermanent(page4 != page3);
     uint64_t * page4Data = (uint64_t *)pageManagerMem.getPageAddress(page4);
@@ -190,6 +194,7 @@ uint64_t PageManagerAccuracyTest (void)
     for(uint64_t i=0; i<256;++i){
         zkassertpermanent(page4Data[i] == i);
     }
+
     //
     // File version
     //
@@ -205,7 +210,7 @@ uint64_t PageManagerAccuracyTest (void)
         zklog.error("Failed to open file: " + (string)strerror(errno));
         exitProcess();
     }
-    //fill file with zeros
+    //fill file with zeros 
     char *buffer = (char *)calloc(file_size, sizeof(char));
     if (buffer == NULL) {
         zklog.error("Failed to allocate buffer: " + (string)strerror(errno));
@@ -245,6 +250,11 @@ uint64_t PageManagerAccuracyTest (void)
     for(uint64_t i=0; i<256;++i){
         page3Data[i] = i;
     }
+    pageManagerFile.flushPages();
+    zkassertpermanent(pageManagerFile.getNumFreePages() == 97);
+    for(uint64_t i=0; i<256;++i){
+        zkassertpermanent(page3Data[i] == i);
+    }
     page4 = pageManagerFile.editPage(page3);
     zkassertpermanent(page4 != page3);
     page4Data = (uint64_t *)pageManagerFile.getPageAddress(page4);
@@ -254,6 +264,7 @@ uint64_t PageManagerAccuracyTest (void)
     zkassertpermanent(pageManagerFile.getNumFreePages() == 96);
 
     zkassertpermanent(pageManagerFile.editPage(page3) == page4);
+    zkassertpermanent(pageManagerFile.editPage(page4) == page4);
     zkassertpermanent(pageManagerFile.editPage(0) == 1);
     zkassertpermanent(pageManagerFile.editPage(1) == 1);
 
