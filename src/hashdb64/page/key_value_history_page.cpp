@@ -21,8 +21,8 @@ zkresult KeyValueHistoryPage::InitEmptyPage (const uint64_t pageNumber)
 zkresult KeyValueHistoryPage::Read (const uint64_t pageNumber, const string &key, const string &keyBits, const uint64_t version, mpz_class &value, const uint64_t level)
 {
     zkassert(key.size() == 32);
-    zkassert(keyBits.size() == 42);
-    zkassert(level < 42);
+    zkassert(keyBits.size() == 43);
+    zkassert(level < 43);
 
     zkresult zkr;
 
@@ -139,8 +139,8 @@ zkresult KeyValueHistoryPage::Read (const uint64_t pageNumber, const string &key
 zkresult KeyValueHistoryPage::Write (uint64_t &pageNumber, const string &key, const string &keyBits, const uint64_t version, const mpz_class &value, const uint64_t level, uint64_t &headerPageNumber)
 {
     zkassert(key.size() == 32);
-    zkassert(keyBits.size() == 42);
-    zkassert(level < 42);
+    zkassert(keyBits.size() == 43);
+    zkassert(level < 43);
 
     zkresult zkr;
 
@@ -305,7 +305,7 @@ zkresult KeyValueHistoryPage::Write (uint64_t &pageNumber, const string &key, co
 
     // Get 256 key bits in SMT order, in sets of 6 bits
     Goldilocks::Element keyFea[4];
-    string2fea(fr, key, keyFea);
+    string2fea(fr, ba2string(key), keyFea);
     uint8_t keyBitsArray[43];
     splitKey6(fr, keyFea, keyBitsArray);
     string keyBits;

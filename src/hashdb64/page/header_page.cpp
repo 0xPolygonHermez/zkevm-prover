@@ -111,7 +111,7 @@ zkresult HeaderPage::GetFreePages (const uint64_t headerPageNumber, vector<uint6
     return PageListPage::GetPages(page->freePages, containerPages, containedPages);
 }
 
-zkresult CreateFreePages (uint64_t &headerPageNumber, vector<uint64_t> (&freePages), vector<uint64_t> (&containerPages), vector<uint64_t> (&containedPages))
+zkresult HeaderPage::CreateFreePages (uint64_t &headerPageNumber, vector<uint64_t> (&freePages), vector<uint64_t> (&containerPages), vector<uint64_t> (&containedPages))
 {
     // Get header page
     HeaderStruct * page = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
@@ -120,7 +120,7 @@ zkresult CreateFreePages (uint64_t &headerPageNumber, vector<uint64_t> (&freePag
     return PageListPage::CreatePages(page->freePages, freePages, containerPages, containedPages);
 }
 
-zkresult ReadRootVersion (const uint64_t headerPageNumber, const string &root, uint64_t &version)
+zkresult HeaderPage::ReadRootVersion (const uint64_t headerPageNumber, const string &root, uint64_t &version)
 {
     // Get header page
     HeaderStruct * page = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
@@ -132,11 +132,15 @@ zkresult ReadRootVersion (const uint64_t headerPageNumber, const string &root, u
     {
         version = value2version(value);
     }
+    else if (zkr == ZKR_DB_KEY_NOT_FOUND)
+    {
+        version = 0;
+    }
 
     return zkr;
 }
 
-zkresult WriteRootVersion (uint64_t &headerPageNumber, const string &root, const uint64_t &version)
+zkresult HeaderPage::WriteRootVersion (uint64_t &headerPageNumber, const string &root, const uint64_t &version)
 {
     // Get an editable page
     headerPageNumber = pageManager.editPage(headerPageNumber);
@@ -148,7 +152,7 @@ zkresult WriteRootVersion (uint64_t &headerPageNumber, const string &root, const
     return KeyValuePage::Write(headerPage->programPage, root, version2value(version), headerPageNumber);
 }
 
-zkresult ReadVersionData (const uint64_t headerPageNumber, const uint64_t &version, VersionDataStruct &versionData)
+zkresult HeaderPage::ReadVersionData (const uint64_t headerPageNumber, const uint64_t &version, VersionDataStruct &versionData)
 {
     // Get header page
     HeaderStruct * headerPage = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
@@ -164,7 +168,7 @@ zkresult ReadVersionData (const uint64_t headerPageNumber, const uint64_t &versi
     return zkr;
 }
 
-zkresult WriteVersionData (uint64_t &headerPageNumber, const uint64_t &version, const VersionDataStruct &versionData)
+zkresult HeaderPage::WriteVersionData (uint64_t &headerPageNumber, const uint64_t &version, const VersionDataStruct &versionData)
 {
     // Get an editable page
     headerPageNumber = pageManager.editPage(headerPageNumber);

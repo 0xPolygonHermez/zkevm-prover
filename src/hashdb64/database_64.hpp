@@ -86,7 +86,7 @@ public:
     bool bInitialized = false;
     bool useRemoteDB = false;
 
-    uint64_t headerPage;
+    uint64_t headerPageNumber;
 
 public:
     //sem_t senderSem; // Semaphore to wakeup database sender thread when flush() is called
