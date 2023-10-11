@@ -170,6 +170,7 @@ public:
     void load(json &config);
     bool generateProof(void) const { return runFileGenBatchProof || runFileGenAggregatedProof || runFileGenFinalProof || runAggregatorClient; }
     void print(void);
+    json toJson(void);
 };
 
 #endif
