@@ -677,4 +677,4 @@ bool Config::check (void)
 
     return bError;
 }
->>>>>>> develop
+
