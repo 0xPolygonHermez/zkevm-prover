@@ -116,7 +116,7 @@ void Config::load(json &config)
 
     // Servers and clients
     ParseBool(config, "runExecutorServer", "RUN_EXECUTOR_SERVER", runExecutorServer, true);
-    ParseBool(config, "runExecutorClient", "", runExecutorClient, false);
+    ParseBool(config, "runExecutorClient", "RUN_EXECUTOR_CLIENT", runExecutorClient, false);
     ParseBool(config, "runExecutorClientMultithread", "RUN_EXECUTOR_CLIENT_MULTITHREAD", runExecutorClientMultithread, false);
     ParseBool(config, "runHashDBServer", "RUN_HASHDB_SERVER", runHashDBServer, true);
     ParseBool(config, "runHashDBTest", "RUN_HASHDB_TEST", runHashDBTest, false);

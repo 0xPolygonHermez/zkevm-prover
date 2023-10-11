@@ -12,6 +12,9 @@ void splitKey (Goldilocks &fr, const Goldilocks::Element (&key)[4], bool (&resul
 // Get 256 key bits in SMT order, in sets of 6 bits
 void splitKey6 (Goldilocks &fr, const Goldilocks::Element (&key)[4], uint8_t (&result)[43]);
 
+// Split a generic-size key, in sets of 9 bits
+void splitKey9 (const string &baString, vector<uint64_t> &result);
+
 // Join bits in SMT order and a remaining key into a full key
 void joinKey (Goldilocks &fr, const vector<uint64_t> &bits, const Goldilocks::Element (&rkey)[4], Goldilocks::Element (&key)[4]);
 

@@ -150,6 +150,8 @@ zkresult PageListPage::GetPages (const uint64_t pageNumber, vector<uint64_t> (&c
 
     // Add this page number to container pages
     containerPages.emplace_back(pageNumber);
+
+    return ZKR_SUCCESS;
 }
 
 zkresult PageListPage::CreatePages (uint64_t &pageNumber, vector<uint64_t> (&freePages), vector<uint64_t> (&containerPages), vector<uint64_t> (&containedPages))
