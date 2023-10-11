@@ -585,6 +585,32 @@ void scalar2ba16(uint64_t *pData, uint64_t &dataSize, mpz_class s)
     dataSize = i+1;
 }
 
+string scalar2ba32(const mpz_class &_s)
+{
+    mpz_class s(_s);
+    string result;
+    result.append(32, 0);
+    for (uint64_t i=0; i<32; i++)
+    {
+        result[31-i] = s.get_ui();
+
+        // Shift right 1 byte the scalar content
+        s = s >> 8;
+
+        // When we run out of significant bytes, break
+        if (s == ScalarZero)
+        {
+            return result;
+        }
+    }
+    if (s != 0)
+    {
+        zklog.error("scalar2ba32() run out of buffer of 32 bytes");
+        exitProcess();
+    }
+    return result;
+}
+
 void scalar2bytes(mpz_class &s, uint8_t (&bytes)[32])
 {
     for (uint64_t i=0; i<32; i++)

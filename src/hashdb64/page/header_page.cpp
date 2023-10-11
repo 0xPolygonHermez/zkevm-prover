@@ -227,7 +227,7 @@ void HeaderPage::Print (const uint64_t headerPageNumber, bool details)
     // Print raw data
     zklog.info("firstRawDataPage=" + to_string(page->firstRawDataPage) + "=" + to_string((uint64_t)pageManager.getPageAddress(page->firstRawDataPage)));
     zklog.info("rawDataPage=" + to_string(page->rawDataPage) + "=" + to_string((uint64_t)pageManager.getPageAddress(page->rawDataPage)));
-    RawDataPage::Print(page->rawDataPage, details);
+    RawDataPage::Print(page->rawDataPage, details, " ");
 
     // Print last version
     zklog.info("lastVersion=" + to_string(page->lastVersion));
@@ -242,7 +242,7 @@ void HeaderPage::Print (const uint64_t headerPageNumber, bool details)
 
     // Print key-value page list
     zklog.info("keyValueHistoryPage=" + to_string(page->keyValueHistoryPage) + "=" + to_string((uint64_t)pageManager.getPageAddress(page->keyValueHistoryPage)));
-    KeyValueHistoryPage::Print(page->keyValueHistoryPage, details);
+    KeyValueHistoryPage::Print(page->keyValueHistoryPage, details, " ");
 
     // Program page
     zklog.info("programPage=" + to_string(page->programPage) + "=" + to_string((uint64_t)pageManager.getPageAddress(page->programPage)));
@@ -250,5 +250,5 @@ void HeaderPage::Print (const uint64_t headerPageNumber, bool details)
 
     // Free pages
     zklog.info("freePages=" + to_string(page->freePages) + "=" + to_string((uint64_t)pageManager.getPageAddress(page->freePages)));
-    PageListPage::Print(page->freePages, details);
+    PageListPage::Print(page->freePages, details, " ");
 }

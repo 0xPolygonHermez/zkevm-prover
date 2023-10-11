@@ -8,6 +8,7 @@
 #include "raw_data_page.hpp"
 #include "header_page.hpp"
 #include "key_utils.hpp"
+#include "constants.hpp"
 
 zkresult KeyValuePage::InitEmptyPage (const uint64_t pageNumber)
 {
@@ -44,8 +45,8 @@ zkresult KeyValuePage::Read (const uint64_t pageNumber, const string &key, const
         // Leaf node
         case 1:
         {
-            uint64_t rawDataPage = page->key[index] & bitMask48;
-            uint64_t rawDataOffset = (page->key[index] >> 48) & bitMask12;
+            uint64_t rawDataPage = page->key[index] & U64Mask48;
+            uint64_t rawDataOffset = (page->key[index] >> 48) & U64Mask12;
             string lengthBa;
             zkr = RawDataPage::Read(rawDataPage, rawDataOffset, 4, lengthBa);
             if (zkr != ZKR_SUCCESS)
@@ -98,7 +99,7 @@ zkresult KeyValuePage::Read (const uint64_t pageNumber, const string &key, const
         // Intermediate node
         case 2:
         {
-            uint64_t nextKeyValuePage = page->key[index] & bitMask48;
+            uint64_t nextKeyValuePage = page->key[index] & U64Mask48;
             return Read(nextKeyValuePage, key, keyBits, value, level+1);
         }
 
@@ -144,12 +145,6 @@ zkresult KeyValuePage::Write (uint64_t &pageNumber, const string &key, const vec
         return ZKR_DB_ERROR;
     }
 
-    if (key.size() + value.size() > 0xFFFFFF)
-    {
-        zklog.error("KeyValuePage::write() got invalid value.size=" + to_string(value.size()) + " + key.size=" + to_string(key.size()) + " > 0xFFFFFF");
-        return ZKR_DB_ERROR;
-    }
-
     // Get an editable page
     pageNumber = pageManager.editPage(pageNumber);
 
@@ -166,7 +161,7 @@ zkresult KeyValuePage::Write (uint64_t &pageNumber, const string &key, const vec
         {
             //zklog.error("KeyValuePage::Write() found empty slot pageNumber=" + to_string(pageNumber) + " index=" + to_string(index) + " level=" + to_string(level) + " key=" + ba2string(key));
             uint64_t length = 4 + key.size() + value.size();
-            if (length > bitMask32)
+            if (length > U64Mask32)
             {
                 zklog.error("KeyValuePage::Write() computed too big length=" + to_string(length) + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index) + " level=" + to_string(level) + " key=" + ba2string(key));
                 return ZKR_DB_ERROR;
@@ -203,7 +198,7 @@ zkresult KeyValuePage::Write (uint64_t &pageNumber, const string &key, const vec
                 " headerPage->rawDataOffset=" + to_string(RawDataPage::GetOffset(headerPage->rawDataPage)));            
 
             // Update this entry as a leaf node (control = 1)
-            page->key[index] = (uint64_t(1)<<60) | ((rawDataOffset & bitMask12) << 48) | (rawDataPage & bitMask48);
+            page->key[index] = (uint64_t(1)<<60) | ((rawDataOffset & U64Mask12) << 48) | (rawDataPage & U64Mask48);
 
             return ZKR_SUCCESS;
         }
@@ -212,8 +207,8 @@ zkresult KeyValuePage::Write (uint64_t &pageNumber, const string &key, const vec
         case 1:
         {
             // Read the key from the raw data page
-            uint64_t rawPageNumber = page->key[index] & bitMask48;
-            uint64_t rawPageOffset = (page->key[index] >> 48) & bitMask12;
+            uint64_t rawPageNumber = page->key[index] & U64Mask48;
+            uint64_t rawPageOffset = (page->key[index] >> 48) & U64Mask12;
             string lengthString;
 
             // Get the length
@@ -306,7 +301,7 @@ zkresult KeyValuePage::Write (uint64_t &pageNumber, const string &key, const vec
         case 2:
         {
             // Call Write with the next level
-            uint64_t nextKeyValuePage = page->key[index] & bitMask48;
+            uint64_t nextKeyValuePage = page->key[index] & U64Mask48;
             zkr = Write(nextKeyValuePage, key, keyBits, value, level+1, headerPageNumber);
             if (zkr != ZKR_SUCCESS)
             {
@@ -373,8 +368,8 @@ void KeyValuePage::Print (const uint64_t pageNumber, bool details, const string&
             {
                 if (details)
                 {
-                    uint64_t rawPageNumber = page->key[i] & bitMask48;
-                    uint64_t rawPageOffset = (page->key[i] >> 48) & bitMask12;
+                    uint64_t rawPageNumber = page->key[i] & U64Mask48;
+                    uint64_t rawPageOffset = (page->key[i] >> 48) & U64Mask12;
                     zklog.info(prefix + "i=" + to_string(i) + " rawPageNumber=" + to_string(rawPageNumber) + " rawPageOffset=" + to_string(rawPageOffset));
                 }
                 continue;
@@ -383,7 +378,7 @@ void KeyValuePage::Print (const uint64_t pageNumber, bool details, const string&
             // Intermediate node
             case 2:
             {
-                uint64_t nextKeyValuePage = page->key[i] & bitMask48;
+                uint64_t nextKeyValuePage = page->key[i] & U64Mask48;
                 nextKeyValuePages.emplace_back(nextKeyValuePage);
                 if (details)
                 {

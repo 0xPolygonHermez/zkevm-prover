@@ -47,7 +47,7 @@ public:
     static zkresult GetPages      (const uint64_t  pageNumber,                                vector<uint64_t> (&containerPages), vector<uint64_t> (&containedPages));
     static zkresult CreatePages   (      uint64_t &pageNumber, vector<uint64_t> (&freePages), vector<uint64_t> (&containerPages), vector<uint64_t> (&containedPages));
 
-    static void Print (const uint64_t pageNumber, bool details);
+    static void Print (const uint64_t pageNumber, bool details, const string &prefix);
 };
 
 #endif

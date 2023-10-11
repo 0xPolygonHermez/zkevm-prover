@@ -9,34 +9,37 @@
 
 struct KeyValueHistoryStruct
 {
-    uint64_t hashPage1AndHistoryCounter; // historyCounter (2B) + hashPage1 (6B)
-    uint64_t hashPage2AndPadding; // padding (2B) + hashPage2 (6B)
-    uint64_t keyValueEntry[64][2];
-        // [0] = rawDataOffset (2B) + rawDataPage (6B) (if leaf node, location of key(32B) + value(32B)), or nextPageNumber (6B) (if intermediate node, page with level+1)
-        // [1] = control (4bits) + previousVersionOffset (12bits) + version (6B)
+    uint64_t historyOffset; // Offset of the next history entry that is free, or maxHistoryCounter
+    uint64_t previousPage; // Number of the previous page
+    uint64_t keyValueEntry[64][3];
+        // [0] = control (4bits) + previousVersionOffset (12bits) + version (6B)
+        // [1] = if leaf node, location of key(32B) + value(32B) = rawDataOffset (2B) + rawDataPage (6B)
+        // [1] = if intermediate node, page with level+1 = nextPageNumber (6B)
+        // [2] = if leaf node, location of hash(32B) = rawDataOffset (2B) + rawDataPage (6B), or 0 if has needs to be calculated
         // If control == 0, then this entry is empty, i.e. value = 0
         // If control == 1, then this entry contains a version (leaf node)
         // If control == 2, then this entry contains the page number of the next level page (intermediate node)
-    uint64_t historyEntry[191][2]; // history entries    
+    uint64_t historyEntry[106][3]; // history entries, copied from keyValueEntry when a new version is written in this page
 };
 
 class KeyValueHistoryPage
 {
-    static const uint64_t minVersionOffset = 8 + 8 + 64*16;
-    static const uint64_t maxVersionOffset = 4096;
+    static const uint64_t entrySize = 3*4; // 24B
+    static const uint64_t minHistoryOffset = 8 + 8 + 64*3*8; // 1552
+    static const uint64_t maxHistoryOffset = 8 + 8 + 64*3*8 + 106*3*8; // 4096
 private:
     static zkresult Read          (const uint64_t pageNumber,  const string &key, const string &keyBits, const uint64_t version,       mpz_class &value, const uint64_t level);
-    static zkresult Write         (      uint64_t &pageNumber, const string &key, const string &keyBits, const uint64_t version, const mpz_class &value, const uint64_t level, const uint64_t headerPageNumber);
+    static zkresult Write         (      uint64_t &pageNumber, const string &key, const string &keyBits, const uint64_t version, const mpz_class &value, const uint64_t level, uint64_t &headerPageNumber);
 public:
 
     static zkresult InitEmptyPage (const uint64_t pageNumber);
     static zkresult Read          (const uint64_t pageNumber,  const string &key, const uint64_t version,       mpz_class &value);
-    static zkresult Write         (      uint64_t &pageNumber, const string &key, const uint64_t version, const mpz_class &value, const uint64_t headerPageNumber);
+    static zkresult Write         (      uint64_t &pageNumber, const string &key, const uint64_t version, const mpz_class &value, uint64_t &headerPageNumber);
     
     static void calculateLeafHash         (const Goldilocks::Element (&key)[4], const uint64_t level, const mpz_class &value, Goldilocks::Element (&hash)[4], vector<HashValueGL> *hashValues);
     static void calculateIntermediateHash (const Goldilocks::Element (&leftHash)[4], const Goldilocks::Element (&rightHash)[4], Goldilocks::Element (&hash)[4], vector<HashValueGL> *hashValues);
 
-    static void Print (const uint64_t pageNumber, bool details);
+    static void Print (const uint64_t pageNumber, bool details, const string &prefix);
 };
 
 #endif

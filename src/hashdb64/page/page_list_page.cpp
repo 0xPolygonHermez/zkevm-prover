@@ -6,6 +6,7 @@
 #include "page_manager.hpp"
 #include "scalar.hpp"
 #include "zkmax.hpp"
+#include "constants.hpp"
 
 zkresult PageListPage::InitEmptyPage (const uint64_t pageNumber)
 {
@@ -25,7 +26,7 @@ zkresult PageListPage::InsertPage (uint64_t &pageNumber, const uint64_t pageNumb
     zkassert(offset >= minOffset);
     zkassert(offset <= maxOffset);
     zkassert((offset & 0x7) == 0);
-    uint64_t nextPageNumber = page->nextPageNumberAndOffset & 0xFFFFFF;
+    uint64_t nextPageNumber = page->nextPageNumberAndOffset & U64Mask48;
     zkassert(nextPageNumber == 0);
 
     // If page is full, create a new one
@@ -44,7 +45,7 @@ zkresult PageListPage::InsertPage (uint64_t &pageNumber, const uint64_t pageNumb
     zkassert(offset >= minOffset);
     zkassert(offset <= maxOffset);
     zkassert((offset & 0x7) == 0);
-    nextPageNumber = page->nextPageNumberAndOffset & 0xFFFFFF;
+    nextPageNumber = page->nextPageNumberAndOffset & U64Mask48;
     zkassert(nextPageNumber == 0);
 
     // Insert the page number
@@ -66,7 +67,7 @@ zkresult PageListPage::ExtractPage (uint64_t &pageNumber, uint64_t &extractedPag
     zkassert(offset >= minOffset);
     zkassert(offset <= maxOffset);
     zkassert((offset & 0x7) == 0);
-    uint64_t nextPageNumber = page->nextPageNumberAndOffset & 0xFFFFFF;
+    uint64_t nextPageNumber = page->nextPageNumberAndOffset & U64Mask48;
     zkassert(nextPageNumber == 0);
 
     // Release any empty page
@@ -211,12 +212,16 @@ zkresult PageListPage::CreatePages (uint64_t &pageNumber, vector<uint64_t> (&fre
     return ZKR_SUCCESS;
 }
 
-void PageListPage::Print (const uint64_t pageNumber, bool details)
+void PageListPage::Print (const uint64_t pageNumber, bool details, const string &prefix)
 {
     zklog.info("PageListPage::Print() pageNumber=" + to_string(pageNumber));
+    PageListStruct * page = (PageListStruct *)pageManager.getPageAddress(pageNumber);
     if (details)
     {
-        PageListStruct * page = (PageListStruct *)pageManager.getPageAddress(pageNumber);
-        zklog.info("  previousPageNumber=" + to_string(page->previousPageNumber) + "  nextPageNumber=" + to_string(page->nextPageNumberAndOffset & 0xFFFFFF) + " offset=" + to_string(page->nextPageNumberAndOffset >> 48));
+        zklog.info("  previousPageNumber=" + to_string(page->previousPageNumber) + "  nextPageNumber=" + to_string(page->nextPageNumberAndOffset & U64Mask48) + " offset=" + to_string(page->nextPageNumberAndOffset >> 48));
+    }
+    if (page->previousPageNumber != 0)
+    {
+        Print(page->previousPageNumber, details, prefix + " ");
     }
 }

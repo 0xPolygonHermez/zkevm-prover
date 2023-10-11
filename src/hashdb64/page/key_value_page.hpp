@@ -22,10 +22,6 @@ class KeyValuePage
 {
 private:
 
-    static const uint64_t bitMask12 = 0xFFF;
-    static const uint64_t bitMask32 = 0xFFFFFFFF;
-    static const uint64_t bitMask48 = 0xFFFFFFFFFFFF;
-
     static zkresult Read          (const uint64_t  pageNumber, const string &key, const vector<uint64_t> &keyBits,       string &value, const uint64_t level);
     static zkresult Write         (      uint64_t &pageNumber, const string &key, const vector<uint64_t> &keyBits, const string &value, const uint64_t level, const uint64_t headerPageNumber);
 
