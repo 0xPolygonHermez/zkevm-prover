@@ -315,11 +315,17 @@ void Config::print(void)
     zklog.info("    proverID=" + proverID);
     zklog.info("    proverName=" + proverName);
 
-    zklog.info(toJson().dump(4));
+    json j = toJson();
+
+    j["databaseURL"] = "REDACTED";
+    j["hashDBURL"] = "REDACTED";
+
+    zklog.info(j.dump(4));
 }
 
 json Config::toJson(void)
 {
+    // The implementation of this function is a direct macro transaction of the Config::load method
     json j;
 
     j["proverID"] = proverID;
