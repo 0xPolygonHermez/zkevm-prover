@@ -7,6 +7,11 @@ TARGET_TEST := zkProverTest
 BUILD_DIR := ./build
 SRC_DIRS := ./src ./test ./tools
 
+LIBOMP := $(shell find /usr/lib/llvm* -name "libomp.so" | find /usr/lib64 -name "libomp.so" | sed 's/libomp.so//')
+ifndef LIBOMP
+$(error LIBOMP is not set, you need to install libomp-dev)
+endif
+
 GRPCPP_FLAGS := $(shell pkg-config grpc++ --cflags)
 GRPCPP_LIBS := $(shell pkg-config grpc++ --libs) -lgrpc++_reflection
 ABSL_LIBS := $(shell pkg-config absl_log_internal_check_op --libs)
@@ -17,7 +22,7 @@ endif
 CXX := g++
 AS := nasm
 CXXFLAGS := -std=c++17 -Wall -pthread -flarge-source-files -Wno-unused-label -rdynamic -mavx2 $(GRPCPP_FLAGS) #-Wfatal-errors
-LDFLAGS := -lprotobuf -lsodium -lgpr -lpthread -lpqxx -lpq -lgmp -lstdc++ -lgmpxx -lsecp256k1 -lcrypto -luuid -fopenmp -lomp $(GRPCPP_LIBS) $(ABSL_LIBS)
+LDFLAGS := -lprotobuf -lsodium -lgpr -lpthread -lpqxx -lpq -lgmp -lstdc++ -lgmpxx -lsecp256k1 -lcrypto -luuid -fopenmp $(GRPCPP_LIBS) $(ABSL_LIBS) -L$(LIBOMP)
 CFLAGS := -fopenmp
 ASFLAGS := -felf64
 
