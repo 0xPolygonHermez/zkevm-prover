@@ -54,6 +54,9 @@ public:
     uint64_t finalizeExecutionLabel;
     uint64_t checkAndSaveFromLabel;
 
+    // HashDB
+    HashDBInterface *pHashDB;
+
     // Constructor
     MainExecutor(Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config);
 

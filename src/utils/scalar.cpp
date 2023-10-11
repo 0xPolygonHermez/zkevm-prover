@@ -76,7 +76,7 @@ void string2fea(Goldilocks &fr, const string&os, vector<Goldilocks::Element> &fe
         fea.push_back(fe);
     }
 }
-void string2key(Goldilocks &fr, const string& os, Goldilocks::Element (&fea)[4])
+void string2fea(Goldilocks &fr, const string& os, Goldilocks::Element (&fea)[4])
 {
     Goldilocks::Element fe;
     if (os.size() != 64)
@@ -97,7 +97,9 @@ string fea2string (Goldilocks &fr, const Goldilocks::Element(&fea)[4])
 {
     mpz_class auxScalar;
     fea2scalar(fr, auxScalar, fea);
-    return auxScalar.get_str(16);
+    string s = auxScalar.get_str(16);
+    PrependZerosNoCopy(s, 64);
+    return s;
 }
 
 string fea2string (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldilocks::Element &fea1, const Goldilocks::Element &fea2, const Goldilocks::Element &fea3)
@@ -110,7 +112,9 @@ string fea2string (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldil
 {
     mpz_class auxScalar;
     fea2scalar(fr, auxScalar, fea0, fea1, fea2, fea3, fea4, fea5, fea6, fea7);
-    return auxScalar.get_str(16);
+    string s = auxScalar.get_str(16);
+    PrependZerosNoCopy(s, 64);
+    return s;
 }
 
 /* Normalized strings */
@@ -292,10 +296,6 @@ bool stringIs0xHex (const string &s)
 
 /* Keccak */
 
-void keccak256(const uint8_t *pInputData, uint64_t inputDataSize, uint8_t *pOutputData, uint64_t outputDataSize)
-{
-    Keccak(1088, 512, pInputData, inputDataSize, 0x1, pOutputData, outputDataSize);
-}
 
 void keccak256 (const uint8_t *pInputData, uint64_t inputDataSize, uint8_t (&hash)[32])
 {
@@ -458,6 +458,56 @@ string ba2string (const string &baString)
 {
     string result;
     ba2string(result, (const uint8_t *)baString.c_str(), baString.size());
+    return result;
+}
+
+void ba2ba (const string &baString, vector<uint8_t> (&baVector))
+{
+    baVector.clear();
+    baVector.reserve(baString.size());
+    for (uint64_t i=0; i<baString.size(); i++)
+    {
+        uint8_t aux = (uint8_t)baString[i];
+        baVector.emplace_back(aux);
+    }
+}
+
+void ba2ba (const vector<uint8_t> (&baVector), string &baString)
+{
+    baString.clear();
+    baString.reserve(baVector.size());
+    for (uint64_t i=0; i<baVector.size(); i++)
+    {
+        baString.append(1, baVector[i]);
+    }
+}
+
+void ba2ba (string &baString, const uint64_t ba)
+{
+    baString = "";
+    for (uint64_t i=0; i<8; i++)
+    {
+        uint8_t byte = (ba >> (56 - i*8));
+        baString.append(1, byte);
+    }
+}
+
+uint64_t ba2ba (const string &baString)
+{
+    if (baString.size() != 8)
+    {
+        zklog.error("ba2ba() found invalid baString.size()=" + to_string(baString.size()) + "!=2");
+        exitProcess();
+    }
+    uint64_t result;
+    result = (uint64_t(uint8_t(baString[0]))<<56) |
+             (uint64_t(uint8_t(baString[1]))<<48) |
+             (uint64_t(uint8_t(baString[2]))<<40) |
+             (uint64_t(uint8_t(baString[3]))<<32) |
+             (uint64_t(uint8_t(baString[4]))<<24) |
+             (uint64_t(uint8_t(baString[5]))<<16) |
+             (uint64_t(uint8_t(baString[6]))<< 8) |
+             (uint64_t(uint8_t(baString[7]))    );
     return result;
 }
 

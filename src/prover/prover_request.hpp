@@ -2,6 +2,7 @@
 #define PROVER_REQUEST_HPP
 
 #include <semaphore.h>
+#include <unordered_set>
 #include "input.hpp"
 #include "proof_fflonk.hpp"
 #include "counters.hpp"
@@ -23,7 +24,8 @@ private:
 public:
     /* IDs */
     string uuid;
-    string externalRequestId;
+    string contextId; // Externally provided context ID
+    vector<LogTag> tags; // Tags used in logs
     string timestamp; // Timestamp, when requested, used as a prefix in the output files
     time_t startTime; // Time when the request started being processed
     time_t endTime; // Time when the request ended
@@ -70,6 +72,10 @@ public:
     /* Executor EVM events */
     vector<string> receipts;
     vector<string> logs;
+
+    /* Keys */
+    unordered_set<string> nodesKeys;
+    unordered_set<string> programKeys;
 
     /* Constructor */
     ProverRequest (Goldilocks &fr, const Config &config, tProverRequestType type);

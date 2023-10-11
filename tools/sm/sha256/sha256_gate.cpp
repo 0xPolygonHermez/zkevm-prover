@@ -6,6 +6,20 @@
 #include "timer.hpp"
 #include "zkassert.hpp"
 
+GateConfig SHA256GateConfig = GateConfig(
+	uint64_t(0),
+	uint64_t(160480),
+	uint64_t(170000),
+	uint64_t(1),
+	uint64_t(45),
+	uint64_t(768),
+	uint64_t(44),
+	uint64_t((45+(768*44))),
+	uint64_t(256),
+	uint64_t(44),
+    uint64_t(1<<23) // TODO
+);
+
 void SHA256GateString (const string &s, string &hash)
 {
     string ba;
@@ -13,24 +27,13 @@ void SHA256GateString (const string &s, string &hash)
     SHA256Gate((uint8_t *)ba.c_str(), ba.size(), hash);
 }
 
-void SHA256Gate (const uint8_t * pData, uint64_t dataSize, string &hash)
+void SHA256Gate (
+    const uint8_t * pData, uint64_t dataSize, string &hash,
+    string scriptFile, string polsFile, string connectionsFile)
 {
     // Initialize hash values:
     // (first 32 bits of the fractional parts of the square roots of the first 8 primes 2..19):
     uint32_t h[8] = { 0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19 };
-
-    // Create a gate configuration instance
-    GateConfig gateConfig;
-    gateConfig.zeroRef         = SHA256_ZeroRef;
-    gateConfig.slotSize        = SHA256_SlotSize;
-    gateConfig.maxRefs         = SHA256_MaxRefs;
-    gateConfig.firstNextRef    = SHA256_FirstNextRef;
-    gateConfig.sinRef0         = SHA256_SinRef0;
-    gateConfig.sinRefNumber    = SHA256_SinRefNumber;
-    gateConfig.sinRefDistance  = SHA256_SinRefDistance;
-    gateConfig.soutRef0        = SHA256_SoutRef0;
-    gateConfig.soutRefNumber   = SHA256_SoutRefNumber;
-    gateConfig.soutRefDistance = SHA256_SoutRefDistance;
 
     // Padding:
     // original message of length L bits
@@ -61,7 +64,7 @@ void SHA256Gate (const uint8_t * pData, uint64_t dataSize, string &hash)
         // (first 32 bits of the fractional parts of the cube roots of the first 64 primes 2..311):
 
         // Create a new gate state per loop
-        GateState S(gateConfig);
+        GateState S(SHA256GateConfig);
 
         // Create the k constants
         GateU32 k[64] = {
@@ -122,7 +125,7 @@ void SHA256Gate (const uint8_t * pData, uint64_t dataSize, string &hash)
             zkassert(bits.size() == 32);
             for (uint64_t j=0; j<32; j++)
             {
-                uint64_t ref = SHA256_SinRef0 + (i*32 + j)*44;
+                uint64_t ref = SHA256GateConfig.sinRef0 + (i*32 + j)*44;
                 S.gate[ref].pin[pin_a].bit = bits[j];
                 S.gate[ref].pin[pin_a].source = external;
                 w[i].bit[j].ref = ref;
@@ -142,7 +145,7 @@ void SHA256Gate (const uint8_t * pData, uint64_t dataSize, string &hash)
             zkassert(bits.size() == 32);
             for (uint64_t j=0; j<32; j++)
             {
-                uint64_t ref = SHA256_SinRef0 + (512 + i*32 + j)*44;
+                uint64_t ref = SHA256GateConfig.sinRef0 + (512 + i*32 + j)*44;
                 S.gate[ref].pin[pin_a].bit = bits[j];
                 S.gate[ref].pin[pin_a].source = external;
                 h32[i].bit[j].ref = ref;
@@ -301,14 +304,43 @@ void SHA256Gate (const uint8_t * pData, uint64_t dataSize, string &hash)
             }
             for (uint64_t j=0; j<32; j++)
             {
-                uint64_t aux = gateConfig.soutRef0 + gateConfig.soutRefDistance*(32*i + j);
-                S.XOR( pGateU32->bit[j].ref, pGateU32->bit[i].pin, gateConfig.zeroRef, pin_a, aux );
+                uint64_t aux = SHA256GateConfig.soutRef0 + SHA256GateConfig.soutRefDistance*(32*i + j);
+                S.XOR( pGateU32->bit[j].ref, pGateU32->bit[i].pin, SHA256GateConfig.zeroRef, pin_a, aux );
                 S.SoutRefs[32*i + j] = aux;
                 //cout << "SHA256() i=" << i << " aux=" << aux << " pin_a=" << (uint64_t)S.gate[S.SoutRefs[i]].pin[pin_a].bit << " pin_r=" << (uint64_t)S.gate[S.SoutRefs[i]].pin[pin_r].bit << endl;
             }
         }
 
         S.printCounters();
+        if (chunk == 0 && scriptFile.size() > 0)
+        {
+            json j;
+            S.saveScriptToJson(j);
+            cout << "Generating SHA256 script file: " << scriptFile << endl;
+            json2file(j, scriptFile);
+            cout << "Generated SHA256 script file: " << scriptFile << endl;
+            scriptFile = "";
+        }
+
+        if (chunk == 0 && polsFile.size() > 0)
+        {
+            json j;
+            S.savePolsToJson(j);
+            cout << "Generating SHA256 polynomials file: " << polsFile << endl;
+            json2file(j, polsFile);
+            cout << "Generated SHA256 polynomials file: " << polsFile << endl;
+            polsFile = "";
+        }
+
+        if (chunk == 0 && connectionsFile.size() > 0)
+        {
+            json j;
+            S.saveConnectionsToJson(j);
+            cout << "Generating SHA256 connections file: " << connectionsFile << endl;
+            json2file(j, connectionsFile);
+            cout << "Generated SHA256 connections file: " << connectionsFile << endl;
+            connectionsFile = "";
+        }
     }
 
     mpz_class hashScalar;

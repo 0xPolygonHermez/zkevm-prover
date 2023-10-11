@@ -3,6 +3,7 @@
 
 #include <gmpxx.h>
 #include <string>
+#include <vector>
 #include "goldilocks_base_field.hpp"
 #include "ffiasm/fec.hpp"
 #include "exit_process.hpp"
@@ -219,7 +220,7 @@ void scalar2key (Goldilocks &fr, mpz_class &s, Goldilocks::Element (&key)[4]);
 /* Hexa string to/from field element (array) conversion */
 void string2fe  (Goldilocks &fr, const string &s, Goldilocks::Element &fe);
 void string2fea (Goldilocks &fr, const string& os, vector<Goldilocks::Element> &fea);
-void string2key(Goldilocks &fr, const string& os, Goldilocks::Element (&fea)[4]);
+void string2fea (Goldilocks &fr, const string& os, Goldilocks::Element (&fea)[4]);
 string fea2string (Goldilocks &fr, const Goldilocks::Element(&fea)[4]);
 string fea2string (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldilocks::Element &fea1, const Goldilocks::Element &fea2, const Goldilocks::Element &fea3);
 string fea2string (Goldilocks &fr, const Goldilocks::Element &fea0, const Goldilocks::Element &fea1, const Goldilocks::Element &fea2, const Goldilocks::Element &fea3, const Goldilocks::Element &fea4, const Goldilocks::Element &fea5, const Goldilocks::Element &fea6, const Goldilocks::Element &fea7);
@@ -273,6 +274,10 @@ void     ba2string (string &s, const uint8_t *pData, uint64_t dataSize);
 string   ba2string (const uint8_t *pData, uint64_t dataSize);
 void     ba2string (const string &baString, string &textString);
 string   ba2string (const string &baString);
+void     ba2ba     (const string &baString, vector<uint8_t> (&baVector));
+void     ba2ba     (const vector<uint8_t> (&baVector), string &baString);
+void     ba2ba     (string &baString, const uint64_t ba);
+uint64_t ba2ba     (const string &baString);
 
 /* Byte array of exactly 2 bytes conversion */
 void ba2u16(const uint8_t *pData, uint16_t &n);
@@ -396,6 +401,20 @@ void bytes2u32 (const uint8_t * pInput, uint32_t &output, bool bBigEndian);
 /* Array of bytes to unsigned 64.  pInput must be 8 bytes long */
 void bytes2u64 (const uint8_t * pInput, uint64_t &output, bool bBigEndian);
 
+/* unsigned64 to string*/
+inline void U64toString(std::string &result, const uint64_t in1, const int radix)
+{
+    mpz_class aux = in1;
+    result = aux.get_str(radix);
+}
+
+/* unsigned64 to string*/
+inline std::string U64toString( const uint64_t in1, const int radix)
+{
+    mpz_class aux = in1;
+    string result = aux.get_str(radix);
+    return result;
+}
 /* Swap bytes, e.g. little to big endian, and vice-versa */
 uint64_t swapBytes64 (uint64_t input);
 

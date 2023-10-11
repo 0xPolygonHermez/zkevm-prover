@@ -176,6 +176,15 @@ string getTimestamp(void)
     return buf;
 }
 
+string getTimestampWithPeriod(void)
+{
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    char buf[256];
+    snprintf(buf, sizeof(buf), "%ld.%06ld", tv.tv_sec, tv.tv_usec);
+    return buf;
+}
+
 void getTimestampWithSlashes(string &timestamp, string &folder, string &file)
 {
     struct timeval tv;

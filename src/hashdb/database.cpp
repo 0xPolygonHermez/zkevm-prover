@@ -333,7 +333,7 @@ zkresult Database::write(const string &_key, const Goldilocks::Element* vkey, co
         if(usingAssociativeCache()){
             Goldilocks::Element vkeyf[4];
             if(vkey == NULL){
-                string2key(fr, _key, vkeyf);
+                string2fea(fr, key, vkeyf);
             }else{
                 vkeyf[0] = vkey[0];
                 vkeyf[1] = vkey[1];
@@ -586,13 +586,13 @@ zkresult Database::readRemote(bool bProgram, const string &key, string &value)
             exitProcess();
         }
 
-        pqxx::row const row = rows[0];
+        const pqxx::row& row = rows[0];
         if (row.size() != 2)
         {
             zklog.error("Database::readRemote() table=" + tableName + " got an invalid number of colums for the row: " + to_string(row.size()));
             exitProcess();
         }
-        pqxx::field const fieldData = row[1];
+        const pqxx::field& fieldData = row[1];
         value = removeBSXIfExists(fieldData.c_str());
     }
     catch (const std::exception &e)
@@ -699,7 +699,7 @@ zkresult Database::readTreeRemote(const string &key, bool *keys, uint64_t level,
                 //zklog.info("Database::readTreeRemote() adding hash=" + hash + " to dbMTCache");
                 if(usingAssociativeCache()){
                     Goldilocks::Element vhash[4];
-                    string2key(fr, hash, vhash);   
+                    string2fea(fr, hash, vhash);   
                     dbMTACache.addKeyValue(vhash, value, false);
                 }else{
                     dbMTCache.add(hash, value, false);
@@ -1350,6 +1350,17 @@ zkresult Database::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlus
 
 zkresult Database::sendData (void)
 {
+    // If we have read-only access to database, just pretend to have sent all data
+    if (config.dbReadOnly)
+    {
+        // If we succeeded, update last sent batch
+        multiWrite.Lock();
+        multiWrite.storedFlushId = multiWrite.storingFlushId;
+        multiWrite.Unlock();
+
+        return ZKR_SUCCESS;
+    }
+
     zkresult zkr = ZKR_SUCCESS;
     
     // Time calculation variables
@@ -1649,7 +1660,7 @@ void Database::printTree(const string &root, string prefix)
     string key = root;
     vector<Goldilocks::Element> value;
     Goldilocks::Element vKey[4];
-    if(Database::useAssociativeCache) string2key(fr, key, vKey);  
+    if(Database::useAssociativeCache) string2fea(fr, key, vKey);  
     read(key,vKey,value, NULL);
 
     if (value.size() != 12)
@@ -1740,6 +1751,7 @@ void Database::clearCache (void)
 {
     dbMTCache.clear();
     dbProgramCache.clear();
+    dbMTACache.clear();
 }
 
 void *dbSenderThread (void *arg)
@@ -2039,7 +2051,8 @@ void loadDb2MemCache(const Config &config)
             hash = treeMapIterator->second[i];
             dbValue.clear();
             Goldilocks::Element vhash[4];
-            if(pHashDB->db.usingAssociativeCache()) string2key(fr, hash, vhash);
+            string hashNorm = NormalizeToNFormat(hash, 64);
+            if(pHashDB->db.usingAssociativeCache()) string2fea(fr, hashNorm, vhash);
             zkresult zkr = pHashDB->db.read(hash, vhash, dbValue, NULL, true);
 
             if (zkr != ZKR_SUCCESS)

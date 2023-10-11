@@ -6,9 +6,7 @@
 #include "definitions.hpp"
 #include "main_sm/fork_5/main/eval_command.hpp"
 #include "keccak_wrapper.hpp"
-
-RawFnec fnec;
-RawFec fec;
+#include "zkglobals.hpp"
 
 mpz_class FNEC("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
 mpz_class FNEC_MINUS_ONE = FNEC - 1;
@@ -176,8 +174,6 @@ ECRecoverResult ECRecover(mpz_class &signature, mpz_class &r, mpz_class &s, mpz_
     }
     assert(ecrecover_y < FPEC);
 
-    // pending: check indeed y^2 has an square root
-
     // parity:
     int bit0 = mpz_tstbit(ecrecover_y.get_mpz_t(), 0);
     if (bit0 + ecrecover_v_parity - 1 == 0)
@@ -308,8 +304,6 @@ int ECRecoverPrecalc(mpz_class &signature, mpz_class &r, mpz_class &s, mpz_class
         }
     }
     assert(ecrecover_y < FPEC);
-
-    // pending: check indeed y^2 has an square root
 
     // parity:
     int bit0 = mpz_tstbit(ecrecover_y.get_mpz_t(), 0);
@@ -841,6 +835,10 @@ void generalAddPointEcJacobian(const RawFec::Element &x1, const RawFec::Element 
                                RawFec::Element &x3, RawFec::Element &y3, RawFec::Element &z3,
                                bool &p3_empty)
 {
+    RawFec::Element z1_2 = fec.mul(z1, z1);
+    RawFec::Element z2_2 = fec.mul(z2, z2);
+    RawFec::Element z1_3 = fec.mul(z1_2, z1);
+    RawFec::Element z2_3 = fec.mul(z2_2, z2);
 
     if (p1_empty && p2_empty)
     {
@@ -869,7 +867,7 @@ void generalAddPointEcJacobian(const RawFec::Element &x1, const RawFec::Element 
             }
             else
             {
-                if (fec.eq(fec.mul(x1, z2), fec.mul(x2, z1)) == 0)
+                if (fec.eq(fec.mul(x1, z2_2), fec.mul(x2, z1_2)) == 0)
                 {
                     addPointEcJacobian(x1, y1, z1, x2, y2, z2, x3, y3, z3);
                     if (fec.isZero(z3) == 1)
@@ -883,7 +881,7 @@ void generalAddPointEcJacobian(const RawFec::Element &x1, const RawFec::Element 
                 }
                 else
                 {
-                    if (fec.eq(fec.mul(y1, z2), fec.mul(y2, z1)) == 0)
+                    if (fec.eq(fec.mul(y1, z2_3), fec.mul(y2, z1_3)) == 0)
                     {
                         p3_empty = true;
                     }
@@ -913,6 +911,11 @@ void generalAddPointEcJacobianZ2Is1(const RawFec::Element &x1, const RawFec::Ele
                                bool &p3_empty)
 {
 
+    RawFec::Element z1_2 = fec.mul(z1, z1);
+    RawFec::Element z2_2 = fec.mul(z2, z2);
+    RawFec::Element z1_3 = fec.mul(z1_2, z1);
+    RawFec::Element z2_3 = fec.mul(z2_2, z2);
+
     if (p1_empty && p2_empty)
     {
         p3_empty = true;
@@ -940,7 +943,7 @@ void generalAddPointEcJacobianZ2Is1(const RawFec::Element &x1, const RawFec::Ele
             }
             else
             {
-                if (fec.eq(fec.mul(x1, z2), fec.mul(x2, z1)) == 0)
+                if (fec.eq(fec.mul(x1, z2_2), fec.mul(x2, z1_2)) == 0)
                 {
                     addPointEcJacobianZ2Is1(x1, y1, z1, x2, y2, z2, x3, y3, z3);
                     if (fec.isZero(z3) == 1)
@@ -954,7 +957,7 @@ void generalAddPointEcJacobianZ2Is1(const RawFec::Element &x1, const RawFec::Ele
                 }
                 else
                 {
-                    if (fec.eq(fec.mul(y1, z2), fec.mul(y2, z1)) == 0)
+                    if (fec.eq(fec.mul(y1, z2_3), fec.mul(y2, z1_3)) == 0)
                     {
                         p3_empty = true;
                     }
@@ -985,6 +988,11 @@ void generalAddPointEcJacobian(const RawFec::Element &x1, const RawFec::Element 
                                bool &p3_empty)
 {
 
+    RawFec::Element z1_2 = fec.mul(z1, z1);
+    RawFec::Element z2_2 = fec.mul(z2, z2);
+    RawFec::Element z1_3 = fec.mul(z1_2, z1);
+    RawFec::Element z2_3 = fec.mul(z2_2, z2);
+
     if (p1_empty && p2_empty)
     {
         p3_empty = true;
@@ -1012,7 +1020,7 @@ void generalAddPointEcJacobian(const RawFec::Element &x1, const RawFec::Element 
             }
             else
             {
-                if (fec.eq(fec.mul(x1, z2), fec.mul(x2, z1)) == 0)
+                if (fec.eq(fec.mul(x1, z2_2), fec.mul(x2, z1_2)) == 0)
                 {
                     addPointEcJacobian(x1, y1, z1, zz1, zzz1, x2, y2, z2, x3, y3, z3);
                     if (fec.isZero(z3) == 1)
@@ -1026,7 +1034,7 @@ void generalAddPointEcJacobian(const RawFec::Element &x1, const RawFec::Element 
                 }
                 else
                 {
-                    if (fec.eq(fec.mul(y1, z2), fec.mul(y2, z1)) == 0)
+                    if (fec.eq(fec.mul(y1, z2_3), fec.mul(y2, z1_3)) == 0)
                     {
                         p3_empty = true;
                     }

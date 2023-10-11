@@ -14,22 +14,12 @@
 #include "exit_process.hpp"
 #include "zkmax.hpp"
 #include "hashdb_remote.hpp"
-
-#ifdef DATABASE_USE_CACHE
-
-// Create static Database64::dbMTCache and DatabaseCacheProgram objects
-// This will be used to store DB records in memory and it will be shared for all the instances of Database class
-// DatabaseCacheMT and DatabaseCacheProgram classes are thread-safe
-DatabaseMTAssociativeCache64 Database64::dbMTACache;
-DatabaseMTCache64 Database64::dbMTCache;
-DatabaseProgramCache64 Database64::dbProgramCache;
-
-string Database64::dbStateRootKey("ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // 64 f's
-Goldilocks::Element Database64::dbStateRootvKey[4] = {0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF};
-bool Database64::useAssociativeCache = false;
-
-
-#endif
+#include "key_value.hpp"
+#include "key_utils.hpp"
+#include "page_manager.hpp"
+#include "header_page.hpp"
+#include "tree_chunk.hpp"
+#include "key_value_page.hpp"
 
 // Helper functions
 string removeBSXIfExists64(string s) {return ((s.at(0) == '\\') && (s.at(1) == 'x')) ? s.substr(2) : s;}
@@ -37,41 +27,23 @@ string removeBSXIfExists64(string s) {return ((s.at(0) == '\\') && (s.at(1) == '
 Database64::Database64 (Goldilocks &fr, const Config &config) :
         fr(fr),
         config(config),
-        connectionsPool(NULL),
-        multiWrite(fr)
+        headerPage(0)
 {
-    // Init mutex
-    pthread_mutex_init(&connMutex, NULL);
-
+    zkresult zkr;
+    headerPage = pageManager.getFreePage();
+    zkr = HeaderPage::InitEmptyPage(headerPage);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("Database64::Database64() failed calling HeaderPage::InitEmptyPage() result=" + zkresult2string(zkr));
+        exitProcess();
+    }
     // Initialize semaphores
-    sem_init(&senderSem, 0, 0);
-    sem_init(&getFlushDataSem, 0, 0);
+    //sem_init(&senderSem, 0, 0);
+    //sem_init(&getFlushDataSem, 0, 0);
 };
 
 Database64::~Database64()
 {
-    if (config.dbConnectionsPool)
-    {
-        if (connectionsPool != NULL)
-        {
-            for (uint64_t i=0; i<config.dbNumberOfPoolConnections; i++)
-            {
-                if (connectionsPool[i].pConnection != NULL)
-                {
-                    //zklog.info("Database64::~Database64() deleting writeConnectionsPool[" + to_string(i) + "].pConnection=" + to_string((uint64_t)writeConnectionsPool[i].pConnection));
-                    delete[] connectionsPool[i].pConnection;
-                }
-            }
-            delete connectionsPool;
-        }
-    }
-    else
-    {
-        if (connection.pConnection != NULL)
-        {
-            delete connection.pConnection;
-        }
-    }
 }
 
 // Database64 class implementation
@@ -88,16 +60,15 @@ void Database64::init(void)
     if (config.databaseURL != "local")
     {
         // Sender thread creation
-        pthread_create(&senderPthread, NULL, dbSenderThread64, this);
+        //pthread_create(&senderPthread, NULL, dbSenderThread64, this);
 
         // Cache synchronization thread creation
-        if (config.dbCacheSynchURL.size() > 0)
+        /*if (config.dbCacheSynchURL.size() > 0)
         {
             pthread_create(&cacheSynchPthread, NULL, dbCacheSynchThread64, this);
 
-        }
+        }*/
 
-        initRemote();
         useRemoteDB = true;
     }
     else
@@ -109,1035 +80,51 @@ void Database64::init(void)
     bInitialized = true;
 }
 
-zkresult Database64::read(const string &_key, Goldilocks::Element (&vkey)[4], vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog, const bool update,  bool *keys, uint64_t level)
+zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, uint64_t &level ,DatabaseMap *dbReadLog)
 {
+    level = 128;
     // Check that it has been initialized before
     if (!bInitialized)
     {
-        zklog.error("Database64::read() called uninitialized");
+        zklog.error("Database64::readKV() called uninitialized");
         exitProcess();
     }
 
     struct timeval t;
     if (dbReadLog != NULL) gettimeofday(&t, NULL);
 
-    zkresult r = ZKR_UNSPECIFIED;
-
-    // Normalize key format
-    string key = NormalizeToNFormat(_key, 64);
-    key = stringToLower(key);
-
-#ifdef DATABASE_USE_CACHE
-    // If the key is found in local database (cached) simply return it
-    if(usingAssociativeCache() && dbMTACache.findKey(vkey,value)){
-
-        if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
-        r = ZKR_SUCCESS;
-
-    } else if( dbMTCache.enabled() && dbMTCache.find(key, value)){
-        
-        if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
-        r = ZKR_SUCCESS;
-    }
-    else
-#endif
-    // If the key is pending to be stored in database, but already deleted from cache
-    if (config.dbMultiWrite && multiWrite.findNode(key, value))
-    {
-        // Add to the read log
-        if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
-
-#ifdef DATABASE_USE_CACHE
-        // Store it locally to avoid any future remote access for this key
-        if(usingAssociativeCache()){
-            dbMTACache.addKeyValue(vkey, value, false);
-        }
-        else if(dbMTCache.enabled()){                
-            dbMTCache.add(key, value, false);
-        }
-#endif
-        r = ZKR_SUCCESS;
-    }
-    // If get tree is configured, read the tree from the branch (key hash) to the leaf (keys since level)
-    else if (config.dbGetTree && (keys != NULL))
-    {
-        // Get the tree
-        uint64_t numberOfFields;
-        r = readTreeRemote(key, keys, level, numberOfFields);
-
-        // Add to the read log, and restart the timer
-        if (dbReadLog != NULL)
-        {
-            dbReadLog->addGetTree(TimeDiff(t), numberOfFields);
-            gettimeofday(&t, NULL);
-        }
-
-        // Retry if failed, since read-only databases have a synchronization latency
-        if ( (r != ZKR_SUCCESS) && (config.dbReadRetryDelay > 0) )
-        {
-            for (uint64_t i=0; i<config.dbReadRetryCounter; i++)
-            {
-                zklog.warning("Database64::read() failed calling readTreeRemote() with error=" + zkresult2string(r) + "; will retry after " + to_string(config.dbReadRetryDelay) + "us key=" + key);
-
-                // Retry after dbReadRetryDelay us
-                usleep(config.dbReadRetryDelay);
-                r = readTreeRemote(key, keys, level, numberOfFields);
-
-                // Add to the read log, and restart the timer
-                if (dbReadLog != NULL)
-                {
-                    dbReadLog->addGetTree(TimeDiff(t), numberOfFields);
-                    gettimeofday(&t, NULL);
-                }
-
-                if (r == ZKR_SUCCESS)
-                {
-                    break;
-                }
-                zklog.warning("Database64::read() retried readTreeRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r) + " i=" + to_string(i));
-            }
-        }
-
-        // If succeeded, now the value should be present in the cache
-        if ( r == ZKR_SUCCESS)
-        {
-            if (usingAssociativeCache() && dbMTACache.findKey(vkey,value)){
-                if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
-                r = ZKR_SUCCESS;
-            }else if(dbMTCache.enabled() && dbMTCache.find(key, value)){
-                if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
-                r = ZKR_SUCCESS;                
-            }
-            else
-            {
-                zklog.warning("Database64::read() called readTreeRemote() but key=" + key + " is not present");
-                r = ZKR_UNSPECIFIED;
-            }
-        }
-        else r = ZKR_UNSPECIFIED;
-    }
-    if (useRemoteDB && (r == ZKR_UNSPECIFIED))
-    {
-        // If multi write is enabled, flush pending data, since some previously written keys
-        // could be in the multi write string but flushed from the cache
-        /*if (config.dbMultiWrite)
-        {
-            flush(); // TODO: manage this situation
-        }*/
-
-        // Otherwise, read it remotelly, up to two times
-        string sData;
-        r = readRemote(false, key, sData);
-        if ( (r != ZKR_SUCCESS) && (config.dbReadRetryDelay > 0) )
-        {
-            for (uint64_t i=0; i<config.dbReadRetryCounter; i++)
-            {
-                zklog.warning("Database64::read() failed calling readRemote() with error=" + zkresult2string(r) + "; will retry after " + to_string(config.dbReadRetryDelay) + "us key=" + key + " i=" + to_string(i));
-
-                // Retry after dbReadRetryDelay us
-                usleep(config.dbReadRetryDelay);
-                r = readRemote(false, key, sData);
-                if (r == ZKR_SUCCESS)
-                {
-                    break;
-                }
-                zklog.warning("Database64::read() retried readRemote() after dbReadRetryDelay=" + to_string(config.dbReadRetryDelay) + "us and failed with error=" + zkresult2string(r) + " i=" + to_string(i));
-            }
-        }
-        if (r == ZKR_SUCCESS)
-        {
-            string2fea(fr, sData, value);
-
-#ifdef DATABASE_USE_CACHE
-            // Store it locally to avoid any future remote access for this key
-            if(usingAssociativeCache()){
-                dbMTACache.addKeyValue(vkey, value, update);
-            }else if (dbMTCache.enabled()){
-                dbMTCache.add(key, value, update);
-            }
-#endif
-
-            // Add to the read log
-            if (dbReadLog != NULL) dbReadLog->add(key, value, false, TimeDiff(t));
-        }
-    }
-
-    // If we could not find the value, report the error
-    if (r == ZKR_UNSPECIFIED)
-    {
-        zklog.error("Database64::read() requested a key that does not exist (ZKR_DB_KEY_NOT_FOUND): " + key);
-        r = ZKR_DB_KEY_NOT_FOUND;
-    }
-
+    zkresult rout = ZKR_UNSPECIFIED;
+    
 #ifdef LOG_DB_READ
     {
-        string s = "Database64::read()";
-        if (r != ZKR_SUCCESS)
-            s += " ERROR=" + zkresult2string(r);
-        s += " key=" + key;
+        string s = "Database64::readKV()";
+        if (rout != ZKR_SUCCESS)
+            s += " ERROR=" + zkresult2string(rout);
+        s += " key=" + keyStr;
         s += " value=";
-        for (uint64_t i = 0; i < value.size(); i++)
-            s += fr.toString(value[i], 16) + ":";
+        s += value.get_str(16) + ";";
         zklog.info(s);
     }
 #endif
+    return rout;
 
-    return r;
 }
-
-zkresult Database64::write(const string &_key, const Goldilocks::Element* vkey, const vector<Goldilocks::Element> &value, const bool persistent)
-{
-    // Check that it has  been initialized before
-    if (!bInitialized)
+/*
+zkresult Database64::readKV(const Goldilocks::Element (&root)[4], vector<KeyValueLevel> &KVLs, DatabaseMap *dbReadLog){
+    zkresult zkr;
+    for (uint64_t i=0; i<KVLs.size(); i++)
     {
-        zklog.error("Database64::write() called uninitialized");
-        exitProcess();
-    }
-
-    if (config.dbMultiWrite && !(dbMTCache.enabled() || dbMTACache.enabled()) && !persistent)
-    {
-        zklog.error("Database64::write() called with multi-write active, cache disabled and no persistance in database, so there is no place to store the date");
-        return ZKR_DB_ERROR;
-    }
-
-    zkresult r;
-
-    // Normalize key format
-    string key = NormalizeToNFormat(_key, 64);
-    key = stringToLower(key);
-
-    if ( useRemoteDB
-#ifdef DATABASE_USE_CACHE
-         && persistent
-#endif
-         )
-    {
-        // Prepare the query
-        string valueString = "";
-        string aux;
-        for (uint64_t i = 0; i < value.size(); i++)
+        zkr = readKV(root, KVLs[i].key, KVLs[i].value, KVLs[i].level, dbReadLog);
+        if (zkr != ZKR_SUCCESS)
         {
-            valueString += PrependZeros(fr.toString(value[i], 16), 16);
-        }
-
-        r = writeRemote(false, key, valueString);
-    }
-    else
-    {
-        r = ZKR_SUCCESS;
-    }
-
-#ifdef DATABASE_USE_CACHE
-    if ((r == ZKR_SUCCESS) && (dbMTCache.enabled() || dbMTACache.enabled()))
-    {
-        if(usingAssociativeCache()){
-            Goldilocks::Element vkeyf[4];
-            if(vkey == NULL){
-                string2key(fr, _key, vkeyf);
-            }else{
-                vkeyf[0] = vkey[0];
-                vkeyf[1] = vkey[1];
-                vkeyf[2] = vkey[2];
-                vkeyf[3] = vkey[3];
-            }
-            dbMTACache.addKeyValue(vkeyf, value, false);
-        }else{
-            dbMTCache.add(key, value, false);
+            zklog.error("Database64::readKV(KBs) failed calling read() result=" + zkresult2string(zkr) + " key=" + fea2string(fr, KVLs[i].key) );
+            return zkr;
         }
     }
-#endif
-
-#ifdef LOG_DB_WRITE
-    {
-        string s = "Database64::write()";
-        if (r != ZKR_SUCCESS)
-            s += " ERROR=" + zkresult2string(r);
-        s += " key=" + key;
-        s += " value=";
-        for (uint64_t i = 0; i < value.size(); i++)
-            s += fr.toString(value[i], 16) + ":";
-        s += " persistent=" + to_string(persistent);
-        zklog.info(s);
-    }
-#endif
-
-    return r;
-}
-
-void Database64::initRemote(void)
-{
-    TimerStart(DB_INIT_REMOTE);
-
-    try
-    {
-        // Build the remote database URI
-        string uri = config.databaseURL;
-        //zklog.info("Database64 URI: " + uri);
-
-        // Create the database connections
-        connLock();
-
-        if (config.dbConnectionsPool)
-        {
-            // Check that we don't support more threads than available connections, including the sender thread
-            if (config.dbNumberOfPoolConnections == 0)
-            {
-                zklog.error("Database64::initRemote() found config.dbNumberOfPoolConnections=" + to_string(config.dbNumberOfPoolConnections));
-                exitProcess();
-            }
-            if ( config.runHashDBServer && ((config.maxHashDBThreads + 1) > config.dbNumberOfPoolConnections) )
-            {
-                zklog.error("Database64::initRemote() found config.maxHashDBThreads + 1=" + to_string(config.maxHashDBThreads + 1) + " > config.dbNumberOfPoolConnections=" + to_string(config.dbNumberOfPoolConnections));
-                exitProcess();
-            }
-            if ( config.runExecutorServer && ((config.maxExecutorThreads + 1) > config.dbNumberOfPoolConnections) )
-            {
-                zklog.error("Database64::initRemote() found config.maxExecutorThreads + 1=" + to_string(config.maxExecutorThreads + 1) + " > config.dbNumberOfPoolConnections=" + to_string(config.dbNumberOfPoolConnections));
-                exitProcess();
-            }
-            if ( config.runHashDBServer && config.runExecutorServer && ((config.maxHashDBThreads + config.maxExecutorThreads + 1) > config.dbNumberOfPoolConnections) )
-            {
-                zklog.error("Database64::initRemote() found config.maxHashDBThreads + config.maxExecutorThreads + 1=" + to_string(config.maxHashDBThreads + config.maxExecutorThreads + 1) + " > config.dbNumberOfPoolConnections=" + to_string(config.dbNumberOfPoolConnections));
-                exitProcess();
-            }
-
-            // Allocate write connections pool
-            connectionsPool = new DatabaseConnection[config.dbNumberOfPoolConnections];
-            if (connectionsPool == NULL)
-            {
-                zklog.error("Database64::initRemote() failed creating write connection pool of size " + to_string(config.dbNumberOfPoolConnections));
-                exitProcess();
-            }
-
-            // Create write connections
-            for (uint64_t i=0; i<config.dbNumberOfPoolConnections; i++)
-            {
-                connectionsPool[i].pConnection = new pqxx::connection{uri};
-                if (connectionsPool[i].pConnection == NULL)
-                {
-                    zklog.error("Database64::initRemote() failed creating write connection " + to_string(i));
-                    exitProcess();
-                }
-                connectionsPool[i].bInUse = false;
-                //zklog.info("Database64::initRemote() created write connection i=" + to_string(i) + " connectionsPool[i]=" + to_string((uint64_t)connectionsPool[i].pConnection));
-            }
-
-            // Reset counters
-            nextConnection = 0;
-            usedConnections = 0;
-        }
-        else
-        {
-            connection.pConnection = new pqxx::connection{uri};
-            if (connection.pConnection == NULL)
-            {
-                zklog.error("Database64::initRemote() failed creating unique connection");
-                exitProcess();
-            }
-            connection.bInUse = false;
-        }
-        
-        connUnlock();
-    }
-    catch (const std::exception &e)
-    {
-        zklog.error("Database64::initRemote() exception: " + string(e.what()));
-        exitProcess();
-    }
-
-    // If configured to use the get tree function, we must install it in the database before using it
-    if (config.dbGetTree && !config.dbReadOnly)
-    {
-        writeGetTreeFunction();
-    }
-
-    // Create state root, only useful if database is empty
-    if (!config.dbReadOnly)
-    {
-        createStateRoot();
-    }
-
-    TimerStopAndLog(DB_INIT_REMOTE);
-}
-
-DatabaseConnection * Database64::getConnection (void)
-{
-    if (config.dbConnectionsPool)
-    {
-        connLock();
-        DatabaseConnection * pConnection = NULL;
-        uint64_t i=0;
-        for (i=0; i<config.dbNumberOfPoolConnections; i++)
-        {
-            if (!connectionsPool[nextConnection].bInUse) break;
-            nextConnection++;
-            if (nextConnection == config.dbNumberOfPoolConnections)
-            {
-                nextConnection = 0;
-            }
-        }
-        if (i==config.dbNumberOfPoolConnections)
-        {
-            zklog.error("Database64::getWriteConnection() run out of free connections");
-            exitProcess();
-        }
-
-        pConnection = &connectionsPool[nextConnection];
-        zkassert(pConnection->bInUse == false);
-        pConnection->bInUse = true;
-        nextConnection++;
-        if (nextConnection == config.dbNumberOfPoolConnections)
-        {
-            nextConnection = 0;
-        }
-        usedConnections++;
-        if (pConnection->bDisconnect)
-        {
-            pConnection->pConnection->disconnect();
-            pConnection->bDisconnect = false;
-        }
-        //zklog.info("Database64::getWriteConnection() pConnection=" + to_string((uint64_t)pConnection) + " nextConnection=" + to_string(nextConnection) + " usedConnections=" + to_string(usedConnections));
-        connUnlock();
-        return pConnection;
-    }
-    else
-    {
-        connLock();
-        zkassert(connection.bInUse == false);
-#ifdef DEBUG
-        connection.bInUse = true;
-#endif
-        return &connection;
-    }
-}
-
-void Database64::disposeConnection (DatabaseConnection * pConnection)
-{
-    if (config.dbConnectionsPool)
-    {
-        connLock();
-        zkassert(pConnection->bInUse == true);
-        pConnection->bInUse = false;
-        zkassert(usedConnections > 0);
-        usedConnections--;
-        //zklog.info("Database64::disposeWriteConnection() pConnection=" + to_string((uint64_t)pConnection) + " nextConnection=" + to_string(nextConnection) + " usedConnections=" + to_string(usedConnections));
-        connUnlock();
-    }
-    else
-    {
-        zkassert(pConnection == &connection);
-        zkassert(pConnection->bInUse == true);
-#ifdef DEBUG
-        pConnection->bInUse = false;
-#endif
-        connUnlock();
-    }
-}
-
-void Database64::queryFailed (void)
-{
-    connLock();
-
-    for (uint64_t i=0; i<config.dbNumberOfPoolConnections; i++)
-    {
-        connectionsPool[i].bDisconnect = true;
-    }
-
-    connUnlock();
-}
-
-zkresult Database64::readRemote(bool bProgram, const string &key, string &value)
-{
-    const string &tableName = (bProgram ? config.dbProgramTableName : config.dbNodesTableName);
-
-    if (config.logRemoteDbReads)
-    {
-        zklog.info("Database64::readRemote() table=" + tableName + " key=" + key);
-    }
-
-    // Get a free read db connection
-    DatabaseConnection * pDatabaseConnection = getConnection();
-
-    try
-    {
-        // Prepare the query
-        string query = "SELECT * FROM " + tableName + " WHERE hash = E\'\\\\x" + key + "\';";
-
-        pqxx::result rows;
-
-        // Start a transaction.
-        pqxx::nontransaction n(*(pDatabaseConnection->pConnection));
-
-        // Execute the query
-        rows = n.exec(query);
-
-        // Commit your transaction
-        n.commit();
-
-        // Process the result
-        if (rows.size() == 0)
-        {
-            disposeConnection(pDatabaseConnection);
-            return ZKR_DB_KEY_NOT_FOUND;
-        }
-        else if (rows.size() > 1)
-        {
-            zklog.error("Database64::readRemote() table=" + tableName + " got more than one row for the same key: " + to_string(rows.size()));
-            exitProcess();
-        }
-
-        pqxx::row const row = rows[0];
-        if (row.size() != 2)
-        {
-            zklog.error("Database64::readRemote() table=" + tableName + " got an invalid number of colums for the row: " + to_string(row.size()));
-            exitProcess();
-        }
-        pqxx::field const fieldData = row[1];
-        value = removeBSXIfExists64(fieldData.c_str());
-    }
-    catch (const std::exception &e)
-    {
-        zklog.error("Database64::readRemote() table=" + tableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
-        queryFailed();
-        disposeConnection(pDatabaseConnection);
-        return ZKR_DB_ERROR;
-    }
-    
-    // Dispose the read db conneciton
-    disposeConnection(pDatabaseConnection);
-
     return ZKR_SUCCESS;
-}
+}*/
 
-zkresult Database64::readTreeRemote(const string &key, bool *keys, uint64_t level, uint64_t &numberOfFields)
-{
-    zkassert(keys != NULL);
-
-    if (config.logRemoteDbReads)
-    {
-        zklog.info("Database64::readTreeRemote() key=" + key);
-    }
-    string rkey;
-    for (uint64_t i=level; i<256; i++)
-    {
-        uint8_t auxByte = (uint8_t)(keys[i]);
-        if (auxByte > 1)
-        {
-            zklog.error("Database64::readTreeRemote() found invalid keys value=" + to_string(auxByte) + " at position " + to_string(i));
-            return ZKR_DB_ERROR;
-        }
-        rkey.append(1, byte2char(auxByte >> 4));
-        rkey.append(1, byte2char(auxByte & 0x0F));
-    }
-
-    // Get a free read db connection
-    DatabaseConnection * pDatabaseConnection = getConnection();
-
-    numberOfFields = 0;
-
-    try
-    {
-        // Prepare the query
-        string query = "SELECT get_tree (E\'\\\\x" + key + "\', E\'\\\\x" + rkey + "\');";
-
-        pqxx::result rows;
-
-        // Start a transaction.
-        pqxx::nontransaction n(*(pDatabaseConnection->pConnection));
-
-        // Execute the query
-        rows = n.exec(query);
-
-        // Commit your transaction
-        n.commit();
-
-        // Process the result
-        numberOfFields = rows.size();
-        for (uint64_t i=0; i<numberOfFields; i++)
-        {
-            pqxx::row const row = rows[i];
-            if (row.size() != 1)
-            {
-                zklog.error("Database64::readTreeRemote() got an invalid number of colums for the row: " + to_string(row.size()));
-                disposeConnection(pDatabaseConnection);
-                return ZKR_UNSPECIFIED;
-            }
-            pqxx::field const fieldData = row[0];
-            string fieldDataString = fieldData.c_str();
-            //zklog.info("got value=" + fieldDataString);
-            string hash, data;
-
-            string first = "(\"\\\\x";
-            string second = "\",\"\\\\x";
-            string third = "\")";
-
-            size_t firstPosition = fieldDataString.find(first);
-            size_t secondPosition = fieldDataString.find(second);
-            size_t thirdPosition = fieldDataString.find(third);
-
-            if ( (firstPosition != 0) ||
-                 (firstPosition + first.size() + 32*2 != secondPosition ) ||
-                 (secondPosition <= first.size()) ||
-                 (thirdPosition == 0) ||
-                 ( (secondPosition + second.size() + 12*8*2 != thirdPosition) &&
-                   (secondPosition + second.size() + 8*8*2 != thirdPosition) ))
-            {
-                zklog.error("Database64::readTreeRemote() got an invalid field=" + fieldDataString);
-                disposeConnection(pDatabaseConnection);
-                return ZKR_UNSPECIFIED;
-            }
-
-            hash = fieldDataString.substr(firstPosition + first.size(), 32*2);
-            data = fieldDataString.substr(secondPosition + second.size(), thirdPosition - secondPosition - second.size());
-            vector<Goldilocks::Element> value;
-            string2fea(fr, data, value);
-
-#ifdef DATABASE_USE_CACHE
-            // Store it locally to avoid any future remote access for this key
-            if (dbMTCache.enabled() || dbMTACache.enabled())
-            {
-                //zklog.info("Database64::readTreeRemote() adding hash=" + hash + " to dbMTCache");
-                if(usingAssociativeCache()){
-                    Goldilocks::Element vhash[4];
-                    string2key(fr, hash, vhash);   
-                    dbMTACache.addKeyValue(vhash, value, false);
-                }else{
-                    dbMTCache.add(hash, value, false);
-              }
-            }
-#endif
-        }
-    }
-    catch (const std::exception &e)
-    {
-        zklog.warning("Database64::readTreeRemote() exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
-        queryFailed();
-        disposeConnection(pDatabaseConnection);
-        return ZKR_DB_ERROR;
-    }
-    
-    // Dispose the read db conneciton
-    disposeConnection(pDatabaseConnection);
-
-    if (config.logRemoteDbReads)
-    {
-        zklog.info("Database64::readTreeRemote() key=" + key + " read " + to_string(numberOfFields));
-    }
-
-    return ZKR_SUCCESS;
-    
-}
-
-zkresult Database64::writeRemote(bool bProgram, const string &key, const string &value)
-{
-    zkresult result = ZKR_SUCCESS;
-    
-    if (config.dbMultiWrite)
-    {
-        multiWrite.Lock();
-
-        if (bProgram)
-        {
-            multiWrite.data[multiWrite.pendingToFlushDataIndex].programIntray[key] = value;
-#ifdef LOG_DB_WRITE_REMOTE
-            zklog.info("Database64::writeRemote() key=" + key + " multiWrite=[" + multiWrite.print() + "]");
-#endif
-        }
-        else
-        {
-            multiWrite.data[multiWrite.pendingToFlushDataIndex].nodesIntray[key] = value;
-        }
-
-        multiWrite.Unlock();
-    }
-    else
-    {
-        const string &tableName = (bProgram ? config.dbProgramTableName : config.dbNodesTableName);
-
-        string query = "INSERT INTO " + tableName + " ( hash, data ) VALUES ( E\'\\\\x" + key + "\', E\'\\\\x" + value + "\' ) ON CONFLICT (hash) DO NOTHING;";
-            
-        DatabaseConnection * pDatabaseConnection = getConnection();
-
-        try
-        {        
-
-#ifdef DATABASE_COMMIT
-            if (autoCommit)
-#endif
-            {
-                pqxx::work w(*(pDatabaseConnection->pConnection));
-                pqxx::result res = w.exec(query);
-                w.commit();
-            }
-#ifdef DATABASE_COMMIT
-            else
-            {
-                if (transaction == NULL)
-                    transaction = new pqxx::work{*pConnectionWrite};
-                pqxx::result res = transaction->exec(query);
-            }
-#endif
-        }
-        catch (const std::exception &e)
-        {
-            zklog.error("Database64::writeRemote() table=" + tableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
-            result = ZKR_DB_ERROR;
-            queryFailed();
-        }
-
-        disposeConnection(pDatabaseConnection);
-    }
-
-    return result;
-}
-
-zkresult Database64::createStateRoot(void)
-{
-    // Copy the state root in the first 4 elements of dbValue
-    vector<Goldilocks::Element> value;
-    for (uint64_t i=0; i<12; i++) value.push_back(fr.zero());
-    
-    // Prepare the value string
-    string valueString = "";
-    string aux;
-    for (uint64_t i = 0; i < value.size(); i++)
-    {
-        valueString += PrependZeros(fr.toString(value[i], 16), 16);
-    }
-
-    zkresult r = ZKR_SUCCESS;
-
-    if (!config.dbReadOnly)
-    {
-        // Prepare the query
-        string query = "INSERT INTO " + config.dbNodesTableName + " ( hash, data ) VALUES ( E\'\\\\x" + dbStateRootKey + "\', E\'\\\\x" + valueString + "\' ) " +
-                    "ON CONFLICT (hash) DO NOTHING;";
-            
-        DatabaseConnection * pDatabaseConnection = getConnection();
-
-        try
-        {        
-
-#ifdef DATABASE_COMMIT
-            if (autoCommit)
-#endif
-            {
-                pqxx::work w(*(pDatabaseConnection->pConnection));
-                pqxx::result res = w.exec(query);
-                w.commit();
-            }
-#ifdef DATABASE_COMMIT
-            else
-            {
-                if (transaction == NULL)
-                    transaction = new pqxx::work{*pConnectionWrite};
-                pqxx::result res = transaction->exec(query);
-            }
-#endif
-        }
-        catch (const std::exception &e)
-        {
-            zklog.error("Database64::createStateRoot() table=" + config.dbNodesTableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
-            r = ZKR_DB_ERROR;
-            queryFailed();
-        }
-
-        disposeConnection(pDatabaseConnection);
-    }
-
-#ifdef LOG_DB_WRITE
-    {
-        string s = "Database64::createStateRoot()";
-        if (r != ZKR_SUCCESS)
-            s += " ERROR=" + zkresult2string(r);
-        s += " key=" + dbStateRootKey;
-        s += " value=";
-        for (uint64_t i = 0; i < value.size(); i++)
-            s += fr.toString(value[i], 16) + ":";
-        zklog.info(s);
-    }
-#endif
-
-    return r;
-}
-
-zkresult Database64::updateStateRoot(const Goldilocks::Element (&stateRoot)[4])
-{
-    // Check that it has  been initialized before
-    if (!bInitialized)
-    {
-        zklog.error("Database64::updateStateRoot() called uninitialized");
-        exitProcess();
-    }
-
-    // Copy the state root in the first 4 elements of dbValue
-    vector<Goldilocks::Element> value;
-    for (uint64_t i=0; i<4; i++) value.push_back(stateRoot[i]);
-    for (uint64_t i=0; i<8; i++) value.push_back(fr.zero());
-    
-    // Prepare the value string
-    string valueString = "";
-    string aux;
-    for (uint64_t i = 0; i < value.size(); i++)
-    {
-        valueString += PrependZeros(fr.toString(value[i], 16), 16);
-    }
-
-    zkresult r = ZKR_SUCCESS;
-
-    if ( useRemoteDB )
-    {
-        if (config.dbMultiWrite)
-        {
-            multiWrite.Lock();
-            multiWrite.data[multiWrite.pendingToFlushDataIndex].nodesStateRoot = valueString;
-            multiWrite.Unlock();    
-        }
-        else
-        {
-            // Prepare the query
-            string query = "UPDATE " + config.dbNodesTableName + " SET data = E\'\\\\x" + valueString + "\' WHERE  hash = E\'\\\\x" + dbStateRootKey + "\';";
-                
-            DatabaseConnection * pDatabaseConnection = getConnection();
-
-            try
-            {        
-
-    #ifdef DATABASE_COMMIT
-                if (autoCommit)
-    #endif
-                {
-                    pqxx::work w(*(pDatabaseConnection->pConnection));
-                    pqxx::result res = w.exec(query);
-                    w.commit();
-                }
-    #ifdef DATABASE_COMMIT
-                else
-                {
-                    if (transaction == NULL)
-                        transaction = new pqxx::work{*pConnectionWrite};
-                    pqxx::result res = transaction->exec(query);
-                }
-    #endif
-            }
-            catch (const std::exception &e)
-            {
-                zklog.error("Database64::updateStateRoot() table=" + config.dbNodesTableName + " exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
-                r = ZKR_DB_ERROR;
-                queryFailed();
-            }
-
-            disposeConnection(pDatabaseConnection);
-        }
-    }
-
-#ifdef DATABASE_USE_CACHE
-    if ((r == ZKR_SUCCESS) && (dbMTCache.enabled() || dbMTACache.enabled()))
-    {
-        // Create in memory cache
-        if(usingAssociativeCache()){
-                dbMTACache.addKeyValue(dbStateRootvKey, value, true);
-        }else{
-                dbMTCache.add(dbStateRootKey, value, true);
-        }
-    }
-#endif
-
-#ifdef LOG_DB_WRITE
-    {
-        string s = "Database64::updateStateRoot()";
-        if (r != ZKR_SUCCESS)
-            s += " ERROR=" + zkresult2string(r);
-        s += " key=" + dbStateRootKey;
-        s += " value=";
-        for (uint64_t i = 0; i < value.size(); i++)
-            s += fr.toString(value[i], 16) + ":";
-        zklog.info(s);
-    }
-#endif
-
-    return r;
-}
-
-zkresult Database64::writeGetTreeFunction(void)
-{
-    if (!config.dbGetTree)
-    {
-        zklog.error("Database64::writeGetTreeFunction() dalled with config.dbGetTree=false");
-        return ZKR_DB_ERROR;
-    }
-    
-    if (config.databaseURL == "local")
-    {
-        zklog.error("Database64::writeGetTreeFunction() dalled with config.databaseURL=local");
-        return ZKR_DB_ERROR;
-    }
-
-    zkresult result = ZKR_SUCCESS;
-
-    string query = string("") +
-    "create or replace function get_tree (root_hash bytea, remaining_key bytea)\n" +
-	"   returns setof state.nodes\n" +
-	"   language plpgsql\n" +
-    "as $$\n" +
-    "declare\n" +
-    "	current_hash bytea;\n" +
-    "	current_row " + config.dbNodesTableName + "%rowtype;\n" +
-    "	remaining_key_length integer;\n" +
-    "	remaining_key_bit integer;\n" +
-    "	byte_71 integer;\n" +
-    "	aux_integer integer;\n" +
-    "begin\n" +
-    "	remaining_key_length = octet_length(remaining_key);\n" +
-    "	current_hash = root_hash;\n" +
-
-    "	-- For every bit (0 or 1) in remaining key\n" +
-    "	for counter in 0..(remaining_key_length-1) loop\n" +
-
-    "		-- Get the current_hash row and store it into current_row\n" +
-    "		select * into current_row from " + config.dbNodesTableName + " where hash = current_hash;\n" +
-    "		if not found then\n" +
-    "			raise EXCEPTION 'Hash % not found', current_hash;\n" +
-    "		end if;\n" +
-
-    "		-- Return it as a result\n" +
-    "		return next current_row;\n" +
-
-    "		-- Data should be a byte array of 12x8 bytes (12 field elements)\n" +
-    "		-- Check data length is exactly 12 field elements\n" +
-    "		if (octet_length(current_row.data) != 12*8) then\n" +
-    "			raise EXCEPTION 'Hash % got invalid data size %', current_hash, octet_length(current_row.data);\n" +
-    "		end if;\n" +
-	//	-- Check that last 3 field elements are zero
-	//	--if (substring(current_row.data from 89 for 8) != E'\\x0000000000000000') then
-	//	--	RAISE EXCEPTION 'Hash % got non-null 12th field element data=%', current_hash, current_row.data;
-	//	--end if;
-	//	--if (substring(current_row.data from 81 for 8) != E'\\x0000000000000000') then
-	//	--	RAISE EXCEPTION 'Hash % got non-null 11th field element data=%', current_hash, current_row.data;
-	//	--end if;
-	//	--if (substring(current_row.data from 73 for 8) != E'\\x0000000000000000') then
-	//	--	RAISE EXCEPTION 'Hash % got non-null 10th field element data=%', current_hash, current_row.data;
-	//	--end if;
-    "		-- If last 4 field elements are 0000, this is an intermediate node\n" +
-    "		byte_71 = get_byte(current_row.data, 71);\n" +
-    "		case byte_71\n" +
-    "		when 0 then\n" +
-
-    "			-- If the next remaining key is a 0, take the left sibling way, if it is a 1, take the right one\n" +
-    "			remaining_key_bit = get_byte(remaining_key, counter);\n" +
-    "			case remaining_key_bit\n" +
-    "			when 0 then\n" +
-    "				current_hash =\n" +
-    "					substring(current_row.data from 25 for 8) ||\n" +
-    "					substring(current_row.data from 17 for 8) ||\n" +
-    "					substring(current_row.data from 9 for 8) ||\n" +
-    "					substring(current_row.data from 1 for 8);\n" +
-    "			when 1 then\n" +
-    "				current_hash =\n" +
-    "					substring(current_row.data from 57 for 8) ||\n" +
-    "					substring(current_row.data from 49 for 8) ||\n" +
-    "					substring(current_row.data from 41 for 8) ||\n" +
-    "					substring(current_row.data from 33 for 8);\n" +
-    "			else\n" +
-    "				raise EXCEPTION 'Invalid remaining key bit at position % with value %', counter, remaining_key_bit ;\n" +
-    "			end case;\n" +
-    
-    "			-- If the hash is a 0, we reached the end of the branch\n" +
-    "			if (get_byte(current_hash, 0) = 0) and\n" +
-    "			   (get_byte(current_hash, 1) = 0) and\n" +
-    "			   (get_byte(current_hash, 2) = 0) and\n" +
-    "			   (get_byte(current_hash, 3) = 0) and\n" +
-    "			   (get_byte(current_hash, 4) = 0) and\n" +
-    "			   (get_byte(current_hash, 5) = 0) and\n" +
-    "			   (get_byte(current_hash, 6) = 0) and\n" +
-    "			   (get_byte(current_hash, 7) = 0) and\n" +
-    "			   (get_byte(current_hash, 8) = 0) and\n" +
-    "			   (get_byte(current_hash, 9) = 0) and\n" +
-    "			   (get_byte(current_hash, 10) = 0) and\n" +
-    "			   (get_byte(current_hash, 11) = 0) and\n" +
-    "			   (get_byte(current_hash, 12) = 0) and\n" +
-    "			   (get_byte(current_hash, 13) = 0) and\n" +
-    "			   (get_byte(current_hash, 14) = 0) and\n" +
-    "			   (get_byte(current_hash, 15) = 0) and\n" +
-    "			   (get_byte(current_hash, 16) = 0) and\n" +
-    "			   (get_byte(current_hash, 17) = 0) and\n" +
-    "			   (get_byte(current_hash, 18) = 0) and\n" +
-    "			   (get_byte(current_hash, 19) = 0) and\n" +
-    "			   (get_byte(current_hash, 20) = 0) and\n" +
-    "			   (get_byte(current_hash, 21) = 0) and\n" +
-    "			   (get_byte(current_hash, 22) = 0) and\n" +
-    "			   (get_byte(current_hash, 23) = 0) and\n" +
-    "			   (get_byte(current_hash, 24) = 0) and\n" +
-    "			   (get_byte(current_hash, 25) = 0) and\n" +
-    "			   (get_byte(current_hash, 26) = 0) and\n" +
-    "			   (get_byte(current_hash, 27) = 0) and\n" +
-    "			   (get_byte(current_hash, 28) = 0) and\n" +
-    "			   (get_byte(current_hash, 29) = 0) and\n" +
-    "			   (get_byte(current_hash, 30) = 0) and\n" +
-    "			   (get_byte(current_hash, 31) = 0) then\n" +
-    "			   return;\n" +
-    "			end if;\n" +
-
-    "		-- If last 4 field elements are 1000, this is a leaf node\n" +
-    "		when 1 then	\n" +
-
-    "			current_hash =\n" +
-    "				substring(current_row.data from 57 for 8) ||\n" +
-    "				substring(current_row.data from 49 for 8) ||\n" +
-    "				substring(current_row.data from 41 for 8) ||\n" +
-    "				substring(current_row.data from 33 for 8);\n" +
-    "			select * into current_row from " + config.dbNodesTableName + " where hash = current_hash;\n" +
-    "			if not found then\n" +
-    "				raise EXCEPTION 'Hash % not found', current_hash;\n" +
-    "			end if;\n" +
-    "			return next current_row;\n" +
-    "			return;\n" +
-
-    "		else\n" +
-    "			raise EXCEPTION 'Hash % got invalid 9th field element data=%', current_hash, current_row.data;\n" +
-    "		end case;\n" +
-			
-    "	end loop;\n" +
-
-    "	return;\n" +
-    "end;$$\n";
-        
-    DatabaseConnection * pDatabaseConnection = getConnection();
-    
-    try
-    {
-#ifdef DATABASE_COMMIT
-        if (autoCommit)
-#endif
-        {
-            pqxx::work w(*(pDatabaseConnection->pConnection));
-            pqxx::result res = w.exec(query);
-            w.commit();
-        }
-#ifdef DATABASE_COMMIT
-        else
-        {
-            if (transaction == NULL)
-                transaction = new pqxx::work{*pConnectionWrite};
-            pqxx::result res = transaction->exec(query);
-        }
-#endif
-    }
-    catch (const std::exception &e)
-    {
-        zklog.error("Database64::writeGetTreeFunction() exception: " + string(e.what()) + " connection=" + to_string((uint64_t)pDatabaseConnection));
-        result = ZKR_DB_ERROR;
-        queryFailed();
-    }
-    
-    disposeConnection(pDatabaseConnection);
-
-    zklog.info("Database64::writeGetTreeFunction() returns " + zkresult2string(result));
-        
-    return result;
-}
-
-zkresult Database64::setProgram (const string &_key, const vector<uint8_t> &data, const bool persistent)
+zkresult Database64::setProgram (const string &key, const vector<uint8_t> &data, const bool persistent)
 {
     // Check that it has been initialized before
     if (!bInitialized)
@@ -1146,43 +133,18 @@ zkresult Database64::setProgram (const string &_key, const vector<uint8_t> &data
         exitProcess();
     }
 
-    zkresult r;
-
-    // Normalize key format
-    string key = NormalizeToNFormat(_key, 64);
-    key = stringToLower(key);
-
-    if ( useRemoteDB
-#ifdef DATABASE_USE_CACHE
-         && persistent
-#endif
-         )
+    string program;
+    ba2ba(data, program);
+    zkresult zkr = HeaderPage::WriteProgram(headerPage, string2ba(key), program);
+    if (zkr != ZKR_SUCCESS)
     {
-        string sData = "";
-        for (uint64_t i=0; i<data.size(); i++)
-        {
-            sData += byte2string(data[i]);
-        }
-
-        r = writeRemote(true, key, sData);
+        zklog.error("Database64::setProgram() failed calling HeaderPage::WriteProgram() result=" + zkresult2string(zkr));
     }
-    else
-    {
-        r = ZKR_SUCCESS;
-    }
-
-#ifdef DATABASE_USE_CACHE
-    if ((r == ZKR_SUCCESS) && (dbProgramCache.enabled()))
-    {
-        // Create in memory cache
-        dbProgramCache.add(key, data, false);
-    }
-#endif
 
 #ifdef LOG_DB_WRITE
     {
         string s = "Database64::setProgram()";
-        if (r != ZKR_SUCCESS)
+        if (zkr != ZKR_SUCCESS)
             s += " ERROR=" + zkresult2string(r);
         s += " key=" + key;
         s += " data=";
@@ -1194,10 +156,10 @@ zkresult Database64::setProgram (const string &_key, const vector<uint8_t> &data
     }
 #endif
 
-    return r;
+    return zkr;
 }
 
-zkresult Database64::getProgram(const string &_key, vector<uint8_t> &data, DatabaseMap *dbReadLog)
+zkresult Database64::getProgram(const string &key, vector<uint8_t> &data, DatabaseMap *dbReadLog)
 {
     // Check that it has been initialized before
     if (!bInitialized)
@@ -1206,64 +168,25 @@ zkresult Database64::getProgram(const string &_key, vector<uint8_t> &data, Datab
         exitProcess();
     }
 
-    zkresult r;
-
     struct timeval t;
     if (dbReadLog != NULL) gettimeofday(&t, NULL);
 
-    // Normalize key format
-    string key = NormalizeToNFormat(_key, 64);
-    key = stringToLower(key);
-
-#ifdef DATABASE_USE_CACHE
-    // If the key is found in local database (cached) simply return it
-    if (dbProgramCache.enabled() && dbProgramCache.find(key, data))
+    string program;
+    zkresult zkr = HeaderPage::ReadProgram(headerPage, string2ba(key), program);
+    if (zkr != ZKR_SUCCESS)
     {
-        // Add to the read log
-        if (dbReadLog != NULL) dbReadLog->add(key, data, true, TimeDiff(t));
-
-        r = ZKR_SUCCESS;
-    }
-    // If the key is pending to be stored on database, but already deleted from cache
-    else if (config.dbMultiWrite && multiWrite.findProgram(key, data))
-    {
-        // Add to the read log
-        if (dbReadLog != NULL) dbReadLog->add(key, data, true, TimeDiff(t));
-
-        r = ZKR_SUCCESS;
-    }
-    else
-#endif
-    if (useRemoteDB)
-    {
-        // Otherwise, read it remotelly
-        string sData;
-        r = readRemote(true, key, sData);
-        if (r == ZKR_SUCCESS)
-        {
-            //String to byte/uint8_t vector
-            string2ba(sData, data);
-
-#ifdef DATABASE_USE_CACHE
-            // Store it locally to avoid any future remote access for this key
-            if (dbProgramCache.enabled()) dbProgramCache.add(key, data, false);
-#endif
-
-            // Add to the read log
-            if (dbReadLog != NULL) dbReadLog->add(key, data, false, TimeDiff(t));
-        }
+        zklog.error("Database64::getProgram() failed calling HeaderPage::ReadProgram() result=" + zkresult2string(zkr));
     }
     else
     {
-        zklog.error("Database64::getProgram() requested a key that does not exist: " + key);
-        r = ZKR_DB_KEY_NOT_FOUND;
+        ba2ba(program, data);
     }
 
 #ifdef LOG_DB_READ
     {
         string s = "Database64::getProgram()";
-        if (r != ZKR_SUCCESS)
-            s += " ERROR=" + zkresult2string(r);
+        if (zkr != ZKR_SUCCESS)
+            s += " ERROR=" + zkresult2string(zkr);
         s += " key=" + key;
         s += " data=";
         for (uint64_t i = 0; (i < (data.size()) && (i < 100)); i++)
@@ -1273,11 +196,12 @@ zkresult Database64::getProgram(const string &_key, vector<uint8_t> &data, Datab
     }
 #endif
 
-    return r;
+    return zkr;
 }
     
 zkresult Database64::flush(uint64_t &thisBatch, uint64_t &lastSentBatch)
 {
+    #if 0
     if (!config.dbMultiWrite)
     {
         return ZKR_SUCCESS;
@@ -1313,30 +237,13 @@ zkresult Database64::flush(uint64_t &thisBatch, uint64_t &lastSentBatch)
     sem_post(&senderSem);
 
     multiWrite.Unlock();
-    return ZKR_SUCCESS;
-}
-
-void Database64::semiFlush (void)
-{
-    if (!config.dbMultiWrite)
-    {
-        return;
-    }
-
-    multiWrite.Lock();
-
-    multiWrite.data[multiWrite.pendingToFlushDataIndex].acceptIntray();
-
-#ifdef LOG_DB_SEMI_FLUSH
-    zklog.info("Database64::semiFlush() called multiWrite=[" + multiWrite.print() + "]");
 #endif
-
-    multiWrite.Unlock();
+    return ZKR_SUCCESS;
 }
 
 zkresult Database64::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram)
 {
-    multiWrite.Lock();
+    /*multiWrite.Lock();
     storedFlushId = multiWrite.storedFlushId;
     storingFlushId = multiWrite.storingFlushId;
     lastFlushId = multiWrite.lastFlushId;
@@ -1344,233 +251,16 @@ zkresult Database64::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFl
     pendingToFlushProgram = multiWrite.data[multiWrite.pendingToFlushDataIndex].program.size();
     storingNodes = multiWrite.data[multiWrite.storingDataIndex].nodes.size();
     storingProgram = multiWrite.data[multiWrite.storingDataIndex].program.size();
-    multiWrite.Unlock();
+    multiWrite.Unlock();*/
+
     return ZKR_SUCCESS;
 }
 
-zkresult Database64::sendData (void)
-{
-    zkresult zkr = ZKR_SUCCESS;
-    
-    // Time calculation variables
-    struct timeval t;
-    uint64_t timeDiff = 0;
-    uint64_t fields = 0;
-
-    // Select proper data instance
-    MultiWriteData64 &data = multiWrite.data[multiWrite.storingDataIndex];
-
-    // Check if there is data
-    if (data.IsEmpty())
-    {
-        zklog.warning("Database64::sendData() called with empty data");
-        return ZKR_SUCCESS;
-    }
-
-    // Check if it has already been stored to database
-    if (data.stored)
-    {
-        zklog.warning("Database64::sendData() called with stored=true");
-        return ZKR_SUCCESS;
-    }
-
-    // Get a free write db connection
-    DatabaseConnection * pDatabaseConnection = getConnection();
-
-    try
-    {
-        if (config.dbMetrics) gettimeofday(&t, NULL);
-        unordered_map<string, string>::const_iterator it;
-        if (data.multiQuery.isEmpty())
-        {
-            // Current query number
-            uint64_t currentQuery = 0;
-            bool firstValue = false;
-
-            // If there are nodes add the corresponding query
-            if (data.nodes.size() > 0)
-            {
-                it = data.nodes.begin();
-                while (it != data.nodes.end())
-                {
-                    // If queries is empty or last query is full, add a new query
-                    if ( (data.multiQuery.queries.size() == 0) || (data.multiQuery.queries[currentQuery].full))
-                    {
-                        SingleQuery query;
-                        data.multiQuery.queries.emplace_back(query);
-                        currentQuery = data.multiQuery.queries.size() - 1;
-                    }
-
-                    data.multiQuery.queries[currentQuery].query += "INSERT INTO " + config.dbNodesTableName + " ( hash, data ) VALUES ";
-                    firstValue = true;
-                    for (; it != data.nodes.end(); it++)
-                    {
-                        if (!firstValue)
-                        {
-                            data.multiQuery.queries[currentQuery].query += ", ";
-                        }
-                        firstValue = false;
-                        data.multiQuery.queries[currentQuery].query += "( E\'\\\\x" + it->first + "\', E\'\\\\x" + it->second + "\' ) ";
-#ifdef LOG_DB_SEND_DATA
-                        zklog.info("Database64::sendData() inserting node key=" + it->first + " value=" + it->second);
-#endif
-                        if (data.multiQuery.queries[currentQuery].query.size() >= config.dbMultiWriteSingleQuerySize)
-                        {
-                            // Mark query as full
-                            data.multiQuery.queries[currentQuery].full = true;
-                            break;
-                        }
-                    }
-                    data.multiQuery.queries[currentQuery].query += " ON CONFLICT (hash) DO NOTHING;";
-                }
-            }
-
-            // If there are program add the corresponding query
-            if (data.program.size() > 0)
-            {
-                it = data.program.begin();
-                while (it != data.program.end())
-                {
-                    // If queries is empty or last query is full, add a new query
-                    if ( (data.multiQuery.queries.size() == 0) || (data.multiQuery.queries[currentQuery].full))
-                    {
-                        SingleQuery query;
-                        data.multiQuery.queries.emplace_back(query);
-                        currentQuery = data.multiQuery.queries.size() - 1;
-                    }
-
-                    data.multiQuery.queries[currentQuery].query += "INSERT INTO " + config.dbProgramTableName + " ( hash, data ) VALUES ";
-                    firstValue = true;
-                    for (; it != data.program.end(); it++)
-                    {
-                        if (!firstValue)
-                        {
-                            data.multiQuery.queries[currentQuery].query += ", ";
-                        }
-                        firstValue = false;
-                        data.multiQuery.queries[currentQuery].query += "( E\'\\\\x" + it->first + "\', E\'\\\\x" + it->second + "\' ) ";
-#ifdef LOG_DB_SEND_DATA
-                        zklog.info("Database64::sendData() inserting program key=" + it->first + " value=" + it->second);
-#endif
-                        if (data.multiQuery.queries[currentQuery].query.size() >= config.dbMultiWriteSingleQuerySize)
-                        {
-                            // Mark query as full
-                            data.multiQuery.queries[currentQuery].full = true;
-                            break;
-                        }
-                    }
-                    data.multiQuery.queries[currentQuery].query += " ON CONFLICT (hash) DO NOTHING;";
-                }
-            }
-
-            // If there is a nodes state root query, add it
-            if (data.nodesStateRoot.size() > 0)
-            {
-                // If queries is empty or last query is full, add a new query
-                if ( (data.multiQuery.queries.size() == 0) || (data.multiQuery.queries[currentQuery].full))
-                {
-                    SingleQuery query;
-                    data.multiQuery.queries.emplace_back(query);
-                    currentQuery = data.multiQuery.queries.size() - 1;
-                }
-
-                data.multiQuery.queries[currentQuery].query += "UPDATE " + config.dbNodesTableName + " SET data = E\'\\\\x" + data.nodesStateRoot + "\' WHERE hash = E\'\\\\x" + dbStateRootKey + "\';";
-
-                // Mark query as full
-                data.multiQuery.queries[currentQuery].full = true;
-#ifdef LOG_DB_SEND_DATA
-                zklog.info("Database64::sendData() inserting root=" + data.nodesStateRoot);
-#endif
-            }
-        }
-
-        if (data.multiQuery.isEmpty())
-        {
-            zklog.warning("Database64::sendData() called without any data to send");
-            data.stored = true;
-        }
-        else
-        {
-            if (config.dbMetrics)
-            {
-                fields = data.nodes.size() + data.program.size() + (data.nodesStateRoot.size() > 0 ? 1 : 0);
-                zklog.info("Database64::sendData() dbMetrics multiWrite nodes=" + to_string(data.nodes.size()) +
-                    " program=" + to_string(data.program.size()) +
-                    " nodesStateRootCounter=" + to_string(data.nodesStateRoot.size() > 0 ? 1 : 0) +
-                    " query.size=" + to_string(data.multiQuery.size()) + "B=" + to_string(data.multiQuery.size()/zkmax(fields,1)) + "B/field" +
-                    " queries.size=" + to_string(data.multiQuery.queries.size()) +
-                    " total=" + to_string(fields) + "fields");
-            }
-
-            // Send all unsent queries to database
-            for (uint64_t i=0; i<data.multiQuery.queries.size(); i++)
-            {
-                // Skip sent queries
-                if (data.multiQuery.queries[i].sent)
-                {
-                    continue;
-                }
-
-                // Start a transaction
-                pqxx::work w(*(pDatabaseConnection->pConnection));
-
-                // Execute the query
-                pqxx::result res = w.exec(data.multiQuery.queries[i].query);
-
-                // Commit your transaction
-                w.commit();
-
-                // Mask as sent
-                data.multiQuery.queries[i].sent = true;
-            }
-
-            //zklog.info("Database64::flush() sent query=" + query);
-            if (config.dbMetrics)
-            {
-                timeDiff = TimeDiff(t);
-                zklog.info("Database64::sendData() dbMetrics multiWrite total=" + to_string(fields) + "fields=" + to_string(timeDiff) + "us=" + to_string(timeDiff/zkmax(fields,1)) + "us/field");
-            }
-
-#ifdef LOG_DB_WRITE_QUERY
-            {
-                string query;
-                for (uint64_t i=0; i<data.multiQuery.queries.size(); i++)
-                {
-                    query += data.multiQuery.queries[i].query;
-                }
-                zklog.info("Database64::sendData() write query=" + query);
-            }
-#endif
-#ifdef LOG_DB_SEND_DATA
-            zklog.info("Database64::sendData() successfully processed query of size= " + to_string(data.multiQuery.size()));
-#endif
-            // Update status
-            data.multiQuery.reset();
-            data.stored = true;
-        }
-
-        // If we succeeded, update last sent batch
-        multiWrite.Lock();
-        multiWrite.storedFlushId = multiWrite.storingFlushId;
-        multiWrite.Unlock();
-    }
-    catch (const std::exception &e)
-    {
-        zklog.error("Database64::sendData() execute query exception: " + string(e.what()));
-        zklog.error("Database64::sendData() query.size=" + to_string(data.multiQuery.queries.size()) + (data.multiQuery.isEmpty() ? "" : (" query(<1024)=" + data.multiQuery.queries[0].query.substr(0, 1024))));
-        queryFailed();
-        zkr = ZKR_DB_ERROR;
-    }
-
-    // Dispose the write db connection
-    disposeConnection(pDatabaseConnection);
-
-    return zkr;
-}
 
 // Get flush data, written to database by dbSenderThread; it blocks
 zkresult Database64::getFlushData(uint64_t flushId, uint64_t &storedFlushId, unordered_map<string, string> (&nodes), unordered_map<string, string> (&program), string &nodesStateRoot)
 {
+#if 0
     //zklog.info("--> getFlushData()");
 
     // Set the deadline to now + 60 seconds
@@ -1615,133 +305,16 @@ zkresult Database64::getFlushData(uint64_t flushId, uint64_t &storedFlushId, uno
     multiWrite.Unlock();
 
     //zklog.info("<-- getFlushData()");
+#endif
 
     return ZKR_SUCCESS;
 }
 
-#ifdef DATABASE_COMMIT
-
-void Database64::setAutoCommit(const bool ac)
-{
-    if (ac && !autoCommit)
-        commit();
-    autoCommit = ac;
-}
-
-void Database64::commit()
-{
-    if ((!autoCommit) && (transaction != NULL))
-    {
-        transaction->commit();
-        delete transaction;
-        transaction = NULL;
-    }
-}
-
-#endif
-
-void Database64::printTree(const string &root, string prefix)
-{
-    if (prefix == "")
-    {
-        zklog.info("Printint tree of root=" + root);
-    }
-    string key = root;
-    vector<Goldilocks::Element> value;
-    Goldilocks::Element vKey[4];
-    if(Database64::useAssociativeCache) string2key(fr, key, vKey);  
-    read(key,vKey,value, NULL);
-
-    if (value.size() != 12)
-    {
-        zklog.error("Database64::printTree() found value.size()=" + to_string(value.size()));
-        return;
-    }
-    if (!fr.equal(value[11], fr.zero()))
-    {
-        zklog.error("Database64::printTree() found value[11]=" + fr.toString(value[11], 16));
-        return;
-    }
-    if (!fr.equal(value[10], fr.zero()))
-    {
-        zklog.error("Database64::printTree() found value[10]=" + fr.toString(value[10], 16));
-        return;
-    }
-    if (!fr.equal(value[9], fr.zero()))
-    {
-        zklog.error("Database64::printTree() found value[9]=" + fr.toString(value[9], 16));
-        return;
-    }
-    if (fr.equal(value[8], fr.zero())) // Intermediate node
-    {
-        string leftKey = fea2string(fr, value[0], value[1], value[2], value[3]);
-        zklog.info(prefix + "Intermediate node - left hash=" + leftKey);
-        if (leftKey != "0")
-            printTree(leftKey, prefix + "  ");
-        string rightKey = fea2string(fr, value[4], value[5], value[6], value[7]);
-        zklog.info(prefix + "Intermediate node - right hash=" + rightKey);
-        if (rightKey != "0")
-            printTree(rightKey, prefix + "  ");
-    }
-    else if (fr.equal(value[8], fr.one())) // Leaf node
-    {
-        string rKey = fea2string(fr, value[0], value[1], value[2], value[3]);
-        zklog.info(prefix + "rKey=" + rKey);
-        string hashValue = fea2string(fr, value[4], value[5], value[6], value[7]);
-        zklog.info(prefix + "hashValue=" + hashValue);
-        vector<Goldilocks::Element> leafValue;
-        Goldilocks::Element vKey[4]={value[4],value[5],value[6],value[7]};
-        read(rKey, vKey, leafValue, NULL);
-        if (leafValue.size() == 12)
-        {
-            if (!fr.equal(leafValue[8], fr.zero()))
-            {
-                zklog.error("Database64::printTree() found leafValue[8]=" + fr.toString(leafValue[8], 16));
-                return;
-            }
-            if (!fr.equal(leafValue[9], fr.zero()))
-            {
-                zklog.error("Database64::printTree() found leafValue[9]=" + fr.toString(leafValue[9], 16));
-                return;
-            }
-            if (!fr.equal(leafValue[10], fr.zero()))
-            {
-                zklog.error("Database64::printTree() found leafValue[10]=" + fr.toString(leafValue[10], 16));
-                return;
-            }
-            if (!fr.equal(leafValue[11], fr.zero()))
-            {
-                zklog.error("Database64::printTree() found leafValue[11]=" + fr.toString(leafValue[11], 16));
-                return;
-            }
-        }
-        else if (leafValue.size() == 8)
-        {
-            zklog.info(prefix + "leafValue.size()=" + to_string(leafValue.size()));
-        }
-        else
-        {
-            zklog.error("Database64::printTree() found lleafValue.size()=" + to_string(leafValue.size()));
-            return;
-        }
-        mpz_class scalarValue;
-        fea2scalar(fr, scalarValue, leafValue[0], leafValue[1], leafValue[2], leafValue[3], leafValue[4], leafValue[5], leafValue[6], leafValue[7]);
-        zklog.info(prefix + "leafValue=" + PrependZeros(scalarValue.get_str(16), 64));
-    }
-    else
-    {
-        zklog.error("Database64::printTree() found value[8]=" + fr.toString(value[8], 16));
-        return;
-    }
-    if (prefix == "") zklog.info("");
-}
-
 void Database64::clearCache (void)
 {
-    dbMTCache.clear();
-    dbProgramCache.clear();
 }
 
+#if 0
 void *dbSenderThread64 (void *arg)
 {
     Database64 *pDatabase = (Database64 *)arg;
@@ -1856,259 +429,564 @@ void *dbSenderThread64 (void *arg)
     zklog.info("dbSenderThread64() done");
     return NULL;
 }
+#endif
 
-void *dbCacheSynchThread64 (void *arg)
+zkresult Database64::consolidateBlock (uint64_t blockNumber)
 {
-    Database *pDatabase = (Database *)arg;
-    zklog.info("dbCacheSynchThread64() started");
-
-    uint64_t storedFlushId = 0;
-
-    Config config = pDatabase->config;
-    config.hashDBURL = config.dbCacheSynchURL;
-
-    while (true)
-    {
-        HashDBInterface *pHashDBRemote = new HashDBRemote (pDatabase->fr, config);
-        if (pHashDBRemote == NULL)
-        {
-            zklog.error("dbCacheSynchThread64() failed calling new HashDBRemote()");
-            sleep(10);
-            continue;
-        }
-
-        while (true)
-        {
-            unordered_map<string, string> nodes;
-            unordered_map<string, string> program;
-            string nodesStateRoot;
-            
-            // Call getFlushData() remotelly
-            zkresult zkr = pHashDBRemote->getFlushData(storedFlushId, storedFlushId, nodes, program, nodesStateRoot);
-            if (zkr != ZKR_SUCCESS)
-            {
-                zklog.error("dbCacheSynchThread64() failed calling pHashDB->getFlushData() result=" + zkresult2string(zkr));
-                sleep(10);
-                break;
-            }
-
-            if (nodes.size()==0 && program.size()==0 && nodesStateRoot.size()==0)
-            {
-                zklog.info("dbCacheSynchThread64() called getFlushData() remotely and got no data: storedFlushId=" + to_string(storedFlushId));
-                continue;
-            }
-
-            TimerStart(DATABASE_CACHE_SYNCH);
-            zklog.info("dbCacheSynchThread64() called getFlushData() remotely and got: storedFlushId=" + to_string(storedFlushId) + " nodes=" + to_string(nodes.size()) + " program=" + to_string(program.size()) + " nodesStateRoot=" + nodesStateRoot);
-
-            // Save nodes to cache
-            unordered_map<string, string>::const_iterator it;
-            if (nodes.size() > 0)
-            {
-                for (it = nodes.begin(); it != nodes.end(); it++)
-                {
-                    vector<Goldilocks::Element> value;
-                    string2fea(pDatabase->fr, it->second, value);
-                    pDatabase->write(it->first, NULL, value, false);
-                }
-            }
-
-            // Save program to cache
-            if (program.size() > 0)
-            {
-                for (it = program.begin(); it != program.end(); it++)
-                {
-                    vector<uint8_t> value;
-                    string2ba(it->second, value);
-                    pDatabase->setProgram(it->first, value, false);
-                }
-            }
-
-            /* TODO: We cannot overwrite state root to DB.  Do we need to update cache?
-            if (nodesStateRoot.size() > 0)
-            {
-                vector<Goldilocks::Element> value;
-                string2fea(pDatabase->fr, nodesStateRoot, value);
-                if (value.size() < 4)
-                {
-                    zklog.error("dbCacheSynchThread() got nodeStateRoot too short=" + nodesStateRoot);
-                }
-                else
-                {
-                    Goldilocks::Element stateRoot[4];
-                    for (uint64_t i=0; i<4; i++)
-                    {
-                        stateRoot[i] = value[i];
-                    }
-                    pDatabase->updateStateRoot(stateRoot);
-                }
-            }*/
-
-            TimerStopAndLog(DATABASE_CACHE_SYNCH);
-        }
-        delete pHashDBRemote;
-    }
-
-    zklog.info("dbCacheSynchThread64() done");
-    return NULL;
+    return ZKR_UNSPECIFIED;
 }
 
-void loadDb2MemCache64 (const Config &config)
+zkresult Database64::revertBlock (uint64_t blockNumber)
 {
-    if (config.databaseURL == "local")
+    return ZKR_UNSPECIFIED;
+}
+
+zkresult Database64::WriteTree (const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> &_keyValues, Goldilocks::Element (&newRoot)[4], const bool persistent)
+{
+    zkresult zkr;
+
+    //HeaderPage::Print(headerPage, true);
+
+    vector<KeyValue> keyValues(_keyValues);
+
+    vector<TreeChunk *> chunks;
+    vector<DB64Query> dbQueries;
+
+    // Tree level; we start at level 0, then we increase it 6 by 6
+    uint64_t level = 0;
+
+    // Create the first tree chunk (the root one), and store it in chunks[0]
+    TreeChunk *c = new TreeChunk(*this, poseidon);
+    if (c == NULL)
     {
-        zklog.error("loadDb2MemCache64() called with config.databaseURL==local");
+        zklog.error("Database64::WriteTree() failed calling new TreeChunk()");
         exitProcess();
     }
+    chunks.push_back(c);
 
-#ifdef DATABASE_USE_CACHE
+    uint64_t chunksProcessed = 0;
 
-    TimerStart(LOAD_DB_TO_CACHE);
+    // Get the old root as a string
+    string oldRootString = fea2string(fr, oldRoot);
 
-    Goldilocks fr;
-    HashDB * pHashDB = (HashDB *)hashDBSingleton.get();
+    uint64_t currentVersion = HeaderPage::GetLastVersion(headerPage);
+    uint64_t version = currentVersion + 1;
+    HeaderPage::SetLastVersion(headerPage, version);
+    HeaderPage::Print(headerPage, false);
 
-    vector<Goldilocks::Element> dbValue;
-    zkresult zkr = pHashDB->db.read(Database64::dbStateRootKey, Database64::dbStateRootvKey, dbValue, NULL, true);
-
-    if (zkr == ZKR_DB_KEY_NOT_FOUND)
+    // If old root is zero, init chunks[0] as an empty tree chunk
+    if (fr.isZero(oldRoot[0]) && fr.isZero(oldRoot[1]) && fr.isZero(oldRoot[2]) && fr.isZero(oldRoot[3]))
     {
-        zklog.warning("loadDb2MemCache64() dbStateRootKey=" +  Database64::dbStateRootKey + " not found in database; normal only if database is empty");
-        TimerStopAndLog(LOAD_DB_TO_CACHE);
-        return;
+        chunks[0]->resetToZero(level);
+        //currentVersion = 0;
     }
-    else if (zkr != ZKR_SUCCESS)
+    else
     {
-        zklog.error("loadDb2MemCache64() failed calling db.read result=" + zkresult2string(zkr));
-        TimerStopAndLog(LOAD_DB_TO_CACHE);
-        return;
-    }
-    
-    string stateRootKey = fea2string(fr, dbValue[0], dbValue[1], dbValue[2], dbValue[3]);
-    zklog.info("loadDb2MemCache64() found state root=" + stateRootKey);
-
-    if (stateRootKey == "0")
-    {
-        zklog.warning("loadDb2MemCache64() found an empty tree");
-        TimerStopAndLog(LOAD_DB_TO_CACHE);
-        return;
+        DB64Query dbQuery(oldRootString, oldRoot, chunks[0]->data);
+        dbQueries.push_back(dbQuery);
     }
 
-    struct timeval loadCacheStartTime;
-    gettimeofday(&loadCacheStartTime, NULL);
-
-    unordered_map<uint64_t, vector<string>> treeMap;
-    vector<string> emptyVector;
-    string hash, leftHash, rightHash;
-    uint64_t counter = 0;
-
-    treeMap[0] = emptyVector;
-    treeMap[0].push_back(stateRootKey);
-    unordered_map<uint64_t, std::vector<std::string>>::iterator treeMapIterator;
-    for (uint64_t level=0; level<256; level++)
+    // Copy the key values list into the root tree chunk
+    uint64_t keyValuesSize = keyValues.size();
+    c->list.reserve(keyValuesSize);
+    for (uint64_t i=0; i<keyValuesSize; i++)
     {
-        // Spend only 10 seconds
-        if (TimeDiff(loadCacheStartTime) > config.loadDBToMemTimeout)
+        c->list.emplace_back(i);
+    }
+
+    while (chunksProcessed < chunks.size())
+    {
+        /*zkr = db.read(dbQueries);
+        if (zkr != ZKR_SUCCESS)
         {
-            break;
+            zklog.error("Database64::WriteTree() failed calling db.multiRead() result=" + zkresult2string(zkr));
+            for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
+            return zkr;
         }
+        dbQueries.clear();*/
 
-        treeMapIterator = treeMap.find(level);
-        if (treeMapIterator == treeMap.end())
+        int chunksToProcess = chunks.size();
+
+        for (int i=chunksProcessed; i<chunksToProcess; i++)
         {
-            break;
-        }
-
-        if (treeMapIterator->second.size()==0)
-        {
-            break;
-        }
-
-        treeMap[level+1] = emptyVector;
-
-        //zklog.info("loadDb2MemCache() searching at level=" + to_string(level) + " for elements=" + to_string(treeMapIterator->second.size()));
-        
-        for (uint64_t i=0; i<treeMapIterator->second.size(); i++)
-        {
-            // Spend only 10 seconds
-            if (TimeDiff(loadCacheStartTime) > config.loadDBToMemTimeout)
+            chunks[i]->setLevel(level);
+            if (chunks[i]->data.size() > 0)
             {
-                break;
+                zkr = chunks[i]->data2children();
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("Database64::WriteTree() failed calling chunks[i]->data2children() result=" + zkresult2string(zkr));
+                    return zkr;
+                }
             }
+            for (uint64_t j=0; j<chunks[i]->list.size(); j++)
+            {
+                bool keyBits[256];
+                splitKey(fr, keyValues[chunks[i]->list[j]].key, keyBits);
+                uint64_t k = getKeyChildren64Position(keyBits, level);
+                switch (chunks[i]->getChild(k).type)
+                {
+                    case ZERO:
+                    {
+                        if (keyValues[chunks[i]->list[j]].value != 0)
+                        {
+                            chunks[i]->setLeafChild(k, keyValues[chunks[i]->list[j]].key, keyValues[chunks[i]->list[j]].value);                  
+                        }
+                        break;
+                    }
+                    case LEAF:
+                    {
+                        // If the key is the same, then check the value
+                        if (fr.equal(chunks[i]->getChild(k).leaf.key[0], keyValues[chunks[i]->list[j]].key[0]) &&
+                            fr.equal(chunks[i]->getChild(k).leaf.key[1], keyValues[chunks[i]->list[j]].key[1]) &&
+                            fr.equal(chunks[i]->getChild(k).leaf.key[2], keyValues[chunks[i]->list[j]].key[2]) &&
+                            fr.equal(chunks[i]->getChild(k).leaf.key[3], keyValues[chunks[i]->list[j]].key[3]))
+                        {
+                            // If value is different, copy it
+                            if (chunks[i]->getChild(k).leaf.value != keyValues[chunks[i]->list[j]].value)
+                            {
+                                if (keyValues[chunks[i]->list[j]].value == 0)
+                                {
+                                    chunks[i]->setZeroChild(k);
+                                }
+                                else
+                                {
+                                    chunks[i]->setLeafChild(k, keyValues[chunks[i]->list[j]].key, keyValues[chunks[i]->list[j]].value);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // We create a new trunk
+                            TreeChunk *c = new TreeChunk(*this, poseidon);
+                            if (c == NULL)
+                            {
+                                zklog.error("Database64::WriteTree() failed calling new TreeChunk()");
+                                exitProcess();
+                            }
 
-            hash = treeMapIterator->second[i];
-            dbValue.clear();
-            Goldilocks::Element vhash[4];
-            if(pHashDB->db.usingAssociativeCache()) string2key(fr, hash, vhash);
-            zkresult zkr = pHashDB->db.read(hash, vhash, dbValue, NULL, true);
+                            // Reset to zero
+                            c->resetToZero(level + 6);
 
+                            // We create a KeyValue from the original leaf node
+                            KeyValue kv;
+                            kv.key[0] = chunks[i]->getChild(k).leaf.key[0];
+                            kv.key[1] = chunks[i]->getChild(k).leaf.key[1];
+                            kv.key[2] = chunks[i]->getChild(k).leaf.key[2];
+                            kv.key[3] = chunks[i]->getChild(k).leaf.key[3];
+                            kv.value = chunks[i]->getChild(k).leaf.value;
+
+                            // We add to the list the original leaf node
+                            keyValues.emplace_back(kv);
+                            c->list.emplace_back(keyValues.size()-1);
+
+                            // We add to the list the new key-value
+                            c->list.emplace_back(chunks[i]->list[j]);
+
+                            int cId = chunks.size();
+                            chunks.push_back(c);
+                            chunks[i]->setTreeChunkChild(k, cId);
+                        }
+                        break;
+                    }
+                    case TREE_CHUNK:
+                    {
+                        // Simply add it to the list of the descendant tree chunk
+                        chunks[chunks[i]->getChild(k).treeChunkId]->list.push_back(chunks[i]->list[j]);
+
+                        break;
+                    }
+                    // If this is an intermediate node, then create the corresponding tree chunk
+                    case INTERMEDIATE:
+                    {
+                        // We create a new trunk
+                        TreeChunk *c = new TreeChunk(*this, poseidon);
+                        if (c == NULL)
+                        {
+                            zklog.error("Database64::WriteTree() failed calling new TreeChunk()");
+                            exitProcess();
+                        }
+                        c->setLevel(level + 6);
+                        
+                        // Create a new query to populate this tree chunk from database
+                        DB64Query dbQuery(fea2string(fr, chunks[i]->getChild(k).intermediate.hash),
+                                        chunks[i]->getChild(k).intermediate.hash,
+                                        c->data);
+                        dbQueries.push_back(dbQuery);
+
+                        // Add the requested key-value to the new tree chunk list
+                        c->list.push_back(chunks[i]->list[j]);
+                        int cId = chunks.size();
+                        chunks.push_back(c);
+                        chunks[i]->setTreeChunkChild(k, cId);
+
+                        break;
+                    }
+                    default:
+                    {
+                        zklog.error("Database64::WriteTree() found invalid chunks[i]->getChild(k).type=" + to_string(chunks[i]->getChild(k).type));
+                        exitProcess();
+                    }
+                }
+            }
+        }
+
+        chunksProcessed = chunksToProcess;
+        level += 6;
+    }
+
+    dbQueries.clear();
+
+    // Calculate the new root hash of the whole tree
+    Child result;
+    zkr = CalculateHash(result, chunks, dbQueries, 0, 0, NULL);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("Database64::WriteTree() failed calling calculateHash() result=" + zkresult2string(zkr));
+        for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
+        return zkr;
+    }
+
+    // Based on the result, calculate the new root hash
+    if (result.type == LEAF)
+    {
+        newRoot[0] = result.leaf.hash[0];
+        newRoot[1] = result.leaf.hash[1];
+        newRoot[2] = result.leaf.hash[2];
+        newRoot[3] = result.leaf.hash[3];
+        string newRootString = fea2string(fr, newRoot);
+
+        if (!chunks[0]->getDataValid())
+        {
+            zkr = chunks[0]->children2data();
             if (zkr != ZKR_SUCCESS)
             {
-                zklog.error("loadDb2MemCache64() failed calling db.read(" + hash + ") result=" + zkresult2string(zkr));
-                TimerStopAndLog(LOAD_DB_TO_CACHE);
-                return;
+                zklog.error("Database64::WriteTree() failed calling chunks[0]->children2data() result=" + zkresult2string(zkr));
+                for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
+                return zkr;
             }
-            if (dbValue.size() != 12)
+            DB64Query dbQuery(newRootString, newRoot, chunks[0]->data);
+            dbQueries.push_back(dbQuery);
+        }
+    }
+    else if (result.type == INTERMEDIATE)
+    {
+        newRoot[0] = result.intermediate.hash[0];
+        newRoot[1] = result.intermediate.hash[1];
+        newRoot[2] = result.intermediate.hash[2];
+        newRoot[3] = result.intermediate.hash[3];
+    }
+    else if (result.type == ZERO)
+    { 
+        newRoot[0] = fr.zero();
+        newRoot[1] = fr.zero();
+        newRoot[2] = fr.zero();
+        newRoot[3] = fr.zero();
+    }
+    else
+    {
+        zklog.error("Database64::WriteTree() found invalid result.type=" + to_string(result.type));
+        for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
+        return zkr;
+    }
+
+    // Save chunks data to database
+    //zkr = db.write(dbQueries, persistent);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("Database64::WriteTree() failed calling db.write() result=" + zkresult2string(zkr));
+        for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
+        return zkr;
+    }
+
+#ifdef SMT64_PRINT_TREE_CHUNKS
+    // Print chunks
+    for (uint c = 0; c < chunks.size(); c++)
+    {
+        zklog.info("Database64::WriteTree() chunk " + to_string(c));
+        chunks[c]->print();
+    }
+#endif
+
+    // Free memory
+    for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
+
+    return ZKR_SUCCESS;
+}
+
+zkresult Database64::CalculateHash (Child &result, vector<TreeChunk *> &chunks, vector<DB64Query> &dbQueries, int chunkId, int level, vector<HashValueGL> *hashValues)
+{
+    zkresult zkr;
+    vector<Child> results(64);
+
+    // Convert all TREE_CHUNK children into something else, typically INTERMEDIATE children,
+    // but they could also be LEAF (only one child below this level) or ZERO 9no children below this level)
+    for (uint64_t i=0; i<64; i++)
+    {
+        if (chunks[chunkId]->getChild(i).type == TREE_CHUNK)
+        {
+            CalculateHash(result, chunks, dbQueries, chunks[chunkId]->getChild(i).treeChunkId, level + 6, hashValues);
+            chunks[chunkId]->setChild(i, result);
+        }
+    }
+
+    // Calculate the hash of this chunk
+    zkr = chunks[chunkId]->calculateHash(hashValues);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("Database64::CalculateHash() failed calling chunks[chunkId]->calculateHash() result=" + zkresult2string(zkr));
+        return zkr;
+    }
+
+    // Copy the result child
+    result = chunks[chunkId]->getChild1();
+
+    // Add to the database queries
+    if (result.type != ZERO)
+    {
+        // Encode the 64 children into database format
+        zkr = chunks[chunkId]->children2data();
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("Database64::CalculateHash() failed calling chunks[chunkId]->children2data() result=" + zkresult2string(zkr));
+            return zkr;
+        }
+
+        Goldilocks::Element hash[4];
+        chunks[chunkId]->getHash(hash);
+        DB64Query dbQuery(fea2string(fr, hash), hash, chunks[chunkId]->data);
+        dbQueries.emplace_back(dbQuery);
+    }
+
+    return ZKR_SUCCESS;
+}
+
+zkresult Database64::ReadTree (const Goldilocks::Element (&root)[4], vector<KeyValue> &keyValues, vector<HashValueGL> *hashValues)
+{
+    zkresult zkr;
+
+    vector<TreeChunk *> chunks;
+    vector<DB64Query> dbQueries;
+
+    // Tree level; we start at level 0, then we increase it 6 by 6
+    uint64_t level = 0;
+
+    // Create the first tree chunk (the root one), and store it in chunks[0]
+    TreeChunk *c = new TreeChunk(*this, poseidon);
+    if (c == NULL)
+    {
+        zklog.error("Database64::ReadTree() failed calling new TreeChunk()");
+        exitProcess();
+    }
+    chunks.push_back(c);
+
+    uint64_t chunksProcessed = 0;
+
+    // Get the old root as a string
+    string rootString = fea2string(fr, root);
+
+    // If root is zero, return all values as zero
+    if (rootString == "0")
+    {
+        delete c;
+        for (uint64_t i=0; i<keyValues.size(); i++)
+        {
+            keyValues[i].value = 0;
+        }
+        return ZKR_SUCCESS;
+    }
+    else
+    {
+        DB64Query dbQuery(rootString, root, chunks[0]->data);
+        dbQueries.push_back(dbQuery);
+    }
+
+    // Copy the key values list into the root tree chunk
+    uint64_t keyValuesSize = keyValues.size();
+    c->list.reserve(keyValuesSize);
+    for (uint64_t i=0; i<keyValuesSize; i++)
+    {
+        c->list.emplace_back(i);
+    }
+
+    while (chunksProcessed < chunks.size())
+    {
+        //zkr = db.read(dbQueries);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("Database64::ReadTree() failed calling db.multiRead() result=" + zkresult2string(zkr));
+            for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
+            return zkr;
+        }
+        dbQueries.clear();
+
+        int chunksToProcess = chunks.size();
+
+        for (int i=chunksProcessed; i<chunksToProcess; i++)
+        {
+            chunks[i]->setLevel(level);
+            if (chunks[i]->data.size() > 0)
             {
-                zklog.error("loadDb2MemCache64() failed calling db.read(" + hash + ") dbValue.size()=" + to_string(dbValue.size()));
-                TimerStopAndLog(LOAD_DB_TO_CACHE);
-                return;
-            }
-            counter++;
-            if(Database64::dbMTCache.enabled()){
-                double sizePercentage = double(Database64::dbMTCache.getCurrentSize())*100.0/double(Database64::dbMTCache.getMaxSize());
-                if ( sizePercentage > 90 )
+                zkr = chunks[i]->data2children();
+                if (zkr != ZKR_SUCCESS)
                 {
-                    zklog.info("loadDb2MemCache64() stopping since size percentage=" + to_string(sizePercentage));
-                    break;
+                    zklog.error("Database64::ReadTree() failed calling chunks[i]->data2children() result=" + zkresult2string(zkr));
+                    return zkr;
                 }
             }
-            // If capaxity is X000
-            if (fr.isZero(dbValue[9]) && fr.isZero(dbValue[10]) && fr.isZero(dbValue[11]))
+            for (uint64_t j=0; j<chunks[i]->list.size(); j++)
             {
-                // If capacity is 0000, this is an intermediate node that contains left and right hashes of its children
-                if (fr.isZero(dbValue[8]))
+                bool keyBits[256];
+                splitKey(fr, keyValues[chunks[i]->list[j]].key, keyBits);
+                uint64_t k = getKeyChildren64Position(keyBits, level);
+                switch (chunks[i]->getChild(k).type)
                 {
-                    leftHash = fea2string(fr, dbValue[0], dbValue[1], dbValue[2], dbValue[3]);
-                    if (leftHash != "0")
+                    case ZERO:
                     {
-                        treeMap[level+1].push_back(leftHash);
-                        //zklog.info("loadDb2MemCache() level=" + to_string(level) + " found leftHash=" + leftHash);
-                    }
-                    rightHash = fea2string(fr, dbValue[4], dbValue[5], dbValue[6], dbValue[7]);
-                    if (rightHash != "0")
-                    {
-                        treeMap[level+1].push_back(rightHash);
-                        //zklog.info("loadDb2MemCache() level=" + to_string(level) + " found rightHash=" + rightHash);
-                    }
-                }
-                // If capacity is 1000, this is a leaf node that contains right hash of the value node
-                else if (fr.isOne(dbValue[8]))
-                {
-                    rightHash = fea2string(fr, dbValue[4], dbValue[5], dbValue[6], dbValue[7]);
-                    if (rightHash != "0")
-                    {
-                        //zklog.info("loadDb2MemCache() level=" + to_string(level) + " found value rightHash=" + rightHash);
-                        dbValue.clear();
-                        Goldilocks::Element vRightHash[4]={dbValue[4], dbValue[5], dbValue[6], dbValue[7]};
-                        zkresult zkr = pHashDB->db.read(rightHash, vRightHash, dbValue, NULL, true);
-                        if (zkr != ZKR_SUCCESS)
+                        for (uint64_t kv=0; kv<keyValues.size(); kv++)
                         {
-                            zklog.error("loadDb2MemCache64() failed calling db.read(" + rightHash + ") result=" + zkresult2string(zkr));
-                            TimerStopAndLog(LOAD_DB_TO_CACHE);
-                            return;
+                            if (fr.equal(keyValues[kv].key[0], keyValues[chunks[i]->list[j]].key[0]) &&
+                                fr.equal(keyValues[kv].key[1], keyValues[chunks[i]->list[j]].key[1]) &&
+                                fr.equal(keyValues[kv].key[2], keyValues[chunks[i]->list[j]].key[2]) &&
+                                fr.equal(keyValues[kv].key[3], keyValues[chunks[i]->list[j]].key[3]))
+                            {
+                                keyValues[kv].value = 0;
+                            }
                         }
-                        counter++;
+                        break;
+                    }
+                    case LEAF:
+                    {
+                        // If the key is the same, then check the value
+                        if (fr.equal(chunks[i]->getChild(k).leaf.key[0], keyValues[chunks[i]->list[j]].key[0]) &&
+                            fr.equal(chunks[i]->getChild(k).leaf.key[1], keyValues[chunks[i]->list[j]].key[1]) &&
+                            fr.equal(chunks[i]->getChild(k).leaf.key[2], keyValues[chunks[i]->list[j]].key[2]) &&
+                            fr.equal(chunks[i]->getChild(k).leaf.key[3], keyValues[chunks[i]->list[j]].key[3]))
+                        {
+                            keyValues[chunks[i]->list[j]].value = chunks[i]->getChild(k).leaf.value;
+                        }
+                        else
+                        {
+                            keyValues[chunks[i]->list[j]].value = 0;
+                        }
+                        break;
+                    }
+                    case TREE_CHUNK:
+                    {
+                        // Simply add it to the list of the descendant tree chunk
+                        chunks[chunks[i]->getChild(k).treeChunkId]->list.push_back(chunks[i]->list[j]);
+
+                        break;
+                    }
+                    // If this is an intermediate node, then create the corresponding tree chunk
+                    case INTERMEDIATE:
+                    {
+                        // We create a new trunk
+                        TreeChunk *c = new TreeChunk(*this, poseidon);
+                        if (c == NULL)
+                        {
+                            zklog.error("Database64::ReadTree() failed calling new TreeChunk()");
+                            exitProcess();
+                        }
+                        c->setLevel(level + 6);
+                        
+                        // Create a new query to populate this tree chunk from database
+                        DB64Query dbQuery(fea2string(fr, chunks[i]->getChild(k).intermediate.hash),
+                                        chunks[i]->getChild(k).intermediate.hash,
+                                        c->data);
+                        dbQueries.push_back(dbQuery);
+
+                        // Add the requested key-value to the new tree chunk list
+                        c->list.push_back(chunks[i]->list[j]);
+                        int cId = chunks.size();
+                        chunks.push_back(c);
+                        chunks[i]->setTreeChunkChild(k, cId);
+
+                        break;
+                    }
+                    default:
+                    {
+                        zklog.error("Database64::ReadTree() found invalid chunks[i]->getChild(k).type=" + to_string(chunks[i]->getChild(k).type));
+                        exitProcess();
                     }
                 }
             }
         }
+
+        chunksProcessed = chunksToProcess;
+        level += 6;
     }
 
-    if(Database64::dbMTCache.enabled()){
-        zklog.info("loadDb2MemCache64() done counter=" + to_string(counter) + " cache at " + to_string((double(Database64::dbMTCache.getCurrentSize())/double(Database64::dbMTCache.getMaxSize()))*100) + "%");
-    }
-    TimerStopAndLog(LOAD_DB_TO_CACHE);
+    dbQueries.clear();
 
+    if (hashValues != NULL)
+    {
+        // Calculate the new root hash of the whole tree
+        Child result;
+        zkr = CalculateHash(result, chunks, dbQueries, 0, 0, hashValues);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("Database64::WriteTree() failed calling calculateHash() result=" + zkresult2string(zkr));
+            for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
+            return zkr;
+        }
+
+        // Based on the result, calculate the new root hash
+        /*if (result.type == LEAF)
+        {
+            newRoot[0] = result.leaf.hash[0];
+            newRoot[1] = result.leaf.hash[1];
+            newRoot[2] = result.leaf.hash[2];
+            newRoot[3] = result.leaf.hash[3];
+            string newRootString = fea2string(fr, newRoot);
+
+            if (!chunks[0]->getDataValid())
+            {
+                zkr = chunks[0]->children2data();
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("Database64::WriteTree() failed calling chunks[0]->children2data() result=" + zkresult2string(zkr));
+                    for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
+                    return zkr;
+                }
+                DB64Query dbQuery(newRootString, newRoot, chunks[0]->data);
+                dbQueries.push_back(dbQuery);
+            }
+        }
+        else if (result.type == INTERMEDIATE)
+        {
+            newRoot[0] = result.intermediate.hash[0];
+            newRoot[1] = result.intermediate.hash[1];
+            newRoot[2] = result.intermediate.hash[2];
+            newRoot[3] = result.intermediate.hash[3];
+        }
+        else if (result.type == ZERO)
+        { 
+            newRoot[0] = fr.zero();
+            newRoot[1] = fr.zero();
+            newRoot[2] = fr.zero();
+            newRoot[3] = fr.zero();
+        }
+        else
+        {
+            zklog.error("Database64::WriteTree() found invalid result.type=" + to_string(result.type));
+            for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
+            return zkr;
+        }*/
+        
+    }
+
+#ifdef SMT64_PRINT_TREE_CHUNKS
+    // Print chunks
+    for (uint c = 0; c < chunks.size(); c++)
+    {
+        zklog.info("Database64::ReadTree() chunk " + to_string(c));
+        chunks[c]->print();
+    }
 #endif
+
+    // Free memory
+    for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
+
+    return ZKR_SUCCESS;
 }
