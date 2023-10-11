@@ -5,13 +5,15 @@
 #include "zklog.hpp"
 #include "exit_process.hpp"
 #include "zkresult.hpp"
-#include <list>
+#include <vector>
 #include <unordered_map>
 #include <mutex>
+#include <shared_mutex>
 #include <vector>
 #include "zkassert.hpp"
 #include <cassert>
 
+#define MULTIPLE_WRITES 0
 
 class PageManager
 {
@@ -29,20 +31,30 @@ public:
     void flushPages();
 
     inline uint64_t getNumFreePages(){
-        return freePages.size()+nPages-firstUnusedPage;
+#if MULTIPLE_WRITES
+        lock_guard<mutex> guard(freePagesLock);
+        shared_lock<shared_mutex> guard2(pagesLock);
+#endif
+        return numFreePages+nPages-firstUnusedPage;
     };
     inline char *getPageAddress(const uint64_t pageNumber)
     {
+        shared_lock<shared_mutex> guard(pagesLock);
         assert(pageNumber < nPages);
         uint64_t fileId = pageNumber/pagesPerFile;
         uint64_t pageInFile = pageNumber % pagesPerFile;
         return pages[fileId] + pageInFile * (uint64_t)4096;
     };
 
+    inline void readLock(){
+        headerLock.lock_shared();
+    }
+    inline void readUnlock(){
+        headerLock.unlock_shared();
+    }
 
 private:
 
-    recursive_mutex mlock;
 
     bool mappedFile;
     string fileName;
@@ -52,15 +64,20 @@ private:
     uint64_t nFiles;
     int file0Descriptor;
 
+    std::shared_mutex pagesLock;
     uint64_t nPages;
     vector<char *> pages;
+    zkresult AddPages(const uint64_t nPages_);
 
-
+    mutex freePagesLock;
     uint64_t firstUnusedPage;
-    std::list<uint64_t> freePages;
+    uint64_t numFreePages;
+    vector<uint64_t> freePages;
+
+    mutex editedPagesLock;
     std::unordered_map<uint64_t, uint64_t> editedPages;
 
-    zkresult AddPages(const uint64_t nPages_);
+    shared_mutex headerLock;
 
 };
 
