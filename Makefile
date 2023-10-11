@@ -7,7 +7,7 @@ TARGET_TEST := zkProverTest
 BUILD_DIR := ./build
 SRC_DIRS := ./src ./test ./tools
 
-LIBOMP := $(shell find /usr/lib/llvm* -name "libomp.so" | find /usr/lib64 -name "libomp.so" | sed 's/libomp.so//')
+LIBOMP := $(shell find /usr/lib/llvm-*/lib -name "libomp.so" | find /usr/lib64 -name "libomp.so" | sed 's/libomp.so//')
 ifndef LIBOMP
 $(error LIBOMP is not set, you need to install libomp-dev)
 endif
