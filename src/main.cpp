@@ -45,6 +45,7 @@
 #include "smt_64_test.hpp"
 #include "sha256.hpp"
 #include "page_manager_test.hpp"
+#include "key_value_tree_test.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -491,6 +492,11 @@ int main(int argc, char **argv)
     if (config.runPageManagerTest)
     {
         PageManagerTest();
+    }
+    // Test KeyValueTree
+    if (config.runKeyValueTreeTest)
+    {
+        KeyValueTreeTest();
     }
     
     // Test SMT64
