@@ -106,7 +106,7 @@ zkresult KeyValuePage::Read (const uint64_t pageNumber, const string &key, strin
     return Read(pageNumber, key, value, 0);
 }
 
-zkresult KeyValuePage::Write (const uint64_t pageNumber, const string &key, const string &value, const uint64_t level, const uint64_t headerPageNumber)
+zkresult KeyValuePage::Write (uint64_t &pageNumber, const string &key, const string &value, const uint64_t level, const uint64_t headerPageNumber)
 {
     // Check input parameters
     if (level >= key.size())
@@ -120,6 +120,9 @@ zkresult KeyValuePage::Write (const uint64_t pageNumber, const string &key, cons
         zklog.error("KeyValuePage::write() got invalid value.size=" + to_string(value.size()) + " + key.size=" + to_string(key.size()) + " > 0xFFFFFF");
         return ZKR_DB_ERROR;
     }
+
+    // Get an editable page
+    pageNumber = pageManager.editPage(pageNumber);
 
     zkresult zkr;
     KeyValueStruct * page = (KeyValueStruct *)pageManager.getPageAddress(pageNumber);
@@ -142,33 +145,27 @@ zkresult KeyValuePage::Write (const uint64_t pageNumber, const string &key, cons
             uint64_t rawDataOffset = RawDataPage::GetOffset(headerPage->rawDataPage);
 
             // Write to raw data page list
-            zkr = RawDataPage::Write(rawDataPage, keyAndValue);
+            zkr = RawDataPage::Write(headerPage->rawDataPage, keyAndValue);
             if (zkr != ZKR_SUCCESS)
             {
                 zklog.error("KeyValuePage::Write() failed calling RawDataPage::Write() result=" + zkresult2string(zkr) + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index) + " level=" + to_string(level) + " key=" + ba2string(key));
                 return zkr;
             }
-            else
-            {
-                zklog.info("KeyValuePage::Write() wrote length=" + to_string(length) +
-                    " result=" + zkresult2string(zkr) +
-                    " pageNumber=" + to_string(pageNumber) +
-                    " index=" + to_string(index) +
-                    " level=" + to_string(level) +
-                    " key=" + ba2string(key) +
-                    " rawDataPage=" + to_string(headerPage->rawDataPage) +
-                    " rawDataOffset=" + to_string(rawDataOffset) +
-                    " leaving headerPage->rawDataPage=" + to_string(rawDataPage) +
-                    " headerPage->rawDataOffset=" + to_string(rawDataOffset));
-            }
-            
+
+            zklog.info("KeyValuePage::Write() wrote length=" + to_string(length) +
+                " result=" + zkresult2string(zkr) +
+                " pageNumber=" + to_string(pageNumber) +
+                " index=" + to_string(index) +
+                " level=" + to_string(level) +
+                " key=" + ba2string(key) +
+                " rawDataPage=" + to_string(rawDataPage) +
+                " rawDataOffset=" + to_string(rawDataOffset) +
+                " leaving headerPage->rawDataPage=" + to_string(headerPage->rawDataPage) +
+                " headerPage->rawDataOffset=" + to_string(RawDataPage::GetOffset(headerPage->rawDataPage)));            
 
             // Update this entry as a leaf node (control = 1)
             page->key[index][0] = length | (uint64_t(1)<<48);
-            page->key[index][1] = headerPage->rawDataPage | (rawDataOffset << 48);
-
-            // Update header page data
-            headerPage->rawDataPage = rawDataPage;
+            page->key[index][1] = rawDataPage | (rawDataOffset << 48);
 
             return ZKR_SUCCESS;
         }
@@ -238,19 +235,29 @@ zkresult KeyValuePage::Write (const uint64_t pageNumber, const string &key, cons
             newPage->key[newIndex][0] = page->key[index][0];
             newPage->key[newIndex][1] = page->key[index][1];
 
+            // Write the new key in the newly created page at the next level
+            zkr = KeyValuePage::Write(newPageNumber, key, value, level+1, headerPageNumber);
+            if (zkr != ZKR_SUCCESS)
+            {
+                return zkr;
+            }
+
             // Set this page entry as a intermeiate node
             page->key[index][0] = newPageNumber | (uint64_t(2) << 48);
             page->key[index][1] = 0;
-
-            // Write the new key in the newly created page at the next level
-            return KeyValuePage::Write(newPageNumber, key, value, level+1, headerPageNumber);
         }
 
         // Intermediate node
         case 2:
         {
             uint64_t nextKeyValuePage = page->key[index][0] & 0xFFFFFF;
-            return Write(nextKeyValuePage, key, value, level+1, headerPageNumber);
+            zkr = Write(nextKeyValuePage, key, value, level+1, headerPageNumber);
+            if (zkr != ZKR_SUCCESS)
+            {
+                return zkr;
+            }
+            page->key[index][0] = nextKeyValuePage + (uint64_t(2) << 48);
+            return ZKR_SUCCESS;
         }
 
         // Default
@@ -264,7 +271,7 @@ zkresult KeyValuePage::Write (const uint64_t pageNumber, const string &key, cons
     return ZKR_DB_ERROR;
 }
 
-zkresult KeyValuePage::Write (const uint64_t pageNumber, const string &key, const string &value, const uint64_t headerPageNumber)
+zkresult KeyValuePage::Write (uint64_t &pageNumber, const string &key, const string &value, const uint64_t headerPageNumber)
 {
     // Check input parameters
     if (key.size() == 0)
@@ -277,59 +284,63 @@ zkresult KeyValuePage::Write (const uint64_t pageNumber, const string &key, cons
     return Write(pageNumber, key, value, 0, headerPageNumber);
 }
 
-void KeyValuePage::Print (const uint64_t pageNumber, bool details)
+void KeyValuePage::Print (const uint64_t pageNumber, bool details, const string& prefix)
 {
-    zklog.info("KeyValuePage::Print() pageNumber=" + to_string(pageNumber));
-    if (details)
+    zklog.info(prefix + "KeyValuePage::Print() pageNumber=" + to_string(pageNumber));
+
+    vector<uint64_t> nextKeyValuePages;
+
+    // For each entry of the page
+    KeyValueStruct * page = (KeyValueStruct *)pageManager.getPageAddress(pageNumber);
+    for (uint64_t i=0; i<256; i++)
     {
-        vector<uint64_t> nextKeyValuePages;
+        uint64_t control = page->key[i][0] >> 48;
 
-        // For each entry of the page
-        KeyValueStruct * page = (KeyValueStruct *)pageManager.getPageAddress(pageNumber);
-        for (uint64_t i=0; i<256; i++)
+        switch (control)
         {
-            uint64_t control = page->key[i][0] >> 48;
-
-            switch (control)
+            // Empty slot
+            case 0:
             {
-                // Empty slot
-                case 0:
-                {
-                    continue;
-                }
+                continue;
+            }
 
-                // Leaf node
-                case 1:
+            // Leaf node
+            case 1:
+            {
+                if (details)
                 {
                     uint64_t length = page->key[i][0] & 0xFFFFFF;
                     uint64_t rawPageNumber = page->key[i][1] & 0xFFFFFF;
                     uint64_t rawPageOffset = page->key[i][1] >> 48;
-                    zklog.info("  i=" + to_string(i) + " length=" + to_string(length) + " rawPageNumber=" + to_string(rawPageNumber) + " rawPageOffset=" + to_string(rawPageOffset));
-                    continue;
+                    zklog.info(prefix + "i=" + to_string(i) + " length=" + to_string(length) + " rawPageNumber=" + to_string(rawPageNumber) + " rawPageOffset=" + to_string(rawPageOffset));
                 }
+                continue;
+            }
 
-                // Intermediate node
-                case 2:
+            // Intermediate node
+            case 2:
+            {
+                uint64_t nextKeyValuePage = page->key[i][0] & 0xFFFFFF;
+                nextKeyValuePages.emplace_back(nextKeyValuePage);
+                if (details)
                 {
-                    uint64_t nextKeyValuePage = page->key[i][0] & 0xFFFFFF;
-                    nextKeyValuePages.emplace_back(nextKeyValuePage);
-                    zklog.info("  i=" + to_string(i) + " nextKeyValuePage=" + to_string(nextKeyValuePage));
-                    continue;
+                    zklog.info(prefix + "i=" + to_string(i) + " nextKeyValuePage=" + to_string(nextKeyValuePage));
                 }
+                continue;
+            }
 
-                // Default
-                default:
-                {
-                    zklog.error("KeyValuePage::Print() found invalid control=" + to_string(control) + " pageNumber=" + to_string(pageNumber) + " i=" + to_string(i));
-                    exitProcess();
-                }
+            // Default
+            default:
+            {
+                zklog.error("KeyValuePage::Print() found invalid control=" + to_string(control) + " pageNumber=" + to_string(pageNumber) + " i=" + to_string(i));
+                exitProcess();
+            }
 
-            }      
-        }
+        }      
+    }
 
-        for (uint64_t i=0; i<nextKeyValuePages.size(); i++)
-        {
-            Print(nextKeyValuePages[i], details);
-        }
+    for (uint64_t i=0; i<nextKeyValuePages.size(); i++)
+    {
+        Print(nextKeyValuePages[i], details, prefix + " ");
     }
 }

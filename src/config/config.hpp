@@ -67,13 +67,38 @@ public:
     int64_t dbMTCacheSize; // Size in MBytes for the cache to store MT records
     bool useAssociativeCache; // Use the associative cache for MT records?
     int64_t log2DbMTAssociativeCacheSize; // log2 of the size in entries of the DatabaseMTAssociativeCache. Note 1 cache entry = 128 bytes
-    int64_t log2DbMTAssociativeCacheIndexesSize; // log2 of the size in entries of the DatabaseMTAssociativeCache indices. Note index entry = 4 bytes
+    int64_t log2DbMTAssociativeCacheIndexesSize; // log2 of the size in entries of the DatabaseMTAssociativeCache indexes. Note index entry = 4 bytes
     int64_t log2DbKVAssociativeCacheSize; // log2 of the size in entries of the DatabaseKVAssociativeCache. Note 1 cache entry = 80 bytes
-    int64_t log2DbKVAssociativeCacheIndexesSize; // log2 of the size in entries of the DatabaseKVAssociativeCache indices. Note index entry = 4 bytes
-    int64_t log2DbVersionsAssociativeCacheSize; // log2 of the size in entries of the DatabaseKVAssociativeCache. Note 1 cache entry = 40 bytes
-    int64_t log2DbVersionsAssociativeCacheIndexesSize; // log2 of the size in entries of the DatabaseKVAssociativeCache indices. Note index entry = 4 bytes
-
+    int64_t log2DbKVAssociativeCacheIndexesSize; // log2 of the size in entries of the DatabaseKVAssociativeCache indexes. Note index entry = 4 bytes
+    int64_t log2DbVersionsAssociativeCacheSize; // log2 of the size in entries of the DatabaseVersionsAssociativeCache. Note 1 cache entry = 40 bytes
+    int64_t log2DbVersionsAssociativeCacheIndexesSize; // log2 of the size in entries of the DatabaseVersionsAssociativeCache indexes. Note index entry = 4 bytes
     int64_t dbProgramCacheSize; // Size in MBytes for the cache to store Program (SC) records
+    
+    // Executor service
+    uint16_t executorServerPort;
+    uint16_t executorClientPort;
+    string executorClientHost;
+    uint64_t executorClientLoops;
+    bool executorClientCheckNewStateRoot;
+
+    // HashDB service
+    uint16_t hashDBServerPort;
+    string hashDBURL;
+    bool hashDB64;
+    uint64_t kvDBMaxVersions;
+    string dbCacheSynchURL;
+
+    // Aggregator service (client)
+    uint16_t aggregatorServerPort;
+    uint16_t aggregatorClientPort;
+    string aggregatorClientHost;
+    uint64_t aggregatorClientMockTimeout;
+    uint64_t aggregatorClientWatchdogTimeout;
+    uint64_t aggregatorClientMaxStreams; // Max number of streams, used to limit E2E test execution; if 0 then there is no limit
+
+    // Executor debugging
+    bool executorROMLineTraces;
+    bool executorTimeStatistics;
     bool opcodeTracer;
     bool logRemoteDbReads;
     bool logExecutorServerInput; // Logs all inputs, before processing 
@@ -83,27 +108,7 @@ public:
     bool logExecutorServerTxs;
     bool dontLoadRomOffsets;
 
-    uint16_t executorServerPort;
-    bool executorROMLineTraces;
-    bool executorTimeStatistics;
-    uint16_t executorClientPort;
-    string executorClientHost;
-    uint64_t executorClientLoops;
-    bool executorClientCheckNewStateRoot;
-
-    uint16_t hashDBServerPort;
-    string hashDBURL;
-    bool hashDB64;
-    uint64_t kvDBMaxVersions;
-    string dbCacheSynchURL;
-
-    uint16_t aggregatorServerPort;
-    uint16_t aggregatorClientPort;
-    string aggregatorClientHost;
-    uint64_t aggregatorClientMockTimeout;
-    uint64_t aggregatorClientWatchdogTimeout;
-    uint64_t aggregatorClientMaxStreams; // Max number of streams, used to limit E2E test execution; if 0 then there is no limit
-
+    // Files
     string inputFile;
     string inputFile2; // Used as the second input in genAggregatedProof
     string outputPath;
@@ -151,6 +156,8 @@ public:
     string recursive1StarkInfo;
     string recursive2StarkInfo;
     string recursivefStarkInfo;
+
+    // Database
     string databaseURL;
     string dbNodesTableName;
     string dbProgramTableName;
@@ -167,20 +174,26 @@ public:
     bool dbReadOnly;
     uint64_t dbReadRetryCounter;
     uint64_t dbReadRetryDelay;
+
+    // State manager
     bool stateManager;
     bool stateManagerPurge;
     bool stateManagerPurgeTxs;
+
+    // Infrastructure
     uint64_t cleanerPollingPeriod;
     uint64_t requestsPersistence;
     uint64_t maxExecutorThreads;
     uint64_t maxProverThreads;
     uint64_t maxHashDBThreads;
     string proverName;
-
     uint64_t fullTracerTraceReserveSize;
+
+    // EC Recover
     bool ECRecoverPrecalc;
     uint64_t ECRecoverPrecalcNThreads;
 
+    // Logs format
     bool jsonLogs;
 
     void load(json &config);

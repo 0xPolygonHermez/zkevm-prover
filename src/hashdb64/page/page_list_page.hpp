@@ -2,8 +2,11 @@
 #define PAGE_LIST_PAGE_HPP
 
 #include <unistd.h>
+#include <vector>
 #include "zkresult.hpp"
 #include "zkassert.hpp"
+
+using namespace std;
 
 /*
     Example with 3 page list pages:
@@ -40,7 +43,10 @@ public:
     static zkresult InitEmptyPage (const uint64_t  pageNumber);
     static zkresult InsertPage    (      uint64_t &pageNumber, const uint64_t pageNumberToInsert);
     static zkresult ExtractPage   (      uint64_t &pageNumber,       uint64_t &extractedPageNumber);
-    
+
+    static zkresult GetPages      (const uint64_t  pageNumber,                                vector<uint64_t> (&containerPages), vector<uint64_t> (&containedPages));
+    static zkresult CreatePages   (      uint64_t &pageNumber, vector<uint64_t> (&freePages), vector<uint64_t> (&containerPages), vector<uint64_t> (&containedPages));
+
     static void Print (const uint64_t pageNumber, bool details);
 };
 
