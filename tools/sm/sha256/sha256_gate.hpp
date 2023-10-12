@@ -9,6 +9,5 @@
 using namespace std;
 
 void SHA256Gate (GateState S, const uint8_t * chunkBytes, string scriptFile="", string polsFile="", string connectionsFile="");
-void SHA256GateString (const string &s, string &hash);
 
 #endif

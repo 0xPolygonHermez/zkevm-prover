@@ -6,13 +6,10 @@
 
 void SHA256Gen (string scriptFile="", string polsFile="", string connectionsFile="")
 {
-    // TODO: Export the generation part from SHA256 and put it here, just like
-    // what was done with keccak_gen.cpp.
-    uint8_t randomTestVector[32];
+    uint8_t thirtyTwoZeroBytes[32];
     for (size_t i = 0; i < 32; ++i)
     {
-        //randomTestVector[i] = static_cast<uint8_t>(dis(gen));
-        randomTestVector[i] = 0;
+        thirtyTwoZeroBytes[i] = 0;
     }
     uint64_t paddedSizeInBitsMin = 32*8 + 1 + 64;
     uint64_t paddedSizeInBits = ((paddedSizeInBitsMin / 512) + 1)*512;
@@ -25,17 +22,16 @@ void SHA256Gen (string scriptFile="", string polsFile="", string connectionsFile
     uint64_t onePosition = 64 - 8 - paddedZeros - 1;
     padding[onePosition] = 0x80;
 
-    uint8_t randomTestVectorPadded[paddedSize];
+    uint8_t thirtyTwoZeroBytesPadded[paddedSize];
     for (uint64_t i=0; i<32; i++)
     {
-        randomTestVectorPadded[i] = randomTestVector[i];
+        thirtyTwoZeroBytesPadded[i] = thirtyTwoZeroBytes[i];
     }
     for (uint64_t i=0; i<(paddedSize-32); i++)
     {
-        randomTestVectorPadded[32+i] = padding[onePosition+i];
+        thirtyTwoZeroBytesPadded[32+i] = padding[onePosition+i];
     }
-    GateState S(SHA256GateConfig);
-    SHA256Gate(S, randomTestVectorPadded, scriptFile, polsFile, connectionsFile);
+    SHA256Gate(GateState(SHA256GateConfig), thirtyTwoZeroBytesPadded, scriptFile, polsFile, connectionsFile);
 }
 
 void SHA256GenerateScript (const Config & config)

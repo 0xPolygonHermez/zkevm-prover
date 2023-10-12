@@ -19,20 +19,10 @@ GateConfig SHA256GateConfig = GateConfig(
     uint64_t(44),                // soutRefDistance
     uint64_t(1 << 23));          // polLength
 
-void SHA256GateString(const string &s, string &hash)
-{
-    string ba;
-    string2ba(s, ba);
-    // SHA256Gate((uint8_t *)ba.c_str(), ba.size(), hash);
-}
-
 void SHA256Gate(
     GateState S, const uint8_t *chunkBytes,
     string scriptFile, string polsFile, string connectionsFile)
 {
-    // Initialize hash values:
-    // (first 32 bits of the fractional parts of the square roots of the first 8 primes 2..19):
-    uint32_t h[8] = {0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19};
 
     // Initialize array of round constants:
     // (first 32 bits of the fractional parts of the cube roots of the first 64 primes 2..311):
@@ -75,16 +65,9 @@ void SHA256Gate(
     // copy the 64 data bytes (512 bits) into Sin[0..511] and into w[0..15]
     for (uint64_t i = 0; i < 16; i++)
     {
-        uint32_t aux;
-        bytes2u32(chunkBytes + 4 * i, aux, true);
-        vector<uint8_t> bits;
-        u322bits(aux, bits);
-        zkassert(bits.size() == 32);
         for (uint64_t j = 0; j < 32; j++)
         {
             uint64_t ref = SHA256GateConfig.sinRef0 + (i * 32 + j) * SHA256GateConfig.sinRefDistance;
-            S.gate[ref].pin[pin_a].bit = bits[j];
-            S.gate[ref].pin[pin_a].source = external;
             w[i].bit[j].ref = ref;
             w[i].bit[j].pin = pin_a;
         }
@@ -97,14 +80,9 @@ void SHA256Gate(
     // copy the h[8] state (256 bits) into Sin[512..767] and into h32[0..7]
     for (uint64_t i = 0; i < 8; i++)
     {
-        vector<uint8_t> bits;
-        u322bits(h[i], bits);
-        zkassert(bits.size() == 32);
         for (uint64_t j = 0; j < 32; j++)
         {
             uint64_t ref = SHA256GateConfig.sinRef0 + (512 + i * 32 + j) * SHA256GateConfig.sinRefDistance;
-            S.gate[ref].pin[pin_a].bit = bits[j];
-            S.gate[ref].pin[pin_a].source = external;
             h32[i].bit[j].ref = ref;
             h32[i].bit[j].pin = pin_a;
         }
@@ -233,15 +211,6 @@ void SHA256Gate(
         // a = temp1 + temp2;
         GateU32_add(S, temp1, temp2, a);
     }
-    // Add the compressed chunk to the current hash value
-    h[0] = h[0] + a.toU32();
-    h[1] = h[1] + b.toU32();
-    h[2] = h[2] + c.toU32();
-    h[3] = h[3] + d.toU32();
-    h[4] = h[4] + e.toU32();
-    h[5] = h[5] + f.toU32();
-    h[6] = h[6] + g.toU32();
-    h[7] = h[7] + hh.toU32();
 
     // Make sure that Sout is located in the expected gates, both in pin a and r
     for (uint64_t i = 0; i < 8; i++)
@@ -279,30 +248,14 @@ void SHA256Gate(
         for (int j = 0; j < 32; j++)
         {
             uint64_t aux;
+            // Set the outputs in the right gates and pins.
+            // Check the comments in sha256_executor_test.cpp for more information and a useful
+            // example.
             aux = SHA256GateConfig.soutRef0 + SHA256GateConfig.soutRefDistance * ((i * 32) + j);
             S.XOR(pGateU32->bit[j].ref, pGateU32->bit[j].pin, SHA256GateConfig.zeroRef, pin_a, aux);
             S.SoutRefs[((i * 32) + j)] = aux;
         }
     }
-
-    mpz_class hashScalar;
-    hashScalar = h[0];
-    hashScalar = hashScalar << 32;
-    hashScalar += h[1];
-    hashScalar = hashScalar << 32;
-    hashScalar += h[2];
-    hashScalar = hashScalar << 32;
-    hashScalar += h[3];
-    hashScalar = hashScalar << 32;
-    hashScalar += h[4];
-    hashScalar = hashScalar << 32;
-    hashScalar += h[5];
-    hashScalar = hashScalar << 32;
-    hashScalar += h[6];
-    hashScalar = hashScalar << 32;
-    hashScalar += h[7];
-
-    cout << hashScalar.get_str(16) << endl;
 
     S.printCounters();
     if (scriptFile.size() > 0)

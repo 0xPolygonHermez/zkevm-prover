@@ -167,7 +167,6 @@ void Sha256Executor::execute(const vector<vector<Goldilocks::Element>> &input, S
     }
 
     // Execute the program
-    uint64_t debugCounter = 0;
     for (uint64_t slot = 0; slot < numberOfSlots; slot++)
     {
         for (uint64_t i = 0; i < program.size(); i++)
@@ -230,17 +229,6 @@ void Sha256Executor::execute(const vector<vector<Goldilocks::Element>> &input, S
                 exitProcess();
             }
             }
-
-            if (false && (slot == 0))
-            {
-                cout << debugCounter << ": " << gateop2string(program[i].op) << endl;
-                cout << "pinA = " << program[i].pina << " | refA = " << program[i].refa << " || " << to_string(getPol(pols.inputs[0], absRefr)) << endl;
-                cout << "pinB = " << program[i].pinb << " | refB = " << program[i].refb << " || " << to_string(getPol(pols.inputs[1], absRefr)) << endl;
-                cout << "pinR = "
-                        << "x"
-                        << " | refR = " << program[i].refr << " || " << to_string(getPol(pols.output, absRefr)) << endl;
-                debugCounter++;
-            }
         }
     }
 
@@ -255,5 +243,5 @@ void Sha256Executor::setPol(CommitPol(&pol), uint64_t index, uint64_t value)
 
 uint64_t Sha256Executor::getPol(CommitPol(&pol), uint64_t index)
 {
-    return ((fr.toU64(pol[index]) == 0)? 0 : 1);
+    return ((fr.toU64(pol[index]) == 0) ? 0 : 1);
 }
