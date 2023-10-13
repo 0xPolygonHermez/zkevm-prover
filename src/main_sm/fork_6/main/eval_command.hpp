@@ -102,6 +102,7 @@ void eval_cond                (Context &ctx, const RomCommand &cmd, CommandResul
 void eval_inverseFpEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_inverseFnEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_sqrtFpEc            (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_sqrtFpEcParity      (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_xAddPointEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_yAddPointEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_xDblPointEc         (Context &ctx, const RomCommand &cmd, CommandResult &cr);

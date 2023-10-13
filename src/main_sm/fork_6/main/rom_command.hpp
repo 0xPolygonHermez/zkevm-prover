@@ -26,6 +26,7 @@ typedef enum : int {
     f_inverseFpEc,
     f_inverseFnEc,
     f_sqrtFpEc,
+    f_sqrtFpEcParity,
     f_xAddPointEc,
     f_yAddPointEc,
     f_xDblPointEc,

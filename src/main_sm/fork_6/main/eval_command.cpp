@@ -6,6 +6,7 @@
 #include "utils.hpp"
 #include "zkassert.hpp"
 #include "zklog.hpp"
+#include "zkglobals.hpp"
 
 namespace fork_6
 {
@@ -30,6 +31,7 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             case f_inverseFpEc:                     return eval_inverseFpEc(ctx, cmd, cr);
             case f_inverseFnEc:                     return eval_inverseFnEc(ctx, cmd, cr);
             case f_sqrtFpEc:                        return eval_sqrtFpEc(ctx, cmd, cr);
+            case f_sqrtFpEcParity:                  return eval_sqrtFpEcParity(ctx, cmd, cr);
             case f_xAddPointEc:                     return eval_xAddPointEc(ctx, cmd, cr);
             case f_yAddPointEc:                     return eval_yAddPointEc(ctx, cmd, cr);
             case f_xDblPointEc:                     return eval_xDblPointEc(ctx, cmd, cr);
@@ -2188,7 +2190,70 @@ void eval_sqrtFpEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     mpz_class a = cr.scalar;
     cr.type = crt_scalar;
     sqrtF3mod4(cr.scalar, cr.scalar);
+}
 
+void eval_sqrtFpEcParity (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 2)
+    {
+        zklog.error("eval_sqrtFpEcParity() invalid number of parameters function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    // Get a by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_sqrtFpEc() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif    
+    mpz_class a = cr.scalar;
+
+    // Get parity by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_sqrtFpEc() 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif    
+    mpz_class parity = cr.scalar;
+
+    // Call the sqrt function
+    cr.type = crt_scalar;
+    sqrtF3mod4(cr.scalar, a);
+
+    // Post-process the result
+    if (cr.scalar == ScalarMask256)
+    {
+        // This sqrt does not have a solution
+    }
+    else if ((cr.scalar & 1) == parity)
+    {
+        // Return r as it is, since it has the requested parity
+    }
+    else
+    {
+        // Negate the result
+        RawFec::Element fe;
+        fec.fromMpz(fe, cr.scalar.get_mpz_t());
+        fec.neg(fe);
+        fec.toMpz(cr.scalar.get_mpz_t(), fe);
+    }
 }
 
 /********************/

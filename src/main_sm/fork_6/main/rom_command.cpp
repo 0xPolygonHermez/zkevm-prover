@@ -51,6 +51,7 @@ tFunction string2Function(string s)
     else if (s == "inverseFpEc")                    return f_inverseFpEc;
     else if (s == "inverseFnEc")                    return f_inverseFnEc;
     else if (s == "sqrtFpEc")                       return f_sqrtFpEc;
+    else if (s == "sqrtFpEcParity")                 return f_sqrtFpEcParity;
     else if (s == "xAddPointEc")                    return f_xAddPointEc;
     else if (s == "yAddPointEc")                    return f_yAddPointEc;
     else if (s == "xDblPointEc")                    return f_xDblPointEc;
@@ -94,6 +95,7 @@ string function2String(tFunction f)
         case f_inverseFpEc:                     return "inverseFpEc";
         case f_inverseFnEc:                     return "inverseFnEc";
         case f_sqrtFpEc:                        return "sqrtFpEc";
+        case f_sqrtFpEcParity:                  return "sqrtFpEcParity";
         case f_xAddPointEc:                     return "xAddPointEc";
         case f_yAddPointEc:                     return "yAddPointEc";
         case f_xDblPointEc:                     return "xDblPointEc";
