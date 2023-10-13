@@ -31,6 +31,7 @@ uint64_t PageManagerPerformanceTest(void){
     string folderName = "db";
     uint64_t numPositions = 20000;
     uint64_t numReps = 100;
+    uint64_t printFreq = 10;
 
     // Create the state manager
     double start = omp_get_wtime();
@@ -58,7 +59,7 @@ uint64_t PageManagerPerformanceTest(void){
     double avgThroughputSecondWriteLast = 0;
     double avgThroughputFlushLast = 0;
     double throughput = 0;
-    uint64_t printFreq = 10;
+    
     
     for(uint64_t k=0; k<numReps;++k){
 
@@ -116,15 +117,15 @@ uint64_t PageManagerPerformanceTest(void){
             }
         }
         
-        if(k%printFreq == 0 && k>0){
+        if(k%printFreq == 0){
 
             std::cout << "Iteration: " << k << std::endl;
-            std::cout << "Average time first read/write: " << avgTimeFistWrite/k << " seconds" << std::endl;
-            std::cout << "Average throughput first read/write (last): " << avgThroughputFirstWrite/k << "( "<< avgThroughputFirstWriteLast/printFreq <<") MBytes/s" << std::endl;
-            std::cout << "Average time second read/write: " << avgTimeSecondWrite/k << " seconds" << std::endl;
-            std::cout << "Average throughput second read/write (last): " << avgThroughputSecondWrite/k << "( "<< avgThroughputSecondWriteLast/printFreq <<") MBytes/s" << std::endl;
+            std::cout << "Average time first read/write: " << avgTimeFistWrite/(k+1) << " seconds" << std::endl;
+            std::cout << "Average throughput first read/write (last): " << avgThroughputFirstWrite/(k+1) << "( "<< avgThroughputFirstWriteLast/printFreq <<") MBytes/s" << std::endl;
+            std::cout << "Average time second read/write: " << avgTimeSecondWrite/(k+1) << " seconds" << std::endl;
+            std::cout << "Average throughput second read/write (last): " << avgThroughputSecondWrite/(k+1) << "( "<< avgThroughputSecondWriteLast/printFreq <<") MBytes/s" << std::endl;
             std::cout << "Average time flush: " << avgTimeFlush/k << " seconds" << std::endl;
-            std::cout << "Average throughput flush (last): " << avgThroughputFlush/k << "( "<< avgThroughputFlushLast/printFreq <<") MBytes/s" << std::endl << std::endl;
+            std::cout << "Average throughput flush (last): " << avgThroughputFlush/(k+1) << "( "<< avgThroughputFlushLast/printFreq <<") MBytes/s" << std::endl << std::endl;
             avgThroughputFirstWriteLast = 0;
             avgThroughputSecondWriteLast = 0;
             avgThroughputFlushLast = 0;
