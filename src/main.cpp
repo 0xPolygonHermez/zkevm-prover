@@ -38,6 +38,7 @@
 #include "unit_test.hpp"
 #include "database_cache_test.hpp"
 #include "main_sm/fork_5/main_exec_c/account.hpp"
+#include "main_sm/fork_6/main_exec_c/account.hpp"
 #include "state_manager.hpp"
 #include "state_manager_64.hpp"
 #include "check_tree_test.hpp"
@@ -353,6 +354,7 @@ int main(int argc, char **argv)
 
     // Generate account zero keys
     fork_5::Account::GenerateZeroKey(fr, poseidon);
+    fork_6::Account::GenerateZeroKey(fr, poseidon);
 
     // Init the HashDB singleton
     hashDBSingleton.init(fr, config);

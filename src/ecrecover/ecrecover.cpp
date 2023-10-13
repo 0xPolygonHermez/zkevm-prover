@@ -4,7 +4,6 @@
 #include "ffiasm/fec.hpp"
 #include "exit_process.hpp"
 #include "definitions.hpp"
-#include "main_sm/fork_5/main/eval_command.hpp"
 #include "keccak_wrapper.hpp"
 #include "zkglobals.hpp"
 

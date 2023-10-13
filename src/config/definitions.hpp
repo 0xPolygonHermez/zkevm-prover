@@ -1,10 +1,10 @@
 #ifndef DEFINITIONS_HPP
 #define DEFINITIONS_HPP
 
-#define PROVER_FORK_ID 5
-#define PROVER_FORK_NAMESPACE fork_5
-#define PROVER_FORK_NAMESPACE_STRING "fork_5"
-#define USING_PROVER_FORK_NAMESPACE using namespace fork_5
+#define PROVER_FORK_ID 6
+#define PROVER_FORK_NAMESPACE fork_6
+#define PROVER_FORK_NAMESPACE_STRING "fork_6"
+#define USING_PROVER_FORK_NAMESPACE using namespace fork_6
 
 /* Log traces selector: uncomment to enable the corresponding trace */
 //#define LOG_START_STEPS
