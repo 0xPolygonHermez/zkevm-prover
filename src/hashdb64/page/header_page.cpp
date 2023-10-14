@@ -149,7 +149,7 @@ zkresult HeaderPage::WriteRootVersion (uint64_t &headerPageNumber, const string 
     HeaderStruct * headerPage = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
 
     // Call the specific method
-    return KeyValuePage::Write(headerPage->programPage, root, version2value(version), headerPageNumber);
+    return KeyValuePage::Write(headerPage->rootVersionPage, root, version2value(version), headerPageNumber);
 }
 
 zkresult HeaderPage::ReadVersionData (const uint64_t headerPageNumber, const uint64_t &version, VersionDataStruct &versionData)
@@ -159,7 +159,7 @@ zkresult HeaderPage::ReadVersionData (const uint64_t headerPageNumber, const uin
 
     // Call the specific method
     string value;
-    zkresult zkr = KeyValuePage::Read(headerPage->programPage, version2key(version), value);
+    zkresult zkr = KeyValuePage::Read(headerPage->versionDataPage, version2key(version), value);
     if (zkr == ZKR_SUCCESS)
     {
         value2versionData(versionData, value);
@@ -177,7 +177,7 @@ zkresult HeaderPage::WriteVersionData (uint64_t &headerPageNumber, const uint64_
     HeaderStruct * headerPage = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
 
     // Call the specific method
-    return KeyValuePage::Write(headerPage->programPage, version2key(version), versionData2value(versionData), headerPageNumber);
+    return KeyValuePage::Write(headerPage->versionDataPage, version2key(version), versionData2value(versionData), headerPageNumber);
 }
 
 zkresult HeaderPage::KeyValueHistoryRead (const uint64_t headerPageNumber, const string &key, const uint64_t version, mpz_class &value)
@@ -199,6 +199,18 @@ zkresult HeaderPage::KeyValueHistoryWrite (uint64_t &headerPageNumber, const str
 
     // Call the specific method
     return KeyValueHistoryPage::Write(headerPage->keyValueHistoryPage, key, version, value, headerPageNumber);
+}
+
+zkresult HeaderPage::KeyValueHistoryCalculateHash (uint64_t &headerPageNumber, Goldilocks::Element (&hash)[4])
+{
+    // Get an editable page
+    headerPageNumber = pageManager.editPage(headerPageNumber);
+    
+    // Get header page
+    HeaderStruct * headerPage = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
+
+    // Call the specific method
+    return KeyValueHistoryPage::calculateHash(headerPage->keyValueHistoryPage, hash, headerPageNumber);
 }
 
 zkresult HeaderPage::ReadProgram (const uint64_t headerPageNumber, const string &key, string &value)
@@ -226,33 +238,43 @@ void HeaderPage::Print (const uint64_t headerPageNumber, bool details)
 {
     // Get page
     HeaderStruct * page = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
+    zklog.info("");
     zklog.info("HeaderPage::Print() headerPageNumber=" + to_string(headerPageNumber));
 
     // Print raw data
-    zklog.info("firstRawDataPage=" + to_string(page->firstRawDataPage) + "=" + to_string((uint64_t)pageManager.getPageAddress(page->firstRawDataPage)));
-    zklog.info("rawDataPage=" + to_string(page->rawDataPage) + "=" + to_string((uint64_t)pageManager.getPageAddress(page->rawDataPage)));
+    zklog.info("");
+    zklog.info("firstRawDataPage=" + to_string(page->firstRawDataPage));
+    zklog.info("rawDataPage=" + to_string(page->rawDataPage));
     RawDataPage::Print(page->rawDataPage, details, " ");
 
     // Print last version
+    zklog.info("");
     zklog.info("lastVersion=" + to_string(page->lastVersion));
 
     // Print root-version page list
-    zklog.info("rootVersionPage=" + to_string(page->rootVersionPage) + "=" + to_string((uint64_t)pageManager.getPageAddress(page->rootVersionPage)));
-    KeyValuePage::Print(page->rootVersionPage, details, " ");
+    zklog.info("");
+    zklog.info("rootVersionPage=" + to_string(page->rootVersionPage));
+    KeyValuePage::Print(page->rootVersionPage, details, " ", 32);
 
     // Print version-versionData page list
-    zklog.info("versionDataPage=" + to_string(page->versionDataPage) + "=" + to_string((uint64_t)pageManager.getPageAddress(page->versionDataPage)));
-    KeyValuePage::Print(page->versionDataPage, details, " ");
+    zklog.info("");
+    zklog.info("versionDataPage=" + to_string(page->versionDataPage));
+    KeyValuePage::Print(page->versionDataPage, details, " ", 8);
 
     // Print key-value page list
-    zklog.info("keyValueHistoryPage=" + to_string(page->keyValueHistoryPage) + "=" + to_string((uint64_t)pageManager.getPageAddress(page->keyValueHistoryPage)));
+    zklog.info("");
+    zklog.info("keyValueHistoryPage=" + to_string(page->keyValueHistoryPage));
     KeyValueHistoryPage::Print(page->keyValueHistoryPage, details, " ");
 
     // Program page
-    zklog.info("programPage=" + to_string(page->programPage) + "=" + to_string((uint64_t)pageManager.getPageAddress(page->programPage)));
-    KeyValuePage::Print(page->programPage, details, " ");
+    zklog.info("");
+    zklog.info("programPage=" + to_string(page->programPage));
+    KeyValuePage::Print(page->programPage, details, " ", 32);
 
     // Free pages
-    zklog.info("freePages=" + to_string(page->freePages) + "=" + to_string((uint64_t)pageManager.getPageAddress(page->freePages)));
+    zklog.info("");
+    zklog.info("freePages=" + to_string(page->freePages));
     PageListPage::Print(page->freePages, details, " ");
+
+    zklog.info("");
 }

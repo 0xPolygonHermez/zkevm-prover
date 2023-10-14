@@ -141,7 +141,7 @@ void RawDataPage::Print (const uint64_t pageNumber, bool details, const string &
     RawDataStruct * page = (RawDataStruct *)pageManager.getPageAddress(pageNumber);
     if (details)
     {
-        zklog.info(prefix + "previousPageNumber=" + to_string(page->previousPageNumber) + "  nextPageNumber=" + to_string(page->nextPageNumberAndOffset & U64Mask48) + " offset=" + to_string(page->nextPageNumberAndOffset >> 48));
+        zklog.info(prefix + "previousPageNumber=" + to_string(page->previousPageNumber) + " nextPageNumber=" + to_string(page->nextPageNumberAndOffset & U64Mask48) + " offset=" + to_string(page->nextPageNumberAndOffset >> 48));
     }
     if (page->previousPageNumber != 0)
     {

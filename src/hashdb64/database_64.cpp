@@ -20,6 +20,7 @@
 #include "header_page.hpp"
 #include "tree_chunk.hpp"
 #include "key_value_page.hpp"
+#include "raw_data_page.hpp"
 
 // Helper functions
 string removeBSXIfExists64(string s) {return ((s.at(0) == '\\') && (s.at(1) == 'x')) ? s.substr(2) : s;}
@@ -455,7 +456,7 @@ zkresult Database64::WriteTree (const Goldilocks::Element (&oldRoot)[4], const v
         return ZKR_DB_ERROR;
     }
 
-    vector<TreeChunk *> chunks;
+    /*vector<TreeChunk *> chunks;
     vector<DB64Query> dbQueries;
 
     // Tree level; we start at level 0, then we increase it 6 by 6
@@ -468,12 +469,12 @@ zkresult Database64::WriteTree (const Goldilocks::Element (&oldRoot)[4], const v
         zklog.error("Database64::WriteTree() failed calling new TreeChunk()");
         exitProcess();
     }
-    chunks.push_back(c);
+    chunks.push_back(c);*/
 
     //uint64_t chunksProcessed = 0;
 
 
-    HeaderPage::Print(headerPageNumber, false);
+    //HeaderPage::Print(headerPageNumber, true);
 
     uint64_t version = 0;
 
@@ -517,6 +518,7 @@ zkresult Database64::WriteTree (const Goldilocks::Element (&oldRoot)[4], const v
     headerPageNumber = pageManager.editPage(headerPageNumber);
     HeaderStruct *headerPage = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
 
+    // Write all key-values
     string keyString;
     string key;
     for (uint64_t i=0; i<keyValues.size(); i++)
@@ -526,18 +528,60 @@ zkresult Database64::WriteTree (const Goldilocks::Element (&oldRoot)[4], const v
         HeaderPage::KeyValueHistoryWrite(headerPageNumber, key, version, keyValues[i].value);
     }
 
+    //HeaderPage::Print(headerPageNumber, true);
+
+    // Calculate new state root hash
+    zkr = HeaderPage::KeyValueHistoryCalculateHash(headerPageNumber, newRoot);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("Database64::WriteTree() failed calling HeaderPage::KeyValueHistoryCalculateHash() result=" + zkresult2string(zkr) + " oldRoot=" + fea2string(fr, oldRoot));
+        return ZKR_DB_ERROR;
+    }
+
 /*  struct VersionDataStruct
     {
         uint8_t  root[32];
         uint64_t keyValueHistoryPage;
-        uint64_t freePagesList;
-        uint64_t createdPagesList;
-        uint64_t modifiedPagesList;
+        uint64_t freePagesList; TODO
+        uint64_t createdPagesList; TODO
+        uint64_t modifiedPagesList; TODO
         uint64_t rawDataPage;
         uint64_t rawDataOffset;
     };*/
 
+    // Create version data
+    VersionDataStruct versionData;
+    string newRootBa = string2ba(fea2string(fr, newRoot));
+    zkassert(newRootBa.size() == 32);
+    memcpy(versionData.root, newRootBa.c_str(), 32);
+    versionData.keyValueHistoryPage = headerPage->keyValueHistoryPage;
+    versionData.rawDataPage = headerPage->rawDataPage;
+    versionData.rawDataOffset = RawDataPage::GetOffset(versionData.rawDataPage);
+
+    // Write version->versionData pair
+    zkr = HeaderPage::WriteVersionData(headerPageNumber, version, versionData);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("Database64::WriteTree() failed calling HeaderPage::WriteVersionData() result=" + zkresult2string(zkr) + " oldRoot=" + fea2string(fr, oldRoot));
+        return ZKR_DB_ERROR;
+    }
+
+    // Write root->version pair
+    zkr = HeaderPage::WriteRootVersion(headerPageNumber, newRootBa, version);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("Database64::WriteTree() failed calling HeaderPage::WriteRootVersion() result=" + zkresult2string(zkr) + " oldRoot=" + fea2string(fr, oldRoot));
+        return ZKR_DB_ERROR;
+    }
+
+    // Set last version
     HeaderPage::SetLastVersion(headerPageNumber, version);
+
+    // Flush all pages to disk
+    pageManager.flushPages();
+
+    headerPageNumber = 0;
+    HeaderPage::Print(headerPageNumber, true);
 
 #if 0
     // If old root is zero, init chunks[0] as an empty tree chunk
@@ -786,7 +830,7 @@ zkresult Database64::CalculateHash (Child &result, vector<TreeChunk *> &chunks, 
     vector<Child> results(64);
 
     // Convert all TREE_CHUNK children into something else, typically INTERMEDIATE children,
-    // but they could also be LEAF (only one child below this level) or ZERO 9no children below this level)
+    // but they could also be LEAF (only one child below this level) or ZERO (no children below this level)
     for (uint64_t i=0; i<64; i++)
     {
         if (chunks[chunkId]->getChild(i).type == TREE_CHUNK)
@@ -838,7 +882,7 @@ zkresult Database64::ReadTree (const Goldilocks::Element (&root)[4], vector<KeyV
     uint64_t level = 0;
 
     // Create the first tree chunk (the root one), and store it in chunks[0]
-    TreeChunk *c = new TreeChunk(*this, poseidon);
+    TreeChunk *c = new TreeChunk(/**this,*/ poseidon);
     if (c == NULL)
     {
         zklog.error("Database64::ReadTree() failed calling new TreeChunk()");
@@ -948,7 +992,7 @@ zkresult Database64::ReadTree (const Goldilocks::Element (&root)[4], vector<KeyV
                     case INTERMEDIATE:
                     {
                         // We create a new trunk
-                        TreeChunk *c = new TreeChunk(*this, poseidon);
+                        TreeChunk *c = new TreeChunk(/**this,*/ poseidon);
                         if (c == NULL)
                         {
                             zklog.error("Database64::ReadTree() failed calling new TreeChunk()");

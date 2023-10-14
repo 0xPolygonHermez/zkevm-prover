@@ -9,7 +9,7 @@ zkresult CheckTree64 (Database64 &db, const string &key, uint64_t level, CheckTr
 
     PoseidonGoldilocks poseidon;
 
-    TreeChunk treeChunk(db, poseidon);
+    TreeChunk treeChunk(poseidon);
     Goldilocks::Element keyFea[4];
     string2fea(db.fr, key, keyFea);
     zkresult result = ZKR_UNSPECIFIED; // = db.read(key, keyFea, treeChunk.data, NULL, false);

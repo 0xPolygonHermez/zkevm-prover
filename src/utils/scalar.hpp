@@ -8,6 +8,7 @@
 #include "ffiasm/fec.hpp"
 #include "exit_process.hpp"
 #include "zklog.hpp"
+#include "zkglobals.hpp"
 
 using namespace std;
 
@@ -424,5 +425,10 @@ uint32_t inline rotateRight32( uint32_t input, uint64_t bits) { return (input >>
 uint32_t inline rotateLeft32( uint32_t input, uint64_t bits) { return (input << bits) | (input >> (32-bits)); }
 uint64_t inline rotateRight64( uint64_t input, uint64_t bits) { return (input >> bits) | (input << (64-bits)); }
 uint64_t inline rotateLeft64( uint64_t input, uint64_t bits) { return (input << bits) | (input >> (64-bits)); }
+
+bool inline feaIsZero (const Goldilocks::Element (&fea)[4])
+{
+    return fr.isZero(fea[0]) && fr.isZero(fea[1]) && fr.isZero(fea[2]) && fr.isZero(fea[3]);
+}
 
 #endif

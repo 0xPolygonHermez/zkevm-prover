@@ -2,6 +2,7 @@
 #include "scalar.hpp"
 #include "zklog.hpp"
 #include "exit_process.hpp"
+#include "zkassert.hpp"
 
 using namespace std;
 
@@ -58,13 +59,17 @@ void splitKey9 (const string &baString, vector<uint64_t> &result)
         // Calculate the byte and bit of the first part
         uint64_t firstByte = i/8;
         uint64_t firstByteBit = i%8;
-        uint64_t resultPart = (uint8_t)baString[firstByte] >> firstByteBit;
+        uint8_t resultByte = (uint8_t)baString[firstByte];
+        resultByte = resultByte << firstByteBit;
+        uint64_t resultPart = resultByte;
+        resultPart = resultPart << (8 - firstByteBit);
 
         // If this is not the end of the byte array, consume the rest of bits of the next byte
         if ((firstByte + 1) < baString.size())
         {
-            resultPart = resultPart << (firstByteBit + 1);
-            resultPart |= (uint8_t)baString[firstByte + 1] >> (7 - firstByteBit);
+            resultByte = (uint8_t)baString[firstByte + 1];
+            resultByte = resultByte >> (7 - firstByteBit);
+            resultPart |= uint64_t(resultByte);
         }
 
         // Add to the result
@@ -142,5 +147,39 @@ uint64_t getKeyChildren64Position (const bool (&keys)[256], uint64_t level)
     if (keys[level + 3]) result += 4;
     if (keys[level + 4]) result += 2;
     if (keys[level + 5]) result += 1;
+    return result;
+}
+
+uint64_t getKeyChildren64Position (const uint64_t index)
+{
+    zkassert(index <= 64);
+
+    uint64_t result = 0;
+
+    if ((index & 0b100000) != 0)
+    {
+        result += 32;
+    }
+    if ((index & 0b010000) != 0)
+    {
+        result += 16;
+    }
+    if ((index & 0b001000) != 0)
+    {
+        result += 8;
+    }
+    if ((index & 0b000100) != 0)
+    {
+        result += 4;
+    }
+    if ((index & 0b000010) != 0)
+    {
+        result += 2;
+    }
+    if ((index & 0b000001) != 0)
+    {
+        result += 1;
+    }
+
     return result;
 }

@@ -31,7 +31,7 @@ public:
     static zkresult Read          (const uint64_t  pageNumber, const string &key,       string &value);
     static zkresult Write         (      uint64_t &pageNumber, const string &key, const string &value, const uint64_t headerPageNumber);
     
-    static void     Print         (const uint64_t pageNumber, bool details, const string &prefix);
+    static void     Print         (const uint64_t pageNumber, bool details, const string &prefix, const uint64_t keySize);
 };
 
 #endif

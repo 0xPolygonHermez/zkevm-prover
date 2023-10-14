@@ -20,9 +20,9 @@ zkresult KeyValuePage::InitEmptyPage (const uint64_t pageNumber)
 zkresult KeyValuePage::Read (const uint64_t pageNumber, const string &key, const vector<uint64_t> &keyBits, string &value, const uint64_t level)
 {
     // Check input parameters
-    if (level >= key.size())
+    if (level >= keyBits.size())
     {
-        zklog.error("KeyValuePage::Read() got invalid level=" + to_string(level) + " > key.size=" + to_string(key.size()));
+        zklog.error("KeyValuePage::Read() got invalid level=" + to_string(level) + " >= keyBits.size=" + to_string(keyBits.size()));
         return ZKR_DB_ERROR;
     }
 
@@ -139,9 +139,9 @@ zkresult KeyValuePage::Read (const uint64_t pageNumber, const string &key, strin
 zkresult KeyValuePage::Write (uint64_t &pageNumber, const string &key, const vector<uint64_t> &keyBits, const string &value, const uint64_t level, const uint64_t headerPageNumber)
 {
     // Check input parameters
-    if (level >= key.size())
+    if (level >= keyBits.size())
     {
-        zklog.error("KeyValuePage::write() got invalid level=" + to_string(level) + " > key.size=" + to_string(key.size()));
+        zklog.error("KeyValuePage::write() got invalid level=" + to_string(level) + " >= keyBits.size=" + to_string(keyBits.size()));
         return ZKR_DB_ERROR;
     }
 
@@ -272,11 +272,12 @@ zkresult KeyValuePage::Write (uint64_t &pageNumber, const string &key, const vec
             uint64_t newPageNumber = pageManager.getFreePage();
             KeyValuePage::InitEmptyPage(newPageNumber);
             KeyValueStruct * newPage = (KeyValueStruct *)pageManager.getPageAddress(newPageNumber);
+            string existingKey = existingLengthAndKey.substr(4);
             vector<uint64_t> existingKeyBits;
-            splitKey9(existingLengthAndKey.substr(4), existingKeyBits);
+            splitKey9(existingKey, existingKeyBits);
             if (existingKeyBits.size() < (level+2))
             {
-                zklog.error("KeyValuePage::Write() found not matching value of existingKeyBits.size=" + to_string(existingKeyBits.size()) + " <" + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index) + " level=" + to_string(level) + " key=" + ba2string(key));
+                zklog.error("KeyValuePage::Write() found not matching value of existingKeyBits.size=" + to_string(existingKeyBits.size()) + " < level+2=" + to_string(level + 2) + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index) + " level=" + to_string(level) + " key=" + ba2string(key));
                 exitProcess();
             }
             uint64_t newIndex = existingKeyBits[level+1];
@@ -343,17 +344,19 @@ zkresult KeyValuePage::Write (uint64_t &pageNumber, const string &key, const str
     return Write(pageNumber, key, keyBits, value, 0, headerPageNumber);
 }
 
-void KeyValuePage::Print (const uint64_t pageNumber, bool details, const string& prefix)
+void KeyValuePage::Print (const uint64_t pageNumber, bool details, const string& prefix, const uint64_t keySize)
 {
     zklog.info(prefix + "KeyValuePage::Print() pageNumber=" + to_string(pageNumber));
+
+    zkresult zkr;
 
     vector<uint64_t> nextKeyValuePages;
 
     // For each entry of the page
     KeyValueStruct * page = (KeyValueStruct *)pageManager.getPageAddress(pageNumber);
-    for (uint64_t i=0; i<256; i++)
+    for (uint64_t index = 0; index < 512; index++)
     {
-        uint64_t control = page->key[i] >> 60;
+        uint64_t control = page->key[index] >> 60;
 
         switch (control)
         {
@@ -366,11 +369,50 @@ void KeyValuePage::Print (const uint64_t pageNumber, bool details, const string&
             // Leaf node
             case 1:
             {
+                uint64_t rawDataPage = page->key[index] & U64Mask48;
+                uint64_t rawDataOffset = (page->key[index] >> 48) & U64Mask12;
+
                 if (details)
                 {
-                    uint64_t rawPageNumber = page->key[i] & U64Mask48;
-                    uint64_t rawPageOffset = (page->key[i] >> 48) & U64Mask12;
-                    zklog.info(prefix + "i=" + to_string(i) + " rawPageNumber=" + to_string(rawPageNumber) + " rawPageOffset=" + to_string(rawPageOffset));
+                    string lengthBa;
+                    zkr = RawDataPage::Read(rawDataPage, rawDataOffset, 4, lengthBa);
+                    if (zkr != ZKR_SUCCESS)
+                    {
+                        zklog.error("KeyValuePage::Print() failed calling RawDataPage::Read(4) result=" + zkresult2string(zkr) + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index));
+                        exitProcess();
+                    }
+                    if (lengthBa.size() != 4)
+                    {
+                        zklog.error("KeyValuePage::Print() called RawDataPage::Read(4) but got invalid size=" + to_string(lengthBa.size()) + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index));
+                        exitProcess();
+                    }
+
+                    uint64_t length;
+                    length = *(uint32_t *)lengthBa.c_str();
+                    string rawData;
+                    zkr = RawDataPage::Read(rawDataPage, rawDataOffset, length, rawData);
+                    if (zkr != ZKR_SUCCESS)
+                    {
+                        zklog.error("KeyValuePage::Print() failed calling RawDataPage::Read() result=" + zkresult2string(zkr) + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index));
+                        exitProcess();
+                    }
+
+                    if (rawData.size() < (4 + keySize))
+                    {
+                        zklog.error("KeyValuePage::Print() called RawDataPage::Read() and got invalid raw data size=" + to_string(rawData.size()) + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index));
+                        exitProcess();
+                    }
+
+                    string key = rawData.substr(4, keySize);
+                    string value = rawData.substr(4 + keySize);
+
+                    zklog.info(prefix + "i=" + to_string(index) +
+                        " rawDataPage=" + to_string(rawDataPage) + " rawDataOffset=" + to_string(rawDataOffset) +
+                        " key=" + ba2string(key) + " value=" + ba2string(value));
+                }
+                else
+                {
+                    zklog.info(prefix + "i=" + to_string(index) + " rawDataPage=" + to_string(rawDataPage) + " rawDataOffset=" + to_string(rawDataOffset));
                 }
                 continue;
             }
@@ -378,11 +420,11 @@ void KeyValuePage::Print (const uint64_t pageNumber, bool details, const string&
             // Intermediate node
             case 2:
             {
-                uint64_t nextKeyValuePage = page->key[i] & U64Mask48;
+                uint64_t nextKeyValuePage = page->key[index] & U64Mask48;
                 nextKeyValuePages.emplace_back(nextKeyValuePage);
                 if (details)
                 {
-                    zklog.info(prefix + "i=" + to_string(i) + " nextKeyValuePage=" + to_string(nextKeyValuePage));
+                    zklog.info(prefix + "i=" + to_string(index) + " nextKeyValuePage=" + to_string(nextKeyValuePage));
                 }
                 continue;
             }
@@ -390,7 +432,7 @@ void KeyValuePage::Print (const uint64_t pageNumber, bool details, const string&
             // Default
             default:
             {
-                zklog.error("KeyValuePage::Print() found invalid control=" + to_string(control) + " pageNumber=" + to_string(pageNumber) + " i=" + to_string(i));
+                zklog.error("KeyValuePage::Print() found invalid control=" + to_string(control) + " pageNumber=" + to_string(pageNumber) + " i=" + to_string(index));
                 exitProcess();
             }
 
@@ -399,6 +441,6 @@ void KeyValuePage::Print (const uint64_t pageNumber, bool details, const string&
 
     for (uint64_t i=0; i<nextKeyValuePages.size(); i++)
     {
-        Print(nextKeyValuePages[i], details, prefix + " ");
+        Print(nextKeyValuePages[i], details, prefix + " ", keySize);
     }
 }
