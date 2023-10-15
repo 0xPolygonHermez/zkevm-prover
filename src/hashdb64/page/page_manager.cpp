@@ -72,6 +72,8 @@ PageManager::PageManager(const string fileName_, const uint64_t fileSize_, const
         if (pages[k] == MAP_FAILED) {
             zklog.error("Failed to mmap file: " + (string)strerror(errno));
         }
+        fileDescriptors.push_back(fd);
+        //if(k!=0) close(fd);
     }
     zkassertpermanent(nPages > 2);
     firstUnusedPage = 2;

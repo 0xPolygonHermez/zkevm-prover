@@ -12,6 +12,7 @@
 #include <vector>
 #include "zkassert.hpp"
 #include <cassert>
+#include <unistd.h>
 
 #define MULTIPLE_WRITES 0
 
@@ -45,6 +46,14 @@ public:
         uint64_t pageInFile = pageNumber % pagesPerFile;
         return pages[fileId] + pageInFile * (uint64_t)4096;
     };
+    void getPageAddressFile(const uint64_t pageNumber, char *out)
+    {
+        shared_lock<shared_mutex> guard(pagesLock);
+        assert(pageNumber < nPages);
+        uint64_t fileId = pageNumber/pagesPerFile;
+        uint64_t pageInFile = pageNumber % pagesPerFile;
+        pread(fileDescriptors[fileId], out, 4096, pageInFile * (uint64_t)4096);
+    };
 
     inline void readLock(){
         headerLock.lock_shared();
@@ -67,6 +76,7 @@ private:
     std::shared_mutex pagesLock;
     uint64_t nPages;
     vector<char *> pages;
+    vector<int> fileDescriptors;
     zkresult AddPages(const uint64_t nPages_);
 
     mutex freePagesLock;
