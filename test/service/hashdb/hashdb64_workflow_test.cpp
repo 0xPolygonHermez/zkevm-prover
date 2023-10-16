@@ -128,7 +128,7 @@ uint64_t HashDB64WorkflowTest (const Config& config)
             for (uint64_t i=0; i<4; i++) root[i] = consolidatedStateRoot[i];
 
             // Wait for data to be sent
-            while (true)
+            /*while (true)
             {
                 uint64_t storedFlushId, storingFlushId, lastFlushId, pendingToFlushNodes, pendingToFlushProgram, storingNodes, storingProgram;
                 string proverId;
@@ -141,7 +141,7 @@ uint64_t HashDB64WorkflowTest (const Config& config)
                 }
                 sleep(1);
             }
-            zklog.info("FLUSHED");
+            zklog.info("FLUSHED");*/
 
             // Call ReadTree with the old state root to get the hashes of the initial values of all read or written keys
             /*vector<HashValueGL> oldHashValues;
@@ -165,7 +165,15 @@ uint64_t HashDB64WorkflowTest (const Config& config)
             {
                 //zklog.info("auxKeyValues[" + to_string(i) + "].key=" + fea2string(fr, auxKeyValues[i].key) + " .value=" + auxKeyValues[i].value.get_str(10));
                 //zklog.info("allKeyValues[i].key=" + fea2string(fr, allKeyValues[i].key) + " .value=" + allKeyValues[i].value.get_str(10));
-                zkassertpermanent(auxKeyValues[i].value == allKeyValues[i].value);
+                if (auxKeyValues[i].value != allKeyValues[i].value)
+                {
+                    zklog.error("Found value=" + auxKeyValues[i].value.get_str() + " != expected value=" + allKeyValues[i].value.get_str());
+                    return 1;
+                }
+                else
+                {
+                    //zklog.error("Found value=" + auxKeyValues[i].value.get_str() + " == expected value=" + allKeyValues[i].value.get_str());
+                }
                 zkassertpermanent( fr.equal(auxKeyValues[i].key[0], allKeyValues[i].key[0]) &&
                                    fr.equal(auxKeyValues[i].key[1], allKeyValues[i].key[1]) &&
                                    fr.equal(auxKeyValues[i].key[2], allKeyValues[i].key[2]) &&
