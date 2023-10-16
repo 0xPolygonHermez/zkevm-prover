@@ -44,6 +44,7 @@ public:
     string checkTreeRoot;
     bool runDatabasePerformanceTest;
     bool runPageManagerTest;
+    bool runKeyValueTreeTest;
     bool runSMT64Test;
     bool runUnitTest;
     
