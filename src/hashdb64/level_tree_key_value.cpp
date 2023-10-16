@@ -31,37 +31,43 @@ void KVTree::postConstruct(uint64_t nBitsStep_)
     nEmptyValues = 0;
 }
 
-bool KVTree::read(const uint64_t key[4], mpz_class &value, uint64_t &level)
+zkresult KVTree::read(const Goldilocks::Element (&key)[4], mpz_class &value, uint64_t &level)
 {
     int64_t pileIdx;
-    level = LevelTree::level(key, &pileIdx);
+    uint64_t key_[4]={key[0].fe,key[1].fe,key[2].fe,key[3].fe}; //avoidable copy
+    level = LevelTree::level(key_, &pileIdx);
     if (pileIdx == -1)
     {
-        return false;
+        return ZKR_DB_KEY_NOT_FOUND;
     }
     else
     {
         value = pileValues[pile[pileIdx * 6 + 5]].value;
-        return true;
+        return ZKR_SUCCESS;
     }
 }
 
-void KVTree::write(const uint64_t key[4], const mpz_class &value, uint64_t &level)
+zkresult KVTree::write(const Goldilocks::Element (&key)[4], const mpz_class &value, uint64_t &level)
 {
     int64_t pileIdx;
-    level = insert(key, &pileIdx);
+    uint64_t key_[4]={key[0].fe,key[1].fe,key[2].fe,key[3].fe}; //avoidable copy
+    level = insert(key_, &pileIdx);
     addValue(pileIdx, value);
+    return ZKR_SUCCESS;
 }
 
-bool KVTree::extract(const uint64_t key[4], mpz_class &value)
+zkresult KVTree::extract(const Goldilocks::Element (&key)[4], mpz_class &value)
 {
     int64_t pileIdx;
-    bool bfound = LevelTree::extract(key, &pileIdx);
+    uint64_t key_[4]={key[0].fe,key[1].fe,key[2].fe,key[3].fe}; //avoidable copy
+    bool bfound = LevelTree::extract(key_, &pileIdx);
+    zkresult result = ZKR_DB_KEY_NOT_FOUND;
     if (bfound)
     {
         removeValue(pileIdx, value);
+        result = ZKR_SUCCESS;
     }
-    return bfound;
+    return result;
 }
 uint64_t KVTree::addValue(const uint64_t pileIdx, const mpz_class &value)
 {
