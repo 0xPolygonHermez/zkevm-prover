@@ -22,11 +22,33 @@ zkresult RawDataPage::Read (const uint64_t _pageNumber, const uint64_t _offset, 
     uint64_t offset = _offset;
     RawDataStruct * page = (RawDataStruct *)pageManager.getPageAddress(pageNumber);
     uint64_t pageOffset = page->nextPageNumberAndOffset >> 48;
-    zkassert(pageOffset >= minOffset);
-    zkassert(pageOffset <= maxOffset);
-    zkassert(offset >= minOffset);
-    zkassert(offset <= maxOffset);
-    zkassert(offset <= pageOffset);
+
+    // Check offsets
+    if (pageOffset < minOffset)
+    {
+        zklog.error("RawDataPage::Read() found too-small pageOffset=" + to_string(pageOffset) + " pageNumber=" + to_string(pageNumber) + " length=" + to_string(length));
+        return ZKR_DB_ERROR;
+    }
+    if (pageOffset > maxOffset)
+    {
+        zklog.error("RawDataPage::Read() found too-big pageOffset=" + to_string(pageOffset) + " pageNumber=" + to_string(pageNumber) + " length=" + to_string(length));
+        return ZKR_DB_ERROR;
+    }
+    if (offset < minOffset)
+    {
+        zklog.error("RawDataPage::Read() found too-small offset=" + to_string(offset) + " pageNumber=" + to_string(pageNumber) + " length=" + to_string(length));
+        return ZKR_DB_ERROR;
+    }
+    if (offset > maxOffset)
+    {
+        zklog.error("RawDataPage::Read() found too-big offset=" + to_string(offset) + " pageNumber=" + to_string(pageNumber) + " length=" + to_string(length));
+        return ZKR_DB_ERROR;
+    }
+    if (offset > pageOffset)
+    {
+        zklog.error("RawDataPage::Read() found offset=" + to_string(offset) + " > pageOffset=" + to_string(pageOffset) + " pageNumber=" + to_string(pageNumber) + " length=" + to_string(length));
+        return ZKR_DB_ERROR;
+    }
 
     uint64_t copiedBytes = 0;
     while (copiedBytes < length)

@@ -525,7 +525,7 @@ void TreeChunk::getLeafHash(const uint64_t _position, Goldilocks::Element (&resu
     uint64_t position = _position;
     if (children64[position].type != LEAF)
     {
-        zklog.error("TreeChunk::getLeafHash() found children64[position].type=" + to_string(children64[position].type));
+        zklog.error("TreeChunk::getLeafHash() found children64[position].type=" + to_string(children64[position].type) + " position=" + to_string(position));
         exitProcess();
     }
     if (!feaIsZero(children64[position].leaf.hash))
@@ -541,7 +541,7 @@ void TreeChunk::getLeafHash(const uint64_t _position, Goldilocks::Element (&resu
     position = position >> 1;
     if (children32[position].type != LEAF)
     {
-        zklog.error("TreeChunk::getLeafHash() found children32[position].type=" + to_string(children64[position].type));
+        zklog.error("TreeChunk::getLeafHash() found children32[position].type=" + to_string(children64[position].type) + " position=" + to_string(position));
         exitProcess();
     }
     if (!feaIsZero(children32[position].leaf.hash))
@@ -557,7 +557,7 @@ void TreeChunk::getLeafHash(const uint64_t _position, Goldilocks::Element (&resu
     position = position >> 1;
     if (children16[position].type != LEAF)
     {
-        zklog.error("TreeChunk::getLeafHash() found children16[position].type=" + to_string(children64[position].type));
+        zklog.error("TreeChunk::getLeafHash() found children16[position].type=" + to_string(children64[position].type) + " position=" + to_string(position));
         exitProcess();
     }
     if (!feaIsZero(children16[position].leaf.hash))
@@ -573,7 +573,7 @@ void TreeChunk::getLeafHash(const uint64_t _position, Goldilocks::Element (&resu
     position = position >> 1;
     if (children8[position].type != LEAF)
     {
-        zklog.error("TreeChunk::getLeafHash() found children8[position].type=" + to_string(children64[position].type));
+        zklog.error("TreeChunk::getLeafHash() found children8[position].type=" + to_string(children64[position].type) + " position=" + to_string(position));
         exitProcess();
     }
     if (!feaIsZero(children8[position].leaf.hash))
@@ -589,7 +589,7 @@ void TreeChunk::getLeafHash(const uint64_t _position, Goldilocks::Element (&resu
     position = position >> 1;
     if (children4[position].type != LEAF)
     {
-        zklog.error("TreeChunk::getLeafHash() found children4[position].type=" + to_string(children64[position].type));
+        zklog.error("TreeChunk::getLeafHash() found children4[position].type=" + to_string(children64[position].type) + " position=" + to_string(position));
         exitProcess();
     }
     if (!feaIsZero(children4[position].leaf.hash))
@@ -605,7 +605,7 @@ void TreeChunk::getLeafHash(const uint64_t _position, Goldilocks::Element (&resu
     position = position >> 1;
     if (children2[position].type != LEAF)
     {
-        zklog.error("TreeChunk::getLeafHash() found children2[position].type=" + to_string(children64[position].type));
+        zklog.error("TreeChunk::getLeafHash() found children2[position].type=" + to_string(children64[position].type) + " position=" + to_string(position));
         exitProcess();
     }
     if (!feaIsZero(children2[position].leaf.hash))
@@ -617,7 +617,7 @@ void TreeChunk::getLeafHash(const uint64_t _position, Goldilocks::Element (&resu
         return;
     }
 
-    zklog.error("TreeChunk::getLeafHash() failed searching for the lef hash position=" + to_string(_position));
+    zklog.error("TreeChunk::getLeafHash() failed searching for the lef hash position=" + to_string(_position) + " position=" + to_string(position));
     exitProcess();    
 }
 

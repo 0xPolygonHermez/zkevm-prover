@@ -69,7 +69,7 @@ void string2fea(Goldilocks &fr, const string&os, vector<Goldilocks::Element> &fe
     {
         if (i + 16 > os.size())
         {
-            zklog.error("Database::string2fea() found incorrect DATA column size: " + to_string(os.size()));
+            zklog.error("string2fea() found incorrect DATA column size: " + to_string(os.size()));
             exitProcess();
         }
         string2fe(fr, os.substr(i, 16), fe);
@@ -81,7 +81,7 @@ void string2fea(Goldilocks &fr, const string& os, Goldilocks::Element (&fea)[4])
     Goldilocks::Element fe;
     if (os.size() != 64)
     {
-        zklog.error("Database::string2fea() found incorrect DATA column size: " + to_string(os.size()));
+        zklog.error("string2fea() found incorrect DATA column size: " + to_string(os.size()));
         exitProcess();
     }
     int ii=0;
