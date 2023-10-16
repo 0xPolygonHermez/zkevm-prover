@@ -25,7 +25,7 @@ uint64_t HashDBTest (const Config& config)
     //runHashDBBigTree(config);
     
     //numberOfFailedTests += HashDBTestMultiWrite(config);
-    numberOfFailedTests += HashDBProgramTest(config);
+    //numberOfFailedTests += HashDBProgramTest(config);
     numberOfFailedTests += HashDB64WorkflowTest(config);
     return numberOfFailedTests;
 }

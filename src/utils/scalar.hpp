@@ -8,6 +8,7 @@
 #include "ffiasm/fec.hpp"
 #include "exit_process.hpp"
 #include "zklog.hpp"
+#include "zkglobals.hpp"
 
 using namespace std;
 
@@ -328,6 +329,7 @@ inline void ba2fea (Goldilocks &fr, const uint8_t * pData, uint64_t len, Goldilo
 /* Scalar to byte array conversion (up to dataSize bytes) */
 void scalar2ba(uint8_t *pData, uint64_t &dataSize, mpz_class s);
 void scalar2ba16(uint64_t *pData, uint64_t &dataSize, mpz_class s);
+string scalar2ba32(const mpz_class &s); // Returns exactly 32 bytes
 void scalar2bytes(mpz_class &s, uint8_t (&bytes)[32]);
 void scalar2bytesBE(mpz_class &s, uint8_t *pBytes); // pBytes must be a 32-bytes array
 
@@ -423,5 +425,10 @@ uint32_t inline rotateRight32( uint32_t input, uint64_t bits) { return (input >>
 uint32_t inline rotateLeft32( uint32_t input, uint64_t bits) { return (input << bits) | (input >> (32-bits)); }
 uint64_t inline rotateRight64( uint64_t input, uint64_t bits) { return (input >> bits) | (input << (64-bits)); }
 uint64_t inline rotateLeft64( uint64_t input, uint64_t bits) { return (input << bits) | (input >> (64-bits)); }
+
+bool inline feaIsZero (const Goldilocks::Element (&fea)[4])
+{
+    return fr.isZero(fea[0]) && fr.isZero(fea[1]) && fr.isZero(fea[2]) && fr.isZero(fea[3]);
+}
 
 #endif

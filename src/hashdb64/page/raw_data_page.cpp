@@ -6,6 +6,7 @@
 #include "page_manager.hpp"
 #include "scalar.hpp"
 #include "zkmax.hpp"
+#include "constants.hpp"
 
 zkresult RawDataPage::InitEmptyPage (const uint64_t pageNumber)
 {
@@ -21,11 +22,33 @@ zkresult RawDataPage::Read (const uint64_t _pageNumber, const uint64_t _offset, 
     uint64_t offset = _offset;
     RawDataStruct * page = (RawDataStruct *)pageManager.getPageAddress(pageNumber);
     uint64_t pageOffset = page->nextPageNumberAndOffset >> 48;
-    zkassert(pageOffset >= minOffset);
-    zkassert(pageOffset <= maxOffset);
-    zkassert(offset >= minOffset);
-    zkassert(offset <= maxOffset);
-    zkassert(offset <= pageOffset);
+
+    // Check offsets
+    if (pageOffset < minOffset)
+    {
+        zklog.error("RawDataPage::Read() found too-small pageOffset=" + to_string(pageOffset) + " pageNumber=" + to_string(pageNumber) + " length=" + to_string(length));
+        return ZKR_DB_ERROR;
+    }
+    if (pageOffset > maxOffset)
+    {
+        zklog.error("RawDataPage::Read() found too-big pageOffset=" + to_string(pageOffset) + " pageNumber=" + to_string(pageNumber) + " length=" + to_string(length));
+        return ZKR_DB_ERROR;
+    }
+    if (offset < minOffset)
+    {
+        zklog.error("RawDataPage::Read() found too-small offset=" + to_string(offset) + " pageNumber=" + to_string(pageNumber) + " length=" + to_string(length));
+        return ZKR_DB_ERROR;
+    }
+    if (offset > maxOffset)
+    {
+        zklog.error("RawDataPage::Read() found too-big offset=" + to_string(offset) + " pageNumber=" + to_string(pageNumber) + " length=" + to_string(length));
+        return ZKR_DB_ERROR;
+    }
+    if (offset > pageOffset)
+    {
+        zklog.error("RawDataPage::Read() found offset=" + to_string(offset) + " > pageOffset=" + to_string(pageOffset) + " pageNumber=" + to_string(pageNumber) + " length=" + to_string(length));
+        return ZKR_DB_ERROR;
+    }
 
     uint64_t copiedBytes = 0;
     while (copiedBytes < length)
@@ -34,7 +57,7 @@ zkresult RawDataPage::Read (const uint64_t _pageNumber, const uint64_t _offset, 
         if (offset == maxOffset)
         { 
             RawDataStruct * page = (RawDataStruct *)pageManager.getPageAddress(pageNumber);
-            uint64_t nextPageNumber = page->nextPageNumberAndOffset & 0xFFFFFF;
+            uint64_t nextPageNumber = page->nextPageNumberAndOffset & U64Mask48;
             uint64_t nextPageOffset = page->nextPageNumberAndOffset >> 48;
             zkassert(nextPageNumber != 0);
             zkassert((nextPageOffset == maxOffset) || ((nextPageOffset - minOffset) >= (length - copiedBytes)));
@@ -69,7 +92,7 @@ zkresult RawDataPage::Write (uint64_t &pageNumber, const string &data)
 
     // Get page attributes
     uint64_t offset = page->nextPageNumberAndOffset >> 48;
-    uint64_t nextPage = page->nextPageNumberAndOffset & 0xFFFFFF;
+    uint64_t nextPage = page->nextPageNumberAndOffset & U64Mask48;
 
     // Check attributes
     if (nextPage != 0)
@@ -134,12 +157,16 @@ uint64_t RawDataPage::GetOffset (const uint64_t pageNumber)
     return offset;
 }
 
-void RawDataPage::Print (const uint64_t pageNumber, bool details)
+void RawDataPage::Print (const uint64_t pageNumber, bool details, const string &prefix)
 {
-    zklog.info("RawDataPage::Print() pageNumber=" + to_string(pageNumber));
+    zklog.info(prefix + "RawDataPage::Print() pageNumber=" + to_string(pageNumber));
+    RawDataStruct * page = (RawDataStruct *)pageManager.getPageAddress(pageNumber);
     if (details)
     {
-        RawDataStruct * page = (RawDataStruct *)pageManager.getPageAddress(pageNumber);
-        zklog.info("  previousPageNumber=" + to_string(page->previousPageNumber) + "  nextPageNumber=" + to_string(page->nextPageNumberAndOffset & 0xFFFFFF) + " offset=" + to_string(page->nextPageNumberAndOffset >> 48));
+        zklog.info(prefix + "previousPageNumber=" + to_string(page->previousPageNumber) + " nextPageNumber=" + to_string(page->nextPageNumberAndOffset & U64Mask48) + " offset=" + to_string(page->nextPageNumberAndOffset >> 48));
+    }
+    if (page->previousPageNumber != 0)
+    {
+        Print(page->previousPageNumber, details, prefix + " ");
     }
 }
