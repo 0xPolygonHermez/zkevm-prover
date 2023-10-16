@@ -5,7 +5,7 @@
 
 using namespace std;
 
-// Split the fe key into 4-bits chuncks, e.g. 0x123456EF -> { 1, 2, 3, 4, 5, 6, E, F }
+// Get 256 key bits in SMT order
 void splitKey (Goldilocks &fr, const Goldilocks::Element (&key)[4], bool (&result)[256])
 {
     bitset<64> auxb0(fr.toU64(key[0]));
@@ -23,6 +23,28 @@ void splitKey (Goldilocks &fr, const Goldilocks::Element (&key)[4], bool (&resul
         result[cont+3] = auxb3[i];
         cont+=4;
     }
+}
+
+// Get 256 key bits in SMT order, in sets of 6 bits
+void splitKey6 (Goldilocks &fr, const Goldilocks::Element (&key)[4], uint8_t (&result)[43])
+{
+    bool bits[256];
+    splitKey(fr, key, bits);
+    for (uint64_t i=0; i<42; i++)
+    {
+        result[i] =
+            bits[i*6 + 0] * 0b000001 +
+            bits[i*6 + 1] * 0b000010 +
+            bits[i*6 + 2] * 0b000100 +
+            bits[i*6 + 3] * 0b001000 +
+            bits[i*6 + 4] * 0b010000 +
+            bits[i*6 + 5] * 0b100000;
+    }
+    result[42] =
+        bits[42*6 + 0] * 0b000001 +
+        bits[42*6 + 1] * 0b000010 +
+        bits[42*6 + 2] * 0b000100 +
+        bits[42*6 + 3] * 0b001000;
 }
 
 // Joins full key from remaining key and path already used

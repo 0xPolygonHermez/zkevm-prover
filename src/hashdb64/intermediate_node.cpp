@@ -1,8 +1,6 @@
 #include "intermediate_node.hpp"
 #include "poseidon_goldilocks.hpp"
-
-Goldilocks fr;
-PoseidonGoldilocks poseidon;
+#include "zkglobals.hpp"
 
 void IntermediateNode::calculateHash (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Goldilocks::Element (&leftHash)[4], const Goldilocks::Element (&rightHash)[4], vector<HashValueGL> *hashValues)
 {

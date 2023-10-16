@@ -45,6 +45,8 @@
 #include "smt_64_test.hpp"
 #include "sha256.hpp"
 #include "page_manager_test.hpp"
+#include "zkglobals.hpp"
+#include "key_value_tree_test.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -307,7 +309,6 @@ int main(int argc, char **argv)
     // Create one instance of Config based on the contents of the file config.json
     json configJson;
     file2json(pConfigFile, configJson);
-    Config config;
     config.load(configJson);
     zklog.setJsonLogs(config.jsonLogs);
     zklog.setPID(config.proverID.substr(0, 7)); // Set the logs prefix
@@ -491,6 +492,11 @@ int main(int argc, char **argv)
     if (config.runPageManagerTest)
     {
         PageManagerTest();
+    }
+    // Test KeyValueTree
+    if (config.runKeyValueTreeTest)
+    {
+        KeyValueTreeTest();
     }
     
     // Test SMT64
