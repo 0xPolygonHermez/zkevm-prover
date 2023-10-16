@@ -222,7 +222,7 @@ public:
         }
     };
 
-    void genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps *steps);
+    void genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldilocks::Element verkey[4], Steps *steps);
 
     Polinomial *transposeH1H2Columns(void *pAddress, uint64_t &numCommited, Goldilocks::Element *pBuffer);
     void transposeH1H2Rows(void *pAddress, uint64_t &numCommited, Polinomial *transPols);

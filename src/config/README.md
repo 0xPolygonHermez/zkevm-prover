@@ -118,7 +118,11 @@ The configuration parameters can be of different uses:
 |`recursivefStarkInfo`|production|string|Recursive final STARK info file|config + "/recursivef/recursivef.starkinfo.json"|RECURSIVEF_STARK_INFO|
 |`finalVerkey`|production|string|Final verification key file|config + "/final/final.fflonk.verkey.json"|FINAL_VERKEY|
 |`zkevmVerifier`|production|string|zkEVM verifier data file|config + "/zkevm/zkevm.verifier.dat"|ZKEVM_VERIFIER|
+|`zkevmVerkey`|production|string|ZKEVM verification key file|config + "/zkevm/zkevm.verkey.json"|ZKEVM_VERKEY|
+|`c12aVerkey`|production|string|C12A verification key file|config + "/c12a/c12a.verkey.json"|C12A_VERKEY|
+|`recursive1Verkey`|production|string|Recursive 1 verification key file|config + "/recursive1/recursive1.verkey.json"|RECURSIVE1_VERKEY|
 |`recursive2Verkey`|production|string|Recursive 2 verification key file|config + "/recursive2/recursive2.verkey.json"|RECURSIVE2_VERKEY|
+|`recursivefVerkey`|production|string|Recursive F verification key file|config + "/recursivef/recursivef.verkey.json"|RECURSIVEF_VERKEY|
 |`finalVerifier`|production|string|Final verifier data file|config + "/final/final.verifier.dat"|FINAL_VERIFIER|
 |`recursive1Exec`|production|string|Recursive 1 exec file|config + "/recursive1/recursive1.exec"|RECURSIVE1_EXEC|
 |`recursive2Exec`|production|string|Recursive 2 exec file|config + "/recursive2/recursive2.exec"|RECURSIVE2_EXEC|
