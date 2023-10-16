@@ -147,6 +147,7 @@ void Config::load(json &config)
     ParseString(config, "checkTreeRoot", "CHECK_TREE_ROOT", checkTreeRoot, "auto");
     ParseBool(config, "runDatabasePerformanceTest", "RUN_DATABASE_PERFORMANCE_TEST", runDatabasePerformanceTest, false);
     ParseBool(config, "runPageManagerTest", "RUN_PAGE_MANAGER_TEST", runPageManagerTest, false);
+    ParseBool(config, "runKeyValueTreeTest", "RUN_KEY_VALUE_TREE_TEST", runKeyValueTreeTest, false);
     ParseBool(config, "runSMT64Test", "RUN_SMT64_TEST", runSMT64Test, false);
     ParseBool(config, "runUnitTest", "RUN_UNIT_TEST", runUnitTest, false);
 
