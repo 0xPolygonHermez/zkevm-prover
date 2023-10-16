@@ -31,50 +31,50 @@ The zkEVM Prover process can provide up to 3 RPC services and clients:
 
 ### Clone repository
 ```sh
-$ git clone git@github.com:0xPolygonHermez/zkevm-prover.git
-$ cd zkevm-prover
-$ git submodule init
-$ git submodule update
+git clone git@github.com:0xPolygonHermez/zkevm-prover.git
+cd zkevm-prover
+git submodule init
+git submodule update
 ```
 
 ### Compile
 The following packages must be installed.
 ```sh
-$ sudo apt update && sudo apt install build-essential libbenchmark-dev libomp-dev libgmp-dev nlohmann-json3-dev postgresql libpqxx-dev libpqxx-doc nasm libsecp256k1-dev grpc-proto libsodium-dev libprotobuf-dev libssl-dev cmake libgrpc++-dev protobuf-compiler protobuf-compiler-grpc uuid-dev
+sudo apt update && sudo apt install build-essential libbenchmark-dev libomp-dev libgmp-dev nlohmann-json3-dev postgresql libpqxx-dev libpqxx-doc nasm libsecp256k1-dev grpc-proto libsodium-dev libprotobuf-dev libssl-dev cmake libgrpc++-dev protobuf-compiler protobuf-compiler-grpc uuid-dev
 ```
 To download the files needed to run the prover, you have to execute the following command
 ```sh
-$ wget https://de012a78750e59b808d922b39535e862.s3.eu-west-1.amazonaws.com/v1.1.0-rc.1-fork.4.tgz
-$ tar -xzvf v1.1.0-rc.1-fork.4.tgz
-$ rm -rf config
-$ mv v1.1.0-rc.1-fork.4/config .
+wget https://de012a78750e59b808d922b39535e862.s3.eu-west-1.amazonaws.com/v2.0.0-RC4-fork.5.tgz
+tar -xzvf v2.0.0-RC4-fork.5.tgz
+rm -rf config
+mv v2.0.0-RC4-fork.5.tgz .
 ```
 
 Run `make` to compile the project
 ```sh
-$ make clean
-$ make -j
+make clean
+make -j
 ```
 
 To run the testvector:
 ```sh
-$ ./build/zkProver -c testvectors/config_runFile_BatchProof.json
+./build/zkProver -c testvectors/config_runFile_BatchProof.json
 ```
 
 ### StateDB service database
 To use persistence in the StateDB (Merkle-tree) service you must create the database objects needed by the service. To do this run the shell script:
 ```sh
-$ ./tools/statedb/create_db.sh <database> <user> <password>
+./tools/statedb/create_db.sh <database> <user> <password>
 ```
 For example:
 ```sh
-$ ./tools/statedb/create_db.sh testdb statedb statedb
+./tools/statedb/create_db.sh testdb statedb statedb
 ```
 
 ### Build & run docker
 ```sh
-$ sudo docker build -t zkprover .
-$ sudo docker run --rm --network host -ti -p 50051:50051 -p 50061:50061 -p 50071:50071 -v $PWD/testvectors:/usr/src/app zkprover input_executor.json
+sudo docker build -t zkprover .
+sudo docker run --rm --network host -ti -p 50051:50051 -p 50061:50061 -p 50071:50071 -v $PWD/testvectors:/usr/src/app zkprover input_executor.json
 ```
 
 ## Usage
