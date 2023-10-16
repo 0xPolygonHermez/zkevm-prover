@@ -2251,7 +2251,7 @@ void eval_sqrtFpEcParity (Context &ctx, const RomCommand &cmd, CommandResult &cr
         // Negate the result
         RawFec::Element fe;
         fec.fromMpz(fe, cr.scalar.get_mpz_t());
-        fec.neg(fe);
+        fe = fec.neg(fe);
         fec.toMpz(cr.scalar.get_mpz_t(), fe);
     }
 }

@@ -27,7 +27,7 @@
   },
   {
    "inCTX": "1",
-   "CONST": "-5",
+   "CONST": "-6",
    "JMPZ": 1,
    "useJmpAddr": 1,
    "jmpAddr": 4,
@@ -35429,7 +35429,7 @@
    "lineStr": "        D           :MSTORE(ecrecover_v)"
   },
   {
-   "CONST": "496474",
+   "CONST": "497524",
    "inCntBinary": "-1",
    "JMPN": 1,
    "useJmpAddr": 1,
@@ -35440,7 +35440,7 @@
    "jmpAddrLabel": "outOfCountersBinary",
    "elseAddrLabel": "next",
    "fileName": "ecrecover/ecrecover.zkasm",
-   "lineStr": "        %MAX_CNT_BINARY - CNT_BINARY - 1600   :JMPN(outOfCountersBinary)"
+   "lineStr": "        %MAX_CNT_BINARY - CNT_BINARY - 550   :JMPN(outOfCountersBinary)"
   },
   {
    "CONST": "247937",
@@ -68442,7 +68442,7 @@
    "fileName": "constants.zkasm"
   },
   "FORK_ID": {
-   "value": "5",
+   "value": "6",
    "type": "CONST",
    "line": 12,
    "fileName": "constants.zkasm"
