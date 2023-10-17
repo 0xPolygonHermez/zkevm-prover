@@ -7,6 +7,7 @@
 #include "executor.pb.h"
 
 #include <functional>
+#include <grpc/impl/codegen/port_platform.h>
 #include <grpcpp/impl/codegen/async_generic_service.h>
 #include <grpcpp/impl/codegen/async_stream.h>
 #include <grpcpp/impl/codegen/async_unary_call.h>
@@ -51,19 +52,43 @@ class ExecutorService final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::executor::v1::GetFlushStatusResponse>> PrepareAsyncGetFlushStatus(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::executor::v1::GetFlushStatusResponse>>(PrepareAsyncGetFlushStatusRaw(context, request, cq));
     }
-    class async_interface {
+    class experimental_async_interface {
      public:
-      virtual ~async_interface() {}
+      virtual ~experimental_async_interface() {}
       // / Processes a batch
       virtual void ProcessBatch(::grpc::ClientContext* context, const ::executor::v1::ProcessBatchRequest* request, ::executor::v1::ProcessBatchResponse* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void ProcessBatch(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::executor::v1::ProcessBatchResponse* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void ProcessBatch(::grpc::ClientContext* context, const ::executor::v1::ProcessBatchRequest* request, ::executor::v1::ProcessBatchResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void ProcessBatch(::grpc::ClientContext* context, const ::executor::v1::ProcessBatchRequest* request, ::executor::v1::ProcessBatchResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void ProcessBatch(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::executor::v1::ProcessBatchResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void ProcessBatch(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::executor::v1::ProcessBatchResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
       virtual void GetFlushStatus(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::executor::v1::GetFlushStatusResponse* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void GetFlushStatus(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::executor::v1::GetFlushStatusResponse* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void GetFlushStatus(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::executor::v1::GetFlushStatusResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void GetFlushStatus(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::executor::v1::GetFlushStatusResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void GetFlushStatus(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::executor::v1::GetFlushStatusResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void GetFlushStatus(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::executor::v1::GetFlushStatusResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
     };
-    typedef class async_interface experimental_async_interface;
-    virtual class async_interface* async() { return nullptr; }
-    class async_interface* experimental_async() { return async(); }
-   private:
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    typedef class experimental_async_interface async_interface;
+    #endif
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    async_interface* async() { return experimental_async(); }
+    #endif
+    virtual class experimental_async_interface* experimental_async() { return nullptr; }
+  private:
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::executor::v1::ProcessBatchResponse>* AsyncProcessBatchRaw(::grpc::ClientContext* context, const ::executor::v1::ProcessBatchRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::executor::v1::ProcessBatchResponse>* PrepareAsyncProcessBatchRaw(::grpc::ClientContext* context, const ::executor::v1::ProcessBatchRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::executor::v1::GetFlushStatusResponse>* AsyncGetFlushStatusRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) = 0;
@@ -71,7 +96,7 @@ class ExecutorService final {
   };
   class Stub final : public StubInterface {
    public:
-    Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
+    Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel);
     ::grpc::Status ProcessBatch(::grpc::ClientContext* context, const ::executor::v1::ProcessBatchRequest& request, ::executor::v1::ProcessBatchResponse* response) override;
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::executor::v1::ProcessBatchResponse>> AsyncProcessBatch(::grpc::ClientContext* context, const ::executor::v1::ProcessBatchRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::executor::v1::ProcessBatchResponse>>(AsyncProcessBatchRaw(context, request, cq));
@@ -86,24 +111,44 @@ class ExecutorService final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::executor::v1::GetFlushStatusResponse>> PrepareAsyncGetFlushStatus(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::executor::v1::GetFlushStatusResponse>>(PrepareAsyncGetFlushStatusRaw(context, request, cq));
     }
-    class async final :
-      public StubInterface::async_interface {
+    class experimental_async final :
+      public StubInterface::experimental_async_interface {
      public:
       void ProcessBatch(::grpc::ClientContext* context, const ::executor::v1::ProcessBatchRequest* request, ::executor::v1::ProcessBatchResponse* response, std::function<void(::grpc::Status)>) override;
+      void ProcessBatch(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::executor::v1::ProcessBatchResponse* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void ProcessBatch(::grpc::ClientContext* context, const ::executor::v1::ProcessBatchRequest* request, ::executor::v1::ProcessBatchResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void ProcessBatch(::grpc::ClientContext* context, const ::executor::v1::ProcessBatchRequest* request, ::executor::v1::ProcessBatchResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void ProcessBatch(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::executor::v1::ProcessBatchResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void ProcessBatch(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::executor::v1::ProcessBatchResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
       void GetFlushStatus(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::executor::v1::GetFlushStatusResponse* response, std::function<void(::grpc::Status)>) override;
+      void GetFlushStatus(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::executor::v1::GetFlushStatusResponse* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void GetFlushStatus(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::executor::v1::GetFlushStatusResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void GetFlushStatus(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::executor::v1::GetFlushStatusResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void GetFlushStatus(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::executor::v1::GetFlushStatusResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void GetFlushStatus(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::executor::v1::GetFlushStatusResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
      private:
       friend class Stub;
-      explicit async(Stub* stub): stub_(stub) { }
+      explicit experimental_async(Stub* stub): stub_(stub) { }
       Stub* stub() { return stub_; }
       Stub* stub_;
     };
-    class async* async() override { return &async_stub_; }
+    class experimental_async_interface* experimental_async() override { return &async_stub_; }
 
    private:
     std::shared_ptr< ::grpc::ChannelInterface> channel_;
-    class async async_stub_{this};
+    class experimental_async async_stub_{this};
     ::grpc::ClientAsyncResponseReader< ::executor::v1::ProcessBatchResponse>* AsyncProcessBatchRaw(::grpc::ClientContext* context, const ::executor::v1::ProcessBatchRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::executor::v1::ProcessBatchResponse>* PrepareAsyncProcessBatchRaw(::grpc::ClientContext* context, const ::executor::v1::ProcessBatchRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::executor::v1::GetFlushStatusResponse>* AsyncGetFlushStatusRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) override;
@@ -163,22 +208,36 @@ class ExecutorService final {
   };
   typedef WithAsyncMethod_ProcessBatch<WithAsyncMethod_GetFlushStatus<Service > > AsyncService;
   template <class BaseClass>
-  class WithCallbackMethod_ProcessBatch : public BaseClass {
+  class ExperimentalWithCallbackMethod_ProcessBatch : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    WithCallbackMethod_ProcessBatch() {
-      ::grpc::Service::MarkMethodCallback(0,
-          new ::grpc::internal::CallbackUnaryHandler< ::executor::v1::ProcessBatchRequest, ::executor::v1::ProcessBatchResponse>(
+    ExperimentalWithCallbackMethod_ProcessBatch() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(0,
+          new ::grpc_impl::internal::CallbackUnaryHandler< ::executor::v1::ProcessBatchRequest, ::executor::v1::ProcessBatchResponse>(
             [this](
-                   ::grpc::CallbackServerContext* context, const ::executor::v1::ProcessBatchRequest* request, ::executor::v1::ProcessBatchResponse* response) { return this->ProcessBatch(context, request, response); }));}
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::executor::v1::ProcessBatchRequest* request, ::executor::v1::ProcessBatchResponse* response) { return this->ProcessBatch(context, request, response); }));}
     void SetMessageAllocatorFor_ProcessBatch(
-        ::grpc::MessageAllocator< ::executor::v1::ProcessBatchRequest, ::executor::v1::ProcessBatchResponse>* allocator) {
+        ::grpc::experimental::MessageAllocator< ::executor::v1::ProcessBatchRequest, ::executor::v1::ProcessBatchResponse>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(0);
-      static_cast<::grpc::internal::CallbackUnaryHandler< ::executor::v1::ProcessBatchRequest, ::executor::v1::ProcessBatchResponse>*>(handler)
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(0);
+    #endif
+      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::executor::v1::ProcessBatchRequest, ::executor::v1::ProcessBatchResponse>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~WithCallbackMethod_ProcessBatch() override {
+    ~ExperimentalWithCallbackMethod_ProcessBatch() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -186,26 +245,46 @@ class ExecutorService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* ProcessBatch(
-      ::grpc::CallbackServerContext* /*context*/, const ::executor::v1::ProcessBatchRequest* /*request*/, ::executor::v1::ProcessBatchResponse* /*response*/)  { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::executor::v1::ProcessBatchRequest* /*request*/, ::executor::v1::ProcessBatchResponse* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* ProcessBatch(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::executor::v1::ProcessBatchRequest* /*request*/, ::executor::v1::ProcessBatchResponse* /*response*/)
+    #endif
+      { return nullptr; }
   };
   template <class BaseClass>
-  class WithCallbackMethod_GetFlushStatus : public BaseClass {
+  class ExperimentalWithCallbackMethod_GetFlushStatus : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    WithCallbackMethod_GetFlushStatus() {
-      ::grpc::Service::MarkMethodCallback(1,
-          new ::grpc::internal::CallbackUnaryHandler< ::google::protobuf::Empty, ::executor::v1::GetFlushStatusResponse>(
+    ExperimentalWithCallbackMethod_GetFlushStatus() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(1,
+          new ::grpc_impl::internal::CallbackUnaryHandler< ::google::protobuf::Empty, ::executor::v1::GetFlushStatusResponse>(
             [this](
-                   ::grpc::CallbackServerContext* context, const ::google::protobuf::Empty* request, ::executor::v1::GetFlushStatusResponse* response) { return this->GetFlushStatus(context, request, response); }));}
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::google::protobuf::Empty* request, ::executor::v1::GetFlushStatusResponse* response) { return this->GetFlushStatus(context, request, response); }));}
     void SetMessageAllocatorFor_GetFlushStatus(
-        ::grpc::MessageAllocator< ::google::protobuf::Empty, ::executor::v1::GetFlushStatusResponse>* allocator) {
+        ::grpc::experimental::MessageAllocator< ::google::protobuf::Empty, ::executor::v1::GetFlushStatusResponse>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(1);
-      static_cast<::grpc::internal::CallbackUnaryHandler< ::google::protobuf::Empty, ::executor::v1::GetFlushStatusResponse>*>(handler)
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(1);
+    #endif
+      static_cast<::grpc_impl::internal::CallbackUnaryHandler< ::google::protobuf::Empty, ::executor::v1::GetFlushStatusResponse>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~WithCallbackMethod_GetFlushStatus() override {
+    ~ExperimentalWithCallbackMethod_GetFlushStatus() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -213,11 +292,20 @@ class ExecutorService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* GetFlushStatus(
-      ::grpc::CallbackServerContext* /*context*/, const ::google::protobuf::Empty* /*request*/, ::executor::v1::GetFlushStatusResponse* /*response*/)  { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::google::protobuf::Empty* /*request*/, ::executor::v1::GetFlushStatusResponse* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* GetFlushStatus(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::google::protobuf::Empty* /*request*/, ::executor::v1::GetFlushStatusResponse* /*response*/)
+    #endif
+      { return nullptr; }
   };
-  typedef WithCallbackMethod_ProcessBatch<WithCallbackMethod_GetFlushStatus<Service > > CallbackService;
-  typedef CallbackService ExperimentalCallbackService;
+  #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+  typedef ExperimentalWithCallbackMethod_ProcessBatch<ExperimentalWithCallbackMethod_GetFlushStatus<Service > > CallbackService;
+  #endif
+
+  typedef ExperimentalWithCallbackMethod_ProcessBatch<ExperimentalWithCallbackMethod_GetFlushStatus<Service > > ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_ProcessBatch : public BaseClass {
    private:
@@ -293,17 +381,27 @@ class ExecutorService final {
     }
   };
   template <class BaseClass>
-  class WithRawCallbackMethod_ProcessBatch : public BaseClass {
+  class ExperimentalWithRawCallbackMethod_ProcessBatch : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    WithRawCallbackMethod_ProcessBatch() {
-      ::grpc::Service::MarkMethodRawCallback(0,
-          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    ExperimentalWithRawCallbackMethod_ProcessBatch() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(0,
+          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->ProcessBatch(context, request, response); }));
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->ProcessBatch(context, request, response); }));
     }
-    ~WithRawCallbackMethod_ProcessBatch() override {
+    ~ExperimentalWithRawCallbackMethod_ProcessBatch() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -311,21 +409,37 @@ class ExecutorService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* ProcessBatch(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* ProcessBatch(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
   };
   template <class BaseClass>
-  class WithRawCallbackMethod_GetFlushStatus : public BaseClass {
+  class ExperimentalWithRawCallbackMethod_GetFlushStatus : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    WithRawCallbackMethod_GetFlushStatus() {
-      ::grpc::Service::MarkMethodRawCallback(1,
-          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+    ExperimentalWithRawCallbackMethod_GetFlushStatus() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(1,
+          new ::grpc_impl::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
-                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->GetFlushStatus(context, request, response); }));
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->GetFlushStatus(context, request, response); }));
     }
-    ~WithRawCallbackMethod_GetFlushStatus() override {
+    ~ExperimentalWithRawCallbackMethod_GetFlushStatus() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -333,8 +447,14 @@ class ExecutorService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     virtual ::grpc::ServerUnaryReactor* GetFlushStatus(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* GetFlushStatus(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
   };
   template <class BaseClass>
   class WithStreamedUnaryMethod_ProcessBatch : public BaseClass {
@@ -345,8 +465,8 @@ class ExecutorService final {
       ::grpc::Service::MarkMethodStreamed(0,
         new ::grpc::internal::StreamedUnaryHandler<
           ::executor::v1::ProcessBatchRequest, ::executor::v1::ProcessBatchResponse>(
-            [this](::grpc::ServerContext* context,
-                   ::grpc::ServerUnaryStreamer<
+            [this](::grpc_impl::ServerContext* context,
+                   ::grpc_impl::ServerUnaryStreamer<
                      ::executor::v1::ProcessBatchRequest, ::executor::v1::ProcessBatchResponse>* streamer) {
                        return this->StreamedProcessBatch(context,
                          streamer);
@@ -372,8 +492,8 @@ class ExecutorService final {
       ::grpc::Service::MarkMethodStreamed(1,
         new ::grpc::internal::StreamedUnaryHandler<
           ::google::protobuf::Empty, ::executor::v1::GetFlushStatusResponse>(
-            [this](::grpc::ServerContext* context,
-                   ::grpc::ServerUnaryStreamer<
+            [this](::grpc_impl::ServerContext* context,
+                   ::grpc_impl::ServerUnaryStreamer<
                      ::google::protobuf::Empty, ::executor::v1::GetFlushStatusResponse>* streamer) {
                        return this->StreamedGetFlushStatus(context,
                          streamer);

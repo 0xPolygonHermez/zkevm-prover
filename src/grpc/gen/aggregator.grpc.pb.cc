@@ -28,28 +28,28 @@ static const char* AggregatorService_method_names[] = {
 
 std::unique_ptr< AggregatorService::Stub> AggregatorService::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
   (void)options;
-  std::unique_ptr< AggregatorService::Stub> stub(new AggregatorService::Stub(channel, options));
+  std::unique_ptr< AggregatorService::Stub> stub(new AggregatorService::Stub(channel));
   return stub;
 }
 
-AggregatorService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options)
-  : channel_(channel), rpcmethod_Channel_(AggregatorService_method_names[0], options.suffix_for_stats(),::grpc::internal::RpcMethod::BIDI_STREAMING, channel)
+AggregatorService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel)
+  : channel_(channel), rpcmethod_Channel_(AggregatorService_method_names[0], ::grpc::internal::RpcMethod::BIDI_STREAMING, channel)
   {}
 
 ::grpc::ClientReaderWriter< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>* AggregatorService::Stub::ChannelRaw(::grpc::ClientContext* context) {
-  return ::grpc::internal::ClientReaderWriterFactory< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>::Create(channel_.get(), rpcmethod_Channel_, context);
+  return ::grpc_impl::internal::ClientReaderWriterFactory< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>::Create(channel_.get(), rpcmethod_Channel_, context);
 }
 
-void AggregatorService::Stub::async::Channel(::grpc::ClientContext* context, ::grpc::ClientBidiReactor< ::aggregator::v1::ProverMessage,::aggregator::v1::AggregatorMessage>* reactor) {
-  ::grpc::internal::ClientCallbackReaderWriterFactory< ::aggregator::v1::ProverMessage,::aggregator::v1::AggregatorMessage>::Create(stub_->channel_.get(), stub_->rpcmethod_Channel_, context, reactor);
+void AggregatorService::Stub::experimental_async::Channel(::grpc::ClientContext* context, ::grpc::experimental::ClientBidiReactor< ::aggregator::v1::ProverMessage,::aggregator::v1::AggregatorMessage>* reactor) {
+  ::grpc_impl::internal::ClientCallbackReaderWriterFactory< ::aggregator::v1::ProverMessage,::aggregator::v1::AggregatorMessage>::Create(stub_->channel_.get(), stub_->rpcmethod_Channel_, context, reactor);
 }
 
 ::grpc::ClientAsyncReaderWriter< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>* AggregatorService::Stub::AsyncChannelRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq, void* tag) {
-  return ::grpc::internal::ClientAsyncReaderWriterFactory< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>::Create(channel_.get(), cq, rpcmethod_Channel_, context, true, tag);
+  return ::grpc_impl::internal::ClientAsyncReaderWriterFactory< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>::Create(channel_.get(), cq, rpcmethod_Channel_, context, true, tag);
 }
 
 ::grpc::ClientAsyncReaderWriter< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>* AggregatorService::Stub::PrepareAsyncChannelRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncReaderWriterFactory< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>::Create(channel_.get(), cq, rpcmethod_Channel_, context, false, nullptr);
+  return ::grpc_impl::internal::ClientAsyncReaderWriterFactory< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>::Create(channel_.get(), cq, rpcmethod_Channel_, context, false, nullptr);
 }
 
 AggregatorService::Service::Service() {
@@ -58,8 +58,8 @@ AggregatorService::Service::Service() {
       ::grpc::internal::RpcMethod::BIDI_STREAMING,
       new ::grpc::internal::BidiStreamingHandler< AggregatorService::Service, ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>(
           [](AggregatorService::Service* service,
-             ::grpc::ServerContext* ctx,
-             ::grpc::ServerReaderWriter<::aggregator::v1::AggregatorMessage,
+             ::grpc_impl::ServerContext* ctx,
+             ::grpc_impl::ServerReaderWriter<::aggregator::v1::AggregatorMessage,
              ::aggregator::v1::ProverMessage>* stream) {
                return service->Channel(ctx, stream);
              }, this)));
