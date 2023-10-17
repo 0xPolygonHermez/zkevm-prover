@@ -162,7 +162,9 @@ zkresult StateManager64::setStateRoot(const string &batchUUID, uint64_t tx, cons
                     unordered_map<string, mpz_class>::const_iterator it;
                     for (it = dbWrite.begin(); it != dbWrite.end(); it++)
                     {
-                        zkr = batchState.keyValueTree.extract(it->first, it->second);
+                        Goldilocks::Element key_[4];
+                        string2fea(frSM64,it->first, key_);
+                        zkr = batchState.keyValueTree.extract(key_, it->second);
                         if (zkr != ZKR_SUCCESS)
                         {
                             zklog.error("StateManager64::setStateRoot() failed calling batchState.keyValueTree.extract()");
@@ -275,7 +277,9 @@ zkresult StateManager64::write (const string &batchUUID, uint64_t tx, const stri
     txState.persistence[persistence].subState[txState.persistence[persistence].currentSubState].dbWrite[key] = value;
 
     // Add to common write pool to speed up read
-    batchState.keyValueTree.write(key, value, level);
+    Goldilocks::Element key_[4];
+    string2fea(frSM64, key, key_);
+    batchState.keyValueTree.write(key_, value, level);
     // TODO: Get level from DB and return the max
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
@@ -306,7 +310,9 @@ zkresult StateManager64::read(const string &batchUUID, const string &key, mpz_cl
     BatchState64 &batchState = it->second;
 
     // Search in the common key-value tree
-    zkresult zkr = batchState.keyValueTree.read(key, value, level);
+    Goldilocks::Element key_[4];
+    string2fea(frSM64, key, key_);
+    zkresult zkr = batchState.keyValueTree.read(key_, value, level);
     if (zkr == ZKR_SUCCESS)
     {
         // Add to the read log

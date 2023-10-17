@@ -1,8 +1,36 @@
 #include "level_tree_key_value.hpp"
+#include "zklog.hpp"
+#include "exit_process.hpp"
 
 KVTree::KVTree(uint64_t nBitsStep_)
 {
     postConstruct(nBitsStep_);
+}
+
+KVTree& KVTree::operator=(const KVTree& other){
+    if(this == &other){
+        return *this;
+    }
+    nBitsStep = other.nBitsStep;
+    stepMask = other.stepMask;
+    stepsPerKeyWord = other.stepsPerKeyWord;
+    nodeSize = other.nodeSize;
+    nSteps = other.nSteps;
+    useInsertCounters = other.useInsertCounters;
+    pileSlotSize = other.pileSlotSize;
+    nodes = other.nodes;
+    nNodes = other.nNodes;
+    pile = other.pile;
+    nKeys = other.nKeys;
+    emptyNodes = other.emptyNodes;
+    nEmptyNodes = other.nEmptyNodes;
+    emptyKeys = other.emptyKeys;
+    nEmptyKeys = other.nEmptyKeys;
+    pileValues = other.pileValues;
+    nValues = other.nValues;
+    emptyValues = other.emptyValues;
+    nEmptyValues = other.nEmptyValues;
+    return *this;
 }
 
 void KVTree::postConstruct(uint64_t nBitsStep_)
@@ -56,7 +84,7 @@ zkresult KVTree::write(const Goldilocks::Element (&key)[4], const mpz_class &val
     return ZKR_SUCCESS;
 }
 
-zkresult KVTree::extract(const Goldilocks::Element (&key)[4], mpz_class &value)
+zkresult KVTree::extract(const Goldilocks::Element (&key)[4], const mpz_class &value)
 {
     int64_t pileIdx;
     uint64_t key_[4]={key[0].fe,key[1].fe,key[2].fe,key[3].fe}; //avoidable copy
@@ -64,7 +92,12 @@ zkresult KVTree::extract(const Goldilocks::Element (&key)[4], mpz_class &value)
     zkresult result = ZKR_DB_KEY_NOT_FOUND;
     if (bfound)
     {
-        removeValue(pileIdx, value);
+        mpz_class value_;
+        removeValue(pileIdx, value_);
+        if(value_ != value){
+            zklog.error("KeyValueTree::extract() found stored value=" + value_.get_str(10) + " != provided value=" + value.get_str(10));
+            exitProcess();
+        }
         result = ZKR_SUCCESS;
     }
     return result;

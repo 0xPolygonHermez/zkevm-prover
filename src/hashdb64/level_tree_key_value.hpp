@@ -30,12 +30,14 @@ public:
     KVTree(){};
     KVTree(uint64_t nBitsStep_);
     void postConstruct(uint64_t nBitsStep_);
+    KVTree& operator=(const KVTree& other);
     ~KVTree(){};
 
     zkresult write(const Goldilocks::Element (&key)[4], const mpz_class &value, uint64_t &level);
     zkresult read(const Goldilocks::Element (&key)[4],       mpz_class &value, uint64_t &level);
-    zkresult extract(const Goldilocks::Element (&key)[4],       mpz_class &value); // returns ZKR_DB_KEY_NOT_FOUND if key was not found; value is used to check that it matches the latest value
+    zkresult extract(const Goldilocks::Element (&key)[4], const mpz_class &value); // returns ZKR_DB_KEY_NOT_FOUND if key was not found; value is used to check that it matches the latest value
     uint64_t level(const Goldilocks::Element (&key)[4]); // returns level; key might or might not exist in the tree
+    
 
 protected:
     uint64_t addValue(const uint64_t pileIdx, const mpz_class &value);
