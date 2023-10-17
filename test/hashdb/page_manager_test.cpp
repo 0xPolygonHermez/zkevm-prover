@@ -292,8 +292,25 @@ uint64_t PageManagerAccuracyTest (void)
         zkassertpermanent(page4Data[i] == i);
     }
 
+    pageManagerFile.addFile();
+    zkassertpermanent(pageManagerFile.getNumFreePages() == 197);
+    pages.clear(); 
+    for(int i=0; i<197;++i){
+        pages.insert(pageManagerFile.getFreePage());
+    }
+    zkassertpermanent(pages.size() == 197);
+    zkassertpermanent(pageManagerFile.getNumFreePages() == 0);
+    for(int i=2; i<200;++i){
+        pageManagerFile.releasePage(i);
+    }
+    zkassertpermanent(pageManagerFile.getNumFreePages() == 198);
+
+
+
     //delete file
     std::remove(fineNameAll.c_str());
+    const string fineNameAll1 = fileName + "_1.db";
+    std::remove(fineNameAll1.c_str());
 
     return 0;   
 }

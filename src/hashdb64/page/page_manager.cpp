@@ -21,7 +21,7 @@ PageManager::PageManager()
     firstUnusedPage = 2;
     numFreePages = 0;
     freePages.resize(16384);
-    AddPages(131072);
+    addPages(131072);
 }
 PageManager::PageManager(const uint64_t nPages_)
 {
@@ -32,7 +32,7 @@ PageManager::PageManager(const uint64_t nPages_)
     pages.resize(1);
     numFreePages = 0;
     freePages.resize(16384);
-    AddPages(nPages_);
+    addPages(nPages_);
 }
 PageManager::PageManager(const string fileName_, const uint64_t fileSize_, const uint64_t nFiles_, const string folderName_){
     
@@ -55,7 +55,7 @@ PageManager::PageManager(const string fileName_, const uint64_t fileSize_, const
         if(folderName != "")
             file = folderName + "/";
         file += (fileName + "_" + to_string(k)+".db");
-        fd = open(file.c_str(), O_RDWR | O_CREAT);
+        fd = open(file.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
         if(k==0) file0Descriptor = fd;
         if (fd == -1) {
             zklog.error("PageManager: failed to open file.");
@@ -93,7 +93,7 @@ PageManager::~PageManager(void)
     }
 }
 
-zkresult PageManager::AddPages(const uint64_t nPages_)
+zkresult PageManager::addPages(const uint64_t nPages_)
 {
     unique_lock<shared_mutex> guard(pagesLock);
     zkassertpermanent(mappedFile == false);
@@ -110,7 +110,34 @@ zkresult PageManager::AddPages(const uint64_t nPages_)
     pagesPerFile = nPages;
     return zkresult::ZKR_SUCCESS;
 }
+zkresult PageManager::addFile(){
 
+    zkassertpermanent(mappedFile == true);
+    string file = "";
+    if(folderName != "")
+        file = folderName + "/";
+    file += (fileName + "_" + to_string(nFiles)+".db");
+    int fd = open(file.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    if (fd == -1) {
+        zklog.error("PageManager: failed to open file.");
+        exitProcess();
+    }
+    if (ftruncate(fd, fileSize) == -1) {
+        zklog.error("PageManager: failed to truncate to file.");
+        close(fd);
+    }
+    unique_lock<shared_mutex> guard(pagesLock);
+    nPages += pagesPerFile;
+    pages.push_back(NULL);
+    pages[nFiles] = (char *)mmap(NULL, fileSize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0); //MAP_POPULATE
+    if (pages[nFiles] == MAP_FAILED) {
+        zklog.error("Failed to mmap file: " + (string)strerror(errno));
+    }
+    ++nFiles;
+#if USE_FILE_IO
+        fileDescriptors.push_back(fd);
+#endif
+}
 uint64_t PageManager::getFreePage(void)
 {
 #if MULTIPLE_WRITES

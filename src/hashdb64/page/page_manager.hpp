@@ -25,6 +25,7 @@ public:
     PageManager(const uint64_t nPages_);
     PageManager(const string fileName_, const uint64_t fileSize_= 1ULL<<37, const uint64_t nFiles_=1, const string folderName_="db");
     ~PageManager();
+    zkresult addFile();
     
 
     uint64_t getFreePage();
@@ -80,7 +81,7 @@ private:
     uint64_t nPages;
     vector<char *> pages;
     vector<int> fileDescriptors;
-    zkresult AddPages(const uint64_t nPages_);
+    zkresult addPages(const uint64_t nPages_);
 
     mutex freePagesLock;
     uint64_t firstUnusedPage;
