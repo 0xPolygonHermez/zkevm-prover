@@ -10,6 +10,8 @@
 #include "key_utils.hpp"
 #include "constants.hpp"
 
+//#define LOG_KEY_VALUE_PAGE
+
 zkresult KeyValuePage::InitEmptyPage (const uint64_t pageNumber)
 {
     KeyValueStruct * page = (KeyValueStruct *)pageManager.getPageAddress(pageNumber);
@@ -82,6 +84,7 @@ zkresult KeyValuePage::Read (const uint64_t pageNumber, const string &key, const
                 return ZKR_DB_KEY_NOT_FOUND;
             }
             
+#ifdef LOG_KEY_VALUE_PAGE
             zklog.info("KeyValuePage::Read() read length=" + to_string(length) +
                 " result=" + zkresult2string(zkr) +
                 " pageNumber=" + to_string(pageNumber) +
@@ -90,7 +93,8 @@ zkresult KeyValuePage::Read (const uint64_t pageNumber, const string &key, const
                 " key=" + ba2string(key) +
                 " rawDataPage=" + to_string(rawDataPage) +
                 " rawDataOffset=" + to_string(rawDataOffset));
-            
+#endif
+
             value = rawData.substr(4 + key.size());
 
             return ZKR_SUCCESS;
@@ -185,6 +189,7 @@ zkresult KeyValuePage::Write (uint64_t &pageNumber, const string &key, const vec
                 return zkr;
             }
 
+#ifdef LOG_KEY_VALUE_PAGE
             zklog.info("KeyValuePage::Write() wrote length=" + to_string(length) +
                 " totalLength=" + to_string(lengthKeyValue.size()) +
                 " result=" + zkresult2string(zkr) +
@@ -196,6 +201,7 @@ zkresult KeyValuePage::Write (uint64_t &pageNumber, const string &key, const vec
                 " rawDataOffset=" + to_string(rawDataOffset) +
                 " leaving headerPage->rawDataPage=" + to_string(headerPage->rawDataPage) +
                 " headerPage->rawDataOffset=" + to_string(RawDataPage::GetOffset(headerPage->rawDataPage)));            
+#endif
 
             // Update this entry as a leaf node (control = 1)
             page->key[index] = (uint64_t(1)<<60) | ((rawDataOffset & U64Mask12) << 48) | (rawDataPage & U64Mask48);
@@ -282,8 +288,10 @@ zkresult KeyValuePage::Write (uint64_t &pageNumber, const string &key, const vec
             }
             uint64_t newIndex = existingKeyBits[level+1];
             newPage->key[newIndex] = page->key[index];
-
+            
+#ifdef LOG_KEY_VALUE_PAGE
             zklog.info("KeyValuePage::Write() moved existing key=" + ba2string(existingLengthAndKey.substr(4)) + " to new page=" + to_string(newPageNumber) + " at index=" + to_string(newIndex));
+#endif
 
             // Write the new key in the newly created page at the next level
             zkr = Write(newPageNumber, key, keyBits, value, level+1, headerPageNumber);

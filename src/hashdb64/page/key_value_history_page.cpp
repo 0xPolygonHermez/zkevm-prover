@@ -19,7 +19,7 @@ zkresult KeyValueHistoryPage::InitEmptyPage (const uint64_t pageNumber)
     return ZKR_SUCCESS;
 }
 
-zkresult KeyValueHistoryPage::Read (const uint64_t pageNumber, const string &key, const string &keyBits, const uint64_t version, mpz_class &value, const uint64_t level)
+zkresult KeyValueHistoryPage::Read (const uint64_t pageNumber, const string &key, const string &keyBits, const uint64_t version, mpz_class &value, const uint64_t level, uint64_t &keyLevel)
 {
     zkassert(key.size() == 32);
     zkassert(keyBits.size() == 43);
@@ -39,6 +39,7 @@ zkresult KeyValueHistoryPage::Read (const uint64_t pageNumber, const string &key
         case 0:
         {
             value = 0;
+            keyLevel = (level + 1) * 6;
             return ZKR_SUCCESS;            
         }
         // Leaf node
@@ -74,11 +75,18 @@ zkresult KeyValueHistoryPage::Read (const uint64_t pageNumber, const string &key
                     {
                         //zklog.info("KeyValueHistoryPage::Read() found existing key=" + ba2string(keyValue.substr(0, 32)) + " != key=" + ba2string(key));
                         value = 0;
+
+                        // Get the key level
+                        keyLevel = (level + 1) * 6;
+
                         return ZKR_SUCCESS;
                     }
 
                     // Convert the value
                     ba2scalar((uint8_t *)keyValue.c_str() + 32, 32, value);
+
+                    // Get the key level
+                    keyLevel = (level + 1) * 6;
 
                     return ZKR_SUCCESS;
                 }
@@ -90,6 +98,10 @@ zkresult KeyValueHistoryPage::Read (const uint64_t pageNumber, const string &key
                 if (previousVersionOffset == 0)
                 {
                     value = 0;
+
+                    // Get the key level
+                    keyLevel = (level + 1) * 6;
+
                     return ZKR_SUCCESS;
                 }
 
@@ -110,11 +122,11 @@ zkresult KeyValueHistoryPage::Read (const uint64_t pageNumber, const string &key
         case 2:
         {
             uint64_t nextPageNumber = page->keyValueEntry[index][1] & U64Mask48;
-            return Read(nextPageNumber, key, keyBits, version, value, level + 1);
+            return Read(nextPageNumber, key, keyBits, version, value, level + 1, keyLevel);
         }
         default:
         {
-            zklog.error("KeyValuePage::Write() found invalid control=" + to_string(control) + " pageNumber=" + to_string(pageNumber));
+            zklog.error("KeyValuePage::Read() found invalid control=" + to_string(control) + " pageNumber=" + to_string(pageNumber));
             return ZKR_DB_ERROR;
         }
     }
@@ -123,7 +135,7 @@ zkresult KeyValueHistoryPage::Read (const uint64_t pageNumber, const string &key
     return ZKR_DB_KEY_NOT_FOUND;
 }
 
-zkresult KeyValueHistoryPage::Read (const uint64_t pageNumber, const string &key, const uint64_t version, mpz_class &value)
+zkresult KeyValueHistoryPage::Read (const uint64_t pageNumber, const string &key, const uint64_t version, mpz_class &value, uint64_t &keyLevel)
 {
     zkassert(key.size() == 32);
     zkassert((version & U64Mask48) == version);
@@ -136,7 +148,112 @@ zkresult KeyValueHistoryPage::Read (const uint64_t pageNumber, const string &key
     string keyBits;
     keyBits.append((char *)keyBitsArray, 43);
 
-    return Read(pageNumber, key, keyBits, version, value, 0);
+    return Read(pageNumber, key, keyBits, version, value, 0, keyLevel);
+}
+
+zkresult KeyValueHistoryPage::ReadLevel (const uint64_t pageNumber, const string &key, const string &keyBits, const uint64_t level, uint64_t &keyLevel)
+{
+    zkassert(key.size() == 32);
+    zkassert(keyBits.size() == 43);
+    zkassert(level < 43);
+
+    zkresult zkr;
+
+    // Get the data from this page
+    KeyValueHistoryStruct * page = (KeyValueHistoryStruct *)pageManager.getPageAddress(pageNumber);
+    uint64_t index = keyBits[level];
+    uint64_t control = page->keyValueEntry[index][0] >> 60;
+
+    // Check control
+    switch (control)
+    {
+        // Empty slot
+        case 0:
+        {
+            keyLevel = (level + 1) * 6;
+            return ZKR_SUCCESS;            
+        }
+        // Leaf node
+        case 1:
+        {
+            uint64_t rawDataPage = page->keyValueEntry[index][1] & U64Mask48;
+            uint64_t rawDataOffset = page->keyValueEntry[index][1] >> 48;
+            string keyValue;
+            zkr = RawDataPage::Read(rawDataPage, rawDataOffset, 64, keyValue);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("KeyValueHistoryPage::ReadLevel() failed calling RawDataPage.Read result=" + zkresult2string(zkr) + " rawDataPage=" + to_string(rawDataPage) + " rawDataOffset=" + to_string(rawDataOffset) + " key=" + ba2string(key) + " level=" + to_string(level) + " index=" + to_string(index));
+                return zkr;
+            }
+            if (keyValue.size() != 64)
+            {
+                zklog.error("KeyValueHistoryPage::ReadLevel() called RawDataPage.Read and got invalid length=" + to_string(keyValue.size()) + " rawDataPage=" + to_string(rawDataPage) + " rawDataOffset=" + to_string(rawDataOffset) + " key=" + ba2string(key) + " level=" + to_string(level) + " index=" + to_string(index));
+                return zkr;
+            }
+
+            // If this is the same key
+            if (memcmp(key.c_str(), keyValue.c_str(), 32) != 0)
+            {
+                // Get the key level
+                keyLevel = (level + 1) * 6;
+
+                return ZKR_SUCCESS;
+            }
+
+            // If keys are different, we need to know how different they are
+            Goldilocks::Element keyFea[4];
+            string2fea(fr, ba2string(keyValue.substr(0, 32)), keyFea);
+            uint8_t foundKeyBitsArray[43];
+            splitKey6(fr, keyFea, foundKeyBitsArray);
+            string foundKeyBits;
+            foundKeyBits.append((char *)foundKeyBitsArray, 43);
+
+
+            // Find the first 6-bit set that is different
+            uint64_t i=0;
+            for (; i<43; i++)
+            {
+                if (keyBits[i] != foundKeyBits[i])
+                {
+                    break;
+                }
+            }
+
+            // Set the level
+            keyLevel = (i + 1) * 6;
+
+            return ZKR_SUCCESS;
+        }
+        // Intermediate node
+        case 2:
+        {
+            uint64_t nextPageNumber = page->keyValueEntry[index][1] & U64Mask48;
+            return ReadLevel(nextPageNumber, key, keyBits, level + 1, keyLevel);
+        }
+        default:
+        {
+            zklog.error("KeyValuePage::ReadLevel() found invalid control=" + to_string(control) + " pageNumber=" + to_string(pageNumber));
+            return ZKR_DB_ERROR;
+        }
+    }
+
+    // Not found
+    return ZKR_DB_KEY_NOT_FOUND;
+}
+
+zkresult KeyValueHistoryPage::ReadLevel (const uint64_t pageNumber, const string &key, uint64_t &keyLevel)
+{
+    zkassert(key.size() == 32);
+
+    // Get 256 key bits in SMT order, in sets of 6 bits
+    Goldilocks::Element keyFea[4];
+    string2fea(fr, ba2string(key), keyFea);
+    uint8_t keyBitsArray[43];
+    splitKey6(fr, keyFea, keyBitsArray);
+    string keyBits;
+    keyBits.append((char *)keyBitsArray, 43);
+
+    return ReadLevel(pageNumber, key, keyBits, 0, keyLevel);
 }
 
 zkresult KeyValueHistoryPage::Write (uint64_t &pageNumber, const string &key, const string &keyBits, const uint64_t version, const mpz_class &value, const uint64_t level, uint64_t &headerPageNumber)

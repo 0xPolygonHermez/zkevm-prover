@@ -53,8 +53,9 @@ public:
     static zkresult WriteVersionData (      uint64_t &headerPageNumber, const uint64_t &version, const VersionDataStruct &versionData);
 
     // Key-Value-History methods
-    static zkresult KeyValueHistoryRead  (const uint64_t keyValueHistoryPage,  const string &key, const uint64_t version,       mpz_class &value);
-    static zkresult KeyValueHistoryWrite (      uint64_t &headerPageNumber, const string &key, const uint64_t version, const mpz_class &value);
+    static zkresult KeyValueHistoryRead          (const uint64_t  keyValueHistoryPage, const string &key, const uint64_t version,       mpz_class &value, uint64_t &keyLevel);
+    static zkresult KeyValueHistoryReadLevel     (      uint64_t &headerPageNumber,    const string &key, uint64_t &keyLevel);
+    static zkresult KeyValueHistoryWrite         (      uint64_t &headerPageNumber,    const string &key, const uint64_t version, const mpz_class &value);
     static zkresult KeyValueHistoryCalculateHash (uint64_t &headerPageNumber, Goldilocks::Element (&hash)[4]);
 
     // Program page methods
