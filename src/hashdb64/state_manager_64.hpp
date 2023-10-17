@@ -70,6 +70,9 @@ public:
     BatchState64() : currentTx(0)
     {
         txState.reserve(32);
+ #ifdef USE_NEW_KVTREE
+        keyValueTree.postConstruct(4);
+#endif       
     };
 };
 
