@@ -20,6 +20,7 @@
 #include "header_page.hpp"
 #include "tree_chunk.hpp"
 #include "key_value_page.hpp"
+#include "raw_data_page.hpp"
 
 // Helper functions
 string removeBSXIfExists64(string s) {return ((s.at(0) == '\\') && (s.at(1) == 'x')) ? s.substr(2) : s;}
@@ -27,11 +28,11 @@ string removeBSXIfExists64(string s) {return ((s.at(0) == '\\') && (s.at(1) == '
 Database64::Database64 (Goldilocks &fr, const Config &config) :
         fr(fr),
         config(config),
-        headerPage(0)
+        headerPageNumber(0)
 {
     zkresult zkr;
-    headerPage = pageManager.getFreePage();
-    zkr = HeaderPage::InitEmptyPage(headerPage);
+    headerPageNumber = 0;
+    zkr = HeaderPage::InitEmptyPage(headerPageNumber);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("Database64::Database64() failed calling HeaderPage::InitEmptyPage() result=" + zkresult2string(zkr));
@@ -135,7 +136,7 @@ zkresult Database64::setProgram (const string &key, const vector<uint8_t> &data,
 
     string program;
     ba2ba(data, program);
-    zkresult zkr = HeaderPage::WriteProgram(headerPage, string2ba(key), program);
+    zkresult zkr = HeaderPage::WriteProgram(headerPageNumber, string2ba(key), program);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("Database64::setProgram() failed calling HeaderPage::WriteProgram() result=" + zkresult2string(zkr));
@@ -172,7 +173,7 @@ zkresult Database64::getProgram(const string &key, vector<uint8_t> &data, Databa
     if (dbReadLog != NULL) gettimeofday(&t, NULL);
 
     string program;
-    zkresult zkr = HeaderPage::ReadProgram(headerPage, string2ba(key), program);
+    zkresult zkr = HeaderPage::ReadProgram(headerPageNumber, string2ba(key), program);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("Database64::getProgram() failed calling HeaderPage::ReadProgram() result=" + zkresult2string(zkr));
@@ -449,267 +450,139 @@ zkresult Database64::WriteTree (const Goldilocks::Element (&oldRoot)[4], const v
 
     vector<KeyValue> keyValues(_keyValues);
 
-    vector<TreeChunk *> chunks;
-    vector<DB64Query> dbQueries;
-
-    // Tree level; we start at level 0, then we increase it 6 by 6
-    uint64_t level = 0;
-
-    // Create the first tree chunk (the root one), and store it in chunks[0]
-    TreeChunk *c = new TreeChunk(*this, poseidon);
-    if (c == NULL)
+    if (keyValues.size() == 0)
     {
-        zklog.error("Database64::WriteTree() failed calling new TreeChunk()");
-        exitProcess();
+        zklog.error("Database64::WriteTree() called with keyValues.size=0");
+        return ZKR_DB_ERROR;
     }
-    chunks.push_back(c);
 
-    uint64_t chunksProcessed = 0;
+    //HeaderPage::Print(headerPageNumber, true);
 
-    // Get the old root as a string
-    string oldRootString = fea2string(fr, oldRoot);
+    uint64_t version = 0;
 
-    uint64_t currentVersion = HeaderPage::GetLastVersion(headerPage);
-    uint64_t version = currentVersion + 1;
-    HeaderPage::SetLastVersion(headerPage, version);
-    HeaderPage::Print(headerPage, false);
-
-    // If old root is zero, init chunks[0] as an empty tree chunk
+    // Check if the root is zero
     if (fr.isZero(oldRoot[0]) && fr.isZero(oldRoot[1]) && fr.isZero(oldRoot[2]) && fr.isZero(oldRoot[3]))
     {
-        chunks[0]->resetToZero(level);
-        //currentVersion = 0;
+        uint64_t lastVersion = HeaderPage::GetLastVersion(headerPageNumber);
+        if (lastVersion != 0)
+        {
+            zklog.error("Database64::WriteTree() called with a zero old state root, but last version=" + to_string(lastVersion) + " oldRoot=" + fea2string(fr, oldRoot));
+            return ZKR_DB_ERROR;
+        }
+        version = 1;
     }
     else
     {
-        DB64Query dbQuery(oldRootString, oldRoot, chunks[0]->data);
-        dbQueries.push_back(dbQuery);
-    }
+        // Get the old root as a string and byte array
+        string oldRootString = fea2string(fr, oldRoot);
+        string oldRootBa = string2ba(oldRootString);
 
-    // Copy the key values list into the root tree chunk
-    uint64_t keyValuesSize = keyValues.size();
-    c->list.reserve(keyValuesSize);
-    for (uint64_t i=0; i<keyValuesSize; i++)
-    {
-        c->list.emplace_back(i);
-    }
-
-    while (chunksProcessed < chunks.size())
-    {
-        /*zkr = db.read(dbQueries);
+        // Get the version corresponding to this old state root
+        uint64_t oldRootVersion;
+        zkr = HeaderPage::ReadRootVersion(headerPageNumber, oldRootBa, oldRootVersion);
         if (zkr != ZKR_SUCCESS)
         {
-            zklog.error("Database64::WriteTree() failed calling db.multiRead() result=" + zkresult2string(zkr));
-            for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
+            zklog.error("Database64::WriteTree() failed calling HeaderPage::ReadRootVersion() result=" + zkresult2string(zkr) + " oldRootString=" + oldRootString);
             return zkr;
         }
-        dbQueries.clear();*/
 
-        int chunksToProcess = chunks.size();
-
-        for (int i=chunksProcessed; i<chunksToProcess; i++)
+        // Get the last version
+        uint64_t lastVersion = HeaderPage::GetLastVersion(headerPageNumber);
+        if (oldRootVersion != lastVersion)
         {
-            chunks[i]->setLevel(level);
-            if (chunks[i]->data.size() > 0)
-            {
-                zkr = chunks[i]->data2children();
-                if (zkr != ZKR_SUCCESS)
-                {
-                    zklog.error("Database64::WriteTree() failed calling chunks[i]->data2children() result=" + zkresult2string(zkr));
-                    return zkr;
-                }
-            }
-            for (uint64_t j=0; j<chunks[i]->list.size(); j++)
-            {
-                bool keyBits[256];
-                splitKey(fr, keyValues[chunks[i]->list[j]].key, keyBits);
-                uint64_t k = getKeyChildren64Position(keyBits, level);
-                switch (chunks[i]->getChild(k).type)
-                {
-                    case ZERO:
-                    {
-                        if (keyValues[chunks[i]->list[j]].value != 0)
-                        {
-                            chunks[i]->setLeafChild(k, keyValues[chunks[i]->list[j]].key, keyValues[chunks[i]->list[j]].value);                  
-                        }
-                        break;
-                    }
-                    case LEAF:
-                    {
-                        // If the key is the same, then check the value
-                        if (fr.equal(chunks[i]->getChild(k).leaf.key[0], keyValues[chunks[i]->list[j]].key[0]) &&
-                            fr.equal(chunks[i]->getChild(k).leaf.key[1], keyValues[chunks[i]->list[j]].key[1]) &&
-                            fr.equal(chunks[i]->getChild(k).leaf.key[2], keyValues[chunks[i]->list[j]].key[2]) &&
-                            fr.equal(chunks[i]->getChild(k).leaf.key[3], keyValues[chunks[i]->list[j]].key[3]))
-                        {
-                            // If value is different, copy it
-                            if (chunks[i]->getChild(k).leaf.value != keyValues[chunks[i]->list[j]].value)
-                            {
-                                if (keyValues[chunks[i]->list[j]].value == 0)
-                                {
-                                    chunks[i]->setZeroChild(k);
-                                }
-                                else
-                                {
-                                    chunks[i]->setLeafChild(k, keyValues[chunks[i]->list[j]].key, keyValues[chunks[i]->list[j]].value);
-                                }
-                            }
-                        }
-                        else
-                        {
-                            // We create a new trunk
-                            TreeChunk *c = new TreeChunk(*this, poseidon);
-                            if (c == NULL)
-                            {
-                                zklog.error("Database64::WriteTree() failed calling new TreeChunk()");
-                                exitProcess();
-                            }
-
-                            // Reset to zero
-                            c->resetToZero(level + 6);
-
-                            // We create a KeyValue from the original leaf node
-                            KeyValue kv;
-                            kv.key[0] = chunks[i]->getChild(k).leaf.key[0];
-                            kv.key[1] = chunks[i]->getChild(k).leaf.key[1];
-                            kv.key[2] = chunks[i]->getChild(k).leaf.key[2];
-                            kv.key[3] = chunks[i]->getChild(k).leaf.key[3];
-                            kv.value = chunks[i]->getChild(k).leaf.value;
-
-                            // We add to the list the original leaf node
-                            keyValues.emplace_back(kv);
-                            c->list.emplace_back(keyValues.size()-1);
-
-                            // We add to the list the new key-value
-                            c->list.emplace_back(chunks[i]->list[j]);
-
-                            int cId = chunks.size();
-                            chunks.push_back(c);
-                            chunks[i]->setTreeChunkChild(k, cId);
-                        }
-                        break;
-                    }
-                    case TREE_CHUNK:
-                    {
-                        // Simply add it to the list of the descendant tree chunk
-                        chunks[chunks[i]->getChild(k).treeChunkId]->list.push_back(chunks[i]->list[j]);
-
-                        break;
-                    }
-                    // If this is an intermediate node, then create the corresponding tree chunk
-                    case INTERMEDIATE:
-                    {
-                        // We create a new trunk
-                        TreeChunk *c = new TreeChunk(*this, poseidon);
-                        if (c == NULL)
-                        {
-                            zklog.error("Database64::WriteTree() failed calling new TreeChunk()");
-                            exitProcess();
-                        }
-                        c->setLevel(level + 6);
-                        
-                        // Create a new query to populate this tree chunk from database
-                        DB64Query dbQuery(fea2string(fr, chunks[i]->getChild(k).intermediate.hash),
-                                        chunks[i]->getChild(k).intermediate.hash,
-                                        c->data);
-                        dbQueries.push_back(dbQuery);
-
-                        // Add the requested key-value to the new tree chunk list
-                        c->list.push_back(chunks[i]->list[j]);
-                        int cId = chunks.size();
-                        chunks.push_back(c);
-                        chunks[i]->setTreeChunkChild(k, cId);
-
-                        break;
-                    }
-                    default:
-                    {
-                        zklog.error("Database64::WriteTree() found invalid chunks[i]->getChild(k).type=" + to_string(chunks[i]->getChild(k).type));
-                        exitProcess();
-                    }
-                }
-            }
+            zklog.error("Database64::WriteTree() found oldRootVersion=" + to_string(oldRootVersion) + " but lastVersion=" + to_string(lastVersion) + " oldRootString=" + oldRootString);
+            return ZKR_DB_ERROR;
         }
-
-        chunksProcessed = chunksToProcess;
-        level += 6;
+        version = lastVersion + 1;
     }
 
-    dbQueries.clear();
+    // Get an editable header page
+    headerPageNumber = pageManager.editPage(headerPageNumber);
+    HeaderStruct *headerPage = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
 
-    // Calculate the new root hash of the whole tree
-    Child result;
-    zkr = CalculateHash(result, chunks, dbQueries, 0, 0, NULL);
+    // Write all key-values
+    string keyString;
+    string key;
+    for (uint64_t i=0; i<keyValues.size(); i++)
+    {
+        keyString = fea2string(fr, keyValues[i].key);
+        key = string2ba(keyString);
+        zkr = HeaderPage::KeyValueHistoryWrite(headerPageNumber, key, version, keyValues[i].value);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("Database64::WriteTree() failed calling HeaderPage::KeyValueHistoryWrite() result=" + zkresult2string(zkr) + " oldRoot=" + fea2string(fr, oldRoot) + " version=" + to_string(version));
+            return ZKR_DB_ERROR;
+        }
+        /*zklog.info("Database64::WriteTree() called HeaderPage::KeyValueHistoryWrite() oldRoot=" + fea2string(fr, oldRoot) + " version=" + to_string(version) + " key=" + keyString + " value=" + keyValues[i].value.get_str(16));
+        
+        mpz_class readValue;
+        zkr = HeaderPage::KeyValueHistoryRead(headerPageNumber, key, version, readValue);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("Database64::WriteTree() failed calling HeaderPage::KeyValueHistoryRead() result=" + zkresult2string(zkr) + " oldRoot=" + fea2string(fr, oldRoot) + " version=" + to_string(version));
+            return ZKR_DB_ERROR;
+        }
+        if (readValue != keyValues[i].value)
+        {
+            zklog.error("Database64::WriteTree() called HeaderPage::KeyValueHistoryRead() readValue=" + readValue.get_str(16) + " expectedValue=" +  keyValues[i].value.get_str(16) + " oldRoot=" + fea2string(fr, oldRoot) + " version=" + to_string(version));
+            return ZKR_DB_ERROR;
+        }*/
+    }
+
+    //HeaderPage::Print(headerPageNumber, true);
+
+    // Calculate new state root hash
+    zkr = HeaderPage::KeyValueHistoryCalculateHash(headerPageNumber, newRoot);
     if (zkr != ZKR_SUCCESS)
     {
-        zklog.error("Database64::WriteTree() failed calling calculateHash() result=" + zkresult2string(zkr));
-        for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
-        return zkr;
+        zklog.error("Database64::WriteTree() failed calling HeaderPage::KeyValueHistoryCalculateHash() result=" + zkresult2string(zkr) + " oldRoot=" + fea2string(fr, oldRoot));
+        return ZKR_DB_ERROR;
     }
 
-    // Based on the result, calculate the new root hash
-    if (result.type == LEAF)
+/*  struct VersionDataStruct
     {
-        newRoot[0] = result.leaf.hash[0];
-        newRoot[1] = result.leaf.hash[1];
-        newRoot[2] = result.leaf.hash[2];
-        newRoot[3] = result.leaf.hash[3];
-        string newRootString = fea2string(fr, newRoot);
+        uint8_t  root[32];
+        uint64_t keyValueHistoryPage;
+        uint64_t freePagesList; TODO
+        uint64_t createdPagesList; TODO
+        uint64_t modifiedPagesList; TODO
+        uint64_t rawDataPage;
+        uint64_t rawDataOffset;
+    };*/
 
-        if (!chunks[0]->getDataValid())
-        {
-            zkr = chunks[0]->children2data();
-            if (zkr != ZKR_SUCCESS)
-            {
-                zklog.error("Database64::WriteTree() failed calling chunks[0]->children2data() result=" + zkresult2string(zkr));
-                for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
-                return zkr;
-            }
-            DB64Query dbQuery(newRootString, newRoot, chunks[0]->data);
-            dbQueries.push_back(dbQuery);
-        }
-    }
-    else if (result.type == INTERMEDIATE)
-    {
-        newRoot[0] = result.intermediate.hash[0];
-        newRoot[1] = result.intermediate.hash[1];
-        newRoot[2] = result.intermediate.hash[2];
-        newRoot[3] = result.intermediate.hash[3];
-    }
-    else if (result.type == ZERO)
-    { 
-        newRoot[0] = fr.zero();
-        newRoot[1] = fr.zero();
-        newRoot[2] = fr.zero();
-        newRoot[3] = fr.zero();
-    }
-    else
-    {
-        zklog.error("Database64::WriteTree() found invalid result.type=" + to_string(result.type));
-        for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
-        return zkr;
-    }
+    // Create version data
+    VersionDataStruct versionData;
+    string newRootBa = string2ba(fea2string(fr, newRoot));
+    zkassert(newRootBa.size() == 32);
+    memcpy(versionData.root, newRootBa.c_str(), 32);
+    versionData.keyValueHistoryPage = headerPage->keyValueHistoryPage;
+    versionData.rawDataPage = headerPage->rawDataPage;
+    versionData.rawDataOffset = RawDataPage::GetOffset(versionData.rawDataPage);
 
-    // Save chunks data to database
-    //zkr = db.write(dbQueries, persistent);
+    // Write version->versionData pair
+    zkr = HeaderPage::WriteVersionData(headerPageNumber, version, versionData);
     if (zkr != ZKR_SUCCESS)
     {
-        zklog.error("Database64::WriteTree() failed calling db.write() result=" + zkresult2string(zkr));
-        for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
-        return zkr;
+        zklog.error("Database64::WriteTree() failed calling HeaderPage::WriteVersionData() result=" + zkresult2string(zkr) + " oldRoot=" + fea2string(fr, oldRoot));
+        return ZKR_DB_ERROR;
     }
 
-#ifdef SMT64_PRINT_TREE_CHUNKS
-    // Print chunks
-    for (uint c = 0; c < chunks.size(); c++)
+    // Write root->version pair
+    zkr = HeaderPage::WriteRootVersion(headerPageNumber, newRootBa, version);
+    if (zkr != ZKR_SUCCESS)
     {
-        zklog.info("Database64::WriteTree() chunk " + to_string(c));
-        chunks[c]->print();
+        zklog.error("Database64::WriteTree() failed calling HeaderPage::WriteRootVersion() result=" + zkresult2string(zkr) + " oldRoot=" + fea2string(fr, oldRoot));
+        return ZKR_DB_ERROR;
     }
-#endif
 
-    // Free memory
-    for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
+    // Set last version
+    HeaderPage::SetLastVersion(headerPageNumber, version);
+
+    // Flush all pages to disk
+    pageManager.flushPages();
+
+    headerPageNumber = 0;
+    //HeaderPage::Print(headerPageNumber, true);
 
     return ZKR_SUCCESS;
 }
@@ -720,7 +593,7 @@ zkresult Database64::CalculateHash (Child &result, vector<TreeChunk *> &chunks, 
     vector<Child> results(64);
 
     // Convert all TREE_CHUNK children into something else, typically INTERMEDIATE children,
-    // but they could also be LEAF (only one child below this level) or ZERO 9no children below this level)
+    // but they could also be LEAF (only one child below this level) or ZERO (no children below this level)
     for (uint64_t i=0; i<64; i++)
     {
         if (chunks[chunkId]->getChild(i).type == TREE_CHUNK)
@@ -765,228 +638,54 @@ zkresult Database64::ReadTree (const Goldilocks::Element (&root)[4], vector<KeyV
 {
     zkresult zkr;
 
-    vector<TreeChunk *> chunks;
-    vector<DB64Query> dbQueries;
+    HeaderPage::Print(headerPageNumber, true);
 
-    // Tree level; we start at level 0, then we increase it 6 by 6
-    uint64_t level = 0;
-
-    // Create the first tree chunk (the root one), and store it in chunks[0]
-    TreeChunk *c = new TreeChunk(*this, poseidon);
-    if (c == NULL)
+    if (keyValues.size() == 0)
     {
-        zklog.error("Database64::ReadTree() failed calling new TreeChunk()");
-        exitProcess();
+        zklog.error("Database64::ReadTree() called with keyValues.size=0");
+        return ZKR_DB_ERROR;
     }
-    chunks.push_back(c);
 
-    uint64_t chunksProcessed = 0;
+    //HeaderPage::Print(headerPageNumber, true);
 
-    // Get the old root as a string
-    string rootString = fea2string(fr, root);
-
-    // If root is zero, return all values as zero
-    if (rootString == "0")
+    // Check if the root is zero, i.e. if all values should be zero
+    if (fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3]))
     {
-        delete c;
         for (uint64_t i=0; i<keyValues.size(); i++)
         {
             keyValues[i].value = 0;
         }
         return ZKR_SUCCESS;
     }
-    else
+    
+    // Get the old root as a string and byte array
+    string rootString = fea2string(fr, root);
+    string rootBa = string2ba(rootString);
+
+    // Get the version corresponding to this state root
+    uint64_t version = 0;
+    zkr = HeaderPage::ReadRootVersion(headerPageNumber, rootBa, version);
+    if (zkr != ZKR_SUCCESS)
     {
-        DB64Query dbQuery(rootString, root, chunks[0]->data);
-        dbQueries.push_back(dbQuery);
+        zklog.error("Database64::ReadTree() failed calling HeaderPage::ReadRootVersion() result=" + zkresult2string(zkr) + " rootString=" + rootString);
+        return zkr;
     }
 
-    // Copy the key values list into the root tree chunk
-    uint64_t keyValuesSize = keyValues.size();
-    c->list.reserve(keyValuesSize);
-    for (uint64_t i=0; i<keyValuesSize; i++)
+    // Read all key-values
+    string keyString;
+    string key;
+    for (uint64_t i=0; i<keyValues.size(); i++)
     {
-        c->list.emplace_back(i);
-    }
-
-    while (chunksProcessed < chunks.size())
-    {
-        //zkr = db.read(dbQueries);
+        keyString = fea2string(fr, keyValues[i].key);
+        key = string2ba(keyString);
+        zkr = HeaderPage::KeyValueHistoryRead(headerPageNumber, key, version, keyValues[i].value);
         if (zkr != ZKR_SUCCESS)
         {
-            zklog.error("Database64::ReadTree() failed calling db.multiRead() result=" + zkresult2string(zkr));
-            for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
+            zklog.error("Database64::ReadTree() failed calling HeaderPage::KeyValueHistoryRead() result=" + zkresult2string(zkr) + " rootString=" + rootString + " version=" + to_string(version));
             return zkr;
         }
-        dbQueries.clear();
-
-        int chunksToProcess = chunks.size();
-
-        for (int i=chunksProcessed; i<chunksToProcess; i++)
-        {
-            chunks[i]->setLevel(level);
-            if (chunks[i]->data.size() > 0)
-            {
-                zkr = chunks[i]->data2children();
-                if (zkr != ZKR_SUCCESS)
-                {
-                    zklog.error("Database64::ReadTree() failed calling chunks[i]->data2children() result=" + zkresult2string(zkr));
-                    return zkr;
-                }
-            }
-            for (uint64_t j=0; j<chunks[i]->list.size(); j++)
-            {
-                bool keyBits[256];
-                splitKey(fr, keyValues[chunks[i]->list[j]].key, keyBits);
-                uint64_t k = getKeyChildren64Position(keyBits, level);
-                switch (chunks[i]->getChild(k).type)
-                {
-                    case ZERO:
-                    {
-                        for (uint64_t kv=0; kv<keyValues.size(); kv++)
-                        {
-                            if (fr.equal(keyValues[kv].key[0], keyValues[chunks[i]->list[j]].key[0]) &&
-                                fr.equal(keyValues[kv].key[1], keyValues[chunks[i]->list[j]].key[1]) &&
-                                fr.equal(keyValues[kv].key[2], keyValues[chunks[i]->list[j]].key[2]) &&
-                                fr.equal(keyValues[kv].key[3], keyValues[chunks[i]->list[j]].key[3]))
-                            {
-                                keyValues[kv].value = 0;
-                            }
-                        }
-                        break;
-                    }
-                    case LEAF:
-                    {
-                        // If the key is the same, then check the value
-                        if (fr.equal(chunks[i]->getChild(k).leaf.key[0], keyValues[chunks[i]->list[j]].key[0]) &&
-                            fr.equal(chunks[i]->getChild(k).leaf.key[1], keyValues[chunks[i]->list[j]].key[1]) &&
-                            fr.equal(chunks[i]->getChild(k).leaf.key[2], keyValues[chunks[i]->list[j]].key[2]) &&
-                            fr.equal(chunks[i]->getChild(k).leaf.key[3], keyValues[chunks[i]->list[j]].key[3]))
-                        {
-                            keyValues[chunks[i]->list[j]].value = chunks[i]->getChild(k).leaf.value;
-                        }
-                        else
-                        {
-                            keyValues[chunks[i]->list[j]].value = 0;
-                        }
-                        break;
-                    }
-                    case TREE_CHUNK:
-                    {
-                        // Simply add it to the list of the descendant tree chunk
-                        chunks[chunks[i]->getChild(k).treeChunkId]->list.push_back(chunks[i]->list[j]);
-
-                        break;
-                    }
-                    // If this is an intermediate node, then create the corresponding tree chunk
-                    case INTERMEDIATE:
-                    {
-                        // We create a new trunk
-                        TreeChunk *c = new TreeChunk(*this, poseidon);
-                        if (c == NULL)
-                        {
-                            zklog.error("Database64::ReadTree() failed calling new TreeChunk()");
-                            exitProcess();
-                        }
-                        c->setLevel(level + 6);
-                        
-                        // Create a new query to populate this tree chunk from database
-                        DB64Query dbQuery(fea2string(fr, chunks[i]->getChild(k).intermediate.hash),
-                                        chunks[i]->getChild(k).intermediate.hash,
-                                        c->data);
-                        dbQueries.push_back(dbQuery);
-
-                        // Add the requested key-value to the new tree chunk list
-                        c->list.push_back(chunks[i]->list[j]);
-                        int cId = chunks.size();
-                        chunks.push_back(c);
-                        chunks[i]->setTreeChunkChild(k, cId);
-
-                        break;
-                    }
-                    default:
-                    {
-                        zklog.error("Database64::ReadTree() found invalid chunks[i]->getChild(k).type=" + to_string(chunks[i]->getChild(k).type));
-                        exitProcess();
-                    }
-                }
-            }
-        }
-
-        chunksProcessed = chunksToProcess;
-        level += 6;
+        //zklog.info("Database64::ReadTree() called HeaderPage::KeyValueHistoryRead() rootString=" + rootString + " version=" + to_string(version) + " key=" + keyString + " value=" + keyValues[i].value.get_str(16));
     }
-
-    dbQueries.clear();
-
-    if (hashValues != NULL)
-    {
-        // Calculate the new root hash of the whole tree
-        Child result;
-        zkr = CalculateHash(result, chunks, dbQueries, 0, 0, hashValues);
-        if (zkr != ZKR_SUCCESS)
-        {
-            zklog.error("Database64::WriteTree() failed calling calculateHash() result=" + zkresult2string(zkr));
-            for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
-            return zkr;
-        }
-
-        // Based on the result, calculate the new root hash
-        /*if (result.type == LEAF)
-        {
-            newRoot[0] = result.leaf.hash[0];
-            newRoot[1] = result.leaf.hash[1];
-            newRoot[2] = result.leaf.hash[2];
-            newRoot[3] = result.leaf.hash[3];
-            string newRootString = fea2string(fr, newRoot);
-
-            if (!chunks[0]->getDataValid())
-            {
-                zkr = chunks[0]->children2data();
-                if (zkr != ZKR_SUCCESS)
-                {
-                    zklog.error("Database64::WriteTree() failed calling chunks[0]->children2data() result=" + zkresult2string(zkr));
-                    for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
-                    return zkr;
-                }
-                DB64Query dbQuery(newRootString, newRoot, chunks[0]->data);
-                dbQueries.push_back(dbQuery);
-            }
-        }
-        else if (result.type == INTERMEDIATE)
-        {
-            newRoot[0] = result.intermediate.hash[0];
-            newRoot[1] = result.intermediate.hash[1];
-            newRoot[2] = result.intermediate.hash[2];
-            newRoot[3] = result.intermediate.hash[3];
-        }
-        else if (result.type == ZERO)
-        { 
-            newRoot[0] = fr.zero();
-            newRoot[1] = fr.zero();
-            newRoot[2] = fr.zero();
-            newRoot[3] = fr.zero();
-        }
-        else
-        {
-            zklog.error("Database64::WriteTree() found invalid result.type=" + to_string(result.type));
-            for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
-            return zkr;
-        }*/
-        
-    }
-
-#ifdef SMT64_PRINT_TREE_CHUNKS
-    // Print chunks
-    for (uint c = 0; c < chunks.size(); c++)
-    {
-        zklog.info("Database64::ReadTree() chunk " + to_string(c));
-        chunks[c]->print();
-    }
-#endif
-
-    // Free memory
-    for (uint c = 0; c < chunks.size(); c++) delete chunks[c];
 
     return ZKR_SUCCESS;
 }

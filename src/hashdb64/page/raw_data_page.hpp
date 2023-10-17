@@ -47,7 +47,7 @@ public:
     
     static uint64_t GetOffset     (const uint64_t  pageNumber);
     
-    static void Print (const uint64_t pageNumber, bool details);
+    static void Print (const uint64_t pageNumber, bool details, const string &prefix);
 };
 
 #endif
