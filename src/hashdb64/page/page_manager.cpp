@@ -55,18 +55,16 @@ PageManager::PageManager(const string fileName_, const uint64_t fileSize_, const
         if(folderName != "")
             file = folderName + "/";
         file += (fileName + "_" + to_string(k)+".db");
-        fd = open(file.c_str(),O_RDWR);
+        fd = open(file.c_str(), O_RDWR | O_CREAT);
         if(k==0) file0Descriptor = fd;
         if (fd == -1) {
-            zklog.error("Failed to open file: " + (string)strerror(errno));
+            zklog.error("PageManager: failed to open file.");
             exitProcess();
         }
-        // Get the file size
-        if (fstat(fd, &file_stat) == -1) {
-            zklog.error("Failed to get file size: " + (string)strerror(errno));
+        if (ftruncate(fd, fileSize) == -1) {
+            zklog.error("PageManager: failed to truncate to file.");
             close(fd);
         }
-        zkassertpermanent(fileSize == (uint64_t)file_stat.st_size);
         nPages += pagesPerFile;
         pages.push_back(NULL);
         pages[k] = (char *)mmap(NULL, fileSize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0); //MAP_POPULATE

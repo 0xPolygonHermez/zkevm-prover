@@ -13,7 +13,8 @@
 #include <random>
 #include <unordered_set>
 
-#define CHECK_FILE 0
+#define TEST_FILE_IO 0
+
 uint64_t PageManagerTest (void)
 {
     TimerStart(PAGE_MANAGER_TEST);
@@ -31,7 +32,7 @@ uint64_t PageManagerPerformanceTest(void){
     string folderName = "db";
     uint64_t numPositions = 20000;
     uint64_t numReps = 100;
-    uint64_t printFreq = 1;
+    uint64_t printFreq = 10;
     char singlePage[4096];
 
     // Create the state manager
@@ -74,7 +75,7 @@ uint64_t PageManagerPerformanceTest(void){
         //Change first value of each page
         uint64_t sum=0;
         start = omp_get_wtime();
-#if CHECK_FILE
+#if TEST_FILE_IO
         //#pragma omp parallel for num_threads(64)
         for (uint64_t i = 0; i < numPositions; ++i) {
             pageManagerFile.getPageAddressFile(position[i], singlePage);
@@ -88,7 +89,9 @@ uint64_t PageManagerPerformanceTest(void){
         }
 #endif
         end = omp_get_wtime();
+#if TEST_FILE_IO
         std::cout << "Sum: " << sum << std::endl;
+#endif
 
         throughput = numGBytes / (end-start);
         avgThroughputFirstWrite += throughput;
@@ -99,7 +102,7 @@ uint64_t PageManagerPerformanceTest(void){
         start = omp_get_wtime();
         for (uint64_t i = 0; i < numPositions; ++i) {
             uint64_t* pageData = (uint64_t *)pageManagerFile.getPageAddress(position[i]);
-#if !CHECK_FILE
+#if !TEST_FILE_IO
         assert(pageData[0] == (pageData[2] + position[i]) );
 #endif
             pageData[1] = position[i];    
@@ -126,7 +129,7 @@ uint64_t PageManagerPerformanceTest(void){
         for (uint64_t i = 0; i < numPositions; ++i) {
             uint64_t* pageData = (uint64_t *)pageManagerFile2.getPageAddress(position[i]);
             if(position[i] != 0){
-#if !CHECK_FILE
+#if !TEST_FILE_IO
         assert(pageData[0] == (pageData[2] + position[i]) );
 #endif
                 assert(pageData[1] == position[i] );
@@ -221,23 +224,6 @@ uint64_t PageManagerAccuracyTest (void)
     const string fineNameAll = fileName + "_0.db";
     const int file_size = 4096 * 100;  
 
-    // Create a binary file and fill it with zeros
-    int fd = open(fineNameAll.c_str(), O_RDWR | O_CREAT, 0644);
-    if (fd == -1) {
-        zklog.error("Failed to open file: " + (string)strerror(errno));
-        exitProcess();
-    }
-    //fill file with zeros 
-    char *buffer = (char *)calloc(file_size, sizeof(char));
-    if (buffer == NULL) {
-        zklog.error("Failed to allocate buffer: " + (string)strerror(errno));
-        exitProcess();
-    }
-    ssize_t  wirten_bytes = write(fd, buffer, file_size);
-    zkassertpermanent(wirten_bytes == file_size);
-    close(fd);
-    free(buffer);
-
     // Same tests than with memory version:
     PageManager pageManagerFile(fileName, file_size, 1,"");
     page1 = pageManagerFile.getFreePage();
@@ -307,7 +293,7 @@ uint64_t PageManagerAccuracyTest (void)
     }
 
     //delete file
-    std::remove(fileName.c_str());
+    std::remove(fineNameAll.c_str());
 
     return 0;   
 }
