@@ -2,6 +2,7 @@
 #define ROOT_VERSION_PAGE_NPP
 
 #include <string>
+#include <stdint.h>
 
 using namespace std;
 

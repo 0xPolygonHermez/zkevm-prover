@@ -2,6 +2,7 @@
 #define PAGE_LIST_PAGE_HPP
 
 #include <unistd.h>
+#include <stdint.h>
 #include <vector>
 #include "zkresult.hpp"
 #include "zkassert.hpp"
