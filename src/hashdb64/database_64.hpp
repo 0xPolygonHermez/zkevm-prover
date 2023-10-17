@@ -66,6 +66,8 @@ private:
 
     bool     bInitialized = false;
     uint64_t headerPageNumber;
+    pthread_mutex_t mutex;
+    uint64_t currentFlushId;
 
 public:
 
@@ -96,8 +98,9 @@ public:
     zkresult flush(uint64_t &flushId, uint64_t &lastSentFlushId);
     zkresult getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram);
 
-    // Get flush data, written to database by dbSenderThread; it blocks
-    zkresult getFlushData(uint64_t flushId, uint64_t &lastSentFlushId, unordered_map<string, string> (&nodes), unordered_map<string, string> (&program), string &nodesStateRoot);
+    // Lock/Unlock
+    void Lock(void) { pthread_mutex_lock(&mutex); };
+    void Unlock(void) { pthread_mutex_unlock(&mutex); };
 };
 
 #endif

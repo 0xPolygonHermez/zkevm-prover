@@ -399,7 +399,8 @@ zkresult HashDB::getFlushData(uint64_t flushId, uint64_t &lastSentFlushId, unord
 
     if (config.hashDB64)
     {
-        zkr = db64.getFlushData(flushId, lastSentFlushId, nodes, program, nodesStateRoot);
+        zklog.error("HashDB::getFlushData() called with config.hashDB64=true");
+        return ZKR_DB_ERROR;
     }
     else
     {
