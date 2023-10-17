@@ -413,7 +413,7 @@ void HashDB::clearCache(void)
 {
     if (config.hashDB64)
     {
-        db64.clearCache();
+        // We don't use cache in HashDB64
     }
     else
     {

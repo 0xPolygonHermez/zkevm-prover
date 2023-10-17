@@ -23,7 +23,7 @@ using namespace std;
 
 /*
 
-A Tree (state) is made of a set of TreeChunks:
+A Tree (state) is made of a set of TreeChunks, each of them stored in one 4kB page:
 
       /\
      /__\
@@ -35,12 +35,12 @@ A Tree (state) is made of a set of TreeChunks:
        /__\
 
 When we want to read [key, value] for a given root:
-    - we call db.read(treeChunk.hash, treeChunk.data) starting from the root until we reach the [key, value] leaf node
+    - we search for the right page starting from the root until we reach the [key, value] leaf node in the final page
 
 When we want to write a new leaf node [key, newValue] on a given root and get the resulting newStateRoot
-    - we calculate the new position of [key, newValue], creating new chunks if needed
+    - we calculate the new position of [key, newValue], creating new pages if needed
     - we recalculate the hashes of all the modified and new chunks
-    - we call db.write(treeChunk.hash, treeChunk.data) of all the modified and new chunks
+    - we write every resulting hash in the proper position of the proper page
 
 Every time we write a [key, newValue] we are potentially creating a new Tree = SUM(TreeChunks) if newValue != oldValue
 Every new Tree represents a newer version of the state
@@ -60,43 +60,12 @@ The Forest takes note of the latest Tree hash to keep track of the current state
 
 */
 
-class DB64Query
-{
-public:
-    string key;
-    Goldilocks::Element keyFea[4];
-    string &value; // value can be an input in multiWrite(), or an output in multiRead()
-    DB64Query(const string &_key, const Goldilocks::Element (&_keyFea)[4], string &_value) : key(_key), value(_value)
-    {
-        keyFea[0] = _keyFea[0];
-        keyFea[1] = _keyFea[1];
-        keyFea[2] = _keyFea[2];
-        keyFea[3] = _keyFea[3];
-    }
-};
-
 class Database64
 {
-public:
-    Goldilocks &fr;
-    const Config &config;
-    PoseidonGoldilocks poseidon;
-
-    // Basic flags
-    bool bInitialized = false;
-    bool useRemoteDB = false;
-
-    uint64_t headerPageNumber;
-
-public:
-    //sem_t senderSem; // Semaphore to wakeup database sender thread when flush() is called
-    //sem_t getFlushDataSem; // Semaphore to unblock getFlushData() callers when new data is available
 private:
-    //pthread_t senderPthread; // Database sender thread
-    //pthread_t cacheSynchPthread; // Cache synchronization thread
 
-    // Tree64
-    zkresult CalculateHash (Child &result, std::vector<TreeChunk *> &chunks, vector<DB64Query> &dbQueries, int idChunk, int level, vector<HashValueGL> *hashValues);
+    bool     bInitialized = false;
+    uint64_t headerPageNumber;
 
 public:
 
@@ -104,7 +73,6 @@ public:
     Database64(Goldilocks &fr, const Config &config);
     ~Database64();
 
-public:
     // Basic methods
     void init(void);
     
@@ -124,24 +92,12 @@ public:
     zkresult consolidateBlock (uint64_t blockNumber); // TODO: Who reports this block number?
     zkresult revertBlock      (uint64_t blockNumber);
 
-public:
     // Flush data pending to be stored permamently
     zkresult flush(uint64_t &flushId, uint64_t &lastSentFlushId);
     zkresult getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram);
 
     // Get flush data, written to database by dbSenderThread; it blocks
     zkresult getFlushData(uint64_t flushId, uint64_t &lastSentFlushId, unordered_map<string, string> (&nodes), unordered_map<string, string> (&program), string &nodesStateRoot);
-
-    // Clear cache
-    void clearCache(void);
-
-   
 };
-
-// Thread to send data to database
-//void *dbSenderThread64(void *arg);
-
-// Thread to synchronize cache from master hash DB server
-//void *dbCacheSynchThread64(void *arg);
 
 #endif
