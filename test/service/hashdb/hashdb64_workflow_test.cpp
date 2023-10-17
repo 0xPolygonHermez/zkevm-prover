@@ -128,7 +128,7 @@ uint64_t HashDB64WorkflowTest (const Config& config)
             for (uint64_t i=0; i<4; i++) root[i] = consolidatedStateRoot[i];
 
             // Wait for data to be sent
-            /*while (true)
+            while (true)
             {
                 uint64_t storedFlushId, storingFlushId, lastFlushId, pendingToFlushNodes, pendingToFlushProgram, storingNodes, storingProgram;
                 string proverId;
@@ -141,7 +141,7 @@ uint64_t HashDB64WorkflowTest (const Config& config)
                 }
                 sleep(1);
             }
-            zklog.info("FLUSHED");*/
+            zklog.info("FLUSHED");
 
             // Call ReadTree with the old state root to get the hashes of the initial values of all read or written keys
             /*vector<HashValueGL> oldHashValues;

@@ -180,13 +180,10 @@ zkresult HeaderPage::WriteVersionData (uint64_t &headerPageNumber, const uint64_
     return KeyValuePage::Write(headerPage->versionDataPage, version2key(version), versionData2value(versionData), headerPageNumber);
 }
 
-zkresult HeaderPage::KeyValueHistoryRead (const uint64_t headerPageNumber, const string &key, const uint64_t version, mpz_class &value)
+zkresult HeaderPage::KeyValueHistoryRead (const uint64_t keyValueHistoryPage, const string &key, const uint64_t version, mpz_class &value)
 {
-    // Get header page
-    HeaderStruct * headerPage = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
-
     // Call the specific method
-    return KeyValueHistoryPage::Read(headerPage->keyValueHistoryPage, key, version, value);
+    return KeyValueHistoryPage::Read(keyValueHistoryPage, key, version, value);
 }
 
 zkresult HeaderPage::KeyValueHistoryWrite (uint64_t &headerPageNumber, const string &key, const uint64_t version, const mpz_class &value)

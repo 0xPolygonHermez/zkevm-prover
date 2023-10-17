@@ -21,15 +21,16 @@
 #include "tree_chunk.hpp"
 #include "key_value_page.hpp"
 #include "raw_data_page.hpp"
+#include "zkglobals.hpp"
 
 // Helper functions
 string removeBSXIfExists64(string s) {return ((s.at(0) == '\\') && (s.at(1) == 'x')) ? s.substr(2) : s;}
 
-Database64::Database64 (Goldilocks &fr, const Config &config) :
-        fr(fr),
-        config(config),
-        headerPageNumber(0)
+Database64::Database64 (Goldilocks &fr, const Config &config) : headerPageNumber(0), currentFlushId(0)
 {
+    // Init mutex
+    pthread_mutex_init(&mutex, NULL);
+
     zkresult zkr;
     headerPageNumber = 0;
     zkr = HeaderPage::InitEmptyPage(headerPageNumber);
@@ -38,9 +39,6 @@ Database64::Database64 (Goldilocks &fr, const Config &config) :
         zklog.error("Database64::Database64() failed calling HeaderPage::InitEmptyPage() result=" + zkresult2string(zkr));
         exitProcess();
     }
-    // Initialize semaphores
-    //sem_init(&senderSem, 0, 0);
-    //sem_init(&getFlushDataSem, 0, 0);
 };
 
 Database64::~Database64()
@@ -57,33 +55,16 @@ void Database64::init(void)
         exitProcess();
     }
 
-    // Configure the server, if configuration is provided
-    if (config.databaseURL != "local")
-    {
-        // Sender thread creation
-        //pthread_create(&senderPthread, NULL, dbSenderThread64, this);
-
-        // Cache synchronization thread creation
-        /*if (config.dbCacheSynchURL.size() > 0)
-        {
-            pthread_create(&cacheSynchPthread, NULL, dbCacheSynchThread64, this);
-
-        }*/
-
-        useRemoteDB = true;
-    }
-    else
-    {
-        useRemoteDB = false;
-    }
-
     // Mark the database as initialized
     bInitialized = true;
 }
 
 zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, uint64_t &level ,DatabaseMap *dbReadLog)
 {
-    level = 128;
+    zkresult zkr;
+
+    level = 128; // TODO: Return the right level
+
     // Check that it has been initialized before
     if (!bInitialized)
     {
@@ -91,39 +72,52 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
         exitProcess();
     }
 
-    struct timeval t;
-    if (dbReadLog != NULL) gettimeofday(&t, NULL);
+    // Convert root to a byte array
+    string rootString = fea2string(fr, root);
+    string rootBa =  string2ba(rootString);
 
-    zkresult rout = ZKR_UNSPECIFIED;
+    // Get the version associated to this root
+    uint64_t version;
+    zkr = HeaderPage::ReadRootVersion(headerPageNumber, rootBa, version);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("Database64::readKV() faile calling HeaderPage::ReadRootVersion() result=" + zkresult2string(zkr) + " root=" + rootString + " key=" + fea2string(fr, key));
+        return zkr;
+    }
+
+    // Get the version data
+    VersionDataStruct versionData;
+    zkr = HeaderPage::ReadVersionData(headerPageNumber, version, versionData);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("Database64::readKV() faile calling HeaderPage::ReadVersionData() result=" + zkresult2string(zkr) + " root=" + rootString + " key=" + fea2string(fr, key));
+        return zkr;
+    }
+
+    // Get the value
+    string keyString = fea2string(fr, key);
+    string keyBa = string2ba(keyString);
+    zkr = HeaderPage::KeyValueHistoryRead(versionData.keyValueHistoryPage, keyBa, version, value);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("Database64::readKV() faile calling HeaderPage::KeyValueHistoryRead() result=" + zkresult2string(zkr) + " root=" + rootString + " key=" + fea2string(fr, key));
+        return zkr;
+    }
     
 #ifdef LOG_DB_READ
     {
         string s = "Database64::readKV()";
-        if (rout != ZKR_SUCCESS)
-            s += " ERROR=" + zkresult2string(rout);
+        if (zkr != ZKR_SUCCESS)
+            s += " ERROR=" + zkresult2string(zkr);
         s += " key=" + keyStr;
         s += " value=";
         s += value.get_str(16) + ";";
         zklog.info(s);
     }
 #endif
-    return rout;
 
+    return zkr;
 }
-/*
-zkresult Database64::readKV(const Goldilocks::Element (&root)[4], vector<KeyValueLevel> &KVLs, DatabaseMap *dbReadLog){
-    zkresult zkr;
-    for (uint64_t i=0; i<KVLs.size(); i++)
-    {
-        zkr = readKV(root, KVLs[i].key, KVLs[i].value, KVLs[i].level, dbReadLog);
-        if (zkr != ZKR_SUCCESS)
-        {
-            zklog.error("Database64::readKV(KBs) failed calling read() result=" + zkresult2string(zkr) + " key=" + fea2string(fr, KVLs[i].key) );
-            return zkr;
-        }
-    }
-    return ZKR_SUCCESS;
-}*/
 
 zkresult Database64::setProgram (const string &key, const vector<uint8_t> &data, const bool persistent)
 {
@@ -202,235 +196,34 @@ zkresult Database64::getProgram(const string &key, vector<uint8_t> &data, Databa
     
 zkresult Database64::flush(uint64_t &thisBatch, uint64_t &lastSentBatch)
 {
-    #if 0
-    if (!config.dbMultiWrite)
-    {
-        return ZKR_SUCCESS;
-    }
-
-    // If we are connected to a read-only database, just free memory and pretend to have sent all the data
-    if (config.dbReadOnly)
-    {
-        multiWrite.Lock();
-        multiWrite.data[multiWrite.pendingToFlushDataIndex].Reset();
-        multiWrite.Unlock();
-
-        return ZKR_SUCCESS;
-    }
-
-    //TimerStart(DATABASE_FLUSH);
-
-    multiWrite.Lock();
-
-    // Accept all intray data
-    multiWrite.data[multiWrite.pendingToFlushDataIndex].acceptIntray();
-
-    // Increase the last processed batch id and return the last sent batch id
-    multiWrite.lastFlushId++;
-    thisBatch = multiWrite.lastFlushId;
-    lastSentBatch = multiWrite.storedFlushId;
+    Lock();
+    currentFlushId++;
+    thisBatch = currentFlushId;
+    lastSentBatch = currentFlushId;
 
 #ifdef LOG_DB_FLUSH
     zklog.info("Database64::flush() thisBatch=" + to_string(thisBatch) + " lastSentBatch=" + to_string(lastSentBatch) + " multiWrite=[" + multiWrite.print() + "]");
 #endif
 
-    // Notify the thread
-    sem_post(&senderSem);
+    Unlock();
 
-    multiWrite.Unlock();
-#endif
     return ZKR_SUCCESS;
 }
 
 zkresult Database64::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram)
 {
-    /*multiWrite.Lock();
-    storedFlushId = multiWrite.storedFlushId;
-    storingFlushId = multiWrite.storingFlushId;
-    lastFlushId = multiWrite.lastFlushId;
-    pendingToFlushNodes = multiWrite.data[multiWrite.pendingToFlushDataIndex].nodes.size();
-    pendingToFlushProgram = multiWrite.data[multiWrite.pendingToFlushDataIndex].program.size();
-    storingNodes = multiWrite.data[multiWrite.storingDataIndex].nodes.size();
-    storingProgram = multiWrite.data[multiWrite.storingDataIndex].program.size();
-    multiWrite.Unlock();*/
+    Lock();
+    storedFlushId = currentFlushId;
+    storingFlushId = currentFlushId;
+    lastFlushId = currentFlushId;
+    pendingToFlushNodes = 0;
+    pendingToFlushProgram = 0;
+    storingNodes = 0;
+    storingProgram = 0;
+    Unlock();
 
     return ZKR_SUCCESS;
 }
-
-
-// Get flush data, written to database by dbSenderThread; it blocks
-zkresult Database64::getFlushData(uint64_t flushId, uint64_t &storedFlushId, unordered_map<string, string> (&nodes), unordered_map<string, string> (&program), string &nodesStateRoot)
-{
-#if 0
-    //zklog.info("--> getFlushData()");
-
-    // Set the deadline to now + 60 seconds
-    struct timespec deadline;
-    clock_gettime(CLOCK_REALTIME, &deadline);
-	deadline.tv_sec += 60;
-
-    // Try to get the semaphore
-    int iResult;
-    iResult = sem_timedwait(&getFlushDataSem, &deadline);
-    if (iResult != 0)
-    {
-        zklog.info("Database64::getFlushData() timed out");
-        return ZKR_SUCCESS;
-    }
-
-    multiWrite.Lock();
-    MultiWriteData64 &data = multiWrite.data[multiWrite.synchronizingDataIndex];
-
-    zklog.info("Database64::getFlushData woke up: pendingToFlushDataIndex=" + to_string(multiWrite.pendingToFlushDataIndex) +
-        " storingDataIndex=" + to_string(multiWrite.storingDataIndex) +
-        " synchronizingDataIndex=" + to_string(multiWrite.synchronizingDataIndex) +
-        " nodes=" + to_string(data.nodes.size()) +
-        " program=" + to_string(data.program.size()) +
-        " nodesStateRoot=" + data.nodesStateRoot);
-
-    if (data.nodes.size() > 0)
-    {
-        nodes = data.nodes;
-    }
-
-    if (data.program.size() > 0)
-    {
-        program = data.program;
-    }
-
-    if (data.nodesStateRoot.size() > 0)
-    {
-        nodesStateRoot = data.nodesStateRoot;
-    }
-
-    multiWrite.Unlock();
-
-    //zklog.info("<-- getFlushData()");
-#endif
-
-    return ZKR_SUCCESS;
-}
-
-void Database64::clearCache (void)
-{
-}
-
-#if 0
-void *dbSenderThread64 (void *arg)
-{
-    Database64 *pDatabase = (Database64 *)arg;
-    zklog.info("dbSenderThread64() started");
-    MultiWrite64 &multiWrite = pDatabase->multiWrite;
-
-    while (true)
-    {
-        // Wait for the sending semaphore to be released, if there is no more data to send
-        struct timespec currentTime;
-        int iResult = clock_gettime(CLOCK_REALTIME, &currentTime);
-        if (iResult == -1)
-        {
-            zklog.error("dbSenderThread64() failed calling clock_gettime()");
-            exitProcess();
-        }
-
-        currentTime.tv_sec += 5;
-        sem_timedwait(&pDatabase->senderSem, &currentTime);
-
-        multiWrite.Lock();
-
-        bool bDataEmpty = false;
-
-        // If sending data is not empty (it failed before) then try to send it again
-        if (!multiWrite.data[multiWrite.storingDataIndex].multiQuery.isEmpty())
-        {
-            zklog.warning("dbSenderThread64() found sending data index not empty, probably because of a previous error; resuming...");
-        }
-        // If processing data is empty, then simply pretend to have sent data
-        else if (multiWrite.data[multiWrite.pendingToFlushDataIndex].IsEmpty())
-        {
-            //zklog.warning("dbSenderThread() found pending to flush data empty");
-
-            // Mark as if we sent all batches
-            multiWrite.storedFlushId = multiWrite.lastFlushId;
-#ifdef LOG_DB_SENDER_THREAD
-            zklog.info("dbSenderThread64() found multi write processing data empty, so ignoring");
-#endif
-            multiWrite.Unlock();
-            continue;
-        }
-        // Else, switch data indexes
-        else
-        {
-            // Accept all intray data
-            multiWrite.data[multiWrite.pendingToFlushDataIndex].acceptIntray(true);
-
-            // Advance processing and sending indexes
-            multiWrite.storingDataIndex = (multiWrite.storingDataIndex + 1) % 3;
-            multiWrite.pendingToFlushDataIndex = (multiWrite.pendingToFlushDataIndex + 1) % 3;
-            multiWrite.data[multiWrite.pendingToFlushDataIndex].Reset();
-#ifdef LOG_DB_SENDER_THREAD
-            zklog.info("dbSenderThread64() updated: multiWrite=[" + multiWrite.print() + "]");
-#endif
-
-            // Record the last processed batch included in this data set
-            multiWrite.storingFlushId = multiWrite.lastFlushId;
-
-            // If there is no data to send, just pretend to have sent it
-            if (multiWrite.data[multiWrite.storingDataIndex].IsEmpty())
-            {
-                // Update stored flush ID
-                multiWrite.storedFlushId = multiWrite.storingFlushId;
-
-                // Advance synchronizing index
-                multiWrite.synchronizingDataIndex = (multiWrite.synchronizingDataIndex + 1) % 3;
-#ifdef LOG_DB_SENDER_THREAD
-                zklog.info("dbSenderThread64() no data to send: multiWrite=[" + multiWrite.print() + "]");
-#endif
-                bDataEmpty = true;
-            }
-
-        }
-
-        // Unlock to let more processing batch data in
-        multiWrite.Unlock();
-
-        if (!bDataEmpty)
-        {
-#ifdef LOG_DB_SENDER_THREAD
-            zklog.info("dbSenderThread64() starting to send data, multiWrite=[" + multiWrite.print() + "]");
-#endif
-            zkresult zkr;
-            zkr = pDatabase->sendData();
-            if (zkr == ZKR_SUCCESS)
-            {
-                multiWrite.Lock();
-                multiWrite.storedFlushId = multiWrite.storingFlushId;
-#ifdef LOG_DB_SENDER_THREAD
-                zklog.info("dbSenderThread64() successfully sent data, multiWrite=[]" + multiWrite.print() + "]");
-#endif
-                // Advance synchronizing index
-                multiWrite.synchronizingDataIndex = (multiWrite.synchronizingDataIndex + 1) % 3;
-#ifdef LOG_DB_SENDER_THREAD
-                zklog.info("dbSenderThread64() updated: multiWrite=[" + multiWrite.print() + "]");
-#endif
-                sem_post(&pDatabase->getFlushDataSem);
-#ifdef LOG_DB_SENDER_THREAD
-                zklog.info("dbSenderThread64() successfully called sem_post(&pDatabase->getFlushDataSem)");
-#endif
-                multiWrite.Unlock();
-            }
-            else
-            {
-                zklog.error("dbSenderThread64() failed calling sendData() error=" + zkresult2string(zkr));
-                usleep(1000000);
-            }
-        }
-    }
-
-    zklog.info("dbSenderThread64() done");
-    return NULL;
-}
-#endif
 
 zkresult Database64::consolidateBlock (uint64_t blockNumber)
 {
@@ -587,58 +380,11 @@ zkresult Database64::WriteTree (const Goldilocks::Element (&oldRoot)[4], const v
     return ZKR_SUCCESS;
 }
 
-zkresult Database64::CalculateHash (Child &result, vector<TreeChunk *> &chunks, vector<DB64Query> &dbQueries, int chunkId, int level, vector<HashValueGL> *hashValues)
-{
-    zkresult zkr;
-    vector<Child> results(64);
-
-    // Convert all TREE_CHUNK children into something else, typically INTERMEDIATE children,
-    // but they could also be LEAF (only one child below this level) or ZERO (no children below this level)
-    for (uint64_t i=0; i<64; i++)
-    {
-        if (chunks[chunkId]->getChild(i).type == TREE_CHUNK)
-        {
-            CalculateHash(result, chunks, dbQueries, chunks[chunkId]->getChild(i).treeChunkId, level + 6, hashValues);
-            chunks[chunkId]->setChild(i, result);
-        }
-    }
-
-    // Calculate the hash of this chunk
-    zkr = chunks[chunkId]->calculateHash(hashValues);
-    if (zkr != ZKR_SUCCESS)
-    {
-        zklog.error("Database64::CalculateHash() failed calling chunks[chunkId]->calculateHash() result=" + zkresult2string(zkr));
-        return zkr;
-    }
-
-    // Copy the result child
-    result = chunks[chunkId]->getChild1();
-
-    // Add to the database queries
-    if (result.type != ZERO)
-    {
-        // Encode the 64 children into database format
-        zkr = chunks[chunkId]->children2data();
-        if (zkr != ZKR_SUCCESS)
-        {
-            zklog.error("Database64::CalculateHash() failed calling chunks[chunkId]->children2data() result=" + zkresult2string(zkr));
-            return zkr;
-        }
-
-        Goldilocks::Element hash[4];
-        chunks[chunkId]->getHash(hash);
-        DB64Query dbQuery(fea2string(fr, hash), hash, chunks[chunkId]->data);
-        dbQueries.emplace_back(dbQuery);
-    }
-
-    return ZKR_SUCCESS;
-}
-
 zkresult Database64::ReadTree (const Goldilocks::Element (&root)[4], vector<KeyValue> &keyValues, vector<HashValueGL> *hashValues)
 {
     zkresult zkr;
 
-    HeaderPage::Print(headerPageNumber, true);
+    //HeaderPage::Print(headerPageNumber, true);
 
     if (keyValues.size() == 0)
     {
@@ -671,6 +417,15 @@ zkresult Database64::ReadTree (const Goldilocks::Element (&root)[4], vector<KeyV
         return zkr;
     }
 
+    // Get the version data
+    VersionDataStruct versionData;
+    zkr = HeaderPage::ReadVersionData(headerPageNumber, version, versionData);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("Database64::ReadTree() failed calling HeaderPage::ReadVersionData() result=" + zkresult2string(zkr) + " rootString=" + rootString);
+        return zkr;
+    }
+
     // Read all key-values
     string keyString;
     string key;
@@ -678,7 +433,7 @@ zkresult Database64::ReadTree (const Goldilocks::Element (&root)[4], vector<KeyV
     {
         keyString = fea2string(fr, keyValues[i].key);
         key = string2ba(keyString);
-        zkr = HeaderPage::KeyValueHistoryRead(headerPageNumber, key, version, keyValues[i].value);
+        zkr = HeaderPage::KeyValueHistoryRead(versionData.keyValueHistoryPage, key, version, keyValues[i].value);
         if (zkr != ZKR_SUCCESS)
         {
             zklog.error("Database64::ReadTree() failed calling HeaderPage::KeyValueHistoryRead() result=" + zkresult2string(zkr) + " rootString=" + rootString + " version=" + to_string(version));

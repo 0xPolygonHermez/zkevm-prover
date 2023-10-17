@@ -2,6 +2,7 @@
 #include "zkmax.hpp"
 #include "scalar.hpp"
 #include "tree_chunk.hpp"
+#include "zkglobals.hpp"
 
 zkresult CheckTree64 (Database64 &db, const string &key, uint64_t level, CheckTreeCounters64 &checkTreeCounters)
 {
@@ -11,7 +12,7 @@ zkresult CheckTree64 (Database64 &db, const string &key, uint64_t level, CheckTr
 
     TreeChunk treeChunk(poseidon);
     Goldilocks::Element keyFea[4];
-    string2fea(db.fr, key, keyFea);
+    string2fea(fr, key, keyFea);
     zkresult result = ZKR_UNSPECIFIED; // = db.read(key, keyFea, treeChunk.data, NULL, false);
     if (result != ZKR_SUCCESS)
     {
@@ -38,7 +39,7 @@ zkresult CheckTree64 (Database64 &db, const string &key, uint64_t level, CheckTr
             case INTERMEDIATE:
             {
                 checkTreeCounters.intermediateNodes++;
-                result = CheckTree64(db, fea2string(db.fr, treeChunk.getChild(i).intermediate.hash), level+1, checkTreeCounters);
+                result = CheckTree64(db, fea2string(fr, treeChunk.getChild(i).intermediate.hash), level+1, checkTreeCounters);
                 if (zkr != ZKR_SUCCESS)
                 {
                     return zkr;
