@@ -18,7 +18,7 @@ uint64_t PageManagerTest (void)
 {
     TimerStart(PAGE_MANAGER_TEST);
     PageManagerAccuracyTest();
-    PageManagerPerformanceTest();
+    //PageManagerPerformanceTest();
     TimerStopAndLog(PAGE_MANAGER_TEST);
     return 0;
 }

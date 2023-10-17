@@ -15,6 +15,7 @@
 #include <unistd.h>
 
 #define MULTIPLE_WRITES 0
+#define USE_FILE_IO 0
 
 class PageManager
 {
@@ -46,6 +47,7 @@ public:
         uint64_t pageInFile = pageNumber % pagesPerFile;
         return pages[fileId] + pageInFile * (uint64_t)4096;
     };
+#if USE_FILE_IO
     void getPageAddressFile(const uint64_t pageNumber, char *out)
     {
         shared_lock<shared_mutex> guard(pagesLock);
@@ -54,6 +56,7 @@ public:
         uint64_t pageInFile = pageNumber % pagesPerFile;
         pread(fileDescriptors[fileId], out, 4096, pageInFile * (uint64_t)4096);
     };
+#endif
 
     inline void readLock(){
         headerLock.lock_shared();

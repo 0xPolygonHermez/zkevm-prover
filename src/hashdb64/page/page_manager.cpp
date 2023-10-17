@@ -10,6 +10,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <cerrno>
+#include <omp.h>
 
 PageManager pageManager;
 PageManager::PageManager()
@@ -72,8 +73,11 @@ PageManager::PageManager(const string fileName_, const uint64_t fileSize_, const
         if (pages[k] == MAP_FAILED) {
             zklog.error("Failed to mmap file: " + (string)strerror(errno));
         }
+#if USE_FILE_IO
         fileDescriptors.push_back(fd);
-        //if(k!=0) close(fd);
+#else
+        if(k!=0) close(fd);
+#endif
     }
     zkassertpermanent(nPages > 2);
     firstUnusedPage = 2;
@@ -173,9 +177,13 @@ void PageManager::flushPages(){
 #if MULTIPLE_WRITES
         shared_lock<shared_mutex> guard(pagesLock);
 #endif
-        msync(getPageAddress(1), fileSize-4096, MS_SYNC);
-        for(uint64_t k=1; k< pages.size(); ++k){
-            msync(pages[k], fileSize, MS_SYNC);
+        #pragma omp parallel for schedule(static,1) num_threads(omp_get_num_threads()/2)
+        for(uint64_t k=0; k< pages.size(); ++k){
+            if(k==0){
+                msync(getPageAddress(1), fileSize-4096, MS_SYNC);
+            }else{
+                msync(pages[k], fileSize, MS_SYNC);
+            }
         }
         off_t offset = 0;
         if(lseek(file0Descriptor, offset, SEEK_SET) == -1) {
