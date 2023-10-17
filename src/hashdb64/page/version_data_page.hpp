@@ -2,6 +2,7 @@
 #define VERSION_DATA_PAGE_NPP
 
 #include <string>
+#include <cstdint>
 
 using namespace std;
 

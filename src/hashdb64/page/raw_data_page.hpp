@@ -2,6 +2,7 @@
 #define RAW_DATA_PAGE_HPP
 
 #include <unistd.h>
+#include <stdint.h>
 #include "zkresult.hpp"
 #include "zkassert.hpp"
 

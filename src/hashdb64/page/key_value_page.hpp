@@ -3,6 +3,7 @@
 
 #include <unistd.h>
 #include <vector>
+#include <stdint.h>
 #include "zkresult.hpp"
 #include "zkassert.hpp"
 
