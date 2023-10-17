@@ -316,199 +316,215 @@ void Config::print(void)
     zklog.info("    proverID=" + proverID);
     zklog.info("    proverName=" + proverName);
 
-    zklog.info("    runExecutorServer=" + to_string(runExecutorServer));
-    if (runExecutorClient)
-        zklog.info("    runExecutorClient=true");
-    if (runExecutorClientMultithread)
-        zklog.info("    runExecutorClientMultithread=true");
-    zklog.info("    runHashDBServer=" + to_string(runHashDBServer));
-    if (runHashDBTest)
-        zklog.info("    runHashDBTest=true");
-    if (runAggregatorServer)
-        zklog.info("    runAggregatorServer=true");
-    zklog.info("    runAggregatorClient=" + to_string(runAggregatorClient));
-    if (runAggregatorClientMock)        
-        zklog.info("    runAggregatorClientMock=true");
-    if (runFileGenBatchProof)
-        zklog.info("    runFileGenBatchProof=true");
-    if (runFileGenAggregatedProof)
-        zklog.info("    runFileGenAggregatedProof=true");
-    if (runFileGenFinalProof)
-        zklog.info("    runFileGenFinalProof=true");
-    if (runFileProcessBatch)
-        zklog.info("    runFileProcessBatch=true");
-    if (runFileProcessBatchMultithread)
-        zklog.info("    runFileProcessBatchMultithread=true");
-    if (runFileExecute)
-        zklog.info("    runFileExecute=true");
+    json j = toJson();
 
-    if (runKeccakScriptGenerator)
-        zklog.info("    runKeccakScriptGenerator=true");
-    if (runSHA256ScriptGenerator)
-        zklog.info("    runSHA256ScriptGenerator=true");
-    if (runKeccakTest)
-        zklog.info("    runKeccakTest=true");
-    if (runStorageSMTest)
-        zklog.info("    runStorageSMTest=true");
-    if (runBinarySMTest)
-        zklog.info("    runBinarySMTest=true");
-    if (runMemAlignSMTest)
-        zklog.info("    runMemAlignSMTest=true");
-    if (runSHA256Test)
-        zklog.info("    runSHA256Test=true");
-    if (runBlakeTest)
-        zklog.info("    runBlakeTest=true");
-    if (runECRecoverTest)
-        zklog.info("    runECRecoverTest=true");
-    if (runDatabaseCacheTest)
-        zklog.info("    runDatabaseCacheTest=true");
-    if (runCheckTreeTest)
-    {
-        zklog.info("    runCheckTreeTest=true");
-        zklog.info("    checkTreeRoot=" + checkTreeRoot);
-    }
-    if (runDatabasePerformanceTest)
-        zklog.info("    runDatabasePerformanceTest=true");
-    if (runPageManagerTest)
-        zklog.info("    runPageManagerTest=true");
-    if (runKeyValueTreeTest)
-        zklog.info("    runKeyValueTreeTest=true");
-    if (runSMT64Test)
-        zklog.info("    runSMT64Test=true");
-    if (runUnitTest)
-        zklog.info("    runUnitTest=true");
+    j["databaseURL"] = "REDACTED";
+    j["hashDBURL"] = "REDACTED";
 
-    zklog.info("    executeInParallel=" + to_string(executeInParallel));
-    zklog.info("    useMainExecGenerated=" + to_string(useMainExecGenerated));
-    zklog.info("    useMainExecC=" + to_string(useMainExecC));
+    zklog.info(j.dump(4));
+}
 
-    if (executorROMLineTraces)
-        zklog.info("    executorROMLineTraces=true");
+json Config::toJson(void)
+{
+    // The implementation of this function is a direct macro transaction of the Config::load method
+    json j;
 
-    zklog.info("    executorTimeStatistics=" + to_string(executorTimeStatistics));
+    j["proverID"] = proverID;
 
-    if (saveRequestToFile)
-        zklog.info("    saveRequestToFile=true");
-    if (saveInputToFile)
-        zklog.info("    saveInputToFile=true");
-    if (saveDbReadsToFile)
-        zklog.info("    saveDbReadsToFile=true");
-    if (saveDbReadsToFileOnChange)
-        zklog.info("    saveDbReadsToFileOnChange=true");
-    if (saveOutputToFile)
-        zklog.info("    saveOutputToFile=true");
-    if (saveProofToFile)
-        zklog.info("    saveProofToFile=true");
-    if (saveFilesInSubfolders)
-        zklog.info("    saveFilesInSubfolders=true");
-    if (saveResponseToFile)
-        zklog.info("    saveResponseToFile=true");
-    zklog.info("    loadDBToMemCache=" + to_string(loadDBToMemCache));
-    if (loadDBToMemCacheInParallel)
-        zklog.info("    loadDBToMemCacheInParallel=true");
-    if (opcodeTracer)
-        zklog.info("    opcodeTracer=true");
-    if (logRemoteDbReads)
-        zklog.info("    logRemoteDbReads=true");
-    if (logExecutorServerInput)
-        zklog.info("    logExecutorServerInput=true");
-    if (logExecutorServerInputJson)
-        zklog.info("    logExecutorServerInputJson=true");
-    if (logExecutorServerInputGasThreshold)
-        zklog.info("    logExecutorServerInputGasThreshold=true");
-    if (logExecutorServerResponses)
-        zklog.info("    logExecutorServerResponses=true");
-    if (logExecutorServerTxs)
-        zklog.info("    logExecutorServerTxs=true");
-    if (dontLoadRomOffsets)
-        zklog.info("    dontLoadRomOffsets=true");
+    // Servers and clients
+    j["runExecutorServer"] = runExecutorServer;
+    j["runExecutorClient"] = runExecutorClient;
+    j["runExecutorClientMultithread"] = runExecutorClientMultithread;
+    j["runHashDBServer"] = runHashDBServer;
+    j["runHashDBTest"] = runHashDBTest;
+    j["runAggregatorServer"] = runAggregatorServer;
+    j["runAggregatorClient"] = runAggregatorClient;
+    j["runAggregatorClientMock"] = runAggregatorClientMock;
 
-    zklog.info("    executorServerPort=" + to_string(executorServerPort));
-    zklog.info("    executorClientPort=" + to_string(executorClientPort));
-    zklog.info("    executorClientHost=" + executorClientHost);
-    zklog.info("    executorClientLoops=" + to_string(executorClientLoops));
-    zklog.info("    executorClientCheckNewStateRoot=" + to_string(executorClientCheckNewStateRoot));
-    zklog.info("    hashDBServerPort=" + to_string(hashDBServerPort));
-    zklog.info("    hashDBURL=" + hashDBURL);
-    zklog.info("    hashDB64=" + to_string(hashDB64));
-    zklog.info("    kvDBMaxVersions=" + to_string(kvDBMaxVersions));
-    zklog.info("    dbCacheSynchURL=" + dbCacheSynchURL);
-    zklog.info("    aggregatorServerPort=" + to_string(aggregatorServerPort));
-    zklog.info("    aggregatorClientPort=" + to_string(aggregatorClientPort));
-    zklog.info("    aggregatorClientHost=" + aggregatorClientHost);
-    zklog.info("    aggregatorClientMockTimeout=" + to_string(aggregatorClientMockTimeout));
-    zklog.info("    aggregatorClientWatchdogTimeout=" + to_string(aggregatorClientWatchdogTimeout));
-    zklog.info("    aggregatorClientMaxStreams=" + to_string(aggregatorClientMaxStreams));
+    // Run file
+    j["runFileGenBatchProof"] = runFileGenBatchProof;
+    j["runFileGenAggregatedProof"] = runFileGenAggregatedProof;
+    j["runFileGenFinalProof"] = runFileGenFinalProof;
+    j["runFileProcessBatch"] = runFileProcessBatch;
+    j["runFileProcessBatchMultithread"] = runFileProcessBatchMultithread;
+    j["runFileExecute"] = runFileExecute;
 
-    zklog.info("    inputFile=" + inputFile);
-    zklog.info("    inputFile2=" + inputFile2);
-    zklog.info("    outputPath=" + outputPath);
-    zklog.info("    configPath=" + configPath);
-    zklog.info("    rom=" + rom);
-    zklog.info("    zkevmCmPols=" + zkevmCmPols);
-    zklog.info("    c12aCmPols=" + c12aCmPols);
-    zklog.info("    recursive1CmPols=" + recursive1CmPols);
-    zklog.info("    zkevmConstPols=" + zkevmConstPols);
-    zklog.info("    c12aConstPols=" + c12aConstPols);
-    zklog.info("    mapConstPolsFile=" + to_string(mapConstPolsFile));
-    zklog.info("    zkevmConstantsTree=" + zkevmConstantsTree);
-    zklog.info("    c12aConstantsTree=" + c12aConstantsTree);
-    zklog.info("    mapConstantsTreeFile=" + to_string(mapConstantsTreeFile));
-    zklog.info("    finalVerkey=" + finalVerkey);
-    zklog.info("    zkevmVerifier=" + zkevmVerifier);
-    zklog.info("    recursive1Verifier=" + recursive1Verifier);
-    zklog.info("    recursive2Verifier=" + recursive2Verifier);
-    zklog.info("    recursive2Verkey=" + recursive2Verkey);
-    zklog.info("    recursivefVerifier=" + recursivefVerifier);
-    zklog.info("    finalVerifier=" + finalVerifier);
-    zklog.info("    finalStarkZkey=" + finalStarkZkey);
-    zklog.info("    publicsOutput=" + publicsOutput);
-    zklog.info("    proofFile=" + proofFile);
-    zklog.info("    keccakScriptFile=" + keccakScriptFile);
-    zklog.info("    sha256ScriptFile=" + sha256ScriptFile);
-    zklog.info("    keccakPolsFile=" + keccakPolsFile);
-    zklog.info("    sha256PolsFile=" + sha256PolsFile);
-    zklog.info("    keccakConnectionsFile=" + keccakConnectionsFile);
-    zklog.info("    storageRomFile=" + storageRomFile);
-    zklog.info("    zkevmStarkInfo=" + zkevmStarkInfo);
-    zklog.info("    c12aStarkInfo=" + c12aStarkInfo);
-    zklog.info("    databaseURL=" + databaseURL.substr(0, 5) + "...");
-    zklog.info("    dbNodesTableName=" + dbNodesTableName);
-    zklog.info("    dbProgramTableName=" + dbProgramTableName);
-    zklog.info("    dbKeyValueTableName=" + dbKeyValueTableName);
-    zklog.info("    dbVersionTableName=" + dbVersionTableName);
-    zklog.info("    dbLatestVersionTableName=" + dbLatestVersionTableName);
-    zklog.info("    dbMultiWrite=" + to_string(dbMultiWrite));
-    zklog.info("    dbMultiWriteSingleQuerySize=" + to_string(dbMultiWriteSingleQuerySize));
-    zklog.info("    dbConnectionsPool=" + to_string(dbConnectionsPool));
-    zklog.info("    dbNumberOfPoolConnections=" + to_string(dbNumberOfPoolConnections));
-    zklog.info("    dbMetrics=" + to_string(dbMetrics));
-    zklog.info("    dbClearCache=" + to_string(dbClearCache));
-    zklog.info("    dbGetTree=" + to_string(dbGetTree));
-    zklog.info("    dbReadOnly=" + to_string(dbReadOnly));
-    zklog.info("    dbReadRetryCounter=" + to_string(dbReadRetryCounter));
-    zklog.info("    dbReadRetryDelay=" + to_string(dbReadRetryDelay));
-    zklog.info("    stateManager=" + to_string(stateManager));
-    zklog.info("    stateManagerPurge=" + to_string(stateManagerPurge));
-    zklog.info("    stateManagerPurgeTxs=" + to_string(stateManagerPurgeTxs));
-    zklog.info("    cleanerPollingPeriod=" + to_string(cleanerPollingPeriod));
-    zklog.info("    requestsPersistence=" + to_string(requestsPersistence));
-    zklog.info("    maxExecutorThreads=" + to_string(maxExecutorThreads));
-    zklog.info("    maxProverThreads=" + to_string(maxProverThreads));
-    zklog.info("    maxHashDBThreads=" + to_string(maxHashDBThreads));
-    zklog.info("    dbMTCacheSize=" + to_string(dbMTCacheSize));
-    zklog.info("    useAssociativeCache=" + to_string(useAssociativeCache));
-    zklog.info("    log2DbMTAssociativeCacheSize=" + to_string(log2DbMTAssociativeCacheSize));
-    zklog.info("    log2DbMTAssociativeCacheIndexesSize=" + to_string(log2DbMTAssociativeCacheIndexesSize));
-    zklog.info("    log2DbKVAssociativeCacheSize=" + to_string(log2DbKVAssociativeCacheSize));
-    zklog.info("    log2DbKVAssociativeCacheIndexesSize=" + to_string(log2DbKVAssociativeCacheIndexesSize));
-    zklog.info("    log2DbVersionsAssociativeCacheSize=" + to_string(log2DbVersionsAssociativeCacheSize));
-    zklog.info("    log2DbVersionsAssociativeCacheIndexesSize=" + to_string(log2DbVersionsAssociativeCacheIndexesSize));
-    zklog.info("    dbProgramCacheSize=" + to_string(dbProgramCacheSize));
-    zklog.info("    loadDBToMemTimeout=" + to_string(loadDBToMemTimeout));
-    zklog.info("    fullTracerTraceReserveSize=" + to_string(fullTracerTraceReserveSize));
-    zklog.info("    ECRecoverPrecalc=" + to_string(ECRecoverPrecalc));
-    zklog.info("    ECRecoverPrecalcNThreads=" + to_string(ECRecoverPrecalcNThreads));
+    // Tests
+    j["runKeccakScriptGenerator"] = runKeccakScriptGenerator;
+    j["runSHA256ScriptGenerator"] = runSHA256ScriptGenerator;
+    j["runKeccakTest"] = runKeccakTest;
+    j["runStorageSMTest"] = runStorageSMTest;
+    j["runBinarySMTest"] = runBinarySMTest;
+    j["runMemAlignSMTest"] = runMemAlignSMTest;
+    j["runSHA256Test"] = runSHA256Test;
+    j["runBlakeTest"] = runBlakeTest;
+    j["runECRecoverTest"] = runECRecoverTest;
+    j["runDatabaseCacheTest"] = runDatabaseCacheTest;
+    j["runCheckTreeTest"] = runCheckTreeTest;
+    j["checkTreeRoot"] = checkTreeRoot;
+    j["runDatabasePerformanceTest"] = runDatabasePerformanceTest;
+    j["runPageManagerTest"] = runPageManagerTest;
+    j["runSMT64Test"] = runSMT64Test;
+    j["runUnitTest"] = runUnitTest;
+
+    // Main SM executor
+    j["executeInParallel"] = executeInParallel;
+    j["useMainExecGenerated"] = useMainExecGenerated;
+    j["useMainExecC"] = useMainExecC;
+
+    // Save to file
+    j["saveRequestToFile"] = saveRequestToFile;
+    j["saveInputToFile"] = saveInputToFile;
+    j["saveDbReadsToFile"] = saveDbReadsToFile;
+    j["saveDbReadsToFileOnChange"] = saveDbReadsToFileOnChange;
+    j["saveOutputToFile"] = saveOutputToFile;
+    j["saveResponseToFile"] = saveResponseToFile;
+    j["saveProofToFile"] = saveProofToFile;
+    j["saveFilesInSubfolders"] = saveFilesInSubfolders;
+
+    // Load DB to mem cache TODO: Discontinue this functionality
+    j["loadDBToMemCache"] = loadDBToMemCache;
+    j["loadDBToMemCacheInParallel"] = loadDBToMemCacheInParallel;
+    j["loadDBToMemTimeout"] = loadDBToMemTimeout;
+
+    // MT cache
+    j["dbMTCacheSize"] = dbMTCacheSize;
+
+   // MT associative cache
+    j["useAssociativeCache"] = useAssociativeCache;
+    j["log2DbMTAssociativeCacheSize"] = log2DbMTAssociativeCacheSize;
+    j["log2DbMTAssociativeCacheIndexesSize"] = log2DbMTAssociativeCacheIndexesSize;
+    j["log2DbKVAssociativeCacheSize"] = log2DbKVAssociativeCacheSize;
+    j["log2DbKVAssociativeCacheIndexesSize"] = log2DbKVAssociativeCacheIndexesSize;
+    j["log2DbVersionsAssociativeCacheSize"] = log2DbVersionsAssociativeCacheSize;
+    j["log2DbVersionsAssociativeCacheIndexesSize"] = log2DbVersionsAssociativeCacheIndexesSize;
+
+     // Program (SC) cache
+    j["dbProgramCacheSize"] = dbProgramCacheSize;
+
+    // Server and client ports, hosts, etc.
+    j["executorServerPort"] = executorServerPort;
+    j["executorClientPort"] = executorClientPort;
+    j["executorClientHost"] = executorClientHost;
+    j["executorClientLoops"] = executorClientLoops;
+    j["executorClientCheckNewStateRoot"] = executorClientCheckNewStateRoot;
+    j["hashDBServerPort"] = hashDBServerPort;
+    j["hashDBURL"] = hashDBURL;
+    j["hashDB64"] = hashDB64;
+    j["kvDBMaxVersions"] = kvDBMaxVersions;
+    j["dbCacheSynchURL"] = dbCacheSynchURL;
+    j["aggregatorServerPort"] = aggregatorServerPort;
+    j["aggregatorClientPort"] = aggregatorClientPort;
+    j["aggregatorClientHost"] = aggregatorClientHost;
+    j["aggregatorClientMockTimeout"] = aggregatorClientMockTimeout;
+    j["aggregatorClientWatchdogTimeout"] = aggregatorClientWatchdogTimeout;
+    j["aggregatorClientMaxStreams"] = aggregatorClientMaxStreams;
+
+    // Logs
+    j["executorROMLineTraces"] = executorROMLineTraces;
+    j["executorTimeStatistics"] = executorTimeStatistics;
+    j["opcodeTracer"] = opcodeTracer;
+    j["logRemoteDbReads"] = logRemoteDbReads;
+    j["logExecutorServerInput"] = logExecutorServerInput;
+    j["logExecutorServerInputJson"] = logExecutorServerInputJson;
+    j["logExecutorServerInputGasThreshold"] = logExecutorServerInputGasThreshold;
+    j["logExecutorServerResponses"] = logExecutorServerResponses;
+    j["logExecutorServerTxs"] = logExecutorServerTxs;
+    j["dontLoadRomOffsets"] = dontLoadRomOffsets;
+
+    // Files and paths
+    j["inputFile"] = inputFile;
+    j["inputFile2"] = inputFile2;
+    j["outputPath"] = outputPath;
+    j["configPath"] = configPath;
+    j["rom"] = rom;
+    j["zkevmCmPols"] = zkevmCmPols;
+    j["zkevmCmPolsAfterExecutor"] = zkevmCmPolsAfterExecutor;
+    j["keccakScriptFile"] = keccakScriptFile;
+    j["sha256ScriptFile"] = sha256ScriptFile;
+    j["storageRomFile"] = storageRomFile;
+    j["zkevmConstPols"] = zkevmConstPols;
+    j["zkevmConstantsTree"] = zkevmConstantsTree;
+    j["zkevmStarkInfo"] = zkevmStarkInfo;
+    j["zkevmVerifier"] = zkevmVerifier;
+    j["c12aConstPols"] = c12aConstPols;
+    j["c12aConstantsTree"] = c12aConstantsTree;
+    j["c12aExec"] = c12aExec;
+    j["c12aStarkInfo"] = c12aStarkInfo;
+    j["recursive1ConstPols"] = recursive1ConstPols;
+    j["recursive1ConstantsTree"] = recursive1ConstantsTree;
+    j["recursive1Exec"] = recursive1Exec;
+    j["recursive1StarkInfo"] = recursive1StarkInfo;
+    j["recursive1Verifier"] = recursive1Verifier;
+    j["recursive2ConstPols"] = recursive2ConstPols;
+    j["recursive2ConstantsTree"] = recursive2ConstantsTree;
+    j["recursive2Exec"] = recursive2Exec;
+    j["recursive2StarkInfo"] = recursive2StarkInfo;
+    j["recursive2Verifier"] = recursive2Verifier;
+    j["recursive2Verkey"] = recursive2Verkey;
+    j["recursivefConstPols"] = recursivefConstPols;
+    j["recursivefConstantsTree"] = recursivefConstantsTree;
+    j["recursivefExec"] = recursivefExec;
+    j["recursivefStarkInfo"] = recursivefStarkInfo;
+    j["recursivefVerifier"] = recursivefVerifier;
+    j["finalVerifier"] = finalVerifier;
+    j["finalVerkey"] = finalVerkey;
+    j["finalStarkZkey"] = finalStarkZkey;
+    j["c12aCmPols"] = c12aCmPols;
+    j["recursive1CmPols"] = recursive1CmPols;
+    j["mapConstPolsFile"] = mapConstPolsFile;
+    j["mapConstantsTreeFile"] = mapConstantsTreeFile;
+    j["proofFile"] = proofFile;
+    j["publicsOutput"] = publicsOutput;
+    j["keccakPolsFile"] = keccakPolsFile;
+    j["sha256PolsFile"] = sha256PolsFile;
+    j["keccakConnectionsFile"] = keccakConnectionsFile;
+    j["sha256PolsFile"] = sha256PolsFile;
+
+    // Database
+    j["databaseURL"] = databaseURL;
+    j["dbNodesTableName"] = dbNodesTableName;
+    j["dbProgramTableName"] = dbProgramTableName;
+    j["dbKeyValueTableName"] = dbKeyValueTableName;
+    j["dbVersionTableName"] = dbVersionTableName;
+    j["dbLatestVersionTableName"] = dbLatestVersionTableName;
+    j["dbMultiWrite"] = dbMultiWrite;
+    j["dbMultiWriteSingleQuerySize"] = dbMultiWriteSingleQuerySize;
+    j["dbConnectionsPool"] = dbConnectionsPool;
+    j["dbNumberOfPoolConnections"] = dbNumberOfPoolConnections;
+    j["dbMetrics"] = dbMetrics;
+    j["dbClearCache"] = dbClearCache;
+    j["dbGetTree"] = dbGetTree;
+    j["dbReadOnly"] = dbReadOnly;
+    j["dbReadRetryCounter"] = dbReadRetryCounter;
+    j["dbReadRetryDelay"] = dbReadRetryDelay;
+
+    // State Manager
+    j["stateManager"] = stateManager;
+    j["stateManagerPurge"] = stateManagerPurge;
+    j["stateManagerPurgeTxs"] = stateManagerPurgeTxs;
+
+    // Threads
+    j["cleanerPollingPeriod"] = cleanerPollingPeriod;
+    j["requestsPersistence"] = requestsPersistence;
+    j["maxExecutorThreads"] = maxExecutorThreads;
+    j["maxProverThreads"] = maxProverThreads;
+    j["maxHashDBThreads"] = maxHashDBThreads;
+
+    // Prover name, name of this instance as per configuration
+    j["proverName"] = proverName;
+
+    // Memory allocation
+    j["fullTracerTraceReserveSize"] = fullTracerTraceReserveSize;
+
+    // ECRecover
+    j["ECRecoverPrecalc"] = ECRecoverPrecalc;
+    j["ECRecoverPrecalcNThreads"] = ECRecoverPrecalcNThreads;
+
+    // Logs
+    j["jsonLogs"] = jsonLogs;
+
+    return j;
 }
 
 bool Config::check (void)
@@ -668,3 +684,4 @@ bool Config::check (void)
 
     return bError;
 }
+

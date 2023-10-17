@@ -199,6 +199,7 @@ public:
     void load(json &config);
     bool generateProof(void) const { return runFileGenBatchProof || runFileGenAggregatedProof || runFileGenFinalProof || runAggregatorClient; }
     void print(void);
+    json toJson(void);
     bool check(void); // Checks that the loaded configuration is correct; returns true if there is at least one error
 };
 
