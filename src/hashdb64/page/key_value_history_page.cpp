@@ -168,7 +168,6 @@ zkresult KeyValueHistoryPage::Write (uint64_t &pageNumber, const string &key, co
 
             uint64_t insertionRawDataPage = headerPage->rawDataPage;
             uint64_t insertionRawDataOffset = RawDataPage::GetOffset(insertionRawDataPage);
-            uint64_t rawDataPage = insertionRawDataPage;
 
             string keyAndValue = key + scalar2ba32(value);  // TODO: Check that value size=32
             zkr = RawDataPage::Write(headerPage->rawDataPage, keyAndValue);
@@ -182,9 +181,6 @@ zkresult KeyValueHistoryPage::Write (uint64_t &pageNumber, const string &key, co
             page->keyValueEntry[index][0] = (uint64_t(1) << 60) | version;
             page->keyValueEntry[index][1] = (insertionRawDataOffset << 48) + insertionRawDataPage;
             page->keyValueEntry[index][2] = 0; // Mask as no hash has been calculated
-
-            // Update header
-            headerPage->rawDataPage = rawDataPage;
 
             return ZKR_SUCCESS;            
         }
@@ -254,10 +250,9 @@ zkresult KeyValueHistoryPage::Write (uint64_t &pageNumber, const string &key, co
                 // Get the current rawDataPage and offset
                 uint64_t insertionRawDataPage = headerPage->rawDataPage;
                 uint64_t insertionRawDataOffset = RawDataPage::GetOffset(headerPage->rawDataPage);
-                uint64_t rawDataPage = insertionRawDataPage;
 
                 string keyAndValue = key + valueBa;
-                zkr = RawDataPage::Write(rawDataPage, keyAndValue);
+                zkr = RawDataPage::Write(headerPage->rawDataPage, keyAndValue);
                 if (zkr != ZKR_SUCCESS)
                 {
                     zklog.error("KeyValueHistoryPage::Write() failed calling RawDataPage.Write result=" + zkresult2string(zkr) + " rawDataPage=" + to_string(rawDataPage) + " rawDataOffset=" + to_string(rawDataOffset) + " key=" + ba2string(key) + " version=" + to_string(version) + " level=" + to_string(level) + " index=" + to_string(index));
@@ -268,9 +263,6 @@ zkresult KeyValueHistoryPage::Write (uint64_t &pageNumber, const string &key, co
                 page->keyValueEntry[index][0] = (uint64_t(1) << 60) | (previousVersionOffset << 48) | version;
                 page->keyValueEntry[index][1] = (insertionRawDataOffset << 48) + (insertionRawDataPage & U64Mask48);
                 page->keyValueEntry[index][2] = 0;
-
-                // Update header
-                headerPage->rawDataPage = rawDataOffset;
 
                 return ZKR_SUCCESS;
             }
@@ -418,13 +410,12 @@ zkresult KeyValueHistoryPage::calculatePageHash (const uint64_t pageNumber, cons
                     // Get the current rawDataPage and offset
                     uint64_t insertionRawDataPage = headerPage->rawDataPage;
                     uint64_t insertionRawDataOffset = RawDataPage::GetOffset(headerPage->rawDataPage);
-                    uint64_t rawDataPage = insertionRawDataPage;
 
                     // Store the hash in raw page
                     string hashBa;
                     hashBa = string2ba(fea2string(fr, hash));
                     zkassert(hashBa.size() == 32);
-                    zkr = RawDataPage::Write(rawDataPage, hashBa);
+                    zkr = RawDataPage::Write(headerPage->rawDataPage, hashBa);
                     if (zkr != ZKR_SUCCESS)
                     {
                         zklog.error("KeyValueHistoryPage::calculatePageHash() failed calling RawDataPage.Write result=" + zkresult2string(zkr) + " insertionRawDataPage=" + to_string(insertionRawDataPage) + " insertionRawDataOffset=" + to_string(insertionRawDataOffset) + " level=" + to_string(level) + " index=" + to_string(index));
@@ -433,9 +424,6 @@ zkresult KeyValueHistoryPage::calculatePageHash (const uint64_t pageNumber, cons
 
                     // Record the new hash and its raw data
                     page->keyValueEntry[index][2] = (insertionRawDataOffset << 48) | (insertionRawDataPage & U64Mask48);
-
-                    // Update the header
-                    headerPage->rawDataPage = rawDataPage;
                 }
                 // If hash was calculated, get it from raw data
                 else
@@ -499,13 +487,12 @@ zkresult KeyValueHistoryPage::calculatePageHash (const uint64_t pageNumber, cons
             // Get the current rawDataPage and offset
             uint64_t insertionRawDataPage = headerPage->rawDataPage;
             uint64_t insertionRawDataOffset = RawDataPage::GetOffset(headerPage->rawDataPage);
-            uint64_t rawDataPage = insertionRawDataPage;
 
             // Store the hash in raw page
             string hashBa;
             hashBa = string2ba(fea2string(fr, hash));
             zkassert(hashBa.size() == 32);
-            zkr = RawDataPage::Write(rawDataPage, hashBa);
+            zkr = RawDataPage::Write(headerPage->rawDataPage, hashBa);
             if (zkr != ZKR_SUCCESS)
             {
                 zklog.error("KeyValueHistoryPage::calculatePageHash() failed calling RawDataPage.Write result=" + zkresult2string(zkr) + " insertionRawDataPage=" + to_string(insertionRawDataPage) + " insertionRawDataOffset=" + to_string(insertionRawDataOffset) + " level=" + to_string(level) + " index=" + to_string(index));
@@ -514,9 +501,6 @@ zkresult KeyValueHistoryPage::calculatePageHash (const uint64_t pageNumber, cons
 
             // Record the new hash and its raw data
             page->keyValueEntry[index][2] = (insertionRawDataOffset << 48) | (insertionRawDataPage & U64Mask48);
-
-            // Update header page
-            headerPage->rawDataPage = rawDataPage;
         }
     }
 

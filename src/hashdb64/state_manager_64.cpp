@@ -5,6 +5,7 @@
 #include "timer.hpp"
 #include "persistence.hpp"
 #include "definitions.hpp"
+#include "zkglobals.hpp"
 
 Goldilocks frSM64;
 PoseidonGoldilocks poseidonSM64;
@@ -638,7 +639,7 @@ zkresult StateManager64::purge (const string &batchUUID, const string &_newState
                 continue;
             }
 
-            zkr = purgeTxPersistence(txState.persistence[persistence], db.config);
+            zkr = purgeTxPersistence(txState.persistence[persistence], config);
             if (zkr != ZKR_SUCCESS)
             {
                 zklog.error("StateManager64::purge() failed calling purgeTxPersistence() zkr=" + zkresult2string(zkr) +
@@ -1019,7 +1020,7 @@ zkresult StateManager64::set (const string &batchUUID, uint64_t tx, Database64 &
 
     zkresult zkr;
 
-    bool bUseStateManager = db.config.stateManager && (batchUUID.size() > 0);
+    bool bUseStateManager = config.stateManager && (batchUUID.size() > 0);
 
     if (bUseStateManager)
     {
@@ -1081,7 +1082,7 @@ zkresult StateManager64::get (const string &batchUUID, Database64 &db, const Gol
     zklog.info("StateManager64::get() called with root=" + fea2string(fr,root) + " and key=" + fea2string(fr,key));
 #endif
 
-    bool bUseStateManager = db.config.stateManager && (batchUUID.size() > 0);
+    bool bUseStateManager = config.stateManager && (batchUUID.size() > 0);
 
     string keyString = fea2string(fr, key);
     mpz_class value;

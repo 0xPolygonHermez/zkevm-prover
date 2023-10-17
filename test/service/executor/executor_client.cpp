@@ -196,7 +196,6 @@ bool ExecutorClient::ProcessBatch (void)
         if (config.hashDB64)
         {
             Database64 &db = hashDB.db64;
-            db.clearCache();
 
             CheckTreeCounters64 checkTreeCounters;
 
