@@ -161,9 +161,6 @@ public:
     string databaseURL;
     string dbNodesTableName;
     string dbProgramTableName;
-    string dbKeyValueTableName;
-    string dbVersionTableName;
-    string dbLatestVersionTableName;
     bool dbMultiWrite;
     uint64_t dbMultiWriteSingleQuerySize;
     bool dbConnectionsPool;
