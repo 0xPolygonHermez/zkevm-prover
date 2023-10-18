@@ -467,3 +467,9 @@ zkresult Database64::ReadTree (const Goldilocks::Element (&root)[4], vector<KeyV
 
     return ZKR_SUCCESS;
 }
+
+zkresult Database64::PrintTree (const string &root)
+{
+    zklog.info("Database64::PrintTree()");
+    return HeaderPage::KeyValueHistoryPrint(headerPageNumber, root);
+}

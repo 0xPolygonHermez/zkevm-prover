@@ -85,6 +85,7 @@ public:
     // Tree64
     zkresult WriteTree (const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> &keyValues, Goldilocks::Element (&newRoot)[4], const bool persistent);
     zkresult ReadTree  (const Goldilocks::Element (&root)[4], vector<KeyValue> &keyValues, vector<HashValueGL> *hashValues);
+    zkresult PrintTree (const string &root); // Prints the tree corresponding to this root.  If root is empty, prints the latest version tree
 
     // Key - Value - Level
     zkresult readKV    (const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value,  uint64_t &level, DatabaseMap *dbReadLog);
