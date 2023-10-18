@@ -4,7 +4,6 @@
 #include "hashdb_singleton.hpp"
 #include "zkmax.hpp"
 #include "check_tree.hpp"
-#include "check_tree_64.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -196,20 +195,12 @@ bool ExecutorClient::ProcessBatch (void)
         if (config.hashDB64)
         {
             Database64 &db = hashDB.db64;
-
-            CheckTreeCounters64 checkTreeCounters;
-
-            zkresult result = CheckTree64(db, newStateRoot, 0, checkTreeCounters);
-            if (result != ZKR_SUCCESS)
+            zkresult zkr = db.PrintTree(newStateRoot);
+            if (zkr != ZKR_SUCCESS)
             {
-                zklog.error("ExecutorClient::ProcessBatch() failed calling ClimbTree64() result=" + zkresult2string(result));
+                zklog.error("ExecutorClient::ProcessBatch() failed calling db.PrintTree() result=" + zkresult2string(zkr));
                 return false;
             }
-
-            zklog.info("intermediateNodes=" + to_string(checkTreeCounters.intermediateNodes));
-            zklog.info("leafNodes=" + to_string(checkTreeCounters.leafNodes));
-            zklog.info("values=" + to_string(checkTreeCounters.values));
-            zklog.info("maxLevel=" + to_string(checkTreeCounters.maxLevel));
         }
         else
         {

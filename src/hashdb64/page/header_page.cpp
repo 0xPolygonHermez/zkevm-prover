@@ -186,7 +186,7 @@ zkresult HeaderPage::KeyValueHistoryRead (const uint64_t keyValueHistoryPage, co
     return KeyValueHistoryPage::Read(keyValueHistoryPage, key, version, value, keyLevel);
 }
 
-zkresult HeaderPage::KeyValueHistoryReadLevel (uint64_t &headerPageNumber, const string &key, uint64_t &keyLevel)
+zkresult HeaderPage::KeyValueHistoryReadLevel (const uint64_t &headerPageNumber, const string &key, uint64_t &keyLevel)
 {
     // Get header page
     HeaderStruct * headerPage = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
@@ -217,6 +217,45 @@ zkresult HeaderPage::KeyValueHistoryCalculateHash (uint64_t &headerPageNumber, G
 
     // Call the specific method
     return KeyValueHistoryPage::calculateHash(headerPage->keyValueHistoryPage, hash, headerPageNumber);
+}
+
+zkresult HeaderPage::KeyValueHistoryPrint (const uint64_t headerPageNumber, const string &root)
+{
+    // Get header page
+    HeaderStruct * headerPage = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
+
+    // If root is empty, print the last version
+    if (root == "")
+    {
+        KeyValueHistoryPage::Print(headerPage->keyValueHistoryPage, false, "");
+        return ZKR_SUCCESS;
+    }
+
+    // Convert root to a byte array
+    string rootString = NormalizeToNFormat(root, 64);
+    string rootBa =  string2ba(rootString);
+
+    // Get the version associated to this root
+    uint64_t version;
+    zkresult zkr = HeaderPage::ReadRootVersion(headerPageNumber, rootBa, version);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("HeaderPage::KeyValueHistoryPrint() faile calling HeaderPage::ReadRootVersion() result=" + zkresult2string(zkr) + " root=" + rootString);
+        return zkr;
+    }
+
+    // Get the version data
+    VersionDataStruct versionData;
+    zkr = HeaderPage::ReadVersionData(headerPageNumber, version, versionData);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("HeaderPage::KeyValueHistoryPrint() faile calling HeaderPage::ReadVersionData() result=" + zkresult2string(zkr) + " root=" + rootString);
+        return zkr;
+    }
+
+    KeyValueHistoryPage::Print(versionData.keyValueHistoryPage, false, "");
+
+    return ZKR_SUCCESS;
 }
 
 zkresult HeaderPage::ReadProgram (const uint64_t headerPageNumber, const string &key, string &value)

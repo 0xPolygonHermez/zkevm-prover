@@ -22,6 +22,15 @@ struct KeyValueHistoryStruct
     uint64_t historyEntry[106][3]; // history entries, copied from keyValueEntry when a new version is written in this page
 };
 
+class KeyValueHistoryCounters
+{
+public:
+    uint64_t intermediateNodes;
+    uint64_t leafNodes;
+    uint64_t maxLevel;
+    KeyValueHistoryCounters() : intermediateNodes(0), leafNodes(0), maxLevel(0) {};
+};
+
 class KeyValueHistoryPage
 {
 private:
@@ -41,10 +50,10 @@ public:
     static zkresult calculateHash             (const uint64_t pageNumber, Goldilocks::Element (&hash)[4], uint64_t &headerPageNumber);
 private:
     static zkresult calculatePageHash         (const uint64_t pageNumber, const uint64_t level, Goldilocks::Element (&hash)[4], uint64_t &headerPageNumber);
-    //static void calculateLeafHash         (const Goldilocks::Element (&key)[4], const uint64_t level, const mpz_class &value, Goldilocks::Element (&hash)[4], vector<HashValueGL> *hashValues);
-    //static void calculateIntermediateHash (const Goldilocks::Element (&leftHash)[4], const Goldilocks::Element (&rightHash)[4], Goldilocks::Element (&hash)[4], vector<HashValueGL> *hashValues);
 public:
+    static void Print (const uint64_t pageNumber, bool details, const string &prefix, const uint64_t level, KeyValueHistoryCounters &counters);
     static void Print (const uint64_t pageNumber, bool details, const string &prefix);
+
 };
 
 #endif

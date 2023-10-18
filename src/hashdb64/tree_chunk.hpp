@@ -49,10 +49,6 @@ During a process batch, we need to:
 class TreeChunk
 {
 private:
-    //Database64          &db;
-    //Goldilocks          &fr;
-    PoseidonGoldilocks  &poseidon;
-private:
     uint64_t            level; // Level of the top hash of the chunk: 0, 6, 12, 18, 24, etc.
     uint8_t             key; // 6 bits portion of the total key at this level of the SMT tree
     Goldilocks::Element hash[4];
@@ -78,10 +74,7 @@ public:
 public:
 
     // Constructor
-    TreeChunk(/*Database64 &db,*/ PoseidonGoldilocks &poseidon) :
-        //db(db),
-        //fr(db.fr),
-        poseidon(poseidon),
+    TreeChunk() :
         bHashValid(false),
         bChildrenRestValid(false),
         bChildren64Valid(false),
@@ -92,13 +85,7 @@ public:
         hash[2] = fr.zero();
         hash[3] = fr.zero();
     };
-
-    // Read from database
-    //zkresult readDataFromDb (const Goldilocks::Element (&hash)[4]);
-
-    // Encode/decode data functions
-    zkresult data2children (void); // Decodde data and store result into children64
-    zkresult children2data (void); // Encode children64 into data
+    
     uint64_t numberOfNonZeroChildren (void);
 
     // Calculate hash functions

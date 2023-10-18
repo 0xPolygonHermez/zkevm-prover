@@ -54,9 +54,10 @@ public:
 
     // Key-Value-History methods
     static zkresult KeyValueHistoryRead          (const uint64_t  keyValueHistoryPage, const string &key, const uint64_t version,       mpz_class &value, uint64_t &keyLevel);
-    static zkresult KeyValueHistoryReadLevel     (      uint64_t &headerPageNumber,    const string &key, uint64_t &keyLevel);
+    static zkresult KeyValueHistoryReadLevel     (const uint64_t &headerPageNumber,    const string &key, uint64_t &keyLevel);
     static zkresult KeyValueHistoryWrite         (      uint64_t &headerPageNumber,    const string &key, const uint64_t version, const mpz_class &value);
-    static zkresult KeyValueHistoryCalculateHash (uint64_t &headerPageNumber, Goldilocks::Element (&hash)[4]);
+    static zkresult KeyValueHistoryCalculateHash (      uint64_t &headerPageNumber,    Goldilocks::Element (&hash)[4]);
+    static zkresult KeyValueHistoryPrint         (const uint64_t  headerPageNumber,    const string &root);
 
     // Program page methods
     static zkresult ReadProgram  (const uint64_t  headerPageNumber, const string &key,       string &value);

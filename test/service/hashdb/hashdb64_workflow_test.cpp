@@ -6,6 +6,7 @@
 #include "utils.hpp"
 #include "hashdb_singleton.hpp"
 #include "timer.hpp"
+#include "check_tree_test.hpp"
 
 uint64_t HashDB64WorkflowTest (const Config& config)
 {
@@ -185,6 +186,8 @@ uint64_t HashDB64WorkflowTest (const Config& config)
             for (uint64_t i=0; i<4; i++) batchNewStateRoot[i] = root[i];
         }
     }
+
+    CheckTreeTest(config);
 
     TimerStopAndLog(HASHDB64_WORKFLOW_TEST);
 

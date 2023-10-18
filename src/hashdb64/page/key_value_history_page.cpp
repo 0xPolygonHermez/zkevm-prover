@@ -10,6 +10,7 @@
 #include "header_page.hpp"
 #include "constants.hpp"
 #include "tree_chunk.hpp"
+#include "zkmax.hpp"
 
 zkresult KeyValueHistoryPage::InitEmptyPage (const uint64_t pageNumber)
 {
@@ -455,7 +456,7 @@ zkresult KeyValueHistoryPage::calculatePageHash (const uint64_t pageNumber, cons
     // Get the SMT level
     uint64_t smtLevel = level*6;
 
-    TreeChunk treeChunk(poseidon);
+    TreeChunk treeChunk;
     treeChunk.resetToZero(smtLevel);
 
     // For each entry, calculate the hash depending on its type
@@ -631,94 +632,12 @@ zkresult KeyValueHistoryPage::calculatePageHash (const uint64_t pageNumber, cons
 
     return ZKR_SUCCESS;
 }
-/*
-void KeyValueHistoryPage::calculateLeafHash (const Goldilocks::Element (&key)[4], const uint64_t level, const mpz_class &value, Goldilocks::Element (&hash)[4], vector<HashValueGL> *hashValues)
-{
-    // Prepare input = [value8, 0000]
-    Goldilocks::Element input[12];
-    scalar2fea(fr, value, input[0], input[1], input[2], input[3], input[4], input[5], input[6], input[7]);
-    input[8] = fr.zero();
-    input[9] = fr.zero();
-    input[10] = fr.zero();
-    input[11] = fr.zero();
 
-    // Calculate the value hash
-    Goldilocks::Element valueHash[4];
-    poseidon.hash(valueHash, input);
-
-    // Return the hash-value pair, if requested
-    if (hashValues != NULL)
-    {
-        HashValueGL hashValue;
-        for (uint64_t i=0; i<4; i++) hashValue.hash[i] = valueHash[i];
-        for (uint64_t i=0; i<12; i++) hashValue.value[i] = input[i];
-        hashValues->emplace_back(hashValue);
-    }
-
-    // Calculate the remaining key
-    Goldilocks::Element rkey[4];
-    removeKeyBits(fr, key, level, rkey);
-
-    // Prepare input = [rkey, valueHash, 1000]
-    input[0] = rkey[0];
-    input[1] = rkey[1];
-    input[2] = rkey[2];
-    input[3] = rkey[3];
-    input[4] = valueHash[0];
-    input[5] = valueHash[1];
-    input[6] = valueHash[2];
-    input[7] = valueHash[3];
-    input[8] = fr.one();
-    input[9] = fr.zero();
-    input[10] = fr.zero();
-    input[11] = fr.zero();
-
-    // Calculate the leaf node hash
-    poseidon.hash(hash, input);
-
-    // Return the hash-value pair, if requested
-    if (hashValues != NULL)
-    {
-        HashValueGL hashValue;
-        for (uint64_t i=0; i<4; i++) hashValue.hash[i] = hash[i];
-        for (uint64_t i=0; i<12; i++) hashValue.value[i] = input[i];
-        hashValues->emplace_back(hashValue);
-    }
-}
-
-void KeyValueHistoryPage::calculateIntermediateHash (const Goldilocks::Element (&leftHash)[4], const Goldilocks::Element (&rightHash)[4], Goldilocks::Element (&hash)[4], vector<HashValueGL> *hashValues)
-{
-    // Prepare input = [leftHash, rightHash, 0000]
-    Goldilocks::Element input[12];
-    input[0] = leftHash[0];
-    input[1] = leftHash[1];
-    input[2] = leftHash[2];
-    input[3] = leftHash[3];
-    input[4] = rightHash[0];
-    input[5] = rightHash[1];
-    input[6] = rightHash[2];
-    input[7] = rightHash[3];
-    input[8] = fr.zero();
-    input[9] = fr.zero();
-    input[10] = fr.zero();
-    input[11] = fr.zero();
-
-    // Calculate the poseidon hash
-    poseidon.hash(hash, input);
-
-    // Return the hash-value pair, if requested
-    if (hashValues != NULL)
-    {
-        HashValueGL hashValue;
-        for (uint64_t i=0; i<4; i++) hashValue.hash[i] = hash[i];
-        for (uint64_t i=0; i<12; i++) hashValue.value[i] = input[i];
-        hashValues->emplace_back(hashValue);
-    }
-}*/
-
-void KeyValueHistoryPage::Print (const uint64_t pageNumber, bool details, const string &prefix)
+void KeyValueHistoryPage::Print (const uint64_t pageNumber, bool details, const string &prefix, const uint64_t level, KeyValueHistoryCounters &counters)
 {
     zklog.info(prefix + "KeyValueHistoryPage::Print() pageNumber=" + to_string(pageNumber));
+
+    counters.maxLevel = zkmax(counters.maxLevel, (level * 6) + 5);
 
     zkresult zkr;
 
@@ -743,6 +662,8 @@ void KeyValueHistoryPage::Print (const uint64_t pageNumber, bool details, const 
             // Leaf node
             case 1:
             {
+                counters.leafNodes++;
+
                 if (details)
                 {
                     uint64_t version = page->keyValueEntry[i][0] & U64Mask48;
@@ -778,6 +699,8 @@ void KeyValueHistoryPage::Print (const uint64_t pageNumber, bool details, const 
             // Intermediate node
             case 2:
             {
+                counters.intermediateNodes++;
+
                 uint64_t nextKeyValueHistoryPage = page->keyValueEntry[i][1] & U64Mask48;
                 nextKeyValueHistoryPages.emplace_back(nextKeyValueHistoryPage);
 
@@ -811,6 +734,14 @@ void KeyValueHistoryPage::Print (const uint64_t pageNumber, bool details, const 
 
     for (uint64_t i=0; i<nextKeyValueHistoryPages.size(); i++)
     {
-        Print(nextKeyValueHistoryPages[i], details, prefix + " ");
+        Print(nextKeyValueHistoryPages[i], details, prefix + " ", level + 1, counters);
     }
+}
+
+void KeyValueHistoryPage::Print (const uint64_t pageNumber, bool details, const string &prefix)
+{
+    zklog.info(prefix + "KeyValueHistoryPage::Print()");
+    KeyValueHistoryCounters counters;
+    Print(pageNumber, details, prefix, 0, counters);
+    zklog.info(prefix + "Counters: leafNodes=" + to_string(counters.leafNodes) + " intermediateNodes=" + to_string(counters.intermediateNodes) + " maxLevel=" + to_string(counters.maxLevel));
 }
