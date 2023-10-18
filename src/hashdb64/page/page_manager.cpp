@@ -10,6 +10,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <cerrno>
+#include <omp.h>
 
 PageManager pageManager;
 PageManager::PageManager()
@@ -20,7 +21,7 @@ PageManager::PageManager()
     firstUnusedPage = 2;
     numFreePages = 0;
     freePages.resize(16384);
-    AddPages(131072);
+    addPages(131072);
 }
 PageManager::PageManager(const uint64_t nPages_)
 {
@@ -31,7 +32,7 @@ PageManager::PageManager(const uint64_t nPages_)
     pages.resize(1);
     numFreePages = 0;
     freePages.resize(16384);
-    AddPages(nPages_);
+    addPages(nPages_);
 }
 PageManager::PageManager(const string fileName_, const uint64_t fileSize_, const uint64_t nFiles_, const string folderName_){
     
@@ -54,26 +55,27 @@ PageManager::PageManager(const string fileName_, const uint64_t fileSize_, const
         if(folderName != "")
             file = folderName + "/";
         file += (fileName + "_" + to_string(k)+".db");
-        fd = open(file.c_str(),O_RDWR);
+        fd = open(file.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
         if(k==0) file0Descriptor = fd;
         if (fd == -1) {
-            zklog.error("Failed to open file: " + (string)strerror(errno));
+            zklog.error("PageManager: failed to open file.");
             exitProcess();
         }
-        // Get the file size
-        if (fstat(fd, &file_stat) == -1) {
-            zklog.error("Failed to get file size: " + (string)strerror(errno));
+        if (ftruncate(fd, fileSize) == -1) {
+            zklog.error("PageManager: failed to truncate to file.");
             close(fd);
         }
-        zkassertpermanent(fileSize == (uint64_t)file_stat.st_size);
         nPages += pagesPerFile;
         pages.push_back(NULL);
         pages[k] = (char *)mmap(NULL, fileSize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0); //MAP_POPULATE
         if (pages[k] == MAP_FAILED) {
             zklog.error("Failed to mmap file: " + (string)strerror(errno));
         }
+#if USE_FILE_IO
         fileDescriptors.push_back(fd);
-        //if(k!=0) close(fd);
+#else
+        if(k!=0) close(fd);
+#endif
     }
     zkassertpermanent(nPages > 2);
     firstUnusedPage = 2;
@@ -91,7 +93,7 @@ PageManager::~PageManager(void)
     }
 }
 
-zkresult PageManager::AddPages(const uint64_t nPages_)
+zkresult PageManager::addPages(const uint64_t nPages_)
 {
     unique_lock<shared_mutex> guard(pagesLock);
     zkassertpermanent(mappedFile == false);
@@ -108,7 +110,34 @@ zkresult PageManager::AddPages(const uint64_t nPages_)
     pagesPerFile = nPages;
     return zkresult::ZKR_SUCCESS;
 }
+zkresult PageManager::addFile(){
 
+    zkassertpermanent(mappedFile == true);
+    string file = "";
+    if(folderName != "")
+        file = folderName + "/";
+    file += (fileName + "_" + to_string(nFiles)+".db");
+    int fd = open(file.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    if (fd == -1) {
+        zklog.error("PageManager: failed to open file.");
+        exitProcess();
+    }
+    if (ftruncate(fd, fileSize) == -1) {
+        zklog.error("PageManager: failed to truncate to file.");
+        close(fd);
+    }
+    unique_lock<shared_mutex> guard(pagesLock);
+    nPages += pagesPerFile;
+    pages.push_back(NULL);
+    pages[nFiles] = (char *)mmap(NULL, fileSize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0); //MAP_POPULATE
+    if (pages[nFiles] == MAP_FAILED) {
+        zklog.error("Failed to mmap file: " + (string)strerror(errno));
+    }
+    ++nFiles;
+#if USE_FILE_IO
+        fileDescriptors.push_back(fd);
+#endif
+}
 uint64_t PageManager::getFreePage(void)
 {
 #if MULTIPLE_WRITES
@@ -173,9 +202,13 @@ void PageManager::flushPages(){
 #if MULTIPLE_WRITES
         shared_lock<shared_mutex> guard(pagesLock);
 #endif
-        msync(getPageAddress(1), fileSize-4096, MS_SYNC);
-        for(uint64_t k=1; k< pages.size(); ++k){
-            msync(pages[k], fileSize, MS_SYNC);
+        #pragma omp parallel for schedule(static,1) num_threads(omp_get_num_threads()/2)
+        for(uint64_t k=0; k< pages.size(); ++k){
+            if(k==0){
+                msync(getPageAddress(1), fileSize-4096, MS_SYNC);
+            }else{
+                msync(pages[k], fileSize, MS_SYNC);
+            }
         }
         off_t offset = 0;
         if(lseek(file0Descriptor, offset, SEEK_SET) == -1) {
