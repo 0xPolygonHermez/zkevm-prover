@@ -6,7 +6,7 @@
 
 USING_PROVER_FORK_NAMESPACE;
 
-void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps *steps)
+void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldilocks::Element verkey[4], Steps *steps)
 {
     // Initialize vars
     TimerStart(STARK_INITIALIZATION);
@@ -25,6 +25,7 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Steps 
     Polinomial root2(HASH_SIZE, 1);
     Polinomial root3(HASH_SIZE, 1);
 
+    transcript.put(&verkey[0], 4);
     transcript.put(&publicInputs[0], starkInfo.nPublics);
     StepsParams params = {
         pols : mem,

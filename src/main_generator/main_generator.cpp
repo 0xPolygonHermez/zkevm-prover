@@ -2066,7 +2066,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        {\n";
                 code += "            proverRequest.result = ZKR_SM_MAIN_MEMORY;\n";
                 code += "            zkPC=" + to_string(zkPC) +";\n";
-                code += "            mainExecutor.logError(ctx, \"Memory Read does not match\");\n";
+                code += "            mainExecutor.logError(ctx, \"Memory Read does not match op=\" + fea2string(fr, op0, op1, op2, op3, op4, op5, op6, op7) + \" mem=\" + fea2string(fr, memIterator->second.fe0, memIterator->second.fe1, memIterator->second.fe2, memIterator->second.fe3, memIterator->second.fe4, memIterator->second.fe5, memIterator->second.fe6, memIterator->second.fe7));\n";
                 code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "            return;\n";
                 code += "        }\n";
