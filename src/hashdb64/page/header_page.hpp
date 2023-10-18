@@ -30,6 +30,7 @@ struct HeaderStruct
 
     // Free pages list
     uint64_t freePages;
+    uint64_t firstUnusedPage;
 };
 
 class HeaderPage
@@ -41,8 +42,10 @@ public:
     static void     SetLastVersion (      uint64_t &headerPageNumber, const uint64_t lastVersion);
 
     // Free pages list methods
-    static zkresult GetFreePages    (const uint64_t  headerPageNumber,                                vector<uint64_t> (&containerPages), vector<uint64_t> (&containedPages));
-    static zkresult CreateFreePages (      uint64_t &headerPageNumber, vector<uint64_t> (&freePages), vector<uint64_t> (&containerPages), vector<uint64_t> (&containedPages));
+    static zkresult GetFreePagesContainer (const uint64_t  headerPageNumber, vector<uint64_t> (&containerPages));
+    static zkresult GetFreePages          (const uint64_t  headerPageNumber, vector<uint64_t> (&freePages));
+    static zkresult CreateFreePages       (      uint64_t &headerPageNumber, vector<uint64_t> (&freePages), vector<uint64_t> (&containerPages));
+    static zkresult setFirstUnusedPage    (      uint64_t &headerPageNumber, const uint64_t firstUnusedPage);
 
     // Root version methods
     static zkresult ReadRootVersion  (const uint64_t  headerPageNumber, const string &root,       uint64_t &version);

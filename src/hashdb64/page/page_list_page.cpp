@@ -120,7 +120,7 @@ zkresult PageListPage::ExtractPage (uint64_t &pageNumber, uint64_t &extractedPag
     return ZKR_SUCCESS;
 }
 
-zkresult PageListPage::GetPages (const uint64_t pageNumber, vector<uint64_t> (&containerPages), vector<uint64_t> (&containedPages))
+zkresult PageListPage::GetPages (const uint64_t pageNumber, vector<uint64_t> (&freePages))
 {
     // Get page
     PageListStruct * page = (PageListStruct *)pageManager.getPageAddress(pageNumber);
@@ -130,7 +130,7 @@ zkresult PageListPage::GetPages (const uint64_t pageNumber, vector<uint64_t> (&c
     {
         // Call GetPages of previous page number
         zkresult zkr;
-        zkr = GetPages(page->previousPageNumber, containerPages, containedPages);
+        zkr = GetPages(page->previousPageNumber,freePages);
         if (zkr != ZKR_SUCCESS)
         {
             return zkr;
@@ -146,7 +146,27 @@ zkresult PageListPage::GetPages (const uint64_t pageNumber, vector<uint64_t> (&c
     // Add all pages contained in this page
     for (uint64_t i = minOffset; i < offset; i += 8)
     {
-        containedPages.emplace_back(*(uint64_t *)((uint8_t *)page + offset));
+        freePages.emplace_back(*(uint64_t *)((uint8_t *)page + offset));
+    }
+
+    return ZKR_SUCCESS;
+}
+
+zkresult PageListPage::GetContainerPages (const uint64_t  pageNumber, vector<uint64_t> (&containerPages))
+{
+    // Get page
+    PageListStruct * page = (PageListStruct *)pageManager.getPageAddress(pageNumber);
+
+    // Get the previous pages
+    if (page->previousPageNumber != 0)
+    {
+        // Call GetPages of previous page number
+        zkresult zkr;
+        zkr = GetContainerPages (page->previousPageNumber, containerPages);
+        if (zkr != ZKR_SUCCESS)
+        {
+            return zkr;
+        }
     }
 
     // Add this page number to container pages
@@ -155,61 +175,57 @@ zkresult PageListPage::GetPages (const uint64_t pageNumber, vector<uint64_t> (&c
     return ZKR_SUCCESS;
 }
 
-zkresult PageListPage::CreatePages (uint64_t &pageNumber, vector<uint64_t> (&freePages), vector<uint64_t> (&containerPages), vector<uint64_t> (&containedPages))
+zkresult PageListPage::CreatePages (uint64_t &pageNumber_, vector<uint64_t> (&freePages), vector<uint64_t> (&containerPages))
 {
-    if (freePages.size() == 0)
-    {
-        pageNumber = 0;
+    if(containerPages.size() == 0){
+        pageNumber_ = 0;
         return ZKR_SUCCESS;
     }
+    pageNumber_ = containerPages[0];
 
-    // Create a new container page
-    pageNumber = freePages[freePages.size() - 1];
-    freePages.pop_back();
-    containerPages.emplace_back(pageNumber);
+    for(uint64_t i=0; i<containerPages.size(); ++i){
+        
+        uint64_t pageNumber = containerPages[i];
 
-    // Init the page
-    zkresult zkr = PageListPage::InitEmptyPage(pageNumber);
-    if (zkr != ZKR_SUCCESS)
-    {
-        zklog.error("PageListPage::CreatePages() failed calling PageListPage::InitEmptyPage() result=" + zkresult2string(zkr) + " pageNumber=" + to_string(pageNumber));
-        return zkr;
+        // Init the page
+        zkresult zkr = PageListPage::InitEmptyPage(pageNumber);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("PageListPage::CreatePages() failed calling PageListPage::InitEmptyPage() result=" + zkresult2string(zkr) + " pageNumber=" + to_string(pageNumber));
+            return zkr;
+        }
+
+        // Get page
+        PageListStruct * page = (PageListStruct *)pageManager.getPageAddress(pageNumber);
+
+        // Get offset
+        uint64_t offset = page->nextPageNumberAndOffset >> 48;
+        zkassert(offset >= minOffset);
+        zkassert(offset <= maxOffset);
+        zkassert((offset & 0x7) == 0);
+
+        // Insert as many pages as possible
+        while ((freePages.size() > 0) && (offset < maxOffset))
+        {
+            // Insert a new contained page
+            uint64_t containedPageNumber = freePages[freePages.size() - 1];
+            freePages.pop_back();
+
+            // Insert the page number
+            *(uint64_t *)((uint8_t *)page + offset) = containedPageNumber;
+
+            // Increase offset
+            offset += 8;
+        }
+
+        // Update the page offset
+        page->nextPageNumberAndOffset = (offset + 8) << 48;
+        page->previousPageNumber = (i == containerPages.size() - 1) ? 0 : containerPages[i + 1];
     }
-
-    // Get page
-    PageListStruct * page = (PageListStruct *)pageManager.getPageAddress(pageNumber);
-
-    // Get offset
-    uint64_t offset = page->nextPageNumberAndOffset >> 48;
-    zkassert(offset >= minOffset);
-    zkassert(offset <= maxOffset);
-    zkassert((offset & 0x7) == 0);
-
-    // Insert as many pages as possible
-    while ((freePages.size() > 0) && (offset < maxOffset))
-    {
-        // Insert a new contained page
-        uint64_t containedPageNumber = freePages[freePages.size() - 1];
-        freePages.pop_back();
-        containedPages.emplace_back(containedPageNumber);
-
-        // Insert the page number
-        *(uint64_t *)((uint8_t *)page + offset) = containedPageNumber;
-
-        // Increase offset
-        offset += 8;
-    }
-
-    // Update the page offset
-    page->nextPageNumberAndOffset = (offset + 8) << 48;
-
-    // If there are more pages left, fill the previous page
-    if (freePages.size() > 0)
-    {
-        return CreatePages(page->previousPageNumber, freePages, containerPages, containedPages);
-    }
+    
 
     return ZKR_SUCCESS;
+
 }
 
 void PageListPage::Print (const uint64_t pageNumber, bool details, const string &prefix)
