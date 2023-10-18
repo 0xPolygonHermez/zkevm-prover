@@ -149,6 +149,7 @@ uint64_t PageManager::getFreePage(void)
         --numFreePages;
     }else{
         pageNumber = firstUnusedPage;
+        memset(getPageAddress(pageNumber), 0, 4096);
         firstUnusedPage++;
 #if MULTIPLE_WRITES
         shared_lock<shared_mutex> guard(pagesLock);
