@@ -145,9 +145,6 @@ The configuration parameters can be of different uses:
 |**`databaseURL`**|production|string|URL of the external database, e.g. postgresql://statedb:statedb@127.0.0.1:5432/testdb, or "local" if no external database is used (data will be stored in cache)|"local"|DATABASE_URL|
 |`dbNodesTableName`|production|string|Name of the nodes table in the external database|"state.nodes"|DB_NODES_TABLE_NAME|
 |`dbProgramTableName`|production|string|Name of the programs (smart contracts) table in the external database|"state.program"|DB_PROGRAM_TABLE_NAME|
-|`dbKeyValueTableName`|production|string|Name of the key-value table in the external database|"state.keyvalue"|DB_KEYVALUE_TABLE_NAME|
-|`dbVersionTableName`|production|string|Name of the version table in the external database|"state.version"|DB_VERSION_TABLE_NAME|
-|`dbLatestVersionTableName`|production|string|Name of the latest version table in the external database|"state.latestversion"|DB_LATEST_VERSION_TABLE_NAME|
 |`dbMultiWrite`|production|boolean|Use Database multi-write mechanism to send multiple write queries to database|true|DB_MULTIWRITE|
 |`dbMultiWriteSingleQuerySize`|production|u64|Threshold of single Database query size when writing multi-write queries, in bytes|20*1024*1024 (20 MB)|DB_MULTIWRITE_SINGLE_QUERY_SIZE|
 |`dbConnectionsPool`|production|boolean|Use a Database connections pool|true|DB_CONNECTIONS_POOL|

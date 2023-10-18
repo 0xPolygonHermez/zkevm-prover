@@ -117,6 +117,30 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
     return zkr;
 }
 
+zkresult Database64::readLevel (const Goldilocks::Element (&key)[4], uint64_t &level)
+{
+    zkresult zkr;
+
+    // Check that it has been initialized before
+    if (!bInitialized)
+    {
+        zklog.error("Database64::readLevel() called uninitialized");
+        exitProcess();
+    }
+
+    // Get the level
+    string keyString = fea2string(fr, key);
+    string keyBa = string2ba(keyString);
+    zkr = HeaderPage::KeyValueHistoryReadLevel(headerPageNumber, keyBa, level);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("Database64::readLevel() faile calling HeaderPage::KeyValueHistoryReadLevel() result=" + zkresult2string(zkr) + " key=" + fea2string(fr, key));
+        return zkr;
+    }
+
+    return zkr;
+}
+
 zkresult Database64::setProgram (const string &key, const vector<uint8_t> &data, const bool persistent)
 {
     // Check that it has been initialized before

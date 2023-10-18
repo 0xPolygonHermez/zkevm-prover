@@ -88,7 +88,7 @@ public:
 
     // Key - Value - Level
     zkresult readKV    (const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value,  uint64_t &level, DatabaseMap *dbReadLog);
-    zkresult readLevel (const Goldilocks::Element (&key)[4], uint64_t &level){ level=128; return ZKR_SUCCESS;}
+    zkresult readLevel (const Goldilocks::Element (&key)[4], uint64_t &level);
 
     // Block
     zkresult consolidateBlock (uint64_t blockNumber); // TODO: Who reports this block number?
