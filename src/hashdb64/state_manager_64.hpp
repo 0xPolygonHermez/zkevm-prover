@@ -14,6 +14,7 @@
 #include "smt_get_result.hpp"
 #include "smt_set_result.hpp"
 #include "key_value_tree.hpp"
+#include "level_tree_key_value.hpp"
 
 using namespace std;
 
@@ -58,13 +59,20 @@ public:
     string newStateRoot;
     uint64_t currentTx;
     vector<TxState64> txState;
+#ifndef USE_NEW_KVTREE
     KeyValueTree keyValueTree;
+#else
+    KVTree keyValueTree;
+#endif
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     TimeMetricStorage timeMetricStorage;
 #endif
     BatchState64() : currentTx(0)
     {
         txState.reserve(32);
+ #ifdef USE_NEW_KVTREE
+        keyValueTree.postConstruct(4);
+#endif       
     };
 };
 

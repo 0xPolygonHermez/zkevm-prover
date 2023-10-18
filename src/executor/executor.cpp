@@ -11,6 +11,9 @@
 #include "main_sm/fork_5/main_exec_generated/main_exec_generated.hpp"
 #include "main_sm/fork_5/main_exec_generated/main_exec_generated_fast.hpp"
 #include "main_sm/fork_5/main_exec_c/main_exec_c.hpp"
+#include "main_sm/fork_6/main_exec_generated/main_exec_generated.hpp"
+#include "main_sm/fork_6/main_exec_generated/main_exec_generated_fast.hpp"
+#include "main_sm/fork_6/main_exec_c/main_exec_c.hpp"
 #include "timer.hpp"
 #include "zklog.hpp"
 
@@ -172,6 +175,41 @@ void Executor::process_batch (ProverRequest &proverRequest)
             }
             return;
         }
+        case 6: // fork_6
+        {
+            if (config.useMainExecC)
+            {
+                //zklog.info("Executor::process_batch() fork 6 C");
+                mainExecutorC_fork_6.execute(proverRequest);
+            }
+            else if (config.useMainExecGenerated)
+            {
+                //zklog.info("Executor::process_batch() fork 5 generated");
+                fork_6::main_exec_generated_fast(mainExecutor_fork_6, proverRequest);
+            }
+            else
+            {
+                //zklog.info("Executor::process_batch() fork 6 native");
+
+                // Allocate committed polynomials for only 1 evaluation
+                void * pAddress = calloc(fork_6::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
+                if (pAddress == NULL)
+                {
+                    zklog.error("Executor::process_batch() failed calling calloc(" + to_string(fork_6::CommitPols::pilSize()) + ")");
+                    exitProcess();
+                }
+                fork_6::CommitPols commitPols(pAddress,1);
+
+                // This instance will store all data required to execute the rest of State Machines
+                fork_6::MainExecRequired required;
+
+                mainExecutor_fork_6.execute(proverRequest, commitPols.Main, required);
+
+                // Free committed polynomials address space
+                free(pAddress);
+            }
+            return;
+        }
         default:
         {
             zklog.error("Executor::process_batch() got invalid fork ID=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID));
@@ -306,11 +344,11 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         {
             if (config.useMainExecGenerated)
             {
-                PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor_fork_5, proverRequest, commitPols.Main, required);
+                PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor_fork_6, proverRequest, commitPols.Main, required);
             }
             else
             {
-                mainExecutor_fork_5.execute(proverRequest, commitPols.Main, required);
+                mainExecutor_fork_6.execute(proverRequest, commitPols.Main, required);
             }
             
             // Save input to <timestamp>.input.json after execution including dbReadLog
@@ -401,11 +439,11 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         TimerStart(MAIN_EXECUTOR_EXECUTE);
         if (config.useMainExecGenerated)
         {
-            PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor_fork_5, proverRequest, commitPols.Main, required);
+            PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor_fork_6, proverRequest, commitPols.Main, required);
         }
         else
         {
-            mainExecutor_fork_5.execute(proverRequest, commitPols.Main, required);
+            mainExecutor_fork_6.execute(proverRequest, commitPols.Main, required);
         }
             
         // Save input to <timestamp>.input.json after execution including dbReadLog

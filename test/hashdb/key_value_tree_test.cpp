@@ -10,6 +10,7 @@
 #include <random>
 #include <gmpxx.h>
 #include <string>
+#include "zkglobals.hpp"
 
 void test_LevelTree_insertCounters()
 {
@@ -538,11 +539,11 @@ void test_KVTree_asLevelTree()
 
     bfound = tree.LevelTree::extract(key1);
     assert(bfound == false);
-    level = tree.level(key1);
+    level = static_cast<LevelTree&>(tree).level(key1);
     assert(level == 0);
     level = tree.insert(key1);
     assert(level == 0);
-    level = tree.level(key1);
+    level = static_cast<LevelTree&>(tree).level(key1);
     assert(level == 0);
 
     // key2: 0 bits in common with key1 (bits of components are interleaved)
@@ -556,7 +557,7 @@ void test_KVTree_asLevelTree()
     key2[2] = std::bitset<64>(binaryStr2_).to_ullong();
     key2[3] = std::bitset<64>(binaryStr3_).to_ullong();
 
-    level = tree.level(key2);
+    level =  static_cast<LevelTree&>(tree).level(key2);
     assert(level == 0);
     bfound = tree.LevelTree::extract(key2);
     assert(bfound == false);
@@ -578,11 +579,11 @@ void test_KVTree_asLevelTree()
 
     bfound = tree.LevelTree::extract(key3);
     assert(bfound == false);
-    level = tree.level(key3);
+    level =  static_cast<LevelTree&>(tree).level(key3);
     assert(level == 1);
     level = tree.insert(key3);
     assert(level == 1);
-    level = tree.level(key1);
+    level =  static_cast<LevelTree&>(tree).level(key1);
     assert(level == 1);
 
     bfound = tree.LevelTree::extract(key3);
@@ -592,7 +593,7 @@ void test_KVTree_asLevelTree()
 
     level = tree.insert(key3);
     assert(level == 1);
-    level = tree.level(key1);
+    level =  static_cast<LevelTree&>(tree).level(key1);
     assert(level == 1);
 
     // key4: 9 bits in common with key1 (bits of components are interleaved)
@@ -608,11 +609,11 @@ void test_KVTree_asLevelTree()
 
     bfound = tree.LevelTree::extract(key4);
     assert(bfound == false);
-    level = tree.level(key4);
+    level =  static_cast<LevelTree&>(tree).level(key4);
     assert(level == 9);
     level = tree.insert(key4);
     assert(level == 9);
-    level = tree.level(key1);
+    level =  static_cast<LevelTree&>(tree).level(key1);
     assert(level == 9);
 
     bfound = tree.LevelTree::extract(key4);
@@ -621,7 +622,7 @@ void test_KVTree_asLevelTree()
     assert(level == 1);
     level = tree.insert(key4);
     assert(level == 9);
-    level = tree.level(key1);
+    level =  static_cast<LevelTree&>(tree).level(key1);
     assert(level == 9);
 
     // key5: 63 bits in common with key1 (bits of components are interleaved)
@@ -637,7 +638,7 @@ void test_KVTree_asLevelTree()
 
     bfound = tree.LevelTree::extract(key5);
     assert(bfound == false);
-    level = tree.level(key5);
+    level =  static_cast<LevelTree&>(tree).level(key5);
     assert(level == 63);
     level = tree.insert(key5);
     assert(level == 63);
@@ -651,7 +652,7 @@ void test_KVTree_asLevelTree()
 
     bfound = tree.LevelTree::extract(key4);
     assert(bfound == true);
-    level = tree.level(key1);
+    level =  static_cast<LevelTree&>(tree).level(key1);
     assert(level == 1);
 
     // key6: 79 bits in common with key1 (bits of components are interleaved)
@@ -665,13 +666,13 @@ void test_KVTree_asLevelTree()
     key6[2] = std::bitset<64>(binaryStr2_).to_ullong();
     key6[3] = std::bitset<64>(binaryStr3_).to_ullong();
 
-    level = tree.level(key6);
+    level =  static_cast<LevelTree&>(tree).level(key6);
     assert(level == 79);
     bfound = tree.LevelTree::extract(key6);
     assert(bfound == false);
     level = tree.insert(key6);
     assert(level == 79);
-    level = tree.level(key1);
+    level =  static_cast<LevelTree&>(tree).level(key1);
     assert(level == 79);
 
     // key7: 187 bits in common with key1 (bits of components are interleaved)
@@ -687,11 +688,11 @@ void test_KVTree_asLevelTree()
 
     bfound = tree.LevelTree::extract(key7);
     assert(bfound == false);
-    level = tree.level(key7);
+    level =  static_cast<LevelTree&>(tree).level(key7);
     assert(level == 187);
     level = tree.insert(key7);
     assert(level == 187);
-    level = tree.level(key1);
+    level =  static_cast<LevelTree&>(tree).level(key1);
     assert(level == 187);
 
     // key8: 201 bits in common with key1 (bits of components are interleaved)
@@ -707,11 +708,11 @@ void test_KVTree_asLevelTree()
 
     bfound = tree.LevelTree::extract(key8);
     assert(bfound == false);
-    level = tree.level(key8);
+    level =  static_cast<LevelTree&>(tree).level(key8);
     assert(level == 201);
     level = tree.insert(key8);
     assert(level == 201);
-    level = tree.level(key1);
+    level =  static_cast<LevelTree&>(tree).level(key1);
     assert(level == 201);
 
     bfound = tree.LevelTree::extract(key8);
@@ -726,14 +727,14 @@ void test_KVTree_asLevelTree()
 
     bfound = tree.LevelTree::extract(key6);
     assert(bfound == true);
-    level = tree.level(key1);
+    level =  static_cast<LevelTree&>(tree).level(key1);
     assert(level == 1);
 }
 
 void test_KVTree(uint64_t nBitsStep)
 {
     uint64_t level;
-    bool bfound;
+    zkresult bfound;
     KVTree kvtree(nBitsStep);
     mpz_class value;
     //
@@ -746,88 +747,90 @@ void test_KVTree(uint64_t nBitsStep)
     std::string binaryStr2 = "1101111010100011110001101110000010101010101011101001001111111011";
     std::string binaryStr3 = "1001001110101110011000010010001010101011111100011111001110000110";
 
-    uint64_t key1[4];
-    key1[0] = std::bitset<64>(binaryStr0).to_ullong();
-    key1[1] = std::bitset<64>(binaryStr1).to_ullong();
-    key1[2] = std::bitset<64>(binaryStr2).to_ullong();
-    key1[3] = std::bitset<64>(binaryStr3).to_ullong();
+    Goldilocks::Element key1[4];
+    key1[0].fe = std::bitset<64>(binaryStr0).to_ullong();
+    key1[1].fe = std::bitset<64>(binaryStr1).to_ullong();
+    key1[2].fe = std::bitset<64>(binaryStr2).to_ullong();
+    key1[3].fe = std::bitset<64>(binaryStr3).to_ullong();
 
     bfound = kvtree.read(key1, value, level);
-    assert(bfound == false);
+    assert(bfound == ZKR_DB_KEY_NOT_FOUND);
     bfound = kvtree.extract(key1, value);
-    assert(bfound == false);
+    assert(bfound == ZKR_DB_KEY_NOT_FOUND);
     level = kvtree.level(key1);
     assert(level == 0);
     kvtree.write(key1, 1, level);
     bfound = kvtree.read(key1, value, level);
-    assert(bfound == true && value == 1 && level == 0);
+    assert(bfound == ZKR_SUCCESS && value == 1 && level == 0);
 
     std::string binaryStr0_ = "1101001110101011010000111011100101010111101011010101101101010101";
     std::string binaryStr1_ = "1011101010110011101100101011011000100100010010000000101101000111";
     std::string binaryStr2_ = "1101111010100011110001101110000010101010101011101001001111111011";
     std::string binaryStr3_ = "1001001110101110011000010010001010101011111100011111001110000110";
-    uint64_t key2[4];
-    key2[0] = std::bitset<64>(binaryStr0_).to_ullong();
-    key2[1] = std::bitset<64>(binaryStr1_).to_ullong();
-    key2[2] = std::bitset<64>(binaryStr2_).to_ullong();
-    key2[3] = std::bitset<64>(binaryStr3_).to_ullong();
+    
+    Goldilocks::Element key2[4];
+    key2[0].fe = std::bitset<64>(binaryStr0_).to_ullong();
+    key2[1].fe = std::bitset<64>(binaryStr1_).to_ullong();
+    key2[2].fe = std::bitset<64>(binaryStr2_).to_ullong();
+    key2[3].fe = std::bitset<64>(binaryStr3_).to_ullong();
 
     kvtree.write(key2, 2, level);
     assert(level == 201);
     bfound = kvtree.read(key1, value, level);
-    assert(bfound == true && value == 1 && level == 201);
+    assert(bfound == ZKR_SUCCESS && value == 1 && level == 201);
     bfound = kvtree.read(key2, value, level);
-    assert(bfound == true && value == 2 && level == 201);
+    assert(bfound == ZKR_SUCCESS && value == 2 && level == 201);
     value = 0;
     bfound = kvtree.extract(key2, value);
-    assert(bfound == true && value == 2);
+    assert(bfound == ZKR_SUCCESS && value == 2);
     bfound = kvtree.read(key1, value, level);
-    assert(bfound == true && value == 1 && level == 0);
+    assert(bfound == ZKR_SUCCESS && value == 1 && level == 0);
 
     binaryStr0_ = "1101001110101011010000111011100101010111101011010101101101010101";
     binaryStr1_ = "1011101010110011101100101011011000100100010010000010101101000111";
     binaryStr2_ = "1101111010100011110001101110000010101010101011101001001111111011";
     binaryStr3_ = "1001001110101110011000010010001010101011111100111111001110000110";
-    uint64_t key3[4];
-    key3[0] = std::bitset<64>(binaryStr0_).to_ullong();
-    key3[1] = std::bitset<64>(binaryStr1_).to_ullong();
-    key3[2] = std::bitset<64>(binaryStr2_).to_ullong();
-    key3[3] = std::bitset<64>(binaryStr3_).to_ullong();
+    
+    Goldilocks::Element key3[4];
+    key3[0].fe = std::bitset<64>(binaryStr0_).to_ullong();
+    key3[1].fe = std::bitset<64>(binaryStr1_).to_ullong();
+    key3[2].fe = std::bitset<64>(binaryStr2_).to_ullong();
+    key3[3].fe = std::bitset<64>(binaryStr3_).to_ullong();
 
     kvtree.write(key3, 2, level);
     assert(level == 187);
     bfound = kvtree.read(key1, value, level);
-    assert(bfound == true && value == 1 && level == 187);
+    assert(bfound == ZKR_SUCCESS && value == 1 && level == 187);
     kvtree.write(key1, 0, level);
     assert(level == 187);
     bfound = kvtree.read(key1, value, level);
-    assert(bfound == true && value == 0 && level == 187);
+    assert(bfound == ZKR_SUCCESS && value == 0 && level == 187);
     kvtree.write(key1, 10, level);
     assert(level == 187);
     bfound = kvtree.read(key1, value, level);
-    assert(bfound == true && value == 10 && level == 187);
+    assert(bfound == ZKR_SUCCESS && value == 10 && level == 187);
     kvtree.write(key1, 20, level);
     assert(level == 187);
     bfound = kvtree.read(key1, value, level);
-    assert(bfound == true && value == 20 && level == 187);
+    assert(bfound == ZKR_SUCCESS && value == 20 && level == 187);
     bfound = kvtree.extract(key1, value);
-    assert(bfound == true && value == 20);
+    assert(bfound == ZKR_SUCCESS && value == 20);
     bfound = kvtree.read(key1, value, level);
-    assert(bfound == true && value == 10 && level == 187);
+    assert(bfound == ZKR_SUCCESS && value == 10 && level == 187);
     kvtree.write(key1, 20, level);
     assert(level == 187);
     bfound = kvtree.read(key1, value, level);
-    assert(bfound == true && value == 20 && level == 187);
+    assert(bfound == ZKR_SUCCESS && value == 20 && level == 187);
     bfound = kvtree.extract(key1, value);
-    assert(bfound == true && value == 20);
+    assert(bfound == ZKR_SUCCESS && value == 20);
     bfound = kvtree.extract(key1, value);
-    assert(bfound == true && value == 10);
+    assert(bfound == ZKR_SUCCESS && value == 10);
     bfound = kvtree.extract(key1, value);
-    assert(bfound == true && value == 0);
+    assert(bfound == ZKR_SUCCESS && value == 0);
     bfound = kvtree.extract(key1, value);
-    assert(bfound == true && value == 1);
+    assert(bfound == ZKR_SUCCESS && value == 1);
     bfound = kvtree.extract(key1, value);
-    assert(bfound == false);
+    assert(bfound == ZKR_DB_KEY_NOT_FOUND);
 }
 
 uint64_t KeyValueTreeTest(void)

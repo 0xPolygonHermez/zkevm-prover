@@ -1,10 +1,10 @@
 #ifndef DEFINITIONS_HPP
 #define DEFINITIONS_HPP
 
-#define PROVER_FORK_ID 5
-#define PROVER_FORK_NAMESPACE fork_5
-#define PROVER_FORK_NAMESPACE_STRING "fork_5"
-#define USING_PROVER_FORK_NAMESPACE using namespace fork_5
+#define PROVER_FORK_ID 6
+#define PROVER_FORK_NAMESPACE fork_6
+#define PROVER_FORK_NAMESPACE_STRING "fork_6"
+#define USING_PROVER_FORK_NAMESPACE using namespace fork_6
 
 /* Log traces selector: uncomment to enable the corresponding trace */
 //#define LOG_START_STEPS
@@ -71,5 +71,6 @@
 //#define HASHDB_LOCK // If defined, the HashDB class will use a lock in all its methods, i.e. they will be serialized
 //#define DATABASE_COMMIT // If defined, the Database class can be configured to autocommit, or explicitly commit(); used for testing only
 #define DATABASE_USE_CACHE // If defined, the Database class uses a cache
+#define USE_NEW_KVTREE
 
 #endif
