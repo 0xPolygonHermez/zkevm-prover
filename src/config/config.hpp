@@ -113,7 +113,6 @@ public:
     string inputFile2; // Used as the second input in genAggregatedProof
     string outputPath;
     string configPath;
-    string rom;
     string zkevmCmPols; // Maps commit pols memory into file, which slows down a bit the executor
     string zkevmCmPolsAfterExecutor; // Saves commit pols into file after the executor has completed, avoiding having to map it from the beginning
     string c12aCmPols;

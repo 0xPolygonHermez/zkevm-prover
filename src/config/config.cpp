@@ -221,7 +221,6 @@ void Config::load(json &config)
     ParseString(config, "inputFile2", "INPUT_FILE_2", inputFile2, "");
     ParseString(config, "outputPath", "OUTPUT_PATH", outputPath, "output");
     ParseString(config, "configPath", "CONFIG_PATH", configPath, "config");
-    ParseString(config, "rom", "ROM", rom, string("src/main_sm/") + string(PROVER_FORK_NAMESPACE_STRING) + string("/scripts/rom.json"));
     ParseString(config, "zkevmCmPols", "ZKEVM_CM_POLS", zkevmCmPols, "");
     ParseString(config, "zkevmCmPolsAfterExecutor", "ZKEVM_CM_POLS_AFTER_EXECUTOR", zkevmCmPolsAfterExecutor, "");
     ParseString(config, "keccakScriptFile", "KECCAK_SCRIPT_FILE", keccakScriptFile, configPath + "/scripts/keccak_script.json");
@@ -441,7 +440,6 @@ void Config::print(void)
     zklog.info("    inputFile2=" + inputFile2);
     zklog.info("    outputPath=" + outputPath);
     zklog.info("    configPath=" + configPath);
-    zklog.info("    rom=" + rom);
     zklog.info("    zkevmCmPols=" + zkevmCmPols);
     zklog.info("    c12aCmPols=" + c12aCmPols);
     zklog.info("    recursive1CmPols=" + recursive1CmPols);
@@ -509,11 +507,6 @@ bool Config::check (void)
 {
     // Check required files presence
     bool bError = false;
-    if (!fileExists(rom))
-    {
-        zklog.error("Required file config.rom=" + rom + " does not exist");
-        bError = true;
-    }
     if (generateProof())
     {
         if (!fileExists(zkevmConstPols))
