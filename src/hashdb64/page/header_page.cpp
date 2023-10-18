@@ -102,22 +102,53 @@ void HeaderPage::SetLastVersion (uint64_t &headerPageNumber, const uint64_t last
     page->lastVersion = lastVersion;
 }
 
-zkresult HeaderPage::GetFreePages (const uint64_t headerPageNumber, vector<uint64_t> (&containerPages), vector<uint64_t> (&containedPages))
+zkresult HeaderPage::GetFreePagesContainer (const uint64_t headerPageNumber, vector<uint64_t> (&containerPages))
 {
     // Get header page
     HeaderStruct * page = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
 
     // Call the specific method
-    return PageListPage::GetPages(page->freePages, containerPages, containedPages);
+    return PageListPage::GetContainerPages (page->freePages, containerPages);
 }
 
-zkresult HeaderPage::CreateFreePages (uint64_t &headerPageNumber, vector<uint64_t> (&freePages), vector<uint64_t> (&containerPages), vector<uint64_t> (&containedPages))
+zkresult HeaderPage::GetFreePages (const uint64_t headerPageNumber, vector<uint64_t> (&freePages))
 {
     // Get header page
     HeaderStruct * page = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
 
     // Call the specific method
-    return PageListPage::CreatePages(page->freePages, freePages, containerPages, containedPages);
+    freePages.clear();
+    return PageListPage::GetPages(page->freePages, freePages);
+}
+
+zkresult HeaderPage::CreateFreePages (uint64_t &headerPageNumber, vector<uint64_t> (&freePages), vector<uint64_t> (&containerPages))
+{
+
+    // Get an editable page
+    headerPageNumber = pageManager.editPage(headerPageNumber);
+
+    // Get header page
+    HeaderStruct * page = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
+
+    // Call the specific method    
+    return PageListPage::CreatePages(page->freePages, freePages, containerPages);
+
+    return ZKR_SUCCESS;
+
+}
+
+zkresult HeaderPage::setFirstUnusedPage (uint64_t &headerPageNumber, const uint64_t firstUnusedPage)
+{
+    // Get an editable page
+    headerPageNumber = pageManager.editPage(headerPageNumber);
+
+    // Get header page
+    HeaderStruct * page = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
+
+    // Call the specific method
+    page->firstUnusedPage = firstUnusedPage;
+
+    return ZKR_SUCCESS;
 }
 
 zkresult HeaderPage::ReadRootVersion (const uint64_t headerPageNumber, const string &root, uint64_t &version)

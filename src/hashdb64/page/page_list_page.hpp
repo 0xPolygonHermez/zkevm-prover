@@ -40,13 +40,15 @@ public:
 
     static const uint64_t minOffset= 16; // This means that the page is completely empty
     static const uint64_t maxOffset = 4096; // This means that the page is completely full
+    static const uint64_t entrySize = 8; 
 
     static zkresult InitEmptyPage (const uint64_t  pageNumber);
     static zkresult InsertPage    (      uint64_t &pageNumber, const uint64_t pageNumberToInsert);
     static zkresult ExtractPage   (      uint64_t &pageNumber,       uint64_t &extractedPageNumber);
 
-    static zkresult GetPages      (const uint64_t  pageNumber,                                vector<uint64_t> (&containerPages), vector<uint64_t> (&containedPages));
-    static zkresult CreatePages   (      uint64_t &pageNumber, vector<uint64_t> (&freePages), vector<uint64_t> (&containerPages), vector<uint64_t> (&containedPages));
+    static zkresult GetPages          (const uint64_t  pageNumber, vector<uint64_t> (&freePages));
+    static zkresult CreatePages       (      uint64_t &pageNumber, vector<uint64_t> (&freePages), vector<uint64_t> (&containerPages));
+    static zkresult GetContainerPages (const uint64_t  pageNumber,                                vector<uint64_t> (&containerPages));
 
     static void Print (const uint64_t pageNumber, bool details, const string &prefix);
 };

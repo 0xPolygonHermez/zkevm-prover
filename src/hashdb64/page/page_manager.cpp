@@ -11,6 +11,8 @@
 #include <unistd.h>
 #include <cerrno>
 #include <omp.h>
+#include "header_page.hpp"
+#include "page_list_page.hpp"
 
 PageManager pageManager;
 PageManager::PageManager()
@@ -41,11 +43,9 @@ PageManager::PageManager(const string fileName_, const uint64_t fileSize_, const
     nFiles = nFiles_;
     folderName = folderName_;
     pagesPerFile = fileSize >> 12;
-    numFreePages = 0;
-    freePages.resize(16384);
+    
 
     mappedFile = true;
-    struct stat file_stat;
     int fd;
     nPages = 0;
     uint64_t pagesPerFile = fileSize >> 12;
@@ -79,6 +79,15 @@ PageManager::PageManager(const string fileName_, const uint64_t fileSize_, const
     }
     zkassertpermanent(nPages > 2);
     firstUnusedPage = 2;
+
+    //Free pages
+    /*vector<uint64_t> freePagesDB;
+    HeaderPage::GetFreePages(0, freePagesDB); 
+    numFreePages = freePagesDB.size();
+    freePages.resize((numFreePages)*2+1);
+    memccpy(freePages.data(), freePagesDB.data(), 0, numFreePages*sizeof(uint64_t));*/
+    numFreePages = 0;
+    freePages.resize(16384);
 }
 PageManager::~PageManager(void)
 {
@@ -137,6 +146,7 @@ zkresult PageManager::addFile(){
 #if USE_FILE_IO
         fileDescriptors.push_back(fd);
 #endif
+    return zkresult::ZKR_SUCCESS;
 }
 uint64_t PageManager::getFreePage(void)
 {
@@ -149,6 +159,7 @@ uint64_t PageManager::getFreePage(void)
         --numFreePages;
     }else{
         pageNumber = firstUnusedPage;
+        memset(getPageAddress(pageNumber), 0, 4096);
         firstUnusedPage++;
 #if MULTIPLE_WRITES
         shared_lock<shared_mutex> guard(pagesLock);
@@ -193,15 +204,56 @@ uint64_t PageManager::editPage(const uint64_t pageNumber)
     }
     return pageNumber_;
 }
+
 void PageManager::flushPages(){
-    
-    if(!mappedFile){
-        unique_lock<shared_mutex> guard2(headerLock);
-        memcpy(getPageAddress(0), getPageAddress(1), 4096); // copy tmp header to header
-    }else{
+
 #if MULTIPLE_WRITES
+        lock_guard<mutex> guard(freePagesLock);
         shared_lock<shared_mutex> guard(pagesLock);
+        std::lock_guard<std::mutex> lock(editedPagesLock);
 #endif
+
+    //1// get list of previous used pages as freePages container
+    uint64_t headerPageNum = 0;
+    vector<uint64_t> prevFreePagesContainer;
+    HeaderPage::GetFreePagesContainer(headerPageNum, prevFreePagesContainer);
+
+    //2// get list of edited pages
+    vector<uint64_t> copiedPages;
+    for(unordered_map<uint64_t, uint64_t>::const_iterator it = editedPages.begin(); it != editedPages.end(); it++){
+        if(it->first != it->second && it->first >= 2){
+            copiedPages.emplace_back(it->first);
+        }
+    }
+
+    //3// generate new list of freePages
+    uint64_t nPrevFreePagesContainer = prevFreePagesContainer.size();
+    uint64_t nEditedPages = copiedPages.size();
+    uint64_t entriesPerPage = (PageListPage::maxOffset - PageListPage::minOffset) / PageListPage::entrySize; 
+    uint64_t nNewFreePages = numFreePages + nEditedPages + nPrevFreePagesContainer;
+    uint64_t nNewContainerPages = (nNewFreePages + entriesPerPage) / (entriesPerPage +1);
+    if(nNewContainerPages > numFreePages){
+        uint64_t nNewFreePages_ = nNewFreePages - numFreePages*(entriesPerPage +1);
+        uint64_t nAddedContanerPages = (nNewFreePages_ + entriesPerPage - 1) / entriesPerPage;
+        nNewContainerPages = numFreePages + nAddedContanerPages;
+    }
+    if(nNewContainerPages == 0) nNewContainerPages = 1; //at least one container page that will be empty
+
+    vector<uint64_t> newContainerPages(nNewContainerPages);
+    for(uint64_t i=0; i< nNewContainerPages; ++i){
+        newContainerPages[i]=getFreePage();
+    }
+
+    vector<uint64_t> newFreePages(numFreePages+nEditedPages+nPrevFreePagesContainer);
+    memcpy(newFreePages.data(), freePages.data(), numFreePages*sizeof(uint64_t));
+    memcpy(newFreePages.data()+numFreePages, prevFreePagesContainer.data(), nPrevFreePagesContainer*sizeof(uint64_t));
+    memcpy(newFreePages.data()+numFreePages+nPrevFreePagesContainer, copiedPages.data(), nEditedPages*sizeof(uint64_t));
+
+    HeaderPage::CreateFreePages(headerPageNum, newFreePages, newContainerPages);
+    HeaderPage::setFirstUnusedPage(headerPageNum, firstUnusedPage);
+
+    //4// sync all pages
+    if(mappedFile){
         #pragma omp parallel for schedule(static,1) num_threads(omp_get_num_threads()/2)
         for(uint64_t k=0; k< pages.size(); ++k){
             if(k==0){
@@ -210,22 +262,33 @@ void PageManager::flushPages(){
                 msync(pages[k], fileSize, MS_SYNC);
             }
         }
-        off_t offset = 0;
-        if(lseek(file0Descriptor, offset, SEEK_SET) == -1) {
-            zklog.error("Failed to seek file: " + (string)strerror(errno));
-            exitProcess();
-        }
-        unique_lock<shared_mutex> guard2(headerLock);
-        ssize_t write_size =write(file0Descriptor, getPageAddress(1), 4096); //how transactional is this?
-        zkassertpermanent(write_size == 4096);
     }
-#if MULTIPLE_WRITES
-    std::lock_guard<std::mutex> lock(editedPagesLock);
-#endif
-    for(unordered_map<uint64_t, uint64_t>::const_iterator it = editedPages.begin(); it != editedPages.end(); it++){
-        if(it->first != it->second && it->first >= 2){
-            releasePage(it->first);
+
+    //5// write header
+    {
+        unique_lock<shared_mutex> guard_header(headerLock);
+        if(mappedFile){
+            off_t offset = 0;
+            if(lseek(file0Descriptor, offset, SEEK_SET) == -1) {
+                zklog.error("Failed to seek file.");
+                exitProcess();
+            }
+            ssize_t write_size =write(file0Descriptor, getPageAddress(1), 4096); //how transactional is this?
+            zkassertpermanent(write_size == 4096);
+        }else{
+            memcpy(getPageAddress(0), getPageAddress(1), 4096);
         }
     }
+
+    //6// Release freePagesContainers 
+    for(vector<uint64_t>::const_iterator it = prevFreePagesContainer.begin(); it != prevFreePagesContainer.end(); it++){
+        releasePage(*it);
+    }
+
+    //7// Release edited pages
+    for(vector<uint64_t>::const_iterator it = copiedPages.begin(); it != copiedPages.end(); it++){
+        releasePage(*it);
+    }     
     editedPages.clear();
+
 }

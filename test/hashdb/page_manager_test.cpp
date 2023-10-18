@@ -33,7 +33,6 @@ uint64_t PageManagerPerformanceTest(void){
     uint64_t numPositions = 20000;
     uint64_t numReps = 100;
     uint64_t printFreq = 10;
-    char singlePage[4096];
 
     // Create the state manager
     double start = omp_get_wtime();
@@ -73,9 +72,10 @@ uint64_t PageManagerPerformanceTest(void){
         }
 
         //Change first value of each page
-        uint64_t sum=0;
         start = omp_get_wtime();
 #if TEST_FILE_IO
+        char singlePage[4096];
+        uint64_t sum=0;
         //#pragma omp parallel for num_threads(64)
         for (uint64_t i = 0; i < numPositions; ++i) {
             pageManagerFile.getPageAddressFile(position[i], singlePage);
