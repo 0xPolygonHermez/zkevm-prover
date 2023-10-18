@@ -11,12 +11,12 @@ The configuration parameters can be of different uses:
 
 |Parameter|Use|Type|Description |Default|Environment variable|
 |---------|---|----|------------|-------|--------------------|
-|**`runExecutorServer`**|production|boolean|Enables Executor GRPC service, provides a service to process transaction batches; used by the Sequencer, Synchronizer and RPC|true|RUN_EXECUTOR_SERVER|
-|`runExecutorClient`|test|boolean|Runs an executor client to test the executor service|false|RUN_EXECUTOR_CLIENT|
-|`runExecutorClientMultithread`|test|boolean|Runs an multithread Executor client to test the Executor service|false|RUN_EXECUTOR_CLIENT_MULTITHREAD|
+|**`runExecutorServer`**|production|boolean|Enables Executor GRPC service, which provides a service to process transaction batches; used by the Sequencer, Synchronizer and RPC|true|RUN_EXECUTOR_SERVER|
+|`runExecutorClient`|test|boolean|Runs an executor GRPC client to test the executor GRPC service submitting a request based on the 'inputFile' parameter|false|RUN_EXECUTOR_CLIENT|
+|`runExecutorClientMultithread`|test|boolean|Runs an multithread Executor GRPC client to test the Executor GRPC service; it performs the same test as 'runExecutorClient' but it spawns several threads to run the test in parallel|false|RUN_EXECUTOR_CLIENT_MULTITHREAD|
 |**`runHashDBServer`**|production|boolean|Enables HashDB GRPC service, provides SMT (Sparse Merkle Tree) and Database access; used by the Synchronizer to create the genesis|true|RUN_HASHDB_SERVER|
 |`runHashDBTest`|test|boolean|Runs a HashDB test to validate the HashDB service|false|RUN_HASHDB_TEST|
-|`runAggregatorServer`|test|boolean|Runs an Aggregator service to test the Aggregator client|false|RUN_AGGREGATOR_SERVER|
+|`runAggregatorServer`|test|boolean|Runs an Aggregator GRPC service to test the Aggregator GRPC client|false|RUN_AGGREGATOR_SERVER|
 |**`runAggregatorClient`**|production|boolean|Enables Aggregator GRPC client, connects to the Aggregator and process its proof generation requests; requires 512GB of RAM|false|RUN_AGGREGATOR_CLIENT|
 |`runAggregatorClientMock`|test|boolean|Runs an Aggregator client mock that generates fake proofs|false|RUN_AGGREGATOR_CLIENT_MOCK|
 |`runFileGenBatchProof`|test|boolean|Submits an input json file, defined in the `inputFile` parameter, to generate a regursive proof|false|RUN_FILE_GEN_BATCH_PROOF|
@@ -45,11 +45,11 @@ The configuration parameters can be of different uses:
 |**`useMainExecGenerated`**|production|boolean|Executes main state machines in generated code, which is faster than native code|true|USE_MAIN_EXEC_GENERATED|
 |`useMainExecC`|tools|boolean|Executes main state machines in C code, instead of executing the ROM|false|USE_MAIN_EXEC_C|
 |`saveRequestToFile`|test|boolean|Saves executor requests to file, in text format|false|SAVE_REQUESTS_TO_FILE|
-|`saveInputToFile`|test|boolean|Saves executor input to file, in JSON format|false|SAVE_INPUT_TO_FILE|
+|`saveInputToFile`|test|boolean|Saves executor GRPC input to file, in JSON format|false|SAVE_INPUT_TO_FILE|
 |`saveDbReadsToFile`|test|boolean|Saves executor reads to database to file, in JSON format|false|SAVE_DB_READS_TO_FILE|
 |`saveDbReadsToFileOnChange`|test|boolean|Saves executor reads to database to file, in JSON format, updating the file every time a new read happens|false|SAVE_DB_READS_TO_FILE_ON_CHANGE|
 |`saveOutputToFile`|test|boolean|Saves executor output to file, in JSON format|false|SAVE_OUTPUT_TO_FILE|
-|`saveResponseToFile`|test|boolean|Saves executor response to file, in text format|false|SAVE_RESPONSE_TO_FILE|
+|`saveResponseToFile`|test|boolean|Saves executor GRPC response to file, in text format|false|SAVE_RESPONSE_TO_FILE|
 |`saveProofToFile`|test|boolean|Saves generated proof to file, in JSON format|false|SAVE_PROOF_TO_FILE|
 |`saveFilesInSubfolders`|test|boolean|Saves files in folders per hour, e.g. `output/2023/01/10/18`|false|SAVE_FILES_IN_SUBFOLDERS|
 |`loadDBToMemCache`|test|boolean|Fill database cache with content during initialization|false|LOAD_DB_TO_MEM_CACHE|
@@ -70,7 +70,7 @@ The configuration parameters can be of different uses:
 |`executorClientLoops`|test|u64|Executor client iterations|1|EXECUTOR_CLIENT_LOOPS|
 |`executorClientCheckNewStateRoot`|test|bool|Executor client checks the new state root returned in the response using CheckTree|false|EXECUTOR_CLIENT_CHECK_NEW_STATE_ROOT|
 |**`hashDBServerPort`**|production|u16|HashDB server GRPC port|50061|HASHDB_SERVER_PORT|
-|**`hashDBURL`**|production|string|URL used by the Executor to connect to the HashDB service, e.g. "127.0.0.1:50061"; if set to "local", no GRPC is used and it connects to the local HashDB interface|"local"|HASHDB_URL|
+|**`hashDBURL`**|production|string|URL used by the Executor to connect to the HashDB service, e.g. "127.0.0.1:50061"; if set to "local", no GRPC is used and it connects to the local HashDB interface using direct calls to the HashDB classes; if your zkProver instance does not need to use a remote HashDB service for a good reason (e.g. not having direct access to the database) then even if it exports this service to other clients we recommend to use "local" since the performance is better|"local"|HASHDB_URL|
 |`hashDB64`|test|boolean|Use HashDB64 new database (experimental)|false|HASHDB64|
 |`kvDBMaxVersions`|production|u64|Maximum number of KV versionn in Database|131072|HASHDB64_MAX_VERSIONS|
 |`dbCacheSynchURL`|test|string|URL of the HashDB service to synchronize the Database cache (experimental)|""|DB_CACHE_SYNCH_URL|
@@ -94,7 +94,6 @@ The configuration parameters can be of different uses:
 |`inputFile2`|test|string|Second input file, used as the second input in genAggregatedProof|""|INPUT_FILE_2|
 |`outputPath`|test|string|Output directory for saved files|"output"|OUTPUT_PATH|
 |**`configPath`**|production|string|Default input directory for configuration and constant files|"config"|CONFIG_PATH|
-|`rom`|production|string|Prover rom.json file location|"src/main_sm/<fork>/scripts/rom.json"|ROM|
 |`zkevmCmPols`|test|string|Maps commit pols memory into file, which slows down a bit the executor|""|ZKEVM_CM_POLS|
 |`zkevmCmPolsAfterExecutor`|test|string|Saves commit pols into file after the executor has completed, avoiding having to map it from the beginning|""|ZKEVM_CM_POLS_AFTER_EXECUTOR|
 |`recursive1CmPols`|test|string|Saves recursive 1 commit polynomials into file|""|RECURSIVE1_CM_POLS|
@@ -160,11 +159,11 @@ The configuration parameters can be of different uses:
 |`stateManagerPurgeTxs`|production|boolean|Purge State Manager transactions|true|STATE_MANAGER_PURGE_TXS|
 |`cleanerPollingPeriod`|production|u64|Polling period of the cleaner thread that deletes completed Prover batches, in seconds|600|CLEANER_POLLING_PERIOD|
 |`requestsPersistence`|production|u64|Time that completed batches stay before being cleaned up|3600|REQUESTS_PERSISTENCE|
-|`maxExecutorThreads`|production|u64|Maximum numbre of GRPC Executor service threads|20|MAX_EXECUTOR_THREADS|
-|`maxProverThreads`|test|u64|Maximum numbre of GRPC Aggregator service threads|8|MAX_PROVER_THREADS|
-|`maxHashDBThreads`|production|u64|Maximum numbre of GRPC HashDB service threads|8|MAX_HASHDB_THREADS|
+|`maxExecutorThreads`|production|u64|Maximum number of GRPC Executor service threads|20|MAX_EXECUTOR_THREADS|
+|`maxProverThreads`|test|u64|Maximum number of GRPC Aggregator service threads|8|MAX_PROVER_THREADS|
+|`maxHashDBThreads`|production|u64|Maximum number of GRPC HashDB service threads|8|MAX_HASHDB_THREADS|
 |`fullTracerTraceReserveSize`|production|u64|Full tracer number of reserved traces|256*1024|FULL_TRACER_TRACE_RESERVE_SIZE|
 |`proverName`|production|string|Prover name, used to identy the prover when connecting to the Aggregator service|"UNSPECIFIED"|PROVER_NAME|
 |`ECRecoverPrecalc`|production|boolean|Use ECRecover precalculation to improve main state machine executor performance|false|ECRECOVER_PRECALC|
 |`ECRecoverPrecalcNThreads`|production|u64|Number of threads used to perform the ECRecover precalculation|16|ECRECOVER_PRECALC_N_THREADS|
-|`jsonLogs`|production|boolean|Generate logs in JSON format, compatible with Datadog service|true|JSON_LOGS|
+|`jsonLogs`|production|boolean|Generate logs in JSON format, compatible with Datadog service; if you do not use Datadog or you do not have to process the log traces, we recommend to set this parameter to 'false' to improve the clarity of the logs|true|JSON_LOGS|

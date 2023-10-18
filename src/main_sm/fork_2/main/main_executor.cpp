@@ -68,13 +68,6 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
 
     TimerStart(ROM_LOAD);
 
-    // Check rom file name
-    if (config.rom.size()==0)
-    {
-        zklog.error("Error: MainExecutor::MainExecutor() ROM file name is empty");
-        exitProcess();
-    }
-
     // Load file contents into a json instance
     json romJson;
     file2json("src/main_sm/fork_2/scripts/rom.json", romJson);
