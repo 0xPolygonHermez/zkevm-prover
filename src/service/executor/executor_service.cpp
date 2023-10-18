@@ -345,7 +345,9 @@ using grpc::Status;
         // Log the input file content
         json inputJson;
         proverRequest.input.save(inputJson);
-        zklog.info("ExecutorServiceImpl::ProcessBatch() Input=" + inputJson.dump(), &proverRequest.tags);
+        string inputJsonString = inputJson.dump();
+        replace(inputJsonString.begin(), inputJsonString.end(), '"', '\'');
+        zklog.info("ExecutorServiceImpl::ProcessBatch() Input=" + inputJsonString, &proverRequest.tags);
     }
 
     prover.processBatch(&proverRequest);
@@ -659,7 +661,9 @@ using grpc::Status;
     {
         json inputJson;
         proverRequest.input.save(inputJson);
-        zklog.info("TP=" + to_string(double(execGas)/execTime) + "gas/s Input=" + inputJson.dump(), &proverRequest.tags);
+        string inputJsonString = inputJson.dump();
+        replace(inputJsonString.begin(), inputJsonString.end(), '"', '\'');
+        zklog.info("TP=" + to_string(double(execGas)/execTime) + "gas/s Input=" + inputJsonString, &proverRequest.tags);
     }
     unlock();
 #endif
