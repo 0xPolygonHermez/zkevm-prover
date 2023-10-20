@@ -9,6 +9,24 @@
 #include "page_list_page.hpp"
 #include "root_version_page.hpp"
 
+
+zkresult HeaderPage::Check (const uint64_t headerPageNumber)
+{
+    // Get the header page
+    HeaderStruct * page = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
+
+    // Check the uuid
+    for(int i=0; i<4; ++i){
+        if (page->uuid[i] != config.hashDBUUID4[i])
+        {
+            zklog.error("HeaderPage::Check() found uuid[" + to_string(i) + "]=" + to_string(page->uuid[i]) + " != config.hashDBUUID[" + to_string(i) + "]=" + to_string(config.hashDBUUID[i]));
+            exitProcess();
+            return ZKR_DB_ERROR;
+        }
+    }
+    return ZKR_SUCCESS;
+
+}
 zkresult HeaderPage::InitEmptyPage (const uint64_t headerPageNumber)
 {
     zkresult zkr;
@@ -64,6 +82,7 @@ zkresult HeaderPage::InitEmptyPage (const uint64_t headerPageNumber)
     }
 
     // Create the free pages page, and init it
+    page->firstUnusedPage = 2;
     page->freePages = pageManager.getFreePage();
     zkr = PageListPage::InitEmptyPage(page->freePages);
     if (zkr != ZKR_SUCCESS)
@@ -71,6 +90,12 @@ zkresult HeaderPage::InitEmptyPage (const uint64_t headerPageNumber)
         zklog.error("HeaderPage::InitEmptyPage() failed calling PageListPage::InitEmptyPage(freePages) result=" + zkresult2string(zkr));
         return zkr;
     }
+
+    // UUID
+    page->uuid[0] = config.hashDBUUID4[0];
+    page->uuid[1] = config.hashDBUUID4[1];
+    page->uuid[2] = config.hashDBUUID4[2];
+    page->uuid[3] = config.hashDBUUID4[3];
     
     return ZKR_SUCCESS;
 }
@@ -137,7 +162,18 @@ zkresult HeaderPage::CreateFreePages (uint64_t &headerPageNumber, vector<uint64_
 
 }
 
-zkresult HeaderPage::setFirstUnusedPage (uint64_t &headerPageNumber, const uint64_t firstUnusedPage)
+zkresult HeaderPage::GetFirstUnusedPage (const uint64_t headerPageNumber, uint64_t &firstUnusedPage)
+{
+    // Get header page
+    HeaderStruct * page = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
+
+    // Call the specific method
+    firstUnusedPage = page->firstUnusedPage;
+
+    return ZKR_SUCCESS;
+}
+
+zkresult HeaderPage::SetFirstUnusedPage (uint64_t &headerPageNumber, const uint64_t firstUnusedPage)
 {
     // Get an editable page
     headerPageNumber = pageManager.editPage(headerPageNumber);

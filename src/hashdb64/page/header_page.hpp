@@ -8,9 +8,13 @@
 #include "zkassert.hpp"
 #include "version_data_page.hpp"
 #include "scalar.hpp"
+#include "zkglobals.hpp"
 
 struct HeaderStruct
 {
+    // UUID
+    uint64_t uuid[4];
+
     // Raw data
     uint64_t firstRawDataPage;
     uint64_t rawDataPage;
@@ -36,6 +40,9 @@ struct HeaderStruct
 class HeaderPage
 {
 public:
+    // Header uuid
+    static zkresult Check (const uint64_t headerPageNumber);
+
     // Header-only methods
     static zkresult InitEmptyPage  (const uint64_t  headerPageNumber);
     static uint64_t GetLastVersion (const uint64_t  headerPageNumber);
@@ -45,7 +52,8 @@ public:
     static zkresult GetFreePagesContainer (const uint64_t  headerPageNumber, vector<uint64_t> (&containerPages));
     static zkresult GetFreePages          (const uint64_t  headerPageNumber, vector<uint64_t> (&freePages));
     static zkresult CreateFreePages       (      uint64_t &headerPageNumber, vector<uint64_t> (&freePages), vector<uint64_t> (&containerPages));
-    static zkresult setFirstUnusedPage    (      uint64_t &headerPageNumber, const uint64_t firstUnusedPage);
+    static zkresult GetFirstUnusedPage    (const uint64_t  headerPageNumber, uint64_t &firstUnusedPage);
+    static zkresult SetFirstUnusedPage    (      uint64_t &headerPageNumber, const uint64_t firstUnusedPage);
 
     // Root version methods
     static zkresult ReadRootVersion  (const uint64_t  headerPageNumber, const string &root,       uint64_t &version);
