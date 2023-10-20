@@ -12,6 +12,9 @@
 
 struct HeaderStruct
 {
+
+    uint64_t freePages;
+
     // UUID
     uint64_t uuid[4];
 
@@ -33,15 +36,15 @@ struct HeaderStruct
     uint64_t programPage;
 
     // Free pages list
-    uint64_t freePages;
     uint64_t firstUnusedPage;
 };
 
 class HeaderPage
 {
-public:
+public
+    
     // Header uuid
-    static zkresult Check (const uint64_t headerPageNumber);
+    static zkresult Check (const PageContext &ctx, const uint64_t headerPageNumber);
 
     // Header-only methods
     static zkresult InitEmptyPage  (const uint64_t  headerPageNumber);

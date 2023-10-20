@@ -13,61 +13,33 @@
 #include "zkassert.hpp"
 #include <cassert>
 #include <unistd.h>
+#include "config.hpp"
 
 #define MULTIPLE_WRITES 0
-#define USE_FILE_IO 0
 
 class PageManager
 {
 public:
 
     PageManager();
-    PageManager(const uint64_t nPages_);
-    PageManager(const string fileName_, const uint64_t fileSize_= 1ULL<<37, const uint64_t nFiles_=1, const string folderName_="db");
     ~PageManager();
+
+    zkresult init( Config* config_ = nullptr);
     zkresult addFile();
-    
+    zkresult addPages(const uint64_t nPages_);
 
     uint64_t getFreePage();
     void releasePage(const uint64_t pageNumber);
     uint64_t editPage(const uint64_t pageNumber);
     void flushPages();
 
-    inline uint64_t getNumFreePages(){
-#if MULTIPLE_WRITES
-        lock_guard<mutex> guard(freePagesLock);
-        shared_lock<shared_mutex> guard2(pagesLock);
-#endif
-        return numFreePages+nPages-firstUnusedPage;
-    };
-    inline char *getPageAddress(const uint64_t pageNumber)
-    {
-        shared_lock<shared_mutex> guard(pagesLock);
-        assert(pageNumber < nPages);
-        uint64_t fileId = pageNumber/pagesPerFile;
-        uint64_t pageInFile = pageNumber % pagesPerFile;
-        return pages[fileId] + pageInFile * (uint64_t)4096;
-    };
-#if USE_FILE_IO
-    void getPageAddressFile(const uint64_t pageNumber, char *out)
-    {
-        shared_lock<shared_mutex> guard(pagesLock);
-        assert(pageNumber < nPages);
-        uint64_t fileId = pageNumber/pagesPerFile;
-        uint64_t pageInFile = pageNumber % pagesPerFile;
-        pread(fileDescriptors[fileId], out, 4096, pageInFile * (uint64_t)4096);
-    };
-#endif
+    inline uint64_t getNumFreePages();
+    inline char *getPageAddress(const uint64_t pageNumber);
 
-    inline void readLock(){
-        headerLock.lock_shared();
-    }
-    inline void readUnlock(){
-        headerLock.unlock_shared();
-    }
+    inline void readLock(){ headerLock.lock_shared();}
+    inline void readUnlock(){ headerLock.unlock_shared();}
 
 private:
-
 
     bool mappedFile;
     string fileName;
@@ -80,8 +52,6 @@ private:
     std::shared_mutex pagesLock;
     uint64_t nPages;
     vector<char *> pages;
-    vector<int> fileDescriptors;
-    zkresult addPages(const uint64_t nPages_);
 
     mutex freePagesLock;
     uint64_t firstUnusedPage;
@@ -95,6 +65,22 @@ private:
 
 };
 
-extern PageManager pageManager;
+extern PageManager *pageManager;
 
+char* PageManager::getPageAddress(const uint64_t pageNumber)
+{
+    shared_lock<shared_mutex> guard(pagesLock);
+    assert(pageNumber < nPages);
+    uint64_t fileId = pageNumber/pagesPerFile;
+    uint64_t pageInFile = pageNumber % pagesPerFile;
+    return pages[fileId] + pageInFile * (uint64_t)4096;
+};
+
+uint64_t PageManager::getNumFreePages(){
+#if MULTIPLE_WRITES
+        lock_guard<mutex> guard(freePagesLock);
+        shared_lock<shared_mutex> guard2(pagesLock);
+#endif
+        return numFreePages+nPages-firstUnusedPage;
+    };
 #endif

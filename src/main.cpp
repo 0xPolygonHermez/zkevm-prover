@@ -48,6 +48,7 @@
 #include "page_manager_test.hpp"
 #include "zkglobals.hpp"
 #include "key_value_tree_test.hpp"
+#include "page_manager.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -358,6 +359,7 @@ int main(int argc, char **argv)
     fork_6::Account::GenerateZeroKey(fr, poseidon);
 
     // Init the HashDB singleton
+    pageManager.init();
     hashDBSingleton.init(fr, config);
 
     // Init the StateManager singleton
