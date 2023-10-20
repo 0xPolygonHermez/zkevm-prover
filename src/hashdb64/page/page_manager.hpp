@@ -95,6 +95,6 @@ private:
 
 };
 
-extern PageManager pageManagerSingleton;
+extern PageManager pageManager;
 
 #endif

@@ -14,7 +14,7 @@
 #include "header_page.hpp"
 #include "page_list_page.hpp"
 
-PageManager pageManagerSingleton;
+PageManager pageManager;
 PageManager::PageManager() 
 {
     nPages = 0;
