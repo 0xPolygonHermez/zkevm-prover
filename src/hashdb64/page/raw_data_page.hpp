@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include "zkresult.hpp"
 #include "zkassert.hpp"
-#include "page_context_page.hpp"
+#include "page_context.hpp"
 
 /*
     Example with 3 raw pages:

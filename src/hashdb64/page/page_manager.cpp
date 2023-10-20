@@ -212,7 +212,7 @@ void PageManager::flushPages(PageContext &ctx){
         shared_lock<shared_mutex> guard(pagesLock);
         std::lock_guard<std::mutex> lock(editedPagesLock);
 #endif
-    assert(&ctx.pageManager == this); 
+    zkassertpermanent(&ctx.pageManager == this); 
     //1// get list of previous used pages as freePages container
     uint64_t headerPageNum = 0;
     vector<uint64_t> prevFreePagesContainer;

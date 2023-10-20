@@ -18,7 +18,7 @@
 #include "version_value.hpp"
 #include "child.hpp"
 #include "page_manager.hpp"
-#include "page_context_page.hpp"
+#include "page_context.hpp"
 
 using namespace std;
 
