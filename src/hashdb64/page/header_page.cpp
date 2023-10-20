@@ -195,6 +195,12 @@ zkresult HeaderPage::KeyValueHistoryReadLevel (const uint64_t &headerPageNumber,
     return KeyValueHistoryPage::ReadLevel(headerPage->keyValueHistoryPage, key, keyLevel);
 }
 
+zkresult HeaderPage::KeyValueHistoryReadTree (const uint64_t keyValueHistoryPage, const uint64_t version, vector<KeyValue> &keyValues, vector<HashValueGL> *hashValues)
+{
+    // Call the specific method
+    return KeyValueHistoryPage::ReadTree(keyValueHistoryPage, version, keyValues, hashValues);
+}
+
 zkresult HeaderPage::KeyValueHistoryWrite (uint64_t &headerPageNumber, const string &key, const uint64_t version, const mpz_class &value)
 {
     // Get an editable page

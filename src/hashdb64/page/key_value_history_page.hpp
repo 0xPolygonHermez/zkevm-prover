@@ -6,6 +6,8 @@
 #include "zkassert.hpp"
 #include "scalar.hpp"
 #include "hash_value_gl.hpp"
+#include "key_value.hpp"
+#include "tree_chunk.hpp"
 
 struct KeyValueHistoryStruct
 {
@@ -33,18 +35,20 @@ public:
 
 class KeyValueHistoryPage
 {
-private:
+public:
     static const uint64_t entrySize = 3*8; // 24B
     static const uint64_t minHistoryOffset = 8 + 8 + 64*3*8; // 1552
     static const uint64_t maxHistoryOffset = 8 + 8 + 64*3*8 + 106*3*8; // 4096
 private:
     static zkresult Read          (const uint64_t pageNumber,  const string &key, const string &keyBits, const uint64_t version,       mpz_class &value, const uint64_t level, uint64_t &keyLevel);
     static zkresult ReadLevel     (const uint64_t pageNumber,  const string &key, const string &keyBits,                                                 const uint64_t level, uint64_t &keyLevel);
+    static zkresult ReadTree      (const uint64_t pageNumber,  const string &key, const string &keyBits, const uint64_t version,       mpz_class &value, vector<HashValueGL> *hashValues, const uint64_t level, unordered_map<uint64_t, TreeChunk> &treeChunkMap);
     static zkresult Write         (      uint64_t &pageNumber, const string &key, const string &keyBits, const uint64_t version, const mpz_class &value, const uint64_t level, uint64_t &headerPageNumber);
 public:
     static zkresult InitEmptyPage (const uint64_t pageNumber);
     static zkresult Read          (const uint64_t pageNumber,  const string &key, const uint64_t version,       mpz_class &value, uint64_t &keyLevel);
     static zkresult ReadLevel     (const uint64_t pageNumber,  const string &key,                                                 uint64_t &keyLevel);
+    static zkresult ReadTree      (const uint64_t pageNumber,  const uint64_t version,  vector<KeyValue> &keyValues, vector<HashValueGL> *hashValues);
     static zkresult Write         (      uint64_t &pageNumber, const string &key, const uint64_t version, const mpz_class &value, uint64_t &headerPageNumber);
     
     static zkresult calculateHash             (const uint64_t pageNumber, Goldilocks::Element (&hash)[4], uint64_t &headerPageNumber);

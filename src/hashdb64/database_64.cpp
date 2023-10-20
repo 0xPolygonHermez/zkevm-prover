@@ -22,6 +22,7 @@
 #include "key_value_page.hpp"
 #include "raw_data_page.hpp"
 #include "zkglobals.hpp"
+#include "key_value_history_page.hpp"
 
 // Helper functions
 string removeBSXIfExists64(string s) {return ((s.at(0) == '\\') && (s.at(1) == 'x')) ? s.substr(2) : s;}
@@ -397,7 +398,8 @@ zkresult Database64::WriteTree (const Goldilocks::Element (&oldRoot)[4], const v
     pageManager.flushPages();
 
     headerPageNumber = 0;
-    //HeaderPage::Print(headerPageNumber, true);
+    
+    //KeyValueHistoryPage::Print(versionData.keyValueHistoryPage, true, "version=" + to_string(version) + " ");
 
     return ZKR_SUCCESS;
 }
@@ -449,20 +451,11 @@ zkresult Database64::ReadTree (const Goldilocks::Element (&root)[4], vector<KeyV
     }
 
     // Read all key-values
-    string keyString;
-    string key;
-    uint64_t level;
-    for (uint64_t i=0; i<keyValues.size(); i++)
+    zkr = HeaderPage::KeyValueHistoryReadTree(versionData.keyValueHistoryPage, version, keyValues, hashValues);
+    if (zkr != ZKR_SUCCESS)
     {
-        keyString = fea2string(fr, keyValues[i].key);
-        key = string2ba(keyString);
-        zkr = HeaderPage::KeyValueHistoryRead(versionData.keyValueHistoryPage, key, version, keyValues[i].value, level);
-        if (zkr != ZKR_SUCCESS)
-        {
-            zklog.error("Database64::ReadTree() failed calling HeaderPage::KeyValueHistoryRead() result=" + zkresult2string(zkr) + " rootString=" + rootString + " version=" + to_string(version));
-            return zkr;
-        }
-        //zklog.info("Database64::ReadTree() called HeaderPage::KeyValueHistoryRead() rootString=" + rootString + " version=" + to_string(version) + " key=" + keyString + " value=" + keyValues[i].value.get_str(16));
+        zklog.error("Database64::ReadTree() failed calling HeaderPage::KeyValueHistoryReadTree() result=" + zkresult2string(zkr) + " rootString=" + rootString + " version=" + to_string(version));
+        return zkr;
     }
 
     return ZKR_SUCCESS;

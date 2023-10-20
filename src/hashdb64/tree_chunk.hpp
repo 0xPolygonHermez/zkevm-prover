@@ -177,9 +177,12 @@ public:
         result[3] = hash[3];
     }
 
-    void getLeafHash(const uint64_t position, Goldilocks::Element (&result)[4]);
+    void getLeafHash (const uint64_t position, Goldilocks::Element (&result)[4]);
 
     void print (void) const;
+
+    zkresult loadFromKeyValueHistoryPage (const uint64_t pageNumber, const uint64_t version, const uint64_t level);
+    zkresult getHashValues (const uint64_t children64Position, vector<HashValueGL> *hashValues);
 };
 
 #endif

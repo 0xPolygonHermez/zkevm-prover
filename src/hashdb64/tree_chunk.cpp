@@ -3,6 +3,11 @@
 #include "scalar.hpp"
 #include "timer.hpp"
 #include "zkglobals.hpp"
+#include "key_value_history_page.hpp"
+#include "page_manager.hpp"
+#include "key_utils.hpp"
+#include "constants.hpp"
+#include "raw_data_page.hpp"
 
 Goldilocks::Element zeroHash[4] = {0, 0, 0, 0};
 
@@ -488,4 +493,907 @@ void TreeChunk::print(void) const
     }
     zklog.info("  bDataValid=" + to_string(bDataValid));
     zklog.info("  data.size=" + to_string(data.size()));
+}
+
+zkresult TreeChunk::loadFromKeyValueHistoryPage (const uint64_t pageNumber, const uint64_t version, const uint64_t _level)
+{
+    zkresult zkr;
+
+    // Copy level
+    level = _level;
+
+    // Get the data from this page
+    KeyValueHistoryStruct * page = (KeyValueHistoryStruct *)pageManager.getPageAddress(pageNumber);
+
+    for (uint64_t index = 0; index < 64; index++)
+    {
+        // Get control
+        uint64_t control = page->keyValueEntry[index][0] >> 60;
+        uint64_t position = getKeyChildren64Position(index);
+
+        Child child;
+
+        // Check control
+        switch (control)
+        {
+            // Empty slot
+            case 0:
+            {
+                children64[position].type = ZERO;
+                continue;            
+            }
+            
+            // Leaf node
+            case 1:
+            {
+                uint64_t *keyValueEntry = page->keyValueEntry[index];
+                uint64_t foundVersion = 0;
+                while (true)
+                {
+                    // Read the latest version of this key in this page
+                    foundVersion = keyValueEntry[0] & U64Mask48;
+
+                    // If it is equal or lower, then we found the slot, although it could be occupied by a different key, so we need to check
+                    if (version >= foundVersion)
+                    {
+                        // Get key and value from raw data
+                        uint64_t rawDataPage = keyValueEntry[1] & U64Mask48;
+                        uint64_t rawDataOffset = keyValueEntry[1] >> 48;
+                        string keyValue;
+                        zkr = RawDataPage::Read(rawDataPage, rawDataOffset, 64, keyValue);
+                        if (zkr != ZKR_SUCCESS)
+                        {
+                            zklog.error("TreeChunk::loadFromKeyValueHistoryPage() failed calling RawDataPage.Read result=" + zkresult2string(zkr) + " rawDataPage=" + to_string(rawDataPage) + " rawDataOffset=" + to_string(rawDataOffset) + " version=" + to_string(version) + " level=" + to_string(level) + " index=" + to_string(index));
+                            return zkr;
+                        }
+                        if (keyValue.size() != 64)
+                        {
+                            zklog.error("TreeChunk::loadFromKeyValueHistoryPage() called RawDataPage.Read and got invalid length=" + to_string(keyValue.size()) + " rawDataPage=" + to_string(rawDataPage) + " rawDataOffset=" + to_string(rawDataOffset) + " version=" + to_string(version) + " level=" + to_string(level) + " index=" + to_string(index));
+                            return zkr;
+                        }
+
+                        // Set key and value in child
+                        string keyBa = keyValue.substr(0, 32);
+                        string keyString = ba2string(keyBa);                        
+                        children64[position].type = LEAF;
+                        string2fea(fr, keyString, children64[position].leaf.key); 
+                        ba2scalar((uint8_t *)keyValue.c_str() + 32, 32, children64[position].leaf.value);
+
+                        // Get hash from raw data
+                        rawDataPage = keyValueEntry[2] & U64Mask48;
+                        rawDataOffset = keyValueEntry[2] >> 48;
+                        if (rawDataPage == 0)
+                        {
+                            zklog.error("TreeChunk::loadFromKeyValueHistoryPage() found hash rawDataPage=0 pageNumber=" + to_string(pageNumber) + " version=" + to_string(version) + " level=" + to_string(level) + " index=" + to_string(index));
+                            return ZKR_DB_ERROR;
+                        }
+                        string hashBa;
+                        zkr = RawDataPage::Read(rawDataPage, rawDataOffset, 32, hashBa);
+                        if (zkr != ZKR_SUCCESS)
+                        {
+                            zklog.error("TreeChunk::loadFromKeyValueHistoryPage() failed calling RawDataPage.Read result=" + zkresult2string(zkr) + " rawDataPage=" + to_string(rawDataPage) + " rawDataOffset=" + to_string(rawDataOffset) + " version=" + to_string(version) + " level=" + to_string(level) + " index=" + to_string(index));
+                            return zkr;
+                        }
+                        if (hashBa.size() != 32)
+                        {
+                            zklog.error("TreeChunk::loadFromKeyValueHistoryPage() called RawDataPage.Read and got invalid length=" + to_string(keyValue.size()) + " rawDataPage=" + to_string(rawDataPage) + " rawDataOffset=" + to_string(rawDataOffset) + " version=" + to_string(version) + " level=" + to_string(level) + " index=" + to_string(index));
+                            return zkr;
+                        }
+
+                        // Set hash in child
+                        string hashString = ba2string(hashBa);
+                        string2fea(fr, hashString, children64[position].leaf.hash);
+
+                        break;
+                    }
+
+                    if (version > foundVersion)
+                    {
+                        continue;
+                    }
+                    
+                    // Search for 
+                    uint64_t previousVersionOffset = (page->keyValueEntry[index][1] >> 48) & U64Mask12;
+
+                    // If there is no previous version for this key, then this is a zero
+                    if (previousVersionOffset == 0)
+                    {
+                        children64[position].type = ZERO;
+                        return ZKR_SUCCESS;
+                    }
+
+                    // If not zero, then check the range of the previous version
+                    if ( (previousVersionOffset < KeyValueHistoryPage::minHistoryOffset) ||
+                        (previousVersionOffset > KeyValueHistoryPage::maxHistoryOffset) ||
+                        ((previousVersionOffset & U64Mask4) != 0) )
+                    {
+                        zklog.error("TreeChunk::loadFromKeyValueHistoryPage() found invalid previousVersionOffset=" + to_string(previousVersionOffset));
+                        return ZKR_DB_ERROR;
+                    }
+
+                    // Get the previous version entry
+                    keyValueEntry = (uint64_t *)((uint8_t *)page + previousVersionOffset);
+                }
+            }
+
+            // Intermediate node
+            case 2:
+            {
+                children64[position].type = INTERMEDIATE;
+
+                // Get hash from raw data
+                uint64_t rawDataPage = page->keyValueEntry[index][2] & U64Mask48;
+                uint64_t rawDataOffset = page->keyValueEntry[index][2] >> 48;
+                string hashBa;
+                zkr = RawDataPage::Read(rawDataPage, rawDataOffset, 32, hashBa);
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("TreeChunk::loadFromKeyValueHistoryPage() failed calling RawDataPage.Read result=" + zkresult2string(zkr) + " rawDataPage=" + to_string(rawDataPage) + " rawDataOffset=" + to_string(rawDataOffset) + " version=" + to_string(version) + " level=" + to_string(level) + " index=" + to_string(index));
+                    return zkr;
+                }
+                if (hashBa.size() != 32)
+                {
+                    zklog.error("TreeChunk::loadFromKeyValueHistoryPage() called RawDataPage.Read and got invalid length=" + to_string(hashBa.size()) + " rawDataPage=" + to_string(rawDataPage) + " rawDataOffset=" + to_string(rawDataOffset) + " version=" + to_string(version) + " level=" + to_string(level) + " index=" + to_string(index));
+                    return zkr;
+                }
+
+                // Set hash in child
+                string hashString = ba2string(hashBa);
+                string2fea(fr, hashString, children64[position].intermediate.hash);
+
+                continue;
+            }
+
+            default:
+            {
+                zklog.error("TreeChunk::loadFromKeyValueHistoryPage() found invalid control=" + to_string(control) + " pageNumber=" + to_string(pageNumber));
+                return ZKR_DB_ERROR;
+            }
+        }
+    }
+
+    // Calculate all intermediate hashes
+    zkr = calculateHash(NULL);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("TreeChunk::loadFromKeyValueHistoryPage() failed calling calculateHash() result=" + zkresult2string(zkr) + " version=" + to_string(version) + " level=" + to_string(level));
+        return zkr;
+    }
+
+    return ZKR_SUCCESS;
+}
+
+#define DOUBLE_CHECK_HASH_VALUES
+
+zkresult TreeChunk::getHashValues (const uint64_t children64Position, vector<HashValueGL> *hashValues)
+{
+    if (hashValues == NULL)
+    {
+        return ZKR_SUCCESS;
+    }
+
+    zkresult zkr;
+
+    zkassert(children64Position < 64);
+    zkassert(bHashValid == true);
+
+    // Search in children64
+    uint64_t position = children64Position;
+    switch (children64[position].type)
+    {
+        case ZERO:
+        {
+            break;
+        }
+        case LEAF:
+        {
+            // Re-create the value hash
+            HashValueGL hashValue;
+            scalar2fea(fr, children64[position].leaf.value, hashValue.value[0], hashValue.value[1], hashValue.value[2], hashValue.value[3], hashValue.value[4], hashValue.value[5], hashValue.value[6], hashValue.value[7]);
+            hashValue.value[8] = fr.zero();
+            hashValue.value[9] = fr.zero();
+            hashValue.value[10] = fr.zero();
+            hashValue.value[11] = fr.zero();
+            poseidon.hash(hashValue.hash, hashValue.value);
+            hashValues->emplace_back(hashValue);
+
+            // Re-create the leaf hash
+            removeKeyBits(fr, children64[position].leaf.key, level + 5, (Goldilocks::Element (&)[4])hashValue.value);
+            hashValue.value[4] = hashValue.hash[0];
+            hashValue.value[5] = hashValue.hash[1];
+            hashValue.value[6] = hashValue.hash[2];
+            hashValue.value[7] = hashValue.hash[3];
+            hashValue.value[8] = fr.one();
+            hashValue.value[9] = fr.zero();
+            hashValue.value[10] = fr.zero();
+            hashValue.value[11] = fr.zero();
+            hashValue.hash[0] = children64[position].leaf.hash[0];
+            hashValue.hash[1] = children64[position].leaf.hash[1];
+            hashValue.hash[2] = children64[position].leaf.hash[2];
+            hashValue.hash[3] = children64[position].leaf.hash[3];
+            hashValues->emplace_back(hashValue);
+
+#ifdef DOUBLE_CHECK_HASH_VALUES
+            Goldilocks::Element hash[4];
+            poseidon.hash(hash, hashValue.value);
+            zkassert(fr.equal(hash[0], hashValue.hash[0]));
+            zkassert(fr.equal(hash[1], hashValue.hash[1]));
+            zkassert(fr.equal(hash[2], hashValue.hash[2]));
+            zkassert(fr.equal(hash[3], hashValue.hash[3]));
+#endif
+
+            break;
+        }
+        case INTERMEDIATE:
+        {
+            break;
+        }
+        default:
+        {
+            zklog.error("TreeChunk::getHashValues() found unexpected children64[position].type=" + to_string(children64[position].type) + " position=" + to_string(position));
+            return ZKR_DB_ERROR;
+        }
+    }
+
+    // Search in children32
+    position = position >> 1;
+    switch (children32[position].type)
+    {
+        case ZERO:
+        {
+            break;
+        }
+        case LEAF:
+        {
+            // Re-create the value hash
+            HashValueGL hashValue;
+            scalar2fea(fr, children32[position].leaf.value, hashValue.value[0], hashValue.value[1], hashValue.value[2], hashValue.value[3], hashValue.value[4], hashValue.value[5], hashValue.value[6], hashValue.value[7]);
+            hashValue.value[8] = fr.zero();
+            hashValue.value[9] = fr.zero();
+            hashValue.value[10] = fr.zero();
+            hashValue.value[11] = fr.zero();
+            poseidon.hash(hashValue.hash, hashValue.value);
+            hashValues->emplace_back(hashValue);
+
+            // Re-create the leaf node hash
+            removeKeyBits(fr, children32[position].leaf.key, level + 5, (Goldilocks::Element (&)[4])hashValue.value);
+            hashValue.value[4] = hashValue.hash[0];
+            hashValue.value[5] = hashValue.hash[1];
+            hashValue.value[6] = hashValue.hash[2];
+            hashValue.value[7] = hashValue.hash[3];
+
+            // Set the capacity to {1,0,0,0}
+            hashValue.value[8] = fr.one();
+            hashValue.value[9] = fr.zero();
+            hashValue.value[10] = fr.zero();
+            hashValue.value[11] = fr.zero();
+
+            // Set the hash
+            hashValue.hash[0] = children32[position].leaf.hash[0];
+            hashValue.hash[1] = children32[position].leaf.hash[1];
+            hashValue.hash[2] = children32[position].leaf.hash[2];
+            hashValue.hash[3] = children32[position].leaf.hash[3];
+
+            // Add to the hash values vector
+            hashValues->emplace_back(hashValue);
+
+#ifdef DOUBLE_CHECK_HASH_VALUES
+            Goldilocks::Element hash[4];
+            poseidon.hash(hash, hashValue.value);
+            zkassert(fr.equal(hash[0], hashValue.hash[0]));
+            zkassert(fr.equal(hash[1], hashValue.hash[1]));
+            zkassert(fr.equal(hash[2], hashValue.hash[2]));
+            zkassert(fr.equal(hash[3], hashValue.hash[3]));
+#endif
+
+            break;
+        }
+        case INTERMEDIATE:
+        {
+            // Calculate the positions of the left and right nodes
+            uint64_t positionLeft = position << 1;
+            uint64_t positionRight = positionLeft + 1;
+
+            // Re-create the intermediate node hash
+            HashValueGL hashValue;
+
+            // Get the left node hash
+            zkr = children64[positionLeft].getHash((Goldilocks::Element (&)[4])hashValue.value[0]);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("TreeChunk::getHashValues() failed calling children64[positionLeft].getHash() zkr=" + zkresult2string(zkr) + " positionLeft=" + to_string(positionLeft));
+                return zkr;
+            }
+
+            // Get the right node hash
+            zkr = children64[positionRight].getHash((Goldilocks::Element (&)[4])hashValue.value[4]);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("TreeChunk::getHashValues() failed calling children64[positionRight].getHash() zkr=" + zkresult2string(zkr) + " positionRight=" + to_string(positionRight));
+                return zkr;
+            }
+
+            // Set the capacity to {0,0,0,0}
+            hashValue.value[8] = fr.zero();
+            hashValue.value[9] = fr.zero();
+            hashValue.value[10] = fr.zero();
+            hashValue.value[11] = fr.zero();
+
+            // Set the hash
+            hashValue.hash[0] = children32[position].intermediate.hash[0];
+            hashValue.hash[1] = children32[position].intermediate.hash[1];
+            hashValue.hash[2] = children32[position].intermediate.hash[2];
+            hashValue.hash[3] = children32[position].intermediate.hash[3];
+
+            // Add to the hash values vector
+            hashValues->emplace_back(hashValue);
+
+#ifdef DOUBLE_CHECK_HASH_VALUES
+            Goldilocks::Element hash[4];
+            poseidon.hash(hash, hashValue.value);
+            zkassert(fr.equal(hash[0], hashValue.hash[0]));
+            zkassert(fr.equal(hash[1], hashValue.hash[1]));
+            zkassert(fr.equal(hash[2], hashValue.hash[2]));
+            zkassert(fr.equal(hash[3], hashValue.hash[3]));
+#endif
+            break;
+        }
+        default:
+        {
+            zklog.error("TreeChunk::getHashValues() found unexpected children32[position].type=" + to_string(children32[position].type) + " position=" + to_string(position));
+            return ZKR_DB_ERROR;
+        }
+    }
+
+    // Search in children16
+    position = position >> 1;
+    switch (children16[position].type)
+    {
+        case ZERO:
+        {
+            break;
+        }
+        case LEAF:
+        {
+            // Re-create the value hash
+            HashValueGL hashValue;
+            scalar2fea(fr, children16[position].leaf.value, hashValue.value[0], hashValue.value[1], hashValue.value[2], hashValue.value[3], hashValue.value[4], hashValue.value[5], hashValue.value[6], hashValue.value[7]);
+            hashValue.value[8] = fr.zero();
+            hashValue.value[9] = fr.zero();
+            hashValue.value[10] = fr.zero();
+            hashValue.value[11] = fr.zero();
+            poseidon.hash(hashValue.hash, hashValue.value);
+            hashValues->emplace_back(hashValue);
+
+            // Re-create the leaf node hash
+            removeKeyBits(fr, children16[position].leaf.key, level + 5, (Goldilocks::Element (&)[4])hashValue.value);
+            hashValue.value[4] = hashValue.hash[0];
+            hashValue.value[5] = hashValue.hash[1];
+            hashValue.value[6] = hashValue.hash[2];
+            hashValue.value[7] = hashValue.hash[3];
+
+            // Set the capacity to {1,0,0,0}
+            hashValue.value[8] = fr.one();
+            hashValue.value[9] = fr.zero();
+            hashValue.value[10] = fr.zero();
+            hashValue.value[11] = fr.zero();
+
+            // Set the hash
+            hashValue.hash[0] = children16[position].leaf.hash[0];
+            hashValue.hash[1] = children16[position].leaf.hash[1];
+            hashValue.hash[2] = children16[position].leaf.hash[2];
+            hashValue.hash[3] = children16[position].leaf.hash[3];
+
+            // Add to the hash values vector
+            hashValues->emplace_back(hashValue);
+
+#ifdef DOUBLE_CHECK_HASH_VALUES
+            Goldilocks::Element hash[4];
+            poseidon.hash(hash, hashValue.value);
+            zkassert(fr.equal(hash[0], hashValue.hash[0]));
+            zkassert(fr.equal(hash[1], hashValue.hash[1]));
+            zkassert(fr.equal(hash[2], hashValue.hash[2]));
+            zkassert(fr.equal(hash[3], hashValue.hash[3]));
+#endif
+
+            break;
+        }
+        case INTERMEDIATE:
+        {
+            // Calculate the positions of the left and right nodes
+            uint64_t positionLeft = position << 1;
+            uint64_t positionRight = positionLeft + 1;
+
+            // Re-create the intermediate node hash
+            HashValueGL hashValue;
+
+            // Get the left node hash
+            zkr = children32[positionLeft].getHash((Goldilocks::Element (&)[4])hashValue.value[0]);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("TreeChunk::getHashValues() failed calling children32[positionLeft].getHash() zkr=" + zkresult2string(zkr) + " positionLeft=" + to_string(positionLeft));
+                return zkr;
+            }
+
+            // Get the right node hash
+            zkr = children32[positionRight].getHash((Goldilocks::Element (&)[4])hashValue.value[4]);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("TreeChunk::getHashValues() failed calling children32[positionRight].getHash() zkr=" + zkresult2string(zkr) + " positionRight=" + to_string(positionRight));
+                return zkr;
+            }
+
+            // Set the capacity to {0,0,0,0}
+            hashValue.value[8] = fr.zero();
+            hashValue.value[9] = fr.zero();
+            hashValue.value[10] = fr.zero();
+            hashValue.value[11] = fr.zero();
+
+            // Set the hash
+            hashValue.hash[0] = children16[position].intermediate.hash[0];
+            hashValue.hash[1] = children16[position].intermediate.hash[1];
+            hashValue.hash[2] = children16[position].intermediate.hash[2];
+            hashValue.hash[3] = children16[position].intermediate.hash[3];
+
+            // Add to the hash values vector
+            hashValues->emplace_back(hashValue);
+
+#ifdef DOUBLE_CHECK_HASH_VALUES
+            Goldilocks::Element hash[4];
+            poseidon.hash(hash, hashValue.value);
+            zkassert(fr.equal(hash[0], hashValue.hash[0]));
+            zkassert(fr.equal(hash[1], hashValue.hash[1]));
+            zkassert(fr.equal(hash[2], hashValue.hash[2]));
+            zkassert(fr.equal(hash[3], hashValue.hash[3]));
+#endif
+            break;
+        }
+        default:
+        {
+            zklog.error("TreeChunk::getHashValues() found unexpected children16[position].type=" + to_string(children16[position].type) + " position=" + to_string(position));
+            return ZKR_DB_ERROR;
+        }
+    }
+
+    // Search in children8
+    position = position >> 1;
+    switch (children8[position].type)
+    {
+        case ZERO:
+        {
+            break;
+        }
+        case LEAF:
+        {
+            // Re-create the value hash
+            HashValueGL hashValue;
+            scalar2fea(fr, children8[position].leaf.value, hashValue.value[0], hashValue.value[1], hashValue.value[2], hashValue.value[3], hashValue.value[4], hashValue.value[5], hashValue.value[6], hashValue.value[7]);
+            hashValue.value[8] = fr.zero();
+            hashValue.value[9] = fr.zero();
+            hashValue.value[10] = fr.zero();
+            hashValue.value[11] = fr.zero();
+            poseidon.hash(hashValue.hash, hashValue.value);
+            hashValues->emplace_back(hashValue);
+
+            // Re-create the leaf node hash
+            removeKeyBits(fr, children8[position].leaf.key, level + 5, (Goldilocks::Element (&)[4])hashValue.value);
+            hashValue.value[4] = hashValue.hash[0];
+            hashValue.value[5] = hashValue.hash[1];
+            hashValue.value[6] = hashValue.hash[2];
+            hashValue.value[7] = hashValue.hash[3];
+
+            // Set the capacity to {1,0,0,0}
+            hashValue.value[8] = fr.one();
+            hashValue.value[9] = fr.zero();
+            hashValue.value[10] = fr.zero();
+            hashValue.value[11] = fr.zero();
+
+            // Set the hash
+            hashValue.hash[0] = children8[position].leaf.hash[0];
+            hashValue.hash[1] = children8[position].leaf.hash[1];
+            hashValue.hash[2] = children8[position].leaf.hash[2];
+            hashValue.hash[3] = children8[position].leaf.hash[3];
+
+            // Add to the hash values vector
+            hashValues->emplace_back(hashValue);
+
+#ifdef DOUBLE_CHECK_HASH_VALUES
+            Goldilocks::Element hash[4];
+            poseidon.hash(hash, hashValue.value);
+            zkassert(fr.equal(hash[0], hashValue.hash[0]));
+            zkassert(fr.equal(hash[1], hashValue.hash[1]));
+            zkassert(fr.equal(hash[2], hashValue.hash[2]));
+            zkassert(fr.equal(hash[3], hashValue.hash[3]));
+#endif
+
+            break;
+        }
+        case INTERMEDIATE:
+        {
+            // Calculate the positions of the left and right nodes
+            uint64_t positionLeft = position << 1;
+            uint64_t positionRight = positionLeft + 1;
+
+            // Re-create the intermediate node hash
+            HashValueGL hashValue;
+
+            // Get the left node hash
+            zkr = children16[positionLeft].getHash((Goldilocks::Element (&)[4])hashValue.value[0]);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("TreeChunk::getHashValues() failed calling children16[positionLeft].getHash() zkr=" + zkresult2string(zkr) + " positionLeft=" + to_string(positionLeft));
+                return zkr;
+            }
+
+            // Get the right node hash
+            zkr = children16[positionRight].getHash((Goldilocks::Element (&)[4])hashValue.value[4]);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("TreeChunk::getHashValues() failed calling children16[positionRight].getHash() zkr=" + zkresult2string(zkr) + " positionRight=" + to_string(positionRight));
+                return zkr;
+            }
+
+            // Set the capacity to {0,0,0,0}
+            hashValue.value[8] = fr.zero();
+            hashValue.value[9] = fr.zero();
+            hashValue.value[10] = fr.zero();
+            hashValue.value[11] = fr.zero();
+
+            // Set the hash
+            hashValue.hash[0] = children8[position].intermediate.hash[0];
+            hashValue.hash[1] = children8[position].intermediate.hash[1];
+            hashValue.hash[2] = children8[position].intermediate.hash[2];
+            hashValue.hash[3] = children8[position].intermediate.hash[3];
+
+            // Add to the hash values vector
+            hashValues->emplace_back(hashValue);
+
+#ifdef DOUBLE_CHECK_HASH_VALUES
+            Goldilocks::Element hash[4];
+            poseidon.hash(hash, hashValue.value);
+            zkassert(fr.equal(hash[0], hashValue.hash[0]));
+            zkassert(fr.equal(hash[1], hashValue.hash[1]));
+            zkassert(fr.equal(hash[2], hashValue.hash[2]));
+            zkassert(fr.equal(hash[3], hashValue.hash[3]));
+#endif
+            break;
+        }
+        default:
+        {
+            zklog.error("TreeChunk::getHashValues() found unexpected children8[position].type=" + to_string(children8[position].type) + " position=" + to_string(position));
+            return ZKR_DB_ERROR;
+        }
+    }
+
+    // Search in children4
+    position = position >> 1;
+    switch (children4[position].type)
+    {
+        case ZERO:
+        {
+            break;
+        }
+        case LEAF:
+        {
+            // Re-create the value hash
+            HashValueGL hashValue;
+            scalar2fea(fr, children4[position].leaf.value, hashValue.value[0], hashValue.value[1], hashValue.value[2], hashValue.value[3], hashValue.value[4], hashValue.value[5], hashValue.value[6], hashValue.value[7]);
+            hashValue.value[8] = fr.zero();
+            hashValue.value[9] = fr.zero();
+            hashValue.value[10] = fr.zero();
+            hashValue.value[11] = fr.zero();
+            poseidon.hash(hashValue.hash, hashValue.value);
+            hashValues->emplace_back(hashValue);
+
+            // Re-create the leaf node hash
+            removeKeyBits(fr, children4[position].leaf.key, level + 5, (Goldilocks::Element (&)[4])hashValue.value);
+            hashValue.value[4] = hashValue.hash[0];
+            hashValue.value[5] = hashValue.hash[1];
+            hashValue.value[6] = hashValue.hash[2];
+            hashValue.value[7] = hashValue.hash[3];
+
+            // Set the capacity to {1,0,0,0}
+            hashValue.value[8] = fr.one();
+            hashValue.value[9] = fr.zero();
+            hashValue.value[10] = fr.zero();
+            hashValue.value[11] = fr.zero();
+
+            // Set the hash
+            hashValue.hash[0] = children4[position].leaf.hash[0];
+            hashValue.hash[1] = children4[position].leaf.hash[1];
+            hashValue.hash[2] = children4[position].leaf.hash[2];
+            hashValue.hash[3] = children4[position].leaf.hash[3];
+
+            // Add to the hash values vector
+            hashValues->emplace_back(hashValue);
+
+#ifdef DOUBLE_CHECK_HASH_VALUES
+            Goldilocks::Element hash[4];
+            poseidon.hash(hash, hashValue.value);
+            zkassert(fr.equal(hash[0], hashValue.hash[0]));
+            zkassert(fr.equal(hash[1], hashValue.hash[1]));
+            zkassert(fr.equal(hash[2], hashValue.hash[2]));
+            zkassert(fr.equal(hash[3], hashValue.hash[3]));
+#endif
+
+            break;
+        }
+        case INTERMEDIATE:
+        {
+            // Calculate the positions of the left and right nodes
+            uint64_t positionLeft = position << 1;
+            uint64_t positionRight = positionLeft + 1;
+
+            // Re-create the intermediate node hash
+            HashValueGL hashValue;
+
+            // Get the left node hash
+            zkr = children8[positionLeft].getHash((Goldilocks::Element (&)[4])hashValue.value[0]);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("TreeChunk::getHashValues() failed calling children8[positionLeft].getHash() zkr=" + zkresult2string(zkr) + " positionLeft=" + to_string(positionLeft));
+                return zkr;
+            }
+
+            // Get the right node hash
+            zkr = children8[positionRight].getHash((Goldilocks::Element (&)[4])hashValue.value[4]);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("TreeChunk::getHashValues() failed calling children8[positionRight].getHash() zkr=" + zkresult2string(zkr) + " positionRight=" + to_string(positionRight));
+                return zkr;
+            }
+
+            // Set the capacity to {0,0,0,0}
+            hashValue.value[8] = fr.zero();
+            hashValue.value[9] = fr.zero();
+            hashValue.value[10] = fr.zero();
+            hashValue.value[11] = fr.zero();
+
+            // Set the hash
+            hashValue.hash[0] = children4[position].intermediate.hash[0];
+            hashValue.hash[1] = children4[position].intermediate.hash[1];
+            hashValue.hash[2] = children4[position].intermediate.hash[2];
+            hashValue.hash[3] = children4[position].intermediate.hash[3];
+
+            // Add to the hash values vector
+            hashValues->emplace_back(hashValue);
+
+#ifdef DOUBLE_CHECK_HASH_VALUES
+            Goldilocks::Element hash[4];
+            poseidon.hash(hash, hashValue.value);
+            zkassert(fr.equal(hash[0], hashValue.hash[0]));
+            zkassert(fr.equal(hash[1], hashValue.hash[1]));
+            zkassert(fr.equal(hash[2], hashValue.hash[2]));
+            zkassert(fr.equal(hash[3], hashValue.hash[3]));
+#endif
+            break;
+        }
+        default:
+        {
+            zklog.error("TreeChunk::getHashValues() found unexpected children4[position].type=" + to_string(children4[position].type) + " position=" + to_string(position));
+            return ZKR_DB_ERROR;
+        }
+    }
+
+    // Search in children2
+    position = position >> 1;
+    switch (children2[position].type)
+    {
+        case ZERO:
+        {
+            break;
+        }
+        case LEAF:
+        {
+            // Re-create the value hash
+            HashValueGL hashValue;
+            scalar2fea(fr, children2[position].leaf.value, hashValue.value[0], hashValue.value[1], hashValue.value[2], hashValue.value[3], hashValue.value[4], hashValue.value[5], hashValue.value[6], hashValue.value[7]);
+            hashValue.value[8] = fr.zero();
+            hashValue.value[9] = fr.zero();
+            hashValue.value[10] = fr.zero();
+            hashValue.value[11] = fr.zero();
+            poseidon.hash(hashValue.hash, hashValue.value);
+            hashValues->emplace_back(hashValue);
+
+            // Re-create the leaf node hash
+            removeKeyBits(fr, children2[position].leaf.key, level + 5, (Goldilocks::Element (&)[4])hashValue.value);
+            hashValue.value[4] = hashValue.hash[0];
+            hashValue.value[5] = hashValue.hash[1];
+            hashValue.value[6] = hashValue.hash[2];
+            hashValue.value[7] = hashValue.hash[3];
+
+            // Set the capacity to {1,0,0,0}
+            hashValue.value[8] = fr.one();
+            hashValue.value[9] = fr.zero();
+            hashValue.value[10] = fr.zero();
+            hashValue.value[11] = fr.zero();
+
+            // Set the hash
+            hashValue.hash[0] = children2[position].leaf.hash[0];
+            hashValue.hash[1] = children2[position].leaf.hash[1];
+            hashValue.hash[2] = children2[position].leaf.hash[2];
+            hashValue.hash[3] = children2[position].leaf.hash[3];
+
+            // Add to the hash values vector
+            hashValues->emplace_back(hashValue);
+
+#ifdef DOUBLE_CHECK_HASH_VALUES
+            Goldilocks::Element hash[4];
+            poseidon.hash(hash, hashValue.value);
+            zkassert(fr.equal(hash[0], hashValue.hash[0]));
+            zkassert(fr.equal(hash[1], hashValue.hash[1]));
+            zkassert(fr.equal(hash[2], hashValue.hash[2]));
+            zkassert(fr.equal(hash[3], hashValue.hash[3]));
+#endif
+
+            break;
+        }
+        case INTERMEDIATE:
+        {
+            // Calculate the positions of the left and right nodes
+            uint64_t positionLeft = position << 1;
+            uint64_t positionRight = positionLeft + 1;
+
+            // Re-create the intermediate node hash
+            HashValueGL hashValue;
+
+            // Get the left node hash
+            zkr = children4[positionLeft].getHash((Goldilocks::Element (&)[4])hashValue.value[0]);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("TreeChunk::getHashValues() failed calling children4[positionLeft].getHash() zkr=" + zkresult2string(zkr) + " positionLeft=" + to_string(positionLeft));
+                return zkr;
+            }
+
+            // Get the right node hash
+            zkr = children4[positionRight].getHash((Goldilocks::Element (&)[4])hashValue.value[4]);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("TreeChunk::getHashValues() failed calling children4[positionRight].getHash() zkr=" + zkresult2string(zkr) + " positionRight=" + to_string(positionRight));
+                return zkr;
+            }
+
+            // Set the capacity to {0,0,0,0}
+            hashValue.value[8] = fr.zero();
+            hashValue.value[9] = fr.zero();
+            hashValue.value[10] = fr.zero();
+            hashValue.value[11] = fr.zero();
+
+            // Set the hash
+            hashValue.hash[0] = children2[position].intermediate.hash[0];
+            hashValue.hash[1] = children2[position].intermediate.hash[1];
+            hashValue.hash[2] = children2[position].intermediate.hash[2];
+            hashValue.hash[3] = children2[position].intermediate.hash[3];
+
+            // Add to the hash values vector
+            hashValues->emplace_back(hashValue);
+
+#ifdef DOUBLE_CHECK_HASH_VALUES
+            Goldilocks::Element hash[4];
+            poseidon.hash(hash, hashValue.value);
+            zkassert(fr.equal(hash[0], hashValue.hash[0]));
+            zkassert(fr.equal(hash[1], hashValue.hash[1]));
+            zkassert(fr.equal(hash[2], hashValue.hash[2]));
+            zkassert(fr.equal(hash[3], hashValue.hash[3]));
+#endif
+            break;
+        }
+        default:
+        {
+            zklog.error("TreeChunk::getHashValues() found unexpected children2[position].type=" + to_string(children2[position].type) + " position=" + to_string(position));
+            return ZKR_DB_ERROR;
+        }
+    }
+
+    // Search in child1
+    position = position >> 1;
+    switch (child1.type)
+    {
+        case ZERO:
+        {
+            break;
+        }
+        case LEAF:
+        {
+            // Re-create the value hash
+            HashValueGL hashValue;
+            scalar2fea(fr, child1.leaf.value, hashValue.value[0], hashValue.value[1], hashValue.value[2], hashValue.value[3], hashValue.value[4], hashValue.value[5], hashValue.value[6], hashValue.value[7]);
+            hashValue.value[8] = fr.zero();
+            hashValue.value[9] = fr.zero();
+            hashValue.value[10] = fr.zero();
+            hashValue.value[11] = fr.zero();
+            poseidon.hash(hashValue.hash, hashValue.value);
+            hashValues->emplace_back(hashValue);
+
+            // Re-create the leaf node hash
+            removeKeyBits(fr, child1.leaf.key, level + 5, (Goldilocks::Element (&)[4])hashValue.value[0]);
+            hashValue.value[4] = hashValue.hash[0];
+            hashValue.value[5] = hashValue.hash[1];
+            hashValue.value[6] = hashValue.hash[2];
+            hashValue.value[7] = hashValue.hash[3];
+
+            // Set the capacity to {1,0,0,0}
+            hashValue.value[8] = fr.one();
+            hashValue.value[9] = fr.zero();
+            hashValue.value[10] = fr.zero();
+            hashValue.value[11] = fr.zero();
+
+            // Set the hash
+            hashValue.hash[0] = child1.leaf.hash[0];
+            hashValue.hash[1] = child1.leaf.hash[1];
+            hashValue.hash[2] = child1.leaf.hash[2];
+            hashValue.hash[3] = child1.leaf.hash[3];
+
+            // Add to the hash values vector
+            hashValues->emplace_back(hashValue);
+
+#ifdef DOUBLE_CHECK_HASH_VALUES
+            Goldilocks::Element hash[4];
+            poseidon.hash(hash, hashValue.value);
+            zkassert(fr.equal(hash[0], hashValue.hash[0]));
+            zkassert(fr.equal(hash[1], hashValue.hash[1]));
+            zkassert(fr.equal(hash[2], hashValue.hash[2]));
+            zkassert(fr.equal(hash[3], hashValue.hash[3]));
+#endif
+
+            break;
+        }
+        case INTERMEDIATE:
+        {
+            // Calculate the positions of the left and right nodes
+            uint64_t positionLeft = position << 1;
+            uint64_t positionRight = positionLeft + 1;
+
+            // Re-create the intermediate node hash
+            HashValueGL hashValue;
+
+            // Get the left node hash
+            zkr = children2[positionLeft].getHash((Goldilocks::Element (&)[4])hashValue.value[0]);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("TreeChunk::getHashValues() failed calling children2[positionLeft].getHash() zkr=" + zkresult2string(zkr) + " positionLeft=" + to_string(positionLeft));
+                return zkr;
+            }
+
+            // Get the right node hash
+            zkr = children2[positionRight].getHash((Goldilocks::Element (&)[4])hashValue.value[4]);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("TreeChunk::getHashValues() failed calling children2[positionRight].getHash() zkr=" + zkresult2string(zkr) + " positionRight=" + to_string(positionRight));
+                return zkr;
+            }
+
+            // Set the capacity to {0,0,0,0}
+            hashValue.value[8] = fr.zero();
+            hashValue.value[9] = fr.zero();
+            hashValue.value[10] = fr.zero();
+            hashValue.value[11] = fr.zero();
+
+            // Set the hash
+            hashValue.hash[0] = child1.intermediate.hash[0];
+            hashValue.hash[1] = child1.intermediate.hash[1];
+            hashValue.hash[2] = child1.intermediate.hash[2];
+            hashValue.hash[3] = child1.intermediate.hash[3];
+
+            // Add to the hash values vector
+            hashValues->emplace_back(hashValue);
+
+#ifdef DOUBLE_CHECK_HASH_VALUES
+            Goldilocks::Element hash[4];
+            poseidon.hash(hash, hashValue.value);
+            zkassert(fr.equal(hash[0], hashValue.hash[0]));
+            zkassert(fr.equal(hash[1], hashValue.hash[1]));
+            zkassert(fr.equal(hash[2], hashValue.hash[2]));
+            zkassert(fr.equal(hash[3], hashValue.hash[3]));
+#endif
+            break;
+        }
+        default:
+        {
+            zklog.error("TreeChunk::getHashValues() found unexpected child1.type=" + to_string(child1.type) + " position=" + to_string(position));
+            return ZKR_DB_ERROR;
+        }
+    }
+
+    return ZKR_SUCCESS;
 }
