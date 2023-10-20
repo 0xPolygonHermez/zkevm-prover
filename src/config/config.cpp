@@ -79,6 +79,27 @@ void ParseString (const json & config, const char *pJsonName, const char *pEnv, 
     ParseEnvironmentString(pEnv, variable);
 }
 
+void ParseUUID (const json & config, const char *pJsonName, const char *pEnv, string &variable, const string &defaultValue, uint64_t hashDBUUID4[4])
+{
+    variable = defaultValue;
+    if (config.contains(pJsonName) && config[pJsonName].is_string())
+    {
+        variable = config[pJsonName];
+    }
+    ParseEnvironmentString(pEnv, variable);
+    //check hashDBUUID is a valid UUID
+    if (variable.length() != 64)
+    {
+        zklog.error("config.hashDBUUID=" + variable + " is not a valid UUID");
+        exitProcess();
+    }
+    //convert to uint64_t[4]
+    for (int i=0; i<4; i++)
+    {
+        hashDBUUID4[i] = strtoull(variable.substr(i*16, 16).c_str(), NULL, 16);
+    }
+}
+
 void ParseU64 (const json & config, const char *pJsonName, const char *pEnv, uint64_t &variable, const uint64_t &defaultValue)
 {
     variable = defaultValue;
@@ -195,8 +216,13 @@ void Config::load(json &config)
     ParseU16(config, "hashDBServerPort", "HASHDB_SERVER_PORT", hashDBServerPort, 50061);
     ParseString(config, "hashDBURL", "HASHDB_URL", hashDBURL, "local");
     ParseBool(config, "hashDB64", "HASHDB64", hashDB64, false);
+    ParseUUID(config, "hashDBUUID", "HASHDB_UUID", hashDBUUID, "a4fed5ea244d6f4c3e750bd5d2be8f602c10524bda0b5dc417d1ce7c060e5a5e", hashDBUUID4);
     ParseU64(config, "kvDBMaxVersions", "HASHDB64_MAX_VERSIONS", kvDBMaxVersions, 131072);
     ParseString(config, "dbCacheSynchURL", "DB_CACHE_SYNCH_URL", dbCacheSynchURL, "");
+    ParseString(config, "hashDBFileName", "HASHDB_FILE_NAME", hashDBFileName, "");
+    ParseU64(config, "hashDBFileSize", "HASHDB_FILE_SIZE", hashDBFileSize, 128);
+    ParseU64(config, "hashDBMinFilesNum", "HASHDB_MIN_FILES_NUM", hashDBMinFilesNum, 1);
+    ParseString(config, "hashDBFolder", "HASHDB_FOLDER", hashDBFolder, "hashdb");
     ParseU16(config, "aggregatorServerPort", "AGGREGATOR_SERVER_PORT", aggregatorServerPort, 50081);
     ParseU16(config, "aggregatorClientPort", "AGGREGATOR_CLIENT_PORT", aggregatorClientPort, 50081);
     ParseString(config, "aggregatorClientHost", "AGGREGATOR_CLIENT_HOST", aggregatorClientHost, "127.0.0.1");
@@ -430,9 +456,14 @@ void Config::print(void)
     zklog.info("    executorClientCheckNewStateRoot=" + to_string(executorClientCheckNewStateRoot));
     zklog.info("    hashDBServerPort=" + to_string(hashDBServerPort));
     zklog.info("    hashDBURL=" + hashDBURL);
+    zklog.info("    hashDBUUID=" + hashDBUUID);
     zklog.info("    hashDB64=" + to_string(hashDB64));
     zklog.info("    kvDBMaxVersions=" + to_string(kvDBMaxVersions));
     zklog.info("    dbCacheSynchURL=" + dbCacheSynchURL);
+    zklog.info("    hashDBFileName=" + hashDBFileName);
+    zklog.info("    hashDBFileSize=" + to_string(hashDBFileSize));
+    zklog.info("    hashDBMinFilesNum=" + to_string(hashDBMinFilesNum));
+    zklog.info("    hastDBFolder=" + hashDBFolder);
     zklog.info("    aggregatorServerPort=" + to_string(aggregatorServerPort));
     zklog.info("    aggregatorClientPort=" + to_string(aggregatorClientPort));
     zklog.info("    aggregatorClientHost=" + aggregatorClientHost);
