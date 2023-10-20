@@ -3,6 +3,7 @@
 
 #include <string>
 #include <cstdint>
+#include "page_context.hpp"
 
 using namespace std;
 
@@ -21,10 +22,10 @@ struct VersionDataStruct
     uint64_t rawDataOffset;
 };
 
-string version2key (const uint64_t version);
+string version2key (PageContext &ctx, const uint64_t version);
 
-string versionData2value (const VersionDataStruct &versionData);
+string versionData2value (PageContext &ctx, const VersionDataStruct &versionData);
 
-void value2versionData (VersionDataStruct &versionData, const string &value);
+void value2versionData (PageContext &ctx, VersionDataStruct &versionData, const string &value);
 
 #endif

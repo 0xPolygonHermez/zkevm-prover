@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include "zkresult.hpp"
 #include "zkassert.hpp"
+#include "page_context.hpp"
 
 using namespace std;
 
@@ -23,16 +24,16 @@ class KeyValuePage
 {
 private:
 
-    static zkresult Read          (const uint64_t  pageNumber, const string &key, const vector<uint64_t> &keyBits,       string &value, const uint64_t level);
-    static zkresult Write         (      uint64_t &pageNumber, const string &key, const vector<uint64_t> &keyBits, const string &value, const uint64_t level, const uint64_t headerPageNumber);
+    static zkresult Read          (PageContext &ctx, const uint64_t  pageNumber, const string &key, const vector<uint64_t> &keyBits,       string &value, const uint64_t level);
+    static zkresult Write         (PageContext &ctx,       uint64_t &pageNumber, const string &key, const vector<uint64_t> &keyBits, const string &value, const uint64_t level, const uint64_t headerPageNumber);
 
 public:
 
-    static zkresult InitEmptyPage (const uint64_t  pageNumber);
-    static zkresult Read          (const uint64_t  pageNumber, const string &key,       string &value);
-    static zkresult Write         (      uint64_t &pageNumber, const string &key, const string &value, const uint64_t headerPageNumber);
+    static zkresult InitEmptyPage (PageContext &ctx, const uint64_t  pageNumber);
+    static zkresult Read          (PageContext &ctx, const uint64_t  pageNumber, const string &key,       string &value);
+    static zkresult Write         (PageContext &ctx,       uint64_t &pageNumber, const string &key, const string &value, const uint64_t headerPageNumber);
     
-    static void     Print         (const uint64_t pageNumber, bool details, const string &prefix, const uint64_t keySize);
+    static void     Print         (PageContext &ctx, const uint64_t pageNumber, bool details, const string &prefix, const uint64_t keySize);
 };
 
 #endif

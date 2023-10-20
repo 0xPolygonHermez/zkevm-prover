@@ -17,6 +17,8 @@
 #include "key_value_level.hpp"
 #include "version_value.hpp"
 #include "child.hpp"
+#include "page_manager.hpp"
+#include "page_context.hpp"
 
 using namespace std;
 
@@ -68,6 +70,8 @@ private:
     uint64_t headerPageNumber;
     pthread_mutex_t mutex;
     uint64_t currentFlushId;
+    PageContext ctx;
+
 
 public:
 
