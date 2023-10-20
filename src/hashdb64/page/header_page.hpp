@@ -8,6 +8,8 @@
 #include "zkassert.hpp"
 #include "version_data_page.hpp"
 #include "scalar.hpp"
+#include "key_value.hpp"
+#include "hash_value_gl.hpp"
 
 struct HeaderStruct
 {
@@ -58,6 +60,7 @@ public:
     // Key-Value-History methods
     static zkresult KeyValueHistoryRead          (const uint64_t  keyValueHistoryPage, const string &key, const uint64_t version,       mpz_class &value, uint64_t &keyLevel);
     static zkresult KeyValueHistoryReadLevel     (const uint64_t &headerPageNumber,    const string &key, uint64_t &keyLevel);
+    static zkresult KeyValueHistoryReadTree      (const uint64_t  keyValueHistoryPage, const uint64_t version,    vector<KeyValue> &keyValues, vector<HashValueGL> *hashValues);
     static zkresult KeyValueHistoryWrite         (      uint64_t &headerPageNumber,    const string &key, const uint64_t version, const mpz_class &value);
     static zkresult KeyValueHistoryCalculateHash (      uint64_t &headerPageNumber,    Goldilocks::Element (&hash)[4]);
     static zkresult KeyValueHistoryPrint         (const uint64_t  headerPageNumber,    const string &root);

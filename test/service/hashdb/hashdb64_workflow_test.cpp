@@ -168,7 +168,7 @@ uint64_t HashDB64WorkflowTest (const Config& config)
                 //zklog.info("allKeyValues[i].key=" + fea2string(fr, allKeyValues[i].key) + " .value=" + allKeyValues[i].value.get_str(10));
                 if (auxKeyValues[i].value != allKeyValues[i].value)
                 {
-                    zklog.error("Found value=" + auxKeyValues[i].value.get_str() + " != expected value=" + allKeyValues[i].value.get_str());
+                    zklog.error("HashDB64WorkflowTest() found value=" + auxKeyValues[i].value.get_str() + " != expected value=" + allKeyValues[i].value.get_str());
                     return 1;
                 }
                 else

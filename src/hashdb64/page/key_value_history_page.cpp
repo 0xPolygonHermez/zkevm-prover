@@ -43,6 +43,7 @@ zkresult KeyValueHistoryPage::Read (const uint64_t pageNumber, const string &key
             keyLevel = (level + 1) * 6;
             return ZKR_SUCCESS;            
         }
+        
         // Leaf node
         case 1:
         {
@@ -119,12 +120,14 @@ zkresult KeyValueHistoryPage::Read (const uint64_t pageNumber, const string &key
                 keyValueEntry = (uint64_t *)((uint8_t *)page + previousVersionOffset);
             }
         }
+
         // Intermediate node
         case 2:
         {
             uint64_t nextPageNumber = page->keyValueEntry[index][1] & U64Mask48;
             return Read(nextPageNumber, key, keyBits, version, value, level + 1, keyLevel);
         }
+
         default:
         {
             zklog.error("KeyValuePage::Read() found invalid control=" + to_string(control) + " pageNumber=" + to_string(pageNumber));
@@ -174,6 +177,7 @@ zkresult KeyValueHistoryPage::ReadLevel (const uint64_t pageNumber, const string
             keyLevel = (level + 1) * 6;
             return ZKR_SUCCESS;            
         }
+
         // Leaf node
         case 1:
         {
@@ -209,7 +213,6 @@ zkresult KeyValueHistoryPage::ReadLevel (const uint64_t pageNumber, const string
             string foundKeyBits;
             foundKeyBits.append((char *)foundKeyBitsArray, 43);
 
-
             // Find the first 6-bit set that is different
             uint64_t i=0;
             for (; i<43; i++)
@@ -225,12 +228,14 @@ zkresult KeyValueHistoryPage::ReadLevel (const uint64_t pageNumber, const string
 
             return ZKR_SUCCESS;
         }
+
         // Intermediate node
         case 2:
         {
             uint64_t nextPageNumber = page->keyValueEntry[index][1] & U64Mask48;
             return ReadLevel(nextPageNumber, key, keyBits, level + 1, keyLevel);
         }
+
         default:
         {
             zklog.error("KeyValuePage::ReadLevel() found invalid control=" + to_string(control) + " pageNumber=" + to_string(pageNumber));
@@ -255,6 +260,212 @@ zkresult KeyValueHistoryPage::ReadLevel (const uint64_t pageNumber, const string
     keyBits.append((char *)keyBitsArray, 43);
 
     return ReadLevel(pageNumber, key, keyBits, 0, keyLevel);
+}
+
+zkresult KeyValueHistoryPage::ReadTree (const uint64_t pageNumber, const string &key, const string &keyBits, const uint64_t version, mpz_class &value, vector<HashValueGL> *hashValues, const uint64_t level, unordered_map<uint64_t, TreeChunk> &treeChunkMap)
+{
+    zkassert(key.size() == 32);
+    zkassert(keyBits.size() == 43);
+    zkassert(level < 43);
+
+    zkresult zkr;
+
+    // Get the data from this page
+    KeyValueHistoryStruct * page = (KeyValueHistoryStruct *)pageManager.getPageAddress(pageNumber);
+    uint64_t index = keyBits[level];
+    uint64_t control = page->keyValueEntry[index][0] >> 60;
+
+    // Create a tree chunk for this page, and store it in treeChunkMap, if it does not exist
+    unordered_map<uint64_t, TreeChunk>::iterator it;
+    it = treeChunkMap.find(pageNumber);
+    if (it == treeChunkMap.end())
+    {
+        // Create a new tree chunk for this page
+        TreeChunk treeChunk;
+        zkr = treeChunk.loadFromKeyValueHistoryPage(pageNumber, version, level * 6);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("KeyValueHistoryPage::ReadTree() failed calling treeChunk.loadFromKeyValueHistoryPage() result=" + zkresult2string(zkr) + " pageNumber=" + to_string(pageNumber));
+            return zkr;
+        }
+
+        // Add it to the map, to reuse it if possible
+        treeChunkMap[pageNumber] = treeChunk;
+        
+        it = treeChunkMap.find(pageNumber);
+        if (it == treeChunkMap.end())
+        {
+            zklog.error("KeyValueHistoryPage::ReadTree() failed calling treeChunkMap.find() of a recently added page number");
+            exitProcess();
+        }
+    }
+
+    TreeChunk &treeChunk = it->second;
+
+    // Check control
+    switch (control)
+    {
+        // Empty slot
+        case 0:
+        {
+            // Get the value
+            value = 0;
+
+            // Get the hash and values
+            zkr = treeChunk.getHashValues( getKeyChildren64Position(index), hashValues);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("KeyValueHistoryPage::ReadTree() failed calling treeChunk.getHashValues() result=" + zkresult2string(zkr) + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index));
+                return zkr;
+            }
+
+            return ZKR_SUCCESS;            
+        }
+        
+        // Leaf node
+        case 1:
+        {
+            uint64_t *keyValueEntry = page->keyValueEntry[index];
+
+            while (true)
+            {
+                // Read the latest version of this key in this page
+                uint64_t foundVersion = keyValueEntry[0] & U64Mask48;
+
+                // If it is equal or lower, then we found the slot, although it could be occupied by a different key, so we need to check
+                if (version >= foundVersion)
+                {
+                    uint64_t rawDataPage = keyValueEntry[1] & U64Mask48;
+                    uint64_t rawDataOffset = keyValueEntry[1] >> 48;
+                    string keyValue;
+                    zkr = RawDataPage::Read(rawDataPage, rawDataOffset, 64, keyValue);
+                    if (zkr != ZKR_SUCCESS)
+                    {
+                        zklog.error("KeyValueHistoryPage::ReadTree() failed calling RawDataPage.Read result=" + zkresult2string(zkr) + " rawDataPage=" + to_string(rawDataPage) + " rawDataOffset=" + to_string(rawDataOffset) + " key=" + ba2string(key) + " version=" + to_string(version) + " level=" + to_string(level) + " index=" + to_string(index));
+                        return zkr;
+                    }
+                    if (keyValue.size() != 64)
+                    {
+                        zklog.error("KeyValueHistoryPage::ReadTree() called RawDataPage.Read and got invalid length=" + to_string(keyValue.size()) + " rawDataPage=" + to_string(rawDataPage) + " rawDataOffset=" + to_string(rawDataOffset) + " key=" + ba2string(key) + " version=" + to_string(version) + " level=" + to_string(level) + " index=" + to_string(index));
+                        return zkr;
+                    }
+
+                    // If this is a different key, then the key does not exist, i.e. the value is 0
+                    if (memcmp(key.c_str(), keyValue.c_str(), 32) != 0)
+                    {
+                        //zklog.info("KeyValueHistoryPage::Read() found existing key=" + ba2string(keyValue.substr(0, 32)) + " != key=" + ba2string(key));
+                        value = 0;
+
+                        // Get the hash and values
+                        zkr = treeChunk.getHashValues( getKeyChildren64Position(index), hashValues);
+                        if (zkr != ZKR_SUCCESS)
+                        {
+                            zklog.error("KeyValueHistoryPage::ReadTree() failed calling treeChunk.getHashValues() result=" + zkresult2string(zkr) + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index));
+                            return zkr;
+                        }
+
+                        return ZKR_SUCCESS;
+                    }
+
+                    // Convert the value
+                    ba2scalar((uint8_t *)keyValue.c_str() + 32, 32, value);
+
+                    // Get the hash and values
+                    zkr = treeChunk.getHashValues( getKeyChildren64Position(index), hashValues);
+                    if (zkr != ZKR_SUCCESS)
+                    {
+                        zklog.error("KeyValueHistoryPage::ReadTree() failed calling treeChunk.getHashValues() result=" + zkresult2string(zkr) + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index));
+                        return zkr;
+                    }
+
+                    return ZKR_SUCCESS;
+                }
+
+                // Search for 
+                uint64_t previousVersionOffset = (page->keyValueEntry[index][1] >> 48) & U64Mask12;
+
+                // If there is no previous version for this key, then this is a zero
+                if (previousVersionOffset == 0)
+                {
+                    value = 0;
+
+                    // Get the hash and values
+                    zkr = treeChunk.getHashValues( getKeyChildren64Position(index), hashValues);
+                    if (zkr != ZKR_SUCCESS)
+                    {
+                        zklog.error("KeyValueHistoryPage::ReadTree() failed calling treeChunk.getHashValues() result=" + zkresult2string(zkr) + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index));
+                        return zkr;
+                    }
+
+                    return ZKR_SUCCESS;
+                }
+
+                // If not zero, then check the range of the previous version
+                if ( (previousVersionOffset < minHistoryOffset) ||
+                     (previousVersionOffset > maxHistoryOffset) ||
+                     ((previousVersionOffset & U64Mask4) != 0) )
+                {
+                    zklog.error("KeyValueHistoryPage::ReadTree() found invalid previousVersionOffset=" + to_string(previousVersionOffset));
+                    return ZKR_DB_ERROR;
+                }
+
+                // Get the previous version entry
+                keyValueEntry = (uint64_t *)((uint8_t *)page + previousVersionOffset);
+            }
+        }
+
+        // Intermediate node
+        case 2:
+        {
+            // Get the hash and values
+            zkr = treeChunk.getHashValues( getKeyChildren64Position(index), hashValues);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("KeyValueHistoryPage::ReadTree() failed calling treeChunk.getHashValues() result=" + zkresult2string(zkr) + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index));
+                return zkr;
+            }
+
+            uint64_t nextPageNumber = page->keyValueEntry[index][1] & U64Mask48;
+            return ReadTree(nextPageNumber, key, keyBits, version, value, hashValues, level + 1, treeChunkMap);
+        }
+
+        default:
+        {
+            zklog.error("KeyValuePage::ReadTree() found invalid control=" + to_string(control) + " pageNumber=" + to_string(pageNumber));
+            return ZKR_DB_ERROR;
+        }
+    }
+
+    // Not found
+    return ZKR_DB_KEY_NOT_FOUND;
+}
+
+zkresult KeyValueHistoryPage::ReadTree (const uint64_t pageNumber, const uint64_t version, vector<KeyValue> &keyValues, vector<HashValueGL> *hashValues)
+{
+    //Print(pageNumber, true, "");
+
+    zkresult zkr;
+
+    unordered_map<uint64_t, TreeChunk> treeChunkMap;
+
+    for (uint64_t i=0; i<keyValues.size(); i++)
+    {
+        uint8_t keyBitsArray[43];
+        splitKey6(fr, keyValues[i].key, keyBitsArray);
+        string keyBits;
+        keyBits.append((char *)keyBitsArray, 43);
+        string keyString = fea2string(fr, keyValues[i].key);
+        string keyBa = string2ba(keyString);
+
+        zkr = ReadTree(pageNumber, keyBa, keyBits, version, keyValues[i].value, hashValues, 0, treeChunkMap);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("KeyValueHistoryPage::ReadTree() failed calling RedTree() result=" + zkresult2string(zkr) + " i=" + to_string(i) + " key=" + keyString);
+            return zkr;
+        }
+    }
+
+    return ZKR_SUCCESS;
 }
 
 zkresult KeyValueHistoryPage::Write (uint64_t &pageNumber, const string &key, const string &keyBits, const uint64_t version, const mpz_class &value, const uint64_t level, uint64_t &headerPageNumber)
@@ -302,6 +513,7 @@ zkresult KeyValueHistoryPage::Write (uint64_t &pageNumber, const string &key, co
 
             return ZKR_SUCCESS;            
         }
+
         // Leaf node
         case 1:
         {
@@ -404,15 +616,22 @@ zkresult KeyValueHistoryPage::Write (uint64_t &pageNumber, const string &key, co
 
             return Write(newPageNumber, key, keyBits, version, value, level+1, headerPageNumber);            
         }
+
         // Intermediate node
         case 2:
         {
             // Call Write with the next page number, which can be modified in it runs out of history
-            uint64_t nextPageNumber = page->keyValueEntry[index][1] & U64Mask48;
-            zkr = Write(nextPageNumber, key, keyBits, version, value, level + 1, headerPageNumber);
-            page->keyValueEntry[index][1] = nextPageNumber;
+            uint64_t oldNextPageNumber = page->keyValueEntry[index][1] & U64Mask48;
+            uint64_t newNextPageNumber = oldNextPageNumber;
+            zkr = Write(newNextPageNumber, key, keyBits, version, value, level + 1, headerPageNumber);
+            if (newNextPageNumber != oldNextPageNumber)
+            {
+                page->keyValueEntry[index][1] = newNextPageNumber;
+                page->keyValueEntry[index][2] = 0;
+            }
             return zkr;
         }
+
         default:
         {
             zklog.error("KeyValueHistoryPage::Write() found invalid control=" + to_string(control) + " pageNumber=" + to_string(pageNumber));
@@ -442,6 +661,7 @@ zkresult KeyValueHistoryPage::calculateHash (const uint64_t pageNumber, Goldiloc
 {
     return calculatePageHash(pageNumber, 0, hash, headerPageNumber);
 }
+
 zkresult KeyValueHistoryPage::calculatePageHash (const uint64_t pageNumber, const uint64_t level, Goldilocks::Element (&hash)[4], uint64_t &headerPageNumber)
 {
     zkassert(level < 43);
@@ -592,7 +812,6 @@ zkresult KeyValueHistoryPage::calculatePageHash (const uint64_t pageNumber, cons
         return zkr;
     }
 
-    //
     // For every leaf node, get the hash
     for (uint64_t index = 0; index < 64; index++)
     {
@@ -659,6 +878,7 @@ void KeyValueHistoryPage::Print (const uint64_t pageNumber, bool details, const 
             {
                 continue;                
             }
+
             // Leaf node
             case 1:
             {
@@ -696,6 +916,7 @@ void KeyValueHistoryPage::Print (const uint64_t pageNumber, bool details, const 
                 }
                 continue;
             }
+
             // Intermediate node
             case 2:
             {
@@ -724,6 +945,7 @@ void KeyValueHistoryPage::Print (const uint64_t pageNumber, bool details, const 
                 }
                 continue;
             }
+
             default:
             {
                 zklog.error(prefix + "KeyValuePage::Print() found invalid control=" + to_string(control) + " pageNumber=" + to_string(pageNumber));
