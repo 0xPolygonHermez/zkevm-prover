@@ -14,8 +14,8 @@
 #include "header_page.hpp"
 #include "page_list_page.hpp"
 
-PageManager pageManager;
-PageManager::PageManager()
+PageManager pageManagerSingleton;
+PageManager::PageManager() 
 {
     nPages = 0;
     mappedFile = false;
@@ -205,18 +205,18 @@ uint64_t PageManager::editPage(const uint64_t pageNumber)
     return pageNumber_;
 }
 
-void PageManager::flushPages(){
+void PageManager::flushPages(PageContext &ctx){
 
 #if MULTIPLE_WRITES
         lock_guard<mutex> guard(freePagesLock);
         shared_lock<shared_mutex> guard(pagesLock);
         std::lock_guard<std::mutex> lock(editedPagesLock);
 #endif
-
+    assert(&ctx.pageManager == this); 
     //1// get list of previous used pages as freePages container
     uint64_t headerPageNum = 0;
     vector<uint64_t> prevFreePagesContainer;
-    HeaderPage::GetFreePagesContainer(headerPageNum, prevFreePagesContainer);
+    HeaderPage::GetFreePagesContainer(ctx, headerPageNum, prevFreePagesContainer);
 
     //2// get list of edited pages
     vector<uint64_t> copiedPages;
@@ -249,8 +249,8 @@ void PageManager::flushPages(){
     memcpy(newFreePages.data()+numFreePages, prevFreePagesContainer.data(), nPrevFreePagesContainer*sizeof(uint64_t));
     memcpy(newFreePages.data()+numFreePages+nPrevFreePagesContainer, copiedPages.data(), nEditedPages*sizeof(uint64_t));
 
-    HeaderPage::CreateFreePages(headerPageNum, newFreePages, newContainerPages);
-    HeaderPage::setFirstUnusedPage(headerPageNum, firstUnusedPage);
+    HeaderPage::CreateFreePages(ctx, headerPageNum, newFreePages, newContainerPages);
+    HeaderPage::setFirstUnusedPage(ctx, headerPageNum, firstUnusedPage);
 
     //4// sync all pages
     if(mappedFile){

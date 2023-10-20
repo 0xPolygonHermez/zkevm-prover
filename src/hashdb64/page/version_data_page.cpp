@@ -2,21 +2,21 @@
 #include "scalar.hpp"
 #include "zkassert.hpp"
 
-string version2key (const uint64_t version)
+string version2key (PageContext &ctx, const uint64_t version)
 {
     string key;
     ba2ba(key, version);
     return key;
 }
 
-string versionData2value (const VersionDataStruct &versionData)
+string versionData2value (PageContext &ctx, const VersionDataStruct &versionData)
 {
     string value;
     value.append((char *)&versionData, sizeof(VersionDataStruct));
     return value;
 }
 
-void value2versionData (VersionDataStruct &versionData, const string &value)
+void value2versionData (PageContext &ctx, VersionDataStruct &versionData, const string &value)
 {
     if (value.size() != sizeof(VersionDataStruct))
     {

@@ -17,6 +17,7 @@
 #define MULTIPLE_WRITES 0
 #define USE_FILE_IO 0
 
+class PageContext;
 class PageManager
 {
 public:
@@ -31,7 +32,7 @@ public:
     uint64_t getFreePage();
     void releasePage(const uint64_t pageNumber);
     uint64_t editPage(const uint64_t pageNumber);
-    void flushPages();
+    void flushPages(PageContext &ctx);
 
     inline uint64_t getNumFreePages(){
 #if MULTIPLE_WRITES
@@ -68,7 +69,6 @@ public:
 
 private:
 
-
     bool mappedFile;
     string fileName;
     string folderName;
@@ -95,6 +95,6 @@ private:
 
 };
 
-extern PageManager pageManager;
+extern PageManager pageManagerSingleton;
 
 #endif

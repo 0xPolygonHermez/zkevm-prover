@@ -12,6 +12,7 @@
 #include "omp.h"
 #include <random>
 #include <unordered_set>
+#include "page_manager.hpp"
 
 #define TEST_FILE_IO 0
 
@@ -37,6 +38,7 @@ uint64_t PageManagerPerformanceTest(void){
     // Create the state manager
     double start = omp_get_wtime();
     PageManager pageManagerFile(fileName, fileSize, nFiles, folderName);
+    PageContext ctx(pageManagerFile, config);
     double end = omp_get_wtime();
     std::cout << std::endl << "Time to construct the PageManager: " << end - start << " seconds" << std::endl;
 
@@ -116,7 +118,7 @@ uint64_t PageManagerPerformanceTest(void){
 
         //flushPAges
         start = omp_get_wtime();
-        pageManagerFile.flushPages();
+        pageManagerFile.flushPages(ctx);
         end = omp_get_wtime();
         
         throughput = numGBytes / (end-start);
@@ -159,6 +161,8 @@ uint64_t PageManagerAccuracyTest (void)
     // Memory version
     //
     PageManager pageManagerMem(100);
+    PageContext ctx(pageManagerMem, config);
+    
     uint64_t page1 = pageManagerMem.getFreePage();
     zkassertpermanent(page1 == 2);
     zkassertpermanent(pageManagerMem.getNumFreePages() == 97);
@@ -187,7 +191,7 @@ uint64_t PageManagerAccuracyTest (void)
     for(uint64_t i=0; i<256;++i){
         page3Data[i] = i;
     }
-    pageManagerMem.flushPages();
+    pageManagerMem.flushPages(ctx);
     zkassertpermanent(pageManagerMem.getNumFreePages() == 97);
     for(uint64_t i=0; i<256;++i){
         zkassertpermanent(page3Data[i] == i);
@@ -206,7 +210,7 @@ uint64_t PageManagerAccuracyTest (void)
     zkassertpermanent(pageManagerMem.editPage(1) == 1);
 
 
-    pageManagerMem.flushPages();
+    pageManagerMem.flushPages(ctx);
     zkassertpermanent(pageManagerMem.getNumFreePages() == 97);
     for(uint64_t i=0; i<256;++i){
         zkassertpermanent(page3Data[i] == 0);
@@ -226,6 +230,7 @@ uint64_t PageManagerAccuracyTest (void)
 
     // Same tests than with memory version:
     PageManager pageManagerFile(fileName, file_size, 1,"");
+    PageContext ctxf(pageManagerFile, config);
     page1 = pageManagerFile.getFreePage();
     zkassertpermanent(page1 == 2);
     zkassertpermanent(pageManagerFile.getNumFreePages() == 97);
@@ -253,7 +258,7 @@ uint64_t PageManagerAccuracyTest (void)
     for(uint64_t i=0; i<256;++i){
         page3Data[i] = i;
     }
-    pageManagerFile.flushPages();
+    pageManagerFile.flushPages(ctxf);
     zkassertpermanent(pageManagerFile.getNumFreePages() == 97);
     for(uint64_t i=0; i<256;++i){
         zkassertpermanent(page3Data[i] == i);
@@ -272,7 +277,7 @@ uint64_t PageManagerAccuracyTest (void)
     zkassertpermanent(pageManagerFile.editPage(1) == 1);
 
 
-    pageManagerFile.flushPages();
+    pageManagerFile.flushPages(ctxf);
     zkassertpermanent(pageManagerFile.getNumFreePages() == 97);
     for(uint64_t i=0; i<256;++i){
         zkassertpermanent(page3Data[i] == 0);

@@ -13,6 +13,7 @@
 #include "key_value.hpp"
 #include "hash_value_gl.hpp"
 #include "zkglobals.hpp"
+#include "page_context_page.hpp"
 
 using namespace std;
 
@@ -181,7 +182,7 @@ public:
 
     void print (void) const;
 
-    zkresult loadFromKeyValueHistoryPage (const uint64_t pageNumber, const uint64_t version, const uint64_t level);
+    zkresult loadFromKeyValueHistoryPage (PageContext &ctx, const uint64_t pageNumber, const uint64_t version, const uint64_t level);
     zkresult getHashValues (const uint64_t children64Position, vector<HashValueGL> *hashValues);
 };
 
