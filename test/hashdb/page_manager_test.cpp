@@ -30,7 +30,6 @@ uint64_t PageManagerPerformanceTest(void){
 
     string fileName = "benchmark_file";
     uint64_t fileSize = 1ULL<<37;
-    uint64_t nFiles = 1;
     string folderName = "db";
     uint64_t numPositions = 20000;
     uint64_t numReps = 100;
@@ -44,7 +43,6 @@ uint64_t PageManagerPerformanceTest(void){
     configPM.hashDBFileName = fileName;
     configPM.hashDBFileSize = fileSize;
     configPM.hashDBFolder = folderName;
-    configPM.hashDBMinFilesNum = nFiles;
     PageContext ctx(pageManagerFile, configPM);
     pageManagerFile.init(ctx);
 
@@ -246,7 +244,6 @@ uint64_t PageManagerAccuracyTest (void)
     Config configPMFile;
     configPMFile.hashDBFileName = fileName;
     configPMFile.hashDBFileSize = file_size;
-    configPMFile.hashDBMinFilesNum = 1;
     configPMFile.hashDBFolder = "";
     PageContext ctxf(pageManagerFile, configPMFile);
 

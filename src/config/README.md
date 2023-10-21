@@ -76,9 +76,7 @@ The configuration parameters can be of different uses:
 |`dbCacheSynchURL`|test|string|URL of the HashDB service to synchronize the Database cache (experimental)|""|DB_CACHE_SYNCH_URL|
 |`hashDBFileName`|test|string|core name used for the hashDB files (path,numbering and extension not included)|""|HASHDB_FILE_NAME|
 |`hashDBFileSize`|test|u64| hashDB files size in GB|128|HASHDB_FILE_SIZE|
-|`hashDBMinFilesNum`|test|u64|minimum number of files used by the hashDB|1|HASHDB_MIN_FILES_NUM|
 |`hashDBFolder`|test|string|folder containing the hashDB files|hashdb|HASHDB_FOLDER|
-|`hashDBUUID`|test|string|hashDB UUID (256bit hexadecimal number)|"a4fed5ea244d6f4c3e750bd5d2be8f602c10524bda0b5dc417d1ce7c060e5a5e"|HASHDB_UUID|
 |`aggregatorServerPort`|test|u16|Aggregator server GRPC port|50081|AGGREGATOR_SERVER_PORT|
 |**`aggregatorClientPort`**|production|u16|Aggregator client GRPC port to connect to|50081|AGGREGATOR_SERVER_PORT|
 |**`aggregatorClientHost`**|production|string|Aggregator client GRPC host name to connect to, i.e. Aggregator server host name|"127.0.0.1"|AGGREGATOR_CLIENT_HOST|
