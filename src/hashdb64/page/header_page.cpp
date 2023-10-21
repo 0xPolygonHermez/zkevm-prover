@@ -16,10 +16,10 @@ zkresult HeaderPage::Check (PageContext &ctx, const uint64_t headerPageNumber)
     HeaderStruct * page = (HeaderStruct *)ctx.pageManager.getPageAddress(headerPageNumber);
 
     // Check the uuid
-    for(int i=0; i<4; ++i){
-        if (page->uuid[i] != config.hashDBUUID4[i])
+    for(int i=0; i<32; ++i){
+        if (page->uuid[i] != ctx.uuid[i])
         {
-            zklog.error("HeaderPage::Check() found uuid[" + to_string(i) + "]=" + to_string(page->uuid[i]) + " != config.hashDBUUID[" + to_string(i) + "]=" + to_string(config.hashDBUUID[i]));
+            zklog.error("HeaderPage::Check() found uuid[" + to_string(i) + "]=" + to_string(page->uuid[i]) + " != config.hashDBUUID[" + to_string(i) + "]=" + to_string(ctx.uuid[i]));
             exitProcess();
             return ZKR_DB_ERROR;
         }
@@ -90,12 +90,10 @@ zkresult HeaderPage::InitEmptyPage (PageContext &ctx, const uint64_t headerPageN
         zklog.error("HeaderPage::InitEmptyPage() failed calling PageListPage::InitEmptyPage(freePages) result=" + zkresult2string(zkr));
         return zkr;
     }
-
     // UUID
-    page->uuid[0] = config.hashDBUUID4[0];
-    page->uuid[1] = config.hashDBUUID4[1];
-    page->uuid[2] = config.hashDBUUID4[2];
-    page->uuid[3] = config.hashDBUUID4[3];
+    for(int i=0; i<32; ++i){
+        page->uuid[i] = ctx.uuid[i];
+    }
     
     return ZKR_SUCCESS;
 }

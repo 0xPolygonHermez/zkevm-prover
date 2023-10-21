@@ -42,10 +42,11 @@ PageManager::~PageManager(void)
 zkresult PageManager::init(PageContext &ctx)
 {
 
+    zkassertpermanent(&ctx.pageManager == this); 
+
     if(ctx.config.hashDBFileName == "" ){
         
         //In-memory initailization
-        
         mappedFile = false;
         nPages = 0;
         pages.resize(1);
@@ -125,7 +126,7 @@ zkresult PageManager::init(PageContext &ctx)
                 }
                 nPages += pagesPerFile;
                 pages.push_back(NULL);
-                pages[nFiles] = (char *)mmap(NULL, fileSize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0); //MAP_POPULATE
+                pages[nFiles] = (char *)mmap(NULL, fileSize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
                 if (pages[nFiles] == MAP_FAILED) {
                     zklog.error("Failed to mmap file: " + (string)strerror(errno));
                     exitProcess();
@@ -139,10 +140,8 @@ zkresult PageManager::init(PageContext &ctx)
                 nFiles++;
             }
             //add new file if needed
-            if(nFiles != ctx.config.hashDBMinFilesNum){
-                for(uint64_t i=nFiles; i<ctx.config.hashDBMinFilesNum; ++i){
-                    addFile();
-                }
+            if(nFiles == 0){
+                addFile();
             }
         }else{
 
@@ -159,17 +158,17 @@ zkresult PageManager::init(PageContext &ctx)
             numFreePages = 0;
             freePages.resize(16384);
             firstUnusedPage = 2;
-            HeaderPage::InitEmptyPage(ctx,0);
+            HeaderPage::InitEmptyPage(ctx, 0);
             msync(getPageAddress(0), 4096, MS_SYNC);
 
         }else{
-            HeaderPage::Check(ctx,0);
+            HeaderPage::Check(ctx, 0);
             vector<uint64_t> freePagesDB;
-            HeaderPage::GetFreePages(ctx,0, freePagesDB); 
+            HeaderPage::GetFreePages(ctx, 0, freePagesDB); 
             numFreePages = freePagesDB.size();
-            freePages.resize((numFreePages)*2+1);
+            freePages.resize((numFreePages)*2+1, 0);
             memcpy(freePages.data(), freePagesDB.data(), numFreePages*sizeof(uint64_t));
-            HeaderPage::GetFirstUnusedPage(ctx,0, firstUnusedPage);
+            HeaderPage::GetFirstUnusedPage(ctx, 0, firstUnusedPage);
         }
 
     }
@@ -238,7 +237,7 @@ uint64_t PageManager::getFreePage(void)
 #if MULTIPLE_WRITES
         shared_lock<shared_mutex> guard(pagesLock);
 #endif
-        if(pageNumber >= nPages && mappedFile){
+        if(firstUnusedPage == nPages){
             if(mappedFile){
                 zklog.info("PageManager: adding file");
                 addFile();
@@ -294,7 +293,8 @@ void PageManager::flushPages(PageContext &ctx){
         std::lock_guard<std::mutex> lock(editedPagesLock);
 #endif
     zkassertpermanent(&ctx.pageManager == this); 
-    //1// get list of previous used pages as freePages container
+
+    //1// get list of previous freePages containers
     uint64_t headerPageNum = 0;
     vector<uint64_t> prevFreePagesContainer;
     HeaderPage::GetFreePagesContainer(ctx, headerPageNum, prevFreePagesContainer);

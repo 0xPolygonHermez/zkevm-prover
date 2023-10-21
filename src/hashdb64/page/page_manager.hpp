@@ -13,7 +13,6 @@
 #include "zkassert.hpp"
 #include <cassert>
 #include <unistd.h>
-#include "config.hpp"
 
 #define MULTIPLE_WRITES 0
 
@@ -26,16 +25,15 @@ public:
     ~PageManager();
 
     zkresult init(PageContext &ctx);
-    zkresult addFile();
-    zkresult addPages(const uint64_t nPages_);
-
     uint64_t getFreePage();
     void releasePage(const uint64_t pageNumber);
     uint64_t editPage(const uint64_t pageNumber);
     void flushPages(PageContext &ctx);
-
-    inline uint64_t getNumFreePages();
     inline char *getPageAddress(const uint64_t pageNumber);
+    inline uint64_t getNumFreePages();
+
+    zkresult addFile();
+    zkresult addPages(const uint64_t nPages_);
 
     inline void readLock(){ headerLock.lock_shared();}
     inline void readUnlock(){ headerLock.unlock_shared();}
@@ -69,7 +67,7 @@ private:
 char* PageManager::getPageAddress(const uint64_t pageNumber)
 {
     shared_lock<shared_mutex> guard(pagesLock);
-    assert(pageNumber < nPages);
+    zkassertpermanent(pageNumber < nPages);
     uint64_t fileId = pageNumber/pagesPerFile;
     uint64_t pageInFile = pageNumber % pagesPerFile;
     return pages[fileId] + pageInFile * (uint64_t)4096;

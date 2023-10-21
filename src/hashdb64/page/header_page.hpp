@@ -11,15 +11,11 @@
 #include "key_value.hpp"
 #include "hash_value_gl.hpp"
 #include "page_context.hpp"
-#include "zkglobals.hpp"
 
 struct HeaderStruct
 {
-
-    uint64_t freePages;
-
     // UUID
-    uint64_t uuid[4];
+    uint8_t uuid[32];
 
     // Raw data
     uint64_t firstRawDataPage;
@@ -39,6 +35,7 @@ struct HeaderStruct
     uint64_t programPage;
 
     // Free pages list
+    uint64_t freePages;
     uint64_t firstUnusedPage;
 };
 
