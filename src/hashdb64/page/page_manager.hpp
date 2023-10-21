@@ -17,6 +17,7 @@
 
 #define MULTIPLE_WRITES 0
 
+class PageContext;
 class PageManager
 {
 public:
@@ -24,14 +25,14 @@ public:
     PageManager();
     ~PageManager();
 
-    zkresult init( Config* config_ = nullptr);
+    zkresult init(PageContext &ctx);
     zkresult addFile();
     zkresult addPages(const uint64_t nPages_);
 
     uint64_t getFreePage();
     void releasePage(const uint64_t pageNumber);
     uint64_t editPage(const uint64_t pageNumber);
-    void flushPages();
+    void flushPages(PageContext &ctx);
 
     inline uint64_t getNumFreePages();
     inline char *getPageAddress(const uint64_t pageNumber);
@@ -64,8 +65,6 @@ private:
     shared_mutex headerLock;
 
 };
-
-extern PageManager *pageManager;
 
 char* PageManager::getPageAddress(const uint64_t pageNumber)
 {

@@ -359,7 +359,6 @@ int main(int argc, char **argv)
     fork_6::Account::GenerateZeroKey(fr, poseidon);
 
     // Init the HashDB singleton
-    pageManager.init();
     hashDBSingleton.init(fr, config);
 
     // Init the StateManager singleton

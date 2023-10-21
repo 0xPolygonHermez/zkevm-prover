@@ -16,10 +16,7 @@
 #include <dirent.h>
 #include <regex>
 
-PageManager pageManagerSingleton;
-PageManager pageManager = &pageManagerSingleton;
-
-PageManager::PageManager()
+PageManager::PageManager() 
 {
     mappedFile=false;
     fileSize=0;
@@ -42,15 +39,10 @@ PageManager::~PageManager(void)
     }
 }
 
-zkresult PageManager::init(Config* config_)
+zkresult PageManager::init(PageContext &ctx)
 {
-    //Choose onfiguration object
-    Config * configPM = config_;
-    if(configPM == nullptr){
-        configPM = &config;
-    }
 
-    if(configPM->hashDBFileName == "" ){
+    if(ctx.config.hashDBFileName == "" ){
         
         //In-memory initailization
         
@@ -65,9 +57,9 @@ zkresult PageManager::init(Config* config_)
     }else{
 
         //File-mapped initialization
-        fileName = configPM->hashDBFileName;
-        fileSize = configPM->hashDBFileSize*1ULL<<30;
-        folderName = configPM->hashDBFolder;
+        fileName = ctx.config.hashDBFileName;
+        fileSize = ctx.config.hashDBFileSize*1ULL<<30;
+        folderName = ctx.config.hashDBFolder;
         pagesPerFile = fileSize >> 12;
         mappedFile = true;
 
@@ -120,7 +112,7 @@ zkresult PageManager::init(Config* config_)
                     zklog.error("PageManager: failed to stat file: " + file);
                     exitProcess();
                 }
-                if(st.st_size != fileSize){
+                if((uint64_t)st.st_size != fileSize){
                     zklog.error("PageManager: found db file with wrong size: " + file_name + "in folder: " + folderName);
                     exitProcess();
                 }
@@ -147,8 +139,8 @@ zkresult PageManager::init(Config* config_)
                 nFiles++;
             }
             //add new file if needed
-            if(nFiles != configPM->hashDBMinFilesNum){
-                for(uint64_t i=nFiles; i<configPM->hashDBMinFilesNum; ++i){
+            if(nFiles != ctx.config.hashDBMinFilesNum){
+                for(uint64_t i=nFiles; i<ctx.config.hashDBMinFilesNum; ++i){
                     addFile();
                 }
             }
@@ -167,17 +159,17 @@ zkresult PageManager::init(Config* config_)
             numFreePages = 0;
             freePages.resize(16384);
             firstUnusedPage = 2;
-            HeaderPage::InitEmptyPage(0);
+            HeaderPage::InitEmptyPage(ctx,0);
             msync(getPageAddress(0), 4096, MS_SYNC);
 
         }else{
-            HeaderPage::Check(0);
+            HeaderPage::Check(ctx,0);
             vector<uint64_t> freePagesDB;
-            HeaderPage::GetFreePages(0, freePagesDB); 
+            HeaderPage::GetFreePages(ctx,0, freePagesDB); 
             numFreePages = freePagesDB.size();
             freePages.resize((numFreePages)*2+1);
             memcpy(freePages.data(), freePagesDB.data(), numFreePages*sizeof(uint64_t));
-            HeaderPage::GetFirstUnusedPage(0, firstUnusedPage);
+            HeaderPage::GetFirstUnusedPage(ctx,0, firstUnusedPage);
         }
 
     }
@@ -294,18 +286,18 @@ uint64_t PageManager::editPage(const uint64_t pageNumber)
     return pageNumber_;
 }
 
-void PageManager::flushPages(){
+void PageManager::flushPages(PageContext &ctx){
 
 #if MULTIPLE_WRITES
         lock_guard<mutex> guard(freePagesLock);
         shared_lock<shared_mutex> guard(pagesLock);
         std::lock_guard<std::mutex> lock(editedPagesLock);
 #endif
-
+    zkassertpermanent(&ctx.pageManager == this); 
     //1// get list of previous used pages as freePages container
     uint64_t headerPageNum = 0;
     vector<uint64_t> prevFreePagesContainer;
-    HeaderPage::GetFreePagesContainer(headerPageNum, prevFreePagesContainer);
+    HeaderPage::GetFreePagesContainer(ctx, headerPageNum, prevFreePagesContainer);
 
     //2// get list of edited pages
     vector<uint64_t> copiedPages;
@@ -338,8 +330,8 @@ void PageManager::flushPages(){
     memcpy(newFreePages.data()+numFreePages, prevFreePagesContainer.data(), nPrevFreePagesContainer*sizeof(uint64_t));
     memcpy(newFreePages.data()+numFreePages+nPrevFreePagesContainer, copiedPages.data(), nEditedPages*sizeof(uint64_t));
 
-    HeaderPage::CreateFreePages(headerPageNum, newFreePages, newContainerPages);
-    HeaderPage::SetFirstUnusedPage(headerPageNum, firstUnusedPage);
+    HeaderPage::CreateFreePages(ctx, headerPageNum, newFreePages, newContainerPages);
+    HeaderPage::SetFirstUnusedPage(ctx, headerPageNum, firstUnusedPage);
 
     //4// sync all pages
     if(mappedFile){
@@ -365,17 +357,7 @@ void PageManager::flushPages(){
             ssize_t write_size =write(file0Descriptor, getPageAddress(1), 4096); //how transactional is this?
             zkassertpermanent(write_size == 4096);
         }else{
-            uint64_t * header0 = (uint64_t*) getPageAddress(0);
-            uint64_t * header1 = (uint64_t*) getPageAddress(1);
-            std::cout<<"header0: "<<header0[0]<<std::endl;
-            std::cout<<"header1: "<<header1[0]<<std::endl;
-            std::cout<<"page0: "<<((HeaderStruct *)pageManager.getPageAddress(0))->freePages<<std::endl;
-            std::cout<<"page1: "<<((HeaderStruct *)pageManager.getPageAddress(1))->freePages<<std::endl;
-            memcpy(header0, header1, 4096);
-            std::cout<<"header0: "<<header0[0]<<std::endl;
-            std::cout<<"header1: "<<header1[0]<<std::endl;
-            std::cout<<"page0: "<<((HeaderStruct *)pageManager.getPageAddress(0))->freePages<<std::endl;
-            std::cout<<"page1: "<<((HeaderStruct *)pageManager.getPageAddress(1))->freePages<<std::endl;
+            memcpy(getPageAddress(0), getPageAddress(1), 4096);
         }
     }
 

@@ -12,6 +12,7 @@
 #include "omp.h"
 #include <random>
 #include <unordered_set>
+#include "page_manager.hpp"
 #include "config.hpp"
 
 #define TEST_FILE_IO 0
@@ -44,7 +45,8 @@ uint64_t PageManagerPerformanceTest(void){
     configPM.hashDBFileSize = fileSize;
     configPM.hashDBFolder = folderName;
     configPM.hashDBMinFilesNum = nFiles;
-    pageManagerFile.init(&configPM);
+    PageContext ctx(pageManagerFile, configPM);
+    pageManagerFile.init(ctx);
 
     double end = omp_get_wtime();
     std::cout << std::endl << "Time to construct the PageManager: " << end - start << " seconds" << std::endl;
@@ -125,7 +127,7 @@ uint64_t PageManagerPerformanceTest(void){
 
         //flushPAges
         start = omp_get_wtime();
-        pageManagerFile.flushPages();
+        pageManagerFile.flushPages(ctx);
         end = omp_get_wtime();
         
         throughput = numGBytes / (end-start);
@@ -135,7 +137,8 @@ uint64_t PageManagerPerformanceTest(void){
         
         //Check that positions are in the file
         PageManager pageManagerFile2;
-        pageManagerFile2.init(&configPM);
+        PageContext ctx2(pageManagerFile2, configPM);
+        pageManagerFile2.init(ctx2);
         for (uint64_t i = 0; i < numPositions; ++i) {
             uint64_t* pageData = (uint64_t *)pageManagerFile2.getPageAddress(position[i]);
             if(position[i] != 0){
@@ -169,10 +172,11 @@ uint64_t PageManagerAccuracyTest (void)
     // Memory version
     //
     PageManager pageManagerMem;
-    pageManager = &pageManagerMem;
     Config configPM;
-    pageManagerMem.init(&configPM);
+    PageContext ctx(pageManagerMem, configPM);
+    pageManagerMem.init(ctx);
     uint64_t initialFreePages = pageManagerMem.getNumFreePages();
+    
     uint64_t page1 = pageManagerMem.getFreePage();
     zkassertpermanent(page1 == 2);
     zkassertpermanent(pageManagerMem.getNumFreePages() == initialFreePages-1);
@@ -201,7 +205,7 @@ uint64_t PageManagerAccuracyTest (void)
     for(uint64_t i=0; i<256;++i){
         page3Data[i] = i;
     }
-    pageManagerMem.flushPages();
+    pageManagerMem.flushPages(ctx);
     zkassertpermanent(pageManagerMem.getNumFreePages() == initialFreePages-2    );
     for(uint64_t i=0; i<256;++i){
         zkassertpermanent(page3Data[i] == i);
@@ -220,7 +224,7 @@ uint64_t PageManagerAccuracyTest (void)
     zkassertpermanent(pageManagerMem.editPage(1) == 1);
 
 
-    pageManagerMem.flushPages();
+    pageManagerMem.flushPages(ctx);
     zkassertpermanent(pageManagerMem.getNumFreePages() == initialFreePages-2);
     for(uint64_t i=0; i<256;++i){
         zkassertpermanent(page3Data[i] == 0);
@@ -244,8 +248,9 @@ uint64_t PageManagerAccuracyTest (void)
     configPMFile.hashDBFileSize = file_size;
     configPMFile.hashDBMinFilesNum = 1;
     configPMFile.hashDBFolder = "";
+    PageContext ctxf(pageManagerFile, configPMFile);
 
-    pageManagerFile.init(&configPMFile);
+    pageManagerFile.init(ctxf);
     page1 = pageManagerFile.getFreePage();
     zkassertpermanent(page1 == 2);
     zkassertpermanent(pageManagerFile.getNumFreePages() == 97);
@@ -273,7 +278,7 @@ uint64_t PageManagerAccuracyTest (void)
     for(uint64_t i=0; i<256;++i){
         page3Data[i] = i;
     }
-    pageManagerFile.flushPages();
+    pageManagerFile.flushPages(ctxf);
     zkassertpermanent(pageManagerFile.getNumFreePages() == 97);
     for(uint64_t i=0; i<256;++i){
         zkassertpermanent(page3Data[i] == i);
@@ -292,7 +297,7 @@ uint64_t PageManagerAccuracyTest (void)
     zkassertpermanent(pageManagerFile.editPage(1) == 1);
 
 
-    pageManagerFile.flushPages();
+    pageManagerFile.flushPages(ctxf);
     zkassertpermanent(pageManagerFile.getNumFreePages() == 97);
     for(uint64_t i=0; i<256;++i){
         zkassertpermanent(page3Data[i] == 0);
@@ -303,7 +308,8 @@ uint64_t PageManagerAccuracyTest (void)
 
     //Let's check persistence of file
     PageManager pageManagerFile2;
-    pageManagerFile2.init(&configPMFile);
+    PageContext ctxf2(pageManagerFile2, configPMFile);
+    pageManagerFile2.init(ctxf2);
     page3Data = (uint64_t *)pageManagerFile2.getPageAddress(page3);
     page4Data = (uint64_t *)pageManagerFile2.getPageAddress(page4);
     for(uint64_t i=0; i<256;++i){

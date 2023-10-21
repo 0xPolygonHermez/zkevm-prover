@@ -22,21 +22,30 @@
 #include "key_value_page.hpp"
 #include "raw_data_page.hpp"
 #include "zkglobals.hpp"
+#include "key_value_history_page.hpp"
 
 // Helper functions
 string removeBSXIfExists64(string s) {return ((s.at(0) == '\\') && (s.at(1) == 'x')) ? s.substr(2) : s;}
 
-Database64::Database64 (Goldilocks &fr, const Config &config) : headerPageNumber(0), currentFlushId(0)
+Database64::Database64 (Goldilocks &fr, const Config &config) : headerPageNumber(0), currentFlushId(0), ctx(pageManager, config)
 {
     // Init mutex
     pthread_mutex_init(&mutex, NULL);
 
     zkresult zkr;
     headerPageNumber = 0;
-    zkr = HeaderPage::InitEmptyPage(headerPageNumber);
+    zkr = HeaderPage::InitEmptyPage(ctx, headerPageNumber);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("Database64::Database64() failed calling HeaderPage::InitEmptyPage() result=" + zkresult2string(zkr));
+        exitProcess();
+    }
+
+    // Init page manager
+    zkr = pageManager.init(ctx);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("Database64::Database64() failed to init page manager result=" + zkresult2string(zkr));
         exitProcess();
     }
 };
@@ -76,7 +85,7 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
 
     // Get the version associated to this root
     uint64_t version;
-    zkr = HeaderPage::ReadRootVersion(headerPageNumber, rootBa, version);
+    zkr = HeaderPage::ReadRootVersion(ctx, headerPageNumber, rootBa, version);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("Database64::readKV() faile calling HeaderPage::ReadRootVersion() result=" + zkresult2string(zkr) + " root=" + rootString + " key=" + fea2string(fr, key));
@@ -85,7 +94,7 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
 
     // Get the version data
     VersionDataStruct versionData;
-    zkr = HeaderPage::ReadVersionData(headerPageNumber, version, versionData);
+    zkr = HeaderPage::ReadVersionData(ctx, headerPageNumber, version, versionData);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("Database64::readKV() faile calling HeaderPage::ReadVersionData() result=" + zkresult2string(zkr) + " root=" + rootString + " key=" + fea2string(fr, key));
@@ -95,7 +104,7 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
     // Get the value
     string keyString = fea2string(fr, key);
     string keyBa = string2ba(keyString);
-    zkr = HeaderPage::KeyValueHistoryRead(versionData.keyValueHistoryPage, keyBa, version, value, level);
+    zkr = HeaderPage::KeyValueHistoryRead(ctx, versionData.keyValueHistoryPage, keyBa, version, value, level);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("Database64::readKV() faile calling HeaderPage::KeyValueHistoryRead() result=" + zkresult2string(zkr) + " root=" + rootString + " key=" + fea2string(fr, key));
@@ -131,7 +140,7 @@ zkresult Database64::readLevel (const Goldilocks::Element (&key)[4], uint64_t &l
     // Get the level
     string keyString = fea2string(fr, key);
     string keyBa = string2ba(keyString);
-    zkr = HeaderPage::KeyValueHistoryReadLevel(headerPageNumber, keyBa, level);
+    zkr = HeaderPage::KeyValueHistoryReadLevel(ctx,headerPageNumber, keyBa, level);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("Database64::readLevel() faile calling HeaderPage::KeyValueHistoryReadLevel() result=" + zkresult2string(zkr) + " key=" + fea2string(fr, key));
@@ -152,7 +161,7 @@ zkresult Database64::setProgram (const string &key, const vector<uint8_t> &data,
 
     string program;
     ba2ba(data, program);
-    zkresult zkr = HeaderPage::WriteProgram(headerPageNumber, string2ba(key), program);
+    zkresult zkr = HeaderPage::WriteProgram(ctx, headerPageNumber, string2ba(key), program);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("Database64::setProgram() failed calling HeaderPage::WriteProgram() result=" + zkresult2string(zkr));
@@ -189,7 +198,7 @@ zkresult Database64::getProgram(const string &key, vector<uint8_t> &data, Databa
     if (dbReadLog != NULL) gettimeofday(&t, NULL);
 
     string program;
-    zkresult zkr = HeaderPage::ReadProgram(headerPageNumber, string2ba(key), program);
+    zkresult zkr = HeaderPage::ReadProgram(ctx, headerPageNumber, string2ba(key), program);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("Database64::getProgram() failed calling HeaderPage::ReadProgram() result=" + zkresult2string(zkr));
@@ -278,7 +287,7 @@ zkresult Database64::WriteTree (const Goldilocks::Element (&oldRoot)[4], const v
     // Check if the root is zero
     if (fr.isZero(oldRoot[0]) && fr.isZero(oldRoot[1]) && fr.isZero(oldRoot[2]) && fr.isZero(oldRoot[3]))
     {
-        uint64_t lastVersion = HeaderPage::GetLastVersion(headerPageNumber);
+        uint64_t lastVersion = HeaderPage::GetLastVersion(ctx, headerPageNumber);
         if (lastVersion != 0)
         {
             zklog.error("Database64::WriteTree() called with a zero old state root, but last version=" + to_string(lastVersion) + " oldRoot=" + fea2string(fr, oldRoot));
@@ -294,7 +303,7 @@ zkresult Database64::WriteTree (const Goldilocks::Element (&oldRoot)[4], const v
 
         // Get the version corresponding to this old state root
         uint64_t oldRootVersion;
-        zkr = HeaderPage::ReadRootVersion(headerPageNumber, oldRootBa, oldRootVersion);
+        zkr = HeaderPage::ReadRootVersion(ctx, headerPageNumber, oldRootBa, oldRootVersion);
         if (zkr != ZKR_SUCCESS)
         {
             zklog.error("Database64::WriteTree() failed calling HeaderPage::ReadRootVersion() result=" + zkresult2string(zkr) + " oldRootString=" + oldRootString);
@@ -302,7 +311,7 @@ zkresult Database64::WriteTree (const Goldilocks::Element (&oldRoot)[4], const v
         }
 
         // Get the last version
-        uint64_t lastVersion = HeaderPage::GetLastVersion(headerPageNumber);
+        uint64_t lastVersion = HeaderPage::GetLastVersion(ctx, headerPageNumber);
         if (oldRootVersion != lastVersion)
         {
             zklog.error("Database64::WriteTree() found oldRootVersion=" + to_string(oldRootVersion) + " but lastVersion=" + to_string(lastVersion) + " oldRootString=" + oldRootString);
@@ -312,8 +321,8 @@ zkresult Database64::WriteTree (const Goldilocks::Element (&oldRoot)[4], const v
     }
 
     // Get an editable header page
-    headerPageNumber = pageManager.editPage(headerPageNumber);
-    HeaderStruct *headerPage = (HeaderStruct *)pageManager.getPageAddress(headerPageNumber);
+    headerPageNumber = ctx.pageManager.editPage(headerPageNumber);
+    HeaderStruct *headerPage = (HeaderStruct *)ctx.pageManager.getPageAddress(headerPageNumber);
 
     // Write all key-values
     string keyString;
@@ -322,7 +331,7 @@ zkresult Database64::WriteTree (const Goldilocks::Element (&oldRoot)[4], const v
     {
         keyString = fea2string(fr, keyValues[i].key);
         key = string2ba(keyString);
-        zkr = HeaderPage::KeyValueHistoryWrite(headerPageNumber, key, version, keyValues[i].value);
+        zkr = HeaderPage::KeyValueHistoryWrite(ctx, headerPageNumber, key, version, keyValues[i].value);
         if (zkr != ZKR_SUCCESS)
         {
             zklog.error("Database64::WriteTree() failed calling HeaderPage::KeyValueHistoryWrite() result=" + zkresult2string(zkr) + " oldRoot=" + fea2string(fr, oldRoot) + " version=" + to_string(version));
@@ -347,7 +356,7 @@ zkresult Database64::WriteTree (const Goldilocks::Element (&oldRoot)[4], const v
     //HeaderPage::Print(headerPageNumber, true);
 
     // Calculate new state root hash
-    zkr = HeaderPage::KeyValueHistoryCalculateHash(headerPageNumber, newRoot);
+    zkr = HeaderPage::KeyValueHistoryCalculateHash(ctx, headerPageNumber, newRoot);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("Database64::WriteTree() failed calling HeaderPage::KeyValueHistoryCalculateHash() result=" + zkresult2string(zkr) + " oldRoot=" + fea2string(fr, oldRoot));
@@ -372,10 +381,10 @@ zkresult Database64::WriteTree (const Goldilocks::Element (&oldRoot)[4], const v
     memcpy(versionData.root, newRootBa.c_str(), 32);
     versionData.keyValueHistoryPage = headerPage->keyValueHistoryPage;
     versionData.rawDataPage = headerPage->rawDataPage;
-    versionData.rawDataOffset = RawDataPage::GetOffset(versionData.rawDataPage);
+    versionData.rawDataOffset = RawDataPage::GetOffset(ctx, versionData.rawDataPage);
 
     // Write version->versionData pair
-    zkr = HeaderPage::WriteVersionData(headerPageNumber, version, versionData);
+    zkr = HeaderPage::WriteVersionData(ctx, headerPageNumber, version, versionData);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("Database64::WriteTree() failed calling HeaderPage::WriteVersionData() result=" + zkresult2string(zkr) + " oldRoot=" + fea2string(fr, oldRoot));
@@ -383,7 +392,7 @@ zkresult Database64::WriteTree (const Goldilocks::Element (&oldRoot)[4], const v
     }
 
     // Write root->version pair
-    zkr = HeaderPage::WriteRootVersion(headerPageNumber, newRootBa, version);
+    zkr = HeaderPage::WriteRootVersion(ctx, headerPageNumber, newRootBa, version);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("Database64::WriteTree() failed calling HeaderPage::WriteRootVersion() result=" + zkresult2string(zkr) + " oldRoot=" + fea2string(fr, oldRoot));
@@ -391,13 +400,14 @@ zkresult Database64::WriteTree (const Goldilocks::Element (&oldRoot)[4], const v
     }
 
     // Set last version
-    HeaderPage::SetLastVersion(headerPageNumber, version);
+    HeaderPage::SetLastVersion(ctx, headerPageNumber, version);
 
     // Flush all pages to disk
-    pageManager.flushPages();
+    ctx.pageManager.flushPages(ctx);
 
     headerPageNumber = 0;
-    //HeaderPage::Print(headerPageNumber, true);
+    
+    //KeyValueHistoryPage::Print(versionData.keyValueHistoryPage, true, "version=" + to_string(version) + " ");
 
     return ZKR_SUCCESS;
 }
@@ -432,7 +442,7 @@ zkresult Database64::ReadTree (const Goldilocks::Element (&root)[4], vector<KeyV
 
     // Get the version corresponding to this state root
     uint64_t version = 0;
-    zkr = HeaderPage::ReadRootVersion(headerPageNumber, rootBa, version);
+    zkr = HeaderPage::ReadRootVersion(ctx, headerPageNumber, rootBa, version);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("Database64::ReadTree() failed calling HeaderPage::ReadRootVersion() result=" + zkresult2string(zkr) + " rootString=" + rootString);
@@ -441,7 +451,7 @@ zkresult Database64::ReadTree (const Goldilocks::Element (&root)[4], vector<KeyV
 
     // Get the version data
     VersionDataStruct versionData;
-    zkr = HeaderPage::ReadVersionData(headerPageNumber, version, versionData);
+    zkr = HeaderPage::ReadVersionData(ctx, headerPageNumber, version, versionData);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("Database64::ReadTree() failed calling HeaderPage::ReadVersionData() result=" + zkresult2string(zkr) + " rootString=" + rootString);
@@ -449,20 +459,11 @@ zkresult Database64::ReadTree (const Goldilocks::Element (&root)[4], vector<KeyV
     }
 
     // Read all key-values
-    string keyString;
-    string key;
-    uint64_t level;
-    for (uint64_t i=0; i<keyValues.size(); i++)
+    zkr = HeaderPage::KeyValueHistoryReadTree(ctx, versionData.keyValueHistoryPage, version, keyValues, hashValues);
+    if (zkr != ZKR_SUCCESS)
     {
-        keyString = fea2string(fr, keyValues[i].key);
-        key = string2ba(keyString);
-        zkr = HeaderPage::KeyValueHistoryRead(versionData.keyValueHistoryPage, key, version, keyValues[i].value, level);
-        if (zkr != ZKR_SUCCESS)
-        {
-            zklog.error("Database64::ReadTree() failed calling HeaderPage::KeyValueHistoryRead() result=" + zkresult2string(zkr) + " rootString=" + rootString + " version=" + to_string(version));
-            return zkr;
-        }
-        //zklog.info("Database64::ReadTree() called HeaderPage::KeyValueHistoryRead() rootString=" + rootString + " version=" + to_string(version) + " key=" + keyString + " value=" + keyValues[i].value.get_str(16));
+        zklog.error("Database64::ReadTree() failed calling HeaderPage::KeyValueHistoryReadTree() result=" + zkresult2string(zkr) + " rootString=" + rootString + " version=" + to_string(version));
+        return zkr;
     }
 
     return ZKR_SUCCESS;
@@ -471,5 +472,5 @@ zkresult Database64::ReadTree (const Goldilocks::Element (&root)[4], vector<KeyV
 zkresult Database64::PrintTree (const string &root)
 {
     zklog.info("Database64::PrintTree()");
-    return HeaderPage::KeyValueHistoryPrint(headerPageNumber, root);
+    return HeaderPage::KeyValueHistoryPrint(ctx, headerPageNumber, root);
 }

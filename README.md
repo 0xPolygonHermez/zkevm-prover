@@ -131,29 +131,11 @@ sudo docker run --rm --network host -ti -p 50051:50051 -p 50061:50061 -p 50071:5
 
 ## Usage
 
-To run the Prover, supply a `config.json` file containing the parameters that help customize various Prover settings. By default, the Prover accesses the `config.json` file from the `testvectors` directory. Below are some of the key parameters, accompanied by their default values from the given `config.json`:
-
-| Parameter              | Description |
-| ---------------------- | ----------- |
-| `runStateDBServer`     | Enables StateDB GRPC service, provides SMT (Sparse Merkle Tree) and Database access |
-| `runExecutorServer`    | Enables Executor GRPC service, provides a service to process transaction batches    |
-| `runAggregatorClient`  | Enables Aggregator GRPC client, connects to the Aggregator and process its requests |
-| `aggregatorClientHost` | IP address of the Aggregator server to which the Aggregator client must connect to  |
-| `runProverServer`      | Enables Prover GRPC service                                                         |
-| `runFileProcessBatch`  | Processes a batch using as input a JSON file defined in the `"inputFile"` parameter |
-| `runFileGenProof`      | Generates a proof using as input a JSON file defined in the `"inputFile"` parameter |
-| `inputFile`            | Input JSON file with path relative to the `testvectors` folder                      |
-| `outputPath`           | Output path to store the result files, relative to the `testvectors` folder         |
-| `saveRequestToFile`    | Saves service received requests to a text file                                      |
-| `saveResponseToFile`   | Saves service returned responses to a text file                                     |
-| `saveInputToFile`      | Saves service received input data to a JSON file                                    |
-| `saveOutputToFile`     | Saves service returned output data to a JSON file                                   |
-| `databaseURL`          | For the StateDB service, if the value is `"local"`, data is stored in memory; otherwise, use the PostgreSQL format: `"postgresql://<user>:<password>@<ip>:<port>/<database>"`, e.g., `"postgresql://statedb:statedb@127.0.0.1:5432/testdb"`. |
-| `stateDBURL`           | For the StateDB service, if the value is "`local"`, a local client replaces the GRPC service. Use the format: `"<ip>:<port>", e.g., "127.0.0.1:50061"`. |
+To run the Prover, supply a `config.json` file containing the parameters that help customize various Prover settings. By default, the Prover accesses the file `config/config.json`.  You can specify a different config file location using the '-c <file>' argument.  In order to know about the different available configuration parameters, please read the src/config/README.md file.
 
 To execute a proof test:
 
 1. Modify the `config.json` file, setting the `"runFileGenProof"` parameter to `"true"`. Ensure all other parameters are set to `"false"`. If you prefer not to use a PostgreSQL database for the test, adjust the `"databaseURL"` to `"local"`.
-2. For the `"inputFile"` parameter, specify the desired input test data file. As an example, the `testvectors` directory contains the `input_executor.json` file.
-3. Launch the Prover from the `testvectors` directory using the command: `../build/zkProver`.
+2. For the `"inputFile"` parameter, specify the desired input test data file. As an example, use the file `testvectors/batchProof/input_executor_0.json`.
+3. Launch the Prover from the project root directory using the command: `build/zkProver`.
 4. The proof's result files will be saved in the directory defined by the `"outputPath"` configuration parameter.

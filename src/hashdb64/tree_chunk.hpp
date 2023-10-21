@@ -13,6 +13,7 @@
 #include "key_value.hpp"
 #include "hash_value_gl.hpp"
 #include "zkglobals.hpp"
+#include "page_context.hpp"
 
 using namespace std;
 
@@ -177,9 +178,12 @@ public:
         result[3] = hash[3];
     }
 
-    void getLeafHash(const uint64_t position, Goldilocks::Element (&result)[4]);
+    void getLeafHash (const uint64_t position, Goldilocks::Element (&result)[4]);
 
     void print (void) const;
+
+    zkresult loadFromKeyValueHistoryPage (PageContext &ctx, const uint64_t pageNumber, const uint64_t version, const uint64_t level);
+    zkresult getHashValues (const uint64_t children64Position, vector<HashValueGL> *hashValues);
 };
 
 #endif

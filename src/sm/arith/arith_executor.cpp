@@ -250,7 +250,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                 {
                     Goldilocks::Element delta = fr.sub(pols.x2[step][index], pols.x1[step][index]);
                     pols.xDeltaChunkInverse[index] = fr.isZero(delta) ? fr.zero() : glp.inv(delta);
-                    xAreDifferent = true;
+                    xAreDifferent = fr.isZero(delta) ? false : true;
                 }
                 pols.xAreDifferent[nextIndex] = xAreDifferent ? fr.one() : fr.zero();
             }
