@@ -46,9 +46,8 @@ private:
     uint64_t fileSize;
     uint64_t pagesPerFile;
     uint64_t nFiles;
-    int file0Descriptor;
 
-    std::shared_mutex pagesLock;
+    shared_mutex pagesLock;
     uint64_t nPages;
     vector<char *> pages;
 
@@ -58,7 +57,7 @@ private:
     vector<uint64_t> freePages;
 
     mutex editedPagesLock;
-    std::unordered_map<uint64_t, uint64_t> editedPages;
+    unordered_map<uint64_t, uint64_t> editedPages;
 
     shared_mutex headerLock;
 
@@ -66,17 +65,18 @@ private:
 
 char* PageManager::getPageAddress(const uint64_t pageNumber)
 {
-    shared_lock<shared_mutex> guard(pagesLock);
+    shared_lock<shared_mutex> guard_pages(pagesLock);
     zkassertpermanent(pageNumber < nPages);
     uint64_t fileId = pageNumber/pagesPerFile;
     uint64_t pageInFile = pageNumber % pagesPerFile;
     return pages[fileId] + pageInFile * (uint64_t)4096;
 };
 
+//Note: if there is a single writter thread we assume that only the writter thread will call this function! 
 uint64_t PageManager::getNumFreePages(){
 #if MULTIPLE_WRITES
-        lock_guard<mutex> guard(freePagesLock);
-        shared_lock<shared_mutex> guard2(pagesLock);
+        lock_guard<mutex> guard_freePages(freePagesLock);
+        shared_lock<shared_mutex> guard_pages(pagesLock);
 #endif
         return numFreePages+nPages-firstUnusedPage;
     };

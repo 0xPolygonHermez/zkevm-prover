@@ -32,7 +32,6 @@ PageManager::~PageManager(void)
         for(uint64_t i=0; i< pages.size(); i++){
             munmap(pages[i], fileSize);
         }
-        close(file0Descriptor);
     }else{
         if (pages[0] != NULL)
             free(pages[0]);
@@ -41,6 +40,10 @@ PageManager::~PageManager(void)
 
 zkresult PageManager::init(PageContext &ctx)
 {
+    unique_lock<shared_mutex> guard_pages(pagesLock);
+    lock_guard<mutex> guard_freePages(freePagesLock);
+    lock_guard<mutex> guard_editedPages(editedPagesLock);
+    unique_lock<shared_mutex> guard_header(headerLock);
 
     zkassertpermanent(&ctx.pageManager == this); 
 
@@ -80,16 +83,16 @@ zkresult PageManager::init(PageContext &ctx)
         DIR *dir;
         struct dirent *ent;
         std::regex rgx(fileName + "_(\\d+)\\.db");
-        bool onlyNewFiles = true;
+        bool newFile = true;
 
         if((dir=opendir(folderName.c_str())) != nullptr){
             nFiles = 0;
             while((ent = readdir(dir)) != nullptr){
 
-                onlyNewFiles = false;
+                newFile = false;
 
                 //check if the file name matches the pattern and is consecutive
-                std::string file_name = ent->d_name;
+                string file_name = ent->d_name;
                 std::smatch match;
                 if(std::regex_search(file_name, match, rgx)){
                     uint64_t file_number = std::stoull(match[1]);
@@ -124,19 +127,14 @@ zkresult PageManager::init(PageContext &ctx)
                     zklog.error("PageManager: failed to open file.");
                     exitProcess();
                 }
-                nPages += pagesPerFile;
                 pages.push_back(NULL);
                 pages[nFiles] = (char *)mmap(NULL, fileSize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
                 if (pages[nFiles] == MAP_FAILED) {
                     zklog.error("Failed to mmap file: " + (string)strerror(errno));
                     exitProcess();
                 }
-                
-                if(nFiles!=0){ 
-                    close(fd);
-                }else{
-                    file0Descriptor = fd;
-                }
+                nPages += pagesPerFile;
+                close(fd);
                 nFiles++;
             }
             //add new file if needed
@@ -150,11 +148,10 @@ zkresult PageManager::init(PageContext &ctx)
 
         }
         closedir(dir);
-        
         zkassertpermanent(nPages > 2);
 
         //Free pages
-        if(onlyNewFiles){
+        if(newFile){
             numFreePages = 0;
             freePages.resize(16384);
             firstUnusedPage = 2;
@@ -178,7 +175,6 @@ zkresult PageManager::init(PageContext &ctx)
 
 zkresult PageManager::addPages(const uint64_t nPages_)
 {
-    unique_lock<shared_mutex> guard(pagesLock);
     zkassertpermanent(mappedFile == false);
     char *auxPages = NULL;
     auxPages = (char *)realloc(pages[0], (nPages + nPages_) * 4096);
@@ -187,6 +183,7 @@ zkresult PageManager::addPages(const uint64_t nPages_)
         zklog.error("PageManager::AddPages() failed calling realloc()");
         exitProcess();
     }
+    unique_lock<shared_mutex> guard(pagesLock);
     pages[0] = auxPages;
     memset(pages[0] + nPages * 4096, 0, nPages_ * 4096);
     nPages += nPages_;
@@ -224,7 +221,7 @@ zkresult PageManager::addFile(){
 uint64_t PageManager::getFreePage(void)
 {
 #if MULTIPLE_WRITES
-    lock_guard<mutex> guard(freePagesLock);
+    lock_guard<mutex> guard_freePages(freePagesLock);
 #endif
     uint64_t pageNumber;
     if(numFreePages > 0){
@@ -234,10 +231,9 @@ uint64_t PageManager::getFreePage(void)
         pageNumber = firstUnusedPage;
         memset(getPageAddress(pageNumber), 0, 4096);
         firstUnusedPage++;
-#if MULTIPLE_WRITES
-        shared_lock<shared_mutex> guard(pagesLock);
-#endif
+
         if(firstUnusedPage == nPages){
+            unique_lock<shared_mutex> guard_pages(pagesLock);
             if(mappedFile){
                 zklog.info("PageManager: adding file");
                 addFile();
@@ -247,9 +243,9 @@ uint64_t PageManager::getFreePage(void)
             }
         }
     }
-    #if MULTIPLE_WRITES
-        std::lock_guard<std::mutex> lock(editedPagesLock);
-    #endif
+#if MULTIPLE_WRITES
+    lock_guard<mutex> guard_editedPages(editedPagesLock);
+#endif
     editedPages[pageNumber] = pageNumber;
     return pageNumber;
 }
@@ -257,11 +253,11 @@ uint64_t PageManager::getFreePage(void)
 void PageManager::releasePage(const uint64_t pageNumber)
 {
     zkassertpermanent(pageNumber >= 2);  //first two pages cannot be released
+    zkassertpermanent(pageNumber<firstUnusedPage);
     memset(getPageAddress(pageNumber), 0, 4096);
 #if MULTIPLE_WRITES
-    std::lock_guard<std::mutex> lock(freePagesLock);
+    lock_guard<mutex> guard_freePages(freePagesLock);
 #endif
-    zkassertpermanent(pageNumber<firstUnusedPage);
     if(numFreePages == freePages.size()){
         freePages.resize(freePages.size()*2);
     }
@@ -272,7 +268,7 @@ uint64_t PageManager::editPage(const uint64_t pageNumber)
 {
     uint32_t pageNumber_;
 #if MULTIPLE_WRITES
-    std::lock_guard<std::mutex> lock(editedPagesLock);
+    lock_guard<mutex> lock(editedPagesLock);
 #endif
     unordered_map<uint64_t, uint64_t>::const_iterator it = editedPages.find(pageNumber);
     if(it == editedPages.end()){
@@ -288,9 +284,10 @@ uint64_t PageManager::editPage(const uint64_t pageNumber)
 void PageManager::flushPages(PageContext &ctx){
 
 #if MULTIPLE_WRITES
-        lock_guard<mutex> guard(freePagesLock);
+        lock_guard<mutex> guard_freePages(freePagesLock);
         shared_lock<shared_mutex> guard(pagesLock);
-        std::lock_guard<std::mutex> lock(editedPagesLock);
+
+        lock_guard<mutex> lock(editedPagesLock);
 #endif
     zkassertpermanent(&ctx.pageManager == this); 
 
@@ -322,7 +319,7 @@ void PageManager::flushPages(PageContext &ctx){
 
     vector<uint64_t> newContainerPages(nNewContainerPages);
     for(uint64_t i=0; i< nNewContainerPages; ++i){
-        newContainerPages[i]=getFreePage();
+        newContainerPages[i]=getFreePage(); //numFreePages may change here
     }
 
     vector<uint64_t> newFreePages(numFreePages+nEditedPages+nPrevFreePagesContainer);
@@ -348,16 +345,9 @@ void PageManager::flushPages(PageContext &ctx){
     //5// write header
     {
         unique_lock<shared_mutex> guard_header(headerLock);
+        memcpy(getPageAddress(0), getPageAddress(1), 4096);
         if(mappedFile){
-            off_t offset = 0;
-            if(lseek(file0Descriptor, offset, SEEK_SET) == -1) {
-                zklog.error("Failed to seek file.");
-                exitProcess();
-            }
-            ssize_t write_size =write(file0Descriptor, getPageAddress(1), 4096); //how transactional is this?
-            zkassertpermanent(write_size == 4096);
-        }else{
-            memcpy(getPageAddress(0), getPageAddress(1), 4096);
+            msync(getPageAddress(0), 4096, MS_SYNC);
         }
     }
 
