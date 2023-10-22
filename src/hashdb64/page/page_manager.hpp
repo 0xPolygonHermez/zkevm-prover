@@ -47,16 +47,14 @@ private:
     uint64_t pagesPerFile;
     uint64_t nFiles;
 
-    shared_mutex pagesLock;
+    shared_mutex dbResizeLock;
     uint64_t nPages;
     vector<char *> pages;
 
-    mutex freePagesLock;
+    recursive_mutex writePagesLock;
     uint64_t firstUnusedPage;
     uint64_t numFreePages;
     vector<uint64_t> freePages;
-
-    mutex editedPagesLock;
     unordered_map<uint64_t, uint64_t> editedPages;
 
     shared_mutex headerLock;
@@ -65,7 +63,7 @@ private:
 
 char* PageManager::getPageAddress(const uint64_t pageNumber)
 {
-    shared_lock<shared_mutex> guard_pages(pagesLock);
+    shared_lock<shared_mutex> guard_pages(dbResizeLock);
     zkassertpermanent(pageNumber < nPages);
     uint64_t fileId = pageNumber/pagesPerFile;
     uint64_t pageInFile = pageNumber % pagesPerFile;
@@ -75,8 +73,8 @@ char* PageManager::getPageAddress(const uint64_t pageNumber)
 //Note: if there is a single writter thread we assume that only the writter thread will call this function! 
 uint64_t PageManager::getNumFreePages(){
 #if MULTIPLE_WRITES
-        lock_guard<mutex> guard_freePages(freePagesLock);
-        shared_lock<shared_mutex> guard_pages(pagesLock);
+        lock_guard<recursive_mutex> guard_freePages(writePagesLock);
+        shared_lock<shared_mutex> guard_pages(dbResizeLock);
 #endif
         return numFreePages+nPages-firstUnusedPage;
     };

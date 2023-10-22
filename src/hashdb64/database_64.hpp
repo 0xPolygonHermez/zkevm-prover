@@ -70,10 +70,8 @@ private:
     uint64_t headerPageNumber;
     pthread_mutex_t mutex;
     uint64_t currentFlushId;
-    PageContext ctx;
     PageManager pageManager;
-
-
+    PageContext ctx;
 
 public:
 

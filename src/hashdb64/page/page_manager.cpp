@@ -40,9 +40,7 @@ PageManager::~PageManager(void)
 
 zkresult PageManager::init(PageContext &ctx)
 {
-    unique_lock<shared_mutex> guard_pages(pagesLock);
-    lock_guard<mutex> guard_freePages(freePagesLock);
-    lock_guard<mutex> guard_editedPages(editedPagesLock);
+    lock_guard<recursive_mutex> guard_freePages(writePagesLock);
     unique_lock<shared_mutex> guard_header(headerLock);
 
     zkassertpermanent(&ctx.pageManager == this); 
@@ -51,15 +49,16 @@ zkresult PageManager::init(PageContext &ctx)
         
         //In-memory initailization
         mappedFile = false;
+        dbResizeLock.lock();
         nPages = 0;
         pages.resize(1);
+        dbResizeLock.unlock();
         firstUnusedPage = 2;
         numFreePages = 0;
         freePages.resize(512);
-        addPages(1024);
+        addPages(1024); 
 
     }else{
-
         //File-mapped initialization
         fileName = ctx.config.hashDBFileName;
         fileSize = ctx.config.hashDBFileSize*1ULL<<30;
@@ -71,7 +70,7 @@ zkresult PageManager::init(PageContext &ctx)
         if(folderName != ""){
             struct stat st = {0};
             if (stat(folderName.c_str(), &st) == -1) {
-                int mkdir_result = mkdir(folderName.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+                int mkdir_result = mkdir(folderName.c_str(), S_IRWXU | S_IRWXG | S_IRWXO);
                 if (mkdir_result == -1) {
                     zklog.error("PageManager: failed to create directory");
                     exitProcess();
@@ -87,56 +86,61 @@ zkresult PageManager::init(PageContext &ctx)
 
         if((dir=opendir(folderName.c_str())) != nullptr){
             nFiles = 0;
+            dbResizeLock.lock();
             while((ent = readdir(dir)) != nullptr){
+                
+                if (strstr(ent->d_name, ".db") != nullptr) {
 
-                newFile = false;
-
-                //check if the file name matches the pattern and is consecutive
-                string file_name = ent->d_name;
-                std::smatch match;
-                if(std::regex_search(file_name, match, rgx)){
-                    uint64_t file_number = std::stoull(match[1]);
-                    if(file_number != nFiles){
-                        zklog.error("PageManager: found non consecuitve db file: " + file_name + "in folder: " + folderName);
+                    newFile = false;
+                    
+                    //check if the file name matches the pattern and is consecutive
+                    string file_name = ent->d_name;
+                    std::smatch match;
+                    if(std::regex_search(file_name, match, rgx)){
+                        uint64_t file_number = std::stoull(match[1]);
+                        if(file_number != nFiles){
+                            zklog.error("PageManager: found non consecuitve db file: " + file_name + "in folder: " + folderName);
+                            exitProcess();
+                        }
+                        
+                    }else{
+                        zklog.error("PageManager: found db file with wrong name: " + file_name + "in folder: " + folderName);
                         exitProcess();
                     }
-                    
-                }else{
-                    zklog.error("PageManager: found db file with wrong name: " + file_name + "in folder: " + folderName);
-                    exitProcess();
-                }
 
-                //check that file size is correct
-                struct stat st;
-                string file = "";   
-                if(folderName != "")
-                    file = folderName + "/";
-                file += file_name;
-                if(stat(file.c_str(), &st) == -1){
-                    zklog.error("PageManager: failed to stat file: " + file);
-                    exitProcess();
-                }
-                if((uint64_t)st.st_size != fileSize){
-                    zklog.error("PageManager: found db file with wrong size: " + file_name + "in folder: " + folderName);
-                    exitProcess();
-                }
+                    //check that file size is correct
+                    struct stat st;
+                    string file = "";   
+                    if(folderName != "")
+                        file = folderName + "/";
+                    file += file_name;
+                    if(stat(file.c_str(), &st) == -1){
+                        zklog.error("PageManager: failed to stat file: " + file);
+                        exitProcess();
+                    }
+                    if((uint64_t)st.st_size != fileSize){
+                        zklog.error("PageManager: found db file with wrong size: " + file_name + "in folder: " + folderName);
+                        exitProcess();
+                    }
 
-                //map the file and increase the number of pages
-                int fd = open(file.c_str(), O_RDWR, S_IRUSR | S_IWUSR);
-                if (fd == -1) {
-                    zklog.error("PageManager: failed to open file.");
-                    exitProcess();
+                    //map the file and increase the number of pages
+                    int fd = open(file.c_str(), O_RDWR, S_IRUSR | S_IWUSR);
+                    if (fd == -1) {
+                        zklog.error("PageManager: failed to open file.");
+                        exitProcess();
+                    }
+                    pages.push_back(NULL);
+                    pages[nFiles] = (char *)mmap(NULL, fileSize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+                    if (pages[nFiles] == MAP_FAILED) {
+                        zklog.error("Failed to mmap file: " + (string)strerror(errno));
+                        exitProcess();
+                    }
+                    nPages += pagesPerFile;
+                    close(fd);
+                    nFiles++;
                 }
-                pages.push_back(NULL);
-                pages[nFiles] = (char *)mmap(NULL, fileSize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-                if (pages[nFiles] == MAP_FAILED) {
-                    zklog.error("Failed to mmap file: " + (string)strerror(errno));
-                    exitProcess();
-                }
-                nPages += pagesPerFile;
-                close(fd);
-                nFiles++;
             }
+            dbResizeLock.unlock();
             //add new file if needed
             if(nFiles == 0){
                 addFile();
@@ -148,7 +152,9 @@ zkresult PageManager::init(PageContext &ctx)
 
         }
         closedir(dir);
+        dbResizeLock.lock_shared();
         zkassertpermanent(nPages > 2);
+        dbResizeLock.unlock_shared();
 
         //Free pages
         if(newFile){
@@ -175,6 +181,7 @@ zkresult PageManager::init(PageContext &ctx)
 
 zkresult PageManager::addPages(const uint64_t nPages_)
 {
+    unique_lock<shared_mutex> guard(dbResizeLock);
     zkassertpermanent(mappedFile == false);
     char *auxPages = NULL;
     auxPages = (char *)realloc(pages[0], (nPages + nPages_) * 4096);
@@ -183,7 +190,6 @@ zkresult PageManager::addPages(const uint64_t nPages_)
         zklog.error("PageManager::AddPages() failed calling realloc()");
         exitProcess();
     }
-    unique_lock<shared_mutex> guard(pagesLock);
     pages[0] = auxPages;
     memset(pages[0] + nPages * 4096, 0, nPages_ * 4096);
     nPages += nPages_;
@@ -207,7 +213,7 @@ zkresult PageManager::addFile(){
         zklog.error("PageManager: failed to truncate to file.");
         close(fd);
     }
-    unique_lock<shared_mutex> guard(pagesLock);
+    unique_lock<shared_mutex> guard(dbResizeLock);
     nPages += pagesPerFile;
     pages.push_back(NULL);
     pages[nFiles] = (char *)mmap(NULL, fileSize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0); //MAP_POPULATE
@@ -221,7 +227,7 @@ zkresult PageManager::addFile(){
 uint64_t PageManager::getFreePage(void)
 {
 #if MULTIPLE_WRITES
-    lock_guard<mutex> guard_freePages(freePagesLock);
+    lock_guard<recursive_mutex> guard_freePages(writePagesLock);
 #endif
     uint64_t pageNumber;
     if(numFreePages > 0){
@@ -231,9 +237,8 @@ uint64_t PageManager::getFreePage(void)
         pageNumber = firstUnusedPage;
         memset(getPageAddress(pageNumber), 0, 4096);
         firstUnusedPage++;
-
+        dbResizeLock.lock_shared();
         if(firstUnusedPage == nPages){
-            unique_lock<shared_mutex> guard_pages(pagesLock);
             if(mappedFile){
                 zklog.info("PageManager: adding file");
                 addFile();
@@ -242,10 +247,8 @@ uint64_t PageManager::getFreePage(void)
                 addPages(nPages);
             }
         }
+        dbResizeLock.unlock_shared();
     }
-#if MULTIPLE_WRITES
-    lock_guard<mutex> guard_editedPages(editedPagesLock);
-#endif
     editedPages[pageNumber] = pageNumber;
     return pageNumber;
 }
@@ -256,7 +259,7 @@ void PageManager::releasePage(const uint64_t pageNumber)
     zkassertpermanent(pageNumber<firstUnusedPage);
     memset(getPageAddress(pageNumber), 0, 4096);
 #if MULTIPLE_WRITES
-    lock_guard<mutex> guard_freePages(freePagesLock);
+    lock_guard<recursive_mutex> guard_freePages(writePagesLock);
 #endif
     if(numFreePages == freePages.size()){
         freePages.resize(freePages.size()*2);
@@ -268,7 +271,7 @@ uint64_t PageManager::editPage(const uint64_t pageNumber)
 {
     uint32_t pageNumber_;
 #if MULTIPLE_WRITES
-    lock_guard<mutex> lock(editedPagesLock);
+    lock_guard<recursive_mutex> lock(writePagesLock);
 #endif
     unordered_map<uint64_t, uint64_t>::const_iterator it = editedPages.find(pageNumber);
     if(it == editedPages.end()){
@@ -284,10 +287,7 @@ uint64_t PageManager::editPage(const uint64_t pageNumber)
 void PageManager::flushPages(PageContext &ctx){
 
 #if MULTIPLE_WRITES
-        lock_guard<mutex> guard_freePages(freePagesLock);
-        shared_lock<shared_mutex> guard(pagesLock);
-
-        lock_guard<mutex> lock(editedPagesLock);
+        lock_guard<recursive_mutex> guard_freePages(writePagesLock);
 #endif
     zkassertpermanent(&ctx.pageManager == this); 
 
@@ -328,6 +328,7 @@ void PageManager::flushPages(PageContext &ctx){
     memcpy(newFreePages.data()+numFreePages+nPrevFreePagesContainer, copiedPages.data(), nEditedPages*sizeof(uint64_t));
 
     HeaderPage::CreateFreePages(ctx, headerPageNum, newFreePages, newContainerPages);
+
     HeaderPage::SetFirstUnusedPage(ctx, headerPageNum, firstUnusedPage);
 
     //4// sync all pages
