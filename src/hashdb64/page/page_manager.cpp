@@ -40,6 +40,7 @@ PageManager::~PageManager(void)
 
 zkresult PageManager::init(PageContext &ctx)
 {
+    zkresult zkr;
     lock_guard<recursive_mutex> guard_freePages(writePagesLock);
     unique_lock<shared_mutex> guard_header(headerLock);
 
@@ -57,6 +58,7 @@ zkresult PageManager::init(PageContext &ctx)
         numFreePages = 0;
         freePages.resize(512);
         addPages(1024); 
+        zkr = HeaderPage::InitEmptyPage(ctx, 0);
 
     }else{
         //File-mapped initialization
@@ -65,6 +67,7 @@ zkresult PageManager::init(PageContext &ctx)
         folderName = ctx.config.hashDBFolder;
         pagesPerFile = fileSize >> 12;
         mappedFile = true;
+
 
         //Create the folder if it does not exist
         if(folderName != ""){
@@ -76,6 +79,9 @@ zkresult PageManager::init(PageContext &ctx)
                     exitProcess();
                 }
             }
+        }else{
+            zklog.error("PageManager: folder name can not be empty");
+            exitProcess();
         }
 
         //Revise syntaxis of the existing files and create new ones if needed
@@ -161,7 +167,7 @@ zkresult PageManager::init(PageContext &ctx)
             numFreePages = 0;
             freePages.resize(16384);
             firstUnusedPage = 2;
-            HeaderPage::InitEmptyPage(ctx, 0);
+            zkr = HeaderPage::InitEmptyPage(ctx, 0);
             msync(getPageAddress(0), 4096, MS_SYNC);
 
         }else{
@@ -175,7 +181,7 @@ zkresult PageManager::init(PageContext &ctx)
         }
 
     }
-    return zkresult::ZKR_SUCCESS;
+    return zkr;
 
 }
 
@@ -234,20 +240,22 @@ uint64_t PageManager::getFreePage(void)
         pageNumber = freePages[numFreePages-1];
         --numFreePages;
     }else{
-        pageNumber = firstUnusedPage;
-        memset(getPageAddress(pageNumber), 0, 4096);
-        firstUnusedPage++;
         dbResizeLock.lock_shared();
-        if(firstUnusedPage == nPages){
+        uint64_t nPages_ = nPages;
+        dbResizeLock.unlock_shared();
+        if(firstUnusedPage == nPages_){
             if(mappedFile){
                 zklog.info("PageManager: adding file");
                 addFile();
             }else{
                 zklog.info("PageManager: adding pages to memory");
-                addPages(nPages);
+                addPages(nPages_);
             }
         }
-        dbResizeLock.unlock_shared();
+        pageNumber = firstUnusedPage;
+        memset(getPageAddress(pageNumber), 0, 4096);
+        firstUnusedPage++;
+        
     }
     editedPages[pageNumber] = pageNumber;
     return pageNumber;

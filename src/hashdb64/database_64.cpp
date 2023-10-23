@@ -42,13 +42,6 @@ Database64::Database64 (Goldilocks &fr, const Config &config) : headerPageNumber
         zklog.error("Database64::Database64() failed to init page manager result=" + zkresult2string(zkr));
         exitProcess();
     }
-
-    zkr = HeaderPage::InitEmptyPage(ctx, headerPageNumber);
-    if (zkr != ZKR_SUCCESS)
-    {
-        zklog.error("Database64::Database64() failed calling HeaderPage::InitEmptyPage() result=" + zkresult2string(zkr));
-        exitProcess();
-    }
 };
 
 Database64::~Database64()

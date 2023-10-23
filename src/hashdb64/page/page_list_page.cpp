@@ -220,7 +220,7 @@ zkresult PageListPage::CreatePages (PageContext &ctx, uint64_t &pageNumber_, vec
         }
 
         // Update the page offset
-        page->nextPageNumberAndOffset = (offset + 8) << 48;
+        page->nextPageNumberAndOffset = offset << 48;
         page->previousPageNumber = (i == containerPages.size() - 1) ? 0 : containerPages[i + 1];
     }
     

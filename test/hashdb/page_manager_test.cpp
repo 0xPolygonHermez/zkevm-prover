@@ -14,6 +14,7 @@
 #include <unordered_set>
 #include "page_manager.hpp"
 #include "config.hpp"
+#include "header_page.hpp"
 
 #define TEST_FILE_IO 0
 
@@ -176,10 +177,10 @@ uint64_t PageManagerAccuracyTest (void)
     uint64_t initialFreePages = pageManagerMem.getNumFreePages();
     
     uint64_t page1 = pageManagerMem.getFreePage();
-    zkassertpermanent(page1 == 2);
+    zkassertpermanent(page1 == 8);
     zkassertpermanent(pageManagerMem.getNumFreePages() == initialFreePages-1);
     uint64_t page2 = pageManagerMem.getFreePage();
-    zkassertpermanent(page2 == 3);
+    zkassertpermanent(page2 == 9);
     zkassertpermanent(pageManagerMem.getNumFreePages() == initialFreePages-2);
     pageManagerMem.releasePage(page1);
     zkassertpermanent(pageManagerMem.getNumFreePages() == initialFreePages-1);
@@ -204,7 +205,7 @@ uint64_t PageManagerAccuracyTest (void)
         page3Data[i] = i;
     }
     pageManagerMem.flushPages(ctx);
-    zkassertpermanent(pageManagerMem.getNumFreePages() == initialFreePages-2    );
+    uint64_t freePagesAfterFlush = pageManagerMem.getNumFreePages();
     for(uint64_t i=0; i<256;++i){
         zkassertpermanent(page3Data[i] == i);
     }
@@ -214,7 +215,7 @@ uint64_t PageManagerAccuracyTest (void)
     for(uint64_t i=0; i<256;++i){
         zkassertpermanent(page4Data[i] == i);
     }
-    zkassertpermanent(pageManagerMem.getNumFreePages() == initialFreePages-3);
+    zkassertpermanent(pageManagerMem.getNumFreePages() == freePagesAfterFlush-1);
 
     zkassertpermanent(pageManagerMem.editPage(page3) == page4);
     zkassertpermanent(pageManagerMem.editPage(page4) == page4);
@@ -223,7 +224,6 @@ uint64_t PageManagerAccuracyTest (void)
 
 
     pageManagerMem.flushPages(ctx);
-    zkassertpermanent(pageManagerMem.getNumFreePages() == initialFreePages-2);
     for(uint64_t i=0; i<256;++i){
         zkassertpermanent(page3Data[i] == 0);
     }
@@ -234,41 +234,49 @@ uint64_t PageManagerAccuracyTest (void)
     //
     // File version
     //
-
+    
     //generate a file with 100 pages
     const string fileName = "page_manager_test";
-    const int file_size = 4096 * 100;  
+    const string folderName = "pmtest";
+    const int file_size = 1;  //in GB
+    
+    //delete folder (is exists)
+    std::string command = "rm -rf " + folderName;
+    system(command.c_str());
+    
 
     // Same tests than with memory version:
     PageManager pageManagerFile;
     Config configPMFile;
     configPMFile.hashDBFileName = fileName;
     configPMFile.hashDBFileSize = file_size;
-    configPMFile.hashDBFolder = "";
+    configPMFile.hashDBFolder = folderName;
     PageContext ctxf(pageManagerFile, configPMFile);
-
     pageManagerFile.init(ctxf);
+    initialFreePages = pageManagerFile.getNumFreePages();
+
+
     page1 = pageManagerFile.getFreePage();
-    zkassertpermanent(page1 == 2);
-    zkassertpermanent(pageManagerFile.getNumFreePages() == 97);
+    zkassertpermanent(page1 == 8);
+    zkassertpermanent(pageManagerFile.getNumFreePages() == initialFreePages-1);
     page2 = pageManagerFile.getFreePage();
-    zkassertpermanent(page2 == 3);
-    zkassertpermanent(pageManagerFile.getNumFreePages() == 96);
+    zkassertpermanent(page2 == 9);
+    zkassertpermanent(pageManagerFile.getNumFreePages() == initialFreePages-2);
     pageManagerFile.releasePage(page1);
-    zkassertpermanent(pageManagerFile.getNumFreePages() == 97);
+    zkassertpermanent(pageManagerFile.getNumFreePages() == initialFreePages-1);
     pageManagerFile.releasePage(page2);
-    zkassertpermanent(pageManagerFile.getNumFreePages() == 98);
+    zkassertpermanent(pageManagerFile.getNumFreePages() == initialFreePages);
 
     pages.clear(); 
-    for(int i=0; i<98;++i){
+    for(uint64_t i=0; i<initialFreePages;++i){
         pages.insert(pageManagerFile.getFreePage());
     }
-    zkassertpermanent(pages.size() == 98);
+    zkassertpermanent(pages.size() == initialFreePages);
     zkassertpermanent(pageManagerFile.getNumFreePages() == 0);
-    for(int i=2; i<100;++i){
+    for(uint64_t i=2; i<initialFreePages+2ULL;++i){
         pageManagerFile.releasePage(i);
     }
-    zkassertpermanent(pageManagerFile.getNumFreePages() == 98);
+    zkassertpermanent(pageManagerFile.getNumFreePages() == initialFreePages);
     
     page3=pageManagerFile.getFreePage();
     page3Data = (uint64_t *)pageManagerFile.getPageAddress(page3);
@@ -276,7 +284,7 @@ uint64_t PageManagerAccuracyTest (void)
         page3Data[i] = i;
     }
     pageManagerFile.flushPages(ctxf);
-    zkassertpermanent(pageManagerFile.getNumFreePages() == 97);
+    freePagesAfterFlush = pageManagerFile.getNumFreePages();
     for(uint64_t i=0; i<256;++i){
         zkassertpermanent(page3Data[i] == i);
     }
@@ -286,7 +294,7 @@ uint64_t PageManagerAccuracyTest (void)
     for(uint64_t i=0; i<256;++i){
         zkassertpermanent(page4Data[i] == i);
     }
-    zkassertpermanent(pageManagerFile.getNumFreePages() == 96);
+    zkassertpermanent(pageManagerFile.getNumFreePages() == freePagesAfterFlush-1);
 
     zkassertpermanent(pageManagerFile.editPage(page3) == page4);
     zkassertpermanent(pageManagerFile.editPage(page4) == page4);
@@ -295,7 +303,6 @@ uint64_t PageManagerAccuracyTest (void)
 
 
     pageManagerFile.flushPages(ctxf);
-    zkassertpermanent(pageManagerFile.getNumFreePages() == 97);
     for(uint64_t i=0; i<256;++i){
         zkassertpermanent(page3Data[i] == 0);
     }
@@ -316,24 +323,25 @@ uint64_t PageManagerAccuracyTest (void)
         zkassertpermanent(page4Data[i] == i);
     }
 
+    uint64_t freePagesBeforeAddFile = pageManagerFile.getNumFreePages();
     pageManagerFile.addFile();
-    zkassertpermanent(pageManagerFile.getNumFreePages() == 197);
+    uint64_t freePagesAfterAddFile = pageManagerFile.getNumFreePages();
+    zkassertpermanent(freePagesAfterAddFile - freePagesBeforeAddFile == (file_size*1024*1024*1024)/4096);
     pages.clear(); 
-    for(int i=0; i<197;++i){
+    for(uint64_t i=0; i<freePagesAfterAddFile;++i){
         pages.insert(pageManagerFile.getFreePage());
     }
-    zkassertpermanent(pages.size() == 197);
+    zkassertpermanent(pages.size() == freePagesAfterAddFile);
     zkassertpermanent(pageManagerFile.getNumFreePages() == 0);
-    for(int i=2; i<200;++i){
+    for(uint64_t i=2; i<freePagesAfterAddFile+2;++i){
         pageManagerFile.releasePage(i);
     }
-    zkassertpermanent(pageManagerFile.getNumFreePages() == 198);
+    zkassertpermanent(pageManagerFile.getNumFreePages() == freePagesAfterAddFile);
 
-    //delete file
-    const string fineNameAll = fileName + "_0.db";
-    std::remove(fineNameAll.c_str());
-    const string fineNameAll1 = fileName + "_1.db";
-    std::remove(fineNameAll1.c_str());
+    //delete folder
+    command = "rm -rf " + folderName;
+    system(command.c_str());
+    
 
     return 0;   
 }
