@@ -408,6 +408,8 @@ using grpc::Status;
         pProcessTransactionResponse->set_state_root(string2ba(responses[tx].state_root));
         pProcessTransactionResponse->set_effective_percentage(responses[tx].effective_percentage);
         pProcessTransactionResponse->set_effective_gas_price(responses[tx].effective_gas_price);
+        pProcessTransactionResponse->set_has_balance_opcode(responses[tx].has_balance_opcode);
+        pProcessTransactionResponse->set_has_gasprice_opcode(responses[tx].has_gasprice_opcode);
         for (uint64_t log=0; log<responses[tx].logs.size(); log++)
         {
             executor::v1::Log * pLog = pProcessTransactionResponse->add_logs();
