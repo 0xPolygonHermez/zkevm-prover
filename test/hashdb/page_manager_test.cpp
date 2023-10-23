@@ -16,25 +16,30 @@
 #include "config.hpp"
 #include "header_page.hpp"
 
-#define TEST_FILE_IO 0
 
 uint64_t PageManagerTest (void)
 {
     TimerStart(PAGE_MANAGER_TEST);
     PageManagerAccuracyTest();
+    PageManagerDBResizeTest();
     //PageManagerPerformanceTest();
     TimerStopAndLog(PAGE_MANAGER_TEST);
     return 0;
 }
 
-uint64_t PageManagerPerformanceTest(void){
+uint64_t PageManagerPerformanceTest (void)
+{
 
     string fileName = "benchmark_file";
-    uint64_t fileSize = 1ULL<<37;
-    string folderName = "db";
+    uint64_t fileSize = 128;
+    string folderName = "pmtest";
     uint64_t numPositions = 20000;
     uint64_t numReps = 100;
     uint64_t printFreq = 10;
+
+    //remove folder if exists
+    std::string command = "rm -rf " + folderName;
+    system(command.c_str());
 
     // Create the state manager
     double start = omp_get_wtime();
@@ -71,7 +76,6 @@ uint64_t PageManagerPerformanceTest(void){
     double avgThroughputFlushLast = 0;
     double throughput = 0;
     
-    
     for(uint64_t k=0; k<numReps;++k){
 
         //Generate randoms
@@ -83,25 +87,11 @@ uint64_t PageManagerPerformanceTest(void){
 
         //Change first value of each page
         start = omp_get_wtime();
-#if TEST_FILE_IO
-        char singlePage[4096];
-        uint64_t sum=0;
-        //#pragma omp parallel for num_threads(64)
-        for (uint64_t i = 0; i < numPositions; ++i) {
-            pageManagerFile.getPageAddressFile(position[i], singlePage);
-            
-            //pageData[0] = pageData[2] + position[i];
-            sum += *reinterpret_cast<uint64_t*>(&singlePage[2]) + position[i];        }
-#else
         for (uint64_t i = 0; i < numPositions; ++i) {
             uint64_t* pageData = (uint64_t *)pageManagerFile.getPageAddress(position[i]);
             pageData[0] = pageData[2] + position[i];
         }
-#endif
         end = omp_get_wtime();
-#if TEST_FILE_IO
-        std::cout << "Sum: " << sum << std::endl;
-#endif
 
         throughput = numGBytes / (end-start);
         avgThroughputFirstWrite += throughput;
@@ -112,9 +102,7 @@ uint64_t PageManagerPerformanceTest(void){
         start = omp_get_wtime();
         for (uint64_t i = 0; i < numPositions; ++i) {
             uint64_t* pageData = (uint64_t *)pageManagerFile.getPageAddress(position[i]);
-#if !TEST_FILE_IO
-        assert(pageData[0] == (pageData[2] + position[i]) );
-#endif
+            assert(pageData[0] == (pageData[2] + position[i]) );
             pageData[1] = position[i];    
         }
         end = omp_get_wtime();
@@ -141,9 +129,7 @@ uint64_t PageManagerPerformanceTest(void){
         for (uint64_t i = 0; i < numPositions; ++i) {
             uint64_t* pageData = (uint64_t *)pageManagerFile2.getPageAddress(position[i]);
             if(position[i] != 0){
-#if !TEST_FILE_IO
-        assert(pageData[0] == (pageData[2] + position[i]) );
-#endif
+                assert(pageData[0] == (pageData[2] + position[i]) );
                 assert(pageData[1] == position[i] );
             }
         }
@@ -162,8 +148,13 @@ uint64_t PageManagerPerformanceTest(void){
             avgThroughputFlushLast = 0;
         }
     }
+
+    //delete folder
+    command = "rm -rf " + folderName;
+    system(command.c_str());
     return 0;
 }
+
 uint64_t PageManagerAccuracyTest (void)
 {
 
@@ -344,4 +335,53 @@ uint64_t PageManagerAccuracyTest (void)
     
 
     return 0;   
+}
+
+uint64_t PageManagerDBResizeTest (void)
+{
+    //
+    // Memory version
+    //
+    PageManager pageManagerMem;
+    Config configPM;
+    PageContext ctx(pageManagerMem, configPM);
+    pageManagerMem.init(ctx);
+    uint64_t initialFreePages = pageManagerMem.getNumFreePages();
+    for(uint64_t i=0; i<initialFreePages;++i){
+        pageManagerMem.getFreePage();
+    }
+    assert(pageManagerMem.getNumFreePages() == 0);
+    pageManagerMem.getFreePage();
+    assert(pageManagerMem.getNumFreePages() == initialFreePages+7);
+
+    //
+    // File version
+    //
+    
+    //generate a file with 100 pages
+    const string fileName = "page_manager_test";
+    const string folderName = "pmtest";
+    const int file_size = 1;  //in GB
+    
+    //delete folder (is exists)
+    std::string command = "rm -rf " + folderName;
+    system(command.c_str());
+
+    PageManager pageManagerFile;
+    Config configPMFile;
+    configPMFile.hashDBFileName = fileName;
+    configPMFile.hashDBFileSize = file_size;
+    configPMFile.hashDBFolder = folderName;
+    PageContext ctxf(pageManagerFile, configPMFile);
+    pageManagerFile.init(ctxf);
+
+    initialFreePages = pageManagerFile.getNumFreePages();
+    for(uint64_t i=0; i<initialFreePages;++i){
+        pageManagerFile.getFreePage();
+    }
+    assert(pageManagerFile.getNumFreePages() == 0);
+    pageManagerFile.getFreePage();
+    assert(pageManagerFile.getNumFreePages() == initialFreePages+7);
+
+    return 0;
 }

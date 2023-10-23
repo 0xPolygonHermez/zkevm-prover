@@ -6,5 +6,6 @@
 uint64_t PageManagerTest (void);
 uint64_t PageManagerAccuracyTest (void);
 uint64_t PageManagerPerformanceTest (void);
+uint64_t PageManagerDBResizeTest (void);
 
 #endif
