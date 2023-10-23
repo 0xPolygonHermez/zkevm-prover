@@ -164,6 +164,6 @@ The configuration parameters can be of different uses:
 |`maxHashDBThreads`|production|u64|Maximum number of GRPC HashDB service threads|8|MAX_HASHDB_THREADS|
 |`fullTracerTraceReserveSize`|production|u64|Full tracer number of reserved traces|256*1024|FULL_TRACER_TRACE_RESERVE_SIZE|
 |`proverName`|production|string|Prover name, used to identy the prover when connecting to the Aggregator service|"UNSPECIFIED"|PROVER_NAME|
-|`ECRecoverPrecalc`|production|boolean|Use ECRecover precalculation to improve main state machine executor performance|false|ECRECOVER_PRECALC|
+|`ECRecoverPrecalc`|production|boolean|Use ECRecover precalculation to improve main state machine executor performance (currently harcoded to false)|false|ECRECOVER_PRECALC|
 |`ECRecoverPrecalcNThreads`|production|u64|Number of threads used to perform the ECRecover precalculation|16|ECRECOVER_PRECALC_N_THREADS|
 |`jsonLogs`|production|boolean|Generate logs in JSON format, compatible with Datadog service; if you do not use Datadog or you do not have to process the log traces, we recommend to set this parameter to 'false' to improve the clarity of the logs|true|JSON_LOGS|
