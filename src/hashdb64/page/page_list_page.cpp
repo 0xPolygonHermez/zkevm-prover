@@ -178,8 +178,9 @@ zkresult PageListPage::GetContainerPages (PageContext &ctx, const uint64_t  page
 zkresult PageListPage::CreatePages (PageContext &ctx, uint64_t &pageNumber_, vector<uint64_t> (&freePages), vector<uint64_t> (&containerPages))
 {
     if(containerPages.size() == 0){
-        pageNumber_ = 0;
-        return ZKR_SUCCESS;
+        zklog.error("PageListPage::CreatePages() containerPages.size() == 0");
+        exitProcess();
+        return ZKR_DB_ERROR;
     }
     pageNumber_ = containerPages[0];
 
@@ -219,7 +220,7 @@ zkresult PageListPage::CreatePages (PageContext &ctx, uint64_t &pageNumber_, vec
         }
 
         // Update the page offset
-        page->nextPageNumberAndOffset = (offset + 8) << 48;
+        page->nextPageNumberAndOffset = offset << 48;
         page->previousPageNumber = (i == containerPages.size() - 1) ? 0 : containerPages[i + 1];
     }
     

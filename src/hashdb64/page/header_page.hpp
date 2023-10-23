@@ -14,6 +14,9 @@
 
 struct HeaderStruct
 {
+    // UUID
+    uint8_t uuid[32];
+
     // Raw data
     uint64_t firstRawDataPage;
     uint64_t rawDataPage;
@@ -39,6 +42,10 @@ struct HeaderStruct
 class HeaderPage
 {
 public:
+    
+    // Header uuid
+    static zkresult Check (PageContext &ctx, const uint64_t headerPageNumber);
+
     // Header-only methods
     static zkresult InitEmptyPage  (PageContext &ctx, const uint64_t  headerPageNumber);
     static uint64_t GetLastVersion (PageContext &ctx, const uint64_t  headerPageNumber);
@@ -48,7 +55,8 @@ public:
     static zkresult GetFreePagesContainer (PageContext &ctx, const uint64_t  headerPageNumber, vector<uint64_t> (&containerPages));
     static zkresult GetFreePages          (PageContext &ctx, const uint64_t  headerPageNumber, vector<uint64_t> (&freePages));
     static zkresult CreateFreePages       (PageContext &ctx,       uint64_t &headerPageNumber, vector<uint64_t> (&freePages), vector<uint64_t> (&containerPages));
-    static zkresult setFirstUnusedPage    (PageContext &ctx,       uint64_t &headerPageNumber, const uint64_t firstUnusedPage);
+    static zkresult GetFirstUnusedPage    (PageContext &ctx,  const uint64_t  headerPageNumber, uint64_t &firstUnusedPage);
+    static zkresult SetFirstUnusedPage    (PageContext &ctx,       uint64_t &headerPageNumber, const uint64_t firstUnusedPage);
 
     // Root version methods
     static zkresult ReadRootVersion  (PageContext &ctx, const uint64_t  headerPageNumber, const string &root,       uint64_t &version);

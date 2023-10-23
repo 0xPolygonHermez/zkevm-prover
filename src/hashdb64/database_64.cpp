@@ -27,17 +27,19 @@
 // Helper functions
 string removeBSXIfExists64(string s) {return ((s.at(0) == '\\') && (s.at(1) == 'x')) ? s.substr(2) : s;}
 
-Database64::Database64 (Goldilocks &fr, const Config &config) : headerPageNumber(0), currentFlushId(0), ctx(pageManager, config)
+Database64::Database64 (Goldilocks &fr, const Config &config) : headerPageNumber(0), currentFlushId(0), pageManager(), ctx(pageManager, config)
 {
     // Init mutex
     pthread_mutex_init(&mutex, NULL);
 
     zkresult zkr;
     headerPageNumber = 0;
-    zkr = HeaderPage::InitEmptyPage(ctx, headerPageNumber);
+
+    // Init page manager
+    zkr = pageManager.init(ctx);
     if (zkr != ZKR_SUCCESS)
     {
-        zklog.error("Database64::Database64() failed calling HeaderPage::InitEmptyPage() result=" + zkresult2string(zkr));
+        zklog.error("Database64::Database64() failed to init page manager result=" + zkresult2string(zkr));
         exitProcess();
     }
 };

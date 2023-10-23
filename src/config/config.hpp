@@ -87,6 +87,9 @@ public:
     bool hashDB64;
     uint64_t kvDBMaxVersions;
     string dbCacheSynchURL;
+    string hashDBFileName;
+    uint64_t hashDBFileSize;
+    string hashDBFolder;
 
     // Aggregator service (client)
     uint16_t aggregatorServerPort;

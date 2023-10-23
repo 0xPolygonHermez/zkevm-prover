@@ -9,6 +9,24 @@
 #include "page_list_page.hpp"
 #include "root_version_page.hpp"
 
+
+zkresult HeaderPage::Check (PageContext &ctx, const uint64_t headerPageNumber)
+{
+    // Get the header page
+    HeaderStruct * page = (HeaderStruct *)ctx.pageManager.getPageAddress(headerPageNumber);
+
+    // Check the uuid
+    for(int i=0; i<32; ++i){
+        if (page->uuid[i] != ctx.uuid[i])
+        {
+            zklog.error("HeaderPage::Check() found uuid[" + to_string(i) + "]=" + to_string(page->uuid[i]) + " != config.hashDBUUID[" + to_string(i) + "]=" + to_string(ctx.uuid[i]));
+            exitProcess();
+            return ZKR_DB_ERROR;
+        }
+    }
+    return ZKR_SUCCESS;
+
+}
 zkresult HeaderPage::InitEmptyPage (PageContext &ctx, const uint64_t headerPageNumber)
 {
     zkresult zkr;
@@ -64,12 +82,17 @@ zkresult HeaderPage::InitEmptyPage (PageContext &ctx, const uint64_t headerPageN
     }
 
     // Create the free pages page, and init it
+    page->firstUnusedPage = 2;
     page->freePages = ctx.pageManager.getFreePage();
     zkr = PageListPage::InitEmptyPage(ctx, page->freePages);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("HeaderPage::InitEmptyPage() failed calling PageListPage::InitEmptyPage(freePages) result=" + zkresult2string(zkr));
         return zkr;
+    }
+    // UUID
+    for(int i=0; i<32; ++i){
+        page->uuid[i] = ctx.uuid[i];
     }
     
     return ZKR_SUCCESS;
@@ -137,7 +160,18 @@ zkresult HeaderPage::CreateFreePages (PageContext &ctx, uint64_t &headerPageNumb
 
 }
 
-zkresult HeaderPage::setFirstUnusedPage (PageContext &ctx, uint64_t &headerPageNumber, const uint64_t firstUnusedPage)
+zkresult HeaderPage::GetFirstUnusedPage (PageContext &ctx,const uint64_t headerPageNumber, uint64_t &firstUnusedPage)
+{
+    // Get header page
+    HeaderStruct * page = (HeaderStruct *)ctx.pageManager.getPageAddress(headerPageNumber);
+
+    // Call the specific method
+    firstUnusedPage = page->firstUnusedPage;
+
+    return ZKR_SUCCESS;
+}
+
+zkresult HeaderPage::SetFirstUnusedPage (PageContext &ctx,uint64_t &headerPageNumber, const uint64_t firstUnusedPage)
 {
     // Get an editable page
     headerPageNumber = ctx.pageManager.editPage(headerPageNumber);

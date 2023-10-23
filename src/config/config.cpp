@@ -197,6 +197,9 @@ void Config::load(json &config)
     ParseBool(config, "hashDB64", "HASHDB64", hashDB64, false);
     ParseU64(config, "kvDBMaxVersions", "HASHDB64_MAX_VERSIONS", kvDBMaxVersions, 131072);
     ParseString(config, "dbCacheSynchURL", "DB_CACHE_SYNCH_URL", dbCacheSynchURL, "");
+    ParseString(config, "hashDBFileName", "HASHDB_FILE_NAME", hashDBFileName, "");
+    ParseU64(config, "hashDBFileSize", "HASHDB_FILE_SIZE", hashDBFileSize, 128);    
+    ParseString(config, "hashDBFolder", "HASHDB_FOLDER", hashDBFolder, "hashdb");
     ParseU16(config, "aggregatorServerPort", "AGGREGATOR_SERVER_PORT", aggregatorServerPort, 50081);
     ParseU16(config, "aggregatorClientPort", "AGGREGATOR_CLIENT_PORT", aggregatorClientPort, 50081);
     ParseString(config, "aggregatorClientHost", "AGGREGATOR_CLIENT_HOST", aggregatorClientHost, "127.0.0.1");
@@ -433,6 +436,9 @@ void Config::print(void)
     zklog.info("    hashDB64=" + to_string(hashDB64));
     zklog.info("    kvDBMaxVersions=" + to_string(kvDBMaxVersions));
     zklog.info("    dbCacheSynchURL=" + dbCacheSynchURL);
+    zklog.info("    hashDBFileName=" + hashDBFileName);
+    zklog.info("    hashDBFileSize=" + to_string(hashDBFileSize));
+    zklog.info("    hastDBFolder=" + hashDBFolder);
     zklog.info("    aggregatorServerPort=" + to_string(aggregatorServerPort));
     zklog.info("    aggregatorClientPort=" + to_string(aggregatorClientPort));
     zklog.info("    aggregatorClientHost=" + aggregatorClientHost);
