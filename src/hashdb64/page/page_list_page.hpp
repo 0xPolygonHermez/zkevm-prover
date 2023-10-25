@@ -6,6 +6,7 @@
 #include <vector>
 #include "zkresult.hpp"
 #include "zkassert.hpp"
+#include "page_context.hpp"
 
 using namespace std;
 
@@ -40,15 +41,19 @@ public:
 
     static const uint64_t minOffset= 16; // This means that the page is completely empty
     static const uint64_t maxOffset = 4096; // This means that the page is completely full
+    static const uint64_t entrySize = 8; 
 
-    static zkresult InitEmptyPage (const uint64_t  pageNumber);
-    static zkresult InsertPage    (      uint64_t &pageNumber, const uint64_t pageNumberToInsert);
-    static zkresult ExtractPage   (      uint64_t &pageNumber,       uint64_t &extractedPageNumber);
+    static zkresult InitEmptyPage (PageContext &ctx, const uint64_t  pageNumber);
+    static zkresult InsertPage    (PageContext &ctx,      uint64_t &pageNumber, const uint64_t pageNumberToInsert);
+    static zkresult ExtractPage   (PageContext &ctx,      uint64_t &pageNumber,       uint64_t &extractedPageNumber);
 
-    static zkresult GetPages      (const uint64_t  pageNumber,                                vector<uint64_t> (&containerPages), vector<uint64_t> (&containedPages));
-    static zkresult CreatePages   (      uint64_t &pageNumber, vector<uint64_t> (&freePages), vector<uint64_t> (&containerPages), vector<uint64_t> (&containedPages));
+    static zkresult GetPages          (PageContext &ctx, const uint64_t  pageNumber, vector<uint64_t> (&freePages));
+    static zkresult CreatePages       (PageContext &ctx,       uint64_t &pageNumber, vector<uint64_t> (&freePages), vector<uint64_t> (&containerPages));
+    static zkresult GetContainerPages (PageContext &ctx, const uint64_t  pageNumber,                                vector<uint64_t> (&containerPages));
 
-    static void Print (const uint64_t pageNumber, bool details, const string &prefix);
+    static void Print (PageContext &ctx, const uint64_t pageNumber, bool details, const string &prefix);
 };
+
+extern PageManager pageManagerSingleton;
 
 #endif

@@ -495,7 +495,7 @@ void TreeChunk::print(void) const
     zklog.info("  data.size=" + to_string(data.size()));
 }
 
-zkresult TreeChunk::loadFromKeyValueHistoryPage (const uint64_t pageNumber, const uint64_t version, const uint64_t _level)
+zkresult TreeChunk::loadFromKeyValueHistoryPage (PageContext &ctx, const uint64_t pageNumber, const uint64_t version, const uint64_t _level)
 {
     zkresult zkr;
 
@@ -503,7 +503,7 @@ zkresult TreeChunk::loadFromKeyValueHistoryPage (const uint64_t pageNumber, cons
     level = _level;
 
     // Get the data from this page
-    KeyValueHistoryStruct * page = (KeyValueHistoryStruct *)pageManager.getPageAddress(pageNumber);
+    KeyValueHistoryStruct * page = (KeyValueHistoryStruct *)ctx.pageManager.getPageAddress(pageNumber);
 
     for (uint64_t index = 0; index < 64; index++)
     {
@@ -540,7 +540,7 @@ zkresult TreeChunk::loadFromKeyValueHistoryPage (const uint64_t pageNumber, cons
                         uint64_t rawDataPage = keyValueEntry[1] & U64Mask48;
                         uint64_t rawDataOffset = keyValueEntry[1] >> 48;
                         string keyValue;
-                        zkr = RawDataPage::Read(rawDataPage, rawDataOffset, 64, keyValue);
+                        zkr = RawDataPage::Read(ctx, rawDataPage, rawDataOffset, 64, keyValue);
                         if (zkr != ZKR_SUCCESS)
                         {
                             zklog.error("TreeChunk::loadFromKeyValueHistoryPage() failed calling RawDataPage.Read result=" + zkresult2string(zkr) + " rawDataPage=" + to_string(rawDataPage) + " rawDataOffset=" + to_string(rawDataOffset) + " version=" + to_string(version) + " level=" + to_string(level) + " index=" + to_string(index));
@@ -568,7 +568,7 @@ zkresult TreeChunk::loadFromKeyValueHistoryPage (const uint64_t pageNumber, cons
                             return ZKR_DB_ERROR;
                         }
                         string hashBa;
-                        zkr = RawDataPage::Read(rawDataPage, rawDataOffset, 32, hashBa);
+                        zkr = RawDataPage::Read(ctx, rawDataPage, rawDataOffset, 32, hashBa);
                         if (zkr != ZKR_SUCCESS)
                         {
                             zklog.error("TreeChunk::loadFromKeyValueHistoryPage() failed calling RawDataPage.Read result=" + zkresult2string(zkr) + " rawDataPage=" + to_string(rawDataPage) + " rawDataOffset=" + to_string(rawDataOffset) + " version=" + to_string(version) + " level=" + to_string(level) + " index=" + to_string(index));
@@ -625,7 +625,7 @@ zkresult TreeChunk::loadFromKeyValueHistoryPage (const uint64_t pageNumber, cons
                 uint64_t rawDataPage = page->keyValueEntry[index][2] & U64Mask48;
                 uint64_t rawDataOffset = page->keyValueEntry[index][2] >> 48;
                 string hashBa;
-                zkr = RawDataPage::Read(rawDataPage, rawDataOffset, 32, hashBa);
+                zkr = RawDataPage::Read(ctx, rawDataPage, rawDataOffset, 32, hashBa);
                 if (zkr != ZKR_SUCCESS)
                 {
                     zklog.error("TreeChunk::loadFromKeyValueHistoryPage() failed calling RawDataPage.Read result=" + zkresult2string(zkr) + " rawDataPage=" + to_string(rawDataPage) + " rawDataOffset=" + to_string(rawDataOffset) + " version=" + to_string(version) + " level=" + to_string(level) + " index=" + to_string(index));
