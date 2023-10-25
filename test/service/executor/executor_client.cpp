@@ -103,10 +103,7 @@ bool ExecutorClient::ProcessBatch (void)
         pTraceConfig->set_disable_stack(input.traceConfig.bDisableStack);
         pTraceConfig->set_enable_memory(input.traceConfig.bEnableMemory);
         pTraceConfig->set_enable_return_data(input.traceConfig.bEnableReturnData);
-        pTraceConfig->set_tx_hash_to_generate_execute_trace(string2ba(input.traceConfig.txHashToGenerateExecuteTrace));
-        pTraceConfig->set_tx_hash_to_generate_call_trace(string2ba(input.traceConfig.txHashToGenerateCallTrace));
-        //request.set_tx_hash_to_generate_execute_trace(string2ba(input.traceConfig.txHashToGenerateExecuteTrace));
-        //request.set_tx_hash_to_generate_call_trace(string2ba(input.traceConfig.txHashToGenerateCallTrace));
+        pTraceConfig->set_tx_hash_to_generate_full_trace(string2ba(input.traceConfig.txHashToGenerateFullTrace));
     }
     request.set_old_batch_num(input.publicInputsExtended.publicInputs.oldBatchNum);
 
