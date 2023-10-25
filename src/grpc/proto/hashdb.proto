@@ -110,10 +110,12 @@ message GetProgramRequest {
  * @dev LoadDBRequest
  * @param {input_db} - list of db records (MT) to load in the database
  * @param {persistent} - indicates if it should be stored in the SQL database (true) or only in the memory cache (false)
+ * @param {state_root} - current (old) state root made up of the provided db records
  */
 message LoadDBRequest {
     map<string, FeList> input_db = 1;
     bool persistent = 2;
+    Fea  state_root = 3;
 }
 
 /**

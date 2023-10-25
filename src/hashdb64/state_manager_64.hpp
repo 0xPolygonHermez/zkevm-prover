@@ -134,6 +134,14 @@ public:
     zkresult set(const string &batchUUID, uint64_t tx, Database64 &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, SmtSetResult &result, DatabaseMap *dbReadLog = NULL);
     zkresult get(const string &batchUUID, Database64 &db, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], SmtGetResult &result, DatabaseMap *dbReadLog = NULL);
 
+    void inline setLastConsolidatedStateRoot(const Goldilocks::Element (&root)[4])
+    {
+        lastConsolidatedStateRoot[0] = root[0];
+        lastConsolidatedStateRoot[1] = root[1];
+        lastConsolidatedStateRoot[2] = root[2];
+        lastConsolidatedStateRoot[3] = root[3];
+        lastConsolidatedStateRootString = fea2string(fr, lastConsolidatedStateRoot);
+    }
 };
 
 extern StateManager64 stateManager64;

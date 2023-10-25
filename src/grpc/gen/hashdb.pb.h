@@ -1394,6 +1394,7 @@ class LoadDBRequest PROTOBUF_FINAL :
 
   enum : int {
     kInputDbFieldNumber = 1,
+    kStateRootFieldNumber = 3,
     kPersistentFieldNumber = 2,
   };
   // map<string, .hashdb.v1.FeList> input_db = 1;
@@ -1412,6 +1413,24 @@ class LoadDBRequest PROTOBUF_FINAL :
       input_db() const;
   ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::hashdb::v1::FeList >*
       mutable_input_db();
+
+  // .hashdb.v1.Fea state_root = 3;
+  bool has_state_root() const;
+  private:
+  bool _internal_has_state_root() const;
+  public:
+  void clear_state_root();
+  const ::hashdb::v1::Fea& state_root() const;
+  ::hashdb::v1::Fea* release_state_root();
+  ::hashdb::v1::Fea* mutable_state_root();
+  void set_allocated_state_root(::hashdb::v1::Fea* state_root);
+  private:
+  const ::hashdb::v1::Fea& _internal_state_root() const;
+  ::hashdb::v1::Fea* _internal_mutable_state_root();
+  public:
+  void unsafe_arena_set_allocated_state_root(
+      ::hashdb::v1::Fea* state_root);
+  ::hashdb::v1::Fea* unsafe_arena_release_state_root();
 
   // bool persistent = 2;
   void clear_persistent();
@@ -1435,6 +1454,7 @@ class LoadDBRequest PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_MESSAGE,
       0 > input_db_;
+  ::hashdb::v1::Fea* state_root_;
   bool persistent_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_hashdb_2eproto;
@@ -7711,6 +7731,87 @@ inline void LoadDBRequest::_internal_set_persistent(bool value) {
 inline void LoadDBRequest::set_persistent(bool value) {
   _internal_set_persistent(value);
   // @@protoc_insertion_point(field_set:hashdb.v1.LoadDBRequest.persistent)
+}
+
+// .hashdb.v1.Fea state_root = 3;
+inline bool LoadDBRequest::_internal_has_state_root() const {
+  return this != internal_default_instance() && state_root_ != nullptr;
+}
+inline bool LoadDBRequest::has_state_root() const {
+  return _internal_has_state_root();
+}
+inline void LoadDBRequest::clear_state_root() {
+  if (GetArena() == nullptr && state_root_ != nullptr) {
+    delete state_root_;
+  }
+  state_root_ = nullptr;
+}
+inline const ::hashdb::v1::Fea& LoadDBRequest::_internal_state_root() const {
+  const ::hashdb::v1::Fea* p = state_root_;
+  return p != nullptr ? *p : *reinterpret_cast<const ::hashdb::v1::Fea*>(
+      &::hashdb::v1::_Fea_default_instance_);
+}
+inline const ::hashdb::v1::Fea& LoadDBRequest::state_root() const {
+  // @@protoc_insertion_point(field_get:hashdb.v1.LoadDBRequest.state_root)
+  return _internal_state_root();
+}
+inline void LoadDBRequest::unsafe_arena_set_allocated_state_root(
+    ::hashdb::v1::Fea* state_root) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(state_root_);
+  }
+  state_root_ = state_root;
+  if (state_root) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:hashdb.v1.LoadDBRequest.state_root)
+}
+inline ::hashdb::v1::Fea* LoadDBRequest::release_state_root() {
+  auto temp = unsafe_arena_release_state_root();
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::hashdb::v1::Fea* LoadDBRequest::unsafe_arena_release_state_root() {
+  // @@protoc_insertion_point(field_release:hashdb.v1.LoadDBRequest.state_root)
+  
+  ::hashdb::v1::Fea* temp = state_root_;
+  state_root_ = nullptr;
+  return temp;
+}
+inline ::hashdb::v1::Fea* LoadDBRequest::_internal_mutable_state_root() {
+  
+  if (state_root_ == nullptr) {
+    auto* p = CreateMaybeMessage<::hashdb::v1::Fea>(GetArena());
+    state_root_ = p;
+  }
+  return state_root_;
+}
+inline ::hashdb::v1::Fea* LoadDBRequest::mutable_state_root() {
+  // @@protoc_insertion_point(field_mutable:hashdb.v1.LoadDBRequest.state_root)
+  return _internal_mutable_state_root();
+}
+inline void LoadDBRequest::set_allocated_state_root(::hashdb::v1::Fea* state_root) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete state_root_;
+  }
+  if (state_root) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(state_root);
+    if (message_arena != submessage_arena) {
+      state_root = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, state_root, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  state_root_ = state_root;
+  // @@protoc_insertion_point(field_set_allocated:hashdb.v1.LoadDBRequest.state_root)
 }
 
 // -------------------------------------------------------------------

@@ -431,4 +431,14 @@ bool inline feaIsZero (const Goldilocks::Element (&fea)[4])
     return fr.isZero(fea[0]) && fr.isZero(fea[1]) && fr.isZero(fea[2]) && fr.isZero(fea[3]);
 }
 
+bool inline feaIsZero (const Goldilocks::Element &fe0, const Goldilocks::Element &fe1, const Goldilocks::Element &fe2, const Goldilocks::Element &fe3)
+{
+    return fr.isZero(fe0) && fr.isZero(fe1) && fr.isZero(fe2) && fr.isZero(fe3);
+}
+
+bool inline feaIsEqual (const Goldilocks::Element (&a)[4], const Goldilocks::Element (&b)[4])
+{
+    return fr.equal(a[0], b[0]) && fr.equal(a[1], b[1]) && fr.equal(a[2], b[2]) && fr.equal(a[3], b[3]);
+}
+
 #endif

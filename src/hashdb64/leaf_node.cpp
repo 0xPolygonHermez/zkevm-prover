@@ -4,6 +4,8 @@
 #include "goldilocks_base_field.hpp"
 #include "key_utils.hpp"
 
+//#define LOG_LEAF_NODE
+
 void LeafNode::calculateHash (Goldilocks &fr, PoseidonGoldilocks &poseidon, vector<HashValueGL> *hashValues)
 {
     // Prepare input = [value8, 0000]
@@ -56,4 +58,8 @@ void LeafNode::calculateHash (Goldilocks &fr, PoseidonGoldilocks &poseidon, vect
         for (uint64_t i=0; i<12; i++) hashValue.value[i] = input[i];
         hashValues->emplace_back(hashValue);
     }
+
+#ifdef LOG_LEAF_NODE
+    zklog.info("LeafNode::calculateChild() leaf key=" + fea2string(fr, key) + " rkey=" + fea2string(fr, rkey) + " value=" + value.get_str(16) + " valueHash=" + fea2string(fr, valueHash) + " hash=" + fea2string(fr, hash) + " level=" + to_string(level));
+#endif
 }
