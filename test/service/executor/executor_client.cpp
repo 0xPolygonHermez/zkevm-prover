@@ -209,10 +209,10 @@ bool ExecutorClient::ProcessBatch (void)
 
             CheckTreeCounters checkTreeCounters;
 
-            zkresult result = CheckTree(db, newStateRoot, 0, checkTreeCounters);
+            zkresult result = CheckTree(db, newStateRoot, 0, checkTreeCounters, "");
             if (result != ZKR_SUCCESS)
             {
-                zklog.error("ExecutorClient::ProcessBatch() failed calling ClimbTree() result=" + zkresult2string(result));
+                zklog.error("ExecutorClient::ProcessBatch() failed calling CheckTree() result=" + zkresult2string(result));
                 return false;
             }
 

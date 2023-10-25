@@ -224,7 +224,7 @@ zkresult StateManager64::write (const string &batchUUID, uint64_t tx, const stri
 #endif
 
 #ifdef LOG_STATE_MANAGER
-    zklog.info("StateManager64::write() batchUUID=" + batchUUID + " tx=" + to_string(tx) + " key=" + key + " persistence=" + persistence2string(persistence));
+    zklog.info("StateManager64::write() batchUUID=" + batchUUID + " tx=" + to_string(tx) + " key=" + key + " persistence=" + persistence2string(persistence) + " value=" + value.get_str(16));
 #endif
 
     // Check persistence range

@@ -27,6 +27,7 @@ void splitKey (Goldilocks &fr, const Goldilocks::Element (&key)[4], bool (&resul
 }
 
 // Get 256 key bits in SMT order, in sets of 6 bits
+// TODO: use SMT order in splitKey6
 void splitKey6 (Goldilocks &fr, const Goldilocks::Element (&key)[4], uint8_t (&result)[43])
 {
     bool bits[256];
@@ -34,18 +35,18 @@ void splitKey6 (Goldilocks &fr, const Goldilocks::Element (&key)[4], uint8_t (&r
     for (uint64_t i=0; i<42; i++)
     {
         result[i] =
-            bits[i*6 + 0] * 0b000001 +
-            bits[i*6 + 1] * 0b000010 +
-            bits[i*6 + 2] * 0b000100 +
-            bits[i*6 + 3] * 0b001000 +
-            bits[i*6 + 4] * 0b010000 +
-            bits[i*6 + 5] * 0b100000;
+            (bits[i*6 + 0] ? 0b000001 : 0) +
+            (bits[i*6 + 1] ? 0b000010 : 0) +
+            (bits[i*6 + 2] ? 0b000100 : 0) +
+            (bits[i*6 + 3] ? 0b001000 : 0) +
+            (bits[i*6 + 4] ? 0b010000 : 0) +
+            (bits[i*6 + 5] ? 0b100000 : 0);
     }
     result[42] =
-        bits[42*6 + 0] * 0b000001 +
-        bits[42*6 + 1] * 0b000010 +
-        bits[42*6 + 2] * 0b000100 +
-        bits[42*6 + 3] * 0b001000;
+        (bits[42*6 + 0] ? 0b000001 : 0) +
+        (bits[42*6 + 1] ? 0b000010 : 0) +
+        (bits[42*6 + 2] ? 0b000100 : 0) +
+        (bits[42*6 + 3] ? 0b001000 : 0);
 }
 
 void splitKey9 (const string &baString, vector<uint64_t> &result)
@@ -150,6 +151,7 @@ uint64_t getKeyChildren64Position (const bool (&keys)[256], uint64_t level)
     return result;
 }
 
+// TODO: use SMT order in splitKey6
 uint64_t getKeyChildren64Position (const uint64_t index)
 {
     zkassert(index <= 64);
@@ -158,27 +160,27 @@ uint64_t getKeyChildren64Position (const uint64_t index)
 
     if ((index & 0b100000) != 0)
     {
-        result += 32;
+        result += 1;
     }
     if ((index & 0b010000) != 0)
     {
-        result += 16;
+        result += 2;
     }
     if ((index & 0b001000) != 0)
     {
-        result += 8;
+        result += 4;
     }
     if ((index & 0b000100) != 0)
     {
-        result += 4;
+        result += 8;
     }
     if ((index & 0b000010) != 0)
     {
-        result += 2;
+        result += 16;
     }
     if ((index & 0b000001) != 0)
     {
-        result += 1;
+        result += 32;
     }
 
     return result;

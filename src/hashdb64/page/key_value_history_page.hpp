@@ -17,7 +17,7 @@ struct KeyValueHistoryStruct
         // [0] = control (4bits) + previousVersionOffset (12bits) + version (6B)
         // [1] = if leaf node, location of key(32B) + value(32B) = rawDataOffset (2B) + rawDataPage (6B)
         // [1] = if intermediate node, page with level+1 = nextPageNumber (6B)
-        // [2] = if leaf or intermediate node, location of hash(32B) = rawDataOffset (2B) + rawDataPage (6B), or 0 if has needs to be calculated
+        // [2] = if leaf or intermediate node, location of hash(32B) = rawDataOffset (2B) + rawDataPage (6B), or 0 if hash needs to be calculated (e.g. key was moved to a deeper level page)
         // If control == 0, then this entry is empty, i.e. value = 0
         // If control == 1, then this entry contains a version (leaf node)
         // If control == 2, then this entry contains the page number of the next level page (intermediate node)

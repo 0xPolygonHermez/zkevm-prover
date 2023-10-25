@@ -140,7 +140,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     // Copy input database content into context database
     if (proverRequest.input.db.size() > 0)
     {
-        pHashDB->loadDB(proverRequest.input.db, true);
+        Goldilocks::Element stateRoot[4];
+        scalar2fea(fr, proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot, stateRoot);
+        pHashDB->loadDB(proverRequest.input.db, true, stateRoot);
         uint64_t flushId, lastSentFlushId;
         pHashDB->flush(emptyString, emptyString, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, flushId, lastSentFlushId);
         if (config.dbClearCache && (config.databaseURL != "local"))
@@ -4356,7 +4358,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     if (config.hashDB64)
     {
         Goldilocks::Element newStateRoot[4];
-        string2fea(fr, proverRequest.pFullTracer->get_new_state_root(), newStateRoot);
+        string2fea(fr, NormalizeToNFormat(proverRequest.pFullTracer->get_new_state_root(), 64), newStateRoot);
         zkresult zkr = pHashDB->purge(proverRequest.uuid, newStateRoot, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);
         if (zkr != ZKR_SUCCESS)
         {
@@ -4367,6 +4369,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
         proverRequest.flushId = 0;
         proverRequest.lastSentFlushId = 0;
+
+        /*Goldilocks::Element consolidatedStateRoot[4];
+        zkr = pHashDB->consolidateState(newStateRoot, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, consolidatedStateRoot, proverRequest.flushId, proverRequest.lastSentFlushId);
+        if (zkr != ZKR_SUCCESS)
+        {
+            proverRequest.result = zkr;
+            logError(ctx, string("Failed calling pHashDB->consolidateState() result=") + zkresult2string(zkr));
+            pHashDB->cancelBatch(proverRequest.uuid);
+            return;
+        }*/
     }
     else
     {
