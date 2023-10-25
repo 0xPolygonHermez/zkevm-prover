@@ -579,7 +579,7 @@ zkresult KeyValueHistoryPage::Write (PageContext &ctx, uint64_t &pageNumber, con
 
                 // Copy the current entry to the next history one
                 uint64_t previousVersionOffset = page->historyOffset;
-                memcpy(page + page->historyOffset, &page->keyValueEntry[index], entrySize);
+                memcpy((uint8_t *)page + page->historyOffset, &page->keyValueEntry[index], entrySize);
                 page->historyOffset += entrySize;
 
                 // Get an editable version of the header page
