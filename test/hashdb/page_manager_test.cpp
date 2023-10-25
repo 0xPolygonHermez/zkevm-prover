@@ -15,6 +15,8 @@
 #include "page_manager.hpp"
 #include "config.hpp"
 #include "header_page.hpp"
+#include "zkglobals.hpp"
+#include <bitset>
 
 
 uint64_t PageManagerTest (void)
