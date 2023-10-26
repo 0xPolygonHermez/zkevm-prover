@@ -32,7 +32,9 @@ public:
     uint64_t intermediateNodes;
     uint64_t leafNodes;
     uint64_t maxLevel;
-    KeyValueHistoryCounters() : intermediateNodes(0), leafNodes(0), maxLevel(0) {};
+    uint64_t intermediateHashes;
+    uint64_t leafHashes;
+    KeyValueHistoryCounters() : intermediateNodes(0), leafNodes(0), maxLevel(0), intermediateHashes(0), leafHashes(0) {};
 };
 
 class KeyValueHistoryPage
@@ -53,9 +55,9 @@ public:
     static zkresult ReadTree      (PageContext &ctx, const uint64_t pageNumber,  const uint64_t version,  vector<KeyValue> &keyValues, vector<HashValueGL> *hashValues);
     static zkresult Write         (PageContext &ctx,       uint64_t &pageNumber, const string &key, const uint64_t version, const mpz_class &value, uint64_t &headerPageNumber);
     
-    static zkresult calculateHash             (PageContext &ctx, const uint64_t pageNumber, Goldilocks::Element (&hash)[4], uint64_t &headerPageNumber);
+    static zkresult calculateHash             (PageContext &ctx, uint64_t &pageNumber, Goldilocks::Element (&hash)[4], uint64_t &headerPageNumber);
 private:
-    static zkresult calculatePageHash         (PageContext &ctx, const uint64_t pageNumber, const uint64_t level, Goldilocks::Element (&hash)[4], uint64_t &headerPageNumber);
+    static zkresult calculatePageHash         (PageContext &ctx, uint64_t &pageNumber, const uint64_t level, Goldilocks::Element (&hash)[4], uint64_t &headerPageNumber);
 public:
     static void Print (PageContext &ctx, const uint64_t pageNumber, bool details, const string &prefix, const uint64_t level, KeyValueHistoryCounters &counters);
     static void Print (PageContext &ctx, const uint64_t pageNumber, bool details, const string &prefix);
