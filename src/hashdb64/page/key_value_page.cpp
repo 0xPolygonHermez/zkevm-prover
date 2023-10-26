@@ -316,7 +316,8 @@ zkresult KeyValuePage::Write (PageContext &ctx, uint64_t &pageNumber, const stri
             {
                 return zkr;
             }
-            page->key[index] = nextKeyValuePage + (uint64_t(2) << 60);
+            //nextKeyValuePage could have changed, so we need to update it.
+            page->key[index] = nextKeyValuePage + (uint64_t(2) << 60); 
 
             return ZKR_SUCCESS;
         }

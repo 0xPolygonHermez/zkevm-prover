@@ -10,6 +10,8 @@
 #include "get_string_increment_test.hpp"
 #include "database_cache_test.hpp"
 #include "hashdb_test.hpp"
+#include "key_utils_unit_tests.hpp"
+
 
 uint64_t UnitTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config)
 {
@@ -53,6 +55,10 @@ uint64_t UnitTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &c
     numberOfErrors += HashDBTest(config);
     TimerStopAndLog(UNIT_TEST_HASH_DB);
     
+    TimerStart(SPLITKEY9_UNIT_TEST);
+    splitKey9Test();
+    TimerStopAndLog(SPLITKEY9_UNIT_TEST);
+
     TimerStopAndLog(UNIT_TEST);
     
     if (numberOfErrors == 0)

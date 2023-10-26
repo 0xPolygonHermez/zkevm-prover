@@ -52,21 +52,22 @@ void splitKey6 (Goldilocks &fr, const Goldilocks::Element (&key)[4], uint8_t (&r
 void splitKey9 (const string &baString, vector<uint64_t> &result)
 {
     // Calculate the total number of bits to read
-    uint64_t numberOfBits = baString.size() * 8;
+    uint64_t size = baString.size();
+    uint64_t numberOfBits = size << 3;
     
     // Split them in chunks of 9 bits
     for (uint64_t i = 0; i < numberOfBits; i += 9)
     {
         // Calculate the byte and bit of the first part
-        uint64_t firstByte = i/8;
-        uint64_t firstByteBit = i%8;
+        uint64_t firstByte = i >> 3;
+        uint64_t firstByteBit = i & 7;
         uint8_t resultByte = (uint8_t)baString[firstByte];
         resultByte = resultByte << firstByteBit;
-        uint64_t resultPart = resultByte;
-        resultPart = resultPart << (8 - firstByteBit);
+        uint64_t resultPart = uint64_t(resultByte);
+        resultPart = resultPart << 1;
 
         // If this is not the end of the byte array, consume the rest of bits of the next byte
-        if ((firstByte + 1) < baString.size())
+        if ((firstByte + 1) < size)
         {
             resultByte = (uint8_t)baString[firstByte + 1];
             resultByte = resultByte >> (7 - firstByteBit);
@@ -74,7 +75,7 @@ void splitKey9 (const string &baString, vector<uint64_t> &result)
         }
 
         // Add to the result
-        result.emplace_back(resultPart);
+        result.emplace_back((uint64_t)resultPart);
     }
 }
 

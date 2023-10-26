@@ -88,6 +88,7 @@ zkresult RawDataPage::Read (PageContext &ctx, const uint64_t _pageNumber, const 
 zkresult RawDataPage::Write (PageContext &ctx, uint64_t &pageNumber, const string &data)
 {
     // Get the pointer corresponding to the current page number
+    pageNumber = ctx.pageManager.editPage(pageNumber);
     RawDataStruct * page = (RawDataStruct *)ctx.pageManager.getPageAddress(pageNumber);
 
     // Get page attributes
