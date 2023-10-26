@@ -94,7 +94,7 @@ zkresult KeyValueHistoryPage::Read (PageContext &ctx, const uint64_t pageNumber,
                 }
 
                 // Search for 
-                uint64_t previousVersionOffset = (page->keyValueEntry[index][1] >> 48) & U64Mask12;
+                uint64_t previousVersionOffset = (page->keyValueEntry[index][0] >> 48) & U64Mask12;
 
                 // If there is no previous version for this key, then this is a zero
                 if (previousVersionOffset == 0)
@@ -197,10 +197,10 @@ zkresult KeyValueHistoryPage::ReadLevel (PageContext &ctx, const uint64_t pageNu
             }
 
             // If this is the same key
-            if (memcmp(key.c_str(), keyValue.c_str(), 32) != 0)
+            if (memcmp(key.c_str(), keyValue.c_str(), 32) == 0)
             {
                 // Get the key level
-                keyLevel = (level + 1) * 6;
+                keyLevel = (level + 1) * 6; 
 
                 return ZKR_SUCCESS;
             }
@@ -477,6 +477,7 @@ zkresult KeyValueHistoryPage::Write (PageContext &ctx, uint64_t &pageNumber, con
     zkresult zkr;
 
     // Get the data from this page
+    pageNumber = ctx.pageManager.editPage(pageNumber);
     KeyValueHistoryStruct * page = (KeyValueHistoryStruct *)ctx.pageManager.getPageAddress(pageNumber);
     uint64_t index = keyBits[level];
     uint64_t control = page->keyValueEntry[index][0] >> 60;
@@ -574,7 +575,6 @@ zkresult KeyValueHistoryPage::Write (PageContext &ctx, uint64_t &pageNumber, con
                 page->historyOffset += entrySize;
 
                 // Get an editable version of the header page
-                headerPageNumber = ctx.pageManager.editPage(headerPageNumber);
                 HeaderStruct *headerPage = (HeaderStruct *)ctx.pageManager.getPageAddress(headerPageNumber);
 
                 // Get the current rawDataPage and offset
@@ -624,11 +624,10 @@ zkresult KeyValueHistoryPage::Write (PageContext &ctx, uint64_t &pageNumber, con
             uint64_t oldNextPageNumber = page->keyValueEntry[index][1] & U64Mask48;
             uint64_t newNextPageNumber = oldNextPageNumber;
             zkr = Write(ctx, newNextPageNumber, key, keyBits, version, value, level + 1, headerPageNumber);
-            if (newNextPageNumber != oldNextPageNumber)
-            {
-                page->keyValueEntry[index][1] = newNextPageNumber;
-                page->keyValueEntry[index][2] = 0;
-            }
+            // newNextPageNumber can be modified in the Write call
+            page->keyValueEntry[index][1] = newNextPageNumber;
+            page->keyValueEntry[index][2] = 0;
+            
             return zkr;
         }
 
