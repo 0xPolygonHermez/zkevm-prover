@@ -529,7 +529,16 @@ zkresult KeyValueHistoryPage::Write (PageContext &ctx, uint64_t &pageNumber, con
             // Update entry
             page->keyValueEntry[index][0] = (uint64_t(1) << 60) | version;
             page->keyValueEntry[index][1] = (insertionRawDataOffset << 48) + insertionRawDataPage;
-            page->keyValueEntry[index][2] = 0; // Mask as no hash has been calculated
+
+            // Reset all leaf nodes hashes, since their relative positions (leaf node level) might have changed
+            for (uint64_t i=0; i<64; i++)
+            {
+                uint64_t control = page->keyValueEntry[i][0] >> 60;
+                if (control == 1)
+                {
+                    page->keyValueEntry[i][2] = 0;
+                }
+            }
 
             return ZKR_SUCCESS;            
         }
@@ -565,7 +574,7 @@ zkresult KeyValueHistoryPage::Write (PageContext &ctx, uint64_t &pageNumber, con
 
                 // If the value is different, then check versions and move this entry to the history array
                 uint64_t currentVersion = page->keyValueEntry[index][0] & U64Mask48;
-                if (version <= currentVersion)
+                if (version < currentVersion)
                 {
                     zklog.error("KeyValueHistoryPage::Write() version discrepancy currentVersion=" + to_string(currentVersion) + " key=" + ba2string(key) + " version=" + to_string(version) + " level=" + to_string(level) + " index=" + to_string(index));
                     return ZKR_DB_ERROR;
@@ -590,7 +599,7 @@ zkresult KeyValueHistoryPage::Write (PageContext &ctx, uint64_t &pageNumber, con
 
                 // Copy the current entry to the next history one
                 uint64_t previousVersionOffset = page->historyOffset;
-                memcpy(page + page->historyOffset, &page->keyValueEntry[index], entrySize);
+                memcpy((uint8_t *)page + page->historyOffset, &page->keyValueEntry[index], entrySize);
                 page->historyOffset += entrySize;
 
                 // Get an editable version of the header page
@@ -677,7 +686,11 @@ zkresult KeyValueHistoryPage::Write (PageContext &ctx, uint64_t &pageNumber, con
 
 zkresult KeyValueHistoryPage::calculateHash (PageContext &ctx, const uint64_t pageNumber, Goldilocks::Element (&hash)[4], uint64_t &headerPageNumber)
 {
-    return calculatePageHash(ctx, pageNumber, 0, hash, headerPageNumber);
+    //Print(pageNumber, true, "Before calculatePageHash() ");
+    zkresult zkr = calculatePageHash(ctx, pageNumber, 0, hash, headerPageNumber);
+    //Print(pageNumber, true, "After calculatePageHash() ");
+    zklog.info("KeyValueHistoryPage::calculateHash() calculated new hash=" + fea2string(fr, hash));
+    return zkr;
 }
 
 zkresult KeyValueHistoryPage::calculatePageHash (PageContext &ctx, const uint64_t pageNumber, const uint64_t level, Goldilocks::Element (&hash)[4], uint64_t &headerPageNumber)
@@ -733,7 +746,7 @@ zkresult KeyValueHistoryPage::calculatePageHash (PageContext &ctx, const uint64_
                 Child child;
                 child.type = LEAF;
                 string2fea(fr, ba2string(keyAndValue.substr(0, 32)), child.leaf.key);
-                ba2scalar(child.leaf.value, keyAndValue.c_str() + 32);
+                ba2scalar(child.leaf.value, keyAndValue.substr(32));
 
                 // Calculate position
                 uint64_t position = getKeyChildren64Position(index);
@@ -861,11 +874,38 @@ zkresult KeyValueHistoryPage::calculatePageHash (PageContext &ctx, const uint64_
 
     // Get the hash of this page
     const Child &child1 = treeChunk.getChild1();
-    zkassert(child1.type == INTERMEDIATE);
-    hash[0] = child1.intermediate.hash[0];
-    hash[1] = child1.intermediate.hash[1];
-    hash[2] = child1.intermediate.hash[2];
-    hash[3] = child1.intermediate.hash[3];
+    switch (child1.type)
+    {
+        case ZERO:
+        {
+            hash[0] = fr.zero();
+            hash[1] = fr.zero();
+            hash[2] = fr.zero();
+            hash[3] = fr.zero();
+            break;
+        }
+        case LEAF:
+        {
+            hash[0] = child1.leaf.hash[0];
+            hash[1] = child1.leaf.hash[1];
+            hash[2] = child1.leaf.hash[2];
+            hash[3] = child1.leaf.hash[3];
+            break;
+        }
+        case INTERMEDIATE:
+        {
+            hash[0] = child1.intermediate.hash[0];
+            hash[1] = child1.intermediate.hash[1];
+            hash[2] = child1.intermediate.hash[2];
+            hash[3] = child1.intermediate.hash[3];
+            break;
+        }
+        default:
+        {
+            zklog.error("KeyValueHistoryPage::calculatePageHash() found invalid child1.type=" + to_string(child1.type) + " level=" + to_string(level));
+            return ZKR_DB_ERROR;
+        }
+    }
 
     return ZKR_SUCCESS;
 }

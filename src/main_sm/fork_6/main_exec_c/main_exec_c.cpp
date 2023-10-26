@@ -42,7 +42,9 @@ void MainExecutorC::execute (ProverRequest &proverRequest)
     // Copy input database content into context database
     if (proverRequest.input.db.size() > 0)
     {
-        pHashDB->loadDB(proverRequest.input.db, true);
+        Goldilocks::Element stateRoot[4];
+        scalar2fea(fr, proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot, stateRoot);
+        pHashDB->loadDB(proverRequest.input.db, true, stateRoot);
         uint64_t flushId, lastSentFlushId;
         pHashDB->flush(emptyString, emptyString, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, flushId, lastSentFlushId);
         if (config.dbClearCache && (config.databaseURL != "local"))

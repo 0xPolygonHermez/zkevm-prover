@@ -260,7 +260,7 @@ zkresult HashDBRemote::getProgram (const Goldilocks::Element (&key)[4], vector<u
     return static_cast<zkresult>(response.result().code());
 }
 
-void HashDBRemote::loadDB(const DatabaseMap::MTMap &input, const bool persistent)
+void HashDBRemote::loadDB(const DatabaseMap::MTMap &input, const bool persistent, const Goldilocks::Element (&stateRoot)[4])
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
     gettimeofday(&t, NULL);
@@ -272,6 +272,19 @@ void HashDBRemote::loadDB(const DatabaseMap::MTMap &input, const bool persistent
     mtMap2grpc(fr, input, request.mutable_input_db());
 
     request.set_persistent(persistent);
+
+
+    hashdb::v1::Fea *state_root = new hashdb::v1::Fea();
+    if (state_root == NULL)
+    {
+        zklog.error("HashDBRemote::loadDB() failed allocating hashdb::v1::Fea for state_root");
+        exitProcess();
+    }
+    state_root->set_fe0(fr.toU64(stateRoot[0]));
+    state_root->set_fe1(fr.toU64(stateRoot[1]));
+    state_root->set_fe2(fr.toU64(stateRoot[2]));
+    state_root->set_fe3(fr.toU64(stateRoot[3]));
+    request.set_allocated_state_root(state_root);
 
     grpc::Status s = stub->LoadDB(&context, request, &response);
     if (s.error_code() != grpc::StatusCode::OK)

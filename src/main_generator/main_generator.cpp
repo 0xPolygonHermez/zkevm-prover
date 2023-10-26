@@ -279,7 +279,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    // Copy input database content into context database\n";
     code += "    if (proverRequest.input.db.size() > 0)\n";
     code += "    {\n";
-    code += "        mainExecutor.pHashDB->loadDB(proverRequest.input.db, true);\n";
+    code += "        Goldilocks::Element stateRoot[4];\n";
+    code += "        scalar2fea(fr, proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot, stateRoot);\n";
+    code += "        mainExecutor.pHashDB->loadDB(proverRequest.input.db, true, stateRoot);\n";
     code += "        mainExecutor.pHashDB->flush(emptyString, emptyString, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, flushId, lastSentFlushId);\n";
     code += "        if (mainExecutor.config.dbClearCache && (mainExecutor.config.databaseURL != \"local\"))\n";
     code += "        {\n";

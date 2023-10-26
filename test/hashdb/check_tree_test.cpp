@@ -45,7 +45,7 @@ uint64_t CheckTreeTest (const Config &config)
 
         CheckTreeCounters checkTreeCounters;
 
-        zkresult result = CheckTree(db, root, 0, checkTreeCounters);
+        zkresult result = CheckTree(db, root, 0, checkTreeCounters, "");
         if (result != ZKR_SUCCESS)
         {
             zklog.error("CheckTreeTest() failed calling ClimbTree() result=" + zkresult2string(result));

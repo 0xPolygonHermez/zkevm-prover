@@ -393,8 +393,11 @@ using grpc::Status;
         return Status::CANCELLED;
     }
 
+    Goldilocks::Element stateRoot[4];
+    grpc2fea(fr, request->state_root(), stateRoot);
+
     // Call load database
-    pHashDB->loadDB(map, request->persistent());
+    pHashDB->loadDB(map, request->persistent(), stateRoot);
 
 #ifdef LOG_HASHDB_SERVICE
     zklog.info("HashDBServiceImpl::LoadDB() completed.");
