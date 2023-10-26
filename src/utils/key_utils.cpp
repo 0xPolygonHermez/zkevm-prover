@@ -35,18 +35,18 @@ void splitKey6 (Goldilocks &fr, const Goldilocks::Element (&key)[4], uint8_t (&r
     for (uint64_t i=0; i<42; i++)
     {
         result[i] =
-            (bits[i*6 + 0] ? 0b000001 : 0) +
-            (bits[i*6 + 1] ? 0b000010 : 0) +
-            (bits[i*6 + 2] ? 0b000100 : 0) +
-            (bits[i*6 + 3] ? 0b001000 : 0) +
-            (bits[i*6 + 4] ? 0b010000 : 0) +
-            (bits[i*6 + 5] ? 0b100000 : 0);
+            (bits[i*6 + 0] ? 0b100000 : 0) +
+            (bits[i*6 + 1] ? 0b010000 : 0) +
+            (bits[i*6 + 2] ? 0b001000 : 0) +
+            (bits[i*6 + 3] ? 0b000100 : 0) +
+            (bits[i*6 + 4] ? 0b000010 : 0) +
+            (bits[i*6 + 5] ? 0b000001 : 0);
     }
     result[42] =
-        (bits[42*6 + 0] ? 0b000001 : 0) +
-        (bits[42*6 + 1] ? 0b000010 : 0) +
-        (bits[42*6 + 2] ? 0b000100 : 0) +
-        (bits[42*6 + 3] ? 0b001000 : 0);
+        (bits[42*6 + 0] ? 0b100000 : 0) +
+        (bits[42*6 + 1] ? 0b010000 : 0) +
+        (bits[42*6 + 2] ? 0b001000 : 0) +
+        (bits[42*6 + 3] ? 0b000100 : 0);
 }
 
 void splitKey9 (const string &baString, vector<uint64_t> &result)
@@ -132,56 +132,4 @@ void removeKeyBits (Goldilocks &fr, const Goldilocks::Element (&key)[4], uint64_
     {
         rkey[i] = fr.fromU64(auxk[i]);
     }
-}
-
-uint64_t getKeyChildren64Position (const bool (&keys)[256], uint64_t level)
-{
-    if (level > 250)
-    {
-        zklog.error("getKeyChildren64Position() got invalid level=" + to_string(level));
-        exitProcess();
-    }
-    uint64_t result = 0;
-    if (keys[level + 0]) result += 32;
-    if (keys[level + 1]) result += 16;
-    if (keys[level + 2]) result += 8;
-    if (keys[level + 3]) result += 4;
-    if (keys[level + 4]) result += 2;
-    if (keys[level + 5]) result += 1;
-    return result;
-}
-
-// TODO: use SMT order in splitKey6
-uint64_t getKeyChildren64Position (const uint64_t index)
-{
-    zkassert(index <= 64);
-
-    uint64_t result = 0;
-
-    if ((index & 0b100000) != 0)
-    {
-        result += 1;
-    }
-    if ((index & 0b010000) != 0)
-    {
-        result += 2;
-    }
-    if ((index & 0b001000) != 0)
-    {
-        result += 4;
-    }
-    if ((index & 0b000100) != 0)
-    {
-        result += 8;
-    }
-    if ((index & 0b000010) != 0)
-    {
-        result += 16;
-    }
-    if ((index & 0b000001) != 0)
-    {
-        result += 32;
-    }
-
-    return result;
 }

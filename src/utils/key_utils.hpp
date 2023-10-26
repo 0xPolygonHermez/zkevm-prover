@@ -21,10 +21,4 @@ void joinKey (Goldilocks &fr, const vector<uint64_t> &bits, const Goldilocks::El
 // Remove bits in SMT order from a key and get a remaining key
 void removeKeyBits (Goldilocks &fr, const Goldilocks::Element (&key)[4], uint64_t nBits, Goldilocks::Element (&rkey)[4]);
 
-// Get the children 64 position of a key in this level
-uint64_t getKeyChildren64Position (const bool (&keys)[256], uint64_t level);
-
-// Get the children 64 position of a key located in this page index
-uint64_t getKeyChildren64Position (const uint64_t index);
-
 #endif

@@ -509,7 +509,6 @@ zkresult TreeChunk::loadFromKeyValueHistoryPage (PageContext &ctx, const uint64_
     {
         // Get control
         uint64_t control = page->keyValueEntry[index][0] >> 60;
-        uint64_t position = getKeyChildren64Position(index);
 
         Child child;
 
@@ -519,7 +518,7 @@ zkresult TreeChunk::loadFromKeyValueHistoryPage (PageContext &ctx, const uint64_
             // Empty slot
             case 0:
             {
-                children64[position].type = ZERO;
+                children64[index].type = ZERO;
                 continue;            
             }
             
@@ -536,6 +535,13 @@ zkresult TreeChunk::loadFromKeyValueHistoryPage (PageContext &ctx, const uint64_
                     // If it is equal or lower, then we found the slot, although it could be occupied by a different key, so we need to check
                     if (version >= foundVersion)
                     {
+                        // Check that we have calculated the hash
+                        if (page->keyValueEntry[2] == 0)
+                        {
+                            zklog.error("TreeChunk::loadFromKeyValueHistoryPage() found leaf node with hash=0 version=" + to_string(version) + " level=" + to_string(level) + " index=" + to_string(index) + " page=" + to_string(pageNumber));
+                            return ZKR_DB_ERROR;
+                        }
+
                         // Get key and value from raw data
                         uint64_t rawDataPage = keyValueEntry[1] & U64Mask48;
                         uint64_t rawDataOffset = keyValueEntry[1] >> 48;
@@ -555,9 +561,9 @@ zkresult TreeChunk::loadFromKeyValueHistoryPage (PageContext &ctx, const uint64_
                         // Set key and value in child
                         string keyBa = keyValue.substr(0, 32);
                         string keyString = ba2string(keyBa);                        
-                        children64[position].type = LEAF;
-                        string2fea(fr, keyString, children64[position].leaf.key); 
-                        ba2scalar((uint8_t *)keyValue.c_str() + 32, 32, children64[position].leaf.value);
+                        children64[index].type = LEAF;
+                        string2fea(fr, keyString, children64[index].leaf.key); 
+                        ba2scalar((uint8_t *)keyValue.c_str() + 32, 32, children64[index].leaf.value);
 
                         // Get hash from raw data
                         rawDataPage = keyValueEntry[2] & U64Mask48;
@@ -582,7 +588,7 @@ zkresult TreeChunk::loadFromKeyValueHistoryPage (PageContext &ctx, const uint64_
 
                         // Set hash in child
                         string hashString = ba2string(hashBa);
-                        string2fea(fr, hashString, children64[position].leaf.hash);
+                        string2fea(fr, hashString, children64[index].leaf.hash);
 
                         break;
                     }
@@ -598,7 +604,7 @@ zkresult TreeChunk::loadFromKeyValueHistoryPage (PageContext &ctx, const uint64_
                     // If there is no previous version for this key, then this is a zero
                     if (previousVersionOffset == 0)
                     {
-                        children64[position].type = ZERO;
+                        children64[index].type = ZERO;
                         return ZKR_SUCCESS;
                     }
 
@@ -619,7 +625,12 @@ zkresult TreeChunk::loadFromKeyValueHistoryPage (PageContext &ctx, const uint64_
             // Intermediate node
             case 2:
             {
-                children64[position].type = INTERMEDIATE;
+                // Check that we have calculated the hash
+                if (page->keyValueEntry[index][2] == 0)
+                {
+                    zklog.error("TreeChunk::loadFromKeyValueHistoryPage() found intermediate node with hash=0 version=" + to_string(version) + " level=" + to_string(level) + " index=" + to_string(index) + " page=" + to_string(pageNumber));
+                    return ZKR_DB_ERROR;
+                }
 
                 // Get hash from raw data
                 uint64_t rawDataPage = page->keyValueEntry[index][2] & U64Mask48;
@@ -639,7 +650,8 @@ zkresult TreeChunk::loadFromKeyValueHistoryPage (PageContext &ctx, const uint64_
 
                 // Set hash in child
                 string hashString = ba2string(hashBa);
-                string2fea(fr, hashString, children64[position].intermediate.hash);
+                children64[index].type = INTERMEDIATE;
+                string2fea(fr, hashString, children64[index].intermediate.hash);
 
                 continue;
             }
