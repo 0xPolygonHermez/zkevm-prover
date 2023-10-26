@@ -41,7 +41,11 @@ uint64_t PageManagerPerformanceTest (void)
 
     //remove folder if exists
     std::string command = "rm -rf " + folderName;
-    system(command.c_str());
+    int r=system(command.c_str());
+    if(r!=0){
+        zklog.info("Error removing folder");
+        return 1;
+    }
 
     // Create the state manager
     double start = omp_get_wtime();
@@ -153,7 +157,11 @@ uint64_t PageManagerPerformanceTest (void)
 
     //delete folder
     command = "rm -rf " + folderName;
-    system(command.c_str());
+    r = system(command.c_str());
+    if(r!=0){
+        zklog.info("Error removing folder");
+        return 1;
+    }
     return 0;
 }
 
@@ -235,7 +243,11 @@ uint64_t PageManagerAccuracyTest (void)
     
     //delete folder (is exists)
     std::string command = "rm -rf " + folderName;
-    system(command.c_str());
+    int r=system(command.c_str());
+    if(r!=0){
+        zklog.info("Error removing folder");
+        return 1;
+    }
     
 
     // Same tests than with memory version:
@@ -333,7 +345,11 @@ uint64_t PageManagerAccuracyTest (void)
 
     //delete folder
     command = "rm -rf " + folderName;
-    system(command.c_str());
+    r = system(command.c_str());
+    if(r!=0){
+        zklog.info("Error removing folder");
+        return 1;
+    }
     
 
     return 0;   
@@ -367,7 +383,11 @@ uint64_t PageManagerDBResizeTest (void)
     
     //delete folder (is exists)
     std::string command = "rm -rf " + folderName;
-    system(command.c_str());
+    int r = system(command.c_str());
+    if(r!=0){
+        zklog.info("Error removing folder");
+        return 1;
+    }
 
     PageManager pageManagerFile;
     Config configPMFile;
@@ -384,6 +404,14 @@ uint64_t PageManagerDBResizeTest (void)
     assert(pageManagerFile.getNumFreePages() == 0);
     pageManagerFile.getFreePage();
     assert(pageManagerFile.getNumFreePages() == initialFreePages+7);
-
+    
+    //delete folder
+    command = "rm -rf " + folderName;
+    r = system(command.c_str());
+    if(r!=0){
+        zklog.info("Error removing folder");
+        return 1;
+    }
+    
     return 0;
 }
