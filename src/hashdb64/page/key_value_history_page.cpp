@@ -78,8 +78,27 @@ zkresult KeyValueHistoryPage::Read (PageContext &ctx, const uint64_t pageNumber,
                         //zklog.info("KeyValueHistoryPage::Read() found existing key=" + ba2string(keyValue.substr(0, 32)) + " != key=" + ba2string(key));
                         value = 0;
 
-                        // Get the key level
-                        keyLevel = (level + 1) * 6;
+                        // If keys are different, we need to know how different they are
+                        Goldilocks::Element keyFea[4];
+                        string2fea(fr, ba2string(keyValue.substr(0, 32)), keyFea);
+                        uint8_t foundKeyBitsArray[43];
+                        splitKey6(fr, keyFea, foundKeyBitsArray);
+                        string foundKeyBits;
+                        foundKeyBits.append((char *)foundKeyBitsArray, 43);
+
+                        // Find the first 6-bit set that is different
+                        uint64_t i=0;
+                        for (; i<43; i++)
+                        {
+                            if (keyBits[i] != foundKeyBits[i])
+                            {
+                                break;
+                            }
+                        }
+
+                        // Set the level
+                        zkassertpermanent(i>=level);
+                        keyLevel = (i + 1) * 6;
 
                         return ZKR_SUCCESS;
                     }
@@ -110,7 +129,7 @@ zkresult KeyValueHistoryPage::Read (PageContext &ctx, const uint64_t pageNumber,
                 // If not zero, then check the range of the previous version
                 if ( (previousVersionOffset < minHistoryOffset) ||
                      (previousVersionOffset > maxHistoryOffset) ||
-                     ((previousVersionOffset & U64Mask4) != 0) )
+                     (((previousVersionOffset - minHistoryOffset) & (entrySize -1) ) != 0) )
                 {
                     zklog.error("KeyValueHistoryPage::Read() found invalid previousVersionOffset=" + to_string(previousVersionOffset));
                     return ZKR_DB_ERROR;
