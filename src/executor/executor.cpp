@@ -142,12 +142,12 @@ void Executor::process_batch (ProverRequest &proverRequest)
         }
         case 5: // fork_5
         {
-            if (config.useMainExecC)
+            /*if (config.useMainExecC)
             {
                 //zklog.info("Executor::process_batch() fork 5 C");
                 mainExecutorC_fork_5.execute(proverRequest);
             }
-            else if (config.useMainExecGenerated)
+            else*/ if (config.useMainExecGenerated)
             {
                 //zklog.info("Executor::process_batch() fork 5 generated");
                 fork_5::main_exec_generated_fast(mainExecutor_fork_5, proverRequest);
@@ -177,12 +177,12 @@ void Executor::process_batch (ProverRequest &proverRequest)
         }
         case 6: // fork_6
         {
-            if (config.useMainExecC)
+            /*if (config.useMainExecC)
             {
                 //zklog.info("Executor::process_batch() fork 6 C");
                 mainExecutorC_fork_6.execute(proverRequest);
             }
-            else if (config.useMainExecGenerated)
+            else*/ if (config.useMainExecGenerated)
             {
                 //zklog.info("Executor::process_batch() fork 5 generated");
                 fork_6::main_exec_generated_fast(mainExecutor_fork_6, proverRequest);
