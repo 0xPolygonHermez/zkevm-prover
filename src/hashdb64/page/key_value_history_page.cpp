@@ -512,7 +512,7 @@ zkresult KeyValueHistoryPage::Write (PageContext &ctx, uint64_t &pageNumber, con
             KeyValueHistoryStruct * page = (KeyValueHistoryStruct *)ctx.pageManager.getPageAddress(pageNumber);
 
             // Get an editable version of the header page
-            //headerPageNumber = ctx.pageManager.editPage(headerPageNumber);
+            headerPageNumber = ctx.pageManager.editPage(headerPageNumber);
             HeaderStruct *headerPage = (HeaderStruct *)ctx.pageManager.getPageAddress(headerPageNumber);
 
             uint64_t insertionRawDataPage = headerPage->rawDataPage;
@@ -603,6 +603,7 @@ zkresult KeyValueHistoryPage::Write (PageContext &ctx, uint64_t &pageNumber, con
                 page->historyOffset += entrySize;
 
                 // Get an editable version of the header page
+                headerPageNumber = ctx.pageManager.editPage(headerPageNumber);
                 HeaderStruct *headerPage = (HeaderStruct *)ctx.pageManager.getPageAddress(headerPageNumber);
 
                 // Get the current rawDataPage and offset
@@ -638,11 +639,13 @@ zkresult KeyValueHistoryPage::Write (PageContext &ctx, uint64_t &pageNumber, con
             newPage->keyValueEntry[newIndex][1] = page->keyValueEntry[index][1];
             newPage->keyValueEntry[newIndex][2] = 0; // Invalidate hash, since level has changed
 
+            zkr = Write(ctx, newPageNumber, key, keyBits, version, value, level+1, headerPageNumber);
+
             page->keyValueEntry[index][0] = uint64_t(2) << 60;
             page->keyValueEntry[index][1] = newPageNumber;
             page->keyValueEntry[index][2] = 0; // Invalidate hash, since now it is an intermediate node hash
 
-            return Write(ctx, newPageNumber, key, keyBits, version, value, level+1, headerPageNumber);            
+            return zkr;
         }
 
         // Intermediate node
@@ -707,6 +710,7 @@ zkresult KeyValueHistoryPage::calculatePageHash (PageContext &ctx, uint64_t &pag
     KeyValueHistoryStruct *page = (KeyValueHistoryStruct *)ctx.pageManager.getPageAddress(pageNumber);
 
     // Get the header page
+    headerPageNumber = ctx.pageManager.editPage(headerPageNumber);
     HeaderStruct *headerPage = (HeaderStruct *)ctx.pageManager.getPageAddress(headerPageNumber);
 
     // Get the SMT level

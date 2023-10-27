@@ -140,7 +140,7 @@ zkresult KeyValuePage::Read (PageContext &ctx, const uint64_t pageNumber, const 
     return Read(ctx, pageNumber, key, keyBits, value, 0);
 }
 
-zkresult KeyValuePage::Write (PageContext &ctx, uint64_t &pageNumber, const string &key, const vector<uint64_t> &keyBits, const string &value, const uint64_t level, const uint64_t headerPageNumber)
+zkresult KeyValuePage::Write (PageContext &ctx, uint64_t &pageNumber, const string &key, const vector<uint64_t> &keyBits, const string &value, const uint64_t level, uint64_t &headerPageNumber)
 {
     // Check input parameters
     if (level >= keyBits.size())
@@ -177,6 +177,7 @@ zkresult KeyValuePage::Write (PageContext &ctx, uint64_t &pageNumber, const stri
             lengthKeyValue += value;
 
             // Get header page data
+            headerPageNumber = ctx.pageManager.editPage(headerPageNumber);
             HeaderStruct * headerPage = (HeaderStruct *)ctx.pageManager.getPageAddress(headerPageNumber);
             uint64_t rawDataPage = headerPage->rawDataPage;
             uint64_t rawDataOffset = RawDataPage::GetOffset(ctx, headerPage->rawDataPage);
@@ -317,7 +318,7 @@ zkresult KeyValuePage::Write (PageContext &ctx, uint64_t &pageNumber, const stri
                 return zkr;
             }
             //nextKeyValuePage could have changed, so we need to update it.
-            page->key[index] = nextKeyValuePage + (uint64_t(2) << 60); 
+            page->key[index] = nextKeyValuePage | (uint64_t(2) << 60); 
 
             return ZKR_SUCCESS;
         }
@@ -333,7 +334,7 @@ zkresult KeyValuePage::Write (PageContext &ctx, uint64_t &pageNumber, const stri
     return ZKR_DB_ERROR;
 }
 
-zkresult KeyValuePage::Write (PageContext &ctx, uint64_t &pageNumber, const string &key, const string &value, const uint64_t headerPageNumber)
+zkresult KeyValuePage::Write (PageContext &ctx, uint64_t &pageNumber, const string &key, const string &value, uint64_t &headerPageNumber)
 {
     // Check input parameters
     if (key.size() == 0)
@@ -345,7 +346,6 @@ zkresult KeyValuePage::Write (PageContext &ctx, uint64_t &pageNumber, const stri
     // Get key bits
     vector<uint64_t> keyBits;
     splitKey9(key, keyBits);
-
 
     //zklog.info("KeyValuePage::Write() key=" + ba2string(key) + " keyBits=" + to_string(keyBits[0]) + ":" + to_string(keyBits[1]) + ":" + to_string(keyBits[2]));
 
