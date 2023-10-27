@@ -512,7 +512,7 @@ zkresult KeyValueHistoryPage::Write (PageContext &ctx, uint64_t &pageNumber, con
             KeyValueHistoryStruct * page = (KeyValueHistoryStruct *)ctx.pageManager.getPageAddress(pageNumber);
 
             // Get an editable version of the header page
-            //headerPageNumber = ctx.pageManager.editPage(headerPageNumber);
+            headerPageNumber = ctx.pageManager.editPage(headerPageNumber);
             HeaderStruct *headerPage = (HeaderStruct *)ctx.pageManager.getPageAddress(headerPageNumber);
 
             uint64_t insertionRawDataPage = headerPage->rawDataPage;
@@ -603,6 +603,7 @@ zkresult KeyValueHistoryPage::Write (PageContext &ctx, uint64_t &pageNumber, con
                 page->historyOffset += entrySize;
 
                 // Get an editable version of the header page
+                headerPageNumber = ctx.pageManager.editPage(headerPageNumber);
                 HeaderStruct *headerPage = (HeaderStruct *)ctx.pageManager.getPageAddress(headerPageNumber);
 
                 // Get the current rawDataPage and offset
