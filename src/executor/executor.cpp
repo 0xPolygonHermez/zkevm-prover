@@ -141,8 +141,8 @@ void Executor::process_batch (ProverRequest &proverRequest)
             return;
         }
         case 5: // fork_5
-        {
-            if (config.useMainExecC)
+        {            
+            if (config.useMainExecC) // Do not use in production; under development
             {
                 //zklog.info("Executor::process_batch() fork 5 C");
                 mainExecutorC_fork_5.execute(proverRequest);
@@ -177,7 +177,7 @@ void Executor::process_batch (ProverRequest &proverRequest)
         }
         case 6: // fork_6
         {
-            if (config.useMainExecC)
+            if (config.useMainExecC) // Do not use in production; under development
             {
                 //zklog.info("Executor::process_batch() fork 6 C");
                 mainExecutorC_fork_6.execute(proverRequest);

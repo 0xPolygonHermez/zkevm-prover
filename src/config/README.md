@@ -43,13 +43,13 @@ The configuration parameters can be of different uses:
 |`runUnitTest`|test|boolean|Runs a unit test|false|RUN_UNIT_TEST|
 |**`executeInParallel`**|production|boolean|Executes secondary state machines in parallel, when possible|true|EXECUTE_IN_PARALLEL|
 |**`useMainExecGenerated`**|production|boolean|Executes main state machines in generated code, which is faster than native code|true|USE_MAIN_EXEC_GENERATED|
-|`useMainExecC`|tools|boolean|Executes main state machines in C code, instead of executing the ROM|false|USE_MAIN_EXEC_C|
-|`saveRequestToFile`|test|boolean|Saves executor requests to file, in text format|false|SAVE_REQUESTS_TO_FILE|
-|`saveInputToFile`|test|boolean|Saves executor input to file, in JSON format|false|SAVE_INPUT_TO_FILE|
-|`saveDbReadsToFile`|test|boolean|Saves executor reads to database to file, in JSON format|false|SAVE_DB_READS_TO_FILE|
-|`saveDbReadsToFileOnChange`|test|boolean|Saves executor reads to database to file, in JSON format, updating the file every time a new read happens|false|SAVE_DB_READS_TO_FILE_ON_CHANGE|
-|`saveOutputToFile`|test|boolean|Saves executor output to file, in JSON format|false|SAVE_OUTPUT_TO_FILE|
-|`saveResponseToFile`|test|boolean|Saves executor response to file, in text format|false|SAVE_RESPONSE_TO_FILE|
+|`useMainExecC`|tools|boolean|Executes main state machines in C code, instead of executing the ROM (do not use in production, under development)|false|USE_MAIN_EXEC_C|
+|`saveRequestToFile`|test|boolean|Saves executor GRPC requests to file, in text format|false|SAVE_REQUESTS_TO_FILE|
+|`saveInputToFile`|test|boolean|Saves executor GRPC input to file, in JSON format|false|SAVE_INPUT_TO_FILE|
+|`saveDbReadsToFile`|test|boolean|Saves executor reads to database to file, together with the input, in JSON format; the resulting file can be used as a self-contained input file that does not depend on any external database|false|SAVE_DB_READS_TO_FILE|
+|`saveDbReadsToFileOnChange`|test|boolean|Saves executor reads to database to file, together with the input, in JSON format, updating the file every time a new read happens, which is useful to reproduce main executor errors; the resulting file can be used as a self-contained input file that does not depend on any external database|false|SAVE_DB_READS_TO_FILE_ON_CHANGE|
+|`saveOutputToFile`|test|boolean|Saves executor GRPC output to file, in JSON format|false|SAVE_OUTPUT_TO_FILE|
+|`saveResponseToFile`|test|boolean|Saves executor GRPC response to file, in text format|false|SAVE_RESPONSE_TO_FILE|
 |`saveProofToFile`|test|boolean|Saves generated proof to file, in JSON format|false|SAVE_PROOF_TO_FILE|
 |`saveFilesInSubfolders`|test|boolean|Saves files in folders per hour, e.g. `output/2023/01/10/18`|false|SAVE_FILES_IN_SUBFOLDERS|
 |`loadDBToMemCache`|test|boolean|Fill database cache with content during initialization|false|LOAD_DB_TO_MEM_CACHE|
@@ -70,8 +70,8 @@ The configuration parameters can be of different uses:
 |`executorClientLoops`|test|u64|Executor client iterations|1|EXECUTOR_CLIENT_LOOPS|
 |`executorClientCheckNewStateRoot`|test|bool|Executor client checks the new state root returned in the response using CheckTree|false|EXECUTOR_CLIENT_CHECK_NEW_STATE_ROOT|
 |**`hashDBServerPort`**|production|u16|HashDB server GRPC port|50061|HASHDB_SERVER_PORT|
-|**`hashDBURL`**|production|string|URL used by the Executor to connect to the HashDB service, e.g. "127.0.0.1:50061"; if set to "local", no GRPC is used and it connects to the local HashDB interface|"local"|HASHDB_URL|
-|`hashDB64`|test|boolean|Use HashDB64 new database (experimental)|false|HASHDB64|
+|**`hashDBURL`**|production|string|URL used by the Executor to connect to the HashDB service, e.g. "127.0.0.1:50061"; if set to "local", no GRPC is used and it connects to the local HashDB interface using direct calls to the HashDB classes; if your zkProver instance does not need to use a remote HashDB service for a good reason (e.g. not having direct access to the database) then even if it exports this service to other clients we recommend to use "local" since the performance is better|"local"|HASHDB_URL|
+|`hashDB64`|test|boolean|Use HashDB64 new database (do not use in  production, under development)|false|HASHDB64|
 |`kvDBMaxVersions`|production|u64|Maximum number of KV versionn in Database|131072|HASHDB64_MAX_VERSIONS|
 |`dbCacheSynchURL`|test|string|URL of the HashDB service to synchronize the Database cache (experimental)|""|DB_CACHE_SYNCH_URL|
 |`aggregatorServerPort`|test|u16|Aggregator server GRPC port|50081|AGGREGATOR_SERVER_PORT|
@@ -168,6 +168,6 @@ The configuration parameters can be of different uses:
 |`maxHashDBThreads`|production|u64|Maximum numbre of GRPC HashDB service threads|8|MAX_HASHDB_THREADS|
 |`fullTracerTraceReserveSize`|production|u64|Full tracer number of reserved traces|256*1024|FULL_TRACER_TRACE_RESERVE_SIZE|
 |`proverName`|production|string|Prover name, used to identy the prover when connecting to the Aggregator service|"UNSPECIFIED"|PROVER_NAME|
-|`ECRecoverPrecalc`|production|boolean|Use ECRecover precalculation to improve main state machine executor performance|false|ECRECOVER_PRECALC|
+|`ECRecoverPrecalc`|production|boolean|Use ECRecover precalculation to improve main state machine executor performance (do not use in production, under development)|false|ECRECOVER_PRECALC|
 |`ECRecoverPrecalcNThreads`|production|u64|Number of threads used to perform the ECRecover precalculation|16|ECRECOVER_PRECALC_N_THREADS|
 |`jsonLogs`|production|boolean|Generate logs in JSON format, compatible with Datadog service|true|JSON_LOGS|
