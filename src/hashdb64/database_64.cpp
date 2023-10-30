@@ -87,7 +87,7 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
     }
 
     // Get the version data
-    VersionDataStruct versionData;
+    VersionDataEntry versionData;
     zkr = HeaderPage::ReadVersionData(ctx, headerPageNumber, version, versionData);
     if (zkr != ZKR_SUCCESS)
     {
@@ -369,13 +369,14 @@ zkresult Database64::WriteTree (const Goldilocks::Element (&oldRoot)[4], const v
     };*/
 
     // Create version data
-    VersionDataStruct versionData;
+    VersionDataEntry versionData;
     string newRootBa = string2ba(fea2string(fr, newRoot));
     zkassert(newRootBa.size() == 32);
     memcpy(versionData.root, newRootBa.c_str(), 32);
     versionData.keyValueHistoryPage = headerPage->keyValueHistoryPage;
-    versionData.rawDataPage = headerPage->rawDataPage;
-    versionData.rawDataOffset = RawDataPage::GetOffset(ctx, versionData.rawDataPage);
+    versionData.key = version;
+    //versionData.rawDataPage = headerPage->rawDataPage;
+    //versionData.rawDataOffset = RawDataPage::GetOffset(ctx, versionData.rawDataPage);
 
     // Write version->versionData pair
     zkr = HeaderPage::WriteVersionData(ctx, headerPageNumber, version, versionData);
@@ -444,7 +445,7 @@ zkresult Database64::ReadTree (const Goldilocks::Element (&root)[4], vector<KeyV
     }
 
     // Get the version data
-    VersionDataStruct versionData;
+    VersionDataEntry versionData;
     zkr = HeaderPage::ReadVersionData(ctx, headerPageNumber, version, versionData);
     if (zkr != ZKR_SUCCESS)
     {
