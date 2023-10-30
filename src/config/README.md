@@ -11,22 +11,22 @@ The configuration parameters can be of different uses:
 
 |Parameter|Use|Type|Description |Default|Environment variable|
 |---------|---|----|------------|-------|--------------------|
-|**`runExecutorServer`**|production|boolean|Enables Executor GRPC service, which provides a service to process transaction batches; used by the Sequencer, Synchronizer and RPC|true|RUN_EXECUTOR_SERVER|
+|**`runExecutorServer`**|production|boolean|Enables Executor GRPC service, which provides a service to process transaction batches; used by the Sequencer, Synchronizer and RPC; in case of RPC, use together with dbReadOnly=true to prevent writing to database|true|RUN_EXECUTOR_SERVER|
 |`runExecutorClient`|test|boolean|Runs an executor GRPC client to test the executor GRPC service submitting a request based on the 'inputFile' parameter|false|RUN_EXECUTOR_CLIENT|
 |`runExecutorClientMultithread`|test|boolean|Runs an multithread Executor GRPC client to test the Executor GRPC service; it performs the same test as 'runExecutorClient' but it spawns several threads to run the test in parallel|false|RUN_EXECUTOR_CLIENT_MULTITHREAD|
 |**`runHashDBServer`**|production|boolean|Enables HashDB GRPC service, provides SMT (Sparse Merkle Tree) and Database access; used by the Synchronizer to create the genesis|true|RUN_HASHDB_SERVER|
 |`runHashDBTest`|test|boolean|Runs a HashDB test to validate the HashDB service|false|RUN_HASHDB_TEST|
+|**`runAggregatorClient`**|production|boolean|Enables Aggregator GRPC client, connects to the Aggregator and processes its proof generation requests; requires 512GB of RAM|false|RUN_AGGREGATOR_CLIENT|
 |`runAggregatorServer`|test|boolean|Runs an Aggregator GRPC service to test the Aggregator GRPC client|false|RUN_AGGREGATOR_SERVER|
-|**`runAggregatorClient`**|production|boolean|Enables Aggregator GRPC client, connects to the Aggregator and process its proof generation requests; requires 512GB of RAM|false|RUN_AGGREGATOR_CLIENT|
 |`runAggregatorClientMock`|test|boolean|Runs an Aggregator client mock that generates fake proofs|false|RUN_AGGREGATOR_CLIENT_MOCK|
-|`runFileGenBatchProof`|test|boolean|Submits an input json file, defined in the `inputFile` parameter, to generate a regursive proof|false|RUN_FILE_GEN_BATCH_PROOF|
-|`runFileGenAggregatedProof`|test|boolean|Submits two recursive proof files, defined in the `inputFile` and `inputFile2` parameters, to generate a recursive proof|false|RUN_FILE_GEN_AGGREGATED_PROOF|
-|`runFileGenFinalProof`|test|boolean|Submits a recursive proof file, defined in the `inputFile` parameter, to generate a final proof|false|RUN_FILE_GEN_FINAL_PROOF|
-|`runFileProcessBatch`|test|boolean|Submits an input json file, defined in the `inputFile` parameter, to process a batch|false|RUN_FILE_PROCESS_BATCH|
-|`runFileProcessBatchMultithread`|test|boolean|Submits an input json file, defined in the `inputFile` parameter, to process a batch, multiple times in parallel|false|RUN_FILE_PROCESS_BATCH_MULTITHREAD|
-|`runFileExecute`|test|boolean|Submits an input json file, defined in the `inputFile` parameter, to process a batch, including all secondary state machines|false|RUN_FILE_EXECUTE|
-|`runKeccakScriptGenerator`|tools|boolean|Runs a Keccak-f hash that generates a keccak script json file|false|RUN_KECCAK_SCRIPT_GENERATOR|
-|`runSHA256ScriptGenerator`|tools|boolean|Runs a SHA-256 hash that generates a SHA-256 script json file|false|RUN_SHA256_SCRIPT_GENERATOR|
+|`runFileGenBatchProof`|test|boolean|Submits an input json file, defined in the `inputFile` parameter, to generate a regursive proof; it does not use GRPC|false|RUN_FILE_GEN_BATCH_PROOF|
+|`runFileGenAggregatedProof`|test|boolean|Submits two recursive proof files, defined in the `inputFile` and `inputFile2` parameters, to generate a recursive proof; it does not use GRPC|false|RUN_FILE_GEN_AGGREGATED_PROOF|
+|`runFileGenFinalProof`|test|boolean|Submits a recursive proof file, defined in the `inputFile` parameter, to generate a final proof; it does not use GRPC|false|RUN_FILE_GEN_FINAL_PROOF|
+|`runFileProcessBatch`|test|boolean|Submits an input json file, defined in the `inputFile` parameter, to process a batch; it does not use GRPC|false|RUN_FILE_PROCESS_BATCH|
+|`runFileProcessBatchMultithread`|test|boolean|Submits an input json file, defined in the `inputFile` parameter, to process a batch, multiple times in parallel; it does not use GRPC|false|RUN_FILE_PROCESS_BATCH_MULTITHREAD|
+|`runFileExecute`|test|boolean|Submits an input json file, defined in the `inputFile` parameter, to process a batch, including all secondary state machines; it does not use GRPC|false|RUN_FILE_EXECUTE|
+|`runKeccakScriptGenerator`|tools|boolean|Runs a Keccak-f hash that generates a Keccak script json file to be used by the Keccak secondary state machine executor|false|RUN_KECCAK_SCRIPT_GENERATOR|
+|`runSHA256ScriptGenerator`|tools|boolean|Runs a SHA-256 hash that generates a SHA-256 script json file to be used by the SHA-256 secondary state machine executor|false|RUN_SHA256_SCRIPT_GENERATOR|
 |`runKeccakTest`|test|boolean|Runs a Keccak-f hash test|false|RUN_KECCAK_TEST|
 |`runStorageSMTest`|test|boolean|Runs a storage state machine test|false|RUN_STORAGE_SM_TEST|
 |`runBinarySMTest`|test|boolean|Runs a binary state machine test|false|RUN_BINARY_SM_TEST|
@@ -36,27 +36,27 @@ The configuration parameters can be of different uses:
 |`runECRecoverTest`|test|boolean|Runs an ECRecover test|false|RUN_ECRECOVER_TEST|
 |`runDatabaseCacheTest`|test|boolean|Runs a database cache test|false|RUN_DATABASE_CACHE_TEST|
 |`runCheckTreeTest`|test|boolean|Runs a check SMT tree test|false|RUN_CHECK_TREE_TEST|
-|`checkTreeRoot`|test|string|State root used to check the tree, or automatically detect the last written one|"auto"|CHECK_TREE_ROOT|
+|`checkTreeRoot`|test|string|State root used to check the tree, or automatically detect the last written one if set to "auto"|"auto"|CHECK_TREE_ROOT|
 |`runDatabasePerformanceTest`|test|boolean|Runs a database performance test|false|RUN_DATABASE_PERFORMANCE_TEST|
 |`runPageManagerTest`|test|boolean|Runs a page manager test|false|RUN_PAGE_MANAGER_TEST|
 |`runSMT64Test`|test|boolean|Runs a SMT64 test|false|RUN_SMT64_TEST|
-|`runUnitTest`|test|boolean|Runs a unit test|false|RUN_UNIT_TEST|
+|`runUnitTest`|test|boolean|Runs a unit test that includes several component tests|false|RUN_UNIT_TEST|
 |**`executeInParallel`**|production|boolean|Executes secondary state machines in parallel, when possible|true|EXECUTE_IN_PARALLEL|
 |**`useMainExecGenerated`**|production|boolean|Executes main state machines in generated code, which is faster than native code|true|USE_MAIN_EXEC_GENERATED|
-|`useMainExecC`|tools|boolean|Executes main state machines in C code, instead of executing the ROM|false|USE_MAIN_EXEC_C|
-|`saveRequestToFile`|test|boolean|Saves executor requests to file, in text format|false|SAVE_REQUESTS_TO_FILE|
+|`useMainExecC`|tools|boolean|Executes main state machines in C code, instead of executing the ROM (do not use in production, under development)|false|USE_MAIN_EXEC_C|
+|`saveRequestToFile`|test|boolean|Saves executor GRPC requests to file, in text format|false|SAVE_REQUESTS_TO_FILE|
 |`saveInputToFile`|test|boolean|Saves executor GRPC input to file, in JSON format|false|SAVE_INPUT_TO_FILE|
-|`saveDbReadsToFile`|test|boolean|Saves executor reads to database to file, in JSON format|false|SAVE_DB_READS_TO_FILE|
-|`saveDbReadsToFileOnChange`|test|boolean|Saves executor reads to database to file, in JSON format, updating the file every time a new read happens|false|SAVE_DB_READS_TO_FILE_ON_CHANGE|
-|`saveOutputToFile`|test|boolean|Saves executor output to file, in JSON format|false|SAVE_OUTPUT_TO_FILE|
+|`saveDbReadsToFile`|test|boolean|Saves executor reads to database to file, together with the input, in JSON format; the resulting file can be used as a self-contained input file that does not depend on any external database|false|SAVE_DB_READS_TO_FILE|
+|`saveDbReadsToFileOnChange`|test|boolean|Saves executor reads to database to file, together with the input, in JSON format, updating the file every time a new read happens, which is useful to reproduce main executor errors; the resulting file can be used as a self-contained input file that does not depend on any external database|false|SAVE_DB_READS_TO_FILE_ON_CHANGE|
+|`saveOutputToFile`|test|boolean|Saves executor GRPC output to file, in JSON format|false|SAVE_OUTPUT_TO_FILE|
 |`saveResponseToFile`|test|boolean|Saves executor GRPC response to file, in text format|false|SAVE_RESPONSE_TO_FILE|
 |`saveProofToFile`|test|boolean|Saves generated proof to file, in JSON format|false|SAVE_PROOF_TO_FILE|
-|`saveFilesInSubfolders`|test|boolean|Saves files in folders per hour, e.g. `output/2023/01/10/18`|false|SAVE_FILES_IN_SUBFOLDERS|
+|`saveFilesInSubfolders`|test|boolean|Saves files in folders named as per hour, e.g. `output/2023/01/10/18`|false|SAVE_FILES_IN_SUBFOLDERS|
 |`loadDBToMemCache`|test|boolean|Fill database cache with content during initialization|false|LOAD_DB_TO_MEM_CACHE|
 |`loadDBToMemCacheInParallel`|test|boolean|Fill database cache in parallel with the normal execution|false|LOAD_DB_TO_MEM_CACHE_IN_PARALLEL|
 |`loadDBToMemTimeout`|test|u64|Fill database cache up to a certain time, in microseconds|30000000 (30 seconds)|LOAD_DB_TO_MEM_TIMEOUT|
 |**`dbMTCacheSize`**|production|s64|Database MT cache size, in MB|8*1024 (8 GB)|DB_MT_CACHE_SIZE|
-|**`useAssociativeCache`**|production|boolean|Use associative cache as Database MT cache, which is faster|false|USE_ASSOCIATIVE_CACHE|
+|**`useAssociativeCache`**|production|boolean|Use associative cache as Database MT cache, which is faster than regular cache|false|USE_ASSOCIATIVE_CACHE|
 |`log2DbMTAssociativeCacheSize`|production|s64|log2 of the size in entries of the DatabaseMTAssociativeCache; note that 1 cache entry = 128 bytes|25|LOG2_DB_MT_ASSOCIATIVE_CACHE_SIZE|
 |`log2DbMTAssociativeCacheIndexesSize`|production|s64|log2 of the size in entries of the DatabaseMTAssociativeCache indexes; note that 1 cache entry = 4 bytes|28|LOG2_DB_MT_ASSOCIATIVE_CACHE_INDEXES_SIZE|
 |`log2DbKVAssociativeCacheSize`|production|s64|log2 of the size in entries of the DatabaseKVAssociativeCache; note that 1 cache entry = 80 bytes|25|LOG2_DB_KV_ASSOCIATIVE_CACHE_SIZE|
@@ -71,19 +71,19 @@ The configuration parameters can be of different uses:
 |`executorClientCheckNewStateRoot`|test|bool|Executor client checks the new state root returned in the response using CheckTree|false|EXECUTOR_CLIENT_CHECK_NEW_STATE_ROOT|
 |**`hashDBServerPort`**|production|u16|HashDB server GRPC port|50061|HASHDB_SERVER_PORT|
 |**`hashDBURL`**|production|string|URL used by the Executor to connect to the HashDB service, e.g. "127.0.0.1:50061"; if set to "local", no GRPC is used and it connects to the local HashDB interface using direct calls to the HashDB classes; if your zkProver instance does not need to use a remote HashDB service for a good reason (e.g. not having direct access to the database) then even if it exports this service to other clients we recommend to use "local" since the performance is better|"local"|HASHDB_URL|
-|`hashDB64`|test|boolean|Use HashDB64 new database (experimental)|false|HASHDB64|
+|`hashDB64`|test|boolean|Use HashDB64 new database (do not use in  production, under development)|false|HASHDB64|
 |`kvDBMaxVersions`|production|u64|Maximum number of KV versionn in Database|131072|HASHDB64_MAX_VERSIONS|
 |`dbCacheSynchURL`|test|string|URL of the HashDB service to synchronize the Database cache (experimental)|""|DB_CACHE_SYNCH_URL|
-|`hashDBFileName`|test|string|core name used for the hashDB files (path,numbering and extension not included). If hashDBFileName is empty in-memory version of the hashDB is used (only for DEBUG purposes). |""|HASHDB_FILE_NAME|
-|`hashDBFileSize`|test|u64| hashDB files size in GB|128|HASHDB_FILE_SIZE|
-|`hashDBFolder`|test|string|folder containing the hashDB files|hashdb|HASHDB_FOLDER|
+|`hashDBFileName`|test|string|Core name used for the hashDB files (path,numbering and extension not included). If hashDBFileName is empty in-memory version of the hashDB is used (only for DEBUG purposes). |""|HASHDB_FILE_NAME|
+|`hashDBFileSize`|test|u64|HashDB files size in GB|128|HASHDB_FILE_SIZE|failures
+|`hashDBFolder`|test|string|Folder containing the hashDB files|hashdb|HASHDB_FOLDER|
 |`aggregatorServerPort`|test|u16|Aggregator server GRPC port|50081|AGGREGATOR_SERVER_PORT|
 |**`aggregatorClientPort`**|production|u16|Aggregator client GRPC port to connect to|50081|AGGREGATOR_SERVER_PORT|
 |**`aggregatorClientHost`**|production|string|Aggregator client GRPC host name to connect to, i.e. Aggregator server host name|"127.0.0.1"|AGGREGATOR_CLIENT_HOST|
 |`aggregatorClientMockTimeout`|test|u64|Aggregator client mock timeout, in microseconds|60000000 (60 seconds)|AGGREGATOR_CLIENT_MOCK_TIMEOUT|
 |**`aggregatorClientWatchdogTimeout`**|production|u64|Aggregator client watchdog timeout, in microseconds|60000000 (60 seconds)|AGGREGATOR_CLIENT_WATCHDOG_TIMEOUT|
 |`aggregatorClientMaxStreams`|test|u64|Max number of aggregator client streams, used to limit E2E test execution; if 0 then there is no limit|0|AGGREGATOR_CLIENT_MAX_STREAMS|
-|`executorROMLineTraces`|test|boolean|If true, the main state machine executor will log the content of every executed ROM program line|false|EXECUTOR_ROM_LINE_TRACES|
+|`executorROMLineTraces`|test|boolean|If true, the main state machine executor will log the content of every executed ROM program line; it only works with native main executor, not with generated code executor|false|EXECUTOR_ROM_LINE_TRACES|
 |`executorTimeStatistics`|test|boolean|If true, the main state machine executor will log the time metrics statistics of external calls|false|EXECUTOR_TIME_STATISTICS|
 |`opcodeTracer`|test|boolean|Generate main state machine executor opcode statistics|false|OPCODE_TRACER|
 |`logRemoteDbReads`|test|boolean|Log main state machine executor remote Database reads|false|LOG_REMOTE_DB_READS|
@@ -132,11 +132,11 @@ The configuration parameters can be of different uses:
 |`finalStarkZkey`|production|string|Final STARK zkey file|config + "/final/final.fflonk.zkey"|FINAL_STARK_ZKEY|
 |`publicsOutput`|production|string|Public data output file|"public.json"|PUBLICS_OUTPUT|
 |`proofFile`|production|string|Proof data output file|"proof.json"|PROOF_FILE|
-|`keccakScriptFile`|production|string|Keccak-f script file|config + "/scripts/keccak_script.json"|KECCAK_SCRIPT_FILE|
-|`sha256ScriptFile`|production|string|SHA-256 script file|config + "/scripts/sha256_script.json"|SHA256_SCRIPT_FILE|
+|`keccakScriptFile`|production|string|Keccak-f state machine script file|config + "/scripts/keccak_script.json"|KECCAK_SCRIPT_FILE|
+|`sha256ScriptFile`|production|string|SHA-256 state machine script file|config + "/scripts/sha256_script.json"|SHA256_SCRIPT_FILE|
 |`keccakPolsFile`|production|string|Keccak-f polynomials file|"keccak_pols.json"|KECCAK_POLS_FILE|
 |`keccakConnectionsFile`|production|string|Keccak-f connections file|"keccak_connections.json"|KECCAK_CONNECTIONS_FILE|
-|`keccakConnectionsFile`|production|string|Keccak-f connections file|"keccak_connections.json"|KECCAK_CONNECTIONS_FILE|
+|`sha256ConnectionsFile`|production|string|SHA-256 connections file|"sha256_connections.json"|KECCAK_CONNECTIONS_FILE|
 |`zkevmStarkInfo`|production|string|zkEVN STARK info file|config + "/zkevm/zkevm.starkinfo.json"|ZKEVM_STARK_INFO|
 |`storageRomFile`|production|string|Storage ROM file|config + "/scripts/storage_sm_rom.json"|STORAGE_ROM_FILE|
 |`recursive1ConstantsTree`|production|string|Recursive 1 contant polynomials tree file|config + "/recursive1/recursive1.consttree"|
@@ -156,17 +156,17 @@ The configuration parameters can be of different uses:
 |`dbGetTree`|production|boolean|Use Database PL-SQL GetTree function|true|DB_GET_TREE|
 |`dbReadOnly`|production|boolean|Don't write any data to the external Database; used in RPC executors|false|DB_READ_ONLY|
 |`dbReadRetryCounter`|production|u64|Number of Database retries, in case an error happens|10|DB_READ_RETRY_COUNTER|
-|`dbReadRetryDelay`|production|u64|Delay between Database retries, in miliseconds|100*1000|DB_READ_RETRY_DELAY|
+|`dbReadRetryDelay`|production|u64|Delay between Database retries, in microseconds|100*1000|DB_READ_RETRY_DELAY|
 |`stateManager`|production|boolean|Use State Manager to consolidate states before writing to Database|true|STATE_MANAGER|
 |`stateManagerPurge`|production|boolean|Purge State Manager sub-states|true|STATE_MANAGER_PURGE|
 |`stateManagerPurgeTxs`|production|boolean|Purge State Manager transactions|true|STATE_MANAGER_PURGE_TXS|
 |`cleanerPollingPeriod`|production|u64|Polling period of the cleaner thread that deletes completed Prover batches, in seconds|600|CLEANER_POLLING_PERIOD|
 |`requestsPersistence`|production|u64|Time that completed batches stay before being cleaned up|3600|REQUESTS_PERSISTENCE|
 |`maxExecutorThreads`|production|u64|Maximum number of GRPC Executor service threads|20|MAX_EXECUTOR_THREADS|
-|`maxProverThreads`|test|u64|Maximum number of GRPC Aggregator service threads|8|MAX_PROVER_THREADS|
+|`maxProverThreads`|test|u64|Maximum number of GRPC Prover service threads|8|MAX_PROVER_THREADS|
 |`maxHashDBThreads`|production|u64|Maximum number of GRPC HashDB service threads|8|MAX_HASHDB_THREADS|
 |`fullTracerTraceReserveSize`|production|u64|Full tracer number of reserved traces|256*1024|FULL_TRACER_TRACE_RESERVE_SIZE|
 |`proverName`|production|string|Prover name, used to identy the prover when connecting to the Aggregator service|"UNSPECIFIED"|PROVER_NAME|
-|`ECRecoverPrecalc`|production|boolean|Use ECRecover precalculation to improve main state machine executor performance (currently harcoded to false)|false|ECRECOVER_PRECALC|
+|`ECRecoverPrecalc`|production|boolean|Use ECRecover precalculation to improve main state machine executor performance (do not use in production, under development)|false|ECRECOVER_PRECALC|
 |`ECRecoverPrecalcNThreads`|production|u64|Number of threads used to perform the ECRecover precalculation|16|ECRECOVER_PRECALC_N_THREADS|
 |`jsonLogs`|production|boolean|Generate logs in JSON format, compatible with Datadog service; if you do not use Datadog or you do not have to process the log traces, we recommend to set this parameter to 'false' to improve the clarity of the logs|true|JSON_LOGS|

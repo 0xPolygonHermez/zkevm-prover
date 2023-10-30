@@ -154,7 +154,8 @@ void Config::load(json &config)
     // Main SM executor
     ParseBool(config, "executeInParallel", "EXECUTE_IN_PARALLEL", executeInParallel, true);
     ParseBool(config, "useMainExecGenerated", "USE_MAIN_EXEC_GENERATED", useMainExecGenerated, true);
-    ParseBool(config, "useMainExecC", "USE_MAIN_EXEC_C", useMainExecC, false);
+    //ParseBool(config, "useMainExecC", "USE_MAIN_EXEC_C", useMainExecC, false);
+    useMainExecC = false; // Do not use in production; under development
 
     // Save to file
     ParseBool(config, "saveRequestToFile", "SAVE_REQUESTS_TO_FILE", saveRequestToFile, false);
@@ -194,7 +195,8 @@ void Config::load(json &config)
     ParseBool(config, "executorClientCheckNewStateRoot", "EXECUTOR_CLIENT_CHECK_NEW_STATE_ROOT", executorClientCheckNewStateRoot, false);
     ParseU16(config, "hashDBServerPort", "HASHDB_SERVER_PORT", hashDBServerPort, 50061);
     ParseString(config, "hashDBURL", "HASHDB_URL", hashDBURL, "local");
-    ParseBool(config, "hashDB64", "HASHDB64", hashDB64, false);
+    //ParseBool(config, "hashDB64", "HASHDB64", hashDB64, false);
+    hashDB64 = false; // Do not use in production; under development
     ParseU64(config, "kvDBMaxVersions", "HASHDB64_MAX_VERSIONS", kvDBMaxVersions, 131072);
     ParseString(config, "dbCacheSynchURL", "DB_CACHE_SYNCH_URL", dbCacheSynchURL, "");
     ParseString(config, "hashDBFileName", "HASHDB_FILE_NAME", hashDBFileName, "");
@@ -306,7 +308,7 @@ void Config::load(json &config)
 
     // ECRecover
     //ParseBool(config, "ECRecoverPrecalc", "ECRECOVER_PRECALC", ECRecoverPrecalc, false);
-    ECRecoverPrecalc = false;
+    ECRecoverPrecalc = false; // Do not use in production; under development
     ParseU64(config, "ECRecoverPrecalcNThreads", "ECRECOVER_PRECALC_N_THREADS", ECRecoverPrecalcNThreads, 16);
 
     // Logs
