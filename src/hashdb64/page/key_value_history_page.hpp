@@ -55,7 +55,7 @@ public:
     
     static zkresult calculateHash             (PageContext &ctx, const uint64_t pageNumber, Goldilocks::Element (&hash)[4], uint64_t &headerPageNumber);
 private:
-    static zkresult calculatePageHash         (PageContext &ctx, const uint64_t pageNumber, const uint64_t level, Goldilocks::Element (&hash)[4], uint64_t &headerPageNumber);
+    static zkresult calculatePageHash         (PageContext &ctx, uint64_t pageNumber, const uint64_t level, Goldilocks::Element (&hash)[4], uint64_t &headerPageNumber);
 public:
     static void Print (PageContext &ctx, const uint64_t pageNumber, bool details, const string &prefix, const uint64_t level, KeyValueHistoryCounters &counters);
     static void Print (PageContext &ctx, const uint64_t pageNumber, bool details, const string &prefix);

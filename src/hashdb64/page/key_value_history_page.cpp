@@ -494,9 +494,10 @@ zkresult KeyValueHistoryPage::Write (PageContext &ctx, uint64_t &pageNumber, con
     zkassert(level < 43);
 
     zkresult zkr;
+    pageNumber = ctx.pageManager.editPage(pageNumber);
+    headerPageNumber = ctx.pageManager.editPage(headerPageNumber);
 
     // Get the data from this page
-    pageNumber = ctx.pageManager.editPage(pageNumber);
     KeyValueHistoryStruct * page = (KeyValueHistoryStruct *)ctx.pageManager.getPageAddress(pageNumber);
     uint64_t index = keyBits[level];
     uint64_t control = page->keyValueEntry[index][0] >> 60;
@@ -508,11 +509,9 @@ zkresult KeyValueHistoryPage::Write (PageContext &ctx, uint64_t &pageNumber, con
         case 0:
         {
             // Get an editable version of this page
-            pageNumber = ctx.pageManager.editPage(pageNumber);
             KeyValueHistoryStruct * page = (KeyValueHistoryStruct *)ctx.pageManager.getPageAddress(pageNumber);
 
             // Get an editable version of the header page
-            headerPageNumber = ctx.pageManager.editPage(headerPageNumber);
             HeaderStruct *headerPage = (HeaderStruct *)ctx.pageManager.getPageAddress(headerPageNumber);
 
             uint64_t insertionRawDataPage = headerPage->rawDataPage;
@@ -603,7 +602,6 @@ zkresult KeyValueHistoryPage::Write (PageContext &ctx, uint64_t &pageNumber, con
                 page->historyOffset += entrySize;
 
                 // Get an editable version of the header page
-                headerPageNumber = ctx.pageManager.editPage(headerPageNumber);
                 HeaderStruct *headerPage = (HeaderStruct *)ctx.pageManager.getPageAddress(headerPageNumber);
 
                 // Get the current rawDataPage and offset
@@ -694,15 +692,17 @@ zkresult KeyValueHistoryPage::calculateHash (PageContext &ctx, const uint64_t pa
     return zkr;
 }
 
-zkresult KeyValueHistoryPage::calculatePageHash (PageContext &ctx, const uint64_t pageNumber, const uint64_t level, Goldilocks::Element (&hash)[4], uint64_t &headerPageNumber)
+zkresult KeyValueHistoryPage::calculatePageHash (PageContext &ctx, uint64_t pageNumber, const uint64_t level, Goldilocks::Element (&hash)[4], uint64_t &headerPageNumber)
 {
     zkassert(level < 43);
     zkresult zkr;
 
     // Get the page
+    pageNumber = ctx.pageManager.editPage(pageNumber);
     KeyValueHistoryStruct *page = (KeyValueHistoryStruct *)ctx.pageManager.getPageAddress(pageNumber);
 
     // Get the header page
+    headerPageNumber = ctx.pageManager.editPage(headerPageNumber);
     HeaderStruct *headerPage = (HeaderStruct *)ctx.pageManager.getPageAddress(headerPageNumber);
 
     // Get the SMT level
