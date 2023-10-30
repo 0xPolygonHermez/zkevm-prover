@@ -25,13 +25,13 @@ class KeyValuePage
 private:
 
     static zkresult Read          (PageContext &ctx, const uint64_t  pageNumber, const string &key, const vector<uint64_t> &keyBits,       string &value, const uint64_t level);
-    static zkresult Write         (PageContext &ctx,       uint64_t &pageNumber, const string &key, const vector<uint64_t> &keyBits, const string &value, const uint64_t level, const uint64_t headerPageNumber);
+    static zkresult Write         (PageContext &ctx,       uint64_t &pageNumber, const string &key, const vector<uint64_t> &keyBits, const string &value, const uint64_t level, uint64_t &headerPageNumber);
 
 public:
 
     static zkresult InitEmptyPage (PageContext &ctx, const uint64_t  pageNumber);
     static zkresult Read          (PageContext &ctx, const uint64_t  pageNumber, const string &key,       string &value);
-    static zkresult Write         (PageContext &ctx,       uint64_t &pageNumber, const string &key, const string &value, const uint64_t headerPageNumber);
+    static zkresult Write         (PageContext &ctx,       uint64_t &pageNumber, const string &key, const string &value, uint64_t &headerPageNumber);
     
     static void     Print         (PageContext &ctx, const uint64_t pageNumber, bool details, const string &prefix, const uint64_t keySize);
 };

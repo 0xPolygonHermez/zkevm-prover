@@ -131,7 +131,7 @@ zkresult HeaderPage::GetFreePagesContainer (PageContext &ctx, const uint64_t hea
     HeaderStruct * page = (HeaderStruct *)ctx.pageManager.getPageAddress(headerPageNumber);
 
     // Call the specific method
-    return PageListPage::GetContainerPages (ctx, page->freePages, containerPages);
+    return PageListPage::GetContainerPages(ctx, page->freePages, containerPages);
 }
 
 zkresult HeaderPage::GetFreePages (PageContext &ctx, const uint64_t headerPageNumber, vector<uint64_t> (&freePages))
@@ -156,11 +156,9 @@ zkresult HeaderPage::CreateFreePages (PageContext &ctx, uint64_t &headerPageNumb
     // Call the specific method    
     return PageListPage::CreatePages(ctx, page->freePages, freePages, containerPages);
 
-    return ZKR_SUCCESS;
-
 }
 
-zkresult HeaderPage::GetFirstUnusedPage (PageContext &ctx,const uint64_t headerPageNumber, uint64_t &firstUnusedPage)
+zkresult HeaderPage::GetFirstUnusedPage (PageContext &ctx, const uint64_t headerPageNumber, uint64_t &firstUnusedPage)
 {
     // Get header page
     HeaderStruct * page = (HeaderStruct *)ctx.pageManager.getPageAddress(headerPageNumber);
@@ -171,7 +169,7 @@ zkresult HeaderPage::GetFirstUnusedPage (PageContext &ctx,const uint64_t headerP
     return ZKR_SUCCESS;
 }
 
-zkresult HeaderPage::SetFirstUnusedPage (PageContext &ctx,uint64_t &headerPageNumber, const uint64_t firstUnusedPage)
+zkresult HeaderPage::SetFirstUnusedPage (PageContext &ctx, uint64_t &headerPageNumber, const uint64_t firstUnusedPage)
 {
     // Get an editable page
     headerPageNumber = ctx.pageManager.editPage(headerPageNumber);
@@ -298,7 +296,7 @@ zkresult HeaderPage::KeyValueHistoryPrint (PageContext &ctx, const uint64_t head
     // If root is empty, print the last version
     if (root == "")
     {
-        KeyValueHistoryPage::Print(ctx, headerPage->keyValueHistoryPage, false, "");
+        KeyValueHistoryPage::Print(ctx, headerPage->keyValueHistoryPage, true, "");
         return ZKR_SUCCESS;
     }
 

@@ -401,7 +401,7 @@ zkresult Database64::WriteTree (const Goldilocks::Element (&oldRoot)[4], const v
 
     headerPageNumber = 0;
     
-    //KeyValueHistoryPage::Print(versionData.keyValueHistoryPage, true, "version=" + to_string(version) + " ");
+        //KeyValueHistoryPage::Print(versionData.keyValueHistoryPage, true, "version=" + to_string(version) + " ");
 
     return ZKR_SUCCESS;
 }
@@ -465,6 +465,6 @@ zkresult Database64::ReadTree (const Goldilocks::Element (&root)[4], vector<KeyV
 
 zkresult Database64::PrintTree (const string &root)
 {
-    zklog.info("Database64::PrintTree()");
+    zklog.info("Database64::PrintTree() headerPageNumber=" + to_string(headerPageNumber));
     return HeaderPage::KeyValueHistoryPrint(ctx, headerPageNumber, root);
 }

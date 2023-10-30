@@ -7,10 +7,14 @@
 #include "hashdb_singleton.hpp"
 #include "timer.hpp"
 #include "check_tree_test.hpp"
+#include "time_metric.hpp"
 
 uint64_t HashDB64WorkflowTest (const Config& config)
 {
     TimerStart(HASHDB64_WORKFLOW_TEST);
+
+    TimeMetricStorage timeMetricStorage;
+    struct timeval t;
 
     zklog.info("HashDB64WorkflowTest() started");
     Goldilocks fr;
@@ -24,8 +28,8 @@ uint64_t HashDB64WorkflowTest (const Config& config)
     
 
     const uint64_t numberOfBatches = 10;
-    const uint64_t numberOfTxsPerBatch = 3;
-    const uint64_t numberOfSetsPerTx = 3;
+    const uint64_t numberOfTxsPerBatch = 10;
+    const uint64_t numberOfSetsPerTx = 10;
 
     zklog.info("HashDB64WorkflowTest() numberOfBatches=" + to_string(numberOfBatches) + " numberOfTxsPerBatch=" + to_string(numberOfTxsPerBatch) + " numberOfSetsPerTx=" + to_string(numberOfSetsPerTx));
 
@@ -61,12 +65,18 @@ uint64_t HashDB64WorkflowTest (const Config& config)
                 //scalar2key(fr, keyScalar, key);
                 value++;
                 
+                gettimeofday(&t, NULL);
                 zkr = pHashDB->set(batchUUID, tx, root, key, value, persistence, newRoot, &setResult, NULL);
+                timeMetricStorage.add("set", TimeDiff(t));
+
                 //zklog.info("SET zkr=" + zkresult2string(zkr) + " root=" + fea2string(fr, root) + " key=" + fea2string(fr, key) + " value=" + value.get_str() + " newRoot=" + fea2string(fr, newRoot));
                 zkassertpermanent(zkr==ZKR_SUCCESS);
                 zkassertpermanent(!fr.isZero(newRoot[0]) || !fr.isZero(newRoot[1]) || !fr.isZero(newRoot[2]) || !fr.isZero(newRoot[3]));
 
+                gettimeofday(&t, NULL);
                 zkr = pHashDB->get(batchUUID, newRoot, key, value, &getResult, NULL);
+                timeMetricStorage.add("get", TimeDiff(t));
+
                 //zklog.info("GET zkr=" + zkresult2string(zkr) + " root=" + fea2string(fr, root) + " key=" + fea2string(fr, key) + " value=" + value.get_str());
                 zkassertpermanent(zkr==ZKR_SUCCESS);
                 zkassertpermanent(value==getResult.value);
@@ -88,11 +98,15 @@ uint64_t HashDB64WorkflowTest (const Config& config)
                 }
             }
 
+            gettimeofday(&t, NULL);
             pHashDB->semiFlush(batchUUID, fea2string(fr, root), persistence);
+            timeMetricStorage.add("semiFlush", TimeDiff(t));
         }
 
         // Purge
+        gettimeofday(&t, NULL);
         zkr = pHashDB->purge(batchUUID, root, persistence);
+        timeMetricStorage.add("purge", TimeDiff(t));
         zkassertpermanent(zkr==ZKR_SUCCESS);
         zklog.info("PURGE zkr=" + zkresult2string(zkr) + " root=" + fea2string(fr, root));
 
@@ -100,7 +114,9 @@ uint64_t HashDB64WorkflowTest (const Config& config)
         {
             //zklog.info("allKeyValues[" + to_string(i) + "].key=" + fea2string(fr, allKeyValues[i].key) + " .value=" + allKeyValues[i].value.get_str(10));
             mpz_class auxValue;
+            gettimeofday(&t, NULL);
             zkr = pHashDB->get(batchUUID, root, allKeyValues[i].key, auxValue, &getResult, NULL);
+            timeMetricStorage.add("get", TimeDiff(t));
             zkassertpermanent(zkr==ZKR_SUCCESS);
             zkassertpermanent(auxValue==allKeyValues[i].value);
         }
@@ -120,7 +136,9 @@ uint64_t HashDB64WorkflowTest (const Config& config)
         if (((batch+1) % 5) == 0)
         {
             Goldilocks::Element consolidatedStateRoot[4];
+            gettimeofday(&t, NULL);
             zkr = pHashDB->consolidateState(root, persistence, consolidatedStateRoot, flushId, storedFlushId);
+            timeMetricStorage.add("consolidateState", TimeDiff(t));
             zkassertpermanent(zkr==ZKR_SUCCESS);
             zklog.info("CONSOLIDATE zkr=" + zkresult2string(zkr) + " virtualRoot=" + fea2string(fr, root) + " consolidatedRoot=" + fea2string(fr, consolidatedStateRoot) + " flushId=" + to_string(flushId) + " storedFlushId=" + to_string(storedFlushId));
 
@@ -157,7 +175,12 @@ uint64_t HashDB64WorkflowTest (const Config& config)
             {
                 auxKeyValues[i].value = 0;
             }
+
+            CheckTreeTest(config);
+
+            gettimeofday(&t, NULL);
             zkr = pHashDB->readTree(batchNewStateRoot, auxKeyValues, hashValues);
+            timeMetricStorage.add("readTree", TimeDiff(t));
             zkassertpermanent(zkr==ZKR_SUCCESS);
             zklog.info("READ TREE batchNewStateRoot=" + fea2string(fr, batchNewStateRoot) + " keyValues.size=" + to_string(auxKeyValues.size()) + " hashValues.size=" + to_string(hashValues.size()));
 
@@ -186,6 +209,8 @@ uint64_t HashDB64WorkflowTest (const Config& config)
             for (uint64_t i=0; i<4; i++) batchNewStateRoot[i] = root[i];
         }
     }
+
+    timeMetricStorage.print("HashDB64 Workflow test metrics");
 
     CheckTreeTest(config);
 
