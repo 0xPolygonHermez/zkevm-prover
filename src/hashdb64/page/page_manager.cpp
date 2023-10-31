@@ -40,7 +40,7 @@ PageManager::~PageManager(void)
 
 zkresult PageManager::init(PageContext &ctx)
 {
-    zkresult zkr;
+    zkresult zkr=ZKR_SUCCESS;
     lock_guard<recursive_mutex> guard_freePages(writePagesLock);
     unique_lock<shared_mutex> guard_header(headerLock);
 
