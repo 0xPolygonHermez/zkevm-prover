@@ -315,7 +315,7 @@ zkresult Database64::WriteTree (const Goldilocks::Element (&oldRoot)[4], const v
     }
 
     // Get an editable header page
-    headerPageNumber = ctx.pageManager.editPage(headerPageNumber);
+    headerPageNumber = ctx.pageManager.editPage(headerPageNumber); //rickask: this will produce race conditions if other threads are writting/reasing
     HeaderStruct *headerPage = (HeaderStruct *)ctx.pageManager.getPageAddress(headerPageNumber);
 
     // Write all key-values
@@ -428,6 +428,7 @@ zkresult Database64::ReadTree (const Goldilocks::Element (&root)[4], vector<KeyV
         {
             keyValues[i].value = 0;
         }
+        //rickask: should also put hash values to zero
         return ZKR_SUCCESS;
     }
     

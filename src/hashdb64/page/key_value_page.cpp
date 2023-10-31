@@ -266,7 +266,7 @@ zkresult KeyValuePage::Write (PageContext &ctx, uint64_t &pageNumber, const stri
                     zklog.error("KeyValuePage::Write() found not matching existingLengthKeyAndValue.size()=" + to_string(existingLengthKeyAndValue.size()) + " != key.size+value.size=" + to_string(key.size() + value.size()) + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index) + " level=" + to_string(level) + " key=" + ba2string(key));
                     exitProcess();
                 }
-                if (value.compare(existingLengthKeyAndValue.substr(4 + key.size())) != 0)
+                if (value.compare(existingLengthKeyAndValue.substr(4 + key.size())) != 0) //rickask: why I can not write a diferent value for the key? check if only used for programs.
                 {
                     zklog.error("KeyValuePage::Write() found not matching value of size=" + to_string(value.size()) + " pageNumber=" + to_string(pageNumber) + " index=" + to_string(index) + " level=" + to_string(level) + " key=" + ba2string(key));
                     exitProcess();

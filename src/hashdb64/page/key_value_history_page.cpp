@@ -487,6 +487,8 @@ zkresult KeyValueHistoryPage::ReadTree (PageContext &ctx, const uint64_t pageNum
     return ZKR_SUCCESS;
 }
 
+//rickask: a key never desapears from the tree, meaning that the level is allways evaluated as if the keys set to 0 are still there,take this into account when we are hashing!
+
 zkresult KeyValueHistoryPage::Write (PageContext &ctx, uint64_t &pageNumber, const string &key, const string &keyBits, const uint64_t version, const mpz_class &value, const uint64_t level, uint64_t &headerPageNumber)
 {
     zkassert(key.size() == 32);
