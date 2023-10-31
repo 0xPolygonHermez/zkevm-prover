@@ -8,6 +8,7 @@
 #include "key_value_page.hpp"
 #include "page_list_page.hpp"
 #include "root_version_page.hpp"
+#include "version_data_page.hpp"
 
 
 zkresult HeaderPage::Check (PageContext &ctx, const uint64_t headerPageNumber)
@@ -215,23 +216,16 @@ zkresult HeaderPage::WriteRootVersion (PageContext &ctx, uint64_t &headerPageNum
     return KeyValuePage::Write(ctx, headerPage->rootVersionPage, root, version2value(ctx, version), headerPageNumber);
 }
 
-zkresult HeaderPage::ReadVersionData (PageContext &ctx, const uint64_t headerPageNumber, const uint64_t &version, VersionDataStruct &versionData)
+zkresult HeaderPage::ReadVersionData (PageContext &ctx, const uint64_t headerPageNumber, const uint64_t &version, VersionDataEntry &versionData)
 {
     // Get header page
     HeaderStruct * headerPage = (HeaderStruct *)ctx.pageManager.getPageAddress(headerPageNumber);
 
     // Call the specific method
-    string value;
-    zkresult zkr = KeyValuePage::Read(ctx, headerPage->versionDataPage, version2key(ctx, version), value);
-    if (zkr == ZKR_SUCCESS)
-    {
-        value2versionData(ctx, versionData, value);
-    }
-
-    return zkr;
+    return VersionDataPage::Read(ctx, headerPage->versionDataPage, version, versionData);
 }
 
-zkresult HeaderPage::WriteVersionData (PageContext &ctx, uint64_t &headerPageNumber, const uint64_t &version, const VersionDataStruct &versionData)
+zkresult HeaderPage::WriteVersionData (PageContext &ctx, uint64_t &headerPageNumber, const uint64_t &version, const VersionDataEntry &versionData)
 {
     // Get an editable page
     headerPageNumber = ctx.pageManager.editPage(headerPageNumber);
@@ -240,7 +234,7 @@ zkresult HeaderPage::WriteVersionData (PageContext &ctx, uint64_t &headerPageNum
     HeaderStruct * headerPage = (HeaderStruct *)ctx.pageManager.getPageAddress(headerPageNumber);
 
     // Call the specific method
-    return KeyValuePage::Write(ctx, headerPage->versionDataPage, version2key(ctx, version), versionData2value(ctx, versionData), headerPageNumber);
+    return VersionDataPage::Write(ctx, headerPage->versionDataPage, version, versionData, headerPageNumber);
 }
 
 zkresult HeaderPage::KeyValueHistoryRead (PageContext &ctx, const uint64_t keyValueHistoryPage, const string &key, const uint64_t version, mpz_class &value, uint64_t &keyLevel)
@@ -314,7 +308,7 @@ zkresult HeaderPage::KeyValueHistoryPrint (PageContext &ctx, const uint64_t head
     }
 
     // Get the version data
-    VersionDataStruct versionData;
+    VersionDataEntry versionData;
     zkr = HeaderPage::ReadVersionData(ctx, headerPageNumber, version, versionData);
     if (zkr != ZKR_SUCCESS)
     {
