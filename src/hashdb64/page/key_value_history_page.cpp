@@ -450,7 +450,7 @@ zkresult KeyValueHistoryPage::ReadTree (PageContext &ctx, const uint64_t pageNum
 
         default:
         {
-            zklog.error("KeyValuePage::ReadTree() found invalid control=" + to_string(control) + " pageNumber=" + to_string(pageNumber));
+            zklog.error("KeyValueHistoryPage::ReadTree() found invalid control=" + to_string(control) + " pageNumber=" + to_string(pageNumber));
             return ZKR_DB_ERROR;
         }
     }
@@ -640,10 +640,12 @@ zkresult KeyValueHistoryPage::Write (PageContext &ctx, uint64_t &pageNumber, con
             newPage->keyValueEntry[newIndex][2] = 0; // Invalidate hash, since level has changed
 
             zkr = Write(ctx, newPageNumber, key, keyBits, version, value, level+1, headerPageNumber);
-
-            page->keyValueEntry[index][0] = uint64_t(2) << 60;
-            page->keyValueEntry[index][1] = newPageNumber;
-            page->keyValueEntry[index][2] = 0; // Invalidate hash, since now it is an intermediate node hash
+            if (zkr == ZKR_SUCCESS)
+            {
+                page->keyValueEntry[index][0] = uint64_t(2) << 60;
+                page->keyValueEntry[index][1] = newPageNumber;
+                page->keyValueEntry[index][2] = 0; // Invalidate hash, since now it is an intermediate node hash
+            }
 
             return zkr;
         }
@@ -692,7 +694,7 @@ zkresult KeyValueHistoryPage::calculateHash (PageContext &ctx, uint64_t &pageNum
     //Print(pageNumber, true, "Before calculatePageHash() ");
     zkresult zkr = calculatePageHash(ctx, pageNumber, 0, hash, headerPageNumber);
     //Print(pageNumber, true, "After calculatePageHash() ");
-    zklog.info("KeyValueHistoryPage::calculateHash() calculated new hash=" + fea2string(fr, hash));
+    //zklog.info("KeyValueHistoryPage::calculateHash() calculated new hash=" + fea2string(fr, hash));
     return zkr;
 }
 
@@ -702,9 +704,9 @@ zkresult KeyValueHistoryPage::calculatePageHash (PageContext &ctx, uint64_t &pag
     zkresult zkr;
 
     // Edit the page
-    uint64_t oldPageNumber = pageNumber;
+    //uint64_t oldPageNumber = pageNumber;
     pageNumber = ctx.pageManager.editPage(pageNumber);
-    zklog.info("KeyValueHistoryPage::calculatePageHash() oldPageNumber=" + to_string(oldPageNumber) + " pageNumber=" + to_string(pageNumber));
+    //zklog.info("KeyValueHistoryPage::calculatePageHash() oldPageNumber=" + to_string(oldPageNumber) + " pageNumber=" + to_string(pageNumber));
 
     // Get the page
     KeyValueHistoryStruct *page = (KeyValueHistoryStruct *)ctx.pageManager.getPageAddress(pageNumber);
@@ -802,7 +804,7 @@ zkresult KeyValueHistoryPage::calculatePageHash (PageContext &ctx, uint64_t &pag
 
                     // Record the new hash and its raw data
                     page->keyValueEntry[index][2] = (insertionRawDataOffset << 48) | (insertionRawDataPage & U64Mask48);
-                    zklog.info("KeyValueHistoryPage::calculatePageHash() wrote intermediate node hash in page=" + to_string(pageNumber) + " index=" + to_string(index));
+                    //zklog.info("KeyValueHistoryPage::calculatePageHash() wrote intermediate node hash in page=" + to_string(pageNumber) + " index=" + to_string(index));
                 }
                 // If hash was calculated, get it from raw data
                 else
@@ -1015,7 +1017,7 @@ void KeyValueHistoryPage::Print (PageContext &ctx, const uint64_t pageNumber, bo
 
             default:
             {
-                zklog.error(prefix + "KeyValuePage::Print() found invalid control=" + to_string(control) + " pageNumber=" + to_string(pageNumber));
+                zklog.error(prefix + "KeyValueHistoryPage::Print() found invalid control=" + to_string(control) + " pageNumber=" + to_string(pageNumber));
                 exitProcess();
             }
         }
@@ -1032,5 +1034,5 @@ void KeyValueHistoryPage::Print (PageContext &ctx, const uint64_t pageNumber, bo
     zklog.info(prefix + "KeyValueHistoryPage::Print()");
     KeyValueHistoryCounters counters;
     Print(ctx, pageNumber, details, prefix, 0, counters);
-    zklog.info(prefix + "Counters: leafNodes=" + to_string(counters.leafNodes) +"(" + to_string(counters.leafHashes) + " hashes)" + " intermediateNodes=" + to_string(counters.intermediateNodes) +"(" + to_string(counters.intermediateHashes) + " hashes) maxLevel=" + to_string(counters.maxLevel));
+    zklog.info(prefix + "Counters: leafNodes=" + to_string(counters.leafNodes) + "(" + to_string(counters.leafHashes) + " hashes)" + " intermediateNodes=" + to_string(counters.intermediateNodes) + "(" + to_string(counters.intermediateHashes) + " hashes) maxLevel=" + to_string(counters.maxLevel));
 }

@@ -6,7 +6,7 @@
 #include "zklog.hpp"
 #include "exit_process.hpp"
 #include "zkassert.hpp"
-#include "version_data_page.hpp"
+#include "version_data_entry.hpp"
 #include "scalar.hpp"
 #include "key_value.hpp"
 #include "hash_value_gl.hpp"
@@ -63,8 +63,8 @@ public:
     static zkresult WriteRootVersion (PageContext &ctx,       uint64_t &headerPageNumber, const string &root, const uint64_t &version);
 
     // Version data methods
-    static zkresult ReadVersionData  (PageContext &ctx, const uint64_t  headerPageNumber, const uint64_t &version,       VersionDataStruct &versionData);
-    static zkresult WriteVersionData (PageContext &ctx,       uint64_t &headerPageNumber, const uint64_t &version, const VersionDataStruct &versionData);
+    static zkresult ReadVersionData  (PageContext &ctx, const uint64_t  headerPageNumber, const uint64_t &version,       VersionDataEntry &versionData);
+    static zkresult WriteVersionData (PageContext &ctx,       uint64_t &headerPageNumber, const uint64_t &version, const VersionDataEntry &versionData);
 
     // Key-Value-History methods
     static zkresult KeyValueHistoryRead          (PageContext &ctx, const uint64_t  keyValueHistoryPage, const string &key, const uint64_t version,       mpz_class &value, uint64_t &keyLevel);
