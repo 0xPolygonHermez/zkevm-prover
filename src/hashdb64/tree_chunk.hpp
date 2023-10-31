@@ -19,7 +19,7 @@ using namespace std;
 
 /*
 A Tree 64 is an SMT data model based on SMT chunks of 1 hash --> 64 childs, i.e. 6 levels of the SMT tree
-Every child an be zero, a leaf node (key, value), or an intermediate node (the hash of another Tree 64)
+Every child can be zero, a leaf node (key, value), or an intermediate node (the hash of another Tree 64)
 
 A TreeChunk contains 6 levels of children:
 
