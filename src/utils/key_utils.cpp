@@ -52,47 +52,12 @@ void splitKey6 (Goldilocks &fr, const Goldilocks::Element (&key)[4], uint8_t (&r
 // Get 64 key bits, in sets of 6 bits
 void splitKey6 (Goldilocks &fr, const uint64_t key, uint8_t (&_result)[11])
 {
-    // Convert to byte array
-    string baString;
-    ba2ba(baString, key);
-
-    // Calculate the total number of bits to read
-    uint64_t size = baString.size();
-    uint64_t numberOfBits = size << 3;
-    
-    // Split them in chunks of 6 bits
-    vector<uint64_t> result;
-    for (uint64_t i = 0; i < numberOfBits; i += 6)
-    {
-        // Calculate the byte and bit of the first part
-        uint64_t firstByte = i / 6;
-        uint64_t firstByteBit = i % 6;
-        uint8_t resultByte = (uint8_t)baString[firstByte];
-        resultByte = resultByte << firstByteBit;
-        uint64_t resultPart = uint64_t(resultByte);
-        resultPart = resultPart << 1;
-
-        // If this is not the end of the byte array, consume the rest of bits of the next byte
-        if ((firstByte + 1) < size)
-        {
-            resultByte = (uint8_t)baString[firstByte + 1];
-            resultByte = resultByte >> (5 - firstByteBit);
-            resultPart |= uint64_t(resultByte);
-        }
-
-        // Add to the result
-        result.emplace_back((uint64_t)resultPart);
-    }
-
-    if (result.size() != 11)
-    {
-        zklog.error("splitKey6() got invalid number of values=" + to_string(result.size()) + " != 11");
-        exitProcess();
-    }
-
-    for (uint64_t i=0; i<11; i++)
-    {
-        _result[i] = result[i];
+    uint64_t bits = key;
+    _result[10] = (uint8_t)(bits & 0x0F);
+    bits >>= 4;
+    for (int i = 9; i >= 0; i--) {
+        _result[i] = (uint8_t)(bits & 0x3F);
+        bits >>= 6;
     }
 }
 
