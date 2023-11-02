@@ -62,6 +62,9 @@ public:
     // HashDB
     HashDBInterface *pHashDB;
 
+    // When we reach this zkPC, state root (SR) will be consolidated (from virtual to real state root)
+    const uint64_t consolidateStateRootZKPC = 4925;
+
     // Constructor
     MainExecutor(Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config);
 

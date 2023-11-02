@@ -303,7 +303,7 @@ zkresult HeaderPage::KeyValueHistoryPrint (PageContext &ctx, const uint64_t head
     zkresult zkr = HeaderPage::ReadRootVersion(ctx, headerPageNumber, rootBa, version);
     if (zkr != ZKR_SUCCESS)
     {
-        zklog.error("HeaderPage::KeyValueHistoryPrint() faile calling HeaderPage::ReadRootVersion() result=" + zkresult2string(zkr) + " root=" + rootString);
+        zklog.error("HeaderPage::KeyValueHistoryPrint() failed calling HeaderPage::ReadRootVersion() result=" + zkresult2string(zkr) + " root=" + rootString);
         return zkr;
     }
 

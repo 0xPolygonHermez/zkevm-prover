@@ -481,6 +481,12 @@ zkresult StateManager64::purgeBatch (BatchState64 &batchState, const string &new
         batchState.txState.pop_back();
     }
 
+    // Delete any padding TXs added at the beginning
+    while ((batchState.txState.size() > 0) && (batchState.txState[0].persistence[PERSISTENCE_DATABASE].oldStateRoot == ""))
+    {
+        batchState.txState.erase(batchState.txState.begin());
+    }
+
     return ZKR_SUCCESS;
 }
 
@@ -893,6 +899,8 @@ zkresult StateManager64::consolidateState(const string &_virtualStateRoot, const
 
     Unlock();
 
+    //db.PrintTree("");
+
     TimerStopAndLog(STATE_MANAGER_CONSOLIDATE_STATE);
 
     return zkr;
@@ -1021,7 +1029,7 @@ bool StateManager64::isVirtualStateRoot(const string &stateRoot)
 zkresult StateManager64::set (const string &batchUUID, uint64_t tx, Database64 &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, SmtSetResult &result, DatabaseMap *dbReadLog)
 {
 #ifdef LOG_STATE_MANAGER
-    zklog.info("StateManager64::set() called with oldRoot=" + fea2string(fr,oldRoot) + " key=" + fea2string(fr,key) + " value=" + value.get_str(16) + " persistent=" + to_string(persistent));
+    zklog.info("StateManager64::set() called with oldRoot=" + fea2string(fr,oldRoot) + " key=" + fea2string(fr,key) + " value=" + value.get_str(16) + " persistent=" + persistence2string(persistence) + " tx=" + to_string(tx));
 #endif
 
     zkresult zkr;
