@@ -389,15 +389,7 @@ zkresult HashDB::flush (const string &batchUUID, const string &newStateRoot, con
     zkresult result;
     if (config.hashDB64)
     {
-        if (config.stateManager && (batchUUID.size() != 0))
-        {
-            zklog.error("HashDB::flush() called with config.hashDB64=true and config.stateManager=false");
-            return ZKR_UNSPECIFIED;
-        }
-        else
-        {
-            result = db64.flush(flushId, storedFlushId);
-        }
+        result = db64.flush(flushId, storedFlushId);
     }
     else
     {

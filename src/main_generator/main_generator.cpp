@@ -9,6 +9,11 @@ using json = nlohmann::json;
 
 // Fork namespace
 const string forkNamespace = PROVER_FORK_NAMESPACE_STRING;
+const uint64_t consolidateStateRootZKPC =
+    forkNamespace == "fork_6" ? 4928 :
+    forkNamespace == "fork_5" ? 4924 :
+    forkNamespace == "fork_4" ? 4925 :
+    uint64_t(0xFFFFFFFFFFFFFFFF);
 
 // Forward declaration
 void file2json (json &rom, string &romFileName);
@@ -500,8 +505,45 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "       ctx.ecRecoverPrecalcBuffer.filled = false;\n";
             code += "    }\n";
         }
-        
 
+        if (bFastMode && (zkPC == consolidateStateRootZKPC))
+        {
+            code += "    // Consolidate the state and store it in SR, just before we save SR into SMT\n";
+            code += "    // Convert pols.SR to virtualStateRoot fea\n";
+            code += "    Goldilocks::Element virtualStateRoot[4];\n";
+            code += "    if (!fea2fea(virtualStateRoot, pols.SR0[0], pols.SR1[0], pols.SR2[0], pols.SR3[0], pols.SR4[0], pols.SR5[0], pols.SR6[0], pols.SR7[0]))\n";
+            code += "    {\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+            code += "        mainExecutor.logError(ctx, string(\"Failed calling fea2fea()\"));\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
+            code += "        return;\n";
+            code += "    }\n";
+
+            code += "    // Call purge()\n";
+            code += "    zkResult = mainExecutor.pHashDB->purge(proverRequest.uuid, virtualStateRoot, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);\n";
+            code += "    if (zkResult != ZKR_SUCCESS)\n";
+            code += "    {\n";
+            code += "        proverRequest.result = zkResult;\n";
+            code += "        mainExecutor.logError(ctx, string(\"Failed calling pHashDB->purge() result=\") + zkresult2string(zkResult));\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
+            code += "        return;\n";
+            code += "    }\n";
+
+            code += "    // Call consolidateState()\n";
+            code += "    Goldilocks::Element consolidatedStateRoot[4];\n";
+            code += "    zkResult = mainExecutor.pHashDB->consolidateState(virtualStateRoot, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE , consolidatedStateRoot, flushId, lastSentFlushId);\n";
+            code += "    if (zkResult != ZKR_SUCCESS)\n";
+            code += "    {\n";
+            code += "        proverRequest.result = zkResult;\n";
+            code += "        mainExecutor.logError(ctx, string(\"Failed calling pHashDB->consolidateState() result=\") + zkresult2string(proverRequest.result));\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
+            code += "        return;\n";
+            code += "    }\n";
+
+            code += "    // Convert consolidatedState fea to pols.SR\n";
+            code += "    fea2fea(pols.SR0[0], pols.SR1[0], pols.SR2[0], pols.SR3[0], pols.SR4[0], pols.SR5[0], pols.SR6[0], pols.SR7[0], consolidatedStateRoot);\n\n";
+        }
+        
         // INITIALIZATION
 
         bool opInitialized = false;
@@ -4786,7 +4828,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    if (ctx.config.hashDB64)\n";
     code += "    {\n";
     code += "        Goldilocks::Element newStateRoot[4];\n";
-    code += "        string2fea(fr, proverRequest.pFullTracer->get_new_state_root(), newStateRoot);\n";
+    code += "        string2fea(fr, NormalizeToNFormat(proverRequest.pFullTracer->get_new_state_root(),64), newStateRoot);\n";
     code += "        zkresult zkr = mainExecutor.pHashDB->purge(proverRequest.uuid, newStateRoot, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);\n";
     code += "        if (zkr != ZKR_SUCCESS)\n";
     code += "        {\n";
@@ -4795,8 +4837,14 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
     code += "            return;\n";
     code += "        }\n";
-    code += "        proverRequest.flushId = 0;\n";
-    code += "        proverRequest.lastSentFlushId = 0;\n";
+    code += "        zkr = mainExecutor.pHashDB->flush(proverRequest.uuid, proverRequest.pFullTracer->get_new_state_root(), proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, proverRequest.flushId, proverRequest.lastSentFlushId);\n";
+    code += "        if (zkr != ZKR_SUCCESS)\n";
+    code += "        {\n";
+    code += "            proverRequest.result = zkr;\n";
+    code += "            mainExecutor.logError(ctx, string(\"Failed calling pHashDB->flush() result=\") + zkresult2string(zkr));\n";
+    code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
+    code += "            return;\n";
+    code += "        }\n";
     code += "    }\n";
     code += "    else\n";
     code += "    {\n";

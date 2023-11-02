@@ -62,6 +62,10 @@ void ExecutorClient::waitForThreads (void)
 
 bool ExecutorClient::ProcessBatch (void)
 {
+    // Get a  HashDB interface
+    HashDBInterface* pHashDB = HashDBClientFactory::createHashDBClient(fr, config);
+    zkassertpermanent(pHashDB != NULL);
+
     TimerStart(EXECUTOR_CLIENT_PROCESS_BATCH);
 
     if (config.inputFile.size() == 0)
@@ -182,6 +186,25 @@ bool ExecutorClient::ProcessBatch (void)
 
     if (config.executorClientCheckNewStateRoot)
     {
+        if (config.hashDB64)
+        {
+            TimerStart(CONSOLIDATE_STATE);
+
+            Goldilocks::Element virtualStateRoot[4];
+            string2fea(fr, newStateRoot, virtualStateRoot);
+            Goldilocks::Element consolidatedStateRoot[4];
+            uint64_t flushId, storedFlushId;
+            zkresult zkr = pHashDB->consolidateState(virtualStateRoot, update_merkle_tree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, consolidatedStateRoot, flushId, storedFlushId);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("ExecutorClient::ProcessBatch() failed calling pHashDB->consolidateState() result=" + zkresult2string(zkr));
+                return false;
+            }
+            newStateRoot = fea2string(fr, consolidatedStateRoot);
+
+            TimerStopAndLog(CONSOLIDATE_STATE);
+        }
+
         TimerStart(CHECK_NEW_STATE_ROOT);
 
         if (newStateRoot.size() == 0)

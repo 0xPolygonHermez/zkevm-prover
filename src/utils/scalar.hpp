@@ -9,6 +9,7 @@
 #include "exit_process.hpp"
 #include "zklog.hpp"
 #include "zkglobals.hpp"
+#include "constants.hpp"
 
 using namespace std;
 
@@ -142,6 +143,107 @@ inline bool fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Ele
     
     scalar += (auxH<<32) + auxL;
     return true;
+}
+
+inline bool fea2fea (Goldilocks::Element (&fea)[4], const Goldilocks::Element &fe0, const Goldilocks::Element &fe1, const Goldilocks::Element &fe2, const Goldilocks::Element &fe3, const Goldilocks::Element &fe4, const Goldilocks::Element &fe5, const Goldilocks::Element &fe6, const Goldilocks::Element &fe7)
+{
+    // Add field element 7
+    uint64_t auxH = fr.toU64(fe7);
+    if (auxH >= 0x100000000)
+    {
+        zklog.error("fea2fea() found element 7 has a too high value=" + fr.toString(fe7, 16));
+        return false;
+    }
+
+    // Add field element 6
+    uint64_t auxL = fr.toU64(fe6);
+    if (auxL >= 0x100000000)
+    {
+        zklog.error("fea2fea() found element 6 has a too high value=" + fr.toString(fe6, 16));
+        return false;
+    }
+
+    fea[3] = fr.fromU64((auxH<<32) + auxL);
+
+    // Add field element 5
+    auxH = fr.toU64(fe5);
+    if (auxH >= 0x100000000)
+    {
+        zklog.error("fea2fea() found element 5 has a too high value=" + fr.toString(fe5, 16));
+        return false;
+    }
+
+    // Add field element 4
+    auxL = fr.toU64(fe4);
+    if (auxL >= 0x100000000)
+    {
+        zklog.error("fea2fea() found element 4 has a too high value=" + fr.toString(fe4, 16));
+        return false;
+    }
+    
+    fea[2] = fr.fromU64((auxH<<32) + auxL);
+
+    // Add field element 3
+    auxH = fr.toU64(fe3);
+    if (auxH >= 0x100000000)
+    {
+        zklog.error("fea2fea() found element 3 has a too high value=" + fr.toString(fe3, 16));
+        return false;
+    }
+
+    // Add field element 2
+    auxL = fr.toU64(fe2);
+    if (auxL >= 0x100000000)
+    {
+        zklog.error("fea2fea() found element 2 has a too high value=" + fr.toString(fe2, 16));
+        return false;
+    }
+    
+    fea[1] = fr.fromU64((auxH<<32) + auxL);
+
+    // Add field element 1
+    auxH = fr.toU64(fe1);
+    if (auxH >= 0x100000000)
+    {
+        zklog.error("fea2fea() found element 1 has a too high value=" + fr.toString(fe1, 16));
+        return false;
+    }
+
+    // Add field element 0
+    auxL = fr.toU64(fe0);
+    if (auxL >= 0x100000000)
+    {
+        zklog.error("fea2fea() found element 0 has a too high value=" + fr.toString(fe0, 16));
+        return false;
+    }
+    
+    fea[0] = fr.fromU64((auxH<<32) + auxL);
+    return true;
+}
+
+inline void fea2fea (Goldilocks::Element &fe0, Goldilocks::Element &fe1, Goldilocks::Element &fe2, Goldilocks::Element &fe3, Goldilocks::Element &fe4, Goldilocks::Element &fe5, Goldilocks::Element &fe6, Goldilocks::Element &fe7, const Goldilocks::Element (&fea)[4])
+{
+    uint64_t aux;
+
+    aux = fr.toU64(fea[0]);
+    fe0 = fr.fromU64(aux & U64Mask32);
+    aux = aux >> 32;
+    fe1 = fr.fromU64(aux);
+    
+    aux = fr.toU64(fea[1]);
+    fe2 = fr.fromU64(aux & U64Mask32);
+    aux = aux >> 32;
+    fe3 = fr.fromU64(aux);
+    
+    aux = fr.toU64(fea[2]);
+    fe4 = fr.fromU64(aux & U64Mask32);
+    aux = aux >> 32;
+    fe5 = fr.fromU64(aux);
+    
+    aux = fr.toU64(fea[3]);
+    fe6 = fr.fromU64(aux & U64Mask32);
+    aux = aux >> 32;
+    fe7 = fr.fromU64(aux);
 }
 
 inline bool fea2scalar (Goldilocks &fr, mpz_class &scalar, const Goldilocks::Element (&fea)[8])
