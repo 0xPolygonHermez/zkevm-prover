@@ -617,8 +617,8 @@ void* hashDBTestClientThread (const Config& config)
             in.push_back(i);
         }
 
-        zkr = client->setProgram(key, in, true);
-        zkr = client->getProgram(key, out, NULL);
+        zkr = client->setProgram(uuid, tx, key, in, PERSISTENCE_DATABASE);
+        zkr = client->getProgram(uuid, key, out, NULL);
 
         for (uint8_t i=0; i<128; i++) {
             zkassertpermanent(in[i]==out[i]);

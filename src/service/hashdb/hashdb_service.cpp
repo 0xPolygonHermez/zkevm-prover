@@ -289,6 +289,15 @@ using grpc::Status;
             data.push_back(request->data().at(i));
         }
 
+        // Get batch UUID
+        string batchUUID = request->batch_uuid();
+
+        // Get TX number
+        uint64_t tx = request->tx();
+
+        // Get persistence flag
+        Persistence persistence = (Persistence)request->persistence();
+
 #ifdef LOG_HASHDB_SERVICE
         {
             string s = "HashDBServiceImpl::SetProgram() called. key=" + fea2string(fr, key[0], key[1], key[2], key[3]) + " data=";
@@ -299,7 +308,7 @@ using grpc::Status;
         }
 #endif
         // Call set program
-        zkresult r = pHashDB->setProgram(key, data, request->persistent());
+        zkresult r = pHashDB->setProgram(batchUUID, tx, key, data, persistence);
 
         // Return result
         ::hashdb::v1::ResultCode* result = new ::hashdb::v1::ResultCode();
@@ -333,13 +342,16 @@ using grpc::Status;
         Goldilocks::Element key[4];
         grpc2fea (fr, request->key(), key);
 
+        // Get batch UUID
+        string batchUUID = request->batch_uuid();
+
 #ifdef LOG_HASHDB_SERVICE
         zklog.info("HashDBServiceImpl::GetProgram() called. key=" + fea2string(fr, key[0], key[1], key[2], key[3]));
 #endif
 
         // Call get program
         vector<uint8_t> value;
-        zkresult r = pHashDB->getProgram(key, value, NULL);
+        zkresult r = pHashDB->getProgram(batchUUID, key, value, NULL);
 
         // Return data
         string sData;
