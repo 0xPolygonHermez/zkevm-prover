@@ -33,6 +33,15 @@ HashDBRemote::~HashDBRemote()
     tms.print("HashDBRemote");
 #endif    
 }
+zkresult HashDBRemote::getLatestStateRoot (Goldilocks::Element (&stateRoot)[4]){
+
+    ::grpc::ClientContext context;
+    ::hashdb::v1::SetRequest request;
+    ::hashdb::v1::SetResponse response;
+
+    return ZKR_DB_ERROR;
+
+}
 
 zkresult HashDBRemote::set (const string &batchUUID, uint64_t tx, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, Goldilocks::Element (&newRoot)[4], SmtSetResult *result, DatabaseMap *dbReadLog)
 {

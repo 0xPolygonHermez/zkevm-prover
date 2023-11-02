@@ -81,7 +81,10 @@ public:
 
     // Basic methods
     void init(void);
-    
+    // State Root
+
+    zkresult getLatestStateRoot (Goldilocks::Element (&stateRoot)[4]);
+
     // Program
     zkresult getProgram (const string &_key, vector<uint8_t> &value, DatabaseMap *dbReadLog);
     zkresult setProgram (const string &_key, const vector<uint8_t> &value, const bool persistent);

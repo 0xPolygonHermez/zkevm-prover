@@ -30,6 +30,25 @@ HashDB::~HashDB()
 #endif    
 }
 
+zkresult HashDB::getLatestStateRoot (Goldilocks::Element (&stateRoot)[4])
+{
+#ifdef HASHDB_LOCK
+    lock_guard<recursive_mutex> guard(mlock);
+#endif
+
+    zkresult zkr;
+    
+    if (config.hashDB64)
+    {
+        zkr = db64.getLatestStateRoot(stateRoot);
+    }
+    else
+    {
+        zklog.error("HashDB::getLatestStateRoot() not suported with option config.hashDB64=false");
+        return ZKR_DB_ERROR;
+    }
+    return zkr;
+}
 zkresult HashDB::set (const string &batchUUID, uint64_t tx, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, Goldilocks::Element (&newRoot)[4], SmtSetResult *result, DatabaseMap *dbReadLog)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB
