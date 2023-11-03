@@ -261,7 +261,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // Consolidate the state and store it in SR, just before we save SR into SMT
-        if (bProcessBatch && (zkPC == consolidateStateRootZKPC))
+        if (config.hashDB64 && bProcessBatch && (zkPC == consolidateStateRootZKPC))
         {
             // Convert pols.SR to virtualStateRoot fea
             Goldilocks::Element virtualStateRoot[4];
