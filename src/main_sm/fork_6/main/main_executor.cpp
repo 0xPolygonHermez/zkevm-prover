@@ -2658,7 +2658,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     proverRequest.programKeys.insert(fea2string(fr, result));
                 }
 
-                zkresult zkResult = pHashDB->setProgram(result, hashPIterator->second.data, proverRequest.input.bUpdateMerkleTree);
+                zkresult zkResult = pHashDB->setProgram(proverRequest.uuid, proverRequest.pFullTracer->get_tx_number(), result, hashPIterator->second.data, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);
                 if (zkResult != ZKR_SUCCESS)
                 {
                     proverRequest.result = zkResult;
@@ -2713,7 +2713,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     proverRequest.programKeys.insert(fea2string(fr, aux));
                 }
 
-                zkresult zkResult = pHashDB->getProgram(aux, hashValue.data, proverRequest.dbReadLog);
+                zkresult zkResult = pHashDB->getProgram(proverRequest.uuid, aux, hashValue.data, proverRequest.dbReadLog);
                 if (zkResult != ZKR_SUCCESS)
                 {
                     proverRequest.result = zkResult;

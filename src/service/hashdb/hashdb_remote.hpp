@@ -33,8 +33,8 @@ public:
     // HashDBInterface methods
     zkresult set              (const string &batchUUID, uint64_t tx, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, Goldilocks::Element (&newRoot)[4], SmtSetResult *result, DatabaseMap *dbReadLog);
     zkresult get              (const string &batchUUID, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtGetResult *result, DatabaseMap *dbReadLog);
-    zkresult setProgram       (const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const bool persistent);
-    zkresult getProgram       (const Goldilocks::Element (&key)[4], vector<uint8_t> &data, DatabaseMap *dbReadLog);
+    zkresult setProgram       (const string &batchUUID, uint64_t tx, const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const Persistence persistence);
+    zkresult getProgram       (const string &batchUUID, const Goldilocks::Element (&key)[4], vector<uint8_t> &data, DatabaseMap *dbReadLog);
     void     loadDB           (const DatabaseMap::MTMap &input, const bool persistent, const Goldilocks::Element (&stateRoot)[4]);
     void     loadProgramDB    (const DatabaseMap::ProgramMap &input, const bool persistent);
     zkresult flush            (const string &batchUUID, const string &newStateRoot, const Persistence persistence, uint64_t &flushId, uint64_t &storedFlushId);

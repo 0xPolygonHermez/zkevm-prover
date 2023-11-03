@@ -101,7 +101,7 @@ zkresult HashDB::get (const string &batchUUID, const Goldilocks::Element (&root)
     return zkr;
 }
 
-zkresult HashDB::setProgram(const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const bool persistent)
+zkresult HashDB::setProgram (const string &batchUUID, uint64_t tx, const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const Persistence persistence)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB
     gettimeofday(&t, NULL);
@@ -114,11 +114,11 @@ zkresult HashDB::setProgram(const Goldilocks::Element (&key)[4], const vector<ui
     zkresult zkr;
     if (config.hashDB64)
     {
-        zkr = db64.setProgram(fea2string(fr, key), data, persistent);
+        zkr = stateManager64.setProgram(batchUUID, tx, db64, key, data, persistence);
     }
     else
     {
-        zkr = db.setProgram(fea2string(fr, key), data, persistent);
+        zkr = db.setProgram(fea2string(fr, key), data, persistence == PERSISTENCE_DATABASE ? true : false);
     }
 
 #ifdef LOG_TIME_STATISTICS_HASHDB
@@ -128,7 +128,7 @@ zkresult HashDB::setProgram(const Goldilocks::Element (&key)[4], const vector<ui
     return zkr;
 }
 
-zkresult HashDB::getProgram(const Goldilocks::Element (&key)[4], vector<uint8_t> &data, DatabaseMap *dbReadLog)
+zkresult HashDB::getProgram (const string &batchUUID, const Goldilocks::Element (&key)[4], vector<uint8_t> &data, DatabaseMap *dbReadLog)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB
     gettimeofday(&t, NULL);
@@ -142,7 +142,7 @@ zkresult HashDB::getProgram(const Goldilocks::Element (&key)[4], vector<uint8_t>
     zkresult zkr;
     if (config.hashDB64)
     {
-        zkr = db64.getProgram(fea2string(fr, key), data, dbReadLog);        
+        zkr = stateManager64.getProgram(batchUUID, db64, key, data, dbReadLog);        
     }
     else
     {

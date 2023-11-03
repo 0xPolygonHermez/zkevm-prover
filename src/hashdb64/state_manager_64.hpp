@@ -39,6 +39,7 @@ public:
     string newStateRoot;
     uint64_t currentSubState;
     vector<TxSubState64> subState;
+    unordered_map<string, vector<uint8_t>> dbProgram;
     TxPersistenceState64() : currentSubState(0)
     {
         subState.reserve(128);
@@ -63,6 +64,7 @@ public:
     KeyValueTree keyValueTree;
 #else
     KVTree keyValueTree;
+    unordered_map<string, vector<uint8_t>> dbProgram;
 #endif
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     TimeMetricStorage timeMetricStorage;
@@ -133,6 +135,12 @@ public:
 
     zkresult set(const string &batchUUID, uint64_t tx, Database64 &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, SmtSetResult &result, DatabaseMap *dbReadLog = NULL);
     zkresult get(const string &batchUUID, Database64 &db, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], SmtGetResult &result, DatabaseMap *dbReadLog = NULL);
+
+    zkresult setProgram (const string &batchUUID, uint64_t tx, Database64 &db, const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const Persistence persistence);
+    zkresult getProgram (const string &batchUUID, Database64 &db, const Goldilocks::Element (&key)[4], vector<uint8_t> &data, DatabaseMap *dbReadLog);
+
+    zkresult writeProgram (const string &batchUUID, uint64_t tx, const string &key, const vector<uint8_t> &data, const Persistence persistence);
+    zkresult readProgram (const string &batchUUID, const string &key, vector<uint8_t> &data, DatabaseMap *dbReadLog);
 
     void inline setLastConsolidatedStateRoot(const Goldilocks::Element (&root)[4])
     {
