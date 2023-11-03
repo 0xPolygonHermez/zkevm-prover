@@ -411,7 +411,6 @@ zkresult Database64::WriteTree (const Goldilocks::Element (&oldRoot)[4], const v
         }
 
         // Write root->version pair
-        std::cout<<"Rick newRoot: "<<fea2string(fr, newRoot)<<std::endl;
         zkr = HeaderPage::WriteRootVersion(ctx, headerPageNumber, newRootBa, version);
         if (zkr != ZKR_SUCCESS)
         {
