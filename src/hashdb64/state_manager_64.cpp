@@ -281,7 +281,6 @@ zkresult StateManager64::write (const string &batchUUID, uint64_t tx, const stri
     Goldilocks::Element key_[4];
     string2fea(frSM64, key, key_);
     batchState.keyValueTree.write(key_, value, level);
-    // TODO: Get level from DB and return the max
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     batchState.timeMetricStorage.add("write", TimeDiff(t));
@@ -292,7 +291,7 @@ zkresult StateManager64::write (const string &batchUUID, uint64_t tx, const stri
     return ZKR_SUCCESS;
 }
 
-zkresult StateManager64::read(const string &batchUUID, const string &key, mpz_class &value, uint64_t &level, DatabaseMap *dbReadLog)
+zkresult StateManager64::read (const string &batchUUID, const string &key, mpz_class &value, uint64_t &level, DatabaseMap *dbReadLog)
 {
     struct timeval t;
     gettimeofday(&t, NULL);
@@ -850,6 +849,25 @@ zkresult StateManager64::consolidateState(const string &_virtualStateRoot, const
                 batchState.newStateRoot = newRootString;
             }
 
+            // Send the programs to database
+            unordered_map<string, vector<uint8_t>>::const_iterator itProgram;
+            for (itProgram = txState.persistence[persistence].dbProgram.begin(); itProgram != txState.persistence[persistence].dbProgram.end(); itProgram++)
+            {
+                zkr = db.setProgram(itProgram->first, itProgram->second, persistence == PERSISTENCE_DATABASE ? true : false);
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("StateManager64::consolidateState() failed calling db.setProgram zkr=" + zkresult2string(zkr) +
+                                " tx=" + to_string(tx) +
+                                " txState.oldStateRoot=" + txState.persistence[persistence].oldStateRoot);
+        #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+                    batchState.timeMetricStorage.add("consolidateState db.setProgram failed", TimeDiff(t));
+                    batchState.timeMetricStorage.print("State Manager calls");
+        #endif
+                    Unlock();
+                    return ZKR_STATE_MANAGER;
+                }
+            }
+
         } // For all transactions
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
@@ -1029,7 +1047,7 @@ bool StateManager64::isVirtualStateRoot(const string &stateRoot)
 zkresult StateManager64::set (const string &batchUUID, uint64_t tx, Database64 &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, SmtSetResult &result, DatabaseMap *dbReadLog)
 {
 #ifdef LOG_STATE_MANAGER
-    zklog.info("StateManager64::set() called with oldRoot=" + fea2string(fr,oldRoot) + " key=" + fea2string(fr,key) + " value=" + value.get_str(16) + " persistent=" + persistence2string(persistence) + " tx=" + to_string(tx));
+    zklog.info("StateManager64::set() called with oldRoot=" + fea2string(fr,oldRoot) + " key=" + fea2string(fr,key) + " value=" + value.get_str(16) + " persistent=" + persistence2string(persistence) + " batchUUID=" + batchUUID + " tx=" + to_string(tx));
 #endif
 
     zkresult zkr;
@@ -1135,4 +1153,174 @@ zkresult StateManager64::get (const string &batchUUID, Database64 &db, const Gol
     result.proofHashCounter = level + 2;
 
     return ZKR_SUCCESS;
+}
+
+zkresult StateManager64::setProgram (const string &batchUUID, uint64_t tx, Database64 &db, const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const Persistence persistence)
+{
+#ifdef LOG_STATE_MANAGER
+    zklog.info("StateManager64::setProgram() called with key=" + fea2string(fr,key) + " data.size=" + to_string(data.size()) + " persistence=" + persistence2string(persistence) + " batchUUID=" + batchUUID + " tx=" + to_string(tx));
+#endif
+
+    zkresult zkr = ZKR_UNSPECIFIED;
+
+    bool bUseStateManager = config.stateManager && (batchUUID.size() > 0);
+    string keyString = fea2string(fr, key);
+
+    if (bUseStateManager)
+    {
+        zkr = stateManager64.writeProgram(batchUUID, tx, keyString, data, persistence);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("StateManager64::setProgram() failed calling stateManager.write() key=" + keyString + " result=" + to_string(zkr) + "=" + zkresult2string(zkr));
+        }
+    }
+    else
+    {
+        zkr = db.setProgram(keyString, data, persistence == PERSISTENCE_DATABASE ? true : false);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("StateManager64::setProgram() failed calling db.setProgram() key=" + keyString + " result=" + to_string(zkr) + "=" + zkresult2string(zkr));
+        }
+    }
+
+    return zkr;
+}
+
+zkresult StateManager64::getProgram (const string &batchUUID, Database64 &db, const Goldilocks::Element (&key)[4], vector<uint8_t> &data, DatabaseMap *dbReadLog)
+{
+#ifdef LOG_STATE_MANAGER
+    zklog.info("StateManager64::getProgram() called with key=" + fea2string(fr,key) + " data.size=" + to_string(data.size()));
+#endif
+
+    bool bUseStateManager = config.stateManager && (batchUUID.size() > 0);
+
+    string keyString = fea2string(fr, key);
+    mpz_class value;
+    zkresult zkr = ZKR_UNSPECIFIED;
+    if (bUseStateManager)
+    {
+        zkr = stateManager64.readProgram(batchUUID, keyString, data, dbReadLog);
+    }
+    if (zkr != ZKR_SUCCESS)
+    {
+        zkr = db.getProgram(keyString, data, dbReadLog);
+    }
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("StateManager64::getProgram() db.getProgram error=" + zkresult2string(zkr) + " root=" + fea2string(fr, lastConsolidatedStateRoot) + " key=" + fea2string(fr, key));
+        return zkr;
+    }
+
+    return ZKR_SUCCESS;
+}
+
+zkresult StateManager64::writeProgram (const string &batchUUID, uint64_t tx, const string &key, const vector<uint8_t> &data, const Persistence persistence)
+{
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+    struct timeval t;
+    gettimeofday(&t, NULL);
+#endif
+
+#ifdef LOG_STATE_MANAGER
+    zklog.info("StateManager64::writeProgram() batchUUID=" + batchUUID + " tx=" + to_string(tx) + " key=" + key + " persistence=" + persistence2string(persistence) + " value=" + value.get_str(16));
+#endif
+
+    // Check persistence range
+    if (persistence >= PERSISTENCE_SIZE)
+    {
+        zklog.error("StateManager64::writeProgram() wrong persistence batchUUID=" + batchUUID + " tx=" + to_string(tx) + " key=" + key + " persistence=" + persistence2string(persistence));
+        return ZKR_STATE_MANAGER;
+    }
+
+    Lock();
+
+    // Find batch state for this uuid
+    unordered_map<string, BatchState64>::iterator it;
+    it = state.find(batchUUID);
+    if (it == state.end())
+    {
+        zklog.error("StateManager64::writeProgram() found no batch state for batch UUID=" + batchUUID);
+        Unlock();
+        return ZKR_STATE_MANAGER;
+    }
+    BatchState64 &batchState = it->second;
+
+    // Check tx range
+    if (tx >= batchState.txState.size())
+    {
+        zklog.error("StateManager64::writeProgram() got tx=" + to_string(tx) + " bigger than txState size=" + to_string(it->second.txState.size()));
+        Unlock();
+        return ZKR_STATE_MANAGER;
+    }
+
+    // Create TxState, if not existing
+    if (tx == batchState.txState.size())
+    {
+        TxState64 aux;
+        aux.persistence[persistence].oldStateRoot = it->second.currentStateRoot;
+        it->second.txState.emplace_back(aux);
+    }
+    TxState64 &txState = batchState.txState[tx];
+
+    // Record the data
+    txState.persistence[persistence].dbProgram[key] = data;
+
+    // Add to common write pool to speed up read
+    batchState.dbProgram[key] = data;
+
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+    batchState.timeMetricStorage.add("writeProgram", TimeDiff(t));
+#endif
+
+    Unlock();
+
+    return ZKR_SUCCESS;
+}
+
+zkresult StateManager64::readProgram (const string &batchUUID, const string &key, vector<uint8_t> &data, DatabaseMap *dbReadLog)
+{
+    struct timeval t;
+    gettimeofday(&t, NULL);
+
+    Lock();
+
+    // Find batch state for this uuid
+    unordered_map<string, BatchState64>::iterator it;
+    it = state.find(batchUUID);
+    if (it == state.end())
+    {
+        // zklog.error("StateManager64::readProgram() found no batch state for batch UUID=" + batchUUID);
+        Unlock();
+        return ZKR_DB_KEY_NOT_FOUND;
+    }
+    BatchState64 &batchState = it->second;
+
+    // Search in the common program 
+    unordered_map<string, vector<uint8_t>>::const_iterator itProgram;
+    itProgram = batchState.dbProgram.find(key);
+    if (itProgram != batchState.dbProgram.end())
+    {
+        // Add to the read log
+        if (dbReadLog != NULL)
+            dbReadLog->add(key, data, true, TimeDiff(t));
+
+#ifdef LOG_STATE_MANAGER
+        zklog.info("StateManager64::readProgram() batchUUID=" + batchUUID + " key=" + key);
+#endif
+
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+        batchState.timeMetricStorage.add("read program success", TimeDiff(t));
+#endif
+        Unlock();
+
+        return ZKR_SUCCESS;
+    }
+
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+    batchState.timeMetricStorage.add("read program not found", TimeDiff(t));
+#endif
+
+    Unlock();
+
+    return ZKR_DB_KEY_NOT_FOUND;
 }

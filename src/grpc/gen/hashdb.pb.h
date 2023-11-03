@@ -1035,8 +1035,10 @@ class SetProgramRequest PROTOBUF_FINAL :
 
   enum : int {
     kDataFieldNumber = 2,
+    kBatchUuidFieldNumber = 4,
     kKeyFieldNumber = 1,
-    kPersistentFieldNumber = 3,
+    kTxFieldNumber = 5,
+    kPersistenceFieldNumber = 3,
   };
   // bytes data = 2;
   void clear_data();
@@ -1063,6 +1065,31 @@ class SetProgramRequest PROTOBUF_FINAL :
   std::string* _internal_mutable_data();
   public:
 
+  // string batch_uuid = 4;
+  void clear_batch_uuid();
+  const std::string& batch_uuid() const;
+  void set_batch_uuid(const std::string& value);
+  void set_batch_uuid(std::string&& value);
+  void set_batch_uuid(const char* value);
+  void set_batch_uuid(const char* value, size_t size);
+  std::string* mutable_batch_uuid();
+  std::string* release_batch_uuid();
+  void set_allocated_batch_uuid(std::string* batch_uuid);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_batch_uuid();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_batch_uuid(
+      std::string* batch_uuid);
+  private:
+  const std::string& _internal_batch_uuid() const;
+  void _internal_set_batch_uuid(const std::string& value);
+  std::string* _internal_mutable_batch_uuid();
+  public:
+
   // .hashdb.v1.Fea key = 1;
   bool has_key() const;
   private:
@@ -1081,13 +1108,22 @@ class SetProgramRequest PROTOBUF_FINAL :
       ::hashdb::v1::Fea* key);
   ::hashdb::v1::Fea* unsafe_arena_release_key();
 
-  // bool persistent = 3;
-  void clear_persistent();
-  bool persistent() const;
-  void set_persistent(bool value);
+  // uint64 tx = 5;
+  void clear_tx();
+  ::PROTOBUF_NAMESPACE_ID::uint64 tx() const;
+  void set_tx(::PROTOBUF_NAMESPACE_ID::uint64 value);
   private:
-  bool _internal_persistent() const;
-  void _internal_set_persistent(bool value);
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_tx() const;
+  void _internal_set_tx(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // .hashdb.v1.Persistence persistence = 3;
+  void clear_persistence();
+  ::hashdb::v1::Persistence persistence() const;
+  void set_persistence(::hashdb::v1::Persistence value);
+  private:
+  ::hashdb::v1::Persistence _internal_persistence() const;
+  void _internal_set_persistence(::hashdb::v1::Persistence value);
   public:
 
   // @@protoc_insertion_point(class_scope:hashdb.v1.SetProgramRequest)
@@ -1098,8 +1134,10 @@ class SetProgramRequest PROTOBUF_FINAL :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr data_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr batch_uuid_;
   ::hashdb::v1::Fea* key_;
-  bool persistent_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 tx_;
+  int persistence_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_hashdb_2eproto;
 };
@@ -1218,8 +1256,34 @@ class GetProgramRequest PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
+    kBatchUuidFieldNumber = 2,
     kKeyFieldNumber = 1,
   };
+  // string batch_uuid = 2;
+  void clear_batch_uuid();
+  const std::string& batch_uuid() const;
+  void set_batch_uuid(const std::string& value);
+  void set_batch_uuid(std::string&& value);
+  void set_batch_uuid(const char* value);
+  void set_batch_uuid(const char* value, size_t size);
+  std::string* mutable_batch_uuid();
+  std::string* release_batch_uuid();
+  void set_allocated_batch_uuid(std::string* batch_uuid);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_batch_uuid();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_batch_uuid(
+      std::string* batch_uuid);
+  private:
+  const std::string& _internal_batch_uuid() const;
+  void _internal_set_batch_uuid(const std::string& value);
+  std::string* _internal_mutable_batch_uuid();
+  public:
+
   // .hashdb.v1.Fea key = 1;
   bool has_key() const;
   private:
@@ -1245,6 +1309,7 @@ class GetProgramRequest PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr batch_uuid_;
   ::hashdb::v1::Fea* key_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_hashdb_2eproto;
@@ -7743,24 +7808,125 @@ inline void SetProgramRequest::unsafe_arena_set_allocated_data(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:hashdb.v1.SetProgramRequest.data)
 }
 
-// bool persistent = 3;
-inline void SetProgramRequest::clear_persistent() {
-  persistent_ = false;
+// .hashdb.v1.Persistence persistence = 3;
+inline void SetProgramRequest::clear_persistence() {
+  persistence_ = 0;
 }
-inline bool SetProgramRequest::_internal_persistent() const {
-  return persistent_;
+inline ::hashdb::v1::Persistence SetProgramRequest::_internal_persistence() const {
+  return static_cast< ::hashdb::v1::Persistence >(persistence_);
 }
-inline bool SetProgramRequest::persistent() const {
-  // @@protoc_insertion_point(field_get:hashdb.v1.SetProgramRequest.persistent)
-  return _internal_persistent();
+inline ::hashdb::v1::Persistence SetProgramRequest::persistence() const {
+  // @@protoc_insertion_point(field_get:hashdb.v1.SetProgramRequest.persistence)
+  return _internal_persistence();
 }
-inline void SetProgramRequest::_internal_set_persistent(bool value) {
+inline void SetProgramRequest::_internal_set_persistence(::hashdb::v1::Persistence value) {
   
-  persistent_ = value;
+  persistence_ = value;
 }
-inline void SetProgramRequest::set_persistent(bool value) {
-  _internal_set_persistent(value);
-  // @@protoc_insertion_point(field_set:hashdb.v1.SetProgramRequest.persistent)
+inline void SetProgramRequest::set_persistence(::hashdb::v1::Persistence value) {
+  _internal_set_persistence(value);
+  // @@protoc_insertion_point(field_set:hashdb.v1.SetProgramRequest.persistence)
+}
+
+// string batch_uuid = 4;
+inline void SetProgramRequest::clear_batch_uuid() {
+  batch_uuid_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& SetProgramRequest::batch_uuid() const {
+  // @@protoc_insertion_point(field_get:hashdb.v1.SetProgramRequest.batch_uuid)
+  return _internal_batch_uuid();
+}
+inline void SetProgramRequest::set_batch_uuid(const std::string& value) {
+  _internal_set_batch_uuid(value);
+  // @@protoc_insertion_point(field_set:hashdb.v1.SetProgramRequest.batch_uuid)
+}
+inline std::string* SetProgramRequest::mutable_batch_uuid() {
+  // @@protoc_insertion_point(field_mutable:hashdb.v1.SetProgramRequest.batch_uuid)
+  return _internal_mutable_batch_uuid();
+}
+inline const std::string& SetProgramRequest::_internal_batch_uuid() const {
+  return batch_uuid_.Get();
+}
+inline void SetProgramRequest::_internal_set_batch_uuid(const std::string& value) {
+  
+  batch_uuid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void SetProgramRequest::set_batch_uuid(std::string&& value) {
+  
+  batch_uuid_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:hashdb.v1.SetProgramRequest.batch_uuid)
+}
+inline void SetProgramRequest::set_batch_uuid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  batch_uuid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:hashdb.v1.SetProgramRequest.batch_uuid)
+}
+inline void SetProgramRequest::set_batch_uuid(const char* value,
+    size_t size) {
+  
+  batch_uuid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:hashdb.v1.SetProgramRequest.batch_uuid)
+}
+inline std::string* SetProgramRequest::_internal_mutable_batch_uuid() {
+  
+  return batch_uuid_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* SetProgramRequest::release_batch_uuid() {
+  // @@protoc_insertion_point(field_release:hashdb.v1.SetProgramRequest.batch_uuid)
+  return batch_uuid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void SetProgramRequest::set_allocated_batch_uuid(std::string* batch_uuid) {
+  if (batch_uuid != nullptr) {
+    
+  } else {
+    
+  }
+  batch_uuid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), batch_uuid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:hashdb.v1.SetProgramRequest.batch_uuid)
+}
+inline std::string* SetProgramRequest::unsafe_arena_release_batch_uuid() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:hashdb.v1.SetProgramRequest.batch_uuid)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return batch_uuid_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void SetProgramRequest::unsafe_arena_set_allocated_batch_uuid(
+    std::string* batch_uuid) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (batch_uuid != nullptr) {
+    
+  } else {
+    
+  }
+  batch_uuid_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      batch_uuid, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:hashdb.v1.SetProgramRequest.batch_uuid)
+}
+
+// uint64 tx = 5;
+inline void SetProgramRequest::clear_tx() {
+  tx_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 SetProgramRequest::_internal_tx() const {
+  return tx_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 SetProgramRequest::tx() const {
+  // @@protoc_insertion_point(field_get:hashdb.v1.SetProgramRequest.tx)
+  return _internal_tx();
+}
+inline void SetProgramRequest::_internal_set_tx(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  tx_ = value;
+}
+inline void SetProgramRequest::set_tx(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_tx(value);
+  // @@protoc_insertion_point(field_set:hashdb.v1.SetProgramRequest.tx)
 }
 
 // -------------------------------------------------------------------
@@ -7846,6 +8012,87 @@ inline void GetProgramRequest::set_allocated_key(::hashdb::v1::Fea* key) {
   }
   key_ = key;
   // @@protoc_insertion_point(field_set_allocated:hashdb.v1.GetProgramRequest.key)
+}
+
+// string batch_uuid = 2;
+inline void GetProgramRequest::clear_batch_uuid() {
+  batch_uuid_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& GetProgramRequest::batch_uuid() const {
+  // @@protoc_insertion_point(field_get:hashdb.v1.GetProgramRequest.batch_uuid)
+  return _internal_batch_uuid();
+}
+inline void GetProgramRequest::set_batch_uuid(const std::string& value) {
+  _internal_set_batch_uuid(value);
+  // @@protoc_insertion_point(field_set:hashdb.v1.GetProgramRequest.batch_uuid)
+}
+inline std::string* GetProgramRequest::mutable_batch_uuid() {
+  // @@protoc_insertion_point(field_mutable:hashdb.v1.GetProgramRequest.batch_uuid)
+  return _internal_mutable_batch_uuid();
+}
+inline const std::string& GetProgramRequest::_internal_batch_uuid() const {
+  return batch_uuid_.Get();
+}
+inline void GetProgramRequest::_internal_set_batch_uuid(const std::string& value) {
+  
+  batch_uuid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void GetProgramRequest::set_batch_uuid(std::string&& value) {
+  
+  batch_uuid_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:hashdb.v1.GetProgramRequest.batch_uuid)
+}
+inline void GetProgramRequest::set_batch_uuid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  batch_uuid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:hashdb.v1.GetProgramRequest.batch_uuid)
+}
+inline void GetProgramRequest::set_batch_uuid(const char* value,
+    size_t size) {
+  
+  batch_uuid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:hashdb.v1.GetProgramRequest.batch_uuid)
+}
+inline std::string* GetProgramRequest::_internal_mutable_batch_uuid() {
+  
+  return batch_uuid_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* GetProgramRequest::release_batch_uuid() {
+  // @@protoc_insertion_point(field_release:hashdb.v1.GetProgramRequest.batch_uuid)
+  return batch_uuid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void GetProgramRequest::set_allocated_batch_uuid(std::string* batch_uuid) {
+  if (batch_uuid != nullptr) {
+    
+  } else {
+    
+  }
+  batch_uuid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), batch_uuid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:hashdb.v1.GetProgramRequest.batch_uuid)
+}
+inline std::string* GetProgramRequest::unsafe_arena_release_batch_uuid() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:hashdb.v1.GetProgramRequest.batch_uuid)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return batch_uuid_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void GetProgramRequest::unsafe_arena_set_allocated_batch_uuid(
+    std::string* batch_uuid) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (batch_uuid != nullptr) {
+    
+  } else {
+    
+  }
+  batch_uuid_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      batch_uuid, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:hashdb.v1.GetProgramRequest.batch_uuid)
 }
 
 // -------------------------------------------------------------------

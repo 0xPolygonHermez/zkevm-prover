@@ -508,6 +508,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
         if (bFastMode && (zkPC == consolidateStateRootZKPC))
         {
+            code += "    if (config.hashDB64)\n";
+            code += "    {\n";
             code += "    // Consolidate the state and store it in SR, just before we save SR into SMT\n";
             code += "    // Convert pols.SR to virtualStateRoot fea\n";
             code += "    Goldilocks::Element virtualStateRoot[4];\n";
@@ -541,7 +543,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    }\n";
 
             code += "    // Convert consolidatedState fea to pols.SR\n";
-            code += "    fea2fea(pols.SR0[0], pols.SR1[0], pols.SR2[0], pols.SR3[0], pols.SR4[0], pols.SR5[0], pols.SR6[0], pols.SR7[0], consolidatedStateRoot);\n\n";
+            code += "    fea2fea(pols.SR0[0], pols.SR1[0], pols.SR2[0], pols.SR3[0], pols.SR4[0], pols.SR5[0], pols.SR6[0], pols.SR7[0], consolidatedStateRoot);\n";
+            code += "    }\n\n";
         }
         
         // INITIALIZATION
@@ -3019,7 +3022,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
             code += "        gettimeofday(&t, NULL);\n";
             code += "#endif\n";
-            code += "        zkResult = mainExecutor.pHashDB->setProgram(result, hashIterator->second.data, proverRequest.input.bUpdateMerkleTree);\n";
+            code += "        zkResult = mainExecutor.pHashDB->setProgram(proverRequest.uuid, proverRequest.pFullTracer->get_tx_number(), result, hashIterator->second.data, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);\n";
             code += "        if (zkResult != ZKR_SUCCESS)\n";
             code += "        {\n";
             code += "            proverRequest.result = zkResult;\n";
@@ -3076,7 +3079,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
             code += "        gettimeofday(&t, NULL);\n";
             code += "#endif\n";
-            code += "        zkResult = mainExecutor.pHashDB->getProgram(aux, hashValue.data, proverRequest.dbReadLog);\n";
+            code += "        zkResult = mainExecutor.pHashDB->getProgram(proverRequest.uuid, aux, hashValue.data, proverRequest.dbReadLog);\n";
             code += "        if (zkResult != ZKR_SUCCESS)\n";
             code += "        {\n";
             code += "            proverRequest.result = zkResult;\n";

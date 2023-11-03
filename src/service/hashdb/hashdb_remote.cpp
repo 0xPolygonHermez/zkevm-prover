@@ -199,7 +199,7 @@ zkresult HashDBRemote::get (const string &batchUUID, const Goldilocks::Element (
     return static_cast<zkresult>(response.result().code());
 }
 
-zkresult HashDBRemote::setProgram (const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const bool persistent)
+zkresult HashDBRemote::setProgram (const string &batchUUID, uint64_t tx, const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const Persistence persistence)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
     gettimeofday(&t, NULL);
@@ -220,7 +220,9 @@ zkresult HashDBRemote::setProgram (const Goldilocks::Element (&key)[4], const ve
     }
     request.set_data(sData);
 
-    request.set_persistent(persistent);
+    request.set_persistence((hashdb::v1::Persistence)persistence);
+    request.set_batch_uuid(batchUUID);
+    request.set_tx(tx);
 
     grpc::Status s = stub->SetProgram(&context, request, &response);
     if (s.error_code() != grpc::StatusCode::OK)
@@ -236,7 +238,7 @@ zkresult HashDBRemote::setProgram (const Goldilocks::Element (&key)[4], const ve
     return static_cast<zkresult>(response.result().code());
 }
 
-zkresult HashDBRemote::getProgram (const Goldilocks::Element (&key)[4], vector<uint8_t> &data, DatabaseMap *dbReadLog)
+zkresult HashDBRemote::getProgram (const string &batchUUID, const Goldilocks::Element (&key)[4], vector<uint8_t> &data, DatabaseMap *dbReadLog)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
     gettimeofday(&t, NULL);
@@ -249,6 +251,8 @@ zkresult HashDBRemote::getProgram (const Goldilocks::Element (&key)[4], vector<u
     ::hashdb::v1::Fea* reqKey = new ::hashdb::v1::Fea();
     fea2grpc(fr, key, reqKey);
     request.set_allocated_key(reqKey);
+
+    request.set_batch_uuid(batchUUID);
 
     grpc::Status s = stub->GetProgram(&context, request, &response);
     if (s.error_code() != grpc::StatusCode::OK)

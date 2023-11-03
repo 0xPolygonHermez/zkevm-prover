@@ -242,7 +242,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
 
         // Consolidate the state and store it in SR, just before we save SR into SMT
-        if (bProcessBatch && (zkPC == consolidateStateRootZKPC))
+        if (config.hashDB64 && bProcessBatch && (zkPC == consolidateStateRootZKPC))
         {
             // Convert pols.SR to virtualStateRoot fea
             Goldilocks::Element virtualStateRoot[4];
@@ -2427,7 +2427,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 gettimeofday(&t, NULL);
 #endif
-                zkresult zkResult = pHashDB->setProgram(result, hashPIterator->second.data, proverRequest.input.bUpdateMerkleTree);
+                zkresult zkResult = pHashDB->setProgram(proverRequest.uuid, proverRequest.pFullTracer->get_tx_number(), result, hashPIterator->second.data, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);
                 if (zkResult != ZKR_SUCCESS)
                 {
                     proverRequest.result = zkResult;
@@ -2470,7 +2470,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 gettimeofday(&t, NULL);
 #endif
-                zkresult zkResult = pHashDB->getProgram(aux, hashValue.data, proverRequest.dbReadLog);
+                zkresult zkResult = pHashDB->getProgram(proverRequest.uuid, aux, hashValue.data, proverRequest.dbReadLog);
                 if (zkResult != ZKR_SUCCESS)
                 {
                     proverRequest.result = zkResult;

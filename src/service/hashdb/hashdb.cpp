@@ -120,7 +120,7 @@ zkresult HashDB::get (const string &batchUUID, const Goldilocks::Element (&root)
     return zkr;
 }
 
-zkresult HashDB::setProgram(const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const bool persistent)
+zkresult HashDB::setProgram (const string &batchUUID, uint64_t tx, const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const Persistence persistence)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB
     gettimeofday(&t, NULL);
@@ -133,11 +133,11 @@ zkresult HashDB::setProgram(const Goldilocks::Element (&key)[4], const vector<ui
     zkresult zkr;
     if (config.hashDB64)
     {
-        zkr = db64.setProgram(fea2string(fr, key), data, persistent);
+        zkr = stateManager64.setProgram(batchUUID, tx, db64, key, data, persistence);
     }
     else
     {
-        zkr = db.setProgram(fea2string(fr, key), data, persistent);
+        zkr = db.setProgram(fea2string(fr, key), data, persistence == PERSISTENCE_DATABASE ? true : false);
     }
 
 #ifdef LOG_TIME_STATISTICS_HASHDB
@@ -147,7 +147,7 @@ zkresult HashDB::setProgram(const Goldilocks::Element (&key)[4], const vector<ui
     return zkr;
 }
 
-zkresult HashDB::getProgram(const Goldilocks::Element (&key)[4], vector<uint8_t> &data, DatabaseMap *dbReadLog)
+zkresult HashDB::getProgram (const string &batchUUID, const Goldilocks::Element (&key)[4], vector<uint8_t> &data, DatabaseMap *dbReadLog)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB
     gettimeofday(&t, NULL);
@@ -161,7 +161,7 @@ zkresult HashDB::getProgram(const Goldilocks::Element (&key)[4], vector<uint8_t>
     zkresult zkr;
     if (config.hashDB64)
     {
-        zkr = db64.getProgram(fea2string(fr, key), data, dbReadLog);        
+        zkr = stateManager64.getProgram(batchUUID, db64, key, data, dbReadLog);        
     }
     else
     {
@@ -180,7 +180,7 @@ zkresult hashValue2keyValue (const DatabaseMap::MTMap &input, const Goldilocks::
     zkresult zkr;
 
     string root = fea2string(fr, stateRoot);
-
+    
     DatabaseMap::MTMap::const_iterator it;
     it = input.find(root);
     if (it == input.end())
@@ -232,6 +232,8 @@ zkresult hashValue2keyValue (const DatabaseMap::MTMap &input, const Goldilocks::
                 return zkr;
             }
         }
+
+        return ZKR_SUCCESS;
     }
 
     // If capacity is {1,0,0,0} then this is a leaf node
@@ -283,7 +285,7 @@ zkresult hashValue2keyValue (const DatabaseMap::MTMap &input, const Goldilocks::
     }
 
     // Invalid capacity
-    zklog.error("hashValue2keyValue() found invalid capacity level=" + to_string(level));
+    zklog.error("hashValue2keyValue() found invalid capacity level=" + to_string(level) + " root=" + root + " capacity=" + to_string(fr.toU64(value[8])) + ":" + to_string(fr.toU64(value[9])) + ":" + to_string(fr.toU64(value[10])) + ":" + to_string(fr.toU64(value[11])));
     return ZKR_DB_ERROR;
 }
 

@@ -91,20 +91,26 @@ message GetRequest {
  * @dev SetProgramRequest
  * @param {key} - key to set
  * @param {data} - Program data to store
- * @param {persistent} - indicates if it should be stored in the SQL database (true) or only in the memory cache (false)
+ * @param {persistence} - indicates if it should be stored only in CACHE, in the SQL DATABASE, or it is just TEMPORARY and should be deleted at the flush of this batch UUID
+ * @param {batch_uuid} - indicates a unique identifier of the current batch or session; data for this batch can be stored in memory until flushed to database
+ * @param {tx} - current transaction ordinal number: 0, 1, 2...
  */
 message SetProgramRequest {
     Fea key = 1;
     bytes data = 2;
-    bool persistent = 3;
+    Persistence persistence = 3;
+    string batch_uuid = 4;
+    uint64 tx = 5;
 }
 
 /**
  * @dev GetProgramRequest
  * @param {key} - key to get program data
+ * @param {batch_uuid} - indicates a unique identifier of the current batch or session; data for this batch can be stored in memory until flushed to database
  */
 message GetProgramRequest {
     Fea key = 1;
+    string batch_uuid = 2;
 }
 
 /**
