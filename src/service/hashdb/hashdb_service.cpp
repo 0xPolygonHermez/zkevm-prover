@@ -15,6 +15,28 @@ using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
 
+::grpc::Status HashDBServiceImpl::GetLatestStateRoot (::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetLatestStateRootResponse* response){
+    // If the process is exising, do not start new activities
+    if (bExitingProcess){
+        return Status::CANCELLED;
+    }
+
+    try{
+        Goldilocks::Element stateRoot[4];
+        pHashDB->getLatestStateRoot(stateRoot);
+        ::hashdb::v1::Fea* resStateRoot = new ::hashdb::v1::Fea();
+        fea2grpc(fr, stateRoot, resStateRoot);
+        response->set_allocated_latest_root(resStateRoot);
+    }
+    catch (const std::exception &e){
+        zklog.error("HashDBServiceImpl::GetLatestStateRoot() exception: " + string(e.what()));
+        return Status::CANCELLED;
+    }
+
+    return Status::OK;
+
+}
+
 ::grpc::Status HashDBServiceImpl::Set(::grpc::ServerContext* context, const ::hashdb::v1::SetRequest* request, ::hashdb::v1::SetResponse* response)
 {
     // If the process is exising, do not start new activities
@@ -485,6 +507,39 @@ using grpc::Status;
 #endif
 
     return Status::OK;
+}
+
+::grpc::Status HashDBServiceImpl::Purge (::grpc::ServerContext* context, const ::hashdb::v1::PurgeRequest* request, ::hashdb::v1::PurgeResponse* response)
+{
+    // If the process is exising, do not start new activities
+    if (bExitingProcess)
+    {
+        return Status::CANCELLED;
+    }
+#ifdef LOG_HASHDB_SERVICE
+    zklog.info("HashDBServiceImpl::Purge called.");
+#endif
+    
+        try
+        {
+            Goldilocks::Element newStateRoot[4];
+            grpc2fea(fr, request->new_state_root(), newStateRoot);
+
+            // Call the HashDB flush method
+            pHashDB->purge(request->batch_uuid(), newStateRoot, (Persistence)(uint64_t)request->persistence());
+
+        }
+        catch (const std::exception &e)
+        {
+            zklog.error("HashDBServiceImpl::Purge() exception: " + string(e.what()));
+            return Status::CANCELLED;
+        }
+
+#ifdef LOG_HASHDB_SERVICE
+    zklog.info("HashDBServiceImpl::Purge() completed.");
+#endif
+        
+        return Status::OK;
 }
 
 ::grpc::Status HashDBServiceImpl::GetFlushStatus (::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetFlushStatusResponse* response)

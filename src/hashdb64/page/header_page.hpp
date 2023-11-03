@@ -59,8 +59,9 @@ public:
     static zkresult SetFirstUnusedPage    (PageContext &ctx,       uint64_t &headerPageNumber, const uint64_t firstUnusedPage);
 
     // Root version methods
-    static zkresult ReadRootVersion  (PageContext &ctx, const uint64_t  headerPageNumber, const string &root,       uint64_t &version);
-    static zkresult WriteRootVersion (PageContext &ctx,       uint64_t &headerPageNumber, const string &root, const uint64_t &version);
+    static zkresult GetLatestStateRoot (PageContext &ctx, const uint64_t  headerPageNumber, Goldilocks::Element (&root)[4]);
+    static zkresult ReadRootVersion    (PageContext &ctx, const uint64_t  headerPageNumber, const string &root,       uint64_t &version);
+    static zkresult WriteRootVersion   (PageContext &ctx,       uint64_t &headerPageNumber, const string &root, const uint64_t &version);
 
     // Version data methods
     static zkresult ReadVersionData  (PageContext &ctx, const uint64_t  headerPageNumber, const uint64_t &version,       VersionDataEntry &versionData);

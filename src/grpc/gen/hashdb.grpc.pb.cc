@@ -23,6 +23,7 @@ namespace hashdb {
 namespace v1 {
 
 static const char* HashDBService_method_names[] = {
+  "/hashdb.v1.HashDBService/GetLatestStateRoot",
   "/hashdb.v1.HashDBService/Set",
   "/hashdb.v1.HashDBService/Get",
   "/hashdb.v1.HashDBService/SetProgram",
@@ -46,21 +47,50 @@ std::unique_ptr< HashDBService::Stub> HashDBService::NewStub(const std::shared_p
 }
 
 HashDBService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel)
-  : channel_(channel), rpcmethod_Set_(HashDBService_method_names[0], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_Get_(HashDBService_method_names[1], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_SetProgram_(HashDBService_method_names[2], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_GetProgram_(HashDBService_method_names[3], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_LoadDB_(HashDBService_method_names[4], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_LoadProgramDB_(HashDBService_method_names[5], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_Flush_(HashDBService_method_names[6], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_SemiFlush_(HashDBService_method_names[7], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_GetFlushStatus_(HashDBService_method_names[8], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_GetFlushData_(HashDBService_method_names[9], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_ConsolidateState_(HashDBService_method_names[10], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_Purge_(HashDBService_method_names[11], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_ReadTree_(HashDBService_method_names[12], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_CancelBatch_(HashDBService_method_names[13], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  : channel_(channel), rpcmethod_GetLatestStateRoot_(HashDBService_method_names[0], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_Set_(HashDBService_method_names[1], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_Get_(HashDBService_method_names[2], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SetProgram_(HashDBService_method_names[3], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_GetProgram_(HashDBService_method_names[4], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_LoadDB_(HashDBService_method_names[5], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_LoadProgramDB_(HashDBService_method_names[6], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_Flush_(HashDBService_method_names[7], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SemiFlush_(HashDBService_method_names[8], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_GetFlushStatus_(HashDBService_method_names[9], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_GetFlushData_(HashDBService_method_names[10], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_ConsolidateState_(HashDBService_method_names[11], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_Purge_(HashDBService_method_names[12], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_ReadTree_(HashDBService_method_names[13], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_CancelBatch_(HashDBService_method_names[14], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
+
+::grpc::Status HashDBService::Stub::GetLatestStateRoot(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::hashdb::v1::GetLatestStateRootResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_GetLatestStateRoot_, context, request, response);
+}
+
+void HashDBService::Stub::experimental_async::GetLatestStateRoot(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetLatestStateRootResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_GetLatestStateRoot_, context, request, response, std::move(f));
+}
+
+void HashDBService::Stub::experimental_async::GetLatestStateRoot(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetLatestStateRootResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_GetLatestStateRoot_, context, request, response, std::move(f));
+}
+
+void HashDBService::Stub::experimental_async::GetLatestStateRoot(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetLatestStateRootResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_GetLatestStateRoot_, context, request, response, reactor);
+}
+
+void HashDBService::Stub::experimental_async::GetLatestStateRoot(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::GetLatestStateRootResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_GetLatestStateRoot_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetLatestStateRootResponse>* HashDBService::Stub::AsyncGetLatestStateRootRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::hashdb::v1::GetLatestStateRootResponse>::Create(channel_.get(), cq, rpcmethod_GetLatestStateRoot_, context, request, true);
+}
+
+::grpc::ClientAsyncResponseReader< ::hashdb::v1::GetLatestStateRootResponse>* HashDBService::Stub::PrepareAsyncGetLatestStateRootRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::hashdb::v1::GetLatestStateRootResponse>::Create(channel_.get(), cq, rpcmethod_GetLatestStateRoot_, context, request, false);
+}
 
 ::grpc::Status HashDBService::Stub::Set(::grpc::ClientContext* context, const ::hashdb::v1::SetRequest& request, ::hashdb::v1::SetResponse* response) {
   return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_Set_, context, request, response);
@@ -458,6 +488,16 @@ HashDBService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       HashDBService_method_names[0],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::google::protobuf::Empty, ::hashdb::v1::GetLatestStateRootResponse>(
+          [](HashDBService::Service* service,
+             ::grpc_impl::ServerContext* ctx,
+             const ::google::protobuf::Empty* req,
+             ::hashdb::v1::GetLatestStateRootResponse* resp) {
+               return service->GetLatestStateRoot(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      HashDBService_method_names[1],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::SetRequest, ::hashdb::v1::SetResponse>(
           [](HashDBService::Service* service,
              ::grpc_impl::ServerContext* ctx,
@@ -466,7 +506,7 @@ HashDBService::Service::Service() {
                return service->Set(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      HashDBService_method_names[1],
+      HashDBService_method_names[2],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::GetRequest, ::hashdb::v1::GetResponse>(
           [](HashDBService::Service* service,
@@ -476,7 +516,7 @@ HashDBService::Service::Service() {
                return service->Get(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      HashDBService_method_names[2],
+      HashDBService_method_names[3],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::SetProgramRequest, ::hashdb::v1::SetProgramResponse>(
           [](HashDBService::Service* service,
@@ -486,7 +526,7 @@ HashDBService::Service::Service() {
                return service->SetProgram(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      HashDBService_method_names[3],
+      HashDBService_method_names[4],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::GetProgramRequest, ::hashdb::v1::GetProgramResponse>(
           [](HashDBService::Service* service,
@@ -496,7 +536,7 @@ HashDBService::Service::Service() {
                return service->GetProgram(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      HashDBService_method_names[4],
+      HashDBService_method_names[5],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::LoadDBRequest, ::google::protobuf::Empty>(
           [](HashDBService::Service* service,
@@ -506,7 +546,7 @@ HashDBService::Service::Service() {
                return service->LoadDB(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      HashDBService_method_names[5],
+      HashDBService_method_names[6],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::LoadProgramDBRequest, ::google::protobuf::Empty>(
           [](HashDBService::Service* service,
@@ -516,7 +556,7 @@ HashDBService::Service::Service() {
                return service->LoadProgramDB(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      HashDBService_method_names[6],
+      HashDBService_method_names[7],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::FlushRequest, ::hashdb::v1::FlushResponse>(
           [](HashDBService::Service* service,
@@ -526,7 +566,7 @@ HashDBService::Service::Service() {
                return service->Flush(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      HashDBService_method_names[7],
+      HashDBService_method_names[8],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::SemiFlushRequest, ::google::protobuf::Empty>(
           [](HashDBService::Service* service,
@@ -536,7 +576,7 @@ HashDBService::Service::Service() {
                return service->SemiFlush(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      HashDBService_method_names[8],
+      HashDBService_method_names[9],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::google::protobuf::Empty, ::hashdb::v1::GetFlushStatusResponse>(
           [](HashDBService::Service* service,
@@ -546,7 +586,7 @@ HashDBService::Service::Service() {
                return service->GetFlushStatus(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      HashDBService_method_names[9],
+      HashDBService_method_names[10],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::GetFlushDataRequest, ::hashdb::v1::GetFlushDataResponse>(
           [](HashDBService::Service* service,
@@ -556,7 +596,7 @@ HashDBService::Service::Service() {
                return service->GetFlushData(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      HashDBService_method_names[10],
+      HashDBService_method_names[11],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::ConsolidateStateRequest, ::hashdb::v1::ConsolidateStateResponse>(
           [](HashDBService::Service* service,
@@ -566,7 +606,7 @@ HashDBService::Service::Service() {
                return service->ConsolidateState(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      HashDBService_method_names[11],
+      HashDBService_method_names[12],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::PurgeRequest, ::hashdb::v1::PurgeResponse>(
           [](HashDBService::Service* service,
@@ -576,7 +616,7 @@ HashDBService::Service::Service() {
                return service->Purge(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      HashDBService_method_names[12],
+      HashDBService_method_names[13],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::ReadTreeRequest, ::hashdb::v1::ReadTreeResponse>(
           [](HashDBService::Service* service,
@@ -586,7 +626,7 @@ HashDBService::Service::Service() {
                return service->ReadTree(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      HashDBService_method_names[13],
+      HashDBService_method_names[14],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::CancelBatchRequest, ::hashdb::v1::CancelBatchResponse>(
           [](HashDBService::Service* service,
@@ -598,6 +638,13 @@ HashDBService::Service::Service() {
 }
 
 HashDBService::Service::~Service() {
+}
+
+::grpc::Status HashDBService::Service::GetLatestStateRoot(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetLatestStateRootResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
 }
 
 ::grpc::Status HashDBService::Service::Set(::grpc::ServerContext* context, const ::hashdb::v1::SetRequest* request, ::hashdb::v1::SetResponse* response) {

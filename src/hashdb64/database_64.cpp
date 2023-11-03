@@ -62,6 +62,29 @@ void Database64::init(void)
     bInitialized = true;
 }
 
+zkresult Database64::getLatestStateRoot (Goldilocks::Element (&stateRoot)[4]){
+    zkresult zkr;
+
+    // Check that it has been initialized before
+    if (!bInitialized)
+    {
+        zklog.error("Database64::getLatestStateRoot() called uninitialized");
+        exitProcess();
+    }
+
+    // Get the latest state root
+    zkr = HeaderPage::GetLatestStateRoot(ctx, headerPageNumber, stateRoot);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("Database64::getLatestStateRoot() failed calling HeaderPage::GetLatestStateRoot() result=" + zkresult2string(zkr));
+        return zkr;
+    }
+
+    return zkr;
+
+}
+
+
 zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, uint64_t &level ,DatabaseMap *dbReadLog)
 {
     zkresult zkr;
@@ -367,42 +390,44 @@ zkresult Database64::WriteTree (const Goldilocks::Element (&oldRoot)[4], const v
         uint64_t rawDataPage;
         uint64_t rawDataOffset;
     };*/
+    if(newRoot[0].fe != oldRoot[0].fe || newRoot[1].fe != oldRoot[1].fe || newRoot[2].fe != oldRoot[2].fe || newRoot[3].fe != oldRoot[3].fe){
+        
+        // Create version data
+        VersionDataEntry versionData;
+        string newRootBa = string2ba(fea2string(fr, newRoot));
+        zkassert(newRootBa.size() == 32);
+        memcpy(versionData.root, newRootBa.c_str(), 32);
+        versionData.keyValueHistoryPage = headerPage->keyValueHistoryPage;
+        versionData.key = version;
+        //versionData.rawDataPage = headerPage->rawDataPage;
+        //versionData.rawDataOffset = RawDataPage::GetOffset(ctx, versionData.rawDataPage);
 
-    // Create version data
-    VersionDataEntry versionData;
-    string newRootBa = string2ba(fea2string(fr, newRoot));
-    zkassert(newRootBa.size() == 32);
-    memcpy(versionData.root, newRootBa.c_str(), 32);
-    versionData.keyValueHistoryPage = headerPage->keyValueHistoryPage;
-    versionData.key = version;
-    //versionData.rawDataPage = headerPage->rawDataPage;
-    //versionData.rawDataOffset = RawDataPage::GetOffset(ctx, versionData.rawDataPage);
+        // Write version->versionData pair
+        zkr = HeaderPage::WriteVersionData(ctx, headerPageNumber, version, versionData);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("Database64::WriteTree() failed calling HeaderPage::WriteVersionData() result=" + zkresult2string(zkr) + " oldRoot=" + fea2string(fr, oldRoot));
+            return ZKR_DB_ERROR;
+        }
 
-    // Write version->versionData pair
-    zkr = HeaderPage::WriteVersionData(ctx, headerPageNumber, version, versionData);
-    if (zkr != ZKR_SUCCESS)
-    {
-        zklog.error("Database64::WriteTree() failed calling HeaderPage::WriteVersionData() result=" + zkresult2string(zkr) + " oldRoot=" + fea2string(fr, oldRoot));
-        return ZKR_DB_ERROR;
+        // Write root->version pair
+        zkr = HeaderPage::WriteRootVersion(ctx, headerPageNumber, newRootBa, version);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("Database64::WriteTree() failed calling HeaderPage::WriteRootVersion() result=" + zkresult2string(zkr) + " oldRoot=" + fea2string(fr, oldRoot));
+            return ZKR_DB_ERROR;
+        }
+
+        // Set last version
+        HeaderPage::SetLastVersion(ctx, headerPageNumber, version);
+
+        // Flush all pages to disk
+        ctx.pageManager.flushPages(ctx);
     }
-
-    // Write root->version pair
-    zkr = HeaderPage::WriteRootVersion(ctx, headerPageNumber, newRootBa, version);
-    if (zkr != ZKR_SUCCESS)
-    {
-        zklog.error("Database64::WriteTree() failed calling HeaderPage::WriteRootVersion() result=" + zkresult2string(zkr) + " oldRoot=" + fea2string(fr, oldRoot));
-        return ZKR_DB_ERROR;
-    }
-
-    // Set last version
-    HeaderPage::SetLastVersion(ctx, headerPageNumber, version);
-
-    // Flush all pages to disk
-    ctx.pageManager.flushPages(ctx);
-
+    
     headerPageNumber = 0;
     
-        //KeyValueHistoryPage::Print(versionData.keyValueHistoryPage, true, "version=" + to_string(version) + " ");
+    //KeyValueHistoryPage::Print(versionData.keyValueHistoryPage, true, "version=" + to_string(version) + " ");
 
     return ZKR_SUCCESS;
 }

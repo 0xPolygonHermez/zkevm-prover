@@ -183,6 +183,36 @@ zkresult HeaderPage::SetFirstUnusedPage (PageContext &ctx, uint64_t &headerPageN
 
     return ZKR_SUCCESS;
 }
+zkresult HeaderPage::GetLatestStateRoot (PageContext &ctx, const uint64_t  headerPageNumber, Goldilocks::Element (&root)[4]){
+    
+    zkresult zkr;
+
+    // Get header page
+    HeaderStruct * page = (HeaderStruct *)ctx.pageManager.getPageAddress(headerPageNumber);
+
+    // Call the specific method
+    VersionDataEntry versionData;
+    zkr = VersionDataPage::Read(ctx, page->versionDataPage, page->lastVersion, versionData);
+
+    if(zkr==ZKR_DB_KEY_NOT_FOUND){
+        if(page->lastVersion==0){
+            // If the last version is 0, then the root is 0
+            root[0].fe = 0;
+            root[1].fe = 0;
+            root[2].fe = 0;
+            root[3].fe = 0;
+            zkr = ZKR_SUCCESS;
+        }
+    }else{
+        // Convert the root from uint8_t[32] to Goldilocks::Element[4]
+        root[3].fe = (((uint64_t)versionData.root[0])<<56) + (((uint64_t)versionData.root[1])<<48) + (((uint64_t)versionData.root[2])<<40) + (((uint64_t)versionData.root[3])<<32) + (((uint64_t)versionData.root[4])<<24) + (((uint64_t)versionData.root[5])<<16) + (((uint64_t)versionData.root[6])<<8) + ((uint64_t)versionData.root[7]);
+        root[2].fe = (((uint64_t)versionData.root[8])<<56) + (((uint64_t)versionData.root[9])<<48) + (((uint64_t)versionData.root[10])<<40) + (((uint64_t)versionData.root[11])<<32) + (((uint64_t)versionData.root[12])<<24) + (((uint64_t)versionData.root[13])<<16) + (((uint64_t)versionData.root[14])<<8) + ((uint64_t)versionData.root[15]);
+        root[1].fe = (((uint64_t)versionData.root[16])<<56) + (((uint64_t)versionData.root[17])<<48) + (((uint64_t)versionData.root[18])<<40) + (((uint64_t)versionData.root[19])<<32) + (((uint64_t)versionData.root[20])<<24) + (((uint64_t)versionData.root[21])<<16) + (((uint64_t)versionData.root[22])<<8) + ((uint64_t)versionData.root[23]);
+        root[0].fe = (((uint64_t)versionData.root[24])<<56) + (((uint64_t)versionData.root[25])<<48) + (((uint64_t)versionData.root[26])<<40) + (((uint64_t)versionData.root[27])<<32) + (((uint64_t)versionData.root[28])<<24) + (((uint64_t)versionData.root[29])<<16) + (((uint64_t)versionData.root[30])<<8) + ((uint64_t)versionData.root[31]);
+    }
+
+    return zkr;
+}
 
 zkresult HeaderPage::ReadRootVersion (PageContext &ctx, const uint64_t headerPageNumber, const string &root, uint64_t &version)
 {

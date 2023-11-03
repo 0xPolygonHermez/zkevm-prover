@@ -95,6 +95,10 @@ class CancelBatchRequestDefaultTypeInternal {
  public:
   ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<CancelBatchRequest> _instance;
 } _CancelBatchRequest_default_instance_;
+class GetLatestStateRootResponseDefaultTypeInternal {
+ public:
+  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<GetLatestStateRootResponse> _instance;
+} _GetLatestStateRootResponse_default_instance_;
 class SetResponse_SiblingsEntry_DoNotUseDefaultTypeInternal {
  public:
   ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<SetResponse_SiblingsEntry_DoNotUse> _instance;
@@ -394,6 +398,22 @@ static void InitDefaultsscc_info_GetFlushStatusResponse_hashdb_2eproto() {
 
 ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_GetFlushStatusResponse_hashdb_2eproto =
     {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_GetFlushStatusResponse_hashdb_2eproto}, {}};
+
+static void InitDefaultsscc_info_GetLatestStateRootResponse_hashdb_2eproto() {
+  GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+  {
+    void* ptr = &::hashdb::v1::_GetLatestStateRootResponse_default_instance_;
+    new (ptr) ::hashdb::v1::GetLatestStateRootResponse();
+    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
+  }
+  ::hashdb::v1::GetLatestStateRootResponse::InitAsDefaultInstance();
+}
+
+::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_GetLatestStateRootResponse_hashdb_2eproto =
+    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 2, 0, InitDefaultsscc_info_GetLatestStateRootResponse_hashdb_2eproto}, {
+      &scc_info_Fea_hashdb_2eproto.base,
+      &scc_info_ResultCode_hashdb_2eproto.base,}};
 
 static void InitDefaultsscc_info_GetProgramRequest_hashdb_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -784,7 +804,7 @@ static void InitDefaultsscc_info_Version_hashdb_2eproto() {
 ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_Version_hashdb_2eproto =
     {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_Version_hashdb_2eproto}, {}};
 
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_hashdb_2eproto[40];
+static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_hashdb_2eproto[41];
 static const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* file_level_enum_descriptors_hashdb_2eproto[2];
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_hashdb_2eproto = nullptr;
 
@@ -918,6 +938,13 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_hashdb_2eproto::offsets[] PROT
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::hashdb::v1::CancelBatchRequest, batch_uuid_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::GetLatestStateRootResponse, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::GetLatestStateRootResponse, latest_root_),
+  PROTOBUF_FIELD_OFFSET(::hashdb::v1::GetLatestStateRootResponse, result_),
   PROTOBUF_FIELD_OFFSET(::hashdb::v1::SetResponse_SiblingsEntry_DoNotUse, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::hashdb::v1::SetResponse_SiblingsEntry_DoNotUse, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -1154,30 +1181,31 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 108, -1, sizeof(::hashdb::v1::PurgeRequest)},
   { 116, -1, sizeof(::hashdb::v1::ReadTreeRequest)},
   { 123, -1, sizeof(::hashdb::v1::CancelBatchRequest)},
-  { 129, 136, sizeof(::hashdb::v1::SetResponse_SiblingsEntry_DoNotUse)},
-  { 138, 145, sizeof(::hashdb::v1::SetResponse_DbReadLogEntry_DoNotUse)},
-  { 147, -1, sizeof(::hashdb::v1::SetResponse)},
-  { 165, 172, sizeof(::hashdb::v1::GetResponse_SiblingsEntry_DoNotUse)},
-  { 174, 181, sizeof(::hashdb::v1::GetResponse_DbReadLogEntry_DoNotUse)},
-  { 183, -1, sizeof(::hashdb::v1::GetResponse)},
-  { 198, -1, sizeof(::hashdb::v1::SetProgramResponse)},
-  { 204, -1, sizeof(::hashdb::v1::GetProgramResponse)},
-  { 211, -1, sizeof(::hashdb::v1::FlushResponse)},
-  { 219, -1, sizeof(::hashdb::v1::GetFlushStatusResponse)},
-  { 232, 239, sizeof(::hashdb::v1::GetFlushDataResponse_NodesEntry_DoNotUse)},
-  { 241, 248, sizeof(::hashdb::v1::GetFlushDataResponse_ProgramEntry_DoNotUse)},
-  { 250, -1, sizeof(::hashdb::v1::GetFlushDataResponse)},
-  { 260, -1, sizeof(::hashdb::v1::ConsolidateStateResponse)},
-  { 269, -1, sizeof(::hashdb::v1::PurgeResponse)},
-  { 275, -1, sizeof(::hashdb::v1::ReadTreeResponse)},
-  { 283, -1, sizeof(::hashdb::v1::CancelBatchResponse)},
-  { 289, -1, sizeof(::hashdb::v1::Fea)},
-  { 298, -1, sizeof(::hashdb::v1::Fea12)},
-  { 315, -1, sizeof(::hashdb::v1::HashValueGL)},
-  { 322, -1, sizeof(::hashdb::v1::KeyValue)},
-  { 329, -1, sizeof(::hashdb::v1::FeList)},
-  { 335, -1, sizeof(::hashdb::v1::SiblingList)},
-  { 341, -1, sizeof(::hashdb::v1::ResultCode)},
+  { 129, -1, sizeof(::hashdb::v1::GetLatestStateRootResponse)},
+  { 136, 143, sizeof(::hashdb::v1::SetResponse_SiblingsEntry_DoNotUse)},
+  { 145, 152, sizeof(::hashdb::v1::SetResponse_DbReadLogEntry_DoNotUse)},
+  { 154, -1, sizeof(::hashdb::v1::SetResponse)},
+  { 172, 179, sizeof(::hashdb::v1::GetResponse_SiblingsEntry_DoNotUse)},
+  { 181, 188, sizeof(::hashdb::v1::GetResponse_DbReadLogEntry_DoNotUse)},
+  { 190, -1, sizeof(::hashdb::v1::GetResponse)},
+  { 205, -1, sizeof(::hashdb::v1::SetProgramResponse)},
+  { 211, -1, sizeof(::hashdb::v1::GetProgramResponse)},
+  { 218, -1, sizeof(::hashdb::v1::FlushResponse)},
+  { 226, -1, sizeof(::hashdb::v1::GetFlushStatusResponse)},
+  { 239, 246, sizeof(::hashdb::v1::GetFlushDataResponse_NodesEntry_DoNotUse)},
+  { 248, 255, sizeof(::hashdb::v1::GetFlushDataResponse_ProgramEntry_DoNotUse)},
+  { 257, -1, sizeof(::hashdb::v1::GetFlushDataResponse)},
+  { 267, -1, sizeof(::hashdb::v1::ConsolidateStateResponse)},
+  { 276, -1, sizeof(::hashdb::v1::PurgeResponse)},
+  { 282, -1, sizeof(::hashdb::v1::ReadTreeResponse)},
+  { 290, -1, sizeof(::hashdb::v1::CancelBatchResponse)},
+  { 296, -1, sizeof(::hashdb::v1::Fea)},
+  { 305, -1, sizeof(::hashdb::v1::Fea12)},
+  { 322, -1, sizeof(::hashdb::v1::HashValueGL)},
+  { 329, -1, sizeof(::hashdb::v1::KeyValue)},
+  { 336, -1, sizeof(::hashdb::v1::FeList)},
+  { 342, -1, sizeof(::hashdb::v1::SiblingList)},
+  { 348, -1, sizeof(::hashdb::v1::ResultCode)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -1197,6 +1225,7 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::hashdb::v1::_PurgeRequest_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::hashdb::v1::_ReadTreeRequest_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::hashdb::v1::_CancelBatchRequest_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::hashdb::v1::_GetLatestStateRootResponse_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::hashdb::v1::_SetResponse_SiblingsEntry_DoNotUse_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::hashdb::v1::_SetResponse_DbReadLogEntry_DoNotUse_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::hashdb::v1::_SetResponse_default_instance_),
@@ -1264,114 +1293,119 @@ const char descriptor_table_protodef_hashdb_2eproto[] PROTOBUF_SECTION_VARIABLE(
   "\030\003 \001(\0162\026.hashdb.v1.Persistence\"S\n\017ReadTr"
   "eeRequest\022\"\n\nstate_root\030\001 \001(\0132\016.hashdb.v"
   "1.Fea\022\034\n\004keys\030\002 \003(\0132\016.hashdb.v1.Fea\"(\n\022C"
-  "ancelBatchRequest\022\022\n\nbatch_uuid\030\001 \001(\t\"\254\004"
-  "\n\013SetResponse\022 \n\010old_root\030\001 \001(\0132\016.hashdb"
-  ".v1.Fea\022 \n\010new_root\030\002 \001(\0132\016.hashdb.v1.Fe"
-  "a\022\033\n\003key\030\003 \001(\0132\016.hashdb.v1.Fea\0226\n\010siblin"
-  "gs\030\004 \003(\0132$.hashdb.v1.SetResponse.Sibling"
-  "sEntry\022\037\n\007ins_key\030\005 \001(\0132\016.hashdb.v1.Fea\022"
-  "\021\n\tins_value\030\006 \001(\t\022\017\n\007is_old0\030\007 \001(\010\022\021\n\to"
-  "ld_value\030\010 \001(\t\022\021\n\tnew_value\030\t \001(\t\022\014\n\004mod"
-  "e\030\n \001(\t\022\032\n\022proof_hash_counter\030\013 \001(\004\022:\n\013d"
-  "b_read_log\030\014 \003(\0132%.hashdb.v1.SetResponse"
-  ".DbReadLogEntry\022%\n\006result\030\r \001(\0132\025.hashdb"
-  ".v1.ResultCode\032G\n\rSiblingsEntry\022\013\n\003key\030\001"
-  " \001(\004\022%\n\005value\030\002 \001(\0132\026.hashdb.v1.SiblingL"
-  "ist:\0028\001\032C\n\016DbReadLogEntry\022\013\n\003key\030\001 \001(\t\022 "
-  "\n\005value\030\002 \001(\0132\021.hashdb.v1.FeList:\0028\001\"\341\003\n"
-  "\013GetResponse\022\034\n\004root\030\001 \001(\0132\016.hashdb.v1.F"
-  "ea\022\033\n\003key\030\002 \001(\0132\016.hashdb.v1.Fea\0226\n\010sibli"
-  "ngs\030\003 \003(\0132$.hashdb.v1.GetResponse.Siblin"
-  "gsEntry\022\037\n\007ins_key\030\004 \001(\0132\016.hashdb.v1.Fea"
-  "\022\021\n\tins_value\030\005 \001(\t\022\017\n\007is_old0\030\006 \001(\010\022\r\n\005"
-  "value\030\007 \001(\t\022\032\n\022proof_hash_counter\030\010 \001(\004\022"
-  ":\n\013db_read_log\030\t \003(\0132%.hashdb.v1.GetResp"
-  "onse.DbReadLogEntry\022%\n\006result\030\n \001(\0132\025.ha"
-  "shdb.v1.ResultCode\032G\n\rSiblingsEntry\022\013\n\003k"
-  "ey\030\001 \001(\004\022%\n\005value\030\002 \001(\0132\026.hashdb.v1.Sibl"
-  "ingList:\0028\001\032C\n\016DbReadLogEntry\022\013\n\003key\030\001 \001"
-  "(\t\022 \n\005value\030\002 \001(\0132\021.hashdb.v1.FeList:\0028\001"
-  "\";\n\022SetProgramResponse\022%\n\006result\030\001 \001(\0132\025"
-  ".hashdb.v1.ResultCode\"I\n\022GetProgramRespo"
-  "nse\022\014\n\004data\030\001 \001(\014\022%\n\006result\030\002 \001(\0132\025.hash"
-  "db.v1.ResultCode\"a\n\rFlushResponse\022\020\n\010flu"
-  "sh_id\030\001 \001(\004\022\027\n\017stored_flush_id\030\002 \001(\004\022%\n\006"
-  "result\030\003 \001(\0132\025.hashdb.v1.ResultCode\"\347\001\n\026"
-  "GetFlushStatusResponse\022\027\n\017stored_flush_i"
-  "d\030\001 \001(\004\022\030\n\020storing_flush_id\030\002 \001(\004\022\025\n\rlas"
-  "t_flush_id\030\003 \001(\004\022\036\n\026pending_to_flush_nod"
-  "es\030\004 \001(\004\022 \n\030pending_to_flush_program\030\005 \001"
-  "(\004\022\025\n\rstoring_nodes\030\006 \001(\004\022\027\n\017storing_pro"
-  "gram\030\007 \001(\004\022\021\n\tprover_id\030\010 \001(\t\"\310\002\n\024GetFlu"
-  "shDataResponse\022\027\n\017stored_flush_id\030\001 \001(\004\022"
-  "9\n\005nodes\030\002 \003(\0132*.hashdb.v1.GetFlushDataR"
-  "esponse.NodesEntry\022=\n\007program\030\003 \003(\0132,.ha"
-  "shdb.v1.GetFlushDataResponse.ProgramEntr"
-  "y\022\030\n\020nodes_state_root\030\004 \001(\t\022%\n\006result\030\005 "
-  "\001(\0132\025.hashdb.v1.ResultCode\032,\n\nNodesEntry"
-  "\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\032.\n\014Prog"
-  "ramEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001"
-  "\"\235\001\n\030ConsolidateStateResponse\022/\n\027consoli"
-  "dated_state_root\030\001 \001(\0132\016.hashdb.v1.Fea\022\020"
-  "\n\010flush_id\030\002 \001(\004\022\027\n\017stored_flush_id\030\003 \001("
-  "\004\022%\n\006result\030\004 \001(\0132\025.hashdb.v1.ResultCode"
-  "\"6\n\rPurgeResponse\022%\n\006result\030\001 \001(\0132\025.hash"
-  "db.v1.ResultCode\"\215\001\n\020ReadTreeResponse\022&\n"
-  "\tkey_value\030\001 \003(\0132\023.hashdb.v1.KeyValue\022*\n"
-  "\nhash_value\030\002 \003(\0132\026.hashdb.v1.HashValueG"
-  "L\022%\n\006result\030\003 \001(\0132\025.hashdb.v1.ResultCode"
-  "\"<\n\023CancelBatchResponse\022%\n\006result\030\001 \001(\0132"
-  "\025.hashdb.v1.ResultCode\"9\n\003Fea\022\013\n\003fe0\030\001 \001"
-  "(\004\022\013\n\003fe1\030\002 \001(\004\022\013\n\003fe2\030\003 \001(\004\022\013\n\003fe3\030\004 \001("
-  "\004\"\245\001\n\005Fea12\022\013\n\003fe0\030\001 \001(\004\022\013\n\003fe1\030\002 \001(\004\022\013\n"
-  "\003fe2\030\003 \001(\004\022\013\n\003fe3\030\004 \001(\004\022\013\n\003fe4\030\005 \001(\004\022\013\n\003"
-  "fe5\030\006 \001(\004\022\013\n\003fe6\030\007 \001(\004\022\013\n\003fe7\030\010 \001(\004\022\013\n\003f"
-  "e8\030\t \001(\004\022\013\n\003fe9\030\n \001(\004\022\014\n\004fe10\030\013 \001(\004\022\014\n\004f"
-  "e11\030\014 \001(\004\"L\n\013HashValueGL\022\034\n\004hash\030\001 \001(\0132\016"
-  ".hashdb.v1.Fea\022\037\n\005value\030\002 \001(\0132\020.hashdb.v"
-  "1.Fea12\"6\n\010KeyValue\022\033\n\003key\030\001 \001(\0132\016.hashd"
-  "b.v1.Fea\022\r\n\005value\030\002 \001(\t\"\024\n\006FeList\022\n\n\002fe\030"
-  "\001 \003(\004\"\036\n\013SiblingList\022\017\n\007sibling\030\001 \003(\004\"\316\001"
-  "\n\nResultCode\022(\n\004code\030\001 \001(\0162\032.hashdb.v1.R"
-  "esultCode.Code\"\225\001\n\004Code\022\024\n\020CODE_UNSPECIF"
-  "IED\020\000\022\020\n\014CODE_SUCCESS\020\001\022\031\n\025CODE_DB_KEY_N"
-  "OT_FOUND\020\002\022\021\n\rCODE_DB_ERROR\020\003\022\027\n\023CODE_IN"
-  "TERNAL_ERROR\020\004\022\036\n\032CODE_SMT_INVALID_DATA_"
-  "SIZE\020\016*e\n\013Persistence\022!\n\035PERSISTENCE_CAC"
-  "HE_UNSPECIFIED\020\000\022\030\n\024PERSISTENCE_DATABASE"
-  "\020\001\022\031\n\025PERSISTENCE_TEMPORARY\020\0022\373\007\n\rHashDB"
-  "Service\0226\n\003Set\022\025.hashdb.v1.SetRequest\032\026."
-  "hashdb.v1.SetResponse\"\000\0226\n\003Get\022\025.hashdb."
-  "v1.GetRequest\032\026.hashdb.v1.GetResponse\"\000\022"
-  "K\n\nSetProgram\022\034.hashdb.v1.SetProgramRequ"
-  "est\032\035.hashdb.v1.SetProgramResponse\"\000\022K\n\n"
-  "GetProgram\022\034.hashdb.v1.GetProgramRequest"
-  "\032\035.hashdb.v1.GetProgramResponse\"\000\022<\n\006Loa"
-  "dDB\022\030.hashdb.v1.LoadDBRequest\032\026.google.p"
-  "rotobuf.Empty\"\000\022J\n\rLoadProgramDB\022\037.hashd"
-  "b.v1.LoadProgramDBRequest\032\026.google.proto"
-  "buf.Empty\"\000\022<\n\005Flush\022\027.hashdb.v1.FlushRe"
-  "quest\032\030.hashdb.v1.FlushResponse\"\000\022B\n\tSem"
-  "iFlush\022\033.hashdb.v1.SemiFlushRequest\032\026.go"
-  "ogle.protobuf.Empty\"\000\022M\n\016GetFlushStatus\022"
-  "\026.google.protobuf.Empty\032!.hashdb.v1.GetF"
-  "lushStatusResponse\"\000\022Q\n\014GetFlushData\022\036.h"
-  "ashdb.v1.GetFlushDataRequest\032\037.hashdb.v1"
-  ".GetFlushDataResponse\"\000\022]\n\020ConsolidateSt"
-  "ate\022\".hashdb.v1.ConsolidateStateRequest\032"
-  "#.hashdb.v1.ConsolidateStateResponse\"\000\022<"
-  "\n\005Purge\022\027.hashdb.v1.PurgeRequest\032\030.hashd"
-  "b.v1.PurgeResponse\"\000\022E\n\010ReadTree\022\032.hashd"
-  "b.v1.ReadTreeRequest\032\033.hashdb.v1.ReadTre"
-  "eResponse\"\000\022N\n\013CancelBatch\022\035.hashdb.v1.C"
-  "ancelBatchRequest\032\036.hashdb.v1.CancelBatc"
-  "hResponse\"\000B9Z7github.com/0xPolygonHerme"
-  "z/zkevm-node/merkletree/hashdbb\006proto3"
+  "ancelBatchRequest\022\022\n\nbatch_uuid\030\001 \001(\t\"h\n"
+  "\032GetLatestStateRootResponse\022#\n\013latest_ro"
+  "ot\030\001 \001(\0132\016.hashdb.v1.Fea\022%\n\006result\030\002 \001(\013"
+  "2\025.hashdb.v1.ResultCode\"\254\004\n\013SetResponse\022"
+  " \n\010old_root\030\001 \001(\0132\016.hashdb.v1.Fea\022 \n\010new"
+  "_root\030\002 \001(\0132\016.hashdb.v1.Fea\022\033\n\003key\030\003 \001(\013"
+  "2\016.hashdb.v1.Fea\0226\n\010siblings\030\004 \003(\0132$.has"
+  "hdb.v1.SetResponse.SiblingsEntry\022\037\n\007ins_"
+  "key\030\005 \001(\0132\016.hashdb.v1.Fea\022\021\n\tins_value\030\006"
+  " \001(\t\022\017\n\007is_old0\030\007 \001(\010\022\021\n\told_value\030\010 \001(\t"
+  "\022\021\n\tnew_value\030\t \001(\t\022\014\n\004mode\030\n \001(\t\022\032\n\022pro"
+  "of_hash_counter\030\013 \001(\004\022:\n\013db_read_log\030\014 \003"
+  "(\0132%.hashdb.v1.SetResponse.DbReadLogEntr"
+  "y\022%\n\006result\030\r \001(\0132\025.hashdb.v1.ResultCode"
+  "\032G\n\rSiblingsEntry\022\013\n\003key\030\001 \001(\004\022%\n\005value\030"
+  "\002 \001(\0132\026.hashdb.v1.SiblingList:\0028\001\032C\n\016DbR"
+  "eadLogEntry\022\013\n\003key\030\001 \001(\t\022 \n\005value\030\002 \001(\0132"
+  "\021.hashdb.v1.FeList:\0028\001\"\341\003\n\013GetResponse\022\034"
+  "\n\004root\030\001 \001(\0132\016.hashdb.v1.Fea\022\033\n\003key\030\002 \001("
+  "\0132\016.hashdb.v1.Fea\0226\n\010siblings\030\003 \003(\0132$.ha"
+  "shdb.v1.GetResponse.SiblingsEntry\022\037\n\007ins"
+  "_key\030\004 \001(\0132\016.hashdb.v1.Fea\022\021\n\tins_value\030"
+  "\005 \001(\t\022\017\n\007is_old0\030\006 \001(\010\022\r\n\005value\030\007 \001(\t\022\032\n"
+  "\022proof_hash_counter\030\010 \001(\004\022:\n\013db_read_log"
+  "\030\t \003(\0132%.hashdb.v1.GetResponse.DbReadLog"
+  "Entry\022%\n\006result\030\n \001(\0132\025.hashdb.v1.Result"
+  "Code\032G\n\rSiblingsEntry\022\013\n\003key\030\001 \001(\004\022%\n\005va"
+  "lue\030\002 \001(\0132\026.hashdb.v1.SiblingList:\0028\001\032C\n"
+  "\016DbReadLogEntry\022\013\n\003key\030\001 \001(\t\022 \n\005value\030\002 "
+  "\001(\0132\021.hashdb.v1.FeList:\0028\001\";\n\022SetProgram"
+  "Response\022%\n\006result\030\001 \001(\0132\025.hashdb.v1.Res"
+  "ultCode\"I\n\022GetProgramResponse\022\014\n\004data\030\001 "
+  "\001(\014\022%\n\006result\030\002 \001(\0132\025.hashdb.v1.ResultCo"
+  "de\"a\n\rFlushResponse\022\020\n\010flush_id\030\001 \001(\004\022\027\n"
+  "\017stored_flush_id\030\002 \001(\004\022%\n\006result\030\003 \001(\0132\025"
+  ".hashdb.v1.ResultCode\"\347\001\n\026GetFlushStatus"
+  "Response\022\027\n\017stored_flush_id\030\001 \001(\004\022\030\n\020sto"
+  "ring_flush_id\030\002 \001(\004\022\025\n\rlast_flush_id\030\003 \001"
+  "(\004\022\036\n\026pending_to_flush_nodes\030\004 \001(\004\022 \n\030pe"
+  "nding_to_flush_program\030\005 \001(\004\022\025\n\rstoring_"
+  "nodes\030\006 \001(\004\022\027\n\017storing_program\030\007 \001(\004\022\021\n\t"
+  "prover_id\030\010 \001(\t\"\310\002\n\024GetFlushDataResponse"
+  "\022\027\n\017stored_flush_id\030\001 \001(\004\0229\n\005nodes\030\002 \003(\013"
+  "2*.hashdb.v1.GetFlushDataResponse.NodesE"
+  "ntry\022=\n\007program\030\003 \003(\0132,.hashdb.v1.GetFlu"
+  "shDataResponse.ProgramEntry\022\030\n\020nodes_sta"
+  "te_root\030\004 \001(\t\022%\n\006result\030\005 \001(\0132\025.hashdb.v"
+  "1.ResultCode\032,\n\nNodesEntry\022\013\n\003key\030\001 \001(\t\022"
+  "\r\n\005value\030\002 \001(\t:\0028\001\032.\n\014ProgramEntry\022\013\n\003ke"
+  "y\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"\235\001\n\030Consolida"
+  "teStateResponse\022/\n\027consolidated_state_ro"
+  "ot\030\001 \001(\0132\016.hashdb.v1.Fea\022\020\n\010flush_id\030\002 \001"
+  "(\004\022\027\n\017stored_flush_id\030\003 \001(\004\022%\n\006result\030\004 "
+  "\001(\0132\025.hashdb.v1.ResultCode\"6\n\rPurgeRespo"
+  "nse\022%\n\006result\030\001 \001(\0132\025.hashdb.v1.ResultCo"
+  "de\"\215\001\n\020ReadTreeResponse\022&\n\tkey_value\030\001 \003"
+  "(\0132\023.hashdb.v1.KeyValue\022*\n\nhash_value\030\002 "
+  "\003(\0132\026.hashdb.v1.HashValueGL\022%\n\006result\030\003 "
+  "\001(\0132\025.hashdb.v1.ResultCode\"<\n\023CancelBatc"
+  "hResponse\022%\n\006result\030\001 \001(\0132\025.hashdb.v1.Re"
+  "sultCode\"9\n\003Fea\022\013\n\003fe0\030\001 \001(\004\022\013\n\003fe1\030\002 \001("
+  "\004\022\013\n\003fe2\030\003 \001(\004\022\013\n\003fe3\030\004 \001(\004\"\245\001\n\005Fea12\022\013\n"
+  "\003fe0\030\001 \001(\004\022\013\n\003fe1\030\002 \001(\004\022\013\n\003fe2\030\003 \001(\004\022\013\n\003"
+  "fe3\030\004 \001(\004\022\013\n\003fe4\030\005 \001(\004\022\013\n\003fe5\030\006 \001(\004\022\013\n\003f"
+  "e6\030\007 \001(\004\022\013\n\003fe7\030\010 \001(\004\022\013\n\003fe8\030\t \001(\004\022\013\n\003fe"
+  "9\030\n \001(\004\022\014\n\004fe10\030\013 \001(\004\022\014\n\004fe11\030\014 \001(\004\"L\n\013H"
+  "ashValueGL\022\034\n\004hash\030\001 \001(\0132\016.hashdb.v1.Fea"
+  "\022\037\n\005value\030\002 \001(\0132\020.hashdb.v1.Fea12\"6\n\010Key"
+  "Value\022\033\n\003key\030\001 \001(\0132\016.hashdb.v1.Fea\022\r\n\005va"
+  "lue\030\002 \001(\t\"\024\n\006FeList\022\n\n\002fe\030\001 \003(\004\"\036\n\013Sibli"
+  "ngList\022\017\n\007sibling\030\001 \003(\004\"\316\001\n\nResultCode\022("
+  "\n\004code\030\001 \001(\0162\032.hashdb.v1.ResultCode.Code"
+  "\"\225\001\n\004Code\022\024\n\020CODE_UNSPECIFIED\020\000\022\020\n\014CODE_"
+  "SUCCESS\020\001\022\031\n\025CODE_DB_KEY_NOT_FOUND\020\002\022\021\n\r"
+  "CODE_DB_ERROR\020\003\022\027\n\023CODE_INTERNAL_ERROR\020\004"
+  "\022\036\n\032CODE_SMT_INVALID_DATA_SIZE\020\016*e\n\013Pers"
+  "istence\022!\n\035PERSISTENCE_CACHE_UNSPECIFIED"
+  "\020\000\022\030\n\024PERSISTENCE_DATABASE\020\001\022\031\n\025PERSISTE"
+  "NCE_TEMPORARY\020\0022\322\010\n\rHashDBService\022U\n\022Get"
+  "LatestStateRoot\022\026.google.protobuf.Empty\032"
+  "%.hashdb.v1.GetLatestStateRootResponse\"\000"
+  "\0226\n\003Set\022\025.hashdb.v1.SetRequest\032\026.hashdb."
+  "v1.SetResponse\"\000\0226\n\003Get\022\025.hashdb.v1.GetR"
+  "equest\032\026.hashdb.v1.GetResponse\"\000\022K\n\nSetP"
+  "rogram\022\034.hashdb.v1.SetProgramRequest\032\035.h"
+  "ashdb.v1.SetProgramResponse\"\000\022K\n\nGetProg"
+  "ram\022\034.hashdb.v1.GetProgramRequest\032\035.hash"
+  "db.v1.GetProgramResponse\"\000\022<\n\006LoadDB\022\030.h"
+  "ashdb.v1.LoadDBRequest\032\026.google.protobuf"
+  ".Empty\"\000\022J\n\rLoadProgramDB\022\037.hashdb.v1.Lo"
+  "adProgramDBRequest\032\026.google.protobuf.Emp"
+  "ty\"\000\022<\n\005Flush\022\027.hashdb.v1.FlushRequest\032\030"
+  ".hashdb.v1.FlushResponse\"\000\022B\n\tSemiFlush\022"
+  "\033.hashdb.v1.SemiFlushRequest\032\026.google.pr"
+  "otobuf.Empty\"\000\022M\n\016GetFlushStatus\022\026.googl"
+  "e.protobuf.Empty\032!.hashdb.v1.GetFlushSta"
+  "tusResponse\"\000\022Q\n\014GetFlushData\022\036.hashdb.v"
+  "1.GetFlushDataRequest\032\037.hashdb.v1.GetFlu"
+  "shDataResponse\"\000\022]\n\020ConsolidateState\022\".h"
+  "ashdb.v1.ConsolidateStateRequest\032#.hashd"
+  "b.v1.ConsolidateStateResponse\"\000\022<\n\005Purge"
+  "\022\027.hashdb.v1.PurgeRequest\032\030.hashdb.v1.Pu"
+  "rgeResponse\"\000\022E\n\010ReadTree\022\032.hashdb.v1.Re"
+  "adTreeRequest\032\033.hashdb.v1.ReadTreeRespon"
+  "se\"\000\022N\n\013CancelBatch\022\035.hashdb.v1.CancelBa"
+  "tchRequest\032\036.hashdb.v1.CancelBatchRespon"
+  "se\"\000B9Z7github.com/0xPolygonHermez/zkevm"
+  "-node/merkletree/hashdbb\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_hashdb_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2fempty_2eproto,
 };
-static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_hashdb_2eproto_sccs[40] = {
+static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_hashdb_2eproto_sccs[41] = {
   &scc_info_CancelBatchRequest_hashdb_2eproto.base,
   &scc_info_CancelBatchResponse_hashdb_2eproto.base,
   &scc_info_ConsolidateStateRequest_hashdb_2eproto.base,
@@ -1386,6 +1420,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_has
   &scc_info_GetFlushDataResponse_NodesEntry_DoNotUse_hashdb_2eproto.base,
   &scc_info_GetFlushDataResponse_ProgramEntry_DoNotUse_hashdb_2eproto.base,
   &scc_info_GetFlushStatusResponse_hashdb_2eproto.base,
+  &scc_info_GetLatestStateRootResponse_hashdb_2eproto.base,
   &scc_info_GetProgramRequest_hashdb_2eproto.base,
   &scc_info_GetProgramResponse_hashdb_2eproto.base,
   &scc_info_GetRequest_hashdb_2eproto.base,
@@ -1415,10 +1450,10 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_has
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_hashdb_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_hashdb_2eproto = {
-  false, false, descriptor_table_protodef_hashdb_2eproto, "hashdb.proto", 5718,
-  &descriptor_table_hashdb_2eproto_once, descriptor_table_hashdb_2eproto_sccs, descriptor_table_hashdb_2eproto_deps, 40, 1,
+  false, false, descriptor_table_protodef_hashdb_2eproto, "hashdb.proto", 5911,
+  &descriptor_table_hashdb_2eproto_once, descriptor_table_hashdb_2eproto_sccs, descriptor_table_hashdb_2eproto_deps, 41, 1,
   schemas, file_default_instances, TableStruct_hashdb_2eproto::offsets,
-  file_level_metadata_hashdb_2eproto, 40, file_level_enum_descriptors_hashdb_2eproto, file_level_service_descriptors_hashdb_2eproto,
+  file_level_metadata_hashdb_2eproto, 41, file_level_enum_descriptors_hashdb_2eproto, file_level_service_descriptors_hashdb_2eproto,
 };
 
 // Force running AddDescriptors() at dynamic initialization time.
@@ -5405,6 +5440,270 @@ void CancelBatchRequest::InternalSwap(CancelBatchRequest* other) {
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata CancelBatchRequest::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
+void GetLatestStateRootResponse::InitAsDefaultInstance() {
+  ::hashdb::v1::_GetLatestStateRootResponse_default_instance_._instance.get_mutable()->latest_root_ = const_cast< ::hashdb::v1::Fea*>(
+      ::hashdb::v1::Fea::internal_default_instance());
+  ::hashdb::v1::_GetLatestStateRootResponse_default_instance_._instance.get_mutable()->result_ = const_cast< ::hashdb::v1::ResultCode*>(
+      ::hashdb::v1::ResultCode::internal_default_instance());
+}
+class GetLatestStateRootResponse::_Internal {
+ public:
+  static const ::hashdb::v1::Fea& latest_root(const GetLatestStateRootResponse* msg);
+  static const ::hashdb::v1::ResultCode& result(const GetLatestStateRootResponse* msg);
+};
+
+const ::hashdb::v1::Fea&
+GetLatestStateRootResponse::_Internal::latest_root(const GetLatestStateRootResponse* msg) {
+  return *msg->latest_root_;
+}
+const ::hashdb::v1::ResultCode&
+GetLatestStateRootResponse::_Internal::result(const GetLatestStateRootResponse* msg) {
+  return *msg->result_;
+}
+GetLatestStateRootResponse::GetLatestStateRootResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:hashdb.v1.GetLatestStateRootResponse)
+}
+GetLatestStateRootResponse::GetLatestStateRootResponse(const GetLatestStateRootResponse& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  if (from._internal_has_latest_root()) {
+    latest_root_ = new ::hashdb::v1::Fea(*from.latest_root_);
+  } else {
+    latest_root_ = nullptr;
+  }
+  if (from._internal_has_result()) {
+    result_ = new ::hashdb::v1::ResultCode(*from.result_);
+  } else {
+    result_ = nullptr;
+  }
+  // @@protoc_insertion_point(copy_constructor:hashdb.v1.GetLatestStateRootResponse)
+}
+
+void GetLatestStateRootResponse::SharedCtor() {
+  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_GetLatestStateRootResponse_hashdb_2eproto.base);
+  ::memset(&latest_root_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&result_) -
+      reinterpret_cast<char*>(&latest_root_)) + sizeof(result_));
+}
+
+GetLatestStateRootResponse::~GetLatestStateRootResponse() {
+  // @@protoc_insertion_point(destructor:hashdb.v1.GetLatestStateRootResponse)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void GetLatestStateRootResponse::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  if (this != internal_default_instance()) delete latest_root_;
+  if (this != internal_default_instance()) delete result_;
+}
+
+void GetLatestStateRootResponse::ArenaDtor(void* object) {
+  GetLatestStateRootResponse* _this = reinterpret_cast< GetLatestStateRootResponse* >(object);
+  (void)_this;
+}
+void GetLatestStateRootResponse::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void GetLatestStateRootResponse::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+const GetLatestStateRootResponse& GetLatestStateRootResponse::default_instance() {
+  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_GetLatestStateRootResponse_hashdb_2eproto.base);
+  return *internal_default_instance();
+}
+
+
+void GetLatestStateRootResponse::Clear() {
+// @@protoc_insertion_point(message_clear_start:hashdb.v1.GetLatestStateRootResponse)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  if (GetArena() == nullptr && latest_root_ != nullptr) {
+    delete latest_root_;
+  }
+  latest_root_ = nullptr;
+  if (GetArena() == nullptr && result_ != nullptr) {
+    delete result_;
+  }
+  result_ = nullptr;
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* GetLatestStateRootResponse::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // .hashdb.v1.Fea latest_root = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          ptr = ctx->ParseMessage(_internal_mutable_latest_root(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // .hashdb.v1.ResultCode result = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+          ptr = ctx->ParseMessage(_internal_mutable_result(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* GetLatestStateRootResponse::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:hashdb.v1.GetLatestStateRootResponse)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // .hashdb.v1.Fea latest_root = 1;
+  if (this->has_latest_root()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        1, _Internal::latest_root(this), target, stream);
+  }
+
+  // .hashdb.v1.ResultCode result = 2;
+  if (this->has_result()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        2, _Internal::result(this), target, stream);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:hashdb.v1.GetLatestStateRootResponse)
+  return target;
+}
+
+size_t GetLatestStateRootResponse::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:hashdb.v1.GetLatestStateRootResponse)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // .hashdb.v1.Fea latest_root = 1;
+  if (this->has_latest_root()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *latest_root_);
+  }
+
+  // .hashdb.v1.ResultCode result = 2;
+  if (this->has_result()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *result_);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void GetLatestStateRootResponse::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:hashdb.v1.GetLatestStateRootResponse)
+  GOOGLE_DCHECK_NE(&from, this);
+  const GetLatestStateRootResponse* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<GetLatestStateRootResponse>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:hashdb.v1.GetLatestStateRootResponse)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:hashdb.v1.GetLatestStateRootResponse)
+    MergeFrom(*source);
+  }
+}
+
+void GetLatestStateRootResponse::MergeFrom(const GetLatestStateRootResponse& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:hashdb.v1.GetLatestStateRootResponse)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from.has_latest_root()) {
+    _internal_mutable_latest_root()->::hashdb::v1::Fea::MergeFrom(from._internal_latest_root());
+  }
+  if (from.has_result()) {
+    _internal_mutable_result()->::hashdb::v1::ResultCode::MergeFrom(from._internal_result());
+  }
+}
+
+void GetLatestStateRootResponse::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:hashdb.v1.GetLatestStateRootResponse)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void GetLatestStateRootResponse::CopyFrom(const GetLatestStateRootResponse& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:hashdb.v1.GetLatestStateRootResponse)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool GetLatestStateRootResponse::IsInitialized() const {
+  return true;
+}
+
+void GetLatestStateRootResponse::InternalSwap(GetLatestStateRootResponse* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(GetLatestStateRootResponse, result_)
+      + sizeof(GetLatestStateRootResponse::result_)
+      - PROTOBUF_FIELD_OFFSET(GetLatestStateRootResponse, latest_root_)>(
+          reinterpret_cast<char*>(&latest_root_),
+          reinterpret_cast<char*>(&other->latest_root_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata GetLatestStateRootResponse::GetMetadata() const {
   return GetMetadataStatic();
 }
 
@@ -11321,6 +11620,9 @@ template<> PROTOBUF_NOINLINE ::hashdb::v1::ReadTreeRequest* Arena::CreateMaybeMe
 }
 template<> PROTOBUF_NOINLINE ::hashdb::v1::CancelBatchRequest* Arena::CreateMaybeMessage< ::hashdb::v1::CancelBatchRequest >(Arena* arena) {
   return Arena::CreateMessageInternal< ::hashdb::v1::CancelBatchRequest >(arena);
+}
+template<> PROTOBUF_NOINLINE ::hashdb::v1::GetLatestStateRootResponse* Arena::CreateMaybeMessage< ::hashdb::v1::GetLatestStateRootResponse >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::hashdb::v1::GetLatestStateRootResponse >(arena);
 }
 template<> PROTOBUF_NOINLINE ::hashdb::v1::SetResponse_SiblingsEntry_DoNotUse* Arena::CreateMaybeMessage< ::hashdb::v1::SetResponse_SiblingsEntry_DoNotUse >(Arena* arena) {
   return Arena::CreateMessageInternal< ::hashdb::v1::SetResponse_SiblingsEntry_DoNotUse >(arena);
