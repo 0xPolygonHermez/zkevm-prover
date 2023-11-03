@@ -161,7 +161,7 @@ zkresult hashValue2keyValue (const DatabaseMap::MTMap &input, const Goldilocks::
     zkresult zkr;
 
     string root = fea2string(fr, stateRoot);
-
+    
     DatabaseMap::MTMap::const_iterator it;
     it = input.find(root);
     if (it == input.end())
@@ -213,6 +213,8 @@ zkresult hashValue2keyValue (const DatabaseMap::MTMap &input, const Goldilocks::
                 return zkr;
             }
         }
+
+        return ZKR_SUCCESS;
     }
 
     // If capacity is {1,0,0,0} then this is a leaf node
@@ -264,7 +266,7 @@ zkresult hashValue2keyValue (const DatabaseMap::MTMap &input, const Goldilocks::
     }
 
     // Invalid capacity
-    zklog.error("hashValue2keyValue() found invalid capacity level=" + to_string(level));
+    zklog.error("hashValue2keyValue() found invalid capacity level=" + to_string(level) + " root=" + root + " capacity=" + to_string(fr.toU64(value[8])) + ":" + to_string(fr.toU64(value[9])) + ":" + to_string(fr.toU64(value[10])) + ":" + to_string(fr.toU64(value[11])));
     return ZKR_DB_ERROR;
 }
 
