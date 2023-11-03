@@ -36,10 +36,19 @@ HashDBRemote::~HashDBRemote()
 zkresult HashDBRemote::getLatestStateRoot (Goldilocks::Element (&stateRoot)[4]){
 
     ::grpc::ClientContext context;
-    ::hashdb::v1::SetRequest request;
-    ::hashdb::v1::SetResponse response;
+    ::google::protobuf::Empty request;
+    ::hashdb::v1::GetLatestStateRootResponse response;
 
-    return ZKR_DB_ERROR;
+    grpc::Status s = stub->GetLatestStateRoot(&context, request, &response);
+    if (s.error_code() != grpc::StatusCode::OK)
+    {
+        zklog.error("HashDBRemote::getLatestStateRoot() GRPC error(" + to_string(s.error_code()) + "): " + s.error_message());
+        return ZKR_HASHDB_GRPC_ERROR;
+    }
+
+    grpc2fea(fr, response.latest_root(), stateRoot);
+
+    return ZKR_SUCCESS;
 
 }
 
@@ -396,7 +405,7 @@ zkresult HashDBRemote::purge (const string &batchUUID, const Goldilocks::Element
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
     tms.add("purge", TimeDiff(t));
 #endif
-    return static_cast<zkresult>(response.result().code());
+    return ZKR_SUCCESS;
 }
 
 zkresult HashDBRemote::consolidateState (const Goldilocks::Element (&virtualStateRoot)[4], const Persistence persistence, Goldilocks::Element (&consolidatedStateRoot)[4], uint64_t &flushId, uint64_t &storedFlushId)

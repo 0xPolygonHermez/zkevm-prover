@@ -21,6 +21,7 @@ message Version {
  * Flush: wait for all the pendings writes to the DB are done
  */
 service HashDBService {
+    rpc GetLatestStateRoot(google.protobuf.Empty) returns (GetLatestStateRootResponse) {}
     rpc Set(SetRequest) returns (SetResponse) {}
     rpc Get(GetRequest) returns (GetResponse) {}
     rpc SetProgram(SetProgramRequest) returns (SetProgramResponse) {}
@@ -203,6 +204,16 @@ message CancelBatchRequest {
 /////////////////////
 // Responses messages
 /////////////////////
+
+/**
+ * @dev GetLatestStateRootResponse
+ * @param {latest_root} - latest state root
+ * @param {result} - result code
+ */
+message GetLatestStateRootResponse {
+    Fea latest_root = 1;
+    ResultCode result = 2;
+}
 
 /**
  * @dev SetResponse

@@ -28,7 +28,7 @@ uint64_t HashDB64SimpleWorkflowTest (const Config& config)
     
 
     const uint64_t numberOfBatches = 1;
-    const uint64_t numberOfTxsPerBatch = 1;
+    const uint64_t numberOfTxsPerBatch = 10;
     const uint64_t numberOfSetsPerTx = 1;
 
     zklog.info("HashDB64WorkflowTest() numberOfBatches=" + to_string(numberOfBatches) + " numberOfTxsPerBatch=" + to_string(numberOfTxsPerBatch) + " numberOfSetsPerTx=" + to_string(numberOfSetsPerTx));
@@ -55,7 +55,6 @@ uint64_t HashDB64SimpleWorkflowTest (const Config& config)
 
         // Start batch
         string batchUUID = getUUID();
-        Goldilocks::Element batchOldStateRoot[4]={root[0], root[1], root[2], root[3]};
         vector<KeyValue> keyValues;
 
         // Set TXs

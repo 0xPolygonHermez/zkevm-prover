@@ -44,6 +44,7 @@ uint64_t HashDB64WorkflowTest (const Config& config)
     mpz_class keyScalar = 0;
     vector<KeyValue> allKeyValues;
 
+    pHashDB->getLatestStateRoot(root);
     for (uint64_t batch=0; batch<numberOfBatches; batch++)
     {
         zklog.info("STARTING BATCH=" + to_string(batch));
