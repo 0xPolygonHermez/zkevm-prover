@@ -58,9 +58,6 @@ zkresult RawDataPage::Read (PageContext &ctx, const uint64_t _pageNumber, const 
         { 
             RawDataStruct * page = (RawDataStruct *)ctx.pageManager.getPageAddress(pageNumber);
             uint64_t nextPageNumber = page->nextPageNumberAndOffset & U64Mask48;
-            uint64_t nextPageOffset = page->nextPageNumberAndOffset >> 48;
-            zkassert(nextPageNumber != 0);
-            zkassert((nextPageOffset == maxOffset) || ((nextPageOffset - minOffset) >= (length - copiedBytes)));
             pageNumber = nextPageNumber;
             offset = minOffset;
         }
@@ -152,11 +149,25 @@ zkresult RawDataPage::Write (PageContext &ctx, uint64_t &pageNumber, const strin
 
         // Copy data
         memcpy((char *)page + offset, data.c_str() + copiedBytes, bytesToCopy);
+        //zklog.info("RawDataPage::Write() wrote bytes=" + to_string(bytesToCopy) + " page=" + to_string(pageNumber) + " offset=" + to_string(offset));
 
         // Update counters
         offset += bytesToCopy;
         copiedBytes += bytesToCopy;
         page->nextPageNumberAndOffset = offset << 48;
+    }
+
+    // If we run out of space in the current page, get a new one
+    if (offset == maxOffset)
+    {
+        uint64_t nextPageNumber = ctx.pageManager.getFreePage();
+        InitEmptyPage(ctx, nextPageNumber);
+        RawDataStruct * nextPage = (RawDataStruct *)ctx.pageManager.getPageAddress(nextPageNumber);
+        page->nextPageNumberAndOffset = nextPageNumber | (maxOffset << 48);
+        nextPage->previousPageNumber = pageNumber;
+        pageNumber = nextPageNumber;
+        page = nextPage;
+        offset = minOffset;
     }
 
     return ZKR_SUCCESS;
