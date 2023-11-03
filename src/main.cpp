@@ -363,7 +363,7 @@ int main(int argc, char **argv)
     // Init the StateManager singleton
     if (config.hashDB64)
     {
-        stateManager64.init(config);
+        stateManager64.init();
     }
     else
     {
