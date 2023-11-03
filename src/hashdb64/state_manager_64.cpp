@@ -7,9 +7,7 @@
 #include "definitions.hpp"
 #include "zkglobals.hpp"
 
-Goldilocks frSM64;
-PoseidonGoldilocks poseidonSM64;
-StateManager64 stateManager64(frSM64, poseidonSM64);
+StateManager64 stateManager64;
 
 zkresult StateManager64::setStateRoot(const string &batchUUID, uint64_t tx, const string &_stateRoot, const bool bIsOldStateRoot, const Persistence persistence)
 {
@@ -164,7 +162,7 @@ zkresult StateManager64::setStateRoot(const string &batchUUID, uint64_t tx, cons
                     for (it = dbWrite.begin(); it != dbWrite.end(); it++)
                     {
                         Goldilocks::Element key_[4];
-                        string2fea(frSM64,it->first, key_);
+                        string2fea(fr, it->first, key_);
                         zkr = batchState.keyValueTree.extract(key_, it->second);
                         if (zkr != ZKR_SUCCESS)
                         {
@@ -279,7 +277,7 @@ zkresult StateManager64::write (const string &batchUUID, uint64_t tx, const stri
 
     // Add to common write pool to speed up read
     Goldilocks::Element key_[4];
-    string2fea(frSM64, key, key_);
+    string2fea(fr, key, key_);
     batchState.keyValueTree.write(key_, value, level);
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
@@ -311,7 +309,7 @@ zkresult StateManager64::read (const string &batchUUID, const string &key, mpz_c
 
     // Search in the common key-value tree
     Goldilocks::Element key_[4];
-    string2fea(frSM64, key, key_);
+    string2fea(fr, key, key_);
     zkresult zkr = batchState.keyValueTree.read(key_, value, level);
     if (zkr == ZKR_SUCCESS)
     {
@@ -589,6 +587,12 @@ zkresult StateManager64::purge (const string &batchUUID, const string &_newState
     zklog.info("StateManager64::purge() batchUUID=" + batchUUID);
 #endif
 
+    if (!isVirtualStateRoot(_newStateRoot))
+    {
+        zklog.info("StateManager64::purge() called with non-virtual _newStateRoot=" + _newStateRoot + "; nothing to do");
+        return ZKR_SUCCESS;
+    }
+
     // For every TX, track backwards from newStateRoot to oldStateRoot, marking sub-states as valid
 
     Lock();
@@ -679,6 +683,8 @@ zkresult StateManager64::purge (const string &batchUUID, const string &_newState
 
 zkresult StateManager64::consolidateState(const string &_virtualStateRoot, const Persistence persistence, string & consolidatedStateRoot, Database64 &db, uint64_t &flushId, uint64_t &lastSentFlushId)
 {
+    zkresult zkr;
+
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     struct timeval t;
     gettimeofday(&t, NULL);
@@ -689,10 +695,19 @@ zkresult StateManager64::consolidateState(const string &_virtualStateRoot, const
     // Format the new state root
     string virtualStateRoot = NormalizeToNFormat(_virtualStateRoot, 64);
 
-    if (!isVirtualStateRoot(virtualStateRoot))
+    if (!isVirtualStateRoot(virtualStateRoot) && (virtualStateRoot == lastConsolidatedStateRootString))
     {
-        zklog.error("StateManager64::consolidateState() called with non-virtual virtualStateRoot=" + virtualStateRoot);
-        return ZKR_STATE_MANAGER;
+        zklog.info("StateManager64::consolidateState() called with non-virtual virtualStateRoot=" + virtualStateRoot + " that matches the lastConsolidatedStateRootString, so nothing to do");
+        consolidatedStateRoot = virtualStateRoot;
+
+        // Call flush and get the flush ID
+        zkr = db.flush(flushId, lastSentFlushId);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("StateManager64::consolidateState() failed calling db.flush() result=" + zkresult2string(zkr));
+        }
+
+        return zkr;
     }
 
 #ifdef LOG_STATE_MANAGER
@@ -704,8 +719,6 @@ zkresult StateManager64::consolidateState(const string &_virtualStateRoot, const
     Lock();
 
     //print(false);
-
-    zkresult zkr;
 
     // Find the batch that ends up with the virtual state root
     uint64_t virtualStatePosition = 0;
@@ -889,7 +902,6 @@ zkresult StateManager64::consolidateState(const string &_virtualStateRoot, const
     lastConsolidatedStateRootString = consolidatedStateRoot;
 
     // Call flush and get the flush ID
-
     zkr = db.flush(flushId, lastSentFlushId);
     if (zkr != ZKR_SUCCESS)
     {
@@ -897,7 +909,6 @@ zkresult StateManager64::consolidateState(const string &_virtualStateRoot, const
     }
 
     // Delete all batches of the virtual state chain
-
     for (int64_t i = (int64_t)virtualStatePosition; i >= 0; i--)
     {
         // Find the batch state corresponding to this position

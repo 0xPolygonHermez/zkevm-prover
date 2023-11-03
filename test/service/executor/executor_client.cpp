@@ -4,6 +4,7 @@
 #include "hashdb_singleton.hpp"
 #include "zkmax.hpp"
 #include "check_tree.hpp"
+#include "state_manager_64.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -187,22 +188,25 @@ bool ExecutorClient::ProcessBatch (void)
     if (config.executorClientCheckNewStateRoot)
     {
         if (config.hashDB64)
-        {
-            TimerStart(CONSOLIDATE_STATE);
-
-            Goldilocks::Element virtualStateRoot[4];
-            string2fea(fr, newStateRoot, virtualStateRoot);
-            Goldilocks::Element consolidatedStateRoot[4];
-            uint64_t flushId, storedFlushId;
-            zkresult zkr = pHashDB->consolidateState(virtualStateRoot, update_merkle_tree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, consolidatedStateRoot, flushId, storedFlushId);
-            if (zkr != ZKR_SUCCESS)
+        {            
+            //if (StateManager64::isVirtualStateRoot(newStateRoot))
             {
-                zklog.error("ExecutorClient::ProcessBatch() failed calling pHashDB->consolidateState() result=" + zkresult2string(zkr));
-                return false;
-            }
-            newStateRoot = fea2string(fr, consolidatedStateRoot);
+                TimerStart(CONSOLIDATE_STATE);
 
-            TimerStopAndLog(CONSOLIDATE_STATE);
+                Goldilocks::Element virtualStateRoot[4];
+                string2fea(fr, newStateRoot, virtualStateRoot);
+                Goldilocks::Element consolidatedStateRoot[4];
+                uint64_t flushId, storedFlushId;
+                zkresult zkr = pHashDB->consolidateState(virtualStateRoot, update_merkle_tree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, consolidatedStateRoot, flushId, storedFlushId);
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("ExecutorClient::ProcessBatch() failed calling pHashDB->consolidateState() result=" + zkresult2string(zkr));
+                    return false;
+                }
+                newStateRoot = fea2string(fr, consolidatedStateRoot);
+
+                TimerStopAndLog(CONSOLIDATE_STATE);
+            }
         }
 
         TimerStart(CHECK_NEW_STATE_ROOT);
