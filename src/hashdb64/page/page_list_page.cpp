@@ -146,7 +146,7 @@ zkresult PageListPage::GetPages (PageContext &ctx, const uint64_t pageNumber, ve
     // Add all pages contained in this page
     for (uint64_t i = minOffset; i < offset; i += 8)
     {
-        freePages.emplace_back(*(uint64_t *)((uint8_t *)page + offset));
+        freePages.emplace_back(*(uint64_t *)((uint8_t *)page + i));
     }
 
     return ZKR_SUCCESS;
