@@ -420,10 +420,9 @@ zkresult Database64::WriteTree (const Goldilocks::Element (&oldRoot)[4], const v
 
         // Set last version
         HeaderPage::SetLastVersion(ctx, headerPageNumber, version);
-
-        // Flush all pages to disk
-        ctx.pageManager.flushPages(ctx);
     }
+    // Flush all pages to disk
+    ctx.pageManager.flushPages(ctx);
     
     headerPageNumber = 0;
     
