@@ -30,7 +30,8 @@ public:
     ::grpc::Status GetFlushStatus (::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetFlushStatusResponse* response) override;
     ::grpc::Status GetFlushData (::grpc::ServerContext* context, const ::hashdb::v1::GetFlushDataRequest* request, ::hashdb::v1::GetFlushDataResponse* response) override;
     ::grpc::Status ConsolidateState (::grpc::ServerContext* context, const ::hashdb::v1::ConsolidateStateRequest* request, ::hashdb::v1::ConsolidateStateResponse* response) override;
-    ::grpc::Status ReadTree (::grpc::ServerContext* context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response);
+    ::grpc::Status ReadTree (::grpc::ServerContext* context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response) override;
+    ::grpc::Status ResetDB (::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::ResetDBResponse* response) override;
 };
 
 #endif

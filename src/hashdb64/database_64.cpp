@@ -105,7 +105,7 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
     zkr = HeaderPage::ReadRootVersion(ctx, headerPageNumber, rootBa, version);
     if (zkr != ZKR_SUCCESS)
     {
-        zklog.error("Database64::readKV() faile calling HeaderPage::ReadRootVersion() result=" + zkresult2string(zkr) + " root=" + rootString + " key=" + fea2string(fr, key));
+        zklog.error("Database64::readKV() failed calling HeaderPage::ReadRootVersion() result=" + zkresult2string(zkr) + " root=" + rootString + " key=" + fea2string(fr, key));
         return zkr;
     }
 
@@ -114,7 +114,7 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
     zkr = HeaderPage::ReadVersionData(ctx, headerPageNumber, version, versionData);
     if (zkr != ZKR_SUCCESS)
     {
-        zklog.error("Database64::readKV() faile calling HeaderPage::ReadVersionData() result=" + zkresult2string(zkr) + " root=" + rootString + " key=" + fea2string(fr, key));
+        zklog.error("Database64::readKV() failed calling HeaderPage::ReadVersionData() result=" + zkresult2string(zkr) + " root=" + rootString + " key=" + fea2string(fr, key));
         return zkr;
     }
 
@@ -124,7 +124,7 @@ zkresult Database64::readKV(const Goldilocks::Element (&root)[4], const Goldiloc
     zkr = HeaderPage::KeyValueHistoryRead(ctx, versionData.keyValueHistoryPage, keyBa, version, value, level);
     if (zkr != ZKR_SUCCESS)
     {
-        zklog.error("Database64::readKV() faile calling HeaderPage::KeyValueHistoryRead() result=" + zkresult2string(zkr) + " root=" + rootString + " key=" + fea2string(fr, key));
+        zklog.error("Database64::readKV() failed calling HeaderPage::KeyValueHistoryRead() result=" + zkresult2string(zkr) + " root=" + rootString + " key=" + fea2string(fr, key));
         return zkr;
     }
     
@@ -160,7 +160,7 @@ zkresult Database64::readLevel (const Goldilocks::Element (&key)[4], uint64_t &l
     zkr = HeaderPage::KeyValueHistoryReadLevel(ctx,headerPageNumber, keyBa, level);
     if (zkr != ZKR_SUCCESS)
     {
-        zklog.error("Database64::readLevel() faile calling HeaderPage::KeyValueHistoryReadLevel() result=" + zkresult2string(zkr) + " key=" + fea2string(fr, key));
+        zklog.error("Database64::readLevel() failed calling HeaderPage::KeyValueHistoryReadLevel() result=" + zkresult2string(zkr) + " key=" + fea2string(fr, key));
         return zkr;
     }
 
@@ -271,6 +271,18 @@ zkresult Database64::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFl
     Unlock();
 
     return ZKR_SUCCESS;
+}
+
+zkresult Database64::resetDB (void)
+{
+    Lock();
+    zkresult zkr = pageManager.reset(ctx);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("Database64::resetDB() failed calling pageManager.reset() result=" + zkresult2string(zkr));
+    }
+    Unlock();
+    return zkr;
 }
 
 zkresult Database64::consolidateBlock (uint64_t blockNumber)

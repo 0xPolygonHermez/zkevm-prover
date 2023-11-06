@@ -626,3 +626,24 @@ zkresult HashDBRemote::cancelBatch (const string &batchUUID)
 #endif
     return static_cast<zkresult>(response.result().code());
 }
+
+zkresult HashDBRemote::resetDB (void)
+{
+
+#ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
+    gettimeofday(&t, NULL);
+#endif
+    ::grpc::ClientContext context;
+    ::google::protobuf::Empty request;
+    ::hashdb::v1::ResetDBResponse response;
+    grpc::Status s = stub->ResetDB(&context, request, &response);
+    if (s.error_code() != grpc::StatusCode::OK)
+    {
+        zklog.error("HashDBRemote:resetDB() GRPC error(" + to_string(s.error_code()) + "): " + s.error_message());
+    }
+
+#ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
+    tms.add("resetDB", TimeDiff(t));
+#endif
+    return static_cast<zkresult>(response.result().code());
+}

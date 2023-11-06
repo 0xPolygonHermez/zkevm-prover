@@ -625,6 +625,34 @@ zkresult HashDB::cancelBatch (const string &batchUUID)
     return result;
 }
 
+zkresult HashDB::resetDB (void)
+{
+#ifdef LOG_TIME_STATISTICS_HASHDB
+    gettimeofday(&t, NULL);
+#endif
+
+#ifdef HASHDB_LOCK
+    lock_guard<recursive_mutex> guard(mlock);
+#endif
+
+    zkresult result;
+    if (config.hashDB64 && config.stateManager)
+    {
+        return db64.resetDB();
+    }
+    else
+    {
+        zklog.error("HashDB::resetDB() called with invalid configuration");
+        result = ZKR_STATE_MANAGER;
+    }
+
+#ifdef LOG_TIME_STATISTICS_HASHDB
+    tms.add("resetDB", TimeDiff(t));
+#endif
+
+    return result;
+}
+
 void HashDB::setAutoCommit(const bool autoCommit)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB

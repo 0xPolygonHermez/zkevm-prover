@@ -36,6 +36,7 @@ service HashDBService {
     rpc Purge (PurgeRequest) returns (PurgeResponse) {}
     rpc ReadTree (ReadTreeRequest) returns (ReadTreeResponse) {}
     rpc CancelBatch (CancelBatchRequest) returns (CancelBatchResponse) {}
+    rpc ResetDB (google.protobuf.Empty) returns (ResetDBResponse) {}
 }
 
 ///////////////////
@@ -386,6 +387,14 @@ message ReadTreeResponse {
  * @param {result} - result code
  */
 message CancelBatchResponse {
+    ResultCode result = 1;
+}
+
+/**
+ * @dev ResetDBResponse
+ * @param {result} - result code
+ */
+message ResetDBResponse {
     ResultCode result = 1;
 }
 

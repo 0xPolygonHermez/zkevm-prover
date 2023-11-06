@@ -1128,7 +1128,7 @@ zkresult StateManager64::get (const string &batchUUID, Database64 &db, const Gol
     bool bUseStateManager = config.stateManager && (batchUUID.size() > 0);
 
     string keyString = fea2string(fr, key);
-    mpz_class value;
+    mpz_class value = 0;
     zkresult zkr = ZKR_UNSPECIFIED;
     uint64_t level = 0;
     if (bUseStateManager)
@@ -1156,8 +1156,23 @@ zkresult StateManager64::get (const string &batchUUID, Database64 &db, const Gol
     }
     if (zkr != ZKR_SUCCESS)
     {
-        zklog.error("StateManager64::get() db.read error=" + zkresult2string(zkr) + " root=" + fea2string(fr, lastConsolidatedStateRoot) + " key=" + fea2string(fr, key));
-        return zkr;
+        if (zkr != ZKR_DB_KEY_NOT_FOUND)
+        {
+            zklog.error("StateManager64::get() db.read error=" + zkresult2string(zkr) + " root=" + fea2string(fr, lastConsolidatedStateRoot) + " key=" + fea2string(fr, key));
+            return zkr;
+        }
+
+        // If key was not found, it's value is 0
+        value = 0;
+
+        uint64_t databaseLevel;
+        zkr = db.readLevel(key, databaseLevel);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("StateManager64::get() db.readLevel error=" + zkresult2string(zkr) + " root=" + fea2string(fr, lastConsolidatedStateRoot) + " key=" + fea2string(fr, key));
+            return zkr;
+        }
+        level = databaseLevel;
     }
     
     result.value = value;
@@ -1295,36 +1310,56 @@ zkresult StateManager64::readProgram (const string &batchUUID, const string &key
 
     Lock();
 
-    // Find batch state for this uuid
-    unordered_map<string, BatchState64>::iterator it;
-    it = state.find(batchUUID);
-    if (it == state.end())
+    // Find the order of this batch
+    uint64_t batchPosition = 0;
+    for (batchPosition = 0; batchPosition < stateOrder.size(); batchPosition++)
     {
-        // zklog.error("StateManager64::readProgram() found no batch state for batch UUID=" + batchUUID);
+        if (stateOrder[batchPosition] == batchUUID)
+        {
+            break;
+        }
+    }
+    if (batchPosition == stateOrder.size())
+    {
+        zklog.error("StateManager64::readProgram() could not find a matching state with batchUUID=" + batchUUID);
         Unlock();
         return ZKR_DB_KEY_NOT_FOUND;
     }
-    BatchState64 &batchState = it->second;
 
-    // Search in the common program 
-    unordered_map<string, vector<uint8_t>>::const_iterator itProgram;
-    itProgram = batchState.dbProgram.find(key);
-    if (itProgram != batchState.dbProgram.end())
+    // Search in all batches, from last to first
+    unordered_map<string, BatchState64>::iterator it;
+    for (int64_t i = (int64_t)batchPosition; i >= 0; i--)
     {
-        // Add to the read log
-        if (dbReadLog != NULL)
-            dbReadLog->add(key, data, true, TimeDiff(t));
+        // Find the batch state corresponding to this position
+        it = state.find(stateOrder[i]);
+        if (it == state.end())
+        {
+            zklog.error("StateManager64::readProgram() could not find a matching virtual state=" + stateOrder[i]);
+            Unlock();
+            return ZKR_STATE_MANAGER;
+        }
+        BatchState64 &batchState = it->second;
+
+        // Search in the common program database
+        unordered_map<string, vector<uint8_t>>::const_iterator itProgram;
+        itProgram = batchState.dbProgram.find(key);
+        if (itProgram != batchState.dbProgram.end())
+        {
+            // Add to the read log
+            if (dbReadLog != NULL)
+                dbReadLog->add(key, data, true, TimeDiff(t));
 
 #ifdef LOG_STATE_MANAGER
-        zklog.info("StateManager64::readProgram() batchUUID=" + batchUUID + " key=" + key);
+            zklog.info("StateManager64::readProgram() batchUUID=" + batchUUID + " key=" + key);
 #endif
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-        batchState.timeMetricStorage.add("read program success", TimeDiff(t));
+            batchState.timeMetricStorage.add("read program success", TimeDiff(t));
 #endif
-        Unlock();
+            Unlock();
 
-        return ZKR_SUCCESS;
+            return ZKR_SUCCESS;
+        }
     }
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
