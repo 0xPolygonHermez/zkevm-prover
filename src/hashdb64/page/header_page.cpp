@@ -320,7 +320,7 @@ zkresult HeaderPage::KeyValueHistoryPrint (PageContext &ctx, const uint64_t head
     // If root is empty, print the last version
     if (root == "")
     {
-        KeyValueHistoryPage::Print(ctx, headerPage->keyValueHistoryPage, true, "");
+        KeyValueHistoryPage::Print(ctx, headerPage->keyValueHistoryPage, false, "");
         return ZKR_SUCCESS;
     }
 

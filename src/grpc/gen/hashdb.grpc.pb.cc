@@ -38,6 +38,7 @@ static const char* HashDBService_method_names[] = {
   "/hashdb.v1.HashDBService/Purge",
   "/hashdb.v1.HashDBService/ReadTree",
   "/hashdb.v1.HashDBService/CancelBatch",
+  "/hashdb.v1.HashDBService/ResetDB",
 };
 
 std::unique_ptr< HashDBService::Stub> HashDBService::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
@@ -62,6 +63,7 @@ HashDBService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& chan
   , rpcmethod_Purge_(HashDBService_method_names[12], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_ReadTree_(HashDBService_method_names[13], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_CancelBatch_(HashDBService_method_names[14], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_ResetDB_(HashDBService_method_names[15], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status HashDBService::Stub::GetLatestStateRoot(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::hashdb::v1::GetLatestStateRootResponse* response) {
@@ -484,6 +486,34 @@ void HashDBService::Stub::experimental_async::CancelBatch(::grpc::ClientContext*
   return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::hashdb::v1::CancelBatchResponse>::Create(channel_.get(), cq, rpcmethod_CancelBatch_, context, request, false);
 }
 
+::grpc::Status HashDBService::Stub::ResetDB(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::hashdb::v1::ResetDBResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_ResetDB_, context, request, response);
+}
+
+void HashDBService::Stub::experimental_async::ResetDB(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::ResetDBResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_ResetDB_, context, request, response, std::move(f));
+}
+
+void HashDBService::Stub::experimental_async::ResetDB(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ResetDBResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_ResetDB_, context, request, response, std::move(f));
+}
+
+void HashDBService::Stub::experimental_async::ResetDB(::grpc::ClientContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::ResetDBResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_ResetDB_, context, request, response, reactor);
+}
+
+void HashDBService::Stub::experimental_async::ResetDB(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::hashdb::v1::ResetDBResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_ResetDB_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::hashdb::v1::ResetDBResponse>* HashDBService::Stub::AsyncResetDBRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::hashdb::v1::ResetDBResponse>::Create(channel_.get(), cq, rpcmethod_ResetDB_, context, request, true);
+}
+
+::grpc::ClientAsyncResponseReader< ::hashdb::v1::ResetDBResponse>* HashDBService::Stub::PrepareAsyncResetDBRaw(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::hashdb::v1::ResetDBResponse>::Create(channel_.get(), cq, rpcmethod_ResetDB_, context, request, false);
+}
+
 HashDBService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       HashDBService_method_names[0],
@@ -635,6 +665,16 @@ HashDBService::Service::Service() {
              ::hashdb::v1::CancelBatchResponse* resp) {
                return service->CancelBatch(ctx, req, resp);
              }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      HashDBService_method_names[15],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::google::protobuf::Empty, ::hashdb::v1::ResetDBResponse>(
+          [](HashDBService::Service* service,
+             ::grpc_impl::ServerContext* ctx,
+             const ::google::protobuf::Empty* req,
+             ::hashdb::v1::ResetDBResponse* resp) {
+               return service->ResetDB(ctx, req, resp);
+             }, this)));
 }
 
 HashDBService::Service::~Service() {
@@ -739,6 +779,13 @@ HashDBService::Service::~Service() {
 }
 
 ::grpc::Status HashDBService::Service::CancelBatch(::grpc::ServerContext* context, const ::hashdb::v1::CancelBatchRequest* request, ::hashdb::v1::CancelBatchResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status HashDBService::Service::ResetDB(::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::ResetDBResponse* response) {
   (void) context;
   (void) request;
   (void) response;

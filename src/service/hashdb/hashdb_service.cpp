@@ -698,7 +698,7 @@ using grpc::Status;
     return Status::OK;
 }
 
-::grpc::Status HashDBServiceImpl::ReadTree(::grpc::ServerContext* context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response)
+::grpc::Status HashDBServiceImpl::ReadTree (::grpc::ServerContext* context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response)
 {
     // If the process is exising, do not start new activities
     if (bExitingProcess)
@@ -785,5 +785,41 @@ using grpc::Status;
     return Status::OK;
 }
 
+::grpc::Status HashDBServiceImpl::ResetDB (::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::ResetDBResponse* response)
+{    
+    // If the process is exising, do not start new activities
+    if (bExitingProcess)
+    {
+        return Status::CANCELLED;
+    }
 
+#ifdef LOG_HASHDB_SERVICE
+    zklog.info("HashDBServiceImpl::ResetDB called.");
+#endif
 
+    try
+    {
+        zkresult zkr = pHashDB->resetDB();
+
+        // Return the result in the response
+        ::hashdb::v1::ResultCode* result = new ::hashdb::v1::ResultCode();
+        if (result == NULL)
+        {
+            zklog.error("HashDBServiceImpl::ResetDB() failed allocating hashdb::v1::ResultCode");
+            exitProcess();
+        }
+        result->set_code(static_cast<::hashdb::v1::ResultCode_Code>(zkr));
+        response->set_allocated_result(result);
+    }
+    catch (const std::exception &e)
+    {
+        zklog.error("HashDBServiceImpl::ResetDB() exception: " + string(e.what()));
+        return Status::CANCELLED;
+    }
+
+#ifdef LOG_HASHDB_SERVICE
+    zklog.info("HashDBServiceImpl::ResetDB() completed.");
+#endif
+    
+    return Status::OK;
+}

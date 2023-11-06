@@ -35,6 +35,7 @@ public:
     virtual zkresult readTree           (const Goldilocks::Element (&root)[4], vector<KeyValue> &keyValues, vector<HashValueGL> &hashValues) = 0;
     virtual zkresult writeTree          (const Goldilocks::Element (&oldRoot)[4], const vector<KeyValue> &keyValues, Goldilocks::Element (&newRoot)[4], const bool persistent) = 0;
     virtual zkresult cancelBatch        (const string &batchUUID) = 0;
+    virtual zkresult resetDB            (void) = 0;
 
 };
 
