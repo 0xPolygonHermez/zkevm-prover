@@ -83,7 +83,6 @@ zkresult HeaderPage::InitEmptyPage (PageContext &ctx, const uint64_t headerPageN
     }
 
     // Create the free pages page, and init it
-    page->firstUnusedPage = 2;
     page->freePages = ctx.pageManager.getFreePage();
     zkr = PageListPage::InitEmptyPage(ctx, page->freePages);
     if (zkr != ZKR_SUCCESS)
@@ -91,6 +90,7 @@ zkresult HeaderPage::InitEmptyPage (PageContext &ctx, const uint64_t headerPageN
         zklog.error("HeaderPage::InitEmptyPage() failed calling PageListPage::InitEmptyPage(freePages) result=" + zkresult2string(zkr));
         return zkr;
     }
+    page->firstUnusedPage = ctx.pageManager.getFirstUnusedPage();
     // UUID
     for(int i=0; i<32; ++i){
         page->uuid[i] = ctx.uuid[i];

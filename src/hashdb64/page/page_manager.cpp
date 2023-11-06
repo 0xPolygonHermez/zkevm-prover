@@ -67,6 +67,7 @@ zkresult PageManager::init(PageContext &ctx)
         folderName = ctx.config.hashDBFolder;
         pagesPerFile = fileSize >> 12;
         mappedFile = true;
+        nPages = 0;
 
 
         //Create the folder if it does not exist
@@ -185,6 +186,21 @@ zkresult PageManager::init(PageContext &ctx)
 
 }
 
+zkresult PageManager::reset(PageContext &ctx){
+    
+    zkresult zkr=ZKR_UNSPECIFIED;
+    numFreePages = 0;
+    firstUnusedPage = 2;
+    memset(pages[0], 0, 2*4096);
+    zkr = HeaderPage::InitEmptyPage(ctx, 0);
+    if(zkr != ZKR_SUCCESS){
+        zklog.error("PageManager::reset() failed calling HeaderPage::InitEmptyPage()");
+        exitProcess();
+    }
+    init(ctx);
+    return zkr;
+
+}
 zkresult PageManager::addPages(const uint64_t nPages_)
 {
     unique_lock<shared_mutex> guard(dbResizeLock);
@@ -238,6 +254,7 @@ uint64_t PageManager::getFreePage(void)
     uint64_t pageNumber;
     if(numFreePages > 0){
         pageNumber = freePages[numFreePages-1];
+        memset(getPageAddress(pageNumber), 0, 4096);
         --numFreePages;
     }else{
         dbResizeLock.lock_shared();
@@ -265,7 +282,6 @@ void PageManager::releasePage(const uint64_t pageNumber)
 {
     zkassertpermanent(pageNumber >= 2);  //first two pages cannot be released
     zkassertpermanent(pageNumber<firstUnusedPage);
-    memset(getPageAddress(pageNumber), 0, 4096);
 #if MULTIPLE_WRITES
     lock_guard<recursive_mutex> guard_freePages(writePagesLock);
 #endif

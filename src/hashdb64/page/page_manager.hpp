@@ -25,12 +25,15 @@ public:
     ~PageManager();
 
     zkresult init(PageContext &ctx);
+    zkresult reset(PageContext &ctx);
+    
     uint64_t getFreePage();
     void releasePage(const uint64_t pageNumber);
     uint64_t editPage(const uint64_t pageNumber);
     void flushPages(PageContext &ctx);
     inline char *getPageAddress(const uint64_t pageNumber);
     inline uint64_t getNumFreePages();
+    inline uint64_t getFirstUnusedPage();
 
     zkresult addFile();
     zkresult addPages(const uint64_t nPages_);
@@ -78,4 +81,13 @@ uint64_t PageManager::getNumFreePages(){
 #endif
         return numFreePages+nPages-firstUnusedPage;
     };
+
+//Note: if there is a single writter thread we assume that only the writter thread will call this function! 
+inline uint64_t PageManager::getFirstUnusedPage(){
+#if MULTIPLE_WRITES
+        lock_guard<recursive_mutex> guard_freePages(writePagesLock);
+#endif
+        return firstUnusedPage;
+}
+
 #endif

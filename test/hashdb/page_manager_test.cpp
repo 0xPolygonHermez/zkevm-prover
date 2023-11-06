@@ -24,6 +24,7 @@ uint64_t PageManagerTest (void)
     TimerStart(PAGE_MANAGER_TEST);
     PageManagerAccuracyTest();
     PageManagerDBResizeTest();
+    PageManagerDBResetTest();
     //PageManagerPerformanceTest();
     TimerStopAndLog(PAGE_MANAGER_TEST);
     return 0;
@@ -181,7 +182,7 @@ uint64_t PageManagerAccuracyTest (void)
     zkassertpermanent(page1 == 8);
     zkassertpermanent(pageManagerMem.getNumFreePages() == initialFreePages-1);
     uint64_t page2 = pageManagerMem.getFreePage();
-    zkassertpermanent(page2 == 9);
+    zkassertpermanent(page2 == 9 );
     zkassertpermanent(pageManagerMem.getNumFreePages() == initialFreePages-2);
     pageManagerMem.releasePage(page1);
     zkassertpermanent(pageManagerMem.getNumFreePages() == initialFreePages-1);
@@ -225,9 +226,6 @@ uint64_t PageManagerAccuracyTest (void)
 
 
     pageManagerMem.flushPages(ctx);
-    for(uint64_t i=0; i<256;++i){
-        zkassertpermanent(page3Data[i] == 0);
-    }
     for(uint64_t i=0; i<256;++i){
         zkassertpermanent(page4Data[i] == i);
     }
@@ -309,9 +307,6 @@ uint64_t PageManagerAccuracyTest (void)
 
     pageManagerFile.flushPages(ctxf);
     for(uint64_t i=0; i<256;++i){
-        zkassertpermanent(page3Data[i] == 0);
-    }
-    for(uint64_t i=0; i<256;++i){
         zkassertpermanent(page4Data[i] == i);
     }
 
@@ -321,9 +316,6 @@ uint64_t PageManagerAccuracyTest (void)
     pageManagerFile2.init(ctxf2);
     page3Data = (uint64_t *)pageManagerFile2.getPageAddress(page3);
     page4Data = (uint64_t *)pageManagerFile2.getPageAddress(page4);
-    for(uint64_t i=0; i<256;++i){
-        zkassertpermanent(page3Data[i] == 0);
-    }
     for(uint64_t i=0; i<256;++i){
         zkassertpermanent(page4Data[i] == i);
     }
@@ -376,7 +368,7 @@ uint64_t PageManagerDBResizeTest (void)
     // File version
     //
     
-    //generate a file with 100 pages
+    //generate a file with
     const string fileName = "page_manager_test";
     const string folderName = "pmtest";
     const int file_size = 1;  //in GB
@@ -415,3 +407,68 @@ uint64_t PageManagerDBResizeTest (void)
     
     return 0;
 }
+
+uint64_t PageManagerDBResetTest (void){
+
+    //
+    // Memory version
+    //
+    PageManager pageManagerMem;
+    Config configPM;
+    PageContext ctx(pageManagerMem, configPM);
+    pageManagerMem.init(ctx);
+    uint64_t initialFreePages = pageManagerMem.getNumFreePages();
+    for(uint64_t i=0; i<initialFreePages;++i){
+        pageManagerMem.getFreePage();
+    }
+    assert(pageManagerMem.getNumFreePages() == 0);
+    pageManagerMem.reset(ctx);
+    assert(pageManagerMem.getNumFreePages() == initialFreePages);
+
+    //
+    // File version
+    //
+    
+    //generate a file
+    const string fileName = "page_manager_test";
+    const string folderName = "pmtest";
+    const int file_size = 1;  //in GB
+    
+    //delete folder (is exists)
+    std::string command = "rm -rf " + folderName;
+    int r = system(command.c_str());
+    if(r!=0){
+        zklog.info("Error removing folder");
+        return 1;
+    }
+
+    PageManager pageManagerFile;
+    Config configPMFile;
+    configPMFile.hashDBFileName = fileName;
+    configPMFile.hashDBFileSize = file_size;
+    configPMFile.hashDBFolder = folderName;
+    PageContext ctxf(pageManagerFile, configPMFile);
+    pageManagerFile.init(ctxf);
+
+    initialFreePages = pageManagerFile.getNumFreePages();
+    for(uint64_t i=0; i<initialFreePages;++i){
+        pageManagerFile.getFreePage();
+    }
+    assert(pageManagerFile.getNumFreePages() == 0);
+    pageManagerFile.getFreePage();
+    assert(pageManagerFile.getNumFreePages() == initialFreePages+7); 
+
+    pageManagerFile.reset(ctxf);
+    assert(pageManagerFile.getNumFreePages() == initialFreePages+262144);
+    
+    //delete folder
+    command = "rm -rf " + folderName;
+    r = system(command.c_str());
+    if(r!=0){
+        zklog.info("Error removing folder");
+        return 1;
+    }
+
+    return 0;
+}
+
