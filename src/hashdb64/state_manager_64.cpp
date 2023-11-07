@@ -1130,11 +1130,11 @@ zkresult StateManager64::get (const string &batchUUID, Database64 &db, const Gol
     string keyString = fea2string(fr, key);
     mpz_class value = 0;
     zkresult zkr = ZKR_UNSPECIFIED;
+    uint64_t stateManagerLevel = 0;
+    uint64_t databaseLevel = 0;
     uint64_t level = 0;
     if (bUseStateManager)
     {
-        uint64_t stateManagerLevel;
-        uint64_t databaseLevel;
         zkr = stateManager64.read(batchUUID, keyString, value, stateManagerLevel, dbReadLog);
         if (zkr == ZKR_SUCCESS)
         {
@@ -1149,19 +1149,24 @@ zkresult StateManager64::get (const string &batchUUID, Database64 &db, const Gol
                 level = zkmax(stateManagerLevel, databaseLevel);
             }
         }
-    }
-    if (zkr != ZKR_SUCCESS)
-    {
-        zkr = db.readKV(lastConsolidatedStateRoot, key, value, level, dbReadLog);
-    }
-    if (zkr != ZKR_SUCCESS)
-    {
-        if (zkr != ZKR_DB_KEY_NOT_FOUND)
+        else if (zkr != ZKR_DB_KEY_NOT_FOUND)
         {
-            zklog.error("StateManager64::get() db.read error=" + zkresult2string(zkr) + " root=" + fea2string(fr, lastConsolidatedStateRoot) + " key=" + fea2string(fr, key));
+            zklog.error("StateManager64::get() failed calling stateManager64.read() error=" + zkresult2string(zkr) + " root=" + fea2string(fr, lastConsolidatedStateRoot) + " key=" + fea2string(fr, key));
             return zkr;
         }
-
+    }
+    if ((zkr != ZKR_SUCCESS) && !feaIsZero(lastConsolidatedStateRoot))
+    {
+        zkr = db.readKV(lastConsolidatedStateRoot, key, value, databaseLevel, dbReadLog);
+        if ((zkr != ZKR_SUCCESS) && (zkr != ZKR_DB_KEY_NOT_FOUND))
+        {
+            zklog.error("StateManager64::get() failed calling db.readKV() error=" + zkresult2string(zkr) + " root=" + fea2string(fr, lastConsolidatedStateRoot) + " key=" + fea2string(fr, key));
+            return zkr;
+        }
+        level = databaseLevel;
+    }
+    if (zkr != ZKR_SUCCESS)
+    {
         // If key was not found, it's value is 0
         value = 0;
 
@@ -1172,7 +1177,7 @@ zkresult StateManager64::get (const string &batchUUID, Database64 &db, const Gol
             zklog.error("StateManager64::get() db.readLevel error=" + zkresult2string(zkr) + " root=" + fea2string(fr, lastConsolidatedStateRoot) + " key=" + fea2string(fr, key));
             return zkr;
         }
-        level = databaseLevel;
+        level = zkmax(databaseLevel, stateManagerLevel);
     }
     
     result.value = value;
@@ -1215,7 +1220,7 @@ zkresult StateManager64::setProgram (const string &batchUUID, uint64_t tx, Datab
 zkresult StateManager64::getProgram (const string &batchUUID, Database64 &db, const Goldilocks::Element (&key)[4], vector<uint8_t> &data, DatabaseMap *dbReadLog)
 {
 #ifdef LOG_STATE_MANAGER
-    zklog.info("StateManager64::getProgram() called with key=" + fea2string(fr,key) + " data.size=" + to_string(data.size()));
+    zklog.info("StateManager64::getProgram() called with key=" + fea2string(fr,key) + " batchUUID=" + batchUUID);
 #endif
 
     bool bUseStateManager = config.stateManager && (batchUUID.size() > 0);
@@ -1345,6 +1350,9 @@ zkresult StateManager64::readProgram (const string &batchUUID, const string &key
         itProgram = batchState.dbProgram.find(key);
         if (itProgram != batchState.dbProgram.end())
         {
+            // Copy the data
+            data = itProgram->second;
+
             // Add to the read log
             if (dbReadLog != NULL)
                 dbReadLog->add(key, data, true, TimeDiff(t));
