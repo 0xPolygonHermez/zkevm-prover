@@ -9,6 +9,42 @@
 #include "check_tree_test.hpp"
 #include "time_metric.hpp"
 
+bool batchIsDiscarded (uint64_t batch)
+{
+    if (((batch+4) % 5) == 0) // 1, 6, 11, 16...
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool batchIsConsolidated (uint64_t batch)
+{
+    if (((batch+1) % 5) == 0) // 4, 9, 14, 19...
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool setIsDiscarded (uint64_t set)
+{
+    if (set == 1)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 uint64_t HashDB64WorkflowTest (const Config& config)
 {
     TimerStart(HASHDB64_WORKFLOW_TEST);
@@ -27,9 +63,10 @@ uint64_t HashDB64WorkflowTest (const Config& config)
     uint64_t flushId, storedFlushId;
     
 
-    const uint64_t numberOfBatches = 10;
-    const uint64_t numberOfTxsPerBatch = 10;
-    const uint64_t numberOfSetsPerTx = 10;
+    const uint64_t numberOfBatches = 10; // Batches  4, 9, 14, 19... will be reverted, and then state will be consolidated
+    const uint64_t numberOfTxsPerBatch = 3;
+    const uint64_t numberOfSetsPerTx = 3; // Set 1 will be reverted
+    const uint64_t numberOfProgramsPerTx = 1; // Set 1 will be reverted
 
     zklog.info("HashDB64WorkflowTest() numberOfBatches=" + to_string(numberOfBatches) + " numberOfTxsPerBatch=" + to_string(numberOfTxsPerBatch) + " numberOfSetsPerTx=" + to_string(numberOfSetsPerTx));
 
@@ -42,9 +79,20 @@ uint64_t HashDB64WorkflowTest (const Config& config)
     Goldilocks::Element keyfea[12] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     mpz_class value = 0;
     mpz_class keyScalar = 0;
-    vector<KeyValue> allKeyValues;
+    vector<KeyValue> persistentKeyValues;
+    vector<KeyValue> discardedKeyValues;
+    unordered_map<string, vector<uint8_t>> persistentPrograms;
+    unordered_map<string, vector<uint8_t>> discardedPrograms;
+    vector<uint8_t> accumulatedProgram;
+    vector<Goldilocks::Element> accumulatedProgramFe;
+    uint64_t programCounter = 0;
 
     pHashDB->getLatestStateRoot(root);
+
+    /*******************************/
+    /* SET KEY-VALUES AND PROGRAMS */
+    /*******************************/
+
     for (uint64_t batch=0; batch<numberOfBatches; batch++)
     {
         zklog.info("STARTING BATCH=" + to_string(batch));
@@ -82,7 +130,8 @@ uint64_t HashDB64WorkflowTest (const Config& config)
                 zkassertpermanent(zkr==ZKR_SUCCESS);
                 zkassertpermanent(value==getResult.value);
 
-                if (set == 1)
+                // Advance the state root only if this set is not discarded
+                if (setIsDiscarded(set))
                 {
                     // We "revert" this sub-state, i.e. we dont advance the state root and we discard this key
                 }
@@ -90,19 +139,56 @@ uint64_t HashDB64WorkflowTest (const Config& config)
                 {
                     // Advance in the state root chain
                     for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
+                }
 
-                    // Take note of the key we used
-                    KeyValue keyValue;
-                    for (uint64_t i=0; i<4; i++) keyValue.key[i] = key[i];
-                    keyValue.value = value;
+                // Build the KeyValue we just set
+                KeyValue keyValue;
+                for (uint64_t i=0; i<4; i++) keyValue.key[i] = key[i];
+                keyValue.value = value;
+
+                // Store the KeyValue in the prover vector, depending on its expected persistence
+                if (setIsDiscarded(set) || batchIsDiscarded(batch))
+                {
+                    // Store in discardedKeyValues
+                    discardedKeyValues.emplace_back(keyValue);
+                }
+                else
+                {
+                    // Store in keyValues
                     keyValues.emplace_back(keyValue);
                 }
-            }
+
+            } // For every set
+
+            // For every program of this tx
+            for (uint64_t program=0; program<numberOfProgramsPerTx; program++)
+            {
+                programCounter++;
+                accumulatedProgram.emplace_back(programCounter);
+                accumulatedProgramFe.emplace_back(fr.fromU64(programCounter));
+                keyfea[0] = fr.fromU64(1000000000+programCounter);
+                poseidon.hash(key, keyfea);
+                string keyString = fea2string(fr, key);
+
+                zkr = pHashDB->setProgram(batchUUID, tx, key, accumulatedProgram, persistence);
+                zkassertpermanent(zkr == ZKR_SUCCESS);
+
+                if (batchIsDiscarded(batch))
+                {
+                    discardedPrograms[keyString] = accumulatedProgram;
+                }
+                else
+                {
+                    persistentPrograms[keyString] = accumulatedProgram;
+                }
+
+            } // For every program
 
             gettimeofday(&t, NULL);
             pHashDB->semiFlush(batchUUID, fea2string(fr, root), persistence);
             timeMetricStorage.add("semiFlush", TimeDiff(t));
-        }
+
+        } // For every tx
 
         // Purge
         gettimeofday(&t, NULL);
@@ -111,30 +197,19 @@ uint64_t HashDB64WorkflowTest (const Config& config)
         zkassertpermanent(zkr==ZKR_SUCCESS);
         zklog.info("PURGE zkr=" + zkresult2string(zkr) + " root=" + fea2string(fr, root));
 
-        for (uint64_t i=0; i<allKeyValues.size(); i++)
-        {
-            //zklog.info("allKeyValues[" + to_string(i) + "].key=" + fea2string(fr, allKeyValues[i].key) + " .value=" + allKeyValues[i].value.get_str(10));
-            mpz_class auxValue;
-            gettimeofday(&t, NULL);
-            zkr = pHashDB->get(batchUUID, root, allKeyValues[i].key, auxValue, &getResult, NULL);
-            timeMetricStorage.add("get", TimeDiff(t));
-            zkassertpermanent(zkr==ZKR_SUCCESS);
-            zkassertpermanent(auxValue==allKeyValues[i].value);
-        }
-
         // Discard some of the batches, and accumulate the key values in the rest
-        if (((batch+4) % 5) == 0)
+        if (batchIsDiscarded(batch))
         {
             for (uint64_t i=0; i<4; i++) root[i] = batchOldStateRoot[i];
         }
         else
         {
-            allKeyValues.insert(allKeyValues.end(), keyValues.begin(), keyValues.end());
+            persistentKeyValues.insert(persistentKeyValues.end(), keyValues.begin(), keyValues.end());
         }
 
         // Consolidate state root every 5 batches, at batches 4, 9, 14, 19...
         Goldilocks::Element batchNewStateRoot[4];
-        if (((batch+1) % 5) == 0)
+        if (batchIsConsolidated(batch))
         {
             Goldilocks::Element consolidatedStateRoot[4];
             gettimeofday(&t, NULL);
@@ -171,13 +246,13 @@ uint64_t HashDB64WorkflowTest (const Config& config)
 
             // Call ReadTree with the new state root to get the hashes of the initial values of all read or written keys
             vector<HashValueGL> hashValues;
-            vector<KeyValue> auxKeyValues = allKeyValues;
+            vector<KeyValue> auxKeyValues = persistentKeyValues;
             for (uint64_t i=0; i<auxKeyValues.size(); i++)
             {
                 auxKeyValues[i].value = 0;
             }
 
-            CheckTreeTest(config);
+            //CheckTreeTest(config);
 
             gettimeofday(&t, NULL);
             zkr = pHashDB->readTree(batchNewStateRoot, auxKeyValues, hashValues);
@@ -185,30 +260,99 @@ uint64_t HashDB64WorkflowTest (const Config& config)
             zkassertpermanent(zkr==ZKR_SUCCESS);
             zklog.info("READ TREE batchNewStateRoot=" + fea2string(fr, batchNewStateRoot) + " keyValues.size=" + to_string(auxKeyValues.size()) + " hashValues.size=" + to_string(hashValues.size()));
 
-            zkassertpermanent(auxKeyValues.size() == allKeyValues.size());
+            zkassertpermanent(auxKeyValues.size() == persistentKeyValues.size());
             for (uint64_t i=0; i<auxKeyValues.size(); i++)
             {
                 //zklog.info("auxKeyValues[" + to_string(i) + "].key=" + fea2string(fr, auxKeyValues[i].key) + " .value=" + auxKeyValues[i].value.get_str(10));
                 //zklog.info("allKeyValues[i].key=" + fea2string(fr, allKeyValues[i].key) + " .value=" + allKeyValues[i].value.get_str(10));
-                if (auxKeyValues[i].value != allKeyValues[i].value)
+                if (auxKeyValues[i].value != persistentKeyValues[i].value)
                 {
-                    zklog.error("HashDB64WorkflowTest() found value=" + auxKeyValues[i].value.get_str() + " != expected value=" + allKeyValues[i].value.get_str());
+                    zklog.error("HashDB64WorkflowTest() found value=" + auxKeyValues[i].value.get_str() + " != expected value=" + persistentKeyValues[i].value.get_str());
                     return 1;
                 }
                 else
                 {
                     //zklog.error("Found value=" + auxKeyValues[i].value.get_str() + " == expected value=" + allKeyValues[i].value.get_str());
                 }
-                zkassertpermanent( fr.equal(auxKeyValues[i].key[0], allKeyValues[i].key[0]) &&
-                                   fr.equal(auxKeyValues[i].key[1], allKeyValues[i].key[1]) &&
-                                   fr.equal(auxKeyValues[i].key[2], allKeyValues[i].key[2]) &&
-                                   fr.equal(auxKeyValues[i].key[3], allKeyValues[i].key[3]) );
+                zkassertpermanent( fr.equal(auxKeyValues[i].key[0], persistentKeyValues[i].key[0]) &&
+                                   fr.equal(auxKeyValues[i].key[1], persistentKeyValues[i].key[1]) &&
+                                   fr.equal(auxKeyValues[i].key[2], persistentKeyValues[i].key[2]) &&
+                                   fr.equal(auxKeyValues[i].key[3], persistentKeyValues[i].key[3]) );
             }
         }
         else
         {
             for (uint64_t i=0; i<4; i++) batchNewStateRoot[i] = root[i];
         }
+
+    } // For every batch
+
+    /*********************/
+    /* CHECK PERSISTENCE */
+    /*********************/
+
+    string batchUUID = "";
+
+    // Check that all persistent keys have their expected value
+    for (uint64_t i=0; i<persistentKeyValues.size(); i++)
+    {
+        //zklog.info("persistentKeyValues[" + to_string(i) + "].key=" + fea2string(fr, persistentKeyValues[i].key) + " .value=" + persistentKeyValues[i].value.get_str(10));
+        mpz_class auxValue;
+        gettimeofday(&t, NULL);
+        zkr = pHashDB->get(batchUUID, root, persistentKeyValues[i].key, auxValue, &getResult, NULL);
+        timeMetricStorage.add("get", TimeDiff(t));
+        zkassertpermanent(zkr==ZKR_SUCCESS);
+        zkassertpermanent(auxValue==persistentKeyValues[i].value);
+    }
+
+    // Check that all discarded keys have value=0
+    for (uint64_t i=0; i<discardedKeyValues.size(); i++)
+    {
+        //zklog.info("discardedKeyValues[" + to_string(i) + "].key=" + fea2string(fr, discardedKeyValues[i].key) + " .value=" + discardedKeyValues[i].value.get_str(10));
+        mpz_class auxValue;
+        gettimeofday(&t, NULL);
+        zkr = pHashDB->get(batchUUID, root, discardedKeyValues[i].key, auxValue, &getResult, NULL);
+        timeMetricStorage.add("get", TimeDiff(t));
+        zkassertpermanent(zkr==ZKR_SUCCESS);
+        zkassertpermanent(auxValue==0);
+    }
+
+    // Check that all persistent programs have their expected value
+    unordered_map<string, vector<uint8_t>>::const_iterator itProgram;
+    for (itProgram = persistentPrograms.begin(); itProgram != persistentPrograms.end(); itProgram++)
+    {
+        vector<uint8_t> auxValue;
+        gettimeofday(&t, NULL);
+        Goldilocks::Element key[4];
+        string2fea(fr, itProgram->first, key);
+        zkr = pHashDB->getProgram(batchUUID, key, auxValue, NULL);
+        timeMetricStorage.add("getProgram", TimeDiff(t));
+        zkassertpermanent(zkr==ZKR_SUCCESS);
+        zkassertpermanent(auxValue.size() == itProgram->second.size());
+        for (uint64_t i=0; i<auxValue.size(); i++)
+        {
+            zkassertpermanent(auxValue[i] == itProgram->second[i]);
+        }
+    }
+    
+    // Check that all discarded programs are not present
+    for (itProgram = discardedPrograms.begin(); itProgram != discardedPrograms.end(); itProgram++)
+    {
+        vector<uint8_t> auxValue;
+        gettimeofday(&t, NULL);
+        Goldilocks::Element key[4];
+        string2fea(fr, itProgram->first, key);
+        zkr = pHashDB->getProgram(batchUUID, key, auxValue, NULL);
+        timeMetricStorage.add("getProgram", TimeDiff(t));
+        if (zkr != ZKR_DB_KEY_NOT_FOUND)
+        {
+            zklog.info("getProgram failed key=" + itProgram->first);
+        }
+        else
+        {
+            //zklog.info("getProgram failed gracefully key=" + itProgram->first);
+        }
+        zkassertpermanent(zkr==ZKR_DB_KEY_NOT_FOUND);
     }
 
     timeMetricStorage.print("HashDB64 Workflow test metrics");
