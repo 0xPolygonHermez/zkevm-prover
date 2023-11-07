@@ -195,8 +195,8 @@ void Config::load(json &config)
     ParseBool(config, "executorClientCheckNewStateRoot", "EXECUTOR_CLIENT_CHECK_NEW_STATE_ROOT", executorClientCheckNewStateRoot, false);
     ParseU16(config, "hashDBServerPort", "HASHDB_SERVER_PORT", hashDBServerPort, 50061);
     ParseString(config, "hashDBURL", "HASHDB_URL", hashDBURL, "local");
-    //ParseBool(config, "hashDB64", "HASHDB64", hashDB64, false);
-    hashDB64 = false; // Do not use in production; under development
+    ParseBool(config, "hashDB64", "HASHDB64", hashDB64, false);
+    //hashDB64 = false; // Do not use in production; under development
     ParseU64(config, "kvDBMaxVersions", "HASHDB64_MAX_VERSIONS", kvDBMaxVersions, 131072);
     ParseString(config, "dbCacheSynchURL", "DB_CACHE_SYNCH_URL", dbCacheSynchURL, "");
     ParseString(config, "hashDBFileName", "HASHDB_FILE_NAME", hashDBFileName, "");
