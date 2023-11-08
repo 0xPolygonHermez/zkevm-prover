@@ -289,25 +289,14 @@ void Input::loadGlobals (json &input)
 #endif
     }
 
-    // Input JSON file may contain a txHashToGenerateExecuteTrace key at the root level
-    if ( input.contains("txHashToGenerateExecuteTrace") &&
-         input["txHashToGenerateExecuteTrace"].is_string() )
-    {
-        traceConfig.bEnabled = true;
-        traceConfig.txHashToGenerateExecuteTrace = Add0xIfMissing(input["txHashToGenerateExecuteTrace"]);
-#ifdef LOG_INPUT
-        zklog.info("loadGlobals(): txHashToGenerateExecuteTrace=" + traceConfig.txHashToGenerateExecuteTrace);
-#endif
-    }
-
     // Input JSON file may contain a txHashToGenerateCallTrace key at the root level
-    if ( input.contains("txHashToGenerateCallTrace") &&
-         input["txHashToGenerateCallTrace"].is_string() )
+    if ( input.contains("txHashToGenerateFullTrace") &&
+         input["txHashToGenerateFullTrace"].is_string() )
     {
         traceConfig.bEnabled = true;
-        traceConfig.txHashToGenerateCallTrace = Add0xIfMissing(input["txHashToGenerateCallTrace"]);
+        traceConfig.txHashToGenerateFullTrace = Add0xIfMissing(input["txHashToGenerateFullTrace"]);
 #ifdef LOG_INPUT
-        zklog.info("loadGlobals(): txHashToGenerateCallTrace=" + traceConfig.txHashToGenerateCallTrace);
+        zklog.info("loadGlobals(): txHashToGenerateFullTrace=" + traceConfig.txHashToGenerateFullTrace);
 #endif
     }
 
@@ -347,8 +336,7 @@ void Input::saveGlobals (json &input) const
         input["disableStack"] = traceConfig.bDisableStack;
         input["enableMemory"] = traceConfig.bEnableMemory;
         input["enableReturnData"] = traceConfig.bEnableReturnData;
-        input["txHashToGenerateExecuteTrace"] = traceConfig.txHashToGenerateExecuteTrace;
-        input["txHashToGenerateCallTrace"] = traceConfig.txHashToGenerateCallTrace;
+        input["txHashToGenerateFullTrace"] = traceConfig.txHashToGenerateFullTrace;
     }
 }
 

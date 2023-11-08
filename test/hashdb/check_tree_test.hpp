@@ -4,6 +4,6 @@
 #include <cstdint>
 #include "config.hpp"
 
-uint64_t CheckTreeTest (Config &config);
+uint64_t CheckTreeTest (const Config &config);
 
 #endif

@@ -8,11 +8,34 @@
 #include "zkresult.hpp"
 #include <iomanip>
 #include "zklog.hpp"
+#include "exit_process.hpp"
 
 using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
+
+::grpc::Status HashDBServiceImpl::GetLatestStateRoot (::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetLatestStateRootResponse* response){
+    // If the process is exising, do not start new activities
+    if (bExitingProcess){
+        return Status::CANCELLED;
+    }
+
+    try{
+        Goldilocks::Element stateRoot[4];
+        pHashDB->getLatestStateRoot(stateRoot);
+        ::hashdb::v1::Fea* resStateRoot = new ::hashdb::v1::Fea();
+        fea2grpc(fr, stateRoot, resStateRoot);
+        response->set_allocated_latest_root(resStateRoot);
+    }
+    catch (const std::exception &e){
+        zklog.error("HashDBServiceImpl::GetLatestStateRoot() exception: " + string(e.what()));
+        return Status::CANCELLED;
+    }
+
+    return Status::OK;
+
+}
 
 ::grpc::Status HashDBServiceImpl::Set(::grpc::ServerContext* context, const ::hashdb::v1::SetRequest* request, ::hashdb::v1::SetResponse* response)
 {
@@ -288,6 +311,15 @@ using grpc::Status;
             data.push_back(request->data().at(i));
         }
 
+        // Get batch UUID
+        string batchUUID = request->batch_uuid();
+
+        // Get TX number
+        uint64_t tx = request->tx();
+
+        // Get persistence flag
+        Persistence persistence = (Persistence)request->persistence();
+
 #ifdef LOG_HASHDB_SERVICE
         {
             string s = "HashDBServiceImpl::SetProgram() called. key=" + fea2string(fr, key[0], key[1], key[2], key[3]) + " data=";
@@ -298,7 +330,7 @@ using grpc::Status;
         }
 #endif
         // Call set program
-        zkresult r = pHashDB->setProgram(key, data, request->persistent());
+        zkresult r = pHashDB->setProgram(batchUUID, tx, key, data, persistence);
 
         // Return result
         ::hashdb::v1::ResultCode* result = new ::hashdb::v1::ResultCode();
@@ -332,13 +364,16 @@ using grpc::Status;
         Goldilocks::Element key[4];
         grpc2fea (fr, request->key(), key);
 
+        // Get batch UUID
+        string batchUUID = request->batch_uuid();
+
 #ifdef LOG_HASHDB_SERVICE
         zklog.info("HashDBServiceImpl::GetProgram() called. key=" + fea2string(fr, key[0], key[1], key[2], key[3]));
 #endif
 
         // Call get program
         vector<uint8_t> value;
-        zkresult r = pHashDB->getProgram(key, value, NULL);
+        zkresult r = pHashDB->getProgram(batchUUID, key, value, NULL);
 
         // Return data
         string sData;
@@ -392,8 +427,11 @@ using grpc::Status;
         return Status::CANCELLED;
     }
 
+    Goldilocks::Element stateRoot[4];
+    grpc2fea(fr, request->state_root(), stateRoot);
+
     // Call load database
-    pHashDB->loadDB(map, request->persistent());
+    pHashDB->loadDB(map, request->persistent(), stateRoot);
 
 #ifdef LOG_HASHDB_SERVICE
     zklog.info("HashDBServiceImpl::LoadDB() completed.");
@@ -469,6 +507,39 @@ using grpc::Status;
 #endif
 
     return Status::OK;
+}
+
+::grpc::Status HashDBServiceImpl::Purge (::grpc::ServerContext* context, const ::hashdb::v1::PurgeRequest* request, ::hashdb::v1::PurgeResponse* response)
+{
+    // If the process is exising, do not start new activities
+    if (bExitingProcess)
+    {
+        return Status::CANCELLED;
+    }
+#ifdef LOG_HASHDB_SERVICE
+    zklog.info("HashDBServiceImpl::Purge called.");
+#endif
+    
+        try
+        {
+            Goldilocks::Element newStateRoot[4];
+            grpc2fea(fr, request->new_state_root(), newStateRoot);
+
+            // Call the HashDB flush method
+            pHashDB->purge(request->batch_uuid(), newStateRoot, (Persistence)(uint64_t)request->persistence());
+
+        }
+        catch (const std::exception &e)
+        {
+            zklog.error("HashDBServiceImpl::Purge() exception: " + string(e.what()));
+            return Status::CANCELLED;
+        }
+
+#ifdef LOG_HASHDB_SERVICE
+    zklog.info("HashDBServiceImpl::Purge() completed.");
+#endif
+        
+        return Status::OK;
 }
 
 ::grpc::Status HashDBServiceImpl::GetFlushStatus (::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetFlushStatusResponse* response)
@@ -573,8 +644,182 @@ using grpc::Status;
     return Status::OK;
 }
 
+::grpc::Status HashDBServiceImpl::ConsolidateState (::grpc::ServerContext* context, const ::hashdb::v1::ConsolidateStateRequest* request, ::hashdb::v1::ConsolidateStateResponse* response)
+{
+    // If the process is exising, do not start new activities
+    if (bExitingProcess)
+    {
+        return Status::CANCELLED;
+    }
 
+#ifdef LOG_HASHDB_SERVICE
+    zklog.info("HashDBServiceImpl::ConsolidateState called.");
+#endif
 
+    try
+    {
+        // Call the HashDB flush method
+        uint64_t flushId = 0, storedFlushId = 0;
+        Goldilocks::Element virtualStateRoot[4];
+        Goldilocks::Element consolidatedStateRoot[4];
+        grpc2fea(fr, request->virtual_state_root(), virtualStateRoot);
+        zkresult zkres = pHashDB->consolidateState(virtualStateRoot, (Persistence)(uint64_t)request->persistence(), consolidatedStateRoot, flushId, storedFlushId);
 
+        // return the result in the response
+        ::hashdb::v1::ResultCode* result = new ::hashdb::v1::ResultCode();
+        if (result == NULL)
+        {
+            zklog.error("HashDBServiceImpl::ConsolidateState() failed allocating hashdb::v1::ResultCode");
+            exitProcess();
+        }
+        result->set_code(static_cast<::hashdb::v1::ResultCode_Code>(zkres));
+        response->set_allocated_result(result);
+        response->set_flush_id(flushId);
+        response->set_stored_flush_id(storedFlushId);
+        hashdb::v1::Fea *consolidated_state_root = new hashdb::v1::Fea();
+        if (consolidated_state_root == NULL)
+        {
+            zklog.error("HashDBServiceImpl::ConsolidateState() failed allocating hashdb::v1::Fea");
+            exitProcess();
+        }
+        fea2grpc(fr, consolidatedStateRoot, consolidated_state_root);
+        response->set_allocated_consolidated_state_root(consolidated_state_root);
+    }
+    catch (const std::exception &e)
+    {
+        zklog.error("HashDBServiceImpl::ConsolidateState() exception: " + string(e.what()));
+        return Status::CANCELLED;
+    }
 
+#ifdef LOG_HASHDB_SERVICE
+    zklog.info("HashDBServiceImpl::ConsolidateState() completed.");
+#endif
 
+    return Status::OK;
+}
+
+::grpc::Status HashDBServiceImpl::ReadTree (::grpc::ServerContext* context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response)
+{
+    // If the process is exising, do not start new activities
+    if (bExitingProcess)
+    {
+        return Status::CANCELLED;
+    }
+
+#ifdef LOG_HASHDB_SERVICE
+    zklog.info("HashDBServiceImpl::ReadTree called.");
+#endif
+
+    try
+    {
+        // Get the keys from the request
+        vector<KeyValue> keyValues;
+        for (int64_t i=0; i<request->keys_size(); i++)
+        {
+            KeyValue keyValue;
+            grpc2fea(fr, request->keys(i), keyValue.key);
+            keyValues.emplace_back(keyValue);
+        }
+
+        // Get the state root from the request
+        Goldilocks::Element stateRoot[4];
+        grpc2fea(fr, request->state_root(), stateRoot);
+
+        // Call readTree()
+        vector<HashValueGL> hashValues;
+        zkresult zkr = pHashDB->readTree(stateRoot, keyValues, hashValues);
+
+        // Return the result in the response
+        ::hashdb::v1::ResultCode* result = new ::hashdb::v1::ResultCode();
+        if (result == NULL)
+        {
+            zklog.error("HashDBServiceImpl::ReadTree() failed allocating hashdb::v1::ResultCode");
+            exitProcess();
+        }
+        result->set_code(static_cast<::hashdb::v1::ResultCode_Code>(zkr));
+        response->set_allocated_result(result);
+
+        // Return the key-value pairs in the response
+        for (uint64_t i=0; i<keyValues.size(); i++)
+        {
+            hashdb::v1::Fea *pKey = new hashdb::v1::Fea();
+            zkassertpermanent(pKey != NULL);
+            pKey->set_fe0(fr.toU64(keyValues[i].key[0]));
+            pKey->set_fe1(fr.toU64(keyValues[i].key[1]));
+            pKey->set_fe2(fr.toU64(keyValues[i].key[2]));
+            pKey->set_fe3(fr.toU64(keyValues[i].key[3]));
+            hashdb::v1::KeyValue *pKeyValue = response->add_key_value();
+            zkassertpermanent(pKeyValue != NULL);
+            pKeyValue->set_allocated_key(pKey);
+            pKeyValue->set_value(keyValues[i].value.get_str(16));
+        }
+
+        // Return the hash-value pairs in the response
+        for (uint64_t i=0; i<hashValues.size(); i++)
+        {
+            hashdb::v1::Fea *pHash = new hashdb::v1::Fea();
+            zkassertpermanent(pHash != NULL);
+            pHash->set_fe0(fr.toU64(hashValues[i].hash[0]));
+            pHash->set_fe1(fr.toU64(hashValues[i].hash[1]));
+            pHash->set_fe2(fr.toU64(hashValues[i].hash[2]));
+            pHash->set_fe3(fr.toU64(hashValues[i].hash[3]));
+            hashdb::v1::Fea12 *pValue = new hashdb::v1::Fea12();
+            zkassertpermanent(pValue != NULL);
+            pValue->set_fe0(fr.toU64(hashValues[i].value[0]));
+            hashdb::v1::HashValueGL *pHashValue = response->add_hash_value();
+            zkassertpermanent(pHashValue != NULL);
+            pHashValue->set_allocated_hash(pHash);
+            pHashValue->set_allocated_value(pValue);
+        }        
+    }
+    catch (const std::exception &e)
+    {
+        zklog.error("HashDBServiceImpl::ReadTree() exception: " + string(e.what()));
+        return Status::CANCELLED;
+    }
+
+#ifdef LOG_HASHDB_SERVICE
+    zklog.info("HashDBServiceImpl::ReadTree() completed.");
+#endif
+
+    return Status::OK;
+}
+
+::grpc::Status HashDBServiceImpl::ResetDB (::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::ResetDBResponse* response)
+{    
+    // If the process is exising, do not start new activities
+    if (bExitingProcess)
+    {
+        return Status::CANCELLED;
+    }
+
+#ifdef LOG_HASHDB_SERVICE
+    zklog.info("HashDBServiceImpl::ResetDB called.");
+#endif
+
+    try
+    {
+        zkresult zkr = pHashDB->resetDB();
+
+        // Return the result in the response
+        ::hashdb::v1::ResultCode* result = new ::hashdb::v1::ResultCode();
+        if (result == NULL)
+        {
+            zklog.error("HashDBServiceImpl::ResetDB() failed allocating hashdb::v1::ResultCode");
+            exitProcess();
+        }
+        result->set_code(static_cast<::hashdb::v1::ResultCode_Code>(zkr));
+        response->set_allocated_result(result);
+    }
+    catch (const std::exception &e)
+    {
+        zklog.error("HashDBServiceImpl::ResetDB() exception: " + string(e.what()));
+        return Status::CANCELLED;
+    }
+
+#ifdef LOG_HASHDB_SERVICE
+    zklog.info("HashDBServiceImpl::ResetDB() completed.");
+#endif
+    
+    return Status::OK;
+}

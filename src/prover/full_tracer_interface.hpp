@@ -81,7 +81,7 @@ public:
     TxTraceContext() : gas(0), gas_used(0), execution_time(0) {};
 };
 
-class CallTrace
+class FullTrace
 {
 public:
     TxTraceContext context;
@@ -91,7 +91,7 @@ public:
 class Response
 {
 public:
-    CallTrace call_trace;
+    FullTrace full_trace;
     string tx_hash;
     string rlp_tx;
     uint64_t type;
@@ -103,10 +103,11 @@ public:
     string create_address;
     string state_root;
     vector<Log> logs;
-    vector<Opcode> execution_trace;
     string effective_gas_price;
     uint32_t effective_percentage;
-    Response() : type(0), gas_left(0), gas_used(0), gas_refunded(0), effective_percentage(0) {};
+    bool has_gasprice_opcode;
+    bool has_balance_opcode;
+    Response() : type(0), gas_left(0), gas_used(0), gas_refunded(0), effective_percentage(0), has_gasprice_opcode(false), has_balance_opcode(false) {};
 };
 
 class FinalTrace

@@ -59,6 +59,12 @@ public:
     // Labels lock
     pthread_mutex_t labelsMutex;    // Mutex to protect the labels vector
 
+    // HashDB
+    HashDBInterface *pHashDB;
+
+    // When we reach this zkPC, state root (SR) will be consolidated (from virtual to real state root)
+    const uint64_t consolidateStateRootZKPC = 4924;
+
     // Constructor
     MainExecutor(Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config);
 

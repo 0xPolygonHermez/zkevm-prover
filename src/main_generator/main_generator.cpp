@@ -9,6 +9,11 @@ using json = nlohmann::json;
 
 // Fork namespace
 const string forkNamespace = PROVER_FORK_NAMESPACE_STRING;
+const uint64_t consolidateStateRootZKPC =
+    forkNamespace == "fork_6" ? 4928 :
+    forkNamespace == "fork_5" ? 4924 :
+    forkNamespace == "fork_4" ? 4925 :
+    uint64_t(0xFFFFFFFFFFFFFFFF);
 
 // Forward declaration
 void file2json (json &rom, string &romFileName);
@@ -255,15 +260,6 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    }\n";
     code += "    mainExecutor.labelsUnlock();\n\n";
 
-    code += "    // Get a HashDBInterface interface, according to the configuration\n";
-    code += "    HashDBInterface *pHashDB = HashDBClientFactory::createHashDBClient(fr, mainExecutor.config);\n";
-    code += "    if (pHashDB == NULL)\n";
-    code += "    {\n";
-    code += "        zklog.error(\"" + functionName + "() failed calling HashDBClientFactory::createHashDBClient() uuid=\" + proverRequest.uuid);\n";
-    code += "        proverRequest.result = ZKR_DB_ERROR;\n";
-    code += "        return;\n";
-    code += "    }\n\n";
-
     code += "    // Init execution flags\n";
     code += "    bool bProcessBatch = (proverRequest.type == prt_processBatch);\n";
     code += "    bool bUnsignedTransaction = (proverRequest.input.from != \"\") && (proverRequest.input.from != \"0x\");\n\n";
@@ -274,11 +270,10 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    {\n";
     code += "        proverRequest.result = ZKR_SM_MAIN_INVALID_UNSIGNED_TX;\n";
     code += "        zklog.error(\"MainExecutor::execute() failed called with bUnsignedTransaction=true but bProcessBatch=false\");\n";
-    code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
     code += "        return;\n";
     code += "    }\n\n";
 
-    code += "    Context ctx(mainExecutor.fr, mainExecutor.config, mainExecutor.fec, mainExecutor.fnec, pols, mainExecutor.rom, proverRequest, pHashDB);\n\n";
+    code += "    Context ctx(mainExecutor.fr, mainExecutor.config, mainExecutor.fec, mainExecutor.fnec, pols, mainExecutor.rom, proverRequest, mainExecutor.pHashDB);\n\n";
 
     code += "    mainExecutor.initState(ctx);\n\n";
 
@@ -289,22 +284,24 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    // Copy input database content into context database\n";
     code += "    if (proverRequest.input.db.size() > 0)\n";
     code += "    {\n";
-    code += "        pHashDB->loadDB(proverRequest.input.db, true);\n";
-    code += "        pHashDB->flush(emptyString, emptyString, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, flushId, lastSentFlushId);\n";
+    code += "        Goldilocks::Element stateRoot[4];\n";
+    code += "        scalar2fea(fr, proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot, stateRoot);\n";
+    code += "        mainExecutor.pHashDB->loadDB(proverRequest.input.db, true, stateRoot);\n";
+    code += "        mainExecutor.pHashDB->flush(emptyString, emptyString, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, flushId, lastSentFlushId);\n";
     code += "        if (mainExecutor.config.dbClearCache && (mainExecutor.config.databaseURL != \"local\"))\n";
     code += "        {\n";
-    code += "            pHashDB->clearCache();\n";
+    code += "            mainExecutor.pHashDB->clearCache();\n";
     code += "        }\n";
     code += "    }\n\n";
 
     code += "    // Copy input contracts database content into context database (dbProgram)\n";
     code += "    if (proverRequest.input.contractsBytecode.size() > 0)\n";
     code += "    {\n";
-    code += "        pHashDB->loadProgramDB(proverRequest.input.contractsBytecode, true);\n";
-    code += "        pHashDB->flush(emptyString, emptyString, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, flushId, lastSentFlushId);\n";
+    code += "        mainExecutor.pHashDB->loadProgramDB(proverRequest.input.contractsBytecode, true);\n";
+    code += "        mainExecutor.pHashDB->flush(emptyString, emptyString, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, flushId, lastSentFlushId);\n";
     code += "        if (mainExecutor.config.dbClearCache && (mainExecutor.config.databaseURL != \"local\"))\n";
     code += "        {\n";
-    code += "            pHashDB->clearCache();\n";
+    code += "            mainExecutor.pHashDB->clearCache();\n";
     code += "        }\n";
     code += "    }\n\n";
 
@@ -432,7 +429,6 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "        {\n";
     code += "            proverRequest.result = ZKR_SM_MAIN_INVALID_NO_COUNTERS;;\n";
     code += "            mainExecutor.logError(ctx, \"" + functionName + "()) found proverRequest.bNoCounters=true and bProcessBatch=false\");\n";
-    code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
     code += "            return;\n";
     code += "        }\n";
     code += "        N_Max = mainExecutor.N_NoCounters;\n";
@@ -509,8 +505,48 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "       ctx.ecRecoverPrecalcBuffer.filled = false;\n";
             code += "    }\n";
         }
-        
 
+        if (bFastMode && (zkPC == consolidateStateRootZKPC))
+        {
+            code += "    if (config.hashDB64)\n";
+            code += "    {\n";
+            code += "    // Consolidate the state and store it in SR, just before we save SR into SMT\n";
+            code += "    // Convert pols.SR to virtualStateRoot fea\n";
+            code += "    Goldilocks::Element virtualStateRoot[4];\n";
+            code += "    if (!fea2fea(virtualStateRoot, pols.SR0[0], pols.SR1[0], pols.SR2[0], pols.SR3[0], pols.SR4[0], pols.SR5[0], pols.SR6[0], pols.SR7[0]))\n";
+            code += "    {\n";
+            code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
+            code += "        mainExecutor.logError(ctx, string(\"Failed calling fea2fea()\"));\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
+            code += "        return;\n";
+            code += "    }\n";
+
+            code += "    // Call purge()\n";
+            code += "    zkResult = mainExecutor.pHashDB->purge(proverRequest.uuid, virtualStateRoot, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);\n";
+            code += "    if (zkResult != ZKR_SUCCESS)\n";
+            code += "    {\n";
+            code += "        proverRequest.result = zkResult;\n";
+            code += "        mainExecutor.logError(ctx, string(\"Failed calling pHashDB->purge() result=\") + zkresult2string(zkResult));\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
+            code += "        return;\n";
+            code += "    }\n";
+
+            code += "    // Call consolidateState()\n";
+            code += "    Goldilocks::Element consolidatedStateRoot[4];\n";
+            code += "    zkResult = mainExecutor.pHashDB->consolidateState(virtualStateRoot, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE , consolidatedStateRoot, flushId, lastSentFlushId);\n";
+            code += "    if (zkResult != ZKR_SUCCESS)\n";
+            code += "    {\n";
+            code += "        proverRequest.result = zkResult;\n";
+            code += "        mainExecutor.logError(ctx, string(\"Failed calling pHashDB->consolidateState() result=\") + zkresult2string(proverRequest.result));\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
+            code += "        return;\n";
+            code += "    }\n";
+
+            code += "    // Convert consolidatedState fea to pols.SR\n";
+            code += "    fea2fea(pols.SR0[0], pols.SR1[0], pols.SR2[0], pols.SR3[0], pols.SR4[0], pols.SR5[0], pols.SR6[0], pols.SR7[0], consolidatedStateRoot);\n";
+            code += "    }\n\n";
+        }
+        
         // INITIALIZATION
 
         bool opInitialized = false;
@@ -538,7 +574,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        {\n";
             code += "            proverRequest.result = cr.zkResult;\n";
             code += "            mainExecutor.logError(ctx, string(\"Failed calling evalCommand() before result=\") + zkresult2string(proverRequest.result));\n";
-            code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "            return;\n";
             code += "        }\n";
             code += "    }\n";
@@ -781,7 +817,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_TOS32;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fr.toS32() with pols.E0[i]=\" + fr.toString(pols.E0[" + string(bFastMode?"0":"i") + "], 16));\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 bAddrRel = true;
@@ -793,7 +829,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_TOS32;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fr.toS32() with pols.RR[i]=\" + fr.toString(pols.RR[" + string(bFastMode?"0":"i") + "], 16));\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 bAddrRel = true;
@@ -813,7 +849,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_TOS32;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fr.toS32() with pols.SP[i]=\" + fr.toString(pols.SP[" + string(bFastMode?"0":"i") + "], 16));\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 if (bAddrRel || bOffset)
@@ -836,7 +872,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "           proverRequest.result = ZKR_SM_MAIN_ADDRESS_OUT_OF_RANGE;\n";
                     code += "           zkPC=" + to_string(zkPC) +";\n";
                     code += "           mainExecutor.logError(ctx, \"addrRel too big addrRel=\" + to_string(addrRel));\n";
-                    code += "           HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                    code += "           mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "           return;\n";
                     code += "       }\n";
                     code += "    }\n";
@@ -847,7 +883,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "           proverRequest.result = ZKR_SM_MAIN_ADDRESS_OUT_OF_RANGE;\n";
                     code += "           zkPC=" + to_string(zkPC) +";\n";
                     code += "           mainExecutor.logError(ctx, \"addrRel too big addrRel=\" + to_string(addrRel));\n";
-                    code += "           HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                    code += "           mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "           return;\n";
                     code += "       }\n";
                     code += "    }\n";
@@ -859,7 +895,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS_OUT_OF_RANGE;\n";
                     code += "        zkPC=" + to_string(zkPC) +";\n";
                     code += "        mainExecutor.logError(ctx, \"addrRel too big addrRel=\" + to_string(addrRel));\n";
-                    code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                    code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "        return;\n";
                     code += "    }\n";
                 }
@@ -870,7 +906,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_ADDRESS_NEGATIVE;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"addrRel<0 addrRel=\" + to_string(addrRel));\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -1033,13 +1069,16 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    Kin1[5] = pols.A5[" + string(bFastMode?"0":"i") + "];\n";
                     code += "    Kin1[6] = pols.B0[" + string(bFastMode?"0":"i") + "];\n";
                     code += "    Kin1[7] = pols.B1[" + string(bFastMode?"0":"i") + "];\n";
+
+                    code += "    b0 = fr.toU64(pols.B0[" + string(bFastMode?"0":"i") + "]);\n";
+                    code += "    bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);\n";
                     
                     code += "    if  ( !fr.isZero(pols.A5[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A6[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A7[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B2[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B3[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B4[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B5[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B6[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B7[" + string(bFastMode?"0":"i") + "]) )\n";
                     code += "    {\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE_INVALID_KEY;\n";
                     code += "        zkPC=" + to_string(zkPC) +";\n";
                     code += "        mainExecutor.logError(ctx, \"Storage read free in found non-zero A-B storage registers\");\n";
-                    code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                    code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "        return;\n";
                     code += "    }\n\n";
 
@@ -1071,16 +1110,23 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "    zklog.info(\"Storage read sRD got poseidon key: \" + ctx.fr.toString(ctx.lastSWrite.key, 16));\n";
                     code += "#endif\n";
                     code += "    sr8to4(fr, pols.SR0[" + string(bFastMode?"0":"i") + "], pols.SR1[" + string(bFastMode?"0":"i") + "], pols.SR2[" + string(bFastMode?"0":"i") + "], pols.SR3[" + string(bFastMode?"0":"i") + "], pols.SR4[" + string(bFastMode?"0":"i") + "], pols.SR5[" + string(bFastMode?"0":"i") + "], pols.SR6[" + string(bFastMode?"0":"i") + "], pols.SR7[" + string(bFastMode?"0":"i") + "], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);\n";
+
+                    code += "    // Collect the keys used to read or write store data\n";
+                    code += "    if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)\n";
+                    code += "    {\n";
+                    code += "        proverRequest.nodesKeys.insert(fea2string(fr, key));\n";
+                    code += "    }\n";
+
                     code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
                     code += "    gettimeofday(&t, NULL);\n";
                     code += "#endif\n";
-                    code += "    zkResult = pHashDB->get(proverRequest.uuid, oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);\n";
+                    code += "    zkResult = mainExecutor.pHashDB->get(proverRequest.uuid, oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);\n";
                     code += "    if (zkResult != ZKR_SUCCESS)\n";
                     code += "    {\n";
                     code += "        proverRequest.result = zkResult;\n";
                     code += "        zkPC=" + to_string(zkPC) +";\n";
-                    code += "        mainExecutor.logError(ctx, string(\"Failed calling pHashDB->get() result=\") + zkresult2string(zkResult));\n";
-                    code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                    code += "        mainExecutor.logError(ctx, string(\"Failed calling mainExecutor.pHashDB->get() result=\") + zkresult2string(zkResult));\n";
+                    code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "        return;\n";
                     code += "    }\n";
                     code += "    incCounter = smtGetResult.proofHashCounter + 2;\n";
@@ -1093,7 +1139,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "        proverRequest.result = zkResult;\n";
                         code += "        zkPC=" + to_string(zkPC) +";\n";
                         code += "        mainExecutor.logError(ctx, string(\"Failed calling eval_addReadWriteAddress() 1 result=\") + zkresult2string(zkResult));\n";
-                        code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                        code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                         code += "        return;\n";
                         code += "    }\n";
                     }
@@ -1146,7 +1192,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE_INVALID_KEY;\n";
                     code += "        zkPC=" + to_string(zkPC) +";\n";
                     code += "        mainExecutor.logError(ctx, \"Storage write free in found non-zero A-B registers\");\n";
-                    code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                    code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "        return;\n";
                     code += "    }\n\n";
 
@@ -1200,7 +1246,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                     code += "        zkPC=" + to_string(zkPC) +";\n";
                     code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar()\");\n";
-                    code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                    code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "        return;\n";
                     code += "    }\n";
                     code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
@@ -1208,13 +1254,19 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "#endif\n";
                     code += "    sr8to4(fr, pols.SR0[" + string(bFastMode?"0":"i") + "], pols.SR1[" + string(bFastMode?"0":"i") + "], pols.SR2[" + string(bFastMode?"0":"i") + "], pols.SR3[" + string(bFastMode?"0":"i") + "], pols.SR4[" + string(bFastMode?"0":"i") + "], pols.SR5[" + string(bFastMode?"0":"i") + "], pols.SR6[" + string(bFastMode?"0":"i") + "], pols.SR7[" + string(bFastMode?"0":"i") + "], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);\n";
 
-                    code += "    zkResult = pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : ( proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE ), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);\n";
+                    code += "    // Collect the keys used to read or write store data\n";
+                    code += "    if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)\n";
+                    code += "    {\n";
+                    code += "        proverRequest.nodesKeys.insert(fea2string(fr, ctx.lastSWrite.key));\n";
+                    code += "    }\n";
+
+                    code += "    zkResult = mainExecutor.pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : ( proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE ), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);\n";
                     code += "    if (zkResult != ZKR_SUCCESS)\n";
                     code += "    {\n";
                     code += "        proverRequest.result = zkResult;\n";
                     code += "        zkPC=" + to_string(zkPC) +";\n";
-                    code += "        mainExecutor.logError(ctx, string(\"Failed calling pHashDB->set() result=\") + zkresult2string(zkResult));\n";
-                    code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                    code += "        mainExecutor.logError(ctx, string(\"Failed calling mainExecutor.pHashDB->set() result=\") + zkresult2string(zkResult));\n";
+                    code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "        return;\n";
                     code += "    }\n";
                     code += "    incCounter = ctx.lastSWrite.res.proofHashCounter + 2;\n";
@@ -1227,7 +1279,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "        proverRequest.result = zkResult;\n";
                         code += "        zkPC=" + to_string(zkPC) +";\n";
                         code += "        mainExecutor.logError(ctx, string(\"Failed calling eval_addReadWriteAddress() 2 result=\") + zkresult2string(zkResult));\n";
-                        code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                        code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                         code += "        return;\n";
                         code += "    }\n";
                     }
@@ -1273,7 +1325,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "        proverRequest.result = ZKR_SM_MAIN_HASHK_SIZE_OUT_OF_RANGE;\n";
                         code += "        zkPC=" + to_string(zkPC) +";\n";
                         code += "        mainExecutor.logError(ctx, \"Invalid size>32 for hashK 1: pols.D0[" + string(bFastMode?"0":"i") + "]=\" + fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16) + \" size=\" + to_string(size));\n";
-                        code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                        code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                         code += "        return;\n";
                         code += "    }\n\n";
                     }
@@ -1289,7 +1341,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHK_POSITION_NEGATIVE;\n";
                     code += "        zkPC=" + to_string(zkPC) +";\n";
                     code += "        mainExecutor.logError(ctx, \"Invalid pos<0 for HashK 1: pols.HASHPOS[" + string(bFastMode?"0":"i") + "]=\" + fr.toString(pols.HASHPOS[" + string(bFastMode?"0":"i") + "], 16) + \" pos=\" + to_string(iPos));\n";
-                    code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                    code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "        return;\n";
                     code += "    }\n";
                     code += "    pos = iPos;\n\n";
@@ -1300,7 +1352,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHK_POSITION_PLUS_SIZE_OUT_OF_RANGE;\n";
                     code += "        zkPC=" + to_string(zkPC) +";\n";
                     code += "        mainExecutor.logError(ctx, \"HashK 1 invalid size of hash: pos=\" + to_string(pos) + \" + size=\" + to_string(size) + \" > data.size=\" + to_string(hashIterator->second.data.size()));\n";
-                    code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                    code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "        return;\n";
                     code += "    }\n";
 
@@ -1331,7 +1383,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_ADDRESS_NOT_FOUND;\n";
                     code += "        zkPC=" + to_string(zkPC) +";\n";
                     code += "        mainExecutor.logError(ctx, \"HashKDigest 1: digest not defined for addr=\" + to_string(addr));\n";
-                    code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                    code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "        return;\n";
                     code += "    }\n";
 
@@ -1341,7 +1393,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_NOT_COMPLETED;\n";
                     code += "        zkPC=" + to_string(zkPC) +";\n";
                     code += "        mainExecutor.logError(ctx, \"HashKDigest 1: digest not calculated for addr=\" + to_string(addr) + \".  Call hashKLen to finish digest.\");\n";
-                    code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                    code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "        return;\n";
                     code += "    }\n";
 
@@ -1378,7 +1430,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "        proverRequest.result = ZKR_SM_MAIN_HASHP_SIZE_OUT_OF_RANGE;\n";
                         code += "        zkPC=" + to_string(zkPC) +";\n";
                         code += "        mainExecutor.logError(ctx, \"Invalid size>32 for hashP 1: pols.D0[" + string(bFastMode?"0":"i") + "]=\" + fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16) + \" size=\" + to_string(size));\n";
-                        code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                        code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                         code += "        return;\n";
                         code += "    }\n\n";
                     }
@@ -1394,7 +1446,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHP_POSITION_NEGATIVE;\n";
                     code += "        zkPC=" + to_string(zkPC) +";\n";
                     code += "        mainExecutor.logError(ctx, \"Invalid pos<0 for HashP 1: pols.HASHPOS[" + string(bFastMode?"0":"i") + "]=\" + fr.toString(pols.HASHPOS[" + string(bFastMode?"0":"i") + "], 16) + \" pos=\" + to_string(iPos));\n";
-                    code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                    code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "        return;\n";
                     code += "    }\n";
                     code += "    pos = iPos;\n\n";
@@ -1405,7 +1457,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHP_POSITION_PLUS_SIZE_OUT_OF_RANGE;\n";
                     code += "        zkPC=" + to_string(zkPC) +";\n";
                     code += "        mainExecutor.logError(ctx, \"HashP 1 invalid size of hash: pos=\" + to_string(pos) + \" size=\" + to_string(size) + \" data.size=\" + to_string(ctx.hashP[addr].data.size()));\n";
-                    code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                    code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "        return;\n";
                     code += "    }\n";
 
@@ -1432,7 +1484,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHPDIGEST_ADDRESS_NOT_FOUND;\n";
                     code += "        zkPC=" + to_string(zkPC) +";\n";
                     code += "        mainExecutor.logError(ctx, \"HashPDigest 1: digest not defined addr=\" + to_string(addr));\n";
-                    code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                    code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "        return;\n";
                     code += "    }\n";
                     code += "    // If digest was not calculated, this is an error\n";
@@ -1441,7 +1493,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "        proverRequest.result = ZKR_SM_MAIN_HASHPDIGEST_NOT_COMPLETED;\n";
                     code += "        zkPC=" + to_string(zkPC) +";\n";
                     code += "        mainExecutor.logError(ctx, \"HashPDigest 1: digest not calculated.  Call hashPLen to finish digest.\");\n";
-                    code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                    code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "        return;\n";
                     code += "    }\n";
                     code += "    // Copy digest into fi\n";
@@ -1460,7 +1512,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                         code += "        zkPC=" + to_string(zkPC) +";\n";
                         code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                        code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                        code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                         code += "        return;\n";
                         code += "    }\n";
                         code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
@@ -1468,7 +1520,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                         code += "        zkPC=" + to_string(zkPC) +";\n";
                         code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                        code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                        code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                         code += "        return;\n";
                         code += "    }\n";
                         code += "    c = (a + b) & ScalarMask256;\n";
@@ -1483,7 +1535,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                         code += "        zkPC=" + to_string(zkPC) +";\n";
                         code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                        code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                        code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                         code += "        return;\n";
                         code += "    }\n";
                         code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
@@ -1491,7 +1543,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                         code += "        zkPC=" + to_string(zkPC) +";\n";
                         code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                        code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                        code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                         code += "        return;\n";
                         code += "    }\n";
                         code += "    c = (a - b + ScalarTwoTo256) & ScalarMask256;\n";
@@ -1506,7 +1558,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                         code += "        zkPC=" + to_string(zkPC) +";\n";
                         code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                        code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                        code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                         code += "        return;\n";
                         code += "    }\n";
                         code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
@@ -1514,7 +1566,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                         code += "        zkPC=" + to_string(zkPC) +";\n";
                         code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                        code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                        code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                         code += "        return;\n";
                         code += "    }\n";
                         code += "    c = (a < b);\n";
@@ -1529,7 +1581,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                         code += "        zkPC=" + to_string(zkPC) +";\n";
                         code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                        code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                        code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                         code += "        return;\n";
                         code += "    }\n";
                         code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
@@ -1537,7 +1589,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                         code += "        zkPC=" + to_string(zkPC) +";\n";
                         code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                        code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                        code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                         code += "        return;\n";
                         code += "    }\n";
                         code += "    if (a >= ScalarTwoTo255) a = a - ScalarTwoTo256;\n";
@@ -1554,7 +1606,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                         code += "        zkPC=" + to_string(zkPC) +";\n";
                         code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                        code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                        code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                         code += "        return;\n";
                         code += "    }\n";
                         code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
@@ -1562,7 +1614,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                         code += "        zkPC=" + to_string(zkPC) +";\n";
                         code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                        code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                        code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                         code += "        return;\n";
                         code += "    }\n";
                         code += "    c = (a == b);\n";
@@ -1577,7 +1629,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                         code += "        zkPC=" + to_string(zkPC) +";\n";
                         code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                        code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                        code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                         code += "        return;\n";
                         code += "    }\n";
                         code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
@@ -1585,7 +1637,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                         code += "        zkPC=" + to_string(zkPC) +";\n";
                         code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                        code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                        code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                         code += "        return;\n";
                         code += "    }\n";
                         code += "    c = (a & b);\n";
@@ -1600,7 +1652,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                         code += "        zkPC=" + to_string(zkPC) +";\n";
                         code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                        code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                        code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                         code += "        return;\n";
                         code += "    }\n";
                         code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
@@ -1608,7 +1660,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                         code += "        zkPC=" + to_string(zkPC) +";\n";
                         code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                        code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                        code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                         code += "        return;\n";
                         code += "    }\n";
                         code += "    c = (a | b);\n";
@@ -1623,7 +1675,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                         code += "        zkPC=" + to_string(zkPC) +";\n";
                         code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                        code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                        code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                         code += "        return;\n";
                         code += "    }\n";
                         code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
@@ -1631,7 +1683,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                         code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                         code += "        zkPC=" + to_string(zkPC) +";\n";
                         code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                        code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                        code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                         code += "        return;\n";
                         code += "    }\n";
                         code += "    c = (a ^ b);\n";
@@ -1655,7 +1707,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                     code += "        zkPC=" + to_string(zkPC) +";\n";
                     code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                    code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                    code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "        return;\n";
                     code += "    }\n";
                     code += "    if (!fea2scalar(fr, m1, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
@@ -1663,7 +1715,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                     code += "        zkPC=" + to_string(zkPC) +";\n";
                     code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                    code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                    code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "        return;\n";
                     code += "    }\n";
                     code += "    if (!fea2scalar(fr, offsetScalar, pols.C0[" + string(bFastMode?"0":"i") + "], pols.C1[" + string(bFastMode?"0":"i") + "], pols.C2[" + string(bFastMode?"0":"i") + "], pols.C3[" + string(bFastMode?"0":"i") + "], pols.C4[" + string(bFastMode?"0":"i") + "], pols.C5[" + string(bFastMode?"0":"i") + "], pols.C6[" + string(bFastMode?"0":"i") + "], pols.C7[" + string(bFastMode?"0":"i") + "]))\n";
@@ -1671,14 +1723,14 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                     code += "        zkPC=" + to_string(zkPC) +";\n";
                     code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.C)\");\n";
-                    code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                    code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "        return;\n";
                     code += "    }\n";
                     code += "    if (offsetScalar<0 || offsetScalar>32)\n";
                     code += "    {\n";
                     code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN_OFFSET_OUT_OF_RANGE;\n";
                     code += "        mainExecutor.logError(ctx, \"MemAlign out of range offset=\" + offsetScalar.get_str());\n";
-                    code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                    code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "        return;\n";
                     code += "    }\n";
                     code += "    offset = offsetScalar.get_ui();\n";
@@ -1778,7 +1830,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "        proverRequest.result = cr.zkResult;\n";
                     code += "        zkPC=" + to_string(zkPC) +";\n";
                     code += "        mainExecutor.logError(ctx, string(\"Main exec failed calling evalCommand() result=\") + zkresult2string(proverRequest.result));\n";
-                    code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                    code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                     code += "        return;\n";
                     code += "    }\n\n";
 
@@ -1973,7 +2025,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        mainExecutor.logError(ctx, string(\"ROM assert failed: AN!=opN\") + ";
             code += "\" A:\" + fr.toString(pols.A7[" + string(bFastMode?"0":"i") + "], 16) + \":\" + fr.toString(pols.A6[" + string(bFastMode?"0":"i") + "], 16) + \":\" + fr.toString(pols.A5[" + string(bFastMode?"0":"i") + "], 16) + \":\" + fr.toString(pols.A4[" + string(bFastMode?"0":"i") + "], 16) + \":\" + fr.toString(pols.A3[" + string(bFastMode?"0":"i") + "], 16) + \":\" + fr.toString(pols.A2[" + string(bFastMode?"0":"i") + "], 16) + \":\" + fr.toString(pols.A1[" + string(bFastMode?"0":"i") + "], 16) + \":\" + fr.toString(pols.A0[" + string(bFastMode?"0":"i") + "], 16) + ";
             code += "\" OP:\" + fr.toString(op7, 16) + \":\" + fr.toString(op6, 16) + \":\" + fr.toString(op5, 16) + \":\" + fr.toString(op4,16) + \":\" + fr.toString(op3, 16) + \":\" + fr.toString(op2, 16) + \":\" + fr.toString(op1, 16) + \":\" + fr.toString(op0, 16));\n";
-            code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n";
             if (!bFastMode)
@@ -2061,8 +2113,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        {\n";
                 code += "            proverRequest.result = ZKR_SM_MAIN_MEMORY;\n";
                 code += "            zkPC=" + to_string(zkPC) +";\n";
-                code += "            mainExecutor.logError(ctx, \"Memory Read does not match\");\n";
-                code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "            mainExecutor.logError(ctx, \"Memory Read does not match op=\" + fea2string(fr, op0, op1, op2, op3, op4, op5, op6, op7) + \" mem=\" + fea2string(fr, memIterator->second.fe0, memIterator->second.fe1, memIterator->second.fe2, memIterator->second.fe3, memIterator->second.fe4, memIterator->second.fe5, memIterator->second.fe6, memIterator->second.fe7));\n";
+                code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "            return;\n";
                 code += "        }\n";
                 code += "    }\n";
@@ -2080,7 +2132,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "            proverRequest.result = ZKR_SM_MAIN_MEMORY;\n";
                 code += "            zkPC=" + to_string(zkPC) +";\n";
                 code += "            mainExecutor.logError(ctx, \"Memory Read does not match (op!=0)\");\n";
-                code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "            return;\n";
                 code += "        }\n";
                 code += "    }\n\n";
@@ -2118,12 +2170,15 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "    Kin1[6] = pols.B0[" + string(bFastMode?"0":"i") + "];\n";
             code += "    Kin1[7] = pols.B1[" + string(bFastMode?"0":"i") + "];\n";
 
+            code += "    b0 = fr.toU64(pols.B0[" + string(bFastMode?"0":"i") + "]);\n";
+            code += "    bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);\n";
+
             code += "    if  ( !fr.isZero(pols.A5[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A6[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A7[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B2[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B3[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B4[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B5[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B6[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B7[" + string(bFastMode?"0":"i") + "]) )\n";
             code += "    {\n";
             code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE_INVALID_KEY;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"Storage read instruction found non-zero A-B registers\");\n";
-            code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n\n";
 
@@ -2181,16 +2236,22 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
             code += "    sr8to4(fr, pols.SR0[" + string(bFastMode?"0":"i") + "], pols.SR1[" + string(bFastMode?"0":"i") + "], pols.SR2[" + string(bFastMode?"0":"i") + "], pols.SR3[" + string(bFastMode?"0":"i") + "], pols.SR4[" + string(bFastMode?"0":"i") + "], pols.SR5[" + string(bFastMode?"0":"i") + "], pols.SR6[" + string(bFastMode?"0":"i") + "], pols.SR7[" + string(bFastMode?"0":"i") + "], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);\n";
 
+            code += "    // Collect the keys used to read or write store data\n";
+            code += "    if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)\n";
+            code += "    {\n";
+            code += "        proverRequest.nodesKeys.insert(fea2string(fr, key));\n";
+            code += "    }\n";
+
             code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
             code += "    gettimeofday(&t, NULL);\n";
             code += "#endif\n";
-            code += "    zkResult = pHashDB->get(proverRequest.uuid, oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);\n";
+            code += "    zkResult = mainExecutor.pHashDB->get(proverRequest.uuid, oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);\n";
             code += "    if (zkResult != ZKR_SUCCESS)\n";
             code += "    {\n";
             code += "        proverRequest.result = zkResult;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
-            code += "        mainExecutor.logError(ctx, string(\"Failed calling pHashDB->get() result=\") + zkresult2string(zkResult));\n";
-            code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "        mainExecutor.logError(ctx, string(\"Failed calling mainExecutor.pHashDB->get() result=\") + zkresult2string(zkResult));\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n";
             code += "    incCounter = smtGetResult.proofHashCounter + 2;\n";
@@ -2203,7 +2264,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = zkResult;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, string(\"Failed calling eval_addReadWriteAddress() 3 result=\") + zkresult2string(zkResult));\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
             }
@@ -2227,7 +2288,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
-            code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n";
             code += "    if (smtGetResult.value != opScalar)\n";
@@ -2235,7 +2296,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE_READ_MISMATCH;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"Storage read does not match: smtGetResult.value=\" + smtGetResult.value.get_str() + \" opScalar=\" + opScalar.get_str());\n";
-            code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n";
 
@@ -2295,7 +2356,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "            proverRequest.result = ZKR_SM_MAIN_STORAGE_INVALID_KEY;\n";
             code += "            zkPC=" + to_string(zkPC) +";\n";
             code += "            mainExecutor.logError(ctx, \"Storage write instruction found non-zero A-B registers\");\n";
-            code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "            return;\n";
             code += "        }\n\n";
 
@@ -2346,7 +2407,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
             code += "            zkPC=" + to_string(zkPC) +";\n";
             code += "            mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.D)\");\n";
-            code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "            return;\n";
             code += "        }\n";
             code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
@@ -2355,13 +2416,19 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
             code += "        sr8to4(fr, pols.SR0[" + string(bFastMode?"0":"i") + "], pols.SR1[" + string(bFastMode?"0":"i") + "], pols.SR2[" + string(bFastMode?"0":"i") + "], pols.SR3[" + string(bFastMode?"0":"i") + "], pols.SR4[" + string(bFastMode?"0":"i") + "], pols.SR5[" + string(bFastMode?"0":"i") + "], pols.SR6[" + string(bFastMode?"0":"i") + "], pols.SR7[" + string(bFastMode?"0":"i") + "], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);\n";
 
-            code += "        zkResult = pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : ( proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE ), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);\n";
+            code += "        // Collect the keys used to read or write store data\n";
+            code += "        if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)\n";
+            code += "        {\n";
+            code += "            proverRequest.nodesKeys.insert(fea2string(fr, ctx.lastSWrite.key));\n";
+            code += "        }\n";
+
+            code += "        zkResult = mainExecutor.pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : ( proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE ), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);\n";
             code += "        if (zkResult != ZKR_SUCCESS)\n";
             code += "        {\n";
             code += "            proverRequest.result = zkResult;\n";
             code += "            zkPC=" + to_string(zkPC) +";\n";
-            code += "            mainExecutor.logError(ctx, string(\"Failed calling pHashDB->set() result=\") + zkresult2string(zkResult));\n";
-            code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "            mainExecutor.logError(ctx, string(\"Failed calling mainExecutor.pHashDB->set() result=\") + zkresult2string(zkResult));\n";
+            code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "            return;\n";
             code += "        }\n";
             code += "        incCounter = ctx.lastSWrite.res.proofHashCounter + 2;\n";
@@ -2374,7 +2441,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "            proverRequest.result = zkResult;\n";
                 code += "            zkPC=" + to_string(zkPC) +";\n";
                 code += "            mainExecutor.logError(ctx, string(\"Failed calling eval_addReadWriteAddress() 4 result=\") + zkresult2string(zkResult));\n";
-                code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "            return;\n";
                 code += "        }\n";
             }
@@ -2427,7 +2494,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE_WRITE_MISMATCH;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"Storage write does not match: ctx.lastSWrite.newRoot: \" + fr.toString(ctx.lastSWrite.newRoot[3], 16) + \":\" + fr.toString(ctx.lastSWrite.newRoot[2], 16) + \":\" + fr.toString(ctx.lastSWrite.newRoot[1], 16) + \":\" + fr.toString(ctx.lastSWrite.newRoot[0], 16) + \" oldRoot: \" + fr.toString(oldRoot[3], 16) + \":\" + fr.toString(oldRoot[2], 16) + \":\" + fr.toString(oldRoot[1], 16) + \":\" + fr.toString(oldRoot[0], 16));\n";
-            code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n";
 
@@ -2440,7 +2507,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        proverRequest.result = ZKR_SM_MAIN_STORAGE_WRITE_MISMATCH;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"Storage write does not match: ctx.lastSWrite.newRoot=\" + fea2string(fr, ctx.lastSWrite.newRoot) + \" op=\" + fea2string(fr, fea));\n";
-            code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n";
 
@@ -2489,7 +2556,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_HASHK_SIZE_OUT_OF_RANGE;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Invalid size>32 for hashK 2: pols.D0[" + string(bFastMode?"0":"i") + "]=\" + fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16));\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n\n";
             }
@@ -2505,7 +2572,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        proverRequest.result = ZKR_SM_MAIN_HASHK_POSITION_NEGATIVE;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"Invalid pos<0 for HashK 2: pols.HASHPOS[" + string(bFastMode?"0":"i") + "]=\" + fr.toString(pols.HASHPOS[" + string(bFastMode?"0":"i") + "], 16) + \" pos=\" + to_string(iPos));\n";
-            code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n";
             code += "    pos = iPos;\n\n";
@@ -2516,7 +2583,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
-            code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n\n";
 
@@ -2534,7 +2601,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "            proverRequest.result = ZKR_SM_MAIN_HASHK_POSITION_PLUS_SIZE_OUT_OF_RANGE;\n";
             code += "            zkPC=" + to_string(zkPC) +";\n";
             code += "            mainExecutor.logError(ctx, \"HashK 2: trying to insert data in a position:\" + to_string(pos+j) + \" higher than current data size:\" + to_string(ctx.hashK[addr].data.size()));\n";
-            code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "            return;\n";
             code += "        }\n";
             code += "        else\n";
@@ -2546,7 +2613,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "                proverRequest.result = ZKR_SM_MAIN_HASHK_VALUE_MISMATCH;\n";
             code += "                zkPC=" + to_string(zkPC) +";\n";
             code += "                mainExecutor.logError(ctx, \"HashK 2 bytes do not match: addr=\" + to_string(addr) + \" pos+j=\" + to_string(pos+j) + \" is bm=\" + to_string(bm) + \" and it should be bh=\" + to_string(bh));\n";
-            code += "                HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "                mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "                return;\n";
             code += "            }\n";
             code += "        }\n";
@@ -2559,7 +2626,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        proverRequest.result = ZKR_SM_MAIN_HASHK_PADDING_MISMATCH;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"HashK 2 incoherent size=\" + to_string(size) + \" a=\" + a.get_str(16) + \" paddingA=\" + paddingA.get_str(16));\n";
-            code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n\n";
 
@@ -2572,7 +2639,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "            proverRequest.result = ZKR_SM_MAIN_HASHK_SIZE_MISMATCH;\n";
             code += "            zkPC=" + to_string(zkPC) +";\n";
             code += "            mainExecutor.logError(ctx, \"HashK 2 different read sizes in the same position addr=\" + to_string(addr) + \" pos=\" + to_string(pos) + \" ctx.hashK[addr].reads[pos]=\" + to_string(ctx.hashK[addr].reads[pos]) + \" size=\" + to_string(size));\n";
-            code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "            return;\n";
             code += "        }\n";
             code += "    }\n";
@@ -2613,7 +2680,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "            proverRequest.result = ZKR_SM_MAIN_HASHKLEN_LENGTH_MISMATCH;\n";
             code += "            zkPC=" + to_string(zkPC) +";\n";
             code += "            mainExecutor.logError(ctx, \"HashKLen 2 hashK[addr] is empty but lm is not 0 addr=\" + to_string(addr) + \" lm=\" + to_string(lm));\n";
-            code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "            return;\n";
             code += "        }\n\n";
 
@@ -2628,7 +2695,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        proverRequest.result = ZKR_SM_MAIN_HASHKLEN_CALLED_TWICE;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"HashKLen 2 called more than once addr=\" + to_string(addr));\n";
-            code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n";
             code += "    ctx.hashK[addr].lenCalled = true;\n";
@@ -2639,7 +2706,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        proverRequest.result = ZKR_SM_MAIN_HASHKLEN_LENGTH_MISMATCH;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"HashKLen 2 length does not match addr=\" + to_string(addr) + \" is lm=\" + to_string(lm) + \" and it should be lh=\" + to_string(lh));\n";
-            code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n";
             code += "    if (!hashIterator->second.digestCalled)\n";
@@ -2681,7 +2748,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_NOT_FOUND;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"HashKDigest 2 could not find entry for addr=\" + to_string(addr));\n";
-            code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n";
 
@@ -2691,7 +2758,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
-            code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n";
 
@@ -2700,7 +2767,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_DIGEST_MISMATCH;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"HashKDigest 2: Digest does not match op\");\n";
-            code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n";
 
@@ -2709,7 +2776,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        proverRequest.result = ZKR_SM_MAIN_HASHKDIGEST_CALLED_TWICE;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"HashKDigest 2 called more than once addr=\" + to_string(addr));\n";
-            code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n";
             code += "    ctx.hashK[addr].digestCalled = true;\n";
@@ -2757,7 +2824,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_HASHP_SIZE_OUT_OF_RANGE;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Invalid size>32 for hashP 2: pols.D0[" + string(bFastMode?"0":"i") + "]=\" + fr.toString(pols.D0[" + string(bFastMode?"0":"i") + "], 16) + \" size=\" + to_string(size));\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n\n";
             }
@@ -2773,7 +2840,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        proverRequest.result = ZKR_SM_MAIN_HASHP_POSITION_NEGATIVE;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"Invalid pos<0 for HashP 2: pols.HASHPOS[" + string(bFastMode?"0":"i") + "]=\" + fr.toString(pols.HASHPOS[" + string(bFastMode?"0":"i") + "], 16) + \" pos=\" + to_string(iPos));\n";
-            code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n";
             code += "    pos = iPos;\n\n";
@@ -2784,7 +2851,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
-            code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n";
 
@@ -2801,7 +2868,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "            proverRequest.result = ZKR_SM_MAIN_HASHP_POSITION_PLUS_SIZE_OUT_OF_RANGE;\n";
             code += "            zkPC=" + to_string(zkPC) +";\n";
             code += "            mainExecutor.logError(ctx, \"HashP 2: trying to insert data in a position:\" + to_string(pos+j) + \" higher than current data size:\" + to_string(ctx.hashP[addr].data.size()));\n";
-            code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "            return;\n";
             code += "        }\n";
             code += "        else\n";
@@ -2813,7 +2880,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "                proverRequest.result = ZKR_SM_MAIN_HASHP_VALUE_MISMATCH;\n";
             code += "                zkPC=" + to_string(zkPC) +";\n";
             code += "                mainExecutor.logError(ctx, \"HashP 2 bytes do not match: addr=\" + to_string(addr) + \" pos+j=\" + to_string(pos+j) + \" is bm=\" + to_string(bm) + \" and it should be bh=\" + to_string(bh));\n";
-            code += "                HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "                mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "                return;\n";
             code += "            }\n";
             code += "        }\n";
@@ -2826,7 +2893,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        proverRequest.result = ZKR_SM_MAIN_HASHP_PADDING_MISMATCH;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"HashP2 incoherent size=\" + to_string(size) + \" a=\" + a.get_str(16) + \" paddingA=\" + paddingA.get_str(16));\n";
-            code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n\n";
 
@@ -2839,7 +2906,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "            proverRequest.result = ZKR_SM_MAIN_HASHP_SIZE_MISMATCH;\n";
             code += "            zkPC=" + to_string(zkPC) +";\n";
             code += "            mainExecutor.logError(ctx, \"HashP 2 diferent read sizes in the same position addr=\" + to_string(addr) + \" pos=\" + to_string(pos));\n";
-            code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "            return;\n";
             code += "        }\n";
             code += "    }\n";
@@ -2876,7 +2943,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "            proverRequest.result = ZKR_SM_MAIN_HASHPLEN_LENGTH_MISMATCH;\n";
             code += "            zkPC=" + to_string(zkPC) +";\n";
             code += "            mainExecutor.logError(ctx, \"HashPLen 2 hashP[addr] is empty but lm is not 0 addr=\" + to_string(addr) + \" lm=\" + to_string(lm));\n";
-            code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "            return;\n";
             code += "        }\n\n";
 
@@ -2891,7 +2958,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        proverRequest.result = ZKR_SM_MAIN_HASHPLEN_CALLED_TWICE;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"HashPLen 2 called more than once addr=\" + to_string(addr));\n";
-            code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n";
             code += "    ctx.hashP[addr].lenCalled = true;\n";
@@ -2902,7 +2969,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        proverRequest.result = ZKR_SM_MAIN_HASHPLEN_LENGTH_MISMATCH;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"HashPLen 2 does not match match addr=\" + to_string(addr) + \" is lm=\" + to_string(lm) + \" and it should be lh=\" + to_string(lh));\n";
-            code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n";
             code += "    if (!hashIterator->second.digestCalled)\n";
@@ -2945,16 +3012,23 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "#endif\n";
             code += "        fea2scalar(fr, hashIterator->second.digest, result);\n";
             code += "        delete[] pBuffer;\n";
+
+            code += "        // Collect the keys used to read or write store data\n";
+            code += "        if (proverRequest.input.bGetKeys)\n";
+            code += "        {\n";
+            code += "            proverRequest.programKeys.insert(fea2string(fr, result));\n";
+            code += "        }\n";
+
             code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
             code += "        gettimeofday(&t, NULL);\n";
             code += "#endif\n";
-            code += "        zkResult = pHashDB->setProgram(result, hashIterator->second.data, proverRequest.input.bUpdateMerkleTree);\n";
+            code += "        zkResult = mainExecutor.pHashDB->setProgram(proverRequest.uuid, proverRequest.pFullTracer->get_tx_number(), result, hashIterator->second.data, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);\n";
             code += "        if (zkResult != ZKR_SUCCESS)\n";
             code += "        {\n";
             code += "            proverRequest.result = zkResult;\n";
             code += "            zkPC=" + to_string(zkPC) +";\n";
-            code += "            mainExecutor.logError(ctx, string(\"Failed calling pHashDB->setProgram() result=\") + zkresult2string(zkResult));\n";
-            code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "            mainExecutor.logError(ctx, string(\"Failed calling mainExecutor.pHashDB->setProgram() result=\") + zkresult2string(zkResult));\n";
+            code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "            return;\n";
             code += "        }\n";
             code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
@@ -2984,7 +3058,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
-            code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n";
 
@@ -2995,16 +3069,23 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        hashValue.digest = dg;\n";
             code += "        Goldilocks::Element aux[4];\n";
             code += "        scalar2fea(fr, dg, aux);\n";
+
+            code += "        // Collect the keys used to read or write store data\n";
+            code += "        if (proverRequest.input.bGetKeys)\n";
+            code += "        {\n";
+            code += "            proverRequest.programKeys.insert(fea2string(fr, aux));\n";
+            code += "        }\n";
+
             code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
             code += "        gettimeofday(&t, NULL);\n";
             code += "#endif\n";
-            code += "        zkResult = pHashDB->getProgram(aux, hashValue.data, proverRequest.dbReadLog);\n";
+            code += "        zkResult = mainExecutor.pHashDB->getProgram(proverRequest.uuid, aux, hashValue.data, proverRequest.dbReadLog);\n";
             code += "        if (zkResult != ZKR_SUCCESS)\n";
             code += "        {\n";
             code += "            proverRequest.result = zkResult;\n";
             code += "            zkPC=" + to_string(zkPC) +";\n";
-            code += "            mainExecutor.logError(ctx, string(\"Failed calling pHashDB->getProgram() result=\") + zkresult2string(zkResult));\n";
-            code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "            mainExecutor.logError(ctx, string(\"Failed calling mainExecutor.pHashDB->getProgram() result=\") + zkresult2string(zkResult));\n";
+            code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "            return;\n";
             code += "        }\n";
             code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
@@ -3020,7 +3101,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        proverRequest.result = ZKR_SM_MAIN_HASHPDIGEST_CALLED_TWICE;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"HashPDigest 2 called more than once addr=\" + to_string(addr));\n";
-            code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n";
             code += "    ctx.hashP[addr].digestCalled = true;\n";
@@ -3033,7 +3114,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        proverRequest.result = ZKR_SM_MAIN_HASHPDIGEST_DIGEST_MISMATCH;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"HashPDigest 2: ctx.hashP[addr].digest=\" + ctx.hashP[addr].digest.get_str(16) + \" does not match op=\" + dg.get_str(16));\n";
-            code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n";
         }
@@ -3048,7 +3129,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
-            code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n";
             code += "    // Store the binary action to execute it later with the binary SM\n";
@@ -3078,7 +3159,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, B, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
@@ -3086,7 +3167,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, C, pols.C0[" + string(bFastMode?"0":"i") + "], pols.C1[" + string(bFastMode?"0":"i") + "], pols.C2[" + string(bFastMode?"0":"i") + "], pols.C3[" + string(bFastMode?"0":"i") + "], pols.C4[" + string(bFastMode?"0":"i") + "], pols.C5[" + string(bFastMode?"0":"i") + "], pols.C6[" + string(bFastMode?"0":"i") + "], pols.C7[" + string(bFastMode?"0":"i") + "]))\n";
@@ -3094,7 +3175,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.C)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, D, pols.D0[" + string(bFastMode?"0":"i") + "], pols.D1[" + string(bFastMode?"0":"i") + "], pols.D2[" + string(bFastMode?"0":"i") + "], pols.D3[" + string(bFastMode?"0":"i") + "], pols.D4[" + string(bFastMode?"0":"i") + "], pols.D5[" + string(bFastMode?"0":"i") + "], pols.D6[" + string(bFastMode?"0":"i") + "], pols.D7[" + string(bFastMode?"0":"i") + "]))\n";
@@ -3102,7 +3183,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.D)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, op, op0, op1, op2, op3, op4, op5, op6, op7))\n";
@@ -3110,7 +3191,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -3122,7 +3203,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        left = (A*B) + C;\n";
                 code += "        right = (D<<256) + op;\n";
                 code += "        mainExecutor.logError(ctx, \"Arithmetic does not match: (A*B) + C = \" + left.get_str(16) + \", (D<<256) + op = \" + right.get_str(16));;\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -3155,7 +3236,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, y1, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
@@ -3163,7 +3244,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, x2, pols.C0[" + string(bFastMode?"0":"i") + "], pols.C1[" + string(bFastMode?"0":"i") + "], pols.C2[" + string(bFastMode?"0":"i") + "], pols.C3[" + string(bFastMode?"0":"i") + "], pols.C4[" + string(bFastMode?"0":"i") + "], pols.C5[" + string(bFastMode?"0":"i") + "], pols.C6[" + string(bFastMode?"0":"i") + "], pols.C7[" + string(bFastMode?"0":"i") + "]))\n";
@@ -3171,7 +3252,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.C)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, y2, pols.D0[" + string(bFastMode?"0":"i") + "], pols.D1[" + string(bFastMode?"0":"i") + "], pols.D2[" + string(bFastMode?"0":"i") + "], pols.D3[" + string(bFastMode?"0":"i") + "], pols.D4[" + string(bFastMode?"0":"i") + "], pols.D5[" + string(bFastMode?"0":"i") + "], pols.D6[" + string(bFastMode?"0":"i") + "], pols.D7[" + string(bFastMode?"0":"i") + "]))\n";
@@ -3179,7 +3260,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.D)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, x3, pols.E0[" + string(bFastMode?"0":"i") + "], pols.E1[" + string(bFastMode?"0":"i") + "], pols.E2[" + string(bFastMode?"0":"i") + "], pols.E3[" + string(bFastMode?"0":"i") + "], pols.E4[" + string(bFastMode?"0":"i") + "], pols.E5[" + string(bFastMode?"0":"i") + "], pols.E6[" + string(bFastMode?"0":"i") + "], pols.E7[" + string(bFastMode?"0":"i") + "]))\n";
@@ -3187,7 +3268,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.E)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, y3, op0, op1, op2, op3, op4, op5, op6, op7))\n";
@@ -3195,7 +3276,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -3238,7 +3319,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = zkResult;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling AddPointEc() in arith operation\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -3254,7 +3335,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_ARITH_ECRECOVER_MISMATCH;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, string(\"Arithmetic curve " + string(dbl?"dbl":"add") + " point does not match x1=\") + x1.get_str() + \" y1=\" + y1.get_str() + \" x2=\" + x2.get_str() + \" y2=\" + y2.get_str() + \" x3=\" + x3.get_str() + \" y3=\" + y3.get_str() + \"_x3=\" + _x3.get_str() + \"_y3=\" + _y3.get_str());\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -3292,7 +3373,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
@@ -3300,7 +3381,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
@@ -3308,7 +3389,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -3318,7 +3399,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY_ADD_MISMATCH;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Binary ADD operation does not match c=op=\" + c.get_str(16) + \" expectedC=(a + b) & ScalarMask256=\" + expectedC.get_str(16));\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -3346,7 +3427,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
@@ -3354,7 +3435,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
@@ -3362,7 +3443,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -3372,7 +3453,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY_SUB_MISMATCH;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Binary SUB operation does not match c=op=\" + c.get_str(16) + \" expectedC=(a - b + ScalarTwoTo256) & ScalarMask256=\" + expectedC.get_str(16));\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -3400,7 +3481,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
@@ -3408,7 +3489,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
@@ -3416,7 +3497,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -3426,7 +3507,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY_LT_MISMATCH;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Binary LT operation does not match c=op=\" + c.get_str(16) + \" expectedC=(a < b)=\" + expectedC.get_str(16));\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -3454,7 +3535,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
@@ -3462,7 +3543,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
@@ -3470,7 +3551,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    _a = a;\n";
@@ -3484,7 +3565,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY_SLT_MISMATCH;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Binary SLT operation does not match a=\" + a.get_str(16) + \" b=\" + b.get_str(16) + \" c=\" + c.get_str(16) + \" _a=\" + _a.get_str(16) + \" _b=\" + _b.get_str(16) + \" expectedC=\" + expectedC.get_str(16));\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -3512,7 +3593,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
@@ -3520,7 +3601,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
@@ -3528,7 +3609,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -3538,7 +3619,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY_EQ_MISMATCH;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError( ctx, \"Binary EQ operation does not match c=op=\" + c.get_str(16) + \" expectedC=(a==b)=\" + expectedC.get_str(16));\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -3566,7 +3647,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
@@ -3574,7 +3655,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
@@ -3582,7 +3663,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -3592,7 +3673,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY_AND_MISMATCH;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Binary AND operation does not match c=op=\" + c.get_str(16) + \" expectedC=(a&b)=\" + expectedC.get_str(16));\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -3621,7 +3702,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
@@ -3629,7 +3710,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
@@ -3637,7 +3718,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -3647,7 +3728,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY_OR_MISMATCH;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Binary OR operation does not match c=op=\" + c.get_str(16) + \" expectedC=(a|b)=\" + expectedC.get_str(16));\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -3673,7 +3754,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, b, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
@@ -3681,7 +3762,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))\n";
@@ -3689,7 +3770,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -3699,7 +3780,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_BINARY_XOR_MISMATCH;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Binary XOR operation does not match c=op=\" + c.get_str(16) + \" expectedC=(a^b)=\" + expectedC.get_str(16));\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -3739,7 +3820,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.A)\");\n";
-            code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n";
             code += "    if (!fea2scalar(fr, m1, pols.B0[" + string(bFastMode?"0":"i") + "], pols.B1[" + string(bFastMode?"0":"i") + "], pols.B2[" + string(bFastMode?"0":"i") + "], pols.B3[" + string(bFastMode?"0":"i") + "], pols.B4[" + string(bFastMode?"0":"i") + "], pols.B5[" + string(bFastMode?"0":"i") + "], pols.B6[" + string(bFastMode?"0":"i") + "], pols.B7[" + string(bFastMode?"0":"i") + "]))\n";
@@ -3747,7 +3828,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.B)\");\n";
-            code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n";
             code += "    if (!fea2scalar(fr, v, op0, op1, op2, op3, op4, op5, op6, op7))\n";
@@ -3755,7 +3836,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(op)\");\n";
-            code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n";
             code += "    if (!fea2scalar(fr, offsetScalar, pols.C0[" + string(bFastMode?"0":"i") + "], pols.C1[" + string(bFastMode?"0":"i") + "], pols.C2[" + string(bFastMode?"0":"i") + "], pols.C3[" + string(bFastMode?"0":"i") + "], pols.C4[" + string(bFastMode?"0":"i") + "], pols.C5[" + string(bFastMode?"0":"i") + "], pols.C6[" + string(bFastMode?"0":"i") + "], pols.C7[" + string(bFastMode?"0":"i") + "]))\n";
@@ -3763,7 +3844,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.C)\");\n";
-            code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n";
             code += "    if (offsetScalar<0 || offsetScalar>32)\n";
@@ -3771,7 +3852,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN_OFFSET_OUT_OF_RANGE;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"MemAlign out of range offset=\" + offsetScalar.get_str());\n";
-            code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n";
             code += "    offset = offsetScalar.get_ui();\n";
@@ -3788,7 +3869,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.D)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    if (!fea2scalar(fr, w1, pols.E0[" + string(bFastMode?"0":"i") + "], pols.E1[" + string(bFastMode?"0":"i") + "], pols.E2[" + string(bFastMode?"0":"i") + "], pols.E3[" + string(bFastMode?"0":"i") + "], pols.E4[" + string(bFastMode?"0":"i") + "], pols.E5[" + string(bFastMode?"0":"i") + "], pols.E6[" + string(bFastMode?"0":"i") + "], pols.E7[" + string(bFastMode?"0":"i") + "]))\n";
@@ -3796,7 +3877,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.E)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    _W0 = (m0 & (ScalarTwoTo256 - (ScalarOne << (256-offset*8)))) | (v >> offset*8);\n";
@@ -3806,7 +3887,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN_WRITE_MISMATCH;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"MemAlign w0, w1 invalid: w0=\" + w0.get_str(16) + \" w1=\" + w1.get_str(16) + \" _W0=\" + _W0.get_str(16) + \" _W1=\" + _W1.get_str(16) + \" m0=\" + m0.get_str(16) + \" m1=\" + m1.get_str(16) + \" offset=\" + to_string(offset) + \" v=\" + v.get_str(16));\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -3835,7 +3916,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Failed calling fea2scalar(pols.D)\");\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
                 code += "    _W0 = (m0 & (byteMaskOn256 >> (offset*8))) | ((v & 0xFF) << ((31-offset)*8));\n";
@@ -3844,7 +3925,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN_WRITE8_MISMATCH;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"Error: MemAlign w0 invalid: w0=\" + w0.get_str(16) + \" _W0=\" + _W0.get_str(16) + \" m0=\" + m0.get_str(16) + \" offset=\" + to_string(offset) + \" v=\" + v.get_str(16));\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -3875,7 +3956,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                 code += "        proverRequest.result = ZKR_SM_MAIN_MEMALIGN_READ_MISMATCH;\n";
                 code += "        zkPC=" + to_string(zkPC) +";\n";
                 code += "        mainExecutor.logError(ctx, \"MemAlign v invalid: v=\" + v.get_str(16) + \" _V=\" + _V.get_str(16) + \" m0=\" + m0.get_str(16) + \" m1=\" + m1.get_str(16) + \" offset=\" + to_string(offset));\n";
-                code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
                 code += "    }\n";
 
@@ -3998,7 +4079,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             if (bFastMode)
             {
             code += "            proverRequest.result = ZKR_SM_MAIN_OOC_ARITH;\n";
-            code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "            return;\n";
             }
             else
@@ -4030,7 +4111,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             if (bFastMode)
             {
             code += "            proverRequest.result = ZKR_SM_MAIN_OOC_BINARY;\n";
-            code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "            return;\n";
             }
             else
@@ -4062,7 +4143,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             if (bFastMode)
             {
             code += "            proverRequest.result = ZKR_SM_MAIN_OOC_MEM_ALIGN;\n";
-            code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "            return;\n";
             }
             else
@@ -4185,7 +4266,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "        proverRequest.result = ZKR_SM_MAIN_S33;\n";
             code += "        zkPC=" + to_string(zkPC) +";\n";
             code += "        mainExecutor.logError(ctx, \"JMPN invalid S33 value op0=\" + to_string(jmpnCondValue));\n";
-            code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "        return;\n";
             code += "    }\n";
             if (!bFastMode)
@@ -4369,7 +4450,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             if (bFastMode)
             {
             code += "            proverRequest.result = ZKR_SM_MAIN_OOC_KECCAK_F;\n";
-            code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "            return;\n";
             }
             else
@@ -4398,7 +4479,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             if (bFastMode)
             {
             code += "            proverRequest.result = ZKR_SM_MAIN_OOC_PADDING_PG;\n";
-            code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "            return;\n";
             }
             else
@@ -4429,7 +4510,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             if (bFastMode)
             {
             code += "            proverRequest.result = ZKR_SM_MAIN_OOC_POSEIDON_G;\n";
-            code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "            return;\n";
             }
             else
@@ -4473,7 +4554,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "                proverRequest.result = cr.zkResult;\n";
             code += "                zkPC=" + to_string(zkPC) +";\n";
             code += "                mainExecutor.logError(ctx, string(\"Failed calling evalCommand() after result=\") + zkresult2string(proverRequest.result));\n";
-            code += "                HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+            code += "                mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
             code += "                return;\n";
             code += "            }\n";
             code += "        }\n";
@@ -4703,7 +4784,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += "        {\n";
         code += "            proverRequest.result = ZKR_SM_MAIN_HASHK_READ_OUT_OF_RANGE;\n";
         code += "            mainExecutor.logError(ctx, \"Reading hashK out of limits: i=\" + to_string(i) + \" p=\" + to_string(p) + \" ctx.hashK[i].data.size()=\" + to_string(ctx.hashK[i].data.size()));\n";
-        code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+        code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
         code += "            return;\n";
         code += "        }\n";
         code += "        h.digestCalled = ctx.hashK[i].digestCalled;\n";
@@ -4734,7 +4815,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += "        {\n";
         code += "            proverRequest.result = ZKR_SM_MAIN_HASHP_READ_OUT_OF_RANGE;\n";
         code += "            mainExecutor.logError(ctx, \"Reading hashP out of limits: i=\" + to_string(i) + \" p=\" + to_string(p) + \" ctx.hashP[i].data.size()=\" + to_string(ctx.hashP[i].data.size()));\n";
-        code += "            HashDBClientFactory::freeHashDBClient(pHashDB);\n";
+        code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
         code += "            return;\n";
         code += "        }\n";
         code += "        h.digestCalled = ctx.hashP[i].digestCalled;\n";
@@ -4746,16 +4827,39 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
     code += "    gettimeofday(&t, NULL);\n";
     code += "#endif\n";
-    
-    code += "    zkresult zkr = pHashDB->flush(proverRequest.uuid, proverRequest.pFullTracer->get_new_state_root(), proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, proverRequest.flushId, proverRequest.lastSentFlushId);\n";
-    code += "    if (zkr != ZKR_SUCCESS)\n";
+
+    code += "    if (ctx.config.hashDB64)\n";
     code += "    {\n";
-    code += "        proverRequest.result = zkr;\n";
-    code += "        mainExecutor.logError(ctx, string(\"Failed calling pHashDB->flush() result=\") + zkresult2string(zkr));\n";
-    code += "        HashDBClientFactory::freeHashDBClient(pHashDB);\n";
-    code += "        return;\n";
+    code += "        Goldilocks::Element newStateRoot[4];\n";
+    code += "        string2fea(fr, NormalizeToNFormat(proverRequest.pFullTracer->get_new_state_root(),64), newStateRoot);\n";
+    code += "        zkresult zkr = mainExecutor.pHashDB->purge(proverRequest.uuid, newStateRoot, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);\n";
+    code += "        if (zkr != ZKR_SUCCESS)\n";
+    code += "        {\n";
+    code += "            proverRequest.result = zkr;\n";
+    code += "            mainExecutor.logError(ctx, string(\"Failed calling mainExecutor.pHashDB->purge() result=\") + zkresult2string(zkr));\n";
+    code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
+    code += "            return;\n";
+    code += "        }\n";
+    code += "        zkr = mainExecutor.pHashDB->flush(proverRequest.uuid, proverRequest.pFullTracer->get_new_state_root(), proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, proverRequest.flushId, proverRequest.lastSentFlushId);\n";
+    code += "        if (zkr != ZKR_SUCCESS)\n";
+    code += "        {\n";
+    code += "            proverRequest.result = zkr;\n";
+    code += "            mainExecutor.logError(ctx, string(\"Failed calling pHashDB->flush() result=\") + zkresult2string(zkr));\n";
+    code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
+    code += "            return;\n";
+    code += "        }\n";
     code += "    }\n";
-    code += "    HashDBClientFactory::freeHashDBClient(pHashDB);\n\n";
+    code += "    else\n";
+    code += "    {\n";
+    code += "        zkresult zkr = mainExecutor.pHashDB->flush(proverRequest.uuid, proverRequest.pFullTracer->get_new_state_root(), proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, proverRequest.flushId, proverRequest.lastSentFlushId);\n";
+    code += "        if (zkr != ZKR_SUCCESS)\n";
+    code += "        {\n";
+    code += "            proverRequest.result = zkr;\n";
+    code += "            mainExecutor.logError(ctx, string(\"Failed calling mainExecutor.pHashDB->flush() result=\") + zkresult2string(zkr));\n";
+    code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
+    code += "            return;\n";
+    code += "        }\n";
+    code += "    }\n\n";
 
     code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
     code += "    mainMetrics.add(\"Flush\", TimeDiff(t));\n";
@@ -4771,7 +4875,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
     
     code += "    if (mainExecutor.config.dbMetrics) proverRequest.dbReadLog->print();\n\n";
 
-    code += "    zklog.info(\"" + functionName + "() done lastStep=\" + to_string(ctx.lastStep) + \" (\" + to_string((double(ctx.lastStep)*100)/mainExecutor.N) + \"%)\");\n\n";
+    code += "    zklog.info(\"" + functionName + "() done lastStep=\" + to_string(ctx.lastStep) + \" (\" + to_string((double(ctx.lastStep)*100)/mainExecutor.N) + \"%)\", &proverRequest.tags);\n\n";
 
     code += "    return;\n\n";
 

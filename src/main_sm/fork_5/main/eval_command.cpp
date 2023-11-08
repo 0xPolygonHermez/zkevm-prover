@@ -2117,7 +2117,7 @@ mpz_class sqrtTonelliShanks ( const mpz_class &n, const mpz_class &p )
         {
             return r;
         }
-        return 0;
+        return ScalarMask256;
     }
 
     mpz_class z = 1;
@@ -2137,7 +2137,7 @@ mpz_class sqrtTonelliShanks ( const mpz_class &n, const mpz_class &p )
             ++i;
             if (i == m)
             {
-                return 0;
+                return ScalarMask256;
             }
         }
         mpz_class b = pow(c, pow(2, m-i-1, p-1), p);
@@ -2156,7 +2156,7 @@ mpz_class sqrtTonelliShanks ( const mpz_class &n, const mpz_class &p )
         }
         return r;
     }
-    return 0;
+    return ScalarMask256;
 }
 
 void eval_sqrtFpEc (Context &ctx, const RomCommand &cmd, CommandResult &cr)

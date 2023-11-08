@@ -499,7 +499,7 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
     gettimeofday(&t, NULL);
 #endif
 
-    TimerStart(STATE_MANAGER_FLUSH);
+    //TimerStart(STATE_MANAGER_FLUSH);
 
 #ifdef LOG_STATE_MANAGER
     zklog.info("StateManager::flush() batchUUID=" + batchUUID);
@@ -524,7 +524,7 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
             zklog.error("StateManager::flush() failed calling db.flush() result=" + zkresult2string(zkr));
         }
 
-        TimerStopAndLog(STATE_MANAGER_FLUSH);
+        //TimerStopAndLog(STATE_MANAGER_FLUSH);
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
         //timeMetricStorage.add("flush UUID not found", TimeDiff(t));
@@ -702,7 +702,7 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
                         zklog.error("StateManager::flush() failed calling db.write() result=" + zkresult2string(zkr));
                         state.erase(it);
 
-                        TimerStopAndLog(STATE_MANAGER_FLUSH);
+                        //TimerStopAndLog(STATE_MANAGER_FLUSH);
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
                         batchState.timeMetricStorage.add("flush error db.write", TimeDiff(t));
@@ -723,7 +723,7 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
                     zklog.error("StateManager::flush() failed calling string2fea() fea.size=" + to_string(fea.size()));
                     state.erase(it);
 
-                    TimerStopAndLog(STATE_MANAGER_FLUSH);
+                    //TimerStopAndLog(STATE_MANAGER_FLUSH);
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
                     batchState.timeMetricStorage.add("flush error string2fea", TimeDiff(t));
@@ -745,7 +745,7 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
                     zklog.error("StateManager::flush() failed calling db.updateStateRoot() result=" + zkresult2string(zkr));
                     state.erase(it);
 
-                    TimerStopAndLog(STATE_MANAGER_FLUSH);
+                    //TimerStopAndLog(STATE_MANAGER_FLUSH);
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
                     batchState.timeMetricStorage.add("flush error db.updateStateRoot", TimeDiff(t));
@@ -774,7 +774,7 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
 
     Unlock();
 
-    TimerStopAndLog(STATE_MANAGER_FLUSH);
+    //TimerStopAndLog(STATE_MANAGER_FLUSH);
 
     return zkr;
 }

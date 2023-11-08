@@ -4,7 +4,7 @@
 #include "hashdb_singleton.hpp"
 #include "zkmax.hpp"
 #include "check_tree.hpp"
-#include "check_tree_64.hpp"
+#include "state_manager_64.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -18,7 +18,7 @@ ExecutorClient::ExecutorClient (Goldilocks &fr, const Config &config) :
     channelArguments.SetMaxReceiveMessageSize(1024*1024*1024);
 
     // Create channel
-    std::shared_ptr<grpc_impl::Channel> channel = grpc::CreateCustomChannel(config.executorClientHost + ":" + to_string(config.executorClientPort), grpc::InsecureChannelCredentials(), channelArguments);
+    std::shared_ptr<grpc::Channel> channel = grpc::CreateCustomChannel(config.executorClientHost + ":" + to_string(config.executorClientPort), grpc::InsecureChannelCredentials(), channelArguments);
 
     // Create stub (i.e. client)
     stub = new executor::v1::ExecutorService::Stub(channel);
@@ -63,6 +63,10 @@ void ExecutorClient::waitForThreads (void)
 
 bool ExecutorClient::ProcessBatch (void)
 {
+    // Get a  HashDB interface
+    HashDBInterface* pHashDB = HashDBClientFactory::createHashDBClient(fr, config);
+    zkassertpermanent(pHashDB != NULL);
+
     TimerStart(EXECUTOR_CLIENT_PROCESS_BATCH);
 
     if (config.inputFile.size() == 0)
@@ -82,6 +86,7 @@ bool ExecutorClient::ProcessBatch (void)
     }
 
     bool update_merkle_tree = true;
+    bool get_keys = false;
 
     //request.set_batch_num(input.publicInputs.batchNum);
     request.set_coinbase(Add0xIfMissing(input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)));
@@ -91,6 +96,7 @@ bool ExecutorClient::ProcessBatch (void)
     request.set_global_exit_root(scalar2ba(input.publicInputsExtended.publicInputs.globalExitRoot));
     request.set_eth_timestamp(input.publicInputsExtended.publicInputs.timestamp);
     request.set_update_merkle_tree(update_merkle_tree);
+    request.set_get_keys(get_keys);
     request.set_chain_id(input.publicInputsExtended.publicInputs.chainID);
     request.set_fork_id(input.publicInputsExtended.publicInputs.forkID);
     request.set_from(input.from);
@@ -102,10 +108,7 @@ bool ExecutorClient::ProcessBatch (void)
         pTraceConfig->set_disable_stack(input.traceConfig.bDisableStack);
         pTraceConfig->set_enable_memory(input.traceConfig.bEnableMemory);
         pTraceConfig->set_enable_return_data(input.traceConfig.bEnableReturnData);
-        pTraceConfig->set_tx_hash_to_generate_execute_trace(string2ba(input.traceConfig.txHashToGenerateExecuteTrace));
-        pTraceConfig->set_tx_hash_to_generate_call_trace(string2ba(input.traceConfig.txHashToGenerateCallTrace));
-        //request.set_tx_hash_to_generate_execute_trace(string2ba(input.traceConfig.txHashToGenerateExecuteTrace));
-        //request.set_tx_hash_to_generate_call_trace(string2ba(input.traceConfig.txHashToGenerateCallTrace));
+        pTraceConfig->set_tx_hash_to_generate_full_trace(string2ba(input.traceConfig.txHashToGenerateFullTrace));
     }
     request.set_old_batch_num(input.publicInputsExtended.publicInputs.oldBatchNum);
 
@@ -181,6 +184,28 @@ bool ExecutorClient::ProcessBatch (void)
 
     if (config.executorClientCheckNewStateRoot)
     {
+        if (config.hashDB64)
+        {            
+            //if (StateManager64::isVirtualStateRoot(newStateRoot))
+            {
+                TimerStart(CONSOLIDATE_STATE);
+
+                Goldilocks::Element virtualStateRoot[4];
+                string2fea(fr, newStateRoot, virtualStateRoot);
+                Goldilocks::Element consolidatedStateRoot[4];
+                uint64_t flushId, storedFlushId;
+                zkresult zkr = pHashDB->consolidateState(virtualStateRoot, update_merkle_tree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, consolidatedStateRoot, flushId, storedFlushId);
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("ExecutorClient::ProcessBatch() failed calling pHashDB->consolidateState() result=" + zkresult2string(zkr));
+                    return false;
+                }
+                newStateRoot = fea2string(fr, consolidatedStateRoot);
+
+                TimerStopAndLog(CONSOLIDATE_STATE);
+            }
+        }
+
         TimerStart(CHECK_NEW_STATE_ROOT);
 
         if (newStateRoot.size() == 0)
@@ -194,21 +219,12 @@ bool ExecutorClient::ProcessBatch (void)
         if (config.hashDB64)
         {
             Database64 &db = hashDB.db64;
-            db.clearCache();
-
-            CheckTreeCounters64 checkTreeCounters;
-
-            zkresult result = CheckTree64(db, newStateRoot, 0, checkTreeCounters);
-            if (result != ZKR_SUCCESS)
+            zkresult zkr = db.PrintTree(newStateRoot);
+            if (zkr != ZKR_SUCCESS)
             {
-                zklog.error("ExecutorClient::ProcessBatch() failed calling ClimbTree64() result=" + zkresult2string(result));
+                zklog.error("ExecutorClient::ProcessBatch() failed calling db.PrintTree() result=" + zkresult2string(zkr));
                 return false;
             }
-
-            zklog.info("intermediateNodes=" + to_string(checkTreeCounters.intermediateNodes));
-            zklog.info("leafNodes=" + to_string(checkTreeCounters.leafNodes));
-            zklog.info("values=" + to_string(checkTreeCounters.values));
-            zklog.info("maxLevel=" + to_string(checkTreeCounters.maxLevel));
         }
         else
         {
@@ -217,10 +233,10 @@ bool ExecutorClient::ProcessBatch (void)
 
             CheckTreeCounters checkTreeCounters;
 
-            zkresult result = CheckTree(db, newStateRoot, 0, checkTreeCounters);
+            zkresult result = CheckTree(db, newStateRoot, 0, checkTreeCounters, "");
             if (result != ZKR_SUCCESS)
             {
-                zklog.error("ExecutorClient::ProcessBatch() failed calling ClimbTree() result=" + zkresult2string(result));
+                zklog.error("ExecutorClient::ProcessBatch() failed calling CheckTree() result=" + zkresult2string(result));
                 return false;
             }
 
