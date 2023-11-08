@@ -14,6 +14,9 @@
 #include "main_sm/fork_6/main_exec_generated/main_exec_generated.hpp"
 #include "main_sm/fork_6/main_exec_generated/main_exec_generated_fast.hpp"
 #include "main_sm/fork_6/main_exec_c/main_exec_c.hpp"
+#include "main_sm/fork_7/main_exec_generated/main_exec_generated.hpp"
+#include "main_sm/fork_7/main_exec_generated/main_exec_generated_fast.hpp"
+#include "main_sm/fork_7/main_exec_c/main_exec_c.hpp"
 #include "timer.hpp"
 #include "zklog.hpp"
 
@@ -184,7 +187,7 @@ void Executor::process_batch (ProverRequest &proverRequest)
             }
             else if (config.useMainExecGenerated)
             {
-                //zklog.info("Executor::process_batch() fork 5 generated");
+                //zklog.info("Executor::process_batch() fork 6 generated");
                 fork_6::main_exec_generated_fast(mainExecutor_fork_6, proverRequest);
             }
             else
@@ -204,6 +207,41 @@ void Executor::process_batch (ProverRequest &proverRequest)
                 fork_6::MainExecRequired required;
 
                 mainExecutor_fork_6.execute(proverRequest, commitPols.Main, required);
+
+                // Free committed polynomials address space
+                free(pAddress);
+            }
+            return;
+        }
+        case 7: // fork_7
+        {
+            if (config.useMainExecC) // Do not use in production; under development
+            {
+                //zklog.info("Executor::process_batch() fork 7 C");
+                mainExecutorC_fork_7.execute(proverRequest);
+            }
+            else if (config.useMainExecGenerated)
+            {
+                //zklog.info("Executor::process_batch() fork 7 generated");
+                fork_7::main_exec_generated_fast(mainExecutor_fork_7, proverRequest);
+            }
+            else
+            {
+                //zklog.info("Executor::process_batch() fork 7 native");
+
+                // Allocate committed polynomials for only 1 evaluation
+                void * pAddress = calloc(fork_7::CommitPols::numPols()*sizeof(Goldilocks::Element), 1);
+                if (pAddress == NULL)
+                {
+                    zklog.error("Executor::process_batch() failed calling calloc(" + to_string(fork_7::CommitPols::pilSize()) + ")");
+                    exitProcess();
+                }
+                fork_7::CommitPols commitPols(pAddress,1);
+
+                // This instance will store all data required to execute the rest of State Machines
+                fork_7::MainExecRequired required;
+
+                mainExecutor_fork_7.execute(proverRequest, commitPols.Main, required);
 
                 // Free committed polynomials address space
                 free(pAddress);
@@ -344,11 +382,11 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         {
             if (config.useMainExecGenerated)
             {
-                PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor_fork_6, proverRequest, commitPols.Main, required);
+                PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor_fork_7, proverRequest, commitPols.Main, required);
             }
             else
             {
-                mainExecutor_fork_6.execute(proverRequest, commitPols.Main, required);
+                mainExecutor_fork_7.execute(proverRequest, commitPols.Main, required);
             }
             
             // Save input to <timestamp>.input.json after execution including dbReadLog
@@ -439,11 +477,11 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         TimerStart(MAIN_EXECUTOR_EXECUTE);
         if (config.useMainExecGenerated)
         {
-            PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor_fork_6, proverRequest, commitPols.Main, required);
+            PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor_fork_7, proverRequest, commitPols.Main, required);
         }
         else
         {
-            mainExecutor_fork_6.execute(proverRequest, commitPols.Main, required);
+            mainExecutor_fork_7.execute(proverRequest, commitPols.Main, required);
         }
             
         // Save input to <timestamp>.input.json after execution including dbReadLog

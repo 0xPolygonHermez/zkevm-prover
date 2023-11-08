@@ -612,6 +612,10 @@ zkresult HashDB::cancelBatch (const string &batchUUID)
     {
         result = stateManager64.cancelBatch(batchUUID);
     }
+    else if (!config.hashDB64 && config.stateManager && (batchUUID.size() != 0))
+    {
+        result = stateManager.cancelBatch(batchUUID);
+    }
     else
     {
         zklog.error("HashDB::cancelBatch() called with invalid configuration");

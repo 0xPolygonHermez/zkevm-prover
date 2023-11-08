@@ -99,6 +99,7 @@ public:
     zkresult read (const string &batchUUID, const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog);
     zkresult semiFlush (const string &batchUUID, const string &newStateRoot, const Persistence persistence);
     zkresult flush (const string &batchUUID, const string &newStateRoot, const Persistence persistence, Database &db, uint64_t &flushId, uint64_t &lastSentFlushId);
+    zkresult cancelBatch (const string &batchUUID);
     void print (bool bDbContent = false);
 
     // Lock/Unlock
