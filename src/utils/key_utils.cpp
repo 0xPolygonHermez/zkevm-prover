@@ -3,6 +3,7 @@
 #include "zklog.hpp"
 #include "exit_process.hpp"
 #include "zkassert.hpp"
+#include "constants.hpp"
 
 using namespace std;
 
