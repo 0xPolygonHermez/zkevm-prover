@@ -12,13 +12,10 @@ public:
     bool bDisableStack;
     bool bEnableMemory;
     bool bEnableReturnData;
-    string txHashToGenerateExecuteTrace; // return execute traces of this tx
-    string txHashToGenerateCallTrace; // return call traces of this tx
+    string txHashToGenerateFullTrace; // return full traces of this tx
 
     // Flags to enable/disable functionality
-    bool bGenerateCallTrace;
-    bool bGenerateExecuteTrace;
-    bool bGenerateTrace;
+    bool bGenerateFullTrace;
     bool bGenerateStorage;
     bool bGenerateStack;
     bool bGenerateMemory;
@@ -30,9 +27,6 @@ public:
         bDisableStack(false),
         bEnableMemory(false),
         bEnableReturnData(false),
-        bGenerateCallTrace(false),
-        bGenerateExecuteTrace(false),
-        bGenerateTrace(false),
         bGenerateStorage(false),
         bGenerateStack(false),
         bGenerateMemory(false),
@@ -42,17 +36,7 @@ public:
     // Call calculateFlags() once all configuration parameters have been set
     void calculateFlags (void)
     {
-        bGenerateCallTrace    = bEnabled && (txHashToGenerateCallTrace.size() > 0);
-        bGenerateExecuteTrace = bEnabled && (txHashToGenerateExecuteTrace.size() > 0);
-        bGenerateTrace        = bGenerateCallTrace || bGenerateExecuteTrace;
-        
-        // If any of call trace or execute trace are active, let's activate both
-        if (bGenerateTrace)
-        {
-            bGenerateCallTrace = true;
-            bGenerateExecuteTrace = true;
-        }
-
+        bGenerateFullTrace    = bEnabled && (txHashToGenerateFullTrace.size() > 0);
         bGenerateStorage      = bEnabled && !bDisableStorage;
         bGenerateStack        = bEnabled && !bDisableStack;
         bGenerateMemory       = bEnabled && bEnableMemory;
@@ -67,8 +51,7 @@ public:
             bDisableStack == other.bDisableStack &&
             bEnableMemory == other.bEnableMemory &&
             bEnableReturnData == other.bEnableReturnData &&
-            txHashToGenerateExecuteTrace == other.txHashToGenerateExecuteTrace &&
-            txHashToGenerateCallTrace == txHashToGenerateCallTrace;
+            txHashToGenerateFullTrace == other.txHashToGenerateFullTrace;
     };
 
     bool operator!=(TraceConfig &other) { return !(*this == other); };
@@ -80,8 +63,7 @@ public:
         bDisableStack = other.bDisableStack;
         bEnableMemory = other.bEnableMemory;
         bEnableReturnData = other.bEnableReturnData;
-        txHashToGenerateExecuteTrace = other.txHashToGenerateExecuteTrace;
-        txHashToGenerateCallTrace = other.txHashToGenerateCallTrace;
+        txHashToGenerateFullTrace = other.txHashToGenerateFullTrace;
         return *this;
     }
 
@@ -93,8 +75,7 @@ public:
             ",bDisableStack=" + to_string(bDisableStack) +
             ",bEnableMemory=" + to_string(bEnableMemory) +
             ",bEnableReturnData=" + to_string(bEnableReturnData) +
-            ",txHashToGenerateExecuteTrace=" + txHashToGenerateExecuteTrace +
-            ",txHashToGenerateCallTrace=" + txHashToGenerateCallTrace;
+            ",txHashToGenerateFullTrace=" + txHashToGenerateFullTrace;
     }
 };
 
