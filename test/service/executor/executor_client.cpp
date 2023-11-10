@@ -95,7 +95,6 @@ bool ExecutorClient::ProcessBatch (void)
     if (input.publicInputsExtended.publicInputs.forkID <= 6)
     {
         ::executor::v1::ProcessBatchRequest request;
-        //request.set_batch_num(input.publicInputs.batchNum);
         request.set_coinbase(Add0xIfMissing(input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)));
         request.set_batch_l2_data(input.publicInputsExtended.publicInputs.batchL2Data);
         request.set_old_state_root(scalar2ba(input.publicInputsExtended.publicInputs.oldStateRoot));
@@ -103,7 +102,6 @@ bool ExecutorClient::ProcessBatch (void)
         request.set_global_exit_root(scalar2ba(input.publicInputsExtended.publicInputs.globalExitRoot));
         request.set_eth_timestamp(input.publicInputsExtended.publicInputs.timestamp);
         request.set_update_merkle_tree(update_merkle_tree);
-        //request.set_get_keys(get_keys);
         request.set_chain_id(input.publicInputsExtended.publicInputs.chainID);
         request.set_fork_id(input.publicInputsExtended.publicInputs.forkID);
         request.set_from(input.from);
@@ -191,19 +189,21 @@ bool ExecutorClient::ProcessBatch (void)
     else
     {
         ::executor::v1::ProcessBatchRequestV2 request;
-        //request.set_batch_num(input.publicInputs.batchNum);
         request.set_coinbase(Add0xIfMissing(input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)));
         request.set_batch_l2_data(input.publicInputsExtended.publicInputs.batchL2Data);
         request.set_old_state_root(scalar2ba(input.publicInputsExtended.publicInputs.oldStateRoot));
         request.set_old_acc_input_hash(scalar2ba(input.publicInputsExtended.publicInputs.oldAccInputHash));
-        //request.set_global_exit_root(scalar2ba(input.publicInputsExtended.publicInputs.globalExitRoot));
-        //request.set_eth_timestamp(input.publicInputsExtended.publicInputs.timestamp);
+        request.set_l1_info_root(scalar2ba(input.publicInputsExtended.publicInputs.l1InfoRoot));
+        request.set_timestamp_limit(input.publicInputsExtended.publicInputs.timestampLimit);
+        request.set_forced_blockhash_l1(scalar2ba(input.publicInputsExtended.publicInputs.forcedBlockHashL1));
         request.set_update_merkle_tree(update_merkle_tree);
+        request.set_no_counters(input.bNoCounters);
         request.set_get_keys(get_keys);
+        request.set_skip_verify_l1_info_root(input.bSkipVerifyL1InfoRoot);
+        request.set_skip_first_change_l2_block(input.bSkipFirstChangeL2Block);
         request.set_chain_id(input.publicInputsExtended.publicInputs.chainID);
         request.set_fork_id(input.publicInputsExtended.publicInputs.forkID);
         request.set_from(input.from);
-        request.set_no_counters(input.bNoCounters);
         if (input.traceConfig.bEnabled)
         {
             executor::v1::TraceConfigV2 * pTraceConfig = request.mutable_trace_config();
