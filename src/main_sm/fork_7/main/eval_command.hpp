@@ -131,6 +131,9 @@ void eval_getL1InfoTimestamp          (Context &ctx, const RomCommand &cmd, Comm
 void eval_getTimestampLimit           (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getForcedBlockHashL1        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_getSmtProof                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getHistoricGERRoot          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getIsForced                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getNewGERRoot               (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_MPdiv                       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_MPdiv_short                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_receiveLenQuotient_short    (Context &ctx, const RomCommand &cmd, CommandResult &cr);

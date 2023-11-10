@@ -79,6 +79,9 @@ tFunction string2Function(string s)
     else if (s == "getTimestampLimit")              return f_getTimestampLimit;
     else if (s == "getForcedBlockHashL1")           return f_getForcedBlockHashL1;
     else if (s == "getSmtProof")                    return f_getSmtProof;
+    else if (s == "getHistoricGERRoot")             return f_getHistoricGERRoot;
+    else if (s == "getIsForced")                    return f_getIsForced;
+    else if (s == "getNewGERRoot")                  return f_getNewGERRoot;
     else if (s == "MPdiv")                          return f_MPdiv;
     else if (s == "MPdiv_short")                    return f_MPdiv_short;
     else if (s == "receiveLenQuotient_short")       return f_receiveLenQuotient_short;
@@ -148,6 +151,9 @@ string function2String(tFunction f)
         case f_getTimestampLimit:               return "getTimestampLimit";
         case f_getForcedBlockHashL1:            return "getForcedBlockHashL1";
         case f_getSmtProof:                     return "getSmtProof";
+        case f_getHistoricGERRoot:              return "getHistoricGERRoot";
+        case f_getIsForced:                     return "getIsForced";
+        case f_getNewGERRoot:                   return "getNewGERRoot";
         case f_MPdiv:                           return "MPdiv";
         case f_MPdiv_short:                     return "MPdiv_short";
         case f_receiveLenQuotient_short:        return "receiveLenQuotient_short";
