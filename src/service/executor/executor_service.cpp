@@ -779,6 +779,7 @@ using grpc::Status;
     case ZKR_SM_MAIN_OOC_KECCAK_F:                          return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_COUNTERS_OVERFLOW_KECCAK;
     case ZKR_SM_MAIN_OOC_MEM_ALIGN:                         return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_COUNTERS_OVERFLOW_MEM;
     case ZKR_SM_MAIN_OOC_PADDING_PG:                        return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_COUNTERS_OVERFLOW_PADDING;
+    case ZKR_SM_MAIN_OOC_SHA256_F:                          return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_COUNTERS_OVERFLOW_SHA256;
     case ZKR_SM_MAIN_OOC_POSEIDON_G:                        return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_COUNTERS_OVERFLOW_POSEIDON;
     case ZKR_SM_MAIN_INVALID_FORK_ID:                       return ::executor::v1::EXECUTOR_ERROR_UNSUPPORTED_FORK_ID;
     case ZKR_SM_MAIN_BALANCE_MISMATCH:                      return ::executor::v1::EXECUTOR_ERROR_BALANCE_MISMATCH;
@@ -841,6 +842,23 @@ using grpc::Status;
     case ZKR_SM_MAIN_OUT_OF_STEPS:                          return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_COUNTERS_OVERFLOW_STEPS;
     case ZKR_SM_MAIN_HASHK_READ_OUT_OF_RANGE:               return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHK_READ_OUT_OF_RANGE;
     case ZKR_SM_MAIN_HASHP_READ_OUT_OF_RANGE:               return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHP_READ_OUT_OF_RANGE;
+
+
+    case ZKR_SM_MAIN_HASHS:                                 return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHS;
+    case ZKR_SM_MAIN_HASHS_SIZE_OUT_OF_RANGE:               return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHS_SIZE_OUT_OF_RANGE;
+    case ZKR_SM_MAIN_HASHS_POSITION_NEGATIVE:               return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHS_POSITION_NEGATIVE;
+    case ZKR_SM_MAIN_HASHS_POSITION_PLUS_SIZE_OUT_OF_RANGE: return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHS_POSITION_PLUS_SIZE_OUT_OF_RANGE;
+    case ZKR_SM_MAIN_HASHSDIGEST_ADDRESS_NOT_FOUND:         return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHSDIGEST_ADDRESS_NOT_FOUND;
+    case ZKR_SM_MAIN_HASHSDIGEST_NOT_COMPLETED:             return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHSDIGEST_NOT_COMPLETED;
+    case ZKR_SM_MAIN_HASHS_VALUE_MISMATCH:                  return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHS_VALUE_MISMATCH;
+    case ZKR_SM_MAIN_HASHS_PADDING_MISMATCH:                return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHS_PADDING_MISMATCH;
+    case ZKR_SM_MAIN_HASHS_SIZE_MISMATCH:                   return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHS_SIZE_MISMATCH;
+    case ZKR_SM_MAIN_HASHSLEN_LENGTH_MISMATCH:              return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHSLEN_LENGTH_MISMATCH;
+    case ZKR_SM_MAIN_HASHSLEN_CALLED_TWICE:                 return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHSLEN_CALLED_TWICE;
+    case ZKR_SM_MAIN_HASHSDIGEST_NOT_FOUND:                 return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHSDIGEST_NOT_FOUND;
+    case ZKR_SM_MAIN_HASHSDIGEST_DIGEST_MISMATCH:           return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHSDIGEST_DIGEST_MISMATCH;
+    case ZKR_SM_MAIN_HASHSDIGEST_CALLED_TWICE:              return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHSDIGEST_CALLED_TWICE;
+    case ZKR_SM_MAIN_HASHS_READ_OUT_OF_RANGE:               return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHS_READ_OUT_OF_RANGE;
 
     default:                                                return ::executor::v1::EXECUTOR_ERROR_UNSPECIFIED;
     }

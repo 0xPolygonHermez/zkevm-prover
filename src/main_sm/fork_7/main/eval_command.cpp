@@ -51,6 +51,34 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             case f_memAlignWR_W1:                   return eval_memAlignWR_W1(ctx, cmd, cr);
             case f_memAlignWR8_W0:                  return eval_memAlignWR8_W0(ctx, cmd, cr);
             case f_beforeLast:                      return eval_beforeLast(ctx, cmd, cr);
+
+            // Etrog (fork 7) new methods:
+            case f_getL1InfoRoot:                   return eval_getL1InfoRoot(ctx, cmd, cr);
+            case f_getL1InfoGER:                    return eval_getL1InfoGER(ctx, cmd, cr);
+            case f_getL1InfoBlockHash:              return eval_getL1InfoBlockHash(ctx, cmd, cr);
+            case f_getL1InfoTimestamp:              return eval_getL1InfoTimestamp(ctx, cmd, cr);
+            case f_getTimestampLimit:               return eval_getTimestampLimit(ctx, cmd, cr);
+            case f_getForcedBlockHashL1:            return eval_getForcedBlockHashL1(ctx, cmd, cr);
+            case f_getSmtProof:                     return eval_getSmtProof(ctx, cmd, cr);
+            case f_MPdiv:                           return eval_MPdiv(ctx, cmd, cr);
+            case f_MPdiv_short:                     return eval_MPdiv_short(ctx, cmd, cr);
+            case f_receiveLenQuotient_short:        return eval_receiveLenQuotient_short(ctx, cmd, cr);
+            case f_receiveQuotientChunk_short:      return eval_receiveQuotientChunk_short(ctx, cmd, cr);
+            case f_receiveRemainderChunk_short:     return eval_receiveRemainderChunk_short(ctx, cmd, cr);
+            case f_receiveLenRemainder:             return eval_receiveLenRemainder(ctx, cmd, cr);
+            case f_receiveRemainderChunk:           return eval_receiveRemainderChunk(ctx, cmd, cr);
+            case f_receiveLenQuotient:              return eval_receiveLenQuotient(ctx, cmd, cr);
+            case f_receiveQuotientChunk:            return eval_receiveQuotientChunk(ctx, cmd, cr);
+            case f_ARITH_BN254_ADDFP2_X:            return eval_ARITH_BN254_ADDFP2_X(ctx, cmd, cr);
+            case f_ARITH_BN254_ADDFP2_Y:            return eval_ARITH_BN254_ADDFP2_Y(ctx, cmd, cr);
+            case f_ARITH_BN254_SUBFP2_X:            return eval_ARITH_BN254_SUBFP2_X(ctx, cmd, cr);
+            case f_ARITH_BN254_SUBFP2_Y:            return eval_ARITH_BN254_SUBFP2_Y(ctx, cmd, cr);
+            case f_ARITH_BN254_MULFP2_X:            return eval_ARITH_BN254_MULFP2_X(ctx, cmd, cr);
+            case f_ARITH_BN254_MULFP2_Y:            return eval_ARITH_BN254_MULFP2_Y(ctx, cmd, cr);
+            case f_fp2InvBN254_x:                   return eval_fp2InvBN254_x(ctx, cmd, cr);
+            case f_fp2InvBN254_y:                   return eval_fp2InvBN254_y(ctx, cmd, cr);
+            case f_fpBN254inv:                      return eval_fpBN254inv(ctx, cmd, cr);
+            
             default:
                 zklog.error("evalCommand() found invalid function=" + to_string(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
                 exitProcess();
@@ -1104,7 +1132,12 @@ void eval_if (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 void eval_getMemValue (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
     cr.type = crt_scalar;
-    Fea fea = ctx.mem[cmd.offset];
+    uint64_t addr = cmd.offset;
+    if (cmd.useCTX == 1)
+    {
+        addr += ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]) * 0x40000;
+    }
+    Fea fea = ctx.mem[addr];
     if (!fea2scalar(ctx.fr, cr.scalar, fea.fe0, fea.fe1, fea.fe2, fea.fe3, fea.fe4, fea.fe5, fea.fe6, fea.fe7))
     {
         cr.zkResult = ZKR_SM_MAIN_FEA2SCALAR;
@@ -2485,6 +2518,211 @@ zkresult eval_addReadWriteAddress (Context &ctx, const mpz_class value)
         ctx.pols.A0[0], ctx.pols.A1[0], ctx.pols.A2[0], ctx.pols.A3[0], ctx.pols.A4[0], ctx.pols.A5[0], ctx.pols.A6[0], ctx.pols.A7[0],
         ctx.pols.B0[0], ctx.pols.B1[0], ctx.pols.B2[0], ctx.pols.B3[0], ctx.pols.B4[0], ctx.pols.B5[0], ctx.pols.B6[0], ctx.pols.B7[0],
         value);
+}
+
+void eval_getL1InfoRoot (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 0)
+    {
+        zklog.error("eval_getL1InfoRoot() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    //return scalar2fea(ctx.Fr, Scalar.e(ctx.input.l1InfoRoot));
+}
+
+void eval_getL1InfoGER (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 1)
+    {
+        zklog.error("eval_getL1InfoGER() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    /*
+   const indexL1InfoTree = evalCommand(ctx, tag.params[0]);
+    const gerL1InfoTree = ctx.input.l1InfoTree[indexL1InfoTree].globalExitRoot;
+
+    return scalar2fea(ctx.Fr, Scalar.e(gerL1InfoTree));*/
+}
+
+void eval_getL1InfoBlockHash (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{ 
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 1)
+    {
+        zklog.error("eval_getL1InfoBlockHash() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    /*
+    const indexL1InfoTree = evalCommand(ctx, tag.params[0]);
+    const blockHashL1InfoTree = ctx.input.l1InfoTree[indexL1InfoTree].blockHash;
+
+    return scalar2fea(ctx.Fr, Scalar.e(blockHashL1InfoTree));*/
+
+}
+
+void eval_getL1InfoTimestamp (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 1)
+    {
+        zklog.error("eval_getL1InfoTimestamp() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    /*const indexL1InfoTree = evalCommand(ctx, tag.params[0]);
+    const timestampL1InfoTree = ctx.input.l1InfoTree[indexL1InfoTree].timestamp;
+
+    return scalar2fea(ctx.Fr, Scalar.e(timestampL1InfoTree));*/
+}
+
+void eval_getTimestampLimit (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 0)
+    {
+        zklog.error("eval_getTimestampLimit() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    /*
+    return [ctx.Fr.e(ctx.input.timestampLimit), ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero];
+    */
+}
+
+void eval_getForcedBlockHashL1 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 0)
+    {
+        zklog.error("eval_getForcedBlockHashL1() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    /*
+    return scalar2fea(ctx.Fr, Scalar.e(ctx.input.forcedBlockHashL1));*/
+}
+
+void eval_getSmtProof (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 2)
+    {
+        zklog.error("eval_getSmtProof() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+/*
+    const index = Number(evalCommand(ctx, tag.params[0]));
+    const level = Number(evalCommand(ctx, tag.params[1]));
+
+    const leafValue = (ctx.input.skipVerifyL1InfoRoot === true)
+        ? Constants.MOCK_VALUE_SMT_PROOF
+        : ctx.input.l1InfoTree[index].smtProof[level];
+
+    return scalar2fea(ctx.Fr, Scalar.e(leafValue));
+*/
+}
+
+void eval_MPdiv (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+
+}
+
+void eval_MPdiv_short (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+
+}
+
+void eval_receiveLenQuotient_short (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+
+}
+
+void eval_receiveQuotientChunk_short (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+
+}
+
+void eval_receiveRemainderChunk_short (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+
+}
+
+void eval_receiveLenRemainder (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+
+}
+
+void eval_receiveRemainderChunk (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+
+}
+
+void eval_receiveLenQuotient (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+
+}
+
+void eval_receiveQuotientChunk (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+
+}
+
+void eval_ARITH_BN254_ADDFP2_X (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+
+}
+
+void eval_ARITH_BN254_ADDFP2_Y (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+
+}
+
+void eval_ARITH_BN254_SUBFP2_X (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+
+}
+
+void eval_ARITH_BN254_SUBFP2_Y (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+
+}
+
+void eval_ARITH_BN254_MULFP2_X (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+
+}
+
+void eval_ARITH_BN254_MULFP2_Y (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+
+}
+
+void eval_fp2InvBN254_x (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+
+}
+
+void eval_fp2InvBN254_y (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+
+}
+
+void eval_fpBN254inv (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+
 }
 
 } // namespace

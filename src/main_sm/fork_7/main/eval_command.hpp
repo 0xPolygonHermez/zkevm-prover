@@ -123,6 +123,34 @@ void eval_memAlignWR_W0       (Context &ctx, const RomCommand &cmd, CommandResul
 void eval_memAlignWR_W1       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_memAlignWR8_W0      (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 
+// Etrog (fork 7) new methods:
+void eval_getL1InfoRoot               (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getL1InfoGER                (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getL1InfoBlockHash          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getL1InfoTimestamp          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getTimestampLimit           (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getForcedBlockHashL1        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_getSmtProof                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_MPdiv                       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_MPdiv_short                 (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_receiveLenQuotient_short    (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_receiveQuotientChunk_short  (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_receiveRemainderChunk_short (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_receiveLenRemainder         (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_receiveRemainderChunk       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_receiveLenQuotient          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_receiveQuotientChunk        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_ARITH_BN254_ADDFP2_X        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_ARITH_BN254_ADDFP2_Y        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_ARITH_BN254_SUBFP2_X        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_ARITH_BN254_SUBFP2_Y        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_ARITH_BN254_MULFP2_X        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_ARITH_BN254_MULFP2_Y        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_fp2InvBN254_x               (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_fp2InvBN254_y               (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_fpBN254inv                  (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+
+
 zkresult AddPointEc (Context &ctx, bool dbl, const RawFec::Element &x1, const RawFec::Element &y1, const RawFec::Element &x2, const RawFec::Element &y2, RawFec::Element &x3, RawFec::Element &y3);
 
 zkresult eval_addReadWriteAddress (Context &ctx, const mpz_class value);

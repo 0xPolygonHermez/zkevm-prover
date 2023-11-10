@@ -2,6 +2,7 @@
 #include "utils.hpp"
 #include "scalar.hpp"
 #include "timer.hpp"
+#include "sha256.hpp"
 
 void SHA256String (const string &s, string &hash)
 {
@@ -11,6 +12,13 @@ void SHA256String (const string &s, string &hash)
 }
 
 void SHA256 (const uint8_t * pData, uint64_t dataSize, string &hash)
+{
+    mpz_class hashScalar;
+    SHA256(pData, dataSize, hashScalar);
+    hash = "0x" + hashScalar.get_str(16);
+}
+
+void SHA256 (const uint8_t * pData, uint64_t dataSize, mpz_class &hashScalar)
 {
     // Initialize hash values:
     // (first 32 bits of the fractional parts of the square roots of the first 8 primes 2..19):
@@ -142,7 +150,6 @@ void SHA256 (const uint8_t * pData, uint64_t dataSize, string &hash)
         h7 = h7 + h;
     }
 
-    mpz_class hashScalar;
     hashScalar = h0;
     hashScalar = hashScalar << 32;
     hashScalar += h1;
@@ -158,6 +165,4 @@ void SHA256 (const uint8_t * pData, uint64_t dataSize, string &hash)
     hashScalar += h6;
     hashScalar = hashScalar << 32;
     hashScalar += h7;
-
-    hash = "0x" + hashScalar.get_str(16);
 }

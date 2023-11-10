@@ -59,6 +59,10 @@ public:
     uint8_t hashP1;
     uint8_t hashPLen;
     uint8_t hashPDigest;
+    uint8_t hashS;
+    uint8_t hashS1;
+    uint8_t hashSLen;
+    uint8_t hashSDigest;
     uint8_t JMP;
     uint8_t JMPC;
     uint8_t JMPN;

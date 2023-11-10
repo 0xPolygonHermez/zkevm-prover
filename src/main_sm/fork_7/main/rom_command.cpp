@@ -72,6 +72,31 @@ tFunction string2Function(string s)
     else if (s == "memAlignWR8_W0")                 return f_memAlignWR8_W0;
     else if (s == "onOpcode")                       return f_onOpcode;
     else if (s == "onUpdateStorage")                return f_onUpdateStorage;
+    else if (s == "getL1InfoRoot")                  return f_getL1InfoRoot;
+    else if (s == "getL1InfoGER")                   return f_getL1InfoGER;
+    else if (s == "getL1InfoBlockHash")             return f_getL1InfoBlockHash;
+    else if (s == "getL1InfoTimestamp")             return f_getL1InfoTimestamp;
+    else if (s == "getTimestampLimit")              return f_getTimestampLimit;
+    else if (s == "getForcedBlockHashL1")           return f_getForcedBlockHashL1;
+    else if (s == "getSmtProof")                    return f_getSmtProof;
+    else if (s == "MPdiv")                          return f_MPdiv;
+    else if (s == "MPdiv_short")                    return f_MPdiv_short;
+    else if (s == "receiveLenQuotient_short")       return f_receiveLenQuotient_short;
+    else if (s == "receiveQuotientChunk_short")     return f_receiveQuotientChunk_short;
+    else if (s == "receiveRemainderChunk_short")    return f_receiveRemainderChunk_short;
+    else if (s == "receiveLenRemainder")            return f_receiveLenRemainder;
+    else if (s == "receiveRemainderChunk")          return f_receiveRemainderChunk;
+    else if (s == "receiveLenQuotient")             return f_receiveLenQuotient;
+    else if (s == "receiveQuotientChunk")           return f_receiveQuotientChunk;
+    else if (s == "ARITH_BN254_ADDFP2_X")           return f_ARITH_BN254_ADDFP2_X;
+    else if (s == "ARITH_BN254_ADDFP2_Y")           return f_ARITH_BN254_ADDFP2_Y;
+    else if (s == "ARITH_BN254_SUBFP2_X")           return f_ARITH_BN254_SUBFP2_X;
+    else if (s == "ARITH_BN254_SUBFP2_Y")           return f_ARITH_BN254_SUBFP2_Y;
+    else if (s == "ARITH_BN254_MULFP2_X")           return f_ARITH_BN254_MULFP2_X;
+    else if (s == "ARITH_BN254_MULFP2_Y")           return f_ARITH_BN254_MULFP2_Y;
+    else if (s == "fp2InvBN254_x")                  return f_fp2InvBN254_x;
+    else if (s == "fp2InvBN254_y")                  return f_fp2InvBN254_y;
+    else if (s == "fpBN254inv")                     return f_fpBN254inv;
     else if (s == "")                               return f_empty;
     else {
         zklog.error("string2function() invalid string = " + s);
@@ -116,6 +141,31 @@ string function2String(tFunction f)
         case f_memAlignWR8_W0:                  return "memAlignWR8_W0";
         case f_onOpcode:                        return "onOpcode";
         case f_onUpdateStorage:                 return "onUpdateStorage";
+        case f_getL1InfoRoot:                   return "getL1InfoRoot";
+        case f_getL1InfoGER:                    return "getL1InfoGER";
+        case f_getL1InfoBlockHash:              return "getL1InfoBlockHash";
+        case f_getL1InfoTimestamp:              return "getL1InfoTimestamp";
+        case f_getTimestampLimit:               return "getTimestampLimit";
+        case f_getForcedBlockHashL1:            return "getForcedBlockHashL1";
+        case f_getSmtProof:                     return "getSmtProof";
+        case f_MPdiv:                           return "MPdiv";
+        case f_MPdiv_short:                     return "MPdiv_short";
+        case f_receiveLenQuotient_short:        return "receiveLenQuotient_short";
+        case f_receiveQuotientChunk_short:      return "receiveQuotientChunk_short";
+        case f_receiveRemainderChunk_short:     return "receiveRemainderChunk_short";
+        case f_receiveLenRemainder:             return "receiveLenRemainder";
+        case f_receiveRemainderChunk:           return "receiveRemainderChunk";
+        case f_receiveLenQuotient:              return "receiveLenQuotient";
+        case f_receiveQuotientChunk:            return "receiveQuotientChunk";
+        case f_ARITH_BN254_ADDFP2_X:            return "ARITH_BN254_ADDFP2_X";
+        case f_ARITH_BN254_ADDFP2_Y:            return "ARITH_BN254_ADDFP2_Y";
+        case f_ARITH_BN254_SUBFP2_X:            return "ARITH_BN254_SUBFP2_X";
+        case f_ARITH_BN254_SUBFP2_Y:            return "ARITH_BN254_SUBFP2_Y";
+        case f_ARITH_BN254_MULFP2_X:            return "ARITH_BN254_MULFP2_X";
+        case f_ARITH_BN254_MULFP2_Y:            return "ARITH_BN254_MULFP2_Y";
+        case f_fp2InvBN254_x:                   return "fp2InvBN254_x";
+        case f_fp2InvBN254_y:                   return "fp2InvBN254_y";
+        case f_fpBN254inv:                      return "fpBN254inv";
         case f_empty:                           return "";
         default:                                return "unknown";
     }
@@ -284,6 +334,7 @@ void parseRomCommand (RomCommand &cmd, json tag)
     if (tag.contains("offset") && tag["offset"].is_number()) { cmd.offset = tag["offset"]; }
     if (tag.contains("values")) parseRomCommandArray(cmd.values, tag["values"]);
     if (tag.contains("params")) parseRomCommandArray(cmd.params, tag["params"]);
+    if (tag.contains("useCTX")) cmd.useCTX = tag["useCTX"];
 
     // Build opAndVar string to be used in time statistics
     cmd.opAndFunction = op2String(cmd.op) + "[" + function2String(cmd.function) + "]";

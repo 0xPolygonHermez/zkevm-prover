@@ -46,7 +46,32 @@ typedef enum : int {
     f_memAlignWR_W1,
     f_memAlignWR8_W0,
     f_onOpcode,
-    f_onUpdateStorage
+    f_onUpdateStorage,
+    f_getL1InfoRoot,
+    f_getL1InfoGER,
+    f_getL1InfoBlockHash,
+    f_getL1InfoTimestamp,
+    f_getTimestampLimit,
+    f_getForcedBlockHashL1,
+    f_getSmtProof,
+    f_MPdiv,
+    f_MPdiv_short,
+    f_receiveLenQuotient_short,
+    f_receiveQuotientChunk_short,
+    f_receiveRemainderChunk_short,
+    f_receiveLenRemainder,
+    f_receiveRemainderChunk,
+    f_receiveLenQuotient,
+    f_receiveQuotientChunk,
+    f_ARITH_BN254_ADDFP2_X,
+    f_ARITH_BN254_ADDFP2_Y,
+    f_ARITH_BN254_SUBFP2_X,
+    f_ARITH_BN254_SUBFP2_Y,
+    f_ARITH_BN254_MULFP2_X,
+    f_ARITH_BN254_MULFP2_Y,
+    f_fp2InvBN254_x,
+    f_fp2InvBN254_y,
+    f_fpBN254inv,
 } tFunction;
 
 // ROM command (op)
@@ -121,7 +146,8 @@ public:
     vector<RomCommand *> params;
     uint64_t offset;
     string opAndFunction;
-    RomCommand() : isPresent(false), op(op_empty), reg(reg_empty), function(f_empty), num(0), offset(0) {};
+    uint64_t useCTX;
+    RomCommand() : isPresent(false), op(op_empty), reg(reg_empty), function(f_empty), num(0), offset(0), useCTX(0) {};
     string toString(void) const;
 };
 
