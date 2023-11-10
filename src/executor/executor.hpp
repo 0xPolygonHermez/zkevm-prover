@@ -24,6 +24,9 @@
 #include "sm/padding_pg/padding_pg_executor.hpp"
 #include "sm/poseidon_g/poseidon_g_executor.hpp"
 #include "sm/mem_align/mem_align_executor.hpp"
+#include "sm/padding_sha256/padding_sha256_executor.hpp"
+#include "sm/padding_sha256bit/padding_sha256bit_executor.hpp"
+#include "sm/sha256_f/sha256_f_executor.hpp"
 #include "prover_request.hpp"
 
 class Executor
@@ -50,9 +53,13 @@ public:
     PaddingKKBitExecutor paddingKKBitExecutor;
     Bits2FieldExecutor bits2FieldExecutor;
     KeccakFExecutor keccakFExecutor;
+    PaddingSha256Executor paddingSha256Executor;
+    PaddingSha256BitExecutor paddingSha256BitExecutor;
+    Sha256FExecutor sha256FExecutor;
     PaddingPGExecutor paddingPGExecutor;
     PoseidonGExecutor poseidonGExecutor;
     MemAlignExecutor memAlignExecutor;
+
 
     Executor(Goldilocks &fr, const Config &config, PoseidonGoldilocks &poseidon) :
         fr(fr),
@@ -75,6 +82,9 @@ public:
         paddingKKBitExecutor(fr),
         bits2FieldExecutor(fr),
         keccakFExecutor(fr, config),
+        paddingSha256Executor(fr),
+        paddingSha256BitExecutor(fr),
+        sha256FExecutor(fr, config),
         paddingPGExecutor(fr, poseidon),
         poseidonGExecutor(fr, poseidon),
         memAlignExecutor(fr, config)
