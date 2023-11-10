@@ -190,11 +190,14 @@ public:
         pEvaluation(NULL),
         N(0){}; // Constructor, setting references
 
-    // HashK database, used in hashK, hashKLen and hashKDigest
+    // HashK database, used in Keccak-f hash instructions hashK, hashK1, hashKLen and hashKDigest
     unordered_map< uint64_t, HashValue > hashK;
 
-    // HashP database, used in hashP, hashPLen and hashPDigest
+    // HashP database, used in Poseidon linear hash instructions hashP, hashP1, hashPLen and hashPDigest
     unordered_map< uint64_t, HashValue > hashP;
+
+    // HashS database, used in SHA-256 hash instructions hashS, hashS1, hashSLen and hashSDigest
+    unordered_map< uint64_t, HashValue > hashS;
 
     // Variables database, used in evalCommand() declareVar/setVar/getVar
     unordered_map< string, mpz_class > vars;

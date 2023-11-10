@@ -72,7 +72,6 @@ void Rom::load(Goldilocks &fr, json &romJson)
     constants.TX_GAS_LIMIT                      = getConstant(romJson, "TX_GAS_LIMIT");
     constants.GLOBAL_EXIT_ROOT_STORAGE_POS      = getConstant(romJson, "GLOBAL_EXIT_ROOT_STORAGE_POS");
     constants.LOCAL_EXIT_ROOT_STORAGE_POS       = getConstant(romJson, "LOCAL_EXIT_ROOT_STORAGE_POS");
-    constants.LAST_TX_STORAGE_POS               = getConstant(romJson, "LAST_TX_STORAGE_POS");
     constants.STATE_ROOT_STORAGE_POS            = getConstant(romJson, "STATE_ROOT_STORAGE_POS");
     constants.MAX_MEM_EXPANSION_BYTES           = getConstant(romJson, "MAX_MEM_EXPANSION_BYTES");
     constants.FORK_ID                           = getConstant(romJson, "FORK_ID");

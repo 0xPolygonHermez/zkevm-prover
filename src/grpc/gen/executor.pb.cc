@@ -661,7 +661,7 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "ER_CODE\020\031\022\'\n#ROM_ERROR_INTRINSIC_TX_GAS_"
   "OVERFLOW\020\032\022 \n\034ROM_ERROR_BATCH_DATA_TOO_B"
   "IG\020\033\022!\n\035ROM_ERROR_UNSUPPORTED_FORK_ID\020\034\022"
-  "\031\n\025ROM_ERROR_INVALID_RLP\020\035*\222\036\n\rExecutorE"
+  "\031\n\025ROM_ERROR_INVALID_RLP\020\035*\321$\n\rExecutorE"
   "rror\022\036\n\032EXECUTOR_ERROR_UNSPECIFIED\020\000\022\033\n\027"
   "EXECUTOR_ERROR_NO_ERROR\020\001\022\033\n\027EXECUTOR_ER"
   "ROR_DB_ERROR\020\002\0222\n.EXECUTOR_ERROR_SM_MAIN"
@@ -758,13 +758,34 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "ERROR_INVALID_CONTRACTS_BYTECODE_KEY\020N\0223"
   "\n/EXECUTOR_ERROR_INVALID_CONTRACTS_BYTEC"
   "ODE_VALUE\020O\022\"\n\036EXECUTOR_ERROR_INVALID_GE"
-  "T_KEY\020P2\271\001\n\017ExecutorService\022U\n\014ProcessBa"
-  "tch\022 .executor.v1.ProcessBatchRequest\032!."
-  "executor.v1.ProcessBatchResponse\"\000\022O\n\016Ge"
-  "tFlushStatus\022\026.google.protobuf.Empty\032#.e"
-  "xecutor.v1.GetFlushStatusResponse\"\000B>Z<g"
-  "ithub.com/0xPolygonHermez/zkevm-node/sta"
-  "te/runtime/executorb\006proto3"
+  "T_KEY\020P\0223\n/EXECUTOR_ERROR_SM_MAIN_COUNTE"
+  "RS_OVERFLOW_SHA256\020Q\022 \n\034EXECUTOR_ERROR_S"
+  "M_MAIN_HASHS\020R\0222\n.EXECUTOR_ERROR_SM_MAIN"
+  "_HASHS_SIZE_OUT_OF_RANGE\020S\0222\n.EXECUTOR_E"
+  "RROR_SM_MAIN_HASHS_POSITION_NEGATIVE\020T\022@"
+  "\n<EXECUTOR_ERROR_SM_MAIN_HASHS_POSITION_"
+  "PLUS_SIZE_OUT_OF_RANGE\020U\0228\n4EXECUTOR_ERR"
+  "OR_SM_MAIN_HASHSDIGEST_ADDRESS_NOT_FOUND"
+  "\020V\0224\n0EXECUTOR_ERROR_SM_MAIN_HASHSDIGEST"
+  "_NOT_COMPLETED\020W\022/\n+EXECUTOR_ERROR_SM_MA"
+  "IN_HASHS_VALUE_MISMATCH\020X\0221\n-EXECUTOR_ER"
+  "ROR_SM_MAIN_HASHS_PADDING_MISMATCH\020Y\022.\n*"
+  "EXECUTOR_ERROR_SM_MAIN_HASHS_SIZE_MISMAT"
+  "CH\020Z\0223\n/EXECUTOR_ERROR_SM_MAIN_HASHSLEN_"
+  "LENGTH_MISMATCH\020[\0220\n,EXECUTOR_ERROR_SM_M"
+  "AIN_HASHSLEN_CALLED_TWICE\020\\\0220\n,EXECUTOR_"
+  "ERROR_SM_MAIN_HASHSDIGEST_NOT_FOUND\020]\0226\n"
+  "2EXECUTOR_ERROR_SM_MAIN_HASHSDIGEST_DIGE"
+  "ST_MISMATCH\020^\0223\n/EXECUTOR_ERROR_SM_MAIN_"
+  "HASHSDIGEST_CALLED_TWICE\020_\0222\n.EXECUTOR_E"
+  "RROR_SM_MAIN_HASHS_READ_OUT_OF_RANGE\020`2\271"
+  "\001\n\017ExecutorService\022U\n\014ProcessBatch\022 .exe"
+  "cutor.v1.ProcessBatchRequest\032!.executor."
+  "v1.ProcessBatchResponse\"\000\022O\n\016GetFlushSta"
+  "tus\022\026.google.protobuf.Empty\032#.executor.v"
+  "1.GetFlushStatusResponse\"\000B>Z<github.com"
+  "/0xPolygonHermez/zkevm-node/state/runtim"
+  "e/executorb\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_executor_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2fempty_2eproto,
@@ -788,7 +809,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_exe
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_executor_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_executor_2eproto = {
-  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 8467,
+  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 9298,
   &descriptor_table_executor_2eproto_once, descriptor_table_executor_2eproto_sccs, descriptor_table_executor_2eproto_deps, 15, 1,
   schemas, file_default_instances, TableStruct_executor_2eproto::offsets,
   file_level_metadata_executor_2eproto, 15, file_level_enum_descriptors_executor_2eproto, file_level_service_descriptors_executor_2eproto,
@@ -927,6 +948,22 @@ bool ExecutorError_IsValid(int value) {
     case 78:
     case 79:
     case 80:
+    case 81:
+    case 82:
+    case 83:
+    case 84:
+    case 85:
+    case 86:
+    case 87:
+    case 88:
+    case 89:
+    case 90:
+    case 91:
+    case 92:
+    case 93:
+    case 94:
+    case 95:
+    case 96:
       return true;
     default:
       return false;
