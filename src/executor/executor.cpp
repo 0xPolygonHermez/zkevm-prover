@@ -340,7 +340,7 @@ void* PoseidonThread (void* arg)
     return NULL;
 }
 
-void* KeccakThread (void* arg)
+void* KeccakSha256Thread (void* arg)
 {
     // Get the context
     ExecutorContext * pExecutorContext = (ExecutorContext *)arg;
@@ -354,6 +354,16 @@ void* KeccakThread (void* arg)
     TimerStart(PADDING_KK_BIT_SM_EXECUTE_THREAD);
     pExecutorContext->pExecutor->paddingKKBitExecutor.execute(pExecutorContext->pRequired->PaddingKKBit, pExecutorContext->pCommitPols->PaddingKKBit, pExecutorContext->pRequired->Bits2Field);
     TimerStopAndLog(PADDING_KK_BIT_SM_EXECUTE_THREAD);
+
+    // Execute the Padding SHA256 State Machine
+    TimerStart(PADDING_SHA256_SM_EXECUTE_THREAD);
+    pExecutorContext->pExecutor->paddingSha256Executor.execute(pExecutorContext->pRequired->PaddingSha256, pExecutorContext->pCommitPols->PaddingSha256, pExecutorContext->pRequired->PaddingSha256Bit);
+    TimerStopAndLog(PADDING_SHA256_SM_EXECUTE_THREAD);
+    
+    // Execute the PaddingKKBit State Machine
+    TimerStart(PADDING_SHA256_BIT_SM_EXECUTE_THREAD);
+    pExecutorContext->pExecutor->paddingSha256BitExecutor.execute(pExecutorContext->pRequired->PaddingSha256Bit, pExecutorContext->pCommitPols->PaddingSha256Bit, pExecutorContext->pRequired->Bits2Field);
+    TimerStopAndLog(PADDING_SHA256_BIT_SM_EXECUTE_THREAD);
     
     // Execute the Poseidon G State Machine
     TimerStart(BITS2FIELD_SM_EXECUTE_THREAD);
@@ -364,6 +374,11 @@ void* KeccakThread (void* arg)
     TimerStart(KECCAK_F_SM_EXECUTE_THREAD);
     pExecutorContext->pExecutor->keccakFExecutor.execute(pExecutorContext->pRequired->KeccakF, pExecutorContext->pCommitPols->KeccakF);
     TimerStopAndLog(KECCAK_F_SM_EXECUTE_THREAD);
+    
+    // Execute the Sha256 F State Machine
+    TimerStart(SHA256_F_SM_EXECUTE_THREAD);
+    pExecutorContext->pExecutor->sha256FExecutor.execute(pExecutorContext->pRequired->Sha256F, pExecutorContext->pCommitPols->Sha256F);
+    TimerStopAndLog(SHA256_F_SM_EXECUTE_THREAD);
 
     return NULL;
 }
@@ -449,6 +464,16 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         paddingKKBitExecutor.execute(required.PaddingKKBit, commitPols.PaddingKKBit, required.Bits2Field);
         TimerStopAndLog(PADDING_KK_BIT_SM_EXECUTE);
 
+        // Execute the PaddingSha256 State Machine
+        TimerStart(PADDING_SHA256_SM_EXECUTE);
+        paddingSha256Executor.execute(required.PaddingSha256, commitPols.PaddingSha256, required.PaddingSha256Bit);
+        TimerStopAndLog(PADDING_SHA256_SM_EXECUTE);
+
+        // Execute the PaddingSha256Bit State Machine
+        TimerStart(PADDING_SHA256_BIT_SM_EXECUTE);
+        paddingSha256BitExecutor.execute(required.PaddingSha256Bit, commitPols.PaddingSha256Bit, required.Bits2Field);
+        TimerStopAndLog(PADDING_SHA256_BIT_SM_EXECUTE);
+
         // Execute the Bits2Field State Machine
         TimerStart(BITS2FIELD_SM_EXECUTE);
         bits2FieldExecutor.execute(required.Bits2Field, commitPols.Bits2Field, required.KeccakF);
@@ -458,6 +483,11 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         TimerStart(KECCAK_F_SM_EXECUTE);
         keccakFExecutor.execute(required.KeccakF, commitPols.KeccakF);
         TimerStopAndLog(KECCAK_F_SM_EXECUTE);
+
+        // Excute the Sha256 F State Machine
+        TimerStart(SHA256_F_SM_EXECUTE);
+        sha256FExecutor.execute(required.Sha256F, commitPols.Sha256F);
+        TimerStopAndLog(SHA256_F_SM_EXECUTE);
 
         // Execute the PoseidonG State Machine
         TimerStart(POSEIDON_G_SM_EXECUTE);
@@ -521,8 +551,8 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         pthread_create(&memoryThread, NULL, MemoryThread, &executorContext);
 
         // Execute the PaddingKK, PaddingKKBit, Bits2Field, Keccak F and NormGate9 State Machines
-        pthread_t keccakThread;
-        pthread_create(&keccakThread, NULL, KeccakThread, &executorContext);
+        pthread_t keccakSha256Thread;
+        pthread_create(&keccakSha256Thread, NULL, KeccakSha256Thread, &executorContext);
 
         // Wait for the parallel SM threads
         pthread_join(binaryThread, NULL);
@@ -530,6 +560,6 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         pthread_join(memoryThread, NULL);
         pthread_join(arithThread, NULL);
         pthread_join(poseidonThread, NULL);
-        pthread_join(keccakThread, NULL);
+        pthread_join(keccakSha256Thread, NULL);
     }
 }

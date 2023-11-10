@@ -4784,7 +4784,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // Generate Padding SHA required data
         for (uint64_t i=0; i<ctx.hashS.size(); i++)
         {
-            PaddingKKExecutorInput h; /////////////////////////// TODO: Replace by SHA equivalent
+            PaddingSha256ExecutorInput h;
             h.dataBytes = ctx.hashS[i].data;
             uint64_t p = 0;
             while (p<ctx.hashS[i].data.size())
@@ -4809,7 +4809,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             h.digestCalled = ctx.hashS[i].digestCalled;
             h.lenCalled = ctx.hashS[i].lenCalled;
-            required.PaddingSHA.push_back(h);
+            required.PaddingSha256.push_back(h);
         }
     }
 
