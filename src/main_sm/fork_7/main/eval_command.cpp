@@ -60,6 +60,9 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             case f_getTimestampLimit:               return eval_getTimestampLimit(ctx, cmd, cr);
             case f_getForcedBlockHashL1:            return eval_getForcedBlockHashL1(ctx, cmd, cr);
             case f_getSmtProof:                     return eval_getSmtProof(ctx, cmd, cr);
+            case f_getHistoricGERRoot:              return eval_getHistoricGERRoot(ctx, cmd, cr);
+            case f_getIsForced:                     return eval_getIsForced(ctx, cmd, cr);
+            case f_getNewGERRoot:                   return eval_getNewGERRoot(ctx, cmd, cr);
             case f_MPdiv:                           return eval_MPdiv(ctx, cmd, cr);
             case f_MPdiv_short:                     return eval_MPdiv_short(ctx, cmd, cr);
             case f_receiveLenQuotient_short:        return eval_receiveLenQuotient_short(ctx, cmd, cr);
@@ -2633,6 +2636,21 @@ void eval_getSmtProof (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 
     return scalar2fea(ctx.Fr, Scalar.e(leafValue));
 */
+}
+
+void eval_getHistoricGERRoot (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    
+}
+
+void eval_getIsForced (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    
+}
+
+void eval_getNewGERRoot (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+    
 }
 
 void eval_MPdiv (Context &ctx, const RomCommand &cmd, CommandResult &cr)

@@ -75,6 +75,7 @@ public:
     uint64_t MAX_CNT_KECCAK_F_LIMIT;
     uint64_t MAX_CNT_PADDING_PG_LIMIT;
     uint64_t MAX_CNT_POSEIDON_G_LIMIT;
+    uint64_t MAX_CNT_SHA256_F_LIMIT;
     uint64_t SAFE_RANGE;
     uint64_t MAX_CNT_STEPS;
     uint64_t MAX_CNT_ARITH;
@@ -83,6 +84,7 @@ public:
     uint64_t MAX_CNT_KECCAK_F;
     uint64_t MAX_CNT_PADDING_PG;
     uint64_t MAX_CNT_POSEIDON_G;
+    uint64_t MAX_CNT_SHA256_F;
     uint64_t MAX_CNT_POSEIDON_SLOAD_SSTORE;
     uint64_t MIN_CNT_KECCAK_BATCH;
     uint64_t CODE_SIZE_LIMIT;
@@ -170,6 +172,7 @@ public:
         MAX_CNT_KECCAK_F_LIMIT(0),
         MAX_CNT_PADDING_PG_LIMIT(0),
         MAX_CNT_POSEIDON_G_LIMIT(0),
+        MAX_CNT_SHA256_F_LIMIT(0),
         SAFE_RANGE(0),
         MAX_CNT_STEPS(0),
         MAX_CNT_ARITH(0),
@@ -178,6 +181,7 @@ public:
         MAX_CNT_KECCAK_F(0),
         MAX_CNT_PADDING_PG(0),
         MAX_CNT_POSEIDON_G(0),
+        MAX_CNT_SHA256_F(0),
         MAX_CNT_POSEIDON_SLOAD_SSTORE(0),
         MIN_CNT_KECCAK_BATCH(0),
         CODE_SIZE_LIMIT(0),

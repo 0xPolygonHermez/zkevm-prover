@@ -132,6 +132,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
     constants.MAX_CNT_KECCAK_F_LIMIT            = getConstant(romJson, "MAX_CNT_KECCAK_F_LIMIT");
     constants.MAX_CNT_PADDING_PG_LIMIT          = getConstant(romJson, "MAX_CNT_PADDING_PG_LIMIT");
     constants.MAX_CNT_POSEIDON_G_LIMIT          = getConstant(romJson, "MAX_CNT_POSEIDON_G_LIMIT");
+    constants.MAX_CNT_SHA256_F_LIMIT            = getConstant(romJson, "MAX_CNT_SHA256_F_LIMIT");
     constants.SAFE_RANGE                        = getConstant(romJson, "SAFE_RANGE");
     constants.MAX_CNT_STEPS                     = getConstant(romJson, "MAX_CNT_STEPS");
     constants.MAX_CNT_ARITH                     = getConstant(romJson, "MAX_CNT_ARITH");
@@ -140,6 +141,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
     constants.MAX_CNT_KECCAK_F                  = getConstant(romJson, "MAX_CNT_KECCAK_F");
     constants.MAX_CNT_PADDING_PG                = getConstant(romJson, "MAX_CNT_PADDING_PG");
     constants.MAX_CNT_POSEIDON_G                = getConstant(romJson, "MAX_CNT_POSEIDON_G");
+    constants.MAX_CNT_SHA256_F                  = getConstant(romJson, "MAX_CNT_SHA256_F");
     constants.MAX_CNT_POSEIDON_SLOAD_SSTORE     = getConstant(romJson, "MAX_CNT_POSEIDON_SLOAD_SSTORE");
     constants.MIN_CNT_KECCAK_BATCH              = getConstant(romJson, "MIN_CNT_KECCAK_BATCH");
     constants.CODE_SIZE_LIMIT                   = getConstant(romJson, "CODE_SIZE_LIMIT");

@@ -38,6 +38,7 @@ public:
     vector<PaddingPGExecutorInput> PaddingPG;
     vector<array<Goldilocks::Element, 17>> PoseidonG; // The 17th fe is the permutation
     vector<MemAlignAction> MemAlign;
+    vector<PaddingKKExecutorInput> PaddingSHA; // TODO: replace by PakkingSHAExecutorInput, when available
 };
 
 } // namespace
