@@ -2624,6 +2624,20 @@ void eval_getL1InfoTimestamp (Context &ctx, const RomCommand &cmd, CommandResult
         exitProcess();
     }
 #endif
+
+    uint64_t indexL1InfoTree = cr.scalar.get_ui();
+
+    unordered_map<uint64_t, L1Data>::const_iterator it;
+    it = ctx.proverRequest.input.l1InfoTreeData.find(indexL1InfoTree);
+    if (ctx.proverRequest.input.l1InfoTreeData.find(indexL1InfoTree) == ctx.proverRequest.input.l1InfoTreeData.end())
+    {
+        zklog.error("eval_getL1InfoTimestamp() could not find index=" + to_string(indexL1InfoTree) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+
+    cr.type = crt_fea;
+    scalar2fea(fr, it->second.minTimestamp, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+
     /*const indexL1InfoTree = evalCommand(ctx, tag.params[0]);
     const timestampL1InfoTree = ctx.input.l1InfoTree[indexL1InfoTree].timestamp;
 
@@ -2640,9 +2654,10 @@ void eval_getTimestampLimit (Context &ctx, const RomCommand &cmd, CommandResult 
         exitProcess();
     }
 #endif
-    /*
-    return [ctx.Fr.e(ctx.input.timestampLimit), ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero];
-    */
+
+    cr.type = crt_fea;
+    mpz_class timestampLimit = ctx.proverRequest.input.publicInputsExtended.publicInputs.timestampLimit;
+    scalar2fea(fr, timestampLimit, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 void eval_getForcedBlockHashL1 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -2655,8 +2670,9 @@ void eval_getForcedBlockHashL1 (Context &ctx, const RomCommand &cmd, CommandResu
         exitProcess();
     }
 #endif
-    /*
-    return scalar2fea(ctx.Fr, Scalar.e(ctx.input.forcedBlockHashL1));*/
+
+    cr.type = crt_fea;
+    scalar2fea(fr, ctx.proverRequest.input.publicInputsExtended.publicInputs.forcedBlockHashL1, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 mpz_class MOCK_VALUE_SMT_PROOF("0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3");
