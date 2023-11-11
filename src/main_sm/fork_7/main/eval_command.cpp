@@ -2533,7 +2533,9 @@ void eval_getL1InfoRoot (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         exitProcess();
     }
 #endif
-    //return scalar2fea(ctx.Fr, Scalar.e(ctx.input.l1InfoRoot));
+
+    cr.type = crt_fea;
+    scalar2fea(fr, ctx.proverRequest.input.publicInputsExtended.publicInputs.l1InfoRoot, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 void eval_getL1InfoGER (Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -2681,6 +2683,7 @@ void eval_getSmtProof (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         leafValue = it->second.smtProof[level];
     }
 
+    cr.type = crt_fea;
     scalar2fea(fr, leafValue, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
