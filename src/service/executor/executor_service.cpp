@@ -91,6 +91,13 @@ using grpc::Status;
 
     // Get fork ID
     proverRequest.input.publicInputsExtended.publicInputs.forkID = request->fork_id();
+    if (proverRequest.input.publicInputsExtended.publicInputs.forkID > 6)
+    {
+        zklog.error("ExecutorServiceImpl::ProcessBatch() got invalid fork ID =" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID), &proverRequest.tags);
+        response->set_error(executor::v1::EXECUTOR_ERROR_UNSUPPORTED_FORK_ID);
+        //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+        return Status::OK;
+    }
 
     // Create full tracer based on fork ID
     proverRequest.CreateFullTracer();
@@ -699,6 +706,13 @@ using grpc::Status;
 
     // Get fork ID
     proverRequest.input.publicInputsExtended.publicInputs.forkID = request->fork_id();
+    if (proverRequest.input.publicInputsExtended.publicInputs.forkID < 7)
+    {
+        zklog.error("ExecutorServiceImpl::ProcessBatchV2() got invalid fork ID =" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID), &proverRequest.tags);
+        response->set_error(executor::v1::EXECUTOR_ERROR_UNSUPPORTED_FORK_ID);
+        //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+        return Status::OK;
+    }
 
     // Create full tracer based on fork ID
     proverRequest.CreateFullTracer();
