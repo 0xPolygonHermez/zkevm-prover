@@ -2550,7 +2550,7 @@ void eval_getL1InfoGER (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #endif
 
     // Get index by executing cmd.params[0]
-    evalCommand(ctx, *cmd.params[1], cr);
+    evalCommand(ctx, *cmd.params[0], cr);
     if (cr.zkResult != ZKR_SUCCESS)
     {
         return;
@@ -2558,7 +2558,7 @@ void eval_getL1InfoGER (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        zklog.error("eval_getL1InfoGER() 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        zklog.error("eval_getL1InfoGER() unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 #endif
@@ -2586,12 +2586,32 @@ void eval_getL1InfoBlockHash (Context &ctx, const RomCommand &cmd, CommandResult
         exitProcess();
     }
 #endif
-    /*
-    const indexL1InfoTree = evalCommand(ctx, tag.params[0]);
-    const blockHashL1InfoTree = ctx.input.l1InfoTree[indexL1InfoTree].blockHash;
 
-    return scalar2fea(ctx.Fr, Scalar.e(blockHashL1InfoTree));*/
+    // Get index by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_getL1InfoBlockHash() unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    uint64_t indexL1InfoTree = cr.scalar.get_ui();
 
+    unordered_map<uint64_t, L1Data>::const_iterator it;
+    it = ctx.proverRequest.input.l1InfoTreeData.find(indexL1InfoTree);
+    if (ctx.proverRequest.input.l1InfoTreeData.find(indexL1InfoTree) == ctx.proverRequest.input.l1InfoTreeData.end())
+    {
+        zklog.error("eval_getL1InfoBlockHash() could not find index=" + to_string(indexL1InfoTree) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+
+    cr.type = crt_fea;
+    scalar2fea(fr, it->second.blockHashL1, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 void eval_getL1InfoTimestamp (Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -2661,7 +2681,7 @@ void eval_getSmtProof (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        zklog.error("eval_getSmtProof() 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        zklog.error("eval_getSmtProof() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 #endif
@@ -2676,7 +2696,7 @@ void eval_getSmtProof (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
     if (cr.type != crt_scalar)
     {
-        zklog.error("eval_getSmtProof() 2 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        zklog.error("eval_getSmtProof() 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 #endif
