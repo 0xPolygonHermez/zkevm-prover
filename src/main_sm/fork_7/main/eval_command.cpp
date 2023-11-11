@@ -2616,6 +2616,8 @@ void eval_getForcedBlockHashL1 (Context &ctx, const RomCommand &cmd, CommandResu
     return scalar2fea(ctx.Fr, Scalar.e(ctx.input.forcedBlockHashL1));*/
 }
 
+mpz_class MOCK_VALUE_SMT_PROOF("0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3");
+
 void eval_getSmtProof (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
@@ -2626,16 +2628,60 @@ void eval_getSmtProof (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         exitProcess();
     }
 #endif
-/*
-    const index = Number(evalCommand(ctx, tag.params[0]));
-    const level = Number(evalCommand(ctx, tag.params[1]));
 
-    const leafValue = (ctx.input.skipVerifyL1InfoRoot === true)
-        ? Constants.MOCK_VALUE_SMT_PROOF
-        : ctx.input.l1InfoTree[index].smtProof[level];
+    // Get index by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_getSmtProof() 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    uint64_t index = cr.scalar.get_ui();
 
-    return scalar2fea(ctx.Fr, Scalar.e(leafValue));
-*/
+    // Get level by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_getSmtProof() 2 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    uint64_t level = cr.scalar.get_ui();
+
+    mpz_class leafValue;
+    if (ctx.proverRequest.input.bSkipVerifyL1InfoRoot)
+    {
+        leafValue = MOCK_VALUE_SMT_PROOF;
+    }
+    else
+    {
+        unordered_map<uint64_t, L1Data>::const_iterator it;
+        it = ctx.proverRequest.input.l1InfoTreeData.find(index);
+        if (ctx.proverRequest.input.l1InfoTreeData.find(index) == ctx.proverRequest.input.l1InfoTreeData.end())
+        {
+            zklog.error("eval_getSmtProof() could not find index=" + to_string(index) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+            exitProcess();
+        }
+        if (level >= it->second.smtProof.size())
+        {
+            zklog.error("eval_getSmtProof() invlaid level=" + to_string(level) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+            exitProcess();
+        }
+        leafValue = it->second.smtProof[level];
+    }
+
+    scalar2fea(fr, leafValue, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 void eval_getHistoricGERRoot (Context &ctx, const RomCommand &cmd, CommandResult &cr)
