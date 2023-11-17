@@ -209,6 +209,11 @@ public:
     // Every position of the vector represents a context
     vector< map<mpz_class, set<mpz_class>> > accessedStorage;
 
+    vector<mpz_class> quotientShort;
+    mpz_class remainderShort;
+    vector<mpz_class> remainder;
+    vector<mpz_class> quotient;
+
     // Print functions
     void printRegs();
     void printVars();
