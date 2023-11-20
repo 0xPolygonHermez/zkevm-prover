@@ -13,6 +13,7 @@ uint64_t PaddingKKExecutor::prepareInput (vector<PaddingKKExecutorInput> &input)
 
     for (uint64_t i=0; i<input.size(); i++)
     {
+        input[i].dataBytes.clear();
         if (input[i].data.length() > 0)
         {
             // Make sure we got an even number of characters

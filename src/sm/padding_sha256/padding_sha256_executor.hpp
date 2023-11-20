@@ -8,6 +8,7 @@
 #include "goldilocks_base_field.hpp"
 #include "padding_sha256bit_executor.hpp"
 #include "scalar.hpp"
+#include "sha256.hpp"
 
 USING_PROVER_FORK_NAMESPACE;
 
@@ -36,6 +37,7 @@ private:
     /* Constant values */
     const uint64_t blockSize;
     const uint64_t bytesPerBlock;
+    const uint64_t bitsPerElement;
     const uint64_t N;
 
     /* Hash of an empty/zero message */
@@ -49,11 +51,12 @@ public:
     /* Constructor */
     PaddingSha256Executor(Goldilocks &fr) :
         fr(fr),
-        blockSize(155286),
-        bytesPerBlock(136),
+        blockSize(31487),
+        bytesPerBlock(64),
+        bitsPerElement(6),
         N(PROVER_FORK_NAMESPACE::PaddingSha256CommitPols::pilDegree())
     {
-        keccak256(NULL, 0, hashZeroScalar);
+        SHA256(NULL, 0, hashZeroScalar);
         scalar2fea(fr, hashZeroScalar, hash0);
     };
 
