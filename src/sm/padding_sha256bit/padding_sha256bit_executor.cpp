@@ -25,7 +25,7 @@ inline void callKeccakF (const uint8_t (&inputState)[200], uint8_t (&outputState
     KeccakF1600(outputState);
 }
 
-void PaddingSha256BitExecutor::execute (vector<PaddingSha256BitExecutorInput> &input, PaddingSha256BitCommitPols &pols, vector<Bits2FieldExecutorInput> &required)
+void PaddingSha256BitExecutor::execute (vector<PaddingSha256BitExecutorInput> &input, PaddingSha256BitCommitPols &pols, vector<Bits2FieldSha256ExecutorInput> &required)
 {
     #if 0
 #ifdef LOG_TIME_STATISTICS

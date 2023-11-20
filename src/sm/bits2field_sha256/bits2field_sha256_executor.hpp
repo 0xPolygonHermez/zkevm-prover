@@ -36,11 +36,11 @@ public:
     Bits2FieldSha256Executor(Goldilocks &fr) :
         fr(fr),
         slotSize(155286),
-        N(Bits2FieldCommitPols::pilDegree()),
+        N(Bits2FieldSha256CommitPols::pilDegree()),
         nSlots((N-1)/slotSize) {};
 
     /* Executor */
-    void execute (vector<Bits2FieldSha256ExecutorInput> &input, Bits2FieldCommitPols &pols, vector<vector<Goldilocks::Element>> &required);
+    void execute (vector<Bits2FieldSha256ExecutorInput> &input, Bits2FieldSha256CommitPols &pols, vector<vector<Goldilocks::Element>> &required);
 
 private:
 

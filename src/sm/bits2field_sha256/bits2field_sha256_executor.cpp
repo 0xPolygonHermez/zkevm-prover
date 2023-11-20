@@ -47,13 +47,14 @@ inline uint64_t getBitFromState ( const uint8_t (&state)[200], uint64_t i )
     return (state[i/8] >> (i%8)) & 1;
 }
 
-void Bits2FieldSha256Executor::execute (vector<Bits2FieldSha256ExecutorInput> &input, Bits2FieldCommitPols &pols, vector<vector<Goldilocks::Element>> &required)
+void Bits2FieldSha256Executor::execute (vector<Bits2FieldSha256ExecutorInput> &input, Bits2FieldSha256CommitPols &pols, vector<vector<Goldilocks::Element>> &required)
 {
+    #if 0
     /* Check input size (the number of keccaks blocks to process) is not bigger than
        the capacity of the SM (the number of slots that fit into the evaluations multiplied by the number of bits per field element) */
     if (input.size() > nSlots*44)
     {
-        zklog.error("Bits2FieldExecutor::execute() too many entries input.size()=" + to_string(input.size()) + " > nSlots*44=" + to_string(nSlots*44));
+        zklog.error("Bits2FieldSha256Executor::execute() too many entries input.size()=" + to_string(input.size()) + " > nSlots*44=" + to_string(nSlots*44));
         exitProcess();
     }
 
@@ -141,7 +142,8 @@ void Bits2FieldSha256Executor::execute (vector<Bits2FieldSha256ExecutorInput> &i
     /* Sanity check */
     zkassert(p <= N);
 
-    zklog.info("Bits2FieldExecutor successfully processed " + to_string(input.size()) + " Keccak hashes (" + to_string((double(input.size())*slotSize*100)/(44*N)) + "%)");
+    zklog.info("Bits2FieldSha256Executor successfully processed " + to_string(input.size()) + " Keccak hashes (" + to_string((double(input.size())*slotSize*100)/(44*N)) + "%)");
+#endif
 }
 
 Goldilocks::Element Bits2FieldSha256Executor::getBit (vector<Bits2FieldSha256ExecutorInput> &input, uint64_t block, bool isOutput, uint64_t pos)
