@@ -85,6 +85,9 @@ string RomLine::toString(Goldilocks &fr)
     if (arithEq0 != 0) result += " arithEq0=" + to_string(arithEq0);
     if (arithEq1 != 0) result += " arithEq1=" + to_string(arithEq1);
     if (arithEq2 != 0) result += " arithEq2=" + to_string(arithEq2);
+    if (arithEq3 != 0) result += " arithEq3=" + to_string(arithEq3);
+    if (arithEq4 != 0) result += " arithEq4=" + to_string(arithEq4);
+    if (arithEq5 != 0) result += " arithEq5=" + to_string(arithEq5);
     if (bin != 0) result += " bin=" + to_string(bin);
     if (binOpcode != 0) result += " binOpcode=" + to_string(binOpcode);
     if (memAlignRD != 0) result += " memAlignRD=" + to_string(memAlignRD);
