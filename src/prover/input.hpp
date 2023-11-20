@@ -18,6 +18,17 @@ using json = nlohmann::json;
 // This max length is checked in preprocessTxs()
 #define MAX_BATCH_L2_DATA_SIZE (120000)
 
+class L1Data
+{
+public:
+    bool bPresent;
+    mpz_class globalExitRoot;
+    mpz_class blockHashL1;
+    uint64_t minTimestamp;
+    vector<mpz_class> smtProof;
+    L1Data() : bPresent(false), minTimestamp(0) {};
+};
+
 class Input
 {
     Goldilocks &fr;
@@ -32,14 +43,20 @@ public:
     bool bUpdateMerkleTree; // if true, save DB writes to SQL database
     bool bNoCounters; // if true, do not increase counters nor limit evaluations
     bool bGetKeys; // if true, return the keys used to read or write storage data
+    bool bSkipVerifyL1InfoRoot; // If true, skip the check when l1Data is verified (fork ID >= 7)
+    bool bSkipFirstChangeL2Block; // If true, skip the restriction to start a batch with a changeL2Block transaction (fork ID >= 7)
     TraceConfig traceConfig; // FullTracer configuration
+    unordered_map<uint64_t, L1Data> l1InfoTreeData;
 
     // Constructor
     Input (Goldilocks &fr) :
         fr(fr),
         bUpdateMerkleTree(false),
         bNoCounters(false),
-        bGetKeys(false) {};
+        bGetKeys(false),
+        bSkipVerifyL1InfoRoot(false),
+        bSkipFirstChangeL2Block(false)
+        {};
 
     // Loads the input object data from a JSON object
     zkresult load (json &input);

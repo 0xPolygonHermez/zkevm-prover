@@ -60,9 +60,6 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             case f_getTimestampLimit:               return eval_getTimestampLimit(ctx, cmd, cr);
             case f_getForcedBlockHashL1:            return eval_getForcedBlockHashL1(ctx, cmd, cr);
             case f_getSmtProof:                     return eval_getSmtProof(ctx, cmd, cr);
-            case f_getHistoricGERRoot:              return eval_getHistoricGERRoot(ctx, cmd, cr);
-            case f_getIsForced:                     return eval_getIsForced(ctx, cmd, cr);
-            case f_getNewGERRoot:                   return eval_getNewGERRoot(ctx, cmd, cr);
             case f_MPdiv:                           return eval_MPdiv(ctx, cmd, cr);
             case f_MPdiv_short:                     return eval_MPdiv_short(ctx, cmd, cr);
             case f_receiveLenQuotient_short:        return eval_receiveLenQuotient_short(ctx, cmd, cr);
@@ -2533,7 +2530,9 @@ void eval_getL1InfoRoot (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         exitProcess();
     }
 #endif
-    //return scalar2fea(ctx.Fr, Scalar.e(ctx.input.l1InfoRoot));
+
+    cr.type = crt_fea;
+    scalar2fea(fr, ctx.proverRequest.input.publicInputsExtended.publicInputs.l1InfoRoot, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 void eval_getL1InfoGER (Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -2546,11 +2545,32 @@ void eval_getL1InfoGER (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         exitProcess();
     }
 #endif
-    /*
-   const indexL1InfoTree = evalCommand(ctx, tag.params[0]);
-    const gerL1InfoTree = ctx.input.l1InfoTree[indexL1InfoTree].globalExitRoot;
 
-    return scalar2fea(ctx.Fr, Scalar.e(gerL1InfoTree));*/
+    // Get index by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_getL1InfoGER() unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    uint64_t indexL1InfoTree = cr.scalar.get_ui();
+
+    unordered_map<uint64_t, L1Data>::const_iterator it;
+    it = ctx.proverRequest.input.l1InfoTreeData.find(indexL1InfoTree);
+    if (ctx.proverRequest.input.l1InfoTreeData.find(indexL1InfoTree) == ctx.proverRequest.input.l1InfoTreeData.end())
+    {
+        zklog.error("eval_getL1InfoGER() could not find index=" + to_string(indexL1InfoTree) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+
+    cr.type = crt_fea;
+    scalar2fea(fr, it->second.globalExitRoot, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 void eval_getL1InfoBlockHash (Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -2563,12 +2583,32 @@ void eval_getL1InfoBlockHash (Context &ctx, const RomCommand &cmd, CommandResult
         exitProcess();
     }
 #endif
-    /*
-    const indexL1InfoTree = evalCommand(ctx, tag.params[0]);
-    const blockHashL1InfoTree = ctx.input.l1InfoTree[indexL1InfoTree].blockHash;
 
-    return scalar2fea(ctx.Fr, Scalar.e(blockHashL1InfoTree));*/
+    // Get index by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_getL1InfoBlockHash() unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    uint64_t indexL1InfoTree = cr.scalar.get_ui();
 
+    unordered_map<uint64_t, L1Data>::const_iterator it;
+    it = ctx.proverRequest.input.l1InfoTreeData.find(indexL1InfoTree);
+    if (ctx.proverRequest.input.l1InfoTreeData.find(indexL1InfoTree) == ctx.proverRequest.input.l1InfoTreeData.end())
+    {
+        zklog.error("eval_getL1InfoBlockHash() could not find index=" + to_string(indexL1InfoTree) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+
+    cr.type = crt_fea;
+    scalar2fea(fr, it->second.blockHashL1, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 void eval_getL1InfoTimestamp (Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -2581,6 +2621,20 @@ void eval_getL1InfoTimestamp (Context &ctx, const RomCommand &cmd, CommandResult
         exitProcess();
     }
 #endif
+
+    uint64_t indexL1InfoTree = cr.scalar.get_ui();
+
+    unordered_map<uint64_t, L1Data>::const_iterator it;
+    it = ctx.proverRequest.input.l1InfoTreeData.find(indexL1InfoTree);
+    if (ctx.proverRequest.input.l1InfoTreeData.find(indexL1InfoTree) == ctx.proverRequest.input.l1InfoTreeData.end())
+    {
+        zklog.error("eval_getL1InfoTimestamp() could not find index=" + to_string(indexL1InfoTree) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+
+    cr.type = crt_fea;
+    scalar2fea(fr, it->second.minTimestamp, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
+
     /*const indexL1InfoTree = evalCommand(ctx, tag.params[0]);
     const timestampL1InfoTree = ctx.input.l1InfoTree[indexL1InfoTree].timestamp;
 
@@ -2597,9 +2651,10 @@ void eval_getTimestampLimit (Context &ctx, const RomCommand &cmd, CommandResult 
         exitProcess();
     }
 #endif
-    /*
-    return [ctx.Fr.e(ctx.input.timestampLimit), ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero, ctx.Fr.zero];
-    */
+
+    cr.type = crt_fea;
+    mpz_class timestampLimit = ctx.proverRequest.input.publicInputsExtended.publicInputs.timestampLimit;
+    scalar2fea(fr, timestampLimit, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
 void eval_getForcedBlockHashL1 (Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -2612,9 +2667,12 @@ void eval_getForcedBlockHashL1 (Context &ctx, const RomCommand &cmd, CommandResu
         exitProcess();
     }
 #endif
-    /*
-    return scalar2fea(ctx.Fr, Scalar.e(ctx.input.forcedBlockHashL1));*/
+
+    cr.type = crt_fea;
+    scalar2fea(fr, ctx.proverRequest.input.publicInputsExtended.publicInputs.forcedBlockHashL1, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
+
+mpz_class MOCK_VALUE_SMT_PROOF("0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3");
 
 void eval_getSmtProof (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
@@ -2626,121 +2684,1194 @@ void eval_getSmtProof (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         exitProcess();
     }
 #endif
-/*
-    const index = Number(evalCommand(ctx, tag.params[0]));
-    const level = Number(evalCommand(ctx, tag.params[1]));
 
-    const leafValue = (ctx.input.skipVerifyL1InfoRoot === true)
-        ? Constants.MOCK_VALUE_SMT_PROOF
-        : ctx.input.l1InfoTree[index].smtProof[level];
+    // Get index by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_getSmtProof() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    uint64_t index = cr.scalar.get_ui();
 
-    return scalar2fea(ctx.Fr, Scalar.e(leafValue));
-*/
+    // Get level by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_getSmtProof() 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    uint64_t level = cr.scalar.get_ui();
+
+    mpz_class leafValue;
+    if (ctx.proverRequest.input.bSkipVerifyL1InfoRoot)
+    {
+        leafValue = MOCK_VALUE_SMT_PROOF;
+    }
+    else
+    {
+        unordered_map<uint64_t, L1Data>::const_iterator it;
+        it = ctx.proverRequest.input.l1InfoTreeData.find(index);
+        if (ctx.proverRequest.input.l1InfoTreeData.find(index) == ctx.proverRequest.input.l1InfoTreeData.end())
+        {
+            zklog.error("eval_getSmtProof() could not find index=" + to_string(index) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+            exitProcess();
+        }
+        if (level >= it->second.smtProof.size())
+        {
+            zklog.error("eval_getSmtProof() invlaid level=" + to_string(level) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+            exitProcess();
+        }
+        leafValue = it->second.smtProof[level];
+    }
+
+    cr.type = crt_fea;
+    scalar2fea(fr, leafValue, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
 }
 
-void eval_getHistoricGERRoot (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+// Compares two unsigned integers represented as arrays of BigInts.
+//    a - Unsigned integer represented as an array of BigInts.
+//    b - Unsigned integer represented as an array of BigInts.
+//    returns 1 if a > b, -1 if a < b, 0 if a == b.
+
+int64_t compare (const vector<mpz_class> &a, const vector<mpz_class> &b)
 {
+    uint64_t aSize = a.size();
+    uint64_t bSize = b.size();
     
+    if (aSize != bSize)
+    {
+        return aSize >= bSize ? 1 : -1;
+    }
+    for (int64_t i = aSize - 1; i >= 0; i--)
+    {
+        if (a[i] != b[i])
+        {
+            return a[i] > b[i] ? 1 : -1;
+        }
+    }
+    return 0;
 }
 
-void eval_getIsForced (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+// Removes leading zeros from a.
+//  a - Unsigned integer represented as an array of BigInts.
+//  returns a with leading zeros removed. It sets a.length = 0 if a = [0n]
+void trim (vector<mpz_class> &a)
 {
-    
+    while (a.size() > 0)
+    {
+        if (a[a.size()-1] == 0)
+        {
+            a.pop_back();
+        }
+        else
+        {
+            break;
+        }
+    }
 }
 
-void eval_getNewGERRoot (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+mpz_class base = ScalarTwoTo256;
+
+// Computes the subtraction of two unsigned integers a,b represented as arrays of BigInts. Assumes a >= b.
+//  param a - Unsigned integer represented as an array of BigInts.
+//  param b - Unsigned integer represented as an array of BigInts.
+//  returns a - b.
+void _MP_sub (const vector<mpz_class> &a, const vector<mpz_class> &b, vector<mpz_class> &result)
 {
-    
+    uint64_t aSize = a.size();
+    uint64_t bSize = b.size();
+    result.clear();
+    mpz_class diff = 0;
+    mpz_class carry = 0;
+
+    uint64_t i = 0;
+    for (i = 0; i < bSize; i++)
+    {
+        diff = a[i] - b[i] - carry;
+        carry = diff < 0 ? 1 : 0;
+        result[i] = diff + carry * base;
+    }
+    for (i = bSize; i < aSize; i++)
+    {
+        diff = a[i] - carry;
+        if (diff < 0)
+        {
+            diff += base;
+        }
+        else
+        {
+            result[i++] = diff;
+            break;
+        }
+        result[i] = diff;
+    }
+    for (; i < aSize; i++)
+    {
+        result[i] = a[i];
+    }
+    trim(result);
 }
 
+// Computes the subtraction of two unsigned integers represented as arrays of BigInts.
+//  a - Unsigned integer represented as an array of BigInts.
+//  b - Unsigned integer represented as an array of BigInts.
+//  returns a - b.
+void MP_sub (const vector<mpz_class> &a, const vector <mpz_class> &b, vector<mpz_class> &result)
+{
+    result.clear();
+    if (compare(a, b) >= 0)
+    {
+        _MP_sub(a, b, result);
+    }
+    else
+    {
+        _MP_sub(b, a, result);
+        result[result.size() - 1] = -result[result.size() - 1];
+    }
+    if (result.size() == 0)
+    {
+        result.emplace_back(0);
+    }
+}
+
+// Computes the multiplication of an unsigned integer represented as an array of BigInts and an unsigned integer represented as a BigInt.
+//  a - Unsigned integer represented as an array of BigInts.
+//  b - Unsigned integer represented as a BigInt.
+//  returns a * b
+void MP_short_mul (const vector<mpz_class> &a, const mpz_class &b, vector<mpz_class> &result)
+{
+    uint64_t aSize = a.size();
+    uint64_t size = aSize;
+    result.clear();
+    for (uint64_t i=0; i<size; i++)
+    {
+        result.emplace_back(0);
+    }
+    mpz_class product;
+    mpz_class carry = 0;
+    uint64_t i;
+    for (i = 0; i < aSize; i++)
+    {
+        product = a[i] * b + carry;
+        carry = product / base;
+        result[i] = product - carry * base;
+    }
+    while (carry > 0)
+    {
+        result.emplace_back(carry % base);
+        carry /= base;
+    }
+    trim(result);
+}
+
+// Computes the normalisation of two unsigned integers a,b as explained here https://www.codeproject.com/Articles/1276311/Multiple-Precision-Arithmetic-Division-Algorithm.
+//  a - Unsigned integer represented as an array of BigInts.
+//  b - Unsigned integer represented as an array of BigInts.
+//  returns Normalised a and b to achieve better performance for MPdiv.
+void normalize (vector<mpz_class> &a, vector<mpz_class> &b, mpz_class &shift)
+{
+    mpz_class bm = b[b.size() - 1];
+    shift = 1; // shift cannot be larger than log2(base) - 1
+    while (bm < (base / 2))
+    {
+        MP_short_mul(b, 2, b); // left-shift b by 2
+        bm = b[b.size() - 1];
+        shift *= 2;
+    }
+
+    MP_short_mul(a, shift, b); // left-shift a by 2^shift
+}
+
+void _MPdiv_short (const vector<mpz_class> &a, const mpz_class &b, vector<mpz_class> &quotient, mpz_class &remainder);
+
+// Computes the next digit of the quotient.
+//  an - Unsigned integer represented as an array of BigInts. This is the current dividend.
+//  b - Unsigned integer represented as an array of BigInts.
+//  returns The next digit of the quotient.
+void findQn (const vector<mpz_class> &an, const vector<mpz_class> &b, mpz_class &result)
+{
+    uint64_t b_l = b.size();
+    mpz_class bm = b[b_l - 1];
+    if (compare(an, b) == -1)
+    {
+        result = 0;
+        return;
+    }
+
+    uint64_t n = an.size();
+    vector<mpz_class> aguess;
+    if (an[n-1] < bm)
+    {
+        aguess.emplace_back(an[n-2]);
+        aguess.emplace_back(an[n-1]);
+    }
+    else
+    {
+        aguess.emplace_back(an[n-1]);
+    }
+
+    if (an[n-1] < bm)
+    {
+        vector<mpz_class> quotient;
+        mpz_class remainder;
+        _MPdiv_short(aguess, bm, quotient, remainder);
+        if (quotient.size() == 0)
+        {
+            zklog.error("findQn() called _MPdiv_short() but got a quotient with size=0");
+            exitProcess();
+        }
+        result = quotient[0]; // this is always a single digit
+    }
+    else if (an[n-1] == bm)
+    {
+        if (b_l < n)
+        {
+            result = base - 1;
+            return;
+        }
+        else
+        {
+            result = 1;
+            return;
+        }
+    }
+    else
+    {
+        result = 1;
+        return;
+    }
+}
+
+// Computes the division of two unsigned integers represented as arrays of BigInts.
+//  a - Unsigned integer represented as an array of BigInts.
+//  b - Unsigned integer represented as an array of BigInts.
+//  returns [quotient, remainder] of a / b.
+void _MPdiv (vector<mpz_class> &a, vector<mpz_class> &b, vector<mpz_class> &quotient, vector<mpz_class> &remainder)
+{
+    mpz_class shift;
+    normalize(a, b, shift);
+    uint64_t a_l = a.size();
+    quotient.clear();
+    remainder.clear();
+    vector<mpz_class> an;
+    while (compare(an, b) == -1)
+    {
+        an.emplace(an.begin(), a[--a_l]);
+    }
+
+    vector<mpz_class> test;
+    mpz_class qn;
+    while (a_l >= 0)
+    {
+        findQn(an, b, qn);
+        MP_short_mul(b, qn, test);
+        while (compare(test, an) == 1)
+        {
+            // maximum 2 iterations
+            qn--;
+            vector<mpz_class> aux;
+            MP_sub(test, b, aux);
+            test.swap(aux);
+        }
+
+        quotient.emplace(quotient.begin(), qn);
+        MP_sub(an, test, remainder);
+        an = remainder;
+        if (a_l == 0)
+        {
+            break;
+        }
+        an.emplace(an.begin(), a[--a_l]);
+    }
+    vector<mpz_class> auxQuotient;
+    mpz_class auxRemainder;
+    _MPdiv_short(remainder, shift, auxQuotient, auxRemainder); // TODO: review with Carlos
+    remainder.emplace_back(auxRemainder);
+    trim(quotient);
+    trim(remainder);
+}
+
+// Computes the division of an unsigned integer represented as an array of BigInts and an unsigned integer represented as a BigInt.
+//  a - Unsigned integer represented as an array of BigInts.
+//  b - Unsigned integer represented as a BigInt.
+//  returns [quotient, remainder] of a / b.
+void _MPdiv_short (const vector<mpz_class> &a, const mpz_class &b, vector<mpz_class> &quotient, mpz_class &remainder)
+{
+    uint64_t a_l = a.size();
+    quotient.clear();
+    remainder = 0;
+
+    mpz_class dividendi;
+    mpz_class qi;
+    for (int64_t i = a_l - 1; i >= 0; i--)
+    {
+        dividendi = remainder*base + a[i];
+        qi = dividendi / b;
+        remainder = dividendi - qi * b;
+        quotient[i] = qi;
+    }
+    trim(quotient);
+}
+
+// Computes the division of two unsigned integers represented as arrays of BigInts.
+//  sets ctx.quotient and ctx.remainder.
 void eval_MPdiv (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 4)
+    {
+        zklog.error("eval_MPdiv() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
 
+    // Get addr1 by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_MPdiv() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    uint64_t addr1 = cr.scalar.get_ui();
+
+    // Get len1 by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_MPdiv() 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    uint64_t len1 = cr.scalar.get_ui();
+
+    // Get addr2 by executing cmd.params[2]
+    evalCommand(ctx, *cmd.params[2], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_MPdiv() 2 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    uint64_t addr2 = cr.scalar.get_ui();
+
+    // Get len2 by executing cmd.params[3]
+    evalCommand(ctx, *cmd.params[3], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_MPdiv() 3 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    uint64_t len2 = cr.scalar.get_ui();
+
+    vector<mpz_class> input1;
+    vector<mpz_class> input2;
+    unordered_map<uint64_t, fork_7::Fea>::const_iterator it;
+    mpz_class auxScalar;
+    for (uint64_t i = 0; i < len1; i++)
+    {
+        it = ctx.mem.find(addr1 + i);
+        if (it == ctx.mem.end())
+        {
+            zklog.error("eval_MPdiv() cound not find ctx.mem entry for address=" + to_string(addr1 + i) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+            exitProcess();
+        }
+        if (!fea2scalar(fr, auxScalar, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7))
+        {
+            zklog.error("eval_MPdiv() failed calling fea2scalar for address=" + to_string(addr1 + i) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+            exitProcess();
+        }
+        input1.emplace_back(auxScalar);
+    }
+    for (uint64_t i = 0; i < len2; i++)
+    {
+        it = ctx.mem.find(addr2 + i);
+        if (it == ctx.mem.end())
+        {
+            zklog.error("eval_MPdiv() cound not find ctx.mem entry for address=" + to_string(addr2 + i) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+            exitProcess();
+        }
+        if (!fea2scalar(fr, auxScalar, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7))
+        {
+            zklog.error("eval_MPdiv() failed calling fea2scalar for address=" + to_string(addr2 + i) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+            exitProcess();
+        }
+        input2.emplace_back(auxScalar);
+    }
+
+    _MPdiv(input1, input2, ctx.quotient, ctx.remainder);
 }
 
 void eval_MPdiv_short (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 3)
+    {
+        zklog.error("eval_MPdiv_short() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
 
+    // Get addr1 by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_MPdiv_short() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    uint64_t addr1 = cr.scalar.get_ui();
+
+    // Get len1 by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_MPdiv_short() 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    uint64_t len1 = cr.scalar.get_ui();
+
+    // Get addr2 by executing cmd.params[2]
+    evalCommand(ctx, *cmd.params[2], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_MPdiv_short() 2 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    mpz_class &input2 = cr.scalar;
+
+    vector<mpz_class> input1;
+    unordered_map<uint64_t, fork_7::Fea>::const_iterator it;
+    mpz_class auxScalar;
+    for (uint64_t i = 0; i < len1; i++)
+    {
+        it = ctx.mem.find(addr1 + i);
+        if (it == ctx.mem.end())
+        {
+            zklog.error("eval_MPdiv_short() cound not find ctx.mem entry for address=" + to_string(addr1 + i) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+            exitProcess();
+        }
+        if (!fea2scalar(fr, auxScalar, it->second.fe0, it->second.fe1, it->second.fe2, it->second.fe3, it->second.fe4, it->second.fe5, it->second.fe6, it->second.fe7))
+        {
+            zklog.error("eval_MPdiv_short() failed calling fea2scalar for address=" + to_string(addr1 + i) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+            exitProcess();
+        }
+        input1.emplace_back(auxScalar);
+    }
+    
+    _MPdiv_short(input1, input2, ctx.quotientShort, ctx.remainderShort);
 }
 
 void eval_receiveLenQuotient_short (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
-
+    cr.type = crt_scalar;
+    cr.scalar = ctx.quotientShort.size();
 }
 
 void eval_receiveQuotientChunk_short (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 1)
+    {
+        zklog.error("eval_receiveQuotientChunk_short() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
 
+    // Get position by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_receiveQuotientChunk_short() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    uint64_t position = cr.scalar.get_ui();
+
+    if (position >= ctx.quotientShort.size())
+    {
+        zklog.error("eval_receiveQuotientChunk_short() 0 unexpected position=" + to_string(position) + " >= ctx.quotientShort.size()=" + to_string(ctx.quotientShort.size()) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+
+    cr.type = crt_scalar;
+    cr.scalar = ctx.quotientShort[position];
 }
 
 void eval_receiveRemainderChunk_short (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
-
+    cr.type = crt_scalar;
+    cr.scalar = ctx.remainderShort;
 }
 
 void eval_receiveLenRemainder (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
-
+    cr.type = crt_scalar;
+    cr.scalar = ctx.remainder.size();
 }
 
 void eval_receiveRemainderChunk (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 1)
+    {
+        zklog.error("eval_receiveRemainderChunk() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
 
+    // Get position by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_receiveRemainderChunk() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    uint64_t position = cr.scalar.get_ui();
+
+    if (position >= ctx.remainder.size())
+    {
+        zklog.error("eval_receiveRemainderChunk() 0 unexpected position=" + to_string(position) + " >= ctx.quotientShort.size()=" + to_string(ctx.quotientShort.size()) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+
+    cr.type = crt_scalar;
+    cr.scalar = ctx.remainder[position];
 }
 
 void eval_receiveLenQuotient (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
-
+    cr.type = crt_scalar;
+    cr.scalar = ctx.quotient.size();
 }
 
 void eval_receiveQuotientChunk (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 1)
+    {
+        zklog.error("eval_receiveQuotientChunk() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
 
-}
+    // Get position by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_receiveQuotientChunk() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    uint64_t position = cr.scalar.get_ui();
 
-void eval_ARITH_BN254_ADDFP2_X (Context &ctx, const RomCommand &cmd, CommandResult &cr)
-{
+    if (position >= ctx.quotient.size())
+    {
+        zklog.error("eval_receiveQuotientChunk() 0 unexpected position=" + to_string(position) + " >= ctx.quotientShort.size()=" + to_string(ctx.quotientShort.size()) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
 
-}
-
-void eval_ARITH_BN254_ADDFP2_Y (Context &ctx, const RomCommand &cmd, CommandResult &cr)
-{
-
-}
-
-void eval_ARITH_BN254_SUBFP2_X (Context &ctx, const RomCommand &cmd, CommandResult &cr)
-{
-
-}
-
-void eval_ARITH_BN254_SUBFP2_Y (Context &ctx, const RomCommand &cmd, CommandResult &cr)
-{
-
+    cr.type = crt_scalar;
+    cr.scalar = ctx.quotient[position];
 }
 
 void eval_ARITH_BN254_MULFP2_X (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 4)
+    {
+        zklog.error("eval_ARITH_BN254_MULFP2_X() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
 
+    // Get x1 by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_ARITH_BN254_MULFP2_X() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawFr::Element x1;
+    bn128.fromMpz(x1, cr.scalar.get_mpz_t());
+
+    // Get y1 by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_ARITH_BN254_MULFP2_X() 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawFr::Element y1;
+    bn128.fromMpz(y1, cr.scalar.get_mpz_t());
+
+    // Get x2 by executing cmd.params[2]
+    evalCommand(ctx, *cmd.params[2], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_ARITH_BN254_MULFP2_X() 2 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawFr::Element x2;
+    bn128.fromMpz(x2, cr.scalar.get_mpz_t());
+
+    // Get y2 by executing cmd.params[3]
+    evalCommand(ctx, *cmd.params[3], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_ARITH_BN254_MULFP2_X() 3 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawFr::Element y2;
+    bn128.fromMpz(y2, cr.scalar.get_mpz_t());
+
+    // Calculate the point coordinate
+    RawFr::Element result;
+    result = bn128.sub(bn128.mul(x1, x2), bn128.mul(y1, y2));
+
+    // Convert result to scalar
+    cr.type = crt_scalar;
+    bn128.toMpz(cr.scalar.get_mpz_t(), result);
 }
 
 void eval_ARITH_BN254_MULFP2_Y (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 4)
+    {
+        zklog.error("eval_ARITH_BN254_MULFP2_Y() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
 
+    // Get x1 by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_ARITH_BN254_MULFP2_Y() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawFr::Element x1;
+    bn128.fromMpz(x1, cr.scalar.get_mpz_t());
+
+    // Get y1 by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_ARITH_BN254_MULFP2_Y() 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawFr::Element y1;
+    bn128.fromMpz(y1, cr.scalar.get_mpz_t());
+
+    // Get x2 by executing cmd.params[2]
+    evalCommand(ctx, *cmd.params[2], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_ARITH_BN254_MULFP2_Y() 2 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawFr::Element x2;
+    bn128.fromMpz(x2, cr.scalar.get_mpz_t());
+
+    // Get y2 by executing cmd.params[3]
+    evalCommand(ctx, *cmd.params[3], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_ARITH_BN254_MULFP2_Y() 3 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawFr::Element y2;
+    bn128.fromMpz(y2, cr.scalar.get_mpz_t());
+
+    // Calculate the point coordinate
+    RawFr::Element result;
+    result = bn128.add(bn128.mul(x1, y2), bn128.mul(x2, y1));
+
+    // Convert result to scalar
+    cr.type = crt_scalar;
+    bn128.toMpz(cr.scalar.get_mpz_t(), result);
 }
 
+void eval_ARITH_BN254_ADDFP2_X (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 2)
+    {
+        zklog.error("eval_ARITH_BN254_ADDFP2_X() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    // Get x1 by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_ARITH_BN254_ADDFP2_X() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawFr::Element x1;
+    bn128.fromMpz(x1, cr.scalar.get_mpz_t());
+
+    // Get y1 by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_ARITH_BN254_ADDFP2_X() 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawFr::Element x2;
+    bn128.fromMpz(x2, cr.scalar.get_mpz_t());
+
+    // Calculate the point coordinate
+    RawFr::Element result;
+    result = bn128.add(x1, x2);
+
+    // Convert result to scalar
+    cr.type = crt_scalar;
+    bn128.toMpz(cr.scalar.get_mpz_t(), result);
+}
+
+void eval_ARITH_BN254_ADDFP2_Y (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 2)
+    {
+        zklog.error("eval_ARITH_BN254_ADDFP2_Y() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    // Get x1 by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_ARITH_BN254_ADDFP2_Y() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawFr::Element y1;
+    bn128.fromMpz(y1, cr.scalar.get_mpz_t());
+
+    // Get y1 by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_ARITH_BN254_ADDFP2_Y() 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawFr::Element y2;
+    bn128.fromMpz(y2, cr.scalar.get_mpz_t());
+
+    // Calculate the point coordinate
+    RawFr::Element result;
+    result = bn128.add(y1, y2);
+
+    // Convert result to scalar
+    cr.type = crt_scalar;
+    bn128.toMpz(cr.scalar.get_mpz_t(), result);
+}
+
+void eval_ARITH_BN254_SUBFP2_X (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 2)
+    {
+        zklog.error("eval_ARITH_BN254_SUBFP2_X() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    // Get x1 by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_ARITH_BN254_SUBFP2_X() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawFr::Element x1;
+    bn128.fromMpz(x1, cr.scalar.get_mpz_t());
+
+    // Get y1 by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_ARITH_BN254_SUBFP2_X() 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawFr::Element x2;
+    bn128.fromMpz(x2, cr.scalar.get_mpz_t());
+
+    // Calculate the point coordinate
+    RawFr::Element result;
+    result = bn128.sub(x1, x2);
+
+    // Convert result to scalar
+    cr.type = crt_scalar;
+    bn128.toMpz(cr.scalar.get_mpz_t(), result);
+}
+
+void eval_ARITH_BN254_SUBFP2_Y (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 2)
+    {
+        zklog.error("eval_ARITH_BN254_SUBFP2_Y() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    // Get x1 by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_ARITH_BN254_SUBFP2_Y() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawFr::Element y1;
+    bn128.fromMpz(y1, cr.scalar.get_mpz_t());
+
+    // Get y1 by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[1], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_ARITH_BN254_SUBFP2_Y() 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawFr::Element y2;
+    bn128.fromMpz(y2, cr.scalar.get_mpz_t());
+
+    // Calculate the point coordinate
+    RawFr::Element result;
+    result = bn128.sub(y1, y2);
+
+    // Convert result to scalar
+    cr.type = crt_scalar;
+    bn128.toMpz(cr.scalar.get_mpz_t(), result);
+}
+
+// Computes the "real" part of the inverse of the given Fp2 element.
 void eval_fp2InvBN254_x (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 2)
+    {
+        zklog.error("eval_fp2InvBN254_x() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
 
+    // Get a by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_fp2InvBN254_x() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawFr::Element a;
+    bn128.fromMpz(a, cr.scalar.get_mpz_t());
+
+    // Get b by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_fp2InvBN254_x() 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawFr::Element b;
+    bn128.fromMpz(b, cr.scalar.get_mpz_t());
+
+    // Calculate the denominator
+    RawFr::Element den;
+    den = bn128.add(bn128.mul(a, a), bn128.mul(b, b));
+
+    // Calculate x
+    RawFr::Element result;
+    bn128.div(result, a, den);
+
+    // Convert back to scalar
+    bn128.toMpz(cr.scalar.get_mpz_t(), result);
 }
 
+// Computes the "imaginary" part of the inverse of the given Fp2 element.
 void eval_fp2InvBN254_y (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 2)
+    {
+        zklog.error("eval_fp2InvBN254_y() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
 
+    // Get a by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_fp2InvBN254_y() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawFr::Element a;
+    bn128.fromMpz(a, cr.scalar.get_mpz_t());
+
+    // Get b by executing cmd.params[1]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_fp2InvBN254_y() 1 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+    RawFr::Element b;
+    bn128.fromMpz(b, cr.scalar.get_mpz_t());
+
+    // Calculate the denominator
+    RawFr::Element den;
+    den = bn128.add(bn128.mul(a, a), bn128.mul(b, b));
+
+    // Calculate y
+    RawFr::Element result;
+    bn128.div(result, bn128.neg(b), den);
+
+    // Convert back to scalar
+    bn128.toMpz(cr.scalar.get_mpz_t(), result);
 }
 
+// Computes the inverse of the given Fp element
 void eval_fpBN254inv (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 {
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() != 1)
+    {
+        zklog.error("eval_fpBN254inv() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
 
+    // Get a by executing cmd.params[0]
+    evalCommand(ctx, *cmd.params[0], cr);
+    if (cr.zkResult != ZKR_SUCCESS)
+    {
+        return;
+    }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    if (cr.type != crt_scalar)
+    {
+        zklog.error("eval_fpBN254inv() unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    // Get the field element from the command result
+    RawFr::Element a;
+    bn128.fromMpz(a, cr.scalar.get_mpz_t());
+
+    // Calculate the inverse of this field element
+    RawFr::Element aInv;
+    bn128.inv(aInv, a);
+
+    // Convert back to scalar
+    bn128.toMpz(cr.scalar.get_mpz_t(), aInv);
 }
+
 
 } // namespace

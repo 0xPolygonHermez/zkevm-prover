@@ -3134,10 +3134,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // Arith instruction
-        if (rom.line[zkPC].arithEq0==1 || rom.line[zkPC].arithEq1==1 || rom.line[zkPC].arithEq2==1)
+        if (rom.line[zkPC].arithEq0==1 || rom.line[zkPC].arithEq1==1 || rom.line[zkPC].arithEq2==1 || rom.line[zkPC].arithEq3==1 || rom.line[zkPC].arithEq4==1 || rom.line[zkPC].arithEq5==1)
         {
             // Arith instruction: check that A*B + C = D<<256 + op, using scalars (result can be a big number)
-            if (rom.line[zkPC].arithEq0==1 && rom.line[zkPC].arithEq1==0 && rom.line[zkPC].arithEq2==0)
+            if (rom.line[zkPC].arithEq0==1 && rom.line[zkPC].arithEq1==0 && rom.line[zkPC].arithEq2==0 && rom.line[zkPC].arithEq3==0 && rom.line[zkPC].arithEq4==0 && rom.line[zkPC].arithEq5==0)
             {
                 // Convert to scalar
                 mpz_class A, B, C, D, op;
@@ -3205,6 +3205,300 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     arithAction.selEq1 = 0;
                     arithAction.selEq2 = 0;
                     arithAction.selEq3 = 0;
+                    arithAction.selEq4 = 0;
+                    arithAction.selEq5 = 0;
+                    arithAction.selEq6 = 0;
+                    required.Arith.push_back(arithAction);
+                }
+            }
+            // Arithmetic FP2 multiplication
+            else if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==0 && rom.line[zkPC].arithEq2==0 && rom.line[zkPC].arithEq3==1 && rom.line[zkPC].arithEq4==0 && rom.line[zkPC].arithEq5==0)
+            {
+                // Convert to scalar
+                mpz_class x1, y1, x2, y2, x3, y3;
+                if (!fea2scalar(fr, x1, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.A)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, y1, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.B)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, x2, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.C)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, y2, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.D)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, x3, pols.E0[i], pols.E1[i], pols.E2[i], pols.E3[i], pols.E4[i], pols.E5[i], pols.E6[i], pols.E7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.E)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, y3, op0, op1, op2, op3, op4, op5, op6, op7))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(op)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                // EQ5:  x1 * x2 - y1 * y2 = x3
+                // EQ6:  y1 * x2 + x1 * y2 = y3
+
+                RawFr::Element x1fe, y1fe, x2fe, y2fe, x3fe, y3fe;
+                bn128.fromMpz(x1fe, x1.get_mpz_t());
+                bn128.fromMpz(y1fe, y1.get_mpz_t());
+                bn128.fromMpz(x2fe, x2.get_mpz_t());
+                bn128.fromMpz(y2fe, y2.get_mpz_t());
+                bn128.fromMpz(x3fe, x3.get_mpz_t());
+                bn128.fromMpz(y3fe, y3.get_mpz_t());
+
+                RawFr::Element _x3fe, _y3fe;
+                _x3fe = bn128.sub(bn128.mul(x1fe, x2fe), bn128.mul(y1fe, y2fe));
+                _y3fe = bn128.add(bn128.mul(y1fe, x2fe), bn128.mul(x1fe, y2fe));
+
+                bool x3eq = bn128.eq(x3fe, _x3fe);
+                bool y3eq = bn128.eq(y3fe, _y3fe);
+
+                if (!x3eq || !y3eq)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_ARITH_MISMATCH;
+                    logError(ctx, "Arithmetic FP2 multiplication point does not match: x3=" + bn128.toString(x3fe, 16) + " _x3=" + bn128.toString(_x3fe, 16) + " y3=" + bn128.toString(y3fe, 16) + " _y3=" + bn128.toString(_y3fe, 16));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                // Store the arith action to execute it later with the arith SM
+                if (!bProcessBatch)
+                {
+                    // Copy ROM flags into the polynomials
+                    pols.arithEq3[i] = fr.one();
+
+                    ArithAction arithAction;
+                    arithAction.x1 = x1;
+                    arithAction.y1 = y1;
+                    arithAction.x2 = x2;
+                    arithAction.y2 = y2;
+                    arithAction.x3 = x3;
+                    arithAction.y3 = y3;
+                    arithAction.selEq0 = 0;
+                    arithAction.selEq1 = 0;
+                    arithAction.selEq2 = 0;
+                    arithAction.selEq3 = 0;
+                    arithAction.selEq4 = 1;
+                    arithAction.selEq5 = 0;
+                    arithAction.selEq6 = 0;
+                    required.Arith.push_back(arithAction);
+                }
+            }
+            // Arithmetic FP2 addition
+            else if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==0 && rom.line[zkPC].arithEq2==0 && rom.line[zkPC].arithEq3==0 && rom.line[zkPC].arithEq4==1 && rom.line[zkPC].arithEq5==0)
+            {
+                // Convert to scalar
+                mpz_class x1, y1, x2, y2, x3, y3;
+                if (!fea2scalar(fr, x1, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.A)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, y1, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.B)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, x2, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.C)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, y2, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.D)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, x3, pols.E0[i], pols.E1[i], pols.E2[i], pols.E3[i], pols.E4[i], pols.E5[i], pols.E6[i], pols.E7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.E)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, y3, op0, op1, op2, op3, op4, op5, op6, op7))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(op)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+             
+                // EQ7:  x1 + x2 = x3
+                // EQ8:  y1 + y2 = y3
+
+                RawFr::Element x1fe, y1fe, x2fe, y2fe, x3fe, y3fe;
+                bn128.fromMpz(x1fe, x1.get_mpz_t());
+                bn128.fromMpz(y1fe, y1.get_mpz_t());
+                bn128.fromMpz(x2fe, x2.get_mpz_t());
+                bn128.fromMpz(y2fe, y2.get_mpz_t());
+                bn128.fromMpz(x3fe, x3.get_mpz_t());
+                bn128.fromMpz(y3fe, y3.get_mpz_t());
+
+                RawFr::Element _x3fe, _y3fe;
+                _x3fe = bn128.add(x1fe, x2fe);
+                _y3fe = bn128.add(y1fe, y2fe);
+
+                bool x3eq = bn128.eq(x3fe, _x3fe);
+                bool y3eq = bn128.eq(y3fe, _y3fe);
+
+                if (!x3eq || !y3eq)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_ARITH_MISMATCH;
+                    logError(ctx, "Arithmetic FP2 addition point does not match: x3=" + bn128.toString(x3fe, 16) + " _x3=" + bn128.toString(_x3fe, 16) + " y3=" + bn128.toString(y3fe, 16) + " _y3=" + bn128.toString(_y3fe, 16));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                // Store the arith action to execute it later with the arith SM
+                if (!bProcessBatch)
+                {
+                    // Copy ROM flags into the polynomials
+                    pols.arithEq4[i] = fr.one();
+
+                    ArithAction arithAction;
+                    arithAction.x1 = x1;
+                    arithAction.y1 = y1;
+                    arithAction.x2 = x2;
+                    arithAction.y2 = y2;
+                    arithAction.x3 = x3;
+                    arithAction.y3 = y3;
+                    arithAction.selEq0 = 0;
+                    arithAction.selEq1 = 0;
+                    arithAction.selEq2 = 0;
+                    arithAction.selEq3 = 0;
+                    arithAction.selEq4 = 0;
+                    arithAction.selEq5 = 1;
+                    arithAction.selEq6 = 0;
+                    required.Arith.push_back(arithAction);
+                }
+            }
+            // Arithmetic FP2 subtraction
+            else if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==0 && rom.line[zkPC].arithEq2==0 && rom.line[zkPC].arithEq3==0 && rom.line[zkPC].arithEq4==0 && rom.line[zkPC].arithEq5==1)
+            {
+                // Convert to scalar
+                mpz_class x1, y1, x2, y2, x3, y3;
+                if (!fea2scalar(fr, x1, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.A)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, y1, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.B)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, x2, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.C)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, y2, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.D)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, x3, pols.E0[i], pols.E1[i], pols.E2[i], pols.E3[i], pols.E4[i], pols.E5[i], pols.E6[i], pols.E7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.E)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, y3, op0, op1, op2, op3, op4, op5, op6, op7))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(op)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+             
+                // EQ7:  x1 - x2 = x3
+                // EQ8:  y1 - y2 = y3
+
+                RawFr::Element x1fe, y1fe, x2fe, y2fe, x3fe, y3fe;
+                bn128.fromMpz(x1fe, x1.get_mpz_t());
+                bn128.fromMpz(y1fe, y1.get_mpz_t());
+                bn128.fromMpz(x2fe, x2.get_mpz_t());
+                bn128.fromMpz(y2fe, y2.get_mpz_t());
+                bn128.fromMpz(x3fe, x3.get_mpz_t());
+                bn128.fromMpz(y3fe, y3.get_mpz_t());
+
+                RawFr::Element _x3fe, _y3fe;
+                _x3fe = bn128.sub(x1fe, x2fe);
+                _y3fe = bn128.sub(y1fe, y2fe);
+
+                bool x3eq = bn128.eq(x3fe, _x3fe);
+                bool y3eq = bn128.eq(y3fe, _y3fe);
+
+                if (!x3eq || !y3eq)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_ARITH_MISMATCH;
+                    logError(ctx, "Arithmetic FP2 subtraction point does not match: x3=" + bn128.toString(x3fe, 16) + " _x3=" + bn128.toString(_x3fe, 16) + " y3=" + bn128.toString(y3fe, 16) + " _y3=" + bn128.toString(_y3fe, 16));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                // Store the arith action to execute it later with the arith SM
+                if (!bProcessBatch)
+                {
+                    // Copy ROM flags into the polynomials
+                    pols.arithEq4[i] = fr.one();
+
+                    ArithAction arithAction;
+                    arithAction.x1 = x1;
+                    arithAction.y1 = y1;
+                    arithAction.x2 = x2;
+                    arithAction.y2 = y2;
+                    arithAction.x3 = x3;
+                    arithAction.y3 = y3;
+                    arithAction.selEq0 = 0;
+                    arithAction.selEq1 = 0;
+                    arithAction.selEq2 = 0;
+                    arithAction.selEq3 = 0;
+                    arithAction.selEq4 = 0;
+                    arithAction.selEq5 = 0;
+                    arithAction.selEq6 = 1;
                     required.Arith.push_back(arithAction);
                 }
             }
@@ -3265,11 +3559,11 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                 // Check if this is a double operation
                 bool dbl = false;
-                if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==1 && rom.line[zkPC].arithEq2==0)
+                if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==1 && rom.line[zkPC].arithEq2==0 && rom.line[zkPC].arithEq3==0 && rom.line[zkPC].arithEq4==0 && rom.line[zkPC].arithEq5==0)
                 {
                     dbl = false;
                 }
-                else if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==0 && rom.line[zkPC].arithEq2==1)
+                else if (rom.line[zkPC].arithEq0==0 && rom.line[zkPC].arithEq1==0 && rom.line[zkPC].arithEq2==1 && rom.line[zkPC].arithEq3==0 && rom.line[zkPC].arithEq4==0 && rom.line[zkPC].arithEq5==0)
                 {
                     dbl = true;
                 }
@@ -3333,6 +3627,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     arithAction.selEq1 = dbl ? 0 : 1;
                     arithAction.selEq2 = dbl ? 1 : 0;
                     arithAction.selEq3 = 1;
+                    arithAction.selEq4 = 0;
+                    arithAction.selEq5 = 0;
+                    arithAction.selEq6 = 0;
                     required.Arith.push_back(arithAction);
                 }
             }
@@ -4144,7 +4441,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         }
 
         // If arith, increment pols.cntArith
-        if ((rom.line[zkPC].arithEq0==1 || rom.line[zkPC].arithEq1==1 || rom.line[zkPC].arithEq2==1) && !proverRequest.input.bNoCounters) {
+        if (!proverRequest.input.bNoCounters && (rom.line[zkPC].arithEq0==1 || rom.line[zkPC].arithEq1==1 || rom.line[zkPC].arithEq2==1 || rom.line[zkPC].arithEq3==1 || rom.line[zkPC].arithEq4==1 || rom.line[zkPC].arithEq5==1) ) {
             pols.cntArith[nexti] = fr.inc(pols.cntArith[i]);
 #ifdef CHECK_MAX_CNT_ASAP
             if (fr.toU64(pols.cntArith[nexti]) > rom.constants.MAX_CNT_ARITH_LIMIT)

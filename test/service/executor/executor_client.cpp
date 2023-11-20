@@ -74,7 +74,7 @@ bool ExecutorClient::ProcessBatch (void)
         cerr << "Error: ExecutorClient::ProcessBatch() found config.inputFile empty" << endl;
         exit(-1);
     }
-    ::executor::v1::ProcessBatchRequest request;
+
     Input input(fr);
     json inputJson;
     file2json(config.inputFile, inputJson);
@@ -85,101 +85,203 @@ bool ExecutorClient::ProcessBatch (void)
         exit(-1);
     }
 
+    // Flags
     bool update_merkle_tree = true;
     bool get_keys = false;
 
-    //request.set_batch_num(input.publicInputs.batchNum);
-    request.set_coinbase(Add0xIfMissing(input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)));
-    request.set_batch_l2_data(input.publicInputsExtended.publicInputs.batchL2Data);
-    request.set_old_state_root(scalar2ba(input.publicInputsExtended.publicInputs.oldStateRoot));
-    request.set_old_acc_input_hash(scalar2ba(input.publicInputsExtended.publicInputs.oldAccInputHash));
-    request.set_global_exit_root(scalar2ba(input.publicInputsExtended.publicInputs.globalExitRoot));
-    request.set_eth_timestamp(input.publicInputsExtended.publicInputs.timestamp);
-    request.set_update_merkle_tree(update_merkle_tree);
-    request.set_get_keys(get_keys);
-    request.set_chain_id(input.publicInputsExtended.publicInputs.chainID);
-    request.set_fork_id(input.publicInputsExtended.publicInputs.forkID);
-    request.set_from(input.from);
-    request.set_no_counters(input.bNoCounters);
-    if (input.traceConfig.bEnabled)
-    {
-        executor::v1::TraceConfig * pTraceConfig = request.mutable_trace_config();
-        pTraceConfig->set_disable_storage(input.traceConfig.bDisableStorage);
-        pTraceConfig->set_disable_stack(input.traceConfig.bDisableStack);
-        pTraceConfig->set_enable_memory(input.traceConfig.bEnableMemory);
-        pTraceConfig->set_enable_return_data(input.traceConfig.bEnableReturnData);
-        pTraceConfig->set_tx_hash_to_generate_full_trace(string2ba(input.traceConfig.txHashToGenerateFullTrace));
-    }
-    request.set_old_batch_num(input.publicInputsExtended.publicInputs.oldBatchNum);
-
-    // Parse keys map
-    DatabaseMap::MTMap::const_iterator it;
-    for (it=input.db.begin(); it!=input.db.end(); it++)
-    {
-        string key = NormalizeToNFormat(it->first, 64);
-        string value;
-        vector<Goldilocks::Element> dbValue = it->second;
-        for (uint64_t i=0; i<dbValue.size(); i++)
-        {
-            value += NormalizeToNFormat(fr.toString(dbValue[i], 16), 16);
-        }
-        (*request.mutable_db())[key] = value;
-    }
-
-    // Parse contracts data
-    DatabaseMap::ProgramMap::const_iterator itp;
-    for (itp=input.contractsBytecode.begin(); itp!=input.contractsBytecode.end(); itp++)
-    {
-        string key = NormalizeToNFormat(itp->first, 64);
-        string value;
-        vector<uint8_t> contractValue = itp->second;
-        for (uint64_t i=0; i<contractValue.size(); i++)
-        {
-            value += byte2string(contractValue[i]);
-        }
-        (*request.mutable_contracts_bytecode())[key] = value;
-    }
-
-    ::executor::v1::ProcessBatchResponse processBatchResponse;
+    // Resulting new state root
     string newStateRoot;
-    for (uint64_t i=0; i<config.executorClientLoops; i++)
-    {
-        if (i == 1)
-        {
-            request.clear_db();
-            request.clear_contracts_bytecode();
-        }
-        ::grpc::ClientContext context;
-        ::grpc::Status grpcStatus = stub->ProcessBatch(&context, request, &processBatchResponse);
-        if (grpcStatus.error_code() != grpc::StatusCode::OK)
-        {
-            cerr << "Error: ExecutorClient::ProcessBatch() failed calling server i=" << i << " error=" << grpcStatus.error_code() << "=" << grpcStatus.error_message() << endl;
-            break;
-        }
-        newStateRoot = ba2string(processBatchResponse.new_state_root());
 
-#ifdef LOG_SERVICE
-        cout << "ExecutorClient::ProcessBatch() got:\n" << response.DebugString() << endl;
-#endif
-    }
-
-    if (processBatchResponse.stored_flush_id() != processBatchResponse.flush_id())
+    if (input.publicInputsExtended.publicInputs.forkID <= 6)
     {
-        executor::v1::GetFlushStatusResponse getFlushStatusResponse;
-        do
+        ::executor::v1::ProcessBatchRequest request;
+        request.set_coinbase(Add0xIfMissing(input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)));
+        request.set_batch_l2_data(input.publicInputsExtended.publicInputs.batchL2Data);
+        request.set_old_state_root(scalar2ba(input.publicInputsExtended.publicInputs.oldStateRoot));
+        request.set_old_acc_input_hash(scalar2ba(input.publicInputsExtended.publicInputs.oldAccInputHash));
+        request.set_global_exit_root(scalar2ba(input.publicInputsExtended.publicInputs.globalExitRoot));
+        request.set_eth_timestamp(input.publicInputsExtended.publicInputs.timestamp);
+        request.set_update_merkle_tree(update_merkle_tree);
+        request.set_chain_id(input.publicInputsExtended.publicInputs.chainID);
+        request.set_fork_id(input.publicInputsExtended.publicInputs.forkID);
+        request.set_from(input.from);
+        request.set_no_counters(input.bNoCounters);
+        if (input.traceConfig.bEnabled)
         {
-            sleep(1);
-            google::protobuf::Empty request;
+            executor::v1::TraceConfig * pTraceConfig = request.mutable_trace_config();
+            pTraceConfig->set_disable_storage(input.traceConfig.bDisableStorage);
+            pTraceConfig->set_disable_stack(input.traceConfig.bDisableStack);
+            pTraceConfig->set_enable_memory(input.traceConfig.bEnableMemory);
+            pTraceConfig->set_enable_return_data(input.traceConfig.bEnableReturnData);
+            pTraceConfig->set_tx_hash_to_generate_full_trace(string2ba(input.traceConfig.txHashToGenerateFullTrace));
+        }
+        request.set_old_batch_num(input.publicInputsExtended.publicInputs.oldBatchNum);
+
+        // Parse keys map
+        DatabaseMap::MTMap::const_iterator it;
+        for (it=input.db.begin(); it!=input.db.end(); it++)
+        {
+            string key = NormalizeToNFormat(it->first, 64);
+            string value;
+            vector<Goldilocks::Element> dbValue = it->second;
+            for (uint64_t i=0; i<dbValue.size(); i++)
+            {
+                value += NormalizeToNFormat(fr.toString(dbValue[i], 16), 16);
+            }
+            (*request.mutable_db())[key] = value;
+        }
+
+        // Parse contracts data
+        DatabaseMap::ProgramMap::const_iterator itp;
+        for (itp=input.contractsBytecode.begin(); itp!=input.contractsBytecode.end(); itp++)
+        {
+            string key = NormalizeToNFormat(itp->first, 64);
+            string value;
+            vector<uint8_t> contractValue = itp->second;
+            for (uint64_t i=0; i<contractValue.size(); i++)
+            {
+                value += byte2string(contractValue[i]);
+            }
+            (*request.mutable_contracts_bytecode())[key] = value;
+        }
+
+        ::executor::v1::ProcessBatchResponse processBatchResponse;
+        string newStateRoot;
+        for (uint64_t i=0; i<config.executorClientLoops; i++)
+        {
+            if (i == 1)
+            {
+                request.clear_db();
+                request.clear_contracts_bytecode();
+            }
             ::grpc::ClientContext context;
-            ::grpc::Status grpcStatus = stub->GetFlushStatus(&context, request, &getFlushStatusResponse);
+            ::grpc::Status grpcStatus = stub->ProcessBatch(&context, request, &processBatchResponse);
             if (grpcStatus.error_code() != grpc::StatusCode::OK)
             {
-                cerr << "Error: ExecutorClient::ProcessBatch() failed calling GetFlushStatus()" << endl;
+                cerr << "Error: ExecutorClient::ProcessBatch() failed calling server i=" << i << " error=" << grpcStatus.error_code() << "=" << grpcStatus.error_message() << endl;
                 break;
             }
-        } while (getFlushStatusResponse.stored_flush_id() < processBatchResponse.flush_id());
-        zklog.info("ExecutorClient::ProcessBatch() successfully stored returned flush id=" + to_string(processBatchResponse.flush_id()));
-        
+            newStateRoot = ba2string(processBatchResponse.new_state_root());
+
+    #ifdef LOG_SERVICE
+            cout << "ExecutorClient::ProcessBatch() got:\n" << response.DebugString() << endl;
+    #endif
+        }
+
+        if (processBatchResponse.stored_flush_id() != processBatchResponse.flush_id())
+        {
+            executor::v1::GetFlushStatusResponse getFlushStatusResponse;
+            do
+            {
+                sleep(1);
+                google::protobuf::Empty request;
+                ::grpc::ClientContext context;
+                ::grpc::Status grpcStatus = stub->GetFlushStatus(&context, request, &getFlushStatusResponse);
+                if (grpcStatus.error_code() != grpc::StatusCode::OK)
+                {
+                    cerr << "Error: ExecutorClient::ProcessBatch() failed calling GetFlushStatus()" << endl;
+                    break;
+                }
+            } while (getFlushStatusResponse.stored_flush_id() < processBatchResponse.flush_id());
+            zklog.info("ExecutorClient::ProcessBatch() successfully stored returned flush id=" + to_string(processBatchResponse.flush_id()));
+        }
+    }
+    else
+    {
+        ::executor::v1::ProcessBatchRequestV2 request;
+        request.set_coinbase(Add0xIfMissing(input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)));
+        request.set_batch_l2_data(input.publicInputsExtended.publicInputs.batchL2Data);
+        request.set_old_state_root(scalar2ba(input.publicInputsExtended.publicInputs.oldStateRoot));
+        request.set_old_acc_input_hash(scalar2ba(input.publicInputsExtended.publicInputs.oldAccInputHash));
+        request.set_l1_info_root(scalar2ba(input.publicInputsExtended.publicInputs.l1InfoRoot));
+        request.set_timestamp_limit(input.publicInputsExtended.publicInputs.timestampLimit);
+        request.set_forced_blockhash_l1(scalar2ba(input.publicInputsExtended.publicInputs.forcedBlockHashL1));
+        request.set_update_merkle_tree(update_merkle_tree);
+        request.set_no_counters(input.bNoCounters);
+        request.set_get_keys(get_keys);
+        request.set_skip_verify_l1_info_root(input.bSkipVerifyL1InfoRoot);
+        request.set_skip_first_change_l2_block(input.bSkipFirstChangeL2Block);
+        request.set_chain_id(input.publicInputsExtended.publicInputs.chainID);
+        request.set_fork_id(input.publicInputsExtended.publicInputs.forkID);
+        request.set_from(input.from);
+        if (input.traceConfig.bEnabled)
+        {
+            executor::v1::TraceConfigV2 * pTraceConfig = request.mutable_trace_config();
+            pTraceConfig->set_disable_storage(input.traceConfig.bDisableStorage);
+            pTraceConfig->set_disable_stack(input.traceConfig.bDisableStack);
+            pTraceConfig->set_enable_memory(input.traceConfig.bEnableMemory);
+            pTraceConfig->set_enable_return_data(input.traceConfig.bEnableReturnData);
+            pTraceConfig->set_tx_hash_to_generate_full_trace(string2ba(input.traceConfig.txHashToGenerateFullTrace));
+        }
+        request.set_old_batch_num(input.publicInputsExtended.publicInputs.oldBatchNum);
+
+        // Parse keys map
+        DatabaseMap::MTMap::const_iterator it;
+        for (it=input.db.begin(); it!=input.db.end(); it++)
+        {
+            string key = NormalizeToNFormat(it->first, 64);
+            string value;
+            vector<Goldilocks::Element> dbValue = it->second;
+            for (uint64_t i=0; i<dbValue.size(); i++)
+            {
+                value += NormalizeToNFormat(fr.toString(dbValue[i], 16), 16);
+            }
+            (*request.mutable_db())[key] = value;
+        }
+
+        // Parse contracts data
+        DatabaseMap::ProgramMap::const_iterator itp;
+        for (itp=input.contractsBytecode.begin(); itp!=input.contractsBytecode.end(); itp++)
+        {
+            string key = NormalizeToNFormat(itp->first, 64);
+            string value;
+            vector<uint8_t> contractValue = itp->second;
+            for (uint64_t i=0; i<contractValue.size(); i++)
+            {
+                value += byte2string(contractValue[i]);
+            }
+            (*request.mutable_contracts_bytecode())[key] = value;
+        }
+
+        ::executor::v1::ProcessBatchResponseV2 processBatchResponse;
+        for (uint64_t i=0; i<config.executorClientLoops; i++)
+        {
+            if (i == 1)
+            {
+                request.clear_db();
+                request.clear_contracts_bytecode();
+            }
+            ::grpc::ClientContext context;
+            ::grpc::Status grpcStatus = stub->ProcessBatchV2(&context, request, &processBatchResponse);
+            if (grpcStatus.error_code() != grpc::StatusCode::OK)
+            {
+                cerr << "Error: ExecutorClient::ProcessBatch() failed calling server i=" << i << " error=" << grpcStatus.error_code() << "=" << grpcStatus.error_message() << endl;
+                break;
+            }
+            newStateRoot = ba2string(processBatchResponse.new_state_root());
+
+    #ifdef LOG_SERVICE
+            cout << "ExecutorClient::ProcessBatch() got:\n" << response.DebugString() << endl;
+    #endif
+        }
+
+        if (processBatchResponse.stored_flush_id() != processBatchResponse.flush_id())
+        {
+            executor::v1::GetFlushStatusResponse getFlushStatusResponse;
+            do
+            {
+                sleep(1);
+                google::protobuf::Empty request;
+                ::grpc::ClientContext context;
+                ::grpc::Status grpcStatus = stub->GetFlushStatus(&context, request, &getFlushStatusResponse);
+                if (grpcStatus.error_code() != grpc::StatusCode::OK)
+                {
+                    cerr << "Error: ExecutorClient::ProcessBatch() failed calling GetFlushStatus()" << endl;
+                    break;
+                }
+            } while (getFlushStatusResponse.stored_flush_id() < processBatchResponse.flush_id());
+            zklog.info("ExecutorClient::ProcessBatch() successfully stored returned flush id=" + to_string(processBatchResponse.flush_id()));
+        }
     }
 
     if (config.executorClientCheckNewStateRoot)

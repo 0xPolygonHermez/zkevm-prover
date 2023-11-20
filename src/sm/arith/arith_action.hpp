@@ -16,8 +16,11 @@ public:
     uint64_t selEq1;
     uint64_t selEq2;
     uint64_t selEq3;
+    uint64_t selEq4;
+    uint64_t selEq5;
+    uint64_t selEq6;
 
-    ArithAction() : selEq0(0), selEq1(0), selEq2(0), selEq3(0) {};
+    ArithAction() : selEq0(0), selEq1(0), selEq2(0), selEq3(0), selEq4(0), selEq5(0), selEq6(0) {};
 };
 
 #endif

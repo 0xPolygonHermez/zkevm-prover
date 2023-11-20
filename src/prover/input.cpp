@@ -34,17 +34,27 @@ void Input::loadGlobals (json &input)
 
     // PUBLIC INPUTS
 
+    // Input JSON file could contain a forkID key at the root level (not mandatory, default is 0)
+    if ( input.contains("forkID") &&
+         input["forkID"].is_number_unsigned() )
+    {
+        publicInputsExtended.publicInputs.forkID = input["forkID"];
+    }
+#ifdef LOG_INPUT
+    zklog.info("Input::loadGlobals(): forkID=" + to_string(publicInputsExtended.publicInputs.forkID));
+#endif
+
     // Input JSON file must contain a oldStateRoot key at the root level
     if ( !input.contains("oldStateRoot") ||
          !input["oldStateRoot"].is_string() )
     {
-        zklog.error("oldStateRoot key not found in input JSON file");
+        zklog.error("Input::loadGlobals() oldStateRoot key not found in input JSON file");
         exitProcess();
     }
     auxString = Remove0xIfPresent(input["oldStateRoot"]);
     publicInputsExtended.publicInputs.oldStateRoot.set_str(auxString, 16);
 #ifdef LOG_INPUT
-    zklog.info("loadGlobals(): oldStateRoot=" + publicInputsExtended.publicInputs.oldStateRoot.get_str(16));
+    zklog.info("Input::loadGlobals(): oldStateRoot=" + publicInputsExtended.publicInputs.oldStateRoot.get_str(16));
 #endif
 
     // Input JSON file may contain a oldAccInputHash key at the root level
@@ -54,7 +64,7 @@ void Input::loadGlobals (json &input)
         auxString = Remove0xIfPresent(input["oldAccInputHash"]);
         publicInputsExtended.publicInputs.oldAccInputHash.set_str(auxString, 16);
 #ifdef LOG_INPUT
-        zklog.info("loadGlobals(): oldAccInputHash=" + publicInputsExtended.publicInputs.oldAccInputHash.get_str(16));
+        zklog.info("Input::loadGlobals(): oldAccInputHash=" + publicInputsExtended.publicInputs.oldAccInputHash.get_str(16));
 #endif
     }
 
@@ -62,7 +72,7 @@ void Input::loadGlobals (json &input)
     if ( !input.contains("oldNumBatch") ||
          !input["oldNumBatch"].is_number_unsigned() )
     {
-        zklog.error("oldNumBatch key not found in input JSON file");
+        zklog.error("Input::loadGlobals() oldNumBatch key not found in input JSON file");
         exitProcess();
     }
     publicInputsExtended.publicInputs.oldBatchNum = input["oldNumBatch"];
@@ -74,7 +84,7 @@ void Input::loadGlobals (json &input)
     if ( !input.contains("chainID") ||
          !input["chainID"].is_number_unsigned() )
     {
-        zklog.error("chainID key not found in input JSON file");
+        zklog.error("Input::loadGlobals() chainID key not found in input JSON file");
         exitProcess();
     }
     else
@@ -82,24 +92,14 @@ void Input::loadGlobals (json &input)
         publicInputsExtended.publicInputs.chainID = input["chainID"];
     }
 #ifdef LOG_INPUT
-    zklog.info("loadGlobals(): chainID=" + to_string(publicInputsExtended.publicInputs.chainID));
-#endif
-
-    // Input JSON file could contain a forkID key at the root level (not mandatory, default is 0)
-    if ( input.contains("forkID") &&
-         input["forkID"].is_number_unsigned() )
-    {
-        publicInputsExtended.publicInputs.forkID = input["forkID"];
-    }
-#ifdef LOG_INPUT
-    zklog.info("loadGlobals(): forkID=" + to_string(publicInputsExtended.publicInputs.forkID));
+    zklog.info("Input::loadGlobals(): chainID=" + to_string(publicInputsExtended.publicInputs.chainID));
 #endif
 
     // Input JSON file must contain a batchL2Data key at the root level
     if ( !input.contains("batchL2Data") ||
          !input["batchL2Data"].is_string() )
     {
-        zklog.error("batchL2Data key not found in input JSON file");
+        zklog.error("Input::loadGlobals() batchL2Data key not found in input JSON file");
         exitProcess();
     }
     publicInputsExtended.publicInputs.batchL2Data = string2ba(input["batchL2Data"]);
@@ -114,40 +114,91 @@ void Input::loadGlobals (json &input)
     zklog.info("loadGlobals(): batchL2Data=" + ba2string(publicInputsExtended.publicInputs.batchL2Data));
 #endif
 
-    // Input JSON file must contain a globalExitRoot key at the root level
-    if ( !input.contains("globalExitRoot") ||
-         !input["globalExitRoot"].is_string() )
+    if (publicInputsExtended.publicInputs.forkID <= 6)
     {
-        zklog.error("globalExitRoot key not found in input JSON file");
-        exitProcess();
-    }
-    publicInputsExtended.publicInputs.globalExitRoot.set_str(Remove0xIfPresent(input["globalExitRoot"]), 16);
+        // Input JSON file must contain a globalExitRoot key at the root level
+        if ( !input.contains("globalExitRoot") ||
+            !input["globalExitRoot"].is_string() )
+        {
+            zklog.error("Input::loadGlobals() globalExitRoot key not found in input JSON file");
+            exitProcess();
+        }
+        publicInputsExtended.publicInputs.globalExitRoot.set_str(Remove0xIfPresent(input["globalExitRoot"]), 16);
 #ifdef LOG_INPUT
-    zklog.info("loadGlobals(): globalExitRoot=" + publicInputsExtended.publicInputs.globalExitRoot.get_str(16));
+        zklog.info("Input::loadGlobals(): globalExitRoot=" + publicInputsExtended.publicInputs.globalExitRoot.get_str(16));
 #endif
+    }
 
-    // Input JSON file must contain a timestamp key at the root level
-    if ( !input.contains("timestamp") ||
-         !input["timestamp"].is_number_unsigned() )
+    if (publicInputsExtended.publicInputs.forkID >= 7)
     {
-        zklog.error("timestamp key not found in input JSON file");
-        exitProcess();
-    }
-    publicInputsExtended.publicInputs.timestamp = input["timestamp"];
+        // Input JSON file must contain a l1InfoRoot key at the root level
+        if ( !input.contains("l1InfoRoot") ||
+            !input["l1InfoRoot"].is_string() )
+        {
+            zklog.error("Input::loadGlobals() l1InfoRoot key not found in input JSON file");
+            exitProcess();
+        }
+        publicInputsExtended.publicInputs.l1InfoRoot.set_str(Remove0xIfPresent(input["l1InfoRoot"]), 16);
 #ifdef LOG_INPUT
-    zklog.info("loadGlobals(): timestamp=" + to_string(publicInputsExtended.publicInputs.timestamp));
+        zklog.info("Input::loadGlobals(): l1InfoRoot=" + publicInputsExtended.publicInputs.l1InfoRoot.get_str(16));
 #endif
+    }
+
+    if (publicInputsExtended.publicInputs.forkID >= 7)
+    {
+        // Input JSON file must contain a forcedBlockHashL1 key at the root level
+        if ( !input.contains("forcedBlockHashL1") ||
+            !input["forcedBlockHashL1"].is_string() )
+        {
+            zklog.error("Input::loadGlobals() forcedBlockHashL1 key not found in input JSON file");
+            exitProcess();
+        }
+        publicInputsExtended.publicInputs.forcedBlockHashL1.set_str(Remove0xIfPresent(input["forcedBlockHashL1"]), 16);
+#ifdef LOG_INPUT
+        zklog.info("Input::loadGlobals(): forcedBlockHashL1=" + publicInputsExtended.publicInputs.forcedBlockHashL1.get_str(16));
+#endif
+    }
+
+    if (publicInputsExtended.publicInputs.forkID <= 6)
+    {
+        // Input JSON file must contain a timestamp key at the root level
+        if ( !input.contains("timestamp") ||
+            !input["timestamp"].is_number_unsigned() )
+        {
+            zklog.error("Input::loadGlobals() timestamp key not found in input JSON file");
+            exitProcess();
+        }
+        publicInputsExtended.publicInputs.timestamp = input["timestamp"];
+#ifdef LOG_INPUT
+        zklog.info("loadGlobals(): timestamp=" + to_string(publicInputsExtended.publicInputs.timestamp));
+#endif
+    }
+
+    if (publicInputsExtended.publicInputs.forkID >= 7)
+    {
+        // Input JSON file must contain a timestampLimit key at the root level
+        if ( !input.contains("timestampLimit") ||
+            !input["timestampLimit"].is_number_unsigned() )
+        {
+            zklog.error("Input::loadGlobals() timestampLimit key not found in input JSON file");
+            exitProcess();
+        }
+        publicInputsExtended.publicInputs.timestampLimit = input["timestampLimit"];
+#ifdef LOG_INPUT
+        zklog.info("loadGlobals(): timestampLimit=" + to_string(publicInputsExtended.publicInputs.timestampLimit));
+#endif
+    }
 
     // Input JSON file must contain a sequencerAddr key at the root level
     if ( !input.contains("sequencerAddr") ||
          !input["sequencerAddr"].is_string() )
     {
-        zklog.error("sequencerAddr key not found in input JSON file");
+        zklog.error("Input::loadGlobals() sequencerAddr key not found in input JSON file");
         exitProcess();
     }
     publicInputsExtended.publicInputs.sequencerAddr.set_str(Remove0xIfPresent(input["sequencerAddr"]), 16);
 #ifdef LOG_INPUT
-    zklog.info("loadGlobals(): sequencerAddr=" + publicInputsExtended.publicInputs.sequencerAddr.get_str(16));
+    zklog.info("Input::loadGlobals(): sequencerAddr=" + publicInputsExtended.publicInputs.sequencerAddr.get_str(16));
 #endif
 
     // Input JSON file may contain a aggregatorAddress key at the root level
@@ -157,7 +208,7 @@ void Input::loadGlobals (json &input)
         auxString = Remove0xIfPresent(input["aggregatorAddress"]);
         publicInputsExtended.publicInputs.aggregatorAddress.set_str(auxString, 16);
 #ifdef LOG_INPUT
-        zklog.info("loadGlobals(): aggregatorAddress=" + publicInputsExtended.publicInputs.aggregatorAddress.get_str(16));
+        zklog.info("Input::loadGlobals(): aggregatorAddress=" + publicInputsExtended.publicInputs.aggregatorAddress.get_str(16));
 #endif
     }
 
@@ -167,13 +218,13 @@ void Input::loadGlobals (json &input)
     if ( !input.contains("newStateRoot") ||
          !input["newStateRoot"].is_string() )
     {
-        zklog.error("newStateRoot key not found in input JSON file");
+        zklog.error("Input::loadGlobals() newStateRoot key not found in input JSON file");
         exitProcess();
     }
     auxString = Remove0xIfPresent(input["newStateRoot"]);
     publicInputsExtended.newStateRoot.set_str(auxString, 16);
 #ifdef LOG_INPUT
-    zklog.info("loadGlobals(): newStateRoot=" + publicInputsExtended.newStateRoot.get_str(16));
+    zklog.info("Input::loadGlobals(): newStateRoot=" + publicInputsExtended.newStateRoot.get_str(16));
 #endif
 
     // Input JSON file may contain a newAccInputHash key at the root level
@@ -183,7 +234,7 @@ void Input::loadGlobals (json &input)
         auxString = Remove0xIfPresent(input["newAccInputHash"]);
         publicInputsExtended.newAccInputHash.set_str(auxString, 16);
 #ifdef LOG_INPUT
-        zklog.info("loadGlobals(): newAccInputHash=" + publicInputsExtended.newAccInputHash.get_str(16));
+        zklog.info("Input::loadGlobals() newAccInputHash=" + publicInputsExtended.newAccInputHash.get_str(16));
 #endif
     }
 
@@ -191,26 +242,26 @@ void Input::loadGlobals (json &input)
     if ( !input.contains("newLocalExitRoot") ||
          !input["newLocalExitRoot"].is_string() )
     {
-        zklog.error("newLocalExitRoot key not found in input JSON file");
+        zklog.error("Input::loadGlobals() newLocalExitRoot key not found in input JSON file");
         exitProcess();
     }
     auxString = Remove0xIfPresent(input["newLocalExitRoot"]);
     publicInputsExtended.newLocalExitRoot.set_str(auxString, 16);
 
 #ifdef LOG_INPUT
-    zklog.info("loadGlobals(): newLocalExitRoot=" + publicInputsExtended.newLocalExitRoot.get_str(16));
+    zklog.info("Input::loadGlobals(): newLocalExitRoot=" + publicInputsExtended.newLocalExitRoot.get_str(16));
 #endif
 
     // Input JSON file must contain a numBatch key at the root level
     if ( !input.contains("newNumBatch") ||
          !input["newNumBatch"].is_number_unsigned() )
     {
-        zklog.error("newNumBatch key not found in input JSON file");
+        zklog.error("Input::loadGlobals() newNumBatch key not found in input JSON file");
         exitProcess();
     }
     publicInputsExtended.newBatchNum = input["newNumBatch"];
 #ifdef LOG_INPUT
-    zklog.info("loadGlobals(): newBatchNum=" + to_string(publicInputsExtended.newBatchNum));
+    zklog.info("Input::loadGlobals(): newBatchNum=" + to_string(publicInputsExtended.newBatchNum));
 #endif
 
     // ROOT
@@ -221,7 +272,7 @@ void Input::loadGlobals (json &input)
     {
         from = Add0xIfMissing(input["from"]);
 #ifdef LOG_INPUT
-        zklog.info("loadGlobals(): from=" + from);
+        zklog.info("Input::loadGlobals() from=" + from);
 #endif
     }
 
@@ -231,7 +282,7 @@ void Input::loadGlobals (json &input)
     {
         bUpdateMerkleTree = input["updateMerkleTree"];
 #ifdef LOG_INPUT
-        zklog.info("loadGlobals(): updateMerkleTree=" + to_string(bUpdateMerkleTree));
+        zklog.info("Input::loadGlobals() updateMerkleTree=" + to_string(bUpdateMerkleTree));
 #endif
     }
 
@@ -241,7 +292,37 @@ void Input::loadGlobals (json &input)
     {
         bNoCounters = input["noCounters"];
 #ifdef LOG_INPUT
-        zklog.info("loadGlobals(): noCounters=" + to_string(bNoCounters));
+        zklog.info("Input::loadGlobals() noCounters=" + to_string(bNoCounters));
+#endif
+    }
+
+    // Input JSON file may contain a getKeys key at the root level
+    if ( input.contains("getKeys") &&
+         input["getKeys"].is_boolean() )
+    {
+        bGetKeys = input["getKeys"];
+#ifdef LOG_INPUT
+        zklog.info("Input::loadGlobals() bGetKeys=" + to_string(bGetKeys));
+#endif
+    }
+
+    // Input JSON file may contain a skipVerifyL1InfoRoot key at the root level
+    if ( input.contains("skipVerifyL1InfoRoot") &&
+         input["skipVerifyL1InfoRoot"].is_boolean() )
+    {
+        bSkipVerifyL1InfoRoot = input["skipVerifyL1InfoRoot"];
+#ifdef LOG_INPUT
+        zklog.info("Input::loadGlobals() bSkipVerifyL1InfoRoot=" + to_string(bSkipVerifyL1InfoRoot));
+#endif
+    }
+
+    // Input JSON file may contain a skipFirstChangeL2Block key at the root level
+    if ( input.contains("skipFirstChangeL2Block") &&
+         input["skipFirstChangeL2Block"].is_boolean() )
+    {
+        bSkipFirstChangeL2Block = input["skipFirstChangeL2Block"];
+#ifdef LOG_INPUT
+        zklog.info("Input::loadGlobals() bSkipFirstChangeL2Block=" + to_string(bSkipFirstChangeL2Block));
 #endif
     }
 
@@ -252,7 +333,7 @@ void Input::loadGlobals (json &input)
         traceConfig.bEnabled = true;
         traceConfig.bDisableStorage = input["disableStorage"];
 #ifdef LOG_INPUT
-        zklog.info("loadGlobals(): disableStorage=" + to_string(traceConfig.bDisableStorage));
+        zklog.info("Input::loadGlobals() disableStorage=" + to_string(traceConfig.bDisableStorage));
 #endif
     }
 
@@ -263,7 +344,7 @@ void Input::loadGlobals (json &input)
         traceConfig.bEnabled = true;
         traceConfig.bDisableStack = input["disableStack"];
 #ifdef LOG_INPUT
-        zklog.info("loadGlobals(): disableStack=" + to_string(traceConfig.bDisableStack));
+        zklog.info("Input::loadGlobals() disableStack=" + to_string(traceConfig.bDisableStack));
 #endif
     }
 
@@ -274,7 +355,7 @@ void Input::loadGlobals (json &input)
         traceConfig.bEnabled = true;
         traceConfig.bEnableMemory = input["enableMemory"];
 #ifdef LOG_INPUT
-        zklog.info("loadGlobals(): enableMemory=" + to_string(traceConfig.bEnableMemory));
+        zklog.info("Input::loadGlobals() enableMemory=" + to_string(traceConfig.bEnableMemory));
 #endif
     }
 
@@ -285,7 +366,7 @@ void Input::loadGlobals (json &input)
         traceConfig.bEnabled = true;
         traceConfig.bEnableReturnData = input["enableReturnData"];
 #ifdef LOG_INPUT
-        zklog.info("loadGlobals(): enableReturnData=" + to_string(traceConfig.bEnableReturnData));
+        zklog.info("Input::loadGlobals() enableReturnData=" + to_string(traceConfig.bEnableReturnData));
 #endif
     }
 
@@ -296,7 +377,7 @@ void Input::loadGlobals (json &input)
         traceConfig.bEnabled = true;
         traceConfig.txHashToGenerateFullTrace = Add0xIfMissing(input["txHashToGenerateFullTrace"]);
 #ifdef LOG_INPUT
-        zklog.info("loadGlobals(): txHashToGenerateFullTrace=" + traceConfig.txHashToGenerateFullTrace);
+        zklog.info("Input::loadGlobals() txHashToGenerateFullTrace=" + traceConfig.txHashToGenerateFullTrace);
 #endif
     }
 
