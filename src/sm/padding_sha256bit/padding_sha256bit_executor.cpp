@@ -122,7 +122,11 @@ void PaddingSha256BitExecutor::execute (vector<PaddingSha256BitExecutorInput> &i
             } 
             p += 1;
         }
-        //required.Bits2FieldSha256.push([stateWithR, curState]); //rick: pending
+        Bits2FieldSha256ExecutorInput b2fInput;
+        memcpy(b2fInput.inBlock, inR, sizeof(inR));
+        memcpy(b2fInput.inputState, stIn, sizeof(stIn));
+        memcpy(b2fInput.outputState, stOut, sizeof(stOut));
+        required.push_back(b2fInput);
 
         memcpy(currentState, stOut, sizeof(currentState));
     }
