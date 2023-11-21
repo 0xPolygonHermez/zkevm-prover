@@ -65,6 +65,18 @@ void Rom::load(Goldilocks &fr, json &romJson)
         effectivePercentageRLPOffset = getMemoryOffset("effectivePercentageRLP");
         calldataCTXOffset            = getMemoryOffset("calldataCTX");
         calldataOffsetOffset         = getMemoryOffset("calldataOffset");
+        blockNumOffset               = getMemoryOffset("blockNum");
+        cumulativeGasUsedOffset      = getMemoryOffset("cumulativeGasUsed");
+        isForcedOffset               = getMemoryOffset("isForced");
+        sequencerAddrOffset          = getMemoryOffset("sequencerAddr");
+        blockInfoSROffset            = getMemoryOffset("blockInfoSR");
+        timestampOffset              = getMemoryOffset("timestamp");
+        gerL1InfoTreeOffset          = getMemoryOffset("gerL1InfoTree");
+        previousBlockHashOffset      = getMemoryOffset("previousBlockHash");
+        blockchashL1InfoTreeOffset   = getMemoryOffset("blockchashL1InfoTree");
+        isChangeL2BlockTxOffset      = getMemoryOffset("isChangeL2BlockTx");
+        txIndexOffset                = getMemoryOffset("txIndex");
+        l2TxHashOffset               = getMemoryOffset("l2TxHash");
     }
 
     // Load ROM integer constants
@@ -146,6 +158,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
     constants.MIN_CNT_KECCAK_BATCH              = getConstant(romJson, "MIN_CNT_KECCAK_BATCH");
     constants.CODE_SIZE_LIMIT                   = getConstant(romJson, "CODE_SIZE_LIMIT");
     constants.BYTECODE_STARTS_EF                = getConstant(romJson, "BYTECODE_STARTS_EF");
+    constants.BLOCK_GAS_LIMIT                   = getConstant(romJson, "BLOCK_GAS_LIMIT");
 
     // Load ROM scalar constants
     constants.ADDRESS_GLOBAL_EXIT_ROOT_MANAGER_L2 = getConstantL(romJson, "ADDRESS_GLOBAL_EXIT_ROOT_MANAGER_L2");

@@ -61,6 +61,18 @@ public:
     uint64_t effectivePercentageRLPOffset;
     uint64_t calldataCTXOffset;
     uint64_t calldataOffsetOffset;
+    uint64_t blockNumOffset;
+    uint64_t cumulativeGasUsedOffset;
+    uint64_t isForcedOffset;
+    uint64_t sequencerAddrOffset;
+    uint64_t blockInfoSROffset;
+    uint64_t timestampOffset;
+    uint64_t gerL1InfoTreeOffset;
+    uint64_t previousBlockHashOffset;
+    uint64_t blockchashL1InfoTreeOffset;
+    uint64_t isChangeL2BlockTxOffset;
+    uint64_t txIndexOffset;
+    uint64_t l2TxHashOffset;
 
     /* Constants */
     RomConstants constants;
@@ -103,7 +115,19 @@ public:
             gasCTXOffset(0),
             lastCtxUsedOffset(0),
             isCreateOffset(0),
-            effectivePercentageRLPOffset(0)
+            effectivePercentageRLPOffset(0),
+            blockNumOffset(0),
+            cumulativeGasUsedOffset(0),
+            isForcedOffset(0),
+            sequencerAddrOffset(0),
+            blockInfoSROffset(0),
+            timestampOffset(0),
+            gerL1InfoTreeOffset(0),
+            previousBlockHashOffset(0),
+            blockchashL1InfoTreeOffset(0),
+            isChangeL2BlockTxOffset(0),
+            txIndexOffset(0),
+            l2TxHashOffset(0)
             { };
 
     /* Destructor */

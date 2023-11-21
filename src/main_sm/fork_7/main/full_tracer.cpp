@@ -64,7 +64,10 @@ set<string> responseErrors = {
     "intrinsic_invalid_balance",
     "intrinsic_invalid_batch_gas_limit",
     "intrinsic_invalid_sender_code",
-    "invalidRLP" };
+    "invalid_change_l2_block",
+    "invalidRLP",
+    "invalidDecodeChangeL2Block",
+    "invalidNotFirstTxChangeL2Block" };
     
 set<string> oocErrors = {
     "OOCS",
@@ -379,19 +382,19 @@ zkresult FullTracer::onError(Context &ctx, const RomCommand &cmd)
     if ( (responseErrors.find(lastError) != responseErrors.end()) ||
          (full_trace.size() == 0) )
     {
-        if (finalTrace.responses.size() > txCount)
+        if (currentBlock.responses.size() > txIndex)
         {
-            finalTrace.responses[txCount].error = lastError;
+            currentBlock.responses[txIndex].error = lastError;
         }
-        else if (finalTrace.responses.size() == txCount)
+        else if (currentBlock.responses.size() == txIndex)
         {
-            Response response;
+            ResponseV2 response;
             response.error = lastError;
-            finalTrace.responses.push_back(response);
+            currentBlock.responses.push_back(response);
         }
         else
         {
-            zklog.error("FullTracer::onError() got error=" + lastError + " with txCount=" + to_string(txCount) + " but finalTrace.responses.size()=" + to_string(finalTrace.responses.size()));
+            zklog.error("FullTracer::onError() got error=" + lastError + " with txIndex=" + to_string(txIndex) + " but currentBlock.responses.size()=" + to_string(currentBlock.responses.size()));
             exitProcess();
         }
     }
@@ -443,19 +446,19 @@ zkresult FullTracer::onError(ContextC &ctxc, const string &error)
     if ( (responseErrors.find(lastError) != responseErrors.end()) ||
          (full_trace.size() == 0) )
     {
-        if (finalTrace.responses.size() > txCount)
+        if (currentBlock.responses.size() > txIndex)
         {
-            finalTrace.responses[txCount].error = lastError;
+            currentBlock.responses[txIndex].error = lastError;
         }
-        else if (finalTrace.responses.size() == txCount)
+        else if (currentBlock.responses.size() == txIndex)
         {
-            Response response;
+            ResponseV2 response;
             response.error = lastError;
-            finalTrace.responses.push_back(response);
+            currentBlock.responses.push_back(response);
         }
         else
         {
-            zklog.error("FullTracer::onError() got error=" + lastError + " with txCount=" + to_string(txCount) + " but finalTrace.responses.size()=" + to_string(finalTrace.responses.size()));
+            zklog.error("FullTracer::onError() got error=" + lastError + " with txIndex=" + to_string(txIndex) + " but currentBlock.responses.size()=" + to_string(currentBlock.responses.size()));
             exitProcess();
         }
     }
@@ -514,23 +517,23 @@ zkresult FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
 
     // Init logs[CTX][indexLog], if required
     uint64_t CTX = ctx.fr.toU64(ctx.pols.CTX[*ctx.pStep]);
-    map<uint64_t, map<uint64_t, Log>>::iterator itCTX;
+    map<uint64_t, map<uint64_t, LogV2>>::iterator itCTX;
     itCTX = logs.find(CTX);
     if (itCTX == logs.end())
     {
-        map<uint64_t, Log> aux;
-        Log log;
+        map<uint64_t, LogV2> aux;
+        LogV2 log;
         aux[indexLog] = log;
         logs[CTX] = aux;
         itCTX = logs.find(CTX);
         zkassert(itCTX != logs.end());
     }
     
-    map<uint64_t, Log>::iterator it;
+    map<uint64_t, LogV2>::iterator it;
     it = itCTX->second.find(indexLog);
     if (it == itCTX->second.end())
     {
-        Log log;
+        LogV2 log;
         logs[CTX][indexLog] = log;
         it = itCTX->second.find(indexLog);
         zkassert(it != itCTX->second.end());
@@ -556,15 +559,16 @@ zkresult FullTracer::onStoreLog (Context &ctx, const RomCommand &cmd)
         return zkr;
     }
     it->second.address = NormalizeTo0xNFormat(auxScalar.get_str(16), 40);
-    zkr = getVarFromCtx(ctx, true, ctx.rom.newNumBatchOffset, auxScalar);
+    zkr = getVarFromCtx(ctx, true, ctx.rom.blockNumOffset, auxScalar);
     if (zkr != ZKR_SUCCESS)
     {
-        zklog.error("FullTracer::onStoreLog() failed calling getVarFromCtx(ctx.rom.newNumBatchOffset)");
+        zklog.error("FullTracer::onStoreLog() failed calling getVarFromCtx(ctx.rom.blockNumOffset)");
         return zkr;
     }
-    it->second.batch_number = auxScalar.get_ui();
-    it->second.tx_hash = finalTrace.responses[txCount].tx_hash;
-    it->second.tx_index = txCount;
+    it->second.block_number = auxScalar.get_ui();
+    it->second.tx_hash = currentBlock.responses[txIndex].tx_hash;
+    it->second.tx_hash_l2 = currentBlock.responses[txIndex].tx_hash_l2;
+    it->second.tx_index = txIndex;
     it->second.index = indexLog;
 
 #ifdef LOG_FULL_TRACER
@@ -662,15 +666,186 @@ zkresult FullTracer::onStoreLog (ContextC &ctxc)
     return ZKR_SUCCESS;
 }
 
+
+// Triggered when a change L2 block transaction is detected
+zkresult FullTracer::onStartBlock (Context &ctx)
+{
+    // If it's not the frist change L2 block transaction, we must finish previous block
+    if (!currentBlock.parent_hash.empty())
+    {
+        onFinishBlock(ctx);
+    }
+
+    // Get prvious block hash
+    mpz_class auxScalar;
+    zkresult zkr = getVarFromCtx(ctx, true, ctx.rom.previousBlockHashOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onStartBlock() failed calling getVarFromCtx(ctx.rom.sequencerAddrOffset)");
+        return zkr;
+    }
+    currentBlock.parent_hash = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
+
+    // Get sequencer address
+    zkr = getVarFromCtx(ctx, true, ctx.rom.sequencerAddrOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onStartBlock() failed calling getVarFromCtx(ctx.rom.sequencerAddrOffset)");
+        return zkr;
+    }
+    currentBlock.coinbase = NormalizeTo0xNFormat(auxScalar.get_str(16), 40);
+
+    // Get gas limit
+    currentBlock.gas_limit = ctx.rom.constants.BLOCK_GAS_LIMIT;
+
+    // Clear transactions
+    currentBlock.responses.clear();
+
+    return ZKR_SUCCESS;
+}
+
+/**
+ * Triggered when a block is finished (at begining of next block or after finishing processing last tx of the batch)
+ * @param {Object} ctx Current context object
+ */
+zkresult FullTracer::onFinishBlock (Context &ctx)
+{
+    mpz_class auxScalar;
+    zkresult zkr;
+
+    // Get block number
+    zkr = getVarFromCtx(ctx, true, ctx.rom.blockNumOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onFinishBlock() failed calling getVarFromCtx(ctx.rom.blockNumOffset)");
+        return zkr;
+    }
+    currentBlock.block_number = auxScalar.get_ui();
+
+    // Get timestamp
+    zkr = getVarFromCtx(ctx, true, ctx.rom.timestampOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onFinishBlock() failed calling getVarFromCtx(ctx.rom.timestampOffset)");
+        return zkr;
+    }
+    currentBlock.timestamp = auxScalar.get_ui();
+
+    // Get global exit root
+    zkr = getVarFromCtx(ctx, true, ctx.rom.gerL1InfoTreeOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onFinishBlock() failed calling getVarFromCtx(ctx.rom.gerL1InfoTreeOffset)");
+        return zkr;
+    }
+    currentBlock.ger = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
+
+    // Get block hash L1
+    zkr = getVarFromCtx(ctx, true, ctx.rom.blockchashL1InfoTreeOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onFinishBlock() failed calling getVarFromCtx(ctx.rom.blockchashL1InfoTreeOffset)");
+        return zkr;
+    }
+    currentBlock.block_hash_l1 = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
+
+    // Get gas used
+    zkr = getVarFromCtx(ctx, true, ctx.rom.cumulativeGasUsedOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onFinishBlock() failed calling getVarFromCtx(ctx.rom.cumulativeGasUsedOffset)");
+        return zkr;
+    }
+    currentBlock.gas_used = auxScalar.get_ui();
+
+    // Get block info root
+    zkr = getVarFromCtx(ctx, true, ctx.rom.blockInfoSROffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onFinishBlock() failed calling getVarFromCtx(ctx.rom.sequencerAddrOffset)");
+        return zkr;
+    }
+    currentBlock.block_info_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
+    
+    // Get block hash
+    if (!fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]))
+    {
+        zklog.error("FullTracer::onFinishBlock() failed calling fea2scalar()");
+        return ZKR_SM_MAIN_FEA2SCALAR;
+    }
+    currentBlock.block_hash = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
+
+    // Clear logs
+    currentBlock.logs.clear();
+
+    // Order all logs (from all CTX) in order of index
+    map<uint64_t, LogV2> auxLogs;
+    map<uint64_t, map<uint64_t, LogV2>>::iterator logIt;
+    map<uint64_t, LogV2>::const_iterator it;
+    for (logIt=logs.begin(); logIt!=logs.end(); logIt++)
+    {
+        for (it = logIt->second.begin(); it != logIt->second.end(); it++)
+        {
+            auxLogs[it->second.index] = it->second;
+        }
+    }
+
+    // Append to response logs, overwriting log indexes to be sequential
+    uint64_t logIndex = 0;
+    map<uint64_t, LogV2>::iterator auxLogsIt;
+    for (auxLogsIt = auxLogs.begin(); auxLogsIt != auxLogs.end(); auxLogsIt++)
+    {
+        auxLogsIt->second.index = logIndex;
+        logIndex++;
+        auxLogsIt->second.block_hash = currentBlock.block_hash;
+        currentBlock.logs.push_back(auxLogsIt->second);
+    }
+
+    // Set block hash to all txs of block
+    for (uint64_t tx=0; tx<currentBlock.responses.size(); tx++)
+    {
+        currentBlock.responses[tx].block_hash = currentBlock.block_hash;
+        currentBlock.responses[tx].block_number = currentBlock.block_number;
+    };
+
+    // Append block to final trace
+    finalTrace.block_responses.emplace_back(currentBlock);
+
+    // Reset tx Count
+    txIndex = 0;
+
+    // Reset logs
+    logs.clear();
+
+    return ZKR_SUCCESS;
+}
+
 // Triggered at the very beginning of transaction process
-zkresult FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
+zkresult FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
 {
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&t, NULL);
 #endif
     mpz_class auxScalar;
-    Response response;
+    ResponseV2 response;
     zkresult zkr;
+
+
+    // Get if this is a new L2 block
+    zkr = getVarFromCtx(ctx, false, ctx.rom.isChangeL2BlockTxOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onProcessTx() failed calling getVarFromCtx(ctx.rom.isChangeL2BlockTxOffset)");
+        return zkr;
+    }
+    if (auxScalar.get_ui() || (isForced && (txIndex == 0)))
+    {
+        onStartBlock(ctx);
+        if (!isForced)
+        {
+            return ZKR_SUCCESS;
+        }
+    }
 
     /* Fill context object */
 
@@ -747,7 +922,7 @@ zkresult FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
     // TX output
     response.full_trace.context.output = "";
 
-    // TX used gas
+    // TX gas used
     response.full_trace.context.gas_used = 0;
 
     // TX execution time
@@ -769,6 +944,25 @@ zkresult FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
         return zkr;
     }
     response.full_trace.context.gas_price = auxScalar;
+
+    // TX chain ID
+    zkr = getVarFromCtx(ctx, false, ctx.rom.txChainIdOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onProcessTx() failed calling getVarFromCtx(ctx.rom.txChainIdOffset)");
+        return zkr;
+    }
+    uint64_t chainId = auxScalar.get_ui();
+    response.full_trace.context.chainId = chainId;
+
+    // TX index
+    zkr = getVarFromCtx(ctx, true, ctx.rom.txIndexOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onProcessTx() failed calling getVarFromCtx(ctx.rom.txIndexOffset)");
+        return zkr;
+    }
+    response.full_trace.context.txIndex = auxScalar.get_ui();
 
     // Call data
     uint64_t CTX = fr.toU64(ctx.pols.CTX[*ctx.pStep]);
@@ -796,15 +990,6 @@ zkresult FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
         zklog.error("FullTracer::onProcessTx() failed calling getVarFromCtx(ctx.rom.txSOffset)");
         return zkr;
     }
-
-    // chain ID
-    zkr = getVarFromCtx(ctx, false, ctx.rom.txChainIdOffset, auxScalar);
-    if (zkr != ZKR_SUCCESS)
-    {
-        zklog.error("FullTracer::onProcessTx() failed calling getVarFromCtx(ctx.rom.txChainIdOffset)");
-        return zkr;
-    }
-    uint64_t chainId = auxScalar.get_ui();
 
     // v
     zkr = getVarFromCtx(ctx, false, ctx.rom.txVOffset, auxScalar);
@@ -855,6 +1040,15 @@ zkresult FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
     response.logs.clear();
     response.full_trace.steps.clear();
 
+    // TX hash L2
+    zkr = getVarFromCtx(ctx, false, ctx.rom.l2TxHashOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onProcessTx() failed calling getVarFromCtx(ctx.rom.l2TxHashOffset)");
+        return zkr;
+    }
+    response.tx_hash_l2 = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
+
     // Get effective percentage
     zkr = getVarFromCtx(ctx, false, ctx.rom.effectivePercentageRLPOffset, auxScalar);
     if (zkr != ZKR_SUCCESS)
@@ -865,7 +1059,7 @@ zkresult FullTracer::onProcessTx(Context &ctx, const RomCommand &cmd)
     response.effective_percentage = auxScalar.get_ui();
 
     // Create current tx object
-    finalTrace.responses.push_back(response);
+    currentBlock.responses.push_back(response);
 
     // Clear temporary tx traces
     full_trace.clear();
@@ -900,7 +1094,7 @@ zkresult FullTracer::onProcessTx (ContextC &ctxc)
 #endif
 
     mpz_class auxScalar;
-    Response response;
+    ResponseV2 response;
     //zkresult zkr;
 /*
     // Fill context object
@@ -1008,7 +1202,7 @@ zkresult FullTracer::onProcessTx (ContextC &ctxc)
     response.effective_percentage = ctxc.batch.tx[ctxc.tx].gasPercentage;
 
     // Create current tx object
-    finalTrace.responses.push_back(response);
+    currentBlock.responses.push_back(response);
 
     // Clear temporary tx traces
     full_trace.clear();
@@ -1158,7 +1352,15 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     gettimeofday(&t, NULL);
 #endif
     zkresult zkr;
-    Response &response = finalTrace.responses[txCount];
+    ResponseV2 &response = currentBlock.responses[txIndex];
+
+    if (response.full_trace.steps.size() == 0)
+    {
+#ifdef LOG_TIME_STATISTICS
+        tms.add("onFinishTx", TimeDiff(t));
+#endif
+        return ZKR_SUCCESS;
+    }
 
     // Set from address
     mpz_class fromScalar;
@@ -1179,6 +1381,15 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
         return zkr;
     }
     response.effective_gas_price = Add0xIfMissing(auxScalar.get_str(16));
+
+    // Set cumulative gas used
+    zkr = getVarFromCtx(ctx, true, ctx.rom.cumulativeGasUsedOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onFinishTx() failed calling getVarFromCtx(ctx.rom.cumulativeGasUsedOffset)");
+        return zkr;
+    }
+    response.cumulative_gas_used = auxScalar.get_ui();
 
     // Set consumed tx gas
     uint64_t polsGas = fr.toU64(ctx.pols.GAS[*ctx.pStep]);
@@ -1237,6 +1448,15 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     // Set gas left
     response.gas_left -= response.gas_used;
 
+    // Set gas refunded
+    zkr = getVarFromCtx(ctx, false, ctx.rom.cumulativeGasUsedOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onFinishTx() failed calling getVarFromCtx(ctx.rom.cumulativeGasUsedOffset)");
+        return zkr;
+    }
+    response.cumulative_gas_used = auxScalar.get_ui();
+
     // Set new State Root
     if (!fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]))
     {
@@ -1250,9 +1470,6 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
          (full_trace.size() > 0) )
     {
         Opcode &lastOpcodeCall = full_trace.at(full_trace.size() - 1);
-
-        // set refunded gas
-        response.gas_refunded = lastOpcodeCall.gas_refund;
 
         // Set gas price of last opcode if no error and is not a deploy and is not STOP (RETURN + REVERT)
         if ( (full_trace.size() > 1) &&
@@ -1274,9 +1491,9 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
               (full_trace.size() > 0) )
     {
         Opcode &lastOpcodeCall = full_trace.at(full_trace.size() - 1);
-        if (finalTrace.responses[finalTrace.responses.size() - 1].error == "")
+        if (currentBlock.responses[currentBlock.responses.size() - 1].error == "")
         {
-            finalTrace.responses[finalTrace.responses.size() - 1].error = lastOpcodeCall.error;
+            currentBlock.responses[currentBlock.responses.size() - 1].error = lastOpcodeCall.error;
         }
     }
         
@@ -1284,17 +1501,17 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
          (numberOfOpcodesInThisTx != 0) &&
          (lastErrorOpcode != numberOfOpcodesInThisTx) )
     {
-        finalTrace.responses[finalTrace.responses.size() - 1].error = "";
+        currentBlock.responses[currentBlock.responses.size() - 1].error = "";
     }
 
     // set flags has_gasprice_opcode and has_balance_opcode
-    finalTrace.responses[finalTrace.responses.size() - 1].has_gasprice_opcode = hasGaspriceOpcode;
-    finalTrace.responses[finalTrace.responses.size() - 1].has_balance_opcode = hasBalanceOpcode;
+    currentBlock.responses[currentBlock.responses.size() - 1].has_gasprice_opcode = hasGaspriceOpcode;
+    currentBlock.responses[currentBlock.responses.size() - 1].has_balance_opcode = hasBalanceOpcode;
 
     // Order all logs (from all CTX) in order of index
-    map<uint64_t, Log> auxLogs;
-    map<uint64_t, map<uint64_t, Log>>::iterator logIt;
-    map<uint64_t, Log>::const_iterator it;
+    map<uint64_t, LogV2> auxLogs;
+    map<uint64_t, map<uint64_t, LogV2>>::iterator logIt;
+    map<uint64_t, LogV2>::const_iterator it;
     for (logIt=logs.begin(); logIt!=logs.end(); logIt++)
     {
         for (it = logIt->second.begin(); it != logIt->second.end(); it++)
@@ -1305,16 +1522,16 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
 
     // Append to response logs, overwriting log indexes to be sequential
     uint64_t logIndex = 0;
-    map<uint64_t, Log>::iterator auxLogsIt;
+    map<uint64_t, LogV2>::iterator auxLogsIt;
     for (auxLogsIt = auxLogs.begin(); auxLogsIt != auxLogs.end(); auxLogsIt++)
     {
         auxLogsIt->second.index = logIndex;
         logIndex++;
-        finalTrace.responses[finalTrace.responses.size() - 1].logs.push_back(auxLogsIt->second);
+        currentBlock.responses[currentBlock.responses.size() - 1].logs.push_back(auxLogsIt->second);
     }
 
-    // Increase transaction count
-    txCount++;
+    // Increase transaction index
+    txIndex++;
 
     // Clean aux array for next iteration
     full_trace.clear();
@@ -1345,7 +1562,7 @@ zkresult FullTracer::onFinishTx (ContextC &ctxc)
     gettimeofday(&t, NULL);
 #endif
     //zkresult zkr;
-    Response &response = finalTrace.responses[txCount];
+    ResponseV2 &response = currentBlock.responses[txIndex];
 
     // Set from address
     response.full_trace.context.from = NormalizeTo0xNFormat(ctxc.batch.tx[ctxc.tx].fromPublicKey.get_str(16), 40);
@@ -1435,9 +1652,9 @@ zkresult FullTracer::onFinishTx (ContextC &ctxc)
               (full_trace.size() > 0) )
     {
         Opcode &lastOpcodeCall = full_trace.at(full_trace.size() - 1);
-        if (finalTrace.responses[finalTrace.responses.size() - 1].error == "")
+        if (currentBlock.responses[currentBlock.responses.size() - 1].error == "")
         {
-            finalTrace.responses[finalTrace.responses.size() - 1].error = lastOpcodeCall.error;
+            currentBlock.responses[currentBlock.responses.size() - 1].error = lastOpcodeCall.error;
         }
     }
         
@@ -1445,13 +1662,13 @@ zkresult FullTracer::onFinishTx (ContextC &ctxc)
          (numberOfOpcodesInThisTx != 0) &&
          (lastErrorOpcode != numberOfOpcodesInThisTx) )
     {
-        finalTrace.responses[finalTrace.responses.size() - 1].error = "";
+        currentBlock.responses[currentBlock.responses.size() - 1].error = "";
     }
 
     // Order all logs (from all CTX) in order of index
-    map<uint64_t, Log> auxLogs;
-    map<uint64_t, map<uint64_t, Log>>::iterator logIt;
-    map<uint64_t, Log>::const_iterator it;
+    map<uint64_t, LogV2> auxLogs;
+    map<uint64_t, map<uint64_t, LogV2>>::iterator logIt;
+    map<uint64_t, LogV2>::const_iterator it;
     for (logIt=logs.begin(); logIt!=logs.end(); logIt++)
     {
         for (it = logIt->second.begin(); it != logIt->second.end(); it++)
@@ -1462,16 +1679,16 @@ zkresult FullTracer::onFinishTx (ContextC &ctxc)
 
     // Append to response logs, overwriting log indexes to be sequential
     uint64_t logIndex = 0;
-    map<uint64_t, Log>::iterator auxLogsIt;
+    map<uint64_t, LogV2>::iterator auxLogsIt;
     for (auxLogsIt = auxLogs.begin(); auxLogsIt != auxLogs.end(); auxLogsIt++)
     {
         auxLogsIt->second.index = logIndex;
         logIndex++;
-        finalTrace.responses[finalTrace.responses.size() - 1].logs.push_back(auxLogsIt->second);
+        currentBlock.responses[currentBlock.responses.size() - 1].logs.push_back(auxLogsIt->second);
     }
 
     // Increase transaction count
-    txCount++;
+    txIndex++;
 
     // Clean aux array for next iteration
     logs.clear();
@@ -1507,7 +1724,17 @@ zkresult FullTracer::onStartBatch(Context &ctx, const RomCommand &cmd)
         return ZKR_SUCCESS;
     }
 
-    finalTrace.responses.clear();
+    // Set is forced
+    mpz_class auxScalar;
+    zkresult zkr = getVarFromCtx(ctx, true, ctx.rom.isForcedOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onFinishTx() failed calling getVarFromCtx(ctx.rom.txDestAddrOffset)");
+        return zkr;
+    }
+    isForced = auxScalar.get_ui();
+
+    finalTrace.block_responses.clear();
     finalTrace.bInitialized = true;
 
 #ifdef LOG_FULL_TRACER
@@ -1533,7 +1760,7 @@ zkresult FullTracer::onStartBatch (ContextC &ctxc)
         return ZKR_SUCCESS;
     }
 
-    finalTrace.responses.clear();
+    finalTrace.block_responses.clear();
     finalTrace.bInitialized = true;
 
 #ifdef LOG_FULL_TRACER
@@ -1551,13 +1778,14 @@ zkresult FullTracer::onFinishBatch(Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&t, NULL);
 #endif
+    mpz_class auxScalar;
     zkresult zkr;
 
-    // Update used gas
-    finalTrace.cumulative_gas_used = accBatchGas;
+    onFinishBlock(ctx);
+
+    finalTrace.gas_used = accBatchGas;
 
     // New state root
-    mpz_class auxScalar;
     if (!fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]))
     {
         zklog.error("FullTracer::onFinishBatch() failed calling fea2scalar(SR)");
@@ -1573,16 +1801,6 @@ zkresult FullTracer::onFinishBatch(Context &ctx, const RomCommand &cmd)
         return zkr;
     }
     finalTrace.new_acc_input_hash = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
-
-    // TODO: Can we simply use finalTrace.new_acc_input_hash when constructing the response? Can we avoid these fields in the .proto?
-    for (uint64_t r=0; r<finalTrace.responses.size(); r++)
-    {
-        finalTrace.responses[r].full_trace.context.batch = finalTrace.new_acc_input_hash;
-        for (uint64_t l=0; l<finalTrace.responses[r].logs.size(); l++)
-        {
-            finalTrace.responses[r].logs[l].batch_hash = finalTrace.new_acc_input_hash;
-        }
-    }
 
     // New local exit root
     zkr = getVarFromCtx(ctx, true, ctx.rom.newLocalExitRootOffset, auxScalar);
