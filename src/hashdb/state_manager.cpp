@@ -8,6 +8,8 @@
 
 StateManager stateManager;
 
+//#define LOG_STATE_MANAGER
+
 zkresult StateManager::setStateRoot (const string &batchUUID, uint64_t tx, const string &_stateRoot, bool bIsOldStateRoot, const Persistence persistence)
 {
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
@@ -569,7 +571,7 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
             TxState &txState = batchState.txState[tx];
 
             // Temporary data can be deleted at the end of a batch
-            if (persistence == PERSISTENCE_TEMPORARY)
+            if ((persistence == PERSISTENCE_TEMPORARY) || (persistence == PERSISTENCE_TEMPORARY_HASH))
             {
                 txState.persistence[persistence].subState.clear();
                 txState.persistence[persistence].currentSubState = 0;
