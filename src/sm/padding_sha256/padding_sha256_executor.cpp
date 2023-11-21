@@ -104,7 +104,7 @@ void PaddingSha256Executor::execute (vector<PaddingSha256ExecutorInput> &input, 
 
             uint64_t s=input[i].dataBytes.size()-1-j;
             if(s < 8) pols.lengthSection[p] = fr.one();
-            if(s < 4) pols.accLength[p] = fr.fromU64((input[i].realLen*8)&&(0xFFFFFFFF<<(s*8))); //rick: ??
+            if(s < 4) pols.accLength[p] = fr.fromU64((input[i].realLen<<3)&&(0xFFFFFFFF<<(s*8))); //check
 
             bool lastBlock = (p % bytesPerBlock) == (bytesPerBlock - 1);
             bool lastHash = lastBlock && ((!fr.isZero(pols.spare[p])) || fr.isZero(pols.rem[p]));
