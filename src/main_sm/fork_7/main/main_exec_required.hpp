@@ -9,9 +9,11 @@
 #include "sm/padding_kk/padding_kk_executor.hpp"
 #include "sm/padding_kkbit/padding_kkbit_executor.hpp"
 #include "sm/bits2field/bits2field_executor.hpp"
+#include "sm/keccak_f/keccak_f_executor.hpp"
 #include "sm/padding_sha256/padding_sha256_executor.hpp"
 #include "sm/padding_sha256bit/padding_sha256bit_executor.hpp"
-#include "sm/keccak_f/keccak_f_executor.hpp"
+#include "sm/bits2field_sha256/bits2field_sha256_executor.hpp"
+#include "sm/sha256_f/sha256_f_executor.hpp"
 #include "sm/memory/memory_executor.hpp"
 #include "sm/padding_pg/padding_pg_executor.hpp"
 #include "sm/mem_align/mem_align_executor.hpp"
@@ -34,6 +36,7 @@ public:
     vector<vector<Goldilocks::Element>> KeccakF;
     vector<PaddingSha256ExecutorInput> PaddingSha256;
     vector<PaddingSha256BitExecutorInput> PaddingSha256Bit;
+    vector<Bits2FieldSha256ExecutorInput> Bits2FieldSha256;
     vector<vector<Goldilocks::Element>> Sha256F;
     vector<PaddingPGExecutorInput> PaddingPG;
     vector<array<Goldilocks::Element, 17>> PoseidonG; // The 17th fe is the permutation

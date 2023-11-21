@@ -5,6 +5,7 @@
 #include "definitions.hpp"
 #include "sm/pols_generated/commit_pols.hpp"
 #include "sm/bits2field/bits2field_executor.hpp"
+#include "sm/bits2field_sha256/bits2field_sha256_executor.hpp"
 
 USING_PROVER_FORK_NAMESPACE;
 
@@ -47,7 +48,7 @@ public:
         nSlots(44*((N-1)/slotSize)) {};
 
     /* Executor */
-    void execute (vector<PaddingSha256BitExecutorInput> &input, PROVER_FORK_NAMESPACE::PaddingSha256BitCommitPols &pols, vector<Bits2FieldExecutorInput> &required);
+    void execute (vector<PaddingSha256BitExecutorInput> &input, PROVER_FORK_NAMESPACE::PaddingSha256BitCommitPols &pols, vector<Bits2FieldSha256ExecutorInput> &required);
 };
 
 #endif

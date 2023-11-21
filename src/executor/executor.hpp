@@ -55,6 +55,7 @@ public:
     KeccakFExecutor keccakFExecutor;
     PaddingSha256Executor paddingSha256Executor;
     PaddingSha256BitExecutor paddingSha256BitExecutor;
+    Bits2FieldSha256Executor bits2FieldSha256Executor;
     Sha256FExecutor sha256FExecutor;
     PaddingPGExecutor paddingPGExecutor;
     PoseidonGExecutor poseidonGExecutor;
@@ -84,6 +85,7 @@ public:
         keccakFExecutor(fr, config),
         paddingSha256Executor(fr),
         paddingSha256BitExecutor(fr),
+        bits2FieldSha256Executor(fr),
         sha256FExecutor(fr, config),
         paddingPGExecutor(fr, poseidon),
         poseidonGExecutor(fr, poseidon),
