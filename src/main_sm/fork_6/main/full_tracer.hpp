@@ -131,6 +131,13 @@ public:
     {
         return finalTrace.responses;
     }
+    vector<Block> emptyBlocks;
+    vector<Block> & get_block_responses(void)
+    {
+        zklog.error("FullTracer::get_block_responses() called in fork 6");
+        exitProcess();
+        return emptyBlocks;
+    }
     vector<Opcode> & get_info(void)
     {
         return full_trace;

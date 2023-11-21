@@ -89,6 +89,7 @@ public:
     uint64_t MIN_CNT_KECCAK_BATCH;
     uint64_t CODE_SIZE_LIMIT;
     uint64_t BYTECODE_STARTS_EF;
+    uint64_t BLOCK_GAS_LIMIT;
 
     /* Scalar constants */
     mpz_class ADDRESS_GLOBAL_EXIT_ROOT_MANAGER_L2;

@@ -367,6 +367,7 @@ using grpc::Status;
     response->set_flush_id(proverRequest.flushId);
     response->set_stored_flush_id(proverRequest.lastSentFlushId);
     response->set_prover_id(config.proverID);
+    response->set_fork_id(proverRequest.input.publicInputsExtended.publicInputs.forkID);
     
     unordered_map<string, InfoReadWrite> * p_read_write_addresses = proverRequest.pFullTracer->get_read_write_addresses();
     if (p_read_write_addresses != NULL)
@@ -1039,6 +1040,7 @@ using grpc::Status;
     response->set_flush_id(proverRequest.flushId);
     response->set_stored_flush_id(proverRequest.lastSentFlushId);
     response->set_prover_id(config.proverID);
+    response->set_fork_id(proverRequest.input.publicInputsExtended.publicInputs.forkID);
     
     unordered_map<string, InfoReadWrite> * p_read_write_addresses = proverRequest.pFullTracer->get_read_write_addresses();
     if (p_read_write_addresses != NULL)
@@ -1054,100 +1056,119 @@ using grpc::Status;
         }
     }
 
-    vector<Response> &responses = proverRequest.pFullTracer->get_responses();
-    for (uint64_t tx=0; tx<responses.size(); tx++)
-    {
-        // Remember the previous memory sent for each TX, and send only increments
-        string previousMemory;
+    vector<Block> &block_responses = proverRequest.pFullTracer->get_block_responses();
+    uint64_t nTxs = 0;
 
+    for (uint64_t block=0; block<block_responses.size(); block++)
+    {
         executor::v1::ProcessBlockResponseV2 * pProcessBlockResponse = response->add_block_responses();
 
-        executor::v1::ProcessTransactionResponseV2 * pProcessTransactionResponse = pProcessBlockResponse->add_responses();
+        pProcessBlockResponse->set_block_hash(string2ba(block_responses[block].block_hash));
+        pProcessBlockResponse->set_block_hash_l1(string2ba(block_responses[block].block_hash_l1));
+        pProcessBlockResponse->set_block_info_root(string2ba(block_responses[block].block_info_root));
+        pProcessBlockResponse->set_block_number(block_responses[block].block_number);
+        pProcessBlockResponse->set_coinbase(block_responses[block].coinbase);
+        pProcessBlockResponse->set_gas_limit(block_responses[block].gas_limit);
+        pProcessBlockResponse->set_gas_used(block_responses[block].gas_used);
+        pProcessBlockResponse->set_ger(string2ba(block_responses[block].ger));
+        pProcessBlockResponse->set_parent_hash(string2ba(block_responses[block].parent_hash));
+        pProcessBlockResponse->set_timestamp(block_responses[block].timestamp);
 
-        //executor::v1::ProcessTransactionResponse * pProcessTransactionResponse = response->add_responses();
-        pProcessTransactionResponse->set_tx_hash(string2ba(responses[tx].tx_hash));
-        pProcessTransactionResponse->set_rlp_tx(responses[tx].rlp_tx);
-        pProcessTransactionResponse->set_type(responses[tx].type); // Type indicates legacy transaction; it will be always 0 (legacy) in the executor
-        pProcessTransactionResponse->set_return_value(string2ba(responses[tx].return_value)); // Returned data from the runtime (function result or data supplied with revert opcode)
-        pProcessTransactionResponse->set_gas_left(responses[tx].gas_left); // Total gas left as result of execution
-        pProcessTransactionResponse->set_gas_used(responses[tx].gas_used); // Total gas used as result of execution or gas estimation
-        pProcessTransactionResponse->set_gas_refunded(responses[tx].gas_refunded); // Total gas refunded as result of execution
-        pProcessTransactionResponse->set_error(string2error(responses[tx].error)); // Any error encountered during the execution
-        pProcessTransactionResponse->set_create_address(responses[tx].create_address); // New SC Address in case of SC creation
-        pProcessTransactionResponse->set_state_root(string2ba(responses[tx].state_root));
-        pProcessTransactionResponse->set_effective_percentage(responses[tx].effective_percentage);
-        pProcessTransactionResponse->set_effective_gas_price(responses[tx].effective_gas_price);
-        pProcessTransactionResponse->set_has_balance_opcode(responses[tx].has_balance_opcode);
-        pProcessTransactionResponse->set_has_gasprice_opcode(responses[tx].has_gasprice_opcode);
-        for (uint64_t log=0; log<responses[tx].logs.size(); log++)
+        vector<ResponseV2> &responses = block_responses[block].responses;
+        nTxs += responses.size();
+
+        for (uint64_t tx=0; tx<block_responses[block].responses.size(); tx++)
         {
-            executor::v1::LogV2 * pLog = pProcessTransactionResponse->add_logs();
-            pLog->set_address(responses[tx].logs[log].address); // Address of the contract that generated the event
-            for (uint64_t topic=0; topic<responses[tx].logs[log].topics.size(); topic++)
+            // Remember the previous memory sent for each TX, and send only increments
+            string previousMemory;
+
+            executor::v1::ProcessTransactionResponseV2 * pProcessTransactionResponse = pProcessBlockResponse->add_responses();
+
+            //executor::v1::ProcessTransactionResponse * pProcessTransactionResponse = response->add_responses();
+            pProcessTransactionResponse->set_tx_hash(string2ba(responses[tx].tx_hash));
+            pProcessTransactionResponse->set_rlp_tx(responses[tx].rlp_tx);
+            pProcessTransactionResponse->set_type(responses[tx].type); // Type indicates legacy transaction; it will be always 0 (legacy) in the executor
+            pProcessTransactionResponse->set_return_value(string2ba(responses[tx].return_value)); // Returned data from the runtime (function result or data supplied with revert opcode)
+            pProcessTransactionResponse->set_gas_left(responses[tx].gas_left); // Total gas left as result of execution
+            pProcessTransactionResponse->set_gas_used(responses[tx].gas_used); // Total gas used as result of execution or gas estimation
+            pProcessTransactionResponse->set_gas_refunded(responses[tx].gas_refunded); // Total gas refunded as result of execution
+            pProcessTransactionResponse->set_error(string2error(responses[tx].error)); // Any error encountered during the execution
+            pProcessTransactionResponse->set_create_address(responses[tx].create_address); // New SC Address in case of SC creation
+            pProcessTransactionResponse->set_state_root(string2ba(responses[tx].state_root));
+            pProcessTransactionResponse->set_effective_percentage(responses[tx].effective_percentage);
+            pProcessTransactionResponse->set_effective_gas_price(responses[tx].effective_gas_price);
+            pProcessTransactionResponse->set_has_balance_opcode(responses[tx].has_balance_opcode);
+            pProcessTransactionResponse->set_has_gasprice_opcode(responses[tx].has_gasprice_opcode);
+            for (uint64_t log=0; log<responses[tx].logs.size(); log++)
             {
-                std::string * pTopic = pLog->add_topics();
-                *pTopic = string2ba(responses[tx].logs[log].topics[topic]); // List of topics provided by the contract
-            }
-            string dataConcatenated;
-            for (uint64_t data=0; data<responses[tx].logs[log].data.size(); data++)
-                dataConcatenated += responses[tx].logs[log].data[data];
-            pLog->set_data(string2ba(dataConcatenated)); // Supplied by the contract, usually ABI-encoded
-            //pLog->set_batch_number(responses[tx].logs[log].batch_number); // Batch in which the transaction was included
-            pLog->set_tx_hash(string2ba(responses[tx].logs[log].tx_hash)); // Hash of the transaction
-            pLog->set_tx_index(responses[tx].logs[log].tx_index); // Index of the transaction in the block
-            //pLog->set_batch_hash(string2ba(responses[tx].logs[log].batch_hash)); // Hash of the batch in which the transaction was included
-            pLog->set_index(responses[tx].logs[log].index); // Index of the log in the block
-        }
-        if (proverRequest.input.traceConfig.bEnabled && (proverRequest.input.traceConfig.txHashToGenerateFullTrace == responses[tx].tx_hash))
-        {
-            executor::v1::FullTraceV2 * pFullTrace = new executor::v1::FullTraceV2();
-            executor::v1::TransactionContextV2 * pTransactionContext = pFullTrace->mutable_context();
-            pTransactionContext->set_type(responses[tx].full_trace.context.type); // "CALL" or "CREATE"
-            pTransactionContext->set_from(responses[tx].full_trace.context.from); // Sender of the transaction
-            pTransactionContext->set_to(responses[tx].full_trace.context.to); // Target of the transaction
-            pTransactionContext->set_data(string2ba(responses[tx].full_trace.context.data)); // Input data of the transaction
-            pTransactionContext->set_gas(responses[tx].full_trace.context.gas);
-            pTransactionContext->set_gas_price(Add0xIfMissing(responses[tx].full_trace.context.gas_price.get_str(16)));
-            pTransactionContext->set_value(Add0xIfMissing(responses[tx].full_trace.context.value.get_str(16)));
-            //pTransactionContext->set_batch(string2ba(responses[tx].full_trace.context.batch)); // Hash of the batch in which the transaction was included
-            pTransactionContext->set_output(string2ba(responses[tx].full_trace.context.output)); // Returned data from the runtime (function result or data supplied with revert opcode)
-            pTransactionContext->set_gas_used(responses[tx].full_trace.context.gas_used); // Total gas used as result of execution
-            pTransactionContext->set_execution_time(responses[tx].full_trace.context.execution_time);
-            pTransactionContext->set_old_state_root(string2ba(responses[tx].full_trace.context.old_state_root)); // Starting state root
-            for (uint64_t step=0; step<responses[tx].full_trace.steps.size(); step++)
-            {
-                executor::v1::TransactionStepV2 * pTransactionStep = pFullTrace->add_steps();
-                pTransactionStep->set_state_root(string2ba(responses[tx].full_trace.steps[step].state_root));
-                pTransactionStep->set_depth(responses[tx].full_trace.steps[step].depth); // Call depth
-                pTransactionStep->set_pc(responses[tx].full_trace.steps[step].pc); // Program counter
-                pTransactionStep->set_gas(responses[tx].full_trace.steps[step].gas); // Remaining gas
-                pTransactionStep->set_gas_cost(responses[tx].full_trace.steps[step].gas_cost); // Gas cost of the operation
-                pTransactionStep->set_gas_refund(responses[tx].full_trace.steps[step].gas_refund); // Gas refunded during the operation
-                pTransactionStep->set_op(responses[tx].full_trace.steps[step].op); // Opcode
-                for (uint64_t stack=0; stack<responses[tx].full_trace.steps[step].stack.size() ; stack++)
-                    pTransactionStep->add_stack(responses[tx].full_trace.steps[step].stack[stack].get_str(16)); // Content of the stack
-                pTransactionStep->set_memory_size(responses[tx].full_trace.steps[step].memory_size);
-                pTransactionStep->set_memory_offset(responses[tx].full_trace.steps[step].memory_offset);
-                pTransactionStep->set_memory(responses[tx].full_trace.steps[step].memory);
+                executor::v1::LogV2 * pLog = pProcessTransactionResponse->add_logs();
+                pLog->set_address(responses[tx].logs[log].address); // Address of the contract that generated the event
+                for (uint64_t topic=0; topic<responses[tx].logs[log].topics.size(); topic++)
+                {
+                    std::string * pTopic = pLog->add_topics();
+                    *pTopic = string2ba(responses[tx].logs[log].topics[topic]); // List of topics provided by the contract
+                }
                 string dataConcatenated;
-                for (uint64_t data=0; data<responses[tx].full_trace.steps[step].return_data.size(); data++)
-                    dataConcatenated += responses[tx].full_trace.steps[step].return_data[data];
-                pTransactionStep->set_return_data(string2ba(dataConcatenated));
-                executor::v1::ContractV2 * pContract = pTransactionStep->mutable_contract(); // Contract information
-                pContract->set_address(responses[tx].full_trace.steps[step].contract.address);
-                pContract->set_caller(responses[tx].full_trace.steps[step].contract.caller);
-                pContract->set_value(Add0xIfMissing(responses[tx].full_trace.steps[step].contract.value.get_str(16)));
-                pContract->set_data(string2ba(responses[tx].full_trace.steps[step].contract.data));
-                pContract->set_gas(responses[tx].full_trace.steps[step].contract.gas);
-                pContract->set_type(responses[tx].full_trace.steps[step].contract.type);
-                pTransactionStep->set_error(string2error(responses[tx].full_trace.steps[step].error));
-
-                google::protobuf::Map<std::string, std::string> * pStorage = pTransactionStep->mutable_storage();
-                unordered_map<string,string>::iterator it;
-                for (it=responses[tx].full_trace.steps[step].storage.begin(); it!=responses[tx].full_trace.steps[step].storage.end(); it++)
-                    (*pStorage)[it->first] = it->second; // Content of the storage
+                for (uint64_t data=0; data<responses[tx].logs[log].data.size(); data++)
+                    dataConcatenated += responses[tx].logs[log].data[data];
+                pLog->set_data(string2ba(dataConcatenated)); // Supplied by the contract, usually ABI-encoded
+                //pLog->set_batch_number(responses[tx].logs[log].batch_number); // Batch in which the transaction was included
+                pLog->set_tx_hash(string2ba(responses[tx].logs[log].tx_hash)); // Hash of the transaction
+                pLog->set_tx_index(responses[tx].logs[log].tx_index); // Index of the transaction in the block
+                //pLog->set_batch_hash(string2ba(responses[tx].logs[log].batch_hash)); // Hash of the batch in which the transaction was included
+                pLog->set_index(responses[tx].logs[log].index); // Index of the log in the block
             }
-            pProcessTransactionResponse->set_allocated_full_trace(pFullTrace);
+            if (proverRequest.input.traceConfig.bEnabled && (proverRequest.input.traceConfig.txHashToGenerateFullTrace == responses[tx].tx_hash))
+            {
+                executor::v1::FullTraceV2 * pFullTrace = new executor::v1::FullTraceV2();
+                executor::v1::TransactionContextV2 * pTransactionContext = pFullTrace->mutable_context();
+                pTransactionContext->set_type(responses[tx].full_trace.context.type); // "CALL" or "CREATE"
+                pTransactionContext->set_from(responses[tx].full_trace.context.from); // Sender of the transaction
+                pTransactionContext->set_to(responses[tx].full_trace.context.to); // Target of the transaction
+                pTransactionContext->set_data(string2ba(responses[tx].full_trace.context.data)); // Input data of the transaction
+                pTransactionContext->set_gas(responses[tx].full_trace.context.gas);
+                pTransactionContext->set_gas_price(Add0xIfMissing(responses[tx].full_trace.context.gas_price.get_str(16)));
+                pTransactionContext->set_value(Add0xIfMissing(responses[tx].full_trace.context.value.get_str(16)));
+                //pTransactionContext->set_batch(string2ba(responses[tx].full_trace.context.batch)); // Hash of the batch in which the transaction was included
+                pTransactionContext->set_output(string2ba(responses[tx].full_trace.context.output)); // Returned data from the runtime (function result or data supplied with revert opcode)
+                pTransactionContext->set_gas_used(responses[tx].full_trace.context.gas_used); // Total gas used as result of execution
+                pTransactionContext->set_execution_time(responses[tx].full_trace.context.execution_time);
+                pTransactionContext->set_old_state_root(string2ba(responses[tx].full_trace.context.old_state_root)); // Starting state root
+                for (uint64_t step=0; step<responses[tx].full_trace.steps.size(); step++)
+                {
+                    executor::v1::TransactionStepV2 * pTransactionStep = pFullTrace->add_steps();
+                    pTransactionStep->set_state_root(string2ba(responses[tx].full_trace.steps[step].state_root));
+                    pTransactionStep->set_depth(responses[tx].full_trace.steps[step].depth); // Call depth
+                    pTransactionStep->set_pc(responses[tx].full_trace.steps[step].pc); // Program counter
+                    pTransactionStep->set_gas(responses[tx].full_trace.steps[step].gas); // Remaining gas
+                    pTransactionStep->set_gas_cost(responses[tx].full_trace.steps[step].gas_cost); // Gas cost of the operation
+                    pTransactionStep->set_gas_refund(responses[tx].full_trace.steps[step].gas_refund); // Gas refunded during the operation
+                    pTransactionStep->set_op(responses[tx].full_trace.steps[step].op); // Opcode
+                    for (uint64_t stack=0; stack<responses[tx].full_trace.steps[step].stack.size() ; stack++)
+                        pTransactionStep->add_stack(responses[tx].full_trace.steps[step].stack[stack].get_str(16)); // Content of the stack
+                    pTransactionStep->set_memory_size(responses[tx].full_trace.steps[step].memory_size);
+                    pTransactionStep->set_memory_offset(responses[tx].full_trace.steps[step].memory_offset);
+                    pTransactionStep->set_memory(responses[tx].full_trace.steps[step].memory);
+                    string dataConcatenated;
+                    for (uint64_t data=0; data<responses[tx].full_trace.steps[step].return_data.size(); data++)
+                        dataConcatenated += responses[tx].full_trace.steps[step].return_data[data];
+                    pTransactionStep->set_return_data(string2ba(dataConcatenated));
+                    executor::v1::ContractV2 * pContract = pTransactionStep->mutable_contract(); // Contract information
+                    pContract->set_address(responses[tx].full_trace.steps[step].contract.address);
+                    pContract->set_caller(responses[tx].full_trace.steps[step].contract.caller);
+                    pContract->set_value(Add0xIfMissing(responses[tx].full_trace.steps[step].contract.value.get_str(16)));
+                    pContract->set_data(string2ba(responses[tx].full_trace.steps[step].contract.data));
+                    pContract->set_gas(responses[tx].full_trace.steps[step].contract.gas);
+                    pContract->set_type(responses[tx].full_trace.steps[step].contract.type);
+                    pTransactionStep->set_error(string2error(responses[tx].full_trace.steps[step].error));
+
+                    google::protobuf::Map<std::string, std::string> * pStorage = pTransactionStep->mutable_storage();
+                    unordered_map<string,string>::iterator it;
+                    for (it=responses[tx].full_trace.steps[step].storage.begin(); it!=responses[tx].full_trace.steps[step].storage.end(); it++)
+                        (*pStorage)[it->first] = it->second; // Content of the storage
+                }
+                pProcessTransactionResponse->set_allocated_full_trace(pFullTrace);
+            }
         }
     }
 
@@ -1183,18 +1204,24 @@ using grpc::Status;
             " counters.binary=" + to_string(proverRequest.counters.binary) +
             " flush_id=" + to_string(proverRequest.flushId) +
             " last_sent_flush_id=" + to_string(proverRequest.lastSentFlushId) +
-            " nTxs=" + to_string(responses.size());
+            " nBlocks=" + to_string(block_responses.size()) +
+            " nTxs=" + to_string(nTxs);
          if (config.logExecutorServerTxs)
          {
-            for (uint64_t tx=0; tx<responses.size(); tx++)
+            for (uint64_t block=0; block<block_responses.size(); block++)
             {
-                s += " tx[" + to_string(tx) + "].hash=" + responses[tx].tx_hash +
-                    " stateRoot=" + responses[tx].state_root +
-                    " gasUsed=" + to_string(responses[tx].gas_used) +
-                    " gasLeft=" + to_string(responses[tx].gas_left) +
-                    " gasUsed+gasLeft=" + to_string(responses[tx].gas_used + responses[tx].gas_left) +
-                    " gasRefunded=" + to_string(responses[tx].gas_refunded) +
-                    " result=" + responses[tx].error;
+                s += " block[" + to_string(block) + "].hash=" + block_responses[block].block_hash;
+                vector<ResponseV2> &responses = block_responses[block].responses;
+                for (uint64_t tx=0; tx<responses.size(); tx++)
+                {
+                    s += " tx[" + to_string(tx) + "].hash=" + responses[tx].tx_hash +
+                        " stateRoot=" + responses[tx].state_root +
+                        " gasUsed=" + to_string(responses[tx].gas_used) +
+                        " gasLeft=" + to_string(responses[tx].gas_left) +
+                        " gasUsed+gasLeft=" + to_string(responses[tx].gas_used + responses[tx].gas_left) +
+                        " gasRefunded=" + to_string(responses[tx].gas_refunded) +
+                        " result=" + responses[tx].error;
+                }
             }
          }
         zklog.info(s, &proverRequest.tags);
@@ -1269,7 +1296,7 @@ using grpc::Status;
     totalGas += execGas;
     uint64_t execBytes = request->batch_l2_data().size();
     totalBytes += execBytes;
-    uint64_t execTX = responses.size();
+    uint64_t execTX = nTxs;
     totalTX += execTX;
     double execTime = double(TimeDiff(EXECUTOR_PROCESS_BATCH_start, EXECUTOR_PROCESS_BATCH_stop))/1000000;
     totalTime += execTime;

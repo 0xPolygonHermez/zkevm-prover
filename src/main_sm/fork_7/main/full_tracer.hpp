@@ -32,13 +32,12 @@ public:
     uint64_t prevCTX;
     uint64_t initGas;
     unordered_map<string,unordered_map<string,string>> deltaStorage;
-    FinalTrace finalTrace;
+    FinalTraceV2 finalTrace;
     unordered_map<uint64_t,TxGAS> txGAS;
-    uint64_t txCount;
     uint64_t txTime; // in us
     vector<vector<mpz_class>> fullStack;// Stack of the transaction
     uint64_t accBatchGas;
-    map<uint64_t,map<uint64_t,Log>> logs;
+    map<uint64_t,map<uint64_t,LogV2>> logs;
     vector<Opcode> full_trace;
     string lastError;
     uint64_t numberOfOpcodesInThisTx;
@@ -49,6 +48,9 @@ public:
     string previousMemory;
     bool hasGaspriceOpcode;
     bool hasBalanceOpcode;
+    uint64_t txIndex;
+    Block currentBlock;
+    bool isForced;
 #ifdef LOG_TIME_STATISTICS
     TimeMetricStorage tms;
     struct timeval t;
@@ -60,6 +62,8 @@ public:
     zkresult onError         (ContextC &ctxc, const string &error);
     zkresult onStoreLog      (Context &ctx, const RomCommand &cmd);
     zkresult onStoreLog      (ContextC &ctxc);
+    zkresult onStartBlock    (Context &ctx);
+    zkresult onFinishBlock   (Context &ctx);
     zkresult onProcessTx     (Context &ctx, const RomCommand &cmd);
     zkresult onProcessTx     (ContextC &ctxc);
     zkresult onUpdateStorage (Context &ctx, const RomCommand &cmd);
@@ -76,7 +80,7 @@ public:
                                    const Goldilocks::Element &keyType0, const Goldilocks::Element &keyType1, const Goldilocks::Element &keyType2, const Goldilocks::Element &keyType3, const Goldilocks::Element &keyType4, const Goldilocks::Element &keyType5, const Goldilocks::Element &keyType6, const Goldilocks::Element &keyType7,
                                    const mpz_class &value );
 
-    FullTracer(Goldilocks &fr) : fr(fr), depth(1), prevCTX(0), initGas(0), txCount(0), txTime(0), accBatchGas(0), numberOfOpcodesInThisTx(0), lastErrorOpcode(0), hasGaspriceOpcode(false), hasBalanceOpcode(false) { };
+    FullTracer(Goldilocks &fr) : fr(fr), depth(1), prevCTX(0), initGas(0), txTime(0), accBatchGas(0), numberOfOpcodesInThisTx(0), lastErrorOpcode(0), hasGaspriceOpcode(false), hasBalanceOpcode(false), txIndex(0), isForced(false) { };
     ~FullTracer()
     {
 #ifdef LOG_TIME_STATISTICS
@@ -94,7 +98,7 @@ public:
         deltaStorage    = other.deltaStorage;
         finalTrace      = other.finalTrace;
         txGAS           = other.txGAS;
-        txCount         = other.txCount;
+        txIndex         = other.txIndex;
         txTime          = other.txTime;
         //info            = other.info;
         fullStack       = other.fullStack;
@@ -103,6 +107,8 @@ public:
         full_trace      = other.full_trace;
         lastError       = other.lastError;
         callData        = other.callData;
+        currentBlock    = other.currentBlock;
+        isForced        = other.isForced;
         return *this;
     }
 
@@ -127,9 +133,16 @@ public:
     {
         return &read_write_addresses;
     }
+    vector<Response> emptyResponses;
     vector<Response> & get_responses(void)
     {
-        return finalTrace.responses;
+        zklog.error("FullTracer::get_responses() called in fork 7");
+        exitProcess();
+        return emptyResponses;
+    }
+    vector<Block> & get_block_responses(void)
+    {
+        return finalTrace.block_responses;
     }
     vector<Opcode> & get_info(void)
     {
@@ -137,7 +150,7 @@ public:
     }
     uint64_t get_tx_number(void)
     {
-        return finalTrace.responses.size();
+        return currentBlock.responses.size();
     }
 };
 
