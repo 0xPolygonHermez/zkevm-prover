@@ -29,6 +29,18 @@ public:
     L1Data() : bPresent(false), minTimestamp(0) {};
 };
 
+class OverrideEntry
+{
+public:
+    bool bBalance; // Indicates whether balance is valid or not
+    mpz_class balance; // Fake balance to set for the account before executing the call
+    uint64_t nonce; // Fake nonce to set for the account before executing the call
+    vector<uint8_t> code; // Fake EVM bytecode to inject into the account before executing the call (byte array, i.e. binary data)
+    unordered_map<string, mpz_class> state; // Fake key-value mapping to override all slots in the account storage before executing the call (key string, value binary)
+    unordered_map<string, mpz_class> stateDiff; // Fake key-value mapping to override individual slots in the account storage before executing the call (key string, value binary)
+    OverrideEntry() : bBalance(false), nonce(0) {};
+};
+
 class Input
 {
     Goldilocks &fr;
@@ -47,6 +59,7 @@ public:
     bool bSkipFirstChangeL2Block; // If true, skip the restriction to start a batch with a changeL2Block transaction (fork ID >= 7)
     TraceConfig traceConfig; // FullTracer configuration
     unordered_map<uint64_t, L1Data> l1InfoTreeData;
+    unordered_map<string, OverrideEntry> stateOverride;
 
     // Constructor
     Input (Goldilocks &fr) :

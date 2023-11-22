@@ -387,12 +387,13 @@ enum ExecutorError : int {
   EXECUTOR_ERROR_INVALID_L1_DATA_V2_GLOBAL_EXIT_ROOT = 99,
   EXECUTOR_ERROR_INVALID_L1_DATA_V2_BLOCK_HASH_L1 = 100,
   EXECUTOR_ERROR_INVALID_L1_SMT_PROOF = 101,
+  EXECUTOR_ERROR_INVALID_BALANCE = 102,
   ExecutorError_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   ExecutorError_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool ExecutorError_IsValid(int value);
 constexpr ExecutorError ExecutorError_MIN = EXECUTOR_ERROR_UNSPECIFIED;
-constexpr ExecutorError ExecutorError_MAX = EXECUTOR_ERROR_INVALID_L1_SMT_PROOF;
+constexpr ExecutorError ExecutorError_MAX = EXECUTOR_ERROR_INVALID_BALANCE;
 constexpr int ExecutorError_ARRAYSIZE = ExecutorError_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ExecutorError_descriptor();
@@ -5363,7 +5364,7 @@ class ProcessBatchResponseV2 PROTOBUF_FINAL :
   enum : int {
     kBlockResponsesFieldNumber = 12,
     kReadWriteAddressesFieldNumber = 14,
-    kNodesKeysFieldNumber = 19,
+    kSmtKeysFieldNumber = 19,
     kProgramKeysFieldNumber = 20,
     kNewStateRootFieldNumber = 1,
     kNewAccInputHashFieldNumber = 2,
@@ -5418,28 +5419,28 @@ class ProcessBatchResponseV2 PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::executor::v1::InfoReadWriteV2 >*
       mutable_read_write_addresses();
 
-  // repeated bytes nodes_keys = 19;
-  int nodes_keys_size() const;
+  // repeated bytes smt_keys = 19;
+  int smt_keys_size() const;
   private:
-  int _internal_nodes_keys_size() const;
+  int _internal_smt_keys_size() const;
   public:
-  void clear_nodes_keys();
-  const std::string& nodes_keys(int index) const;
-  std::string* mutable_nodes_keys(int index);
-  void set_nodes_keys(int index, const std::string& value);
-  void set_nodes_keys(int index, std::string&& value);
-  void set_nodes_keys(int index, const char* value);
-  void set_nodes_keys(int index, const void* value, size_t size);
-  std::string* add_nodes_keys();
-  void add_nodes_keys(const std::string& value);
-  void add_nodes_keys(std::string&& value);
-  void add_nodes_keys(const char* value);
-  void add_nodes_keys(const void* value, size_t size);
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& nodes_keys() const;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_nodes_keys();
+  void clear_smt_keys();
+  const std::string& smt_keys(int index) const;
+  std::string* mutable_smt_keys(int index);
+  void set_smt_keys(int index, const std::string& value);
+  void set_smt_keys(int index, std::string&& value);
+  void set_smt_keys(int index, const char* value);
+  void set_smt_keys(int index, const void* value, size_t size);
+  std::string* add_smt_keys();
+  void add_smt_keys(const std::string& value);
+  void add_smt_keys(std::string&& value);
+  void add_smt_keys(const char* value);
+  void add_smt_keys(const void* value, size_t size);
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& smt_keys() const;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_smt_keys();
   private:
-  const std::string& _internal_nodes_keys(int index) const;
-  std::string* _internal_add_nodes_keys();
+  const std::string& _internal_smt_keys(int index) const;
+  std::string* _internal_add_smt_keys();
   public:
 
   // repeated bytes program_keys = 20;
@@ -5697,7 +5698,7 @@ class ProcessBatchResponseV2 PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_MESSAGE,
       0 > read_write_addresses_;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> nodes_keys_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> smt_keys_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> program_keys_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr new_state_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr new_acc_input_hash_;
@@ -7808,9 +7809,9 @@ class ProcessBlockResponseV2 PROTOBUF_FINAL :
     kBlockInfoRootFieldNumber = 9,
     kBlockHashFieldNumber = 10,
     kGasLimitFieldNumber = 3,
+    kBlockNumberFieldNumber = 4,
     kTimestampFieldNumber = 5,
     kGasUsedFieldNumber = 8,
-    kBlockNumberFieldNumber = 4,
   };
   // repeated .executor.v1.ProcessTransactionResponseV2 responses = 11;
   int responses_size() const;
@@ -8007,6 +8008,15 @@ class ProcessBlockResponseV2 PROTOBUF_FINAL :
   void _internal_set_gas_limit(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
+  // uint64 block_number = 4;
+  void clear_block_number();
+  ::PROTOBUF_NAMESPACE_ID::uint64 block_number() const;
+  void set_block_number(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_block_number() const;
+  void _internal_set_block_number(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
   // uint64 timestamp = 5;
   void clear_timestamp();
   ::PROTOBUF_NAMESPACE_ID::uint64 timestamp() const;
@@ -8025,15 +8035,6 @@ class ProcessBlockResponseV2 PROTOBUF_FINAL :
   void _internal_set_gas_used(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // uint32 block_number = 4;
-  void clear_block_number();
-  ::PROTOBUF_NAMESPACE_ID::uint32 block_number() const;
-  void set_block_number(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_block_number() const;
-  void _internal_set_block_number(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  public:
-
   // @@protoc_insertion_point(class_scope:executor.v1.ProcessBlockResponseV2)
  private:
   class _Internal;
@@ -8050,9 +8051,9 @@ class ProcessBlockResponseV2 PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr block_info_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr block_hash_;
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_limit_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 block_number_;
   ::PROTOBUF_NAMESPACE_ID::uint64 timestamp_;
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_used_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 block_number_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
 };
@@ -16328,78 +16329,78 @@ inline void ProcessBatchResponseV2::set_gas_used(::PROTOBUF_NAMESPACE_ID::uint64
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponseV2.gas_used)
 }
 
-// repeated bytes nodes_keys = 19;
-inline int ProcessBatchResponseV2::_internal_nodes_keys_size() const {
-  return nodes_keys_.size();
+// repeated bytes smt_keys = 19;
+inline int ProcessBatchResponseV2::_internal_smt_keys_size() const {
+  return smt_keys_.size();
 }
-inline int ProcessBatchResponseV2::nodes_keys_size() const {
-  return _internal_nodes_keys_size();
+inline int ProcessBatchResponseV2::smt_keys_size() const {
+  return _internal_smt_keys_size();
 }
-inline void ProcessBatchResponseV2::clear_nodes_keys() {
-  nodes_keys_.Clear();
+inline void ProcessBatchResponseV2::clear_smt_keys() {
+  smt_keys_.Clear();
 }
-inline std::string* ProcessBatchResponseV2::add_nodes_keys() {
-  // @@protoc_insertion_point(field_add_mutable:executor.v1.ProcessBatchResponseV2.nodes_keys)
-  return _internal_add_nodes_keys();
+inline std::string* ProcessBatchResponseV2::add_smt_keys() {
+  // @@protoc_insertion_point(field_add_mutable:executor.v1.ProcessBatchResponseV2.smt_keys)
+  return _internal_add_smt_keys();
 }
-inline const std::string& ProcessBatchResponseV2::_internal_nodes_keys(int index) const {
-  return nodes_keys_.Get(index);
+inline const std::string& ProcessBatchResponseV2::_internal_smt_keys(int index) const {
+  return smt_keys_.Get(index);
 }
-inline const std::string& ProcessBatchResponseV2::nodes_keys(int index) const {
-  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchResponseV2.nodes_keys)
-  return _internal_nodes_keys(index);
+inline const std::string& ProcessBatchResponseV2::smt_keys(int index) const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchResponseV2.smt_keys)
+  return _internal_smt_keys(index);
 }
-inline std::string* ProcessBatchResponseV2::mutable_nodes_keys(int index) {
-  // @@protoc_insertion_point(field_mutable:executor.v1.ProcessBatchResponseV2.nodes_keys)
-  return nodes_keys_.Mutable(index);
+inline std::string* ProcessBatchResponseV2::mutable_smt_keys(int index) {
+  // @@protoc_insertion_point(field_mutable:executor.v1.ProcessBatchResponseV2.smt_keys)
+  return smt_keys_.Mutable(index);
 }
-inline void ProcessBatchResponseV2::set_nodes_keys(int index, const std::string& value) {
-  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponseV2.nodes_keys)
-  nodes_keys_.Mutable(index)->assign(value);
+inline void ProcessBatchResponseV2::set_smt_keys(int index, const std::string& value) {
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponseV2.smt_keys)
+  smt_keys_.Mutable(index)->assign(value);
 }
-inline void ProcessBatchResponseV2::set_nodes_keys(int index, std::string&& value) {
-  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponseV2.nodes_keys)
-  nodes_keys_.Mutable(index)->assign(std::move(value));
+inline void ProcessBatchResponseV2::set_smt_keys(int index, std::string&& value) {
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponseV2.smt_keys)
+  smt_keys_.Mutable(index)->assign(std::move(value));
 }
-inline void ProcessBatchResponseV2::set_nodes_keys(int index, const char* value) {
+inline void ProcessBatchResponseV2::set_smt_keys(int index, const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  nodes_keys_.Mutable(index)->assign(value);
-  // @@protoc_insertion_point(field_set_char:executor.v1.ProcessBatchResponseV2.nodes_keys)
+  smt_keys_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:executor.v1.ProcessBatchResponseV2.smt_keys)
 }
-inline void ProcessBatchResponseV2::set_nodes_keys(int index, const void* value, size_t size) {
-  nodes_keys_.Mutable(index)->assign(
+inline void ProcessBatchResponseV2::set_smt_keys(int index, const void* value, size_t size) {
+  smt_keys_.Mutable(index)->assign(
     reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:executor.v1.ProcessBatchResponseV2.nodes_keys)
+  // @@protoc_insertion_point(field_set_pointer:executor.v1.ProcessBatchResponseV2.smt_keys)
 }
-inline std::string* ProcessBatchResponseV2::_internal_add_nodes_keys() {
-  return nodes_keys_.Add();
+inline std::string* ProcessBatchResponseV2::_internal_add_smt_keys() {
+  return smt_keys_.Add();
 }
-inline void ProcessBatchResponseV2::add_nodes_keys(const std::string& value) {
-  nodes_keys_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add:executor.v1.ProcessBatchResponseV2.nodes_keys)
+inline void ProcessBatchResponseV2::add_smt_keys(const std::string& value) {
+  smt_keys_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add:executor.v1.ProcessBatchResponseV2.smt_keys)
 }
-inline void ProcessBatchResponseV2::add_nodes_keys(std::string&& value) {
-  nodes_keys_.Add(std::move(value));
-  // @@protoc_insertion_point(field_add:executor.v1.ProcessBatchResponseV2.nodes_keys)
+inline void ProcessBatchResponseV2::add_smt_keys(std::string&& value) {
+  smt_keys_.Add(std::move(value));
+  // @@protoc_insertion_point(field_add:executor.v1.ProcessBatchResponseV2.smt_keys)
 }
-inline void ProcessBatchResponseV2::add_nodes_keys(const char* value) {
+inline void ProcessBatchResponseV2::add_smt_keys(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  nodes_keys_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add_char:executor.v1.ProcessBatchResponseV2.nodes_keys)
+  smt_keys_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:executor.v1.ProcessBatchResponseV2.smt_keys)
 }
-inline void ProcessBatchResponseV2::add_nodes_keys(const void* value, size_t size) {
-  nodes_keys_.Add()->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_add_pointer:executor.v1.ProcessBatchResponseV2.nodes_keys)
+inline void ProcessBatchResponseV2::add_smt_keys(const void* value, size_t size) {
+  smt_keys_.Add()->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:executor.v1.ProcessBatchResponseV2.smt_keys)
 }
 inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>&
-ProcessBatchResponseV2::nodes_keys() const {
-  // @@protoc_insertion_point(field_list:executor.v1.ProcessBatchResponseV2.nodes_keys)
-  return nodes_keys_;
+ProcessBatchResponseV2::smt_keys() const {
+  // @@protoc_insertion_point(field_list:executor.v1.ProcessBatchResponseV2.smt_keys)
+  return smt_keys_;
 }
 inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
-ProcessBatchResponseV2::mutable_nodes_keys() {
-  // @@protoc_insertion_point(field_mutable_list:executor.v1.ProcessBatchResponseV2.nodes_keys)
-  return &nodes_keys_;
+ProcessBatchResponseV2::mutable_smt_keys() {
+  // @@protoc_insertion_point(field_mutable_list:executor.v1.ProcessBatchResponseV2.smt_keys)
+  return &smt_keys_;
 }
 
 // repeated bytes program_keys = 20;
@@ -19280,22 +19281,22 @@ inline void ProcessBlockResponseV2::set_gas_limit(::PROTOBUF_NAMESPACE_ID::uint6
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBlockResponseV2.gas_limit)
 }
 
-// uint32 block_number = 4;
+// uint64 block_number = 4;
 inline void ProcessBlockResponseV2::clear_block_number() {
-  block_number_ = 0u;
+  block_number_ = PROTOBUF_ULONGLONG(0);
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBlockResponseV2::_internal_block_number() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessBlockResponseV2::_internal_block_number() const {
   return block_number_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBlockResponseV2::block_number() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessBlockResponseV2::block_number() const {
   // @@protoc_insertion_point(field_get:executor.v1.ProcessBlockResponseV2.block_number)
   return _internal_block_number();
 }
-inline void ProcessBlockResponseV2::_internal_set_block_number(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+inline void ProcessBlockResponseV2::_internal_set_block_number(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   
   block_number_ = value;
 }
-inline void ProcessBlockResponseV2::set_block_number(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+inline void ProcessBlockResponseV2::set_block_number(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   _internal_set_block_number(value);
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBlockResponseV2.block_number)
 }

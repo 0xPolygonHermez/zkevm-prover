@@ -309,6 +309,117 @@ using grpc::Status;
 #endif
     }
 
+    if (request->state_override_size() > 0)
+    {
+        google::protobuf::Map<std::string, executor::v1::OverrideAccount>::const_iterator it;
+        for (it = request->state_override().begin(); it != request->state_override().end(); it++)
+        {
+            OverrideEntry overrideEntry;
+
+            // Get balance
+            if (it->second.balance().size() > 32)
+            {
+                zklog.error("ExecutorServiceImpl::ProcessBatch() got state override balance too long, size=" + to_string(it->second.balance().size()), &proverRequest.tags);
+                response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_BALANCE);
+                return Status::OK;
+            }
+            if (it->second.balance().size() > 0)
+            {
+                overrideEntry.balance.set_str(ba2string(it->second.balance()), 16);
+                overrideEntry.bBalance = true;
+            }
+
+            // Get nonce
+            overrideEntry.nonce = it->second.nonce();
+
+            // Get code
+            ba2ba(it->second.code(), overrideEntry.code);
+
+            // Get state
+            if (it->second.state_size() > 0)
+            {
+                google::protobuf::Map<std::string, std::string>::const_iterator itState;
+                for (itState = it->second.state().begin(); itState != it->second.state().end(); itState++)
+                {
+                    // Get a valid key
+                    string keyString = Remove0xIfPresent(itState->first);
+                    if (keyString.size() > 64)
+                    {
+                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override key too long, size=" + to_string(keyString.size()), &proverRequest.tags);
+                        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_KEY);
+                        return Status::OK;
+                    }
+                    if (!stringIsHex(keyString))
+                    {
+                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override key not hex, key=" + keyString, &proverRequest.tags);
+                        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_KEY);
+                        return Status::OK;
+                    }
+                    keyString = NormalizeToNFormat(keyString, 64);
+
+                    // Get a valid value
+                    string valueBa = itState->second;
+                    if (valueBa.size() > 32)
+                    {
+                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override value too long, size=" + to_string(valueBa.size()), &proverRequest.tags);
+                        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
+                        return Status::OK;
+                    }
+                    string valueString;
+                    ba2string(valueBa, valueString);
+                    mpz_class valueScalar;
+                    valueScalar.set_str(valueString, 16);
+
+                    // Store the value
+                    overrideEntry.state[keyString] = valueScalar;
+                }
+            }
+
+            // Get state diff
+            if (it->second.state_diff_size() > 0)
+            {
+                google::protobuf::Map<std::string, std::string>::const_iterator itState;
+                for (itState = it->second.state_diff().begin(); itState != it->second.state_diff().end(); itState++)
+                {
+                    // Get a valid key
+                    string keyString = Remove0xIfPresent(itState->first);
+                    if (keyString.size() > 64)
+                    {
+                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override key too long, size=" + to_string(keyString.size()), &proverRequest.tags);
+                        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_KEY);
+                        return Status::OK;
+                    }
+                    if (!stringIsHex(keyString))
+                    {
+                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override key not hex, key=" + keyString, &proverRequest.tags);
+                        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_KEY);
+                        return Status::OK;
+                    }
+                    keyString = NormalizeToNFormat(keyString, 64);
+
+                    // Get a valid value
+                    string valueBa = itState->second;
+                    if (valueBa.size() > 32)
+                    {
+                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override value too long, size=" + to_string(valueBa.size()), &proverRequest.tags);
+                        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
+                        return Status::OK;
+                    }
+                    string valueString;
+                    ba2string(valueBa, valueString);
+                    mpz_class valueScalar;
+                    valueScalar.set_str(valueString, 16);
+
+                    // Store the value
+                    overrideEntry.stateDiff[keyString] = valueScalar;
+                }
+            }
+
+            // Store the override entry
+            proverRequest.input.stateOverride[it->first] = overrideEntry;
+        }
+    }
+
     // Get no counters flag
     proverRequest.input.bNoCounters = request->no_counters();
 
@@ -982,6 +1093,118 @@ using grpc::Status;
         proverRequest.input.l1InfoTreeData[index] = l1Data;
     }
 
+    if (request->state_override_size() > 0)
+    {
+        google::protobuf::Map<std::string, executor::v1::OverrideAccountV2>::const_iterator it;
+        for (it = request->state_override().begin(); it != request->state_override().end(); it++)
+        {
+            OverrideEntry overrideEntry;
+
+            // Get balance
+            if (it->second.balance().size() > 32)
+            {
+                zklog.error("ExecutorServiceImpl::ProcessBatchV2() got state override balance too long, size=" + to_string(it->second.balance().size()), &proverRequest.tags);
+                response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_BALANCE);
+                return Status::OK;
+            }
+
+            if (it->second.balance().size() > 0)
+            {
+                overrideEntry.balance.set_str(ba2string(it->second.balance()), 16);
+                overrideEntry.bBalance = true;
+            }
+
+            // Get nonce
+            overrideEntry.nonce = it->second.nonce();
+
+            // Get code
+            ba2ba(it->second.code(), overrideEntry.code);
+
+            // Get state
+            if (it->second.state_size() > 0)
+            {
+                google::protobuf::Map<std::string, std::string>::const_iterator itState;
+                for (itState = it->second.state().begin(); itState != it->second.state().end(); itState++)
+                {
+                    // Get a valid key
+                    string keyString = Remove0xIfPresent(itState->first);
+                    if (keyString.size() > 64)
+                    {
+                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override key too long, size=" + to_string(keyString.size()), &proverRequest.tags);
+                        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_KEY);
+                        return Status::OK;
+                    }
+                    if (!stringIsHex(keyString))
+                    {
+                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override key not hex, key=" + keyString, &proverRequest.tags);
+                        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_KEY);
+                        return Status::OK;
+                    }
+                    keyString = NormalizeToNFormat(keyString, 64);
+
+                    // Get a valid value
+                    string valueBa = itState->second;
+                    if (valueBa.size() > 32)
+                    {
+                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override value too long, size=" + to_string(valueBa.size()), &proverRequest.tags);
+                        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
+                        return Status::OK;
+                    }
+                    string valueString;
+                    ba2string(valueBa, valueString);
+                    mpz_class valueScalar;
+                    valueScalar.set_str(valueString, 16);
+
+                    // Store the value
+                    overrideEntry.state[keyString] = valueScalar;
+                }
+            }
+
+            // Get state diff
+            if (it->second.state_diff_size() > 0)
+            {
+                google::protobuf::Map<std::string, std::string>::const_iterator itState;
+                for (itState = it->second.state_diff().begin(); itState != it->second.state_diff().end(); itState++)
+                {
+                    // Get a valid key
+                    string keyString = Remove0xIfPresent(itState->first);
+                    if (keyString.size() > 64)
+                    {
+                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override key too long, size=" + to_string(keyString.size()), &proverRequest.tags);
+                        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_KEY);
+                        return Status::OK;
+                    }
+                    if (!stringIsHex(keyString))
+                    {
+                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override key not hex, key=" + keyString, &proverRequest.tags);
+                        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_KEY);
+                        return Status::OK;
+                    }
+                    keyString = NormalizeToNFormat(keyString, 64);
+
+                    // Get a valid value
+                    string valueBa = itState->second;
+                    if (valueBa.size() > 32)
+                    {
+                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override value too long, size=" + to_string(valueBa.size()), &proverRequest.tags);
+                        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
+                        return Status::OK;
+                    }
+                    string valueString;
+                    ba2string(valueBa, valueString);
+                    mpz_class valueScalar;
+                    valueScalar.set_str(valueString, 16);
+
+                    // Store the value
+                    overrideEntry.stateDiff[keyString] = valueScalar;
+                }
+            }
+
+            // Store the override entry
+            proverRequest.input.stateOverride[it->first] = overrideEntry;
+        }
+    }
+
 #ifdef LOG_SERVICE_EXECUTOR_INPUT
     zklog.info(string("ExecutorServiceImpl::ProcessBatchV2() got") +
         " sequencerAddr=" + proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16) +
@@ -1178,7 +1401,7 @@ using grpc::Status;
         unordered_set<string>::const_iterator it;
         for (it = proverRequest.nodesKeys.begin(); it != proverRequest.nodesKeys.end(); it++)
         {
-            response->add_nodes_keys(string2ba(it->c_str()));
+            response->add_smt_keys(string2ba(it->c_str()));
         }
         for (it = proverRequest.programKeys.begin(); it != proverRequest.programKeys.end(); it++)
         {
