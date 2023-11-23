@@ -262,12 +262,13 @@ enum RomError : int {
   ROM_ERROR_INVALID_RLP = 30,
   ROM_ERROR_INVALID_DECODE_CHANGE_L2_BLOCK = 31,
   ROM_ERROR_INVALID_NOT_FIRST_TX_CHANGE_L2_BLOCK = 32,
+  ROM_ERROR_INVALID_TX_CHANGE_L2_BLOCK = 33,
   RomError_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   RomError_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool RomError_IsValid(int value);
 constexpr RomError RomError_MIN = ROM_ERROR_UNSPECIFIED;
-constexpr RomError RomError_MAX = ROM_ERROR_INVALID_NOT_FIRST_TX_CHANGE_L2_BLOCK;
+constexpr RomError RomError_MAX = ROM_ERROR_INVALID_TX_CHANGE_L2_BLOCK;
 constexpr int RomError_ARRAYSIZE = RomError_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* RomError_descriptor();
@@ -1870,13 +1871,13 @@ class TraceConfig PROTOBUF_FINAL :
 class OverrideAccount_StateEntry_DoNotUse : public ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<OverrideAccount_StateEntry_DoNotUse, 
     std::string, std::string,
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_BYTES,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
     0 > {
 public:
   typedef ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<OverrideAccount_StateEntry_DoNotUse, 
     std::string, std::string,
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_BYTES,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
     0 > SuperType;
   OverrideAccount_StateEntry_DoNotUse();
   OverrideAccount_StateEntry_DoNotUse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
@@ -1885,7 +1886,9 @@ public:
   static bool ValidateKey(std::string* s) {
     return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "executor.v1.OverrideAccount.StateEntry.key");
  }
-  static bool ValidateValue(void*) { return true; }
+  static bool ValidateValue(std::string* s) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "executor.v1.OverrideAccount.StateEntry.value");
+ }
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& other) final;
   ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
   private:
@@ -1902,13 +1905,13 @@ public:
 class OverrideAccount_StateDiffEntry_DoNotUse : public ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<OverrideAccount_StateDiffEntry_DoNotUse, 
     std::string, std::string,
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_BYTES,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
     0 > {
 public:
   typedef ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<OverrideAccount_StateDiffEntry_DoNotUse, 
     std::string, std::string,
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_BYTES,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
     0 > SuperType;
   OverrideAccount_StateDiffEntry_DoNotUse();
   OverrideAccount_StateDiffEntry_DoNotUse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
@@ -1917,7 +1920,9 @@ public:
   static bool ValidateKey(std::string* s) {
     return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "executor.v1.OverrideAccount.StateDiffEntry.key");
  }
-  static bool ValidateValue(void*) { return true; }
+  static bool ValidateValue(std::string* s) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "executor.v1.OverrideAccount.StateDiffEntry.value");
+ }
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& other) final;
   ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
   private:
@@ -2051,7 +2056,7 @@ class OverrideAccount PROTOBUF_FINAL :
     kCodeFieldNumber = 3,
     kNonceFieldNumber = 2,
   };
-  // map<string, bytes> state = 4;
+  // map<string, string> state = 4;
   int state_size() const;
   private:
   int _internal_state_size() const;
@@ -2068,7 +2073,7 @@ class OverrideAccount PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
       mutable_state();
 
-  // map<string, bytes> state_diff = 5;
+  // map<string, string> state_diff = 5;
   int state_diff_size() const;
   private:
   int _internal_state_diff_size() const;
@@ -2155,13 +2160,13 @@ class OverrideAccount PROTOBUF_FINAL :
       OverrideAccount_StateEntry_DoNotUse,
       std::string, std::string,
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_BYTES,
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
       0 > state_;
   ::PROTOBUF_NAMESPACE_ID::internal::MapField<
       OverrideAccount_StateDiffEntry_DoNotUse,
       std::string, std::string,
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_BYTES,
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
       0 > state_diff_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr balance_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr code_;
@@ -5362,14 +5367,14 @@ class ProcessBatchResponseV2 PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kBlockResponsesFieldNumber = 12,
-    kReadWriteAddressesFieldNumber = 14,
-    kSmtKeysFieldNumber = 19,
-    kProgramKeysFieldNumber = 20,
+    kBlockResponsesFieldNumber = 13,
+    kReadWriteAddressesFieldNumber = 15,
+    kSmtKeysFieldNumber = 20,
+    kProgramKeysFieldNumber = 21,
     kNewStateRootFieldNumber = 1,
     kNewAccInputHashFieldNumber = 2,
     kNewLocalExitRootFieldNumber = 3,
-    kProverIdFieldNumber = 17,
+    kProverIdFieldNumber = 18,
     kNewBatchNumFieldNumber = 4,
     kCntKeccakHashesFieldNumber = 5,
     kCntPoseidonHashesFieldNumber = 6,
@@ -5378,13 +5383,14 @@ class ProcessBatchResponseV2 PROTOBUF_FINAL :
     kCntArithmeticsFieldNumber = 9,
     kCntBinariesFieldNumber = 10,
     kCntStepsFieldNumber = 11,
-    kErrorFieldNumber = 13,
-    kFlushIdFieldNumber = 15,
-    kStoredFlushIdFieldNumber = 16,
-    kGasUsedFieldNumber = 18,
-    kForkIdFieldNumber = 21,
+    kCntSha256HashesFieldNumber = 12,
+    kFlushIdFieldNumber = 16,
+    kStoredFlushIdFieldNumber = 17,
+    kGasUsedFieldNumber = 19,
+    kForkIdFieldNumber = 22,
+    kErrorFieldNumber = 14,
   };
-  // repeated .executor.v1.ProcessBlockResponseV2 block_responses = 12;
+  // repeated .executor.v1.ProcessBlockResponseV2 block_responses = 13;
   int block_responses_size() const;
   private:
   int _internal_block_responses_size() const;
@@ -5402,7 +5408,7 @@ class ProcessBatchResponseV2 PROTOBUF_FINAL :
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::executor::v1::ProcessBlockResponseV2 >&
       block_responses() const;
 
-  // map<string, .executor.v1.InfoReadWriteV2> read_write_addresses = 14;
+  // map<string, .executor.v1.InfoReadWriteV2> read_write_addresses = 15;
   int read_write_addresses_size() const;
   private:
   int _internal_read_write_addresses_size() const;
@@ -5419,7 +5425,7 @@ class ProcessBatchResponseV2 PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::executor::v1::InfoReadWriteV2 >*
       mutable_read_write_addresses();
 
-  // repeated bytes smt_keys = 19;
+  // repeated bytes smt_keys = 20;
   int smt_keys_size() const;
   private:
   int _internal_smt_keys_size() const;
@@ -5443,7 +5449,7 @@ class ProcessBatchResponseV2 PROTOBUF_FINAL :
   std::string* _internal_add_smt_keys();
   public:
 
-  // repeated bytes program_keys = 20;
+  // repeated bytes program_keys = 21;
   int program_keys_size() const;
   private:
   int _internal_program_keys_size() const;
@@ -5542,7 +5548,7 @@ class ProcessBatchResponseV2 PROTOBUF_FINAL :
   std::string* _internal_mutable_new_local_exit_root();
   public:
 
-  // string prover_id = 17;
+  // string prover_id = 18;
   void clear_prover_id();
   const std::string& prover_id() const;
   void set_prover_id(const std::string& value);
@@ -5639,16 +5645,16 @@ class ProcessBatchResponseV2 PROTOBUF_FINAL :
   void _internal_set_cnt_steps(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
-  // .executor.v1.ExecutorError error = 13;
-  void clear_error();
-  ::executor::v1::ExecutorError error() const;
-  void set_error(::executor::v1::ExecutorError value);
+  // uint32 cnt_sha256_hashes = 12;
+  void clear_cnt_sha256_hashes();
+  ::PROTOBUF_NAMESPACE_ID::uint32 cnt_sha256_hashes() const;
+  void set_cnt_sha256_hashes(::PROTOBUF_NAMESPACE_ID::uint32 value);
   private:
-  ::executor::v1::ExecutorError _internal_error() const;
-  void _internal_set_error(::executor::v1::ExecutorError value);
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_cnt_sha256_hashes() const;
+  void _internal_set_cnt_sha256_hashes(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
-  // uint64 flush_id = 15;
+  // uint64 flush_id = 16;
   void clear_flush_id();
   ::PROTOBUF_NAMESPACE_ID::uint64 flush_id() const;
   void set_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
@@ -5657,7 +5663,7 @@ class ProcessBatchResponseV2 PROTOBUF_FINAL :
   void _internal_set_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // uint64 stored_flush_id = 16;
+  // uint64 stored_flush_id = 17;
   void clear_stored_flush_id();
   ::PROTOBUF_NAMESPACE_ID::uint64 stored_flush_id() const;
   void set_stored_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
@@ -5666,7 +5672,7 @@ class ProcessBatchResponseV2 PROTOBUF_FINAL :
   void _internal_set_stored_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // uint64 gas_used = 18;
+  // uint64 gas_used = 19;
   void clear_gas_used();
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_used() const;
   void set_gas_used(::PROTOBUF_NAMESPACE_ID::uint64 value);
@@ -5675,13 +5681,22 @@ class ProcessBatchResponseV2 PROTOBUF_FINAL :
   void _internal_set_gas_used(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // uint64 fork_id = 21;
+  // uint64 fork_id = 22;
   void clear_fork_id();
   ::PROTOBUF_NAMESPACE_ID::uint64 fork_id() const;
   void set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   private:
   ::PROTOBUF_NAMESPACE_ID::uint64 _internal_fork_id() const;
   void _internal_set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // .executor.v1.ExecutorError error = 14;
+  void clear_error();
+  ::executor::v1::ExecutorError error() const;
+  void set_error(::executor::v1::ExecutorError value);
+  private:
+  ::executor::v1::ExecutorError _internal_error() const;
+  void _internal_set_error(::executor::v1::ExecutorError value);
   public:
 
   // @@protoc_insertion_point(class_scope:executor.v1.ProcessBatchResponseV2)
@@ -5712,11 +5727,12 @@ class ProcessBatchResponseV2 PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint32 cnt_arithmetics_;
   ::PROTOBUF_NAMESPACE_ID::uint32 cnt_binaries_;
   ::PROTOBUF_NAMESPACE_ID::uint32 cnt_steps_;
-  int error_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 cnt_sha256_hashes_;
   ::PROTOBUF_NAMESPACE_ID::uint64 flush_id_;
   ::PROTOBUF_NAMESPACE_ID::uint64 stored_flush_id_;
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_used_;
   ::PROTOBUF_NAMESPACE_ID::uint64 fork_id_;
+  int error_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
 };
@@ -5922,13 +5938,13 @@ class TraceConfigV2 PROTOBUF_FINAL :
 class OverrideAccountV2_StateEntry_DoNotUse : public ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<OverrideAccountV2_StateEntry_DoNotUse, 
     std::string, std::string,
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_BYTES,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
     0 > {
 public:
   typedef ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<OverrideAccountV2_StateEntry_DoNotUse, 
     std::string, std::string,
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_BYTES,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
     0 > SuperType;
   OverrideAccountV2_StateEntry_DoNotUse();
   OverrideAccountV2_StateEntry_DoNotUse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
@@ -5937,7 +5953,9 @@ public:
   static bool ValidateKey(std::string* s) {
     return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "executor.v1.OverrideAccountV2.StateEntry.key");
  }
-  static bool ValidateValue(void*) { return true; }
+  static bool ValidateValue(std::string* s) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "executor.v1.OverrideAccountV2.StateEntry.value");
+ }
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& other) final;
   ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
   private:
@@ -5954,13 +5972,13 @@ public:
 class OverrideAccountV2_StateDiffEntry_DoNotUse : public ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<OverrideAccountV2_StateDiffEntry_DoNotUse, 
     std::string, std::string,
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_BYTES,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
     0 > {
 public:
   typedef ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<OverrideAccountV2_StateDiffEntry_DoNotUse, 
     std::string, std::string,
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_BYTES,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
     0 > SuperType;
   OverrideAccountV2_StateDiffEntry_DoNotUse();
   OverrideAccountV2_StateDiffEntry_DoNotUse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
@@ -5969,7 +5987,9 @@ public:
   static bool ValidateKey(std::string* s) {
     return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "executor.v1.OverrideAccountV2.StateDiffEntry.key");
  }
-  static bool ValidateValue(void*) { return true; }
+  static bool ValidateValue(std::string* s) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "executor.v1.OverrideAccountV2.StateDiffEntry.value");
+ }
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& other) final;
   ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
   private:
@@ -6103,7 +6123,7 @@ class OverrideAccountV2 PROTOBUF_FINAL :
     kCodeFieldNumber = 3,
     kNonceFieldNumber = 2,
   };
-  // map<string, bytes> state = 4;
+  // map<string, string> state = 4;
   int state_size() const;
   private:
   int _internal_state_size() const;
@@ -6120,7 +6140,7 @@ class OverrideAccountV2 PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
       mutable_state();
 
-  // map<string, bytes> state_diff = 5;
+  // map<string, string> state_diff = 5;
   int state_diff_size() const;
   private:
   int _internal_state_diff_size() const;
@@ -6207,13 +6227,13 @@ class OverrideAccountV2 PROTOBUF_FINAL :
       OverrideAccountV2_StateEntry_DoNotUse,
       std::string, std::string,
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_BYTES,
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
       0 > state_;
   ::PROTOBUF_NAMESPACE_ID::internal::MapField<
       OverrideAccountV2_StateDiffEntry_DoNotUse,
       std::string, std::string,
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_BYTES,
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
       0 > state_diff_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr balance_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr code_;
@@ -10979,7 +10999,7 @@ inline void OverrideAccount::unsafe_arena_set_allocated_code(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.OverrideAccount.code)
 }
 
-// map<string, bytes> state = 4;
+// map<string, string> state = 4;
 inline int OverrideAccount::_internal_state_size() const {
   return state_.size();
 }
@@ -11008,7 +11028,7 @@ OverrideAccount::mutable_state() {
   return _internal_mutable_state();
 }
 
-// map<string, bytes> state_diff = 5;
+// map<string, string> state_diff = 5;
 inline int OverrideAccount::_internal_state_diff_size() const {
   return state_diff_.size();
 }
@@ -16100,7 +16120,27 @@ inline void ProcessBatchResponseV2::set_cnt_steps(::PROTOBUF_NAMESPACE_ID::uint3
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponseV2.cnt_steps)
 }
 
-// repeated .executor.v1.ProcessBlockResponseV2 block_responses = 12;
+// uint32 cnt_sha256_hashes = 12;
+inline void ProcessBatchResponseV2::clear_cnt_sha256_hashes() {
+  cnt_sha256_hashes_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchResponseV2::_internal_cnt_sha256_hashes() const {
+  return cnt_sha256_hashes_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchResponseV2::cnt_sha256_hashes() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchResponseV2.cnt_sha256_hashes)
+  return _internal_cnt_sha256_hashes();
+}
+inline void ProcessBatchResponseV2::_internal_set_cnt_sha256_hashes(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  cnt_sha256_hashes_ = value;
+}
+inline void ProcessBatchResponseV2::set_cnt_sha256_hashes(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_cnt_sha256_hashes(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponseV2.cnt_sha256_hashes)
+}
+
+// repeated .executor.v1.ProcessBlockResponseV2 block_responses = 13;
 inline int ProcessBatchResponseV2::_internal_block_responses_size() const {
   return block_responses_.size();
 }
@@ -16139,7 +16179,7 @@ ProcessBatchResponseV2::block_responses() const {
   return block_responses_;
 }
 
-// .executor.v1.ExecutorError error = 13;
+// .executor.v1.ExecutorError error = 14;
 inline void ProcessBatchResponseV2::clear_error() {
   error_ = 0;
 }
@@ -16159,7 +16199,7 @@ inline void ProcessBatchResponseV2::set_error(::executor::v1::ExecutorError valu
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponseV2.error)
 }
 
-// map<string, .executor.v1.InfoReadWriteV2> read_write_addresses = 14;
+// map<string, .executor.v1.InfoReadWriteV2> read_write_addresses = 15;
 inline int ProcessBatchResponseV2::_internal_read_write_addresses_size() const {
   return read_write_addresses_.size();
 }
@@ -16188,7 +16228,7 @@ ProcessBatchResponseV2::mutable_read_write_addresses() {
   return _internal_mutable_read_write_addresses();
 }
 
-// uint64 flush_id = 15;
+// uint64 flush_id = 16;
 inline void ProcessBatchResponseV2::clear_flush_id() {
   flush_id_ = PROTOBUF_ULONGLONG(0);
 }
@@ -16208,7 +16248,7 @@ inline void ProcessBatchResponseV2::set_flush_id(::PROTOBUF_NAMESPACE_ID::uint64
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponseV2.flush_id)
 }
 
-// uint64 stored_flush_id = 16;
+// uint64 stored_flush_id = 17;
 inline void ProcessBatchResponseV2::clear_stored_flush_id() {
   stored_flush_id_ = PROTOBUF_ULONGLONG(0);
 }
@@ -16228,7 +16268,7 @@ inline void ProcessBatchResponseV2::set_stored_flush_id(::PROTOBUF_NAMESPACE_ID:
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponseV2.stored_flush_id)
 }
 
-// string prover_id = 17;
+// string prover_id = 18;
 inline void ProcessBatchResponseV2::clear_prover_id() {
   prover_id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -16309,7 +16349,7 @@ inline void ProcessBatchResponseV2::unsafe_arena_set_allocated_prover_id(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBatchResponseV2.prover_id)
 }
 
-// uint64 gas_used = 18;
+// uint64 gas_used = 19;
 inline void ProcessBatchResponseV2::clear_gas_used() {
   gas_used_ = PROTOBUF_ULONGLONG(0);
 }
@@ -16329,7 +16369,7 @@ inline void ProcessBatchResponseV2::set_gas_used(::PROTOBUF_NAMESPACE_ID::uint64
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponseV2.gas_used)
 }
 
-// repeated bytes smt_keys = 19;
+// repeated bytes smt_keys = 20;
 inline int ProcessBatchResponseV2::_internal_smt_keys_size() const {
   return smt_keys_.size();
 }
@@ -16403,7 +16443,7 @@ ProcessBatchResponseV2::mutable_smt_keys() {
   return &smt_keys_;
 }
 
-// repeated bytes program_keys = 20;
+// repeated bytes program_keys = 21;
 inline int ProcessBatchResponseV2::_internal_program_keys_size() const {
   return program_keys_.size();
 }
@@ -16477,7 +16517,7 @@ ProcessBatchResponseV2::mutable_program_keys() {
   return &program_keys_;
 }
 
-// uint64 fork_id = 21;
+// uint64 fork_id = 22;
 inline void ProcessBatchResponseV2::clear_fork_id() {
   fork_id_ = PROTOBUF_ULONGLONG(0);
 }
@@ -16852,7 +16892,7 @@ inline void OverrideAccountV2::unsafe_arena_set_allocated_code(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.OverrideAccountV2.code)
 }
 
-// map<string, bytes> state = 4;
+// map<string, string> state = 4;
 inline int OverrideAccountV2::_internal_state_size() const {
   return state_.size();
 }
@@ -16881,7 +16921,7 @@ OverrideAccountV2::mutable_state() {
   return _internal_mutable_state();
 }
 
-// map<string, bytes> state_diff = 5;
+// map<string, string> state_diff = 5;
 inline int OverrideAccountV2::_internal_state_diff_size() const {
   return state_diff_.size();
 }

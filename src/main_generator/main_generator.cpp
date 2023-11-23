@@ -193,6 +193,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
     }
     code += "\n";
 
+    code += " #ifdef MAIN_SM_EXECUTOR_GENERATED_CODE\n";
+    code += "\n";
+
     code += "namespace " + forkNamespace + "\n";
     code += "{\n";
 
@@ -228,7 +231,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
         code += ";\n";
         code += "}\n";
         code += "\n";
-        code += "#endif\n";
+        code += "#endif // MAIN_SM_EXECUTOR_GENERATED_CODE\n";
+        code += "\n";
+        code += "#endif // Header protection\n";
         return code;
     }
     else
@@ -1260,7 +1265,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "        proverRequest.nodesKeys.insert(fea2string(fr, ctx.lastSWrite.key));\n";
                     code += "    }\n";
 
-                    code += "    zkResult = mainExecutor.pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : ( proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE ), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);\n";
+                    code += "    zkResult = mainExecutor.pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_block_number(), proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : ( proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE ), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);\n";
                     code += "    if (zkResult != ZKR_SUCCESS)\n";
                     code += "    {\n";
                     code += "        proverRequest.result = zkResult;\n";
@@ -2422,7 +2427,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "            proverRequest.nodesKeys.insert(fea2string(fr, ctx.lastSWrite.key));\n";
             code += "        }\n";
 
-            code += "        zkResult = mainExecutor.pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : ( proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE ), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);\n";
+            code += "        zkResult = mainExecutor.pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_block_number(), proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : ( proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE ), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);\n";
             code += "        if (zkResult != ZKR_SUCCESS)\n";
             code += "        {\n";
             code += "            proverRequest.result = zkResult;\n";
@@ -3022,7 +3027,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
             code += "        gettimeofday(&t, NULL);\n";
             code += "#endif\n";
-            code += "        zkResult = mainExecutor.pHashDB->setProgram(proverRequest.uuid, proverRequest.pFullTracer->get_tx_number(), result, hashIterator->second.data, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);\n";
+            code += "        zkResult = mainExecutor.pHashDB->setProgram(proverRequest.uuid, proverRequest.pFullTracer->get_block_number(), proverRequest.pFullTracer->get_tx_number(), result, hashIterator->second.data, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);\n";
             code += "        if (zkResult != ZKR_SUCCESS)\n";
             code += "        {\n";
             code += "            proverRequest.result = zkResult;\n";
@@ -4884,6 +4889,9 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "#pragma GCC pop_options\n\n";
 
     code += "} // namespace\n\n";
+
+    code += "\n";
+    code += "#endif // MAIN_SM_EXECUTOR_GENERATED_CODE\n";
 
     return code;
 }

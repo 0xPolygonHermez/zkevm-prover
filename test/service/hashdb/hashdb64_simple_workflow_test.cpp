@@ -19,7 +19,7 @@ uint64_t HashDB64SimpleWorkflowTest (const Config& config)
     zklog.info("HashDB64WorkflowTest() started");
     Goldilocks fr;
     PoseidonGoldilocks poseidon;
-    //uint64_t tx = 0;
+    uint64_t block = 0;
     zkresult zkr;
     Persistence persistence = PERSISTENCE_DATABASE;
     HashDBInterface* pHashDB = HashDBClientFactory::createHashDBClient(fr, config);
@@ -68,7 +68,7 @@ uint64_t HashDB64SimpleWorkflowTest (const Config& config)
                 //scalar2key(fr, keyScalar, key);
                 value++;
                 
-                zkr = pHashDB->set(batchUUID, tx, root, key, value, persistence, newRoot, &setResult, NULL);
+                zkr = pHashDB->set(batchUUID, block, tx, root, key, value, persistence, newRoot, &setResult, NULL);
                 zklog.info("SET zkr=" + zkresult2string(zkr) + " root=" + fea2string(fr, root) + " key=" + fea2string(fr, key) + " value=" + value.get_str() + " newRoot=" + fea2string(fr, newRoot));
                 zkassertpermanent(zkr==ZKR_SUCCESS);
                 zkassertpermanent(!fr.isZero(newRoot[0]) || !fr.isZero(newRoot[1]) || !fr.isZero(newRoot[2]) || !fr.isZero(newRoot[3]));

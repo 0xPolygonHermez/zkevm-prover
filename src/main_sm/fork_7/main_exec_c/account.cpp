@@ -313,7 +313,7 @@ zkresult Account::SetBalance (const string &batchUUID, uint64_t tx, Goldilocks::
     // Check that balance key has been generated
     CheckBalanceKey();
 
-    zkresult zkResult = hashDB.set(batchUUID, tx, root, balanceKey, balance, /*proverRequest.input.bUpdateMerkleTree*/ PERSISTENCE_CACHE, root, /*&ctx.lastSWrite.res*/ NULL, /*proverRequest.dbReadLog*/ NULL);
+    zkresult zkResult = hashDB.set(batchUUID, 0, tx, root, balanceKey, balance, /*proverRequest.input.bUpdateMerkleTree*/ PERSISTENCE_CACHE, root, /*&ctx.lastSWrite.res*/ NULL, /*proverRequest.dbReadLog*/ NULL);
     if (zkResult != ZKR_SUCCESS)
     {
         zklog.error("Account::SetBalance()) failed calling hashDB.set() result=" + zkresult2string(zkResult));
@@ -360,7 +360,7 @@ zkresult Account::SetNonce (const string &batchUUID, uint64_t tx, Goldilocks::El
     CheckNonceKey();
 
     mpz_class value = nonce;
-    zkresult zkResult = hashDB.set(batchUUID, tx, root, nonceKey, value, /*proverRequest.input.bUpdateMerkleTree*/ PERSISTENCE_CACHE, root, /*&ctx.lastSWrite.res*/ NULL, /*proverRequest.dbReadLog*/ NULL);
+    zkresult zkResult = hashDB.set(batchUUID, 0, tx, root, nonceKey, value, /*proverRequest.input.bUpdateMerkleTree*/ PERSISTENCE_CACHE, root, /*&ctx.lastSWrite.res*/ NULL, /*proverRequest.dbReadLog*/ NULL);
     if (zkResult != ZKR_SUCCESS)
     {
         zklog.error("Account::SetNonce() failed calling hashDB.set() result=" + zkresult2string(zkResult));
@@ -379,7 +379,7 @@ zkresult Account::SetGlobalExitRoot (const string &batchUUID, uint64_t tx, Goldi
     // Check that nonce key has been generated
     CheckGlobalExitRootKey(globalExitRoot);
 
-    zkresult zkResult = hashDB.set(batchUUID, tx, root, globalExitRootKey, value, /*proverRequest.input.bUpdateMerkleTree*/ PERSISTENCE_CACHE, root, /*&ctx.lastSWrite.res*/ NULL, /*proverRequest.dbReadLog*/ NULL);
+    zkresult zkResult = hashDB.set(batchUUID, 0, tx, root, globalExitRootKey, value, /*proverRequest.input.bUpdateMerkleTree*/ PERSISTENCE_CACHE, root, /*&ctx.lastSWrite.res*/ NULL, /*proverRequest.dbReadLog*/ NULL);
     if (zkResult != ZKR_SUCCESS)
     {
         zklog.error("Account::SetGlobalExitRoot() failed calling hashDB.set() result=" + zkresult2string(zkResult));
@@ -417,7 +417,7 @@ zkresult Account::SetTxCount (const string &batchUUID, uint64_t tx, Goldilocks::
     // Check that nonce key has been generated
     CheckTxCountKey();
 
-    zkresult zkResult = hashDB.set(batchUUID, tx, root, txCountKey, txCount, /*proverRequest.input.bUpdateMerkleTree*/ PERSISTENCE_CACHE, root, /*&ctx.lastSWrite.res*/ NULL, /*proverRequest.dbReadLog*/ NULL);
+    zkresult zkResult = hashDB.set(batchUUID, 0, tx, root, txCountKey, txCount, /*proverRequest.input.bUpdateMerkleTree*/ PERSISTENCE_CACHE, root, /*&ctx.lastSWrite.res*/ NULL, /*proverRequest.dbReadLog*/ NULL);
     if (zkResult != ZKR_SUCCESS)
     {
         zklog.error("Account::SetBatchNumber() failed calling hashDB.set() result=" + zkresult2string(zkResult));
@@ -437,7 +437,7 @@ zkresult Account::SetStateRoot (const string &batchUUID, uint64_t tx, Goldilocks
     Goldilocks::Element stateRootKey[4];
     GenerateStateRootKey(txCount, stateRootKey);
 
-    zkresult zkResult = hashDB.set(batchUUID, tx, root, stateRootKey, stateRoot, /*proverRequest.input.bUpdateMerkleTree*/ PERSISTENCE_CACHE, root, /*&ctx.lastSWrite.res*/ NULL, /*proverRequest.dbReadLog*/ NULL);
+    zkresult zkResult = hashDB.set(batchUUID, 0, tx, root, stateRootKey, stateRoot, /*proverRequest.input.bUpdateMerkleTree*/ PERSISTENCE_CACHE, root, /*&ctx.lastSWrite.res*/ NULL, /*proverRequest.dbReadLog*/ NULL);
     if (zkResult != ZKR_SUCCESS)
     {
         zklog.error("Account::SetStateRoot() failed calling hashDB.set() result=" + zkresult2string(zkResult));

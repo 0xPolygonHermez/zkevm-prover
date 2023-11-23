@@ -73,4 +73,6 @@
 #define DATABASE_USE_CACHE // If defined, the Database class uses a cache
 #define USE_NEW_KVTREE
 
+//#define MAIN_SM_EXECUTOR_GENERATED_CODE
+
 #endif

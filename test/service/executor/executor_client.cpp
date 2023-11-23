@@ -61,7 +61,7 @@ void ExecutorClient::waitForThreads (void)
     }
 }
 
-bool ExecutorClient::ProcessBatch (void)
+bool ExecutorClient::ProcessBatch (const string &inputFile)
 {
     // Get a  HashDB interface
     HashDBInterface* pHashDB = HashDBClientFactory::createHashDBClient(fr, config);
@@ -69,15 +69,15 @@ bool ExecutorClient::ProcessBatch (void)
 
     TimerStart(EXECUTOR_CLIENT_PROCESS_BATCH);
 
-    if (config.inputFile.size() == 0)
+    if (inputFile.size() == 0)
     {
-        cerr << "Error: ExecutorClient::ProcessBatch() found config.inputFile empty" << endl;
+        cerr << "Error: ExecutorClient::ProcessBatch() found inputFile empty" << endl;
         exit(-1);
     }
 
     Input input(fr);
     json inputJson;
-    file2json(config.inputFile, inputJson);
+    file2json(inputFile, inputJson);
     zkresult zkResult = input.load(inputJson);
     if (zkResult != ZKR_SUCCESS)
     {
@@ -146,7 +146,6 @@ bool ExecutorClient::ProcessBatch (void)
         }
 
         ::executor::v1::ProcessBatchResponse processBatchResponse;
-        string newStateRoot;
         for (uint64_t i=0; i<config.executorClientLoops; i++)
         {
             if (i == 1)
@@ -159,7 +158,12 @@ bool ExecutorClient::ProcessBatch (void)
             if (grpcStatus.error_code() != grpc::StatusCode::OK)
             {
                 cerr << "Error: ExecutorClient::ProcessBatch() failed calling server i=" << i << " error=" << grpcStatus.error_code() << "=" << grpcStatus.error_message() << endl;
-                break;
+                return false;
+            }
+            if (processBatchResponse.error() != executor::v1::EXECUTOR_ERROR_NO_ERROR)
+            {
+                cerr << "Error: ExecutorClient::ProcessBatch() failed i=" << i << " error=" << processBatchResponse.error() << endl;
+                return false;
             }
             newStateRoot = ba2string(processBatchResponse.new_state_root());
 
@@ -173,7 +177,7 @@ bool ExecutorClient::ProcessBatch (void)
             executor::v1::GetFlushStatusResponse getFlushStatusResponse;
             do
             {
-                sleep(1);
+                usleep(10000);
                 google::protobuf::Empty request;
                 ::grpc::ClientContext context;
                 ::grpc::Status grpcStatus = stub->GetFlushStatus(&context, request, &getFlushStatusResponse);
@@ -258,6 +262,11 @@ bool ExecutorClient::ProcessBatch (void)
                 cerr << "Error: ExecutorClient::ProcessBatch() failed calling server i=" << i << " error=" << grpcStatus.error_code() << "=" << grpcStatus.error_message() << endl;
                 break;
             }
+            if (processBatchResponse.error() != executor::v1::EXECUTOR_ERROR_NO_ERROR)
+            {
+                cerr << "Error: ExecutorClient::ProcessBatch() failed i=" << i << " error=" << processBatchResponse.error() << endl;
+                return false;
+            }
             newStateRoot = ba2string(processBatchResponse.new_state_root());
 
     #ifdef LOG_SERVICE
@@ -270,7 +279,7 @@ bool ExecutorClient::ProcessBatch (void)
             executor::v1::GetFlushStatusResponse getFlushStatusResponse;
             do
             {
-                sleep(1);
+                usleep(10000);
                 google::protobuf::Empty request;
                 ::grpc::ClientContext context;
                 ::grpc::Status grpcStatus = stub->GetFlushStatus(&context, request, &getFlushStatusResponse);
@@ -375,7 +384,30 @@ void* executorClientThread (void* arg)
     
     // Execute should block and succeed
     cout << "executorClientThread() calling pClient->ProcessBatch()" << endl;
-    pClient->ProcessBatch();
+
+    if (config.inputFile.back() == '/')
+    {
+        Config tmpConfig = config;
+        // Get files sorted alphabetically from the folder
+        vector<string> files = getFolderFiles(config.inputFile, true);
+        // Process each input file in order
+        for (size_t i = 0; i < files.size(); i++)
+        {
+            string inputFile = config.inputFile + files[i];
+            zklog.info("executorClientThread() i=" + to_string(i) + " inputFile=" + inputFile);
+            bool bResult = pClient->ProcessBatch(inputFile);
+            if (!bResult)
+            {
+                zklog.error("executorClientThread() failed i=" + to_string(i) + " inputFile=" + inputFile);
+                break;
+            }
+        }
+    }
+    else
+    {
+        pClient->ProcessBatch(config.inputFile);
+    }
+    
     return NULL;
 }
 
@@ -388,8 +420,29 @@ void* executorClientThreads (void* arg)
     // Execute should block and succeed
     //cout << "executorClientThreads() calling pClient->ProcessBatch()" << endl;
     for(uint64_t i=0; i<EXECUTOR_CLIENT_MULTITHREAD_N_FILES; i++)
-    {
-        pClient->ProcessBatch();
+    {        
+        if (config.inputFile.back() == '/')
+        {
+            Config tmpConfig = config;
+            // Get files sorted alphabetically from the folder
+            vector<string> files = getFolderFiles(config.inputFile, true);
+            // Process each input file in order
+            for (size_t i = 0; i < files.size(); i++)
+            {
+                string inputFile = config.inputFile + files[i];
+                zklog.info("executorClientThreads() inputFile=" + inputFile);
+                bool bResult = pClient->ProcessBatch(inputFile);
+                if (!bResult)
+                {
+                    zklog.error("executorClientThreads() failed i=" + to_string(i) + " inputFile=" + inputFile);
+                    break;
+                }
+            }
+        }
+        else
+        {
+            pClient->ProcessBatch(config.inputFile);
+        }
     }
 
     return NULL;

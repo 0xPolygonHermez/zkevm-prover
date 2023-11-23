@@ -93,12 +93,15 @@ using grpc::Status;
         // Get batch UUID
         string batchUUID = request->batch_uuid();
 
+        // Get block number
+        uint64_t block = request->block_index();
+
         // Get TX number
-        uint64_t tx = request->tx();
+        uint64_t tx = request->tx_index();
 
         // Call SMT set
         Goldilocks::Element newRoot[4];
-        zkresult zkr = pHashDB->set(batchUUID, tx, oldRoot, key, value, persistence, newRoot, &r, dbReadLog);
+        zkresult zkr = pHashDB->set(batchUUID, block, tx, oldRoot, key, value, persistence, newRoot, &r, dbReadLog);
 
         // Return database read log
         if (request->get_db_read_log())
@@ -314,8 +317,11 @@ using grpc::Status;
         // Get batch UUID
         string batchUUID = request->batch_uuid();
 
+        // Get block number
+        uint64_t block = request->block_index();
+
         // Get TX number
-        uint64_t tx = request->tx();
+        uint64_t tx = request->tx_index();
 
         // Get persistence flag
         Persistence persistence = (Persistence)request->persistence();
@@ -330,7 +336,7 @@ using grpc::Status;
         }
 #endif
         // Call set program
-        zkresult r = pHashDB->setProgram(batchUUID, tx, key, data, persistence);
+        zkresult r = pHashDB->setProgram(batchUUID, block, tx, key, data, persistence);
 
         // Return result
         ::hashdb::v1::ResultCode* result = new ::hashdb::v1::ResultCode();

@@ -58,7 +58,8 @@ enum Persistence {
  * @param {details} - indicates if it should return all response parameters (true) or just the new root (false)
  * @param {get_db_read_log} - indicates if it should return the DB reads generated during the execution of the request
  * @param {batch_uuid} - indicates a unique identifier of the current batch or session; data for this batch can be stored in memory until flushed to database
- * @param {tx} - current transaction ordinal number: 0, 1, 2...
+ * @param {tx_index} - current transaction ordinal index: 0, 1, 2...
+ * @param {block_index} - current block ordinal index: 0, 1, 2...
  */
 message SetRequest {
     Fea old_root = 1;
@@ -68,8 +69,8 @@ message SetRequest {
     bool details = 5;
     bool get_db_read_log = 6;
     string batch_uuid = 7;
-    uint64 tx = 8;
-
+    uint64 tx_index = 8;
+    uint64 block_index = 9;
 }
 
 /**
@@ -94,14 +95,16 @@ message GetRequest {
  * @param {data} - Program data to store
  * @param {persistence} - indicates if it should be stored only in CACHE, in the SQL DATABASE, or it is just TEMPORARY and should be deleted at the flush of this batch UUID
  * @param {batch_uuid} - indicates a unique identifier of the current batch or session; data for this batch can be stored in memory until flushed to database
- * @param {tx} - current transaction ordinal number: 0, 1, 2...
+ * @param {tx_index} - current transaction ordinal index: 0, 1, 2...
+ * @param {block_index} - current block ordinal index: 0, 1, 2...
  */
 message SetProgramRequest {
     Fea key = 1;
     bytes data = 2;
     Persistence persistence = 3;
     string batch_uuid = 4;
-    uint64 tx = 5;
+    uint64 tx_index = 5;
+    uint64 block_index = 6;
 }
 
 /**

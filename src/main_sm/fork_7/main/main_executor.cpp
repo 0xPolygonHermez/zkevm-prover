@@ -1274,7 +1274,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                             proverRequest.nodesKeys.insert(fea2string(fr, ctx.lastSWrite.key));
                         }
 
-                        zkResult = pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, value, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : bIsBlockL2Hash ? PERSISTENCE_TEMPORARY_HASH : proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
+                        zkResult = pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_block_number(), proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, value, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : bIsBlockL2Hash ? PERSISTENCE_TEMPORARY_HASH : proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
                         if (zkResult != ZKR_SUCCESS)
                         {
                             proverRequest.result = zkResult;
@@ -2388,7 +2388,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     proverRequest.nodesKeys.insert(fea2string(fr, ctx.lastSWrite.key));
                 }
 
-                zkresult zkResult = pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : bIsBlockL2Hash ? PERSISTENCE_TEMPORARY_HASH : proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
+                zkresult zkResult = pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_block_number(), proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : bIsBlockL2Hash ? PERSISTENCE_TEMPORARY_HASH : proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
                 if (zkResult != ZKR_SUCCESS)
                 {
                     proverRequest.result = zkResult;
@@ -2949,7 +2949,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     proverRequest.programKeys.insert(fea2string(fr, result));
                 }
 
-                zkresult zkResult = pHashDB->setProgram(proverRequest.uuid, proverRequest.pFullTracer->get_tx_number(), result, hashPIterator->second.data, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);
+                zkresult zkResult = pHashDB->setProgram(proverRequest.uuid, proverRequest.pFullTracer->get_block_number(), proverRequest.pFullTracer->get_tx_number(), result, hashPIterator->second.data, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);
                 if (zkResult != ZKR_SUCCESS)
                 {
                     proverRequest.result = zkResult;
@@ -5098,6 +5098,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     proverRequest.counters.memAlign = fr.toU64(pols.cntMemAlign[0]);
     proverRequest.counters.paddingPG = fr.toU64(pols.cntPaddingPG[0]);
     proverRequest.counters.poseidonG = fr.toU64(pols.cntPoseidonG[0]);
+    proverRequest.counters.sha256F = fr.toU64(pols.cntSha256F[0]);
     proverRequest.counters.steps = ctx.lastStep;
 
     // Set the error (all previous errors generated a return)

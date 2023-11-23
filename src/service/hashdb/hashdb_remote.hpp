@@ -33,9 +33,9 @@ public:
     // HashDBInterface methods
         
     zkresult getLatestStateRoot (Goldilocks::Element (&stateRoot)[4]);
-    zkresult set                (const string &batchUUID, uint64_t tx, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, Goldilocks::Element (&newRoot)[4], SmtSetResult *result, DatabaseMap *dbReadLog);
+    zkresult set                (const string &batchUUID, uint64_t block, uint64_t tx, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, Goldilocks::Element (&newRoot)[4], SmtSetResult *result, DatabaseMap *dbReadLog);
     zkresult get                (const string &batchUUID, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], mpz_class &value, SmtGetResult *result, DatabaseMap *dbReadLog);
-    zkresult setProgram         (const string &batchUUID, uint64_t tx, const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const Persistence persistence);
+    zkresult setProgram         (const string &batchUUID, uint64_t block, uint64_t tx, const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const Persistence persistence);
     zkresult getProgram         (const string &batchUUID, const Goldilocks::Element (&key)[4], vector<uint8_t> &data, DatabaseMap *dbReadLog);
     void     loadDB             (const DatabaseMap::MTMap &input, const bool persistent, const Goldilocks::Element (&stateRoot)[4]);
     void     loadProgramDB      (const DatabaseMap::ProgramMap &input, const bool persistent);

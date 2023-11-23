@@ -48,20 +48,33 @@ public:
     TxPersistenceState persistence[PERSISTENCE_SIZE];
 };
 
-class BatchState
+class BlockState
 {
 public:
     string oldStateRoot;
     string currentStateRoot;
     uint64_t currentTx;
     vector<TxState> txState;
+    BlockState() : currentTx(0)
+    {
+        txState.reserve(32);
+    };
+};
+
+class BatchState
+{
+public:
+    string oldStateRoot;
+    string currentStateRoot;
+    uint64_t currentBlock;
+    vector<BlockState> blockState;
     unordered_map<string, vector<Goldilocks::Element>> dbWrite;
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     TimeMetricStorage timeMetricStorage;
 #endif
-    BatchState() : currentTx(0)
+    BatchState() : currentBlock(0)
     {
-        txState.reserve(32);
+        blockState.reserve(32);
         dbWrite.reserve(1024);
     };
 };
@@ -80,22 +93,22 @@ public:
         pthread_mutex_init(&mutex, NULL);
     };
 private:
-    zkresult setStateRoot (const string &batchUUID, uint64_t tx, const string &stateRoot, bool bIsOldStateRoot, const Persistence persistence);
+    zkresult setStateRoot (const string &batchUUID, uint64_t block, uint64_t tx, const string &stateRoot, bool bIsOldStateRoot, const Persistence persistence);
 public:
     void init (const Config &_config)
     {
         config = _config;
     }
-    zkresult setOldStateRoot (const string &batchUUID, uint64_t tx, const string &stateRoot, const Persistence persistence)
+    zkresult setOldStateRoot (const string &batchUUID, uint64_t block, uint64_t tx, const string &stateRoot, const Persistence persistence)
     {
-        return setStateRoot(batchUUID, tx, stateRoot, true, persistence);
+        return setStateRoot(batchUUID, block, tx, stateRoot, true, persistence);
     }
-    zkresult setNewStateRoot (const string &batchUUID, uint64_t tx, const string &stateRoot, const Persistence persistence)
+    zkresult setNewStateRoot (const string &batchUUID, uint64_t block, uint64_t tx, const string &stateRoot, const Persistence persistence)
     {
-        return setStateRoot(batchUUID, tx, stateRoot, false, persistence);
+        return setStateRoot(batchUUID, block, tx, stateRoot, false, persistence);
     }
-    zkresult write (const string &batchUUID, uint64_t tx, const string &_key, const vector<Goldilocks::Element> &value, const Persistence persistence);
-    zkresult deleteNode (const string &batchUUID, uint64_t tx, const string &_key, const Persistence persistence);
+    zkresult write (const string &batchUUID, uint64_t block, uint64_t tx, const string &_key, const vector<Goldilocks::Element> &value, const Persistence persistence);
+    zkresult deleteNode (const string &batchUUID, uint64_t block, uint64_t tx, const string &_key, const Persistence persistence);
     zkresult read (const string &batchUUID, const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog);
     zkresult semiFlush (const string &batchUUID, const string &newStateRoot, const Persistence persistence);
     zkresult flush (const string &batchUUID, const string &newStateRoot, const Persistence persistence, Database &db, uint64_t &flushId, uint64_t &lastSentFlushId);

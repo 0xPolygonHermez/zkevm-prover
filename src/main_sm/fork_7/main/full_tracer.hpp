@@ -148,6 +148,10 @@ public:
     {
         return full_trace;
     }
+    uint64_t get_block_number(void)
+    {
+        return finalTrace.block_responses.size();
+    }
     uint64_t get_tx_number(void)
     {
         return currentBlock.responses.size();

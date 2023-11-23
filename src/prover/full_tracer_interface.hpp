@@ -267,6 +267,7 @@ public:
     virtual vector<Response> & get_responses(void) = 0;
     virtual vector<Block> & get_block_responses(void) = 0;
     virtual vector<Opcode> & get_info(void) = 0;
+    virtual uint64_t get_block_number(void) = 0; // block number = 0, 1, 2...
     virtual uint64_t get_tx_number(void) = 0; // tx number = 0, 1, 2...
 };
 

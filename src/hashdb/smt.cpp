@@ -8,7 +8,7 @@
 #include "state_manager.hpp"
 #include "key_utils.hpp"
 
-zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, SmtSetResult &result, DatabaseMap *dbReadLog)
+zkresult Smt::set (const string &batchUUID, uint64_t block, uint64_t tx, Database &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, SmtSetResult &result, DatabaseMap *dbReadLog)
 {
 #ifdef LOG_SMT
     zklog.info("Smt::set() called with oldRoot=" + fea2string(fr,oldRoot) + " key=" + fea2string(fr,key) + " value=" + value.get_str(16) + " persistent=" + to_string(persistent));
@@ -16,11 +16,11 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
 
     bool bUseStateManager = db.config.stateManager && (batchUUID.size() > 0);
 
-    SmtContext ctx(db, bUseStateManager, batchUUID, tx, persistence);
+    SmtContext ctx(db, bUseStateManager, batchUUID, block, tx, persistence);
 
     if (bUseStateManager)
     {
-        stateManager.setOldStateRoot(batchUUID, tx, fea2string(fr, oldRoot), persistence);
+        stateManager.setOldStateRoot(batchUUID, block, tx, fea2string(fr, oldRoot), persistence);
     }
 
     Goldilocks::Element r[4];
@@ -231,7 +231,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                             nodeToDeleteString = fea2string(fr, nodeToDelete);
                             if (nodeToDeleteString != "0")
                             {
-                                stateManager.deleteNode(batchUUID, tx, nodeToDeleteString, persistence);
+                                stateManager.deleteNode(batchUUID, block, tx, nodeToDeleteString, persistence);
                             }
                         }
                     }
@@ -463,7 +463,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                         nodeToDeleteString = fea2string(fr, nodeToDelete);
                         if (nodeToDeleteString != "0")
                         {
-                            stateManager.deleteNode(batchUUID, tx, nodeToDeleteString, persistence);
+                            stateManager.deleteNode(batchUUID, block, tx, nodeToDeleteString, persistence);
                         }
                     }
                 }
@@ -507,7 +507,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                     nodeToDeleteString = fea2string(fr, nodeToDelete);
                     if (nodeToDeleteString != "0")
                     {
-                        stateManager.deleteNode(batchUUID, tx, nodeToDeleteString, persistence);
+                        stateManager.deleteNode(batchUUID, block, tx, nodeToDeleteString, persistence);
                     }
                 }
                 else
@@ -735,7 +735,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
                     nodeToDeleteString = fea2string(fr, nodeToDelete);
                     if (nodeToDeleteString != "0")
                     {
-                        stateManager.deleteNode(batchUUID, tx, nodeToDeleteString, persistence);
+                        stateManager.deleteNode(batchUUID, block, tx, nodeToDeleteString, persistence);
                     }
                 }
             }
@@ -751,7 +751,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t tx, Database &db, const Gol
 
     if (bUseStateManager)
     {
-        stateManager.setNewStateRoot(batchUUID, tx, fea2string(fr, newRoot), persistence);
+        stateManager.setNewStateRoot(batchUUID, block, tx, fea2string(fr, newRoot), persistence);
     }
     else if ( (persistence == PERSISTENCE_DATABASE) &&
          (
@@ -1014,7 +1014,7 @@ zkresult Smt::hashSave ( const SmtContext &ctx, const Goldilocks::Element (&v)[1
 
     if (ctx.bUseStateManager)
     {
-        zkr = stateManager.write(ctx.batchUUID, ctx.tx, hashString, dbValue, ctx.persistence);
+        zkr = stateManager.write(ctx.batchUUID, ctx.block, ctx.tx, hashString, dbValue, ctx.persistence);
         if (zkr != ZKR_SUCCESS)
         {
             zklog.error("Smt::hashSave() failed calling stateManager.write() key=" + hashString + " result=" + to_string(zkr) + "=" + zkresult2string(zkr));

@@ -566,7 +566,8 @@ class SetRequest PROTOBUF_FINAL :
     kPersistenceFieldNumber = 4,
     kDetailsFieldNumber = 5,
     kGetDbReadLogFieldNumber = 6,
-    kTxFieldNumber = 8,
+    kTxIndexFieldNumber = 8,
+    kBlockIndexFieldNumber = 9,
   };
   // string value = 3;
   void clear_value();
@@ -681,13 +682,22 @@ class SetRequest PROTOBUF_FINAL :
   void _internal_set_get_db_read_log(bool value);
   public:
 
-  // uint64 tx = 8;
-  void clear_tx();
-  ::PROTOBUF_NAMESPACE_ID::uint64 tx() const;
-  void set_tx(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  // uint64 tx_index = 8;
+  void clear_tx_index();
+  ::PROTOBUF_NAMESPACE_ID::uint64 tx_index() const;
+  void set_tx_index(::PROTOBUF_NAMESPACE_ID::uint64 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_tx() const;
-  void _internal_set_tx(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_tx_index() const;
+  void _internal_set_tx_index(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 block_index = 9;
+  void clear_block_index();
+  ::PROTOBUF_NAMESPACE_ID::uint64 block_index() const;
+  void set_block_index(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_block_index() const;
+  void _internal_set_block_index(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
   // @@protoc_insertion_point(class_scope:hashdb.v1.SetRequest)
@@ -704,7 +714,8 @@ class SetRequest PROTOBUF_FINAL :
   int persistence_;
   bool details_;
   bool get_db_read_log_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 tx_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 tx_index_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 block_index_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_hashdb_2eproto;
 };
@@ -1041,7 +1052,8 @@ class SetProgramRequest PROTOBUF_FINAL :
     kDataFieldNumber = 2,
     kBatchUuidFieldNumber = 4,
     kKeyFieldNumber = 1,
-    kTxFieldNumber = 5,
+    kTxIndexFieldNumber = 5,
+    kBlockIndexFieldNumber = 6,
     kPersistenceFieldNumber = 3,
   };
   // bytes data = 2;
@@ -1112,13 +1124,22 @@ class SetProgramRequest PROTOBUF_FINAL :
       ::hashdb::v1::Fea* key);
   ::hashdb::v1::Fea* unsafe_arena_release_key();
 
-  // uint64 tx = 5;
-  void clear_tx();
-  ::PROTOBUF_NAMESPACE_ID::uint64 tx() const;
-  void set_tx(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  // uint64 tx_index = 5;
+  void clear_tx_index();
+  ::PROTOBUF_NAMESPACE_ID::uint64 tx_index() const;
+  void set_tx_index(::PROTOBUF_NAMESPACE_ID::uint64 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_tx() const;
-  void _internal_set_tx(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_tx_index() const;
+  void _internal_set_tx_index(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 block_index = 6;
+  void clear_block_index();
+  ::PROTOBUF_NAMESPACE_ID::uint64 block_index() const;
+  void set_block_index(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_block_index() const;
+  void _internal_set_block_index(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
   // .hashdb.v1.Persistence persistence = 3;
@@ -1140,7 +1161,8 @@ class SetProgramRequest PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr data_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr batch_uuid_;
   ::hashdb::v1::Fea* key_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 tx_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 tx_index_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 block_index_;
   int persistence_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_hashdb_2eproto;
@@ -7485,24 +7507,44 @@ inline void SetRequest::unsafe_arena_set_allocated_batch_uuid(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:hashdb.v1.SetRequest.batch_uuid)
 }
 
-// uint64 tx = 8;
-inline void SetRequest::clear_tx() {
-  tx_ = PROTOBUF_ULONGLONG(0);
+// uint64 tx_index = 8;
+inline void SetRequest::clear_tx_index() {
+  tx_index_ = PROTOBUF_ULONGLONG(0);
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint64 SetRequest::_internal_tx() const {
-  return tx_;
+inline ::PROTOBUF_NAMESPACE_ID::uint64 SetRequest::_internal_tx_index() const {
+  return tx_index_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint64 SetRequest::tx() const {
-  // @@protoc_insertion_point(field_get:hashdb.v1.SetRequest.tx)
-  return _internal_tx();
+inline ::PROTOBUF_NAMESPACE_ID::uint64 SetRequest::tx_index() const {
+  // @@protoc_insertion_point(field_get:hashdb.v1.SetRequest.tx_index)
+  return _internal_tx_index();
 }
-inline void SetRequest::_internal_set_tx(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+inline void SetRequest::_internal_set_tx_index(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   
-  tx_ = value;
+  tx_index_ = value;
 }
-inline void SetRequest::set_tx(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_tx(value);
-  // @@protoc_insertion_point(field_set:hashdb.v1.SetRequest.tx)
+inline void SetRequest::set_tx_index(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_tx_index(value);
+  // @@protoc_insertion_point(field_set:hashdb.v1.SetRequest.tx_index)
+}
+
+// uint64 block_index = 9;
+inline void SetRequest::clear_block_index() {
+  block_index_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 SetRequest::_internal_block_index() const {
+  return block_index_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 SetRequest::block_index() const {
+  // @@protoc_insertion_point(field_get:hashdb.v1.SetRequest.block_index)
+  return _internal_block_index();
+}
+inline void SetRequest::_internal_set_block_index(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  block_index_ = value;
+}
+inline void SetRequest::set_block_index(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_block_index(value);
+  // @@protoc_insertion_point(field_set:hashdb.v1.SetRequest.block_index)
 }
 
 // -------------------------------------------------------------------
@@ -8059,24 +8101,44 @@ inline void SetProgramRequest::unsafe_arena_set_allocated_batch_uuid(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:hashdb.v1.SetProgramRequest.batch_uuid)
 }
 
-// uint64 tx = 5;
-inline void SetProgramRequest::clear_tx() {
-  tx_ = PROTOBUF_ULONGLONG(0);
+// uint64 tx_index = 5;
+inline void SetProgramRequest::clear_tx_index() {
+  tx_index_ = PROTOBUF_ULONGLONG(0);
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint64 SetProgramRequest::_internal_tx() const {
-  return tx_;
+inline ::PROTOBUF_NAMESPACE_ID::uint64 SetProgramRequest::_internal_tx_index() const {
+  return tx_index_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint64 SetProgramRequest::tx() const {
-  // @@protoc_insertion_point(field_get:hashdb.v1.SetProgramRequest.tx)
-  return _internal_tx();
+inline ::PROTOBUF_NAMESPACE_ID::uint64 SetProgramRequest::tx_index() const {
+  // @@protoc_insertion_point(field_get:hashdb.v1.SetProgramRequest.tx_index)
+  return _internal_tx_index();
 }
-inline void SetProgramRequest::_internal_set_tx(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+inline void SetProgramRequest::_internal_set_tx_index(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   
-  tx_ = value;
+  tx_index_ = value;
 }
-inline void SetProgramRequest::set_tx(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_tx(value);
-  // @@protoc_insertion_point(field_set:hashdb.v1.SetProgramRequest.tx)
+inline void SetProgramRequest::set_tx_index(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_tx_index(value);
+  // @@protoc_insertion_point(field_set:hashdb.v1.SetProgramRequest.tx_index)
+}
+
+// uint64 block_index = 6;
+inline void SetProgramRequest::clear_block_index() {
+  block_index_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 SetProgramRequest::_internal_block_index() const {
+  return block_index_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 SetProgramRequest::block_index() const {
+  // @@protoc_insertion_point(field_get:hashdb.v1.SetProgramRequest.block_index)
+  return _internal_block_index();
+}
+inline void SetProgramRequest::_internal_set_block_index(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  block_index_ = value;
+}
+inline void SetProgramRequest::set_block_index(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_block_index(value);
+  // @@protoc_insertion_point(field_set:hashdb.v1.SetProgramRequest.block_index)
 }
 
 // -------------------------------------------------------------------

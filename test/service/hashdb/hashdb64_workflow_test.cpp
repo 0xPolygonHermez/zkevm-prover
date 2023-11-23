@@ -55,7 +55,7 @@ uint64_t HashDB64WorkflowTest (const Config& config)
     zklog.info("HashDB64WorkflowTest() started");
     Goldilocks fr;
     PoseidonGoldilocks poseidon;
-    //uint64_t tx = 0;
+    uint64_t block = 0;
     zkresult zkr;
     Persistence persistence = PERSISTENCE_DATABASE;
     HashDBInterface* pHashDB = HashDBClientFactory::createHashDBClient(fr, config);
@@ -115,7 +115,7 @@ uint64_t HashDB64WorkflowTest (const Config& config)
                 value++;
                 
                 gettimeofday(&t, NULL);
-                zkr = pHashDB->set(batchUUID, tx, root, key, value, persistence, newRoot, &setResult, NULL);
+                zkr = pHashDB->set(batchUUID, block, tx, root, key, value, persistence, newRoot, &setResult, NULL);
                 timeMetricStorage.add("set", TimeDiff(t));
 
                 //zklog.info("SET zkr=" + zkresult2string(zkr) + " root=" + fea2string(fr, root) + " key=" + fea2string(fr, key) + " value=" + value.get_str() + " newRoot=" + fea2string(fr, newRoot));
@@ -170,7 +170,7 @@ uint64_t HashDB64WorkflowTest (const Config& config)
                 poseidon.hash(key, keyfea);
                 string keyString = fea2string(fr, key);
 
-                zkr = pHashDB->setProgram(batchUUID, tx, key, accumulatedProgram, persistence);
+                zkr = pHashDB->setProgram(batchUUID, block, tx, key, accumulatedProgram, persistence);
                 zkassertpermanent(zkr == ZKR_SUCCESS);
 
                 if (batchIsDiscarded(batch))

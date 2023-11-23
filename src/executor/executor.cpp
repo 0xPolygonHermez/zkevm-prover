@@ -115,12 +115,14 @@ void Executor::process_batch (ProverRequest &proverRequest)
         }
         case 4: // fork_4
         {
+#ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
             if (config.useMainExecGenerated)
             {
                 //zklog.info("Executor::process_batch() fork 4 generated");
                 fork_4::main_exec_generated_fast(mainExecutor_fork_4, proverRequest);
             }
             else
+#endif
             {
                 //zklog.info("Executor::process_batch() fork 4 native");
 
@@ -150,11 +152,13 @@ void Executor::process_batch (ProverRequest &proverRequest)
                 //zklog.info("Executor::process_batch() fork 5 C");
                 mainExecutorC_fork_5.execute(proverRequest);
             }
+#ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
             else if (config.useMainExecGenerated)
             {
                 //zklog.info("Executor::process_batch() fork 5 generated");
                 fork_5::main_exec_generated_fast(mainExecutor_fork_5, proverRequest);
             }
+#endif
             else
             {
                 //zklog.info("Executor::process_batch() fork 5 native");
@@ -185,11 +189,13 @@ void Executor::process_batch (ProverRequest &proverRequest)
                 //zklog.info("Executor::process_batch() fork 6 C");
                 mainExecutorC_fork_6.execute(proverRequest);
             }
+#ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
             else if (config.useMainExecGenerated)
             {
                 //zklog.info("Executor::process_batch() fork 6 generated");
                 fork_6::main_exec_generated_fast(mainExecutor_fork_6, proverRequest);
             }
+#endif
             else
             {
                 //zklog.info("Executor::process_batch() fork 6 native");
@@ -220,12 +226,14 @@ void Executor::process_batch (ProverRequest &proverRequest)
                 //zklog.info("Executor::process_batch() fork 7 C");
                 mainExecutorC_fork_7.execute(proverRequest);
             }
+#ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
             else if (config.useMainExecGenerated)
             {
                 //zklog.info("Executor::process_batch() fork 7 generated");
                 fork_7::main_exec_generated_fast(mainExecutor_fork_7, proverRequest);
             }
             else
+#endif
             {
                 //zklog.info("Executor::process_batch() fork 7 native");
 
@@ -408,11 +416,13 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         TimerStart(MAIN_EXECUTOR_EXECUTE);
         if (proverRequest.input.publicInputsExtended.publicInputs.forkID == PROVER_FORK_ID)
         {
+#ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
             if (config.useMainExecGenerated)
             {
                 PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor_fork_7, proverRequest, commitPols.Main, required);
             }
             else
+#endif
             {
                 mainExecutor_fork_7.execute(proverRequest, commitPols.Main, required);
             }
@@ -523,11 +533,13 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
 
         // Execute the Main State Machine
         TimerStart(MAIN_EXECUTOR_EXECUTE);
+#ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
         if (config.useMainExecGenerated)
         {
             PROVER_FORK_NAMESPACE::main_exec_generated(mainExecutor_fork_7, proverRequest, commitPols.Main, required);
         }
         else
+#endif
         {
             mainExecutor_fork_7.execute(proverRequest, commitPols.Main, required);
         }

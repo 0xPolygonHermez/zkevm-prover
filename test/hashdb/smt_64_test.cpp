@@ -188,7 +188,7 @@ uint64_t Smt64Test (const Config &config)
         {
             for (uint64_t j=0; j<SMT64_TEST_KEYS_PER_WRITE; j++)
             {
-                zkr = pHashDB->set("", 0, root, keyValues[i][j].key, keyValues[i][j].value, PERSISTENCE_DATABASE, root, NULL, NULL);
+                zkr = pHashDB->set("", 0, 0, root, keyValues[i][j].key, keyValues[i][j].value, PERSISTENCE_DATABASE, root, NULL, NULL);
                 if (zkr != ZKR_SUCCESS)
                 {
                     zklog.error("Smt64Test() failed calling pHashDB->set() result=" + zkresult2string(zkr));

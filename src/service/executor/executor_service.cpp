@@ -358,15 +358,19 @@ using grpc::Status;
                     keyString = NormalizeToNFormat(keyString, 64);
 
                     // Get a valid value
-                    string valueBa = itState->second;
-                    if (valueBa.size() > 32)
+                    string valueString = Remove0xIfPresent(itState->second);
+                    if (valueString.size() > 64)
                     {
-                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override value too long, size=" + to_string(valueBa.size()), &proverRequest.tags);
+                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override value too long, size=" + to_string(valueString.size()), &proverRequest.tags);
                         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
                         return Status::OK;
                     }
-                    string valueString;
-                    ba2string(valueBa, valueString);
+                    if (!stringIsHex(valueString))
+                    {
+                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override value not hex, value=" + valueString, &proverRequest.tags);
+                        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
+                        return Status::OK;
+                    }
                     mpz_class valueScalar;
                     valueScalar.set_str(valueString, 16);
 
@@ -398,15 +402,19 @@ using grpc::Status;
                     keyString = NormalizeToNFormat(keyString, 64);
 
                     // Get a valid value
-                    string valueBa = itState->second;
-                    if (valueBa.size() > 32)
+                    string valueString = Remove0xIfPresent(itState->second);
+                    if (valueString.size() > 64)
                     {
-                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override value too long, size=" + to_string(valueBa.size()), &proverRequest.tags);
+                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override value too long, size=" + to_string(valueString.size()), &proverRequest.tags);
                         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
                         return Status::OK;
                     }
-                    string valueString;
-                    ba2string(valueBa, valueString);
+                    if (!stringIsHex(valueString))
+                    {
+                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override value not hex, value=" + valueString, &proverRequest.tags);
+                        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
+                        return Status::OK;
+                    }
                     mpz_class valueScalar;
                     valueScalar.set_str(valueString, 16);
 
@@ -1143,15 +1151,19 @@ using grpc::Status;
                     keyString = NormalizeToNFormat(keyString, 64);
 
                     // Get a valid value
-                    string valueBa = itState->second;
-                    if (valueBa.size() > 32)
+                    string valueString = Remove0xIfPresent(itState->second);
+                    if (valueString.size() > 64)
                     {
-                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override value too long, size=" + to_string(valueBa.size()), &proverRequest.tags);
+                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override value too long, size=" + to_string(valueString.size()), &proverRequest.tags);
                         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
                         return Status::OK;
                     }
-                    string valueString;
-                    ba2string(valueBa, valueString);
+                    if (!stringIsHex(valueString))
+                    {
+                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override value not hex, value=" + valueString, &proverRequest.tags);
+                        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
+                        return Status::OK;
+                    }
                     mpz_class valueScalar;
                     valueScalar.set_str(valueString, 16);
 
@@ -1183,15 +1195,19 @@ using grpc::Status;
                     keyString = NormalizeToNFormat(keyString, 64);
 
                     // Get a valid value
-                    string valueBa = itState->second;
-                    if (valueBa.size() > 32)
+                    string valueString = Remove0xIfPresent(itState->second);
+                    if (valueString.size() > 64)
                     {
-                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override value too long, size=" + to_string(valueBa.size()), &proverRequest.tags);
+                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override value too long, size=" + to_string(valueString.size()), &proverRequest.tags);
                         response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
                         return Status::OK;
                     }
-                    string valueString;
-                    ba2string(valueBa, valueString);
+                    if (!stringIsHex(valueString))
+                    {
+                        zklog.error("ExecutorServiceImpl::ProcessBatch() got state override value not hex, value=" + valueString, &proverRequest.tags);
+                        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_DB_VALUE);
+                        return Status::OK;
+                    }
                     mpz_class valueScalar;
                     valueScalar.set_str(valueString, 16);
 
@@ -1256,6 +1272,7 @@ using grpc::Status;
     response->set_cnt_mem_aligns(proverRequest.counters.memAlign);
     response->set_cnt_arithmetics(proverRequest.counters.arith);
     response->set_cnt_binaries(proverRequest.counters.binary);
+    response->set_cnt_sha256_hashes(proverRequest.counters.sha256F);
     response->set_cnt_steps(proverRequest.counters.steps);
     response->set_new_state_root(string2ba(proverRequest.pFullTracer->get_new_state_root()));
     response->set_new_acc_input_hash(string2ba(proverRequest.pFullTracer->get_new_acc_input_hash()));
@@ -1445,6 +1462,7 @@ using grpc::Status;
             " counters.memAlign=" + to_string(proverRequest.counters.memAlign) +
             " counters.arith=" + to_string(proverRequest.counters.arith) +
             " counters.binary=" + to_string(proverRequest.counters.binary) +
+            " counters.sha256F=" + to_string(proverRequest.counters.sha256F) +
             " flush_id=" + to_string(proverRequest.flushId) +
             " last_sent_flush_id=" + to_string(proverRequest.lastSentFlushId) +
             " nBlocks=" + to_string(block_responses.size()) +
@@ -1691,6 +1709,7 @@ using grpc::Status;
     if (errorString == "OOCA"                             ) return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_ARITH;
     if (errorString == "OOCPA"                            ) return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_PADDING;
     if (errorString == "OOCPO"                            ) return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_POSEIDON;
+    if (errorString == "OOCSH"                            ) return ::executor::v1::ROM_ERROR_OUT_OF_COUNTERS_SHA;
     if (errorString == "intrinsic_invalid_signature"      ) return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_SIGNATURE;
     if (errorString == "intrinsic_invalid_chain_id"       ) return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_CHAIN_ID;
     if (errorString == "intrinsic_invalid_nonce"          ) return ::executor::v1::ROM_ERROR_INTRINSIC_INVALID_NONCE;
@@ -1707,6 +1726,9 @@ using grpc::Status;
     if (errorString == "invalidCodeSize"                  ) return ::executor::v1::ROM_ERROR_MAX_CODE_SIZE_EXCEEDED;
     if (errorString == "invalidCodeStartsEF"              ) return ::executor::v1::ROM_ERROR_INVALID_BYTECODE_STARTS_EF;
     if (errorString == "invalid_fork_id"                  ) return ::executor::v1::ROM_ERROR_UNSUPPORTED_FORK_ID;
+    if (errorString == "invalid_change_l2_block"          ) return ::executor::v1::ROM_ERROR_INVALID_TX_CHANGE_L2_BLOCK;
+    if (errorString == "invalidDecodeChangeL2Block"       ) return ::executor::v1::ROM_ERROR_INVALID_DECODE_CHANGE_L2_BLOCK;
+    if (errorString == "invalidNotFirstTxChangeL2Block"   ) return ::executor::v1::ROM_ERROR_INVALID_NOT_FIRST_TX_CHANGE_L2_BLOCK;
     if (errorString == ""                                 ) return ::executor::v1::ROM_ERROR_NO_ERROR;
     zklog.error("ExecutorServiceImpl::string2error() found invalid error string=" + errorString);
     exitProcess();

@@ -142,9 +142,13 @@ public:
     {
         return full_trace;
     }
-    uint64_t get_tx_number(void)
+    uint64_t get_block_number(void)
     {
         return finalTrace.responses.size();
+    }
+    uint64_t get_tx_number(void)
+    {
+        return 0;
     }
 };
 

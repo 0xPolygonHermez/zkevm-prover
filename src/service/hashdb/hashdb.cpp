@@ -49,7 +49,7 @@ zkresult HashDB::getLatestStateRoot (Goldilocks::Element (&stateRoot)[4])
     }
     return zkr;
 }
-zkresult HashDB::set (const string &batchUUID, uint64_t tx, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, Goldilocks::Element (&newRoot)[4], SmtSetResult *result, DatabaseMap *dbReadLog)
+zkresult HashDB::set (const string &batchUUID, uint64_t block, uint64_t tx, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, Goldilocks::Element (&newRoot)[4], SmtSetResult *result, DatabaseMap *dbReadLog)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB
     gettimeofday(&t, NULL);
@@ -71,7 +71,7 @@ zkresult HashDB::set (const string &batchUUID, uint64_t tx, const Goldilocks::El
     }
     else
     {
-        zkr = smt.set(batchUUID, tx, db, oldRoot, key, value, persistence, *r, dbReadLog);
+        zkr = smt.set(batchUUID, block, tx, db, oldRoot, key, value, persistence, *r, dbReadLog);
     }
     for (int i = 0; i < 4; i++) newRoot[i] = r->newRoot[i];
 
@@ -120,7 +120,7 @@ zkresult HashDB::get (const string &batchUUID, const Goldilocks::Element (&root)
     return zkr;
 }
 
-zkresult HashDB::setProgram (const string &batchUUID, uint64_t tx, const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const Persistence persistence)
+zkresult HashDB::setProgram (const string &batchUUID, uint64_t block, uint64_t tx, const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const Persistence persistence)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB
     gettimeofday(&t, NULL);
@@ -710,7 +710,7 @@ void HashDB::hashSave(const Goldilocks::Element (&a)[8], const Goldilocks::Eleme
     }
     else
     {
-        SmtContext ctx(db, false, "", 0, persistence);
+        SmtContext ctx(db, false, "", 0, 0, persistence);
         smt.hashSave(ctx, a, c, hash);
     }
 

@@ -52,7 +52,7 @@ zkresult HashDBRemote::getLatestStateRoot (Goldilocks::Element (&stateRoot)[4]){
 
 }
 
-zkresult HashDBRemote::set (const string &batchUUID, uint64_t tx, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, Goldilocks::Element (&newRoot)[4], SmtSetResult *result, DatabaseMap *dbReadLog)
+zkresult HashDBRemote::set (const string &batchUUID, uint64_t block, uint64_t tx, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, Goldilocks::Element (&newRoot)[4], SmtSetResult *result, DatabaseMap *dbReadLog)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
     gettimeofday(&t, NULL);
@@ -75,7 +75,8 @@ zkresult HashDBRemote::set (const string &batchUUID, uint64_t tx, const Goldiloc
     request.set_details(result != NULL);
     request.set_get_db_read_log((dbReadLog != NULL));
     request.set_batch_uuid(batchUUID);
-    request.set_tx(tx);
+    request.set_tx_index(tx);
+    request.set_block_index(block);
 
     grpc::Status s = stub->Set(&context, request, &response);
     if (s.error_code() != grpc::StatusCode::OK)
@@ -199,7 +200,7 @@ zkresult HashDBRemote::get (const string &batchUUID, const Goldilocks::Element (
     return static_cast<zkresult>(response.result().code());
 }
 
-zkresult HashDBRemote::setProgram (const string &batchUUID, uint64_t tx, const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const Persistence persistence)
+zkresult HashDBRemote::setProgram (const string &batchUUID, uint64_t block, uint64_t tx, const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const Persistence persistence)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
     gettimeofday(&t, NULL);
@@ -222,7 +223,8 @@ zkresult HashDBRemote::setProgram (const string &batchUUID, uint64_t tx, const G
 
     request.set_persistence((hashdb::v1::Persistence)persistence);
     request.set_batch_uuid(batchUUID);
-    request.set_tx(tx);
+    request.set_tx_index(tx);
+    request.set_block_index(block);
 
     grpc::Status s = stub->SetProgram(&context, request, &response);
     if (s.error_code() != grpc::StatusCode::OK)

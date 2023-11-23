@@ -670,6 +670,8 @@ zkresult FullTracer::onStoreLog (ContextC &ctxc)
 // Triggered when a change L2 block transaction is detected
 zkresult FullTracer::onStartBlock (Context &ctx)
 {
+    zklog.info("FullTracer::onStartBlock()");
+
     // If it's not the frist change L2 block transaction, we must finish previous block
     if (!currentBlock.parent_hash.empty())
     {
@@ -710,6 +712,8 @@ zkresult FullTracer::onStartBlock (Context &ctx)
  */
 zkresult FullTracer::onFinishBlock (Context &ctx)
 {
+    zklog.info("FullTracer::onFinishBlock()");
+
     mpz_class auxScalar;
     zkresult zkr;
 
