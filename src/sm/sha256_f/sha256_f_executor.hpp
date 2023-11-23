@@ -45,7 +45,7 @@ public:
         N(PROVER_FORK_NAMESPACE::PaddingSha256BitCommitPols::pilDegree()),
         slotSize(31487),
         bitsPerElement(6),
-        nSlots(bitsPerElement*((N-1)/slotSize))
+        nSlots((N-1)/slotSize)
     {
         bLoaded = false;
 

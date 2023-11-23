@@ -23,18 +23,18 @@ uint64_t string2pinSha (string s)
     if (s=="in3") return 2;
     if (s=="out") return 3;
 
-    zklog.error("string2pin() got an invalid pin id string=" + s);
+    zklog.error("string2pinSha() got an invalid pin id string=" + s);
     exitProcess();
     return 0;
 }
 
 TypeSha256Gate string2typeSha (string s)
 {
-    if (s=="wire") return TypeSha256Gate::type_wired;
+    if (s=="wired") return TypeSha256Gate::type_wired;
     if (s=="input") return TypeSha256Gate::type_input;
     if (s=="inputState") return TypeSha256Gate::type_inputState;
 
-    zklog.error("string2pin() got an invalid pin id string=" + s);
+    zklog.error("string2typeSha() got an invalid type id string=" + s);
     exitProcess();
     return TypeSha256Gate::type_unknown;
 }
@@ -72,11 +72,7 @@ void Sha256FExecutor::loadScript(json j)
         if (!j["program"][i].contains("in1") ||
             !j["program"][i]["in1"].is_object() ||
             !j["program"][i]["in1"].contains("type") ||
-            !j["program"][i]["in1"]["type"].is_string() ||
-            !j["program"][i]["in1"].contains("bit") ||
-            !j["program"][i]["in1"]["bit"].is_number_unsigned() ||
-            !j["program"][i]["in1"].contains("wire") ||
-            !j["program"][i]["in1"]["wire"].is_number_unsigned())
+            !j["program"][i]["in1"]["type"].is_string())
         {
             zklog.error("Sha256FExecutor::loadEvals() found JSON array's element does not contain a valid in1 object as field");
             exitProcess();
@@ -85,31 +81,19 @@ void Sha256FExecutor::loadScript(json j)
         //check in2 object
         if (!j["program"][i].contains("in2") ||
             !j["program"][i]["in2"].is_object() ||
-            !j["program"][i]["in2"].contains("type") ||
-            !j["program"][i]["in2"]["type"].is_string() ||
-            !j["program"][i]["in2"].contains("bit") ||
-            !j["program"][i]["in2"]["bit"].is_number_unsigned() ||
-            !j["program"][i]["in2"].contains("wire") ||
-            !j["program"][i]["in2"]["wire"].is_number_unsigned())
+            !j["program"][i]["in2"].contains("type"))
         {
             zklog.error("Sha256FExecutor::loadEvals() found JSON array's element does not contain a valid in2 object as field");
             exitProcess();
         }
-        
         //check in3 object
-        if (!j["program"][i].contains("in3") ||
-            !j["program"][i]["in3"].is_object() ||
-            !j["program"][i]["in3"].contains("type") ||
-            !j["program"][i]["in3"]["type"].is_string() ||
-            !j["program"][i]["in3"].contains("pin") ||
-            !j["program"][i]["in3"]["pin"].is_string() ||
-            !j["program"][i]["in3"].contains("wire") ||
-            !j["program"][i]["in3"]["wire"].is_number_unsigned() ||
-            !j["program"][i]["in3"].contains("gate") ||
-            !j["program"][i]["in3"]["gate"].is_number_unsigned())
-        {
-            zklog.error("Sha256FExecutor::loadEvals() found JSON array's element does not contain a valid in3 object as field");
-            exitProcess();
+        if(j["program"][i].contains("in3")){
+            if (!j["program"][i]["in3"].is_object() ||
+                !j["program"][i]["in3"].contains("type"))
+            {
+                zklog.error("Sha256FExecutor::loadEvals() found JSON array's element does not contain a valid in3 object as field");
+                exitProcess();
+            }
         }
         
         Sha256Instruction instruction;
@@ -127,7 +111,7 @@ void Sha256FExecutor::loadScript(json j)
         {
             instruction.op = gop_maj;
         }
-        else if (j["pragam"][i]["op"] == "add")
+        else if (j["program"][i]["op"] == "add")
         {
             instruction.op = gop_add;
         }
@@ -139,24 +123,21 @@ void Sha256FExecutor::loadScript(json j)
         }
         instruction.ref = j["program"][i]["ref"];
 
-        
         // Get input in1 pin data
         instruction.type[0] = string2typeSha(j["program"][i]["in1"]["type"]);
-        instruction.bit[0] = j["program"][i]["in1"]["bit"];
+        if(j["program"][i]["in1"].contains("bit")) instruction.bit[0] = j["program"][i]["in1"]["bit"];
 
         // Get input in2 pin data
-        instruction.type[0] = string2typeSha(j["program"][i]["in1"]["type"]);
-        instruction.bit[0] = j["program"][i]["in1"]["bit"];
+        instruction.type[1] = string2typeSha(j["program"][i]["in2"]["type"]);
+        if(j["program"][i]["in2"].contains("bit")) instruction.bit[1] = j["program"][i]["in2"]["bit"];
 
         // Get input in3 pin data
-        instruction.type[0] = string2typeSha(j["program"][i]["in1"]["type"]);
-        instruction.bit[0] = j["program"][i]["in1"]["bit"];
-        instruction.gate[0] = j["program"][i]["in1"]["gate"];
-    
+        if(j["program"][i].contains("in3")){
+            instruction.type[2] = string2typeSha(j["program"][i]["in3"]["type"]);
+            if(j["program"][i]["in3"].contains("gate"))instruction.gate[2] = j["program"][i]["in3"]["gate"];
+        }
         program.push_back(instruction);
     }
-
-    zkassert(j["maxRef"] == SHA256GateConfig.slotSize);
 
     bLoaded = true;
 }
