@@ -317,6 +317,10 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
         if (l["hashP1"].is_number_integer()) line[i].hashP1 = l["hashP1"]; else line[i].hashP1 = 0;
         if (l["hashPLen"].is_number_integer()) line[i].hashPLen = l["hashPLen"]; else line[i].hashPLen = 0;
         if (l["hashPDigest"].is_number_integer()) line[i].hashPDigest = l["hashPDigest"]; else line[i].hashPDigest = 0;
+        if (l["hashS"].is_number_integer()) line[i].hashS = l["hashS"]; else line[i].hashS = 0;
+        if (l["hashS1"].is_number_integer()) line[i].hashS1 = l["hashS1"]; else line[i].hashS1 = 0;
+        if (l["hashSLen"].is_number_integer()) line[i].hashSLen = l["hashSLen"]; else line[i].hashSLen = 0;
+        if (l["hashSDigest"].is_number_integer()) line[i].hashSDigest = l["hashSDigest"]; else line[i].hashSDigest = 0;
 
         if (l["JMP"].is_number_integer()) line[i].JMP = l["JMP"]; else line[i].JMP = 0;
         if (l["JMPC"].is_number_integer()) line[i].JMPC = l["JMPC"]; else line[i].JMPC = 0;
