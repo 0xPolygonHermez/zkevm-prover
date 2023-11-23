@@ -273,6 +273,15 @@ bool stringIsHex (const string &s)
     return true;
 }
 
+bool stringIsDec (const string &s)
+{
+    for (uint64_t i=0; i<s.size(); i++)
+    {
+        if (!charIsDec(s.at(i))) return false;
+    }
+    return true;
+}
+
 bool stringIs0xHex (const string &s)
 {
     if (s.size() < 2)
