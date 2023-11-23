@@ -284,6 +284,16 @@ bool ExecutorClient::ProcessBatch (void)
         }
     }
 
+    if (input.publicInputsExtended.newStateRoot != 0)
+    {
+        mpz_class newStateRootScalar;
+        newStateRootScalar.set_str(Remove0xIfPresent(newStateRoot), 16);
+        if (input.publicInputsExtended.newStateRoot != newStateRootScalar)
+        {
+            zklog.error("ExecutorClient::ProcessBatch() returned newStateRoot=" + newStateRoot + " != input.publicInputsExtended.newStateRoot=" + input.publicInputsExtended.newStateRoot.get_str(16));
+        }
+    }
+
     if (config.executorClientCheckNewStateRoot)
     {
         if (config.hashDB64)

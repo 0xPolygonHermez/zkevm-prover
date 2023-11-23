@@ -1297,6 +1297,26 @@ using grpc::Status;
         pProcessBlockResponse->set_parent_hash(string2ba(block_responses[block].parent_hash));
         pProcessBlockResponse->set_timestamp(block_responses[block].timestamp);
 
+        for (uint64_t log=0; log<block_responses[block].logs.size(); log++)
+        {
+            executor::v1::LogV2 * pLog = pProcessBlockResponse->add_logs();
+            pLog->set_address(block_responses[block].logs[log].address); // Address of the contract that generated the event
+            for (uint64_t topic=0; topic<block_responses[block].logs[log].topics.size(); topic++)
+            {
+                std::string * pTopic = pLog->add_topics();
+                *pTopic = string2ba(block_responses[block].logs[log].topics[topic]); // List of topics provided by the contract
+            }
+            string dataConcatenated;
+            for (uint64_t data=0; data<block_responses[block].logs[log].data.size(); data++)
+                dataConcatenated += block_responses[block].logs[log].data[data];
+            pLog->set_data(string2ba(dataConcatenated)); // Supplied by the contract, usually ABI-encoded
+            //pLog->set_batch_number(block_responses[tblockx].logs[log].batch_number); // Batch in which the transaction was included
+            pLog->set_tx_hash(string2ba(block_responses[block].logs[log].tx_hash)); // Hash of the transaction
+            pLog->set_tx_index(block_responses[block].logs[log].tx_index); // Index of the transaction in the block
+            //pLog->set_batch_hash(string2ba(block_responses[block].logs[log].batch_hash)); // Hash of the batch in which the transaction was included
+            pLog->set_index(block_responses[block].logs[log].index); // Index of the log in the block
+        }
+
         vector<ResponseV2> &responses = block_responses[block].responses;
         nTxs += responses.size();
 
