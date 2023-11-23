@@ -37,7 +37,7 @@ public:
     vector<PaddingSha256ExecutorInput> PaddingSha256;
     vector<PaddingSha256BitExecutorInput> PaddingSha256Bit;
     vector<Bits2FieldSha256ExecutorInput> Bits2FieldSha256;
-    vector<vector<Goldilocks::Element>> Sha256F;
+    vector<Sha256FExecutorInput> Sha256F;
     vector<PaddingPGExecutorInput> PaddingPG;
     vector<array<Goldilocks::Element, 17>> PoseidonG; // The 17th fe is the permutation
     vector<MemAlignAction> MemAlign;

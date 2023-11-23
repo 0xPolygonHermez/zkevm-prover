@@ -36,8 +36,8 @@ uint64_t PaddingSha256Executor::prepareInput (vector<PaddingSha256ExecutorInput>
         SHA256(input[i].dataBytes.data(), input[i].dataBytes.size(), input[i].hash);
 
         input[i].realLen = input[i].dataBytes.size();
-        if(input[i].realLen > 1ULL<<30){
-            zklog.error("PaddingSha256Executor::prepareInput() detected at entry i=" + to_string(i) + " a data string length=" + to_string(input[i].realLen) + " > 2^30");
+        if(input[i].realLen > 1ULL<<29){
+            zklog.error("PaddingSha256Executor::prepareInput() detected at entry i=" + to_string(i) + " a data string length=" + to_string(input[i].realLen) + " > 2^29");
             exitProcess();
         }
 
@@ -47,7 +47,7 @@ uint64_t PaddingSha256Executor::prepareInput (vector<PaddingSha256ExecutorInput>
         for(uint64_t j=0; j<4; j++) input[i].dataBytes.push_back(0);
 
         uint64_t bitLen = input[i].realLen*8;
-        for(uint64_t e=3; e>=0; e--)
+        for(int64_t e=3; e>=0; e--)
         {
             input[i].dataBytes.push_back(bitLen >> (8*e) && 0xFF);
         }
@@ -62,8 +62,9 @@ void PaddingSha256Executor::execute (vector<PaddingSha256ExecutorInput> &input, 
 {
     uint64_t totalInputBytes = prepareInput(input);
 
-    // Check input size
-    if (totalInputBytes > (bitsPerElement*bytesPerBlock*(N/blockSize)))
+    // Check input size: totalInputBytes/bitsPerElement <= bytesPerBlock* maxBlocks; maxBlocks=N/blockSize
+    //                   this condition depends on all the SM used to evaluated the Sha256 hash
+    if (totalInputBytes * blockSize > bitsPerElement*bytesPerBlock*N)
     {
         zklog.error("PaddingKKExecutor::execute() Too many entries input.size()=" + to_string(input.size()) + " totalInputBytes=" + to_string(totalInputBytes) + " > bitsPerElement*bytesPerBlock*(N/blockSize)=" + to_string(bitsPerElement*bytesPerBlock*(N/blockSize)));
         exitProcess();
@@ -71,17 +72,10 @@ void PaddingSha256Executor::execute (vector<PaddingSha256ExecutorInput> &input, 
 
     uint64_t p = 0;
     uint64_t pDone = 0;
-
     uint64_t addr = 0;
 
     CommitPol crF[8] = { pols.crF0, pols.crF1, pols.crF2, pols.crF3, pols.crF4, pols.crF5, pols.crF6, pols.crF7 };
-
     CommitPol crV[8] = { pols.crV0, pols.crV1, pols.crV2, pols.crV3, pols.crV4, pols.crV5, pols.crV6, pols.crV7 };
-
-    /*for (uint64_t k=0; k<8; k++) // polynomials already initialized to 0
-    {
-        crV[k][p] = 0;
-    }*/
 
     for (uint64_t i=0; i<input.size(); i++)
     {
@@ -99,16 +93,16 @@ void PaddingSha256Executor::execute (vector<PaddingSha256ExecutorInput> &input, 
             pols.rem[p] = fr.sub(fr.fromU64(input[i].realLen), fr.fromU64(j)); 
             if (!fr.isZero(pols.rem[p])) pols.remInv[p] = glp.inv(pols.rem[p]);
             
-            if (fr.toS64(pols.rem[p]) < 0) pols.spare[p] = fr.one(); // padding bytes if rem == 0 or spare == 1
+            if (j > input[i].realLen) pols.spare[p] = fr.one(); // padding bytes will meet condition: rem == 0 or spare == 1
             pols.incCounter[p] = fr.fromU64((j / bytesPerBlock) +1);
 
             uint64_t s=input[i].dataBytes.size()-1-j;
             if(s < 8) pols.lengthSection[p] = fr.one();
-            if(s < 4) pols.accLength[p] = fr.fromU64((input[i].realLen<<3)&&(0xFFFFFFFF<<(s*8))); //check
+            if(s < 4) pols.accLength[p] = fr.fromU64((input[i].realLen<<3)&&(0xFFFFFFFF<<(s*8)));
 
-            bool lastBlock = (p % bytesPerBlock) == (bytesPerBlock - 1);
-            bool lastHash = lastBlock && ((!fr.isZero(pols.spare[p])) || fr.isZero(pols.rem[p]));
-            if (lastHash)
+            bool lastBlockLatch = (p % bytesPerBlock) == (bytesPerBlock - 1);
+            bool lastHashLatch = lastBlockLatch && ((!fr.isZero(pols.spare[p])) || fr.isZero(pols.rem[p]));
+            if (lastHashLatch)
             {
                 if (input[i].lenCalled)
                 {

@@ -15,28 +15,25 @@ USING_PROVER_FORK_NAMESPACE;
 
 using namespace std;
 
-class Sha256FExecuteInput
+class Sha256FExecutorInput
 {
 public:
-    uint8_t Sin[54][9][1600];
-    Sha256FExecuteInput ()
-    {
-        memset(Sin, 0, sizeof(Sin));
-    }
+    vector<Goldilocks::Element> stIn;
+    vector<Goldilocks::Element> rIn;
+
+    /* Constructor */
+    Sha256FExecutorInput() {};
 };
 
-class Sha256FExecuteOutput
-{
-public:
-    uint64_t pol[3][1<<23];
-};
 
 class Sha256FExecutor
 {
     Goldilocks &fr;
     const Config &config;
     const uint64_t N;
-    const uint64_t numberOfSlots;
+    const uint64_t slotSize;
+    const uint64_t bitsPerElement;
+    const uint64_t nSlots;
     vector<Sha256Instruction> program;
     bool bLoaded;
 public:
@@ -45,36 +42,30 @@ public:
     Sha256FExecutor (Goldilocks &fr, const Config &config) :
         fr(fr),
         config(config),
-        N(PROVER_FORK_NAMESPACE::KeccakFCommitPols::pilDegree()),
-        numberOfSlots((N-1)/SHA256GateConfig.slotSize)
+        N(PROVER_FORK_NAMESPACE::PaddingSha256BitCommitPols::pilDegree()),
+        slotSize(31487),
+        bitsPerElement(6),
+        nSlots((N-1)/slotSize)
     {
         bLoaded = false;
 
         // Avoid initialization if we are not going to generate any proof
-        if (!config.generateProof() && !config.runFileExecute &&!config.runKeccakTest) return;
+        if (!config.generateProof() && !config.runFileExecute) return;
 
-        TimerStart(KECCAK_F_SM_EXECUTOR_LOAD);
+        TimerStart(SHA256_F_SM_EXECUTOR_LOAD);
         json j;
-        file2json(config.keccakScriptFile, j);
+        file2json(config.sha256ScriptFile, j);
         loadScript(j);
-        TimerStopAndLog(KECCAK_F_SM_EXECUTOR_LOAD);
+        bLoaded = true;
+        TimerStopAndLog(SHA256_F_SM_EXECUTOR_LOAD);
     }
 
     /* Loads evaluations and SoutRefs from a json object */
     void loadScript (json j);
 
-    /* Executs Keccak-f() over the provided state */
-    void execute (GateState &S);
+    void execute (const vector<Sha256FExecutorInput> &input, PROVER_FORK_NAMESPACE::Sha256FCommitPols &pols);
 
-    /* Input is a vector of numberOfSlots*1600 fe, output is KeccakPols */
-    void execute (const vector<vector<Goldilocks::Element>> &input, PROVER_FORK_NAMESPACE::Sha256FCommitPols &pols);
-
-    void setPol (PROVER_FORK_NAMESPACE::CommitPol (&pol)[4], uint64_t index, uint64_t value);
-    uint64_t getPol (PROVER_FORK_NAMESPACE::CommitPol (&pol)[4], uint64_t index);
-
-    /* Calculates keccak hash of input data.  Output must be 32-bytes long. */
-    /* Internally, it calls execute(GateState) */
-    //void Keccak (const uint8_t * pInput, uint64_t inputSize, uint8_t * pOutput);
+private:
+    Goldilocks::Element getVal(const vector<Sha256FExecutorInput> &input, Sha256FCommitPols &pols, uint64_t block, uint64_t j, uint16_t i);
 };
-
 #endif

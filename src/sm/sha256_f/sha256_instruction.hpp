@@ -6,27 +6,33 @@
 
 using namespace std;
 
+enum TypeSha256Gate
+{
+    type_unknown = 0,
+    type_wired = 1,
+    type_input = 2,
+    type_inputState = 3
+};
+
 class Sha256Instruction
 {
 public:
-    GateOperation op;
 
-    // An instruction describes how a gate works: 
-    // refr.pinr = op(refa.pina,  refb.pinb)
-    // For example, if op=xor, then refr.pinr = refa.pina XOR refb.pinb
-    
-    uint64_t refa;
-    uint64_t refb;
-    uint64_t refr;
-    uint64_t pina;
-    uint64_t pinb;
+    GateOperation op;
+    uint64_t ref;
+
+    uint64_t pin[4];
+    TypeSha256Gate type[4];
+    uint64_t gate[4];
+    uint64_t bit[4];
+
     Sha256Instruction () {
         op = gop_xor;
-        refa = 0;
-        refb = 0;
-        refr = 0;
-        pina = 0;
-        pinb = 0;
+        ref = 0;
+        memset(pin, 0, sizeof(pin));
+        memset(type, 0, sizeof(type));
+        memset(gate, 0, sizeof(gate));
+        memset(bit, 0, sizeof(bit));
     }
 };
 
