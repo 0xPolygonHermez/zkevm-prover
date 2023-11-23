@@ -177,13 +177,39 @@ void Input::loadGlobals (json &input)
     if (publicInputsExtended.publicInputs.forkID >= 7)
     {
         // Input JSON file must contain a timestampLimit key at the root level
-        if ( !input.contains("timestampLimit") ||
-            !input["timestampLimit"].is_number_unsigned() )
+        if ( !input.contains("timestampLimit") )
         {
             zklog.error("Input::loadGlobals() timestampLimit key not found in input JSON file");
             exitProcess();
         }
-        publicInputsExtended.publicInputs.timestampLimit = input["timestampLimit"];
+        // Parse it based on its type
+        if ( input["timestampLimit"].is_number_unsigned() )
+        {
+            publicInputsExtended.publicInputs.timestampLimit = input["timestampLimit"];
+        }
+        else if ( input["timestampLimit"].is_string() )
+        {
+            string timestampLimitString = input["timestampLimit"];
+            if (!stringIsDec(timestampLimitString))
+            {
+                zklog.error("Input::loadGlobals() timestampLimit key found in input JSON file is not decimal value=" + timestampLimitString);
+                exitProcess();
+            }
+            mpz_class timestampLimitScalar;
+            timestampLimitScalar.set_str(timestampLimitString, 10);
+            if (timestampLimitScalar > ScalarMask64)
+            {
+                zklog.error("Input::loadGlobals() timestampLimit key found in input JSON file is too big value=" + timestampLimitString);
+                exitProcess();
+            }
+            publicInputsExtended.publicInputs.timestampLimit = timestampLimitScalar.get_ui();
+        }
+        else
+        {
+            zklog.error("Input::loadGlobals() timestampLimit invalid type");
+            exitProcess();
+        }
+
 #ifdef LOG_INPUT
         zklog.info("loadGlobals(): timestampLimit=" + to_string(publicInputsExtended.publicInputs.timestampLimit));
 #endif
