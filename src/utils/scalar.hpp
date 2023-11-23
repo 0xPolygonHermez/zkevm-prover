@@ -347,8 +347,18 @@ inline bool charIsHex (char c)
     return false;
 }
 
+// Check that a char is a decimal character
+inline bool charIsDec (char c)
+{
+    if ( (c >= '0') && (c <= '9') ) return true;
+    return false;
+}
+
 // Check that the string contains only hex characters
 bool stringIsHex (const string &s);
+
+// Check that the string contains only decimal characters
+bool stringIsDec (const string &s);
 
 // Check that the string contains only 0x + hex characters
 bool stringIs0xHex (const string &s);
