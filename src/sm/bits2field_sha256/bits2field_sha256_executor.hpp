@@ -39,7 +39,7 @@ public:
         fr(fr),
         slotSize(31487),
         N(Bits2FieldSha256CommitPols::pilDegree()),
-        bitsPerElement(6),
+        bitsPerElement(7),
         nSlots((N-1)/slotSize) {};
 
     /* Executor */
