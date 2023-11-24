@@ -146,6 +146,109 @@ void Input::loadGlobals (json &input)
 
     if (publicInputsExtended.publicInputs.forkID >= 7)
     {
+        // Input JSON file can contain a l1InfoTree key at the root level
+        if ( input.contains("l1InfoTree") &&
+             input["l1InfoTree"].is_object() )
+        {
+            if ( input["l1InfoTree"].contains("skipVerifyL1InfoRoot") &&
+                 input["l1InfoTree"]["skipVerifyL1InfoRoot"].is_boolean() )
+            {
+                bSkipVerifyL1InfoRoot = input["l1InfoTree"]["skipVerifyL1InfoRoot"];
+            }
+            json::iterator it;
+            for (it = input["l1InfoTree"].begin(); it != input["l1InfoTree"].end(); it++)
+            {
+                string key = it.key();
+                if (key == "skipVerifyL1InfoRoot")
+                {
+                    if (it.value().is_boolean())
+                    {
+                        bSkipVerifyL1InfoRoot = input["l1InfoTree"]["skipVerifyL1InfoRoot"];
+                    }
+                    else
+                    {
+                        zklog.error("Input::loadGlobals() l1InfoTree skipVerifyL1InfoRoot found in input JSON file but with invalid type");
+                        exitProcess();
+                    }
+                    continue;
+                }
+                
+                L1Data l1Data;
+
+                if (!stringIsDec(key))
+                {
+                    continue;
+                }
+                uint64_t index = atoi(key.c_str());
+
+                // Parse global exit root
+                if ( input["l1InfoTree"][key].contains("globalExitRoot") &&
+                     input["l1InfoTree"][key]["globalExitRoot"].is_string() )
+                {
+                    string globalExitRootString = input["l1InfoTree"][key]["globalExitRoot"];
+                    globalExitRootString = Remove0xIfPresent(globalExitRootString);
+                    if (!stringIsHex(globalExitRootString))
+                    {
+                        zklog.error("Input::loadGlobals() l1InfoTree globalExitRoot found in input JSON file but not an hex string");
+                        exitProcess();
+                    }
+                    if (globalExitRootString.size() > 64)
+                    {
+                        zklog.error("Input::loadGlobals() l1InfoTree globalExitRoot found in input JSON file is too long");
+                        exitProcess();
+                    }
+                    l1Data.globalExitRoot.set_str(globalExitRootString, 16);
+                }
+
+                // Parse block hash
+                if ( input["l1InfoTree"][key].contains("blockHash") &&
+                     input["l1InfoTree"][key]["blockHash"].is_string() )
+                {
+                    string blockHashString = input["l1InfoTree"][key]["blockHash"];
+                    blockHashString = Remove0xIfPresent(blockHashString);
+                    if (!stringIsHex(blockHashString))
+                    {
+                        zklog.error("Input::loadGlobals() l1InfoTree blockHash found in input JSON file but not an hex string");
+                        exitProcess();
+                    }
+                    if (blockHashString.size() > 64)
+                    {
+                        zklog.error("Input::loadGlobals() l1InfoTree blockHash found in input JSON file is too long");
+                        exitProcess();
+                    }
+                    l1Data.blockHashL1.set_str(blockHashString, 16);
+                }
+
+                // Parse timestamp
+                if ( input["l1InfoTree"][key].contains("timestamp") &&
+                     input["l1InfoTree"][key]["timestamp"].is_string() )
+                {
+                    string timestampString = input["l1InfoTree"][key]["timestamp"];
+                    if (!stringIsDec(timestampString))
+                    {
+                        zklog.error("Input::loadGlobals() l1InfoTree timestamp found in input JSON file but not a decimal string");
+                        exitProcess();
+                    }
+                    mpz_class timestampScalar;
+                    timestampScalar.set_str(timestampString, 10);
+                    if (timestampScalar > ScalarMask64)
+                    {
+                        zklog.error("Input::loadGlobals() l1InfoTree timestamp found in input JSON file is too big");
+                        exitProcess();
+                    }
+                    l1Data.minTimestamp = timestampScalar.get_ui();
+                }
+
+                l1InfoTreeData[index] = l1Data;
+            }
+        }
+#ifdef LOG_INPUT
+        zklog.info("Input::loadGlobals(): l1InfoTree.size=" + to_string(l1InfoTreeData.size()));
+#endif
+    }
+
+    if (publicInputsExtended.publicInputs.forkID >= 7)
+    {
         // Input JSON file must contain a forcedBlockHashL1 key at the root level
         if ( !input.contains("forcedBlockHashL1") ||
             !input["forcedBlockHashL1"].is_string() )
@@ -190,19 +293,37 @@ void Input::loadGlobals (json &input)
         else if ( input["timestampLimit"].is_string() )
         {
             string timestampLimitString = input["timestampLimit"];
-            if (!stringIsDec(timestampLimitString))
+            if (stringIsDec(timestampLimitString))
             {
-                zklog.error("Input::loadGlobals() timestampLimit key found in input JSON file is not decimal value=" + timestampLimitString);
-                exitProcess();
+                mpz_class timestampLimitScalar;
+                timestampLimitScalar.set_str(timestampLimitString, 10);
+                if (timestampLimitScalar > ScalarMask64)
+                {
+                    zklog.error("Input::loadGlobals() timestampLimit key found in input JSON file is too big value=" + timestampLimitString);
+                    exitProcess();
+                }
+                publicInputsExtended.publicInputs.timestampLimit = timestampLimitScalar.get_ui();
             }
-            mpz_class timestampLimitScalar;
-            timestampLimitScalar.set_str(timestampLimitString, 10);
-            if (timestampLimitScalar > ScalarMask64)
+            else
             {
-                zklog.error("Input::loadGlobals() timestampLimit key found in input JSON file is too big value=" + timestampLimitString);
-                exitProcess();
+                timestampLimitString = Remove0xIfPresent(timestampLimitString);
+                if (stringIsHex(timestampLimitString))
+                {
+                    mpz_class timestampLimitScalar;
+                    timestampLimitScalar.set_str(timestampLimitString, 16);
+                    if (timestampLimitScalar > ScalarMask64)
+                    {
+                        zklog.error("Input::loadGlobals() timestampLimit key found in input JSON file is too big value=" + timestampLimitString);
+                        exitProcess();
+                    }
+                    publicInputsExtended.publicInputs.timestampLimit = timestampLimitScalar.get_ui();
+                }
+                else
+                {
+                    zklog.error("Input::loadGlobals() timestampLimit key found in input JSON file is not decimal nor hexa value=" + timestampLimitString);
+                    exitProcess();
+                }
             }
-            publicInputsExtended.publicInputs.timestampLimit = timestampLimitScalar.get_ui();
         }
         else
         {

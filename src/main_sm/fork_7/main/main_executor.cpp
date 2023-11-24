@@ -3289,7 +3289,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             }
             ctx.hashS[addr].digestCalled = true;
 
-            incCounter = ceil((double(hashSIterator->second.data.size()) + double(1)) / double(136));
+            incCounter = ceil((double(hashSIterator->second.data.size()) + double(1)) / double(64));
 
 #ifdef LOG_HASHS
             zklog.info("hashSDigest 2 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr) + " digest=" + ctx.hashS[addr].digest.get_str(16));
@@ -3447,25 +3447,25 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 // EQ5:  x1 * x2 - y1 * y2 = x3
                 // EQ6:  y1 * x2 + x1 * y2 = y3
 
-                RawFr::Element x1fe, y1fe, x2fe, y2fe, x3fe, y3fe;
-                bn128.fromMpz(x1fe, x1.get_mpz_t());
-                bn128.fromMpz(y1fe, y1.get_mpz_t());
-                bn128.fromMpz(x2fe, x2.get_mpz_t());
-                bn128.fromMpz(y2fe, y2.get_mpz_t());
-                bn128.fromMpz(x3fe, x3.get_mpz_t());
-                bn128.fromMpz(y3fe, y3.get_mpz_t());
+                RawFq::Element x1fe, y1fe, x2fe, y2fe, x3fe, y3fe;
+                fq.fromMpz(x1fe, x1.get_mpz_t());
+                fq.fromMpz(y1fe, y1.get_mpz_t());
+                fq.fromMpz(x2fe, x2.get_mpz_t());
+                fq.fromMpz(y2fe, y2.get_mpz_t());
+                fq.fromMpz(x3fe, x3.get_mpz_t());
+                fq.fromMpz(y3fe, y3.get_mpz_t());
 
-                RawFr::Element _x3fe, _y3fe;
-                _x3fe = bn128.sub(bn128.mul(x1fe, x2fe), bn128.mul(y1fe, y2fe));
-                _y3fe = bn128.add(bn128.mul(y1fe, x2fe), bn128.mul(x1fe, y2fe));
+                RawFq::Element _x3fe, _y3fe;
+                _x3fe = fq.sub(fq.mul(x1fe, x2fe), fq.mul(y1fe, y2fe));
+                _y3fe = fq.add(fq.mul(y1fe, x2fe), fq.mul(x1fe, y2fe));
 
-                bool x3eq = bn128.eq(x3fe, _x3fe);
-                bool y3eq = bn128.eq(y3fe, _y3fe);
+                bool x3eq = fq.eq(x3fe, _x3fe);
+                bool y3eq = fq.eq(y3fe, _y3fe);
 
                 if (!x3eq || !y3eq)
                 {
                     proverRequest.result = ZKR_SM_MAIN_ARITH_MISMATCH;
-                    logError(ctx, "Arithmetic FP2 multiplication point does not match: x3=" + bn128.toString(x3fe, 16) + " _x3=" + bn128.toString(_x3fe, 16) + " y3=" + bn128.toString(y3fe, 16) + " _y3=" + bn128.toString(_y3fe, 16));
+                    logError(ctx, "Arithmetic FP2 multiplication point does not match: x3=" + fq.toString(x3fe, 16) + " _x3=" + fq.toString(_x3fe, 16) + " y3=" + fq.toString(y3fe, 16) + " _y3=" + fq.toString(_y3fe, 16));
                     pHashDB->cancelBatch(proverRequest.uuid);
                     return;
                 }
@@ -3544,25 +3544,25 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 // EQ7:  x1 + x2 = x3
                 // EQ8:  y1 + y2 = y3
 
-                RawFr::Element x1fe, y1fe, x2fe, y2fe, x3fe, y3fe;
-                bn128.fromMpz(x1fe, x1.get_mpz_t());
-                bn128.fromMpz(y1fe, y1.get_mpz_t());
-                bn128.fromMpz(x2fe, x2.get_mpz_t());
-                bn128.fromMpz(y2fe, y2.get_mpz_t());
-                bn128.fromMpz(x3fe, x3.get_mpz_t());
-                bn128.fromMpz(y3fe, y3.get_mpz_t());
+                RawFq::Element x1fe, y1fe, x2fe, y2fe, x3fe, y3fe;
+                fq.fromMpz(x1fe, x1.get_mpz_t());
+                fq.fromMpz(y1fe, y1.get_mpz_t());
+                fq.fromMpz(x2fe, x2.get_mpz_t());
+                fq.fromMpz(y2fe, y2.get_mpz_t());
+                fq.fromMpz(x3fe, x3.get_mpz_t());
+                fq.fromMpz(y3fe, y3.get_mpz_t());
 
-                RawFr::Element _x3fe, _y3fe;
-                _x3fe = bn128.add(x1fe, x2fe);
-                _y3fe = bn128.add(y1fe, y2fe);
+                RawFq::Element _x3fe, _y3fe;
+                _x3fe = fq.add(x1fe, x2fe);
+                _y3fe = fq.add(y1fe, y2fe);
 
-                bool x3eq = bn128.eq(x3fe, _x3fe);
-                bool y3eq = bn128.eq(y3fe, _y3fe);
+                bool x3eq = fq.eq(x3fe, _x3fe);
+                bool y3eq = fq.eq(y3fe, _y3fe);
 
                 if (!x3eq || !y3eq)
                 {
                     proverRequest.result = ZKR_SM_MAIN_ARITH_MISMATCH;
-                    logError(ctx, "Arithmetic FP2 addition point does not match: x3=" + bn128.toString(x3fe, 16) + " _x3=" + bn128.toString(_x3fe, 16) + " y3=" + bn128.toString(y3fe, 16) + " _y3=" + bn128.toString(_y3fe, 16));
+                    logError(ctx, "Arithmetic FP2 addition point does not match: x3=" + fq.toString(x3fe, 16) + " _x3=" + fq.toString(_x3fe, 16) + " y3=" + fq.toString(y3fe, 16) + " _y3=" + fq.toString(_y3fe, 16));
                     pHashDB->cancelBatch(proverRequest.uuid);
                     return;
                 }
@@ -3641,25 +3641,25 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 // EQ7:  x1 - x2 = x3
                 // EQ8:  y1 - y2 = y3
 
-                RawFr::Element x1fe, y1fe, x2fe, y2fe, x3fe, y3fe;
-                bn128.fromMpz(x1fe, x1.get_mpz_t());
-                bn128.fromMpz(y1fe, y1.get_mpz_t());
-                bn128.fromMpz(x2fe, x2.get_mpz_t());
-                bn128.fromMpz(y2fe, y2.get_mpz_t());
-                bn128.fromMpz(x3fe, x3.get_mpz_t());
-                bn128.fromMpz(y3fe, y3.get_mpz_t());
+                RawFq::Element x1fe, y1fe, x2fe, y2fe, x3fe, y3fe;
+                fq.fromMpz(x1fe, x1.get_mpz_t());
+                fq.fromMpz(y1fe, y1.get_mpz_t());
+                fq.fromMpz(x2fe, x2.get_mpz_t());
+                fq.fromMpz(y2fe, y2.get_mpz_t());
+                fq.fromMpz(x3fe, x3.get_mpz_t());
+                fq.fromMpz(y3fe, y3.get_mpz_t());
 
-                RawFr::Element _x3fe, _y3fe;
-                _x3fe = bn128.sub(x1fe, x2fe);
-                _y3fe = bn128.sub(y1fe, y2fe);
+                RawFq::Element _x3fe, _y3fe;
+                _x3fe = fq.sub(x1fe, x2fe);
+                _y3fe = fq.sub(y1fe, y2fe);
 
-                bool x3eq = bn128.eq(x3fe, _x3fe);
-                bool y3eq = bn128.eq(y3fe, _y3fe);
+                bool x3eq = fq.eq(x3fe, _x3fe);
+                bool y3eq = fq.eq(y3fe, _y3fe);
 
                 if (!x3eq || !y3eq)
                 {
                     proverRequest.result = ZKR_SM_MAIN_ARITH_MISMATCH;
-                    logError(ctx, "Arithmetic FP2 subtraction point does not match: x3=" + bn128.toString(x3fe, 16) + " _x3=" + bn128.toString(_x3fe, 16) + " y3=" + bn128.toString(y3fe, 16) + " _y3=" + bn128.toString(_y3fe, 16));
+                    logError(ctx, "Arithmetic FP2 subtraction point does not match: x3=" + fq.toString(x3fe, 16) + " _x3=" + fq.toString(_x3fe, 16) + " y3=" + fq.toString(y3fe, 16) + " _y3=" + fq.toString(_y3fe, 16));
                     pHashDB->cancelBatch(proverRequest.uuid);
                     return;
                 }

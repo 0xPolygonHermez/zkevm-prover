@@ -268,6 +268,21 @@ bool fileExists (const string &fileName)
     return (iResult == 0);
 }
 
+bool fileIsDirectory (const string &fileName)
+{
+    struct stat fileStat;
+    int iResult = stat( fileName.c_str(), &fileStat);
+    if (iResult != 0)
+    {
+        return false;
+    }
+    if ((fileStat.st_mode & S_IFMT) == S_IFDIR)
+    {
+        return true;
+    }
+    return false;
+}
+
 void ensureDirectoryExists (const string &fileName)
 {
     string command = "[ -d " + fileName + " ] || mkdir -p " + fileName;
