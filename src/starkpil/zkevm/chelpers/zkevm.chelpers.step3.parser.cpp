@@ -911,7 +911,13 @@ void ZkevmSteps::step3_parser_first_avx(StepsParams &params, uint64_t nrows, uin
                     i_args += 9;
                     break;
                }
-               case 115:
+               case 115: {
+                    // TODO
+               }
+               case 116: {
+                    // TODO
+               }
+               case 117:
                {
                     // 0, 50
                     Goldilocks::add_avx(tmp1[(args3[i_args])], tmp1[args3[i_args + 1]], tmp1[args3[i_args + 2]]);
@@ -2753,7 +2759,13 @@ void ZkevmSteps::step3_parser_first_avx512(StepsParams &params, uint64_t nrows, 
                     i_args += 9;
                     break;
                }
-               case 115:
+               case 115: {
+                    // TODO
+               }
+               case 116: {
+                    // TODO
+               }
+               case 117:
                {
                     // 0, 50
                     Goldilocks::add_avx512(tmp1[(args3[i_args])], tmp1[args3[i_args + 1]], tmp1[args3[i_args + 2]]);

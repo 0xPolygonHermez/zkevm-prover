@@ -38,16 +38,14 @@ typedef enum
 {
     cm1_n = 0,
     cm1_2ns = 1,
-    cm2_n = 2,
-    cm2_2ns = 3,
-    cm3_n = 4,
-    cm3_2ns = 5,
-    cm4_n = 6,
-    cm4_2ns = 7,
-    tmpExp_n = 8,
-    q_2ns = 9,
-    f_2ns = 10,
-    eSectionMax = 11
+    cm3_n = 2,
+    cm3_2ns = 3,
+    cm4_n = 4,
+    cm4_2ns = 5,
+    tmpExp_n = 6,
+    q_2ns = 7,
+    f_2ns = 8,
+    eSectionMax = 9
 } eSection;
 
 eSection string2section (const string s);
@@ -119,9 +117,10 @@ class PuCtx
 public:
     uint64_t tExpId;
     uint64_t fExpId;
-    uint64_t h1Id;
-    uint64_t h2Id;
-    uint64_t zId;
+    vector<vector<uint64_t>> fVals;
+    vector<uint64_t> tVals;
+    uint64_t mId;
+    uint64_t sId;
     uint64_t c1Id;
     uint64_t numId;
     uint64_t denId;
@@ -275,8 +274,8 @@ public:
     uint64_t mapTotalN;
     uint64_t nConstants;
     uint64_t nPublics;
+    uint64_t nCommitments;
     uint64_t nCm1;
-    uint64_t nCm2;
     uint64_t nCm3;
     uint64_t nCm4;
     uint64_t qDeg;
@@ -298,7 +297,7 @@ public:
     vector<PuCtx> puCtx;
     vector<CiCtx> ciCtx;
     vector<EvMap> evMap;
-    Step step2prev;
+    Step step1;
     Step step3prev;
     Step step3;
     Step step42ns;

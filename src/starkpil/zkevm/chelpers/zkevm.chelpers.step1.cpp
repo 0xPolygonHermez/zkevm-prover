@@ -4,7 +4,7 @@
 #include "constant_pols_starks.hpp"
 #include "zkevmSteps.hpp"
 
-void ZkevmSteps::step2prev_first(StepsParams &params, uint64_t i) {
+void ZkevmSteps::step1_first(StepsParams &params, uint64_t i) {
      Goldilocks::Element tmp_1308;
      Goldilocks::copy(tmp_1308, params.pols[1 + i*669]);
      Goldilocks::Element tmp_1309;
@@ -3578,7 +3578,7 @@ void ZkevmSteps::step2prev_first(StepsParams &params, uint64_t i) {
      Goldilocks3::add((Goldilocks3::Element &)(params.pols[6719275236 + i*372]), tmp_1307, (Goldilocks3::Element &)(params.pols[9890168951 + i*269]));
 }
 
-void ZkevmSteps::step2prev_i(StepsParams &params, uint64_t i) {
+void ZkevmSteps::step1_i(StepsParams &params, uint64_t i) {
      Goldilocks::Element tmp_1308;
      Goldilocks::copy(tmp_1308, params.pols[1 + i*669]);
      Goldilocks::Element tmp_1309;
@@ -7152,7 +7152,7 @@ void ZkevmSteps::step2prev_i(StepsParams &params, uint64_t i) {
      Goldilocks3::add((Goldilocks3::Element &)(params.pols[6719275236 + i*372]), tmp_1307, (Goldilocks3::Element &)(params.pols[9890168951 + i*269]));
 }
 
-void ZkevmSteps::step2prev_last(StepsParams &params, uint64_t i) {
+void ZkevmSteps::step1_last(StepsParams &params, uint64_t i) {
      Goldilocks::Element tmp_1308;
      Goldilocks::copy(tmp_1308, params.pols[1 + i*669]);
      Goldilocks::Element tmp_1309;

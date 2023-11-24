@@ -24,3 +24,19 @@ bool CompareFeVectorImpl(const std::vector<Goldilocks::Element> &a, const std::v
         return Goldilocks::toU64(a[2]) < Goldilocks::toU64(b[2]);
     }
 }
+
+bool CompareFeVectorEqual(const std::vector<Goldilocks::Element> &a, const std::vector<Goldilocks::Element> &b)
+{
+    if (a.size() == 1 && Goldilocks::toU64(a[0]) == Goldilocks::toU64(b[0]))
+    {
+        return true;
+    }
+    else if (a.size() == 3 && Goldilocks::toU64(a[0]) == Goldilocks::toU64(b[0]) 
+        && Goldilocks::toU64(a[1]) == Goldilocks::toU64(b[1]) 
+        && Goldilocks::toU64(a[2]) == Goldilocks::toU64(b[2]))
+    {
+        return true;
+    }
+
+    return false;
+}

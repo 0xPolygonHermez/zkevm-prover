@@ -658,7 +658,11 @@ void ZkevmSteps::step42ns_parser_first_avx(StepsParams &params, uint64_t nrows, 
                     i_args += 4;
                     break;
                }
-               case 84:
+               case 84: 
+               {
+                    // TODO
+               }
+               case 85:
                {
                     // 12 - 70: 1918
                     Goldilocks3::add13_avx(tmp3[args42[i_args]], tmp1[args42[i_args + 1]], tmp3[args42[i_args + 2]]);
@@ -667,7 +671,7 @@ void ZkevmSteps::step42ns_parser_first_avx(StepsParams &params, uint64_t nrows, 
                     i_args += 3;
                     break;
                }
-               case 85:
+               case 86:
                {
                     // 0 - 50: 1462
                     Goldilocks::add_avx(tmp1[(args42[i_args])], tmp1[args42[i_args + 1]], tmp1[args42[i_args + 2]]);
@@ -676,7 +680,7 @@ void ZkevmSteps::step42ns_parser_first_avx(StepsParams &params, uint64_t nrows, 
                     i_args += 5;
                     break;
                }
-               case 86:
+               case 87:
                {
                     //  32, 47, 21, 32, 48: 166
                     Goldilocks::sub_avx(tmp1[(args42[i_args])], Goldilocks::fromU64(args42[i_args + 1]), &params.pConstPols2ns->getElement(args42[i_args + 2], i), numpols);
@@ -695,9 +699,9 @@ void ZkevmSteps::step42ns_parser_first_avx(StepsParams &params, uint64_t nrows, 
                     i_args += 6;
                     break;
                }
-               case 87:
+               case 88:
                {
-                    //  84, 84, 84, 84,
+                    //  85, 85, 85, 85,
                     Goldilocks3::add13_avx(tmp3[args42[i_args]], tmp1[args42[i_args + 1]], tmp3[args42[i_args + 2]]);
                     i_args += 3;
                     Goldilocks3::mul33c_avx(tmp3[args42[i_args]], tmp3[args42[i_args + 2]], params.challenges[args42[i_args + 1]]);
@@ -716,10 +720,10 @@ void ZkevmSteps::step42ns_parser_first_avx(StepsParams &params, uint64_t nrows, 
                     i_args += 3;
                     break;
                }
-               case 88:
+               case 89:
                {
-                    // 88
-                    //  21, 50, 21, 53, 0, 85, 50, 85, 21, 50,
+                    // 89
+                    //  21, 50, 21, 53, 0, 86, 50, 86, 21, 50,
                     Goldilocks::sub_avx(tmp1[(args42[i_args])], tmp1[args42[i_args + 1]], tmp1[args42[i_args + 2]]);
                     i_args += 3;
                     Goldilocks::mul_avx(tmp1[(args42[i_args])], &params.pols[args42[i_args + 1] + i * args42[i_args + 2]], &params.pols[args42[i_args + 3] + i * args42[i_args + 4]], args42[i_args + 2], args42[i_args + 4]);

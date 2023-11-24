@@ -155,13 +155,11 @@ class Proofs
 {
 public:
     std::vector<Goldilocks::Element> root1;
-    std::vector<Goldilocks::Element> root2;
     std::vector<Goldilocks::Element> root3;
     std::vector<Goldilocks::Element> root4;
     Fri fri;
     std::vector<std::vector<Goldilocks::Element>> evals;
     Proofs(uint64_t polN, uint64_t dim, uint64_t numSteps, uint64_t evalSize) : root1(HASH_SIZE, Goldilocks::zero()),
-                                                                                root2(HASH_SIZE, Goldilocks::zero()),
                                                                                 root3(HASH_SIZE, Goldilocks::zero()),
                                                                                 root4(HASH_SIZE, Goldilocks::zero()),
                                                                                 fri(polN, dim, numSteps),
@@ -183,11 +181,6 @@ public:
         {
             json_root1.push_back(Goldilocks::toString(root1[i]));
         }
-        ordered_json json_root2 = ordered_json::array();
-        for (uint i = 0; i < root2.size(); i++)
-        {
-            json_root2.push_back(Goldilocks::toString(root2[i]));
-        }
         ordered_json json_root3 = ordered_json::array();
         for (uint i = 0; i < root3.size(); i++)
         {
@@ -199,7 +192,6 @@ public:
             json_root4.push_back(Goldilocks::toString(root4[i]));
         }
         j["root1"] = json_root1;
-        j["root2"] = json_root2;
         j["root3"] = json_root3;
         j["root4"] = json_root4;
 

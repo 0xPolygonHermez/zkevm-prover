@@ -15,8 +15,8 @@
 #include "zklog.hpp"
 #include "exit_process.hpp"
 
-#define STARK_C12_A_NUM_TREES 5
-#define NUM_CHALLENGES 8
+#define STARK_C12_A_NUM_TREES 4
+#define NUM_CHALLENGES 7
 
 struct StarkFiles
 {
@@ -55,8 +55,6 @@ private:
 
     Goldilocks::Element *p_cm1_2ns;
     Goldilocks::Element *p_cm1_n;
-    Goldilocks::Element *p_cm2_2ns;
-    Goldilocks::Element *p_cm2_n;
     Goldilocks::Element *p_cm3_2ns;
     Goldilocks::Element *p_cm3_n;
     Goldilocks::Element *cm4_2ns;
@@ -165,8 +163,6 @@ public:
 
         p_cm1_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm1_2ns]];
         p_cm1_n = &mem[starkInfo.mapOffsets.section[eSection::cm1_n]];
-        p_cm2_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm2_2ns]];
-        p_cm2_n = &mem[starkInfo.mapOffsets.section[eSection::cm2_n]];
         p_cm3_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm3_2ns]];
         p_cm3_n = &mem[starkInfo.mapOffsets.section[eSection::cm3_n]];
         cm4_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm4_2ns]];
@@ -184,10 +180,9 @@ public:
 
         TimerStart(MERKLE_TREE_ALLOCATION);
         treesGL[0] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::cm1_n], p_cm1_2ns);
-        treesGL[1] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::cm2_n], p_cm2_2ns);
-        treesGL[2] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::cm3_n], p_cm3_2ns);
-        treesGL[3] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::cm4_2ns], cm4_2ns);
-        treesGL[4] = new MerkleTreeGL((Goldilocks::Element *)pConstTreeAddress);
+        treesGL[1] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::cm3_n], p_cm3_2ns);
+        treesGL[2] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::cm4_2ns], cm4_2ns);
+        treesGL[3] = new MerkleTreeGL((Goldilocks::Element *)pConstTreeAddress);
         TimerStopAndLog(MERKLE_TREE_ALLOCATION);
     };
     ~Starks()
@@ -216,7 +211,7 @@ public:
             free(pConstTreeAddress);
         }
 
-        for (uint i = 0; i < 5; i++)
+        for (uint i = 0; i < 4; i++)
         {
             delete treesGL[i];
         }

@@ -246,6 +246,46 @@ public:
         return Goldilocks::toU64(_pAddress[idx * _offset]);
     }
 
+    static void calculateMulCounter(Polinomial &m, Polinomial* fPols, Polinomial* tPols, uint64_t nPols)
+    {
+        uint64_t size = m.degree();
+
+        Polinomial one(1, 1);
+        Goldilocks::copy((Goldilocks::Element *)one[0],  &Goldilocks::one());
+
+        // TODO: initialize one;
+
+        for(uint64_t j = 0; j < size; j++) {
+            for(uint64_t k = 0; k < size; k++) {
+                for(uint64_t l = 0; l < nPols; l++) {
+                    vector<Goldilocks::Element> tPol = tPols[l].toVector(j);
+                    vector<Goldilocks::Element> fPol = fPols[l].toVector(k);
+                    if(!CompareFeVectorEqual(fPol, tPol)) break;
+                    if(l == nPols - 1) addElement(m, j, m, j, one, 0);
+                }
+            }
+        }
+
+        // Normalize mulCount
+        for(uint64_t j = 0; j < size; j++) {
+            Polinomial repetitions(1, 1);
+            Goldilocks::copy((Goldilocks::Element *)repetitions[0],  &Goldilocks::one());
+            for(uint64_t k = 0; k < size; k++) {
+                if(k == j) continue;
+                for(uint64_t l = 0; l < nPols; l++) {
+                    vector<Goldilocks::Element> tPol1 = tPols[l].toVector(j);
+                    vector<Goldilocks::Element> tPol2 = tPols[l].toVector(k);
+                    if(!CompareFeVectorEqual(tPol1, tPol2)) break;
+                    if(l == nPols - 1) addElement(repetitions, 0, repetitions, 0, one, 0);
+                }
+            }
+
+            if(!Goldilocks::isOne((Goldilocks::Element &)*repetitions[0])) {
+                divElement(m, j, m, j, repetitions, 0);
+            }
+        }
+    }
+
     static void calculateH1H2(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol)
     {
         map<std::vector<Goldilocks::Element>, uint64_t, CompareFe> idx_t;
@@ -604,6 +644,29 @@ public:
         Polinomial::mulElement(checkVal, 0, z, size - 1, tmp, 0);
 
         zkassert(Goldilocks3::isOne((Goldilocks3::Element &)*checkVal[0]));
+    }
+
+    static void calculateS(Polinomial &s, Polinomial &num, Polinomial &den)
+    {
+        uint64_t size = num.degree();
+
+        Polinomial denI(size, 3);
+        Polinomial checkVal(1, 3);
+        Goldilocks::Element *pS = s[0];
+        Goldilocks3::copy((Goldilocks3::Element *)&pS[0], &Goldilocks3::zero());
+
+        batchInverse(denI, den);
+        for (uint64_t i = 1; i < size; i++)
+        {
+            Polinomial tmp(1, 3);
+            Polinomial::mulElement(tmp, 0, num, i - 1, denI, i - 1);
+            Polinomial::addElement(s, i, s, i - 1, tmp, 0);
+        }
+        Polinomial tmp(1, 3);
+        Polinomial::mulElement(tmp, 0, num, size - 1, denI, size - 1);
+        Polinomial::addElement(checkVal, 0, s, size - 1, tmp, 0);
+
+        zkassert(Goldilocks3::isZero((Goldilocks3::Element &)*checkVal[0]));
     }
 
     // compute the multiplications of the polynomials in src in parallel with partitions of size partitionSize

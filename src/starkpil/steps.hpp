@@ -21,11 +21,11 @@ struct StepsParams
 class Steps
 {
 public:
-    virtual void step2prev_first(StepsParams &params, uint64_t i) = 0;
-    virtual void step2prev_i(StepsParams &params, uint64_t i) = 0;
-    virtual void step2prev_last(StepsParams &params, uint64_t i) = 0;
-    virtual void step2prev_parser_first_avx(StepsParams &params, uint64_t nrows, uint64_t nrowsBatch){};
-    virtual void step2prev_parser_first_avx512(StepsParams &params, uint64_t nrows, uint64_t nrowsBatch){};
+    virtual void step1_first(StepsParams &params, uint64_t i) = 0;
+    virtual void step1_i(StepsParams &params, uint64_t i) = 0;
+    virtual void step1_last(StepsParams &params, uint64_t i) = 0;
+    virtual void step1_parser_first_avx(StepsParams &params, uint64_t nrows, uint64_t nrowsBatch){};
+    virtual void step1_parser_first_avx512(StepsParams &params, uint64_t nrows, uint64_t nrowsBatch){};
 
     virtual void step3prev_first(StepsParams &params, uint64_t i) = 0;
     virtual void step3prev_i(StepsParams &params, uint64_t i) = 0;

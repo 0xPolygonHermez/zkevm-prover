@@ -34,8 +34,8 @@ void StarkInfo::load(json j)
     mapTotalN = j["mapTotalN"];
     nConstants = j["nConstants"];
     nPublics = j["nPublics"];
+    nCommitments = j["nCommitments"];
     nCm1 = j["nCm1"];
-    nCm2 = j["nCm2"];
     nCm3 = j["nCm3"];
     nCm4 = j["nCm4"];
     friExpId = j["friExpId"];
@@ -44,25 +44,21 @@ void StarkInfo::load(json j)
     qDeg = j["qDeg"];
 
     mapDeg.section[cm1_n] = j["mapDeg"]["cm1_n"];
-    mapDeg.section[cm2_n] = j["mapDeg"]["cm2_n"];
     mapDeg.section[cm3_n] = j["mapDeg"]["cm3_n"];
     mapDeg.section[cm4_n] = j["mapDeg"]["cm4_n"];
     mapDeg.section[eSection::tmpExp_n] = j["mapDeg"]["tmpExp_n"];
     mapDeg.section[f_2ns] = j["mapDeg"]["f_2ns"];
     mapDeg.section[cm1_2ns] = j["mapDeg"]["cm1_2ns"];
-    mapDeg.section[cm2_2ns] = j["mapDeg"]["cm2_2ns"];
     mapDeg.section[cm3_2ns] = j["mapDeg"]["cm3_2ns"];
     mapDeg.section[cm4_2ns] = j["mapDeg"]["cm4_2ns"];
     mapDeg.section[q_2ns] = j["mapDeg"]["q_2ns"];
 
     mapOffsets.section[cm1_n] = j["mapOffsets"]["cm1_n"];
-    mapOffsets.section[cm2_n] = j["mapOffsets"]["cm2_n"];
     mapOffsets.section[cm3_n] = j["mapOffsets"]["cm3_n"];
     mapOffsets.section[cm4_n] = j["mapOffsets"]["cm4_n"];
     mapOffsets.section[eSection::tmpExp_n] = j["mapOffsets"]["tmpExp_n"];
     mapOffsets.section[f_2ns] = j["mapOffsets"]["f_2ns"];
     mapOffsets.section[cm1_2ns] = j["mapOffsets"]["cm1_2ns"];
-    mapOffsets.section[cm2_2ns] = j["mapOffsets"]["cm2_2ns"];
     mapOffsets.section[cm3_2ns] = j["mapOffsets"]["cm3_2ns"];
     mapOffsets.section[cm4_2ns] = j["mapOffsets"]["cm4_2ns"];
     mapOffsets.section[q_2ns] = j["mapOffsets"]["q_2ns"];
@@ -70,8 +66,6 @@ void StarkInfo::load(json j)
 
     for (uint64_t i = 0; i < j["mapSections"]["cm1_n"].size(); i++)
         mapSections.section[cm1_n].push_back(j["mapSections"]["cm1_n"][i]);
-    for (uint64_t i = 0; i < j["mapSections"]["cm2_n"].size(); i++)
-        mapSections.section[cm2_n].push_back(j["mapSections"]["cm2_n"][i]);
     for (uint64_t i = 0; i < j["mapSections"]["cm3_n"].size(); i++)
         mapSections.section[cm3_n].push_back(j["mapSections"]["cm3_n"][i]);
     for (uint64_t i = 0; i < j["mapSections"]["cm4_n"].size(); i++)
@@ -82,8 +76,6 @@ void StarkInfo::load(json j)
         mapSections.section[f_2ns].push_back(j["mapSections"]["f_2ns"][i]);
     for (uint64_t i = 0; i < j["mapSections"]["cm1_2ns"].size(); i++)
         mapSections.section[cm1_2ns].push_back(j["mapSections"]["cm1_2ns"][i]);
-    for (uint64_t i = 0; i < j["mapSections"]["cm2_2ns"].size(); i++)
-        mapSections.section[cm2_2ns].push_back(j["mapSections"]["cm2_2ns"][i]);
     for (uint64_t i = 0; i < j["mapSections"]["cm3_2ns"].size(); i++)
         mapSections.section[cm3_2ns].push_back(j["mapSections"]["cm3_2ns"][i]);
     for (uint64_t i = 0; i < j["mapSections"]["cm4_2ns"].size(); i++)
@@ -92,38 +84,32 @@ void StarkInfo::load(json j)
         mapSections.section[q_2ns].push_back(j["mapSections"]["q_2ns"][i]);
 
     mapSectionsN.section[cm1_n] = j["mapSectionsN"]["cm1_n"];
-    mapSectionsN.section[cm2_n] = j["mapSectionsN"]["cm2_n"];
     mapSectionsN.section[cm3_n] = j["mapSectionsN"]["cm3_n"];
     mapSectionsN.section[cm4_n] = j["mapSectionsN"]["cm4_n"];
     mapSectionsN.section[eSection::tmpExp_n] = j["mapSectionsN"]["tmpExp_n"];
     mapSectionsN.section[f_2ns] = j["mapSectionsN"]["f_2ns"];
     mapSectionsN.section[cm1_2ns] = j["mapSectionsN"]["cm1_2ns"];
-    mapSectionsN.section[cm2_2ns] = j["mapSectionsN"]["cm2_2ns"];
     mapSectionsN.section[cm3_2ns] = j["mapSectionsN"]["cm3_2ns"];
     mapSectionsN.section[cm4_2ns] = j["mapSectionsN"]["cm4_2ns"];
     mapSectionsN.section[q_2ns] = j["mapSectionsN"]["q_2ns"];
 
     mapSectionsN1.section[cm1_n] = j["mapSectionsN1"]["cm1_n"];
-    mapSectionsN1.section[cm2_n] = j["mapSectionsN1"]["cm2_n"];
     mapSectionsN1.section[cm3_n] = j["mapSectionsN1"]["cm3_n"];
     mapSectionsN1.section[cm4_n] = j["mapSectionsN1"]["cm4_n"];
     mapSectionsN1.section[eSection::tmpExp_n] = j["mapSectionsN1"]["tmpExp_n"];
     mapSectionsN1.section[f_2ns] = j["mapSectionsN1"]["f_2ns"];
     mapSectionsN1.section[cm1_2ns] = j["mapSectionsN1"]["cm1_2ns"];
-    mapSectionsN1.section[cm2_2ns] = j["mapSectionsN1"]["cm2_2ns"];
     mapSectionsN1.section[cm3_2ns] = j["mapSectionsN1"]["cm3_2ns"];
     mapSectionsN1.section[cm4_2ns] = j["mapSectionsN1"]["cm4_2ns"];
     mapSectionsN1.section[q_2ns] = j["mapSectionsN1"]["q_2ns"];
 
 
     mapSectionsN3.section[cm1_n] = j["mapSectionsN3"]["cm1_n"];
-    mapSectionsN3.section[cm2_n] = j["mapSectionsN3"]["cm2_n"];
     mapSectionsN3.section[cm3_n] = j["mapSectionsN3"]["cm3_n"];
     mapSectionsN3.section[cm4_n] = j["mapSectionsN3"]["cm4_n"];
     mapSectionsN3.section[eSection::tmpExp_n] = j["mapSectionsN3"]["tmpExp_n"];
     mapSectionsN3.section[f_2ns] = j["mapSectionsN3"]["f_2ns"];
     mapSectionsN3.section[cm1_2ns] = j["mapSectionsN3"]["cm1_2ns"];
-    mapSectionsN3.section[cm2_2ns] = j["mapSectionsN3"]["cm2_2ns"];
     mapSectionsN3.section[cm3_2ns] = j["mapSectionsN3"]["cm3_2ns"];
     mapSectionsN3.section[cm4_2ns] = j["mapSectionsN3"]["cm4_2ns"];
     mapSectionsN3.section[q_2ns] = j["mapSectionsN3"]["q_2ns"];
@@ -164,9 +150,17 @@ void StarkInfo::load(json j)
         PuCtx pu;
         pu.tExpId = j["puCtx"][i]["tExpId"];
         pu.fExpId = j["puCtx"][i]["fExpId"];
-        pu.h1Id = j["puCtx"][i]["h1Id"];
-        pu.h2Id = j["puCtx"][i]["h2Id"];
-        pu.zId = j["puCtx"][i]["zId"];
+        pu.mId = j["puCtx"][i]["mId"];
+        for(uint64_t k = 0; k < j["puCtx"][i]["tVals"].size(); k++) {
+            pu.tVals.push_back(j["puCtx"][i]["tVals"][k]);
+        }
+
+        for(uint64_t k = 0; k < j["puCtx"][i]["fVals"].size(); k++) {
+            for(uint64_t l = 0; l < j["puCtx"][i]["fVals"][k].size(); l++) {
+                pu.fVals.push_back(j["puCtx"][i]["fVals"][k][l]);
+            }
+        }
+        pu.sId = j["puCtx"][i]["sId"];
         pu.c1Id = j["puCtx"][i]["c1Id"];
         pu.numId = j["puCtx"][i]["numId"];
         pu.denId = j["puCtx"][i]["denId"];
@@ -194,42 +188,42 @@ void StarkInfo::load(json j)
         evMap.push_back(map);
     }
 
-    step2prev.tmpUsed = j["step2prev"]["tmpUsed"];
-    for (uint64_t i = 0; i < j["step2prev"]["first"].size(); i++)
+    step1.tmpUsed = j["step1"]["tmpUsed"];
+    for (uint64_t i = 0; i < j["step1"]["first"].size(); i++)
     {
         StepOperation op;
-        op.setOperation(j["step2prev"]["first"][i]["op"]);           // Mandatory field
-        op.dest.setType(j["step2prev"]["first"][i]["dest"]["type"]); // Mandatory field
-        op.dest.id = j["step2prev"]["first"][i]["dest"]["id"];       // Mandatory field
-        if (j["step2prev"]["first"][i]["dest"].contains("prime"))
-            op.dest.prime = j["step2prev"]["first"][i]["dest"]["prime"];
+        op.setOperation(j["step1"]["first"][i]["op"]);           // Mandatory field
+        op.dest.setType(j["step1"]["first"][i]["dest"]["type"]); // Mandatory field
+        op.dest.id = j["step1"]["first"][i]["dest"]["id"];       // Mandatory field
+        if (j["step1"]["first"][i]["dest"].contains("prime"))
+            op.dest.prime = j["step1"]["first"][i]["dest"]["prime"];
         else
             op.dest.prime = false;
-        if (j["step2prev"]["first"][i]["dest"].contains("p"))
-            op.dest.p = j["step2prev"]["first"][i]["dest"]["p"];
+        if (j["step1"]["first"][i]["dest"].contains("p"))
+            op.dest.p = j["step1"]["first"][i]["dest"]["p"];
         else
             op.dest.p = 0;
-        for (uint64_t k = 0; k < j["step2prev"]["first"][i]["src"].size(); k++)
+        for (uint64_t k = 0; k < j["step1"]["first"][i]["src"].size(); k++)
         {
             StepType ty;
-            ty.setType(j["step2prev"]["first"][i]["src"][k]["type"]); // Mandatory field
-            if (j["step2prev"]["first"][i]["src"][k].contains("id"))
-                ty.id = j["step2prev"]["first"][i]["src"][k]["id"];
+            ty.setType(j["step1"]["first"][i]["src"][k]["type"]); // Mandatory field
+            if (j["step1"]["first"][i]["src"][k].contains("id"))
+                ty.id = j["step1"]["first"][i]["src"][k]["id"];
             else
                 ty.id = 0; // Mandatory field
-            if (j["step2prev"]["first"][i]["src"][k].contains("prime"))
-                ty.prime = j["step2prev"]["first"][i]["src"][k]["prime"];
+            if (j["step1"]["first"][i]["src"][k].contains("prime"))
+                ty.prime = j["step1"]["first"][i]["src"][k]["prime"];
             else
                 ty.prime = false;
-            if (j["step2prev"]["first"][i]["src"][k].contains("p"))
-                ty.p = j["step2prev"]["first"][i]["src"][k]["p"];
+            if (j["step1"]["first"][i]["src"][k].contains("p"))
+                ty.p = j["step1"]["first"][i]["src"][k]["p"];
             else
                 ty.p = 0;
-            if (j["step2prev"]["first"][i]["src"][k].contains("value"))
-                ty.value = j["step2prev"]["first"][i]["src"][k]["value"];
+            if (j["step1"]["first"][i]["src"][k].contains("value"))
+                ty.value = j["step1"]["first"][i]["src"][k]["value"];
             op.src.push_back(ty);
         }
-        step2prev.first.push_back(op);
+        step1.first.push_back(op);
     }
 
     step3prev.tmpUsed = j["step3prev"]["tmpUsed"];
@@ -485,8 +479,6 @@ eSection string2section(const string s)
 {
     if (s == "cm1_n")
         return cm1_n;
-    if (s == "cm2_n")
-        return cm2_n;
     if (s == "cm3_n")
         return cm3_n;
     if (s == "cm4_n")
@@ -497,8 +489,6 @@ eSection string2section(const string s)
         return f_2ns;
     if (s == "cm1_2ns")
         return cm1_2ns;
-    if (s == "cm2_2ns")
-        return cm2_2ns;
     if (s == "cm3_2ns")
         return cm3_2ns;
     if (s == "cm4_2ns")
