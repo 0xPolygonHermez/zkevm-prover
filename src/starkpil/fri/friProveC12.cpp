@@ -242,7 +242,7 @@ void FRIProveC12::evalPol(Polinomial &res, uint64_t res_idx, Polinomial &p, Poli
 void FRIProveC12::queryPol(FRIProofC12 &fproof, MerkleTreeBN128 **trees, uint64_t idx, uint64_t treeIdx)
 {
     vector<MerkleProofC12> vMkProof;
-    for (uint i = 0; i < 5; i++)
+    for (uint i = 0; i < 4; i++)
     {
         RawFr::Element *buff = (RawFr::Element *)calloc(trees[i]->source_width * sizeof(Goldilocks::Element) + MerkleTreeBN128::getMerkleProofSize(trees[i]->height), 1);
         trees[i]->getGroupProof(&buff[0], idx);

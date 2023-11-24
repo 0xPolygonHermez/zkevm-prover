@@ -216,10 +216,10 @@ void FRIProve::evalPol(Polinomial &res, uint64_t res_idx, Polinomial &p, Polinom
     }
 }
 
-void FRIProve::queryPol(FRIProof &fproof, MerkleTreeGL *treesGL[5], uint64_t idx, uint64_t treeIdx)
+void FRIProve::queryPol(FRIProof &fproof, MerkleTreeGL *treesGL[4], uint64_t idx, uint64_t treeIdx)
 {
     vector<MerkleProof> vMkProof;
-    for (uint i = 0; i < 5; i++)
+    for (uint i = 0; i < 4; i++)
     {
         MerkleTreeGL *treesGLTmp = treesGL[i];
         Goldilocks::Element buff[treesGLTmp->width + treesGLTmp->MerkleProofSize() * HASH_SIZE] = {Goldilocks::zero()};

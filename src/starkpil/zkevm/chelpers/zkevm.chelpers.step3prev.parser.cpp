@@ -706,8 +706,8 @@ void ZkevmSteps::step3prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 91:
                {
-                    assert(0); // code not used
-                    i_args += 4;
+                    Goldilocks::copy_avx(&params.pols[args3prev[i_args] + i * args3prev[i_args + 1]], args3prev[i_args + 1], &params.pConstPols->getElement(args3prev[i_args + 2], i), numpols);
+                    i_args += 3;
                     break;
                }
                case 92:
@@ -742,7 +742,7 @@ void ZkevmSteps::step3prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 97:
                {
-                    assert(0); // code not used
+                    Goldilocks3::sub33c_avx(&params.pols[args3prev[i_args] + i * args3prev[i_args + 1]], args3prev[i_args + 1], tmp3[args3prev[i_args + 2]], tmp3[args3prev[i_args + 3]]);
                     i_args += 4;
                     break;
                }
@@ -754,8 +754,8 @@ void ZkevmSteps::step3prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                }
                case 99:
                {
-                    assert(0); // code not used
-                    i_args += 4;
+                    Goldilocks::mul_avx(&params.pols[args3prev[i_args] + i * args3prev[i_args + 1]], args3prev[i_args + 1], &params.pols[args3prev[i_args + 2] + i * args3prev[i_args + 3]], args3prev[i_args + 3], &params.pConstPols->getElement(args3prev[i_args + 4], i), numpols);
+                    i_args += 5;
                     break;
                }
                case 100:
@@ -905,6 +905,24 @@ void ZkevmSteps::step3prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                     }
                     Goldilocks::add_avx(&params.pols[0], offsets1, tmp1[args3prev[i_args + 4]], &params.pols[0], offsets2);
                     i_args += 9;
+                    break;
+               }
+               case 116:
+               {
+                    Goldilocks3::add_avx(&params.pols[args3prev[i_args] + i * args3prev[i_args + 1]], args3prev[i_args + 1], tmp3[args3prev[i_args + 2]], tmp3[args3prev[i_args + 3]]);
+                    i_args += 4;
+                    break;
+               }
+               case 117:
+               {
+                    Goldilocks::copy_avx(&params.pols[args3prev[i_args] + i * args3prev[i_args + 1]], args3prev[i_args + 1], &params.pols[args3prev[i_args + 2] + i * args3prev[i_args + 3]], args3prev[i_args + 3]);
+                    i_args += 4;
+                    break;
+               }
+               case 118:
+               {
+                    Goldilocks::add_avx(&params.pols[args3prev[i_args] + i * args3prev[i_args + 1]], args3prev[i_args + 1], &params.pols[args3prev[i_args + 2] + i * args3prev[i_args + 3]], args3prev[i_args + 3], &params.pols[args3prev[i_args + 4] + i * args3prev[i_args + 5]], args3prev[i_args + 5]);
+                    i_args += 6;
                     break;
                }
                default:
@@ -1634,8 +1652,8 @@ void ZkevmSteps::step3prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 91:
                {
-                    assert(0); // code not used
-                    i_args += 4;
+                    //Goldilocks::copy_avx512(&params.pols[args3prev[i_args] + i * args3prev[i_args + 1]], args3prev[i_args + 1], &params.pConstPols->getElement(args3prev[i_args + 2], i));
+                    i_args += 3;
                     break;
                }
                case 92:
@@ -1670,7 +1688,7 @@ void ZkevmSteps::step3prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 97:
                {
-                    assert(0); // code not used
+                    //Goldilocks::sub_avx(&params.pols[args3[i_args] + i * args3[i_args + 1]], args3[i_args + 1], tmp3[args3[i_args + 2]], tmp3[args3[i_args + 3]]);
                     i_args += 4;
                     break;
                }

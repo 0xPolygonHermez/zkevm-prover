@@ -8,6 +8,11 @@
 #include "zklog.hpp"
 #include "exit_process.hpp"
 
+struct PolSectionInfo
+{
+    uint64_t offset;
+    uint64_t nCols;
+};
 class Polinomial
 {
 private:
@@ -244,6 +249,61 @@ public:
     inline uint64_t firstValueU64(uint64_t idx)
     {
         return Goldilocks::toU64(_pAddress[idx * _offset]);
+    }
+
+    inline Goldilocks::Element getValue(uint64_t idx)
+    {
+        return _pAddress[idx * _offset];
+    }
+
+    static uint64_t calculateHash(uint64_t* values, uint64_t nPols) {
+        if(nPols == 1) {
+            return values[0];
+        } 
+
+        uint64_t hashValue = nPols;
+        for(uint64_t l = 0; l < nPols; l++) {
+            hashValue ^= values[l] + 0x9e3779b9 + (hashValue << 6) + (hashValue >> 2);
+        }
+        return hashValue;
+    }
+    
+    static void calculateMulCounter(Polinomial &m, int64_t* fHash, int64_t* tHash) {
+        uint64_t size = m.degree();
+
+        std::unordered_map<int64_t, int64_t> multiplicities;
+        
+        uint64_t nVals = 0;
+
+        for(uint64_t i = 0; i < size; ++i) {
+            if(fHash[i] != -1) {
+                if(multiplicities.count(fHash[i]) > 0) {
+                    multiplicities[fHash[i]] -= 1;
+                } else {
+                    multiplicities[fHash[i]] = -1;
+                    nVals++;
+                }
+            }
+        }
+
+        for(uint64_t i = 0; i < size; ++i) {
+            if(tHash[i] == -1 || !multiplicities.count(tHash[i])) {
+                m[i][0] = Goldilocks::zero();
+            } else {
+                if(multiplicities[tHash[i]] < 0) {
+                    multiplicities[tHash[i]] *= (-1);
+                    nVals--;
+                }
+                m[i][0] = Goldilocks::fromU64(multiplicities[tHash[i]]);
+            }   
+        }
+
+        if(nVals != 0) {
+            zklog.error("Polinomial::calculateMulCounter() Some of the f values are not included in t");
+            exitProcess();
+        }
+
+        multiplicities.clear();
     }
 
     static void calculateH1H2(Polinomial &h1, Polinomial &h2, Polinomial &fPol, Polinomial &tPol)
@@ -604,6 +664,29 @@ public:
         Polinomial::mulElement(checkVal, 0, z, size - 1, tmp, 0);
 
         zkassert(Goldilocks3::isOne((Goldilocks3::Element &)*checkVal[0]));
+    }
+
+    static void calculateS(Polinomial &s, Polinomial &num, Polinomial &den)
+    {
+        uint64_t size = num.degree();
+
+        Polinomial denI(size, 3);
+        Polinomial checkVal(1, 3);
+        Goldilocks::Element *pS = s[0];
+        Goldilocks3::copy((Goldilocks3::Element *)&pS[0], &Goldilocks3::zero());
+
+        batchInverse(denI, den);
+        for (uint64_t i = 1; i < size; i++)
+        {
+            Polinomial tmp(1, 3);
+            Polinomial::mulElement(tmp, 0, num, i - 1, denI, i - 1);
+            Polinomial::addElement(s, i, s, i - 1, tmp, 0);
+        }
+        Polinomial tmp(1, 3);
+        Polinomial::mulElement(tmp, 0, num, size - 1, denI, size - 1);
+        Polinomial::addElement(checkVal, 0, s, size - 1, tmp, 0);
+
+        zkassert(Goldilocks3::isZero((Goldilocks3::Element &)*checkVal[0]));
     }
 
     // compute the multiplications of the polynomials in src in parallel with partitions of size partitionSize

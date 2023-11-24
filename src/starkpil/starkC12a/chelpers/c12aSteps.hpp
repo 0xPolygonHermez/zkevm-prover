@@ -10,9 +10,9 @@
 class C12aSteps : public Steps
 {
 public:
-    void step2prev_first(StepsParams &params, uint64_t i);
-    void step2prev_i(StepsParams &params, uint64_t i);
-    void step2prev_last(StepsParams &params, uint64_t i);
+    void step1_first(StepsParams &params, uint64_t i);
+    void step1_i(StepsParams &params, uint64_t i);
+    void step1_last(StepsParams &params, uint64_t i);
 
     void step3prev_first(StepsParams &params, uint64_t i);
     void step3prev_i(StepsParams &params, uint64_t i);

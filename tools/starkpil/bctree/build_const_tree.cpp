@@ -9,6 +9,7 @@
 #include <fstream>
 #include "timer.hpp"
 #include "merkleTreeBN128.hpp"
+#include "zkglobals.hpp"
 #include <filesystem>
 #include <cstdint>
 
@@ -22,7 +23,7 @@ using json = nlohmann::json;
 
 #define SIZE_GL 8
 
-Goldilocks fr;
+//Goldilocks fr;
 
 string time()
 {
