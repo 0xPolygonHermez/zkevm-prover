@@ -1461,6 +1461,11 @@ void ZkevmSteps::step42ns_parser_first(StepsParams &params, uint64_t nrows, uint
                     i_args += 6;
                     break;
                }
+               case 89: 
+               {
+                    assert(0);
+                    break;
+               }
                default:
                     std::cout << " Wrong operation in step42ns_first!" << std::endl;
                     exit(1); // rick, use execption
@@ -2187,7 +2192,17 @@ void ZkevmSteps::step42ns_parser_first_avx_jump(StepsParams &params, uint64_t nr
               i_args += 3;
               Goldilocks::mul_avx(tmp1[(args42[i_args])], &params.pols[args42[i_args + 1] + i * args42[i_args + 2]], &params.pols[args42[i_args + 3] + i * args42[i_args + 4]], args42[i_args + 2], args42[i_args + 4]);
               i_args += 5;
-         }
+         },
+         [](int i, int &i_args, __m256i tmp1[NTEMP1_], Goldilocks3::Element_avx tmp3[NTEMP3_], uint64_t offsets1[4], uint64_t offsets2[4], StepsParams &params, const int numpols)
+	     {
+		// 89
+          for (uint64_t j = 0; j < AVX_SIZE_; ++j)
+          {
+               offsets1[j] = args42[i_args + 1] + (((i + j) + args42[i_args + 2]) % args42[i_args + 3]) * args42[i_args + 4];
+          }
+          Goldilocks3::sub31c_avx(tmp3[(args42[i_args])], &params.pols[0], Goldilocks::fromU64(args42[i_args + 5]), offsets1);
+          i_args += 6;
+	  }
 
      };
 
@@ -2945,6 +2960,16 @@ void ZkevmSteps::step42ns_parser_first_avx512(StepsParams &params, uint64_t nrow
                     i_args += 3;
                     Goldilocks::mul_avx512(tmp1[(args42[i_args])], &params.pols[args42[i_args + 1] + i * args42[i_args + 2]], &params.pols[args42[i_args + 3] + i * args42[i_args + 4]], args42[i_args + 2], args42[i_args + 4]);
                     i_args += 5;
+                    break;
+               }
+               case 89: 
+               {
+                    for (uint64_t j = 0; j < AVX512_SIZE_; ++j)
+                    {
+                         offsets1[j] = args42[i_args + 1] + (((i + j) + args42[i_args + 2]) % args42[i_args + 3]) * args42[i_args + 4];
+                    }
+                    Goldilocks3::sub31c_avx512(tmp3[(args42[i_args])], &params.pols[0], Goldilocks::fromU64(args42[i_args + 5]), offsets1);
+                    i_args += 6;
                     break;
                }
                default:

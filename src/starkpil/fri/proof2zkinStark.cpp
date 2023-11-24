@@ -10,7 +10,6 @@ ordered_json proof2zkinStark(ordered_json &proof)
     ordered_json zkinOut = ordered_json::object();
 
     zkinOut["root1"] = proof["root1"];
-    zkinOut["root2"] = proof["root2"];
     zkinOut["root3"] = proof["root3"];
     zkinOut["root4"] = proof["root4"];
     zkinOut["evals"] = proof["evals"];
@@ -123,7 +122,6 @@ ordered_json joinzkin(ordered_json &zkin1, ordered_json &zkin2, ordered_json &ve
 
     zkinOut["a_publics"] = zkin1["publics"];
     zkinOut["a_root1"] = zkin1["root1"];
-    zkinOut["a_root2"] = zkin1["root2"];
     zkinOut["a_root3"] = zkin1["root3"];
     zkinOut["a_root4"] = zkin1["root4"];
     zkinOut["a_evals"] = zkin1["evals"];
@@ -145,7 +143,6 @@ ordered_json joinzkin(ordered_json &zkin1, ordered_json &zkin2, ordered_json &ve
 
     zkinOut["b_publics"] = zkin2["publics"];
     zkinOut["b_root1"] = zkin2["root1"];
-    zkinOut["b_root2"] = zkin2["root2"];
     zkinOut["b_root3"] = zkin2["root3"];
     zkinOut["b_root4"] = zkin2["root4"];
     zkinOut["b_evals"] = zkin2["evals"];

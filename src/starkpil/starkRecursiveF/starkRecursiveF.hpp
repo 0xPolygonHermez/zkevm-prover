@@ -20,7 +20,7 @@
 #include "steps.hpp"
 
 #define BN128_ARITY 16
-#define STARK_RECURSIVE_F_NUM_TREES 5
+#define STARK_RECURSIVE_F_NUM_TREES 4
 
 class StarkRecursiveF
 {
@@ -49,8 +49,6 @@ private:
 
     Goldilocks::Element *p_cm1_2ns;
     Goldilocks::Element *p_cm1_n;
-    Goldilocks::Element *p_cm2_2ns;
-    Goldilocks::Element *p_cm2_n;
     Goldilocks::Element *p_cm3_2ns;
     Goldilocks::Element *p_cm3_n;
     Goldilocks::Element *cm4_2ns;
@@ -117,9 +115,6 @@ public:
 
     /* Returns the size of all the polynomials: committed, constant, etc. */
     uint64_t getTotalPolsSize(void) { return starkInfo.mapTotalN * sizeof(Goldilocks::Element); }
-
-    /* Returns the size of the committed polynomials */
-    uint64_t getCommitPolsSize(void) { return starkInfo.mapOffsets.section[cm2_n] * sizeof(Goldilocks::Element); }
 
     /* Generates a proof from the address to all polynomials memory area, and the committed pols */
     void genProof(FRIProofC12 &proof, Goldilocks::Element publicInputs[8]);

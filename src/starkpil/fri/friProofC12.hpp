@@ -149,13 +149,11 @@ class ProofsC12
 {
 public:
     std::vector<RawFr::Element> root1;
-    std::vector<RawFr::Element> root2;
     std::vector<RawFr::Element> root3;
     std::vector<RawFr::Element> root4;
     FriC12 fri;
     std::vector<std::vector<Goldilocks::Element>> evals;
     ProofsC12(uint64_t polN, uint64_t dim, uint64_t numSteps, uint64_t evalSize) : root1(1, RawFr::field.zero()),
-                                                                                   root2(1, RawFr::field.zero()),
                                                                                    root3(1, RawFr::field.zero()),
                                                                                    root4(1, RawFr::field.zero()),
                                                                                    fri(polN, dim, numSteps),
@@ -173,12 +171,10 @@ public:
         ordered_json j = ordered_json::object();
 
         ordered_json json_root1 = ordered_json::array();
-        ordered_json json_root2 = ordered_json::array();
         ordered_json json_root3 = ordered_json::array();
         ordered_json json_root4 = ordered_json::array();
 
         j["root1"] = RawFr::field.toString(root1[0]);
-        j["root2"] = RawFr::field.toString(root2[0]);
         j["root3"] = RawFr::field.toString(root3[0]);
         j["root4"] = RawFr::field.toString(root4[0]);
 

@@ -8,7 +8,7 @@
 #include "zklog.hpp"
 #include "exit_process.hpp"
 
-#define NUM_CHALLENGES 8
+#define NUM_CHALLENGES 7
 
 StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config(config),
                                                                           starkInfo(config, config.recursivefStarkInfo),
@@ -102,8 +102,6 @@ StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config
 
     p_cm1_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm1_2ns]];
     p_cm1_n = &mem[starkInfo.mapOffsets.section[eSection::cm1_n]];
-    p_cm2_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm2_2ns]];
-    p_cm2_n = &mem[starkInfo.mapOffsets.section[eSection::cm2_n]];
     p_cm3_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm3_2ns]];
     p_cm3_n = &mem[starkInfo.mapOffsets.section[eSection::cm3_n]];
     cm4_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm4_2ns]];
@@ -147,29 +145,27 @@ void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInp
     StarkRecursiveFSteps recurisveFsteps;
     StarkRecursiveFSteps *steps = &recurisveFsteps;
     // Initialize vars
-    uint64_t numCommited = starkInfo.nCm1;
+    uint64_t numCommited = starkInfo.nCommitments;
     TranscriptBN128 transcript;
     Polinomial evals(N, FIELD_EXTENSION);
     Polinomial xDivXSubXi(NExtended, FIELD_EXTENSION);
     Polinomial xDivXSubWXi(NExtended, FIELD_EXTENSION);
     Polinomial challenges(NUM_CHALLENGES, FIELD_EXTENSION);
 
-    CommitPolsStarks cmPols(pAddress, starkInfo.mapDeg.section[eSection::cm1_n], numCommited);
+    CommitPolsStarks cmPols(pAddress, starkInfo.mapDeg.section[eSection::cm1_n], starkInfo.nCm1);
 
     RawFr::Element rootC;
     RawFr::Element root0;
-    RawFr::Element root1;
     RawFr::Element root2;
     RawFr::Element root3;
 
     MerkleTreeBN128 *treesBN128[STARK_RECURSIVE_F_NUM_TREES];
     treesBN128[0] = new MerkleTreeBN128(NExtended, starkInfo.mapSectionsN.section[eSection::cm1_n], p_cm1_2ns);
-    treesBN128[1] = new MerkleTreeBN128(NExtended, starkInfo.mapSectionsN.section[eSection::cm2_n], p_cm2_2ns);
-    treesBN128[2] = new MerkleTreeBN128(NExtended, starkInfo.mapSectionsN.section[eSection::cm3_n], p_cm3_2ns);
-    treesBN128[3] = new MerkleTreeBN128(NExtended, starkInfo.mapSectionsN.section[eSection::cm4_2ns], cm4_2ns);
-    treesBN128[4] = new MerkleTreeBN128(pConstTreeAddress);
+    treesBN128[1] = new MerkleTreeBN128(NExtended, starkInfo.mapSectionsN.section[eSection::cm3_n], p_cm3_2ns);
+    treesBN128[2] = new MerkleTreeBN128(NExtended, starkInfo.mapSectionsN.section[eSection::cm4_2ns], cm4_2ns);
+    treesBN128[3] = new MerkleTreeBN128(pConstTreeAddress);
 
-    treesBN128[4]->getRoot(&rootC);
+    treesBN128[3]->getRoot(&rootC);
 
     transcript.put(&rootC, 1);
     transcript.put(&publicInputs[0], starkInfo.nPublics);
@@ -192,6 +188,96 @@ void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInp
     // 1.- Calculate p_cm1_2ns
     //--------------------------------
     TimerStart(STARK_RECURSIVE_F_STEP_1);
+
+    TimerStart(STARK_RECURSIVE_F_STEP_1_CALCULATE_EXPS);
+    #pragma omp parallel for
+    for (uint64_t i = 0; i < N; i++)
+    {
+        steps->step1_first(params, i);
+    }
+    TimerStopAndLog(STARK_RECURSIVE_F_STEP_1_CALCULATE_EXPS);
+
+   TimerStart(STARK_STEP_1_CALCULATE_MULTIPLICITIES);
+
+    int64_t* fHash = new int64_t[N * starkInfo.puCtx.size()];
+    int64_t* tHash = new int64_t[N * starkInfo.puCtx.size()];
+
+    memset(fHash, -1, N * starkInfo.puCtx.size() * sizeof(int64_t));
+    memset(fHash, -1, N * starkInfo.puCtx.size() * sizeof(int64_t));
+        
+    vector<vector<PolSectionInfo>> tPolsInfo(starkInfo.puCtx.size());
+    vector<vector<PolSectionInfo>> fPolsInfo(starkInfo.puCtx.size());
+    vector<PolSectionInfo> fSelPolInfo(starkInfo.puCtx.size());
+    vector<PolSectionInfo> tSelPolInfo(starkInfo.puCtx.size());
+
+    #pragma omp parallel for 
+    for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++) {
+        uint64_t nPols = starkInfo.puCtx[i].tVals.size();
+        tPolsInfo[i] = vector<PolSectionInfo>(nPols);
+        fPolsInfo[i] = vector<PolSectionInfo>(nPols);
+        for (uint64_t j = 0; j < nPols; j++) 
+        {
+            VarPolMap polInfo = starkInfo.varPolMap[starkInfo.exp2pol[to_string(starkInfo.puCtx[i].tVals[j])]];
+            tPolsInfo[i][j] = {starkInfo.mapOffsets.section[polInfo.section] + polInfo.sectionPos, starkInfo.mapSectionsN.section[polInfo.section]};
+        }
+
+        for (uint64_t j = 0; j < nPols; j++) 
+        {
+            VarPolMap polInfo = starkInfo.varPolMap[starkInfo.exp2pol[to_string(starkInfo.puCtx[i].fVals[j])]];
+            fPolsInfo[i][j] = {starkInfo.mapOffsets.section[polInfo.section] + polInfo.sectionPos, starkInfo.mapSectionsN.section[polInfo.section]};
+        }
+
+        if(starkInfo.puCtx[i].hasSelT) {
+            VarPolMap polInfo = starkInfo.varPolMap[starkInfo.exp2pol[to_string(starkInfo.puCtx[i].tSelExpId)]];
+            tSelPolInfo[i] = {starkInfo.mapOffsets.section[polInfo.section] + polInfo.sectionPos, starkInfo.mapSectionsN.section[polInfo.section]};
+        }
+
+        if(starkInfo.puCtx[i].hasSelF) {
+            VarPolMap polInfo = starkInfo.varPolMap[starkInfo.exp2pol[to_string(starkInfo.puCtx[i].fSelExpId)]];
+            fSelPolInfo[i] = {starkInfo.mapOffsets.section[polInfo.section] + polInfo.sectionPos, starkInfo.mapSectionsN.section[polInfo.section]};
+        }
+    }
+
+    TimerStart(STARK_STEP_1_CALCULATE_HASHES);
+
+    #pragma omp parallel for collapse(2)
+    for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++) {
+        for (uint64_t j = 0; j < N; j++) {
+            uint64_t pos = i * N + j;
+            uint64_t nPols = tPolsInfo[i].size();
+            if(!starkInfo.puCtx[i].hasSelT || !Goldilocks::isZero(mem[tSelPolInfo[i].offset + j * tSelPolInfo[i].nCols])) {
+                uint64_t values[nPols];
+                for(uint64_t k = 0; k < nPols; k++) {
+                    values[k] = Goldilocks::toU64(mem[tPolsInfo[i][k].offset + j * tPolsInfo[i][k].nCols]);
+                }
+                tHash[pos] = Polinomial::calculateHash(values, nPols);
+            }
+
+            if(!starkInfo.puCtx[i].hasSelF || !Goldilocks::isZero(mem[fSelPolInfo[i].offset + j * fSelPolInfo[i].nCols])) {
+                uint64_t values[nPols];
+                for(uint64_t k = 0; k < nPols; k++) {
+                    values[k] = Goldilocks::toU64(mem[fPolsInfo[i][k].offset + j * fPolsInfo[i][k].nCols]);
+                }
+                fHash[pos] = Polinomial::calculateHash(values, nPols);
+            }
+        }
+    }
+
+    TimerStopAndLog(STARK_STEP_1_CALCULATE_HASHES);
+
+    #pragma omp parallel for
+    for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
+    {
+        Polinomial m = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited + i]);
+        Polinomial::calculateMulCounter(m, &fHash[i * N], &tHash[i * N]);
+    }
+    numCommited += starkInfo.puCtx.size();
+
+    delete[] fHash;
+    delete[] tHash;
+    TimerStopAndLog(STARK_STEP_1_CALCULATE_MULTIPLICITIES);
+
+
     TimerStart(STARK_RECURSIVE_F_STEP_1_LDE_AND_MERKLETREE);
     TimerStart(STARK_RECURSIVE_F_STEP_1_LDE);
 
@@ -207,51 +293,12 @@ void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInp
     TimerStopAndLog(STARK_RECURSIVE_F_STEP_1);
 
     //--------------------------------
-    // 2.- Caluculate plookups h1 and h2
-    //--------------------------------
-    TimerStart(STARK_RECURSIVE_F_STEP_2);
-    transcript.getField((uint64_t *)challenges[0]); // u
-    transcript.getField((uint64_t *)challenges[1]); // defVal
-    TimerStart(STARK_RECURSIVE_F_STEP_2_CALCULATE_EXPS);
-
-#pragma omp parallel for
-    for (uint64_t i = 0; i < N; i++)
-    {
-        steps->step2prev_first(params, i);
-    }
-    TimerStopAndLog(STARK_RECURSIVE_F_STEP_2_CALCULATE_EXPS);
-
-    TimerStart(STARK_RECURSIVE_F_STEP_2_CALCULATEH1H2);
-#pragma omp parallel for
-    for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
-    {
-        Polinomial fPol = starkInfo.getPolinomial(mem, starkInfo.exp2pol[to_string(starkInfo.puCtx[i].fExpId)]);
-        Polinomial tPol = starkInfo.getPolinomial(mem, starkInfo.exp2pol[to_string(starkInfo.puCtx[i].tExpId)]);
-        Polinomial h1 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited++]);
-        Polinomial h2 = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited++]);
-
-        Polinomial::calculateH1H2(h1, h2, fPol, tPol);
-    }
-    TimerStopAndLog(STARK_RECURSIVE_F_STEP_2_CALCULATEH1H2);
-
-    TimerStart(STARK_RECURSIVE_F_STEP_2_LDE_AND_MERKLETREE);
-
-    ntt.extendPol(p_cm2_2ns, p_cm2_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm2_n], pBuffer);
-
-    treesBN128[1]->merkelize();
-    treesBN128[1]->getRoot(&root1);
-    zklog.info("MerkleTree root 1: [ " + RawFr::field.toString(root1, 10) + " ]");
-    transcript.put(&root1, 1);
-
-    TimerStopAndLog(STARK_RECURSIVE_F_STEP_2_LDE_AND_MERKLETREE);
-    TimerStopAndLog(STARK_RECURSIVE_F_STEP_2);
-
-    //--------------------------------
     // 3.- Compute Z polynomials
     //--------------------------------
     TimerStart(STARK_RECURSIVE_F_STEP_3);
+    transcript.getField((uint64_t *)challenges[0]); // alpha
+    transcript.getField((uint64_t *)challenges[1]); // beta
     transcript.getField((uint64_t *)challenges[2]); // gamma
-    transcript.getField((uint64_t *)challenges[3]); // betta
 
     TimerStart(STARK_RECURSIVE_F_STEP_3_PREV_CALCULATE_EXPS);
 #pragma omp parallel for
@@ -266,8 +313,8 @@ void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInp
     {
         Polinomial pNum = starkInfo.getPolinomial(mem, starkInfo.exp2pol[to_string(starkInfo.puCtx[i].numId)]);
         Polinomial pDen = starkInfo.getPolinomial(mem, starkInfo.exp2pol[to_string(starkInfo.puCtx[i].denId)]);
-        Polinomial z = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited++]);
-        Polinomial::calculateZ(z, pNum, pDen);
+        Polinomial s = starkInfo.getPolinomial(mem, starkInfo.cm_n[numCommited++]);
+        Polinomial::calculateS(s, pNum, pDen);
     }
 
     for (uint64_t i = 0; i < starkInfo.peCtx.size(); i++)
@@ -299,8 +346,8 @@ void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInp
 
     ntt.extendPol(p_cm3_2ns, p_cm3_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm3_n], pBuffer);
 
-    treesBN128[2]->merkelize();
-    treesBN128[2]->getRoot(&root2);
+    treesBN128[1]->merkelize();
+    treesBN128[1]->getRoot(&root2);
     zklog.info("MerkleTree root 2: [ " + RawFr::field.toString(root2, 10) + " ]");
     transcript.put(&root2, 1);
 
@@ -313,7 +360,7 @@ void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInp
     TimerStart(STARK_RECURSIVE_F_STEP_4);
     TimerStart(STARK_RECURSIVE_F_STEP_4_CALCULATE_EXPS);
 
-    transcript.getField((uint64_t *)challenges[4]); // gamma
+    transcript.getField((uint64_t *)challenges[3]); // vc
 
     TimerStopAndLog(STARK_RECURSIVE_F_STEP_4_CALCULATE_EXPS);
 
@@ -348,8 +395,8 @@ void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInp
     TimerStopAndLog(STARK_RECURSIVE_F_STEP_4_CALCULATE_EXPS_2NS);
     TimerStart(STARK_RECURSIVE_F_STEP_4_MERKLETREE);
 
-    treesBN128[3]->merkelize();
-    treesBN128[3]->getRoot(&root3);
+    treesBN128[2]->merkelize();
+    treesBN128[2]->getRoot(&root3);
     zklog.info("MerkleTree root 3: [ " + RawFr::field.toString(root3, 10) + " ]");
     transcript.put(&root3, 1);
     TimerStopAndLog(STARK_RECURSIVE_F_STEP_4_MERKLETREE);
@@ -361,9 +408,7 @@ void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInp
     TimerStart(STARK_RECURSIVE_F_STEP_5);
     TimerStart(STARK_RECURSIVE_F_STEP_5_LEv_LpEv);
 
-    // transcript.getField((uint64_t *)challenges[5]); // v1
-    // transcript.getField((uint64_t *)challenges[6]); // v2
-    transcript.getField((uint64_t *)challenges[7]); // xi
+    transcript.getField((uint64_t *)challenges[6]); // xi
 
     Polinomial LEv(N, 3, "LEv");
     Polinomial LpEv(N, 3, "LpEv");
@@ -374,8 +419,8 @@ void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInp
     Goldilocks3::one((Goldilocks3::Element &)*LEv[0]);
     Goldilocks3::one((Goldilocks3::Element &)*LpEv[0]);
 
-    Polinomial::divElement(xis, 0, challenges, 7, (Goldilocks::Element &)Goldilocks::shift());
-    Polinomial::mulElement(c_w, 0, challenges, 7, (Goldilocks::Element &)Goldilocks::w(starkInfo.starkStruct.nBits));
+    Polinomial::divElement(xis, 0, challenges, 6, (Goldilocks::Element &)Goldilocks::shift());
+    Polinomial::mulElement(c_w, 0, challenges, 6, (Goldilocks::Element &)Goldilocks::w(starkInfo.starkStruct.nBits));
     Polinomial::divElement(wxis, 0, c_w, 0, (Goldilocks::Element &)Goldilocks::shift());
 
     for (uint64_t k = 1; k < N; k++)
@@ -593,15 +638,15 @@ void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInp
         transcript.put(evals[i], 3);
     }
 
-    transcript.getField((uint64_t *)challenges[5]); // v1
-    transcript.getField((uint64_t *)challenges[6]); // v2
+    transcript.getField((uint64_t *)challenges[4]); // v1
+    transcript.getField((uint64_t *)challenges[5]); // v2
 
     // Calculate xDivXSubXi, xDivXSubWXi
     Polinomial xi(1, FIELD_EXTENSION);
     Polinomial wxi(1, FIELD_EXTENSION);
 
-    Polinomial::copyElement(xi, 0, challenges, 7);
-    Polinomial::mulElement(wxi, 0, challenges, 7, (Goldilocks::Element &)Goldilocks::w(starkInfo.starkStruct.nBits));
+    Polinomial::copyElement(xi, 0, challenges, 6);
+    Polinomial::mulElement(wxi, 0, challenges, 6, (Goldilocks::Element &)Goldilocks::w(starkInfo.starkStruct.nBits));
 
     Polinomial x(1, FIELD_EXTENSION);
     *x[0] = Goldilocks::shift();
@@ -643,10 +688,9 @@ void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInp
     proof.proofs.setEvals(evals.address());
 
     std::memcpy(&proof.proofs.root1[0], &root0, sizeof(RawFr::Element));
-    std::memcpy(&proof.proofs.root2[0], &root1, sizeof(RawFr::Element));
     std::memcpy(&proof.proofs.root3[0], &root2, sizeof(RawFr::Element));
     std::memcpy(&proof.proofs.root4[0], &root3, sizeof(RawFr::Element));
-    for (uint i = 0; i < 5; i++)
+    for (uint i = 0; i < 4; i++)
     {
         delete treesBN128[i];
     }

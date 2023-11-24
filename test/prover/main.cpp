@@ -1,88 +1,63 @@
 #include <stdio.h>
 #include "starks.hpp"
 #include "proof2zkinStark.hpp"
-#include "zkevmSteps.hpp"
+#include "allSteps.hpp"
 
 int main()
 {
 
     Config config;
-    config.runFileGenBatchProof = true;
-    config.zkevmConstPols = "config/zkevm/zkevm.const";
+    config.runFileGenBatchProof = true; // So that starkInfo is created
     config.mapConstPolsFile = false;
-    config.zkevmConstantsTree = "config/zkevm/zkevm.consttree";
-    config.zkevmStarkInfo = "config/zkevm/zkevm.starkinfo.json";
+    config.mapConstantsTreeFile = false;
+    
+    string constPols = "test/prover/all.const";
+    string constTree = "test/prover/all.consttree";
+    string starkInfoFile = "test/prover/all.starkinfo.json";
+    string commitPols = "test/prover/all.commit";
+    string verkey = "test/prover/all.verkey.json";
 
-    StarkInfo starkInfo(config, config.zkevmStarkInfo);
-
+    StarkInfo starkInfo(config, starkInfoFile);
 
     uint64_t polBits = starkInfo.starkStruct.steps[starkInfo.starkStruct.steps.size() - 1].nBits;
     FRIProof fproof((1 << polBits), FIELD_EXTENSION, starkInfo.starkStruct.steps.size(), starkInfo.evMap.size(), starkInfo.nPublics);
 
-    void *pCommit = copyFile("config/zkevm/zkevm.commit", starkInfo.nCm1 * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
+    void *pCommit = copyFile(commitPols, starkInfo.nCommitments * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
     void *pAddress = (void *)calloc(starkInfo.mapTotalN + (starkInfo.mapSectionsN.section[eSection::cm1_n] * (1 << starkInfo.starkStruct.nBits) * FIELD_EXTENSION ), sizeof(uint64_t));
 
-        Starks starks(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo},pAddress);
+    Starks starks(config, {constPols, config.mapConstPolsFile, constTree, starkInfoFile}, pAddress);
 
+    starks.nrowsStepBatch = 4;
 
-    std::memcpy(pAddress, pCommit, starkInfo.nCm1 * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
+    uint64_t N = (1 << starkInfo.starkStruct.nBits);
+    #pragma omp parallel for
+    for (uint64_t i = 0; i < N; i += 1)
+    {
+        std::memcpy((uint8_t*)pAddress + i*starkInfo.nCm1*sizeof(Goldilocks::Element), (uint8_t*)pCommit + i*starkInfo.nCommitments*sizeof(Goldilocks::Element), starkInfo.nCommitments*sizeof(Goldilocks::Element));
+    }
 
-    Goldilocks::Element publicInputs[47] = {
-        Goldilocks::fromU64(3248459814),
-        Goldilocks::fromU64(1620587195),
-        Goldilocks::fromU64(3678822139),
-        Goldilocks::fromU64(1824295850),
-        Goldilocks::fromU64(366027599),
-        Goldilocks::fromU64(1355324045),
-        Goldilocks::fromU64(1531026716),
-        Goldilocks::fromU64(1017354875),
-        Goldilocks::fromU64(0),
-        Goldilocks::fromU64(0),
-        Goldilocks::fromU64(0),
-        Goldilocks::fromU64(0),
-        Goldilocks::fromU64(0),
-        Goldilocks::fromU64(0),
-        Goldilocks::fromU64(0),
-        Goldilocks::fromU64(0),
-        Goldilocks::fromU64(0),
-        Goldilocks::fromU64(1000),
-        Goldilocks::fromU64(2046823526),
-        Goldilocks::fromU64(324844084),
-        Goldilocks::fromU64(2227533143),
-        Goldilocks::fromU64(4019066851),
-        Goldilocks::fromU64(2813851449),
-        Goldilocks::fromU64(3704192333),
-        Goldilocks::fromU64(4283076590),
-        Goldilocks::fromU64(1639128234),
-        Goldilocks::fromU64(4132056474),
-        Goldilocks::fromU64(3588173260),
-        Goldilocks::fromU64(2226075649),
-        Goldilocks::fromU64(3791783573),
-        Goldilocks::fromU64(459514060),
-        Goldilocks::fromU64(4265611735),
-        Goldilocks::fromU64(3195494985),
-        Goldilocks::fromU64(118230042),
-        Goldilocks::fromU64(0),
-        Goldilocks::fromU64(0),
-        Goldilocks::fromU64(0),
-        Goldilocks::fromU64(0),
-        Goldilocks::fromU64(0),
-        Goldilocks::fromU64(0),
-        Goldilocks::fromU64(0),
-        Goldilocks::fromU64(0),
+    Goldilocks::Element publicInputs[3] = {
         Goldilocks::fromU64(1),
-        Goldilocks::fromU64(17096957522471052170ULL),
-        Goldilocks::fromU64(3393099452376483046ULL),
-        Goldilocks::fromU64(13454683351222426301ULL),
-        Goldilocks::fromU64(7169267199863900071ULL)};
+        Goldilocks::fromU64(2),
+        Goldilocks::fromU64(74469561660084004),
+    };
 
     json publicStarkJson;
-    for (int i = 0; i < 47; i++)
+    for (int i = 0; i < 3; i++)
     {
         publicStarkJson[i] = Goldilocks::toString(publicInputs[i]);
     }
-    ZkevmSteps zkevmSteps;
-    starks.genProof(fproof, &publicInputs[0], &zkevmSteps);
+    AllSteps allSteps;
+
+    json allVerkeyJson;
+    file2json(verkey, allVerkeyJson);
+    Goldilocks::Element allVerkey[4];
+    allVerkey[0] = Goldilocks::fromU64(allVerkeyJson["constRoot"][0]);
+    allVerkey[1] = Goldilocks::fromU64(allVerkeyJson["constRoot"][1]);
+    allVerkey[2] = Goldilocks::fromU64(allVerkeyJson["constRoot"][2]);
+    allVerkey[3] = Goldilocks::fromU64(allVerkeyJson["constRoot"][3]);
+
+    starks.genProof(fproof, &publicInputs[0], allVerkey, &allSteps);
 
     nlohmann::ordered_json jProof = fproof.proofs.proof2json();
     nlohmann::json zkin = proof2zkinStark(jProof);
@@ -90,8 +65,9 @@ int main()
     jProof["publics"] = publicStarkJson;
     zkin["publics"] = publicStarkJson;
 
-    json2file(zkin, "zkin.json");
-    json2file(jProof, "jProof.json");
+    json2file(publicStarkJson, "runtime/output/publics.json");
+    json2file(zkin, "runtime/output/zkin.json");
+    json2file(jProof, "runtime/output/jProof.json");
 
     return 0;
 }

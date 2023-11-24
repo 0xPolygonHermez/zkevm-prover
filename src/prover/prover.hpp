@@ -55,6 +55,7 @@ private:
     pthread_mutex_t mutex;    // Mutex to protect the requests queues
     void *pAddress = NULL;
     void *pAddressStarksRecursiveF = NULL;
+    void *cmAddress = NULL;
     int protocolId;
 public:
     const Config &config;

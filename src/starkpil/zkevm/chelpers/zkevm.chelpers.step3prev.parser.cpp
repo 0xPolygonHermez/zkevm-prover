@@ -1671,8 +1671,8 @@ void ZkevmSteps::step3prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 91:
                {
-                    assert(0); // code not used
-                    i_args += 4;
+                    //Goldilocks::copy_avx512(&params.pols[args3prev[i_args] + i * args3prev[i_args + 1]], args3prev[i_args + 1], &params.pConstPols->getElement(args3prev[i_args + 2], i));
+                    i_args += 3;
                     break;
                }
                case 92:
@@ -1707,7 +1707,7 @@ void ZkevmSteps::step3prev_parser_first_avx512(StepsParams &params, uint64_t nro
                }
                case 97:
                {
-                    assert(0); // code not used
+                    //Goldilocks::sub_avx(&params.pols[args3[i_args] + i * args3[i_args + 1]], args3[i_args + 1], tmp3[args3[i_args + 2]], tmp3[args3[i_args + 3]]);
                     i_args += 4;
                     break;
                }
