@@ -3012,6 +3012,7 @@ void _MPdiv_short (const vector<mpz_class> &a, const mpz_class &b, vector<mpz_cl
 {
     uint64_t a_l = a.size();
     quotient.clear();
+    quotient.insert(quotient.begin(), a_l, ScalarZero);
     remainder = 0;
 
     mpz_class dividendi;
@@ -3239,13 +3240,13 @@ void eval_receiveQuotientChunk_short (Context &ctx, const RomCommand &cmd, Comma
         return;
     }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
-    if (cr.type != crt_scalar)
+    if (cr.type != crt_u64)
     {
         zklog.error("eval_receiveQuotientChunk_short() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 #endif
-    uint64_t position = cr.scalar.get_ui();
+    uint64_t position = cr.u64;
 
     if (position >= ctx.quotientShort.size())
     {
