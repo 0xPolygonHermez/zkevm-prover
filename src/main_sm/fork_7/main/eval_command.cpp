@@ -3542,7 +3542,7 @@ void eval_ARITH_BN254_ADDFP2_X (Context &ctx, const RomCommand &cmd, CommandResu
     RawFr::Element x1;
     bn128.fromMpz(x1, cr.scalar.get_mpz_t());
 
-    // Get y1 by executing cmd.params[1]
+    // Get x2 by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
     if (cr.zkResult != ZKR_SUCCESS)
     {
@@ -3578,7 +3578,7 @@ void eval_ARITH_BN254_ADDFP2_Y (Context &ctx, const RomCommand &cmd, CommandResu
     }
 #endif
 
-    // Get x1 by executing cmd.params[0]
+    // Get y1 by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
     if (cr.zkResult != ZKR_SUCCESS)
     {
@@ -3594,7 +3594,7 @@ void eval_ARITH_BN254_ADDFP2_Y (Context &ctx, const RomCommand &cmd, CommandResu
     RawFr::Element y1;
     bn128.fromMpz(y1, cr.scalar.get_mpz_t());
 
-    // Get y1 by executing cmd.params[1]
+    // Get y2 by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
     if (cr.zkResult != ZKR_SUCCESS)
     {
@@ -3646,7 +3646,7 @@ void eval_ARITH_BN254_SUBFP2_X (Context &ctx, const RomCommand &cmd, CommandResu
     RawFr::Element x1;
     bn128.fromMpz(x1, cr.scalar.get_mpz_t());
 
-    // Get y1 by executing cmd.params[1]
+    // Get x2 by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
     if (cr.zkResult != ZKR_SUCCESS)
     {
@@ -3682,7 +3682,7 @@ void eval_ARITH_BN254_SUBFP2_Y (Context &ctx, const RomCommand &cmd, CommandResu
     }
 #endif
 
-    // Get x1 by executing cmd.params[0]
+    // Get y1 by executing cmd.params[0]
     evalCommand(ctx, *cmd.params[0], cr);
     if (cr.zkResult != ZKR_SUCCESS)
     {
@@ -3698,7 +3698,7 @@ void eval_ARITH_BN254_SUBFP2_Y (Context &ctx, const RomCommand &cmd, CommandResu
     RawFr::Element y1;
     bn128.fromMpz(y1, cr.scalar.get_mpz_t());
 
-    // Get y1 by executing cmd.params[1]
+    // Get y2 by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
     if (cr.zkResult != ZKR_SUCCESS)
     {
@@ -3752,7 +3752,7 @@ void eval_fp2InvBN254_x (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     bn128.fromMpz(a, cr.scalar.get_mpz_t());
 
     // Get b by executing cmd.params[1]
-    evalCommand(ctx, *cmd.params[0], cr);
+    evalCommand(ctx, *cmd.params[1], cr);
     if (cr.zkResult != ZKR_SUCCESS)
     {
         return;
@@ -3808,7 +3808,7 @@ void eval_fp2InvBN254_y (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     bn128.fromMpz(a, cr.scalar.get_mpz_t());
 
     // Get b by executing cmd.params[1]
-    evalCommand(ctx, *cmd.params[0], cr);
+    evalCommand(ctx, *cmd.params[1], cr);
     if (cr.zkResult != ZKR_SUCCESS)
     {
         return;
