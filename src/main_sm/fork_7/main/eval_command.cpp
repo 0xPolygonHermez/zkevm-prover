@@ -3012,6 +3012,7 @@ void _MPdiv_short (const vector<mpz_class> &a, const mpz_class &b, vector<mpz_cl
 {
     uint64_t a_l = a.size();
     quotient.clear();
+    quotient.insert(quotient.begin(), a_l, ScalarZero);
     remainder = 0;
 
     mpz_class dividendi;
@@ -3239,13 +3240,13 @@ void eval_receiveQuotientChunk_short (Context &ctx, const RomCommand &cmd, Comma
         return;
     }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
-    if (cr.type != crt_scalar)
+    if (cr.type != crt_u64)
     {
         zklog.error("eval_receiveQuotientChunk_short() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 #endif
-    uint64_t position = cr.scalar.get_ui();
+    uint64_t position = cr.u64;
 
     if (position >= ctx.quotientShort.size())
     {
@@ -3371,8 +3372,8 @@ void eval_ARITH_BN254_MULFP2_X (Context &ctx, const RomCommand &cmd, CommandResu
         exitProcess();
     }
 #endif
-    RawFr::Element x1;
-    bn128.fromMpz(x1, cr.scalar.get_mpz_t());
+    RawFq::Element x1;
+    fq.fromMpz(x1, cr.scalar.get_mpz_t());
 
     // Get y1 by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
@@ -3387,8 +3388,8 @@ void eval_ARITH_BN254_MULFP2_X (Context &ctx, const RomCommand &cmd, CommandResu
         exitProcess();
     }
 #endif
-    RawFr::Element y1;
-    bn128.fromMpz(y1, cr.scalar.get_mpz_t());
+    RawFq::Element y1;
+    fq.fromMpz(y1, cr.scalar.get_mpz_t());
 
     // Get x2 by executing cmd.params[2]
     evalCommand(ctx, *cmd.params[2], cr);
@@ -3403,8 +3404,8 @@ void eval_ARITH_BN254_MULFP2_X (Context &ctx, const RomCommand &cmd, CommandResu
         exitProcess();
     }
 #endif
-    RawFr::Element x2;
-    bn128.fromMpz(x2, cr.scalar.get_mpz_t());
+    RawFq::Element x2;
+    fq.fromMpz(x2, cr.scalar.get_mpz_t());
 
     // Get y2 by executing cmd.params[3]
     evalCommand(ctx, *cmd.params[3], cr);
@@ -3419,16 +3420,16 @@ void eval_ARITH_BN254_MULFP2_X (Context &ctx, const RomCommand &cmd, CommandResu
         exitProcess();
     }
 #endif
-    RawFr::Element y2;
-    bn128.fromMpz(y2, cr.scalar.get_mpz_t());
+    RawFq::Element y2;
+    fq.fromMpz(y2, cr.scalar.get_mpz_t());
 
-    // Calculate the point coordinate
-    RawFr::Element result;
-    result = bn128.sub(bn128.mul(x1, x2), bn128.mul(y1, y2));
+    // Calculate the point coordinate: x1*x2 - y1*y2
+    RawFq::Element result;
+    result = fq.sub(fq.mul(x1, x2), fq.mul(y1, y2));
 
     // Convert result to scalar
     cr.type = crt_scalar;
-    bn128.toMpz(cr.scalar.get_mpz_t(), result);
+    fq.toMpz(cr.scalar.get_mpz_t(), result);
 }
 
 void eval_ARITH_BN254_MULFP2_Y (Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -3455,8 +3456,8 @@ void eval_ARITH_BN254_MULFP2_Y (Context &ctx, const RomCommand &cmd, CommandResu
         exitProcess();
     }
 #endif
-    RawFr::Element x1;
-    bn128.fromMpz(x1, cr.scalar.get_mpz_t());
+    RawFq::Element x1;
+    fq.fromMpz(x1, cr.scalar.get_mpz_t());
 
     // Get y1 by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
@@ -3471,8 +3472,8 @@ void eval_ARITH_BN254_MULFP2_Y (Context &ctx, const RomCommand &cmd, CommandResu
         exitProcess();
     }
 #endif
-    RawFr::Element y1;
-    bn128.fromMpz(y1, cr.scalar.get_mpz_t());
+    RawFq::Element y1;
+    fq.fromMpz(y1, cr.scalar.get_mpz_t());
 
     // Get x2 by executing cmd.params[2]
     evalCommand(ctx, *cmd.params[2], cr);
@@ -3487,8 +3488,8 @@ void eval_ARITH_BN254_MULFP2_Y (Context &ctx, const RomCommand &cmd, CommandResu
         exitProcess();
     }
 #endif
-    RawFr::Element x2;
-    bn128.fromMpz(x2, cr.scalar.get_mpz_t());
+    RawFq::Element x2;
+    fq.fromMpz(x2, cr.scalar.get_mpz_t());
 
     // Get y2 by executing cmd.params[3]
     evalCommand(ctx, *cmd.params[3], cr);
@@ -3503,16 +3504,16 @@ void eval_ARITH_BN254_MULFP2_Y (Context &ctx, const RomCommand &cmd, CommandResu
         exitProcess();
     }
 #endif
-    RawFr::Element y2;
-    bn128.fromMpz(y2, cr.scalar.get_mpz_t());
+    RawFq::Element y2;
+    fq.fromMpz(y2, cr.scalar.get_mpz_t());
 
-    // Calculate the point coordinate
-    RawFr::Element result;
-    result = bn128.add(bn128.mul(x1, y2), bn128.mul(x2, y1));
+    // Calculate the point coordinate: x1*y2 + x2*y1
+    RawFq::Element result;
+    result = fq.add(fq.mul(x1, y2), fq.mul(x2, y1));
 
     // Convert result to scalar
     cr.type = crt_scalar;
-    bn128.toMpz(cr.scalar.get_mpz_t(), result);
+    fq.toMpz(cr.scalar.get_mpz_t(), result);
 }
 
 void eval_ARITH_BN254_ADDFP2_X (Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -3539,8 +3540,8 @@ void eval_ARITH_BN254_ADDFP2_X (Context &ctx, const RomCommand &cmd, CommandResu
         exitProcess();
     }
 #endif
-    RawFr::Element x1;
-    bn128.fromMpz(x1, cr.scalar.get_mpz_t());
+    RawFq::Element x1;
+    fq.fromMpz(x1, cr.scalar.get_mpz_t());
 
     // Get x2 by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
@@ -3555,16 +3556,16 @@ void eval_ARITH_BN254_ADDFP2_X (Context &ctx, const RomCommand &cmd, CommandResu
         exitProcess();
     }
 #endif
-    RawFr::Element x2;
-    bn128.fromMpz(x2, cr.scalar.get_mpz_t());
+    RawFq::Element x2;
+    fq.fromMpz(x2, cr.scalar.get_mpz_t());
 
     // Calculate the point coordinate
-    RawFr::Element result;
-    result = bn128.add(x1, x2);
+    RawFq::Element result;
+    result = fq.add(x1, x2);
 
     // Convert result to scalar
     cr.type = crt_scalar;
-    bn128.toMpz(cr.scalar.get_mpz_t(), result);
+    fq.toMpz(cr.scalar.get_mpz_t(), result);
 }
 
 void eval_ARITH_BN254_ADDFP2_Y (Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -3591,8 +3592,8 @@ void eval_ARITH_BN254_ADDFP2_Y (Context &ctx, const RomCommand &cmd, CommandResu
         exitProcess();
     }
 #endif
-    RawFr::Element y1;
-    bn128.fromMpz(y1, cr.scalar.get_mpz_t());
+    RawFq::Element y1;
+    fq.fromMpz(y1, cr.scalar.get_mpz_t());
 
     // Get y2 by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
@@ -3607,16 +3608,16 @@ void eval_ARITH_BN254_ADDFP2_Y (Context &ctx, const RomCommand &cmd, CommandResu
         exitProcess();
     }
 #endif
-    RawFr::Element y2;
-    bn128.fromMpz(y2, cr.scalar.get_mpz_t());
+    RawFq::Element y2;
+    fq.fromMpz(y2, cr.scalar.get_mpz_t());
 
     // Calculate the point coordinate
-    RawFr::Element result;
-    result = bn128.add(y1, y2);
+    RawFq::Element result;
+    result = fq.add(y1, y2);
 
     // Convert result to scalar
     cr.type = crt_scalar;
-    bn128.toMpz(cr.scalar.get_mpz_t(), result);
+    fq.toMpz(cr.scalar.get_mpz_t(), result);
 }
 
 void eval_ARITH_BN254_SUBFP2_X (Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -3643,8 +3644,8 @@ void eval_ARITH_BN254_SUBFP2_X (Context &ctx, const RomCommand &cmd, CommandResu
         exitProcess();
     }
 #endif
-    RawFr::Element x1;
-    bn128.fromMpz(x1, cr.scalar.get_mpz_t());
+    RawFq::Element x1;
+    fq.fromMpz(x1, cr.scalar.get_mpz_t());
 
     // Get x2 by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
@@ -3659,16 +3660,16 @@ void eval_ARITH_BN254_SUBFP2_X (Context &ctx, const RomCommand &cmd, CommandResu
         exitProcess();
     }
 #endif
-    RawFr::Element x2;
-    bn128.fromMpz(x2, cr.scalar.get_mpz_t());
+    RawFq::Element x2;
+    fq.fromMpz(x2, cr.scalar.get_mpz_t());
 
     // Calculate the point coordinate
-    RawFr::Element result;
-    result = bn128.sub(x1, x2);
+    RawFq::Element result;
+    result = fq.sub(x1, x2);
 
     // Convert result to scalar
     cr.type = crt_scalar;
-    bn128.toMpz(cr.scalar.get_mpz_t(), result);
+    fq.toMpz(cr.scalar.get_mpz_t(), result);
 }
 
 void eval_ARITH_BN254_SUBFP2_Y (Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -3695,8 +3696,8 @@ void eval_ARITH_BN254_SUBFP2_Y (Context &ctx, const RomCommand &cmd, CommandResu
         exitProcess();
     }
 #endif
-    RawFr::Element y1;
-    bn128.fromMpz(y1, cr.scalar.get_mpz_t());
+    RawFq::Element y1;
+    fq.fromMpz(y1, cr.scalar.get_mpz_t());
 
     // Get y2 by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
@@ -3711,16 +3712,16 @@ void eval_ARITH_BN254_SUBFP2_Y (Context &ctx, const RomCommand &cmd, CommandResu
         exitProcess();
     }
 #endif
-    RawFr::Element y2;
-    bn128.fromMpz(y2, cr.scalar.get_mpz_t());
+    RawFq::Element y2;
+    fq.fromMpz(y2, cr.scalar.get_mpz_t());
 
     // Calculate the point coordinate
-    RawFr::Element result;
-    result = bn128.sub(y1, y2);
+    RawFq::Element result;
+    result = fq.sub(y1, y2);
 
     // Convert result to scalar
     cr.type = crt_scalar;
-    bn128.toMpz(cr.scalar.get_mpz_t(), result);
+    fq.toMpz(cr.scalar.get_mpz_t(), result);
 }
 
 // Computes the "real" part of the inverse of the given Fp2 element.
@@ -3748,8 +3749,8 @@ void eval_fp2InvBN254_x (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         exitProcess();
     }
 #endif
-    RawFr::Element a;
-    bn128.fromMpz(a, cr.scalar.get_mpz_t());
+    RawFq::Element a;
+    fq.fromMpz(a, cr.scalar.get_mpz_t());
 
     // Get b by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
@@ -3764,19 +3765,19 @@ void eval_fp2InvBN254_x (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         exitProcess();
     }
 #endif
-    RawFr::Element b;
-    bn128.fromMpz(b, cr.scalar.get_mpz_t());
+    RawFq::Element b;
+    fq.fromMpz(b, cr.scalar.get_mpz_t());
 
     // Calculate the denominator
-    RawFr::Element den;
-    den = bn128.add(bn128.mul(a, a), bn128.mul(b, b));
+    RawFq::Element den;
+    den = fq.add(fq.mul(a, a), fq.mul(b, b));
 
     // Calculate x
-    RawFr::Element result;
-    bn128.div(result, a, den);
+    RawFq::Element result;
+    fq.div(result, a, den);
 
     // Convert back to scalar
-    bn128.toMpz(cr.scalar.get_mpz_t(), result);
+    fq.toMpz(cr.scalar.get_mpz_t(), result);
 }
 
 // Computes the "imaginary" part of the inverse of the given Fp2 element.
@@ -3804,8 +3805,8 @@ void eval_fp2InvBN254_y (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         exitProcess();
     }
 #endif
-    RawFr::Element a;
-    bn128.fromMpz(a, cr.scalar.get_mpz_t());
+    RawFq::Element a;
+    fq.fromMpz(a, cr.scalar.get_mpz_t());
 
     // Get b by executing cmd.params[1]
     evalCommand(ctx, *cmd.params[1], cr);
@@ -3820,19 +3821,19 @@ void eval_fp2InvBN254_y (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         exitProcess();
     }
 #endif
-    RawFr::Element b;
-    bn128.fromMpz(b, cr.scalar.get_mpz_t());
+    RawFq::Element b;
+    fq.fromMpz(b, cr.scalar.get_mpz_t());
 
     // Calculate the denominator
-    RawFr::Element den;
-    den = bn128.add(bn128.mul(a, a), bn128.mul(b, b));
+    RawFq::Element den;
+    den = fq.add(fq.mul(a, a), fq.mul(b, b));
 
     // Calculate y
-    RawFr::Element result;
-    bn128.div(result, bn128.neg(b), den);
+    RawFq::Element result;
+    fq.div(result, fq.neg(b), den);
 
     // Convert back to scalar
-    bn128.toMpz(cr.scalar.get_mpz_t(), result);
+    fq.toMpz(cr.scalar.get_mpz_t(), result);
 }
 
 // Computes the inverse of the given Fp element
@@ -3862,15 +3863,15 @@ void eval_fpBN254inv (Context &ctx, const RomCommand &cmd, CommandResult &cr)
 #endif
 
     // Get the field element from the command result
-    RawFr::Element a;
-    bn128.fromMpz(a, cr.scalar.get_mpz_t());
+    RawFq::Element a;
+    fq.fromMpz(a, cr.scalar.get_mpz_t());
 
     // Calculate the inverse of this field element
-    RawFr::Element aInv;
-    bn128.inv(aInv, a);
+    RawFq::Element aInv;
+    fq.inv(aInv, a);
 
     // Convert back to scalar
-    bn128.toMpz(cr.scalar.get_mpz_t(), aInv);
+    fq.toMpz(cr.scalar.get_mpz_t(), aInv);
 }
 
 

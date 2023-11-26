@@ -572,6 +572,8 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
 
     zkresult zkr;
 
+    //print(true);
+
     // Find batch state for this uuid
     unordered_map<string, BatchState>::iterator it;
     it = state.find(batchUUID);
@@ -716,6 +718,13 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
                     }
                     if (i == currentSubState)
                     {
+                        // If the origin of this sub-state is the tx old state root, then we are done
+                        if (txState.persistence[persistence].subState[currentSubState].oldStateRoot == txState.persistence[persistence].oldStateRoot)
+                        {
+                            break;
+                        }
+
+                        // Otherwise, we could not find a sub-state that connects to this one
                         zklog.error("StateManager::flush() could not find previous tx sub-state: batchUUID=" + batchUUID +
                             " newStateRoot=" + _newStateRoot +
                             " block=" + to_string(block) +

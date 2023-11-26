@@ -56,6 +56,7 @@ set<string> responseErrors = {
     "OOCA",
     "OOCPA",
     "OOCPO",
+    "OOCSH",
     "intrinsic_invalid_signature",
     "intrinsic_invalid_chain_id",
     "intrinsic_invalid_nonce",
