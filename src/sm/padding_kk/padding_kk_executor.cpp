@@ -13,7 +13,6 @@ uint64_t PaddingKKExecutor::prepareInput (vector<PaddingKKExecutorInput> &input)
 
     for (uint64_t i=0; i<input.size(); i++)
     {
-        input[i].dataBytes.clear();
         if (input[i].data.length() > 0)
         {
             // Make sure we got an even number of characters
@@ -24,6 +23,7 @@ uint64_t PaddingKKExecutor::prepareInput (vector<PaddingKKExecutorInput> &input)
             }
 
             // Convert string (data) into binary (dataBytes)
+            input[i].dataBytes.clear();
             for (uint64_t c=0; c<input[i].data.length(); c+=2)
             {
                 uint8_t aux;

@@ -14,7 +14,6 @@ uint64_t PaddingSha256Executor::prepareInput (vector<PaddingSha256ExecutorInput>
 
     for (uint64_t i=0; i<input.size(); i++)
     {
-        input[i].dataBytes.clear();
         if (input[i].data.length() > 0)
         {
             // Make sure we got an even number of characters
@@ -25,6 +24,7 @@ uint64_t PaddingSha256Executor::prepareInput (vector<PaddingSha256ExecutorInput>
             }
 
             // Convert string (data) into binary (dataBytes)
+            input[i].dataBytes.clear();
             for (uint64_t c=0; c<input[i].data.length(); c+=2)
             {
                 uint8_t aux;
@@ -87,6 +87,7 @@ void PaddingSha256Executor::execute (vector<PaddingSha256ExecutorInput> &input, 
         {
 
             pols.freeIn[p] = fr.fromU64(input[i].dataBytes[j]);
+            std::cout<<"Execute: input[i].realLen="<<input[i].realLen<<std::endl;
             pols.len[p] = fr.fromU64(input[i].realLen);
             pols.addr[p] = fr.fromU64(addr);
             if (j >= bytesPerBlock) pols.connected[p] = fr.one();
@@ -156,7 +157,7 @@ void PaddingSha256Executor::execute (vector<PaddingSha256ExecutorInput> &input, 
 
                 if (j == input[i].dataBytes.size() - 1) 
                 {
-                    scalar2fea(fr, input[i].hash,
+/*                    scalar2fea(fr, input[i].hash,
                         pols.hash0[p], 
                         pols.hash1[p], 
                         pols.hash2[p], 
@@ -164,7 +165,16 @@ void PaddingSha256Executor::execute (vector<PaddingSha256ExecutorInput> &input, 
                         pols.hash4[p], 
                         pols.hash5[p], 
                         pols.hash6[p], 
-                        pols.hash7[p]);
+                        pols.hash7[p]);*/
+                    scalar2fea(fr, input[i].hash,
+                        pols.hash7[p], 
+                        pols.hash6[p], 
+                        pols.hash5[p], 
+                        pols.hash4[p], 
+                        pols.hash3[p], 
+                        pols.hash2[p], 
+                        pols.hash1[p], 
+                        pols.hash0[p]);
 
                     for (uint64_t k=1; k<input[i].dataBytes.size(); k++)
                     {
