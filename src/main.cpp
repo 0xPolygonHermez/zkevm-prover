@@ -354,6 +354,13 @@ int main(int argc, char **argv)
     // Create one instance of the Poseidon hash library
     PoseidonGoldilocks poseidon;
 
+#ifdef DEBUG
+    zklog.info("BN128 p-1=" + bn128.toString(bn128.negOne(),16));
+    zklog.info("FQ p-1=" + fq.toString(fq.negOne(),16));
+    zklog.info("FEC p-1=" + fec.toString(fec.negOne(),16));
+    zklog.info("FNEC p-1=" + fnec.toString(fnec.negOne(),16));
+#endif
+
     // Generate account zero keys
     fork_5::Account::GenerateZeroKey(fr, poseidon);
     fork_6::Account::GenerateZeroKey(fr, poseidon);

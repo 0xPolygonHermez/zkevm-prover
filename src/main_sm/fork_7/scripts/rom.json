@@ -60311,7 +60311,7 @@
   {
    "freeInTag": {
     "op": "functionCall",
-    "funcName": "ARITH_BN254_ADDFP2_X",
+    "funcName": "ARITH_BN254_ADDFP2",
     "params": [
      {
       "op": "getReg",
@@ -60319,15 +60319,7 @@
      },
      {
       "op": "getReg",
-      "regName": "B"
-     },
-     {
-      "op": "getReg",
       "regName": "C"
-     },
-     {
-      "op": "getReg",
-      "regName": "D"
      }
     ]
    },
@@ -60335,24 +60327,16 @@
    "setE": 1,
    "line": 15,
    "fileName": "pairings/FP2BN254/addFp2BN254.zkasm",
-   "lineStr": "        ${ARITH_BN254_ADDFP2_X(A,B,C,D)} => E"
+   "lineStr": "        ${ARITH_BN254_ADDFP2(A,C)} => E"
   },
   {
    "freeInTag": {
     "op": "functionCall",
-    "funcName": "ARITH_BN254_ADDFP2_Y",
+    "funcName": "ARITH_BN254_ADDFP2",
     "params": [
      {
       "op": "getReg",
-      "regName": "A"
-     },
-     {
-      "op": "getReg",
       "regName": "B"
-     },
-     {
-      "op": "getReg",
-      "regName": "C"
      },
      {
       "op": "getReg",
@@ -60374,7 +60358,7 @@
    "offsetLabel": "addFp2BN254_i",
    "useCTX": 0,
    "fileName": "pairings/FP2BN254/addFp2BN254.zkasm",
-   "lineStr": "        ${ARITH_BN254_ADDFP2_Y(A,B,C,D)}      :MSTORE(addFp2BN254_i), ARITH_BN254_ADDFP2"
+   "lineStr": "        ${ARITH_BN254_ADDFP2(B,D)}      :MSTORE(addFp2BN254_i), ARITH_BN254_ADDFP2"
   },
   {
    "freeInTag": {
@@ -60399,7 +60383,7 @@
   {
    "freeInTag": {
     "op": "functionCall",
-    "funcName": "ARITH_BN254_SUBFP2_X",
+    "funcName": "ARITH_BN254_SUBFP2",
     "params": [
      {
       "op": "getReg",
@@ -60407,15 +60391,7 @@
      },
      {
       "op": "getReg",
-      "regName": "B"
-     },
-     {
-      "op": "getReg",
       "regName": "C"
-     },
-     {
-      "op": "getReg",
-      "regName": "D"
      }
     ]
    },
@@ -60423,24 +60399,16 @@
    "setE": 1,
    "line": 15,
    "fileName": "pairings/FP2BN254/subFp2BN254.zkasm",
-   "lineStr": "        ${ARITH_BN254_SUBFP2_X(A,B,C,D)} => E"
+   "lineStr": "        ${ARITH_BN254_SUBFP2(A,C)} => E"
   },
   {
    "freeInTag": {
     "op": "functionCall",
-    "funcName": "ARITH_BN254_SUBFP2_Y",
+    "funcName": "ARITH_BN254_SUBFP2",
     "params": [
      {
       "op": "getReg",
-      "regName": "A"
-     },
-     {
-      "op": "getReg",
       "regName": "B"
-     },
-     {
-      "op": "getReg",
-      "regName": "C"
      },
      {
       "op": "getReg",
@@ -60462,7 +60430,7 @@
    "offsetLabel": "subFp2BN254_i",
    "useCTX": 0,
    "fileName": "pairings/FP2BN254/subFp2BN254.zkasm",
-   "lineStr": "        ${ARITH_BN254_SUBFP2_Y(A,B,C,D)}      :MSTORE(subFp2BN254_i), ARITH_BN254_SUBFP2"
+   "lineStr": "        ${ARITH_BN254_SUBFP2(B,D)}      :MSTORE(subFp2BN254_i), ARITH_BN254_SUBFP2"
   },
   {
    "freeInTag": {

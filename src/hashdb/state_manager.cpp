@@ -9,6 +9,9 @@
 StateManager stateManager;
 
 //#define LOG_STATE_MANAGER
+//#define LOG_STATE_MANAGER_READ
+//#define LOG_STATE_MANAGER_WRITE
+//#define LOG_STATE_MANAGER_DELETE_NODE
 
 zkresult StateManager::setStateRoot (const string &batchUUID, uint64_t block, uint64_t tx, const string &_stateRoot, bool bIsOldStateRoot, const Persistence persistence)
 {
@@ -214,7 +217,7 @@ zkresult StateManager::write (const string &batchUUID, uint64_t block, uint64_t 
     string key = NormalizeToNFormat(_key, 64);
     key = stringToLower(key);
 
-#ifdef LOG_STATE_MANAGER
+#ifdef LOG_STATE_MANAGER_WRITE
     zklog.info("StateManager::write() batchUUID=" + batchUUID + " block=" + to_string(block) + " tx=" + to_string(tx) + " key=" + key + " persistence=" + persistence2string(persistence));
 #endif
 
@@ -300,7 +303,7 @@ zkresult StateManager::deleteNode (const string &batchUUID, uint64_t block, uint
     string key = NormalizeToNFormat(_key, 64);
     key = stringToLower(key);
 
-#ifdef LOG_STATE_MANAGER
+#ifdef LOG_STATE_MANAGER_DELETE_NODE
     zklog.info("StateManager::deleteNode() batchUUID=" + batchUUID + " block=" + to_string(block) + " tx=" + to_string(tx) + " key=" + key + " persistence=" + persistence2string(persistence));
 #endif
 
@@ -414,7 +417,7 @@ zkresult StateManager::read (const string &batchUUID, const string &_key, vector
         // Add to the read log
         if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
 
-#ifdef LOG_STATE_MANAGER
+#ifdef LOG_STATE_MANAGER_READ
         zklog.info("StateManager::read() batchUUID=" + batchUUID + " key=" + key);
 #endif
 
@@ -563,7 +566,7 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
     //TimerStart(STATE_MANAGER_FLUSH);
 
 #ifdef LOG_STATE_MANAGER
-    zklog.info("StateManager::flush() batchUUID=" + batchUUID);
+    zklog.info("StateManager::flush() batchUUID=" + batchUUID + " newStateRoot=" + _newStateRoot + " persistence=" + persistence2string(_persistence));
 #endif
 
     // For every TX, track backwards from newStateRoot to oldStateRoot, marking sub-states as valid
@@ -572,7 +575,7 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
 
     zkresult zkr;
 
-    //print(true);
+    //print(false);
 
     // Find batch state for this uuid
     unordered_map<string, BatchState>::iterator it;
