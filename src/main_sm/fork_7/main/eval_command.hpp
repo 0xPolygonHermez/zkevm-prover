@@ -140,10 +140,8 @@ void eval_receiveLenRemainder         (Context &ctx, const RomCommand &cmd, Comm
 void eval_receiveRemainderChunk       (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_receiveLenQuotient          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_receiveQuotientChunk        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_ARITH_BN254_ADDFP2_X        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_ARITH_BN254_ADDFP2_Y        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_ARITH_BN254_SUBFP2_X        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
-void eval_ARITH_BN254_SUBFP2_Y        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_ARITH_BN254_ADDFP2          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
+void eval_ARITH_BN254_SUBFP2          (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_ARITH_BN254_MULFP2_X        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_ARITH_BN254_MULFP2_Y        (Context &ctx, const RomCommand &cmd, CommandResult &cr);
 void eval_fp2InvBN254_x               (Context &ctx, const RomCommand &cmd, CommandResult &cr);
