@@ -16,18 +16,6 @@ inline uint64_t carry(uint64_t a, uint64_t b, uint64_t c) {
     return (~a & 0xFFFFFFFF & b & c) | (a & b) | (a & c);
 }
 
-uint64_t string2pinSha (string s)
-{
-    if (s=="in1") return 0;
-    if (s=="in2") return 1;
-    if (s=="in3") return 2;
-    if (s=="out") return 3;
-
-    zklog.error("string2pinSha() got an invalid pin id string=" + s);
-    exitProcess();
-    return 0;
-}
-
 TypeSha256Gate string2typeSha (string s)
 {
     if (s=="wired") return TypeSha256Gate::type_wired;
@@ -101,19 +89,19 @@ void Sha256FExecutor::loadScript(json j)
         // Get gate operation and reference
         if (j["program"][i]["op"] == "xor")
         {
-            instruction.op = gop_xor;
+            instruction.op = GateOperation::gop_xor;
         }
         else if (j["program"][i]["op"] == "ch")
         {
-            instruction.op = gop_ch;
+            instruction.op = GateOperation::gop_ch;
         }
         else if (j["program"][i]["op"] == "maj")
         {
-            instruction.op = gop_maj;
+            instruction.op = GateOperation::gop_maj;
         }
         else if (j["program"][i]["op"] == "add")
         {
-            instruction.op = gop_add;
+            instruction.op = GateOperation::gop_add;
         }
         else
         {
@@ -125,17 +113,25 @@ void Sha256FExecutor::loadScript(json j)
 
         // Get input in1 pin data
         instruction.type[0] = string2typeSha(j["program"][i]["in1"]["type"]);
+        instruction.in[0] = true;
         if(j["program"][i]["in1"].contains("bit")) instruction.bit[0] = j["program"][i]["in1"]["bit"];
+        if(j["program"][i]["in1"].contains("gate")) instruction.gate[0] = j["program"][i]["in1"]["gate"];
 
         // Get input in2 pin data
         instruction.type[1] = string2typeSha(j["program"][i]["in2"]["type"]);
+        instruction.in[1] = true;
         if(j["program"][i]["in2"].contains("bit")) instruction.bit[1] = j["program"][i]["in2"]["bit"];
+        if(j["program"][i]["in2"].contains("gate")) instruction.gate[1] = j["program"][i]["in2"]["gate"];
 
         // Get input in3 pin data
-        if(j["program"][i].contains("in3")){
+        if(j["program"][i].contains("in3"))
+        {   
+            instruction.in[2] = true;
             instruction.type[2] = string2typeSha(j["program"][i]["in3"]["type"]);
-            if(j["program"][i]["in3"].contains("gate"))instruction.gate[2] = j["program"][i]["in3"]["gate"];
+            if(j["program"][i]["in3"].contains("bit")) instruction.bit[2] = j["program"][i]["in3"]["bit"];
+            if(j["program"][i]["in3"].contains("gate")) instruction.gate[2] = j["program"][i]["in3"]["gate"];
         }
+        
         program.push_back(instruction);
     }
 
@@ -172,15 +168,15 @@ void Sha256FExecutor::execute(const vector<Sha256FExecutorInput> &input, Sha256F
     pols.output[0] = fr.fromU64((1 << bitsPerElement) - 1);
 
     // Execute the program
-#pragma omp parallel for
+//#pragma omp parallel for
     for (uint64_t i = 0; i < nSlots; i++)
     {
         uint64_t offset = i * slotSize;
         for (uint64_t j = 0; j < program.size(); j++)
         {
-            if(program[j].pin[0]) pols.input[0][program[j].ref + offset] = getVal(input, pols, i, j, 0);
-            if(program[j].pin[1]) pols.input[1][program[j].ref + offset] = getVal(input, pols, i, j, 1);
-            if(program[j].pin[2]) pols.input[2][program[j].ref + offset] = getVal(input, pols, i, j, 2);
+            if(program[j].in[0]) pols.input[0][program[j].ref + offset] = getVal(input, pols, i, j, 0);
+            if(program[j].in[1]) pols.input[1][program[j].ref + offset] = getVal(input, pols, i, j, 1);
+            if(program[j].in[2]) pols.input[2][program[j].ref + offset] = getVal(input, pols, i, j, 2);
             uint64_t a = fr.toU64(pols.input[0][program[j].ref + offset]);
             uint64_t b = fr.toU64(pols.input[1][program[j].ref + offset]);
             uint64_t c = fr.toU64(pols.input[2][program[j].ref + offset]);
@@ -222,10 +218,10 @@ Goldilocks::Element Sha256FExecutor::getVal(const vector<Sha256FExecutorInput> &
         zklog.error("Sha256FExecutor::getVal() found invalid pin value: " + to_string(program[j].pin[i]));
     }
     if(program[j].type[i] == TypeSha256Gate::type_input){
-        return input[block].stIn[program[j].bit[i]];
+        return input[block].rIn[program[j].bit[i]];
     }
     if(program[j].type[i] == TypeSha256Gate::type_inputState){
-        return input[block].rIn[program[j].bit[i]];
+        return input[block].stIn[program[j].bit[i]];
     }
     zklog.error("Sha256FExecutor::getVal() found invalid reference type: " + to_string(program[j].type[i]));
     return fr.zero();

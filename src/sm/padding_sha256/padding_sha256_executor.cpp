@@ -14,7 +14,6 @@ uint64_t PaddingSha256Executor::prepareInput (vector<PaddingSha256ExecutorInput>
 
     for (uint64_t i=0; i<input.size(); i++)
     {
-        input[i].dataBytes.clear();
         if (input[i].data.length() > 0)
         {
             // Make sure we got an even number of characters
@@ -25,6 +24,7 @@ uint64_t PaddingSha256Executor::prepareInput (vector<PaddingSha256ExecutorInput>
             }
 
             // Convert string (data) into binary (dataBytes)
+            input[i].dataBytes.clear();
             for (uint64_t c=0; c<input[i].data.length(); c+=2)
             {
                 uint8_t aux;
@@ -98,7 +98,7 @@ void PaddingSha256Executor::execute (vector<PaddingSha256ExecutorInput> &input, 
 
             uint64_t s=input[i].dataBytes.size()-1-j;
             if(s < 8) pols.lengthSection[p] = fr.one();
-            if(s < 4) pols.accLength[p] = fr.fromU64((input[i].realLen<<3)&&(0xFFFFFFFF<<(s*8)));
+            if(s < 4) pols.accLength[p] = fr.fromU64((input[i].realLen<<3) & (0xFFFFFFFF<<(s*8)));
 
             bool lastBlockLatch = (p % bytesPerBlock) == (bytesPerBlock - 1);
             bool lastHashLatch = lastBlockLatch && ((!fr.isZero(pols.spare[p])) || fr.isZero(pols.rem[p]));
@@ -156,7 +156,7 @@ void PaddingSha256Executor::execute (vector<PaddingSha256ExecutorInput> &input, 
 
                 if (j == input[i].dataBytes.size() - 1) 
                 {
-                    scalar2fea(fr, input[i].hash,
+/*                    scalar2fea(fr, input[i].hash,
                         pols.hash0[p], 
                         pols.hash1[p], 
                         pols.hash2[p], 
@@ -164,7 +164,16 @@ void PaddingSha256Executor::execute (vector<PaddingSha256ExecutorInput> &input, 
                         pols.hash4[p], 
                         pols.hash5[p], 
                         pols.hash6[p], 
-                        pols.hash7[p]);
+                        pols.hash7[p]);*/
+                    scalar2fea(fr, input[i].hash,
+                        pols.hash7[p], 
+                        pols.hash6[p], 
+                        pols.hash5[p], 
+                        pols.hash4[p], 
+                        pols.hash3[p], 
+                        pols.hash2[p], 
+                        pols.hash1[p], 
+                        pols.hash0[p]);
 
                     for (uint64_t k=1; k<input[i].dataBytes.size(); k++)
                     {
@@ -213,13 +222,12 @@ void PaddingSha256Executor::execute (vector<PaddingSha256ExecutorInput> &input, 
             if (j == 0)
             {
                 pols.freeIn[p] = fr.fromU64(0x80);
-            }
-            else
-            {
+            }else{
                 pols.rem[p] = fr.neg(fr.fromU64(j));
-                pols.remInv[p] = glp.inv(pols.rem[p]);
+                if (!fr.isZero(pols.rem[p])) pols.remInv[p] = glp.inv(pols.rem[p]);
                 pols.spare[p] = fr.one();
             }
+            
 
             pols.incCounter[p] = fr.one();
             if(j>=56) pols.lengthSection[p] = fr.one();
@@ -237,15 +245,22 @@ void PaddingSha256Executor::execute (vector<PaddingSha256ExecutorInput> &input, 
                 paddingSha256BitExecutorInput.connected = false;
                 required.push_back(paddingSha256BitExecutorInput);
         
-                pols.hash0[p] = hash0[0];
+                /*pols.hash0[p] = hash0[0];
                 pols.hash1[p] = hash0[1];
                 pols.hash2[p] = hash0[2];
                 pols.hash3[p] = hash0[3];
                 pols.hash4[p] = hash0[4];
                 pols.hash5[p] = hash0[5];
                 pols.hash6[p] = hash0[6];
-                pols.hash7[p] = hash0[7];
-                
+                pols.hash7[p] = hash0[7];*/
+                pols.hash0[p] = hash0[7];
+                pols.hash1[p] = hash0[6];
+                pols.hash2[p] = hash0[5];
+                pols.hash3[p] = hash0[4];
+                pols.hash4[p] = hash0[3];
+                pols.hash5[p] = hash0[2];
+                pols.hash6[p] = hash0[1];
+                pols.hash7[p] = hash0[0];
                 for (uint64_t k=1; k<bytesPerBlock; k++)
                 {
                     pols.hash0[p-k] = pols.hash0[p];

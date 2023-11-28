@@ -53,7 +53,7 @@ public:
         fr(fr),
         blockSize(31487),
         bytesPerBlock(64),
-        bitsPerElement(6),
+        bitsPerElement(7),
         N(PROVER_FORK_NAMESPACE::PaddingSha256CommitPols::pilDegree())
     {
         SHA256(NULL, 0, hashZeroScalar);
