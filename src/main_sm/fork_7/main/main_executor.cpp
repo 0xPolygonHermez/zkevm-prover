@@ -3330,7 +3330,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             // Store the binary action to execute it later with the binary SM
             BinaryAction binaryAction;
-            mpz_class auxB("0xFFFFFFFF00000001FFFFFFFF00000001FFFFFFFF00000001FFFFFFFF00000001", 16);
+            mpz_class auxB;
+            mpz_set_str(auxB.get_mpz_t(), "0xFFFFFFFF00000001FFFFFFFF00000001FFFFFFFF00000001FFFFFFFF00000001", 16);
             binaryAction.a = op;
             binaryAction.b = auxB;
             binaryAction.c = 1;

@@ -119,17 +119,23 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
             zklog.info("Computing binary pols " + to_string(i) + "/" + to_string(input.size()));
         }
 #endif
+        
+        uint64_t opcode = input[i].opcode;
+        uint64_t reset4 = opcode == 8 ? 1 : 0;
+        Goldilocks::Element previousAreLt4 = fr.zero();
 
         for (uint64_t j = 0; j < STEPS; j++)
         {
             bool last = (j == (STEPS - 1)) ? true : false;
             uint64_t index = i*STEPS + j;
-            pols.opcode[index] = fr.fromU64(input[i].opcode);
+            pols.opcode[index] = fr.fromU64(opcode);
 
             Goldilocks::Element cIn = fr.zero();
             Goldilocks::Element cOut = fr.zero();
             bool reset = (j == 0) ? true : false;
+            uint64_t resetCarry = ((reset == 1) || (reset4 == 1 && ((j%4)==0))) ? 1 : 0;
             bool useCarry = false;
+            uint64_t usePreviousAreLt4 = 0;
 
             for (uint64_t k = 0; k < 2; k++)
             {
@@ -140,13 +146,14 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                 uint64_t byteC = input[i].c_bytes[j*2 + k];
                 bool resetByte = reset && (k == 0);
                 bool lastByte = last && (k == 1);
+                uint64_t byteIndex = j*2+k;
                 pols.freeInA[k][index] = fr.fromU64(byteA);
                 pols.freeInB[k][index] = fr.fromU64(byteB);
                 pols.freeInC[k][index] = fr.fromU64(byteC);
 
-                // carry management
-
-                switch (input[i].opcode)
+                // ONLY forcarry, ge4 management
+                uint64_t opcode = input[i].opcode;
+                switch (opcode)
                 {
                     // ADD   (OPCODE = 0)
                     case 0:
@@ -169,7 +176,9 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                         break;
                     }
                     // LT    (OPCODE = 2)
-                    case 2:
+                    case 2: 
+                    // LT4   (OPTCODE = 8)
+                    case 8:
                     {
                         if (resetByte)
                         {
@@ -191,8 +200,15 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
 
                         if (lastByte)
                         {
-                            useCarry = true;
-                            pols.freeInC[1][index] = fr.fromU64(input[i].c_bytes[0]);
+                            if(opcode == 2 || cOut == fr.zero()){
+                                useCarry = true;
+                                pols.freeInC[1][index] = fr.fromU64(input[i].c_bytes[0]);
+                            } else {
+                                usePreviousAreLt4 = 1;
+                                // SPECIAL CASE: using a runtime value previousAreLt4, but lookup table was static, means in
+                                // this case put expected value, because when rebuild c using correctly previousAreLt4 no freeInC.
+                                pols.freeInC[1][index] = cOut;
+                            }
                         }
                         break;
                     }
@@ -313,11 +329,20 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                     pols.cOut[index] = cOut;
                 }
             }
+            if( j % 16 == 3){
+                previousAreLt4 = cOut;
+            } else if ( j % 16 ==7 || j % 16 == 11){
+                previousAreLt4 = previousAreLt4 * cOut;
+            }
 
             pols.useCarry[index] = useCarry ? fr.one() : fr.zero();
+            pols.usePreviousAreLt4[index] = fr.fromU64(usePreviousAreLt4);
+            pols.reset4[index] = fr.fromU64(reset4);
 
             uint64_t nextIndex = (index + 1) % N;
             bool nextReset = (nextIndex % STEPS) == 0 ? true : false;
+
+            pols.previousAreLt4[nextIndex] = previousAreLt4;
 
             // We can set the cIn and the LCin when RESET =1
             if (nextReset)
@@ -326,22 +351,22 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
             }
             else
             {
-                pols.cIn[nextIndex] = pols.cOut[index];
+                pols.cIn[nextIndex] = (reset4 == 1 && (index % 4) == 3) ? fr.zero() : pols.cOut[index];
             }
-            pols.lCout[nextIndex] = pols.cOut[index];
+            pols.lCout[nextIndex] = usePreviousAreLt4 ? previousAreLt4 : pols.cOut[index];
             pols.lOpcode[nextIndex] = pols.opcode[index];
 
             pols.a[0][nextIndex] = fr.fromU64( fr.toU64(pols.a[0][index])*(reset ? 0 : 1) + fr.toU64(pols.freeInA[0][index])*FACTOR[0][index] + 256*fr.toU64(pols.freeInA[1][index])*FACTOR[0][index] );
             pols.b[0][nextIndex] = fr.fromU64( fr.toU64(pols.b[0][index])*(reset ? 0 : 1) + fr.toU64(pols.freeInB[0][index])*FACTOR[0][index] + 256*fr.toU64(pols.freeInB[1][index])*FACTOR[0][index] );
 
             c0Temp[index] = fr.toU64(pols.c[0][index])*(reset ? 0 : 1) + fr.toU64(pols.freeInC[0][index])*FACTOR[0][index] + 256*fr.toU64(pols.freeInC[1][index])*FACTOR[0][index];
-            pols.c[0][nextIndex] = (!fr.isZero(pols.useCarry[index])) ? pols.cOut[index] : fr.fromU64(c0Temp[index]);
+            pols.c[0][nextIndex] = (!fr.isZero(pols.useCarry[index])) ? pols.cOut[index] : (pols.usePreviousAreLt4[index] == fr.one() ? pols.previousAreLt4[index] : fr.fromU64(c0Temp[index]));
 
             for (uint64_t k = 1; k < REGISTERS_NUM; k++)
             {
                 pols.a[k][nextIndex] = fr.fromU64( fr.toU64(pols.a[k][index])*(reset ? 0 : 1) + fr.toU64(pols.freeInA[0][index])*FACTOR[k][index] + 256*fr.toU64(pols.freeInA[1][index])*FACTOR[k][index] );
                 pols.b[k][nextIndex] = fr.fromU64( fr.toU64(pols.b[k][index])*(reset ? 0 : 1) + fr.toU64(pols.freeInB[0][index])*FACTOR[k][index] + 256*fr.toU64(pols.freeInB[1][index])*FACTOR[k][index] );
-                if (last && useCarry)
+                if (last && (useCarry || usePreviousAreLt4))
                 {
                     pols.c[k][nextIndex] = fr.zero();
                 }
