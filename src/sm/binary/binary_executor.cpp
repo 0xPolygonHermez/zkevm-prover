@@ -120,7 +120,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
         }
 #endif
         
-        uint64_t opcode = input[i].opcode;
+        const uint64_t opcode = input[i].opcode;
         uint64_t reset4 = opcode == 8 ? 1 : 0;
         Goldilocks::Element previousAreLt4 = fr.zero();
 
@@ -146,13 +146,11 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                 uint64_t byteC = input[i].c_bytes[j*2 + k];
                 bool resetByte = reset && (k == 0);
                 bool lastByte = last && (k == 1);
-                uint64_t byteIndex = j*2+k;
                 pols.freeInA[k][index] = fr.fromU64(byteA);
                 pols.freeInB[k][index] = fr.fromU64(byteB);
                 pols.freeInC[k][index] = fr.fromU64(byteC);
 
                 // ONLY forcarry, ge4 management
-                uint64_t opcode = input[i].opcode;
                 switch (opcode)
                 {
                     // ADD   (OPCODE = 0)
