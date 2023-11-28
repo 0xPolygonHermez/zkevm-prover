@@ -82,11 +82,11 @@ Goldilocks::Element Bits2FieldSha256Executor::getBit (vector<Bits2FieldSha256Exe
     /* Return the bit "pos" of the input or output part of the state */
     if (type == BitType::STATE_IN)
     {
-        return fr.fromU64(getStateBit(input[block].outputState, pos));
+        return fr.fromU64(getStateBit(input[block].inputState, pos));
     }
     else if( type == BitType::STATE_OUT)
     {
-        return fr.fromU64(getStateBit(input[block].inputState, pos));
+        return fr.fromU64(getStateBit(input[block].outputState, pos));
     } else{
         uint64_t byte = pos/8;
         uint64_t sh = 7 - (pos%8);
