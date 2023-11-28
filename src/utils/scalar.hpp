@@ -507,6 +507,26 @@ void sr4to8 ( Goldilocks &fr,
 void fec2scalar(RawFec &fec, const RawFec::Element &fe, mpz_class &s);
 void scalar2fec(RawFec &fec, RawFec::Element &fe, const mpz_class &s);
 
+/* Less than 4
+*  Computes comparation of 256 bits, these values (a,b) are divided in 4 chunks of 64 bits
+*  and compared one-to-one, 4 comparations, lt4 return 1 if ALL chunks of a are less than b.
+*  lt = a[0] < b[0] && a[1] < b[1] && a[2] < b[2] && a[3] < b[3]
+*/
+inline mpz_class lt4(const mpz_class& a, const mpz_class& b) {
+     
+    mpz_class a_=a;
+    mpz_class b_=b;
+    mpz_class mask(0xffffffffffffffff);
+    for (int i = 0; i < 4; i++) {    
+        if ((a_ & mask) >= (b_ & mask) ) {
+            return 0;
+        }
+        a_ = a_ >> 64;
+        b_ = b_ >> 64;
+    }
+    return 1;
+}
+
 /* Unsigned 64 to an array of bytes.  pOutput must be 8 bytes long */
 void u642bytes (uint64_t input, uint8_t * pOutput, bool bBigEndian);
 
@@ -553,5 +573,7 @@ bool inline feaIsEqual (const Goldilocks::Element (&a)[4], const Goldilocks::Ele
 {
     return fr.equal(a[0], b[0]) && fr.equal(a[1], b[1]) && fr.equal(a[2], b[2]) && fr.equal(a[3], b[3]);
 }
+
+
 
 #endif

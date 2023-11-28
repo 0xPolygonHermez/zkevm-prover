@@ -1794,6 +1794,26 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         c = (a ^ b);
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                         nHits++;
+                    } else if ( rom.line[zkPC].binOpcode == 8 ) // LT4
+                    {
+                        mpz_class a, b, c;
+                        if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.A)");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.B)");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        c = lt4(a, b);
+                        scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
+                        nHits++;
                     }
                     else
                     {
@@ -3310,10 +3330,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             // Store the binary action to execute it later with the binary SM
             BinaryAction binaryAction;
+            mpz_class auxB;
+            mpz_set_str(auxB.get_mpz_t(), "0xFFFFFFFF00000001FFFFFFFF00000001FFFFFFFF00000001FFFFFFFF00000001", 16);
             binaryAction.a = op;
-            binaryAction.b = 0;
-            binaryAction.c = op;
-            binaryAction.opcode = 1;
+            binaryAction.b = auxB;
+            binaryAction.c = 1;
+            binaryAction.opcode = 8;
             binaryAction.type = 2;
             required.Binary.push_back(binaryAction);
         }
@@ -4233,6 +4255,55 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     binaryAction.b = b;
                     binaryAction.c = c;
                     binaryAction.opcode = 7;
+                    binaryAction.type = 1;
+                    required.Binary.push_back(binaryAction);
+                }
+            } else if (rom.line[zkPC].binOpcode == 8) // LT4
+            {
+                mpz_class a, b, c;
+                if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.A)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.B)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                }
+                if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError( ctx, "Failed calling fea2scalar(op)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                   
+                mpz_class expectedC;
+                expectedC = lt4(a,b); 
+                if (c != expectedC)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_BINARY_LT4_MISMATCH; 
+                    logError(ctx, "Binary LT4 operation does not match c=op=" + c.get_str(16) + " expectedC=(a LT4 b)=" + expectedC.get_str(16));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                pols.carry[i] = fr.fromScalar(c);
+
+                 if (!bProcessBatch)
+                {
+                    pols.binOpcode[i] = fr.fromU64(8);
+
+                    // Store the binary action to execute it later with the binary SM
+                    BinaryAction binaryAction;
+                    binaryAction.a = a;
+                    binaryAction.b = b;
+                    binaryAction.c = c;
+                    binaryAction.opcode = 8;
                     binaryAction.type = 1;
                     required.Binary.push_back(binaryAction);
                 }
