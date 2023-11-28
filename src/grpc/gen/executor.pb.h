@@ -389,12 +389,13 @@ enum ExecutorError : int {
   EXECUTOR_ERROR_INVALID_L1_DATA_V2_BLOCK_HASH_L1 = 100,
   EXECUTOR_ERROR_INVALID_L1_SMT_PROOF = 101,
   EXECUTOR_ERROR_INVALID_BALANCE = 102,
+  EXECUTOR_ERROR_SM_MAIN_BINARY_LT4_MISMATCH = 103,
   ExecutorError_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   ExecutorError_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool ExecutorError_IsValid(int value);
 constexpr ExecutorError ExecutorError_MIN = EXECUTOR_ERROR_UNSPECIFIED;
-constexpr ExecutorError ExecutorError_MAX = EXECUTOR_ERROR_INVALID_BALANCE;
+constexpr ExecutorError ExecutorError_MAX = EXECUTOR_ERROR_SM_MAIN_BINARY_LT4_MISMATCH;
 constexpr int ExecutorError_ARRAYSIZE = ExecutorError_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ExecutorError_descriptor();

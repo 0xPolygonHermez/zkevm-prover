@@ -817,4 +817,6 @@ enum ExecutorError {
     EXECUTOR_ERROR_INVALID_L1_SMT_PROOF = 101;
     // EXECUTOR_ERROR_INVALID_BALANCE indicates that the input parameter balance value is invalid
     EXECUTOR_ERROR_INVALID_BALANCE = 102;
+    // EXECUTOR_ERROR_SM_MAIN_BINARY_LT4_MISMATCH indicates that the binary instruction less than four opcode failed
+    EXECUTOR_ERROR_SM_MAIN_BINARY_LT4_MISMATCH = 103;
 }

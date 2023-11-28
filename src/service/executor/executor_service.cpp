@@ -1825,6 +1825,8 @@ using grpc::Status;
     case ZKR_SM_MAIN_HASHSDIGEST_DIGEST_MISMATCH:           return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHSDIGEST_DIGEST_MISMATCH;
     case ZKR_SM_MAIN_HASHSDIGEST_CALLED_TWICE:              return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHSDIGEST_CALLED_TWICE;
     case ZKR_SM_MAIN_HASHS_READ_OUT_OF_RANGE:               return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHS_READ_OUT_OF_RANGE;
+    
+    case ZKR_SM_MAIN_BINARY_LT4_MISMATCH:                   return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_BINARY_LT4_MISMATCH;
 
     default:                                                return ::executor::v1::EXECUTOR_ERROR_UNSPECIFIED;
     }
