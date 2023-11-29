@@ -212,7 +212,8 @@ public:
     string block_hash_l1;
     vector<ResponseV2> responses;
     vector<LogV2> logs;
-    Block() : gas_limit(0), block_number(0), timestamp(0) {};
+    bool initialized;
+    Block() : gas_limit(0), block_number(0), timestamp(0), initialized(false) {};
 };
 
 class FinalTraceV2
