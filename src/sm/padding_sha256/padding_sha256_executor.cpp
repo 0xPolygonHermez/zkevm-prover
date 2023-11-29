@@ -49,7 +49,7 @@ uint64_t PaddingSha256Executor::prepareInput (vector<PaddingSha256ExecutorInput>
         uint64_t bitLen = input[i].realLen*8;
         for(int64_t e=3; e>=0; e--)
         {
-            input[i].dataBytes.push_back(bitLen >> (8*e) && 0xFF);
+            input[i].dataBytes.push_back((bitLen >> (8*e)) & 0xFF);
         }
 
         totalInputBytes += input[i].dataBytes.size();

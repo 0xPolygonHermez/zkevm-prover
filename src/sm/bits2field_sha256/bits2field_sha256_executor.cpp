@@ -53,6 +53,9 @@ void Bits2FieldSha256Executor::execute (vector<Bits2FieldSha256ExecutorInput> &i
                 req.rIn.push_back(accField);
             }
         }
+        for (uint64_t j = 1024 * bitsPerElement; j < slotSize; j++) {
+            p += 1;
+        }
 
         /* Add the rquest to the Sha256-f SM*/
         required.push_back(req);
@@ -87,10 +90,13 @@ Goldilocks::Element Bits2FieldSha256Executor::getBit (vector<Bits2FieldSha256Exe
     else if( type == BitType::STATE_OUT)
     {
         return fr.fromU64(getStateBit(input[block].outputState, pos));
-    } else{
+    } else if( type == BitType::BLOCK_IN) {
         uint64_t byte = pos/8;
         uint64_t sh = 7 - (pos%8);
         return fr.fromU64((input[block].inBlock[byte] >> sh) & 1);
+    } else {
+        zklog.error("Bits2FieldSha256Executor::getBit() found invalid type value: " + to_string(type));
+        exitProcess();
     }
     return fr.zero();
 }
