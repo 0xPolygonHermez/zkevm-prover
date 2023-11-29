@@ -9,6 +9,7 @@ const uint32_t hIn[8] = { 0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e
 
 inline uint64_t getStateBit ( const uint32_t (&state)[8], uint64_t i )
 {
+    if(i >= 256) return 0;
     uint64_t sh = 31 - (i%32);
     return (state[i/32] >> sh) & 1;
 }
