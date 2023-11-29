@@ -55,6 +55,8 @@ public:
     uint64_t checkAndSaveFromLabel;
     uint64_t ecrecoverStoreArgsLabel;
     uint64_t ecrecoverEndLabel;
+    uint64_t checkFirstTxTypeLabel;
+    uint64_t writeBlockInfoRootLabel;
 
     // Labels lock
     pthread_mutex_t labelsMutex;    // Mutex to protect the labels vector

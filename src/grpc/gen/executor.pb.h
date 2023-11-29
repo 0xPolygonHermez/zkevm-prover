@@ -4561,10 +4561,10 @@ class ProcessBatchRequestV2 PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kL1InfoTreeDataFieldNumber = 16,
-    kDbFieldNumber = 17,
-    kContractsBytecodeFieldNumber = 18,
-    kStateOverrideFieldNumber = 22,
+    kL1InfoTreeDataFieldNumber = 17,
+    kDbFieldNumber = 18,
+    kContractsBytecodeFieldNumber = 19,
+    kStateOverrideFieldNumber = 23,
     kOldStateRootFieldNumber = 1,
     kOldAccInputHashFieldNumber = 2,
     kBatchL2DataFieldNumber = 6,
@@ -4572,8 +4572,8 @@ class ProcessBatchRequestV2 PROTOBUF_FINAL :
     kCoinbaseFieldNumber = 9,
     kForcedBlockhashL1FieldNumber = 10,
     kFromFieldNumber = 13,
-    kContextIdFieldNumber = 20,
-    kTraceConfigFieldNumber = 19,
+    kContextIdFieldNumber = 21,
+    kTraceConfigFieldNumber = 20,
     kOldBatchNumFieldNumber = 3,
     kChainIdFieldNumber = 4,
     kForkIdFieldNumber = 5,
@@ -4582,9 +4582,10 @@ class ProcessBatchRequestV2 PROTOBUF_FINAL :
     kNoCountersFieldNumber = 12,
     kSkipVerifyL1InfoRootFieldNumber = 14,
     kSkipFirstChangeL2BlockFieldNumber = 15,
-    kGetKeysFieldNumber = 21,
+    kSkipWriteBlockInfoRootFieldNumber = 16,
+    kGetKeysFieldNumber = 22,
   };
-  // map<uint32, .executor.v1.L1DataV2> l1_info_tree_data = 16;
+  // map<uint32, .executor.v1.L1DataV2> l1_info_tree_data = 17;
   int l1_info_tree_data_size() const;
   private:
   int _internal_l1_info_tree_data_size() const;
@@ -4601,7 +4602,7 @@ class ProcessBatchRequestV2 PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::Map< ::PROTOBUF_NAMESPACE_ID::uint32, ::executor::v1::L1DataV2 >*
       mutable_l1_info_tree_data();
 
-  // map<string, string> db = 17;
+  // map<string, string> db = 18;
   int db_size() const;
   private:
   int _internal_db_size() const;
@@ -4618,7 +4619,7 @@ class ProcessBatchRequestV2 PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
       mutable_db();
 
-  // map<string, string> contracts_bytecode = 18;
+  // map<string, string> contracts_bytecode = 19;
   int contracts_bytecode_size() const;
   private:
   int _internal_contracts_bytecode_size() const;
@@ -4635,7 +4636,7 @@ class ProcessBatchRequestV2 PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
       mutable_contracts_bytecode();
 
-  // map<string, .executor.v1.OverrideAccountV2> state_override = 22;
+  // map<string, .executor.v1.OverrideAccountV2> state_override = 23;
   int state_override_size() const;
   private:
   int _internal_state_override_size() const;
@@ -4827,7 +4828,7 @@ class ProcessBatchRequestV2 PROTOBUF_FINAL :
   std::string* _internal_mutable_from();
   public:
 
-  // string context_id = 20;
+  // string context_id = 21;
   void clear_context_id();
   const std::string& context_id() const;
   void set_context_id(const std::string& value);
@@ -4852,7 +4853,7 @@ class ProcessBatchRequestV2 PROTOBUF_FINAL :
   std::string* _internal_mutable_context_id();
   public:
 
-  // .executor.v1.TraceConfigV2 trace_config = 19;
+  // .executor.v1.TraceConfigV2 trace_config = 20;
   bool has_trace_config() const;
   private:
   bool _internal_has_trace_config() const;
@@ -4942,7 +4943,16 @@ class ProcessBatchRequestV2 PROTOBUF_FINAL :
   void _internal_set_skip_first_change_l2_block(::PROTOBUF_NAMESPACE_ID::uint32 value);
   public:
 
-  // uint32 get_keys = 21;
+  // uint32 skip_write_block_info_root = 16;
+  void clear_skip_write_block_info_root();
+  ::PROTOBUF_NAMESPACE_ID::uint32 skip_write_block_info_root() const;
+  void set_skip_write_block_info_root(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_skip_write_block_info_root() const;
+  void _internal_set_skip_write_block_info_root(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // uint32 get_keys = 22;
   void clear_get_keys();
   ::PROTOBUF_NAMESPACE_ID::uint32 get_keys() const;
   void set_get_keys(::PROTOBUF_NAMESPACE_ID::uint32 value);
@@ -4999,6 +5009,7 @@ class ProcessBatchRequestV2 PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint32 no_counters_;
   ::PROTOBUF_NAMESPACE_ID::uint32 skip_verify_l1_info_root_;
   ::PROTOBUF_NAMESPACE_ID::uint32 skip_first_change_l2_block_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 skip_write_block_info_root_;
   ::PROTOBUF_NAMESPACE_ID::uint32 get_keys_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
@@ -15154,7 +15165,27 @@ inline void ProcessBatchRequestV2::set_skip_first_change_l2_block(::PROTOBUF_NAM
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequestV2.skip_first_change_l2_block)
 }
 
-// map<uint32, .executor.v1.L1DataV2> l1_info_tree_data = 16;
+// uint32 skip_write_block_info_root = 16;
+inline void ProcessBatchRequestV2::clear_skip_write_block_info_root() {
+  skip_write_block_info_root_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchRequestV2::_internal_skip_write_block_info_root() const {
+  return skip_write_block_info_root_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchRequestV2::skip_write_block_info_root() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchRequestV2.skip_write_block_info_root)
+  return _internal_skip_write_block_info_root();
+}
+inline void ProcessBatchRequestV2::_internal_set_skip_write_block_info_root(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  skip_write_block_info_root_ = value;
+}
+inline void ProcessBatchRequestV2::set_skip_write_block_info_root(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_skip_write_block_info_root(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequestV2.skip_write_block_info_root)
+}
+
+// map<uint32, .executor.v1.L1DataV2> l1_info_tree_data = 17;
 inline int ProcessBatchRequestV2::_internal_l1_info_tree_data_size() const {
   return l1_info_tree_data_.size();
 }
@@ -15183,7 +15214,7 @@ ProcessBatchRequestV2::mutable_l1_info_tree_data() {
   return _internal_mutable_l1_info_tree_data();
 }
 
-// map<string, string> db = 17;
+// map<string, string> db = 18;
 inline int ProcessBatchRequestV2::_internal_db_size() const {
   return db_.size();
 }
@@ -15212,7 +15243,7 @@ ProcessBatchRequestV2::mutable_db() {
   return _internal_mutable_db();
 }
 
-// map<string, string> contracts_bytecode = 18;
+// map<string, string> contracts_bytecode = 19;
 inline int ProcessBatchRequestV2::_internal_contracts_bytecode_size() const {
   return contracts_bytecode_.size();
 }
@@ -15241,7 +15272,7 @@ ProcessBatchRequestV2::mutable_contracts_bytecode() {
   return _internal_mutable_contracts_bytecode();
 }
 
-// .executor.v1.TraceConfigV2 trace_config = 19;
+// .executor.v1.TraceConfigV2 trace_config = 20;
 inline bool ProcessBatchRequestV2::_internal_has_trace_config() const {
   return this != internal_default_instance() && trace_config_ != nullptr;
 }
@@ -15322,7 +15353,7 @@ inline void ProcessBatchRequestV2::set_allocated_trace_config(::executor::v1::Tr
   // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessBatchRequestV2.trace_config)
 }
 
-// string context_id = 20;
+// string context_id = 21;
 inline void ProcessBatchRequestV2::clear_context_id() {
   context_id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -15403,7 +15434,7 @@ inline void ProcessBatchRequestV2::unsafe_arena_set_allocated_context_id(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBatchRequestV2.context_id)
 }
 
-// uint32 get_keys = 21;
+// uint32 get_keys = 22;
 inline void ProcessBatchRequestV2::clear_get_keys() {
   get_keys_ = 0u;
 }
@@ -15423,7 +15454,7 @@ inline void ProcessBatchRequestV2::set_get_keys(::PROTOBUF_NAMESPACE_ID::uint32 
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequestV2.get_keys)
 }
 
-// map<string, .executor.v1.OverrideAccountV2> state_override = 22;
+// map<string, .executor.v1.OverrideAccountV2> state_override = 23;
 inline int ProcessBatchRequestV2::_internal_state_override_size() const {
   return state_override_.size();
 }

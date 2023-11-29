@@ -82,6 +82,8 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     checkAndSaveFromLabel = 1000000; // TODO: Decide if we need this label any more
     ecrecoverStoreArgsLabel = rom.getLabel(string("ecrecover_store_args"));
     ecrecoverEndLabel       = rom.getLabel(string("ecrecover_end"));
+    checkFirstTxTypeLabel   = rom.getLabel(string("checkFirstTxType"));
+    writeBlockInfoRootLabel = rom.getLabel(string("writeBlockInfoRoot"));
 
     // Init labels mutex
     pthread_mutex_init(&labelsMutex, NULL);
@@ -2119,6 +2121,32 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     }
                 }
             }
+        }
+
+        // overwrite 'op' when hiting 'checkFirstTxType' label
+        if ((zkPC == checkFirstTxTypeLabel) && proverRequest.input.bSkipFirstChangeL2Block)
+        {
+            op0 = fr.one();
+            op1 = fr.one();
+            op2 = fr.one();
+            op3 = fr.one();
+            op4 = fr.one();
+            op5 = fr.one();
+            op6 = fr.one();
+            op7 = fr.one();
+        }
+
+        // overwrite 'op' when hiting 'writeBlockInfoRoot' label
+        if ((zkPC == writeBlockInfoRootLabel) && proverRequest.input.bSkipWriteBlockInfoRoot)
+        {
+            op0 = fr.zero();
+            op1 = fr.zero();
+            op2 = fr.zero();
+            op3 = fr.zero();
+            op4 = fr.zero();
+            op5 = fr.zero();
+            op6 = fr.zero();
+            op7 = fr.zero();
         }
 
         // Storage read instruction

@@ -919,6 +919,7 @@ using grpc::Status;
     proverRequest.input.bGetKeys = request->get_keys();
     proverRequest.input.bSkipVerifyL1InfoRoot = request->skip_verify_l1_info_root();
     proverRequest.input.bSkipFirstChangeL2Block = request->skip_first_change_l2_block();
+    proverRequest.input.bSkipWriteBlockInfoRoot = request->skip_write_block_info_root();
 
     // Trace config
     if (request->has_trace_config())
@@ -1825,7 +1826,7 @@ using grpc::Status;
     case ZKR_SM_MAIN_HASHSDIGEST_DIGEST_MISMATCH:           return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHSDIGEST_DIGEST_MISMATCH;
     case ZKR_SM_MAIN_HASHSDIGEST_CALLED_TWICE:              return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHSDIGEST_CALLED_TWICE;
     case ZKR_SM_MAIN_HASHS_READ_OUT_OF_RANGE:               return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHS_READ_OUT_OF_RANGE;
-    
+
     case ZKR_SM_MAIN_BINARY_LT4_MISMATCH:                   return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_BINARY_LT4_MISMATCH;
 
     default:                                                return ::executor::v1::EXECUTOR_ERROR_UNSPECIFIED;
