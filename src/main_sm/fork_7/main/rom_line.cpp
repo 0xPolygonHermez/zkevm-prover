@@ -29,6 +29,7 @@ string RomLine::toString(Goldilocks &fr)
     if (!fr.isZero(inCntBinary)) result += " inCntBinary=" + fr.toString(inCntBinary,10);
     if (!fr.isZero(inCntMemAlign)) result += " inCntMemAlign=" + fr.toString(inCntMemAlign,10);
     if (!fr.isZero(inCntKeccakF)) result += " inCntKeccakF=" + fr.toString(inCntKeccakF,10);
+    if (!fr.isZero(inCntSha256F)) result += " inCntSha256F=" + fr.toString(inCntSha256F,10);
     if (!fr.isZero(inCntPoseidonG)) result += " inCntPoseidonG=" + fr.toString(inCntPoseidonG,10);
     if (!fr.isZero(inCntPaddingPG)) result += " inCntPaddingPG=" + fr.toString(inCntPaddingPG,10);
     if (!fr.isZero(inROTL_C)) result += " inROTL_C=" + fr.toString(inROTL_C,10);

@@ -302,6 +302,7 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
         if (l["inCntBinary"].is_string()) fr.fromString(line[i].inCntBinary, l["inCntBinary"]); else line[i].inCntBinary = fr.zero();
         if (l["inCntMemAlign"].is_string()) fr.fromString(line[i].inCntMemAlign, l["inCntMemAlign"]); else line[i].inCntMemAlign = fr.zero();
         if (l["inCntKeccakF"].is_string()) fr.fromString(line[i].inCntKeccakF, l["inCntKeccakF"]); else line[i].inCntKeccakF = fr.zero();
+        if (l["inCntSha256F"].is_string()) fr.fromString(line[i].inCntSha256F, l["inCntSha256F"]); else line[i].inCntSha256F = fr.zero();
         if (l["inCntPoseidonG"].is_string()) fr.fromString(line[i].inCntPoseidonG, l["inCntPoseidonG"]); else line[i].inCntPoseidonG = fr.zero();
         if (l["inCntPaddingPG"].is_string()) fr.fromString(line[i].inCntPaddingPG, l["inCntPaddingPG"]); else line[i].inCntPaddingPG = fr.zero();
         if (l["inROTL_C"].is_string()) fr.fromString(line[i].inROTL_C, l["inROTL_C"]); else line[i].inROTL_C = fr.zero();

@@ -36,6 +36,7 @@ public:
     Goldilocks::Element inCntBinary;
     Goldilocks::Element inCntMemAlign;
     Goldilocks::Element inCntKeccakF;
+    Goldilocks::Element inCntSha256F;
     Goldilocks::Element inCntPoseidonG;
     Goldilocks::Element inCntPaddingPG;
     Goldilocks::Element inROTL_C;
