@@ -575,6 +575,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
         }
 
+        // If inCntSha256F, op = op + inCntSha256F*cntKeccakF
+        if (!fr.isZero(rom.line[zkPC].inCntSha256F))
+        {
+            op0 = fr.add(op0, fr.mul(rom.line[zkPC].inCntSha256F, pols.cntSha256F[i]));
+            pols.inCntSha256F[i] = rom.line[zkPC].inCntSha256F;
+#ifdef LOG_INX
+            zklog.info("inCntSha256F op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
+#endif
+        }
+
         // If inCntPoseidonG, op = op + inCntPoseidonG*cntPoseidonG
         if (!fr.isZero(rom.line[zkPC].inCntPoseidonG))
         {

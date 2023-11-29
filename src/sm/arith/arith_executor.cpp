@@ -373,7 +373,8 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
             if (!fr.isZero(pols.selEq[3][index]) || !fr.isZero(pols.selEq[4][index]) || !fr.isZero(pols.selEq[5][index]) || !fr.isZero(pols.selEq[6][index]))
             {
                 Goldilocks::Element chunkValue = step < 16 ? pols.x3[15 - step16][offset] : pols.y3[15 - step16][offset];
-                uint64_t chunkPrime = fr.isZero(pols.selEq[3][index]) ? chunksPrimeSecp256k1[step16] : chunksPrimeBN254[step16];
+                uint64_t chunkPrime = !fr.isZero(pols.selEq[3][index]) ? chunksPrimeSecp256k1[step16] : chunksPrimeBN254[step16];
+
                 bool chunkLtPrime = valueLtPrime ? false : (fr.toU64(chunkValue) < chunkPrime);
                 valueLtPrime = valueLtPrime || chunkLtPrime;
                 pols.chunkLtPrime[index] = chunkLtPrime ? fr.one() : fr.zero();
