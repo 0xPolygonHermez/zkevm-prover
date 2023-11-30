@@ -873,7 +873,7 @@ using grpc::Status;
     }
     ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.forcedBlockHashL1, request->forced_blockhash_l1());
 
-    // Get timestamp
+    // Get timestamp limit
     proverRequest.input.publicInputsExtended.publicInputs.timestampLimit = request->timestamp_limit();
 
     // Get sequencer address
@@ -1235,13 +1235,14 @@ using grpc::Status;
             (((proverRequest.input.publicInputsExtended.publicInputs.forkID >= 5) && config.useMainExecC) ? " C" :
              ((proverRequest.input.publicInputsExtended.publicInputs.forkID >= 4) && config.useMainExecGenerated) ? " generated" : " native") +
         " globalExitRoot=" + proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot.get_str(16) +
-        " timestamp=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.timestamp) +
+        " timestampLimit=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.timestampLimit) +
         " from=" + proverRequest.input.from +
         " bUpdateMerkleTree=" + to_string(proverRequest.input.bUpdateMerkleTree) +
         " bNoCounters=" + to_string(proverRequest.input.bNoCounters) +
         " bGetKeys=" + to_string(proverRequest.input.bGetKeys) +
         " bSkipVerifyL1InfoRoot=" + to_string(proverRequest.input.bSkipVerifyL1InfoRoot) +
         " bSkipFirstChangeL2Block=" + to_string(proverRequest.input.bSkipFirstChangeL2Block) +
+        " bSkipWriteBlockInfoRoot=" + to_string(proverRequest.input.bSkipWriteBlockInfoRoot) +
         " traceConfig=" + proverRequest.input.traceConfig.toString() +
         " UUID=" + proverRequest.uuid, &proverRequest.tags);
 #endif

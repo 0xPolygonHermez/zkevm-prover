@@ -61,6 +61,7 @@ public:
     TraceConfig traceConfig; // FullTracer configuration
     unordered_map<uint64_t, L1Data> l1InfoTreeData;
     unordered_map<string, OverrideEntry> stateOverride;
+    uint64_t stepsN;
 
     // Constructor
     Input (Goldilocks &fr) :
@@ -70,7 +71,8 @@ public:
         bGetKeys(false),
         bSkipVerifyL1InfoRoot(false),
         bSkipFirstChangeL2Block(false),
-        bSkipWriteBlockInfoRoot(false)
+        bSkipWriteBlockInfoRoot(false),
+        stepsN(0)
         {};
 
     // Loads the input object data from a JSON object

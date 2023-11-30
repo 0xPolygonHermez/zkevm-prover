@@ -88,7 +88,12 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
     // Flags
     bool update_merkle_tree = true;
     bool get_keys = false;
-
+    bool no_counters = input.bNoCounters;
+    if (input.stepsN > 0)
+    {
+        no_counters = true;
+    }
+    
     // Resulting new state root
     string newStateRoot;
 
@@ -105,7 +110,7 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
         request.set_chain_id(input.publicInputsExtended.publicInputs.chainID);
         request.set_fork_id(input.publicInputsExtended.publicInputs.forkID);
         request.set_from(input.from);
-        request.set_no_counters(input.bNoCounters);
+        request.set_no_counters(no_counters);
         if (input.traceConfig.bEnabled)
         {
             executor::v1::TraceConfig * pTraceConfig = request.mutable_trace_config();
@@ -201,7 +206,7 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
         request.set_timestamp_limit(input.publicInputsExtended.publicInputs.timestampLimit);
         request.set_forced_blockhash_l1(scalar2ba(input.publicInputsExtended.publicInputs.forcedBlockHashL1));
         request.set_update_merkle_tree(update_merkle_tree);
-        request.set_no_counters(input.bNoCounters);
+        request.set_no_counters(no_counters);
         request.set_get_keys(get_keys);
         request.set_skip_verify_l1_info_root(input.bSkipVerifyL1InfoRoot);
         request.set_skip_first_change_l2_block(input.bSkipFirstChangeL2Block);
@@ -427,8 +432,8 @@ bool ProcessDirectory (ExecutorClient *pClient, const string &directoryName, uin
                 /* Files not expected to be skipped, i.e. issues */
 
                 || (inputFile == "testvectors/inputs-executor/calldata/test-length-data_1.json") // newStateRoot=c14d4d9f490cd974197f01ed1adecc4024d53fa3c7e81763a03808f65b84ae71 != input.publicInputsExtended.newStateRoot=b0efbc28d34fc4fe525dd4abe23503c861134af89cca6e14af69f6973ab9a6bf OOCB => new state root does not match
-                || (inputFile == "testvectors/inputs-executor/ethereum-tests/GeneralStateTests/stBadOpcode/measureGas_10.json") // newStateRoot=4a31d576b3ca0e6d7c9f6b89833ec267ab114efb8a96d6cea558660643b195aa != input.publicInputsExtended.newStateRoot=d32dfc86ffb21f10eea6612ecb3f82e23259db32136ebd7231b1ba39ca2f5fc5
-                || (inputFile == "testvectors/inputs-executor/ethereum-tests/GeneralStateTests/VMTests/performanceTester_1.json") // newStateRoot=8048cecbd2ad46fe5f502fc41b4947e56ce0bf2d48afa196cc7a9509f4f4f0ab != input.publicInputsExtended.newStateRoot=26a2462229e0e7f990a5074cba25f3c820932ede4f28b6a41130c1d6da0e3d1b
+                //|| (inputFile == "testvectors/inputs-executor/ethereum-tests/GeneralStateTests/stBadOpcode/measureGas_10.json") // newStateRoot=4a31d576b3ca0e6d7c9f6b89833ec267ab114efb8a96d6cea558660643b195aa != input.publicInputsExtended.newStateRoot=d32dfc86ffb21f10eea6612ecb3f82e23259db32136ebd7231b1ba39ca2f5fc5
+                //|| (inputFile == "testvectors/inputs-executor/ethereum-tests/GeneralStateTests/VMTests/performanceTester_1.json") // newStateRoot=8048cecbd2ad46fe5f502fc41b4947e56ce0bf2d48afa196cc7a9509f4f4f0ab != input.publicInputsExtended.newStateRoot=26a2462229e0e7f990a5074cba25f3c820932ede4f28b6a41130c1d6da0e3d1b
                 // TODO: if "stepsN": 8388608 is present, use no_counters = true
 
                 // TODO: Debug C vs JS registers for the next 8 files, print and check timestampLimit -> precompiled helpers returning different from JS

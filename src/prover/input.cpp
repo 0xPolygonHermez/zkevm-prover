@@ -262,6 +262,19 @@ void Input::loadGlobals (json &input)
 #endif
     }
 
+    if (publicInputsExtended.publicInputs.forkID >= 7)
+    {
+        // Input JSON file might contain a stepsN key at the root level
+        if ( input.contains("stepsN") &&
+            input["stepsN"].is_number_unsigned() )
+        {
+            stepsN = input["stepsN"];
+#ifdef LOG_INPUT
+            zklog.info("Input::loadGlobals(): stepsN=" + to_string(stepsN));
+#endif
+        }
+    }
+
     if (publicInputsExtended.publicInputs.forkID <= 6)
     {
         // Input JSON file must contain a timestamp key at the root level
