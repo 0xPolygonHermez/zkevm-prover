@@ -15,6 +15,10 @@ config/c12a/*
 config/final/*
 config/recursive*/*
 config/zkevm/*
+config/multichainAgg/*
+config/multichainAggF/*
+config/multichainFinal/*
+config/multichainPrep/*
 config/tmp
 config/config.json
 runtime/*

@@ -62,7 +62,7 @@ private:
     void *pAddress;
 
 public:
-    StarkRecursiveF(const Config &config, void *_pAddress);
+    StarkRecursiveF(const Config &config, void *_pAddress, bool aggregationLayer);
     ~StarkRecursiveF();
 
     uint64_t getConstTreeSize(uint64_t n, uint64_t pol)
@@ -122,6 +122,6 @@ public:
     uint64_t getCommitPolsSize(void) { return starkInfo.mapOffsets.section[cm2_n] * sizeof(Goldilocks::Element); }
 
     /* Generates a proof from the address to all polynomials memory area, and the committed pols */
-    void genProof(FRIProofC12 &proof, Goldilocks::Element publicInputs[8]);
+    void genProof(FRIProofC12 &proof, Goldilocks::Element publicInputs[8], Steps *steps);
 };
 #endif

@@ -93,6 +93,45 @@ void SHA256 (const uint8_t * pData, uint64_t dataSize, mpz_class &hashScalar)
     hashScalar += stIn[7];
 }
 
+void SHA256_PARTIAL (const string &s, uint32_t stIn[8], uint32_t stOut[8])
+{
+    string ba;
+    string2ba(s, ba);
+
+    uint8_t* pData = (uint8_t *)ba.c_str();
+    uint64_t dataSize = ba.size();
+
+    // padded data = pData[dataSize] + paddedZeros*0x00
+    uint64_t paddedSizeInBits = (((dataSize*8 - 1) / 512) + 1)*512;
+    uint64_t paddedSize = paddedSizeInBits / 8;
+
+    // Create the padding data buffer
+    uint8_t padding[64] = {0};
+    uint64_t dataPosition = (dataSize/64)*64;
+    for (uint64_t i=0; i<dataSize%64; i++)
+    {
+        padding[i] = pData[dataPosition+i];
+    }
+
+    memcpy(stOut, stIn, 32);
+
+    // Process the message in successive 512-bit chunks: break message into 512-bit chunks
+    for (uint64_t chunk=0; chunk<paddedSize/64; chunk++)
+    {   
+        // determinte the buffer to copy data from
+        const uint8_t *pChunkBytes;
+        if ((chunk == ((paddedSize/64) - 1)) && (dataSize%64 != 0))
+        {
+            pChunkBytes = padding;
+        }
+        else
+        {
+            pChunkBytes = pData + chunk*64;
+        }
+        SHA256F(pChunkBytes, stOut, stOut);
+    }
+}
+
 void SHA256F (const uint8_t inR[64], const uint32_t stIn[8], uint32_t stOut[8]){
 
     // create a 64-entry message schedule array w[0..63] of 32-bit words

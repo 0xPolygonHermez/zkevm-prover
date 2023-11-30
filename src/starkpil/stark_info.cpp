@@ -7,7 +7,7 @@
 StarkInfo::StarkInfo(const Config &config, string file) : config(config)
 {
     // Avoid initialization if we are not going to generate any proof
-    if (!config.generateProof())
+    if (!config.genProof())
         return;
 
     // Load contents from json file

@@ -74,20 +74,20 @@ public:
     Starks(const Config &config, StarkFiles starkFiles, void *_pAddress) : config(config),
                                                                            starkInfo(config, starkFiles.zkevmStarkInfo),
                                                                            starkFiles(starkFiles),
-                                                                           zi(config.generateProof() ? starkInfo.starkStruct.nBits : 0,
-                                                                              config.generateProof() ? starkInfo.starkStruct.nBitsExt : 0),
-                                                                           N(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
-                                                                           NExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
-                                                                           ntt(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
-                                                                           nttExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
-                                                                           x_n(config.generateProof() ? N : 0, config.generateProof() ? 1 : 0),
-                                                                           x_2ns(config.generateProof() ? NExtended : 0, config.generateProof() ? 1 : 0),
+                                                                           zi(config.genProof() ? starkInfo.starkStruct.nBits : 0,
+                                                                              config.genProof() ? starkInfo.starkStruct.nBitsExt : 0),
+                                                                           N(config.genProof() ? 1 << starkInfo.starkStruct.nBits : 0),
+                                                                           NExtended(config.genProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
+                                                                           ntt(config.genProof() ? 1 << starkInfo.starkStruct.nBits : 0),
+                                                                           nttExtended(config.genProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
+                                                                           x_n(config.genProof() ? N : 0, config.genProof() ? 1 : 0),
+                                                                           x_2ns(config.genProof() ? NExtended : 0, config.genProof() ? 1 : 0),
                                                                            pAddress(_pAddress),
-                                                                           x(config.generateProof() ? N << (starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits) : 0, config.generateProof() ? FIELD_EXTENSION : 0)
+                                                                           x(config.genProof() ? N << (starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits) : 0, config.genProof() ? FIELD_EXTENSION : 0)
     {
         nrowsStepBatch = 1;
         // Avoid unnecessary initialization if we are not going to generate any proof
-        if (!config.generateProof())
+        if (!config.genProof())
             return;
 
         // Allocate an area of memory, mapped to file, to read all the constant polynomials,
@@ -192,7 +192,7 @@ public:
     };
     ~Starks()
     {
-        if (!config.generateProof())
+        if (!config.genProof())
             return;
 
         delete pConstPols;

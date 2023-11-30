@@ -275,6 +275,43 @@ void Config::load(json &config)
     ParseString(config, "keccakConnectionsFile", "KECCAK_CONNECTIONS_FILE", keccakConnectionsFile, "keccak_connections.json");
     ParseString(config, "sha256PolsFile", "SHA256_CONNECTIONS_FILE", sha256PolsFile, "sha256_connections.json");
 
+    // Aggregation
+    ParseString(config, "aggregatorAddress", "AGGREGATOR_ADDRESS", aggregatorAddress, "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266");
+    ParseBool(config, "runFileCalculateHash", "RUN_FILE_GEN_CALCULATE_HASH", runFileCalculateHash, false);
+    ParseBool(config, "runFileGenPrepareMultichainProof", "RUN_FILE_GEN_PREPARE_MULTICHAIN_PROOF", runFileGenPrepareMultichainProof, false);
+    ParseBool(config, "runFileGenAggregatedMultichainProof", "RUN_FILE_GEN_AGGREGATED_MULTICHAIN_PROOF", runFileGenAggregatedMultichainProof, false);
+    ParseBool(config, "runFileGenFinalMultichainProof", "RUN_FILE_GEN_FINAL_MULTICHAIN_PROOF", runFileGenFinalMultichainProof, false);
+    ParseBool(config, "runMultichainServer", "RUN_MULTICHAIN_SERVER", runMultichainServer, false);
+    ParseBool(config, "runMultichainClient", "RUN_MULTICHAIN_CLIENT", runMultichainClient, false);
+    ParseString(config, "multichainPrepConstPols", "MULTICHAIN_PREP_CONST_POLS", multichainPrepConstPols, configPath + "/multichainPrep/multichainPrep.const");
+    ParseString(config, "multichainPrepConstantsTree", "MULTICHAIN_PREP_CONSTANTS_TREE", multichainPrepConstantsTree, configPath + "/multichainPrep/multichainPrep.consttree");
+    ParseString(config, "multichainPrepExec", "MULTICHAIN_PREP_EXEC", multichainPrepExec, configPath + "/multichainPrep/multichainPrep.exec");
+    ParseString(config, "multichainPrepStarkInfo", "MULTICHAIN_PREP_STARK_INFO", multichainPrepStarkInfo, configPath + "/multichainPrep/multichainPrep.starkinfo.json");
+    ParseString(config, "multichainPrepVerifier", "MULTICHAIN_PREP_VERIFIER", multichainPrepVerifier, configPath + "/multichainPrep/multichainPrep.verifier.dat");
+    ParseString(config, "multichainPrepVerkey", "MULTICHAIN_PREP_VERKEY", multichainPrepVerkey, configPath + "/multichainPrep/multichainPrep.verkey.json");
+    ParseString(config, "multichainAggConstPols", "MULTICHAIN_AGG_CONST_POLS", multichainAggConstPols, configPath + "/multichainAgg/multichainAgg.const");
+    ParseString(config, "multichainAggConstantsTree", "MULTICHAIN_AGG_CONSTANTS_TREE", multichainAggConstantsTree, configPath + "/multichainAgg/multichainAgg.consttree");
+    ParseString(config, "multichainAggExec", "MULTICHAIN_AGG_EXEC", multichainAggExec, configPath + "/multichainAgg/multichainAgg.exec");
+    ParseString(config, "multichainAggStarkInfo", "MULTICHAIN_AGG_STARK_INFO", multichainAggStarkInfo, configPath + "/multichainAgg/multichainAgg.starkinfo.json");
+    ParseString(config, "multichainAggVerifier", "MULTICHAIN_AGG_VERIFIER", multichainAggVerifier, configPath + "/multichainAgg/multichainAgg.verifier.dat");
+    ParseString(config, "multichainAggVerkey", "MULTICHAIN_AGG_VERKEY", multichainAggVerkey, configPath + "/multichainAgg/multichainAgg.verkey.json");
+    ParseString(config, "multichainAggFConstPols", "MULTICHAIN_AGG_F_CONST_POLS", multichainAggFConstPols, configPath + "/multichainAggF/multichainAggF.const");
+    ParseString(config, "multichainAggFConstantsTree", "MULTICHAIN_AGG_F_CONSTANTS_TREE", multichainAggFConstantsTree, configPath + "/multichainAggF/multichainAggF.consttree");
+    ParseString(config, "multichainAggFExec", "MULTICHAIN_AGG_F_EXEC", multichainAggFExec, configPath + "/multichainAggF/multichainAggF.exec");
+    ParseString(config, "multichainAggFStarkInfo", "MULTICHAIN_AGG_F_STARK_INFO", multichainAggFStarkInfo, configPath + "/multichainAggF/multichainAggF.starkinfo.json");
+    ParseString(config, "multichainAggFVerifier", "MULTICHAIN_AGG_F_VERIFIER", multichainAggFVerifier, configPath + "/multichainAggF/multichainAggF.verifier.dat");
+    ParseString(config, "multichainAggFVerkey", "MULTICHAIN_AGG_F_VERKEY", multichainAggFVerkey, configPath + "/multichainAggF/multichainAggF.verkey.json");
+    ParseString(config, "multichainFinalVerifier", "MULTICHAIN_FINAL_VERIFIER", multichainFinalVerifier, configPath + "/multichainFinal/multichainFinal.verifier.dat");
+    ParseString(config, "multichainFinalVerkey", "MULTICHAIN_FINAL_VERKEY", multichainFinalVerkey, configPath + "/multichainFinal/multichainFinal.fflonk.verkey.json");
+    ParseString(config, "multichainFinalStarkZkey", "MULTICHAIN_FINAL_STARK_ZKEY", multichainFinalStarkZkey, configPath + "/multichainFinal/multichainFinal.fflonk.zkey");
+
+    ParseU16(config, "multichainServerPort", "MULTICHAIN_SERVER_PORT", multichainServerPort, 50091);
+    ParseU16(config, "multichainClientPort", "MULTICHAIN_CLIENT_PORT", multichainClientPort, 50091);
+    ParseString(config, "multichainClientHost", "MULTICHAIN_CLIENT_HOST", multichainClientHost, "127.0.0.1");
+    ParseU64(config, "multichainClientMockTimeout", "MULTICHAIN_CLIENT_MOCK_TIMEOUT", multichainClientMockTimeout, 60 * 1000 * 1000);
+    ParseU64(config, "multichainClientWatchdogTimeout", "MULTICHAIN_CLIENT_WATCHDOG_TIMEOUT", multichainClientWatchdogTimeout, 60 * 1000 * 1000);
+    ParseU64(config, "multichainClientMaxStreams", "MULTICHAIN_CLIENT_MAX_STREAMS", multichainClientMaxStreams, 0);
+
     // Database
     ParseString(config, "databaseURL", "DATABASE_URL", databaseURL, "local");
     ParseString(config, "dbNodesTableName", "DB_NODES_TABLE_NAME", dbNodesTableName, "state.nodes");
@@ -521,6 +558,35 @@ void Config::print(void)
     zklog.info("    fullTracerTraceReserveSize=" + to_string(fullTracerTraceReserveSize));
     zklog.info("    ECRecoverPrecalc=" + to_string(ECRecoverPrecalc));
     zklog.info("    ECRecoverPrecalcNThreads=" + to_string(ECRecoverPrecalcNThreads));
+
+    if (runFileCalculateHash)
+        zklog.info("    runFileCalculateHash=true");
+    if (runFileGenPrepareMultichainProof)
+        zklog.info("    runFileGenPrepareMultichainProof=true");
+    if (runFileGenAggregatedMultichainProof)
+        zklog.info("    runFileGenAggregatedMultichainProof=true");
+    if (runFileGenFinalMultichainProof)
+        zklog.info("    runFileGenFinalMultichainProof=true");
+    if (runMultichainServer)
+        zklog.info("    runMultichainServer=true");
+    if (runMultichainClient)
+    zklog.info("    runMultichainClient=" + to_string(runMultichainClient));
+
+    zklog.info("    multichainPrepVerifier=" + multichainPrepVerifier);
+    zklog.info("    multichainPrepVerkey=" + multichainPrepVerkey);
+    zklog.info("    multichainAggVerifier=" + multichainAggVerifier);
+    zklog.info("    multichainAggVerkey=" + multichainAggVerkey);
+    zklog.info("    multichainAggFVerifier=" + multichainAggFVerifier);
+    zklog.info("    multichainAggFVerkey=" + multichainAggFVerkey);
+    zklog.info("    multichainfinalVerifier=" + multichainFinalVerifier);
+    zklog.info("    multichainfinalStarkZkey=" + multichainFinalStarkZkey);
+
+    zklog.info("    multichainServerPort=" + to_string(multichainServerPort));
+    zklog.info("    multichainClientPort=" + to_string(multichainClientPort));
+    zklog.info("    multichainClientHost=" + multichainClientHost);
+    zklog.info("    multichainClientMockTimeout=" + to_string(multichainClientMockTimeout));
+    zklog.info("    multichainClientWatchdogTimeout=" + to_string(multichainClientWatchdogTimeout));
+    zklog.info("    multichainClientMaxStreams=" + to_string(multichainClientMaxStreams));
 }
 
 bool Config::check (void)
@@ -683,6 +749,115 @@ bool Config::check (void)
         if (!fileExists(recursivefExec))
         {
             zklog.error("required file config.recursivefExec=" + recursivefExec + " does not exist");
+            bError = true;
+        }
+    }
+
+    if (generateProofAggregation()) {
+        // Aggregation
+        if (!fileExists(multichainPrepConstPols))
+        {
+            zklog.error("required file config.multichainPrepConstPols=" + multichainPrepConstPols + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(multichainAggConstPols))
+        {
+            zklog.error("required file config.multichainAggConstPols=" + multichainAggConstPols + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(multichainAggFConstPols))
+        {
+            zklog.error("required file config.multichainAggFConstPols=" + multichainAggFConstPols + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(multichainPrepConstantsTree))
+        {
+            zklog.error("required file config.multichainPrepConstantsTree=" + multichainPrepConstantsTree + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(multichainAggConstantsTree))
+        {
+            zklog.error("required file config.multichainAggConstantsTree=" + multichainAggConstantsTree + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(multichainAggFConstantsTree))
+        {
+            zklog.error("required file config.multichainAggFConstantsTree=" + multichainAggFConstantsTree + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(multichainPrepVerifier))
+        {
+            zklog.error("required file config.multichainPrepVerifier=" + multichainPrepVerifier + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(multichainPrepVerkey))
+        {
+            zklog.error("required file config.multichainPrepVerkey=" + multichainPrepVerkey + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(multichainAggVerifier))
+        {
+            zklog.error("required file config.multichainAggVerifier=" + multichainAggVerifier + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(multichainAggVerkey))
+        {
+            zklog.error("required file config.multichainAggVerkey=" + multichainAggVerkey + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(multichainFinalVerifier))
+        {
+            zklog.error("required file config.multichainFinalVerifier=" + multichainFinalVerifier + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(multichainAggFVerifier))
+        {
+            zklog.error("required file config.multichainAggFVerifier=" + multichainAggFVerifier + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(multichainAggFVerkey))
+        {
+            zklog.error("required file config.multichainAggFVerkey=" + multichainAggFVerkey + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(multichainFinalStarkZkey))
+        {
+            zklog.error("required file config.multichainFinalStarkZkey=" + multichainFinalStarkZkey + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(multichainFinalVerkey))
+        {
+            zklog.error("required file config.multichainFinalVerkey=" + multichainFinalStarkZkey + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(multichainPrepStarkInfo))
+        {
+            zklog.error("required file config.multichainPrepStarkInfo=" + multichainPrepStarkInfo + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(multichainAggStarkInfo))
+        {
+            zklog.error("required file config.multichainAggStarkInfo=" + multichainAggStarkInfo + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(multichainAggFStarkInfo))
+        {
+            zklog.error("required file config.multichainAggFStarkInfo=" + multichainAggFStarkInfo + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(multichainPrepExec))
+        {
+            zklog.error("required file config.multichainPrepExec=" + multichainPrepExec + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(multichainAggExec))
+        {
+            zklog.error("required file config.multichainAggExec=" + multichainAggExec + " does not exist");
+            bError = true;
+        }
+        if (!fileExists(multichainAggFExec))
+        {
+            zklog.error("required file config.multichainAggFExec=" + multichainAggFExec + " does not exist");
             bError = true;
         }
     }

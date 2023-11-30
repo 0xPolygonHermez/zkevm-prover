@@ -29,6 +29,7 @@
 #include "c12aSteps.hpp"
 #include "recursive1Steps.hpp"
 #include "recursive2Steps.hpp"
+#include "starkRecursiveFSteps.hpp"
 #include "zklog.hpp"
 #include "exit_process.hpp"
 
@@ -125,7 +126,7 @@ Prover::Prover(Goldilocks &fr,
             starksC12a = new Starks(config, {config.c12aConstPols, config.mapConstPolsFile, config.c12aConstantsTree, config.c12aStarkInfo}, pAddress);
             starksRecursive1 = new Starks(config, {config.recursive1ConstPols, config.mapConstPolsFile, config.recursive1ConstantsTree, config.recursive1StarkInfo}, pAddress);
             starksRecursive2 = new Starks(config, {config.recursive2ConstPols, config.mapConstPolsFile, config.recursive2ConstantsTree, config.recursive2StarkInfo}, pAddress);
-            starksRecursiveF = new StarkRecursiveF(config, pAddressStarksRecursiveF);
+            starksRecursiveF = new StarkRecursiveF(config, pAddressStarksRecursiveF, false);
         }
     }
     catch (std::exception &e)
@@ -855,9 +856,10 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
     //  ----------------------------------------------
 
     TimerStart(STARK_RECURSIVE_F_PROOF_BATCH_PROOF);
+    StarkRecursiveFSteps recursiveFsteps;
     uint64_t polBitsRecursiveF = starksRecursiveF->starkInfo.starkStruct.steps[starksRecursiveF->starkInfo.starkStruct.steps.size() - 1].nBits;
     FRIProofC12 fproofRecursiveF((1 << polBitsRecursiveF), FIELD_EXTENSION, starksRecursiveF->starkInfo.starkStruct.steps.size(), starksRecursiveF->starkInfo.evMap.size(), starksRecursiveF->starkInfo.nPublics);
-    starksRecursiveF->genProof(fproofRecursiveF, publics);
+    starksRecursiveF->genProof(fproofRecursiveF, publics, &recursiveFsteps);
     TimerStopAndLog(STARK_RECURSIVE_F_PROOF_BATCH_PROOF);
 
     // Save the proof & zkinproof

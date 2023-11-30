@@ -12,6 +12,7 @@ int main()
     config.mapConstPolsFile = false;
     config.zkevmConstantsTree = "config/zkevm/zkevm.consttree";
     config.zkevmStarkInfo = "config/zkevm/zkevm.starkinfo.json";
+    config.zkevmVerkey = "config/zkevm/zkevm.verkey.json";
 
     StarkInfo starkInfo(config, config.zkevmStarkInfo);
 
@@ -22,10 +23,17 @@ int main()
     void *pCommit = copyFile("config/zkevm/zkevm.commit", starkInfo.nCm1 * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
     void *pAddress = (void *)calloc(starkInfo.mapTotalN + (starkInfo.mapSectionsN.section[eSection::cm1_n] * (1 << starkInfo.starkStruct.nBits) * FIELD_EXTENSION ), sizeof(uint64_t));
 
-        Starks starks(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo},pAddress);
-
+    Starks starks(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo},pAddress);
 
     std::memcpy(pAddress, pCommit, starkInfo.nCm1 * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
+
+    json zkevmVerkeyJson;
+    file2json(config.zkevmVerkey, zkevmVerkeyJson);
+    Goldilocks::Element zkevmVerkey[4];
+    zkevmVerkey[0] = Goldilocks::fromU64(zkevmVerkeyJson["constRoot"][0]);
+    zkevmVerkey[1] = Goldilocks::fromU64(zkevmVerkeyJson["constRoot"][1]);
+    zkevmVerkey[2] = Goldilocks::fromU64(zkevmVerkeyJson["constRoot"][2]);
+    zkevmVerkey[3] = Goldilocks::fromU64(zkevmVerkeyJson["constRoot"][3]);
 
     Goldilocks::Element publicInputs[47] = {
         Goldilocks::fromU64(3248459814),
@@ -82,7 +90,7 @@ int main()
         publicStarkJson[i] = Goldilocks::toString(publicInputs[i]);
     }
     ZkevmSteps zkevmSteps;
-    starks.genProof(fproof, &publicInputs[0], &zkevmSteps);
+    starks.genProof(fproof, &publicInputs[0], zkevmVerkey, &zkevmSteps);
 
     nlohmann::ordered_json jProof = fproof.proofs.proof2json();
     nlohmann::json zkin = proof2zkinStark(jProof);

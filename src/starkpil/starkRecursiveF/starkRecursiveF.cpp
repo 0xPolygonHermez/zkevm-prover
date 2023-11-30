@@ -4,35 +4,37 @@
 #include "ntt_goldilocks.hpp"
 #include "fr.hpp"
 #include "poseidon_opt.hpp"
-#include "starkRecursiveFSteps.hpp"
 #include "zklog.hpp"
 #include "exit_process.hpp"
 
 #define NUM_CHALLENGES 8
 
-StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config(config),
-                                                                          starkInfo(config, config.recursivefStarkInfo),
-                                                                          zi(config.generateProof() ? starkInfo.starkStruct.nBits : 0,
-                                                                             config.generateProof() ? starkInfo.starkStruct.nBitsExt : 0),
-                                                                          N(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
-                                                                          NExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
-                                                                          ntt(config.generateProof() ? 1 << starkInfo.starkStruct.nBits : 0),
-                                                                          nttExtended(config.generateProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
-                                                                          x_n(config.generateProof() ? N : 0, config.generateProof() ? 1 : 0),
-                                                                          x_2ns(config.generateProof() ? NExtended : 0, config.generateProof() ? 1 : 0),
+StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress, bool aggregationLayer) : config(config),
+                                                                          starkInfo(config, aggregationLayer ? config.multichainAggFStarkInfo : config.recursivefStarkInfo),
+                                                                          zi(config.genProof() ? starkInfo.starkStruct.nBits : 0,
+                                                                             config.genProof() ? starkInfo.starkStruct.nBitsExt : 0),
+                                                                          N(config.genProof() ? 1 << starkInfo.starkStruct.nBits : 0),
+                                                                          NExtended(config.genProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
+                                                                          ntt(config.genProof() ? 1 << starkInfo.starkStruct.nBits : 0),
+                                                                          nttExtended(config.genProof() ? 1 << starkInfo.starkStruct.nBitsExt : 0),
+                                                                          x_n(config.genProof() ? N : 0, config.genProof() ? 1 : 0),
+                                                                          x_2ns(config.genProof() ? NExtended : 0, config.genProof() ? 1 : 0),
                                                                           pAddress(_pAddress)
 {
     // Avoid unnecessary initialization if we are not going to generate any proof
-    if (!config.generateProof())
+    if (!config.genProof())
         return;
 
     // Allocate an area of memory, mapped to file, to read all the constant polynomials,
     // and create them using the allocated address
     TimerStart(LOAD_RECURSIVE_F_CONST_POLS_TO_MEMORY);
     pConstPolsAddress = NULL;
-    if (config.recursivefConstPols.size() == 0)
+
+    string constPolsFilename = aggregationLayer ? config.multichainAggFConstPols : config.recursivefConstPols;
+
+    if (constPolsFilename.size() == 0)
     {
-        zklog.error("StarkRecursiveF::StarkRecursiveF() received an empty config.recursivefConstPols");
+        zklog.error("StarkRecursiveF::StarkRecursiveF() received an empty constPolsFilename");
         exitProcess();
     }
     constPolsDegree = (1 << starkInfo.starkStruct.nBits);
@@ -40,13 +42,13 @@ StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config
 
     if (config.mapConstPolsFile)
     {
-        pConstPolsAddress = mapFile(config.recursivefConstPols, constPolsSize, false);
-        zklog.info("StarkRecursiveF::StarkRecursiveF() successfully mapped " + to_string(constPolsSize) + " bytes from constant file " + config.recursivefConstPols);
+        pConstPolsAddress = mapFile(constPolsFilename, constPolsSize, false);
+        zklog.info("StarkRecursiveF::StarkRecursiveF() successfully mapped " + to_string(constPolsSize) + " bytes from constant file " + constPolsFilename);
     }
     else
     {
-        pConstPolsAddress = copyFile(config.recursivefConstPols, constPolsSize);
-        zklog.info("StarkRecursiveF::StarkRecursiveF() successfully copied " + to_string(constPolsSize) + " bytes from constant file " + config.recursivefConstPols);
+        pConstPolsAddress = copyFile(constPolsFilename, constPolsSize);
+        zklog.info("StarkRecursiveF::StarkRecursiveF() successfully copied " + to_string(constPolsSize) + " bytes from constant file " + constPolsFilename);
     }
     pConstPols = new ConstantPolsStarks(pConstPolsAddress, constPolsDegree, starkInfo.nConstants);
     TimerStopAndLog(LOAD_RECURSIVE_F_CONST_POLS_TO_MEMORY);
@@ -55,21 +57,24 @@ StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config
 
     TimerStart(LOAD_RECURSIVE_F_CONST_TREE_TO_MEMORY);
     pConstTreeAddress = NULL;
-    if (config.recursivefConstantsTree.size() == 0)
+
+    string constTreeFilename = aggregationLayer ? config.multichainAggFConstantsTree : config.recursivefConstantsTree;
+
+    if (constTreeFilename.size() == 0)
     {
-        zklog.error("StarkRecursiveF::StarkRecursiveF() received an empty config.recursivefConstantsTree");
+        zklog.error("StarkRecursiveF::StarkRecursiveF() received an empty constTreeFilename");
         exitProcess();
     }
 
     if (config.mapConstantsTreeFile)
     {
-        pConstTreeAddress = mapFile(config.recursivefConstantsTree, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants), false);
-        zklog.info("StarkRecursiveF::StarkRecursiveF() successfully mapped " + to_string(getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants)) + " bytes from constant tree file " + config.recursivefConstantsTree);
+        pConstTreeAddress = mapFile(constTreeFilename, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants), false);
+        zklog.info("StarkRecursiveF::StarkRecursiveF() successfully mapped " + to_string(getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants)) + " bytes from constant tree file " + constTreeFilename);
     }
     else
     {
-        pConstTreeAddress = copyFile(config.recursivefConstantsTree, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants));
-        zklog.info("StarkRecursiveF::StarkRecursiveF() successfully copied " + to_string(getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants)) + " bytes from constant file " + config.recursivefConstantsTree);
+        pConstTreeAddress = copyFile(constTreeFilename, getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants));
+        zklog.info("StarkRecursiveF::StarkRecursiveF() successfully copied " + to_string(getTreeSize((1 << starkInfo.starkStruct.nBitsExt), starkInfo.nConstants)) + " bytes from constant file " + constTreeFilename);
     }
     TimerStopAndLog(LOAD_RECURSIVE_F_CONST_TREE_TO_MEMORY);
 
@@ -113,7 +118,7 @@ StarkRecursiveF::StarkRecursiveF(const Config &config, void *_pAddress) : config
 
 StarkRecursiveF::~StarkRecursiveF()
 {
-    if (!config.generateProof())
+    if (!config.genProof())
         return;
 
     delete pConstPols;
@@ -141,11 +146,9 @@ StarkRecursiveF::~StarkRecursiveF()
     free(pBuffer);
 }
 
-void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInputs[8])
+void StarkRecursiveF::genProof(FRIProofC12 &proof, Goldilocks::Element publicInputs[8], Steps *steps)
 {
 
-    StarkRecursiveFSteps recurisveFsteps;
-    StarkRecursiveFSteps *steps = &recurisveFsteps;
     // Initialize vars
     uint64_t numCommited = starkInfo.nCm1;
     TranscriptBN128 transcript;

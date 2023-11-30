@@ -22,3 +22,18 @@ node ../pil-stark/src/main_verifier.js -p config/recursive2/recursive2.pil -s co
 ```bash
 snarkjs ffv config/final/final.fflonk.verkey.json $(ls -t runtime//output/*.gen_final_proof_public.json | head -n1) $(ls -t runtime//output/*.final_proof.proof.json | head -n1)
 ```
+
+### Verify multichain prepare with pil-stark
+```bash
+node ../pil-stark/src/main_verifier.js -p config/multichainPrep/multichainPrep.pil -s config/multichainPrep/multichainPrep.starkinfo.json -o $(ls -t runtime/output/*.prepare_multichain_proof.proof.json | head -n1) -b $(ls -t runtime//output/*.gen_prepare_multichain_proof_public.json | head -n1) -v config/multichainPrep/multichainPrep.verkey.json
+```
+
+### Verify multichain aggregation proof with pil-stark
+```bash
+node ../pil-stark/src/main_verifier.js -p config/multichainAgg/multichainAgg.pil -s config/multichainAgg/multichainAgg.starkinfo.json -o $(ls -t runtime/output/*.aggregated_multichain_proof.proof.json | head -n1) -b $(ls -t runtime/output/*.gen_aggregated_multichain_proof_public.json | head -n1) -v config/multichainAgg/multichainAgg.verkey.json
+```
+
+#### Verify multichain final snark
+```bash
+snarkjs ffv config/multichainFinal/multichainFinal.fflonk.verkey.json $(ls -t runtime//output/*.gen_final_multichain_proof_public.json | head -n1) $(ls -t runtime//output/*.multichain_final_proof.proof.json | head -n1)
+```

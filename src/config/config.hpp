@@ -165,6 +165,48 @@ public:
     string recursive2StarkInfo;
     string recursivefStarkInfo;
 
+    // Aggregation Files
+
+    string aggregatorAddress;
+
+    bool runFileCalculateHash;
+    bool runFileGenPrepareMultichainProof;      // Prepare recursive2 (or recursive1) proof to be aggregated with other chains
+    bool runFileGenAggregatedMultichainProof;   // Aggregated different chains proofs
+    bool runFileGenFinalMultichainProof;        // Final proof of an aggregated multichain proof = RecursiveF + Fflonk (Snark)
+
+    bool runMultichainServer;
+    bool runMultichainClient;
+
+    string multichainPrepConstPols;
+    string multichainAggConstPols;
+    string multichainAggFConstPols;
+    string multichainPrepConstantsTree;
+    string multichainAggConstantsTree;
+    string multichainAggFConstantsTree;
+    string multichainPrepVerifier;
+    string multichainAggVerifier;
+    string multichainAggFVerifier;
+    string multichainFinalVerifier;
+    string multichainPrepVerkey;    
+    string multichainAggVerkey;    
+    string multichainAggFVerkey;   
+    string multichainFinalVerkey; 
+    string multichainPrepExec;
+    string multichainAggExec;
+    string multichainAggFExec;
+    string multichainFinalStarkZkey;
+    string multichainPrepStarkInfo;
+    string multichainAggStarkInfo;
+    string multichainAggFStarkInfo;
+
+    // Multichain service (client)
+    uint16_t multichainServerPort;
+    uint16_t multichainClientPort;
+    string multichainClientHost;
+    uint64_t multichainClientMockTimeout;
+    uint64_t multichainClientWatchdogTimeout;
+    uint64_t multichainClientMaxStreams; // Max number of streams, used to limit E2E test execution; if 0 then there is no limit
+
     // Database
     string databaseURL;
     string dbNodesTableName;
@@ -201,9 +243,17 @@ public:
     bool jsonLogs;
 
     void load(json &config);
-    bool generateProof(void) const { return runFileGenBatchProof || runFileGenAggregatedProof || runFileGenFinalProof || runAggregatorClient; }
     void print(void);
     bool check(void); // Checks that the loaded configuration is correct; returns true if there is at least one error
+
+    bool generateProof(void) const { return runFileGenBatchProof || runFileGenAggregatedProof || runFileGenFinalProof || runAggregatorClient; }
+    bool generatePrepareMultichainProof(void) const { return runFileGenPrepareMultichainProof || runMultichainClient; }
+    bool generateAggregatedMultichainProof(void) const { return runFileGenAggregatedMultichainProof || runMultichainClient; }
+    bool generateFinalMultichainProof(void) const { return runFileGenFinalMultichainProof || runMultichainClient; }
+    bool generateMultichainProof(void) const { return generatePrepareMultichainProof() || generateAggregatedMultichainProof(); }
+    bool generateProofAggregation(void) const { return generateFinalMultichainProof() || generateMultichainProof(); }
+    bool genProof(void) const { return generateProof() || generateProofAggregation(); }
+
 };
 
 #endif

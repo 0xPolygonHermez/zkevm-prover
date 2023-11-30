@@ -132,6 +132,33 @@ The configuration parameters can be of different uses:
 |`recursive2Exec`|production|string|Recursive 2 exec file|config + "/recursive2/recursive2.exec"|RECURSIVE2_EXEC|
 |`recursivefExec`|production|string|Recursive final exec file|config + "/recursivef/recursivef.exec"|RECURSIVEF_EXEC|
 |`finalStarkZkey`|production|string|Final STARK zkey file|config + "/final/final.fflonk.zkey"|FINAL_STARK_ZKEY|
+|`runFileCalculateHash`|test|boolean|Given a last hash and a new set of publics, calculate the sha256 hash after adding those publics (with no padding) |false|RUN_FILE_CALCULATE_HASH|
+|`runFileGenPrepareMultichainProof`|test|boolean|Submits an input json file, defined in the `inputFile` parameter, to generate a multichain proof that can be aggregated|false|RUN_FILE_GEN_PREPARE_MULTICHAIN_PROOF|
+|`runFileGenAggregatedMultichainProof`|test|boolean|Submits two aggregated multichain proof files, defined in the `inputFile` and `inputFile2` parameters, to generate a aggregated multichain proof|false|RUN_FILE_GEN_AGGREGATED_MULTICHAIN_PROOF|
+|`runFileGenFinalMultichainProof`|test|boolean|Submits a recursive proof file, defined in the `inputFile` parameter, to generate a final multichain proof|false|RUN_FILE_GEN_FINAL_MULTICHAIN_PROOF|
+|`runMultichainServer`|test|boolean|Runs a Multichain service to test the Multichain client|false|RUN_MULTICHAIN_SERVER|
+|**`runMultichainClient`**|production|boolean|Enables Multichain GRPC client, connects to the Multichain and process its proof generation requests; requires 256GB of RAM|false|RUN_MULTICHAIN_CLIENT|
+|`multichainPrepConstPols`|production|string|Multichain Prepare constant polynomials file|config + "/multichainPrep/multichainPrep.const"|MULTICHAIN_PREP_CONST_POLS|
+|`multichainAggConstPols`|production|string|Multichain Aggregation constant polynomials file|config + "/multichainAgg/multichainAgg.const"|MULTICHAIN_AGG_CONST_POLS|
+|`multichainAggFConstPols`|production|string|Multichain Aggregation Final constant polynomials file|config + "/multichainAggF/multichainAggF.const"|MULTICHAIN_AGG_F_CONST_POLS|
+|`multichainPrepConstantsTree`|production|string|Multichain Prepare constant polynomials tree file|config + "/multichainPrep/multichainPrep.consttree"|MULTICHAIN_PREP_CONSTANTS_TREE|
+|`multichainAggConstantsTree`|production|string|Multichain Aggregation constant polynomials tree file|config + "/multichainAgg/multichainAgg.consttree"|MULTICHAIN_AGG_CONSTANTS_TREE|
+|`multichainAggFConstantsTree`|production|string|Multichain Aggregation Final constant polynomials tree file|config + "/multichainAggF/multichainAggF.consttree"|MULTICHAIN_AGG_F_CONSTANTS_TREE|
+|`multichainPrepVerifier`|production|string|Multichain Prepare verifier data file|config + "/multichainPrep/multichainPrep.verifier.dat"|MULTICHAIN_PREP_VERIFIER|
+|`multichainAggVerifier`|production|string|Multichain Aggregation verifier data file|config + "/multichainAgg/multichainAgg.verifier.dat"|MULTICHAIN_AGG_VERIFIER|
+|`multichainAggFVerifier`|production|string|Multichain Aggregation Final verifier data file|config + "/multichainAggF/multichainAggF.verifier.dat"|MULTICHAIN_AGG_F_VERIFIER|
+|`multichainPrepStarkInfo`|production|string|Multichain Prepare STARK info file|config + "/multichainPrep/multichainPrep.starkinfo.json"|MULTICHAIN_PREP_STARK_INFO|
+|`multichainAggStarkInfo`|production|string|Multichain Aggregation STARK info file|config + "/multichainAgg/multichainAgg.starkinfo.json"|MULTICHAIN_AGG_STARK_INFO|
+|`multichainAggFStarkInfo`|production|string|Multichain Aggregation Final STARK info file|config + "/multichainAggF/multichainAggF.starkinfo.json"|MULTICHAIN_AGG_F_STARK_INFO|
+|`multichainFinalVerkey`|production|string|Multichain Final verification key file|config + "/multichainFinal/multichainFinal.fflonk.verkey.json"|MULTICHAIN_FINAL_VERKEY|
+|`multichainPrepVerkey`|production|string|Multichain Prepare verification key file|config + "/multichainPrep/multichainPrep.verkey.json"|MULTICHAIN_PREP_VERKEY|
+|`multichainAggVerkey`|production|string|Multichain Aggregation verification key file|config + "/multichainAgg/multichainAgg.verkey.json"|MULTICHAIN_AGG_VERKEY|
+|`multichainAggFVerkey`|production|string|Multichain Aggregation Final verification key file|config + "/multichainAggF/multichainAggF.verkey.json"|MULTICHAIN_AGG_F_VERKEY|
+|`multichainFinalVerifier`|production|string|Multichain Final verifier data file|config + "/multichainFinal/multichainFinal.verifier.dat"|MULTICHAIN_FINAL_VERIFIER|
+|`multichainPrepExec`|production|string|Multichain Prepare exec file|config + "/multichainPrep/multichainPrep.exec"|MULTICHAIN_PREP_EXEC|
+|`multichainAggExec`|production|string|Multichain Aggregation exec file|config + "/multichainAgg/multichainAgg.exec"|MULTICHAIN_AGG_EXEC|
+|`multichainAggFExec`|production|string|Multichain Aggregation Final exec file|config + "/multichainAggF/multichainAggF.exec"|MULTICHAIN_AGG_F_EXEC|
+|`multichainFinalStarkZkey`|production|string|Multichain Final STARK zkey file|config + "/multichainFinal/multichainFinal.fflonk.zkey"|MULTICHAIN_FINAL_STARK_ZKEY|
 |`publicsOutput`|production|string|Public data output file|"public.json"|PUBLICS_OUTPUT|
 |`proofFile`|production|string|Proof data output file|"proof.json"|PROOF_FILE|
 |`keccakScriptFile`|production|string|Keccak-f state machine script file|config + "/scripts/keccak_script.json"|KECCAK_SCRIPT_FILE|
