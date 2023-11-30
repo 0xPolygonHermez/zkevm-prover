@@ -20,7 +20,7 @@ jobs:
       - name: Submodule init
         run: |
           git submodule init
-          git submodule update
+          git submodule update --remote
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
