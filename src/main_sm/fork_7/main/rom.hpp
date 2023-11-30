@@ -69,7 +69,7 @@ public:
     uint64_t timestampOffset;
     uint64_t gerL1InfoTreeOffset;
     uint64_t previousBlockHashOffset;
-    uint64_t blockchashL1InfoTreeOffset;
+    uint64_t blockHashL1InfoTreeOffset;
     uint64_t isChangeL2BlockTxOffset;
     uint64_t txIndexOffset;
     uint64_t l2TxHashOffset;
@@ -124,7 +124,7 @@ public:
             timestampOffset(0),
             gerL1InfoTreeOffset(0),
             previousBlockHashOffset(0),
-            blockchashL1InfoTreeOffset(0),
+            blockHashL1InfoTreeOffset(0),
             isChangeL2BlockTxOffset(0),
             txIndexOffset(0),
             l2TxHashOffset(0)

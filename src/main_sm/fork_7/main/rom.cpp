@@ -73,7 +73,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
         timestampOffset              = getMemoryOffset("timestamp");
         gerL1InfoTreeOffset          = getMemoryOffset("gerL1InfoTree");
         previousBlockHashOffset      = getMemoryOffset("previousBlockHash");
-        blockchashL1InfoTreeOffset   = getMemoryOffset("blockchashL1InfoTree");
+        blockHashL1InfoTreeOffset    = getMemoryOffset("blockHashL1InfoTree");
         isChangeL2BlockTxOffset      = getMemoryOffset("isChangeL2BlockTx");
         txIndexOffset                = getMemoryOffset("txIndex");
         l2TxHashOffset               = getMemoryOffset("l2TxHash");

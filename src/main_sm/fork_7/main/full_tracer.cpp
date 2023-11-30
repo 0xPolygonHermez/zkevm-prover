@@ -751,10 +751,10 @@ zkresult FullTracer::onFinishBlock (Context &ctx)
     currentBlock.ger = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
 
     // Get block hash L1
-    zkr = getVarFromCtx(ctx, true, ctx.rom.blockchashL1InfoTreeOffset, auxScalar);
+    zkr = getVarFromCtx(ctx, true, ctx.rom.blockHashL1InfoTreeOffset, auxScalar);
     if (zkr != ZKR_SUCCESS)
     {
-        zklog.error("FullTracer::onFinishBlock() failed calling getVarFromCtx(ctx.rom.blockchashL1InfoTreeOffset)");
+        zklog.error("FullTracer::onFinishBlock() failed calling getVarFromCtx(ctx.rom.blockHashL1InfoTreeOffset)");
         return zkr;
     }
     currentBlock.block_hash_l1 = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
