@@ -77,13 +77,13 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     rom.load(fr, romJson);
 
     // Get labels
-    finalizeExecutionLabel  = rom.getLabel(string("finalizeExecution"));
-    //checkAndSaveFromLabel   = rom.getLabel(string("checkAndSaveFrom"));
-    checkAndSaveFromLabel = 1000000; // TODO: Decide if we need this label any more
-    ecrecoverStoreArgsLabel = rom.getLabel(string("ecrecover_store_args"));
-    ecrecoverEndLabel       = rom.getLabel(string("ecrecover_end"));
-    checkFirstTxTypeLabel   = rom.getLabel(string("checkFirstTxType"));
-    writeBlockInfoRootLabel = rom.getLabel(string("writeBlockInfoRoot"));
+    finalizeExecutionLabel    = rom.getLabel(string("finalizeExecution"));
+    checkAndSaveFromLabel     = rom.getLabel(string("checkAndSaveFrom"));
+    ecrecoverStoreArgsLabel   = rom.getLabel(string("ecrecover_store_args"));
+    ecrecoverEndLabel         = rom.getLabel(string("ecrecover_end"));
+    checkFirstTxTypeLabel     = rom.getLabel(string("checkFirstTxType"));
+    writeBlockInfoRootLabel   = rom.getLabel(string("writeBlockInfoRoot"));
+    verifyMerkleProofEndLabel = rom.getLabel(string("verifyMerkleProofEnd"));
 
     // Init labels mutex
     pthread_mutex_init(&labelsMutex, NULL);
@@ -4598,7 +4598,22 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_SETX
             zklog.info("setC C[nexti]=" + fea2string(fr, pols.C0[nexti], pols.C1[nexti], pols.C2[nexti], pols.C3[nexti], pols.C4[nexti], pols.C5[nexti], pols.C6[nexti], pols.C7[nexti]));
 #endif
-        } else {
+        }            
+        else if ((zkPC == verifyMerkleProofEndLabel) && proverRequest.input.bSkipVerifyL1InfoRoot)
+        {
+            // Set C register with input.l1InfoRoot to process unsigned transactions
+            scalar2fea(fr, proverRequest.input.publicInputsExtended.publicInputs.l1InfoRoot,
+                pols.C0[nexti],
+                pols.C1[nexti],
+                pols.C2[nexti],
+                pols.C3[nexti],
+                pols.C4[nexti],
+                pols.C5[nexti],
+                pols.C6[nexti],
+                pols.C7[nexti]);
+        }
+        else
+        {
             pols.C0[nexti] = pols.C0[i];
             pols.C1[nexti] = pols.C1[i];
             pols.C2[nexti] = pols.C2[i];
