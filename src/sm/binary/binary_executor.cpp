@@ -101,7 +101,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
         input.push_back(actionBytes);
     }
 
-    // Local array of N uint32
+    // Local array of N uint32 
     uint32_t * c0Temp = (uint32_t *)calloc(N*sizeof(uint32_t),1);
     if (c0Temp == NULL)
     {
@@ -133,7 +133,6 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
             Goldilocks::Element cIn = fr.zero();
             Goldilocks::Element cOut = fr.zero();
             bool reset = (j == 0) ? true : false;
-            uint64_t resetCarry = ((reset == 1) || (reset4 == 1 && ((j%4)==0))) ? 1 : 0;
             bool useCarry = false;
             uint64_t usePreviousAreLt4 = 0;
 

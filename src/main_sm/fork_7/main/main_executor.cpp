@@ -575,7 +575,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
         }
 
-        // If inCntSha256F, op = op + inCntSha256F*cntKeccakF
+        // If inCntSha256F, op = op + inCntSha256F*cntSha256F
         if (!fr.isZero(rom.line[zkPC].inCntSha256F))
         {
             op0 = fr.add(op0, fr.mul(rom.line[zkPC].inCntSha256F, pols.cntSha256F[i]));
