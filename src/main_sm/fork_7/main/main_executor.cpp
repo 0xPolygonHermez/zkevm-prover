@@ -635,15 +635,15 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // If inCONST, op = op + CONST
         if (rom.line[zkPC].bConstLPresent)
         {
-            scalar2fea(fr, rom.line[zkPC].CONSTL, op0, op1, op2, op3, op4, op5, op6, op7);
-            pols.CONST0[i] = op0;
-            pols.CONST1[i] = op1;
-            pols.CONST2[i] = op2;
-            pols.CONST3[i] = op3;
-            pols.CONST4[i] = op4;
-            pols.CONST5[i] = op5;
-            pols.CONST6[i] = op6;
-            pols.CONST7[i] = op7;
+            scalar2fea(fr, rom.line[zkPC].CONSTL, pols.CONST0[i], pols.CONST1[i], pols.CONST2[i], pols.CONST3[i], pols.CONST4[i], pols.CONST5[i], pols.CONST6[i], pols.CONST7[i]);
+            op0 = fr.add(op0, pols.CONST0[i]);
+            op1 = fr.add(op1, pols.CONST1[i]);
+            op2 = fr.add(op2, pols.CONST2[i]);
+            op3 = fr.add(op3, pols.CONST3[i]);
+            op4 = fr.add(op4, pols.CONST4[i]);
+            op5 = fr.add(op5, pols.CONST5[i]);
+            op6 = fr.add(op6, pols.CONST6[i]);
+            op7 = fr.add(op7, pols.CONST7[i]);
 #ifdef LOG_INX
             zklog.info("CONSTL op=" + rom.line[zkPC].CONSTL.get_str(16));
 #endif
