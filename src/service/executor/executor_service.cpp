@@ -1222,6 +1222,8 @@ using grpc::Status;
         }
     }
 
+    proverRequest.input.debug.gasLimit = request->debug().gas_limit();
+
 #ifdef LOG_SERVICE_EXECUTOR_INPUT
     zklog.info(string("ExecutorServiceImpl::ProcessBatchV2() got") +
         " sequencerAddr=" + proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16) +
@@ -1244,7 +1246,9 @@ using grpc::Status;
         " bSkipFirstChangeL2Block=" + to_string(proverRequest.input.bSkipFirstChangeL2Block) +
         " bSkipWriteBlockInfoRoot=" + to_string(proverRequest.input.bSkipWriteBlockInfoRoot) +
         " traceConfig=" + proverRequest.input.traceConfig.toString() +
-        " UUID=" + proverRequest.uuid, &proverRequest.tags);
+        " UUID=" + proverRequest.uuid +
+        " gasLimit=" + to_string(proverRequest.input.debug.gasLimit)
+        , &proverRequest.tags);
 #endif
 
     if (config.logExecutorServerInputJson)

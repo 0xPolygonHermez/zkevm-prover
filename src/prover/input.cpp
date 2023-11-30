@@ -275,6 +275,27 @@ void Input::loadGlobals (json &input)
         }
     }
 
+    if (publicInputsExtended.publicInputs.forkID >= 7)
+    {
+        // Input JSON file might contain a gasLimit key at the root level
+        if ( input.contains("gasLimit") &&
+            input["gasLimit"].is_string() )
+        {
+            string gasLimitString = input["gasLimit"];
+            mpz_class gasLimitScalar;
+            gasLimitScalar.set_str(gasLimitString, 10);
+            if (gasLimitScalar > ScalarMask64)
+            {
+                zklog.error("Input::loadGlobals() gasLimit key value is too high value=" + gasLimitString);
+                exitProcess();
+            }
+            debug.gasLimit = gasLimitScalar.get_ui();
+#ifdef LOG_INPUT
+            zklog.info("Input::loadGlobals(): gasLimit=" + to_string(debug.gasLimit));
+#endif
+        }
+    }
+
     if (publicInputsExtended.publicInputs.forkID <= 6)
     {
         // Input JSON file must contain a timestamp key at the root level

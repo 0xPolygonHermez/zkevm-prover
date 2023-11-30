@@ -52,7 +52,7 @@ struct TableStruct_executor_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxillaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[40]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[41]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -67,6 +67,9 @@ extern ContractDefaultTypeInternal _Contract_default_instance_;
 class ContractV2;
 class ContractV2DefaultTypeInternal;
 extern ContractV2DefaultTypeInternal _ContractV2_default_instance_;
+class DebugV2;
+class DebugV2DefaultTypeInternal;
+extern DebugV2DefaultTypeInternal _DebugV2_default_instance_;
 class FullTrace;
 class FullTraceDefaultTypeInternal;
 extern FullTraceDefaultTypeInternal _FullTrace_default_instance_;
@@ -186,6 +189,7 @@ extern TransactionStep_StorageEntry_DoNotUseDefaultTypeInternal _TransactionStep
 PROTOBUF_NAMESPACE_OPEN
 template<> ::executor::v1::Contract* Arena::CreateMaybeMessage<::executor::v1::Contract>(Arena*);
 template<> ::executor::v1::ContractV2* Arena::CreateMaybeMessage<::executor::v1::ContractV2>(Arena*);
+template<> ::executor::v1::DebugV2* Arena::CreateMaybeMessage<::executor::v1::DebugV2>(Arena*);
 template<> ::executor::v1::FullTrace* Arena::CreateMaybeMessage<::executor::v1::FullTrace>(Arena*);
 template<> ::executor::v1::FullTraceV2* Arena::CreateMaybeMessage<::executor::v1::FullTraceV2>(Arena*);
 template<> ::executor::v1::GetFlushStatusResponse* Arena::CreateMaybeMessage<::executor::v1::GetFlushStatusResponse>(Arena*);
@@ -4574,6 +4578,7 @@ class ProcessBatchRequestV2 PROTOBUF_FINAL :
     kFromFieldNumber = 13,
     kContextIdFieldNumber = 21,
     kTraceConfigFieldNumber = 20,
+    kDebugFieldNumber = 24,
     kOldBatchNumFieldNumber = 3,
     kChainIdFieldNumber = 4,
     kForkIdFieldNumber = 5,
@@ -4871,6 +4876,24 @@ class ProcessBatchRequestV2 PROTOBUF_FINAL :
       ::executor::v1::TraceConfigV2* trace_config);
   ::executor::v1::TraceConfigV2* unsafe_arena_release_trace_config();
 
+  // .executor.v1.DebugV2 debug = 24;
+  bool has_debug() const;
+  private:
+  bool _internal_has_debug() const;
+  public:
+  void clear_debug();
+  const ::executor::v1::DebugV2& debug() const;
+  ::executor::v1::DebugV2* release_debug();
+  ::executor::v1::DebugV2* mutable_debug();
+  void set_allocated_debug(::executor::v1::DebugV2* debug);
+  private:
+  const ::executor::v1::DebugV2& _internal_debug() const;
+  ::executor::v1::DebugV2* _internal_mutable_debug();
+  public:
+  void unsafe_arena_set_allocated_debug(
+      ::executor::v1::DebugV2* debug);
+  ::executor::v1::DebugV2* unsafe_arena_release_debug();
+
   // uint64 old_batch_num = 3;
   void clear_old_batch_num();
   ::PROTOBUF_NAMESPACE_ID::uint64 old_batch_num() const;
@@ -5001,6 +5024,7 @@ class ProcessBatchRequestV2 PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr from_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr context_id_;
   ::executor::v1::TraceConfigV2* trace_config_;
+  ::executor::v1::DebugV2* debug_;
   ::PROTOBUF_NAMESPACE_ID::uint64 old_batch_num_;
   ::PROTOBUF_NAMESPACE_ID::uint64 chain_id_;
   ::PROTOBUF_NAMESPACE_ID::uint64 fork_id_;
@@ -5233,6 +5257,143 @@ class L1DataV2 PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class DebugV2 PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:executor.v1.DebugV2) */ {
+ public:
+  inline DebugV2() : DebugV2(nullptr) {};
+  virtual ~DebugV2();
+
+  DebugV2(const DebugV2& from);
+  DebugV2(DebugV2&& from) noexcept
+    : DebugV2() {
+    *this = ::std::move(from);
+  }
+
+  inline DebugV2& operator=(const DebugV2& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline DebugV2& operator=(DebugV2&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const DebugV2& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const DebugV2* internal_default_instance() {
+    return reinterpret_cast<const DebugV2*>(
+               &_DebugV2_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    25;
+
+  friend void swap(DebugV2& a, DebugV2& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(DebugV2* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(DebugV2* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline DebugV2* New() const final {
+    return CreateMaybeMessage<DebugV2>(nullptr);
+  }
+
+  DebugV2* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<DebugV2>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const DebugV2& from);
+  void MergeFrom(const DebugV2& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(DebugV2* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "executor.v1.DebugV2";
+  }
+  protected:
+  explicit DebugV2(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
+    return ::descriptor_table_executor_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kGasLimitFieldNumber = 1,
+  };
+  // uint64 gas_limit = 1;
+  void clear_gas_limit();
+  ::PROTOBUF_NAMESPACE_ID::uint64 gas_limit() const;
+  void set_gas_limit(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_gas_limit() const;
+  void _internal_set_gas_limit(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:executor.v1.DebugV2)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 gas_limit_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_executor_2eproto;
+};
+// -------------------------------------------------------------------
+
 class ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse : public ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse, 
     std::string, ::executor::v1::InfoReadWriteV2,
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
@@ -5257,7 +5418,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
-    return ::descriptor_table_executor_2eproto.file_level_metadata[25];
+    return ::descriptor_table_executor_2eproto.file_level_metadata[26];
   }
 
   public:
@@ -5307,7 +5468,7 @@ class ProcessBatchResponseV2 PROTOBUF_FINAL :
                &_ProcessBatchResponseV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    26;
+    27;
 
   friend void swap(ProcessBatchResponseV2& a, ProcessBatchResponseV2& b) {
     a.Swap(&b);
@@ -5792,7 +5953,7 @@ class TraceConfigV2 PROTOBUF_FINAL :
                &_TraceConfigV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    27;
+    28;
 
   friend void swap(TraceConfigV2& a, TraceConfigV2& b) {
     a.Swap(&b);
@@ -5973,7 +6134,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
-    return ::descriptor_table_executor_2eproto.file_level_metadata[28];
+    return ::descriptor_table_executor_2eproto.file_level_metadata[29];
   }
 
   public:
@@ -6007,7 +6168,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
-    return ::descriptor_table_executor_2eproto.file_level_metadata[29];
+    return ::descriptor_table_executor_2eproto.file_level_metadata[30];
   }
 
   public:
@@ -6057,7 +6218,7 @@ class OverrideAccountV2 PROTOBUF_FINAL :
                &_OverrideAccountV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    30;
+    31;
 
   friend void swap(OverrideAccountV2& a, OverrideAccountV2& b) {
     a.Swap(&b);
@@ -6297,7 +6458,7 @@ class InfoReadWriteV2 PROTOBUF_FINAL :
                &_InfoReadWriteV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    31;
+    32;
 
   friend void swap(InfoReadWriteV2& a, InfoReadWriteV2& b) {
     a.Swap(&b);
@@ -6477,7 +6638,7 @@ class FullTraceV2 PROTOBUF_FINAL :
                &_FullTraceV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    32;
+    33;
 
   friend void swap(FullTraceV2& a, FullTraceV2& b) {
     a.Swap(&b);
@@ -6643,7 +6804,7 @@ class TransactionContextV2 PROTOBUF_FINAL :
                &_TransactionContextV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    33;
+    34;
 
   friend void swap(TransactionContextV2& a, TransactionContextV2& b) {
     a.Swap(&b);
@@ -7062,7 +7223,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
-    return ::descriptor_table_executor_2eproto.file_level_metadata[34];
+    return ::descriptor_table_executor_2eproto.file_level_metadata[35];
   }
 
   public:
@@ -7112,7 +7273,7 @@ class TransactionStepV2 PROTOBUF_FINAL :
                &_TransactionStepV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    35;
+    36;
 
   friend void swap(TransactionStepV2& a, TransactionStepV2& b) {
     a.Swap(&b);
@@ -7489,7 +7650,7 @@ class ContractV2 PROTOBUF_FINAL :
                &_ContractV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    36;
+    37;
 
   friend void swap(ContractV2& a, ContractV2& b) {
     a.Swap(&b);
@@ -7761,7 +7922,7 @@ class ProcessBlockResponseV2 PROTOBUF_FINAL :
                &_ProcessBlockResponseV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    37;
+    38;
 
   friend void swap(ProcessBlockResponseV2& a, ProcessBlockResponseV2& b) {
     a.Swap(&b);
@@ -8133,7 +8294,7 @@ class ProcessTransactionResponseV2 PROTOBUF_FINAL :
                &_ProcessTransactionResponseV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    38;
+    39;
 
   friend void swap(ProcessTransactionResponseV2& a, ProcessTransactionResponseV2& b) {
     a.Swap(&b);
@@ -8625,7 +8786,7 @@ class LogV2 PROTOBUF_FINAL :
                &_LogV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    39;
+    40;
 
   friend void swap(LogV2& a, LogV2& b) {
     a.Swap(&b);
@@ -15483,6 +15644,87 @@ ProcessBatchRequestV2::mutable_state_override() {
   return _internal_mutable_state_override();
 }
 
+// .executor.v1.DebugV2 debug = 24;
+inline bool ProcessBatchRequestV2::_internal_has_debug() const {
+  return this != internal_default_instance() && debug_ != nullptr;
+}
+inline bool ProcessBatchRequestV2::has_debug() const {
+  return _internal_has_debug();
+}
+inline void ProcessBatchRequestV2::clear_debug() {
+  if (GetArena() == nullptr && debug_ != nullptr) {
+    delete debug_;
+  }
+  debug_ = nullptr;
+}
+inline const ::executor::v1::DebugV2& ProcessBatchRequestV2::_internal_debug() const {
+  const ::executor::v1::DebugV2* p = debug_;
+  return p != nullptr ? *p : *reinterpret_cast<const ::executor::v1::DebugV2*>(
+      &::executor::v1::_DebugV2_default_instance_);
+}
+inline const ::executor::v1::DebugV2& ProcessBatchRequestV2::debug() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchRequestV2.debug)
+  return _internal_debug();
+}
+inline void ProcessBatchRequestV2::unsafe_arena_set_allocated_debug(
+    ::executor::v1::DebugV2* debug) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(debug_);
+  }
+  debug_ = debug;
+  if (debug) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBatchRequestV2.debug)
+}
+inline ::executor::v1::DebugV2* ProcessBatchRequestV2::release_debug() {
+  auto temp = unsafe_arena_release_debug();
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::executor::v1::DebugV2* ProcessBatchRequestV2::unsafe_arena_release_debug() {
+  // @@protoc_insertion_point(field_release:executor.v1.ProcessBatchRequestV2.debug)
+  
+  ::executor::v1::DebugV2* temp = debug_;
+  debug_ = nullptr;
+  return temp;
+}
+inline ::executor::v1::DebugV2* ProcessBatchRequestV2::_internal_mutable_debug() {
+  
+  if (debug_ == nullptr) {
+    auto* p = CreateMaybeMessage<::executor::v1::DebugV2>(GetArena());
+    debug_ = p;
+  }
+  return debug_;
+}
+inline ::executor::v1::DebugV2* ProcessBatchRequestV2::mutable_debug() {
+  // @@protoc_insertion_point(field_mutable:executor.v1.ProcessBatchRequestV2.debug)
+  return _internal_mutable_debug();
+}
+inline void ProcessBatchRequestV2::set_allocated_debug(::executor::v1::DebugV2* debug) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete debug_;
+  }
+  if (debug) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(debug);
+    if (message_arena != submessage_arena) {
+      debug = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, debug, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  debug_ = debug;
+  // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessBatchRequestV2.debug)
+}
+
 // -------------------------------------------------------------------
 
 // L1DataV2
@@ -15741,6 +15983,30 @@ inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
 L1DataV2::mutable_smt_proof() {
   // @@protoc_insertion_point(field_mutable_list:executor.v1.L1DataV2.smt_proof)
   return &smt_proof_;
+}
+
+// -------------------------------------------------------------------
+
+// DebugV2
+
+// uint64 gas_limit = 1;
+inline void DebugV2::clear_gas_limit() {
+  gas_limit_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 DebugV2::_internal_gas_limit() const {
+  return gas_limit_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 DebugV2::gas_limit() const {
+  // @@protoc_insertion_point(field_get:executor.v1.DebugV2.gas_limit)
+  return _internal_gas_limit();
+}
+inline void DebugV2::_internal_set_gas_limit(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  gas_limit_ = value;
+}
+inline void DebugV2::set_gas_limit(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_gas_limit(value);
+  // @@protoc_insertion_point(field_set:executor.v1.DebugV2.gas_limit)
 }
 
 // -------------------------------------------------------------------
@@ -21333,6 +21599,8 @@ inline void LogV2::set_index(::PROTOBUF_NAMESPACE_ID::uint32 value) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

@@ -291,6 +291,7 @@ message ProcessBatchRequestV2 {
     // where each entry specifies some state to be ephemerally overridden
     // prior to executing the call.
     map<string, OverrideAccountV2> state_override = 23;
+    DebugV2 debug = 24;
 }
 
 message L1DataV2 {
@@ -298,6 +299,10 @@ message L1DataV2 {
     bytes block_hash_l1 = 2;
     uint64 min_timestamp = 3;
     repeated bytes smt_proof = 4;
+}
+
+message DebugV2 {
+    uint64 gas_limit = 1;
 }
 
 message ProcessBatchResponseV2 {
@@ -819,6 +824,6 @@ enum ExecutorError {
     EXECUTOR_ERROR_INVALID_L1_SMT_PROOF = 101;
     // EXECUTOR_ERROR_INVALID_BALANCE indicates that the input parameter balance value is invalid
     EXECUTOR_ERROR_INVALID_BALANCE = 102;
-// EXECUTOR_ERROR_SM_MAIN_BINARY_LT4_MISMATCH indicates that the binary instruction less than four opcode failed
+    // EXECUTOR_ERROR_SM_MAIN_BINARY_LT4_MISMATCH indicates that the binary instruction less than four opcode failed
     EXECUTOR_ERROR_SM_MAIN_BINARY_LT4_MISMATCH = 103;
 }

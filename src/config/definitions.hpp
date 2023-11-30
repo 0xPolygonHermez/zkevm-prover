@@ -75,4 +75,6 @@
 
 //#define MAIN_SM_EXECUTOR_GENERATED_CODE
 
+//#define MULTI_ROM_TEST
+
 #endif

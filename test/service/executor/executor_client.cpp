@@ -214,6 +214,13 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
         request.set_chain_id(input.publicInputsExtended.publicInputs.chainID);
         request.set_fork_id(input.publicInputsExtended.publicInputs.forkID);
         request.set_from(input.from);
+        executor::v1::DebugV2 *pDebug = new executor::v1::DebugV2();
+        if (input.debug.gasLimit > 0)
+        {
+            zkassertpermanent(pDebug != NULL);
+            pDebug->set_gas_limit(input.debug.gasLimit);
+            request.set_allocated_debug(pDebug);
+        }
         unordered_map<uint64_t, L1Data>::const_iterator itL1Data;
         for (itL1Data = input.l1InfoTreeData.begin(); itL1Data != input.l1InfoTreeData.end(); itL1Data++)
         {
@@ -419,60 +426,34 @@ bool ProcessDirectory (ExecutorClient *pClient, const string &directoryName, uin
 
         // Skip some files that we know are failing
         if ( skipping 
-
-                /* Files and directories expected to be skipped */
-
-                || (files[i].find("ignore") != string::npos) // Ignore tests masked as "ignore"
-
-                || (files[i].find("tests-30M") == 0) // different state roots due to expected different rom gas limit; gasLimit input not being parsed and used in C -> TODO: to pass via grpc and select rom.json
-
-                || (inputFile == "testvectors/inputs-executor/rlp-error/test-length-data_1.json") // batchL2Data.size()=120119 > MAX_BATCH_L2_DATA_SIZE=120000
-                || (inputFile == "testvectors/inputs-executor/rlp-error/test-length-data_2.json") // batchL2Data.size()=120118 > MAX_BATCH_L2_DATA_SIZE=120000
-
-                /* Files not expected to be skipped, i.e. issues */
-
-                || (inputFile == "testvectors/inputs-executor/calldata/test-length-data_1.json") // newStateRoot=c14d4d9f490cd974197f01ed1adecc4024d53fa3c7e81763a03808f65b84ae71 != input.publicInputsExtended.newStateRoot=b0efbc28d34fc4fe525dd4abe23503c861134af89cca6e14af69f6973ab9a6bf OOCB => new state root does not match
-                //|| (inputFile == "testvectors/inputs-executor/ethereum-tests/GeneralStateTests/stBadOpcode/measureGas_10.json") // newStateRoot=4a31d576b3ca0e6d7c9f6b89833ec267ab114efb8a96d6cea558660643b195aa != input.publicInputsExtended.newStateRoot=d32dfc86ffb21f10eea6612ecb3f82e23259db32136ebd7231b1ba39ca2f5fc5
-                //|| (inputFile == "testvectors/inputs-executor/ethereum-tests/GeneralStateTests/VMTests/performanceTester_1.json") // newStateRoot=8048cecbd2ad46fe5f502fc41b4947e56ce0bf2d48afa196cc7a9509f4f4f0ab != input.publicInputsExtended.newStateRoot=26a2462229e0e7f990a5074cba25f3c820932ede4f28b6a41130c1d6da0e3d1b
-                // TODO: if "stepsN": 8388608 is present, use no_counters = true
-
-                // TODO: Debug C vs JS registers for the next 8 files, print and check timestampLimit -> precompiled helpers returning different from JS
-                || (inputFile == "testvectors/inputs-executor/ethereum-tests/GeneralStateTests/stStaticFlagEnabled/CallcodeToPrecompileFromCalledContract-custom.json") // newStateRoot=91d9a9046fdadf44836559ae91ced0457c7505c20283ce22761902e42e2e5c6e != input.publicInputsExtended.newStateRoot=99e32a7ab1582c1979d72942d5a1a2bf63234444f95ccc92ec77b7039276d774             
-                || (inputFile == "testvectors/inputs-executor/ethereum-tests/GeneralStateTests/stStaticFlagEnabled/CallcodeToPrecompileFromTransaction-custom.json") // newStateRoot=91d9a9046fdadf44836559ae91ced0457c7505c20283ce22761902e42e2e5c6e != input.publicInputsExtended.newStateRoot=99e32a7ab1582c1979d72942d5a1a2bf63234444f95ccc92ec77b7039276d774
-                || (inputFile == "testvectors/inputs-executor/ethereum-tests/GeneralStateTests/stStaticFlagEnabled/DelegatecallToPrecompileFromCalledContract-custom.json") // newStateRoot=91d9a9046fdadf44836559ae91ced0457c7505c20283ce22761902e42e2e5c6e != input.publicInputsExtended.newStateRoot=99e32a7ab1582c1979d72942d5a1a2bf63234444f95ccc92ec77b7039276d774
-                || (inputFile == "testvectors/inputs-executor/ethereum-tests/GeneralStateTests/stStaticFlagEnabled/DelegatecallToPrecompileFromTransaction-custom.json") // newStateRoot=f5971aedd8f30d3eba337d8257020b16015572f7f538678ed7ea31c17819a61e != input.publicInputsExtended.newStateRoot=d1b397950750cefdff4ef8691a3234e4d6cc99b1436fdcb181a17cb8b0cc6865
-                
-                // TOP PRIORITY pairingTest_0.json
-                || (inputFile == "testvectors/inputs-executor/ethereum-tests/GeneralStateTests/stZeroKnowledge/pairingTest_0.json") // newStateRoot=5517e42cc95e1f4bab7f535a563f5c1d14900c8b6a93ffb7c19446c6c4641d26 != input.publicInputsExtended.newStateRoot=9f5fdf3aa6107c42c69af17aeddc00d92a7e575e73504af75b6d690175a53700
-                || (inputFile == "testvectors/inputs-executor/ethereum-tests/GeneralStateTests/stZeroKnowledge/pairingTest_12.json") // newStateRoot=e3aa4a919114315c36c0dc705b9b3ba16cc4e456af138a89fd2268237d49d8b3 != input.publicInputsExtended.newStateRoot=5a59ac290a34f38caf116922864dcefea5f17acb3c63bfc7e8c77621293df934
-                || (inputFile == "testvectors/inputs-executor/ethereum-tests/GeneralStateTests/stZeroKnowledge/pairingTest_16.json") // newStateRoot=a2de34399cc117f9734fefa5ecb8511c68780cfd526cbae5fac0cc9fc2898b59 != input.publicInputsExtended.newStateRoot=bc1861dcf5671cf3c72af7db982d8753ed972e20afeee78670c80b9cf5cc54e9
-                || (inputFile == "testvectors/inputs-executor/ethereum-tests/GeneralStateTests/stZeroKnowledge/pairingTest_4.json") // newStateRoot=ea0e3f1dec1adb8368dd399fc60f467cc5c7966e13c7340c68d465ce0367c36f != input.publicInputsExtended.newStateRoot=5f84bbf18e70fa498363ad4fb57b1c11639c7e2aa9019903f935b6cd2646d0e6
-                || (inputFile == "testvectors/inputs-executor/ethereum-tests/GeneralStateTests/stZeroKnowledge/pairingTest_8.json") // newStateRoot=be3742934aa3d001391fb16d1bceb3787fb777811c07d6919d46c5426b09949d != input.publicInputsExtended.newStateRoot=3a3f8ce88f7e73d8823e5f3cc177d03bcdfe5fac226235d7f3d00b28c58b3245
-            )
+             /* Files and directories expected to be skipped */
+             || (files[i].find("ignore") != string::npos) // Ignore tests masked as "ignore"
+             || (files[i].find("-list.json") != string::npos) // Ignore tests masked as "-list"
+             || (inputFile == "testvectors/inputs-executor/rlp-error/test-length-data_1.json") // batchL2Data.size()=120119 > MAX_BATCH_L2_DATA_SIZE=120000
+             || (inputFile == "testvectors/inputs-executor/rlp-error/test-length-data_2.json") // batchL2Data.size()=120118 > MAX_BATCH_L2_DATA_SIZE=120000
+           )
         {
             zklog.warning("ProcessDirectory() skipping file=" + inputFile + " fileCounter=" + to_string(fileCounter) + " skippedFileCounter=" + to_string(skippedFileCounter));
             if (isDirectory)
             {
-                skipping = true;
+                skippedDirectoryCounter++;
+                bool bResult = ProcessDirectory(pClient, inputFile + "/", fileCounter, directoryCounter, skippedFileCounter, skippedDirectoryCounter, true);
+                if (bResult == false)
+                {
+                    return false;
+                }
             }
             else
             {
                 skippedFileCounter++;
-                continue;
             }
+            continue;
         }
 
         // If file is a directory, call recursively
         if (isDirectory)
         {
-            if (skipping)
-            {
-                skippedDirectoryCounter++;
-            }
-            else
-            {
-                directoryCounter++;
-            }
+            directoryCounter++;
             bool bResult = ProcessDirectory(pClient, inputFile + "/", fileCounter, directoryCounter, skippedFileCounter, skippedDirectoryCounter, skipping);
             if (bResult == false)
             {

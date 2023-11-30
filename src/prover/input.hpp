@@ -41,6 +41,13 @@ public:
     OverrideEntry() : bBalance(false), nonce(0) {};
 };
 
+class InputDebug
+{
+public:
+    uint64_t gasLimit;
+    InputDebug() : gasLimit(0) {};
+};
+
 class Input
 {
     Goldilocks &fr;
@@ -62,6 +69,7 @@ public:
     unordered_map<uint64_t, L1Data> l1InfoTreeData;
     unordered_map<string, OverrideEntry> stateOverride;
     uint64_t stepsN;
+    InputDebug debug;
 
     // Constructor
     Input (Goldilocks &fr) :

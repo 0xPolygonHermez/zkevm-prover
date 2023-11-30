@@ -65,6 +65,11 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     N_NoCounters(N_NO_COUNTERS_MULTIPLICATION_FACTOR*MainCommitPols::pilDegree()),
     poseidon(poseidon),
     rom(config),
+#ifdef MULTI_ROM_TEST
+    rom_gas_limit_100000000(config),
+    rom_gas_limit_2147483647(config),
+    rom_gas_limit_89128960(config),
+#endif
     config(config)
 {
     /* Load and parse ROM JSON file */
@@ -77,6 +82,18 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
 
     // Load ROM data from JSON data
     rom.load(fr, romJson);
+
+#ifdef MULTI_ROM_TEST
+    romJson.clear();
+    file2json("src/main_sm/fork_7/scripts/rom_gas_limit_100000000.json", romJson);
+    rom_gas_limit_100000000.load(fr, romJson);
+    romJson.clear();
+    file2json("src/main_sm/fork_7/scripts/rom_gas_limit_2147483647.json", romJson);
+    rom_gas_limit_2147483647.load(fr, romJson);
+    romJson.clear();
+    file2json("src/main_sm/fork_7/scripts/rom_gas_limit_89128960.json", romJson);
+    rom_gas_limit_89128960.load(fr, romJson);
+#endif
 
     // Get labels
     finalizeExecutionLabel    = rom.getLabel(string("finalizeExecution"));
@@ -118,6 +135,35 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     struct timeval t;
     TimeMetricStorage mainMetrics;
     TimeMetricStorage evalCommandMetrics;
+#endif
+
+#ifdef MULTI_ROM_TEST
+
+    // Get the right rom based on gas limit
+    Rom * pRom = &rom;
+    if (proverRequest.input.debug.gasLimit == 100000000)
+    {
+        pRom = &rom_gas_limit_100000000;
+    }
+    else if (proverRequest.input.debug.gasLimit == 2147483647)
+    {
+        pRom = &rom_gas_limit_2147483647;
+    }
+    else if (proverRequest.input.debug.gasLimit == 89128960)
+    {
+        pRom = &rom_gas_limit_89128960;
+    }
+    Rom &rom = *pRom;
+
+    // Get labels
+    finalizeExecutionLabel    = rom.getLabel(string("finalizeExecution"));
+    checkAndSaveFromLabel     = rom.getLabel(string("checkAndSaveFrom"));
+    ecrecoverStoreArgsLabel   = rom.getLabel(string("ecrecover_store_args"));
+    ecrecoverEndLabel         = rom.getLabel(string("ecrecover_end"));
+    checkFirstTxTypeLabel     = rom.getLabel(string("checkFirstTxType"));
+    writeBlockInfoRootLabel   = rom.getLabel(string("writeBlockInfoRoot"));
+    verifyMerkleProofEndLabel = rom.getLabel(string("verifyMerkleProofEnd"));
+    
 #endif
 
     // Init execution flags
