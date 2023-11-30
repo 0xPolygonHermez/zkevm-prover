@@ -121,8 +121,7 @@ void Account::GenerateNonceKey (void)
 void Account::GenerateGlobalExitRootKey (const mpz_class &globalExitRoot)
 {
     uint8_t data64[64];
-    mpz_class auxScalar = globalExitRoot;
-    scalar2bytesBE(auxScalar, &data64[0]);
+    scalar2bytesBE(globalExitRoot, &data64[0]);
     memset(&data64[32], 0, 32);
 
     mpz_class keccakScalar;
@@ -239,10 +238,8 @@ void Account::GenerateStateRootKey (const mpz_class &batchNumber, Goldilocks::El
 {
     // 64B buffer = batchNumber (32B) + STATE_ROOT_STORAGE_POS (32B)
     uint8_t data64[64];
-    mpz_class auxScalar = batchNumber;
-    scalar2bytesBE(auxScalar, &data64[0]);
-    auxScalar = STATE_ROOT_STORAGE_POS;
-    scalar2bytesBE(auxScalar, &data64[32]);
+    scalar2bytesBE(batchNumber, &data64[0]);
+    scalar2bytesBE(STATE_ROOT_STORAGE_POS, &data64[32]);
 
     // Calculate Keccak-256 hash of 64B buffer
     mpz_class keccakScalar;

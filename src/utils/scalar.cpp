@@ -33,6 +33,7 @@ mpz_class ScalarTwoTo258("400000000000000000000000000000000000000000000000000000
 mpz_class ScalarZero    ("0", 16);
 mpz_class ScalarOne     ("1", 16);
 mpz_class ScalarGoldilocksPrime = (uint64_t)GOLDILOCKS_PRIME;
+mpz_class Scalar4xGoldilocksPrime ("FFFFFFFF00000001FFFFFFFF00000001FFFFFFFF00000001FFFFFFFF00000001", 16);
 
 /* Scalar to/from a Sparse Merkle Tree key, interleaving bits */
 
@@ -621,7 +622,7 @@ string scalar2ba32(const mpz_class &_s)
     return result;
 }
 
-void scalar2bytes(mpz_class &s, uint8_t (&bytes)[32])
+void scalar2bytes(mpz_class s, uint8_t (&bytes)[32])
 {
     for (uint64_t i=0; i<32; i++)
     {
@@ -636,7 +637,7 @@ void scalar2bytes(mpz_class &s, uint8_t (&bytes)[32])
     }
 }
 
-void scalar2bytesBE(mpz_class &s, uint8_t *pBytes)
+void scalar2bytesBE(mpz_class s, uint8_t *pBytes)
 {
     for (uint64_t i=0; i<32; i++)
     {
