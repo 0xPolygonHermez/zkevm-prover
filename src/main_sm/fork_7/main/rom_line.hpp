@@ -30,6 +30,7 @@ public:
     Goldilocks::Element inGAS;
     Goldilocks::Element inSTEP;
     Goldilocks::Element inFREE;
+    Goldilocks::Element inFREE0;
     Goldilocks::Element inRR;
     Goldilocks::Element inHASHPOS;
     Goldilocks::Element inCntArith;
