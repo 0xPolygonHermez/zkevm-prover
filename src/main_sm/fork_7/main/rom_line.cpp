@@ -18,9 +18,10 @@ string RomLine::toString(Goldilocks &fr)
     if (!fr.isZero(inPC)) result += " inPC=" + fr.toString(inPC,10);
     if (!fr.isZero(inGAS)) result += " inGAS=" + fr.toString(inGAS,10);
     if (!fr.isZero(inSTEP)) result += " inSTEP=" + fr.toString(inSTEP,10);
-    if (!fr.isZero(inFREE))
+    if (!fr.isZero(inFREE) || !fr.isZero(inFREE0))
     {
         result += " inFREE=" + fr.toString(inFREE,10);
+        result += " inFREE0=" + fr.toString(inFREE0,10);
         result += " freeInTag={" + freeInTag.toString() + "}";
     }
     if (!fr.isZero(inRR)) result += " inRR=" + fr.toString(inRR,10);

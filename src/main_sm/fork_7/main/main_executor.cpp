@@ -57,6 +57,8 @@ namespace fork_7
 #endif
 #define CHECK_MAX_CNT_AT_THE_END
 
+//#define LOG_COMPLETED_STEPS_TO_FILE
+
 MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config) :
     fr(fr),
     N(MainCommitPols::pilDegree()),
@@ -77,13 +79,13 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     rom.load(fr, romJson);
 
     // Get labels
-    finalizeExecutionLabel  = rom.getLabel(string("finalizeExecution"));
-    //checkAndSaveFromLabel   = rom.getLabel(string("checkAndSaveFrom"));
-    checkAndSaveFromLabel = 1000000; // TODO: Decide if we need this label any more
-    ecrecoverStoreArgsLabel = rom.getLabel(string("ecrecover_store_args"));
-    ecrecoverEndLabel       = rom.getLabel(string("ecrecover_end"));
-    checkFirstTxTypeLabel   = rom.getLabel(string("checkFirstTxType"));
-    writeBlockInfoRootLabel = rom.getLabel(string("writeBlockInfoRoot"));
+    finalizeExecutionLabel    = rom.getLabel(string("finalizeExecution"));
+    checkAndSaveFromLabel     = rom.getLabel(string("checkAndSaveFrom"));
+    ecrecoverStoreArgsLabel   = rom.getLabel(string("ecrecover_store_args"));
+    ecrecoverEndLabel         = rom.getLabel(string("ecrecover_end"));
+    checkFirstTxTypeLabel     = rom.getLabel(string("checkFirstTxType"));
+    writeBlockInfoRootLabel   = rom.getLabel(string("writeBlockInfoRoot"));
+    verifyMerkleProofEndLabel = rom.getLabel(string("verifyMerkleProofEnd"));
 
     // Init labels mutex
     pthread_mutex_init(&labelsMutex, NULL);
@@ -794,8 +796,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         /* FREE INPUT */
         /**************/
 
-        // If inFREE, calculate the free input value, and add it to op
-        if (!fr.isZero(rom.line[zkPC].inFREE))
+        // If inFREE or inFREE0, calculate the free input value, and add it to op
+        if (!fr.isZero(rom.line[zkPC].inFREE) || !fr.isZero(rom.line[zkPC].inFREE0))
         {
             // freeInTag must be present
             if (rom.line[zkPC].freeInTag.isPresent == false)
@@ -1989,7 +1991,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.FREE7[i] = fi7;
 
             // op = op + inFREE*fi
-            op0 = fr.add(op0, fr.mul(rom.line[zkPC].inFREE, fi0));
+            op0 = fr.add(op0, fr.mul(fr.add(rom.line[zkPC].inFREE, rom.line[zkPC].inFREE0), fi0));
             op1 = fr.add(op1, fr.mul(rom.line[zkPC].inFREE, fi1));
             op2 = fr.add(op2, fr.mul(rom.line[zkPC].inFREE, fi2));
             op3 = fr.add(op3, fr.mul(rom.line[zkPC].inFREE, fi3));
@@ -2000,6 +2002,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             // Copy ROM flags into the polynomials
             pols.inFREE[i] = rom.line[zkPC].inFREE;
+            pols.inFREE0[i] = rom.line[zkPC].inFREE0;
         }
 
         if (!fr.isZero(op0) && !bProcessBatch)
@@ -4596,7 +4599,22 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_SETX
             zklog.info("setC C[nexti]=" + fea2string(fr, pols.C0[nexti], pols.C1[nexti], pols.C2[nexti], pols.C3[nexti], pols.C4[nexti], pols.C5[nexti], pols.C6[nexti], pols.C7[nexti]));
 #endif
-        } else {
+        }            
+        else if ((zkPC == verifyMerkleProofEndLabel) && proverRequest.input.bSkipVerifyL1InfoRoot)
+        {
+            // Set C register with input.l1InfoRoot to process unsigned transactions
+            scalar2fea(fr, proverRequest.input.publicInputsExtended.publicInputs.l1InfoRoot,
+                pols.C0[nexti],
+                pols.C1[nexti],
+                pols.C2[nexti],
+                pols.C3[nexti],
+                pols.C4[nexti],
+                pols.C5[nexti],
+                pols.C6[nexti],
+                pols.C7[nexti]);
+        }
+        else
+        {
             pols.C0[nexti] = pols.C0[i];
             pols.C1[nexti] = pols.C1[i];
             pols.C2[nexti] = pols.C2[i];

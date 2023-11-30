@@ -24,6 +24,7 @@ string RomCommand::toString (void) const
     if (reg != reg_empty) result += " regName=" + reg2string(reg);
     if (num != mpz_class(0)) result += " num=" + num.get_str(16);
     if (offset != 0) result += " offset=" + to_string(offset);
+    if (useCTX != 0) result += " useCTX=" + to_string(useCTX);
 
     for (uint64_t i=0; i<values.size(); i++)
     {

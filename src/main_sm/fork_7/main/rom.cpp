@@ -296,6 +296,7 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
         if (l["inGAS"].is_string()) fr.fromString(line[i].inGAS, l["inGAS"]); else line[i].inGAS = fr.zero();
         if (l["inSTEP"].is_string()) fr.fromString(line[i].inSTEP, l["inSTEP"]); else line[i].inSTEP = fr.zero();
         if (l["inFREE"].is_string()) fr.fromString(line[i].inFREE, l["inFREE"]); else line[i].inFREE = fr.zero();
+        if (l["inFREE0"].is_string()) fr.fromString(line[i].inFREE0, l["inFREE0"]); else line[i].inFREE0 = fr.zero();
         if (l["inRR"].is_string()) fr.fromString(line[i].inRR, l["inRR"]); else line[i].inRR = fr.zero();
         if (l["inHASHPOS"].is_string()) fr.fromString(line[i].inHASHPOS, l["inHASHPOS"]); else line[i].inHASHPOS = fr.zero();
         if (l["inCntArith"].is_string()) fr.fromString(line[i].inCntArith, l["inCntArith"]); else line[i].inCntArith = fr.zero();
