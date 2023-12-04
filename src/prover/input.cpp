@@ -507,6 +507,16 @@ void Input::loadGlobals (json &input)
 #endif
     }
 
+    // Input JSON file may contain a skipWriteBlockInfoRoot key at the root level
+    if ( input.contains("skipWriteBlockInfoRoot") &&
+         input["skipWriteBlockInfoRoot"].is_boolean() )
+    {
+        bSkipWriteBlockInfoRoot = input["skipWriteBlockInfoRoot"];
+#ifdef LOG_INPUT
+        zklog.info("Input::loadGlobals() bSkipWriteBlockInfoRoot=" + to_string(bSkipWriteBlockInfoRoot));
+#endif
+    }
+
     // Input JSON file may contain a disableStorage key at the root level
     if ( input.contains("disableStorage") &&
          input["disableStorage"].is_boolean() )
