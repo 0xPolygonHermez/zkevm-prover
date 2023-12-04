@@ -909,7 +909,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
                     // Track if we used the state override or not
-                    bool bStatusOverride = false;
+                    bool bStateOverride = false;
                     mpz_class value;
                     SmtGetResult smtGetResult;
 
@@ -954,12 +954,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                             if ((keyType == rom.constants.SMT_KEY_BALANCE) && it->second.bBalance)
                             {
                                 value = it->second.balance;
-                                bStatusOverride = true;
+                                bStateOverride = true;
                             }
                             else if ((keyType == rom.constants.SMT_KEY_NONCE) && (it->second.nonce > 0))
                             {
                                 value = it->second.nonce;
-                                bStatusOverride = true;
+                                bStateOverride = true;
                             }
                             else if ((keyType == rom.constants.SMT_KEY_SC_CODE) && (it->second.code.size() > 0))
                             {
@@ -975,12 +975,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                                 // Convert to scalar
                                 fea2scalar(fr, value, result);
 
-                                bStatusOverride = true;
+                                bStateOverride = true;
                             }
                             else if ((keyType == rom.constants.SMT_KEY_SC_LENGTH) && (it->second.code.size() > 0))
                             {
                                 value = it->second.code.size();
-                                bStatusOverride = true;
+                                bStateOverride = true;
                             }
                             else if ((keyType == rom.constants.SMT_KEY_SC_STORAGE) && (it->second.state.size() > 0))
                             {
@@ -994,7 +994,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                                 {
                                     value = 0;
                                 }
-                                bStatusOverride = true;
+                                bStateOverride = true;
                             }
                             else if ((keyType == rom.constants.SMT_KEY_SC_STORAGE) && (it->second.stateDiff.size() > 0))
                             {
@@ -1008,12 +1008,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                                 {
                                     value = 0;
                                 }
-                                bStatusOverride = true;
+                                bStateOverride = true;
                             }
                         }
                     }
 
-                    if (bStatusOverride)
+                    if (bStateOverride)
                     {
                         smtGetResult.value = value;
 
@@ -1087,7 +1087,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                         gettimeofday(&t, NULL);
 #endif
-
                         // Collect the keys used to read or write store data
                         if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)
                         {
@@ -1152,6 +1151,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
+                    
                     // Get old state root
                     Goldilocks::Element oldRoot[4];
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
@@ -1168,8 +1168,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                     // Track if we used the state override or not
                     bool bStatusOverride = false;
-
-                    //SmtGetResult smtGetResult;
 
                     // If the input contains a state override section, then use it
                     if (!proverRequest.input.stateOverride.empty())
@@ -1222,17 +1220,17 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                             }
                             else if ((keyType == rom.constants.SMT_KEY_SC_CODE) && (it->second.code.size() > 0))
                             {
-                                proverRequest.input.stateOverride[keyAddress].code = proverRequest.input.contractsBytecode[NormalizeTo0xNFormat(value.get_str(16), 64)];
+                                it->second.code = proverRequest.input.contractsBytecode[NormalizeTo0xNFormat(value.get_str(16), 64)];
                                 bStatusOverride = true;
                             }
                             else if ((keyType == rom.constants.SMT_KEY_SC_STORAGE) && (it->second.state.size() > 0))
                             {
-                                proverRequest.input.stateOverride[keyAddress].state[keyStorage] = value;
+                                it->second.state[keyStorage] = value;
                                 bStatusOverride = true;
                             }
                             else if ((keyType == rom.constants.SMT_KEY_SC_STORAGE) && (it->second.stateDiff.size() > 0))
                             {
-                                proverRequest.input.stateOverride[keyAddress].stateDiff[keyStorage] = value;
+                                it->second.stateDiff[keyStorage] = value;
                                 bStatusOverride = true;
                             }
                         }
@@ -1242,7 +1240,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     {
 
 #ifdef LOG_SMT_KEY_DETAILS
-                    zklog.info("SMT get state override C=" + fea2string(fr, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]) +
+                    zklog.info("SMT set state override C=" + fea2string(fr, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]) +
                         " A=" + fea2string(fr, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]) +
                         " B=" + fea2string(fr, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]) +
                         " oldRoot=" + fea2string(fr, oldRoot) +
@@ -1643,7 +1641,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                     nHits++;
 
-#ifdef LOG_HASHK
+#ifdef LOG_HASHS
                     zklog.info("hashS 1 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr) + " pos=" + to_string(pos) + " size=" + to_string(size) + " data=" + s.get_str(16));
 #endif
                 }
@@ -1677,7 +1675,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                     nHits++;
 
-#ifdef LOG_HASHK
+#ifdef LOG_HASHS
                     zklog.info("hashSDigest 1 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr) + " digest=" + ctx.hashS[addr].digest.get_str(16));
 #endif
                 }

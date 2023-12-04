@@ -73,6 +73,7 @@ public:
     void checkFinalState(Context &ctx);
     void assertOutputs(Context &ctx);
     void logError(Context &ctx, const string &message = "");
+    void linearPoseidon(Context &ctx, const vector<uint8_t> &data, Goldilocks::Element (&result)[4]);
 };
 
 } // namespace

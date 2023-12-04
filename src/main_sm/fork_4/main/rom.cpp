@@ -71,6 +71,11 @@ void Rom::load(Goldilocks &fr, json &romJson)
     MAX_CNT_KECCAK_F_LIMIT   = getConstant(romJson, "MAX_CNT_KECCAK_F_LIMIT");
     MAX_CNT_PADDING_PG_LIMIT = getConstant(romJson, "MAX_CNT_PADDING_PG_LIMIT");
     MAX_CNT_POSEIDON_G_LIMIT = getConstant(romJson, "MAX_CNT_POSEIDON_G_LIMIT");
+    SMT_KEY_BALANCE          = getConstant(romJson, "SMT_KEY_BALANCE");
+    SMT_KEY_NONCE            = getConstant(romJson, "SMT_KEY_NONCE");
+    SMT_KEY_SC_CODE          = getConstant(romJson, "SMT_KEY_SC_CODE");
+    SMT_KEY_SC_LENGTH        = getConstant(romJson, "SMT_KEY_SC_LENGTH");
+    SMT_KEY_SC_STORAGE       = getConstant(romJson, "SMT_KEY_SC_STORAGE");
 }
 
 void Rom::loadProgram(Goldilocks &fr, json &romJson)
