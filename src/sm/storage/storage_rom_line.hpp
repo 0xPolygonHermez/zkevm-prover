@@ -15,16 +15,16 @@ public:
     string fileName;
 
     // Instructions
-    bool iJmpz;
-    bool iJmp;
-    bool iRotateLevel;
-    bool iHash;
-    uint64_t iHashType;
-    bool iClimbRkey;
-    bool iClimbSiblingRkey;
-    bool iClimbSiblingRkeyN;
-    bool iLatchGet;
-    bool iLatchSet;
+    bool jmpz;
+    bool jmpnz;
+    bool jmp;
+    bool hash;
+    uint64_t hashType;
+    bool climbRkey;
+    bool climbSiblingRkey;
+    bool climbBitN;
+    bool latchGet;
+    bool latchSet;
 
     // Selectors
     bool inFREE;
@@ -34,9 +34,10 @@ public:
     bool inVALUE_LOW;
     bool inVALUE_HIGH;
     bool inRKEY;
-    bool inSIBLING_RKEY;
+    int64_t inSIBLING_RKEY;
     bool inSIBLING_VALUE_HASH;
     bool inROTL_VH;
+    bool inLEVEL;
 
     // Setters
     bool setRKEY;
@@ -67,16 +68,16 @@ public:
     {
         line = 0;
         inRKEY_BIT = false;
-        iJmpz = false;
-        iJmp = false;
-        iRotateLevel = false;
-        iHash = false;
-        iHashType = 0;
-        iClimbRkey = false;
-        iClimbSiblingRkey = false;
-        iClimbSiblingRkeyN = false;
-        iLatchGet = false;
-        iLatchSet = false;
+        jmpz = false;
+        jmpnz = false;
+        jmp = false;
+        hash = false;
+        hashType = 0;
+        climbRkey = false;
+        climbSiblingRkey = false;
+        climbBitN = false;
+        latchGet = false;
+        latchSet = false;
         inFREE = false;
         inOLD_ROOT = false;
         inNEW_ROOT = false;
@@ -84,9 +85,10 @@ public:
         inVALUE_LOW = false;
         inVALUE_HIGH = false;
         inRKEY = false;
-        inSIBLING_RKEY = false;
+        inSIBLING_RKEY = 0;
         inSIBLING_VALUE_HASH = false;
         inROTL_VH = false;
+        inLEVEL = false;
         setRKEY = false;
         setRKEY_BIT = false;
         setVALUE_LOW = false;

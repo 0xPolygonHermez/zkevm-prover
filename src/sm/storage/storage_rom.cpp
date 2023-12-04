@@ -21,68 +21,74 @@ void StorageRom::load(json &j)
         romLine.line = j["program"][i]["line"];
         romLine.fileName = j["program"][i]["fileName"];
 
+        json l = j["program"][i];
+//        if (l["inA"].is_string()) fr.fromString(line[i].inA, l["inA"]); else line[i].inA = fr.zero();
+
         // Instructions
-        if (j["program"][i].contains("iJmpz")) romLine.iJmpz = true;
-        if (j["program"][i].contains("iJmp")) romLine.iJmp = true;
-        if (j["program"][i].contains("iRotateLevel")) romLine.iRotateLevel = true;
-        if (j["program"][i].contains("iHash")) romLine.iHash = true;
-        if (j["program"][i].contains("iHashType")) romLine.iHashType = j["program"][i]["iHashType"];
-        if (j["program"][i].contains("iClimbRkey")) romLine.iClimbRkey = true;
-        if (j["program"][i].contains("iClimbSiblingRkey")) romLine.iClimbSiblingRkey = true;
-        if (j["program"][i].contains("iClimbSiblingRkeyN")) romLine.iClimbSiblingRkeyN = true;
-        if (j["program"][i].contains("iLatchGet")) romLine.iLatchGet = true;
-        if (j["program"][i].contains("iLatchSet")) romLine.iLatchSet = true;
-        
+        if (l["jmpz"] == 1) romLine.jmpz = true;
+        if (l["jmpz"] == 1) romLine.jmpnz = true;
+        if (l["jmp"] == 1) romLine.jmp = true;
+        if (l["hash"] == 1) romLine.hash = true;
+        if (l["hashType"].is_number()) romLine.hashType = l["hashType"].get<uint64_t>();
+        if (l["climbRkey"] == 1) romLine.climbRkey = true;
+        if (l["climbSiblingRkey"] == 1) romLine.climbSiblingRkey = true;
+        if (l["climbBitN"] == 1) romLine.climbBitN = true;
+        if (l["latchGet"] == 1) romLine.latchGet = true;
+        if (l["latchSet"] == 1) romLine.latchSet = true;
+
         // Selectors
-        if (j["program"][i].contains("inFREE")) romLine.inFREE = true;
-        if (j["program"][i].contains("inOLD_ROOT")) romLine.inOLD_ROOT = true;
-        if (j["program"][i].contains("inNEW_ROOT")) romLine.inNEW_ROOT = true;
-        if (j["program"][i].contains("inVALUE_LOW")) romLine.inVALUE_LOW = true;
-        if (j["program"][i].contains("inVALUE_HIGH")) romLine.inVALUE_HIGH = true;
-        if (j["program"][i].contains("inRKEY")) romLine.inRKEY = true;
-        if (j["program"][i].contains("inRKEY_BIT")) romLine.inRKEY_BIT = true;
-        if (j["program"][i].contains("inSIBLING_RKEY")) romLine.inSIBLING_RKEY = true;
-        if (j["program"][i].contains("inSIBLING_VALUE_HASH")) romLine.inSIBLING_VALUE_HASH = true;
-        if (j["program"][i].contains("inROTL_VH")) romLine.inROTL_VH = true;
+        if (l["inFREE"] == 1) romLine.inFREE = true;
+        if (l["inOLD_ROOT"] == 1) romLine.inOLD_ROOT = true;
+        if (l["inNEW_ROOT"] == 1) romLine.inNEW_ROOT = true;
+        if (l["inVALUE_LOW"] == 1) romLine.inVALUE_LOW = true;
+        if (l["inVALUE_HIGH"] == 1) romLine.inVALUE_HIGH = true;
+        if (l["inRKEY"] == 1) romLine.inRKEY = true;
+        if (l["inRKEY_BIT"] == 1) romLine.inRKEY_BIT = true;
+        if (l["inSIBLING_RKEY"].is_number()) romLine.inSIBLING_RKEY = l["inSIBLING_RKEY"].get<int64_t>();
+        if (l["inSIBLING_VALUE_HASH"] == 1) romLine.inSIBLING_VALUE_HASH = true;
+        if (l["inROTL_VH"] == 1) romLine.inROTL_VH = true;
+        if (l["inLEVEL"] == 1) romLine.inLEVEL = true;
 
         // Setters
-        if (j["program"][i].contains("setRKEY")) romLine.setRKEY = true;
-        if (j["program"][i].contains("setRKEY_BIT")) romLine.setRKEY_BIT = true;
-        if (j["program"][i].contains("setVALUE_LOW")) romLine.setVALUE_LOW = true;
-        if (j["program"][i].contains("setVALUE_HIGH")) romLine.setVALUE_HIGH = true;
-        if (j["program"][i].contains("setLEVEL")) romLine.setLEVEL = true;
-        if (j["program"][i].contains("setOLD_ROOT")) romLine.setOLD_ROOT = true;
-        if (j["program"][i].contains("setNEW_ROOT")) romLine.setNEW_ROOT = true;
-        if (j["program"][i].contains("setHASH_LEFT")) romLine.setHASH_LEFT = true;
-        if (j["program"][i].contains("setHASH_RIGHT")) romLine.setHASH_RIGHT = true;
-        if (j["program"][i].contains("setSIBLING_RKEY")) romLine.setSIBLING_RKEY = true;
-        if (j["program"][i].contains("setSIBLING_VALUE_HASH")) romLine.setSIBLING_VALUE_HASH = true;
+        if (l["setRKEY"] == 1) romLine.setRKEY = true;
+        if (l["setRKEY_BIT"] == 1) romLine.setRKEY_BIT = true;
+        if (l["setVALUE_LOW"] == 1) romLine.setVALUE_LOW = true;
+        if (l["setVALUE_HIGH"] == 1) romLine.setVALUE_HIGH = true;
+        if (l["setLEVEL"] == 1) romLine.setLEVEL = true;
+        if (l["setOLD_ROOT"] == 1) romLine.setOLD_ROOT = true;
+        if (l["setNEW_ROOT"] == 1) romLine.setNEW_ROOT = true;
+        if (l["setHASH_LEFT"] == 1) romLine.setHASH_LEFT = true;
+        if (l["setHASH_RIGHT"] == 1) romLine.setHASH_RIGHT = true;
+        if (l["setSIBLING_RKEY"] == 1) romLine.setSIBLING_RKEY = true;
+        if (l["setSIBLING_VALUE_HASH"] == 1) romLine.setSIBLING_VALUE_HASH = true;
 
         // Jump parameters
-        if (romLine.iJmp || romLine.iJmpz)
+        if (romLine.jmp || romLine.jmpz || romLine.jmpnz)
         {
-            romLine.addressLabel = j["program"][i]["addressLabel"];
-            romLine.address = j["program"][i]["address"];
+            romLine.addressLabel = l["addressLabel"];
+            romLine.address = l["address"];
         }
 
         // inFREE parameters
         if (romLine.inFREE)
         {
-            romLine.op = j["program"][i]["freeInTag"]["op"];
+            romLine.op = l["freeInTag"]["op"];
             if (romLine.op=="functionCall")
             {
-                romLine.funcName = j["program"][i]["freeInTag"]["funcName"];
-                for (uint64_t p=0; p<j["program"][i]["freeInTag"]["params"].size(); p++)
+                romLine.funcName = l["freeInTag"]["funcName"];
+                const uint64_t paramCount = l["freeInTag"]["params"].size();
+                json params = l["freeInTag"]["params"];
+                for (uint64_t iParam = 0; iParam < paramCount; iParam++)
                 {
-                    romLine.params.push_back(j["program"][i]["freeInTag"]["params"][p]["num"]);
+                    romLine.params.push_back(params[iParam]["num"]);
                 }
             }
         }
 
         // Constant
-        if (j["program"][i].contains("CONST"))
+        if (l["CONST"])
         {
-            romLine.CONST = j["program"][i]["CONST"];
+            romLine.CONST = l["CONST"];
         }
 
         line.push_back(romLine);

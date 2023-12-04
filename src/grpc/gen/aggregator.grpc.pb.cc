@@ -6,19 +6,19 @@
 #include "aggregator.grpc.pb.h"
 
 #include <functional>
-#include <grpcpp/impl/codegen/async_stream.h>
-#include <grpcpp/impl/codegen/async_unary_call.h>
-#include <grpcpp/impl/codegen/channel_interface.h>
-#include <grpcpp/impl/codegen/client_unary_call.h>
-#include <grpcpp/impl/codegen/client_callback.h>
-#include <grpcpp/impl/codegen/message_allocator.h>
-#include <grpcpp/impl/codegen/method_handler.h>
-#include <grpcpp/impl/codegen/rpc_service_method.h>
-#include <grpcpp/impl/codegen/server_callback.h>
+#include <grpcpp/support/async_stream.h>
+#include <grpcpp/support/async_unary_call.h>
+#include <grpcpp/impl/channel_interface.h>
+#include <grpcpp/impl/client_unary_call.h>
+#include <grpcpp/support/client_callback.h>
+#include <grpcpp/support/message_allocator.h>
+#include <grpcpp/support/method_handler.h>
+#include <grpcpp/impl/rpc_service_method.h>
+#include <grpcpp/support/server_callback.h>
 #include <grpcpp/impl/codegen/server_callback_handlers.h>
-#include <grpcpp/impl/codegen/server_context.h>
-#include <grpcpp/impl/codegen/service_type.h>
-#include <grpcpp/impl/codegen/sync_stream.h>
+#include <grpcpp/server_context.h>
+#include <grpcpp/impl/service_type.h>
+#include <grpcpp/support/sync_stream.h>
 namespace aggregator {
 namespace v1 {
 
@@ -28,28 +28,28 @@ static const char* AggregatorService_method_names[] = {
 
 std::unique_ptr< AggregatorService::Stub> AggregatorService::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
   (void)options;
-  std::unique_ptr< AggregatorService::Stub> stub(new AggregatorService::Stub(channel));
+  std::unique_ptr< AggregatorService::Stub> stub(new AggregatorService::Stub(channel, options));
   return stub;
 }
 
-AggregatorService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel)
-  : channel_(channel), rpcmethod_Channel_(AggregatorService_method_names[0], ::grpc::internal::RpcMethod::BIDI_STREAMING, channel)
+AggregatorService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options)
+  : channel_(channel), rpcmethod_Channel_(AggregatorService_method_names[0], options.suffix_for_stats(),::grpc::internal::RpcMethod::BIDI_STREAMING, channel)
   {}
 
 ::grpc::ClientReaderWriter< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>* AggregatorService::Stub::ChannelRaw(::grpc::ClientContext* context) {
-  return ::grpc_impl::internal::ClientReaderWriterFactory< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>::Create(channel_.get(), rpcmethod_Channel_, context);
+  return ::grpc::internal::ClientReaderWriterFactory< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>::Create(channel_.get(), rpcmethod_Channel_, context);
 }
 
-void AggregatorService::Stub::experimental_async::Channel(::grpc::ClientContext* context, ::grpc::experimental::ClientBidiReactor< ::aggregator::v1::ProverMessage,::aggregator::v1::AggregatorMessage>* reactor) {
-  ::grpc_impl::internal::ClientCallbackReaderWriterFactory< ::aggregator::v1::ProverMessage,::aggregator::v1::AggregatorMessage>::Create(stub_->channel_.get(), stub_->rpcmethod_Channel_, context, reactor);
+void AggregatorService::Stub::async::Channel(::grpc::ClientContext* context, ::grpc::ClientBidiReactor< ::aggregator::v1::ProverMessage,::aggregator::v1::AggregatorMessage>* reactor) {
+  ::grpc::internal::ClientCallbackReaderWriterFactory< ::aggregator::v1::ProverMessage,::aggregator::v1::AggregatorMessage>::Create(stub_->channel_.get(), stub_->rpcmethod_Channel_, context, reactor);
 }
 
 ::grpc::ClientAsyncReaderWriter< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>* AggregatorService::Stub::AsyncChannelRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq, void* tag) {
-  return ::grpc_impl::internal::ClientAsyncReaderWriterFactory< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>::Create(channel_.get(), cq, rpcmethod_Channel_, context, true, tag);
+  return ::grpc::internal::ClientAsyncReaderWriterFactory< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>::Create(channel_.get(), cq, rpcmethod_Channel_, context, true, tag);
 }
 
 ::grpc::ClientAsyncReaderWriter< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>* AggregatorService::Stub::PrepareAsyncChannelRaw(::grpc::ClientContext* context, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncReaderWriterFactory< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>::Create(channel_.get(), cq, rpcmethod_Channel_, context, false, nullptr);
+  return ::grpc::internal::ClientAsyncReaderWriterFactory< ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>::Create(channel_.get(), cq, rpcmethod_Channel_, context, false, nullptr);
 }
 
 AggregatorService::Service::Service() {
@@ -58,8 +58,8 @@ AggregatorService::Service::Service() {
       ::grpc::internal::RpcMethod::BIDI_STREAMING,
       new ::grpc::internal::BidiStreamingHandler< AggregatorService::Service, ::aggregator::v1::ProverMessage, ::aggregator::v1::AggregatorMessage>(
           [](AggregatorService::Service* service,
-             ::grpc_impl::ServerContext* ctx,
-             ::grpc_impl::ServerReaderWriter<::aggregator::v1::AggregatorMessage,
+             ::grpc::ServerContext* ctx,
+             ::grpc::ServerReaderWriter<::aggregator::v1::AggregatorMessage,
              ::aggregator::v1::ProverMessage>* stream) {
                return service->Channel(ctx, stream);
              }, this)));

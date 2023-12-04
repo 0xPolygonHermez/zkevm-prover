@@ -162,6 +162,16 @@ using grpc::Status;
 
             // Return hash counter
             response->set_proof_hash_counter(r.proofHashCounter);
+
+            // Return sibling left child
+            ::hashdb::v1::Fea* resSiblingLeftChild = new ::hashdb::v1::Fea();
+            fea2grpc(fr, r.siblingLeftChild, resSiblingLeftChild);
+            response->set_allocated_sibling_left_child(resSiblingLeftChild);
+
+            // Return sibling right child
+            ::hashdb::v1::Fea* resSiblingRightChild = new ::hashdb::v1::Fea();
+            fea2grpc(fr, r.siblingRightChild, resSiblingRightChild);
+            response->set_allocated_sibling_right_child(resSiblingRightChild);
         }
 
         // Return result
@@ -525,7 +535,7 @@ using grpc::Status;
 #ifdef LOG_HASHDB_SERVICE
     zklog.info("HashDBServiceImpl::Purge called.");
 #endif
-    
+
         try
         {
             Goldilocks::Element newStateRoot[4];
@@ -544,7 +554,7 @@ using grpc::Status;
 #ifdef LOG_HASHDB_SERVICE
     zklog.info("HashDBServiceImpl::Purge() completed.");
 #endif
-        
+
         return Status::OK;
 }
 
@@ -591,7 +601,7 @@ using grpc::Status;
 #ifdef LOG_HASHDB_SERVICE
     zklog.info("HashDBServiceImpl::GetFlushStatus() completed.");
 #endif
-    
+
     return Status::OK;
 }
 
@@ -646,7 +656,7 @@ using grpc::Status;
 #ifdef LOG_HASHDB_SERVICE
     zklog.info("HashDBServiceImpl::GetFlushData() completed.");
 #endif
-    
+
     return Status::OK;
 }
 
@@ -776,7 +786,7 @@ using grpc::Status;
             zkassertpermanent(pHashValue != NULL);
             pHashValue->set_allocated_hash(pHash);
             pHashValue->set_allocated_value(pValue);
-        }        
+        }
     }
     catch (const std::exception &e)
     {
@@ -792,7 +802,7 @@ using grpc::Status;
 }
 
 ::grpc::Status HashDBServiceImpl::ResetDB (::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::ResetDBResponse* response)
-{    
+{
     // If the process is exising, do not start new activities
     if (bExitingProcess)
     {
@@ -826,6 +836,6 @@ using grpc::Status;
 #ifdef LOG_HASHDB_SERVICE
     zklog.info("HashDBServiceImpl::ResetDB() completed.");
 #endif
-    
+
     return Status::OK;
 }

@@ -40,9 +40,12 @@ zkresult Smt::set (const string &batchUUID, uint64_t block, uint64_t tx, Databas
     bool bFoundKey = false;
     Goldilocks::Element foundKey[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
     Goldilocks::Element foundRKey[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
+
     Goldilocks::Element insKey[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
 
     map< uint64_t, vector<Goldilocks::Element> > siblings;
+    Goldilocks::Element siblingLeftChild[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
+    Goldilocks::Element siblingRightChild[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
 
     vector<string> nodesToDelete; // vector to store all nodes keys to delete because they are no longer part of the tree
     Goldilocks::Element nodeToDelete[4]; // key, in field element format, of a node to delete
@@ -96,7 +99,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t block, uint64_t tx, Databas
         siblings[level][9].fe = dbValue[9].fe;
         siblings[level][10].fe = dbValue[10].fe;
         siblings[level][11].fe = dbValue[11].fe;
-        
+
         // if siblings[level][8]=1 then this is a leaf node
         if ( siblings[level].size()>8 && fr.equal(siblings[level][8], fr.one()) )
         {
@@ -667,11 +670,49 @@ zkresult Smt::set (const string &batchUUID, uint64_t block, uint64_t tx, Databas
                     zklog.info("Smt::set() mode=" + mode);
 #endif
                 }
+                if ( mode == "deleteNotFound") {
+                    bool siblingKey = keys[level] ? false : true;
+                    Goldilocks::Element siblingRoot[4];
+                    for (uint64_t i=0; i<4; i++) siblingRoot[i] = siblings[level][siblingKey*4+i];
+                    string siblingRootString = fea2string(fr, siblingRoot);
+
+                    // Read its 2 siblings
+                    dbres = ZKR_UNSPECIFIED;
+                    if (bUseStateManager)
+                    {
+                        dbres = stateManager.read(batchUUID, siblingRootString, dbValue, dbReadLog);
+                    }
+                    if (dbres != ZKR_SUCCESS)
+                    {
+                        // TO REVIEW: Are extra parameters necessary?  [, false, keys, level] be careful
+                        // because geting childs of sibling intermediate node, last key is siblingKey.
+                        dbres = db.read(siblingRootString, siblingRoot, dbValue, dbReadLog);
+                    }
+                    if ( dbres != ZKR_SUCCESS)
+                    {
+                        zklog.error("Smt::set() db.read error: " + to_string(dbres) + " (" + zkresult2string(dbres) + ") root:" + siblingRootString);
+                        return dbres;
+                    }
+
+                    // setting left child of sibling
+                    siblingLeftChild[0].fe = dbValue[0].fe;
+                    siblingLeftChild[1].fe = dbValue[1].fe;
+                    siblingLeftChild[2].fe = dbValue[2].fe;
+                    siblingLeftChild[3].fe = dbValue[3].fe;
+
+                    // setting right child of sibling
+                    siblingRightChild[0].fe = dbValue[4].fe;
+                    siblingRightChild[1].fe = dbValue[5].fe;
+                    siblingRightChild[2].fe = dbValue[6].fe;
+                    siblingRightChild[3].fe = dbValue[7].fe;
+
+                    proofHashCounter += 1;
+                }
             }
             // If level=0, this means we are deleting the root node
             else
             {
-                mode = "deleteLast";
+                mode = "deleteNotFound";
 #ifdef LOG_SMT
                 zklog.info("Smt::set() mode=" + mode);
 #endif
@@ -691,6 +732,11 @@ zkresult Smt::set (const string &batchUUID, uint64_t block, uint64_t tx, Databas
                 insValue = foundValue;
                 isOld0 = false;
             }
+            // anything to update on tree, newRoot = oldRoot
+            newRoot[0] = oldRoot[0];
+            newRoot[1] = oldRoot[1];
+            newRoot[2] = oldRoot[2];
+            newRoot[3] = oldRoot[3];
 #ifdef LOG_SMT
             zklog.info("Smt::set() mode=" + mode);
 #endif
@@ -701,6 +747,9 @@ zkresult Smt::set (const string &batchUUID, uint64_t block, uint64_t tx, Databas
     map< uint64_t, vector<Goldilocks::Element> >::iterator it;
     it = siblings.find(level+1);
     siblings.erase(it, siblings.end());
+
+    // in case of zero to zero doesn't rebuild newRoot because it's same root (like get zero)
+    uint64_t proofHashCounterIncrement = (mode == "zeroToZero") ? 0 : 1;
 
     // Go up the tree creating all intermediate nodes up to the new root
     while (level >= 0)
@@ -715,8 +764,8 @@ zkresult Smt::set (const string &batchUUID, uint64_t block, uint64_t tx, Databas
             return dbres;
         }
 
-        // Increment the counter
-        proofHashCounter += 1;
+        // Increment the counter if no zeroTozero
+        proofHashCounter += proofHashCounterIncrement;
 
         // Go up 1 level
         level--;
@@ -791,6 +840,14 @@ zkresult Smt::set (const string &batchUUID, uint64_t block, uint64_t tx, Databas
     result.newValue   = value;
     result.mode       = mode;
     result.proofHashCounter = proofHashCounter;
+    result.siblingLeftChild[0] = siblingLeftChild[0];
+    result.siblingLeftChild[1] = siblingLeftChild[1];
+    result.siblingLeftChild[2] = siblingLeftChild[2];
+    result.siblingLeftChild[3] = siblingLeftChild[3];
+    result.siblingRightChild[0] = siblingRightChild[0];
+    result.siblingRightChild[1] = siblingRightChild[1];
+    result.siblingRightChild[2] = siblingRightChild[2];
+    result.siblingRightChild[3] = siblingRightChild[3];
 
 #ifdef LOG_SMT
     zklog.info("Smt::set() returns isOld0=" + to_string(result.isOld0) + " insKey=" + fea2string(fr,result.insKey) + " oldValue=" + result.oldValue.get_str(16) + " newRoot=" + fea2string(fr,result.newRoot) + " mode=" + result.mode);
@@ -1028,7 +1085,7 @@ zkresult Smt::hashSave ( const SmtContext &ctx, const Goldilocks::Element (&v)[1
             zklog.error("Smt::hashSave() failed calling db.write() key=" + hashString + " result=" + to_string(zkr) + "=" + zkresult2string(zkr));
         }
     }
-    
+
 #ifdef LOG_SMT
     {
         string s = "Smt::hashSave() key=" + hashString + " value=";
