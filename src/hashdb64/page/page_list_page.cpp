@@ -26,7 +26,7 @@ zkresult PageListPage::InsertPage (PageContext &ctx, uint64_t &pageNumber, const
     zkassert(offset >= minOffset);
     zkassert(offset <= maxOffset);
     zkassert((offset & 0x7) == 0);
-    zkassert(page->nextPageNumberAndOffset & U64Mask4 == 0);
+    zkassert((page->nextPageNumberAndOffset & U64Mask4) == 0);
 
     // If page is full, create a new one
     if (offset == maxOffset)
@@ -44,7 +44,7 @@ zkresult PageListPage::InsertPage (PageContext &ctx, uint64_t &pageNumber, const
     zkassert(offset >= minOffset);
     zkassert(offset <= maxOffset);
     zkassert((offset & 0x7) == 0);
-    zkassert(page->nextPageNumberAndOffset & U64Mask48 == 0);
+    zkassert((page->nextPageNumberAndOffset & U64Mask48) == 0);
 
     // Insert the page number
     *(uint64_t *)((uint8_t *)page + offset) = pageNumberToInsert;
@@ -65,7 +65,7 @@ zkresult PageListPage::ExtractPage (PageContext &ctx, uint64_t &pageNumber, uint
     zkassert(offset >= minOffset);
     zkassert(offset <= maxOffset);
     zkassert((offset & 0x7) == 0);
-    zkassert(page->nextPageNumberAndOffset & U64Mask48 == 0);
+    zkassert((page->nextPageNumberAndOffset & U64Mask48) == 0);
 
     // Release any empty page
     while (offset == minOffset)
