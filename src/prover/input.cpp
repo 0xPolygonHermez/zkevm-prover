@@ -239,6 +239,26 @@ void Input::loadGlobals (json &input)
                     l1Data.minTimestamp = timestampScalar.get_ui();
                 }
 
+                // Parse smtProof
+                if ( input["l1InfoTree"][key].contains("smtProof") &&
+                     input["l1InfoTree"][key]["smtProof"].is_array() )
+                {
+                    uint64_t smtProofSize = input["l1InfoTree"][key]["smtProof"].size();
+                    for (uint64_t i=0; i<smtProofSize; i++)
+                    {
+                        string auxString = input["l1InfoTree"][key]["smtProof"][i];
+                        auxString = Remove0xIfPresent(auxString);
+                        if (!stringIsHex(auxString))
+                        {
+                            zklog.error("Input::loadGlobals() l1InfoTree smtProof found in input JSON file is not an hexa string");
+                            exitProcess();
+                        }
+                        mpz_class auxScalar;
+                        auxScalar.set_str(auxString, 16);
+                        l1Data.smtProof.emplace_back(auxScalar);
+                    }
+                }
+
                 l1InfoTreeData[index] = l1Data;
             }
         }
