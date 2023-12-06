@@ -9,17 +9,17 @@
 
 using json = nlohmann::json;
 
-Goldilocks::Element eq0 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
-Goldilocks::Element eq1 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
-Goldilocks::Element eq2 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
-Goldilocks::Element eq3 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
-Goldilocks::Element eq4 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
-Goldilocks::Element eq5 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
-Goldilocks::Element eq6 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
-Goldilocks::Element eq7 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
-Goldilocks::Element eq8 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
-Goldilocks::Element eq9 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
-Goldilocks::Element eq10 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
+int64_t eq0 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
+int64_t eq1 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
+int64_t eq2 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
+int64_t eq3 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
+int64_t eq4 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
+int64_t eq5 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
+int64_t eq6 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
+int64_t eq7 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
+int64_t eq8 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
+int64_t eq9 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
+int64_t eq10 (Goldilocks &fr, ArithCommitPols &p, uint64_t step, uint64_t _o);
 
 const uint16_t chunksPrimeSecp256k1[16] = { 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
                                             0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFE, 0xFFFF, 0xFC2F };
@@ -132,7 +132,7 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
         // Note1: Since we can choose whether the quotient is positive or negative, we choose it so
         //        that the added offset is the lowest.
         // Note2: x1,x2,y1,y2 can be assumed to be alias free, as this is the pre condition in the Arith SM.
-        //        I.e, x1,x2,y1,y2 ∈ [0, p-1], where p is the corresponding prime.
+        //        I.e, x1,x2,y1,y2 ∈ [0, 2^256-1].
         if (input[i].selEq1 == 1)
         {
             // s=(y2-y1)/(x2-x1)
@@ -151,14 +151,19 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
 
             // Check
             mpz_class pq0;
-            pq0 = sScalar*input[i].x2 - sScalar*input[i].x1 - input[i].y2 + input[i].y1; // Worst values are {-pFec*(pFec-1),pFec*(pFec-1)}
+            pq0 = sScalar*input[i].x2 - sScalar*input[i].x1 - input[i].y2 + input[i].y1; // Worst values are {-2^256*(2^256-1),2^256*(2^256-1)}
             q0 = pq0/pFec;
             if ((pq0 - pFec*q0) != 0)
             {
                 zklog.error("ArithExecutor::execute() For input " + to_string(i) + " with the calculated q0 the residual is not zero (diff point)");
                 exitProcess();
             } 
-            q0 += ScalarTwoTo256;
+            q0 += ScalarTwoTo257;
+            if(q0 < 0)
+            {
+                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " the q0 with offset is negative (diff point). Actual value: " + q0.get_str(16));
+                exitProcess();
+            }
         }
         else if (input[i].selEq2 == 1)
         {
@@ -175,15 +180,20 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
 
             // Check
             mpz_class pq0;
-            pq0 = sScalar*2*input[i].y1 - 3*input[i].x1*input[i].x1; // Worst values are {-3*(pFec-1)**2,2*(pFec-1)**2}
-                                                                     // with |-3*(pFec-1)**2| > 2*(pFec-1)**2
+            pq0 = sScalar*2*input[i].y1 - 3*input[i].x1*input[i].x1; // Worst values are {-3*(2^256-1)**2,2*(2^256-1)**2}
+                                                                     // with |-3*(2^256-1)**2| > 2*(2^256-1)**2
             q0 = -(pq0/pFec);
             if ((pq0 + pFec*q0) != 0)
             {
                 zklog.error("ArithExecutor::execute() For input " + to_string(i) + " with the calculated q0 the residual is not zero (same point)");
                 exitProcess();
             } 
-            q0 += ScalarTwoTo257;
+            q0 += ScalarTwoTo258;
+            if(q0 < 0)
+            {
+                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " the q0 with offset is negative (same point). Actual value: " + q0.get_str(16));
+                exitProcess();
+            }
         }
         else
         {
@@ -199,8 +209,8 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
 
             // Check q1
             mpz_class pq1;
-            pq1 = sScalar*sScalar - input[i].x1 - input[i].x2 - input[i].x3; // Worst values are {-3*(pFec-1),(pFec-1)**2}
-                                                                             // with (pFec-1)**2 > |-3*(pFec-1)|
+            pq1 = sScalar*sScalar - input[i].x1 - input[i].x2 - input[i].x3; /// Worst values are {-3*(2^256-1),(2^256-1)**2}
+                                                                             // with (2^256-1)**2 > |-3*(2^256-1)|
             q1 = pq1/pFec;
             if ((pq1 - pFec*q1) != 0)
             {
@@ -208,12 +218,17 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                 exitProcess();
             }
             // offset 
-            q1 += 4;
+            q1 += 4; //2**2
+            if(q1 < 0)
+            {
+                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " the q1 with offset is negative (point addition). Actual value: " + q1.get_str(16));
+                exitProcess();
+            }
 
             // Check q2
             mpz_class pq2;
-            pq2 = sScalar*input[i].x1 - sScalar*input[i].x3 - input[i].y1 - input[i].y3; // Worst values are {-(pFec+1)*(pFec-1),(pFec-1)**2}
-                                                                                         // with |-(pFec+1)*(pFec-1)| > (pFec-1)**2
+            pq2 = sScalar*input[i].x1 - sScalar*input[i].x3 - input[i].y1 - input[i].y3; // Worst values are {-(2^256+1)*(2^256-1),(2^256-1)**2}
+                                                                                         // with |-(2^256+1)*(2^256-1)| > (2^256-1)**2
             q2 = -(pq2/pFec);
             if ((pq2 + pFec*q2) != 0)
             {
@@ -221,14 +236,20 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                 exitProcess();
             }
             //offset 
-            q2 += ScalarTwoTo256;
+            q2 += ScalarTwoTo257;
+            if(q2 < 0)
+            {
+                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " the q2 with offset is negative (point addition). Actual value: " + q2.get_str(16));
+                exitProcess();
+            }
+
         }        
         else if (input[i].selEq4 == 1)
         {
             // Check q1
             mpz_class pq1;
-            pq1 = input[i].x1*input[i].x2 - input[i].y1*input[i].y2 - input[i].x3; // Worst values are {-(pBN254-1)**2+(pBN254-1),(pBN254-1)**2}
-                                                                                   // with |-(pBN254-1)**2+(pBN254-1)| > (pBN254-1)**2
+            pq1 = input[i].x1*input[i].x2 - input[i].y1*input[i].y2 - input[i].x3; /// Worst values are {-2^256*(2^256-1),(2^256-1)**2}
+                                                                                   // with |-2^256*(2^256-1)| > (2^256-1)**2
             q1 = -(pq1/pBN254);
             if ((pq1 + pBN254*q1) != 0)
             {
@@ -236,13 +257,17 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                 exitProcess();
             }
             // offset
-            q1 += ScalarTwoTo254;
+            q1 += ScalarTwoTo259;
+            if(q1 < 0)
+            {
+                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " the q1 with offset is negative (complex mul). Actual value: " + q1.get_str(16));
+                exitProcess();
+            }
 
             // Check q2
             mpz_class pq2;
-            pq2 = input[i].y1*input[i].x2 + input[i].x1*input[i].y2 - input[i].y3; // Worst values are {-(pBN254-1),2*(pBN254-1)}
-                                                                                   // with 2*(pBN254-1) > |-(pBN254-1)|
-                                                                                   // No offset is needed!
+            pq2 = input[i].y1*input[i].x2 + input[i].x1*input[i].y2 - input[i].y3; // Worst values are {-(2^256-1),2*(2^256-1)}
+                                                                                   // with 2*(2^256-1) > |-(2^256-1)|
             q2 = pq2/pBN254;
             if ((pq2 - pBN254*q2) != 0)
             {
@@ -250,15 +275,19 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                 exitProcess();
             }
             // offset
-            q2 += 1;
+            q2 += 8; //2**3
+            if(q2 < 0)
+            {
+                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " the q2 with offset is negative (complex mul). Actual value: " + q2.get_str(16));
+                exitProcess();
+            }
         }
         else if (input[i].selEq5 == 1)
         {
             // Check q1
             mpz_class pq1;
-            pq1 = input[i].x1 + input[i].x2 - input[i].x3; // Worst values are {-(pBN254-1),2*(pBN254-1)}
-                                                           // with 2*(pBN254-1) > |-(pBN254-1)|
-                                                           // No offset is needed!
+            pq1 = input[i].x1 + input[i].x2 - input[i].x3; // Worst values are {-(2^256-1),2*(2^256-1)}
+                                                           // with 2*(2^256-1) > |-(2^256-1)|
             q1 = pq1/pBN254;
             if ((pq1 - pBN254*q1) != 0)
             {
@@ -266,13 +295,17 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                 exitProcess();
             }
             //offset
-            q1 += 1;
+            q1 += 8; //2**3
+            if(q1 < 0)
+            {
+                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " the q1 with offset is negative (complex add). Actual value: " + q1.get_str(16));
+                exitProcess();
+            }
 
             // Check q2
             mpz_class pq2;
-            pq2 = input[i].y1 + input[i].y2 - input[i].y3; // Worst values are {-(pBN254-1),2*(pBN254-1)}
-                                                           // with 2*(pBN254-1) > |-(pBN254-1)|
-                                                           // No offset is needed!
+            pq2 = input[i].y1 + input[i].y2 - input[i].y3; // Worst values are {-(2^256-1),2*(2^256-1)}
+                                                           // with 2*(2^256-1) > |-(2^256-1)|
             q2 = pq2/pBN254;
             if ((pq2 - pBN254*q2) != 0)
             {
@@ -280,15 +313,19 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                 exitProcess();
             }
             //offset
-            q2 += 1;
+            q2 += 8; //2**3
+            if(q2 < 0)
+            {
+                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " the q2 with offset is negative (complex add). Actual value: " + q2.get_str(16));
+                exitProcess();
+            }
         }
         else if (input[i].selEq6 == 1)
         {
             // Check q1
             mpz_class pq1;
-            pq1 = input[i].x1 - input[i].x2 - input[i].x3; // Worst values are {-2*(pBN254-1),(pBN254-1)}
-                                                           // with |-2*(pBN254-1)| > (pBN254-1)
-                                                           // No offset is needed!
+            pq1 = input[i].x1 - input[i].x2 - input[i].x3; // Worst values are {-2*(2^256-1),(2^256-1)}
+                                                           // with |-2*(2^256-1)| > (2^256-1)
             q1 = -(pq1/pBN254);
             if ((pq1 + pBN254*q1) != 0)
             {
@@ -296,13 +333,17 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                 exitProcess();
             }
             //offset
-            q1 += 1;
-
+            q1 += 8; //2**3
+            if(q1 < 0)
+            {
+                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " the q1 with offset is negative (complex sub). Actual value: " + q1.get_str(16));
+                exitProcess();
+            }
             // Check q2
             mpz_class pq2;
-            pq2 = input[i].y1 - input[i].y2 - input[i].y3; // Worst values are {-2*(pBN254-1),(pBN254-1)}
-                                                           // with |-2*(pBN254-1)| > (pBN254-1)
-                                                           // No offset is needed!
+            pq2 = input[i].y1 - input[i].y2 - input[i].y3; // Worst values are {-2*(2^256-1),(2^256-1)}
+                                                           // with |-2*(2^256-1)| > (2^256-1)
+                                                           
             q2 = -(pq2/pBN254);
             if ((pq2 + pBN254*q2) != 0)
             {
@@ -310,7 +351,12 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                 exitProcess();
             }
             //offset
-            q2 += 1;
+            q2 += 8; //2**3
+            if(q2 < 0)
+            {
+                zklog.error("ArithExecutor::execute() For input " + to_string(i) + " the q2 with offset is negative (complex sub). Actual value: " + q2.get_str(16));
+                exitProcess();
+            }
         }
         else
         {
@@ -426,17 +472,17 @@ void ArithExecutor::execute (vector<ArithAction> &action, ArithCommitPols &pols)
                 uint64_t carryIndex = eqIndexToCarryIndex[eqIndex];
                 switch(eqIndex)
                 {
-                    case 0:  eq[eqIndex] = fr.toS64(eq0(fr, pols, step, offset)); break;
-                    case 1:  eq[eqIndex] = fr.toS64(eq1(fr, pols, step, offset)); break;
-                    case 2:  eq[eqIndex] = fr.toS64(eq2(fr, pols, step, offset)); break;
-                    case 3:  eq[eqIndex] = fr.toS64(eq3(fr, pols, step, offset)); break;
-                    case 4:  eq[eqIndex] = fr.toS64(eq4(fr, pols, step, offset)); break;
-                    case 5:  eq[eqIndex] = fr.toS64(eq5(fr, pols, step, offset)); break;
-                    case 6:  eq[eqIndex] = fr.toS64(eq6(fr, pols, step, offset)); break;
-                    case 7:  eq[eqIndex] = fr.toS64(eq7(fr, pols, step, offset)); break;
-                    case 8:  eq[eqIndex] = fr.toS64(eq8(fr, pols, step, offset)); break;
-                    case 9:  eq[eqIndex] = fr.toS64(eq9(fr, pols, step, offset)); break;
-                    case 10: eq[eqIndex] = fr.toS64(eq10(fr, pols, step, offset)); break;
+                    case 0:  eq[eqIndex] = eq0(fr, pols, step, offset); break;
+                    case 1:  eq[eqIndex] = eq1(fr, pols, step, offset); break;
+                    case 2:  eq[eqIndex] = eq2(fr, pols, step, offset); break;
+                    case 3:  eq[eqIndex] = eq3(fr, pols, step, offset); break;
+                    case 4:  eq[eqIndex] = eq4(fr, pols, step, offset); break;
+                    case 5:  eq[eqIndex] = eq5(fr, pols, step, offset); break;
+                    case 6:  eq[eqIndex] = eq6(fr, pols, step, offset); break;
+                    case 7:  eq[eqIndex] = eq7(fr, pols, step, offset); break;
+                    case 8:  eq[eqIndex] = eq8(fr, pols, step, offset); break;
+                    case 9:  eq[eqIndex] = eq9(fr, pols, step, offset); break;
+                    case 10: eq[eqIndex] = eq10(fr, pols, step, offset); break;
                     default:
                         zklog.error("ArithExecutor::execute() invalid eqIndex=" + to_string(eqIndex));
                         exitProcess();
