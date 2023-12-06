@@ -430,7 +430,7 @@ bool ProcessDirectory (ExecutorClient *pClient, const string &directoryName, uin
              || (files[i].find("ignore") != string::npos) // Ignore tests masked as "ignore"
              || (files[i].find("-list.json") != string::npos) // Ignore tests masked as "-list"
 #ifndef MULTI_ROM_TEST
-             || (files[i].find("tests-30M") != string::npos) // Ignore tests that require a rom withaa different gas limit
+             || (files[i].find("tests-30M") != string::npos) // Ignore tests that require a rom with a different gas limit
 #endif
              || (inputFile == "testvectors/inputs-executor/rlp-error/test-length-data_1.json") // batchL2Data.size()=120119 > MAX_BATCH_L2_DATA_SIZE=120000
              || (inputFile == "testvectors/inputs-executor/rlp-error/test-length-data_2.json") // batchL2Data.size()=120118 > MAX_BATCH_L2_DATA_SIZE=120000
