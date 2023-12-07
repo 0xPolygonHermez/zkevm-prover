@@ -33,6 +33,24 @@ HashDBRemote::~HashDBRemote()
     tms.print("HashDBRemote");
 #endif    
 }
+zkresult HashDBRemote::getLatestStateRoot (Goldilocks::Element (&stateRoot)[4]){
+
+    ::grpc::ClientContext context;
+    ::google::protobuf::Empty request;
+    ::hashdb::v1::GetLatestStateRootResponse response;
+
+    grpc::Status s = stub->GetLatestStateRoot(&context, request, &response);
+    if (s.error_code() != grpc::StatusCode::OK)
+    {
+        zklog.error("HashDBRemote::getLatestStateRoot() GRPC error(" + to_string(s.error_code()) + "): " + s.error_message());
+        return ZKR_HASHDB_GRPC_ERROR;
+    }
+
+    grpc2fea(fr, response.latest_root(), stateRoot);
+
+    return ZKR_SUCCESS;
+
+}
 
 zkresult HashDBRemote::set (const string &batchUUID, uint64_t tx, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, Goldilocks::Element (&newRoot)[4], SmtSetResult *result, DatabaseMap *dbReadLog)
 {
@@ -181,7 +199,7 @@ zkresult HashDBRemote::get (const string &batchUUID, const Goldilocks::Element (
     return static_cast<zkresult>(response.result().code());
 }
 
-zkresult HashDBRemote::setProgram (const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const bool persistent)
+zkresult HashDBRemote::setProgram (const string &batchUUID, uint64_t tx, const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const Persistence persistence)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
     gettimeofday(&t, NULL);
@@ -202,7 +220,9 @@ zkresult HashDBRemote::setProgram (const Goldilocks::Element (&key)[4], const ve
     }
     request.set_data(sData);
 
-    request.set_persistent(persistent);
+    request.set_persistence((hashdb::v1::Persistence)persistence);
+    request.set_batch_uuid(batchUUID);
+    request.set_tx(tx);
 
     grpc::Status s = stub->SetProgram(&context, request, &response);
     if (s.error_code() != grpc::StatusCode::OK)
@@ -218,7 +238,7 @@ zkresult HashDBRemote::setProgram (const Goldilocks::Element (&key)[4], const ve
     return static_cast<zkresult>(response.result().code());
 }
 
-zkresult HashDBRemote::getProgram (const Goldilocks::Element (&key)[4], vector<uint8_t> &data, DatabaseMap *dbReadLog)
+zkresult HashDBRemote::getProgram (const string &batchUUID, const Goldilocks::Element (&key)[4], vector<uint8_t> &data, DatabaseMap *dbReadLog)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
     gettimeofday(&t, NULL);
@@ -231,6 +251,8 @@ zkresult HashDBRemote::getProgram (const Goldilocks::Element (&key)[4], vector<u
     ::hashdb::v1::Fea* reqKey = new ::hashdb::v1::Fea();
     fea2grpc(fr, key, reqKey);
     request.set_allocated_key(reqKey);
+
+    request.set_batch_uuid(batchUUID);
 
     grpc::Status s = stub->GetProgram(&context, request, &response);
     if (s.error_code() != grpc::StatusCode::OK)
@@ -260,7 +282,7 @@ zkresult HashDBRemote::getProgram (const Goldilocks::Element (&key)[4], vector<u
     return static_cast<zkresult>(response.result().code());
 }
 
-void HashDBRemote::loadDB(const DatabaseMap::MTMap &input, const bool persistent)
+void HashDBRemote::loadDB(const DatabaseMap::MTMap &input, const bool persistent, const Goldilocks::Element (&stateRoot)[4])
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
     gettimeofday(&t, NULL);
@@ -272,6 +294,19 @@ void HashDBRemote::loadDB(const DatabaseMap::MTMap &input, const bool persistent
     mtMap2grpc(fr, input, request.mutable_input_db());
 
     request.set_persistent(persistent);
+
+
+    hashdb::v1::Fea *state_root = new hashdb::v1::Fea();
+    if (state_root == NULL)
+    {
+        zklog.error("HashDBRemote::loadDB() failed allocating hashdb::v1::Fea for state_root");
+        exitProcess();
+    }
+    state_root->set_fe0(fr.toU64(stateRoot[0]));
+    state_root->set_fe1(fr.toU64(stateRoot[1]));
+    state_root->set_fe2(fr.toU64(stateRoot[2]));
+    state_root->set_fe3(fr.toU64(stateRoot[3]));
+    request.set_allocated_state_root(state_root);
 
     grpc::Status s = stub->LoadDB(&context, request, &response);
     if (s.error_code() != grpc::StatusCode::OK)
@@ -374,7 +409,7 @@ zkresult HashDBRemote::purge (const string &batchUUID, const Goldilocks::Element
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
     tms.add("purge", TimeDiff(t));
 #endif
-    return static_cast<zkresult>(response.result().code());
+    return ZKR_SUCCESS;
 }
 
 zkresult HashDBRemote::consolidateState (const Goldilocks::Element (&virtualStateRoot)[4], const Persistence persistence, Goldilocks::Element (&consolidatedStateRoot)[4], uint64_t &flushId, uint64_t &storedFlushId)
@@ -588,6 +623,27 @@ zkresult HashDBRemote::cancelBatch (const string &batchUUID)
 
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
     tms.add("cancelBatch", TimeDiff(t));
+#endif
+    return static_cast<zkresult>(response.result().code());
+}
+
+zkresult HashDBRemote::resetDB (void)
+{
+
+#ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
+    gettimeofday(&t, NULL);
+#endif
+    ::grpc::ClientContext context;
+    ::google::protobuf::Empty request;
+    ::hashdb::v1::ResetDBResponse response;
+    grpc::Status s = stub->ResetDB(&context, request, &response);
+    if (s.error_code() != grpc::StatusCode::OK)
+    {
+        zklog.error("HashDBRemote:resetDB() GRPC error(" + to_string(s.error_code()) + "): " + s.error_message());
+    }
+
+#ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
+    tms.add("resetDB", TimeDiff(t));
 #endif
     return static_cast<zkresult>(response.result().code());
 }

@@ -9,6 +9,7 @@
 #include "database_map.hpp"
 #include "state_manager.hpp"
 #include "state_manager_64.hpp"
+#include "key_utils.hpp"
 
 HashDB::HashDB(Goldilocks &fr, const Config &config) : fr(fr), config(config), db(fr, config), db64(fr, config), smt(fr)
 {
@@ -29,6 +30,25 @@ HashDB::~HashDB()
 #endif    
 }
 
+zkresult HashDB::getLatestStateRoot (Goldilocks::Element (&stateRoot)[4])
+{
+#ifdef HASHDB_LOCK
+    lock_guard<recursive_mutex> guard(mlock);
+#endif
+
+    zkresult zkr;
+    
+    if (config.hashDB64)
+    {
+        zkr = db64.getLatestStateRoot(stateRoot);
+    }
+    else
+    {
+        zklog.error("HashDB::getLatestStateRoot() not suported with option config.hashDB64=false");
+        return ZKR_DB_ERROR;
+    }
+    return zkr;
+}
 zkresult HashDB::set (const string &batchUUID, uint64_t tx, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, Goldilocks::Element (&newRoot)[4], SmtSetResult *result, DatabaseMap *dbReadLog)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB
@@ -100,7 +120,7 @@ zkresult HashDB::get (const string &batchUUID, const Goldilocks::Element (&root)
     return zkr;
 }
 
-zkresult HashDB::setProgram(const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const bool persistent)
+zkresult HashDB::setProgram (const string &batchUUID, uint64_t tx, const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const Persistence persistence)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB
     gettimeofday(&t, NULL);
@@ -113,11 +133,11 @@ zkresult HashDB::setProgram(const Goldilocks::Element (&key)[4], const vector<ui
     zkresult zkr;
     if (config.hashDB64)
     {
-        zkr = db64.setProgram(fea2string(fr, key), data, persistent);
+        zkr = stateManager64.setProgram(batchUUID, tx, db64, key, data, persistence);
     }
     else
     {
-        zkr = db.setProgram(fea2string(fr, key), data, persistent);
+        zkr = db.setProgram(fea2string(fr, key), data, persistence == PERSISTENCE_DATABASE ? true : false);
     }
 
 #ifdef LOG_TIME_STATISTICS_HASHDB
@@ -127,7 +147,7 @@ zkresult HashDB::setProgram(const Goldilocks::Element (&key)[4], const vector<ui
     return zkr;
 }
 
-zkresult HashDB::getProgram(const Goldilocks::Element (&key)[4], vector<uint8_t> &data, DatabaseMap *dbReadLog)
+zkresult HashDB::getProgram (const string &batchUUID, const Goldilocks::Element (&key)[4], vector<uint8_t> &data, DatabaseMap *dbReadLog)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB
     gettimeofday(&t, NULL);
@@ -141,7 +161,7 @@ zkresult HashDB::getProgram(const Goldilocks::Element (&key)[4], vector<uint8_t>
     zkresult zkr;
     if (config.hashDB64)
     {
-        zkr = db64.getProgram(fea2string(fr, key), data, dbReadLog);        
+        zkr = stateManager64.getProgram(batchUUID, db64, key, data, dbReadLog);        
     }
     else
     {
@@ -155,7 +175,127 @@ zkresult HashDB::getProgram(const Goldilocks::Element (&key)[4], vector<uint8_t>
     return zkr;
 }
 
-void HashDB::loadDB(const DatabaseMap::MTMap &input, const bool persistent)
+zkresult hashValue2keyValue (const DatabaseMap::MTMap &input, const Goldilocks::Element (&stateRoot)[4], vector<KeyValue> &keyValues, const uint64_t level, vector<uint64_t> &bits)
+{
+    zkresult zkr;
+
+    string root = fea2string(fr, stateRoot);
+    
+    DatabaseMap::MTMap::const_iterator it;
+    it = input.find(root);
+    if (it == input.end())
+    {
+        zklog.error("hashValue2keyValue() failed searching for root=" + root);
+        return ZKR_DB_KEY_NOT_FOUND;
+    }
+
+    const vector<Goldilocks::Element> &value = it->second;
+    if (value.size() != 12)
+    {
+        zklog.error("hashValue2keyValue() found value.size=" + to_string(value.size()));
+        return ZKR_DB_ERROR;
+    }
+
+    // If capacity is {0,0,0,0} then this is an intermediate node
+    if (fr.isZero(value[8]) && fr.isZero(value[9]) && fr.isZero(value[10]) && fr.isZero(value[11]))
+    {
+        Goldilocks::Element valueFea[4];
+
+        // If left hash is not {0,0,0,0} then iterate
+        valueFea[0] = value[0];
+        valueFea[1] = value[1];
+        valueFea[2] = value[2];
+        valueFea[3] = value[3];
+        if (!feaIsZero(valueFea))
+        {
+            vector<uint64_t> leftBits = bits;
+            leftBits.emplace_back(0);
+            zkr = hashValue2keyValue(input, valueFea, keyValues, level + 1, leftBits);
+            if (zkr != ZKR_SUCCESS)
+            {
+                return zkr;
+            }
+        }
+
+        // If right hash is not {0,0,0,0} then iterate
+        valueFea[0] = value[4];
+        valueFea[1] = value[5];
+        valueFea[2] = value[6];
+        valueFea[3] = value[7];
+        if (!feaIsZero(valueFea))
+        {
+            vector<uint64_t> rightBits = bits;
+            rightBits.emplace_back(1);
+            zkr = hashValue2keyValue(input, valueFea, keyValues, level + 1, rightBits);
+            if (zkr != ZKR_SUCCESS)
+            {
+                return zkr;
+            }
+        }
+
+        return ZKR_SUCCESS;
+    }
+
+    // If capacity is {1,0,0,0} then this is a leaf node
+    else if (fr.isOne(value[8]) && fr.isZero(value[9]) && fr.isZero(value[10]) && fr.isZero(value[11]))
+    {
+        KeyValue keyValue;
+
+        // Re-build the key
+        Goldilocks::Element remainingKey[4];
+        remainingKey[0] = value[0];
+        remainingKey[1] = value[1];
+        remainingKey[2] = value[2];
+        remainingKey[3] = value[3];
+        joinKey(fr, bits, remainingKey, keyValue.key);
+
+        // Get the value hash
+        Goldilocks::Element valueHash[4];
+        valueHash[0] = value[4];
+        valueHash[1] = value[5];
+        valueHash[2] = value[6];
+        valueHash[3] = value[7];
+
+        // Get the value
+        string valueHashString = fea2string(fr, valueHash);
+        DatabaseMap::MTMap::const_iterator it;
+        it = input.find(valueHashString);
+        if (it == input.end())
+        {
+            zklog.error("hashValue2keyValue() failed searching for valueHash=" + valueHashString);
+            return ZKR_DB_KEY_NOT_FOUND;
+        }
+        const vector<Goldilocks::Element> &value = it->second;
+        if (value.size() != 12)
+        {
+            zklog.error("hashValue2keyValue() value vector with size=" + value.size());
+            return ZKR_DB_ERROR;
+        }
+        if (!fr.isZero(value[8]) || !fr.isZero(value[9]) || !fr.isZero(value[10]) || !fr.isZero(value[11]))
+        {
+            zklog.error("hashValue2keyValue() value vector with invalid capacity");
+            return ZKR_DB_ERROR;
+        }
+        fea2scalar(fr, keyValue.value, value[0], value[1], value[2], value[3], value[4], value[5], value[6], value[7]);
+
+        // Store the key value
+        keyValues.emplace_back(keyValue);
+
+        return ZKR_SUCCESS;
+    }
+
+    // Invalid capacity
+    zklog.error("hashValue2keyValue() found invalid capacity level=" + to_string(level) + " root=" + root + " capacity=" + to_string(fr.toU64(value[8])) + ":" + to_string(fr.toU64(value[9])) + ":" + to_string(fr.toU64(value[10])) + ":" + to_string(fr.toU64(value[11])));
+    return ZKR_DB_ERROR;
+}
+
+zkresult hashValue2keyValue (const DatabaseMap::MTMap &input, const Goldilocks::Element (&stateRoot)[4], vector<KeyValue> &keyValues)
+{
+    vector<uint64_t> bits;
+    return hashValue2keyValue(input, stateRoot, keyValues, 0, bits);
+}
+
+void HashDB::loadDB(const DatabaseMap::MTMap &input, const bool persistent, const Goldilocks::Element (&stateRoot)[4])
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB
     gettimeofday(&t, NULL);
@@ -168,10 +308,30 @@ void HashDB::loadDB(const DatabaseMap::MTMap &input, const bool persistent)
     DatabaseMap::MTMap::const_iterator it;
     if (config.hashDB64)
     {
-        for (it = input.begin(); it != input.end(); it++)
+        vector<KeyValue> keyValues;
+        zkresult zkr = hashValue2keyValue(input, stateRoot, keyValues);
+        if (zkr != ZKR_SUCCESS)
         {
-            // TODO: db64.write(it->first, NULL, it->second, persistent);
+            zklog.error("HashDB::loadDB() failed calling hashValue2keyValue() result=" + zkresult2string(zkr));
+            exitProcess();
         }
+        Goldilocks::Element oldStateRoot[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
+        Goldilocks::Element newStateRoot[4] = {fr.zero(), fr.zero(), fr.zero(), fr.zero()};
+
+        zkr = db64.WriteTree(oldStateRoot, keyValues, newStateRoot, persistent);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("HashDB::loadDB() failed calling db64.WriteTree() result=" + zkresult2string(zkr));
+            exitProcess();
+        }
+
+        if (!feaIsEqual(newStateRoot, stateRoot))
+        {
+            zklog.error("HashDB::loadDB() failed called db64.WriteTree() but got newStateRoot=" + fea2string(fr, newStateRoot) + " != extected stateRoot=" + fea2string(fr, stateRoot));
+            exitProcess();
+        }
+
+        stateManager64.setLastConsolidatedStateRoot(stateRoot);
     }
     else
     {
@@ -231,15 +391,7 @@ zkresult HashDB::flush (const string &batchUUID, const string &newStateRoot, con
     zkresult result;
     if (config.hashDB64)
     {
-        if (config.stateManager && (batchUUID.size() != 0))
-        {
-            zklog.error("HashDB::flush() called with config.hashDB64=true and config.stateManager=false");
-            return ZKR_UNSPECIFIED;
-        }
-        else
-        {
-            result = db64.flush(flushId, storedFlushId);
-        }
+        result = db64.flush(flushId, storedFlushId);
     }
     else
     {
@@ -332,6 +484,7 @@ zkresult HashDB::consolidateState (const Goldilocks::Element (&virtualStateRoot)
             if (result == ZKR_SUCCESS)
             {
                 string2fea(fr, consolidatedStateRootString, consolidatedStateRoot);
+                zklog.info("HashDB::consolidateState() virtualState=" + fea2string(fr, virtualStateRoot) + " consolidatedState=" + consolidatedStateRootString);
             }
         }
         else
@@ -399,7 +552,8 @@ zkresult HashDB::getFlushData(uint64_t flushId, uint64_t &lastSentFlushId, unord
 
     if (config.hashDB64)
     {
-        zkr = db64.getFlushData(flushId, lastSentFlushId, nodes, program, nodesStateRoot);
+        zklog.error("HashDB::getFlushData() called with config.hashDB64=true");
+        return ZKR_DB_ERROR;
     }
     else
     {
@@ -413,7 +567,7 @@ void HashDB::clearCache(void)
 {
     if (config.hashDB64)
     {
-        db64.clearCache();
+        // We don't use cache in HashDB64
     }
     else
     {
@@ -466,6 +620,34 @@ zkresult HashDB::cancelBatch (const string &batchUUID)
 
 #ifdef LOG_TIME_STATISTICS_HASHDB
     tms.add("cancelBatch", TimeDiff(t));
+#endif
+
+    return result;
+}
+
+zkresult HashDB::resetDB (void)
+{
+#ifdef LOG_TIME_STATISTICS_HASHDB
+    gettimeofday(&t, NULL);
+#endif
+
+#ifdef HASHDB_LOCK
+    lock_guard<recursive_mutex> guard(mlock);
+#endif
+
+    zkresult result;
+    if (config.hashDB64 && config.stateManager)
+    {
+        return db64.resetDB();
+    }
+    else
+    {
+        zklog.error("HashDB::resetDB() called with invalid configuration");
+        result = ZKR_STATE_MANAGER;
+    }
+
+#ifdef LOG_TIME_STATISTICS_HASHDB
+    tms.add("resetDB", TimeDiff(t));
 #endif
 
     return result;

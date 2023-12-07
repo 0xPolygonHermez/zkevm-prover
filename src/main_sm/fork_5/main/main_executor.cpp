@@ -68,13 +68,6 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
 
     TimerStart(ROM_LOAD);
 
-    // Check rom file name
-    if (config.rom.size()==0)
-    {
-        zklog.error("MainExecutor::MainExecutor() ROM file name is empty");
-        exitProcess();
-    }
-
     // Load file contents into a json instance
     json romJson;
     file2json("src/main_sm/fork_5/scripts/rom.json", romJson);
@@ -147,7 +140,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     // Copy input database content into context database
     if (proverRequest.input.db.size() > 0)
     {
-        pHashDB->loadDB(proverRequest.input.db, true);
+        Goldilocks::Element stateRoot[4];
+        scalar2fea(fr, proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot, stateRoot);
+        pHashDB->loadDB(proverRequest.input.db, true, stateRoot);
         uint64_t flushId, lastSentFlushId;
         pHashDB->flush(emptyString, emptyString, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, flushId, lastSentFlushId);
         if (config.dbClearCache && (config.databaseURL != "local"))
@@ -263,6 +258,46 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 zkassert(ctx.ecRecoverPrecalcBuffer.pos == ctx.ecRecoverPrecalcBuffer.posUsed);
                 ctx.ecRecoverPrecalcBuffer.filled = false;
             }
+        }
+
+        // Consolidate the state and store it in SR, just before we save SR into SMT
+        if (config.hashDB64 && bProcessBatch && (zkPC == consolidateStateRootZKPC))
+        {
+            // Convert pols.SR to virtualStateRoot fea
+            Goldilocks::Element virtualStateRoot[4];
+            if (!fea2fea(virtualStateRoot, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i]))
+            {
+                proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                logError(ctx, string("Failed calling fea2fea()"));
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
+            }
+
+            // Call purge()
+            zkresult zkr = pHashDB->purge(proverRequest.uuid, virtualStateRoot, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);
+            if (zkr != ZKR_SUCCESS)
+            {
+                proverRequest.result = zkr;
+                logError(ctx, string("Failed calling pHashDB->purge() result=") + zkresult2string(zkr));
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
+            }
+
+            // Call consolidateState()
+            Goldilocks::Element consolidatedStateRoot[4];
+            uint64_t flushId, storedFlushId;
+            zkr = pHashDB->consolidateState(virtualStateRoot, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE , consolidatedStateRoot, flushId, storedFlushId);
+            if (zkr != ZKR_SUCCESS)
+            {
+                proverRequest.result = zkr;
+                logError(ctx, string("Failed calling pHashDB->consolidateState() result=") + zkresult2string(proverRequest.result));
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
+            }
+
+            // Convert consolidatedState fea to pols.SR
+            fea2fea(pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], consolidatedStateRoot);
+            //zklog.info("SR=" + fea2string(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i]));
         }
 
 #ifdef LOG_FILENAME
@@ -2622,7 +2657,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     proverRequest.programKeys.insert(fea2string(fr, result));
                 }
 
-                zkresult zkResult = pHashDB->setProgram(result, hashPIterator->second.data, proverRequest.input.bUpdateMerkleTree);
+                zkresult zkResult = pHashDB->setProgram(proverRequest.uuid, proverRequest.pFullTracer->get_tx_number(), result, hashPIterator->second.data, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);
                 if (zkResult != ZKR_SUCCESS)
                 {
                     proverRequest.result = zkResult;
@@ -2677,7 +2712,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     proverRequest.programKeys.insert(fea2string(fr, aux));
                 }
 
-                zkresult zkResult = pHashDB->getProgram(aux, hashValue.data, proverRequest.dbReadLog);
+                zkresult zkResult = pHashDB->getProgram(proverRequest.uuid, aux, hashValue.data, proverRequest.dbReadLog);
                 if (zkResult != ZKR_SUCCESS)
                 {
                     proverRequest.result = zkResult;
@@ -4362,7 +4397,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     if (config.hashDB64)
     {
         Goldilocks::Element newStateRoot[4];
-        string2fea(fr, proverRequest.pFullTracer->get_new_state_root(), newStateRoot);
+        string2fea(fr, NormalizeToNFormat(proverRequest.pFullTracer->get_new_state_root(), 64), newStateRoot);
         zkresult zkr = pHashDB->purge(proverRequest.uuid, newStateRoot, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);
         if (zkr != ZKR_SUCCESS)
         {
@@ -4371,8 +4406,15 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pHashDB->cancelBatch(proverRequest.uuid);
             return;
         }
-        proverRequest.flushId = 0;
-        proverRequest.lastSentFlushId = 0;
+        
+        zkr = pHashDB->flush(proverRequest.uuid, proverRequest.pFullTracer->get_new_state_root(), proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, proverRequest.flushId, proverRequest.lastSentFlushId);
+        if (zkr != ZKR_SUCCESS)
+        {
+            proverRequest.result = zkr;
+            logError(ctx, string("Failed calling pHashDB->flush() result=") + zkresult2string(zkr));
+            pHashDB->cancelBatch(proverRequest.uuid);
+            return;
+        }
     }
     else
     {

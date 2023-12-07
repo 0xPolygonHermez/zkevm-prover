@@ -69,7 +69,7 @@ void string2fea(Goldilocks &fr, const string&os, vector<Goldilocks::Element> &fe
     {
         if (i + 16 > os.size())
         {
-            zklog.error("Database::string2fea() found incorrect DATA column size: " + to_string(os.size()));
+            zklog.error("string2fea() found incorrect DATA column size: " + to_string(os.size()));
             exitProcess();
         }
         string2fe(fr, os.substr(i, 16), fe);
@@ -81,7 +81,7 @@ void string2fea(Goldilocks &fr, const string& os, Goldilocks::Element (&fea)[4])
     Goldilocks::Element fe;
     if (os.size() != 64)
     {
-        zklog.error("Database::string2fea() found incorrect DATA column size: " + to_string(os.size()));
+        zklog.error("string2fea() found incorrect DATA column size: " + to_string(os.size()));
         exitProcess();
     }
     int ii=0;
@@ -492,6 +492,25 @@ void ba2ba (string &baString, const uint64_t ba)
     }
 }
 
+uint64_t ba2ba (const string &baString)
+{
+    if (baString.size() != 8)
+    {
+        zklog.error("ba2ba() found invalid baString.size()=" + to_string(baString.size()) + "!=2");
+        exitProcess();
+    }
+    uint64_t result;
+    result = (uint64_t(uint8_t(baString[0]))<<56) |
+             (uint64_t(uint8_t(baString[1]))<<48) |
+             (uint64_t(uint8_t(baString[2]))<<40) |
+             (uint64_t(uint8_t(baString[3]))<<32) |
+             (uint64_t(uint8_t(baString[4]))<<24) |
+             (uint64_t(uint8_t(baString[5]))<<16) |
+             (uint64_t(uint8_t(baString[6]))<< 8) |
+             (uint64_t(uint8_t(baString[7]))    );
+    return result;
+}
+
 /* Byte array of exactly 2 bytes conversion */
 
 void ba2u16 (const uint8_t *pData, uint16_t &n)
@@ -564,6 +583,32 @@ void scalar2ba16(uint64_t *pData, uint64_t &dataSize, mpz_class s)
         exitProcess();
     }
     dataSize = i+1;
+}
+
+string scalar2ba32(const mpz_class &_s)
+{
+    mpz_class s(_s);
+    string result;
+    result.append(32, 0);
+    for (uint64_t i=0; i<32; i++)
+    {
+        result[31-i] = s.get_ui();
+
+        // Shift right 1 byte the scalar content
+        s = s >> 8;
+
+        // When we run out of significant bytes, break
+        if (s == ScalarZero)
+        {
+            return result;
+        }
+    }
+    if (s != 0)
+    {
+        zklog.error("scalar2ba32() run out of buffer of 32 bytes");
+        exitProcess();
+    }
+    return result;
 }
 
 void scalar2bytes(mpz_class &s, uint8_t (&bytes)[32])

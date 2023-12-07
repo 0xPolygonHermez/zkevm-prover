@@ -5,53 +5,89 @@
 #include "zklog.hpp"
 #include "exit_process.hpp"
 #include "zkresult.hpp"
-#include <list>
+#include <vector>
 #include <unordered_map>
 #include <mutex>
+#include <shared_mutex>
+#include <vector>
+#include "zkassert.hpp"
+#include <cassert>
+#include <unistd.h>
 
+#define MULTIPLE_WRITES 0
 
+class PageContext;
 class PageManager
 {
 public:
-    PageManager();
-    PageManager(const uint64_t nPages_);
-    PageManager(const string fileName_);
-    ~PageManager();
-    
 
+    PageManager();
+    ~PageManager();
+
+    zkresult init(PageContext &ctx);
+    zkresult reset(PageContext &ctx);
+    
     uint64_t getFreePage();
     void releasePage(const uint64_t pageNumber);
-    uint32_t editPage(const uint32_t pageNumber);
-    void flushPages();
+    uint64_t editPage(const uint64_t pageNumber);
+    void flushPages(PageContext &ctx);
+    inline char *getPageAddress(const uint64_t pageNumber);
+    inline uint64_t getNumFreePages();
+    inline uint64_t getFirstUnusedPage();
 
-    inline uint32_t getNumFreePages(){
-        return freePages.size()+nPages-firstUnusedPage;
-    };
-    inline char *getPageAddress(const uint64_t pageNumber)
-    {
-        return pages + pageNumber * 4096;
-    };
+    zkresult addFile();
+    zkresult addPages(const uint64_t nPages_);
+
+    inline void readLock(){ headerLock.lock_shared();}
+    inline void readUnlock(){ headerLock.unlock_shared();}
 
 private:
 
-    recursive_mutex mlock;
-
     bool mappedFile;
     string fileName;
+    string folderName;
     uint64_t fileSize;
-    int fd;
+    uint64_t pagesPerFile;
+    uint64_t nFiles;
 
-    uint32_t nPages;
-    char *pages;
+    shared_mutex dbResizeLock;
+    uint64_t nPages;
+    vector<char *> pages;
 
-    uint32_t firstUnusedPage;
-    std::list<uint32_t> freePages;
-    std::unordered_map<uint32_t, uint32_t> editedPages;
+    recursive_mutex writePagesLock;
+    uint64_t firstUnusedPage;
+    uint64_t numFreePages;
+    vector<uint64_t> freePages;
+    unordered_map<uint64_t, uint64_t> editedPages;
 
-    zkresult AddPages(const uint64_t nPages_);
+    shared_mutex headerLock;
 
 };
 
-extern PageManager pageManager;
+char* PageManager::getPageAddress(const uint64_t pageNumber)
+{
+    shared_lock<shared_mutex> guard_pages(dbResizeLock);
+    zkassertpermanent(pageNumber < nPages);
+    uint64_t fileId = pageNumber/pagesPerFile;
+    uint64_t pageInFile = pageNumber % pagesPerFile;
+    return pages[fileId] + pageInFile * (uint64_t)4096;
+};
+
+//Note: if there is a single writter thread we assume that only the writter thread will call this function! 
+uint64_t PageManager::getNumFreePages(){
+#if MULTIPLE_WRITES
+        lock_guard<recursive_mutex> guard_freePages(writePagesLock);
+        shared_lock<shared_mutex> guard_pages(dbResizeLock);
+#endif
+        return numFreePages+nPages-firstUnusedPage;
+    };
+
+//Note: if there is a single writter thread we assume that only the writter thread will call this function! 
+inline uint64_t PageManager::getFirstUnusedPage(){
+#if MULTIPLE_WRITES
+        lock_guard<recursive_mutex> guard_freePages(writePagesLock);
+#endif
+        return firstUnusedPage;
+}
 
 #endif

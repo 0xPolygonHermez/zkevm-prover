@@ -52,7 +52,7 @@ struct TableStruct_executor_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxillaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[16]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[15]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -61,18 +61,12 @@ struct TableStruct_executor_2eproto {
 extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_executor_2eproto;
 namespace executor {
 namespace v1 {
-class CallTrace;
-class CallTraceDefaultTypeInternal;
-extern CallTraceDefaultTypeInternal _CallTrace_default_instance_;
 class Contract;
 class ContractDefaultTypeInternal;
 extern ContractDefaultTypeInternal _Contract_default_instance_;
-class ExecutionTraceStep;
-class ExecutionTraceStepDefaultTypeInternal;
-extern ExecutionTraceStepDefaultTypeInternal _ExecutionTraceStep_default_instance_;
-class ExecutionTraceStep_StorageEntry_DoNotUse;
-class ExecutionTraceStep_StorageEntry_DoNotUseDefaultTypeInternal;
-extern ExecutionTraceStep_StorageEntry_DoNotUseDefaultTypeInternal _ExecutionTraceStep_StorageEntry_DoNotUse_default_instance_;
+class FullTrace;
+class FullTraceDefaultTypeInternal;
+extern FullTraceDefaultTypeInternal _FullTrace_default_instance_;
 class GetFlushStatusResponse;
 class GetFlushStatusResponseDefaultTypeInternal;
 extern GetFlushStatusResponseDefaultTypeInternal _GetFlushStatusResponse_default_instance_;
@@ -109,13 +103,14 @@ extern TransactionContextDefaultTypeInternal _TransactionContext_default_instanc
 class TransactionStep;
 class TransactionStepDefaultTypeInternal;
 extern TransactionStepDefaultTypeInternal _TransactionStep_default_instance_;
+class TransactionStep_StorageEntry_DoNotUse;
+class TransactionStep_StorageEntry_DoNotUseDefaultTypeInternal;
+extern TransactionStep_StorageEntry_DoNotUseDefaultTypeInternal _TransactionStep_StorageEntry_DoNotUse_default_instance_;
 }  // namespace v1
 }  // namespace executor
 PROTOBUF_NAMESPACE_OPEN
-template<> ::executor::v1::CallTrace* Arena::CreateMaybeMessage<::executor::v1::CallTrace>(Arena*);
 template<> ::executor::v1::Contract* Arena::CreateMaybeMessage<::executor::v1::Contract>(Arena*);
-template<> ::executor::v1::ExecutionTraceStep* Arena::CreateMaybeMessage<::executor::v1::ExecutionTraceStep>(Arena*);
-template<> ::executor::v1::ExecutionTraceStep_StorageEntry_DoNotUse* Arena::CreateMaybeMessage<::executor::v1::ExecutionTraceStep_StorageEntry_DoNotUse>(Arena*);
+template<> ::executor::v1::FullTrace* Arena::CreateMaybeMessage<::executor::v1::FullTrace>(Arena*);
 template<> ::executor::v1::GetFlushStatusResponse* Arena::CreateMaybeMessage<::executor::v1::GetFlushStatusResponse>(Arena*);
 template<> ::executor::v1::InfoReadWrite* Arena::CreateMaybeMessage<::executor::v1::InfoReadWrite>(Arena*);
 template<> ::executor::v1::Log* Arena::CreateMaybeMessage<::executor::v1::Log>(Arena*);
@@ -128,6 +123,7 @@ template<> ::executor::v1::ProcessTransactionResponse* Arena::CreateMaybeMessage
 template<> ::executor::v1::TraceConfig* Arena::CreateMaybeMessage<::executor::v1::TraceConfig>(Arena*);
 template<> ::executor::v1::TransactionContext* Arena::CreateMaybeMessage<::executor::v1::TransactionContext>(Arena*);
 template<> ::executor::v1::TransactionStep* Arena::CreateMaybeMessage<::executor::v1::TransactionStep>(Arena*);
+template<> ::executor::v1::TransactionStep_StorageEntry_DoNotUse* Arena::CreateMaybeMessage<::executor::v1::TransactionStep_StorageEntry_DoNotUse>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 namespace executor {
 namespace v1 {
@@ -1658,61 +1654,35 @@ class TraceConfig PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kTxHashToGenerateExecuteTraceFieldNumber = 5,
-    kTxHashToGenerateCallTraceFieldNumber = 6,
+    kTxHashToGenerateFullTraceFieldNumber = 5,
     kDisableStorageFieldNumber = 1,
     kDisableStackFieldNumber = 2,
     kEnableMemoryFieldNumber = 3,
     kEnableReturnDataFieldNumber = 4,
   };
-  // bytes tx_hash_to_generate_execute_trace = 5;
-  void clear_tx_hash_to_generate_execute_trace();
-  const std::string& tx_hash_to_generate_execute_trace() const;
-  void set_tx_hash_to_generate_execute_trace(const std::string& value);
-  void set_tx_hash_to_generate_execute_trace(std::string&& value);
-  void set_tx_hash_to_generate_execute_trace(const char* value);
-  void set_tx_hash_to_generate_execute_trace(const void* value, size_t size);
-  std::string* mutable_tx_hash_to_generate_execute_trace();
-  std::string* release_tx_hash_to_generate_execute_trace();
-  void set_allocated_tx_hash_to_generate_execute_trace(std::string* tx_hash_to_generate_execute_trace);
+  // bytes tx_hash_to_generate_full_trace = 5;
+  void clear_tx_hash_to_generate_full_trace();
+  const std::string& tx_hash_to_generate_full_trace() const;
+  void set_tx_hash_to_generate_full_trace(const std::string& value);
+  void set_tx_hash_to_generate_full_trace(std::string&& value);
+  void set_tx_hash_to_generate_full_trace(const char* value);
+  void set_tx_hash_to_generate_full_trace(const void* value, size_t size);
+  std::string* mutable_tx_hash_to_generate_full_trace();
+  std::string* release_tx_hash_to_generate_full_trace();
+  void set_allocated_tx_hash_to_generate_full_trace(std::string* tx_hash_to_generate_full_trace);
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  std::string* unsafe_arena_release_tx_hash_to_generate_execute_trace();
+  std::string* unsafe_arena_release_tx_hash_to_generate_full_trace();
   GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
   "    string fields are deprecated and will be removed in a"
   "    future release.")
-  void unsafe_arena_set_allocated_tx_hash_to_generate_execute_trace(
-      std::string* tx_hash_to_generate_execute_trace);
+  void unsafe_arena_set_allocated_tx_hash_to_generate_full_trace(
+      std::string* tx_hash_to_generate_full_trace);
   private:
-  const std::string& _internal_tx_hash_to_generate_execute_trace() const;
-  void _internal_set_tx_hash_to_generate_execute_trace(const std::string& value);
-  std::string* _internal_mutable_tx_hash_to_generate_execute_trace();
-  public:
-
-  // bytes tx_hash_to_generate_call_trace = 6;
-  void clear_tx_hash_to_generate_call_trace();
-  const std::string& tx_hash_to_generate_call_trace() const;
-  void set_tx_hash_to_generate_call_trace(const std::string& value);
-  void set_tx_hash_to_generate_call_trace(std::string&& value);
-  void set_tx_hash_to_generate_call_trace(const char* value);
-  void set_tx_hash_to_generate_call_trace(const void* value, size_t size);
-  std::string* mutable_tx_hash_to_generate_call_trace();
-  std::string* release_tx_hash_to_generate_call_trace();
-  void set_allocated_tx_hash_to_generate_call_trace(std::string* tx_hash_to_generate_call_trace);
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  std::string* unsafe_arena_release_tx_hash_to_generate_call_trace();
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  void unsafe_arena_set_allocated_tx_hash_to_generate_call_trace(
-      std::string* tx_hash_to_generate_call_trace);
-  private:
-  const std::string& _internal_tx_hash_to_generate_call_trace() const;
-  void _internal_set_tx_hash_to_generate_call_trace(const std::string& value);
-  std::string* _internal_mutable_tx_hash_to_generate_call_trace();
+  const std::string& _internal_tx_hash_to_generate_full_trace() const;
+  void _internal_set_tx_hash_to_generate_full_trace(const std::string& value);
+  std::string* _internal_mutable_tx_hash_to_generate_full_trace();
   public:
 
   // uint32 disable_storage = 1;
@@ -1758,8 +1728,7 @@ class TraceConfig PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr tx_hash_to_generate_execute_trace_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr tx_hash_to_generate_call_trace_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr tx_hash_to_generate_full_trace_;
   ::PROTOBUF_NAMESPACE_ID::uint32 disable_storage_;
   ::PROTOBUF_NAMESPACE_ID::uint32 disable_stack_;
   ::PROTOBUF_NAMESPACE_ID::uint32 enable_memory_;
@@ -1949,23 +1918,23 @@ class InfoReadWrite PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
-class CallTrace PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:executor.v1.CallTrace) */ {
+class FullTrace PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:executor.v1.FullTrace) */ {
  public:
-  inline CallTrace() : CallTrace(nullptr) {};
-  virtual ~CallTrace();
+  inline FullTrace() : FullTrace(nullptr) {};
+  virtual ~FullTrace();
 
-  CallTrace(const CallTrace& from);
-  CallTrace(CallTrace&& from) noexcept
-    : CallTrace() {
+  FullTrace(const FullTrace& from);
+  FullTrace(FullTrace&& from) noexcept
+    : FullTrace() {
     *this = ::std::move(from);
   }
 
-  inline CallTrace& operator=(const CallTrace& from) {
+  inline FullTrace& operator=(const FullTrace& from) {
     CopyFrom(from);
     return *this;
   }
-  inline CallTrace& operator=(CallTrace&& from) noexcept {
+  inline FullTrace& operator=(FullTrace&& from) noexcept {
     if (GetArena() == from.GetArena()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -1983,20 +1952,20 @@ class CallTrace PROTOBUF_FINAL :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return GetMetadataStatic().reflection;
   }
-  static const CallTrace& default_instance();
+  static const FullTrace& default_instance();
 
   static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
-  static inline const CallTrace* internal_default_instance() {
-    return reinterpret_cast<const CallTrace*>(
-               &_CallTrace_default_instance_);
+  static inline const FullTrace* internal_default_instance() {
+    return reinterpret_cast<const FullTrace*>(
+               &_FullTrace_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
     8;
 
-  friend void swap(CallTrace& a, CallTrace& b) {
+  friend void swap(FullTrace& a, FullTrace& b) {
     a.Swap(&b);
   }
-  inline void Swap(CallTrace* other) {
+  inline void Swap(FullTrace* other) {
     if (other == this) return;
     if (GetArena() == other->GetArena()) {
       InternalSwap(other);
@@ -2004,7 +1973,7 @@ class CallTrace PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(CallTrace* other) {
+  void UnsafeArenaSwap(FullTrace* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetArena() == other->GetArena());
     InternalSwap(other);
@@ -2012,17 +1981,17 @@ class CallTrace PROTOBUF_FINAL :
 
   // implements Message ----------------------------------------------
 
-  inline CallTrace* New() const final {
-    return CreateMaybeMessage<CallTrace>(nullptr);
+  inline FullTrace* New() const final {
+    return CreateMaybeMessage<FullTrace>(nullptr);
   }
 
-  CallTrace* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<CallTrace>(arena);
+  FullTrace* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<FullTrace>(arena);
   }
   void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const CallTrace& from);
-  void MergeFrom(const CallTrace& from);
+  void CopyFrom(const FullTrace& from);
+  void MergeFrom(const FullTrace& from);
   PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
   bool IsInitialized() const final;
 
@@ -2036,13 +2005,13 @@ class CallTrace PROTOBUF_FINAL :
   inline void SharedCtor();
   inline void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(CallTrace* other);
+  void InternalSwap(FullTrace* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "executor.v1.CallTrace";
+    return "executor.v1.FullTrace";
   }
   protected:
-  explicit CallTrace(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  explicit FullTrace(::PROTOBUF_NAMESPACE_ID::Arena* arena);
   private:
   static void ArenaDtor(void* object);
   inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
@@ -2101,7 +2070,7 @@ class CallTrace PROTOBUF_FINAL :
       ::executor::v1::TransactionContext* context);
   ::executor::v1::TransactionContext* unsafe_arena_release_context();
 
-  // @@protoc_insertion_point(class_scope:executor.v1.CallTrace)
+  // @@protoc_insertion_point(class_scope:executor.v1.FullTrace)
  private:
   class _Internal;
 
@@ -2517,6 +2486,40 @@ class TransactionContext PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class TransactionStep_StorageEntry_DoNotUse : public ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<TransactionStep_StorageEntry_DoNotUse, 
+    std::string, std::string,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    0 > {
+public:
+  typedef ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<TransactionStep_StorageEntry_DoNotUse, 
+    std::string, std::string,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+    0 > SuperType;
+  TransactionStep_StorageEntry_DoNotUse();
+  TransactionStep_StorageEntry_DoNotUse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  void MergeFrom(const TransactionStep_StorageEntry_DoNotUse& other);
+  static const TransactionStep_StorageEntry_DoNotUse* internal_default_instance() { return reinterpret_cast<const TransactionStep_StorageEntry_DoNotUse*>(&_TransactionStep_StorageEntry_DoNotUse_default_instance_); }
+  static bool ValidateKey(std::string* s) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "executor.v1.TransactionStep.StorageEntry.key");
+ }
+  static bool ValidateValue(std::string* s) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "executor.v1.TransactionStep.StorageEntry.value");
+ }
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& other) final;
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
+    return ::descriptor_table_executor_2eproto.file_level_metadata[10];
+  }
+
+  public:
+};
+
+// -------------------------------------------------------------------
+
 class TransactionStep PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:executor.v1.TransactionStep) */ {
  public:
@@ -2559,7 +2562,7 @@ class TransactionStep PROTOBUF_FINAL :
                &_TransactionStep_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    10;
+    11;
 
   friend void swap(TransactionStep& a, TransactionStep& b) {
     a.Swap(&b);
@@ -2627,10 +2630,12 @@ class TransactionStep PROTOBUF_FINAL :
 
   // nested types ----------------------------------------------------
 
+
   // accessors -------------------------------------------------------
 
   enum : int {
     kStackFieldNumber = 8,
+    kStorageFieldNumber = 15,
     kStateRootFieldNumber = 1,
     kMemoryFieldNumber = 9,
     kReturnDataFieldNumber = 12,
@@ -2668,6 +2673,23 @@ class TransactionStep PROTOBUF_FINAL :
   const std::string& _internal_stack(int index) const;
   std::string* _internal_add_stack();
   public:
+
+  // map<string, string> storage = 15;
+  int storage_size() const;
+  private:
+  int _internal_storage_size() const;
+  public:
+  void clear_storage();
+  private:
+  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
+      _internal_storage() const;
+  ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
+      _internal_mutable_storage();
+  public:
+  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
+      storage() const;
+  ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
+      mutable_storage();
 
   // bytes state_root = 1;
   void clear_state_root();
@@ -2851,6 +2873,12 @@ class TransactionStep PROTOBUF_FINAL :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> stack_;
+  ::PROTOBUF_NAMESPACE_ID::internal::MapField<
+      TransactionStep_StorageEntry_DoNotUse,
+      std::string, std::string,
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+      0 > storage_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr state_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr memory_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr return_data_;
@@ -2911,7 +2939,7 @@ class Contract PROTOBUF_FINAL :
                &_Contract_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    11;
+    12;
 
   friend void swap(Contract& a, Contract& b) {
     a.Swap(&b);
@@ -3183,7 +3211,7 @@ class ProcessTransactionResponse PROTOBUF_FINAL :
                &_ProcessTransactionResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    12;
+    13;
 
   friend void swap(ProcessTransactionResponse& a, ProcessTransactionResponse& b) {
     a.Swap(&b);
@@ -3255,14 +3283,13 @@ class ProcessTransactionResponse PROTOBUF_FINAL :
 
   enum : int {
     kLogsFieldNumber = 11,
-    kExecutionTraceFieldNumber = 13,
     kTxHashFieldNumber = 1,
     kRlpTxFieldNumber = 2,
     kReturnValueFieldNumber = 4,
     kCreateAddressFieldNumber = 9,
     kStateRootFieldNumber = 10,
     kEffectiveGasPriceFieldNumber = 15,
-    kCallTraceFieldNumber = 14,
+    kFullTraceFieldNumber = 14,
     kGasLeftFieldNumber = 5,
     kTypeFieldNumber = 3,
     kErrorFieldNumber = 8,
@@ -3289,24 +3316,6 @@ class ProcessTransactionResponse PROTOBUF_FINAL :
   ::executor::v1::Log* add_logs();
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::executor::v1::Log >&
       logs() const;
-
-  // repeated .executor.v1.ExecutionTraceStep execution_trace = 13;
-  int execution_trace_size() const;
-  private:
-  int _internal_execution_trace_size() const;
-  public:
-  void clear_execution_trace();
-  ::executor::v1::ExecutionTraceStep* mutable_execution_trace(int index);
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::executor::v1::ExecutionTraceStep >*
-      mutable_execution_trace();
-  private:
-  const ::executor::v1::ExecutionTraceStep& _internal_execution_trace(int index) const;
-  ::executor::v1::ExecutionTraceStep* _internal_add_execution_trace();
-  public:
-  const ::executor::v1::ExecutionTraceStep& execution_trace(int index) const;
-  ::executor::v1::ExecutionTraceStep* add_execution_trace();
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::executor::v1::ExecutionTraceStep >&
-      execution_trace() const;
 
   // bytes tx_hash = 1;
   void clear_tx_hash();
@@ -3458,23 +3467,23 @@ class ProcessTransactionResponse PROTOBUF_FINAL :
   std::string* _internal_mutable_effective_gas_price();
   public:
 
-  // .executor.v1.CallTrace call_trace = 14;
-  bool has_call_trace() const;
+  // .executor.v1.FullTrace full_trace = 14;
+  bool has_full_trace() const;
   private:
-  bool _internal_has_call_trace() const;
+  bool _internal_has_full_trace() const;
   public:
-  void clear_call_trace();
-  const ::executor::v1::CallTrace& call_trace() const;
-  ::executor::v1::CallTrace* release_call_trace();
-  ::executor::v1::CallTrace* mutable_call_trace();
-  void set_allocated_call_trace(::executor::v1::CallTrace* call_trace);
+  void clear_full_trace();
+  const ::executor::v1::FullTrace& full_trace() const;
+  ::executor::v1::FullTrace* release_full_trace();
+  ::executor::v1::FullTrace* mutable_full_trace();
+  void set_allocated_full_trace(::executor::v1::FullTrace* full_trace);
   private:
-  const ::executor::v1::CallTrace& _internal_call_trace() const;
-  ::executor::v1::CallTrace* _internal_mutable_call_trace();
+  const ::executor::v1::FullTrace& _internal_full_trace() const;
+  ::executor::v1::FullTrace* _internal_mutable_full_trace();
   public:
-  void unsafe_arena_set_allocated_call_trace(
-      ::executor::v1::CallTrace* call_trace);
-  ::executor::v1::CallTrace* unsafe_arena_release_call_trace();
+  void unsafe_arena_set_allocated_full_trace(
+      ::executor::v1::FullTrace* full_trace);
+  ::executor::v1::FullTrace* unsafe_arena_release_full_trace();
 
   // uint64 gas_left = 5;
   void clear_gas_left();
@@ -3556,14 +3565,13 @@ class ProcessTransactionResponse PROTOBUF_FINAL :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::executor::v1::Log > logs_;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::executor::v1::ExecutionTraceStep > execution_trace_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr tx_hash_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr rlp_tx_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr return_value_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr create_address_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr state_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr effective_gas_price_;
-  ::executor::v1::CallTrace* call_trace_;
+  ::executor::v1::FullTrace* full_trace_;
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_left_;
   ::PROTOBUF_NAMESPACE_ID::uint32 type_;
   int error_;
@@ -3619,7 +3627,7 @@ class Log PROTOBUF_FINAL :
                &_Log_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    13;
+    14;
 
   friend void swap(Log& a, Log& b) {
     a.Swap(&b);
@@ -3865,386 +3873,6 @@ class Log PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint64 batch_number_;
   ::PROTOBUF_NAMESPACE_ID::uint32 tx_index_;
   ::PROTOBUF_NAMESPACE_ID::uint32 index_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  friend struct ::TableStruct_executor_2eproto;
-};
-// -------------------------------------------------------------------
-
-class ExecutionTraceStep_StorageEntry_DoNotUse : public ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<ExecutionTraceStep_StorageEntry_DoNotUse, 
-    std::string, std::string,
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-    0 > {
-public:
-  typedef ::PROTOBUF_NAMESPACE_ID::internal::MapEntry<ExecutionTraceStep_StorageEntry_DoNotUse, 
-    std::string, std::string,
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-    0 > SuperType;
-  ExecutionTraceStep_StorageEntry_DoNotUse();
-  ExecutionTraceStep_StorageEntry_DoNotUse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  void MergeFrom(const ExecutionTraceStep_StorageEntry_DoNotUse& other);
-  static const ExecutionTraceStep_StorageEntry_DoNotUse* internal_default_instance() { return reinterpret_cast<const ExecutionTraceStep_StorageEntry_DoNotUse*>(&_ExecutionTraceStep_StorageEntry_DoNotUse_default_instance_); }
-  static bool ValidateKey(std::string* s) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "executor.v1.ExecutionTraceStep.StorageEntry.key");
- }
-  static bool ValidateValue(std::string* s) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(s->data(), static_cast<int>(s->size()), ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::PARSE, "executor.v1.ExecutionTraceStep.StorageEntry.value");
- }
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& other) final;
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
-    return ::descriptor_table_executor_2eproto.file_level_metadata[14];
-  }
-
-  public:
-};
-
-// -------------------------------------------------------------------
-
-class ExecutionTraceStep PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:executor.v1.ExecutionTraceStep) */ {
- public:
-  inline ExecutionTraceStep() : ExecutionTraceStep(nullptr) {};
-  virtual ~ExecutionTraceStep();
-
-  ExecutionTraceStep(const ExecutionTraceStep& from);
-  ExecutionTraceStep(ExecutionTraceStep&& from) noexcept
-    : ExecutionTraceStep() {
-    *this = ::std::move(from);
-  }
-
-  inline ExecutionTraceStep& operator=(const ExecutionTraceStep& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline ExecutionTraceStep& operator=(ExecutionTraceStep&& from) noexcept {
-    if (GetArena() == from.GetArena()) {
-      if (this != &from) InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return GetMetadataStatic().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return GetMetadataStatic().reflection;
-  }
-  static const ExecutionTraceStep& default_instance();
-
-  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
-  static inline const ExecutionTraceStep* internal_default_instance() {
-    return reinterpret_cast<const ExecutionTraceStep*>(
-               &_ExecutionTraceStep_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    15;
-
-  friend void swap(ExecutionTraceStep& a, ExecutionTraceStep& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(ExecutionTraceStep* other) {
-    if (other == this) return;
-    if (GetArena() == other->GetArena()) {
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(ExecutionTraceStep* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  inline ExecutionTraceStep* New() const final {
-    return CreateMaybeMessage<ExecutionTraceStep>(nullptr);
-  }
-
-  ExecutionTraceStep* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<ExecutionTraceStep>(arena);
-  }
-  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const ExecutionTraceStep& from);
-  void MergeFrom(const ExecutionTraceStep& from);
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
-      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _cached_size_.Get(); }
-
-  private:
-  inline void SharedCtor();
-  inline void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(ExecutionTraceStep* other);
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "executor.v1.ExecutionTraceStep";
-  }
-  protected:
-  explicit ExecutionTraceStep(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  private:
-  static void ArenaDtor(void* object);
-  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  public:
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
-    return ::descriptor_table_executor_2eproto.file_level_metadata[kIndexInFileMessages];
-  }
-
-  public:
-
-  // nested types ----------------------------------------------------
-
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kStackFieldNumber = 8,
-    kStorageFieldNumber = 10,
-    kOpFieldNumber = 2,
-    kMemoryFieldNumber = 5,
-    kReturnDataFieldNumber = 9,
-    kPcFieldNumber = 1,
-    kRemainingGasFieldNumber = 3,
-    kGasCostFieldNumber = 4,
-    kMemorySizeFieldNumber = 6,
-    kMemoryOffsetFieldNumber = 7,
-    kGasRefundFieldNumber = 12,
-    kDepthFieldNumber = 11,
-    kErrorFieldNumber = 13,
-  };
-  // repeated string stack = 8;
-  int stack_size() const;
-  private:
-  int _internal_stack_size() const;
-  public:
-  void clear_stack();
-  const std::string& stack(int index) const;
-  std::string* mutable_stack(int index);
-  void set_stack(int index, const std::string& value);
-  void set_stack(int index, std::string&& value);
-  void set_stack(int index, const char* value);
-  void set_stack(int index, const char* value, size_t size);
-  std::string* add_stack();
-  void add_stack(const std::string& value);
-  void add_stack(std::string&& value);
-  void add_stack(const char* value);
-  void add_stack(const char* value, size_t size);
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>& stack() const;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>* mutable_stack();
-  private:
-  const std::string& _internal_stack(int index) const;
-  std::string* _internal_add_stack();
-  public:
-
-  // map<string, string> storage = 10;
-  int storage_size() const;
-  private:
-  int _internal_storage_size() const;
-  public:
-  void clear_storage();
-  private:
-  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
-      _internal_storage() const;
-  ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
-      _internal_mutable_storage();
-  public:
-  const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
-      storage() const;
-  ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
-      mutable_storage();
-
-  // string op = 2;
-  void clear_op();
-  const std::string& op() const;
-  void set_op(const std::string& value);
-  void set_op(std::string&& value);
-  void set_op(const char* value);
-  void set_op(const char* value, size_t size);
-  std::string* mutable_op();
-  std::string* release_op();
-  void set_allocated_op(std::string* op);
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  std::string* unsafe_arena_release_op();
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  void unsafe_arena_set_allocated_op(
-      std::string* op);
-  private:
-  const std::string& _internal_op() const;
-  void _internal_set_op(const std::string& value);
-  std::string* _internal_mutable_op();
-  public:
-
-  // bytes memory = 5;
-  void clear_memory();
-  const std::string& memory() const;
-  void set_memory(const std::string& value);
-  void set_memory(std::string&& value);
-  void set_memory(const char* value);
-  void set_memory(const void* value, size_t size);
-  std::string* mutable_memory();
-  std::string* release_memory();
-  void set_allocated_memory(std::string* memory);
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  std::string* unsafe_arena_release_memory();
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  void unsafe_arena_set_allocated_memory(
-      std::string* memory);
-  private:
-  const std::string& _internal_memory() const;
-  void _internal_set_memory(const std::string& value);
-  std::string* _internal_mutable_memory();
-  public:
-
-  // bytes return_data = 9;
-  void clear_return_data();
-  const std::string& return_data() const;
-  void set_return_data(const std::string& value);
-  void set_return_data(std::string&& value);
-  void set_return_data(const char* value);
-  void set_return_data(const void* value, size_t size);
-  std::string* mutable_return_data();
-  std::string* release_return_data();
-  void set_allocated_return_data(std::string* return_data);
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  std::string* unsafe_arena_release_return_data();
-  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
-  "    string fields are deprecated and will be removed in a"
-  "    future release.")
-  void unsafe_arena_set_allocated_return_data(
-      std::string* return_data);
-  private:
-  const std::string& _internal_return_data() const;
-  void _internal_set_return_data(const std::string& value);
-  std::string* _internal_mutable_return_data();
-  public:
-
-  // uint64 pc = 1;
-  void clear_pc();
-  ::PROTOBUF_NAMESPACE_ID::uint64 pc() const;
-  void set_pc(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_pc() const;
-  void _internal_set_pc(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  public:
-
-  // uint64 remaining_gas = 3;
-  void clear_remaining_gas();
-  ::PROTOBUF_NAMESPACE_ID::uint64 remaining_gas() const;
-  void set_remaining_gas(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_remaining_gas() const;
-  void _internal_set_remaining_gas(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  public:
-
-  // uint64 gas_cost = 4;
-  void clear_gas_cost();
-  ::PROTOBUF_NAMESPACE_ID::uint64 gas_cost() const;
-  void set_gas_cost(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_gas_cost() const;
-  void _internal_set_gas_cost(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  public:
-
-  // uint32 memory_size = 6;
-  void clear_memory_size();
-  ::PROTOBUF_NAMESPACE_ID::uint32 memory_size() const;
-  void set_memory_size(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_memory_size() const;
-  void _internal_set_memory_size(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  public:
-
-  // uint32 memory_offset = 7;
-  void clear_memory_offset();
-  ::PROTOBUF_NAMESPACE_ID::uint32 memory_offset() const;
-  void set_memory_offset(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_memory_offset() const;
-  void _internal_set_memory_offset(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  public:
-
-  // uint64 gas_refund = 12;
-  void clear_gas_refund();
-  ::PROTOBUF_NAMESPACE_ID::uint64 gas_refund() const;
-  void set_gas_refund(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_gas_refund() const;
-  void _internal_set_gas_refund(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  public:
-
-  // uint32 depth = 11;
-  void clear_depth();
-  ::PROTOBUF_NAMESPACE_ID::uint32 depth() const;
-  void set_depth(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_depth() const;
-  void _internal_set_depth(::PROTOBUF_NAMESPACE_ID::uint32 value);
-  public:
-
-  // .executor.v1.RomError error = 13;
-  void clear_error();
-  ::executor::v1::RomError error() const;
-  void set_error(::executor::v1::RomError value);
-  private:
-  ::executor::v1::RomError _internal_error() const;
-  void _internal_set_error(::executor::v1::RomError value);
-  public:
-
-  // @@protoc_insertion_point(class_scope:executor.v1.ExecutionTraceStep)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string> stack_;
-  ::PROTOBUF_NAMESPACE_ID::internal::MapField<
-      ExecutionTraceStep_StorageEntry_DoNotUse,
-      std::string, std::string,
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-      0 > storage_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr op_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr memory_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr return_data_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 pc_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 remaining_gas_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 gas_cost_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 memory_size_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 memory_offset_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 gas_refund_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 depth_;
-  int error_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
 };
@@ -6204,166 +5832,85 @@ inline void TraceConfig::set_enable_return_data(::PROTOBUF_NAMESPACE_ID::uint32 
   // @@protoc_insertion_point(field_set:executor.v1.TraceConfig.enable_return_data)
 }
 
-// bytes tx_hash_to_generate_execute_trace = 5;
-inline void TraceConfig::clear_tx_hash_to_generate_execute_trace() {
-  tx_hash_to_generate_execute_trace_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+// bytes tx_hash_to_generate_full_trace = 5;
+inline void TraceConfig::clear_tx_hash_to_generate_full_trace() {
+  tx_hash_to_generate_full_trace_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline const std::string& TraceConfig::tx_hash_to_generate_execute_trace() const {
-  // @@protoc_insertion_point(field_get:executor.v1.TraceConfig.tx_hash_to_generate_execute_trace)
-  return _internal_tx_hash_to_generate_execute_trace();
+inline const std::string& TraceConfig::tx_hash_to_generate_full_trace() const {
+  // @@protoc_insertion_point(field_get:executor.v1.TraceConfig.tx_hash_to_generate_full_trace)
+  return _internal_tx_hash_to_generate_full_trace();
 }
-inline void TraceConfig::set_tx_hash_to_generate_execute_trace(const std::string& value) {
-  _internal_set_tx_hash_to_generate_execute_trace(value);
-  // @@protoc_insertion_point(field_set:executor.v1.TraceConfig.tx_hash_to_generate_execute_trace)
+inline void TraceConfig::set_tx_hash_to_generate_full_trace(const std::string& value) {
+  _internal_set_tx_hash_to_generate_full_trace(value);
+  // @@protoc_insertion_point(field_set:executor.v1.TraceConfig.tx_hash_to_generate_full_trace)
 }
-inline std::string* TraceConfig::mutable_tx_hash_to_generate_execute_trace() {
-  // @@protoc_insertion_point(field_mutable:executor.v1.TraceConfig.tx_hash_to_generate_execute_trace)
-  return _internal_mutable_tx_hash_to_generate_execute_trace();
+inline std::string* TraceConfig::mutable_tx_hash_to_generate_full_trace() {
+  // @@protoc_insertion_point(field_mutable:executor.v1.TraceConfig.tx_hash_to_generate_full_trace)
+  return _internal_mutable_tx_hash_to_generate_full_trace();
 }
-inline const std::string& TraceConfig::_internal_tx_hash_to_generate_execute_trace() const {
-  return tx_hash_to_generate_execute_trace_.Get();
+inline const std::string& TraceConfig::_internal_tx_hash_to_generate_full_trace() const {
+  return tx_hash_to_generate_full_trace_.Get();
 }
-inline void TraceConfig::_internal_set_tx_hash_to_generate_execute_trace(const std::string& value) {
+inline void TraceConfig::_internal_set_tx_hash_to_generate_full_trace(const std::string& value) {
   
-  tx_hash_to_generate_execute_trace_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+  tx_hash_to_generate_full_trace_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
 }
-inline void TraceConfig::set_tx_hash_to_generate_execute_trace(std::string&& value) {
+inline void TraceConfig::set_tx_hash_to_generate_full_trace(std::string&& value) {
   
-  tx_hash_to_generate_execute_trace_.Set(
+  tx_hash_to_generate_full_trace_.Set(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:executor.v1.TraceConfig.tx_hash_to_generate_execute_trace)
+  // @@protoc_insertion_point(field_set_rvalue:executor.v1.TraceConfig.tx_hash_to_generate_full_trace)
 }
-inline void TraceConfig::set_tx_hash_to_generate_execute_trace(const char* value) {
+inline void TraceConfig::set_tx_hash_to_generate_full_trace(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   
-  tx_hash_to_generate_execute_trace_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+  tx_hash_to_generate_full_trace_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
               GetArena());
-  // @@protoc_insertion_point(field_set_char:executor.v1.TraceConfig.tx_hash_to_generate_execute_trace)
+  // @@protoc_insertion_point(field_set_char:executor.v1.TraceConfig.tx_hash_to_generate_full_trace)
 }
-inline void TraceConfig::set_tx_hash_to_generate_execute_trace(const void* value,
+inline void TraceConfig::set_tx_hash_to_generate_full_trace(const void* value,
     size_t size) {
   
-  tx_hash_to_generate_execute_trace_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+  tx_hash_to_generate_full_trace_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:executor.v1.TraceConfig.tx_hash_to_generate_execute_trace)
+  // @@protoc_insertion_point(field_set_pointer:executor.v1.TraceConfig.tx_hash_to_generate_full_trace)
 }
-inline std::string* TraceConfig::_internal_mutable_tx_hash_to_generate_execute_trace() {
+inline std::string* TraceConfig::_internal_mutable_tx_hash_to_generate_full_trace() {
   
-  return tx_hash_to_generate_execute_trace_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  return tx_hash_to_generate_full_trace_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline std::string* TraceConfig::release_tx_hash_to_generate_execute_trace() {
-  // @@protoc_insertion_point(field_release:executor.v1.TraceConfig.tx_hash_to_generate_execute_trace)
-  return tx_hash_to_generate_execute_trace_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+inline std::string* TraceConfig::release_tx_hash_to_generate_full_trace() {
+  // @@protoc_insertion_point(field_release:executor.v1.TraceConfig.tx_hash_to_generate_full_trace)
+  return tx_hash_to_generate_full_trace_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void TraceConfig::set_allocated_tx_hash_to_generate_execute_trace(std::string* tx_hash_to_generate_execute_trace) {
-  if (tx_hash_to_generate_execute_trace != nullptr) {
+inline void TraceConfig::set_allocated_tx_hash_to_generate_full_trace(std::string* tx_hash_to_generate_full_trace) {
+  if (tx_hash_to_generate_full_trace != nullptr) {
     
   } else {
     
   }
-  tx_hash_to_generate_execute_trace_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), tx_hash_to_generate_execute_trace,
+  tx_hash_to_generate_full_trace_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), tx_hash_to_generate_full_trace,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:executor.v1.TraceConfig.tx_hash_to_generate_execute_trace)
+  // @@protoc_insertion_point(field_set_allocated:executor.v1.TraceConfig.tx_hash_to_generate_full_trace)
 }
-inline std::string* TraceConfig::unsafe_arena_release_tx_hash_to_generate_execute_trace() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.TraceConfig.tx_hash_to_generate_execute_trace)
+inline std::string* TraceConfig::unsafe_arena_release_tx_hash_to_generate_full_trace() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.TraceConfig.tx_hash_to_generate_full_trace)
   GOOGLE_DCHECK(GetArena() != nullptr);
   
-  return tx_hash_to_generate_execute_trace_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+  return tx_hash_to_generate_full_trace_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       GetArena());
 }
-inline void TraceConfig::unsafe_arena_set_allocated_tx_hash_to_generate_execute_trace(
-    std::string* tx_hash_to_generate_execute_trace) {
+inline void TraceConfig::unsafe_arena_set_allocated_tx_hash_to_generate_full_trace(
+    std::string* tx_hash_to_generate_full_trace) {
   GOOGLE_DCHECK(GetArena() != nullptr);
-  if (tx_hash_to_generate_execute_trace != nullptr) {
+  if (tx_hash_to_generate_full_trace != nullptr) {
     
   } else {
     
   }
-  tx_hash_to_generate_execute_trace_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      tx_hash_to_generate_execute_trace, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.TraceConfig.tx_hash_to_generate_execute_trace)
-}
-
-// bytes tx_hash_to_generate_call_trace = 6;
-inline void TraceConfig::clear_tx_hash_to_generate_call_trace() {
-  tx_hash_to_generate_call_trace_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline const std::string& TraceConfig::tx_hash_to_generate_call_trace() const {
-  // @@protoc_insertion_point(field_get:executor.v1.TraceConfig.tx_hash_to_generate_call_trace)
-  return _internal_tx_hash_to_generate_call_trace();
-}
-inline void TraceConfig::set_tx_hash_to_generate_call_trace(const std::string& value) {
-  _internal_set_tx_hash_to_generate_call_trace(value);
-  // @@protoc_insertion_point(field_set:executor.v1.TraceConfig.tx_hash_to_generate_call_trace)
-}
-inline std::string* TraceConfig::mutable_tx_hash_to_generate_call_trace() {
-  // @@protoc_insertion_point(field_mutable:executor.v1.TraceConfig.tx_hash_to_generate_call_trace)
-  return _internal_mutable_tx_hash_to_generate_call_trace();
-}
-inline const std::string& TraceConfig::_internal_tx_hash_to_generate_call_trace() const {
-  return tx_hash_to_generate_call_trace_.Get();
-}
-inline void TraceConfig::_internal_set_tx_hash_to_generate_call_trace(const std::string& value) {
-  
-  tx_hash_to_generate_call_trace_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
-}
-inline void TraceConfig::set_tx_hash_to_generate_call_trace(std::string&& value) {
-  
-  tx_hash_to_generate_call_trace_.Set(
-    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:executor.v1.TraceConfig.tx_hash_to_generate_call_trace)
-}
-inline void TraceConfig::set_tx_hash_to_generate_call_trace(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  tx_hash_to_generate_call_trace_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
-              GetArena());
-  // @@protoc_insertion_point(field_set_char:executor.v1.TraceConfig.tx_hash_to_generate_call_trace)
-}
-inline void TraceConfig::set_tx_hash_to_generate_call_trace(const void* value,
-    size_t size) {
-  
-  tx_hash_to_generate_call_trace_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:executor.v1.TraceConfig.tx_hash_to_generate_call_trace)
-}
-inline std::string* TraceConfig::_internal_mutable_tx_hash_to_generate_call_trace() {
-  
-  return tx_hash_to_generate_call_trace_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline std::string* TraceConfig::release_tx_hash_to_generate_call_trace() {
-  // @@protoc_insertion_point(field_release:executor.v1.TraceConfig.tx_hash_to_generate_call_trace)
-  return tx_hash_to_generate_call_trace_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void TraceConfig::set_allocated_tx_hash_to_generate_call_trace(std::string* tx_hash_to_generate_call_trace) {
-  if (tx_hash_to_generate_call_trace != nullptr) {
-    
-  } else {
-    
-  }
-  tx_hash_to_generate_call_trace_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), tx_hash_to_generate_call_trace,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:executor.v1.TraceConfig.tx_hash_to_generate_call_trace)
-}
-inline std::string* TraceConfig::unsafe_arena_release_tx_hash_to_generate_call_trace() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.TraceConfig.tx_hash_to_generate_call_trace)
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  
-  return tx_hash_to_generate_call_trace_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      GetArena());
-}
-inline void TraceConfig::unsafe_arena_set_allocated_tx_hash_to_generate_call_trace(
-    std::string* tx_hash_to_generate_call_trace) {
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  if (tx_hash_to_generate_call_trace != nullptr) {
-    
-  } else {
-    
-  }
-  tx_hash_to_generate_call_trace_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      tx_hash_to_generate_call_trace, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.TraceConfig.tx_hash_to_generate_call_trace)
+  tx_hash_to_generate_full_trace_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      tx_hash_to_generate_full_trace, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.TraceConfig.tx_hash_to_generate_full_trace)
 }
 
 // -------------------------------------------------------------------
@@ -6534,31 +6081,31 @@ inline void InfoReadWrite::unsafe_arena_set_allocated_balance(
 
 // -------------------------------------------------------------------
 
-// CallTrace
+// FullTrace
 
 // .executor.v1.TransactionContext context = 1;
-inline bool CallTrace::_internal_has_context() const {
+inline bool FullTrace::_internal_has_context() const {
   return this != internal_default_instance() && context_ != nullptr;
 }
-inline bool CallTrace::has_context() const {
+inline bool FullTrace::has_context() const {
   return _internal_has_context();
 }
-inline void CallTrace::clear_context() {
+inline void FullTrace::clear_context() {
   if (GetArena() == nullptr && context_ != nullptr) {
     delete context_;
   }
   context_ = nullptr;
 }
-inline const ::executor::v1::TransactionContext& CallTrace::_internal_context() const {
+inline const ::executor::v1::TransactionContext& FullTrace::_internal_context() const {
   const ::executor::v1::TransactionContext* p = context_;
   return p != nullptr ? *p : *reinterpret_cast<const ::executor::v1::TransactionContext*>(
       &::executor::v1::_TransactionContext_default_instance_);
 }
-inline const ::executor::v1::TransactionContext& CallTrace::context() const {
-  // @@protoc_insertion_point(field_get:executor.v1.CallTrace.context)
+inline const ::executor::v1::TransactionContext& FullTrace::context() const {
+  // @@protoc_insertion_point(field_get:executor.v1.FullTrace.context)
   return _internal_context();
 }
-inline void CallTrace::unsafe_arena_set_allocated_context(
+inline void FullTrace::unsafe_arena_set_allocated_context(
     ::executor::v1::TransactionContext* context) {
   if (GetArena() == nullptr) {
     delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(context_);
@@ -6569,23 +6116,23 @@ inline void CallTrace::unsafe_arena_set_allocated_context(
   } else {
     
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.CallTrace.context)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.FullTrace.context)
 }
-inline ::executor::v1::TransactionContext* CallTrace::release_context() {
+inline ::executor::v1::TransactionContext* FullTrace::release_context() {
   auto temp = unsafe_arena_release_context();
   if (GetArena() != nullptr) {
     temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
   }
   return temp;
 }
-inline ::executor::v1::TransactionContext* CallTrace::unsafe_arena_release_context() {
-  // @@protoc_insertion_point(field_release:executor.v1.CallTrace.context)
+inline ::executor::v1::TransactionContext* FullTrace::unsafe_arena_release_context() {
+  // @@protoc_insertion_point(field_release:executor.v1.FullTrace.context)
   
   ::executor::v1::TransactionContext* temp = context_;
   context_ = nullptr;
   return temp;
 }
-inline ::executor::v1::TransactionContext* CallTrace::_internal_mutable_context() {
+inline ::executor::v1::TransactionContext* FullTrace::_internal_mutable_context() {
   
   if (context_ == nullptr) {
     auto* p = CreateMaybeMessage<::executor::v1::TransactionContext>(GetArena());
@@ -6593,11 +6140,11 @@ inline ::executor::v1::TransactionContext* CallTrace::_internal_mutable_context(
   }
   return context_;
 }
-inline ::executor::v1::TransactionContext* CallTrace::mutable_context() {
-  // @@protoc_insertion_point(field_mutable:executor.v1.CallTrace.context)
+inline ::executor::v1::TransactionContext* FullTrace::mutable_context() {
+  // @@protoc_insertion_point(field_mutable:executor.v1.FullTrace.context)
   return _internal_mutable_context();
 }
-inline void CallTrace::set_allocated_context(::executor::v1::TransactionContext* context) {
+inline void FullTrace::set_allocated_context(::executor::v1::TransactionContext* context) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
   if (message_arena == nullptr) {
     delete context_;
@@ -6614,45 +6161,45 @@ inline void CallTrace::set_allocated_context(::executor::v1::TransactionContext*
     
   }
   context_ = context;
-  // @@protoc_insertion_point(field_set_allocated:executor.v1.CallTrace.context)
+  // @@protoc_insertion_point(field_set_allocated:executor.v1.FullTrace.context)
 }
 
 // repeated .executor.v1.TransactionStep steps = 2;
-inline int CallTrace::_internal_steps_size() const {
+inline int FullTrace::_internal_steps_size() const {
   return steps_.size();
 }
-inline int CallTrace::steps_size() const {
+inline int FullTrace::steps_size() const {
   return _internal_steps_size();
 }
-inline void CallTrace::clear_steps() {
+inline void FullTrace::clear_steps() {
   steps_.Clear();
 }
-inline ::executor::v1::TransactionStep* CallTrace::mutable_steps(int index) {
-  // @@protoc_insertion_point(field_mutable:executor.v1.CallTrace.steps)
+inline ::executor::v1::TransactionStep* FullTrace::mutable_steps(int index) {
+  // @@protoc_insertion_point(field_mutable:executor.v1.FullTrace.steps)
   return steps_.Mutable(index);
 }
 inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::executor::v1::TransactionStep >*
-CallTrace::mutable_steps() {
-  // @@protoc_insertion_point(field_mutable_list:executor.v1.CallTrace.steps)
+FullTrace::mutable_steps() {
+  // @@protoc_insertion_point(field_mutable_list:executor.v1.FullTrace.steps)
   return &steps_;
 }
-inline const ::executor::v1::TransactionStep& CallTrace::_internal_steps(int index) const {
+inline const ::executor::v1::TransactionStep& FullTrace::_internal_steps(int index) const {
   return steps_.Get(index);
 }
-inline const ::executor::v1::TransactionStep& CallTrace::steps(int index) const {
-  // @@protoc_insertion_point(field_get:executor.v1.CallTrace.steps)
+inline const ::executor::v1::TransactionStep& FullTrace::steps(int index) const {
+  // @@protoc_insertion_point(field_get:executor.v1.FullTrace.steps)
   return _internal_steps(index);
 }
-inline ::executor::v1::TransactionStep* CallTrace::_internal_add_steps() {
+inline ::executor::v1::TransactionStep* FullTrace::_internal_add_steps() {
   return steps_.Add();
 }
-inline ::executor::v1::TransactionStep* CallTrace::add_steps() {
-  // @@protoc_insertion_point(field_add:executor.v1.CallTrace.steps)
+inline ::executor::v1::TransactionStep* FullTrace::add_steps() {
+  // @@protoc_insertion_point(field_add:executor.v1.FullTrace.steps)
   return _internal_add_steps();
 }
 inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::executor::v1::TransactionStep >&
-CallTrace::steps() const {
-  // @@protoc_insertion_point(field_list:executor.v1.CallTrace.steps)
+FullTrace::steps() const {
+  // @@protoc_insertion_point(field_list:executor.v1.FullTrace.steps)
   return steps_;
 }
 
@@ -7451,6 +6998,8 @@ inline void TransactionContext::unsafe_arena_set_allocated_old_state_root(
 
 // -------------------------------------------------------------------
 
+// -------------------------------------------------------------------
+
 // TransactionStep
 
 // bytes state_root = 1;
@@ -8029,6 +7578,35 @@ inline void TransactionStep::_internal_set_error(::executor::v1::RomError value)
 inline void TransactionStep::set_error(::executor::v1::RomError value) {
   _internal_set_error(value);
   // @@protoc_insertion_point(field_set:executor.v1.TransactionStep.error)
+}
+
+// map<string, string> storage = 15;
+inline int TransactionStep::_internal_storage_size() const {
+  return storage_.size();
+}
+inline int TransactionStep::storage_size() const {
+  return _internal_storage_size();
+}
+inline void TransactionStep::clear_storage() {
+  storage_.Clear();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
+TransactionStep::_internal_storage() const {
+  return storage_.GetMap();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
+TransactionStep::storage() const {
+  // @@protoc_insertion_point(field_map:executor.v1.TransactionStep.storage)
+  return _internal_storage();
+}
+inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
+TransactionStep::_internal_mutable_storage() {
+  return storage_.MutableMap();
+}
+inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
+TransactionStep::mutable_storage() {
+  // @@protoc_insertion_point(field_mutable_map:executor.v1.TransactionStep.storage)
+  return _internal_mutable_storage();
 }
 
 // -------------------------------------------------------------------
@@ -9008,124 +8586,85 @@ ProcessTransactionResponse::logs() const {
   return logs_;
 }
 
-// repeated .executor.v1.ExecutionTraceStep execution_trace = 13;
-inline int ProcessTransactionResponse::_internal_execution_trace_size() const {
-  return execution_trace_.size();
+// .executor.v1.FullTrace full_trace = 14;
+inline bool ProcessTransactionResponse::_internal_has_full_trace() const {
+  return this != internal_default_instance() && full_trace_ != nullptr;
 }
-inline int ProcessTransactionResponse::execution_trace_size() const {
-  return _internal_execution_trace_size();
+inline bool ProcessTransactionResponse::has_full_trace() const {
+  return _internal_has_full_trace();
 }
-inline void ProcessTransactionResponse::clear_execution_trace() {
-  execution_trace_.Clear();
-}
-inline ::executor::v1::ExecutionTraceStep* ProcessTransactionResponse::mutable_execution_trace(int index) {
-  // @@protoc_insertion_point(field_mutable:executor.v1.ProcessTransactionResponse.execution_trace)
-  return execution_trace_.Mutable(index);
-}
-inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::executor::v1::ExecutionTraceStep >*
-ProcessTransactionResponse::mutable_execution_trace() {
-  // @@protoc_insertion_point(field_mutable_list:executor.v1.ProcessTransactionResponse.execution_trace)
-  return &execution_trace_;
-}
-inline const ::executor::v1::ExecutionTraceStep& ProcessTransactionResponse::_internal_execution_trace(int index) const {
-  return execution_trace_.Get(index);
-}
-inline const ::executor::v1::ExecutionTraceStep& ProcessTransactionResponse::execution_trace(int index) const {
-  // @@protoc_insertion_point(field_get:executor.v1.ProcessTransactionResponse.execution_trace)
-  return _internal_execution_trace(index);
-}
-inline ::executor::v1::ExecutionTraceStep* ProcessTransactionResponse::_internal_add_execution_trace() {
-  return execution_trace_.Add();
-}
-inline ::executor::v1::ExecutionTraceStep* ProcessTransactionResponse::add_execution_trace() {
-  // @@protoc_insertion_point(field_add:executor.v1.ProcessTransactionResponse.execution_trace)
-  return _internal_add_execution_trace();
-}
-inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::executor::v1::ExecutionTraceStep >&
-ProcessTransactionResponse::execution_trace() const {
-  // @@protoc_insertion_point(field_list:executor.v1.ProcessTransactionResponse.execution_trace)
-  return execution_trace_;
-}
-
-// .executor.v1.CallTrace call_trace = 14;
-inline bool ProcessTransactionResponse::_internal_has_call_trace() const {
-  return this != internal_default_instance() && call_trace_ != nullptr;
-}
-inline bool ProcessTransactionResponse::has_call_trace() const {
-  return _internal_has_call_trace();
-}
-inline void ProcessTransactionResponse::clear_call_trace() {
-  if (GetArena() == nullptr && call_trace_ != nullptr) {
-    delete call_trace_;
+inline void ProcessTransactionResponse::clear_full_trace() {
+  if (GetArena() == nullptr && full_trace_ != nullptr) {
+    delete full_trace_;
   }
-  call_trace_ = nullptr;
+  full_trace_ = nullptr;
 }
-inline const ::executor::v1::CallTrace& ProcessTransactionResponse::_internal_call_trace() const {
-  const ::executor::v1::CallTrace* p = call_trace_;
-  return p != nullptr ? *p : *reinterpret_cast<const ::executor::v1::CallTrace*>(
-      &::executor::v1::_CallTrace_default_instance_);
+inline const ::executor::v1::FullTrace& ProcessTransactionResponse::_internal_full_trace() const {
+  const ::executor::v1::FullTrace* p = full_trace_;
+  return p != nullptr ? *p : *reinterpret_cast<const ::executor::v1::FullTrace*>(
+      &::executor::v1::_FullTrace_default_instance_);
 }
-inline const ::executor::v1::CallTrace& ProcessTransactionResponse::call_trace() const {
-  // @@protoc_insertion_point(field_get:executor.v1.ProcessTransactionResponse.call_trace)
-  return _internal_call_trace();
+inline const ::executor::v1::FullTrace& ProcessTransactionResponse::full_trace() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessTransactionResponse.full_trace)
+  return _internal_full_trace();
 }
-inline void ProcessTransactionResponse::unsafe_arena_set_allocated_call_trace(
-    ::executor::v1::CallTrace* call_trace) {
+inline void ProcessTransactionResponse::unsafe_arena_set_allocated_full_trace(
+    ::executor::v1::FullTrace* full_trace) {
   if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(call_trace_);
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(full_trace_);
   }
-  call_trace_ = call_trace;
-  if (call_trace) {
+  full_trace_ = full_trace;
+  if (full_trace) {
     
   } else {
     
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessTransactionResponse.call_trace)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessTransactionResponse.full_trace)
 }
-inline ::executor::v1::CallTrace* ProcessTransactionResponse::release_call_trace() {
-  auto temp = unsafe_arena_release_call_trace();
+inline ::executor::v1::FullTrace* ProcessTransactionResponse::release_full_trace() {
+  auto temp = unsafe_arena_release_full_trace();
   if (GetArena() != nullptr) {
     temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
   }
   return temp;
 }
-inline ::executor::v1::CallTrace* ProcessTransactionResponse::unsafe_arena_release_call_trace() {
-  // @@protoc_insertion_point(field_release:executor.v1.ProcessTransactionResponse.call_trace)
+inline ::executor::v1::FullTrace* ProcessTransactionResponse::unsafe_arena_release_full_trace() {
+  // @@protoc_insertion_point(field_release:executor.v1.ProcessTransactionResponse.full_trace)
   
-  ::executor::v1::CallTrace* temp = call_trace_;
-  call_trace_ = nullptr;
+  ::executor::v1::FullTrace* temp = full_trace_;
+  full_trace_ = nullptr;
   return temp;
 }
-inline ::executor::v1::CallTrace* ProcessTransactionResponse::_internal_mutable_call_trace() {
+inline ::executor::v1::FullTrace* ProcessTransactionResponse::_internal_mutable_full_trace() {
   
-  if (call_trace_ == nullptr) {
-    auto* p = CreateMaybeMessage<::executor::v1::CallTrace>(GetArena());
-    call_trace_ = p;
+  if (full_trace_ == nullptr) {
+    auto* p = CreateMaybeMessage<::executor::v1::FullTrace>(GetArena());
+    full_trace_ = p;
   }
-  return call_trace_;
+  return full_trace_;
 }
-inline ::executor::v1::CallTrace* ProcessTransactionResponse::mutable_call_trace() {
-  // @@protoc_insertion_point(field_mutable:executor.v1.ProcessTransactionResponse.call_trace)
-  return _internal_mutable_call_trace();
+inline ::executor::v1::FullTrace* ProcessTransactionResponse::mutable_full_trace() {
+  // @@protoc_insertion_point(field_mutable:executor.v1.ProcessTransactionResponse.full_trace)
+  return _internal_mutable_full_trace();
 }
-inline void ProcessTransactionResponse::set_allocated_call_trace(::executor::v1::CallTrace* call_trace) {
+inline void ProcessTransactionResponse::set_allocated_full_trace(::executor::v1::FullTrace* full_trace) {
   ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
   if (message_arena == nullptr) {
-    delete call_trace_;
+    delete full_trace_;
   }
-  if (call_trace) {
+  if (full_trace) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(call_trace);
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(full_trace);
     if (message_arena != submessage_arena) {
-      call_trace = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, call_trace, submessage_arena);
+      full_trace = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, full_trace, submessage_arena);
     }
     
   } else {
     
   }
-  call_trace_ = call_trace;
-  // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessTransactionResponse.call_trace)
+  full_trace_ = full_trace;
+  // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessTransactionResponse.full_trace)
 }
 
 // string effective_gas_price = 15;
@@ -9731,523 +9270,9 @@ inline void Log::set_index(::PROTOBUF_NAMESPACE_ID::uint32 value) {
   // @@protoc_insertion_point(field_set:executor.v1.Log.index)
 }
 
-// -------------------------------------------------------------------
-
-// -------------------------------------------------------------------
-
-// ExecutionTraceStep
-
-// uint64 pc = 1;
-inline void ExecutionTraceStep::clear_pc() {
-  pc_ = PROTOBUF_ULONGLONG(0);
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 ExecutionTraceStep::_internal_pc() const {
-  return pc_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 ExecutionTraceStep::pc() const {
-  // @@protoc_insertion_point(field_get:executor.v1.ExecutionTraceStep.pc)
-  return _internal_pc();
-}
-inline void ExecutionTraceStep::_internal_set_pc(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  
-  pc_ = value;
-}
-inline void ExecutionTraceStep::set_pc(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_pc(value);
-  // @@protoc_insertion_point(field_set:executor.v1.ExecutionTraceStep.pc)
-}
-
-// string op = 2;
-inline void ExecutionTraceStep::clear_op() {
-  op_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline const std::string& ExecutionTraceStep::op() const {
-  // @@protoc_insertion_point(field_get:executor.v1.ExecutionTraceStep.op)
-  return _internal_op();
-}
-inline void ExecutionTraceStep::set_op(const std::string& value) {
-  _internal_set_op(value);
-  // @@protoc_insertion_point(field_set:executor.v1.ExecutionTraceStep.op)
-}
-inline std::string* ExecutionTraceStep::mutable_op() {
-  // @@protoc_insertion_point(field_mutable:executor.v1.ExecutionTraceStep.op)
-  return _internal_mutable_op();
-}
-inline const std::string& ExecutionTraceStep::_internal_op() const {
-  return op_.Get();
-}
-inline void ExecutionTraceStep::_internal_set_op(const std::string& value) {
-  
-  op_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
-}
-inline void ExecutionTraceStep::set_op(std::string&& value) {
-  
-  op_.Set(
-    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:executor.v1.ExecutionTraceStep.op)
-}
-inline void ExecutionTraceStep::set_op(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  op_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
-              GetArena());
-  // @@protoc_insertion_point(field_set_char:executor.v1.ExecutionTraceStep.op)
-}
-inline void ExecutionTraceStep::set_op(const char* value,
-    size_t size) {
-  
-  op_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:executor.v1.ExecutionTraceStep.op)
-}
-inline std::string* ExecutionTraceStep::_internal_mutable_op() {
-  
-  return op_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline std::string* ExecutionTraceStep::release_op() {
-  // @@protoc_insertion_point(field_release:executor.v1.ExecutionTraceStep.op)
-  return op_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void ExecutionTraceStep::set_allocated_op(std::string* op) {
-  if (op != nullptr) {
-    
-  } else {
-    
-  }
-  op_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), op,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:executor.v1.ExecutionTraceStep.op)
-}
-inline std::string* ExecutionTraceStep::unsafe_arena_release_op() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.ExecutionTraceStep.op)
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  
-  return op_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      GetArena());
-}
-inline void ExecutionTraceStep::unsafe_arena_set_allocated_op(
-    std::string* op) {
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  if (op != nullptr) {
-    
-  } else {
-    
-  }
-  op_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      op, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ExecutionTraceStep.op)
-}
-
-// uint64 remaining_gas = 3;
-inline void ExecutionTraceStep::clear_remaining_gas() {
-  remaining_gas_ = PROTOBUF_ULONGLONG(0);
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 ExecutionTraceStep::_internal_remaining_gas() const {
-  return remaining_gas_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 ExecutionTraceStep::remaining_gas() const {
-  // @@protoc_insertion_point(field_get:executor.v1.ExecutionTraceStep.remaining_gas)
-  return _internal_remaining_gas();
-}
-inline void ExecutionTraceStep::_internal_set_remaining_gas(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  
-  remaining_gas_ = value;
-}
-inline void ExecutionTraceStep::set_remaining_gas(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_remaining_gas(value);
-  // @@protoc_insertion_point(field_set:executor.v1.ExecutionTraceStep.remaining_gas)
-}
-
-// uint64 gas_cost = 4;
-inline void ExecutionTraceStep::clear_gas_cost() {
-  gas_cost_ = PROTOBUF_ULONGLONG(0);
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 ExecutionTraceStep::_internal_gas_cost() const {
-  return gas_cost_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 ExecutionTraceStep::gas_cost() const {
-  // @@protoc_insertion_point(field_get:executor.v1.ExecutionTraceStep.gas_cost)
-  return _internal_gas_cost();
-}
-inline void ExecutionTraceStep::_internal_set_gas_cost(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  
-  gas_cost_ = value;
-}
-inline void ExecutionTraceStep::set_gas_cost(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_gas_cost(value);
-  // @@protoc_insertion_point(field_set:executor.v1.ExecutionTraceStep.gas_cost)
-}
-
-// bytes memory = 5;
-inline void ExecutionTraceStep::clear_memory() {
-  memory_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline const std::string& ExecutionTraceStep::memory() const {
-  // @@protoc_insertion_point(field_get:executor.v1.ExecutionTraceStep.memory)
-  return _internal_memory();
-}
-inline void ExecutionTraceStep::set_memory(const std::string& value) {
-  _internal_set_memory(value);
-  // @@protoc_insertion_point(field_set:executor.v1.ExecutionTraceStep.memory)
-}
-inline std::string* ExecutionTraceStep::mutable_memory() {
-  // @@protoc_insertion_point(field_mutable:executor.v1.ExecutionTraceStep.memory)
-  return _internal_mutable_memory();
-}
-inline const std::string& ExecutionTraceStep::_internal_memory() const {
-  return memory_.Get();
-}
-inline void ExecutionTraceStep::_internal_set_memory(const std::string& value) {
-  
-  memory_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
-}
-inline void ExecutionTraceStep::set_memory(std::string&& value) {
-  
-  memory_.Set(
-    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:executor.v1.ExecutionTraceStep.memory)
-}
-inline void ExecutionTraceStep::set_memory(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  memory_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
-              GetArena());
-  // @@protoc_insertion_point(field_set_char:executor.v1.ExecutionTraceStep.memory)
-}
-inline void ExecutionTraceStep::set_memory(const void* value,
-    size_t size) {
-  
-  memory_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:executor.v1.ExecutionTraceStep.memory)
-}
-inline std::string* ExecutionTraceStep::_internal_mutable_memory() {
-  
-  return memory_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline std::string* ExecutionTraceStep::release_memory() {
-  // @@protoc_insertion_point(field_release:executor.v1.ExecutionTraceStep.memory)
-  return memory_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void ExecutionTraceStep::set_allocated_memory(std::string* memory) {
-  if (memory != nullptr) {
-    
-  } else {
-    
-  }
-  memory_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), memory,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:executor.v1.ExecutionTraceStep.memory)
-}
-inline std::string* ExecutionTraceStep::unsafe_arena_release_memory() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.ExecutionTraceStep.memory)
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  
-  return memory_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      GetArena());
-}
-inline void ExecutionTraceStep::unsafe_arena_set_allocated_memory(
-    std::string* memory) {
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  if (memory != nullptr) {
-    
-  } else {
-    
-  }
-  memory_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      memory, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ExecutionTraceStep.memory)
-}
-
-// uint32 memory_size = 6;
-inline void ExecutionTraceStep::clear_memory_size() {
-  memory_size_ = 0u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint32 ExecutionTraceStep::_internal_memory_size() const {
-  return memory_size_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint32 ExecutionTraceStep::memory_size() const {
-  // @@protoc_insertion_point(field_get:executor.v1.ExecutionTraceStep.memory_size)
-  return _internal_memory_size();
-}
-inline void ExecutionTraceStep::_internal_set_memory_size(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  
-  memory_size_ = value;
-}
-inline void ExecutionTraceStep::set_memory_size(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _internal_set_memory_size(value);
-  // @@protoc_insertion_point(field_set:executor.v1.ExecutionTraceStep.memory_size)
-}
-
-// uint32 memory_offset = 7;
-inline void ExecutionTraceStep::clear_memory_offset() {
-  memory_offset_ = 0u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint32 ExecutionTraceStep::_internal_memory_offset() const {
-  return memory_offset_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint32 ExecutionTraceStep::memory_offset() const {
-  // @@protoc_insertion_point(field_get:executor.v1.ExecutionTraceStep.memory_offset)
-  return _internal_memory_offset();
-}
-inline void ExecutionTraceStep::_internal_set_memory_offset(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  
-  memory_offset_ = value;
-}
-inline void ExecutionTraceStep::set_memory_offset(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _internal_set_memory_offset(value);
-  // @@protoc_insertion_point(field_set:executor.v1.ExecutionTraceStep.memory_offset)
-}
-
-// repeated string stack = 8;
-inline int ExecutionTraceStep::_internal_stack_size() const {
-  return stack_.size();
-}
-inline int ExecutionTraceStep::stack_size() const {
-  return _internal_stack_size();
-}
-inline void ExecutionTraceStep::clear_stack() {
-  stack_.Clear();
-}
-inline std::string* ExecutionTraceStep::add_stack() {
-  // @@protoc_insertion_point(field_add_mutable:executor.v1.ExecutionTraceStep.stack)
-  return _internal_add_stack();
-}
-inline const std::string& ExecutionTraceStep::_internal_stack(int index) const {
-  return stack_.Get(index);
-}
-inline const std::string& ExecutionTraceStep::stack(int index) const {
-  // @@protoc_insertion_point(field_get:executor.v1.ExecutionTraceStep.stack)
-  return _internal_stack(index);
-}
-inline std::string* ExecutionTraceStep::mutable_stack(int index) {
-  // @@protoc_insertion_point(field_mutable:executor.v1.ExecutionTraceStep.stack)
-  return stack_.Mutable(index);
-}
-inline void ExecutionTraceStep::set_stack(int index, const std::string& value) {
-  // @@protoc_insertion_point(field_set:executor.v1.ExecutionTraceStep.stack)
-  stack_.Mutable(index)->assign(value);
-}
-inline void ExecutionTraceStep::set_stack(int index, std::string&& value) {
-  // @@protoc_insertion_point(field_set:executor.v1.ExecutionTraceStep.stack)
-  stack_.Mutable(index)->assign(std::move(value));
-}
-inline void ExecutionTraceStep::set_stack(int index, const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  stack_.Mutable(index)->assign(value);
-  // @@protoc_insertion_point(field_set_char:executor.v1.ExecutionTraceStep.stack)
-}
-inline void ExecutionTraceStep::set_stack(int index, const char* value, size_t size) {
-  stack_.Mutable(index)->assign(
-    reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:executor.v1.ExecutionTraceStep.stack)
-}
-inline std::string* ExecutionTraceStep::_internal_add_stack() {
-  return stack_.Add();
-}
-inline void ExecutionTraceStep::add_stack(const std::string& value) {
-  stack_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add:executor.v1.ExecutionTraceStep.stack)
-}
-inline void ExecutionTraceStep::add_stack(std::string&& value) {
-  stack_.Add(std::move(value));
-  // @@protoc_insertion_point(field_add:executor.v1.ExecutionTraceStep.stack)
-}
-inline void ExecutionTraceStep::add_stack(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  stack_.Add()->assign(value);
-  // @@protoc_insertion_point(field_add_char:executor.v1.ExecutionTraceStep.stack)
-}
-inline void ExecutionTraceStep::add_stack(const char* value, size_t size) {
-  stack_.Add()->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_add_pointer:executor.v1.ExecutionTraceStep.stack)
-}
-inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>&
-ExecutionTraceStep::stack() const {
-  // @@protoc_insertion_point(field_list:executor.v1.ExecutionTraceStep.stack)
-  return stack_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField<std::string>*
-ExecutionTraceStep::mutable_stack() {
-  // @@protoc_insertion_point(field_mutable_list:executor.v1.ExecutionTraceStep.stack)
-  return &stack_;
-}
-
-// bytes return_data = 9;
-inline void ExecutionTraceStep::clear_return_data() {
-  return_data_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline const std::string& ExecutionTraceStep::return_data() const {
-  // @@protoc_insertion_point(field_get:executor.v1.ExecutionTraceStep.return_data)
-  return _internal_return_data();
-}
-inline void ExecutionTraceStep::set_return_data(const std::string& value) {
-  _internal_set_return_data(value);
-  // @@protoc_insertion_point(field_set:executor.v1.ExecutionTraceStep.return_data)
-}
-inline std::string* ExecutionTraceStep::mutable_return_data() {
-  // @@protoc_insertion_point(field_mutable:executor.v1.ExecutionTraceStep.return_data)
-  return _internal_mutable_return_data();
-}
-inline const std::string& ExecutionTraceStep::_internal_return_data() const {
-  return return_data_.Get();
-}
-inline void ExecutionTraceStep::_internal_set_return_data(const std::string& value) {
-  
-  return_data_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
-}
-inline void ExecutionTraceStep::set_return_data(std::string&& value) {
-  
-  return_data_.Set(
-    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:executor.v1.ExecutionTraceStep.return_data)
-}
-inline void ExecutionTraceStep::set_return_data(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  return_data_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
-              GetArena());
-  // @@protoc_insertion_point(field_set_char:executor.v1.ExecutionTraceStep.return_data)
-}
-inline void ExecutionTraceStep::set_return_data(const void* value,
-    size_t size) {
-  
-  return_data_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:executor.v1.ExecutionTraceStep.return_data)
-}
-inline std::string* ExecutionTraceStep::_internal_mutable_return_data() {
-  
-  return return_data_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline std::string* ExecutionTraceStep::release_return_data() {
-  // @@protoc_insertion_point(field_release:executor.v1.ExecutionTraceStep.return_data)
-  return return_data_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void ExecutionTraceStep::set_allocated_return_data(std::string* return_data) {
-  if (return_data != nullptr) {
-    
-  } else {
-    
-  }
-  return_data_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), return_data,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:executor.v1.ExecutionTraceStep.return_data)
-}
-inline std::string* ExecutionTraceStep::unsafe_arena_release_return_data() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.ExecutionTraceStep.return_data)
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  
-  return return_data_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      GetArena());
-}
-inline void ExecutionTraceStep::unsafe_arena_set_allocated_return_data(
-    std::string* return_data) {
-  GOOGLE_DCHECK(GetArena() != nullptr);
-  if (return_data != nullptr) {
-    
-  } else {
-    
-  }
-  return_data_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
-      return_data, GetArena());
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ExecutionTraceStep.return_data)
-}
-
-// map<string, string> storage = 10;
-inline int ExecutionTraceStep::_internal_storage_size() const {
-  return storage_.size();
-}
-inline int ExecutionTraceStep::storage_size() const {
-  return _internal_storage_size();
-}
-inline void ExecutionTraceStep::clear_storage() {
-  storage_.Clear();
-}
-inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
-ExecutionTraceStep::_internal_storage() const {
-  return storage_.GetMap();
-}
-inline const ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >&
-ExecutionTraceStep::storage() const {
-  // @@protoc_insertion_point(field_map:executor.v1.ExecutionTraceStep.storage)
-  return _internal_storage();
-}
-inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
-ExecutionTraceStep::_internal_mutable_storage() {
-  return storage_.MutableMap();
-}
-inline ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >*
-ExecutionTraceStep::mutable_storage() {
-  // @@protoc_insertion_point(field_mutable_map:executor.v1.ExecutionTraceStep.storage)
-  return _internal_mutable_storage();
-}
-
-// uint32 depth = 11;
-inline void ExecutionTraceStep::clear_depth() {
-  depth_ = 0u;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint32 ExecutionTraceStep::_internal_depth() const {
-  return depth_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint32 ExecutionTraceStep::depth() const {
-  // @@protoc_insertion_point(field_get:executor.v1.ExecutionTraceStep.depth)
-  return _internal_depth();
-}
-inline void ExecutionTraceStep::_internal_set_depth(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  
-  depth_ = value;
-}
-inline void ExecutionTraceStep::set_depth(::PROTOBUF_NAMESPACE_ID::uint32 value) {
-  _internal_set_depth(value);
-  // @@protoc_insertion_point(field_set:executor.v1.ExecutionTraceStep.depth)
-}
-
-// uint64 gas_refund = 12;
-inline void ExecutionTraceStep::clear_gas_refund() {
-  gas_refund_ = PROTOBUF_ULONGLONG(0);
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 ExecutionTraceStep::_internal_gas_refund() const {
-  return gas_refund_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 ExecutionTraceStep::gas_refund() const {
-  // @@protoc_insertion_point(field_get:executor.v1.ExecutionTraceStep.gas_refund)
-  return _internal_gas_refund();
-}
-inline void ExecutionTraceStep::_internal_set_gas_refund(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  
-  gas_refund_ = value;
-}
-inline void ExecutionTraceStep::set_gas_refund(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_gas_refund(value);
-  // @@protoc_insertion_point(field_set:executor.v1.ExecutionTraceStep.gas_refund)
-}
-
-// .executor.v1.RomError error = 13;
-inline void ExecutionTraceStep::clear_error() {
-  error_ = 0;
-}
-inline ::executor::v1::RomError ExecutionTraceStep::_internal_error() const {
-  return static_cast< ::executor::v1::RomError >(error_);
-}
-inline ::executor::v1::RomError ExecutionTraceStep::error() const {
-  // @@protoc_insertion_point(field_get:executor.v1.ExecutionTraceStep.error)
-  return _internal_error();
-}
-inline void ExecutionTraceStep::_internal_set_error(::executor::v1::RomError value) {
-  
-  error_ = value;
-}
-inline void ExecutionTraceStep::set_error(::executor::v1::RomError value) {
-  _internal_set_error(value);
-  // @@protoc_insertion_point(field_set:executor.v1.ExecutionTraceStep.error)
-}
-
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
-// -------------------------------------------------------------------
-
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

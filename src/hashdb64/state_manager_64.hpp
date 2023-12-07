@@ -14,6 +14,7 @@
 #include "smt_get_result.hpp"
 #include "smt_set_result.hpp"
 #include "key_value_tree.hpp"
+#include "level_tree_key_value.hpp"
 
 using namespace std;
 
@@ -38,6 +39,7 @@ public:
     string newStateRoot;
     uint64_t currentSubState;
     vector<TxSubState64> subState;
+    unordered_map<string, vector<uint8_t>> dbProgram;
     TxPersistenceState64() : currentSubState(0)
     {
         subState.reserve(128);
@@ -58,30 +60,35 @@ public:
     string newStateRoot;
     uint64_t currentTx;
     vector<TxState64> txState;
+#ifndef USE_NEW_KVTREE
     KeyValueTree keyValueTree;
+#else
+    KVTree keyValueTree;
+    unordered_map<string, vector<uint8_t>> dbProgram;
+#endif
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     TimeMetricStorage timeMetricStorage;
 #endif
     BatchState64() : currentTx(0)
     {
         txState.reserve(32);
+ #ifdef USE_NEW_KVTREE
+        keyValueTree.postConstruct(4);
+#endif       
     };
 };
 
 class StateManager64
 {
 private:
-    Goldilocks &fr;
-    PoseidonGoldilocks &poseidon;
     unordered_map<string, BatchState64> state;
     vector<string> stateOrder;
-    Config config;
     pthread_mutex_t mutex; // Mutex to protect the multi write queues
     uint64_t lastVirtualStateRoot;
     Goldilocks::Element lastConsolidatedStateRoot[4];
     string lastConsolidatedStateRootString;
 public:
-    StateManager64(Goldilocks &fr, PoseidonGoldilocks &poseidon) : fr(fr), poseidon(poseidon), lastVirtualStateRoot(0)
+    StateManager64() : lastVirtualStateRoot(0)
     {        
         // Init mutex
         pthread_mutex_init(&mutex, NULL);
@@ -96,9 +103,8 @@ private:
     zkresult purgeTxPersistence (TxPersistenceState64 &txPersistence, const Config &config);
 
 public:
-    void init (const Config &_config)
+    void init (void)
     {
-        config = _config;
     }
     zkresult setOldStateRoot (const string &batchUUID, uint64_t tx, const string &stateRoot, const Persistence persistence)
     {
@@ -117,7 +123,7 @@ public:
 
     void print (bool bDbContent = false);
     void getVirtualStateRoot (Goldilocks::Element (&newStateRoot)[4], string &newStateRootString);
-    bool isVirtualStateRoot (const string &stateRoot);
+    static bool isVirtualStateRoot (const string &stateRoot);
 
     // Lock/Unlock
     void Lock(void) { pthread_mutex_lock(&mutex); };
@@ -126,6 +132,20 @@ public:
     zkresult set(const string &batchUUID, uint64_t tx, Database64 &db, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, SmtSetResult &result, DatabaseMap *dbReadLog = NULL);
     zkresult get(const string &batchUUID, Database64 &db, const Goldilocks::Element (&root)[4], const Goldilocks::Element (&key)[4], SmtGetResult &result, DatabaseMap *dbReadLog = NULL);
 
+    zkresult setProgram (const string &batchUUID, uint64_t tx, Database64 &db, const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const Persistence persistence);
+    zkresult getProgram (const string &batchUUID, Database64 &db, const Goldilocks::Element (&key)[4], vector<uint8_t> &data, DatabaseMap *dbReadLog);
+
+    zkresult writeProgram (const string &batchUUID, uint64_t tx, const string &key, const vector<uint8_t> &data, const Persistence persistence);
+    zkresult readProgram (const string &batchUUID, const string &key, vector<uint8_t> &data, DatabaseMap *dbReadLog);
+
+    void inline setLastConsolidatedStateRoot(const Goldilocks::Element (&root)[4])
+    {
+        lastConsolidatedStateRoot[0] = root[0];
+        lastConsolidatedStateRoot[1] = root[1];
+        lastConsolidatedStateRoot[2] = root[2];
+        lastConsolidatedStateRoot[3] = root[3];
+        lastConsolidatedStateRootString = fea2string(fr, lastConsolidatedStateRoot);
+    }
 };
 
 extern StateManager64 stateManager64;

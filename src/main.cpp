@@ -38,6 +38,7 @@
 #include "unit_test.hpp"
 #include "database_cache_test.hpp"
 #include "main_sm/fork_5/main_exec_c/account.hpp"
+#include "main_sm/fork_6/main_exec_c/account.hpp"
 #include "state_manager.hpp"
 #include "state_manager_64.hpp"
 #include "check_tree_test.hpp"
@@ -45,6 +46,8 @@
 #include "smt_64_test.hpp"
 #include "sha256.hpp"
 #include "page_manager_test.hpp"
+#include "zkglobals.hpp"
+#include "key_value_tree_test.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -307,7 +310,6 @@ int main(int argc, char **argv)
     // Create one instance of Config based on the contents of the file config.json
     json configJson;
     file2json(pConfigFile, configJson);
-    Config config;
     config.load(configJson);
     zklog.setJsonLogs(config.jsonLogs);
     zklog.setPID(config.proverID.substr(0, 7)); // Set the logs prefix
@@ -353,6 +355,7 @@ int main(int argc, char **argv)
 
     // Generate account zero keys
     fork_5::Account::GenerateZeroKey(fr, poseidon);
+    fork_6::Account::GenerateZeroKey(fr, poseidon);
 
     // Init the HashDB singleton
     hashDBSingleton.init(fr, config);
@@ -360,7 +363,7 @@ int main(int argc, char **argv)
     // Init the StateManager singleton
     if (config.hashDB64)
     {
-        stateManager64.init(config);
+        stateManager64.init();
     }
     else
     {
@@ -491,6 +494,11 @@ int main(int argc, char **argv)
     if (config.runPageManagerTest)
     {
         PageManagerTest();
+    }
+    // Test KeyValueTree
+    if (config.runKeyValueTreeTest)
+    {
+        KeyValueTreeTest();
     }
     
     // Test SMT64

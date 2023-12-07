@@ -2,7 +2,7 @@ name: Build docker image and run node tests
 
 on:
   push:
-    branches: [ develop, main, fractasy_state_root_map ]
+    branches: [ develop, main, fractasy_full_tracer_diet ]
 
 jobs:
   build-docker:

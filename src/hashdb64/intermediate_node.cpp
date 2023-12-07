@@ -1,8 +1,9 @@
 #include "intermediate_node.hpp"
 #include "poseidon_goldilocks.hpp"
+#include "zkglobals.hpp"
+#include "scalar.hpp"
 
-Goldilocks fr;
-PoseidonGoldilocks poseidon;
+//#define LOG_INTERMEDIATE_NODE
 
 void IntermediateNode::calculateHash (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Goldilocks::Element (&leftHash)[4], const Goldilocks::Element (&rightHash)[4], vector<HashValueGL> *hashValues)
 {
@@ -32,4 +33,7 @@ void IntermediateNode::calculateHash (Goldilocks &fr, PoseidonGoldilocks &poseid
         for (uint64_t i=0; i<12; i++) hashValue.value[i] = input[i];
         hashValues->emplace_back(hashValue);
     }
+#ifdef LOG_INTERMEDIATE_NODE
+    zklog.info("IntermediateNode::calculateHash() leftHash=" + fea2string(fr, leftHash) + " rightHash=" + fea2string(fr, rightHash) + " hash=" + fea2string(fr, hash));
+#endif
 }

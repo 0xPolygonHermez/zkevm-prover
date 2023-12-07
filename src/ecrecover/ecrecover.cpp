@@ -4,11 +4,8 @@
 #include "ffiasm/fec.hpp"
 #include "exit_process.hpp"
 #include "definitions.hpp"
-#include "main_sm/fork_5/main/eval_command.hpp"
 #include "keccak_wrapper.hpp"
-
-RawFnec fnec;
-RawFec fec;
+#include "zkglobals.hpp"
 
 mpz_class FNEC("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141");
 mpz_class FNEC_MINUS_ONE = FNEC - 1;

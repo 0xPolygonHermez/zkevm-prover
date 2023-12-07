@@ -39,8 +39,7 @@ public:
     vector<vector<mpz_class>> fullStack;// Stack of the transaction
     uint64_t accBatchGas;
     map<uint64_t,map<uint64_t,Log>> logs;
-    vector<Opcode> call_trace;
-    vector<Opcode> execution_trace;
+    vector<Opcode> full_trace;
     string lastError;
     uint64_t numberOfOpcodesInThisTx;
     uint64_t lastErrorOpcode;
@@ -101,8 +100,7 @@ public:
         fullStack       = other.fullStack;
         accBatchGas     = other.accBatchGas;
         logs            = other.logs;
-        call_trace      = other.call_trace;
-        execution_trace = other.execution_trace;
+        full_trace      = other.full_trace;
         lastError       = other.lastError;
         callData        = other.callData;
         return *this;
@@ -135,7 +133,7 @@ public:
     }
     vector<Opcode> & get_info(void)
     {
-        return execution_trace;
+        return full_trace;
     }
     uint64_t get_tx_number(void)
     {
