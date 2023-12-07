@@ -25,7 +25,7 @@ void StorageRom::load(json &j)
 
         // Instructions
         if (l["jmpz"] == 1) romLine.jmpz = true;
-        if (l["jmpz"] == 1) romLine.jmpnz = true;
+        if (l["jmpnz"] == 1) romLine.jmpnz = true;
         if (l["jmp"] == 1) romLine.jmp = true;
         if (l["hash"] == 1) romLine.hash = true;
         if (l["hashType"].is_number()) romLine.hashType = l["hashType"].get<uint64_t>();

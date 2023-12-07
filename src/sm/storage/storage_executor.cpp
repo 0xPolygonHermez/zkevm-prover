@@ -279,7 +279,8 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
 
                 else if (rom.line[l].funcName=="isValueZero")
                 {
-                    if ((action[a].bIsSet ? action[a].setResult.newValue : action[a].getResult.value) == 0) {
+                    // if ctionList is empty => finish, value is zero
+                    if (actionListEmpty || (action[a].bIsSet ? action[a].setResult.newValue : action[a].getResult.value) == 0) {
                         op[0] = fr.one();
                     }
 
@@ -492,6 +493,40 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                     exitProcess();
                 }
             }
+            else if (rom.line[l].climbRkey) {
+                const int bit = rom.line[l].climbBitN? 1 - fr.toU64(pols.rkeyBit[i]) : fr.toU64(pols.rkeyBit[i]);
+                const int level = fr.toU64(pols.level[i]);
+                const int zlevel = level % 4;
+                Goldilocks::Element rkeys[4] = {pols.rkey0[i], pols.rkey1[i], pols.rkey2[i], pols.rkey3[i]};
+                Goldilocks::Element rkeyClimbed;
+
+                if (!ClimbKeyHelper::calculate(fr, rkeys[zlevel], bit, rkeyClimbed)) {
+                    zklog.error("StorageExecutor() ClimbRkey fails because rkey["+to_string(zlevel)+"] has an invalid value ("+fr.toString(rkeys[zlevel])+") before climb with bit="+to_string(bit));
+                    exitProcess();
+                }
+                rkeys[zlevel] = rkeyClimbed;
+                op[0] = rkeys[0];
+                op[1] = rkeys[1];
+                op[2] = rkeys[2];
+                op[3] = rkeys[3];
+            }
+            else if (rom.line[l].climbSiblingRkey) {
+                const int bit = rom.line[l].climbBitN? 1 - fr.toU64(pols.rkeyBit[i]) : fr.toU64(pols.rkeyBit[i]);
+                const int level = fr.toU64(pols.level[i]);
+                const int zlevel = level % 4;
+                Goldilocks::Element rkeys[4] = {pols.siblingRkey0[i], pols.siblingRkey1[i], pols.siblingRkey2[i], pols.siblingRkey3[i]};
+                Goldilocks::Element rkeyClimbed;
+
+                if (!ClimbKeyHelper::calculate(fr, rkeys[zlevel], bit, rkeyClimbed)) {
+                    zklog.error("StorageExecutor() climbSiblingRkey fails because siblingRkey["+to_string(zlevel)+"] has an invalid value ("+fr.toString(rkeys[zlevel])+") before climb with bit="+to_string(bit));
+                    exitProcess();
+                }
+                rkeys[zlevel] = rkeyClimbed;
+                op[0] = rkeys[0];
+                op[1] = rkeys[1];
+                op[2] = rkeys[2];
+                op[3] = rkeys[3];
+            }
 
             // Ignore; this is just to report a list of setters
             else if (rom.line[l].op=="")
@@ -658,7 +693,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                 //zklog.info("StorageExecutor jmpz jmpAddress=" + to_string(rom.line[l].jmpAddress));
             }
             pols.jmpAddress[i] = fr.fromU64(rom.line[l].jmpAddress);
-            pols.jmpz[i] = fr.one();
+            pols.jmpnz[i] = fr.one();
         }
 
         // JMP: Jump always
