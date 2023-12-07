@@ -7,11 +7,14 @@
 #include "goldilocks_precomputed.hpp"
 #include "zklog.hpp"
 #include "exit_process.hpp"
+#include "climb_key_executor.hpp"
 
 using json = nlohmann::json;
 using namespace std;
 
-void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pols, vector<array<Goldilocks::Element, 17>> &required)
+#define PRE_CLIMB_UP_LIMIT 0x7FFFFFFF80000000ULL
+
+void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pols, vector<array<Goldilocks::Element, 17>> &poseidonRequired, vector<ClimbKeyAction> &climbKeyRequired)
 {
     uint64_t l=0; // rom line number, so current line is rom.line[l]
     uint64_t a=0; // action number, so current action is action[a]
@@ -231,6 +234,57 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
 
 #ifdef LOG_STORAGE_EXECUTOR
                     zklog.info("StorageExecutor GetSiblingHash returns " + fea2string(fr, op));
+#endif
+                }
+                else if (rom.line[l].funcName=="GetSiblingLeftChildHash")
+                {
+                    if (action[a].bIsSet)
+                    {
+                        op[0] = action[a].setResult.siblingLeftChild[0];
+                        op[1] = action[a].setResult.siblingLeftChild[1];
+                        op[2] = action[a].setResult.siblingLeftChild[2];
+                        op[3] = action[a].setResult.siblingLeftChild[3];
+                    }
+                    else
+                    {
+                        zklog.error("StorageExecutor.execute() called GetSiblingLeftChildHash() on GET operation input = " + to_string(a));
+                        exitProcess();
+                    }
+
+#ifdef LOG_STORAGE_EXECUTOR
+                    zklog.info("StorageExecutor GetSiblingLeftChildHash returns " + fea2string(fr, op));
+#endif
+                }
+                else if (rom.line[l].funcName=="GetSiblingRightChildHash")
+                {
+                    if (action[a].bIsSet)
+                    {
+                        op[0] = action[a].setResult.siblingRightChild[0];
+                        op[1] = action[a].setResult.siblingRightChild[1];
+                        op[2] = action[a].setResult.siblingRightChild[2];
+                        op[3] = action[a].setResult.siblingRightChild[3];
+                    }
+                    else
+                    {
+                        zklog.error("StorageExecutor.execute() called GetSiblingRightChildHash() on GET operation input = " + to_string(a));
+                        exitProcess();
+                    }
+
+#ifdef LOG_STORAGE_EXECUTOR
+                    zklog.info("StorageExecutor GetSiblingRightChildHash returns " + fea2string(fr, op));
+#endif
+                }
+
+                // Return if value is zero
+
+                else if (rom.line[l].funcName=="isValueZero")
+                {
+                    if ((action[a].bIsSet ? action[a].setResult.newValue : action[a].getResult.value) == 0) {
+                        op[0] = fr.one();
+                    }
+
+#ifdef LOG_STORAGE_EXECUTOR
+                    zklog.info("StorageExecutor isValueZero returns " + fea2string(fr, op));
 #endif
                 }
 
@@ -567,7 +621,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
         // If inROTL_VH then op=rotate_left(VALUE_HIGH)
         if (rom.line[l].inLEVEL)
         {
-            pols.inLEVEL[i] = fr.one();
+            pols.inLevel[i] = fr.one();
             op[0] = fr.add(op[0], pols.level[i]);
         }
 
@@ -580,14 +634,14 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
         {
             if (fr.isZero(op[0]))
             {
-                pols.pc[nexti] = fr.fromU64(rom.line[l].address);
-                //zklog.info("StorageExecutor iJmpz address=" + to_string(rom.line[l].address));
+                pols.pc[nexti] = fr.fromU64(rom.line[l].jmpAddress);
+                //zklog.info("StorageExecutor jmpz jmpAddress=" + to_string(rom.line[l].jmpAddress));
             }
             else
             {
                 pols.pc[nexti] = fr.add(pols.pc[i], fr.one());
             }
-            pols.address[i] = fr.fromU64(rom.line[l].address);
+            pols.jmpAddress[i] = fr.fromU64(rom.line[l].jmpAddress);
             pols.jmpz[i] = fr.one();
         }
 
@@ -600,19 +654,19 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             }
             else
             {
-                pols.pc[nexti] = fr.fromU64(rom.line[l].address);
-                //zklog.info("StorageExecutor iJmpz address=" + to_string(rom.line[l].address));
+                pols.pc[nexti] = fr.fromU64(rom.line[l].jmpAddress);
+                //zklog.info("StorageExecutor jmpz jmpAddress=" + to_string(rom.line[l].jmpAddress));
             }
-            pols.address[i] = fr.fromU64(rom.line[l].address);
+            pols.jmpAddress[i] = fr.fromU64(rom.line[l].jmpAddress);
             pols.jmpz[i] = fr.one();
         }
 
         // JMP: Jump always
         else if (rom.line[l].jmp)
         {
-            pols.pc[nexti] = fr.fromU64(rom.line[l].address);
-            pols.address[i] = fr.fromU64(rom.line[l].address);
-            //zklog.info("StorageExecutor iJmp address=" + to_string(rom.line[l].address));
+            pols.pc[nexti] = fr.fromU64(rom.line[l].jmpAddress);
+            pols.jmpAddress[i] = fr.fromU64(rom.line[l].jmpAddress);
+            //zklog.info("StorageExecutor iJmp jmpAddress=" + to_string(rom.line[l].jmpAddress));
             pols.jmp[i] = fr.one();
         }
 
@@ -686,7 +740,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             req[14] = feaHash[2];
             req[15] = feaHash[3];
             req[16] = fr.fromU64(POSEIDONG_PERMUTATION3_ID);
-            required.push_back(req);
+            poseidonRequired.push_back(req);
 
 #ifdef LOG_STORAGE_EXECUTOR
             {
@@ -698,135 +752,73 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
         }
 
         // Climb the remaining key, by injecting the RKEY_BIT in the register specified by LEVEL
-        if (rom.line[l].iClimbRkey)
+        if (rom.line[l].climbRkey)
         {
-            uint64_t bit = fr.toU64(pols.rkeyBit[i]);
-            if (fr.isOne(pols.level0[i]))
-            {
-                pols.rkey0[nexti] = fr.fromU64((fr.toU64(pols.rkey0[i])<<1) + bit);
-                pols.rkey1[nexti] = pols.rkey1[i];
-                pols.rkey2[nexti] = pols.rkey2[i];
-                pols.rkey3[nexti] = pols.rkey3[i];
+            const int bit = rom.line[l].climbBitN? 1 - fr.toU64(pols.rkeyBit[i]) : fr.toU64(pols.rkeyBit[i]);
+            const int level = fr.toU64(pols.level[i]);
+            const int zlevel = level % 4;
+            Goldilocks::Element rkeys[4] = {pols.rkey0[i], pols.rkey1[i], pols.rkey2[i], pols.rkey3[i]};
+            Goldilocks::Element rkeyClimbed;
+
+            if (!ClimbKeyHelper::calculate(fr, rkeys[zlevel], bit, rkeyClimbed)) {
+                zklog.error("StorageExecutor() ClimbRkey fails because rkey["+to_string(zlevel)+"] has an invalid value ("+fr.toString(rkeys[zlevel])+") before climb with bit="+to_string(bit));
+                exitProcess();
             }
-            if (fr.isOne(pols.level1[i]))
-            {
-                pols.rkey0[nexti] = pols.rkey0[i];
-                pols.rkey1[nexti] = fr.fromU64((fr.toU64(pols.rkey1[i])<<1) + bit);
-                pols.rkey2[nexti] = pols.rkey2[i];
-                pols.rkey3[nexti] = pols.rkey3[i];
-            }
-            if (fr.isOne(pols.level2[i]))
-            {
-                pols.rkey0[nexti] = pols.rkey0[i];
-                pols.rkey1[nexti] = pols.rkey1[i];
-                pols.rkey2[nexti] = fr.fromU64((fr.toU64(pols.rkey2[i])<<1) + bit);
-                pols.rkey3[nexti] = pols.rkey3[i];
-            }
-            if (fr.isOne(pols.level3[i]))
-            {
-                pols.rkey0[nexti] = pols.rkey0[i];
-                pols.rkey1[nexti] = pols.rkey1[i];
-                pols.rkey2[nexti] = pols.rkey2[i];
-                pols.rkey3[nexti] = fr.fromU64((fr.toU64(pols.rkey3[i])<<1) + bit);
+            else if (!fr.equal(rkeyClimbed, op[zlevel])) {
+                zklog.error("StorageExecutor() ClimbRkey fails because rkey["+to_string(zlevel)+"] not match ("+fr.toString(op[zlevel])+" vs "+fr.toString(rkeyClimbed)+") after climb with bit="+to_string(bit));
+                exitProcess();
             }
             pols.climbRkey[i] = fr.one();
 
+            ClimbKeyAction climbKeyAction;
+            climbKeyAction.key[0] = rkeys[0];
+            climbKeyAction.key[1] = rkeys[1];
+            climbKeyAction.key[2] = rkeys[2];
+            climbKeyAction.key[3] = rkeys[3];
+            climbKeyAction.level = level;
+            climbKeyAction.bit = bit;
+            climbKeyRequired.push_back(climbKeyAction);
+
 #ifdef LOG_STORAGE_EXECUTOR
-            Goldilocks::Element fea[4] = {pols.rkey0[i], pols.rkey1[i], pols.rkey2[i], pols.rkey3[i]};
-            zklog.info("StorageExecutor iClimbRkey sibling bit=" + to_string(bit) + " rkey=" + fea2string(fr,fea));
+            zklog.info("StorageExecutor iClimbRkey bit=" + to_string(bit) + " rkey=" + fea2string(fr,rkeys)+ " op=" + feastring(fr, op));
 #endif
         }
 
         // Climb the sibling remaining key, by injecting the sibling bit in the register specified by LEVEL
-        if (rom.line[l].iClimbSiblingRkey)
+        if (rom.line[l].climbSiblingRkey)
         {
-#ifdef LOG_STORAGE_EXECUTOR
-            Goldilocks::Element fea1[4] = {pols.siblingRkey0[i], pols.siblingRkey1[i], pols.siblingRkey2[i], pols.siblingRkey3[i]};
-            zklog.info("StorageExecutor iClimbSiblingRkey before rkey=" + fea2string(fr,fea1));
-#endif
-            uint64_t bit = fr.toU64(pols.rkeyBit[i]);
-            if (fr.isOne(pols.level0[i]))
-            {
-                pols.siblingRkey0[nexti] = fr.fromU64((fr.toU64(pols.siblingRkey0[i])<<1) + bit);
-                pols.siblingRkey1[nexti] = pols.siblingRkey1[i];
-                pols.siblingRkey2[nexti] = pols.siblingRkey2[i];
-                pols.siblingRkey3[nexti] = pols.siblingRkey3[i];
+            const int bit = rom.line[l].climbBitN? 1 - fr.toU64(pols.rkeyBit[i]) : fr.toU64(pols.rkeyBit[i]);
+            const int level = fr.toU64(pols.level[i]);
+            const int zlevel = level % 4;
+            Goldilocks::Element rkeys[4] = {pols.siblingRkey0[i], pols.siblingRkey1[i], pols.siblingRkey2[i], pols.siblingRkey3[i]};
+            Goldilocks::Element rkeyClimbed;
+
+            if (!ClimbKeyHelper::calculate(fr, rkeys[zlevel], bit, rkeyClimbed)) {
+                zklog.error("StorageExecutor() climbSiblingRkey fails because siblingRkey["+to_string(zlevel)+"] has an invalid value ("+fr.toString(rkeys[zlevel])+") before climb with bit="+to_string(bit));
+                exitProcess();
             }
-            if (fr.isOne(pols.level1[i]))
-            {
-                pols.siblingRkey0[nexti] = pols.siblingRkey0[i];
-                pols.siblingRkey1[nexti] = fr.fromU64((fr.toU64(pols.siblingRkey1[i])<<1) + bit);
-                pols.siblingRkey2[nexti] = pols.siblingRkey2[i];
-                pols.siblingRkey3[nexti] = pols.siblingRkey3[i];
-            }
-            if (fr.isOne(pols.level2[i]))
-            {
-                pols.siblingRkey0[nexti] = pols.siblingRkey0[i];
-                pols.siblingRkey1[nexti] = pols.siblingRkey1[i];
-                pols.siblingRkey2[nexti] = fr.fromU64((fr.toU64(pols.siblingRkey2[i])<<1) + bit);
-                pols.siblingRkey3[nexti] = pols.siblingRkey3[i];
-            }
-            if (fr.isOne(pols.level3[i]))
-            {
-                pols.siblingRkey0[nexti] = pols.siblingRkey0[i];
-                pols.siblingRkey1[nexti] = pols.siblingRkey1[i];
-                pols.siblingRkey2[nexti] = pols.siblingRkey2[i];
-                pols.siblingRkey3[nexti] = fr.fromU64((fr.toU64(pols.siblingRkey3[i])<<1) + bit);
+            else if (!fr.equal(rkeyClimbed, op[zlevel])) {
+                zklog.error("StorageExecutor() climbSiblingRkey fails because siblingRkey["+to_string(zlevel)+"] not match ("+fr.toString(op[zlevel])+" vs "+fr.toString(rkeyClimbed)+") after climb with bit="+to_string(bit));
+                exitProcess();
             }
             pols.climbSiblingRkey[i] = fr.one();
 
-#ifdef LOG_STORAGE_EXECUTOR
-            Goldilocks::Element fea[4] = {pols.siblingRkey0[i], pols.siblingRkey1[i], pols.siblingRkey2[i], pols.siblingRkey3[i]};
-            zklog.info("StorageExecutor iClimbSiblingRkey after sibling bit=" + to_string(bit) + " rkey=" + fea2string(fr,fea));
-#endif
-        }
-
-        // Climb the sibling remaining key, by injecting the sibling bit in the register specified by LEVEL
-        if (rom.line[l].iClimbSiblingRkeyN)
-        {
-#ifdef LOG_STORAGE_EXECUTOR
-            Goldilocks::Element fea1[4] = {pols.siblingRkey0[i], pols.siblingRkey1[i], pols.siblingRkey2[i], pols.siblingRkey3[i]};
-            zklog.info("StorageExecutor iClimbSiblingRkeyN before rkey=" + fea2string(fr,fea1));
-#endif
-            uint64_t bit = 1 - fr.toU64(pols.rkeyBit[i]);
-            if (fr.equal(pols.level0[i], fr.one()))
-            {
-                pols.siblingRkey0[nexti] = fr.fromU64((fr.toU64(pols.siblingRkey0[i])<<1) + bit);
-                pols.siblingRkey1[nexti] = pols.siblingRkey1[i];
-                pols.siblingRkey2[nexti] = pols.siblingRkey2[i];
-                pols.siblingRkey3[nexti] = pols.siblingRkey3[i];
-            }
-            if (fr.equal(pols.level1[i], fr.one()))
-            {
-                pols.siblingRkey0[nexti] = pols.siblingRkey0[i];
-                pols.siblingRkey1[nexti] = fr.fromU64((fr.toU64(pols.siblingRkey1[i])<<1) + bit);
-                pols.siblingRkey2[nexti] = pols.siblingRkey2[i];
-                pols.siblingRkey3[nexti] = pols.siblingRkey3[i];
-            }
-            if (fr.equal(pols.level2[i], fr.one()))
-            {
-                pols.siblingRkey0[nexti] = pols.siblingRkey0[i];
-                pols.siblingRkey1[nexti] = pols.siblingRkey1[i];
-                pols.siblingRkey2[nexti] = fr.fromU64((fr.toU64(pols.siblingRkey2[i])<<1) + bit);
-                pols.siblingRkey3[nexti] = pols.siblingRkey3[i];
-            }
-            if (fr.equal(pols.level3[i], fr.one()))
-            {
-                pols.siblingRkey0[nexti] = pols.siblingRkey0[i];
-                pols.siblingRkey1[nexti] = pols.siblingRkey1[i];
-                pols.siblingRkey2[nexti] = pols.siblingRkey2[i];
-                pols.siblingRkey3[nexti] = fr.fromU64((fr.toU64(pols.siblingRkey3[i])<<1) + bit);
-            }
-            pols.climbSiblingRkeyN[i] = fr.one();
+            ClimbKeyAction climbKeyAction;
+            climbKeyAction.key[0] = rkeys[0];
+            climbKeyAction.key[1] = rkeys[1];
+            climbKeyAction.key[2] = rkeys[2];
+            climbKeyAction.key[3] = rkeys[3];
+            climbKeyAction.level = level;
+            climbKeyAction.bit = bit;
+            climbKeyRequired.push_back(climbKeyAction);
 
 #ifdef LOG_STORAGE_EXECUTOR
-            Goldilocks::Element fea[4] = {pols.siblingRkey0[i], pols.siblingRkey1[i], pols.siblingRkey2[i], pols.siblingRkey3[i]};
-            zklog.info("StorageExecutor iClimbSiblingRkeyN after sibling bit=" + to_string(bit) + " rkey=" + fea2string(fr,fea));
+            zklog.info("StorageExecutor ClimbSiblingRkey bit=" + to_string(bit) + " rkey=" + fea2string(fr,rkeys)+ " op=" + feastring(fr, op));
 #endif
         }
 
         // Latch get: at this point consistency is granted: OLD_ROOT, RKEY (complete key), VALUE_LOW, VALUE_HIGH, LEVEL
-        if (rom.line[l].iLatchGet)
+        if (rom.line[l].latchGet)
         {
             // Check that the current action is an SMT get
             if (action[a].bIsSet)
@@ -906,7 +898,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
         }
 
         // Latch set: at this point consistency is granted: OLD_ROOT, NEW_ROOT, RKEY (complete key), VALUE_LOW, VALUE_HIGH, LEVEL
-        if (rom.line[l].iLatchSet)
+        if (rom.line[l].latchSet)
         {
             // Check that the current action is an SMT set
             if (!action[a].bIsSet)
@@ -946,12 +938,9 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             }
 
             // Check that final level state is consistent
-            if ( !fr.isOne(pols.level0[i]) ||
-                 !fr.isZero(pols.level1[i]) ||
-                 !fr.isZero(pols.level2[i]) ||
-                 !fr.isZero(pols.level3[i]) )
+            if ( !fr.isZero(pols.level[i]) )
             {
-                zklog.error("StorageExecutor() LATCH SET found action " + to_string(a) + " wrong level=" + fr.toString(pols.level3[i], 10) + ":" + fr.toString(pols.level2[i], 10) + ":" + fr.toString(pols.level1[i], 10) + ":" + fr.toString(pols.level0[i], 10) + " mode=" + action[a].setResult.mode);
+                zklog.error("StorageExecutor() LATCH SET found action " + to_string(a) + " wrong level=" + fr.toString(pols.level[i], 10) + " mode=" + action[a].setResult.mode);
                 exitProcess();
             }
 
@@ -1222,7 +1211,8 @@ void StorageExecutor::execute (vector<SmtAction> &action)
         exitProcess();
     }
     CommitPols cmPols(pAddress, CommitPols::pilDegree());
-    vector<array<Goldilocks::Element, 17>> required;
-    execute(action, cmPols.Storage, required);
+    vector<array<Goldilocks::Element, 17>> poseidonRequired;
+    vector<ClimbKeyAction> climbKeyRequired;
+    execute(action, cmPols.Storage, poseidonRequired, climbKeyRequired);
     free(pAddress);
 }

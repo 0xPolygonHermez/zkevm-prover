@@ -3,23 +3,11 @@
 #include "scalar.hpp"
 #include "zklog.hpp"
 
-uint8_t STEP (uint64_t i) { return i % 32; }
-uint8_t OFFSET (uint64_t i) { return ((i >> 5) % 32); }
-uint8_t WR8 (uint64_t i) { return (i % 3072) >= 2048 ?  1 : 0; }
-uint8_t V_BYTE (uint64_t i) { return (31 + (OFFSET(i) + WR8(i)) - STEP(i)) % 32; }
-uint64_t FACTORV (uint8_t index, uint64_t i) {
-    uint64_t f[4] = {1, 0x100, 0x10000, 0x1000000};
-    return (V_BYTE(i) >> 2) == index ? f[V_BYTE(i) % 4] : 0;
-}
-
-uint8_t getByte (mpz_class value, uint8_t index) {
-    mpz_class r = (value >> (8 * index)) & 0xFF;
-    return r.get_ui();
-}
-
 #define CLIMB_KEY_CLOCKS       4
 #define CLIMB_KEY_LAST_CLOCK   (CLIMB_KEY_CLOCKS - 1)
 #define CLIMB_KEY_RESULT_CLOCK (CLIMB_KEY_CLOCKS - 2)
+
+#define LIMIT_BEFORE_CLIMB_UP (GOLDILOCKS_PRIME >> 1)
 
 void ClimbKeyExecutor::execute (vector<ClimbKeyAction> &input, ClimbKeyCommitPols &pols)
 {
@@ -104,4 +92,14 @@ void ClimbKeyExecutor::execute (vector<ClimbKeyAction> &input, ClimbKeyCommitPol
     }
 
     zklog.info("ClimbKeyExecutor successfully processed " + to_string(input.size()) + " climbkey actions (" + to_string((double(input.size())*CLIMB_KEY_CLOCKS*100)/N) + "%)");
+}
+
+bool ClimbKeyHelper::calculate(Goldilocks &fr, const Goldilocks::Element &current, bool bit, Goldilocks::Element &result)
+{
+    uint64_t currentU64 = fr.toU64(current);
+    if (currentU64 > (LIMIT_BEFORE_CLIMB_UP - (uint64_t) bit)) {
+        return false;
+    }
+    result = fr.fromU64(currentU64 * 2ULL + (uint64_t) bit);
+    return true;
 }

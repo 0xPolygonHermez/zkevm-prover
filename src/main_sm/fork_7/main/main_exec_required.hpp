@@ -17,6 +17,7 @@
 #include "sm/memory/memory_executor.hpp"
 #include "sm/padding_pg/padding_pg_executor.hpp"
 #include "sm/mem_align/mem_align_executor.hpp"
+#include "sm/climb_key/climb_key_executor.hpp"
 
 using namespace std;
 
@@ -40,6 +41,7 @@ public:
     vector<Sha256FExecutorInput> Sha256F;
     vector<PaddingPGExecutorInput> PaddingPG;
     vector<array<Goldilocks::Element, 17>> PoseidonG; // The 17th fe is the permutation
+    vector<ClimbKeyAction> ClimbKey; // The 17th fe is the permutation
     vector<MemAlignAction> MemAlign;
 };
 

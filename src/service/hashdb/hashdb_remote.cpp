@@ -115,8 +115,8 @@ zkresult HashDBRemote::set (const string &batchUUID, uint64_t block, uint64_t tx
         result->mode = response.mode();
         result->proofHashCounter = response.proof_hash_counter();
 
-        grpc2fea(fr, response.siblingLeftChild(), result->siblingLeftChild);
-        grpc2fea(fr, response.siblingRightChild(), result->siblingRightChild);
+        grpc2fea(fr, response.sibling_left_child(), result->siblingLeftChild);
+        grpc2fea(fr, response.sibling_right_child(), result->siblingRightChild);
     }
 
     if (dbReadLog != NULL)

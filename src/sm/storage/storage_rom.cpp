@@ -22,7 +22,6 @@ void StorageRom::load(json &j)
         romLine.fileName = j["program"][i]["fileName"];
 
         json l = j["program"][i];
-//        if (l["inA"].is_string()) fr.fromString(line[i].inA, l["inA"]); else line[i].inA = fr.zero();
 
         // Instructions
         if (l["jmpz"] == 1) romLine.jmpz = true;
@@ -65,8 +64,8 @@ void StorageRom::load(json &j)
         // Jump parameters
         if (romLine.jmp || romLine.jmpz || romLine.jmpnz)
         {
-            romLine.addressLabel = l["addressLabel"];
-            romLine.address = l["address"];
+            romLine.jmpAddressLabel = l["jmpAddressLabel"];
+            romLine.jmpAddress = l["jmpAddress"];
         }
 
         // inFREE parameters
@@ -86,9 +85,9 @@ void StorageRom::load(json &j)
         }
 
         // Constant
-        if (l["CONST"])
+        if (l["CONST"].is_number())
         {
-            romLine.CONST = l["CONST"];
+            romLine.CONST = to_string(l["CONST"].get<int64_t>());
         }
 
         line.push_back(romLine);

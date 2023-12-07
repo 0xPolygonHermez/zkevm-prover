@@ -17,6 +17,13 @@ public:
     uint8_t bit;
 };
 
+
+class ClimbKeyHelper
+{
+    public:
+        static bool calculate(Goldilocks &fr, const Goldilocks::Element &current, bool bit, Goldilocks::Element &result);
+};
+
 class ClimbKeyExecutor
 {
     Goldilocks &fr;
@@ -29,6 +36,8 @@ public:
         config(config),
         N(PROVER_FORK_NAMESPACE::ClimbKeyCommitPols::pilDegree()) {}
     void execute (vector<ClimbKeyAction> &input, PROVER_FORK_NAMESPACE::ClimbKeyCommitPols &pols);
+    static bool check(const Goldilocks::Element &current, const Goldilocks::Element &expected, bool bit);
+    static bool calculate(const Goldilocks::Element &current, Goldilocks::Element &expected, bool bit);
 };
 
 #endif

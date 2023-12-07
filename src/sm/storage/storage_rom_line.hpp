@@ -53,8 +53,8 @@ public:
     bool setSIBLING_VALUE_HASH;
 
     // Jump parameters
-    string addressLabel;
-    uint64_t address;
+    string jmpAddressLabel;
+    uint64_t jmpAddress;
 
     // inFREE parameters
     string op;
@@ -100,7 +100,7 @@ public:
         setHASH_RIGHT = false;
         setSIBLING_RKEY = false;
         setSIBLING_VALUE_HASH = false;
-        address = 0;
+        jmpAddress = 0;
     }
     void print (uint64_t l);
 };

@@ -41,8 +41,8 @@ void StorageRomLine::print (uint64_t l)
     if (jmpz) s += "jmpz ";
     if (jmpz) s += "jmpnz ";
     if (jmp) s += "jmp ";
-    if (addressLabel.size()>0) s += "addressLabel=" + addressLabel + " "; // Jump parameter
-    if (address>0) s += "address=" + to_string(address) + " "; // Jump parameter
+    if (jmpAddressLabel.size()>0) s += "jmpAddressLabel=" + jmpAddressLabel + " "; // Jump parameter
+    if (jmpAddress>0) s += "jmpAddress=" + to_string(jmpAddress) + " "; // Jump parameter
     if (hash) s += "hash hashType=" + to_string(hashType) + " ";
     if (climbRkey) s += "climbRkey ";
     if (climbSiblingRkey) s += "climbSiblingRkey ";

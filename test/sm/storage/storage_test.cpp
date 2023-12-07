@@ -66,13 +66,13 @@ void StorageSM_UnitTest (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Con
     actionList.addGetAction(getResult);
     cout << "2: StorageSMTest Get nonZero value=" << getResult.value.get_str(16) << endl;
 
-    // Set deleteLast
+    // Set deleteNotFound (deleteLast)
     value=0;
     smt.set(uuid, block, tx, db, root, key, value, PERSISTENCE_CACHE, setResult);
     actionList.addSetAction(setResult);
     for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
-    zkassertpermanent(setResult.mode=="deleteLast");
-    cout << "3: StorageSMTest Set deleteLast root=" << fea2string(fr, root) << " mode=" << setResult.mode <<endl;
+    zkassertpermanent(setResult.mode=="deleteNotFound");
+    cout << "3: StorageSMTest Set deleteNotFound(deleteLast) root=" << fea2string(fr, root) << " mode=" << setResult.mode <<endl;
 
     // Set insertNotFound
     value=10;
