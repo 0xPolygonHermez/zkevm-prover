@@ -45,7 +45,6 @@ public:
     uint64_t oldNumBatchOffset;
     uint64_t newNumBatchOffset;
     uint64_t newLocalExitRootOffset;
-    uint64_t depthOffset;
     uint64_t gasRefundOffset;
     uint64_t txSrcAddrOffset;
     uint64_t gasCallOffset;
@@ -102,7 +101,6 @@ public:
             oldNumBatchOffset(0),
             newNumBatchOffset(0),
             newLocalExitRootOffset(0),
-            depthOffset(0),
             gasRefundOffset(0),
             txSrcAddrOffset(0),
             gasCallOffset(0),

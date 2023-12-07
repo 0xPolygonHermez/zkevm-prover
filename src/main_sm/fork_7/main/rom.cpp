@@ -49,7 +49,6 @@ void Rom::load(Goldilocks &fr, json &romJson)
         oldNumBatchOffset            = getMemoryOffset("oldNumBatch");
         newNumBatchOffset            = getMemoryOffset("newNumBatch");
         newLocalExitRootOffset       = getMemoryOffset("newLocalExitRoot");
-        depthOffset                  = getMemoryOffset("depth");
         gasRefundOffset              = getMemoryOffset("gasRefund");
         txSrcAddrOffset              = getMemoryOffset("txSrcAddr");
         gasCallOffset                = getMemoryOffset("gasCall");
@@ -116,7 +115,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
     constants.LOG_GAS                           = getConstant(romJson, "LOG_GAS");
     constants.LOG_TOPIC_GAS                     = getConstant(romJson, "LOG_TOPIC_GAS");
     constants.JUMP_DEST_GAS                     = getConstant(romJson, "JUMP_DEST_GAS");
-    constants.WARM_STORGE_READ_GAS              = getConstant(romJson, "WARM_STORGE_READ_GAS");
+    constants.WARM_STORAGE_READ_GAS             = getConstant(romJson, "WARM_STORAGE_READ_GAS");
     constants.COLD_ACCOUNT_ACCESS_COST_REDUCED  = getConstant(romJson, "COLD_ACCOUNT_ACCESS_COST_REDUCED");
     constants.COLD_ACCOUNT_ACCESS_COST          = getConstant(romJson, "COLD_ACCOUNT_ACCESS_COST");
     constants.EXP_BYTE_GAS                      = getConstant(romJson, "EXP_BYTE_GAS");
