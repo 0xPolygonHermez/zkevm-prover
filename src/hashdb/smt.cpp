@@ -671,7 +671,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t block, uint64_t tx, Databas
 #endif
                 }
                 if ( mode == "deleteNotFound") {
-                    bool siblingKey = keys[level] ? false : true;
+                    bool siblingKey = keys[level] ? 0 : 1;
                     Goldilocks::Element siblingRoot[4];
                     for (uint64_t i=0; i<4; i++) siblingRoot[i] = siblings[level][siblingKey*4+i];
                     string siblingRootString = fea2string(fr, siblingRoot);

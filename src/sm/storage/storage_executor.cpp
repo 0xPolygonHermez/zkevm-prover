@@ -9,6 +9,8 @@
 #include "exit_process.hpp"
 #include "climb_key_executor.hpp"
 
+#define LOG_STORAGE_EXECUTOR_ROM_LINE 1
+
 using json = nlohmann::json;
 using namespace std;
 
@@ -41,12 +43,14 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
         uint64_t nexti = (i+1)%N;
 
 #ifdef LOG_STORAGE_EXECUTOR_ROM_LINE
+        string source = "";
         if (rom.line[l].funcName!="isAlmostEndPolynomial")
         {
-            rom.line[l].print(l); // Print the rom line content
+            source = rom.line[l].fileName.substr(8, rom.line[l].fileName.length() - 14) + ":" + to_string(rom.line[l].line);
+            printf("[SR%04d I%03d %-28s] %s\n", (int)l, (int)a, source.c_str(), rom.line[l].lineStr.c_str());
+            // rom.line[l].print(l); // Print the rom line content
         }
 #endif
-
         /*************/
         /* Selectors */
         /*************/
@@ -251,9 +255,9 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                         exitProcess();
                     }
 
-#ifdef LOG_STORAGE_EXECUTOR
-                    zklog.info("StorageExecutor GetSiblingLeftChildHash returns " + fea2string(fr, op));
-#endif
+// #ifdef LOG_STORAGE_EXECUTOR
+                    zklog.info("StorageExecutor GetSiblingLeftChildHash returns " + fea2string(fr, op) + " input=" + to_string(a));
+// #endif
                 }
                 else if (rom.line[l].funcName=="GetSiblingRightChildHash")
                 {
@@ -270,9 +274,9 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                         exitProcess();
                     }
 
-#ifdef LOG_STORAGE_EXECUTOR
-                    zklog.info("StorageExecutor GetSiblingRightChildHash returns " + fea2string(fr, op));
-#endif
+// #ifdef LOG_STORAGE_EXECUTOR
+                    zklog.info("StorageExecutor GetSiblingRightChildHash returns " + fea2string(fr, op) + " input=" + to_string(a));
+// #endif
                 }
 
                 // Return if value is zero
@@ -566,20 +570,20 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
         // If inOLD_ROOT then op=OLD_ROOT
         if (rom.line[l].inOLD_ROOT)
         {
-            op[0] = fr.add(op[0], fr.mul(pols.inOldRoot[i], pols.oldRoot0[i]));
-            op[1] = fr.add(op[1], fr.mul(pols.inOldRoot[i], pols.oldRoot1[i]));
-            op[2] = fr.add(op[2], fr.mul(pols.inOldRoot[i], pols.oldRoot2[i]));
-            op[3] = fr.add(op[3], fr.mul(pols.inOldRoot[i], pols.oldRoot3[i]));
+            op[0] = fr.add(op[0], pols.oldRoot0[i]);
+            op[1] = fr.add(op[1], pols.oldRoot1[i]);
+            op[2] = fr.add(op[2], pols.oldRoot2[i]);
+            op[3] = fr.add(op[3], pols.oldRoot3[i]);
             pols.inOldRoot[i] = fr.one();
         }
 
         // If inNEW_ROOT then op=NEW_ROOT
         if (rom.line[l].inNEW_ROOT)
         {
-            op[0] = fr.add(op[0], fr.mul(pols.inNewRoot[i], pols.newRoot0[i]));
-            op[1] = fr.add(op[1], fr.mul(pols.inNewRoot[i], pols.newRoot1[i]));
-            op[2] = fr.add(op[2], fr.mul(pols.inNewRoot[i], pols.newRoot2[i]));
-            op[3] = fr.add(op[3], fr.mul(pols.inNewRoot[i], pols.newRoot3[i]));
+            op[0] = fr.add(op[0], pols.newRoot0[i]);
+            op[1] = fr.add(op[1], pols.newRoot1[i]);
+            op[2] = fr.add(op[2], pols.newRoot2[i]);
+            op[3] = fr.add(op[3], pols.newRoot3[i]);
             pols.inNewRoot[i] = fr.one();
         }
 
@@ -907,6 +911,13 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                 exitProcess();
             }
 
+            if ( fr.toU64(pols.incCounter[i]) != action[a].getResult.proofHashCounter )
+            {
+                zklog.error("StorageExecutor() LATCH SET found action " + to_string(a) + " wrong incCounter=" + fr.toString(pols.incCounter[i], 10) + " mode=" + to_string(action[a].getResult.proofHashCounter));
+                exitProcess();
+            }
+
+
 #ifdef LOG_STORAGE_EXECUTOR
             zklog.info("StorageExecutor LATCH GET");
 #endif
@@ -997,6 +1008,13 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
                 exitProcess();
             }
 
+            // Check that final level state is consistent
+            if ( fr.toU64(pols.incCounter[i]) != action[a].setResult.proofHashCounter )
+            {
+                zklog.error("StorageExecutor() LATCH SET found action " + to_string(a) + " wrong incCounter=" + fr.toString(pols.incCounter[i], 10) + " mode=" + to_string(action[a].setResult.proofHashCounter));
+                exitProcess();
+            }
+
 #ifdef LOG_STORAGE_EXECUTOR
             zklog.info("StorageExecutor LATCH SET");
 #endif
@@ -1021,6 +1039,14 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
 
             pols.latchSet[i] = fr.one();
         }
+
+#ifdef LOG_STORAGE_EXECUTOR_ROM_LINE
+        if (rom.line[l].funcName!="isAlmostEndPolynomial")
+        {
+            printf("[SR%04d I%03d %-28s] OP=[\x1B[35m%s\x1B[0m]\n", (int)l, (int)a, source.c_str(), fea2string(fr, op).c_str());
+        }
+#endif
+
 
         /***********/
         /* Setters */

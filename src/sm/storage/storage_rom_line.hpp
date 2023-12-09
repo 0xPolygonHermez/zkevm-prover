@@ -13,6 +13,7 @@ public:
     // Mandatory fields
     uint64_t line;
     string fileName;
+    string lineStr;
 
     // Instructions
     bool jmpz;

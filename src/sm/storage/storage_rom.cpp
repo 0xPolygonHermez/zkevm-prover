@@ -20,6 +20,7 @@ void StorageRom::load(json &j)
         // Mandatory fields
         romLine.line = j["program"][i]["line"];
         romLine.fileName = j["program"][i]["fileName"];
+        romLine.lineStr = j["program"][i]["lineStr"];
 
         json l = j["program"][i];
 
