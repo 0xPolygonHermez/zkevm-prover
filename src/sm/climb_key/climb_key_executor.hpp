@@ -36,6 +36,10 @@ public:
         config(config),
         N(PROVER_FORK_NAMESPACE::ClimbKeyCommitPols::pilDegree()) {}
     void execute (vector<ClimbKeyAction> &input, PROVER_FORK_NAMESPACE::ClimbKeyCommitPols &pols);
+
+    // To be used only for testing, since it allocates a lot of memory
+    void execute (vector<ClimbKeyAction> &action);
+
     static bool check(const Goldilocks::Element &current, const Goldilocks::Element &expected, bool bit);
     static bool calculate(const Goldilocks::Element &current, Goldilocks::Element &expected, bool bit);
 };

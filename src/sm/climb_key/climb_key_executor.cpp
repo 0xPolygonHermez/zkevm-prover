@@ -13,7 +13,7 @@ void ClimbKeyExecutor::execute (vector<ClimbKeyAction> &input, ClimbKeyCommitPol
 {
     static const uint64_t GL_CHUNKS[CLIMB_KEY_CLOCKS] = {0x00001, 0x3C000, 0x3FFFF, 0x003FF};
     static const uint64_t CHUNK_MASKS[CLIMB_KEY_CLOCKS] = {0x3FFFF, 0x3FFFF, 0x3FFFF, 0x003FF};
-    static const uint64_t CHUNK_FACTORS[CLIMB_KEY_CLOCKS] = {1, 1<<8, 1<<36, 1<<54};
+    static const uint64_t CHUNK_FACTORS[CLIMB_KEY_CLOCKS] = {1ULL, 1ULL << 18, 1ULL << 36, 1ULL << 54};
 
     // Check input size
     if (input.size()* CLIMB_KEY_CLOCKS > N)
@@ -92,6 +92,19 @@ void ClimbKeyExecutor::execute (vector<ClimbKeyAction> &input, ClimbKeyCommitPol
     }
 
     zklog.info("ClimbKeyExecutor successfully processed " + to_string(input.size()) + " climbkey actions (" + to_string((double(input.size())*CLIMB_KEY_CLOCKS*100)/N) + "%)");
+}
+
+void ClimbKeyExecutor::execute (vector<ClimbKeyAction> &action)
+{
+    void * pAddress = malloc(CommitPols::pilSize());
+    if (pAddress == NULL)
+    {
+        zklog.error("ClimbKeyExecutor::execute() failed calling malloc() of size=" + to_string(CommitPols::pilSize()));
+        exitProcess();
+    }
+    CommitPols cmPols(pAddress, CommitPols::pilDegree());
+    execute(action, cmPols.ClimbKey);
+    free(pAddress);
 }
 
 bool ClimbKeyHelper::calculate(Goldilocks &fr, const Goldilocks::Element &current, bool bit, Goldilocks::Element &result)

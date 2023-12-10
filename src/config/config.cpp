@@ -137,6 +137,7 @@ void Config::load(json &config)
     ParseBool(config, "runSHA256ScriptGenerator", "RUN_SHA256_SCRIPT_GENERATOR", runSHA256ScriptGenerator, false);
     ParseBool(config, "runKeccakTest", "RUN_KECCAK_TEST", runKeccakTest, false);
     ParseBool(config, "runStorageSMTest", "RUN_STORAGE_SM_TEST", runStorageSMTest, false);
+    ParseBool(config, "runClimbKeySMTest", "RUN_CLIMBKEY_SM_TEST", runClimbKeySMTest, false);
     ParseBool(config, "runBinarySMTest", "RUN_BINARY_SM_TEST", runBinarySMTest, false);
     ParseBool(config, "runMemAlignSMTest", "RUN_MEM_ALIGN_SM_TEST", runMemAlignSMTest, false);
     ParseBool(config, "runSHA256Test", "RUN_SHA256_TEST", runSHA256Test, false);
@@ -200,7 +201,7 @@ void Config::load(json &config)
     ParseU64(config, "kvDBMaxVersions", "HASHDB64_MAX_VERSIONS", kvDBMaxVersions, 131072);
     ParseString(config, "dbCacheSynchURL", "DB_CACHE_SYNCH_URL", dbCacheSynchURL, "");
     ParseString(config, "hashDBFileName", "HASHDB_FILE_NAME", hashDBFileName, "");
-    ParseU64(config, "hashDBFileSize", "HASHDB_FILE_SIZE", hashDBFileSize, 128);    
+    ParseU64(config, "hashDBFileSize", "HASHDB_FILE_SIZE", hashDBFileSize, 128);
     ParseString(config, "hashDBFolder", "HASHDB_FOLDER", hashDBFolder, "hashdb");
     ParseU16(config, "aggregatorServerPort", "AGGREGATOR_SERVER_PORT", aggregatorServerPort, 50081);
     ParseU16(config, "aggregatorClientPort", "AGGREGATOR_CLIENT_PORT", aggregatorClientPort, 50081);
@@ -333,7 +334,7 @@ void Config::print(void)
     if (runAggregatorServer)
         zklog.info("    runAggregatorServer=true");
     zklog.info("    runAggregatorClient=" + to_string(runAggregatorClient));
-    if (runAggregatorClientMock)        
+    if (runAggregatorClientMock)
         zklog.info("    runAggregatorClientMock=true");
     if (runFileGenBatchProof)
         zklog.info("    runFileGenBatchProof=true");
@@ -356,6 +357,8 @@ void Config::print(void)
         zklog.info("    runKeccakTest=true");
     if (runStorageSMTest)
         zklog.info("    runStorageSMTest=true");
+    if (runClimbKeySMTest)
+        zklog.info("    runClimbKeySMTest=true");
     if (runBinarySMTest)
         zklog.info("    runBinarySMTest=true");
     if (runMemAlignSMTest)
