@@ -513,6 +513,11 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         TimerStart(POSEIDON_G_SM_EXECUTE);
         poseidonGExecutor.execute(required.PoseidonG, commitPols.PoseidonG);
         TimerStopAndLog(POSEIDON_G_SM_EXECUTE);
+
+        // Execute the ClimbKey State Machine
+        TimerStart(CLIMB_KEY_SM_EXECUTE);
+        climbKeyExecutor.execute(required.ClimbKey, commitPols.ClimbKey);
+        TimerStopAndLog(CLIMB_KEY_SM_EXECUTE);
     }
     else
     {
