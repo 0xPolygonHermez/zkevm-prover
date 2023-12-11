@@ -268,6 +268,18 @@ bool fileExists (const string &fileName)
     return (iResult == 0);
 }
 
+uint64_t fileSize (const string &fileName)
+{
+    struct stat fileStat;
+    int iResult = stat( fileName.c_str(), &fileStat);
+    if (iResult != 0)
+    {
+        zklog.error("fileSize() could not find file " + fileName);
+        exitProcess();
+    }
+    return fileStat.st_size;
+}
+
 bool fileIsDirectory (const string &fileName)
 {
     struct stat fileStat;
