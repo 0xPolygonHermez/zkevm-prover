@@ -90,7 +90,8 @@ uint64_t HashDB64SimpleWorkflowTest (const Config& config)
                 keyValues.emplace_back(keyValue);
                 
             }
-            pHashDB->semiFlush(batchUUID, fea2string(fr, root), persistence);
+            pHashDB->finishTx(batchUUID, fea2string(fr, root), persistence);
+            pHashDB->finishBlock(batchUUID, fea2string(fr, root), persistence);
         }
         // Purge
         zkr = pHashDB->purge(batchUUID, root, persistence);

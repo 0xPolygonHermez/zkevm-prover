@@ -826,6 +826,15 @@ zkresult FullTracer::onFinishBlock (Context &ctx)
 
     // Reset logs
     logs.clear();
+    
+    // Call finishTx() with the current state root
+    if (!fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]))
+    {
+        zklog.error("FullTracer::onFinishBlock() failed calling fea2scalar(SR)");
+        return ZKR_SM_MAIN_FEA2SCALAR;
+    }
+    string state_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
+    ctx.pHashDB->finishBlock(ctx.proverRequest.uuid, state_root, ctx.proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);
 
     return ZKR_SUCCESS;
 }
@@ -1118,7 +1127,7 @@ zkresult FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
     lastError = "";
 
 #ifdef LOG_FULL_TRACER
-    zklog.info("FullTracer::onProcessTx() finalTrace.responses.size()=" + to_string(finalTrace.responses.size()));
+    zklog.info("FullTracer::onProcessTx() currentBlock.responses.size()=" + to_string(currentBlock.responses.size()));
 #endif
 #ifdef LOG_TIME_STATISTICS
     tms.add("onProcessTx", TimeDiff(t));
@@ -1583,11 +1592,11 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     numberOfOpcodesInThisTx = 0;
     lastErrorOpcode = 0;
 
-    // Call semiFlush
-    ctx.pHashDB->semiFlush(ctx.proverRequest.uuid, response.state_root, ctx.proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);
+    // Call finishTx()
+    ctx.pHashDB->finishTx(ctx.proverRequest.uuid, response.state_root, ctx.proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);
 
 #ifdef LOG_FULL_TRACER
-    zklog.info("FullTracer::onFinishTx() txCount=" + to_string(txCount) + " finalTrace.responses.size()=" + to_string(finalTrace.responses.size()) + " create_address=" + response.create_address + " state_root=" + response.state_root);
+    zklog.info("FullTracer::onFinishTx() txIndex=" + to_string(txIndex) + " currentBlock.responses.size()=" + to_string(currentBlock.responses.size()) + " create_address=" + response.create_address + " state_root=" + response.state_root);
 #endif
 #ifdef LOG_TIME_STATISTICS
     tms.add("onFinishTx", TimeDiff(t));
@@ -1739,8 +1748,8 @@ zkresult FullTracer::onFinishTx (ContextC &ctxc)
     numberOfOpcodesInThisTx = 0;
     lastErrorOpcode = 0;
 
-    // Call semiFlush
-    ctxc.pHashDB->semiFlush(ctxc.proverRequest.uuid, response.state_root, ctxc.proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);
+    // Call finishTx()
+    ctxc.pHashDB->finishTx(ctxc.proverRequest.uuid, response.state_root, ctxc.proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);
 
 #ifdef LOG_FULL_TRACER
     zklog.info("FullTracer::onFinishTx() txCount=" + to_string(txCount) + " finalTrace.responses.size()=" + to_string(finalTrace.responses.size()) + " create_address=" + response.create_address + " state_root=" + response.state_root);

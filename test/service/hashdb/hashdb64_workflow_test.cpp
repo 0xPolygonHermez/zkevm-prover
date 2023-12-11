@@ -185,7 +185,8 @@ uint64_t HashDB64WorkflowTest (const Config& config)
             } // For every program
 
             gettimeofday(&t, NULL);
-            pHashDB->semiFlush(batchUUID, fea2string(fr, root), persistence);
+            pHashDB->finishTx(batchUUID, fea2string(fr, root), persistence);
+            pHashDB->finishBlock(batchUUID, fea2string(fr, root), persistence);
             timeMetricStorage.add("semiFlush", TimeDiff(t));
 
         } // For every tx

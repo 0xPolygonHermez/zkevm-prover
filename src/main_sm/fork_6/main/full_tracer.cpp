@@ -974,8 +974,9 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     numberOfOpcodesInThisTx = 0;
     lastErrorOpcode = 0;
 
-    // Call semiFlush
-    ctx.pHashDB->semiFlush(ctx.proverRequest.uuid, response.state_root, ctx.proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);
+    // Call finishTx() and finishBlock()
+    ctx.pHashDB->finishTx(ctx.proverRequest.uuid, response.state_root, ctx.proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);
+    ctx.pHashDB->finishBlock(ctx.proverRequest.uuid, response.state_root, ctx.proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);
 
 #ifdef LOG_FULL_TRACER
     zklog.info("FullTracer::onFinishTx() txCount=" + to_string(txCount) + " finalTrace.responses.size()=" + to_string(finalTrace.responses.size()) + " create_address=" + response.create_address + " state_root=" + response.state_root);

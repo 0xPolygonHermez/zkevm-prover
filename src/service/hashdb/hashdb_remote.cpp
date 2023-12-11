@@ -345,6 +345,28 @@ void HashDBRemote::loadProgramDB(const DatabaseMap::ProgramMap &input, const boo
 #endif
 }
 
+void HashDBRemote::finishTx (const string &batchUUID, const string &newStateRoot, const Persistence persistence)
+{
+    ::grpc::ClientContext context;
+    ::hashdb::v1::FinishTxRequest request;
+    request.set_batch_uuid(batchUUID);
+    request.set_new_state_root(newStateRoot);
+    request.set_persistence((hashdb::v1::Persistence)persistence);
+    ::google::protobuf::Empty response;
+    grpc::Status s = stub->FinishTx(&context, request, &response);
+}
+
+void HashDBRemote::finishBlock (const string &batchUUID, const string &newStateRoot, const Persistence persistence)
+{
+    ::grpc::ClientContext context;
+    ::hashdb::v1::FinishBlockRequest request;
+    request.set_batch_uuid(batchUUID);
+    request.set_new_state_root(newStateRoot);
+    request.set_persistence((hashdb::v1::Persistence)persistence);
+    ::google::protobuf::Empty response;
+    grpc::Status s = stub->FinishBlock(&context, request, &response);
+}
+
 zkresult HashDBRemote::flush(const string &batchUUID, const string &newStateRoot, const Persistence persistence, uint64_t &flushId, uint64_t &storedFlushId)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
@@ -368,17 +390,6 @@ zkresult HashDBRemote::flush(const string &batchUUID, const string &newStateRoot
     tms.add("flush", TimeDiff(t));
 #endif
     return static_cast<zkresult>(response.result().code());
-}
-
-void HashDBRemote::semiFlush (const string &batchUUID, const string &newStateRoot, const Persistence persistence)
-{
-    ::grpc::ClientContext context;
-    ::hashdb::v1::SemiFlushRequest request;
-    request.set_batch_uuid(batchUUID);
-    request.set_new_state_root(newStateRoot);
-    request.set_persistence((hashdb::v1::Persistence)persistence);
-    ::google::protobuf::Empty response;
-    grpc::Status s = stub->SemiFlush(&context, request, &response);
 }
 
 zkresult HashDBRemote::purge (const string &batchUUID, const Goldilocks::Element (&newStateRoot)[4], const Persistence persistence)

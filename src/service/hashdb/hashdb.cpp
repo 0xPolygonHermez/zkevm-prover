@@ -378,6 +378,45 @@ void HashDB::loadProgramDB(const DatabaseMap::ProgramMap &input, const bool pers
 #endif
 }
 
+void HashDB::finishTx (const string &batchUUID, const string &newStateRoot, const Persistence persistence)
+{
+    if (config.hashDB64)
+    {
+        if (config.stateManager && (batchUUID.size() != 0))
+        {
+            stateManager64.semiFlush(batchUUID, newStateRoot, persistence);
+        }
+    }
+    else
+    {
+        if (config.stateManager && (batchUUID.size() != 0))
+        {
+            stateManager.finishTx(batchUUID, newStateRoot, persistence);
+        }
+        else
+        {
+            db.semiFlush();
+        }
+    }
+}
+void HashDB::finishBlock (const string &batchUUID, const string &newStateRoot, const Persistence persistence)
+{
+    if (config.hashDB64)
+    {
+    }
+    else
+    {
+        if (config.stateManager && (batchUUID.size() != 0))
+        {
+            stateManager.finishBlock(batchUUID, newStateRoot, persistence);
+        }
+        else
+        {
+            db.semiFlush();
+        }
+    }
+}
+
 zkresult HashDB::flush (const string &batchUUID, const string &newStateRoot, const Persistence persistence, uint64_t &flushId, uint64_t &storedFlushId)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB
@@ -412,28 +451,6 @@ zkresult HashDB::flush (const string &batchUUID, const string &newStateRoot, con
 #endif
 
     return result;
-}
-
-void HashDB::semiFlush (const string &batchUUID, const string &newStateRoot, const Persistence persistence)
-{
-    if (config.hashDB64)
-    {
-        if (config.stateManager && (batchUUID.size() != 0))
-        {
-            stateManager64.semiFlush(batchUUID, newStateRoot, persistence);
-        }
-    }
-    else
-    {
-        if (config.stateManager && (batchUUID.size() != 0))
-        {
-            stateManager.semiFlush(batchUUID, newStateRoot, persistence);
-        }
-        else
-        {
-            db.semiFlush();
-        }
-    }
 }
 
 zkresult HashDB::purge (const string &batchUUID, const Goldilocks::Element (&newStateRoot)[4], const Persistence persistence)

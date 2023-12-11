@@ -76,10 +76,19 @@ zkresult StateManager::setStateRoot (const string &batchUUID, uint64_t block, ui
 
         // Create a block state to insert
         BlockState blockState;
+        blockState.oldStateRoot = stateRoot;
         
         // Insert the block state
         for (uint64_t i=0; i<blocksToCreate; i++)
         {
+            if ((i+1) == blocksToCreate)
+            {
+                blockState.currentStateRoot.clear();
+            }
+            else
+            {
+                blockState.currentStateRoot = stateRoot;
+            }
             batchState.blockState.emplace_back(blockState);
         }
 
@@ -443,7 +452,7 @@ bool IsInvalid(TxSubState &txSubState)
     return !txSubState.bValid;
 }
 
-zkresult StateManager::semiFlush (const string &batchUUID, const string &_stateRoot, const Persistence persistence)
+zkresult StateManager::finishTx (const string &batchUUID, const string &_stateRoot, const Persistence persistence)
 {
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     struct timeval t;
@@ -457,12 +466,12 @@ zkresult StateManager::semiFlush (const string &batchUUID, const string &_stateR
     // Check persistence range
     if (persistence >= PERSISTENCE_SIZE)
     {
-        zklog.error("StateManager::semiFlush() invalid persistence batchUUID=" + batchUUID + " stateRoot=" + stateRoot + " persistence=" + persistence2string(persistence));
+        zklog.error("StateManager::finishTx() invalid persistence batchUUID=" + batchUUID + " stateRoot=" + stateRoot + " persistence=" + persistence2string(persistence));
         return ZKR_STATE_MANAGER;
     }
 
 #ifdef LOG_STATE_MANAGER
-    zklog.info("StateManager::semiFlush() batchUUID=" + batchUUID + " stateRoot=" + stateRoot + " persistence=" + persistence2string(persistence));
+    zklog.info("StateManager::finishTx() batchUUID=" + batchUUID + " stateRoot=" + stateRoot + " persistence=" + persistence2string(persistence));
 #endif
 
     Lock();
@@ -473,10 +482,10 @@ zkresult StateManager::semiFlush (const string &batchUUID, const string &_stateR
     it = state.find(batchUUID);
     if (it == state.end())
     {
-        zklog.warning("StateManager::semiFlush() found no batch state for batch UUID=" + batchUUID + "; normal if no SMT activity happened");
+        zklog.warning("StateManager::finishTx() found no batch state for batch UUID=" + batchUUID + "; normal if no SMT activity happened");
  
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-        //batchState.timeMetricStorage.add("semiFlush UUID not found", TimeDiff(t));
+        //batchState.timeMetricStorage.add("finishTx UUID not found", TimeDiff(t));
         //batchState.timeMetricStorage.print("State Manager calls");
 #endif
         Unlock();
@@ -487,7 +496,7 @@ zkresult StateManager::semiFlush (const string &batchUUID, const string &_stateR
     // Check currentBlock range
     if (batchState.currentBlock >= batchState.blockState.size())
     {
-        zklog.error("StateManager::semiFlush() found batchState.currentBlock=" + to_string(batchState.currentBlock) + " >= batchState.blockState.size=" + to_string(batchState.blockState.size()) + " batchUUID=" + batchUUID + " stateRoot=" + stateRoot + " persistence=" + persistence2string(persistence));
+        zklog.error("StateManager::finishTx() found batchState.currentBlock=" + to_string(batchState.currentBlock) + " >= batchState.blockState.size=" + to_string(batchState.blockState.size()) + " batchUUID=" + batchUUID + " stateRoot=" + stateRoot + " persistence=" + persistence2string(persistence));
         Unlock();
         return ZKR_STATE_MANAGER;
     }
@@ -496,7 +505,7 @@ zkresult StateManager::semiFlush (const string &batchUUID, const string &_stateR
     // Check currentTx range
     if (blockState.currentTx >= blockState.txState.size())
     {
-        zklog.error("StateManager::semiFlush() found blockState.currentTx=" + to_string(blockState.currentTx) + " >= blockState.txState.size=" + to_string(blockState.txState.size()) + " batchUUID=" + batchUUID + " stateRoot=" + stateRoot + " persistence=" + persistence2string(persistence));
+        zklog.error("StateManager::finishTx() found blockState.currentTx=" + to_string(blockState.currentTx) + " >= blockState.txState.size=" + to_string(blockState.txState.size()) + " batchUUID=" + batchUUID + " stateRoot=" + stateRoot + " persistence=" + persistence2string(persistence));
         Unlock();
         return ZKR_STATE_MANAGER;
     }
@@ -548,7 +557,120 @@ zkresult StateManager::semiFlush (const string &batchUUID, const string &_stateR
     }
     
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-    batchState.timeMetricStorage.add("semi flush", TimeDiff(t));
+    batchState.timeMetricStorage.add("finishTx", TimeDiff(t));
+#endif
+
+    Unlock();
+
+    return ZKR_SUCCESS;
+}
+
+zkresult StateManager::finishBlock (const string &batchUUID, const string &_stateRoot, const Persistence persistence)
+{
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+    struct timeval t;
+    gettimeofday(&t, NULL);
+#endif
+
+    // Normalize state root format
+    string stateRoot = NormalizeToNFormat(_stateRoot, 64);
+    stateRoot = stringToLower(stateRoot);
+
+    // Check persistence range
+    if (persistence >= PERSISTENCE_SIZE)
+    {
+        zklog.error("StateManager::finishBlock() invalid persistence batchUUID=" + batchUUID + " stateRoot=" + stateRoot + " persistence=" + persistence2string(persistence));
+        return ZKR_STATE_MANAGER;
+    }
+
+#ifdef LOG_STATE_MANAGER
+    zklog.info("StateManager::finishBlock() batchUUID=" + batchUUID + " stateRoot=" + stateRoot + " persistence=" + persistence2string(persistence));
+#endif
+
+    Lock();
+
+    unordered_map<string, BatchState>::iterator it;
+
+    // Find batch state for this uuid
+    it = state.find(batchUUID);
+    if (it == state.end())
+    {
+        zklog.warning("StateManager::finishBlock() found no batch state for batch UUID=" + batchUUID + "; normal if no SMT activity happened");
+ 
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+        //batchState.timeMetricStorage.add("finishBlock UUID not found", TimeDiff(t));
+        //batchState.timeMetricStorage.print("State Manager calls");
+#endif
+        Unlock();
+        return ZKR_SUCCESS;
+    }
+    BatchState &batchState = it->second;
+
+    // Check currentBlock range
+    if (batchState.currentBlock >= batchState.blockState.size())
+    {
+        zklog.error("StateManager::finishBlock() found batchState.currentBlock=" + to_string(batchState.currentBlock) + " >= batchState.blockState.size=" + to_string(batchState.blockState.size()) + " batchUUID=" + batchUUID + " stateRoot=" + stateRoot + " persistence=" + persistence2string(persistence));
+        Unlock();
+        return ZKR_STATE_MANAGER;
+    }
+    BlockState &blockState = batchState.blockState[batchState.currentBlock];
+
+    // Check currentTx range
+    if (blockState.currentTx >= blockState.txState.size())
+    {
+        zklog.error("StateManager::finishBlock() found blockState.currentTx=" + to_string(blockState.currentTx) + " >= blockState.txState.size=" + to_string(blockState.txState.size()) + " batchUUID=" + batchUUID + " stateRoot=" + stateRoot + " persistence=" + persistence2string(persistence));
+        Unlock();
+        return ZKR_STATE_MANAGER;
+    }
+
+    // Get a reference to the tx state
+    TxState &txState = blockState.txState[blockState.currentTx];
+    TxPersistenceState &txPersistenceState = txState.persistence[persistence];
+
+    if (txPersistenceState.newStateRoot == stateRoot)
+    {
+        // This is the expected case
+    }
+    else if (txPersistenceState.oldStateRoot == stateRoot)
+    {
+        if (config.stateManagerPurge)
+        {
+            // The block ended up with the same state root as the beginning, so we can delete all data
+            blockState.txState.clear();
+            blockState.currentStateRoot = stateRoot;
+            blockState.currentTx = 0;
+        }
+    }
+    else
+    {
+        if (config.stateManagerPurge)
+        {
+            // Search for the point at which we reach this state, and delete the rest
+            bool bFound = false;
+            uint64_t i=0;
+            uint64_t txStateSize = blockState.txState.size();
+            for (i=0; i<txStateSize; i++)
+            {
+                if (!bFound && blockState.txState[i].persistence[persistence].oldStateRoot == stateRoot)
+                {
+                    bFound = true;
+                    break;
+                }
+            }
+            if (bFound)
+            {
+                blockState.currentStateRoot = stateRoot;
+                blockState.currentTx = (i == 0) ? 0 : i-1;
+                for (; i<txStateSize; i++)
+                {
+                    blockState.txState.pop_back();
+                }
+            }
+        }
+    }
+    
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+    batchState.timeMetricStorage.add("finishBlock", TimeDiff(t));
 #endif
 
     Unlock();

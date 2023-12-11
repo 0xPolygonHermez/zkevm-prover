@@ -28,8 +28,9 @@ service HashDBService {
     rpc GetProgram(GetProgramRequest) returns (GetProgramResponse) {}
     rpc LoadDB(LoadDBRequest) returns (google.protobuf.Empty) {}
     rpc LoadProgramDB(LoadProgramDBRequest) returns (google.protobuf.Empty) {}
+    rpc FinishTx (FinishTxRequest) returns (google.protobuf.Empty) {}
+    rpc FinishBlock (FinishBlockRequest) returns (google.protobuf.Empty) {}
     rpc Flush (FlushRequest) returns (FlushResponse) {}
-    rpc SemiFlush (SemiFlushRequest) returns (google.protobuf.Empty) {}
     rpc GetFlushStatus (google.protobuf.Empty) returns (GetFlushStatusResponse) {}
     rpc GetFlushData (GetFlushDataRequest) returns (GetFlushDataResponse) {}
     rpc ConsolidateState (ConsolidateStateRequest) returns (ConsolidateStateResponse) {}
@@ -152,12 +153,24 @@ message FlushRequest {
 }
 
 /**
- * @dev SemiFlushRequest
- * @param {batch_uuid} - indicates a unique identifier of the current batch or session which data will be semi-flushed
+ * @dev FinishTxRequest
+ * @param {batch_uuid} - indicates a unique identifier of the current batch or session which tx will be finished
  * @param {new_state_root} - state root at this point of the execution
  * @param {persistence} - indicates if it should be stored only in CACHE, in the SQL DATABASE, or it is just TEMPORARY and should be deleted at the flush of this batch UUID
  */
-message SemiFlushRequest {
+message FinishTxRequest {
+    string batch_uuid = 1;
+    string new_state_root = 2;
+    Persistence persistence = 3;
+}
+
+/**
+ * @dev FinishBlockRequest
+ * @param {batch_uuid} - indicates a unique identifier of the current batch or session which block will be finished
+ * @param {new_state_root} - state root at this point of the execution
+ * @param {persistence} - indicates if it should be stored only in CACHE, in the SQL DATABASE, or it is just TEMPORARY and should be deleted at the flush of this batch UUID
+ */
+message FinishBlockRequest {
     string batch_uuid = 1;
     string new_state_root = 2;
     Persistence persistence = 3;

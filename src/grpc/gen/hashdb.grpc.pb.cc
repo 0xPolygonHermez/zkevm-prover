@@ -30,8 +30,9 @@ static const char* HashDBService_method_names[] = {
   "/hashdb.v1.HashDBService/GetProgram",
   "/hashdb.v1.HashDBService/LoadDB",
   "/hashdb.v1.HashDBService/LoadProgramDB",
+  "/hashdb.v1.HashDBService/FinishTx",
+  "/hashdb.v1.HashDBService/FinishBlock",
   "/hashdb.v1.HashDBService/Flush",
-  "/hashdb.v1.HashDBService/SemiFlush",
   "/hashdb.v1.HashDBService/GetFlushStatus",
   "/hashdb.v1.HashDBService/GetFlushData",
   "/hashdb.v1.HashDBService/ConsolidateState",
@@ -55,15 +56,16 @@ HashDBService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& chan
   , rpcmethod_GetProgram_(HashDBService_method_names[4], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_LoadDB_(HashDBService_method_names[5], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_LoadProgramDB_(HashDBService_method_names[6], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_Flush_(HashDBService_method_names[7], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_SemiFlush_(HashDBService_method_names[8], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_GetFlushStatus_(HashDBService_method_names[9], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_GetFlushData_(HashDBService_method_names[10], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_ConsolidateState_(HashDBService_method_names[11], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_Purge_(HashDBService_method_names[12], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_ReadTree_(HashDBService_method_names[13], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_CancelBatch_(HashDBService_method_names[14], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_ResetDB_(HashDBService_method_names[15], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_FinishTx_(HashDBService_method_names[7], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_FinishBlock_(HashDBService_method_names[8], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_Flush_(HashDBService_method_names[9], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_GetFlushStatus_(HashDBService_method_names[10], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_GetFlushData_(HashDBService_method_names[11], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_ConsolidateState_(HashDBService_method_names[12], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_Purge_(HashDBService_method_names[13], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_ReadTree_(HashDBService_method_names[14], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_CancelBatch_(HashDBService_method_names[15], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_ResetDB_(HashDBService_method_names[16], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status HashDBService::Stub::GetLatestStateRoot(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::hashdb::v1::GetLatestStateRootResponse* response) {
@@ -262,6 +264,62 @@ void HashDBService::Stub::experimental_async::LoadProgramDB(::grpc::ClientContex
   return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::google::protobuf::Empty>::Create(channel_.get(), cq, rpcmethod_LoadProgramDB_, context, request, false);
 }
 
+::grpc::Status HashDBService::Stub::FinishTx(::grpc::ClientContext* context, const ::hashdb::v1::FinishTxRequest& request, ::google::protobuf::Empty* response) {
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_FinishTx_, context, request, response);
+}
+
+void HashDBService::Stub::experimental_async::FinishTx(::grpc::ClientContext* context, const ::hashdb::v1::FinishTxRequest* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_FinishTx_, context, request, response, std::move(f));
+}
+
+void HashDBService::Stub::experimental_async::FinishTx(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_FinishTx_, context, request, response, std::move(f));
+}
+
+void HashDBService::Stub::experimental_async::FinishTx(::grpc::ClientContext* context, const ::hashdb::v1::FinishTxRequest* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_FinishTx_, context, request, response, reactor);
+}
+
+void HashDBService::Stub::experimental_async::FinishTx(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_FinishTx_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* HashDBService::Stub::AsyncFinishTxRaw(::grpc::ClientContext* context, const ::hashdb::v1::FinishTxRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::google::protobuf::Empty>::Create(channel_.get(), cq, rpcmethod_FinishTx_, context, request, true);
+}
+
+::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* HashDBService::Stub::PrepareAsyncFinishTxRaw(::grpc::ClientContext* context, const ::hashdb::v1::FinishTxRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::google::protobuf::Empty>::Create(channel_.get(), cq, rpcmethod_FinishTx_, context, request, false);
+}
+
+::grpc::Status HashDBService::Stub::FinishBlock(::grpc::ClientContext* context, const ::hashdb::v1::FinishBlockRequest& request, ::google::protobuf::Empty* response) {
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_FinishBlock_, context, request, response);
+}
+
+void HashDBService::Stub::experimental_async::FinishBlock(::grpc::ClientContext* context, const ::hashdb::v1::FinishBlockRequest* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_FinishBlock_, context, request, response, std::move(f));
+}
+
+void HashDBService::Stub::experimental_async::FinishBlock(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)> f) {
+  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_FinishBlock_, context, request, response, std::move(f));
+}
+
+void HashDBService::Stub::experimental_async::FinishBlock(::grpc::ClientContext* context, const ::hashdb::v1::FinishBlockRequest* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_FinishBlock_, context, request, response, reactor);
+}
+
+void HashDBService::Stub::experimental_async::FinishBlock(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_FinishBlock_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* HashDBService::Stub::AsyncFinishBlockRaw(::grpc::ClientContext* context, const ::hashdb::v1::FinishBlockRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::google::protobuf::Empty>::Create(channel_.get(), cq, rpcmethod_FinishBlock_, context, request, true);
+}
+
+::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* HashDBService::Stub::PrepareAsyncFinishBlockRaw(::grpc::ClientContext* context, const ::hashdb::v1::FinishBlockRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::google::protobuf::Empty>::Create(channel_.get(), cq, rpcmethod_FinishBlock_, context, request, false);
+}
+
 ::grpc::Status HashDBService::Stub::Flush(::grpc::ClientContext* context, const ::hashdb::v1::FlushRequest& request, ::hashdb::v1::FlushResponse* response) {
   return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_Flush_, context, request, response);
 }
@@ -288,34 +346,6 @@ void HashDBService::Stub::experimental_async::Flush(::grpc::ClientContext* conte
 
 ::grpc::ClientAsyncResponseReader< ::hashdb::v1::FlushResponse>* HashDBService::Stub::PrepareAsyncFlushRaw(::grpc::ClientContext* context, const ::hashdb::v1::FlushRequest& request, ::grpc::CompletionQueue* cq) {
   return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::hashdb::v1::FlushResponse>::Create(channel_.get(), cq, rpcmethod_Flush_, context, request, false);
-}
-
-::grpc::Status HashDBService::Stub::SemiFlush(::grpc::ClientContext* context, const ::hashdb::v1::SemiFlushRequest& request, ::google::protobuf::Empty* response) {
-  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_SemiFlush_, context, request, response);
-}
-
-void HashDBService::Stub::experimental_async::SemiFlush(::grpc::ClientContext* context, const ::hashdb::v1::SemiFlushRequest* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_SemiFlush_, context, request, response, std::move(f));
-}
-
-void HashDBService::Stub::experimental_async::SemiFlush(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, std::function<void(::grpc::Status)> f) {
-  ::grpc_impl::internal::CallbackUnaryCall(stub_->channel_.get(), stub_->rpcmethod_SemiFlush_, context, request, response, std::move(f));
-}
-
-void HashDBService::Stub::experimental_async::SemiFlush(::grpc::ClientContext* context, const ::hashdb::v1::SemiFlushRequest* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_SemiFlush_, context, request, response, reactor);
-}
-
-void HashDBService::Stub::experimental_async::SemiFlush(::grpc::ClientContext* context, const ::grpc::ByteBuffer* request, ::google::protobuf::Empty* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc_impl::internal::ClientCallbackUnaryFactory::Create(stub_->channel_.get(), stub_->rpcmethod_SemiFlush_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* HashDBService::Stub::AsyncSemiFlushRaw(::grpc::ClientContext* context, const ::hashdb::v1::SemiFlushRequest& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::google::protobuf::Empty>::Create(channel_.get(), cq, rpcmethod_SemiFlush_, context, request, true);
-}
-
-::grpc::ClientAsyncResponseReader< ::google::protobuf::Empty>* HashDBService::Stub::PrepareAsyncSemiFlushRaw(::grpc::ClientContext* context, const ::hashdb::v1::SemiFlushRequest& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc_impl::internal::ClientAsyncResponseReaderFactory< ::google::protobuf::Empty>::Create(channel_.get(), cq, rpcmethod_SemiFlush_, context, request, false);
 }
 
 ::grpc::Status HashDBService::Stub::GetFlushStatus(::grpc::ClientContext* context, const ::google::protobuf::Empty& request, ::hashdb::v1::GetFlushStatusResponse* response) {
@@ -588,6 +618,26 @@ HashDBService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       HashDBService_method_names[7],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::FinishTxRequest, ::google::protobuf::Empty>(
+          [](HashDBService::Service* service,
+             ::grpc_impl::ServerContext* ctx,
+             const ::hashdb::v1::FinishTxRequest* req,
+             ::google::protobuf::Empty* resp) {
+               return service->FinishTx(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      HashDBService_method_names[8],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::FinishBlockRequest, ::google::protobuf::Empty>(
+          [](HashDBService::Service* service,
+             ::grpc_impl::ServerContext* ctx,
+             const ::hashdb::v1::FinishBlockRequest* req,
+             ::google::protobuf::Empty* resp) {
+               return service->FinishBlock(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      HashDBService_method_names[9],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::FlushRequest, ::hashdb::v1::FlushResponse>(
           [](HashDBService::Service* service,
              ::grpc_impl::ServerContext* ctx,
@@ -596,17 +646,7 @@ HashDBService::Service::Service() {
                return service->Flush(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      HashDBService_method_names[8],
-      ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::SemiFlushRequest, ::google::protobuf::Empty>(
-          [](HashDBService::Service* service,
-             ::grpc_impl::ServerContext* ctx,
-             const ::hashdb::v1::SemiFlushRequest* req,
-             ::google::protobuf::Empty* resp) {
-               return service->SemiFlush(ctx, req, resp);
-             }, this)));
-  AddMethod(new ::grpc::internal::RpcServiceMethod(
-      HashDBService_method_names[9],
+      HashDBService_method_names[10],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::google::protobuf::Empty, ::hashdb::v1::GetFlushStatusResponse>(
           [](HashDBService::Service* service,
@@ -616,7 +656,7 @@ HashDBService::Service::Service() {
                return service->GetFlushStatus(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      HashDBService_method_names[10],
+      HashDBService_method_names[11],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::GetFlushDataRequest, ::hashdb::v1::GetFlushDataResponse>(
           [](HashDBService::Service* service,
@@ -626,7 +666,7 @@ HashDBService::Service::Service() {
                return service->GetFlushData(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      HashDBService_method_names[11],
+      HashDBService_method_names[12],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::ConsolidateStateRequest, ::hashdb::v1::ConsolidateStateResponse>(
           [](HashDBService::Service* service,
@@ -636,7 +676,7 @@ HashDBService::Service::Service() {
                return service->ConsolidateState(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      HashDBService_method_names[12],
+      HashDBService_method_names[13],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::PurgeRequest, ::hashdb::v1::PurgeResponse>(
           [](HashDBService::Service* service,
@@ -646,7 +686,7 @@ HashDBService::Service::Service() {
                return service->Purge(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      HashDBService_method_names[13],
+      HashDBService_method_names[14],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::ReadTreeRequest, ::hashdb::v1::ReadTreeResponse>(
           [](HashDBService::Service* service,
@@ -656,7 +696,7 @@ HashDBService::Service::Service() {
                return service->ReadTree(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      HashDBService_method_names[14],
+      HashDBService_method_names[15],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::hashdb::v1::CancelBatchRequest, ::hashdb::v1::CancelBatchResponse>(
           [](HashDBService::Service* service,
@@ -666,7 +706,7 @@ HashDBService::Service::Service() {
                return service->CancelBatch(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      HashDBService_method_names[15],
+      HashDBService_method_names[16],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< HashDBService::Service, ::google::protobuf::Empty, ::hashdb::v1::ResetDBResponse>(
           [](HashDBService::Service* service,
@@ -729,14 +769,21 @@ HashDBService::Service::~Service() {
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
 }
 
-::grpc::Status HashDBService::Service::Flush(::grpc::ServerContext* context, const ::hashdb::v1::FlushRequest* request, ::hashdb::v1::FlushResponse* response) {
+::grpc::Status HashDBService::Service::FinishTx(::grpc::ServerContext* context, const ::hashdb::v1::FinishTxRequest* request, ::google::protobuf::Empty* response) {
   (void) context;
   (void) request;
   (void) response;
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
 }
 
-::grpc::Status HashDBService::Service::SemiFlush(::grpc::ServerContext* context, const ::hashdb::v1::SemiFlushRequest* request, ::google::protobuf::Empty* response) {
+::grpc::Status HashDBService::Service::FinishBlock(::grpc::ServerContext* context, const ::hashdb::v1::FinishBlockRequest* request, ::google::protobuf::Empty* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status HashDBService::Service::Flush(::grpc::ServerContext* context, const ::hashdb::v1::FlushRequest* request, ::hashdb::v1::FlushResponse* response) {
   (void) context;
   (void) request;
   (void) response;

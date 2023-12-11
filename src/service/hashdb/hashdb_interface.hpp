@@ -25,8 +25,9 @@ public:
     virtual zkresult getProgram         (const string &batchUUID, const Goldilocks::Element (&key)[4], vector<uint8_t> &data, DatabaseMap *dbReadLog) = 0;
     virtual void     loadDB             (const DatabaseMap::MTMap &input, const bool persistentconst, const Goldilocks::Element (&stateRoot)[4]) = 0;
     virtual void     loadProgramDB      (const DatabaseMap::ProgramMap &input, const bool persistent) = 0;
+    virtual void     finishTx           (const string &batchUUID, const string &newStateRoot, const Persistence persistence) = 0;
+    virtual void     finishBlock        (const string &batchUUID, const string &newStateRoot, const Persistence persistence) = 0;
     virtual zkresult flush              (const string &batchUUID, const string &newStateRoot, const Persistence persistence, uint64_t &flushId, uint64_t &storedFlushId) = 0;
-    virtual void     semiFlush          (const string &batchUUID, const string &newStateRoot, const Persistence persistence) = 0;
     virtual zkresult purge              (const string &batchUUID, const Goldilocks::Element (&newStateRoot)[4], const Persistence persistence) = 0;
     virtual zkresult consolidateState   (const Goldilocks::Element (&virtualStateRoot)[4], const Persistence persistence, Goldilocks::Element (&consolidatedStateRoot)[4], uint64_t &flushId, uint64_t &storedFlushId) = 0;
     virtual zkresult getFlushStatus     (uint64_t &storedFlushId, uint64_t &storingFlushId, uint64_t &lastFlushId, uint64_t &pendingToFlushNodes, uint64_t &pendingToFlushProgram, uint64_t &storingNodes, uint64_t &storingProgram, string &proverId) = 0;
