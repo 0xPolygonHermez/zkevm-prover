@@ -3775,7 +3775,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (!bProcessBatch)
                 {
                     // Copy ROM flags into the polynomials
-                    pols.arithEq4[i] = fr.one();
+                    pols.arithEq5[i] = fr.one();
 
                     ArithAction arithAction;
                     arithAction.x1 = x1;
