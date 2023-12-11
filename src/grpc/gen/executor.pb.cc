@@ -14,812 +14,755 @@
 #include <google/protobuf/wire_format.h>
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_Contract_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_ContractV2_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_DebugV2_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_FullTrace_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_FullTraceV2_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_InfoReadWrite_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_InfoReadWriteV2_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_L1DataV2_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_Log_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_LogV2_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_OverrideAccount_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_OverrideAccount_StateDiffEntry_DoNotUse_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_OverrideAccount_StateEntry_DoNotUse_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_OverrideAccountV2_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_OverrideAccountV2_StateDiffEntry_DoNotUse_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_OverrideAccountV2_StateEntry_DoNotUse_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_ProcessBatchRequest_DbEntry_DoNotUse_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_ProcessBatchRequest_StateOverrideEntry_DoNotUse_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_ProcessBatchRequestV2_ContractsBytecodeEntry_DoNotUse_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_ProcessBatchRequestV2_DbEntry_DoNotUse_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_ProcessBatchRequestV2_L1InfoTreeDataEntry_DoNotUse_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_ProcessBatchRequestV2_StateOverrideEntry_DoNotUse_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_ProcessBlockResponseV2_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_ProcessTransactionResponse_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_ProcessTransactionResponseV2_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_TraceConfig_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_TraceConfigV2_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_TransactionContext_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_TransactionContextV2_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_TransactionStep_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_TransactionStep_StorageEntry_DoNotUse_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_TransactionStepV2_executor_2eproto;
-extern PROTOBUF_INTERNAL_EXPORT_executor_2eproto ::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_TransactionStepV2_StorageEntry_DoNotUse_executor_2eproto;
+
+PROTOBUF_PRAGMA_INIT_SEG
+
+namespace _pb = ::PROTOBUF_NAMESPACE_ID;
+namespace _pbi = _pb::internal;
+
 namespace executor {
 namespace v1 {
-class ProcessBatchRequest_DbEntry_DoNotUseDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<ProcessBatchRequest_DbEntry_DoNotUse> _instance;
-} _ProcessBatchRequest_DbEntry_DoNotUse_default_instance_;
-class ProcessBatchRequest_ContractsBytecodeEntry_DoNotUseDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse> _instance;
-} _ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse_default_instance_;
-class ProcessBatchRequest_StateOverrideEntry_DoNotUseDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<ProcessBatchRequest_StateOverrideEntry_DoNotUse> _instance;
-} _ProcessBatchRequest_StateOverrideEntry_DoNotUse_default_instance_;
-class ProcessBatchRequestDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<ProcessBatchRequest> _instance;
-} _ProcessBatchRequest_default_instance_;
-class ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUseDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse> _instance;
-} _ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse_default_instance_;
-class ProcessBatchResponseDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<ProcessBatchResponse> _instance;
-} _ProcessBatchResponse_default_instance_;
-class GetFlushStatusResponseDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<GetFlushStatusResponse> _instance;
-} _GetFlushStatusResponse_default_instance_;
-class TraceConfigDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<TraceConfig> _instance;
-} _TraceConfig_default_instance_;
-class OverrideAccount_StateEntry_DoNotUseDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<OverrideAccount_StateEntry_DoNotUse> _instance;
-} _OverrideAccount_StateEntry_DoNotUse_default_instance_;
-class OverrideAccount_StateDiffEntry_DoNotUseDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<OverrideAccount_StateDiffEntry_DoNotUse> _instance;
-} _OverrideAccount_StateDiffEntry_DoNotUse_default_instance_;
-class OverrideAccountDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<OverrideAccount> _instance;
-} _OverrideAccount_default_instance_;
-class InfoReadWriteDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<InfoReadWrite> _instance;
-} _InfoReadWrite_default_instance_;
-class FullTraceDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<FullTrace> _instance;
-} _FullTrace_default_instance_;
-class TransactionContextDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<TransactionContext> _instance;
-} _TransactionContext_default_instance_;
-class TransactionStep_StorageEntry_DoNotUseDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<TransactionStep_StorageEntry_DoNotUse> _instance;
-} _TransactionStep_StorageEntry_DoNotUse_default_instance_;
-class TransactionStepDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<TransactionStep> _instance;
-} _TransactionStep_default_instance_;
-class ContractDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<Contract> _instance;
-} _Contract_default_instance_;
-class ProcessTransactionResponseDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<ProcessTransactionResponse> _instance;
-} _ProcessTransactionResponse_default_instance_;
-class LogDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<Log> _instance;
-} _Log_default_instance_;
-class ProcessBatchRequestV2_L1InfoTreeDataEntry_DoNotUseDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<ProcessBatchRequestV2_L1InfoTreeDataEntry_DoNotUse> _instance;
-} _ProcessBatchRequestV2_L1InfoTreeDataEntry_DoNotUse_default_instance_;
-class ProcessBatchRequestV2_DbEntry_DoNotUseDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<ProcessBatchRequestV2_DbEntry_DoNotUse> _instance;
-} _ProcessBatchRequestV2_DbEntry_DoNotUse_default_instance_;
-class ProcessBatchRequestV2_ContractsBytecodeEntry_DoNotUseDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<ProcessBatchRequestV2_ContractsBytecodeEntry_DoNotUse> _instance;
-} _ProcessBatchRequestV2_ContractsBytecodeEntry_DoNotUse_default_instance_;
-class ProcessBatchRequestV2_StateOverrideEntry_DoNotUseDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<ProcessBatchRequestV2_StateOverrideEntry_DoNotUse> _instance;
-} _ProcessBatchRequestV2_StateOverrideEntry_DoNotUse_default_instance_;
-class ProcessBatchRequestV2DefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<ProcessBatchRequestV2> _instance;
-} _ProcessBatchRequestV2_default_instance_;
-class L1DataV2DefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<L1DataV2> _instance;
-} _L1DataV2_default_instance_;
-class DebugV2DefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<DebugV2> _instance;
-} _DebugV2_default_instance_;
-class ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUseDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse> _instance;
-} _ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse_default_instance_;
-class ProcessBatchResponseV2DefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<ProcessBatchResponseV2> _instance;
-} _ProcessBatchResponseV2_default_instance_;
-class TraceConfigV2DefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<TraceConfigV2> _instance;
-} _TraceConfigV2_default_instance_;
-class OverrideAccountV2_StateEntry_DoNotUseDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<OverrideAccountV2_StateEntry_DoNotUse> _instance;
-} _OverrideAccountV2_StateEntry_DoNotUse_default_instance_;
-class OverrideAccountV2_StateDiffEntry_DoNotUseDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<OverrideAccountV2_StateDiffEntry_DoNotUse> _instance;
-} _OverrideAccountV2_StateDiffEntry_DoNotUse_default_instance_;
-class OverrideAccountV2DefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<OverrideAccountV2> _instance;
-} _OverrideAccountV2_default_instance_;
-class InfoReadWriteV2DefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<InfoReadWriteV2> _instance;
-} _InfoReadWriteV2_default_instance_;
-class FullTraceV2DefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<FullTraceV2> _instance;
-} _FullTraceV2_default_instance_;
-class TransactionContextV2DefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<TransactionContextV2> _instance;
-} _TransactionContextV2_default_instance_;
-class TransactionStepV2_StorageEntry_DoNotUseDefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<TransactionStepV2_StorageEntry_DoNotUse> _instance;
-} _TransactionStepV2_StorageEntry_DoNotUse_default_instance_;
-class TransactionStepV2DefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<TransactionStepV2> _instance;
-} _TransactionStepV2_default_instance_;
-class ContractV2DefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<ContractV2> _instance;
-} _ContractV2_default_instance_;
-class ProcessBlockResponseV2DefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<ProcessBlockResponseV2> _instance;
-} _ProcessBlockResponseV2_default_instance_;
-class ProcessTransactionResponseV2DefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<ProcessTransactionResponseV2> _instance;
-} _ProcessTransactionResponseV2_default_instance_;
-class LogV2DefaultTypeInternal {
- public:
-  ::PROTOBUF_NAMESPACE_ID::internal::ExplicitlyConstructed<LogV2> _instance;
-} _LogV2_default_instance_;
+PROTOBUF_CONSTEXPR ProcessBatchRequest_DbEntry_DoNotUse::ProcessBatchRequest_DbEntry_DoNotUse(
+    ::_pbi::ConstantInitialized) {}
+struct ProcessBatchRequest_DbEntry_DoNotUseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ProcessBatchRequest_DbEntry_DoNotUseDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ProcessBatchRequest_DbEntry_DoNotUseDefaultTypeInternal() {}
+  union {
+    ProcessBatchRequest_DbEntry_DoNotUse _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ProcessBatchRequest_DbEntry_DoNotUseDefaultTypeInternal _ProcessBatchRequest_DbEntry_DoNotUse_default_instance_;
+PROTOBUF_CONSTEXPR ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse::ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse(
+    ::_pbi::ConstantInitialized) {}
+struct ProcessBatchRequest_ContractsBytecodeEntry_DoNotUseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ProcessBatchRequest_ContractsBytecodeEntry_DoNotUseDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ProcessBatchRequest_ContractsBytecodeEntry_DoNotUseDefaultTypeInternal() {}
+  union {
+    ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ProcessBatchRequest_ContractsBytecodeEntry_DoNotUseDefaultTypeInternal _ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse_default_instance_;
+PROTOBUF_CONSTEXPR ProcessBatchRequest_StateOverrideEntry_DoNotUse::ProcessBatchRequest_StateOverrideEntry_DoNotUse(
+    ::_pbi::ConstantInitialized) {}
+struct ProcessBatchRequest_StateOverrideEntry_DoNotUseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ProcessBatchRequest_StateOverrideEntry_DoNotUseDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ProcessBatchRequest_StateOverrideEntry_DoNotUseDefaultTypeInternal() {}
+  union {
+    ProcessBatchRequest_StateOverrideEntry_DoNotUse _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ProcessBatchRequest_StateOverrideEntry_DoNotUseDefaultTypeInternal _ProcessBatchRequest_StateOverrideEntry_DoNotUse_default_instance_;
+PROTOBUF_CONSTEXPR ProcessBatchRequest::ProcessBatchRequest(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.db_)*/{::_pbi::ConstantInitialized()}
+  , /*decltype(_impl_.contracts_bytecode_)*/{::_pbi::ConstantInitialized()}
+  , /*decltype(_impl_.state_override_)*/{::_pbi::ConstantInitialized()}
+  , /*decltype(_impl_.old_state_root_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.old_acc_input_hash_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.batch_l2_data_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.global_exit_root_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.coinbase_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.from_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.context_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.trace_config_)*/nullptr
+  , /*decltype(_impl_.old_batch_num_)*/uint64_t{0u}
+  , /*decltype(_impl_.chain_id_)*/uint64_t{0u}
+  , /*decltype(_impl_.fork_id_)*/uint64_t{0u}
+  , /*decltype(_impl_.eth_timestamp_)*/uint64_t{0u}
+  , /*decltype(_impl_.no_counters_)*/uint64_t{0u}
+  , /*decltype(_impl_.update_merkle_tree_)*/0u
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct ProcessBatchRequestDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ProcessBatchRequestDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ProcessBatchRequestDefaultTypeInternal() {}
+  union {
+    ProcessBatchRequest _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ProcessBatchRequestDefaultTypeInternal _ProcessBatchRequest_default_instance_;
+PROTOBUF_CONSTEXPR ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse::ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse(
+    ::_pbi::ConstantInitialized) {}
+struct ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUseDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUseDefaultTypeInternal() {}
+  union {
+    ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUseDefaultTypeInternal _ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse_default_instance_;
+PROTOBUF_CONSTEXPR ProcessBatchResponse::ProcessBatchResponse(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.responses_)*/{}
+  , /*decltype(_impl_.read_write_addresses_)*/{::_pbi::ConstantInitialized()}
+  , /*decltype(_impl_.new_state_root_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.new_acc_input_hash_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.new_local_exit_root_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.prover_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.new_batch_num_)*/uint64_t{0u}
+  , /*decltype(_impl_.cnt_keccak_hashes_)*/0u
+  , /*decltype(_impl_.cnt_poseidon_hashes_)*/0u
+  , /*decltype(_impl_.cnt_poseidon_paddings_)*/0u
+  , /*decltype(_impl_.cnt_mem_aligns_)*/0u
+  , /*decltype(_impl_.cnt_arithmetics_)*/0u
+  , /*decltype(_impl_.cnt_binaries_)*/0u
+  , /*decltype(_impl_.cumulative_gas_used_)*/uint64_t{0u}
+  , /*decltype(_impl_.cnt_steps_)*/0u
+  , /*decltype(_impl_.error_)*/0
+  , /*decltype(_impl_.flush_id_)*/uint64_t{0u}
+  , /*decltype(_impl_.stored_flush_id_)*/uint64_t{0u}
+  , /*decltype(_impl_.fork_id_)*/uint64_t{0u}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct ProcessBatchResponseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ProcessBatchResponseDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ProcessBatchResponseDefaultTypeInternal() {}
+  union {
+    ProcessBatchResponse _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ProcessBatchResponseDefaultTypeInternal _ProcessBatchResponse_default_instance_;
+PROTOBUF_CONSTEXPR GetFlushStatusResponse::GetFlushStatusResponse(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.prover_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.stored_flush_id_)*/uint64_t{0u}
+  , /*decltype(_impl_.storing_flush_id_)*/uint64_t{0u}
+  , /*decltype(_impl_.last_flush_id_)*/uint64_t{0u}
+  , /*decltype(_impl_.pending_to_flush_nodes_)*/uint64_t{0u}
+  , /*decltype(_impl_.pending_to_flush_program_)*/uint64_t{0u}
+  , /*decltype(_impl_.storing_nodes_)*/uint64_t{0u}
+  , /*decltype(_impl_.storing_program_)*/uint64_t{0u}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct GetFlushStatusResponseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR GetFlushStatusResponseDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~GetFlushStatusResponseDefaultTypeInternal() {}
+  union {
+    GetFlushStatusResponse _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 GetFlushStatusResponseDefaultTypeInternal _GetFlushStatusResponse_default_instance_;
+PROTOBUF_CONSTEXPR TraceConfig::TraceConfig(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.tx_hash_to_generate_full_trace_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.disable_storage_)*/0u
+  , /*decltype(_impl_.disable_stack_)*/0u
+  , /*decltype(_impl_.enable_memory_)*/0u
+  , /*decltype(_impl_.enable_return_data_)*/0u
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct TraceConfigDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR TraceConfigDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~TraceConfigDefaultTypeInternal() {}
+  union {
+    TraceConfig _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 TraceConfigDefaultTypeInternal _TraceConfig_default_instance_;
+PROTOBUF_CONSTEXPR OverrideAccount_StateEntry_DoNotUse::OverrideAccount_StateEntry_DoNotUse(
+    ::_pbi::ConstantInitialized) {}
+struct OverrideAccount_StateEntry_DoNotUseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR OverrideAccount_StateEntry_DoNotUseDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~OverrideAccount_StateEntry_DoNotUseDefaultTypeInternal() {}
+  union {
+    OverrideAccount_StateEntry_DoNotUse _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 OverrideAccount_StateEntry_DoNotUseDefaultTypeInternal _OverrideAccount_StateEntry_DoNotUse_default_instance_;
+PROTOBUF_CONSTEXPR OverrideAccount_StateDiffEntry_DoNotUse::OverrideAccount_StateDiffEntry_DoNotUse(
+    ::_pbi::ConstantInitialized) {}
+struct OverrideAccount_StateDiffEntry_DoNotUseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR OverrideAccount_StateDiffEntry_DoNotUseDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~OverrideAccount_StateDiffEntry_DoNotUseDefaultTypeInternal() {}
+  union {
+    OverrideAccount_StateDiffEntry_DoNotUse _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 OverrideAccount_StateDiffEntry_DoNotUseDefaultTypeInternal _OverrideAccount_StateDiffEntry_DoNotUse_default_instance_;
+PROTOBUF_CONSTEXPR OverrideAccount::OverrideAccount(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.state_)*/{::_pbi::ConstantInitialized()}
+  , /*decltype(_impl_.state_diff_)*/{::_pbi::ConstantInitialized()}
+  , /*decltype(_impl_.balance_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.code_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.nonce_)*/uint64_t{0u}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct OverrideAccountDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR OverrideAccountDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~OverrideAccountDefaultTypeInternal() {}
+  union {
+    OverrideAccount _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 OverrideAccountDefaultTypeInternal _OverrideAccount_default_instance_;
+PROTOBUF_CONSTEXPR InfoReadWrite::InfoReadWrite(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.nonce_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.balance_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct InfoReadWriteDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR InfoReadWriteDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~InfoReadWriteDefaultTypeInternal() {}
+  union {
+    InfoReadWrite _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 InfoReadWriteDefaultTypeInternal _InfoReadWrite_default_instance_;
+PROTOBUF_CONSTEXPR FullTrace::FullTrace(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.steps_)*/{}
+  , /*decltype(_impl_.context_)*/nullptr
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct FullTraceDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR FullTraceDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~FullTraceDefaultTypeInternal() {}
+  union {
+    FullTrace _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FullTraceDefaultTypeInternal _FullTrace_default_instance_;
+PROTOBUF_CONSTEXPR TransactionContext::TransactionContext(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.type_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.from_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.to_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.data_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.value_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.batch_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.output_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.gas_price_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.old_state_root_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.gas_)*/uint64_t{0u}
+  , /*decltype(_impl_.gas_used_)*/uint64_t{0u}
+  , /*decltype(_impl_.execution_time_)*/0u
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct TransactionContextDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR TransactionContextDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~TransactionContextDefaultTypeInternal() {}
+  union {
+    TransactionContext _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 TransactionContextDefaultTypeInternal _TransactionContext_default_instance_;
+PROTOBUF_CONSTEXPR TransactionStep_StorageEntry_DoNotUse::TransactionStep_StorageEntry_DoNotUse(
+    ::_pbi::ConstantInitialized) {}
+struct TransactionStep_StorageEntry_DoNotUseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR TransactionStep_StorageEntry_DoNotUseDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~TransactionStep_StorageEntry_DoNotUseDefaultTypeInternal() {}
+  union {
+    TransactionStep_StorageEntry_DoNotUse _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 TransactionStep_StorageEntry_DoNotUseDefaultTypeInternal _TransactionStep_StorageEntry_DoNotUse_default_instance_;
+PROTOBUF_CONSTEXPR TransactionStep::TransactionStep(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.stack_)*/{}
+  , /*decltype(_impl_.storage_)*/{::_pbi::ConstantInitialized()}
+  , /*decltype(_impl_.state_root_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.memory_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.return_data_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.contract_)*/nullptr
+  , /*decltype(_impl_.pc_)*/uint64_t{0u}
+  , /*decltype(_impl_.gas_)*/uint64_t{0u}
+  , /*decltype(_impl_.depth_)*/0u
+  , /*decltype(_impl_.op_)*/0u
+  , /*decltype(_impl_.gas_cost_)*/uint64_t{0u}
+  , /*decltype(_impl_.gas_refund_)*/uint64_t{0u}
+  , /*decltype(_impl_.memory_size_)*/0u
+  , /*decltype(_impl_.memory_offset_)*/0u
+  , /*decltype(_impl_.error_)*/0
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct TransactionStepDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR TransactionStepDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~TransactionStepDefaultTypeInternal() {}
+  union {
+    TransactionStep _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 TransactionStepDefaultTypeInternal _TransactionStep_default_instance_;
+PROTOBUF_CONSTEXPR Contract::Contract(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.address_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.caller_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.value_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.data_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.type_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.gas_)*/uint64_t{0u}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct ContractDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ContractDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ContractDefaultTypeInternal() {}
+  union {
+    Contract _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ContractDefaultTypeInternal _Contract_default_instance_;
+PROTOBUF_CONSTEXPR ProcessTransactionResponse::ProcessTransactionResponse(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.logs_)*/{}
+  , /*decltype(_impl_.tx_hash_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.rlp_tx_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.return_value_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.create_address_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.state_root_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.effective_gas_price_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.full_trace_)*/nullptr
+  , /*decltype(_impl_.gas_left_)*/uint64_t{0u}
+  , /*decltype(_impl_.type_)*/0u
+  , /*decltype(_impl_.error_)*/0
+  , /*decltype(_impl_.gas_used_)*/uint64_t{0u}
+  , /*decltype(_impl_.gas_refunded_)*/uint64_t{0u}
+  , /*decltype(_impl_.effective_percentage_)*/0u
+  , /*decltype(_impl_.has_gasprice_opcode_)*/0u
+  , /*decltype(_impl_.has_balance_opcode_)*/0u
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct ProcessTransactionResponseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ProcessTransactionResponseDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ProcessTransactionResponseDefaultTypeInternal() {}
+  union {
+    ProcessTransactionResponse _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ProcessTransactionResponseDefaultTypeInternal _ProcessTransactionResponse_default_instance_;
+PROTOBUF_CONSTEXPR Log::Log(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.topics_)*/{}
+  , /*decltype(_impl_.address_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.data_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.tx_hash_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.batch_hash_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.batch_number_)*/uint64_t{0u}
+  , /*decltype(_impl_.tx_index_)*/0u
+  , /*decltype(_impl_.index_)*/0u
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct LogDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR LogDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~LogDefaultTypeInternal() {}
+  union {
+    Log _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 LogDefaultTypeInternal _Log_default_instance_;
+PROTOBUF_CONSTEXPR ProcessBatchRequestV2_L1InfoTreeDataEntry_DoNotUse::ProcessBatchRequestV2_L1InfoTreeDataEntry_DoNotUse(
+    ::_pbi::ConstantInitialized) {}
+struct ProcessBatchRequestV2_L1InfoTreeDataEntry_DoNotUseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ProcessBatchRequestV2_L1InfoTreeDataEntry_DoNotUseDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ProcessBatchRequestV2_L1InfoTreeDataEntry_DoNotUseDefaultTypeInternal() {}
+  union {
+    ProcessBatchRequestV2_L1InfoTreeDataEntry_DoNotUse _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ProcessBatchRequestV2_L1InfoTreeDataEntry_DoNotUseDefaultTypeInternal _ProcessBatchRequestV2_L1InfoTreeDataEntry_DoNotUse_default_instance_;
+PROTOBUF_CONSTEXPR ProcessBatchRequestV2_DbEntry_DoNotUse::ProcessBatchRequestV2_DbEntry_DoNotUse(
+    ::_pbi::ConstantInitialized) {}
+struct ProcessBatchRequestV2_DbEntry_DoNotUseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ProcessBatchRequestV2_DbEntry_DoNotUseDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ProcessBatchRequestV2_DbEntry_DoNotUseDefaultTypeInternal() {}
+  union {
+    ProcessBatchRequestV2_DbEntry_DoNotUse _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ProcessBatchRequestV2_DbEntry_DoNotUseDefaultTypeInternal _ProcessBatchRequestV2_DbEntry_DoNotUse_default_instance_;
+PROTOBUF_CONSTEXPR ProcessBatchRequestV2_ContractsBytecodeEntry_DoNotUse::ProcessBatchRequestV2_ContractsBytecodeEntry_DoNotUse(
+    ::_pbi::ConstantInitialized) {}
+struct ProcessBatchRequestV2_ContractsBytecodeEntry_DoNotUseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ProcessBatchRequestV2_ContractsBytecodeEntry_DoNotUseDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ProcessBatchRequestV2_ContractsBytecodeEntry_DoNotUseDefaultTypeInternal() {}
+  union {
+    ProcessBatchRequestV2_ContractsBytecodeEntry_DoNotUse _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ProcessBatchRequestV2_ContractsBytecodeEntry_DoNotUseDefaultTypeInternal _ProcessBatchRequestV2_ContractsBytecodeEntry_DoNotUse_default_instance_;
+PROTOBUF_CONSTEXPR ProcessBatchRequestV2_StateOverrideEntry_DoNotUse::ProcessBatchRequestV2_StateOverrideEntry_DoNotUse(
+    ::_pbi::ConstantInitialized) {}
+struct ProcessBatchRequestV2_StateOverrideEntry_DoNotUseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ProcessBatchRequestV2_StateOverrideEntry_DoNotUseDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ProcessBatchRequestV2_StateOverrideEntry_DoNotUseDefaultTypeInternal() {}
+  union {
+    ProcessBatchRequestV2_StateOverrideEntry_DoNotUse _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ProcessBatchRequestV2_StateOverrideEntry_DoNotUseDefaultTypeInternal _ProcessBatchRequestV2_StateOverrideEntry_DoNotUse_default_instance_;
+PROTOBUF_CONSTEXPR ProcessBatchRequestV2::ProcessBatchRequestV2(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.l1_info_tree_data_)*/{::_pbi::ConstantInitialized()}
+  , /*decltype(_impl_.db_)*/{::_pbi::ConstantInitialized()}
+  , /*decltype(_impl_.contracts_bytecode_)*/{::_pbi::ConstantInitialized()}
+  , /*decltype(_impl_.state_override_)*/{::_pbi::ConstantInitialized()}
+  , /*decltype(_impl_.old_state_root_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.old_acc_input_hash_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.batch_l2_data_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.l1_info_root_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.coinbase_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.forced_blockhash_l1_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.from_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.context_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.trace_config_)*/nullptr
+  , /*decltype(_impl_.debug_)*/nullptr
+  , /*decltype(_impl_.old_batch_num_)*/uint64_t{0u}
+  , /*decltype(_impl_.chain_id_)*/uint64_t{0u}
+  , /*decltype(_impl_.fork_id_)*/uint64_t{0u}
+  , /*decltype(_impl_.timestamp_limit_)*/uint64_t{0u}
+  , /*decltype(_impl_.update_merkle_tree_)*/0u
+  , /*decltype(_impl_.no_counters_)*/0u
+  , /*decltype(_impl_.skip_verify_l1_info_root_)*/0u
+  , /*decltype(_impl_.skip_first_change_l2_block_)*/0u
+  , /*decltype(_impl_.skip_write_block_info_root_)*/0u
+  , /*decltype(_impl_.get_keys_)*/0u
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct ProcessBatchRequestV2DefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ProcessBatchRequestV2DefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ProcessBatchRequestV2DefaultTypeInternal() {}
+  union {
+    ProcessBatchRequestV2 _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ProcessBatchRequestV2DefaultTypeInternal _ProcessBatchRequestV2_default_instance_;
+PROTOBUF_CONSTEXPR L1DataV2::L1DataV2(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.smt_proof_)*/{}
+  , /*decltype(_impl_.global_exit_root_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.block_hash_l1_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.min_timestamp_)*/uint64_t{0u}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct L1DataV2DefaultTypeInternal {
+  PROTOBUF_CONSTEXPR L1DataV2DefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~L1DataV2DefaultTypeInternal() {}
+  union {
+    L1DataV2 _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 L1DataV2DefaultTypeInternal _L1DataV2_default_instance_;
+PROTOBUF_CONSTEXPR DebugV2::DebugV2(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.gas_limit_)*/uint64_t{0u}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct DebugV2DefaultTypeInternal {
+  PROTOBUF_CONSTEXPR DebugV2DefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~DebugV2DefaultTypeInternal() {}
+  union {
+    DebugV2 _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DebugV2DefaultTypeInternal _DebugV2_default_instance_;
+PROTOBUF_CONSTEXPR ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse::ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse(
+    ::_pbi::ConstantInitialized) {}
+struct ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUseDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUseDefaultTypeInternal() {}
+  union {
+    ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUseDefaultTypeInternal _ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse_default_instance_;
+PROTOBUF_CONSTEXPR ProcessBatchResponseV2::ProcessBatchResponseV2(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.block_responses_)*/{}
+  , /*decltype(_impl_.read_write_addresses_)*/{::_pbi::ConstantInitialized()}
+  , /*decltype(_impl_.smt_keys_)*/{}
+  , /*decltype(_impl_.program_keys_)*/{}
+  , /*decltype(_impl_.new_state_root_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.new_acc_input_hash_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.new_local_exit_root_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.prover_id_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.new_batch_num_)*/uint64_t{0u}
+  , /*decltype(_impl_.cnt_keccak_hashes_)*/0u
+  , /*decltype(_impl_.cnt_poseidon_hashes_)*/0u
+  , /*decltype(_impl_.cnt_poseidon_paddings_)*/0u
+  , /*decltype(_impl_.cnt_mem_aligns_)*/0u
+  , /*decltype(_impl_.cnt_arithmetics_)*/0u
+  , /*decltype(_impl_.cnt_binaries_)*/0u
+  , /*decltype(_impl_.cnt_steps_)*/0u
+  , /*decltype(_impl_.cnt_sha256_hashes_)*/0u
+  , /*decltype(_impl_.flush_id_)*/uint64_t{0u}
+  , /*decltype(_impl_.stored_flush_id_)*/uint64_t{0u}
+  , /*decltype(_impl_.gas_used_)*/uint64_t{0u}
+  , /*decltype(_impl_.fork_id_)*/uint64_t{0u}
+  , /*decltype(_impl_.error_)*/0
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct ProcessBatchResponseV2DefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ProcessBatchResponseV2DefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ProcessBatchResponseV2DefaultTypeInternal() {}
+  union {
+    ProcessBatchResponseV2 _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ProcessBatchResponseV2DefaultTypeInternal _ProcessBatchResponseV2_default_instance_;
+PROTOBUF_CONSTEXPR TraceConfigV2::TraceConfigV2(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.tx_hash_to_generate_full_trace_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.disable_storage_)*/0u
+  , /*decltype(_impl_.disable_stack_)*/0u
+  , /*decltype(_impl_.enable_memory_)*/0u
+  , /*decltype(_impl_.enable_return_data_)*/0u
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct TraceConfigV2DefaultTypeInternal {
+  PROTOBUF_CONSTEXPR TraceConfigV2DefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~TraceConfigV2DefaultTypeInternal() {}
+  union {
+    TraceConfigV2 _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 TraceConfigV2DefaultTypeInternal _TraceConfigV2_default_instance_;
+PROTOBUF_CONSTEXPR OverrideAccountV2_StateEntry_DoNotUse::OverrideAccountV2_StateEntry_DoNotUse(
+    ::_pbi::ConstantInitialized) {}
+struct OverrideAccountV2_StateEntry_DoNotUseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR OverrideAccountV2_StateEntry_DoNotUseDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~OverrideAccountV2_StateEntry_DoNotUseDefaultTypeInternal() {}
+  union {
+    OverrideAccountV2_StateEntry_DoNotUse _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 OverrideAccountV2_StateEntry_DoNotUseDefaultTypeInternal _OverrideAccountV2_StateEntry_DoNotUse_default_instance_;
+PROTOBUF_CONSTEXPR OverrideAccountV2_StateDiffEntry_DoNotUse::OverrideAccountV2_StateDiffEntry_DoNotUse(
+    ::_pbi::ConstantInitialized) {}
+struct OverrideAccountV2_StateDiffEntry_DoNotUseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR OverrideAccountV2_StateDiffEntry_DoNotUseDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~OverrideAccountV2_StateDiffEntry_DoNotUseDefaultTypeInternal() {}
+  union {
+    OverrideAccountV2_StateDiffEntry_DoNotUse _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 OverrideAccountV2_StateDiffEntry_DoNotUseDefaultTypeInternal _OverrideAccountV2_StateDiffEntry_DoNotUse_default_instance_;
+PROTOBUF_CONSTEXPR OverrideAccountV2::OverrideAccountV2(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.state_)*/{::_pbi::ConstantInitialized()}
+  , /*decltype(_impl_.state_diff_)*/{::_pbi::ConstantInitialized()}
+  , /*decltype(_impl_.balance_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.code_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.nonce_)*/uint64_t{0u}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct OverrideAccountV2DefaultTypeInternal {
+  PROTOBUF_CONSTEXPR OverrideAccountV2DefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~OverrideAccountV2DefaultTypeInternal() {}
+  union {
+    OverrideAccountV2 _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 OverrideAccountV2DefaultTypeInternal _OverrideAccountV2_default_instance_;
+PROTOBUF_CONSTEXPR InfoReadWriteV2::InfoReadWriteV2(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.nonce_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.balance_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct InfoReadWriteV2DefaultTypeInternal {
+  PROTOBUF_CONSTEXPR InfoReadWriteV2DefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~InfoReadWriteV2DefaultTypeInternal() {}
+  union {
+    InfoReadWriteV2 _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 InfoReadWriteV2DefaultTypeInternal _InfoReadWriteV2_default_instance_;
+PROTOBUF_CONSTEXPR FullTraceV2::FullTraceV2(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.steps_)*/{}
+  , /*decltype(_impl_.context_)*/nullptr
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct FullTraceV2DefaultTypeInternal {
+  PROTOBUF_CONSTEXPR FullTraceV2DefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~FullTraceV2DefaultTypeInternal() {}
+  union {
+    FullTraceV2 _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FullTraceV2DefaultTypeInternal _FullTraceV2_default_instance_;
+PROTOBUF_CONSTEXPR TransactionContextV2::TransactionContextV2(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.type_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.from_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.to_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.data_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.value_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.block_hash_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.output_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.gas_price_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.old_state_root_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.gas_)*/uint64_t{0u}
+  , /*decltype(_impl_.gas_used_)*/uint64_t{0u}
+  , /*decltype(_impl_.nonce_)*/uint64_t{0u}
+  , /*decltype(_impl_.tx_index_)*/uint64_t{0u}
+  , /*decltype(_impl_.chain_id_)*/uint64_t{0u}
+  , /*decltype(_impl_.execution_time_)*/0u
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct TransactionContextV2DefaultTypeInternal {
+  PROTOBUF_CONSTEXPR TransactionContextV2DefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~TransactionContextV2DefaultTypeInternal() {}
+  union {
+    TransactionContextV2 _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 TransactionContextV2DefaultTypeInternal _TransactionContextV2_default_instance_;
+PROTOBUF_CONSTEXPR TransactionStepV2_StorageEntry_DoNotUse::TransactionStepV2_StorageEntry_DoNotUse(
+    ::_pbi::ConstantInitialized) {}
+struct TransactionStepV2_StorageEntry_DoNotUseDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR TransactionStepV2_StorageEntry_DoNotUseDefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~TransactionStepV2_StorageEntry_DoNotUseDefaultTypeInternal() {}
+  union {
+    TransactionStepV2_StorageEntry_DoNotUse _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 TransactionStepV2_StorageEntry_DoNotUseDefaultTypeInternal _TransactionStepV2_StorageEntry_DoNotUse_default_instance_;
+PROTOBUF_CONSTEXPR TransactionStepV2::TransactionStepV2(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.stack_)*/{}
+  , /*decltype(_impl_.storage_)*/{::_pbi::ConstantInitialized()}
+  , /*decltype(_impl_.state_root_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.memory_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.return_data_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.contract_)*/nullptr
+  , /*decltype(_impl_.pc_)*/uint64_t{0u}
+  , /*decltype(_impl_.gas_)*/uint64_t{0u}
+  , /*decltype(_impl_.depth_)*/0u
+  , /*decltype(_impl_.op_)*/0u
+  , /*decltype(_impl_.gas_cost_)*/uint64_t{0u}
+  , /*decltype(_impl_.gas_refund_)*/uint64_t{0u}
+  , /*decltype(_impl_.memory_size_)*/0u
+  , /*decltype(_impl_.memory_offset_)*/0u
+  , /*decltype(_impl_.error_)*/0
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct TransactionStepV2DefaultTypeInternal {
+  PROTOBUF_CONSTEXPR TransactionStepV2DefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~TransactionStepV2DefaultTypeInternal() {}
+  union {
+    TransactionStepV2 _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 TransactionStepV2DefaultTypeInternal _TransactionStepV2_default_instance_;
+PROTOBUF_CONSTEXPR ContractV2::ContractV2(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.address_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.caller_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.value_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.data_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.type_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.gas_)*/uint64_t{0u}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct ContractV2DefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ContractV2DefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ContractV2DefaultTypeInternal() {}
+  union {
+    ContractV2 _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ContractV2DefaultTypeInternal _ContractV2_default_instance_;
+PROTOBUF_CONSTEXPR ProcessBlockResponseV2::ProcessBlockResponseV2(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.responses_)*/{}
+  , /*decltype(_impl_.logs_)*/{}
+  , /*decltype(_impl_.parent_hash_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.coinbase_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.ger_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.block_hash_l1_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.block_info_root_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.block_hash_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.gas_limit_)*/uint64_t{0u}
+  , /*decltype(_impl_.block_number_)*/uint64_t{0u}
+  , /*decltype(_impl_.timestamp_)*/uint64_t{0u}
+  , /*decltype(_impl_.gas_used_)*/uint64_t{0u}
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct ProcessBlockResponseV2DefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ProcessBlockResponseV2DefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ProcessBlockResponseV2DefaultTypeInternal() {}
+  union {
+    ProcessBlockResponseV2 _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ProcessBlockResponseV2DefaultTypeInternal _ProcessBlockResponseV2_default_instance_;
+PROTOBUF_CONSTEXPR ProcessTransactionResponseV2::ProcessTransactionResponseV2(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.logs_)*/{}
+  , /*decltype(_impl_.tx_hash_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.tx_hash_l2_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.rlp_tx_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.block_hash_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.return_value_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.create_address_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.state_root_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.effective_gas_price_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.full_trace_)*/nullptr
+  , /*decltype(_impl_.block_number_)*/uint64_t{0u}
+  , /*decltype(_impl_.gas_left_)*/uint64_t{0u}
+  , /*decltype(_impl_.gas_used_)*/uint64_t{0u}
+  , /*decltype(_impl_.type_)*/0u
+  , /*decltype(_impl_.error_)*/0
+  , /*decltype(_impl_.cumulative_gas_used_)*/uint64_t{0u}
+  , /*decltype(_impl_.gas_refunded_)*/uint64_t{0u}
+  , /*decltype(_impl_.effective_percentage_)*/0u
+  , /*decltype(_impl_.has_gasprice_opcode_)*/0u
+  , /*decltype(_impl_.has_balance_opcode_)*/0u
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct ProcessTransactionResponseV2DefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ProcessTransactionResponseV2DefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ProcessTransactionResponseV2DefaultTypeInternal() {}
+  union {
+    ProcessTransactionResponseV2 _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ProcessTransactionResponseV2DefaultTypeInternal _ProcessTransactionResponseV2_default_instance_;
+PROTOBUF_CONSTEXPR LogV2::LogV2(
+    ::_pbi::ConstantInitialized): _impl_{
+    /*decltype(_impl_.topics_)*/{}
+  , /*decltype(_impl_.address_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.data_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.tx_hash_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.tx_hash_l2_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.block_hash_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
+  , /*decltype(_impl_.block_number_)*/uint64_t{0u}
+  , /*decltype(_impl_.tx_index_)*/0u
+  , /*decltype(_impl_.index_)*/0u
+  , /*decltype(_impl_._cached_size_)*/{}} {}
+struct LogV2DefaultTypeInternal {
+  PROTOBUF_CONSTEXPR LogV2DefaultTypeInternal()
+      : _instance(::_pbi::ConstantInitialized{}) {}
+  ~LogV2DefaultTypeInternal() {}
+  union {
+    LogV2 _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 LogV2DefaultTypeInternal _LogV2_default_instance_;
 }  // namespace v1
 }  // namespace executor
-static ::_pb::Metadata file_level_metadata_executor_2eproto[40];
+static ::_pb::Metadata file_level_metadata_executor_2eproto[41];
 static const ::_pb::EnumDescriptor* file_level_enum_descriptors_executor_2eproto[2];
 static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_executor_2eproto = nullptr;
 
-  {
-    void* ptr = &::executor::v1::_Contract_default_instance_;
-    new (ptr) ::executor::v1::Contract();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::executor::v1::Contract::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_Contract_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_Contract_executor_2eproto}, {}};
-
-static void InitDefaultsscc_info_ContractV2_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_ContractV2_default_instance_;
-    new (ptr) ::executor::v1::ContractV2();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::executor::v1::ContractV2::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_ContractV2_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_ContractV2_executor_2eproto}, {}};
-
-static void InitDefaultsscc_info_DebugV2_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_DebugV2_default_instance_;
-    new (ptr) ::executor::v1::DebugV2();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::executor::v1::DebugV2::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_DebugV2_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_DebugV2_executor_2eproto}, {}};
-
-static void InitDefaultsscc_info_FullTrace_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_FullTrace_default_instance_;
-    new (ptr) ::executor::v1::FullTrace();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::executor::v1::FullTrace::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_FullTrace_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 2, 0, InitDefaultsscc_info_FullTrace_executor_2eproto}, {
-      &scc_info_TransactionContext_executor_2eproto.base,
-      &scc_info_TransactionStep_executor_2eproto.base,}};
-
-static void InitDefaultsscc_info_FullTraceV2_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_FullTraceV2_default_instance_;
-    new (ptr) ::executor::v1::FullTraceV2();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::executor::v1::FullTraceV2::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_FullTraceV2_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 2, 0, InitDefaultsscc_info_FullTraceV2_executor_2eproto}, {
-      &scc_info_TransactionContextV2_executor_2eproto.base,
-      &scc_info_TransactionStepV2_executor_2eproto.base,}};
-
-static void InitDefaultsscc_info_GetFlushStatusResponse_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_GetFlushStatusResponse_default_instance_;
-    new (ptr) ::executor::v1::GetFlushStatusResponse();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::executor::v1::GetFlushStatusResponse::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_GetFlushStatusResponse_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_GetFlushStatusResponse_executor_2eproto}, {}};
-
-static void InitDefaultsscc_info_InfoReadWrite_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_InfoReadWrite_default_instance_;
-    new (ptr) ::executor::v1::InfoReadWrite();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::executor::v1::InfoReadWrite::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_InfoReadWrite_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_InfoReadWrite_executor_2eproto}, {}};
-
-static void InitDefaultsscc_info_InfoReadWriteV2_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_InfoReadWriteV2_default_instance_;
-    new (ptr) ::executor::v1::InfoReadWriteV2();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::executor::v1::InfoReadWriteV2::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_InfoReadWriteV2_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_InfoReadWriteV2_executor_2eproto}, {}};
-
-static void InitDefaultsscc_info_L1DataV2_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_L1DataV2_default_instance_;
-    new (ptr) ::executor::v1::L1DataV2();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::executor::v1::L1DataV2::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_L1DataV2_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_L1DataV2_executor_2eproto}, {}};
-
-static void InitDefaultsscc_info_Log_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_Log_default_instance_;
-    new (ptr) ::executor::v1::Log();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::executor::v1::Log::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_Log_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_Log_executor_2eproto}, {}};
-
-static void InitDefaultsscc_info_LogV2_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_LogV2_default_instance_;
-    new (ptr) ::executor::v1::LogV2();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::executor::v1::LogV2::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_LogV2_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_LogV2_executor_2eproto}, {}};
-
-static void InitDefaultsscc_info_OverrideAccount_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_OverrideAccount_default_instance_;
-    new (ptr) ::executor::v1::OverrideAccount();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::executor::v1::OverrideAccount::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_OverrideAccount_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 2, 0, InitDefaultsscc_info_OverrideAccount_executor_2eproto}, {
-      &scc_info_OverrideAccount_StateEntry_DoNotUse_executor_2eproto.base,
-      &scc_info_OverrideAccount_StateDiffEntry_DoNotUse_executor_2eproto.base,}};
-
-static void InitDefaultsscc_info_OverrideAccount_StateDiffEntry_DoNotUse_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_OverrideAccount_StateDiffEntry_DoNotUse_default_instance_;
-    new (ptr) ::executor::v1::OverrideAccount_StateDiffEntry_DoNotUse();
-  }
-  ::executor::v1::OverrideAccount_StateDiffEntry_DoNotUse::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_OverrideAccount_StateDiffEntry_DoNotUse_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_OverrideAccount_StateDiffEntry_DoNotUse_executor_2eproto}, {}};
-
-static void InitDefaultsscc_info_OverrideAccount_StateEntry_DoNotUse_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_OverrideAccount_StateEntry_DoNotUse_default_instance_;
-    new (ptr) ::executor::v1::OverrideAccount_StateEntry_DoNotUse();
-  }
-  ::executor::v1::OverrideAccount_StateEntry_DoNotUse::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_OverrideAccount_StateEntry_DoNotUse_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_OverrideAccount_StateEntry_DoNotUse_executor_2eproto}, {}};
-
-static void InitDefaultsscc_info_OverrideAccountV2_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_OverrideAccountV2_default_instance_;
-    new (ptr) ::executor::v1::OverrideAccountV2();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::executor::v1::OverrideAccountV2::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_OverrideAccountV2_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 2, 0, InitDefaultsscc_info_OverrideAccountV2_executor_2eproto}, {
-      &scc_info_OverrideAccountV2_StateEntry_DoNotUse_executor_2eproto.base,
-      &scc_info_OverrideAccountV2_StateDiffEntry_DoNotUse_executor_2eproto.base,}};
-
-static void InitDefaultsscc_info_OverrideAccountV2_StateDiffEntry_DoNotUse_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_OverrideAccountV2_StateDiffEntry_DoNotUse_default_instance_;
-    new (ptr) ::executor::v1::OverrideAccountV2_StateDiffEntry_DoNotUse();
-  }
-  ::executor::v1::OverrideAccountV2_StateDiffEntry_DoNotUse::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_OverrideAccountV2_StateDiffEntry_DoNotUse_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_OverrideAccountV2_StateDiffEntry_DoNotUse_executor_2eproto}, {}};
-
-static void InitDefaultsscc_info_OverrideAccountV2_StateEntry_DoNotUse_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_OverrideAccountV2_StateEntry_DoNotUse_default_instance_;
-    new (ptr) ::executor::v1::OverrideAccountV2_StateEntry_DoNotUse();
-  }
-  ::executor::v1::OverrideAccountV2_StateEntry_DoNotUse::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_OverrideAccountV2_StateEntry_DoNotUse_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_OverrideAccountV2_StateEntry_DoNotUse_executor_2eproto}, {}};
-
-static void InitDefaultsscc_info_ProcessBatchRequest_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_ProcessBatchRequest_default_instance_;
-    new (ptr) ::executor::v1::ProcessBatchRequest();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::executor::v1::ProcessBatchRequest::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<4> scc_info_ProcessBatchRequest_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 4, 0, InitDefaultsscc_info_ProcessBatchRequest_executor_2eproto}, {
-      &scc_info_ProcessBatchRequest_DbEntry_DoNotUse_executor_2eproto.base,
-      &scc_info_ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse_executor_2eproto.base,
-      &scc_info_TraceConfig_executor_2eproto.base,
-      &scc_info_ProcessBatchRequest_StateOverrideEntry_DoNotUse_executor_2eproto.base,}};
-
-static void InitDefaultsscc_info_ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse_default_instance_;
-    new (ptr) ::executor::v1::ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse();
-  }
-  ::executor::v1::ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse_executor_2eproto}, {}};
-
-static void InitDefaultsscc_info_ProcessBatchRequest_DbEntry_DoNotUse_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_ProcessBatchRequest_DbEntry_DoNotUse_default_instance_;
-    new (ptr) ::executor::v1::ProcessBatchRequest_DbEntry_DoNotUse();
-  }
-  ::executor::v1::ProcessBatchRequest_DbEntry_DoNotUse::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_ProcessBatchRequest_DbEntry_DoNotUse_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_ProcessBatchRequest_DbEntry_DoNotUse_executor_2eproto}, {}};
-
-static void InitDefaultsscc_info_ProcessBatchRequest_StateOverrideEntry_DoNotUse_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_ProcessBatchRequest_StateOverrideEntry_DoNotUse_default_instance_;
-    new (ptr) ::executor::v1::ProcessBatchRequest_StateOverrideEntry_DoNotUse();
-  }
-  ::executor::v1::ProcessBatchRequest_StateOverrideEntry_DoNotUse::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_ProcessBatchRequest_StateOverrideEntry_DoNotUse_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_ProcessBatchRequest_StateOverrideEntry_DoNotUse_executor_2eproto}, {
-      &scc_info_OverrideAccount_executor_2eproto.base,}};
-
-static void InitDefaultsscc_info_ProcessBatchRequestV2_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_ProcessBatchRequestV2_default_instance_;
-    new (ptr) ::executor::v1::ProcessBatchRequestV2();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::executor::v1::ProcessBatchRequestV2::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<6> scc_info_ProcessBatchRequestV2_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 6, 0, InitDefaultsscc_info_ProcessBatchRequestV2_executor_2eproto}, {
-      &scc_info_ProcessBatchRequestV2_L1InfoTreeDataEntry_DoNotUse_executor_2eproto.base,
-      &scc_info_ProcessBatchRequestV2_DbEntry_DoNotUse_executor_2eproto.base,
-      &scc_info_ProcessBatchRequestV2_ContractsBytecodeEntry_DoNotUse_executor_2eproto.base,
-      &scc_info_TraceConfigV2_executor_2eproto.base,
-      &scc_info_ProcessBatchRequestV2_StateOverrideEntry_DoNotUse_executor_2eproto.base,
-      &scc_info_DebugV2_executor_2eproto.base,}};
-
-static void InitDefaultsscc_info_ProcessBatchRequestV2_ContractsBytecodeEntry_DoNotUse_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_ProcessBatchRequestV2_ContractsBytecodeEntry_DoNotUse_default_instance_;
-    new (ptr) ::executor::v1::ProcessBatchRequestV2_ContractsBytecodeEntry_DoNotUse();
-  }
-  ::executor::v1::ProcessBatchRequestV2_ContractsBytecodeEntry_DoNotUse::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_ProcessBatchRequestV2_ContractsBytecodeEntry_DoNotUse_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_ProcessBatchRequestV2_ContractsBytecodeEntry_DoNotUse_executor_2eproto}, {}};
-
-static void InitDefaultsscc_info_ProcessBatchRequestV2_DbEntry_DoNotUse_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_ProcessBatchRequestV2_DbEntry_DoNotUse_default_instance_;
-    new (ptr) ::executor::v1::ProcessBatchRequestV2_DbEntry_DoNotUse();
-  }
-  ::executor::v1::ProcessBatchRequestV2_DbEntry_DoNotUse::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_ProcessBatchRequestV2_DbEntry_DoNotUse_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_ProcessBatchRequestV2_DbEntry_DoNotUse_executor_2eproto}, {}};
-
-static void InitDefaultsscc_info_ProcessBatchRequestV2_L1InfoTreeDataEntry_DoNotUse_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_ProcessBatchRequestV2_L1InfoTreeDataEntry_DoNotUse_default_instance_;
-    new (ptr) ::executor::v1::ProcessBatchRequestV2_L1InfoTreeDataEntry_DoNotUse();
-  }
-  ::executor::v1::ProcessBatchRequestV2_L1InfoTreeDataEntry_DoNotUse::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_ProcessBatchRequestV2_L1InfoTreeDataEntry_DoNotUse_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_ProcessBatchRequestV2_L1InfoTreeDataEntry_DoNotUse_executor_2eproto}, {
-      &scc_info_L1DataV2_executor_2eproto.base,}};
-
-static void InitDefaultsscc_info_ProcessBatchRequestV2_StateOverrideEntry_DoNotUse_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_ProcessBatchRequestV2_StateOverrideEntry_DoNotUse_default_instance_;
-    new (ptr) ::executor::v1::ProcessBatchRequestV2_StateOverrideEntry_DoNotUse();
-  }
-  ::executor::v1::ProcessBatchRequestV2_StateOverrideEntry_DoNotUse::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_ProcessBatchRequestV2_StateOverrideEntry_DoNotUse_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_ProcessBatchRequestV2_StateOverrideEntry_DoNotUse_executor_2eproto}, {
-      &scc_info_OverrideAccountV2_executor_2eproto.base,}};
-
-static void InitDefaultsscc_info_ProcessBatchResponse_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_ProcessBatchResponse_default_instance_;
-    new (ptr) ::executor::v1::ProcessBatchResponse();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::executor::v1::ProcessBatchResponse::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_ProcessBatchResponse_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 2, 0, InitDefaultsscc_info_ProcessBatchResponse_executor_2eproto}, {
-      &scc_info_ProcessTransactionResponse_executor_2eproto.base,
-      &scc_info_ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse_executor_2eproto.base,}};
-
-static void InitDefaultsscc_info_ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse_default_instance_;
-    new (ptr) ::executor::v1::ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse();
-  }
-  ::executor::v1::ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse_executor_2eproto}, {
-      &scc_info_InfoReadWrite_executor_2eproto.base,}};
-
-static void InitDefaultsscc_info_ProcessBatchResponseV2_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_ProcessBatchResponseV2_default_instance_;
-    new (ptr) ::executor::v1::ProcessBatchResponseV2();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::executor::v1::ProcessBatchResponseV2::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_ProcessBatchResponseV2_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 2, 0, InitDefaultsscc_info_ProcessBatchResponseV2_executor_2eproto}, {
-      &scc_info_ProcessBlockResponseV2_executor_2eproto.base,
-      &scc_info_ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse_executor_2eproto.base,}};
-
-static void InitDefaultsscc_info_ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse_default_instance_;
-    new (ptr) ::executor::v1::ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse();
-  }
-  ::executor::v1::ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<1> scc_info_ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 1, 0, InitDefaultsscc_info_ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse_executor_2eproto}, {
-      &scc_info_InfoReadWriteV2_executor_2eproto.base,}};
-
-static void InitDefaultsscc_info_ProcessBlockResponseV2_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_ProcessBlockResponseV2_default_instance_;
-    new (ptr) ::executor::v1::ProcessBlockResponseV2();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::executor::v1::ProcessBlockResponseV2::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_ProcessBlockResponseV2_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 2, 0, InitDefaultsscc_info_ProcessBlockResponseV2_executor_2eproto}, {
-      &scc_info_ProcessTransactionResponseV2_executor_2eproto.base,
-      &scc_info_LogV2_executor_2eproto.base,}};
-
-static void InitDefaultsscc_info_ProcessTransactionResponse_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_ProcessTransactionResponse_default_instance_;
-    new (ptr) ::executor::v1::ProcessTransactionResponse();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::executor::v1::ProcessTransactionResponse::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_ProcessTransactionResponse_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 2, 0, InitDefaultsscc_info_ProcessTransactionResponse_executor_2eproto}, {
-      &scc_info_Log_executor_2eproto.base,
-      &scc_info_FullTrace_executor_2eproto.base,}};
-
-static void InitDefaultsscc_info_ProcessTransactionResponseV2_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_ProcessTransactionResponseV2_default_instance_;
-    new (ptr) ::executor::v1::ProcessTransactionResponseV2();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::executor::v1::ProcessTransactionResponseV2::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_ProcessTransactionResponseV2_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 2, 0, InitDefaultsscc_info_ProcessTransactionResponseV2_executor_2eproto}, {
-      &scc_info_LogV2_executor_2eproto.base,
-      &scc_info_FullTraceV2_executor_2eproto.base,}};
-
-static void InitDefaultsscc_info_TraceConfig_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_TraceConfig_default_instance_;
-    new (ptr) ::executor::v1::TraceConfig();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::executor::v1::TraceConfig::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_TraceConfig_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_TraceConfig_executor_2eproto}, {}};
-
-static void InitDefaultsscc_info_TraceConfigV2_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_TraceConfigV2_default_instance_;
-    new (ptr) ::executor::v1::TraceConfigV2();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::executor::v1::TraceConfigV2::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_TraceConfigV2_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_TraceConfigV2_executor_2eproto}, {}};
-
-static void InitDefaultsscc_info_TransactionContext_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_TransactionContext_default_instance_;
-    new (ptr) ::executor::v1::TransactionContext();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::executor::v1::TransactionContext::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_TransactionContext_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_TransactionContext_executor_2eproto}, {}};
-
-static void InitDefaultsscc_info_TransactionContextV2_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_TransactionContextV2_default_instance_;
-    new (ptr) ::executor::v1::TransactionContextV2();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::executor::v1::TransactionContextV2::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_TransactionContextV2_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_TransactionContextV2_executor_2eproto}, {}};
-
-static void InitDefaultsscc_info_TransactionStep_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_TransactionStep_default_instance_;
-    new (ptr) ::executor::v1::TransactionStep();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::executor::v1::TransactionStep::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_TransactionStep_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 2, 0, InitDefaultsscc_info_TransactionStep_executor_2eproto}, {
-      &scc_info_Contract_executor_2eproto.base,
-      &scc_info_TransactionStep_StorageEntry_DoNotUse_executor_2eproto.base,}};
-
-static void InitDefaultsscc_info_TransactionStep_StorageEntry_DoNotUse_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_TransactionStep_StorageEntry_DoNotUse_default_instance_;
-    new (ptr) ::executor::v1::TransactionStep_StorageEntry_DoNotUse();
-  }
-  ::executor::v1::TransactionStep_StorageEntry_DoNotUse::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_TransactionStep_StorageEntry_DoNotUse_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_TransactionStep_StorageEntry_DoNotUse_executor_2eproto}, {}};
-
-static void InitDefaultsscc_info_TransactionStepV2_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_TransactionStepV2_default_instance_;
-    new (ptr) ::executor::v1::TransactionStepV2();
-    ::PROTOBUF_NAMESPACE_ID::internal::OnShutdownDestroyMessage(ptr);
-  }
-  ::executor::v1::TransactionStepV2::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<2> scc_info_TransactionStepV2_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 2, 0, InitDefaultsscc_info_TransactionStepV2_executor_2eproto}, {
-      &scc_info_ContractV2_executor_2eproto.base,
-      &scc_info_TransactionStepV2_StorageEntry_DoNotUse_executor_2eproto.base,}};
-
-static void InitDefaultsscc_info_TransactionStepV2_StorageEntry_DoNotUse_executor_2eproto() {
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
-
-  {
-    void* ptr = &::executor::v1::_TransactionStepV2_StorageEntry_DoNotUse_default_instance_;
-    new (ptr) ::executor::v1::TransactionStepV2_StorageEntry_DoNotUse();
-  }
-  ::executor::v1::TransactionStepV2_StorageEntry_DoNotUse::InitAsDefaultInstance();
-}
-
-::PROTOBUF_NAMESPACE_ID::internal::SCCInfo<0> scc_info_TransactionStepV2_StorageEntry_DoNotUse_executor_2eproto =
-    {{ATOMIC_VAR_INIT(::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase::kUninitialized), 0, 0, InitDefaultsscc_info_TransactionStepV2_StorageEntry_DoNotUse_executor_2eproto}, {}};
-
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_executor_2eproto[41];
-static const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* file_level_enum_descriptors_executor_2eproto[2];
-static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_executor_2eproto = nullptr;
-
-const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_executor_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+const uint32_t TableStruct_executor_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequest_DbEntry_DoNotUse, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequest_DbEntry_DoNotUse, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -1122,45 +1065,48 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_executor_2eproto::offsets[] PR
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, old_state_root_),
-  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, old_acc_input_hash_),
-  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, old_batch_num_),
-  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, chain_id_),
-  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, fork_id_),
-  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, batch_l2_data_),
-  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, l1_info_root_),
-  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, timestamp_limit_),
-  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, coinbase_),
-  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, forced_blockhash_l1_),
-  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, update_merkle_tree_),
-  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, no_counters_),
-  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, from_),
-  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, skip_verify_l1_info_root_),
-  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, skip_first_change_l2_block_),
-  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, skip_write_block_info_root_),
-  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, l1_info_tree_data_),
-  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, db_),
-  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, contracts_bytecode_),
-  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, trace_config_),
-  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, context_id_),
-  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, get_keys_),
-  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, state_override_),
-  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, debug_),
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, _impl_.old_state_root_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, _impl_.old_acc_input_hash_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, _impl_.old_batch_num_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, _impl_.chain_id_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, _impl_.fork_id_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, _impl_.batch_l2_data_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, _impl_.l1_info_root_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, _impl_.timestamp_limit_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, _impl_.coinbase_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, _impl_.forced_blockhash_l1_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, _impl_.update_merkle_tree_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, _impl_.no_counters_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, _impl_.from_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, _impl_.skip_verify_l1_info_root_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, _impl_.skip_first_change_l2_block_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, _impl_.skip_write_block_info_root_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, _impl_.l1_info_tree_data_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, _impl_.db_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, _impl_.contracts_bytecode_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, _impl_.trace_config_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, _impl_.context_id_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, _impl_.get_keys_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, _impl_.state_override_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchRequestV2, _impl_.debug_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::executor::v1::L1DataV2, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::executor::v1::L1DataV2, global_exit_root_),
-  PROTOBUF_FIELD_OFFSET(::executor::v1::L1DataV2, block_hash_l1_),
-  PROTOBUF_FIELD_OFFSET(::executor::v1::L1DataV2, min_timestamp_),
-  PROTOBUF_FIELD_OFFSET(::executor::v1::L1DataV2, smt_proof_),
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::executor::v1::L1DataV2, _impl_.global_exit_root_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::L1DataV2, _impl_.block_hash_l1_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::L1DataV2, _impl_.min_timestamp_),
+  PROTOBUF_FIELD_OFFSET(::executor::v1::L1DataV2, _impl_.smt_proof_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::executor::v1::DebugV2, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::executor::v1::DebugV2, gas_limit_),
+  ~0u,  // no _inlined_string_donated_
+  PROTOBUF_FIELD_OFFSET(::executor::v1::DebugV2, _impl_.gas_limit_),
   PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::executor::v1::ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -1381,92 +1327,92 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_executor_2eproto::offsets[] PR
   PROTOBUF_FIELD_OFFSET(::executor::v1::LogV2, _impl_.block_hash_),
   PROTOBUF_FIELD_OFFSET(::executor::v1::LogV2, _impl_.index_),
 };
-static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, 7, sizeof(::executor::v1::ProcessBatchRequest_DbEntry_DoNotUse)},
-  { 9, 16, sizeof(::executor::v1::ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse)},
-  { 18, 25, sizeof(::executor::v1::ProcessBatchRequest_StateOverrideEntry_DoNotUse)},
-  { 27, -1, sizeof(::executor::v1::ProcessBatchRequest)},
-  { 49, 56, sizeof(::executor::v1::ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse)},
-  { 58, -1, sizeof(::executor::v1::ProcessBatchResponse)},
-  { 82, -1, sizeof(::executor::v1::GetFlushStatusResponse)},
-  { 95, -1, sizeof(::executor::v1::TraceConfig)},
-  { 105, 112, sizeof(::executor::v1::OverrideAccount_StateEntry_DoNotUse)},
-  { 114, 121, sizeof(::executor::v1::OverrideAccount_StateDiffEntry_DoNotUse)},
-  { 123, -1, sizeof(::executor::v1::OverrideAccount)},
-  { 133, -1, sizeof(::executor::v1::InfoReadWrite)},
-  { 140, -1, sizeof(::executor::v1::FullTrace)},
-  { 147, -1, sizeof(::executor::v1::TransactionContext)},
-  { 164, 171, sizeof(::executor::v1::TransactionStep_StorageEntry_DoNotUse)},
-  { 173, -1, sizeof(::executor::v1::TransactionStep)},
-  { 193, -1, sizeof(::executor::v1::Contract)},
-  { 204, -1, sizeof(::executor::v1::ProcessTransactionResponse)},
-  { 225, -1, sizeof(::executor::v1::Log)},
-  { 238, 245, sizeof(::executor::v1::ProcessBatchRequestV2_L1InfoTreeDataEntry_DoNotUse)},
-  { 247, 254, sizeof(::executor::v1::ProcessBatchRequestV2_DbEntry_DoNotUse)},
-  { 256, 263, sizeof(::executor::v1::ProcessBatchRequestV2_ContractsBytecodeEntry_DoNotUse)},
-  { 265, 272, sizeof(::executor::v1::ProcessBatchRequestV2_StateOverrideEntry_DoNotUse)},
-  { 274, -1, sizeof(::executor::v1::ProcessBatchRequestV2)},
-  { 303, -1, sizeof(::executor::v1::L1DataV2)},
-  { 312, -1, sizeof(::executor::v1::DebugV2)},
-  { 318, 325, sizeof(::executor::v1::ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse)},
-  { 327, -1, sizeof(::executor::v1::ProcessBatchResponseV2)},
-  { 354, -1, sizeof(::executor::v1::TraceConfigV2)},
-  { 364, 371, sizeof(::executor::v1::OverrideAccountV2_StateEntry_DoNotUse)},
-  { 373, 380, sizeof(::executor::v1::OverrideAccountV2_StateDiffEntry_DoNotUse)},
-  { 382, -1, sizeof(::executor::v1::OverrideAccountV2)},
-  { 392, -1, sizeof(::executor::v1::InfoReadWriteV2)},
-  { 399, -1, sizeof(::executor::v1::FullTraceV2)},
-  { 406, -1, sizeof(::executor::v1::TransactionContextV2)},
-  { 426, 433, sizeof(::executor::v1::TransactionStepV2_StorageEntry_DoNotUse)},
-  { 435, -1, sizeof(::executor::v1::TransactionStepV2)},
-  { 455, -1, sizeof(::executor::v1::ContractV2)},
-  { 466, -1, sizeof(::executor::v1::ProcessBlockResponseV2)},
-  { 483, -1, sizeof(::executor::v1::ProcessTransactionResponseV2)},
-  { 508, -1, sizeof(::executor::v1::LogV2)},
+static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+  { 0, 8, -1, sizeof(::executor::v1::ProcessBatchRequest_DbEntry_DoNotUse)},
+  { 10, 18, -1, sizeof(::executor::v1::ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse)},
+  { 20, 28, -1, sizeof(::executor::v1::ProcessBatchRequest_StateOverrideEntry_DoNotUse)},
+  { 30, -1, -1, sizeof(::executor::v1::ProcessBatchRequest)},
+  { 53, 61, -1, sizeof(::executor::v1::ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse)},
+  { 63, -1, -1, sizeof(::executor::v1::ProcessBatchResponse)},
+  { 88, -1, -1, sizeof(::executor::v1::GetFlushStatusResponse)},
+  { 102, -1, -1, sizeof(::executor::v1::TraceConfig)},
+  { 113, 121, -1, sizeof(::executor::v1::OverrideAccount_StateEntry_DoNotUse)},
+  { 123, 131, -1, sizeof(::executor::v1::OverrideAccount_StateDiffEntry_DoNotUse)},
+  { 133, -1, -1, sizeof(::executor::v1::OverrideAccount)},
+  { 144, -1, -1, sizeof(::executor::v1::InfoReadWrite)},
+  { 152, -1, -1, sizeof(::executor::v1::FullTrace)},
+  { 160, -1, -1, sizeof(::executor::v1::TransactionContext)},
+  { 178, 186, -1, sizeof(::executor::v1::TransactionStep_StorageEntry_DoNotUse)},
+  { 188, -1, -1, sizeof(::executor::v1::TransactionStep)},
+  { 209, -1, -1, sizeof(::executor::v1::Contract)},
+  { 221, -1, -1, sizeof(::executor::v1::ProcessTransactionResponse)},
+  { 243, -1, -1, sizeof(::executor::v1::Log)},
+  { 257, 265, -1, sizeof(::executor::v1::ProcessBatchRequestV2_L1InfoTreeDataEntry_DoNotUse)},
+  { 267, 275, -1, sizeof(::executor::v1::ProcessBatchRequestV2_DbEntry_DoNotUse)},
+  { 277, 285, -1, sizeof(::executor::v1::ProcessBatchRequestV2_ContractsBytecodeEntry_DoNotUse)},
+  { 287, 295, -1, sizeof(::executor::v1::ProcessBatchRequestV2_StateOverrideEntry_DoNotUse)},
+  { 297, -1, -1, sizeof(::executor::v1::ProcessBatchRequestV2)},
+  { 327, -1, -1, sizeof(::executor::v1::L1DataV2)},
+  { 337, -1, -1, sizeof(::executor::v1::DebugV2)},
+  { 344, 352, -1, sizeof(::executor::v1::ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse)},
+  { 354, -1, -1, sizeof(::executor::v1::ProcessBatchResponseV2)},
+  { 382, -1, -1, sizeof(::executor::v1::TraceConfigV2)},
+  { 393, 401, -1, sizeof(::executor::v1::OverrideAccountV2_StateEntry_DoNotUse)},
+  { 403, 411, -1, sizeof(::executor::v1::OverrideAccountV2_StateDiffEntry_DoNotUse)},
+  { 413, -1, -1, sizeof(::executor::v1::OverrideAccountV2)},
+  { 424, -1, -1, sizeof(::executor::v1::InfoReadWriteV2)},
+  { 432, -1, -1, sizeof(::executor::v1::FullTraceV2)},
+  { 440, -1, -1, sizeof(::executor::v1::TransactionContextV2)},
+  { 461, 469, -1, sizeof(::executor::v1::TransactionStepV2_StorageEntry_DoNotUse)},
+  { 471, -1, -1, sizeof(::executor::v1::TransactionStepV2)},
+  { 492, -1, -1, sizeof(::executor::v1::ContractV2)},
+  { 504, -1, -1, sizeof(::executor::v1::ProcessBlockResponseV2)},
+  { 522, -1, -1, sizeof(::executor::v1::ProcessTransactionResponseV2)},
+  { 548, -1, -1, sizeof(::executor::v1::LogV2)},
 };
 
-static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_ProcessBatchRequest_DbEntry_DoNotUse_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_ProcessBatchRequest_StateOverrideEntry_DoNotUse_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_ProcessBatchRequest_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_ProcessBatchResponse_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_GetFlushStatusResponse_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_TraceConfig_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_OverrideAccount_StateEntry_DoNotUse_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_OverrideAccount_StateDiffEntry_DoNotUse_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_OverrideAccount_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_InfoReadWrite_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_FullTrace_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_TransactionContext_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_TransactionStep_StorageEntry_DoNotUse_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_TransactionStep_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_Contract_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_ProcessTransactionResponse_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_Log_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_ProcessBatchRequestV2_L1InfoTreeDataEntry_DoNotUse_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_ProcessBatchRequestV2_DbEntry_DoNotUse_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_ProcessBatchRequestV2_ContractsBytecodeEntry_DoNotUse_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_ProcessBatchRequestV2_StateOverrideEntry_DoNotUse_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_ProcessBatchRequestV2_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_L1DataV2_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_DebugV2_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_ProcessBatchResponseV2_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_TraceConfigV2_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_OverrideAccountV2_StateEntry_DoNotUse_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_OverrideAccountV2_StateDiffEntry_DoNotUse_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_OverrideAccountV2_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_InfoReadWriteV2_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_FullTraceV2_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_TransactionContextV2_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_TransactionStepV2_StorageEntry_DoNotUse_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_TransactionStepV2_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_ContractV2_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_ProcessBlockResponseV2_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_ProcessTransactionResponseV2_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::executor::v1::_LogV2_default_instance_),
+static const ::_pb::Message* const file_default_instances[] = {
+  &::executor::v1::_ProcessBatchRequest_DbEntry_DoNotUse_default_instance_._instance,
+  &::executor::v1::_ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse_default_instance_._instance,
+  &::executor::v1::_ProcessBatchRequest_StateOverrideEntry_DoNotUse_default_instance_._instance,
+  &::executor::v1::_ProcessBatchRequest_default_instance_._instance,
+  &::executor::v1::_ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse_default_instance_._instance,
+  &::executor::v1::_ProcessBatchResponse_default_instance_._instance,
+  &::executor::v1::_GetFlushStatusResponse_default_instance_._instance,
+  &::executor::v1::_TraceConfig_default_instance_._instance,
+  &::executor::v1::_OverrideAccount_StateEntry_DoNotUse_default_instance_._instance,
+  &::executor::v1::_OverrideAccount_StateDiffEntry_DoNotUse_default_instance_._instance,
+  &::executor::v1::_OverrideAccount_default_instance_._instance,
+  &::executor::v1::_InfoReadWrite_default_instance_._instance,
+  &::executor::v1::_FullTrace_default_instance_._instance,
+  &::executor::v1::_TransactionContext_default_instance_._instance,
+  &::executor::v1::_TransactionStep_StorageEntry_DoNotUse_default_instance_._instance,
+  &::executor::v1::_TransactionStep_default_instance_._instance,
+  &::executor::v1::_Contract_default_instance_._instance,
+  &::executor::v1::_ProcessTransactionResponse_default_instance_._instance,
+  &::executor::v1::_Log_default_instance_._instance,
+  &::executor::v1::_ProcessBatchRequestV2_L1InfoTreeDataEntry_DoNotUse_default_instance_._instance,
+  &::executor::v1::_ProcessBatchRequestV2_DbEntry_DoNotUse_default_instance_._instance,
+  &::executor::v1::_ProcessBatchRequestV2_ContractsBytecodeEntry_DoNotUse_default_instance_._instance,
+  &::executor::v1::_ProcessBatchRequestV2_StateOverrideEntry_DoNotUse_default_instance_._instance,
+  &::executor::v1::_ProcessBatchRequestV2_default_instance_._instance,
+  &::executor::v1::_L1DataV2_default_instance_._instance,
+  &::executor::v1::_DebugV2_default_instance_._instance,
+  &::executor::v1::_ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse_default_instance_._instance,
+  &::executor::v1::_ProcessBatchResponseV2_default_instance_._instance,
+  &::executor::v1::_TraceConfigV2_default_instance_._instance,
+  &::executor::v1::_OverrideAccountV2_StateEntry_DoNotUse_default_instance_._instance,
+  &::executor::v1::_OverrideAccountV2_StateDiffEntry_DoNotUse_default_instance_._instance,
+  &::executor::v1::_OverrideAccountV2_default_instance_._instance,
+  &::executor::v1::_InfoReadWriteV2_default_instance_._instance,
+  &::executor::v1::_FullTraceV2_default_instance_._instance,
+  &::executor::v1::_TransactionContextV2_default_instance_._instance,
+  &::executor::v1::_TransactionStepV2_StorageEntry_DoNotUse_default_instance_._instance,
+  &::executor::v1::_TransactionStepV2_default_instance_._instance,
+  &::executor::v1::_ContractV2_default_instance_._instance,
+  &::executor::v1::_ProcessBlockResponseV2_default_instance_._instance,
+  &::executor::v1::_ProcessTransactionResponseV2_default_instance_._instance,
+  &::executor::v1::_LogV2_default_instance_._instance,
 };
 
 const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
@@ -1843,55 +1789,14 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
 static const ::_pbi::DescriptorTable* const descriptor_table_executor_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2fempty_2eproto,
 };
-static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_executor_2eproto_sccs[41] = {
-  &scc_info_Contract_executor_2eproto.base,
-  &scc_info_ContractV2_executor_2eproto.base,
-  &scc_info_DebugV2_executor_2eproto.base,
-  &scc_info_FullTrace_executor_2eproto.base,
-  &scc_info_FullTraceV2_executor_2eproto.base,
-  &scc_info_GetFlushStatusResponse_executor_2eproto.base,
-  &scc_info_InfoReadWrite_executor_2eproto.base,
-  &scc_info_InfoReadWriteV2_executor_2eproto.base,
-  &scc_info_L1DataV2_executor_2eproto.base,
-  &scc_info_Log_executor_2eproto.base,
-  &scc_info_LogV2_executor_2eproto.base,
-  &scc_info_OverrideAccount_executor_2eproto.base,
-  &scc_info_OverrideAccount_StateDiffEntry_DoNotUse_executor_2eproto.base,
-  &scc_info_OverrideAccount_StateEntry_DoNotUse_executor_2eproto.base,
-  &scc_info_OverrideAccountV2_executor_2eproto.base,
-  &scc_info_OverrideAccountV2_StateDiffEntry_DoNotUse_executor_2eproto.base,
-  &scc_info_OverrideAccountV2_StateEntry_DoNotUse_executor_2eproto.base,
-  &scc_info_ProcessBatchRequest_executor_2eproto.base,
-  &scc_info_ProcessBatchRequest_ContractsBytecodeEntry_DoNotUse_executor_2eproto.base,
-  &scc_info_ProcessBatchRequest_DbEntry_DoNotUse_executor_2eproto.base,
-  &scc_info_ProcessBatchRequest_StateOverrideEntry_DoNotUse_executor_2eproto.base,
-  &scc_info_ProcessBatchRequestV2_executor_2eproto.base,
-  &scc_info_ProcessBatchRequestV2_ContractsBytecodeEntry_DoNotUse_executor_2eproto.base,
-  &scc_info_ProcessBatchRequestV2_DbEntry_DoNotUse_executor_2eproto.base,
-  &scc_info_ProcessBatchRequestV2_L1InfoTreeDataEntry_DoNotUse_executor_2eproto.base,
-  &scc_info_ProcessBatchRequestV2_StateOverrideEntry_DoNotUse_executor_2eproto.base,
-  &scc_info_ProcessBatchResponse_executor_2eproto.base,
-  &scc_info_ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse_executor_2eproto.base,
-  &scc_info_ProcessBatchResponseV2_executor_2eproto.base,
-  &scc_info_ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse_executor_2eproto.base,
-  &scc_info_ProcessBlockResponseV2_executor_2eproto.base,
-  &scc_info_ProcessTransactionResponse_executor_2eproto.base,
-  &scc_info_ProcessTransactionResponseV2_executor_2eproto.base,
-  &scc_info_TraceConfig_executor_2eproto.base,
-  &scc_info_TraceConfigV2_executor_2eproto.base,
-  &scc_info_TransactionContext_executor_2eproto.base,
-  &scc_info_TransactionContextV2_executor_2eproto.base,
-  &scc_info_TransactionStep_executor_2eproto.base,
-  &scc_info_TransactionStep_StorageEntry_DoNotUse_executor_2eproto.base,
-  &scc_info_TransactionStepV2_executor_2eproto.base,
-  &scc_info_TransactionStepV2_StorageEntry_DoNotUse_executor_2eproto.base,
-};
-static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_executor_2eproto_once;
-const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_executor_2eproto = {
-  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 14728,
-  &descriptor_table_executor_2eproto_once, descriptor_table_executor_2eproto_sccs, descriptor_table_executor_2eproto_deps, 41, 1,
-  schemas, file_default_instances, TableStruct_executor_2eproto::offsets,
-  file_level_metadata_executor_2eproto, 41, file_level_enum_descriptors_executor_2eproto, file_level_service_descriptors_executor_2eproto,
+static ::_pbi::once_flag descriptor_table_executor_2eproto_once;
+const ::_pbi::DescriptorTable descriptor_table_executor_2eproto = {
+    false, false, 14728, descriptor_table_protodef_executor_2eproto,
+    "executor.proto",
+    &descriptor_table_executor_2eproto_once, descriptor_table_executor_2eproto_deps, 1, 41,
+    schemas, file_default_instances, TableStruct_executor_2eproto::offsets,
+    file_level_metadata_executor_2eproto, file_level_enum_descriptors_executor_2eproto,
+    file_level_service_descriptors_executor_2eproto,
 };
 PROTOBUF_ATTRIBUTE_WEAK const ::_pbi::DescriptorTable* descriptor_table_executor_2eproto_getter() {
   return &descriptor_table_executor_2eproto;
@@ -8359,12 +8264,6 @@ void ProcessBatchRequestV2_StateOverrideEntry_DoNotUse::MergeFrom(const ProcessB
 
 // ===================================================================
 
-void ProcessBatchRequestV2::InitAsDefaultInstance() {
-  ::executor::v1::_ProcessBatchRequestV2_default_instance_._instance.get_mutable()->trace_config_ = const_cast< ::executor::v1::TraceConfigV2*>(
-      ::executor::v1::TraceConfigV2::internal_default_instance());
-  ::executor::v1::_ProcessBatchRequestV2_default_instance_._instance.get_mutable()->debug_ = const_cast< ::executor::v1::DebugV2*>(
-      ::executor::v1::DebugV2::internal_default_instance());
-}
 class ProcessBatchRequestV2::_Internal {
  public:
   static const ::executor::v1::TraceConfigV2& trace_config(const ProcessBatchRequestV2* msg);
@@ -8377,16 +8276,15 @@ ProcessBatchRequestV2::_Internal::trace_config(const ProcessBatchRequestV2* msg)
 }
 const ::executor::v1::DebugV2&
 ProcessBatchRequestV2::_Internal::debug(const ProcessBatchRequestV2* msg) {
-  return *msg->debug_;
+  return *msg->_impl_.debug_;
 }
-ProcessBatchRequestV2::ProcessBatchRequestV2(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena),
-  l1_info_tree_data_(arena),
-  db_(arena),
-  contracts_bytecode_(arena),
-  state_override_(arena) {
-  SharedCtor();
-  RegisterArenaDtor(arena);
+ProcessBatchRequestV2::ProcessBatchRequestV2(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
+  if (arena != nullptr && !is_message_owned) {
+    arena->OwnCustomDestructor(this, &ProcessBatchRequestV2::ArenaDtor);
+  }
   // @@protoc_insertion_point(arena_constructor:executor.v1.ProcessBatchRequestV2)
 }
 ProcessBatchRequestV2::ProcessBatchRequestV2(const ProcessBatchRequestV2& from)
@@ -8406,6 +8304,7 @@ ProcessBatchRequestV2::ProcessBatchRequestV2(const ProcessBatchRequestV2& from)
     , decltype(_impl_.from_){}
     , decltype(_impl_.context_id_){}
     , decltype(_impl_.trace_config_){nullptr}
+    , decltype(_impl_.debug_){nullptr}
     , decltype(_impl_.old_batch_num_){}
     , decltype(_impl_.chain_id_){}
     , decltype(_impl_.fork_id_){}
@@ -8414,6 +8313,7 @@ ProcessBatchRequestV2::ProcessBatchRequestV2(const ProcessBatchRequestV2& from)
     , decltype(_impl_.no_counters_){}
     , decltype(_impl_.skip_verify_l1_info_root_){}
     , decltype(_impl_.skip_first_change_l2_block_){}
+    , decltype(_impl_.skip_write_block_info_root_){}
     , decltype(_impl_.get_keys_){}
     , /*decltype(_impl_._cached_size_)*/{}};
 
@@ -8490,13 +8390,11 @@ ProcessBatchRequestV2::ProcessBatchRequestV2(const ProcessBatchRequestV2& from)
     _this->_impl_.trace_config_ = new ::executor::v1::TraceConfigV2(*from._impl_.trace_config_);
   }
   if (from._internal_has_debug()) {
-    debug_ = new ::executor::v1::DebugV2(*from.debug_);
-  } else {
-    debug_ = nullptr;
+    _this->_impl_.debug_ = new ::executor::v1::DebugV2(*from._impl_.debug_);
   }
-  ::memcpy(&old_batch_num_, &from.old_batch_num_,
-    static_cast<size_t>(reinterpret_cast<char*>(&get_keys_) -
-    reinterpret_cast<char*>(&old_batch_num_)) + sizeof(get_keys_));
+  ::memcpy(&_impl_.old_batch_num_, &from._impl_.old_batch_num_,
+    static_cast<size_t>(reinterpret_cast<char*>(&_impl_.get_keys_) -
+    reinterpret_cast<char*>(&_impl_.old_batch_num_)) + sizeof(_impl_.get_keys_));
   // @@protoc_insertion_point(copy_constructor:executor.v1.ProcessBatchRequestV2)
 }
 
@@ -8518,6 +8416,7 @@ inline void ProcessBatchRequestV2::SharedCtor(
     , decltype(_impl_.from_){}
     , decltype(_impl_.context_id_){}
     , decltype(_impl_.trace_config_){nullptr}
+    , decltype(_impl_.debug_){nullptr}
     , decltype(_impl_.old_batch_num_){uint64_t{0u}}
     , decltype(_impl_.chain_id_){uint64_t{0u}}
     , decltype(_impl_.fork_id_){uint64_t{0u}}
@@ -8526,6 +8425,7 @@ inline void ProcessBatchRequestV2::SharedCtor(
     , decltype(_impl_.no_counters_){0u}
     , decltype(_impl_.skip_verify_l1_info_root_){0u}
     , decltype(_impl_.skip_first_change_l2_block_){0u}
+    , decltype(_impl_.skip_write_block_info_root_){0u}
     , decltype(_impl_.get_keys_){0u}
     , /*decltype(_impl_._cached_size_)*/{}
   };
@@ -8573,18 +8473,26 @@ ProcessBatchRequestV2::~ProcessBatchRequestV2() {
   SharedDtor();
 }
 
-void ProcessBatchRequestV2::SharedDtor() {
-  GOOGLE_DCHECK(GetArena() == nullptr);
-  old_state_root_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  old_acc_input_hash_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  batch_l2_data_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  l1_info_root_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  coinbase_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  forced_blockhash_l1_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  from_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  context_id_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (this != internal_default_instance()) delete trace_config_;
-  if (this != internal_default_instance()) delete debug_;
+inline void ProcessBatchRequestV2::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  _impl_.l1_info_tree_data_.Destruct();
+  _impl_.l1_info_tree_data_.~MapField();
+  _impl_.db_.Destruct();
+  _impl_.db_.~MapField();
+  _impl_.contracts_bytecode_.Destruct();
+  _impl_.contracts_bytecode_.~MapField();
+  _impl_.state_override_.Destruct();
+  _impl_.state_override_.~MapField();
+  _impl_.old_state_root_.Destroy();
+  _impl_.old_acc_input_hash_.Destroy();
+  _impl_.batch_l2_data_.Destroy();
+  _impl_.l1_info_root_.Destroy();
+  _impl_.coinbase_.Destroy();
+  _impl_.forced_blockhash_l1_.Destroy();
+  _impl_.from_.Destroy();
+  _impl_.context_id_.Destroy();
+  if (this != internal_default_instance()) delete _impl_.trace_config_;
+  if (this != internal_default_instance()) delete _impl_.debug_;
 }
 
 void ProcessBatchRequestV2::ArenaDtor(void* object) {
@@ -8619,14 +8527,14 @@ void ProcessBatchRequestV2::Clear() {
   if (GetArenaForAllocation() == nullptr && _impl_.trace_config_ != nullptr) {
     delete _impl_.trace_config_;
   }
-  trace_config_ = nullptr;
-  if (GetArena() == nullptr && debug_ != nullptr) {
-    delete debug_;
+  _impl_.trace_config_ = nullptr;
+  if (GetArenaForAllocation() == nullptr && _impl_.debug_ != nullptr) {
+    delete _impl_.debug_;
   }
-  debug_ = nullptr;
-  ::memset(&old_batch_num_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&get_keys_) -
-      reinterpret_cast<char*>(&old_batch_num_)) + sizeof(get_keys_));
+  _impl_.debug_ = nullptr;
+  ::memset(&_impl_.old_batch_num_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&_impl_.get_keys_) -
+      reinterpret_cast<char*>(&_impl_.old_batch_num_)) + sizeof(_impl_.get_keys_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -8767,14 +8675,15 @@ const char* ProcessBatchRequestV2::_InternalParse(const char* ptr, ::_pbi::Parse
         continue;
       // uint32 skip_write_block_info_root = 16;
       case 16:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 128)) {
-          skip_write_block_info_root_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 128)) {
+          _impl_.skip_write_block_info_root_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // map<uint32, .executor.v1.L1DataV2> l1_info_tree_data = 17;
       case 17:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 138)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 138)) {
           ptr -= 2;
           do {
             ptr += 2;
@@ -8782,11 +8691,12 @@ const char* ProcessBatchRequestV2::_InternalParse(const char* ptr, ::_pbi::Parse
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<138>(ptr));
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // map<string, string> db = 18;
       case 18:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 146)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 146)) {
           ptr -= 2;
           do {
             ptr += 2;
@@ -8794,11 +8704,12 @@ const char* ProcessBatchRequestV2::_InternalParse(const char* ptr, ::_pbi::Parse
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<146>(ptr));
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // map<string, string> contracts_bytecode = 19;
       case 19:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 154)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 154)) {
           ptr -= 2;
           do {
             ptr += 2;
@@ -8806,11 +8717,12 @@ const char* ProcessBatchRequestV2::_InternalParse(const char* ptr, ::_pbi::Parse
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<154>(ptr));
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // .executor.v1.TraceConfigV2 trace_config = 20;
       case 20:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 162)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 162)) {
           ptr = ctx->ParseMessage(_internal_mutable_trace_config(), ptr);
           CHK_(ptr);
         } else
@@ -8818,7 +8730,7 @@ const char* ProcessBatchRequestV2::_InternalParse(const char* ptr, ::_pbi::Parse
         continue;
       // string context_id = 21;
       case 21:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 170)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 170)) {
           auto str = _internal_mutable_context_id();
           ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
@@ -8828,15 +8740,15 @@ const char* ProcessBatchRequestV2::_InternalParse(const char* ptr, ::_pbi::Parse
         continue;
       // uint32 get_keys = 22;
       case 22:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 176)) {
-          get_keys_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 176)) {
+          _impl_.get_keys_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
           CHK_(ptr);
         } else
           goto handle_unusual;
         continue;
       // map<string, .executor.v1.OverrideAccountV2> state_override = 23;
       case 23:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 186)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 186)) {
           ptr -= 2;
           do {
             ptr += 2;
@@ -8844,14 +8756,16 @@ const char* ProcessBatchRequestV2::_InternalParse(const char* ptr, ::_pbi::Parse
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
           } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<186>(ptr));
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       // .executor.v1.DebugV2 debug = 24;
       case 24:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 194)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 194)) {
           ptr = ctx->ParseMessage(_internal_mutable_debug(), ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
       default:
         goto handle_unusual;
@@ -8981,9 +8895,9 @@ uint8_t* ProcessBatchRequestV2::_InternalSerialize(
   }
 
   // uint32 skip_write_block_info_root = 16;
-  if (this->skip_write_block_info_root() != 0) {
+  if (this->_internal_skip_write_block_info_root() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(16, this->_internal_skip_write_block_info_root(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(16, this->_internal_skip_write_block_info_root(), target);
   }
 
   // map<uint32, .executor.v1.L1DataV2> l1_info_tree_data = 17;
@@ -8992,26 +8906,13 @@ uint8_t* ProcessBatchRequestV2::_InternalSerialize(
     using WireHelper = ProcessBatchRequestV2_L1InfoTreeDataEntry_DoNotUse::Funcs;
     const auto& map_field = this->_internal_l1_info_tree_data();
 
-    if (stream->IsSerializationDeterministic() &&
-        this->_internal_l1_info_tree_data().size() > 1) {
-      ::std::unique_ptr<SortItem[]> items(
-          new SortItem[this->_internal_l1_info_tree_data().size()]);
-      typedef ::PROTOBUF_NAMESPACE_ID::Map< ::PROTOBUF_NAMESPACE_ID::uint32, ::executor::v1::L1DataV2 >::size_type size_type;
-      size_type n = 0;
-      for (::PROTOBUF_NAMESPACE_ID::Map< ::PROTOBUF_NAMESPACE_ID::uint32, ::executor::v1::L1DataV2 >::const_iterator
-          it = this->_internal_l1_info_tree_data().begin();
-          it != this->_internal_l1_info_tree_data().end(); ++it, ++n) {
-        items[static_cast<ptrdiff_t>(n)] = SortItem(&*it);
-      }
-      ::std::sort(&items[0], &items[static_cast<ptrdiff_t>(n)], Less());
-      for (size_type i = 0; i < n; i++) {
-        target = ProcessBatchRequestV2_L1InfoTreeDataEntry_DoNotUse::Funcs::InternalSerialize(17, items[static_cast<ptrdiff_t>(i)].second->first, items[static_cast<ptrdiff_t>(i)].second->second, target, stream);
+    if (stream->IsSerializationDeterministic() && map_field.size() > 1) {
+      for (const auto& entry : ::_pbi::MapSorterFlat<MapType>(map_field)) {
+        target = WireHelper::InternalSerialize(17, entry.first, entry.second, target, stream);
       }
     } else {
-      for (::PROTOBUF_NAMESPACE_ID::Map< ::PROTOBUF_NAMESPACE_ID::uint32, ::executor::v1::L1DataV2 >::const_iterator
-          it = this->_internal_l1_info_tree_data().begin();
-          it != this->_internal_l1_info_tree_data().end(); ++it) {
-        target = ProcessBatchRequestV2_L1InfoTreeDataEntry_DoNotUse::Funcs::InternalSerialize(17, it->first, it->second, target, stream);
+      for (const auto& entry : map_field) {
+        target = WireHelper::InternalSerialize(17, entry.first, entry.second, target, stream);
       }
     }
   }
@@ -9033,28 +8934,15 @@ uint8_t* ProcessBatchRequestV2::_InternalSerialize(
         "executor.v1.ProcessBatchRequestV2.DbEntry.value");
     };
 
-    if (stream->IsSerializationDeterministic() &&
-        this->_internal_db().size() > 1) {
-      ::std::unique_ptr<SortItem[]> items(
-          new SortItem[this->_internal_db().size()]);
-      typedef ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >::size_type size_type;
-      size_type n = 0;
-      for (::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >::const_iterator
-          it = this->_internal_db().begin();
-          it != this->_internal_db().end(); ++it, ++n) {
-        items[static_cast<ptrdiff_t>(n)] = SortItem(&*it);
-      }
-      ::std::sort(&items[0], &items[static_cast<ptrdiff_t>(n)], Less());
-      for (size_type i = 0; i < n; i++) {
-        target = ProcessBatchRequestV2_DbEntry_DoNotUse::Funcs::InternalSerialize(18, items[static_cast<ptrdiff_t>(i)]->first, items[static_cast<ptrdiff_t>(i)]->second, target, stream);
-        Utf8Check::Check(&(*items[static_cast<ptrdiff_t>(i)]));
+    if (stream->IsSerializationDeterministic() && map_field.size() > 1) {
+      for (const auto& entry : ::_pbi::MapSorterPtr<MapType>(map_field)) {
+        target = WireHelper::InternalSerialize(18, entry.first, entry.second, target, stream);
+        check_utf8(entry);
       }
     } else {
-      for (::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >::const_iterator
-          it = this->_internal_db().begin();
-          it != this->_internal_db().end(); ++it) {
-        target = ProcessBatchRequestV2_DbEntry_DoNotUse::Funcs::InternalSerialize(18, it->first, it->second, target, stream);
-        Utf8Check::Check(&(*it));
+      for (const auto& entry : map_field) {
+        target = WireHelper::InternalSerialize(18, entry.first, entry.second, target, stream);
+        check_utf8(entry);
       }
     }
   }
@@ -9076,42 +8964,28 @@ uint8_t* ProcessBatchRequestV2::_InternalSerialize(
         "executor.v1.ProcessBatchRequestV2.ContractsBytecodeEntry.value");
     };
 
-    if (stream->IsSerializationDeterministic() &&
-        this->_internal_contracts_bytecode().size() > 1) {
-      ::std::unique_ptr<SortItem[]> items(
-          new SortItem[this->_internal_contracts_bytecode().size()]);
-      typedef ::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >::size_type size_type;
-      size_type n = 0;
-      for (::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >::const_iterator
-          it = this->_internal_contracts_bytecode().begin();
-          it != this->_internal_contracts_bytecode().end(); ++it, ++n) {
-        items[static_cast<ptrdiff_t>(n)] = SortItem(&*it);
-      }
-      ::std::sort(&items[0], &items[static_cast<ptrdiff_t>(n)], Less());
-      for (size_type i = 0; i < n; i++) {
-        target = ProcessBatchRequestV2_ContractsBytecodeEntry_DoNotUse::Funcs::InternalSerialize(19, items[static_cast<ptrdiff_t>(i)]->first, items[static_cast<ptrdiff_t>(i)]->second, target, stream);
-        Utf8Check::Check(&(*items[static_cast<ptrdiff_t>(i)]));
+    if (stream->IsSerializationDeterministic() && map_field.size() > 1) {
+      for (const auto& entry : ::_pbi::MapSorterPtr<MapType>(map_field)) {
+        target = WireHelper::InternalSerialize(19, entry.first, entry.second, target, stream);
+        check_utf8(entry);
       }
     } else {
-      for (::PROTOBUF_NAMESPACE_ID::Map< std::string, std::string >::const_iterator
-          it = this->_internal_contracts_bytecode().begin();
-          it != this->_internal_contracts_bytecode().end(); ++it) {
-        target = ProcessBatchRequestV2_ContractsBytecodeEntry_DoNotUse::Funcs::InternalSerialize(19, it->first, it->second, target, stream);
-        Utf8Check::Check(&(*it));
+      for (const auto& entry : map_field) {
+        target = WireHelper::InternalSerialize(19, entry.first, entry.second, target, stream);
+        check_utf8(entry);
       }
     }
   }
 
   // .executor.v1.TraceConfigV2 trace_config = 20;
-  if (this->has_trace_config()) {
-    target = stream->EnsureSpace(target);
+  if (this->_internal_has_trace_config()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        20, _Internal::trace_config(this), target, stream);
+      InternalWriteMessage(20, _Internal::trace_config(this),
+        _Internal::trace_config(this).GetCachedSize(), target, stream);
   }
 
   // string context_id = 21;
-  if (this->context_id().size() > 0) {
+  if (!this->_internal_context_id().empty()) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_context_id().data(), static_cast<int>(this->_internal_context_id().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
@@ -9121,9 +8995,9 @@ uint8_t* ProcessBatchRequestV2::_InternalSerialize(
   }
 
   // uint32 get_keys = 22;
-  if (this->get_keys() != 0) {
+  if (this->_internal_get_keys() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(22, this->_internal_get_keys(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt32ToArray(22, this->_internal_get_keys(), target);
   }
 
   // map<string, .executor.v1.OverrideAccountV2> state_override = 23;
@@ -9139,38 +9013,24 @@ uint8_t* ProcessBatchRequestV2::_InternalSerialize(
         "executor.v1.ProcessBatchRequestV2.StateOverrideEntry.key");
     };
 
-    if (stream->IsSerializationDeterministic() &&
-        this->_internal_state_override().size() > 1) {
-      ::std::unique_ptr<SortItem[]> items(
-          new SortItem[this->_internal_state_override().size()]);
-      typedef ::PROTOBUF_NAMESPACE_ID::Map< std::string, ::executor::v1::OverrideAccountV2 >::size_type size_type;
-      size_type n = 0;
-      for (::PROTOBUF_NAMESPACE_ID::Map< std::string, ::executor::v1::OverrideAccountV2 >::const_iterator
-          it = this->_internal_state_override().begin();
-          it != this->_internal_state_override().end(); ++it, ++n) {
-        items[static_cast<ptrdiff_t>(n)] = SortItem(&*it);
-      }
-      ::std::sort(&items[0], &items[static_cast<ptrdiff_t>(n)], Less());
-      for (size_type i = 0; i < n; i++) {
-        target = ProcessBatchRequestV2_StateOverrideEntry_DoNotUse::Funcs::InternalSerialize(23, items[static_cast<ptrdiff_t>(i)]->first, items[static_cast<ptrdiff_t>(i)]->second, target, stream);
-        Utf8Check::Check(&(*items[static_cast<ptrdiff_t>(i)]));
+    if (stream->IsSerializationDeterministic() && map_field.size() > 1) {
+      for (const auto& entry : ::_pbi::MapSorterPtr<MapType>(map_field)) {
+        target = WireHelper::InternalSerialize(23, entry.first, entry.second, target, stream);
+        check_utf8(entry);
       }
     } else {
-      for (::PROTOBUF_NAMESPACE_ID::Map< std::string, ::executor::v1::OverrideAccountV2 >::const_iterator
-          it = this->_internal_state_override().begin();
-          it != this->_internal_state_override().end(); ++it) {
-        target = ProcessBatchRequestV2_StateOverrideEntry_DoNotUse::Funcs::InternalSerialize(23, it->first, it->second, target, stream);
-        Utf8Check::Check(&(*it));
+      for (const auto& entry : map_field) {
+        target = WireHelper::InternalSerialize(23, entry.first, entry.second, target, stream);
+        check_utf8(entry);
       }
     }
   }
 
   // .executor.v1.DebugV2 debug = 24;
-  if (this->has_debug()) {
-    target = stream->EnsureSpace(target);
+  if (this->_internal_has_debug()) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(
-        24, _Internal::debug(this), target, stream);
+      InternalWriteMessage(24, _Internal::debug(this),
+        _Internal::debug(this).GetCachedSize(), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -9275,24 +9135,24 @@ size_t ProcessBatchRequestV2::ByteSizeLong() const {
   }
 
   // string context_id = 21;
-  if (this->context_id().size() > 0) {
+  if (!this->_internal_context_id().empty()) {
     total_size += 2 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_context_id());
   }
 
   // .executor.v1.TraceConfigV2 trace_config = 20;
-  if (this->has_trace_config()) {
+  if (this->_internal_has_trace_config()) {
     total_size += 2 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
         *_impl_.trace_config_);
   }
 
   // .executor.v1.DebugV2 debug = 24;
-  if (this->has_debug()) {
+  if (this->_internal_has_debug()) {
     total_size += 2 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-        *debug_);
+        *_impl_.debug_);
   }
 
   // uint64 old_batch_num = 3;
@@ -9336,14 +9196,14 @@ size_t ProcessBatchRequestV2::ByteSizeLong() const {
   }
 
   // uint32 skip_write_block_info_root = 16;
-  if (this->skip_write_block_info_root() != 0) {
+  if (this->_internal_skip_write_block_info_root() != 0) {
     total_size += 2 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
+      ::_pbi::WireFormatLite::UInt32Size(
         this->_internal_skip_write_block_info_root());
   }
 
   // uint32 get_keys = 22;
-  if (this->get_keys() != 0) {
+  if (this->_internal_get_keys() != 0) {
     total_size += 2 +
       ::_pbi::WireFormatLite::UInt32Size(
         this->_internal_get_keys());
@@ -9399,11 +9259,12 @@ void ProcessBatchRequestV2::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, 
     _this->_internal_mutable_trace_config()->::executor::v1::TraceConfigV2::MergeFrom(
         from._internal_trace_config());
   }
-  if (from.has_debug()) {
-    _internal_mutable_debug()->::executor::v1::DebugV2::MergeFrom(from._internal_debug());
+  if (from._internal_has_debug()) {
+    _this->_internal_mutable_debug()->::executor::v1::DebugV2::MergeFrom(
+        from._internal_debug());
   }
-  if (from.old_batch_num() != 0) {
-    _internal_set_old_batch_num(from._internal_old_batch_num());
+  if (from._internal_old_batch_num() != 0) {
+    _this->_internal_set_old_batch_num(from._internal_old_batch_num());
   }
   if (from._internal_chain_id() != 0) {
     _this->_internal_set_chain_id(from._internal_chain_id());
@@ -9426,11 +9287,11 @@ void ProcessBatchRequestV2::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, 
   if (from._internal_skip_first_change_l2_block() != 0) {
     _this->_internal_set_skip_first_change_l2_block(from._internal_skip_first_change_l2_block());
   }
-  if (from.skip_write_block_info_root() != 0) {
-    _internal_set_skip_write_block_info_root(from._internal_skip_write_block_info_root());
+  if (from._internal_skip_write_block_info_root() != 0) {
+    _this->_internal_set_skip_write_block_info_root(from._internal_skip_write_block_info_root());
   }
-  if (from.get_keys() != 0) {
-    _internal_set_get_keys(from._internal_get_keys());
+  if (from._internal_get_keys() != 0) {
+    _this->_internal_set_get_keys(from._internal_get_keys());
   }
   _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
@@ -9807,115 +9668,116 @@ void L1DataV2::InternalSwap(L1DataV2* other) {
 
 // ===================================================================
 
-void DebugV2::InitAsDefaultInstance() {
-}
 class DebugV2::_Internal {
  public:
 };
 
-DebugV2::DebugV2(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
-  SharedCtor();
-  RegisterArenaDtor(arena);
+DebugV2::DebugV2(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                         bool is_message_owned)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
+  SharedCtor(arena, is_message_owned);
   // @@protoc_insertion_point(arena_constructor:executor.v1.DebugV2)
 }
 DebugV2::DebugV2(const DebugV2& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
+  DebugV2* const _this = this; (void)_this;
+  new (&_impl_) Impl_{
+      decltype(_impl_.gas_limit_){}
+    , /*decltype(_impl_._cached_size_)*/{}};
+
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  gas_limit_ = from.gas_limit_;
+  _this->_impl_.gas_limit_ = from._impl_.gas_limit_;
   // @@protoc_insertion_point(copy_constructor:executor.v1.DebugV2)
 }
 
-void DebugV2::SharedCtor() {
-  gas_limit_ = PROTOBUF_ULONGLONG(0);
+inline void DebugV2::SharedCtor(
+    ::_pb::Arena* arena, bool is_message_owned) {
+  (void)arena;
+  (void)is_message_owned;
+  new (&_impl_) Impl_{
+      decltype(_impl_.gas_limit_){uint64_t{0u}}
+    , /*decltype(_impl_._cached_size_)*/{}
+  };
 }
 
 DebugV2::~DebugV2() {
   // @@protoc_insertion_point(destructor:executor.v1.DebugV2)
+  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
+  (void)arena;
+    return;
+  }
   SharedDtor();
-  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void DebugV2::SharedDtor() {
-  GOOGLE_DCHECK(GetArena() == nullptr);
+inline void DebugV2::SharedDtor() {
+  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
 }
 
-void DebugV2::ArenaDtor(void* object) {
-  DebugV2* _this = reinterpret_cast< DebugV2* >(object);
-  (void)_this;
-}
-void DebugV2::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
-}
 void DebugV2::SetCachedSize(int size) const {
-  _cached_size_.Set(size);
+  _impl_._cached_size_.Set(size);
 }
-const DebugV2& DebugV2::default_instance() {
-  ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&::scc_info_DebugV2_executor_2eproto.base);
-  return *internal_default_instance();
-}
-
 
 void DebugV2::Clear() {
 // @@protoc_insertion_point(message_clear_start:executor.v1.DebugV2)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  gas_limit_ = PROTOBUF_ULONGLONG(0);
+  _impl_.gas_limit_ = uint64_t{0u};
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* DebugV2::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* DebugV2::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  ::PROTOBUF_NAMESPACE_ID::Arena* arena = GetArena(); (void)arena;
   while (!ctx->Done(&ptr)) {
-    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
-    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
-    CHK_(ptr);
+    uint32_t tag;
+    ptr = ::_pbi::ReadTag(ptr, &tag);
     switch (tag >> 3) {
       // uint64 gas_limit = 1;
       case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          gas_limit_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
+          _impl_.gas_limit_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
-        } else goto handle_unusual;
+        } else
+          goto handle_unusual;
         continue;
-      default: {
-      handle_unusual:
-        if ((tag & 7) == 4 || tag == 0) {
-          ctx->SetLastTag(tag);
-          goto success;
-        }
-        ptr = UnknownFieldParse(tag,
-            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-            ptr, ctx);
-        CHK_(ptr != nullptr);
-        continue;
-      }
+      default:
+        goto handle_unusual;
     }  // switch
+  handle_unusual:
+    if ((tag == 0) || ((tag & 7) == 4)) {
+      CHK_(ptr);
+      ctx->SetLastTag(tag);
+      goto message_done;
+    }
+    ptr = UnknownFieldParse(
+        tag,
+        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+        ptr, ctx);
+    CHK_(ptr != nullptr);
   }  // while
-success:
+message_done:
   return ptr;
 failure:
   ptr = nullptr;
-  goto success;
+  goto message_done;
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* DebugV2::_InternalSerialize(
-    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+uint8_t* DebugV2::_InternalSerialize(
+    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:executor.v1.DebugV2)
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   // uint64 gas_limit = 1;
-  if (this->gas_limit() != 0) {
+  if (this->_internal_gas_limit() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(1, this->_internal_gas_limit(), target);
+    target = ::_pbi::WireFormatLite::WriteUInt64ToArray(1, this->_internal_gas_limit(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:executor.v1.DebugV2)
@@ -9926,58 +9788,37 @@ size_t DebugV2::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:executor.v1.DebugV2)
   size_t total_size = 0;
 
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // uint64 gas_limit = 1;
-  if (this->gas_limit() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_gas_limit());
+  if (this->_internal_gas_limit() != 0) {
+    total_size += ::_pbi::WireFormatLite::UInt64SizePlusOne(this->_internal_gas_limit());
   }
 
-  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
-        _internal_metadata_, total_size, &_cached_size_);
-  }
-  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
-  SetCachedSize(cached_size);
-  return total_size;
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-void DebugV2::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:executor.v1.DebugV2)
-  GOOGLE_DCHECK_NE(&from, this);
-  const DebugV2* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<DebugV2>(
-          &from);
-  if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:executor.v1.DebugV2)
-    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
-  } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:executor.v1.DebugV2)
-    MergeFrom(*source);
-  }
-}
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData DebugV2::_class_data_ = {
+    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
+    DebugV2::MergeImpl
+};
+const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*DebugV2::GetClassData() const { return &_class_data_; }
 
-void DebugV2::MergeFrom(const DebugV2& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:executor.v1.DebugV2)
-  GOOGLE_DCHECK_NE(&from, this);
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+
+void DebugV2::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+  auto* const _this = static_cast<DebugV2*>(&to_msg);
+  auto& from = static_cast<const DebugV2&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:executor.v1.DebugV2)
+  GOOGLE_DCHECK_NE(&from, _this);
+  uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from.gas_limit() != 0) {
-    _internal_set_gas_limit(from._internal_gas_limit());
+  if (from._internal_gas_limit() != 0) {
+    _this->_internal_set_gas_limit(from._internal_gas_limit());
   }
-}
-
-void DebugV2::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:executor.v1.DebugV2)
-  if (&from == this) return;
-  Clear();
-  MergeFrom(from);
+  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void DebugV2::CopyFrom(const DebugV2& from) {
@@ -9993,14 +9834,15 @@ bool DebugV2::IsInitialized() const {
 
 void DebugV2::InternalSwap(DebugV2* other) {
   using std::swap;
-  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
-  swap(gas_limit_, other->gas_limit_);
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_.gas_limit_, other->_impl_.gas_limit_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata DebugV2::GetMetadata() const {
-  return GetMetadataStatic();
+  return ::_pbi::AssignDescriptors(
+      &descriptor_table_executor_2eproto_getter, &descriptor_table_executor_2eproto_once,
+      file_level_metadata_executor_2eproto[25]);
 }
-
 
 // ===================================================================
 
@@ -10013,7 +9855,7 @@ void ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse::MergeFrom(const Pr
 ::PROTOBUF_NAMESPACE_ID::Metadata ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_executor_2eproto_getter, &descriptor_table_executor_2eproto_once,
-      file_level_metadata_executor_2eproto[25]);
+      file_level_metadata_executor_2eproto[26]);
 }
 
 // ===================================================================
@@ -10876,7 +10718,7 @@ void ProcessBatchResponseV2::InternalSwap(ProcessBatchResponseV2* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata ProcessBatchResponseV2::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_executor_2eproto_getter, &descriptor_table_executor_2eproto_once,
-      file_level_metadata_executor_2eproto[26]);
+      file_level_metadata_executor_2eproto[27]);
 }
 
 // ===================================================================
@@ -11182,7 +11024,7 @@ void TraceConfigV2::InternalSwap(TraceConfigV2* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata TraceConfigV2::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_executor_2eproto_getter, &descriptor_table_executor_2eproto_once,
-      file_level_metadata_executor_2eproto[27]);
+      file_level_metadata_executor_2eproto[28]);
 }
 
 // ===================================================================
@@ -11196,7 +11038,7 @@ void OverrideAccountV2_StateEntry_DoNotUse::MergeFrom(const OverrideAccountV2_St
 ::PROTOBUF_NAMESPACE_ID::Metadata OverrideAccountV2_StateEntry_DoNotUse::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_executor_2eproto_getter, &descriptor_table_executor_2eproto_once,
-      file_level_metadata_executor_2eproto[28]);
+      file_level_metadata_executor_2eproto[29]);
 }
 
 // ===================================================================
@@ -11210,7 +11052,7 @@ void OverrideAccountV2_StateDiffEntry_DoNotUse::MergeFrom(const OverrideAccountV
 ::PROTOBUF_NAMESPACE_ID::Metadata OverrideAccountV2_StateDiffEntry_DoNotUse::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_executor_2eproto_getter, &descriptor_table_executor_2eproto_once,
-      file_level_metadata_executor_2eproto[29]);
+      file_level_metadata_executor_2eproto[30]);
 }
 
 // ===================================================================
@@ -11609,7 +11451,7 @@ void OverrideAccountV2::InternalSwap(OverrideAccountV2* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata OverrideAccountV2::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_executor_2eproto_getter, &descriptor_table_executor_2eproto_once,
-      file_level_metadata_executor_2eproto[30]);
+      file_level_metadata_executor_2eproto[31]);
 }
 
 // ===================================================================
@@ -11862,7 +11704,7 @@ void InfoReadWriteV2::InternalSwap(InfoReadWriteV2* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata InfoReadWriteV2::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_executor_2eproto_getter, &descriptor_table_executor_2eproto_once,
-      file_level_metadata_executor_2eproto[31]);
+      file_level_metadata_executor_2eproto[32]);
 }
 
 // ===================================================================
@@ -12089,7 +11931,7 @@ void FullTraceV2::InternalSwap(FullTraceV2* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata FullTraceV2::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_executor_2eproto_getter, &descriptor_table_executor_2eproto_once,
-      file_level_metadata_executor_2eproto[32]);
+      file_level_metadata_executor_2eproto[33]);
 }
 
 // ===================================================================
@@ -12828,7 +12670,7 @@ void TransactionContextV2::InternalSwap(TransactionContextV2* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata TransactionContextV2::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_executor_2eproto_getter, &descriptor_table_executor_2eproto_once,
-      file_level_metadata_executor_2eproto[33]);
+      file_level_metadata_executor_2eproto[34]);
 }
 
 // ===================================================================
@@ -12842,7 +12684,7 @@ void TransactionStepV2_StorageEntry_DoNotUse::MergeFrom(const TransactionStepV2_
 ::PROTOBUF_NAMESPACE_ID::Metadata TransactionStepV2_StorageEntry_DoNotUse::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_executor_2eproto_getter, &descriptor_table_executor_2eproto_once,
-      file_level_metadata_executor_2eproto[34]);
+      file_level_metadata_executor_2eproto[35]);
 }
 
 // ===================================================================
@@ -13509,7 +13351,7 @@ void TransactionStepV2::InternalSwap(TransactionStepV2* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata TransactionStepV2::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_executor_2eproto_getter, &descriptor_table_executor_2eproto_once,
-      file_level_metadata_executor_2eproto[35]);
+      file_level_metadata_executor_2eproto[36]);
 }
 
 // ===================================================================
@@ -13934,7 +13776,7 @@ void ContractV2::InternalSwap(ContractV2* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata ContractV2::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_executor_2eproto_getter, &descriptor_table_executor_2eproto_once,
-      file_level_metadata_executor_2eproto[36]);
+      file_level_metadata_executor_2eproto[37]);
 }
 
 // ===================================================================
@@ -14538,7 +14380,7 @@ void ProcessBlockResponseV2::InternalSwap(ProcessBlockResponseV2* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata ProcessBlockResponseV2::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_executor_2eproto_getter, &descriptor_table_executor_2eproto_once,
-      file_level_metadata_executor_2eproto[37]);
+      file_level_metadata_executor_2eproto[38]);
 }
 
 // ===================================================================
@@ -15397,7 +15239,7 @@ void ProcessTransactionResponseV2::InternalSwap(ProcessTransactionResponseV2* ot
 ::PROTOBUF_NAMESPACE_ID::Metadata ProcessTransactionResponseV2::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_executor_2eproto_getter, &descriptor_table_executor_2eproto_once,
-      file_level_metadata_executor_2eproto[38]);
+      file_level_metadata_executor_2eproto[39]);
 }
 
 // ===================================================================
@@ -15898,7 +15740,7 @@ void LogV2::InternalSwap(LogV2* other) {
 ::PROTOBUF_NAMESPACE_ID::Metadata LogV2::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_executor_2eproto_getter, &descriptor_table_executor_2eproto_once,
-      file_level_metadata_executor_2eproto[39]);
+      file_level_metadata_executor_2eproto[40]);
 }
 
 // @@protoc_insertion_point(namespace_scope)
@@ -16005,10 +15847,12 @@ template<> PROTOBUF_NOINLINE ::executor::v1::L1DataV2*
 Arena::CreateMaybeMessage< ::executor::v1::L1DataV2 >(Arena* arena) {
   return Arena::CreateMessageInternal< ::executor::v1::L1DataV2 >(arena);
 }
-template<> PROTOBUF_NOINLINE ::executor::v1::DebugV2* Arena::CreateMaybeMessage< ::executor::v1::DebugV2 >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::executor::v1::DebugV2*
+Arena::CreateMaybeMessage< ::executor::v1::DebugV2 >(Arena* arena) {
   return Arena::CreateMessageInternal< ::executor::v1::DebugV2 >(arena);
 }
-template<> PROTOBUF_NOINLINE ::executor::v1::ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse* Arena::CreateMaybeMessage< ::executor::v1::ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse >(Arena* arena) {
+template<> PROTOBUF_NOINLINE ::executor::v1::ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse*
+Arena::CreateMaybeMessage< ::executor::v1::ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse >(Arena* arena) {
   return Arena::CreateMessageInternal< ::executor::v1::ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse >(arena);
 }
 template<> PROTOBUF_NOINLINE ::executor::v1::ProcessBatchResponseV2*

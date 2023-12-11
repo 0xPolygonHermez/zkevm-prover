@@ -9,8 +9,6 @@
 #include "exit_process.hpp"
 #include "climb_key_executor.hpp"
 
-#define LOG_STORAGE_EXECUTOR_ROM_LINE 1
-
 using json = nlohmann::json;
 using namespace std;
 

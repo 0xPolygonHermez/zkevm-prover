@@ -46,15 +46,7 @@ PROTOBUF_NAMESPACE_CLOSE
 
 // Internal implementation detail -- do not use these members.
 struct TableStruct_executor_2eproto {
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTableField entries[]
-    PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::AuxillaryParseTableField aux[]
-    PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[41]
-    PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
-  static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
-  static const ::PROTOBUF_NAMESPACE_ID::uint32 offsets[];
+  static const uint32_t offsets[];
 };
 extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_executor_2eproto;
 namespace executor {
@@ -66,7 +58,7 @@ class ContractV2;
 struct ContractV2DefaultTypeInternal;
 extern ContractV2DefaultTypeInternal _ContractV2_default_instance_;
 class DebugV2;
-class DebugV2DefaultTypeInternal;
+struct DebugV2DefaultTypeInternal;
 extern DebugV2DefaultTypeInternal _DebugV2_default_instance_;
 class FullTrace;
 struct FullTraceDefaultTypeInternal;
@@ -392,8 +384,8 @@ enum ExecutorError : int {
   EXECUTOR_ERROR_INVALID_L1_SMT_PROOF = 101,
   EXECUTOR_ERROR_INVALID_BALANCE = 102,
   EXECUTOR_ERROR_SM_MAIN_BINARY_LT4_MISMATCH = 103,
-  ExecutorError_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
-  ExecutorError_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
+  ExecutorError_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::min(),
+  ExecutorError_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<int32_t>::max()
 };
 bool ExecutorError_IsValid(int value);
 constexpr ExecutorError ExecutorError_MIN = EXECUTOR_ERROR_UNSPECIFIED;
@@ -4386,7 +4378,7 @@ class ProcessBatchRequestV2 final :
   public:
   void clear_debug();
   const ::executor::v1::DebugV2& debug() const;
-  ::executor::v1::DebugV2* release_debug();
+  PROTOBUF_NODISCARD ::executor::v1::DebugV2* release_debug();
   ::executor::v1::DebugV2* mutable_debug();
   void set_allocated_debug(::executor::v1::DebugV2* debug);
   private:
@@ -4471,11 +4463,11 @@ class ProcessBatchRequestV2 final :
 
   // uint32 skip_write_block_info_root = 16;
   void clear_skip_write_block_info_root();
-  ::PROTOBUF_NAMESPACE_ID::uint32 skip_write_block_info_root() const;
-  void set_skip_write_block_info_root(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  uint32_t skip_write_block_info_root() const;
+  void set_skip_write_block_info_root(uint32_t value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_skip_write_block_info_root() const;
-  void _internal_set_skip_write_block_info_root(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  uint32_t _internal_skip_write_block_info_root() const;
+  void _internal_set_skip_write_block_info_root(uint32_t value);
   public:
 
   // uint32 get_keys = 22;
@@ -4494,51 +4486,50 @@ class ProcessBatchRequestV2 final :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::MapField<
-      ProcessBatchRequestV2_L1InfoTreeDataEntry_DoNotUse,
-      ::PROTOBUF_NAMESPACE_ID::uint32, ::executor::v1::L1DataV2,
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_UINT32,
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_MESSAGE,
-      0 > l1_info_tree_data_;
-  ::PROTOBUF_NAMESPACE_ID::internal::MapField<
-      ProcessBatchRequestV2_DbEntry_DoNotUse,
-      std::string, std::string,
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-      0 > db_;
-  ::PROTOBUF_NAMESPACE_ID::internal::MapField<
-      ProcessBatchRequestV2_ContractsBytecodeEntry_DoNotUse,
-      std::string, std::string,
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-      0 > contracts_bytecode_;
-  ::PROTOBUF_NAMESPACE_ID::internal::MapField<
-      ProcessBatchRequestV2_StateOverrideEntry_DoNotUse,
-      std::string, ::executor::v1::OverrideAccountV2,
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_MESSAGE,
-      0 > state_override_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr old_state_root_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr old_acc_input_hash_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr batch_l2_data_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr l1_info_root_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr coinbase_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr forced_blockhash_l1_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr from_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr context_id_;
-  ::executor::v1::TraceConfigV2* trace_config_;
-  ::executor::v1::DebugV2* debug_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 old_batch_num_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 chain_id_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 fork_id_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 timestamp_limit_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 update_merkle_tree_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 no_counters_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 skip_verify_l1_info_root_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 skip_first_change_l2_block_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 skip_write_block_info_root_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 get_keys_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  struct Impl_ {
+    ::PROTOBUF_NAMESPACE_ID::internal::MapField<
+        ProcessBatchRequestV2_L1InfoTreeDataEntry_DoNotUse,
+        uint32_t, ::executor::v1::L1DataV2,
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_UINT32,
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_MESSAGE> l1_info_tree_data_;
+    ::PROTOBUF_NAMESPACE_ID::internal::MapField<
+        ProcessBatchRequestV2_DbEntry_DoNotUse,
+        std::string, std::string,
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING> db_;
+    ::PROTOBUF_NAMESPACE_ID::internal::MapField<
+        ProcessBatchRequestV2_ContractsBytecodeEntry_DoNotUse,
+        std::string, std::string,
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING> contracts_bytecode_;
+    ::PROTOBUF_NAMESPACE_ID::internal::MapField<
+        ProcessBatchRequestV2_StateOverrideEntry_DoNotUse,
+        std::string, ::executor::v1::OverrideAccountV2,
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_STRING,
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::TYPE_MESSAGE> state_override_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr old_state_root_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr old_acc_input_hash_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr batch_l2_data_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr l1_info_root_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr coinbase_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr forced_blockhash_l1_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr from_;
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr context_id_;
+    ::executor::v1::TraceConfigV2* trace_config_;
+    ::executor::v1::DebugV2* debug_;
+    uint64_t old_batch_num_;
+    uint64_t chain_id_;
+    uint64_t fork_id_;
+    uint64_t timestamp_limit_;
+    uint32_t update_merkle_tree_;
+    uint32_t no_counters_;
+    uint32_t skip_verify_l1_info_root_;
+    uint32_t skip_first_change_l2_block_;
+    uint32_t skip_write_block_info_root_;
+    uint32_t get_keys_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
   friend struct ::TableStruct_executor_2eproto;
 };
 // -------------------------------------------------------------------
@@ -4749,11 +4740,12 @@ class L1DataV2 final :
 };
 // -------------------------------------------------------------------
 
-class DebugV2 PROTOBUF_FINAL :
+class DebugV2 final :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:executor.v1.DebugV2) */ {
  public:
-  inline DebugV2() : DebugV2(nullptr) {};
-  virtual ~DebugV2();
+  inline DebugV2() : DebugV2(nullptr) {}
+  ~DebugV2() override;
+  explicit PROTOBUF_CONSTEXPR DebugV2(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
 
   DebugV2(const DebugV2& from);
   DebugV2(DebugV2&& from) noexcept
@@ -4766,8 +4758,13 @@ class DebugV2 PROTOBUF_FINAL :
     return *this;
   }
   inline DebugV2& operator=(DebugV2&& from) noexcept {
-    if (GetArena() == from.GetArena()) {
-      if (this != &from) InternalSwap(&from);
+    if (this == &from) return *this;
+    if (GetOwningArena() == from.GetOwningArena()
+  #ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetOwningArena() != nullptr
+  #endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
     } else {
       CopyFrom(from);
     }
@@ -4778,14 +4775,14 @@ class DebugV2 PROTOBUF_FINAL :
     return GetDescriptor();
   }
   static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return GetMetadataStatic().descriptor;
+    return default_instance().GetMetadata().descriptor;
   }
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return GetMetadataStatic().reflection;
+    return default_instance().GetMetadata().reflection;
   }
-  static const DebugV2& default_instance();
-
-  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static const DebugV2& default_instance() {
+    return *internal_default_instance();
+  }
   static inline const DebugV2* internal_default_instance() {
     return reinterpret_cast<const DebugV2*>(
                &_DebugV2_default_instance_);
@@ -4798,7 +4795,12 @@ class DebugV2 PROTOBUF_FINAL :
   }
   inline void Swap(DebugV2* other) {
     if (other == this) return;
-    if (GetArena() == other->GetArena()) {
+  #ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() != nullptr &&
+        GetOwningArena() == other->GetOwningArena()) {
+   #else  // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetOwningArena() == other->GetOwningArena()) {
+  #endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
       InternalSwap(other);
     } else {
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
@@ -4806,56 +4808,53 @@ class DebugV2 PROTOBUF_FINAL :
   }
   void UnsafeArenaSwap(DebugV2* other) {
     if (other == this) return;
-    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    GOOGLE_DCHECK(GetOwningArena() == other->GetOwningArena());
     InternalSwap(other);
   }
 
   // implements Message ----------------------------------------------
 
-  inline DebugV2* New() const final {
-    return CreateMaybeMessage<DebugV2>(nullptr);
-  }
-
-  DebugV2* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+  DebugV2* New(::PROTOBUF_NAMESPACE_ID::Arena* arena = nullptr) const final {
     return CreateMaybeMessage<DebugV2>(arena);
   }
-  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  using ::PROTOBUF_NAMESPACE_ID::Message::CopyFrom;
   void CopyFrom(const DebugV2& from);
-  void MergeFrom(const DebugV2& from);
+  using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
+  void MergeFrom( const DebugV2& from) {
+    DebugV2::MergeImpl(*this, from);
+  }
+  private:
+  static void MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg);
+  public:
   PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
   bool IsInitialized() const final;
 
   size_t ByteSizeLong() const final;
   const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
-      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _cached_size_.Get(); }
+  uint8_t* _InternalSerialize(
+      uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _impl_._cached_size_.Get(); }
 
   private:
-  inline void SharedCtor();
-  inline void SharedDtor();
+  void SharedCtor(::PROTOBUF_NAMESPACE_ID::Arena* arena, bool is_message_owned);
+  void SharedDtor();
   void SetCachedSize(int size) const final;
   void InternalSwap(DebugV2* other);
+
+  private:
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
     return "executor.v1.DebugV2";
   }
   protected:
-  explicit DebugV2(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  private:
-  static void ArenaDtor(void* object);
-  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  explicit DebugV2(::PROTOBUF_NAMESPACE_ID::Arena* arena,
+                       bool is_message_owned = false);
   public:
+
+  static const ClassData _class_data_;
+  const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*GetClassData() const final;
 
   ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
-    return ::descriptor_table_executor_2eproto.file_level_metadata[kIndexInFileMessages];
-  }
-
-  public:
 
   // nested types ----------------------------------------------------
 
@@ -4866,11 +4865,11 @@ class DebugV2 PROTOBUF_FINAL :
   };
   // uint64 gas_limit = 1;
   void clear_gas_limit();
-  ::PROTOBUF_NAMESPACE_ID::uint64 gas_limit() const;
-  void set_gas_limit(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  uint64_t gas_limit() const;
+  void set_gas_limit(uint64_t value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_gas_limit() const;
-  void _internal_set_gas_limit(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  uint64_t _internal_gas_limit() const;
+  void _internal_set_gas_limit(uint64_t value);
   public:
 
   // @@protoc_insertion_point(class_scope:executor.v1.DebugV2)
@@ -4880,8 +4879,11 @@ class DebugV2 PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 gas_limit_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  struct Impl_ {
+    uint64_t gas_limit_;
+    mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  };
+  union { Impl_ _impl_; };
   friend struct ::TableStruct_executor_2eproto;
 };
 // -------------------------------------------------------------------
@@ -4907,13 +4909,7 @@ public:
   static bool ValidateValue(void*) { return true; }
   using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
   ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
-    return ::descriptor_table_executor_2eproto.file_level_metadata[26];
-  }
-
-  public:
+  friend struct ::TableStruct_executor_2eproto;
 };
 
 // -------------------------------------------------------------------
@@ -5591,13 +5587,7 @@ public:
  }
   using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
   ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
-    return ::descriptor_table_executor_2eproto.file_level_metadata[29];
-  }
-
-  public:
+  friend struct ::TableStruct_executor_2eproto;
 };
 
 // -------------------------------------------------------------------
@@ -5625,13 +5615,7 @@ public:
  }
   using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
   ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
-    return ::descriptor_table_executor_2eproto.file_level_metadata[30];
-  }
-
-  public:
+  friend struct ::TableStruct_executor_2eproto;
 };
 
 // -------------------------------------------------------------------
@@ -6581,13 +6565,7 @@ public:
  }
   using ::PROTOBUF_NAMESPACE_ID::Message::MergeFrom;
   ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
-    return ::descriptor_table_executor_2eproto.file_level_metadata[35];
-  }
-
-  public:
+  friend struct ::TableStruct_executor_2eproto;
 };
 
 // -------------------------------------------------------------------
@@ -12908,20 +12886,20 @@ inline void ProcessBatchRequestV2::set_skip_first_change_l2_block(uint32_t value
 
 // uint32 skip_write_block_info_root = 16;
 inline void ProcessBatchRequestV2::clear_skip_write_block_info_root() {
-  skip_write_block_info_root_ = 0u;
+  _impl_.skip_write_block_info_root_ = 0u;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchRequestV2::_internal_skip_write_block_info_root() const {
-  return skip_write_block_info_root_;
+inline uint32_t ProcessBatchRequestV2::_internal_skip_write_block_info_root() const {
+  return _impl_.skip_write_block_info_root_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchRequestV2::skip_write_block_info_root() const {
+inline uint32_t ProcessBatchRequestV2::skip_write_block_info_root() const {
   // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchRequestV2.skip_write_block_info_root)
   return _internal_skip_write_block_info_root();
 }
-inline void ProcessBatchRequestV2::_internal_set_skip_write_block_info_root(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+inline void ProcessBatchRequestV2::_internal_set_skip_write_block_info_root(uint32_t value) {
   
-  skip_write_block_info_root_ = value;
+  _impl_.skip_write_block_info_root_ = value;
 }
-inline void ProcessBatchRequestV2::set_skip_write_block_info_root(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+inline void ProcessBatchRequestV2::set_skip_write_block_info_root(uint32_t value) {
   _internal_set_skip_write_block_info_root(value);
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchRequestV2.skip_write_block_info_root)
 }
@@ -13204,21 +13182,21 @@ ProcessBatchRequestV2::mutable_state_override() {
 
 // .executor.v1.DebugV2 debug = 24;
 inline bool ProcessBatchRequestV2::_internal_has_debug() const {
-  return this != internal_default_instance() && debug_ != nullptr;
+  return this != internal_default_instance() && _impl_.debug_ != nullptr;
 }
 inline bool ProcessBatchRequestV2::has_debug() const {
   return _internal_has_debug();
 }
 inline void ProcessBatchRequestV2::clear_debug() {
-  if (GetArena() == nullptr && debug_ != nullptr) {
-    delete debug_;
+  if (GetArenaForAllocation() == nullptr && _impl_.debug_ != nullptr) {
+    delete _impl_.debug_;
   }
-  debug_ = nullptr;
+  _impl_.debug_ = nullptr;
 }
 inline const ::executor::v1::DebugV2& ProcessBatchRequestV2::_internal_debug() const {
-  const ::executor::v1::DebugV2* p = debug_;
-  return p != nullptr ? *p : *reinterpret_cast<const ::executor::v1::DebugV2*>(
-      &::executor::v1::_DebugV2_default_instance_);
+  const ::executor::v1::DebugV2* p = _impl_.debug_;
+  return p != nullptr ? *p : reinterpret_cast<const ::executor::v1::DebugV2&>(
+      ::executor::v1::_DebugV2_default_instance_);
 }
 inline const ::executor::v1::DebugV2& ProcessBatchRequestV2::debug() const {
   // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchRequestV2.debug)
@@ -13226,10 +13204,10 @@ inline const ::executor::v1::DebugV2& ProcessBatchRequestV2::debug() const {
 }
 inline void ProcessBatchRequestV2::unsafe_arena_set_allocated_debug(
     ::executor::v1::DebugV2* debug) {
-  if (GetArena() == nullptr) {
-    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(debug_);
+  if (GetArenaForAllocation() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(_impl_.debug_);
   }
-  debug_ = debug;
+  _impl_.debug_ = debug;
   if (debug) {
     
   } else {
@@ -13238,39 +13216,48 @@ inline void ProcessBatchRequestV2::unsafe_arena_set_allocated_debug(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessBatchRequestV2.debug)
 }
 inline ::executor::v1::DebugV2* ProcessBatchRequestV2::release_debug() {
-  auto temp = unsafe_arena_release_debug();
-  if (GetArena() != nullptr) {
+  
+  ::executor::v1::DebugV2* temp = _impl_.debug_;
+  _impl_.debug_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old =  reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(temp);
+  temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  if (GetArenaForAllocation() == nullptr) { delete old; }
+#else  // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArenaForAllocation() != nullptr) {
     temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
   }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
   return temp;
 }
 inline ::executor::v1::DebugV2* ProcessBatchRequestV2::unsafe_arena_release_debug() {
   // @@protoc_insertion_point(field_release:executor.v1.ProcessBatchRequestV2.debug)
   
-  ::executor::v1::DebugV2* temp = debug_;
-  debug_ = nullptr;
+  ::executor::v1::DebugV2* temp = _impl_.debug_;
+  _impl_.debug_ = nullptr;
   return temp;
 }
 inline ::executor::v1::DebugV2* ProcessBatchRequestV2::_internal_mutable_debug() {
   
-  if (debug_ == nullptr) {
-    auto* p = CreateMaybeMessage<::executor::v1::DebugV2>(GetArena());
-    debug_ = p;
+  if (_impl_.debug_ == nullptr) {
+    auto* p = CreateMaybeMessage<::executor::v1::DebugV2>(GetArenaForAllocation());
+    _impl_.debug_ = p;
   }
-  return debug_;
+  return _impl_.debug_;
 }
 inline ::executor::v1::DebugV2* ProcessBatchRequestV2::mutable_debug() {
+  ::executor::v1::DebugV2* _msg = _internal_mutable_debug();
   // @@protoc_insertion_point(field_mutable:executor.v1.ProcessBatchRequestV2.debug)
-  return _internal_mutable_debug();
+  return _msg;
 }
 inline void ProcessBatchRequestV2::set_allocated_debug(::executor::v1::DebugV2* debug) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
   if (message_arena == nullptr) {
-    delete debug_;
+    delete _impl_.debug_;
   }
   if (debug) {
     ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(debug);
+        ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(debug);
     if (message_arena != submessage_arena) {
       debug = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
           message_arena, debug, submessage_arena);
@@ -13279,7 +13266,7 @@ inline void ProcessBatchRequestV2::set_allocated_debug(::executor::v1::DebugV2* 
   } else {
     
   }
-  debug_ = debug;
+  _impl_.debug_ = debug;
   // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessBatchRequestV2.debug)
 }
 
@@ -13488,20 +13475,20 @@ L1DataV2::mutable_smt_proof() {
 
 // uint64 gas_limit = 1;
 inline void DebugV2::clear_gas_limit() {
-  gas_limit_ = PROTOBUF_ULONGLONG(0);
+  _impl_.gas_limit_ = uint64_t{0u};
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint64 DebugV2::_internal_gas_limit() const {
-  return gas_limit_;
+inline uint64_t DebugV2::_internal_gas_limit() const {
+  return _impl_.gas_limit_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint64 DebugV2::gas_limit() const {
+inline uint64_t DebugV2::gas_limit() const {
   // @@protoc_insertion_point(field_get:executor.v1.DebugV2.gas_limit)
   return _internal_gas_limit();
 }
-inline void DebugV2::_internal_set_gas_limit(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+inline void DebugV2::_internal_set_gas_limit(uint64_t value) {
   
-  gas_limit_ = value;
+  _impl_.gas_limit_ = value;
 }
-inline void DebugV2::set_gas_limit(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+inline void DebugV2::set_gas_limit(uint64_t value) {
   _internal_set_gas_limit(value);
   // @@protoc_insertion_point(field_set:executor.v1.DebugV2.gas_limit)
 }
