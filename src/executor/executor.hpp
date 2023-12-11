@@ -25,6 +25,7 @@
 #include "sm/padding_sha256/padding_sha256_executor.hpp"
 #include "sm/padding_sha256bit/padding_sha256bit_executor.hpp"
 #include "sm/sha256_f/sha256_f_executor.hpp"
+#include "sm/climb_key/climb_key_executor.hpp"
 #include "prover_request.hpp"
 
 class Executor
@@ -32,7 +33,7 @@ class Executor
 public:
     Goldilocks &fr;
     const Config &config;
-    
+
     fork_1::MainExecutor mainExecutor_fork_1;
     fork_2::MainExecutor mainExecutor_fork_2;
     fork_3::MainExecutor mainExecutor_fork_3;
@@ -56,6 +57,7 @@ public:
     PaddingPGExecutor paddingPGExecutor;
     PoseidonGExecutor poseidonGExecutor;
     MemAlignExecutor memAlignExecutor;
+    ClimbKeyExecutor climbKeyExecutor;
 
 
     Executor(Goldilocks &fr, const Config &config, PoseidonGoldilocks &poseidon) :
@@ -83,7 +85,8 @@ public:
         sha256FExecutor(fr, config),
         paddingPGExecutor(fr, poseidon),
         poseidonGExecutor(fr, poseidon),
-        memAlignExecutor(fr, config)
+        memAlignExecutor(fr, config),
+        climbKeyExecutor(fr, config)
         {};
 
     // Full version: all polynomials are evaluated, in all evaluations

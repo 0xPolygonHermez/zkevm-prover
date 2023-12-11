@@ -15,7 +15,7 @@ private:
     uint64_t _index;
 public:
     ConstantPol(Goldilocks::Element * pAddress, uint64_t degree, uint64_t index) : _pAddress(pAddress), _degree(degree), _index(index) {};
-    inline Goldilocks::Element & operator[](uint64_t i) { return _pAddress[i*260]; };
+    inline Goldilocks::Element & operator[](uint64_t i) { return _pAddress[i*234]; };
     inline Goldilocks::Element * operator=(Goldilocks::Element * pAddress) { _pAddress = pAddress; return _pAddress; };
 
     inline Goldilocks::Element * address (void) { return _pAddress; }
@@ -407,99 +407,68 @@ public:
     inline uint64_t size (void) { return _degree*10*sizeof(Goldilocks::Element); }
 };
 
+class ClimbKeyConstantPols
+{
+public:
+    ConstantPol FACTOR;
+    ConstantPol T_CLKEYSEL;
+    ConstantPol T_LEVEL;
+    ConstantPol T_CHUNK_VALUE;
+    ConstantPol T_CARRYLT_IN;
+    ConstantPol T_CARRYLT_OUT;
+private:
+    void * _pAddress;
+    uint64_t _degree;
+public:
+
+    ClimbKeyConstantPols (void * pAddress, uint64_t degree) :
+        FACTOR((Goldilocks::Element *)((uint8_t *)pAddress + 1200), degree, 150),
+        T_CLKEYSEL((Goldilocks::Element *)((uint8_t *)pAddress + 1208), degree, 151),
+        T_LEVEL((Goldilocks::Element *)((uint8_t *)pAddress + 1216), degree, 152),
+        T_CHUNK_VALUE((Goldilocks::Element *)((uint8_t *)pAddress + 1224), degree, 153),
+        T_CARRYLT_IN((Goldilocks::Element *)((uint8_t *)pAddress + 1232), degree, 154),
+        T_CARRYLT_OUT((Goldilocks::Element *)((uint8_t *)pAddress + 1240), degree, 155),
+        _pAddress(pAddress),
+        _degree(degree) {};
+
+    inline static uint64_t pilDegree (void) { return 8388608; }
+    inline static uint64_t pilSize (void) { return 48; }
+    inline static uint64_t numPols (void) { return 6; }
+
+    inline void * address (void) { return _pAddress; }
+    inline uint64_t degree (void) { return _degree; }
+    inline uint64_t size (void) { return _degree*6*sizeof(Goldilocks::Element); }
+};
+
 class StorageConstantPols
 {
 public:
-    ConstantPol rHash;
-    ConstantPol rHashType;
-    ConstantPol rLatchGet;
-    ConstantPol rLatchSet;
-    ConstantPol rClimbRkey;
-    ConstantPol rClimbSiblingRkey;
-    ConstantPol rClimbSiblingRkeyN;
-    ConstantPol rRotateLevel;
-    ConstantPol rJmpz;
-    ConstantPol rJmp;
-    ConstantPol rConst0;
-    ConstantPol rConst1;
-    ConstantPol rConst2;
-    ConstantPol rConst3;
-    ConstantPol rAddress;
-    ConstantPol rLine;
-    ConstantPol rInFree;
-    ConstantPol rInNewRoot;
-    ConstantPol rInOldRoot;
-    ConstantPol rInRkey;
-    ConstantPol rInRkeyBit;
-    ConstantPol rInSiblingRkey;
-    ConstantPol rInSiblingValueHash;
-    ConstantPol rInValueLow;
-    ConstantPol rInValueHigh;
-    ConstantPol rInRotlVh;
-    ConstantPol rSetHashLeft;
-    ConstantPol rSetHashRight;
-    ConstantPol rSetLevel;
-    ConstantPol rSetNewRoot;
-    ConstantPol rSetOldRoot;
-    ConstantPol rSetRkey;
-    ConstantPol rSetRkeyBit;
-    ConstantPol rSetSiblingRkey;
-    ConstantPol rSetSiblingValueHash;
-    ConstantPol rSetValueHigh;
-    ConstantPol rSetValueLow;
+    ConstantPol OPERATION;
+    ConstantPol CONST0;
+    ConstantPol JMP_ADDRESS;
+    ConstantPol LINE;
+    ConstantPol IN_SIBLING_RKEY;
 private:
     void * _pAddress;
     uint64_t _degree;
 public:
 
     StorageConstantPols (void * pAddress, uint64_t degree) :
-        rHash((Goldilocks::Element *)((uint8_t *)pAddress + 1200), degree, 150),
-        rHashType((Goldilocks::Element *)((uint8_t *)pAddress + 1208), degree, 151),
-        rLatchGet((Goldilocks::Element *)((uint8_t *)pAddress + 1216), degree, 152),
-        rLatchSet((Goldilocks::Element *)((uint8_t *)pAddress + 1224), degree, 153),
-        rClimbRkey((Goldilocks::Element *)((uint8_t *)pAddress + 1232), degree, 154),
-        rClimbSiblingRkey((Goldilocks::Element *)((uint8_t *)pAddress + 1240), degree, 155),
-        rClimbSiblingRkeyN((Goldilocks::Element *)((uint8_t *)pAddress + 1248), degree, 156),
-        rRotateLevel((Goldilocks::Element *)((uint8_t *)pAddress + 1256), degree, 157),
-        rJmpz((Goldilocks::Element *)((uint8_t *)pAddress + 1264), degree, 158),
-        rJmp((Goldilocks::Element *)((uint8_t *)pAddress + 1272), degree, 159),
-        rConst0((Goldilocks::Element *)((uint8_t *)pAddress + 1280), degree, 160),
-        rConst1((Goldilocks::Element *)((uint8_t *)pAddress + 1288), degree, 161),
-        rConst2((Goldilocks::Element *)((uint8_t *)pAddress + 1296), degree, 162),
-        rConst3((Goldilocks::Element *)((uint8_t *)pAddress + 1304), degree, 163),
-        rAddress((Goldilocks::Element *)((uint8_t *)pAddress + 1312), degree, 164),
-        rLine((Goldilocks::Element *)((uint8_t *)pAddress + 1320), degree, 165),
-        rInFree((Goldilocks::Element *)((uint8_t *)pAddress + 1328), degree, 166),
-        rInNewRoot((Goldilocks::Element *)((uint8_t *)pAddress + 1336), degree, 167),
-        rInOldRoot((Goldilocks::Element *)((uint8_t *)pAddress + 1344), degree, 168),
-        rInRkey((Goldilocks::Element *)((uint8_t *)pAddress + 1352), degree, 169),
-        rInRkeyBit((Goldilocks::Element *)((uint8_t *)pAddress + 1360), degree, 170),
-        rInSiblingRkey((Goldilocks::Element *)((uint8_t *)pAddress + 1368), degree, 171),
-        rInSiblingValueHash((Goldilocks::Element *)((uint8_t *)pAddress + 1376), degree, 172),
-        rInValueLow((Goldilocks::Element *)((uint8_t *)pAddress + 1384), degree, 173),
-        rInValueHigh((Goldilocks::Element *)((uint8_t *)pAddress + 1392), degree, 174),
-        rInRotlVh((Goldilocks::Element *)((uint8_t *)pAddress + 1400), degree, 175),
-        rSetHashLeft((Goldilocks::Element *)((uint8_t *)pAddress + 1408), degree, 176),
-        rSetHashRight((Goldilocks::Element *)((uint8_t *)pAddress + 1416), degree, 177),
-        rSetLevel((Goldilocks::Element *)((uint8_t *)pAddress + 1424), degree, 178),
-        rSetNewRoot((Goldilocks::Element *)((uint8_t *)pAddress + 1432), degree, 179),
-        rSetOldRoot((Goldilocks::Element *)((uint8_t *)pAddress + 1440), degree, 180),
-        rSetRkey((Goldilocks::Element *)((uint8_t *)pAddress + 1448), degree, 181),
-        rSetRkeyBit((Goldilocks::Element *)((uint8_t *)pAddress + 1456), degree, 182),
-        rSetSiblingRkey((Goldilocks::Element *)((uint8_t *)pAddress + 1464), degree, 183),
-        rSetSiblingValueHash((Goldilocks::Element *)((uint8_t *)pAddress + 1472), degree, 184),
-        rSetValueHigh((Goldilocks::Element *)((uint8_t *)pAddress + 1480), degree, 185),
-        rSetValueLow((Goldilocks::Element *)((uint8_t *)pAddress + 1488), degree, 186),
+        OPERATION((Goldilocks::Element *)((uint8_t *)pAddress + 1248), degree, 156),
+        CONST0((Goldilocks::Element *)((uint8_t *)pAddress + 1256), degree, 157),
+        JMP_ADDRESS((Goldilocks::Element *)((uint8_t *)pAddress + 1264), degree, 158),
+        LINE((Goldilocks::Element *)((uint8_t *)pAddress + 1272), degree, 159),
+        IN_SIBLING_RKEY((Goldilocks::Element *)((uint8_t *)pAddress + 1280), degree, 160),
         _pAddress(pAddress),
         _degree(degree) {};
 
     inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t pilSize (void) { return 296; }
-    inline static uint64_t numPols (void) { return 37; }
+    inline static uint64_t pilSize (void) { return 40; }
+    inline static uint64_t numPols (void) { return 5; }
 
     inline void * address (void) { return _pAddress; }
     inline uint64_t degree (void) { return _degree; }
-    inline uint64_t size (void) { return _degree*37*sizeof(Goldilocks::Element); }
+    inline uint64_t size (void) { return _degree*5*sizeof(Goldilocks::Element); }
 };
 
 class KeccakFConstantPols
@@ -519,14 +488,14 @@ private:
 public:
 
     KeccakFConstantPols (void * pAddress, uint64_t degree) :
-        ConnA((Goldilocks::Element *)((uint8_t *)pAddress + 1496), degree, 187),
-        ConnB((Goldilocks::Element *)((uint8_t *)pAddress + 1504), degree, 188),
-        ConnC((Goldilocks::Element *)((uint8_t *)pAddress + 1512), degree, 189),
-        GateType((Goldilocks::Element *)((uint8_t *)pAddress + 1520), degree, 190),
-        kGateType((Goldilocks::Element *)((uint8_t *)pAddress + 1528), degree, 191),
-        kA((Goldilocks::Element *)((uint8_t *)pAddress + 1536), degree, 192),
-        kB((Goldilocks::Element *)((uint8_t *)pAddress + 1544), degree, 193),
-        kC((Goldilocks::Element *)((uint8_t *)pAddress + 1552), degree, 194),
+        ConnA((Goldilocks::Element *)((uint8_t *)pAddress + 1288), degree, 161),
+        ConnB((Goldilocks::Element *)((uint8_t *)pAddress + 1296), degree, 162),
+        ConnC((Goldilocks::Element *)((uint8_t *)pAddress + 1304), degree, 163),
+        GateType((Goldilocks::Element *)((uint8_t *)pAddress + 1312), degree, 164),
+        kGateType((Goldilocks::Element *)((uint8_t *)pAddress + 1320), degree, 165),
+        kA((Goldilocks::Element *)((uint8_t *)pAddress + 1328), degree, 166),
+        kB((Goldilocks::Element *)((uint8_t *)pAddress + 1336), degree, 167),
+        kC((Goldilocks::Element *)((uint8_t *)pAddress + 1344), degree, 168),
         _pAddress(pAddress),
         _degree(degree) {};
 
@@ -550,8 +519,8 @@ private:
 public:
 
     Bits2FieldConstantPols (void * pAddress, uint64_t degree) :
-        FieldLatch((Goldilocks::Element *)((uint8_t *)pAddress + 1560), degree, 195),
-        Factor((Goldilocks::Element *)((uint8_t *)pAddress + 1568), degree, 196),
+        FieldLatch((Goldilocks::Element *)((uint8_t *)pAddress + 1352), degree, 169),
+        Factor((Goldilocks::Element *)((uint8_t *)pAddress + 1360), degree, 170),
         _pAddress(pAddress),
         _degree(degree) {};
 
@@ -590,23 +559,23 @@ private:
 public:
 
     PaddingKKBitConstantPols (void * pAddress, uint64_t degree) :
-        r8Id((Goldilocks::Element *)((uint8_t *)pAddress + 1576), degree, 197),
-        sOutId((Goldilocks::Element *)((uint8_t *)pAddress + 1584), degree, 198),
-        latchR8((Goldilocks::Element *)((uint8_t *)pAddress + 1592), degree, 199),
-        Fr8((Goldilocks::Element *)((uint8_t *)pAddress + 1600), degree, 200),
-        rBitValid((Goldilocks::Element *)((uint8_t *)pAddress + 1608), degree, 201),
-        latchSOut((Goldilocks::Element *)((uint8_t *)pAddress + 1616), degree, 202),
-        FSOut0((Goldilocks::Element *)((uint8_t *)pAddress + 1624), degree, 203),
-        FSOut1((Goldilocks::Element *)((uint8_t *)pAddress + 1632), degree, 204),
-        FSOut2((Goldilocks::Element *)((uint8_t *)pAddress + 1640), degree, 205),
-        FSOut3((Goldilocks::Element *)((uint8_t *)pAddress + 1648), degree, 206),
-        FSOut4((Goldilocks::Element *)((uint8_t *)pAddress + 1656), degree, 207),
-        FSOut5((Goldilocks::Element *)((uint8_t *)pAddress + 1664), degree, 208),
-        FSOut6((Goldilocks::Element *)((uint8_t *)pAddress + 1672), degree, 209),
-        FSOut7((Goldilocks::Element *)((uint8_t *)pAddress + 1680), degree, 210),
-        ConnSOutBit((Goldilocks::Element *)((uint8_t *)pAddress + 1688), degree, 211),
-        ConnSInBit((Goldilocks::Element *)((uint8_t *)pAddress + 1696), degree, 212),
-        ConnBits2FieldBit((Goldilocks::Element *)((uint8_t *)pAddress + 1704), degree, 213),
+        r8Id((Goldilocks::Element *)((uint8_t *)pAddress + 1368), degree, 171),
+        sOutId((Goldilocks::Element *)((uint8_t *)pAddress + 1376), degree, 172),
+        latchR8((Goldilocks::Element *)((uint8_t *)pAddress + 1384), degree, 173),
+        Fr8((Goldilocks::Element *)((uint8_t *)pAddress + 1392), degree, 174),
+        rBitValid((Goldilocks::Element *)((uint8_t *)pAddress + 1400), degree, 175),
+        latchSOut((Goldilocks::Element *)((uint8_t *)pAddress + 1408), degree, 176),
+        FSOut0((Goldilocks::Element *)((uint8_t *)pAddress + 1416), degree, 177),
+        FSOut1((Goldilocks::Element *)((uint8_t *)pAddress + 1424), degree, 178),
+        FSOut2((Goldilocks::Element *)((uint8_t *)pAddress + 1432), degree, 179),
+        FSOut3((Goldilocks::Element *)((uint8_t *)pAddress + 1440), degree, 180),
+        FSOut4((Goldilocks::Element *)((uint8_t *)pAddress + 1448), degree, 181),
+        FSOut5((Goldilocks::Element *)((uint8_t *)pAddress + 1456), degree, 182),
+        FSOut6((Goldilocks::Element *)((uint8_t *)pAddress + 1464), degree, 183),
+        FSOut7((Goldilocks::Element *)((uint8_t *)pAddress + 1472), degree, 184),
+        ConnSOutBit((Goldilocks::Element *)((uint8_t *)pAddress + 1480), degree, 185),
+        ConnSInBit((Goldilocks::Element *)((uint8_t *)pAddress + 1488), degree, 186),
+        ConnBits2FieldBit((Goldilocks::Element *)((uint8_t *)pAddress + 1496), degree, 187),
         _pAddress(pAddress),
         _degree(degree) {};
 
@@ -634,12 +603,12 @@ private:
 public:
 
     PaddingKKConstantPols (void * pAddress, uint64_t degree) :
-        r8Id((Goldilocks::Element *)((uint8_t *)pAddress + 1712), degree, 214),
-        lastBlock((Goldilocks::Element *)((uint8_t *)pAddress + 1720), degree, 215),
-        lastBlockLatch((Goldilocks::Element *)((uint8_t *)pAddress + 1728), degree, 216),
-        r8valid((Goldilocks::Element *)((uint8_t *)pAddress + 1736), degree, 217),
-        sOutId((Goldilocks::Element *)((uint8_t *)pAddress + 1744), degree, 218),
-        forceLastHash((Goldilocks::Element *)((uint8_t *)pAddress + 1752), degree, 219),
+        r8Id((Goldilocks::Element *)((uint8_t *)pAddress + 1504), degree, 188),
+        lastBlock((Goldilocks::Element *)((uint8_t *)pAddress + 1512), degree, 189),
+        lastBlockLatch((Goldilocks::Element *)((uint8_t *)pAddress + 1520), degree, 190),
+        r8valid((Goldilocks::Element *)((uint8_t *)pAddress + 1528), degree, 191),
+        sOutId((Goldilocks::Element *)((uint8_t *)pAddress + 1536), degree, 192),
+        forceLastHash((Goldilocks::Element *)((uint8_t *)pAddress + 1544), degree, 193),
         _pAddress(pAddress),
         _degree(degree) {};
 
@@ -670,20 +639,20 @@ private:
 public:
 
     Sha256FConstantPols (void * pAddress, uint64_t degree) :
-        kGateType((Goldilocks::Element *)((uint8_t *)pAddress + 1760), degree, 220),
-        kA((Goldilocks::Element *)((uint8_t *)pAddress + 1768), degree, 221),
-        kB((Goldilocks::Element *)((uint8_t *)pAddress + 1776), degree, 222),
-        kC((Goldilocks::Element *)((uint8_t *)pAddress + 1784), degree, 223),
-        kOut((Goldilocks::Element *)((uint8_t *)pAddress + 1792), degree, 224),
-        kCarryOut((Goldilocks::Element *)((uint8_t *)pAddress + 1800), degree, 225),
+        kGateType((Goldilocks::Element *)((uint8_t *)pAddress + 1552), degree, 194),
+        kA((Goldilocks::Element *)((uint8_t *)pAddress + 1560), degree, 195),
+        kB((Goldilocks::Element *)((uint8_t *)pAddress + 1568), degree, 196),
+        kC((Goldilocks::Element *)((uint8_t *)pAddress + 1576), degree, 197),
+        kOut((Goldilocks::Element *)((uint8_t *)pAddress + 1584), degree, 198),
+        kCarryOut((Goldilocks::Element *)((uint8_t *)pAddress + 1592), degree, 199),
         Conn{
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1808), degree, 226),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1816), degree, 227),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1824), degree, 228),
-            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1832), degree, 229)
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1600), degree, 200),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1608), degree, 201),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1616), degree, 202),
+            ConstantPol((Goldilocks::Element *)((uint8_t *)pAddress + 1624), degree, 203)
         },
-        GATE_TYPE((Goldilocks::Element *)((uint8_t *)pAddress + 1840), degree, 230),
-        CARRY_ENABLED((Goldilocks::Element *)((uint8_t *)pAddress + 1848), degree, 231),
+        GATE_TYPE((Goldilocks::Element *)((uint8_t *)pAddress + 1632), degree, 204),
+        CARRY_ENABLED((Goldilocks::Element *)((uint8_t *)pAddress + 1640), degree, 205),
         _pAddress(pAddress),
         _degree(degree) {};
 
@@ -707,8 +676,8 @@ private:
 public:
 
     Bits2FieldSha256ConstantPols (void * pAddress, uint64_t degree) :
-        FieldLatch((Goldilocks::Element *)((uint8_t *)pAddress + 1856), degree, 232),
-        Factor((Goldilocks::Element *)((uint8_t *)pAddress + 1864), degree, 233),
+        FieldLatch((Goldilocks::Element *)((uint8_t *)pAddress + 1648), degree, 206),
+        Factor((Goldilocks::Element *)((uint8_t *)pAddress + 1656), degree, 207),
         _pAddress(pAddress),
         _degree(degree) {};
 
@@ -748,24 +717,24 @@ private:
 public:
 
     PaddingSha256BitConstantPols (void * pAddress, uint64_t degree) :
-        r8Id((Goldilocks::Element *)((uint8_t *)pAddress + 1872), degree, 234),
-        sOutId((Goldilocks::Element *)((uint8_t *)pAddress + 1880), degree, 235),
-        latchR8((Goldilocks::Element *)((uint8_t *)pAddress + 1888), degree, 236),
-        Fr8((Goldilocks::Element *)((uint8_t *)pAddress + 1896), degree, 237),
-        latchSOut((Goldilocks::Element *)((uint8_t *)pAddress + 1904), degree, 238),
-        FSOut0((Goldilocks::Element *)((uint8_t *)pAddress + 1912), degree, 239),
-        FSOut1((Goldilocks::Element *)((uint8_t *)pAddress + 1920), degree, 240),
-        FSOut2((Goldilocks::Element *)((uint8_t *)pAddress + 1928), degree, 241),
-        FSOut3((Goldilocks::Element *)((uint8_t *)pAddress + 1936), degree, 242),
-        FSOut4((Goldilocks::Element *)((uint8_t *)pAddress + 1944), degree, 243),
-        FSOut5((Goldilocks::Element *)((uint8_t *)pAddress + 1952), degree, 244),
-        FSOut6((Goldilocks::Element *)((uint8_t *)pAddress + 1960), degree, 245),
-        FSOut7((Goldilocks::Element *)((uint8_t *)pAddress + 1968), degree, 246),
-        HIn((Goldilocks::Element *)((uint8_t *)pAddress + 1976), degree, 247),
-        DoConnect((Goldilocks::Element *)((uint8_t *)pAddress + 1984), degree, 248),
-        ConnS1((Goldilocks::Element *)((uint8_t *)pAddress + 1992), degree, 249),
-        ConnS2((Goldilocks::Element *)((uint8_t *)pAddress + 2000), degree, 250),
-        ConnBits2FieldBit((Goldilocks::Element *)((uint8_t *)pAddress + 2008), degree, 251),
+        r8Id((Goldilocks::Element *)((uint8_t *)pAddress + 1664), degree, 208),
+        sOutId((Goldilocks::Element *)((uint8_t *)pAddress + 1672), degree, 209),
+        latchR8((Goldilocks::Element *)((uint8_t *)pAddress + 1680), degree, 210),
+        Fr8((Goldilocks::Element *)((uint8_t *)pAddress + 1688), degree, 211),
+        latchSOut((Goldilocks::Element *)((uint8_t *)pAddress + 1696), degree, 212),
+        FSOut0((Goldilocks::Element *)((uint8_t *)pAddress + 1704), degree, 213),
+        FSOut1((Goldilocks::Element *)((uint8_t *)pAddress + 1712), degree, 214),
+        FSOut2((Goldilocks::Element *)((uint8_t *)pAddress + 1720), degree, 215),
+        FSOut3((Goldilocks::Element *)((uint8_t *)pAddress + 1728), degree, 216),
+        FSOut4((Goldilocks::Element *)((uint8_t *)pAddress + 1736), degree, 217),
+        FSOut5((Goldilocks::Element *)((uint8_t *)pAddress + 1744), degree, 218),
+        FSOut6((Goldilocks::Element *)((uint8_t *)pAddress + 1752), degree, 219),
+        FSOut7((Goldilocks::Element *)((uint8_t *)pAddress + 1760), degree, 220),
+        HIn((Goldilocks::Element *)((uint8_t *)pAddress + 1768), degree, 221),
+        DoConnect((Goldilocks::Element *)((uint8_t *)pAddress + 1776), degree, 222),
+        ConnS1((Goldilocks::Element *)((uint8_t *)pAddress + 1784), degree, 223),
+        ConnS2((Goldilocks::Element *)((uint8_t *)pAddress + 1792), degree, 224),
+        ConnBits2FieldBit((Goldilocks::Element *)((uint8_t *)pAddress + 1800), degree, 225),
         _pAddress(pAddress),
         _degree(degree) {};
 
@@ -795,14 +764,14 @@ private:
 public:
 
     PaddingSha256ConstantPols (void * pAddress, uint64_t degree) :
-        r8Id((Goldilocks::Element *)((uint8_t *)pAddress + 2016), degree, 252),
-        lastBlock((Goldilocks::Element *)((uint8_t *)pAddress + 2024), degree, 253),
-        lastBlockLatch((Goldilocks::Element *)((uint8_t *)pAddress + 2032), degree, 254),
-        r8valid((Goldilocks::Element *)((uint8_t *)pAddress + 2040), degree, 255),
-        PrevLengthSection((Goldilocks::Element *)((uint8_t *)pAddress + 2048), degree, 256),
-        LengthWeight((Goldilocks::Element *)((uint8_t *)pAddress + 2056), degree, 257),
-        sOutId((Goldilocks::Element *)((uint8_t *)pAddress + 2064), degree, 258),
-        forceLastHash((Goldilocks::Element *)((uint8_t *)pAddress + 2072), degree, 259),
+        r8Id((Goldilocks::Element *)((uint8_t *)pAddress + 1808), degree, 226),
+        lastBlock((Goldilocks::Element *)((uint8_t *)pAddress + 1816), degree, 227),
+        lastBlockLatch((Goldilocks::Element *)((uint8_t *)pAddress + 1824), degree, 228),
+        r8valid((Goldilocks::Element *)((uint8_t *)pAddress + 1832), degree, 229),
+        PrevLengthSection((Goldilocks::Element *)((uint8_t *)pAddress + 1840), degree, 230),
+        LengthWeight((Goldilocks::Element *)((uint8_t *)pAddress + 1848), degree, 231),
+        sOutId((Goldilocks::Element *)((uint8_t *)pAddress + 1856), degree, 232),
+        forceLastHash((Goldilocks::Element *)((uint8_t *)pAddress + 1864), degree, 233),
         _pAddress(pAddress),
         _degree(degree) {};
 
@@ -825,6 +794,7 @@ public:
     BinaryConstantPols Binary;
     PoseidonGConstantPols PoseidonG;
     PaddingPGConstantPols PaddingPG;
+    ClimbKeyConstantPols ClimbKey;
     StorageConstantPols Storage;
     KeccakFConstantPols KeccakF;
     Bits2FieldConstantPols Bits2Field;
@@ -847,6 +817,7 @@ public:
         Binary(pAddress, degree),
         PoseidonG(pAddress, degree),
         PaddingPG(pAddress, degree),
+        ClimbKey(pAddress, degree),
         Storage(pAddress, degree),
         KeccakF(pAddress, degree),
         Bits2Field(pAddress, degree),
@@ -859,13 +830,13 @@ public:
         _pAddress(pAddress),
         _degree(degree) {}
 
-    inline static uint64_t pilSize (void) { return 17448304640; }
+    inline static uint64_t pilSize (void) { return 15703474176; }
     inline static uint64_t pilDegree (void) { return 8388608; }
-    inline static uint64_t numPols (void) { return 260; }
+    inline static uint64_t numPols (void) { return 234; }
 
     inline void * address (void) { return _pAddress; }
     inline uint64_t degree (void) { return _degree; }
-    inline uint64_t size (void) { return _degree*260*sizeof(Goldilocks::Element); }
+    inline uint64_t size (void) { return _degree*234*sizeof(Goldilocks::Element); }
 
     inline Goldilocks::Element &getElement (uint64_t pol, uint64_t evaluation)
     {
@@ -1025,116 +996,90 @@ inline const char * address2ConstantPolName (uint64_t address)
     if ((address >= 1176) && (address <= 1183)) return "PaddingPG.F[7]";
     if ((address >= 1184) && (address <= 1191)) return "PaddingPG.lastBlock";
     if ((address >= 1192) && (address <= 1199)) return "PaddingPG.crValid";
-    if ((address >= 1200) && (address <= 1207)) return "Storage.rHash";
-    if ((address >= 1208) && (address <= 1215)) return "Storage.rHashType";
-    if ((address >= 1216) && (address <= 1223)) return "Storage.rLatchGet";
-    if ((address >= 1224) && (address <= 1231)) return "Storage.rLatchSet";
-    if ((address >= 1232) && (address <= 1239)) return "Storage.rClimbRkey";
-    if ((address >= 1240) && (address <= 1247)) return "Storage.rClimbSiblingRkey";
-    if ((address >= 1248) && (address <= 1255)) return "Storage.rClimbSiblingRkeyN";
-    if ((address >= 1256) && (address <= 1263)) return "Storage.rRotateLevel";
-    if ((address >= 1264) && (address <= 1271)) return "Storage.rJmpz";
-    if ((address >= 1272) && (address <= 1279)) return "Storage.rJmp";
-    if ((address >= 1280) && (address <= 1287)) return "Storage.rConst0";
-    if ((address >= 1288) && (address <= 1295)) return "Storage.rConst1";
-    if ((address >= 1296) && (address <= 1303)) return "Storage.rConst2";
-    if ((address >= 1304) && (address <= 1311)) return "Storage.rConst3";
-    if ((address >= 1312) && (address <= 1319)) return "Storage.rAddress";
-    if ((address >= 1320) && (address <= 1327)) return "Storage.rLine";
-    if ((address >= 1328) && (address <= 1335)) return "Storage.rInFree";
-    if ((address >= 1336) && (address <= 1343)) return "Storage.rInNewRoot";
-    if ((address >= 1344) && (address <= 1351)) return "Storage.rInOldRoot";
-    if ((address >= 1352) && (address <= 1359)) return "Storage.rInRkey";
-    if ((address >= 1360) && (address <= 1367)) return "Storage.rInRkeyBit";
-    if ((address >= 1368) && (address <= 1375)) return "Storage.rInSiblingRkey";
-    if ((address >= 1376) && (address <= 1383)) return "Storage.rInSiblingValueHash";
-    if ((address >= 1384) && (address <= 1391)) return "Storage.rInValueLow";
-    if ((address >= 1392) && (address <= 1399)) return "Storage.rInValueHigh";
-    if ((address >= 1400) && (address <= 1407)) return "Storage.rInRotlVh";
-    if ((address >= 1408) && (address <= 1415)) return "Storage.rSetHashLeft";
-    if ((address >= 1416) && (address <= 1423)) return "Storage.rSetHashRight";
-    if ((address >= 1424) && (address <= 1431)) return "Storage.rSetLevel";
-    if ((address >= 1432) && (address <= 1439)) return "Storage.rSetNewRoot";
-    if ((address >= 1440) && (address <= 1447)) return "Storage.rSetOldRoot";
-    if ((address >= 1448) && (address <= 1455)) return "Storage.rSetRkey";
-    if ((address >= 1456) && (address <= 1463)) return "Storage.rSetRkeyBit";
-    if ((address >= 1464) && (address <= 1471)) return "Storage.rSetSiblingRkey";
-    if ((address >= 1472) && (address <= 1479)) return "Storage.rSetSiblingValueHash";
-    if ((address >= 1480) && (address <= 1487)) return "Storage.rSetValueHigh";
-    if ((address >= 1488) && (address <= 1495)) return "Storage.rSetValueLow";
-    if ((address >= 1496) && (address <= 1503)) return "KeccakF.ConnA";
-    if ((address >= 1504) && (address <= 1511)) return "KeccakF.ConnB";
-    if ((address >= 1512) && (address <= 1519)) return "KeccakF.ConnC";
-    if ((address >= 1520) && (address <= 1527)) return "KeccakF.GateType";
-    if ((address >= 1528) && (address <= 1535)) return "KeccakF.kGateType";
-    if ((address >= 1536) && (address <= 1543)) return "KeccakF.kA";
-    if ((address >= 1544) && (address <= 1551)) return "KeccakF.kB";
-    if ((address >= 1552) && (address <= 1559)) return "KeccakF.kC";
-    if ((address >= 1560) && (address <= 1567)) return "Bits2Field.FieldLatch";
-    if ((address >= 1568) && (address <= 1575)) return "Bits2Field.Factor";
-    if ((address >= 1576) && (address <= 1583)) return "PaddingKKBit.r8Id";
-    if ((address >= 1584) && (address <= 1591)) return "PaddingKKBit.sOutId";
-    if ((address >= 1592) && (address <= 1599)) return "PaddingKKBit.latchR8";
-    if ((address >= 1600) && (address <= 1607)) return "PaddingKKBit.Fr8";
-    if ((address >= 1608) && (address <= 1615)) return "PaddingKKBit.rBitValid";
-    if ((address >= 1616) && (address <= 1623)) return "PaddingKKBit.latchSOut";
-    if ((address >= 1624) && (address <= 1631)) return "PaddingKKBit.FSOut0";
-    if ((address >= 1632) && (address <= 1639)) return "PaddingKKBit.FSOut1";
-    if ((address >= 1640) && (address <= 1647)) return "PaddingKKBit.FSOut2";
-    if ((address >= 1648) && (address <= 1655)) return "PaddingKKBit.FSOut3";
-    if ((address >= 1656) && (address <= 1663)) return "PaddingKKBit.FSOut4";
-    if ((address >= 1664) && (address <= 1671)) return "PaddingKKBit.FSOut5";
-    if ((address >= 1672) && (address <= 1679)) return "PaddingKKBit.FSOut6";
-    if ((address >= 1680) && (address <= 1687)) return "PaddingKKBit.FSOut7";
-    if ((address >= 1688) && (address <= 1695)) return "PaddingKKBit.ConnSOutBit";
-    if ((address >= 1696) && (address <= 1703)) return "PaddingKKBit.ConnSInBit";
-    if ((address >= 1704) && (address <= 1711)) return "PaddingKKBit.ConnBits2FieldBit";
-    if ((address >= 1712) && (address <= 1719)) return "PaddingKK.r8Id";
-    if ((address >= 1720) && (address <= 1727)) return "PaddingKK.lastBlock";
-    if ((address >= 1728) && (address <= 1735)) return "PaddingKK.lastBlockLatch";
-    if ((address >= 1736) && (address <= 1743)) return "PaddingKK.r8valid";
-    if ((address >= 1744) && (address <= 1751)) return "PaddingKK.sOutId";
-    if ((address >= 1752) && (address <= 1759)) return "PaddingKK.forceLastHash";
-    if ((address >= 1760) && (address <= 1767)) return "Sha256F.kGateType";
-    if ((address >= 1768) && (address <= 1775)) return "Sha256F.kA";
-    if ((address >= 1776) && (address <= 1783)) return "Sha256F.kB";
-    if ((address >= 1784) && (address <= 1791)) return "Sha256F.kC";
-    if ((address >= 1792) && (address <= 1799)) return "Sha256F.kOut";
-    if ((address >= 1800) && (address <= 1807)) return "Sha256F.kCarryOut";
-    if ((address >= 1808) && (address <= 1815)) return "Sha256F.Conn[0]";
-    if ((address >= 1816) && (address <= 1823)) return "Sha256F.Conn[1]";
-    if ((address >= 1824) && (address <= 1831)) return "Sha256F.Conn[2]";
-    if ((address >= 1832) && (address <= 1839)) return "Sha256F.Conn[3]";
-    if ((address >= 1840) && (address <= 1847)) return "Sha256F.GATE_TYPE";
-    if ((address >= 1848) && (address <= 1855)) return "Sha256F.CARRY_ENABLED";
-    if ((address >= 1856) && (address <= 1863)) return "Bits2FieldSha256.FieldLatch";
-    if ((address >= 1864) && (address <= 1871)) return "Bits2FieldSha256.Factor";
-    if ((address >= 1872) && (address <= 1879)) return "PaddingSha256Bit.r8Id";
-    if ((address >= 1880) && (address <= 1887)) return "PaddingSha256Bit.sOutId";
-    if ((address >= 1888) && (address <= 1895)) return "PaddingSha256Bit.latchR8";
-    if ((address >= 1896) && (address <= 1903)) return "PaddingSha256Bit.Fr8";
-    if ((address >= 1904) && (address <= 1911)) return "PaddingSha256Bit.latchSOut";
-    if ((address >= 1912) && (address <= 1919)) return "PaddingSha256Bit.FSOut0";
-    if ((address >= 1920) && (address <= 1927)) return "PaddingSha256Bit.FSOut1";
-    if ((address >= 1928) && (address <= 1935)) return "PaddingSha256Bit.FSOut2";
-    if ((address >= 1936) && (address <= 1943)) return "PaddingSha256Bit.FSOut3";
-    if ((address >= 1944) && (address <= 1951)) return "PaddingSha256Bit.FSOut4";
-    if ((address >= 1952) && (address <= 1959)) return "PaddingSha256Bit.FSOut5";
-    if ((address >= 1960) && (address <= 1967)) return "PaddingSha256Bit.FSOut6";
-    if ((address >= 1968) && (address <= 1975)) return "PaddingSha256Bit.FSOut7";
-    if ((address >= 1976) && (address <= 1983)) return "PaddingSha256Bit.HIn";
-    if ((address >= 1984) && (address <= 1991)) return "PaddingSha256Bit.DoConnect";
-    if ((address >= 1992) && (address <= 1999)) return "PaddingSha256Bit.ConnS1";
-    if ((address >= 2000) && (address <= 2007)) return "PaddingSha256Bit.ConnS2";
-    if ((address >= 2008) && (address <= 2015)) return "PaddingSha256Bit.ConnBits2FieldBit";
-    if ((address >= 2016) && (address <= 2023)) return "PaddingSha256.r8Id";
-    if ((address >= 2024) && (address <= 2031)) return "PaddingSha256.lastBlock";
-    if ((address >= 2032) && (address <= 2039)) return "PaddingSha256.lastBlockLatch";
-    if ((address >= 2040) && (address <= 2047)) return "PaddingSha256.r8valid";
-    if ((address >= 2048) && (address <= 2055)) return "PaddingSha256.PrevLengthSection";
-    if ((address >= 2056) && (address <= 2063)) return "PaddingSha256.LengthWeight";
-    if ((address >= 2064) && (address <= 2071)) return "PaddingSha256.sOutId";
-    if ((address >= 2072) && (address <= 2079)) return "PaddingSha256.forceLastHash";
+    if ((address >= 1200) && (address <= 1207)) return "ClimbKey.FACTOR";
+    if ((address >= 1208) && (address <= 1215)) return "ClimbKey.T_CLKEYSEL";
+    if ((address >= 1216) && (address <= 1223)) return "ClimbKey.T_LEVEL";
+    if ((address >= 1224) && (address <= 1231)) return "ClimbKey.T_CHUNK_VALUE";
+    if ((address >= 1232) && (address <= 1239)) return "ClimbKey.T_CARRYLT_IN";
+    if ((address >= 1240) && (address <= 1247)) return "ClimbKey.T_CARRYLT_OUT";
+    if ((address >= 1248) && (address <= 1255)) return "Storage.OPERATION";
+    if ((address >= 1256) && (address <= 1263)) return "Storage.CONST0";
+    if ((address >= 1264) && (address <= 1271)) return "Storage.JMP_ADDRESS";
+    if ((address >= 1272) && (address <= 1279)) return "Storage.LINE";
+    if ((address >= 1280) && (address <= 1287)) return "Storage.IN_SIBLING_RKEY";
+    if ((address >= 1288) && (address <= 1295)) return "KeccakF.ConnA";
+    if ((address >= 1296) && (address <= 1303)) return "KeccakF.ConnB";
+    if ((address >= 1304) && (address <= 1311)) return "KeccakF.ConnC";
+    if ((address >= 1312) && (address <= 1319)) return "KeccakF.GateType";
+    if ((address >= 1320) && (address <= 1327)) return "KeccakF.kGateType";
+    if ((address >= 1328) && (address <= 1335)) return "KeccakF.kA";
+    if ((address >= 1336) && (address <= 1343)) return "KeccakF.kB";
+    if ((address >= 1344) && (address <= 1351)) return "KeccakF.kC";
+    if ((address >= 1352) && (address <= 1359)) return "Bits2Field.FieldLatch";
+    if ((address >= 1360) && (address <= 1367)) return "Bits2Field.Factor";
+    if ((address >= 1368) && (address <= 1375)) return "PaddingKKBit.r8Id";
+    if ((address >= 1376) && (address <= 1383)) return "PaddingKKBit.sOutId";
+    if ((address >= 1384) && (address <= 1391)) return "PaddingKKBit.latchR8";
+    if ((address >= 1392) && (address <= 1399)) return "PaddingKKBit.Fr8";
+    if ((address >= 1400) && (address <= 1407)) return "PaddingKKBit.rBitValid";
+    if ((address >= 1408) && (address <= 1415)) return "PaddingKKBit.latchSOut";
+    if ((address >= 1416) && (address <= 1423)) return "PaddingKKBit.FSOut0";
+    if ((address >= 1424) && (address <= 1431)) return "PaddingKKBit.FSOut1";
+    if ((address >= 1432) && (address <= 1439)) return "PaddingKKBit.FSOut2";
+    if ((address >= 1440) && (address <= 1447)) return "PaddingKKBit.FSOut3";
+    if ((address >= 1448) && (address <= 1455)) return "PaddingKKBit.FSOut4";
+    if ((address >= 1456) && (address <= 1463)) return "PaddingKKBit.FSOut5";
+    if ((address >= 1464) && (address <= 1471)) return "PaddingKKBit.FSOut6";
+    if ((address >= 1472) && (address <= 1479)) return "PaddingKKBit.FSOut7";
+    if ((address >= 1480) && (address <= 1487)) return "PaddingKKBit.ConnSOutBit";
+    if ((address >= 1488) && (address <= 1495)) return "PaddingKKBit.ConnSInBit";
+    if ((address >= 1496) && (address <= 1503)) return "PaddingKKBit.ConnBits2FieldBit";
+    if ((address >= 1504) && (address <= 1511)) return "PaddingKK.r8Id";
+    if ((address >= 1512) && (address <= 1519)) return "PaddingKK.lastBlock";
+    if ((address >= 1520) && (address <= 1527)) return "PaddingKK.lastBlockLatch";
+    if ((address >= 1528) && (address <= 1535)) return "PaddingKK.r8valid";
+    if ((address >= 1536) && (address <= 1543)) return "PaddingKK.sOutId";
+    if ((address >= 1544) && (address <= 1551)) return "PaddingKK.forceLastHash";
+    if ((address >= 1552) && (address <= 1559)) return "Sha256F.kGateType";
+    if ((address >= 1560) && (address <= 1567)) return "Sha256F.kA";
+    if ((address >= 1568) && (address <= 1575)) return "Sha256F.kB";
+    if ((address >= 1576) && (address <= 1583)) return "Sha256F.kC";
+    if ((address >= 1584) && (address <= 1591)) return "Sha256F.kOut";
+    if ((address >= 1592) && (address <= 1599)) return "Sha256F.kCarryOut";
+    if ((address >= 1600) && (address <= 1607)) return "Sha256F.Conn[0]";
+    if ((address >= 1608) && (address <= 1615)) return "Sha256F.Conn[1]";
+    if ((address >= 1616) && (address <= 1623)) return "Sha256F.Conn[2]";
+    if ((address >= 1624) && (address <= 1631)) return "Sha256F.Conn[3]";
+    if ((address >= 1632) && (address <= 1639)) return "Sha256F.GATE_TYPE";
+    if ((address >= 1640) && (address <= 1647)) return "Sha256F.CARRY_ENABLED";
+    if ((address >= 1648) && (address <= 1655)) return "Bits2FieldSha256.FieldLatch";
+    if ((address >= 1656) && (address <= 1663)) return "Bits2FieldSha256.Factor";
+    if ((address >= 1664) && (address <= 1671)) return "PaddingSha256Bit.r8Id";
+    if ((address >= 1672) && (address <= 1679)) return "PaddingSha256Bit.sOutId";
+    if ((address >= 1680) && (address <= 1687)) return "PaddingSha256Bit.latchR8";
+    if ((address >= 1688) && (address <= 1695)) return "PaddingSha256Bit.Fr8";
+    if ((address >= 1696) && (address <= 1703)) return "PaddingSha256Bit.latchSOut";
+    if ((address >= 1704) && (address <= 1711)) return "PaddingSha256Bit.FSOut0";
+    if ((address >= 1712) && (address <= 1719)) return "PaddingSha256Bit.FSOut1";
+    if ((address >= 1720) && (address <= 1727)) return "PaddingSha256Bit.FSOut2";
+    if ((address >= 1728) && (address <= 1735)) return "PaddingSha256Bit.FSOut3";
+    if ((address >= 1736) && (address <= 1743)) return "PaddingSha256Bit.FSOut4";
+    if ((address >= 1744) && (address <= 1751)) return "PaddingSha256Bit.FSOut5";
+    if ((address >= 1752) && (address <= 1759)) return "PaddingSha256Bit.FSOut6";
+    if ((address >= 1760) && (address <= 1767)) return "PaddingSha256Bit.FSOut7";
+    if ((address >= 1768) && (address <= 1775)) return "PaddingSha256Bit.HIn";
+    if ((address >= 1776) && (address <= 1783)) return "PaddingSha256Bit.DoConnect";
+    if ((address >= 1784) && (address <= 1791)) return "PaddingSha256Bit.ConnS1";
+    if ((address >= 1792) && (address <= 1799)) return "PaddingSha256Bit.ConnS2";
+    if ((address >= 1800) && (address <= 1807)) return "PaddingSha256Bit.ConnBits2FieldBit";
+    if ((address >= 1808) && (address <= 1815)) return "PaddingSha256.r8Id";
+    if ((address >= 1816) && (address <= 1823)) return "PaddingSha256.lastBlock";
+    if ((address >= 1824) && (address <= 1831)) return "PaddingSha256.lastBlockLatch";
+    if ((address >= 1832) && (address <= 1839)) return "PaddingSha256.r8valid";
+    if ((address >= 1840) && (address <= 1847)) return "PaddingSha256.PrevLengthSection";
+    if ((address >= 1848) && (address <= 1855)) return "PaddingSha256.LengthWeight";
+    if ((address >= 1856) && (address <= 1863)) return "PaddingSha256.sOutId";
+    if ((address >= 1864) && (address <= 1871)) return "PaddingSha256.forceLastHash";
     return "ERROR_NOT_FOUND";
 }
 

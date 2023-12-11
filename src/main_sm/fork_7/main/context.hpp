@@ -47,6 +47,7 @@ public:
     Goldilocks::Element key[4];
     Goldilocks::Element keyI[4];
     Goldilocks::Element newRoot[4];
+
     SmtSetResult res;
     void reset (void)
     {
@@ -201,7 +202,7 @@ public:
 
     // Variables database, used in evalCommand() declareVar/setVar/getVar
     unordered_map< string, mpz_class > vars;
-    
+
     // Memory map, using absolute address as key, and field element array as value
     unordered_map< uint64_t, Fea > mem; // TODO: Use array<Goldilocks::Element,8> instead of Fea, or declare Fea8, Fea4 at a higher level
 

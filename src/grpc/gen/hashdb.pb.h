@@ -3477,6 +3477,8 @@ class SetResponse PROTOBUF_FINAL :
     kKeyFieldNumber = 3,
     kInsKeyFieldNumber = 5,
     kResultFieldNumber = 13,
+    kSiblingLeftChildFieldNumber = 14,
+    kSiblingRightChildFieldNumber = 15,
     kProofHashCounterFieldNumber = 11,
     kIsOld0FieldNumber = 7,
   };
@@ -3704,6 +3706,42 @@ class SetResponse PROTOBUF_FINAL :
       ::hashdb::v1::ResultCode* result);
   ::hashdb::v1::ResultCode* unsafe_arena_release_result();
 
+  // .hashdb.v1.Fea sibling_left_child = 14;
+  bool has_sibling_left_child() const;
+  private:
+  bool _internal_has_sibling_left_child() const;
+  public:
+  void clear_sibling_left_child();
+  const ::hashdb::v1::Fea& sibling_left_child() const;
+  ::hashdb::v1::Fea* release_sibling_left_child();
+  ::hashdb::v1::Fea* mutable_sibling_left_child();
+  void set_allocated_sibling_left_child(::hashdb::v1::Fea* sibling_left_child);
+  private:
+  const ::hashdb::v1::Fea& _internal_sibling_left_child() const;
+  ::hashdb::v1::Fea* _internal_mutable_sibling_left_child();
+  public:
+  void unsafe_arena_set_allocated_sibling_left_child(
+      ::hashdb::v1::Fea* sibling_left_child);
+  ::hashdb::v1::Fea* unsafe_arena_release_sibling_left_child();
+
+  // .hashdb.v1.Fea sibling_right_child = 15;
+  bool has_sibling_right_child() const;
+  private:
+  bool _internal_has_sibling_right_child() const;
+  public:
+  void clear_sibling_right_child();
+  const ::hashdb::v1::Fea& sibling_right_child() const;
+  ::hashdb::v1::Fea* release_sibling_right_child();
+  ::hashdb::v1::Fea* mutable_sibling_right_child();
+  void set_allocated_sibling_right_child(::hashdb::v1::Fea* sibling_right_child);
+  private:
+  const ::hashdb::v1::Fea& _internal_sibling_right_child() const;
+  ::hashdb::v1::Fea* _internal_mutable_sibling_right_child();
+  public:
+  void unsafe_arena_set_allocated_sibling_right_child(
+      ::hashdb::v1::Fea* sibling_right_child);
+  ::hashdb::v1::Fea* unsafe_arena_release_sibling_right_child();
+
   // uint64 proof_hash_counter = 11;
   void clear_proof_hash_counter();
   ::PROTOBUF_NAMESPACE_ID::uint64 proof_hash_counter() const;
@@ -3750,6 +3788,8 @@ class SetResponse PROTOBUF_FINAL :
   ::hashdb::v1::Fea* key_;
   ::hashdb::v1::Fea* ins_key_;
   ::hashdb::v1::ResultCode* result_;
+  ::hashdb::v1::Fea* sibling_left_child_;
+  ::hashdb::v1::Fea* sibling_right_child_;
   ::PROTOBUF_NAMESPACE_ID::uint64 proof_hash_counter_;
   bool is_old0_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
@@ -10774,6 +10814,168 @@ inline void SetResponse::set_allocated_result(::hashdb::v1::ResultCode* result) 
   }
   result_ = result;
   // @@protoc_insertion_point(field_set_allocated:hashdb.v1.SetResponse.result)
+}
+
+// .hashdb.v1.Fea sibling_left_child = 14;
+inline bool SetResponse::_internal_has_sibling_left_child() const {
+  return this != internal_default_instance() && sibling_left_child_ != nullptr;
+}
+inline bool SetResponse::has_sibling_left_child() const {
+  return _internal_has_sibling_left_child();
+}
+inline void SetResponse::clear_sibling_left_child() {
+  if (GetArena() == nullptr && sibling_left_child_ != nullptr) {
+    delete sibling_left_child_;
+  }
+  sibling_left_child_ = nullptr;
+}
+inline const ::hashdb::v1::Fea& SetResponse::_internal_sibling_left_child() const {
+  const ::hashdb::v1::Fea* p = sibling_left_child_;
+  return p != nullptr ? *p : *reinterpret_cast<const ::hashdb::v1::Fea*>(
+      &::hashdb::v1::_Fea_default_instance_);
+}
+inline const ::hashdb::v1::Fea& SetResponse::sibling_left_child() const {
+  // @@protoc_insertion_point(field_get:hashdb.v1.SetResponse.sibling_left_child)
+  return _internal_sibling_left_child();
+}
+inline void SetResponse::unsafe_arena_set_allocated_sibling_left_child(
+    ::hashdb::v1::Fea* sibling_left_child) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(sibling_left_child_);
+  }
+  sibling_left_child_ = sibling_left_child;
+  if (sibling_left_child) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:hashdb.v1.SetResponse.sibling_left_child)
+}
+inline ::hashdb::v1::Fea* SetResponse::release_sibling_left_child() {
+  auto temp = unsafe_arena_release_sibling_left_child();
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::hashdb::v1::Fea* SetResponse::unsafe_arena_release_sibling_left_child() {
+  // @@protoc_insertion_point(field_release:hashdb.v1.SetResponse.sibling_left_child)
+  
+  ::hashdb::v1::Fea* temp = sibling_left_child_;
+  sibling_left_child_ = nullptr;
+  return temp;
+}
+inline ::hashdb::v1::Fea* SetResponse::_internal_mutable_sibling_left_child() {
+  
+  if (sibling_left_child_ == nullptr) {
+    auto* p = CreateMaybeMessage<::hashdb::v1::Fea>(GetArena());
+    sibling_left_child_ = p;
+  }
+  return sibling_left_child_;
+}
+inline ::hashdb::v1::Fea* SetResponse::mutable_sibling_left_child() {
+  // @@protoc_insertion_point(field_mutable:hashdb.v1.SetResponse.sibling_left_child)
+  return _internal_mutable_sibling_left_child();
+}
+inline void SetResponse::set_allocated_sibling_left_child(::hashdb::v1::Fea* sibling_left_child) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete sibling_left_child_;
+  }
+  if (sibling_left_child) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(sibling_left_child);
+    if (message_arena != submessage_arena) {
+      sibling_left_child = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, sibling_left_child, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  sibling_left_child_ = sibling_left_child;
+  // @@protoc_insertion_point(field_set_allocated:hashdb.v1.SetResponse.sibling_left_child)
+}
+
+// .hashdb.v1.Fea sibling_right_child = 15;
+inline bool SetResponse::_internal_has_sibling_right_child() const {
+  return this != internal_default_instance() && sibling_right_child_ != nullptr;
+}
+inline bool SetResponse::has_sibling_right_child() const {
+  return _internal_has_sibling_right_child();
+}
+inline void SetResponse::clear_sibling_right_child() {
+  if (GetArena() == nullptr && sibling_right_child_ != nullptr) {
+    delete sibling_right_child_;
+  }
+  sibling_right_child_ = nullptr;
+}
+inline const ::hashdb::v1::Fea& SetResponse::_internal_sibling_right_child() const {
+  const ::hashdb::v1::Fea* p = sibling_right_child_;
+  return p != nullptr ? *p : *reinterpret_cast<const ::hashdb::v1::Fea*>(
+      &::hashdb::v1::_Fea_default_instance_);
+}
+inline const ::hashdb::v1::Fea& SetResponse::sibling_right_child() const {
+  // @@protoc_insertion_point(field_get:hashdb.v1.SetResponse.sibling_right_child)
+  return _internal_sibling_right_child();
+}
+inline void SetResponse::unsafe_arena_set_allocated_sibling_right_child(
+    ::hashdb::v1::Fea* sibling_right_child) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(sibling_right_child_);
+  }
+  sibling_right_child_ = sibling_right_child;
+  if (sibling_right_child) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:hashdb.v1.SetResponse.sibling_right_child)
+}
+inline ::hashdb::v1::Fea* SetResponse::release_sibling_right_child() {
+  auto temp = unsafe_arena_release_sibling_right_child();
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::hashdb::v1::Fea* SetResponse::unsafe_arena_release_sibling_right_child() {
+  // @@protoc_insertion_point(field_release:hashdb.v1.SetResponse.sibling_right_child)
+  
+  ::hashdb::v1::Fea* temp = sibling_right_child_;
+  sibling_right_child_ = nullptr;
+  return temp;
+}
+inline ::hashdb::v1::Fea* SetResponse::_internal_mutable_sibling_right_child() {
+  
+  if (sibling_right_child_ == nullptr) {
+    auto* p = CreateMaybeMessage<::hashdb::v1::Fea>(GetArena());
+    sibling_right_child_ = p;
+  }
+  return sibling_right_child_;
+}
+inline ::hashdb::v1::Fea* SetResponse::mutable_sibling_right_child() {
+  // @@protoc_insertion_point(field_mutable:hashdb.v1.SetResponse.sibling_right_child)
+  return _internal_mutable_sibling_right_child();
+}
+inline void SetResponse::set_allocated_sibling_right_child(::hashdb::v1::Fea* sibling_right_child) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete sibling_right_child_;
+  }
+  if (sibling_right_child) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(sibling_right_child);
+    if (message_arena != submessage_arena) {
+      sibling_right_child = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, sibling_right_child, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  sibling_right_child_ = sibling_right_child;
+  // @@protoc_insertion_point(field_set_allocated:hashdb.v1.SetResponse.sibling_right_child)
 }
 
 // -------------------------------------------------------------------

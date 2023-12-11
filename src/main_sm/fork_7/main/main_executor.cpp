@@ -306,7 +306,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         if (zkPC == ecrecoverEndLabel)
         {
             if ( ctx.ecRecoverPrecalcBuffer.filled)
-            {  
+            {
                 zkassert(ctx.ecRecoverPrecalcBuffer.pos == ctx.ecRecoverPrecalcBuffer.posUsed);
                 ctx.ecRecoverPrecalcBuffer.filled = false;
             }
@@ -903,7 +903,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
-                    
+
                     // Get old state root
                     Goldilocks::Element oldRoot[4];
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
@@ -1278,7 +1278,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         uint64_t b0 = fr.toU64(pols.B0[i]);
                         bool bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);
                         bool bIsBlockL2Hash = (b0 > 6);
-                    
+
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                         gettimeofday(&t, NULL);
 #endif
@@ -1294,7 +1294,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         // Call poseidon hash
                         Goldilocks::Element Kin1Hash[4];
                         poseidon.hash(Kin1Hash, Kin1);
-                        
+
                         // Store a copy of the data in ctx.lastSWrite
                         if (!bProcessBatch)
                         {
@@ -1350,7 +1350,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                             " Kin1Hash=" + fea2string(fr, Kin1Hash) +
                             " oldRoot=" + fea2string(fr, oldRoot) +
                             " value=" + value.get_str(10) +
-                            " newRoot=" + fea2string(fr, ctx.lastSWrite.newRoot));
+                            " newRoot=" + fea2string(fr, ctx.lastSWrite.newRoot) +
+                            " siblingLeftChild=" + fea2string(fr, ctx.lastSWrite.res.siblingLeftChild) +
+                            " siblingRightChild=" + fea2string(fr, ctx.lastSWrite.res.siblingRightChild));
 #endif
                     }
                     if (bProcessBatch)
@@ -1370,7 +1372,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     {
                         mpz_class balanceDifference = ctx.lastSWrite.res.newValue - ctx.lastSWrite.res.oldValue;
                         ctx.totalTransferredBalance += balanceDifference;
-                        //cout << "Set balance: oldValue=" << ctx.lastSWrite.res.oldValue.get_str(10) << 
+                        //cout << "Set balance: oldValue=" << ctx.lastSWrite.res.oldValue.get_str(10) <<
                         //        " newValue=" << ctx.lastSWrite.res.newValue.get_str(10) <<
                         //        " difference=" << balanceDifference.get_str(10) <<
                         //        " total=" << ctx.totalTransferredBalance.get_str(10) << endl;
@@ -2272,7 +2274,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             {
                 // Declare PoseidonG required data
                 array<Goldilocks::Element,17> pg;
-                
+
                 // Store PoseidonG required data
                 for (uint64_t j=0; j<12; j++)
                 {
@@ -2424,7 +2426,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 uint64_t b0 = fr.toU64(pols.B0[i]);
                 bool bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);
                 bool bIsBlockL2Hash = (b0 > 6);
-                
+
                 if  ( !fr.isZero(pols.A5[i]) || !fr.isZero(pols.A6[i]) || !fr.isZero(pols.A7[i]) || !fr.isZero(pols.B2[i]) || !fr.isZero(pols.B3[i]) || !fr.isZero(pols.B4[i]) || !fr.isZero(pols.B5[i])|| !fr.isZero(pols.B6[i])|| !fr.isZero(pols.B7[i]) )
                 {
                     proverRequest.result = ZKR_SM_MAIN_STORAGE_INVALID_KEY;
@@ -2447,7 +2449,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                 Goldilocks::Element Kin1Hash[4];
                 poseidon.hash(Kin1Hash, Kin1);
-                    
+
                 // Store a copy of the data in ctx.lastSWrite
                 if (!bProcessBatch)
                 {
@@ -3645,7 +3647,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     pHashDB->cancelBatch(proverRequest.uuid);
                     return;
                 }
-             
+
                 // EQ7:  x1 + x2 = x3
                 // EQ8:  y1 + y2 = y3
 
@@ -3742,7 +3744,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     pHashDB->cancelBatch(proverRequest.uuid);
                     return;
                 }
-             
+
                 // EQ7:  x1 - x2 = x3
                 // EQ8:  y1 - y2 = y3
 
@@ -4233,7 +4235,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 if (!bProcessBatch)
                 {
                     pols.binOpcode[i] = fr.fromU64(5);
-                    
+
                     // Store the binary action to execute it later with the binary SM
                     BinaryAction binaryAction;
                     binaryAction.a = a;
@@ -4785,7 +4787,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.RR[nexti] = op0;
             if (!bProcessBatch) pols.setRR[i] = fr.one();
         }
-        else if (rom.line[zkPC].call == 1)        
+        else if (rom.line[zkPC].call == 1)
         {
             pols.RR[nexti] = fr.fromU64(zkPC + 1);
         }
@@ -4859,7 +4861,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         {
             pols.RCX[nexti] = op0;
             if (!bProcessBatch)
-                pols.setRCX[i] = fr.one();            
+                pols.setRCX[i] = fr.one();
         }
         else if (rom.line[zkPC].repeat)
         {
@@ -5230,14 +5232,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         std::ofstream outfile;
         outfile.open("c.txt", std::ios_base::app); // append instead of overwrite
         outfile << "<-- Completed step=" << step << " zkPC=" << zkPC << " op=" << fr.toString(op7,16) << ":" << fr.toString(op6,16) << ":" << fr.toString(op5,16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3,16) << ":" << fr.toString(op2,16) << ":" << fr.toString(op1,16) << ":" << fr.toString(op0,16) << " ABCDE0=" << fr.toString(pols.A0[i],16) << ":" << fr.toString(pols.B0[i],16) << ":" << fr.toString(pols.C0[i],16) << ":" << fr.toString(pols.D0[i],16) << ":" << fr.toString(pols.E0[i],16) << " FREE0:7=" << fr.toString(pols.FREE0[i],16) << ":" << fr.toString(pols.FREE7[i],16) << " addr=" << addr << endl;
-        /*outfile << "<-- Completed step=" << step << " zkPC=" << zkPC << 
+        /*outfile << "<-- Completed step=" << step << " zkPC=" << zkPC <<
                    " op=" << fr.toString(op7,16) << ":" << fr.toString(op6,16) << ":" << fr.toString(op5,16) << ":" << fr.toString(op4,16) << ":" << fr.toString(op3,16) << ":" << fr.toString(op2,16) << ":" << fr.toString(op1,16) << ":" << fr.toString(op0,16) <<
-                   " A=" << fr.toString(pols.A7[i],16) << ":" << fr.toString(pols.A6[i],16) << ":" << fr.toString(pols.A5[i],16) << ":" << fr.toString(pols.A4[i],16) << ":" << fr.toString(pols.A3[i],16) << ":" << fr.toString(pols.A2[i],16) << ":" << fr.toString(pols.A1[i],16) << ":" << fr.toString(pols.A0[i],16) << 
-                   " B=" << fr.toString(pols.B7[i],16) << ":" << fr.toString(pols.B6[i],16) << ":" << fr.toString(pols.B5[i],16) << ":" << fr.toString(pols.B4[i],16) << ":" << fr.toString(pols.B3[i],16) << ":" << fr.toString(pols.B2[i],16) << ":" << fr.toString(pols.B1[i],16) << ":" << fr.toString(pols.B0[i],16) << 
-                   " C=" << fr.toString(pols.C7[i],16) << ":" << fr.toString(pols.C6[i],16) << ":" << fr.toString(pols.C5[i],16) << ":" << fr.toString(pols.C4[i],16) << ":" << fr.toString(pols.C3[i],16) << ":" << fr.toString(pols.C2[i],16) << ":" << fr.toString(pols.C1[i],16) << ":" << fr.toString(pols.C0[i],16) << 
-                   " D=" << fr.toString(pols.D7[i],16) << ":" << fr.toString(pols.D6[i],16) << ":" << fr.toString(pols.D5[i],16) << ":" << fr.toString(pols.D4[i],16) << ":" << fr.toString(pols.D3[i],16) << ":" << fr.toString(pols.D2[i],16) << ":" << fr.toString(pols.D1[i],16) << ":" << fr.toString(pols.D0[i],16) << 
-                   " E=" << fr.toString(pols.E7[i],16) << ":" << fr.toString(pols.E6[i],16) << ":" << fr.toString(pols.E5[i],16) << ":" << fr.toString(pols.E4[i],16) << ":" << fr.toString(pols.E3[i],16) << ":" << fr.toString(pols.E2[i],16) << ":" << fr.toString(pols.E1[i],16) << ":" << fr.toString(pols.E0[i],16) << 
-                   " FREE0:7=" << fr.toString(pols.FREE0[i],16) << ":" << fr.toString(pols.FREE7[i],16) << 
+                   " A=" << fr.toString(pols.A7[i],16) << ":" << fr.toString(pols.A6[i],16) << ":" << fr.toString(pols.A5[i],16) << ":" << fr.toString(pols.A4[i],16) << ":" << fr.toString(pols.A3[i],16) << ":" << fr.toString(pols.A2[i],16) << ":" << fr.toString(pols.A1[i],16) << ":" << fr.toString(pols.A0[i],16) <<
+                   " B=" << fr.toString(pols.B7[i],16) << ":" << fr.toString(pols.B6[i],16) << ":" << fr.toString(pols.B5[i],16) << ":" << fr.toString(pols.B4[i],16) << ":" << fr.toString(pols.B3[i],16) << ":" << fr.toString(pols.B2[i],16) << ":" << fr.toString(pols.B1[i],16) << ":" << fr.toString(pols.B0[i],16) <<
+                   " C=" << fr.toString(pols.C7[i],16) << ":" << fr.toString(pols.C6[i],16) << ":" << fr.toString(pols.C5[i],16) << ":" << fr.toString(pols.C4[i],16) << ":" << fr.toString(pols.C3[i],16) << ":" << fr.toString(pols.C2[i],16) << ":" << fr.toString(pols.C1[i],16) << ":" << fr.toString(pols.C0[i],16) <<
+                   " D=" << fr.toString(pols.D7[i],16) << ":" << fr.toString(pols.D6[i],16) << ":" << fr.toString(pols.D5[i],16) << ":" << fr.toString(pols.D4[i],16) << ":" << fr.toString(pols.D3[i],16) << ":" << fr.toString(pols.D2[i],16) << ":" << fr.toString(pols.D1[i],16) << ":" << fr.toString(pols.D0[i],16) <<
+                   " E=" << fr.toString(pols.E7[i],16) << ":" << fr.toString(pols.E6[i],16) << ":" << fr.toString(pols.E5[i],16) << ":" << fr.toString(pols.E4[i],16) << ":" << fr.toString(pols.E3[i],16) << ":" << fr.toString(pols.E2[i],16) << ":" << fr.toString(pols.E1[i],16) << ":" << fr.toString(pols.E0[i],16) <<
+                   " FREE0:7=" << fr.toString(pols.FREE0[i],16) << ":" << fr.toString(pols.FREE7[i],16) <<
                    " addr=" << addr << endl;*/
         outfile.close();
         //if (i==1000) break;
@@ -5481,7 +5483,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pHashDB->cancelBatch(proverRequest.uuid);
             return;
         }
-        
+
         zkr = pHashDB->flush(proverRequest.uuid, proverRequest.pFullTracer->get_new_state_root(), proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, proverRequest.flushId, proverRequest.lastSentFlushId);
         if (zkr != ZKR_SUCCESS)
         {
@@ -5512,7 +5514,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             return;
         }
     }
-        
+
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
     mainMetrics.add("Flush", TimeDiff(t));
 #endif
@@ -5531,7 +5533,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     }
 
     zklog.info("MainExecutor::execute() done lastStep=" + to_string(ctx.lastStep) + " (" + to_string((double(ctx.lastStep)*100)/N) + "%)", &proverRequest.tags);
-    
+
     TimerStopAndLog(MAIN_EXECUTOR_EXECUTE);
 }
 
@@ -5639,7 +5641,7 @@ void MainExecutor::checkFinalState(Context &ctx)
         logError(ctx, "MainExecutor::checkFinalState() Register C=" + cScalar.get_str(16) + " not terminated equal as its initial value=" + ctx.proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16));
         exitProcess();
     }
-    
+
     if (!fr.equal(ctx.pols.SP[0], fr.fromU64(ctx.proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum)))
     {
         logError(ctx, "MainExecutor::checkFinalState() Register SP not terminated equal as its initial value");
@@ -5761,7 +5763,7 @@ void MainExecutor::logError (Context &ctx, const string &message)
 
     // Log registers
     ctx.printRegs();
-    
+
     // Log the input file content
     json inputJson;
     ctx.proverRequest.input.save(inputJson);
