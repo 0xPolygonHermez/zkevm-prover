@@ -671,7 +671,9 @@ zkresult FullTracer::onStoreLog (ContextC &ctxc)
 // Triggered when a change L2 block transaction is detected
 zkresult FullTracer::onStartBlock (Context &ctx)
 {
+#ifdef LOG_FULL_TRACER
     zklog.info("FullTracer::onStartBlock()");
+#endif
 
     zkresult zkr;
     mpz_class auxScalar;
@@ -709,7 +711,9 @@ zkresult FullTracer::onStartBlock (Context &ctx)
  */
 zkresult FullTracer::onFinishBlock (Context &ctx)
 {
+#ifdef LOG_FULL_TRACER
     zklog.info("FullTracer::onFinishBlock()");
+#endif
 
     mpz_class auxScalar;
     zkresult zkr;
