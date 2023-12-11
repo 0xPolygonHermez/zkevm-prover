@@ -628,7 +628,7 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
         // If inSIBLING_RKEY then op=SIBLING_RKEY
         if (rom.line[l].inSIBLING_RKEY)
         {
-            pols.inSiblingRkey[i] = fr.fromU64(rom.line[l].inSIBLING_RKEY);
+            pols.inSiblingRkey[i] = fr.fromS64(rom.line[l].inSIBLING_RKEY);
             op[0] = fr.add(op[0], fr.mul(pols.inSiblingRkey[i], pols.siblingRkey0[i]));
             op[1] = fr.add(op[1], fr.mul(pols.inSiblingRkey[i], pols.siblingRkey1[i]));
             op[2] = fr.add(op[2], fr.mul(pols.inSiblingRkey[i], pols.siblingRkey2[i]));
@@ -788,6 +788,13 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
 #endif
         }
 
+        if (rom.line[l].climbBitN) {
+            pols.climbBitN[i] = fr.one();
+#ifdef LOG_STORAGE_EXECUTOR
+            zklog.info("StorageExecutor climbBitN = 1");
+#endif
+        }
+
         // Climb the remaining key, by injecting the RKEY_BIT in the register specified by LEVEL
         if (rom.line[l].climbRkey)
         {
@@ -853,7 +860,6 @@ void StorageExecutor::execute (vector<SmtAction> &action, StorageCommitPols &pol
             zklog.info("StorageExecutor ClimbSiblingRkey bit=" + to_string(bit) + " rkey=" + fea2string(fr,rkeys)+ " op=" + feastring(fr, op));
 #endif
         }
-
         // Latch get: at this point consistency is granted: OLD_ROOT, RKEY (complete key), VALUE_LOW, VALUE_HIGH, LEVEL
         if (rom.line[l].latchGet)
         {
