@@ -18,9 +18,10 @@ string RomLine::toString(Goldilocks &fr)
     if (!fr.isZero(inPC)) result += " inPC=" + fr.toString(inPC,10);
     if (!fr.isZero(inGAS)) result += " inGAS=" + fr.toString(inGAS,10);
     if (!fr.isZero(inSTEP)) result += " inSTEP=" + fr.toString(inSTEP,10);
-    if (!fr.isZero(inFREE))
+    if (!fr.isZero(inFREE) || !fr.isZero(inFREE0))
     {
         result += " inFREE=" + fr.toString(inFREE,10);
+        result += " inFREE0=" + fr.toString(inFREE0,10);
         result += " freeInTag={" + freeInTag.toString() + "}";
     }
     if (!fr.isZero(inRR)) result += " inRR=" + fr.toString(inRR,10);
@@ -29,6 +30,7 @@ string RomLine::toString(Goldilocks &fr)
     if (!fr.isZero(inCntBinary)) result += " inCntBinary=" + fr.toString(inCntBinary,10);
     if (!fr.isZero(inCntMemAlign)) result += " inCntMemAlign=" + fr.toString(inCntMemAlign,10);
     if (!fr.isZero(inCntKeccakF)) result += " inCntKeccakF=" + fr.toString(inCntKeccakF,10);
+    if (!fr.isZero(inCntSha256F)) result += " inCntSha256F=" + fr.toString(inCntSha256F,10);
     if (!fr.isZero(inCntPoseidonG)) result += " inCntPoseidonG=" + fr.toString(inCntPoseidonG,10);
     if (!fr.isZero(inCntPaddingPG)) result += " inCntPaddingPG=" + fr.toString(inCntPaddingPG,10);
     if (!fr.isZero(inROTL_C)) result += " inROTL_C=" + fr.toString(inROTL_C,10);

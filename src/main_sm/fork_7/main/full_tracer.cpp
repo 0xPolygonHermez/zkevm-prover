@@ -673,21 +673,14 @@ zkresult FullTracer::onStartBlock (Context &ctx)
 {
     zklog.info("FullTracer::onStartBlock()");
 
+    zkresult zkr;
+    mpz_class auxScalar;
+
     // If it's not the frist change L2 block transaction, we must finish previous block
-    if (!currentBlock.parent_hash.empty())
+    if (currentBlock.initialized)
     {
         onFinishBlock(ctx);
     }
-
-    // Get prvious block hash
-    mpz_class auxScalar;
-    zkresult zkr = getVarFromCtx(ctx, true, ctx.rom.previousBlockHashOffset, auxScalar);
-    if (zkr != ZKR_SUCCESS)
-    {
-        zklog.error("FullTracer::onStartBlock() failed calling getVarFromCtx(ctx.rom.sequencerAddrOffset)");
-        return zkr;
-    }
-    currentBlock.parent_hash = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
 
     // Get sequencer address
     zkr = getVarFromCtx(ctx, true, ctx.rom.sequencerAddrOffset, auxScalar);
@@ -704,6 +697,9 @@ zkresult FullTracer::onStartBlock (Context &ctx)
     // Clear transactions
     currentBlock.responses.clear();
 
+    // Mark as initialized
+    currentBlock.initialized = true;
+
     return ZKR_SUCCESS;
 }
 
@@ -717,6 +713,15 @@ zkresult FullTracer::onFinishBlock (Context &ctx)
 
     mpz_class auxScalar;
     zkresult zkr;
+
+    // Get parent hash
+    zkr = getVarFromCtx(ctx, true, ctx.rom.previousBlockHashOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onFinishBlock() failed calling getVarFromCtx(ctx.rom.previousBlockHashOffset)");
+        return zkr;
+    }
+    currentBlock.parent_hash = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
 
     // Get block number
     zkr = getVarFromCtx(ctx, true, ctx.rom.blockNumOffset, auxScalar);
@@ -746,10 +751,10 @@ zkresult FullTracer::onFinishBlock (Context &ctx)
     currentBlock.ger = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
 
     // Get block hash L1
-    zkr = getVarFromCtx(ctx, true, ctx.rom.blockchashL1InfoTreeOffset, auxScalar);
+    zkr = getVarFromCtx(ctx, true, ctx.rom.blockHashL1InfoTreeOffset, auxScalar);
     if (zkr != ZKR_SUCCESS)
     {
-        zklog.error("FullTracer::onFinishBlock() failed calling getVarFromCtx(ctx.rom.blockchashL1InfoTreeOffset)");
+        zklog.error("FullTracer::onFinishBlock() failed calling getVarFromCtx(ctx.rom.blockHashL1InfoTreeOffset)");
         return zkr;
     }
     currentBlock.block_hash_l1 = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
@@ -1062,6 +1067,37 @@ zkresult FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
         return zkr;
     }
     response.effective_percentage = auxScalar.get_ui();
+
+    // create block object if flag skipFirstChangeL2Block is active and this.currentBlock has no properties
+    if (ctx.proverRequest.input.bSkipFirstChangeL2Block && !currentBlock.initialized)
+    {
+        // Get parent hash
+        zkr = getVarFromCtx(ctx, true, ctx.rom.previousBlockHashOffset, auxScalar);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("FullTracer::onProcessTx() failed calling getVarFromCtx(ctx.rom.previousBlockHashOffset)");
+            return zkr;
+        }
+        currentBlock.parent_hash = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
+
+        // Get sequencer address
+        zkr = getVarFromCtx(ctx, true, ctx.rom.sequencerAddrOffset, auxScalar);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("FullTracer::onProcessTx() failed calling getVarFromCtx(ctx.rom.sequencerAddrOffset)");
+            return zkr;
+        }
+        currentBlock.coinbase = NormalizeTo0xNFormat(auxScalar.get_str(16), 40);
+
+        // Get gas limit
+        currentBlock.gas_limit = ctx.rom.constants.BLOCK_GAS_LIMIT;
+
+        // Clear transactions
+        currentBlock.responses.clear();
+
+        // Mark as initialized
+        currentBlock.initialized = true;
+    }
 
     // Create current tx object
     currentBlock.responses.push_back(response);

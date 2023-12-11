@@ -10,10 +10,8 @@
 #include "main_sm/fork_4/main_exec_generated/main_exec_generated_fast.hpp"
 #include "main_sm/fork_5/main_exec_generated/main_exec_generated.hpp"
 #include "main_sm/fork_5/main_exec_generated/main_exec_generated_fast.hpp"
-#include "main_sm/fork_5/main_exec_c/main_exec_c.hpp"
 #include "main_sm/fork_6/main_exec_generated/main_exec_generated.hpp"
 #include "main_sm/fork_6/main_exec_generated/main_exec_generated_fast.hpp"
-#include "main_sm/fork_6/main_exec_c/main_exec_c.hpp"
 #include "main_sm/fork_7/main_exec_generated/main_exec_generated.hpp"
 #include "main_sm/fork_7/main_exec_generated/main_exec_generated_fast.hpp"
 #include "main_sm/fork_7/main_exec_c/main_exec_c.hpp"
@@ -147,19 +145,14 @@ void Executor::process_batch (ProverRequest &proverRequest)
         }
         case 5: // fork_5
         {
-            if (config.useMainExecC) // Do not use in production; under development
-            {
-                //zklog.info("Executor::process_batch() fork 5 C");
-                mainExecutorC_fork_5.execute(proverRequest);
-            }
 #ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
-            else if (config.useMainExecGenerated)
+            if (config.useMainExecGenerated)
             {
                 //zklog.info("Executor::process_batch() fork 5 generated");
                 fork_5::main_exec_generated_fast(mainExecutor_fork_5, proverRequest);
             }
-#endif
             else
+#endif
             {
                 //zklog.info("Executor::process_batch() fork 5 native");
 
@@ -184,19 +177,14 @@ void Executor::process_batch (ProverRequest &proverRequest)
         }
         case 6: // fork_6
         {
-            if (config.useMainExecC) // Do not use in production; under development
-            {
-                //zklog.info("Executor::process_batch() fork 6 C");
-                mainExecutorC_fork_6.execute(proverRequest);
-            }
 #ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
-            else if (config.useMainExecGenerated)
+            if (config.useMainExecGenerated)
             {
                 //zklog.info("Executor::process_batch() fork 6 generated");
                 fork_6::main_exec_generated_fast(mainExecutor_fork_6, proverRequest);
             }
-#endif
             else
+#endif
             {
                 //zklog.info("Executor::process_batch() fork 6 native");
 

@@ -30,12 +30,14 @@ public:
     Goldilocks::Element inGAS;
     Goldilocks::Element inSTEP;
     Goldilocks::Element inFREE;
+    Goldilocks::Element inFREE0;
     Goldilocks::Element inRR;
     Goldilocks::Element inHASHPOS;
     Goldilocks::Element inCntArith;
     Goldilocks::Element inCntBinary;
     Goldilocks::Element inCntMemAlign;
     Goldilocks::Element inCntKeccakF;
+    Goldilocks::Element inCntSha256F;
     Goldilocks::Element inCntPoseidonG;
     Goldilocks::Element inCntPaddingPG;
     Goldilocks::Element inROTL_C;

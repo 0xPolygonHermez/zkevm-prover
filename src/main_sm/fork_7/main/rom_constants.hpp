@@ -47,7 +47,7 @@ public:
     uint64_t LOG_GAS;
     uint64_t LOG_TOPIC_GAS;
     uint64_t JUMP_DEST_GAS;
-    uint64_t WARM_STORGE_READ_GAS;
+    uint64_t WARM_STORAGE_READ_GAS;
     uint64_t COLD_ACCOUNT_ACCESS_COST_REDUCED;
     uint64_t COLD_ACCOUNT_ACCESS_COST;
     uint64_t EXP_BYTE_GAS;
@@ -145,7 +145,7 @@ public:
         LOG_GAS(0),
         LOG_TOPIC_GAS(0),
         JUMP_DEST_GAS(0),
-        WARM_STORGE_READ_GAS(0),
+        WARM_STORAGE_READ_GAS(0),
         COLD_ACCOUNT_ACCESS_COST_REDUCED(0),
         COLD_ACCOUNT_ACCESS_COST(0),
         EXP_BYTE_GAS(0),

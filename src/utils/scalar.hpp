@@ -29,13 +29,17 @@ extern mpz_class ScalarTwoTo32;
 extern mpz_class ScalarTwoTo64;
 extern mpz_class ScalarTwoTo128;
 extern mpz_class ScalarTwoTo192;
+extern mpz_class ScalarTwoTo254;
 extern mpz_class ScalarTwoTo255;
 extern mpz_class ScalarTwoTo256;
 extern mpz_class ScalarTwoTo257;
 extern mpz_class ScalarTwoTo258;
+extern mpz_class ScalarTwoTo259;
 extern mpz_class ScalarZero;
 extern mpz_class ScalarOne;
 extern mpz_class ScalarGoldilocksPrime;
+extern mpz_class Scalar4xGoldilocksPrime;
+
 
 /* Scalar to/from field element conversion */
 
@@ -443,8 +447,8 @@ inline void ba2fea (Goldilocks &fr, const uint8_t * pData, uint64_t len, Goldilo
 void scalar2ba(uint8_t *pData, uint64_t &dataSize, mpz_class s);
 void scalar2ba16(uint64_t *pData, uint64_t &dataSize, mpz_class s);
 string scalar2ba32(const mpz_class &s); // Returns exactly 32 bytes
-void scalar2bytes(mpz_class &s, uint8_t (&bytes)[32]);
-void scalar2bytesBE(mpz_class &s, uint8_t *pBytes); // pBytes must be a 32-bytes array
+void scalar2bytes(mpz_class s, uint8_t (&bytes)[32]);
+void scalar2bytesBE(mpz_class s, uint8_t *pBytes); // pBytes must be a 32-bytes array
 
 
 /* Scalar to byte array string conversion */
@@ -507,6 +511,26 @@ void sr4to8 ( Goldilocks &fr,
 void fec2scalar(RawFec &fec, const RawFec::Element &fe, mpz_class &s);
 void scalar2fec(RawFec &fec, RawFec::Element &fe, const mpz_class &s);
 
+/* Less than 4
+*  Computes comparation of 256 bits, these values (a,b) are divided in 4 chunks of 64 bits
+*  and compared one-to-one, 4 comparations, lt4 return 1 if ALL chunks of a are less than b.
+*  lt = a[0] < b[0] && a[1] < b[1] && a[2] < b[2] && a[3] < b[3]
+*/
+inline mpz_class lt4(const mpz_class& a, const mpz_class& b) {
+     
+    mpz_class a_=a;
+    mpz_class b_=b;
+    mpz_class mask(0xffffffffffffffff);
+    for (int i = 0; i < 4; i++) {    
+        if ((a_ & mask) >= (b_ & mask) ) {
+            return 0;
+        }
+        a_ = a_ >> 64;
+        b_ = b_ >> 64;
+    }
+    return 1;
+}
+
 /* Unsigned 64 to an array of bytes.  pOutput must be 8 bytes long */
 void u642bytes (uint64_t input, uint8_t * pOutput, bool bBigEndian);
 
@@ -553,5 +577,7 @@ bool inline feaIsEqual (const Goldilocks::Element (&a)[4], const Goldilocks::Ele
 {
     return fr.equal(a[0], b[0]) && fr.equal(a[1], b[1]) && fr.equal(a[2], b[2]) && fr.equal(a[3], b[3]);
 }
+
+
 
 #endif

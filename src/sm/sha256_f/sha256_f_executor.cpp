@@ -27,6 +27,18 @@ TypeSha256Gate string2typeSha (string s)
     return TypeSha256Gate::type_unknown;
 }
 
+uint64_t string2pinSha(string s)
+{
+    if (s=="in1") return 0;
+    if (s=="in2") return 1;
+    if (s=="in3") return 2;
+    if (s=="out") return 3;
+
+    zklog.error("string2pin() got an invalid pin id string=" + s);
+    exitProcess();
+    return 0;
+}
+
 void Sha256FExecutor::loadScript(json j)
 {
     if (!j.contains("program") ||
@@ -116,12 +128,16 @@ void Sha256FExecutor::loadScript(json j)
         instruction.in[0] = true;
         if(j["program"][i]["in1"].contains("bit")) instruction.bit[0] = j["program"][i]["in1"]["bit"];
         if(j["program"][i]["in1"].contains("gate")) instruction.gate[0] = j["program"][i]["in1"]["gate"];
+        if(j["program"][i]["in1"].contains("pin"))  instruction.pin[0] = string2pinSha(j["program"][i]["in1"]["pin"]);
+
 
         // Get input in2 pin data
         instruction.type[1] = string2typeSha(j["program"][i]["in2"]["type"]);
         instruction.in[1] = true;
         if(j["program"][i]["in2"].contains("bit")) instruction.bit[1] = j["program"][i]["in2"]["bit"];
         if(j["program"][i]["in2"].contains("gate")) instruction.gate[1] = j["program"][i]["in2"]["gate"];
+        if(j["program"][i]["in2"].contains("pin"))  instruction.pin[1] = string2pinSha(j["program"][i]["in2"]["pin"]);
+
 
         // Get input in3 pin data
         if(j["program"][i].contains("in3"))
@@ -130,6 +146,8 @@ void Sha256FExecutor::loadScript(json j)
             instruction.type[2] = string2typeSha(j["program"][i]["in3"]["type"]);
             if(j["program"][i]["in3"].contains("bit")) instruction.bit[2] = j["program"][i]["in3"]["bit"];
             if(j["program"][i]["in3"].contains("gate")) instruction.gate[2] = j["program"][i]["in3"]["gate"];
+            if(j["program"][i]["in3"].contains("pin"))  instruction.pin[2] = string2pinSha(j["program"][i]["in3"]["pin"]);
+
         }
         
         program.push_back(instruction);

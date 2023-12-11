@@ -873,7 +873,7 @@ using grpc::Status;
     }
     ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.forcedBlockHashL1, request->forced_blockhash_l1());
 
-    // Get timestamp
+    // Get timestamp limit
     proverRequest.input.publicInputsExtended.publicInputs.timestampLimit = request->timestamp_limit();
 
     // Get sequencer address
@@ -919,6 +919,7 @@ using grpc::Status;
     proverRequest.input.bGetKeys = request->get_keys();
     proverRequest.input.bSkipVerifyL1InfoRoot = request->skip_verify_l1_info_root();
     proverRequest.input.bSkipFirstChangeL2Block = request->skip_first_change_l2_block();
+    proverRequest.input.bSkipWriteBlockInfoRoot = request->skip_write_block_info_root();
 
     // Trace config
     if (request->has_trace_config())
@@ -1221,6 +1222,8 @@ using grpc::Status;
         }
     }
 
+    proverRequest.input.debug.gasLimit = request->debug().gas_limit();
+
 #ifdef LOG_SERVICE_EXECUTOR_INPUT
     zklog.info(string("ExecutorServiceImpl::ProcessBatchV2() got") +
         " sequencerAddr=" + proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16) +
@@ -1234,15 +1237,18 @@ using grpc::Status;
             (((proverRequest.input.publicInputsExtended.publicInputs.forkID >= 5) && config.useMainExecC) ? " C" :
              ((proverRequest.input.publicInputsExtended.publicInputs.forkID >= 4) && config.useMainExecGenerated) ? " generated" : " native") +
         " globalExitRoot=" + proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot.get_str(16) +
-        " timestamp=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.timestamp) +
+        " timestampLimit=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.timestampLimit) +
         " from=" + proverRequest.input.from +
         " bUpdateMerkleTree=" + to_string(proverRequest.input.bUpdateMerkleTree) +
         " bNoCounters=" + to_string(proverRequest.input.bNoCounters) +
         " bGetKeys=" + to_string(proverRequest.input.bGetKeys) +
         " bSkipVerifyL1InfoRoot=" + to_string(proverRequest.input.bSkipVerifyL1InfoRoot) +
         " bSkipFirstChangeL2Block=" + to_string(proverRequest.input.bSkipFirstChangeL2Block) +
+        " bSkipWriteBlockInfoRoot=" + to_string(proverRequest.input.bSkipWriteBlockInfoRoot) +
         " traceConfig=" + proverRequest.input.traceConfig.toString() +
-        " UUID=" + proverRequest.uuid, &proverRequest.tags);
+        " UUID=" + proverRequest.uuid +
+        " gasLimit=" + to_string(proverRequest.input.debug.gasLimit)
+        , &proverRequest.tags);
 #endif
 
     if (config.logExecutorServerInputJson)
@@ -1825,6 +1831,8 @@ using grpc::Status;
     case ZKR_SM_MAIN_HASHSDIGEST_DIGEST_MISMATCH:           return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHSDIGEST_DIGEST_MISMATCH;
     case ZKR_SM_MAIN_HASHSDIGEST_CALLED_TWICE:              return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHSDIGEST_CALLED_TWICE;
     case ZKR_SM_MAIN_HASHS_READ_OUT_OF_RANGE:               return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHS_READ_OUT_OF_RANGE;
+
+    case ZKR_SM_MAIN_BINARY_LT4_MISMATCH:                   return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_BINARY_LT4_MISMATCH;
 
     default:                                                return ::executor::v1::EXECUTOR_ERROR_UNSPECIFIED;
     }

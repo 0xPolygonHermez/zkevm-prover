@@ -41,6 +41,13 @@ public:
     OverrideEntry() : bBalance(false), nonce(0) {};
 };
 
+class InputDebug
+{
+public:
+    uint64_t gasLimit;
+    InputDebug() : gasLimit(0) {};
+};
+
 class Input
 {
     Goldilocks &fr;
@@ -57,9 +64,12 @@ public:
     bool bGetKeys; // if true, return the keys used to read or write storage data
     bool bSkipVerifyL1InfoRoot; // If true, skip the check when l1Data is verified (fork ID >= 7)
     bool bSkipFirstChangeL2Block; // If true, skip the restriction to start a batch with a changeL2Block transaction (fork ID >= 7)
+    bool bSkipWriteBlockInfoRoot; // If true, skip the block info root (fork ID >= 7)
     TraceConfig traceConfig; // FullTracer configuration
     unordered_map<uint64_t, L1Data> l1InfoTreeData;
     unordered_map<string, OverrideEntry> stateOverride;
+    uint64_t stepsN;
+    InputDebug debug;
 
     // Constructor
     Input (Goldilocks &fr) :
@@ -68,7 +78,9 @@ public:
         bNoCounters(false),
         bGetKeys(false),
         bSkipVerifyL1InfoRoot(false),
-        bSkipFirstChangeL2Block(false)
+        bSkipFirstChangeL2Block(false),
+        bSkipWriteBlockInfoRoot(false),
+        stepsN(0)
         {};
 
     // Loads the input object data from a JSON object

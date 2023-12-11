@@ -9,6 +9,7 @@ const uint32_t hIn[8] = { 0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e
 
 inline uint64_t getStateBit ( const uint32_t (&state)[8], uint64_t i )
 {
+    assert(i < 256);
     uint64_t sh = 31 - (i%32);
     return (state[i/32] >> sh) & 1;
 }
@@ -89,7 +90,9 @@ void PaddingSha256BitExecutor::execute (vector<PaddingSha256BitExecutorInput> &i
 
             if(connected) pols.connected[p] = fr.one();
             pols.s1[p] = fr.fromU64(bit);
-            pols.s2[p] = fr.fromU64(getStateBit(stOut, j));
+            if(j < 256){
+                pols.s2[p] = fr.fromU64(getStateBit(stOut, j));
+            }
 
             uint64_t k = 7 - (j % 8);
             uint64_t inc = fr.toU64(pols.s1[p]) << k;

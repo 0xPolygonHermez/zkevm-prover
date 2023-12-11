@@ -32,7 +32,9 @@ void Input::loadGlobals (json &input)
 {
     string auxString;
 
-    // PUBLIC INPUTS
+    /*****************/
+    /* PUBLIC INPUTS */
+    /*****************/
 
     // Input JSON file could contain a forkID key at the root level (not mandatory, default is 0)
     if ( input.contains("forkID") &&
@@ -141,109 +143,6 @@ void Input::loadGlobals (json &input)
         publicInputsExtended.publicInputs.l1InfoRoot.set_str(Remove0xIfPresent(input["l1InfoRoot"]), 16);
 #ifdef LOG_INPUT
         zklog.info("Input::loadGlobals(): l1InfoRoot=" + publicInputsExtended.publicInputs.l1InfoRoot.get_str(16));
-#endif
-    }
-
-    if (publicInputsExtended.publicInputs.forkID >= 7)
-    {
-        // Input JSON file can contain a l1InfoTree key at the root level
-        if ( input.contains("l1InfoTree") &&
-             input["l1InfoTree"].is_object() )
-        {
-            if ( input["l1InfoTree"].contains("skipVerifyL1InfoRoot") &&
-                 input["l1InfoTree"]["skipVerifyL1InfoRoot"].is_boolean() )
-            {
-                bSkipVerifyL1InfoRoot = input["l1InfoTree"]["skipVerifyL1InfoRoot"];
-            }
-            json::iterator it;
-            for (it = input["l1InfoTree"].begin(); it != input["l1InfoTree"].end(); it++)
-            {
-                string key = it.key();
-                if (key == "skipVerifyL1InfoRoot")
-                {
-                    if (it.value().is_boolean())
-                    {
-                        bSkipVerifyL1InfoRoot = input["l1InfoTree"]["skipVerifyL1InfoRoot"];
-                    }
-                    else
-                    {
-                        zklog.error("Input::loadGlobals() l1InfoTree skipVerifyL1InfoRoot found in input JSON file but with invalid type");
-                        exitProcess();
-                    }
-                    continue;
-                }
-                
-                L1Data l1Data;
-
-                if (!stringIsDec(key))
-                {
-                    continue;
-                }
-                uint64_t index = atoi(key.c_str());
-
-                // Parse global exit root
-                if ( input["l1InfoTree"][key].contains("globalExitRoot") &&
-                     input["l1InfoTree"][key]["globalExitRoot"].is_string() )
-                {
-                    string globalExitRootString = input["l1InfoTree"][key]["globalExitRoot"];
-                    globalExitRootString = Remove0xIfPresent(globalExitRootString);
-                    if (!stringIsHex(globalExitRootString))
-                    {
-                        zklog.error("Input::loadGlobals() l1InfoTree globalExitRoot found in input JSON file but not an hex string");
-                        exitProcess();
-                    }
-                    if (globalExitRootString.size() > 64)
-                    {
-                        zklog.error("Input::loadGlobals() l1InfoTree globalExitRoot found in input JSON file is too long");
-                        exitProcess();
-                    }
-                    l1Data.globalExitRoot.set_str(globalExitRootString, 16);
-                }
-
-                // Parse block hash
-                if ( input["l1InfoTree"][key].contains("blockHash") &&
-                     input["l1InfoTree"][key]["blockHash"].is_string() )
-                {
-                    string blockHashString = input["l1InfoTree"][key]["blockHash"];
-                    blockHashString = Remove0xIfPresent(blockHashString);
-                    if (!stringIsHex(blockHashString))
-                    {
-                        zklog.error("Input::loadGlobals() l1InfoTree blockHash found in input JSON file but not an hex string");
-                        exitProcess();
-                    }
-                    if (blockHashString.size() > 64)
-                    {
-                        zklog.error("Input::loadGlobals() l1InfoTree blockHash found in input JSON file is too long");
-                        exitProcess();
-                    }
-                    l1Data.blockHashL1.set_str(blockHashString, 16);
-                }
-
-                // Parse timestamp
-                if ( input["l1InfoTree"][key].contains("timestamp") &&
-                     input["l1InfoTree"][key]["timestamp"].is_string() )
-                {
-                    string timestampString = input["l1InfoTree"][key]["timestamp"];
-                    if (!stringIsDec(timestampString))
-                    {
-                        zklog.error("Input::loadGlobals() l1InfoTree timestamp found in input JSON file but not a decimal string");
-                        exitProcess();
-                    }
-                    mpz_class timestampScalar;
-                    timestampScalar.set_str(timestampString, 10);
-                    if (timestampScalar > ScalarMask64)
-                    {
-                        zklog.error("Input::loadGlobals() l1InfoTree timestamp found in input JSON file is too big");
-                        exitProcess();
-                    }
-                    l1Data.minTimestamp = timestampScalar.get_ui();
-                }
-
-                l1InfoTreeData[index] = l1Data;
-            }
-        }
-#ifdef LOG_INPUT
-        zklog.info("Input::loadGlobals(): l1InfoTree.size=" + to_string(l1InfoTreeData.size()));
 #endif
     }
 
@@ -359,20 +258,20 @@ void Input::loadGlobals (json &input)
 #endif
     }
 
-    // PUBLIC INPUTS EXTENDED
+    /**************************/
+    /* PUBLIC INPUTS EXTENDED */
+    /**************************/
 
-    // Input JSON file must contain a newStateRoot key at the root level
-    if ( !input.contains("newStateRoot") ||
-         !input["newStateRoot"].is_string() )
+    // Input JSON file may contain a newStateRoot key at the root level
+    if ( input.contains("newStateRoot") &&
+         input["newStateRoot"].is_string() )
     {
-        zklog.error("Input::loadGlobals() newStateRoot key not found in input JSON file");
-        exitProcess();
-    }
-    auxString = Remove0xIfPresent(input["newStateRoot"]);
-    publicInputsExtended.newStateRoot.set_str(auxString, 16);
+        auxString = Remove0xIfPresent(input["newStateRoot"]);
+        publicInputsExtended.newStateRoot.set_str(auxString, 16);
 #ifdef LOG_INPUT
-    zklog.info("Input::loadGlobals(): newStateRoot=" + publicInputsExtended.newStateRoot.get_str(16));
+        zklog.info("Input::loadGlobals(): newStateRoot=" + publicInputsExtended.newStateRoot.get_str(16));
 #endif
+    }
 
     // Input JSON file may contain a newAccInputHash key at the root level
     if ( input.contains("newAccInputHash") &&
@@ -385,33 +284,31 @@ void Input::loadGlobals (json &input)
 #endif
     }
 
-    // Input JSON file must contain a newLocalExitRoot key at the root level
-    if ( !input.contains("newLocalExitRoot") ||
-         !input["newLocalExitRoot"].is_string() )
+    // Input JSON file may contain a newLocalExitRoot key at the root level
+    if ( input.contains("newLocalExitRoot") &&
+         input["newLocalExitRoot"].is_string() )
     {
-        zklog.error("Input::loadGlobals() newLocalExitRoot key not found in input JSON file");
-        exitProcess();
-    }
-    auxString = Remove0xIfPresent(input["newLocalExitRoot"]);
-    publicInputsExtended.newLocalExitRoot.set_str(auxString, 16);
+        auxString = Remove0xIfPresent(input["newLocalExitRoot"]);
+        publicInputsExtended.newLocalExitRoot.set_str(auxString, 16);
 
 #ifdef LOG_INPUT
-    zklog.info("Input::loadGlobals(): newLocalExitRoot=" + publicInputsExtended.newLocalExitRoot.get_str(16));
+        zklog.info("Input::loadGlobals(): newLocalExitRoot=" + publicInputsExtended.newLocalExitRoot.get_str(16));
 #endif
-
-    // Input JSON file must contain a numBatch key at the root level
-    if ( !input.contains("newNumBatch") ||
-         !input["newNumBatch"].is_number_unsigned() )
-    {
-        zklog.error("Input::loadGlobals() newNumBatch key not found in input JSON file");
-        exitProcess();
     }
-    publicInputsExtended.newBatchNum = input["newNumBatch"];
-#ifdef LOG_INPUT
-    zklog.info("Input::loadGlobals(): newBatchNum=" + to_string(publicInputsExtended.newBatchNum));
-#endif
 
-    // ROOT
+    // Input JSON file may contain a numBatch key at the root level
+    if ( input.contains("newNumBatch") &&
+         input["newNumBatch"].is_number_unsigned() )
+    {
+        publicInputsExtended.newBatchNum = input["newNumBatch"];
+#ifdef LOG_INPUT
+        zklog.info("Input::loadGlobals(): newBatchNum=" + to_string(publicInputsExtended.newBatchNum));
+#endif
+    }
+
+    /********/
+    /* ROOT */
+    /********/
 
     // Input JSON file may contain a from key at the root level
     if ( input.contains("from") &&
@@ -443,6 +340,40 @@ void Input::loadGlobals (json &input)
 #endif
     }
 
+    if (publicInputsExtended.publicInputs.forkID >= 7)
+    {
+        // Input JSON file might contain a stepsN key at the root level
+        if ( input.contains("stepsN") &&
+            input["stepsN"].is_number_unsigned() )
+        {
+            stepsN = input["stepsN"];
+#ifdef LOG_INPUT
+            zklog.info("Input::loadGlobals(): stepsN=" + to_string(stepsN));
+#endif
+        }
+    }
+
+    if (publicInputsExtended.publicInputs.forkID >= 7)
+    {
+        // Input JSON file might contain a gasLimit key at the root level
+        if ( input.contains("gasLimit") &&
+            input["gasLimit"].is_string() )
+        {
+            string gasLimitString = input["gasLimit"];
+            mpz_class gasLimitScalar;
+            gasLimitScalar.set_str(gasLimitString, 10);
+            if (gasLimitScalar > ScalarMask64)
+            {
+                zklog.error("Input::loadGlobals() gasLimit key value is too high value=" + gasLimitString);
+                exitProcess();
+            }
+            debug.gasLimit = gasLimitScalar.get_ui();
+#ifdef LOG_INPUT
+            zklog.info("Input::loadGlobals(): gasLimit=" + to_string(debug.gasLimit));
+#endif
+        }
+    }
+
     // Input JSON file may contain a getKeys key at the root level
     if ( input.contains("getKeys") &&
          input["getKeys"].is_boolean() )
@@ -472,6 +403,143 @@ void Input::loadGlobals (json &input)
         zklog.info("Input::loadGlobals() bSkipFirstChangeL2Block=" + to_string(bSkipFirstChangeL2Block));
 #endif
     }
+
+    // Input JSON file may contain a skipWriteBlockInfoRoot key at the root level
+    if ( input.contains("skipWriteBlockInfoRoot") &&
+         input["skipWriteBlockInfoRoot"].is_boolean() )
+    {
+        bSkipWriteBlockInfoRoot = input["skipWriteBlockInfoRoot"];
+#ifdef LOG_INPUT
+        zklog.info("Input::loadGlobals() bSkipWriteBlockInfoRoot=" + to_string(bSkipWriteBlockInfoRoot));
+#endif
+    }
+
+    if (publicInputsExtended.publicInputs.forkID >= 7)
+    {
+        // Input JSON file can contain a l1InfoTree key at the root level
+        if ( input.contains("l1InfoTree") &&
+             input["l1InfoTree"].is_object() )
+        {
+            /*if ( input["l1InfoTree"].contains("skipVerifyL1InfoRoot") &&
+                 input["l1InfoTree"]["skipVerifyL1InfoRoot"].is_boolean() )
+            {
+                bSkipVerifyL1InfoRoot = input["l1InfoTree"]["skipVerifyL1InfoRoot"];
+            }*/
+            json::iterator it;
+            for (it = input["l1InfoTree"].begin(); it != input["l1InfoTree"].end(); it++)
+            {
+                string key = it.key();
+                if (key == "skipVerifyL1InfoRoot")
+                {
+                    if (it.value().is_boolean())
+                    {
+                        bSkipVerifyL1InfoRoot = input["l1InfoTree"]["skipVerifyL1InfoRoot"];
+                    }
+                    else
+                    {
+                        zklog.error("Input::loadGlobals() l1InfoTree skipVerifyL1InfoRoot found in input JSON file but with invalid type");
+                        exitProcess();
+                    }
+                    continue;
+                }
+                
+                L1Data l1Data;
+
+                if (!stringIsDec(key))
+                {
+                    continue;
+                }
+                uint64_t index = atoi(key.c_str());
+
+                // Parse global exit root
+                if ( input["l1InfoTree"][key].contains("globalExitRoot") &&
+                     input["l1InfoTree"][key]["globalExitRoot"].is_string() )
+                {
+                    string globalExitRootString = input["l1InfoTree"][key]["globalExitRoot"];
+                    globalExitRootString = Remove0xIfPresent(globalExitRootString);
+                    if (!stringIsHex(globalExitRootString))
+                    {
+                        zklog.error("Input::loadGlobals() l1InfoTree globalExitRoot found in input JSON file but not an hex string");
+                        exitProcess();
+                    }
+                    if (globalExitRootString.size() > 64)
+                    {
+                        zklog.error("Input::loadGlobals() l1InfoTree globalExitRoot found in input JSON file is too long");
+                        exitProcess();
+                    }
+                    l1Data.globalExitRoot.set_str(globalExitRootString, 16);
+                }
+
+                // Parse block hash
+                if ( input["l1InfoTree"][key].contains("blockHash") &&
+                     input["l1InfoTree"][key]["blockHash"].is_string() )
+                {
+                    string blockHashString = input["l1InfoTree"][key]["blockHash"];
+                    blockHashString = Remove0xIfPresent(blockHashString);
+                    if (!stringIsHex(blockHashString))
+                    {
+                        zklog.error("Input::loadGlobals() l1InfoTree blockHash found in input JSON file but not an hex string");
+                        exitProcess();
+                    }
+                    if (blockHashString.size() > 64)
+                    {
+                        zklog.error("Input::loadGlobals() l1InfoTree blockHash found in input JSON file is too long");
+                        exitProcess();
+                    }
+                    l1Data.blockHashL1.set_str(blockHashString, 16);
+                }
+
+                // Parse timestamp
+                if ( input["l1InfoTree"][key].contains("timestamp") &&
+                     input["l1InfoTree"][key]["timestamp"].is_string() )
+                {
+                    string timestampString = input["l1InfoTree"][key]["timestamp"];
+                    if (!stringIsDec(timestampString))
+                    {
+                        zklog.error("Input::loadGlobals() l1InfoTree timestamp found in input JSON file but not a decimal string");
+                        exitProcess();
+                    }
+                    mpz_class timestampScalar;
+                    timestampScalar.set_str(timestampString, 10);
+                    if (timestampScalar > ScalarMask64)
+                    {
+                        zklog.error("Input::loadGlobals() l1InfoTree timestamp found in input JSON file is too big");
+                        exitProcess();
+                    }
+                    l1Data.minTimestamp = timestampScalar.get_ui();
+                }
+
+                // Parse smtProof
+                if ( input["l1InfoTree"][key].contains("smtProof") &&
+                     input["l1InfoTree"][key]["smtProof"].is_array() )
+                {
+                    uint64_t smtProofSize = input["l1InfoTree"][key]["smtProof"].size();
+                    for (uint64_t i=0; i<smtProofSize; i++)
+                    {
+                        string auxString = input["l1InfoTree"][key]["smtProof"][i];
+                        auxString = Remove0xIfPresent(auxString);
+                        if (!stringIsHex(auxString))
+                        {
+                            zklog.error("Input::loadGlobals() l1InfoTree smtProof found in input JSON file is not an hexa string");
+                            exitProcess();
+                        }
+                        mpz_class auxScalar;
+                        auxScalar.set_str(auxString, 16);
+                        l1Data.smtProof.emplace_back(auxScalar);
+                    }
+                }
+
+                l1InfoTreeData[index] = l1Data;
+            }
+        }
+#ifdef LOG_INPUT
+        zklog.info("Input::loadGlobals(): l1InfoTree.size=" + to_string(l1InfoTreeData.size()));
+#endif
+    }
+
+    /****************/
+    /* TRACE CONFIG */
+    /****************/
 
     // Input JSON file may contain a disableStorage key at the root level
     if ( input.contains("disableStorage") &&
@@ -535,27 +603,74 @@ void Input::loadGlobals (json &input)
 void Input::saveGlobals (json &input) const
 {
     // Public inputs
-    input["oldStateRoot"] = Add0xIfMissing(publicInputsExtended.publicInputs.oldStateRoot.get_str(16));
-    input["oldAccInputHash"] = Add0xIfMissing(publicInputsExtended.publicInputs.oldAccInputHash.get_str(16));
+    input["forkID"] = publicInputsExtended.publicInputs.forkID;
+    input["oldStateRoot"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.oldStateRoot.get_str(16), 64);
+    input["oldAccInputHash"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.oldAccInputHash.get_str(16), 64);
     input["oldNumBatch"] = publicInputsExtended.publicInputs.oldBatchNum;
     input["chainID"] = publicInputsExtended.publicInputs.chainID;
-    input["forkID"] = publicInputsExtended.publicInputs.forkID;
     input["batchL2Data"] = Add0xIfMissing(ba2string(publicInputsExtended.publicInputs.batchL2Data));
-    input["globalExitRoot"] = Add0xIfMissing(publicInputsExtended.publicInputs.globalExitRoot.get_str(16));
-    input["timestamp"] = publicInputsExtended.publicInputs.timestamp;
-    input["sequencerAddr"] = Add0xIfMissing(publicInputsExtended.publicInputs.sequencerAddr.get_str(16));
-    input["aggregatorAddress"] = Add0xIfMissing(publicInputsExtended.publicInputs.aggregatorAddress.get_str(16));
+    input["sequencerAddr"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.sequencerAddr.get_str(16), 40);
+    if (publicInputsExtended.publicInputs.aggregatorAddress != 0) input["aggregatorAddress"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.aggregatorAddress.get_str(16), 40);
+    if (publicInputsExtended.publicInputs.forkID <= 6)
+    {
+        input["globalExitRoot"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.globalExitRoot.get_str(16), 64);
+        input["timestamp"] = publicInputsExtended.publicInputs.timestamp;
+    }
+    if (publicInputsExtended.publicInputs.forkID >= 7)
+    {
+        input["l1InfoRoot"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.l1InfoRoot.get_str(16), 64);
+        input["forcedBlockHashL1"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.forcedBlockHashL1.get_str(16), 64);
+        input["timestampLimit"] = publicInputsExtended.publicInputs.timestampLimit;
+    }
 
     // Public inputs extended
-    input["newStateRoot"] = Add0xIfMissing(publicInputsExtended.newStateRoot.get_str(16));
-    input["newAccInputHash"] = Add0xIfMissing(publicInputsExtended.newAccInputHash.get_str(16));
-    input["newLocalExitRoot"] = Add0xIfMissing(publicInputsExtended.newLocalExitRoot.get_str(16));
-    input["newNumBatch"] = publicInputsExtended.newBatchNum;
+    if (publicInputsExtended.newStateRoot != 0) input["newStateRoot"] = NormalizeTo0xNFormat(publicInputsExtended.newStateRoot.get_str(16), 64);
+    if (publicInputsExtended.newAccInputHash != 0) input["newAccInputHash"] = NormalizeTo0xNFormat(publicInputsExtended.newAccInputHash.get_str(16), 64);
+    if (publicInputsExtended.newLocalExitRoot != 0) input["newLocalExitRoot"] = NormalizeTo0xNFormat(publicInputsExtended.newLocalExitRoot.get_str(16), 64);
+    if (publicInputsExtended.newBatchNum != 0) input["newNumBatch"] = publicInputsExtended.newBatchNum;
 
     // Root
-    input["from"] = from;
+    if (!from.empty() && (from != "0x")) input["from"] = from;
     input["updateMerkleTree"] = bUpdateMerkleTree;
-    input["noCounters"] = bNoCounters;
+    if (bNoCounters) input["noCounters"] = bNoCounters;
+    if (bGetKeys) input["getKeys"] = bGetKeys;
+    if (bSkipVerifyL1InfoRoot) input["skipVerifyL1InfoRoot"] = bSkipVerifyL1InfoRoot;
+    if (bSkipFirstChangeL2Block) input["skipFirstChangeL2Block"] = bSkipFirstChangeL2Block;
+    if (bSkipWriteBlockInfoRoot) input["skipWriteBlockInfoRoot"] = bSkipWriteBlockInfoRoot;
+    if (publicInputsExtended.publicInputs.forkID >= 7)
+    {
+        if (stepsN != 0)
+        {
+            input["stepsN"] = stepsN;
+        }
+        if (debug.gasLimit != 0)
+        {
+            input["gasLimit"] = debug.gasLimit;
+        }
+        unordered_map<uint64_t, L1Data>::const_iterator it;
+        for (it = l1InfoTreeData.begin(); it != l1InfoTreeData.end(); it++)
+        {
+            string index = to_string(it->first);
+            if (it->second.globalExitRoot != 0)
+            {
+                input["l1InfoTree"][index]["globalExitRoot"] = NormalizeTo0xNFormat(it->second.globalExitRoot.get_str(16), 64);
+            }
+            if (it->second.blockHashL1 != 0)
+            {
+                input["l1InfoTree"][index]["blockHash"] = NormalizeTo0xNFormat(it->second.blockHashL1.get_str(16), 64);
+            }
+            if (it->second.minTimestamp != 0)
+            {
+                mpz_class auxScalar;
+                auxScalar = it->second.minTimestamp;
+                input["l1InfoTree"][index]["timestamp"] = auxScalar.get_str(10);
+            }
+            for (uint64_t i=0; i<it->second.smtProof.size(); i++)
+            {
+                input["l1InfoTree"][index]["smtProof"][i] = NormalizeTo0xNFormat(it->second.smtProof[i].get_str(16), 64);
+            }
+        }
+    }
 
     // TraceConfig
     if (traceConfig.bEnabled)
@@ -704,7 +819,7 @@ void Input::contractsBytecode2json (json &input, const DatabaseMap::ProgramMap &
         {
             value += byte2string(dbValue[i]);
         }
-        input[name][key] = value;
+        input[name][key] = "0x" + value;
     }
 }
 

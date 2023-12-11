@@ -4,6 +4,8 @@
 #include "key_utils.hpp"
 #include "constants.hpp"
 #include "header_page.hpp"
+#include "zkmax.hpp"
+
 
 zkresult VersionDataPage::InitEmptyPage (PageContext &ctx, const uint64_t pageNumber)
 {

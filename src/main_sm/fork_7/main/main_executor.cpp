@@ -57,12 +57,19 @@ namespace fork_7
 #endif
 #define CHECK_MAX_CNT_AT_THE_END
 
+//#define LOG_COMPLETED_STEPS_TO_FILE
+
 MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config) :
     fr(fr),
     N(MainCommitPols::pilDegree()),
     N_NoCounters(N_NO_COUNTERS_MULTIPLICATION_FACTOR*MainCommitPols::pilDegree()),
     poseidon(poseidon),
     rom(config),
+#ifdef MULTI_ROM_TEST
+    rom_gas_limit_100000000(config),
+    rom_gas_limit_2147483647(config),
+    rom_gas_limit_89128960(config),
+#endif
     config(config)
 {
     /* Load and parse ROM JSON file */
@@ -76,12 +83,26 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     // Load ROM data from JSON data
     rom.load(fr, romJson);
 
+#ifdef MULTI_ROM_TEST
+    romJson.clear();
+    file2json("src/main_sm/fork_7/scripts/rom_gas_limit_100000000.json", romJson);
+    rom_gas_limit_100000000.load(fr, romJson);
+    romJson.clear();
+    file2json("src/main_sm/fork_7/scripts/rom_gas_limit_2147483647.json", romJson);
+    rom_gas_limit_2147483647.load(fr, romJson);
+    romJson.clear();
+    file2json("src/main_sm/fork_7/scripts/rom_gas_limit_89128960.json", romJson);
+    rom_gas_limit_89128960.load(fr, romJson);
+#endif
+
     // Get labels
-    finalizeExecutionLabel  = rom.getLabel(string("finalizeExecution"));
-    //checkAndSaveFromLabel   = rom.getLabel(string("checkAndSaveFrom"));
-    checkAndSaveFromLabel = 1000000; // TODO: Decide if we need this label any more
-    ecrecoverStoreArgsLabel = rom.getLabel(string("ecrecover_store_args"));
-    ecrecoverEndLabel       = rom.getLabel(string("ecrecover_end"));
+    finalizeExecutionLabel    = rom.getLabel(string("finalizeExecution"));
+    checkAndSaveFromLabel     = rom.getLabel(string("checkAndSaveFrom"));
+    ecrecoverStoreArgsLabel   = rom.getLabel(string("ecrecover_store_args"));
+    ecrecoverEndLabel         = rom.getLabel(string("ecrecover_end"));
+    checkFirstTxTypeLabel     = rom.getLabel(string("checkFirstTxType"));
+    writeBlockInfoRootLabel   = rom.getLabel(string("writeBlockInfoRoot"));
+    verifyMerkleProofEndLabel = rom.getLabel(string("verifyMerkleProofEnd"));
 
     // Init labels mutex
     pthread_mutex_init(&labelsMutex, NULL);
@@ -114,6 +135,35 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     struct timeval t;
     TimeMetricStorage mainMetrics;
     TimeMetricStorage evalCommandMetrics;
+#endif
+
+#ifdef MULTI_ROM_TEST
+
+    // Get the right rom based on gas limit
+    Rom * pRom = &rom;
+    if (proverRequest.input.debug.gasLimit == 100000000)
+    {
+        pRom = &rom_gas_limit_100000000;
+    }
+    else if (proverRequest.input.debug.gasLimit == 2147483647)
+    {
+        pRom = &rom_gas_limit_2147483647;
+    }
+    else if (proverRequest.input.debug.gasLimit == 89128960)
+    {
+        pRom = &rom_gas_limit_89128960;
+    }
+    Rom &rom = *pRom;
+
+    // Get labels
+    finalizeExecutionLabel    = rom.getLabel(string("finalizeExecution"));
+    checkAndSaveFromLabel     = rom.getLabel(string("checkAndSaveFrom"));
+    ecrecoverStoreArgsLabel   = rom.getLabel(string("ecrecover_store_args"));
+    ecrecoverEndLabel         = rom.getLabel(string("ecrecover_end"));
+    checkFirstTxTypeLabel     = rom.getLabel(string("checkFirstTxType"));
+    writeBlockInfoRootLabel   = rom.getLabel(string("writeBlockInfoRoot"));
+    verifyMerkleProofEndLabel = rom.getLabel(string("verifyMerkleProofEnd"));
+    
 #endif
 
     // Init execution flags
@@ -573,6 +623,16 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #endif
         }
 
+        // If inCntSha256F, op = op + inCntSha256F*cntSha256F
+        if (!fr.isZero(rom.line[zkPC].inCntSha256F))
+        {
+            op0 = fr.add(op0, fr.mul(rom.line[zkPC].inCntSha256F, pols.cntSha256F[i]));
+            pols.inCntSha256F[i] = rom.line[zkPC].inCntSha256F;
+#ifdef LOG_INX
+            zklog.info("inCntSha256F op=" + fr.toString(op3, 16) + ":" + fr.toString(op2, 16) + ":" + fr.toString(op1, 16) + ":" + fr.toString(op0, 16));
+#endif
+        }
+
         // If inCntPoseidonG, op = op + inCntPoseidonG*cntPoseidonG
         if (!fr.isZero(rom.line[zkPC].inCntPoseidonG))
         {
@@ -621,15 +681,15 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         // If inCONST, op = op + CONST
         if (rom.line[zkPC].bConstLPresent)
         {
-            scalar2fea(fr, rom.line[zkPC].CONSTL, op0, op1, op2, op3, op4, op5, op6, op7);
-            pols.CONST0[i] = op0;
-            pols.CONST1[i] = op1;
-            pols.CONST2[i] = op2;
-            pols.CONST3[i] = op3;
-            pols.CONST4[i] = op4;
-            pols.CONST5[i] = op5;
-            pols.CONST6[i] = op6;
-            pols.CONST7[i] = op7;
+            scalar2fea(fr, rom.line[zkPC].CONSTL, pols.CONST0[i], pols.CONST1[i], pols.CONST2[i], pols.CONST3[i], pols.CONST4[i], pols.CONST5[i], pols.CONST6[i], pols.CONST7[i]);
+            op0 = fr.add(op0, pols.CONST0[i]);
+            op1 = fr.add(op1, pols.CONST1[i]);
+            op2 = fr.add(op2, pols.CONST2[i]);
+            op3 = fr.add(op3, pols.CONST3[i]);
+            op4 = fr.add(op4, pols.CONST4[i]);
+            op5 = fr.add(op5, pols.CONST5[i]);
+            op6 = fr.add(op6, pols.CONST6[i]);
+            op7 = fr.add(op7, pols.CONST7[i]);
 #ifdef LOG_INX
             zklog.info("CONSTL op=" + rom.line[zkPC].CONSTL.get_str(16));
 #endif
@@ -782,8 +842,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         /* FREE INPUT */
         /**************/
 
-        // If inFREE, calculate the free input value, and add it to op
-        if (!fr.isZero(rom.line[zkPC].inFREE))
+        // If inFREE or inFREE0, calculate the free input value, and add it to op
+        if (!fr.isZero(rom.line[zkPC].inFREE) || !fr.isZero(rom.line[zkPC].inFREE0))
         {
             // freeInTag must be present
             if (rom.line[zkPC].freeInTag.isPresent == false)
@@ -849,7 +909,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
                     // Track if we used the state override or not
-                    bool bStatusOverride = false;
+                    bool bStateOverride = false;
                     mpz_class value;
                     SmtGetResult smtGetResult;
 
@@ -894,12 +954,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                             if ((keyType == rom.constants.SMT_KEY_BALANCE) && it->second.bBalance)
                             {
                                 value = it->second.balance;
-                                bStatusOverride = true;
+                                bStateOverride = true;
                             }
                             else if ((keyType == rom.constants.SMT_KEY_NONCE) && (it->second.nonce > 0))
                             {
                                 value = it->second.nonce;
-                                bStatusOverride = true;
+                                bStateOverride = true;
                             }
                             else if ((keyType == rom.constants.SMT_KEY_SC_CODE) && (it->second.code.size() > 0))
                             {
@@ -915,12 +975,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                                 // Convert to scalar
                                 fea2scalar(fr, value, result);
 
-                                bStatusOverride = true;
+                                bStateOverride = true;
                             }
                             else if ((keyType == rom.constants.SMT_KEY_SC_LENGTH) && (it->second.code.size() > 0))
                             {
                                 value = it->second.code.size();
-                                bStatusOverride = true;
+                                bStateOverride = true;
                             }
                             else if ((keyType == rom.constants.SMT_KEY_SC_STORAGE) && (it->second.state.size() > 0))
                             {
@@ -934,7 +994,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                                 {
                                     value = 0;
                                 }
-                                bStatusOverride = true;
+                                bStateOverride = true;
                             }
                             else if ((keyType == rom.constants.SMT_KEY_SC_STORAGE) && (it->second.stateDiff.size() > 0))
                             {
@@ -948,12 +1008,12 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                                 {
                                     value = 0;
                                 }
-                                bStatusOverride = true;
+                                bStateOverride = true;
                             }
                         }
                     }
 
-                    if (bStatusOverride)
+                    if (bStateOverride)
                     {
                         smtGetResult.value = value;
 
@@ -1027,7 +1087,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                         gettimeofday(&t, NULL);
 #endif
-
                         // Collect the keys used to read or write store data
                         if (proverRequest.input.bGetKeys && !bIsTouchedAddressTree)
                         {
@@ -1092,6 +1151,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
+                    
                     // Get old state root
                     Goldilocks::Element oldRoot[4];
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
@@ -1108,8 +1168,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                     // Track if we used the state override or not
                     bool bStatusOverride = false;
-
-                    //SmtGetResult smtGetResult;
 
                     // If the input contains a state override section, then use it
                     if (!proverRequest.input.stateOverride.empty())
@@ -1162,17 +1220,17 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                             }
                             else if ((keyType == rom.constants.SMT_KEY_SC_CODE) && (it->second.code.size() > 0))
                             {
-                                proverRequest.input.stateOverride[keyAddress].code = proverRequest.input.contractsBytecode[NormalizeTo0xNFormat(value.get_str(16), 64)];
+                                it->second.code = proverRequest.input.contractsBytecode[NormalizeTo0xNFormat(value.get_str(16), 64)];
                                 bStatusOverride = true;
                             }
                             else if ((keyType == rom.constants.SMT_KEY_SC_STORAGE) && (it->second.state.size() > 0))
                             {
-                                proverRequest.input.stateOverride[keyAddress].state[keyStorage] = value;
+                                it->second.state[keyStorage] = value;
                                 bStatusOverride = true;
                             }
                             else if ((keyType == rom.constants.SMT_KEY_SC_STORAGE) && (it->second.stateDiff.size() > 0))
                             {
-                                proverRequest.input.stateOverride[keyAddress].stateDiff[keyStorage] = value;
+                                it->second.stateDiff[keyStorage] = value;
                                 bStatusOverride = true;
                             }
                         }
@@ -1182,7 +1240,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     {
 
 #ifdef LOG_SMT_KEY_DETAILS
-                    zklog.info("SMT get state override C=" + fea2string(fr, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]) +
+                    zklog.info("SMT set state override C=" + fea2string(fr, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]) +
                         " A=" + fea2string(fr, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]) +
                         " B=" + fea2string(fr, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]) +
                         " oldRoot=" + fea2string(fr, oldRoot) +
@@ -1585,7 +1643,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                     nHits++;
 
-#ifdef LOG_HASHK
+#ifdef LOG_HASHS
                     zklog.info("hashS 1 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr) + " pos=" + to_string(pos) + " size=" + to_string(size) + " data=" + s.get_str(16));
 #endif
                 }
@@ -1619,7 +1677,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
                     nHits++;
 
-#ifdef LOG_HASHK
+#ifdef LOG_HASHS
                     zklog.info("hashSDigest 1 i=" + to_string(i) + " zkPC=" + to_string(zkPC) + " addr=" + to_string(addr) + " digest=" + ctx.hashS[addr].digest.get_str(16));
 #endif
                 }
@@ -1796,6 +1854,26 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         c = (a ^ b);
                         scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
                         nHits++;
+                    } else if ( rom.line[zkPC].binOpcode == 8 ) // LT4
+                    {
+                        mpz_class a, b, c;
+                        if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.A)");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar(pols.B)");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        c = lt4(a, b);
+                        scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
+                        nHits++;
                     }
                     else
                     {
@@ -1959,7 +2037,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             pols.FREE7[i] = fi7;
 
             // op = op + inFREE*fi
-            op0 = fr.add(op0, fr.mul(rom.line[zkPC].inFREE, fi0));
+            op0 = fr.add(op0, fr.mul(fr.add(rom.line[zkPC].inFREE, rom.line[zkPC].inFREE0), fi0));
             op1 = fr.add(op1, fr.mul(rom.line[zkPC].inFREE, fi1));
             op2 = fr.add(op2, fr.mul(rom.line[zkPC].inFREE, fi2));
             op3 = fr.add(op3, fr.mul(rom.line[zkPC].inFREE, fi3));
@@ -1970,6 +2048,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             // Copy ROM flags into the polynomials
             pols.inFREE[i] = rom.line[zkPC].inFREE;
+            pols.inFREE0[i] = rom.line[zkPC].inFREE0;
         }
 
         if (!fr.isZero(op0) && !bProcessBatch)
@@ -2101,6 +2180,32 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     }
                 }
             }
+        }
+
+        // overwrite 'op' when hiting 'checkFirstTxType' label
+        if ((zkPC == checkFirstTxTypeLabel) && proverRequest.input.bSkipFirstChangeL2Block)
+        {
+            op0 = fr.one();
+            op1 = fr.one();
+            op2 = fr.one();
+            op3 = fr.one();
+            op4 = fr.one();
+            op5 = fr.one();
+            op6 = fr.one();
+            op7 = fr.one();
+        }
+
+        // overwrite 'op' when hiting 'writeBlockInfoRoot' label
+        if ((zkPC == writeBlockInfoRootLabel) && proverRequest.input.bSkipWriteBlockInfoRoot)
+        {
+            op0 = fr.zero();
+            op1 = fr.zero();
+            op2 = fr.zero();
+            op3 = fr.zero();
+            op4 = fr.zero();
+            op5 = fr.zero();
+            op6 = fr.zero();
+            op7 = fr.zero();
         }
 
         // Storage read instruction
@@ -3313,9 +3418,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             // Store the binary action to execute it later with the binary SM
             BinaryAction binaryAction;
             binaryAction.a = op;
-            binaryAction.b = 0;
-            binaryAction.c = op;
-            binaryAction.opcode = 1;
+            binaryAction.b = Scalar4xGoldilocksPrime;
+            binaryAction.c = 1;
+            binaryAction.opcode = 8;
             binaryAction.type = 2;
             required.Binary.push_back(binaryAction);
         }
@@ -4238,6 +4343,55 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                     binaryAction.type = 1;
                     required.Binary.push_back(binaryAction);
                 }
+            } else if (rom.line[zkPC].binOpcode == 8) // LT4
+            {
+                mpz_class a, b, c;
+                if (!fea2scalar(fr, a, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.A)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                if (!fea2scalar(fr, b, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError(ctx, "Failed calling fea2scalar(pols.B)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                }
+                if (!fea2scalar(fr, c, op0, op1, op2, op3, op4, op5, op6, op7))
+                {
+                    proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                    logError( ctx, "Failed calling fea2scalar(op)");
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+                   
+                mpz_class expectedC;
+                expectedC = lt4(a,b); 
+                if (c != expectedC)
+                {
+                    proverRequest.result = ZKR_SM_MAIN_BINARY_LT4_MISMATCH; 
+                    logError(ctx, "Binary LT4 operation does not match c=op=" + c.get_str(16) + " expectedC=(a LT4 b)=" + expectedC.get_str(16));
+                    pHashDB->cancelBatch(proverRequest.uuid);
+                    return;
+                }
+
+                pols.carry[i] = fr.fromScalar(c);
+
+                 if (!bProcessBatch)
+                {
+                    pols.binOpcode[i] = fr.fromU64(8);
+
+                    // Store the binary action to execute it later with the binary SM
+                    BinaryAction binaryAction;
+                    binaryAction.a = a;
+                    binaryAction.b = b;
+                    binaryAction.c = c;
+                    binaryAction.opcode = 8;
+                    binaryAction.type = 1;
+                    required.Binary.push_back(binaryAction);
+                }
             }
             else
             {
@@ -4491,7 +4645,22 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_SETX
             zklog.info("setC C[nexti]=" + fea2string(fr, pols.C0[nexti], pols.C1[nexti], pols.C2[nexti], pols.C3[nexti], pols.C4[nexti], pols.C5[nexti], pols.C6[nexti], pols.C7[nexti]));
 #endif
-        } else {
+        }            
+        else if ((zkPC == verifyMerkleProofEndLabel) && proverRequest.input.bSkipVerifyL1InfoRoot)
+        {
+            // Set C register with input.l1InfoRoot to process unsigned transactions
+            scalar2fea(fr, proverRequest.input.publicInputsExtended.publicInputs.l1InfoRoot,
+                pols.C0[nexti],
+                pols.C1[nexti],
+                pols.C2[nexti],
+                pols.C3[nexti],
+                pols.C4[nexti],
+                pols.C5[nexti],
+                pols.C6[nexti],
+                pols.C7[nexti]);
+        }
+        else
+        {
             pols.C0[nexti] = pols.C0[i];
             pols.C1[nexti] = pols.C1[i];
             pols.C2[nexti] = pols.C2[i];

@@ -46,6 +46,11 @@ public:
 
     // ROM JSON file data:
     Rom rom;
+#ifdef MULTI_ROM_TEST
+    Rom rom_gas_limit_100000000;
+    Rom rom_gas_limit_2147483647;
+    Rom rom_gas_limit_89128960;
+#endif
 
     // Database server configuration, if any
     const Config &config;
@@ -55,6 +60,9 @@ public:
     uint64_t checkAndSaveFromLabel;
     uint64_t ecrecoverStoreArgsLabel;
     uint64_t ecrecoverEndLabel;
+    uint64_t checkFirstTxTypeLabel;
+    uint64_t writeBlockInfoRootLabel;
+    uint64_t verifyMerkleProofEndLabel;
 
     // Labels lock
     pthread_mutex_t labelsMutex;    // Mutex to protect the labels vector

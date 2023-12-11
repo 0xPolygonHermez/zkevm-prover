@@ -49,7 +49,6 @@ void Rom::load(Goldilocks &fr, json &romJson)
         oldNumBatchOffset            = getMemoryOffset("oldNumBatch");
         newNumBatchOffset            = getMemoryOffset("newNumBatch");
         newLocalExitRootOffset       = getMemoryOffset("newLocalExitRoot");
-        depthOffset                  = getMemoryOffset("depth");
         gasRefundOffset              = getMemoryOffset("gasRefund");
         txSrcAddrOffset              = getMemoryOffset("txSrcAddr");
         gasCallOffset                = getMemoryOffset("gasCall");
@@ -73,7 +72,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
         timestampOffset              = getMemoryOffset("timestamp");
         gerL1InfoTreeOffset          = getMemoryOffset("gerL1InfoTree");
         previousBlockHashOffset      = getMemoryOffset("previousBlockHash");
-        blockchashL1InfoTreeOffset   = getMemoryOffset("blockchashL1InfoTree");
+        blockHashL1InfoTreeOffset    = getMemoryOffset("blockHashL1InfoTree");
         isChangeL2BlockTxOffset      = getMemoryOffset("isChangeL2BlockTx");
         txIndexOffset                = getMemoryOffset("txIndex");
         l2TxHashOffset               = getMemoryOffset("l2TxHash");
@@ -116,7 +115,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
     constants.LOG_GAS                           = getConstant(romJson, "LOG_GAS");
     constants.LOG_TOPIC_GAS                     = getConstant(romJson, "LOG_TOPIC_GAS");
     constants.JUMP_DEST_GAS                     = getConstant(romJson, "JUMP_DEST_GAS");
-    constants.WARM_STORGE_READ_GAS              = getConstant(romJson, "WARM_STORGE_READ_GAS");
+    constants.WARM_STORAGE_READ_GAS             = getConstant(romJson, "WARM_STORAGE_READ_GAS");
     constants.COLD_ACCOUNT_ACCESS_COST_REDUCED  = getConstant(romJson, "COLD_ACCOUNT_ACCESS_COST_REDUCED");
     constants.COLD_ACCOUNT_ACCESS_COST          = getConstant(romJson, "COLD_ACCOUNT_ACCESS_COST");
     constants.EXP_BYTE_GAS                      = getConstant(romJson, "EXP_BYTE_GAS");
@@ -296,12 +295,14 @@ void Rom::loadProgram(Goldilocks &fr, json &romJson)
         if (l["inGAS"].is_string()) fr.fromString(line[i].inGAS, l["inGAS"]); else line[i].inGAS = fr.zero();
         if (l["inSTEP"].is_string()) fr.fromString(line[i].inSTEP, l["inSTEP"]); else line[i].inSTEP = fr.zero();
         if (l["inFREE"].is_string()) fr.fromString(line[i].inFREE, l["inFREE"]); else line[i].inFREE = fr.zero();
+        if (l["inFREE0"].is_string()) fr.fromString(line[i].inFREE0, l["inFREE0"]); else line[i].inFREE0 = fr.zero();
         if (l["inRR"].is_string()) fr.fromString(line[i].inRR, l["inRR"]); else line[i].inRR = fr.zero();
         if (l["inHASHPOS"].is_string()) fr.fromString(line[i].inHASHPOS, l["inHASHPOS"]); else line[i].inHASHPOS = fr.zero();
         if (l["inCntArith"].is_string()) fr.fromString(line[i].inCntArith, l["inCntArith"]); else line[i].inCntArith = fr.zero();
         if (l["inCntBinary"].is_string()) fr.fromString(line[i].inCntBinary, l["inCntBinary"]); else line[i].inCntBinary = fr.zero();
         if (l["inCntMemAlign"].is_string()) fr.fromString(line[i].inCntMemAlign, l["inCntMemAlign"]); else line[i].inCntMemAlign = fr.zero();
         if (l["inCntKeccakF"].is_string()) fr.fromString(line[i].inCntKeccakF, l["inCntKeccakF"]); else line[i].inCntKeccakF = fr.zero();
+        if (l["inCntSha256F"].is_string()) fr.fromString(line[i].inCntSha256F, l["inCntSha256F"]); else line[i].inCntSha256F = fr.zero();
         if (l["inCntPoseidonG"].is_string()) fr.fromString(line[i].inCntPoseidonG, l["inCntPoseidonG"]); else line[i].inCntPoseidonG = fr.zero();
         if (l["inCntPaddingPG"].is_string()) fr.fromString(line[i].inCntPaddingPG, l["inCntPaddingPG"]); else line[i].inCntPaddingPG = fr.zero();
         if (l["inROTL_C"].is_string()) fr.fromString(line[i].inROTL_C, l["inROTL_C"]); else line[i].inROTL_C = fr.zero();
