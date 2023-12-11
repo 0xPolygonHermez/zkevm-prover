@@ -23,6 +23,8 @@
 #include "sm/keccak_f/keccak_executor_test.hpp"
 #include "sm/storage/storage_executor.hpp"
 #include "sm/storage/storage_test.hpp"
+#include "sm/climb_key/climb_key_executor.hpp"
+#include "sm/climb_key/climb_key_test.hpp"
 #include "sm/binary/binary_test.hpp"
 #include "sm/mem_align/mem_align_test.hpp"
 #include "timer.hpp"
@@ -96,7 +98,7 @@ void runFileGenBatchProof(Goldilocks fr, Prover &prover, Config &config)
         }
     }
     TimerStopAndLog(INPUT_LOAD);
-    
+
     // Create full tracer based on fork ID
     proverRequest.CreateFullTracer();
     if (proverRequest.result != ZKR_SUCCESS)
@@ -171,7 +173,7 @@ void runFileProcessBatch(Goldilocks fr, Prover &prover, Config &config)
         }
     }
     TimerStopAndLog(INPUT_LOAD);
-    
+
     // Create full tracer based on fork ID
     proverRequest.CreateFullTracer();
     if (proverRequest.result != ZKR_SUCCESS)
@@ -270,7 +272,7 @@ void runFileExecute(Goldilocks fr, Prover &prover, Config &config)
         }
     }
     TimerStopAndLog(INPUT_LOAD);
-    
+
     // Create full tracer based on fork ID
     proverRequest.CreateFullTracer();
     if (proverRequest.result != ZKR_SUCCESS)
@@ -378,7 +380,7 @@ int main(int argc, char **argv)
     // Init goldilocks precomputed
     TimerStart(GOLDILOCKS_PRECOMPUTED_INIT);
     glp.init();
-    TimerStopAndLog(GOLDILOCKS_PRECOMPUTED_INIT);    
+    TimerStopAndLog(GOLDILOCKS_PRECOMPUTED_INIT);
 
     /* TOOLS */
 
@@ -429,7 +431,7 @@ int main(int argc, char **argv)
             TimerStopAndLog(DB_CACHE_LOAD);
         }
     }
-    
+
 #endif // DATABASE_USE_CACHE
 
     /* TESTS */
@@ -446,6 +448,12 @@ int main(int argc, char **argv)
     if (config.runStorageSMTest)
     {
         StorageSMTest(fr, poseidon, config);
+    }
+
+    // Test Storage SM
+    if (config.runClimbKeySMTest)
+    {
+        ClimbKeySMTest(fr, config);
     }
 
     // Test Binary SM
@@ -489,7 +497,7 @@ int main(int argc, char **argv)
     {
         CheckTreeTest(config);
     }
-    
+
     // Test Database performance
     if (config.runDatabasePerformanceTest)
     {
@@ -505,7 +513,7 @@ int main(int argc, char **argv)
     {
         KeyValueTreeTest();
     }
-    
+
     // Test SMT64
     if (config.runSMT64Test)
     {

@@ -240,6 +240,8 @@ message GetLatestStateRootResponse {
  * @param {proof_hash_counter}
  * @param {db_read_log} - list of db records read during the execution of the request
  * @param {result} - result code
+ * @param {sibling_left_child} - on delete not found, use children to hash intermediate node (to be sure that it's a intermediate)
+ * @param {sibling_right_child} - on delete not found, use children to hash intermediate node (to be sure that it's a intermediate)
  */
 message SetResponse {
     Fea old_root = 1;
@@ -255,6 +257,8 @@ message SetResponse {
     uint64 proof_hash_counter = 11;
     map<string, FeList> db_read_log = 12;
     ResultCode result = 13;
+    Fea sibling_left_child = 14;
+    Fea sibling_right_child = 15;
 }
 
 /**

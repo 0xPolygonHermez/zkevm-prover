@@ -26,5 +26,7 @@ string SmtSetResult::toString (Goldilocks &fr)
         }
         result += "\n";
     }
+    result += "siblingLeftChild=" + fea2string(fr, siblingLeftChild) + "\n";
+    result += "siblingRightChild=" + fea2string(fr, siblingRightChild) + "\n";
     return result;
 }

@@ -29,6 +29,7 @@ The configuration parameters can be of different uses:
 |`runSHA256ScriptGenerator`|tools|boolean|Runs a SHA-256 hash that generates a SHA-256 script json file to be used by the SHA-256 secondary state machine executor|false|RUN_SHA256_SCRIPT_GENERATOR|
 |`runKeccakTest`|test|boolean|Runs a Keccak-f hash test|false|RUN_KECCAK_TEST|
 |`runStorageSMTest`|test|boolean|Runs a storage state machine test|false|RUN_STORAGE_SM_TEST|
+|`runClimbKeySMTest`|test|boolean|Runs a climb key state machine test|false|RUN_CLIMBKEY_SM_TEST|
 |`runBinarySMTest`|test|boolean|Runs a binary state machine test|false|RUN_BINARY_SM_TEST|
 |`runMemAlignSMTest`|test|boolean|Runs a memory alignment state machine test|false|RUN_MEM_ALIGN_SM_TEST|
 |`runSHA256Test`|test|boolean|Runs a SHA-256 hash test|false|RUN_SHA256_TEST|

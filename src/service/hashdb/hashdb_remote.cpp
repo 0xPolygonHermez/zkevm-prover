@@ -28,10 +28,10 @@ HashDBRemote::HashDBRemote (Goldilocks &fr, const Config &config) : fr(fr), conf
 HashDBRemote::~HashDBRemote()
 {
     delete stub;
-    
+
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
     tms.print("HashDBRemote");
-#endif    
+#endif
 }
 zkresult HashDBRemote::getLatestStateRoot (Goldilocks::Element (&stateRoot)[4]){
 
@@ -114,6 +114,9 @@ zkresult HashDBRemote::set (const string &batchUUID, uint64_t block, uint64_t tx
         result->newValue.set_str(response.new_value(),16);
         result->mode = response.mode();
         result->proofHashCounter = response.proof_hash_counter();
+
+        grpc2fea(fr, response.sibling_left_child(), result->siblingLeftChild);
+        grpc2fea(fr, response.sibling_right_child(), result->siblingRightChild);
     }
 
     if (dbReadLog != NULL)
@@ -527,7 +530,7 @@ zkresult HashDBRemote::getFlushData(uint64_t flushId, uint64_t &storedFlushId, u
     }
 
     // Copy the nodes state root
-    nodesStateRoot = response.nodes_state_root();    
+    nodesStateRoot = response.nodes_state_root();
 
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
     tms.add("getFlushData", TimeDiff(t));
@@ -553,7 +556,7 @@ zkresult HashDBRemote::readTree (const Goldilocks::Element (&root)[4], vector<Ke
     }
     fea2grpc(fr, root, state_root);
     request.set_allocated_state_root(state_root);
-    
+
     // Prepare the keys
     for (uint64_t i=0; i<keyValues.size(); i++)
     {

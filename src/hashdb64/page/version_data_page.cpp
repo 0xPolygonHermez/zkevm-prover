@@ -41,9 +41,9 @@ zkresult VersionDataPage::Read (PageContext &ctx, const uint64_t pageNumber, con
         // Empty slot
         case 0:
         {
-            return ZKR_DB_KEY_NOT_FOUND;            
+            return ZKR_DB_KEY_NOT_FOUND;
         }
-        
+
         // Leaf node
         case 1:
         {
@@ -120,7 +120,7 @@ zkresult VersionDataPage::Write (PageContext &ctx, uint64_t &pageNumber, const u
             memcpy(&(page->versionDataEntry[index]), &value, sizeof(VersionDataEntry));
             page->versionDataEntry[index].controlAndFreePagesList |= (uint64_t(1) << 48);
 
-            return ZKR_SUCCESS;            
+            return ZKR_SUCCESS;
         }
 
         // Leaf node
@@ -171,7 +171,7 @@ zkresult VersionDataPage::Write (PageContext &ctx, uint64_t &pageNumber, const u
             zkr = Write(ctx, newNextPageNumber, key, keyBits, value, level + 1, headerPageNumber);
             // newNextPageNumber can be modified in the Write call
             page->versionDataEntry[index].controlAndFreePagesList = (uint64_t(0x2) << 48) | newNextPageNumber;
-            
+
             return zkr;
         }
 
@@ -204,7 +204,7 @@ void VersionDataPage::Print (PageContext &ctx, const uint64_t pageNumber, bool d
             // Empty slot
             case 0:
             {
-                continue;                
+                continue;
             }
 
             // Leaf node
@@ -216,7 +216,7 @@ void VersionDataPage::Print (PageContext &ctx, const uint64_t pageNumber, bool d
                 {
                     string rootBa;
                     rootBa.append((const char *)page->versionDataEntry[i].root, 32);
-                    zklog.info(prefix + 
+                    zklog.info(prefix +
                         "i=" + to_string(i) +
                         " key=" + to_string(page->versionDataEntry[i].key) +
                         " root=" + ba2string(rootBa) +
