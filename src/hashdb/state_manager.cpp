@@ -74,21 +74,12 @@ zkresult StateManager::setStateRoot (const string &batchUUID, uint64_t block, ui
         // Calculate the number of block slots to create
         uint64_t blocksToCreate = block - batchState.blockState.size() + 1;
 
-        // Create a block state to insert
+        // Create an empty block state to insert
         BlockState blockState;
-        blockState.oldStateRoot = stateRoot;
         
         // Insert the block state
         for (uint64_t i=0; i<blocksToCreate; i++)
         {
-            if ((i+1) == blocksToCreate)
-            {
-                blockState.currentStateRoot.clear();
-            }
-            else
-            {
-                blockState.currentStateRoot = stateRoot;
-            }
             batchState.blockState.emplace_back(blockState);
         }
 
@@ -98,6 +89,14 @@ zkresult StateManager::setStateRoot (const string &batchUUID, uint64_t block, ui
 
     // Get a reference to the block state
     BlockState &blockState = batchState.blockState[block];
+
+    // The first time we set a non-temporary old state root, assign it to the block old state root
+    if ( blockState.oldStateRoot.empty() &&
+         ((persistence == PERSISTENCE_DATABASE) || (persistence == PERSISTENCE_CACHE)) &&
+         bIsOldStateRoot )
+    {
+        blockState.oldStateRoot = stateRoot;
+    }
 
     // Create tx states, if needed
     if (tx >= blockState.txState.size())
@@ -627,10 +626,14 @@ zkresult StateManager::finishBlock (const string &batchUUID, const string &_stat
     TxState &txState = blockState.txState[blockState.currentTx];
     TxPersistenceState &txPersistenceState = txState.persistence[persistence];
 
+
+    // This is the happy path case: the last tx
     if (txPersistenceState.newStateRoot == stateRoot)
     {
-        // This is the expected case
+        blockState.currentStateRoot = stateRoot;
     }
+
+    // If it ended with the same state, activity can be discarded
     else if (txPersistenceState.oldStateRoot == stateRoot)
     {
         if (config.stateManagerPurge)
@@ -685,10 +688,12 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
     gettimeofday(&t, NULL);
 #endif
 
+    string newStateRoot = NormalizeToNFormat(_newStateRoot, 64);
+
     //TimerStart(STATE_MANAGER_FLUSH);
 
 #ifdef LOG_STATE_MANAGER
-    zklog.info("StateManager::flush() batchUUID=" + batchUUID + " newStateRoot=" + _newStateRoot + " persistence=" + persistence2string(_persistence));
+    zklog.info("StateManager::flush() batchUUID=" + batchUUID + " newStateRoot=" + newStateRoot + " persistence=" + persistence2string(_persistence));
 #endif
 
     // For every TX, track backwards from newStateRoot to oldStateRoot, marking sub-states as valid
@@ -723,38 +728,73 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
     }
     BatchState &batchState = it->second;
 
-    // For all blocks
-    /*
-    for (uint64_t block=0; block<batchState.blockState.size(); block++)
+    // Purge batch, i.e. delete unnecessary blocks
+    if (config.stateManagerPurge && !_newStateRoot.empty() && !batchState.blockState.empty())
     {
-        BlockState &blockState = batchState.blockState[block];
 
-        // For all txs, delete the ones that are not part of the final state root chain
-        if (config.stateManagerPurgeTxs && (_newStateRoot.size() > 0) && (_persistence == PERSISTENCE_DATABASE))
+        // Search for the first block that starts at the new state root
+        uint64_t firstBlock;
+        bool firstBlockFound = false;
+        for (firstBlock = 0; firstBlock < batchState.blockState.size(); firstBlock++)
         {
-            string newStateRoot = NormalizeToNFormat(_newStateRoot, 64);
-
-            int64_t tx = -1;
-            for (tx=batchState.txState.size()-1; tx>=0; tx--)
+            if (batchState.blockState[firstBlock].oldStateRoot == newStateRoot)
             {
-                if (batchState.txState[tx].persistence[PERSISTENCE_DATABASE].newStateRoot == newStateRoot)
+                firstBlockFound = true;
+                break;
+            }
+        }
+
+        // If we found it
+        if (firstBlockFound)
+        {
+            // Delete this block, and the next blocks
+            while (batchState.blockState.size() > firstBlock)
+            {
+                batchState.blockState.pop_back();
+            }
+        }
+
+        // Search for the last block that ends at the new state root
+        if (!batchState.blockState.empty())
+        {
+            int64_t lastBlock;
+            bool lastBlockFound = false;
+            for (lastBlock = (batchState.blockState.size() - 1); lastBlock >= 0; lastBlock--)
+            {
+                if (batchState.blockState[lastBlock].currentStateRoot == newStateRoot)
                 {
+                    lastBlockFound = true;
                     break;
                 }
             }
-            if (tx < 0)
+            if (!lastBlockFound)
             {
-                zklog.error("StateManager::flush() called with newStateRoot=" + newStateRoot + " but could not find it");
+                zklog.error("StateManager::flush() could not find a block state that ends with newStateRoot=" + newStateRoot + " batchUUID=" + batchUUID);
+                Unlock();
+                return ZKR_STATE_MANAGER;
             }
-            else
+
+            // Delete all previous blocks not belonging to the state root chain
+            string currentStateRoot = batchState.blockState[lastBlock].oldStateRoot;
+            for (int64_t block = lastBlock - 1; block >= 0; block--)
             {
-                while ((int64_t)batchState.txState.size() > (tx + 1))
+                if (batchState.blockState[block].currentStateRoot == currentStateRoot)
                 {
-                    batchState.txState.pop_back();
+                    currentStateRoot = batchState.blockState[block].oldStateRoot;
+                    continue;
                 }
+                batchState.blockState.erase(batchState.blockState.begin() + block);
+            }
+
+            // Check that we reached the expected batch old state root
+            if (batchState.blockState[0].oldStateRoot != batchState.oldStateRoot)
+            {
+                zklog.error("StateManager::flush() could not find a block state that starts with oldStateRoot=" + batchState.oldStateRoot + " batchUUID=" + batchUUID);
+                Unlock();
+                return ZKR_STATE_MANAGER;
             }
         }
-    }*/
+    }
 
     // For all blocks
     for (uint64_t block=0; block<batchState.blockState.size(); block++)
@@ -1047,7 +1087,7 @@ void StateManager::print (bool bDbContent)
 
         for (uint64_t block=0; block<batchState.blockState.size(); block++)
         {
-            zklog.info("    BLOCK=" + to_string(block));
+            zklog.info("    BLOCK=" + to_string(block) + "/" + to_string(batchState.blockState.size()));
             const BlockState &blockState = batchState.blockState[block];
 
             zklog.info("    oldStateRoot=" + blockState.oldStateRoot);
@@ -1056,11 +1096,12 @@ void StateManager::print (bool bDbContent)
 
             for (uint64_t tx=0; tx<blockState.txState.size(); tx++)
             {
-                zklog.info("      TX=" + to_string(tx));
+                zklog.info("      TX=" + to_string(tx) + "/" + to_string(blockState.txState.size()));
                 const TxState &txState = blockState.txState[tx];
 
                 for (uint64_t persistence = 0; persistence < PERSISTENCE_SIZE; persistence++)
                 {
+                    //if (persistence != PERSISTENCE_DATABASE) continue;
                     zklog.info("        persistence=" + to_string(persistence) + "=" + persistence2string((Persistence)persistence));
                     zklog.info("          oldStateRoot=" + txState.persistence[persistence].oldStateRoot);
                     zklog.info("          newStateRoot=" + txState.persistence[persistence].newStateRoot);
