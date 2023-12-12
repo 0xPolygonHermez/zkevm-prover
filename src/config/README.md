@@ -160,7 +160,6 @@ The configuration parameters can be of different uses:
 |`dbReadRetryDelay`|production|u64|Delay between Database retries, in microseconds|100*1000|DB_READ_RETRY_DELAY|
 |`stateManager`|production|boolean|Use State Manager to consolidate states before writing to Database|true|STATE_MANAGER|
 |`stateManagerPurge`|production|boolean|Purge State Manager sub-states|true|STATE_MANAGER_PURGE|
-|`stateManagerPurgeTxs`|production|boolean|Purge State Manager transactions|true|STATE_MANAGER_PURGE_TXS|
 |`cleanerPollingPeriod`|production|u64|Polling period of the cleaner thread that deletes completed Prover batches, in seconds|600|CLEANER_POLLING_PERIOD|
 |`requestsPersistence`|production|u64|Time that completed batches stay before being cleaned up|3600|REQUESTS_PERSISTENCE|
 |`maxExecutorThreads`|production|u64|Maximum number of GRPC Executor service threads|20|MAX_EXECUTOR_THREADS|

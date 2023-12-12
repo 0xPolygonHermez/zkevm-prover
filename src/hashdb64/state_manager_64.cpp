@@ -449,7 +449,7 @@ zkresult StateManager64::semiFlush(const string &batchUUID, const string &_state
 
 zkresult StateManager64::purgeBatch (BatchState64 &batchState, const string &newStateRoot)
 {
-    zkassert(config.stateManagerPurgeTxs == true);
+    zkassert(config.stateManagerPurge == true);
     zkassert(newStateRoot.size() > 0);
 
     // For all txs, delete the ones that are not part of the final state root chain
@@ -617,7 +617,7 @@ zkresult StateManager64::purge (const string &batchUUID, const string &_newState
 
     // Purge the batch from unneeded TXs
     zkresult zkr;
-    if (config.stateManagerPurgeTxs && (_newStateRoot.size() > 0) && (persistence == PERSISTENCE_DATABASE))
+    if (config.stateManagerPurge && (_newStateRoot.size() > 0) && (persistence == PERSISTENCE_DATABASE))
     {
         zkr = purgeBatch(batchState, newStateRoot);
         if (zkr != ZKR_SUCCESS)

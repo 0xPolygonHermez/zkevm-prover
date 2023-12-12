@@ -292,7 +292,6 @@ void Config::load(json &config)
     // State Manager
     ParseBool(config, "stateManager", "STATE_MANAGER", stateManager, true);
     ParseBool(config, "stateManagerPurge", "STATE_MANAGER_PURGE", stateManagerPurge, true);
-    ParseBool(config, "stateManagerPurgeTxs", "STATE_MANAGER_PURGE_TXS", stateManagerPurgeTxs, true);
 
     // Threads
     ParseU64(config, "cleanerPollingPeriod", "CLEANER_POLLING_PERIOD", cleanerPollingPeriod, 600);
@@ -502,7 +501,6 @@ void Config::print(void)
     zklog.info("    dbReadRetryDelay=" + to_string(dbReadRetryDelay));
     zklog.info("    stateManager=" + to_string(stateManager));
     zklog.info("    stateManagerPurge=" + to_string(stateManagerPurge));
-    zklog.info("    stateManagerPurgeTxs=" + to_string(stateManagerPurgeTxs));
     zklog.info("    cleanerPollingPeriod=" + to_string(cleanerPollingPeriod));
     zklog.info("    requestsPersistence=" + to_string(requestsPersistence));
     zklog.info("    maxExecutorThreads=" + to_string(maxExecutorThreads));

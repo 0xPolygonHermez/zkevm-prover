@@ -182,7 +182,6 @@ public:
     // State manager
     bool stateManager;
     bool stateManagerPurge;
-    bool stateManagerPurgeTxs;
 
     // Infrastructure
     uint64_t cleanerPollingPeriod;
