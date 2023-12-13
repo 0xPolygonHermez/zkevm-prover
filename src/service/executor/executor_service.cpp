@@ -441,8 +441,11 @@ using grpc::Status;
         " oldBatchNum=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum) +
         " chainId=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.chainID) +
         " forkId=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID) +
-            (((proverRequest.input.publicInputsExtended.publicInputs.forkID >= 5) && config.useMainExecC) ? " C" :
-             ((proverRequest.input.publicInputsExtended.publicInputs.forkID >= 4) && config.useMainExecGenerated) ? " generated" : " native") +
+            (((proverRequest.input.publicInputsExtended.publicInputs.forkID >= 7) && config.useMainExecC) ? " C" :
+#ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
+             ((proverRequest.input.publicInputsExtended.publicInputs.forkID >= 4) && config.useMainExecGenerated) ? " generated" :
+#endif
+             " native") +
         " globalExitRoot=" + proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot.get_str(16) +
         " timestamp=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.timestamp) +
         " from=" + proverRequest.input.from +
@@ -1234,8 +1237,11 @@ using grpc::Status;
         " oldBatchNum=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum) +
         " chainId=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.chainID) +
         " forkId=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.forkID) +
-            (((proverRequest.input.publicInputsExtended.publicInputs.forkID >= 5) && config.useMainExecC) ? " C" :
-             ((proverRequest.input.publicInputsExtended.publicInputs.forkID >= 4) && config.useMainExecGenerated) ? " generated" : " native") +
+            (((proverRequest.input.publicInputsExtended.publicInputs.forkID >= 7) && config.useMainExecC) ? " C" :
+#ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
+             ((proverRequest.input.publicInputsExtended.publicInputs.forkID >= 4) && config.useMainExecGenerated) ? " generated" :
+#endif
+             " native") +
         " globalExitRoot=" + proverRequest.input.publicInputsExtended.publicInputs.globalExitRoot.get_str(16) +
         " timestampLimit=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.timestampLimit) +
         " from=" + proverRequest.input.from +
