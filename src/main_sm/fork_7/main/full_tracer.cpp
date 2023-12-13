@@ -853,21 +853,26 @@ zkresult FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
     ResponseV2 response;
     zkresult zkr;
 
-
-    // Get if this is a new L2 block
+    // Create new block if:
+    // - it is a change L2 block tx
+    // - it is forced batch and the currentTx is 1
+    zkr = getVarFromCtx(ctx, true, ctx.rom.currentTxOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onProcessTx() failed calling getVarFromCtx(ctx.rom.currentTxOffset)");
+        return zkr;
+    }
+    uint64_t currentTx = auxScalar.get_ui();
     zkr = getVarFromCtx(ctx, false, ctx.rom.isChangeL2BlockTxOffset, auxScalar);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("FullTracer::onProcessTx() failed calling getVarFromCtx(ctx.rom.isChangeL2BlockTxOffset)");
         return zkr;
     }
-    if (auxScalar.get_ui() || (isForced && (txIndex == 0)))
+    if (auxScalar.get_ui() || (isForced && (currentTx == 1)))
     {
         onStartBlock(ctx);
-        if (!isForced)
-        {
-            return ZKR_SUCCESS;
-        }
+        return ZKR_SUCCESS;
     }
 
     /* Fill context object */

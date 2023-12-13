@@ -76,6 +76,7 @@ void Rom::load(Goldilocks &fr, json &romJson)
         isChangeL2BlockTxOffset      = getMemoryOffset("isChangeL2BlockTx");
         txIndexOffset                = getMemoryOffset("txIndex");
         l2TxHashOffset               = getMemoryOffset("l2TxHash");
+        currentTxOffset              = getMemoryOffset("currentTx");
     }
 
     // Load ROM integer constants

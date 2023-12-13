@@ -72,6 +72,7 @@ public:
     uint64_t isChangeL2BlockTxOffset;
     uint64_t txIndexOffset;
     uint64_t l2TxHashOffset;
+    uint64_t currentTxOffset;
 
     /* Constants */
     RomConstants constants;
@@ -125,7 +126,8 @@ public:
             blockHashL1InfoTreeOffset(0),
             isChangeL2BlockTxOffset(0),
             txIndexOffset(0),
-            l2TxHashOffset(0)
+            l2TxHashOffset(0),
+            currentTxOffset(0)
             { };
 
     /* Destructor */
