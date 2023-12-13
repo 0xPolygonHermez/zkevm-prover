@@ -50,12 +50,19 @@ zkresult StateManager::setStateRoot (const string &batchUUID, uint64_t block, ui
             return ZKR_STATE_MANAGER;
         }
         BatchState batchState;
-        batchState.oldStateRoot = stateRoot;
         state[batchUUID] = batchState;
         it = state.find(batchUUID);
         zkassert(it != state.end());
     }
     BatchState &batchState = it->second;
+
+    // The first time we set a non-temporary old state root, assign it to the batch old state root
+    if ( batchState.oldStateRoot.empty() &&
+         ((persistence == PERSISTENCE_DATABASE) || (persistence == PERSISTENCE_CACHE)) &&
+         bIsOldStateRoot )
+    {
+        batchState.oldStateRoot = stateRoot;
+    }
 
     // Set the current state root
     batchState.currentStateRoot = stateRoot;
