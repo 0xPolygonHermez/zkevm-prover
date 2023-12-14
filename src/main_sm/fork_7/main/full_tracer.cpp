@@ -1415,14 +1415,6 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     zkresult zkr;
     ResponseV2 &response = currentBlock.responses[txIndex];
 
-    if (response.full_trace.steps.size() == 0)
-    {
-#ifdef LOG_TIME_STATISTICS
-        tms.add("onFinishTx", TimeDiff(t));
-#endif
-        return ZKR_SUCCESS;
-    }
-
     // Set from address
     mpz_class fromScalar;
     zkr = getVarFromCtx(ctx, true, ctx.rom.txSrcOriginAddrOffset, fromScalar);
