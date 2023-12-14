@@ -13,6 +13,8 @@
 #include "timer.hpp"
 #include "zklog.hpp"
 
+//#define LOG_FULL_TRACER
+
 using namespace std;
 
 namespace fork_7
@@ -658,7 +660,7 @@ zkresult FullTracer::onStoreLog (ContextC &ctxc)
     it->second.index = indexLog;
 */
 #ifdef LOG_FULL_TRACER
-    zklog.info("FullTracer::onStoreLog() CTX=" + to_string(CTX) + " indexLog=" + to_string(indexLog) + " isTopic=" + to_string(isTopic) + " data=" + dataString);
+    //zklog.info("FullTracer::onStoreLog() CTX=" + to_string(CTX) + " indexLog=" + to_string(indexLog) + " isTopic=" + to_string(isTopic) + " data=" + dataString);
 #endif
 #ifdef LOG_TIME_STATISTICS
     tms.add("onStoreLog", TimeDiff(t));
@@ -1279,7 +1281,7 @@ zkresult FullTracer::onProcessTx (ContextC &ctxc)
     lastError = "";
 
 #ifdef LOG_FULL_TRACER
-    zklog.info("FullTracer::onProcessTx() finalTrace.responses.size()=" + to_string(finalTrace.responses.size()));
+    //zklog.info("FullTracer::onProcessTx() finalTrace.responses.size()=" + to_string(finalTrace.responses.size()));
 #endif
 #ifdef LOG_TIME_STATISTICS
     tms.add("onProcessTx", TimeDiff(t));
@@ -1761,7 +1763,7 @@ zkresult FullTracer::onFinishTx (ContextC &ctxc)
     ctxc.pHashDB->finishTx(ctxc.proverRequest.uuid, response.state_root, ctxc.proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);
 
 #ifdef LOG_FULL_TRACER
-    zklog.info("FullTracer::onFinishTx() txCount=" + to_string(txCount) + " finalTrace.responses.size()=" + to_string(finalTrace.responses.size()) + " create_address=" + response.create_address + " state_root=" + response.state_root);
+    //zklog.info("FullTracer::onFinishTx() txCount=" + to_string(txCount) + " finalTrace.responses.size()=" + to_string(finalTrace.responses.size()) + " create_address=" + response.create_address + " state_root=" + response.state_root);
 #endif
 #ifdef LOG_TIME_STATISTICS
     tms.add("onFinishTx", TimeDiff(t));

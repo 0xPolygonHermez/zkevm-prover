@@ -70,6 +70,7 @@ The configuration parameters can be of different uses:
 |`executorClientHost`|test|string|Executor client host it connects to|"127.0.0.1"|EXECUTOR_CLIENT_HOST|
 |`executorClientLoops`|test|u64|Executor client iterations|1|EXECUTOR_CLIENT_LOOPS|
 |`executorClientCheckNewStateRoot`|test|bool|Executor client checks the new state root returned in the response using CheckTree|false|EXECUTOR_CLIENT_CHECK_NEW_STATE_ROOT|
+|`executorClientResetDB`|test|bool|Executor client resets the database before processing a batch; it only works in debug mode|false|EXECUTOR_CLIENT_RESET_DB|
 |**`hashDBServerPort`**|production|u16|HashDB server GRPC port|50061|HASHDB_SERVER_PORT|
 |**`hashDBURL`**|production|string|URL used by the Executor to connect to the HashDB service, e.g. "127.0.0.1:50061"; if set to "local", no GRPC is used and it connects to the local HashDB interface using direct calls to the HashDB classes; if your zkProver instance does not need to use a remote HashDB service for a good reason (e.g. not having direct access to the database) then even if it exports this service to other clients we recommend to use "local" since the performance is better|"local"|HASHDB_URL|
 |`hashDB64`|test|boolean|Use HashDB64 new database (do not use in  production, under development)|false|HASHDB64|

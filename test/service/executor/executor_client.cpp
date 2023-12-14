@@ -153,7 +153,11 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
         ::executor::v1::ProcessBatchResponse processBatchResponse;
         for (uint64_t i=0; i<config.executorClientLoops; i++)
         {
-            if (i == 1)
+            if (config.executorClientResetDB)
+            {
+                pHashDB->resetDB();
+            }
+            else if (i == 1)
             {
                 request.clear_db();
                 request.clear_contracts_bytecode();
@@ -276,7 +280,11 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
         ::executor::v1::ProcessBatchResponseV2 processBatchResponse;
         for (uint64_t i=0; i<config.executorClientLoops; i++)
         {
-            if (i == 1)
+            if (config.executorClientResetDB)
+            {
+                pHashDB->resetDB();
+            }
+            else if (i == 1)
             {
                 request.clear_db();
                 request.clear_contracts_bytecode();

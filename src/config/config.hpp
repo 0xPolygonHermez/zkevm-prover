@@ -81,6 +81,7 @@ public:
     string executorClientHost;
     uint64_t executorClientLoops;
     bool executorClientCheckNewStateRoot;
+    bool executorClientResetDB;
 
     // HashDB service
     uint16_t hashDBServerPort;

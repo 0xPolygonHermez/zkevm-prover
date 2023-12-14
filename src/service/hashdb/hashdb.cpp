@@ -659,12 +659,11 @@ zkresult HashDB::resetDB (void)
     zkresult result;
     if (config.hashDB64 && config.stateManager)
     {
-        return db64.resetDB();
+        result = db64.resetDB();
     }
     else
     {
-        zklog.error("HashDB::resetDB() called with invalid configuration");
-        result = ZKR_STATE_MANAGER;
+        result = db.resetDB();
     }
 
 #ifdef LOG_TIME_STATISTICS_HASHDB

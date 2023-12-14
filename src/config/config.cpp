@@ -194,6 +194,7 @@ void Config::load(json &config)
     ParseString(config, "executorClientHost", "EXECUTOR_CLIENT_HOST", executorClientHost, "127.0.0.1");
     ParseU64(config, "executorClientLoops", "EXECUTOR_CLIENT_LOOPS", executorClientLoops, 1);
     ParseBool(config, "executorClientCheckNewStateRoot", "EXECUTOR_CLIENT_CHECK_NEW_STATE_ROOT", executorClientCheckNewStateRoot, false);
+    ParseBool(config, "executorClientResetDB", "EXECUTOR_CLIENT_RESET_DB", executorClientResetDB, false);
     ParseU16(config, "hashDBServerPort", "HASHDB_SERVER_PORT", hashDBServerPort, 50061);
     ParseString(config, "hashDBURL", "HASHDB_URL", hashDBURL, "local");
     //ParseBool(config, "hashDB64", "HASHDB64", hashDB64, false);
@@ -436,6 +437,7 @@ void Config::print(void)
     zklog.info("    executorClientHost=" + executorClientHost);
     zklog.info("    executorClientLoops=" + to_string(executorClientLoops));
     zklog.info("    executorClientCheckNewStateRoot=" + to_string(executorClientCheckNewStateRoot));
+    zklog.info("    executorClientResetDB=" + to_string(executorClientResetDB));
     zklog.info("    hashDBServerPort=" + to_string(hashDBServerPort));
     zklog.info("    hashDBURL=" + hashDBURL);
     zklog.info("    hashDB64=" + to_string(hashDB64));
