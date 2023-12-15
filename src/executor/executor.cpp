@@ -313,30 +313,55 @@ void* ArithThread (void* arg)
     return NULL;
 }
 
-void* PoseidonThread (void* arg)
+void* PaddingPGThread (void* arg)
 {
     // Get the context
     ExecutorContext * pExecutorContext = (ExecutorContext *)arg;
 
     // Execute the Padding PG State Machine
     TimerStart(PADDING_PG_SM_EXECUTE_THREAD);
-    pExecutorContext->pExecutor->paddingPGExecutor.execute(pExecutorContext->pRequired->PaddingPG, pExecutorContext->pCommitPols->PaddingPG, pExecutorContext->pRequired->PoseidonG);
+    pExecutorContext->pExecutor->paddingPGExecutor.execute(pExecutorContext->pRequired->PaddingPG, pExecutorContext->pCommitPols->PaddingPG, pExecutorContext->pRequired->PoseidonGFromPG);
     TimerStopAndLog(PADDING_PG_SM_EXECUTE_THREAD);
+
+    return NULL;
+}
+
+void* StorageThread (void* arg)
+{
+    // Get the context
+    ExecutorContext * pExecutorContext = (ExecutorContext *)arg;
 
     // Execute the Storage State Machine
     TimerStart(STORAGE_SM_EXECUTE_THREAD);
-    pExecutorContext->pExecutor->storageExecutor.execute(pExecutorContext->pRequired->Storage, pExecutorContext->pCommitPols->Storage, pExecutorContext->pRequired->PoseidonG, pExecutorContext->pRequired->ClimbKey);
+    pExecutorContext->pExecutor->storageExecutor.execute(pExecutorContext->pRequired->Storage, pExecutorContext->pCommitPols->Storage, pExecutorContext->pRequired->PoseidonGFromST, pExecutorContext->pRequired->ClimbKey);
     TimerStopAndLog(STORAGE_SM_EXECUTE_THREAD);
 
-    // Execute the Poseidon G State Machine
-    TimerStart(POSEIDON_G_SM_EXECUTE_THREAD);
-    pExecutorContext->pExecutor->poseidonGExecutor.execute(pExecutorContext->pRequired->PoseidonG, pExecutorContext->pCommitPols->PoseidonG);
-    TimerStopAndLog(POSEIDON_G_SM_EXECUTE_THREAD);
+    return NULL;
+}
+
+void* ClimbKeyThread (void* arg)
+{
+    // Get the context
+    ExecutorContext * pExecutorContext = (ExecutorContext *)arg;
 
     // Execute the ClimbKey State Machine
     TimerStart(CLIMB_KEY_SM_EXECUTE_THREAD);
     pExecutorContext->pExecutor->climbKeyExecutor.execute(pExecutorContext->pRequired->ClimbKey, pExecutorContext->pCommitPols->ClimbKey);
     TimerStopAndLog(CLIMB_KEY_SM_EXECUTE_THREAD);
+
+    return NULL;
+}
+
+void* PoseidonThread (void* arg)
+{
+    // Get the context
+    ExecutorContext * pExecutorContext = (ExecutorContext *)arg;
+
+    // Execute the Poseidon G State Machine
+    TimerStart(POSEIDON_G_SM_EXECUTE_THREAD);
+    pExecutorContext->pExecutor->poseidonGExecutor.execute(pExecutorContext->pRequired->PoseidonG, pExecutorContext->pRequired->PoseidonGFromPG, pExecutorContext->pRequired->PoseidonGFromST, pExecutorContext->pCommitPols->PoseidonG);
+    TimerStopAndLog(POSEIDON_G_SM_EXECUTE_THREAD);
+
     return NULL;
 }
 
@@ -441,12 +466,12 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
 
         // Execute the Padding PG State Machine
         TimerStart(PADDING_PG_SM_EXECUTE);
-        paddingPGExecutor.execute(required.PaddingPG, commitPols.PaddingPG, required.PoseidonG);
+        paddingPGExecutor.execute(required.PaddingPG, commitPols.PaddingPG, required.PoseidonGFromPG);
         TimerStopAndLog(PADDING_PG_SM_EXECUTE);
 
         // Execute the Storage State Machine
         TimerStart(STORAGE_SM_EXECUTE);
-        storageExecutor.execute(required.Storage, commitPols.Storage, required.PoseidonG, required.ClimbKey);
+        storageExecutor.execute(required.Storage, commitPols.Storage, required.PoseidonGFromST, required.ClimbKey);
         TimerStopAndLog(STORAGE_SM_EXECUTE);
 
         // Execute the Arith State Machine
@@ -511,7 +536,7 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
 
         // Execute the PoseidonG State Machine
         TimerStart(POSEIDON_G_SM_EXECUTE);
-        poseidonGExecutor.execute(required.PoseidonG, commitPols.PoseidonG);
+        poseidonGExecutor.execute(required.PoseidonG, required.PoseidonGFromPG, required.PoseidonGFromST, commitPols.PoseidonG);
         TimerStopAndLog(POSEIDON_G_SM_EXECUTE);
 
         // Execute the ClimbKey State Machine
@@ -557,9 +582,13 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
             return;
         }
 
-        // Execute the Padding PG, Storage and Poseidon G State Machines
-        pthread_t poseidonThread;
-        pthread_create(&poseidonThread, NULL, PoseidonThread, &executorContext);
+        // Execute the Storage State Machines
+        pthread_t storageThread;
+        pthread_create(&storageThread, NULL, StorageThread, &executorContext);
+
+        // Execute the Padding PG
+        pthread_t paddingPGThread;
+        pthread_create(&paddingPGThread, NULL, PaddingPGThread, &executorContext);
 
         // Execute the Arith State Machine, in parallel
         pthread_t arithThread;
@@ -585,6 +614,20 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         pthread_t sha256Thread;
         pthread_create(&sha256Thread, NULL, Sha256Thread, &executorContext);
 
+        // Wait for the Storage SM threads
+        pthread_join(storageThread, NULL);
+
+        // Execute the ClimKey State Machines (now that Storage is done)
+        pthread_t climbKeyThread;
+        pthread_create(&climbKeyThread, NULL, ClimbKeyThread, &executorContext);
+
+        // Wait for the PaddingPG SM threads
+        pthread_join(paddingPGThread, NULL);
+
+        // Execute the PoseidonG State Machine (now that Storage and PaddingPG are done)
+        pthread_t poseidonThread;
+        pthread_create(&poseidonThread, NULL, PoseidonThread, &executorContext);
+
         // Wait for the parallel SM threads
         pthread_join(binaryThread, NULL);
         pthread_join(memAlignThread, NULL);
@@ -593,6 +636,7 @@ void Executor::execute (ProverRequest &proverRequest, PROVER_FORK_NAMESPACE::Com
         pthread_join(poseidonThread, NULL);
         pthread_join(keccakThread, NULL);
         pthread_join(sha256Thread, NULL);
+        pthread_join(climbKeyThread, NULL);
 
     }
 }

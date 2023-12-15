@@ -41,6 +41,8 @@ public:
     vector<Sha256FExecutorInput> Sha256F;
     vector<PaddingPGExecutorInput> PaddingPG;
     vector<array<Goldilocks::Element, 17>> PoseidonG; // The 17th fe is the permutation
+    vector<array<Goldilocks::Element, 17>> PoseidonGFromPG; // The 17th fe is the permutation
+    vector<array<Goldilocks::Element, 17>> PoseidonGFromST; // The 17th fe is the permutation
     vector<ClimbKeyAction> ClimbKey; // The 17th fe is the permutation
     vector<MemAlignAction> MemAlign;
 };
