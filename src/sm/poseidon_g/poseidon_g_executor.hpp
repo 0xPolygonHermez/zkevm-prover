@@ -49,7 +49,10 @@ public:
             }
         }
     };
-    void execute (vector<array<Goldilocks::Element, 17>> &input, PROVER_FORK_NAMESPACE::PoseidonGCommitPols &pols);
+    void execute (  vector<array<Goldilocks::Element, 17>> &inputMain,
+                    vector<array<Goldilocks::Element, 17>> &inputPadding, 
+                    vector<array<Goldilocks::Element, 17>> &inputStorage, 
+                    PoseidonGCommitPols &pols);
     Goldilocks::Element pow7(Goldilocks::Element &a);
 };
 
