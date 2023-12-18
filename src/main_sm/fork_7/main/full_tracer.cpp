@@ -67,10 +67,30 @@ set<string> responseErrors = {
     "intrinsic_invalid_balance",
     "intrinsic_invalid_batch_gas_limit",
     "intrinsic_invalid_sender_code",
-    "invalid_change_l2_block",
+    "invalid_change_l2_block_limit_timestamp",
+    "invalid_change_l2_block_min_timestamp",
     "invalidRLP",
     "invalidDecodeChangeL2Block",
     "invalidNotFirstTxChangeL2Block" };
+    
+set<string> invalidBatchErrors = {
+    "OOCS",
+    "OOCK",
+    "OOCB",
+    "OOCM",
+    "OOCA",
+    "OOCPA",
+    "OOCPO",
+    "OOCSH",
+    "invalid_change_l2_block_limit_timestamp",
+    "invalid_change_l2_block_min_timestamp",
+    "invalidRLP",
+    "invalidDecodeChangeL2Block",
+    "invalidNotFirstTxChangeL2Block" };
+    
+set<string> changeBlockErrors = {
+    "invalid_change_l2_block_limit_timestamp",
+    "invalid_change_l2_block_min_timestamp" };
     
 set<string> oocErrors = {
     "OOCS",
@@ -335,6 +355,19 @@ zkresult FullTracer::handleEvent(Context &ctx, const RomCommand &cmd)
         }
         return onFinishTx(ctx, cmd);
     }
+    if (cmd.params[0]->varName == "onStartBlock")
+    {
+        return onStartBlock(ctx);
+    }
+    if (cmd.params[0]->varName == "onFinishBlock")
+    {
+        if ( (oocErrors.find(lastError)==oocErrors.end()) && (ctx.totalTransferredBalance != 0) )
+        {
+            zklog.error("FullTracer::handleEvent(onFinishBlock) found ctx.totalTransferredBalance=" + ctx.totalTransferredBalance.get_str(10));
+            return ZKR_SM_MAIN_BALANCE_MISMATCH;
+        }
+        return onFinishBlock(ctx);
+    }
     if (cmd.params[0]->varName == "onStartBatch")
     {
         return onStartBatch(ctx, cmd);
@@ -381,19 +414,60 @@ zkresult FullTracer::onError(Context &ctx, const RomCommand &cmd)
     lastError = cmd.params[1]->varName;
     lastErrorOpcode = numberOfOpcodesInThisTx;
 
+    // Set invalid_batch flag if error invalidates the full batch
+    // Continue function to set the error when it has been triggered
+    if (invalidBatchErrors.find(lastError) != invalidBatchErrors.end())
+    {
+        finalTrace.invalid_batch = true;
+        finalTrace.error = lastError;
+
+        // Finish setting errors if there is no block processed
+        if (!currentBlock.initialized)
+        {
+#ifdef LOG_FULL_TRACER_ON_ERROR
+            zklog.info("FullTracer::onError() error=" + lastError + " zkPC=" + to_string(*ctx.pZKPC) + " rom=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr));
+#endif
+#ifdef LOG_TIME_STATISTICS
+            tms.add("onError", TimeDiff(t));
+#endif
+            return ZKR_SUCCESS;
+        }
+    }
+
+    // Set error at block level if error is triggered by the block transaction
+    if (changeBlockErrors.find(lastError) != changeBlockErrors.end())
+    {
+        currentBlock.error = lastError;
+#ifdef LOG_FULL_TRACER_ON_ERROR
+        zklog.info("FullTracer::onError() error=" + lastError + " zkPC=" + to_string(*ctx.pZKPC) + " rom=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr));
+#endif
+#ifdef LOG_TIME_STATISTICS
+        tms.add("onError", TimeDiff(t));
+#endif
+        return ZKR_SUCCESS;
+    }
+
+    // Set error at block level if error is an invalid batch and there is no transaction processed in that block
+    if ((invalidBatchErrors.find(lastError) != invalidBatchErrors.end()) && currentBlock.responses.empty())
+    {
+        currentBlock.error = lastError;
+#ifdef LOG_FULL_TRACER_ON_ERROR
+        zklog.info("FullTracer::onError() error=" + lastError + " zkPC=" + to_string(*ctx.pZKPC) + " rom=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr));
+#endif
+#ifdef LOG_TIME_STATISTICS
+        tms.add("onError", TimeDiff(t));
+#endif
+        return ZKR_SUCCESS;
+    }
+
     // Intrinsic error should be set at tx level (not opcode)
+    // Error triggered with no previous opcode set at tx level
     if ( (responseErrors.find(lastError) != responseErrors.end()) ||
-         (full_trace.size() == 0) )
+         full_trace.empty() )
     {
         if (currentBlock.responses.size() > txIndex)
         {
             currentBlock.responses[txIndex].error = lastError;
-        }
-        else if (currentBlock.responses.size() == txIndex)
-        {
-            ResponseV2 response;
-            response.error = lastError;
-            currentBlock.responses.push_back(response);
         }
         else
         {
@@ -674,23 +748,49 @@ zkresult FullTracer::onStoreLog (ContextC &ctxc)
 zkresult FullTracer::onStartBlock (Context &ctx)
 {
 #ifdef LOG_FULL_TRACER
-    zklog.info("FullTracer::onStartBlock()");
+    //zklog.info("FullTracer::onStartBlock()");
 #endif
 
     zkresult zkr;
     mpz_class auxScalar;
 
-    // If it's not the frist change L2 block transaction, we must finish previous block
-    if (currentBlock.initialized)
+    // Get block number
+    // When this event is triggered, the block number is not updated yet, so we must add 1
+    zkr = getVarFromCtx(ctx, true, ctx.rom.blockNumOffset, auxScalar);
+    if (zkr != ZKR_SUCCESS)
     {
-        onFinishBlock(ctx);
+        zklog.error("FullTracer::onStartBlock() failed calling getVarFromCtx(ctx.rom.blockNumOffset)");
+        return zkr;
     }
+    if (auxScalar >= ScalarMask64)
+    {
+        zklog.error("FullTracer::onStartBlock() called getVarFromCtx(ctx.rom.blockNumOffset) but got a too high value=" + auxScalar.get_str(10));
+        return zkr;
+    }
+    uint64_t blockNumber = auxScalar.get_ui();
+
+    // if this.options.skipFirstChangeL2Block is not active
+    if (!ctx.proverRequest.input.bSkipFirstChangeL2Block)
+    {
+        blockNumber++;
+    }
+
+    currentBlock.block_number = blockNumber;
+
+#ifdef LOG_FULL_TRACER
+    zklog.info("FullTracer::onStartBlock() block=" + to_string(currentBlock.block_number));
+#endif
 
     // Get sequencer address
     zkr = getVarFromCtx(ctx, true, ctx.rom.sequencerAddrOffset, auxScalar);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("FullTracer::onStartBlock() failed calling getVarFromCtx(ctx.rom.sequencerAddrOffset)");
+        return zkr;
+    }
+    if (auxScalar > ScalarMask160)
+    {
+        zklog.error("FullTracer::onStartBlock() called getVarFromCtx(ctx.rom.sequencerAddrOffset) but got a too high value=" + auxScalar.get_str(10));
         return zkr;
     }
     currentBlock.coinbase = NormalizeTo0xNFormat(auxScalar.get_str(16), 40);
@@ -701,8 +801,20 @@ zkresult FullTracer::onStartBlock (Context &ctx)
     // Clear transactions
     currentBlock.responses.clear();
 
+    // Clear error
+    currentBlock.error.clear();
+
     // Mark as initialized
     currentBlock.initialized = true;
+    
+    // Call startBlock() with the current state root
+    if (!fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]))
+    {
+        zklog.error("FullTracer::onStartBlock() failed calling fea2scalar(SR)");
+        return ZKR_SM_MAIN_FEA2SCALAR;
+    }
+    string state_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
+    ctx.pHashDB->startBlock(ctx.proverRequest.uuid, state_root, ctx.proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);
 
     return ZKR_SUCCESS;
 }
@@ -714,7 +826,7 @@ zkresult FullTracer::onStartBlock (Context &ctx)
 zkresult FullTracer::onFinishBlock (Context &ctx)
 {
 #ifdef LOG_FULL_TRACER
-    zklog.info("FullTracer::onFinishBlock()");
+    //zklog.info("FullTracer::onFinishBlock()");
 #endif
 
     mpz_class auxScalar;
@@ -826,20 +938,23 @@ zkresult FullTracer::onFinishBlock (Context &ctx)
 
     // Append block to final trace
     finalTrace.block_responses.emplace_back(currentBlock);
-
-    // Reset tx Count
-    txIndex = 0;
+    currentBlock.initialized = false;
 
     // Reset logs
     logs.clear();
     
-    // Call finishTx() with the current state root
+    // Call finishBlock() with the current state root
     if (!fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]))
     {
         zklog.error("FullTracer::onFinishBlock() failed calling fea2scalar(SR)");
         return ZKR_SM_MAIN_FEA2SCALAR;
     }
     string state_root = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
+
+#ifdef LOG_FULL_TRACER
+    zklog.info("FullTracer::onFinishBlock() block=" + to_string(currentBlock.block_number));
+#endif
+
     ctx.pHashDB->finishBlock(ctx.proverRequest.uuid, state_root, ctx.proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);
 
     return ZKR_SUCCESS;
@@ -858,24 +973,18 @@ zkresult FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
     // Create new block if:
     // - it is a change L2 block tx
     // - it is forced batch and the currentTx is 1
-    zkr = getVarFromCtx(ctx, true, ctx.rom.currentTxOffset, auxScalar);
+    zkr = getVarFromCtx(ctx, true, ctx.rom.txIndexOffset, auxScalar);
     if (zkr != ZKR_SUCCESS)
     {
-        zklog.error("FullTracer::onProcessTx() failed calling getVarFromCtx(ctx.rom.currentTxOffset)");
+        zklog.error("FullTracer::onProcessTx() failed calling getVarFromCtx(ctx.rom.txIndexOffset)");
         return zkr;
     }
-    uint64_t currentTx = auxScalar.get_ui();
-    zkr = getVarFromCtx(ctx, false, ctx.rom.isChangeL2BlockTxOffset, auxScalar);
-    if (zkr != ZKR_SUCCESS)
+    if (auxScalar > ScalarMask64)
     {
-        zklog.error("FullTracer::onProcessTx() failed calling getVarFromCtx(ctx.rom.isChangeL2BlockTxOffset)");
+        zklog.error("FullTracer::onProcessTx() called getVarFromCtx(ctx.rom.txIndexOffset) but got a too high value=" + auxScalar.get_str(10));
         return zkr;
     }
-    if (auxScalar.get_ui() || (isForced && (currentTx == 1)))
-    {
-        onStartBlock(ctx);
-        return ZKR_SUCCESS;
-    }
+    txIndex = auxScalar.get_ui();
 
     /* Fill context object */
 
@@ -986,13 +1095,7 @@ zkresult FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
     response.full_trace.context.chainId = chainId;
 
     // TX index
-    zkr = getVarFromCtx(ctx, true, ctx.rom.txIndexOffset, auxScalar);
-    if (zkr != ZKR_SUCCESS)
-    {
-        zklog.error("FullTracer::onProcessTx() failed calling getVarFromCtx(ctx.rom.txIndexOffset)");
-        return zkr;
-    }
-    response.full_trace.context.txIndex = auxScalar.get_ui();
+    response.full_trace.context.txIndex = txIndex;
 
     // Call data
     uint64_t CTX = fr.toU64(ctx.pols.CTX[*ctx.pStep]);
@@ -1088,35 +1191,10 @@ zkresult FullTracer::onProcessTx (Context &ctx, const RomCommand &cmd)
     }
     response.effective_percentage = auxScalar.get_ui();
 
-    // create block object if flag skipFirstChangeL2Block is active and this.currentBlock has no properties
+    // Create block object if flag skipFirstChangeL2Block is active and this.currentBlock has no properties
     if (ctx.proverRequest.input.bSkipFirstChangeL2Block && !currentBlock.initialized)
     {
-        // Get parent hash
-        zkr = getVarFromCtx(ctx, true, ctx.rom.previousBlockHashOffset, auxScalar);
-        if (zkr != ZKR_SUCCESS)
-        {
-            zklog.error("FullTracer::onProcessTx() failed calling getVarFromCtx(ctx.rom.previousBlockHashOffset)");
-            return zkr;
-        }
-        currentBlock.parent_hash = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
-
-        // Get sequencer address
-        zkr = getVarFromCtx(ctx, true, ctx.rom.sequencerAddrOffset, auxScalar);
-        if (zkr != ZKR_SUCCESS)
-        {
-            zklog.error("FullTracer::onProcessTx() failed calling getVarFromCtx(ctx.rom.sequencerAddrOffset)");
-            return zkr;
-        }
-        currentBlock.coinbase = NormalizeTo0xNFormat(auxScalar.get_str(16), 40);
-
-        // Get gas limit
-        currentBlock.gas_limit = ctx.rom.constants.BLOCK_GAS_LIMIT;
-
-        // Clear transactions
-        currentBlock.responses.clear();
-
-        // Mark as initialized
-        currentBlock.initialized = true;
+        onStartBlock(ctx);
     }
 
     // Create current tx object
@@ -1412,6 +1490,20 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
 #ifdef LOG_TIME_STATISTICS
     gettimeofday(&t, NULL);
 #endif
+
+    // if the 'onFinishTx' is triggered with no previous transactions, do nothing
+    // this can happen when the first transaction of the batch is a changeL2BlockTx or a new block is started with no transactions
+    if (currentBlock.responses.empty())
+    {
+#ifdef LOG_FULL_TRACER
+        zklog.info("FullTracer::onFinishTx() txIndex=" + to_string(txIndex) + " currentBlock.responses.size()=" + to_string(currentBlock.responses.size()));
+#endif
+#ifdef LOG_TIME_STATISTICS
+        tms.add("onFinishTx", TimeDiff(t));
+#endif
+        return ZKR_SUCCESS;
+    }
+
     zkresult zkr;
     ResponseV2 &response = currentBlock.responses[txIndex];
 
@@ -1833,8 +1925,6 @@ zkresult FullTracer::onFinishBatch(Context &ctx, const RomCommand &cmd)
 #endif
     mpz_class auxScalar;
     zkresult zkr;
-
-    onFinishBlock(ctx);
 
     finalTrace.gas_used = accBatchGas;
 

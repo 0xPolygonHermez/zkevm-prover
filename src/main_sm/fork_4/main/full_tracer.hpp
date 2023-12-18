@@ -139,6 +139,15 @@ public:
     {
         return 0;
     }
+    string emptyString;
+    string & get_error(void)
+    {
+        return emptyString;
+    }
+    bool get_invalid_batch(void)
+    {
+        return false;
+    }
 };
                          
 } // namespace

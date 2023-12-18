@@ -14,13 +14,19 @@ zkresult Smt::set (const string &batchUUID, uint64_t block, uint64_t tx, Databas
     zklog.info("Smt::set() called with oldRoot=" + fea2string(fr,oldRoot) + " key=" + fea2string(fr,key) + " value=" + value.get_str(16) + " persistent=" + to_string(persistent));
 #endif
 
+    zkresult zkr;
     bool bUseStateManager = db.config.stateManager && (batchUUID.size() > 0);
 
     SmtContext ctx(db, bUseStateManager, batchUUID, block, tx, persistence);
 
     if (bUseStateManager)
     {
-        stateManager.setOldStateRoot(batchUUID, block, tx, fea2string(fr, oldRoot), persistence);
+        zkr = stateManager.setOldStateRoot(batchUUID, block, tx, fea2string(fr, oldRoot), persistence);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("Smt::set() failed calling stateManager.setOldStateRoot() result=" + zkresult2string(zkr) + " batchUUI=" + batchUUID + " block=" + to_string(block) + " tx=" + to_string(tx) + " oldRoot=" + fea2string(fr, oldRoot));
+            return zkr;
+        }
     }
 
     Goldilocks::Element r[4];
@@ -73,7 +79,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t block, uint64_t tx, Databas
         dbres = ZKR_UNSPECIFIED;
         if (bUseStateManager)
         {
-            dbres = stateManager.read(batchUUID, rootString, dbValue, dbReadLog);
+            dbres = stateManager.readNode(batchUUID, rootString, dbValue, dbReadLog);
         }
         if (dbres != ZKR_SUCCESS)
         {
@@ -112,7 +118,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t block, uint64_t tx, Databas
             dbres = ZKR_UNSPECIFIED;
             if (bUseStateManager)
             {
-                dbres = stateManager.read(batchUUID, foundValueHashString, dbValue, dbReadLog);
+                dbres = stateManager.readNode(batchUUID, foundValueHashString, dbValue, dbReadLog);
             }
             if (dbres != ZKR_SUCCESS)
             {
@@ -540,7 +546,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t block, uint64_t tx, Databas
                     dbres = ZKR_UNSPECIFIED;
                     if (bUseStateManager)
                     {
-                        dbres = stateManager.read(batchUUID, auxString, dbValue, dbReadLog);
+                        dbres = stateManager.readNode(batchUUID, auxString, dbValue, dbReadLog);
                     }
                     if (dbres != ZKR_SUCCESS)
                     {
@@ -567,7 +573,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t block, uint64_t tx, Databas
                         dbres = ZKR_UNSPECIFIED;
                         if (bUseStateManager)
                         {
-                            dbres = stateManager.read(batchUUID, valHString, dbValue, dbReadLog);
+                            dbres = stateManager.readNode(batchUUID, valHString, dbValue, dbReadLog);
                         }
                         if (dbres != ZKR_SUCCESS)
                         {
@@ -680,7 +686,7 @@ zkresult Smt::set (const string &batchUUID, uint64_t block, uint64_t tx, Databas
                     dbres = ZKR_UNSPECIFIED;
                     if (bUseStateManager)
                     {
-                        dbres = stateManager.read(batchUUID, siblingRootString, dbValue, dbReadLog);
+                        dbres = stateManager.readNode(batchUUID, siblingRootString, dbValue, dbReadLog);
                     }
                     if (dbres != ZKR_SUCCESS)
                     {
@@ -800,7 +806,12 @@ zkresult Smt::set (const string &batchUUID, uint64_t block, uint64_t tx, Databas
 
     if (bUseStateManager)
     {
-        stateManager.setNewStateRoot(batchUUID, block, tx, fea2string(fr, newRoot), persistence);
+        zkr = stateManager.setNewStateRoot(batchUUID, block, tx, fea2string(fr, newRoot), persistence);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("Smt::set() failed calling stateManager.setNewStateRoot() result=" + zkresult2string(zkr) + " batchUUI=" + batchUUID + " block=" + to_string(block) + " tx=" + to_string(tx) + " oldRoot=" + fea2string(fr, oldRoot));
+            return zkr;
+        }
     }
     else if ( (persistence == PERSISTENCE_DATABASE) &&
          (
@@ -909,7 +920,7 @@ zkresult Smt::get (const string &batchUUID, Database &db, const Goldilocks::Elem
         dbres = ZKR_UNSPECIFIED;
         if (bUseStateManager)
         {
-            dbres = stateManager.read(batchUUID, rString, dbValue, dbReadLog);
+            dbres = stateManager.readNode(batchUUID, rString, dbValue, dbReadLog);
         }
         if (dbres != ZKR_SUCCESS)
         {
@@ -937,7 +948,7 @@ zkresult Smt::get (const string &batchUUID, Database &db, const Goldilocks::Elem
             dbres = ZKR_UNSPECIFIED;
             if (bUseStateManager)
             {
-                dbres = stateManager.read(batchUUID, foundValueHashString, dbValue, dbReadLog);
+                dbres = stateManager.readNode(batchUUID, foundValueHashString, dbValue, dbReadLog);
             }
             if (dbres != ZKR_SUCCESS)
             {
@@ -1071,7 +1082,7 @@ zkresult Smt::hashSave ( const SmtContext &ctx, const Goldilocks::Element (&v)[1
 
     if (ctx.bUseStateManager)
     {
-        zkr = stateManager.write(ctx.batchUUID, ctx.block, ctx.tx, hashString, dbValue, ctx.persistence);
+        zkr = stateManager.writeNode(ctx.batchUUID, ctx.block, ctx.tx, hashString, dbValue, ctx.persistence);
         if (zkr != ZKR_SUCCESS)
         {
             zklog.error("Smt::hashSave() failed calling stateManager.write() key=" + hashString + " result=" + to_string(zkr) + "=" + zkresult2string(zkr));

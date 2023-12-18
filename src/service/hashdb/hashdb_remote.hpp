@@ -40,6 +40,7 @@ public:
     void     loadDB             (const DatabaseMap::MTMap &input, const bool persistent, const Goldilocks::Element (&stateRoot)[4]);
     void     loadProgramDB      (const DatabaseMap::ProgramMap &input, const bool persistent);
     void     finishTx           (const string &batchUUID, const string &newStateRoot, const Persistence persistence);
+    void     startBlock         (const string &batchUUID, const string &oldStateRoot, const Persistence persistence);
     void     finishBlock        (const string &batchUUID, const string &newStateRoot, const Persistence persistence);
     zkresult flush              (const string &batchUUID, const string &newStateRoot, const Persistence persistence, uint64_t &flushId, uint64_t &storedFlushId);
     zkresult purge              (const string &batchUUID, const Goldilocks::Element (&newStateRoot)[4], const Persistence persistence);

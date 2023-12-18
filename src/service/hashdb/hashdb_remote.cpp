@@ -359,6 +359,17 @@ void HashDBRemote::finishTx (const string &batchUUID, const string &newStateRoot
     grpc::Status s = stub->FinishTx(&context, request, &response);
 }
 
+void HashDBRemote::startBlock (const string &batchUUID, const string &oldStateRoot, const Persistence persistence)
+{
+    ::grpc::ClientContext context;
+    ::hashdb::v1::StartBlockRequest request;
+    request.set_batch_uuid(batchUUID);
+    request.set_old_state_root(oldStateRoot);
+    request.set_persistence((hashdb::v1::Persistence)persistence);
+    ::google::protobuf::Empty response;
+    grpc::Status s = stub->StartBlock(&context, request, &response);
+}
+
 void HashDBRemote::finishBlock (const string &batchUUID, const string &newStateRoot, const Persistence persistence)
 {
     ::grpc::ClientContext context;

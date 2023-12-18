@@ -266,13 +266,14 @@ enum RomError : int {
   ROM_ERROR_INVALID_RLP = 30,
   ROM_ERROR_INVALID_DECODE_CHANGE_L2_BLOCK = 31,
   ROM_ERROR_INVALID_NOT_FIRST_TX_CHANGE_L2_BLOCK = 32,
-  ROM_ERROR_INVALID_TX_CHANGE_L2_BLOCK = 33,
+  ROM_ERROR_INVALID_TX_CHANGE_L2_BLOCK_LIMIT_TIMESTAMP = 33,
+  ROM_ERROR_INVALID_TX_CHANGE_L2_BLOCK_MIN_TIMESTAMP = 34,
   RomError_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   RomError_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool RomError_IsValid(int value);
 constexpr RomError RomError_MIN = ROM_ERROR_UNSPECIFIED;
-constexpr RomError RomError_MAX = ROM_ERROR_INVALID_TX_CHANGE_L2_BLOCK;
+constexpr RomError RomError_MAX = ROM_ERROR_INVALID_TX_CHANGE_L2_BLOCK_MIN_TIMESTAMP;
 constexpr int RomError_ARRAYSIZE = RomError_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* RomError_descriptor();
@@ -5559,9 +5560,11 @@ class ProcessBatchResponseV2 PROTOBUF_FINAL :
     kCntSha256HashesFieldNumber = 12,
     kFlushIdFieldNumber = 16,
     kStoredFlushIdFieldNumber = 17,
+    kErrorFieldNumber = 14,
+    kInvalidBatchFieldNumber = 23,
     kGasUsedFieldNumber = 19,
     kForkIdFieldNumber = 22,
-    kErrorFieldNumber = 14,
+    kErrorRomFieldNumber = 24,
   };
   // repeated .executor.v1.ProcessBlockResponseV2 block_responses = 13;
   int block_responses_size() const;
@@ -5845,6 +5848,24 @@ class ProcessBatchResponseV2 PROTOBUF_FINAL :
   void _internal_set_stored_flush_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
+  // .executor.v1.ExecutorError error = 14;
+  void clear_error();
+  ::executor::v1::ExecutorError error() const;
+  void set_error(::executor::v1::ExecutorError value);
+  private:
+  ::executor::v1::ExecutorError _internal_error() const;
+  void _internal_set_error(::executor::v1::ExecutorError value);
+  public:
+
+  // uint32 invalid_batch = 23;
+  void clear_invalid_batch();
+  ::PROTOBUF_NAMESPACE_ID::uint32 invalid_batch() const;
+  void set_invalid_batch(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_invalid_batch() const;
+  void _internal_set_invalid_batch(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
   // uint64 gas_used = 19;
   void clear_gas_used();
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_used() const;
@@ -5863,13 +5884,13 @@ class ProcessBatchResponseV2 PROTOBUF_FINAL :
   void _internal_set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // .executor.v1.ExecutorError error = 14;
-  void clear_error();
-  ::executor::v1::ExecutorError error() const;
-  void set_error(::executor::v1::ExecutorError value);
+  // .executor.v1.RomError error_rom = 24;
+  void clear_error_rom();
+  ::executor::v1::RomError error_rom() const;
+  void set_error_rom(::executor::v1::RomError value);
   private:
-  ::executor::v1::ExecutorError _internal_error() const;
-  void _internal_set_error(::executor::v1::ExecutorError value);
+  ::executor::v1::RomError _internal_error_rom() const;
+  void _internal_set_error_rom(::executor::v1::RomError value);
   public:
 
   // @@protoc_insertion_point(class_scope:executor.v1.ProcessBatchResponseV2)
@@ -5903,9 +5924,11 @@ class ProcessBatchResponseV2 PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint32 cnt_sha256_hashes_;
   ::PROTOBUF_NAMESPACE_ID::uint64 flush_id_;
   ::PROTOBUF_NAMESPACE_ID::uint64 stored_flush_id_;
+  int error_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 invalid_batch_;
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_used_;
   ::PROTOBUF_NAMESPACE_ID::uint64 fork_id_;
-  int error_;
+  int error_rom_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
 };
@@ -8005,6 +8028,7 @@ class ProcessBlockResponseV2 PROTOBUF_FINAL :
     kBlockNumberFieldNumber = 4,
     kTimestampFieldNumber = 5,
     kGasUsedFieldNumber = 8,
+    kErrorFieldNumber = 13,
   };
   // repeated .executor.v1.ProcessTransactionResponseV2 responses = 11;
   int responses_size() const;
@@ -8228,6 +8252,15 @@ class ProcessBlockResponseV2 PROTOBUF_FINAL :
   void _internal_set_gas_used(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
+  // .executor.v1.RomError error = 13;
+  void clear_error();
+  ::executor::v1::RomError error() const;
+  void set_error(::executor::v1::RomError value);
+  private:
+  ::executor::v1::RomError _internal_error() const;
+  void _internal_set_error(::executor::v1::RomError value);
+  public:
+
   // @@protoc_insertion_point(class_scope:executor.v1.ProcessBlockResponseV2)
  private:
   class _Internal;
@@ -8247,6 +8280,7 @@ class ProcessBlockResponseV2 PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint64 block_number_;
   ::PROTOBUF_NAMESPACE_ID::uint64 timestamp_;
   ::PROTOBUF_NAMESPACE_ID::uint64 gas_used_;
+  int error_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
 };
@@ -16835,6 +16869,46 @@ inline void ProcessBatchResponseV2::set_fork_id(::PROTOBUF_NAMESPACE_ID::uint64 
   // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponseV2.fork_id)
 }
 
+// uint32 invalid_batch = 23;
+inline void ProcessBatchResponseV2::clear_invalid_batch() {
+  invalid_batch_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchResponseV2::_internal_invalid_batch() const {
+  return invalid_batch_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 ProcessBatchResponseV2::invalid_batch() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchResponseV2.invalid_batch)
+  return _internal_invalid_batch();
+}
+inline void ProcessBatchResponseV2::_internal_set_invalid_batch(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  invalid_batch_ = value;
+}
+inline void ProcessBatchResponseV2::set_invalid_batch(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_invalid_batch(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponseV2.invalid_batch)
+}
+
+// .executor.v1.RomError error_rom = 24;
+inline void ProcessBatchResponseV2::clear_error_rom() {
+  error_rom_ = 0;
+}
+inline ::executor::v1::RomError ProcessBatchResponseV2::_internal_error_rom() const {
+  return static_cast< ::executor::v1::RomError >(error_rom_);
+}
+inline ::executor::v1::RomError ProcessBatchResponseV2::error_rom() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBatchResponseV2.error_rom)
+  return _internal_error_rom();
+}
+inline void ProcessBatchResponseV2::_internal_set_error_rom(::executor::v1::RomError value) {
+  
+  error_rom_ = value;
+}
+inline void ProcessBatchResponseV2::set_error_rom(::executor::v1::RomError value) {
+  _internal_set_error_rom(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBatchResponseV2.error_rom)
+}
+
 // -------------------------------------------------------------------
 
 // TraceConfigV2
@@ -20079,6 +20153,26 @@ inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::executor::v1::LogV2 >&
 ProcessBlockResponseV2::logs() const {
   // @@protoc_insertion_point(field_list:executor.v1.ProcessBlockResponseV2.logs)
   return logs_;
+}
+
+// .executor.v1.RomError error = 13;
+inline void ProcessBlockResponseV2::clear_error() {
+  error_ = 0;
+}
+inline ::executor::v1::RomError ProcessBlockResponseV2::_internal_error() const {
+  return static_cast< ::executor::v1::RomError >(error_);
+}
+inline ::executor::v1::RomError ProcessBlockResponseV2::error() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessBlockResponseV2.error)
+  return _internal_error();
+}
+inline void ProcessBlockResponseV2::_internal_set_error(::executor::v1::RomError value) {
+  
+  error_ = value;
+}
+inline void ProcessBlockResponseV2::set_error(::executor::v1::RomError value) {
+  _internal_set_error(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessBlockResponseV2.error)
 }
 
 // -------------------------------------------------------------------
