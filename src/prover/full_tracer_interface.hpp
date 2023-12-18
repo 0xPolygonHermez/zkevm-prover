@@ -213,6 +213,7 @@ public:
     vector<ResponseV2> responses;
     vector<LogV2> logs;
     bool initialized;
+    string error;
     Block() : gas_limit(0), block_number(0), timestamp(0), initialized(false) {};
 };
 
@@ -228,8 +229,9 @@ public:
     uint64_t cumulative_gas_used;
     uint64_t gas_used;
     vector<Block> block_responses;
+    bool invalid_batch;
     string error;
-    FinalTraceV2() : bInitialized(false), numBatch(0), cumulative_gas_used(0), gas_used(0) {};
+    FinalTraceV2() : bInitialized(false), numBatch(0), cumulative_gas_used(0), gas_used(0), invalid_batch(false) {};
 };
 
 class InfoReadWrite
@@ -270,6 +272,8 @@ public:
     virtual vector<Opcode> & get_info(void) = 0;
     virtual uint64_t get_block_number(void) = 0; // block number = 0, 1, 2...
     virtual uint64_t get_tx_number(void) = 0; // tx number = 0, 1, 2...
+    virtual string & get_error(void) = 0;
+    virtual bool get_invalid_batch(void) = 0;
 };
 
 #endif

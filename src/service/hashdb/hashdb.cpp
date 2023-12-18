@@ -137,7 +137,7 @@ zkresult HashDB::setProgram (const string &batchUUID, uint64_t block, uint64_t t
     }
     else
     {
-        zkr = db.setProgram(fea2string(fr, key), data, persistence == PERSISTENCE_DATABASE ? true : false);
+        zkr = stateManager.writeProgram(batchUUID, block, tx, fea2string(fr, key), data, persistence);
     }
 
 #ifdef LOG_TIME_STATISTICS_HASHDB
@@ -165,7 +165,16 @@ zkresult HashDB::getProgram (const string &batchUUID, const Goldilocks::Element 
     }
     else
     {
-        zkr = db.getProgram(fea2string(fr, key), data, dbReadLog);
+        string keyString = fea2string(fr, key);
+        zkr = stateManager.readProgram(batchUUID, keyString, data, dbReadLog);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zkr = db.getProgram(keyString, data, dbReadLog);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("HashDB::getProgram() failed result=" + zkresult2string(zkr) + " key=" + keyString);
+            }
+        }
     }
 
 #ifdef LOG_TIME_STATISTICS_HASHDB
@@ -399,6 +408,25 @@ void HashDB::finishTx (const string &batchUUID, const string &newStateRoot, cons
         }
     }
 }
+
+void HashDB::startBlock (const string &batchUUID, const string &oldStateRoot, const Persistence persistence)
+{
+    if (config.hashDB64)
+    {
+    }
+    else
+    {
+        if (config.stateManager && (batchUUID.size() != 0))
+        {
+            stateManager.startBlock(batchUUID, oldStateRoot, persistence);
+        }
+        else
+        {
+            db.semiFlush();
+        }
+    }
+}
+
 void HashDB::finishBlock (const string &batchUUID, const string &newStateRoot, const Persistence persistence)
 {
     if (config.hashDB64)

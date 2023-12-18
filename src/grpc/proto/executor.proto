@@ -332,6 +332,8 @@ message ProcessBatchResponseV2 {
     repeated bytes smt_keys = 20;
     repeated bytes program_keys = 21;
     uint64 fork_id = 22;
+    uint32 invalid_batch = 23;
+    RomError error_rom = 24;
 }
 
 // Trace configuration request params
@@ -479,6 +481,8 @@ message ProcessBlockResponseV2 {
     repeated ProcessTransactionResponseV2 responses = 11;
     // All Logs emited by LOG opcode during the block
     repeated LogV2 logs = 12;
+    // Any error encountered during block execution
+    RomError error = 13;
 }
 
 message ProcessTransactionResponseV2 {
@@ -617,8 +621,10 @@ enum RomError {
     ROM_ERROR_INVALID_DECODE_CHANGE_L2_BLOCK = 31;
     // ROM_ERROR_INVALID_NOT_FIRST_TX_CHANGE_L2_BLOCK indicates that the first transaction in a batch is not a change l2 block transaction
     ROM_ERROR_INVALID_NOT_FIRST_TX_CHANGE_L2_BLOCK = 32;
-    // ROM_ERROR_INVALID_TX_CHANGE_L2_BLOCK indicates that the change l2 block transaction has trigger an error during while executing
-    ROM_ERROR_INVALID_TX_CHANGE_L2_BLOCK = 33;
+    // ROM_ERROR_INVALID_TX_CHANGE_L2_BLOCK_LIMIT_TIMESTAMP indicates that the change l2 block transaction has trigger an error during while executing
+    ROM_ERROR_INVALID_TX_CHANGE_L2_BLOCK_LIMIT_TIMESTAMP = 33;
+    // ROM_ERROR_INVALID_TX_CHANGE_L2_BLOCK_MIN_TIMESTAMP indicates that the change l2 block transaction has trigger an error during while executing
+    ROM_ERROR_INVALID_TX_CHANGE_L2_BLOCK_MIN_TIMESTAMP = 34;
 }
 
 enum ExecutorError {

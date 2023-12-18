@@ -48,7 +48,7 @@ public:
     string previousMemory;
     bool hasGaspriceOpcode;
     bool hasBalanceOpcode;
-    uint64_t txIndex;
+    uint64_t txIndex; // Transaction index in the current block
     Block currentBlock;
     bool isForced;
 #ifdef LOG_TIME_STATISTICS
@@ -155,6 +155,14 @@ public:
     uint64_t get_tx_number(void)
     {
         return currentBlock.responses.size();
+    }
+    string & get_error(void)
+    {
+        return finalTrace.error;
+    }
+    bool get_invalid_batch(void)
+    {
+        return finalTrace.invalid_batch;
     }
 };
 

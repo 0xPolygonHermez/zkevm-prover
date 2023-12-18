@@ -6,6 +6,7 @@
 #include "persistence.hpp"
 #include "definitions.hpp"
 
+// Singleton definition
 StateManager stateManager;
 
 //#define LOG_STATE_MANAGER
@@ -67,31 +68,12 @@ zkresult StateManager::setStateRoot (const string &batchUUID, uint64_t block, ui
     // Set the current state root
     batchState.currentStateRoot = stateRoot;
 
-    // Create block states, if needed
+    // Check block range
     if (block >= batchState.blockState.size())
     {
-        // If this is the first state of a new block, check that it is the old state root
-        if (!bIsOldStateRoot)
-        {
-            zklog.error("StateManager::setStateRoot() called with bIsOldStateRoot=false, but block=" + to_string(block) + " does not previously exist");
-            Unlock();
-            return ZKR_STATE_MANAGER;
-        }
-
-        // Calculate the number of block slots to create
-        uint64_t blocksToCreate = block - batchState.blockState.size() + 1;
-
-        // Create an empty block state to insert
-        BlockState blockState;
-        
-        // Insert the block state
-        for (uint64_t i=0; i<blocksToCreate; i++)
-        {
-            batchState.blockState.emplace_back(blockState);
-        }
-
-        // Set current block
-        batchState.currentBlock = block;
+        zklog.error("StateManager::setStateRoot() called with block=" + to_string(block) + " but blockState.size=" + to_string(batchState.blockState.size()));
+        Unlock();
+        return ZKR_STATE_MANAGER;
     }
 
     // Get a reference to the block state
@@ -221,7 +203,7 @@ zkresult StateManager::setStateRoot (const string &batchUUID, uint64_t block, ui
 
 }
 
-zkresult StateManager::write (const string &batchUUID, uint64_t block, uint64_t tx, const string &_key, const vector<Goldilocks::Element> &value, const Persistence persistence)
+zkresult StateManager::writeNode (const string &batchUUID, uint64_t block, uint64_t tx, const string &_key, const vector<Goldilocks::Element> &value, const Persistence persistence)
 {
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     struct timeval t;
@@ -233,13 +215,13 @@ zkresult StateManager::write (const string &batchUUID, uint64_t block, uint64_t 
     key = stringToLower(key);
 
 #ifdef LOG_STATE_MANAGER_WRITE
-    zklog.info("StateManager::write() batchUUID=" + batchUUID + " block=" + to_string(block) + " tx=" + to_string(tx) + " key=" + key + " persistence=" + persistence2string(persistence));
+    zklog.info("StateManager::writeNode() batchUUID=" + batchUUID + " block=" + to_string(block) + " tx=" + to_string(tx) + " key=" + key + " persistence=" + persistence2string(persistence));
 #endif
 
     // Check persistence range
     if (persistence >= PERSISTENCE_SIZE)
     {
-        zklog.error("StateManager::write() wrong persistence batchUUID=" + batchUUID + " block=" + to_string(block) + " tx=" + to_string(tx) + " key=" + key + " persistence=" + persistence2string(persistence));
+        zklog.error("StateManager::writeNode() wrong persistence batchUUID=" + batchUUID + " block=" + to_string(block) + " tx=" + to_string(tx) + " key=" + key + " persistence=" + persistence2string(persistence));
         return ZKR_STATE_MANAGER;
     }
 
@@ -250,16 +232,16 @@ zkresult StateManager::write (const string &batchUUID, uint64_t block, uint64_t 
     it = state.find(batchUUID);
     if (it == state.end())
     {
-        zklog.error("StateManager::write() found no batch state for batch UUID=" + batchUUID);
+        zklog.error("StateManager::writeNode() found no batch state for batch UUID=" + batchUUID);
         Unlock();
         return ZKR_STATE_MANAGER;
     }
     BatchState &batchState = it->second;
 
     // Check block range
-    if (block > batchState.blockState.size())
+    if (block >= batchState.blockState.size())
     {
-        zklog.error("StateManager::write() got block=" + to_string(block) + " bigger than blockState size=" + to_string(it->second.blockState.size()));
+        zklog.error("StateManager::writeNode() got block=" + to_string(block) + " bigger than blockState size=" + to_string(it->second.blockState.size()));
         Unlock();
         return ZKR_STATE_MANAGER;
     }
@@ -268,7 +250,7 @@ zkresult StateManager::write (const string &batchUUID, uint64_t block, uint64_t 
     // Check tx range
     if (tx > blockState.txState.size())
     {
-        zklog.error("StateManager::write() got tx=" + to_string(tx) + " bigger than txState size=" + to_string(blockState.txState.size()));
+        zklog.error("StateManager::writeNode() got tx=" + to_string(tx) + " bigger than txState size=" + to_string(blockState.txState.size()));
         Unlock();
         return ZKR_STATE_MANAGER;
     }
@@ -293,13 +275,13 @@ zkresult StateManager::write (const string &batchUUID, uint64_t block, uint64_t 
     }
 
     // Add to sub-state
-    txState.persistence[persistence].subState[txState.persistence[persistence].currentSubState].dbWrite[key] = value;
+    txState.persistence[persistence].subState[txState.persistence[persistence].currentSubState].dbWriteNodes[key] = value;
     
     // Add to common write pool to speed up read
-    batchState.dbWrite[key] = value;
+    batchState.dbWriteNodes[key] = value;
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-    batchState.timeMetricStorage.add("write", TimeDiff(t));
+    batchState.timeMetricStorage.add("writeNode", TimeDiff(t));
 #endif
 
     Unlock();
@@ -389,10 +371,10 @@ zkresult StateManager::deleteNode (const string &batchUUID, uint64_t block, uint
         zklog.info("StateManager::deleteNode() batchUUID=" + batchUUID + " tx=" + to_string(tx) + " key=" + key);
     }*/
 
-    txSubState.dbDelete.emplace_back(key);
+    txSubState.dbDeleteNodes.emplace_back(key);
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-    batchState.timeMetricStorage.add("deleteNodes", TimeDiff(t));
+    batchState.timeMetricStorage.add("deleteNode", TimeDiff(t));
 #endif
 
     Unlock();
@@ -400,7 +382,7 @@ zkresult StateManager::deleteNode (const string &batchUUID, uint64_t block, uint
     return ZKR_SUCCESS;
 }
 
-zkresult StateManager::read (const string &batchUUID, const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog)
+zkresult StateManager::readNode (const string &batchUUID, const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog)
 {
     struct timeval t;
     gettimeofday(&t, NULL);
@@ -424,8 +406,8 @@ zkresult StateManager::read (const string &batchUUID, const string &_key, vector
 
     // Search in the common write list
     unordered_map<string, vector<Goldilocks::Element>>::iterator dbIt;
-    dbIt = batchState.dbWrite.find(key);
-    if (dbIt != batchState.dbWrite.end())
+    dbIt = batchState.dbWriteNodes.find(key);
+    if (dbIt != batchState.dbWriteNodes.end())
     {
         value = dbIt->second;
                         
@@ -433,11 +415,11 @@ zkresult StateManager::read (const string &batchUUID, const string &_key, vector
         if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
 
 #ifdef LOG_STATE_MANAGER_READ
-        zklog.info("StateManager::read() batchUUID=" + batchUUID + " key=" + key);
+        zklog.info("StateManager::readNode() batchUUID=" + batchUUID + " key=" + key);
 #endif
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-        batchState.timeMetricStorage.add("read success", TimeDiff(t));
+        batchState.timeMetricStorage.add("readNode success", TimeDiff(t));
 #endif
         Unlock();
 
@@ -445,7 +427,145 @@ zkresult StateManager::read (const string &batchUUID, const string &_key, vector
     }
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-    batchState.timeMetricStorage.add("read not found", TimeDiff(t));
+    batchState.timeMetricStorage.add("readNode not found", TimeDiff(t));
+#endif
+
+    Unlock();
+
+    return ZKR_DB_KEY_NOT_FOUND;
+}
+
+zkresult StateManager::writeProgram (const string &batchUUID, uint64_t block, uint64_t tx, const string &_key, const vector<uint8_t> &value, const Persistence persistence)
+{
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+    struct timeval t;
+    gettimeofday(&t, NULL);
+#endif
+
+    // Normalize key format
+    string key = NormalizeToNFormat(_key, 64);
+    key = stringToLower(key);
+
+#ifdef LOG_STATE_MANAGER_WRITE
+    zklog.info("StateManager::writeProgram() batchUUID=" + batchUUID + " block=" + to_string(block) + " tx=" + to_string(tx) + " key=" + key + " persistence=" + persistence2string(persistence));
+#endif
+
+    // Check persistence range
+    if (persistence >= PERSISTENCE_SIZE)
+    {
+        zklog.error("StateManager::writeProgram() wrong persistence batchUUID=" + batchUUID + " block=" + to_string(block) + " tx=" + to_string(tx) + " key=" + key + " persistence=" + persistence2string(persistence));
+        return ZKR_STATE_MANAGER;
+    }
+
+    Lock();
+
+    // Find batch state for this uuid, or create it if it does not exist
+    unordered_map<string, BatchState>::iterator it;
+    it = state.find(batchUUID);
+    if (it == state.end())
+    {
+        BatchState batchState;
+        state[batchUUID] = batchState;
+        it = state.find(batchUUID);
+        zkassert(it != state.end());
+    }
+    BatchState &batchState = it->second;
+
+    // Detect first set programs before first block, one per TX, and ignore them
+    if ((block == 0) && batchState.blockState.empty())
+    {
+        zklog.warning("StateManager::writeProgram() ignoring program set before first block key=" + key);
+        Unlock();
+        return ZKR_SUCCESS;
+    }
+
+    // Check block range
+    if (block >= batchState.blockState.size())
+    {
+        zklog.error("StateManager::writeProgram() got block=" + to_string(block) + " bigger than blockState size=" + to_string(it->second.blockState.size()));
+        Unlock();
+        return ZKR_STATE_MANAGER;
+    }
+    BlockState &blockState = batchState.blockState[block];
+
+    // Check tx range
+    if (tx > blockState.txState.size())
+    {
+        zklog.error("StateManager::writeProgram() got tx=" + to_string(tx) + " bigger than txState size=" + to_string(blockState.txState.size()));
+        Unlock();
+        return ZKR_STATE_MANAGER;
+    }
+
+    // Create TxState, if not existing
+    if (tx == blockState.txState.size())
+    {
+        TxState aux;
+        aux.persistence[persistence].oldStateRoot = it->second.currentStateRoot;
+        blockState.txState.emplace_back(aux);
+    }
+    TxState &txState = blockState.txState[tx];
+
+    // Add to sub-state
+    txState.persistence[persistence].dbWritePrograms[key] = value;
+    
+    // Add to common write pool to speed up read
+    batchState.dbWritePrograms[key] = value;
+
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+    batchState.timeMetricStorage.add("writePrograms", TimeDiff(t));
+#endif
+
+    Unlock();
+
+    return ZKR_SUCCESS;
+}
+
+zkresult StateManager::readProgram (const string &batchUUID, const string &_key, vector<uint8_t> &value, DatabaseMap *dbReadLog)
+{
+    struct timeval t;
+    gettimeofday(&t, NULL);
+
+    // Normalize key format
+    string key = NormalizeToNFormat(_key, 64);
+    key = stringToLower(key);
+
+    Lock();
+
+    // Find batch state for this uuid
+    unordered_map<string, BatchState>::iterator it;
+    it = state.find(batchUUID);
+    if (it == state.end())
+    {
+        //zklog.error("StateManager::readProgram() found no batch state for batch UUID=" + batchUUID);
+        Unlock();
+        return ZKR_DB_KEY_NOT_FOUND;
+    }
+    BatchState &batchState = it->second;
+
+    // Search in the common write list
+    unordered_map<string, vector<uint8_t>>::iterator dbIt;
+    dbIt = batchState.dbWritePrograms.find(key);
+    if (dbIt != batchState.dbWritePrograms.end())
+    {
+        value = dbIt->second;
+                        
+        // Add to the read log
+        if (dbReadLog != NULL) dbReadLog->add(key, value, true, TimeDiff(t));
+
+#ifdef LOG_STATE_MANAGER_READ
+        zklog.info("StateManager::readProgram() batchUUID=" + batchUUID + " key=" + key);
+#endif
+
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+        batchState.timeMetricStorage.add("readProgram success", TimeDiff(t));
+#endif
+        Unlock();
+
+        return ZKR_SUCCESS;
+    }
+
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+    batchState.timeMetricStorage.add("readProgram not found", TimeDiff(t));
 #endif
 
     Unlock();
@@ -564,6 +684,68 @@ zkresult StateManager::finishTx (const string &batchUUID, const string &_stateRo
     
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     batchState.timeMetricStorage.add("finishTx", TimeDiff(t));
+#endif
+
+    Unlock();
+
+    return ZKR_SUCCESS;
+}
+
+zkresult StateManager::startBlock (const string &batchUUID, const string &_stateRoot, const Persistence persistence)
+{
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+    struct timeval t;
+    gettimeofday(&t, NULL);
+#endif
+
+    // Normalize state root format
+    string stateRoot = NormalizeToNFormat(_stateRoot, 64);
+    stateRoot = stringToLower(stateRoot);
+
+    // Check persistence range
+    if (persistence >= PERSISTENCE_SIZE)
+    {
+        zklog.error("StateManager::startBlock() invalid persistence batchUUID=" + batchUUID + " stateRoot=" + stateRoot + " persistence=" + persistence2string(persistence));
+        return ZKR_STATE_MANAGER;
+    }
+
+#ifdef LOG_STATE_MANAGER
+    zklog.info("StateManager::startBlock() batchUUID=" + batchUUID + " stateRoot=" + stateRoot + " persistence=" + persistence2string(persistence));
+#endif
+
+    Lock();
+
+    unordered_map<string, BatchState>::iterator it;
+
+    // Find batch state for this uuid
+    it = state.find(batchUUID);
+    if (it == state.end())
+    {
+        BatchState batchState;
+        state[batchUUID] = batchState;
+        it = state.find(batchUUID);
+        zkassert(it != state.end());
+    }
+    BatchState &batchState = it->second;
+
+    // Check currentBlock range
+    if (!batchState.blockState.empty() && (batchState.currentBlock >= batchState.blockState.size()))
+    {
+        zklog.error("StateManager::startBlock() found batchState.currentBlock=" + to_string(batchState.currentBlock) + " >= batchState.blockState.size=" + to_string(batchState.blockState.size()) + " batchUUID=" + batchUUID + " stateRoot=" + stateRoot + " persistence=" + persistence2string(persistence));
+        Unlock();
+        return ZKR_STATE_MANAGER;
+    }
+
+    // Create an empty block state to insert
+    BlockState blockState;
+    blockState.oldStateRoot = stateRoot;
+    batchState.blockState.emplace_back(blockState);
+
+    // Set current block
+    batchState.currentBlock = batchState.blockState.size() - 1;
+    
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+    batchState.timeMetricStorage.add("startBlock", TimeDiff(t));
 #endif
 
     Unlock();
@@ -736,7 +918,7 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
     BatchState &batchState = it->second;
 
     // Purge batch, i.e. delete unnecessary blocks
-    if (config.stateManagerPurge && !_newStateRoot.empty() && !batchState.blockState.empty())
+    if (config.stateManagerPurge && !_newStateRoot.empty() && !batchState.blockState.empty() && !batchState.oldStateRoot.empty())
     {
 
         // Search for the first block that starts at the new state root
@@ -933,15 +1115,25 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
                     for (uint64_t ss = 0; ss < txState.persistence[persistence].subState.size(); ss++)
                     {
                         // For all keys to delete
-                        for (uint64_t k = 0; k < txState.persistence[persistence].subState[ss].dbDelete.size(); k++)
+                        for (uint64_t k = 0; k < txState.persistence[persistence].subState[ss].dbDeleteNodes.size(); k++)
                         {
-                            // For all previouse sub-states, previous to the current sub-state
+                            // At current tx, for all sub-states previous to the current sub-state
                             for (uint64_t pss = 0; pss < ss; pss++)
                             {
-                                txState.persistence[persistence].subState[pss].dbWrite.erase(txState.persistence[persistence].subState[ss].dbDelete[k]);
+                                txState.persistence[persistence].subState[pss].dbWriteNodes.erase(txState.persistence[persistence].subState[ss].dbDeleteNodes[k]);
+                            }
+
+                            // For previous txs of this block, for all sub-states
+                            for (uint64_t ptx = 0; ptx < tx; ptx++)
+                            {
+                                TxPersistenceState persistenceState = blockState.txState[ptx].persistence[persistence];
+                                for (uint64_t pss = 0; pss < persistenceState.subState.size(); pss++)
+                                {
+                                    persistenceState.subState[pss].dbWriteNodes.erase(txState.persistence[persistence].subState[ss].dbDeleteNodes[k]);
+                                }
                             }
                         }
-                        txState.persistence[persistence].subState[ss].dbDelete.clear();
+                        txState.persistence[persistence].subState[ss].dbDeleteNodes.clear();
                     }
                 }
 
@@ -952,9 +1144,9 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
                 {
                     // For all keys to write
                     unordered_map<string, vector<Goldilocks::Element>>::const_iterator writeIt;
-                    for ( writeIt = txState.persistence[persistence].subState[ss].dbWrite.begin();
-                        writeIt != txState.persistence[persistence].subState[ss].dbWrite.end();
-                        writeIt++ )
+                    for ( writeIt = txState.persistence[persistence].subState[ss].dbWriteNodes.begin();
+                          writeIt != txState.persistence[persistence].subState[ss].dbWriteNodes.end();
+                          writeIt++ )
                     {
                         zkr = db.write(writeIt->first, NULL, writeIt->second, persistence == PERSISTENCE_DATABASE ? 1 : 0);
                         if (zkr != ZKR_SUCCESS)
@@ -1011,6 +1203,29 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
                         batchState.timeMetricStorage.add("flush error db.updateStateRoot", TimeDiff(t));
                         batchState.timeMetricStorage.print("State Manager calls");
     #endif
+                        Unlock();
+                        return zkr;
+                    }
+                }
+
+                // For all programs to write
+                unordered_map<string, vector<uint8_t>>::const_iterator writeIt;
+                for ( writeIt = txState.persistence[persistence].dbWritePrograms.begin();
+                    writeIt != txState.persistence[persistence].dbWritePrograms.end();
+                    writeIt++ )
+                {
+                    zkr = db.setProgram(writeIt->first, writeIt->second, persistence == PERSISTENCE_DATABASE ? 1 : 0);
+                    if (zkr != ZKR_SUCCESS)
+                    {
+                        zklog.error("StateManager::flush() failed calling db.writeProgram() result=" + zkresult2string(zkr));
+                        state.erase(it);
+
+                        //TimerStopAndLog(STATE_MANAGER_FLUSH);
+
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+                        batchState.timeMetricStorage.add("flush error db.writeProgram", TimeDiff(t));
+                        batchState.timeMetricStorage.print("State Manager calls");
+#endif
                         Unlock();
                         return zkr;
                     }
@@ -1122,25 +1337,34 @@ void StateManager::print (bool bDbContent)
                         zklog.info("              newStateRoot=" + txSubState.newStateRoot);
                         zklog.info("              valid=" + to_string(txSubState.bValid));
                         zklog.info("              previousSubState=" + to_string(txSubState.previousSubState));
-                        zklog.info("              dbWrite.size=" + to_string(txSubState.dbWrite.size()));
+                        zklog.info("              dbWriteNodes.size=" + to_string(txSubState.dbWriteNodes.size()));
 
-                        totalDbWrites[persistence] += txSubState.dbWrite.size();
+                        totalDbWrites[persistence] += txSubState.dbWriteNodes.size();
                         if (bDbContent)
                         {
                             unordered_map<string, vector<Goldilocks::Element>>::const_iterator dbIt;
-                            for (dbIt = txSubState.dbWrite.begin(); dbIt != txSubState.dbWrite.end(); dbIt++)
+                            for (dbIt = txSubState.dbWriteNodes.begin(); dbIt != txSubState.dbWriteNodes.end(); dbIt++)
                             {
                                 zklog.info("                " + dbIt->first);
                             }
                         }
-                        zklog.info("              dbDelete.size=" + to_string(txSubState.dbDelete.size()));
-                        totalDbDeletes[persistence] += txSubState.dbDelete.size();
+                        zklog.info("              dbDeleteNodes.size=" + to_string(txSubState.dbDeleteNodes.size()));
+                        totalDbDeletes[persistence] += txSubState.dbDeleteNodes.size();
                         if (bDbContent)
                         {
-                            for (uint64_t j=0; j<txSubState.dbDelete.size(); j++)
+                            for (uint64_t j=0; j<txSubState.dbDeleteNodes.size(); j++)
                             {
-                                zklog.info("                " + txSubState.dbDelete[j]);
+                                zklog.info("                " + txSubState.dbDeleteNodes[j]);
                             }
+                        }
+                    }
+                    zklog.info("          dbWritePrograms.size=" + to_string(txState.persistence[persistence].dbWritePrograms.size()));
+                    if (bDbContent)
+                    {
+                        unordered_map<string, vector<uint8_t>>::const_iterator dbIt;
+                        for (dbIt = txState.persistence[persistence].dbWritePrograms.begin(); dbIt != txState.persistence[persistence].dbWritePrograms.end(); dbIt++)
+                        {
+                            zklog.info("                " + dbIt->first);
                         }
                     }
                 }

@@ -26,6 +26,7 @@ public:
     virtual void     loadDB             (const DatabaseMap::MTMap &input, const bool persistentconst, const Goldilocks::Element (&stateRoot)[4]) = 0;
     virtual void     loadProgramDB      (const DatabaseMap::ProgramMap &input, const bool persistent) = 0;
     virtual void     finishTx           (const string &batchUUID, const string &newStateRoot, const Persistence persistence) = 0;
+    virtual void     startBlock         (const string &batchUUID, const string &oldStateRoot, const Persistence persistence) = 0;
     virtual void     finishBlock        (const string &batchUUID, const string &newStateRoot, const Persistence persistence) = 0;
     virtual zkresult flush              (const string &batchUUID, const string &newStateRoot, const Persistence persistence, uint64_t &flushId, uint64_t &storedFlushId) = 0;
     virtual zkresult purge              (const string &batchUUID, const Goldilocks::Element (&newStateRoot)[4], const Persistence persistence) = 0;

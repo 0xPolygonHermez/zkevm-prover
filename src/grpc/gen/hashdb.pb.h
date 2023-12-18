@@ -52,7 +52,7 @@ struct TableStruct_hashdb_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxillaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[43]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[44]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -187,6 +187,9 @@ extern SetResponse_SiblingsEntry_DoNotUseDefaultTypeInternal _SetResponse_Siblin
 class SiblingList;
 class SiblingListDefaultTypeInternal;
 extern SiblingListDefaultTypeInternal _SiblingList_default_instance_;
+class StartBlockRequest;
+class StartBlockRequestDefaultTypeInternal;
+extern StartBlockRequestDefaultTypeInternal _StartBlockRequest_default_instance_;
 class Version;
 class VersionDefaultTypeInternal;
 extern VersionDefaultTypeInternal _Version_default_instance_;
@@ -235,6 +238,7 @@ template<> ::hashdb::v1::SetResponse* Arena::CreateMaybeMessage<::hashdb::v1::Se
 template<> ::hashdb::v1::SetResponse_DbReadLogEntry_DoNotUse* Arena::CreateMaybeMessage<::hashdb::v1::SetResponse_DbReadLogEntry_DoNotUse>(Arena*);
 template<> ::hashdb::v1::SetResponse_SiblingsEntry_DoNotUse* Arena::CreateMaybeMessage<::hashdb::v1::SetResponse_SiblingsEntry_DoNotUse>(Arena*);
 template<> ::hashdb::v1::SiblingList* Arena::CreateMaybeMessage<::hashdb::v1::SiblingList>(Arena*);
+template<> ::hashdb::v1::StartBlockRequest* Arena::CreateMaybeMessage<::hashdb::v1::StartBlockRequest>(Arena*);
 template<> ::hashdb::v1::Version* Arena::CreateMaybeMessage<::hashdb::v1::Version>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 namespace hashdb {
@@ -2136,6 +2140,197 @@ class FinishTxRequest PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class StartBlockRequest PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:hashdb.v1.StartBlockRequest) */ {
+ public:
+  inline StartBlockRequest() : StartBlockRequest(nullptr) {};
+  virtual ~StartBlockRequest();
+
+  StartBlockRequest(const StartBlockRequest& from);
+  StartBlockRequest(StartBlockRequest&& from) noexcept
+    : StartBlockRequest() {
+    *this = ::std::move(from);
+  }
+
+  inline StartBlockRequest& operator=(const StartBlockRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline StartBlockRequest& operator=(StartBlockRequest&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const StartBlockRequest& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const StartBlockRequest* internal_default_instance() {
+    return reinterpret_cast<const StartBlockRequest*>(
+               &_StartBlockRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    11;
+
+  friend void swap(StartBlockRequest& a, StartBlockRequest& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(StartBlockRequest* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(StartBlockRequest* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline StartBlockRequest* New() const final {
+    return CreateMaybeMessage<StartBlockRequest>(nullptr);
+  }
+
+  StartBlockRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<StartBlockRequest>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const StartBlockRequest& from);
+  void MergeFrom(const StartBlockRequest& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(StartBlockRequest* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "hashdb.v1.StartBlockRequest";
+  }
+  protected:
+  explicit StartBlockRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_hashdb_2eproto);
+    return ::descriptor_table_hashdb_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kBatchUuidFieldNumber = 1,
+    kOldStateRootFieldNumber = 2,
+    kPersistenceFieldNumber = 3,
+  };
+  // string batch_uuid = 1;
+  void clear_batch_uuid();
+  const std::string& batch_uuid() const;
+  void set_batch_uuid(const std::string& value);
+  void set_batch_uuid(std::string&& value);
+  void set_batch_uuid(const char* value);
+  void set_batch_uuid(const char* value, size_t size);
+  std::string* mutable_batch_uuid();
+  std::string* release_batch_uuid();
+  void set_allocated_batch_uuid(std::string* batch_uuid);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_batch_uuid();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_batch_uuid(
+      std::string* batch_uuid);
+  private:
+  const std::string& _internal_batch_uuid() const;
+  void _internal_set_batch_uuid(const std::string& value);
+  std::string* _internal_mutable_batch_uuid();
+  public:
+
+  // string old_state_root = 2;
+  void clear_old_state_root();
+  const std::string& old_state_root() const;
+  void set_old_state_root(const std::string& value);
+  void set_old_state_root(std::string&& value);
+  void set_old_state_root(const char* value);
+  void set_old_state_root(const char* value, size_t size);
+  std::string* mutable_old_state_root();
+  std::string* release_old_state_root();
+  void set_allocated_old_state_root(std::string* old_state_root);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_old_state_root();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_old_state_root(
+      std::string* old_state_root);
+  private:
+  const std::string& _internal_old_state_root() const;
+  void _internal_set_old_state_root(const std::string& value);
+  std::string* _internal_mutable_old_state_root();
+  public:
+
+  // .hashdb.v1.Persistence persistence = 3;
+  void clear_persistence();
+  ::hashdb::v1::Persistence persistence() const;
+  void set_persistence(::hashdb::v1::Persistence value);
+  private:
+  ::hashdb::v1::Persistence _internal_persistence() const;
+  void _internal_set_persistence(::hashdb::v1::Persistence value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:hashdb.v1.StartBlockRequest)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr batch_uuid_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr old_state_root_;
+  int persistence_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_hashdb_2eproto;
+};
+// -------------------------------------------------------------------
+
 class FinishBlockRequest PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:hashdb.v1.FinishBlockRequest) */ {
  public:
@@ -2178,7 +2373,7 @@ class FinishBlockRequest PROTOBUF_FINAL :
                &_FinishBlockRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    11;
+    12;
 
   friend void swap(FinishBlockRequest& a, FinishBlockRequest& b) {
     a.Swap(&b);
@@ -2369,7 +2564,7 @@ class GetFlushDataRequest PROTOBUF_FINAL :
                &_GetFlushDataRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    12;
+    13;
 
   friend void swap(GetFlushDataRequest& a, GetFlushDataRequest& b) {
     a.Swap(&b);
@@ -2506,7 +2701,7 @@ class ConsolidateStateRequest PROTOBUF_FINAL :
                &_ConsolidateStateRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    13;
+    14;
 
   friend void swap(ConsolidateStateRequest& a, ConsolidateStateRequest& b) {
     a.Swap(&b);
@@ -2663,7 +2858,7 @@ class PurgeRequest PROTOBUF_FINAL :
                &_PurgeRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    14;
+    15;
 
   friend void swap(PurgeRequest& a, PurgeRequest& b) {
     a.Swap(&b);
@@ -2847,7 +3042,7 @@ class ReadTreeRequest PROTOBUF_FINAL :
                &_ReadTreeRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    15;
+    16;
 
   friend void swap(ReadTreeRequest& a, ReadTreeRequest& b) {
     a.Swap(&b);
@@ -3013,7 +3208,7 @@ class CancelBatchRequest PROTOBUF_FINAL :
                &_CancelBatchRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    16;
+    17;
 
   friend void swap(CancelBatchRequest& a, CancelBatchRequest& b) {
     a.Swap(&b);
@@ -3166,7 +3361,7 @@ class GetLatestStateRootResponse PROTOBUF_FINAL :
                &_GetLatestStateRootResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    17;
+    18;
 
   friend void swap(GetLatestStateRootResponse& a, GetLatestStateRootResponse& b) {
     a.Swap(&b);
@@ -3312,7 +3507,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_hashdb_2eproto);
-    return ::descriptor_table_hashdb_2eproto.file_level_metadata[18];
+    return ::descriptor_table_hashdb_2eproto.file_level_metadata[19];
   }
 
   public:
@@ -3344,7 +3539,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_hashdb_2eproto);
-    return ::descriptor_table_hashdb_2eproto.file_level_metadata[19];
+    return ::descriptor_table_hashdb_2eproto.file_level_metadata[20];
   }
 
   public:
@@ -3394,7 +3589,7 @@ class SetResponse PROTOBUF_FINAL :
                &_SetResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    20;
+    21;
 
   friend void swap(SetResponse& a, SetResponse& b) {
     a.Swap(&b);
@@ -3819,7 +4014,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_hashdb_2eproto);
-    return ::descriptor_table_hashdb_2eproto.file_level_metadata[21];
+    return ::descriptor_table_hashdb_2eproto.file_level_metadata[22];
   }
 
   public:
@@ -3851,7 +4046,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_hashdb_2eproto);
-    return ::descriptor_table_hashdb_2eproto.file_level_metadata[22];
+    return ::descriptor_table_hashdb_2eproto.file_level_metadata[23];
   }
 
   public:
@@ -3901,7 +4096,7 @@ class GetResponse PROTOBUF_FINAL :
                &_GetResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    23;
+    24;
 
   friend void swap(GetResponse& a, GetResponse& b) {
     a.Swap(&b);
@@ -4232,7 +4427,7 @@ class SetProgramResponse PROTOBUF_FINAL :
                &_SetProgramResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    24;
+    25;
 
   friend void swap(SetProgramResponse& a, SetProgramResponse& b) {
     a.Swap(&b);
@@ -4378,7 +4573,7 @@ class GetProgramResponse PROTOBUF_FINAL :
                &_GetProgramResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    25;
+    26;
 
   friend void swap(GetProgramResponse& a, GetProgramResponse& b) {
     a.Swap(&b);
@@ -4551,7 +4746,7 @@ class FlushResponse PROTOBUF_FINAL :
                &_FlushResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    26;
+    27;
 
   friend void swap(FlushResponse& a, FlushResponse& b) {
     a.Swap(&b);
@@ -4719,7 +4914,7 @@ class GetFlushStatusResponse PROTOBUF_FINAL :
                &_GetFlushStatusResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    27;
+    28;
 
   friend void swap(GetFlushStatusResponse& a, GetFlushStatusResponse& b) {
     a.Swap(&b);
@@ -4933,7 +5128,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_hashdb_2eproto);
-    return ::descriptor_table_hashdb_2eproto.file_level_metadata[28];
+    return ::descriptor_table_hashdb_2eproto.file_level_metadata[29];
   }
 
   public:
@@ -4967,7 +5162,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_hashdb_2eproto);
-    return ::descriptor_table_hashdb_2eproto.file_level_metadata[29];
+    return ::descriptor_table_hashdb_2eproto.file_level_metadata[30];
   }
 
   public:
@@ -5017,7 +5212,7 @@ class GetFlushDataResponse PROTOBUF_FINAL :
                &_GetFlushDataResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    30;
+    31;
 
   friend void swap(GetFlushDataResponse& a, GetFlushDataResponse& b) {
     a.Swap(&b);
@@ -5250,7 +5445,7 @@ class ConsolidateStateResponse PROTOBUF_FINAL :
                &_ConsolidateStateResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    31;
+    32;
 
   friend void swap(ConsolidateStateResponse& a, ConsolidateStateResponse& b) {
     a.Swap(&b);
@@ -5438,7 +5633,7 @@ class PurgeResponse PROTOBUF_FINAL :
                &_PurgeResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    32;
+    33;
 
   friend void swap(PurgeResponse& a, PurgeResponse& b) {
     a.Swap(&b);
@@ -5584,7 +5779,7 @@ class ReadTreeResponse PROTOBUF_FINAL :
                &_ReadTreeResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    33;
+    34;
 
   friend void swap(ReadTreeResponse& a, ReadTreeResponse& b) {
     a.Swap(&b);
@@ -5770,7 +5965,7 @@ class CancelBatchResponse PROTOBUF_FINAL :
                &_CancelBatchResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    34;
+    35;
 
   friend void swap(CancelBatchResponse& a, CancelBatchResponse& b) {
     a.Swap(&b);
@@ -5916,7 +6111,7 @@ class ResetDBResponse PROTOBUF_FINAL :
                &_ResetDBResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    35;
+    36;
 
   friend void swap(ResetDBResponse& a, ResetDBResponse& b) {
     a.Swap(&b);
@@ -6062,7 +6257,7 @@ class Fea PROTOBUF_FINAL :
                &_Fea_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    36;
+    37;
 
   friend void swap(Fea& a, Fea& b) {
     a.Swap(&b);
@@ -6232,7 +6427,7 @@ class Fea12 PROTOBUF_FINAL :
                &_Fea12_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    37;
+    38;
 
   friend void swap(Fea12& a, Fea12& b) {
     a.Swap(&b);
@@ -6490,7 +6685,7 @@ class HashValueGL PROTOBUF_FINAL :
                &_HashValueGL_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    38;
+    39;
 
   friend void swap(HashValueGL& a, HashValueGL& b) {
     a.Swap(&b);
@@ -6656,7 +6851,7 @@ class KeyValue PROTOBUF_FINAL :
                &_KeyValue_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    39;
+    40;
 
   friend void swap(KeyValue& a, KeyValue& b) {
     a.Swap(&b);
@@ -6829,7 +7024,7 @@ class FeList PROTOBUF_FINAL :
                &_FeList_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    40;
+    41;
 
   friend void swap(FeList& a, FeList& b) {
     a.Swap(&b);
@@ -6980,7 +7175,7 @@ class SiblingList PROTOBUF_FINAL :
                &_SiblingList_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    41;
+    42;
 
   friend void swap(SiblingList& a, SiblingList& b) {
     a.Swap(&b);
@@ -7131,7 +7326,7 @@ class ResultCode PROTOBUF_FINAL :
                &_ResultCode_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    42;
+    43;
 
   friend void swap(ResultCode& a, ResultCode& b) {
     a.Swap(&b);
@@ -9103,6 +9298,192 @@ inline void FinishTxRequest::_internal_set_persistence(::hashdb::v1::Persistence
 inline void FinishTxRequest::set_persistence(::hashdb::v1::Persistence value) {
   _internal_set_persistence(value);
   // @@protoc_insertion_point(field_set:hashdb.v1.FinishTxRequest.persistence)
+}
+
+// -------------------------------------------------------------------
+
+// StartBlockRequest
+
+// string batch_uuid = 1;
+inline void StartBlockRequest::clear_batch_uuid() {
+  batch_uuid_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& StartBlockRequest::batch_uuid() const {
+  // @@protoc_insertion_point(field_get:hashdb.v1.StartBlockRequest.batch_uuid)
+  return _internal_batch_uuid();
+}
+inline void StartBlockRequest::set_batch_uuid(const std::string& value) {
+  _internal_set_batch_uuid(value);
+  // @@protoc_insertion_point(field_set:hashdb.v1.StartBlockRequest.batch_uuid)
+}
+inline std::string* StartBlockRequest::mutable_batch_uuid() {
+  // @@protoc_insertion_point(field_mutable:hashdb.v1.StartBlockRequest.batch_uuid)
+  return _internal_mutable_batch_uuid();
+}
+inline const std::string& StartBlockRequest::_internal_batch_uuid() const {
+  return batch_uuid_.Get();
+}
+inline void StartBlockRequest::_internal_set_batch_uuid(const std::string& value) {
+  
+  batch_uuid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void StartBlockRequest::set_batch_uuid(std::string&& value) {
+  
+  batch_uuid_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:hashdb.v1.StartBlockRequest.batch_uuid)
+}
+inline void StartBlockRequest::set_batch_uuid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  batch_uuid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:hashdb.v1.StartBlockRequest.batch_uuid)
+}
+inline void StartBlockRequest::set_batch_uuid(const char* value,
+    size_t size) {
+  
+  batch_uuid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:hashdb.v1.StartBlockRequest.batch_uuid)
+}
+inline std::string* StartBlockRequest::_internal_mutable_batch_uuid() {
+  
+  return batch_uuid_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* StartBlockRequest::release_batch_uuid() {
+  // @@protoc_insertion_point(field_release:hashdb.v1.StartBlockRequest.batch_uuid)
+  return batch_uuid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void StartBlockRequest::set_allocated_batch_uuid(std::string* batch_uuid) {
+  if (batch_uuid != nullptr) {
+    
+  } else {
+    
+  }
+  batch_uuid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), batch_uuid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:hashdb.v1.StartBlockRequest.batch_uuid)
+}
+inline std::string* StartBlockRequest::unsafe_arena_release_batch_uuid() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:hashdb.v1.StartBlockRequest.batch_uuid)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return batch_uuid_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void StartBlockRequest::unsafe_arena_set_allocated_batch_uuid(
+    std::string* batch_uuid) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (batch_uuid != nullptr) {
+    
+  } else {
+    
+  }
+  batch_uuid_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      batch_uuid, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:hashdb.v1.StartBlockRequest.batch_uuid)
+}
+
+// string old_state_root = 2;
+inline void StartBlockRequest::clear_old_state_root() {
+  old_state_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& StartBlockRequest::old_state_root() const {
+  // @@protoc_insertion_point(field_get:hashdb.v1.StartBlockRequest.old_state_root)
+  return _internal_old_state_root();
+}
+inline void StartBlockRequest::set_old_state_root(const std::string& value) {
+  _internal_set_old_state_root(value);
+  // @@protoc_insertion_point(field_set:hashdb.v1.StartBlockRequest.old_state_root)
+}
+inline std::string* StartBlockRequest::mutable_old_state_root() {
+  // @@protoc_insertion_point(field_mutable:hashdb.v1.StartBlockRequest.old_state_root)
+  return _internal_mutable_old_state_root();
+}
+inline const std::string& StartBlockRequest::_internal_old_state_root() const {
+  return old_state_root_.Get();
+}
+inline void StartBlockRequest::_internal_set_old_state_root(const std::string& value) {
+  
+  old_state_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void StartBlockRequest::set_old_state_root(std::string&& value) {
+  
+  old_state_root_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:hashdb.v1.StartBlockRequest.old_state_root)
+}
+inline void StartBlockRequest::set_old_state_root(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  old_state_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:hashdb.v1.StartBlockRequest.old_state_root)
+}
+inline void StartBlockRequest::set_old_state_root(const char* value,
+    size_t size) {
+  
+  old_state_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:hashdb.v1.StartBlockRequest.old_state_root)
+}
+inline std::string* StartBlockRequest::_internal_mutable_old_state_root() {
+  
+  return old_state_root_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* StartBlockRequest::release_old_state_root() {
+  // @@protoc_insertion_point(field_release:hashdb.v1.StartBlockRequest.old_state_root)
+  return old_state_root_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void StartBlockRequest::set_allocated_old_state_root(std::string* old_state_root) {
+  if (old_state_root != nullptr) {
+    
+  } else {
+    
+  }
+  old_state_root_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), old_state_root,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:hashdb.v1.StartBlockRequest.old_state_root)
+}
+inline std::string* StartBlockRequest::unsafe_arena_release_old_state_root() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:hashdb.v1.StartBlockRequest.old_state_root)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return old_state_root_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void StartBlockRequest::unsafe_arena_set_allocated_old_state_root(
+    std::string* old_state_root) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (old_state_root != nullptr) {
+    
+  } else {
+    
+  }
+  old_state_root_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      old_state_root, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:hashdb.v1.StartBlockRequest.old_state_root)
+}
+
+// .hashdb.v1.Persistence persistence = 3;
+inline void StartBlockRequest::clear_persistence() {
+  persistence_ = 0;
+}
+inline ::hashdb::v1::Persistence StartBlockRequest::_internal_persistence() const {
+  return static_cast< ::hashdb::v1::Persistence >(persistence_);
+}
+inline ::hashdb::v1::Persistence StartBlockRequest::persistence() const {
+  // @@protoc_insertion_point(field_get:hashdb.v1.StartBlockRequest.persistence)
+  return _internal_persistence();
+}
+inline void StartBlockRequest::_internal_set_persistence(::hashdb::v1::Persistence value) {
+  
+  persistence_ = value;
+}
+inline void StartBlockRequest::set_persistence(::hashdb::v1::Persistence value) {
+  _internal_set_persistence(value);
+  // @@protoc_insertion_point(field_set:hashdb.v1.StartBlockRequest.persistence)
 }
 
 // -------------------------------------------------------------------
@@ -13832,6 +14213,8 @@ inline void ResultCode::set_code(::hashdb::v1::ResultCode_Code value) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

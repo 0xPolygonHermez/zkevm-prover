@@ -20,12 +20,12 @@ public:
     string newStateRoot;
     uint64_t previousSubState;
     bool bValid;
-    unordered_map<string, vector<Goldilocks::Element>> dbWrite;
-    vector<string> dbDelete;
+    unordered_map<string, vector<Goldilocks::Element>> dbWriteNodes;
+    vector<string> dbDeleteNodes;
     TxSubState() : previousSubState(0), bValid(false)
     {
-        dbWrite.reserve(128);
-        dbDelete.reserve(128);
+        dbWriteNodes.reserve(128);
+        dbDeleteNodes.reserve(128);
     };
 };
 
@@ -36,9 +36,11 @@ public:
     string newStateRoot;
     uint64_t currentSubState;
     vector<TxSubState> subState;
+    unordered_map<string, vector<uint8_t>> dbWritePrograms;
     TxPersistenceState() : currentSubState(0)
     {
         subState.reserve(128);
+        dbWritePrograms.reserve(8);
     };
 };
 
@@ -68,14 +70,16 @@ public:
     string currentStateRoot;
     uint64_t currentBlock;
     vector<BlockState> blockState;
-    unordered_map<string, vector<Goldilocks::Element>> dbWrite;
+    unordered_map<string, vector<Goldilocks::Element>> dbWriteNodes;
+    unordered_map<string, vector<uint8_t>> dbWritePrograms;
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
     TimeMetricStorage timeMetricStorage;
 #endif
     BatchState() : currentBlock(0)
     {
         blockState.reserve(32);
-        dbWrite.reserve(1024);
+        dbWriteNodes.reserve(1024);
+        dbWritePrograms.reserve(8);
     };
 };
 
@@ -107,10 +111,13 @@ public:
     {
         return setStateRoot(batchUUID, block, tx, stateRoot, false, persistence);
     }
-    zkresult write (const string &batchUUID, uint64_t block, uint64_t tx, const string &_key, const vector<Goldilocks::Element> &value, const Persistence persistence);
+    zkresult writeNode (const string &batchUUID, uint64_t block, uint64_t tx, const string &_key, const vector<Goldilocks::Element> &value, const Persistence persistence);
     zkresult deleteNode (const string &batchUUID, uint64_t block, uint64_t tx, const string &_key, const Persistence persistence);
-    zkresult read (const string &batchUUID, const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog);
+    zkresult readNode (const string &batchUUID, const string &_key, vector<Goldilocks::Element> &value, DatabaseMap *dbReadLog);
+    zkresult writeProgram (const string &batchUUID, uint64_t block, uint64_t tx, const string &_key, const vector<uint8_t> &value, const Persistence persistence);
+    zkresult readProgram (const string &batchUUID, const string &_key, vector<uint8_t> &value, DatabaseMap *dbReadLog);
     zkresult finishTx (const string &batchUUID, const string &newStateRoot, const Persistence persistence);
+    zkresult startBlock (const string &batchUUID, const string &oldStateRoot, const Persistence persistence);
     zkresult finishBlock (const string &batchUUID, const string &newStateRoot, const Persistence persistence);
     zkresult flush (const string &batchUUID, const string &newStateRoot, const Persistence persistence, Database &db, uint64_t &flushId, uint64_t &lastSentFlushId);
     zkresult cancelBatch (const string &batchUUID);

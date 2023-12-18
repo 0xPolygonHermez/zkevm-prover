@@ -1319,6 +1319,8 @@ using grpc::Status;
     response->set_stored_flush_id(proverRequest.lastSentFlushId);
     response->set_prover_id(config.proverID);
     response->set_fork_id(proverRequest.input.publicInputsExtended.publicInputs.forkID);
+    response->set_error_rom(string2error(proverRequest.pFullTracer->get_error()));
+    response->set_invalid_batch(proverRequest.pFullTracer->get_invalid_batch());
     
     unordered_map<string, InfoReadWrite> * p_read_write_addresses = proverRequest.pFullTracer->get_read_write_addresses();
     if (p_read_write_addresses != NULL)
@@ -1351,6 +1353,7 @@ using grpc::Status;
         pProcessBlockResponse->set_ger(string2ba(block_responses[block].ger));
         pProcessBlockResponse->set_parent_hash(string2ba(block_responses[block].parent_hash));
         pProcessBlockResponse->set_timestamp(block_responses[block].timestamp);
+        pProcessBlockResponse->set_error(string2error(block_responses[block].error));
 
         for (uint64_t log=0; log<block_responses[block].logs.size(); log++)
         {
@@ -1764,7 +1767,8 @@ using grpc::Status;
     if (errorString == "invalidCodeSize"                  ) return ::executor::v1::ROM_ERROR_MAX_CODE_SIZE_EXCEEDED;
     if (errorString == "invalidCodeStartsEF"              ) return ::executor::v1::ROM_ERROR_INVALID_BYTECODE_STARTS_EF;
     if (errorString == "invalid_fork_id"                  ) return ::executor::v1::ROM_ERROR_UNSUPPORTED_FORK_ID;
-    if (errorString == "invalid_change_l2_block"          ) return ::executor::v1::ROM_ERROR_INVALID_TX_CHANGE_L2_BLOCK;
+    if (errorString == "invalid_change_l2_block_limit_timestamp") return ::executor::v1::ROM_ERROR_INVALID_TX_CHANGE_L2_BLOCK_LIMIT_TIMESTAMP;
+    if (errorString == "invalid_change_l2_block_min_timestamp"  ) return ::executor::v1::ROM_ERROR_INVALID_TX_CHANGE_L2_BLOCK_MIN_TIMESTAMP;
     if (errorString == "invalidDecodeChangeL2Block"       ) return ::executor::v1::ROM_ERROR_INVALID_DECODE_CHANGE_L2_BLOCK;
     if (errorString == "invalidNotFirstTxChangeL2Block"   ) return ::executor::v1::ROM_ERROR_INVALID_NOT_FIRST_TX_CHANGE_L2_BLOCK;
     if (errorString == ""                                 ) return ::executor::v1::ROM_ERROR_NO_ERROR;
@@ -1814,6 +1818,7 @@ using grpc::Status;
     case ZKR_SM_MAIN_MEMORY:                                return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_MEMORY;
     case ZKR_SM_MAIN_STORAGE_READ_MISMATCH:                 return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_STORAGE_READ_MISMATCH;
     case ZKR_SM_MAIN_STORAGE_WRITE_MISMATCH:                return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_STORAGE_WRITE_MISMATCH;
+
     case ZKR_SM_MAIN_HASHK_VALUE_MISMATCH:                  return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHK_VALUE_MISMATCH;
     case ZKR_SM_MAIN_HASHK_PADDING_MISMATCH:                return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHK_PADDING_MISMATCH;
     case ZKR_SM_MAIN_HASHK_SIZE_MISMATCH:                   return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHK_SIZE_MISMATCH;
@@ -1822,6 +1827,7 @@ using grpc::Status;
     case ZKR_SM_MAIN_HASHKDIGEST_NOT_FOUND:                 return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHKDIGEST_NOT_FOUND;
     case ZKR_SM_MAIN_HASHKDIGEST_DIGEST_MISMATCH:           return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHKDIGEST_DIGEST_MISMATCH;
     case ZKR_SM_MAIN_HASHKDIGEST_CALLED_TWICE:              return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHKDIGEST_CALLED_TWICE;
+
     case ZKR_SM_MAIN_HASHP_VALUE_MISMATCH:                  return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHP_VALUE_MISMATCH;
     case ZKR_SM_MAIN_HASHP_PADDING_MISMATCH:                return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHP_PADDING_MISMATCH;
     case ZKR_SM_MAIN_HASHP_SIZE_MISMATCH:                   return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHP_SIZE_MISMATCH;
@@ -1829,6 +1835,7 @@ using grpc::Status;
     case ZKR_SM_MAIN_HASHPLEN_CALLED_TWICE:                 return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHPLEN_CALLED_TWICE;
     case ZKR_SM_MAIN_HASHPDIGEST_DIGEST_MISMATCH:           return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHPDIGEST_DIGEST_MISMATCH;
     case ZKR_SM_MAIN_HASHPDIGEST_CALLED_TWICE:              return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_HASHPDIGEST_CALLED_TWICE;
+
     case ZKR_SM_MAIN_ARITH_MISMATCH:                        return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_ARITH_MISMATCH;
     case ZKR_SM_MAIN_ARITH_ECRECOVER_MISMATCH:              return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_ARITH_ECRECOVER_MISMATCH;
     case ZKR_SM_MAIN_BINARY_ADD_MISMATCH:                   return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_BINARY_ADD_MISMATCH;
