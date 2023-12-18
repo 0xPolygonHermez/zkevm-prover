@@ -303,6 +303,10 @@ message L1DataV2 {
 
 message DebugV2 {
     uint64 gas_limit = 1;
+    bytes new_state_root = 2; 
+    bytes new_acc_input_hash = 3;
+    bytes new_local_exit_root = 4;
+    uint64 new_batch_num = 5;
 }
 
 message ProcessBatchResponseV2 {

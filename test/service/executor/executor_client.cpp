@@ -219,12 +219,18 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
         request.set_fork_id(input.publicInputsExtended.publicInputs.forkID);
         request.set_from(input.from);
         executor::v1::DebugV2 *pDebug = new executor::v1::DebugV2();
-        if (input.debug.gasLimit > 0)
+        if (input.debug.newBatchNum > 0)
         {
             zkassertpermanent(pDebug != NULL);
             pDebug->set_gas_limit(input.debug.gasLimit);
+            pDebug->set_new_state_root(scalar2ba(input.debug.newStateRoot));
+            pDebug->set_new_acc_input_hash(scalar2ba(input.debug.newAccInputHash));
+            pDebug->set_new_local_exit_root(scalar2ba(input.debug.newLocalExitRoot));
+            pDebug->set_new_batch_num(input.debug.newBatchNum);
             request.set_allocated_debug(pDebug);
         }
+
+
         unordered_map<uint64_t, L1Data>::const_iterator itL1Data;
         for (itL1Data = input.l1InfoTreeData.begin(); itL1Data != input.l1InfoTreeData.end(); itL1Data++)
         {

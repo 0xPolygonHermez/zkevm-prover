@@ -1226,6 +1226,10 @@ using grpc::Status;
     }
 
     proverRequest.input.debug.gasLimit = request->debug().gas_limit();
+    ba2scalar(proverRequest.input.debug.newStateRoot, request->debug().new_state_root());
+    ba2scalar(proverRequest.input.debug.newAccInputHash, request->debug().new_acc_input_hash());
+    ba2scalar(proverRequest.input.debug.newLocalExitRoot, request->debug().new_local_exit_root());
+    proverRequest.input.debug.newBatchNum = request->debug().new_batch_num();
 
 #ifdef LOG_SERVICE_EXECUTOR_INPUT
     zklog.info(string("ExecutorServiceImpl::ProcessBatchV2() got") +
