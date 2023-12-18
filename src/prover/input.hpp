@@ -45,11 +45,7 @@ class InputDebug
 {
 public:
     uint64_t gasLimit;
-    mpz_class newStateRoot;
-    mpz_class newAccInputHash;
-    mpz_class newLocalExitRoot;
-    uint32_t  newBatchNum;
-    InputDebug() : gasLimit(0), newBatchNum(0) {};
+    InputDebug() : gasLimit(0) {};
 };
 
 class Input

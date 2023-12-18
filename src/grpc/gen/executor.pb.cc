@@ -1671,7 +1671,7 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "RLP\020\036\022,\n(ROM_ERROR_INVALID_DECODE_CHANGE"
   "_L2_BLOCK\020\037\0222\n.ROM_ERROR_INVALID_NOT_FIR"
   "ST_TX_CHANGE_L2_BLOCK\020 \022(\n$ROM_ERROR_INV"
-  "ALID_TX_CHANGE_L2_BLOCK\020!*\224\'\n\rExecutorEr"
+  "ALID_TX_CHANGE_L2_BLOCK\020!*\236(\n\rExecutorEr"
   "ror\022\036\n\032EXECUTOR_ERROR_UNSPECIFIED\020\000\022\033\n\027E"
   "XECUTOR_ERROR_NO_ERROR\020\001\022\033\n\027EXECUTOR_ERR"
   "OR_DB_ERROR\020\002\0222\n.EXECUTOR_ERROR_SM_MAIN_"
@@ -1797,15 +1797,19 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "XECUTOR_ERROR_INVALID_L1_SMT_PROOF\020e\022\"\n\036"
   "EXECUTOR_ERROR_INVALID_BALANCE\020f\022.\n*EXEC"
   "UTOR_ERROR_SM_MAIN_BINARY_LT4_MISMATCH\020g"
-  "2\226\002\n\017ExecutorService\022U\n\014ProcessBatch\022 .e"
-  "xecutor.v1.ProcessBatchRequest\032!.executo"
-  "r.v1.ProcessBatchResponse\"\000\022[\n\016ProcessBa"
-  "tchV2\022\".executor.v1.ProcessBatchRequestV"
-  "2\032#.executor.v1.ProcessBatchResponseV2\"\000"
-  "\022O\n\016GetFlushStatus\022\026.google.protobuf.Emp"
-  "ty\032#.executor.v1.GetFlushStatusResponse\""
-  "\000B>Z<github.com/0xPolygonHermez/zkevm-no"
-  "de/state/runtime/executorb\006proto3"
+  "\022)\n%EXECUTOR_ERROR_INVALID_NEW_STATE_ROO"
+  "T\020h\022-\n)EXECUTOR_ERROR_INVALID_NEW_ACC_IN"
+  "PUT_HASH\020i\022.\n*EXECUTOR_ERROR_INVALID_NEW"
+  "_LOCAL_EXIT_ROOT\020j2\226\002\n\017ExecutorService\022U"
+  "\n\014ProcessBatch\022 .executor.v1.ProcessBatc"
+  "hRequest\032!.executor.v1.ProcessBatchRespo"
+  "nse\"\000\022[\n\016ProcessBatchV2\022\".executor.v1.Pr"
+  "ocessBatchRequestV2\032#.executor.v1.Proces"
+  "sBatchResponseV2\"\000\022O\n\016GetFlushStatus\022\026.g"
+  "oogle.protobuf.Empty\032#.executor.v1.GetFl"
+  "ushStatusResponse\"\000B>Z<github.com/0xPoly"
+  "gonHermez/zkevm-node/state/runtime/execu"
+  "torb\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_executor_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2fempty_2eproto,
@@ -1855,7 +1859,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_exe
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_executor_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_executor_2eproto = {
-  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 14833,
+  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 14971,
   &descriptor_table_executor_2eproto_once, descriptor_table_executor_2eproto_sccs, descriptor_table_executor_2eproto_deps, 41, 1,
   schemas, file_default_instances, TableStruct_executor_2eproto::offsets,
   file_level_metadata_executor_2eproto, 41, file_level_enum_descriptors_executor_2eproto, file_level_service_descriptors_executor_2eproto,
@@ -2021,6 +2025,9 @@ bool ExecutorError_IsValid(int value) {
     case 101:
     case 102:
     case 103:
+    case 104:
+    case 105:
+    case 106:
       return true;
     default:
       return false;

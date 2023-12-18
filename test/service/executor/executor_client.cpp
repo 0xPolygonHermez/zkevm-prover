@@ -219,14 +219,32 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
         request.set_fork_id(input.publicInputsExtended.publicInputs.forkID);
         request.set_from(input.from);
         executor::v1::DebugV2 *pDebug = new executor::v1::DebugV2();
-        if (input.debug.newBatchNum > 0)
+        zkassertpermanent(pDebug != NULL);
+        bool bDebug = false;
+
+        if (input.publicInputsExtended.newStateRoot != 0)
         {
-            zkassertpermanent(pDebug != NULL);
+            bDebug = true;
+            pDebug->set_new_state_root(scalar2ba(input.publicInputsExtended.newStateRoot));
+        }
+        if (input.publicInputsExtended.newAccInputHash != 0){
+            bDebug = true;
+            pDebug->set_new_acc_input_hash(scalar2ba(input.publicInputsExtended.newAccInputHash));
+        }
+        if (input.publicInputsExtended.newLocalExitRoot != 0){
+            bDebug = true;
+            pDebug->set_new_local_exit_root(scalar2ba(input.publicInputsExtended.newLocalExitRoot));
+        }
+        if (input.publicInputsExtended.newBatchNum != 0){
+            bDebug = true;
+            pDebug->set_new_batch_num(input.publicInputsExtended.newBatchNum);
+        }
+        if (input.debug.gasLimit != 0)
+        {
+            bDebug = true;
             pDebug->set_gas_limit(input.debug.gasLimit);
-            pDebug->set_new_state_root(scalar2ba(input.debug.newStateRoot));
-            pDebug->set_new_acc_input_hash(scalar2ba(input.debug.newAccInputHash));
-            pDebug->set_new_local_exit_root(scalar2ba(input.debug.newLocalExitRoot));
-            pDebug->set_new_batch_num(input.debug.newBatchNum);
+        }
+        if( bDebug ){
             request.set_allocated_debug(pDebug);
         }
 
