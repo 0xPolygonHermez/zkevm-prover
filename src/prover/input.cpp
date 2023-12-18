@@ -643,8 +643,12 @@ void Input::saveGlobals (json &input) const
         {
             input["stepsN"] = stepsN;
         }
-        if (debug.gasLimit != 0)
+        if (debug.newBatchNum != 0)
         {
+            input["newStateRoot"] = NormalizeTo0xNFormat(debug.newStateRoot.get_str(16), 64);
+            input["newAccInputHash"] = NormalizeTo0xNFormat(debug.newAccInputHash.get_str(16), 64);
+            input["newLocalExitRoot"] = NormalizeTo0xNFormat(debug.newLocalExitRoot.get_str(16), 64);
+            input["newNumBatch"] = debug.newBatchNum;
             input["gasLimit"] = debug.gasLimit;
         }
         unordered_map<uint64_t, L1Data>::const_iterator it;
