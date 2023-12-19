@@ -1371,7 +1371,7 @@ zkresult StateManager64::readProgram (const string &batchUUID, const string &key
     }
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-    batchState.timeMetricStorage.add("read program not found", TimeDiff(t));
+    //batchState.timeMetricStorage.add("read program not found", TimeDiff(t));
 #endif
 
     Unlock();

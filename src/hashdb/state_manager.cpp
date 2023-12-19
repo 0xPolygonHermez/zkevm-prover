@@ -873,7 +873,7 @@ zkresult StateManager::finishBlock (const string &batchUUID, const string &_stat
 zkresult StateManager::flush (const string &batchUUID, const string &_newStateRoot, const Persistence _persistence, Database &db, uint64_t &flushId, uint64_t &lastSentFlushId)
 {
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-    struct timeval t;
+    struct timeval t, t2;
     gettimeofday(&t, NULL);
 #endif
 
@@ -917,9 +917,16 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
     }
     BatchState &batchState = it->second;
 
-    // Purge batch, i.e. delete unnecessary blocks
+    /////////////////////////////////////////////////
+    // Purge batch, i.e. delete unnecessary blocks //
+    /////////////////////////////////////////////////
+
     if (config.stateManagerPurge && !_newStateRoot.empty() && !batchState.blockState.empty() && !batchState.oldStateRoot.empty())
     {
+
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+        gettimeofday(&t2, NULL);
+#endif
 
         // Search for the first block that starts at the new state root
         uint64_t firstBlock;
@@ -983,7 +990,15 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
                 return ZKR_STATE_MANAGER;
             }
         }
+
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+        batchState.timeMetricStorage.add("purge blocks", TimeDiff(t2));
+#endif
     }
+
+    // Data to write to database
+    unordered_map<string, vector<Goldilocks::Element>> dbWriteNodes;
+    string lastNewStateRoot;
 
     // For all blocks
     for (uint64_t block=0; block<batchState.blockState.size(); block++)
@@ -1029,6 +1044,13 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
                     return ZKR_STATE_MANAGER;
                 }
 
+                //////////////////////////
+                // Find valid substates //
+                //////////////////////////
+
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+                gettimeofday(&t2, NULL);
+#endif
                 uint64_t currentSubState = txState.persistence[persistence].currentSubState;
                 while (true)
                 {
@@ -1044,10 +1066,10 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
                                 " currentSubState=" + to_string(txState.persistence[persistence].currentSubState) +
                                 " substate.oldStateRoot=" + txState.persistence[persistence].subState[currentSubState].oldStateRoot);
 
-    #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
                             batchState.timeMetricStorage.add("flush UUID inconsistent old state roots", TimeDiff(t));
                             batchState.timeMetricStorage.print("State Manager calls");
-    #endif
+#endif
                             Unlock();
                             return ZKR_STATE_MANAGER;
                         }
@@ -1086,134 +1108,73 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
                             " txState.oldStateRoot=" + txState.persistence[persistence].oldStateRoot +
                             " currentSubState=" + to_string(txState.persistence[persistence].currentSubState) +
                             " substate.oldStateRoot=" + txState.persistence[persistence].subState[currentSubState].oldStateRoot);
-    #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
                         batchState.timeMetricStorage.add("flush UUID cannot find previous tx sub-state", TimeDiff(t));
                         batchState.timeMetricStorage.print("State Manager calls");
-    #endif
+#endif
                         Unlock();
                         return ZKR_STATE_MANAGER;
                     }
                     currentSubState = previousSubState;
                 }
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+                batchState.timeMetricStorage.add("find valid substates", TimeDiff(t2));
+#endif
 
-                // Delete invalid TX sub-states
-                if (db.config.stateManagerPurge)
-                {
-                    // Delete all substates that are not valid or that did not change the state root (i.e. SMT set update in which new value was equal to old value)
-                    for (int64_t i = txState.persistence[persistence].subState.size()-1; i>=0; i--)
-                    {
-                        if (!txState.persistence[persistence].subState[i].bValid ||
-                            (txState.persistence[persistence].subState[i].oldStateRoot == txState.persistence[persistence].subState[i].newStateRoot) )
-                        {
-                            txState.persistence[persistence].subState.erase(txState.persistence[persistence].subState.begin() + i);
-                        }
-                    }
+                /////////////////////////////////
+                // Load data to write database //
+                /////////////////////////////////
 
-                    // Delete unneeded hashes: delete only hashes written previously to the deletion time
-
-                    // For all sub-states
-                    for (uint64_t ss = 0; ss < txState.persistence[persistence].subState.size(); ss++)
-                    {
-                        // For all keys to delete
-                        for (uint64_t k = 0; k < txState.persistence[persistence].subState[ss].dbDeleteNodes.size(); k++)
-                        {
-                            // At current tx, for all sub-states previous to the current sub-state
-                            for (uint64_t pss = 0; pss < ss; pss++)
-                            {
-                                txState.persistence[persistence].subState[pss].dbWriteNodes.erase(txState.persistence[persistence].subState[ss].dbDeleteNodes[k]);
-                            }
-
-                            // For previous txs of this block, for all sub-states
-                            for (uint64_t ptx = 0; ptx < tx; ptx++)
-                            {
-                                TxPersistenceState persistenceState = blockState.txState[ptx].persistence[persistence];
-                                for (uint64_t pss = 0; pss < persistenceState.subState.size(); pss++)
-                                {
-                                    persistenceState.subState[pss].dbWriteNodes.erase(txState.persistence[persistence].subState[ss].dbDeleteNodes[k]);
-                                }
-                            }
-                        }
-                        txState.persistence[persistence].subState[ss].dbDeleteNodes.clear();
-                    }
-                }
-
-                // Save data to database
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+                gettimeofday(&t2, NULL);
+#endif
 
                 // For all sub-states
                 for (uint64_t ss = 0; ss < txState.persistence[persistence].subState.size(); ss++)
                 {
-                    // For all keys to write
-                    unordered_map<string, vector<Goldilocks::Element>>::const_iterator writeIt;
-                    for ( writeIt = txState.persistence[persistence].subState[ss].dbWriteNodes.begin();
-                          writeIt != txState.persistence[persistence].subState[ss].dbWriteNodes.end();
-                          writeIt++ )
+                    // Skip invalid sub-states (if purge is active)
+                    if (db.config.stateManagerPurge &&
+                        ( !txState.persistence[persistence].subState[ss].bValid ||
+                          (txState.persistence[persistence].subState[ss].oldStateRoot == txState.persistence[persistence].subState[ss].newStateRoot) ) )
                     {
-                        zkr = db.write(writeIt->first, NULL, writeIt->second, persistence == PERSISTENCE_DATABASE ? 1 : 0);
-                        if (zkr != ZKR_SUCCESS)
+                        continue;
+                    }
+
+                    // Add node keys to dbWriteNodes
+                    dbWriteNodes.insert( txState.persistence[persistence].subState[ss].dbWriteNodes.begin(),
+                                         txState.persistence[persistence].subState[ss].dbWriteNodes.end());
+
+                    // Delete node keys (if purge is active)
+                    if (db.config.stateManagerPurge)
+                    {
+                        for (uint64_t k = 0; k < txState.persistence[persistence].subState[ss].dbDeleteNodes.size(); k++)
                         {
-                            zklog.error("StateManager::flush() failed calling db.write() result=" + zkresult2string(zkr));
-                            state.erase(it);
-
-                            //TimerStopAndLog(STATE_MANAGER_FLUSH);
-
-    #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-                            batchState.timeMetricStorage.add("flush error db.write", TimeDiff(t));
-                            batchState.timeMetricStorage.print("State Manager calls");
-    #endif
-                            Unlock();
-                            return zkr;
+                            dbWriteNodes.erase(txState.persistence[persistence].subState[ss].dbDeleteNodes[k]);
                         }
                     }
+
+                    // Copy new state root
+                    lastNewStateRoot = txState.persistence[persistence].newStateRoot;
                 }
 
-                if (persistence == PERSISTENCE_DATABASE)
-                {
-                    vector<Goldilocks::Element> fea;
-                    string2fea(db.fr, txState.persistence[persistence].newStateRoot, fea);
-                    if (fea.size() != 4)
-                    {
-                        zklog.error("StateManager::flush() failed calling string2fea() fea.size=" + to_string(fea.size()));
-                        state.erase(it);
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+                batchState.timeMetricStorage.add("load data to write to DB", TimeDiff(t2));
+#endif
 
-                        //TimerStopAndLog(STATE_MANAGER_FLUSH);
+                ///////////////////////////////////////////
+                // Write programs of this TX to database //
+                ///////////////////////////////////////////
 
-    #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-                        batchState.timeMetricStorage.add("flush error string2fea", TimeDiff(t));
-                        batchState.timeMetricStorage.print("State Manager calls");
-    #endif
-                        Unlock();
-                        return zkr;
-
-                    }
-                    Goldilocks::Element newStateRootFea[4];
-                    newStateRootFea[0] = fea[3];
-                    newStateRootFea[1] = fea[2];
-                    newStateRootFea[2] = fea[1];
-                    newStateRootFea[3] = fea[0];
-
-                    zkr = db.updateStateRoot(newStateRootFea);
-                    if (zkr != ZKR_SUCCESS)
-                    {
-                        zklog.error("StateManager::flush() failed calling db.updateStateRoot() result=" + zkresult2string(zkr));
-                        state.erase(it);
-
-                        //TimerStopAndLog(STATE_MANAGER_FLUSH);
-
-    #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-                        batchState.timeMetricStorage.add("flush error db.updateStateRoot", TimeDiff(t));
-                        batchState.timeMetricStorage.print("State Manager calls");
-    #endif
-                        Unlock();
-                        return zkr;
-                    }
-                }
-
-                // For all programs to write
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+                gettimeofday(&t2, NULL);
+#endif
+                // For all programs in dbWritePrograms
                 unordered_map<string, vector<uint8_t>>::const_iterator writeIt;
                 for ( writeIt = txState.persistence[persistence].dbWritePrograms.begin();
-                    writeIt != txState.persistence[persistence].dbWritePrograms.end();
-                    writeIt++ )
+                      writeIt != txState.persistence[persistence].dbWritePrograms.end();
+                      writeIt++ )
                 {
+                    // Call db.setProgram
                     zkr = db.setProgram(writeIt->first, writeIt->second, persistence == PERSISTENCE_DATABASE ? 1 : 0);
                     if (zkr != ZKR_SUCCESS)
                     {
@@ -1230,10 +1191,71 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
                         return zkr;
                     }
                 }
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+                batchState.timeMetricStorage.add("db.setProgram", TimeDiff(t2));
+#endif
             }
         }
     }
 
+    // Write nodes to database
+    unordered_map<string, vector<Goldilocks::Element>>::const_iterator writeIt;
+    for (writeIt = dbWriteNodes.begin(); writeIt != dbWriteNodes.end(); writeIt++)
+    {
+        zkr = db.write(writeIt->first, NULL, writeIt->second, _persistence == PERSISTENCE_DATABASE ? 1 : 0);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("StateManager::flush() failed calling db.write() result=" + zkresult2string(zkr));
+            state.erase(it);
+
+            //TimerStopAndLog(STATE_MANAGER_FLUSH);
+
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+            batchState.timeMetricStorage.add("flush error db.write", TimeDiff(t));
+            batchState.timeMetricStorage.print("State Manager calls");
+#endif
+            Unlock();
+            return zkr;
+        }
+    }
+
+    // Write last new state root to database
+    if (!lastNewStateRoot.empty())
+    {
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+        gettimeofday(&t2, NULL);
+#endif
+        // Convert string to field element array
+        Goldilocks::Element newStateRootFea[4];
+        string2fea(db.fr, lastNewStateRoot, newStateRootFea);
+
+        // Call db.updateStateRoot()
+        zkr = db.updateStateRoot(newStateRootFea);
+        if (zkr != ZKR_SUCCESS)
+        {
+            zklog.error("StateManager::flush() failed calling db.updateStateRoot() result=" + zkresult2string(zkr));
+            state.erase(it);
+
+            //TimerStopAndLog(STATE_MANAGER_FLUSH);
+
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+            batchState.timeMetricStorage.add("flush error db.updateStateRoot", TimeDiff(t));
+            batchState.timeMetricStorage.print("State Manager calls");
+#endif
+            Unlock();
+            return zkr;
+        }
+
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+        batchState.timeMetricStorage.add("db.updateStateRoot", TimeDiff(t2));
+#endif
+    }
+
+    // Flush written data to remote database
+
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+    gettimeofday(&t2, NULL);
+#endif
     zkr = db.flush(flushId, lastSentFlushId);
     if (zkr != ZKR_SUCCESS)
     {
@@ -1241,6 +1263,7 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
     }
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+    batchState.timeMetricStorage.add("db.flush", TimeDiff(t2));
     batchState.timeMetricStorage.add("flush success", TimeDiff(t));
     batchState.timeMetricStorage.print("State Manager calls");
 #endif
