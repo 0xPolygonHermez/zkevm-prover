@@ -303,6 +303,10 @@ message L1DataV2 {
 
 message DebugV2 {
     uint64 gas_limit = 1;
+    bytes new_state_root = 2; 
+    bytes new_acc_input_hash = 3;
+    bytes new_local_exit_root = 4;
+    uint64 new_batch_num = 5;
 }
 
 message ProcessBatchResponseV2 {
@@ -832,4 +836,10 @@ enum ExecutorError {
     EXECUTOR_ERROR_INVALID_BALANCE = 102;
     // EXECUTOR_ERROR_SM_MAIN_BINARY_LT4_MISMATCH indicates that the binary instruction less than four opcode failed
     EXECUTOR_ERROR_SM_MAIN_BINARY_LT4_MISMATCH = 103;
+    // EXECUTOR_ERROR_INVALID_NEW_STATE_ROOT indicates that the input parameter new_state_root is invalid
+    EXECUTOR_ERROR_INVALID_NEW_STATE_ROOT = 104;
+    // EXECUTOR_ERROR_INVALID_NEW_ACC_INPUT_HASH indicates that the input parameter new_acc_input_hash is invalid
+    EXECUTOR_ERROR_INVALID_NEW_ACC_INPUT_HASH = 105;
+    // EXECUTOR_ERROR_INVALID_NEW_LOCAL_EXIT_ROOT indicates that the input parameter new_local_exit_root is invalid
+    EXECUTOR_ERROR_INVALID_NEW_LOCAL_EXIT_ROOT = 106;
 }
