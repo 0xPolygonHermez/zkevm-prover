@@ -28,13 +28,6 @@ set<string> opIncContext = {
     "CREATE",
     "CREATE2" };
 
-set<string> opDecContext = {
-    "SELFDESTRUCT",
-    "STOP",
-    "INVALID",
-    "REVERT",
-    "RETURN" };
-
 set<string> opCall = {
     "CALL",
     "STATICCALL",
