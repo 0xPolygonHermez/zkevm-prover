@@ -314,13 +314,7 @@ void getTransactionHash( string    &to,
 /***************/
 
 zkresult FullTracer::handleEvent(Context &ctx, const RomCommand &cmd)
-{
-    // Full tracer should only be used during a process batch request
-    if (ctx.proverRequest.type != prt_processBatch)
-    {
-        return ZKR_SUCCESS;
-    }
-    
+{    
     if (cmd.function == f_storeLog)
     {
         // if (ctx.proverRequest.bNoCounters) return;
