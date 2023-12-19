@@ -1226,6 +1226,32 @@ using grpc::Status;
     }
 
     proverRequest.input.debug.gasLimit = request->debug().gas_limit();
+    
+    if (request->debug().new_state_root().size() > 32)
+    {
+        zklog.error("ExecutorServiceImpl::ProcessBatchV2() got new_state_root too long, size=" + to_string(request->debug().new_state_root().size()), &proverRequest.tags);
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_NEW_STATE_ROOT);
+        //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+        return Status::OK;
+    }
+    ba2scalar(proverRequest.input.publicInputsExtended.newStateRoot, request->debug().new_state_root());
+    if (request->debug().new_acc_input_hash().size() > 32)
+    {
+        zklog.error("ExecutorServiceImpl::ProcessBatchV2() got new_acc_input_hash too long, size=" + to_string(request->debug().new_acc_input_hash().size()), &proverRequest.tags);
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_NEW_ACC_INPUT_HASH);
+        //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+        return Status::OK;
+    }
+    ba2scalar(proverRequest.input.publicInputsExtended.newAccInputHash, request->debug().new_acc_input_hash());
+    if (request->debug().new_local_exit_root().size() > 32)
+    {
+        zklog.error("ExecutorServiceImpl::ProcessBatchV2() got new_local_exit_root too long, size=" + to_string(request->debug().new_local_exit_root().size()), &proverRequest.tags);
+        response->set_error(executor::v1::EXECUTOR_ERROR_INVALID_NEW_LOCAL_EXIT_ROOT);
+        //TimerStopAndLog(EXECUTOR_PROCESS_BATCH);
+        return Status::OK;
+    }
+    ba2scalar(proverRequest.input.publicInputsExtended.newLocalExitRoot, request->debug().new_local_exit_root());
+    proverRequest.input.publicInputsExtended.newBatchNum = request->debug().new_batch_num();
 
 #ifdef LOG_SERVICE_EXECUTOR_INPUT
     zklog.info(string("ExecutorServiceImpl::ProcessBatchV2() got") +

@@ -218,13 +218,49 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
         request.set_chain_id(input.publicInputsExtended.publicInputs.chainID);
         request.set_fork_id(input.publicInputsExtended.publicInputs.forkID);
         request.set_from(input.from);
-        executor::v1::DebugV2 *pDebug = new executor::v1::DebugV2();
-        if (input.debug.gasLimit > 0)
+        executor::v1::DebugV2 *pDebug = NULL;
+        if (input.publicInputsExtended.newStateRoot != 0)
         {
-            zkassertpermanent(pDebug != NULL);
+            if(pDebug == NULL)
+            {
+                pDebug = new executor::v1::DebugV2();
+            }
+            pDebug->set_new_state_root(scalar2ba(input.publicInputsExtended.newStateRoot));
+        }
+        if (input.publicInputsExtended.newAccInputHash != 0){
+            if(pDebug == NULL)
+            {
+                pDebug = new executor::v1::DebugV2();
+            }
+            pDebug->set_new_acc_input_hash(scalar2ba(input.publicInputsExtended.newAccInputHash));
+        }
+        if (input.publicInputsExtended.newLocalExitRoot != 0){
+            if(pDebug == NULL)
+            {
+                pDebug = new executor::v1::DebugV2();
+            }
+            pDebug->set_new_local_exit_root(scalar2ba(input.publicInputsExtended.newLocalExitRoot));
+        }
+        if (input.publicInputsExtended.newBatchNum != 0){
+            if(pDebug == NULL)
+            {
+                pDebug = new executor::v1::DebugV2();
+            }
+            pDebug->set_new_batch_num(input.publicInputsExtended.newBatchNum);
+        }
+        if (input.debug.gasLimit != 0)
+        {
+            if(pDebug == NULL)
+            {
+                pDebug = new executor::v1::DebugV2();
+            }
             pDebug->set_gas_limit(input.debug.gasLimit);
+        }
+        if( pDebug != NULL ){
             request.set_allocated_debug(pDebug);
         }
+
+
         unordered_map<uint64_t, L1Data>::const_iterator itL1Data;
         for (itL1Data = input.l1InfoTreeData.begin(); itL1Data != input.l1InfoTreeData.end(); itL1Data++)
         {
