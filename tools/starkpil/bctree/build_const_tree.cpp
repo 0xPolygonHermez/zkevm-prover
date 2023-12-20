@@ -9,6 +9,7 @@
 #include <fstream>
 #include "timer.hpp"
 #include "merkleTreeBN128.hpp"
+#include "zkglobals.hpp"
 #include <filesystem>
 #include <cstdint>
 
@@ -21,8 +22,6 @@ using json = nlohmann::json;
 #define maxNperThread 1 << 18
 
 #define SIZE_GL 8
-
-Goldilocks fr;
 
 string time()
 {
