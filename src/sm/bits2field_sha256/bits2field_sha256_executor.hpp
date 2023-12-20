@@ -37,7 +37,7 @@ public:
     /* Constructor */
     Bits2FieldSha256Executor(Goldilocks &fr) :
         fr(fr),
-        slotSize(31487),
+        slotSize(31488),
         N(Bits2FieldSha256CommitPols::pilDegree()),
         bitsPerElement(7),
         nSlots((N-1)/slotSize) {};

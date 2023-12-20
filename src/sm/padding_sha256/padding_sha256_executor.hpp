@@ -51,7 +51,7 @@ public:
     /* Constructor */
     PaddingSha256Executor(Goldilocks &fr) :
         fr(fr),
-        blockSize(31487),
+        blockSize(31488),
         bytesPerBlock(64),
         bitsPerElement(7),
         N(PROVER_FORK_NAMESPACE::PaddingSha256CommitPols::pilDegree())
