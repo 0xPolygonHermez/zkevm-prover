@@ -209,6 +209,12 @@ void ZkevmSteps::step52ns_parser_first_avx(StepsParams &params, uint64_t nrows, 
                     i_args += 3;
                     break;
                }
+ 	       case 21:
+               {
+                    Goldilocks3::sub13c_avx(tmp0_0, tmp0_1, tmp0_2, &params.pols[args52[i_args] + i * args52[i_args + 1]], &evals_[args52[i_args + 2] * 3], args52[i_args + 1]);
+                    i_args += 3;
+                    break;
+               }
                default:
                     std::ostringstream message;
                     message << "Invalid operation in step52ns_first, component: " << kk << " value: " << op52[kk];
@@ -373,12 +379,6 @@ void ZkevmSteps::step52ns_parser_first(StepsParams &params, uint64_t nrows, uint
                     Goldilocks3::mul_batch(tmp, tmp, challenge6, challenge6_ops);
                     Goldilocks3::sub33c_batch(tmp2, &params.pols[args52[i_args] + i * args52[i_args + 1]], &evals_[args52[i_args + 2] * 3], args52[i_args + 1]);
                     Goldilocks3::add_batch(tmp, tmp, tmp2);
-                    i_args += 3;
-                    break;
-               }
-               case 21:
-               {
-                    Goldilocks3::sub13c_batch(tmp, &params.pols[args52[i_args] + i * args52[i_args + 1]], &evals_[args52[i_args + 2] * 3], args52[i_args + 1]);
                     i_args += 3;
                     break;
                }
