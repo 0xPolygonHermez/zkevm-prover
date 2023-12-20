@@ -474,7 +474,7 @@ zkresult StateManager::writeProgram (const string &batchUUID, uint64_t block, ui
     // Detect first set programs before first block, one per TX, and ignore them
     if ((block == 0) && batchState.blockState.empty())
     {
-        zklog.warning("StateManager::writeProgram() ignoring program set before first block key=" + key);
+        //zklog.warning("StateManager::writeProgram() ignoring program set before first block key=" + key);
         Unlock();
         return ZKR_SUCCESS;
     }

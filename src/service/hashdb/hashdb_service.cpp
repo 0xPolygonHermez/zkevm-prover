@@ -570,7 +570,7 @@ using grpc::Status;
     try
     {
         // Call the HashDB finishBlock method
-        pHashDB->startBlock(request->batch_uuid(), request->new_state_root(), (Persistence)(uint64_t)request->persistence());
+        pHashDB->finishBlock(request->batch_uuid(), request->new_state_root(), (Persistence)(uint64_t)request->persistence());
     }
     catch (const std::exception &e)
     {
