@@ -44,7 +44,7 @@ public:
     PaddingSha256BitExecutor(Goldilocks &fr) :
         fr(fr),
         N(PROVER_FORK_NAMESPACE::PaddingSha256BitCommitPols::pilDegree()),
-        slotSize(31487),
+        slotSize(31488),
         bitsPerElement(7),
         nSlots(bitsPerElement*((N-1)/slotSize)) {};
 

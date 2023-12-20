@@ -156,15 +156,8 @@ void PaddingSha256Executor::execute (vector<PaddingSha256ExecutorInput> &input, 
 
                 if (j == input[i].dataBytes.size() - 1) 
                 {
-/*                    scalar2fea(fr, input[i].hash,
-                        pols.hash0[p], 
-                        pols.hash1[p], 
-                        pols.hash2[p], 
-                        pols.hash3[p], 
-                        pols.hash4[p], 
-                        pols.hash5[p], 
-                        pols.hash6[p], 
-                        pols.hash7[p]);*/
+                    // The Sha digest's chunks are ordered from most to
+                    // least significant. (input7 => hash0, input6 => hash1, ..)
                     scalar2fea(fr, input[i].hash,
                         pols.hash7[p], 
                         pols.hash6[p], 
@@ -244,15 +237,9 @@ void PaddingSha256Executor::execute (vector<PaddingSha256ExecutorInput> &input, 
                 }
                 paddingSha256BitExecutorInput.connected = false;
                 required.push_back(paddingSha256BitExecutorInput);
-        
-                /*pols.hash0[p] = hash0[0];
-                pols.hash1[p] = hash0[1];
-                pols.hash2[p] = hash0[2];
-                pols.hash3[p] = hash0[3];
-                pols.hash4[p] = hash0[4];
-                pols.hash5[p] = hash0[5];
-                pols.hash6[p] = hash0[6];
-                pols.hash7[p] = hash0[7];*/
+                
+                // The Sha digest's chunks are ordered from most to
+                // least significant. (input7 => hash0, input6 => hash1, ..)                
                 pols.hash0[p] = hash0[7];
                 pols.hash1[p] = hash0[6];
                 pols.hash2[p] = hash0[5];
