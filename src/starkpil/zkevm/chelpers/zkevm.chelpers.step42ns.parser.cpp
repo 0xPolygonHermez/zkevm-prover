@@ -746,6 +746,39 @@ void ZkevmSteps::step42ns_parser_first_avx(StepsParams &params, uint64_t nrows, 
                     i_args += 5;
                     break;
                }
+	          case 89: 
+               {
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
+                    {
+                         offsets1[j] = args42[i_args + 1] + (((i + j) + args42[i_args + 2]) % args42[i_args + 3]) * args42[i_args + 4];
+                    }
+                    Goldilocks3::sub31c_avx(tmp3[(args42[i_args])], &params.pols[0], Goldilocks::fromU64(args42[i_args + 5]), offsets1);
+                    i_args += 6;
+                    break;
+               }
+               case 90:
+               {
+                    for (uint64_t j = 0; j < AVX_SIZE_; ++j)
+                    {
+                         offsets1[j] = args42[i_args + 1] + (((i + j) + args42[i_args + 2]) % args42[i_args + 3]) * args42[i_args + 4];
+                         offsets2[j] = args42[i_args + 5] + (((i + j) + args42[i_args + 6]) % args42[i_args + 7]) * numpols;
+                    }
+                    Goldilocks::mul_avx(tmp1[args42[i_args]], &params.pols[0], &params.pConstPols2ns->getElement(0, 0), offsets1, offsets2);
+                    i_args += 6;
+                    break;
+               }
+               case 91:
+               {
+                    Goldilocks::sub_avx(tmp1[(args42[i_args])], &params.pols[args42[i_args + 1] + i * args42[i_args + 2]], &params.pConstPols2ns->getElement(args42[i_args + 3], i), args42[i_args + 2], numpols);
+                    i_args += 4;
+                    break;
+               }
+               case 92:
+               {
+                    Goldilocks::sub_avx(tmp1[(args42[i_args])], &params.pConstPols2ns->getElement(args42[i_args + 1], i), numpols, tmp1[args42[i_args + 2]]);
+                    i_args += 3;
+                    break;
+               }
                default:
                     std::cout
                         << " Wrong operation in step42ns_first!"

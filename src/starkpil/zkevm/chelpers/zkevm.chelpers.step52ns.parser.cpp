@@ -376,6 +376,12 @@ void ZkevmSteps::step52ns_parser_first(StepsParams &params, uint64_t nrows, uint
                     i_args += 3;
                     break;
                }
+               case 21:
+               {
+                    Goldilocks3::sub13c_batch(tmp, &params.pols[args52[i_args] + i * args52[i_args + 1]], &evals_[args52[i_args + 2] * 3], args52[i_args + 1]);
+                    i_args += 3;
+                    break;
+               }
                default:
                     std::ostringstream message;
                     message << "Invalid operation in step52ns_first, component: " << kk << " value: " << op52[kk];
