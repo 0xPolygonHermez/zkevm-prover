@@ -1873,6 +1873,18 @@ using grpc::Status;
 
     case ZKR_SM_MAIN_BINARY_LT4_MISMATCH:                   return ::executor::v1::EXECUTOR_ERROR_SM_MAIN_BINARY_LT4_MISMATCH;
 
-    default:                                                return ::executor::v1::EXECUTOR_ERROR_UNSPECIFIED;
+    case ZKR_DB_KEY_NOT_FOUND:                              return ::executor::v1::EXECUTOR_ERROR_DB_KEY_NOT_FOUND;
+    case ZKR_SMT_INVALID_DATA_SIZE:                         return ::executor::v1::EXECUTOR_ERROR_SMT_INVALID_DATA_SIZE;
+    case ZKR_HASHDB_GRPC_ERROR:                             return ::executor::v1::EXECUTOR_ERROR_HASHDB_GRPC_ERROR;
+    case ZKR_STATE_MANAGER:                                 return ::executor::v1::EXECUTOR_ERROR_STATE_MANAGER;
+
+    case ZKR_AGGREGATED_PROOF_INVALID_INPUT: // Only returned when generating a proof
+    case ZKR_DB_VERSION_NOT_FOUND_KVDB: // To be mapped to an executor error when HashDB64 is operative
+    case ZKR_DB_VERSION_NOT_FOUND_GLOBAL: // To be mapped to an executor error when HashDB64 is operative
+    default:
+    {
+        zklog.error("ExecutorServiceImpl::zkresult2error() could not map zkresult=" + to_string(result) + "=" + zkresult2string(result));
+        return ::executor::v1::EXECUTOR_ERROR_UNSPECIFIED;
+    }
     }
 }

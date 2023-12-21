@@ -398,12 +398,16 @@ enum ExecutorError : int {
   EXECUTOR_ERROR_INVALID_NEW_STATE_ROOT = 104,
   EXECUTOR_ERROR_INVALID_NEW_ACC_INPUT_HASH = 105,
   EXECUTOR_ERROR_INVALID_NEW_LOCAL_EXIT_ROOT = 106,
+  EXECUTOR_ERROR_DB_KEY_NOT_FOUND = 107,
+  EXECUTOR_ERROR_SMT_INVALID_DATA_SIZE = 108,
+  EXECUTOR_ERROR_HASHDB_GRPC_ERROR = 109,
+  EXECUTOR_ERROR_STATE_MANAGER = 110,
   ExecutorError_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   ExecutorError_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool ExecutorError_IsValid(int value);
 constexpr ExecutorError ExecutorError_MIN = EXECUTOR_ERROR_UNSPECIFIED;
-constexpr ExecutorError ExecutorError_MAX = EXECUTOR_ERROR_INVALID_NEW_LOCAL_EXIT_ROOT;
+constexpr ExecutorError ExecutorError_MAX = EXECUTOR_ERROR_STATE_MANAGER;
 constexpr int ExecutorError_ARRAYSIZE = ExecutorError_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ExecutorError_descriptor();
