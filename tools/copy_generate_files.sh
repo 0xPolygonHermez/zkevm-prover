@@ -1,6 +1,6 @@
 #!/bin/bash -x
 
-VERSION=v3.0.0-RC3-fork.6
+VERSION=v4.0.0-RC1-fork.7
 FORK_VERSION=$(sed -e 's/.*-fork.//g' <<< ${VERSION})
 FORK_ID=fork_$FORK_VERSION
 
@@ -68,14 +68,14 @@ sed -i "1s/^/$CIRCOM_HEADER/" ${RECURSIVEFINAL_CPP}
 echo -e "}\n#pragma GCC diagnostic pop" >> ${RECURSIVEFINAL_CPP}
 
 #Copy pols_generated files
-cp -r ${CONFIG_DIR}/scripts/* ./src/main_sm/$FORK_ID/scripts/
+cp ${CONFIG_DIR}/scripts/rom.json ./src/main_sm/$FORK_ID/scripts/
+cp ${CONFIG_DIR}/scripts/metadata-rom.txt ./src/main_sm/$FORK_ID/scripts/
 cp ${WORKING_DIR}/pil/zkevm/main.pil.json  ./src/main_sm/$FORK_ID/scripts/
 
 #main generator files
 make main_generator
-
 ./build/mainGenerator
 
+#pols generator files
 make pols_generator
-
 ./build/polsGenerator

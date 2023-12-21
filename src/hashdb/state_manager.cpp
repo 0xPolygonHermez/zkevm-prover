@@ -13,6 +13,7 @@ StateManager stateManager;
 //#define LOG_STATE_MANAGER_READ
 //#define LOG_STATE_MANAGER_WRITE
 //#define LOG_STATE_MANAGER_DELETE_NODE
+//#define LOG_STATE_MANAGER_WRITE_PROGRAM
 
 zkresult StateManager::setStateRoot (const string &batchUUID, uint64_t block, uint64_t tx, const string &_stateRoot, bool bIsOldStateRoot, const Persistence persistence)
 {
@@ -446,7 +447,7 @@ zkresult StateManager::writeProgram (const string &batchUUID, uint64_t block, ui
     string key = NormalizeToNFormat(_key, 64);
     key = stringToLower(key);
 
-#ifdef LOG_STATE_MANAGER_WRITE
+#ifdef LOG_STATE_MANAGER_WRITE_PROGRAM
     zklog.info("StateManager::writeProgram() batchUUID=" + batchUUID + " block=" + to_string(block) + " tx=" + to_string(tx) + " key=" + key + " persistence=" + persistence2string(persistence));
 #endif
 
