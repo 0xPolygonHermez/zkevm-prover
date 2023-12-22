@@ -105,7 +105,18 @@ int main (int argc, char **argv)
                 uint64_t bytePosition = readBytes + i;
                 uint64_t polNumber = bytePosition % (fork_7::CommitPols::numPols() * 8);
                 uint64_t evaluation = bytePosition / (fork_7::CommitPols::numPols() * 8);
-                cout << "pos=" << bytePosition << " file1=" << uint64_t(buffer1[i]) << " file2=" << uint64_t(buffer2[i]) << " " << fork_7::address2CommitPolName(polNumber) << " eval=" << evaluation << endl;
+
+                // Read zkPC for this evaluation in file 1
+                fork_7::CommitPols commitPols(0, fork_7::CommitPols::pilDegree());
+                uint64_t zkPCOffset = (uint64_t)(commitPols.Main.zkPC.address() + evaluation*fork_7::CommitPols::numPols());
+                fpos_t pos1;
+                fgetpos(file1, &pos1);
+                fseek(file1, zkPCOffset, SEEK_SET);
+                uint64_t zkPC;
+                fread(&zkPC, 8, 1, file1);
+                fsetpos(file1, &pos1);
+                
+                cout << "pos=" << bytePosition << " file1=" << uint64_t(buffer1[i]) << " file2=" << uint64_t(buffer2[i]) << " " << fork_7::address2CommitPolName(polNumber) << " eval=" << evaluation << " zkPCOffset=" << zkPCOffset << " zkPC1=" << zkPC << endl;
             }
         }
         readBytes += numberOfBytesToRead;
