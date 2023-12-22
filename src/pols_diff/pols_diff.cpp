@@ -8,6 +8,7 @@
 #include "../main_sm/fork_7/pols_generated/commit_pols.hpp"
 
 using namespace std;
+using namespace fork_7;
 
 // Fork namespace
 const string forkNamespace = PROVER_FORK_NAMESPACE_STRING;
@@ -103,12 +104,12 @@ int main (int argc, char **argv)
             if (buffer1[i] != buffer2[i])
             {
                 uint64_t bytePosition = readBytes + i;
-                uint64_t polNumber = bytePosition % (fork_7::CommitPols::numPols() * 8);
-                uint64_t evaluation = bytePosition / (fork_7::CommitPols::numPols() * 8);
+                uint64_t polNumber = bytePosition % (CommitPols::numPols() * 8);
+                uint64_t evaluation = bytePosition / (CommitPols::numPols() * 8);
 
                 // Read zkPC for this evaluation in file 1
-                fork_7::CommitPols commitPols(0, fork_7::CommitPols::pilDegree());
-                uint64_t zkPCOffset = (uint64_t)(commitPols.Main.zkPC.address() + evaluation*fork_7::CommitPols::numPols());
+                CommitPols commitPols(0, CommitPols::pilDegree());
+                uint64_t zkPCOffset = (uint64_t)(commitPols.Main.zkPC.address() + evaluation*CommitPols::numPols());
                 fpos_t pos1;
                 fgetpos(file1, &pos1);
                 fseek(file1, zkPCOffset, SEEK_SET);
@@ -116,7 +117,7 @@ int main (int argc, char **argv)
                 fread(&zkPC, 8, 1, file1);
                 fsetpos(file1, &pos1);
                 
-                cout << "pos=" << bytePosition << " file1=" << uint64_t(buffer1[i]) << " file2=" << uint64_t(buffer2[i]) << " " << fork_7::address2CommitPolName(polNumber) << " eval=" << evaluation << " zkPCOffset=" << zkPCOffset << " zkPC1=" << zkPC << endl;
+                cout << "pos=" << bytePosition << " file1=" << uint64_t(buffer1[i]) << " file2=" << uint64_t(buffer2[i]) << " " << address2CommitPolName(polNumber) << " eval=" << evaluation << " zkPCOffset=" << zkPCOffset << " zkPC1=" << zkPC << endl;
             }
         }
         readBytes += numberOfBytesToRead;
