@@ -944,6 +944,27 @@ void ZkevmSteps::step3prev_parser_first_avx(StepsParams &params, uint64_t nrows,
                     i_args += 5;
                     break;
                }
+               case 124: 
+               {
+                    // 124: 12, 70, 12, 70, 12, 70, 12, 70
+                    Goldilocks3::add13_avx(tmp3[args3prev[i_args]], tmp1[args3prev[i_args + 1]], tmp3[args3prev[i_args + 2]]);
+                    i_args += 3;
+                    Goldilocks3::mul33c_avx(tmp3[args3prev[i_args]], tmp3[args3prev[i_args + 2]], params.challenges[args3prev[i_args + 1]]);
+                    i_args += 3;
+                    Goldilocks3::add13_avx(tmp3[args3prev[i_args]], tmp1[args3prev[i_args + 1]], tmp3[args3prev[i_args + 2]]);
+                    i_args += 3;
+                    Goldilocks3::mul33c_avx(tmp3[args3prev[i_args]], tmp3[args3prev[i_args + 2]], params.challenges[args3prev[i_args + 1]]);
+                    i_args += 3;
+                    Goldilocks3::add13_avx(tmp3[args3prev[i_args]], tmp1[args3prev[i_args + 1]], tmp3[args3prev[i_args + 2]]);
+                    i_args += 3;
+                    Goldilocks3::mul33c_avx(tmp3[args3prev[i_args]], tmp3[args3prev[i_args + 2]], params.challenges[args3prev[i_args + 1]]);
+                    i_args += 3;
+                    Goldilocks3::add13_avx(tmp3[args3prev[i_args]], tmp1[args3prev[i_args + 1]], tmp3[args3prev[i_args + 2]]);
+                    i_args += 3;
+                    Goldilocks3::mul33c_avx(tmp3[args3prev[i_args]], tmp3[args3prev[i_args + 2]], params.challenges[args3prev[i_args + 1]]);
+                    i_args += 3;
+                    break;
+               }    
                default:
                {
                     std::cout << " Wrong operation in step42ns_first!" << std::endl;
