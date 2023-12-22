@@ -4886,9 +4886,11 @@ code += "    #endif\n";
                 code += "        return;\n";
                 code += "    }\n";
 
+                code += "    pols.carry[" + string(bFastMode?"0":"i") + "] = fr.fromScalar(c);\n";
+
                 if (!bFastMode)
                 {
-                    code += "    pols.binOpcode[i] = fr.fromU64(7);\n";
+                    code += "    pols.binOpcode[i] = fr.fromU64(8);\n";
 
                     code += "    // Store the binary action to execute it later with the binary SM\n";
                     code += "    binaryAction.a = a;\n";
@@ -6152,10 +6154,12 @@ string selectorConst (int64_t CONST, bool opInitialized, bool bFastMode)
     code += "    // op0 = op0 + CONST\n";
 
     string value = "";
-    if (CONST > 0)
+    string valueCopy;
+    if (CONST >= 0)
         value += "fr.fromU64(" + to_string(CONST) + ")";
     else
         value += "fr.neg(fr.fromU64(" + to_string(-CONST) + "))";
+    valueCopy = value;
     if (opInitialized)
         value = "fr.add(op0, " + value + ")";
     code += "    op0 = " + value + ";\n";
@@ -6165,7 +6169,9 @@ string selectorConst (int64_t CONST, bool opInitialized, bool bFastMode)
             code += "    op" + to_string(j) + " = fr.zero();\n";
         }
     if (!bFastMode)
-        code += "    pols.CONST0[i] = fr.fromS32(" + to_string(CONST) + ");\n\n";
+    {
+        code += "    pols.CONST0[i] = " + valueCopy + ";\n\n";
+    }
     code += "\n";
     return code;
 }
