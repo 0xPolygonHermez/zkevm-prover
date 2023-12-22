@@ -18,6 +18,8 @@ RECURSIVEFINAL_CPP=./src/starkpil/recursivefinal/final.verifier.cpp
 #Sync the config directory
 rsync -avz --progress ${CONFIG_DIR}/scripts/ config/scripts/
 rsync -avz --progress ${CONFIG_DIR}/ config/
+rm config/scripts/rom.json
+rm config/scripts/metadata-rom.txt
 
 #Uncomment the following line if you want to generate source code the first time after the release files generation
 
