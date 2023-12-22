@@ -764,7 +764,7 @@ void ZkevmSteps::step42ns_parser_first_avx(StepsParams &params, uint64_t nrows, 
                          offsets2[j] = args42[i_args + 5] + (((i + j) + args42[i_args + 6]) % args42[i_args + 7]) * numpols;
                     }
                     Goldilocks::mul_avx(tmp1[args42[i_args]], &params.pols[0], &params.pConstPols2ns->getElement(0, 0), offsets1, offsets2);
-                    i_args += 6;
+                    i_args += 8;
                     break;
                }
                case 91:
