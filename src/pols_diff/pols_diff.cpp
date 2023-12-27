@@ -74,9 +74,10 @@ int main (int argc, char **argv)
 
     FILE * file2;
     file2 = fopen(secondFileName.c_str(),"rb");
-    if (file1 == NULL)
+    if (file2 == NULL)
     {
         cerr << "Error calling fopen() of secondFileName=" << secondFileName << endl;
+        fclose(file1);
         return -1;
     }
 
@@ -91,12 +92,16 @@ int main (int argc, char **argv)
         if (result != 1)
         {
             cerr << "Error calling fread() of firstFileName=" << firstFileName << " result=" << result << endl;
+            fclose(file1);
+            fclose(file2);
             return -1;
         }
         result = fread(buffer2, numberOfBytesToRead, 1, file2);
         if (result != 1)
         {
             cerr << "Error calling fread() of secondFileName=" << secondFileName << " result=" << result << endl;
+            fclose(file1);
+            fclose(file2);
             return -1;
         }
         for (uint64_t i=0; i<numberOfBytesToRead; i++)
@@ -122,6 +127,9 @@ int main (int argc, char **argv)
         }
         readBytes += numberOfBytesToRead;
     }
+
+    fclose(file1);
+    fclose(file2);
 
     return 0;
 }
