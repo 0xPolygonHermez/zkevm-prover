@@ -101,6 +101,7 @@ void ClimbKeyExecutor::execute (vector<ClimbKeyAction> &action)
     {
         zklog.error("ClimbKeyExecutor::execute() failed calling malloc() of size=" + to_string(CommitPols::pilSize()));
         exitProcess();
+        return;
     }
     CommitPols cmPols(pAddress, CommitPols::pilDegree());
     execute(action, cmPols.ClimbKey);
