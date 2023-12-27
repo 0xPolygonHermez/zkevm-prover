@@ -42,22 +42,24 @@ class KeccakFExecutor
 public:
 
     /* Constructor */
-    KeccakFExecutor (Goldilocks &fr, const Config &config) :
+    KeccakFExecutor (Goldilocks &fr, const Config &config, int mpiRank = 0) :
         fr(fr),
         config(config),
         N(PROVER_FORK_NAMESPACE::KeccakFCommitPols::pilDegree()),
         numberOfSlots((N-1)/KeccakGateConfig.slotSize)
     {
-        bLoaded = false;
+        if(mpiRank == 0){
+            bLoaded = false;
 
-        // Avoid initialization if we are not going to generate any proof
-        if (!config.generateProof() && !config.runFileExecute &&!config.runKeccakTest) return;
+            // Avoid initialization if we are not going to generate any proof
+            if (!config.generateProof() && !config.runFileExecute &&!config.runKeccakTest) return;
 
-        TimerStart(KECCAK_F_SM_EXECUTOR_LOAD);
-        json j;
-        file2json(config.keccakScriptFile, j);
-        loadScript(j);
-        TimerStopAndLog(KECCAK_F_SM_EXECUTOR_LOAD);
+            TimerStart(KECCAK_F_SM_EXECUTOR_LOAD);
+            json j;
+            file2json(config.keccakScriptFile, j);
+            loadScript(j);
+            TimerStopAndLog(KECCAK_F_SM_EXECUTOR_LOAD);
+        }
     }
 
     /* Loads evaluations and SoutRefs from a json object */

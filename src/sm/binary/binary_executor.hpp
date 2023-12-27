@@ -20,7 +20,7 @@ private:
     vector<uint64_t> RESET;
 
 public:
-    BinaryExecutor (Goldilocks &fr, const Config &config);
+    BinaryExecutor (Goldilocks &fr, const Config &config, int mpiRank=0);
     
     void execute (vector<BinaryAction> &action, PROVER_FORK_NAMESPACE::BinaryCommitPols &pols);
 

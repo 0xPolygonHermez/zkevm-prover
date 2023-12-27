@@ -460,7 +460,13 @@ vector<string> getFolderFiles (string folder, bool sorted)
 
 uint64_t getNumberOfCores (void)
 {
-    return omp_get_num_procs();
+    int nthreads;
+#pragma omp parallel
+    {
+            #pragma omp master
+            nthreads = omp_get_num_threads();
+    }
+    return nthreads;
 }
 
 void string2file (const string & s, const string & fileName)

@@ -56,6 +56,7 @@ private:
     void *pAddress = NULL;
     void *pAddressStarksRecursiveF = NULL;
     int protocolId;
+    int mpiRank;
 public:
     const Config &config;
     sem_t pendingRequestSem; // Semaphore to wakeup prover thread when a new request is available
@@ -64,7 +65,8 @@ public:
 
     Prover(Goldilocks &fr,
            PoseidonGoldilocks &poseidon,
-           const Config &config);
+           const Config &config, 
+           int mpiRank_ = 0);
 
     ~Prover();
 

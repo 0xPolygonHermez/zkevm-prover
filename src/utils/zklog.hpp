@@ -45,7 +45,11 @@ public:
     void setPID (const string &_pid) { pid = _pid; };
     void setJsonLogs (bool bJsonLogs) { jsonLogs = bJsonLogs; };
 
-    void info      (const string &message, const vector<LogTag> *tags = NULL) { log(logTypeInfo,    message, tags); };
+    void info      (const string &message, const vector<LogTag> *tags = NULL, int mpi_rank=0) { 
+        if(mpi_rank==0){
+            log(logTypeInfo,    message, tags);
+        } 
+     };
     void warning   (const string &message, const vector<LogTag> *tags = NULL) { log(logTypeWarning, message, tags); };
     void error     (const string &message, const vector<LogTag> *tags = NULL) { log(logTypeError,   message, tags); };
 };

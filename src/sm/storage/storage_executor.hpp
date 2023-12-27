@@ -24,16 +24,18 @@ class StorageExecutor
     StorageRom rom;
 
 public:
-    StorageExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config) :
+    StorageExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config, int mpiRank = 0) :
         fr(fr),
         poseidon(poseidon),
         config(config),
         N(PROVER_FORK_NAMESPACE::StorageCommitPols::pilDegree())
     {
-        // Init rom from file
-        json romJson;
-        file2json(config.storageRomFile, romJson);
-        rom.load(romJson);
+        if(mpiRank == 0){
+            // Init rom from file
+            json romJson;
+            file2json(config.storageRomFile, romJson);
+            rom.load(romJson);
+        }
     }
 
     // To be used by prover

@@ -66,7 +66,7 @@ public:
     const uint64_t consolidateStateRootZKPC = 4928;
 
     // Constructor
-    MainExecutor(Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config);
+    MainExecutor(Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config, int mpiRank_ = 0);
 
     // Destructor
     ~MainExecutor();
@@ -83,6 +83,8 @@ public:
     // Labels lock / unlock
     void labelsLock(void) { pthread_mutex_lock(&labelsMutex); };
     void labelsUnlock(void) { pthread_mutex_unlock(&labelsMutex); };
+private:
+    int mpiRank;
 };
 
 } // namespace

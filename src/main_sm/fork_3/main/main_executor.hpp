@@ -61,7 +61,7 @@ public:
     const uint64_t consolidateStateRootZKPC = 4922;
 
     // Constructor
-    MainExecutor(Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config);
+    MainExecutor(Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &confi, int mpiRank_ = 0);
 
     // Destructor
     ~MainExecutor();
@@ -74,6 +74,8 @@ public:
     void assertOutputs(Context &ctx);
     void logError(Context &ctx, const string &message = "");
     void linearPoseidon(Context &ctx, const vector<uint8_t> &data, Goldilocks::Element (&result)[4]);
+private:
+    int mpiRank;
 };
 
 } // namespace

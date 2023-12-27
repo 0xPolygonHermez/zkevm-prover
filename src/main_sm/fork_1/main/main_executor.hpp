@@ -61,7 +61,8 @@ public:
     const uint64_t consolidateStateRootZKPC = 4835;
 
     // Constructor
-    MainExecutor(Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config);
+    MainExecutor(Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config, int mpiRank_ = 0);
+
 
     // Destructor
     ~MainExecutor();
@@ -81,6 +82,7 @@ private:
     void flushLock(void) { pthread_mutex_lock(&flushMutex); };
     void flushUnlock(void) { pthread_mutex_unlock(&flushMutex); };
     vector<pthread_t> flushQueue;
+    int mpiRank;
 };
 
 } // namespace

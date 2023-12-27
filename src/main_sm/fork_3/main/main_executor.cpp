@@ -56,7 +56,7 @@ namespace fork_3
 #endif
 #define CHECK_MAX_CNT_AT_THE_END
 
-MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config) :
+MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config, int mpiRank_) :
     fr(fr),
     N(MainCommitPols::pilDegree()),
     N_NoCounters(N_NO_COUNTERS_MULTIPLICATION_FACTOR*MainCommitPols::pilDegree()),
@@ -64,50 +64,56 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     rom(config),
     config(config)
 {
-    /* Load and parse ROM JSON file */
+    mpiRank = mpiRank_;
+    if(mpiRank == 0)
+    {    
+        /* Load and parse ROM JSON file */
 
-    TimerStart(ROM_LOAD);
+        TimerStart(ROM_LOAD);
 
-    // Load file contents into a json instance
-    json romJson;
-    file2json("src/main_sm/fork_3/scripts/rom.json", romJson);
+        // Load file contents into a json instance
+        json romJson;
+        file2json("src/main_sm/fork_3/scripts/rom.json", romJson);
 
-    // Load ROM data from JSON data
-    rom.load(fr, romJson);
+        // Load ROM data from JSON data
+        rom.load(fr, romJson);
 
-    finalizeExecutionLabel = rom.getLabel(string("finalizeExecution"));
-    checkAndSaveFromLabel  = rom.getLabel(string("checkAndSaveFrom"));
+        finalizeExecutionLabel = rom.getLabel(string("finalizeExecution"));
+        checkAndSaveFromLabel  = rom.getLabel(string("checkAndSaveFrom"));
 
-    // Initialize the Ethereum opcode list: opcode=array position, operation=position content
-    ethOpcodeInit();
+        // Initialize the Ethereum opcode list: opcode=array position, operation=position content
+        ethOpcodeInit();
 
-    // Use the rom labels object to map every opcode to a ROM address
-    if (!romJson.contains("labels") ||
-        !romJson["labels"].is_object() )
-    {
-        zklog.error("MainExecutor::MainExecutor() ROM file does not contain a labels object at root level");
-        exitProcess();
+        // Use the rom labels object to map every opcode to a ROM address
+        if (!romJson.contains("labels") ||
+            !romJson["labels"].is_object() )
+        {
+            zklog.error("MainExecutor::MainExecutor() ROM file does not contain a labels object at root level");
+            exitProcess();
+        }
+        opcodeAddressInit(romJson["labels"]);
+
+        /* Get a HashDBInterface interface, according to the configuration */
+        pHashDB = HashDBClientFactory::createHashDBClient(fr, config);
+        if (pHashDB == NULL)
+        {
+            zklog.error("MainExecutor::MainExecutor() failed calling HashDBClientFactory::createHashDBClient()");
+            exitProcess();
+        }
+        
+        TimerStopAndLog(ROM_LOAD);
     }
-    opcodeAddressInit(romJson["labels"]);
-
-    /* Get a HashDBInterface interface, according to the configuration */
-    pHashDB = HashDBClientFactory::createHashDBClient(fr, config);
-    if (pHashDB == NULL)
-    {
-        zklog.error("MainExecutor::MainExecutor() failed calling HashDBClientFactory::createHashDBClient()");
-        exitProcess();
-    }
-    
-    TimerStopAndLog(ROM_LOAD);
 };
 
 MainExecutor::~MainExecutor ()
 {
-    TimerStart(MAIN_EXECUTOR_DESTRUCTOR_fork_3);
+    if(mpiRank == 0){
+        TimerStart(MAIN_EXECUTOR_DESTRUCTOR_fork_3);
 
-    HashDBClientFactory::freeHashDBClient(pHashDB);
+        HashDBClientFactory::freeHashDBClient(pHashDB);
 
-    TimerStopAndLog(MAIN_EXECUTOR_DESTRUCTOR_fork_3);
+        TimerStopAndLog(MAIN_EXECUTOR_DESTRUCTOR_fork_3);
+    }
 }
     
 void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, MainExecRequired &required)

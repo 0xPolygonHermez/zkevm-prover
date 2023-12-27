@@ -26,7 +26,7 @@ private:
     const array<Goldilocks::Element,12> MDIAG;
     array<array<Goldilocks::Element,12>,12> M;
 public:
-    PoseidonGExecutor(Goldilocks &fr, PoseidonGoldilocks &poseidon) :
+    PoseidonGExecutor(Goldilocks &fr, PoseidonGoldilocks &poseidon, int mpiRank = 0) :
         fr(fr),
         poseidon(poseidon),
         N(PROVER_FORK_NAMESPACE::PoseidonGCommitPols::pilDegree()),
@@ -37,14 +37,16 @@ public:
         MCIRC({17, 15, 41, 16, 2, 28, 13, 13, 39, 18, 34, 20}),
         MDIAG({8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
     {
-        for (uint64_t i = 0; i < 12; i++)
-        {
-            for (uint64_t j = 0; j < 12; j++)
+        if(mpiRank == 0){
+            for (uint64_t i = 0; i < 12; i++)
             {
-                M[i][j] = MCIRC[(-i + j + 12) % 12];
-                if (i==j)
+                for (uint64_t j = 0; j < 12; j++)
                 {
-                    M[i][j] = fr.add(M[i][j], MDIAG[i]);
+                    M[i][j] = MCIRC[(-i + j + 12) % 12];
+                    if (i==j)
+                    {
+                        M[i][j] = fr.add(M[i][j], MDIAG[i]);
+                    }
                 }
             }
         }

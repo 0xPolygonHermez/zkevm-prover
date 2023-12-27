@@ -9,17 +9,19 @@
 
 using json = nlohmann::json;
 
-BinaryExecutor::BinaryExecutor (Goldilocks &fr, const Config &config) :
+BinaryExecutor::BinaryExecutor (Goldilocks &fr, const Config &config, int mpiRank) :
     fr(fr),
     config(config),
     N(BinaryCommitPols::pilDegree())
 {
-    TimerStart(BINARY_EXECUTOR);
+    if(mpiRank==0){
+        TimerStart(BINARY_EXECUTOR);
 
-    buildFactors();
-    buildReset();
+        buildFactors();
+        buildReset();
 
-    TimerStopAndLog(BINARY_EXECUTOR);
+        TimerStopAndLog(BINARY_EXECUTOR);
+    }
 }
 
 /*  =========

@@ -50,6 +50,8 @@
 #include "zkglobals.hpp"
 #include "key_value_tree_test.hpp"
 
+#include "mpi.h"
+
 using namespace std;
 using json = nlohmann::json;
 
@@ -80,33 +82,36 @@ using json = nlohmann::json;
     | Circom
 */
 
-void runFileGenBatchProof(Goldilocks fr, Prover &prover, Config &config)
+void runFileGenBatchProof(Goldilocks fr, Prover &prover, Config &config, int mpiRank)
 {
-    // Load and parse input JSON file
-    TimerStart(INPUT_LOAD);
-    // Create and init an empty prover request
-    ProverRequest proverRequest(fr, config, prt_genBatchProof);
-    if (config.inputFile.size() > 0)
-    {
-        json inputJson;
-        file2json(config.inputFile, inputJson);
-        zkresult zkResult = proverRequest.input.load(inputJson);
-        if (zkResult != ZKR_SUCCESS)
+        
+        // Create and init an empty prover request
+        ProverRequest proverRequest(fr, config, prt_genBatchProof);
+            
+        if(mpiRank == 0){
+        // Load and parse input JSON file
+        TimerStart(INPUT_LOAD);
+        if (config.inputFile.size() > 0)
         {
-            zklog.error("runFileGenBatchProof() failed calling proverRequest.input.load() zkResult=" + to_string(zkResult) + "=" + zkresult2string(zkResult));
+            json inputJson;
+            file2json(config.inputFile, inputJson);
+            zkresult zkResult = proverRequest.input.load(inputJson);
+            if (zkResult != ZKR_SUCCESS)
+            {
+                zklog.error("runFileGenBatchProof() failed calling proverRequest.input.load() zkResult=" + to_string(zkResult) + "=" + zkresult2string(zkResult));
+                exitProcess();
+            }
+        }
+        TimerStopAndLog(INPUT_LOAD);
+
+        // Create full tracer based on fork ID
+        proverRequest.CreateFullTracer();
+        if (proverRequest.result != ZKR_SUCCESS)
+        {
+            zklog.error("runFileGenBatchProof() failed calling proverRequest.CreateFullTracer() zkResult=" + to_string(proverRequest.result) + "=" + zkresult2string(proverRequest.result));
             exitProcess();
         }
     }
-    TimerStopAndLog(INPUT_LOAD);
-
-    // Create full tracer based on fork ID
-    proverRequest.CreateFullTracer();
-    if (proverRequest.result != ZKR_SUCCESS)
-    {
-        zklog.error("runFileGenBatchProof() failed calling proverRequest.CreateFullTracer() zkResult=" + to_string(proverRequest.result) + "=" + zkresult2string(proverRequest.result));
-        exitProcess();
-    }
-
     // Call the prover
     prover.genBatchProof(&proverRequest);
 }
@@ -308,249 +313,287 @@ int main(int argc, char **argv)
         }
     }
 
-    // Create one instance of Config based on the contents of the file config.json
-    json configJson;
-    file2json(pConfigFile, configJson);
-    config.load(configJson);
-    zklog.setJsonLogs(config.jsonLogs);
-    zklog.setPID(config.proverID.substr(0, 7)); // Set the logs prefix
-
-    // Print the zkProver version
-    zklog.info("Version: " + string(ZKEVM_PROVER_VERSION));
-
-    // Test that stderr is properly logged
-    cerr << "Checking error channel; ignore this trace\n";
-    zklog.warning("Checking warning channel; ignore this trace");
-
-    // Print the configuration file name
-    string configFileName = pConfigFile;
-    zklog.info("Config file: " + configFileName);
-
-    // Print the number of cores
-    zklog.info("Number of cores=" + to_string(getNumberOfCores()));
-
-    // Print the hostname and the IP address
-    string ipAddress;
-    getIPAddress(ipAddress);
-    zklog.info("IP address=" + ipAddress);
-
-#ifdef DEBUG
-    zklog.info("DEBUG defined");
-#endif
-
-    config.print();
-
-    TimerStart(WHOLE_PROCESS);
-
-    if (config.check())
+    // MPI additional code
+    int mpiRank = 0;
+    int mpiSize = 1;
+    int mpi_thread_level_requested = MPI_THREAD_MULTIPLE;
+    int mpi_thread_level_provided = 0;
+    MPI_Init_thread(&argc, &argv, mpi_thread_level_requested, &mpi_thread_level_provided);
+    if (mpi_thread_level_provided < mpi_thread_level_requested)
     {
-        zklog.error("main() failed calling config.check()");
+        zklog.error("MPI_Init_thread() failed: mpi_thread_level_provided=" + to_string(mpi_thread_level_provided) + " < mpi_thread_level_requested=" + to_string(mpi_thread_level_requested));
         exitProcess();
     }
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpiRank);
+    MPI_Comm_size(MPI_COMM_WORLD, &mpiSize);
+    omp_set_num_threads(256/mpiSize);
+    if (mpiRank == 0)
+    {
+        zklog.info("MPI_Init_thread() successful: mpi_thread_level_provided=" + to_string(mpi_thread_level_provided) + " >= mpi_thread_level_requested=" + to_string(mpi_thread_level_requested));
+        zklog.info("MPI_Init_thread() successful: mpiRank=" + to_string(mpiRank) + " mpiSize=" + to_string(mpiSize));
+        #pragma omp parallel
+        {
+            #pragma omp master
+            {
+                zklog.info("MPI_Init_thread() successful: omp_get_max_threads()=" + to_string(omp_get_max_threads()) + " omp_get_num_threads()=" + to_string(omp_get_num_threads()));
+            }
+        }
+        
+    }
+    if (mpiRank == 0)
+    {
 
-    // Create one instance of the Goldilocks finite field instance
-    Goldilocks fr;
+        // Create one instance of Config based on the contents of the file config.json
+        json configJson;
+        file2json(pConfigFile, configJson);
+        config.load(configJson);
+        zklog.setJsonLogs(config.jsonLogs);
+        zklog.setPID(config.proverID.substr(0, 7)); // Set the logs prefix
 
-    // Create one instance of the Poseidon hash library
-    PoseidonGoldilocks poseidon;
+        // Print the zkProver version
+        zklog.info("Version: " + string(ZKEVM_PROVER_VERSION));
 
+        // Test that stderr is properly logged
+        cerr << "Checking error channel; ignore this trace\n";
+        zklog.warning("Checking warning channel; ignore this trace");
+
+        // Print the configuration file name
+        string configFileName = pConfigFile;
+        zklog.info("Config file: " + configFileName);
+
+        // Print the number of cores
+        omp_set_num_threads(256);
+        zklog.info("Number of cores=" + to_string(getNumberOfCores()));
+
+        // Print the hostname and the IP address
+        string ipAddress;
+        getIPAddress(ipAddress);
+        zklog.info("IP address=" + ipAddress);
+    
 #ifdef DEBUG
-    zklog.info("BN128 p-1 =" + bn128.toString(bn128.negOne(),16) + " = " + bn128.toString(bn128.negOne(),10));
-    zklog.info("FQ    p-1 =" + fq.toString(fq.negOne(),16) + " = " + fq.toString(fq.negOne(),10));
-    zklog.info("FEC   p-1 =" + fec.toString(fec.negOne(),16) + " = " + fec.toString(fec.negOne(),10));
-    zklog.info("FNEC  p-1 =" + fnec.toString(fnec.negOne(),16) + " = " + fnec.toString(fnec.negOne(),10));
+        zklog.info("DEBUG defined");
 #endif
 
-    // Generate account zero keys
-    fork_7::Account::GenerateZeroKey(fr, poseidon);
-
-    // Init the HashDB singleton
-    hashDBSingleton.init(fr, config);
-
-    // Init the StateManager singleton
-    if (config.hashDB64)
-    {
-        stateManager64.init();
+        config.print();
     }
-    else
+        TimerStart(WHOLE_PROCESS);
+    if(mpiRank==0)
     {
-        stateManager.init(config);
-    }
+        if (config.check())
+        {
+            zklog.error("main() failed calling config.check()");
+            exitProcess();
+        }
 
-    // Init goldilocks precomputed
-    TimerStart(GOLDILOCKS_PRECOMPUTED_INIT);
-    glp.init();
-    TimerStopAndLog(GOLDILOCKS_PRECOMPUTED_INIT);
+        // Create one instance of the Goldilocks finite field instance
+        Goldilocks fr;
 
-    /* TOOLS */
+        // Create one instance of the Poseidon hash library
+        PoseidonGoldilocks poseidon;
 
-    // Generate Keccak SM script
-    if (config.runKeccakScriptGenerator)
-    {
-        KeccakGenerateScript(config);
-    }
+#ifdef DEBUG
+        zklog.info("BN128 p-1 =" + bn128.toString(bn128.negOne(), 16) + " = " + bn128.toString(bn128.negOne(), 10));
+        zklog.info("FQ    p-1 =" + fq.toString(fq.negOne(), 16) + " = " + fq.toString(fq.negOne(), 10));
+        zklog.info("FEC   p-1 =" + fec.toString(fec.negOne(), 16) + " = " + fec.toString(fec.negOne(), 10));
+        zklog.info("FNEC  p-1 =" + fnec.toString(fnec.negOne(), 16) + " = " + fnec.toString(fnec.negOne(), 10));
+#endif
 
-    // Generate SHA256 SM script
-    if (config.runSHA256ScriptGenerator)
-    {
-        SHA256GenerateScript(config);
-    }
+        // Generate account zero keys
+        fork_7::Account::GenerateZeroKey(fr, poseidon);
+
+        // Init the HashDB singleton
+        hashDBSingleton.init(fr, config);
+
+        // Init the StateManager singleton
+        if (config.hashDB64)
+        {
+            stateManager64.init();
+        }
+        else
+        {
+            stateManager.init(config);
+        }
+
+        // Init goldilocks precomputed
+        TimerStart(GOLDILOCKS_PRECOMPUTED_INIT);
+        glp.init();
+        TimerStopAndLog(GOLDILOCKS_PRECOMPUTED_INIT);
+
+        /* TOOLS */
+
+        // Generate Keccak SM script
+        if (config.runKeccakScriptGenerator)
+        {
+            KeccakGenerateScript(config);
+        }
+
+        // Generate SHA256 SM script
+        if (config.runSHA256ScriptGenerator)
+        {
+            SHA256GenerateScript(config);
+        }
 
 #ifdef DATABASE_USE_CACHE
 
-    /* INIT DB CACHE */
-    if(config.useAssociativeCache){
-        Database::useAssociativeCache = true;
-        Database::dbMTACache.postConstruct(config.log2DbMTAssociativeCacheIndexesSize, config.log2DbMTAssociativeCacheSize, "MTACache");
-    }
-    else{
-        Database::useAssociativeCache = false;
-        Database::dbMTCache.setName("MTCache");
-        Database::dbMTCache.setMaxSize(config.dbMTCacheSize*1024*1024);
-    }
-    Database::dbProgramCache.setName("ProgramCache");
-    Database::dbProgramCache.setMaxSize(config.dbProgramCacheSize*1024*1024);
-
-    if (config.databaseURL != "local") // remote DB
-    {
-
-        if (config.loadDBToMemCache && (config.runAggregatorClient || config.runExecutorServer || config.runHashDBServer))
+        /* INIT DB CACHE */
+        if (config.useAssociativeCache)
         {
-            TimerStart(DB_CACHE_LOAD);
-            // if we have a db cache enabled
-            if ((Database::dbMTCache.enabled()) || (Database::dbProgramCache.enabled()) || (Database::dbMTACache.enabled()))
-            {
-                if (config.loadDBToMemCacheInParallel) {
-                    // Run thread that loads the DB into the dbCache
-                    std::thread loadDBThread (loadDb2MemCache, config);
-                    loadDBThread.detach();
-                } else {
-                    loadDb2MemCache(config);
-                }
-            }
-            TimerStopAndLog(DB_CACHE_LOAD);
+            Database::useAssociativeCache = true;
+            Database::dbMTACache.postConstruct(config.log2DbMTAssociativeCacheIndexesSize, config.log2DbMTAssociativeCacheSize, "MTACache");
         }
-    }
+        else
+        {
+            Database::useAssociativeCache = false;
+            Database::dbMTCache.setName("MTCache");
+            Database::dbMTCache.setMaxSize(config.dbMTCacheSize * 1024 * 1024);
+        }
+        Database::dbProgramCache.setName("ProgramCache");
+        Database::dbProgramCache.setMaxSize(config.dbProgramCacheSize * 1024 * 1024);
+
+        if (config.databaseURL != "local") // remote DB
+        {
+
+            if (config.loadDBToMemCache && (config.runAggregatorClient || config.runExecutorServer || config.runHashDBServer))
+            {
+                TimerStart(DB_CACHE_LOAD);
+                // if we have a db cache enabled
+                if ((Database::dbMTCache.enabled()) || (Database::dbProgramCache.enabled()) || (Database::dbMTACache.enabled()))
+                {
+                    if (config.loadDBToMemCacheInParallel)
+                    {
+                        // Run thread that loads the DB into the dbCache
+                        std::thread loadDBThread(loadDb2MemCache, config);
+                        loadDBThread.detach();
+                    }
+                    else
+                    {
+                        loadDb2MemCache(config);
+                    }
+                }
+                TimerStopAndLog(DB_CACHE_LOAD);
+            }
+        }
 
 #endif // DATABASE_USE_CACHE
 
-    /* TESTS */
+        /* TESTS */
 
-    // Test Keccak SM
-    if (config.runKeccakTest)
-    {
-        // Keccak2Test();
-        KeccakTest();
-        KeccakSMExecutorTest(fr, config);
-    }
+        // Test Keccak SM
+        if (config.runKeccakTest)
+        {
+            // Keccak2Test();
+            KeccakTest();
+            KeccakSMExecutorTest(fr, config);
+        }
 
-    // Test Storage SM
-    if (config.runStorageSMTest)
-    {
-        StorageSMTest(fr, poseidon, config);
-    }
+        // Test Storage SM
+        if (config.runStorageSMTest)
+        {
+            StorageSMTest(fr, poseidon, config);
+        }
 
-    // Test Storage SM
-    if (config.runClimbKeySMTest)
-    {
-        ClimbKeySMTest(fr, config);
-    }
+        // Test Storage SM
+        if (config.runClimbKeySMTest)
+        {
+            ClimbKeySMTest(fr, config);
+        }
 
-    // Test Binary SM
-    if (config.runBinarySMTest)
-    {
-        BinarySMTest(fr, config);
-    }
+        // Test Binary SM
+        if (config.runBinarySMTest)
+        {
+            BinarySMTest(fr, config);
+        }
 
-    // Test MemAlign SM
-    if (config.runMemAlignSMTest)
-    {
-        MemAlignSMTest(fr, config);
-    }
+        // Test MemAlign SM
+        if (config.runMemAlignSMTest)
+        {
+            MemAlignSMTest(fr, config);
+        }
 
-    // Test SHA256
-    if (config.runSHA256Test)
-    {
-        SHA256Test(fr, config);
-    }
+        // Test SHA256
+        if (config.runSHA256Test)
+        {
+            SHA256Test(fr, config);
+        }
 
-    // Test Blake
-    if (config.runBlakeTest)
-    {
-        Blake2b256_Test(fr, config);
-    }
+        // Test Blake
+        if (config.runBlakeTest)
+        {
+            Blake2b256_Test(fr, config);
+        }
 
-    // Test ECRecover
-    if (config.runECRecoverTest)
-    {
-        ECRecoverTest();
-    }
+        // Test ECRecover
+        if (config.runECRecoverTest)
+        {
+            ECRecoverTest();
+        }
 
-    // Test Database cache
-    if (config.runDatabaseCacheTest)
-    {
-        DatabaseCacheTest();
-    }
+        // Test Database cache
+        if (config.runDatabaseCacheTest)
+        {
+            DatabaseCacheTest();
+        }
 
-    // Test check tree
-    if (config.runCheckTreeTest)
-    {
-        CheckTreeTest(config);
-    }
+        // Test check tree
+        if (config.runCheckTreeTest)
+        {
+            CheckTreeTest(config);
+        }
 
-    // Test Database performance
-    if (config.runDatabasePerformanceTest)
-    {
-        DatabasePerformanceTest();
-    }
-    // Test PageManager
-    if (config.runPageManagerTest)
-    {
-        PageManagerTest();
-    }
-    // Test KeyValueTree
-    if (config.runKeyValueTreeTest)
-    {
-        KeyValueTreeTest();
-    }
+        // Test Database performance
+        if (config.runDatabasePerformanceTest)
+        {
+            DatabasePerformanceTest();
+        }
+        // Test PageManager
+        if (config.runPageManagerTest)
+        {
+            PageManagerTest();
+        }
+        // Test KeyValueTree
+        if (config.runKeyValueTreeTest)
+        {
+            KeyValueTreeTest();
+        }
 
-    // Test SMT64
-    if (config.runSMT64Test)
-    {
-        Smt64Test(config);
-    }
+        // Test SMT64
+        if (config.runSMT64Test)
+        {
+            Smt64Test(config);
+        }
 
-    // Unit test
-    if (config.runUnitTest)
-    {
-        UnitTest(fr, poseidon, config);
-    }
+        // Unit test
+        if (config.runUnitTest)
+        {
+            UnitTest(fr, poseidon, config);
+        }
 
-    // If there is nothing else to run, exit normally
-    if (!config.runExecutorServer && !config.runExecutorClient && !config.runExecutorClientMultithread &&
-        !config.runHashDBServer && !config.runHashDBTest &&
-        !config.runAggregatorServer && !config.runAggregatorClient && !config.runAggregatorClientMock &&
-        !config.runFileGenBatchProof && !config.runFileGenAggregatedProof && !config.runFileGenFinalProof &&
-        !config.runFileProcessBatch && !config.runFileProcessBatchMultithread && !config.runFileExecute)
-    {
-        return 0;
-    }
+        // If there is nothing else to run, exit normally
+        if (!config.runExecutorServer && !config.runExecutorClient && !config.runExecutorClientMultithread &&
+            !config.runHashDBServer && !config.runHashDBTest &&
+            !config.runAggregatorServer && !config.runAggregatorClient && !config.runAggregatorClientMock &&
+            !config.runFileGenBatchProof && !config.runFileGenAggregatedProof && !config.runFileGenFinalProof &&
+            !config.runFileProcessBatch && !config.runFileProcessBatchMultithread && !config.runFileExecute)
+        {
+            return 0;
+        }
 
 #if 0
-    BatchMachineExecutor::batchInverseTest(fr);
+        BatchMachineExecutor::batchInverseTest(fr);
 #endif
 
-    // Create output directory, if specified; otherwise, current working directory will be used to store output files
-    if (config.outputPath.size() > 0)
-    {
-        ensureDirectoryExists(config.outputPath);
+        // Create output directory, if specified; otherwise, current working directory will be used to store output files
+        if (config.outputPath.size() > 0)
+        {
+            ensureDirectoryExists(config.outputPath);
+        }
     }
-
     // Create an instace of the Prover
     TimerStart(PROVER_CONSTRUCTOR);
     Prover prover(fr,
                   poseidon,
-                  config);
+                  config,
+                  mpiRank);
     TimerStopAndLog(PROVER_CONSTRUCTOR);
 
     /* SERVERS */
@@ -602,13 +645,13 @@ int main(int argc, char **argv)
                 tmpConfig.inputFile = config.inputFile + files[i];
                 zklog.info("runFileGenBatchProof inputFile=" + tmpConfig.inputFile);
                 // Call the prover
-                runFileGenBatchProof(fr, prover, tmpConfig);
+                runFileGenBatchProof(fr, prover, tmpConfig, mpiRank);
             }
         }
         else
         {
             // Call the prover
-            runFileGenBatchProof(fr, prover, config);
+            runFileGenBatchProof(fr, prover, config, mpiRank);
         }
     }
 
@@ -834,6 +877,6 @@ int main(int argc, char **argv)
     }
 
     TimerStopAndLog(WHOLE_PROCESS);
-
+    MPI_Barrier(MPI_COMM_WORLD);
     zklog.info("Done");
 }

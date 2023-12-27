@@ -58,7 +58,7 @@ namespace fork_4
 #endif
 #define CHECK_MAX_CNT_AT_THE_END
 
-MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config) :
+MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const Config &config, int mpiRank_) :
     fr(fr),
     N(MainCommitPols::pilDegree()),
     N_NoCounters(N_NO_COUNTERS_MULTIPLICATION_FACTOR*MainCommitPols::pilDegree()),
@@ -66,44 +66,50 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     rom(config),
     config(config)
 {
-    /* Load and parse ROM JSON file */
+    mpiRank = mpiRank_;
+    if(mpiRank==0){
+        /* Load and parse ROM JSON file */
 
-    TimerStart(ROM_LOAD);
+        TimerStart(ROM_LOAD);
 
-    // Load file contents into a json instance
-    json romJson;
-    file2json("src/main_sm/fork_4/scripts/rom.json", romJson);
+        // Load file contents into a json instance
+        json romJson;
+        file2json("src/main_sm/fork_4/scripts/rom.json", romJson);
 
-    // Load ROM data from JSON data
-    rom.load(fr, romJson);
+        // Load ROM data from JSON data
+        rom.load(fr, romJson);
 
-    // Get labels
-    finalizeExecutionLabel  = rom.getLabel(string("finalizeExecution"));
-    checkAndSaveFromLabel   = rom.getLabel(string("checkAndSaveFrom"));
-    ecrecoverStoreArgsLabel = rom.getLabel(string("ecrecover_store_args"));
-    ecrecoverEndLabel       = rom.getLabel(string("ecrecover_end"));
+        // Get labels
+        finalizeExecutionLabel  = rom.getLabel(string("finalizeExecution"));
+        checkAndSaveFromLabel   = rom.getLabel(string("checkAndSaveFrom"));
+        ecrecoverStoreArgsLabel = rom.getLabel(string("ecrecover_store_args"));
+        ecrecoverEndLabel       = rom.getLabel(string("ecrecover_end"));
 
-    // Init labels mutex
-    pthread_mutex_init(&labelsMutex, NULL);
+        // Init labels mutex
+        pthread_mutex_init(&labelsMutex, NULL);
 
-    /* Get a HashDBInterface interface, according to the configuration */
-    pHashDB = HashDBClientFactory::createHashDBClient(fr, config);
-    if (pHashDB == NULL)
-    {
-        zklog.error("MainExecutor::MainExecutor() failed calling HashDBClientFactory::createHashDBClient()");
-        exitProcess();
+        /* Get a HashDBInterface interface, according to the configuration */
+        pHashDB = HashDBClientFactory::createHashDBClient(fr, config);
+        if (pHashDB == NULL)
+        {
+            zklog.error("MainExecutor::MainExecutor() failed calling HashDBClientFactory::createHashDBClient()");
+            exitProcess();
+        }
+        
+        TimerStopAndLog(ROM_LOAD);
     }
-    
-    TimerStopAndLog(ROM_LOAD);
 };
 
 MainExecutor::~MainExecutor ()
 {
-    TimerStart(MAIN_EXECUTOR_DESTRUCTOR_fork_4);
+    if(mpiRank == 0)
+    {
+        TimerStart(MAIN_EXECUTOR_DESTRUCTOR_fork_4);
 
-    HashDBClientFactory::freeHashDBClient(pHashDB);
+        HashDBClientFactory::freeHashDBClient(pHashDB);
 
-    TimerStopAndLog(MAIN_EXECUTOR_DESTRUCTOR_fork_4);
+        TimerStopAndLog(MAIN_EXECUTOR_DESTRUCTOR_fork_4);
+    }
 }
 
 void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, MainExecRequired &required)

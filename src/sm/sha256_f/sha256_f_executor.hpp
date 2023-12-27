@@ -39,7 +39,7 @@ class Sha256FExecutor
 public:
 
     /* Constructor */
-    Sha256FExecutor (Goldilocks &fr, const Config &config) :
+    Sha256FExecutor (Goldilocks &fr, const Config &config, int mpiRank=0) :
         fr(fr),
         config(config),
         N(PROVER_FORK_NAMESPACE::PaddingSha256BitCommitPols::pilDegree()),
@@ -47,17 +47,19 @@ public:
         bitsPerElement(7),
         nSlots((N-1)/slotSize)
     {
-        bLoaded = false;
+        if(mpiRank == 0){
+            bLoaded = false;
 
-        // Avoid initialization if we are not going to generate any proof
-        if (!config.generateProof() && !config.runFileExecute) return;
+            // Avoid initialization if we are not going to generate any proof
+            if (!config.generateProof() && !config.runFileExecute) return;
 
-        TimerStart(SHA256_F_SM_EXECUTOR_LOAD);
-        json j;
-        file2json(config.sha256ScriptFile, j);
-        loadScript(j);
-        bLoaded = true;
-        TimerStopAndLog(SHA256_F_SM_EXECUTOR_LOAD);
+            TimerStart(SHA256_F_SM_EXECUTOR_LOAD);
+            json j;
+            file2json(config.sha256ScriptFile, j);
+            loadScript(j);
+            bLoaded = true;
+            TimerStopAndLog(SHA256_F_SM_EXECUTOR_LOAD);
+        }
     }
 
     /* Loads evaluations and SoutRefs from a json object */
