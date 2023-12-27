@@ -82,8 +82,8 @@ int main (int argc, char **argv)
     }
 
 #define FILE_BUFFER_SIZE 1024
-    uint8_t buffer1[FILE_BUFFER_SIZE];
-    uint8_t buffer2[FILE_BUFFER_SIZE];
+    uint8_t buffer1[FILE_BUFFER_SIZE] = { 0 };
+    uint8_t buffer2[FILE_BUFFER_SIZE] = { 0 };
     uint64_t readBytes = 0;
     while (readBytes < firstFileSize)
     {
