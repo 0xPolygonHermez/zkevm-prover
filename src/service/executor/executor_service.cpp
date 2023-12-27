@@ -14,7 +14,7 @@ using grpc::Status;
 
 ::grpc::Status ExecutorServiceImpl::ProcessBatch(::grpc::ServerContext* context, const ::executor::v1::ProcessBatchRequest* request, ::executor::v1::ProcessBatchResponse* response)
 {
-    // If the process is exising, do not start new activities
+    // If the process is exiting, do not start new activities
     if (bExitingProcess)
     {
         return Status::CANCELLED;
@@ -752,7 +752,7 @@ using grpc::Status;
 
 ::grpc::Status ExecutorServiceImpl::ProcessBatchV2 (::grpc::ServerContext* context, const ::executor::v1::ProcessBatchRequestV2* request, ::executor::v1::ProcessBatchResponseV2* response)
 {
-    // If the process is exising, do not start new activities
+    // If the process is exiting, do not start new activities
     if (bExitingProcess)
     {
         return Status::CANCELLED;
@@ -1647,7 +1647,7 @@ using grpc::Status;
 
 ::grpc::Status ExecutorServiceImpl::GetFlushStatus (::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::executor::v1::GetFlushStatusResponse* response)
 {
-    // If the process is exising, do not start new activities
+    // If the process is exiting, do not start new activities
     if (bExitingProcess)
     {
         return Status::CANCELLED;
@@ -1680,7 +1680,7 @@ using grpc::Status;
 
 ::grpc::Status ExecutorServiceImpl::ProcessBatchStream (::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::executor::v1::ProcessBatchResponse, ::executor::v1::ProcessBatchRequest>* stream)
 {
-    // If the process is exising, do not start new activities
+    // If the process is exiting, do not start new activities
     if (bExitingProcess)
     {
         return Status::CANCELLED;
