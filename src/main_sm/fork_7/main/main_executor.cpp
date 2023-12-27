@@ -219,8 +219,6 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     // opN are local, uncommitted polynomials
     Goldilocks::Element op0, op1, op2, op3, op4, op5, op6, op7;
 
-    logError(ctx, "lalala");
-
     uint64_t zkPC = 0; // Zero-knowledge program counter
     uint64_t step = 0; // Step, number of polynomial evaluation
     uint64_t i; // Step, as it is used internally, set to 0 in fast mode to reuse the same evaluation all the time
