@@ -7,6 +7,11 @@ namespace fork_7
 void Context::printRegs()
 {
     zklog.info("Registers:");
+    if (pStep == NULL)
+    {
+        zklog.error("Context::printRegs() called with pStep==NULL");
+        return;
+    }
     printReg("A", pols.A0[*pStep], pols.A1[*pStep], pols.A2[*pStep], pols.A3[*pStep], pols.A4[*pStep], pols.A5[*pStep], pols.A6[*pStep], pols.A7[*pStep]);
     printReg("B", pols.B0[*pStep], pols.B1[*pStep], pols.B2[*pStep], pols.B3[*pStep], pols.B4[*pStep], pols.B5[*pStep], pols.B6[*pStep], pols.B7[*pStep]);
     printReg("C", pols.C0[*pStep], pols.C1[*pStep], pols.C2[*pStep], pols.C3[*pStep], pols.C4[*pStep], pols.C5[*pStep], pols.C6[*pStep], pols.C7[*pStep]);

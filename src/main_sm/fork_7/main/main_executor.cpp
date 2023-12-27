@@ -219,6 +219,8 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     // opN are local, uncommitted polynomials
     Goldilocks::Element op0, op1, op2, op3, op4, op5, op6, op7;
 
+    logError(ctx, "lalala");
+
     uint64_t zkPC = 0; // Zero-knowledge program counter
     uint64_t step = 0; // Step, number of polynomial evaluation
     uint64_t i; // Step, as it is used internally, set to 0 in fast mode to reuse the same evaluation all the time
@@ -5760,7 +5762,18 @@ void MainExecutor::logError (Context &ctx, const string &message)
     }
 
     // Log details
-    zklog.error(string("MainExecutor::logError() proverRequest.result=") + zkresult2string(ctx.proverRequest.result) + " step=" + to_string(*ctx.pStep) + " eval=" + to_string(*ctx.pEvaluation) + " zkPC=" + to_string(*ctx.pZKPC) + " rom.line={" + rom.line[*ctx.pZKPC].toString(fr) + "} uuid=" + ctx.proverRequest.uuid, &ctx.proverRequest.tags);
+#define INVALID_LOG_ERROR_VALUE 999999999
+    uint64_t step = (ctx.pStep != NULL) ? *ctx.pStep : INVALID_LOG_ERROR_VALUE;
+    uint64_t evaluation = (ctx.pEvaluation != NULL) ? *ctx.pEvaluation : INVALID_LOG_ERROR_VALUE;
+    uint64_t zkpc = (ctx.pZKPC != NULL) ? *ctx.pZKPC : INVALID_LOG_ERROR_VALUE;
+    string romLine = (ctx.pZKPC != NULL) ? rom.line[*ctx.pZKPC].toString(fr) : "INVALID_ZKPC";
+    zklog.error(string("MainExecutor::logError() proverRequest.result=") + zkresult2string(ctx.proverRequest.result) +
+        " step=" + to_string(step) +
+        " eval=" + to_string(evaluation) +
+        " zkPC=" + to_string(zkpc) +
+        " rom.line={" + romLine +
+        "} uuid=" + ctx.proverRequest.uuid,
+        &ctx.proverRequest.tags);
 
     // Log registers
     ctx.printRegs();
