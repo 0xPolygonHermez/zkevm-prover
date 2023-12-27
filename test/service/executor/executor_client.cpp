@@ -546,7 +546,7 @@ void* executorClientThread (void* arg)
         {
             zklog.error("executorClientThread() failed calling ProcessDirectory()");
         }
-        zklog.info("executorClientThread() called ProcessDirectory() and got directories=" + to_string(directoryCounter) + " files=" + to_string(fileCounter) + " skippedFiles=" + to_string(skippedFileCounter) + " percentage=" + to_string((fileCounter*100)/(fileCounter + skippedFileCounter)) + "% skippedDirectories=" + to_string(skippedDirectoryCounter));
+        zklog.info("executorClientThread() called ProcessDirectory() and got directories=" + to_string(directoryCounter) + " files=" + to_string(fileCounter) + " skippedFiles=" + to_string(skippedFileCounter) + " percentage=" + to_string((fileCounter*100)/zkmax(1, fileCounter + skippedFileCounter)) + "% skippedDirectories=" + to_string(skippedDirectoryCounter));
     }
     else
     {
