@@ -9,8 +9,8 @@
 #include "main_sm/fork_4/main/main_executor.hpp"
 #include "main_sm/fork_5/main/main_executor.hpp"
 #include "main_sm/fork_6/main/main_executor.hpp"
-#include "main_sm/fork_5/main_exec_c/main_exec_c.hpp"
-#include "main_sm/fork_6/main_exec_c/main_exec_c.hpp"
+#include "main_sm/fork_7/main/main_executor.hpp"
+#include "main_sm/fork_7/main_exec_c/main_exec_c.hpp"
 #include "sm/storage/storage_executor.hpp"
 #include "sm/memory/memory_executor.hpp"
 #include "sm/binary/binary_executor.hpp"
@@ -22,6 +22,10 @@
 #include "sm/padding_pg/padding_pg_executor.hpp"
 #include "sm/poseidon_g/poseidon_g_executor.hpp"
 #include "sm/mem_align/mem_align_executor.hpp"
+#include "sm/padding_sha256/padding_sha256_executor.hpp"
+#include "sm/padding_sha256bit/padding_sha256bit_executor.hpp"
+#include "sm/sha256_f/sha256_f_executor.hpp"
+#include "sm/climb_key/climb_key_executor.hpp"
 #include "prover_request.hpp"
 
 class Executor
@@ -29,15 +33,15 @@ class Executor
 public:
     Goldilocks &fr;
     const Config &config;
-    
+
     fork_1::MainExecutor mainExecutor_fork_1;
     fork_2::MainExecutor mainExecutor_fork_2;
     fork_3::MainExecutor mainExecutor_fork_3;
     fork_4::MainExecutor mainExecutor_fork_4;
     fork_5::MainExecutor mainExecutor_fork_5;
     fork_6::MainExecutor mainExecutor_fork_6;
-    fork_5::MainExecutorC mainExecutorC_fork_5;
-    fork_6::MainExecutorC mainExecutorC_fork_6;
+    fork_7::MainExecutor mainExecutor_fork_7;
+    fork_7::MainExecutorC mainExecutorC_fork_7;
     StorageExecutor storageExecutor;
     MemoryExecutor memoryExecutor;
     BinaryExecutor binaryExecutor;
@@ -46,9 +50,15 @@ public:
     PaddingKKBitExecutor paddingKKBitExecutor;
     Bits2FieldExecutor bits2FieldExecutor;
     KeccakFExecutor keccakFExecutor;
+    PaddingSha256Executor paddingSha256Executor;
+    PaddingSha256BitExecutor paddingSha256BitExecutor;
+    Bits2FieldSha256Executor bits2FieldSha256Executor;
+    Sha256FExecutor sha256FExecutor;
     PaddingPGExecutor paddingPGExecutor;
     PoseidonGExecutor poseidonGExecutor;
     MemAlignExecutor memAlignExecutor;
+    ClimbKeyExecutor climbKeyExecutor;
+
 
     Executor(Goldilocks &fr, const Config &config, PoseidonGoldilocks &poseidon) :
         fr(fr),
@@ -59,8 +69,8 @@ public:
         mainExecutor_fork_4(fr, poseidon, config),
         mainExecutor_fork_5(fr, poseidon, config),
         mainExecutor_fork_6(fr, poseidon, config),
-        mainExecutorC_fork_5(mainExecutor_fork_5),
-        mainExecutorC_fork_6(mainExecutor_fork_6),
+        mainExecutor_fork_7(fr, poseidon, config),
+        mainExecutorC_fork_7(mainExecutor_fork_7),
         storageExecutor(fr, poseidon, config),
         memoryExecutor(fr, config),
         binaryExecutor(fr, config),
@@ -69,9 +79,14 @@ public:
         paddingKKBitExecutor(fr),
         bits2FieldExecutor(fr),
         keccakFExecutor(fr, config),
+        paddingSha256Executor(fr),
+        paddingSha256BitExecutor(fr),
+        bits2FieldSha256Executor(fr),
+        sha256FExecutor(fr, config),
         paddingPGExecutor(fr, poseidon),
         poseidonGExecutor(fr, poseidon),
-        memAlignExecutor(fr, config)
+        memAlignExecutor(fr, config),
+        climbKeyExecutor(fr, config)
         {};
 
     // Full version: all polynomials are evaluated, in all evaluations

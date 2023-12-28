@@ -18,6 +18,36 @@ using json = nlohmann::json;
 // This max length is checked in preprocessTxs()
 #define MAX_BATCH_L2_DATA_SIZE (120000)
 
+class L1Data
+{
+public:
+    bool bPresent;
+    mpz_class globalExitRoot;
+    mpz_class blockHashL1;
+    uint64_t minTimestamp;
+    vector<mpz_class> smtProof;
+    L1Data() : bPresent(false), minTimestamp(0) {};
+};
+
+class OverrideEntry
+{
+public:
+    bool bBalance; // Indicates whether balance is valid or not
+    mpz_class balance; // Fake balance to set for the account before executing the call
+    uint64_t nonce; // Fake nonce to set for the account before executing the call
+    vector<uint8_t> code; // Fake EVM bytecode to inject into the account before executing the call (byte array, i.e. binary data)
+    unordered_map<string, mpz_class> state; // Fake key-value mapping to override all slots in the account storage before executing the call (key string, value binary)
+    unordered_map<string, mpz_class> stateDiff; // Fake key-value mapping to override individual slots in the account storage before executing the call (key string, value binary)
+    OverrideEntry() : bBalance(false), nonce(0) {};
+};
+
+class InputDebug
+{
+public:
+    uint64_t gasLimit;
+    InputDebug() : gasLimit(0) {};
+};
+
 class Input
 {
     Goldilocks &fr;
@@ -32,14 +62,26 @@ public:
     bool bUpdateMerkleTree; // if true, save DB writes to SQL database
     bool bNoCounters; // if true, do not increase counters nor limit evaluations
     bool bGetKeys; // if true, return the keys used to read or write storage data
+    bool bSkipVerifyL1InfoRoot; // If true, skip the check when l1Data is verified (fork ID >= 7)
+    bool bSkipFirstChangeL2Block; // If true, skip the restriction to start a batch with a changeL2Block transaction (fork ID >= 7)
+    bool bSkipWriteBlockInfoRoot; // If true, skip the block info root (fork ID >= 7)
     TraceConfig traceConfig; // FullTracer configuration
+    unordered_map<uint64_t, L1Data> l1InfoTreeData;
+    unordered_map<string, OverrideEntry> stateOverride;
+    uint64_t stepsN;
+    InputDebug debug;
 
     // Constructor
     Input (Goldilocks &fr) :
         fr(fr),
         bUpdateMerkleTree(false),
         bNoCounters(false),
-        bGetKeys(false) {};
+        bGetKeys(false),
+        bSkipVerifyL1InfoRoot(false),
+        bSkipFirstChangeL2Block(false),
+        bSkipWriteBlockInfoRoot(false),
+        stepsN(0)
+        {};
 
     // Loads the input object data from a JSON object
     zkresult load (json &input);

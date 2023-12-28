@@ -809,30 +809,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 // Storage read free in: get a poseidon hash, and read fi=sto[hash]
                 if (rom.line[zkPC].sRD == 1)
                 {
-                    Goldilocks::Element Kin0[12];
-                    Kin0[0] = pols.C0[i];
-                    Kin0[1] = pols.C1[i];
-                    Kin0[2] = pols.C2[i];
-                    Kin0[3] = pols.C3[i];
-                    Kin0[4] = pols.C4[i];
-                    Kin0[5] = pols.C5[i];
-                    Kin0[6] = pols.C6[i];
-                    Kin0[7] = pols.C7[i];
-                    Kin0[8] = fr.zero();
-                    Kin0[9] = fr.zero();
-                    Kin0[10] = fr.zero();
-                    Kin0[11] = fr.zero();
+                    zkresult zkResult;
 
-                    Goldilocks::Element Kin1[12];
-                    Kin1[0] = pols.A0[i];
-                    Kin1[1] = pols.A1[i];
-                    Kin1[2] = pols.A2[i];
-                    Kin1[3] = pols.A3[i];
-                    Kin1[4] = pols.A4[i];
-                    Kin1[5] = pols.A5[i];
-                    Kin1[6] = pols.B0[i];
-                    Kin1[7] = pols.B1[i];
-
+                    // Check the range of the registers A and B
                     if  ( !fr.isZero(pols.A5[i]) || !fr.isZero(pols.A6[i]) || !fr.isZero(pols.A7[i]) || !fr.isZero(pols.B2[i]) || !fr.isZero(pols.B3[i]) || !fr.isZero(pols.B4[i]) || !fr.isZero(pols.B5[i])|| !fr.isZero(pols.B6[i])|| !fr.isZero(pols.B7[i]) )
                     {
                         proverRequest.result = ZKR_SM_MAIN_STORAGE_INVALID_KEY;
@@ -840,73 +819,216 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
-
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-                    gettimeofday(&t, NULL);
-#endif
-                    // Call poseidon and get the hash key
-                    Goldilocks::Element Kin0Hash[4];
-                    poseidon.hash(Kin0Hash, Kin0);
-
-                    // Reinject the first resulting hash as the capacity for the next poseidon hash
-                    Kin1[8] = Kin0Hash[0];
-                    Kin1[9] = Kin0Hash[1];
-                    Kin1[10] = Kin0Hash[2];
-                    Kin1[11] = Kin0Hash[3];
-
-                    // Call poseidon hash
-                    Goldilocks::Element Kin1Hash[4];
-                    poseidon.hash(Kin1Hash, Kin1);
-
-                    Goldilocks::Element key[4];
-                    key[0] = Kin1Hash[0];
-                    key[1] = Kin1Hash[1];
-                    key[2] = Kin1Hash[2];
-                    key[3] = Kin1Hash[3];
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-                    mainMetrics.add("Poseidon", TimeDiff(t), 3);
-#endif
-
-#ifdef LOG_STORAGE
-                    zklog.info("Storage read sRD got poseidon key: " + ctx.fr.toString(ctx.lastSWrite.key, 16));
-#endif
+                    
+                    // Get old state root
                     Goldilocks::Element oldRoot[4];
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-                    gettimeofday(&t, NULL);
-#endif
-                    SmtGetResult smtGetResult;
+                    // Track if we used the state override or not
+                    bool bStateOverride = false;
                     mpz_class value;
-                    zkresult zkResult = pHashDB->get(proverRequest.uuid, oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);
-                    if (zkResult != ZKR_SUCCESS)
+                    SmtGetResult smtGetResult;
+
+                    // If the input contains a state override section, then use it
+                    if (!proverRequest.input.stateOverride.empty())
                     {
-                        proverRequest.result = zkResult;
-                        logError(ctx, string("Failed calling pHashDB->get() result=") + zkresult2string(zkResult));
-                        pHashDB->cancelBatch(proverRequest.uuid);
-                        return;
+                        // Get the key address
+                        mpz_class auxScalar;
+                        if (!fea2scalar(fr, auxScalar, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar()");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        string keyAddress = NormalizeTo0xNFormat(auxScalar.get_str(16), 40);
+
+                        // Get the key type
+                        if (!fea2scalar(fr, auxScalar, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar()");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        uint64_t keyType = auxScalar.get_ui();
+
+                        // Get the key storage
+                        if (!fea2scalar(fr, auxScalar, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar()");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        string keyStorage = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
+
+                        unordered_map<string, OverrideEntry>::const_iterator it;
+                        it = proverRequest.input.stateOverride.find(keyAddress);
+                        if (it != proverRequest.input.stateOverride.end())
+                        {
+                            if ((keyType == rom.SMT_KEY_BALANCE) && it->second.bBalance)
+                            {
+                                value = it->second.balance;
+                                bStateOverride = true;
+                            }
+                            else if ((keyType == rom.SMT_KEY_NONCE) && (it->second.nonce > 0))
+                            {
+                                value = it->second.nonce;
+                                bStateOverride = true;
+                            }
+                            else if ((keyType == rom.SMT_KEY_SC_CODE) && (it->second.code.size() > 0))
+                            {
+                                // Calculate the linear poseidon hash
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                                gettimeofday(&t, NULL);
+#endif
+                                Goldilocks::Element result[4];
+                                linearPoseidon(ctx, it->second.code, result);
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                                mainMetrics.add("Poseidon", TimeDiff(t));
+#endif
+                                // Convert to scalar
+                                fea2scalar(fr, value, result);
+
+                                bStateOverride = true;
+                            }
+                            else if ((keyType == rom.SMT_KEY_SC_LENGTH) && (it->second.code.size() > 0))
+                            {
+                                value = it->second.code.size();
+                                bStateOverride = true;
+                            }
+                            else if ((keyType == rom.SMT_KEY_SC_STORAGE) && (it->second.state.size() > 0))
+                            {
+                                unordered_map<string, mpz_class>::const_iterator itState;
+                                itState = it->second.state.find(keyStorage);
+                                if (itState != it->second.state.end())
+                                {
+                                    value = itState->second;
+                                }
+                                else
+                                {
+                                    value = 0;
+                                }
+                                bStateOverride = true;
+                            }
+                            else if ((keyType == rom.SMT_KEY_SC_STORAGE) && (it->second.stateDiff.size() > 0))
+                            {
+                                unordered_map<string, mpz_class>::const_iterator itState;
+                                itState = it->second.stateDiff.find(keyStorage);
+                                if (itState != it->second.stateDiff.end())
+                                {
+                                    value = itState->second;
+                                }
+                                else
+                                {
+                                    value = 0;
+                                }
+                                bStateOverride = true;
+                            }
+                        }
                     }
-                    incCounter = smtGetResult.proofHashCounter + 2;
+
+                    if (bStateOverride)
+                    {
+                        smtGetResult.value = value;
 
 #ifdef LOG_SMT_KEY_DETAILS
-                    zklog.info("SMT get C=" + fea2string(fr, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]) +
+                    zklog.info("SMT get state override C=" + fea2string(fr, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]) +
                         " A=" + fea2string(fr, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]) +
                         " B=" + fea2string(fr, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]) +
-                        " Kin0Hash=" + fea2string(fr, Kin0Hash) +
-                        " Kin1Hash=" + fea2string(fr, Kin1Hash) +
                         " oldRoot=" + fea2string(fr, oldRoot) +
                         " value=" + value.get_str(10));
 #endif
-                    //cout << "smt.get() returns value=" << smtGetResult.value.get_str(16) << endl;
+                    }
+                    else
+                    {
+                        Goldilocks::Element Kin0[12];
+                        Kin0[0] = pols.C0[i];
+                        Kin0[1] = pols.C1[i];
+                        Kin0[2] = pols.C2[i];
+                        Kin0[3] = pols.C3[i];
+                        Kin0[4] = pols.C4[i];
+                        Kin0[5] = pols.C5[i];
+                        Kin0[6] = pols.C6[i];
+                        Kin0[7] = pols.C7[i];
+                        Kin0[8] = fr.zero();
+                        Kin0[9] = fr.zero();
+                        Kin0[10] = fr.zero();
+                        Kin0[11] = fr.zero();
+
+                        Goldilocks::Element Kin1[12];
+                        Kin1[0] = pols.A0[i];
+                        Kin1[1] = pols.A1[i];
+                        Kin1[2] = pols.A2[i];
+                        Kin1[3] = pols.A3[i];
+                        Kin1[4] = pols.A4[i];
+                        Kin1[5] = pols.A5[i];
+                        Kin1[6] = pols.B0[i];
+                        Kin1[7] = pols.B1[i];
+
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                        gettimeofday(&t, NULL);
+#endif
+                        // Call poseidon and get the hash key
+                        Goldilocks::Element Kin0Hash[4];
+                        poseidon.hash(Kin0Hash, Kin0);
+
+                        // Reinject the first resulting hash as the capacity for the next poseidon hash
+                        Kin1[8] = Kin0Hash[0];
+                        Kin1[9] = Kin0Hash[1];
+                        Kin1[10] = Kin0Hash[2];
+                        Kin1[11] = Kin0Hash[3];
+
+                        // Call poseidon hash
+                        Goldilocks::Element Kin1Hash[4];
+                        poseidon.hash(Kin1Hash, Kin1);
+
+                        Goldilocks::Element key[4];
+                        key[0] = Kin1Hash[0];
+                        key[1] = Kin1Hash[1];
+                        key[2] = Kin1Hash[2];
+                        key[3] = Kin1Hash[3];
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                        mainMetrics.add("Poseidon", TimeDiff(t), 3);
+#endif
+
+#ifdef LOG_STORAGE
+                        zklog.info("Storage read sRD got poseidon key: " + ctx.fr.toString(ctx.lastSWrite.key, 16));
+#endif
+
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                        gettimeofday(&t, NULL);
+#endif
+                        zkResult = pHashDB->get(proverRequest.uuid, oldRoot, key, value, &smtGetResult, proverRequest.dbReadLog);
+                        if (zkResult != ZKR_SUCCESS)
+                        {
+                            proverRequest.result = zkResult;
+                            logError(ctx, string("Failed calling pHashDB->get() result=") + zkresult2string(zkResult));
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        incCounter = smtGetResult.proofHashCounter + 2;
+
+#ifdef LOG_SMT_KEY_DETAILS
+                        zklog.info("SMT get C=" + fea2string(fr, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]) +
+                            " A=" + fea2string(fr, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]) +
+                            " B=" + fea2string(fr, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]) +
+                            " Kin0Hash=" + fea2string(fr, Kin0Hash) +
+                            " Kin1Hash=" + fea2string(fr, Kin1Hash) +
+                            " oldRoot=" + fea2string(fr, oldRoot) +
+                            " value=" + value.get_str(10));
+#endif
+
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                        mainMetrics.add("SMT Get", TimeDiff(t));
+#endif
+                    }
 
                     if (bProcessBatch)
                     {
                         eval_addReadWriteAddress(ctx, smtGetResult.value);
                     }
-
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-                    mainMetrics.add("SMT Get", TimeDiff(t));
-#endif
 
                     scalar2fea(fr, smtGetResult.value, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);
 
@@ -919,35 +1041,9 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 // Storage write free in: calculate the poseidon hash key, check its entry exists in storage, and update new root hash
                 if (rom.line[zkPC].sWR == 1)
                 {
-                    // reset lastSWrite
-                    ctx.lastSWrite.reset();
-                    Goldilocks::Element Kin0[12];
-                    Kin0[0] = pols.C0[i];
-                    Kin0[1] = pols.C1[i];
-                    Kin0[2] = pols.C2[i];
-                    Kin0[3] = pols.C3[i];
-                    Kin0[4] = pols.C4[i];
-                    Kin0[5] = pols.C5[i];
-                    Kin0[6] = pols.C6[i];
-                    Kin0[7] = pols.C7[i];
-                    Kin0[8] = fr.zero();
-                    Kin0[9] = fr.zero();
-                    Kin0[10] = fr.zero();
-                    Kin0[11] = fr.zero();
+                    zkresult zkResult;
 
-                    Goldilocks::Element Kin1[12];
-                    Kin1[0] = pols.A0[i];
-                    Kin1[1] = pols.A1[i];
-                    Kin1[2] = pols.A2[i];
-                    Kin1[3] = pols.A3[i];
-                    Kin1[4] = pols.A4[i];
-                    Kin1[5] = pols.A5[i];
-                    Kin1[6] = pols.B0[i];
-                    Kin1[7] = pols.B1[i];
-
-                    uint64_t b0 = fr.toU64(pols.B0[i]);
-                    bool bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);
-
+                    // Check the range of the registers A and B
                     if  ( !fr.isZero(pols.A5[i]) || !fr.isZero(pols.A6[i]) || !fr.isZero(pols.A7[i]) || !fr.isZero(pols.B2[i]) || !fr.isZero(pols.B3[i]) || !fr.isZero(pols.B4[i]) || !fr.isZero(pols.B5[i])|| !fr.isZero(pols.B6[i])|| !fr.isZero(pols.B7[i]) )
                     {
                         proverRequest.result = ZKR_SM_MAIN_STORAGE_INVALID_KEY;
@@ -955,84 +1051,205 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                         pHashDB->cancelBatch(proverRequest.uuid);
                         return;
                     }
-
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-                    gettimeofday(&t, NULL);
-#endif
-                    // Call poseidon and get the hash key
-                    Goldilocks::Element Kin0Hash[4];
-                    poseidon.hash(Kin0Hash, Kin0);
-
-                    Kin1[8] = Kin0Hash[0];
-                    Kin1[9] = Kin0Hash[1];
-                    Kin1[10] = Kin0Hash[2];
-                    Kin1[11] = Kin0Hash[3];
-
-                    // Call poseidon hash
-                    Goldilocks::Element Kin1Hash[4];
-                    poseidon.hash(Kin1Hash, Kin1);
                     
-                    // Store a copy of the data in ctx.lastSWrite
-                    if (!bProcessBatch)
-                    {
-                        for (uint64_t j=0; j<12; j++)
-                        {
-                            ctx.lastSWrite.Kin0[j] = Kin0[j];
-                        }
-                        for (uint64_t j=0; j<12; j++)
-                        {
-                            ctx.lastSWrite.Kin1[j] = Kin1[j];
-                        }
-                    }
-                    for (uint64_t j=0; j<4; j++)
-                    {
-                        ctx.lastSWrite.keyI[j] = Kin0Hash[j];
-                    }
-                    for (uint64_t j=0; j<4; j++)
-                    {
-                        ctx.lastSWrite.key[j] = Kin1Hash[j];
-                    }
-
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-                    mainMetrics.add("Poseidon", TimeDiff(t));
-#endif
-
-#ifdef LOG_STORAGE
-                    zklog.info("Storage write sWR got poseidon key: " + ctx.fr.toString(ctx.lastSWrite.key, 16));
-#endif
-                    // Call SMT to get the new Merkel Tree root hash
-                    mpz_class scalarD;
-                    fea2scalar(fr, scalarD, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]);
-                    
-#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
-                    gettimeofday(&t, NULL);
-#endif
+                    // Get old state root
                     Goldilocks::Element oldRoot[4];
                     sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
-                    zkresult zkResult = pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : ( proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE ), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
-                    if (zkResult != ZKR_SUCCESS)
+                    // Get the value to write
+                    mpz_class value;
+                    if (!fea2scalar(fr, value, pols.D0[i], pols.D1[i], pols.D2[i], pols.D3[i], pols.D4[i], pols.D5[i], pols.D6[i], pols.D7[i]))
                     {
-                        proverRequest.result = zkResult;
-                        logError(ctx, string("Failed calling pHashDB->set() result=") + zkresult2string(zkResult));
+                        proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                        logError(ctx, "Failed calling fea2scalar()");
                         pHashDB->cancelBatch(proverRequest.uuid);
-                        return; 
+                        return;
                     }
-                    incCounter = ctx.lastSWrite.res.proofHashCounter + 2;
+
+                    // Track if we used the state override or not
+                    bool bStatusOverride = false;
+
+                    // If the input contains a state override section, then use it
+                    if (!proverRequest.input.stateOverride.empty())
+                    {
+                        // Get the key address
+                        mpz_class auxScalar;
+                        if (!fea2scalar(fr, auxScalar, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar()");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        string keyAddress = NormalizeTo0xNFormat(auxScalar.get_str(16), 40);
+
+                        // Get the key type
+                        if (!fea2scalar(fr, auxScalar, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar()");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        uint64_t keyType = auxScalar.get_ui();
+
+                        // Get the key storage
+                        if (!fea2scalar(fr, auxScalar, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]))
+                        {
+                            proverRequest.result = ZKR_SM_MAIN_FEA2SCALAR;
+                            logError(ctx, "Failed calling fea2scalar()");
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return;
+                        }
+                        string keyStorage = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
+
+                        unordered_map<string, OverrideEntry>::iterator it;
+                        it = proverRequest.input.stateOverride.find(keyAddress);
+                        if (it != proverRequest.input.stateOverride.end())
+                        {
+                            if ((keyType == rom.SMT_KEY_BALANCE) && it->second.bBalance)
+                            {
+                                it->second.balance = value;
+                                it->second.bBalance = true;
+                                bStatusOverride = true;
+                            }
+                            else if ((keyType == rom.SMT_KEY_NONCE) && (it->second.nonce > 0))
+                            {
+                                it->second.nonce = value.get_ui();
+                                bStatusOverride = true;
+                            }
+                            else if ((keyType == rom.SMT_KEY_SC_CODE) && (it->second.code.size() > 0))
+                            {
+                                it->second.code = proverRequest.input.contractsBytecode[NormalizeTo0xNFormat(value.get_str(16), 64)];
+                                bStatusOverride = true;
+                            }
+                            else if ((keyType == rom.SMT_KEY_SC_STORAGE) && (it->second.state.size() > 0))
+                            {
+                                it->second.state[keyStorage] = value;
+                                bStatusOverride = true;
+                            }
+                            else if ((keyType == rom.SMT_KEY_SC_STORAGE) && (it->second.stateDiff.size() > 0))
+                            {
+                                it->second.stateDiff[keyStorage] = value;
+                                bStatusOverride = true;
+                            }
+                        }
+                    }
+
+                    if (bStatusOverride)
+                    {
 
 #ifdef LOG_SMT_KEY_DETAILS
-                    zklog.info("SMT set C=" + fea2string(fr, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]) +
+                    zklog.info("SMT set state override C=" + fea2string(fr, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]) +
                         " A=" + fea2string(fr, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]) +
                         " B=" + fea2string(fr, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]) +
-                        " Kin0Hash=" + fea2string(fr, Kin0Hash) +
-                        " Kin1Hash=" + fea2string(fr, Kin1Hash) +
                         " oldRoot=" + fea2string(fr, oldRoot) +
-                        " value=" + scalarD.get_str(10) +
-                        " newRoot=" + fea2string(fr, ctx.lastSWrite.newRoot));
+                        " value=" + value.get_str(10));
 #endif
+                    }
+                    else
+                    {
+                        // reset lastSWrite
+                        ctx.lastSWrite.reset();
+                        Goldilocks::Element Kin0[12];
+                        Kin0[0] = pols.C0[i];
+                        Kin0[1] = pols.C1[i];
+                        Kin0[2] = pols.C2[i];
+                        Kin0[3] = pols.C3[i];
+                        Kin0[4] = pols.C4[i];
+                        Kin0[5] = pols.C5[i];
+                        Kin0[6] = pols.C6[i];
+                        Kin0[7] = pols.C7[i];
+                        Kin0[8] = fr.zero();
+                        Kin0[9] = fr.zero();
+                        Kin0[10] = fr.zero();
+                        Kin0[11] = fr.zero();
+
+                        Goldilocks::Element Kin1[12];
+                        Kin1[0] = pols.A0[i];
+                        Kin1[1] = pols.A1[i];
+                        Kin1[2] = pols.A2[i];
+                        Kin1[3] = pols.A3[i];
+                        Kin1[4] = pols.A4[i];
+                        Kin1[5] = pols.A5[i];
+                        Kin1[6] = pols.B0[i];
+                        Kin1[7] = pols.B1[i];
+
+                        uint64_t b0 = fr.toU64(pols.B0[i]);
+                        bool bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);
+
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                        gettimeofday(&t, NULL);
+#endif
+                        // Call poseidon and get the hash key
+                        Goldilocks::Element Kin0Hash[4];
+                        poseidon.hash(Kin0Hash, Kin0);
+
+                        Kin1[8] = Kin0Hash[0];
+                        Kin1[9] = Kin0Hash[1];
+                        Kin1[10] = Kin0Hash[2];
+                        Kin1[11] = Kin0Hash[3];
+
+                        // Call poseidon hash
+                        Goldilocks::Element Kin1Hash[4];
+                        poseidon.hash(Kin1Hash, Kin1);
+                        
+                        // Store a copy of the data in ctx.lastSWrite
+                        if (!bProcessBatch)
+                        {
+                            for (uint64_t j=0; j<12; j++)
+                            {
+                                ctx.lastSWrite.Kin0[j] = Kin0[j];
+                            }
+                            for (uint64_t j=0; j<12; j++)
+                            {
+                                ctx.lastSWrite.Kin1[j] = Kin1[j];
+                            }
+                        }
+                        for (uint64_t j=0; j<4; j++)
+                        {
+                            ctx.lastSWrite.keyI[j] = Kin0Hash[j];
+                        }
+                        for (uint64_t j=0; j<4; j++)
+                        {
+                            ctx.lastSWrite.key[j] = Kin1Hash[j];
+                        }
+
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                        mainMetrics.add("Poseidon", TimeDiff(t));
+#endif
+
+#ifdef LOG_STORAGE
+                        zklog.info("Storage write sWR got poseidon key: " + ctx.fr.toString(ctx.lastSWrite.key, 16));
+#endif
+#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
+                        gettimeofday(&t, NULL);
+#endif
+
+                        zkResult = pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_block_number(), proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, value, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : ( proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE ), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
+                        if (zkResult != ZKR_SUCCESS)
+                        {
+                            proverRequest.result = zkResult;
+                            logError(ctx, string("Failed calling pHashDB->set() result=") + zkresult2string(zkResult));
+                            pHashDB->cancelBatch(proverRequest.uuid);
+                            return; 
+                        }
+                        incCounter = ctx.lastSWrite.res.proofHashCounter + 2;
+
+#ifdef LOG_SMT_KEY_DETAILS
+                        zklog.info("SMT set C=" + fea2string(fr, pols.C0[i], pols.C1[i], pols.C2[i], pols.C3[i], pols.C4[i], pols.C5[i], pols.C6[i], pols.C7[i]) +
+                            " A=" + fea2string(fr, pols.A0[i], pols.A1[i], pols.A2[i], pols.A3[i], pols.A4[i], pols.A5[i], pols.A6[i], pols.A7[i]) +
+                            " B=" + fea2string(fr, pols.B0[i], pols.B1[i], pols.B2[i], pols.B3[i], pols.B4[i], pols.B5[i], pols.B6[i], pols.B7[i]) +
+                            " Kin0Hash=" + fea2string(fr, Kin0Hash) +
+                            " Kin1Hash=" + fea2string(fr, Kin1Hash) +
+                            " oldRoot=" + fea2string(fr, oldRoot) +
+                            " value=" + value.get_str(10) +
+                            " newRoot=" + fea2string(fr, ctx.lastSWrite.newRoot));
+#endif
+                    }
                     if (bProcessBatch)
                     {
-                        eval_addReadWriteAddress(ctx, scalarD);
+                        eval_addReadWriteAddress(ctx, value);
                     }
 
                     // If we just modified a balance
@@ -1868,7 +2085,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 Goldilocks::Element oldRoot[4];
                 sr8to4(fr, pols.SR0[i], pols.SR1[i], pols.SR2[i], pols.SR3[i], pols.SR4[i], pols.SR5[i], pols.SR6[i], pols.SR7[i], oldRoot[0], oldRoot[1], oldRoot[2], oldRoot[3]);
 
-                zkresult zkResult = pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : (proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
+                zkresult zkResult = pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_block_number(), proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : (proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);
                 if (zkResult != ZKR_SUCCESS)
                 {
                     proverRequest.result = zkResult;
@@ -2427,7 +2644,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR
                 gettimeofday(&t, NULL);
 #endif
-                zkresult zkResult = pHashDB->setProgram(proverRequest.uuid, proverRequest.pFullTracer->get_tx_number(), result, hashPIterator->second.data, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);
+                zkresult zkResult = pHashDB->setProgram(proverRequest.uuid, proverRequest.pFullTracer->get_block_number(), proverRequest.pFullTracer->get_tx_number(), result, hashPIterator->second.data, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);
                 if (zkResult != ZKR_SUCCESS)
                 {
                     proverRequest.result = zkResult;
@@ -4211,6 +4428,43 @@ void MainExecutor::logError(Context &ctx, const string &message)
     json inputJson;
     ctx.proverRequest.input.save(inputJson);
     zklog.error("Input=" + inputJson.dump());
+}
+
+void MainExecutor::linearPoseidon (Context &ctx, const vector<uint8_t> &_data, Goldilocks::Element (&result)[4])
+{
+    // Get a local copy of the bytes vector
+    vector<uint8_t> data = _data;
+
+    // Add padding = 0b1000...00001  up to a length of 56xN (7x8xN)
+    data.push_back(0x01);
+    while((data.size() % 56) != 0) data.push_back(0);
+    data[data.size()-1] |= 0x80;
+
+    // Create a FE buffer to store the transformed bytes into fe
+    uint64_t bufferSize = data.size()/7;
+    Goldilocks::Element * pBuffer = new Goldilocks::Element[bufferSize];
+    if (pBuffer == NULL)
+    {
+        logError(ctx, "MainExecutor::linearPoseidon() failed allocating memory of " + to_string(bufferSize) + " field elements");
+        exitProcess();
+    }
+
+    // Init to zero
+    for (uint64_t j=0; j<bufferSize; j++) pBuffer[j] = fr.zero();
+
+    // Copy the bytes into the fe lower 7 sections
+    for (uint64_t j=0; j<data.size(); j++)
+    {
+        uint64_t fePos = j/7;
+        uint64_t shifted = uint64_t(data[j]) << ((j%7)*8);
+        pBuffer[fePos] = fr.add(pBuffer[fePos], fr.fromU64(shifted));
+    }
+
+    // Call poseidon linear hash
+    poseidon.linear_hash(result, pBuffer, bufferSize);
+
+    // Free allocated memory
+    delete[] pBuffer;
 }
 
 } // namespace

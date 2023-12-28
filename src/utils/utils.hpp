@@ -51,6 +51,12 @@ void file2json(const string &fileName, ordered_json &j);
 // Returns if file exists
 bool fileExists (const string &fileName);
 
+// Returns file size
+uint64_t fileSize (const string &fileName);
+
+// Return if file is a directory
+bool fileIsDirectory (const string &fileName);
+
 // Ensure directory exists
 void ensureDirectoryExists (const string &fileName);
 

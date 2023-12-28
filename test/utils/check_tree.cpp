@@ -4,7 +4,7 @@
 
 zkresult CheckTree (Database &db, const string &key, uint64_t level, CheckTreeCounters &checkTreeCounters, const string &prefix)
 {
-    zklog.info(prefix + "CheckTree() hash=" + key + " level=" + to_string(level));
+    //zklog.info(prefix + "CheckTree() hash=" + key + " level=" + to_string(level));
 
     checkTreeCounters.maxLevel = zkmax(checkTreeCounters.maxLevel, level);
 
@@ -26,7 +26,7 @@ zkresult CheckTree (Database &db, const string &key, uint64_t level, CheckTreeCo
     if (!db.fr.isZero(value[9]))
     {
         zklog.error(prefix + "CheckTree() fe9 not zero value.size=" + to_string(value.size()) + " key=" + key + " level=" + to_string(level) + " fe9=" + db.fr.toString(value[9],16));
-        return ZKR_UNSPECIFIED;
+        return ZKR_UNSPECIFIED;    
     }
 
     if (!db.fr.isZero(value[10]))
@@ -50,25 +50,23 @@ zkresult CheckTree (Database &db, const string &key, uint64_t level, CheckTreeCo
         if (!feaIsZero(value[0], value[1], value[2], value[3]))
         {
             string hashLeft = fea2string(db.fr, value[0], value[1], value[2], value[3]);
-            zklog.info(prefix + "CheckTree() hashLeft=" + hashLeft + " level=" + to_string(level));
             result = CheckTree(db, hashLeft, level+1, checkTreeCounters, prefix + " ");
             if (result != ZKR_SUCCESS)
             {
                 return result;
             }
         }
-
         if (!feaIsZero(value[4], value[5], value[6], value[7]))
         {
             string hashRight = fea2string(db.fr, value[4], value[5], value[6], value[7]);
-            zklog.info(prefix + "CheckTree() hashRight=" + hashRight + " level=" + to_string(level));
             result = CheckTree(db, hashRight, level+1, checkTreeCounters, prefix + " ");
-            if (result != ZKR_SUCCESS)
-            {
-                return result;
-            }
+            return result;
         }
-
+        if (feaIsZero(value[0], value[1], value[2], value[3]) && feaIsZero(value[4], value[5], value[6], value[7]))
+        {
+            zklog.error("CheckTree() found both hashLeft and hashRight = 0");
+            return ZKR_UNSPECIFIED;
+        }
         return ZKR_SUCCESS;
     }
     else if (fe8 == 1) // Leaf node
@@ -78,8 +76,8 @@ zkresult CheckTree (Database &db, const string &key, uint64_t level, CheckTreeCo
         //level++;
         string valueHash = fea2string(db.fr, value[4], value[5], value[6], value[7]);
         Goldilocks::Element vHash[4]={value[4], value[5], value[6], value[7]};
-        zklog.info(prefix + "CheckTree() rkey=" + fea2string(db.fr, value[0], value[1], value[2], value[3]));
-        zklog.info(prefix + "CheckTree() valueHash=" + valueHash);
+        //zklog.info(prefix + "CheckTree() rkey=" + fea2string(db.fr, value[0], value[1], value[2], value[3]));
+        //zklog.info(prefix + "CheckTree() valueHash=" + valueHash);
         value.clear();
         zkresult result = db.read(valueHash, vHash, value, NULL, false);
         if (result != ZKR_SUCCESS)
@@ -89,20 +87,28 @@ zkresult CheckTree (Database &db, const string &key, uint64_t level, CheckTreeCo
         }
         if (value.size() != 12)
         {
-            zklog.error(prefix + "CheckTree() found value for key=" + valueHash + " at level=" + to_string(level) + " with incorrect size=" + to_string(value.size()));
-            return ZKR_DB_ERROR;
+            zklog.error("CheckTree() found value for key=" + valueHash + " at level=" + to_string(level) + " with incorrect size=" + to_string(value.size()));
+            /*zklog.error("valueL=" + fea2string(db.fr, value[0], value[1], value[2], value[3]));
+            zklog.error("valueH=" + fea2string(db.fr, value[4], value[5], value[6], value[7]));
+            PoseidonGoldilocks poseidon;
+            Goldilocks::Element valueFea[12];
+            valueFea[0] = value[0];
+            valueFea[1] = value[1];
+            valueFea[2] = value[2];
+            valueFea[3] = value[3];
+            valueFea[4] = value[4];
+            valueFea[5] = value[5];
+            valueFea[6] = value[6];
+            valueFea[7] = value[7];
+            valueFea[8] = db.fr.zero();
+            valueFea[9] = db.fr.zero();
+            valueFea[10] = db.fr.zero();
+            valueFea[11] = db.fr.zero();
+            Goldilocks::Element hashFea[4];
+            poseidon.hash(hashFea, valueFea);
+            zklog.info("poseidon=" + fea2string(db.fr, hashFea));*/
+            //return ZKR_UNSPECIFIED;
         }
-        string valueString;
-        for (uint64_t i=0; i<value.size(); i++)
-        {
-            if (i != 0)
-            {
-                valueString += ':';
-            }
-            valueString += fr.toString(value[i], 16);
-        }
-        zklog.info(prefix + "CheckTree() value=" + valueString + " level=" + to_string(level));
-
         checkTreeCounters.maxLevel = zkmax(checkTreeCounters.maxLevel, level);
         checkTreeCounters.values++;
         if (checkTreeCounters.values % 1000 == 0)
@@ -116,4 +122,4 @@ zkresult CheckTree (Database &db, const string &key, uint64_t level, CheckTreeCo
         zklog.error(prefix + "CheckTree() failed key=" + key + " level=" + to_string(level) + " invalid fe8=" + to_string(fe8));
         return ZKR_UNSPECIFIED;
     }
-};
+}

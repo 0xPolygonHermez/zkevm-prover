@@ -31,6 +31,7 @@ uint64_t HashDBProgramTest (const Config& config)
     mpz_class keyScalar = 0;
     vector<uint8_t> program;
     string batchUUID = getUUID();
+    uint64_t block = 0;
     uint64_t tx = 0;
 
     for (uint64_t i=0; i<numberOfPrograms; i++)
@@ -40,7 +41,7 @@ uint64_t HashDBProgramTest (const Config& config)
         poseidon.hash(key, keyfea);
         program.emplace_back((uint8_t)i);
                 
-        zkr = pHashDB->setProgram(batchUUID, tx, key, program, persistence);
+        zkr = pHashDB->setProgram(batchUUID, block, tx, key, program, persistence);
         zkassertpermanent(zkr==ZKR_SUCCESS);
     }
     

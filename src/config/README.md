@@ -29,6 +29,7 @@ The configuration parameters can be of different uses:
 |`runSHA256ScriptGenerator`|tools|boolean|Runs a SHA-256 hash that generates a SHA-256 script json file to be used by the SHA-256 secondary state machine executor|false|RUN_SHA256_SCRIPT_GENERATOR|
 |`runKeccakTest`|test|boolean|Runs a Keccak-f hash test|false|RUN_KECCAK_TEST|
 |`runStorageSMTest`|test|boolean|Runs a storage state machine test|false|RUN_STORAGE_SM_TEST|
+|`runClimbKeySMTest`|test|boolean|Runs a climb key state machine test|false|RUN_CLIMBKEY_SM_TEST|
 |`runBinarySMTest`|test|boolean|Runs a binary state machine test|false|RUN_BINARY_SM_TEST|
 |`runMemAlignSMTest`|test|boolean|Runs a memory alignment state machine test|false|RUN_MEM_ALIGN_SM_TEST|
 |`runSHA256Test`|test|boolean|Runs a SHA-256 hash test|false|RUN_SHA256_TEST|
@@ -69,6 +70,7 @@ The configuration parameters can be of different uses:
 |`executorClientHost`|test|string|Executor client host it connects to|"127.0.0.1"|EXECUTOR_CLIENT_HOST|
 |`executorClientLoops`|test|u64|Executor client iterations|1|EXECUTOR_CLIENT_LOOPS|
 |`executorClientCheckNewStateRoot`|test|bool|Executor client checks the new state root returned in the response using CheckTree|false|EXECUTOR_CLIENT_CHECK_NEW_STATE_ROOT|
+|`executorClientResetDB`|test|bool|Executor client resets the database before processing a batch; it only works in debug mode|false|EXECUTOR_CLIENT_RESET_DB|
 |**`hashDBServerPort`**|production|u16|HashDB server GRPC port|50061|HASHDB_SERVER_PORT|
 |**`hashDBURL`**|production|string|URL used by the Executor to connect to the HashDB service, e.g. "127.0.0.1:50061"; if set to "local", no GRPC is used and it connects to the local HashDB interface using direct calls to the HashDB classes; if your zkProver instance does not need to use a remote HashDB service for a good reason (e.g. not having direct access to the database) then even if it exports this service to other clients we recommend to use "local" since the performance is better|"local"|HASHDB_URL|
 |`hashDB64`|test|boolean|Use HashDB64 new database (do not use in  production, under development)|false|HASHDB64|
@@ -159,7 +161,6 @@ The configuration parameters can be of different uses:
 |`dbReadRetryDelay`|production|u64|Delay between Database retries, in microseconds|100*1000|DB_READ_RETRY_DELAY|
 |`stateManager`|production|boolean|Use State Manager to consolidate states before writing to Database|true|STATE_MANAGER|
 |`stateManagerPurge`|production|boolean|Purge State Manager sub-states|true|STATE_MANAGER_PURGE|
-|`stateManagerPurgeTxs`|production|boolean|Purge State Manager transactions|true|STATE_MANAGER_PURGE_TXS|
 |`cleanerPollingPeriod`|production|u64|Polling period of the cleaner thread that deletes completed Prover batches, in seconds|600|CLEANER_POLLING_PERIOD|
 |`requestsPersistence`|production|u64|Time that completed batches stay before being cleaned up|3600|REQUESTS_PERSISTENCE|
 |`maxExecutorThreads`|production|u64|Maximum number of GRPC Executor service threads|20|MAX_EXECUTOR_THREADS|

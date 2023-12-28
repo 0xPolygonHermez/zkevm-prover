@@ -32,11 +32,6 @@
 #include "zklog.hpp"
 #include "exit_process.hpp"
 
-#ifndef __AVX512__
-#define NROWS_STEPS_ 4
-#else
-#define NROWS_STEPS_ 8
-#endif
 
 Prover::Prover(Goldilocks &fr,
                PoseidonGoldilocks &poseidon,
@@ -998,6 +993,13 @@ void Prover::execute(ProverRequest *pProverRequest)
     zklog.info("Prover::execute() input file: " + pProverRequest->inputFile());
     // zklog.info("Prover::execute() public file: " + pProverRequest->publicsOutputFile());
     // zklog.info("Prover::execute() proof file: " + pProverRequest->proofFile());
+
+    // In proof-generation executions we can only process the exact number of steps
+    if (pProverRequest->input.stepsN > 0)
+    {
+        zklog.error("Prover::execute() called with input.stepsN=" + to_string(pProverRequest->input.stepsN));
+        exitProcess();
+    }
 
     // Save input to <timestamp>.input.json, as provided by client
     if (config.saveInputToFile)

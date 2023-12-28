@@ -26,12 +26,17 @@ mpz_class ScalarTwoTo32 ("100000000", 16);
 mpz_class ScalarTwoTo64 ("10000000000000000", 16);
 mpz_class ScalarTwoTo128("100000000000000000000000000000000", 16);
 mpz_class ScalarTwoTo192("1000000000000000000000000000000000000000000000000", 16);
-mpz_class ScalarTwoTo256("10000000000000000000000000000000000000000000000000000000000000000", 16);
+mpz_class ScalarTwoTo254("4000000000000000000000000000000000000000000000000000000000000000", 16);
 mpz_class ScalarTwoTo255("8000000000000000000000000000000000000000000000000000000000000000", 16);
+mpz_class ScalarTwoTo256("10000000000000000000000000000000000000000000000000000000000000000", 16);
+mpz_class ScalarTwoTo257("20000000000000000000000000000000000000000000000000000000000000000", 16);
 mpz_class ScalarTwoTo258("40000000000000000000000000000000000000000000000000000000000000000", 16);
+mpz_class ScalarTwoTo259("80000000000000000000000000000000000000000000000000000000000000000", 16);
+
 mpz_class ScalarZero    ("0", 16);
 mpz_class ScalarOne     ("1", 16);
 mpz_class ScalarGoldilocksPrime = (uint64_t)GOLDILOCKS_PRIME;
+mpz_class Scalar4xGoldilocksPrime ("FFFFFFFF00000001FFFFFFFF00000001FFFFFFFF00000001FFFFFFFF00000001", 16);
 
 /* Scalar to/from a Sparse Merkle Tree key, interleaving bits */
 
@@ -138,7 +143,7 @@ string Add0xIfMissing(const string &s)
 
 
 // A set of strings with zeros is available in memory for performance reasons
-string sZeros[64] = {
+string sZeros[65] = {
     "",
     "0",
     "00",
@@ -202,7 +207,8 @@ string sZeros[64] = {
     "000000000000000000000000000000000000000000000000000000000000",
     "0000000000000000000000000000000000000000000000000000000000000",
     "00000000000000000000000000000000000000000000000000000000000000",
-    "000000000000000000000000000000000000000000000000000000000000000"
+    "000000000000000000000000000000000000000000000000000000000000000",
+    "0000000000000000000000000000000000000000000000000000000000000000"
 };
 
 string PrependZeros (const string &s, uint64_t n)
@@ -269,6 +275,15 @@ bool stringIsHex (const string &s)
     for (uint64_t i=0; i<s.size(); i++)
     {
         if (!charIsHex(s.at(i))) return false;
+    }
+    return true;
+}
+
+bool stringIsDec (const string &s)
+{
+    for (uint64_t i=0; i<s.size(); i++)
+    {
+        if (!charIsDec(s.at(i))) return false;
     }
     return true;
 }
@@ -611,7 +626,7 @@ string scalar2ba32(const mpz_class &_s)
     return result;
 }
 
-void scalar2bytes(mpz_class &s, uint8_t (&bytes)[32])
+void scalar2bytes(mpz_class s, uint8_t (&bytes)[32])
 {
     for (uint64_t i=0; i<32; i++)
     {
@@ -626,7 +641,7 @@ void scalar2bytes(mpz_class &s, uint8_t (&bytes)[32])
     }
 }
 
-void scalar2bytesBE(mpz_class &s, uint8_t *pBytes)
+void scalar2bytesBE(mpz_class s, uint8_t *pBytes)
 {
     for (uint64_t i=0; i<32; i++)
     {

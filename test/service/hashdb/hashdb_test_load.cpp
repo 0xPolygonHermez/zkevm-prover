@@ -31,6 +31,7 @@ const bool BASIC_TEST = true;
 void runHashDBTestLoad (const Config& config)
 {
     string uuid = getUUID();
+    uint64_t block = 0;
     uint64_t tx = 0;
 
     Goldilocks fr;
@@ -158,7 +159,7 @@ void runHashDBTestLoad (const Config& config)
         scalar2key(fr, keyScalar, key);
         //hashDB.setDBDebug(true);
         value=2;
-        client.set(uuid, tx, oldRoot, key, value, PERSISTENCE_DATABASE, newRoot, &setResult, NULL);
+        client.set(uuid, block, tx, oldRoot, key, value, PERSISTENCE_DATABASE, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
@@ -167,7 +168,7 @@ void runHashDBTestLoad (const Config& config)
         zkassertpermanent(value==2);
 
         value=0;
-        client.set(uuid, tx, root, key, value, PERSISTENCE_DATABASE, newRoot, &setResult, NULL);
+        client.set(uuid, block, tx, root, key, value, PERSISTENCE_DATABASE, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(fr.equal(oldRoot[0],root[0]) && fr.equal(oldRoot[1],root[1]) && fr.equal(oldRoot[2],root[2]) && fr.equal(oldRoot[3],root[3]));
 
@@ -243,6 +244,7 @@ void* hashDBTestLoadThread (const Config& config, uint8_t idBranch)
     const string stestItems = std::to_string(testItems);
 
     string uuid = getUUID();
+    uint64_t block = 0;
     uint64_t tx = 0;
 
     Goldilocks fr;
@@ -296,7 +298,7 @@ void* hashDBTestLoadThread (const Config& config, uint8_t idBranch)
         }
         scalar2key(fr, keyScalar, key);
 
-        client.set(uuid, tx, root, key, i, PERSISTENCE_DATABASE, newRoot, &setResult, NULL);
+        client.set(uuid, block, tx, root, key, i, PERSISTENCE_DATABASE, newRoot, &setResult, NULL);
 
         for (int j=0; j<4; j++) root[j] = setResult.newRoot[j];
         if ((i)%(testItems*0.05)==0) {

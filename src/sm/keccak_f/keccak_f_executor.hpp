@@ -15,7 +15,7 @@ USING_PROVER_FORK_NAMESPACE;
 
 using namespace std;
 
-class KeccakFExecuteInput
+/*class KeccakFExecuteInput
 {
 public:
     uint8_t Sin[54][9][1600];
@@ -23,7 +23,7 @@ public:
     {
         memset(Sin, 0, sizeof(Sin));
     }
-};
+};*/
 
 class KeccakFExecuteOutput
 {

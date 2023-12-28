@@ -24,6 +24,8 @@ public:
     mpz_class newValue;
     string mode;
     uint64_t proofHashCounter;
+    Goldilocks::Element siblingLeftChild[4];
+    Goldilocks::Element siblingRightChild[4];
     string toString (Goldilocks &fr);
 };
 

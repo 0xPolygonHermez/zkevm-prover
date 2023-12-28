@@ -33,6 +33,7 @@ void* hashDBPerfTestThread (const Config& config)
     Goldilocks fr;
 
     string uuid = getUUID();
+    uint64_t block = 0;
     uint64_t tx = 0;
 
     string sTest;
@@ -94,7 +95,7 @@ void* hashDBPerfTestThread (const Config& config)
         value=i;
 
         #if PERF_TEST == PERF_SET
-            client->set(uuid, tx, root, key, value, PERSISTENCE_DATABASE, newRoot, &setResult, NULL);
+            client->set(uuid, block, tx, root, key, value, PERSISTENCE_DATABASE, newRoot, &setResult, NULL);
             for (int j=0; j<4; j++) root[j] = setResult.newRoot[j];
         #elif PERF_TEST == PERF_GET
             client->get(root, key, value, &getResult);

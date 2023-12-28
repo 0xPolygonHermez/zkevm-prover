@@ -120,13 +120,33 @@ public:
     {
         return finalTrace.responses;
     }
+    vector<Block> emptyBlocks;
+    vector<Block> & get_block_responses(void)
+    {
+        zklog.error("FullTracer::get_block_responses() called in fork 1");
+        exitProcess();
+        return emptyBlocks;
+    }
     vector<Opcode> & get_info(void)
     {
         return full_trace;
     }
-    uint64_t get_tx_number(void)
+    uint64_t get_block_number(void)
     {
         return finalTrace.responses.size();
+    }
+    uint64_t get_tx_number(void)
+    {
+        return 0;
+    }
+    string emptyString;
+    string & get_error(void)
+    {
+        return emptyString;
+    }
+    bool get_invalid_batch(void)
+    {
+        return false;
     }
 };
                          

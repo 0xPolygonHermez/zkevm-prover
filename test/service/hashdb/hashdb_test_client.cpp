@@ -28,6 +28,7 @@ void* hashDBTestClientThread (const Config& config)
     cout << "HashDB test client started" << endl;
     Goldilocks fr;
     string uuid = getUUID();
+    uint64_t block = 0;
     uint64_t tx = 0;
     zkresult zkr;
     Persistence persistence = PERSISTENCE_DATABASE;
@@ -49,7 +50,7 @@ void* hashDBTestClientThread (const Config& config)
         scalar2key(fr, keyScalar, key);
         value=2;
         
-        zkr = client->set(uuid, tx, root, key, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         zkassertpermanent(zkr==ZKR_SUCCESS);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
@@ -63,7 +64,7 @@ void* hashDBTestClientThread (const Config& config)
 
         value=0;
 
-        zkr = client->set(uuid, tx, root, key, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         zkassertpermanent(zkr==ZKR_SUCCESS);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
@@ -80,6 +81,7 @@ void* hashDBTestClientThread (const Config& config)
     }
 
     uuid = getUUID();
+    block = 0;
     tx = 0;
 
     // It should update an element 1
@@ -98,7 +100,7 @@ void* hashDBTestClientThread (const Config& config)
         scalar2key(fr, keyScalar, key);
 
         value=2;
-        zkr = client->set(uuid, tx, root, key, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         for (uint64_t i=0; i<4; i++) initialRoot[i] = root[i];
@@ -111,7 +113,7 @@ void* hashDBTestClientThread (const Config& config)
         zkassertpermanent(value==2);
 
         value=3;
-        zkr = client->set(uuid, tx, root, key, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
@@ -123,7 +125,7 @@ void* hashDBTestClientThread (const Config& config)
         zkassertpermanent(value==3);
 
         value=2;
-        zkr = client->set(uuid, tx, root, key, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
@@ -142,6 +144,7 @@ void* hashDBTestClientThread (const Config& config)
     }
 
     uuid = getUUID();
+    block = 0;
     tx = 0;
 
     // It should add a shared element 2
@@ -162,25 +165,25 @@ void* hashDBTestClientThread (const Config& config)
         scalar2key(fr, keyScalar, key2);
 
         value=2;
-        zkr = client->set(uuid, tx, root, key1, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key1, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key1=" << fea2string(fr, key1) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=3;
-        zkr = client->set(uuid, tx, root, key2, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key2, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key2=" << fea2string(fr, key2) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=0;
 
-        zkr = client->set(uuid, tx, root, key1, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key1, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key1=" << fea2string(fr, key1) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
-        zkr = client->set(uuid, tx, root, key2, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key2, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key2=" << fea2string(fr, key2) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(config.hashDB64 || (fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3])));
@@ -192,6 +195,7 @@ void* hashDBTestClientThread (const Config& config)
     }
 
     uuid = getUUID();
+    block = 0;
     tx = 0;
 
     // It should add a shared element 3
@@ -212,25 +216,25 @@ void* hashDBTestClientThread (const Config& config)
         scalar2key(fr, keyScalar, key2);
 
         value=2;
-        zkr = client->set(uuid, tx, root, key1, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key1, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key1=" << fea2string(fr, key1) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=3;
-        zkr = client->set(uuid, tx, root, key2, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key2, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key2=" << fea2string(fr, key2) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=0;
 
-        zkr = client->set(uuid, tx, root, key1, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key1, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key1=" << fea2string(fr, key1) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
-        zkr = client->set(uuid, tx, root, key2, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key2, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key2=" << fea2string(fr, key2) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(config.hashDB64 || (fr.isZero(root[0]) && fr.isZero(root[1]) && fr.isZero(root[2]) && fr.isZero(root[3])));
@@ -242,6 +246,7 @@ void* hashDBTestClientThread (const Config& config)
     }
 
     uuid = getUUID();
+    block = 0;
     tx = 0;
 
     // It should add a shared element
@@ -266,37 +271,37 @@ void* hashDBTestClientThread (const Config& config)
         scalar2key(fr, keyScalar, key3);
 
         value=107;
-        zkr = client->set(uuid, tx, root, key1, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key1, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key1=" << fea2string(fr, key1) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
 
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=115;
-        zkr = client->set(uuid, tx, root, key2, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key2, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key2=" << fea2string(fr, key2) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=103;
-        zkr = client->set(uuid, tx, root, key3, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key3, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key3=" << fea2string(fr, key3) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
         value=0;
 
-        zkr = client->set(uuid, tx, root, key1, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key1, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key1=" << fea2string(fr, key1) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
-        zkr = client->set(uuid, tx, root, key2, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key2, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key2=" << fea2string(fr, key2) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
-        zkr = client->set(uuid, tx, root, key3, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key3, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key3=" << fea2string(fr, key3) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
 
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
@@ -309,6 +314,7 @@ void* hashDBTestClientThread (const Config& config)
     }
 
     uuid = getUUID();
+    block = 0;
     tx = 0;
 
     // Add-Remove 128 elements
@@ -327,7 +333,7 @@ void* hashDBTestClientThread (const Config& config)
             keyScalar=i;
             scalar2key(fr, keyScalar, key);
             value = i + 1000;
-            zkr = client->set(uuid, tx, root, key, value, persistence, newRoot, &setResult, NULL);
+            zkr = client->set(uuid, block, tx, root, key, value, persistence, newRoot, &setResult, NULL);
             cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
 
             for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
@@ -339,7 +345,7 @@ void* hashDBTestClientThread (const Config& config)
         {
             keyScalar=i;
             scalar2key(fr, keyScalar, key);
-            zkr = client->set(uuid, tx, root, key, value, persistence, newRoot, &setResult, NULL);
+            zkr = client->set(uuid, block, tx, root, key, value, persistence, newRoot, &setResult, NULL);
             cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
 
             for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
@@ -354,6 +360,7 @@ void* hashDBTestClientThread (const Config& config)
     }
 
     uuid = getUUID();
+    block = 0;
     tx = 0;
 
     // Should read random
@@ -372,7 +379,7 @@ void* hashDBTestClientThread (const Config& config)
             keyScalar = i;
             scalar2key(fr, keyScalar, key);
             value = i + 1000;
-            zkr = client->set(uuid, tx, root, key, value, persistence, newRoot, &setResult, NULL);
+            zkr = client->set(uuid, block, tx, root, key, value, persistence, newRoot, &setResult, NULL);
             cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
             for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
             zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
@@ -394,6 +401,7 @@ void* hashDBTestClientThread (const Config& config)
     }
 
     uuid = getUUID();
+    block = 0;
     tx = 0;
 
     // It should add elements with similar keys
@@ -415,7 +423,7 @@ void* hashDBTestClientThread (const Config& config)
         keyScalar = 0; //0x00
         scalar2key(fr, keyScalar, key);
         value=2;
-        zkr = client->set(uuid, tx, root, key, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
@@ -423,7 +431,7 @@ void* hashDBTestClientThread (const Config& config)
         keyScalar = 4369; //0x1111
         scalar2key(fr, keyScalar, key);
         value=2;
-        zkr = client->set(uuid, tx, root, key, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
@@ -431,7 +439,7 @@ void* hashDBTestClientThread (const Config& config)
         keyScalar = 69905; //0x11111
         scalar2key(fr, keyScalar, key);
         value=3;
-        zkr = client->set(uuid, tx, root, key, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
@@ -445,6 +453,7 @@ void* hashDBTestClientThread (const Config& config)
     }
 
     uuid = getUUID();
+    block = 0;
     tx = 0;
 
     // It should update leaf with more than one level depth
@@ -466,7 +475,7 @@ void* hashDBTestClientThread (const Config& config)
         keyScalar.set_str("56714103185361745016746792718676985000067748055642999311525839752090945477479", 10);
         value.set_str("8163644824788514136399898658176031121905718480550577527648513153802600646339", 10);
         scalar2key(fr, keyScalar, key);
-        zkr = client->set(uuid, tx, root, key, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
@@ -474,7 +483,7 @@ void* hashDBTestClientThread (const Config& config)
         keyScalar.set_str("980275562601266368747428591417466442501663392777380336768719359283138048405", 10);
         value.set_str("115792089237316195423570985008687907853269984665640564039457584007913129639934", 10);
         scalar2key(fr, keyScalar, key);
-        zkr = client->set(uuid, tx, root, key, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
@@ -482,7 +491,7 @@ void* hashDBTestClientThread (const Config& config)
         keyScalar.set_str("53001048207672216258532366725645107222481888169041567493527872624420899640125", 10);
         value.set_str("115792089237316195423570985008687907853269984665640564039457584007913129639935", 10);
         scalar2key(fr, keyScalar, key);
-        zkr = client->set(uuid, tx, root, key, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
@@ -490,7 +499,7 @@ void* hashDBTestClientThread (const Config& config)
         keyScalar.set_str("60338373645545410525187552446039797737650319331856456703054942630761553352879", 10);
         value.set_str("7943875943875408", 10);
         scalar2key(fr, keyScalar, key);
-        zkr = client->set(uuid, tx, root, key, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
@@ -499,7 +508,7 @@ void* hashDBTestClientThread (const Config& config)
         value.set_str("35179347944617143021579132182092200136526168785636368258055676929581544372820", 10);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         scalar2key(fr, keyScalar, key);
-        zkr = client->set(uuid, tx, root, key, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key, value, persistence, newRoot, &setResult, NULL);
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
 
@@ -512,6 +521,7 @@ void* hashDBTestClientThread (const Config& config)
     }
 
     uuid = getUUID();
+    block = 0;
     tx = 0;
 
     // It should Zero to Zero with isOldZero=0
@@ -528,7 +538,7 @@ void* hashDBTestClientThread (const Config& config)
         keyScalar=1;
         value=2;
         scalar2key(fr, keyScalar, key);
-        zkr = client->set(uuid, tx, root, key, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
@@ -536,7 +546,7 @@ void* hashDBTestClientThread (const Config& config)
         keyScalar=2;
         value=3;
         scalar2key(fr, keyScalar, key);
-        zkr = client->set(uuid, tx, root, key, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
@@ -544,7 +554,7 @@ void* hashDBTestClientThread (const Config& config)
         keyScalar=0x10000;
         value=0;
         scalar2key(fr, keyScalar, key);
-        zkr = client->set(uuid, tx, root, key, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
 
@@ -558,6 +568,7 @@ void* hashDBTestClientThread (const Config& config)
     }
 
     uuid = getUUID();
+    block = 0;
     tx = 0;
 
     // It should Zero to Zero with isOldZero=0
@@ -575,7 +586,7 @@ void* hashDBTestClientThread (const Config& config)
         keyScalar=1;
         value=2;
         scalar2key(fr, keyScalar, key);
-        zkr = client->set(uuid, tx, root, key, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
         zkassertpermanent(!fr.isZero(root[0]) || !fr.isZero(root[1]) || !fr.isZero(root[2]) || !fr.isZero(root[3]));
@@ -584,7 +595,7 @@ void* hashDBTestClientThread (const Config& config)
         keyScalar=0x10000;
         value=0;
         scalar2key(fr, keyScalar, key);
-        zkr = client->set(uuid, tx, root, key, value, persistence, newRoot, &setResult, NULL);
+        zkr = client->set(uuid, block, tx, root, key, value, persistence, newRoot, &setResult, NULL);
         cout << "SET zkr=" << zkresult2string(zkr) << " root=" << fea2string(fr, root) << " key=" << fea2string(fr, key) << " value=" << value.get_str() << " newRoot=" << fea2string(fr, newRoot) << endl;
         for (uint64_t i=0; i<4; i++) root[i] = setResult.newRoot[i];
 
@@ -598,6 +609,7 @@ void* hashDBTestClientThread (const Config& config)
     }
 
     uuid = getUUID();
+    block = 0;
     tx = 0;
 
     // It should add program data (setProgram) and retrieve it (getProgram)
@@ -617,7 +629,7 @@ void* hashDBTestClientThread (const Config& config)
             in.push_back(i);
         }
 
-        zkr = client->setProgram(uuid, tx, key, in, PERSISTENCE_DATABASE);
+        zkr = client->setProgram(uuid, block, tx, key, in, PERSISTENCE_DATABASE);
         zkr = client->getProgram(uuid, key, out, NULL);
 
         for (uint8_t i=0; i<128; i++) {

@@ -1,6 +1,8 @@
 #ifndef VERSION_DATA_ENTRY_HPP
 #define VERSION_DATA_ENTRY_HPP
 
+#include <cstdint>
+
 struct VersionDataEntry
 {
     uint64_t key;

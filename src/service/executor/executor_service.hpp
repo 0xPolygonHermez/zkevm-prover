@@ -70,7 +70,8 @@ public:
     }
     void lock(void) { pthread_mutex_lock(&mutex); };
     void unlock(void) { pthread_mutex_unlock(&mutex); };
-    ::grpc::Status ProcessBatch (::grpc::ServerContext* context, const ::executor::v1::ProcessBatchRequest* request, ::executor::v1::ProcessBatchResponse* response) override;
+    ::grpc::Status ProcessBatch   (::grpc::ServerContext* context, const ::executor::v1::ProcessBatchRequest*   request, ::executor::v1::ProcessBatchResponse*   response) override;
+    ::grpc::Status ProcessBatchV2 (::grpc::ServerContext* context, const ::executor::v1::ProcessBatchRequestV2* request, ::executor::v1::ProcessBatchResponseV2* response) override;
     ::grpc::Status GetFlushStatus (::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::executor::v1::GetFlushStatusResponse* response) override;
 #ifdef PROCESS_BATCH_STREAM
     ::grpc::Status ProcessBatchStream (::grpc::ServerContext* context, ::grpc::ServerReaderWriter< ::executor::v1::ProcessBatchResponse, ::executor::v1::ProcessBatchRequest>* stream) override;

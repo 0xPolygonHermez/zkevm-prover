@@ -34,7 +34,7 @@ public:
     void runThreads (void);
     void waitForThreads (void);
 
-    bool ProcessBatch (void);
+    bool ProcessBatch (const string &inputFile);
 };
 
 void* executorClientThread  (void* arg); // One process batch

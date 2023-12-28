@@ -16,5 +16,6 @@ config/final/*
 config/recursive*/*
 config/zkevm/*
 config/tmp
+config/config.json
 runtime/*
 !runtime/README.md

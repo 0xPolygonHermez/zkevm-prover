@@ -28,10 +28,10 @@ HashDBRemote::HashDBRemote (Goldilocks &fr, const Config &config) : fr(fr), conf
 HashDBRemote::~HashDBRemote()
 {
     delete stub;
-    
+
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
     tms.print("HashDBRemote");
-#endif    
+#endif
 }
 zkresult HashDBRemote::getLatestStateRoot (Goldilocks::Element (&stateRoot)[4]){
 
@@ -52,7 +52,7 @@ zkresult HashDBRemote::getLatestStateRoot (Goldilocks::Element (&stateRoot)[4]){
 
 }
 
-zkresult HashDBRemote::set (const string &batchUUID, uint64_t tx, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, Goldilocks::Element (&newRoot)[4], SmtSetResult *result, DatabaseMap *dbReadLog)
+zkresult HashDBRemote::set (const string &batchUUID, uint64_t block, uint64_t tx, const Goldilocks::Element (&oldRoot)[4], const Goldilocks::Element (&key)[4], const mpz_class &value, const Persistence persistence, Goldilocks::Element (&newRoot)[4], SmtSetResult *result, DatabaseMap *dbReadLog)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
     gettimeofday(&t, NULL);
@@ -75,7 +75,8 @@ zkresult HashDBRemote::set (const string &batchUUID, uint64_t tx, const Goldiloc
     request.set_details(result != NULL);
     request.set_get_db_read_log((dbReadLog != NULL));
     request.set_batch_uuid(batchUUID);
-    request.set_tx(tx);
+    request.set_tx_index(tx);
+    request.set_block_index(block);
 
     grpc::Status s = stub->Set(&context, request, &response);
     if (s.error_code() != grpc::StatusCode::OK)
@@ -113,6 +114,9 @@ zkresult HashDBRemote::set (const string &batchUUID, uint64_t tx, const Goldiloc
         result->newValue.set_str(response.new_value(),16);
         result->mode = response.mode();
         result->proofHashCounter = response.proof_hash_counter();
+
+        grpc2fea(fr, response.sibling_left_child(), result->siblingLeftChild);
+        grpc2fea(fr, response.sibling_right_child(), result->siblingRightChild);
     }
 
     if (dbReadLog != NULL)
@@ -199,7 +203,7 @@ zkresult HashDBRemote::get (const string &batchUUID, const Goldilocks::Element (
     return static_cast<zkresult>(response.result().code());
 }
 
-zkresult HashDBRemote::setProgram (const string &batchUUID, uint64_t tx, const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const Persistence persistence)
+zkresult HashDBRemote::setProgram (const string &batchUUID, uint64_t block, uint64_t tx, const Goldilocks::Element (&key)[4], const vector<uint8_t> &data, const Persistence persistence)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
     gettimeofday(&t, NULL);
@@ -222,7 +226,8 @@ zkresult HashDBRemote::setProgram (const string &batchUUID, uint64_t tx, const G
 
     request.set_persistence((hashdb::v1::Persistence)persistence);
     request.set_batch_uuid(batchUUID);
-    request.set_tx(tx);
+    request.set_tx_index(tx);
+    request.set_block_index(block);
 
     grpc::Status s = stub->SetProgram(&context, request, &response);
     if (s.error_code() != grpc::StatusCode::OK)
@@ -343,6 +348,39 @@ void HashDBRemote::loadProgramDB(const DatabaseMap::ProgramMap &input, const boo
 #endif
 }
 
+void HashDBRemote::finishTx (const string &batchUUID, const string &newStateRoot, const Persistence persistence)
+{
+    ::grpc::ClientContext context;
+    ::hashdb::v1::FinishTxRequest request;
+    request.set_batch_uuid(batchUUID);
+    request.set_new_state_root(newStateRoot);
+    request.set_persistence((hashdb::v1::Persistence)persistence);
+    ::google::protobuf::Empty response;
+    grpc::Status s = stub->FinishTx(&context, request, &response);
+}
+
+void HashDBRemote::startBlock (const string &batchUUID, const string &oldStateRoot, const Persistence persistence)
+{
+    ::grpc::ClientContext context;
+    ::hashdb::v1::StartBlockRequest request;
+    request.set_batch_uuid(batchUUID);
+    request.set_old_state_root(oldStateRoot);
+    request.set_persistence((hashdb::v1::Persistence)persistence);
+    ::google::protobuf::Empty response;
+    grpc::Status s = stub->StartBlock(&context, request, &response);
+}
+
+void HashDBRemote::finishBlock (const string &batchUUID, const string &newStateRoot, const Persistence persistence)
+{
+    ::grpc::ClientContext context;
+    ::hashdb::v1::FinishBlockRequest request;
+    request.set_batch_uuid(batchUUID);
+    request.set_new_state_root(newStateRoot);
+    request.set_persistence((hashdb::v1::Persistence)persistence);
+    ::google::protobuf::Empty response;
+    grpc::Status s = stub->FinishBlock(&context, request, &response);
+}
+
 zkresult HashDBRemote::flush(const string &batchUUID, const string &newStateRoot, const Persistence persistence, uint64_t &flushId, uint64_t &storedFlushId)
 {
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
@@ -366,17 +404,6 @@ zkresult HashDBRemote::flush(const string &batchUUID, const string &newStateRoot
     tms.add("flush", TimeDiff(t));
 #endif
     return static_cast<zkresult>(response.result().code());
-}
-
-void HashDBRemote::semiFlush (const string &batchUUID, const string &newStateRoot, const Persistence persistence)
-{
-    ::grpc::ClientContext context;
-    ::hashdb::v1::SemiFlushRequest request;
-    request.set_batch_uuid(batchUUID);
-    request.set_new_state_root(newStateRoot);
-    request.set_persistence((hashdb::v1::Persistence)persistence);
-    ::google::protobuf::Empty response;
-    grpc::Status s = stub->SemiFlush(&context, request, &response);
 }
 
 zkresult HashDBRemote::purge (const string &batchUUID, const Goldilocks::Element (&newStateRoot)[4], const Persistence persistence)
@@ -525,7 +552,7 @@ zkresult HashDBRemote::getFlushData(uint64_t flushId, uint64_t &storedFlushId, u
     }
 
     // Copy the nodes state root
-    nodesStateRoot = response.nodes_state_root();    
+    nodesStateRoot = response.nodes_state_root();
 
 #ifdef LOG_TIME_STATISTICS_HASHDB_REMOTE
     tms.add("getFlushData", TimeDiff(t));
@@ -551,7 +578,7 @@ zkresult HashDBRemote::readTree (const Goldilocks::Element (&root)[4], vector<Ke
     }
     fea2grpc(fr, root, state_root);
     request.set_allocated_state_root(state_root);
-    
+
     // Prepare the keys
     for (uint64_t i=0; i<keyValues.size(); i++)
     {

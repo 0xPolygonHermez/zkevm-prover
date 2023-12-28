@@ -27,20 +27,20 @@ using grpc::Status;
     string requestID;
     string proof;
 
-    const string inputFile0  = "testvectors/batchProof/input_executor_0.json";
+    const string inputFile0  = "testvectors/batchProof_fork7/input_executor_0.json";
     const string outputFile0 = "testvectors/aggregatedProof/recursive1.zkin.proof_0.json";
 
-    const string inputFile1  = "testvectors/batchProof/input_executor_1.json";
+    const string inputFile1  = "testvectors/batchProof_fork7/input_executor_1.json";
     const string outputFile1 = "testvectors/aggregatedProof/recursive1.zkin.proof_1.json";
 
     const string inputFile01a = outputFile0;
     const string inputFile01b = outputFile1;
     const string outputFile01 = "testvectors/finalProof/recursive2.zkin.proof_01.json";
 
-    const string inputFile2  = "testvectors/batchProof/input_executor_2.json";
+    const string inputFile2  = "testvectors/batchProof_fork7/input_executor_2.json";
     const string outputFile2 = "testvectors/aggregatedProof/recursive1.zkin.proof_2.json";
     
-    const string inputFile3  = "testvectors/batchProof/input_executor_3.json";
+    const string inputFile3  = "testvectors/batchProof_fork7/input_executor_3.json";
     const string outputFile3 = "testvectors/aggregatedProof/recursive1.zkin.proof_3.json";
 
     const string inputFile23a = outputFile2;
@@ -277,8 +277,9 @@ using grpc::Status;
     pPublicInputs->set_chain_id(input.publicInputsExtended.publicInputs.chainID);
     pPublicInputs->set_fork_id(input.publicInputsExtended.publicInputs.forkID);
     pPublicInputs->set_batch_l2_data(input.publicInputsExtended.publicInputs.batchL2Data);
-    pPublicInputs->set_global_exit_root(scalar2ba(input.publicInputsExtended.publicInputs.globalExitRoot));
-    pPublicInputs->set_eth_timestamp(input.publicInputsExtended.publicInputs.timestamp);
+    pPublicInputs->set_l1_info_root(scalar2ba(input.publicInputsExtended.publicInputs.l1InfoRoot));
+    pPublicInputs->set_timestamp_limit(input.publicInputsExtended.publicInputs.timestampLimit);
+    pPublicInputs->set_forced_blockhash_l1(scalar2ba(input.publicInputsExtended.publicInputs.forcedBlockHashL1));
     pPublicInputs->set_sequencer_addr(Add0xIfMissing(input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)));
     pPublicInputs->set_aggregator_addr(Add0xIfMissing(input.publicInputsExtended.publicInputs.aggregatorAddress.get_str(16)));
     pInputProver->set_allocated_public_inputs(pPublicInputs);
@@ -309,6 +310,20 @@ using grpc::Status;
             value += byte2string(contractValue[i]);
         }
         (*pInputProver->mutable_contracts_bytecode())[key] = value;
+    }
+
+    unordered_map<uint64_t, L1Data>::const_iterator itL1Data;
+    for (itL1Data = input.l1InfoTreeData.begin(); itL1Data != input.l1InfoTreeData.end(); itL1Data++)
+    {
+        aggregator::v1::L1Data l1Data;
+        l1Data.set_global_exit_root(string2ba(itL1Data->second.globalExitRoot.get_str(16)));
+        l1Data.set_blockhash_l1(string2ba(itL1Data->second.blockHashL1.get_str(16)));
+        l1Data.set_min_timestamp(itL1Data->second.minTimestamp);
+        for (uint64_t i=0; i<itL1Data->second.smtProof.size(); i++)
+        {
+            l1Data.add_smt_proof(string2ba(itL1Data->second.smtProof[i].get_str(16)));
+        }
+        (*pInputProver->mutable_public_inputs()->mutable_l1_info_tree_data())[itL1Data->first] = l1Data;
     }
 
     // Allocate the gen batch request
@@ -832,8 +847,9 @@ using grpc::Status;
         pPublicInputs->set_chain_id(input.publicInputsExtended.publicInputs.chainID);
         pPublicInputs->set_fork_id(input.publicInputsExtended.publicInputs.forkID);
         pPublicInputs->set_batch_l2_data(input.publicInputsExtended.publicInputs.batchL2Data);
-        pPublicInputs->set_global_exit_root(scalar2ba(input.publicInputsExtended.publicInputs.globalExitRoot));
-        pPublicInputs->set_eth_timestamp(input.publicInputsExtended.publicInputs.timestamp);
+        pPublicInputs->set_l1_info_root(scalar2ba(input.publicInputsExtended.publicInputs.l1InfoRoot));
+        pPublicInputs->set_timestamp_limit(input.publicInputsExtended.publicInputs.timestampLimit);
+        pPublicInputs->set_forced_blockhash_l1(scalar2ba(input.publicInputsExtended.publicInputs.forcedBlockHashL1));
         pPublicInputs->set_sequencer_addr(Add0xIfMissing(input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)));
         pPublicInputs->set_aggregator_addr(Add0xIfMissing(input.publicInputsExtended.publicInputs.aggregatorAddress.get_str(16)));
         pInputProver->set_allocated_public_inputs(pPublicInputs);

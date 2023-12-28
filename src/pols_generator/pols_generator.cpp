@@ -178,6 +178,8 @@ string generate(const ordered_json &pols, const string &type, const string &name
 
     code += "};\n\n";
 
+    map<uint64_t, string> polsMap;
+
     // For each cmP pol, add it to the proper namespace array
     for (uint64_t i = 0; i < numPols; i++)
     {
@@ -233,6 +235,7 @@ string generate(const ordered_json &pols, const string &type, const string &name
                             comma = "";
                         }
                         initialization[namespaceId] += "            " + sufix + "Pol((" + ctype + " *)((uint8_t *)pAddress + " + to_string(offset_transpositioned) + "), degree, " + to_string(i+a) + ")" + comma + "\n";
+                        polsMap[offset_transpositioned] = namespaceString + "." + filter_name(name) + "[" + to_string(a) + "]";
                         offset += csize*uint64_t(pol["polDeg"]);
                         offset_transpositioned += csize;
                         localOffset[namespaceId] += csize;
@@ -241,6 +244,7 @@ string generate(const ordered_json &pols, const string &type, const string &name
                     initialization[namespaceId] += "        },\n";
                 } else {
                     initialization[namespaceId] += "        " + filter_name(name) + "((" + ctype + " *)((uint8_t *)pAddress + " + to_string(offset_transpositioned) + "), degree, " + to_string(i) + "),\n";
+                    polsMap[offset_transpositioned] = namespaceString + "." + filter_name(name);
                     offset += csize*uint64_t(pol["polDeg"]);
                     offset_transpositioned += csize;
                     localOffset[namespaceId] += csize;
@@ -313,6 +317,16 @@ string generate(const ordered_json &pols, const string &type, const string &name
     code += "    }\n";
     code += "};\n";
     code += "\n";
+
+    map<uint64_t, string>::const_iterator it;
+    code += "inline const char * address2" + sufix + "PolName (uint64_t address)\n";
+    code += "{\n";
+    for (it = polsMap.begin(); it != polsMap.end(); it++)
+    {
+        code += "    if ((address >= " + to_string(it->first) +") && (address <= " + to_string(it->first + 7) + ")) return \"" + it->second + "\";\n";
+    }
+    code += "    return \"ERROR_NOT_FOUND\";\n";
+    code += "}\n\n";
     
     code += "} // namespace\n\n"; // namespace name
 

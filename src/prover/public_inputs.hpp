@@ -9,18 +9,21 @@ using namespace std;
 class PublicInputs
 {
 public:
+    uint64_t  forkID;
     mpz_class oldStateRoot;
     mpz_class oldAccInputHash;
     uint32_t  oldBatchNum;
     uint64_t  chainID;
-    uint64_t  forkID;
     string    batchL2Data; // This is, in fact, a byte array, not a hex string(not "0xf355...")
-    mpz_class globalExitRoot;
-    uint64_t  timestamp;
+    mpz_class globalExitRoot; // Used when forkID <= 6
+    mpz_class l1InfoRoot; // Used when forkID >= 7
+    uint64_t  timestamp; // Used when forkID <= 6
+    uint64_t  timestampLimit; // Used when forkID >= 7
+    mpz_class forcedBlockHashL1; // Used when forkID >= 7
     mpz_class sequencerAddr;
     mpz_class aggregatorAddress; // Ethereum address of the aggregator that sends verifyBatch TX to the SC, used to prevent proof front-running
 
-    PublicInputs() : oldBatchNum(0), chainID(0), forkID(0), timestamp(0)
+    PublicInputs() : forkID(0), oldBatchNum(0), chainID(0), timestamp(0), timestampLimit(0)
     {
         aggregatorAddress.set_str("f39fd6e51aad88f6f4ce6ab8827279cfffb92266", 16); // Default aggregator address
     }
