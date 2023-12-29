@@ -3,11 +3,14 @@
 #include "sm/pols_generated/commit_pols.hpp"
 #include "zklog.hpp"
 #include "exit_process.hpp"
+#include "mpi.h"
 
 USING_PROVER_FORK_NAMESPACE;
 
 void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldilocks::Element verkey[4], Steps *steps)
 {
+    int mpiRank = 0;
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpiRank);
     // Initialize vars
     TimerStart(STARK_INITIALIZATION);
 
@@ -24,24 +27,12 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldil
     Polinomial root1(HASH_SIZE, 1);
     Polinomial root2(HASH_SIZE, 1);
     Polinomial root3(HASH_SIZE, 1);
-
-    transcript.put(&verkey[0], 4);
-    transcript.put(&publicInputs[0], starkInfo.nPublics);
-    StepsParams params = {
-        pols : mem,
-        pConstPols : pConstPols,
-        pConstPols2ns : pConstPols2ns,
-        challenges : challenges,
-        x_n : x_n,
-        x_2ns : x_2ns,
-        zi : zi,
-        evals : evals,
-        xDivXSubXi : xDivXSubXi,
-        xDivXSubWXi : xDivXSubWXi,
-        publicInputs : publicInputs,
-        q_2ns : p_q_2ns,
-        f_2ns : p_f_2ns
-    };
+    
+    if(mpiRank == 0){
+        transcript.put(&verkey[0], 4);
+        transcript.put(&publicInputs[0], starkInfo.nPublics);
+    }
+    
     TimerStopAndLog(STARK_INITIALIZATION);
     //--------------------------------
     // 1.- Calculate p_cm1_2ns
@@ -49,358 +40,382 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldil
     TimerStart(STARK_STEP_1);
     TimerStart(STARK_STEP_1_LDE_AND_MERKLETREE);
     TimerStart(STARK_STEP_1_LDE);
+    
+    // El rank 0 distribueix les files entre els difeerents ranks
+    // Nova redistribució per fer la NTT
+    // Merkelització i li passem al rank0 i continua
 
-    ntt.extendPol(p_cm1_2ns, p_cm1_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm1_n], p_cm2_2ns);
-    TimerStopAndLog(STARK_STEP_1_LDE);
-    TimerStart(STARK_STEP_1_MERKLETREE);
-    treesGL[0]->merkelize();
-    treesGL[0]->getRoot(root0.address());
-    TimerStopAndLog(STARK_STEP_1_MERKLETREE);
-    zklog.info("MerkleTree rootGL 0: [ " + root0.toString(4) + " ]");
-    transcript.put(root0.address(), HASH_SIZE);
-    TimerStopAndLog(STARK_STEP_1_LDE_AND_MERKLETREE);
-    TimerStopAndLog(STARK_STEP_1);
+    if(mpiRank==0){
+        std::cout << "Abans de fer la NTT; " << NExtended << " " << N << " " << starkInfo.mapSectionsN.section[eSection::cm1_n] << std::endl;
+        ntt.extendPol(p_cm1_2ns, p_cm1_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm1_n], p_cm2_2ns);
+        TimerStopAndLog(STARK_STEP_1_LDE);
+        TimerStart(STARK_STEP_1_MERKLETREE);
+        treesGL[0]->merkelize();
+        treesGL[0]->getRoot(root0.address());
+        TimerStopAndLog(STARK_STEP_1_MERKLETREE);
+        zklog.info("MerkleTree rootGL 0: [ " + root0.toString(4) + " ]");
+        transcript.put(root0.address(), HASH_SIZE);
+        TimerStopAndLog(STARK_STEP_1_LDE_AND_MERKLETREE);
+        TimerStopAndLog(STARK_STEP_1);
+    }
 
-    //--------------------------------
-    // 2.- Caluculate plookups h1 and h2
-    //--------------------------------
-    TimerStart(STARK_STEP_2);
-    transcript.getField(challenges[0]); // u
-    transcript.getField(challenges[1]); // defVal
-    if (nrowsStepBatch == 4)
-    {
-        TimerStart(STARK_STEP_2_CALCULATE_EXPS_AVX);
-        steps->step2prev_parser_first_avx(params, N, nrowsStepBatch);
-        TimerStopAndLog(STARK_STEP_2_CALCULATE_EXPS_AVX);
-    }
-    else if (nrowsStepBatch == 8)
-    {
-        TimerStart(STARK_STEP_2_CALCULATE_EXPS_AVX512);
-        steps->step2prev_parser_first_avx512(params, N, nrowsStepBatch);
-        TimerStopAndLog(STARK_STEP_2_CALCULATE_EXPS_AVX512);
-    }
-    else
-    {
-        TimerStart(STARK_STEP_2_CALCULATE_EXPS);
-#pragma omp parallel for
-        for (uint64_t i = 0; i < N; i++)
+    if(mpiRank == 0){
+        StepsParams params = {
+            pols : mem,
+            pConstPols : pConstPols,
+            pConstPols2ns : pConstPols2ns,
+            challenges : challenges,
+            x_n : x_n,
+            x_2ns : x_2ns,
+            zi : zi,
+            evals : evals,
+            xDivXSubXi : xDivXSubXi,
+            xDivXSubWXi : xDivXSubWXi,
+            publicInputs : publicInputs,
+            q_2ns : p_q_2ns,
+            f_2ns : p_f_2ns
+        };
+        //--------------------------------
+        // 2.- Caluculate plookups h1 and h2
+        //--------------------------------
+        TimerStart(STARK_STEP_2);
+        transcript.getField(challenges[0]); // u
+        transcript.getField(challenges[1]); // defVal
+        if (nrowsStepBatch == 4)
         {
-            steps->step2prev_first(params, i);
+            TimerStart(STARK_STEP_2_CALCULATE_EXPS_AVX);
+            steps->step2prev_parser_first_avx(params, N, nrowsStepBatch);
+            TimerStopAndLog(STARK_STEP_2_CALCULATE_EXPS_AVX);
         }
-        TimerStopAndLog(STARK_STEP_2_CALCULATE_EXPS);
-    }
-    TimerStart(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE);
-    Polinomial *transPols = transposeH1H2Columns(pAddress, numCommited, pBuffer);
-    TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE);
-    TimerStart(STARK_STEP_2_CALCULATEH1H2);
-
-    uint64_t nthreads = starkInfo.puCtx.size();
-    if (nthreads == 0)
-    {
-        nthreads += 1;
-    }
-    uint64_t buffSize = 8 * starkInfo.puCtx.size() * N;
-    assert(buffSize <= starkInfo.mapSectionsN.section[eSection::cm3_2ns] * NExtended);
-    uint64_t *mam = (uint64_t *)pAddress;
-    uint64_t *pbufferH = &mam[starkInfo.mapOffsets.section[eSection::cm3_2ns]];
-    uint64_t buffSizeThread = buffSize / nthreads;
-
-#pragma omp parallel for num_threads(nthreads)
-    for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
-    {
-        int indx1 = 4 * i;
-        if (transPols[indx1 + 2].dim() == 1)
+        else if (nrowsStepBatch == 8)
         {
-            uint64_t buffSizeThreadValues = 3 * N;
-            uint64_t buffSizeThreadKeys = buffSizeThread - buffSizeThreadValues;
-            Polinomial::calculateH1H2_opt1(transPols[indx1 + 2], transPols[indx1 + 3], transPols[indx1], transPols[indx1 + 1], i, &pbufferH[omp_get_thread_num() * buffSizeThread], buffSizeThreadKeys, buffSizeThreadValues);
+            TimerStart(STARK_STEP_2_CALCULATE_EXPS_AVX512);
+            steps->step2prev_parser_first_avx512(params, N, nrowsStepBatch);
+            TimerStopAndLog(STARK_STEP_2_CALCULATE_EXPS_AVX512);
         }
         else
         {
-            assert(transPols[indx1 + 2].dim() == 3);
-            uint64_t buffSizeThreadValues = 5 * N;
-            uint64_t buffSizeThreadKeys = buffSizeThread - buffSizeThreadValues;
-            Polinomial::calculateH1H2_opt3(transPols[indx1 + 2], transPols[indx1 + 3], transPols[indx1], transPols[indx1 + 1], i, &pbufferH[omp_get_thread_num() * buffSizeThread], buffSizeThreadKeys, buffSizeThreadValues);
-        }
-    }
-    TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2);
-
-    TimerStart(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE_2);
-    transposeH1H2Rows(pAddress, numCommited, transPols);
-    TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE_2);
-
-    TimerStart(STARK_STEP_2_LDE_AND_MERKLETREE);
-    TimerStart(STARK_STEP_2_LDE);
-    ntt.extendPol(p_cm2_2ns, p_cm2_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm2_n], pBuffer);
-    TimerStopAndLog(STARK_STEP_2_LDE);
-    TimerStart(STARK_STEP_2_MERKLETREE);
-    treesGL[1]->merkelize();
-    treesGL[1]->getRoot(root1.address());
-    TimerStopAndLog(STARK_STEP_2_MERKLETREE);
-    zklog.info("MerkleTree rootGL 1: [ " + root1.toString(4) + " ]");
-    transcript.put(root1.address(), HASH_SIZE);
-
-    TimerStopAndLog(STARK_STEP_2_LDE_AND_MERKLETREE);
-    TimerStopAndLog(STARK_STEP_2);
-
-    //--------------------------------
-    // 3.- Compute Z polynomials
-    //--------------------------------
-    TimerStart(STARK_STEP_3);
-    transcript.getField(challenges[2]); // gamma
-    transcript.getField(challenges[3]); // betta
-    if (nrowsStepBatch == 4)
-    {
-        TimerStart(STARK_STEP_3_CALCULATE_EXPS_AVX);
-        steps->step3prev_parser_first_avx(params, N, nrowsStepBatch);
-        TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS_AVX);
-    }
-    else if (nrowsStepBatch == 8)
-    {
-        TimerStart(STARK_STEP_3_CALCULATE_EXPS_AVX512);
-        steps->step3prev_parser_first_avx512(params, N, nrowsStepBatch);
-        TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS_AVX512);
-    }
-    else
-    {
-        TimerStart(STARK_STEP_3_CALCULATE_EXPS);
-#pragma omp parallel for
-        for (uint64_t i = 0; i < N; i++)
-        {
-            steps->step3prev_first(params, i);
-        }
-        TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS);
-    }
-    TimerStart(STARK_STEP_3_CALCULATE_Z_TRANSPOSE);
-    Polinomial *newpols_ = transposeZColumns(pAddress, numCommited, pBuffer);
-    TimerStopAndLog(STARK_STEP_3_CALCULATE_Z_TRANSPOSE);
-
-    TimerStart(STARK_STEP_3_CALCULATE_Z);
-    u_int64_t numpols = starkInfo.ciCtx.size() + starkInfo.peCtx.size() + starkInfo.puCtx.size();
-#pragma omp parallel for
-    for (uint64_t i = 0; i < numpols; i++)
-    {
-        int indx1 = 3 * i;
-        Polinomial::calculateZ(newpols_[indx1 + 2], newpols_[indx1], newpols_[indx1 + 1]);
-    }
-    TimerStopAndLog(STARK_STEP_3_CALCULATE_Z);
-    TimerStart(STARK_STEP_3_CALCULATE_Z_TRANSPOSE_2);
-    transposeZRows(pAddress, numCommited, newpols_);
-    TimerStopAndLog(STARK_STEP_3_CALCULATE_Z_TRANSPOSE_2);
-    if (nrowsStepBatch == 4)
-    {
-        TimerStart(STARK_STEP_3_CALCULATE_EXPS_2_AVX);
-        steps->step3_parser_first_avx(params, N, nrowsStepBatch);
-        TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS_2_AVX);
-    }
-    else if (nrowsStepBatch == 8)
-    {
-        TimerStart(STARK_STEP_3_CALCULATE_EXPS_2_AVX512);
-        steps->step3_parser_first_avx512(params, N, nrowsStepBatch);
-        TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS_2_AVX512);
-    }
-    else
-    {
-        TimerStart(STARK_STEP_3_CALCULATE_EXPS_2);
-#pragma omp parallel for
-        for (uint64_t i = 0; i < N; i++)
-        {
-            steps->step3_first(params, i);
-        }
-        TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS_2);
-    }
-
-    TimerStart(STARK_STEP_3_LDE_AND_MERKLETREE);
-    TimerStart(STARK_STEP_3_LDE);
-    ntt.extendPol(p_cm3_2ns, p_cm3_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm3_n], pBuffer);
-    TimerStopAndLog(STARK_STEP_3_LDE);
-    TimerStart(STARK_STEP_3_MERKLETREE);
-    treesGL[2]->merkelize();
-    treesGL[2]->getRoot(root2.address());
-    TimerStopAndLog(STARK_STEP_3_MERKLETREE);
-    zklog.info("MerkleTree rootGL 2: [ " + root2.toString(4) + " ]");
-    transcript.put(root2.address(), HASH_SIZE);
-    TimerStopAndLog(STARK_STEP_3_LDE_AND_MERKLETREE);
-    TimerStopAndLog(STARK_STEP_3);
-
-    //--------------------------------
-    // 4. Compute C Polynomial
-    //--------------------------------
-    TimerStart(STARK_STEP_4);
-    TimerStart(STARK_STEP_4_INIT);
-
-    Polinomial qq1 = Polinomial(NExtended, starkInfo.qDim, "qq1");
-    Polinomial qq2 = Polinomial(NExtended * starkInfo.qDeg, starkInfo.qDim, "qq2");
-    transcript.getField(challenges[4]); // gamma
-
-    uint64_t extendBits = starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits;
-    TimerStopAndLog(STARK_STEP_4_INIT);
-    if (nrowsStepBatch == 4)
-    {
-        TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_AVX);
-        steps->step42ns_parser_first_avx(params, NExtended, nrowsStepBatch);
-        TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS_AVX);
-    }
-    else if (nrowsStepBatch == 8)
-    {
-        TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_AVX512);
-        steps->step42ns_parser_first_avx512(params, NExtended, nrowsStepBatch);
-        TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS_AVX512);
-    }
-    else
-    {
-        TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS);
-#pragma omp parallel for
-        for (uint64_t i = 0; i < NExtended; i++)
-        {
-            steps->step42ns_first(params, i);
-        }
-        TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS);
-    }
-
-    TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_INTT);
-    nttExtended.INTT(qq1.address(), p_q_2ns, NExtended, starkInfo.qDim, NULL, 2, 1);
-    TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS_INTT);
-
-    TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_MUL);
-    Goldilocks::Element shiftIn = Goldilocks::exp(Goldilocks::inv(Goldilocks::shift()), N);
-
-    uint64_t stride = 2048;
-#pragma omp parallel for
-    for (uint64_t ii = 0; ii < N; ii += stride)
-    {
-        Goldilocks::Element curS = Goldilocks::one();
-        for (uint64_t p = 0; p < starkInfo.qDeg; p++)
-        {
-            for (uint64_t k = ii; k < min(N, ii + stride); ++k)
+            TimerStart(STARK_STEP_2_CALCULATE_EXPS);
+    #pragma omp parallel for
+            for (uint64_t i = 0; i < N; i++)
             {
-                Goldilocks3::mul((Goldilocks3::Element &)*qq2[k * starkInfo.qDeg + p], (Goldilocks3::Element &)*qq1[p * N + k], curS);
+                steps->step2prev_first(params, i);
             }
-            curS = Goldilocks::mul(curS, shiftIn);
+            TimerStopAndLog(STARK_STEP_2_CALCULATE_EXPS);
         }
-    }
-    TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS_MUL);
+        TimerStart(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE);
+        Polinomial *transPols = transposeH1H2Columns(pAddress, numCommited, pBuffer);
+        TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE);
+        TimerStart(STARK_STEP_2_CALCULATEH1H2);
 
-    TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_NTT);
-    nttExtended.NTT(cm4_2ns, qq2.address(), NExtended, starkInfo.qDim * starkInfo.qDeg);
-    TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS_NTT);
-
-    TimerStart(STARK_STEP_4_MERKLETREE);
-
-    treesGL[3]->merkelize();
-    treesGL[3]->getRoot(root3.address());
-    zklog.info("MerkleTree rootGL 3: [ " + root3.toString(4) + " ]");
-    transcript.put(root3.address(), HASH_SIZE);
-
-    TimerStopAndLog(STARK_STEP_4_MERKLETREE);
-    TimerStopAndLog(STARK_STEP_4);
-
-    //--------------------------------
-    // 5. Compute FRI Polynomial
-    //--------------------------------
-    TimerStart(STARK_STEP_5);
-    TimerStart(STARK_STEP_5_LEv_LpEv);
-
-    // transcript.getField(challenges[5]); // v1
-    // transcript.getField(challenges[6]); // v2
-    transcript.getField(challenges[7]); // xi
-
-    Polinomial LEv(N, 3, "LEv");
-    Polinomial LpEv(N, 3, "LpEv");
-    Polinomial xis(1, 3);
-    Polinomial wxis(1, 3);
-    Polinomial c_w(1, 3);
-
-    Goldilocks3::one((Goldilocks3::Element &)*LEv[0]);
-    Goldilocks3::one((Goldilocks3::Element &)*LpEv[0]);
-
-    Polinomial::divElement(xis, 0, challenges, 7, (Goldilocks::Element &)Goldilocks::shift());
-    Polinomial::mulElement(c_w, 0, challenges, 7, (Goldilocks::Element &)Goldilocks::w(starkInfo.starkStruct.nBits));
-    Polinomial::divElement(wxis, 0, c_w, 0, (Goldilocks::Element &)Goldilocks::shift());
-
-    for (uint64_t k = 1; k < N; k++)
-    {
-        Polinomial::mulElement(LEv, k, LEv, k - 1, xis, 0);
-        Polinomial::mulElement(LpEv, k, LpEv, k - 1, wxis, 0);
-    }
-    ntt.INTT(LEv.address(), LEv.address(), N, 3);
-    ntt.INTT(LpEv.address(), LpEv.address(), N, 3);
-
-    TimerStopAndLog(STARK_STEP_5_LEv_LpEv);
-
-    TimerStart(STARK_STEP_5_EVMAP);
-    evmap(pAddress, evals, LEv, LpEv);
-    TimerStopAndLog(STARK_STEP_5_EVMAP);
-    TimerStart(STARK_STEP_5_XDIVXSUB);
-
-    for (uint64_t i = 0; i < starkInfo.evMap.size(); i++)
-    {
-        transcript.put(evals[i], 3);
-    }
-
-    transcript.getField(challenges[5]); // v1
-    transcript.getField(challenges[6]); // v2
-
-    // Calculate xDivXSubXi, xDivXSubWXi
-    Polinomial xi(1, FIELD_EXTENSION);
-    Polinomial wxi(1, FIELD_EXTENSION);
-
-    Polinomial::copyElement(xi, 0, challenges, 7);
-    Polinomial::mulElement(wxi, 0, challenges, 7, (Goldilocks::Element &)Goldilocks::w(starkInfo.starkStruct.nBits));
-
-#pragma omp parallel for
-    for (uint64_t k = 0; k < (N << extendBits); k++)
-    {
-        Polinomial::subElement(xDivXSubXi, k, x, k, xi, 0);
-        Polinomial::subElement(xDivXSubWXi, k, x, k, wxi, 0);
-    }
-
-    Polinomial::batchInverseParallel(xDivXSubXi, xDivXSubXi);
-    Polinomial::batchInverseParallel(xDivXSubWXi, xDivXSubWXi);
-
-#pragma omp parallel for
-    for (uint64_t k = 0; k < (N << extendBits); k++)
-    {
-        Polinomial::mulElement(xDivXSubXi, k, xDivXSubXi, k, x, k);
-        Polinomial::mulElement(xDivXSubWXi, k, xDivXSubWXi, k, x, k);
-    }
-    TimerStopAndLog(STARK_STEP_5_XDIVXSUB);
-    if (nrowsStepBatch == 4)
-    {
-        TimerStart(STARK_STEP_5_CALCULATE_EXPS_AVX);
-        steps->step52ns_parser_first_avx(params, NExtended, nrowsStepBatch);
-        TimerStopAndLog(STARK_STEP_5_CALCULATE_EXPS_AVX);
-    }
-    else if (nrowsStepBatch == 8)
-    {
-        TimerStart(STARK_STEP_5_CALCULATE_EXPS_AVX512);
-        steps->step52ns_parser_first_avx512(params, NExtended, nrowsStepBatch);
-        TimerStopAndLog(STARK_STEP_5_CALCULATE_EXPS_AVX512);
-    }
-    else
-    {
-        TimerStart(STARK_STEP_5_CALCULATE_EXPS);
-#pragma omp parallel for
-        for (uint64_t i = 0; i < NExtended; i++)
+        uint64_t nthreads = starkInfo.puCtx.size();
+        if (nthreads == 0)
         {
-            steps->step52ns_first(params, i);
+            nthreads += 1;
         }
-        TimerStopAndLog(STARK_STEP_5_CALCULATE_EXPS);
+        uint64_t buffSize = 8 * starkInfo.puCtx.size() * N;
+        assert(buffSize <= starkInfo.mapSectionsN.section[eSection::cm3_2ns] * NExtended);
+        uint64_t *mam = (uint64_t *)pAddress;
+        uint64_t *pbufferH = &mam[starkInfo.mapOffsets.section[eSection::cm3_2ns]];
+        uint64_t buffSizeThread = buffSize / nthreads;
+
+    #pragma omp parallel for num_threads(nthreads)
+        for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
+        {
+            int indx1 = 4 * i;
+            if (transPols[indx1 + 2].dim() == 1)
+            {
+                uint64_t buffSizeThreadValues = 3 * N;
+                uint64_t buffSizeThreadKeys = buffSizeThread - buffSizeThreadValues;
+                Polinomial::calculateH1H2_opt1(transPols[indx1 + 2], transPols[indx1 + 3], transPols[indx1], transPols[indx1 + 1], i, &pbufferH[omp_get_thread_num() * buffSizeThread], buffSizeThreadKeys, buffSizeThreadValues);
+            }
+            else
+            {
+                assert(transPols[indx1 + 2].dim() == 3);
+                uint64_t buffSizeThreadValues = 5 * N;
+                uint64_t buffSizeThreadKeys = buffSizeThread - buffSizeThreadValues;
+                Polinomial::calculateH1H2_opt3(transPols[indx1 + 2], transPols[indx1 + 3], transPols[indx1], transPols[indx1 + 1], i, &pbufferH[omp_get_thread_num() * buffSizeThread], buffSizeThreadKeys, buffSizeThreadValues);
+            }
+        }
+        TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2);
+
+        TimerStart(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE_2);
+        transposeH1H2Rows(pAddress, numCommited, transPols);
+        TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE_2);
+
+        TimerStart(STARK_STEP_2_LDE_AND_MERKLETREE);
+        TimerStart(STARK_STEP_2_LDE);
+        ntt.extendPol(p_cm2_2ns, p_cm2_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm2_n], pBuffer);
+        TimerStopAndLog(STARK_STEP_2_LDE);
+        TimerStart(STARK_STEP_2_MERKLETREE);
+        treesGL[1]->merkelize();
+        treesGL[1]->getRoot(root1.address());
+        TimerStopAndLog(STARK_STEP_2_MERKLETREE);
+        zklog.info("MerkleTree rootGL 1: [ " + root1.toString(4) + " ]");
+        transcript.put(root1.address(), HASH_SIZE);
+
+        TimerStopAndLog(STARK_STEP_2_LDE_AND_MERKLETREE);
+        TimerStopAndLog(STARK_STEP_2);
+
+        //--------------------------------
+        // 3.- Compute Z polynomials
+        //--------------------------------
+        TimerStart(STARK_STEP_3);
+        transcript.getField(challenges[2]); // gamma
+        transcript.getField(challenges[3]); // betta
+        if (nrowsStepBatch == 4)
+        {
+            TimerStart(STARK_STEP_3_CALCULATE_EXPS_AVX);
+            steps->step3prev_parser_first_avx(params, N, nrowsStepBatch);
+            TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS_AVX);
+        }
+        else if (nrowsStepBatch == 8)
+        {
+            TimerStart(STARK_STEP_3_CALCULATE_EXPS_AVX512);
+            steps->step3prev_parser_first_avx512(params, N, nrowsStepBatch);
+            TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS_AVX512);
+        }
+        else
+        {
+            TimerStart(STARK_STEP_3_CALCULATE_EXPS);
+    #pragma omp parallel for
+            for (uint64_t i = 0; i < N; i++)
+            {
+                steps->step3prev_first(params, i);
+            }
+            TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS);
+        }
+        TimerStart(STARK_STEP_3_CALCULATE_Z_TRANSPOSE);
+        Polinomial *newpols_ = transposeZColumns(pAddress, numCommited, pBuffer);
+        TimerStopAndLog(STARK_STEP_3_CALCULATE_Z_TRANSPOSE);
+
+        TimerStart(STARK_STEP_3_CALCULATE_Z);
+        u_int64_t numpols = starkInfo.ciCtx.size() + starkInfo.peCtx.size() + starkInfo.puCtx.size();
+    #pragma omp parallel for
+        for (uint64_t i = 0; i < numpols; i++)
+        {
+            int indx1 = 3 * i;
+            Polinomial::calculateZ(newpols_[indx1 + 2], newpols_[indx1], newpols_[indx1 + 1]);
+        }
+        TimerStopAndLog(STARK_STEP_3_CALCULATE_Z);
+        TimerStart(STARK_STEP_3_CALCULATE_Z_TRANSPOSE_2);
+        transposeZRows(pAddress, numCommited, newpols_);
+        TimerStopAndLog(STARK_STEP_3_CALCULATE_Z_TRANSPOSE_2);
+        if (nrowsStepBatch == 4)
+        {
+            TimerStart(STARK_STEP_3_CALCULATE_EXPS_2_AVX);
+            steps->step3_parser_first_avx(params, N, nrowsStepBatch);
+            TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS_2_AVX);
+        }
+        else if (nrowsStepBatch == 8)
+        {
+            TimerStart(STARK_STEP_3_CALCULATE_EXPS_2_AVX512);
+            steps->step3_parser_first_avx512(params, N, nrowsStepBatch);
+            TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS_2_AVX512);
+        }
+        else
+        {
+            TimerStart(STARK_STEP_3_CALCULATE_EXPS_2);
+    #pragma omp parallel for
+            for (uint64_t i = 0; i < N; i++)
+            {
+                steps->step3_first(params, i);
+            }
+            TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS_2);
+        }
+
+        TimerStart(STARK_STEP_3_LDE_AND_MERKLETREE);
+        TimerStart(STARK_STEP_3_LDE);
+        ntt.extendPol(p_cm3_2ns, p_cm3_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm3_n], pBuffer);
+        TimerStopAndLog(STARK_STEP_3_LDE);
+        TimerStart(STARK_STEP_3_MERKLETREE);
+        treesGL[2]->merkelize();
+        treesGL[2]->getRoot(root2.address());
+        TimerStopAndLog(STARK_STEP_3_MERKLETREE);
+        zklog.info("MerkleTree rootGL 2: [ " + root2.toString(4) + " ]");
+        transcript.put(root2.address(), HASH_SIZE);
+        TimerStopAndLog(STARK_STEP_3_LDE_AND_MERKLETREE);
+        TimerStopAndLog(STARK_STEP_3);
+
+        //--------------------------------
+        // 4. Compute C Polynomial
+        //--------------------------------
+        TimerStart(STARK_STEP_4);
+        TimerStart(STARK_STEP_4_INIT);
+
+        Polinomial qq1 = Polinomial(NExtended, starkInfo.qDim, "qq1");
+        Polinomial qq2 = Polinomial(NExtended * starkInfo.qDeg, starkInfo.qDim, "qq2");
+        transcript.getField(challenges[4]); // gamma
+
+        uint64_t extendBits = starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits;
+        TimerStopAndLog(STARK_STEP_4_INIT);
+        if (nrowsStepBatch == 4)
+        {
+            TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_AVX);
+            steps->step42ns_parser_first_avx(params, NExtended, nrowsStepBatch);
+            TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS_AVX);
+        }
+        else if (nrowsStepBatch == 8)
+        {
+            TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_AVX512);
+            steps->step42ns_parser_first_avx512(params, NExtended, nrowsStepBatch);
+            TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS_AVX512);
+        }
+        else
+        {
+            TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS);
+    #pragma omp parallel for
+            for (uint64_t i = 0; i < NExtended; i++)
+            {
+                steps->step42ns_first(params, i);
+            }
+            TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS);
+        }
+
+        TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_INTT);
+        nttExtended.INTT(qq1.address(), p_q_2ns, NExtended, starkInfo.qDim, NULL, 2, 1);
+        TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS_INTT);
+
+        TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_MUL);
+        Goldilocks::Element shiftIn = Goldilocks::exp(Goldilocks::inv(Goldilocks::shift()), N);
+
+        uint64_t stride = 2048;
+    #pragma omp parallel for
+        for (uint64_t ii = 0; ii < N; ii += stride)
+        {
+            Goldilocks::Element curS = Goldilocks::one();
+            for (uint64_t p = 0; p < starkInfo.qDeg; p++)
+            {
+                for (uint64_t k = ii; k < min(N, ii + stride); ++k)
+                {
+                    Goldilocks3::mul((Goldilocks3::Element &)*qq2[k * starkInfo.qDeg + p], (Goldilocks3::Element &)*qq1[p * N + k], curS);
+                }
+                curS = Goldilocks::mul(curS, shiftIn);
+            }
+        }
+        TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS_MUL);
+
+        TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_NTT);
+        nttExtended.NTT(cm4_2ns, qq2.address(), NExtended, starkInfo.qDim * starkInfo.qDeg);
+        TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS_NTT);
+
+        TimerStart(STARK_STEP_4_MERKLETREE);
+
+        treesGL[3]->merkelize();
+        treesGL[3]->getRoot(root3.address());
+        zklog.info("MerkleTree rootGL 3: [ " + root3.toString(4) + " ]");
+        transcript.put(root3.address(), HASH_SIZE);
+
+        TimerStopAndLog(STARK_STEP_4_MERKLETREE);
+        TimerStopAndLog(STARK_STEP_4);
+
+        //--------------------------------
+        // 5. Compute FRI Polynomial
+        //--------------------------------
+        TimerStart(STARK_STEP_5);
+        TimerStart(STARK_STEP_5_LEv_LpEv);
+
+        // transcript.getField(challenges[5]); // v1
+        // transcript.getField(challenges[6]); // v2
+        transcript.getField(challenges[7]); // xi
+
+        Polinomial LEv(N, 3, "LEv");
+        Polinomial LpEv(N, 3, "LpEv");
+        Polinomial xis(1, 3);
+        Polinomial wxis(1, 3);
+        Polinomial c_w(1, 3);
+
+        Goldilocks3::one((Goldilocks3::Element &)*LEv[0]);
+        Goldilocks3::one((Goldilocks3::Element &)*LpEv[0]);
+
+        Polinomial::divElement(xis, 0, challenges, 7, (Goldilocks::Element &)Goldilocks::shift());
+        Polinomial::mulElement(c_w, 0, challenges, 7, (Goldilocks::Element &)Goldilocks::w(starkInfo.starkStruct.nBits));
+        Polinomial::divElement(wxis, 0, c_w, 0, (Goldilocks::Element &)Goldilocks::shift());
+
+        for (uint64_t k = 1; k < N; k++)
+        {
+            Polinomial::mulElement(LEv, k, LEv, k - 1, xis, 0);
+            Polinomial::mulElement(LpEv, k, LpEv, k - 1, wxis, 0);
+        }
+        ntt.INTT(LEv.address(), LEv.address(), N, 3);
+        ntt.INTT(LpEv.address(), LpEv.address(), N, 3);
+
+        TimerStopAndLog(STARK_STEP_5_LEv_LpEv);
+
+        TimerStart(STARK_STEP_5_EVMAP);
+        evmap(pAddress, evals, LEv, LpEv);
+        TimerStopAndLog(STARK_STEP_5_EVMAP);
+        TimerStart(STARK_STEP_5_XDIVXSUB);
+
+        for (uint64_t i = 0; i < starkInfo.evMap.size(); i++)
+        {
+            transcript.put(evals[i], 3);
+        }
+
+        transcript.getField(challenges[5]); // v1
+        transcript.getField(challenges[6]); // v2
+
+        // Calculate xDivXSubXi, xDivXSubWXi
+        Polinomial xi(1, FIELD_EXTENSION);
+        Polinomial wxi(1, FIELD_EXTENSION);
+
+        Polinomial::copyElement(xi, 0, challenges, 7);
+        Polinomial::mulElement(wxi, 0, challenges, 7, (Goldilocks::Element &)Goldilocks::w(starkInfo.starkStruct.nBits));
+
+    #pragma omp parallel for
+        for (uint64_t k = 0; k < (N << extendBits); k++)
+        {
+            Polinomial::subElement(xDivXSubXi, k, x, k, xi, 0);
+            Polinomial::subElement(xDivXSubWXi, k, x, k, wxi, 0);
+        }
+
+        Polinomial::batchInverseParallel(xDivXSubXi, xDivXSubXi);
+        Polinomial::batchInverseParallel(xDivXSubWXi, xDivXSubWXi);
+
+    #pragma omp parallel for
+        for (uint64_t k = 0; k < (N << extendBits); k++)
+        {
+            Polinomial::mulElement(xDivXSubXi, k, xDivXSubXi, k, x, k);
+            Polinomial::mulElement(xDivXSubWXi, k, xDivXSubWXi, k, x, k);
+        }
+        TimerStopAndLog(STARK_STEP_5_XDIVXSUB);
+        if (nrowsStepBatch == 4)
+        {
+            TimerStart(STARK_STEP_5_CALCULATE_EXPS_AVX);
+            steps->step52ns_parser_first_avx(params, NExtended, nrowsStepBatch);
+            TimerStopAndLog(STARK_STEP_5_CALCULATE_EXPS_AVX);
+        }
+        else if (nrowsStepBatch == 8)
+        {
+            TimerStart(STARK_STEP_5_CALCULATE_EXPS_AVX512);
+            steps->step52ns_parser_first_avx512(params, NExtended, nrowsStepBatch);
+            TimerStopAndLog(STARK_STEP_5_CALCULATE_EXPS_AVX512);
+        }
+        else
+        {
+            TimerStart(STARK_STEP_5_CALCULATE_EXPS);
+    #pragma omp parallel for
+            for (uint64_t i = 0; i < NExtended; i++)
+            {
+                steps->step52ns_first(params, i);
+            }
+            TimerStopAndLog(STARK_STEP_5_CALCULATE_EXPS);
+        }
+
+        TimerStopAndLog(STARK_STEP_5);
+        TimerStart(STARK_STEP_FRI);
+
+        Polinomial friPol = Polinomial(p_f_2ns, NExtended, 3, 3, "friPol");
+        FRIProve::prove(proof, treesGL, transcript, friPol, starkInfo.starkStruct.nBitsExt, starkInfo);
+
+        proof.proofs.setEvals(evals.address());
+
+        std::memcpy(&proof.proofs.root1[0], root0.address(), HASH_SIZE * sizeof(Goldilocks::Element));
+        std::memcpy(&proof.proofs.root2[0], root1.address(), HASH_SIZE * sizeof(Goldilocks::Element));
+        std::memcpy(&proof.proofs.root3[0], root2.address(), HASH_SIZE * sizeof(Goldilocks::Element));
+        std::memcpy(&proof.proofs.root4[0], root3.address(), HASH_SIZE * sizeof(Goldilocks::Element));
+        TimerStopAndLog(STARK_STEP_FRI);
     }
-
-    TimerStopAndLog(STARK_STEP_5);
-    TimerStart(STARK_STEP_FRI);
-
-    Polinomial friPol = Polinomial(p_f_2ns, NExtended, 3, 3, "friPol");
-    FRIProve::prove(proof, treesGL, transcript, friPol, starkInfo.starkStruct.nBitsExt, starkInfo);
-
-    proof.proofs.setEvals(evals.address());
-
-    std::memcpy(&proof.proofs.root1[0], root0.address(), HASH_SIZE * sizeof(Goldilocks::Element));
-    std::memcpy(&proof.proofs.root2[0], root1.address(), HASH_SIZE * sizeof(Goldilocks::Element));
-    std::memcpy(&proof.proofs.root3[0], root2.address(), HASH_SIZE * sizeof(Goldilocks::Element));
-    std::memcpy(&proof.proofs.root4[0], root3.address(), HASH_SIZE * sizeof(Goldilocks::Element));
-    TimerStopAndLog(STARK_STEP_FRI);
 }
 
 Polinomial *Starks::transposeH1H2Columns(void *pAddress, uint64_t &numCommited, Goldilocks::Element *pBuffer)

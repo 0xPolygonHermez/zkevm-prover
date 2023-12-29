@@ -136,6 +136,8 @@ Prover::Prover(Goldilocks &fr,
             zklog.error("Prover::Prover() got an exception: " + string(e.what()));
             exitProcess();
         }
+    }else{
+        starkZkevm = new Starks(config, {config.zkevmConstPols, config.mapConstPolsFile, config.zkevmConstantsTree, config.zkevmStarkInfo}, pAddress);
     }
 }
 
@@ -397,11 +399,20 @@ void Prover::processBatch(ProverRequest *pProverRequest)
 
 void Prover::genBatchProof(ProverRequest *pProverRequest)
 {
+    Goldilocks::Element zkevmVerkey[4];
+    Goldilocks::Element publics[mpiRank==0 ? starksRecursive1->starkInfo.nPublics : 100];
+    json publicStarkJson;
+    Goldilocks::Element c12aVerkey[4];
+    json recursive2Verkey;
+    Goldilocks::Element recursive1Verkey[4];
+    TimerStart(PROVER_BATCH_PROOF);
+
     if(mpiRank==0){
+
         zkassert(config.generateProof());
         zkassert(pProverRequest != NULL);
 
-        TimerStart(PROVER_BATCH_PROOF);
+        //TimerStart(PROVER_BATCH_PROOF);
 
         printMemoryInfo(true);
         printProcessInfo(true);
@@ -450,19 +461,19 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
             unmapFile(pointerCmPols, cmPols.size());
         }
 
-        if (pProverRequest->result == ZKR_SUCCESS)
-        {
+        //if (pProverRequest->result == ZKR_SUCCESS)
+        //{
             /*************************************/
             /*  Generate publics input           */
             /*************************************/
             TimerStart(SAVE_PUBLICS_JSON_BATCH_PROOF);
-            json publicStarkJson;
+            //json publicStarkJson;
 
             uint64_t lastN = cmPols.pilDegree() - 1;
 
             json zkevmVerkeyJson;
             file2json(config.zkevmVerkey, zkevmVerkeyJson);
-            Goldilocks::Element zkevmVerkey[4];
+            //Goldilocks::Element zkevmVerkey[4];
             zkevmVerkey[0] = Goldilocks::fromU64(zkevmVerkeyJson["constRoot"][0]);
             zkevmVerkey[1] = Goldilocks::fromU64(zkevmVerkeyJson["constRoot"][1]);
             zkevmVerkey[2] = Goldilocks::fromU64(zkevmVerkeyJson["constRoot"][2]);
@@ -470,7 +481,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
 
             json c12aVerkeyJson;
             file2json(config.c12aVerkey, c12aVerkeyJson);
-            Goldilocks::Element c12aVerkey[4];
+            //Goldilocks::Element c12aVerkey[4];
             c12aVerkey[0] = Goldilocks::fromU64(c12aVerkeyJson["constRoot"][0]);
             c12aVerkey[1] = Goldilocks::fromU64(c12aVerkeyJson["constRoot"][1]);
             c12aVerkey[2] = Goldilocks::fromU64(c12aVerkeyJson["constRoot"][2]);
@@ -478,16 +489,16 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
 
             json recursive1VerkeyJson;
             file2json(config.recursive1Verkey, recursive1VerkeyJson);
-            Goldilocks::Element recursive1Verkey[4];
+            //Goldilocks::Element recursive1Verkey[4];
             recursive1Verkey[0] = Goldilocks::fromU64(recursive1VerkeyJson["constRoot"][0]);
             recursive1Verkey[1] = Goldilocks::fromU64(recursive1VerkeyJson["constRoot"][1]);
             recursive1Verkey[2] = Goldilocks::fromU64(recursive1VerkeyJson["constRoot"][2]);
             recursive1Verkey[3] = Goldilocks::fromU64(recursive1VerkeyJson["constRoot"][3]);
 
-            json recursive2Verkey;
+            //json recursive2Verkey;
             file2json(config.recursive2Verkey, recursive2Verkey);
 
-            Goldilocks::Element publics[starksRecursive1->starkInfo.nPublics];
+            //Goldilocks::Element publics[starksRecursive1->starkInfo.nPublics];
 
             // oldStateRoot
             publics[0] = cmPols.Main.B0[0];
@@ -560,19 +571,27 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
             }
 
             TimerStopAndLog(SAVE_PUBLICS_JSON_BATCH_PROOF);
-
+    }
             /*************************************/
             /*  Generate stark proof            */
             /*************************************/
+    TimerStart(STARK_PROOF_BATCH_PROOF);
 
-            TimerStart(STARK_PROOF_BATCH_PROOF);
+    ZkevmSteps zkevmSteps;
+    uint64_t polBits = mpiRank == 0 ? starkZkevm->starkInfo.starkStruct.steps[starkZkevm->starkInfo.starkStruct.steps.size() - 1].nBits : 1;
+    FRIProof fproof(mpiRank == 0 ? (1 << polBits) : 1,
+                    mpiRank == 0 ? FIELD_EXTENSION : 1,
+                    mpiRank == 0 ? starkZkevm->starkInfo.starkStruct.steps.size() : 1,
+                    mpiRank == 0 ? starkZkevm->starkInfo.evMap.size() : 1,
+                    mpiRank == 0 ? starkZkevm->starkInfo.nPublics : 1);
+    Goldilocks::Element zkevmVerkey_[4];
+    starkZkevm->genProof(fproof,
+                         mpiRank == 0 ? &publics[0] : NULL,
+                         mpiRank == 0 ? zkevmVerkey : zkevmVerkey_,
+                         &zkevmSteps);
 
-            ZkevmSteps zkevmSteps;
-            uint64_t polBits = starkZkevm->starkInfo.starkStruct.steps[starkZkevm->starkInfo.starkStruct.steps.size() - 1].nBits;
-            FRIProof fproof((1 << polBits), FIELD_EXTENSION, starkZkevm->starkInfo.starkStruct.steps.size(), starkZkevm->starkInfo.evMap.size(), starkZkevm->starkInfo.nPublics);
-            starkZkevm->genProof(fproof, &publics[0], zkevmVerkey, &zkevmSteps);
-
-            TimerStopAndLog(STARK_PROOF_BATCH_PROOF);
+    TimerStopAndLog(STARK_PROOF_BATCH_PROOF);
+    if(mpiRank==0){    
             TimerStart(STARK_GEN_AND_CALC_WITNESS_C12A);
             TimerStart(STARK_JSON_GENERATION_BATCH_PROOF);
 
@@ -664,10 +683,11 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
                 json2file(jProofRecursive1, pProverRequest->filePrefix + "batch_proof.proof.json");
             }
             TimerStopAndLog(SAVE_PROOF);
-        }
+        //}
 
-        TimerStopAndLog(PROVER_BATCH_PROOF);
     }
+    TimerStopAndLog(PROVER_BATCH_PROOF);
+
 }
 
 void Prover::genAggregatedProof(ProverRequest *pProverRequest)

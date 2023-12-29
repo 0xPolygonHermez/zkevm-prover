@@ -85,10 +85,10 @@ using json = nlohmann::json;
 void runFileGenBatchProof(Goldilocks fr, Prover &prover, Config &config, int mpiRank)
 {
         
-        // Create and init an empty prover request
-        ProverRequest proverRequest(fr, config, prt_genBatchProof);
-            
-        if(mpiRank == 0){
+    // Create and init an empty prover request
+    ProverRequest proverRequest(fr, config, prt_genBatchProof);
+        
+    if(mpiRank == 0){
         // Load and parse input JSON file
         TimerStart(INPUT_LOAD);
         if (config.inputFile.size() > 0)
@@ -340,16 +340,16 @@ int main(int argc, char **argv)
         }
         
     }
+
+
+    // Create one instance of Config based on the contents of the file config.json
+    json configJson;
+    file2json(pConfigFile, configJson);
+    config.load(configJson);
+    zklog.setJsonLogs(config.jsonLogs);
+    zklog.setPID(config.proverID.substr(0, 7)); // Set the logs prefix
     if (mpiRank == 0)
     {
-
-        // Create one instance of Config based on the contents of the file config.json
-        json configJson;
-        file2json(pConfigFile, configJson);
-        config.load(configJson);
-        zklog.setJsonLogs(config.jsonLogs);
-        zklog.setPID(config.proverID.substr(0, 7)); // Set the logs prefix
-
         // Print the zkProver version
         zklog.info("Version: " + string(ZKEVM_PROVER_VERSION));
 
