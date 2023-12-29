@@ -791,6 +791,9 @@ zkresult FullTracer::onStartBlock (Context &ctx)
     // Clear error
     currentBlock.error.clear();
 
+    // Get context
+    currentBlock.ctx = fr.toU64(ctx.pols.CTX[*ctx.pStep]);
+
     // Mark as initialized
     currentBlock.initialized = true;
     
@@ -819,6 +822,30 @@ zkresult FullTracer::onFinishBlock (Context &ctx)
     mpz_class auxScalar;
     zkresult zkr;
 
+    // Get data from context
+    ////////////////////////
+
+    // Get global exit root
+    zkr = getVarFromCtx(ctx, false, ctx.rom.gerL1InfoTreeOffset, auxScalar, &currentBlock.ctx);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onFinishBlock() failed calling getVarFromCtx(ctx.rom.gerL1InfoTreeOffset)");
+        return zkr;
+    }
+    currentBlock.ger = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
+
+    // Get block hash L1
+    zkr = getVarFromCtx(ctx, false, ctx.rom.blockHashL1InfoTreeOffset, auxScalar, &currentBlock.ctx);
+    if (zkr != ZKR_SUCCESS)
+    {
+        zklog.error("FullTracer::onFinishBlock() failed calling getVarFromCtx(ctx.rom.blockHashL1InfoTreeOffset)");
+        return zkr;
+    }
+    currentBlock.block_hash_l1 = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
+
+    // Get global data
+    //////////////////
+
     // Get parent hash
     zkr = getVarFromCtx(ctx, true, ctx.rom.previousBlockHashOffset, auxScalar);
     if (zkr != ZKR_SUCCESS)
@@ -845,24 +872,6 @@ zkresult FullTracer::onFinishBlock (Context &ctx)
         return zkr;
     }
     currentBlock.timestamp = auxScalar.get_ui();
-
-    // Get global exit root
-    zkr = getVarFromCtx(ctx, true, ctx.rom.gerL1InfoTreeOffset, auxScalar);
-    if (zkr != ZKR_SUCCESS)
-    {
-        zklog.error("FullTracer::onFinishBlock() failed calling getVarFromCtx(ctx.rom.gerL1InfoTreeOffset)");
-        return zkr;
-    }
-    currentBlock.ger = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
-
-    // Get block hash L1
-    zkr = getVarFromCtx(ctx, true, ctx.rom.blockHashL1InfoTreeOffset, auxScalar);
-    if (zkr != ZKR_SUCCESS)
-    {
-        zklog.error("FullTracer::onFinishBlock() failed calling getVarFromCtx(ctx.rom.blockHashL1InfoTreeOffset)");
-        return zkr;
-    }
-    currentBlock.block_hash_l1 = NormalizeTo0xNFormat(auxScalar.get_str(16), 64);
 
     // Get gas used
     zkr = getVarFromCtx(ctx, true, ctx.rom.cumulativeGasUsedOffset, auxScalar);

@@ -38,24 +38,3 @@ RUN DEBIAN_FRONTEND=noninteractive apt update && \
 COPY --from=build /usr/src/app/build/zkProver /usr/local/bin/zkProver
 
 ENTRYPOINT []
-
-
-FROM executor as prover
-
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y awscli && \
-    rm -fr /var/cache/apt/*
-WORKDIR /app/config
-RUN aws s3 cp s3://de012a78750e59b808d922b39535e862/v0.6.0.0-rc.1/c12a c12a --recursive --no-sign-request --region=eu-west-1
-RUN aws s3 cp s3://de012a78750e59b808d922b39535e862/v0.6.0.0-rc.1/final final --recursive --no-sign-request --region=eu-west-1
-RUN aws s3 cp s3://de012a78750e59b808d922b39535e862/v0.6.0.0-rc.1/recursive1 recursive1 --recursive --no-sign-request --region=eu-west-1
-RUN aws s3 cp s3://de012a78750e59b808d922b39535e862/v0.6.0.0-rc.1/recursive2 recursive2 --recursive --no-sign-request --region=eu-west-1
-RUN aws s3 cp s3://de012a78750e59b808d922b39535e862/v0.6.0.0-rc.1/recursivef recursivef --recursive --no-sign-request --region=eu-west-1
-RUN aws s3 cp s3://de012a78750e59b808d922b39535e862/v0.6.0.0-rc.1/scripts scripts --recursive --no-sign-request --region=eu-west-1
-RUN aws s3 cp s3://de012a78750e59b808d922b39535e862/v0.6.0.0-rc.1/zkevm/zkevm.const zkevm/ --no-sign-request --region=eu-west-1
-RUN aws s3 cp s3://de012a78750e59b808d922b39535e862/v0.6.0.0-rc.1/zkevm/zkevm.consttree zkevm/ --no-sign-request --region=eu-west-1
-RUN aws s3 cp s3://de012a78750e59b808d922b39535e862/v0.6.0.0-rc.1/zkevm/zkevm.starkinfo.json zkevm/ --no-sign-request --region=eu-west-1
-RUN aws s3 cp s3://de012a78750e59b808d922b39535e862/v0.6.0.0-rc.1/zkevm/zkevm.verifier.dat zkevm/ --no-sign-request --region=eu-west-1
-RUN aws s3 cp s3://de012a78750e59b808d922b39535e862/v0.6.0.0-rc.1/zkevm/zkevm.verkey.json zkevm/ --no-sign-request --region=eu-west-1
-
-WORKDIR /app
-ENTRYPOINT []

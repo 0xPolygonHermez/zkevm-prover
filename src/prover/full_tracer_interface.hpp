@@ -214,7 +214,8 @@ public:
     vector<LogV2> logs;
     bool initialized;
     string error;
-    Block() : gas_limit(0), block_number(0), timestamp(0), initialized(false) {};
+    uint64_t ctx;
+    Block() : gas_limit(0), block_number(0), timestamp(0), initialized(false), ctx(0) {};
 };
 
 class FinalTraceV2

@@ -15,8 +15,9 @@ using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
 
-::grpc::Status HashDBServiceImpl::GetLatestStateRoot (::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetLatestStateRootResponse* response){
-    // If the process is exising, do not start new activities
+::grpc::Status HashDBServiceImpl::GetLatestStateRoot (::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetLatestStateRootResponse* response)
+{
+    // If the process is exiting, do not start new activities
     if (bExitingProcess){
         return Status::CANCELLED;
     }
@@ -34,12 +35,11 @@ using grpc::Status;
     }
 
     return Status::OK;
-
 }
 
 ::grpc::Status HashDBServiceImpl::Set(::grpc::ServerContext* context, const ::hashdb::v1::SetRequest* request, ::hashdb::v1::SetResponse* response)
 {
-    // If the process is exising, do not start new activities
+    // If the process is exiting, do not start new activities
     if (bExitingProcess)
     {
         return Status::CANCELLED;
@@ -194,7 +194,7 @@ using grpc::Status;
 
 ::grpc::Status HashDBServiceImpl::Get(::grpc::ServerContext* context, const ::hashdb::v1::GetRequest* request, ::hashdb::v1::GetResponse* response)
 {
-    // If the process is exising, do not start new activities
+    // If the process is exiting, do not start new activities
     if (bExitingProcess)
     {
         return Status::CANCELLED;
@@ -305,7 +305,7 @@ using grpc::Status;
 
 ::grpc::Status HashDBServiceImpl::SetProgram(::grpc::ServerContext* context, const ::hashdb::v1::SetProgramRequest* request, ::hashdb::v1::SetProgramResponse* response)
 {
-    // If the process is exising, do not start new activities
+    // If the process is exiting, do not start new activities
     if (bExitingProcess)
     {
         return Status::CANCELLED;
@@ -368,7 +368,7 @@ using grpc::Status;
 
 ::grpc::Status HashDBServiceImpl::GetProgram(::grpc::ServerContext* context, const ::hashdb::v1::GetProgramRequest* request, ::hashdb::v1::GetProgramResponse* response)
 {
-    // If the process is exising, do not start new activities
+    // If the process is exiting, do not start new activities
     if (bExitingProcess)
     {
         return Status::CANCELLED;
@@ -424,7 +424,7 @@ using grpc::Status;
 
 ::grpc::Status HashDBServiceImpl::LoadDB(::grpc::ServerContext* context, const ::hashdb::v1::LoadDBRequest* request, ::google::protobuf::Empty* response)
 {
-    // If the process is exising, do not start new activities
+    // If the process is exiting, do not start new activities
     if (bExitingProcess)
     {
         return Status::CANCELLED;
@@ -458,7 +458,7 @@ using grpc::Status;
 
 ::grpc::Status HashDBServiceImpl::LoadProgramDB(::grpc::ServerContext* context, const ::hashdb::v1::LoadProgramDBRequest* request, ::google::protobuf::Empty* response)
 {
-    // If the process is exising, do not start new activities
+    // If the process is exiting, do not start new activities
     if (bExitingProcess)
     {
         return Status::CANCELLED;
@@ -489,7 +489,7 @@ using grpc::Status;
 
 ::grpc::Status HashDBServiceImpl::Flush(::grpc::ServerContext* context, const ::hashdb::v1::FlushRequest* request, ::hashdb::v1::FlushResponse* response)
 {
-    // If the process is exising, do not start new activities
+    // If the process is exiting, do not start new activities
     if (bExitingProcess)
     {
         return Status::CANCELLED;
@@ -527,7 +527,7 @@ using grpc::Status;
 
 ::grpc::Status HashDBServiceImpl::StartBlock (::grpc::ServerContext* context, const ::hashdb::v1::StartBlockRequest* request, ::google::protobuf::Empty* response)
 {
-    // If the process is exising, do not start new activities
+    // If the process is exiting, do not start new activities
     if (bExitingProcess)
     {
         return Status::CANCELLED;
@@ -557,7 +557,7 @@ using grpc::Status;
 
 ::grpc::Status HashDBServiceImpl::FinishBlock (::grpc::ServerContext* context, const ::hashdb::v1::FinishBlockRequest* request, ::google::protobuf::Empty* response)
 {
-    // If the process is exising, do not start new activities
+    // If the process is exiting, do not start new activities
     if (bExitingProcess)
     {
         return Status::CANCELLED;
@@ -587,7 +587,7 @@ using grpc::Status;
     
 ::grpc::Status HashDBServiceImpl::Purge (::grpc::ServerContext* context, const ::hashdb::v1::PurgeRequest* request, ::hashdb::v1::PurgeResponse* response)
 {
-    // If the process is exising, do not start new activities
+    // If the process is exiting, do not start new activities
     if (bExitingProcess)
     {
         return Status::CANCELLED;
@@ -621,7 +621,7 @@ using grpc::Status;
 
 ::grpc::Status HashDBServiceImpl::GetFlushStatus (::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::GetFlushStatusResponse* response)
 {
-    // If the process is exising, do not start new activities
+    // If the process is exiting, do not start new activities
     if (bExitingProcess)
     {
         return Status::CANCELLED;
@@ -668,7 +668,7 @@ using grpc::Status;
 
 ::grpc::Status HashDBServiceImpl::GetFlushData (::grpc::ServerContext* context, const ::hashdb::v1::GetFlushDataRequest* request, ::hashdb::v1::GetFlushDataResponse* response)
 {
-    // If the process is exising, do not start new activities
+    // If the process is exiting, do not start new activities
     if (bExitingProcess)
     {
         return Status::CANCELLED;
@@ -723,7 +723,7 @@ using grpc::Status;
 
 ::grpc::Status HashDBServiceImpl::ConsolidateState (::grpc::ServerContext* context, const ::hashdb::v1::ConsolidateStateRequest* request, ::hashdb::v1::ConsolidateStateResponse* response)
 {
-    // If the process is exising, do not start new activities
+    // If the process is exiting, do not start new activities
     if (bExitingProcess)
     {
         return Status::CANCELLED;
@@ -777,7 +777,7 @@ using grpc::Status;
 
 ::grpc::Status HashDBServiceImpl::ReadTree (::grpc::ServerContext* context, const ::hashdb::v1::ReadTreeRequest* request, ::hashdb::v1::ReadTreeResponse* response)
 {
-    // If the process is exising, do not start new activities
+    // If the process is exiting, do not start new activities
     if (bExitingProcess)
     {
         return Status::CANCELLED;
@@ -864,7 +864,7 @@ using grpc::Status;
 
 ::grpc::Status HashDBServiceImpl::ResetDB (::grpc::ServerContext* context, const ::google::protobuf::Empty* request, ::hashdb::v1::ResetDBResponse* response)
 {
-    // If the process is exising, do not start new activities
+    // If the process is exiting, do not start new activities
     if (bExitingProcess)
     {
         return Status::CANCELLED;

@@ -573,7 +573,7 @@ zkresult HashDB::getFlushStatus(uint64_t &storedFlushId, uint64_t &storingFlushI
         db.getFlushStatus(storedFlushId, storingFlushId, lastFlushId, pendingToFlushNodes, pendingToFlushProgram, storingNodes, storingProgram);
     }
 
-    // Get proces ID from configuration
+    // Get process ID from configuration
     proverId = config.proverID;
 
 #ifdef LOG_TIME_STATISTICS_HASHDB
