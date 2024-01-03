@@ -461,6 +461,13 @@ zkresult FullTracer::onError(Context &ctx, const RomCommand &cmd)
             zklog.error("FullTracer::onError() got error=" + lastError + " with txIndex=" + to_string(txIndex) + " but currentBlock.responses.size()=" + to_string(currentBlock.responses.size()));
             exitProcess();
         }
+#ifdef LOG_FULL_TRACER_ON_ERROR
+        zklog.info("FullTracer::onError() error=" + lastError + " zkPC=" + to_string(*ctx.pZKPC) + " rom=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr));
+#endif
+#ifdef LOG_TIME_STATISTICS
+        tms.add("onError", TimeDiff(t));
+#endif
+        return ZKR_SUCCESS;
     }
 
     if (full_trace.size() > 0)
