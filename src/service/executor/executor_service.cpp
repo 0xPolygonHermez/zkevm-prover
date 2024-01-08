@@ -1254,6 +1254,12 @@ using grpc::Status;
     proverRequest.input.publicInputsExtended.newBatchNum = request->debug().new_batch_num();
 
 #ifdef LOG_SERVICE_EXECUTOR_INPUT
+    string l1InfoTreeDataString = " l1InfoTreeData.size=" + to_string(proverRequest.input.l1InfoTreeData.size()) + "=";
+    unordered_map<uint64_t, L1Data>::const_iterator itl1;
+    for (itl1 = proverRequest.input.l1InfoTreeData.begin(); itl1 != proverRequest.input.l1InfoTreeData.end(); itl1++)
+    {
+        l1InfoTreeDataString += to_string(itl1->first) + ",";
+    }
     zklog.info(string("ExecutorServiceImpl::ProcessBatchV2() got") +
         " sequencerAddr=" + proverRequest.input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16) +
         " batchL2DataLength=" + to_string(request->batch_l2_data().size()) +
@@ -1279,7 +1285,9 @@ using grpc::Status;
         " bSkipWriteBlockInfoRoot=" + to_string(proverRequest.input.bSkipWriteBlockInfoRoot) +
         " traceConfig=" + proverRequest.input.traceConfig.toString() +
         " UUID=" + proverRequest.uuid +
-        " gasLimit=" + to_string(proverRequest.input.debug.gasLimit)
+        " gasLimit=" + to_string(proverRequest.input.debug.gasLimit) +
+        l1InfoTreeDataString +
+        " stateOverride.size=" + to_string(proverRequest.input.stateOverride.size())
         , &proverRequest.tags);
 #endif
 

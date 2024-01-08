@@ -313,7 +313,7 @@ void Config::load(json &config)
     ParseU64(config, "ECRecoverPrecalcNThreads", "ECRECOVER_PRECALC_N_THREADS", ECRecoverPrecalcNThreads, 16);
 
     // Logs
-    ParseBool(config, "jsonLogs", "JSON_LOGS", jsonLogs, true);
+    ParseBool(config, "jsonLogs", "JSON_LOGS", jsonLogs, false);
 }
 
 void Config::print(void)
