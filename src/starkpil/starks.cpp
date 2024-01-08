@@ -47,6 +47,7 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldil
     //--------------------------------
     TimerStart(STARK_STEP_1);
 
+    nrowsStepBatch = 0;
     if (nrowsStepBatch == 4)
     {
         TimerStart(STARK_STEP_1_CALCULATE_EXPS_AVX);

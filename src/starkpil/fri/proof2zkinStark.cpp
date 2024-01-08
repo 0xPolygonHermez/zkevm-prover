@@ -30,10 +30,6 @@ ordered_json proof2zkinStark(ordered_json &proof)
     zkinOut["s0_vals1"] = ordered_json::array();
     if (friProof[0]["polQueries"][0][1][0].size())
     {
-        zkinOut["s0_vals2"] = ordered_json::array();
-    }
-    if (friProof[0]["polQueries"][0][2][0].size())
-    {
         zkinOut["s0_vals3"] = ordered_json::array();
     }
 
@@ -41,10 +37,6 @@ ordered_json proof2zkinStark(ordered_json &proof)
     zkinOut["s0_valsC"] = ordered_json::array();
     zkinOut["s0_siblings1"] = ordered_json::array();
     if (friProof[0]["polQueries"][0][1][0].size())
-    {
-        zkinOut["s0_siblings2"] = ordered_json::array();
-    }
-    if (friProof[0]["polQueries"][0][2][0].size())
     {
         zkinOut["s0_siblings3"] = ordered_json::array();
     }
@@ -59,20 +51,15 @@ ordered_json proof2zkinStark(ordered_json &proof)
 
         if (friProof[0]["polQueries"][0][1][0].size())
         {
-            zkinOut["s0_vals2"][i] = friProof[0]["polQueries"][i][1][0];
-            zkinOut["s0_siblings2"][i] = friProof[0]["polQueries"][i][1][1];
-        }
-        if (friProof[0]["polQueries"][0][2][0].size())
-        {
-            zkinOut["s0_vals3"][i] = friProof[0]["polQueries"][i][2][0];
-            zkinOut["s0_siblings3"][i] = friProof[0]["polQueries"][i][2][1];
+            zkinOut["s0_vals3"][i] = friProof[0]["polQueries"][i][1][0];
+            zkinOut["s0_siblings3"][i] = friProof[0]["polQueries"][i][1][1];
         }
 
-        zkinOut["s0_vals4"][i] = friProof[0]["polQueries"][i][3][0];
-        zkinOut["s0_siblings4"][i] = friProof[0]["polQueries"][i][3][1];
+        zkinOut["s0_vals4"][i] = friProof[0]["polQueries"][i][2][0];
+        zkinOut["s0_siblings4"][i] = friProof[0]["polQueries"][i][2][1];
 
-        zkinOut["s0_valsC"][i] = friProof[0]["polQueries"][i][4][0];
-        zkinOut["s0_siblingsC"][i] = friProof[0]["polQueries"][i][4][1];
+        zkinOut["s0_valsC"][i] = friProof[0]["polQueries"][i][3][0];
+        zkinOut["s0_siblingsC"][i] = friProof[0]["polQueries"][i][3][1];
     }
 
     zkinOut["finalPol"] = friProof[friProof.size() - 1];

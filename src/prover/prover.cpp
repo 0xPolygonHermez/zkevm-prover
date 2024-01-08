@@ -600,6 +600,8 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         jProof["publics"] = publicStarkJson;
         zkin["publics"] = publicStarkJson;
 
+        json2file(zkin, pProverRequest->filePrefix + "zkevm_proof.proof.json");
+
         TimerStopAndLog(STARK_JSON_GENERATION_BATCH_PROOF);
 
         CommitPolsStarks cmPols12a(pAddress, (1 << starksC12a->starkInfo.starkStruct.nBits), starksC12a->starkInfo.nCm1);
