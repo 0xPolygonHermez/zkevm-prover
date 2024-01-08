@@ -79,6 +79,7 @@ zkresult StateManager::setStateRoot (const string &batchUUID, uint64_t block, ui
         {
             batchState.blockState.emplace_back(emptyBlockState);
         }
+        batchState.currentBlock = batchState.blockState.size() - 1;
     }
 
     // Get a reference to the block state
