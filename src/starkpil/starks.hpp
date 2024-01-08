@@ -14,6 +14,7 @@
 #include "steps.hpp"
 #include "zklog.hpp"
 #include "exit_process.hpp"
+#include "mpi.h"
 
 #define STARK_C12_A_NUM_TREES 5
 #define NUM_CHALLENGES 8
@@ -69,6 +70,39 @@ private:
     Polinomial x;
 
     void merkelizeMemory(); // function for DBG purposes
+
+    //
+    // MPI elements
+    //
+    int mpiRank;
+    int mpiSize;
+    Goldilocks::Element *MPIBufferA;
+    Goldilocks::Element *MPIBufferB;
+    Goldilocks::Element *MPIBufferC;
+    MPI_Datatype rowType;
+    uint64_t scatterSize;
+    uint64_t gatherSize;
+    std::vector<MPI_Count> sendcounts;
+    std::vector<MPI_Count> sendcountsExtended;
+    std::vector<MPI_Aint> displs_send;
+    std::vector<MPI_Aint> displs_sendExtended;
+    std::vector<MPI_Count> recvcounts;
+    std::vector<MPI_Count> recvcountsExtended;
+    std::vector<MPI_Aint> displs_recv;
+    std::vector<MPI_Aint> displs_recvExtended;
+    std::vector<MPI_Count> sendcols;
+    std::vector<MPI_Count> sendcolsAcc;
+    std::vector<MPI_Count> recvcountsGatherv;
+    std::vector<MPI_Aint> displs_recvGatherv;
+    uint64_t fftSizeLoc;
+    uint64_t fftSizeExtendedLoc;
+    uint64_t numColumnsLoc;
+
+    void MPIEvalCounts(uint64_t numColumns);
+    void MPIRowsToCols(uint64_t numColumns, int nthreads);
+    void MPIColsToRows(uint64_t numColumns, int nthreads);
+    void MPIScatter(Goldilocks::Element *section, uint64_t numColumns);
+    void MPIGather(Goldilocks::Element *section, uint64_t numColumns);
 
 public:
     Starks(const Config &config, StarkFiles starkFiles, void *_pAddress) : config(config),
@@ -189,6 +223,35 @@ public:
         treesGL[3] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::cm4_2ns], cm4_2ns);
         treesGL[4] = new MerkleTreeGL((Goldilocks::Element *)pConstTreeAddress);
         TimerStopAndLog(MERKLE_TREE_ALLOCATION);
+
+        //
+        //  MPI elements
+        //
+        MPI_Comm_rank(MPI_COMM_WORLD, &mpiRank);
+        MPI_Comm_size(MPI_COMM_WORLD, &mpiSize);
+        uint64_t mpiBuffersSize = NExtended * (starkInfo.mapSectionsN.section[eSection::cm1_n]+ mpiSize - 1)/mpiSize; //rick: to update
+        MPIBufferA   = new Goldilocks::Element[mpiBuffersSize];
+        MPIBufferB = new Goldilocks::Element[mpiBuffersSize];
+        MPIBufferC = new Goldilocks::Element[mpiBuffersSize];
+        scatterSize = N/mpiSize;
+        gatherSize = NExtended/mpiSize;
+        sendcounts.resize(mpiSize);
+        sendcountsExtended.resize(mpiSize);
+        displs_send.resize(mpiSize);
+        displs_sendExtended.resize(mpiSize);
+        recvcounts.resize(mpiSize);
+        recvcountsExtended.resize(mpiSize);
+        displs_recv.resize(mpiSize);
+        displs_recvExtended.resize(mpiSize);
+        sendcols.resize(mpiSize);
+        sendcolsAcc.resize(mpiSize);
+        recvcountsGatherv.resize(mpiSize);
+        displs_recvGatherv.resize(mpiSize);
+        uint64_t fftSizeBlock =  (N + mpiSize - 1)/ mpiSize;
+        uint64_t rowStart = min(mpiRank * fftSizeBlock, N);
+        uint64_t rowEnd = min((mpiRank + 1) * fftSizeBlock, N);
+        fftSizeLoc = rowEnd - rowStart;
+        fftSizeExtendedLoc = fftSizeLoc << 1;
     };
     ~Starks()
     {
@@ -220,6 +283,9 @@ public:
         {
             delete treesGL[i];
         }
+        delete[] MPIBufferA;
+        delete[] MPIBufferB;
+        delete[] MPIBufferC;
     };
 
     void genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldilocks::Element verkey[4], Steps *steps);

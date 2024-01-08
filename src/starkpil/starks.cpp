@@ -4,13 +4,22 @@
 #include "zklog.hpp"
 #include "exit_process.hpp"
 #include "mpi.h"
+#include <vector>
+
+static bool firstEntry = true;
+
+using namespace std;
+#define max(a,b) (((a)>(b))?(a):(b))
+#define min(a,b) (((a)<(b))?(a):(b))
 
 USING_PROVER_FORK_NAMESPACE;
 
 void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldilocks::Element verkey[4], Steps *steps)
 {
-    int mpiRank = 0;
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpiRank);
+    
+    int nthreads = omp_get_max_threads()/mpiSize;
+    uint64_t numColumns;
+
     // Initialize vars
     TimerStart(STARK_INITIALIZATION);
 
@@ -40,45 +49,51 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldil
     TimerStart(STARK_STEP_1);
     TimerStart(STARK_STEP_1_LDE_AND_MERKLETREE);
     TimerStart(STARK_STEP_1_LDE);
-    
-    // El rank 0 distribueix les files entre els difeerents ranks
-    // Nova redistribució per fer la NTT
-    // Merkelització i li passem al rank0 i continua
-
+    if(firstEntry == true){
+        numColumns = starkInfo.mapSectionsN.section[eSection::cm1_n];
+        std::cout << "First ExtendPol columns: " << numColumns << std::endl;
+        MPIEvalCounts(numColumns);
+        MPIScatter(p_cm1_n, numColumns);
+        MPIRowsToCols(numColumns, nthreads);
+        ntt.extendPol(MPIBufferB, MPIBufferA, NExtended, N, numColumnsLoc, MPIBufferC);
+        MPIColsToRows(numColumns, nthreads);
+        MPIGather(p_cm1_2ns, numColumns);
+    }else{
+        if(mpiRank==0) ntt.extendPol(p_cm1_2ns, p_cm1_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm1_n], p_cm2_2ns);
+    }
+    TimerStopAndLog(STARK_STEP_1_LDE);
     if(mpiRank==0){
-        std::cout << "Abans de fer la NTT; " << NExtended << " " << N << " " << starkInfo.mapSectionsN.section[eSection::cm1_n] << std::endl;
-        ntt.extendPol(p_cm1_2ns, p_cm1_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm1_n], p_cm2_2ns);
-        TimerStopAndLog(STARK_STEP_1_LDE);
+
         TimerStart(STARK_STEP_1_MERKLETREE);
         treesGL[0]->merkelize();
         treesGL[0]->getRoot(root0.address());
         TimerStopAndLog(STARK_STEP_1_MERKLETREE);
         zklog.info("MerkleTree rootGL 0: [ " + root0.toString(4) + " ]");
-        transcript.put(root0.address(), HASH_SIZE);
-        TimerStopAndLog(STARK_STEP_1_LDE_AND_MERKLETREE);
-        TimerStopAndLog(STARK_STEP_1);
+        transcript.put(root0.address(), HASH_SIZE);      
     }
+    TimerStopAndLog(STARK_STEP_1_LDE_AND_MERKLETREE);
+    TimerStopAndLog(STARK_STEP_1);
 
+    StepsParams params = {
+        pols : mem,
+        pConstPols : pConstPols,
+        pConstPols2ns : pConstPols2ns,
+        challenges : challenges,
+        x_n : x_n,
+        x_2ns : x_2ns,
+        zi : zi,
+        evals : evals,
+        xDivXSubXi : xDivXSubXi,
+        xDivXSubWXi : xDivXSubWXi,
+        publicInputs : publicInputs,
+        q_2ns : p_q_2ns,
+        f_2ns : p_f_2ns
+    };
+    //--------------------------------
+    // 2.- Caluculate plookups h1 and h2
+    //--------------------------------
+    TimerStart(STARK_STEP_2);
     if(mpiRank == 0){
-        StepsParams params = {
-            pols : mem,
-            pConstPols : pConstPols,
-            pConstPols2ns : pConstPols2ns,
-            challenges : challenges,
-            x_n : x_n,
-            x_2ns : x_2ns,
-            zi : zi,
-            evals : evals,
-            xDivXSubXi : xDivXSubXi,
-            xDivXSubWXi : xDivXSubWXi,
-            publicInputs : publicInputs,
-            q_2ns : p_q_2ns,
-            f_2ns : p_f_2ns
-        };
-        //--------------------------------
-        // 2.- Caluculate plookups h1 and h2
-        //--------------------------------
-        TimerStart(STARK_STEP_2);
         transcript.getField(challenges[0]); // u
         transcript.getField(challenges[1]); // defVal
         if (nrowsStepBatch == 4)
@@ -143,10 +158,23 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldil
         transposeH1H2Rows(pAddress, numCommited, transPols);
         TimerStopAndLog(STARK_STEP_2_CALCULATEH1H2_TRANSPOSE_2);
 
-        TimerStart(STARK_STEP_2_LDE_AND_MERKLETREE);
-        TimerStart(STARK_STEP_2_LDE);
-        ntt.extendPol(p_cm2_2ns, p_cm2_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm2_n], pBuffer);
-        TimerStopAndLog(STARK_STEP_2_LDE);
+    }
+    TimerStart(STARK_STEP_2_LDE_AND_MERKLETREE);
+    TimerStart(STARK_STEP_2_LDE);
+    if(firstEntry == true){
+        numColumns = starkInfo.mapSectionsN.section[eSection::cm2_n];
+        std::cout << "Second ExtendPol columns: " << numColumns << std::endl;
+        MPIEvalCounts(numColumns);
+        MPIScatter(p_cm2_n, numColumns);
+        MPIRowsToCols(numColumns, nthreads);
+        ntt.extendPol(MPIBufferB, MPIBufferA, NExtended, N, numColumnsLoc, MPIBufferC);
+        MPIColsToRows(numColumns, nthreads);
+        MPIGather(p_cm2_2ns, numColumns);
+    }else{
+        if(mpiRank==0) ntt.extendPol(p_cm2_2ns, p_cm2_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm2_n], pBuffer);
+    }
+    TimerStopAndLog(STARK_STEP_2_LDE);
+    if(mpiRank==0){
         TimerStart(STARK_STEP_2_MERKLETREE);
         treesGL[1]->merkelize();
         treesGL[1]->getRoot(root1.address());
@@ -156,11 +184,12 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldil
 
         TimerStopAndLog(STARK_STEP_2_LDE_AND_MERKLETREE);
         TimerStopAndLog(STARK_STEP_2);
-
-        //--------------------------------
-        // 3.- Compute Z polynomials
-        //--------------------------------
-        TimerStart(STARK_STEP_3);
+    }
+    //--------------------------------
+    // 3.- Compute Z polynomials
+    //--------------------------------
+    TimerStart(STARK_STEP_3);
+    if(mpiRank==0){
         transcript.getField(challenges[2]); // gamma
         transcript.getField(challenges[3]); // betta
         if (nrowsStepBatch == 4)
@@ -224,10 +253,23 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldil
             TimerStopAndLog(STARK_STEP_3_CALCULATE_EXPS_2);
         }
 
-        TimerStart(STARK_STEP_3_LDE_AND_MERKLETREE);
-        TimerStart(STARK_STEP_3_LDE);
-        ntt.extendPol(p_cm3_2ns, p_cm3_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm3_n], pBuffer);
-        TimerStopAndLog(STARK_STEP_3_LDE);
+    }
+    TimerStart(STARK_STEP_3_LDE_AND_MERKLETREE);
+    TimerStart(STARK_STEP_3_LDE);
+    if(firstEntry == true){
+        numColumns = starkInfo.mapSectionsN.section[eSection::cm3_n];
+        std::cout << "Third ExtendPol columns: " << numColumns << std::endl;
+        MPIEvalCounts(numColumns);
+        MPIScatter(p_cm3_n, numColumns);
+        MPIRowsToCols(numColumns, nthreads);
+        ntt.extendPol(MPIBufferB, MPIBufferA, NExtended, N, numColumnsLoc, MPIBufferC);
+        MPIColsToRows(numColumns, nthreads);
+        MPIGather(p_cm3_2ns, numColumns);
+    }else{
+        if(mpiRank==0) ntt.extendPol(p_cm3_2ns, p_cm3_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm3_n], pBuffer);
+    }
+    TimerStopAndLog(STARK_STEP_3_LDE);
+    if(mpiRank==0){
         TimerStart(STARK_STEP_3_MERKLETREE);
         treesGL[2]->merkelize();
         treesGL[2]->getRoot(root2.address());
@@ -416,6 +458,7 @@ void Starks::genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldil
         std::memcpy(&proof.proofs.root4[0], root3.address(), HASH_SIZE * sizeof(Goldilocks::Element));
         TimerStopAndLog(STARK_STEP_FRI);
     }
+    firstEntry = false;
 }
 
 Polinomial *Starks::transposeH1H2Columns(void *pAddress, uint64_t &numCommited, Goldilocks::Element *pBuffer)
@@ -712,4 +755,90 @@ void Starks::merkelizeMemory()
     std::cout << "rootDBG[2]: [ " << Goldilocks::toU64(rootDBG[2]) << " ]" << std::endl;
     std::cout << "rootDBG[3]: [ " << Goldilocks::toU64(rootDBG[3]) << " ]" << std::endl;
     delete[] treeDBG;
+}
+
+void Starks::MPIEvalCounts(uint64_t numColumns){
+       //
+        // Evaluate counts for alltoallv 
+        //
+        uint64_t BLOWUP_FACTOR = 1;
+        uint64_t fftSizeBlock =  (N + mpiSize - 1)/ mpiSize;
+        numColumnsLoc = numColumns / mpiSize;
+        if ((uint64_t) mpiRank < numColumns % mpiSize) numColumnsLoc++;
+        
+        
+        MPI_Count columns_block = numColumns / mpiSize;
+        MPI_Count sum_cols = 0;
+        for(uint64_t i=0; i< (uint64_t)mpiSize; ++i){
+
+            sendcols[i] = columns_block;
+            MPI_Count startRow = min(i * fftSizeBlock, N);
+            MPI_Count endRow = min((i + 1) * fftSizeBlock, N);
+            MPI_Count fftSizeLoc_i = endRow - startRow;
+            MPI_Count fftSizeExtendedLoc_i = fftSizeLoc_i << BLOWUP_FACTOR;
+
+            if (i < numColumns % mpiSize) sendcols[i]++;
+            sendcolsAcc[i] = sum_cols;
+
+            sendcounts[i] = fftSizeLoc * sendcols[i];
+            recvcounts[i] = fftSizeLoc_i * numColumnsLoc;
+
+            displs_send[i] = sum_cols * fftSizeLoc;
+            displs_recv[i] = i ==0 ? 0 : displs_recv[i-1] + recvcounts[i-1];
+
+            sendcountsExtended[i] = fftSizeExtendedLoc_i * numColumnsLoc;
+            recvcountsExtended[i] = fftSizeExtendedLoc * sendcols[i];
+            
+            displs_sendExtended[i] =  i ==0 ? 0 : displs_sendExtended[i-1] + sendcountsExtended[i-1];
+            displs_recvExtended[i] = sum_cols * fftSizeExtendedLoc;
+
+            sum_cols += sendcols[i];
+
+            recvcountsGatherv[i] = mpiRank > 0 ? 0 :fftSizeExtendedLoc_i*CAPACITY;
+            displs_recvGatherv[i] = (i==0 || mpiRank>0) ? 0: displs_recvGatherv[i-1] + recvcountsGatherv[i-1];
+        }
+}
+void Starks::MPIRowsToCols(uint64_t numColumns, int nthreads){
+    // 
+    // Transpose buffers
+    //  
+    #pragma omp parallel for num_threads(nthreads)
+    for(uint64_t i=0; i< (uint64_t) mpiSize; ++i){
+        uint64_t count=0;
+        for(uint64_t k=0; k<fftSizeLoc; ++k){
+            for(int j=sendcolsAcc[i]; j<sendcolsAcc[i]+sendcols[i]; ++j){
+                MPIBufferC[sendcolsAcc[i]*fftSizeLoc+count]=MPIBufferA[k*numColumns+j];
+                ++count;
+            }
+        }
+    }
+    MPI_Alltoallv_c(MPIBufferC, sendcounts.data(), displs_send.data(), MPI_UINT64_T, MPIBufferA, recvcounts.data(), displs_recv.data(), MPI_UINT64_T, MPI_COMM_WORLD);
+}
+void Starks::MPIColsToRows(uint64_t numColumns, int nthreads){
+    //
+    // Transpose results
+    //  
+    MPI_Alltoallv_c(MPIBufferB, sendcountsExtended.data(), displs_sendExtended.data(), MPI_UINT64_T, MPIBufferC, recvcountsExtended.data(), displs_recvExtended.data(), MPI_UINT64_T, MPI_COMM_WORLD);        
+    #pragma omp parallel for num_threads(nthreads)
+    for(uint64_t i=0; i< (uint64_t) mpiSize; ++i){
+        uint64_t count=0;
+        for(uint64_t k=0; k<fftSizeExtendedLoc; ++k){
+            for(int j=sendcolsAcc[i]; j<sendcolsAcc[i]+sendcols[i]; ++j){
+                MPIBufferB[k*numColumns+j]=MPIBufferC[sendcolsAcc[i]*fftSizeExtendedLoc+count];
+                ++count;
+            }
+        }
+    }
+}
+void Starks::MPIScatter(Goldilocks::Element * section, uint64_t numColumns){
+    MPI_Type_contiguous(numColumns, MPI_UINT64_T, &rowType);
+    MPI_Type_commit(&rowType);
+    MPI_Scatter(section, scatterSize, rowType, MPIBufferA, scatterSize, rowType, 0, MPI_COMM_WORLD);
+    MPI_Type_free(&rowType);
+}
+void Starks::MPIGather(Goldilocks::Element * section, uint64_t numColumns){
+    MPI_Type_contiguous(numColumns, MPI_UINT64_T, &rowType);
+    MPI_Type_commit(&rowType);
+    MPI_Gather(MPIBufferB, gatherSize, rowType, section, gatherSize, rowType, 0, MPI_COMM_WORLD);
+    MPI_Type_free(&rowType);
 }
