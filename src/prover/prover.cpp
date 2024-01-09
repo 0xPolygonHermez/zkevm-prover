@@ -435,6 +435,8 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
     executor.execute(*pProverRequest, cmPols);
     TimerStopAndLog(EXECUTOR_EXECUTE_BATCH_PROOF);
 
+    zklog.info("Prover::genBatchProof() called executor.execute() oldStateRoot=" + pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) + " newStateRoot=" + pProverRequest->pFullTracer->get_new_state_root());
+
     // Save commit pols to file zkevm.commit
     if (config.zkevmCmPolsAfterExecutor != "")
     {
@@ -1044,6 +1046,8 @@ void Prover::execute(ProverRequest *pProverRequest)
     TimerStart(EXECUTOR_EXECUTE_EXECUTE);
     executor.execute(*pProverRequest, cmPols);
     TimerStopAndLog(EXECUTOR_EXECUTE_EXECUTE);
+
+    zklog.info("Prover::execute() called executor.execute() oldStateRoot=" + pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) + " newStateRoot=" + pProverRequest->pFullTracer->get_new_state_root());
 
     // Save input to <timestamp>.input.json after execution including dbReadLog
     if (config.saveDbReadsToFile)
