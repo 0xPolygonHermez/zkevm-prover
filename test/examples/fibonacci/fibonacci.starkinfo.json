@@ -1,0 +1,7917 @@
+{
+ "varPolMap": [
+  {
+   "section": "cm1_n",
+   "dim": 1,
+   "sectionPos": 0
+  },
+  {
+   "section": "cm1_2ns",
+   "dim": 1,
+   "sectionPos": 0
+  },
+  {
+   "section": "cm1_n",
+   "dim": 1,
+   "sectionPos": 1
+  },
+  {
+   "section": "cm1_2ns",
+   "dim": 1,
+   "sectionPos": 1
+  },
+  {
+   "section": "cm3_n",
+   "dim": 1,
+   "sectionPos": 0
+  },
+  {
+   "section": "cm3_2ns",
+   "dim": 1,
+   "sectionPos": 0
+  },
+  {
+   "section": "cm4_n",
+   "dim": 3,
+   "sectionPos": 0
+  },
+  {
+   "section": "cm4_2ns",
+   "dim": 3,
+   "sectionPos": 0
+  },
+  {
+   "section": "q_2ns",
+   "dim": 3,
+   "sectionPos": 0
+  },
+  {
+   "section": "f_2ns",
+   "dim": 3,
+   "sectionPos": 0
+  }
+ ],
+ "puCtx": [],
+ "peCtx": [],
+ "ciCtx": [],
+ "starkStruct": {
+  "nBits": 10,
+  "nBitsExt": 11,
+  "nQueries": 8,
+  "verificationHashType": "GL",
+  "steps": [
+   {
+    "nBits": 11
+   },
+   {
+    "nBits": 7
+   },
+   {
+    "nBits": 3
+   }
+  ]
+ },
+ "nConstants": 2,
+ "nPublics": 3,
+ "publicsCode": [
+  {
+   "first": [
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "id": 0,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 1,
+       "prime": false,
+       "p": 2,
+       "dim": 1
+      }
+     ]
+    }
+   ],
+   "i": [
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "id": 0,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 1,
+       "prime": false,
+       "p": 2,
+       "dim": 1
+      }
+     ]
+    }
+   ],
+   "last": [
+    {
+     "op": "copy",
+     "dest": {
+      "type": "tmp",
+      "id": 0,
+      "dim": 1
+     },
+     "src": [
+      {
+       "type": "cm",
+       "id": 1,
+       "prime": false,
+       "p": 2,
+       "dim": 1
+      }
+     ]
+    }
+   ],
+   "tmpUsed": 1
+  }
+ ],
+ "nCm1": 2,
+ "step2prev": {
+  "first": [],
+  "i": [],
+  "last": [],
+  "tmpUsed": 0
+ },
+ "nCm2": 0,
+ "step3prev": {
+  "first": [],
+  "i": [],
+  "last": [],
+  "tmpUsed": 0
+ },
+ "qDeg": 1,
+ "imExps": {
+  "2": true
+ },
+ "imExpsList": [
+  2
+ ],
+ "imExp2cm": {
+  "2": 2
+ },
+ "cExp": 7,
+ "nCm3": 1,
+ "qs": [
+  3
+ ],
+ "step3": {
+  "first": [
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 0,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": false,
+      "p": 0,
+      "dim": 1
+     },
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": false,
+      "p": 0,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 1,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 1,
+      "prime": false,
+      "p": 2,
+      "dim": 1
+     },
+     {
+      "type": "cm",
+      "id": 1,
+      "prime": false,
+      "p": 2,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "cm",
+     "prime": false,
+     "id": 2,
+     "p": 4,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 0,
+      "dim": 1
+     },
+     {
+      "type": "tmp",
+      "id": 1,
+      "dim": 1
+     }
+    ]
+   }
+  ],
+  "i": [
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 0,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": false,
+      "p": 0,
+      "dim": 1
+     },
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": false,
+      "p": 0,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 1,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 1,
+      "prime": false,
+      "p": 2,
+      "dim": 1
+     },
+     {
+      "type": "cm",
+      "id": 1,
+      "prime": false,
+      "p": 2,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "cm",
+     "prime": false,
+     "id": 2,
+     "p": 4,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 0,
+      "dim": 1
+     },
+     {
+      "type": "tmp",
+      "id": 1,
+      "dim": 1
+     }
+    ]
+   }
+  ],
+  "last": [
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 0,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": false,
+      "p": 0,
+      "dim": 1
+     },
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": false,
+      "p": 0,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 1,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 1,
+      "prime": false,
+      "p": 2,
+      "dim": 1
+     },
+     {
+      "type": "cm",
+      "id": 1,
+      "prime": false,
+      "p": 2,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "cm",
+     "prime": false,
+     "id": 2,
+     "p": 4,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 0,
+      "dim": 1
+     },
+     {
+      "type": "tmp",
+      "id": 1,
+      "dim": 1
+     }
+    ]
+   }
+  ],
+  "tmpUsed": 2
+ },
+ "step42ns": {
+  "first": [
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 0,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 1,
+      "prime": true,
+      "p": 3,
+      "dim": 1
+     },
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 1,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "number",
+      "value": "1",
+      "dim": 1
+     },
+     {
+      "type": "const",
+      "id": 1,
+      "prime": false,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 2,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 0,
+      "dim": 1
+     },
+     {
+      "type": "tmp",
+      "id": 1,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 25,
+     "expId": 1,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 2,
+      "dim": 1
+     },
+     {
+      "type": "number",
+      "value": "0",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 3,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": true,
+      "p": 1,
+      "dim": 1
+     },
+     {
+      "type": "cm",
+      "id": 2,
+      "prime": false,
+      "p": 5,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 4,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "number",
+      "value": "1",
+      "dim": 1
+     },
+     {
+      "type": "const",
+      "id": 1,
+      "prime": false,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 5,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 3,
+      "dim": 1
+     },
+     {
+      "type": "tmp",
+      "id": 4,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 26,
+     "expId": 3,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 5,
+      "dim": 1
+     },
+     {
+      "type": "number",
+      "value": "0",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 6,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 1,
+      "prime": false,
+      "p": 3,
+      "dim": 1
+     },
+     {
+      "type": "public",
+      "id": 0,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 7,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "const",
+      "id": 0,
+      "prime": false,
+      "dim": 1
+     },
+     {
+      "type": "tmp",
+      "id": 6,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 27,
+     "expId": 4,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 7,
+      "dim": 1
+     },
+     {
+      "type": "number",
+      "value": "0",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 8,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "dim": 1
+     },
+     {
+      "type": "public",
+      "id": 1,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 9,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "const",
+      "id": 0,
+      "prime": false,
+      "dim": 1
+     },
+     {
+      "type": "tmp",
+      "id": 8,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 28,
+     "expId": 5,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 9,
+      "dim": 1
+     },
+     {
+      "type": "number",
+      "value": "0",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 10,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "dim": 1
+     },
+     {
+      "type": "public",
+      "id": 2,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 11,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "const",
+      "id": 1,
+      "prime": false,
+      "dim": 1
+     },
+     {
+      "type": "tmp",
+      "id": 10,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 29,
+     "expId": 6,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 11,
+      "dim": 1
+     },
+     {
+      "type": "number",
+      "value": "0",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 12,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 4,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 25,
+      "prime": false,
+      "expId": 1,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 13,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 12,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 26,
+      "prime": false,
+      "expId": 3,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 14,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 4,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 13,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 15,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 14,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 27,
+      "prime": false,
+      "expId": 4,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 16,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 4,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 15,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 17,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 16,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 28,
+      "prime": false,
+      "expId": 5,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 18,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 4,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 17,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 19,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 18,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 29,
+      "prime": false,
+      "expId": 6,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 20,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 4,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 19,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 21,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "dim": 1
+     },
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 22,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 1,
+      "prime": false,
+      "p": 3,
+      "dim": 1
+     },
+     {
+      "type": "cm",
+      "id": 1,
+      "prime": false,
+      "p": 3,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 23,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 21,
+      "dim": 1
+     },
+     {
+      "type": "tmp",
+      "id": 22,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 24,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 23,
+      "dim": 1
+     },
+     {
+      "type": "cm",
+      "id": 2,
+      "prime": false,
+      "p": 5,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 30,
+     "expId": 7,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 20,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 24,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "q",
+     "id": 0,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "prime": false,
+      "id": 30,
+      "expId": 7,
+      "dim": 3
+     },
+     {
+      "type": "Zi",
+      "dim": 1
+     }
+    ]
+   }
+  ],
+  "i": [
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 0,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 1,
+      "prime": true,
+      "p": 3,
+      "dim": 1
+     },
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 1,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "number",
+      "value": "1",
+      "dim": 1
+     },
+     {
+      "type": "const",
+      "id": 1,
+      "prime": false,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 2,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 0,
+      "dim": 1
+     },
+     {
+      "type": "tmp",
+      "id": 1,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 25,
+     "expId": 1,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 2,
+      "dim": 1
+     },
+     {
+      "type": "number",
+      "value": "0",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 3,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": true,
+      "p": 1,
+      "dim": 1
+     },
+     {
+      "type": "cm",
+      "id": 2,
+      "prime": false,
+      "p": 5,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 4,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "number",
+      "value": "1",
+      "dim": 1
+     },
+     {
+      "type": "const",
+      "id": 1,
+      "prime": false,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 5,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 3,
+      "dim": 1
+     },
+     {
+      "type": "tmp",
+      "id": 4,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 26,
+     "expId": 3,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 5,
+      "dim": 1
+     },
+     {
+      "type": "number",
+      "value": "0",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 6,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 1,
+      "prime": false,
+      "p": 3,
+      "dim": 1
+     },
+     {
+      "type": "public",
+      "id": 0,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 7,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "const",
+      "id": 0,
+      "prime": false,
+      "dim": 1
+     },
+     {
+      "type": "tmp",
+      "id": 6,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 27,
+     "expId": 4,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 7,
+      "dim": 1
+     },
+     {
+      "type": "number",
+      "value": "0",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 8,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "dim": 1
+     },
+     {
+      "type": "public",
+      "id": 1,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 9,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "const",
+      "id": 0,
+      "prime": false,
+      "dim": 1
+     },
+     {
+      "type": "tmp",
+      "id": 8,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 28,
+     "expId": 5,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 9,
+      "dim": 1
+     },
+     {
+      "type": "number",
+      "value": "0",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 10,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "dim": 1
+     },
+     {
+      "type": "public",
+      "id": 2,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 11,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "const",
+      "id": 1,
+      "prime": false,
+      "dim": 1
+     },
+     {
+      "type": "tmp",
+      "id": 10,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 29,
+     "expId": 6,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 11,
+      "dim": 1
+     },
+     {
+      "type": "number",
+      "value": "0",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 12,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 4,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 25,
+      "prime": false,
+      "expId": 1,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 13,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 12,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 26,
+      "prime": false,
+      "expId": 3,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 14,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 4,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 13,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 15,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 14,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 27,
+      "prime": false,
+      "expId": 4,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 16,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 4,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 15,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 17,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 16,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 28,
+      "prime": false,
+      "expId": 5,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 18,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 4,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 17,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 19,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 18,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 29,
+      "prime": false,
+      "expId": 6,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 20,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 4,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 19,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 21,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "dim": 1
+     },
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 22,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 1,
+      "prime": false,
+      "p": 3,
+      "dim": 1
+     },
+     {
+      "type": "cm",
+      "id": 1,
+      "prime": false,
+      "p": 3,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 23,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 21,
+      "dim": 1
+     },
+     {
+      "type": "tmp",
+      "id": 22,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 24,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 23,
+      "dim": 1
+     },
+     {
+      "type": "cm",
+      "id": 2,
+      "prime": false,
+      "p": 5,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 30,
+     "expId": 7,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 20,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 24,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "q",
+     "id": 0,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "prime": false,
+      "id": 30,
+      "expId": 7,
+      "dim": 3
+     },
+     {
+      "type": "Zi",
+      "dim": 1
+     }
+    ]
+   }
+  ],
+  "last": [
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 0,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 1,
+      "prime": true,
+      "p": 3,
+      "dim": 1
+     },
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 1,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "number",
+      "value": "1",
+      "dim": 1
+     },
+     {
+      "type": "const",
+      "id": 1,
+      "prime": false,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 2,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 0,
+      "dim": 1
+     },
+     {
+      "type": "tmp",
+      "id": 1,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 25,
+     "expId": 1,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 2,
+      "dim": 1
+     },
+     {
+      "type": "number",
+      "value": "0",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 3,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": true,
+      "p": 1,
+      "dim": 1
+     },
+     {
+      "type": "cm",
+      "id": 2,
+      "prime": false,
+      "p": 5,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 4,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "number",
+      "value": "1",
+      "dim": 1
+     },
+     {
+      "type": "const",
+      "id": 1,
+      "prime": false,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 5,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 3,
+      "dim": 1
+     },
+     {
+      "type": "tmp",
+      "id": 4,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 26,
+     "expId": 3,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 5,
+      "dim": 1
+     },
+     {
+      "type": "number",
+      "value": "0",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 6,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 1,
+      "prime": false,
+      "p": 3,
+      "dim": 1
+     },
+     {
+      "type": "public",
+      "id": 0,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 7,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "const",
+      "id": 0,
+      "prime": false,
+      "dim": 1
+     },
+     {
+      "type": "tmp",
+      "id": 6,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 27,
+     "expId": 4,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 7,
+      "dim": 1
+     },
+     {
+      "type": "number",
+      "value": "0",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 8,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "dim": 1
+     },
+     {
+      "type": "public",
+      "id": 1,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 9,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "const",
+      "id": 0,
+      "prime": false,
+      "dim": 1
+     },
+     {
+      "type": "tmp",
+      "id": 8,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 28,
+     "expId": 5,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 9,
+      "dim": 1
+     },
+     {
+      "type": "number",
+      "value": "0",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 10,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "dim": 1
+     },
+     {
+      "type": "public",
+      "id": 2,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 11,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "const",
+      "id": 1,
+      "prime": false,
+      "dim": 1
+     },
+     {
+      "type": "tmp",
+      "id": 10,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 29,
+     "expId": 6,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 11,
+      "dim": 1
+     },
+     {
+      "type": "number",
+      "value": "0",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 12,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 4,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 25,
+      "prime": false,
+      "expId": 1,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 13,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 12,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 26,
+      "prime": false,
+      "expId": 3,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 14,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 4,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 13,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 15,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 14,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 27,
+      "prime": false,
+      "expId": 4,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 16,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 4,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 15,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 17,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 16,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 28,
+      "prime": false,
+      "expId": 5,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 18,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 4,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 17,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 19,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 18,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 29,
+      "prime": false,
+      "expId": 6,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 20,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 4,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 19,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 21,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "dim": 1
+     },
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 22,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 1,
+      "prime": false,
+      "p": 3,
+      "dim": 1
+     },
+     {
+      "type": "cm",
+      "id": 1,
+      "prime": false,
+      "p": 3,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 23,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 21,
+      "dim": 1
+     },
+     {
+      "type": "tmp",
+      "id": 22,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 24,
+     "dim": 1
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 23,
+      "dim": 1
+     },
+     {
+      "type": "cm",
+      "id": 2,
+      "prime": false,
+      "p": 5,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 30,
+     "expId": 7,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 20,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 24,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "q",
+     "id": 0,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "prime": false,
+      "id": 30,
+      "expId": 7,
+      "dim": 3
+     },
+     {
+      "type": "Zi",
+      "dim": 1
+     }
+    ]
+   }
+  ],
+  "tmpUsed": 31
+ },
+ "nCm4": 1,
+ "verifierCode": {
+  "first": [
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 0,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 0,
+      "dim": 3
+     },
+     {
+      "type": "eval",
+      "id": 1,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 1,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "number",
+      "value": "1",
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 2,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 2,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 0,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 1,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 19,
+     "expId": 1,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 2,
+      "dim": 3
+     },
+     {
+      "type": "number",
+      "value": "0",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 3,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 3,
+      "dim": 3
+     },
+     {
+      "type": "eval",
+      "id": 4,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 4,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "number",
+      "value": "1",
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 2,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 5,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 3,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 4,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 20,
+     "expId": 3,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "number",
+      "value": "0",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 6,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "public",
+      "id": 0,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 7,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 6,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 21,
+     "expId": 4,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 7,
+      "dim": 3
+     },
+     {
+      "type": "number",
+      "value": "0",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 8,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 1,
+      "dim": 3
+     },
+     {
+      "type": "public",
+      "id": 1,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 9,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 6,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 8,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 22,
+     "expId": 5,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 9,
+      "dim": 3
+     },
+     {
+      "type": "number",
+      "value": "0",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 10,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 1,
+      "dim": 3
+     },
+     {
+      "type": "public",
+      "id": 2,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 11,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 2,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 10,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 23,
+     "expId": 6,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 11,
+      "dim": 3
+     },
+     {
+      "type": "number",
+      "value": "0",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 12,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 4,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 19,
+      "prime": false,
+      "expId": 1,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 20,
+      "prime": false,
+      "expId": 3,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 13,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 4,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 12,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 21,
+      "prime": false,
+      "expId": 4,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 14,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 4,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 13,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 22,
+      "prime": false,
+      "expId": 5,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 15,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 4,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 14,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 23,
+      "prime": false,
+      "expId": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 16,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "eval",
+      "id": 5,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 17,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 1,
+      "dim": 3
+     },
+     {
+      "type": "eval",
+      "id": 1,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 16,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 18,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 17,
+      "dim": 3
+     },
+     {
+      "type": "eval",
+      "id": 4,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 24,
+     "expId": 7,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 4,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 15,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 18,
+      "dim": 3
+     }
+    ]
+   }
+  ],
+  "i": [
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 0,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 0,
+      "dim": 3
+     },
+     {
+      "type": "eval",
+      "id": 1,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 1,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "number",
+      "value": "1",
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 2,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 2,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 0,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 1,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 19,
+     "expId": 1,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 2,
+      "dim": 3
+     },
+     {
+      "type": "number",
+      "value": "0",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 3,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 3,
+      "dim": 3
+     },
+     {
+      "type": "eval",
+      "id": 4,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 4,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "number",
+      "value": "1",
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 2,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 5,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 3,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 4,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 20,
+     "expId": 3,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "number",
+      "value": "0",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 6,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "public",
+      "id": 0,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 7,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 6,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 21,
+     "expId": 4,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 7,
+      "dim": 3
+     },
+     {
+      "type": "number",
+      "value": "0",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 8,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 1,
+      "dim": 3
+     },
+     {
+      "type": "public",
+      "id": 1,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 9,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 6,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 8,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 22,
+     "expId": 5,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 9,
+      "dim": 3
+     },
+     {
+      "type": "number",
+      "value": "0",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 10,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 1,
+      "dim": 3
+     },
+     {
+      "type": "public",
+      "id": 2,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 11,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 2,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 10,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 23,
+     "expId": 6,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 11,
+      "dim": 3
+     },
+     {
+      "type": "number",
+      "value": "0",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 12,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 4,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 19,
+      "prime": false,
+      "expId": 1,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 20,
+      "prime": false,
+      "expId": 3,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 13,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 4,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 12,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 21,
+      "prime": false,
+      "expId": 4,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 14,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 4,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 13,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 22,
+      "prime": false,
+      "expId": 5,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 15,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 4,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 14,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 23,
+      "prime": false,
+      "expId": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 16,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "eval",
+      "id": 5,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 17,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 1,
+      "dim": 3
+     },
+     {
+      "type": "eval",
+      "id": 1,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 16,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 18,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 17,
+      "dim": 3
+     },
+     {
+      "type": "eval",
+      "id": 4,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 24,
+     "expId": 7,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 4,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 15,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 18,
+      "dim": 3
+     }
+    ]
+   }
+  ],
+  "last": [
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 0,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 0,
+      "dim": 3
+     },
+     {
+      "type": "eval",
+      "id": 1,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 1,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "number",
+      "value": "1",
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 2,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 2,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 0,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 1,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 19,
+     "expId": 1,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 2,
+      "dim": 3
+     },
+     {
+      "type": "number",
+      "value": "0",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 3,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 3,
+      "dim": 3
+     },
+     {
+      "type": "eval",
+      "id": 4,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 4,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "number",
+      "value": "1",
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 2,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 5,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 3,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 4,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 20,
+     "expId": 3,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "number",
+      "value": "0",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 6,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "public",
+      "id": 0,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 7,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 6,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 21,
+     "expId": 4,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 7,
+      "dim": 3
+     },
+     {
+      "type": "number",
+      "value": "0",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 8,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 1,
+      "dim": 3
+     },
+     {
+      "type": "public",
+      "id": 1,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 9,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 6,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 8,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 22,
+     "expId": 5,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 9,
+      "dim": 3
+     },
+     {
+      "type": "number",
+      "value": "0",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 10,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 1,
+      "dim": 3
+     },
+     {
+      "type": "public",
+      "id": 2,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 11,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 2,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 10,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 23,
+     "expId": 6,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 11,
+      "dim": 3
+     },
+     {
+      "type": "number",
+      "value": "0",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 12,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 4,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 19,
+      "prime": false,
+      "expId": 1,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 20,
+      "prime": false,
+      "expId": 3,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 13,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 4,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 12,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 21,
+      "prime": false,
+      "expId": 4,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 14,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 4,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 13,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 22,
+      "prime": false,
+      "expId": 5,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 15,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 4,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 14,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 23,
+      "prime": false,
+      "expId": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 16,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "eval",
+      "id": 5,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 17,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "eval",
+      "id": 1,
+      "dim": 3
+     },
+     {
+      "type": "eval",
+      "id": 1,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 16,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 18,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 17,
+      "dim": 3
+     },
+     {
+      "type": "eval",
+      "id": 4,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 24,
+     "expId": 7,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 4,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 15,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 18,
+      "dim": 3
+     }
+    ]
+   }
+  ],
+  "tmpUsed": 25
+ },
+ "evIdx": {
+  "cm": [
+   {
+    "0": 1,
+    "1": 5,
+    "2": 4,
+    "3": 7
+   },
+   {
+    "0": 3,
+    "1": 0
+   }
+  ],
+  "const": [
+   {
+    "0": 6,
+    "1": 2
+   },
+   {}
+  ]
+ },
+ "evMap": [
+  {
+   "type": "cm",
+   "id": 1,
+   "prime": true
+  },
+  {
+   "type": "cm",
+   "id": 0,
+   "prime": false
+  },
+  {
+   "type": "const",
+   "id": 1,
+   "prime": false
+  },
+  {
+   "type": "cm",
+   "id": 0,
+   "prime": true
+  },
+  {
+   "type": "cm",
+   "id": 2,
+   "prime": false
+  },
+  {
+   "type": "cm",
+   "id": 1,
+   "prime": false
+  },
+  {
+   "type": "const",
+   "id": 0,
+   "prime": false
+  },
+  {
+   "type": "cm",
+   "id": 3,
+   "prime": false
+  }
+ ],
+ "friExpId": 8,
+ "step52ns": {
+  "first": [
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 25,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 26,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 25,
+      "dim": 3
+     },
+     {
+      "type": "cm",
+      "id": 1,
+      "prime": false,
+      "p": 3,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 27,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 26,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 28,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 27,
+      "dim": 3
+     },
+     {
+      "type": "cm",
+      "id": 2,
+      "prime": false,
+      "p": 5,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 29,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 28,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 30,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 29,
+      "dim": 3
+     },
+     {
+      "type": "cm",
+      "id": 3,
+      "prime": false,
+      "p": 7,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 31,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 30,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 32,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 1,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 33,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 32,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 34,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "const",
+      "id": 1,
+      "prime": false,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 2,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 35,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 33,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 34,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 36,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 35,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 37,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 2,
+      "prime": false,
+      "p": 5,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 4,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 38,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 36,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 37,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 39,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 38,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 40,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 1,
+      "prime": false,
+      "p": 3,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 5,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 41,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 39,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 40,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 42,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 41,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 43,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "const",
+      "id": 0,
+      "prime": false,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 44,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 42,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 43,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 45,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 44,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 46,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 3,
+      "prime": false,
+      "p": 7,
+      "dim": 3
+     },
+     {
+      "type": "eval",
+      "id": 7,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 47,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 45,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 46,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 48,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 47,
+      "dim": 3
+     },
+     {
+      "type": "xDivXSubXi",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 49,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 31,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 48,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 50,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 49,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 51,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 1,
+      "prime": false,
+      "p": 3,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 0,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 52,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 51,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 53,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 3,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 54,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 52,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 53,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 55,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 54,
+      "dim": 3
+     },
+     {
+      "type": "xDivXSubWXi",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 56,
+     "expId": 8,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 50,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 55,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "copy",
+    "dest": {
+     "type": "f",
+     "id": 0,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "prime": false,
+      "id": 56,
+      "expId": 8,
+      "dim": 3
+     }
+    ]
+   }
+  ],
+  "i": [
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 25,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 26,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 25,
+      "dim": 3
+     },
+     {
+      "type": "cm",
+      "id": 1,
+      "prime": false,
+      "p": 3,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 27,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 26,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 28,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 27,
+      "dim": 3
+     },
+     {
+      "type": "cm",
+      "id": 2,
+      "prime": false,
+      "p": 5,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 29,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 28,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 30,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 29,
+      "dim": 3
+     },
+     {
+      "type": "cm",
+      "id": 3,
+      "prime": false,
+      "p": 7,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 31,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 30,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 32,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 1,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 33,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 32,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 34,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "const",
+      "id": 1,
+      "prime": false,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 2,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 35,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 33,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 34,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 36,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 35,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 37,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 2,
+      "prime": false,
+      "p": 5,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 4,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 38,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 36,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 37,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 39,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 38,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 40,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 1,
+      "prime": false,
+      "p": 3,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 5,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 41,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 39,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 40,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 42,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 41,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 43,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "const",
+      "id": 0,
+      "prime": false,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 44,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 42,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 43,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 45,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 44,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 46,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 3,
+      "prime": false,
+      "p": 7,
+      "dim": 3
+     },
+     {
+      "type": "eval",
+      "id": 7,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 47,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 45,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 46,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 48,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 47,
+      "dim": 3
+     },
+     {
+      "type": "xDivXSubXi",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 49,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 31,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 48,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 50,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 49,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 51,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 1,
+      "prime": false,
+      "p": 3,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 0,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 52,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 51,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 53,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 3,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 54,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 52,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 53,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 55,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 54,
+      "dim": 3
+     },
+     {
+      "type": "xDivXSubWXi",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 56,
+     "expId": 8,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 50,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 55,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "copy",
+    "dest": {
+     "type": "f",
+     "id": 0,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "prime": false,
+      "id": 56,
+      "expId": 8,
+      "dim": 3
+     }
+    ]
+   }
+  ],
+  "last": [
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 25,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 26,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 25,
+      "dim": 3
+     },
+     {
+      "type": "cm",
+      "id": 1,
+      "prime": false,
+      "p": 3,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 27,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 26,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 28,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 27,
+      "dim": 3
+     },
+     {
+      "type": "cm",
+      "id": 2,
+      "prime": false,
+      "p": 5,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 29,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 28,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 30,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 29,
+      "dim": 3
+     },
+     {
+      "type": "cm",
+      "id": 3,
+      "prime": false,
+      "p": 7,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 31,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 30,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 32,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 1,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 33,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 32,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 34,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "const",
+      "id": 1,
+      "prime": false,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 2,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 35,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 33,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 34,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 36,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 35,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 37,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 2,
+      "prime": false,
+      "p": 5,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 4,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 38,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 36,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 37,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 39,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 38,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 40,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 1,
+      "prime": false,
+      "p": 3,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 5,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 41,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 39,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 40,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 42,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 41,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 43,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "const",
+      "id": 0,
+      "prime": false,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 44,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 42,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 43,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 45,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 44,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 46,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 3,
+      "prime": false,
+      "p": 7,
+      "dim": 3
+     },
+     {
+      "type": "eval",
+      "id": 7,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 47,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 45,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 46,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 48,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 47,
+      "dim": 3
+     },
+     {
+      "type": "xDivXSubXi",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 49,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 31,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 48,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 50,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 49,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 51,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 1,
+      "prime": false,
+      "p": 3,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 0,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 52,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 51,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 53,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "cm",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 3,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "id": 54,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 52,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 53,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 55,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 54,
+      "dim": 3
+     },
+     {
+      "type": "xDivXSubWXi",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "add",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 56,
+     "expId": 8,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 50,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 55,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "copy",
+    "dest": {
+     "type": "f",
+     "id": 0,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "prime": false,
+      "id": 56,
+      "expId": 8,
+      "dim": 3
+     }
+    ]
+   }
+  ],
+  "tmpUsed": 57
+ },
+ "verifierQueryCode": {
+  "first": [
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 0,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "tree1",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "treePos": 0,
+      "dim": 1
+     },
+     {
+      "type": "tree1",
+      "id": 1,
+      "prime": false,
+      "p": 3,
+      "treePos": 1,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 1,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 0,
+      "dim": 3
+     },
+     {
+      "type": "tree3",
+      "id": 2,
+      "prime": false,
+      "p": 5,
+      "treePos": 0,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 2,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 1,
+      "dim": 3
+     },
+     {
+      "type": "tree4",
+      "id": 3,
+      "prime": false,
+      "p": 7,
+      "treePos": 0,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 3,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tree1",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "treePos": 0,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 1,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 4,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "const",
+      "id": 1,
+      "prime": false,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 2,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 5,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 3,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 4,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 6,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tree3",
+      "id": 2,
+      "prime": false,
+      "p": 5,
+      "treePos": 0,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 4,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 7,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 8,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tree1",
+      "id": 1,
+      "prime": false,
+      "p": 3,
+      "treePos": 1,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 5,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 9,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 7,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 8,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 10,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "const",
+      "id": 0,
+      "prime": false,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 11,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 9,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 10,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 12,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tree4",
+      "id": 3,
+      "prime": false,
+      "p": 7,
+      "treePos": 0,
+      "dim": 3
+     },
+     {
+      "type": "eval",
+      "id": 7,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 13,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 11,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 12,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 14,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 13,
+      "dim": 3
+     },
+     {
+      "type": "xDivXSubXi",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 15,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 2,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 14,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 16,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tree1",
+      "id": 1,
+      "prime": false,
+      "p": 3,
+      "treePos": 1,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 0,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 17,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tree1",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "treePos": 0,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 3,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 18,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 16,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 17,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 19,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 18,
+      "dim": 3
+     },
+     {
+      "type": "xDivXSubWXi",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 20,
+     "expId": 8,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 15,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 19,
+      "dim": 3
+     }
+    ]
+   }
+  ],
+  "i": [
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 0,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "tree1",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "treePos": 0,
+      "dim": 1
+     },
+     {
+      "type": "tree1",
+      "id": 1,
+      "prime": false,
+      "p": 3,
+      "treePos": 1,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 1,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 0,
+      "dim": 3
+     },
+     {
+      "type": "tree3",
+      "id": 2,
+      "prime": false,
+      "p": 5,
+      "treePos": 0,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 2,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 1,
+      "dim": 3
+     },
+     {
+      "type": "tree4",
+      "id": 3,
+      "prime": false,
+      "p": 7,
+      "treePos": 0,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 3,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tree1",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "treePos": 0,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 1,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 4,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "const",
+      "id": 1,
+      "prime": false,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 2,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 5,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 3,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 4,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 6,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tree3",
+      "id": 2,
+      "prime": false,
+      "p": 5,
+      "treePos": 0,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 4,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 7,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 8,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tree1",
+      "id": 1,
+      "prime": false,
+      "p": 3,
+      "treePos": 1,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 5,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 9,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 7,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 8,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 10,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "const",
+      "id": 0,
+      "prime": false,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 11,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 9,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 10,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 12,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tree4",
+      "id": 3,
+      "prime": false,
+      "p": 7,
+      "treePos": 0,
+      "dim": 3
+     },
+     {
+      "type": "eval",
+      "id": 7,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 13,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 11,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 12,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 14,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 13,
+      "dim": 3
+     },
+     {
+      "type": "xDivXSubXi",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 15,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 2,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 14,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 16,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tree1",
+      "id": 1,
+      "prime": false,
+      "p": 3,
+      "treePos": 1,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 0,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 17,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tree1",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "treePos": 0,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 3,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 18,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 16,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 17,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 19,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 18,
+      "dim": 3
+     },
+     {
+      "type": "xDivXSubWXi",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 20,
+     "expId": 8,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 15,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 19,
+      "dim": 3
+     }
+    ]
+   }
+  ],
+  "last": [
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 0,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "tree1",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "treePos": 0,
+      "dim": 1
+     },
+     {
+      "type": "tree1",
+      "id": 1,
+      "prime": false,
+      "p": 3,
+      "treePos": 1,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 1,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 0,
+      "dim": 3
+     },
+     {
+      "type": "tree3",
+      "id": 2,
+      "prime": false,
+      "p": 5,
+      "treePos": 0,
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 2,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 1,
+      "dim": 3
+     },
+     {
+      "type": "tree4",
+      "id": 3,
+      "prime": false,
+      "p": 7,
+      "treePos": 0,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 3,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tree1",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "treePos": 0,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 1,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 4,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "const",
+      "id": 1,
+      "prime": false,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 2,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 5,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 3,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 4,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 6,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tree3",
+      "id": 2,
+      "prime": false,
+      "p": 5,
+      "treePos": 0,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 4,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 7,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 8,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tree1",
+      "id": 1,
+      "prime": false,
+      "p": 3,
+      "treePos": 1,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 5,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 9,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 7,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 8,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 10,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "const",
+      "id": 0,
+      "prime": false,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 6,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 11,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 9,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 10,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 12,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tree4",
+      "id": 3,
+      "prime": false,
+      "p": 7,
+      "treePos": 0,
+      "dim": 3
+     },
+     {
+      "type": "eval",
+      "id": 7,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 13,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 11,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 12,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 14,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 13,
+      "dim": 3
+     },
+     {
+      "type": "xDivXSubXi",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 15,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 2,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 14,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 16,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tree1",
+      "id": 1,
+      "prime": false,
+      "p": 3,
+      "treePos": 1,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 0,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "sub",
+    "dest": {
+     "type": "tmp",
+     "id": 17,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tree1",
+      "id": 0,
+      "prime": false,
+      "p": 1,
+      "treePos": 0,
+      "dim": 1
+     },
+     {
+      "type": "eval",
+      "id": 3,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "id": 18,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 16,
+      "dim": 3
+     },
+     {
+      "type": "challenge",
+      "id": 6,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 17,
+      "dim": 3
+     }
+    ]
+   },
+   {
+    "op": "mul",
+    "dest": {
+     "type": "tmp",
+     "id": 19,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "tmp",
+      "id": 18,
+      "dim": 3
+     },
+     {
+      "type": "xDivXSubWXi",
+      "dim": 1
+     }
+    ]
+   },
+   {
+    "op": "muladd",
+    "dest": {
+     "type": "tmp",
+     "prime": false,
+     "id": 20,
+     "expId": 8,
+     "dim": 3
+    },
+    "src": [
+     {
+      "type": "challenge",
+      "id": 5,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 15,
+      "dim": 3
+     },
+     {
+      "type": "tmp",
+      "id": 19,
+      "dim": 3
+     }
+    ]
+   }
+  ],
+  "tmpUsed": 21
+ },
+ "nExps": 9,
+ "cm_n": [
+  0,
+  2,
+  4,
+  6
+ ],
+ "cm_2ns": [
+  1,
+  3,
+  5,
+  7
+ ],
+ "tmpExp_n": [],
+ "q_2ns": [
+  8
+ ],
+ "f_2ns": [
+  9
+ ],
+ "mapSections": {
+  "cm1_n": [
+   0,
+   2
+  ],
+  "cm1_2ns": [
+   1,
+   3
+  ],
+  "cm2_n": [],
+  "cm2_2ns": [],
+  "cm3_n": [
+   4
+  ],
+  "cm3_2ns": [
+   5
+  ],
+  "cm4_n": [
+   6
+  ],
+  "cm4_2ns": [
+   7
+  ],
+  "tmpExp_n": [],
+  "q_2ns": [],
+  "f_2ns": []
+ },
+ "mapSectionsN1": {
+  "cm1_n": 2,
+  "cm1_2ns": 2,
+  "cm2_n": 0,
+  "cm2_2ns": 0,
+  "cm3_n": 1,
+  "cm3_2ns": 1,
+  "cm4_n": 0,
+  "cm4_2ns": 0,
+  "tmpExp_n": 0,
+  "q_2ns": 0,
+  "f_2ns": 0
+ },
+ "mapSectionsN3": {
+  "cm1_n": 0,
+  "cm1_2ns": 0,
+  "cm2_n": 0,
+  "cm2_2ns": 0,
+  "cm3_n": 0,
+  "cm3_2ns": 0,
+  "cm4_n": 1,
+  "cm4_2ns": 1,
+  "tmpExp_n": 0,
+  "q_2ns": 1,
+  "f_2ns": 1
+ },
+ "mapSectionsN": {
+  "cm1_n": 2,
+  "cm1_2ns": 2,
+  "cm2_n": 0,
+  "cm2_2ns": 0,
+  "cm3_n": 1,
+  "cm3_2ns": 1,
+  "cm4_n": 3,
+  "cm4_2ns": 3,
+  "tmpExp_n": 0,
+  "q_2ns": 3,
+  "f_2ns": 3
+ },
+ "exp2pol": {
+  "2": 4
+ },
+ "qDim": 3,
+ "mapOffsets": {
+  "cm1_n": 0,
+  "cm2_n": 2048,
+  "cm3_n": 2048,
+  "cm4_n": 3072,
+  "tmpExp_n": 6144,
+  "cm1_2ns": 6144,
+  "cm2_2ns": 10240,
+  "cm3_2ns": 10240,
+  "cm4_2ns": 12288,
+  "q_2ns": 18432,
+  "f_2ns": 24576
+ },
+ "mapTotalN": 30720,
+ "mapDeg": {
+  "cm1_n": 1024,
+  "cm2_n": 1024,
+  "cm3_n": 1024,
+  "cm4_n": 1024,
+  "tmpExp_n": 1024,
+  "cm1_2ns": 2048,
+  "cm2_2ns": 2048,
+  "cm3_2ns": 2048,
+  "cm4_2ns": 2048,
+  "q_2ns": 2048,
+  "f_2ns": 2048
+ },
+ "publics": [
+  {
+   "polType": "imP",
+   "polId": 0,
+   "idx": 0,
+   "id": 0,
+   "name": "in1"
+  },
+  {
+   "polType": "cmP",
+   "polId": 0,
+   "idx": 0,
+   "id": 1,
+   "name": "in2"
+  },
+  {
+   "polType": "cmP",
+   "polId": 0,
+   "idx": 1023,
+   "id": 2,
+   "name": "out"
+  }
+ ]
+}

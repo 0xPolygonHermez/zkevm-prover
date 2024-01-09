@@ -1,5 +1,5 @@
-#ifndef STARKS_ALL_STEPS_HPP
-#define STARKS_ALL_STEPS_HPP
+#ifndef STARKS_FIBONACCI_STEPS_HPP
+#define STARKS_FIBONACCI_STEPS_HPP
 
 #include "goldilocks_cubic_extension.hpp"
 #include "zhInv.hpp"
@@ -7,7 +7,7 @@
 #include "starks.hpp"
 #include "constant_pols_starks.hpp"
 
-class AllSteps : public Steps
+class FibonacciSteps : public Steps
 {
 public:
     void step2prev_first(StepsParams &params, uint64_t i);

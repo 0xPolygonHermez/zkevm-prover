@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include "starks.hpp"
 #include "proof2zkinStark.hpp"
-#include "allSteps.hpp"
+// #include "allSteps.hpp"
+#include "fibonacciSteps.hpp"
 
 int main()
 {
@@ -11,11 +12,18 @@ int main()
     config.mapConstPolsFile = false;
     config.mapConstantsTreeFile = false;
     
-    string constPols = "test/examples/all/all.const";
-    string constTree = "test/examples/all/all.consttree";
-    string starkInfoFile = "test/examples/all/all.starkinfo.json";
-    string commitPols = "test/examples/all/all.commit";
-    string verkey = "test/examples/all/all.verkey.json";
+    // string constPols = "test/examples/all/all.const";
+    // string constTree = "test/examples/all/all.consttree";
+    // string starkInfoFile = "test/examples/all/all.starkinfo.json";
+    // string commitPols = "test/examples/all/all.commit";
+    // string verkey = "test/examples/all/all.verkey.json";
+
+    string constPols = "test/examples/fibonacci/fibonacci.const";
+    string constTree = "test/examples/fibonacci/fibonacci.consttree";
+    string starkInfoFile = "test/examples/fibonacci/fibonacci.starkinfo.json";
+    string commitPols = "test/examples/fibonacci/fibonacci.commit";
+    string verkey = "test/examples/fibonacci/fibonacci.verkey.json";
+
 
     StarkInfo starkInfo(config, starkInfoFile);
 
@@ -47,17 +55,18 @@ int main()
     {
         publicStarkJson[i] = Goldilocks::toString(publicInputs[i]);
     }
-    AllSteps allSteps;
+    // AllSteps steps;
+    FibonacciSteps steps;
 
-    json allVerkeyJson;
-    file2json(verkey, allVerkeyJson);
-    Goldilocks::Element allVerkey[4];
-    allVerkey[0] = Goldilocks::fromU64(allVerkeyJson["constRoot"][0]);
-    allVerkey[1] = Goldilocks::fromU64(allVerkeyJson["constRoot"][1]);
-    allVerkey[2] = Goldilocks::fromU64(allVerkeyJson["constRoot"][2]);
-    allVerkey[3] = Goldilocks::fromU64(allVerkeyJson["constRoot"][3]);
+    json verkeyJson;
+    file2json(verkey, verkeyJson);
+    Goldilocks::Element Verkey[4];
+    Verkey[0] = Goldilocks::fromU64(verkeyJson["constRoot"][0]);
+    Verkey[1] = Goldilocks::fromU64(verkeyJson["constRoot"][1]);
+    Verkey[2] = Goldilocks::fromU64(verkeyJson["constRoot"][2]);
+    Verkey[3] = Goldilocks::fromU64(verkeyJson["constRoot"][3]);
 
-    starks.genProof(fproof, &publicInputs[0], allVerkey, &allSteps);
+    starks.genProof(fproof, &publicInputs[0], Verkey, &steps);
 
     nlohmann::ordered_json jProof = fproof.proofs.proof2json();
     nlohmann::json zkin = proof2zkinStark(jProof);
