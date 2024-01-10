@@ -435,7 +435,18 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
     executor.execute(*pProverRequest, cmPols);
     TimerStopAndLog(EXECUTOR_EXECUTE_BATCH_PROOF);
 
-    zklog.info("Prover::genBatchProof() called executor.execute() oldStateRoot=" + pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) + " newStateRoot=" + pProverRequest->pFullTracer->get_new_state_root());
+    uint64_t lastN = cmPols.pilDegree() - 1;
+
+    zklog.info("Prover::genBatchProof() called executor.execute() oldStateRoot=" + pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) +
+        " newStateRoot=" + pProverRequest->pFullTracer->get_new_state_root() +
+        " pols.B[0]=" + fea2string(fr, cmPols.Main.B0[0], cmPols.Main.B1[0], cmPols.Main.B2[0], cmPols.Main.B3[0], cmPols.Main.B4[0], cmPols.Main.B5[0], cmPols.Main.B6[0], cmPols.Main.B7[0]) +
+        " pols.SR[lastN]=" + fea2string(fr, cmPols.Main.SR0[lastN], cmPols.Main.SR1[lastN], cmPols.Main.SR2[lastN], cmPols.Main.SR3[lastN], cmPols.Main.SR4[lastN], cmPols.Main.SR5[lastN], cmPols.Main.SR6[lastN], cmPols.Main.SR7[lastN]) +
+        " lastN=" + to_string(lastN));
+    zklog.info("Prover::genBatchProof() called executor.execute() oldAccInputHash=" + pProverRequest->input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16) +
+        " newAccInputHash=" + pProverRequest->pFullTracer->get_new_acc_input_hash() +
+        " pols.C[0]=" + fea2string(fr, cmPols.Main.C0[0], cmPols.Main.C1[0], cmPols.Main.C2[0], cmPols.Main.C3[0], cmPols.Main.C4[0], cmPols.Main.C5[0], cmPols.Main.C6[0], cmPols.Main.C7[0]) +
+        " pols.D[lastN]=" + fea2string(fr, cmPols.Main.D0[lastN], cmPols.Main.D1[lastN], cmPols.Main.D2[lastN], cmPols.Main.D3[lastN], cmPols.Main.D4[lastN], cmPols.Main.D5[lastN], cmPols.Main.D6[lastN], cmPols.Main.D7[lastN]) +
+        " lastN=" + to_string(lastN));
 
     // Save commit pols to file zkevm.commit
     if (config.zkevmCmPolsAfterExecutor != "")
@@ -452,8 +463,6 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         /*************************************/
         TimerStart(SAVE_PUBLICS_JSON_BATCH_PROOF);
         json publicStarkJson;
-
-        uint64_t lastN = cmPols.pilDegree() - 1;
 
         json zkevmVerkeyJson;
         file2json(config.zkevmVerkey, zkevmVerkeyJson);
@@ -1047,7 +1056,17 @@ void Prover::execute(ProverRequest *pProverRequest)
     executor.execute(*pProverRequest, cmPols);
     TimerStopAndLog(EXECUTOR_EXECUTE_EXECUTE);
 
-    zklog.info("Prover::execute() called executor.execute() oldStateRoot=" + pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) + " newStateRoot=" + pProverRequest->pFullTracer->get_new_state_root());
+    uint64_t lastN = cmPols.pilDegree() - 1;
+    zklog.info("Prover::execute() called executor.execute() oldStateRoot=" + pProverRequest->input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16) +
+        " newStateRoot=" + pProverRequest->pFullTracer->get_new_state_root() +
+        " pols.B[0]=" + fea2string(fr, cmPols.Main.B0[0], cmPols.Main.B1[0], cmPols.Main.B2[0], cmPols.Main.B3[0], cmPols.Main.B4[0], cmPols.Main.B5[0], cmPols.Main.B6[0], cmPols.Main.B7[0]) +
+        " pols.SR[lastN]=" + fea2string(fr, cmPols.Main.SR0[lastN], cmPols.Main.SR1[lastN], cmPols.Main.SR2[lastN], cmPols.Main.SR3[lastN], cmPols.Main.SR4[lastN], cmPols.Main.SR5[lastN], cmPols.Main.SR6[lastN], cmPols.Main.SR7[lastN]) +
+        " lastN=" + to_string(lastN));
+    zklog.info("Prover::execute() called executor.execute() oldAccInputHash=" + pProverRequest->input.publicInputsExtended.publicInputs.oldAccInputHash.get_str(16) +
+        " newAccInputHash=" + pProverRequest->pFullTracer->get_new_acc_input_hash() +
+        " pols.C[0]=" + fea2string(fr, cmPols.Main.C0[0], cmPols.Main.C1[0], cmPols.Main.C2[0], cmPols.Main.C3[0], cmPols.Main.C4[0], cmPols.Main.C5[0], cmPols.Main.C6[0], cmPols.Main.C7[0]) +
+        " pols.D[lastN]=" + fea2string(fr, cmPols.Main.D0[lastN], cmPols.Main.D1[lastN], cmPols.Main.D2[lastN], cmPols.Main.D3[lastN], cmPols.Main.D4[lastN], cmPols.Main.D5[lastN], cmPols.Main.D6[lastN], cmPols.Main.D7[lastN]) +
+        " lastN=" + to_string(lastN));
 
     // Save input to <timestamp>.input.json after execution including dbReadLog
     if (config.saveDbReadsToFile)
