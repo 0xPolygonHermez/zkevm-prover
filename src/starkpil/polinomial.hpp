@@ -641,7 +641,7 @@ public:
         uint64_t nThreads = (1 << (int)pow2thread) / 4;
         uint64_t partitionSize = size / nThreads;
 
-        // initalize tmp with src
+        // initialize tmp with src
         // | s_0 0 0 .. 0 | s_partitionSize 0 0 .. 0 | s_partitionSize+1 0 0 .. 0 | s_partitionSize*(nThreads-1) ... 0 |
 
 #pragma omp parallel for num_threads(nThreads)
