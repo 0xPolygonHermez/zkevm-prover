@@ -39,6 +39,13 @@ endif
 INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
+# Enable link with zkevm_sm rust library
+ifeq ($(zkevm_sm),1)
+	  LDFLAGS += -L../zkevm_sm/target/release -lzkevm_sm
+	  INC_FLAGS += -I../zkevm_sm/include
+	  CXXFLAGS += -D__ZKEVM_SM__
+endif
+
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 
 GRPC_CPP_PLUGIN = grpc_cpp_plugin
