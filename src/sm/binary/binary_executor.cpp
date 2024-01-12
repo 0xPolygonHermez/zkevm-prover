@@ -6,6 +6,9 @@
 #include "scalar.hpp"
 #include "timer.hpp"
 #include "zklog.hpp"
+#ifdef __ZKEVM_SM__
+#include "zkevm_sm.h"
+#endif
 
 using json = nlohmann::json;
 
@@ -100,7 +103,10 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
         actionBytes.type = action[i].type;
         input.push_back(actionBytes);
     }
-
+#ifdef __ZKEVM_SM__
+    BinaryExecutor *params = (BinaryExecutor *)malloc(100);
+    binary_sm_execute(params, input.data(), input.size());
+#else
     // Local array of N uint32 
     uint32_t * c0Temp = (uint32_t *)calloc(N*sizeof(uint32_t),1);
     if (c0Temp == NULL)
@@ -403,7 +409,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
     }
 
     free(c0Temp);
-
+#endif
     zklog.info("BinaryExecutor successfully processed " + to_string(action.size()) + " binary actions (" + to_string((double(action.size())*LATCH_SIZE*100)/N) + "%)");
 }
 
