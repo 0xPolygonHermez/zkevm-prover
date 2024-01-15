@@ -52,7 +52,7 @@ SRCS_ZKP := $(shell find $(SRC_DIRS) ! -path "./src/aggregation/*" ! -path "./to
 OBJS_ZKP := $(SRCS_ZKP:%=$(BUILD_DIR)/%.o)
 DEPS_ZKP := $(OBJS_ZKP:.o=.d)
 
-SRCS_AGG := $(shell find ./src/aggregation ./src/goldilocks/src ./src/starkpil ./src/ffiasm ./src/grpc/gen/multichain.* ./src/rapidsnark ./src/utils ./src/config ./src/poseidon_opt ./src/XKCP ./tools/sm/sha256 ./src/sm/gate -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
+SRCS_AGG := $(shell find ./src/aggregation ./src/goldilocks/src ./src/starkpil ./src/ffiasm ./src/grpc/gen/multichain.* ./src/rapidsnark ./src/utils ./src/config ./src/poseidon_opt ./src/XKCP ./tools/sm/sha256 ./src/sm/gate  ! -path "./src/starkpil/recursivefinal/*" ! -path "./src/starkpil/starkC12a/*" ! -path "./src/starkpil/starkRecursive1/*" ! -path "./src/starkpil/starkRecursive2/*" ! -path "./src/starkpil/starkRecursiveF/*" ! -path "./src/starkpil/zkevm/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
 OBJS_AGG := $(SRCS_AGG:%=$(BUILD_DIR)/%.o)
 DEPS_AGG := $(OBJS_AGG:.o=.d)
 

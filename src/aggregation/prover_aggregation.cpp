@@ -47,14 +47,14 @@ ProverAggregation::ProverAggregation(Goldilocks &fr,
             mpz_set_str(altBbn128r, "21888242871839275222246405745257275088548364400416034343698204186575808495617", 10);
 
             StarkInfo _starkInfo(config, config.multichainPrepStarkInfo);
-            uint64_t polsSize = _starkInfo.mapTotalN * sizeof(Goldilocks::Element) + _starkInfo.mapSectionsN.section[eSection::cm3_2ns] * (1 << _starkInfo.starkStruct.nBitsExt) * sizeof(Goldilocks::Element);
+            polsSize = _starkInfo.mapTotalN * sizeof(Goldilocks::Element) + _starkInfo.mapSectionsN.section[eSection::cm3_2ns] * (1 << _starkInfo.starkStruct.nBitsExt) * sizeof(Goldilocks::Element);
             
             if(config.generateFinalMultichainProof()) {
                 uint64_t polsFflonkSize = 63350767616;
                 polsSize = std::max(polsSize, polsFflonkSize);
                 StarkInfo _starksMultichainAggF(config, config.multichainAggFStarkInfo);
 
-                uint64_t polsSizeMultichainAggF = _starksMultichainAggF.mapTotalN * sizeof(Goldilocks::Element);
+                polsSizeMultichainAggF = _starksMultichainAggF.mapTotalN * sizeof(Goldilocks::Element);
 
                 pAddressStarksMultichainAggF = (void *)malloc(polsSizeMultichainAggF);
                 if (pAddressStarksMultichainAggF == NULL)

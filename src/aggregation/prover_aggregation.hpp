@@ -57,6 +57,9 @@ public:
     string lastComputedRequestId;
     uint64_t lastComputedRequestEndTime;
 
+    uint64_t polsSize;
+    uint64_t polsSizeMultichainAggF;
+
     ProverAggregation(Goldilocks &fr,
            PoseidonGoldilocks &poseidon,
            const Config &config);
