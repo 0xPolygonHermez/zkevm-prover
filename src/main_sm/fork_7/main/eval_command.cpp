@@ -2564,7 +2564,8 @@ void eval_getL1InfoGER (Context &ctx, const RomCommand &cmd, CommandResult &cr)
     if (ctx.proverRequest.input.l1InfoTreeData.find(indexL1InfoTree) == ctx.proverRequest.input.l1InfoTreeData.end())
     {
         zklog.error("eval_getL1InfoGER() could not find index=" + to_string(indexL1InfoTree) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
-        exitProcess();
+        cr.zkResult = ZKR_SM_MAIN_INVALID_L1_INFO_TREE_INDEX;
+        return;
     }
 
     cr.type = crt_fea;
@@ -2602,7 +2603,8 @@ void eval_getL1InfoBlockHash (Context &ctx, const RomCommand &cmd, CommandResult
     if (ctx.proverRequest.input.l1InfoTreeData.find(indexL1InfoTree) == ctx.proverRequest.input.l1InfoTreeData.end())
     {
         zklog.error("eval_getL1InfoBlockHash() could not find index=" + to_string(indexL1InfoTree) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
-        exitProcess();
+        cr.zkResult = ZKR_SM_MAIN_INVALID_L1_INFO_TREE_INDEX;
+        return;
     }
 
     cr.type = crt_fea;
@@ -2640,16 +2642,12 @@ void eval_getL1InfoTimestamp (Context &ctx, const RomCommand &cmd, CommandResult
     if (ctx.proverRequest.input.l1InfoTreeData.find(indexL1InfoTree) == ctx.proverRequest.input.l1InfoTreeData.end())
     {
         zklog.error("eval_getL1InfoTimestamp() could not find index=" + to_string(indexL1InfoTree) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
-        exitProcess();
+        cr.zkResult = ZKR_SM_MAIN_INVALID_L1_INFO_TREE_INDEX;
+        return;
     }
 
     cr.type = crt_fea;
     scalar2fea(fr, it->second.minTimestamp, cr.fea0, cr.fea1, cr.fea2, cr.fea3, cr.fea4, cr.fea5, cr.fea6, cr.fea7);
-
-    /*const indexL1InfoTree = evalCommand(ctx, tag.params[0]);
-    const timestampL1InfoTree = ctx.input.l1InfoTree[indexL1InfoTree].timestamp;
-
-    return scalar2fea(ctx.Fr, Scalar.e(timestampL1InfoTree));*/
 }
 
 void eval_getTimestampLimit (Context &ctx, const RomCommand &cmd, CommandResult &cr)
@@ -2738,12 +2736,14 @@ void eval_getSmtProof (Context &ctx, const RomCommand &cmd, CommandResult &cr)
         if (ctx.proverRequest.input.l1InfoTreeData.find(index) == ctx.proverRequest.input.l1InfoTreeData.end())
         {
             zklog.error("eval_getSmtProof() could not find index=" + to_string(index) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
-            exitProcess();
+            cr.zkResult = ZKR_SM_MAIN_INVALID_L1_INFO_TREE_INDEX;
+            return;
         }
         if (level >= it->second.smtProof.size())
         {
             zklog.error("eval_getSmtProof() invalid level=" + to_string(level) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
-            exitProcess();
+            cr.zkResult = ZKR_SM_MAIN_INVALID_L1_INFO_TREE_SMT_PROOF_VALUE;
+            return;
         }
         leafValue = it->second.smtProof[level];
     }

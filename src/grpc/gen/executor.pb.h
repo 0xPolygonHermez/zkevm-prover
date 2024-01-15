@@ -402,12 +402,14 @@ enum ExecutorError : int {
   EXECUTOR_ERROR_SMT_INVALID_DATA_SIZE = 108,
   EXECUTOR_ERROR_HASHDB_GRPC_ERROR = 109,
   EXECUTOR_ERROR_STATE_MANAGER = 110,
+  EXECUTOR_ERROR_INVALID_L1_INFO_TREE_INDEX = 111,
+  EXECUTOR_ERROR_INVALID_L1_INFO_TREE_SMT_PROOF_VALUE = 112,
   ExecutorError_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   ExecutorError_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool ExecutorError_IsValid(int value);
 constexpr ExecutorError ExecutorError_MIN = EXECUTOR_ERROR_UNSPECIFIED;
-constexpr ExecutorError ExecutorError_MAX = EXECUTOR_ERROR_STATE_MANAGER;
+constexpr ExecutorError ExecutorError_MAX = EXECUTOR_ERROR_INVALID_L1_INFO_TREE_SMT_PROOF_VALUE;
 constexpr int ExecutorError_ARRAYSIZE = ExecutorError_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ExecutorError_descriptor();
