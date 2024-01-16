@@ -1596,15 +1596,6 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
     // Set gas left
     response.gas_left -= response.gas_used;
 
-    // Set gas refunded
-    zkr = getVarFromCtx(ctx, false, ctx.rom.cumulativeGasUsedOffset, auxScalar);
-    if (zkr != ZKR_SUCCESS)
-    {
-        zklog.error("FullTracer::onFinishTx() failed calling getVarFromCtx(ctx.rom.cumulativeGasUsedOffset)");
-        return zkr;
-    }
-    response.cumulative_gas_used = auxScalar.get_ui();
-
     // Set new State Root
     if (!fea2scalar(ctx.fr, auxScalar, ctx.pols.SR0[*ctx.pStep], ctx.pols.SR1[*ctx.pStep], ctx.pols.SR2[*ctx.pStep], ctx.pols.SR3[*ctx.pStep], ctx.pols.SR4[*ctx.pStep], ctx.pols.SR5[*ctx.pStep], ctx.pols.SR6[*ctx.pStep], ctx.pols.SR7[*ctx.pStep]))
     {

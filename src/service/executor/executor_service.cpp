@@ -1410,6 +1410,8 @@ using grpc::Status;
             pProcessTransactionResponse->set_effective_gas_price(responses[tx].effective_gas_price);
             pProcessTransactionResponse->set_has_balance_opcode(responses[tx].has_balance_opcode);
             pProcessTransactionResponse->set_has_gasprice_opcode(responses[tx].has_gasprice_opcode);
+            pProcessTransactionResponse->set_cumulative_gas_used(responses[tx].cumulative_gas_used);
+            
             for (uint64_t log=0; log<responses[tx].logs.size(); log++)
             {
                 executor::v1::LogV2 * pLog = pProcessTransactionResponse->add_logs();
