@@ -1378,6 +1378,7 @@ using grpc::Status;
             pLog->set_data(string2ba(dataConcatenated)); // Supplied by the contract, usually ABI-encoded
             //pLog->set_batch_number(block_responses[tblockx].logs[log].batch_number); // Batch in which the transaction was included
             pLog->set_tx_hash(string2ba(block_responses[block].logs[log].tx_hash)); // Hash of the transaction
+            pLog->set_tx_hash_l2(string2ba(block_responses[block].logs[log].tx_hash_l2)); // Hash of the transaction in layer 2
             pLog->set_tx_index(block_responses[block].logs[log].tx_index); // Index of the transaction in the block
             //pLog->set_batch_hash(string2ba(block_responses[block].logs[log].batch_hash)); // Hash of the batch in which the transaction was included
             pLog->set_index(block_responses[block].logs[log].index); // Index of the log in the block
@@ -1395,6 +1396,7 @@ using grpc::Status;
 
             //executor::v1::ProcessTransactionResponse * pProcessTransactionResponse = response->add_responses();
             pProcessTransactionResponse->set_tx_hash(string2ba(responses[tx].tx_hash));
+            pProcessTransactionResponse->set_tx_hash_l2(string2ba(responses[tx].tx_hash_l2));
             pProcessTransactionResponse->set_rlp_tx(responses[tx].rlp_tx);
             pProcessTransactionResponse->set_type(responses[tx].type); // Type indicates legacy transaction; it will be always 0 (legacy) in the executor
             pProcessTransactionResponse->set_return_value(string2ba(responses[tx].return_value)); // Returned data from the runtime (function result or data supplied with revert opcode)
