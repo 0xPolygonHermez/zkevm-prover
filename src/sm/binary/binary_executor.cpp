@@ -18,10 +18,12 @@ BinaryExecutor::BinaryExecutor (Goldilocks &fr, const Config &config) :
     N(BinaryCommitPols::pilDegree())
 {
     TimerStart(BINARY_EXECUTOR);
-
+#ifdef __ZKEVM_SM__
+    ZkevmSM_BinaryExecutorPtr = binary_sm_new(N);
+#else
     buildFactors();
     buildReset();
-
+#endif
     TimerStopAndLog(BINARY_EXECUTOR);
 }
 
@@ -104,8 +106,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
         input.push_back(actionBytes);
     }
 #ifdef __ZKEVM_SM__
-    BinaryExecutor *params = (BinaryExecutor *)malloc(100);
-    binary_sm_execute(params, input.data(), input.size());
+    binary_sm_execute(ZkevmSM_BinaryExecutorPtr, input.data(), input.size(), (void*)pols.address(), 1880, 751*8, N);
 #else
     // Local array of N uint32 
     uint32_t * c0Temp = (uint32_t *)calloc(N*sizeof(uint32_t),1);
