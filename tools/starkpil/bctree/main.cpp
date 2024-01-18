@@ -1,10 +1,16 @@
+#include <sys/stat.h>
 #include "build_const_tree.hpp"
-#include "utils.hpp"
-#include "timer.hpp"
 
 #define BCTREE_VERSION "0.1.0.0"
 
 using namespace std;
+
+bool fileExists (const string &fileName)
+{
+    struct stat fileStat;
+    int iResult = stat( fileName.c_str(), &fileStat);
+    return (iResult == 0);
+}
 
 class ArgumentParser {
 private:
