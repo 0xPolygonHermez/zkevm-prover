@@ -40,8 +40,8 @@ endif
 
 # Enable link with zkevm_sm rust library
 ifeq ($(zkevm_sm),1)
-	  LDFLAGS_EXT += -L../zkevm-sm/target/debug -lzkevm_sm
-	  INCFLAGS_EXT += -I./../zkevm-sm/include
+	  LDFLAGS_EXT += -L../zkevm-prover-rust/target/release -lzkevm_sm
+	  INCFLAGS_EXT += -I./../zkevm-prover-rust/include
 	  CXXFLAGS += -D__ZKEVM_SM__
 endif
 
