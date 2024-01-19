@@ -5,6 +5,10 @@
 #include "config.hpp"
 #include "goldilocks_base_field.hpp"
 #include "sm/pols_generated/commit_pols.hpp"
+#include <fstream>
+#ifdef __ZKEVM_SM__
+#include "zkevm_sm.h"
+#endif
 
 USING_PROVER_FORK_NAMESPACE;
 
@@ -29,11 +33,19 @@ class MemoryExecutor
     Goldilocks &fr;
     const Config &config;
     const uint64_t N;
+
+#ifdef __ZKEVM_SM__
+    void *ZkevmSMMemoryPtr;
+#endif
 public:
     MemoryExecutor (Goldilocks &fr, const Config &config) :
         fr(fr),
         config(config),
-        N(PROVER_FORK_NAMESPACE::MemCommitPols::pilDegree()) {}
+        N(PROVER_FORK_NAMESPACE::MemCommitPols::pilDegree()) {
+#ifdef __ZKEVM_SM__
+        ZkevmSMMemoryPtr = sm_memory_new(N);
+#endif
+        }
 
     void execute (vector<MemoryAccess> &input, PROVER_FORK_NAMESPACE::MemCommitPols &pols);
 

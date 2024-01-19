@@ -9,6 +9,10 @@ using json = nlohmann::json;
 
 void MemoryExecutor::execute (vector<MemoryAccess> &input, MemCommitPols &pols)
 {
+#ifdef __ZKEVM_SM__
+    sm_memory_execute(ZkevmSMMemoryPtr, (void *)input.data(), input.size(), (void*)pols.address(), 3968, 751*8, N);
+#else
+
     // Get input size
     uint64_t inputSize = input.size();
     uint64_t inputSizeMinusOne = inputSize - 1;
@@ -104,6 +108,7 @@ void MemoryExecutor::execute (vector<MemoryAccess> &input, MemCommitPols &pols)
     pols.lastAccess[N-1] = fr.one();
 
     zklog.info("MemoryExecutor successfully processed " + to_string(access.size()) + " memory accesses (" + to_string((double(access.size())*100)/N) + "%)");
+#endif
 }
 
 class MemoryAccessCompare

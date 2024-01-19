@@ -20,6 +20,9 @@ uint8_t getByte (mpz_class value, uint8_t index) {
 
 void MemAlignExecutor::execute (vector<MemAlignAction> &input, MemAlignCommitPols &pols)
 {
+#ifdef __ZKEVM_SM__
+    sm_mem_align_execute(ZkevmSMMemAlignPtr, (void *)input.data(), input.size(), (void*)pols.address(), 0, 751*8, N);
+#else 
     // Check input size 
     if (input.size()*32 > N)
     {
@@ -98,4 +101,5 @@ void MemAlignExecutor::execute (vector<MemAlignAction> &input, MemAlignCommitPol
     }    
 
     zklog.info("MemAlignExecutor successfully processed " + to_string(input.size()) + " memory align actions (" + to_string((double(input.size())*32*100)/N) + "%)");
+#endif
 }
