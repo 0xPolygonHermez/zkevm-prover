@@ -13,34 +13,35 @@
       "pvtKey": "0x4d27a600dce8c29b7bd080e29a26972377dbb04d7a27d919adbb602bf13cfd23"
     }
   ],
-  "tx": {
-    "from": "0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D",
-    "to": "0x4d5Cf5032B2a844602278b01199ED191A86c93ff",
-    "nonce": 0,
-    "value": "3000000000000000000",
-    "gasLimit": 100000,
-    "gasPrice": "1000000000",
-    "chainId": 1000
-  },
+  "tx": [
+    {
+      "type": 11,
+      "deltaTimestamp": "1944498031",
+      "l1Info": {
+        "globalExitRoot": "0x16994edfddddb9480667b64174fc00d3b6da7290d37b8db3a16571b4ddf0789f",
+        "blockHash": "0x24a5871d68723340d9eadc674aa8ad75f3e33b61d5a9db7db92af856a19270bb",
+        "timestamp": "42"
+      },
+      "indexL1InfoTree": 0
+    },
+    {
+      "from": "0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D",
+      "to": "0x4d5Cf5032B2a844602278b01199ED191A86c93ff",
+      "nonce": 0,
+      "value": "3000000000000000000",
+      "gasLimit": 100000,
+      "gasPrice": "1000000000",
+      "chainId": 1000
+    }
+  ],
   "sequencerAddr": "0x617b3a3528F9cDd6630fd3301B9c8911F7Bf063D",
-  "newStateRoot": "0x233b53c98ba14bd95f362ceaace6bde63ee22920ff2ab0638f66472037186420",
   "oldAccInputHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
-  "newAccInputHash": "0x17c04c3760510b48c6012742c540a81aba4bca2f78b9d14bfd2f123e2e53ea3e",
-  "globalExitRoot": "0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9",
-  "numBatch": 1,
-  "timestamp": 1944498031,
+  "l1InfoRoot": "0x090bcaf734c4f06c93954a827b45a6e8c67b8e0fd1e0a35a1c5982d6961828f9",
+  "timestampLimit": 1944498031,
   "chainID": 1000,
-  "forkID": 5,
+  "forkID": 7,
   "contractsBytecode": {},
   "expectedLeafs": {
-    "0xa40d5f56745a118d0906a34e69aec8c0db1cb8fa": {
-      "balance": "0",
-      "nonce": "0",
-      "storage": {
-        "0x53d3f126103a7f7d6245751d2392e0245bf71479d10a3c27a5b501ace6dde1b7": "0x73e6af6f"
-      },
-      "hashBytecode": "0x0000000000000000000000000000000000000000000000000000000000000000"
-    },
     "0x617b3a3528f9cdd6630fd3301b9c8911f7bf063d": {
       "balance": "997000000000000000000",
       "nonce": "1",
@@ -58,7 +59,9 @@
       "nonce": "0",
       "storage": {
         "0x0000000000000000000000000000000000000000000000000000000000000000": "0x01",
-        "0xcc69885fda6bcc1a4ace058b4a62bf5e179ea78fd58a1ccd71c22cc9b688792f": "0x1b2ec5ea0b764a4ad513da1c363a2a13b76d2205f0a31e387cc86d3bf5c1a674"
+        "0x0000000000000000000000000000000000000000000000000000000000000002": "0x73e6af6f",
+        "0xa6eef7e35abe7026729641147f7915573c7e97b47efa546f5f6e3230263bcb49": "0x3ca39a7b5b419d1c50c89a8d15d1234f6cbc8baadb465efb609832bbc19f9026",
+        "0x0000000000000000000000000000000000000000000000000000000000000003": "0x9dbf7683f104fd4c0315f533b7b8218b57e81427d9517dc9923d87959847a861"
       },
       "hashBytecode": "0x0000000000000000000000000000000000000000000000000000000000000000"
     }
