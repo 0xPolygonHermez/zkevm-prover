@@ -6,9 +6,11 @@
 #include "scalar.hpp"
 #include "timer.hpp"
 #include "zklog.hpp"
+#include <fstream>
 #ifdef __ZKEVM_SM__
 #include "zkevm_sm.h"
 #endif
+#include "poseidon_goldilocks.hpp"
 
 using json = nlohmann::json;
 
@@ -106,7 +108,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
         input.push_back(actionBytes);
     }
 #ifdef __ZKEVM_SM__
-    binary_sm_execute(ZkevmSM_BinaryExecutorPtr, input.data(), input.size(), (void*)pols.address(), 1880, 751*8, N);
+    sm_binary_execute(ZkevmSMBinaryPtr, (void *)input.data(), input.size(), (void *)pols.address(), 1880, 751 * 8, N);
 #else
     // Local array of N uint32 
     uint32_t * c0Temp = (uint32_t *)calloc(N*sizeof(uint32_t),1);
@@ -410,8 +412,8 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
     }
 
     free(c0Temp);
+    zklog.info("BinaryExecutor successfully processed " + to_string(action.size()) + " binary actions (" + to_string((double(action.size()) * LATCH_SIZE * 100) / N) + "%)");
 #endif
-    zklog.info("BinaryExecutor successfully processed " + to_string(action.size()) + " binary actions (" + to_string((double(action.size())*LATCH_SIZE*100)/N) + "%)");
 }
 
 // To be used only for testing, since it allocates a lot of memory
@@ -425,5 +427,24 @@ void BinaryExecutor::execute (vector<BinaryAction> &action)
     }
     CommitPols cmPols(pAddress, CommitPols::pilDegree());
     execute(action, cmPols.Binary);
+
+    // copy all the thrace in a single array
+    /*uint64_t size = CommitPols::pilDegree() * cmPols.Binary.numPols();
+    Goldilocks::Element *trace = (Goldilocks::Element *)calloc(size, sizeof(Goldilocks::Element));
+    for (int i = 0; i < CommitPols::pilDegree(); i++)
+    {
+        uint64_t index = i * 751 + 235;
+        for (int j = 0; j < cmPols.Binary.numPols(); j++)
+        {
+            trace[i * cmPols.Binary.numPols() + j] = ((Goldilocks::Element *)cmPols.Binary.address())[index + 8];
+        }
+    }
+    Goldilocks::Element hash[4];
+    PoseidonGoldilocks::linear_hash_seq(hash, trace, size);
+
+    std::cout<<"hash: "<<std::endl;
+    for(int i=0; i<4; i++){
+        std::cout<<Goldilocks::toU64(hash[i])<<std::endl;
+    }*/
     free(pAddress);
 }

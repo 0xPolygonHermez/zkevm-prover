@@ -7,9 +7,6 @@
 #include "binary_action.hpp"
 #include "utils.hpp"
 #include "sm/pols_generated/commit_pols.hpp"
-#ifdef __ZKEVM_SM__
-#include "zkevm_sm.h"
-#endif
 
 USING_PROVER_FORK_NAMESPACE;
 
@@ -22,7 +19,7 @@ private:
     vector<vector<uint64_t>> FACTOR;
     vector<uint64_t> RESET;
 #ifdef __ZKEVM_SM__
-    BinaryExecutor *ZkevmSMBinaryPtr;
+    void *ZkevmSMBinaryPtr;
 #endif
 
 public:
