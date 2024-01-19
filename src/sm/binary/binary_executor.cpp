@@ -21,7 +21,7 @@ BinaryExecutor::BinaryExecutor (Goldilocks &fr, const Config &config) :
 {
     TimerStart(BINARY_EXECUTOR);
 #ifdef __ZKEVM_SM__
-    ZkevmSM_BinaryExecutorPtr = binary_sm_new(N);
+    ZkevmSMBinaryPtr = sm_binary_new(N);
 #else
     buildFactors();
     buildReset();
@@ -88,6 +88,9 @@ void BinaryExecutor::buildReset (void)
 
 void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &pols)
 {
+#ifdef __ZKEVM_SM__
+    sm_binary_execute(ZkevmSMBinaryPtr, (void *)action.data(), action.size(), (void *)pols.address(), 1880, 751 * 8, N);
+#else
     // Check that we have enough room in polynomials  TODO: Do this check in JS
     if (action.size()*LATCH_SIZE > N)
     {
@@ -107,9 +110,6 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
         actionBytes.type = action[i].type;
         input.push_back(actionBytes);
     }
-#ifdef __ZKEVM_SM__
-    sm_binary_execute(ZkevmSMBinaryPtr, (void *)input.data(), input.size(), (void *)pols.address(), 1880, 751 * 8, N);
-#else
     // Local array of N uint32 
     uint32_t * c0Temp = (uint32_t *)calloc(N*sizeof(uint32_t),1);
     if (c0Temp == NULL)
@@ -426,7 +426,148 @@ void BinaryExecutor::execute (vector<BinaryAction> &action)
         exitProcess();
     }
     CommitPols cmPols(pAddress, CommitPols::pilDegree());
+
+    double startTime = omp_get_wtime();
     execute(action, cmPols.Binary);
+    cout << "Execution time: " << omp_get_wtime() - startTime << "\n";
+
+
+    // // Sum all the vlaues for each polynomial in cmPols.Binary
+    // Goldilocks::Element sum_pol_opcode = fr.zero();
+    // Goldilocks::Element sum_pol_a0 = fr.zero();
+    // Goldilocks::Element sum_pol_a1 = fr.zero();
+    // Goldilocks::Element sum_pol_a2 = fr.zero();
+    // Goldilocks::Element sum_pol_a3 = fr.zero();
+    // Goldilocks::Element sum_pol_a4 = fr.zero();
+    // Goldilocks::Element sum_pol_a5 = fr.zero();
+    // Goldilocks::Element sum_pol_a6 = fr.zero();
+    // Goldilocks::Element sum_pol_a7 = fr.zero();
+    // Goldilocks::Element sum_pol_b0 = fr.zero();
+    // Goldilocks::Element sum_pol_b1 = fr.zero();
+    // Goldilocks::Element sum_pol_b2 = fr.zero();
+    // Goldilocks::Element sum_pol_b3 = fr.zero();
+    // Goldilocks::Element sum_pol_b4 = fr.zero();
+    // Goldilocks::Element sum_pol_b5 = fr.zero();
+    // Goldilocks::Element sum_pol_b6 = fr.zero();
+    // Goldilocks::Element sum_pol_b7 = fr.zero();
+    // Goldilocks::Element sum_pol_c0 = fr.zero();
+    // Goldilocks::Element sum_pol_c1 = fr.zero();
+    // Goldilocks::Element sum_pol_c2 = fr.zero();
+    // Goldilocks::Element sum_pol_c3 = fr.zero();
+    // Goldilocks::Element sum_pol_c4 = fr.zero();
+    // Goldilocks::Element sum_pol_c5 = fr.zero();
+    // Goldilocks::Element sum_pol_c6 = fr.zero();
+    // Goldilocks::Element sum_pol_c7 = fr.zero();
+    // Goldilocks::Element sum_pol_freein_a0 = fr.zero();
+    // Goldilocks::Element sum_pol_freein_a1 = fr.zero();
+    // Goldilocks::Element sum_pol_freein_b0 = fr.zero();
+    // Goldilocks::Element sum_pol_freein_b1 = fr.zero();
+    // Goldilocks::Element sum_pol_freein_c0 = fr.zero();
+    // Goldilocks::Element sum_pol_freein_c1 = fr.zero();
+    // Goldilocks::Element sum_pol_cin = fr.zero();
+    // Goldilocks::Element sum_pol_cmiddle = fr.zero();
+    // Goldilocks::Element sum_pol_cout = fr.zero();
+    // Goldilocks::Element sum_pol_l_cout = fr.zero();
+    // Goldilocks::Element sum_pol_l_opcode = fr.zero();
+    // Goldilocks::Element sum_pol_previous_are_lt4 = fr.zero();
+    // Goldilocks::Element sum_pol_use_previous_are_lt4 = fr.zero();
+    // Goldilocks::Element sum_pol_reset4 = fr.zero();
+    // Goldilocks::Element sum_pol_use_carry = fr.zero();
+    // Goldilocks::Element sum_pol_result_bin_op = fr.zero();
+    // Goldilocks::Element sum_pol_result_valid_range = fr.zero();
+
+    // for (uint64_t i = 0; i < CommitPols::pilDegree(); ++i) {
+    //     sum_pol_opcode = sum_pol_opcode + cmPols.Binary.opcode[i];
+    //     sum_pol_a0 = sum_pol_a0 + cmPols.Binary.a[0][i];
+    //     sum_pol_a1 = sum_pol_a1 + cmPols.Binary.a[1][i];
+    //     sum_pol_a2 = sum_pol_a2 + cmPols.Binary.a[2][i];
+    //     sum_pol_a3 = sum_pol_a3 + cmPols.Binary.a[3][i];
+    //     sum_pol_a4 = sum_pol_a4 + cmPols.Binary.a[4][i];
+    //     sum_pol_a5 = sum_pol_a5 + cmPols.Binary.a[5][i];
+    //     sum_pol_a6 = sum_pol_a6 + cmPols.Binary.a[6][i];
+    //     sum_pol_a7 = sum_pol_a7 + cmPols.Binary.a[7][i];
+    //     sum_pol_b0 = sum_pol_b0 + cmPols.Binary.b[0][i];
+    //     sum_pol_b1 = sum_pol_b1 + cmPols.Binary.b[1][i];
+    //     sum_pol_b2 = sum_pol_b2 + cmPols.Binary.b[2][i];
+    //     sum_pol_b3 = sum_pol_b3 + cmPols.Binary.b[3][i];
+    //     sum_pol_b4 = sum_pol_b4 + cmPols.Binary.b[4][i];
+    //     sum_pol_b5 = sum_pol_b5 + cmPols.Binary.b[5][i];
+    //     sum_pol_b6 = sum_pol_b6 + cmPols.Binary.b[6][i];
+    //     sum_pol_b7 = sum_pol_b7 + cmPols.Binary.b[7][i];
+    //     sum_pol_c0 = sum_pol_c0 + cmPols.Binary.c[0][i];
+    //     sum_pol_c1 = sum_pol_c1 + cmPols.Binary.c[1][i];
+    //     sum_pol_c2 = sum_pol_c2 + cmPols.Binary.c[2][i];
+    //     sum_pol_c3 = sum_pol_c3 + cmPols.Binary.c[3][i];
+    //     sum_pol_c4 = sum_pol_c4 + cmPols.Binary.c[4][i];
+    //     sum_pol_c5 = sum_pol_c5 + cmPols.Binary.c[5][i];
+    //     sum_pol_c6 = sum_pol_c6 + cmPols.Binary.c[6][i];
+    //     sum_pol_c7 = sum_pol_c7 + cmPols.Binary.c[7][i];
+    //     sum_pol_freein_a0 = sum_pol_freein_a0 + cmPols.Binary.freeInA[0][i];
+    //     sum_pol_freein_a1 = sum_pol_freein_a1 + cmPols.Binary.freeInA[1][i];
+    //     sum_pol_freein_b0 = sum_pol_freein_b0 + cmPols.Binary.freeInB[0][i];
+    //     sum_pol_freein_b1 = sum_pol_freein_b1 + cmPols.Binary.freeInB[1][i];
+    //     sum_pol_freein_c0 = sum_pol_freein_c0 + cmPols.Binary.freeInC[0][i];
+    //     sum_pol_freein_c1 = sum_pol_freein_c1 + cmPols.Binary.freeInC[1][i];
+    //     sum_pol_cin = sum_pol_cin + cmPols.Binary.cIn[i];
+    //     sum_pol_cmiddle = sum_pol_cmiddle + cmPols.Binary.cMiddle[i];
+    //     sum_pol_cout = sum_pol_cout + cmPols.Binary.cOut[i];
+    //     sum_pol_l_cout = sum_pol_l_cout + cmPols.Binary.lCout[i];
+    //     sum_pol_l_opcode = sum_pol_l_opcode + cmPols.Binary.lOpcode[i];
+    //     sum_pol_previous_are_lt4 = sum_pol_previous_are_lt4 + cmPols.Binary.previousAreLt4[i];
+    //     sum_pol_use_previous_are_lt4 = sum_pol_use_previous_are_lt4 + cmPols.Binary.usePreviousAreLt4[i];
+    //     sum_pol_reset4 = sum_pol_reset4 + cmPols.Binary.reset4[i];
+    //     sum_pol_use_carry = sum_pol_use_carry + cmPols.Binary.useCarry[i];
+    //     sum_pol_result_bin_op = sum_pol_result_bin_op + cmPols.Binary.resultBinOp[i];
+    //     sum_pol_result_valid_range = sum_pol_result_valid_range + cmPols.Binary.resultValidRange[i];
+    // }
+
+    // std::cout << "sum_pol_opcode = " << fr.toString(sum_pol_opcode) << std::endl;
+    // std::cout << "sum_pol_a0 = " << fr.toString(sum_pol_a0) << std::endl;
+    // std::cout << "sum_pol_a1 = " << fr.toString(sum_pol_a1) << std::endl;
+    // std::cout << "sum_pol_a2 = " << fr.toString(sum_pol_a2) << std::endl;
+    // std::cout << "sum_pol_a3 = " << fr.toString(sum_pol_a3) << std::endl;
+    // std::cout << "sum_pol_a4 = " << fr.toString(sum_pol_a4) << std::endl;
+    // std::cout << "sum_pol_a5 = " << fr.toString(sum_pol_a5) << std::endl;
+    // std::cout << "sum_pol_a6 = " << fr.toString(sum_pol_a6) << std::endl;
+    // std::cout << "sum_pol_a7 = " << fr.toString(sum_pol_a7) << std::endl;
+    // std::cout << "sum_pol_b0 = " << fr.toString(sum_pol_b0) << std::endl;
+    // std::cout << "sum_pol_b1 = " << fr.toString(sum_pol_b1) << std::endl;
+    // std::cout << "sum_pol_b2 = " << fr.toString(sum_pol_b2) << std::endl;
+    // std::cout << "sum_pol_b3 = " << fr.toString(sum_pol_b3) << std::endl;
+    // std::cout << "sum_pol_b4 = " << fr.toString(sum_pol_b4) << std::endl;
+    // std::cout << "sum_pol_b5 = " << fr.toString(sum_pol_b5) << std::endl;
+    // std::cout << "sum_pol_b6 = " << fr.toString(sum_pol_b6) << std::endl;
+    // std::cout << "sum_pol_b7 = " << fr.toString(sum_pol_b7) << std::endl;
+    // std::cout << "sum_pol_c0 = " << fr.toString(sum_pol_c0) << std::endl;
+    // std::cout << "sum_pol_c1 = " << fr.toString(sum_pol_c1) << std::endl;
+    // std::cout << "sum_pol_c2 = " << fr.toString(sum_pol_c2) << std::endl;
+    // std::cout << "sum_pol_c3 = " << fr.toString(sum_pol_c3) << std::endl;
+    // std::cout << "sum_pol_c4 = " << fr.toString(sum_pol_c4) << std::endl;
+    // std::cout << "sum_pol_c5 = " << fr.toString(sum_pol_c5) << std::endl;
+    // std::cout << "sum_pol_c6 = " << fr.toString(sum_pol_c6) << std::endl;
+    // std::cout << "sum_pol_c7 = " << fr.toString(sum_pol_c7) << std::endl;
+    // std::cout << "sum_pol_freein_a0 = " << fr.toString(sum_pol_freein_a0) << std::endl;
+    // std::cout << "sum_pol_freein_a1 = " << fr.toString(sum_pol_freein_a1) << std::endl;
+    // std::cout << "sum_pol_freein_b0 = " << fr.toString(sum_pol_freein_b0) << std::endl;
+    // std::cout << "sum_pol_freein_b1 = " << fr.toString(sum_pol_freein_b1) << std::endl;
+    // std::cout << "sum_pol_freein_c0 = " << fr.toString(sum_pol_freein_c0) << std::endl;
+    // std::cout << "sum_pol_freein_c1 = " << fr.toString(sum_pol_freein_c1) << std::endl;
+    // std::cout << "sum_pol_cin = " << fr.toString(sum_pol_cin) << std::endl;
+    // std::cout << "sum_pol_cmiddle = " << fr.toString(sum_pol_cmiddle) << std::endl;
+    // std::cout << "sum_pol_cout = " << fr.toString(sum_pol_cout) << std::endl;
+    // std::cout << "sum_pol_l_cout = " << fr.toString(sum_pol_l_cout) << std::endl;
+    // std::cout << "sum_pol_l_opcode = " << fr.toString(sum_pol_l_opcode) << std::endl;
+    // std::cout << "sum_pol_previous_are_lt4 = " << fr.toString(sum_pol_previous_are_lt4) << std::endl;
+    // std::cout << "sum_pol_use_previous_are_lt4 = " << fr.toString(sum_pol_use_previous_are_lt4) << std::endl;
+    // std::cout << "sum_pol_reset4 = " << fr.toString(sum_pol_reset4) << std::endl;
+    // std::cout << "sum_pol_use_carry = " << fr.toString(sum_pol_use_carry) << std::endl;
+    // std::cout << "sum_pol_result_bin_op = " << fr.toString(sum_pol_result_bin_op) << std::endl;
+    // std::cout << "sum_pol_result_valid_range = " << fr.toString(sum_pol_result_valid_range) << std::endl;
+
+    // // Sum all sum_pol variables
+    // Goldilocks::Element sum_all = sum_pol_opcode + sum_pol_a0 + sum_pol_a1 + sum_pol_a2 + sum_pol_a3 + sum_pol_a4 + sum_pol_a5 + sum_pol_a6 + sum_pol_a7 + sum_pol_b0 + sum_pol_b1 + sum_pol_b2 + sum_pol_b3 + sum_pol_b4 + sum_pol_b5 + sum_pol_b6 + sum_pol_b7 + sum_pol_c0 + sum_pol_c1 + sum_pol_c2 + sum_pol_c3 + sum_pol_c4 + sum_pol_c5 + sum_pol_c6 + sum_pol_c7 + sum_pol_freein_a0 + sum_pol_freein_a1 + sum_pol_freein_b0 + sum_pol_freein_b1 + sum_pol_freein_c0 + sum_pol_freein_c1 + sum_pol_cin + sum_pol_cmiddle + sum_pol_cout + sum_pol_l_cout + sum_pol_l_opcode + sum_pol_previous_are_lt4 + sum_pol_use_previous_are_lt4 + sum_pol_reset4 + sum_pol_use_carry + sum_pol_result_bin_op + sum_pol_result_valid_range;
+
+    // std::cout << "sum_all = " << fr.toString(sum_all) << std::endl;
 
     // copy all the thrace in a single array
     /*uint64_t size = CommitPols::pilDegree() * cmPols.Binary.numPols();
