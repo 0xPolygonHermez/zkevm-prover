@@ -264,6 +264,7 @@ class FullTracerInterface
 public:
     virtual ~FullTracerInterface(){};
     virtual uint64_t get_cumulative_gas_used(void) = 0;
+    virtual uint64_t get_gas_used(void) = 0;
     virtual string & get_new_state_root(void) = 0;
     virtual string & get_new_acc_input_hash(void) = 0;
     virtual string & get_new_local_exit_root(void) = 0;
