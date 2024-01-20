@@ -29,6 +29,7 @@ public:
     bool runFileProcessBatch;               // Executor (only main SM)
     bool runFileProcessBatchMultithread;    // Executor (only main SM) in parallel
     bool runFileExecute;                    // Executor (all SMs)
+    bool runFileProcessBatchWitness;        // Process batch of a file containing the witness
 
     bool runKeccakScriptGenerator;
     bool runSHA256ScriptGenerator;

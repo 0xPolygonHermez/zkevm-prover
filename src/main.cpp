@@ -49,6 +49,7 @@
 #include "page_manager_test.hpp"
 #include "zkglobals.hpp"
 #include "key_value_tree_test.hpp"
+#include "witness.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -157,21 +158,26 @@ uint64_t processBatchTotalSteps = 0;
 
 void runFileProcessBatch(Goldilocks fr, Prover &prover, Config &config)
 {
-    // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
+    
     // Create and init an empty prover request
     ProverRequest proverRequest(fr, config, prt_processBatch);
-    if (config.inputFile.size() > 0)
+
+    // Load and parse input JSON file
+    if (config.inputFile.empty())
     {
-        json inputJson;
-        file2json(config.inputFile, inputJson);
-        zkresult zkResult = proverRequest.input.load(inputJson);
-        if (zkResult != ZKR_SUCCESS)
-        {
-            zklog.error("runFileProcessBatch() failed calling proverRequest.input.load() zkResult=" + to_string(zkResult) + "=" + zkresult2string(zkResult));
-            exitProcess();
-        }
+        zklog.error("runFileProcessBatch() found config.inputFile empty");
+        exitProcess();
     }
+    json inputJson;
+    file2json(config.inputFile, inputJson);
+    zkresult zkResult = proverRequest.input.load(inputJson);
+    if (zkResult != ZKR_SUCCESS)
+    {
+        zklog.error("runFileProcessBatch() failed calling proverRequest.input.load() zkResult=" + to_string(zkResult) + "=" + zkresult2string(zkResult));
+        exitProcess();
+    }
+
     TimerStopAndLog(INPUT_LOAD);
 
     // Create full tracer based on fork ID
@@ -208,7 +214,76 @@ void runFileProcessBatch(Goldilocks fr, Prover &prover, Config &config)
         " paddingPG=" + to_string(processBatchTotalPaddingPG) +
         " poseidonG=" + to_string(processBatchTotalPoseidonG) +
         " steps=" + to_string(processBatchTotalSteps));
- }
+}
+
+void runFileProcessBatchWitness(Goldilocks fr, Prover &prover, Config &config)
+{
+    TimerStart(INPUT_LOAD);
+    
+    // Create and init an empty prover request
+    ProverRequest proverRequest(fr, config, prt_processBatch);
+
+    // Load and parse input JSON file
+    if (config.inputFile.empty())
+    {
+        zklog.error("runFileProcessBatchWitness() found config.inputFile empty");
+        exitProcess();
+    }
+    json inputJson;
+    file2json(config.inputFile, inputJson);
+    if (!inputJson.contains("result") ||
+        !inputJson["result"].is_string())
+    {
+        zklog.error("runFileProcessBatchWitness() cound not find a result string element in input file=" + config.inputFile);
+        exitProcess();
+    }
+    string witness = inputJson["result"];
+    string witnessBa = string2ba(witness);
+    string stateRoot;
+    zkresult zkResult = witness2db(witnessBa, proverRequest.input.db, stateRoot);
+    if (zkResult != ZKR_SUCCESS)
+    {
+        zklog.error("runFileProcessBatch() failed calling witness2db() zkResult=" + to_string(zkResult) + "=" + zkresult2string(zkResult));
+        exitProcess();
+    }
+    
+    TimerStopAndLog(INPUT_LOAD);
+
+    // Create full tracer based on fork ID
+    proverRequest.CreateFullTracer();
+    if (proverRequest.result != ZKR_SUCCESS)
+    {
+        zklog.error("runFileProcessBatch() failed calling proverRequest.CreateFullTracer() zkResult=" + to_string(proverRequest.result) + "=" + zkresult2string(proverRequest.result));
+        exitProcess();
+    }
+
+    // Call the prover
+    prover.processBatch(&proverRequest);
+
+    processBatchTotalArith += proverRequest.counters.arith;
+    processBatchTotalBinary += proverRequest.counters.binary;
+    processBatchTotalKeccakF += proverRequest.counters.keccakF;
+    processBatchTotalMemAlign += proverRequest.counters.memAlign;
+    processBatchTotalPaddingPG += proverRequest.counters.paddingPG;
+    processBatchTotalPoseidonG += proverRequest.counters.poseidonG;
+    processBatchTotalSteps += proverRequest.counters.steps;
+
+    zklog.info("runFileProcessBatch(" + config.inputFile + ") got counters: arith=" + to_string(proverRequest.counters.arith) +
+        " binary=" + to_string(proverRequest.counters.binary) +
+        " keccakF=" + to_string(proverRequest.counters.keccakF) +
+        " memAlign=" + to_string(proverRequest.counters.memAlign) +
+        " paddingPG=" + to_string(proverRequest.counters.paddingPG) +
+        " poseidonG=" + to_string(proverRequest.counters.poseidonG) +
+        " steps=" + to_string(proverRequest.counters.steps) +
+        " totals:" +
+        " arith=" + to_string(processBatchTotalArith) +
+        " binary=" + to_string(processBatchTotalBinary) +
+        " keccakF=" + to_string(processBatchTotalKeccakF) +
+        " memAlign=" + to_string(processBatchTotalMemAlign) +
+        " paddingPG=" + to_string(processBatchTotalPaddingPG) +
+        " poseidonG=" + to_string(processBatchTotalPoseidonG) +
+        " steps=" + to_string(processBatchTotalSteps));
+}
 
 class RunFileThreadArguments
 {
@@ -531,7 +606,7 @@ int main(int argc, char **argv)
         !config.runHashDBServer && !config.runHashDBTest &&
         !config.runAggregatorServer && !config.runAggregatorClient && !config.runAggregatorClientMock &&
         !config.runFileGenBatchProof && !config.runFileGenAggregatedProof && !config.runFileGenFinalProof &&
-        !config.runFileProcessBatch && !config.runFileProcessBatchMultithread && !config.runFileExecute)
+        !config.runFileProcessBatch && !config.runFileProcessBatchMultithread && !config.runFileProcessBatchWitness && !config.runFileExecute)
     {
         return 0;
     }
@@ -680,6 +755,29 @@ int main(int argc, char **argv)
         else
         {
             runFileProcessBatch(fr, prover, config);
+        }
+    }
+
+    // Execute (no proof generation) the witness file
+    if (config.runFileProcessBatchWitness)
+    {
+        if (config.inputFile.back() == '/')
+        {
+            Config tmpConfig = config;
+            // Get files sorted alphabetically from the folder
+            vector<string> files = getFolderFiles(config.inputFile, true);
+            // Process each input file in order
+            for (size_t i = 0; i < files.size(); i++)
+            {
+                tmpConfig.inputFile = config.inputFile + files[i];
+                zklog.info("runFileProcessBatchWitness inputFile=" + tmpConfig.inputFile);
+                // Call the prover
+                runFileProcessBatchWitness(fr, prover, tmpConfig);
+            }
+        }
+        else
+        {
+            runFileProcessBatchWitness(fr, prover, config);
         }
     }
 
