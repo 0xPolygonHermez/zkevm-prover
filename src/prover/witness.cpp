@@ -5,11 +5,12 @@
 #include "zkglobals.hpp"
 #include "key_utils.hpp"
 
-zkresult cborU64 (const string &s, uint64_t &p, uint64_t &value)
+// This CBOR function expects a simple integer < 24; otherwise it fails
+zkresult cbor2u64 (const string &s, uint64_t &p, uint64_t &value)
 {
     if (p >= s.size())
     {
-        zklog.error("cborU64() found too high p");
+        zklog.error("cbor2u64() found too high p");
         return ZKR_SM_MAIN_INVALID_WITNESS;
     }
     uint8_t firstByte = s[p];
@@ -19,15 +20,16 @@ zkresult cborU64 (const string &s, uint64_t &p, uint64_t &value)
         value = firstByte;
         return ZKR_SUCCESS;
     }
-    zklog.error("cborU64() found unexpected firstByte=" + to_string(firstByte));
+    zklog.error("cbor2u64() found unexpected firstByte=" + to_string(firstByte));
     return ZKR_SM_MAIN_INVALID_WITNESS;
 }
 
-zkresult cborScalar (const string &s, uint64_t &p, mpz_class &value)
+// This function expects an integer, which can be long, and returns a scalar
+zkresult cbor2scalar (const string &s, uint64_t &p, mpz_class &value)
 {
     if (p >= s.size())
     {
-        zklog.error("cborScalar() found too high p");
+        zklog.error("cbor2scalar() found too high p");
         return ZKR_SM_MAIN_INVALID_WITNESS;
     }
     uint8_t firstByte = s[p];
@@ -49,7 +51,7 @@ zkresult cborScalar (const string &s, uint64_t &p, mpz_class &value)
     {
         if (p >= s.size())
         {
-            zklog.error("cborScalar() run out of bytes");
+            zklog.error("cbor2scalar() run out of bytes");
             return ZKR_SM_MAIN_INVALID_WITNESS;
         }
         uint8_t secondByte = s[p];
@@ -60,7 +62,7 @@ zkresult cborScalar (const string &s, uint64_t &p, mpz_class &value)
     {
         if (p + 1 >= s.size())
         {
-            zklog.error("cborScalar() run out of bytes");
+            zklog.error("cbor2scalar() run out of bytes");
             return ZKR_SM_MAIN_INVALID_WITNESS;
         }
         uint8_t secondByte = s[p];
@@ -73,7 +75,7 @@ zkresult cborScalar (const string &s, uint64_t &p, mpz_class &value)
     {
         if (p + 3 >= s.size())
         {
-            zklog.error("cborScalar() run out of bytes");
+            zklog.error("cbor2scalar() run out of bytes");
             return ZKR_SM_MAIN_INVALID_WITNESS;
         }
         uint8_t secondByte = s[p];
@@ -90,7 +92,7 @@ zkresult cborScalar (const string &s, uint64_t &p, mpz_class &value)
     {
         if (p + 7 >= s.size())
         {
-            zklog.error("cborScalar() run out of bytes");
+            zklog.error("cbor2scalar() run out of bytes");
             return ZKR_SM_MAIN_INVALID_WITNESS;
         }
         uint8_t secondByte = s[p];
@@ -129,7 +131,7 @@ zkresult cborScalar (const string &s, uint64_t &p, mpz_class &value)
         {
             if ((p + longCount) > s.size())
             {
-                zklog.error("cborScalar() not enough space left for longCount=" + to_string(longCount));
+                zklog.error("cbor2scalar() not enough space left for longCount=" + to_string(longCount));
                 return ZKR_SM_MAIN_INVALID_WITNESS;
             }
             ba2scalar((const uint8_t *)s.c_str() + p, longCount, value);
@@ -138,7 +140,7 @@ zkresult cborScalar (const string &s, uint64_t &p, mpz_class &value)
         }
         case 3: // text string
         {
-            zklog.error("cborScalar() majorType=3 (text string) not supported");
+            zklog.error("cbor2scalar() majorType=3 (text string) not supported");
             return ZKR_SM_MAIN_INVALID_WITNESS;
         }
 
@@ -159,7 +161,7 @@ zkresult cborScalar (const string &s, uint64_t &p, mpz_class &value)
         }
     }
     
-    //zklog.info("cborScalar() got value=" + value.get_str(16));
+    //zklog.info("cbor2scalar() got value=" + value.get_str(16));
     return ZKR_SUCCESS;
 }
 
@@ -173,7 +175,7 @@ zkresult calculateWitnessHash (const string &witness, uint64_t &p, uint64_t leve
         zklog.error("calculateWitnessHash() reached an invalid level=" + to_string(level));
         return ZKR_SM_MAIN_INVALID_WITNESS;
     }
-    
+
     // Get instruction opcode from witness
     if (p >= witness.size())
     {
@@ -189,10 +191,10 @@ zkresult calculateWitnessHash (const string &witness, uint64_t &p, uint64_t leve
         {
             // Get the mask
             uint64_t mask;
-            zkr = cborU64(witness, p, mask);
+            zkr = cbor2u64(witness, p, mask);
             if (zkr != ZKR_SUCCESS)
             {
-                zklog.error("calculateWitnessHash() failed calling cborU64() result=" + zkresult2string(zkr));
+                zklog.error("calculateWitnessHash() failed calling cbor2u64() result=" + zkresult2string(zkr));
                 return zkr;
             }
             zklog.info("BRANCH level=" + to_string(level) + " mask=" + to_string(mask));
@@ -317,10 +319,10 @@ zkresult calculateWitnessHash (const string &witness, uint64_t &p, uint64_t leve
 
             // Read address
             mpz_class address;
-            zkr = cborScalar(witness, p, address);
+            zkr = cbor2scalar(witness, p, address);
             if (zkr != ZKR_SUCCESS)
             {
-                zklog.error("calculateWitnessHash() failed calling cborScalar(address) result=" + zkresult2string(zkr));
+                zklog.error("calculateWitnessHash() failed calling cbor2scalar(address) result=" + zkresult2string(zkr));
                 return zkr;
             }
             //zklog.info("SMT_LEAF address=" + address.get_str(16));
@@ -329,10 +331,10 @@ zkresult calculateWitnessHash (const string &witness, uint64_t &p, uint64_t leve
             mpz_class storageKey;
             if (nodeType == 0x03) // an extra field storageKey is read
             {
-                zkr = cborScalar(witness, p, storageKey);
+                zkr = cbor2scalar(witness, p, storageKey);
                 if (zkr != ZKR_SUCCESS)
                 {
-                    zklog.error("calculateWitnessHash() failed calling cborScalar(storageKey) result=" + zkresult2string(zkr));
+                    zklog.error("calculateWitnessHash() failed calling cbor2scalar(storageKey) result=" + zkresult2string(zkr));
                     return zkr;
                 }
                 //zklog.info("SMT_LEAF storageKey=" + storageKey.get_str(16));
@@ -340,10 +342,10 @@ zkresult calculateWitnessHash (const string &witness, uint64_t &p, uint64_t leve
 
             // Read value
             mpz_class value;
-            zkr = cborScalar(witness, p, value);
+            zkr = cbor2scalar(witness, p, value);
             if (zkr != ZKR_SUCCESS)
             {
-                zklog.error("calculateWitnessHash() failed calling cborScalar(value) result=" + zkresult2string(zkr));
+                zklog.error("calculateWitnessHash() failed calling cbor2scalar(value) result=" + zkresult2string(zkr));
                 return zkr;
             }
             //zklog.info("SMT_LEAF value=" + value.get_str(16));
@@ -470,10 +472,10 @@ zkresult calculateWitnessHash (const string &witness, uint64_t &p, uint64_t leve
         {
             // Read node hash
             mpz_class hashScalar;
-            zkr = cborScalar(witness, p, hashScalar);
+            zkr = cbor2scalar(witness, p, hashScalar);
             if (zkr != ZKR_SUCCESS)
             {
-                zklog.error("calculateWitnessHash() failed calling cborScalar(hashScalar) result=" + zkresult2string(zkr));
+                zklog.error("calculateWitnessHash() failed calling cbor2scalar(hashScalar) result=" + zkresult2string(zkr));
                 return zkr;
             }
             zklog.info("HASH hash=" + hashScalar.get_str(16));
