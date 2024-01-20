@@ -103,6 +103,10 @@ public:
     {
         return finalTrace.cumulative_gas_used;
     }
+    uint64_t get_gas_used (void)
+    {
+        return 0;
+    }
     string & get_new_state_root (void)
     {
         return finalTrace.new_state_root;
