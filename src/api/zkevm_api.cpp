@@ -285,11 +285,9 @@ void runFileExecute(Goldilocks fr, Prover &prover, Config &config)
     prover.execute(&proverRequest);
 }
 
-int external_prove(char* configFile)
-{
-    /* CONFIG */
 
-    char *pConfigFile = configFile;
+int zkevm_main(char *pConfigFile)
+{
 
     // Create one instance of Config based on the contents of the file config.json
     json configJson;
