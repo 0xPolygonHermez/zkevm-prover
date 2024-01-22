@@ -167,7 +167,8 @@ zkresult cbor2scalar (const string &s, uint64_t &p, mpz_class &value)
 }
 
 #define WITNESS_CHECK_BITS
-#define WITNESS_CHECK_SMT
+//#define WITNESS_CHECK_SMT
+//#define LOG_WITNESS
 
 class WitnessContext
 {
@@ -235,7 +236,9 @@ zkresult calculateWitnessHash (WitnessContext &ctx, Goldilocks::Element (&hash)[
                 zklog.error("calculateWitnessHash() failed calling cbor2u64() result=" + zkresult2string(zkr));
                 return zkr;
             }
+#ifdef LOG_WITNESS
             zklog.info("BRANCH level=" + to_string(ctx.level) + " mask=" + to_string(mask));
+#endif
 
             // Get if there are children at the left and/or at the right, from the mask
             bool hasLeft;
@@ -347,7 +350,9 @@ zkresult calculateWitnessHash (WitnessContext &ctx, Goldilocks::Element (&hash)[
             }
             ctx.db[fea2string(fr, hash)] = valueData;
 
+#ifdef LOG_WITNESS
             zklog.info("BANCH level=" + to_string(ctx.level) + " leftHash=" + fea2string(fr, leftHash) + " rightHash=" + fea2string(fr, rightHash) + " hash=" + fea2string(fr, hash));
+#endif
 
             break;
         }
@@ -543,7 +548,9 @@ zkresult calculateWitnessHash (WitnessContext &ctx, Goldilocks::Element (&hash)[
             }
             ctx.db[fea2string(fr, hash)] = valueData;
 
+#ifdef LOG_WITNESS
             zklog.info("LEAF level=" + to_string(ctx.level) + " address=" + address.get_str(16) + " type=" + to_string(nodeType) + " storageKey=" + storageKey.get_str(16) + " value=" + value.get_str(16) + " key=" + fea2string(fr, key) + " rkey=" + fea2string(fr, rkey) + " value=" + value.get_str(16) + " valueHash=" + fea2string(fr, valueHash) + " hash=" + fea2string(fr, hash));
+#endif
 
             break;
         }
