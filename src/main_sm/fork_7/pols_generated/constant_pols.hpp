@@ -259,8 +259,8 @@ public:
 class ArithConstantPols
 {
 public:
-    ConstantPol BYTE2_BIT19;
-    ConstantPol SEL_BYTE2_BIT19;
+    ConstantPol BYTE2_BIT21;
+    ConstantPol SEL_BYTE2_BIT21;
     ConstantPol GL_SIGNED_22BITS;
     ConstantPol RANGE_SEL;
 private:
@@ -269,8 +269,8 @@ private:
 public:
 
     ArithConstantPols (void * pAddress, uint64_t degree) :
-        BYTE2_BIT19((Goldilocks::Element *)((uint8_t *)pAddress + 856), degree, 107),
-        SEL_BYTE2_BIT19((Goldilocks::Element *)((uint8_t *)pAddress + 864), degree, 108),
+        BYTE2_BIT21((Goldilocks::Element *)((uint8_t *)pAddress + 856), degree, 107),
+        SEL_BYTE2_BIT21((Goldilocks::Element *)((uint8_t *)pAddress + 864), degree, 108),
         GL_SIGNED_22BITS((Goldilocks::Element *)((uint8_t *)pAddress + 872), degree, 109),
         RANGE_SEL((Goldilocks::Element *)((uint8_t *)pAddress + 880), degree, 110),
         _pAddress(pAddress),
@@ -953,8 +953,8 @@ inline const char * address2ConstantPolName (uint64_t address)
     if ((address >= 832) && (address <= 839)) return "MemAlign.WR8";
     if ((address >= 840) && (address <= 847)) return "MemAlign.OFFSET";
     if ((address >= 848) && (address <= 855)) return "MemAlign.SELM1";
-    if ((address >= 856) && (address <= 863)) return "Arith.BYTE2_BIT19";
-    if ((address >= 864) && (address <= 871)) return "Arith.SEL_BYTE2_BIT19";
+    if ((address >= 856) && (address <= 863)) return "Arith.BYTE2_BIT21";
+    if ((address >= 864) && (address <= 871)) return "Arith.SEL_BYTE2_BIT21";
     if ((address >= 872) && (address <= 879)) return "Arith.GL_SIGNED_22BITS";
     if ((address >= 880) && (address <= 887)) return "Arith.RANGE_SEL";
     if ((address >= 888) && (address <= 895)) return "Binary.P_OPCODE";
