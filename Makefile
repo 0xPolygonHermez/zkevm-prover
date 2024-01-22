@@ -1,11 +1,13 @@
 TARGET_ZKP := zkProver
 TARGET_BCT := bctree
+TARGET_LIB := libzkProver.a
 TARGET_MNG += mainGenerator
 TARGET_PLG += polsGenerator
 TARGET_PLD += polsDiff
 TARGET_TEST := zkProverTest
 
 BUILD_DIR := ./build
+LIB_DIR := ./lib
 SRC_DIRS := ./src ./test ./tools
 
 GRPCPP_FLAGS := $(shell pkg-config grpc++ --cflags)
@@ -60,6 +62,10 @@ SRCS_ZKP := $(shell find $(SRC_DIRS) ! -path "./tools/starkpil/bctree/*" ! -path
 OBJS_ZKP := $(SRCS_ZKP:%=$(BUILD_DIR)/%.o)
 DEPS_ZKP := $(OBJS_ZKP:.o=.d)
 
+SRCS_LIB := $(shell find $(SRC_DIRS)  ! -path "./src/main.cpp" ! -path "./tools/starkpil/bctree/*" ! -path "./test/prover/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/benchs/*" ! -path "./src/goldilocks/tests/*" ! -path "./src/main_generator/*" ! -path "./src/pols_generator/*" ! -path "./src/pols_diff/*" -name *.cpp -or -name *.c -or -name *.asm -or -name *.cc)
+OBJS_LIB := $(SRCS_LIB:%=$(BUILD_DIR)/%.o)
+DEPS_LIB := $(OBJS_LIB:.o=.d)
+
 SRCS_BCT := ./tools/starkpil/bctree/build_const_tree.cpp ./tools/starkpil/bctree/main.cpp ./src/goldilocks/src/goldilocks_base_field.cpp ./src/ffiasm/fr.cpp ./src/ffiasm/fr.asm ./src/starkpil/merkleTree/merkleTreeBN128.cpp ./src/poseidon_opt/poseidon_opt.cpp ./src/goldilocks/src/poseidon_goldilocks.cpp
 OBJS_BCT := $(SRCS_BCT:%=$(BUILD_DIR)/%.o)
 DEPS_BCT := $(OBJS_BCT:.o=.d)
@@ -70,9 +76,17 @@ DEPS_TEST := $(OBJS_TEST:.o=.d)
 
 all: $(BUILD_DIR)/$(TARGET_ZKP)
 
+lib: $(TARGET) $(LIB_DIR)/$(TARGET_LIB)
+
 bctree: $(BUILD_DIR)/$(TARGET_BCT)
 
 test: $(BUILD_DIR)/$(TARGET_TEST)
+
+$(LIB_DIR)/$(TARGET_LIB): $(OBJS_LIB)
+	mkdir -p $(LIB_DIR)
+	mkdir -p $(LIB_DIR)/include
+	$(AR) rcs $@ $^
+	cp src/api/zkevm_api.hpp $(LIB_DIR)/include/zkevm-prover.h
 
 $(BUILD_DIR)/$(TARGET_ZKP): $(OBJS_ZKP)
 	$(CXX) $(OBJS_ZKP) $(CXXFLAGS) -o $@ $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS_EXT)
