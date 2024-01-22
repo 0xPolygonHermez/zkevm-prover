@@ -10,7 +10,6 @@ int main(int argc, char **argv)
     {
         if ((strcmp(argv[1], "-v") == 0) || (strcmp(argv[1], "--version") == 0))
         {
-
             // If requested to only print the version,   then exit the program
             return 0;
         }
@@ -25,6 +24,6 @@ int main(int argc, char **argv)
             pConfigFile = argv[2];
         }
     }
+    zkevm_main(pConfigFile);
 
-    zkevm_main(pConfigFile, NULL);
 }
