@@ -4,6 +4,7 @@
 #include "scalar.hpp"
 #include "zkglobals.hpp"
 #include "key_utils.hpp"
+#include "hashdb_factory.hpp"
 
 // This CBOR function expects a simple integer < 24; otherwise it fails
 zkresult cbor2u64 (const string &s, uint64_t &p, uint64_t &value)
@@ -165,25 +166,62 @@ zkresult cbor2scalar (const string &s, uint64_t &p, mpz_class &value)
     return ZKR_SUCCESS;
 }
 
-zkresult calculateWitnessHash (const string &witness, uint64_t &p, uint64_t level, DatabaseMap::MTMap &db, Goldilocks::Element (&hash)[4])
+#define WITNESS_CHECK_BITS
+#define WITNESS_CHECK_SMT
+
+class WitnessContext
+{
+public:
+    const string &witness;
+    uint64_t p; // pointer to the first witness byte pending to be parsed
+    uint64_t level; // SMT level, being level=0 the root, level>0 higher levels
+    DatabaseMap::MTMap &db; // database to store all the hash-value
+#ifdef WITNESS_CHECK_BITS
+    vector<uint8_t> bits; // key bits consumed while climbing the tree; used only for debugging
+#endif
+#ifdef WITNESS_CHECK_SMT
+    Goldilocks::Element root[4]; // the root of the witness data SMT tree; used only for debugging
+#endif
+    WitnessContext(const string &witness, DatabaseMap::MTMap &db) : witness(witness), p(0), level(0), db(db)
+    {
+#ifdef WITNESS_CHECK_SMT
+        root[0] = fr.zero();
+        root[1] = fr.zero();
+        root[2] = fr.zero();
+        root[3] = fr.zero();
+#endif
+    }
+
+};
+
+zkresult calculateWitnessHash (WitnessContext &ctx, Goldilocks::Element (&hash)[4])
 {
     zkresult zkr;
 
     // Check level range
-    if (level > 255)
+    if (ctx.level > 255)
     {
-        zklog.error("calculateWitnessHash() reached an invalid level=" + to_string(level));
+        zklog.error("calculateWitnessHash() reached an invalid level=" + to_string(ctx.level));
         return ZKR_SM_MAIN_INVALID_WITNESS;
     }
 
+#ifdef WITNESS_CHECK_BITS
+    // Check level-bits consistency
+    if (ctx.level != ctx.bits.size())
+    {
+        zklog.error("calculateWitnessHash() got level=" + to_string(ctx.level) + "different from bits.size()=" + to_string(ctx.bits.size()));
+        return ZKR_SM_MAIN_INVALID_WITNESS;
+    }
+#endif
+
     // Get instruction opcode from witness
-    if (p >= witness.size())
+    if (ctx.p >= ctx.witness.size())
     {
         zklog.error("calculateWitnessHash() run out of witness data");
         return ZKR_SM_MAIN_INVALID_WITNESS;
     }
-    uint8_t opcode = witness[p];
-    p++;
+    uint8_t opcode = ctx.witness[ctx.p];
+    ctx.p++;
 
     switch (opcode)
     {
@@ -191,26 +229,26 @@ zkresult calculateWitnessHash (const string &witness, uint64_t &p, uint64_t leve
         {
             // Get the mask
             uint64_t mask;
-            zkr = cbor2u64(witness, p, mask);
+            zkr = cbor2u64(ctx.witness, ctx.p, mask);
             if (zkr != ZKR_SUCCESS)
             {
                 zklog.error("calculateWitnessHash() failed calling cbor2u64() result=" + zkresult2string(zkr));
                 return zkr;
             }
-            zklog.info("BRANCH level=" + to_string(level) + " mask=" + to_string(mask));
+            zklog.info("BRANCH level=" + to_string(ctx.level) + " mask=" + to_string(mask));
 
             // Get if there are children at the left and/or at the right, from the mask
             bool hasLeft;
             bool hasRight;
             switch (mask)
             {
-                case 2:
+                case 1:
                 {
                     hasLeft = true;
                     hasRight = false;
                     break;
                 }
-                case 1:
+                case 2:
                 {
                     hasLeft = false;
                     hasRight = true;
@@ -233,7 +271,15 @@ zkresult calculateWitnessHash (const string &witness, uint64_t &p, uint64_t leve
             Goldilocks::Element leftHash[4];
             if (hasLeft)
             {
-                zkr = calculateWitnessHash(witness, p, level + 1, db, leftHash);
+#ifdef WITNESS_CHECK_BITS
+                ctx.bits.emplace_back(0);
+#endif
+                ctx.level++;
+                zkr = calculateWitnessHash(ctx, leftHash);
+                ctx.level--;
+#ifdef WITNESS_CHECK_BITS
+                ctx.bits.pop_back();
+#endif
                 if (zkr != ZKR_SUCCESS)
                 {
                     return zkr;
@@ -251,7 +297,15 @@ zkresult calculateWitnessHash (const string &witness, uint64_t &p, uint64_t leve
             Goldilocks::Element rightHash[4];
             if (hasRight)
             {
-                zkr = calculateWitnessHash(witness, p, level + 1, db, rightHash);
+#ifdef WITNESS_CHECK_BITS
+                ctx.bits.emplace_back(1);
+#endif
+                ctx.level++;
+                zkr = calculateWitnessHash(ctx, rightHash);
+                ctx.level--;
+#ifdef WITNESS_CHECK_BITS
+                ctx.bits.pop_back();
+#endif
                 if (zkr != ZKR_SUCCESS)
                 {
                     return zkr;
@@ -291,9 +345,9 @@ zkresult calculateWitnessHash (const string &witness, uint64_t &p, uint64_t leve
             {
                 valueData.emplace_back(input[i]);
             }
-            db[fea2string(fr, hash)] = valueData;
+            ctx.db[fea2string(fr, hash)] = valueData;
 
-            zklog.info("BANCH level=" + to_string(level) + " leftHash=" + fea2string(fr, leftHash) + " rightHash=" + fea2string(fr, rightHash) + " hash=" + fea2string(fr, hash));
+            zklog.info("BANCH level=" + to_string(ctx.level) + " leftHash=" + fea2string(fr, leftHash) + " rightHash=" + fea2string(fr, rightHash) + " hash=" + fea2string(fr, hash));
 
             break;
         }
@@ -308,18 +362,18 @@ zkresult calculateWitnessHash (const string &witness, uint64_t &p, uint64_t leve
             // 4 = SC LENGTH
             // 5, 6 = touched addresses
             // < 11 (0xb) = info block tree of Etrog
-            if (p >= witness.size())
+            if (ctx.p >= ctx.witness.size())
             {
                 zklog.error("calculateWitnessHash() unexpected end of witness");
                 return ZKR_SM_MAIN_INVALID_WITNESS;
             }
-            uint8_t nodeType = witness[p];
-            p++;
+            uint8_t nodeType = ctx.witness[ctx.p];
+            ctx.p++;
             //zklog.info("SMT_LEAF nodeType=" + to_string(nodeType));
 
             // Read address
             mpz_class address;
-            zkr = cbor2scalar(witness, p, address);
+            zkr = cbor2scalar(ctx.witness, ctx.p, address);
             if (zkr != ZKR_SUCCESS)
             {
                 zklog.error("calculateWitnessHash() failed calling cbor2scalar(address) result=" + zkresult2string(zkr));
@@ -331,7 +385,7 @@ zkresult calculateWitnessHash (const string &witness, uint64_t &p, uint64_t leve
             mpz_class storageKey;
             if (nodeType == 0x03) // an extra field storageKey is read
             {
-                zkr = cbor2scalar(witness, p, storageKey);
+                zkr = cbor2scalar(ctx.witness, ctx.p, storageKey);
                 if (zkr != ZKR_SUCCESS)
                 {
                     zklog.error("calculateWitnessHash() failed calling cbor2scalar(storageKey) result=" + zkresult2string(zkr));
@@ -342,7 +396,7 @@ zkresult calculateWitnessHash (const string &witness, uint64_t &p, uint64_t leve
 
             // Read value
             mpz_class value;
-            zkr = cbor2scalar(witness, p, value);
+            zkr = cbor2scalar(ctx.witness, ctx.p, value);
             if (zkr != ZKR_SUCCESS)
             {
                 zklog.error("calculateWitnessHash() failed calling cbor2scalar(value) result=" + zkresult2string(zkr));
@@ -416,6 +470,11 @@ zkresult calculateWitnessHash (const string &witness, uint64_t &p, uint64_t leve
             // Calculate this leaf node hash = poseidonHash(remainingKey, valueHash, 1000),
             // where valueHash = poseidonHash(value, 0000)
 
+#ifdef WITNESS_CHECK_SMT
+            HashDBInterface * pHashDB = HashDBClientFactory::createHashDBClient(fr,config);
+            pHashDB->set("", 0, 0, ctx.root, key, value, PERSISTENCE_TEMPORARY, ctx.root, NULL, NULL);
+#endif
+
             // Prepare input = [value8, 0000]
             Goldilocks::Element input[12];
             scalar2fea(fr, value, input[0], input[1], input[2], input[3], input[4], input[5], input[6], input[7]);
@@ -434,11 +493,31 @@ zkresult calculateWitnessHash (const string &witness, uint64_t &p, uint64_t leve
             {
                 valueData.emplace_back(input[i]);
             }
-            db[fea2string(fr, valueHash)] = valueData;
+            ctx.db[fea2string(fr, valueHash)] = valueData;
+
+#ifdef WITNESS_CHECK_BITS
+            // Check key
+            bool keyBits[256];
+            splitKey(fr, key, keyBits);
+            for (uint64_t i=0; i<ctx.level; i++)
+            {
+                if (keyBits[i] != ctx.bits[i])
+                {
+                    zklog.error("calculateWitnessHash() found different keyBits[i]=" + to_string(keyBits[i]) + " bits[i]=" + to_string(ctx.bits[i]) + " i=" + to_string(i));
+                    zklog.error("bits=");
+                    for (uint64_t b=0; b<ctx.bits.size(); b++)
+                    {
+                        zklog.error(" b=" + to_string(b) + " keyBits=" + to_string(keyBits[b]) + " bits=" + to_string(ctx.bits[b]));
+                    }
+
+                    return ZKR_SM_MAIN_INVALID_WITNESS;
+                }
+            }
+#endif
 
             // Calculate the remaining key
             Goldilocks::Element rkey[4];
-            removeKeyBits(fr, key, level, rkey);
+            removeKeyBits(fr, key, ctx.level, rkey);
 
             // Prepare input = [rkey, valueHash, 1000]
             input[0] = rkey[0];
@@ -462,9 +541,9 @@ zkresult calculateWitnessHash (const string &witness, uint64_t &p, uint64_t leve
             {
                 valueData[i] = input[i];
             }
-            db[fea2string(fr, hash)] = valueData;
+            ctx.db[fea2string(fr, hash)] = valueData;
 
-            zklog.info("LEAF level=" + to_string(level) + " address=" + address.get_str(16) + " type=" + to_string(nodeType) + " storageKey=" + storageKey.get_str(16) + " value=" + value.get_str(16) + " key=" + fea2string(fr, key) + " rkey=" + fea2string(fr, rkey) + " value=" + value.get_str(16) + " valueHash=" + fea2string(fr, valueHash) + " hash=" + fea2string(fr, hash));
+            zklog.info("LEAF level=" + to_string(ctx.level) + " address=" + address.get_str(16) + " type=" + to_string(nodeType) + " storageKey=" + storageKey.get_str(16) + " value=" + value.get_str(16) + " key=" + fea2string(fr, key) + " rkey=" + fea2string(fr, rkey) + " value=" + value.get_str(16) + " valueHash=" + fea2string(fr, valueHash) + " hash=" + fea2string(fr, hash));
 
             break;
         }
@@ -472,7 +551,7 @@ zkresult calculateWitnessHash (const string &witness, uint64_t &p, uint64_t leve
         {
             // Read node hash
             mpz_class hashScalar;
-            zkr = cbor2scalar(witness, p, hashScalar);
+            zkr = cbor2scalar(ctx.witness, ctx.p, hashScalar);
             if (zkr != ZKR_SUCCESS)
             {
                 zklog.error("calculateWitnessHash() failed calling cbor2scalar(hashScalar) result=" + zkresult2string(zkr));
@@ -516,21 +595,22 @@ zkresult witness2db (const string &witness, DatabaseMap::MTMap &db, string &stat
         return ZKR_SM_MAIN_INVALID_WITNESS;
     }
 
-    // Witness position counter
-    uint64_t p = 0;
+    // Create witness context
+    WitnessContext ctx(witness, db);
 
     // Parse header version
-    uint8_t headerVersion = witness[p];
+    uint8_t headerVersion = ctx.witness[ctx.p];
     if (headerVersion != 1)
     {
         zklog.error("witness2db() expected headerVersion=1 but got value=" + to_string(headerVersion));
         return ZKR_SM_MAIN_INVALID_WITNESS;
     }
-    p++;
+    ctx.p++;
 
     // Calculate witness hash
     Goldilocks::Element hash[4];
-    zkr = calculateWitnessHash(witness, p, 0, db, hash);
+    vector<uint8_t> bits;
+    zkr = calculateWitnessHash(ctx, hash);
     if (zkr != ZKR_SUCCESS)
     {
         zklog.error("witness2db() failed calling calculateWitnessHash() result=" + zkresult2string(zkr));
@@ -541,6 +621,10 @@ zkresult witness2db (const string &witness, DatabaseMap::MTMap &db, string &stat
     stateRoot = fea2string(fr, hash);
 
     zklog.info("witness2db() calculated stateRoot=" + stateRoot);
+
+#ifdef WITNESS_CHECK_SMT
+    zklog.info("witness2db() calculated SMT root=" + fea2string(fr, ctx.root));
+#endif
 
     return ZKR_SUCCESS;
 }
