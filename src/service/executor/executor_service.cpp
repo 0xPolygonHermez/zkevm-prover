@@ -1311,7 +1311,7 @@ using grpc::Status;
     }
     
     response->set_error(zkresult2error(proverRequest.result));
-    //response->set_cumulative_gas_used(proverRequest.pFullTracer->get_cumulative_gas_used());
+    response->set_gas_used(proverRequest.pFullTracer->get_gas_used());
     response->set_cnt_keccak_hashes(proverRequest.counters.keccakF);
     response->set_cnt_poseidon_hashes(proverRequest.counters.poseidonG);
     response->set_cnt_poseidon_paddings(proverRequest.counters.paddingPG);
@@ -1378,6 +1378,7 @@ using grpc::Status;
             pLog->set_data(string2ba(dataConcatenated)); // Supplied by the contract, usually ABI-encoded
             //pLog->set_batch_number(block_responses[tblockx].logs[log].batch_number); // Batch in which the transaction was included
             pLog->set_tx_hash(string2ba(block_responses[block].logs[log].tx_hash)); // Hash of the transaction
+            pLog->set_tx_hash_l2(string2ba(block_responses[block].logs[log].tx_hash_l2)); // Hash of the transaction in layer 2
             pLog->set_tx_index(block_responses[block].logs[log].tx_index); // Index of the transaction in the block
             //pLog->set_batch_hash(string2ba(block_responses[block].logs[log].batch_hash)); // Hash of the batch in which the transaction was included
             pLog->set_index(block_responses[block].logs[log].index); // Index of the log in the block
@@ -1395,6 +1396,7 @@ using grpc::Status;
 
             //executor::v1::ProcessTransactionResponse * pProcessTransactionResponse = response->add_responses();
             pProcessTransactionResponse->set_tx_hash(string2ba(responses[tx].tx_hash));
+            pProcessTransactionResponse->set_tx_hash_l2(string2ba(responses[tx].tx_hash_l2));
             pProcessTransactionResponse->set_rlp_tx(responses[tx].rlp_tx);
             pProcessTransactionResponse->set_type(responses[tx].type); // Type indicates legacy transaction; it will be always 0 (legacy) in the executor
             pProcessTransactionResponse->set_return_value(string2ba(responses[tx].return_value)); // Returned data from the runtime (function result or data supplied with revert opcode)
@@ -1408,6 +1410,8 @@ using grpc::Status;
             pProcessTransactionResponse->set_effective_gas_price(responses[tx].effective_gas_price);
             pProcessTransactionResponse->set_has_balance_opcode(responses[tx].has_balance_opcode);
             pProcessTransactionResponse->set_has_gasprice_opcode(responses[tx].has_gasprice_opcode);
+            pProcessTransactionResponse->set_cumulative_gas_used(responses[tx].cumulative_gas_used);
+            
             for (uint64_t log=0; log<responses[tx].logs.size(); log++)
             {
                 executor::v1::LogV2 * pLog = pProcessTransactionResponse->add_logs();
@@ -1504,7 +1508,7 @@ using grpc::Status;
             " new_local_exit_root=" + proverRequest.pFullTracer->get_new_local_exit_root() +
             " old_batch_num=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum) +
             " steps=" + to_string(proverRequest.counters.steps) +
-            " gasUsed=" + to_string(proverRequest.pFullTracer->get_cumulative_gas_used()) +
+            " gasUsed=" + to_string(proverRequest.pFullTracer->get_gas_used()) +
             " counters.keccakF=" + to_string(proverRequest.counters.keccakF) +
             " counters.poseidonG=" + to_string(proverRequest.counters.poseidonG) +
             " counters.paddingPG=" + to_string(proverRequest.counters.paddingPG) +
@@ -1602,7 +1606,7 @@ using grpc::Status;
 #ifdef LOG_TIME
     lock();
     counter++;
-    uint64_t execGas = 0; //response->cumulative_gas_used();
+    uint64_t execGas = response->gas_used();
     totalGas += execGas;
     uint64_t execBytes = request->batch_l2_data().size();
     totalBytes += execBytes;
@@ -1885,6 +1889,9 @@ using grpc::Status;
     case ZKR_SMT_INVALID_DATA_SIZE:                         return ::executor::v1::EXECUTOR_ERROR_SMT_INVALID_DATA_SIZE;
     case ZKR_HASHDB_GRPC_ERROR:                             return ::executor::v1::EXECUTOR_ERROR_HASHDB_GRPC_ERROR;
     case ZKR_STATE_MANAGER:                                 return ::executor::v1::EXECUTOR_ERROR_STATE_MANAGER;
+
+    case ZKR_SM_MAIN_INVALID_L1_INFO_TREE_INDEX:            return ::executor::v1::EXECUTOR_ERROR_INVALID_L1_INFO_TREE_INDEX;
+    case ZKR_SM_MAIN_INVALID_L1_INFO_TREE_SMT_PROOF_VALUE:  return ::executor::v1::EXECUTOR_ERROR_INVALID_L1_INFO_TREE_SMT_PROOF_VALUE;
 
     case ZKR_AGGREGATED_PROOF_INVALID_INPUT: // Only returned when generating a proof
     case ZKR_DB_VERSION_NOT_FOUND_KVDB: // To be mapped to an executor error when HashDB64 is operative

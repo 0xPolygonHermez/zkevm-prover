@@ -449,7 +449,14 @@ uint64_t Rom::getConstant(json &romJson, const string &constantName)
     string auxString;
     auxString = romJson["constants"][constantName]["value"];
     //cout << "Rom::getConstant() " << constantName << "=" << auxString << endl;
-    return atoi(auxString.c_str());
+    mpz_class auxScalar;
+    auxScalar.set_str(auxString, 10);
+    if (auxScalar > ScalarMask64)
+    {
+        zklog.error("Rom::getConstant() found too large constant " + constantName + " in rom json, value=" + auxString);
+        exitProcess();
+    }
+    return auxScalar.get_ui();
 }
 
 mpz_class Rom::getConstantL(json &romJson, const string &constantName)
