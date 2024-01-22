@@ -1444,12 +1444,34 @@ zkresult FullTracer::onOpcode(Context &ctx, const RomCommand &cmd)
 
             prevTraceCall->gas_cost = prevTraceCall->gas - gasCTX;
         }
+        else if (prevTraceCall->depth != singleInfo.depth)
+        {
+            // Means opcode failed with error (ex: oog, invalidStaticTx...)
+            if (!prevTraceCall->error.empty())
+            {
+                prevTraceCall->gas_cost = prevTraceCall->gas;
+            }
+        }
         else
         {
             prevTraceCall->gas_cost = gasCost;
         }
 
         // cout << "info[info.size() - 1].gas_cost=" << info[info.size() - 1].gas_cost << endl;
+
+        // If gas cost is negative means gas has been added from a deeper context, it should be recalculated
+        if (prevTraceCall->gas_cost < 0)
+        {
+            if (full_trace.size() > 2)
+            {
+                prevTraceCall->gas_cost = full_trace[full_trace.size() - 2].gas - prevTraceCall->gas;
+            }
+            else
+            {
+                zklog.error("FullTracer::onOpcode() found full_trace.size=" + to_string(full_trace.size()) + " too low");
+                return ZKR_UNSPECIFIED;
+            }
+        }
 
         // Set gas refund for sstore opcode
         zkr = getVarFromCtx(ctx, false, ctx.rom.gasRefundOffset, auxScalar);
