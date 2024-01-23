@@ -876,4 +876,6 @@ enum ExecutorError {
     EXECUTOR_ERROR_INVALID_WITNESS = 113;
     // EXECUTOR_ERROR_INVALID_CBOR indicates that the provided CBOR data is invalid
     EXECUTOR_ERROR_INVALID_CBOR = 114;
+    // EXECUTOR_ERROR_INVALID_DATA_STREAM indicates that the provided data stream data is invalid
+    EXECUTOR_ERROR_INVALID_DATA_STREAM = 115;
 }
