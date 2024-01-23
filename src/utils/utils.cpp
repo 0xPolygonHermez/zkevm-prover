@@ -671,3 +671,40 @@ void getStringIncrement(const string &oldString, const string &newString, uint64
 }
 
 string emptyString;
+
+void poseidonLinearHash (const vector<uint8_t> &_data, Goldilocks::Element (&result)[4])
+{
+    // Get a local copy of the bytes vector
+    vector<uint8_t> data = _data;
+
+    // Add padding = 0b1000...00001  up to a length of 56xN (7x8xN)
+    data.push_back(0x01);
+    while((data.size() % 56) != 0) data.push_back(0);
+    data[data.size()-1] |= 0x80;
+
+    // Create a FE buffer to store the transformed bytes into fe
+    uint64_t bufferSize = data.size()/7;
+    Goldilocks::Element * pBuffer = new Goldilocks::Element[bufferSize];
+    if (pBuffer == NULL)
+    {
+        zklog.error("poseidonLinearHash() failed allocating memory of " + to_string(bufferSize) + " field elements");
+        exitProcess();
+    }
+
+    // Init to zero
+    for (uint64_t j=0; j<bufferSize; j++) pBuffer[j] = fr.zero();
+
+    // Copy the bytes into the fe lower 7 sections
+    for (uint64_t j=0; j<data.size(); j++)
+    {
+        uint64_t fePos = j/7;
+        uint64_t shifted = uint64_t(data[j]) << ((j%7)*8);
+        pBuffer[fePos] = fr.add(pBuffer[fePos], fr.fromU64(shifted));
+    }
+
+    // Call poseidon linear hash
+    poseidon.linear_hash(result, pBuffer, bufferSize);
+
+    // Free allocated memory
+    delete[] pBuffer;
+}

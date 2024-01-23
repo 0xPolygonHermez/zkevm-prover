@@ -29,6 +29,7 @@ message AggregatorMessage
         GenFinalProofRequest gen_final_proof_request = 5;
         CancelRequest cancel_request = 6;
         GetProofRequest get_proof_request = 7;
+        GenStatelessBatchProofRequest gen_stateless_batch_proof_request = 8;
     }
 }
 
@@ -61,6 +62,10 @@ message GetStatusRequest {}
  */
 message GenBatchProofRequest {
     InputProver input = 1;
+}
+
+message GenStatelessBatchProofRequest {
+    StatelessInputProver input = 1;
 }
 
 /**
@@ -269,6 +274,18 @@ message PublicInputs {
     map<uint32, L1Data> l1_info_tree_data = 16;
 }
 
+message StatelessPublicInputs {
+    bytes witness = 1;
+    bytes datastream_data = 2;
+    bytes old_acc_input_hash = 3;
+    bytes l1_info_root = 4;
+    uint64 timestamp_limit = 5;
+    string sequencer_addr = 6;
+    bytes forced_blockhash_l1 = 7;
+    string aggregator_addr = 8;
+    map<uint32, L1Data> l1_info_tree_data = 9;
+}
+
 // l1InfoTree leaf values
 message L1Data {
     bytes global_exit_root = 1;
@@ -287,6 +304,10 @@ message InputProver {
     PublicInputs public_inputs = 1;
     map<string, string> db = 4; // For debug/testing purpposes only. Don't fill this on production
     map<string, string> contracts_bytecode = 5; // For debug/testing purpposes only. Don't fill this on production
+}
+
+message StatelessInputProver {
+    StatelessPublicInputs public_inputs = 1;
 }
 
 /**

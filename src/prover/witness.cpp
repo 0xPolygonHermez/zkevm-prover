@@ -5,166 +5,9 @@
 #include "zkglobals.hpp"
 #include "key_utils.hpp"
 #include "hashdb_factory.hpp"
+#include "cbor.hpp"
+#include "utils.hpp"
 
-// This CBOR function expects a simple integer < 24; otherwise it fails
-zkresult cbor2u64 (const string &s, uint64_t &p, uint64_t &value)
-{
-    if (p >= s.size())
-    {
-        zklog.error("cbor2u64() found too high p");
-        return ZKR_SM_MAIN_INVALID_WITNESS;
-    }
-    uint8_t firstByte = s[p];
-    p++;
-    if (firstByte < 24)
-    {
-        value = firstByte;
-        return ZKR_SUCCESS;
-    }
-    zklog.error("cbor2u64() found unexpected firstByte=" + to_string(firstByte));
-    return ZKR_SM_MAIN_INVALID_WITNESS;
-}
-
-// This function expects an integer, which can be long, and returns a scalar
-zkresult cbor2scalar (const string &s, uint64_t &p, mpz_class &value)
-{
-    if (p >= s.size())
-    {
-        zklog.error("cbor2scalar() found too high p");
-        return ZKR_SM_MAIN_INVALID_WITNESS;
-    }
-    uint8_t firstByte = s[p];
-    p++;
-    if (firstByte < 24)
-    {
-        value = firstByte;
-        return ZKR_SUCCESS;
-    }
-    uint8_t majorType = firstByte >> 5;
-    uint8_t shortCount = firstByte & 0x1F;
-
-    uint64_t longCount;
-    if (shortCount <= 23)
-    {
-        longCount = shortCount;
-    }
-    else if (shortCount == 24)
-    {
-        if (p >= s.size())
-        {
-            zklog.error("cbor2scalar() run out of bytes");
-            return ZKR_SM_MAIN_INVALID_WITNESS;
-        }
-        uint8_t secondByte = s[p];
-        p++;
-        longCount = secondByte;
-    }
-    else if (shortCount == 25)
-    {
-        if (p + 1 >= s.size())
-        {
-            zklog.error("cbor2scalar() run out of bytes");
-            return ZKR_SM_MAIN_INVALID_WITNESS;
-        }
-        uint8_t secondByte = s[p];
-        p++;
-        uint8_t thirdByte = s[p];
-        p++;
-        longCount = (uint64_t(secondByte)<<8) + uint64_t(thirdByte);
-    }
-    else if (shortCount == 26)
-    {
-        if (p + 3 >= s.size())
-        {
-            zklog.error("cbor2scalar() run out of bytes");
-            return ZKR_SM_MAIN_INVALID_WITNESS;
-        }
-        uint8_t secondByte = s[p];
-        p++;
-        uint8_t thirdByte = s[p];
-        p++;
-        uint8_t fourthByte = s[p];
-        p++;
-        uint8_t fifthByte = s[p];
-        p++;
-        longCount = (uint64_t(secondByte)<<24) + (uint64_t(thirdByte)<<16) + (uint64_t(fourthByte)<<8) + uint64_t(fifthByte);
-    }
-    else if (shortCount == 27)
-    {
-        if (p + 7 >= s.size())
-        {
-            zklog.error("cbor2scalar() run out of bytes");
-            return ZKR_SM_MAIN_INVALID_WITNESS;
-        }
-        uint8_t secondByte = s[p];
-        p++;
-        uint8_t thirdByte = s[p];
-        p++;
-        uint8_t fourthByte = s[p];
-        p++;
-        uint8_t fifthByte = s[p];
-        p++;
-        uint8_t sixthByte = s[p];
-        p++;
-        uint8_t seventhByte = s[p];
-        p++;
-        uint8_t eighthByte = s[p];
-        p++;
-        uint8_t ninethByte = s[p];
-        p++;
-        longCount = (uint64_t(secondByte)<<56) + (uint64_t(thirdByte)<<48) + (uint64_t(fourthByte)<<40) + (uint64_t(fifthByte)<<32) + (uint64_t(sixthByte)<<24) + (uint64_t(seventhByte)<<16) + (uint64_t(eighthByte)<<8) + uint64_t(ninethByte);
-    }
-
-    switch (majorType)
-    {
-        // Assuming CBOR short field encoding
-        // For types 0, 1, and 7, there is no payload; the count is the value
-        case 0:
-        case 1:
-        case 7:
-        {
-            value = shortCount;
-            break;
-        }
-
-        // For types 2 (byte string) and 3 (text string), the count is the length of the payload
-        case 2: // byte string
-        {
-            if ((p + longCount) > s.size())
-            {
-                zklog.error("cbor2scalar() not enough space left for longCount=" + to_string(longCount));
-                return ZKR_SM_MAIN_INVALID_WITNESS;
-            }
-            ba2scalar((const uint8_t *)s.c_str() + p, longCount, value);
-            p += longCount;
-            break;
-        }
-        case 3: // text string
-        {
-            zklog.error("cbor2scalar() majorType=3 (text string) not supported");
-            return ZKR_SM_MAIN_INVALID_WITNESS;
-        }
-
-        // For types 4 (array) and 5 (map), the count is the number of items (pairs) in the payload
-        case 4: // array
-        {
-            zkassert(false);
-        }
-        case 5: // map
-        {
-            zkassert(false);
-        }
-
-        // For type 6 (tag), the payload is a single item and the count is a numeric tag number which describes the enclosed item
-        case 6: // tag
-        {
-            zkassert(false);
-        }
-    }
-    
-    //zklog.info("cbor2scalar() got value=" + value.get_str(16));
-    return ZKR_SUCCESS;
-}
 
 #define WITNESS_CHECK_BITS
 //#define WITNESS_CHECK_SMT
@@ -177,13 +20,14 @@ public:
     uint64_t p; // pointer to the first witness byte pending to be parsed
     uint64_t level; // SMT level, being level=0 the root, level>0 higher levels
     DatabaseMap::MTMap &db; // database to store all the hash-value
+    DatabaseMap::ProgramMap &programs; // database to store all the programs (smart contracts)
 #ifdef WITNESS_CHECK_BITS
     vector<uint8_t> bits; // key bits consumed while climbing the tree; used only for debugging
 #endif
 #ifdef WITNESS_CHECK_SMT
     Goldilocks::Element root[4]; // the root of the witness data SMT tree; used only for debugging
 #endif
-    WitnessContext(const string &witness, DatabaseMap::MTMap &db) : witness(witness), p(0), level(0), db(db)
+    WitnessContext(const string &witness, DatabaseMap::MTMap &db, DatabaseMap::ProgramMap &programs) : witness(witness), p(0), level(0), db(db), programs(programs)
     {
 #ifdef WITNESS_CHECK_SMT
         root[0] = fr.zero();
@@ -388,7 +232,7 @@ zkresult calculateWitnessHash (WitnessContext &ctx, Goldilocks::Element (&hash)[
 
             // Read storage key
             mpz_class storageKey;
-            if (nodeType == 0x03) // an extra field storageKey is read
+            if (nodeType == 0x03) // SC STORAGE: an extra field storageKey is read
             {
                 zkr = cbor2scalar(ctx.witness, ctx.p, storageKey);
                 if (zkr != ZKR_SUCCESS)
@@ -401,11 +245,24 @@ zkresult calculateWitnessHash (WitnessContext &ctx, Goldilocks::Element (&hash)[
 
             // Read value
             mpz_class value;
-            zkr = cbor2scalar(ctx.witness, ctx.p, value);
-            if (zkr != ZKR_SUCCESS)
+            /*if (nodeType == 0x02) // SC CODE: we need to read the SC and calculate the hash
             {
-                zklog.error("calculateWitnessHash() failed calling cbor2scalar(value) result=" + zkresult2string(zkr));
-                return zkr;
+                string program;
+                zkr = cbor2ba(ctx.witness, ctx.p, program);
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("calculateWitnessHash() failed calling cbor2ba(value) result=" + zkresult2string(zkr));
+                    return zkr;
+                }
+            }
+            else*/
+            {
+                zkr = cbor2scalar(ctx.witness, ctx.p, value);
+                if (zkr != ZKR_SUCCESS)
+                {
+                    zklog.error("calculateWitnessHash() failed calling cbor2scalar(value) result=" + zkresult2string(zkr));
+                    return zkr;
+                }
             }
             //zklog.info("SMT_LEAF value=" + value.get_str(16));
 
@@ -571,9 +428,44 @@ zkresult calculateWitnessHash (WitnessContext &ctx, Goldilocks::Element (&hash)[
 
             break;
         }
+        case 0x04: // CODE -> ( 0x04 CBOR(code)... )
+        {
+            string program;
+
+            // Parse CBOR data
+            zkr = cbor2ba(ctx.witness, ctx.p, program);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("calculateWitnessHash() failed calling cbor2ba(program) result=" + zkresult2string(zkr));
+                return zkr;
+            }
+            if (program.empty())
+            {
+                zklog.error("calculateWitnessHash() called cbor2ba(program) and got an empty byte array");
+                return ZKR_SM_MAIN_INVALID_WITNESS;
+            }
+
+            // Convert to vector
+            vector<uint8_t> programVector(program.size());
+            for (uint64_t i=0; i<program.size(); i++)
+            {
+                programVector.emplace_back(program[i]);
+            }
+
+            // Calculate hash
+            Goldilocks::Element linearHash[4];
+            poseidonLinearHash(programVector, linearHash);
+
+            // Save into programs
+            string linearHashString = fea2string(fr, linearHash);
+            ctx.programs[linearHashString] = programVector;
+
+            zklog.info("CODE size=" + to_string(program.size()) + " hash=" + linearHashString);
+
+            break;
+        }
         case 0x00: // LEAF -> ( 0x00 CBOR(ENCODE_KEY(key))... CBOR(value)... )
         case 0x01: // EXTENSION -> ( 0x01 CBOR(ENCODE_KEY(key))... )
-        case 0x04: // CODE -> ( 0x04 CBOR(code)... )
         case 0x05: // ACCOUNT_LEAF -> ( 0x05 CBOR(ENCODE_KEY(key))... flags /CBOR(nonce).../ /CBOR(balance).../ )
             // `flags` is a bitset encoded in a single byte (bit endian):
             // * bit 0 defines if **code** is present; if set to 1, then `has_code=true`;
@@ -591,7 +483,7 @@ zkresult calculateWitnessHash (WitnessContext &ctx, Goldilocks::Element (&hash)[
     return ZKR_SUCCESS;
 }
 
-zkresult witness2db (const string &witness, DatabaseMap::MTMap &db, string &stateRoot)
+zkresult witness2db (const string &witness, DatabaseMap::MTMap &db, DatabaseMap::ProgramMap &programs, string &stateRoot)
 {
     zkresult zkr;
 
@@ -603,7 +495,7 @@ zkresult witness2db (const string &witness, DatabaseMap::MTMap &db, string &stat
     }
 
     // Create witness context
-    WitnessContext ctx(witness, db);
+    WitnessContext ctx(witness, db, programs);
 
     // Parse header version
     uint8_t headerVersion = ctx.witness[ctx.p];

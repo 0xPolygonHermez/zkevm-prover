@@ -240,7 +240,7 @@ void runFileProcessBatchWitness(Goldilocks fr, Prover &prover, Config &config)
     string witness = inputJson["result"];
     string witnessBa = string2ba(witness);
     string stateRoot;
-    zkresult zkResult = witness2db(witnessBa, proverRequest.input.db, stateRoot);
+    zkresult zkResult = witness2db(witnessBa, proverRequest.input.db, proverRequest.input.contractsBytecode, stateRoot);
     if (zkResult != ZKR_SUCCESS)
     {
         zklog.error("runFileProcessBatch() failed calling witness2db() zkResult=" + to_string(zkResult) + "=" + zkresult2string(zkResult));

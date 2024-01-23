@@ -7,6 +7,6 @@
 
 using namespace std;
 
-zkresult witness2db (const string &witness, DatabaseMap::MTMap &db, string &stateRoot);
+zkresult witness2db (const string &witness, DatabaseMap::MTMap &db, DatabaseMap::ProgramMap &programs, string &stateRoot);
 
 #endif

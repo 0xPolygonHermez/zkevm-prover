@@ -1893,6 +1893,10 @@ using grpc::Status;
     case ZKR_SM_MAIN_INVALID_L1_INFO_TREE_INDEX:            return ::executor::v1::EXECUTOR_ERROR_INVALID_L1_INFO_TREE_INDEX;
     case ZKR_SM_MAIN_INVALID_L1_INFO_TREE_SMT_PROOF_VALUE:  return ::executor::v1::EXECUTOR_ERROR_INVALID_L1_INFO_TREE_SMT_PROOF_VALUE;
 
+    case ZKR_SM_MAIN_INVALID_WITNESS:                       return ::executor::v1::EXECUTOR_ERROR_INVALID_WITNESS;
+    case ZKR_CBOR_INVALID_DATA:                             return ::executor::v1::EXECUTOR_ERROR_INVALID_CBOR;
+
+
     case ZKR_AGGREGATED_PROOF_INVALID_INPUT: // Only returned when generating a proof
     case ZKR_DB_VERSION_NOT_FOUND_KVDB: // To be mapped to an executor error when HashDB64 is operative
     case ZKR_DB_VERSION_NOT_FOUND_GLOBAL: // To be mapped to an executor error when HashDB64 is operative
