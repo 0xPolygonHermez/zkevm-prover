@@ -1311,7 +1311,7 @@ using grpc::Status;
     }
     
     response->set_error(zkresult2error(proverRequest.result));
-    //response->set_cumulative_gas_used(proverRequest.pFullTracer->get_cumulative_gas_used());
+    response->set_gas_used(proverRequest.pFullTracer->get_gas_used());
     response->set_cnt_keccak_hashes(proverRequest.counters.keccakF);
     response->set_cnt_poseidon_hashes(proverRequest.counters.poseidonG);
     response->set_cnt_poseidon_paddings(proverRequest.counters.paddingPG);
@@ -1508,7 +1508,7 @@ using grpc::Status;
             " new_local_exit_root=" + proverRequest.pFullTracer->get_new_local_exit_root() +
             " old_batch_num=" + to_string(proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum) +
             " steps=" + to_string(proverRequest.counters.steps) +
-            " gasUsed=" + to_string(proverRequest.pFullTracer->get_cumulative_gas_used()) +
+            " gasUsed=" + to_string(proverRequest.pFullTracer->get_gas_used()) +
             " counters.keccakF=" + to_string(proverRequest.counters.keccakF) +
             " counters.poseidonG=" + to_string(proverRequest.counters.poseidonG) +
             " counters.paddingPG=" + to_string(proverRequest.counters.paddingPG) +
@@ -1606,7 +1606,7 @@ using grpc::Status;
 #ifdef LOG_TIME
     lock();
     counter++;
-    uint64_t execGas = 0; //response->cumulative_gas_used();
+    uint64_t execGas = response->gas_used();
     totalGas += execGas;
     uint64_t execBytes = request->batch_l2_data().size();
     totalBytes += execBytes;
