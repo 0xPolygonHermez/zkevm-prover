@@ -40,8 +40,10 @@ int main(int argc, char **argv)
 
     // Load rom.json
     string romFileName = "src/main_sm/" + forkNamespace + "/scripts/rom.json";
+    cout << "ROM file name=" << romFileName << endl;
     json rom;
     file2json(rom, romFileName);
+    cout << "ROM file loaded" << endl;
 
     string code = generate(rom, functionName, fileName, false, false);
     string2file(code, directoryName + "/" + fileName + ".cpp");
@@ -194,7 +196,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
     }
     code += "\n";
 
-    code += " #ifdef MAIN_SM_EXECUTOR_GENERATED_CODE\n";
+    code += "#ifdef MAIN_SM_EXECUTOR_GENERATED_CODE\n";
     code += "\n";
 
     code += "namespace " + forkNamespace + "\n";
@@ -1522,7 +1524,7 @@ code += "    #endif\n";
 #if PROVER_FORK_ID >= 7
                     code += "    zkResult = mainExecutor.pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_block_number(), proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, value, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : bIsBlockL2Hash ? PERSISTENCE_TEMPORARY_HASH : proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);\n";
 #else
-                    code += "    zkResult = mainExecutor.pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_block_number(), proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : ( proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE ), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);\n";
+                    code += "    zkResult = mainExecutor.pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_block_number(), proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, value, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : ( proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE ), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);\n";
 #endif
                     code += "    if (zkResult != ZKR_SUCCESS)\n";
                     code += "    {\n";
@@ -2555,7 +2557,8 @@ code += "    #endif\n";
 
 #if PROVER_FORK_ID >= 7
         // overwrite 'op' when hiting 'checkFirstTxType' label
-        if (zkPC == rom["labels"]["checkFirstTxType"])
+        if ( rom["labels"].contains("checkFirstTxType") &&
+             (zkPC == rom["labels"]["checkFirstTxType"]) )
         {
             code += "    if (proverRequest.input.bSkipFirstChangeL2Block)\n";
             code += "    {\n";
@@ -2570,7 +2573,8 @@ code += "    #endif\n";
             code += "    }\n";
         }
         // overwrite 'op' when hiting 'writeBlockInfoRoot' label
-        if (zkPC == rom["labels"]["writeBlockInfoRoot"])
+        if ( rom["labels"].contains("writeBlockInfoRoot") &&
+             (zkPC == rom["labels"]["writeBlockInfoRoot"]) )
         {
             code += "    if (proverRequest.input.bSkipWriteBlockInfoRoot)\n";
             code += "    {\n";
@@ -2704,7 +2708,7 @@ code += "    #endif\n";
                     
             if (bFastMode)
             {
-                code += "    zkResult = eval_addReadWriteAddress(ctx, scalarD);\n";
+                code += "    zkResult = eval_addReadWriteAddress(ctx, value);\n";
                 code += "    if (zkResult != ZKR_SUCCESS)\n";
                 code += "    {\n";
                 code += "        proverRequest.result = zkResult;\n";
