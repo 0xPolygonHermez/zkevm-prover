@@ -33,6 +33,30 @@ bool batchIsConsolidated (uint64_t batch)
     }
 }
 
+bool blockIsDiscarded (uint64_t block)
+{
+    if (block == 1)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool txIsDiscarded (uint64_t tx)
+{
+    if (tx == 1)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 bool setIsDiscarded (uint64_t set)
 {
     if (set == 1)
@@ -106,12 +130,20 @@ uint64_t HashDB64WorkflowTest (const Config& config)
         // Set TXs
         for (uint64_t tx=0; tx<numberOfTxsPerBatch; tx++)
         {
+
+            Goldilocks::Element txOldRoot[4];
+            for (uint64_t i=0; i<4; i++) txOldRoot[i] = root[i];
+
             for (uint64_t set=0; set<numberOfSetsPerTx; set++)
             {
                 keyScalar++;
                 keyfea[0] = fr.fromU64(keyScalar.get_ui());
                 poseidon.hash(key, keyfea);
                 //scalar2key(fr, keyScalar, key);
+                if (fea2string(fr, key) == "adb5787a1f8676b554f2216c0b37148d303a082109d64fe07615b40971dc29f2")
+                {
+                    zklog.info("special key found setIsDiscarded(set)=" + to_string(setIsDiscarded(set)) + " batchIsDiscarded(batch)=" + to_string(batchIsDiscarded(batch)));
+                }
                 value++;
                 
                 gettimeofday(&t, NULL);
@@ -147,7 +179,7 @@ uint64_t HashDB64WorkflowTest (const Config& config)
                 keyValue.value = value;
 
                 // Store the KeyValue in the prover vector, depending on its expected persistence
-                if (setIsDiscarded(set) || batchIsDiscarded(batch))
+                if (setIsDiscarded(set) || txIsDiscarded(tx) || batchIsDiscarded(batch))
                 {
                     // Store in discardedKeyValues
                     discardedKeyValues.emplace_back(keyValue);
@@ -173,7 +205,7 @@ uint64_t HashDB64WorkflowTest (const Config& config)
                 zkr = pHashDB->setProgram(batchUUID, block, tx, key, accumulatedProgram, persistence);
                 zkassertpermanent(zkr == ZKR_SUCCESS);
 
-                if (batchIsDiscarded(batch))
+                if (batchIsDiscarded(batch) || txIsDiscarded(tx))
                 {
                     discardedPrograms[keyString] = accumulatedProgram;
                 }
@@ -189,15 +221,21 @@ uint64_t HashDB64WorkflowTest (const Config& config)
             pHashDB->finishBlock(batchUUID, fea2string(fr, root), persistence);
             timeMetricStorage.add("semiFlush", TimeDiff(t));
 
+            if (txIsDiscarded(tx))
+            {
+                for (uint64_t i=0; i<4; i++) root[i] = txOldRoot[i];
+            }
+
         } // For every tx
 
-        // Purge
+        // Flush
         gettimeofday(&t, NULL);
-        zkr = pHashDB->purge(batchUUID, root, persistence);
-        timeMetricStorage.add("purge", TimeDiff(t));
+        /*uint64_t flushId, storedFlushId;
+        zkr = pHashDB->flush(batchUUID, fea2string(fr, root), persistence, flushId, storedFlushId);
+        timeMetricStorage.add("flush", TimeDiff(t));
         zkassertpermanent(zkr==ZKR_SUCCESS);
-        zklog.info("PURGE zkr=" + zkresult2string(zkr) + " root=" + fea2string(fr, root));
-
+        zklog.info("FLUSH zkr=" + zkresult2string(zkr) + " root=" + fea2string(fr, root));
+*/
         // Discard some of the batches, and accumulate the key values in the rest
         if (batchIsDiscarded(batch))
         {

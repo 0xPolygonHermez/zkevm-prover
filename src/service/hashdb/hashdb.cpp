@@ -67,7 +67,7 @@ zkresult HashDB::set (const string &batchUUID, uint64_t block, uint64_t tx, cons
 
     if (config.hashDB64)
     {
-        zkr = stateManager64.set(batchUUID, tx, db64, oldRoot, key, value, persistence, *r, dbReadLog);
+        zkr = stateManager64.set(batchUUID, block, tx, db64, oldRoot, key, value, persistence, *r, dbReadLog);
     }
     else
     {
@@ -130,14 +130,18 @@ zkresult HashDB::setProgram (const string &batchUUID, uint64_t block, uint64_t t
     lock_guard<recursive_mutex> guard(mlock);
 #endif
 
+    // Get the key as an hexa string
+    string keyString = fea2string(fr, key);
+
+    // Call writeProgram()
     zkresult zkr;
     if (config.hashDB64)
     {
-        zkr = stateManager64.setProgram(batchUUID, tx, db64, key, data, persistence);
+        zkr = stateManager64.writeProgram(batchUUID, block, tx, keyString, data, persistence);
     }
     else
     {
-        zkr = stateManager.writeProgram(batchUUID, block, tx, fea2string(fr, key), data, persistence);
+        zkr = stateManager.writeProgram(batchUUID, block, tx, keyString, data, persistence);
     }
 
 #ifdef LOG_TIME_STATISTICS_HASHDB
@@ -157,11 +161,25 @@ zkresult HashDB::getProgram (const string &batchUUID, const Goldilocks::Element 
     lock_guard<recursive_mutex> guard(mlock);
 #endif
 
+    // Get the key as an hexa string
+    string keyString = fea2string(fr, key);
+
+    // Clear data
     data.clear();
+
+    // Call readProgram
     zkresult zkr;
     if (config.hashDB64)
     {
-        zkr = stateManager64.getProgram(batchUUID, db64, key, data, dbReadLog);        
+        zkr = stateManager64.readProgram(batchUUID, keyString, data, dbReadLog);    
+        if (zkr != ZKR_SUCCESS)
+        {
+            zkr = db64.getProgram(keyString, data, dbReadLog);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("HashDB::getProgram() failed result=" + zkresult2string(zkr) + " key=" + keyString);
+            }
+        }    
     }
     else
     {
@@ -393,7 +411,7 @@ void HashDB::finishTx (const string &batchUUID, const string &newStateRoot, cons
     {
         if (config.stateManager && (batchUUID.size() != 0))
         {
-            stateManager64.semiFlush(batchUUID, newStateRoot, persistence);
+            stateManager64.finishTx(batchUUID, newStateRoot, persistence);
         }
     }
     else
@@ -431,6 +449,14 @@ void HashDB::finishBlock (const string &batchUUID, const string &newStateRoot, c
 {
     if (config.hashDB64)
     {
+        if (config.stateManager && (batchUUID.size() != 0))
+        {
+            stateManager64.finishBlock(batchUUID, newStateRoot, persistence);
+        }
+        else
+        {
+            //db64.semiFlush();
+        }
     }
     else
     {
@@ -458,7 +484,10 @@ zkresult HashDB::flush (const string &batchUUID, const string &newStateRoot, con
     zkresult result;
     if (config.hashDB64)
     {
-        result = db64.flush(flushId, storedFlushId);
+        //result = db64.flush(flushId, storedFlushId);
+        //result = stateManager64.flush(batchUUID, newStateRoot, persistence, db64, flushId, storedFlushId);
+        zklog.error("HashDB::flush() no longer supported in StateManager64");
+        result = ZKR_STATE_MANAGER;
     }
     else
     {
@@ -494,7 +523,9 @@ zkresult HashDB::purge (const string &batchUUID, const Goldilocks::Element (&new
     zkresult result;
     if (config.hashDB64 && config.stateManager && (batchUUID.size() != 0))
     {
-        result = stateManager64.purge(batchUUID, fea2string(fr, newStateRoot), persistence, db64);
+        //result = stateManager64.purge(batchUUID, fea2string(fr, newStateRoot), persistence, db64);
+        zklog.error("HashDB::purge() no longer supported in StateManager64");
+        result = ZKR_STATE_MANAGER;
     }
     else
     {
