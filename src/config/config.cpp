@@ -131,7 +131,6 @@ void Config::load(json &config)
     ParseBool(config, "runFileProcessBatch", "RUN_FILE_PROCESS_BATCH", runFileProcessBatch, false);
     ParseBool(config, "runFileProcessBatchMultithread", "RUN_FILE_PROCESS_BATCH_MULTITHREAD", runFileProcessBatchMultithread, false);
     ParseBool(config, "runFileExecute", "RUN_FILE_EXECUTE", runFileExecute, false);
-    ParseBool(config, "runFileProcessBatchWitness", "RUN_FILE_PROCESS_BATCH_WITNESS", runFileProcessBatchWitness, false);
 
     // Tests
     ParseBool(config, "runKeccakScriptGenerator", "RUN_KECCAK_SCRIPT_GENERATOR", runKeccakScriptGenerator, false);
@@ -349,8 +348,6 @@ void Config::print(void)
         zklog.info("    runFileProcessBatchMultithread=true");
     if (runFileExecute)
         zklog.info("    runFileExecute=true");
-    if (runFileProcessBatchWitness)
-        zklog.info("    runFileProcessBatchWitness=true");
 
     if (runKeccakScriptGenerator)
         zklog.info("    runKeccakScriptGenerator=true");
