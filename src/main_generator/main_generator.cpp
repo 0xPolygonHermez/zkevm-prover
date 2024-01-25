@@ -3316,7 +3316,33 @@ code += "    #endif\n";
             code += "    for (uint64_t j=0; j<size; j++) {\n";
             code += "        result = (a >> (size-j-1)*8) & ScalarMask8;\n";
             code += "        uint8_t bm = result.get_ui();\n";
-            code += "        if (hashIterator->second.data.size() == (pos+j))\n";
+                             // Allow to fill the first byte with a zero
+            code += "        if (((pos+j) == 1) && hashIterator->second.data.empty() && !hashIterator->second.firstByteWritten)\n";
+            code += "        {\n";
+                                 // Fill a zero
+            code += "            hashIterator->second.data.push_back(0);\n";
+                    
+                                 // Record the read operation
+            code += "            readsIterator = hashIterator->second.reads.find(0);\n";
+            code += "            if ( readsIterator != hashIterator->second.reads.end() )\n";
+            code += "            {\n";
+            code += "                proverRequest.result = ZKR_SM_MAIN_HASHP_SIZE_MISMATCH;\n";
+            code += "                mainExecutor.logError(ctx, \"HashP 2 zero position already existed addr=\" + to_string(addr) + \" pos=\" + to_string(pos));\n";
+            code += "                mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
+            code += "                return;\n";
+            code += "            }\n";
+            code += "            else\n";
+            code += "            {\n";
+            code += "                ctx.hashP[addr].reads[0] = 1;\n";
+            code += "            }\n";
+            code += "        }\n";
+                             // Allow to overwrite the first byte
+            code += "        if (((pos+j) == 0) && (size==1) && !hashIterator->second.firstByteWritten)\n";
+            code += "        {\n";
+            code += "            hashIterator->second.data[0] = bm;\n";
+            code += "            hashIterator->second.firstByteWritten = true;\n";
+            code += "        }\n";
+            code += "        else if (hashIterator->second.data.size() == (pos+j))\n";
             code += "        {\n";
             code += "            hashIterator->second.data.push_back(bm);\n";
             code += "        }\n";

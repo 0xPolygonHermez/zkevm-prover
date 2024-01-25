@@ -34,7 +34,8 @@ public:
     mpz_class digest;
     bool digestCalled;
     bool lenCalled;
-    HashValue() : digestCalled(false), lenCalled(false) {};
+    bool firstByteWritten;
+    HashValue() : digestCalled(false), lenCalled(false), firstByteWritten(false) {};
 };
 
 class LastSWrite

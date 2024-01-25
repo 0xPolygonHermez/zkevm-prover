@@ -2929,7 +2929,36 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
             for (uint64_t j=0; j<size; j++) {
                 result = (a >> (size-j-1)*8) & ScalarMask8;
                 uint8_t bm = result.get_ui();
-                if (hashPIterator->second.data.size() == (pos+j))
+
+                // Allow to fill the first byte with a zero
+                if (((pos+j) == 1) && hashPIterator->second.data.empty() && !hashPIterator->second.firstByteWritten)
+                {
+                    // Fill a zero
+                    hashPIterator->second.data.push_back(0);
+                    
+                    // Record the read operation
+                    unordered_map<uint64_t, uint64_t>::iterator readsIterator;
+                    readsIterator = hashPIterator->second.reads.find(0);
+                    if ( readsIterator != hashPIterator->second.reads.end() )
+                    {
+                        proverRequest.result = ZKR_SM_MAIN_HASHP_SIZE_MISMATCH;
+                        logError(ctx, "HashP 2 zero position already existed addr=" + to_string(addr) + " pos=" + to_string(pos));
+                        pHashDB->cancelBatch(proverRequest.uuid);
+                        return;
+                    }
+                    else
+                    {
+                        ctx.hashP[addr].reads[0] = 1;
+                    }
+                }
+
+                // Allow to overwrite the first byte
+                if (((pos+j) == 0) && (size==1) && !hashPIterator->second.firstByteWritten)
+                {
+                    hashPIterator->second.data[0] = bm;
+                    hashPIterator->second.firstByteWritten = true;
+                }
+                else if (hashPIterator->second.data.size() == (pos+j))
                 {
                     hashPIterator->second.data.push_back(bm);
                 }
@@ -5474,10 +5503,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
     if (config.hashDB64)
     {
-        Goldilocks::Element newStateRoot[4];
+        /*Goldilocks::Element newStateRoot[4];
         string2fea(fr, NormalizeToNFormat(proverRequest.pFullTracer->get_new_state_root(), 64), newStateRoot);
         zkresult zkr;
-        /*zkr = pHashDB->purge(proverRequest.uuid, newStateRoot, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);
+        zkr = pHashDB->purge(proverRequest.uuid, newStateRoot, proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE);
         if (zkr != ZKR_SUCCESS)
         {
             proverRequest.result = zkr;
