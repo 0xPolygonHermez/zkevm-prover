@@ -36,6 +36,13 @@ void Input::loadGlobals (json &input)
     /* PUBLIC INPUTS */
     /*****************/
 
+    // Input JSON could contain a dataStream key
+    if (input.contains("dataStream") && input["dataStream"].is_string())
+    {
+        string dataStream = input["dataStream"];
+        publicInputsExtended.publicInputs.dataStream = string2ba(dataStream);
+    }
+
     // Input JSON file could contain a forkID key at the root level (not mandatory, default is 0)
     if ( input.contains("forkID") &&
          input["forkID"].is_number_unsigned() )
@@ -46,18 +53,16 @@ void Input::loadGlobals (json &input)
     zklog.info("Input::loadGlobals(): forkID=" + to_string(publicInputsExtended.publicInputs.forkID));
 #endif
 
-    // Input JSON file must contain a oldStateRoot key at the root level
-    if ( !input.contains("oldStateRoot") ||
-         !input["oldStateRoot"].is_string() )
+    // Input JSON file might contain a oldStateRoot key at the root level
+    if ( input.contains("oldStateRoot") &&
+         input["oldStateRoot"].is_string() )
     {
-        zklog.error("Input::loadGlobals() oldStateRoot key not found in input JSON file");
-        exitProcess();
-    }
-    auxString = Remove0xIfPresent(input["oldStateRoot"]);
-    publicInputsExtended.publicInputs.oldStateRoot.set_str(auxString, 16);
+        auxString = Remove0xIfPresent(input["oldStateRoot"]);
+        publicInputsExtended.publicInputs.oldStateRoot.set_str(auxString, 16);
 #ifdef LOG_INPUT
-    zklog.info("Input::loadGlobals(): oldStateRoot=" + publicInputsExtended.publicInputs.oldStateRoot.get_str(16));
+        zklog.info("Input::loadGlobals(): oldStateRoot=" + publicInputsExtended.publicInputs.oldStateRoot.get_str(16));
 #endif
+    }
 
     // Input JSON file may contain a oldAccInputHash key at the root level
     if ( input.contains("oldAccInputHash") &&
@@ -71,16 +76,14 @@ void Input::loadGlobals (json &input)
     }
 
     // Input JSON file must contain a oldBatchNum key at the root level
-    if ( !input.contains("oldNumBatch") ||
-         !input["oldNumBatch"].is_number_unsigned() )
+    if ( input.contains("oldNumBatch") &&
+         input["oldNumBatch"].is_number_unsigned() )
     {
-        zklog.error("Input::loadGlobals() oldNumBatch key not found in input JSON file");
-        exitProcess();
-    }
-    publicInputsExtended.publicInputs.oldBatchNum = input["oldNumBatch"];
+        publicInputsExtended.publicInputs.oldBatchNum = input["oldNumBatch"];
 #ifdef LOG_INPUT
-    zklog.info("loadGlobals(): oldBatchNum=" + to_string(publicInputsExtended.publicInputs.oldBatchNum));
+        zklog.info("loadGlobals(): oldBatchNum=" + to_string(publicInputsExtended.publicInputs.oldBatchNum));
 #endif
+    }
 
     // Input JSON file must contain a chainID key at the root level (it is mandatory)
     if ( !input.contains("chainID") ||
@@ -97,14 +100,12 @@ void Input::loadGlobals (json &input)
     zklog.info("Input::loadGlobals(): chainID=" + to_string(publicInputsExtended.publicInputs.chainID));
 #endif
 
-    // Input JSON file must contain a batchL2Data key at the root level
-    if ( !input.contains("batchL2Data") ||
-         !input["batchL2Data"].is_string() )
+    // Input JSON file might contain a batchL2Data key at the root level
+    if ( input.contains("batchL2Data") &&
+         input["batchL2Data"].is_string() )
     {
-        zklog.error("Input::loadGlobals() batchL2Data key not found in input JSON file");
-        exitProcess();
+        publicInputsExtended.publicInputs.batchL2Data = string2ba(input["batchL2Data"]);
     }
-    publicInputsExtended.publicInputs.batchL2Data = string2ba(input["batchL2Data"]);
 
     // Check the batchL2Data length
     if (publicInputsExtended.publicInputs.batchL2Data.size() > (MAX_BATCH_L2_DATA_SIZE))
@@ -116,7 +117,7 @@ void Input::loadGlobals (json &input)
     zklog.info("loadGlobals(): batchL2Data=" + ba2string(publicInputsExtended.publicInputs.batchL2Data));
 #endif
 
-    if (publicInputsExtended.publicInputs.forkID <= 6)
+    if ((publicInputsExtended.publicInputs.forkID >= 1) && (publicInputsExtended.publicInputs.forkID <= 6))
     {
         // Input JSON file must contain a globalExitRoot key at the root level
         if ( !input.contains("globalExitRoot") ||
@@ -161,7 +162,7 @@ void Input::loadGlobals (json &input)
 #endif
     }
 
-    if (publicInputsExtended.publicInputs.forkID <= 6)
+    if ((publicInputsExtended.publicInputs.forkID >= 1) && (publicInputsExtended.publicInputs.forkID <= 6))
     {
         // Input JSON file must contain a timestamp key at the root level
         if ( !input.contains("timestamp") ||
@@ -603,14 +604,32 @@ void Input::loadGlobals (json &input)
 void Input::saveGlobals (json &input) const
 {
     // Public inputs
-    input["forkID"] = publicInputsExtended.publicInputs.forkID;
-    input["oldStateRoot"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.oldStateRoot.get_str(16), 64);
-    input["oldAccInputHash"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.oldAccInputHash.get_str(16), 64);
-    input["oldNumBatch"] = publicInputsExtended.publicInputs.oldBatchNum;
+    if (publicInputsExtended.publicInputs.forkID != 0)
+    {
+        input["forkID"] = publicInputsExtended.publicInputs.forkID;
+    }
+    if (publicInputsExtended.publicInputs.oldStateRoot != 0)
+    {
+        input["oldStateRoot"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.oldStateRoot.get_str(16), 64);
+    }
+    if (publicInputsExtended.publicInputs.oldAccInputHash != 0)
+    {
+        input["oldAccInputHash"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.oldAccInputHash.get_str(16), 64);
+    }
+    if (publicInputsExtended.publicInputs.oldBatchNum != 0)
+    {
+        input["oldNumBatch"] = publicInputsExtended.publicInputs.oldBatchNum;
+    }
     input["chainID"] = publicInputsExtended.publicInputs.chainID;
-    input["batchL2Data"] = Add0xIfMissing(ba2string(publicInputsExtended.publicInputs.batchL2Data));
+    if (!publicInputsExtended.publicInputs.batchL2Data.empty())
+    {
+        input["batchL2Data"] = Add0xIfMissing(ba2string(publicInputsExtended.publicInputs.batchL2Data));
+    }
     input["sequencerAddr"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.sequencerAddr.get_str(16), 40);
-    if (publicInputsExtended.publicInputs.aggregatorAddress != 0) input["aggregatorAddress"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.aggregatorAddress.get_str(16), 40);
+    if (publicInputsExtended.publicInputs.aggregatorAddress != 0)
+    {
+        input["aggregatorAddress"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.aggregatorAddress.get_str(16), 40);
+    }
     if (publicInputsExtended.publicInputs.forkID <= 6)
     {
         input["globalExitRoot"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.globalExitRoot.get_str(16), 64);
@@ -621,6 +640,14 @@ void Input::saveGlobals (json &input) const
         input["l1InfoRoot"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.l1InfoRoot.get_str(16), 64);
         input["forcedBlockHashL1"] = NormalizeTo0xNFormat(publicInputsExtended.publicInputs.forcedBlockHashL1.get_str(16), 64);
         input["timestampLimit"] = publicInputsExtended.publicInputs.timestampLimit;
+    }
+    if (!publicInputsExtended.publicInputs.witness.empty())
+    {
+        input["witness"] = Add0xIfMissing(ba2string(publicInputsExtended.publicInputs.witness));
+    }
+    if (!publicInputsExtended.publicInputs.dataStream.empty())
+    {
+        input["dataStream"] =  Add0xIfMissing(ba2string(publicInputsExtended.publicInputs.dataStream));
     }
 
     // Public inputs extended
@@ -688,6 +715,13 @@ void Input::saveGlobals (json &input) const
 
 void Input::loadDatabase (json &input)
 {
+    // Load witness
+    if (input.contains("witness") && input["witness"].is_string())
+    {
+        string witness = input["witness"];
+        publicInputsExtended.publicInputs.witness = string2ba(witness);
+    }
+
     // Input JSON file must contain a db structure at the root level
     if ( !input.contains("db") ||
          !input["db"].is_structured() )

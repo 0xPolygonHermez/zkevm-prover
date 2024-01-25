@@ -5172,12 +5172,13 @@ class ProcessStatelessBatchRequestV2 PROTOBUF_FINAL :
   enum : int {
     kWitnessFieldNumber = 1,
     kDataStreamFieldNumber = 2,
-    kCoinbaseFieldNumber = 3,
-    kOldAccInputHashFieldNumber = 4,
-    kL1InfoRootFieldNumber = 5,
-    kForcedBlockhashL1FieldNumber = 7,
-    kContextIdFieldNumber = 8,
-    kTimestampLimitFieldNumber = 6,
+    kCoinbaseFieldNumber = 4,
+    kOldAccInputHashFieldNumber = 5,
+    kL1InfoRootFieldNumber = 6,
+    kForcedBlockhashL1FieldNumber = 8,
+    kContextIdFieldNumber = 9,
+    kChainIdFieldNumber = 3,
+    kTimestampLimitFieldNumber = 7,
   };
   // bytes witness = 1;
   void clear_witness();
@@ -5229,7 +5230,7 @@ class ProcessStatelessBatchRequestV2 PROTOBUF_FINAL :
   std::string* _internal_mutable_data_stream();
   public:
 
-  // string coinbase = 3;
+  // string coinbase = 4;
   void clear_coinbase();
   const std::string& coinbase() const;
   void set_coinbase(const std::string& value);
@@ -5254,7 +5255,7 @@ class ProcessStatelessBatchRequestV2 PROTOBUF_FINAL :
   std::string* _internal_mutable_coinbase();
   public:
 
-  // bytes old_acc_input_hash = 4;
+  // bytes old_acc_input_hash = 5;
   void clear_old_acc_input_hash();
   const std::string& old_acc_input_hash() const;
   void set_old_acc_input_hash(const std::string& value);
@@ -5279,7 +5280,7 @@ class ProcessStatelessBatchRequestV2 PROTOBUF_FINAL :
   std::string* _internal_mutable_old_acc_input_hash();
   public:
 
-  // bytes l1_info_root = 5;
+  // bytes l1_info_root = 6;
   void clear_l1_info_root();
   const std::string& l1_info_root() const;
   void set_l1_info_root(const std::string& value);
@@ -5304,7 +5305,7 @@ class ProcessStatelessBatchRequestV2 PROTOBUF_FINAL :
   std::string* _internal_mutable_l1_info_root();
   public:
 
-  // bytes forced_blockhash_l1 = 7;
+  // bytes forced_blockhash_l1 = 8;
   void clear_forced_blockhash_l1();
   const std::string& forced_blockhash_l1() const;
   void set_forced_blockhash_l1(const std::string& value);
@@ -5329,7 +5330,7 @@ class ProcessStatelessBatchRequestV2 PROTOBUF_FINAL :
   std::string* _internal_mutable_forced_blockhash_l1();
   public:
 
-  // string context_id = 8;
+  // string context_id = 9;
   void clear_context_id();
   const std::string& context_id() const;
   void set_context_id(const std::string& value);
@@ -5354,7 +5355,16 @@ class ProcessStatelessBatchRequestV2 PROTOBUF_FINAL :
   std::string* _internal_mutable_context_id();
   public:
 
-  // uint64 timestamp_limit = 6;
+  // uint64 chain_id = 3;
+  void clear_chain_id();
+  ::PROTOBUF_NAMESPACE_ID::uint64 chain_id() const;
+  void set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_chain_id() const;
+  void _internal_set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 timestamp_limit = 7;
   void clear_timestamp_limit();
   ::PROTOBUF_NAMESPACE_ID::uint64 timestamp_limit() const;
   void set_timestamp_limit(::PROTOBUF_NAMESPACE_ID::uint64 value);
@@ -5377,6 +5387,7 @@ class ProcessStatelessBatchRequestV2 PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr l1_info_root_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr forced_blockhash_l1_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr context_id_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 chain_id_;
   ::PROTOBUF_NAMESPACE_ID::uint64 timestamp_limit_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_executor_2eproto;
@@ -16359,7 +16370,27 @@ inline void ProcessStatelessBatchRequestV2::unsafe_arena_set_allocated_data_stre
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessStatelessBatchRequestV2.data_stream)
 }
 
-// string coinbase = 3;
+// uint64 chain_id = 3;
+inline void ProcessStatelessBatchRequestV2::clear_chain_id() {
+  chain_id_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessStatelessBatchRequestV2::_internal_chain_id() const {
+  return chain_id_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessStatelessBatchRequestV2::chain_id() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessStatelessBatchRequestV2.chain_id)
+  return _internal_chain_id();
+}
+inline void ProcessStatelessBatchRequestV2::_internal_set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  chain_id_ = value;
+}
+inline void ProcessStatelessBatchRequestV2::set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_chain_id(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessStatelessBatchRequestV2.chain_id)
+}
+
+// string coinbase = 4;
 inline void ProcessStatelessBatchRequestV2::clear_coinbase() {
   coinbase_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -16440,7 +16471,7 @@ inline void ProcessStatelessBatchRequestV2::unsafe_arena_set_allocated_coinbase(
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessStatelessBatchRequestV2.coinbase)
 }
 
-// bytes old_acc_input_hash = 4;
+// bytes old_acc_input_hash = 5;
 inline void ProcessStatelessBatchRequestV2::clear_old_acc_input_hash() {
   old_acc_input_hash_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -16521,7 +16552,7 @@ inline void ProcessStatelessBatchRequestV2::unsafe_arena_set_allocated_old_acc_i
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessStatelessBatchRequestV2.old_acc_input_hash)
 }
 
-// bytes l1_info_root = 5;
+// bytes l1_info_root = 6;
 inline void ProcessStatelessBatchRequestV2::clear_l1_info_root() {
   l1_info_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -16602,7 +16633,7 @@ inline void ProcessStatelessBatchRequestV2::unsafe_arena_set_allocated_l1_info_r
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessStatelessBatchRequestV2.l1_info_root)
 }
 
-// uint64 timestamp_limit = 6;
+// uint64 timestamp_limit = 7;
 inline void ProcessStatelessBatchRequestV2::clear_timestamp_limit() {
   timestamp_limit_ = PROTOBUF_ULONGLONG(0);
 }
@@ -16622,7 +16653,7 @@ inline void ProcessStatelessBatchRequestV2::set_timestamp_limit(::PROTOBUF_NAMES
   // @@protoc_insertion_point(field_set:executor.v1.ProcessStatelessBatchRequestV2.timestamp_limit)
 }
 
-// bytes forced_blockhash_l1 = 7;
+// bytes forced_blockhash_l1 = 8;
 inline void ProcessStatelessBatchRequestV2::clear_forced_blockhash_l1() {
   forced_blockhash_l1_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
@@ -16703,7 +16734,7 @@ inline void ProcessStatelessBatchRequestV2::unsafe_arena_set_allocated_forced_bl
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessStatelessBatchRequestV2.forced_blockhash_l1)
 }
 
-// string context_id = 8;
+// string context_id = 9;
 inline void ProcessStatelessBatchRequestV2::clear_context_id() {
   context_id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }

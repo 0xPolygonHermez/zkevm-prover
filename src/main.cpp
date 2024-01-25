@@ -239,7 +239,7 @@ void runFileProcessBatchWitness(Goldilocks fr, Prover &prover, Config &config)
     }
     string witness = inputJson["result"];
     string witnessBa = string2ba(witness);
-    string stateRoot;
+    mpz_class stateRoot;
     zkresult zkResult = witness2db(witnessBa, proverRequest.input.db, proverRequest.input.contractsBytecode, stateRoot);
     if (zkResult != ZKR_SUCCESS)
     {

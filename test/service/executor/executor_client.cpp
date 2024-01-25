@@ -97,7 +97,8 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
     // Resulting new state root
     string newStateRoot;
 
-    if (input.publicInputsExtended.publicInputs.forkID <= 6)
+    if ((input.publicInputsExtended.publicInputs.forkID >= 1) &&
+        (input.publicInputsExtended.publicInputs.forkID <= 6))
     {
         ::executor::v1::ProcessBatchRequest request;
         request.set_coinbase(Add0xIfMissing(input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)));
@@ -199,7 +200,7 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
             zklog.info("ExecutorClient::ProcessBatch() successfully stored returned flush id=" + to_string(processBatchResponse.flush_id()));
         }
     }
-    else
+    else if (input.publicInputsExtended.publicInputs.witness.empty())
     {
         ::executor::v1::ProcessBatchRequestV2 request;
         request.set_coinbase(Add0xIfMissing(input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)));
@@ -327,6 +328,67 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
             }
             ::grpc::ClientContext context;
             ::grpc::Status grpcStatus = stub->ProcessBatchV2(&context, request, &processBatchResponse);
+            if (grpcStatus.error_code() != grpc::StatusCode::OK)
+            {
+                cerr << "Error: ExecutorClient::ProcessBatch() failed calling server i=" << i << " error=" << grpcStatus.error_code() << "=" << grpcStatus.error_message() << endl;
+                break;
+            }
+            if (processBatchResponse.error() != executor::v1::EXECUTOR_ERROR_NO_ERROR)
+            {
+                cerr << "Error: ExecutorClient::ProcessBatch() failed i=" << i << " error=" << processBatchResponse.error() << endl;
+                return false;
+            }
+            newStateRoot = ba2string(processBatchResponse.new_state_root());
+
+    #ifdef LOG_SERVICE
+            cout << "ExecutorClient::ProcessBatch() got:\n" << response.DebugString() << endl;
+    #endif
+        }
+
+        if (processBatchResponse.stored_flush_id() != processBatchResponse.flush_id())
+        {
+            executor::v1::GetFlushStatusResponse getFlushStatusResponse;
+            do
+            {
+                usleep(10000);
+                google::protobuf::Empty request;
+                ::grpc::ClientContext context;
+                ::grpc::Status grpcStatus = stub->GetFlushStatus(&context, request, &getFlushStatusResponse);
+                if (grpcStatus.error_code() != grpc::StatusCode::OK)
+                {
+                    cerr << "Error: ExecutorClient::ProcessBatch() failed calling GetFlushStatus()" << endl;
+                    break;
+                }
+            } while (getFlushStatusResponse.stored_flush_id() < processBatchResponse.flush_id());
+            zklog.info("ExecutorClient::ProcessBatch() successfully stored returned flush id=" + to_string(processBatchResponse.flush_id()));
+        }
+    }
+    else if (!input.publicInputsExtended.publicInputs.witness.empty()) // Stateless
+    {
+        ::executor::v1::ProcessStatelessBatchRequestV2 request;
+        request.set_witness(input.publicInputsExtended.publicInputs.witness);
+        request.set_data_stream(input.publicInputsExtended.publicInputs.dataStream);
+        request.set_coinbase(Add0xIfMissing(input.publicInputsExtended.publicInputs.sequencerAddr.get_str(16)));
+        request.set_old_acc_input_hash(scalar2ba(input.publicInputsExtended.publicInputs.oldAccInputHash));
+        request.set_l1_info_root(scalar2ba(input.publicInputsExtended.publicInputs.l1InfoRoot));
+        request.set_timestamp_limit(input.publicInputsExtended.publicInputs.timestampLimit);
+        request.set_forced_blockhash_l1(scalar2ba(input.publicInputsExtended.publicInputs.forcedBlockHashL1));
+        request.set_chain_id(input.publicInputsExtended.publicInputs.chainID);
+
+        ::executor::v1::ProcessBatchResponseV2 processBatchResponse;
+        for (uint64_t i=0; i<config.executorClientLoops; i++)
+        {
+            if (config.executorClientResetDB)
+            {
+                pHashDB->resetDB();
+            }
+            else if (i == 1)
+            {
+                //request.clear_db();
+                //request.clear_contracts_bytecode();
+            }
+            ::grpc::ClientContext context;
+            ::grpc::Status grpcStatus = stub->ProcessStatelessBatchV2(&context, request, &processBatchResponse);
             if (grpcStatus.error_code() != grpc::StatusCode::OK)
             {
                 cerr << "Error: ExecutorClient::ProcessBatch() failed calling server i=" << i << " error=" << grpcStatus.error_code() << "=" << grpcStatus.error_message() << endl;

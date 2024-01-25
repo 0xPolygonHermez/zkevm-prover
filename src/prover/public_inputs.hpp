@@ -22,6 +22,8 @@ public:
     mpz_class forcedBlockHashL1; // Used when forkID >= 7
     mpz_class sequencerAddr;
     mpz_class aggregatorAddress; // Ethereum address of the aggregator that sends verifyBatch TX to the SC, used to prevent proof front-running
+    string    witness; // Byte array of the SMT required data in witness (binary) format
+    string    dataStream; // Byte array of the batch input required data in Data Streadm (binary) format
 
     PublicInputs() : forkID(0), oldBatchNum(0), chainID(0), timestamp(0), timestampLimit(0)
     {

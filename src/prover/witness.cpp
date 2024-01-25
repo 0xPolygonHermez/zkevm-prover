@@ -493,7 +493,7 @@ zkresult calculateWitnessHash (WitnessContext &ctx, Goldilocks::Element (&hash)[
     return ZKR_SUCCESS;
 }
 
-zkresult witness2db (const string &witness, DatabaseMap::MTMap &db, DatabaseMap::ProgramMap &programs, string &stateRoot)
+zkresult witness2db (const string &witness, DatabaseMap::MTMap &db, DatabaseMap::ProgramMap &programs, mpz_class &stateRoot)
 {
     zkresult zkr;
 
@@ -527,9 +527,9 @@ zkresult witness2db (const string &witness, DatabaseMap::MTMap &db, DatabaseMap:
     }
 
     // Convert state root
-    stateRoot = fea2string(fr, hash);
+    fea2scalar(fr, stateRoot, hash);
 
-    zklog.info("witness2db() calculated stateRoot=" + stateRoot);
+    zklog.info("witness2db() calculated stateRoot=" + stateRoot.get_str(16));
 
 #ifdef WITNESS_CHECK_SMT
     zklog.info("witness2db() calculated SMT root=" + fea2string(fr, ctx.root));
