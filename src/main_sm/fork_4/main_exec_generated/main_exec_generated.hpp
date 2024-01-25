@@ -5,7 +5,7 @@
 #include "main_sm/fork_4/main/main_executor.hpp"
 #include "main_sm/fork_4/main/main_exec_required.hpp"
 
- #ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
+#ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
 
 namespace fork_4
 {
