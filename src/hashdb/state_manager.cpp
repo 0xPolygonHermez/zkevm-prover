@@ -164,7 +164,7 @@ zkresult StateManager::setStateRoot (const string &batchUUID, uint64_t block, ui
             }
 
             // Check that new state root is empty
-            if (txState.persistence[persistence].subState[currentSubStateSize-1].newStateRoot.size() == 0)
+            if (txState.persistence[persistence].subState[currentSubStateSize-1].newStateRoot.empty())
             {
                 zklog.error("StateManager::setStateRoot() oldStateRoot found previous newStateRoot empty");
                 Unlock();

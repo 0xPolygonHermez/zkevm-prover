@@ -27,8 +27,8 @@ uint64_t HashDBTest (const Config& config)
     
     //numberOfFailedTests += HashDBTestMultiWrite(config);
     //numberOfFailedTests += HashDBProgramTest(config);
-    //numberOfFailedTests += HashDB64WorkflowTest(config);
-    numberOfFailedTests += HashDB64SimpleWorkflowTest(config);
+    numberOfFailedTests += HashDB64WorkflowTest(config);
+    //numberOfFailedTests += HashDB64SimpleWorkflowTest(config);
     return numberOfFailedTests;
 }
 
