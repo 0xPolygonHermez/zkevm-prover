@@ -286,7 +286,7 @@ void runFileExecute(Goldilocks fr, Prover &prover, Config &config)
 }
 
 
-int zkevm_main(char *pConfigFile)
+int zkevm_main(char *pConfigFile, void* pAddress)
 {
 
     // Create one instance of Config based on the contents of the file config.json
@@ -531,7 +531,8 @@ int zkevm_main(char *pConfigFile)
     TimerStart(PROVER_CONSTRUCTOR);
     Prover prover(fr,
                   poseidon,
-                  config);
+                  config,
+                  pAddress);
     TimerStopAndLog(PROVER_CONSTRUCTOR);
 
     /* SERVERS */

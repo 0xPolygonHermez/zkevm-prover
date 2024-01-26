@@ -35,7 +35,7 @@
 
 Prover::Prover(Goldilocks &fr,
                PoseidonGoldilocks &poseidon,
-               const Config &config) : fr(fr),
+               const Config &config, void *pExternalAddress) : fr(fr),
                                        poseidon(poseidon),
                                        executor(fr, config, poseidon),
                                        pCurrentRequest(NULL),
@@ -105,12 +105,20 @@ Prover::Prover(Goldilocks &fr,
             }
             else
             {
-                pAddress = calloc(polsSize, 1);
-                if (pAddress == NULL)
+                externalAllocated = pExternalAddress != NULL;
+
+                if(externalAllocated)
                 {
-                    zklog.error("Prover::genBatchProof() failed calling malloc() of size " + to_string(polsSize));
-                    exitProcess();
+                    pAddress = static_cast<void*>(pExternalAddress);
+                } else {
+                    pAddress = calloc(polsSize, 1);
+                    if (pAddress == NULL)
+                    {
+                        zklog.error("Prover::genBatchProof() failed calling malloc() of size " + to_string(polsSize));
+                        exitProcess();
+                    }
                 }
+
                 zklog.info("Prover::genBatchProof() successfully allocated " + to_string(polsSize) + " bytes");
             }
 
@@ -165,7 +173,7 @@ Prover::~Prover()
         }
         else
         {
-            free(pAddress);
+            if(!externalAllocated) free(pAddress);
         }
         free(pAddressStarksRecursiveF);
 
@@ -456,10 +464,12 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         unmapFile(pointerCmPols, cmPols.size());
     }
 
+#ifndef __LIB__
     if (pProverRequest->result == ZKR_SUCCESS)
     {
         genStarkProof(cmPols, lastN, *pProverRequest);
     }
+#endif
 
     TimerStopAndLog(PROVER_BATCH_PROOF);
 }

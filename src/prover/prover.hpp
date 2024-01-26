@@ -64,7 +64,8 @@ public:
 
     Prover(Goldilocks &fr,
            PoseidonGoldilocks &poseidon,
-           const Config &config);
+           const Config &config,
+           void *pAddress = NULL);
 
     ~Prover();
 

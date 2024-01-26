@@ -44,8 +44,10 @@ endif
 ifeq ($(zkevm_sm),1)
 	  LDFLAGS_EXT += -L../zkevm-prover-rust/target/release -lzkevm_sm
 	  INCFLAGS_EXT += -I./../zkevm-prover-rust/include
-	  CXXFLAGS += -D__ZKEVM_SM__
+	  CXXFLAGS += -D__ZKEVM_SM__ -D__LIB__
 endif
+
+
 
 INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
