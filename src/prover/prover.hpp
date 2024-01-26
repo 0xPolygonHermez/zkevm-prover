@@ -69,6 +69,7 @@ public:
     ~Prover();
 
     void genBatchProof(ProverRequest *pProverRequest);
+    void genStarkProof(PROVER_FORK_NAMESPACE::CommitPols &cmPols, uint64_t lastN, ProverRequest &pProverRequest);
     void genAggregatedProof(ProverRequest *pProverRequest);
     void genFinalProof(ProverRequest *pProverRequest);
     void processBatch(ProverRequest *pProverRequest);
