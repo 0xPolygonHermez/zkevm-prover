@@ -52,7 +52,7 @@ struct TableStruct_executor_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxillaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[41]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[42]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -154,6 +154,9 @@ extern ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUseDefaultTypeInternal 
 class ProcessBlockResponseV2;
 class ProcessBlockResponseV2DefaultTypeInternal;
 extern ProcessBlockResponseV2DefaultTypeInternal _ProcessBlockResponseV2_default_instance_;
+class ProcessStatelessBatchRequestV2;
+class ProcessStatelessBatchRequestV2DefaultTypeInternal;
+extern ProcessStatelessBatchRequestV2DefaultTypeInternal _ProcessStatelessBatchRequestV2_default_instance_;
 class ProcessTransactionResponse;
 class ProcessTransactionResponseDefaultTypeInternal;
 extern ProcessTransactionResponseDefaultTypeInternal _ProcessTransactionResponse_default_instance_;
@@ -218,6 +221,7 @@ template<> ::executor::v1::ProcessBatchResponseV2* Arena::CreateMaybeMessage<::e
 template<> ::executor::v1::ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse* Arena::CreateMaybeMessage<::executor::v1::ProcessBatchResponseV2_ReadWriteAddressesEntry_DoNotUse>(Arena*);
 template<> ::executor::v1::ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse* Arena::CreateMaybeMessage<::executor::v1::ProcessBatchResponse_ReadWriteAddressesEntry_DoNotUse>(Arena*);
 template<> ::executor::v1::ProcessBlockResponseV2* Arena::CreateMaybeMessage<::executor::v1::ProcessBlockResponseV2>(Arena*);
+template<> ::executor::v1::ProcessStatelessBatchRequestV2* Arena::CreateMaybeMessage<::executor::v1::ProcessStatelessBatchRequestV2>(Arena*);
 template<> ::executor::v1::ProcessTransactionResponse* Arena::CreateMaybeMessage<::executor::v1::ProcessTransactionResponse>(Arena*);
 template<> ::executor::v1::ProcessTransactionResponseV2* Arena::CreateMaybeMessage<::executor::v1::ProcessTransactionResponseV2>(Arena*);
 template<> ::executor::v1::TraceConfig* Arena::CreateMaybeMessage<::executor::v1::TraceConfig>(Arena*);
@@ -404,12 +408,15 @@ enum ExecutorError : int {
   EXECUTOR_ERROR_STATE_MANAGER = 110,
   EXECUTOR_ERROR_INVALID_L1_INFO_TREE_INDEX = 111,
   EXECUTOR_ERROR_INVALID_L1_INFO_TREE_SMT_PROOF_VALUE = 112,
+  EXECUTOR_ERROR_INVALID_WITNESS = 113,
+  EXECUTOR_ERROR_INVALID_CBOR = 114,
+  EXECUTOR_ERROR_INVALID_DATA_STREAM = 115,
   ExecutorError_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   ExecutorError_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool ExecutorError_IsValid(int value);
 constexpr ExecutorError ExecutorError_MIN = EXECUTOR_ERROR_UNSPECIFIED;
-constexpr ExecutorError ExecutorError_MAX = EXECUTOR_ERROR_INVALID_L1_INFO_TREE_SMT_PROOF_VALUE;
+constexpr ExecutorError ExecutorError_MAX = EXECUTOR_ERROR_INVALID_DATA_STREAM;
 constexpr int ExecutorError_ARRAYSIZE = ExecutorError_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ExecutorError_descriptor();
@@ -5050,6 +5057,343 @@ class ProcessBatchRequestV2 PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class ProcessStatelessBatchRequestV2 PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:executor.v1.ProcessStatelessBatchRequestV2) */ {
+ public:
+  inline ProcessStatelessBatchRequestV2() : ProcessStatelessBatchRequestV2(nullptr) {};
+  virtual ~ProcessStatelessBatchRequestV2();
+
+  ProcessStatelessBatchRequestV2(const ProcessStatelessBatchRequestV2& from);
+  ProcessStatelessBatchRequestV2(ProcessStatelessBatchRequestV2&& from) noexcept
+    : ProcessStatelessBatchRequestV2() {
+    *this = ::std::move(from);
+  }
+
+  inline ProcessStatelessBatchRequestV2& operator=(const ProcessStatelessBatchRequestV2& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ProcessStatelessBatchRequestV2& operator=(ProcessStatelessBatchRequestV2&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const ProcessStatelessBatchRequestV2& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const ProcessStatelessBatchRequestV2* internal_default_instance() {
+    return reinterpret_cast<const ProcessStatelessBatchRequestV2*>(
+               &_ProcessStatelessBatchRequestV2_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    24;
+
+  friend void swap(ProcessStatelessBatchRequestV2& a, ProcessStatelessBatchRequestV2& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(ProcessStatelessBatchRequestV2* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ProcessStatelessBatchRequestV2* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline ProcessStatelessBatchRequestV2* New() const final {
+    return CreateMaybeMessage<ProcessStatelessBatchRequestV2>(nullptr);
+  }
+
+  ProcessStatelessBatchRequestV2* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<ProcessStatelessBatchRequestV2>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const ProcessStatelessBatchRequestV2& from);
+  void MergeFrom(const ProcessStatelessBatchRequestV2& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(ProcessStatelessBatchRequestV2* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "executor.v1.ProcessStatelessBatchRequestV2";
+  }
+  protected:
+  explicit ProcessStatelessBatchRequestV2(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
+    return ::descriptor_table_executor_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kWitnessFieldNumber = 1,
+    kDataStreamFieldNumber = 2,
+    kCoinbaseFieldNumber = 4,
+    kOldAccInputHashFieldNumber = 5,
+    kL1InfoRootFieldNumber = 6,
+    kForcedBlockhashL1FieldNumber = 8,
+    kContextIdFieldNumber = 9,
+    kChainIdFieldNumber = 3,
+    kTimestampLimitFieldNumber = 7,
+  };
+  // bytes witness = 1;
+  void clear_witness();
+  const std::string& witness() const;
+  void set_witness(const std::string& value);
+  void set_witness(std::string&& value);
+  void set_witness(const char* value);
+  void set_witness(const void* value, size_t size);
+  std::string* mutable_witness();
+  std::string* release_witness();
+  void set_allocated_witness(std::string* witness);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_witness();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_witness(
+      std::string* witness);
+  private:
+  const std::string& _internal_witness() const;
+  void _internal_set_witness(const std::string& value);
+  std::string* _internal_mutable_witness();
+  public:
+
+  // bytes data_stream = 2;
+  void clear_data_stream();
+  const std::string& data_stream() const;
+  void set_data_stream(const std::string& value);
+  void set_data_stream(std::string&& value);
+  void set_data_stream(const char* value);
+  void set_data_stream(const void* value, size_t size);
+  std::string* mutable_data_stream();
+  std::string* release_data_stream();
+  void set_allocated_data_stream(std::string* data_stream);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_data_stream();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_data_stream(
+      std::string* data_stream);
+  private:
+  const std::string& _internal_data_stream() const;
+  void _internal_set_data_stream(const std::string& value);
+  std::string* _internal_mutable_data_stream();
+  public:
+
+  // string coinbase = 4;
+  void clear_coinbase();
+  const std::string& coinbase() const;
+  void set_coinbase(const std::string& value);
+  void set_coinbase(std::string&& value);
+  void set_coinbase(const char* value);
+  void set_coinbase(const char* value, size_t size);
+  std::string* mutable_coinbase();
+  std::string* release_coinbase();
+  void set_allocated_coinbase(std::string* coinbase);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_coinbase();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_coinbase(
+      std::string* coinbase);
+  private:
+  const std::string& _internal_coinbase() const;
+  void _internal_set_coinbase(const std::string& value);
+  std::string* _internal_mutable_coinbase();
+  public:
+
+  // bytes old_acc_input_hash = 5;
+  void clear_old_acc_input_hash();
+  const std::string& old_acc_input_hash() const;
+  void set_old_acc_input_hash(const std::string& value);
+  void set_old_acc_input_hash(std::string&& value);
+  void set_old_acc_input_hash(const char* value);
+  void set_old_acc_input_hash(const void* value, size_t size);
+  std::string* mutable_old_acc_input_hash();
+  std::string* release_old_acc_input_hash();
+  void set_allocated_old_acc_input_hash(std::string* old_acc_input_hash);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_old_acc_input_hash();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_old_acc_input_hash(
+      std::string* old_acc_input_hash);
+  private:
+  const std::string& _internal_old_acc_input_hash() const;
+  void _internal_set_old_acc_input_hash(const std::string& value);
+  std::string* _internal_mutable_old_acc_input_hash();
+  public:
+
+  // bytes l1_info_root = 6;
+  void clear_l1_info_root();
+  const std::string& l1_info_root() const;
+  void set_l1_info_root(const std::string& value);
+  void set_l1_info_root(std::string&& value);
+  void set_l1_info_root(const char* value);
+  void set_l1_info_root(const void* value, size_t size);
+  std::string* mutable_l1_info_root();
+  std::string* release_l1_info_root();
+  void set_allocated_l1_info_root(std::string* l1_info_root);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_l1_info_root();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_l1_info_root(
+      std::string* l1_info_root);
+  private:
+  const std::string& _internal_l1_info_root() const;
+  void _internal_set_l1_info_root(const std::string& value);
+  std::string* _internal_mutable_l1_info_root();
+  public:
+
+  // bytes forced_blockhash_l1 = 8;
+  void clear_forced_blockhash_l1();
+  const std::string& forced_blockhash_l1() const;
+  void set_forced_blockhash_l1(const std::string& value);
+  void set_forced_blockhash_l1(std::string&& value);
+  void set_forced_blockhash_l1(const char* value);
+  void set_forced_blockhash_l1(const void* value, size_t size);
+  std::string* mutable_forced_blockhash_l1();
+  std::string* release_forced_blockhash_l1();
+  void set_allocated_forced_blockhash_l1(std::string* forced_blockhash_l1);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_forced_blockhash_l1();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_forced_blockhash_l1(
+      std::string* forced_blockhash_l1);
+  private:
+  const std::string& _internal_forced_blockhash_l1() const;
+  void _internal_set_forced_blockhash_l1(const std::string& value);
+  std::string* _internal_mutable_forced_blockhash_l1();
+  public:
+
+  // string context_id = 9;
+  void clear_context_id();
+  const std::string& context_id() const;
+  void set_context_id(const std::string& value);
+  void set_context_id(std::string&& value);
+  void set_context_id(const char* value);
+  void set_context_id(const char* value, size_t size);
+  std::string* mutable_context_id();
+  std::string* release_context_id();
+  void set_allocated_context_id(std::string* context_id);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_context_id();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_context_id(
+      std::string* context_id);
+  private:
+  const std::string& _internal_context_id() const;
+  void _internal_set_context_id(const std::string& value);
+  std::string* _internal_mutable_context_id();
+  public:
+
+  // uint64 chain_id = 3;
+  void clear_chain_id();
+  ::PROTOBUF_NAMESPACE_ID::uint64 chain_id() const;
+  void set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_chain_id() const;
+  void _internal_set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 timestamp_limit = 7;
+  void clear_timestamp_limit();
+  ::PROTOBUF_NAMESPACE_ID::uint64 timestamp_limit() const;
+  void set_timestamp_limit(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_timestamp_limit() const;
+  void _internal_set_timestamp_limit(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:executor.v1.ProcessStatelessBatchRequestV2)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr witness_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr data_stream_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr coinbase_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr old_acc_input_hash_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr l1_info_root_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr forced_blockhash_l1_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr context_id_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 chain_id_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 timestamp_limit_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_executor_2eproto;
+};
+// -------------------------------------------------------------------
+
 class L1DataV2 PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:executor.v1.L1DataV2) */ {
  public:
@@ -5092,7 +5436,7 @@ class L1DataV2 PROTOBUF_FINAL :
                &_L1DataV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    24;
+    25;
 
   friend void swap(L1DataV2& a, L1DataV2& b) {
     a.Swap(&b);
@@ -5309,7 +5653,7 @@ class DebugV2 PROTOBUF_FINAL :
                &_DebugV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    25;
+    26;
 
   friend void swap(DebugV2& a, DebugV2& b) {
     a.Swap(&b);
@@ -5520,7 +5864,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
-    return ::descriptor_table_executor_2eproto.file_level_metadata[26];
+    return ::descriptor_table_executor_2eproto.file_level_metadata[27];
   }
 
   public:
@@ -5570,7 +5914,7 @@ class ProcessBatchResponseV2 PROTOBUF_FINAL :
                &_ProcessBatchResponseV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    27;
+    28;
 
   friend void swap(ProcessBatchResponseV2& a, ProcessBatchResponseV2& b) {
     a.Swap(&b);
@@ -6077,7 +6421,7 @@ class TraceConfigV2 PROTOBUF_FINAL :
                &_TraceConfigV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    28;
+    29;
 
   friend void swap(TraceConfigV2& a, TraceConfigV2& b) {
     a.Swap(&b);
@@ -6258,7 +6602,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
-    return ::descriptor_table_executor_2eproto.file_level_metadata[29];
+    return ::descriptor_table_executor_2eproto.file_level_metadata[30];
   }
 
   public:
@@ -6292,7 +6636,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
-    return ::descriptor_table_executor_2eproto.file_level_metadata[30];
+    return ::descriptor_table_executor_2eproto.file_level_metadata[31];
   }
 
   public:
@@ -6342,7 +6686,7 @@ class OverrideAccountV2 PROTOBUF_FINAL :
                &_OverrideAccountV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    31;
+    32;
 
   friend void swap(OverrideAccountV2& a, OverrideAccountV2& b) {
     a.Swap(&b);
@@ -6582,7 +6926,7 @@ class InfoReadWriteV2 PROTOBUF_FINAL :
                &_InfoReadWriteV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    32;
+    33;
 
   friend void swap(InfoReadWriteV2& a, InfoReadWriteV2& b) {
     a.Swap(&b);
@@ -6762,7 +7106,7 @@ class FullTraceV2 PROTOBUF_FINAL :
                &_FullTraceV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    33;
+    34;
 
   friend void swap(FullTraceV2& a, FullTraceV2& b) {
     a.Swap(&b);
@@ -6928,7 +7272,7 @@ class TransactionContextV2 PROTOBUF_FINAL :
                &_TransactionContextV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    34;
+    35;
 
   friend void swap(TransactionContextV2& a, TransactionContextV2& b) {
     a.Swap(&b);
@@ -7347,7 +7691,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_executor_2eproto);
-    return ::descriptor_table_executor_2eproto.file_level_metadata[35];
+    return ::descriptor_table_executor_2eproto.file_level_metadata[36];
   }
 
   public:
@@ -7397,7 +7741,7 @@ class TransactionStepV2 PROTOBUF_FINAL :
                &_TransactionStepV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    36;
+    37;
 
   friend void swap(TransactionStepV2& a, TransactionStepV2& b) {
     a.Swap(&b);
@@ -7774,7 +8118,7 @@ class ContractV2 PROTOBUF_FINAL :
                &_ContractV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    37;
+    38;
 
   friend void swap(ContractV2& a, ContractV2& b) {
     a.Swap(&b);
@@ -8046,7 +8390,7 @@ class ProcessBlockResponseV2 PROTOBUF_FINAL :
                &_ProcessBlockResponseV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    38;
+    39;
 
   friend void swap(ProcessBlockResponseV2& a, ProcessBlockResponseV2& b) {
     a.Swap(&b);
@@ -8429,7 +8773,7 @@ class ProcessTransactionResponseV2 PROTOBUF_FINAL :
                &_ProcessTransactionResponseV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    39;
+    40;
 
   friend void swap(ProcessTransactionResponseV2& a, ProcessTransactionResponseV2& b) {
     a.Swap(&b);
@@ -8921,7 +9265,7 @@ class LogV2 PROTOBUF_FINAL :
                &_LogV2_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    40;
+    41;
 
   friend void swap(LogV2& a, LogV2& b) {
     a.Swap(&b);
@@ -15862,6 +16206,617 @@ inline void ProcessBatchRequestV2::set_allocated_debug(::executor::v1::DebugV2* 
 
 // -------------------------------------------------------------------
 
+// ProcessStatelessBatchRequestV2
+
+// bytes witness = 1;
+inline void ProcessStatelessBatchRequestV2::clear_witness() {
+  witness_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& ProcessStatelessBatchRequestV2::witness() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessStatelessBatchRequestV2.witness)
+  return _internal_witness();
+}
+inline void ProcessStatelessBatchRequestV2::set_witness(const std::string& value) {
+  _internal_set_witness(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessStatelessBatchRequestV2.witness)
+}
+inline std::string* ProcessStatelessBatchRequestV2::mutable_witness() {
+  // @@protoc_insertion_point(field_mutable:executor.v1.ProcessStatelessBatchRequestV2.witness)
+  return _internal_mutable_witness();
+}
+inline const std::string& ProcessStatelessBatchRequestV2::_internal_witness() const {
+  return witness_.Get();
+}
+inline void ProcessStatelessBatchRequestV2::_internal_set_witness(const std::string& value) {
+  
+  witness_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void ProcessStatelessBatchRequestV2::set_witness(std::string&& value) {
+  
+  witness_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:executor.v1.ProcessStatelessBatchRequestV2.witness)
+}
+inline void ProcessStatelessBatchRequestV2::set_witness(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  witness_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:executor.v1.ProcessStatelessBatchRequestV2.witness)
+}
+inline void ProcessStatelessBatchRequestV2::set_witness(const void* value,
+    size_t size) {
+  
+  witness_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:executor.v1.ProcessStatelessBatchRequestV2.witness)
+}
+inline std::string* ProcessStatelessBatchRequestV2::_internal_mutable_witness() {
+  
+  return witness_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* ProcessStatelessBatchRequestV2::release_witness() {
+  // @@protoc_insertion_point(field_release:executor.v1.ProcessStatelessBatchRequestV2.witness)
+  return witness_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ProcessStatelessBatchRequestV2::set_allocated_witness(std::string* witness) {
+  if (witness != nullptr) {
+    
+  } else {
+    
+  }
+  witness_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), witness,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessStatelessBatchRequestV2.witness)
+}
+inline std::string* ProcessStatelessBatchRequestV2::unsafe_arena_release_witness() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.ProcessStatelessBatchRequestV2.witness)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return witness_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void ProcessStatelessBatchRequestV2::unsafe_arena_set_allocated_witness(
+    std::string* witness) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (witness != nullptr) {
+    
+  } else {
+    
+  }
+  witness_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      witness, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessStatelessBatchRequestV2.witness)
+}
+
+// bytes data_stream = 2;
+inline void ProcessStatelessBatchRequestV2::clear_data_stream() {
+  data_stream_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& ProcessStatelessBatchRequestV2::data_stream() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessStatelessBatchRequestV2.data_stream)
+  return _internal_data_stream();
+}
+inline void ProcessStatelessBatchRequestV2::set_data_stream(const std::string& value) {
+  _internal_set_data_stream(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessStatelessBatchRequestV2.data_stream)
+}
+inline std::string* ProcessStatelessBatchRequestV2::mutable_data_stream() {
+  // @@protoc_insertion_point(field_mutable:executor.v1.ProcessStatelessBatchRequestV2.data_stream)
+  return _internal_mutable_data_stream();
+}
+inline const std::string& ProcessStatelessBatchRequestV2::_internal_data_stream() const {
+  return data_stream_.Get();
+}
+inline void ProcessStatelessBatchRequestV2::_internal_set_data_stream(const std::string& value) {
+  
+  data_stream_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void ProcessStatelessBatchRequestV2::set_data_stream(std::string&& value) {
+  
+  data_stream_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:executor.v1.ProcessStatelessBatchRequestV2.data_stream)
+}
+inline void ProcessStatelessBatchRequestV2::set_data_stream(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  data_stream_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:executor.v1.ProcessStatelessBatchRequestV2.data_stream)
+}
+inline void ProcessStatelessBatchRequestV2::set_data_stream(const void* value,
+    size_t size) {
+  
+  data_stream_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:executor.v1.ProcessStatelessBatchRequestV2.data_stream)
+}
+inline std::string* ProcessStatelessBatchRequestV2::_internal_mutable_data_stream() {
+  
+  return data_stream_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* ProcessStatelessBatchRequestV2::release_data_stream() {
+  // @@protoc_insertion_point(field_release:executor.v1.ProcessStatelessBatchRequestV2.data_stream)
+  return data_stream_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ProcessStatelessBatchRequestV2::set_allocated_data_stream(std::string* data_stream) {
+  if (data_stream != nullptr) {
+    
+  } else {
+    
+  }
+  data_stream_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), data_stream,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessStatelessBatchRequestV2.data_stream)
+}
+inline std::string* ProcessStatelessBatchRequestV2::unsafe_arena_release_data_stream() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.ProcessStatelessBatchRequestV2.data_stream)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return data_stream_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void ProcessStatelessBatchRequestV2::unsafe_arena_set_allocated_data_stream(
+    std::string* data_stream) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (data_stream != nullptr) {
+    
+  } else {
+    
+  }
+  data_stream_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      data_stream, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessStatelessBatchRequestV2.data_stream)
+}
+
+// uint64 chain_id = 3;
+inline void ProcessStatelessBatchRequestV2::clear_chain_id() {
+  chain_id_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessStatelessBatchRequestV2::_internal_chain_id() const {
+  return chain_id_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessStatelessBatchRequestV2::chain_id() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessStatelessBatchRequestV2.chain_id)
+  return _internal_chain_id();
+}
+inline void ProcessStatelessBatchRequestV2::_internal_set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  chain_id_ = value;
+}
+inline void ProcessStatelessBatchRequestV2::set_chain_id(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_chain_id(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessStatelessBatchRequestV2.chain_id)
+}
+
+// string coinbase = 4;
+inline void ProcessStatelessBatchRequestV2::clear_coinbase() {
+  coinbase_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& ProcessStatelessBatchRequestV2::coinbase() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessStatelessBatchRequestV2.coinbase)
+  return _internal_coinbase();
+}
+inline void ProcessStatelessBatchRequestV2::set_coinbase(const std::string& value) {
+  _internal_set_coinbase(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessStatelessBatchRequestV2.coinbase)
+}
+inline std::string* ProcessStatelessBatchRequestV2::mutable_coinbase() {
+  // @@protoc_insertion_point(field_mutable:executor.v1.ProcessStatelessBatchRequestV2.coinbase)
+  return _internal_mutable_coinbase();
+}
+inline const std::string& ProcessStatelessBatchRequestV2::_internal_coinbase() const {
+  return coinbase_.Get();
+}
+inline void ProcessStatelessBatchRequestV2::_internal_set_coinbase(const std::string& value) {
+  
+  coinbase_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void ProcessStatelessBatchRequestV2::set_coinbase(std::string&& value) {
+  
+  coinbase_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:executor.v1.ProcessStatelessBatchRequestV2.coinbase)
+}
+inline void ProcessStatelessBatchRequestV2::set_coinbase(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  coinbase_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:executor.v1.ProcessStatelessBatchRequestV2.coinbase)
+}
+inline void ProcessStatelessBatchRequestV2::set_coinbase(const char* value,
+    size_t size) {
+  
+  coinbase_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:executor.v1.ProcessStatelessBatchRequestV2.coinbase)
+}
+inline std::string* ProcessStatelessBatchRequestV2::_internal_mutable_coinbase() {
+  
+  return coinbase_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* ProcessStatelessBatchRequestV2::release_coinbase() {
+  // @@protoc_insertion_point(field_release:executor.v1.ProcessStatelessBatchRequestV2.coinbase)
+  return coinbase_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ProcessStatelessBatchRequestV2::set_allocated_coinbase(std::string* coinbase) {
+  if (coinbase != nullptr) {
+    
+  } else {
+    
+  }
+  coinbase_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), coinbase,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessStatelessBatchRequestV2.coinbase)
+}
+inline std::string* ProcessStatelessBatchRequestV2::unsafe_arena_release_coinbase() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.ProcessStatelessBatchRequestV2.coinbase)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return coinbase_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void ProcessStatelessBatchRequestV2::unsafe_arena_set_allocated_coinbase(
+    std::string* coinbase) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (coinbase != nullptr) {
+    
+  } else {
+    
+  }
+  coinbase_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      coinbase, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessStatelessBatchRequestV2.coinbase)
+}
+
+// bytes old_acc_input_hash = 5;
+inline void ProcessStatelessBatchRequestV2::clear_old_acc_input_hash() {
+  old_acc_input_hash_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& ProcessStatelessBatchRequestV2::old_acc_input_hash() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessStatelessBatchRequestV2.old_acc_input_hash)
+  return _internal_old_acc_input_hash();
+}
+inline void ProcessStatelessBatchRequestV2::set_old_acc_input_hash(const std::string& value) {
+  _internal_set_old_acc_input_hash(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessStatelessBatchRequestV2.old_acc_input_hash)
+}
+inline std::string* ProcessStatelessBatchRequestV2::mutable_old_acc_input_hash() {
+  // @@protoc_insertion_point(field_mutable:executor.v1.ProcessStatelessBatchRequestV2.old_acc_input_hash)
+  return _internal_mutable_old_acc_input_hash();
+}
+inline const std::string& ProcessStatelessBatchRequestV2::_internal_old_acc_input_hash() const {
+  return old_acc_input_hash_.Get();
+}
+inline void ProcessStatelessBatchRequestV2::_internal_set_old_acc_input_hash(const std::string& value) {
+  
+  old_acc_input_hash_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void ProcessStatelessBatchRequestV2::set_old_acc_input_hash(std::string&& value) {
+  
+  old_acc_input_hash_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:executor.v1.ProcessStatelessBatchRequestV2.old_acc_input_hash)
+}
+inline void ProcessStatelessBatchRequestV2::set_old_acc_input_hash(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  old_acc_input_hash_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:executor.v1.ProcessStatelessBatchRequestV2.old_acc_input_hash)
+}
+inline void ProcessStatelessBatchRequestV2::set_old_acc_input_hash(const void* value,
+    size_t size) {
+  
+  old_acc_input_hash_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:executor.v1.ProcessStatelessBatchRequestV2.old_acc_input_hash)
+}
+inline std::string* ProcessStatelessBatchRequestV2::_internal_mutable_old_acc_input_hash() {
+  
+  return old_acc_input_hash_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* ProcessStatelessBatchRequestV2::release_old_acc_input_hash() {
+  // @@protoc_insertion_point(field_release:executor.v1.ProcessStatelessBatchRequestV2.old_acc_input_hash)
+  return old_acc_input_hash_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ProcessStatelessBatchRequestV2::set_allocated_old_acc_input_hash(std::string* old_acc_input_hash) {
+  if (old_acc_input_hash != nullptr) {
+    
+  } else {
+    
+  }
+  old_acc_input_hash_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), old_acc_input_hash,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessStatelessBatchRequestV2.old_acc_input_hash)
+}
+inline std::string* ProcessStatelessBatchRequestV2::unsafe_arena_release_old_acc_input_hash() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.ProcessStatelessBatchRequestV2.old_acc_input_hash)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return old_acc_input_hash_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void ProcessStatelessBatchRequestV2::unsafe_arena_set_allocated_old_acc_input_hash(
+    std::string* old_acc_input_hash) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (old_acc_input_hash != nullptr) {
+    
+  } else {
+    
+  }
+  old_acc_input_hash_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      old_acc_input_hash, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessStatelessBatchRequestV2.old_acc_input_hash)
+}
+
+// bytes l1_info_root = 6;
+inline void ProcessStatelessBatchRequestV2::clear_l1_info_root() {
+  l1_info_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& ProcessStatelessBatchRequestV2::l1_info_root() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessStatelessBatchRequestV2.l1_info_root)
+  return _internal_l1_info_root();
+}
+inline void ProcessStatelessBatchRequestV2::set_l1_info_root(const std::string& value) {
+  _internal_set_l1_info_root(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessStatelessBatchRequestV2.l1_info_root)
+}
+inline std::string* ProcessStatelessBatchRequestV2::mutable_l1_info_root() {
+  // @@protoc_insertion_point(field_mutable:executor.v1.ProcessStatelessBatchRequestV2.l1_info_root)
+  return _internal_mutable_l1_info_root();
+}
+inline const std::string& ProcessStatelessBatchRequestV2::_internal_l1_info_root() const {
+  return l1_info_root_.Get();
+}
+inline void ProcessStatelessBatchRequestV2::_internal_set_l1_info_root(const std::string& value) {
+  
+  l1_info_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void ProcessStatelessBatchRequestV2::set_l1_info_root(std::string&& value) {
+  
+  l1_info_root_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:executor.v1.ProcessStatelessBatchRequestV2.l1_info_root)
+}
+inline void ProcessStatelessBatchRequestV2::set_l1_info_root(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  l1_info_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:executor.v1.ProcessStatelessBatchRequestV2.l1_info_root)
+}
+inline void ProcessStatelessBatchRequestV2::set_l1_info_root(const void* value,
+    size_t size) {
+  
+  l1_info_root_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:executor.v1.ProcessStatelessBatchRequestV2.l1_info_root)
+}
+inline std::string* ProcessStatelessBatchRequestV2::_internal_mutable_l1_info_root() {
+  
+  return l1_info_root_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* ProcessStatelessBatchRequestV2::release_l1_info_root() {
+  // @@protoc_insertion_point(field_release:executor.v1.ProcessStatelessBatchRequestV2.l1_info_root)
+  return l1_info_root_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ProcessStatelessBatchRequestV2::set_allocated_l1_info_root(std::string* l1_info_root) {
+  if (l1_info_root != nullptr) {
+    
+  } else {
+    
+  }
+  l1_info_root_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), l1_info_root,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessStatelessBatchRequestV2.l1_info_root)
+}
+inline std::string* ProcessStatelessBatchRequestV2::unsafe_arena_release_l1_info_root() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.ProcessStatelessBatchRequestV2.l1_info_root)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return l1_info_root_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void ProcessStatelessBatchRequestV2::unsafe_arena_set_allocated_l1_info_root(
+    std::string* l1_info_root) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (l1_info_root != nullptr) {
+    
+  } else {
+    
+  }
+  l1_info_root_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      l1_info_root, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessStatelessBatchRequestV2.l1_info_root)
+}
+
+// uint64 timestamp_limit = 7;
+inline void ProcessStatelessBatchRequestV2::clear_timestamp_limit() {
+  timestamp_limit_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessStatelessBatchRequestV2::_internal_timestamp_limit() const {
+  return timestamp_limit_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ProcessStatelessBatchRequestV2::timestamp_limit() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessStatelessBatchRequestV2.timestamp_limit)
+  return _internal_timestamp_limit();
+}
+inline void ProcessStatelessBatchRequestV2::_internal_set_timestamp_limit(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  timestamp_limit_ = value;
+}
+inline void ProcessStatelessBatchRequestV2::set_timestamp_limit(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_timestamp_limit(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessStatelessBatchRequestV2.timestamp_limit)
+}
+
+// bytes forced_blockhash_l1 = 8;
+inline void ProcessStatelessBatchRequestV2::clear_forced_blockhash_l1() {
+  forced_blockhash_l1_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& ProcessStatelessBatchRequestV2::forced_blockhash_l1() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessStatelessBatchRequestV2.forced_blockhash_l1)
+  return _internal_forced_blockhash_l1();
+}
+inline void ProcessStatelessBatchRequestV2::set_forced_blockhash_l1(const std::string& value) {
+  _internal_set_forced_blockhash_l1(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessStatelessBatchRequestV2.forced_blockhash_l1)
+}
+inline std::string* ProcessStatelessBatchRequestV2::mutable_forced_blockhash_l1() {
+  // @@protoc_insertion_point(field_mutable:executor.v1.ProcessStatelessBatchRequestV2.forced_blockhash_l1)
+  return _internal_mutable_forced_blockhash_l1();
+}
+inline const std::string& ProcessStatelessBatchRequestV2::_internal_forced_blockhash_l1() const {
+  return forced_blockhash_l1_.Get();
+}
+inline void ProcessStatelessBatchRequestV2::_internal_set_forced_blockhash_l1(const std::string& value) {
+  
+  forced_blockhash_l1_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void ProcessStatelessBatchRequestV2::set_forced_blockhash_l1(std::string&& value) {
+  
+  forced_blockhash_l1_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:executor.v1.ProcessStatelessBatchRequestV2.forced_blockhash_l1)
+}
+inline void ProcessStatelessBatchRequestV2::set_forced_blockhash_l1(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  forced_blockhash_l1_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:executor.v1.ProcessStatelessBatchRequestV2.forced_blockhash_l1)
+}
+inline void ProcessStatelessBatchRequestV2::set_forced_blockhash_l1(const void* value,
+    size_t size) {
+  
+  forced_blockhash_l1_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:executor.v1.ProcessStatelessBatchRequestV2.forced_blockhash_l1)
+}
+inline std::string* ProcessStatelessBatchRequestV2::_internal_mutable_forced_blockhash_l1() {
+  
+  return forced_blockhash_l1_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* ProcessStatelessBatchRequestV2::release_forced_blockhash_l1() {
+  // @@protoc_insertion_point(field_release:executor.v1.ProcessStatelessBatchRequestV2.forced_blockhash_l1)
+  return forced_blockhash_l1_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ProcessStatelessBatchRequestV2::set_allocated_forced_blockhash_l1(std::string* forced_blockhash_l1) {
+  if (forced_blockhash_l1 != nullptr) {
+    
+  } else {
+    
+  }
+  forced_blockhash_l1_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), forced_blockhash_l1,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessStatelessBatchRequestV2.forced_blockhash_l1)
+}
+inline std::string* ProcessStatelessBatchRequestV2::unsafe_arena_release_forced_blockhash_l1() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.ProcessStatelessBatchRequestV2.forced_blockhash_l1)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return forced_blockhash_l1_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void ProcessStatelessBatchRequestV2::unsafe_arena_set_allocated_forced_blockhash_l1(
+    std::string* forced_blockhash_l1) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (forced_blockhash_l1 != nullptr) {
+    
+  } else {
+    
+  }
+  forced_blockhash_l1_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      forced_blockhash_l1, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessStatelessBatchRequestV2.forced_blockhash_l1)
+}
+
+// string context_id = 9;
+inline void ProcessStatelessBatchRequestV2::clear_context_id() {
+  context_id_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& ProcessStatelessBatchRequestV2::context_id() const {
+  // @@protoc_insertion_point(field_get:executor.v1.ProcessStatelessBatchRequestV2.context_id)
+  return _internal_context_id();
+}
+inline void ProcessStatelessBatchRequestV2::set_context_id(const std::string& value) {
+  _internal_set_context_id(value);
+  // @@protoc_insertion_point(field_set:executor.v1.ProcessStatelessBatchRequestV2.context_id)
+}
+inline std::string* ProcessStatelessBatchRequestV2::mutable_context_id() {
+  // @@protoc_insertion_point(field_mutable:executor.v1.ProcessStatelessBatchRequestV2.context_id)
+  return _internal_mutable_context_id();
+}
+inline const std::string& ProcessStatelessBatchRequestV2::_internal_context_id() const {
+  return context_id_.Get();
+}
+inline void ProcessStatelessBatchRequestV2::_internal_set_context_id(const std::string& value) {
+  
+  context_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void ProcessStatelessBatchRequestV2::set_context_id(std::string&& value) {
+  
+  context_id_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:executor.v1.ProcessStatelessBatchRequestV2.context_id)
+}
+inline void ProcessStatelessBatchRequestV2::set_context_id(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  context_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:executor.v1.ProcessStatelessBatchRequestV2.context_id)
+}
+inline void ProcessStatelessBatchRequestV2::set_context_id(const char* value,
+    size_t size) {
+  
+  context_id_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:executor.v1.ProcessStatelessBatchRequestV2.context_id)
+}
+inline std::string* ProcessStatelessBatchRequestV2::_internal_mutable_context_id() {
+  
+  return context_id_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* ProcessStatelessBatchRequestV2::release_context_id() {
+  // @@protoc_insertion_point(field_release:executor.v1.ProcessStatelessBatchRequestV2.context_id)
+  return context_id_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ProcessStatelessBatchRequestV2::set_allocated_context_id(std::string* context_id) {
+  if (context_id != nullptr) {
+    
+  } else {
+    
+  }
+  context_id_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), context_id,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:executor.v1.ProcessStatelessBatchRequestV2.context_id)
+}
+inline std::string* ProcessStatelessBatchRequestV2::unsafe_arena_release_context_id() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:executor.v1.ProcessStatelessBatchRequestV2.context_id)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return context_id_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void ProcessStatelessBatchRequestV2::unsafe_arena_set_allocated_context_id(
+    std::string* context_id) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (context_id != nullptr) {
+    
+  } else {
+    
+  }
+  context_id_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      context_id, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:executor.v1.ProcessStatelessBatchRequestV2.context_id)
+}
+
+// -------------------------------------------------------------------
+
 // L1DataV2
 
 // bytes global_exit_root = 1;
@@ -22057,6 +23012,8 @@ inline void LogV2::set_index(::PROTOBUF_NAMESPACE_ID::uint32 value) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

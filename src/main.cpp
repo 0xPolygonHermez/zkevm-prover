@@ -157,21 +157,26 @@ uint64_t processBatchTotalSteps = 0;
 
 void runFileProcessBatch(Goldilocks fr, Prover &prover, Config &config)
 {
-    // Load and parse input JSON file
     TimerStart(INPUT_LOAD);
+    
     // Create and init an empty prover request
     ProverRequest proverRequest(fr, config, prt_processBatch);
-    if (config.inputFile.size() > 0)
+
+    // Load and parse input JSON file
+    if (config.inputFile.empty())
     {
-        json inputJson;
-        file2json(config.inputFile, inputJson);
-        zkresult zkResult = proverRequest.input.load(inputJson);
-        if (zkResult != ZKR_SUCCESS)
-        {
-            zklog.error("runFileProcessBatch() failed calling proverRequest.input.load() zkResult=" + to_string(zkResult) + "=" + zkresult2string(zkResult));
-            exitProcess();
-        }
+        zklog.error("runFileProcessBatch() found config.inputFile empty");
+        exitProcess();
     }
+    json inputJson;
+    file2json(config.inputFile, inputJson);
+    zkresult zkResult = proverRequest.input.load(inputJson);
+    if (zkResult != ZKR_SUCCESS)
+    {
+        zklog.error("runFileProcessBatch() failed calling proverRequest.input.load() zkResult=" + to_string(zkResult) + "=" + zkresult2string(zkResult));
+        exitProcess();
+    }
+
     TimerStopAndLog(INPUT_LOAD);
 
     // Create full tracer based on fork ID
@@ -208,7 +213,7 @@ void runFileProcessBatch(Goldilocks fr, Prover &prover, Config &config)
         " paddingPG=" + to_string(processBatchTotalPaddingPG) +
         " poseidonG=" + to_string(processBatchTotalPoseidonG) +
         " steps=" + to_string(processBatchTotalSteps));
- }
+}
 
 class RunFileThreadArguments
 {

@@ -730,6 +730,14 @@ zkresult StateManager64::purgeBatch (const string &batchUUID, BatchState64 &batc
     // Delete invalid blocks //
     ///////////////////////////
 
+    // Simple case: TX was cancelled (e.g. OOC) and state root does not change, so clear blocks
+    if (config.stateManagerPurge && (newStateRoot == batchState.oldStateRoot))
+    {
+        batchState.blockState.clear();
+        batchState.currentBlock = 0;
+        batchState.currentStateRoot = batchState.oldStateRoot;
+    }
+
     if (config.stateManagerPurge && !batchState.blockState.empty() && !batchState.oldStateRoot.empty())
     {
 
