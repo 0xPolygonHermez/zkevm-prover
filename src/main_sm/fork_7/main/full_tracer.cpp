@@ -1616,7 +1616,7 @@ zkresult FullTracer::onFinishTx(Context &ctx, const RomCommand &cmd)
              (lastOpcodeCall.error.size() == 0) &&
              (response.full_trace.context.to != "0x") )
         {
-            lastOpcodeCall.gas_cost = lastOpcodeCall.gas - fr.toU64(ctx.pols.GAS[*ctx.pStep]);
+            lastOpcodeCall.gas_cost = lastOpcodeCall.gas - fr.toU64(ctx.pols.GAS[*ctx.pStep]) + lastOpcodeCall.gas_refund;
         }
 
         response.full_trace.steps.swap(full_trace);

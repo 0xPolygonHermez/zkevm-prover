@@ -4,7 +4,7 @@
 #include <string>
 #include "main_sm/fork_6/main/main_executor.hpp"
 
- #ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
+#ifdef MAIN_SM_EXECUTOR_GENERATED_CODE
 
 namespace fork_6
 {
