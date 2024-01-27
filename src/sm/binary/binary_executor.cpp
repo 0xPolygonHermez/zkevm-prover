@@ -89,21 +89,7 @@ void BinaryExecutor::buildReset (void)
 void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &pols)
 {
 #ifdef __ZKEVM_SM__
-    // Split actions into bytes
-    vector<BinaryActionBytes> input;
-
-    for (uint64_t i=0; i<action.size(); i++)
-    {
-        BinaryActionBytes actionBytes;
-        scalar2bytes(action[i].a, actionBytes.a_bytes);
-        scalar2bytes(action[i].b, actionBytes.b_bytes);
-        scalar2bytes(action[i].c, actionBytes.c_bytes);
-        actionBytes.opcode = action[i].opcode;
-        actionBytes.type = action[i].type;
-        input.push_back(actionBytes);
-    }
-
-    sm_binary_execute(ZkevmSMBinaryPtr, (void *)input.data(), input.size(), (void *)pols.address(), 1880, 751 * 8, N);
+    sm_binary_execute(ZkevmSMBinaryPtr, (void *)action.data(), action.size(), (void *)pols.address(), 1880, 751 * 8, N);
 #else
     // Check that we have enough room in polynomials  TODO: Do this check in JS
     if (action.size()*LATCH_SIZE > N)
@@ -142,7 +128,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
             zklog.info("Computing binary pols " + to_string(i) + "/" + to_string(input.size()));
         }
 #endif
-        
+
         const uint64_t opcode = input[i].opcode;
         uint64_t reset4 = opcode == 8 ? 1 : 0;
         Goldilocks::Element previousAreLt4 = fr.zero();
@@ -166,6 +152,7 @@ void BinaryExecutor::execute (vector<BinaryAction> &action, BinaryCommitPols &po
                 uint64_t byteA = input[i].a_bytes[j*2 + k];
                 uint64_t byteB = input[i].b_bytes[j*2 + k];
                 uint64_t byteC = input[i].c_bytes[j*2 + k];
+
                 bool resetByte = reset && (k == 0);
                 bool lastByte = last && (k == 1);
                 pols.freeInA[k][index] = fr.fromU64(byteA);
