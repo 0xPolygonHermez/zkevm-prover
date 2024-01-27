@@ -183,7 +183,6 @@ zkresult HashDB::getProgram (const string &batchUUID, const Goldilocks::Element 
     }
     else
     {
-        string keyString = fea2string(fr, key);
         zkr = stateManager.readProgram(batchUUID, keyString, data, dbReadLog);
         if (zkr != ZKR_SUCCESS)
         {
