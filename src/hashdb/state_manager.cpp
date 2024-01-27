@@ -938,7 +938,7 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
     // Simple case: TX was cancelled (e.g. OOC) and state root does not change, so clear blocks
     if (config.stateManagerPurge && (newStateRoot == batchState.oldStateRoot))
     {
-        zklog.info("StateManager::flush() deleting whole batch");
+        //zklog.info("StateManager::flush() deleting whole batch");
         batchState.blockState.clear();
         batchState.currentBlock = 0;
         batchState.currentStateRoot = batchState.oldStateRoot;
@@ -955,7 +955,7 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
         {
             if (batchState.blockState[block].currentStateRoot == batchState.blockState[block].oldStateRoot)
             {
-                zklog.info("StateManager::flush() deleting block that does not change the sate=" + batchState.blockState[block].currentStateRoot + " at position=" + to_string(block));
+                //zklog.info("StateManager::flush() deleting block that does not change the state=" + batchState.blockState[block].currentStateRoot + " at position=" + to_string(block));
                 batchState.blockState.erase(batchState.blockState.begin() + block);
             }
         }
@@ -1108,7 +1108,7 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
                         ( !txState.persistence[persistence].subState[ss].bValid ||
                           (txState.persistence[persistence].subState[ss].oldStateRoot == txState.persistence[persistence].subState[ss].newStateRoot) ) )
                     {
-                        zklog.info("StateManager::flush() skipping subState block=" + to_string(block) + " tx=" + to_string(tx) + " persistence=" + persistence2string((Persistence)persistence) + " ss=" + to_string(ss));
+                        //zklog.info("StateManager::flush() skipping subState block=" + to_string(block) + " tx=" + to_string(tx) + " persistence=" + persistence2string((Persistence)persistence) + " ss=" + to_string(ss));
                         continue;
                     }
 
