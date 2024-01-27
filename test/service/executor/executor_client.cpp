@@ -97,6 +97,8 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
     // Resulting new state root
     string newStateRoot;
 
+    vector<string> blockStateRoots;
+
     if ((input.publicInputsExtended.publicInputs.forkID >= 1) &&
         (input.publicInputsExtended.publicInputs.forkID <= 6))
     {
@@ -345,6 +347,12 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
     #endif
         }
 
+        // Store the hash at the end of each block
+        for (int64_t b=0; b < processBatchResponse.block_responses().size(); b++)
+        {
+            blockStateRoots.emplace_back(ba2string(processBatchResponse.block_responses()[b].block_hash()));
+        }
+
         if (processBatchResponse.stored_flush_id() != processBatchResponse.flush_id())
         {
             executor::v1::GetFlushStatusResponse getFlushStatusResponse;
@@ -404,6 +412,12 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
     #ifdef LOG_SERVICE
             cout << "ExecutorClient::ProcessBatch() got:\n" << response.DebugString() << endl;
     #endif
+        }
+        
+        // Store the hash at the end of each block
+        for (int64_t b=0; b < processBatchResponse.block_responses().size(); b++)
+        {
+            blockStateRoots.emplace_back(ba2string(processBatchResponse.block_responses()[b].block_hash()));
         }
 
         if (processBatchResponse.stored_flush_id() != processBatchResponse.flush_id())
@@ -482,22 +496,31 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
         }
         else
         {
+            blockStateRoots.emplace_back(newStateRoot);
+            vector<string>::iterator it = unique(blockStateRoots.begin(), blockStateRoots.end());
+            blockStateRoots.resize(distance(blockStateRoots.begin(), it));
+
             Database &db = hashDB.db;
-            db.clearCache();
-
-            CheckTreeCounters checkTreeCounters;
-
-            zkresult result = CheckTree(db, newStateRoot, 0, checkTreeCounters, "");
-            if (result != ZKR_SUCCESS)
+            for (uint64_t b = 0; b < blockStateRoots.size(); b++)
             {
-                zklog.error("ExecutorClient::ProcessBatch() failed calling CheckTree() result=" + zkresult2string(result));
-                return false;
-            }
+                db.clearCache();
 
-            zklog.info("intermediateNodes=" + to_string(checkTreeCounters.intermediateNodes));
-            zklog.info("leafNodes=" + to_string(checkTreeCounters.leafNodes));
-            zklog.info("values=" + to_string(checkTreeCounters.values));
-            zklog.info("maxLevel=" + to_string(checkTreeCounters.maxLevel));
+                CheckTreeCounters checkTreeCounters;
+
+                zklog.info("ExecutorClient::ProcessBatch() checking state of block=" + to_string(b) + " root=" + blockStateRoots[b]);
+
+                zkresult result = CheckTree(db, blockStateRoots[b], 0, checkTreeCounters, "");
+                if (result != ZKR_SUCCESS)
+                {
+                    zklog.error("ExecutorClient::ProcessBatch() failed calling CheckTree() result=" + zkresult2string(result));
+                    return false;
+                }
+
+                zklog.info("intermediateNodes=" + to_string(checkTreeCounters.intermediateNodes));
+                zklog.info("leafNodes=" + to_string(checkTreeCounters.leafNodes));
+                zklog.info("values=" + to_string(checkTreeCounters.values));
+                zklog.info("maxLevel=" + to_string(checkTreeCounters.maxLevel));
+            }
         }
 
         TimerStopAndLog(CHECK_NEW_STATE_ROOT);
@@ -538,10 +561,11 @@ bool ProcessDirectory (ExecutorClient *pClient, const string &directoryName, uin
 #ifndef MULTI_ROM_TEST
              || (files[i].find("tests-30M") != string::npos) // Ignore tests that require a rom with a different gas limit
 #endif
-             || (inputFile == "testvectors/inputs-executor/rlp-error/test-length-data_1.json") // batchL2Data.size()=120119 > MAX_BATCH_L2_DATA_SIZE=120000
-             || (inputFile == "testvectors/inputs-executor/rlp-error/test-length-data_2.json") // batchL2Data.size()=120118 > MAX_BATCH_L2_DATA_SIZE=120000
-             || (inputFile == "testvectors/inputs-executor/ethereum-tests/GeneralStateTests/stMemoryStressTest/mload32bitBound_return2_0.json") // executor.v1.ProcessBatchResponseV2 exceeded maximum protobuf size of 2GB: 4294968028
-             || (inputFile == "testvectors/inputs-executor/ethereum-tests/GeneralStateTests/stMemoryStressTest/mload32bitBound_return_0.json") // executor.v1.ProcessBatchResponseV2 exceeded maximum protobuf size of 2GB: 4294968028
+             || (inputFile == "../zkevm-testvectors-internal/inputs-executor/rlp-error/test-length-data_1.json") // batchL2Data.size()=120119 > MAX_BATCH_L2_DATA_SIZE=120000
+             || (inputFile == "../zkevm-testvectors-internal/inputs-executor/rlp-error/test-length-data_2.json") // batchL2Data.size()=120118 > MAX_BATCH_L2_DATA_SIZE=120000
+             || (inputFile == "../zkevm-testvectors-internal/inputs-executor/ethereum-tests/GeneralStateTests/stMemoryStressTest/mload32bitBound_return2_0.json") // executor.v1.ProcessBatchResponseV2 exceeded maximum protobuf size of 2GB: 4294968028
+             || (inputFile == "../zkevm-testvectors-internal/inputs-executor/ethereum-tests/GeneralStateTests/stMemoryStressTest/mload32bitBound_return_0.json") // executor.v1.ProcessBatchResponseV2 exceeded maximum protobuf size of 2GB: 4294968028
+             || (inputFile == "../zkevm-testvectors-internal/inputs-executor/calldata/pre-modexp_8.json")
            )
         {
             zklog.warning("ProcessDirectory() skipping file=" + inputFile + " fileCounter=" + to_string(fileCounter) + " skippedFileCounter=" + to_string(skippedFileCounter));

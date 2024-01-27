@@ -3337,7 +3337,7 @@ code += "    #endif\n";
             code += "            }\n";
             code += "        }\n";
                              // Allow to overwrite the first byte
-            code += "        if (((pos+j) == 0) && (size==1) && !hashIterator->second.firstByteWritten)\n";
+            code += "        if (((pos+j) == 0) && (size==1) && !hashIterator->second.data.empty() && !hashIterator->second.firstByteWritten)\n";
             code += "        {\n";
             code += "            hashIterator->second.data[0] = bm;\n";
             code += "            hashIterator->second.firstByteWritten = true;\n";

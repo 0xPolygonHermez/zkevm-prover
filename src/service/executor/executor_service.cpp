@@ -1526,7 +1526,7 @@ using grpc::Status;
          {
             for (uint64_t block=0; block<block_responses.size(); block++)
             {
-                s += " block[" + to_string(block) + "].hash=" + block_responses[block].block_hash;
+                s += " block[" + to_string(block) + "].hash=" + block_responses[block].block_hash + " blockNumber=" + to_string(block_responses[block].block_number);
                 vector<ResponseV2> &responses = block_responses[block].responses;
                 for (uint64_t tx=0; tx<responses.size(); tx++)
                 {
@@ -2144,7 +2144,7 @@ using grpc::Status;
          {
             for (uint64_t block=0; block<block_responses.size(); block++)
             {
-                s += " block[" + to_string(block) + "].hash=" + block_responses[block].block_hash;
+                s += " block[" + to_string(block) + "].hash=" + block_responses[block].block_hash + " blockNumber=" + to_string(block_responses[block].block_number);
                 vector<ResponseV2> &responses = block_responses[block].responses;
                 for (uint64_t tx=0; tx<responses.size(); tx++)
                 {
