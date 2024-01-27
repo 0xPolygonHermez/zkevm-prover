@@ -50,6 +50,7 @@ zkresult CheckTree (Database &db, const string &key, uint64_t level, CheckTreeCo
         if (!feaIsZero(value[0], value[1], value[2], value[3]))
         {
             string hashLeft = fea2string(db.fr, value[0], value[1], value[2], value[3]);
+            //zklog.info("CheckTree() level=" + to_string(level) + " hashLeft=" + hashLeft);
             result = CheckTree(db, hashLeft, level+1, checkTreeCounters, prefix + " ");
             if (result != ZKR_SUCCESS)
             {
@@ -59,6 +60,7 @@ zkresult CheckTree (Database &db, const string &key, uint64_t level, CheckTreeCo
         if (!feaIsZero(value[4], value[5], value[6], value[7]))
         {
             string hashRight = fea2string(db.fr, value[4], value[5], value[6], value[7]);
+            //zklog.info("CheckTree() level=" + to_string(level) + " hashRight=" + hashRight);
             result = CheckTree(db, hashRight, level+1, checkTreeCounters, prefix + " ");
             return result;
         }

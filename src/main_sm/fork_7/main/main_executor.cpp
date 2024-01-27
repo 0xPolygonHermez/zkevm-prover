@@ -2953,7 +2953,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 }
 
                 // Allow to overwrite the first byte
-                if (((pos+j) == 0) && (size==1) && !hashPIterator->second.firstByteWritten)
+                if (((pos+j) == 0) && (size==1) && !hashPIterator->second.data.empty() && !hashPIterator->second.firstByteWritten)
                 {
                     hashPIterator->second.data[0] = bm;
                     hashPIterator->second.firstByteWritten = true;
