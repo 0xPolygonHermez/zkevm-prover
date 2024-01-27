@@ -938,78 +938,25 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
     // Simple case: TX was cancelled (e.g. OOC) and state root does not change, so clear blocks
     if (config.stateManagerPurge && (newStateRoot == batchState.oldStateRoot))
     {
+        //zklog.info("StateManager::flush() deleting whole batch");
         batchState.blockState.clear();
         batchState.currentBlock = 0;
         batchState.currentStateRoot = batchState.oldStateRoot;
     }
 
+    // Apply the same logic for all blocks: if block does not change the state, delete it
     if (config.stateManagerPurge && !_newStateRoot.empty() && !batchState.blockState.empty() && !batchState.oldStateRoot.empty())
     {
 
 #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
         gettimeofday(&t2, NULL);
 #endif
-
-        // Search for the first block that starts at the new state root
-        uint64_t firstBlock;
-        bool firstBlockFound = false;
-        for (firstBlock = 0; firstBlock < batchState.blockState.size(); firstBlock++)
+        for (int64_t block = batchState.blockState.size() - 1; block >= 0; block--)
         {
-            if (batchState.blockState[firstBlock].oldStateRoot == newStateRoot)
+            if (batchState.blockState[block].currentStateRoot == batchState.blockState[block].oldStateRoot)
             {
-                firstBlockFound = true;
-                break;
-            }
-        }
-
-        // If we found it
-        if (firstBlockFound)
-        {
-            // Delete this block, and the next blocks
-            while (batchState.blockState.size() > firstBlock)
-            {
-                batchState.blockState.pop_back();
-            }
-        }
-
-        // Search for the last block that ends at the new state root
-        if (!batchState.blockState.empty())
-        {
-            int64_t lastBlock;
-            bool lastBlockFound = false;
-            for (lastBlock = (batchState.blockState.size() - 1); lastBlock >= 0; lastBlock--)
-            {
-                if (batchState.blockState[lastBlock].currentStateRoot == newStateRoot)
-                {
-                    lastBlockFound = true;
-                    break;
-                }
-            }
-            if (!lastBlockFound)
-            {
-                zklog.error("StateManager::flush() could not find a block state that ends with newStateRoot=" + newStateRoot + " batchUUID=" + batchUUID);
-                Unlock();
-                return ZKR_STATE_MANAGER;
-            }
-
-            // Delete all previous blocks not belonging to the state root chain
-            string currentStateRoot = batchState.blockState[lastBlock].oldStateRoot;
-            for (int64_t block = lastBlock - 1; block >= 0; block--)
-            {
-                if (batchState.blockState[block].currentStateRoot == currentStateRoot)
-                {
-                    currentStateRoot = batchState.blockState[block].oldStateRoot;
-                    continue;
-                }
+                //zklog.info("StateManager::flush() deleting block that does not change the state=" + batchState.blockState[block].currentStateRoot + " at position=" + to_string(block));
                 batchState.blockState.erase(batchState.blockState.begin() + block);
-            }
-
-            // Check that we reached the expected batch old state root
-            if (batchState.blockState[0].oldStateRoot != batchState.oldStateRoot)
-            {
-                zklog.error("StateManager::flush() could not find a block state that starts with oldStateRoot=" + batchState.oldStateRoot + " batchUUID=" + batchUUID);
-                Unlock();
-                return ZKR_STATE_MANAGER;
             }
         }
 
@@ -1018,14 +965,16 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
 #endif
     }
 
-    // Data to write to database
-    unordered_map<string, vector<Goldilocks::Element>> dbWriteNodes;
     string lastNewStateRoot;
 
     // For all blocks
     for (uint64_t block=0; block<batchState.blockState.size(); block++)
     {
+        // Get a reference to the block state
         BlockState &blockState = batchState.blockState[block];
+
+        // Data to write to database
+        unordered_map<string, vector<Goldilocks::Element>> dbWriteNodes;
 
         // For all tx sub-states, purge the data to write
         for (uint64_t tx=0; tx<blockState.txState.size(); tx++)
@@ -1058,10 +1007,10 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
                         " currentSubState=" + to_string(txState.persistence[persistence].currentSubState) +
                         " substate.newStateRoot=" + txState.persistence[persistence].subState[txState.persistence[persistence].currentSubState].newStateRoot);
                         
-    #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
                     batchState.timeMetricStorage.add("flush UUID inconsistent new state roots", TimeDiff(t));
                     batchState.timeMetricStorage.print("State Manager calls");
-    #endif
+#endif
                     Unlock();
                     return ZKR_STATE_MANAGER;
                 }
@@ -1159,6 +1108,7 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
                         ( !txState.persistence[persistence].subState[ss].bValid ||
                           (txState.persistence[persistence].subState[ss].oldStateRoot == txState.persistence[persistence].subState[ss].newStateRoot) ) )
                     {
+                        //zklog.info("StateManager::flush() skipping subState block=" + to_string(block) + " tx=" + to_string(tx) + " persistence=" + persistence2string((Persistence)persistence) + " ss=" + to_string(ss));
                         continue;
                     }
 
@@ -1171,6 +1121,7 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
                     {
                         for (uint64_t k = 0; k < txState.persistence[persistence].subState[ss].dbDeleteNodes.size(); k++)
                         {
+                            //zklog.info("StateManager::flush() deleting key=" + txState.persistence[persistence].subState[ss].dbDeleteNodes[k] + " at block=" + to_string(block) + " with stateRoot=" + batchState.blockState[block].currentStateRoot);
                             dbWriteNodes.erase(txState.persistence[persistence].subState[ss].dbDeleteNodes[k]);
                         }
                     }
@@ -1218,26 +1169,26 @@ zkresult StateManager::flush (const string &batchUUID, const string &_newStateRo
 #endif
             }
         }
-    }
 
-    // Write nodes to database
-    unordered_map<string, vector<Goldilocks::Element>>::const_iterator writeIt;
-    for (writeIt = dbWriteNodes.begin(); writeIt != dbWriteNodes.end(); writeIt++)
-    {
-        zkr = db.write(writeIt->first, NULL, writeIt->second, _persistence == PERSISTENCE_DATABASE ? 1 : 0);
-        if (zkr != ZKR_SUCCESS)
+        // Write remaining nodes of this block to database
+        unordered_map<string, vector<Goldilocks::Element>>::const_iterator writeIt;
+        for (writeIt = dbWriteNodes.begin(); writeIt != dbWriteNodes.end(); writeIt++)
         {
-            zklog.error("StateManager::flush() failed calling db.write() result=" + zkresult2string(zkr));
-            state.erase(it);
+            zkr = db.write(writeIt->first, NULL, writeIt->second, _persistence == PERSISTENCE_DATABASE ? 1 : 0);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("StateManager::flush() failed calling db.write() result=" + zkresult2string(zkr));
+                state.erase(it);
 
-            //TimerStopAndLog(STATE_MANAGER_FLUSH);
+                //TimerStopAndLog(STATE_MANAGER_FLUSH);
 
-#ifdef LOG_TIME_STATISTICS_STATE_MANAGER
-            batchState.timeMetricStorage.add("flush error db.write", TimeDiff(t));
-            batchState.timeMetricStorage.print("State Manager calls");
-#endif
-            Unlock();
-            return zkr;
+    #ifdef LOG_TIME_STATISTICS_STATE_MANAGER
+                batchState.timeMetricStorage.add("flush error db.write", TimeDiff(t));
+                batchState.timeMetricStorage.print("State Manager calls");
+    #endif
+                Unlock();
+                return zkr;
+            }
         }
     }
 
