@@ -408,13 +408,17 @@ zkresult calculateWitnessHash (WitnessContext &ctx, Goldilocks::Element (&hash)[
             {
                 // Read node hash
                 mpz_class hashScalar;
-                zkr = cbor2scalar(ctx.witness, ctx.p, hashScalar);
-                if (zkr != ZKR_SUCCESS)
+                if (ctx.p + 32 > ctx.witness.size())
                 {
-                    zklog.error("calculateWitnessHash() failed calling cbor2scalar(hashScalar) result=" + zkresult2string(zkr));
-                    return zkr;
+                    zklog.error("calculateWitnessHash() run out of witness data");
+                    return ZKR_SM_MAIN_INVALID_WITNESS;
                 }
+                ba2scalar((const uint8_t *)ctx.witness.c_str() + ctx.p, 32, hashScalar);
+                ctx.p += 32;
+
+#ifdef LOG_WITNESS
                 zklog.info("HASH hash=" + hashScalar.get_str(16));
+#endif
 
                 // Convert to field elements
                 scalar2fea(fr, hashScalar, hash); // TODO: return error if hashScalar is invalid, instead of killing the process
