@@ -565,7 +565,6 @@ bool ProcessDirectory (ExecutorClient *pClient, const string &directoryName, uin
              || (inputFile == "../zkevm-testvectors-internal/inputs-executor/rlp-error/test-length-data_2.json") // batchL2Data.size()=120118 > MAX_BATCH_L2_DATA_SIZE=120000
              || (inputFile == "../zkevm-testvectors-internal/inputs-executor/ethereum-tests/GeneralStateTests/stMemoryStressTest/mload32bitBound_return2_0.json") // executor.v1.ProcessBatchResponseV2 exceeded maximum protobuf size of 2GB: 4294968028
              || (inputFile == "../zkevm-testvectors-internal/inputs-executor/ethereum-tests/GeneralStateTests/stMemoryStressTest/mload32bitBound_return_0.json") // executor.v1.ProcessBatchResponseV2 exceeded maximum protobuf size of 2GB: 4294968028
-             || (inputFile == "../zkevm-testvectors-internal/inputs-executor/calldata/pre-modexp_8.json")
            )
         {
             zklog.warning("ProcessDirectory() skipping file=" + inputFile + " fileCounter=" + to_string(fileCounter) + " skippedFileCounter=" + to_string(skippedFileCounter));
