@@ -2811,7 +2811,7 @@ void _MP_sub (const vector<mpz_class> &a, const vector<mpz_class> &b, vector<mpz
     {
         diff = a[i] - b[i] - carry;
         carry = diff < 0 ? 1 : 0;
-        result[i] = diff + carry * ScalarTwoTo256;
+        result.emplace_back(diff + carry * ScalarTwoTo256);
     }
     for (i = bSize; i < aSize; i++)
     {
@@ -2822,14 +2822,16 @@ void _MP_sub (const vector<mpz_class> &a, const vector<mpz_class> &b, vector<mpz
         }
         else
         {
-            result[i++] = diff;
+            result.emplace_back(diff);
+            i++;
             break;
         }
-        result[i] = diff;
+        result.emplace_back(diff);
+        i++;
     }
     for (; i < aSize; i++)
     {
-        result[i] = a[i];
+        result.emplace_back(a[i]);
     }
     trim(result);
 }
@@ -2896,12 +2898,16 @@ void normalize (vector<mpz_class> &a, vector<mpz_class> &b, mpz_class &shift)
     shift = 1; // shift cannot be larger than log2(base) - 1
     while (bm < (ScalarTwoTo256 / 2))
     {
-        MP_short_mul(b, 2, b); // left-shift b by 2
+        vector<mpz_class> aux;
+        MP_short_mul(b, 2, aux); // left-shift b by 2
+        b.swap(aux);
         bm = b[b.size() - 1];
         shift *= 2;
     }
 
-    MP_short_mul(a, shift, b); // left-shift a by 2^shift
+    vector<mpz_class> result;
+    MP_short_mul(a, shift, result); // left-shift a by 2^shift
+    a.swap(result);
 }
 
 void _MPdiv_short (const vector<mpz_class> &a, const mpz_class &b, vector<mpz_class> &quotient, mpz_class &remainder);
@@ -2972,7 +2978,7 @@ void _MPdiv (vector<mpz_class> &a, vector<mpz_class> &b, vector<mpz_class> &quot
 {
     mpz_class shift;
     normalize(a, b, shift);
-    uint64_t a_l = a.size();
+    int64_t a_l = a.size();
     quotient.clear();
     remainder.clear();
     vector<mpz_class> an;
@@ -3008,7 +3014,7 @@ void _MPdiv (vector<mpz_class> &a, vector<mpz_class> &b, vector<mpz_class> &quot
     vector<mpz_class> auxQuotient;
     mpz_class auxRemainder;
     _MPdiv_short(remainder, shift, auxQuotient, auxRemainder); // TODO: review with Carlos
-    remainder.emplace_back(auxRemainder);
+    remainder.swap(auxQuotient);
     trim(quotient);
     trim(remainder);
 }
@@ -3339,13 +3345,13 @@ void eval_receiveQuotientChunk (Context &ctx, const RomCommand &cmd, CommandResu
         return;
     }
 #ifdef CHECK_EVAL_COMMAND_PARAMETERS
-    if (cr.type != crt_scalar)
+    if (cr.type != crt_u64)
     {
         zklog.error("eval_receiveQuotientChunk() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
         exitProcess();
     }
 #endif
-    uint64_t position = cr.scalar.get_ui();
+    uint64_t position = cr.u64;
 
     if (position >= ctx.quotient.size())
     {
