@@ -8,6 +8,8 @@ string cborType2string (CborResult::ResultType type)
         case CborResult::U64: return "U64";
         case CborResult::BA: return "BA";
         case CborResult::TEXT: return "TEXT";
+        case CborResult::ARRAY: return "ARRAY";
+        case CborResult::TAG: return "TAG";
         default:
         {
             return "<UNRECOGNIZED TYPE=" + to_string(type) + ">"; 
@@ -15,7 +17,7 @@ string cborType2string (CborResult::ResultType type)
     }
 }
 
-// This function expects an integer, which can be long, and returns a scalar
+// This function parses CBOR field and stores it in a CborResult
 void cbor2result (const string &s, uint64_t &p, CborResult &cborResult)
 {
     if (p >= s.size())
@@ -158,13 +160,28 @@ void cbor2result (const string &s, uint64_t &p, CborResult &cborResult)
         // For types 4 (array) and 5 (map), the count is the number of items (pairs) in the payload
         case 4: // array
         {
-            zklog.error("cbor2result() majorType=4 (array) not supported");
-            cborResult.result = ZKR_CBOR_INVALID_DATA;
-            return;
+            //zklog.info("cbor2result() starting array of " + to_string(longCount) + " elements");
+            //zklog.info(" data=" + ba2string(s.substr(p-1)));
+            for (uint64_t a=0; a<longCount; a++)
+            {
+                CborResult result;
+                cbor2result(s, p, result);
+                if (result.result != ZKR_SUCCESS)
+                {
+                    zklog.error("cbor2result() found an array and failed calling itself a=" + to_string(a) + " result=" + zkresult2string(result.result));
+                    cborResult.result = result.result;
+                    return;
+                }
+                cborResult.array.emplace_back(result);
+            }
+            cborResult.type = CborResult::ARRAY;
+            cborResult.result = ZKR_SUCCESS;
+            //zklog.info("cbor2result() ending array of " + to_string(longCount) + " elements");
+            break;
         }
         case 5: // map
         {
-            zklog.error("cbor2result() majorType=5 (map) not supported");
+            zklog.error("cbor2result() majorType=5 (map) not supported longCount=" + to_string(longCount));
             cborResult.result = ZKR_CBOR_INVALID_DATA;
             return;
         }
@@ -172,9 +189,20 @@ void cbor2result (const string &s, uint64_t &p, CborResult &cborResult)
         // For type 6 (tag), the payload is a single item and the count is a numeric tag number which describes the enclosed item
         case 6: // tag
         {
-            zklog.error("cbor2result() majorType=6 (tag) not supported");
-            cborResult.result = ZKR_CBOR_INVALID_DATA;
-            return;
+            //zklog.info("cbor2result() majorType=6 (tag)");
+            CborResult result;
+            cbor2result(s, p, result);
+            if (result.result != ZKR_SUCCESS)
+            {
+                zklog.error("cbor2result() TAG failed calling itself result=" + zkresult2string(result.result));
+                cborResult.result = result.result;
+                return;
+            }
+            cborResult.tagCount = longCount;
+            cborResult.tag.emplace_back(result);
+            cborResult.type = CborResult::TAG;
+            cborResult.result = ZKR_SUCCESS;
+            break;
         }
     }
     

@@ -13,13 +13,18 @@ public:
         UNDEFINED = 0,
         U64 = 1,
         BA = 2,
-        TEXT = 3
+        TEXT = 3,
+        ARRAY = 4,
+        TAG = 6
     };
     zkresult result;
     ResultType type;
     uint64_t u64;
     string ba;
     string text;
+    vector<CborResult> array;
+    uint64_t tagCount;
+    vector<CborResult> tag;
 };
 
 string cborType2string (CborResult::ResultType type);

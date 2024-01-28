@@ -59,22 +59,20 @@ class DataStreamBatch
 {
 public:
     uint64_t batchNumber;
-    map<uint64_t, DataStreamBlock> blocks;
-    uint64_t currentBlock;
+    vector<DataStreamBlock> blocks; // In order of appearance, block numbers must be consecutive: N, N+1, N+2, etc.
     uint64_t forkId; // It comes from the blocks, and must be the same in all blocks
-    DataStreamBatch() : batchNumber(0), currentBlock(0), forkId(0) {};
+    DataStreamBatch() { reset(); };
     void reset (void)
     {
         batchNumber = 0;
         blocks.clear();
-        currentBlock = 0;
+        forkId = 0;
     }
     string toString (void)
     {
         return
             "batchNumber=" + to_string(batchNumber) +
-            " blocks.size=" + to_string(blocks.size()) +
-            " currentBlock=" + to_string(currentBlock);
+            " blocks.size=" + to_string(blocks.size());
     }
 };
 

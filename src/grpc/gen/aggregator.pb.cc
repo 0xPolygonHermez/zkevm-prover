@@ -752,7 +752,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_aggregator_2eproto::offsets[] 
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::StatelessPublicInputs, witness_),
-  PROTOBUF_FIELD_OFFSET(::aggregator::v1::StatelessPublicInputs, datastream_data_),
+  PROTOBUF_FIELD_OFFSET(::aggregator::v1::StatelessPublicInputs, data_stream_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::StatelessPublicInputs, old_acc_input_hash_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::StatelessPublicInputs, l1_info_root_),
   PROTOBUF_FIELD_OFFSET(::aggregator::v1::StatelessPublicInputs, timestamp_limit_),
@@ -952,40 +952,40 @@ const char descriptor_table_protodef_aggregator_2eproto[] PROTOBUF_SECTION_VARIA
   "data\030\020 \003(\0132/.aggregator.v1.PublicInputs."
   "L1InfoTreeDataEntry\032L\n\023L1InfoTreeDataEnt"
   "ry\022\013\n\003key\030\001 \001(\r\022$\n\005value\030\002 \001(\0132\025.aggrega"
-  "tor.v1.L1Data:\0028\001\"\375\002\n\025StatelessPublicInp"
-  "uts\022\017\n\007witness\030\001 \001(\014\022\027\n\017datastream_data\030"
-  "\002 \001(\014\022\032\n\022old_acc_input_hash\030\003 \001(\014\022\024\n\014l1_"
-  "info_root\030\004 \001(\014\022\027\n\017timestamp_limit\030\005 \001(\004"
-  "\022\026\n\016sequencer_addr\030\006 \001(\t\022\033\n\023forced_block"
-  "hash_l1\030\007 \001(\014\022\027\n\017aggregator_addr\030\010 \001(\t\022S"
-  "\n\021l1_info_tree_data\030\t \003(\01328.aggregator.v"
-  "1.StatelessPublicInputs.L1InfoTreeDataEn"
-  "try\032L\n\023L1InfoTreeDataEntry\022\013\n\003key\030\001 \001(\r\022"
-  "$\n\005value\030\002 \001(\0132\025.aggregator.v1.L1Data:\0028"
-  "\001\"b\n\006L1Data\022\030\n\020global_exit_root\030\001 \001(\014\022\024\n"
-  "\014blockhash_l1\030\002 \001(\014\022\025\n\rmin_timestamp\030\003 \001"
-  "(\r\022\021\n\tsmt_proof\030\004 \003(\014\"\245\002\n\013InputProver\0222\n"
-  "\rpublic_inputs\030\001 \001(\0132\033.aggregator.v1.Pub"
-  "licInputs\022.\n\002db\030\004 \003(\0132\".aggregator.v1.In"
-  "putProver.DbEntry\022M\n\022contracts_bytecode\030"
-  "\005 \003(\01321.aggregator.v1.InputProver.Contra"
-  "ctsBytecodeEntry\032)\n\007DbEntry\022\013\n\003key\030\001 \001(\t"
-  "\022\r\n\005value\030\002 \001(\t:\0028\001\0328\n\026ContractsBytecode"
-  "Entry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"S\n"
-  "\024StatelessInputProver\022;\n\rpublic_inputs\030\001"
-  " \001(\0132$.aggregator.v1.StatelessPublicInpu"
-  "ts\"\262\001\n\024PublicInputsExtended\0222\n\rpublic_in"
-  "puts\030\001 \001(\0132\033.aggregator.v1.PublicInputs\022"
-  "\026\n\016new_state_root\030\002 \001(\014\022\032\n\022new_acc_input"
-  "_hash\030\003 \001(\014\022\033\n\023new_local_exit_root\030\004 \001(\014"
-  "\022\025\n\rnew_batch_num\030\005 \001(\004*\\\n\006Result\022\026\n\022RES"
-  "ULT_UNSPECIFIED\020\000\022\r\n\tRESULT_OK\020\001\022\020\n\014RESU"
-  "LT_ERROR\020\002\022\031\n\025RESULT_INTERNAL_ERROR\020\0032d\n"
-  "\021AggregatorService\022O\n\007Channel\022\034.aggregat"
-  "or.v1.ProverMessage\032 .aggregator.v1.Aggr"
-  "egatorMessage\"\000(\0010\001B;Z9github.com/0xPoly"
-  "gonHermez/zkevm-node/proverclient/prover"
-  "b\006proto3"
+  "tor.v1.L1Data:\0028\001\"\371\002\n\025StatelessPublicInp"
+  "uts\022\017\n\007witness\030\001 \001(\014\022\023\n\013data_stream\030\002 \001("
+  "\014\022\032\n\022old_acc_input_hash\030\003 \001(\014\022\024\n\014l1_info"
+  "_root\030\004 \001(\014\022\027\n\017timestamp_limit\030\005 \001(\004\022\026\n\016"
+  "sequencer_addr\030\006 \001(\t\022\033\n\023forced_blockhash"
+  "_l1\030\007 \001(\014\022\027\n\017aggregator_addr\030\010 \001(\t\022S\n\021l1"
+  "_info_tree_data\030\t \003(\01328.aggregator.v1.St"
+  "atelessPublicInputs.L1InfoTreeDataEntry\032"
+  "L\n\023L1InfoTreeDataEntry\022\013\n\003key\030\001 \001(\r\022$\n\005v"
+  "alue\030\002 \001(\0132\025.aggregator.v1.L1Data:\0028\001\"b\n"
+  "\006L1Data\022\030\n\020global_exit_root\030\001 \001(\014\022\024\n\014blo"
+  "ckhash_l1\030\002 \001(\014\022\025\n\rmin_timestamp\030\003 \001(\r\022\021"
+  "\n\tsmt_proof\030\004 \003(\014\"\245\002\n\013InputProver\0222\n\rpub"
+  "lic_inputs\030\001 \001(\0132\033.aggregator.v1.PublicI"
+  "nputs\022.\n\002db\030\004 \003(\0132\".aggregator.v1.InputP"
+  "rover.DbEntry\022M\n\022contracts_bytecode\030\005 \003("
+  "\01321.aggregator.v1.InputProver.ContractsB"
+  "ytecodeEntry\032)\n\007DbEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005"
+  "value\030\002 \001(\t:\0028\001\0328\n\026ContractsBytecodeEntr"
+  "y\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"S\n\024Sta"
+  "telessInputProver\022;\n\rpublic_inputs\030\001 \001(\013"
+  "2$.aggregator.v1.StatelessPublicInputs\"\262"
+  "\001\n\024PublicInputsExtended\0222\n\rpublic_inputs"
+  "\030\001 \001(\0132\033.aggregator.v1.PublicInputs\022\026\n\016n"
+  "ew_state_root\030\002 \001(\014\022\032\n\022new_acc_input_has"
+  "h\030\003 \001(\014\022\033\n\023new_local_exit_root\030\004 \001(\014\022\025\n\r"
+  "new_batch_num\030\005 \001(\004*\\\n\006Result\022\026\n\022RESULT_"
+  "UNSPECIFIED\020\000\022\r\n\tRESULT_OK\020\001\022\020\n\014RESULT_E"
+  "RROR\020\002\022\031\n\025RESULT_INTERNAL_ERROR\020\0032d\n\021Agg"
+  "regatorService\022O\n\007Channel\022\034.aggregator.v"
+  "1.ProverMessage\032 .aggregator.v1.Aggregat"
+  "orMessage\"\000(\0010\001B;Z9github.com/0xPolygonH"
+  "ermez/zkevm-node/proverclient/proverb\006pr"
+  "oto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_aggregator_2eproto_deps[1] = {
 };
@@ -1020,7 +1020,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_agg
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_aggregator_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_aggregator_2eproto = {
-  false, false, descriptor_table_protodef_aggregator_2eproto, "aggregator.proto", 4488,
+  false, false, descriptor_table_protodef_aggregator_2eproto, "aggregator.proto", 4484,
   &descriptor_table_aggregator_2eproto_once, descriptor_table_aggregator_2eproto_sccs, descriptor_table_aggregator_2eproto_deps, 27, 0,
   schemas, file_default_instances, TableStruct_aggregator_2eproto::offsets,
   file_level_metadata_aggregator_2eproto, 27, file_level_enum_descriptors_aggregator_2eproto, file_level_service_descriptors_aggregator_2eproto,
@@ -6904,9 +6904,9 @@ StatelessPublicInputs::StatelessPublicInputs(const StatelessPublicInputs& from)
     witness_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_witness(),
       GetArena());
   }
-  datastream_data_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (!from._internal_datastream_data().empty()) {
-    datastream_data_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_datastream_data(),
+  data_stream_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_data_stream().empty()) {
+    data_stream_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), from._internal_data_stream(),
       GetArena());
   }
   old_acc_input_hash_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
@@ -6941,7 +6941,7 @@ StatelessPublicInputs::StatelessPublicInputs(const StatelessPublicInputs& from)
 void StatelessPublicInputs::SharedCtor() {
   ::PROTOBUF_NAMESPACE_ID::internal::InitSCC(&scc_info_StatelessPublicInputs_aggregator_2eproto.base);
   witness_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  datastream_data_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  data_stream_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   old_acc_input_hash_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   l1_info_root_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   sequencer_addr_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
@@ -6959,7 +6959,7 @@ StatelessPublicInputs::~StatelessPublicInputs() {
 void StatelessPublicInputs::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
   witness_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  datastream_data_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  data_stream_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   old_acc_input_hash_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   l1_info_root_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   sequencer_addr_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
@@ -6990,7 +6990,7 @@ void StatelessPublicInputs::Clear() {
 
   l1_info_tree_data_.Clear();
   witness_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  datastream_data_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  data_stream_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   old_acc_input_hash_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   l1_info_root_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   sequencer_addr_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
@@ -7016,10 +7016,10 @@ const char* StatelessPublicInputs::_InternalParse(const char* ptr, ::PROTOBUF_NA
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // bytes datastream_data = 2;
+      // bytes data_stream = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
-          auto str = _internal_mutable_datastream_data();
+          auto str = _internal_mutable_data_stream();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(ptr);
         } else goto handle_unusual;
@@ -7119,10 +7119,10 @@ failure:
         1, this->_internal_witness(), target);
   }
 
-  // bytes datastream_data = 2;
-  if (this->datastream_data().size() > 0) {
+  // bytes data_stream = 2;
+  if (this->data_stream().size() > 0) {
     target = stream->WriteBytesMaybeAliased(
-        2, this->_internal_datastream_data(), target);
+        2, this->_internal_data_stream(), target);
   }
 
   // bytes old_acc_input_hash = 3;
@@ -7232,11 +7232,11 @@ size_t StatelessPublicInputs::ByteSizeLong() const {
         this->_internal_witness());
   }
 
-  // bytes datastream_data = 2;
-  if (this->datastream_data().size() > 0) {
+  // bytes data_stream = 2;
+  if (this->data_stream().size() > 0) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::BytesSize(
-        this->_internal_datastream_data());
+        this->_internal_data_stream());
   }
 
   // bytes old_acc_input_hash = 3;
@@ -7316,8 +7316,8 @@ void StatelessPublicInputs::MergeFrom(const StatelessPublicInputs& from) {
   if (from.witness().size() > 0) {
     _internal_set_witness(from._internal_witness());
   }
-  if (from.datastream_data().size() > 0) {
-    _internal_set_datastream_data(from._internal_datastream_data());
+  if (from.data_stream().size() > 0) {
+    _internal_set_data_stream(from._internal_data_stream());
   }
   if (from.old_acc_input_hash().size() > 0) {
     _internal_set_old_acc_input_hash(from._internal_old_acc_input_hash());
@@ -7362,7 +7362,7 @@ void StatelessPublicInputs::InternalSwap(StatelessPublicInputs* other) {
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   l1_info_tree_data_.Swap(&other->l1_info_tree_data_);
   witness_.Swap(&other->witness_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  datastream_data_.Swap(&other->datastream_data_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  data_stream_.Swap(&other->data_stream_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   old_acc_input_hash_.Swap(&other->old_acc_input_hash_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   l1_info_root_.Swap(&other->l1_info_root_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   sequencer_addr_.Swap(&other->sequencer_addr_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());

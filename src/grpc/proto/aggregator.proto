@@ -276,7 +276,7 @@ message PublicInputs {
 
 message StatelessPublicInputs {
     bytes witness = 1;
-    bytes datastream_data = 2;
+    bytes data_stream = 2;
     bytes old_acc_input_hash = 3;
     bytes l1_info_root = 4;
     uint64 timestamp_limit = 5;
