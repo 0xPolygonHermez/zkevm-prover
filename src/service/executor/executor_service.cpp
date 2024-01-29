@@ -1785,7 +1785,7 @@ using grpc::Status;
     proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum = batch.batchNumber;
 
     // Get chain ID
-    proverRequest.input.publicInputsExtended.publicInputs.chainID = request->chain_id();
+    proverRequest.input.publicInputsExtended.publicInputs.chainID = batch.chainId;
     if (proverRequest.input.publicInputsExtended.publicInputs.chainID == 0)
     {
         zklog.error("ExecutorServiceImpl::ProcessStatelessBatchV2() got chainID = 0", &proverRequest.tags);

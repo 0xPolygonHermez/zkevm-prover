@@ -381,7 +381,6 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
         request.set_l1_info_root(scalar2ba(input.publicInputsExtended.publicInputs.l1InfoRoot));
         request.set_timestamp_limit(input.publicInputsExtended.publicInputs.timestampLimit);
         request.set_forced_blockhash_l1(scalar2ba(input.publicInputsExtended.publicInputs.forcedBlockHashL1));
-        request.set_chain_id(input.publicInputsExtended.publicInputs.chainID);
 
         ::executor::v1::ProcessBatchResponseV2 processBatchResponse;
         for (uint64_t i=0; i<config.executorClientLoops; i++)

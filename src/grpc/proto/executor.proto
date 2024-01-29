@@ -300,17 +300,16 @@ message ProcessStatelessBatchRequestV2 {
     bytes witness = 1; // SMT partial tree, SCs, (indirectly) old state root
     bytes data_stream = 2; // txs, old batch num, chain id, fork id, effective gas price, block header, index of L1 info tree (global exit root, min timestamp, ...)
 
-    uint64 chain_id = 3;
-    string coinbase = 4; // sequencer address
-    bytes old_acc_input_hash = 5; // 0 for executor, required for the prover
+    string coinbase = 3; // sequencer address
+    bytes old_acc_input_hash = 4; // 0 for executor, required for the prover
 
     // Used by injected/first batches (do not use it for regular batches)
-    bytes l1_info_root = 6; // 0 for executor, required for the prover
-    uint64 timestamp_limit = 7; // if 0, replace by now + 10 min internally
-    bytes forced_blockhash_l1 = 8; // we need it, 0 in regular batches, hash in forced batches, also used in injected/first batches, 0 by now
+    bytes l1_info_root = 5; // 0 for executor, required for the prover
+    uint64 timestamp_limit = 6; // if 0, replace by now + 10 min internally
+    bytes forced_blockhash_l1 = 7; // we need it, 0 in regular batches, hash in forced batches, also used in injected/first batches, 0 by now
 
     // Debug
-    string context_id = 9; // batch ID to be shown in the executor traces, for your convenience: "Erigon_candidate_batch_N"
+    string context_id = 8; // batch ID to be shown in the executor traces, for your convenience: "Erigon_candidate_batch_N"
 }
 
 message L1DataV2 {
