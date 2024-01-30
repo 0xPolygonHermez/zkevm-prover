@@ -463,6 +463,48 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    }\n\n";
     code += "    N_Max_minus_one = N_Max - 1;\n";
 
+
+    // This code is only used when 'skipFirstChangeL2Block = true'
+    // This only is triggered when executong transaction by transaction across batches
+    // This cannot be executed in prover mode
+    // This code aims to set the timestamp of the batch to the one read from the state
+    // Issue fixed: timestamp is set when processed a 'changeL2Block', stored on state and hold on memory.
+    // Later on, 'opTIMESTAMP' loads the value hold on memory.
+    // Hence, execution transaction by transaction lost track of the timestamp
+    // This function aims to solve the abive issue by loading the timestamp from the state
+    code += "    if (bProcessBatch && proverRequest.input.bSkipFirstChangeL2Block)\n";
+    code += "    {\n";
+        // this smt key is built with the following registers:
+        // A: `0x000000000000000000000000000000005ca1ab1e` (%ADDRESS_SYSTEM)
+        // B: `3` (%SMT_KEY_SC_STORAGE)
+        // C: `2` (%TIMESTAMP_STORAGE_POS)
+    code += "        Goldilocks::Element keyToRead[4];\n";
+    code += "        keyToRead[0] = fr.fromU64(13748230500842749409ULL);\n";
+    code += "        keyToRead[1] = fr.fromU64(4428676446262882967ULL);\n";
+    code += "        keyToRead[2] = fr.fromU64(12167292013585018040ULL);\n";
+    code += "        keyToRead[3] = fr.fromU64(12161933621946006603ULL);\n";
+
+        // Get old state root (current state root)
+    code += "        Goldilocks::Element oldStateRoot[4];\n";
+    code += "        scalar2fea(fr, proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot, oldStateRoot);\n";
+
+        // Get timestamp from storage
+    code += "        mpz_class timestampFromSR;\n";
+    code += "        zkresult zkr = mainExecutor.pHashDB->get(proverRequest.uuid, oldStateRoot, keyToRead, timestampFromSR, NULL, proverRequest.dbReadLog);\n";
+    code += "        if (zkr != ZKR_SUCCESS)\n";
+    code += "        {\n";
+    code += "            proverRequest.result = zkr;\n";
+    code += "            mainExecutor.logError(ctx, string(\"Copying timestamp from state to memory, failed calling pHashDB->get() result=\") + zkresult2string(zkr));\n";
+    code += "            mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
+    code += "            return;\n";
+    code += "        }\n";
+
+        // Pre-load memory with this timestamp value
+    code += "        Fea fea;\n";
+    code += "        scalar2fea(fr, timestampFromSR, fea.fe0, fea.fe1, fea.fe2, fea.fe3, fea.fe4, fea.fe5, fea.fe6, fea.fe7);\n";
+    code += "        ctx.mem[rom.timestampOffset] = fea;\n";
+    code += "    }\n";
+
     for (uint64_t zkPC=0; zkPC<rom["program"].size(); zkPC++)
     {
 
