@@ -1,6 +1,7 @@
 #include "data_stream.hpp"
 #include "zklog.hpp"
 #include "scalar.hpp"
+#include "rlp.hpp"
 
 //#define LOG_DATA_STREAM
 
@@ -494,7 +495,8 @@ zkresult dataStream2batch (const string &dataStream, DataStreamBatch &batch)
         }
     }
 
-    zklog.info("dataStream2batch() gott:");
+#ifdef LOG_DATA_STREAM_BATCH
+    zklog.info("dataStream2batch() got:");
     string log = batch.toString() + "\n";
     for (uint64_t b=0; b<batch.blocks.size(); b++)
     {
@@ -505,6 +507,7 @@ zkresult dataStream2batch (const string &dataStream, DataStreamBatch &batch)
         }
     }
     cout << log << endl;
+#endif
 
     return ZKR_SUCCESS;
 }
@@ -518,8 +521,6 @@ zkresult dataStreamBatch2batchL2Data (const DataStreamBatch &batch, string &batc
     for (uint64_t b=0; b < batch.blocks.size(); b++)
     {
         const DataStreamBlock &block = batch.blocks[b];
-
-        //if (block.txs.empty()) continue;
 
         // Start of block
         batchL2Data.push_back(0x0b);
@@ -535,16 +536,134 @@ zkresult dataStreamBatch2batchL2Data (const DataStreamBatch &batch, string &batc
         for (uint64_t t = 0; t < block.txs.size(); t++)
         {
             const DataStreamTx &tx = block.txs[t];
-            batchL2Data += tx.encodedTx; // TODO: Is rsv concatenated or part of the RLP itself?
+            string transcodedTx;
+            zkresult zkr = transcodeTx(tx.encodedTx, batch.chainId, transcodedTx);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("dataStreamBatch2batchL2Data() failed calling transcodeTx() result=" + zkresult2string(zkr));
+                return zkr;
+            }
+            batchL2Data += transcodedTx;
             batchL2Data += tx.gasPricePercentage;
         }
-
-        //break;
     }
 
     zklog.info("dataStreamBatch2batchL2Data() generated data of size=" + to_string(batchL2Data.size()));
 
-    //cout << ba2string(batchL2Data) << endl;
+    return ZKR_SUCCESS;
+}
+
+// Decodes tx from Ethereum RLP format, and encodes it into ROM RLP format
+// From: RLP(fields, v, r, s) --> To: RLP(fields, chainId, 0, 0) | r | s | v
+zkresult transcodeTx (const string &tx, uint32_t batchChainId, string &transcodedTx)
+{
+    // Decode the TX RLP list
+    bool bResult;
+    vector<string> fields;
+    bResult = rlp::decodeList(tx, fields);
+    if (!bResult)
+    {
+        zklog.error("transcodeTx() failed calling decodeList()");
+        return ZKR_DATA_STREAM_INVALID_DATA;
+    }
+
+    // Expected TX fields:
+    // 0: nonce
+    // 1: gas price
+    // 2: gas limit
+    // 3: to
+    // 4: value
+    // 5: data
+    // 6: v --> We can get the chain ID from tx.v
+    // 7: r
+    // 8: s
+
+    // Check fields size
+    if (fields.size() != 9)
+    {
+        zklog.error("transcodeTx() called decodeList() and got invalid fields.size=" + to_string(fields.size()));
+        return ZKR_DATA_STREAM_INVALID_DATA;
+    }
+
+    // Get TX v
+    mpz_class vScalar;
+    ba2scalar(vScalar, fields[6]);
+    if (vScalar > ScalarMask64)
+    {
+        zklog.error("transcodeTx() called decodeList() and got too big v=" + vScalar.get_str(16));
+        return ZKR_DATA_STREAM_INVALID_DATA;
+    }
+    uint64_t txv = vScalar.get_ui();
+
+    // Get chain ID
+    uint64_t chainId = (txv - 35) / 2;
+    if (chainId != batchChainId)
+    {
+        zklog.error("transcodeTx() called decodeList() and got chainId=" + to_string(chainId) + " != batchChainId=" + to_string(batchChainId));
+        return ZKR_DATA_STREAM_INVALID_DATA;
+    }
+
+    // Get ROM v
+    uint64_t v = txv - chainId*2 - 35 + 27;
+
+    // Get r
+    mpz_class r;
+    ba2scalar(r, fields[7]);
+    if (r > ScalarMask256)
+    {
+        zklog.error("transcodeTx() called decodeList() and got too big r=" + r.get_str(16));
+        return ZKR_DATA_STREAM_INVALID_DATA;
+    }
+
+    // Get s
+    mpz_class s;
+    ba2scalar(s, fields[8]);
+    if (s > ScalarMask256)
+    {
+        zklog.error("transcodeTx() called decodeList() and got too big r=" + r.get_str(16));
+        return ZKR_DATA_STREAM_INVALID_DATA;
+    }
+
+    // Set fields[6] = chain ID
+    fields[6].clear();
+    const uint8_t * pChainId = (const uint8_t *)&batchChainId;
+    bool writing = false;
+    for (int64_t i = 3; i >= 0; i--)
+    {
+        if (writing || (pChainId[i] != 0))
+        {
+            fields[6] += pChainId[i];
+            writing = true;
+        }
+    }
+
+    // Clear fields[7]
+    fields[7].clear();
+
+    // Clear fields[8]
+    fields[8].clear();
+
+    // Encode RLP list
+    bResult = rlp::encodeList(fields, transcodedTx);
+    if (!bResult)
+    {
+        zklog.error("transcodeTx() failed calling encodeList()");
+        return ZKR_DATA_STREAM_INVALID_DATA;
+    }
+
+    // Format r and concatenate to tx
+    string rBa;
+    rBa = scalar2ba32(r);
+    transcodedTx += rBa;
+
+    // Format s and concatenate to tx
+    string sBa;
+    sBa = scalar2ba32(r);
+    transcodedTx += sBa;
+
+    // Concatenat v to tx
+    uint8_t d = v;
+    transcodedTx += d;
 
     return ZKR_SUCCESS;
 }
