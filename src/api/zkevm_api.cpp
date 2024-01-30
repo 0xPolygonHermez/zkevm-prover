@@ -49,6 +49,8 @@
 #include "page_manager_test.hpp"
 #include "zkglobals.hpp"
 #include "key_value_tree_test.hpp"
+#include "zkevmSteps.hpp"
+
 
 using namespace std;
 using json = nlohmann::json;
@@ -819,4 +821,24 @@ int zkevm_main(char *pConfigFile, void* pAddress)
 
     zklog.info("Done");
     return 1;
+}
+
+void *zkevm_steps_new() {
+    ZkevmSteps* zkevmSteps = new ZkevmSteps();
+    return zkevmSteps;
+}
+
+void zkevm_steps_free(void *pZkevmSteps) {
+    ZkevmSteps* zkevmSteps = (ZkevmSteps*)pZkevmSteps;
+    delete zkevmSteps;
+}
+
+void *fri_proof_new(uint64_t polN, uint64_t dim, uint64_t numTrees, uint64_t evalSize, uint64_t nPublics) {
+    FRIProof* friProof = new FRIProof(polN, dim, numTrees, evalSize, nPublics);
+    return friProof;
+}
+
+void fri_proof_free(void *pFriProof) {
+    FRIProof* friProof = (FRIProof*)pFriProof;
+    delete friProof;
 }
