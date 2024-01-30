@@ -1,8 +1,9 @@
 #include "data_stream.hpp"
 #include "zklog.hpp"
 #include "scalar.hpp"
+#include "rlp.hpp"
 
-#define LOG_DATA_STREAM
+//#define LOG_DATA_STREAM
 
 uint8_t ParseU8 (const string &data, uint64_t &p)
 {
@@ -14,68 +15,90 @@ uint8_t ParseU8 (const string &data, uint64_t &p)
 
 uint16_t ParseBigEndianU16 (const string &data, uint64_t &p)
 {
-    uint16_t result;
-    result = (uint16_t(uint8_t(data[p  ]))<<8) +
-              uint16_t(uint8_t(data[p+1]));
-    p += 2;
-    return result;
-}
+    // Get the 2 bytes
+    uint8_t d0 = data[p];
+    uint8_t d1 = data[p+1];
 
-uint16_t ParseLittleEndianU16 (const string &data, uint64_t &p)
-{
-    uint16_t result;
-    result = (uint16_t(uint8_t(data[p+1]))<<8) +
-              uint16_t(uint8_t(data[p  ]));
+    // Build the result
+    uint32_t result;
+    result = d0;
+    result <<= 8;
+    result += d1;
+
+    // Increase the counter
     p += 2;
+
     return result;
 }
 
 uint32_t ParseBigEndianU32 (const string &data, uint64_t &p)
 {
-    uint32_t result;
-    result = (uint32_t(uint8_t(data[p  ]))<<24) +
-             (uint32_t(uint8_t(data[p+1]))<<16) +
-             (uint32_t(uint8_t(data[p+2]))<<8) +
-              uint32_t(uint8_t(data[p+3]));
-    p += 4;
-    return result;
-}
+    // Get the 4 bytes
+    uint8_t d0 = data[p];
+    uint8_t d1 = data[p+1];
+    uint8_t d2 = data[p+2];
+    uint8_t d3 = data[p+3];
 
-uint32_t ParseLittleEndianU32 (const string &data, uint64_t &p)
-{
+    // Build the result
     uint32_t result;
-    result = *(uint32_t *)(&data[p]);
+    result = d0;
+    result <<= 8;
+    result += d1;
+    result <<= 8;
+    result += d2;
+    result <<= 8;
+    result += d3;
+
+    // Increase the counter
     p += 4;
+
     return result;
 }
 
 uint64_t ParseBigEndianU64 (const string &data, uint64_t &p)
 {
-    uint64_t result;
-    result = (uint64_t(uint8_t(data[p  ]))<<56) +
-             (uint64_t(uint8_t(data[p+1]))<<48) +
-             (uint64_t(uint8_t(data[p+2]))<<40) +
-             (uint64_t(uint8_t(data[p+3]))<<32) +
-             (uint64_t(uint8_t(data[p+4]))<<24) +
-             (uint64_t(uint8_t(data[p+5]))<<16) +
-             (uint64_t(uint8_t(data[p+6]))<<8) +
-              uint64_t(uint8_t(data[p+7]));
+    // Get the 8 bytes
+    uint8_t d0 = data[p];
+    uint8_t d1 = data[p+1];
+    uint8_t d2 = data[p+2];
+    uint8_t d3 = data[p+3];
+    uint8_t d4 = data[p+4];
+    uint8_t d5 = data[p+5];
+    uint8_t d6 = data[p+6];
+    uint8_t d7 = data[p+7];
+
+    // Build the result
+    uint32_t result;
+    result = d0;
+    result <<= 8;
+    result += d1;
+    result <<= 8;
+    result += d2;
+    result <<= 8;
+    result += d3;
+    result <<= 8;
+    result += d4;
+    result <<= 8;
+    result += d5;
+    result <<= 8;
+    result += d6;
+    result <<= 8;
+    result += d7;
+
+    // Increase the counter
     p += 8;
+
     return result;
 }
 
-uint64_t ParseLittleEndianU64 (const string &data, uint64_t &p)
-{
-    uint64_t result;
-    result = *(uint64_t *)(&data[p]);
-    p += 8;
-    return result;
-}
-
-string EncodeLittleEndianU32 (uint32_t value)
+string EncodeBigEndianU32 (uint32_t value)
 {
     string result;
-    result.append((const char *)&value, 4);
+    const char * data = (const char *)&value;
+    result.push_back(data[3]);
+    result.push_back(data[2]);
+    result.push_back(data[1]);
+    result.push_back(data[0]);
     return result;
 }
 
@@ -101,7 +124,7 @@ zkresult dataStream2batch (const string &dataStream, DataStreamBatch &batch)
         uint8_t packetType = ParseU8(dataStream, p);
 
         // Parse length
-        if (p + 3 >= dataStream.size())
+        if (p + 4 > dataStream.size())
         {
             zklog.error("dataStream2batch() parsing length, run out of data stream data p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
             return ZKR_DATA_STREAM_INVALID_DATA;
@@ -114,14 +137,14 @@ zkresult dataStream2batch (const string &dataStream, DataStreamBatch &batch)
             zklog.error("dataStream2batch() checking length range, length=" + to_string(length) + "<17");
             return ZKR_DATA_STREAM_INVALID_DATA;
         }
-        if (p + length - 1 /*packetType*/ - 4 /*length*/ - 1 >= dataStream.size())
+        if (p + length - 1 /*packetType*/ - 4 /*length*/ - 1 > dataStream.size())
         {
             zklog.error("dataStream2batch() checking length, run out of data stream data p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
             //return ZKR_DATA_STREAM_INVALID_DATA;
         }
 
         // Parse type
-        if (p + 3 >= dataStream.size())
+        if (p + 4 > dataStream.size())
         {
             zklog.error("dataStream2batch() parsing type, run out of data stream data p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
             return ZKR_DATA_STREAM_INVALID_DATA;
@@ -139,7 +162,7 @@ zkresult dataStream2batch (const string &dataStream, DataStreamBatch &batch)
 
         // Check that there is enough room for data
         uint64_t dataLength = length - 17;
-        if (p + dataLength - 1 >= dataStream.size())
+        if (p + dataLength > dataStream.size())
         {
             zklog.error("dataStream2batch() checking data length=" + to_string(dataLength) + ", run out of data stream data p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
             return ZKR_DATA_STREAM_INVALID_DATA;
@@ -178,23 +201,26 @@ zkresult dataStream2batch (const string &dataStream, DataStreamBatch &batch)
                     u64 batchNum
                     u64 blockL2Num
                     u64 timestamp
+                    u32 deltaTimestamp
+                    u32 L1InfoTreeIndex
                     u8[32] l1BlockHash
                     u8[32] globalExitRoot
                     u8[20] coinbase
-                    u16 forkId
+                    u16 forkID
+                    u32 chainID
             */
             case 1: // Start L2 block
             {
                 // Check data length range
-                if (dataLength != 110)
+                if (dataLength != 122)
                 {
-                    zklog.error("dataStream2batch() start L2 block invalid dataLength=" + to_string(dataLength) + "!=110 p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
+                    zklog.error("dataStream2batch() start L2 block invalid dataLength=" + to_string(dataLength) + "!=122 p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
                     return ZKR_DATA_STREAM_INVALID_DATA;
                 }
 
                 // Get batch number
                 uint64_t batchNumber;
-                batchNumber = ParseLittleEndianU64(dataStream, p);
+                batchNumber = ParseBigEndianU64(dataStream, p);
                 if (batchNumber == 0)
                 {
                     zklog.error("dataStream2batch() start L2 block, found batchNumber=0 p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
@@ -205,7 +231,7 @@ zkresult dataStream2batch (const string &dataStream, DataStreamBatch &batch)
                 DataStreamBlock block;
 
                 // Parse block number
-                block.blockNumber = ParseLittleEndianU64(dataStream, p);
+                block.blockNumber = ParseBigEndianU64(dataStream, p);
                 if (block.blockNumber == 0)
                 {
                     zklog.error("dataStream2batch() end L2 block, found blockNumber=0 p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
@@ -213,7 +239,13 @@ zkresult dataStream2batch (const string &dataStream, DataStreamBatch &batch)
                 }
 
                 // Parse block timestamp
-                block.timestamp = ParseLittleEndianU64(dataStream, p);
+                block.timestamp = ParseBigEndianU64(dataStream, p);
+
+                // Parse block delta timestamp
+                block.deltaTimestamp = ParseBigEndianU32(dataStream, p);
+
+                // Parse block L1 info tree index
+                block.l1InfoTreeIndex = ParseBigEndianU32(dataStream, p);
 
                 // Parse L1 block hash
                 ba2string(block.l1BlockHash, (const uint8_t *)dataStream.c_str() + p, 32);
@@ -228,12 +260,15 @@ zkresult dataStream2batch (const string &dataStream, DataStreamBatch &batch)
                 p += 20;
 
                 // Parse block fork ID
-                block.forkId = ParseLittleEndianU16(dataStream, p);
+                block.forkId = ParseBigEndianU16(dataStream, p);
                 if (block.forkId == 0)
                 {
                     zklog.error("dataStream2batch() start L2 block, found forkId=0 block number=" + to_string(block.blockNumber) + " p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
                     return ZKR_DATA_STREAM_INVALID_DATA;
                 }
+
+                // Parse chain ID
+                block.chainId = ParseBigEndianU32(dataStream, p);
 
                 // If batch is empty, initialize it
                 if (batch.blocks.empty())
@@ -242,6 +277,7 @@ zkresult dataStream2batch (const string &dataStream, DataStreamBatch &batch)
                     batch.blocks.emplace_back(block);
                     batch.batchNumber = batchNumber;
                     batch.forkId = block.forkId;
+                    batch.chainId = block.chainId;
                 }
 
                 // If batch number has already been assigned, perform checks
@@ -258,6 +294,13 @@ zkresult dataStream2batch (const string &dataStream, DataStreamBatch &batch)
                     if (block.forkId != batch.forkId)
                     {
                         zklog.error("dataStream2batch() start L2 block, found block.forkId=" + to_string(block.forkId) + " different from btach.forkId=" + to_string(batch.forkId) + " blockNumber=" + to_string(block.blockNumber) + " p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
+                        return ZKR_DATA_STREAM_INVALID_DATA;
+                    }
+
+                    // Check that the chain IDs match
+                    if (block.chainId != batch.chainId)
+                    {
+                        zklog.error("dataStream2batch() start L2 block, found block.chainId=" + to_string(block.chainId) + " different from btach.chainId=" + to_string(batch.chainId) + " blockNumber=" + to_string(block.blockNumber) + " p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
                         return ZKR_DATA_STREAM_INVALID_DATA;
                     }
 
@@ -333,7 +376,7 @@ zkresult dataStream2batch (const string &dataStream, DataStreamBatch &batch)
                 tx.isValid = ParseU8(dataStream, p);
                 ba2string(tx.stateRoot, (const uint8_t *)dataStream.c_str() + p, 32);
                 p += 32;
-                uint32_t encodedTxLength = ParseLittleEndianU32(dataStream, p);
+                uint32_t encodedTxLength = ParseBigEndianU32(dataStream, p);
                 if (p + encodedTxLength - 1 >= dataStream.size())
                 {
                     zklog.error("dataStream2batch() L2 TX, run out of data latestBlock.blockNumber=" + to_string(latestBlock.blockNumber) + " p=" + to_string(p) + " dataStream.size=" + to_string(dataStream.size()));
@@ -370,7 +413,7 @@ zkresult dataStream2batch (const string &dataStream, DataStreamBatch &batch)
                 }
 
                 // Get block number
-                uint64_t blockNumber = ParseLittleEndianU64(dataStream, p);
+                uint64_t blockNumber = ParseBigEndianU64(dataStream, p);
 
                 // Check that batch is in the proper state, i.e. with current block still open
                 if (batch.blocks.empty())
@@ -452,6 +495,20 @@ zkresult dataStream2batch (const string &dataStream, DataStreamBatch &batch)
         }
     }
 
+#ifdef LOG_DATA_STREAM_BATCH
+    zklog.info("dataStream2batch() got:");
+    string log = batch.toString() + "\n";
+    for (uint64_t b=0; b<batch.blocks.size(); b++)
+    {
+        log += "  blocks[" + to_string(b) + "]= " + batch.blocks[b].toString() + "\n";
+        for (uint64_t t=0; t<batch.blocks[b].txs.size(); t++)
+        {
+            log += "    txs[" + to_string(t) + "]= " + batch.blocks[b].txs[t].toString() + " encodedTx=" + ba2string(batch.blocks[b].txs[t].encodedTx) + "\n";
+        }
+    }
+    cout << log << endl;
+#endif
+
     return ZKR_SUCCESS;
 }
 
@@ -468,36 +525,145 @@ zkresult dataStreamBatch2batchL2Data (const DataStreamBatch &batch, string &batc
         // Start of block
         batchL2Data.push_back(0x0b);
 
-        // 4B = delta timestamp = timestamp - previous block timestamp (0 for block 0) -> new parameter?  If we had the whole DB we could get it from there and calculate the difference
-        uint32_t deltaTimestamp = block.timestamp; // TODO: calculate deltaTimestamp
-        batchL2Data += EncodeLittleEndianU32(deltaTimestamp);
+        // 4B = delta timestamp = timestamp - previous block timestamp (0 for block 0)
+        uint32_t deltaTimestamp = block.deltaTimestamp;
+        batchL2Data += EncodeBigEndianU32(deltaTimestamp);
 
-        //4B = L1 info tree index - It should be part of the datastream data, but not in the spec, yet
-        uint32_t l1InfoTreeIndex = 0; // TODO: get it
-        batchL2Data += EncodeLittleEndianU32(l1InfoTreeIndex);
+        //4B = L1 info tree index 
+        uint32_t l1InfoTreeIndex = block.l1InfoTreeIndex;
+        batchL2Data += EncodeBigEndianU32(l1InfoTreeIndex);
 
         for (uint64_t t = 0; t < block.txs.size(); t++)
         {
             const DataStreamTx &tx = block.txs[t];
-            batchL2Data += tx.encodedTx; // TODO: Is rsv concatenated or part of the RLP itself?
+            string transcodedTx;
+            zkresult zkr = transcodeTx(tx.encodedTx, batch.chainId, transcodedTx);
+            if (zkr != ZKR_SUCCESS)
+            {
+                zklog.error("dataStreamBatch2batchL2Data() failed calling transcodeTx() result=" + zkresult2string(zkr));
+                return zkr;
+            }
+            batchL2Data += transcodedTx;
             batchL2Data += tx.gasPricePercentage;
         }
     }
 
+    zklog.info("dataStreamBatch2batchL2Data() generated data of size=" + to_string(batchL2Data.size()));
+
     return ZKR_SUCCESS;
 }
 
+// Decodes tx from Ethereum RLP format, and encodes it into ROM RLP format
+// From: RLP(fields, v, r, s) --> To: RLP(fields, chainId, 0, 0) | r | s | v
+zkresult transcodeTx (const string &tx, uint32_t batchChainId, string &transcodedTx)
+{
+    // Decode the TX RLP list
+    bool bResult;
+    vector<string> fields;
+    bResult = rlp::decodeList(tx, fields);
+    if (!bResult)
+    {
+        zklog.error("transcodeTx() failed calling decodeList()");
+        return ZKR_DATA_STREAM_INVALID_DATA;
+    }
 
+    // Expected TX fields:
+    // 0: nonce
+    // 1: gas price
+    // 2: gas limit
+    // 3: to
+    // 4: value
+    // 5: data
+    // 6: v --> We can get the chain ID from tx.v
+    // 7: r
+    // 8: s
 
+    // Check fields size
+    if (fields.size() != 9)
+    {
+        zklog.error("transcodeTx() called decodeList() and got invalid fields.size=" + to_string(fields.size()));
+        return ZKR_DATA_STREAM_INVALID_DATA;
+    }
 
-/*
+    // Get TX v
+    mpz_class vScalar;
+    ba2scalar(vScalar, fields[6]);
+    if (vScalar > ScalarMask64)
+    {
+        zklog.error("transcodeTx() called decodeList() and got too big v=" + vScalar.get_str(16));
+        return ZKR_DATA_STREAM_INVALID_DATA;
+    }
+    uint64_t txv = vScalar.get_ui();
 
-02
-0000007f
-00000001
-00000000000273f8
+    // Get chain ID
+    uint64_t chainId = (txv - 35) / 2;
+    if (chainId != batchChainId)
+    {
+        zklog.error("transcodeTx() called decodeList() and got chainId=" + to_string(chainId) + " != batchChainId=" + to_string(batchChainId));
+        return ZKR_DATA_STREAM_INVALID_DATA;
+    }
 
-6400000000000000
-e9d0000000000000
-bc3190650000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000d969b8348f0144f4e154efa0dbf3949a8694a737070002000000590000000300000000000273f9e9d0000000000000ad9fb4d1f089b854a27eb65bb5473da933aec764ba536d74829d248ef97a641b7a0d90f62aeeafa675f26e2c0ce54969a3c793505c5a0cd1c4a8586490a0b5f0020000007f0000000100000000000273fb6400000000000000ead0000000000000bf319065
-*/
+    // Get ROM v
+    uint64_t v = txv - chainId*2 - 35 + 27;
+
+    // Get r
+    mpz_class r;
+    ba2scalar(r, fields[7]);
+    if (r > ScalarMask256)
+    {
+        zklog.error("transcodeTx() called decodeList() and got too big r=" + r.get_str(16));
+        return ZKR_DATA_STREAM_INVALID_DATA;
+    }
+
+    // Get s
+    mpz_class s;
+    ba2scalar(s, fields[8]);
+    if (s > ScalarMask256)
+    {
+        zklog.error("transcodeTx() called decodeList() and got too big r=" + r.get_str(16));
+        return ZKR_DATA_STREAM_INVALID_DATA;
+    }
+
+    // Set fields[6] = chain ID
+    fields[6].clear();
+    const uint8_t * pChainId = (const uint8_t *)&batchChainId;
+    bool writing = false;
+    for (int64_t i = 3; i >= 0; i--)
+    {
+        if (writing || (pChainId[i] != 0))
+        {
+            fields[6] += pChainId[i];
+            writing = true;
+        }
+    }
+
+    // Clear fields[7]
+    fields[7].clear();
+
+    // Clear fields[8]
+    fields[8].clear();
+
+    // Encode RLP list
+    bResult = rlp::encodeList(fields, transcodedTx);
+    if (!bResult)
+    {
+        zklog.error("transcodeTx() failed calling encodeList()");
+        return ZKR_DATA_STREAM_INVALID_DATA;
+    }
+
+    // Format r and concatenate to tx
+    string rBa;
+    rBa = scalar2ba32(r);
+    transcodedTx += rBa;
+
+    // Format s and concatenate to tx
+    string sBa;
+    sBa = scalar2ba32(r);
+    transcodedTx += sBa;
+
+    // Concatenat v to tx
+    uint8_t d = v;
+    transcodedTx += d;
+
+    return ZKR_SUCCESS;
+}
