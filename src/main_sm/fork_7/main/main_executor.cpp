@@ -245,6 +245,47 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
         N_Max = N;
     }
 
+    // This code is only used when 'skipFirstChangeL2Block = true'
+    // This only is triggered when executong transaction by transaction across batches
+    // This cannot be executed in prover mode
+    // This code aims to set the timestamp of the batch to the one read from the state
+    // Issue fixed: timestamp is set when processed a 'changeL2Block', stored on state and hold on memory.
+    // Later on, 'opTIMESTAMP' loads the value hold on memory.
+    // Hence, execution transaction by transaction lost track of the timestamp
+    // This function aims to solve the abive issue by loading the timestamp from the state
+    if (bProcessBatch && proverRequest.input.bSkipFirstChangeL2Block)
+    {
+        // this smt key is built with the following registers:
+        // A: `0x000000000000000000000000000000005ca1ab1e` (%ADDRESS_SYSTEM)
+        // B: `3` (%SMT_KEY_SC_STORAGE)
+        // C: `2` (%TIMESTAMP_STORAGE_POS)
+        Goldilocks::Element keyToRead[4];
+        keyToRead[0] = fr.fromU64(13748230500842749409ULL);
+        keyToRead[1] = fr.fromU64(4428676446262882967ULL);
+        keyToRead[2] = fr.fromU64(12167292013585018040ULL);
+        keyToRead[3] = fr.fromU64(12161933621946006603ULL);
+
+        // Get old state root (current state root)
+        Goldilocks::Element oldStateRoot[4];
+        scalar2fea(fr, proverRequest.input.publicInputsExtended.publicInputs.oldStateRoot, oldStateRoot);
+
+        // Get timestamp from storage
+        mpz_class timestampFromSR;
+        zkresult zkr = pHashDB->get(proverRequest.uuid, oldStateRoot, keyToRead, timestampFromSR, NULL, proverRequest.dbReadLog);
+        if (zkr != ZKR_SUCCESS)
+        {
+            proverRequest.result = zkr;
+            logError(ctx, string("Copying timestamp from state to memory, failed calling pHashDB->get() result=") + zkresult2string(zkr));
+            pHashDB->cancelBatch(proverRequest.uuid);
+            return;
+        }
+
+        // Pre-load memory with this timestamp value
+        Fea fea;
+        scalar2fea(fr, timestampFromSR, fea.fe0, fea.fe1, fea.fe2, fea.fe3, fea.fe4, fea.fe5, fea.fe6, fea.fe7);
+        ctx.mem[rom.timestampOffset] = fea;
+    }
+
     for (step=0; step<N_Max; step++)
     {
         if (bProcessBatch)
