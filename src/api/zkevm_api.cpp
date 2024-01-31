@@ -50,6 +50,7 @@
 #include "zkglobals.hpp"
 #include "key_value_tree_test.hpp"
 #include "zkevmSteps.hpp"
+#include "starks.hpp"
 
 
 using namespace std;
@@ -841,4 +842,35 @@ void *fri_proof_new(uint64_t polN, uint64_t dim, uint64_t numTrees, uint64_t eva
 void fri_proof_free(void *pFriProof) {
     FRIProof* friProof = (FRIProof*)pFriProof;
     delete friProof;
+}
+
+void *config_new(char* filename) {
+    Config* config = new Config();
+    json configJson;
+    file2json(filename, configJson);
+    config->load(configJson);
+}
+
+void config_free(void *pConfig) {
+    Config* config = (Config*)pConfig;
+    delete config;
+}
+
+void *starks_new(void *pConfig, char* constPols, char* mapConstPolsFile, char* constantsTree, char* starkInfo, void *pAddress) {
+    Config* config = (Config*)pConfig;
+    return new Starks(*config, {constPols, mapConstPolsFile, constantsTree, starkInfo}, pAddress);
+}
+
+void starks_gen_proof(void *pStarks, void *pFRIProof, void *pPublicInputs, void *pVerkey, void *pSteps) {
+    Starks* starks = (Starks*)pStarks;
+    FRIProof* friProof = (FRIProof*)pFRIProof;
+    Goldilocks::Element* publicInputs = (Goldilocks::Element*)pPublicInputs;
+    Goldilocks::Element* verkey = (Goldilocks::Element*)pVerkey;
+    ZkevmSteps* zkevmSteps = (ZkevmSteps*)pSteps;
+    starks->genProof(*friProof, publicInputs, verkey, zkevmSteps);
+}
+
+void starks_free(void *pStarks) {
+    Starks* starks = (Starks*)pStarks;
+    delete starks;
 }
