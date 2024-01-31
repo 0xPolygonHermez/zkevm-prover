@@ -1781,7 +1781,7 @@ using grpc::Status;
     }
     ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.oldAccInputHash, request->old_acc_input_hash());
 
-    // Get batchNum
+    // Get old batch number
     proverRequest.input.publicInputsExtended.publicInputs.oldBatchNum = batch.batchNumber;
 
     // Get chain ID
@@ -1813,7 +1813,7 @@ using grpc::Status;
         return Status::OK;
     }
 
-    // Get globalExitRoot
+    // Get L1 info root
     if (request->l1_info_root().size() > 32)
     {
         zklog.error("ExecutorServiceImpl::ProcessStatelessBatchV2() got l1_info_root too long, size=" + to_string(request->l1_info_root().size()), &proverRequest.tags);
@@ -1823,7 +1823,7 @@ using grpc::Status;
     }
     ba2scalar(proverRequest.input.publicInputsExtended.publicInputs.l1InfoRoot, request->l1_info_root());
 
-    // Get forcedBlockHashL1
+    // Get forced block hash L1
     if (request->forced_blockhash_l1().size() > 32)
     {
         zklog.error("ExecutorServiceImpl::ProcessStatelessBatchV2() got forced_blockhash_l1 too long, size=" + to_string(request->forced_blockhash_l1().size()), &proverRequest.tags);
