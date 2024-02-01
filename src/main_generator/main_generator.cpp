@@ -7,14 +7,10 @@
 using namespace std;
 using json = nlohmann::json;
 
-// Fork namespace
-const string forkNamespace = PROVER_FORK_NAMESPACE_STRING;
-const uint64_t proverForkID = PROVER_FORK_ID;
-const uint64_t consolidateStateRootZKPC =
-    forkNamespace == "fork_6" ? 4928 :
-    forkNamespace == "fork_5" ? 4924 :
-    forkNamespace == "fork_4" ? 4925 :
-    uint64_t(0xFFFFFFFFFFFFFFFF);
+// Fork ID and depending parameters
+uint64_t forkID = PROVER_FORK_ID;
+string forkNamespace = PROVER_FORK_NAMESPACE_STRING;
+uint64_t consolidateStateRootZKPC = uint64_t(0xFFFFFFFFFFFFFFFF);
 
 // Forward declaration
 void file2json (json &rom, string &romFileName);
@@ -27,10 +23,34 @@ string selectorConstL (const string &CONSTL, bool opInitialized, bool bFastMode)
 string setter8 (const string &reg, bool setReg, bool bFastMode, uint64_t zkPC, const json &rom);
 string string2lower (const string &s);
 string string2upper (const string &s);
+bool stringIsDec (const string &s);
 
 int main(int argc, char **argv)
 {
     cout << "Main generator" << endl;
+
+    // Overwrite fork ID it one has been provided as a parameter
+    if (argc == 2)
+    {
+        string argString = argv[1];
+        if (!stringIsDec(argString))
+        {
+            cout << "Main generator got invalid parameter=" + argString << endl;
+            return -1;
+        }
+        forkID = atoi(argString.c_str());
+    }
+    cout << "Main generator starting for fork ID=" << forkID << endl;
+
+    // Set fork namespace based on fork ID
+    forkNamespace = "fork_" + to_string(forkID);
+
+    // Set consolidateStateRootZKPC based on fork ID
+    consolidateStateRootZKPC =
+        forkNamespace == "fork_6" ? 4928 :
+        forkNamespace == "fork_5" ? 4924 :
+        forkNamespace == "fork_4" ? 4925 :
+        uint64_t(0xFFFFFFFFFFFFFFFF);
 
     string codeGenerationName = "main_exec_generated";
 
@@ -380,10 +400,10 @@ string generate(const json &rom, const string &functionName, const string &fileN
 
     code += "    uint64_t b0;\n";
     code += "    bool bIsTouchedAddressTree;\n";
-#if PROVER_FORK_ID >= 7
+    if (forkID >= 7)
+    {
     code += "    bool bIsBlockL2Hash;\n";
-#endif
-
+    }
     code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
     code += "    struct timeval t;\n";
     code += "    TimeMetricStorage mainMetrics;\n";
@@ -400,10 +420,11 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    bool x3eq;\n";
     code += "    bool y3eq;\n";
     code += "    RawFec::Element fecX1, fecY1, fecX2, fecY2, fecX3, fecY3;\n";
-#if PROVER_FORK_ID >= 7
+    if (forkID >= 7)
+    {
     code += "    RawFq::Element x1fe, y1fe, x2fe, y2fe, x3fe, y3fe;\n";
     code += "    RawFq::Element _x3fe, _y3fe;\n";
-#endif
+    }
 
     if (!bFastMode)
         code += "    MemoryAccess memoryAccess;\n";
@@ -463,7 +484,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    }\n\n";
     code += "    N_Max_minus_one = N_Max - 1;\n";
 
-
+    if (forkID >= 7)
+    {
     // This code is only used when 'skipFirstChangeL2Block = true'
     // This only is triggered when executong transaction by transaction across batches
     // This cannot be executed in prover mode
@@ -503,7 +525,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "        Fea fea;\n";
     code += "        scalar2fea(fr, timestampFromSR, fea.fe0, fea.fe1, fea.fe2, fea.fe3, fea.fe4, fea.fe5, fea.fe6, fea.fe7);\n";
     code += "        ctx.mem[rom.timestampOffset] = fea;\n";
-    code += "    }\n";
+    code += "    }\n\n";
+    }
 
     for (uint64_t zkPC=0; zkPC<rom["program"].size(); zkPC++)
     {
@@ -775,13 +798,12 @@ string generate(const json &rom, const string &functionName, const string &fileN
             code += selector1("cntKeccakF", rom["program"][zkPC]["inCntKeccakF"], opInitialized, bFastMode);
             opInitialized = true;
         }
-#if PROVER_FORK_ID >= 7
-        if (rom["program"][zkPC].contains("inCntSha256F") && (rom["program"][zkPC]["inCntSha256F"]!=0))
+
+        if ((forkID >= 7) && rom["program"][zkPC].contains("inCntSha256F") && (rom["program"][zkPC]["inCntSha256F"]!=0))
         {
             code += selector1("cntSha256F", rom["program"][zkPC]["inCntSha256F"], opInitialized, bFastMode);
             opInitialized = true;
         }
-#endif
 
         if (rom["program"][zkPC].contains("inCntPoseidonG") && (rom["program"][zkPC]["inCntPoseidonG"]!=0))
         {
@@ -870,12 +892,14 @@ string generate(const json &rom, const string &functionName, const string &fileN
              (rom["program"][zkPC].contains("hashP1") && (rom["program"][zkPC]["hashP1"]==1)) ||
              (rom["program"][zkPC].contains("hashPLen") && (rom["program"][zkPC]["hashPLen"]==1)) ||
              (rom["program"][zkPC].contains("hashPDigest") && (rom["program"][zkPC]["hashPDigest"]==1)) ||
-#if PROVER_FORK_ID >= 7
-             (rom["program"][zkPC].contains("hashS") && (rom["program"][zkPC]["hashS"]==1)) ||
-             (rom["program"][zkPC].contains("hashS1") && (rom["program"][zkPC]["hashS1"]==1)) ||
-             (rom["program"][zkPC].contains("hashSLen") && (rom["program"][zkPC]["hashSLen"]==1)) ||
-             (rom["program"][zkPC].contains("hashSDigest") && (rom["program"][zkPC]["hashSDigest"]==1)) ||
-#endif
+             (  (forkID >= 7) &&
+                (
+                    (rom["program"][zkPC].contains("hashS") && (rom["program"][zkPC]["hashS"]==1)) ||
+                    (rom["program"][zkPC].contains("hashS1") && (rom["program"][zkPC]["hashS1"]==1)) ||
+                    (rom["program"][zkPC].contains("hashSLen") && (rom["program"][zkPC]["hashSLen"]==1)) ||
+                    (rom["program"][zkPC].contains("hashSDigest") && (rom["program"][zkPC]["hashSDigest"]==1))
+                )
+             ) ||
              (rom["program"][zkPC].contains("JMP") && (rom["program"][zkPC]["JMP"]==1)) ||
              (rom["program"][zkPC].contains("JMPN") && (rom["program"][zkPC]["JMPN"]==1)) ||
              (rom["program"][zkPC].contains("JMPC") && (rom["program"][zkPC]["JMPC"]==1)) ||
@@ -1084,10 +1108,7 @@ string generate(const json &rom, const string &functionName, const string &fileN
         /**************/
 
         if (rom["program"][zkPC].contains("inFREE")
-#if PROVER_FORK_ID >= 7
-            || rom["program"][zkPC].contains("inFREE0")
-#endif
-        )
+            || ( (forkID >= 7) && rom["program"][zkPC].contains("inFREE0") ) )
         {
 
             if (!rom["program"][zkPC].contains("freeInTag"))
@@ -1187,17 +1208,17 @@ string generate(const json &rom, const string &functionName, const string &fileN
                     code += "        itStateOverride = proverRequest.input.stateOverride.find(keyAddress);\n";
                     code += "        if (itStateOverride != proverRequest.input.stateOverride.end())\n";
                     code += "        {\n";
-                    code += "            if ((keyType == rom." + (proverForkID >= 5 ? string("constants.") : "") + "SMT_KEY_BALANCE) && itStateOverride->second.bBalance)\n";
+                    code += "            if ((keyType == rom." + (forkID >= 5 ? string("constants.") : "") + "SMT_KEY_BALANCE) && itStateOverride->second.bBalance)\n";
                     code += "            {\n";
                     code += "                value = itStateOverride->second.balance;\n";
                     code += "                bStateOverride = true;\n";
                     code += "            }\n";
-                    code += "            else if ((keyType == rom." + (proverForkID >= 5 ? string("constants.") : "") + "SMT_KEY_NONCE) && (itStateOverride->second.nonce > 0))\n";
+                    code += "            else if ((keyType == rom." + (forkID >= 5 ? string("constants.") : "") + "SMT_KEY_NONCE) && (itStateOverride->second.nonce > 0))\n";
                     code += "            {\n";
                     code += "                value = itStateOverride->second.nonce;\n";
                     code += "                bStateOverride = true;\n";
                     code += "            }\n";
-                    code += "            else if ((keyType == rom." + (proverForkID >= 5 ? string("constants.") : "") + "SMT_KEY_SC_CODE) && (itStateOverride->second.code.size() > 0))\n";
+                    code += "            else if ((keyType == rom." + (forkID >= 5 ? string("constants.") : "") + "SMT_KEY_SC_CODE) && (itStateOverride->second.code.size() > 0))\n";
                     code += "            {\n";
                                 // Calculate the linear poseidon hash
 code += "    #ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
@@ -1213,12 +1234,12 @@ code += "    #endif\n";
 
                     code += "                bStateOverride = true;\n";
                     code += "            }\n";
-                    code += "            else if ((keyType == rom." + (proverForkID >= 5 ? string("constants.") : "") + "SMT_KEY_SC_LENGTH) && (itStateOverride->second.code.size() > 0))\n";
+                    code += "            else if ((keyType == rom." + (forkID >= 5 ? string("constants.") : "") + "SMT_KEY_SC_LENGTH) && (itStateOverride->second.code.size() > 0))\n";
                     code += "            {\n";
                     code += "                value = itStateOverride->second.code.size();\n";
                     code += "                bStateOverride = true;\n";
                     code += "            }\n";
-                    code += "            else if ((keyType == rom." + (proverForkID >= 5 ? string("constants.") : "") + "SMT_KEY_SC_STORAGE) && (itStateOverride->second.state.size() > 0))\n";
+                    code += "            else if ((keyType == rom." + (forkID >= 5 ? string("constants.") : "") + "SMT_KEY_SC_STORAGE) && (itStateOverride->second.state.size() > 0))\n";
                     code += "            {\n";
                     code += "                itState = itStateOverride->second.state.find(keyStorage);\n";
                     code += "                if (itState != itStateOverride->second.state.end())\n";
@@ -1231,7 +1252,7 @@ code += "    #endif\n";
                     code += "                }\n";
                     code += "                bStateOverride = true;\n";
                     code += "            }\n";
-                    code += "            else if ((keyType == rom." + (proverForkID >= 5 ? string("constants.") : "") + "SMT_KEY_SC_STORAGE) && (itStateOverride->second.stateDiff.size() > 0))\n";
+                    code += "            else if ((keyType == rom." + (forkID >= 5 ? string("constants.") : "") + "SMT_KEY_SC_STORAGE) && (itStateOverride->second.stateDiff.size() > 0))\n";
                     code += "            {\n";
                     code += "                itState = itStateOverride->second.stateDiff.find(keyStorage);\n";
                     code += "                if (itState != itStateOverride->second.stateDiff.end())\n";
@@ -1432,28 +1453,28 @@ code += "    #endif\n";
                     code += "        itStateOverride = proverRequest.input.stateOverride.find(keyAddress);\n";
                     code += "        if (itStateOverride != proverRequest.input.stateOverride.end())\n";
                     code += "        {\n";
-                    code += "            if ((keyType == rom." + (proverForkID >= 5 ? string("constants.") : "") + "SMT_KEY_BALANCE) && itStateOverride->second.bBalance)\n";
+                    code += "            if ((keyType == rom." + (forkID >= 5 ? string("constants.") : "") + "SMT_KEY_BALANCE) && itStateOverride->second.bBalance)\n";
                     code += "            {\n";
                     code += "                itStateOverride->second.balance = value;\n";
                     code += "                itStateOverride->second.bBalance = true;\n";
                     code += "                bStateOverride = true;\n";
                     code += "            }\n";
-                    code += "            else if ((keyType == rom." + (proverForkID >= 5 ? string("constants.") : "") + "SMT_KEY_NONCE) && (itStateOverride->second.nonce > 0))\n";
+                    code += "            else if ((keyType == rom." + (forkID >= 5 ? string("constants.") : "") + "SMT_KEY_NONCE) && (itStateOverride->second.nonce > 0))\n";
                     code += "            {\n";
                     code += "                itStateOverride->second.nonce = value.get_ui();\n";
                     code += "                bStateOverride = true;\n";
                     code += "            }\n";
-                    code += "            else if ((keyType == rom." + (proverForkID >= 5 ? string("constants.") : "") + "SMT_KEY_SC_CODE) && (itStateOverride->second.code.size() > 0))\n";
+                    code += "            else if ((keyType == rom." + (forkID >= 5 ? string("constants.") : "") + "SMT_KEY_SC_CODE) && (itStateOverride->second.code.size() > 0))\n";
                     code += "            {\n";
                     code += "                itStateOverride->second.code = proverRequest.input.contractsBytecode[NormalizeTo0xNFormat(value.get_str(16), 64)];\n";
                     code += "                bStateOverride = true;\n";
                     code += "            }\n";
-                    code += "            else if ((keyType == rom." + (proverForkID >= 5 ? string("constants.") : "") + "SMT_KEY_SC_STORAGE) && (itStateOverride->second.state.size() > 0))\n";
+                    code += "            else if ((keyType == rom." + (forkID >= 5 ? string("constants.") : "") + "SMT_KEY_SC_STORAGE) && (itStateOverride->second.state.size() > 0))\n";
                     code += "            {\n";
                     code += "                itStateOverride->second.state[keyStorage] = value;\n";
                     code += "                bStateOverride = true;\n";
                     code += "            }\n";
-                    code += "            else if ((keyType == rom." + (proverForkID >= 5 ? string("constants.") : "") + "SMT_KEY_SC_STORAGE) && (itStateOverride->second.stateDiff.size() > 0))\n";
+                    code += "            else if ((keyType == rom." + (forkID >= 5 ? string("constants.") : "") + "SMT_KEY_SC_STORAGE) && (itStateOverride->second.stateDiff.size() > 0))\n";
                     code += "            {\n";
                     code += "                itStateOverride->second.stateDiff[keyStorage] = value;\n";
                     code += "                bStateOverride = true;\n";
@@ -1504,9 +1525,10 @@ code += "    #endif\n";
 
                     code += "    b0 = fr.toU64(pols.B0[" + string(bFastMode?"0":"i") + "]);\n";
                     code += "    bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);\n";
-#if PROVER_FORK_ID >= 7
+                    if (forkID >= 7)
+                    {
                     code += "    bIsBlockL2Hash = (b0 > 6);\n";
-#endif
+                    }
 
                     code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
                     code += "    gettimeofday(&t, NULL);\n";
@@ -1563,11 +1585,15 @@ code += "    #endif\n";
                     code += "        proverRequest.nodesKeys.insert(fea2string(fr, ctx.lastSWrite.key));\n";
                     code += "    }\n";
 
-#if PROVER_FORK_ID >= 7
+                    if (forkID >= 7)
+                    {
                     code += "    zkResult = mainExecutor.pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_block_number(), proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, value, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : bIsBlockL2Hash ? PERSISTENCE_TEMPORARY_HASH : proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);\n";
-#else
+                    }
+                    else
+                    {
                     code += "    zkResult = mainExecutor.pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_block_number(), proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, value, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : ( proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE ), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);\n";
-#endif
+                    }
+
                     code += "    if (zkResult != ZKR_SUCCESS)\n";
                     code += "    {\n";
                     code += "        proverRequest.result = zkResult;\n";
@@ -1810,7 +1836,8 @@ code += "    #endif\n";
                     nHits++;
                 }
 
-#if PROVER_FORK_ID >= 7
+                if (forkID >= 7)
+                {
 
                 // HashS free in
                 if ( (rom["program"][zkPC].contains("hashS") && (rom["program"][zkPC]["hashS"] == 1)) ||
@@ -1916,7 +1943,8 @@ code += "    #endif\n";
 
                     nHits++;
                 }
-#endif
+
+                }
 
                 // Binary free in
                 if (rom["program"][zkPC].contains("bin") && (rom["program"][zkPC]["bin"] == 1))
@@ -2107,8 +2135,7 @@ code += "    #endif\n";
                         code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
                         nHits++;
                     }
-#if PROVER_FORK_ID >= 7
-                    else if (rom["program"][zkPC]["binOpcode"] == 8) // LT4
+                    else if ((forkID >= 7) && (rom["program"][zkPC]["binOpcode"] == 8)) // LT4
                     {
                         code += "    //Binary free in XOR\n";
                         code += "    if (!fea2scalar(fr, a, pols.A0[" + string(bFastMode?"0":"i") + "], pols.A1[" + string(bFastMode?"0":"i") + "], pols.A2[" + string(bFastMode?"0":"i") + "], pols.A3[" + string(bFastMode?"0":"i") + "], pols.A4[" + string(bFastMode?"0":"i") + "], pols.A5[" + string(bFastMode?"0":"i") + "], pols.A6[" + string(bFastMode?"0":"i") + "], pols.A7[" + string(bFastMode?"0":"i") + "]))\n";
@@ -2131,7 +2158,6 @@ code += "    #endif\n";
                         code += "    scalar2fea(fr, c, fi0, fi1, fi2, fi3, fi4, fi5, fi6, fi7);\n";
                         nHits++;
                     }
-#endif
                     else
                     {
                         cerr << "Error: Invalid binary operation: opcode=" << rom["program"][zkPC]["binOpcode"] << endl;
@@ -2373,12 +2399,17 @@ code += "    #endif\n";
 
             code += "    // op = op + inFREE*fi\n";
             string inFREEString = rom["program"][zkPC]["inFREE"];
-#if PROVER_FORK_ID >= 7
-            string inFREE0String = rom["program"][zkPC]["inFREE0"];
-            int64_t inFREE = atoi(inFREEString.c_str()) + atoi(inFREE0String.c_str());
-#else
-            int64_t inFREE = atoi(inFREEString.c_str());
-#endif
+            int64_t inFREE;
+            if (forkID >= 7)
+            {
+                string inFREE0String = rom["program"][zkPC]["inFREE0"];
+                inFREE = atoi(inFREEString.c_str()) + atoi(inFREE0String.c_str());
+            }
+            else
+            {
+                inFREE = atoi(inFREEString.c_str());
+            }
+
             if (inFREE == 1)
             {
                 if (opInitialized)
@@ -2409,11 +2440,14 @@ code += "    #endif\n";
             {
                 if (opInitialized)
                 {
-#if PROVER_FORK_ID >= 7
+                    if (forkID >= 7)
+                    {
                     code += "    op0 = fr.add(op0, fr.mul(fr.add(rom.line[" + to_string(zkPC) + "].inFREE, rom.line[" + to_string(zkPC) + "].inFREE0), fi0));\n";
-#else
+                    }
+                    else
+                    {
                     code += "    op0 = fr.add(op0, fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi0));\n";
-#endif
+                    }
                     code += "    op1 = fr.add(op1, fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi1));\n";
                     code += "    op2 = fr.add(op2, fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi2));\n";
                     code += "    op3 = fr.add(op3, fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi3));\n";
@@ -2424,11 +2458,14 @@ code += "    #endif\n";
                 }
                 else
                 {
-#if PROVER_FORK_ID >= 7
+                    if (forkID >= 7)
+                    {
                     code += "    op0 = fr.mul(fr.add(rom.line[" + to_string(zkPC) + "].inFREE, rom.line[" + to_string(zkPC) + "].inFREE0), fi0);\n";
-#else
+                    }
+                    else
+                    {
                     code += "    op0 = fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi0);\n";
-#endif
+                    }
                     code += "    op1 = fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi1);\n";
                     code += "    op2 = fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi2);\n";
                     code += "    op3 = fr.mul(rom.line[" + to_string(zkPC) + "].inFREE, fi3);\n";
@@ -2444,9 +2481,10 @@ code += "    #endif\n";
             {
                 code += "    // Copy ROM flags into the polynomials\n";
                 code += "    pols.inFREE[i] = rom.line[" + to_string(zkPC) + "].inFREE;\n\n";
-#if PROVER_FORK_ID >= 7
+                if (forkID >= 7)
+                {
                 code += "    pols.inFREE0[i] = rom.line[" + to_string(zkPC) + "].inFREE0;\n\n";
-#endif
+                }
             }
         }
 
@@ -2597,40 +2635,41 @@ code += "    #endif\n";
             }
         }
 
-#if PROVER_FORK_ID >= 7
-        // overwrite 'op' when hiting 'checkFirstTxType' label
-        if ( rom["labels"].contains("checkFirstTxType") &&
-             (zkPC == rom["labels"]["checkFirstTxType"]) )
+        if (forkID >= 7)
         {
-            code += "    if (proverRequest.input.bSkipFirstChangeL2Block)\n";
-            code += "    {\n";
-            code += "        op0 = fr.one();\n";
-            code += "        op1 = fr.one();\n";
-            code += "        op2 = fr.one();\n";
-            code += "        op3 = fr.one();\n";
-            code += "        op4 = fr.one();\n";
-            code += "        op5 = fr.one();\n";
-            code += "        op6 = fr.one();\n";
-            code += "        op7 = fr.one();\n";
-            code += "    }\n";
+            // overwrite 'op' when hiting 'checkFirstTxType' label
+            if ( rom["labels"].contains("checkFirstTxType") &&
+                (zkPC == rom["labels"]["checkFirstTxType"]) )
+            {
+                code += "    if (proverRequest.input.bSkipFirstChangeL2Block)\n";
+                code += "    {\n";
+                code += "        op0 = fr.one();\n";
+                code += "        op1 = fr.one();\n";
+                code += "        op2 = fr.one();\n";
+                code += "        op3 = fr.one();\n";
+                code += "        op4 = fr.one();\n";
+                code += "        op5 = fr.one();\n";
+                code += "        op6 = fr.one();\n";
+                code += "        op7 = fr.one();\n";
+                code += "    }\n";
+            }
+            // overwrite 'op' when hiting 'writeBlockInfoRoot' label
+            if ( rom["labels"].contains("writeBlockInfoRoot") &&
+                (zkPC == rom["labels"]["writeBlockInfoRoot"]) )
+            {
+                code += "    if (proverRequest.input.bSkipWriteBlockInfoRoot)\n";
+                code += "    {\n";
+                code += "        op0 = fr.zero();\n";
+                code += "        op1 = fr.zero();\n";
+                code += "        op2 = fr.zero();\n";
+                code += "        op3 = fr.zero();\n";
+                code += "        op4 = fr.zero();\n";
+                code += "        op5 = fr.zero();\n";
+                code += "        op6 = fr.zero();\n";
+                code += "        op7 = fr.zero();\n";
+                code += "    }\n";
+            }
         }
-        // overwrite 'op' when hiting 'writeBlockInfoRoot' label
-        if ( rom["labels"].contains("writeBlockInfoRoot") &&
-             (zkPC == rom["labels"]["writeBlockInfoRoot"]) )
-        {
-            code += "    if (proverRequest.input.bSkipWriteBlockInfoRoot)\n";
-            code += "    {\n";
-            code += "        op0 = fr.zero();\n";
-            code += "        op1 = fr.zero();\n";
-            code += "        op2 = fr.zero();\n";
-            code += "        op3 = fr.zero();\n";
-            code += "        op4 = fr.zero();\n";
-            code += "        op5 = fr.zero();\n";
-            code += "        op6 = fr.zero();\n";
-            code += "        op7 = fr.zero();\n";
-            code += "    }\n";
-        }
-#endif
 
         // Storage read instruction
         if (rom["program"][zkPC].contains("sRD") && (rom["program"][zkPC]["sRD"] == 1) )
@@ -2842,9 +2881,10 @@ code += "    #endif\n";
 
             code += "        b0 = fr.toU64(pols.B0[" + string(bFastMode?"0":"i") + "]);;\n";
             code += "        bIsTouchedAddressTree = (b0 == 5) || (b0 == 6);\n";
-#if PROVER_FORK_ID >= 7
+            if (forkID >= 7)
+            {
             code += "        bIsBlockL2Hash = (b0 > 6);\n";
-#endif
+            }
 
             code += "        if  ( !fr.isZero(pols.A5[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A6[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.A7[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B2[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B3[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B4[" + string(bFastMode?"0":"i") + "]) || !fr.isZero(pols.B5[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B6[" + string(bFastMode?"0":"i") + "])|| !fr.isZero(pols.B7[" + string(bFastMode?"0":"i") + "]) )\n";
             code += "        {\n";
@@ -2917,11 +2957,14 @@ code += "    #endif\n";
             code += "            proverRequest.nodesKeys.insert(fea2string(fr, ctx.lastSWrite.key));\n";
             code += "        }\n";
 
-#if PROVER_FORK_ID >= 7
+            if (forkID >= 7)
+            {
             code += "        zkResult = mainExecutor.pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_block_number(), proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : bIsBlockL2Hash ? PERSISTENCE_TEMPORARY_HASH : proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE, ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);\n";
-#else
+            }
+            else
+            {
             code += "        zkResult = mainExecutor.pHashDB->set(proverRequest.uuid, proverRequest.pFullTracer->get_block_number(), proverRequest.pFullTracer->get_tx_number(), oldRoot, ctx.lastSWrite.key, scalarD, bIsTouchedAddressTree ? PERSISTENCE_TEMPORARY : ( proverRequest.input.bUpdateMerkleTree ? PERSISTENCE_DATABASE : PERSISTENCE_CACHE ), ctx.lastSWrite.newRoot, &ctx.lastSWrite.res, proverRequest.dbReadLog);\n";
-#endif
+            }
             code += "        if (zkResult != ZKR_SUCCESS)\n";
             code += "        {\n";
             code += "            proverRequest.result = zkResult;\n";
@@ -3358,6 +3401,8 @@ code += "    #endif\n";
             code += "    for (uint64_t j=0; j<size; j++) {\n";
             code += "        result = (a >> (size-j-1)*8) & ScalarMask8;\n";
             code += "        uint8_t bm = result.get_ui();\n";
+            if (forkID >= 7)
+            {
                              // Allow to fill the first byte with a zero
             code += "        if (((pos+j) == 1) && hashIterator->second.data.empty() && !hashIterator->second.firstByteWritten)\n";
             code += "        {\n";
@@ -3385,6 +3430,11 @@ code += "    #endif\n";
             code += "            hashIterator->second.firstByteWritten = true;\n";
             code += "        }\n";
             code += "        else if (hashIterator->second.data.size() == (pos+j))\n";
+            }
+            else
+            {
+            code += "        if (hashIterator->second.data.size() == (pos+j))\n";
+            }
             code += "        {\n";
             code += "            hashIterator->second.data.push_back(bm);\n";
             code += "        }\n";
@@ -3616,7 +3666,9 @@ code += "    #endif\n";
             code += "    }\n";
         }
 
-#if PROVER_FORK_ID >= 7
+        if (forkID >= 7)
+        {
+
         // HashS instruction
         if ( (rom["program"][zkPC].contains("hashS") && (rom["program"][zkPC]["hashS"] == 1)) ||
              (rom["program"][zkPC].contains("hashS1") && (rom["program"][zkPC]["hashS1"] == 1)) )
@@ -3883,7 +3935,8 @@ code += "    #endif\n";
             code += "    zklog.info(\"hashSDigest 2 i=\" + to_string(i) + \" zkPC=" + to_string(zkPC) + " addr=\" + to_string(addr) + \" digest=\" + ctx.hashS[addr].digest.get_str(16));\n";
             code += "#endif\n";
         }
-#endif
+
+        }
 
         // HashP or Storage write instructions, required data
         if (!bFastMode && ( (rom["program"][zkPC].contains("hashPDigest") && (rom["program"][zkPC]["hashPDigest"]==1)) ||
@@ -3900,15 +3953,18 @@ code += "    #endif\n";
             code += "    }\n";
             code += "    // Store the binary action to execute it later with the binary SM\n";
             code += "    binaryAction.a = op;\n";
-#if PROVER_FORK_ID >= 7
+            if (forkID >= 7)
+            {
             code += "    binaryAction.b = Scalar4xGoldilocksPrime;\n";
             code += "    binaryAction.c = 1;\n";
             code += "    binaryAction.opcode = 8;\n";
-#else
+            }
+            else
+            {
             code += "    binaryAction.b = 0;\n";
             code += "    binaryAction.c = op;\n";
             code += "    binaryAction.opcode = 1;\n";
-#endif
+            }
             code += "    binaryAction.type = 2;\n";
             code += "    required.Binary.push_back(binaryAction);\n";
         }
@@ -3917,23 +3973,27 @@ code += "    #endif\n";
         if ( (rom["program"][zkPC].contains("arithEq0") && (rom["program"][zkPC]["arithEq0"]==1)) ||
              (rom["program"][zkPC].contains("arithEq1") && (rom["program"][zkPC]["arithEq1"]==1)) ||
              (rom["program"][zkPC].contains("arithEq2") && (rom["program"][zkPC]["arithEq2"]==1)) ||
-#if PROVER_FORK_ID >= 7
-             (rom["program"][zkPC].contains("arithEq3") && (rom["program"][zkPC]["arithEq3"]==1)) ||
-             (rom["program"][zkPC].contains("arithEq4") && (rom["program"][zkPC]["arithEq4"]==1)) ||
-             (rom["program"][zkPC].contains("arithEq5") && (rom["program"][zkPC]["arithEq5"]==1)) ||
-#endif
-             false)
+             (  (forkID >= 7) &&
+                (
+                    (rom["program"][zkPC].contains("arithEq3") && (rom["program"][zkPC]["arithEq3"]==1)) ||
+                    (rom["program"][zkPC].contains("arithEq4") && (rom["program"][zkPC]["arithEq4"]==1)) ||
+                    (rom["program"][zkPC].contains("arithEq5") && (rom["program"][zkPC]["arithEq5"]==1))
+                )
+             )
+           )
         {
             // Arith instruction: check that A*B + C = D<<256 + op, using scalars (result can be a big number)
             if ( (rom["program"][zkPC].contains("arithEq0") && rom["program"][zkPC]["arithEq0"]==1) &&
                  (!rom["program"][zkPC].contains("arithEq1") || rom["program"][zkPC]["arithEq1"]==0) &&
                  (!rom["program"][zkPC].contains("arithEq2") || rom["program"][zkPC]["arithEq2"]==0) &&
-#if PROVER_FORK_ID >= 7
-                 (!rom["program"][zkPC].contains("arithEq3") || rom["program"][zkPC]["arithEq3"]==0) &&
-                 (!rom["program"][zkPC].contains("arithEq4") || rom["program"][zkPC]["arithEq4"]==0) &&
-                 (!rom["program"][zkPC].contains("arithEq5") || rom["program"][zkPC]["arithEq5"]==0) &&
-#endif
-                 true)
+                 ( (forkID < 7) ||
+                   (
+                        (!rom["program"][zkPC].contains("arithEq3") || rom["program"][zkPC]["arithEq3"]==0) &&
+                        (!rom["program"][zkPC].contains("arithEq4") || rom["program"][zkPC]["arithEq4"]==0) &&
+                        (!rom["program"][zkPC].contains("arithEq5") || rom["program"][zkPC]["arithEq5"]==0)
+                   )
+                 )
+               )
             {
                 code += "    // Arith instruction: check that A*B + C = D<<256 + op, using scalars (result can be a big number)\n";
 
@@ -4013,10 +4073,9 @@ code += "    #endif\n";
                 }
             }
 
-#if PROVER_FORK_ID >= 7
-
             // Arithmetic FP2 multiplication
-            else if ( (!rom["program"][zkPC].contains("arithEq0") || rom["program"][zkPC]["arithEq0"]==0) &&
+            else if ( (forkID >= 7) &&
+                 (!rom["program"][zkPC].contains("arithEq0") || rom["program"][zkPC]["arithEq0"]==0) &&
                  (!rom["program"][zkPC].contains("arithEq1") || rom["program"][zkPC]["arithEq1"]==0) &&
                  (!rom["program"][zkPC].contains("arithEq2") || rom["program"][zkPC]["arithEq2"]==0) &&
                  (rom["program"][zkPC].contains("arithEq3") && rom["program"][zkPC]["arithEq3"]==1) &&
@@ -4121,7 +4180,8 @@ code += "    #endif\n";
             }
 
             // Arithmetic FP2 addition
-            else if ( (!rom["program"][zkPC].contains("arithEq0") || rom["program"][zkPC]["arithEq0"]==0) &&
+            else if ( (forkID >= 7) &&
+                 (!rom["program"][zkPC].contains("arithEq0") || rom["program"][zkPC]["arithEq0"]==0) &&
                  (!rom["program"][zkPC].contains("arithEq1") || rom["program"][zkPC]["arithEq1"]==0) &&
                  (!rom["program"][zkPC].contains("arithEq2") || rom["program"][zkPC]["arithEq2"]==0) &&
                  (!rom["program"][zkPC].contains("arithEq3") || rom["program"][zkPC]["arithEq3"]==0) &&
@@ -4226,7 +4286,8 @@ code += "    #endif\n";
             }
 
             // Arithmetic FP2 subtraction
-            else if ( (!rom["program"][zkPC].contains("arithEq0") || rom["program"][zkPC]["arithEq0"]==0) &&
+            else if ( (forkID >= 7) &&
+                 (!rom["program"][zkPC].contains("arithEq0") || rom["program"][zkPC]["arithEq0"]==0) &&
                  (!rom["program"][zkPC].contains("arithEq1") || rom["program"][zkPC]["arithEq1"]==0) &&
                  (!rom["program"][zkPC].contains("arithEq2") || rom["program"][zkPC]["arithEq2"]==0) &&
                  (!rom["program"][zkPC].contains("arithEq3") || rom["program"][zkPC]["arithEq3"]==0) &&
@@ -4329,7 +4390,6 @@ code += "    #endif\n";
                     code += "    required.Arith.push_back(arithAction);\n";
                 }
             }
-#endif
 
             // Arith instruction: check curve points
             else
@@ -4396,24 +4456,28 @@ code += "    #endif\n";
                 if ( (!rom["program"][zkPC].contains("arithEq0") || (rom["program"][zkPC]["arithEq0"]==0)) &&
                      (rom["program"][zkPC].contains("arithEq1") && (rom["program"][zkPC]["arithEq1"]==1)) &&
                      (!rom["program"][zkPC].contains("arithEq2") || (rom["program"][zkPC]["arithEq2"]==0)) &&
-#if PROVER_FORK_ID >= 7
-                     (!rom["program"][zkPC].contains("arithEq3") || (rom["program"][zkPC]["arithEq3"]==0)) &&
-                     (!rom["program"][zkPC].contains("arithEq4") || (rom["program"][zkPC]["arithEq4"]==0)) &&
-                     (!rom["program"][zkPC].contains("arithEq5") || (rom["program"][zkPC]["arithEq5"]==0)) &&
-#endif
-                     true)
+                     ( (forkID < 7) ||
+                        (
+                            (!rom["program"][zkPC].contains("arithEq3") || (rom["program"][zkPC]["arithEq3"]==0)) &&
+                            (!rom["program"][zkPC].contains("arithEq4") || (rom["program"][zkPC]["arithEq4"]==0)) &&
+                            (!rom["program"][zkPC].contains("arithEq5") || (rom["program"][zkPC]["arithEq5"]==0))
+                        )
+                     )
+                   )
                 {
                     dbl = false;
                 }
                 else if ( (!rom["program"][zkPC].contains("arithEq0") || (rom["program"][zkPC]["arithEq0"]==0)) &&
                           (!rom["program"][zkPC].contains("arithEq1") || (rom["program"][zkPC]["arithEq1"]==0)) &&
                           (rom["program"][zkPC].contains("arithEq2") && (rom["program"][zkPC]["arithEq2"]==1)) &&
-#if PROVER_FORK_ID >= 7
-                          (!rom["program"][zkPC].contains("arithEq3") || (rom["program"][zkPC]["arithEq3"]==0)) &&
-                          (!rom["program"][zkPC].contains("arithEq4") || (rom["program"][zkPC]["arithEq4"]==0)) &&
-                          (!rom["program"][zkPC].contains("arithEq5") || (rom["program"][zkPC]["arithEq5"]==0)) &&
-#endif
-                          true)
+                          ( (forkID < 7) ||
+                             (
+                                (!rom["program"][zkPC].contains("arithEq3") || (rom["program"][zkPC]["arithEq3"]==0)) &&
+                                (!rom["program"][zkPC].contains("arithEq4") || (rom["program"][zkPC]["arithEq4"]==0)) &&
+                                (!rom["program"][zkPC].contains("arithEq5") || (rom["program"][zkPC]["arithEq5"]==0))
+                             )
+                          )
+                        )
                 {
                     dbl = true;
                 }
@@ -4918,8 +4982,7 @@ code += "    #endif\n";
                     code += "    required.Binary.push_back(binaryAction);\n";
                 }
             }
-#if PROVER_FORK_ID >= 7
-            else if (rom["program"][zkPC]["binOpcode"] == 8) // LT4
+            else if ((forkID >= 7) && rom["program"][zkPC]["binOpcode"] == 8) // LT4
             {
                 code += "    // Binary instruction: LT4\n";
 
@@ -4973,7 +5036,6 @@ code += "    #endif\n";
                     code += "    required.Binary.push_back(binaryAction);\n";
                 }
             }
-#endif
             else
             {
                 cerr << "Error: Invalid binary operation opcode=" << rom["program"][zkPC]["binOpcode"] << " zkPC=" << zkPC << endl;
@@ -5244,12 +5306,14 @@ code += "    #endif\n";
         if ( (rom["program"][zkPC].contains("arithEq0") && (rom["program"][zkPC]["arithEq0"]==1)) ||
              (rom["program"][zkPC].contains("arithEq1") && (rom["program"][zkPC]["arithEq1"]==1)) ||
              (rom["program"][zkPC].contains("arithEq2") && (rom["program"][zkPC]["arithEq2"]==1)) ||
-#if PROVER_FORK_ID >= 7
-             (rom["program"][zkPC].contains("arithEq3") && (rom["program"][zkPC]["arithEq3"]==1)) ||
-             (rom["program"][zkPC].contains("arithEq4") && (rom["program"][zkPC]["arithEq4"]==1)) ||
-             (rom["program"][zkPC].contains("arithEq5") && (rom["program"][zkPC]["arithEq5"]==1)) ||
-#endif
-             false)
+             ( (forkID >= 7) &&
+                (
+                    (rom["program"][zkPC].contains("arithEq3") && (rom["program"][zkPC]["arithEq3"]==1)) ||
+                    (rom["program"][zkPC].contains("arithEq4") && (rom["program"][zkPC]["arithEq4"]==1)) ||
+                    (rom["program"][zkPC].contains("arithEq5") && (rom["program"][zkPC]["arithEq5"]==1))
+                )
+             )
+           )
         {
             code += "    if (!proverRequest.input.bNoCounters)\n";
             code += "    {\n";
@@ -5616,11 +5680,11 @@ code += "    #endif\n";
                             (rom["program"][zkPC].contains("sWR") && (rom["program"][zkPC]["sWR"]==1)) ||
                             (rom["program"][zkPC].contains("hashKDigest") && (rom["program"][zkPC]["hashKDigest"]==1)) ||
                             (rom["program"][zkPC].contains("hashPDigest") && (rom["program"][zkPC]["hashPDigest"]==1)) ||
-#if PROVER_FORK_ID >= 7
-                            (rom["program"][zkPC].contains("hashSDigest") && (rom["program"][zkPC]["hashSDigest"]==1)) ||
-#endif
-                            false
-                          ))
+                            ( (forkID >= 7) &&
+                              (rom["program"][zkPC].contains("hashSDigest") && (rom["program"][zkPC]["hashSDigest"]==1))
+                            )
+                          )
+           )
         {
             code += "    pols.incCounter[i] = fr.fromU64(incCounter);\n";
         }
@@ -5683,7 +5747,8 @@ code += "    #endif\n";
             code += "    pols.cntPaddingPG[nexti] = pols.cntPaddingPG[i];\n";
         }
 
-#if PROVER_FORK_ID >= 7
+        if (forkID >= 7)
+        {
         if ( rom["program"][zkPC].contains("hashSDigest") && (rom["program"][zkPC]["hashSDigest"] == 1) )
         {
             code += "    if (!proverRequest.input.bNoCounters)\n";
@@ -5712,7 +5777,7 @@ code += "    #endif\n";
         {
             code += "    pols.cntSha256F[nexti] = pols.cntSha256F[i];\n";
         }
-#endif
+        }
 
         if ( (rom["program"][zkPC].contains("sRD") && (rom["program"][zkPC]["sRD"]==1)) ||
              (rom["program"][zkPC].contains("sWR") && (rom["program"][zkPC]["sWR"]==1)) ||
@@ -5906,9 +5971,10 @@ code += "    #endif\n";
     code += "    proverRequest.counters.memAlign = fr.toU64(pols.cntMemAlign[0]);\n";
     code += "    proverRequest.counters.paddingPG = fr.toU64(pols.cntPaddingPG[0]);\n";
     code += "    proverRequest.counters.poseidonG = fr.toU64(pols.cntPoseidonG[0]);\n";
-#if PROVER_FORK_ID >= 7
+    if (forkID >= 7)
+    {
     code += "    proverRequest.counters.sha256F = fr.toU64(pols.cntSha256F[0]);\n";
-#endif
+    }
     code += "    proverRequest.counters.steps = ctx.lastStep;\n\n";
 
     code += "    // Set the error (all previous errors generated a return)\n";
@@ -5975,7 +6041,8 @@ code += "    #endif\n";
     if (!bFastMode)
         code += "        exitProcess();\n";
     code += "    }\n";
-#if PROVER_FORK_ID >= 7
+    if (forkID >= 7)
+    {
     code += "    if (!proverRequest.input.bNoCounters && (fr.toU64(pols.cntSha256F[0]) > " + (string)rom["constants"]["MAX_CNT_SHA256_F_LIMIT"]["value"] + "))\n";
     code += "    {\n";
     code += "        proverRequest.result = ZKR_SM_MAIN_OOC_SHA256_F;\n";
@@ -5983,7 +6050,7 @@ code += "    #endif\n";
     if (!bFastMode)
         code += "        exitProcess();\n";
     code += "    }\n";
-#endif
+    }
     code += "#endif\n\n";
 
     if (!bFastMode) // In fast mode, last nexti was not 0 but 1, and pols have only 2 evaluations
@@ -6054,7 +6121,8 @@ code += "    #endif\n";
         code += "        required.PaddingPG.push_back(h);\n";
         code += "    }\n";
 
-#if PROVER_FORK_ID >= 7
+        if (forkID >= 7)
+        {
         code += "    // Generate Padding SHA required data\n";
         code += "    for (uint64_t i=0; i<ctx.hashS.size(); i++)\n";
         code += "    {\n";
@@ -6085,7 +6153,7 @@ code += "    #endif\n";
         code += "        h.lenCalled = ctx.hashS[i].lenCalled;\n";
         code += "        required.PaddingSha256.push_back(h);\n";
         code += "    }\n";
-#endif
+        }
     }
 
     code += "#ifdef LOG_TIME_STATISTICS_MAIN_EXECUTOR\n";
@@ -6313,8 +6381,7 @@ string setter8 (const string &reg, bool setReg, bool bFastMode, uint64_t zkPC, c
         }
         code += "\n";
     }
-#if PROVER_FORK_ID >= 7
-    else if ((rom["labels"].contains("verifyMerkleProofEnd") && (zkPC == rom["labels"]["verifyMerkleProofEnd"])) && (reg=="C"))
+    else if ((forkID >= 7) && rom["labels"].contains("verifyMerkleProofEnd") && (zkPC == rom["labels"]["verifyMerkleProofEnd"]) && (reg=="C"))
     {
         code += "    if (proverRequest.input.bSkipVerifyL1InfoRoot)\n";
         code += "    {\n";
@@ -6332,7 +6399,6 @@ string setter8 (const string &reg, bool setReg, bool bFastMode, uint64_t zkPC, c
         }
         code += "\n";
     }
-#endif
     else if (!bFastMode)
     {
         code += "    // " + reg + "' = " + reg + "\n";
@@ -6356,4 +6422,19 @@ string string2upper (const string &s)
     string result = s;
     transform(result.begin(), result.end(), result.begin(), ::toupper);
     return result;
+}
+
+inline bool charIsDec (char c)
+{
+    if ( (c >= '0') && (c <= '9') ) return true;
+    return false;
+}
+
+bool stringIsDec (const string &s)
+{
+    for (uint64_t i=0; i<s.size(); i++)
+    {
+        if (!charIsDec(s.at(i))) return false;
+    }
+    return true;
 }
