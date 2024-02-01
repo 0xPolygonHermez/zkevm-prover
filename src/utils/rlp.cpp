@@ -133,7 +133,7 @@ bool rlp::decodeBa (const string &input, uint64_t &p, string &output, bool &list
     return true;
 }
 
-bool rlp::decodeList (const string &input, vector<string> (&output))
+bool rlp::decodeList (const string &input, std::vector<string> &output)
 {
     // Decode the list length
     bool bResult;
@@ -273,7 +273,7 @@ bool rlp::encodeBa (const string &input, string &output)
     return true;
 }
 
-bool rlp::encodeList (const vector<string> (&input), string &output)
+bool rlp::encodeList (const std::vector<string> &input, string &output)
 {
     // Build the list raw data by encoding all byte arrays, and concatenate them
     bool bResult;
