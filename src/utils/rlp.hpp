@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <string>
+#include <vector>
 #include <gmp.h>
 #include <gmpxx.h>
 
