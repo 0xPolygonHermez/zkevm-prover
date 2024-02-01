@@ -849,6 +849,8 @@ void *config_new(char* filename) {
     json configJson;
     file2json(filename, configJson);
     config->load(configJson);
+
+    return config;
 }
 
 void config_free(void *pConfig) {
@@ -856,7 +858,7 @@ void config_free(void *pConfig) {
     delete config;
 }
 
-void *starks_new(void *pConfig, char* constPols, char* mapConstPolsFile, char* constantsTree, char* starkInfo, void *pAddress) {
+void *starks_new(void *pConfig, char* constPols, bool mapConstPolsFile, char* constantsTree, char* starkInfo, void *pAddress) {
     Config* config = (Config*)pConfig;
     return new Starks(*config, {constPols, mapConstPolsFile, constantsTree, starkInfo}, pAddress);
 }

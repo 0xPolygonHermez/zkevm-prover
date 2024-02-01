@@ -24,7 +24,7 @@
 
     // Starks
     // ========================================================================================
-    void *starks_new(void *pConfig, char* constPols, char* mapConstPolsFile, char* constantsTree, char* starkInfo, void *pAddress);
+    void *starks_new(void *pConfig, char* constPols, bool mapConstPolsFile, char* constantsTree, char* starkInfo, void *pAddress);
     void starks_gen_proof(void *pStarks, void *pFRIProof, void *pPublicInputs, void *pVerkey, void *pSteps);
     void starks_free(void *pStarks);
 #endif
