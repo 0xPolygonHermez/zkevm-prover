@@ -147,10 +147,10 @@ inline bool encodeHexData(string &data, const string &hex)
 // Where BA = batch array, equivalent to a binary string
 bool decodeLength (const string &input, uint64_t &p, uint64_t &length, bool &list);
 bool decodeBa     (const string &input, uint64_t &p, string &output, bool &list);
-bool decodeList   (const string &input, vector<string> (&output));
+bool decodeList   (const string &input, std::vector<string> &output);
 bool encodeLength (uint64_t length, bool list, string &output);
 bool encodeBa     (const string &input, string &output);
-bool encodeList   (const vector<string> (&input), string &output);
+bool encodeList   (const std::vector<string> &input, string &output);
 
 }
 #endif

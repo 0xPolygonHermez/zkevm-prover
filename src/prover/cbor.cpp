@@ -37,7 +37,7 @@ void cbor2result (const string &s, uint64_t &p, CborResult &cborResult)
     uint8_t majorType = firstByte >> 5;
     uint8_t shortCount = firstByte & 0x1F;
 
-    uint64_t longCount;
+    uint64_t longCount = 0;
     if (shortCount <= 23)
     {
         longCount = shortCount;
