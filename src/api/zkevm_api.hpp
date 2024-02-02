@@ -6,10 +6,16 @@
 
     // FFI functions
 
-    // ZkevmSteps
+    // Steps
     // ========================================================================================
     void *zkevm_steps_new();
     void zkevm_steps_free(void *pZkevmSteps);
+    void *c12a_steps_new();
+    void c12a_steps_free(void *pC12aSteps);
+    void *recursive1_steps_new();
+    void recursive1_steps_free(void *pRecursive1Steps);
+    void *recursive2_steps_new();
+    void recursive2_steps_free(void *Recursive2Steps);
 
 
     // FRIProof
@@ -27,4 +33,18 @@
     void *starks_new(void *pConfig, char* constPols, bool mapConstPolsFile, char* constantsTree, char* starkInfo, void *pAddress);
     void starks_gen_proof(void *pStarks, void *pFRIProof, void *pPublicInputs, void *pVerkey, void *pSteps);
     void starks_free(void *pStarks);
+
+    // CommitPolsStarks
+    // ========================================================================================
+    void *commit_pols_starks_new(void *pAddress, uint64_t degree, uint64_t nCommitedPols);
+    void commit_pols_starks_free(void *pCommitPolsStarks);
+
+    // Circom
+    // ========================================================================================
+    void circom_get_commited_pols(void *pCommitPolsStarks, char* zkevmVerifier, char* execFile, void* zkin, uint64_t N, uint64_t nCols);
+    void circom_recursive1_get_commited_pols(void *pCommitPolsStarks, char* zkevmVerifier, char* execFile, void* zkin, uint64_t N, uint64_t nCols);
+
+    // zkin
+    // ========================================================================================
+    void *zkin_new(void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, unsigned long numRootC, void *pRootC);
 #endif

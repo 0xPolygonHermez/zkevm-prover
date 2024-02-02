@@ -25,5 +25,6 @@ int main(int argc, char **argv)
             pConfigFile = argv[2];
         }
     }
-    zkevm_main(pConfigFile);
+
+    zkevm_main(pConfigFile, NULL);
 }

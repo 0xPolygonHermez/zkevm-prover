@@ -13,6 +13,7 @@
 #include "calcwit.hpp"
 #include "circom.hpp"
 #include "main.hpp"
+#include "main.recursive1.hpp"
 #include "prover.hpp"
 #include "service/executor/executor_server.hpp"
 #include "service/executor/executor_client.hpp"
@@ -50,6 +51,9 @@
 #include "zkglobals.hpp"
 #include "key_value_tree_test.hpp"
 #include "zkevmSteps.hpp"
+#include "c12aSteps.hpp"
+#include "recursive1Steps.hpp"
+#include "recursive2Steps.hpp"
 #include "starks.hpp"
 
 
@@ -572,7 +576,6 @@ int zkevm_main(char *pConfigFile, void* pAddress)
     }
 
     /* FILE-BASED INPUT */
-
     // Generate a batch proof from the input file
     if (config.runFileGenBatchProof)
     {
@@ -834,6 +837,33 @@ void zkevm_steps_free(void *pZkevmSteps) {
     delete zkevmSteps;
 }
 
+void *c12a_steps_new() {
+    C12aSteps* c12aSteps = new C12aSteps();
+    return c12aSteps;
+}
+void c12a_steps_free(void *pC12aSteps) {
+    C12aSteps* c12aSteps = (C12aSteps*)pC12aSteps;
+    delete c12aSteps;
+}
+void *recursive1_steps_new() {
+    Recursive1Steps* recursive1Steps = new Recursive1Steps();
+    return recursive1Steps;
+}
+void recursive1_steps_free(void *pRecursive1Steps) {
+    Recursive1Steps* recursive1Steps = (Recursive1Steps*)pRecursive1Steps;
+    delete recursive1Steps;
+}
+void *recursive2_steps_new() {
+    Recursive2Steps* recursive2Steps = new Recursive2Steps();
+    return recursive2Steps;
+}
+
+void recursive2_steps_free(void *pRecursive2Steps) {
+    Recursive2Steps* recursive2Steps = (Recursive2Steps*)pRecursive2Steps;
+    delete recursive2Steps;
+}
+
+
 void *fri_proof_new(uint64_t polN, uint64_t dim, uint64_t numTrees, uint64_t evalSize, uint64_t nPublics) {
     FRIProof* friProof = new FRIProof(polN, dim, numTrees, evalSize, nPublics);
     return friProof;
@@ -876,3 +906,52 @@ void starks_free(void *pStarks) {
     Starks* starks = (Starks*)pStarks;
     delete starks;
 }
+
+void *commit_pols_starks_new(void *pAddress, uint64_t degree, uint64_t nCommitedPols) {
+    return new CommitPolsStarks(pAddress, degree, nCommitedPols);
+}
+
+void commit_pols_starks_free(void *pCommitPolsStarks) {
+    CommitPolsStarks* commitPolsStarks = (CommitPolsStarks*)pCommitPolsStarks;
+    delete commitPolsStarks;
+}
+
+void circom_get_commited_pols(void *pCommitPolsStarks, char* zkevmVerifier, char* execFile, void* zkin, uint64_t N, uint64_t nCols) {
+    nlohmann::json* zkinJson = (nlohmann::json*) zkin;
+    Circom::getCommitedPols((CommitPolsStarks*)pCommitPolsStarks, zkevmVerifier, execFile, *zkinJson, N, nCols);
+}
+
+void circom_recursive1_get_commited_pols(void *pCommitPolsStarks, char* zkevmVerifier, char* execFile, void* zkin, uint64_t N, uint64_t nCols) {
+    nlohmann::json* zkinJson = (nlohmann::json*) zkin;
+    CircomRecursive1::getCommitedPols((CommitPolsStarks*)pCommitPolsStarks, zkevmVerifier, execFile, *zkinJson, N, nCols);
+}
+
+void *zkin_new(void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, unsigned long numRootC, void *pRootC) {
+    FRIProof* friProof = (FRIProof*)pFriProof;
+    Goldilocks::Element* publicInputs = (Goldilocks::Element*)pPublicInputs;
+    Goldilocks::Element* rootC = (Goldilocks::Element*)pRootC;
+
+    // Generate publics
+    json publicStarkJson;
+    for (uint64_t i = 0; i < numPublicInputs; i++)
+    {
+        publicStarkJson[i] = Goldilocks::toString(publicInputs[i]);
+    }
+
+    json xrootC;
+    for (uint64_t i = 0; i < numRootC; i++)
+    {
+        xrootC[i] = Goldilocks::toString(rootC[i]);
+    }
+
+    nlohmann::ordered_json* jProof = new nlohmann::ordered_json();
+    nlohmann::json* zkin = new nlohmann::json();
+    *jProof = friProof->proofs.proof2json();
+
+    *zkin = proof2zkinStark(*jProof);
+    (*zkin)["publics"] = publicStarkJson;
+    if (numRootC != 0) (*zkin)["rootC"] = xrootC;
+
+    return zkin;
+}
+
