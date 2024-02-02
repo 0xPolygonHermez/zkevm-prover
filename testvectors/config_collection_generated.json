@@ -1,0 +1,82 @@
+{
+    "runExecutorServer": true,
+    "runExecutorClient": true,
+    "runExecutorClientMultithread": false,
+
+    "runStateDBServer": false,
+    "runStateDBTest": false,
+
+    "runAggregatorServer": false,
+    "runAggregatorClient": false,
+    "runAggregatorClientMock": false, 
+    
+    "runFileGenBatchProof": false,
+    "runFileGenAggregatedProof": false,
+    "runFileGenFinalProof": false,
+    "runFileProcessBatch": false,
+    "runFileProcessBatchMultithread": false,
+
+    "runKeccakScriptGenerator": false,
+    "runKeccakTest": false,
+    "runStorageSMTest": false,
+    "runBinarySMTest": false,
+    "runMemAlignSMTest": false,
+    "runSHA256Test": false,
+    "runBlakeTest": false,
+
+    "executeInParallel": true,
+    "useMainExecGenerated": true,
+    
+    "saveRequestToFile": false,
+    "saveInputToFile": false,
+    "saveDbReadsToFile": false,
+    "saveDbReadsToFileOnChange": false,
+    "saveOutputToFile": false,
+    "saveProofToFile": false,
+    "saveResponseToFile": false,
+    "loadDBToMemCache": false,
+    "opcodeTracer": false,
+    "logRemoteDbReads": false,
+    "logExecutorServerResponses": false,
+
+    "proverServerPort": 50051,
+    "proverServerMockPort": 50052,
+    "proverServerMockTimeout": 10000000,
+    "proverClientPort": 50051,
+    "proverClientHost": "127.0.0.1",
+
+    "executorServerPort": 50071,
+    "executorROMLineTraces": false,
+    "executorClientPort": 50071,
+    "executorClientHost": "127.0.0.1",
+
+    "hashDBServerPort": 50061,
+    "hashDBURL": "local",
+
+    "aggregatorServerPort": 50081,
+    "aggregatorClientPort": 50081,
+    "aggregatorClientHost": "127.0.0.1",
+
+    "mapConstPolsFile": false,
+    "mapConstantsTreeFile": false,
+
+    "inputFile": "testvectors/collection/",
+
+    "outputPath": "runtime/output",
+    "configPath": "config",
+
+    "publicsOutput": "public.json",
+    "proofFile": "proof.json",
+
+    "databaseURL": "local",
+    "databaseURL_disabled": "postgresql://statedb:statedb@127.0.0.1:5432/testdb",
+    "dbNodesTableName": "state.nodes",
+    "dbProgramTableName": "state.program",
+    "dbAsyncWrite": false,
+    "cleanerPollingPeriod": 600,
+    "requestsPersistence": 3600,
+    "maxExecutorThreads": 20,
+    "maxProverThreads": 8,
+    "maxStateDBThreads": 8,
+    "aggregatorClientMaxStreams": 1
+}

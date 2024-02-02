@@ -194,7 +194,8 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
     #endif
         }
 
-        if (processBatchResponse.stored_flush_id() != processBatchResponse.flush_id())
+        // Wait until the returned flush ID has been stored to database
+        if ((config.databaseURL != "local") && (processBatchResponse.stored_flush_id() != processBatchResponse.flush_id()))
         {
             executor::v1::GetFlushStatusResponse getFlushStatusResponse;
             do
@@ -363,7 +364,8 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
             blockStateRoots.emplace_back(ba2string(processBatchResponse.block_responses()[b].block_hash()));
         }
 
-        if (processBatchResponse.stored_flush_id() != processBatchResponse.flush_id())
+        // Wait until the returned flush ID has been stored to database
+        if ((config.databaseURL != "local") && (processBatchResponse.stored_flush_id() != processBatchResponse.flush_id()))
         {
             executor::v1::GetFlushStatusResponse getFlushStatusResponse;
             do
@@ -429,7 +431,8 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
             blockStateRoots.emplace_back(ba2string(processBatchResponse.block_responses()[b].block_hash()));
         }
 
-        if (processBatchResponse.stored_flush_id() != processBatchResponse.flush_id())
+        // Wait until the returned flush ID has been stored to database
+        if ((config.databaseURL != "local") && (processBatchResponse.stored_flush_id() != processBatchResponse.flush_id()))
         {
             executor::v1::GetFlushStatusResponse getFlushStatusResponse;
             do
