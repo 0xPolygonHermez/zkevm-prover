@@ -37,9 +37,11 @@ void ExecutorClient::runThread (void)
     pthread_create(&t, NULL, executorClientThread, this);
 }
 
-void ExecutorClient::waitForThread (void)
+int64_t ExecutorClient::waitForThread (void)
 {
-    pthread_join(t, NULL);
+    void * pResult;
+    pthread_join(t, &pResult);
+    return (int64_t)pResult;
 }
 
 void ExecutorClient::runThreads (void)
@@ -53,12 +55,20 @@ void ExecutorClient::runThreads (void)
     }
 }
 
-void ExecutorClient::waitForThreads (void)
+int64_t ExecutorClient::waitForThreads (void)
 {
+    int64_t iTotalResult = 0;
     for (uint64_t i=0; i<EXECUTOR_CLIENT_MULTITHREAD_N_THREADS; i++)
     {
-        pthread_join(threads[i], NULL);
+        void * pResult;
+        pthread_join(threads[i], &pResult);
+        int64_t iResult = (int64_t)pResult;
+        if (iResult != 0)
+        {
+            iTotalResult = iResult;
+        }
     }
+    return iTotalResult;
 }
 
 bool ExecutorClient::ProcessBatch (const string &inputFile)
@@ -184,7 +194,8 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
     #endif
         }
 
-        if (processBatchResponse.stored_flush_id() != processBatchResponse.flush_id())
+        // Wait until the returned flush ID has been stored to database
+        if ((config.databaseURL != "local") && (processBatchResponse.stored_flush_id() != processBatchResponse.flush_id()))
         {
             executor::v1::GetFlushStatusResponse getFlushStatusResponse;
             do
@@ -353,7 +364,8 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
             blockStateRoots.emplace_back(ba2string(processBatchResponse.block_responses()[b].block_hash()));
         }
 
-        if (processBatchResponse.stored_flush_id() != processBatchResponse.flush_id())
+        // Wait until the returned flush ID has been stored to database
+        if ((config.databaseURL != "local") && (processBatchResponse.stored_flush_id() != processBatchResponse.flush_id()))
         {
             executor::v1::GetFlushStatusResponse getFlushStatusResponse;
             do
@@ -419,7 +431,8 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
             blockStateRoots.emplace_back(ba2string(processBatchResponse.block_responses()[b].block_hash()));
         }
 
-        if (processBatchResponse.stored_flush_id() != processBatchResponse.flush_id())
+        // Wait until the returned flush ID has been stored to database
+        if ((config.databaseURL != "local") && (processBatchResponse.stored_flush_id() != processBatchResponse.flush_id()))
         {
             executor::v1::GetFlushStatusResponse getFlushStatusResponse;
             do
@@ -610,7 +623,8 @@ bool ProcessDirectory (ExecutorClient *pClient, const string &directoryName, uin
 
 void* executorClientThread (void* arg)
 {
-    cout << "executorClientThread() started" << endl;
+    zklog.info("executorClientThread() started");
+    int64_t result = 0;
     string uuid;
     ExecutorClient *pClient = (ExecutorClient *)arg;
 
@@ -629,22 +643,29 @@ void* executorClientThread (void* arg)
         if (!bResult)
         {
             zklog.error("executorClientThread() failed calling ProcessDirectory()");
+            result = -1;
         }
         zklog.info("executorClientThread() called ProcessDirectory() and got directories=" + to_string(directoryCounter) + " files=" + to_string(fileCounter) + " skippedFiles=" + to_string(skippedFileCounter) + " percentage=" + to_string((fileCounter*100)/zkmax(1, fileCounter + skippedFileCounter)) + "% skippedDirectories=" + to_string(skippedDirectoryCounter));
     }
     else
     {
-        pClient->ProcessBatch(config.inputFile);
+        bool bResult = pClient->ProcessBatch(config.inputFile);
+        if (!bResult)
+        {
+            zklog.error("executorClientThread() failed calling ProcessBatch()");
+            result = -1;
+        }
     }
 
     TimerStopAndLog(EXECUTOR_CLIENT_THREAD);
 
-    return NULL;
+    return (void *)result;
 }
 
 void* executorClientThreads (void* arg)
 {
-    //cout << "executorClientThreads() started" << endl;
+    zklog.info("executorClientThreads() started");
+    int64_t result = 0;
     string uuid;
     ExecutorClient *pClient = (ExecutorClient *)arg;
 
@@ -665,15 +686,21 @@ void* executorClientThreads (void* arg)
                 if (!bResult)
                 {
                     zklog.error("executorClientThreads() failed i=" + to_string(i) + " inputFile=" + inputFile);
+                    result = -1;
                     break;
                 }
             }
         }
         else
         {
-            pClient->ProcessBatch(config.inputFile);
+            bool bResult = pClient->ProcessBatch(config.inputFile);
+            if (!bResult)
+            {
+                zklog.error("executorClientThreads() failed calling ProcessBatch()");
+                result = -1;
+            }
         }
     }
 
-    return NULL;
+    return (void *)result;
 }

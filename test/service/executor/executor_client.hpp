@@ -28,11 +28,11 @@ public:
 
     // Mono-thread
     void runThread (void);
-    void waitForThread (void);
+    int64_t waitForThread (void);
 
     // Multi-thread
     void runThreads (void);
-    void waitForThreads (void);
+    int64_t waitForThreads (void);
 
     bool ProcessBatch (const string &inputFile);
 };
