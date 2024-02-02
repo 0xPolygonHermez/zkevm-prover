@@ -299,7 +299,7 @@ int main(int argc, char **argv)
         if ((strcmp(argv[1], "-v") == 0) || (strcmp(argv[1], "--version") == 0))
         {
             // If requested to only print the version, then exit the program
-            return 0;
+            return -1;
         }
     }
 
@@ -757,19 +757,19 @@ int main(int argc, char **argv)
     if (config.runExecutorClient)
     {
         zkassert(pExecutorClient != NULL);
-        pExecutorClient->waitForThread();
+        int64_t iResult = pExecutorClient->waitForThread();
         sleep(1);
-        return 0;
+        return iResult;
     }
 
     // Wait for the executor client thread to end
     if (config.runExecutorClientMultithread)
     {
         zkassert(pExecutorClient != NULL);
-        pExecutorClient->waitForThreads();
+        int64_t iResult = pExecutorClient->waitForThreads();
         zklog.info("All executor client threads have completed");
         sleep(1);
-        return 0;
+        return iResult;
     }
 
     // Wait for the executor server thread to end
@@ -841,4 +841,6 @@ int main(int argc, char **argv)
     TimerStopAndLog(WHOLE_PROCESS);
 
     zklog.info("Done");
+
+    return 0;
 }
