@@ -8,7 +8,7 @@ on:
     branches: [ "main","develop", "release_*" ]
 
 jobs:
-  build:
+  e2e-collection-tests:
 
     runs-on: [self-hosted, linux, X64, hc, hm]
 
@@ -29,6 +29,10 @@ jobs:
       run: rm -rf runtime/output/*
     - name: link files
       run: ln -s /home/gha/v4.0.0-rc.6-fork.7/config/ config
+    - name: run collection native tests
+      run: ./build/zkProver -c testvectors/config_collection_native.json
+    - name: run collection generated tests
+      run: ./build/zkProver -c testvectors/config_collection_generated.json
     - name: run e2e tests
       run: ./build/zkProver -c testvectors/config_runFile_e2e.json 
     - name: run snarkjs verification
