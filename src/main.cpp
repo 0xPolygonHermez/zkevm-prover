@@ -39,7 +39,7 @@
 #include "hashdb_singleton.hpp"
 #include "unit_test.hpp"
 #include "database_cache_test.hpp"
-#include "main_sm/fork_7/main_exec_c/account.hpp"
+#include "main_sm/fork_8/main_exec_c/account.hpp"
 #include "state_manager.hpp"
 #include "state_manager_64.hpp"
 #include "check_tree_test.hpp"
@@ -367,7 +367,7 @@ int main(int argc, char **argv)
 #endif
 
     // Generate account zero keys
-    fork_7::Account::GenerateZeroKey(fr, poseidon);
+    fork_8::Account::GenerateZeroKey(fr, poseidon);
 
     // Init the HashDB singleton
     hashDBSingleton.init(fr, config);

@@ -6,7 +6,6 @@
 #include "main_sm/fork_7/main/context.hpp"
 #include "main_sm/fork_7/main/rom_command.hpp"
 #include "main_sm/fork_7/main/rom_line.hpp"
-#include "main_sm/fork_7/main_exec_c/context_c.hpp"
 #include "utils/time_metric.hpp"
 #include "goldilocks_base_field.hpp"
 #include "config.hpp"
@@ -59,21 +58,14 @@ public:
 #endif
 public:
     zkresult onError         (Context &ctx, const RomCommand &cmd);
-    zkresult onError         (ContextC &ctxc, const string &error);
     zkresult onStoreLog      (Context &ctx, const RomCommand &cmd);
-    zkresult onStoreLog      (ContextC &ctxc);
     zkresult onStartBlock    (Context &ctx);
     zkresult onFinishBlock   (Context &ctx);
     zkresult onProcessTx     (Context &ctx, const RomCommand &cmd);
-    zkresult onProcessTx     (ContextC &ctxc);
     zkresult onUpdateStorage (Context &ctx, const RomCommand &cmd);
-    zkresult onUpdateStorage (ContextC &ctxc);
     zkresult onFinishTx      (Context &ctx, const RomCommand &cmd);
-    zkresult onFinishTx      (ContextC &ctxc);
     zkresult onStartBatch    (Context &ctx, const RomCommand &cmd);
-    zkresult onStartBatch    (ContextC &ctxc);
     zkresult onFinishBatch   (Context &ctx, const RomCommand &cmd);
-    zkresult onFinishBatch   (ContextC &ctxc);
 
     zkresult onOpcode (Context &ctx, const RomCommand &cmd);
     zkresult addReadWriteAddress ( const Goldilocks::Element &address0, const Goldilocks::Element &address1, const Goldilocks::Element &address2, const Goldilocks::Element &faddress3, const Goldilocks::Element &address4, const Goldilocks::Element &address5, const Goldilocks::Element &address6, const Goldilocks::Element &address7,
