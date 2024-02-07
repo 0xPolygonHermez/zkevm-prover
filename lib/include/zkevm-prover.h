@@ -47,4 +47,8 @@
     // zkin
     // ========================================================================================
     void *zkin_new(void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, unsigned long numRootC, void *pRootC);
+
+    // Save proof
+    // ========================================================================================
+    void save_proof(void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix);
 #endif

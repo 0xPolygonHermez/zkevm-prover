@@ -955,3 +955,36 @@ void *zkin_new(void *pFriProof, unsigned long numPublicInputs, void *pPublicInpu
     return zkin;
 }
 
+void save_proof(void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix) {
+    FRIProof* friProof = (FRIProof*)pFriProof;
+    Goldilocks::Element* publicInputs = (Goldilocks::Element*)pPublicInputs;
+
+    // Generate publics
+    json publicStarkJson;
+    for (uint64_t i = 0; i < numPublicInputs; i++)
+    {
+        publicStarkJson[i] = Goldilocks::toString(publicInputs[i]);
+    }
+
+
+
+    nlohmann::ordered_json jProofRecursive1 = friProof->proofs.proof2json();
+    nlohmann::ordered_json zkinRecursive1 = proof2zkinStark(jProofRecursive1);
+    zkinRecursive1["publics"] = publicStarkJson;
+
+    // save publics to filestarks
+    json2file(publicStarkJson, publicsOutputFile);
+
+    // Save output to file
+    if (config.saveOutputToFile)
+    {
+        json2file(zkinRecursive1, string(filePrefix) + "batch_proof.output.json");
+    }
+    // Save proof to file
+    if (config.saveProofToFile)
+    {
+        jProofRecursive1["publics"] = publicStarkJson;
+        json2file(jProofRecursive1, string(filePrefix) + "batch_proof.proof.json");
+    }
+}
+
