@@ -5,79 +5,77 @@
 #include "proof2zkinStark.hpp"
 using namespace std;
 
-ordered_json proof2zkinStark(ordered_json &proof)
+ordered_json proof2zkinStark(ordered_json &proof, StarkInfo starkInfo)
 {
+    uint64_t friSteps = starkInfo.starkStruct.steps.size();
+    uint64_t nQueries = starkInfo.starkStruct.nQueries;
+    uint64_t nStages = 3; // TODO
+    uint64_t nSubAirValues = 0; // TODO
+   
     ordered_json zkinOut = ordered_json::object();
 
     zkinOut["root1"] = proof["root1"];
-    zkinOut["root2"] = proof["root2"];
-    zkinOut["root3"] = proof["root3"];
+    for(uint64_t i = 0; i < nStages - 1; i++) {
+        uint64_t stage = i + 2;
+        zkinOut["root" + to_string(stage)] = proof["root" + to_string(stage)];
+    }
     zkinOut["root4"] = proof["root4"];
     zkinOut["evals"] = proof["evals"];
 
     ordered_json friProof = proof["fri"];
-    for (uint i = 1; i < friProof.size() - 1; i++)
+    for (uint64_t i = 1; i < friSteps - 1; i++)
     {
         zkinOut["s" + std::to_string(i) + "_root"] = friProof[i]["root"];
         zkinOut["s" + std::to_string(i) + "_vals"] = ordered_json::array();
         zkinOut["s" + std::to_string(i) + "_siblings"] = ordered_json::array();
-        for (uint q = 0; q < friProof[0]["polQueries"].size(); q++)
+        for (uint q = 0; q < nQueries; q++)
         {
             zkinOut["s" + std::to_string(i) + "_vals"][q] = friProof[i]["polQueries"][q][0];
             zkinOut["s" + std::to_string(i) + "_siblings"][q] = friProof[i]["polQueries"][q][1];
         }
     }
-
-    zkinOut["s0_vals1"] = ordered_json::array();
-    if (friProof[0]["polQueries"][0][1][0].size())
-    {
-        zkinOut["s0_vals2"] = ordered_json::array();
-    }
-    if (friProof[0]["polQueries"][0][2][0].size())
-    {
-        zkinOut["s0_vals3"] = ordered_json::array();
-    }
-
-    zkinOut["s0_vals4"] = ordered_json::array();
+  
     zkinOut["s0_valsC"] = ordered_json::array();
-    zkinOut["s0_siblings1"] = ordered_json::array();
-    if (friProof[0]["polQueries"][0][1][0].size())
-    {
-        zkinOut["s0_siblings2"] = ordered_json::array();
+    zkinOut["s0_vals1"] = ordered_json::array();
+
+    for(uint64_t i = 0; i < nStages - 1; ++i) {
+        uint64_t stage = i + 2;
+        zkinOut["s0_vals" + to_string(stage)] = ordered_json::array();
     }
-    if (friProof[0]["polQueries"][0][2][0].size())
-    {
-        zkinOut["s0_siblings3"] = ordered_json::array();
+    zkinOut["s0_vals4"] = ordered_json::array();
+
+    zkinOut["s0_siblingsC"] = ordered_json::array();
+    zkinOut["s0_siblings1"] = ordered_json::array();
+
+    for(uint64_t i = 0; i < nStages - 1; ++i) {
+        uint64_t stage = i + 2;
+        zkinOut["s0_siblings" + to_string(stage)] = ordered_json::array();
     }
     zkinOut["s0_siblings4"] = ordered_json::array();
-    zkinOut["s0_siblingsC"] = ordered_json::array();
 
-    for (uint i = 0; i < friProof[0]["polQueries"].size(); i++)
-    {
+    for (uint64_t i = 0; i < nQueries; i++) {
+        zkinOut["s0_valsC"][i] = friProof[0]["polQueries"][i][0][0];
+        zkinOut["s0_siblingsC"][i] = friProof[0]["polQueries"][i][0][1];
 
-        zkinOut["s0_vals1"][i] = friProof[0]["polQueries"][i][0][0];
-        zkinOut["s0_siblings1"][i] = friProof[0]["polQueries"][i][0][1];
-
-        if (friProof[0]["polQueries"][0][1][0].size())
-        {
-            zkinOut["s0_vals2"][i] = friProof[0]["polQueries"][i][1][0];
-            zkinOut["s0_siblings2"][i] = friProof[0]["polQueries"][i][1][1];
-        }
-        if (friProof[0]["polQueries"][0][2][0].size())
-        {
-            zkinOut["s0_vals3"][i] = friProof[0]["polQueries"][i][2][0];
-            zkinOut["s0_siblings3"][i] = friProof[0]["polQueries"][i][2][1];
+        zkinOut["s0_vals1"][i] = friProof[0]["polQueries"][i][1][0];
+        zkinOut["s0_siblings1"][i] = friProof[0]["polQueries"][i][1][1];
+        
+        for (uint64_t j = 0; j < nStages - 1; ++j) {
+            uint64_t stage = j + 2;
+            zkinOut["s0_vals" + to_string(stage)][i] = friProof[0]["polQueries"][i][stage][0];
+            zkinOut["s0_siblings" + to_string(stage)][i] = friProof[0]["polQueries"][i][stage][1];
         }
 
-        zkinOut["s0_vals4"][i] = friProof[0]["polQueries"][i][3][0];
-        zkinOut["s0_siblings4"][i] = friProof[0]["polQueries"][i][3][1];
-
-        zkinOut["s0_valsC"][i] = friProof[0]["polQueries"][i][4][0];
-        zkinOut["s0_siblingsC"][i] = friProof[0]["polQueries"][i][4][1];
+        zkinOut["s0_vals4"][i] = friProof[0]["polQueries"][i][nStages + 1][0];
+        zkinOut["s0_siblings4"][i] = friProof[0]["polQueries"][i][nStages + 1][1];
     }
 
-    zkinOut["finalPol"] = friProof[friProof.size() - 1];
+    zkinOut["finalPol"] = friProof[friSteps - 1];
 
+    if (nSubAirValues > 0) {
+        // zkin.subAirValues = proof.subAirValues;
+    }
+    
     return zkinOut;
 };
 

@@ -4,7 +4,6 @@
 #include "prover.hpp"
 #include "utils.hpp"
 #include "scalar.hpp"
-#include "proof2zkin.hpp"
 #include "main.hpp"
 #include "main.recursive1.hpp"
 #include "main.recursive2.hpp"
@@ -572,8 +571,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         TimerStart(STARK_PROOF_BATCH_PROOF);
 
         ZkevmSteps zkevmSteps;
-        uint64_t polBits = starkZkevm->starkInfo.starkStruct.steps[starkZkevm->starkInfo.starkStruct.steps.size() - 1].nBits;
-        FRIProof fproof((1 << polBits), FIELD_EXTENSION, starkZkevm->starkInfo.starkStruct.steps.size(), starkZkevm->starkInfo.evMap.size(), starkZkevm->starkInfo.nPublics);
+        FRIProof<Goldilocks::Element, Goldilocks> fproof(starkZkevm->starkInfo, 4);
         starkZkevm->genProof(fproof, &publics[0], zkevmVerkey, &zkevmSteps);
 
         TimerStopAndLog(STARK_PROOF_BATCH_PROOF);
@@ -581,7 +579,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         TimerStart(STARK_JSON_GENERATION_BATCH_PROOF);
 
         nlohmann::ordered_json jProof = fproof.proofs.proof2json();
-        nlohmann::json zkin = proof2zkinStark(jProof);
+        nlohmann::json zkin = proof2zkinStark(jProof, starkZkevm->starkInfo);
         // Generate publics
         jProof["publics"] = publicStarkJson;
         zkin["publics"] = publicStarkJson;
@@ -601,8 +599,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         //-------------------------------------------
         TimerStopAndLog(STARK_GEN_AND_CALC_WITNESS_C12A);
         TimerStart(STARK_C12_A_PROOF_BATCH_PROOF);
-        uint64_t polBitsC12 = starksC12a->starkInfo.starkStruct.steps[starksC12a->starkInfo.starkStruct.steps.size() - 1].nBits;
-        FRIProof fproofC12a((1 << polBitsC12), FIELD_EXTENSION, starksC12a->starkInfo.starkStruct.steps.size(), starksC12a->starkInfo.evMap.size(), starksC12a->starkInfo.nPublics);
+        FRIProof<Goldilocks::Element, Goldilocks> fproofC12a(starksC12a->starkInfo, 4);
 
         // Generate the proof
         C12aSteps c12aSteps;
@@ -614,7 +611,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
 
         // Save the proof & zkinproof
         nlohmann::ordered_json jProofc12a = fproofC12a.proofs.proof2json();
-        nlohmann::json zkinC12a = proof2zkinStark(jProofc12a);
+        nlohmann::json zkinC12a = proof2zkinStark(jProofc12a, starksC12a->starkInfo);
 
         // Add the recursive2 verification key
         json rootC;
@@ -638,8 +635,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         //-------------------------------------------
 
         TimerStart(STARK_RECURSIVE_1_PROOF_BATCH_PROOF);
-        uint64_t polBitsRecursive1 = starksRecursive1->starkInfo.starkStruct.steps[starksRecursive1->starkInfo.starkStruct.steps.size() - 1].nBits;
-        FRIProof fproofRecursive1((1 << polBitsRecursive1), FIELD_EXTENSION, starksRecursive1->starkInfo.starkStruct.steps.size(), starksRecursive1->starkInfo.evMap.size(), starksRecursive1->starkInfo.nPublics);
+        FRIProof<Goldilocks::Element, Goldilocks> fproofRecursive1(starksRecursive1->starkInfo, 4);
         Recursive1Steps recursive1Steps;
         starksRecursive1->genProof(fproofRecursive1, publics, recursive1Verkey, &recursive1Steps);
         TimerStopAndLog(STARK_RECURSIVE_1_PROOF_BATCH_PROOF);
@@ -648,7 +644,7 @@ void Prover::genBatchProof(ProverRequest *pProverRequest)
         TimerStart(SAVE_PROOF);
 
         nlohmann::ordered_json jProofRecursive1 = fproofRecursive1.proofs.proof2json();
-        nlohmann::ordered_json zkinRecursive1 = proof2zkinStark(jProofRecursive1);
+        nlohmann::ordered_json zkinRecursive1 = proof2zkinStark(jProofRecursive1, starksRecursive1->starkInfo);
         zkinRecursive1["publics"] = publicStarkJson;
 
         pProverRequest->batchProofOutput = zkinRecursive1;
@@ -776,15 +772,14 @@ void Prover::genAggregatedProof(ProverRequest *pProverRequest)
     //-------------------------------------------
 
     TimerStart(STARK_RECURSIVE_2_PROOF_BATCH_PROOF);
-    uint64_t polBitsRecursive2 = starksRecursive2->starkInfo.starkStruct.steps[starksRecursive2->starkInfo.starkStruct.steps.size() - 1].nBits;
-    FRIProof fproofRecursive2((1 << polBitsRecursive2), FIELD_EXTENSION, starksRecursive2->starkInfo.starkStruct.steps.size(), starksRecursive2->starkInfo.evMap.size(), starksRecursive2->starkInfo.nPublics);
+    FRIProof<Goldilocks::Element, Goldilocks> fproofRecursive2(starksRecursive2->starkInfo, 4);
     Recursive2Steps recursive2Steps;
     starksRecursive2->genProof(fproofRecursive2, publics, recursive2VerkeyValues, &recursive2Steps);
     TimerStopAndLog(STARK_RECURSIVE_2_PROOF_BATCH_PROOF);
 
     // Save the proof & zkinproof
     nlohmann::ordered_json jProofRecursive2 = fproofRecursive2.proofs.proof2json();
-    nlohmann::ordered_json zkinRecursive2 = proof2zkinStark(jProofRecursive2);
+    nlohmann::ordered_json zkinRecursive2 = proof2zkinStark(jProofRecursive2, starksRecursive2->starkInfo);
     zkinRecursive2["publics"] = zkinInputRecursive2["publics"];
 
     // Output is pProverRequest->aggregatedProofOutput (of type json)
@@ -873,7 +868,7 @@ void Prover::genFinalProof(ProverRequest *pProverRequest)
 
     // Save the proof & zkinproof
     nlohmann::ordered_json jProofRecursiveF = fproofRecursiveF.proofs.proof2json();
-    json zkinRecursiveF = proof2zkinStark(jProofRecursiveF);
+    json zkinRecursiveF = proof2zkinStark(jProofRecursiveF, starksRecursiveF->starkInfo);
     zkinRecursiveF["publics"] = zkinFinal["publics"];
     zkinRecursiveF["aggregatorAddr"] = strAddress10;
 

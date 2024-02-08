@@ -188,15 +188,25 @@ void MerkleTreeBN128::getRoot(RawFr::Element *root)
     std::memcpy(root, &nodes[numNodes - 1], sizeof(RawFr::Element));
 }
 
-uint64_t MerkleTreeBN128::getMerkleProofLength(uint64_t n)
+uint64_t MerkleTreeBN128::getMerkleProofLength()
 {
-    return ceil((double)log(n) / log(16));
+    return ceil((double)log(height) / log(16));
 }
 
-uint64_t MerkleTreeBN128::getMerkleProofSize(uint64_t n)
+uint64_t MerkleTreeBN128::getMerkleProofSize()
 {
-    return getMerkleProofLength(n) * 16 * sizeof(RawFr::Element);
+    return getMerkleProofLength() * 16 * sizeof(RawFr::Element);
 }
+
+uint64_t MerkleTreeBN128::getMerkleTreeWidth()
+{
+    return source_width;
+}
+
+uint64_t MerkleTreeBN128::getElementSize() {
+    return elementSize;
+}
+
 
 void MerkleTreeBN128::getGroupProof(void *res, uint64_t idx)
 {
@@ -210,10 +220,10 @@ void MerkleTreeBN128::getGroupProof(void *res, uint64_t idx)
     std::memcpy(res, &v[0], source_width * sizeof(Goldilocks::Element));
     void *resCursor = (uint8_t *)res + source_width * sizeof(Goldilocks::Element);
 
-    RawFr::Element *mp = (RawFr::Element *)calloc(getMerkleProofSize(height), 1);
+    RawFr::Element *mp = (RawFr::Element *)calloc(getMerkleProofSize(), 1);
     merkle_genMerkleProof(mp, idx, 0, height);
 
-    std::memcpy(resCursor, &mp[0], getMerkleProofSize(height));
+    std::memcpy(resCursor, &mp[0], getMerkleProofSize());
     free(mp);
 }
 

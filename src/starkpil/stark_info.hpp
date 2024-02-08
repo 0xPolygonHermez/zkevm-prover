@@ -309,6 +309,11 @@ public:
     vector<uint64_t> cm4_2nsVector;
     vector<uint64_t> tmpExp_n;
     map<string,uint64_t> exp2pol;
+
+    vector<uint64_t> openingPoints;
+    vector<uint64_t> numChallenges;
+    uint64_t nStages;
+    uint64_t nChallenges;
     
     /* Constructor */
     StarkInfo(const Config &config, string file);

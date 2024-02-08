@@ -8,7 +8,6 @@
 
 #define MT_BN128_ARITY 16
 #define GOLDILOCKS_ELEMENTS 3
-#define HASH_SIZE 4
 
 class MerkleTreeBN128
 {
@@ -23,6 +22,8 @@ public:
     uint64_t height;
     uint64_t width;
     uint64_t source_width;
+    uint64_t hashArity = MT_BN128_ARITY;
+    uint64_t elementSize = 1;
     bool intialized = false;
     bool isSourceAllocated = false;
     bool isNodesAllocated = false;
@@ -33,8 +34,10 @@ public:
     ~MerkleTreeBN128();
     void getRoot(RawFr::Element *root);
     static uint64_t getNumNodes(uint64_t n);
-    static uint64_t getMerkleProofLength(uint64_t n);
-    static uint64_t getMerkleProofSize(uint64_t n);
+    uint64_t getMerkleTreeWidth();
+    uint64_t getMerkleProofLength();
+    uint64_t getMerkleProofSize();
+    uint64_t getElementSize();
     RawFr::Element *address() { return nodes; };
     void getGroupProof(void *res, uint64_t idx);
     Goldilocks::Element getElement(uint64_t idx, uint64_t subIdx);
