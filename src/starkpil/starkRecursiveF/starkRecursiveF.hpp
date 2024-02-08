@@ -7,7 +7,6 @@
 #include "merklehash_goldilocks.hpp"
 #include "polinomial.hpp"
 #include "ntt_goldilocks.hpp"
-#include "friProof.hpp"
 #include "friProveC12.hpp"
 #include "proof2zkinStark.hpp"
 #include "compare_fe.hpp"

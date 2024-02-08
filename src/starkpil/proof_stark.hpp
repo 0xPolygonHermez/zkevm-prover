@@ -1,30 +1,34 @@
-#ifndef FRI_PROOF
-#define FRI_PROOF
+#ifndef PROOF
+#define PROOF
 
 #include "goldilocks_base_field.hpp"
 #include "poseidon_goldilocks.hpp"
-
+#include "stark_info.hpp"
+#include "fr.hpp"
 #include <vector>
+#include "nlohmann/json.hpp"
 
 using ordered_json = nlohmann::ordered_json;
 
+template <typename ElementType, typename FieldType>
 class MerkleProof
 {
 public:
     std::vector<std::vector<Goldilocks::Element>> v;
-    std::vector<std::vector<Goldilocks::Element>> mp;
+    std::vector<std::vector<ElementType>> mp;
 
-    MerkleProof(uint64_t nLinears, uint64_t elementsTree, Goldilocks::Element *pointer) : v(nLinears, std::vector<Goldilocks::Element>(1, Goldilocks::zero())), mp(elementsTree, std::vector<Goldilocks::Element>(HASH_SIZE, Goldilocks::zero()))
+    MerkleProof(uint64_t nLinears, uint64_t elementsTree, uint64_t elementsTreeSize, void *pointer) : v(nLinears, std::vector<Goldilocks::Element>(1, Goldilocks::zero())), mp(elementsTree, std::vector<ElementType>(elementsTreeSize, FieldType::zero()))
     {
         for (uint64_t i = 0; i < nLinears; i++)
         {
-            std::memcpy(&v[i][0], &pointer[i], sizeof(Goldilocks::Element));
+            std::memcpy(&v[i][0], &((Goldilocks::Element *)pointer)[i], sizeof(Goldilocks::Element));
         }
         for (uint64_t j = 0; j < elementsTree; j++)
         {
-            std::memcpy(&mp[j][0], &pointer[nLinears + j * HASH_SIZE], HASH_SIZE * sizeof(Goldilocks::Element));
+            std::memcpy(&mp[j][0], &((ElementType *)pointer)[nLinears + j * elementsTreeSize], elementsTreeSize * sizeof(ElementType));
         }
-    };
+    }
+
     ordered_json merkleProof2json()
     {
         ordered_json j = ordered_json::array();
@@ -53,7 +57,7 @@ public:
             ordered_json element = ordered_json::array();
             for (uint j = 0; j < mp[i].size(); j++)
             {
-                element.push_back(Goldilocks::toString(mp[i][j]));
+                element.push_back(FieldType::toString(mp[i][j]));
             }
             json_mp.push_back(element);
         }
@@ -62,16 +66,20 @@ public:
     }
 };
 
+template <typename ElementType, typename FieldType>
 class ProofTree
 {
 public:
-    std::vector<Goldilocks::Element> root;
-    std::vector<std::vector<MerkleProof>> polQueries;
+    std::vector<ElementType> root;
+    std::vector<std::vector<MerkleProof<ElementType, FieldType>>> polQueries;
 
-    ProofTree() : root(HASH_SIZE){};
-    void setRoot(Goldilocks::Element *_root)
+    uint64_t elementSize;
+
+    ProofTree(uint64_t elementSize) : root(elementSize), elementSize(elementSize) {}
+
+    void setRoot(ElementType *_root)
     {
-        std::memcpy(&root[0], &_root[0], HASH_SIZE * sizeof(Goldilocks::Element));
+        std::memcpy(&root[0], &_root[0], elementSize * sizeof(ElementType));
     };
 
     ordered_json ProofTree2json()
@@ -81,9 +89,10 @@ public:
         ordered_json json_root = ordered_json::array();
         for (uint i = 0; i < root.size(); i++)
         {
-            json_root.push_back(Goldilocks::toString(root[i]));
+            json_root.push_back(FieldType::toString(root[i]));
         }
-        if (Goldilocks::toU64(root[0]) != 0 && Goldilocks::toU64(root[1]) != 0 && Goldilocks::toU64(root[2]) != 0 && Goldilocks::toU64(root[3]) != 0)
+
+        if (FieldType::toU64(root[0]) != 0 && FieldType::toU64(root[1]) != 0 && FieldType::toU64(root[2]) != 0 && FieldType::toU64(root[3]) != 0)
             j_ProofTree2json.erase("root");
 
         ordered_json json_polQueries = ordered_json::array();
@@ -103,6 +112,7 @@ public:
                 json_polQueries.push_back(polQueries[i][0].merkleProof2json());
             }
         }
+
         j_ProofTree2json["root"] = json_root;
         j_ProofTree2json["polQueries"] = json_polQueries;
 
@@ -110,14 +120,15 @@ public:
     }
 };
 
+template <typename ElementType, typename FieldType>
 class Fri
 {
 public:
     std::vector<std::vector<Goldilocks::Element>> pol;
-    std::vector<ProofTree> trees;
+    std::vector<ProofTree<ElementType, FieldType>> trees;
 
-    Fri(uint64_t polN, uint64_t dim, uint64_t numSteps) : pol(polN, std::vector<Goldilocks::Element>(dim, Goldilocks::zero())),
-                                                          trees(numSteps){};
+    Fri(StarkInfo starkInfo, int64_t elementSize) : pol(1 << starkInfo.starkStruct.steps[starkInfo.starkStruct.steps.size() - 1].nBits, std::vector<Goldilocks::Element>(FIELD_EXTENSION, Goldilocks::zero())),
+                                                             trees(starkInfo.starkStruct.steps.size(), elementSize) {}
 
     void setPol(Goldilocks::Element *pPol)
     {
@@ -151,21 +162,37 @@ public:
     }
 };
 
+template <typename ElementType, typename FieldType>
 class Proofs
 {
 public:
-    std::vector<Goldilocks::Element> root1;
-    std::vector<Goldilocks::Element> root2;
-    std::vector<Goldilocks::Element> root3;
-    std::vector<Goldilocks::Element> root4;
-    Fri fri;
+    uint64_t elementSize;
+    uint64_t nStages;
+    ElementType **roots;
+    Fri<ElementType, FieldType> fri;
     std::vector<std::vector<Goldilocks::Element>> evals;
-    Proofs(uint64_t polN, uint64_t dim, uint64_t numSteps, uint64_t evalSize) : root1(HASH_SIZE, Goldilocks::zero()),
-                                                                                root2(HASH_SIZE, Goldilocks::zero()),
-                                                                                root3(HASH_SIZE, Goldilocks::zero()),
-                                                                                root4(HASH_SIZE, Goldilocks::zero()),
-                                                                                fri(polN, dim, numSteps),
-                                                                                evals(evalSize, std::vector<Goldilocks::Element>(dim, Goldilocks::zero())){};
+    Proofs(StarkInfo starkInfo, uint64_t elementSize) :
+        elementSize(elementSize),
+        fri(starkInfo, elementSize),
+        evals(starkInfo.evMap.size(), std::vector<Goldilocks::Element>(FIELD_EXTENSION, Goldilocks::zero()))
+        {
+            roots = new ElementType*[elementSize];
+            nStages = starkInfo.nStages + 1;
+            for(uint64_t i = 0; i < nStages; i++)
+            {
+                roots[i] = new ElementType[elementSize];
+                for (uint64_t j = 0; j < elementSize; ++j) {
+                    roots[i][j] = FieldType::zero(); 
+                }
+            }
+        };
+
+    ~Proofs() {
+        for (uint64_t i = 0; i < nStages; ++i) {
+            delete[] roots[i];
+        }
+        delete[] roots;
+    }
 
     void setEvals(Goldilocks::Element *_evals)
     {
@@ -174,34 +201,19 @@ public:
             std::memcpy(&evals[i][0], &_evals[i * evals[i].size()], evals[i].size() * sizeof(Goldilocks::Element));
         }
     }
+
     ordered_json proof2json()
     {
         ordered_json j = ordered_json::object();
 
-        ordered_json json_root1 = ordered_json::array();
-        for (uint i = 0; i < root1.size(); i++)
-        {
-            json_root1.push_back(Goldilocks::toString(root1[i]));
+        for(uint64_t i = 0; i < nStages; i++) {
+            ordered_json json_root = ordered_json::array();
+            for (uint k = 0; k < elementSize; k++)
+            {
+                json_root.push_back(FieldType::toString(roots[i][k]));
+            }
+            j["root" + to_string(i + 1)] = json_root;
         }
-        ordered_json json_root2 = ordered_json::array();
-        for (uint i = 0; i < root2.size(); i++)
-        {
-            json_root2.push_back(Goldilocks::toString(root2[i]));
-        }
-        ordered_json json_root3 = ordered_json::array();
-        for (uint i = 0; i < root3.size(); i++)
-        {
-            json_root3.push_back(Goldilocks::toString(root3[i]));
-        }
-        ordered_json json_root4 = ordered_json::array();
-        for (uint i = 0; i < root4.size(); i++)
-        {
-            json_root4.push_back(Goldilocks::toString(root4[i]));
-        }
-        j["root1"] = json_root1;
-        j["root2"] = json_root2;
-        j["root3"] = json_root3;
-        j["root4"] = json_root4;
 
         ordered_json json_evals = ordered_json::array();
         for (uint i = 0; i < evals.size(); i++)
@@ -219,19 +231,14 @@ public:
     }
 };
 
+template <typename ElementType, typename FieldType>
 class FRIProof
 {
 public:
-    Proofs proofs;
-    std::vector<Goldilocks::Element> publics;
+    Proofs<ElementType, FieldType> proofs;
+    std::vector<ElementType> publics;
 
-    FRIProof(
-        uint64_t polN,
-        uint64_t dim,
-        uint64_t numTrees,
-        uint64_t evalSize,
-        uint64_t nPublics) : proofs(polN, dim, numTrees, evalSize),
-                             publics(nPublics){};
+    FRIProof(StarkInfo starkInfo, uint64_t elementSize) : proofs(starkInfo, elementSize), publics(starkInfo.nPublics){};
 };
 
 #endif

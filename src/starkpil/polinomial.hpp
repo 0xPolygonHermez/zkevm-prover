@@ -206,6 +206,12 @@ public:
         }
     };
 
+    static inline void divElement(Polinomial &out, uint64_t idx_out, Goldilocks::Element &a, Polinomial &in_b, uint64_t idx_b)
+    {
+        Polinomial polA(&a, 1, 1);
+        divElement(out, idx_out, polA, 0, in_b, idx_b);
+    }
+
     static inline void divElement(Polinomial &out, uint64_t idx_out, Polinomial &in_a, uint64_t idx_a, Goldilocks::Element &b)
     {
         Polinomial polB(&b, 1, 1);

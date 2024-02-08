@@ -19,8 +19,7 @@ int main()
 
     StarkInfo starkInfo(config, starkInfoFile);
 
-    uint64_t polBits = starkInfo.starkStruct.steps[starkInfo.starkStruct.steps.size() - 1].nBits;
-    FRIProof fproof((1 << polBits), FIELD_EXTENSION, starkInfo.starkStruct.steps.size(), starkInfo.evMap.size(), starkInfo.nPublics);
+    FRIProof<Goldilocks::Element, Goldilocks> fproof(starkInfo, 4);
 
     void *pCommit = copyFile(commitPols, starkInfo.nCm1 * sizeof(Goldilocks::Element) * (1 << starkInfo.starkStruct.nBits));
     void *pAddress = (void *)calloc(starkInfo.mapTotalN + (starkInfo.mapSectionsN.section[eSection::cm1_n] * (1 << starkInfo.starkStruct.nBits) * FIELD_EXTENSION ), sizeof(uint64_t));
@@ -60,7 +59,9 @@ int main()
     starks.genProof(fproof, &publicInputs[0], allVerkey, &allSteps);
 
     nlohmann::ordered_json jProof = fproof.proofs.proof2json();
-    nlohmann::json zkin = proof2zkinStark(jProof);
+
+    nlohmann::json zkin = proof2zkinStark(jProof, starkInfo);
+
     // Generate publics
     jProof["publics"] = publicStarkJson;
     zkin["publics"] = publicStarkJson;

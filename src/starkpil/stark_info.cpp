@@ -451,6 +451,17 @@ void StarkInfo::load(json j)
          exp2pol.insert(pair(key,value));
     }
 
+    // TODO: THIS SHOULD NOT BE HARDCODED
+    
+    openingPoints.push_back(0);
+    openingPoints.push_back(1);
+
+    numChallenges.push_back(0);
+    numChallenges.push_back(2);
+    numChallenges.push_back(2);
+
+    nStages = numChallenges.size();
+    nChallenges = std::accumulate(numChallenges.begin(), numChallenges.end(), 4);
 }
 
 void StarkInfo::getPol(void *pAddress, uint64_t idPol, PolInfo &polInfo)

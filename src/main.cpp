@@ -9,7 +9,6 @@
 #include "utils.hpp"
 #include "config.hpp"
 #include "version.hpp"
-#include "proof2zkin.hpp"
 #include "calcwit.hpp"
 #include "circom.hpp"
 #include "main.hpp"
