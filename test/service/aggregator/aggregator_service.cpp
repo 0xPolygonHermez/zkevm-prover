@@ -28,20 +28,20 @@ using grpc::Status;
     string requestID;
     string proof;
 
-    const string inputFile0  = "testvectors/batchProof_fork" + to_string(PROVER_FORK_ID) + "/input_executor_0.json";
+    const string inputFile0  = "testvectors/e2e/" + string(PROVER_FORK_NAMESPACE_STRING) + "/input_executor_0.json";
     const string outputFile0 = "testvectors/aggregatedProof/recursive1.zkin.proof_0.json";
 
-    const string inputFile1  = "testvectors/batchProof_fork" + to_string(PROVER_FORK_ID) + "/input_executor_1.json";
+    const string inputFile1  = "testvectors/e2e/" + string(PROVER_FORK_NAMESPACE_STRING) + "/input_executor_1.json";
     const string outputFile1 = "testvectors/aggregatedProof/recursive1.zkin.proof_1.json";
 
     const string inputFile01a = outputFile0;
     const string inputFile01b = outputFile1;
     const string outputFile01 = "testvectors/finalProof/recursive2.zkin.proof_01.json";
 
-    const string inputFile2  = "testvectors/batchProof_fork" + to_string(PROVER_FORK_ID) + "/input_executor_2.json";
+    const string inputFile2  = "testvectors/e2e/" + string(PROVER_FORK_NAMESPACE_STRING) + "/input_executor_2.json";
     const string outputFile2 = "testvectors/aggregatedProof/recursive1.zkin.proof_2.json";
     
-    const string inputFile3  = "testvectors/batchProof_fork" + to_string(PROVER_FORK_ID) + "/input_executor_3.json";
+    const string inputFile3  = "testvectors/e2e/" + string(PROVER_FORK_NAMESPACE_STRING) + "/input_executor_3.json";
     const string outputFile3 = "testvectors/aggregatedProof/recursive1.zkin.proof_3.json";
 
     const string inputFile23a = outputFile2;
