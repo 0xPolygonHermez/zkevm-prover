@@ -5160,10 +5160,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
         // If setHASHPOS, HASHPOS' = op0 + incHashPos
         if (rom.line[zkPC].setHASHPOS == 1) {
-
-            int64_t iAux;
-            fr.toS64(iAux, op0);
-            pols.HASHPOS[nexti] = fr.fromU64(iAux + incHashPos);
+            pols.HASHPOS[nexti] = fr.add(op0, fr.fromU64(incHashPos));
             pols.setHASHPOS[i] = fr.one();
         } else {
             pols.HASHPOS[nexti] = fr.add( pols.HASHPOS[i], fr.fromU64(incHashPos) );

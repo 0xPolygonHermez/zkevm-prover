@@ -165,17 +165,6 @@ void Rom::load(Goldilocks &fr, json &romJson)
     constants.ADDRESS_SYSTEM                      = getConstantL(romJson, "ADDRESS_SYSTEM");
     constants.MAX_NONCE                           = getConstantL(romJson, "MAX_NONCE");
     constants.MAX_UINT_256                        = getConstantL(romJson, "MAX_UINT_256");
-    constants.FPEC                                = getConstantL(romJson, "FPEC");
-    constants.FPEC_MINUS_ONE                      = getConstantL(romJson, "FPEC_MINUS_ONE");
-    constants.FNEC_DIV_TWO                        = getConstantL(romJson, "FNEC_DIV_TWO");
-    constants.FPEC_C2_256                         = getConstantL(romJson, "FPEC_C2_256");
-    constants.FPEC_NON_SQRT                       = getConstantL(romJson, "FPEC_NON_SQRT");
-    constants.FNEC                                = getConstantL(romJson, "FNEC");
-    constants.FNEC_MINUS_ONE                      = getConstantL(romJson, "FNEC_MINUS_ONE");
-    constants.ECGX                                = getConstantL(romJson, "ECGX");
-    constants.ECGY                                = getConstantL(romJson, "ECGY");
-    constants.P2_160                              = getConstantL(romJson, "P2_160");
-    constants.P2_96                               = getConstantL(romJson, "P2_96");
 }
 
 void Rom::loadProgram(Goldilocks &fr, json &romJson)

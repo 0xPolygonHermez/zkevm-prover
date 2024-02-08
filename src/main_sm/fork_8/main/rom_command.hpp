@@ -63,6 +63,7 @@ typedef enum : int {
     f_receiveRemainderChunk,
     f_receiveLenQuotient,
     f_receiveQuotientChunk,
+    f_receiveLen,
     f_ARITH_BN254_ADDFP2,
     f_ARITH_BN254_SUBFP2,
     f_ARITH_BN254_MULFP2_X,

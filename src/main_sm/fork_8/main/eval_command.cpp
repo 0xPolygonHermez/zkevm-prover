@@ -69,6 +69,7 @@ void evalCommand (Context &ctx, const RomCommand &cmd, CommandResult &cr)
             case f_receiveRemainderChunk:           return eval_receiveRemainderChunk(ctx, cmd, cr);
             case f_receiveLenQuotient:              return eval_receiveLenQuotient(ctx, cmd, cr);
             case f_receiveQuotientChunk:            return eval_receiveQuotientChunk(ctx, cmd, cr);
+            case f_receiveLen:                      return eval_receiveLen(ctx, cmd, cr);
             case f_ARITH_BN254_ADDFP2:              return eval_ARITH_BN254_ADDFP2(ctx, cmd, cr);
             case f_ARITH_BN254_SUBFP2:              return eval_ARITH_BN254_SUBFP2(ctx, cmd, cr);
             case f_ARITH_BN254_MULFP2_X:            return eval_ARITH_BN254_MULFP2_X(ctx, cmd, cr);
@@ -3361,6 +3362,53 @@ void eval_receiveQuotientChunk (Context &ctx, const RomCommand &cmd, CommandResu
 
     cr.type = crt_scalar;
     cr.scalar = ctx.quotient[position];
+}
+
+// Length of the binary representation of the input scalar. If there are multiple input scalars, it returns the maximum length
+void eval_receiveLen (Context &ctx, const RomCommand &cmd, CommandResult &cr)
+{
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+    // Check parameters list size
+    if (cmd.params.size() == 0)
+    {
+        zklog.error("eval_receiveLen() invalid number of parameters=" + to_string(cmd.params.size()) + " function " + function2String(cmd.function) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+        exitProcess();
+    }
+#endif
+
+    uint64_t len = 0;
+
+    for (uint64_t i = 0; i < cmd.params.size(); i++)
+    {
+        evalCommand(ctx, *cmd.params[i], cr);
+        if (cr.zkResult != ZKR_SUCCESS)
+        {
+            return;
+        }
+#ifdef CHECK_EVAL_COMMAND_PARAMETERS
+        if (cr.type != crt_scalar)
+        {
+            zklog.error("eval_receiveLen() 0 unexpected command result type: " + to_string(cr.type) + " step=" + to_string(*ctx.pStep) + " zkPC=" + to_string(*ctx.pZKPC) + " line=" + ctx.rom.line[*ctx.pZKPC].toString(ctx.fr) + " uuid=" + ctx.proverRequest.uuid);
+            exitProcess();
+        }
+#endif
+        mpz_class ki = cr.scalar;
+        if (ki == 0)
+        {
+            continue;
+        }
+
+        uint64_t leni = 0;
+        while (ki != 1)
+        {
+            ki >>= 1;
+            leni++;
+        }
+        len = zkmax(len, leni);
+    }
+
+    cr.type = crt_u64;
+    cr.u64 = len;
 }
 
 void eval_ARITH_BN254_MULFP2_X (Context &ctx, const RomCommand &cmd, CommandResult &cr)

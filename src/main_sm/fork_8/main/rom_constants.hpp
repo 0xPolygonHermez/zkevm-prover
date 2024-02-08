@@ -96,17 +96,6 @@ public:
     mpz_class ADDRESS_SYSTEM;
     mpz_class MAX_NONCE;
     mpz_class MAX_UINT_256;
-    mpz_class FPEC;
-    mpz_class FPEC_MINUS_ONE;
-    mpz_class FNEC_DIV_TWO;
-    mpz_class FPEC_C2_256;
-    mpz_class FPEC_NON_SQRT;
-    mpz_class FNEC;
-    mpz_class FNEC_MINUS_ONE;
-    mpz_class ECGX;
-    mpz_class ECGY;
-    mpz_class P2_160;
-    mpz_class P2_96;
 
     RomConstants() :
         BATCH_DIFFICULTY(0),

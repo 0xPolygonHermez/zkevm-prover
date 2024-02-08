@@ -270,7 +270,8 @@ string generate(const json &rom, const string &functionName, const string &fileN
     code += "    int32_t addrRel = 0; // Relative and absolute address auxiliary variables\n";
     code += "    uint64_t addr = 0;\n";
     code += "    int32_t sp;\n";
-    code += "    int64_t i64Aux;\n";
+    if (forkID < 8)
+        code += "    int64_t i64Aux;\n";
     //code += "    int64_t incHashPos = 0;\n"; // TODO: Remove initialization to check it is initialized before being used
     code += "    Rom &rom = mainExecutor.rom;\n";
     code += "    Goldilocks &fr = mainExecutor.fr;\n";
@@ -5659,11 +5660,21 @@ code += "    #endif\n";
         // If setHASHPOS, HASHPOS' = op0 + incHashPos
         if ( rom["program"][zkPC].contains("setHASHPOS") && (rom["program"][zkPC]["setHASHPOS"] == 1) )
         {
-            code += "    fr.toS64(i64Aux, op0);\n";
-            if (bIncHashPos)
-                code += "    pols.HASHPOS[" + string(bFastMode?"0":"nexti") + "] = fr.fromU64(i64Aux + incHashPos);\n";
+            if (forkID < 8)
+            {
+                code += "    fr.toS64(i64Aux, op0);\n";
+                if (bIncHashPos)
+                    code += "    pols.HASHPOS[" + string(bFastMode?"0":"nexti") + "] = fr.fromU64(i64Aux + incHashPos);\n";
+                else
+                    code += "    pols.HASHPOS[" + string(bFastMode?"0":"nexti") + "] = fr.fromU64(i64Aux);\n";
+            }
             else
-                code += "    pols.HASHPOS[" + string(bFastMode?"0":"nexti") + "] = fr.fromU64(i64Aux);\n";
+            {
+                if (bIncHashPos)
+                    code += "    pols.HASHPOS[" + string(bFastMode?"0":"nexti") + "] = fr.add(op0, fr.fromU64(incHashPos));\n";
+                else
+                    code += "    pols.HASHPOS[" + string(bFastMode?"0":"nexti") + "] = op0;\n";
+            }
             if (!bFastMode)
                 code += "    pols.setHASHPOS[i] = fr.one();\n";
         }

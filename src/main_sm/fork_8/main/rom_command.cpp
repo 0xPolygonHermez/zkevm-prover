@@ -89,6 +89,7 @@ tFunction string2Function(string s)
     else if (s == "receiveRemainderChunk")          return f_receiveRemainderChunk;
     else if (s == "receiveLenQuotient")             return f_receiveLenQuotient;
     else if (s == "receiveQuotientChunk")           return f_receiveQuotientChunk;
+    else if (s == "receiveLen")                     return f_receiveLen;
     else if (s == "ARITH_BN254_ADDFP2")             return f_ARITH_BN254_ADDFP2;
     else if (s == "ARITH_BN254_SUBFP2")             return f_ARITH_BN254_SUBFP2;
     else if (s == "ARITH_BN254_MULFP2_X")           return f_ARITH_BN254_MULFP2_X;
@@ -156,6 +157,7 @@ string function2String(tFunction f)
         case f_receiveRemainderChunk:           return "receiveRemainderChunk";
         case f_receiveLenQuotient:              return "receiveLenQuotient";
         case f_receiveQuotientChunk:            return "receiveQuotientChunk";
+        case f_receiveLen:                      return "receiveLen";
         case f_ARITH_BN254_ADDFP2:              return "ARITH_BN254_ADDFP2";
         case f_ARITH_BN254_SUBFP2:              return "ARITH_BN254_SUBFP2";
         case f_ARITH_BN254_MULFP2_X:            return "ARITH_BN254_MULFP2_X";
