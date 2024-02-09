@@ -863,6 +863,131 @@ void recursive2_steps_free(void *pRecursive2Steps) {
     delete recursive2Steps;
 }
 
+void step2prev_parser_first_avx(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch) {
+    auto steps = (Steps*)pSteps;
+    StepsParams* stepsParams = (StepsParams*)pParams;
+
+    steps->step2prev_parser_first_avx(*stepsParams, nrows, nrowsBatch);
+}
+
+void step2prev_parser_first_avx512(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch) {
+    auto steps = (Steps*)pSteps;
+    StepsParams* stepsParams = (StepsParams*)pParams;
+
+    steps->step2prev_parser_first_avx512(*stepsParams, nrows, nrowsBatch);
+}
+
+void step2prev_first_parallel(void *pSteps, void *pParams, uint64_t nrows) {
+    auto steps = (Steps*)pSteps;
+    StepsParams* stepsParams = (StepsParams*)pParams;
+
+#pragma omp parallel for
+    for (uint64_t i = 0; i < nrows; i++)
+    {
+        steps->step2prev_first(*stepsParams, i);
+    }
+
+}
+
+void step3prev_parser_first_avx(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch) {
+    auto steps = (Steps*)pSteps;
+    StepsParams* stepsParams = (StepsParams*)pParams;
+
+    steps->step3prev_parser_first_avx(*stepsParams, nrows, nrowsBatch);
+}
+
+void step3prev_parser_first_avx512(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch) {
+    auto steps = (Steps*)pSteps;
+    StepsParams* stepsParams = (StepsParams*)pParams;
+
+    steps->step3prev_parser_first_avx512(*stepsParams, nrows, nrowsBatch);
+}
+
+void step3prev_first_parallel(void *pSteps, void *pParams, uint64_t nrows) {
+    auto steps = (Steps*)pSteps;
+    StepsParams* stepsParams = (StepsParams*)pParams;
+
+#pragma omp parallel for
+    for (uint64_t i = 0; i < nrows; i++)
+    {
+        steps->step3prev_first(*stepsParams, i);
+    }
+}
+
+void step3_parser_first_avx(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch) {
+    auto steps = (Steps*)pSteps;
+    StepsParams* stepsParams = (StepsParams*)pParams;
+
+    steps->step3_parser_first_avx(*stepsParams, nrows, nrowsBatch);
+}
+
+void step3_parser_first_avx512(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch) {
+    auto steps = (Steps*)pSteps;
+    StepsParams* stepsParams = (StepsParams*)pParams;
+
+    steps->step3_parser_first_avx512(*stepsParams, nrows, nrowsBatch);
+}
+
+void step3_first_parallel(void *pSteps, void *pParams, uint64_t nrows) {
+    auto steps = (Steps*)pSteps;
+    StepsParams* stepsParams = (StepsParams*)pParams;
+
+#pragma omp parallel for
+    for (uint64_t i = 0; i < nrows; i++)
+    {
+        steps->step3_first(*stepsParams, i);
+    }
+}
+
+void step42ns_parser_first_avx(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch) {
+    auto steps = (Steps*)pSteps;
+    StepsParams* stepsParams = (StepsParams*)pParams;
+
+    steps->step42ns_parser_first_avx(*stepsParams, nrows, nrowsBatch);
+}
+
+void step42ns_parser_first_avx512(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch) {
+    auto steps = (Steps*)pSteps;
+    StepsParams* stepsParams = (StepsParams*)pParams;
+
+    steps->step42ns_parser_first_avx512(*stepsParams, nrows, nrowsBatch);
+}
+
+void step42ns_first_parallel(void *pSteps, void *pParams, uint64_t nrows) {
+    auto steps = (Steps*)pSteps;
+    StepsParams* stepsParams = (StepsParams*)pParams;
+
+#pragma omp parallel for
+    for (uint64_t i = 0; i < nrows; i++)
+    {
+        steps->step42ns_first(*stepsParams, i);
+    }
+}
+
+void step52ns_parser_first_avx(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch) {
+    auto steps = (Steps*)pSteps;
+    StepsParams* stepsParams = (StepsParams*)pParams;
+
+    steps->step52ns_parser_first_avx(*stepsParams, nrows, nrowsBatch);
+}
+
+void step52ns_parser_first_avx512(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch) {
+    auto steps = (Steps*)pSteps;
+    StepsParams* stepsParams = (StepsParams*)pParams;
+
+    steps->step52ns_parser_first_avx512(*stepsParams, nrows, nrowsBatch);
+}
+
+void step52ns_first_parallel(void *pSteps, void *pParams, uint64_t nrows) {
+    auto steps = (Steps*)pSteps;
+    StepsParams* stepsParams = (StepsParams*)pParams;
+
+#pragma omp parallel for
+    for (uint64_t i = 0; i < nrows; i++)
+    {
+        steps->step52ns_first(*stepsParams, i);
+    }
+}
 
 void *fri_proof_new(uint64_t polN, uint64_t dim, uint64_t numTrees, uint64_t evalSize, uint64_t nPublics) {
     FRIProof* friProof = new FRIProof(polN, dim, numTrees, evalSize, nPublics);
@@ -905,6 +1030,84 @@ void starks_gen_proof(void *pStarks, void *pFRIProof, void *pPublicInputs, void 
 void starks_free(void *pStarks) {
     Starks* starks = (Starks*)pStarks;
     delete starks;
+}
+
+void *transpose_h1_h2_columns(void *pStarks, void *pAddress, uint64_t *numCommited, void *pBuffer) 
+{
+    return ((Starks*)pStarks)->transposeH1H2Columns(pAddress, *numCommited, (Goldilocks::Element*)pBuffer);
+}
+
+void transpose_h1_h2_rows(void *pStarks, void *pAddress, uint64_t *numCommited, void *transPols) {
+    ((Starks*)pStarks)->transposeH1H2Rows(pAddress, *numCommited, (Polinomial *)transPols);
+}
+
+void *transpose_z_columns(void *pStarks, void *pAddress, uint64_t *numCommited, void *pBuffer) {
+    return ((Starks*)pStarks)->transposeZColumns(pAddress, *numCommited, (Goldilocks::Element*)pBuffer);
+}
+
+void transpose_z_rows(void *pStarks, void *pAddress, uint64_t *numCommited, void *transPols) {
+    ((Starks*)pStarks)->transposeZRows(pAddress, *numCommited, (Polinomial*)transPols);
+}
+
+void evmap(void *pStarks, void *pAddress, void *evals, void *LEv, void *LpEv) {
+    ((Starks*)pStarks)->evmap(pAddress, *(Polinomial*)evals, *(Polinomial*)LEv, *(Polinomial*)LpEv);
+}
+
+void *steps_params_new(void *pStarks, void * pChallenges, void *pEvals, void *pXDivXSubXi, void *pXDivXSubWXi, void *pPublicInputs) {
+    Starks* starks = (Starks*)pStarks;
+
+    return starks->createStepsParams(pChallenges, pEvals, pXDivXSubXi, pXDivXSubWXi, pPublicInputs);
+}
+
+void steps_params_free(void *pStepsParams) {
+    StepsParams* stepsParams = (StepsParams*)pStepsParams;
+
+    delete stepsParams;
+}
+
+void tree_merkelize(void *pStarks, uint64_t index) {
+    Starks* starks = (Starks*)pStarks;
+    starks->treeMerkelize(index);
+}
+
+void tree_get_root(void *pStarks, uint64_t index, void *root) {
+    Starks* starks = (Starks*)pStarks;
+
+    starks->treeGetRoot(index, (Goldilocks::Element*)root);
+}
+
+void extend_pol(void *pStarks, uint64_t step) {
+    Starks* starks = (Starks*)pStarks;
+    starks->extendPol(step);
+}
+
+void *get_pbuffer(void *pStarks) {
+    return ((Starks*)pStarks)->getPBuffer();
+}
+
+void calculate_h1_h2(void *pStarks, void *pTransPols) {
+    ((Starks*)pStarks)->ffi_calculateH1H2((Polinomial*)pTransPols);
+}
+
+void calculate_z(void *pStarks, void *pNewPols) {
+    ((Starks*)pStarks)->ffi_calculateZ((Polinomial*)pNewPols);
+
+}
+
+void calculate_exps_2ns(void *pStarks, void  *pQq1, void *pQq2) {
+    ((Starks*)pStarks)->ffi_exps_2ns((Polinomial*)pQq1, (Polinomial*)pQq2);
+}
+
+void calculate_lev_lpev(void *pStarks, void *pLEv, void *pLpEv, void *pXis, void *pWxis, void *pC_w, void *pChallenges) {
+    ((Starks*)pStarks)->ffi_lev_lpev((Polinomial*)pLEv, (Polinomial*)pLpEv, (Polinomial*)pXis, (Polinomial*)pWxis, (Polinomial*)pC_w, (Polinomial*)pChallenges);
+}
+
+void calculate_xdivxsubxi(void *pStarks, uint64_t extendBits, void *xi, void *wxi, void *challenges, void *xDivXSubXi, void *xDivXSubWXi) {
+    ((Starks*)pStarks)->ffi_xdivxsubxi(extendBits, (Polinomial*)xi, (Polinomial*)wxi, (Polinomial*)challenges, (Polinomial*)xDivXSubXi, (Polinomial*)xDivXSubWXi);
+}
+
+void finalize_proof(void *pStarks, void *proof, void *transcript, void *evals, void *root0, void *root1, void *root2, void *root3) {
+    ((Starks*)pStarks)->ffi_finalize_proof((FRIProof*)proof, (Transcript*)transcript, (Polinomial*)evals, (Polinomial*)root0, (Polinomial*)root1, (Polinomial*)root2, (Polinomial*)root3);
 }
 
 void *commit_pols_starks_new(void *pAddress, uint64_t degree, uint64_t nCommitedPols) {
@@ -988,3 +1191,64 @@ void save_proof(void *pFriProof, unsigned long numPublicInputs, void *pPublicInp
     }
 }
 
+void *transcript_new() {
+    Transcript *transcript = new Transcript();
+    return transcript;
+}
+
+void transcript_put(void *pTranscript, void *pInput, uint64_t size) {
+    auto transcript = (Transcript *)pTranscript;
+    auto input = (Goldilocks::Element *)pInput;
+
+    transcript->put(input, size);
+}
+
+void transcript_get_field(void *pTranscript, void *pOutput) {
+    auto transcript = (Transcript *)pTranscript;
+    auto output = (Goldilocks::Element *)pOutput;
+
+    transcript->getField(output);
+}
+
+
+void transcript_free(void *pTranscript) {
+    Transcript* transcript = (Transcript*)pTranscript;
+    delete transcript;
+}
+
+uint64_t get_num_rows_step_batch(void *pStarks) {
+    Starks* starks = (Starks*)pStarks;
+
+    return starks->nrowsStepBatch;
+}
+
+void *polinomial_new(uint64_t degree, uint64_t dim, char* name) {
+    auto pPolinomial = new Polinomial(degree, dim, string(name));
+    return pPolinomial;
+}
+
+void *polinomial_get_address(void *pPolinomial) {
+    Polinomial* polinomial = (Polinomial*)pPolinomial;
+    
+    return polinomial->address();
+}
+
+void *polinomial_get_p_element(void *pPolinomial, uint64_t index) {
+    Polinomial* polinomial = (Polinomial*)pPolinomial;
+    return polinomial->operator[](index);
+}
+
+void polinomial_free(void *pPolinomial) {
+    Polinomial* polinomial = (Polinomial*)pPolinomial;
+    delete polinomial;
+}
+
+void *commit_pols_new(void * pAddress, uint64_t degree) {
+    auto pCommitPols = new CommitPols(pAddress, degree);
+    return pCommitPols;
+}
+
+void commit_pols_free(void *pCommitPols) {
+    CommitPols* commitPols = (CommitPols*)pCommitPols;
+    delete commitPols;
+}

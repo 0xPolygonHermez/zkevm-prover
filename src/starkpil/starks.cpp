@@ -698,3 +698,171 @@ void Starks::merkelizeMemory()
     std::cout << "rootDBG[3]: [ " << Goldilocks::toU64(rootDBG[3]) << " ]" << std::endl;
     delete[] treeDBG;
 }
+
+void * Starks::createStepsParams(void *pChallenges, void *pEvals, void *pXDivXSubXi, void *pXDivXSubWXi, void *pPublicInputs) {
+    StepsParams *params = (StepsParams*)calloc(1, sizeof(StepsParams));
+
+    params->pols = mem;
+    params->pConstPols = pConstPols;
+    params->pConstPols2ns = pConstPols2ns;
+    params->challenges = (Polinomial&)pChallenges;
+    params->x_n = x_n;
+    params->x_2ns = x_2ns;
+    params->zi = zi;
+    params->evals = (Polinomial&)pEvals;
+    params->xDivXSubXi = (Polinomial&)pXDivXSubXi;
+    params->xDivXSubWXi = (Polinomial&)pXDivXSubWXi;
+    params->publicInputs = (Goldilocks::Element*)pPublicInputs;
+    params->q_2ns = p_q_2ns;
+    params->f_2ns = p_f_2ns;
+
+    return params;
+}
+
+void Starks::treeMerkelize(uint64_t index) {
+    treesGL[index]->merkelize();
+}
+void Starks::treeGetRoot(uint64_t index, Goldilocks::Element *root) {
+    treesGL[index]->getRoot(root);
+}
+
+void Starks::extendPol(uint64_t step) {
+    if(step == 1) {
+        ntt.extendPol(p_cm1_2ns, p_cm1_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm1_n], p_cm2_2ns);
+    } else if(step == 2) {
+        ntt.extendPol(p_cm2_2ns, p_cm2_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm2_n], pBuffer);
+    } else if(step == 3) {
+        ntt.extendPol(p_cm3_2ns, p_cm3_n, NExtended, N, starkInfo.mapSectionsN.section[eSection::cm3_n], pBuffer);
+    }
+}
+
+void *Starks::getPBuffer() {
+    return pBuffer;
+}
+
+void Starks::ffi_calculateH1H2(Polinomial *transPols) {
+    uint64_t nthreads = starkInfo.puCtx.size();
+    if (nthreads == 0)
+    {
+        nthreads += 1;
+    }
+    uint64_t buffSize = 8 * starkInfo.puCtx.size() * N;
+    assert(buffSize <= starkInfo.mapSectionsN.section[eSection::cm3_2ns] * NExtended);
+    uint64_t *mam = (uint64_t *)pAddress;
+    uint64_t *pbufferH = &mam[starkInfo.mapOffsets.section[eSection::cm3_2ns]];
+    uint64_t buffSizeThread = buffSize / nthreads;
+
+#pragma omp parallel for num_threads(nthreads)
+    for (uint64_t i = 0; i < starkInfo.puCtx.size(); i++)
+    {
+        int indx1 = 4 * i;
+        if (transPols[indx1 + 2].dim() == 1)
+        {
+            uint64_t buffSizeThreadValues = 3 * N;
+            uint64_t buffSizeThreadKeys = buffSizeThread - buffSizeThreadValues;
+            Polinomial::calculateH1H2_opt1(transPols[indx1 + 2], transPols[indx1 + 3], transPols[indx1], transPols[indx1 + 1], i, &pbufferH[omp_get_thread_num() * buffSizeThread], buffSizeThreadKeys, buffSizeThreadValues);
+        }
+        else
+        {
+            assert(transPols[indx1 + 2].dim() == 3);
+            uint64_t buffSizeThreadValues = 5 * N;
+            uint64_t buffSizeThreadKeys = buffSizeThread - buffSizeThreadValues;
+            Polinomial::calculateH1H2_opt3(transPols[indx1 + 2], transPols[indx1 + 3], transPols[indx1], transPols[indx1 + 1], i, &pbufferH[omp_get_thread_num() * buffSizeThread], buffSizeThreadKeys, buffSizeThreadValues);
+        }
+    }
+}
+
+void Starks::ffi_calculateZ(Polinomial *newPols) {
+    u_int64_t numpols = starkInfo.ciCtx.size() + starkInfo.peCtx.size() + starkInfo.puCtx.size();
+
+#pragma omp parallel for
+    for (uint64_t i = 0; i < numpols; i++)
+    {
+        int indx1 = 3 * i;
+        Polinomial::calculateZ(newPols[indx1 + 2], newPols[indx1], newPols[indx1 + 1]);
+    }
+}
+
+void Starks::ffi_exps_2ns(Polinomial *qq1, Polinomial *qq2) {
+    TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_INTT);
+    nttExtended.INTT(qq1->address(), p_q_2ns, NExtended, starkInfo.qDim, NULL, 2, 1);
+    TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS_INTT);
+
+    TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_MUL);
+    Goldilocks::Element shiftIn = Goldilocks::exp(Goldilocks::inv(Goldilocks::shift()), N);
+
+    uint64_t stride = 2048;
+#pragma omp parallel for
+    for (uint64_t ii = 0; ii < N; ii += stride)
+    {
+        Goldilocks::Element curS = Goldilocks::one();
+        for (uint64_t p = 0; p < starkInfo.qDeg; p++)
+        {
+            for (uint64_t k = ii; k < min(N, ii + stride); ++k)
+            {
+                Goldilocks3::mul((Goldilocks3::Element &)*(*qq2)[k * starkInfo.qDeg + p], (Goldilocks3::Element &)*(*qq1)[p * N + k], curS);
+            }
+            curS = Goldilocks::mul(curS, shiftIn);
+        }
+    }
+    TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS_MUL);
+
+    TimerStart(STARK_STEP_4_CALCULATE_EXPS_2NS_NTT);
+    nttExtended.NTT(cm4_2ns, qq2->address(), NExtended, starkInfo.qDim * starkInfo.qDeg);
+    TimerStopAndLog(STARK_STEP_4_CALCULATE_EXPS_2NS_NTT);  
+}
+
+void Starks::ffi_lev_lpev(Polinomial *LEv, Polinomial *LpEv, Polinomial *xis, Polinomial *wxis, Polinomial *c_w, Polinomial *challenges) {
+    Goldilocks3::one((Goldilocks3::Element &)*(*LEv)[0]);
+    Goldilocks3::one((Goldilocks3::Element &)*(*LpEv)[0]);
+
+    Polinomial::divElement(*xis, 0, *challenges, 7, (Goldilocks::Element &)Goldilocks::shift());
+    Polinomial::mulElement(*c_w, 0, *challenges, 7, (Goldilocks::Element &)Goldilocks::w(starkInfo.starkStruct.nBits));
+    Polinomial::divElement(*wxis, 0, *c_w, 0, (Goldilocks::Element &)Goldilocks::shift());
+
+    for (uint64_t k = 1; k < N; k++)
+    {
+        Polinomial::mulElement(*LEv, k, *LEv, k - 1, *xis, 0);
+        Polinomial::mulElement(*LpEv, k, *LpEv, k - 1, *wxis, 0);
+    }
+    ntt.INTT((*LEv).address(), (*LEv).address(), N, 3);
+    ntt.INTT((*LpEv).address(), (*LpEv).address(), N, 3);
+}
+
+void Starks::ffi_xdivxsubxi(uint64_t extendBits, Polinomial *xi, Polinomial *wxi, Polinomial *challenges, Polinomial *xDivXSubXi, Polinomial *xDivXSubWXi) {
+    Polinomial::copyElement(*xi, 0, *challenges, 7);
+    Polinomial::mulElement(*wxi, 0, *challenges, 7, (Goldilocks::Element &)Goldilocks::w(starkInfo.starkStruct.nBits));
+
+#pragma omp parallel for
+    for (uint64_t k = 0; k < (N << extendBits); k++)
+    {
+        Polinomial::subElement(*xDivXSubXi, k, x, k, *xi, 0);
+        Polinomial::subElement(*xDivXSubWXi, k, x, k, *wxi, 0);
+    }
+
+    Polinomial::batchInverseParallel(*xDivXSubXi, *xDivXSubXi);
+    Polinomial::batchInverseParallel(*xDivXSubWXi, *xDivXSubWXi);
+
+#pragma omp parallel for
+    for (uint64_t k = 0; k < (N << extendBits); k++)
+    {
+        Polinomial::mulElement(*xDivXSubXi, k, *xDivXSubXi, k, x, k);
+        Polinomial::mulElement(*xDivXSubWXi, k, *xDivXSubWXi, k, x, k);
+    }
+}
+
+void Starks::ffi_finalize_proof(FRIProof *proof, Transcript *transcript, Polinomial *evals, Polinomial *root0, Polinomial *root1, Polinomial *root2, Polinomial *root3) {
+    Polinomial friPol = Polinomial(p_f_2ns, NExtended, 3, 3, "friPol");
+    FRIProve::prove(*proof, treesGL, *transcript, friPol, starkInfo.starkStruct.nBitsExt, starkInfo);
+
+    (*proof).proofs.setEvals((*evals).address());
+
+    std::memcpy(&(*proof).proofs.root1[0], (*root0).address(), HASH_SIZE * sizeof(Goldilocks::Element));
+    std::memcpy(&(*proof).proofs.root2[0], (*root1).address(), HASH_SIZE * sizeof(Goldilocks::Element));
+    std::memcpy(&(*proof).proofs.root3[0], (*root2).address(), HASH_SIZE * sizeof(Goldilocks::Element));
+    std::memcpy(&(*proof).proofs.root4[0], (*root3).address(), HASH_SIZE * sizeof(Goldilocks::Element));
+}
+
+
+
+

@@ -17,6 +17,25 @@
     void *recursive2_steps_new();
     void recursive2_steps_free(void *Recursive2Steps);
 
+    void step2prev_parser_first_avx(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch);
+    void step2prev_parser_first_avx512(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch);
+    void step2prev_first_parallel(void *pSteps, void *pParams, uint64_t nrows);
+    
+    void step3prev_parser_first_avx(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch);
+    void step3prev_parser_first_avx512(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch);
+    void step3prev_first_parallel(void *pSteps, void *pParams, uint64_t nrows);
+
+    void step3_parser_first_avx(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch);
+    void step3_parser_first_avx512(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch);
+    void step3_first_parallel(void *pSteps, void *pParams, uint64_t nrows);
+
+    void step42ns_parser_first_avx(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch);
+    void step42ns_parser_first_avx512(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch);
+    void step42ns_first_parallel(void *pSteps, void *pParams, uint64_t nrows);
+
+    void step52ns_parser_first_avx(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch);
+    void step52ns_parser_first_avx512(void *pSteps, void *pParams, uint64_t nrows, uint64_t nrowsBatch);
+    void step52ns_first_parallel(void *pSteps, void *pParams, uint64_t nrows);
 
     // FRIProof
     // ========================================================================================
@@ -34,6 +53,28 @@
     void starks_gen_proof(void *pStarks, void *pFRIProof, void *pPublicInputs, void *pVerkey, void *pSteps);
     void starks_free(void *pStarks);
 
+    void *transpose_h1_h2_columns(void *pStarks, void *pAddress, uint64_t *numCommited, void *pBuffer);
+    void transpose_h1_h2_rows(void *pStarks, void *pAddress, uint64_t *numCommited, void *transPols);
+    void *transpose_z_columns(void *pStarks, void *pAddress, uint64_t *numCommited, void *pBuffer);
+    void transpose_z_rows(void *pStarks, void *pAddress, uint64_t *numCommited, void *transPols);
+    void evmap(void *pStarks, void *pAddress, void *evals, void *LEv, void *LpEv);
+
+    void *steps_params_new(void *pStarks, void * pChallenges, void *pEvals, void *pXDivXSubXi, void *pXDivXSubWXi, void *pPublicInputs);
+    void steps_params_free(void *pStepsParams);
+    void tree_merkelize(void *pStarks, uint64_t index);
+    void tree_get_root(void *pStarks, uint64_t index, void *root);
+    void extend_pol(void *pStarks, uint64_t step);
+    void *get_pbuffer(void *pStarks);
+
+    void calculate_h1_h2(void *pStarks, void *pTransPols);
+    void calculate_z(void *pStarks, void *pNewPols);
+    void calculate_exps_2ns(void *pStarks, void  *pQq1, void *pQq2);
+    void calculate_lev_lpev(void *pStarks, void *pLEv, void *pLpEv, void *pXis, void *pWxis, void *pC_w, void *pChallenges);
+    void calculate_xdivxsubxi(void *pStarks, uint64_t extendBits, void *xi, void *wxi, void *challenges, void *xDivXSubXi, void *xDivXSubWXi);
+    void finalize_proof(void *pStarks, void *proof, void *transcript, void *evals, void *root0, void *root1, void *root2, void *root3);
+
+    uint64_t get_num_rows_step_batch(void *pStarks);
+
     // CommitPolsStarks
     // ========================================================================================
     void *commit_pols_starks_new(void *pAddress, uint64_t degree, uint64_t nCommitedPols);
@@ -48,7 +89,26 @@
     // ========================================================================================
     void *zkin_new(void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, unsigned long numRootC, void *pRootC);
 
-    // Save proof
+    // FRI Proof
     // ========================================================================================
     void save_proof(void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix);
+
+    // Transcript
+    // =================================================================================
+    void *transcript_new();
+    void transcript_put(void *pTranscript, void *pInput, uint64_t size);
+    void transcript_get_field(void *pTranscript, void *pOutput);
+    void transcript_free(void *pTranscript);
+
+    // Polinomial
+    // =================================================================================
+    void *polinomial_new(uint64_t degree, uint64_t dim, char* name);
+    void *polinomial_get_address(void *pPolinomial);
+    void *polinomial_get_p_element(void *pPolinomial, uint64_t index);
+    void polinomial_free(void *pPolinomial);
+
+    // CommitPols
+    // =================================================================================
+    void *commit_pols_new(void * pAddress, uint64_t degree);
+    void commit_pols_free(void *pCommitPols);
 #endif

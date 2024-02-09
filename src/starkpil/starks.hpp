@@ -229,6 +229,19 @@ public:
     Polinomial *transposeZColumns(void *pAddress, uint64_t &numCommited, Goldilocks::Element *pBuffer);
     void transposeZRows(void *pAddress, uint64_t &numCommited, Polinomial *transPols);
     void evmap(void *pAddress, Polinomial &evals, Polinomial &LEv, Polinomial &LpEv);
+
+    // Following function are created to be used by the ffi interface
+    void *createStepsParams(void *pChallenges, void *pEvals, void *pXDivXSubXi, void *pXDivXSubWXi, void *pPublicInputs);
+    void treeMerkelize(uint64_t index);
+    void treeGetRoot(uint64_t index, Goldilocks::Element *root);
+    void extendPol(uint64_t step);
+    void *getPBuffer();
+    void ffi_calculateH1H2(Polinomial *transPols);
+    void ffi_calculateZ(Polinomial *newPols);
+    void ffi_exps_2ns(Polinomial *qq1, Polinomial *qq2);
+    void ffi_lev_lpev(Polinomial *LEv, Polinomial *LpEv, Polinomial *xis, Polinomial *wxis, Polinomial *c_w, Polinomial *challenges);
+    void ffi_xdivxsubxi(uint64_t extendBits, Polinomial *xi, Polinomial *wxi, Polinomial *challenges, Polinomial *xDivXSubXi, Polinomial *xDivXSubWXi);
+    void ffi_finalize_proof(FRIProof *proof, Transcript *transcript, Polinomial *evals, Polinomial *root0, Polinomial *root1, Polinomial *root2, Polinomial *root3);
 };
 
 #endif // STARKS_H
