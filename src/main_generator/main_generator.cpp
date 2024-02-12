@@ -5499,12 +5499,12 @@ code += "    #endif\n";
 
             if ((proverForkID == 7) && rom["program"][zkPC].contains("jmpAddrLabel") && (rom["program"][zkPC]["jmpAddrLabel"] == "funcModexp"))
             {
-                code += "        proverRequest.result = ZKR_SM_MAIN_ASSERT;\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_UNSUPPORTED_PRECOMPILED;\n";
                 code += "        mainExecutor.logError(ctx, \"Invalid funcModexp call\");\n";
                 code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
                 code += "        return;\n";
             }
-            
+
             code += "    }\n";
             // If op>=0, simply increase zkPC'=zkPC+1
             code += "    else if (jmpnCondValue <= FrLast32Positive)\n";
