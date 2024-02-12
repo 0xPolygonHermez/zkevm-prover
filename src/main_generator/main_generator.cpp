@@ -5554,6 +5554,20 @@ code += "    #endif\n";
                     code += "    pols.zkPC[nexti] = fr.fromU64(addr);\n";
                 }
             }
+
+            bool bCheck = (proverForkID == 7) && rom["program"][zkPC].contains("jmpAddrLabel") && (rom["program"][zkPC]["jmpAddrLabel"] == "modexp");
+
+            if (bCheck)
+            {
+                code += "    memIterator = ctx.mem.find(rom.modexp_MlenOffset);\n";
+                code += "    if ((memIterator == ctx.mem.end()) || (fr.toU64(memIterator->second.fe0) > 1))\n";
+                code += "    {\n";
+                code += "        proverRequest.result = ZKR_SM_MAIN_ASSERT;\n";
+                code += "        mainExecutor.logError(ctx, \"Invalid modexp_Mlen value=\" + to_string((memIterator == ctx.mem.end()) ? 0 :fr.toU64(memIterator->second.fe0)));\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
+                code += "        return;\n";
+                code += "    }\n";
+            }            
         }
         // If return
         else if (rom["program"][zkPC].contains("return") && (rom["program"][zkPC]["return"] == 1))
