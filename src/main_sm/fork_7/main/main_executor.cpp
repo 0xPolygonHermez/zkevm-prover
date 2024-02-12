@@ -5132,23 +5132,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             if (pols.zkPC[nexti] == fr.fromU64(modexpLabel))
             {
-                std::unordered_map<uint64_t, Fea>::iterator memIterator;
-                memIterator = ctx.mem.find(rom.modexp_BlenOffset);
-                if ((memIterator == ctx.mem.end()) || (fr.toU64(memIterator->second.fe0) > 16))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_ASSERT;
-                    logError(ctx, "Invalid modexp_Blen value=" + to_string((memIterator == ctx.mem.end()) ? 0 :fr.toU64(memIterator->second.fe0)));
-                    pHashDB->cancelBatch(proverRequest.uuid);
-                    return;
-                }
-                memIterator = ctx.mem.find(rom.modexp_MlenOffset);
-                if ((memIterator == ctx.mem.end()) || (fr.toU64(memIterator->second.fe0) > 1))
-                {
-                    proverRequest.result = ZKR_SM_MAIN_ASSERT;
-                    logError(ctx, "Invalid modexp_Mlen value=" + to_string((memIterator == ctx.mem.end()) ? 0 :fr.toU64(memIterator->second.fe0)));
-                    pHashDB->cancelBatch(proverRequest.uuid);
-                    return;
-                }
+                proverRequest.result = ZKR_SM_MAIN_ASSERT;
+                logError(ctx, "Invalid modexp call");
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
             }
 
             pols.call[i] = fr.one();
