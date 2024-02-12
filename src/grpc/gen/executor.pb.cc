@@ -1718,7 +1718,7 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "_INVALID_NOT_FIRST_TX_CHANGE_L2_BLOCK\020 \022"
   "8\n4ROM_ERROR_INVALID_TX_CHANGE_L2_BLOCK_"
   "LIMIT_TIMESTAMP\020!\0226\n2ROM_ERROR_INVALID_T"
-  "X_CHANGE_L2_BLOCK_MIN_TIMESTAMP\020\"*\212+\n\rEx"
+  "X_CHANGE_L2_BLOCK_MIN_TIMESTAMP\020\"*\345+\n\rEx"
   "ecutorError\022\036\n\032EXECUTOR_ERROR_UNSPECIFIE"
   "D\020\000\022\033\n\027EXECUTOR_ERROR_NO_ERROR\020\001\022\033\n\027EXEC"
   "UTOR_ERROR_DB_ERROR\020\002\0222\n.EXECUTOR_ERROR_"
@@ -1856,19 +1856,21 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "OR_INVALID_L1_INFO_TREE_SMT_PROOF_VALUE\020"
   "p\022\"\n\036EXECUTOR_ERROR_INVALID_WITNESS\020q\022\037\n"
   "\033EXECUTOR_ERROR_INVALID_CBOR\020r\022&\n\"EXECUT"
-  "OR_ERROR_INVALID_DATA_STREAM\020s2\205\003\n\017Execu"
-  "torService\022U\n\014ProcessBatch\022 .executor.v1"
-  ".ProcessBatchRequest\032!.executor.v1.Proce"
-  "ssBatchResponse\"\000\022[\n\016ProcessBatchV2\022\".ex"
-  "ecutor.v1.ProcessBatchRequestV2\032#.execut"
-  "or.v1.ProcessBatchResponseV2\"\000\022m\n\027Proces"
-  "sStatelessBatchV2\022+.executor.v1.ProcessS"
-  "tatelessBatchRequestV2\032#.executor.v1.Pro"
-  "cessBatchResponseV2\"\000\022O\n\016GetFlushStatus\022"
-  "\026.google.protobuf.Empty\032#.executor.v1.Ge"
-  "tFlushStatusResponse\"\000B>Z<github.com/0xP"
-  "olygonHermez/zkevm-node/state/runtime/ex"
-  "ecutorb\006proto3"
+  "OR_ERROR_INVALID_DATA_STREAM\020s\022-\n)EXECUT"
+  "OR_ERROR_INVALID_UPDATE_MERKLE_TREE\020t\022*\n"
+  "&EXECUTOR_ERROR_UNSUPPORTED_PRECOMPILED\020"
+  "u2\205\003\n\017ExecutorService\022U\n\014ProcessBatch\022 ."
+  "executor.v1.ProcessBatchRequest\032!.execut"
+  "or.v1.ProcessBatchResponse\"\000\022[\n\016ProcessB"
+  "atchV2\022\".executor.v1.ProcessBatchRequest"
+  "V2\032#.executor.v1.ProcessBatchResponseV2\""
+  "\000\022m\n\027ProcessStatelessBatchV2\022+.executor."
+  "v1.ProcessStatelessBatchRequestV2\032#.exec"
+  "utor.v1.ProcessBatchResponseV2\"\000\022O\n\016GetF"
+  "lushStatus\022\026.google.protobuf.Empty\032#.exe"
+  "cutor.v1.GetFlushStatusResponse\"\000B>Z<git"
+  "hub.com/0xPolygonHermez/zkevm-node/state"
+  "/runtime/executorb\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_executor_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2fempty_2eproto,
@@ -1919,7 +1921,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_exe
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_executor_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_executor_2eproto = {
-  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 15854,
+  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 15945,
   &descriptor_table_executor_2eproto_once, descriptor_table_executor_2eproto_sccs, descriptor_table_executor_2eproto_deps, 42, 1,
   schemas, file_default_instances, TableStruct_executor_2eproto::offsets,
   file_level_metadata_executor_2eproto, 42, file_level_enum_descriptors_executor_2eproto, file_level_service_descriptors_executor_2eproto,
@@ -2098,6 +2100,8 @@ bool ExecutorError_IsValid(int value) {
     case 113:
     case 114:
     case 115:
+    case 116:
+    case 117:
       return true;
     default:
       return false;

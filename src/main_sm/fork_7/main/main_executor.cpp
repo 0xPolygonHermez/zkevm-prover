@@ -5044,7 +5044,7 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
 
             if (pols.zkPC[nexti] == fr.fromU64(funcModexpLabel))
             {
-                proverRequest.result = ZKR_SM_MAIN_ASSERT;
+                proverRequest.result = ZKR_SM_MAIN_UNSUPPORTED_PRECOMPILED;
                 logError(ctx, "Invalid funcModexp call");
                 pHashDB->cancelBatch(proverRequest.uuid);
                 return;
