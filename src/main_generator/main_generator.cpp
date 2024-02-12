@@ -5432,6 +5432,15 @@ code += "    #endif\n";
             //code += "        goto *" + functionName + "_labels[addr]; // If op<0, jump to addr: zkPC'=addr\n";
             code += "        bJump = true;\n";
             bConditionalJump = true;
+
+            if ((proverForkID == 7) && rom["program"][zkPC].contains("jmpAddrLabel") && (rom["program"][zkPC]["jmpAddrLabel"] == "funcModexp"))
+            {
+                code += "        proverRequest.result = ZKR_SM_MAIN_ASSERT;\n";
+                code += "        mainExecutor.logError(ctx, \"Invalid funcModexp call\");\n";
+                code += "        mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
+                code += "        return;\n";
+            }
+            
             code += "    }\n";
             // If op>=0, simply increase zkPC'=zkPC+1
             code += "    else if (jmpnCondValue <= FrLast32Positive)\n";
@@ -5553,17 +5562,7 @@ code += "    #endif\n";
                 {
                     code += "    pols.zkPC[nexti] = fr.fromU64(addr);\n";
                 }
-            }
-
-            bool bCheck = (proverForkID == 7) && rom["program"][zkPC].contains("jmpAddrLabel") && (rom["program"][zkPC]["jmpAddrLabel"] == "modexp");
-
-            if (bCheck)
-            {
-                code += "    proverRequest.result = ZKR_SM_MAIN_ASSERT;\n";
-                code += "    mainExecutor.logError(ctx, \"Invalid modexp call\");\n";
-                code += "    mainExecutor.pHashDB->cancelBatch(proverRequest.uuid);\n";
-                code += "    return;\n";
-            }            
+            }          
         }
         // If return
         else if (rom["program"][zkPC].contains("return") && (rom["program"][zkPC]["return"] == 1))
