@@ -63,6 +63,7 @@ public:
     uint64_t checkFirstTxTypeLabel;
     uint64_t writeBlockInfoRootLabel;
     uint64_t verifyMerkleProofEndLabel;
+    uint64_t funcModexpLabel;
 
     // Labels lock
     pthread_mutex_t labelsMutex;    // Mutex to protect the labels vector

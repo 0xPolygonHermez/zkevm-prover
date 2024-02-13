@@ -1717,7 +1717,7 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "_TX_CHANGE_L2_BLOCK\020 \0228\n4ROM_ERROR_INVAL"
   "ID_TX_CHANGE_L2_BLOCK_LIMIT_TIMESTAMP\020!\022"
   "6\n2ROM_ERROR_INVALID_TX_CHANGE_L2_BLOCK_"
-  "MIN_TIMESTAMP\020\"*\271+\n\rExecutorError\022\036\n\032EXE"
+  "MIN_TIMESTAMP\020\"*\345+\n\rExecutorError\022\036\n\032EXE"
   "CUTOR_ERROR_UNSPECIFIED\020\000\022\033\n\027EXECUTOR_ER"
   "ROR_NO_ERROR\020\001\022\033\n\027EXECUTOR_ERROR_DB_ERRO"
   "R\020\002\0222\n.EXECUTOR_ERROR_SM_MAIN_COUNTERS_O"
@@ -1856,19 +1856,20 @@ const char descriptor_table_protodef_executor_2eproto[] PROTOBUF_SECTION_VARIABL
   "R_INVALID_WITNESS\020q\022\037\n\033EXECUTOR_ERROR_IN"
   "VALID_CBOR\020r\022&\n\"EXECUTOR_ERROR_INVALID_D"
   "ATA_STREAM\020s\022-\n)EXECUTOR_ERROR_INVALID_U"
-  "PDATE_MERKLE_TREE\020t2\205\003\n\017ExecutorService\022"
-  "U\n\014ProcessBatch\022 .executor.v1.ProcessBat"
-  "chRequest\032!.executor.v1.ProcessBatchResp"
-  "onse\"\000\022[\n\016ProcessBatchV2\022\".executor.v1.P"
-  "rocessBatchRequestV2\032#.executor.v1.Proce"
-  "ssBatchResponseV2\"\000\022m\n\027ProcessStatelessB"
-  "atchV2\022+.executor.v1.ProcessStatelessBat"
-  "chRequestV2\032#.executor.v1.ProcessBatchRe"
-  "sponseV2\"\000\022O\n\016GetFlushStatus\022\026.google.pr"
-  "otobuf.Empty\032#.executor.v1.GetFlushStatu"
-  "sResponse\"\000B>Z<github.com/0xPolygonHerme"
-  "z/zkevm-node/state/runtime/executorb\006pro"
-  "to3"
+  "PDATE_MERKLE_TREE\020t\022*\n&EXECUTOR_ERROR_UN"
+  "SUPPORTED_PRECOMPILED\020u2\205\003\n\017ExecutorServ"
+  "ice\022U\n\014ProcessBatch\022 .executor.v1.Proces"
+  "sBatchRequest\032!.executor.v1.ProcessBatch"
+  "Response\"\000\022[\n\016ProcessBatchV2\022\".executor."
+  "v1.ProcessBatchRequestV2\032#.executor.v1.P"
+  "rocessBatchResponseV2\"\000\022m\n\027ProcessStatel"
+  "essBatchV2\022+.executor.v1.ProcessStateles"
+  "sBatchRequestV2\032#.executor.v1.ProcessBat"
+  "chResponseV2\"\000\022O\n\016GetFlushStatus\022\026.googl"
+  "e.protobuf.Empty\032#.executor.v1.GetFlushS"
+  "tatusResponse\"\000B>Z<github.com/0xPolygonH"
+  "ermez/zkevm-node/state/runtime/executorb"
+  "\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_executor_2eproto_deps[1] = {
   &::descriptor_table_google_2fprotobuf_2fempty_2eproto,
@@ -1919,7 +1920,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::SCCInfoBase*const descriptor_table_exe
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_executor_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_executor_2eproto = {
-  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 15883,
+  false, false, descriptor_table_protodef_executor_2eproto, "executor.proto", 15927,
   &descriptor_table_executor_2eproto_once, descriptor_table_executor_2eproto_sccs, descriptor_table_executor_2eproto_deps, 42, 1,
   schemas, file_default_instances, TableStruct_executor_2eproto::offsets,
   file_level_metadata_executor_2eproto, 42, file_level_enum_descriptors_executor_2eproto, file_level_service_descriptors_executor_2eproto,
@@ -2099,6 +2100,7 @@ bool ExecutorError_IsValid(int value) {
     case 114:
     case 115:
     case 116:
+    case 117:
       return true;
     default:
       return false;

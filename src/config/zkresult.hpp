@@ -109,7 +109,8 @@ typedef enum : int
     ZKR_SM_MAIN_INVALID_L1_INFO_TREE_SMT_PROOF_VALUE = 95, // Main state machine ROM requests a L1InfoTree SMT proof value not present in input
     ZKR_SM_MAIN_INVALID_WITNESS = 96, // Main state machine input witness is invalid or corrupt
     ZKR_CBOR_INVALID_DATA = 97, // CBOR data is invalid
-    ZKR_DATA_STREAM_INVALID_DATA = 98 // Data stream data is invalid
+    ZKR_DATA_STREAM_INVALID_DATA = 98, // Data stream data is invalid
+    ZKR_SM_MAIN_UNSUPPORTED_PRECOMPILED = 99 // Main state machine tried to use an unsupported precompiled
 
 } zkresult;
 

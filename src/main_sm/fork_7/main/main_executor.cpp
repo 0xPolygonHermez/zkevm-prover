@@ -104,6 +104,7 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     checkFirstTxTypeLabel     = rom.getLabel(string("checkFirstTxType"));
     writeBlockInfoRootLabel   = rom.getLabel(string("writeBlockInfoRoot"));
     verifyMerkleProofEndLabel = rom.getLabel(string("verifyMerkleProofEnd"));
+    funcModexpLabel           = rom.getLabel(string("funcModexp"));
 
     // Init labels mutex
     pthread_mutex_init(&labelsMutex, NULL);
@@ -5040,6 +5041,14 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 jmpnCondValue = jmpnCondValue >> 1;
             }
             pols.JMPN[i] = fr.one();
+
+            if (pols.zkPC[nexti] == fr.fromU64(funcModexpLabel))
+            {
+                proverRequest.result = ZKR_SM_MAIN_UNSUPPORTED_PRECOMPILED;
+                logError(ctx, "Invalid funcModexp call");
+                pHashDB->cancelBatch(proverRequest.uuid);
+                return;
+            }
         }
         // If JMPC, jump conditionally if carry
         else if (rom.line[zkPC].JMPC == 1)

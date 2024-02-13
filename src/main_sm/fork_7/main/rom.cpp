@@ -77,6 +77,8 @@ void Rom::load(Goldilocks &fr, json &romJson)
         txIndexOffset                = getMemoryOffset("txIndex");
         l2TxHashOffset               = getMemoryOffset("l2TxHash");
         currentTxOffset              = getMemoryOffset("currentTx");
+        modexp_BlenOffset            = getMemoryOffset("modexp_Blen");
+        modexp_MlenOffset            = getMemoryOffset("modexp_Mlen");
     }
 
     // Load ROM integer constants
