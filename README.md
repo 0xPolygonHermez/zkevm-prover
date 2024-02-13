@@ -97,6 +97,7 @@ Run `make` to compile the main project:
 
 ```sh
 make clean
+make generate
 make -j
 ```
 

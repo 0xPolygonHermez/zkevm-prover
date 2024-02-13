@@ -94,6 +94,9 @@ $(BUILD_DIR)/$(TARGET_MNG): ./src/main_generator/main_generator.cpp
 	$(MKDIR_P) $(BUILD_DIR)
 	g++ -g ./src/main_generator/main_generator.cpp -o $@ -lgmp
 
+generate: main_generator
+	$(BUILD_DIR)/$(TARGET_MNG) all
+
 pols_generator: $(BUILD_DIR)/$(TARGET_PLG)
 
 $(BUILD_DIR)/$(TARGET_PLG): ./src/pols_generator/pols_generator.cpp
@@ -110,6 +113,7 @@ $(BUILD_DIR)/$(TARGET_PLD): ./src/pols_diff/pols_diff.cpp
 
 clean:
 	$(RM) -r $(BUILD_DIR)
+	find . -name main_exec_generated*pp -delete
 
 -include $(DEPS_ZKP)
 -include $(DEPS_BCT)

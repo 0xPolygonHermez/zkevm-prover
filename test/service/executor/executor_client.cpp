@@ -506,7 +506,8 @@ bool ExecutorClient::ProcessBatch (const string &inputFile)
                 return false;
             }
         }
-        else
+        else if (NormalizeToNFormat(input.publicInputsExtended.publicInputs.oldStateRoot.get_str(16), 64) !=
+                 NormalizeToNFormat(newStateRoot, 64))
         {
             blockStateRoots.emplace_back(newStateRoot);
             vector<string>::iterator it = unique(blockStateRoots.begin(), blockStateRoots.end());
