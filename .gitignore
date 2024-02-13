@@ -1,4 +1,5 @@
 build
+src/main_sm/fork_*/main_exec_generated/*
 testvectors/commit.bin
 testvectors/verifier.dat
 testvectors/constantstree.bin
