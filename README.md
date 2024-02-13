@@ -109,9 +109,9 @@ To compile in debug mode, run `make -j dbg=1`.
 ./build/zkProver -c testvectors/config_runFile_BatchProof.json
 ```
 
-## StateDB service database
+## HashDB service database
 
-To use persistence in the StateDB (Merkle-tree) service you must create the database objects needed by the service. To do this run the shell script:
+To use persistence in the HashDB (Merkle-tree) service you must create the database objects needed by the service. To do this run the shell script:
 
 ```sh
 ./tools/statedb/create_db.sh <database> <user> <password>
