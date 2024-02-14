@@ -39,59 +39,59 @@
 
     // FRIProof
     // ========================================================================================
-    void *fri_proof_new(uint64_t polN, uint64_t dim, uint64_t numTrees, uint64_t evalSize, uint64_t nPublics);
-    void fri_proof_free(void *pFriProof);
+    // void *fri_proof_new(uint64_t polN, uint64_t dim, uint64_t numTrees, uint64_t evalSize, uint64_t nPublics);
+    // void fri_proof_free(void *pFriProof);
 
     // Config
     // ========================================================================================
-    void *config_new(char* filename);
-    void config_free(void *pConfig);
+    // void *config_new(char* filename);
+    // void config_free(void *pConfig);
 
     // Starks
     // ========================================================================================
-    void *starks_new(void *pConfig, char* constPols, bool mapConstPolsFile, char* constantsTree, char* starkInfo, void *pAddress);
-    void starks_gen_proof(void *pStarks, void *pFRIProof, void *pPublicInputs, void *pVerkey, void *pSteps);
-    void starks_free(void *pStarks);
+    // void *starks_new(void *pConfig, char* constPols, bool mapConstPolsFile, char* constantsTree, char* starkInfo, void *pAddress);
+    // void starks_gen_proof(void *pStarks, void *pFRIProof, void *pPublicInputs, void *pVerkey, void *pSteps);
+    // void starks_free(void *pStarks);
 
-    void *transpose_h1_h2_columns(void *pStarks, void *pAddress, uint64_t *numCommited, void *pBuffer);
-    void transpose_h1_h2_rows(void *pStarks, void *pAddress, uint64_t *numCommited, void *transPols);
-    void *transpose_z_columns(void *pStarks, void *pAddress, uint64_t *numCommited, void *pBuffer);
-    void transpose_z_rows(void *pStarks, void *pAddress, uint64_t *numCommited, void *transPols);
-    void evmap(void *pStarks, void *pAddress, void *evals, void *LEv, void *LpEv);
+    // void *transpose_h1_h2_columns(void *pStarks, void *pAddress, uint64_t *numCommited, void *pBuffer);
+    // void transpose_h1_h2_rows(void *pStarks, void *pAddress, uint64_t *numCommited, void *transPols);
+    // void *transpose_z_columns(void *pStarks, void *pAddress, uint64_t *numCommited, void *pBuffer);
+    // void transpose_z_rows(void *pStarks, void *pAddress, uint64_t *numCommited, void *transPols);
+    // void evmap(void *pStarks, void *pAddress, void *evals, void *LEv, void *LpEv);
 
-    void *steps_params_new(void *pStarks, void * pChallenges, void *pEvals, void *pXDivXSubXi, void *pXDivXSubWXi, void *pPublicInputs);
-    void steps_params_free(void *pStepsParams);
-    void tree_merkelize(void *pStarks, uint64_t index);
-    void tree_get_root(void *pStarks, uint64_t index, void *root);
-    void extend_pol(void *pStarks, uint64_t step);
-    void *get_pbuffer(void *pStarks);
+    // void *steps_params_new(void *pStarks, void * pChallenges, void *pEvals, void *pXDivXSubXi, void *pXDivXSubWXi, void *pPublicInputs);
+    // void steps_params_free(void *pStepsParams);
+    // void tree_merkelize(void *pStarks, uint64_t index);
+    // void tree_get_root(void *pStarks, uint64_t index, void *root);
+    // void extend_pol(void *pStarks, uint64_t step);
+    // void *get_pbuffer(void *pStarks);
 
-    void calculate_h1_h2(void *pStarks, void *pTransPols);
-    void calculate_z(void *pStarks, void *pNewPols);
-    void calculate_exps_2ns(void *pStarks, void  *pQq1, void *pQq2);
-    void calculate_lev_lpev(void *pStarks, void *pLEv, void *pLpEv, void *pXis, void *pWxis, void *pC_w, void *pChallenges);
-    void calculate_xdivxsubxi(void *pStarks, uint64_t extendBits, void *xi, void *wxi, void *challenges, void *xDivXSubXi, void *xDivXSubWXi);
-    void finalize_proof(void *pStarks, void *proof, void *transcript, void *evals, void *root0, void *root1, void *root2, void *root3);
+    // void calculate_h1_h2(void *pStarks, void *pTransPols);
+    // void calculate_z(void *pStarks, void *pNewPols);
+    // void calculate_exps_2ns(void *pStarks, void  *pQq1, void *pQq2);
+    // void calculate_lev_lpev(void *pStarks, void *pLEv, void *pLpEv, void *pXis, void *pWxis, void *pC_w, void *pChallenges);
+    // void calculate_xdivxsubxi(void *pStarks, uint64_t extendBits, void *xi, void *wxi, void *challenges, void *xDivXSubXi, void *xDivXSubWXi);
+    // void finalize_proof(void *pStarks, void *proof, void *transcript, void *evals, void *root0, void *root1, void *root2, void *root3);
 
     uint64_t get_num_rows_step_batch(void *pStarks);
 
     // CommitPolsStarks
     // ========================================================================================
-    void *commit_pols_starks_new(void *pAddress, uint64_t degree, uint64_t nCommitedPols);
-    void commit_pols_starks_free(void *pCommitPolsStarks);
+    // void *commit_pols_starks_new(void *pAddress, uint64_t degree, uint64_t nCommitedPols);
+    // void commit_pols_starks_free(void *pCommitPolsStarks);
 
     // Circom
     // ========================================================================================
-    void circom_get_commited_pols(void *pCommitPolsStarks, char* zkevmVerifier, char* execFile, void* zkin, uint64_t N, uint64_t nCols);
-    void circom_recursive1_get_commited_pols(void *pCommitPolsStarks, char* zkevmVerifier, char* execFile, void* zkin, uint64_t N, uint64_t nCols);
+    // void circom_get_commited_pols(void *pCommitPolsStarks, char* zkevmVerifier, char* execFile, void* zkin, uint64_t N, uint64_t nCols);
+    // void circom_recursive1_get_commited_pols(void *pCommitPolsStarks, char* zkevmVerifier, char* execFile, void* zkin, uint64_t N, uint64_t nCols);
 
     // zkin
     // ========================================================================================
-    void *zkin_new(void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, unsigned long numRootC, void *pRootC);
+    // void *zkin_new(void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, unsigned long numRootC, void *pRootC);
 
     // FRI Proof
     // ========================================================================================
-    void save_proof(void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix);
+    // void save_proof(void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix);
 
     // Transcript
     // =================================================================================

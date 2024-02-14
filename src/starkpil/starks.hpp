@@ -2,21 +2,18 @@
 #define STARKS_HPP
 
 #include <algorithm>
+#include <cmath>
 #include "config.hpp"
 #include "utils.hpp"
 #include "timer.hpp"
 #include "constant_pols_starks.hpp"
-#include "friProof.hpp"
-#include "friProofC12.hpp"
-#include "friProve.hpp"
+#include "proof_stark.hpp"
+#include "fri.hpp"
 #include "transcript.hpp"
 #include "zhInv.hpp"
 #include "steps.hpp"
 #include "zklog.hpp"
 #include "exit_process.hpp"
-
-#define STARK_C12_A_NUM_TREES 5
-#define NUM_CHALLENGES 8
 
 struct StarkFiles
 {
@@ -49,21 +46,11 @@ private:
     Polinomial x_2ns;
     uint64_t constPolsSize;
     uint64_t constPolsDegree;
-    MerkleTreeGL *treesGL[STARK_C12_A_NUM_TREES];
+    MerkleTreeGL **treesGL;
+    MerkleTreeGL **treesFRI;
 
+    Transcript transcript;
     Goldilocks::Element *mem;
-
-    Goldilocks::Element *p_cm1_2ns;
-    Goldilocks::Element *p_cm1_n;
-    Goldilocks::Element *p_cm2_2ns;
-    Goldilocks::Element *p_cm2_n;
-    Goldilocks::Element *p_cm3_2ns;
-    Goldilocks::Element *p_cm3_n;
-    Goldilocks::Element *cm4_2ns;
-    Goldilocks::Element *p_q_2ns;
-    Goldilocks::Element *p_f_2ns;
-    Goldilocks::Element *pBuffer;
-
     void *pAddress;
 
     Polinomial x;
@@ -161,18 +148,7 @@ public:
         TimerStopAndLog(COMPUTE_X_N_AND_X_2_NS);
 
         mem = (Goldilocks::Element *)pAddress;
-        pBuffer = &mem[starkInfo.mapTotalN];
-
-        p_cm1_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm1_2ns]];
-        p_cm1_n = &mem[starkInfo.mapOffsets.section[eSection::cm1_n]];
-        p_cm2_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm2_2ns]];
-        p_cm2_n = &mem[starkInfo.mapOffsets.section[eSection::cm2_n]];
-        p_cm3_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm3_2ns]];
-        p_cm3_n = &mem[starkInfo.mapOffsets.section[eSection::cm3_n]];
-        cm4_2ns = &mem[starkInfo.mapOffsets.section[eSection::cm4_2ns]];
-        p_q_2ns = &mem[starkInfo.mapOffsets.section[eSection::q_2ns]];
-        p_f_2ns = &mem[starkInfo.mapOffsets.section[eSection::f_2ns]];
-
+        
         *x[0] = Goldilocks::shift();
 
         uint64_t extendBits = starkInfo.starkStruct.nBitsExt - starkInfo.starkStruct.nBits;
@@ -183,11 +159,10 @@ public:
         }
 
         TimerStart(MERKLE_TREE_ALLOCATION);
-        treesGL[0] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::cm1_n], p_cm1_2ns);
-        treesGL[1] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::cm2_n], p_cm2_2ns);
-        treesGL[2] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::cm3_n], p_cm3_2ns);
-        treesGL[3] = new MerkleTreeGL(NExtended, starkInfo.mapSectionsN.section[eSection::cm4_2ns], cm4_2ns);
-        treesGL[4] = new MerkleTreeGL((Goldilocks::Element *)pConstTreeAddress);
+        treesGL = new MerkleTreeGL*[starkInfo.nStages + 2];
+        treesGL[starkInfo.nStages + 1] = new MerkleTreeGL((Goldilocks::Element *)pConstTreeAddress);
+
+        treesFRI = new MerkleTreeGL*[starkInfo.starkStruct.steps.size() - 1];
         TimerStopAndLog(MERKLE_TREE_ALLOCATION);
     };
     ~Starks()
@@ -216,32 +191,58 @@ public:
             free(pConstTreeAddress);
         }
 
-        for (uint i = 0; i < 5; i++)
+        for (uint i = 0; i < starkInfo.nStages + 2; i++)
         {
             delete treesGL[i];
         }
+        delete[] treesGL;
+
+        for (uint64_t i = 0; i < starkInfo.starkStruct.steps.size() - 1; i++)
+        {
+            delete treesFRI[i];
+        }
+        delete[] treesFRI;
     };
 
-    void genProof(FRIProof &proof, Goldilocks::Element *publicInputs, Goldilocks::Element verkey[4], Steps *steps);
+    void genProof(FRIProof<Goldilocks::Element, Goldilocks> &proof, Goldilocks::Element *publicInputs, Goldilocks::Element verkey[4], Steps *steps);
+    
+    void calculateZ(StepsParams& params, StarkInfo starkInfo);
+    void calculateH1H2(StepsParams& params, StarkInfo starkInfo);
 
-    Polinomial *transposeH1H2Columns(void *pAddress, uint64_t &numCommited, Goldilocks::Element *pBuffer);
-    void transposeH1H2Rows(void *pAddress, uint64_t &numCommited, Polinomial *transPols);
-    Polinomial *transposeZColumns(void *pAddress, uint64_t &numCommited, Goldilocks::Element *pBuffer);
-    void transposeZRows(void *pAddress, uint64_t &numCommited, Polinomial *transPols);
-    void evmap(void *pAddress, Polinomial &evals, Polinomial &LEv, Polinomial &LpEv);
+    void extendAndMerkelize(uint64_t step, StepsParams& params, StarkInfo starkInfo, FRIProof<Goldilocks::Element, Goldilocks> &proof);
+    void calculateExpressions(std::string step, uint64_t nrowsStepBatch, Steps *steps, StepsParams &params, uint64_t N);
+    void computeQ(StepsParams& params, StarkInfo starkInfo, FRIProof<Goldilocks::Element, Goldilocks> &proof);
+    void computeEvals(StepsParams& params, FRIProof<Goldilocks::Element, Goldilocks> &proof, StarkInfo starkInfo);
+
+    Polinomial computeFRIPol(StepsParams& params, StarkInfo starkInfo, Steps *steps, uint64_t nrowsStepBatch);
+    void computeFRIFolding(FRIProof<Goldilocks::Element, Goldilocks> &fproof, StarkInfo starkInfo, Polinomial &friPol, uint64_t step, Polinomial &challenge);
+    void computeFRIQueries(FRIProof<Goldilocks::Element, Goldilocks> &fproof, StarkInfo starkInfo, Polinomial &friPol, uint64_t* friQueries);
+
+    void addTranscript(Transcript &transcript, Goldilocks::Element* buffer, uint64_t nElements);
+    void addTranscript(Transcript &transcript, Polinomial& pol);
+    void getChallenges(Transcript &transcript, Polinomial &challenges, uint64_t nChallenges, uint64_t index);
+
+    int findIndex(std::vector<uint64_t> openingPoints, int prime);
+
+private:
+    Polinomial *transposeH1H2Columns(StepsParams& params, StarkInfo starkInfo);
+    void transposeH1H2Rows(StepsParams& params, StarkInfo starkInfo, Polinomial *transPols);
+    Polinomial *transposeZColumns(StepsParams& params, StarkInfo starkInfo);
+    void transposeZRows(StepsParams& params, StarkInfo starkInfo, Polinomial *transPols);
+    void evmap(StepsParams &params, Polinomial *LEv, StarkInfo starkInfo);
 
     // Following function are created to be used by the ffi interface
-    void *createStepsParams(void *pChallenges, void *pEvals, void *pXDivXSubXi, void *pXDivXSubWXi, void *pPublicInputs);
-    void treeMerkelize(uint64_t index);
-    void treeGetRoot(uint64_t index, Goldilocks::Element *root);
-    void extendPol(uint64_t step);
-    void *getPBuffer();
-    void ffi_calculateH1H2(Polinomial *transPols);
-    void ffi_calculateZ(Polinomial *newPols);
-    void ffi_exps_2ns(Polinomial *qq1, Polinomial *qq2);
-    void ffi_lev_lpev(Polinomial *LEv, Polinomial *LpEv, Polinomial *xis, Polinomial *wxis, Polinomial *c_w, Polinomial *challenges);
-    void ffi_xdivxsubxi(uint64_t extendBits, Polinomial *xi, Polinomial *wxi, Polinomial *challenges, Polinomial *xDivXSubXi, Polinomial *xDivXSubWXi);
-    void ffi_finalize_proof(FRIProof *proof, Transcript *transcript, Polinomial *evals, Polinomial *root0, Polinomial *root1, Polinomial *root2, Polinomial *root3);
+    // void *createStepsParams(void *pChallenges, void *pEvals, void *pXDivXSubXi, void *pXDivXSubWXi, void *pPublicInputs);
+    // void treeMerkelize(uint64_t index);
+    // void treeGetRoot(uint64_t index, Goldilocks::Element *root);
+    // void extendPol(uint64_t step);
+    // void *getPBuffer();
+    // void ffi_calculateH1H2(Polinomial *transPols);
+    // void ffi_calculateZ(Polinomial *newPols);
+    // void ffi_exps_2ns(Polinomial *qq1, Polinomial *qq2);
+    // void ffi_lev_lpev(Polinomial *LEv, Polinomial *LpEv, Polinomial *xis, Polinomial *wxis, Polinomial *c_w, Polinomial *challenges);
+    // void ffi_xdivxsubxi(uint64_t extendBits, Polinomial *xi, Polinomial *wxi, Polinomial *challenges, Polinomial *xDivXSubXi, Polinomial *xDivXSubWXi);
+    // void ffi_finalize_proof(FRIProof<Goldilocks::Element, Goldilocks> *proof, Transcript *transcript, Polinomial *evals, Polinomial *root0, Polinomial *root1, Polinomial *root2, Polinomial *root3);
 };
 
 #endif // STARKS_H

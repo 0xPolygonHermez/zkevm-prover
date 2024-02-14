@@ -3,9 +3,9 @@
 
 #include "goldilocks_base_field.hpp"
 #include "poseidon_goldilocks.hpp"
+#include "zklog.hpp"
 #include <math.h>
 
-#define MERKLEHASHGL_ARITY 2
 class MerkleTreeGL
 {
 private:
@@ -20,6 +20,9 @@ public:
     Goldilocks::Element *nodes;
     bool isSourceAllocated = false;
     bool isNodesAllocated = false;
+    uint64_t hashArity = 2;
+    uint64_t elementSize = 4;
+
     MerkleTreeGL(){};
     MerkleTreeGL(Goldilocks::Element *tree)
     {
@@ -60,20 +63,35 @@ public:
     void merkelize();
     uint64_t getTreeNumElements()
     {
-        return height * HASH_SIZE + (height - 1) * HASH_SIZE;
+        return height * elementSize + (height - 1) * elementSize;
     }
     void getRoot(Goldilocks::Element *root)
     {
-        std::memcpy(root, &nodes[getTreeNumElements() - HASH_SIZE], HASH_SIZE * sizeof(Goldilocks::Element));
+        std::memcpy(root, &nodes[getTreeNumElements() - elementSize], elementSize * sizeof(Goldilocks::Element));
+        zklog.info("MerkleTree root: [ " + Goldilocks::toString(root[0]) + ", " + Goldilocks::toString(root[1]) + ", " + Goldilocks::toString(root[2]) + ", " + Goldilocks::toString(root[3]) + " ]");
     }
     void getGroupProof(Goldilocks::Element *proof, uint64_t idx);
 
-    uint64_t MerkleProofSize()
-    {
-        if (height > 1)
-        {
-            return (uint64_t)ceil(log10(height) / log10(MERKLEHASHGL_ARITY));
-        }
+
+    uint64_t getElementSize() {
+        return elementSize;
+    }
+
+    uint64_t getMerkleTreeWidth() {
+        return width;
+    }
+
+    uint64_t getMerkleProofSize() {
+        if(height > 1) {
+            return (uint64_t)ceil(log10(height) / log10(hashArity)) * elementSize;
+        } 
+        return 0;
+    }
+
+    uint64_t getMerkleProofLength() {
+        if(height > 1) {
+            return (uint64_t)ceil(log10(height) / log10(hashArity));
+        } 
         return 0;
     }
 };

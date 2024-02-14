@@ -9,7 +9,6 @@
 #include "utils.hpp"
 #include "config.hpp"
 #include "version.hpp"
-#include "proof2zkin.hpp"
 #include "calcwit.hpp"
 #include "circom.hpp"
 #include "main.hpp"
@@ -989,207 +988,207 @@ void step52ns_first_parallel(void *pSteps, void *pParams, uint64_t nrows) {
     }
 }
 
-void *fri_proof_new(uint64_t polN, uint64_t dim, uint64_t numTrees, uint64_t evalSize, uint64_t nPublics) {
-    FRIProof* friProof = new FRIProof(polN, dim, numTrees, evalSize, nPublics);
-    return friProof;
-}
+// void *fri_proof_new(uint64_t polN, uint64_t dim, uint64_t numTrees, uint64_t evalSize, uint64_t nPublics) {
+//     FRIProof* friProof = new FRIProof(polN, dim, numTrees, evalSize, nPublics);
+//     return friProof;
+// }
 
-void fri_proof_free(void *pFriProof) {
-    FRIProof* friProof = (FRIProof*)pFriProof;
-    delete friProof;
-}
+// void fri_proof_free(void *pFriProof) {
+//     FRIProof* friProof = (FRIProof*)pFriProof;
+//     delete friProof;
+// }
 
-void *config_new(char* filename) {
-    Config* config = new Config();
-    json configJson;
-    file2json(filename, configJson);
-    config->load(configJson);
+// void *config_new(char* filename) {
+//     Config* config = new Config();
+//     json configJson;
+//     file2json(filename, configJson);
+//     config->load(configJson);
 
-    return config;
-}
+//     return config;
+// }
 
-void config_free(void *pConfig) {
-    Config* config = (Config*)pConfig;
-    delete config;
-}
+// void config_free(void *pConfig) {
+//     Config* config = (Config*)pConfig;
+//     delete config;
+// }
 
-void *starks_new(void *pConfig, char* constPols, bool mapConstPolsFile, char* constantsTree, char* starkInfo, void *pAddress) {
-    Config* config = (Config*)pConfig;
-    return new Starks(*config, {constPols, mapConstPolsFile, constantsTree, starkInfo}, pAddress);
-}
+// void *starks_new(void *pConfig, char* constPols, bool mapConstPolsFile, char* constantsTree, char* starkInfo, void *pAddress) {
+//     Config* config = (Config*)pConfig;
+//     return new Starks(*config, {constPols, mapConstPolsFile, constantsTree, starkInfo}, pAddress);
+// }
 
-void starks_gen_proof(void *pStarks, void *pFRIProof, void *pPublicInputs, void *pVerkey, void *pSteps) {
-    Starks* starks = (Starks*)pStarks;
-    FRIProof* friProof = (FRIProof*)pFRIProof;
-    Goldilocks::Element* publicInputs = (Goldilocks::Element*)pPublicInputs;
-    Goldilocks::Element* verkey = (Goldilocks::Element*)pVerkey;
-    ZkevmSteps* zkevmSteps = (ZkevmSteps*)pSteps;
-    starks->genProof(*friProof, publicInputs, verkey, zkevmSteps);
-}
+// void starks_gen_proof(void *pStarks, void *pFRIProof, void *pPublicInputs, void *pVerkey, void *pSteps) {
+//     Starks* starks = (Starks*)pStarks;
+//     FRIProof* friProof = (FRIProof*)pFRIProof;
+//     Goldilocks::Element* publicInputs = (Goldilocks::Element*)pPublicInputs;
+//     Goldilocks::Element* verkey = (Goldilocks::Element*)pVerkey;
+//     ZkevmSteps* zkevmSteps = (ZkevmSteps*)pSteps;
+//     starks->genProof(*friProof, publicInputs, verkey, zkevmSteps);
+// }
 
-void starks_free(void *pStarks) {
-    Starks* starks = (Starks*)pStarks;
-    delete starks;
-}
+// void starks_free(void *pStarks) {
+//     Starks* starks = (Starks*)pStarks;
+//     delete starks;
+// }
 
-void *transpose_h1_h2_columns(void *pStarks, void *pAddress, uint64_t *numCommited, void *pBuffer) 
-{
-    return ((Starks*)pStarks)->transposeH1H2Columns(pAddress, *numCommited, (Goldilocks::Element*)pBuffer);
-}
+// void *transpose_h1_h2_columns(void *pStarks, void *pAddress, uint64_t *numCommited, void *pBuffer) 
+// {
+//     return ((Starks*)pStarks)->transposeH1H2Columns(pAddress, *numCommited, (Goldilocks::Element*)pBuffer);
+// }
 
-void transpose_h1_h2_rows(void *pStarks, void *pAddress, uint64_t *numCommited, void *transPols) {
-    ((Starks*)pStarks)->transposeH1H2Rows(pAddress, *numCommited, (Polinomial *)transPols);
-}
+// void transpose_h1_h2_rows(void *pStarks, void *pAddress, uint64_t *numCommited, void *transPols) {
+//     ((Starks*)pStarks)->transposeH1H2Rows(pAddress, *numCommited, (Polinomial *)transPols);
+// }
 
-void *transpose_z_columns(void *pStarks, void *pAddress, uint64_t *numCommited, void *pBuffer) {
-    return ((Starks*)pStarks)->transposeZColumns(pAddress, *numCommited, (Goldilocks::Element*)pBuffer);
-}
+// void *transpose_z_columns(void *pStarks, void *pAddress, uint64_t *numCommited, void *pBuffer) {
+//     return ((Starks*)pStarks)->transposeZColumns(pAddress, *numCommited, (Goldilocks::Element*)pBuffer);
+// }
 
-void transpose_z_rows(void *pStarks, void *pAddress, uint64_t *numCommited, void *transPols) {
-    ((Starks*)pStarks)->transposeZRows(pAddress, *numCommited, (Polinomial*)transPols);
-}
+// void transpose_z_rows(void *pStarks, void *pAddress, uint64_t *numCommited, void *transPols) {
+//     ((Starks*)pStarks)->transposeZRows(pAddress, *numCommited, (Polinomial*)transPols);
+// }
 
-void evmap(void *pStarks, void *pAddress, void *evals, void *LEv, void *LpEv) {
-    ((Starks*)pStarks)->evmap(pAddress, *(Polinomial*)evals, *(Polinomial*)LEv, *(Polinomial*)LpEv);
-}
+// void evmap(void *pStarks, void *pAddress, void *evals, void *LEv, void *LpEv) {
+//     ((Starks*)pStarks)->evmap(pAddress, *(Polinomial*)evals, *(Polinomial*)LEv, *(Polinomial*)LpEv);
+// }
 
-void *steps_params_new(void *pStarks, void * pChallenges, void *pEvals, void *pXDivXSubXi, void *pXDivXSubWXi, void *pPublicInputs) {
-    Starks* starks = (Starks*)pStarks;
+// void *steps_params_new(void *pStarks, void * pChallenges, void *pEvals, void *pXDivXSubXi, void *pXDivXSubWXi, void *pPublicInputs) {
+//     Starks* starks = (Starks*)pStarks;
 
-    return starks->createStepsParams(pChallenges, pEvals, pXDivXSubXi, pXDivXSubWXi, pPublicInputs);
-}
+//     return starks->createStepsParams(pChallenges, pEvals, pXDivXSubXi, pXDivXSubWXi, pPublicInputs);
+// }
 
-void steps_params_free(void *pStepsParams) {
-    StepsParams* stepsParams = (StepsParams*)pStepsParams;
+// void steps_params_free(void *pStepsParams) {
+//     StepsParams* stepsParams = (StepsParams*)pStepsParams;
 
-    delete stepsParams;
-}
+//     delete stepsParams;
+// }
 
-void tree_merkelize(void *pStarks, uint64_t index) {
-    Starks* starks = (Starks*)pStarks;
-    starks->treeMerkelize(index);
-}
+// void tree_merkelize(void *pStarks, uint64_t index) {
+//     Starks* starks = (Starks*)pStarks;
+//     starks->treeMerkelize(index);
+// }
 
-void tree_get_root(void *pStarks, uint64_t index, void *root) {
-    Starks* starks = (Starks*)pStarks;
+// void tree_get_root(void *pStarks, uint64_t index, void *root) {
+//     Starks* starks = (Starks*)pStarks;
 
-    starks->treeGetRoot(index, (Goldilocks::Element*)root);
-}
+//     starks->treeGetRoot(index, (Goldilocks::Element*)root);
+// }
 
-void extend_pol(void *pStarks, uint64_t step) {
-    Starks* starks = (Starks*)pStarks;
-    starks->extendPol(step);
-}
+// void extend_pol(void *pStarks, uint64_t step) {
+//     Starks* starks = (Starks*)pStarks;
+//     starks->extendPol(step);
+// }
 
-void *get_pbuffer(void *pStarks) {
-    return ((Starks*)pStarks)->getPBuffer();
-}
+// void *get_pbuffer(void *pStarks) {
+//     return ((Starks*)pStarks)->getPBuffer();
+// }
 
-void calculate_h1_h2(void *pStarks, void *pTransPols) {
-    ((Starks*)pStarks)->ffi_calculateH1H2((Polinomial*)pTransPols);
-}
+// void calculate_h1_h2(void *pStarks, void *pTransPols) {
+//     ((Starks*)pStarks)->ffi_calculateH1H2((Polinomial*)pTransPols);
+// }
 
-void calculate_z(void *pStarks, void *pNewPols) {
-    ((Starks*)pStarks)->ffi_calculateZ((Polinomial*)pNewPols);
+// void calculate_z(void *pStarks, void *pNewPols) {
+//     ((Starks*)pStarks)->ffi_calculateZ((Polinomial*)pNewPols);
 
-}
+// }
 
-void calculate_exps_2ns(void *pStarks, void  *pQq1, void *pQq2) {
-    ((Starks*)pStarks)->ffi_exps_2ns((Polinomial*)pQq1, (Polinomial*)pQq2);
-}
+// void calculate_exps_2ns(void *pStarks, void  *pQq1, void *pQq2) {
+//     ((Starks*)pStarks)->ffi_exps_2ns((Polinomial*)pQq1, (Polinomial*)pQq2);
+// }
 
-void calculate_lev_lpev(void *pStarks, void *pLEv, void *pLpEv, void *pXis, void *pWxis, void *pC_w, void *pChallenges) {
-    ((Starks*)pStarks)->ffi_lev_lpev((Polinomial*)pLEv, (Polinomial*)pLpEv, (Polinomial*)pXis, (Polinomial*)pWxis, (Polinomial*)pC_w, (Polinomial*)pChallenges);
-}
+// void calculate_lev_lpev(void *pStarks, void *pLEv, void *pLpEv, void *pXis, void *pWxis, void *pC_w, void *pChallenges) {
+//     ((Starks*)pStarks)->ffi_lev_lpev((Polinomial*)pLEv, (Polinomial*)pLpEv, (Polinomial*)pXis, (Polinomial*)pWxis, (Polinomial*)pC_w, (Polinomial*)pChallenges);
+// }
 
-void calculate_xdivxsubxi(void *pStarks, uint64_t extendBits, void *xi, void *wxi, void *challenges, void *xDivXSubXi, void *xDivXSubWXi) {
-    ((Starks*)pStarks)->ffi_xdivxsubxi(extendBits, (Polinomial*)xi, (Polinomial*)wxi, (Polinomial*)challenges, (Polinomial*)xDivXSubXi, (Polinomial*)xDivXSubWXi);
-}
+// void calculate_xdivxsubxi(void *pStarks, uint64_t extendBits, void *xi, void *wxi, void *challenges, void *xDivXSubXi, void *xDivXSubWXi) {
+//     ((Starks*)pStarks)->ffi_xdivxsubxi(extendBits, (Polinomial*)xi, (Polinomial*)wxi, (Polinomial*)challenges, (Polinomial*)xDivXSubXi, (Polinomial*)xDivXSubWXi);
+// }
 
-void finalize_proof(void *pStarks, void *proof, void *transcript, void *evals, void *root0, void *root1, void *root2, void *root3) {
-    ((Starks*)pStarks)->ffi_finalize_proof((FRIProof*)proof, (Transcript*)transcript, (Polinomial*)evals, (Polinomial*)root0, (Polinomial*)root1, (Polinomial*)root2, (Polinomial*)root3);
-}
+// void finalize_proof(void *pStarks, void *proof, void *transcript, void *evals, void *root0, void *root1, void *root2, void *root3) {
+//     ((Starks*)pStarks)->ffi_finalize_proof((FRIProof*)proof, (Transcript*)transcript, (Polinomial*)evals, (Polinomial*)root0, (Polinomial*)root1, (Polinomial*)root2, (Polinomial*)root3);
+// }
 
-void *commit_pols_starks_new(void *pAddress, uint64_t degree, uint64_t nCommitedPols) {
-    return new CommitPolsStarks(pAddress, degree, nCommitedPols);
-}
+// void *commit_pols_starks_new(void *pAddress, uint64_t degree, uint64_t nCommitedPols) {
+//     return new CommitPolsStarks(pAddress, degree, nCommitedPols);
+// }
 
-void commit_pols_starks_free(void *pCommitPolsStarks) {
-    CommitPolsStarks* commitPolsStarks = (CommitPolsStarks*)pCommitPolsStarks;
-    delete commitPolsStarks;
-}
+// void commit_pols_starks_free(void *pCommitPolsStarks) {
+//     CommitPolsStarks* commitPolsStarks = (CommitPolsStarks*)pCommitPolsStarks;
+//     delete commitPolsStarks;
+// }
 
-void circom_get_commited_pols(void *pCommitPolsStarks, char* zkevmVerifier, char* execFile, void* zkin, uint64_t N, uint64_t nCols) {
-    nlohmann::json* zkinJson = (nlohmann::json*) zkin;
-    Circom::getCommitedPols((CommitPolsStarks*)pCommitPolsStarks, zkevmVerifier, execFile, *zkinJson, N, nCols);
-}
+// void circom_get_commited_pols(void *pCommitPolsStarks, char* zkevmVerifier, char* execFile, void* zkin, uint64_t N, uint64_t nCols) {
+//     nlohmann::json* zkinJson = (nlohmann::json*) zkin;
+//     Circom::getCommitedPols((CommitPolsStarks*)pCommitPolsStarks, zkevmVerifier, execFile, *zkinJson, N, nCols);
+// }
 
-void circom_recursive1_get_commited_pols(void *pCommitPolsStarks, char* zkevmVerifier, char* execFile, void* zkin, uint64_t N, uint64_t nCols) {
-    nlohmann::json* zkinJson = (nlohmann::json*) zkin;
-    CircomRecursive1::getCommitedPols((CommitPolsStarks*)pCommitPolsStarks, zkevmVerifier, execFile, *zkinJson, N, nCols);
-}
+// void circom_recursive1_get_commited_pols(void *pCommitPolsStarks, char* zkevmVerifier, char* execFile, void* zkin, uint64_t N, uint64_t nCols) {
+//     nlohmann::json* zkinJson = (nlohmann::json*) zkin;
+//     CircomRecursive1::getCommitedPols((CommitPolsStarks*)pCommitPolsStarks, zkevmVerifier, execFile, *zkinJson, N, nCols);
+// }
 
-void *zkin_new(void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, unsigned long numRootC, void *pRootC) {
-    FRIProof* friProof = (FRIProof*)pFriProof;
-    Goldilocks::Element* publicInputs = (Goldilocks::Element*)pPublicInputs;
-    Goldilocks::Element* rootC = (Goldilocks::Element*)pRootC;
+// void *zkin_new(void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, unsigned long numRootC, void *pRootC) {
+//     FRIProof* friProof = (FRIProof*)pFriProof;
+//     Goldilocks::Element* publicInputs = (Goldilocks::Element*)pPublicInputs;
+//     Goldilocks::Element* rootC = (Goldilocks::Element*)pRootC;
 
-    // Generate publics
-    json publicStarkJson;
-    for (uint64_t i = 0; i < numPublicInputs; i++)
-    {
-        publicStarkJson[i] = Goldilocks::toString(publicInputs[i]);
-    }
+//     // Generate publics
+//     json publicStarkJson;
+//     for (uint64_t i = 0; i < numPublicInputs; i++)
+//     {
+//         publicStarkJson[i] = Goldilocks::toString(publicInputs[i]);
+//     }
 
-    json xrootC;
-    for (uint64_t i = 0; i < numRootC; i++)
-    {
-        xrootC[i] = Goldilocks::toString(rootC[i]);
-    }
+//     json xrootC;
+//     for (uint64_t i = 0; i < numRootC; i++)
+//     {
+//         xrootC[i] = Goldilocks::toString(rootC[i]);
+//     }
 
-    nlohmann::ordered_json* jProof = new nlohmann::ordered_json();
-    nlohmann::json* zkin = new nlohmann::json();
-    *jProof = friProof->proofs.proof2json();
+//     nlohmann::ordered_json* jProof = new nlohmann::ordered_json();
+//     nlohmann::json* zkin = new nlohmann::json();
+//     *jProof = friProof->proofs.proof2json();
 
-    *zkin = proof2zkinStark(*jProof);
-    (*zkin)["publics"] = publicStarkJson;
-    if (numRootC != 0) (*zkin)["rootC"] = xrootC;
+//     *zkin = proof2zkinStark(*jProof);
+//     (*zkin)["publics"] = publicStarkJson;
+//     if (numRootC != 0) (*zkin)["rootC"] = xrootC;
 
-    return zkin;
-}
+//     return zkin;
+// }
 
-void save_proof(void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix) {
-    FRIProof* friProof = (FRIProof*)pFriProof;
-    Goldilocks::Element* publicInputs = (Goldilocks::Element*)pPublicInputs;
+// void save_proof(void *pFriProof, unsigned long numPublicInputs, void *pPublicInputs, char* publicsOutputFile, char* filePrefix) {
+//     FRIProof* friProof = (FRIProof*)pFriProof;
+//     Goldilocks::Element* publicInputs = (Goldilocks::Element*)pPublicInputs;
 
-    // Generate publics
-    json publicStarkJson;
-    for (uint64_t i = 0; i < numPublicInputs; i++)
-    {
-        publicStarkJson[i] = Goldilocks::toString(publicInputs[i]);
-    }
+//     // Generate publics
+//     json publicStarkJson;
+//     for (uint64_t i = 0; i < numPublicInputs; i++)
+//     {
+//         publicStarkJson[i] = Goldilocks::toString(publicInputs[i]);
+//     }
 
 
 
-    nlohmann::ordered_json jProofRecursive1 = friProof->proofs.proof2json();
-    nlohmann::ordered_json zkinRecursive1 = proof2zkinStark(jProofRecursive1);
-    zkinRecursive1["publics"] = publicStarkJson;
+//     nlohmann::ordered_json jProofRecursive1 = friProof->proofs.proof2json();
+//     nlohmann::ordered_json zkinRecursive1 = proof2zkinStark(jProofRecursive1);
+//     zkinRecursive1["publics"] = publicStarkJson;
 
-    // save publics to filestarks
-    json2file(publicStarkJson, publicsOutputFile);
+//     // save publics to filestarks
+//     json2file(publicStarkJson, publicsOutputFile);
 
-    // Save output to file
-    if (config.saveOutputToFile)
-    {
-        json2file(zkinRecursive1, string(filePrefix) + "batch_proof.output.json");
-    }
-    // Save proof to file
-    if (config.saveProofToFile)
-    {
-        jProofRecursive1["publics"] = publicStarkJson;
-        json2file(jProofRecursive1, string(filePrefix) + "batch_proof.proof.json");
-    }
-}
+//     // Save output to file
+//     if (config.saveOutputToFile)
+//     {
+//         json2file(zkinRecursive1, string(filePrefix) + "batch_proof.output.json");
+//     }
+//     // Save proof to file
+//     if (config.saveProofToFile)
+//     {
+//         jProofRecursive1["publics"] = publicStarkJson;
+//         json2file(jProofRecursive1, string(filePrefix) + "batch_proof.proof.json");
+//     }
+// }
 
 void *transcript_new() {
     Transcript *transcript = new Transcript();

@@ -244,9 +244,9 @@ void FRIProveC12::queryPol(FRIProofC12 &fproof, MerkleTreeBN128 **trees, uint64_
     vector<MerkleProofC12> vMkProof;
     for (uint i = 0; i < 5; i++)
     {
-        RawFr::Element *buff = (RawFr::Element *)calloc(trees[i]->source_width * sizeof(Goldilocks::Element) + MerkleTreeBN128::getMerkleProofSize(trees[i]->height), 1);
+        RawFr::Element *buff = (RawFr::Element *)calloc(trees[i]->getMerkleTreeWidth() * sizeof(Goldilocks::Element) + trees[i]->getMerkleProofSize(), 1);
         trees[i]->getGroupProof(&buff[0], idx);
-        MerkleProofC12 mkProof(trees[i]->source_width, MerkleTreeBN128::getMerkleProofLength(trees[i]->height), &buff[0]);
+        MerkleProofC12 mkProof(trees[i]->getMerkleTreeWidth(), trees[i]->getMerkleProofLength(), &buff[0]);
         vMkProof.push_back(mkProof);
         free(buff);
     }
@@ -260,9 +260,9 @@ void FRIProveC12::queryPol(FRIProofC12 &fproof, MerkleTreeBN128 *tree, uint64_t 
 
     vector<MerkleProofC12> vMkProof;
 
-    RawFr::Element *buff = (RawFr::Element *)calloc(tree->source_width * sizeof(Goldilocks::Element) + MerkleTreeBN128::getMerkleProofSize(tree->height), 1);
+    RawFr::Element *buff = (RawFr::Element *)calloc(tree->getMerkleTreeWidth() * sizeof(Goldilocks::Element) + tree->getMerkleProofSize(), 1);
     tree->getGroupProof(&buff[0], idx);
-    MerkleProofC12 mkProof(tree->source_width, MerkleTreeBN128::getMerkleProofLength(tree->height), &buff[0]);
+    MerkleProofC12 mkProof(tree->getMerkleTreeWidth(), tree->getMerkleProofLength(), &buff[0]);
     vMkProof.push_back(mkProof);
     fproof.proofs.fri.trees[treeIdx].polQueries.push_back(vMkProof);
     free(buff);
