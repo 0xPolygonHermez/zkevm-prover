@@ -2517,6 +2517,8 @@ using grpc::Status;
     case ZKR_CBOR_INVALID_DATA:                             return ::executor::v1::EXECUTOR_ERROR_INVALID_CBOR;
     case ZKR_DATA_STREAM_INVALID_DATA:                      return ::executor::v1::EXECUTOR_ERROR_INVALID_DATA_STREAM;
     case ZKR_SM_MAIN_UNSUPPORTED_PRECOMPILED:               return ::executor::v1::EXECUTOR_ERROR_UNSUPPORTED_PRECOMPILED;
+    case ZKR_SM_MAIN_OOG_2:                                 return ::executor::v1::EXECUTOR_ERROR_OOG_2;
+    case ZKR_SM_MAIN_CLOSE_BATCH:                           return ::executor::v1::EXECUTOR_ERROR_CLOSE_BATCH;
 
     case ZKR_AGGREGATED_PROOF_INVALID_INPUT: // Only returned when generating a proof
     case ZKR_DB_VERSION_NOT_FOUND_KVDB: // To be mapped to an executor error when HashDB64 is operative
