@@ -105,7 +105,6 @@ MainExecutor::MainExecutor (Goldilocks &fr, PoseidonGoldilocks &poseidon, const 
     writeBlockInfoRootLabel   = rom.getLabel(string("writeBlockInfoRoot"));
     verifyMerkleProofEndLabel = rom.getLabel(string("verifyMerkleProofEnd"));
     funcModexpLabel           = rom.getLabel(string("funcModexp"));
-    outOfGasLabel             = rom.getLabel(string("outOfGas"));
 
     // Init labels mutex
     pthread_mutex_init(&labelsMutex, NULL);
@@ -4998,20 +4997,20 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
                 pols.isNeg[i] = fr.one();
                 if (rom.line[zkPC].useJmpAddr)
                 {
-                    if ( (rom.line[zkPC].jmpAddr == fr.fromU64(outOfGasLabel)) &&
-                         (pols.zkPC[i] == fr.fromU64(1582)) )
+                    if (pols.zkPC[i] == fr.fromU64(1582)) 
                     {
                         uint64_t depth = ((fork_7::FullTracer *)proverRequest.pFullTracer)->depth;
                         if (depth > 1)
                         {
                             proverRequest.result = ZKR_SM_MAIN_OOG_2;
-                            logError(ctx, "Invalid OOG 2");
+                            logError(ctx, "Invalid OOG_2");
                             pHashDB->cancelBatch(proverRequest.uuid);
                             return;
                         }
                         else
                         {
-                            proverRequest.result = ZKR_SM_MAIN_CLOSE_BATCH;                            
+                            proverRequest.result = ZKR_SM_MAIN_CLOSE_BATCH;
+                            zklog.info("Main Executor OOG_2 ZKR_SM_MAIN_CLOSE_BATCH");
                         }
                     }
                     pols.zkPC[nexti] = rom.line[zkPC].jmpAddr;
@@ -5372,7 +5371,10 @@ void MainExecutor::execute (ProverRequest &proverRequest, MainCommitPols &pols, 
     proverRequest.counters.steps = ctx.lastStep;
 
     // Set the error (all previous errors generated a return)
-    proverRequest.result = ZKR_SUCCESS;
+    if (proverRequest.result != ZKR_SM_MAIN_CLOSE_BATCH)
+    {
+        proverRequest.result = ZKR_SUCCESS;
+    }
 
     // Check that we did not run out of steps during the execution
     if (ctx.lastStep == 0)
